@@ -1,7 +1,10 @@
 # D2 / D3 scientific objectives: definition, student identity, implementation
 
-**Status:** contract revision 4 (`0ebccd15…`) and its core implementation,
-2026-10-13. Authorizes nothing.
+**Status:** contract revision 5 (`a01b1be7…`): D3's λ = 7.34 and the
+diagnostic thresholds FROZEN from the reference calibration (stage L,
+`refcal_20261013_170714`), 2026-10-13. GPU evidence:
+[`../analyses/d2_gpu_evidence_review.md`](../analyses/d2_gpu_evidence_review.md).
+Authorizes nothing.
 
 **Revision 4, after the post-revision-3 review.** The objective identities,
 the ranking and the λ rule are unchanged.
@@ -519,65 +522,66 @@ which a mutation check confirms.
 hoarded pool and records `cache_fix_validated`. Until that flag is true, the
 records price is in force.
 
-| step | expected | hard ceiling |
-| --- | --- | --- |
-| R0 | $1.53 | $3.60 (grant $4.00) |
-| reference calibration: λ, thresholds, rescoring timing, objective-overhead pairs | $0.68 | $1.18 must-complete (grant $1.52); $1.42 with both pairs at maxima |
-| D2 search, records price (in force) | $11.00 | **$33.30, over the $30 cap** |
-| D2 search, cache fix validated | $11.00 | $23.68 |
-| D2 screening (8 probes, 4 arms; no B/q2) | $16.34 | $20.31 |
-| D2 confirmation (3 probes, 1 arm) | $6.87 | $8.36 |
+| step | expected | hard ceiling | actual |
+| --- | --- | --- | --- |
+| R0 | $1.53 | $3.60 (grant $4.00) | **$1.5074**, PASS |
+| reference calibration (stage L) | $0.87 | $1.42 (grant $1.76) | **$0.8069**, complete |
+| D2 search, price in force `cache_fix_validated` | $10.80 | $22.38 | — |
+| D2 search, records price (not in force) | $10.80 | $32.01, over the $30 cap | — |
+| D2 screening (8 probes, 4 arms; no B/q2; measured rescoring inside) | $16.61 | $20.83 | — |
+| D2 confirmation (3 probes, 1 arm; measured rescoring inside) | $6.97 | $8.55 | — |
 
-- **The rollout rescoring** is **excluded** from the ceilings until the
-  reference calibration measures it. Its estimate, about $1.32, is shown
-  separately and is not a bound.
-- **The calibration's timing pairs** are deadline-gated and optional, so the
-  must-complete work prices the session cap.
-  - If you choose $1.76 / $1.42 instead of $1.52 / $1.18, both pairs are
-    guaranteed to run even when every earlier component is at its maximum.
-  - Either way the calibration record is written first.
-- **Engineering book:** R0 plus the calibration is $5.52 against the GPU
-  allocation of $6.65.
+- **The switch to `cache_fix_validated`** was made by `d2_budget.py` itself.
+  It reads the stage-L session booked in the calibration campaign
+  (`evidence_session_sha256` `6806eb84…`), verifies the hash and the
+  identities, and takes `cache_fix_validated = true` from it. No field was
+  set by hand.
+- **The measured overheads:**
+  - DEPTH: +0.184 s per candidate;
+  - state evaluation: +0.466 s per evaluation;
+  - rescoring: 1.83 min per probe.
+
+  Each enters the expectation as measured and the planning bound with a 1.5×
+  margin, because one timing is not a bound.
 
 **What each figure is:**
 
 | layer | D2 search | status |
 | --- | --- | --- |
-| measured | D1's search: 551.99 min, $10.03, same space, support, beam and GPU; per-expansion telemetry committed and hash-verified | completed run |
-| estimate | 576.4 min, $11.00 = D1 + the objective's expected added minutes | the overhead is **provisional** until stage L |
-| planning bound | 1,744 min, $33.30 (records) / 1,240 min, $23.68 (cache fix validated) | D1's measured maxima on its worst-case trajectory; **not** a proven runtime bound |
-| enforceable stop | the session cap in the D2 search authorization, at the live rate | **what bounds money**: the watchdog at the plan's hard-terminate minutes; the driver's soft stop fails closed before it |
+| measured | D1's search: 551.99 min, $10.03; stage L: +0.184 s per DEPTH candidate, +0.466 s per state evaluation; cache fix validated | completed runs |
+| estimate | 565.5 min, $10.80 = D1 + the measured added minutes | from records and one measurement |
+| planning bound | 1,172 min, $22.38: D1's worst-case trajectory, DEPTH at the cached cell, overheads ×1.5 | **not** a proven runtime bound |
+| enforceable stop | the session cap in the D2 search authorization, at the live rate | the watchdog at hard-terminate; the soft stop and the cache-regression guard fail the search closed before it |
 
 **Programme scenarios** (`d_series_programme_budget.json`):
 
 - **Status:** a dated snapshot against the live limits:
-  - project remaining $122.46 of $590 (binding);
+  - project remaining $120.14 of $590;
   - formal remaining $127.96;
-  - engineering remaining $6.65;
+  - engineering remaining $4.34;
   - $30 per session.
-- **Reserves:** each session's teardown reserve is counted once.
+- **Reserves:** each formal session's teardown reserve is counted once. R0's
+  and the calibration's grants are released against their bills: both
+  campaigns are closed, and their recorded costs are already inside the live
+  limits.
 
-| search price | D2 search hard | D2 + D3 at hard | + fresh confirmation |
+| scenario (price in force) | expected | hard + reserves | left at hard |
 | --- | --- | --- | --- |
-| records (in force) | $33.30, **over the cap** | $131.26, **does not fit** | short $26.94 |
-| cache fix validated | $23.68 | $112.02, fits | short $7.70 |
+| D2 | $34.38 | $52.66 | $67.48 |
+| D2 + D3 | $68.76 | $105.32 | $14.82 |
+| D2 + D3 + one fresh confirmation | $80.99 | $120.82 | **−$0.68** |
 
-**D2 + D3 expected: $70.63.**
-
-**Reservation rule (proposed).** Authorize D2's formal sessions only if,
-after engineering and D2 at hard ceilings, the remainder still covers D3 and
-one fresh confirmation at theirs. It is not satisfied under either price.
+**Reservation rule (proposed):** not satisfied, short by $0.68. Hard ceilings
+and unverified diagnostic estimates are reported separately; with the
+rescoring measured, no unverified estimate remains.
 
 The levers, all the maintainer's:
 
-- **Validate the cache fix** (stage L, no extra session). It saves $9.62
-  per search.
-- **Measure the objective overhead** (stage L).
-- **Run D3 at K = 2.** This saves $9.40 at hard.
-- **`scored_v1`** if R0 passes.
-- **Re-derive from actual spend.** D1 spent $10.03 of $21.49, and $10.34 of
-  $15.20.
-- **Raise the cap.**
+- D2 under `scored_v1`, now eligible: about 5% of DEPTH time, not priced in;
+- re-deriving after the D2 search from actual spend (D1 spent $10.03 of
+  $21.49);
+- D3 at K = 2, saving $9.66;
+- a cap decision.
 
 **Behavioural field.** The shared protocol trains 2K + 3 probes per
 experiment and never trains B or q2. **K = 4 is prepared**, as the independent
@@ -867,11 +871,11 @@ The original 15:
 
 | step | state | cost |
 | --- | --- | --- |
-| R0: `scored_v1` GPU equivalence (KL path) | **granted** $4.00 / $3.60 (2026-10-13); run `r0_20261013_154325` | $1.53 expected, $3.60 hard |
-| reference calibration, stage `L`: λ, thresholds, rescoring cost, objective overhead, cache-fix GPU evidence, cached-vs-recomputed and D2 scored-rows equivalence | **granted** $1.76 / $1.42 (plan v2); runs after R0's review | $0.87 expected; $1.18 must-complete, $1.42 with the core steps |
-| D2 preregistration | draft `phase_d2/plans/d2_preregistration_v1.json`, accepted in principle; its exact revision needs approval in the search grant | — |
+| R0: `scored_v1` GPU equivalence (KL path) | **DONE, PASS** -- `r0_20261013_154325`, $1.5074 | — |
+| reference calibration, stage `L` | **DONE** -- `refcal_20261013_170714`, $0.8069: λ 7.34, thresholds, overhead, cache fix validated, both equivalences PASS | — |
+| D2 preregistration | draft `phase_d2/plans/d2_preregistration_v1.json` (`489f49ba…`), accepted in principle; its exact revision needs approval in the search grant | — |
 | D2 session, driver, launcher, grant type | **built, $0-tested**: `d2_session.py`, `autoinit_d2_driver.py`, `autoinit_d2_launch.py`, `d2_authorization.py`, pod branch `SESSION_KIND=d2` | — |
-| D2 search price | `d2_budget.py`, switched only by booked, hash-verified stage-L evidence | records $33.30 / cache-fixed $23.68 |
+| D2 search price | `d2_budget.py`, switched by the booked, hash-verified stage-L evidence to `cache_fix_validated` | $10.80 expected / $22.38 bound (records price $32.01) |
 | `phase_d2` in `funds_formal_sessions_of` | **owed: maintainer amendment**; the issuer refuses without it | — |
 | exact engine ids for the rescoring | wrapper done, stub-validated; **real vLLM validation and cost owed** before a behavioural driver enables it | — |
 | behavioural driver with the wrapper and the rescoring | owed engineering | — |

@@ -28,7 +28,7 @@
   "objective_hash": "063bafd46c9dc8ece77869f6b80a5e618bfad0ec237f47c2d9bdde06b1263a20",
   "formula": "L(x) = (1/T_x) sum_{t in T_x} (1 - c_t) KL_t, minimized",
   "contract": "logs/stages/stage-1/families/d_series/plans/d2_d3_objective_contract_v1.json",
-  "contract_hash": "0ebccd156458281a83111a55afa43c8fbc62e1e823cac648ba0a9bb6a6c9b5dc",
+  "contract_hash": "a01b1be714d0020684350666bf67247527425810b9c68de2aa61976f9f822945",
   "scope": {
    "acts_directly_on": [
     "DEPTH's operator-local candidate evaluation (depth.causal_kl_greedy_v1)",
@@ -310,7 +310,7 @@
   "validation": "Top-K confidence is a proxy for structure selection; its usefulness is established only by independent behavioural evidence after recovery training"
  },
  "status": "DRAFT -- not approved, not authorized",
- "preregistration_hash": "2641a820ba0600703de6c5682c081510d98b34a76f6c03135f3b900c5341320e",
+ "preregistration_hash": "489f49ba49560b769fdb0f9ac6b13f1e97cd6db076ce1ac893c9a0c20ee4e7d8",
  "budget": {
   "owner": "logs/stages/stage-1/families/d_series/plans/d2_budget_v1.json",
   "steps": {
@@ -396,68 +396,103 @@
      }
     },
     "objective_overhead": {
-     "source": "provisional -- an estimate, not a measurement",
+     "source": "measured once: logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/runs/refcal_20261013_170714/out/adoption_all_v1/adoption.json (stage L); the bound adds a variation margin",
      "depth_seconds_per_candidate": {
-      "expected": 0.3425,
-      "bound": 0.6851
+      "expected": 0.1843,
+      "bound": 0.2764
      },
      "state_eval_seconds_per_evaluation": {
-      "expected": 0.4032,
-      "bound": 1.0969
-     }
+      "expected": 0.466,
+      "bound": 0.699
+     },
+     "bound_factor_on_one_measurement": 1.5
     },
     "expected": {
-     "minutes": 576.4,
-     "gpu_usd": 10.47,
-     "disk_usd": 0.53,
-     "all_in_usd": 11.0
+     "minutes": 565.5,
+     "gpu_usd": 10.27,
+     "disk_usd": 0.52,
+     "all_in_usd": 10.8
     },
     "hard": {
-     "minutes": 1744.3,
-     "gpu_usd": 31.69,
-     "disk_usd": 1.62,
-     "all_in_usd": 33.3
+     "minutes": 1172.1,
+     "gpu_usd": 21.29,
+     "disk_usd": 1.09,
+     "all_in_usd": 22.38
     },
     "depth_cell_minutes": {
-     "root_max": 44.6929,
-     "deeper_max": 38.5904
+     "root_max": 24.1853,
+     "deeper_max": 23.8455
     },
     "priced_by": {
      "expansions_max": 92,
-     "structural_minutes_max": 1649.33,
+     "structural_minutes_max": 1077.14,
      "session_overhead_minutes": 95.0,
-     "hard_ceiling_minutes": 1744.33,
-     "hard_ceiling_usd": 33.3038
+     "hard_ceiling_minutes": 1172.14,
+     "hard_ceiling_usd": 22.3792
     },
-    "pricing_in_force": "records_max",
+    "pricing_in_force": "cache_fix_validated",
     "container_disk_gb": 400,
     "hard_records_max": {
-     "minutes": 1744.3,
-     "gpu_usd": 31.69,
-     "disk_usd": 1.62,
-     "all_in_usd": 33.3
+     "minutes": 1676.4,
+     "gpu_usd": 30.45,
+     "disk_usd": 1.55,
+     "all_in_usd": 32.01
     },
     "hard_if_cache_fix_validated": {
-     "minutes": 1240.0,
-     "gpu_usd": 22.53,
-     "disk_usd": 1.15,
-     "all_in_usd": 23.68
+     "minutes": 1172.1,
+     "gpu_usd": 21.29,
+     "disk_usd": 1.09,
+     "all_in_usd": 22.38
     },
     "calibration_evidence": {
-     "usable": false,
-     "cache_fix_validated": false,
+     "usable": true,
+     "cache_fix_validated": true,
      "campaign": "logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/campaign.json",
-     "why": "no stage-L session is booked with evidence"
+     "subrun_id": "refcal_s1",
+     "evidence_session": "logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/runs/refcal_20261013_170714/out/adoption_all_v1/adoption.json",
+     "evidence_session_sha256": "6806eb846f7e8a50b6c9eb4165e24ad5c7474f586f1f259b947a3d89968b6155",
+     "checks": {
+      "session_complete": true,
+      "stage_l_ran": true,
+      "d2_objective": true,
+      "lambda_rule": true,
+      "threshold_rule": true,
+      "incumbent": true
+     },
+     "depth": {
+      "overhead_seconds_per_candidate": 0.1843,
+      "same_cache_mode": true,
+      "cache_fix_validated": true,
+      "skipped": null,
+      "failed": null
+     },
+     "state_eval": {
+      "overhead_seconds_per_evaluation": 0.466,
+      "skipped": null,
+      "failed": null
+     },
+     "d2_scored_rows_equivalence": "PASS",
+     "rescoring": {
+      "_timing_only": "B's initialization stands in for a trained student of the same size; no behavioural quantity is measured here",
+      "peak_memory_gib": 9.95,
+      "projected_minutes_per_probe": 1.83,
+      "seconds": 1.584,
+      "seconds_per_1k_tokens": 0.1155,
+      "sequences": 24,
+      "tokens": 13719,
+      "tokens_per_probe_basis": 951268
+     },
+     "why": null
     },
     "cache_fix": {
      "what": "`_available_memory_bytes` returns the allocator's hoard (empty_cache) before reading the driver: D1's search recomputed the reference in 15/16 DEPTH expansions with 0.12 GiB free and 36 GiB reclaimable",
-     "validated_on_gpu": false,
+     "validated_on_gpu": true,
      "_validated_on_gpu_is": "DERIVED from the booked, hash-verified stage-L evidence above; never set by hand",
      "validated_by": "stage L's DEPTH pair, which runs under a deliberately hoarded pool and records reference_cache.mode; or D2's own first DEPTH expansions",
      "until_validated": "the planning bound prices DEPTH at D1's measured recompute-mode maxima",
      "depth_cell_minutes_if_validated": {
-      "root_max": 25.9629,
-      "deeper_max": 25.6231
+      "root_max": 24.1853,
+      "deeper_max": 23.8455
      }
     },
     "previous_model_superseded": {
@@ -466,7 +501,6 @@
      "why": "D1's design priced DEPTH from a8's one CACHED invocation (1194 s); D1's own search then recomputed the reference cache in 15 of 16 DEPTH expansions, up to 2486 s. The records model takes DEPTH from that search, and applies the objective's overhead to the two paths it touches instead of x1.10 on every structural minute"
     },
     "assumptions_not_measured": [
-     "the objective's added seconds per DEPTH candidate and per state evaluation: +5% of D1's mean (expected) and +10% (planning bound) until stage L measures them",
      "D2's trajectory has D1's size (92 expansions, 16 DEPTH): the beam schedule fixes the expansion count, not the operator mix"
     ],
     "hard_is": "a PLANNING BOUND from D1's measured maxima, not a proven bound on runtime. What bounds MONEY is the enforceable stop below; the bound decides only whether the search is expected to FINISH inside it",
@@ -482,44 +516,66 @@
     "n_probes": 8,
     "n_arms_materialized": 4,
     "expected": {
-     "minutes": 886.1,
-     "gpu_usd": 16.1,
+     "minutes": 900.8,
+     "gpu_usd": 16.36,
      "disk_usd": 0.25,
-     "all_in_usd": 16.34
+     "all_in_usd": 16.61
     },
     "hard": {
-     "minutes": 1101.0,
-     "gpu_usd": 20.0,
+     "minutes": 1129.5,
+     "gpu_usd": 20.52,
      "disk_usd": 0.31,
-     "all_in_usd": 20.31
+     "all_in_usd": 20.83
+    },
+    "rescoring": {
+     "source": "measured once (stage L)",
+     "minutes_per_probe": 1.83,
+     "in_ceilings": true,
+     "hard": {
+      "minutes": 28.5,
+      "gpu_usd": 0.52,
+      "disk_usd": 0.01,
+      "all_in_usd": 0.53
+     }
     },
     "rescoring_provisional_not_a_bound": {
-     "minutes": 52.0,
-     "gpu_usd": 0.94,
-     "disk_usd": 0.01,
-     "all_in_usd": 0.96
+     "minutes": 0.0,
+     "gpu_usd": 0.0,
+     "disk_usd": 0.0,
+     "all_in_usd": 0.0
     }
    },
    "d2_confirmation": {
     "n_probes": 3,
     "n_arms_materialized": 1,
     "expected": {
-     "minutes": 372.5,
-     "gpu_usd": 6.77,
-     "disk_usd": 0.1,
-     "all_in_usd": 6.87
+     "minutes": 378.0,
+     "gpu_usd": 6.87,
+     "disk_usd": 0.11,
+     "all_in_usd": 6.97
     },
     "hard": {
-     "minutes": 453.1,
-     "gpu_usd": 8.23,
+     "minutes": 463.8,
+     "gpu_usd": 8.43,
      "disk_usd": 0.13,
-     "all_in_usd": 8.36
+     "all_in_usd": 8.55
+    },
+    "rescoring": {
+     "source": "measured once (stage L)",
+     "minutes_per_probe": 1.83,
+     "in_ceilings": true,
+     "hard": {
+      "minutes": 10.7,
+      "gpu_usd": 0.19,
+      "disk_usd": 0.0,
+      "all_in_usd": 0.2
+     }
     },
     "rescoring_provisional_not_a_bound": {
-     "minutes": 19.5,
-     "gpu_usd": 0.35,
-     "disk_usd": 0.01,
-     "all_in_usd": 0.36
+     "minutes": 0.0,
+     "gpu_usd": 0.0,
+     "disk_usd": 0.0,
+     "all_in_usd": 0.0
     }
    }
   },

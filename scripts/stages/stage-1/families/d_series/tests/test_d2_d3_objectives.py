@@ -255,7 +255,7 @@ class TestTheContractStatesWhyAndWhereTheClaimsStop:
     def test_the_record_carries_the_objectives_it_declares(self):
         record = O.contract(REPO)
         assert record["d2"]["objective_hash"] == O.D2_OBJECTIVE.objective_hash
-        assert record["revision"] == 4
+        assert record["revision"] == 5
         assert record["d2"]["objective"]["aggregation"] == \
             "kl_path_weighting_per_consumer/v2"
 
@@ -302,7 +302,13 @@ class TestTheD2Budget:
                              "d2_screening", "d2_confirmation"))
         assert b["totals"]["hard_ceiling_usd"] == pytest.approx(
             hard + b["steps"]["r0"]["hard"]["all_in_usd"])
-        assert "only after" in b["totals"]["rescoring_excluded"]
+        rescoring = b["steps"]["d2_screening"]["rescoring"]
+        if rescoring["in_ceilings"]:
+            assert rescoring["source"].startswith("measured")
+            assert b["steps"]["d2_screening"][
+                "rescoring_provisional_not_a_bound"]["all_in_usd"] == 0.0
+        else:
+            assert "only after" in b["totals"]["rescoring"]
 
 
 
@@ -360,12 +366,18 @@ class TestTheProgrammeScenarios:
         expected = round(sum(b[k]["hard"]["all_in_usd"] + BUD.TEARDOWN_RESERVE_USD
                              for k in ("d2_search", "d2_screening",
                                        "d2_confirmation")), 2)
-        assert s["search_pricing"]["records_max"]["d2_block"][
+        assert s["search_pricing"][s["search_pricing_in_force"]]["d2_block"][
             "hard_with_reserves"] == expected
-        #: R0's and the calibration's reserves are INSIDE their grants.
-        assert s["engineering"]["hard_with_reserves"] == \
-            round(b["r0"]["grant_proposed_usd"]
-                  + b["reference_calibration"]["grant_proposed_usd"], 2)
+        #: R0's and the calibration's reserves are INSIDE their grants, and a
+        #: CLOSED campaign holds nothing: its recorded cost is already inside
+        #: the live limits, so subtracting its grant would count it twice.
+        camps = s["engineering"]["campaigns"]
+        assert s["engineering"]["hard_with_reserves"] == round(sum(
+            0.0 if c["closed"] else c["grant_usd"] - c["booked_usd"]
+            for c in camps.values()), 2)
+        for c in camps.values():
+            if c["closed"]:
+                assert c["outstanding_usd"] == 0.0
 
     def test_the_reservation_rule_is_reported_not_assumed(self):
         for pricing in self._scen()["search_pricing"].values():
@@ -398,9 +410,12 @@ class TestTheProgrammeScenarios:
                     scen["hard_with_reserves_usd"]
                     + scen["unverified_diagnostic_estimate_usd"], 2)
 
-    def test_the_price_in_force_is_the_unvalidated_one(self):
+    def test_the_price_in_force_follows_the_verified_evidence(self):
+        from stages.d_series import d2_budget as BUD
         s = self._scen()
-        assert s["search_pricing_in_force"] == "records_max"
+        validated = BUD.calibration_evidence()["cache_fix_validated"]
+        assert s["search_pricing_in_force"] == (
+            "cache_fix_validated" if validated else "records_max")
         assert (s["search_pricing"]["cache_fix_validated"]["search_hard_usd"]
                 < s["search_pricing"]["records_max"]["search_hard_usd"])
 

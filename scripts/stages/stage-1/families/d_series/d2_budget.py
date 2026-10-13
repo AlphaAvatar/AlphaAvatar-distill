@@ -38,6 +38,8 @@ for _extra in ("src", "scripts", "scripts/stages/stage-1"):
 SCHEMA = "aadistill.d_series.d2_budget/v1"
 RECORD = "logs/stages/stage-1/families/d_series/plans/d2_budget_v1.json"
 D1_DESIGN = "logs/stages/stage-1/phase_d1/plans/d1_design.json"
+R0_CAMPAIGN = ("logs/stages/stage-1/families/d_series/validations/"
+               "prediction-rows-r0/v1/campaign.json")
 R0_PLAN = ("logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/"
            "v1/plan.json")
 
@@ -209,6 +211,8 @@ def calibration_evidence(repo_root: str | Path | None = None) -> dict[str, Any]:
                 "overhead_seconds_per_evaluation", "skipped", "failed")},
             "d2_scored_rows_equivalence": (lc.get("d2_scored_rows_equivalence")
                                            or {}).get("verdict"),
+            "rescoring": ((lc.get("calibration") or {}).get(
+                "rescoring_cost_measured") or {}),
             "why": None if usable else "an identity or completion check failed"}
 
 
@@ -497,12 +501,35 @@ def build(k_candidates: int = 4) -> dict[str, Any]:
     sess_over = float(screening["session_overhead_minutes"])
     disk_beh = float(screening["container_disk_gb"])
 
+    #: THE ROLLOUT RESCORING: measured by stage L when its evidence verified
+    #: (projected per probe from real-model per-token time), else the
+    #: estimate. Measured, it JOINS the ceilings with the one-measurement
+    #: margin; estimated, it stays outside them and is reported apart.
+    resc = (evidence.get("rescoring") or {}) if evidence["usable"] else {}
+    resc_measured = resc.get("projected_minutes_per_probe")
+
     def behaviour(n_probes: int, n_arms: int) -> dict[str, Any]:
         fixed = sess_over + n_arms * per_arm
         probes = n_probes * probe_bound
+        if resc_measured is not None:
+            r_exp = n_probes * float(resc_measured)
+            r_hard = r_exp * MEASURED_OVERHEAD_BOUND_FACTOR * overrun
+            return {"n_probes": n_probes, "n_arms_materialized": n_arms,
+                    "expected": _usd(fixed + probes + r_exp, rate, disk_beh),
+                    "hard": _usd(fixed + probes * overrun + r_hard, rate,
+                                 disk_beh),
+                    "rescoring": {"source": "measured once (stage L)",
+                                  "minutes_per_probe": float(resc_measured),
+                                  "in_ceilings": True,
+                                  "hard": _usd(r_hard, rate, disk_beh)},
+                    "rescoring_provisional_not_a_bound": _usd(0.0, rate,
+                                                              disk_beh)}
         return {"n_probes": n_probes, "n_arms_materialized": n_arms,
                 "expected": _usd(fixed + probes, rate, disk_beh),
                 "hard": _usd(fixed + probes * overrun, rate, disk_beh),
+                "rescoring": {"source": "estimate", "in_ceilings": False,
+                              "minutes_per_probe":
+                                  RESCORING_MINUTES_PER_PROBE_ESTIMATE},
                 "rescoring_provisional_not_a_bound": _usd(
                     n_probes * RESCORING_MINUTES_PER_PROBE_ESTIMATE * overrun,
                     rate, disk_beh)}
@@ -540,7 +567,10 @@ def build(k_candidates: int = 4) -> dict[str, Any]:
                                                   * TEARDOWN_RESERVE_USD, 2),
                    "hard_plus_reserves_usd": round(
                        hard_total + sessions * TEARDOWN_RESERVE_USD, 2),
-                   "rescoring_excluded": (
+                   "rescoring": (
+                       "MEASURED by stage L and inside the behavioural "
+                       "ceilings with the one-measurement margin"
+                       if resc_measured is not None else
                        "the rollout-rescoring diagnostic adds about "
                        f"${d2_screening['rescoring_provisional_not_a_bound']['all_in_usd'] + d2_confirmation['rescoring_provisional_not_a_bound']['all_in_usd']:.2f} "
                        "at its ESTIMATE; it joins the ceilings only after the "
@@ -596,10 +626,29 @@ def programme_scenarios(limits: dict[str, float],
     eng = {"r0": steps["r0"]["grant_proposed_usd"],
            "reference_calibration": steps["reference_calibration"][
                "grant_proposed_usd"]}
-    eng_exp = (steps["r0"]["expected"]["all_in_usd"]
-               + steps["reference_calibration"]["expected"]["all_in_usd"])
+    #: RESERVES RELEASED AGAINST ACTUAL BILLS. The live limits are derived
+    #: from recorded spend, so a CLOSED campaign's cost is already inside
+    #: `project_remaining_usd`; subtracting its grant again would count it
+    #: twice. An open campaign still holds its unspent grant.
+    outstanding, eng_state = {}, {}
+    for name, rel in (("r0", R0_CAMPAIGN), ("reference_calibration",
+                                             CALIBRATION_CAMPAIGN)):
+        camp = _read(rel)
+        booked = round(sum(float(r.get("cost_usd") or 0)
+                           for r in camp.get("subruns") or []), 4)
+        closed = str(camp.get("status", "")).startswith("COMPLETE and CLOSED")
+        outstanding[name] = 0.0 if closed else round(eng[name] - booked, 4)
+        eng_state[name] = {"grant_usd": eng[name], "booked_usd": booked,
+                           "closed": closed,
+                           "outstanding_usd": outstanding[name]}
+    eng_exp = sum(
+        0.0 if eng_state[n]["closed"] else steps[n]["expected"]["all_in_usd"]
+        for n in eng)
     engineering = {"expected": round(eng_exp, 2),
-                   "hard_with_reserves": round(sum(eng.values()), 2)}
+                   "hard_with_reserves": round(sum(outstanding.values()), 2),
+                   "campaigns": eng_state,
+                   "_closed_campaigns_are": ("already inside the live limits "
+                                             "through their recorded cost")}
     fresh = d1_priced_confirmation(rate)
     fresh_block = {"expected": fresh["expected"]["all_in_usd"],
                    "hard_with_reserves": round(fresh["hard"]["all_in_usd"]
@@ -684,7 +733,7 @@ def programme_scenarios(limits: dict[str, float],
         "limits_owner": ("scripts/maintenance/consolidation/derive_budget.py "
                          "(the one budget authority)"),
         "engineering_grants": eng,
-        "engineering_fits_allowance": (sum(eng.values())
+        "engineering_fits_allowance": (engineering["hard_with_reserves"]
                                        <= limits["engineering_remaining_usd"]),
         "engineering": engineering,
         "fresh_confirmation": fresh_block,

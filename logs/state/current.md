@@ -9,8 +9,8 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods,
-0 network volumes and $0/h (2026-10-12 16:09 UTC).
+**NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods
+(2026-10-13 17:51 UTC, after the reference calibration's confirmed teardown).
 
 **D2/D3 OBJECTIVES CORRECTED (maintainer decision, 2026-10-13).** Both read
 the candidate student's own Top-200 conditional entropy,
@@ -32,44 +32,43 @@ the candidate student's own Top-200 conditional entropy,
 - Owner:
   [`d2_d3_objective_design.md`](../stages/stage-1/families/d_series/plans/d2_d3_objective_design.md).
 
-**D2 IS PREREGISTERED IN DRAFT; NO D2, R0 OR CALIBRATION SESSION IS GRANTED (post-revision-3
-review, 2026-10-13).**
-- **Contract.** Revision 4 (`0ebccd15…`); the objective hashes are unchanged.
-  - The objective aggregates with D1's KL-path weighting.
-  - The raw KL equals D1's metrics; this is the KL-only control.
-  - It acts on DEPTH, state evaluation and the beam only.
-  - High KL is a flag, never a rule.
-- **Order:**
-  1. R0: $4.00 grant / $3.60 cap.
-  2. The reference calibration (stage `L`, which measures λ, the thresholds
-     and the objective's overhead): $1.52 grant / $1.18 cap.
-  3. Then D2.
+**R0 PASSED AND THE REFERENCE CALIBRATION IS DONE (2026-10-13); THE D2
+SEARCH IS NOT AUTHORIZED.**
 
-  Proposed authorizations and exact commands are under
-  `families/d_series/validations/`.
-- **D2 search price**, from D1's own search telemetry
-  (`families/d_series/plans/d2_budget_v1.json`):
-  - expected $11.00;
-  - planning bound **$33.30, over the $30 per-session ceiling**, because 15
-    of D1's 16 DEPTH expansions recomputed the reference cache.
-- **The cause is fixed in core, but GPU validation is owed.** The cache probe
-  ignored 36 GiB the allocator held unused. Stage L validates the fix; once
-  validated, the bound is $23.68.
-- **Programme** (`d_series_programme_budget.json`): D2 + D3 is $70.63
-  expected.
-  - At the validated price it fits the $122.46 remainder at hard ($112.02).
-  - At the records price it does not ($131.26).
-  - A fresh confirmation on top is short by $7.70 or $26.94 respectively.
-- **Exact token ids:** a read-only generator wrapper keeps
-  `d_series_shared_eval@v1` unchanged (tested).
-- **D2 chain:**
-  - preregistration draft (`phase_d2/plans/d2_preregistration_v1.json`,
-    `2641a820…`, K = 4);
-  - session and driver, checked at $0.
+Owners:
+[`d2_gpu_evidence_review.md`](../stages/stage-1/families/d_series/analyses/d2_gpu_evidence_review.md)
+and `logs/budget/decisions.md`.
 
-  Owed: the launcher and grant schema, and adding `phase_d2` to the formal
-  allowance scope.
-- Owner: `logs/budget/decisions.md` (2026-10-13, post-revision-3 review).
+- **R0** (`r0_20261013_154325`, $1.5074): `scored_v1` is equivalent on the
+  KL path.
+  - DEPTH removal orders are identical.
+  - Candidate scores differ by at most 1.65e-7 and state evaluation by
+    1.28e-7, against a tolerance of 1e-5.
+- **Reference calibration** (`refcal_20261013_170714`, $0.8069):
+  - λ = 7.34 and the thresholds are frozen; contract revision 5 is
+    `a01b1be7…`.
+  - **The cache fix is validated on the GPU**: with a 34.9 GiB hoard, the
+    reference was cached with 0 recomputes.
+  - Cached and recomputed references are EXACT.
+  - The D2 objective adds +0.184 s per DEPTH candidate and +0.466 s per
+    state evaluation.
+  - The D2 scored-rows equivalence PASSES.
+  - Rescoring costs 1.83 min/probe.
+- **Both sessions are closed:** pods deleted and confirmed, $2.3143 of the
+  $5.76 granted.
+- **D2 price**, switched automatically by the booked evidence:
+  - search $10.80 expected, $22.38 bound;
+  - D2 $52.66 at hard;
+  - D2 + D3 $105.32 fits the $120.14 remainder;
+  - with a fresh confirmation, short by $0.68.
+- **D2 launch chain built at $0:** typed grant, launcher, pod branch, a soft
+  stop taken from `soft_stop_minutes`, and the cache-regression guard.
+- **Open maintainer decisions:**
+  - approve the preregistration revision (`489f49ba…`);
+  - add `phase_d2` to `funds_formal_sessions_of`;
+  - choose `all_v1` or `scored_v1`;
+  - handle the $0.68 shortfall;
+  - then the D2 search grant.
 
 **NEXT ROUND: R0 → D2 → D3 ON A SHARED BEHAVIOURAL EVALUATION (maintainer
 decision, 2026-10-13).** D2/D3 do not retrain B or q2.
@@ -83,9 +82,7 @@ decision, 2026-10-13).** D2/D3 do not retrain B or q2.
 - D2/D3 are controlled jointly at a one-sided α of 0.025 each. A pass on the
   shared rows (`SHARED_GO`) nominates for a fresh confirmation on the
   reserved d2/d3 battery and never promotes.
-- **R0 is ready but unfunded:** expected $1.53, hard ceiling $3.60 all-in.
-  Launch repairs are done at $0. It needs a grant, which writes its
-  `authorization.json`.
+- **R0 is done:** PASS, $1.5074 (see above).
 - Owner:
   [`families/d_series/plans/d2_d3_shared_evaluation_design.md`](../stages/stage-1/families/d_series/plans/d2_d3_shared_evaluation_design.md).
 
@@ -3756,9 +3753,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$127.9624` of `$256.6523` |
-| GPU engineering | `$6.6510` of `$25.0741` |
-| package | `$134.6134` of `$281.7264` |
-| project cap | `$467.5446` spent of `$590.0000`, leaving `$122.4554` |
+| GPU engineering | `$4.3367` of `$25.0741` |
+| package | `$132.2991` of `$281.7264` |
+| project cap | `$469.8589` spent of `$590.0000`, leaving `$120.1411` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 4.** 5 ceilings cost `$150.0000` and the formal allowance has `$127.9624`. Dividing the PACKAGE balance instead gives 4, which is the error: the engineering allowance cannot pay for a formal probe.
 

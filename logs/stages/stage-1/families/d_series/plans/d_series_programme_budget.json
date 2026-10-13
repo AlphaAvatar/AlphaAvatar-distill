@@ -2,10 +2,10 @@
  "schema": "aadistill.d_series.programme_budget/v2",
  "_contract": "A DATED planning snapshot of D2, D3 and one fresh independent confirmation against the live limits from the budget authority. Re-derive before every authorization; it permits nothing.",
  "limits": {
-  "project_remaining_usd": 122.4554,
+  "project_remaining_usd": 120.1411,
   "project_cap_usd": 590.0,
   "formal_remaining_usd": 127.9624,
-  "engineering_remaining_usd": 6.651,
+  "engineering_remaining_usd": 4.3367,
   "per_session_cap_usd": 30.0
  },
  "limits_owner": "scripts/maintenance/consolidation/derive_budget.py (the one budget authority)",
@@ -15,8 +15,23 @@
  },
  "engineering_fits_allowance": true,
  "engineering": {
-  "expected": 2.4,
-  "hard_with_reserves": 5.76
+  "expected": 0.0,
+  "hard_with_reserves": 0.0,
+  "campaigns": {
+   "r0": {
+    "grant_usd": 4.0,
+    "booked_usd": 1.5074,
+    "closed": true,
+    "outstanding_usd": 0.0
+   },
+   "reference_calibration": {
+    "grant_usd": 1.76,
+    "booked_usd": 0.8069,
+    "closed": true,
+    "outstanding_usd": 0.0
+   }
+  },
+  "_closed_campaigns_are": "already inside the live limits through their recorded cost"
  },
  "fresh_confirmation": {
   "expected": 12.23,
@@ -26,17 +41,17 @@
  "reservation_rule": "authorize D2's formal sessions only if the project remainder after engineering and D2 at hard ceilings still covers D3 and one fresh confirmation at theirs",
  "search_pricing": {
   "records_max": {
-   "search_hard_usd": 33.3,
+   "search_hard_usd": 32.01,
    "search_fits_per_session_cap": false,
    "d2_block": {
-    "expected": 34.21,
-    "hard_with_reserves": 62.87,
-    "rescoring_estimate": 1.32
+    "expected": 34.38,
+    "hard_with_reserves": 62.29,
+    "rescoring_estimate": 0.0
    },
    "d3_block": {
-    "expected": 34.21,
-    "hard_with_reserves": 62.87,
-    "rescoring_estimate": 1.32
+    "expected": 34.38,
+    "hard_with_reserves": 62.29,
+    "rescoring_estimate": 0.0
    },
    "scenarios": {
     "A_d2": {
@@ -44,12 +59,12 @@
       "engineering (R0 + reference calibration)",
       "d2"
      ],
-     "expected_usd": 36.61,
-     "hard_with_reserves_usd": 68.63,
-     "unverified_diagnostic_estimate_usd": 1.32,
-     "conservative_planning_usd": 69.95,
-     "project_remaining_after_hard_usd": 53.83,
-     "project_remaining_after_conservative_usd": 52.51,
+     "expected_usd": 34.38,
+     "hard_with_reserves_usd": 62.29,
+     "unverified_diagnostic_estimate_usd": 0.0,
+     "conservative_planning_usd": 62.29,
+     "project_remaining_after_hard_usd": 57.85,
+     "project_remaining_after_conservative_usd": 57.85,
      "fits_project_at_hard": true,
      "fits_project_conservative": true,
      "fits_project_at_expected": true
@@ -60,12 +75,12 @@
       "d2",
       "d3"
      ],
-     "expected_usd": 70.82,
-     "hard_with_reserves_usd": 131.5,
-     "unverified_diagnostic_estimate_usd": 2.64,
-     "conservative_planning_usd": 134.14,
-     "project_remaining_after_hard_usd": -9.04,
-     "project_remaining_after_conservative_usd": -11.68,
+     "expected_usd": 68.76,
+     "hard_with_reserves_usd": 124.58,
+     "unverified_diagnostic_estimate_usd": 0.0,
+     "conservative_planning_usd": 124.58,
+     "project_remaining_after_hard_usd": -4.44,
+     "project_remaining_after_conservative_usd": -4.44,
      "fits_project_at_hard": false,
      "fits_project_conservative": false,
      "fits_project_at_expected": true
@@ -77,41 +92,41 @@
       "d3",
       "fresh_confirmation"
      ],
-     "expected_usd": 83.05,
-     "hard_with_reserves_usd": 147.0,
-     "unverified_diagnostic_estimate_usd": 2.64,
-     "conservative_planning_usd": 149.64,
-     "project_remaining_after_hard_usd": -24.54,
-     "project_remaining_after_conservative_usd": -27.18,
+     "expected_usd": 80.99,
+     "hard_with_reserves_usd": 140.08,
+     "unverified_diagnostic_estimate_usd": 0.0,
+     "conservative_planning_usd": 140.08,
+     "project_remaining_after_hard_usd": -19.94,
+     "project_remaining_after_conservative_usd": -19.94,
      "fits_project_at_hard": false,
      "fits_project_conservative": false,
      "fits_project_at_expected": true
     }
    },
    "reservation_rule": {
-    "left_after_d2_at_hard_usd": 53.83,
-    "needed_for_d3_and_fresh_at_hard_usd": 78.37,
+    "left_after_d2_at_hard_usd": 57.85,
+    "needed_for_d3_and_fresh_at_hard_usd": 77.79,
     "satisfied": false,
-    "shortfall_usd": 24.54,
+    "shortfall_usd": 19.94,
     "conservative_with_unverified_estimates": {
-     "estimates_usd": 2.64,
+     "estimates_usd": 0.0,
      "satisfied": false,
-     "shortfall_usd": 27.18
+     "shortfall_usd": 19.94
     }
    }
   },
   "cache_fix_validated": {
-   "search_hard_usd": 23.68,
+   "search_hard_usd": 22.38,
    "search_fits_per_session_cap": true,
    "d2_block": {
-    "expected": 34.21,
-    "hard_with_reserves": 53.25,
-    "rescoring_estimate": 1.32
+    "expected": 34.38,
+    "hard_with_reserves": 52.66,
+    "rescoring_estimate": 0.0
    },
    "d3_block": {
-    "expected": 34.21,
-    "hard_with_reserves": 53.25,
-    "rescoring_estimate": 1.32
+    "expected": 34.38,
+    "hard_with_reserves": 52.66,
+    "rescoring_estimate": 0.0
    },
    "scenarios": {
     "A_d2": {
@@ -119,12 +134,12 @@
       "engineering (R0 + reference calibration)",
       "d2"
      ],
-     "expected_usd": 36.61,
-     "hard_with_reserves_usd": 59.01,
-     "unverified_diagnostic_estimate_usd": 1.32,
-     "conservative_planning_usd": 60.33,
-     "project_remaining_after_hard_usd": 63.45,
-     "project_remaining_after_conservative_usd": 62.13,
+     "expected_usd": 34.38,
+     "hard_with_reserves_usd": 52.66,
+     "unverified_diagnostic_estimate_usd": 0.0,
+     "conservative_planning_usd": 52.66,
+     "project_remaining_after_hard_usd": 67.48,
+     "project_remaining_after_conservative_usd": 67.48,
      "fits_project_at_hard": true,
      "fits_project_conservative": true,
      "fits_project_at_expected": true
@@ -135,12 +150,12 @@
       "d2",
       "d3"
      ],
-     "expected_usd": 70.82,
-     "hard_with_reserves_usd": 112.26,
-     "unverified_diagnostic_estimate_usd": 2.64,
-     "conservative_planning_usd": 114.9,
-     "project_remaining_after_hard_usd": 10.2,
-     "project_remaining_after_conservative_usd": 7.56,
+     "expected_usd": 68.76,
+     "hard_with_reserves_usd": 105.32,
+     "unverified_diagnostic_estimate_usd": 0.0,
+     "conservative_planning_usd": 105.32,
+     "project_remaining_after_hard_usd": 14.82,
+     "project_remaining_after_conservative_usd": 14.82,
      "fits_project_at_hard": true,
      "fits_project_conservative": true,
      "fits_project_at_expected": true
@@ -152,39 +167,39 @@
       "d3",
       "fresh_confirmation"
      ],
-     "expected_usd": 83.05,
-     "hard_with_reserves_usd": 127.76,
-     "unverified_diagnostic_estimate_usd": 2.64,
-     "conservative_planning_usd": 130.4,
-     "project_remaining_after_hard_usd": -5.3,
-     "project_remaining_after_conservative_usd": -7.94,
+     "expected_usd": 80.99,
+     "hard_with_reserves_usd": 120.82,
+     "unverified_diagnostic_estimate_usd": 0.0,
+     "conservative_planning_usd": 120.82,
+     "project_remaining_after_hard_usd": -0.68,
+     "project_remaining_after_conservative_usd": -0.68,
      "fits_project_at_hard": false,
      "fits_project_conservative": false,
      "fits_project_at_expected": true
     }
    },
    "reservation_rule": {
-    "left_after_d2_at_hard_usd": 63.45,
-    "needed_for_d3_and_fresh_at_hard_usd": 68.75,
+    "left_after_d2_at_hard_usd": 67.48,
+    "needed_for_d3_and_fresh_at_hard_usd": 68.16,
     "satisfied": false,
-    "shortfall_usd": 5.3,
+    "shortfall_usd": 0.68,
     "conservative_with_unverified_estimates": {
-     "estimates_usd": 2.64,
+     "estimates_usd": 0.0,
      "satisfied": false,
-     "shortfall_usd": 7.94
+     "shortfall_usd": 0.68
     }
    }
   }
  },
- "search_pricing_in_force": "records_max",
+ "search_pricing_in_force": "cache_fix_validated",
  "levers_if_short": {
   "validate_the_reference_cache_fix": {
-   "saves_hard_usd_per_search": 9.62,
+   "saves_hard_usd_per_search": 9.63,
    "how": "the reference calibration's stage L DEPTH pair, already in its plan, at no extra session"
   },
   "measure_the_objective_overhead": "stage L's two timing pairs replace the provisional +5%/+10% on the DEPTH loop and the state evaluation",
   "d3_at_k2": {
-   "saves_hard_usd": 9.4,
+   "saves_hard_usd": 9.66,
    "cost": "narrower structural coverage for D3"
   },
   "scored_v1_after_r0": "about 8% of DEPTH time if R0 passes; unmeasured",

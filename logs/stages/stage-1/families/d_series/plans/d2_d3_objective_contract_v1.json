@@ -62,9 +62,9 @@
    "aggregation": "kl_path_weighting_per_consumer/v2",
    "direction": "minimize"
   },
-  "reward_scale": null,
-  "objective_hash": null,
-  "status": "PENDING_LAMBDA: the rule is registered; the value is measured on the reference pair BEFORE D2's formal search, with the diagnostic thresholds",
+  "reward_scale": 7.34,
+  "objective_hash": "7b2545389874b445628ac46ddef32bebee92622150560c1bd899dffb75033636",
+  "status": "FROZEN",
   "formula": "L(x) = (1/T_x) sum_{t in T_x} [KL_t - lambda c_t], minimized (S = -L maximized)",
   "hypothesis": "The student's own predictive certainty may carry structural-selection value independent of the teacher KL: even where its token distribution differs from the teacher's, a student that is certain of its own distribution earns a separate confidence reward. Whether that signal is useful is decided by task correctness after recovery training, not by the reward.",
   "lambda_rule": {
@@ -126,6 +126,11 @@
    "is set or revised after D2/D3 candidate results exist"
   ],
   "rule_hash": "8ea3a526d7f9d2eb0394f3ed21ce136a41e52c5d328f4e64bad8c020b234405b"
+ },
+ "diagnostic_thresholds": {
+  "high_kl": 13.854034805297852,
+  "high_confidence": 0.7757596909999848,
+  "low_topk_mass": 0.432262933254242
  },
  "ranking": {
   "policy": "beam.pareto_scoring_objective@v1",
@@ -270,7 +275,7 @@
   ],
   "validation": "Top-K confidence is a proxy for structure selection; its usefulness is established only by independent behavioural evidence after recovery training"
  },
- "revision": 4,
+ "revision": 5,
  "revision_history": [
   {
    "revision": 1,
@@ -291,8 +296,13 @@
    "revision": 4,
    "date": "2026-10-13",
    "change": "post-revision-3 review: (1) aggregation_difference_from_d1 no longer contradicts the revision-3 aggregation; (2) exact engine token ids through a read-only generator wrapper whose generation identity is the plain run's. Objective identities, ranking and lambda rule unchanged"
+  },
+  {
+   "revision": 5,
+   "date": "2026-10-13",
+   "change": "the reference calibration ran (stage L, run refcal_20261013_170714) under the registered rules: D3's lambda = 7.34 and the diagnostic thresholds are FROZEN from its committed record, before any D2 search. D2's objective, the ranking and both rules unchanged"
   }
  ],
- "contract_hash": "0ebccd156458281a83111a55afa43c8fbc62e1e823cac648ba0a9bb6a6c9b5dc",
+ "contract_hash": "a01b1be714d0020684350666bf67247527425810b9c68de2aa61976f9f822945",
  "authorizes": "nothing"
 }

@@ -2,13 +2,42 @@
  "schema": "aadistill.engineering_campaign/v1",
  "campaign_id": "d_series_reference_calibration",
  "_contract": "Cumulative cost of the reference calibration across every resource and subrun. A rerun does NOT reset it.",
- "status": "OPEN -- granted 2026-10-13T17:06:59Z (all-in $1.76, session cap $1.42); cumulative across subruns",
+ "status": "COMPLETE and CLOSED -- stage L complete (run refcal_20261013_170714, $0.8069 of the $1.76 grant); evidence booked by sha256",
  "authorization": "logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/authorization.json",
  "package_id": "phase_c1.execution_package.2026-09-11",
  "_package_id": "the GPU ENGINEERING book, as for R0 and the Top-K adoption validation",
  "plan": "logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/plan.json",
  "teardown_reserve_usd": 0.3,
  "inherited_spend": [],
- "subruns": [],
- "authorizes": "nothing by itself"
+ "subruns": [
+  {
+   "subrun_id": "refcal_s1",
+   "run_id": "refcal_20261013_170714",
+   "cost_usd": 0.8069,
+   "pod_id": "7cr5l46wa7ptfy",
+   "rate_usd_per_hour": 1.09,
+   "outcome": "COMPLETE -- stage L: calibration, cache fix validated, both equivalences PASS",
+   "notes": "lambda 7.34; thresholds hc 0.776 / kl 13.85 / mass 0.432; DEPTH objective +0.184 s/candidate, state eval +0.466 s; cache cached under a 34.9 GiB hoard; cached==recomputed exactly; D2 scored_v1 PASS",
+   "evidence": "logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/runs/refcal_20261013_170714",
+   "evidence_sha256": {
+    "cost.json": "536ab96f81496c9ab50925bfd41477f472a773a303140b915926e3f3b284bc05",
+    "launch.log": "da93114f8d0b082d0da328e1e59ca891fa1fa115fdf42b2273f6e04efa88b379",
+    "out/adoption_all_v1/adoption.json": "6806eb846f7e8a50b6c9eb4165e24ad5c7474f586f1f259b947a3d89968b6155",
+    "out/adoption_all_v1/journal.jsonl": "bc3389f86f3d16c641ef34f163513d81d2d6792953cc3ae0892c7e819c4c4c17",
+    "out/adoption_all_v1/reference_calibration.json": "7884022fcf9e382cdc15aea06bfabb9700fa974168958e9ada27991dba9dd617",
+    "out/adoption_all_v1.log": "f40bb3db36aea1e02fa1a9f5becdd066f3c972fe8a1d3773e2790573b5b6c53c",
+    "out/host_gpu.txt": "7853c0d8b47c15bfa4c1800e33b839347e6976c9ceea547c8d8795aee7947bf5",
+    "out/preflight_all_v1/adoption.json": "ab1d049cc2e9eb860149fd4069f76a5f2dfe62d81974e2cc68ae2d70178a6ce8",
+    "out/preflight_all_v1/journal.jsonl": "8ffe1b6c2a0d0839e21074f28d54678e43917b02103254139a3e74037919ecb9",
+    "out/preflight_all_v1.log": "c7b0986624224accb71c07403b7118cec075f34f23b767b54935e94b91c3e8a0",
+    "out/runtime.txt": "8df33ef6ed783d31a27fd57b2ded72ebdba4106c422742000225213fba2be4b7",
+    "required_inputs.jsonl": "1cc0f12d949720a984ab41745aaa14a3def096b4325f6ba38469190a9ec6b769",
+    "watchdog.jsonl": "f016a28ebccb14e03caa8a49dea633b25ee2b8feaf9f0966f89cf48786cabd05"
+   },
+   "evidence_session": "logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/runs/refcal_20261013_170714/out/adoption_all_v1/adoption.json",
+   "evidence_session_sha256": "6806eb846f7e8a50b6c9eb4165e24ad5c7474f586f1f259b947a3d89968b6155"
+  }
+ ],
+ "authorizes": "nothing by itself",
+ "booked_usd": 0.8069
 }

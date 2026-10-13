@@ -1,0 +1,1289 @@
+{
+ "schema": "aadistill.d_series.reference_calibration/v1",
+ "rule_hash": "8817206125772078b4f2c472df3e3cb919d0aa2bcfb4585ae090180729047256",
+ "threshold_rule_hash": "8ea3a526d7f9d2eb0394f3ed21ce136a41e52c5d328f4e64bad8c020b234405b",
+ "reward_scale": 7.34,
+ "lambda": {
+  "reward_scale": 7.34,
+  "unrounded": 7.3358322259908775,
+  "iqr_kl": 1.2081147924813838,
+  "iqr_confidence": 0.16468680788541334,
+  "sd_ratio_sensitivity": 7.220591278515128,
+  "n_items": 147
+ },
+ "lambda_sensitivity_not_used": {
+  "with_duplicate_draws": {
+   "reward_scale": 7.52,
+   "unrounded": 7.524188486745674,
+   "iqr_kl": 1.2303831888360381,
+   "iqr_confidence": 0.1635237063775628,
+   "sd_ratio_sensitivity": 7.284095948072803,
+   "n_items": 209
+  },
+  "set:calib.domain_balanced@v1": {
+   "reward_scale": 6.53,
+   "unrounded": 6.527616123667068,
+   "iqr_kl": 1.1511206259506173,
+   "iqr_confidence": 0.1763462501688815,
+   "sd_ratio_sensitivity": 6.6474711133016555,
+   "n_items": 67
+  },
+  "set:calib.reasoning_heavy@v2": {
+   "reward_scale": 7.01,
+   "unrounded": 7.011900429210163,
+   "iqr_kl": 1.1873393901319158,
+   "iqr_confidence": 0.1693320380286205,
+   "sd_ratio_sensitivity": 7.452303707068283,
+   "n_items": 51
+  },
+  "set:state_eval_v1": {
+   "reward_scale": 8.21,
+   "unrounded": 8.214391258722726,
+   "iqr_kl": 1.1959106748477897,
+   "iqr_confidence": 0.14558725499931258,
+   "sd_ratio_sensitivity": 7.706689517310034,
+   "n_items": 80
+  }
+ },
+ "diagnostic_thresholds": {
+  "high_kl": 13.854034805297852,
+  "high_confidence": 0.7757596909999848,
+  "low_topk_mass": 0.432262933254242
+ },
+ "independence": {
+  "draws": 209,
+  "unique_items": 147,
+  "scored_positions": 98760
+ },
+ "rescoring_cost_measured": {
+  "sequences": 24,
+  "tokens": 13719,
+  "seconds": 1.584,
+  "seconds_per_1k_tokens": 0.1155,
+  "projected_minutes_per_probe": 1.83,
+  "tokens_per_probe_basis": 951268,
+  "peak_memory_gib": 9.95,
+  "_timing_only": "B's initialization stands in for a trained student of the same size; no behavioural quantity is measured here"
+ },
+ "identities": {
+  "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "student_identity": {
+   "verified": [
+    "arch_signature",
+    "artifact_digest",
+    "single_shard_sha256",
+    "weights_digest"
+   ],
+   "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+   "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "single_shard_sha256": "b24f0b63afd3b99f14d34d4fc508abbb26f65421dc5784f3738bd9565608d010",
+   "weights_digest": "85c5c50de3cd7e5242097e05e6f09057d9b27ae98ec49050219e75a2f49e2335"
+  },
+  "student_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+  "support_top_k": 200,
+  "entropy_top_k": 200,
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "item_sets": {
+   "draws": 209,
+   "unique": 147,
+   "per_set": {
+    "calib.domain_balanced@v1": {
+     "draws": 67,
+     "unique_within": 67,
+     "new_unique": 67
+    },
+    "calib.reasoning_heavy@v2": {
+     "draws": 62,
+     "unique_within": 51,
+     "new_unique": 0
+    },
+    "state_eval_v1": {
+     "draws": 80,
+     "unique_within": 80,
+     "new_unique": 80
+    }
+   }
+  },
+  "seconds": 16.9
+ },
+ "per_unique_item": [
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "general/fineweb-40000",
+   "content": "1f78b4dbdcbcfdea6e536a668d60a45135433d39958bed3b311eb9c75d247323",
+   "kl": 9.502526987068189,
+   "confidence": 0.7314873513332598,
+   "scored_positions": 628
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "general/fineweb-40001",
+   "content": "62698e739d3f9052b584e9694ddc9b2379d3766b6b4e4ab3181c305274e35698",
+   "kl": 8.380101551313768,
+   "confidence": 0.4519557686834376,
+   "scored_positions": 233
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "general/fineweb-40002",
+   "content": "9a8e0985c0c2c018641ef815826461a946734287d5b452500a3a4b467000b8e0",
+   "kl": 8.160483640862962,
+   "confidence": 0.5386866521472713,
+   "scored_positions": 526
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "general/fineweb-40003",
+   "content": "d644dac475bda9b606c7f586757bc3079e52a1f4f17ea153d7a283ea183eea79",
+   "kl": 8.983088238202324,
+   "confidence": 0.6450157919595408,
+   "scored_positions": 645
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "general/fineweb-40004",
+   "content": "f7b684fd48b4bafd70ac7720e962d74b85edd681fe25a13472411d9ba09c230b",
+   "kl": 8.030261226942216,
+   "confidence": 0.598068555048077,
+   "scored_positions": 671
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "general/fineweb-40005",
+   "content": "78cd162cbe66a85c41bf5ada626078702c0b85a2c8f68a7f727c17fb6df3cee7",
+   "kl": 7.487251925317547,
+   "confidence": 0.47943736782556845,
+   "scored_positions": 316
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "general/fineweb-40006",
+   "content": "47e3acff3a01e8a0379b99d41c2f74a4dc72c114f1de6d8b210b40b374e2b932",
+   "kl": 7.854692728488477,
+   "confidence": 0.5692184838381681,
+   "scored_positions": 308
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "general/fineweb-40007",
+   "content": "c6f56e5782993646d01e8549f5c16e72e7d326466a14ec979b751312057dc106",
+   "kl": 8.005348976891952,
+   "confidence": 0.3739774173510343,
+   "scored_positions": 489
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "general/fineweb-40008",
+   "content": "ae107daefe2f33e6af46949d0af417bcd7c714514bc84e4b0ad42ad5df742731",
+   "kl": 8.249806213763453,
+   "confidence": 0.4481372785183691,
+   "scored_positions": 124
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "general/fineweb-40009",
+   "content": "71aa269e62995a8836d00fb684de7121cd78e3d633dcfeec746794e84bed478e",
+   "kl": 8.759061667697464,
+   "confidence": 0.45842362053048163,
+   "scored_positions": 613
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "general/fineweb-40010",
+   "content": "a1819bb8c9bc07d612e4867f8d26d8547d319d81b0b9559b668d7703971dc59c",
+   "kl": 7.878504360817511,
+   "confidence": 0.48462889854043345,
+   "scored_positions": 1023
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "general/fineweb-40011",
+   "content": "0004abea66020a59cd56dc7884ddfab78b526bf33627843774c82c6db4b31d70",
+   "kl": 9.507961583877236,
+   "confidence": 0.44376752285513504,
+   "scored_positions": 419
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "general/fineweb-40012",
+   "content": "b86fe65006311ac26a8adaff8342e9ba53085c39a2e6501517a0c0a546976f4e",
+   "kl": 7.796280354033899,
+   "confidence": 0.6195613082128627,
+   "scored_positions": 524
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "general/fineweb-40013",
+   "content": "1bfca5ae7754bab6afece280a486e60b21cd7b14950d318ca1853c4051550eee",
+   "kl": 6.532935361496083,
+   "confidence": 0.4676113387352319,
+   "scored_positions": 394
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "general/fineweb-40014",
+   "content": "6a2ccce1758143fd3a47a7de7660d5111b277cd0d632fe9747f27d56ed5c3bbb",
+   "kl": 7.752390276762395,
+   "confidence": 0.5071124268253384,
+   "scored_positions": 459
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "general/fineweb-40015",
+   "content": "766cac3675e51edde3d32cd21be18e6cb710d07e9046a00ceb3fb7d5421106a4",
+   "kl": 7.815342008904681,
+   "confidence": 0.5652808607601728,
+   "scored_positions": 915
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "rag_evidence/squad_v2-000000#t1",
+   "content": "b74a35c97d5d9a79f947774da67c56d730c3551c982f0dfb2880edffd5c9c449",
+   "kl": 7.552178540800372,
+   "confidence": 0.32039920336160904,
+   "scored_positions": 468
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "rag_evidence/squad_v2-000004#t1",
+   "content": "2c30420285c4edada6f2a7f9a60b9106d7aa0d7340f67598a9f1bbc2e0da450f",
+   "kl": 7.4126931651827475,
+   "confidence": 0.30352897922091443,
+   "scored_positions": 373
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "rag_evidence/squad_v2-000006#t1",
+   "content": "2df78468e2f052982a7b289def5ded373f6f1b1abe50a1a675b9e681d7c05bef",
+   "kl": 8.77056915998459,
+   "confidence": 0.2754596883058548,
+   "scored_positions": 400
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "rag_evidence/squad_v2-000008#t1",
+   "content": "0aaec51d3ea2363dbd47ebeb9b604ad6234553ccd6ccc9e55ddc9386df252635",
+   "kl": 7.954125131879534,
+   "confidence": 0.34502336104492565,
+   "scored_positions": 364
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "rag_evidence/squad_v2-000010#t1",
+   "content": "1d9b914f154b83d05a9bd9b205fc046438f651c47654d76a075b783301c85f64",
+   "kl": 8.421580933421463,
+   "confidence": 0.3048556512826449,
+   "scored_positions": 308
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "rag_evidence/squad_v2-000013#t1",
+   "content": "e07140a4bbca4a4c261ba9a54533ff65be06dad26df42af8e10090dd083c10a7",
+   "kl": 8.55637814077604,
+   "confidence": 0.3625715572088572,
+   "scored_positions": 387
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "rag_evidence/squad_v2-000015#t1",
+   "content": "c29670c6f0ad481587083687377e60a7bccc9c8d0f0e98aa085049a9cad131e8",
+   "kl": 9.66563000746474,
+   "confidence": 0.3052745311445481,
+   "scored_positions": 592
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "rag_evidence/squad_v2-000017#t1",
+   "content": "50746423a4da609b7c7ac0191476c5a03728d1789476cd9ef6000bdca2ed5497",
+   "kl": 8.145909253579493,
+   "confidence": 0.3306394415692641,
+   "scored_positions": 416
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "rag_evidence/squad_v2-000023#t1",
+   "content": "fedbd0b5de0c48a7f3d3343b539a029f967a27f4e7cacd30d10ba3b20742f1bd",
+   "kl": 8.493738041500027,
+   "confidence": 0.41636416182089386,
+   "scored_positions": 178
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "rag_evidence/squad_v2-000026#t1",
+   "content": "324a251c0bef6dbe673cd2df5f684a25db1bf15d5ad2ff7ef52c8f742aea8b4f",
+   "kl": 9.120816727574363,
+   "confidence": 0.37488883534116607,
+   "scored_positions": 209
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "rag_evidence/squad_v2-000028#t1",
+   "content": "25f783d6a5364189acbc809ba97d8a4e1810765a19e6e95479d2da2335eb05f6",
+   "kl": 7.8573729396437,
+   "confidence": 0.34861622767062367,
+   "scored_positions": 457
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "rag_evidence/squad_v2-000030#t1",
+   "content": "fe4085c02818d93f34e9cf1669fcc21751cb275ca24a396f1427af1c53e43b84",
+   "kl": 8.989187751092068,
+   "confidence": 0.28906087992953605,
+   "scored_positions": 294
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "rag_evidence/squad_v2-000032#t1",
+   "content": "2684f9790321283456856442360cfef7551f38cd492546013a3b38a50302d3ea",
+   "kl": 8.40419746507769,
+   "confidence": 0.3867060424193092,
+   "scored_positions": 460
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "multihop_qa/hotpot-000000#t1",
+   "content": "532171056a8e8f8ccd3df0df209d8320b92d40a751b74c257df470e07984eb92",
+   "kl": 10.12055872944281,
+   "confidence": 0.22214025093065337,
+   "scored_positions": 431
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "multihop_qa/hotpot-000058#t1",
+   "content": "5016146ecbc6792e3f626afb65acd41251e381a0ccd45ce27f1f75fe8a09b4e8",
+   "kl": 9.707026505437208,
+   "confidence": 0.312366032153988,
+   "scored_positions": 721
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "multihop_qa/hotpot-000067#t1",
+   "content": "a742674137cdb0c8cc03257526d97c6f8a2a120a29ab4d50da8e88967c1d374f",
+   "kl": 10.333504075253451,
+   "confidence": 0.2714366528722975,
+   "scored_positions": 540
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "multihop_qa/hotpot-000101#t1",
+   "content": "6b5a940dca89b7dcecd0e4a139f37a3932e0fe5fd39e481578e83d94abf8964d",
+   "kl": 10.137211624578258,
+   "confidence": 0.16120343080692337,
+   "scored_positions": 411
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "multihop_qa/hotpot-000114#t1",
+   "content": "b932d0263e222e6843ed17bcfb9d9d4f23db14c693f4784e73e63863b159386d",
+   "kl": 10.535744134485096,
+   "confidence": 0.4249422184076449,
+   "scored_positions": 477
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "gsm8k/gsm8k-000034#t1",
+   "content": "3bd405ea80dffb05cc07ecac883edc13ed9f2817e53908408dd3750652a09e81",
+   "kl": 7.731945420144779,
+   "confidence": 0.3178655713050122,
+   "scored_positions": 519
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "gsm8k/gsm8k-000039#t1",
+   "content": "b3fa13e7dc8b2cb80f1a31577e82b9cbf1bff47dc28aa40ddd66e59455dd9e6b",
+   "kl": 8.973875323743783,
+   "confidence": 0.21539442623681562,
+   "scored_positions": 748
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "gsm8k/gsm8k-000052#t1",
+   "content": "587a5c16d07a233a93c2b9eb51a9440a6594c5141b1f496e1875fb89a099d848",
+   "kl": 7.400837753927661,
+   "confidence": 0.39341091257309224,
+   "scored_positions": 972
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "gsm8k/gsm8k-000073#t1",
+   "content": "2dc2360338cee07b61b3e36bb36d688142df32aacd9f5a3e18c8565069048768",
+   "kl": 8.558078469992253,
+   "confidence": 0.4844341408280493,
+   "scored_positions": 412
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "gsm8k/gsm8k-000078#t1",
+   "content": "18c7e876cc73ecb8bfb6b8ef59af5a593f3765d9a2be9254ca5d4fadf06b5d5a",
+   "kl": 8.787273508369584,
+   "confidence": 0.5466162881293855,
+   "scored_positions": 770
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "gsm8k/gsm8k-000082#t1",
+   "content": "478d81012a5994e5b269eca78bb19167e0ae3371f6d0379930c6fc81582d730c",
+   "kl": 7.735425682080468,
+   "confidence": 0.4968734543134131,
+   "scored_positions": 919
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "gsm8k/gsm8k-000086#t1",
+   "content": "027b3c273cd70c6ea786c00a7519a508c2bc46883b33ab9d493262aad4be6a8e",
+   "kl": 7.8032036778579075,
+   "confidence": 0.4411163714458263,
+   "scored_positions": 811
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "gsm8k/gsm8k-000100#t1",
+   "content": "f54e0731dbe89541d5fb26e6fbbe6599599d90b780bd649a005a13435f3ef872",
+   "kl": 9.031811409001977,
+   "confidence": 0.25017642799545736,
+   "scored_positions": 442
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "gsm8k/gsm8k-000104#t1",
+   "content": "a5d396d8e7476c48b7394d4c3d40dba4ba2e2be5aa093c78ceb45469956ec282",
+   "kl": 7.742492826974184,
+   "confidence": 0.5359225617785032,
+   "scored_positions": 735
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "gsm8k/gsm8k-000108#t1",
+   "content": "6c357bb8fac971d8432a7e3430012831d11bd99b43b6988e40f0f5dfe0677f49",
+   "kl": 7.141680411255664,
+   "confidence": 0.46488635178287296,
+   "scored_positions": 1427
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "openmath/openmath-000008#t1",
+   "content": "e4960ece7a08456e93d467c54807faf6c920c1672b8cdb25e1700a59669bfd37",
+   "kl": 7.780934390169709,
+   "confidence": 0.32795828982618014,
+   "scored_positions": 1988
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "openmath/openmath-000016#t1",
+   "content": "8372e3f7abad5435129db37fb46c6588743ff3a82976aca221baebd663feed5f",
+   "kl": 8.531657129524703,
+   "confidence": 0.3804613596772494,
+   "scored_positions": 1460
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "openmath/openmath-000070#t1",
+   "content": "bba5214581c4c43b9b7c5e666a2cf9fc2a05efd066f6b82cd9a2321c2350e7bb",
+   "kl": 7.870253196149594,
+   "confidence": 0.5577144463503922,
+   "scored_positions": 1463
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "openmath/openmath-000341#t1",
+   "content": "56ee076a8a3dc71a9d89cab192f8c709d3bc36f3b0e92be0ad81c1e86061d938",
+   "kl": 7.316477104041833,
+   "confidence": 0.3414513370757673,
+   "scored_positions": 1831
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "openmath/openmath-001017#t1",
+   "content": "542d3e926523af9fdf6f38f938bf0c0712beca4bab15cce97892726c1a6f9cca",
+   "kl": 7.801316854996661,
+   "confidence": 0.5784089073780267,
+   "scored_positions": 1049
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "code/mbpp-000003#t1",
+   "content": "52e2260e92e925024f53eb93541e220a0cb3b53a80f7a760ea4b5fb1ee0310d5",
+   "kl": 9.489669724708737,
+   "confidence": 0.1329261281038865,
+   "scored_positions": 1616
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "code/mbpp-000036#t1",
+   "content": "26b96f5e170f20df02070c0365f156c962df2af6a87fd315811fa506c4a296f5",
+   "kl": 8.041162346557366,
+   "confidence": 0.484161814164849,
+   "scored_positions": 716
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "code/mbpp-000139#t1",
+   "content": "a438c515c2a5c9069068422a52d52bbb1f3f4babd5a0f09768e1edc9c35eb4c3",
+   "kl": 8.99700781737345,
+   "confidence": 0.3938417948831199,
+   "scored_positions": 1681
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "code/mbpp-000197#t1",
+   "content": "3b599d7532d1ef90c8c5dcf683f37ec8bf44ae71b775cbbb71cb97d6f0580e09",
+   "kl": 7.890623772777081,
+   "confidence": 0.48338531493938747,
+   "scored_positions": 1181
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "code/mbpp-000227#t1",
+   "content": "59335d7adc4cfa223524ebc8e7fe4b759212b6f7272333f85ad753a479b77756",
+   "kl": 8.86367048651577,
+   "confidence": 0.28914170409595163,
+   "scored_positions": 1098
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "code/mbpp-000254#t1",
+   "content": "83a7b99c67ede1cc24c66759b91e1a2f47ad466e6575cd35646490deeb7b476f",
+   "kl": 7.5322103345433025,
+   "confidence": 0.3995528589151932,
+   "scored_positions": 1686
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "tool_calling/glaive-000132#t1",
+   "content": "3be1e30faf8cffad14b3af9f0aeb01b980ec903b3ad59777219672e8e6654f58",
+   "kl": 9.262051004693255,
+   "confidence": 0.23218776828133017,
+   "scored_positions": 217
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "tool_calling/glaive-000175#t3",
+   "content": "ac575d7e428c53812d10805ec2ab44aed5ae06715160aba201666f60aa4f1828",
+   "kl": 8.468201237413288,
+   "confidence": 0.43087342653274535,
+   "scored_positions": 625
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "tool_calling/glaive-000204#t3",
+   "content": "9e12e97be21a14dc68f07f43b9fea0a17e2af58a92fba48d24295aeb5ce87b64",
+   "kl": 8.746945131025956,
+   "confidence": 0.3356901008761331,
+   "scored_positions": 356
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "tool_calling/glaive-000219#t5",
+   "content": "f8b38abfeff22ec2277636ee4ea81d4b6b70a386c0fa67bd3980dfe953fa6457",
+   "kl": 9.218973967819533,
+   "confidence": 0.2562159239996427,
+   "scored_positions": 239
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "tool_calling/glaive-000455#t6",
+   "content": "510efa315ea47b5a4c0a65b5ab9ad6ac930d015e60b57c348570f14c9921c993",
+   "kl": 9.133022236549202,
+   "confidence": 0.4244092671946765,
+   "scored_positions": 347
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "tool_calling/glaive-000460#t3",
+   "content": "bdb8c8aa112a67a1062a0f779a70997c9e38ba98f86672b5a77099ca187c7805",
+   "kl": 9.50001001244138,
+   "confidence": 0.23641504546639266,
+   "scored_positions": 314
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "tool_calling/glaive-000539#t4",
+   "content": "e19ca20fa24e8087e37525c5f9c31d3aeceae4e7235fb91d4e3b22327c594a42",
+   "kl": 8.450191251556427,
+   "confidence": 0.4610702622035318,
+   "scored_positions": 484
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "tool_calling/glaive-000545#t4",
+   "content": "707c86962bed9e4d61bd7f8e1423189289ab8abe1d86ef957742d4433f3cd831",
+   "kl": 8.384236773296639,
+   "confidence": 0.30136264540531016,
+   "scored_positions": 540
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "tool_calling/glaive-000957#t1",
+   "content": "e9fd866efd84cbd8d1debce0d3b97203185d08cca13243dd82b94d69cba13df9",
+   "kl": 8.381675888132493,
+   "confidence": 0.4487794974190388,
+   "scored_positions": 1479
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "tool_calling/glaive-000982#t3",
+   "content": "94e1ae19c80f5096a14e7ef56028d84f412f30f1d02ce9e3957a41e231e3b732",
+   "kl": 8.358068622967613,
+   "confidence": 0.30605355867615935,
+   "scored_positions": 257
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "tool_calling/glaive-001170#t5",
+   "content": "c0feadf6bf482c8c15795be68dee0c3295c2ea5ce032bda3d705cf742f60f438",
+   "kl": 8.932963533621086,
+   "confidence": 0.2664995901286602,
+   "scored_positions": 304
+  },
+  {
+   "set": "calib.domain_balanced@v1",
+   "item_id": "tool_calling/glaive-001193#t5",
+   "content": "64984ba6e8f7cb99a688eea92cc570bacb14fe35aae46801059620a8c098098c",
+   "kl": 8.620523532508559,
+   "confidence": 0.2694971104532169,
+   "scored_positions": 287
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "code/mbpp-000004#t1",
+   "content": "ee611f6c53251684072541e350741a3e91edbcb2f2f457dcdba614007c0f16db",
+   "kl": 8.68812524824645,
+   "confidence": 0.3773864087443465,
+   "scored_positions": 1729
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "code/mbpp-000005#t1",
+   "content": "cf355aef7cdd2c1d3b682bb297cfe7b8236959daf0329f56e7f5fe85652ba2c7",
+   "kl": 7.807847554844537,
+   "confidence": 0.49653638994046884,
+   "scored_positions": 1290
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "code/mbpp-000065#t1",
+   "content": "a2dac2b8eb09ebf5d876c90df67fd55985ac9bb06831b5dfff969208bd13943e",
+   "kl": 7.978335088221156,
+   "confidence": 0.2698421795854705,
+   "scored_positions": 1676
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "code/mbpp-000074#t1",
+   "content": "33e27cc0e03b5fba9db9b630e3a931c7392a0baec6359993c0300970992dc770",
+   "kl": 8.168703798837312,
+   "confidence": 0.3464103770952842,
+   "scored_positions": 1266
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "code/mbpp-000109#t1",
+   "content": "b198ddc4ce010626e31d275f48d4a5f32473432d39f1dbc9a5a819822b94bf07",
+   "kl": 9.83134558136805,
+   "confidence": 0.392130451879913,
+   "scored_positions": 834
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "code/mbpp-000188#t1",
+   "content": "fdde64d23ed4540a84215db9ba76491c90e9f396f8536c8506c34295bc70ecb6",
+   "kl": 7.753393835771976,
+   "confidence": 0.516270755163442,
+   "scored_positions": 1645
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "general/fineweb-40016",
+   "content": "1a86d5897531da2fdd5306358230e8829f64ab0d10370a13c68d393fe3828d92",
+   "kl": 8.291519338907491,
+   "confidence": 0.6955273393824406,
+   "scored_positions": 922
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "general/fineweb-40017",
+   "content": "e3e0713aa8816bca2c2853615383a194c63ce1f7c65fdef5299774cb19afb17f",
+   "kl": 7.083925034104321,
+   "confidence": 0.47857992302986885,
+   "scored_positions": 1023
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "general/fineweb-40018",
+   "content": "c5fbc39fea09230381c5adb1136f1f15029f5470875806a90e882b56c48f9bb9",
+   "kl": 7.748942232290601,
+   "confidence": 0.4246407189749946,
+   "scored_positions": 526
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "general/fineweb-40019",
+   "content": "19e976ab1566942594f278311bac0513f2b6762184f126c7e55d95b4ddb37783",
+   "kl": 8.939738322291637,
+   "confidence": 0.27474439385478483,
+   "scored_positions": 815
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "general/fineweb-40020",
+   "content": "bc67689e1c6610c3261b0dc0cd3a3af38ade8751de4530f538f6ecece3658c25",
+   "kl": 7.249875004966821,
+   "confidence": 0.5281687767507977,
+   "scored_positions": 1023
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "general/fineweb-40021",
+   "content": "20b01d74b3f56defe330d968dc5f89118fc2db9549c919606505136f7bcfbfd0",
+   "kl": 7.78220872692684,
+   "confidence": 0.5408484520953013,
+   "scored_positions": 467
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "general/fineweb-40022",
+   "content": "d98815fc8561663c7bba32651f0c9775308d38f3a4f4aebeb3b72944c59ac76b",
+   "kl": 9.114513110207474,
+   "confidence": 0.4410901566886384,
+   "scored_positions": 368
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "general/fineweb-40023",
+   "content": "8726101c40ad467eab6de6e68d296a13a72419047cd0076d6defde932bfce99f",
+   "kl": 7.662941701214975,
+   "confidence": 0.3175860265249847,
+   "scored_positions": 1023
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "general/fineweb-40024",
+   "content": "6bdd26124fcc07d6e3f6d05df277e8b698fb94ac0b1200ead7d687fd202a5c48",
+   "kl": 8.765776087461678,
+   "confidence": 0.43387676141828385,
+   "scored_positions": 1023
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "general/fineweb-40025",
+   "content": "e99e30c3688f5594f53f815c640ebb16ef63986fb10e0b86c734450f277d3b77",
+   "kl": 8.394442724575628,
+   "confidence": 0.5430688735676651,
+   "scored_positions": 1023
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "multihop_qa/hotpot-000001#t1",
+   "content": "d305863f0cd9bcb3b68955d216b21ac7f2aaa78c8c32f171aba88e1b12d471e8",
+   "kl": 9.757793965853955,
+   "confidence": 0.2919556688786742,
+   "scored_positions": 401
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "multihop_qa/hotpot-000042#t1",
+   "content": "9b06ea9d3bd543722a36e61fa0803c9fce668f4d8e6136d778de576e15d6c68b",
+   "kl": 9.826217221710044,
+   "confidence": 0.23592304931560032,
+   "scored_positions": 710
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "multihop_qa/hotpot-000071#t1",
+   "content": "8dde0080c334643547139edb52aa36c501f5f32263a9b801ed420e7dc20459c8",
+   "kl": 10.067264589870874,
+   "confidence": 0.22975488656874088,
+   "scored_positions": 571
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "multihop_qa/hotpot-000083#t1",
+   "content": "bab36f83d5b0307a57464f60a9359a06eaf5ffdb16062820e03ef5e7bfab7028",
+   "kl": 10.30524216903277,
+   "confidence": 0.22164608572303027,
+   "scored_positions": 829
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "multihop_qa/hotpot-000090#t1",
+   "content": "b76091b644e9fe14350c1dbd6779e64e95a5f1a0a2d0ea876b0606c515dc3db3",
+   "kl": 10.840589405274859,
+   "confidence": 0.3495730644737194,
+   "scored_positions": 459
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "rag_evidence/squad_v2-000039#t1",
+   "content": "c13e0697363f2b6af7566fb5af3d65f1a0a82a3b95aa66776d0080a112a4301f",
+   "kl": 8.561390790567604,
+   "confidence": 0.27593115677115737,
+   "scored_positions": 372
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "rag_evidence/squad_v2-000041#t1",
+   "content": "e5a7bb92b031e90334f16935c843ef6fdc0b5be08482c04aeece7d5acaf31edb",
+   "kl": 10.862173622932987,
+   "confidence": 0.23102657518525055,
+   "scored_positions": 276
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "rag_evidence/squad_v2-000043#t1",
+   "content": "4b63f06bc7d379e22a29d6781d0070bc7adad0e93682e8051367a646188d1000",
+   "kl": 9.472233069402881,
+   "confidence": 0.28802218228490134,
+   "scored_positions": 337
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "rag_evidence/squad_v2-000045#t1",
+   "content": "33bb90137db0c526e3f29dccc0c7acf6a20496bc1bc5db0b2cfc4f1d5cbce29e",
+   "kl": 9.276790222871616,
+   "confidence": 0.2682631658704093,
+   "scored_positions": 267
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "rag_evidence/squad_v2-000047#t1",
+   "content": "b0fd0757ada3c49b6aa83201a4edb6d4dc6aae8d62b30123abcf51ff0646e6b1",
+   "kl": 9.333634690252309,
+   "confidence": 0.2991744995792594,
+   "scored_positions": 353
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "rag_evidence/squad_v2-000050#t1",
+   "content": "c3a61529ee665f2c8ebc2606466db450ae2af1cc7e2fe7c867c2bd0ed03f2e84",
+   "kl": 10.212455179900804,
+   "confidence": 0.22425691203592213,
+   "scored_positions": 239
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "rag_evidence/squad_v2-000054#t1",
+   "content": "dba7c5a2aea3375d6b407531cdfa7a2fc72ce35db4e983b06b21f73fd66ec533",
+   "kl": 9.074162793671427,
+   "confidence": 0.3172513446437313,
+   "scored_positions": 489
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "rag_evidence/squad_v2-000056#t1",
+   "content": "62642dbcc2298690589db6efff31a3f278011f9c60e3dd570040942e70f28574",
+   "kl": 8.387952157774487,
+   "confidence": 0.3172420647901458,
+   "scored_positions": 296
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "rag_evidence/squad_v2-000058#t1",
+   "content": "08c755f2a9f2045872ede27424f4af38927f3d3438db5dbb53af80038e421fc4",
+   "kl": 9.030663577020935,
+   "confidence": 0.331947424571128,
+   "scored_positions": 389
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "rag_evidence/squad_v2-000060#t1",
+   "content": "9b7ca09eb53f2a9718e63dbb09bcdb15e4bf0fed2f634f2e324d266896480fb3",
+   "kl": 9.943600198861633,
+   "confidence": 0.2849634714218091,
+   "scored_positions": 469
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "rag_evidence/squad_v2-000063#t1",
+   "content": "93a3eb25c959be300882405ec9b80f492693b76710d2f7b99f9c585340052000",
+   "kl": 9.812675901967236,
+   "confidence": 0.32532259219052784,
+   "scored_positions": 351
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "rag_evidence/squad_v2-000067#t1",
+   "content": "b82cdb513024a949e6da2901f0113ef1d6dacc310c4704f54f697145d1e4f18b",
+   "kl": 8.252136986070592,
+   "confidence": 0.3485797641509707,
+   "scored_positions": 277
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "rag_evidence/squad_v2-000071#t1",
+   "content": "72626181cba64842275c43d9095eef27d9a7e23e366fe3d84eb15ae537b8adc7",
+   "kl": 9.43675170326233,
+   "confidence": 0.35515951037406923,
+   "scored_positions": 250
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "rag_evidence/squad_v2-000073#t1",
+   "content": "0ca5fdf03d0c0f6ae46635b4f81b0c81b9987cbac1341ac4155008fb4a213bd2",
+   "kl": 10.320181289953846,
+   "confidence": 0.3076643209372248,
+   "scored_positions": 224
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "gsm8k/gsm8k-000000#t1",
+   "content": "e3d618567097735fc81c7b8c2f83340eae241ca006855e63dbc188e18e9b9652",
+   "kl": 8.483436287408308,
+   "confidence": 0.47865149731466755,
+   "scored_positions": 338
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "gsm8k/gsm8k-000017#t1",
+   "content": "5f95877ee3da7ea5179479d1206391db58f6a77abcea82e85be3d612948798ae",
+   "kl": 7.888517548946879,
+   "confidence": 0.3065217228848468,
+   "scored_positions": 977
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "gsm8k/gsm8k-000026#t1",
+   "content": "b60aa55035b021cb92e4f3f2525480a6d6d036a64fe09d387f9e7b68c7c751d7",
+   "kl": 7.849916017848811,
+   "confidence": 0.3578035324025783,
+   "scored_positions": 834
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "gsm8k/gsm8k-000030#t1",
+   "content": "64822239a7a285e8a25368a15272ff7c4117de69f18ff08a2180441647c180ef",
+   "kl": 8.887370191603377,
+   "confidence": 0.7278072092079457,
+   "scored_positions": 1193
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "gsm8k/gsm8k-000065#t1",
+   "content": "0ed92e714dbb5cec94d0540239c25e9c43fe7a08f04a065eb936dce707d6b225",
+   "kl": 8.004354634313353,
+   "confidence": 0.46146474606016785,
+   "scored_positions": 656
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "gsm8k/gsm8k-000069#t1",
+   "content": "2e0bb0a4018b882e7cd2df72e7ef1157f44ad895b81bc643f694a50654ac90bc",
+   "kl": 8.187856125826244,
+   "confidence": 0.5369200914454975,
+   "scored_positions": 556
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "gsm8k/gsm8k-000113#t1",
+   "content": "3f171022f62280abce8e574b1d45926f54b57c4d8e206ed006a980e73bfc3911",
+   "kl": 7.436241282747456,
+   "confidence": 0.5861290916347117,
+   "scored_positions": 986
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "gsm8k/gsm8k-000121#t1",
+   "content": "7f4f3205b6c48d9080e678842197ad77f95ea27ba260b0c86bddf790bd8007d1",
+   "kl": 6.577382416739347,
+   "confidence": 0.5865348765749924,
+   "scored_positions": 1238
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "gsm8k/gsm8k-000127#t1",
+   "content": "2e8d1e3e482c88035ff3bc6112ab432ab53d54baa55950bf3514d023bb45ef49",
+   "kl": 8.653865351729596,
+   "confidence": 0.5241392510054199,
+   "scored_positions": 1142
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "openmath/openmath-000000#t1",
+   "content": "9daba17e301cf093ff1210a3aa2d9dd8b467e889e3eb6a3ef4193b22055ea2fd",
+   "kl": 7.187147490574025,
+   "confidence": 0.533304639951586,
+   "scored_positions": 1526
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "openmath/openmath-000245#t1",
+   "content": "78c311c3bb096d253f97c9d8c3aaefc25436668b0a476b5f731db68b81978eaf",
+   "kl": 7.670558040130247,
+   "confidence": 0.42478990191366617,
+   "scored_positions": 410
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "openmath/openmath-000329#t1",
+   "content": "9513fa93e6d44b8dee05bc01f1f02e664e2913cc6e1b7ac38844a519eb53a42a",
+   "kl": 7.868375721049497,
+   "confidence": 0.5065676475780597,
+   "scored_positions": 690
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "openmath/openmath-000350#t1",
+   "content": "9154d774f1f6352a8b0a809719d1c7d139716332d39946a52d22e37e2effd209",
+   "kl": 8.32744645555903,
+   "confidence": 0.4032674400903053,
+   "scored_positions": 1061
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "openmath/openmath-000366#t1",
+   "content": "a6548d2059a762857671d9de36cd097a93bbcf378531ecc351c6c89aab756bf2",
+   "kl": 8.616094059952346,
+   "confidence": 0.383230934684702,
+   "scored_positions": 964
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "openmath/openmath-000562#t1",
+   "content": "e65e76e122f33f9bce7090a7efa3102641a34f0218baaa1af63cc0b00fbe64bb",
+   "kl": 8.964828453311014,
+   "confidence": 0.6582226395679595,
+   "scored_positions": 1642
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "openmath/openmath-000641#t1",
+   "content": "2784aa44cf167a549610cfbb637bd9ea1e6538299a79fd4d8b377eb821e418f9",
+   "kl": 7.811483445482842,
+   "confidence": 0.41032216961990076,
+   "scored_positions": 759
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "openmath/openmath-000712#t1",
+   "content": "7a03a844798023a10e8154b1b6edc153a735504722c60ddf2d20dfd3e86a79a9",
+   "kl": 8.8011950755441,
+   "confidence": 0.31834767689932647,
+   "scored_positions": 1319
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000064#t3",
+   "content": "6e46e1473192bc62d55ed1bc427b215cbe20d12eabb719ab8c79870fdf52bddd",
+   "kl": 8.698720605205239,
+   "confidence": 0.4514119410601059,
+   "scored_positions": 553
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000096#t5",
+   "content": "f331a1d54b8c364768ef078625c157b9b46bd7c1334fb7faad3e4df45973e4ca",
+   "kl": 9.463849330219356,
+   "confidence": 0.18994330763816833,
+   "scored_positions": 220
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000162#t3",
+   "content": "b8a85d2bf70a4077a9cb0bd3c9f216f1541e38ccde3a77547843d8171356fd43",
+   "kl": 8.673891020410382,
+   "confidence": 0.3096636869333535,
+   "scored_positions": 698
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000179#t1",
+   "content": "8076418f2b51e07d59e39183c83895584b3891cc03177357e92c4a545ae80d5b",
+   "kl": 8.264615813177265,
+   "confidence": 0.31198807831058006,
+   "scored_positions": 501
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000216#t3",
+   "content": "89ab09c1b16488acd3b30e5304ae59fa3ecd1701e72e3908aa5809596417b180",
+   "kl": 8.24629654709226,
+   "confidence": 0.22672058138877724,
+   "scored_positions": 1413
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000257#t5",
+   "content": "c61212973734e8ffa813023061c519730cec0bb599afa7584c7a9f3507c35037",
+   "kl": 7.960988484589797,
+   "confidence": 0.3359631185641374,
+   "scored_positions": 391
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000346#t3",
+   "content": "8165bf1a2bb8c2fee37ce6e24f27c5617889a32cfd888fed8aaa56e0e251c0a2",
+   "kl": 8.458483589215998,
+   "confidence": 0.3931055793351534,
+   "scored_positions": 418
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000422#t1",
+   "content": "877fd7cb004c30be0f9f7ade36187adf495a42cdc784a3b280e048d542c9c3f5",
+   "kl": 8.068733014705673,
+   "confidence": 0.3526422386195001,
+   "scored_positions": 373
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000487#t1",
+   "content": "fdd61898c761d2273e3fb20550b43892170c0f110475003f8d2f55ba9b8f8ed3",
+   "kl": 9.180641559384904,
+   "confidence": 0.40424398273791906,
+   "scored_positions": 265
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000536#t1",
+   "content": "06e8df1513356401d8b2f90ed941be21000ac196c61fe21363e88c6ca3debd1d",
+   "kl": 9.045725197740719,
+   "confidence": 0.24794752218506552,
+   "scored_positions": 418
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000549#t5",
+   "content": "cc4794b11e13f7cbd21a6dae985f8a5ef7c892d1ee866e46792a3671eb50ba3a",
+   "kl": 9.090824348258447,
+   "confidence": 0.3226114360840766,
+   "scored_positions": 182
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000563#t1",
+   "content": "ffda6f98f983bccb627b4bd99e94617515002312d5c43704e2d586854f95f003",
+   "kl": 8.56498270095384,
+   "confidence": 0.31731934146762386,
+   "scored_positions": 241
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000631#t3",
+   "content": "b529a36db335b51a50500a6afd7b455dd3515bb4587dde2d4a6f2367a8fe4d29",
+   "kl": 8.186889720218275,
+   "confidence": 0.4448773512300455,
+   "scored_positions": 689
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000803#t3",
+   "content": "c01d75c3ef562a42571693d8cc2bb965ae7ef1eb9bca3601bc567084bde490d0",
+   "kl": 9.233117012397663,
+   "confidence": 0.2571929325928559,
+   "scored_positions": 370
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000831#t3",
+   "content": "cda99e215dfec5be1df88b0f5ddb15d6c1a51a6e1aa040f625a3f981c07905de",
+   "kl": 10.23053861343236,
+   "confidence": 0.3115075593114171,
+   "scored_positions": 439
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000844#t5",
+   "content": "7fe0269a5bbeb7a9df42e2af78c8f52341390c92e21cbb63fe371443bc0e4d22",
+   "kl": 8.823229588331563,
+   "confidence": 0.2825930643765653,
+   "scored_positions": 244
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000859#t5",
+   "content": "59d6bbeced339778bcd3ba66d54d3cbf4a29d93bdeddb261f5e11d8981869b6a",
+   "kl": 8.95438965912641,
+   "confidence": 0.2789911507989801,
+   "scored_positions": 418
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000871#t3",
+   "content": "5120035e2ab3cc4f449e65ce0b638b22aa52df882ff842ecc917625e0a4ad8b6",
+   "kl": 7.655727107534085,
+   "confidence": 0.3424592950823191,
+   "scored_positions": 841
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000905#t1",
+   "content": "0b739e3747cce7b8c9df58762ea68eb38b2235406913fc1f64819a8a64c1d122",
+   "kl": 8.18154642205028,
+   "confidence": 0.30470310699413805,
+   "scored_positions": 272
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000969#t1",
+   "content": "fb5fecc13e0d15c79651936a94f1898cecdefbb1b711d60f9ef0d762b3f2adb4",
+   "kl": 8.015940883663855,
+   "confidence": 0.26638386154375154,
+   "scored_positions": 714
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-000979#t1",
+   "content": "2a7fb19659a3d417aa0e7ccfc70878311a4fdf89614f386be813d50b45e13ecb",
+   "kl": 9.523458905841993,
+   "confidence": 0.29398689291361346,
+   "scored_positions": 391
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-001058#t5",
+   "content": "7ec251418b680dfdf9f6fb16386a6b1242a80ba32ed8f78e6ce52ce78973b7d9",
+   "kl": 8.649323952731802,
+   "confidence": 0.32101600798801405,
+   "scored_positions": 603
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-001075#t3",
+   "content": "488f60eecef4b4d0bc6c444fe8d6769e27befe7001783f3d4472373d5f1c214a",
+   "kl": 7.7386722508739485,
+   "confidence": 0.33936844963776436,
+   "scored_positions": 950
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-001156#t1",
+   "content": "9e603e3f6e3b9e1071ee3edd6b4ac6225a076ac7ef6b6cd22a90b1649d0b74a0",
+   "kl": 8.968838591228499,
+   "confidence": 0.3520939651576952,
+   "scored_positions": 261
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-001217#t1",
+   "content": "1afa9c52d40ed6d0425541df6e8e6f2dc11038047e4e50bbe13db904f16fec39",
+   "kl": 7.612793165454119,
+   "confidence": 0.3986033939682277,
+   "scored_positions": 678
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-001218#t3",
+   "content": "4ba46447f11a03c2d4fe478d91dc07b766f9d5c69a323626110963854a2449fb",
+   "kl": 9.760516475170103,
+   "confidence": 0.29078307955377947,
+   "scored_positions": 359
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-001254#t5",
+   "content": "0ca39180eb24fd30d6b39e53591ac3a52395a753adbc1f08e01bb77b51b330e4",
+   "kl": 8.967205788408007,
+   "confidence": 0.24487616177788354,
+   "scored_positions": 266
+  },
+  {
+   "set": "state_eval_v1",
+   "item_id": "tool_calling/glaive-001258#t5",
+   "content": "51ecb578d8edf9b686a4d0399c1228f797b917244ee8737b2373ac04ae354a23",
+   "kl": 8.673115474837166,
+   "confidence": 0.254773189653113,
+   "scored_positions": 343
+  }
+ ],
+ "record_sha256": "ea5d3ff997f14174f6aefbe796d16f2a1423b9b27a76e13ff8724f9d543f8c06"
+}

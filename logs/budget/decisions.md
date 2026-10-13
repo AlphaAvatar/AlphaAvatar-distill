@@ -10739,3 +10739,56 @@ on a paid pod.
     real vLLM environment.
 - **Activation:** R0's `authorization.json` is written and its campaign is
   OPEN. The calibration is activated after R0's review, on its final plan.
+
+## 2026-10-13 — R0 and the reference calibration: results, closeout, re-derived D2 budget
+
+- **Context:** both engineering sessions granted after the post-48fcc638
+  review ran, in order, inside their grants.
+- **Results.** Owner: `families/d_series/analyses/d2_gpu_evidence_review.md`.
+  - **R0, `r0_20261013_154325`, $1.5074: PASS.**
+    - DEPTH removal orders are identical (history = oracle = scored_v1) on
+      both profiles.
+    - Maximum candidate relative difference is 1.65e-7 and state-evaluation
+      ranked drift 1.28e-7, both under the 1e-5 tolerances.
+    - scored_v1 is 3.7–5% faster on DEPTH and uses about 2 GiB less peak
+      memory.
+  - **Reference calibration, `refcal_20261013_170714`, $0.8069: complete.**
+    - λ = 7.34 and thresholds high_confidence 0.776, high_kl 13.85,
+      low_topk_mass 0.432, all frozen in contract revision 5 (`a01b1be7…`).
+    - **The cache fix is validated on the GPU.** With a 34.9 GiB hoard and
+      0.25 GiB driver-free, the reference was cached (67 fills, 0
+      recomputes).
+    - Cached and recomputed references are EXACT; recomputing is 1.83×
+      slower.
+    - D2 objective overhead: +0.184 s per DEPTH candidate and +0.466 s per
+      state evaluation. The raw-KL control equals D1's KL to 0.0.
+    - The D2 scored-rows equivalence PASSES (2.7e-7 on DEPTH, 8.0e-7 on
+      state evaluation, same choice).
+    - Rescoring costs 1.83 min/probe.
+- **Closeout:**
+  - both pods were deleted by their launchers, with the provider confirming
+    on the first attempt;
+  - both campaigns are booked and CLOSED, totalling $2.3143 of $5.76;
+  - no observer, worktree or resource remains.
+- **Budget, re-derived automatically from the booked, hash-verified stage-L
+  evidence:**
+  - D2 search price in force `cache_fix_validated`: $10.80 expected,
+    $22.38 planning bound (records price $32.01);
+  - D2 $52.66 at hard with reserves;
+  - D2 + D3 $105.32, fitting the live $120.14 remainder;
+  - with a fresh confirmation $120.82, short by $0.68.
+
+  Engineering reserves are released against the bills, because both
+  campaigns are closed.
+- **Engineering added this round ($0):** stage-L evidence steps; evidence-bound
+  pricing; D2 launch chain (typed grant, launcher, pod branch, soft stop from
+  `soft_stop_minutes`, cache-regression guard); per-row token-id alignment.
+- **Maintainer decisions now open:**
+  - approve the exact preregistration revision (`489f49ba…`);
+  - add `phase_d2` to `funds_formal_sessions_of`;
+  - choose `all_v1` or `scored_v1` for the D2 search;
+  - decide how the $0.68 shortfall of the full programme is handled. The
+    options are re-deriving after D2, D3 at K = 2, or a cap decision; none is
+    applied.
+
+  The D2 search is not authorized.

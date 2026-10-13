@@ -659,6 +659,9 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                "lambda_rule": lambda_rule(),
                "lambda_record": REFERENCE_CALIBRATION},
         "diagnostic_threshold_rule": diagnostic_threshold_rule(),
+        "diagnostic_thresholds": (frozen_diagnostic_thresholds(repo_root)
+                                  if (repo_root / REFERENCE_CALIBRATION).is_file()
+                                  else None),
         "ranking": {"policy": OBJECTIVE_PARETO_V1.qualified_id,
                     "policy_hash": OBJECTIVE_PARETO_V1.policy_hash,
                     "objectives": [o.key for o in OBJECTIVE_PARETO_V1.objectives],
@@ -707,7 +710,7 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
             "introduced in D2 or D3"),
         "behavioural_diagnostics": BEHAVIOURAL_DIAGNOSTICS,
         "claim_boundary": CLAIM_BOUNDARY,
-        "revision": 4,
+        "revision": 5,
         "revision_history": [
             {"revision": 1, "date": "2026-10-13",
              "change": "D2/D3 objectives, identities, ranking, lambda rule"},
@@ -731,7 +734,14 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                         "the revision-3 aggregation; (2) exact engine token "
                         "ids through a read-only generator wrapper whose "
                         "generation identity is the plain run's. Objective "
-                        "identities, ranking and lambda rule unchanged")}],
+                        "identities, ranking and lambda rule unchanged")},
+            {"revision": 5, "date": "2026-10-13",
+             "change": ("the reference calibration ran (stage L, run "
+                        "refcal_20261013_170714) under the registered rules: "
+                        "D3's lambda = 7.34 and the diagnostic thresholds are "
+                        "FROZEN from its committed record, before any D2 "
+                        "search. D2's objective, the ranking and both rules "
+                        "unchanged")}],
     }
     out = {**science, "contract_hash": sha256_json(science),
            "authorizes": "nothing"}

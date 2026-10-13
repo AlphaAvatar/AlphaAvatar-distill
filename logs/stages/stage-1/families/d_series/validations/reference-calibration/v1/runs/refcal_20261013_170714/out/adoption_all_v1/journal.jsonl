@@ -1,0 +1,27 @@
+{"stage": "environment", "status": "start", "t": 0.0}
+{"seconds": 1.645, "stage": "environment", "status": "ok", "t": 1.645}
+{"stage": "register_and_policy", "status": "start", "t": 1.645}
+{"seconds": 0.037, "stage": "register_and_policy", "status": "ok", "t": 1.682}
+{"stage": "bind_full_vocab", "status": "start", "t": 1.683}
+{"seconds": 0.042, "stage": "bind_full_vocab", "status": "ok", "t": 1.724}
+{"stage": "bind_reference_topk_tail", "status": "start", "t": 1.725}
+{"seconds": 0.037, "stage": "bind_reference_topk_tail", "status": "ok", "t": 1.762}
+{"stage": "reference_calibration_premises", "status": "start", "t": 1.763}
+{"seconds": 0.067, "stage": "reference_calibration_premises", "status": "ok", "t": 1.83}
+{"stage": "teacher_fetch_verify", "status": "start", "t": 1.83}
+{"seconds": 9.195, "stage": "teacher_fetch_verify", "status": "ok", "t": 11.025}
+{"stage": "L_reference_calibration", "status": "start", "t": 11.026}
+{"stage": "L.materialize_B", "status": "start", "t": 11.032}
+{"seconds": 1270.935, "stage": "L.materialize_B", "status": "ok", "t": 1281.967}
+{"stage": "L.calibration", "status": "start", "t": 1284.107}
+{"seconds": 16.943, "stage": "L.calibration", "status": "ok", "t": 1301.05}
+{"stage": "L.state_eval", "status": "ok", "t": 1326.828}
+{"stage": "L.d2_rows_state_eval", "status": "ok", "t": 1334.93}
+{"invocation_s": 209.22, "mode": "cached", "stage": "L.depth.kl_only", "status": "ok", "t": 1545.572}
+{"invocation_s": 215.85, "mode": "cached", "stage": "L.depth.d2_objective", "status": "ok", "t": 1763.476}
+{"stage": "L.depth_one_round", "status": "ok", "t": 1764.4}
+{"invocation_s": 383.77, "mode": "recomputed", "stage": "L.depth.kl_only_forced_recompute", "status": "ok", "t": 2149.325}
+{"stage": "L.depth_recompute_equivalence", "status": "ok", "t": 2150.239}
+{"invocation_s": 203.7, "mode": "cached", "stage": "L.depth.d2_objective_scored_v1", "status": "ok", "t": 2355.329}
+{"stage": "L.d2_rows_depth", "status": "ok", "t": 2356.22}
+{"seconds": 2345.203, "stage": "L_reference_calibration", "status": "ok", "t": 2356.23}
