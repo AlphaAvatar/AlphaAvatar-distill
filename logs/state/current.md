@@ -22,6 +22,13 @@ the candidate student's own Top-200 conditional entropy,
   absent when undeclared, so D1, R0 and the shared protocol are unchanged.
 - DEPTH and state evaluation use it exactly. FFN/WIDTH/ATTENTION keep D1's
   local statistic, because no candidate exists at their selection.
+- Motivation (contract revision 2): **capacity-aware student reasoning**.
+  - Confidence is a proxy for structure selection, judged only by behaviour
+    after recovery.
+  - Teacher-native calibration is kept.
+  - Own-rollout diagnostics apply to new candidates only, because B/q2 have
+    no logits or checkpoints.
+  - The B/q2 text-level baseline is in `analyses/d1_rollout_profile.json`.
 - Owner:
   [`d2_d3_objective_design.md`](../stages/stage-1/families/d_series/plans/d2_d3_objective_design.md).
 

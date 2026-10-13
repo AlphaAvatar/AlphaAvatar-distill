@@ -13,7 +13,45 @@ with a pointer here.
 | `src/aadistill/initialization/scoring/objective.py` | the generic forms, the student Top-K entropy and the fixed-denominator reducer |
 | `scripts/stages/stage-1/families/d_series/objectives.py` | this campaign's instances (D2, D3(λ), `OBJECTIVE_PARETO_V1`) and the λ rule |
 | `scripts/stages/stage-1/families/d_series/calibrate_d3_lambda.py` | the λ measurement; runs on a GPU, before D3's search |
-| `tests/initialization/test_scoring_objective.py`, `families/d_series/tests/test_d2_d3_objectives.py` | 64 tests |
+| `scripts/stages/stage-1/families/d_series/rollout_profile.py`, `scripts/shared/evaluation/rollout_rescoring.py` | the behavioural diagnostics: text-level for every unit; per-position for new candidates |
+| `tests/initialization/test_scoring_objective.py`, `families/d_series/tests/test_d2_d3_objectives.py`, `test_rollout_diagnostics.py` | 76 tests |
+
+## 0. Why the student's confidence enters: capacity-aware student reasoning
+
+This section records the maintainer's supplement of 2026-10-13. It is
+contract revision 2; the objective identities are unchanged.
+
+- **Premise.** The teacher (Qwen3-4B-Thinking) and the ~0.6B student differ
+  in capacity, expressiveness and learning ability. The student need not,
+  and may not be able to, reproduce the teacher's reasoning distribution. On
+  some tasks it may reach the same correct answer by a shorter, simpler or
+  entirely different trajectory.
+- **Consequence.** A large teacher token-level KL does not by itself mean
+  worse student reasoning. KL-based compression selection may over-reward
+  structures that imitate the teacher and under-rate structures that
+  preserve the student's own effective way of reasoning.
+- **D2 tests** whether relaxing strict imitation where the student is
+  certain helps a small model keep computation suited to its capacity. It
+  does **not** assume the student is right where it is confident.
+- **D3 tests** whether the student's own certainty has structural-selection
+  value independent of the KL.
+- **The research question** is neither "maximize confidence" nor "minimize
+  KL". It is: which structural initialization, under the capacity limit,
+  best lets the student keep and recover its own effective reasoning?
+  Student Top-K confidence is a **candidate proxy**, and only independent
+  behavioural evidence after recovery training decides whether it helps.
+
+**Four quantities, kept apart:**
+
+| quantity | where it is measured | role in D2/D3 |
+| --- | --- | --- |
+| student Top-K entropy on **teacher-native** prefixes | search (calibration, state evaluation) | **is** the objective's input |
+| student Top-K entropy on the student's **own rollout** prefixes | `rollout_rescoring.py`, after generation | diagnostic only, never selects |
+| student–teacher distribution fit (Top-K + tail KL) | teacher-native in search; own-rollout in the diagnostic, beside teacher surprisal | objective component / diagnostic |
+| autonomous rollout correctness | shared protocol, after recovery | **the endpoint**; the only thing a promotion question uses |
+
+**Calibration stays the frozen teacher-native profiles**, so the objective is
+the only variable. D2 and D3 introduce no student-prefix calibration.
 
 ## 1. Definitions
 
@@ -381,6 +419,73 @@ always recorded next to the objective, and **a low D2 score is never read as
 higher fidelity**. A D2 preregistration should name a raw-KL diagnostic
 threshold that triggers review.
 
+## 8a. Behavioural diagnostics and the claim boundary
+
+Beyond the endpoint, every D2/D3 behavioural round analyses the following.
+All of it is **exploratory**: none of it decides `SHARED_GO` or `NO_GO`.
+
+| question | instrument | arms it applies to |
+| --- | --- | --- |
+| does the student still solve the task when far from the teacher's distribution? | rescoring: per-sample KL and teacher surprisal on its own rollout, × correctness | new candidates only |
+| autonomous reasoning length, correctness, usable rollout | `rollout_profile.py` (text-level, $0) | every unit, B/q2 included |
+| how does confidence relate to correctness? | rescoring: confidence over the reasoning and answer spans, × correctness | new candidates only |
+| are high-confidence, high-KL positions valid alternative reasoning or wrong overconfidence? | rescoring: quadrant fraction × correctness. Thresholds are registered in each preregistration before any result; none are in code | new candidates only |
+| did D2/D3 improve autonomous generation, not only the search objective? | the endpoint and the rollout profile against B/q2, read beside the search objective and raw KL | candidates vs B/q2 |
+
+**The rescoring instrument** (`scripts/shared/evaluation/rollout_rescoring.py`):
+
+- **Per position of the student's own greedy rollout:** student confidence,
+  student token log-prob, teacher surprisal, and KL(teacher ‖ student) on
+  the Top-200 + tail.
+- **Where it runs:** it needs the trained checkpoint, so it runs **on the
+  pod, after generation and before the checkpoint is released**.
+- **What it does not touch:** it reads the generations and changes neither
+  generation nor scoring, so the shared protocol's evaluation identity is
+  untouched.
+- **Cost:** estimated 3–5 GPU-minutes per probe, about 0.95M tokens per
+  probe at D1's measured lengths.
+- **Tests:** an independent computation with the causal shift; a mutation of
+  the shift is caught.
+- **Owed:** the D2/D3 behavioural driver must call it.
+
+**What B and q2 can and cannot contribute.** Their ten units hold decoded
+text and the engine's token counts. They hold **no** token ids,
+log-probabilities or logits, and their checkpoints are retired. So:
+
+- their confidence on their own rollouts is **not available** and is not
+  estimated;
+- comparisons with them are text-level and endpoint-level only;
+- re-tokenizing their text reproduces the engine's count exactly for 82–85%
+  of samples, so even a teacher-only pass over their text would be an
+  approximation of the generated sequence.
+
+**Baseline facts** (`analyses/d1_rollout_profile.json`, descriptive). These
+set what the diagnostics can resolve:
+
+- B and q2 answer 2–4% of scorable prompts. On confirmation, B is right on
+  103 of 2550.
+- Their correct sets barely overlap: both are right on 29 prompt-seeds, q2
+  alone on 73, and B alone on 74.
+- Median generation is 444–539 tokens and median reasoning about 300.
+- Correctness is roughly flat across reasoning-length quartiles.
+- So any confidence–correctness or quadrant analysis rests on about 100
+  correct samples per arm and is low-powered.
+
+**Claim boundary** (the contract's `claim_boundary`):
+
+- **Goal:** initializations that help the student keep and recover its own
+  effective reasoning under the capacity limit.
+- **Not the goal:** maximizing confidence or minimizing KL.
+- **May claim:**
+  - a candidate's endpoint result on the shared protocol, within its limits;
+  - labelled exploratory diagnostics of measured candidates.
+- **May not claim:**
+  - that a lower search objective means better reasoning or fidelity;
+  - that confident, far-from-teacher positions are better or alternative
+    reasoning, without rollout evidence linking them to correct completions;
+  - anything per-position or about confidence for B or q2;
+  - a mechanism from the diagnostics alone.
+
 ## 9. Evidence
 
 **`tests/initialization/test_scoring_objective.py`: 49 tests.**
@@ -428,7 +533,29 @@ threshold that triggers review.
   - all three mismatches are refused;
   - a real toy search runs and ranks on the objective.
 
-**`families/d_series/tests/test_d2_d3_objectives.py`: 15 tests.**
+**`families/d_series/tests/test_rollout_diagnostics.py`: 8 tests.**
+
+- The text profile:
+  - its join;
+  - the engine count kept, with a re-tokenization flag;
+  - an unscored generation refused;
+  - rates and paired deltas.
+- The rescoring:
+  - against an independent computation of the student's token log-prob,
+    the teacher's surprisal and the student's own Top-K confidence, with the
+    causal shift;
+  - the same model gives zero KL;
+  - spans and thresholds.
+
+**`families/d_series/tests/test_d2_d3_objectives.py`: 19 tests.** These are
+the 15 below plus 4 on contract revision 2:
+
+- the four quantities are kept apart;
+- the claim boundary;
+- mechanism analyses are limited to measured candidates;
+- the identities are unchanged.
+
+The original 15:
 
 - The two instances.
 - D3 refused until λ is frozen, and refused under another rule.

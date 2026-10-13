@@ -10559,3 +10559,34 @@ on a paid pod.
 - **Revisit when:** the D2 driver and preregistration are put forward
   (including the behavioural K, decided on screening ability and winner's
   curse, not cost alone), or the λ session runs.
+
+## 2026-10-13 — D2/D3 motivation: capacity-aware student reasoning (contract revision 2)
+
+- **Context:** the maintainer stated why student confidence enters D2/D3.
+  A ~0.6B student may solve tasks by trajectories unlike the 4B teacher's, so
+  a large teacher KL need not mean worse reasoning, and KL-based selection
+  may over-reward imitation.
+- **Decision (maintainer):**
+  - the motivation, the D2/D3 hypotheses, the separation of four quantities
+    and the behavioural diagnostics are part of the formal contract;
+  - calibration stays teacher-native, with no student-prefix calibration in
+    D2/D3;
+  - the goal is neither maximal confidence nor minimal KL. It is structures
+    that help the student keep and recover its own effective reasoning,
+    validated only by behavioural evidence;
+  - nothing may be claimed from observations the evidence does not contain.
+- **Implemented ($0):**
+  - `d2_d3_objective_contract_v1.json` revision 2. Objective identities are
+    unchanged (D2 `999f002b…`);
+  - `rollout_profile.py`: a text-level instrument for every unit, with the
+    B/q2 baseline in `analyses/d1_rollout_profile.json`;
+  - `rollout_rescoring.py`: a per-position own-rollout instrument for new
+    candidates, run on the pod before checkpoint release. Estimated 3–5
+    GPU-minutes per probe.
+- **Recorded limits:**
+  - B/q2 have no ids, log-probabilities or checkpoints, so their confidence
+    is not available and is not estimated;
+  - their correct rates are 2–4%, with 29 shared correct prompt-seeds on
+    confirmation, so mechanism analyses are exploratory and low-powered.
+- **Revisit when:** a D2 preregistration registers the quadrant thresholds and
+  wires the rescoring into its behavioural driver.
