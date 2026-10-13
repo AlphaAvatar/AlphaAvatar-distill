@@ -58,7 +58,7 @@
     "formal_funding": "priced in the frozen design (logs/stages/stage-1/phase_d1/plans/d1_design.json :: pricing); the budget terms live with the C1 grant the design cites",
     "one_use_execution_authorization": "none outstanding — a chain is built fresh per attempt and consumed by it (P12.1)",
     "open_scientific_blockers": [],
-    "maintainer_pause": "MAINTAINER 2026-10-12: D1 route kept; B stays the anchor, q2 is the working baseline (not promoted). Next: R0 GPU equivalence of prediction_rows=scored_v1 (needs an engineering grant, ~$1.5), then R1 calib.teacher_native@v1 at $0. Owner: phase_d1/analyses/d1_followup_technical_review_and_next_round.md."
+    "maintainer_pause": "POST-REV-3 REVIEW 2026-10-13 applied (contract rev 4). Order: R0 ($4.00) -> reference calibration ($1.52; lambda, thresholds, objective overhead, cache-fix GPU check) -> D2 (preregistration draft, K=4). D2 search bound $33.30 > $30 cap until the cache fix is validated ($23.68). All need grants. Owner: logs/budget/decisions.md, families/d_series/plans/d2_budget_v1.json."
   },
   "runs": {
     "root": "logs/stages/stage-1/phase_d1/runs",
@@ -98,7 +98,7 @@
     ]
   },
   "active_run": null,
-  "next_scientific_action": "MAINTAINER 2026-10-12: D1 route kept; B stays the anchor, q2 is the working baseline (not promoted). Next: R0 GPU equivalence of prediction_rows=scored_v1 (needs an engineering grant, ~$1.5), then R1 calib.teacher_native@v1 at $0. Owner: phase_d1/analyses/d1_followup_technical_review_and_next_round.md.",
+  "next_scientific_action": "POST-REV-3 REVIEW 2026-10-13 applied (contract rev 4). Order: R0 ($4.00) -> reference calibration ($1.52; lambda, thresholds, objective overhead, cache-fix GPU check) -> D2 (preregistration draft, K=4). D2 search bound $33.30 > $30 cap until the cache fix is validated ($23.68). All need grants. Owner: logs/budget/decisions.md, families/d_series/plans/d2_budget_v1.json.",
   "_next_owner": "logs/state/current.json :: next",
   "authorizes": "nothing"
 }

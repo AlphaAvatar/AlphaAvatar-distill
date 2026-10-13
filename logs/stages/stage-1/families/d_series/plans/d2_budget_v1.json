@@ -26,16 +26,22 @@
   },
   "reference_calibration": {
    "expected": {
-    "minutes": 29.7,
-    "gpu_usd": 0.54,
-    "disk_usd": 0.0,
-    "all_in_usd": 0.54
+    "minutes": 37.4,
+    "gpu_usd": 0.68,
+    "disk_usd": 0.01,
+    "all_in_usd": 0.68
    },
    "hard": {
     "minutes": 64.6,
     "gpu_usd": 1.17,
     "disk_usd": 0.01,
     "all_in_usd": 1.18
+   },
+   "hard_with_timing": {
+    "minutes": 77.3,
+    "gpu_usd": 1.41,
+    "disk_usd": 0.01,
+    "all_in_usd": 1.42
    },
    "components": {
     "setup_and_overhead": [
@@ -61,25 +67,174 @@
     "teardown": [
      1.0,
      2.0
+    ],
+    "objective_timing_state_eval_pair": [
+     0.7,
+     2.0
+    ],
+    "objective_timing_depth_one_round_pair": [
+     7.0,
+     10.75
     ]
    },
+   "timing_pairs_are": "deadline-gated and optional: the calibration record is written first, and a pair starts only when the driver's deadline still covers its whole bound. So `hard` -- the must-complete work -- prices the session cap, and the pairs run inside it whenever the work before them is not at its maxima (expected: always)",
    "_basis": "setup from R0's plan (measured a2/a8 components); B rebuild measured 1279.8 s (expected) and D1's 22 min per arm (bound); forwards from state-evaluation timings (80 items in ~11 s at the frozen suite) with a 5x allowance",
-   "grant_proposed_usd": 1.52
+   "grant_proposed_usd": 1.52,
+   "session_cap_proposed_usd": 1.18,
+   "alternative_guaranteeing_timing": {
+    "session_cap_usd": 1.42,
+    "grant_usd": 1.76,
+    "buys": "both timing pairs even when every earlier component is at its maximum; a maintainer choice, not taken by this record"
+   }
   },
   "d2_search": {
+   "measured_basis": {
+    "d1_search_actual": {
+     "minutes": 552.0,
+     "gpu_usd": 10.03,
+     "disk_usd": 0.0,
+     "all_in_usd": 10.03
+    },
+    "telemetry": "logs/stages/stage-1/families/d_series/analyses/d1_search_telemetry.jsonl",
+    "telemetry_verified_against": "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/manifest.json",
+    "source": "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/closeout/outcome.json: 92/92 expansions, same space, support, beam and L40S",
+    "components": {
+     "expansions": 92,
+     "cells_minutes": {
+      "attention.activation_importance_v1": {
+       "root_max": 0.9792,
+       "root_mean": 0.9533,
+       "deeper_max": 0.7382,
+       "deeper_mean": 0.4564
+      },
+      "depth.causal_kl_greedy_v1": {
+       "root_max": 41.7059,
+       "root_mean": 30.8149,
+       "deeper_max": 35.6034,
+       "deeper_mean": 30.0999
+      },
+      "ffn.activation_importance_v0": {
+       "root_max": 0.9705,
+       "root_mean": 0.9655,
+       "deeper_max": 0.8585,
+       "deeper_mean": 0.6958
+      },
+      "width.global_pca_v0": {
+       "root_max": 0.9853,
+       "root_mean": 0.9737,
+       "deeper_max": 0.748,
+       "deeper_mean": 0.5508
+      }
+     },
+     "counts": {
+      "attention.activation_importance_v1": {
+       "root": 2,
+       "deeper": 24
+      },
+      "depth.causal_kl_greedy_v1": {
+       "root": 2,
+       "deeper": 14
+      },
+      "ffn.activation_importance_v0": {
+       "root": 2,
+       "deeper": 16
+      },
+      "width.global_pca_v0": {
+       "root": 2,
+       "deeper": 30
+      }
+     },
+     "depth": {
+      "expansions": 16,
+      "candidates_per_expansion": [
+       260
+      ],
+      "scoring_loop_minutes": 474.97,
+      "loop_seconds_per_candidate_mean": 6.8505,
+      "reference_cache_modes": [
+       "cached",
+       "recomputed"
+      ],
+      "recomputed": 15
+     },
+     "state_evaluation": {
+      "evaluations": 92,
+      "minutes": 12.36,
+      "seconds_mean": 8.063,
+      "seconds_max": 10.969
+     },
+     "cells_total_minutes": 527.42,
+     "session_minutes": 551.99,
+     "outside_cells_minutes": 24.57
+    }
+   },
+   "objective_overhead": {
+    "source": "provisional -- an estimate, not a measurement",
+    "depth_seconds_per_candidate": {
+     "expected": 0.3425,
+     "bound": 0.6851
+    },
+    "state_eval_seconds_per_evaluation": {
+     "expected": 0.4032,
+     "bound": 1.0969
+    }
+   },
    "expected": {
-    "minutes": 579.6,
-    "gpu_usd": 10.53,
-    "disk_usd": 0.54,
-    "all_in_usd": 11.07
+    "minutes": 576.4,
+    "gpu_usd": 10.47,
+    "disk_usd": 0.53,
+    "all_in_usd": 11.0
    },
    "hard": {
-    "minutes": 1228.6,
-    "gpu_usd": 22.32,
-    "disk_usd": 1.14,
-    "all_in_usd": 23.46
+    "minutes": 1744.3,
+    "gpu_usd": 31.69,
+    "disk_usd": 1.62,
+    "all_in_usd": 33.3
    },
-   "_basis": "D1's priced search (same space, support and beam): session overhead 95.0 min + structural max 1030.55 min x 1.1 (PROVISIONAL objective overhead). Expected: D1's measured 551.99 min x 1.05. No scored_v1 saving is assumed until R0 passes"
+   "depth_cell_minutes": {
+    "root_max": 44.6929,
+    "deeper_max": 38.5904
+   },
+   "priced_by": {
+    "expansions_max": 92,
+    "structural_minutes_max": 1649.33,
+    "session_overhead_minutes": 95.0,
+    "hard_ceiling_minutes": 1744.33,
+    "hard_ceiling_usd": 33.3038
+   },
+   "hard_if_cache_fix_validated": {
+    "minutes": 1240.0,
+    "gpu_usd": 22.53,
+    "disk_usd": 1.15,
+    "all_in_usd": 23.68
+   },
+   "cache_fix": {
+    "what": "`_available_memory_bytes` returns the allocator's hoard (empty_cache) before reading the driver: D1's search recomputed the reference in 15/16 DEPTH expansions with 0.12 GiB free and 36 GiB reclaimable",
+    "validated_on_gpu": false,
+    "validated_by": "stage L's DEPTH pair, which runs under a deliberately hoarded pool and records reference_cache.mode; or D2's own first DEPTH expansions",
+    "until_validated": "the planning bound prices DEPTH at D1's measured recompute-mode maxima",
+    "depth_cell_minutes_if_validated": {
+     "root_max": 25.9629,
+     "deeper_max": 25.6231
+    }
+   },
+   "previous_model_superseded": {
+    "d1_priced_structural_max_minutes": 1030.55,
+    "d1_priced_session_overhead_minutes": 95.0,
+    "why": "D1's design priced DEPTH from a8's one CACHED invocation (1194 s); D1's own search then recomputed the reference cache in 15 of 16 DEPTH expansions, up to 2486 s. The records model takes DEPTH from that search, and applies the objective's overhead to the two paths it touches instead of x1.10 on every structural minute"
+   },
+   "assumptions_not_measured": [
+    "the objective's added seconds per DEPTH candidate and per state evaluation: +5% of D1's mean (expected) and +10% (planning bound) until stage L measures them",
+    "D2's trajectory has D1's size (92 expansions, 16 DEPTH): the beam schedule fixes the expansion count, not the operator mix"
+   ],
+   "hard_is": "a PLANNING BOUND from D1's measured maxima, not a proven bound on runtime. What bounds MONEY is the enforceable stop below; the bound decides only whether the search is expected to FINISH inside it",
+   "enforceable_stop": {
+    "usd": null,
+    "set_at": "the D2 search authorization, at the live rate",
+    "mechanism": "the launcher's session cap: the watchdog kills the pod at the plan's hard-terminate minutes and the driver's soft stop fails the search closed before it, so spend stops at the cap whatever the runtime",
+    "proposal": "the planning bound, rounded up"
+   },
+   "_basis": "expected = D1's measured 551.99 min + the objective's expected added minutes over D1's trajectory; bound = D1's search_cost on the records-rebuilt cost model"
   },
   "d2_screening": {
    "n_probes": 8,
@@ -127,13 +282,13 @@
   }
  },
  "totals": {
-  "expected_usd": 36.35,
-  "hard_ceiling_usd": 56.91,
+  "expected_usd": 36.42,
+  "hard_ceiling_usd": 66.75,
   "teardown_reserves_usd": 1.5,
-  "hard_plus_reserves_usd": 58.41,
+  "hard_plus_reserves_usd": 68.25,
   "rescoring_excluded": "the rollout-rescoring diagnostic adds about $1.32 at its ESTIMATE; it joins the ceilings only after the reference calibration measures it"
  },
  "per_session_cap_usd": 30.0,
- "every_session_under_cap": true,
+ "every_session_under_cap": false,
  "authorizes": "nothing"
 }

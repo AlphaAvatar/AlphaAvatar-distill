@@ -1,0 +1,28 @@
+{
+ "schema": "aadistill.engineering_authorization/v1",
+ "status": "PROPOSED -- NOT GRANTED. No pod may be created on this record.",
+ "authorization_id": "d_series_reference_calibration",
+ "book": "ENGINEERING",
+ "all_in_ceiling_usd": 1.52,
+ "session_cap_usd": 1.18,
+ "_ceiling_composition": "the must-complete hard ceiling ($1.18, 64.6 min at $1.09/h incl. disk) + the $0.30 teardown reserve + $0.04 rounding. The reserve is INSIDE this figure; a programme total must not add it again",
+ "rate_basis_usd_per_hour": 1.09,
+ "rate_rule": "re-quoted live at launch; the launcher derives the session ceiling and timeout from the live rate and refuses if the cap no longer buys the work",
+ "order": "only after R0's session has closed (R0 first)",
+ "covers": [
+  "stage L of topk_adoption_driver.py on one L40S pod: B rebuilt, lambda and thresholds, the rescoring timing, and the two deadline-gated objective-overhead timing pairs (the DEPTH pair under a hoarded allocator pool, which also validates the reference-cache fix on the GPU)"
+ ],
+ "does_not_cover": [
+  "any D2/D3 search, candidate or behavioural measurement",
+  "recording the D2 objective's DEPTH choice",
+  "raising the cap to guarantee the timing pairs (the $1.76 alternative is a separate maintainer choice)",
+  "a second pod for a failed stage without a recorded engineering cause"
+ ],
+ "plan": "logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/plan.json",
+ "plan_sha256": "5fb9524bd9aa79068e0c8c78b7e89e0136505b72aef275bc1e0e23e0b84f1412",
+ "campaign": "logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/campaign.json",
+ "command": "ADOPT_CAMPAIGN=logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/campaign.json ADOPT_COMMIT=<the commit that records the grant> ADOPT_BRANCH=exec/d1-behavioural-readiness ADOPT_STAGES=L ADOPT_PREDICTION_ROWS=<all_v1, or scored_v1 iff R0's recorded verdict is PASS> SESSION_CAP=1.18 nohup bash scripts/stages/stage-1/phase_d1/topk_adoption_launch.sh refcal_<utc> > artifacts/stages/stage-1/phase_d1/qualification/topk_adoption/refcal_<utc>.log 2>&1 &",
+ "activation": "only on the maintainer's explicit confirmation: this record is copied to authorization.json with granted_utc and the decision reference, and the campaign status becomes OPEN. Until then the budget script cannot read an authorization and the launcher exits at $0",
+ "on_ordinary_failure": "repair and retry inside this ceiling (AGENTS.md P12.1); a deterministic paid failure is never retried unchanged",
+ "authorizes": "nothing while PROPOSED"
+}

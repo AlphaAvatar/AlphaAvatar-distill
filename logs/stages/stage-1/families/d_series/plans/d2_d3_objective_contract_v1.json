@@ -21,8 +21,9 @@
   "_meaning": "D1 declares no scoring objective; its per-item mean of the KL is the historical, KL-only path and its identities are untouched"
  },
  "aggregation_difference_from_d1": {
-  "depth": "none: D1's DEPTH already averages per item over T_x, then by sub-type and domain",
-  "state_evaluation": "D1's state KL pools TOKENS within a sub-type; the D2/D3 objective averages PER ITEM first, as the decision requires. So D2/D3 also record D1's KL under the per-item rule (state.objective.raw_kl.*), which separates the effect of the aggregation from the effect of confidence"
+  "depth": "none: per item over T_x, items averaged equally within a sub-type, then sub-type and domain -- D1's DEPTH rule",
+  "state_evaluation": "none since revision 3: within a sub-type items are weighted by T_x (the integrand pooled over the sub-type's scored positions, divided by their count) and each critical class is pooled over items -- D1's state-KL weighting. The per-item value keeps the fixed 1/T_x. state.objective.raw_kl.* is the raw KL under this same aggregation and equals D1's state.teacher_kl.* and state.critical_token_kl",
+  "matches_objective_identity_field": "kl_path_weighting_per_consumer/v2"
  },
  "scientific_motivation": {
   "title": "capacity-aware student reasoning",
@@ -177,7 +178,18 @@
   "built_in_kl_only_control": "every objective evaluation also reports state.objective.raw_kl.* -- the raw KL aggregated exactly as the objective is -- which equals D1's state.teacher_kl.* and state.critical_token_kl in the same evaluation (tested to 1e-6). Rankings by raw_kl and by the objective on the same states isolate the effect of the integrand"
  },
  "rollout_rescoring_integration": {
-  "token_ids": "use the generation engine's exact ids. The current generator (scripts/shared/evaluation/uncapped_eval.py) holds them in memory but records only decoded text; recording them changes a file in the generation source set, hence the generation fingerprint and the shared protocol's evaluation identity. That is a VERSIONED decision (d_series_shared_eval v2 with a record-only equivalence check), not an edit. Until it is taken, ids_source=retokenized_text, labelled approximate per sample",
+  "token_ids": "use the generation engine's exact ids, kept by the read-only sidecar wrapper scripts/shared/evaluation/uncapped_eval_token_ids.py. It runs the UNCHANGED in-tree generator (same argv, interpreter and environment) with a hook on the one post-wave decode per record, after the engine loop, so the generation source set, the generation fingerprint and the shared protocol's evaluation identity are the plain run's -- tested on the real generator with a stub engine: identical records, summaries and reconstructed fingerprint. The hook installs only when the generator's source digest equals the protocol's; every row is verified against its record (id count, prompt count, decoded-text sha256, EOS vs stop_reason) and the sidecar header says whether the stratum is exact. A record with no exact row is rescored from retokenized text, ids_source=retokenized_text, labelled approximate per sample. Recording ids inside the generator itself remains a VERSIONED decision (d_series_shared_eval v2), not taken",
+  "token_ids_identity": {
+   "unchanged": [
+    "generation_source_digest",
+    "generation fingerprint",
+    "evaluation_protocol_hash per rung",
+    "shared protocol hash"
+   ],
+   "changes": "only the behavioural driver's own executable closure, because its argv names the wrapper -- correct for reproducibility, and not part of the generation identity",
+   "not_in_generation_source_set": "the wrapper is deliberately NOT added to source_sets.json generation.files: adding it would move the source digest it exists to preserve",
+   "residual": "engine scheduling is timing-dependent in the plain run too; the wrapper adds no work inside the engine loop, so it changes no code path the tokens depend on, but token equality with a counterfactual plain run cannot be proven on a non-batch-invariant engine"
+  },
   "alignment_evidence": [
    "prompt ids sha256",
    "completion ids sha256",
@@ -258,7 +270,7 @@
   ],
   "validation": "Top-K confidence is a proxy for structure selection; its usefulness is established only by independent behavioural evidence after recovery training"
  },
- "revision": 3,
+ "revision": 4,
  "revision_history": [
   {
    "revision": 1,
@@ -274,8 +286,13 @@
    "revision": 3,
    "date": "2026-10-13",
    "change": "independent review: (1) state-evaluation aggregation now uses the KL-only path's T_x weighting, objectives re-versioned v2; (2) lambda and diagnostic thresholds measured before D2's search, on 147 unique items (lambda rule v2); (3) objective scope and intermediate-student boundary; (4) high raw KL is a registered flag only; (5) rescoring integration contract"
+  },
+  {
+   "revision": 4,
+   "date": "2026-10-13",
+   "change": "post-revision-3 review: (1) aggregation_difference_from_d1 no longer contradicts the revision-3 aggregation; (2) exact engine token ids through a read-only generator wrapper whose generation identity is the plain run's. Objective identities, ranking and lambda rule unchanged"
   }
  ],
- "contract_hash": "1006c4368e1bbdb0e0bfc5bed5fc53e6dbe1b995690ec4078bdd5cea17528b3b",
+ "contract_hash": "0ebccd156458281a83111a55afa43c8fbc62e1e823cac648ba0a9bb6a6c9b5dc",
  "authorizes": "nothing"
 }

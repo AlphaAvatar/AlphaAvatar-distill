@@ -10631,3 +10631,72 @@ on a paid pod.
   check. Until then the rescoring runs on labelled re-tokenized ids.
 - **No paid resource authorized.** R0 ($4.00), the reference calibration
   ($1.52) and the D2 search and behaviour each need explicit grants.
+
+## 2026-10-13 — Post-revision-3 review: contract, R0 → calibration, D2 price, token ids, D2 chain
+
+- **Context:** the independent review of `88fdcddc` approved revision 3 in
+  principle and required six items. It is not a paid authorization.
+- **Implemented ($0):**
+  1. **Contract (revision 4, hash `0ebccd15…`).** `aggregation_difference_from_d1`
+     no longer contradicts the revision-3 aggregation. The generator test
+     refuses any state-evaluation text that claims item-equal weighting. D1
+     identities and the objective hashes are unchanged (D2 `063bafd4…`).
+  2. **R0, then the reference calibration.** Both have a plan, a campaign
+     (AWAITING_GRANT) and a proposed authorization with the exact command:
+     - R0: $4.00 grant / $3.60 cap.
+     - Reference calibration: $1.52 grant / $1.18 cap.
+
+     The calibration is stage `L` of `topk_adoption_driver.py`. It rebuilds
+     B, writes λ and the thresholds **first**, then runs two objective-overhead
+     timing pairs, each gated on its whole bound against the deadline. The
+     remote script's deadline now counts setup.
+  3. **D2 price from D1's own records.**
+     - D1's search telemetry (92 rows) is committed, verified against D1's
+       evidence manifest.
+     - D2's search is priced by D1's `search_cost` with DEPTH at D1's
+       measured end-to-end maxima. 15 of 16 DEPTH expansions recomputed the
+       reference cache, at up to 2,486 s.
+     - The objective's overhead now applies only to the DEPTH loop and the
+       state evaluation, as added seconds. Stage L replaces it
+       (`--calibration-session`).
+     - Result: expected $11.00, planning bound **$33.30 — above the $30
+       per-session ceiling**.
+  4. **The recompute cause, fixed in core (GPU validation owed).** The cache
+     probe read `mem_get_info` with 36 GiB held unused by the allocator; it
+     now calls `empty_cache()` first. Stage L's DEPTH pair runs under a
+     deliberately hoarded pool and records `cache_fix_validated`. Validated,
+     the bound is **$23.68**.
+  5. **Exact token ids without moving the protocol.**
+     `uncapped_eval_token_ids.py` runs the unchanged generator with a
+     read-only post-wave decode hook. Plain vs wrapped runs give identical
+     records, summaries and reconstructed fingerprint (tested; two mutations
+     caught). `d_series_shared_eval@v1` is unchanged, and v2 is not opened.
+  6. **D2 chain:**
+     - preregistration draft `d2_preregistration_v1.json`
+       (`2641a820…`, K = 4);
+     - `d2_session.py`, checked against it at $0;
+     - `autoinit_d2_driver.py`, which records the objective commit, the
+       KL-only control ranking and the objective telemetry.
+- **Programme (live limits; project remaining $122.46):**
+
+  | pricing | D2 search hard | D2 + D3 at hard | + fresh confirmation |
+  |---|---|---|---|
+  | records (in force) | $33.30, over cap | $131.26, does not fit | short $26.94 |
+  | cache fix validated | $23.68 | $112.02, fits | short $7.70 |
+
+  Expected: D2 + D3 $70.63.
+- **Owed before a D2 search launch:**
+  - the D2 launcher and grant schema (`SessionSpec`, budget spec from the
+    priced plan, shell dispatch, the session-launcher registry);
+  - the driver deadline from `soft_stop_minutes`. D1's launcher reads a
+    non-existent `soft_stop_seconds`, so D1's driver ran with no deadline;
+    D1 is closed and its file is left as is;
+  - adding `phase_d2` to the formal-allowance scope (maintainer).
+- **Maintainer decisions requested:**
+  - grant R0 and the reference calibration (or the $1.76 / $1.42
+    calibration alternative that guarantees the timing pairs at maxima);
+  - approve the D2 preregistration;
+  - decide the search price route: the cache-fix validation in stage L, or
+    a cap decision;
+  - decide the reservation rule.
+- **No paid resource authorized.**

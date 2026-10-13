@@ -1,0 +1,73 @@
+{
+ "schema": "aadistill.d_series.validation_plan/v1",
+ "validation_id": "reference_calibration",
+ "version": 1,
+ "_contract": "REGISTERED BEFORE ANY SESSION. Produces what the D2/D3 objective contract requires BEFORE D2's formal search: D3's lambda (lambda rule v2), the diagnostic thresholds (diagnostic_threshold_rule), the rollout-rescoring cost, and the D2 objective's overhead on the production state-evaluation and DEPTH paths. No D2 candidate exists when it runs and none is created. AUTHORIZES NOTHING: a session needs the maintainer's grant (authorization.json, absent until then).",
+ "question": "on the standing incumbent B against the teacher, what are lambda and the registered diagnostic thresholds, and what does the D2 objective add to a state evaluation and to one DEPTH round on the production path?",
+ "order": "after R0 (independent review, 2026-10-13: R0 first, then the reference calibration)",
+ "stages": [
+  "L"
+ ],
+ "prediction_rows": "the mode D2's search will run: all_v1, or scored_v1 if and only if R0's verdict is PASS and recorded before this session's authorization. The calibration pass is execution-independent (its own forwards); only the timing pairs read the mode",
+ "rules": {
+  "contract_hash": "0ebccd156458281a83111a55afa43c8fbc62e1e823cac648ba0a9bb6a6c9b5dc",
+  "lambda_rule_hash": "8817206125772078b4f2c472df3e3cb919d0aa2bcfb4585ae090180729047256",
+  "threshold_rule_hash": "8ea3a526d7f9d2eb0394f3ed21ce136a41e52c5d328f4e64bad8c020b234405b",
+  "d2_objective_hash": "063bafd46c9dc8ece77869f6b80a5e618bfad0ec237f47c2d9bdde06b1263a20",
+  "registered_pool": {
+   "draws": 209,
+   "unique": 147
+  }
+ },
+ "incumbent": {
+  "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+  "weights_digest": "85c5c50de3cd7e5242097e05e6f09057d9b27ae98ec49050219e75a2f49e2335",
+  "single_shard_sha256": "b24f0b63afd3b99f14d34d4fc508abbb26f65421dc5784f3738bd9565608d010",
+  "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+ },
+ "sequence": [
+  "check-only preflight on the pod: B's identities and the $0 construction gate, the registered pool, the policy, both rule hashes",
+  "rebuild B from its one construction owner (A_bsz1, verified against all four identities), the GPU to itself",
+  "teacher and B forwards over the 147 unique items -> lambda and thresholds; rescoring timed on 24 items",
+  "WRITE reference_calibration.json and flush the partial record",
+  "state-evaluation pair (KL-only, D2, KL-only), only if the deadline covers 120 s",
+  "one DEPTH round at the root, KL-only then D2, each under a deliberately hoarded allocator pool, only if the deadline covers 645 s"
+ ],
+ "never_records": "the D2 objective's DEPTH choice or round table: only its timing. Nothing that looks like a D2 search result may exist before D2's search",
+ "acceptance": {
+  "calibration": "lambda_from_reference returns a value (it refuses a zero confidence IQR) and the pool is the registered 209 draws / 147 unique items",
+  "timing": "diagnostic: a skipped or failed pair is recorded and the cost model keeps its provisional factor for that path; it never invalidates the calibration",
+  "raw_kl_control": "reported (max |objective raw KL - KL-only teacher KL|); a large value is an engineering defect to diagnose",
+  "cache_fix": "diagnostic, recorded as timing_depth_one_round.cache_fix_validated: both arms entered the operator with < 1 GiB driver-free and > 1 GiB hoarded and still CACHED the reference -- the GPU evidence the allocator-hoard fix in _available_memory_bytes owes. False is a finding about the fix, not a failure of the session, and the D2 search keeps its recompute-mode price"
+ },
+ "hardware": {
+  "gpu": "NVIDIA L40S",
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "disk_gb": 60,
+  "peak_memory_gib_measured": 20.49,
+  "_peak_from": "a3 stage D; stage P peaked at 16.29 GiB (a8). A 24 GB card is too tight"
+ },
+ "time_and_money": {
+  "owner": "logs/stages/stage-1/families/d_series/plans/d2_budget_v1.json -> steps.reference_calibration",
+  "expected_usd": 0.68,
+  "expected_minutes": 37.4,
+  "hard_usd": 1.18,
+  "hard_minutes": 64.6,
+  "hard_with_timing_usd": 1.42,
+  "session_cap_usd": 1.18,
+  "all_in_ceiling_usd": 1.52,
+  "alternative": {
+   "session_cap_usd": 1.42,
+   "grant_usd": 1.76,
+   "buys": "both timing pairs even when every earlier component is at its maximum; a maintainer choice, not taken by this record"
+  },
+  "_cap_vs_bill": "the session cap sets the launcher's ssh window (cap / live rate); the watchdog stops the pod 12 min after it, so the worst bill exceeds the cap -- the grant covers that with the $0.30 teardown reserve inside it"
+ },
+ "command": "ADOPT_CAMPAIGN=logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/campaign.json ADOPT_COMMIT=<the commit that records the grant> ADOPT_BRANCH=exec/d1-behavioural-readiness ADOPT_STAGES=L ADOPT_PREDICTION_ROWS=<all_v1, or scored_v1 iff R0's recorded verdict is PASS> SESSION_CAP=1.18 nohup bash scripts/stages/stage-1/phase_d1/topk_adoption_launch.sh refcal_<utc> > artifacts/stages/stage-1/phase_d1/qualification/topk_adoption/refcal_<utc>.log 2>&1 &",
+ "outputs": {
+  "record": "<OUT>/out/adoption_<mode>/reference_calibration.json",
+  "session": "<OUT>/out/adoption_<mode>/adoption.json (L_reference_calibration)",
+  "committed_as": "logs/stages/stage-1/families/d_series/analyses/d2_d3_reference_calibration.json"
+ },
+ "authorizes": "nothing"
+}

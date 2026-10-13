@@ -1,7 +1,20 @@
 # D2 / D3 scientific objectives: definition, student identity, implementation
 
-**Status:** contract revision 3 and its core implementation, 2026-10-13.
-Authorizes nothing.
+**Status:** contract revision 4 (`0ebccd15…`) and its core implementation,
+2026-10-13. Authorizes nothing.
+
+**Revision 4, after the post-revision-3 review.** The objective identities,
+the ranking and the λ rule are unchanged.
+
+- The contract no longer says that state evaluation averages items equally.
+  A generator test refuses that text.
+- Exact engine token ids come from a read-only generator wrapper, and the
+  shared protocol is unchanged (§8a).
+- The D2 search is priced from D1's own search records (§7).
+- The reference cache's hoarded-memory fallback is fixed in core, and its
+  GPU validation is owed (§7).
+- The reference calibration is wired as stage `L`.
+- D2 has a draft preregistration, a session and a driver (§10).
 
 **Revision 3, after an independent review.** The rest of this page reflects
 it. The objectives were re-versioned to v2: D2 is `063bafd4…`, and D3 is
@@ -31,9 +44,9 @@ with a pointer here.
 | [`d2_d3_objective_contract_v1.json`](d2_d3_objective_contract_v1.json) | the registered contract: both objectives' identities, the ranking policy, the λ rule, and where each objective applies. Carries `contract_hash` |
 | `src/aadistill/initialization/scoring/objective.py` | the generic forms, the student Top-K entropy and the fixed-denominator reducer |
 | `scripts/stages/stage-1/families/d_series/objectives.py` | this campaign's instances (D2, D3(λ), `OBJECTIVE_PARETO_V1`) and the λ rule |
-| `scripts/stages/stage-1/families/d_series/calibrate_d3_lambda.py` | the λ measurement; runs on a GPU, before D3's search |
+| `scripts/stages/stage-1/families/d_series/reference_calibration.py`, stage `L` of `phase_d1/topk_adoption_driver.py` | λ, the diagnostic thresholds and measured costs; one GPU session, after R0 and before D2's search |
 | `scripts/stages/stage-1/families/d_series/rollout_profile.py`, `scripts/shared/evaluation/rollout_rescoring.py` | the behavioural diagnostics: text-level for every unit; per-position for new candidates |
-| `tests/initialization/test_scoring_objective.py`, `families/d_series/tests/test_d2_d3_objectives.py`, `test_rollout_diagnostics.py` | 92 tests (52 + 28 + 12) |
+| `tests/initialization/test_scoring_objective.py`, `families/d_series/tests/test_d2_d3_objectives.py`, `test_rollout_diagnostics.py`, `test_production_operator_timing.py`, `tests/evaluation/test_uncapped_eval_token_ids.py`, `phase_d2/tests/` | the tests |
 | `scripts/stages/stage-1/families/d_series/d2_budget.py` → [`d2_budget_v1.json`](d2_budget_v1.json) | the derived budget through D2 |
 
 ## 0. Why the student's confidence enters: capacity-aware student reasoning
@@ -464,25 +477,107 @@ same Top-200 + tail support with `all_v1` (the previous design page said
 - the objective adds the estimates above.
 
 **The executable budget** is derived by `d2_budget.py` into
-[`d2_budget_v1.json`](d2_budget_v1.json) from D1's priced chain, R0's plan and
-the measured probe timings, at K = 4:
+[`d2_budget_v1.json`](d2_budget_v1.json), at K = 4.
+
+**Records model (post-revision-3 review).** The D2 search is now priced
+from D1's own search records, not D1's pre-search design:
+
+- **Telemetry.** D1's telemetry (92 expansions) is committed as
+  [`../analyses/d1_search_telemetry.jsonl`](../analyses/d1_search_telemetry.jsonl).
+  It is refused unless its sha256 is the one D1's evidence manifest records.
+- **Pricing machinery.** D1's own `search_cost` prices it, so there is no
+  second formula, with two changes to the cost model:
+  - **DEPTH** takes D1's measured end-to-end maxima: root 41.71 min,
+    deeper 35.60 min.
+  - **The other operators** keep the frozen cross-host cells. They are more
+    conservative: D1's own were 3–4× smaller on a fast host.
+- **The objective's overhead** applies only to the DEPTH scoring loop and
+  the state evaluation, as added seconds per candidate and per evaluation:
+  - **provisional:** +5% / +10% of D1's means;
+  - **after stage L:** measured. `d2_budget.py --calibration-session <adoption.json>`
+    substitutes the measurement.
+- **Expectation:** D1's measured session plus the expected added minutes over
+  D1's actual trajectory.
+
+**Why DEPTH moved.** D1's design priced DEPTH from a8's single cached
+invocation (1,194 s). D1's search then recomputed the reference cache in 15
+of its 16 DEPTH expansions, taking 1,336–2,486 s each.
+
+The cause is in the telemetry:
+
+- 0.12 GiB driver-free;
+- **36.0 GiB reserved but unused** by the allocator;
+- a 0.14 GiB sketch.
+
+`_available_memory_bytes` read `mem_get_info`, which counts the allocator's
+hoard as taken. It now calls `empty_cache()` first. That is the remedy
+`memory_snapshot` names, and it changes no tensor, kernel or identity. It is
+declared in `test_cuda_surface_preserved.py` and covered by a CPU regression,
+which a mutation check confirms.
+
+**GPU validation is owed.** Stage L's DEPTH pair runs under a deliberately
+hoarded pool and records `cache_fix_validated`. Until that flag is true, the
+records price is in force.
 
 | step | expected | hard ceiling |
 | --- | --- | --- |
 | R0 | $1.53 | $3.60 (grant $4.00) |
-| reference calibration (λ, thresholds, rescoring timing) | $0.54 | $1.18 (grant $1.52) |
-| D2 search (D1's priced search; the objective's overhead provisionally ×1.10) | $11.07 | $23.46 |
+| reference calibration: λ, thresholds, rescoring timing, objective-overhead pairs | $0.68 | $1.18 must-complete (grant $1.52); $1.42 with both pairs at maxima |
+| D2 search, records price (in force) | $11.00 | **$33.30, over the $30 cap** |
+| D2 search, cache fix validated | $11.00 | $23.68 |
 | D2 screening (8 probes, 4 arms; no B/q2) | $16.34 | $20.31 |
 | D2 confirmation (3 probes, 1 arm) | $6.87 | $8.36 |
-| **total** | **$36.35** | **$56.91** (+$1.50 teardown reserves) |
 
-- Every session is under the $30 per-session cap.
-- The rollout rescoring is **excluded** from the ceilings until the reference
-  calibration measures it. Its estimate, about $1.32, is shown separately and
-  is not a bound.
-- Spending authority: the project has $122.46 left of $590, and the
-  derivation is the authority. R0 and the reference calibration together are
-  $5.52 against the GPU-engineering allowance of $6.65.
+- **The rollout rescoring** is **excluded** from the ceilings until the
+  reference calibration measures it. Its estimate, about $1.32, is shown
+  separately and is not a bound.
+- **The calibration's timing pairs** are deadline-gated and optional, so the
+  must-complete work prices the session cap.
+  - If you choose $1.76 / $1.42 instead of $1.52 / $1.18, both pairs are
+    guaranteed to run even when every earlier component is at its maximum.
+  - Either way the calibration record is written first.
+- **Engineering book:** R0 plus the calibration is $5.52 against the GPU
+  allocation of $6.65.
+
+**What each figure is:**
+
+| layer | D2 search | status |
+| --- | --- | --- |
+| measured | D1's search: 551.99 min, $10.03, same space, support, beam and GPU; per-expansion telemetry committed and hash-verified | completed run |
+| estimate | 576.4 min, $11.00 = D1 + the objective's expected added minutes | the overhead is **provisional** until stage L |
+| planning bound | 1,744 min, $33.30 (records) / 1,240 min, $23.68 (cache fix validated) | D1's measured maxima on its worst-case trajectory; **not** a proven runtime bound |
+| enforceable stop | the session cap in the D2 search authorization, at the live rate | **what bounds money**: the watchdog at the plan's hard-terminate minutes; the driver's soft stop fails closed before it |
+
+**Programme scenarios** (`d_series_programme_budget.json`):
+
+- **Status:** a dated snapshot against the live limits:
+  - project remaining $122.46 of $590 (binding);
+  - formal remaining $127.96;
+  - engineering remaining $6.65;
+  - $30 per session.
+- **Reserves:** each session's teardown reserve is counted once.
+
+| search price | D2 search hard | D2 + D3 at hard | + fresh confirmation |
+| --- | --- | --- | --- |
+| records (in force) | $33.30, **over the cap** | $131.26, **does not fit** | short $26.94 |
+| cache fix validated | $23.68 | $112.02, fits | short $7.70 |
+
+**D2 + D3 expected: $70.63.**
+
+**Reservation rule (proposed).** Authorize D2's formal sessions only if,
+after engineering and D2 at hard ceilings, the remainder still covers D3 and
+one fresh confirmation at theirs. It is not satisfied under either price.
+
+The levers, all the maintainer's:
+
+- **Validate the cache fix** (stage L, no extra session). It saves $9.62
+  per search.
+- **Measure the objective overhead** (stage L).
+- **Run D3 at K = 2.** This saves $9.40 at hard.
+- **`scored_v1`** if R0 passes.
+- **Re-derive from actual spend.** D1 spent $10.03 of $21.49, and $10.34 of
+  $15.20.
+- **Raise the cap.**
 
 **Behavioural field.** The shared protocol trains 2K + 3 probes per
 experiment and never trains B or q2. **K = 4 is prepared**, as the independent
@@ -579,18 +674,31 @@ All of it is **exploratory**: none of it decides `SHARED_GO` or `NO_GO`.
 **Integration contract** (contract field `rollout_rescoring_integration`,
 from the independent review):
 
-- **Exact engine ids.**
+- **Exact engine ids (revision 4).**
   - The generator (`uncapped_eval.py`) holds the ids in memory but records
-    only decoded text.
-  - Recording them changes a file in the generation source set, which moves
-    the generation fingerprint and therefore the shared protocol's evaluation
-    identity. It is therefore a **versioned decision**:
-    `d_series_shared_eval` v2 with a record-only equivalence check, not an
-    edit.
-  - Until it is taken, the rescoring runs on re-tokenized text, labelled
-    `ids_source=retokenized_text`, with per-sample exactness recorded.
-    `alignment_evidence` refuses "engine" ids that do not reproduce the
-    record's count and text.
+    only decoded text. Editing it to record them would change a file in the
+    generation source set, moving the generation fingerprint and the shared
+    protocol's evaluation identity -- a **versioned decision**
+    (`d_series_shared_eval` v2), not taken.
+  - Instead, `scripts/shared/evaluation/uncapped_eval_token_ids.py` runs the
+    **unchanged** generator with a read-only hook on its single post-wave
+    `tok.decode(gen)` per record, after the engine loop has exited. It writes
+    `<stratum>.token_ids.jsonl` (never `*.json`, which admission reads as a
+    summary) and verifies every row against its record: id count, prompt
+    count, decoded-text sha256, EOS vs `stop_reason`.
+  - Identity: the hook installs only when the generator's source digest is
+    the protocol's; the wrapper is **not** in the generation source set. On
+    the real generator with a stub engine, plain and wrapped runs give
+    identical records, summaries and reconstructed generation fingerprint
+    (`tests/evaluation/test_uncapped_eval_token_ids.py`; two mutations of the
+    hook are caught). Only the behavioural driver's own executable closure
+    moves, because its argv names the wrapper.
+  - Residual: vLLM's scheduling is timing-dependent in the plain run too. The
+    wrapper adds no work inside the engine loop, but token equality with a
+    counterfactual plain run cannot be proven on a non-batch-invariant engine.
+  - A record without an exact sidecar row is rescored from re-tokenized text,
+    labelled `ids_source=retokenized_text`. `alignment_evidence` refuses
+    "engine" ids that do not reproduce the record's count and text.
 - **Alignment evidence per sample:** prompt and completion id hashes, the
   tokenizer hash, the generation fingerprint, and the count and text match.
 - **Untouched:** D1's evidence, and the shared protocol's scoring contract
@@ -759,11 +867,13 @@ The original 15:
 
 | step | state | cost |
 | --- | --- | --- |
-| R0: `scored_v1` GPU equivalence | ready, needs its grant | $1.53 expected, $3.60 hard ceiling |
-| reference calibration: λ + diagnostic thresholds + measured rescoring cost (`reference_calibration.py`) | code ready; session wiring owed; needs its grant; **before D2's search** | $0.54 expected, $1.18 hard ceiling |
-| D2 search driver: `SearchConfig(scoring_objective=D2_OBJECTIVE, policy=OBJECTIVE_PARETO_V1)`, evaluator with the same objective, `scored_v1` if R0 passes | owed engineering, $0 | — |
-| D2 retention rule, K (4 prepared), preregistration, pricing from `d2_budget_v1.json` | owed, maintainer decisions inside | see §7 |
-| behavioural driver with the rescoring wired in (§8a contract); exact engine ids need the versioned generation-record decision | owed engineering | — |
+| R0: `scored_v1` GPU equivalence | ready; proposed authorization and command written; needs its grant | $1.53 expected, $3.60 hard |
+| reference calibration (stage `L` of `topk_adoption_driver.py`): λ, thresholds, rescoring cost, objective overhead, cache-fix GPU check | wired, CPU-tested; plan, campaign and proposed authorization written; needs its grant; **after R0, before D2's search** | $0.68 expected, $1.18 must-complete |
+| D2 preregistration | **draft** `phase_d2/plans/d2_preregistration_v1.json` (`2641a820…`, K = 4); needs maintainer approval | — |
+| D2 session and search driver | `phase_d2/d2_session.py`, `autoinit_d2_driver.py`: checked against the preregistration at $0 | — |
+| D2 launcher and grant schema | **owed** (needs the price route and the formal-allowance scope first) | — |
+| exact engine ids for the rescoring | **done** without a protocol change: `uncapped_eval_token_ids.py` | — |
+| behavioural driver with the wrapper and the rescoring | owed engineering | — |
 | D3 driver and preregistration (λ frozen in its identity) | after D2 | — |
 
 Behavioural screening and confirmation run on `d_series_shared_eval@v1`,

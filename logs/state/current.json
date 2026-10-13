@@ -73,17 +73,17 @@
  },
  "d_series": {
   "authorizes": "nothing",
-  "behavioural_design": "Top-4 candidates / 2 screening seeds / 3 confirmation seeds = 10 + 6 probes over 5 and 2 arms. Owner: d1_design.json.",
+  "behavioural_design": "D1 (complete): Top-4, 10 + 6 probes, owner d1_design.json. D2: shared protocol, K=4 prepared, 8 + 3 probes, no B/q2 training, owner families/d_series/plans/d2_budget_v1.json.",
   "behavioural_pricing": "Owner: d1_design.json :: budget.chain; attempt bounds: the run's governance/authorization.json :: money.attempt_bounds.",
-  "blockers": "NONE OPEN. Incumbent identity CORRECTED 2026-10-08 and the check kept armed. Evidence CLOSED. ENVELOPE RESOLVED_FITS. FUNDING AUTHORIZED 2026-10-05. Owner d1_design.json.",
-  "d2_owed_engineering": "D2 search driver + preregistration (K, raw-KL review threshold); D3 lambda GPU session (~$0.55). Core objective support DONE. Owner: d2_d3_objective_design.md section 10.",
-  "execution_wiring": "SEARCH complete. SCREENING chain COMPLETE, tested at $0: driver with on-pod digest-pinned arm materialization, launcher, one-use issuer, preregistration, replay plan, sweep contract phase_d1_behavioural, dispatch branch, both pinned scorers. Confirmation verdict computation is owed before that launch. Owners: d1_design.json, the preregistration.",
+  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2: nothing authorized; pending R0 and reference-calibration grants, preregistration approval, a search price under the $30 cap (cache fix validated, or a cap decision) and the formal-allowance scope. Owner: logs/budget/decisions.md 2026-10-13.",
+  "d2_owed_engineering": "D2 launcher + grant schema (SessionSpec, priced budget spec, shell dispatch, launcher registry, deadline from soft_stop_minutes); behavioural driver with the token-id wrapper and rescoring. DONE: core objective, stage L, preregistration draft, session, driver.",
+  "execution_wiring": "D1 chain COMPLETE and CLOSED. D2: preregistration draft phase_d2/plans/d2_preregistration_v1.json; session + search driver checked at $0; launcher owed. Owner: families/d_series/plans/d2_d3_objective_design.md.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
   "incumbent": "B = C1's PROMOTED TREATMENT, 53e30566..., attention.activation_importance_v1; state_id null, built as a fixed path, rebuilt on the pod. DERIVED from C1's verdict by phase_d_series/incumbent.py. The design named C1's BEATEN arm c313d1b4... until 2026-10-08. Owner: phase_d1/analyses/d1_control_arm_identity.json.",
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
   "scoring_protocol": "reference_topk_tail_v1, K=200: reference-defined support plus one K+1 tail bucket from the COMPLEMENT's logits, carried by SearchConfig.distribution_support -- an OPTIONAL term, absent under the historical full-vocab contract, folded into one measurement_protocol_id. Owner: scripts/stages/stage-1/families/d_series/scoring_protocol.py",
   "seeds": "MATERIALIZED and HASH-BOUND in plans/d1_behavioural_preregistration.json (2 screening, 3 confirmation, 6 exclusions), before any candidate result exists. Owner: the preregistration.",
-  "state": "D1 COMPLETE / NO-GO. D2 and D3 NOT STARTED; they will measure on the shared protocol d_series_shared_eval@v1. Owner: families/d_series/plans/."
+  "state": "D1 COMPLETE / NO-GO. D2 PREREGISTERED IN DRAFT, not approved, not authorized; D3 NOT STARTED. Shared protocol d_series_shared_eval@v1. Owner: phase_d2/plans/ and families/d_series/plans/."
  },
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
  "dirty": false,
@@ -127,11 +127,11 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "REVIEW 2026-10-13 applied (D2/D3 contract rev 3). Order: R0 ($4.00) -> reference calibration ($1.52, lambda+thresholds) -> D2 search+behaviour (K=4 prepared). All need grants. Owner: families/d_series/plans/d2_d3_objective_design.md, d2_budget_v1.json.",
+ "next": "POST-REV-3 REVIEW 2026-10-13 applied (contract rev 4). Order: R0 ($4.00) -> reference calibration ($1.52; lambda, thresholds, objective overhead, cache-fix GPU check) -> D2 (preregistration draft, K=4). D2 search bound $33.30 > $30 cap until the cache fix is validated ($23.68). All need grants. Owner: logs/budget/decisions.md, families/d_series/plans/d2_budget_v1.json.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "R0 (granted separately), then D2's engineering and preregistration on the shared protocol; R1 at $0 in parallel. No provider resource exists.",
-  "not_next": "no paid resource before the launch review; no recovery, screening or confirmation session (each separately authorized); no D2/D3; no retry of a complete measurement; no K sweep; no change to the frozen design. Owner: decisions.md and the 2026-10-05 amendment.",
+  "next_work": "Maintainer: grant R0 then the reference calibration; approve the D2 preregistration; choose the D2 search price route. Agent at $0: the D2 launcher.",
+  "not_next": "no paid resource without its own grant; no retraining or regeneration of B/q2; no rerun of D1 or change to its records; no third KL-only search. Owner: decisions.md 2026-10-13.",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 COMPLETE / NO-GO (q2 did not confirm; B stands).",
   "then": "nothing is queued."
  },
@@ -237,6 +237,6 @@
   "d1_launch": "1029 passed / 13 skipped / 0 failed, 2m38s: phase_d1 + docs + integration. GREEN, and the accepted out-of-tree source-screen failure is NOT in it.",
   "integration": "SQUASH AND MERGE, AGENTS.md P12.2. DONE 2026-10-05: main 4500d775 squashes prep/d-series-topk-tail, which is PRESERVED -- 637 cited commit hashes resolve only there. Ranges: decisions.md.",
   "known_red": "ONE, pre-existing (bc31175f), out-of-tree, NOT core and NOT in the D1 launch suite: phase_d_series test_source_evidence::test_it_regenerates_identically. Its screen is nondeterministic across processes. Diagnosis: current.md.",
-  "next_work": "none owed; awaiting the formal launch review."
+  "next_work": "none owed."
  }
 }
