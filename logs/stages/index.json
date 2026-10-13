@@ -882,7 +882,7 @@
    "classification_reason": "Stage 1 for the reason D1 is: it varies how a Stage-1 initialization is SCORED, measured through a Stage-3 recovery probe. A separate experiment from D1 because its objective is a different estimand, not a rerun -- D1 is complete and its records are not edited.",
    "canonical_scripts": "scripts/stages/stage-1/phase_d2",
    "canonical_artifacts": null,
-   "canonical_configs": null,
+   "canonical_configs": "configs/stages/stage-1/phase_d2",
    "canonical_data": null,
    "canonical_docs": null,
    "live_state": null

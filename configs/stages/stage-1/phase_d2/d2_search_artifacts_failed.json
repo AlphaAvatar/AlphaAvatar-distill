@@ -1,0 +1,38 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_d2_search",
+ "note": "FAILURE spec: what a stopped D2 search still owes -- the journal, the per-expansion telemetry (cache modes and costs), the state journal and d2_search.json (budget and objective telemetry). Nothing is required: an early refusal may have produced none of it, and demanding it would block collecting what the run has.",
+ "patterns_are_relative_to": "the collector's --root, which SessionRunner sets to <checkout>/artifacts",
+ "entries": [
+  {
+   "artifact_class": "d2_search_record",
+   "pattern": "audit/autoinit_d2/d2_search.json",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_stage1_selection",
+   "pattern": "audit/autoinit_d2/stage1_selection.json",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_state_journal",
+   "pattern": "audit/autoinit_d2/search/states.jsonl",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_search_telemetry",
+   "pattern": "audit/autoinit_d2/search/telemetry.jsonl",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_search_journal",
+   "pattern": "audit/autoinit_d2/journal.jsonl",
+   "required": false,
+   "lifecycle": "final_required"
+  }
+ ]
+}

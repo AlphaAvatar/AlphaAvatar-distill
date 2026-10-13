@@ -435,6 +435,7 @@ def build(k_candidates: int = 4) -> dict[str, Any]:
         "depth_cell_minutes": rec["depth_cell_minutes"],
         "priced_by": rec["priced"],
         "pricing_in_force": in_force,
+        "container_disk_gb": disk_search,
         "hard_records_max": _usd(records["priced"]["hard_ceiling_minutes"],
                                  rate, disk_search),
         "hard_if_cache_fix_validated": _usd(

@@ -868,6 +868,27 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'search {a.allows_beam_search}, arm {a.arm}, '
       f'protocol {a.measurement_protocol_id[:12]}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "d2" ]; then
+  # D2. Its own grant TYPE: a D1 artifact must not authorize a D2 search, and
+  # a missing branch would fall through to `spend`. Like D1's search it RUNS a
+  # beam, so `allows_beam_search` is asserted TRUE; recovery and behavioural
+  # work are separate grants. The plan hash is the preregistration's.
+  cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_d2.d2_authorization import D2Authorization
+a = D2Authorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_d2_search is True, 'a D2 session needs a D2 authorization'
+assert a.allows_beam_search is True, 'a D2 search session must authorize the search'
+assert a.allows_recovery is False, 'the D2 search commits a field and trains nothing'
+assert a.allows_behavioural is False, 'the behavioural rungs are separate sessions'
+assert a.automatic_followon_start is False, 'nothing chains off the D2 search'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, rows {a.prediction_rows}, '
+      f'pricing {a.pricing.get(\"pricing_in_force\")}, '
+      f'objective {a.objective_hash[:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "d1_behavioural" ]; then
   # D1 BEHAVIOURAL. The ONLY D1 session that trains: ten screening probes (or
   # six confirmation probes) under the frozen recovery recipe, from arms

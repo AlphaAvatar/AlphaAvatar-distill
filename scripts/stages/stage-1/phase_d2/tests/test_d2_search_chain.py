@@ -28,6 +28,33 @@ from stages.phase_d2 import write_d2_preregistration as W  # noqa: E402
 SUITE = REPO / "artifacts/stages/stage-1/state_eval_v1/items.jsonl"
 
 
+def _grant(tmp_path, **over):
+    """A real `D2Authorization`, serialized by its own `as_dict`."""
+    from stages.phase_d2.d2_authorization import (
+        AUTHORIZED_STAGES, D2_SEARCH_POLICY, STAGE_CONDITIONS, D2Authorization,
+    )
+    contract = {"preregistration_hash": "p" * 64, "measurement_protocol_id": "m",
+                "config_hash": "c", "objective_hash": "o",
+                "ranking_policy_hash": "r"}
+    fields = dict(
+        authorization_id="autoinit.v1.phase_d2", granted_utc="2026-10-13T00:00:00Z",
+        granted_by="test", plan_id="autoinit.v1.phase_d2",
+        plan_hash=contract["preregistration_hash"], expected_usd=11.0,
+        hard_cap_usd=25.0, authorized_stages=AUTHORIZED_STAGES,
+        stage_conditions=STAGE_CONDITIONS, scope_note="test",
+        authorized_session_commit="a" * 40,
+        harness_source_digest="h" * 64, harness_source_files=("x.py",),
+        preregistration_hash=contract["preregistration_hash"], run_id="r1",
+        measurement_protocol_id="m", config_hash="c", suite_content_sha256="s",
+        objective_hash="o", ranking_policy_hash="r",
+        pricing={"pricing_in_force": "records_max"},
+        action_policy=D2_SEARCH_POLICY)
+    fields.update(over)
+    path = tmp_path / "authorization.json"
+    path.write_text(json.dumps(D2Authorization(**fields).as_dict()))
+    return str(path), contract
+
+
 class TestThePreregistration:
 
     def test_the_committed_record_is_what_the_writer_derives(self):
@@ -106,27 +133,23 @@ class TestTheSessionContract:
 
 class TestTheDriverDecisions:
 
-    CONTRACT = {"preregistration_hash": "p", "measurement_protocol_id": "m",
-                "config_hash": "c", "objective_hash": "o"}
-
-    def _auth(self, tmp_path, **over):
-        body = {"authorizes_d2_search": True, "authorization_id": "a",
-                "hard_cap_usd": 25.0, **self.CONTRACT, **over}
-        path = tmp_path / "auth.json"
-        path.write_text(json.dumps(body))
-        return str(path)
-
     def test_the_grant_must_bind_this_sessions_identities(self, tmp_path):
-        assert DRV.load_authorization(self._auth(tmp_path),
-                                      contract=self.CONTRACT)["hard_cap_usd"] == 25.0
-        for key in self.CONTRACT:
+        from stages.phase_d2.d2_authorization import D2AuthorizationRefused
+
+        auth, contract = _grant(tmp_path)
+        out = DRV.load_authorization(auth, contract=contract, run_id="r1",
+                                     prediction_rows="all_v1")
+        assert out["hard_cap_usd"] == 25.0
+        with pytest.raises(D2AuthorizationRefused):
+            DRV.load_authorization(auth, contract=contract, run_id="other",
+                                   prediction_rows="all_v1")
+        for key in ("config_hash", "objective_hash"):
             with pytest.raises(DRV.D2DriverError, match=key):
-                DRV.load_authorization(self._auth(tmp_path, **{key: "x"}),
-                                       contract=self.CONTRACT)
-        with pytest.raises(DRV.D2DriverError, match="does not authorize"):
-            DRV.load_authorization(
-                self._auth(tmp_path, authorizes_d2_search=False),
-                contract=self.CONTRACT)
+                DRV.load_authorization(auth, contract={**contract, key: "x"},
+                                       run_id="r1", prediction_rows="all_v1")
+        with pytest.raises(DRV.D2DriverError, match="prediction_rows"):
+            DRV.load_authorization(auth, contract=contract, run_id="r1",
+                                   prediction_rows="scored_v1")
 
     def test_the_kl_only_control_is_reported_and_never_used(self):
         result = SimpleNamespace(finalists=lambda policy, k: SimpleNamespace(

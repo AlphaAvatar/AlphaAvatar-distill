@@ -150,6 +150,14 @@ class TestASessionWithItsOwnStagedViewHasItsOwnEntry:
         "autoinit_device_canary_launch",
         "autoinit_measurement_launch",
         "autoinit_recovery_continuation_launch",
+        #: D2's search (2026-10-13). Deliberately without a launch-readiness
+        #: record or a sweep contract (AGENTS.md P8.2.1): what such a record
+        #: re-checked is bound by the typed grant (harness by membership and
+        #: digest), the session-commit gate and the bundle round trip, and the
+        #: pod's own blocking test gate runs D2's suite on the billing
+        #: machine. Revisit if a maintainer makes the launch-bound sweep
+        #: mandatory for every formal session.
+        "autoinit_d2_launch",
     })
 
     def test_every_session_launcher_is_either_registered_or_named(self):

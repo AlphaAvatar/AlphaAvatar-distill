@@ -45,28 +45,106 @@ class D2DriverError(RuntimeError):
     pass
 
 
-def load_authorization(path: str, *, contract: dict[str, Any]) -> dict[str, Any]:
-    """The grant, bound to THIS session's identities, or refused."""
-    auth = json.loads(Path(path).read_text())
-    if not auth.get("authorizes_d2_search"):
-        raise D2DriverError(f"{path} does not authorize a D2 search")
-    for key in ("preregistration_hash", "measurement_protocol_id",
-                "config_hash", "objective_hash"):
-        if auth.get(key) != contract.get(key):
+def load_authorization(path: str, *, contract: dict[str, Any],
+                       run_id: str, prediction_rows: str) -> dict[str, Any]:
+    """The typed grant, bound to THIS session's identities, or refused."""
+    from stages.phase_d2.d2_authorization import D2Authorization
+
+    auth = D2Authorization.load(path)
+    auth.require_plan(contract["preregistration_hash"])
+    auth.require_run_id(run_id)
+    for key in ("measurement_protocol_id", "config_hash", "objective_hash",
+                "ranking_policy_hash"):
+        if getattr(auth, key) != contract.get(key):
             raise D2DriverError(
-                f"the authorization binds {key} {str(auth.get(key))[:12]} and "
-                f"this session is {str(contract.get(key))[:12]}; the grant "
+                f"the authorization binds {key} {str(getattr(auth, key))[:12]} "
+                f"and this session is {str(contract.get(key))[:12]}; the grant "
                 "priced another run")
-    return {k: auth.get(k) for k in (
-        "authorization_id", "hard_cap_usd", "authorized_session_commit",
-        "preregistration_hash", "config_hash")}
+    if auth.prediction_rows != prediction_rows:
+        raise D2DriverError(
+            f"the authorization binds prediction_rows {auth.prediction_rows!r} "
+            f"and this session runs {prediction_rows!r}")
+    if auth.allows_recovery or auth.allows_behavioural:
+        raise D2DriverError("a D2 search grant may not claim recovery or "
+                            "behavioural permission")
+    return {"authorization_id": auth.authorization_id,
+            "hard_cap_usd": auth.hard_cap_usd,
+            "authorized_session_commit": auth.authorized_session_commit,
+            "preregistration_hash": auth.preregistration_hash,
+            "config_hash": auth.config_hash,
+            "pricing": dict(auth.pricing)}
 
 
-def _run_search(session, teacher, deadline_s: int) -> tuple[dict[str, Any], Any]:
+def cache_regression(telemetry_path: Path) -> dict[str, Any] | None:
+    """The first DEPTH expansion whose reference cache was NOT cached, or None."""
+    if not telemetry_path.is_file():
+        return None
+    for line in telemetry_path.read_text().splitlines():
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except ValueError:
+            continue
+        if not str(row.get("impl_id", "")).startswith("depth."):
+            continue
+        mode = (row.get("reference_cache") or {}).get("mode")
+        if mode != "cached":
+            return {"state_id": row.get("state_id"), "mode": mode,
+                    "operator_seconds": row.get("operator_seconds")}
+    return None
+
+
+def guarded_deadline(seconds: float, *, started: float, telemetry_path: Path,
+                     guard_cache: bool):
+    """The soft stop, plus the reference-cache regression guard.
+
+    A search priced on the CACHED DEPTH cell (the allocator-hoard fix validated
+    on one root profile) must not keep running on that cheap expectation once
+    a DEPTH expansion recomputes: the price no longer holds. The guard reads
+    the search's own telemetry (at most every 30 s) and, on the first
+    regression, expires the deadline -- the search fails closed with every
+    record written, and the regression is in the evidence. A search priced on
+    D1's recompute-mode maxima needs no guard: its price already assumes it.
+    """
+    from dataclasses import dataclass, field
+
+    from aadistill.initialization.planning.search import Deadline
+
+    @dataclass
+    class CacheGuardDeadline(Deadline):
+        telemetry_path: Path = field(default=Path("/nonexistent"))
+        guard_cache: bool = False
+        regression: dict | None = None
+        _checked_at: float = 0.0
+
+        def remaining(self) -> float:
+            base = super().remaining()
+            if not self.guard_cache or self.regression is not None:
+                return 0.0 if self.regression is not None else base
+            now = time.monotonic()
+            if now - self._checked_at >= 30.0:
+                self._checked_at = now
+                self.regression = cache_regression(self.telemetry_path)
+                if self.regression is not None:
+                    self.fired_at = (
+                        "reference-cache regression at "
+                        f"{self.regression['state_id']} "
+                        f"(mode {self.regression['mode']}): the cached-path "
+                        "price no longer holds")
+                    return 0.0
+            return base
+
+    return CacheGuardDeadline(seconds=float(seconds), started=started,
+                              telemetry_path=telemetry_path,
+                              guard_cache=guard_cache)
+
+
+def _run_search(session, teacher, deadline) -> tuple[dict[str, Any], Any]:
     from aadistill.initialization.calibration.items import (
         prepare_calibration_items,
     )
-    from aadistill.initialization.planning.search import BeamSearch, Deadline
+    from aadistill.initialization.planning.search import BeamSearch
     from aadistill.initialization.specs.arch import get_adapter
     from stages.phase_d1 import d1_session as D1S
 
@@ -82,7 +160,7 @@ def _run_search(session, teacher, deadline_s: int) -> tuple[dict[str, Any], Any]
         measurer=session.measurer(),
         execution=session.evaluator.execution,
         numerics=D1S.numerics(),
-        deadline=Deadline(seconds=float(deadline_s)) if deadline_s > 0 else None)
+        deadline=deadline)
     result = search.run()
     return {"n_states": len(result.states), "n_leaves": len(result.leaves),
             "n_complete_leaves": len(result.complete_leaves),
@@ -179,7 +257,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--authorization", default=None)
     ap.add_argument("--deadline-s", type=int, default=0,
                     help="seconds from THIS process's start; the launcher "
-                         "derives it from the plan's soft stop minus elapsed")
+                         "derives it from the plan's soft_stop_minutes minus "
+                         "the session minutes already elapsed")
     ap.add_argument("--prediction-rows", default="all_v1",
                     choices=list(S.PREDICTION_ROWS))
     ap.add_argument("--device", default="cuda")
@@ -187,6 +266,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--check-only", action="store_true")
     args = ap.parse_args(argv)
 
+    process_started = time.monotonic()
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     status = Path(args.status)
@@ -214,7 +294,8 @@ def main(argv: list[str] | None = None) -> int:
         if args.authorization:
             with journal.stage("A", "authorization") as st:
                 record["authorization"] = load_authorization(
-                    args.authorization, contract=record["contract"])
+                    args.authorization, contract=record["contract"],
+                    run_id=args.run_id, prediction_rows=args.prediction_rows)
                 st.result = {"hard_cap_usd":
                              record["authorization"]["hard_cap_usd"]}
         elif not args.check_only:
@@ -231,8 +312,22 @@ def main(argv: list[str] | None = None) -> int:
             session.evaluator.prime_reference(teacher)
             st.result = {"revision": str(teacher_id.get("revision", ""))[:12]}
         with journal.stage("C", "beam_search") as st:
-            record["search"], result = _run_search(session, teacher,
-                                                   args.deadline_s)
+            pricing = (record.get("authorization") or {}).get("pricing") or {}
+            deadline = (guarded_deadline(
+                args.deadline_s, started=process_started,
+                telemetry_path=out / "search" / "telemetry.jsonl",
+                guard_cache=pricing.get("pricing_in_force")
+                == "cache_fix_validated") if args.deadline_s > 0 else None)
+            record["deadline"] = {"seconds_from_driver_start": args.deadline_s,
+                                  "cache_guard": bool(deadline
+                                                      and deadline.guard_cache)}
+            try:
+                record["search"], result = _run_search(session, teacher,
+                                                       deadline)
+            finally:
+                if deadline is not None:
+                    record["deadline"].update(deadline.as_dict())
+                    record["deadline"]["cache_regression"] = deadline.regression
             st.result = {"states": record["search"]["n_states"]}
         with journal.stage("D", "commit_top_k") as st:
             k = int(S.preregistration()["retention"]["k"])

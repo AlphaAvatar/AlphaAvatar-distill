@@ -45,6 +45,9 @@ SESSION_LAUNCHERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     #: setup on an asset it had not declared, which is precisely the class the
     #: local-asset check exists to catch at $0.
     ("autoinit_d1_replay_launch", ()),
+    #: D2's search, added WITH its launcher (2026-10-13) so every structural
+    #: check that reads this list covers it from the first commit.
+    ("autoinit_d2_launch", ()),
 )
 
 
