@@ -1,0 +1,3327 @@
+{
+ "D_candidate": {
+  "_why_this_candidate": "stage D compares two REDUCERS on one candidate; the candidate's selection rule does not enter that comparison, and this one needs no calibration so it costs seconds instead of half an hour. The geometry, vocabulary, device and evaluator are all real.",
+  "built_by": "depth.positional_v0",
+  "candidate_checkpoint": "/workspace/out/adoption_scored_v1/candidate/positional_candidate",
+  "seconds": 30.671
+ },
+ "D_state_eval": {
+  "arms": {
+   "full_vocab_v1": {
+    "allocated_before_bytes": 14575939584,
+    "detail_per_domain": {
+     "code": 1.8579363348359745,
+     "general": 1.6509756036932832,
+     "rag_multihop": 1.8849247604333697,
+     "reasoning_math": 1.9367944631545018,
+     "tool": 1.8914917835819758
+    },
+    "evaluation_delta_bytes": 5334855168,
+    "measurement_protocol_id": "52fa6135307c6ae37caf36b4f64fe7df",
+    "n_reference_sketches": 0,
+    "peak_memory_bytes": 19910794752,
+    "reduction": {
+     "aggregation_rule": "equal_subtype_then_equal_domain/v1",
+     "chunk": 512,
+     "reference_strategy": "recompute"
+    },
+    "reference_sketch_bytes": 0,
+    "seconds": 10.362,
+    "values": {
+     "state.critical_token_kl": 5.145334572320392,
+     "state.critical_token_kl.assistant": 1.8952086827986152,
+     "state.critical_token_kl.eos": 6.660313630104065,
+     "state.critical_token_kl.final_answer": 1.7318008321017577,
+     "state.critical_token_kl.reasoning": 1.9400473658604538,
+     "state.critical_token_kl.think_close": 1.7430050299369864,
+     "state.critical_token_kl.tool_close": 10.446218797138759,
+     "state.nll.code": 2.0355939892231008,
+     "state.nll.general": 3.921405671009494,
+     "state.nll.pooled_all_domains": 2.36486202745236,
+     "state.nll.rag_multihop": 2.063102368950501,
+     "state.nll.reasoning_math": 2.0778574173732025,
+     "state.nll.teacher_reference_pooled": 0.5076326292186082,
+     "state.nll.tool": 2.1569026619224614,
+     "state.nll_delta_vs_teacher_pooled": 1.8572293982337518,
+     "state.reverse_kl.token_mean": 8.635600683941334,
+     "state.teacher_kl.code": 1.8579363348359745,
+     "state.teacher_kl.equal_domain_mean": 1.844424589139821,
+     "state.teacher_kl.general": 1.6509756036932832,
+     "state.teacher_kl.rag_multihop": 1.8849247604333697,
+     "state.teacher_kl.reasoning_math": 1.9367944631545018,
+     "state.teacher_kl.token_mean": 1.8580722685598605,
+     "state.teacher_kl.tool": 1.8914917835819758,
+     "state.teacher_kl.worst_domain": 1.9367944631545018,
+     "state.top1_agreement": 0.4907801681045655
+    },
+    "worst_domain": null
+   },
+   "reference_topk_tail_v1": {
+    "allocated_before_bytes": 14584459264,
+    "detail_per_domain": {
+     "code": 1.8579344480315247,
+     "general": 1.6340710425625384,
+     "rag_multihop": 1.8848972582788766,
+     "reasoning_math": 1.9367922925167487,
+     "tool": 1.8914860037266523
+    },
+    "evaluation_delta_bytes": 5442768896,
+    "measurement_protocol_id": "79e43b8c3949dac7ce1a5b9f255373c9",
+    "n_reference_sketches": 80,
+    "peak_memory_bytes": 20027228160,
+    "reduction": {
+     "aggregation_rule": "equal_subtype_then_equal_domain/v1",
+     "chunk": 512,
+     "distribution_support": {
+      "support_id": "reference_topk_tail_v1",
+      "top_k": 200
+     },
+     "reference_strategy": "recompute"
+    },
+    "reference_sketch_bytes": 130497824,
+    "seconds": 10.27,
+    "values": {
+     "state.critical_token_kl": 5.1452832167809746,
+     "state.critical_token_kl.assistant": 1.8952017711574136,
+     "state.critical_token_kl.eos": 6.660313965593065,
+     "state.critical_token_kl.final_answer": 1.7317999835423803,
+     "state.critical_token_kl.reasoning": 1.940038890500853,
+     "state.critical_token_kl.think_close": 1.7429487918636628,
+     "state.critical_token_kl.tool_close": 10.446070126124791,
+     "state.nll.code": 2.0355941904664605,
+     "state.nll.general": 3.92140590661222,
+     "state.nll.pooled_all_domains": 2.36486227285391,
+     "state.nll.rag_multihop": 2.0631026623845536,
+     "state.nll.reasoning_math": 2.0778576616835744,
+     "state.nll.teacher_reference_pooled": 0.5076325968987684,
+     "state.nll.tool": 2.156902916099148,
+     "state.nll_delta_vs_teacher_pooled": 1.8572296759551417,
+     "state.reverse_kl.token_mean": 8.183552616610397,
+     "state.teacher_kl.code": 1.8579344480315247,
+     "state.teacher_kl.equal_domain_mean": 1.8410362090232681,
+     "state.teacher_kl.general": 1.6340710425625384,
+     "state.teacher_kl.rag_multihop": 1.8848972582788766,
+     "state.teacher_kl.reasoning_math": 1.9367922925167487,
+     "state.teacher_kl.token_mean": 1.8554960157245686,
+     "state.teacher_kl.tool": 1.8914860037266523,
+     "state.teacher_kl.worst_domain": 1.9367922925167487,
+     "state.top1_agreement": 0.4907801681045655
+    },
+    "worst_domain": null
+   }
+  },
+  "comparison": {
+   "_memory": {
+    "delta_ratio": 1.0202,
+    "full_vocab_peak_bytes": 19910794752,
+    "topk_peak_bytes": 20027228160,
+    "topk_reference_sketch_bytes": 130497824
+   },
+   "_nll_must_be_exact": "CE is not a KL and is not coarsened by this protocol. Any `.nll` metric differing by more than float noise is a DEFECT, not a protocol difference.",
+   "_speed": {
+    "full_vocab_seconds": 10.362,
+    "ratio": 0.9911,
+    "topk_seconds": 10.27
+   },
+   "metrics": {
+    "state.critical_token_kl": {
+     "absolute": -5.135553941748583e-05,
+     "full_vocab": 5.145334572320392,
+     "reference_topk_tail": 5.1452832167809746,
+     "relative": -9.980991264155251e-06
+    },
+    "state.critical_token_kl.assistant": {
+     "absolute": -6.911641201590157e-06,
+     "full_vocab": 1.8952086827986152,
+     "reference_topk_tail": 1.8952017711574136,
+     "relative": -3.6469024568755566e-06
+    },
+    "state.critical_token_kl.eos": {
+     "absolute": 3.3548900013613547e-07,
+     "full_vocab": 6.660313630104065,
+     "reference_topk_tail": 6.660313965593065,
+     "relative": 5.037135167625636e-08
+    },
+    "state.critical_token_kl.final_answer": {
+     "absolute": -8.485593774310018e-07,
+     "full_vocab": 1.7318008321017577,
+     "reference_topk_tail": 1.7317999835423803,
+     "relative": -4.899867015314738e-07
+    },
+    "state.critical_token_kl.reasoning": {
+     "absolute": -8.475359600801369e-06,
+     "full_vocab": 1.9400473658604538,
+     "reference_topk_tail": 1.940038890500853,
+     "relative": -4.368635400323002e-06
+    },
+    "state.critical_token_kl.think_close": {
+     "absolute": -5.623807332355568e-05,
+     "full_vocab": 1.7430050299369864,
+     "reference_topk_tail": 1.7429487918636628,
+     "relative": -3.226500919827456e-05
+    },
+    "state.critical_token_kl.tool_close": {
+     "absolute": -0.0001486710139673164,
+     "full_vocab": 10.446218797138759,
+     "reference_topk_tail": 10.446070126124791,
+     "relative": -1.423204097620832e-05
+    },
+    "state.nll.code": {
+     "absolute": 2.01243359754244e-07,
+     "full_vocab": 2.0355939892231008,
+     "reference_topk_tail": 2.0355941904664605,
+     "relative": 9.886222931472204e-08
+    },
+    "state.nll.general": {
+     "absolute": 2.3560272577327623e-07,
+     "full_vocab": 3.921405671009494,
+     "reference_topk_tail": 3.92140590661222,
+     "relative": 6.008119167957051e-08
+    },
+    "state.nll.pooled_all_domains": {
+     "absolute": 2.45401550191815e-07,
+     "full_vocab": 2.36486202745236,
+     "reference_topk_tail": 2.36486227285391,
+     "relative": 1.0376992287206852e-07
+    },
+    "state.nll.rag_multihop": {
+     "absolute": 2.934340526117296e-07,
+     "full_vocab": 2.063102368950501,
+     "reference_topk_tail": 2.0631026623845536,
+     "relative": 1.422295165901047e-07
+    },
+    "state.nll.reasoning_math": {
+     "absolute": 2.4431037193295424e-07,
+     "full_vocab": 2.0778574173732025,
+     "reference_topk_tail": 2.0778576616835744,
+     "relative": 1.175780252726907e-07
+    },
+    "state.nll.teacher_reference_pooled": {
+     "absolute": -3.231983980445108e-08,
+     "full_vocab": 0.5076326292186082,
+     "reference_topk_tail": 0.5076325968987684,
+     "relative": -6.366777457587893e-08
+    },
+    "state.nll.tool": {
+     "absolute": 2.5417668680915995e-07,
+     "full_vocab": 2.1569026619224614,
+     "reference_topk_tail": 2.156902916099148,
+     "relative": 1.1784337387882429e-07
+    },
+    "state.nll_delta_vs_teacher_pooled": {
+     "absolute": 2.7772138988524375e-07,
+     "full_vocab": 1.8572293982337518,
+     "reference_topk_tail": 1.8572296759551417,
+     "relative": 1.4953531865765222e-07
+    },
+    "state.reverse_kl.token_mean": {
+     "absolute": -0.45204806733093683,
+     "full_vocab": 8.635600683941334,
+     "reference_topk_tail": 8.183552616610397,
+     "relative": -0.052347032230376324
+    },
+    "state.teacher_kl.code": {
+     "absolute": -1.8868044497910574e-06,
+     "full_vocab": 1.8579363348359745,
+     "reference_topk_tail": 1.8579344480315247,
+     "relative": -1.0155377309834632e-06
+    },
+    "state.teacher_kl.equal_domain_mean": {
+     "absolute": -0.003388380116552847,
+     "full_vocab": 1.844424589139821,
+     "reference_topk_tail": 1.8410362090232681,
+     "relative": -0.001837093333337676
+    },
+    "state.teacher_kl.general": {
+     "absolute": -0.01690456113074479,
+     "full_vocab": 1.6509756036932832,
+     "reference_topk_tail": 1.6340710425625384,
+     "relative": -0.010239134420235383
+    },
+    "state.teacher_kl.rag_multihop": {
+     "absolute": -2.7502154493097564e-05,
+     "full_vocab": 1.8849247604333697,
+     "reference_topk_tail": 1.8848972582788766,
+     "relative": -1.459058476518418e-05
+    },
+    "state.teacher_kl.reasoning_math": {
+     "absolute": -2.1706377530961163e-06,
+     "full_vocab": 1.9367944631545018,
+     "reference_topk_tail": 1.9367922925167487,
+     "relative": -1.1207372771815697e-06
+    },
+    "state.teacher_kl.token_mean": {
+     "absolute": -0.002576252835291948,
+     "full_vocab": 1.8580722685598605,
+     "reference_topk_tail": 1.8554960157245686,
+     "relative": -0.0013865191784433277
+    },
+    "state.teacher_kl.tool": {
+     "absolute": -5.779855323462257e-06,
+     "full_vocab": 1.8914917835819758,
+     "reference_topk_tail": 1.8914860037266523,
+     "relative": -3.0557126251517567e-06
+    },
+    "state.teacher_kl.worst_domain": {
+     "absolute": -2.1706377530961163e-06,
+     "full_vocab": 1.9367944631545018,
+     "reference_topk_tail": 1.9367922925167487,
+     "relative": -1.1207372771815697e-06
+    },
+    "state.top1_agreement": {
+     "absolute": 0.0,
+     "full_vocab": 0.4907801681045655,
+     "reference_topk_tail": 0.4907801681045655,
+     "relative": 0.0
+    }
+   },
+   "protocol_ids_differ": true,
+   "worst_domain_agrees": true
+  }
+ },
+ "P_premises": {
+  "_why_the_treatment": "both D1 arms reach the same weighted reducer, and this measured that only the treatment hands it a weight tensor on the real mixtures -- the control's `prediction_weights_for` returns None, its uniform answer. So the treatment is the more expensive arm and bounds both.",
+  "ceiling_arm": "treatment",
+  "impl_id": "depth.causal_kl_greedy_v1",
+  "impl_signature_hash": "8106604694621d30",
+  "per_profile": {
+   "calib.domain_balanced@v1": {
+    "config_keys": [
+     "distribution_support",
+     "n_calibration_items",
+     "position_policy",
+     "position_policy_hash",
+     "scoring_content_sha256"
+    ],
+    "n_groups": 23,
+    "n_items": 67,
+    "weights": {
+     "control": null,
+     "treatment": {
+      "nonzero": 665,
+      "positions": 924,
+      "shape": [
+       3,
+       308
+      ]
+     }
+    }
+   },
+   "calib.reasoning_heavy@v2": {
+    "config_keys": [
+     "distribution_support",
+     "n_calibration_items",
+     "position_policy",
+     "position_policy_hash",
+     "scoring_content_sha256"
+    ],
+    "n_groups": 21,
+    "n_items": 62,
+    "weights": {
+     "control": null,
+     "treatment": {
+      "nonzero": 673,
+      "positions": 948,
+      "shape": [
+       3,
+       316
+      ]
+     }
+    }
+   }
+  }
+ },
+ "P_production_timing": {
+  "_if_split_was_enabled": "AADISTILL_DEPTH_SYNC_TELEMETRY=1 inserts two synchronize() calls per group inside the hot path. The operator's own source says that perturbs it. Such a run describes the split and prices nothing.",
+  "_max_not_mean": "a ceiling built on a mean is not a ceiling. The max over the two profiles is the pricing input.",
+  "_measurement_path_meaning": "the number below is a wall clock around `impl.execute(ctx)` on the registry's `depth.causal_kl_greedy_v1`, which is the SAME quantity and the same code path `BeamSearch._expand_one` records as `operator_seconds`. A record without this marker was produced by the superseded shadow loop and cannot price.",
+  "_root_bounds_the_deeper_parents": "measured at the ROOT parent. A deeper parent is a strictly smaller model -- no frozen operator increases any structural field, established by tests/initialization/test_operators_only_shrink.py -- so the root invocation bounds the deeper cell too.",
+  "_this_is_the_operator_term": "one DEPTH expansion's OPERATOR cost, complete. A cost-model CELL is one expansion END TO END, so the non-operator phases -- parent load, materialize, identify, canonical reload, validation, state evaluation -- must still be ADDED from committed telemetry. They are NOT re-measured here: paying GPU time again for phases the committed telemetry already holds would buy nothing.",
+  "_valid_for_pricing": true,
+  "measurement_path": "operator_execute_v1",
+  "micro_batch_size": 3,
+  "operator_invocation_seconds_max": 1111.2218,
+  "operator_invocation_seconds_mean": 1109.604,
+  "packing": "length_sorted_v1",
+  "per_profile": {
+   "calib.domain_balanced@v1": {
+    "_extrapolation_cross_check": {
+     "_meaning": "`candidates x max` is what the superseded stage would have priced, BEFORE adding any fixed term. Reported so the direction of the old error is visible, not to price anything.",
+     "candidates_times_max_seconds": 2405.962,
+     "measured_invocation_seconds": 1107.9862
+    },
+    "_per_candidate_unavailable": null,
+    "attribution": {
+     "_distortion_includes": "the weighted Top-K reduction, the values.tolist() host transfer and the per-subtype collection",
+     "_if_split_is_not_attributed": "`ablated_seconds` and `distortion_seconds` are NOT a clean forward/reduction split: no synchronization separates them, so the asynchronous forward's tail is billed to the phase that forces the next one. Their sum is the scoring loop; neither alone is that phase's cost. This is deliberate -- inserting the syncs is what made a6 unusable for pricing.",
+     "_outside_is": "packing, the reference-sketch cache object, the position-policy setup, greedy bookkeeping and the CHILD CONSTRUCTION -- all of it inside operator_seconds and none of it in a per-candidate number",
+     "ablated_seconds": 882.8249,
+     "distortion_seconds": 184.7258,
+     "outside_scoring_loop_seconds": 28.5509,
+     "reference_seconds": 11.8597,
+     "scoring_loop_seconds": 1079.4353,
+     "split_is_attributed": false
+    },
+    "candidate_subsets": 260,
+    "n_items": 67,
+    "operator_invocation_seconds": 1107.9862,
+    "operator_timing": {
+     "ablated_forwards": 5980,
+     "ablated_items": 17420,
+     "ablated_seconds": 882.8249,
+     "calibration_batch_packing": "length_sorted_v1",
+     "candidate_subsets": 260,
+     "distortion_calls": 17420,
+     "distortion_seconds": 184.7258,
+     "forward_rows": 16161860,
+     "item_seconds": 1079.4353,
+     "micro_batch_size": 3,
+     "prediction_rows": "scored_v1",
+     "reference_seconds": 11.8597,
+     "scored_rows": 11633960,
+     "split_is_attributed": false
+    },
+    "peak_memory_bytes": 14931831296,
+    "per_candidate_distribution": {
+     "max": 9.2537,
+     "mean": 4.152037307692308,
+     "min": 3.722,
+     "n": 260,
+     "p1": 3.7271,
+     "p5": 3.7453,
+     "p50": 4.1777,
+     "p95": 4.4867,
+     "p99": 4.4986
+    },
+    "per_candidate_n": 260,
+    "per_candidate_seconds": [
+     9.2537,
+     4.4345,
+     4.4463,
+     4.4521,
+     4.4462,
+     4.4506,
+     4.4529,
+     4.47,
+     4.4655,
+     4.4683,
+     4.4781,
+     4.4739,
+     4.4804,
+     4.482,
+     4.4786,
+     4.478,
+     4.4801,
+     4.4816,
+     4.4895,
+     4.4879,
+     4.4996,
+     4.496,
+     4.4922,
+     4.4867,
+     4.4739,
+     4.4757,
+     4.4855,
+     4.475,
+     4.4951,
+     4.4963,
+     4.4986,
+     4.4976,
+     4.4816,
+     4.501,
+     4.4983,
+     4.4932,
+     4.385,
+     4.3886,
+     4.3887,
+     4.3663,
+     4.3896,
+     4.3876,
+     4.3827,
+     4.3943,
+     4.3836,
+     4.3815,
+     4.3737,
+     4.3926,
+     4.387,
+     4.3924,
+     4.3867,
+     4.395,
+     4.3982,
+     4.3898,
+     4.3875,
+     4.3642,
+     4.3763,
+     4.3863,
+     4.3898,
+     4.398,
+     4.3969,
+     4.3903,
+     4.3913,
+     4.3927,
+     4.3915,
+     4.3903,
+     4.3957,
+     4.3917,
+     4.3887,
+     4.3903,
+     4.3843,
+     4.2834,
+     4.2851,
+     4.2833,
+     4.2869,
+     4.2749,
+     4.2824,
+     4.2848,
+     4.2802,
+     4.2647,
+     4.2683,
+     4.2708,
+     4.2665,
+     4.2855,
+     4.2805,
+     4.2823,
+     4.284,
+     4.2803,
+     4.2865,
+     4.279,
+     4.2895,
+     4.2855,
+     4.284,
+     4.2846,
+     4.2886,
+     4.2904,
+     4.2812,
+     4.2847,
+     4.2885,
+     4.2818,
+     4.2862,
+     4.2878,
+     4.2831,
+     4.2851,
+     4.2754,
+     4.1766,
+     4.18,
+     4.178,
+     4.1807,
+     4.1692,
+     4.1857,
+     4.1788,
+     4.183,
+     4.1785,
+     4.1813,
+     4.1762,
+     4.1783,
+     4.176,
+     4.1781,
+     4.18,
+     4.1775,
+     4.1786,
+     4.1783,
+     4.1804,
+     4.18,
+     4.1776,
+     4.1777,
+     4.179,
+     4.1798,
+     4.1797,
+     4.1793,
+     4.1764,
+     4.1798,
+     4.1813,
+     4.1881,
+     4.189,
+     4.1816,
+     4.1738,
+     4.0749,
+     4.0799,
+     4.0763,
+     4.0694,
+     4.0652,
+     4.0685,
+     4.046,
+     4.0506,
+     4.0609,
+     4.0789,
+     4.0702,
+     4.0776,
+     4.0728,
+     4.0753,
+     4.0757,
+     4.0685,
+     4.0525,
+     4.0536,
+     4.0472,
+     4.0489,
+     4.0579,
+     4.0556,
+     4.0454,
+     4.0515,
+     4.0716,
+     4.0768,
+     4.0698,
+     4.0442,
+     4.0462,
+     4.0544,
+     4.0547,
+     4.0409,
+     3.9407,
+     3.9512,
+     3.9446,
+     3.9382,
+     3.9299,
+     3.9439,
+     3.9464,
+     3.9357,
+     3.9349,
+     3.9424,
+     3.9406,
+     3.9433,
+     3.9425,
+     3.9504,
+     3.948,
+     3.96,
+     3.9647,
+     3.9656,
+     3.95,
+     3.9444,
+     3.9624,
+     3.9611,
+     3.9572,
+     3.9632,
+     3.9633,
+     3.9586,
+     3.9436,
+     3.9623,
+     3.9595,
+     3.9612,
+     3.9554,
+     3.8551,
+     3.8568,
+     3.854,
+     3.8552,
+     3.8465,
+     3.8518,
+     3.8577,
+     3.8475,
+     3.8298,
+     3.8436,
+     3.8576,
+     3.8547,
+     3.8597,
+     3.8335,
+     3.8437,
+     3.8586,
+     3.8578,
+     3.8508,
+     3.8353,
+     3.8401,
+     3.861,
+     3.8532,
+     3.8548,
+     3.8314,
+     3.859,
+     3.8531,
+     3.8535,
+     3.8363,
+     3.8382,
+     3.8487,
+     3.7441,
+     3.748,
+     3.7427,
+     3.7457,
+     3.7372,
+     3.7453,
+     3.7642,
+     3.7471,
+     3.7421,
+     3.7505,
+     3.7468,
+     3.7464,
+     3.7394,
+     3.7425,
+     3.7474,
+     3.7466,
+     3.749,
+     3.7477,
+     3.7459,
+     3.7457,
+     3.7442,
+     3.7254,
+     3.722,
+     3.7253,
+     3.7271,
+     3.7302,
+     3.7463,
+     3.7477,
+     3.7414
+    ],
+    "prediction_rows": "scored_v1",
+    "reference_cache": {
+     "available_bytes": 38997917696,
+     "bytes_ratio_vs_full_vocab": 0.00594304,
+     "cached": true,
+     "distribution_support": "reference_topk_tail_v1",
+     "full_vocab_bytes_avoided": 18160302336,
+     "has_tail": true,
+     "headroom_source": "cuda.mem_get_info:cuda:0 after empty_cache",
+     "items_total": 67,
+     "memory_before": {
+      "allocator_allocated_bytes": 8110756864,
+      "allocator_allocated_gib": 7.554,
+      "allocator_reserved_bytes": 8124366848,
+      "allocator_reserved_gib": 7.566,
+      "allocator_reserved_not_allocated_bytes": 13609984,
+      "device": "cuda:0",
+      "driver_free_bytes": 38997917696,
+      "driver_free_gib": 36.32,
+      "driver_total_bytes": 47667740672,
+      "kind": "cuda",
+      "reclaimable_by_empty_cache_gib": 0.013,
+      "unaccounted_gib": 0.508
+     },
+     "mode": "cached",
+     "positions": 44746,
+     "scored_rows_only": true,
+     "sketch_bytes": 107927352,
+     "top_k": 200
+    },
+    "removed": [
+     2,
+     3,
+     32,
+     16,
+     26,
+     15,
+     17,
+     27
+    ],
+    "round_tables": [
+     [
+      [
+       0,
+       8.375654848906729
+      ],
+      [
+       1,
+       0.3430838289834835
+      ],
+      [
+       2,
+       0.03285078261332737
+      ],
+      [
+       3,
+       0.04626665853470459
+      ],
+      [
+       4,
+       0.05331780482240811
+      ],
+      [
+       5,
+       0.07219201033457419
+      ],
+      [
+       6,
+       1.4233063584914905
+      ],
+      [
+       7,
+       0.06353601717938943
+      ],
+      [
+       8,
+       0.06949357182945944
+      ],
+      [
+       9,
+       0.07740381313273134
+      ],
+      [
+       10,
+       0.08387358081767818
+      ],
+      [
+       11,
+       0.07302509323372454
+      ],
+      [
+       12,
+       0.09935006291553536
+      ],
+      [
+       13,
+       0.09807023997709634
+      ],
+      [
+       14,
+       0.07997704937617003
+      ],
+      [
+       15,
+       0.07395485082046907
+      ],
+      [
+       16,
+       0.0718064165985045
+      ],
+      [
+       17,
+       0.08552820420476409
+      ],
+      [
+       18,
+       0.09496282989596556
+      ],
+      [
+       19,
+       0.1182956355858156
+      ],
+      [
+       20,
+       0.08198836100478939
+      ],
+      [
+       21,
+       0.08939191991188751
+      ],
+      [
+       22,
+       0.11061028594142804
+      ],
+      [
+       23,
+       0.12450736671485514
+      ],
+      [
+       24,
+       0.13575719232689062
+      ],
+      [
+       25,
+       0.09165012397310113
+      ],
+      [
+       26,
+       0.0786179439786189
+      ],
+      [
+       27,
+       0.0911524645477483
+      ],
+      [
+       28,
+       0.10284273593853097
+      ],
+      [
+       29,
+       0.10123893858040903
+      ],
+      [
+       30,
+       0.1115583796318711
+      ],
+      [
+       31,
+       0.08702848723157755
+      ],
+      [
+       32,
+       0.07466763002030188
+      ],
+      [
+       33,
+       0.10831012559495448
+      ],
+      [
+       34,
+       0.16556534617171906
+      ],
+      [
+       35,
+       0.17684433922522172
+      ]
+     ],
+     [
+      [
+       0,
+       8.750863943907843
+      ],
+      [
+       1,
+       1.8618744854960425
+      ],
+      [
+       3,
+       0.09592971638351935
+      ],
+      [
+       4,
+       0.12000175770122996
+      ],
+      [
+       5,
+       0.13198716551320383
+      ],
+      [
+       6,
+       1.9845908764210587
+      ],
+      [
+       7,
+       0.11295305721144829
+      ],
+      [
+       8,
+       0.11421958175007371
+      ],
+      [
+       9,
+       0.11883835028698782
+      ],
+      [
+       10,
+       0.12471707419510025
+      ],
+      [
+       11,
+       0.10737447703857188
+      ],
+      [
+       12,
+       0.13722584271152888
+      ],
+      [
+       13,
+       0.13796311905808295
+      ],
+      [
+       14,
+       0.11043860414465671
+      ],
+      [
+       15,
+       0.10226661160858544
+      ],
+      [
+       16,
+       0.10112808240352819
+      ],
+      [
+       17,
+       0.11211766315173488
+      ],
+      [
+       18,
+       0.11743235080096528
+      ],
+      [
+       19,
+       0.14621755580331422
+      ],
+      [
+       20,
+       0.10960670861087621
+      ],
+      [
+       21,
+       0.11559490512055692
+      ],
+      [
+       22,
+       0.13795418121916522
+      ],
+      [
+       23,
+       0.1496338398528443
+      ],
+      [
+       24,
+       0.1620072587190567
+      ],
+      [
+       25,
+       0.12446842473486693
+      ],
+      [
+       26,
+       0.10945528513510057
+      ],
+      [
+       27,
+       0.11899983585261964
+      ],
+      [
+       28,
+       0.13119069341014952
+      ],
+      [
+       29,
+       0.1292718344776321
+      ],
+      [
+       30,
+       0.1400696374636965
+      ],
+      [
+       31,
+       0.11730050592707286
+      ],
+      [
+       32,
+       0.10259885842077535
+      ],
+      [
+       33,
+       0.136263144386104
+      ],
+      [
+       34,
+       0.19631249984706617
+      ],
+      [
+       35,
+       0.20658063944703983
+      ]
+     ],
+     [
+      [
+       0,
+       9.620638714401757
+      ],
+      [
+       1,
+       0.5065745633732526
+      ],
+      [
+       4,
+       0.3196624300693466
+      ],
+      [
+       5,
+       0.29330312110904644
+      ],
+      [
+       6,
+       3.2836019434206447
+      ],
+      [
+       7,
+       0.21727920788670502
+      ],
+      [
+       8,
+       0.21118349639080422
+      ],
+      [
+       9,
+       0.20988950866741968
+      ],
+      [
+       10,
+       0.19790912543851086
+      ],
+      [
+       11,
+       0.18693888752976326
+      ],
+      [
+       12,
+       0.21779253761630962
+      ],
+      [
+       13,
+       0.22481257037716046
+      ],
+      [
+       14,
+       0.18096078218565517
+      ],
+      [
+       15,
+       0.17086098578300052
+      ],
+      [
+       16,
+       0.1630239033423007
+      ],
+      [
+       17,
+       0.1767879167473665
+      ],
+      [
+       18,
+       0.18272155120249003
+      ],
+      [
+       19,
+       0.21214192108003402
+      ],
+      [
+       20,
+       0.1708249068645054
+      ],
+      [
+       21,
+       0.17853942955400354
+      ],
+      [
+       22,
+       0.1983520477582863
+      ],
+      [
+       23,
+       0.2121219805276294
+      ],
+      [
+       24,
+       0.21986733421906318
+      ],
+      [
+       25,
+       0.1938079880387394
+      ],
+      [
+       26,
+       0.17110159358478091
+      ],
+      [
+       27,
+       0.18032575503727788
+      ],
+      [
+       28,
+       0.18970862738445862
+      ],
+      [
+       29,
+       0.1885719831040257
+      ],
+      [
+       30,
+       0.19652810858894293
+      ],
+      [
+       31,
+       0.17930351199768207
+      ],
+      [
+       32,
+       0.16210110637899877
+      ],
+      [
+       33,
+       0.19658539714596723
+      ],
+      [
+       34,
+       0.25965420713168863
+      ],
+      [
+       35,
+       0.26455558965608844
+      ]
+     ],
+     [
+      [
+       0,
+       9.566709000496814
+      ],
+      [
+       1,
+       0.5482655658968963
+      ],
+      [
+       4,
+       0.3727903174422258
+      ],
+      [
+       5,
+       0.3465776112705477
+      ],
+      [
+       6,
+       3.3200913277844046
+      ],
+      [
+       7,
+       0.27535951035571193
+      ],
+      [
+       8,
+       0.26709541038195833
+      ],
+      [
+       9,
+       0.2663421936664669
+      ],
+      [
+       10,
+       0.25474510425013464
+      ],
+      [
+       11,
+       0.24535387303254258
+      ],
+      [
+       12,
+       0.2718592470994906
+      ],
+      [
+       13,
+       0.2786133520474824
+      ],
+      [
+       14,
+       0.24080593607635348
+      ],
+      [
+       15,
+       0.23084651547125584
+      ],
+      [
+       16,
+       0.22337961406682463
+      ],
+      [
+       17,
+       0.23264273606036995
+      ],
+      [
+       18,
+       0.23850050000700868
+      ],
+      [
+       19,
+       0.2683465382028293
+      ],
+      [
+       20,
+       0.22882433065443558
+      ],
+      [
+       21,
+       0.2397665363831006
+      ],
+      [
+       22,
+       0.2633376913395057
+      ],
+      [
+       23,
+       0.28226253596946027
+      ],
+      [
+       24,
+       0.27640230158772133
+      ],
+      [
+       25,
+       0.2963977420282963
+      ],
+      [
+       26,
+       0.23764712506862065
+      ],
+      [
+       27,
+       0.25302337801460784
+      ],
+      [
+       28,
+       0.27036297232369344
+      ],
+      [
+       29,
+       0.2694518954430175
+      ],
+      [
+       30,
+       0.27655146039498557
+      ],
+      [
+       31,
+       0.28093806756463435
+      ],
+      [
+       33,
+       0.3550423106276767
+      ],
+      [
+       34,
+       0.5023283142318771
+      ],
+      [
+       35,
+       0.3645664413961901
+      ]
+     ],
+     [
+      [
+       0,
+       9.956984435336105
+      ],
+      [
+       1,
+       0.6226343194372321
+      ],
+      [
+       4,
+       0.4515749230914906
+      ],
+      [
+       5,
+       0.42344607580673055
+      ],
+      [
+       6,
+       6.017075267680291
+      ],
+      [
+       7,
+       0.34785816051461527
+      ],
+      [
+       8,
+       0.3386682354141483
+      ],
+      [
+       9,
+       0.34495905541510713
+      ],
+      [
+       10,
+       0.3338817814139305
+      ],
+      [
+       11,
+       0.3321471753511388
+      ],
+      [
+       12,
+       0.36678563195789354
+      ],
+      [
+       13,
+       0.38504228306772104
+      ],
+      [
+       14,
+       0.3481935041596297
+      ],
+      [
+       15,
+       0.2986746317733671
+      ],
+      [
+       17,
+       0.30877288654655094
+      ],
+      [
+       18,
+       0.32647166185824555
+      ],
+      [
+       19,
+       0.35890534238754823
+      ],
+      [
+       20,
+       0.3121267749281443
+      ],
+      [
+       21,
+       0.31509251303553765
+      ],
+      [
+       22,
+       0.32598395087826604
+      ],
+      [
+       23,
+       0.34576888412294704
+      ],
+      [
+       24,
+       0.3407814949620267
+      ],
+      [
+       25,
+       0.3526880862453157
+      ],
+      [
+       26,
+       0.29501988517643163
+      ],
+      [
+       27,
+       0.3067848684618347
+      ],
+      [
+       28,
+       0.32404348101143177
+      ],
+      [
+       29,
+       0.3244679776306788
+      ],
+      [
+       30,
+       0.33300801835038707
+      ],
+      [
+       31,
+       0.3354031003832147
+      ],
+      [
+       33,
+       0.40098928036324033
+      ],
+      [
+       34,
+       0.5786901719840596
+      ],
+      [
+       35,
+       0.42446592279220796
+      ]
+     ],
+     [
+      [
+       0,
+       9.598702111362531
+      ],
+      [
+       1,
+       0.682743264309237
+      ],
+      [
+       4,
+       0.5194663604214924
+      ],
+      [
+       5,
+       0.493122952023947
+      ],
+      [
+       6,
+       5.749725657785859
+      ],
+      [
+       7,
+       0.41527498423400644
+      ],
+      [
+       8,
+       0.4037952033067519
+      ],
+      [
+       9,
+       0.4118631120067408
+      ],
+      [
+       10,
+       0.3987417006283273
+      ],
+      [
+       11,
+       0.39827771230264347
+      ],
+      [
+       12,
+       0.42992766873634986
+      ],
+      [
+       13,
+       0.4491206505891633
+      ],
+      [
+       14,
+       0.4152463418254368
+      ],
+      [
+       15,
+       0.3645857433170559
+      ],
+      [
+       17,
+       0.37652032135503644
+      ],
+      [
+       18,
+       0.3945802613395341
+      ],
+      [
+       19,
+       0.43128838969124966
+      ],
+      [
+       20,
+       0.3912904325424231
+      ],
+      [
+       21,
+       0.393316768336818
+      ],
+      [
+       22,
+       0.4080890981251062
+      ],
+      [
+       23,
+       0.44526843344289124
+      ],
+      [
+       24,
+       0.44429805511780207
+      ],
+      [
+       25,
+       0.40910022625738457
+      ],
+      [
+       27,
+       0.39482897789628213
+      ],
+      [
+       28,
+       0.41061812653802593
+      ],
+      [
+       29,
+       0.4154580201935466
+      ],
+      [
+       30,
+       0.4233031387948431
+      ],
+      [
+       31,
+       0.4076016965404182
+      ],
+      [
+       33,
+       0.5045595146599539
+      ],
+      [
+       34,
+       0.6627154525601718
+      ],
+      [
+       35,
+       0.49029971779622317
+      ]
+     ],
+     [
+      [
+       0,
+       9.509549965757039
+      ],
+      [
+       1,
+       0.7596688447743999
+      ],
+      [
+       4,
+       0.6279854021417676
+      ],
+      [
+       5,
+       0.5840755611551305
+      ],
+      [
+       6,
+       6.2898861773996
+      ],
+      [
+       7,
+       0.5029998671368513
+      ],
+      [
+       8,
+       0.4947285043028436
+      ],
+      [
+       9,
+       0.4949792649976061
+      ],
+      [
+       10,
+       0.4722987038479312
+      ],
+      [
+       11,
+       0.48239435618298804
+      ],
+      [
+       12,
+       0.5212955261103852
+      ],
+      [
+       13,
+       0.545231464604558
+      ],
+      [
+       14,
+       0.47564582870247296
+      ],
+      [
+       17,
+       0.45030802645774237
+      ],
+      [
+       18,
+       0.479591160459067
+      ],
+      [
+       19,
+       0.5235306486955839
+      ],
+      [
+       20,
+       0.47098699535955346
+      ],
+      [
+       21,
+       0.47467829778522574
+      ],
+      [
+       22,
+       0.4825601065919619
+      ],
+      [
+       23,
+       0.5096033231689543
+      ],
+      [
+       24,
+       0.5120485373618008
+      ],
+      [
+       25,
+       0.478436297636355
+      ],
+      [
+       27,
+       0.4574340006311589
+      ],
+      [
+       28,
+       0.47392547494654186
+      ],
+      [
+       29,
+       0.4782233612529483
+      ],
+      [
+       30,
+       0.48953316564416127
+      ],
+      [
+       31,
+       0.4776939582972237
+      ],
+      [
+       33,
+       0.5673656687528073
+      ],
+      [
+       34,
+       0.7363231220701959
+      ],
+      [
+       35,
+       0.5416596873296282
+      ]
+     ],
+     [
+      [
+       0,
+       9.604117920600824
+      ],
+      [
+       1,
+       0.8496029281243048
+      ],
+      [
+       4,
+       0.742196309585094
+      ],
+      [
+       5,
+       0.6834783081640566
+      ],
+      [
+       6,
+       4.92775454460133
+      ],
+      [
+       7,
+       0.6103823477914229
+      ],
+      [
+       8,
+       0.5843146673246447
+      ],
+      [
+       9,
+       0.5848306724306004
+      ],
+      [
+       10,
+       0.5835673170629694
+      ],
+      [
+       11,
+       0.5821845589420921
+      ],
+      [
+       12,
+       0.614177464001957
+      ],
+      [
+       13,
+       0.6262103921793606
+      ],
+      [
+       14,
+       0.5684052655552595
+      ],
+      [
+       18,
+       0.5579984336193456
+      ],
+      [
+       19,
+       0.6310803603810439
+      ],
+      [
+       20,
+       0.5751988177801198
+      ],
+      [
+       21,
+       0.5808487929920165
+      ],
+      [
+       22,
+       0.5923182692753801
+      ],
+      [
+       23,
+       0.6006414250396619
+      ],
+      [
+       24,
+       0.6035189155407782
+      ],
+      [
+       25,
+       0.5522153050693313
+      ],
+      [
+       27,
+       0.5358045708616951
+      ],
+      [
+       28,
+       0.551505368434594
+      ],
+      [
+       29,
+       0.5516163552648905
+      ],
+      [
+       30,
+       0.5613448587195304
+      ],
+      [
+       31,
+       0.5581493432320448
+      ],
+      [
+       33,
+       0.6474188311646434
+      ],
+      [
+       34,
+       0.816599497217708
+      ],
+      [
+       35,
+       0.6326006493121633
+      ]
+     ]
+    ],
+    "rounds": 8
+   },
+   "calib.reasoning_heavy@v2": {
+    "_extrapolation_cross_check": {
+     "_meaning": "`candidates x max` is what the superseded stage would have priced, BEFORE adding any fixed term. Reported so the direction of the old error is visible, not to price anything.",
+     "candidates_times_max_seconds": 2422.394,
+     "measured_invocation_seconds": 1111.2218
+    },
+    "_per_candidate_unavailable": null,
+    "attribution": {
+     "_distortion_includes": "the weighted Top-K reduction, the values.tolist() host transfer and the per-subtype collection",
+     "_if_split_is_not_attributed": "`ablated_seconds` and `distortion_seconds` are NOT a clean forward/reduction split: no synchronization separates them, so the asynchronous forward's tail is billed to the phase that forces the next one. Their sum is the scoring loop; neither alone is that phase's cost. This is deliberate -- inserting the syncs is what made a6 unusable for pricing.",
+     "_outside_is": "packing, the reference-sketch cache object, the position-policy setup, greedy bookkeeping and the CHILD CONSTRUCTION -- all of it inside operator_seconds and none of it in a per-candidate number",
+     "ablated_seconds": 879.653,
+     "distortion_seconds": 192.6161,
+     "outside_scoring_loop_seconds": 27.7103,
+     "reference_seconds": 11.2163,
+     "scoring_loop_seconds": 1083.5115,
+     "split_is_attributed": false
+    },
+    "candidate_subsets": 260,
+    "n_items": 62,
+    "operator_invocation_seconds": 1111.2218,
+    "operator_timing": {
+     "ablated_forwards": 5460,
+     "ablated_items": 16120,
+     "ablated_seconds": 879.653,
+     "calibration_batch_packing": "length_sorted_v1",
+     "candidate_subsets": 260,
+     "distortion_calls": 16120,
+     "distortion_seconds": 192.6161,
+     "forward_rows": 15968680,
+     "item_seconds": 1083.5115,
+     "micro_batch_size": 3,
+     "prediction_rows": "scored_v1",
+     "reference_seconds": 11.2163,
+     "scored_rows": 12174500,
+     "split_is_attributed": false
+    },
+    "peak_memory_bytes": 15289144320,
+    "per_candidate_distribution": {
+     "max": 9.3169,
+     "mean": 4.167710384615385,
+     "min": 3.7394,
+     "n": 260,
+     "p1": 3.7416,
+     "p5": 3.7465,
+     "p50": 4.1759,
+     "p95": 4.5158,
+     "p99": 4.5201
+    },
+    "per_candidate_n": 260,
+    "per_candidate_seconds": [
+     9.3169,
+     4.4621,
+     4.4652,
+     4.4702,
+     4.4784,
+     4.4815,
+     4.479,
+     4.4882,
+     4.497,
+     4.5009,
+     4.5078,
+     4.5005,
+     4.5029,
+     4.5064,
+     4.5162,
+     4.5124,
+     4.5146,
+     4.5194,
+     4.5106,
+     4.5089,
+     4.5133,
+     4.515,
+     4.5201,
+     4.5177,
+     4.5203,
+     4.5181,
+     4.5183,
+     4.5171,
+     4.5176,
+     4.5155,
+     4.5206,
+     4.5158,
+     4.515,
+     4.5183,
+     4.5183,
+     4.5156,
+     4.4092,
+     4.4114,
+     4.4186,
+     4.4065,
+     4.4112,
+     4.4062,
+     4.4106,
+     4.405,
+     4.3899,
+     4.4011,
+     4.3811,
+     4.3801,
+     4.3844,
+     4.3845,
+     4.3866,
+     4.3885,
+     4.3847,
+     4.4046,
+     4.4113,
+     4.3768,
+     4.3848,
+     4.4083,
+     4.3992,
+     4.3812,
+     4.4134,
+     4.4072,
+     4.4098,
+     4.4097,
+     4.4139,
+     4.4115,
+     4.4077,
+     4.3839,
+     4.3963,
+     4.4177,
+     4.3845,
+     4.3085,
+     4.3132,
+     4.3124,
+     4.3047,
+     4.2987,
+     4.3101,
+     4.3089,
+     4.2997,
+     4.2861,
+     4.3117,
+     4.3031,
+     4.3063,
+     4.297,
+     4.2809,
+     4.2915,
+     4.3055,
+     4.3044,
+     4.3079,
+     4.2986,
+     4.2986,
+     4.2987,
+     4.2926,
+     4.2836,
+     4.3088,
+     4.3059,
+     4.3086,
+     4.303,
+     4.3062,
+     4.274,
+     4.2749,
+     4.2886,
+     4.3011,
+     4.2984,
+     4.2976,
+     4.1835,
+     4.1601,
+     4.1752,
+     4.1908,
+     4.1659,
+     4.1762,
+     4.1845,
+     4.1669,
+     4.1721,
+     4.1759,
+     4.171,
+     4.181,
+     4.1913,
+     4.1905,
+     4.175,
+     4.1985,
+     4.1914,
+     4.1963,
+     4.1994,
+     4.1974,
+     4.1944,
+     4.1863,
+     4.1971,
+     4.1965,
+     4.1995,
+     4.1963,
+     4.1938,
+     4.1826,
+     4.1731,
+     4.1981,
+     4.1995,
+     4.1946,
+     4.191,
+     4.0891,
+     4.087,
+     4.0817,
+     4.088,
+     4.0754,
+     4.0872,
+     4.086,
+     4.0916,
+     4.0865,
+     4.0862,
+     4.0882,
+     4.0885,
+     4.0829,
+     4.0588,
+     4.0607,
+     4.0596,
+     4.0692,
+     4.0898,
+     4.0876,
+     4.0914,
+     4.088,
+     4.0885,
+     4.0738,
+     4.0666,
+     4.0631,
+     4.0706,
+     4.0897,
+     4.0908,
+     4.0729,
+     4.0602,
+     4.0627,
+     4.0664,
+     3.9795,
+     3.9609,
+     3.9663,
+     3.9773,
+     3.9576,
+     3.9679,
+     3.9787,
+     3.9671,
+     3.9649,
+     3.9734,
+     3.9737,
+     3.9635,
+     3.9856,
+     3.9783,
+     3.9794,
+     3.9723,
+     3.9545,
+     3.9583,
+     3.9645,
+     3.964,
+     3.9889,
+     3.9744,
+     3.9806,
+     3.9803,
+     3.9654,
+     3.9742,
+     3.9733,
+     3.982,
+     3.9784,
+     3.9692,
+     3.9787,
+     3.8673,
+     3.8489,
+     3.8625,
+     3.8673,
+     3.8653,
+     3.8714,
+     3.8612,
+     3.8773,
+     3.8752,
+     3.8615,
+     3.8726,
+     3.8675,
+     3.8519,
+     3.8538,
+     3.8527,
+     3.8516,
+     3.8495,
+     3.8517,
+     3.8579,
+     3.8754,
+     3.8727,
+     3.8692,
+     3.88,
+     3.8746,
+     3.8508,
+     3.849,
+     3.8516,
+     3.8505,
+     3.8494,
+     3.8468,
+     3.7448,
+     3.7416,
+     3.7431,
+     3.7498,
+     3.7494,
+     3.7446,
+     3.7624,
+     3.743,
+     3.7516,
+     3.7454,
+     3.7592,
+     3.763,
+     3.7611,
+     3.7537,
+     3.7653,
+     3.77,
+     3.7521,
+     3.7398,
+     3.7423,
+     3.7431,
+     3.751,
+     3.7394,
+     3.744,
+     3.7465,
+     3.7606,
+     3.7462,
+     3.7602,
+     3.7605,
+     3.7395
+    ],
+    "prediction_rows": "scored_v1",
+    "reference_cache": {
+     "available_bytes": 38997917696,
+     "bytes_ratio_vs_full_vocab": 0.00621916,
+     "cached": true,
+     "distribution_support": "reference_topk_tail_v1",
+     "full_vocab_bytes_avoided": 18160302336,
+     "has_tail": true,
+     "headroom_source": "cuda.mem_get_info:cuda:0 after empty_cache",
+     "items_total": 51,
+     "memory_before": {
+      "allocator_allocated_bytes": 8110756864,
+      "allocator_allocated_gib": 7.554,
+      "allocator_reserved_bytes": 8124366848,
+      "allocator_reserved_gib": 7.566,
+      "allocator_reserved_not_allocated_bytes": 13609984,
+      "device": "cuda:0",
+      "driver_free_bytes": 38997917696,
+      "driver_free_gib": 36.32,
+      "driver_total_bytes": 47667740672,
+      "kind": "cuda",
+      "reclaimable_by_empty_cache_gib": 0.013,
+      "unaccounted_gib": 0.508
+     },
+     "mode": "cached",
+     "positions": 46825,
+     "scored_rows_only": true,
+     "sketch_bytes": 112941900,
+     "top_k": 200
+    },
+    "removed": [
+     2,
+     3,
+     32,
+     16,
+     15,
+     26,
+     17,
+     27
+    ],
+    "round_tables": [
+     [
+      [
+       0,
+       8.39069826209845
+      ],
+      [
+       1,
+       0.338912295920698
+      ],
+      [
+       2,
+       0.03497983306031684
+      ],
+      [
+       3,
+       0.04837260167961762
+      ],
+      [
+       4,
+       0.055130535129972534
+      ],
+      [
+       5,
+       0.0767737010571047
+      ],
+      [
+       6,
+       1.4033528387520482
+      ],
+      [
+       7,
+       0.06595752087694415
+      ],
+      [
+       8,
+       0.07164262958288936
+      ],
+      [
+       9,
+       0.08167323216649713
+      ],
+      [
+       10,
+       0.08700074027930196
+      ],
+      [
+       11,
+       0.07364610969752498
+      ],
+      [
+       12,
+       0.10345692995530938
+      ],
+      [
+       13,
+       0.09940557139448271
+      ],
+      [
+       14,
+       0.08050781186499621
+      ],
+      [
+       15,
+       0.07392932619626556
+      ],
+      [
+       16,
+       0.0702031414397922
+      ],
+      [
+       17,
+       0.08535696751780061
+      ],
+      [
+       18,
+       0.09293181285069417
+      ],
+      [
+       19,
+       0.11888602502054643
+      ],
+      [
+       20,
+       0.08325778716480112
+      ],
+      [
+       21,
+       0.0893509560964679
+      ],
+      [
+       22,
+       0.11325201130900864
+      ],
+      [
+       23,
+       0.12254795743992548
+      ],
+      [
+       24,
+       0.13709169013716707
+      ],
+      [
+       25,
+       0.09259490130535286
+      ],
+      [
+       26,
+       0.08199451970502632
+      ],
+      [
+       27,
+       0.0944993538087706
+      ],
+      [
+       28,
+       0.10438780033929332
+      ],
+      [
+       29,
+       0.10366430758078338
+      ],
+      [
+       30,
+       0.11359524497103261
+      ],
+      [
+       31,
+       0.08760377493092812
+      ],
+      [
+       32,
+       0.07312560482630964
+      ],
+      [
+       33,
+       0.10843999669239661
+      ],
+      [
+       34,
+       0.16754469914763787
+      ],
+      [
+       35,
+       0.17477404654694725
+      ]
+     ],
+     [
+      [
+       0,
+       8.791294108178333
+      ],
+      [
+       1,
+       1.8285112843067466
+      ],
+      [
+       3,
+       0.10084602370730873
+      ],
+      [
+       4,
+       0.12499161536571121
+      ],
+      [
+       5,
+       0.1387616322142068
+      ],
+      [
+       6,
+       1.952722597406721
+      ],
+      [
+       7,
+       0.1170434480851632
+      ],
+      [
+       8,
+       0.11853297880475111
+      ],
+      [
+       9,
+       0.12444493694545522
+      ],
+      [
+       10,
+       0.1287047386865575
+      ],
+      [
+       11,
+       0.11076175854675427
+      ],
+      [
+       12,
+       0.14209493961145148
+      ],
+      [
+       13,
+       0.13939674118012585
+      ],
+      [
+       14,
+       0.11382198574635025
+      ],
+      [
+       15,
+       0.10544974499525905
+      ],
+      [
+       16,
+       0.10256135501453911
+      ],
+      [
+       17,
+       0.11317997934921949
+      ],
+      [
+       18,
+       0.11790496555211408
+      ],
+      [
+       19,
+       0.14815511105303603
+      ],
+      [
+       20,
+       0.11356562482943615
+      ],
+      [
+       21,
+       0.1173048829849763
+      ],
+      [
+       22,
+       0.14219714524377008
+      ],
+      [
+       23,
+       0.1490642164461323
+      ],
+      [
+       24,
+       0.16583009251247036
+      ],
+      [
+       25,
+       0.1277151810183174
+      ],
+      [
+       26,
+       0.11456052042348738
+      ],
+      [
+       27,
+       0.12383304573174136
+      ],
+      [
+       28,
+       0.13469940659742413
+      ],
+      [
+       29,
+       0.13380304072401664
+      ],
+      [
+       30,
+       0.1440253485411766
+      ],
+      [
+       31,
+       0.12003826729338977
+      ],
+      [
+       32,
+       0.10271902686396087
+      ],
+      [
+       33,
+       0.13612765824888923
+      ],
+      [
+       34,
+       0.2012356865301061
+      ],
+      [
+       35,
+       0.20628523851140876
+      ]
+     ],
+     [
+      [
+       0,
+       9.723500428902739
+      ],
+      [
+       1,
+       0.5046919951833975
+      ],
+      [
+       4,
+       0.3233468769112086
+      ],
+      [
+       5,
+       0.3005860317329165
+      ],
+      [
+       6,
+       3.243475926944285
+      ],
+      [
+       7,
+       0.221200469421013
+      ],
+      [
+       8,
+       0.21722964135824402
+      ],
+      [
+       9,
+       0.21674173772323496
+      ],
+      [
+       10,
+       0.20196423885643539
+      ],
+      [
+       11,
+       0.19598500382413597
+      ],
+      [
+       12,
+       0.22155409356243783
+      ],
+      [
+       13,
+       0.23085811632086672
+      ],
+      [
+       14,
+       0.18680390014208675
+      ],
+      [
+       15,
+       0.17666542387743617
+      ],
+      [
+       16,
+       0.16652194479175356
+      ],
+      [
+       17,
+       0.18031023019220271
+      ],
+      [
+       18,
+       0.1849413270951979
+      ],
+      [
+       19,
+       0.21672443430663435
+      ],
+      [
+       20,
+       0.17858163597877158
+      ],
+      [
+       21,
+       0.18360634990744
+      ],
+      [
+       22,
+       0.2061443365237495
+      ],
+      [
+       23,
+       0.2137145903057563
+      ],
+      [
+       24,
+       0.22755747915236996
+      ],
+      [
+       25,
+       0.19880064504903147
+      ],
+      [
+       26,
+       0.17951970734115105
+      ],
+      [
+       27,
+       0.18679213672628034
+      ],
+      [
+       28,
+       0.19516877941954414
+      ],
+      [
+       29,
+       0.196161242755419
+      ],
+      [
+       30,
+       0.20342686457467604
+      ],
+      [
+       31,
+       0.1838412305559718
+      ],
+      [
+       32,
+       0.16494195922688318
+      ],
+      [
+       33,
+       0.19749769196761052
+      ],
+      [
+       34,
+       0.26712965312275744
+      ],
+      [
+       35,
+       0.2701764439083539
+      ]
+     ],
+     [
+      [
+       0,
+       9.65542083852262
+      ],
+      [
+       1,
+       0.5459960107355043
+      ],
+      [
+       4,
+       0.3748447435431556
+      ],
+      [
+       5,
+       0.3525762847078656
+      ],
+      [
+       6,
+       3.2893921025872443
+      ],
+      [
+       7,
+       0.2765852197752904
+      ],
+      [
+       8,
+       0.2712535919731538
+      ],
+      [
+       9,
+       0.27098223750521633
+      ],
+      [
+       10,
+       0.25531931443363154
+      ],
+      [
+       11,
+       0.25220954430490633
+      ],
+      [
+       12,
+       0.2736314345274112
+      ],
+      [
+       13,
+       0.28179512294334536
+      ],
+      [
+       14,
+       0.24477628382646718
+      ],
+      [
+       15,
+       0.2346200709095449
+      ],
+      [
+       16,
+       0.22439676983138815
+      ],
+      [
+       17,
+       0.2339012492014915
+      ],
+      [
+       18,
+       0.2375888578014787
+      ],
+      [
+       19,
+       0.27054828738045356
+      ],
+      [
+       20,
+       0.23351135986380175
+      ],
+      [
+       21,
+       0.24239282585421856
+      ],
+      [
+       22,
+       0.26728156489423305
+      ],
+      [
+       23,
+       0.2813255601108991
+      ],
+      [
+       24,
+       0.28194373878135864
+      ],
+      [
+       25,
+       0.30208551701296543
+      ],
+      [
+       26,
+       0.24300629211990624
+      ],
+      [
+       27,
+       0.2568597283259534
+      ],
+      [
+       28,
+       0.27488314947560355
+      ],
+      [
+       29,
+       0.2753837581644286
+      ],
+      [
+       30,
+       0.2820175572697616
+      ],
+      [
+       31,
+       0.2815054250682949
+      ],
+      [
+       33,
+       0.3604635984056789
+      ],
+      [
+       34,
+       0.5000397996573347
+      ],
+      [
+       35,
+       0.3687342778372368
+      ]
+     ],
+     [
+      [
+       0,
+       10.153030738606876
+      ],
+      [
+       1,
+       0.6174860170114925
+      ],
+      [
+       4,
+       0.4530583664510505
+      ],
+      [
+       5,
+       0.42642371563450876
+      ],
+      [
+       6,
+       5.956358513347675
+      ],
+      [
+       7,
+       0.34840957848556914
+      ],
+      [
+       8,
+       0.3415133580546679
+      ],
+      [
+       9,
+       0.34821008573204054
+      ],
+      [
+       10,
+       0.3334502693434093
+      ],
+      [
+       11,
+       0.3369343431141503
+      ],
+      [
+       12,
+       0.36495738453734494
+      ],
+      [
+       13,
+       0.38347600804325327
+      ],
+      [
+       14,
+       0.34887094174572797
+      ],
+      [
+       15,
+       0.2986849693400747
+      ],
+      [
+       17,
+       0.30891630371454526
+      ],
+      [
+       18,
+       0.32502869602185364
+      ],
+      [
+       19,
+       0.36044299036732846
+      ],
+      [
+       20,
+       0.31335552548692186
+      ],
+      [
+       21,
+       0.31544831429883613
+      ],
+      [
+       22,
+       0.3279552121101283
+      ],
+      [
+       23,
+       0.34459638500025325
+      ],
+      [
+       24,
+       0.3422160949084775
+      ],
+      [
+       25,
+       0.3544347901947399
+      ],
+      [
+       26,
+       0.298840700769314
+      ],
+      [
+       27,
+       0.3096566020579974
+      ],
+      [
+       28,
+       0.32692898387536606
+      ],
+      [
+       29,
+       0.32836567742101164
+      ],
+      [
+       30,
+       0.3358609451206003
+      ],
+      [
+       31,
+       0.3353784405094563
+      ],
+      [
+       33,
+       0.4034270371680645
+      ],
+      [
+       34,
+       0.5721353028627327
+      ],
+      [
+       35,
+       0.42748589558837446
+      ]
+     ],
+     [
+      [
+       0,
+       10.102686416264396
+      ],
+      [
+       1,
+       0.6968600853154843
+      ],
+      [
+       4,
+       0.5649721553389014
+      ],
+      [
+       5,
+       0.5256370037563534
+      ],
+      [
+       6,
+       6.361526420456937
+      ],
+      [
+       7,
+       0.4415173261834041
+      ],
+      [
+       8,
+       0.43599548313407155
+      ],
+      [
+       9,
+       0.4319182111042353
+      ],
+      [
+       10,
+       0.4113321711741415
+      ],
+      [
+       11,
+       0.4274077190222247
+      ],
+      [
+       12,
+       0.4585985474730885
+      ],
+      [
+       13,
+       0.4870303387778783
+      ],
+      [
+       14,
+       0.41510032788015805
+      ],
+      [
+       17,
+       0.3899980777095518
+      ],
+      [
+       18,
+       0.4198516700752606
+      ],
+      [
+       19,
+       0.45855698547014806
+      ],
+      [
+       20,
+       0.3974529221184269
+      ],
+      [
+       21,
+       0.40117705624809374
+      ],
+      [
+       22,
+       0.4071941484807005
+      ],
+      [
+       23,
+       0.4159575330895632
+      ],
+      [
+       24,
+       0.4145025471197982
+      ],
+      [
+       25,
+       0.4283951276810411
+      ],
+      [
+       26,
+       0.36670078759090885
+      ],
+      [
+       27,
+       0.3767941693394448
+      ],
+      [
+       28,
+       0.396785407745774
+      ],
+      [
+       29,
+       0.3954937442049412
+      ],
+      [
+       30,
+       0.4074420933749699
+      ],
+      [
+       31,
+       0.41044732549688295
+      ],
+      [
+       33,
+       0.4781917399388654
+      ],
+      [
+       34,
+       0.6473159599333878
+      ],
+      [
+       35,
+       0.48405436589431156
+      ]
+     ],
+     [
+      [
+       0,
+       9.648097500705706
+      ],
+      [
+       1,
+       0.7559598368660646
+      ],
+      [
+       4,
+       0.629959893939825
+      ],
+      [
+       5,
+       0.5900180953739587
+      ],
+      [
+       6,
+       6.2213807594343375
+      ],
+      [
+       7,
+       0.5044181788402674
+      ],
+      [
+       8,
+       0.4994113072280399
+      ],
+      [
+       9,
+       0.49759903260284943
+      ],
+      [
+       10,
+       0.4723746682333877
+      ],
+      [
+       11,
+       0.49040224232694724
+      ],
+      [
+       12,
+       0.519328295885692
+      ],
+      [
+       13,
+       0.5463342994653847
+      ],
+      [
+       14,
+       0.4786080519896494
+      ],
+      [
+       17,
+       0.4555553367505514
+      ],
+      [
+       18,
+       0.4843307839050327
+      ],
+      [
+       19,
+       0.5267799892579885
+      ],
+      [
+       20,
+       0.47038370810502717
+      ],
+      [
+       21,
+       0.4752312911161293
+      ],
+      [
+       22,
+       0.48488972587236406
+      ],
+      [
+       23,
+       0.5098759685624688
+      ],
+      [
+       24,
+       0.5130393471041036
+      ],
+      [
+       25,
+       0.4819480325287756
+      ],
+      [
+       27,
+       0.4606957830385457
+      ],
+      [
+       28,
+       0.48174090434590805
+      ],
+      [
+       29,
+       0.4826972534804003
+      ],
+      [
+       30,
+       0.4942885181339218
+      ],
+      [
+       31,
+       0.48088454550946247
+      ],
+      [
+       33,
+       0.5737440145327687
+      ],
+      [
+       34,
+       0.7323682686001843
+      ],
+      [
+       35,
+       0.5461245519069864
+      ]
+     ],
+     [
+      [
+       0,
+       9.75107370336368
+      ],
+      [
+       1,
+       0.8494486695296907
+      ],
+      [
+       4,
+       0.748118600181752
+      ],
+      [
+       5,
+       0.6919796398130504
+      ],
+      [
+       6,
+       4.874473117435569
+      ],
+      [
+       7,
+       0.6162265982025114
+      ],
+      [
+       8,
+       0.5920293622275625
+      ],
+      [
+       9,
+       0.5897905588844634
+      ],
+      [
+       10,
+       0.5872091017714409
+      ],
+      [
+       11,
+       0.5919657728574338
+      ],
+      [
+       12,
+       0.6226624693673287
+      ],
+      [
+       13,
+       0.6308202254188772
+      ],
+      [
+       14,
+       0.5776856858837268
+      ],
+      [
+       18,
+       0.5665400887107721
+      ],
+      [
+       19,
+       0.6404828005727998
+      ],
+      [
+       20,
+       0.579467315963886
+      ],
+      [
+       21,
+       0.5880342917703791
+      ],
+      [
+       22,
+       0.5990596961253644
+      ],
+      [
+       23,
+       0.6054562620062649
+      ],
+      [
+       24,
+       0.6090576025470275
+      ],
+      [
+       25,
+       0.559336032836422
+      ],
+      [
+       27,
+       0.5402227289639051
+      ],
+      [
+       28,
+       0.5613310470533566
+      ],
+      [
+       29,
+       0.5586333287165031
+      ],
+      [
+       30,
+       0.5693205646912605
+      ],
+      [
+       31,
+       0.5641783292251785
+      ],
+      [
+       33,
+       0.6553428148448617
+      ],
+      [
+       34,
+       0.815314120501298
+      ],
+      [
+       35,
+       0.6411416246441777
+      ]
+     ]
+    ],
+    "rounds": 8
+   }
+  },
+  "position_policy": {
+   "position_policy": "positions.supervised_target_v1@v1",
+   "position_policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12"
+  },
+  "position_weighting_cost": {
+   "_why": "the priced invocation runs the treatment; this shows whether the control's position setup could exceed it. It is per INVOCATION, not per candidate.",
+   "control": {
+    "policy_hash": "f0d6271329edb3c6",
+    "setup_seconds": 0.0159
+   },
+   "n_items": 67,
+   "profile": "calib.domain_balanced@v1",
+   "treatment": {
+    "policy_hash": "f5991d9abffee32f",
+    "setup_seconds": 0.0181
+   }
+  },
+  "profiles": [
+   "calib.domain_balanced@v1",
+   "calib.reasoning_heavy@v2"
+  ],
+  "stopped_before_profile": null,
+  "sync_split_enabled": false,
+  "top_k": 200
+ },
+ "_contract": "ENGINEERING EVIDENCE ONLY, for the maintainer decision of 2026-10-04. No recovery training, no behavioural screening, no confirmation, no formal search, no promotion, no GO/NO-GO. No D-series behavioural prompt is read. AUTHORIZES NOTHING.",
+ "bound_full_vocab": {
+  "distribution_support": "full_vocab_v1",
+  "measurement_protocol_id": "52fa6135307c6ae37caf36b4f64fe7df",
+  "n_items": 80,
+  "position_policy": "positions.supervised_target_v1",
+  "position_policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12",
+  "reduction": {
+   "chunk": 512,
+   "reference_strategy": "ReferenceStrategy.RECOMPUTE"
+  },
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "suite_structural_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+ },
+ "bound_reference_topk_tail": {
+  "distribution_support": "reference_topk_tail_v1(top_k=200)",
+  "measurement_protocol_id": "79e43b8c3949dac7ce1a5b9f255373c9",
+  "n_items": 80,
+  "position_policy": "positions.supervised_target_v1",
+  "position_policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12",
+  "reduction": {
+   "chunk": 512,
+   "reference_strategy": "ReferenceStrategy.RECOMPUTE"
+  },
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "suite_structural_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+ },
+ "elapsed_seconds": 2290.871,
+ "ended_utc": "2026-10-13T17:05:31Z",
+ "environment": {
+  "_device_count": 1,
+  "_no_ordinal_is_hardcoded": "the index comes from torch.cuda.current_device(), so the record describes whichever device the runtime selected",
+  "bf16_supported": true,
+  "capability": "8.9",
+  "cuda_runtime": "12.8",
+  "cudnn_tf32": true,
+  "device": "cuda",
+  "gpu_name": "NVIDIA L40S",
+  "gpu_total_memory_bytes": 47667740672,
+  "matmul_tf32": false,
+  "torch": "2.11.0+cu128",
+  "transformers": "5.13.1"
+ },
+ "prediction_rows": "scored_v1",
+ "schema": "aadistill.d_series.topk_adoption/v1",
+ "scoring_protocol": {
+  "_does_not_move_the_batteries": "Top-K changes structural scoring and evaluation, not prompt content. family_content_id 1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58 stands.",
+  "coarsened_under_this_protocol": [
+   "forward KL",
+   "reverse KL",
+   "critical-token KL"
+  ],
+  "critical_tokens": "critical tags identify prediction POSITIONS, not vocabulary entries, so those positions use this same KL and need no separate support rule",
+  "decision_record": "logs/budget/decisions.md 2026-10-04",
+  "exact_under_this_protocol": [
+   "target-token CE/NLL",
+   "top-1 agreement"
+  ],
+  "execution": {
+   "calibration_batch_packing": "length_sorted_v1",
+   "micro_batch_size": 3
+  },
+  "k_is_not_outcome_selected": "maintainer-selected 2026-10-04. No sweep was run and K must not be tuned against D1/D2/D3 results.",
+  "owner": "scripts/experiments/stage-1/phase_d_series/scoring_protocol.py",
+  "protocol_id": "reference_topk_tail_v1",
+  "reference_for_depth": "the intact current parent; the candidate is that parent with the candidate block bypassed. NOT the original teacher -- DEPTH's objective is local and parent-relative, and forcing the teacher's support onto it would score a different question",
+  "reference_for_state_evaluation": "the original teacher",
+  "reverse_kl_partition": "the SAME reference-defined K+1 partition as the forward direction. One state evaluation must not carry two incompatible partitions",
+  "support": "the Top-200 entries of the REFERENCE distribution at each prediction position",
+  "tail": "every vocabulary entry outside that support, aggregated into one K+1 bucket",
+  "top_k": 200
+ },
+ "stages": [
+  {
+   "gpu": "NVIDIA L40S",
+   "seconds": 1.724,
+   "stage": "environment",
+   "status": "ok"
+  },
+  {
+   "seconds": 0.036,
+   "stage": "register_and_policy",
+   "status": "ok",
+   "top_k": 200
+  },
+  {
+   "protocol": "52fa6135307c6ae3",
+   "seconds": 0.043,
+   "stage": "bind_full_vocab",
+   "status": "ok"
+  },
+  {
+   "protocol": "79e43b8c3949dac7",
+   "seconds": 0.038,
+   "stage": "bind_reference_topk_tail",
+   "status": "ok"
+  },
+  {
+   "impl": "depth.causal_kl_greedy_v1",
+   "seconds": 0.15,
+   "stage": "depth_operator_and_policy",
+   "status": "ok",
+   "weighted_arm": "treatment"
+  },
+  {
+   "path": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea",
+   "seconds": 8.266,
+   "stage": "teacher_fetch_verify",
+   "status": "ok"
+  },
+  {
+   "protocol_ids_differ": true,
+   "seconds": 56.966,
+   "stage": "D_state_eval_both_supports",
+   "status": "ok",
+   "worst_domain_agrees": true
+  },
+  {
+   "invocation_s_max": 1111.2218,
+   "seconds": 2223.639,
+   "stage": "P_production_operator_invocation",
+   "status": "ok"
+  }
+ ],
+ "stages_requested": [
+  "D",
+  "P"
+ ],
+ "started_utc": "2026-10-13T16:27:21Z",
+ "status": "COMPLETE"
+}

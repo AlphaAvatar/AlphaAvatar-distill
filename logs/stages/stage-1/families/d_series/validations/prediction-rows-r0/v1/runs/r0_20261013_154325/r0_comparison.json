@@ -1,0 +1,165 @@
+{
+ "authorizes": "nothing; a PASS makes scored_v1 ELIGIBLE for a later preregistration to name",
+ "depth": {
+  "calib.domain_balanced@v1": {
+   "candidates_compared": 260,
+   "max_absolute_difference": 3.71841242241544e-08,
+   "max_relative_difference": 1.453657329618962e-07,
+   "oracle_equals_history": true,
+   "order_equal": true,
+   "removed": {
+    "history": [
+     2,
+     3,
+     32,
+     16,
+     26,
+     15,
+     17,
+     27
+    ],
+    "oracle": [
+     2,
+     3,
+     32,
+     16,
+     26,
+     15,
+     17,
+     27
+    ],
+    "treatment": [
+     2,
+     3,
+     32,
+     16,
+     26,
+     15,
+     17,
+     27
+    ]
+   },
+   "timing": {
+    "oracle_peak_gib": 16.282,
+    "oracle_seconds": 1166.3029,
+    "ratio": 0.95,
+    "treatment_peak_gib": 13.906,
+    "treatment_seconds": 1107.9862
+   }
+  },
+  "calib.reasoning_heavy@v2": {
+   "candidates_compared": 260,
+   "max_absolute_difference": 5.230920052667898e-08,
+   "max_relative_difference": 1.652269316060029e-07,
+   "oracle_equals_history": true,
+   "order_equal": true,
+   "removed": {
+    "history": [
+     2,
+     3,
+     32,
+     16,
+     15,
+     26,
+     17,
+     27
+    ],
+    "oracle": [
+     2,
+     3,
+     32,
+     16,
+     15,
+     26,
+     17,
+     27
+    ],
+    "treatment": [
+     2,
+     3,
+     32,
+     16,
+     15,
+     26,
+     17,
+     27
+    ]
+   },
+   "timing": {
+    "oracle_peak_gib": 16.25,
+    "oracle_seconds": 1154.0299,
+    "ratio": 0.9629,
+    "treatment_peak_gib": 14.239,
+    "treatment_seconds": 1111.2218
+   }
+  }
+ },
+ "failures": [],
+ "identity": {
+  "full_vocab": {
+   "history": "d463a1dc6afbd778123a128f4ed46e16",
+   "oracle": "d463a1dc6afbd778123a128f4ed46e16",
+   "oracle_equals_history": true,
+   "treatment": "52fa6135307c6ae37caf36b4f64fe7df",
+   "treatment_differs": true
+  },
+  "oracle_mode": "all_v1",
+  "oracle_status": "COMPLETE",
+  "reference_topk_tail": {
+   "history": "9c9b0b43dc00b695c185982b8b0a18e7",
+   "oracle": "9c9b0b43dc00b695c185982b8b0a18e7",
+   "oracle_equals_history": true,
+   "treatment": "79e43b8c3949dac7ce1a5b9f255373c9",
+   "treatment_differs": true
+  },
+  "treatment_mode": "scored_v1",
+  "treatment_status": "COMPLETE"
+ },
+ "inputs_sha256": {
+  "history": "eb7dd703ed21ed48b0df06f17989cc9219eccd08268e0b77cdf0a9723a117108",
+  "oracle": "0660834a8672cff8ee2f4bae7ef2e71ca8e17a81cb6e91bd4b63f71d355f2014",
+  "treatment": "486459f205dbff298c040217b75b56608b67685a0f9e5c69d5f5134e1f0faf6e"
+ },
+ "plan": "logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/plan.json",
+ "plan_sha256": "1e1eac39445a19eacd5d820b9b04545d9cbbc928dee8b978cad369ae32aaa518",
+ "schema": "aadistill.d_series.prediction_rows_r0_comparison/v1",
+ "state_eval": {
+  "full_vocab_v1": {
+   "max_absolute_drift_all_values": 2.0435878234081883e-07,
+   "max_ranked_absolute_drift": 5.6609556153830454e-08,
+   "peak_gib": {
+    "oracle": 20.341,
+    "treatment": 18.543
+   },
+   "ranked_absolute_drift": {
+    "state.critical_token_kl": 5.6609556153830454e-08,
+    "state.teacher_kl.equal_domain_mean": 1.1117433418306177e-08,
+    "state.teacher_kl.worst_domain": 4.412732623748639e-09
+   },
+   "seconds": {
+    "oracle": 11.041,
+    "treatment": 10.362
+   },
+   "worst_domain_agrees": true
+  },
+  "reference_topk_tail_v1": {
+   "max_absolute_drift_all_values": 6.539481027800775e-07,
+   "max_ranked_absolute_drift": 1.277688381762232e-07,
+   "peak_gib": {
+    "oracle": 20.492,
+    "treatment": 18.652
+   },
+   "ranked_absolute_drift": {
+    "state.critical_token_kl": 1.277688381762232e-07,
+    "state.teacher_kl.equal_domain_mean": 6.921223816291899e-09,
+    "state.teacher_kl.worst_domain": 7.246169886343523e-09
+   },
+   "seconds": {
+    "oracle": 11.044,
+    "treatment": 10.27
+   },
+   "worst_domain_agrees": true
+  }
+ },
+ "verdict": "PASS"
+}

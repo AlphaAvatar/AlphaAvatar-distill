@@ -867,14 +867,35 @@ The original 15:
 
 | step | state | cost |
 | --- | --- | --- |
-| R0: `scored_v1` GPU equivalence | ready; proposed authorization and command written; needs its grant | $1.53 expected, $3.60 hard |
-| reference calibration (stage `L` of `topk_adoption_driver.py`): λ, thresholds, rescoring cost, objective overhead, cache-fix GPU check | wired, CPU-tested; plan, campaign and proposed authorization written; needs its grant; **after R0, before D2's search** | $0.68 expected, $1.18 must-complete |
-| D2 preregistration | **draft** `phase_d2/plans/d2_preregistration_v1.json` (`2641a820…`, K = 4); needs maintainer approval | — |
-| D2 session and search driver | `phase_d2/d2_session.py`, `autoinit_d2_driver.py`: checked against the preregistration at $0 | — |
-| D2 launcher and grant schema | **owed** (needs the price route and the formal-allowance scope first) | — |
-| exact engine ids for the rescoring | **done** without a protocol change: `uncapped_eval_token_ids.py` | — |
+| R0: `scored_v1` GPU equivalence (KL path) | **granted** $4.00 / $3.60 (2026-10-13); run `r0_20261013_154325` | $1.53 expected, $3.60 hard |
+| reference calibration, stage `L`: λ, thresholds, rescoring cost, objective overhead, cache-fix GPU evidence, cached-vs-recomputed and D2 scored-rows equivalence | **granted** $1.76 / $1.42 (plan v2); runs after R0's review | $0.87 expected; $1.18 must-complete, $1.42 with the core steps |
+| D2 preregistration | draft `phase_d2/plans/d2_preregistration_v1.json`, accepted in principle; its exact revision needs approval in the search grant | — |
+| D2 session, driver, launcher, grant type | **built, $0-tested**: `d2_session.py`, `autoinit_d2_driver.py`, `autoinit_d2_launch.py`, `d2_authorization.py`, pod branch `SESSION_KIND=d2` | — |
+| D2 search price | `d2_budget.py`, switched only by booked, hash-verified stage-L evidence | records $33.30 / cache-fixed $23.68 |
+| `phase_d2` in `funds_formal_sessions_of` | **owed: maintainer amendment**; the issuer refuses without it | — |
+| exact engine ids for the rescoring | wrapper done, stub-validated; **real vLLM validation and cost owed** before a behavioural driver enables it | — |
 | behavioural driver with the wrapper and the rescoring | owed engineering | — |
 | D3 driver and preregistration (λ frozen in its identity) | after D2 | — |
+
+**The D2 launch chain, and what each guard is for:**
+
+- **Soft stop.** The driver's deadline is `plan.soft_stop_minutes` minus the
+  session minutes already elapsed. D1's launcher read
+  `plan.soft_stop_seconds`, a field `BudgetPlan` does not have, so D1's driver
+  ran with no deadline and only the watchdog bounded it. D1 is closed, and its
+  file is left as it is.
+- **Reference-cache regression guard.** When the cached-cell price is in
+  force, the first DEPTH expansion that does not cache its reference expires
+  the deadline. The search then fails closed with every record written, and
+  the regression is named in `d2_search.json`. A records-priced search is
+  unguarded, because its price already assumes recomputes.
+- **Failure path.** It keeps `d2_search.json` (budget, pricing, objective
+  telemetry, deadline), the journal, the per-expansion telemetry with cache
+  modes, and the state journal. None of them is required, so an early stop
+  still collects what exists.
+- **No readiness record.** P8.2.1 applies: the grant binds the harness by
+  membership and digest, the session-commit gate binds the tree, and the
+  bundle round trip binds what the pod fetches.
 
 Behavioural screening and confirmation run on `d_series_shared_eval@v1`,
 which this decision leaves unchanged.
