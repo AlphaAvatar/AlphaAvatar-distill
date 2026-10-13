@@ -1,6 +1,25 @@
-# D2 / D3 scientific objectives, v1: definition, student identity, implementation
+# D2 / D3 scientific objectives: definition, student identity, implementation
 
-**Status:** contract and core implementation, 2026-10-13. Authorizes nothing.
+**Status:** contract revision 3 and its core implementation, 2026-10-13.
+Authorizes nothing.
+
+**Revision 3, after an independent review.** The rest of this page reflects
+it. The objectives were re-versioned to v2: D2 is `063bafd4…`, and D3 is
+pending λ.
+
+1. **State-evaluation aggregation.** It now uses the KL-only path's `T_x`
+   weighting, with a built-in KL-only control (§1).
+2. **λ and the diagnostic thresholds.** Both are measured **before D2's
+   search**, on 147 unique items rather than 209 draws (§4).
+3. **Scope.** The objective acts on DEPTH, state evaluation and the beam, not
+   on the FFN/WIDTH/ATTENTION local rules. Confidence read on intermediate
+   candidates is not the final student's (§3).
+4. **High raw KL** is a registered diagnostic flag and never a selection
+   rule. Top-K mass is flagged beside confidence (§8).
+5. **Rescoring integration contract.** It covers exact ids, alignment
+   evidence, failure isolation and cost measured before pricing (§8a).
+6. **Budget.** There is a derived budget at K = 4, in
+   [`d2_budget_v1.json`](d2_budget_v1.json) (§7).
 
 This page follows the maintainer decision of 2026-10-13, which corrects the
 D2/D3 objectives. It supersedes the D2/D3 sections of
@@ -14,7 +33,8 @@ with a pointer here.
 | `scripts/stages/stage-1/families/d_series/objectives.py` | this campaign's instances (D2, D3(λ), `OBJECTIVE_PARETO_V1`) and the λ rule |
 | `scripts/stages/stage-1/families/d_series/calibrate_d3_lambda.py` | the λ measurement; runs on a GPU, before D3's search |
 | `scripts/stages/stage-1/families/d_series/rollout_profile.py`, `scripts/shared/evaluation/rollout_rescoring.py` | the behavioural diagnostics: text-level for every unit; per-position for new candidates |
-| `tests/initialization/test_scoring_objective.py`, `families/d_series/tests/test_d2_d3_objectives.py`, `test_rollout_diagnostics.py` | 76 tests |
+| `tests/initialization/test_scoring_objective.py`, `families/d_series/tests/test_d2_d3_objectives.py`, `test_rollout_diagnostics.py` | 92 tests (52 + 28 + 12) |
+| `scripts/stages/stage-1/families/d_series/d2_budget.py` → [`d2_budget_v1.json`](d2_budget_v1.json) | the derived budget through D2 |
 
 ## 0. Why the student's confidence enters: capacity-aware student reasoning
 
@@ -110,12 +130,38 @@ identity:
 - the denominator and the aggregation;
 - the direction, and λ.
 
-**One aggregation difference from D1, disclosed.** D1's *state evaluation*
-pools tokens within a sub-type, while D2/D3 average per item first, as
-decided. D2/D3 therefore also record D1's KL under the per-item rule
-(`state.objective.raw_kl.*`). That lets a reader separate the effect of the
-aggregation from the effect of confidence. DEPTH already averaged per item
-under D1, so it has no such difference.
+**Aggregation across items keeps D1's weighting in each consumer
+(revision 3).**
+
+- **Per item:** the formula keeps the fixed `1/T_x` and never divides by a
+  sum of confidence weights.
+- **DEPTH:** items are averaged equally within a sub-type, exactly as D1's
+  DEPTH did.
+- **State evaluation:**
+  - within a sub-type, items are weighted by `T_x`, which is the same as
+    pooling the integrand over the sub-type's scored positions and dividing
+    by their count;
+  - each critical class is pooled over items;
+  - this is exactly D1's state-KL weighting.
+- **Identity:** `aggregation: kl_path_weighting_per_consumer/v2`.
+
+Revision 2 had averaged state-evaluation items equally. That changed the
+length weighting as well as the integrand, so a ranking change could not be
+attributed to confidence.
+
+**The KL-only control is built in.** Every objective evaluation reports
+`state.objective.raw_kl.*`: the raw KL aggregated exactly as the objective
+is.
+
+- Tested to 1e-6 relative on a suite of unequal item lengths, it equals the
+  same evaluation's `state.teacher_kl.equal_domain_mean`, `.worst_domain`,
+  each domain, and `state.critical_token_kl`.
+- A companion test shows that item-equal weighting would *not* reproduce
+  them on that suite, so the control is not vacuous.
+- A mutation that reverts to item-equal weighting is caught.
+
+So, on the same states, rankings by raw KL and by the objective differ only
+through the integrand.
 
 ## 2. Computation order: one forward, with selection before the head
 
@@ -143,6 +189,25 @@ The tests show `scored_v1` and `all_v1` give identical objective scores and
 decisions, for DEPTH and for state evaluation, at batch sizes 1 and 3.
 
 ## 3. Which model is the student, operator by operator
+
+**Scope** (contract field `objective_scope`). The new objective acts directly
+on exactly three places:
+
+- DEPTH's operator-local candidate evaluation;
+- global state evaluation;
+- beam ranking and pruning.
+
+The FFN, WIDTH and ATTENTION local rules keep D1's statistic. **Do not claim
+that all four operators' local rules use student confidence.**
+
+**The confidence the search reads belongs to intermediate candidates:**
+
+- in DEPTH, the parent with layers bypassed;
+- in state evaluation, partially compressed children.
+
+All of this is before recovery training. It is not the final ~0.6B student's
+confidence, and it is not evidence about that model's capacity adaptation;
+only the behavioural evaluation after recovery speaks to that.
 
 Each operator is answered against the user's eight questions.
 
@@ -262,13 +327,18 @@ contract):
 
 - **Reference pair:** the teacher (reference) and B (student), a pair no
   D-series search produced.
-- **Items:** every item of `calib.domain_balanced@v1`,
-  `calib.reasoning_heavy@v2` and `state_eval_v1`, each counted once (209
-  items; 44,746 + 46,825 + 54,014 scored positions).
+- **Items:** the three sets hold **209 draws but 147 unique items** by
+  content identity, and each unique item counts once (rule v2):
+  - `reasoning_heavy@v2`'s 62 draws are 51 unique items, and every one of
+    them is also in `domain_balanced@v1` (67 items, the same pool sampled
+    with replacement);
+  - `state_eval_v1` adds 80 disjoint items.
+
+  The with-duplicates value is reported as sensitivity only.
 - **Per-item quantities:** fixed-denominator means of the Top-200 + tail KL
   and of B's own Top-200 confidence.
-- **Reported as sensitivity, never used to choose:** the SD ratio, each set
-  alone, and q2 as the student.
+- **Reported as sensitivity, never used to choose:** the SD ratio, the
+  209-draw value, each set alone, and q2 as the student.
 - **Refused:** fewer than 20 items, `IQR(c) = 0`, a non-finite KL, or a λ
   that is not positive and finite.
 
@@ -278,11 +348,20 @@ interquartile range of confidence trades for one interquartile range of KL,
 so neither dominates the ranking by units alone. The IQR is used because
 per-item KL is heavy-tailed; a test shows one extreme item does not move λ.
 
-**When.** λ is measured **once, before D3's search**, by
-`calibrate_d3_lambda.py`, and committed as
-`analyses/d3_lambda_calibration.json`. Until that record exists,
-`objectives.frozen_d3_objective` refuses and D3 has no objective. No D2 search
-or behavioural result enters it.
+**When.** λ is measured **once, before D2's formal search**. This
+corrects revision 2, whose execution plan said "before D3" while the rule
+said "before D2". It is measured by `reference_calibration.py`, in the same
+pass as:
+
+- the **diagnostic thresholds**: p90 per-position KL, p90 confidence and p10
+  Top-K mass of B against the teacher, all registered in
+  `diagnostic_threshold_rule`;
+- a **measured cost** of the rollout rescoring on the real teacher and a
+  0.6B model.
+
+It is committed as `analyses/d2_d3_reference_calibration.json`. Until that
+record exists, `frozen_d3_objective` and `frozen_diagnostic_thresholds`
+refuse. No D2 or D3 search or behavioural result enters it.
 
 **It needs a GPU.** It needs teacher and B forwards, and B is rebuilt on the
 pod (1279.8 s measured). This dev box has neither the teacher's weights nor
@@ -291,13 +370,16 @@ the memory.
 **Cost.** Setup 1.6 / 15 min (expected / bound), other overhead 2.8 / 13.6,
 B rebuild 21.3, forwards about 3–5, teardown about 1:
 
+From [`d2_budget_v1.json`](d2_budget_v1.json):
+
 | | time | all-in |
 | --- | --- | --- |
-| expected | about 30 min | about $0.55 |
-| ceiling | about 57 min | about $1.05 |
+| expected | 29.7 min | $0.54 |
+| hard | 64.6 min | $1.18 |
+| proposed grant (with $0.30 reserve) | — | $1.52 |
 
 The session wiring, which runs `frozen_baseline_spec` and then this script, is
-owed before D3. It does not block D2.
+owed **before D2's search**. It needs its own grant.
 
 ## 5. Identity, and why D1 and R0 are unchanged
 
@@ -381,13 +463,31 @@ same Top-200 + tail support with `all_v1` (the previous design page said
 - `scored_v1` is expected to subtract about 8% of DEPTH time, if R0 passes;
 - the objective adds the estimates above.
 
-Expect roughly D1's measured cost, about ±10%. The formal price comes from
-the search cost model at each preregistration. D3 adds the λ session (§4).
+**The executable budget** is derived by `d2_budget.py` into
+[`d2_budget_v1.json`](d2_budget_v1.json) from D1's priced chain, R0's plan and
+the measured probe timings, at K = 4:
 
-**Behavioural cost** is unchanged from the shared protocol: 2K + 3 probes per
-experiment.
+| step | expected | hard ceiling |
+| --- | --- | --- |
+| R0 | $1.53 | $3.60 (grant $4.00) |
+| reference calibration (λ, thresholds, rescoring timing) | $0.54 | $1.18 (grant $1.52) |
+| D2 search (D1's priced search; the objective's overhead provisionally ×1.10) | $11.07 | $23.46 |
+| D2 screening (8 probes, 4 arms; no B/q2) | $16.34 | $20.31 |
+| D2 confirmation (3 probes, 1 arm) | $6.87 | $8.36 |
+| **total** | **$36.35** | **$56.91** (+$1.50 teardown reserves) |
 
-**The choice of K is left to D2's preregistration, not taken by cost:**
+- Every session is under the $30 per-session cap.
+- The rollout rescoring is **excluded** from the ceilings until the reference
+  calibration measures it. Its estimate, about $1.32, is shown separately and
+  is not a bound.
+- Spending authority: the project has $122.46 left of $590, and the
+  derivation is the authority. R0 and the reference calibration together are
+  $5.52 against the GPU-engineering allowance of $6.65.
+
+**Behavioural field.** The shared protocol trains 2K + 3 probes per
+experiment and never trains B or q2. **K = 4 is prepared**, as the independent
+review recommends, for wider structural coverage. It is frozen only in D2's
+preregistration. For reference:
 
 | | K = 2 | K = 4 |
 | --- | --- | --- |
@@ -416,8 +516,36 @@ Recorded on every DEPTH candidate and every state:
 **D2's degeneracy.** A candidate can lower D2's objective by becoming more
 confident at high-KL positions. D2's ranking never sees raw KL, so it is
 always recorded next to the objective, and **a low D2 score is never read as
-higher fidelity**. A D2 preregistration should name a raw-KL diagnostic
-threshold that triggers review.
+higher fidelity**.
+
+**High raw KL is not a reason to drop a candidate.** A confident student
+departing from the teacher is the hypothesis under test. Review is a
+**registered diagnostic flag** (`diagnostic_threshold_rule`):
+
+- it is computed offline from records the search already writes;
+- it never enters a score, a ranking, pruning or retention;
+- it is never a manual step in a running search.
+
+**Thresholds** come from the B–teacher reference calibration and are frozen
+before any D2 candidate exists:
+
+| threshold | value |
+| --- | --- |
+| high KL | p90 of per-position KL |
+| high confidence | p90 of B's confidence |
+| low Top-K mass | p10 of B's Top-K mass |
+
+**What is recorded.** Each DEPTH candidate and each state records two joint
+histograms:
+
+- confidence decile × a fixed log grid of KL;
+- confidence decile × Top-K-mass decile. This exposes a high *conditional*
+  confidence sitting on a Top-K that holds little of the student's real
+  probability.
+
+`objectives.flag_counts` applies a threshold at the first grid edge at or
+beyond it, so a flag never counts a position the exact threshold would not.
+The rollout rescoring applies the thresholds per position, exactly.
 
 ## 8a. Behavioural diagnostics and the claim boundary
 
@@ -447,6 +575,32 @@ All of it is **exploratory**: none of it decides `SHARED_GO` or `NO_GO`.
 - **Tests:** an independent computation with the causal shift; a mutation of
   the shift is caught.
 - **Owed:** the D2/D3 behavioural driver must call it.
+
+**Integration contract** (contract field `rollout_rescoring_integration`,
+from the independent review):
+
+- **Exact engine ids.**
+  - The generator (`uncapped_eval.py`) holds the ids in memory but records
+    only decoded text.
+  - Recording them changes a file in the generation source set, which moves
+    the generation fingerprint and therefore the shared protocol's evaluation
+    identity. It is therefore a **versioned decision**:
+    `d_series_shared_eval` v2 with a record-only equivalence check, not an
+    edit.
+  - Until it is taken, the rescoring runs on re-tokenized text, labelled
+    `ids_source=retokenized_text`, with per-sample exactness recorded.
+    `alignment_evidence` refuses "engine" ids that do not reproduce the
+    record's count and text.
+- **Alignment evidence per sample:** prompt and completion id hashes, the
+  tokenizer hash, the generation fingerprint, and the count and text match.
+- **Untouched:** D1's evidence, and the shared protocol's scoring contract
+  and endpoint.
+- **Release order:** a checkpoint is released only after the diagnostic
+  evidence is persisted, when a consumer exists.
+- **Failure isolation:** `rescore_unit` records failures per sample and never
+  touches a completed score.
+- **Cost:** measured by the reference calibration before any ceiling
+  includes it.
 
 **What B and q2 can and cannot contribute.** Their ten units hold decoded
 text and the engine's token counts. They hold **no** token ids,
@@ -487,6 +641,32 @@ set what the diagnostics can resolve:
   - a mechanism from the diagnostics alone.
 
 ## 9. Evidence
+
+**Revision 3 additions:**
+
+- **Core:** 52 tests, up from 49. Added:
+  - the toy suite now has unequal item lengths;
+  - `T_x` weighting;
+  - the KL-only control equals D1's metrics;
+  - a non-vacuity test;
+  - joint histograms count every scored position.
+
+  A mutation reverting to item-equal weighting is caught.
+- **Family:** 28 tests, up from 19. Added:
+  - unique-item dedup;
+  - with-duplicates sensitivity and thresholds in the record;
+  - conservative offline flags;
+  - scope and ordering;
+  - the measured-rate projection;
+  - the budget: derived, no B/q2 probes, the diagnostic excluded from
+    ceilings.
+- **Rescoring:** 12 tests, up from 8. Added:
+  - engine ids must reproduce the record;
+  - re-tokenized ids are labelled;
+  - low Top-K mass is flagged;
+  - one failing sample does not stop a unit.
+
+The lists below are revision 2's.
 
 **`tests/initialization/test_scoring_objective.py`: 49 tests.**
 
@@ -580,10 +760,11 @@ The original 15:
 | step | state | cost |
 | --- | --- | --- |
 | R0: `scored_v1` GPU equivalence | ready, needs its grant | $1.53 expected, $3.60 hard ceiling |
+| reference calibration: λ + diagnostic thresholds + measured rescoring cost (`reference_calibration.py`) | code ready; session wiring owed; needs its grant; **before D2's search** | $0.54 expected, $1.18 hard ceiling |
 | D2 search driver: `SearchConfig(scoring_objective=D2_OBJECTIVE, policy=OBJECTIVE_PARETO_V1)`, evaluator with the same objective, `scored_v1` if R0 passes | owed engineering, $0 | — |
-| D2 retention rule and K, raw-KL review threshold, preregistration, pricing | owed, maintainer decisions inside | — |
-| D3 λ session wiring and run | owed before D3 | ~$0.55, ceiling ~$1.05 |
-| D3 driver and preregistration (λ frozen in its identity) | after λ | — |
+| D2 retention rule, K (4 prepared), preregistration, pricing from `d2_budget_v1.json` | owed, maintainer decisions inside | see §7 |
+| behavioural driver with the rescoring wired in (§8a contract); exact engine ids need the versioned generation-record decision | owed engineering | — |
+| D3 driver and preregistration (λ frozen in its identity) | after D2 | — |
 
 Behavioural screening and confirmation run on `d_series_shared_eval@v1`,
 which this decision leaves unchanged.

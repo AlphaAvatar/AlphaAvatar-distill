@@ -80,9 +80,9 @@
   },
   "objectives": {
     "contract": "logs/stages/stage-1/families/d_series/plans/d2_d3_objective_contract_v1.json",
-    "contract_hash": "1e3368482899f7d0901ab87d883ba57b0789dda01efba90d7d26bb673c2c80d6",
+    "contract_hash": "1006c4368e1bbdb0e0bfc5bed5fc53e6dbe1b995690ec4078bdd5cea17528b3b",
     "design": "logs/stages/stage-1/families/d_series/plans/d2_d3_objective_design.md",
-    "d2_objective_hash": "999f002bee0701a5528480b8bcb66cd47bfcdd41cb88a7d175569f96fac81a01",
+    "d2_objective_hash": "063bafd46c9dc8ece77869f6b80a5e618bfad0ec237f47c2d9bdde06b1263a20",
     "d3_status": "PENDING_LAMBDA"
   },
   "authorizes": "nothing"

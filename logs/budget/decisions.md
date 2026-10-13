@@ -10590,3 +10590,44 @@ on a paid pod.
     confirmation, so mechanism analyses are exploratory and low-powered.
 - **Revisit when:** a D2 preregistration registers the quadrant thresholds and
   wires the rescoring into its behavioural driver.
+
+## 2026-10-13 — D2/D3 independent review: attribution, λ order, scope, flags, budget
+
+- **Context:** an independent review of `5fc5150d` accepted the D2/D3
+  objectives and the D1 evidence reuse, and required six corrections before
+  D2's formal search.
+- **Decision (maintainer, via the review):**
+  1. Remove the state-evaluation aggregation confound, or control for it.
+  2. Freeze λ before D2's search, and report independence honestly
+     (147 unique items, not 209).
+  3. Do not overstate where confidence acts.
+  4. High raw KL is a registered flag, never a selection rule.
+  5. Wire the rescoring with exact ids, isolation and a measured cost.
+  6. The 0.10 family bound is nominal, the budget has one authority, and K = 4
+     is prepared.
+- **Implemented ($0):**
+  - **Aggregation:** the state evaluator aggregates the objective with D1's
+    KL-path weighting (`T_x`-weighted per sub-type, critical classes pooled).
+    `state.objective.raw_kl.*` equals D1's KL metrics (tested; a mutation is
+    caught). The objectives were re-versioned to v2 (D2 `063bafd4…`) in
+    contract revision 3.
+  - **Reference calibration:** `reference_calibration.py` measures λ (rule
+    v2, unique items), the diagnostic thresholds and the rescoring's real GPU
+    cost in one pass. It runs before D2's search and needs its own grant.
+  - **Flags:** `objective_scope` and `diagnostic_threshold_rule` registered,
+    with joint histograms and conservative offline `flag_counts`.
+  - **Rescoring:** `rollout_rescoring` gains alignment evidence, exact-id
+    refusal and per-sample failure isolation.
+  - **Shared protocol:** an erratum on the nominal union bound sits outside
+    its hash, so `protocol_hash` 5ed198ae… is unchanged.
+  - **Budget:** `current.json` loses the stale `project_cap_usd` 465. The
+    deriver's 590 is the one cap.
+  - **D2 budget:** `d2_budget_v1.json` gives $36.35 expected and $56.91 hard
+    at K = 4, every session under $30, with the rescoring excluded until
+    measured.
+- **Owed decision:** recording exact engine ids changes the generation
+  source set, and therefore the shared protocol's evaluation identity. That
+  needs a versioned `d_series_shared_eval` v2 with a record-only equivalence
+  check. Until then the rescoring runs on labelled re-tokenized ids.
+- **No paid resource authorized.** R0 ($4.00), the reference calibration
+  ($1.52) and the D2 search and behaviour each need explicit grants.

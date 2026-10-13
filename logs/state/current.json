@@ -41,7 +41,6 @@
   "per_session_ceiling_usd": 30.0,
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
-  "project_cap_usd": 465.0,
   "remaining_is_not_permission": true,
   "remaining_usd": 122.4554,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
@@ -128,7 +127,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "MAINTAINER 2026-10-13: D2/D3 objectives corrected (student Top-200 confidence; D2 (1-c)KL fixed 1/T_x, D3 KL-lambda*c). R0 ready, needs a grant; then D2 driver+prereg. Owner: families/d_series/plans/d2_d3_objective_design.md.",
+ "next": "REVIEW 2026-10-13 applied (D2/D3 contract rev 3). Order: R0 ($4.00) -> reference calibration ($1.52, lambda+thresholds) -> D2 search+behaviour (K=4 prepared). All need grants. Owner: families/d_series/plans/d2_d3_objective_design.md, d2_budget_v1.json.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "R0 (granted separately), then D2's engineering and preregistration on the shared protocol; R1 at $0 in parallel. No provider resource exists.",

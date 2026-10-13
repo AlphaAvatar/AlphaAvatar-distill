@@ -3,7 +3,7 @@
  "_contract": "Whether every B/q2 unit D1 measured can be consumed by the shared protocol: bytes re-hashed against the committed records, per-sample rows recomputed from the raw generations by the rung's own scorer, and D1's two decisions re-derived through the shared path. $0, CPU. Deterministic: rerun to check.",
  "protocol_hash": "5ed198aed960e987f137ec6342ef7fa6ac24c8484b991bac8cd6a210f7ae742d",
  "implementation_sha256": {
-  "scripts/stages/stage-1/families/d_series/shared_evaluation.py": "05a462b0fdbc488bfabb512f3eeab15667554d9737459321d2083d06a6df086d",
+  "scripts/stages/stage-1/families/d_series/shared_evaluation.py": "fe3618e87c2acfc4d5fe58dd14b0aa6ae7299bc3a5994f354cf967a3b100c5a7",
   "scripts/shared/evaluation/evidence_reuse.py": "634024565e28b3cbb6dc307b76fcd55ea3b02608eb9a40da06a78e3cf66647f4"
  },
  "rescored": true,

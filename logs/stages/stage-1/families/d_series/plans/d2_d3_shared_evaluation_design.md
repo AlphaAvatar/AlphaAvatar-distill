@@ -130,8 +130,14 @@ seed. The audit shows each outcome on real data:
    - The family {D2, D3} is controlled by **Bonferroni with a fixed equal
      split, one-sided α = 0.025 each**. That holds under any dependence and
      needs no knowledge of which experiment reports first. D1 already spent
-     α = 0.05 on these rows, so the union bound on *any* false pass across
-     D1–D3 is **0.10**.
+     α = 0.05 on these rows, so the nominal union bound on *any* false pass
+     across D1–D3 is **0.10**.
+   - **Erratum, independent review 2026-10-13:** 0.10 is a nominal
+     accounting bound, the sum of nominal levels. It holds only if each test
+     attains its nominal level, which adaptive reuse of the already-observed
+     rows can violate. It is **not** an unconditional guarantee. The protocol
+     record carries this erratum outside its hash, so `protocol_hash` is
+     unchanged.
 3. **Multiplicity correction does not cover adaptive reuse.** That risk is
    controlled by what is frozen before any D2/D3 behavioural result exists:
    - the objective definitions, already in the 2026-10-01 roadmap;
@@ -192,8 +198,13 @@ The savings in detail:
   contradicts). For the D2/D3 search price, see
   [`d2_d3_objective_design.md`](d2_d3_objective_design.md) §7.
 
-K is each experiment's preregistered choice, not this protocol's. At D1's
-measured spread, **K = 2** gives the best balance:
+K is each experiment's preregistered choice, not this protocol's.
+**Revision, independent review 2026-10-13: K = 4 is PREPARED** for D2, for
+wider structural coverage, because how often the search's quality order
+contains the behaviourally better candidate is unmeasured. It is frozen only
+in D2's preregistration and complete budget
+([`d2_budget_v1.json`](d2_budget_v1.json)). The arithmetic below is kept:
+at D1's measured spread, **K = 2** gives:
 
 - **Probes:** 7 per experiment.
 - **Screening inflation:** 0.43 SESOI.

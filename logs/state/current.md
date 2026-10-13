@@ -32,6 +32,19 @@ the candidate student's own Top-200 conditional entropy,
 - Owner:
   [`d2_d3_objective_design.md`](../stages/stage-1/families/d_series/plans/d2_d3_objective_design.md).
 
+**INDEPENDENT REVIEW APPLIED (2026-10-13).** The D2/D3 contract is at
+revision 3:
+- The objective aggregates with D1's KL-path weighting, and the raw KL
+  equals D1's metrics (the KL-only control).
+- λ and the diagnostic thresholds are measured before D2's search, on 147
+  unique items.
+- The objective acts on DEPTH, state evaluation and the beam only.
+- High KL is a flag, never a rule.
+- The budget through D2 is $36.35 expected and $56.91 hard
+  (`families/d_series/plans/d2_budget_v1.json`).
+- Order: R0 ($4.00 grant), then the reference calibration ($1.52 grant),
+  then D2. None is authorized.
+
 **NEXT ROUND: R0 → D2 → D3 ON A SHARED BEHAVIOURAL EVALUATION (maintainer
 decision, 2026-10-13).** D2/D3 do not retrain B or q2.
 - A new, versioned protocol `d_series_shared_eval@v1` (`protocol_hash`

@@ -35,16 +35,16 @@
   "objective": {
    "schema": "aadistill.scoring_objective/v1",
    "objective_id": "objective.d2_student_uncertainty_weighted_kl",
-   "version": 1,
+   "version": 2,
    "form": "student_uncertainty_weighted_kl",
    "entropy_definition": "student_own_topk_conditional_entropy/v1",
    "entropy_top_k": 200,
    "confidence_mapping": "one_minus_entropy_over_log_k/v1",
    "denominator": "scored_position_count/v1",
-   "item_aggregation": "per_item_fixed_denominator_then_caller_rule/v1",
+   "aggregation": "kl_path_weighting_per_consumer/v2",
    "direction": "minimize"
   },
-  "objective_hash": "999f002bee0701a5528480b8bcb66cd47bfcdd41cb88a7d175569f96fac81a01",
+  "objective_hash": "063bafd46c9dc8ece77869f6b80a5e618bfad0ec237f47c2d9bdde06b1263a20",
   "formula": "L(x) = (1/T_x) sum_{t in T_x} (1 - c_t) KL_t, minimized",
   "hypothesis": "The more certain the student is of its own prediction at a position, the weaker the KL penalty for differing from the teacher there should be. This does NOT assume the student is right where it is confident; it tests whether relaxing strict imitation of the teacher's distribution helps a small model keep computation and reasoning suited to its own capacity."
  },
@@ -52,25 +52,26 @@
   "objective_template": {
    "schema": "aadistill.scoring_objective/v1",
    "objective_id": "objective.d3_kl_minus_student_confidence",
-   "version": 1,
+   "version": 2,
    "form": "kl_minus_student_confidence_reward",
    "entropy_definition": "student_own_topk_conditional_entropy/v1",
    "entropy_top_k": 200,
    "confidence_mapping": "one_minus_entropy_over_log_k/v1",
    "denominator": "scored_position_count/v1",
-   "item_aggregation": "per_item_fixed_denominator_then_caller_rule/v1",
+   "aggregation": "kl_path_weighting_per_consumer/v2",
    "direction": "minimize"
   },
   "reward_scale": null,
   "objective_hash": null,
-  "status": "PENDING_LAMBDA: the rule is registered; the value is measured on the reference pair before D3's search",
+  "status": "PENDING_LAMBDA: the rule is registered; the value is measured on the reference pair BEFORE D2's formal search, with the diagnostic thresholds",
   "formula": "L(x) = (1/T_x) sum_{t in T_x} [KL_t - lambda c_t], minimized (S = -L maximized)",
   "hypothesis": "The student's own predictive certainty may carry structural-selection value independent of the teacher KL: even where its token distribution differs from the teacher's, a student that is certain of its own distribution earns a separate confidence reward. Whether that signal is useful is decided by task correctness after recovery training, not by the reward.",
   "lambda_rule": {
-   "schema": "aadistill.d_series.d3_lambda_rule/v1",
+   "schema": "aadistill.d_series.d3_lambda_rule/v2",
    "statistic": "per-item means over each item's scored positions (1/T_x)",
    "formula": "lambda = IQR(item KL) / IQR(item confidence)",
-   "pooling": "every item of the three item sets once, unweighted; the per-set values are reported as sensitivity, never chosen",
+   "pooling": "every UNIQUE item of the three item sets once, unweighted, unique by content identity (sha256 of the token ids). The three sets hold 209 draws but 147 unique items: reasoning_heavy@v2's 62 draws are 51 unique items, all of them also in domain_balanced@v1, which sampled with replacement from the same pool. Counting a repeated draw twice would weight it twice. The with-duplicates value and each set alone are reported as sensitivity, never chosen",
+   "when": "ONCE, BEFORE D2's formal search -- not before D3 -- and never revised by any D2 or D3 search or behavioural result",
    "rounding": "3 significant figures",
    "reference": {
     "reference_model": "the original teacher, Qwen/Qwen3-4B-Thinking-2507 @ 768f209d",
@@ -88,6 +89,7 @@
    "why_this_reference": "a pair NO D-series search produced: the teacher every search starts from and the incumbent every candidate is compared with, at the geometry every search ends at. Measured before D2's search starts and never revised: a lambda chosen after seeing D2 or D3 search or behavioural results would be a selection on outcomes.",
    "sensitivity_reported_not_used": [
     "SD ratio",
+    "with duplicate draws (209)",
     "each item set alone",
     "q2 as the student"
    ],
@@ -96,9 +98,33 @@
     "a non-finite or non-positive lambda",
     "fewer than 20 items"
    ],
-   "rule_hash": "5ba538c734079fa5b0e91c409040943509cb0c3b1a84999c06e0958b7c3190c8"
+   "rule_hash": "8817206125772078b4f2c472df3e3cb919d0aa2bcfb4585ae090180729047256"
   },
-  "lambda_record": "logs/stages/stage-1/families/d_series/analyses/d3_lambda_calibration.json"
+  "lambda_record": "logs/stages/stage-1/families/d_series/analyses/d2_d3_reference_calibration.json"
+ },
+ "diagnostic_threshold_rule": {
+  "schema": "aadistill.d_series.diagnostic_threshold_rule/v1",
+  "source": "the same B-vs-teacher reference calibration as lambda, over the scored positions of the 147 unique items, measured before D2's formal search",
+  "thresholds": {
+   "high_kl": "p90 of per-position Top-200 + tail KL (teacher || B)",
+   "high_confidence": "p90 of B's per-position Top-200 confidence",
+   "low_topk_mass": "p10 of B's per-position Top-200 mass"
+  },
+  "flags": {
+   "high_confidence_high_kl": "confident AND far from the teacher: alternative reasoning or overconfidence, told apart only by correctness",
+   "high_confidence_low_topk_mass": "a confident Top-200 that holds little of the student's real probability",
+   "high_raw_kl": "raw KL at or above high_kl, recorded, never acted on"
+  },
+  "application": {
+   "rollout_rescoring": "per position, exact thresholds",
+   "depth_candidates_and_states": "from the recorded joint histograms; a 'high' threshold is applied at the first grid edge at or above it and a 'low' one at the last edge at or below it, so a flag never counts a position the exact threshold would not"
+  },
+  "never": [
+   "enters a score, ranking, pruning or retention",
+   "triggers a manual intervention in a running search",
+   "is set or revised after D2/D3 candidate results exist"
+  ],
+  "rule_hash": "8ea3a526d7f9d2eb0394f3ed21ce136a41e52c5d328f4e64bad8c020b234405b"
  },
  "ranking": {
   "policy": "beam.pareto_scoring_objective@v1",
@@ -113,6 +139,18 @@
    "state.objective.worst_domain": 0.0001,
    "state.objective.critical_token": 0.0001
   }
+ },
+ "objective_scope": {
+  "acts_directly_on": [
+   "DEPTH's operator-local candidate evaluation (depth.causal_kl_greedy_v1)",
+   "global state evaluation of every child",
+   "beam ranking and pruning (OBJECTIVE_PARETO_V1)"
+  ],
+  "does_not_act_on": [
+   "FFN, residual WIDTH and ATTENTION operator-local selection: they keep D1's target-aware activation statistic unchanged; their children are reached by the objective only through state evaluation and the beam"
+  ],
+  "do_not_claim": "that the local rules of all four operators use student confidence",
+  "intermediate_vs_final_student": "the confidence the search reads belongs to INTERMEDIATE candidates -- the parent with some layers bypassed in DEPTH, partially compressed children in state evaluation -- before any recovery training. It is not the confidence of the final ~0.6B student after recovery, and it is not evidence about that model's capacity adaptation; only the behavioural evaluation after recovery speaks to that"
  },
  "where_each_objective_applies": {
   "depth.causal_kl_greedy_v1": "OPERATOR-LOCAL, exactly: the candidate is the parent with S bypassed, and its KL against the parent and its own Top-K entropy come from the same forward",
@@ -132,7 +170,30 @@
   "reference tail mass",
   "D1's KL metrics, unchanged, beside them"
  ],
- "d2_degeneracy_watch": "a candidate can lower D2's objective by becoming more confident at high-KL positions. D2's ranking never sees raw KL, so raw KL, confidence and the weight distribution are recorded on every candidate and state, and a low D2 score is never read as higher fidelity",
+ "d2_degeneracy_watch": "a candidate can lower D2's objective by becoming more confident at high-KL positions. D2's ranking never sees raw KL, so raw KL, confidence, Top-K mass and the weight distribution are recorded on every candidate and state, and a low D2 score is never read as higher fidelity. High raw KL is a registered DIAGNOSTIC FLAG (diagnostic_threshold_rule), never an elimination criterion and never a manual intervention",
+ "aggregation_control": {
+  "issue": "revision 2 averaged state-evaluation items EQUALLY, where D1's KL-only state metrics weight items by scored positions within a sub-type and pool critical classes over items. That changed length weighting as well as the integrand, so a D1-vs-D2 ranking change could not be attributed to confidence",
+  "resolution": "each consumer keeps its KL-only path's weighting (objective identity field `aggregation`, kl_path_weighting_per_consumer/v2): DEPTH averages items equally, as D1's DEPTH did; state evaluation weights items by T_x and pools critical classes. The per-item formula keeps the fixed 1/T_x and never divides by a sum of confidence weights",
+  "built_in_kl_only_control": "every objective evaluation also reports state.objective.raw_kl.* -- the raw KL aggregated exactly as the objective is -- which equals D1's state.teacher_kl.* and state.critical_token_kl in the same evaluation (tested to 1e-6). Rankings by raw_kl and by the objective on the same states isolate the effect of the integrand"
+ },
+ "rollout_rescoring_integration": {
+  "token_ids": "use the generation engine's exact ids. The current generator (scripts/shared/evaluation/uncapped_eval.py) holds them in memory but records only decoded text; recording them changes a file in the generation source set, hence the generation fingerprint and the shared protocol's evaluation identity. That is a VERSIONED decision (d_series_shared_eval v2 with a record-only equivalence check), not an edit. Until it is taken, ids_source=retokenized_text, labelled approximate per sample",
+  "alignment_evidence": [
+   "prompt ids sha256",
+   "completion ids sha256",
+   "tokenizer sha256",
+   "generation fingerprint",
+   "count and decoded-text match with the record"
+  ],
+  "untouched": [
+   "D1's evaluation evidence",
+   "the shared protocol's scoring contract and endpoint"
+  ],
+  "checkpoint_release": "only after the diagnostic evidence is persisted durably, when a consumer exists",
+  "failure_isolation": "a rescoring failure is recorded per sample and never alters or blocks a completed per-sample score (rollout_rescoring.rescore_unit)",
+  "cost": "MEASURE before pricing: the reference calibration session times the rescoring on the real teacher and B over sequences of D1's measured lengths; the behavioural ceiling includes it only after that measurement. The 3-5 min/probe figure is an estimate, not a bound",
+  "historical_units": "no logits, confidence or student-side quantity is computed or estimated for B or q2"
+ },
  "independence": "D3's definition, K and lambda rule are fixed in this record before D2 runs; no D2 behavioural or search result may adjust them",
  "measurement_distinctions": {
   "student_entropy_on_teacher_native_prefixes": "what the D2/D3 search objectives use: the student's own Top-K entropy on the frozen teacher-native calibration and state-eval sequences",
@@ -190,11 +251,14 @@
    "that a lower D2/D3 search objective means better reasoning or higher fidelity",
    "that the student reasons differently, or better, where it is confident and far from the teacher, without rollout-level evidence linking those positions to correct completions",
    "any confidence or per-position statement about B or q2, whose checkpoints are retired and whose generations carry no log-probabilities",
-   "a mechanism from the exploratory diagnostics alone"
+   "a mechanism from the exploratory diagnostics alone",
+   "that the local selection rules of all four operators use student confidence (only DEPTH's does; see objective_scope)",
+   "that confidence read on intermediate search candidates describes the final recovered student's capacity adaptation",
+   "that the family-wise bound across D1-D3 is an unconditional guarantee: it is a nominal accounting bound, conditional on each test's nominal level, which adaptive reuse of the observed confirmation data can violate"
   ],
   "validation": "Top-K confidence is a proxy for structure selection; its usefulness is established only by independent behavioural evidence after recovery training"
  },
- "revision": 2,
+ "revision": 3,
  "revision_history": [
   {
    "revision": 1,
@@ -205,8 +269,13 @@
    "revision": 2,
    "date": "2026-10-13",
    "change": "capacity-aware motivation, hypotheses, measurement distinctions, behavioural diagnostics and claim boundary (maintainer supplement). Objective identities, ranking and lambda rule unchanged"
+  },
+  {
+   "revision": 3,
+   "date": "2026-10-13",
+   "change": "independent review: (1) state-evaluation aggregation now uses the KL-only path's T_x weighting, objectives re-versioned v2; (2) lambda and diagnostic thresholds measured before D2's search, on 147 unique items (lambda rule v2); (3) objective scope and intermediate-student boundary; (4) high raw KL is a registered flag only; (5) rescoring integration contract"
   }
  ],
- "contract_hash": "1e3368482899f7d0901ab87d883ba57b0789dda01efba90d7d26bb673c2c80d6",
+ "contract_hash": "1006c4368e1bbdb0e0bfc5bed5fc53e6dbe1b995690ec4078bdd5cea17528b3b",
  "authorizes": "nothing"
 }

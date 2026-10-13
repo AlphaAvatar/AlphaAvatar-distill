@@ -441,5 +441,13 @@
   "confirmation_verdict_sha256": "dea0678e8e30ea18a6ec469edae46eda49c46c83386ba74da4f88b545ae6d863",
   "verdict": "NO-GO"
  },
+ "errata": [
+  {
+   "date": "2026-10-13",
+   "source": "independent review",
+   "field": "statistics.family.d1_already_spent",
+   "correction": "`union_bound_over_d1_d2_d3` = 0.10 is a NOMINAL accounting bound: the sum of the three tests' nominal one-sided levels. It holds only if each test attains its nominal level, which adaptive reuse of the already-observed d1_confirmation rows can violate. It is not an unconditional guarantee, and its `_meaning` sentence (\"the probability that ANY of the three experiments falsely clears this battery is at most this bound\") must be read with that condition. No rule, alpha, outcome or identity changes."
+  }
+ ],
  "authorizes": "nothing"
 }

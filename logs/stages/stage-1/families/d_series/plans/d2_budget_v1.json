@@ -1,0 +1,139 @@
+{
+ "schema": "aadistill.d_series.d2_budget/v1",
+ "_contract": "Derived budget for R0, the reference calibration and D2 (search + behaviour on d_series_shared_eval@v1). AUTHORIZES NOTHING; each paid step needs its own grant at the live rate.",
+ "rate_usd_per_hour_basis": 1.09,
+ "k_candidates": 4,
+ "k_status": "K=4 PREPARED per the independent review; frozen only in D2's preregistration",
+ "order": [
+  "r0",
+  "reference_calibration",
+  "d2_search",
+  "d2_screening",
+  "d2_confirmation"
+ ],
+ "steps": {
+  "r0": {
+   "expected": {
+    "all_in_usd": 1.53,
+    "minutes": 83.4
+   },
+   "hard": {
+    "all_in_usd": 3.6,
+    "minutes": 196.7
+   },
+   "grant_proposed_usd": 4.0,
+   "owner": "logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/plan.json"
+  },
+  "reference_calibration": {
+   "expected": {
+    "minutes": 29.7,
+    "gpu_usd": 0.54,
+    "disk_usd": 0.0,
+    "all_in_usd": 0.54
+   },
+   "hard": {
+    "minutes": 64.6,
+    "gpu_usd": 1.17,
+    "disk_usd": 0.01,
+    "all_in_usd": 1.18
+   },
+   "components": {
+    "setup_and_overhead": [
+     4.4,
+     28.6
+    ],
+    "b_materialization": [
+     21.3,
+     22.0
+    ],
+    "teacher_fetch_and_load": [
+     1.0,
+     2.0
+    ],
+    "teacher_and_b_forwards_147_items": [
+     1.0,
+     5.0
+    ],
+    "rescoring_timing": [
+     1.0,
+     5.0
+    ],
+    "teardown": [
+     1.0,
+     2.0
+    ]
+   },
+   "_basis": "setup from R0's plan (measured a2/a8 components); B rebuild measured 1279.8 s (expected) and D1's 22 min per arm (bound); forwards from state-evaluation timings (80 items in ~11 s at the frozen suite) with a 5x allowance",
+   "grant_proposed_usd": 1.52
+  },
+  "d2_search": {
+   "expected": {
+    "minutes": 579.6,
+    "gpu_usd": 10.53,
+    "disk_usd": 0.54,
+    "all_in_usd": 11.07
+   },
+   "hard": {
+    "minutes": 1228.6,
+    "gpu_usd": 22.32,
+    "disk_usd": 1.14,
+    "all_in_usd": 23.46
+   },
+   "_basis": "D1's priced search (same space, support and beam): session overhead 95.0 min + structural max 1030.55 min x 1.1 (PROVISIONAL objective overhead). Expected: D1's measured 551.99 min x 1.05. No scored_v1 saving is assumed until R0 passes"
+  },
+  "d2_screening": {
+   "n_probes": 8,
+   "n_arms_materialized": 4,
+   "expected": {
+    "minutes": 886.1,
+    "gpu_usd": 16.1,
+    "disk_usd": 0.25,
+    "all_in_usd": 16.34
+   },
+   "hard": {
+    "minutes": 1101.0,
+    "gpu_usd": 20.0,
+    "disk_usd": 0.31,
+    "all_in_usd": 20.31
+   },
+   "rescoring_provisional_not_a_bound": {
+    "minutes": 52.0,
+    "gpu_usd": 0.94,
+    "disk_usd": 0.01,
+    "all_in_usd": 0.96
+   }
+  },
+  "d2_confirmation": {
+   "n_probes": 3,
+   "n_arms_materialized": 1,
+   "expected": {
+    "minutes": 372.5,
+    "gpu_usd": 6.77,
+    "disk_usd": 0.1,
+    "all_in_usd": 6.87
+   },
+   "hard": {
+    "minutes": 453.1,
+    "gpu_usd": 8.23,
+    "disk_usd": 0.13,
+    "all_in_usd": 8.36
+   },
+   "rescoring_provisional_not_a_bound": {
+    "minutes": 19.5,
+    "gpu_usd": 0.35,
+    "disk_usd": 0.01,
+    "all_in_usd": 0.36
+   }
+  }
+ },
+ "totals": {
+  "expected_usd": 36.35,
+  "hard_ceiling_usd": 56.91,
+  "teardown_reserves_usd": 1.5,
+  "hard_plus_reserves_usd": 58.41,
+  "rescoring_excluded": "the rollout-rescoring diagnostic adds about $1.32 at its ESTIMATE; it joins the ceilings only after the reference calibration measures it"
+ },
+ "per_session_cap_usd": 30.0,
+ "every_session_under_cap": true,
+ "authorizes": "nothing"
+}

@@ -615,8 +615,8 @@ that does is this one.
 > student Top-200 conditional entropy** as D2, not a full-vocabulary entropy,
 > and adds confidence as a separate reward: `L(x) = (1/T_x) Σ [KL_t − λ c_s(t)]`.
 > `λ` follows a registered rule: the inter-quartile-range ratio of per-item KL
-> to per-item confidence, measured on teacher vs. B before D3's search and
-> then frozen. The owner of the current definition is
+> to per-item confidence on 147 unique items, measured on teacher vs. B
+> before D2's search and then frozen (contract revision 3). The owner of the current definition is
 > [`d2_d3_objective_contract_v1.json`](../../families/d_series/plans/d2_d3_objective_contract_v1.json).
 > The text below is kept unchanged as history.
 
