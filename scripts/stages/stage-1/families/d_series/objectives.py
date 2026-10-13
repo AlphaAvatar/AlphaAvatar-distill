@@ -219,6 +219,147 @@ def lambda_from_reference(item_kl: Sequence[float],
             "n_items": len(item_kl)}
 
 
+# --- why, what is measured where, and what may be claimed ----------------------
+
+#: Maintainer supplement 2026-10-13: the reason the student's confidence enters.
+SCIENTIFIC_MOTIVATION = {
+    "title": "capacity-aware student reasoning",
+    "premise": (
+        "The teacher (Qwen3-4B-Thinking) and the ~0.6B student differ in "
+        "capacity, expressiveness and learning ability. The student need not, "
+        "and may not be able to, reproduce the teacher's reasoning "
+        "distribution; on some tasks it may reach the same correct answer by "
+        "a shorter, simpler or entirely different trajectory."),
+    "consequence": (
+        "A large teacher token-level KL does not by itself mean worse student "
+        "reasoning. KL-based compression selection may over-reward structures "
+        "that imitate the teacher's distribution and under-rate structures "
+        "that preserve the student's own effective way of reasoning."),
+    "question": (
+        "Which structural initialization, under the capacity limit, best lets "
+        "the student keep and recover its own effective reasoning ability?"),
+    "role_of_confidence": (
+        "the student's Top-K confidence is a CANDIDATE PROXY signal for "
+        "structure selection. Its value is decided by independent behavioural "
+        "evidence, never assumed"),
+}
+
+#: Four quantities that are NOT the same, and where each is measured.
+MEASUREMENT_DISTINCTIONS = {
+    "student_entropy_on_teacher_native_prefixes": (
+        "what the D2/D3 search objectives use: the student's own Top-K "
+        "entropy on the frozen teacher-native calibration and state-eval "
+        "sequences"),
+    "student_entropy_on_student_rollout_prefixes": (
+        "a behavioural DIAGNOSTIC only: the student's own Top-K entropy at the "
+        "positions of its own greedy rollout, by "
+        "scripts/shared/evaluation/rollout_rescoring.py after generation. "
+        "Never an input to selection in D2/D3"),
+    "student_teacher_distribution_fit": (
+        "the Top-K + tail KL: on teacher-native prefixes in the search; on "
+        "the student's own prefixes in the rollout diagnostic, beside the "
+        "teacher's surprisal of the student's tokens"),
+    "autonomous_rollout_correctness": (
+        "the primary behavioural endpoint, correct_overall on the shared "
+        "protocol, after the frozen recovery recipe. The only quantity a "
+        "D2/D3 promotion question is decided on"),
+}
+
+#: What D2/D3 behavioural rounds analyse beyond the endpoint, with the
+#: instrument and the arms it can be applied to. EXPLORATORY: none of these
+#: decides SHARED_GO / NO_GO.
+BEHAVIOURAL_DIAGNOSTICS = {
+    "instruments": {
+        "rollout_profile": (
+            "scripts/stages/stage-1/families/d_series/rollout_profile.py -- "
+            "text-level, $0, from secured generations: generated length "
+            "(engine count), reasoning/answer length, natural termination, "
+            "degeneration, correctness by reasoning length, and paired "
+            "same-prompt comparisons"),
+        "rollout_rescoring": (
+            "scripts/shared/evaluation/rollout_rescoring.py -- per position of "
+            "the student's own rollout: student confidence, student token "
+            "log-prob, teacher surprisal, KL(teacher || student). Needs the "
+            "trained checkpoint, so it runs ON THE POD after generation and "
+            "before the checkpoint is released. Reads generations; changes "
+            "neither generation nor scoring, so the shared evaluation "
+            "protocol's identity is untouched. Estimated 3-5 GPU-minutes per "
+            "probe (~0.95M tokens per probe at D1's measured lengths)"),
+    },
+    "analyses": [
+        {"question": "does the student still solve the task when it is far "
+                     "from the teacher's distribution?",
+         "instrument": "rollout_rescoring (per sample: mean KL and teacher "
+                       "surprisal on its own rollout) joined to correctness",
+         "arms": "new D2/D3 candidates only"},
+        {"question": "autonomous reasoning length, correctness and usable "
+                     "rollout",
+         "instrument": "rollout_profile",
+         "arms": "every unit, including the imported B/q2 (baseline recorded "
+                 "in analyses/d1_rollout_profile.json)"},
+        {"question": "how does student confidence relate to actual "
+                     "correctness?",
+         "instrument": "rollout_rescoring confidence (reasoning and answer "
+                       "spans) against per-sample correctness",
+         "arms": "new D2/D3 candidates only"},
+        {"question": "are high-confidence, high-KL positions valid "
+                     "alternative reasoning or wrong overconfidence?",
+         "instrument": ("rollout_rescoring quadrant fraction against "
+                        "correctness; thresholds registered in each "
+                        "experiment's preregistration before any result, none "
+                        "in code"),
+         "arms": "new D2/D3 candidates only"},
+        {"question": "did D2/D3 improve autonomous generation after recovery, "
+                     "not only the search objective?",
+         "instrument": ("the shared-protocol endpoint and the rollout profile "
+                        "against B (and q2), read beside each candidate's "
+                        "search objective and raw KL"),
+         "arms": "candidates vs the imported B/q2 units"},
+    ],
+    "historical_units": (
+        "B's and q2's ten units have decoded text and the engine's token "
+        "counts, but NO token ids, log-probabilities or logits, and their "
+        "checkpoints are retired. Their student confidence on their own "
+        "rollouts is therefore NOT available and must not be estimated or "
+        "inferred; comparisons with B/q2 are text-level and endpoint-level "
+        "only. Re-tokenizing their text reproduces the engine's count exactly "
+        "for 82-85% of samples"),
+    "power_note": (
+        "D1's units answer ~2-4% of scorable prompts correctly (B: 103 of "
+        "2550 on confirmation), and q2 and B are both right on only 29 "
+        "prompt-seeds there. Any confidence-correctness or quadrant analysis "
+        "rests on ~100 correct samples per arm and is exploratory"),
+}
+
+CLAIM_BOUNDARY = {
+    "goal": ("structural initializations that, under the capacity limit, help "
+             "the student keep and recover its own effective reasoning"),
+    "not_the_goal": ["maximizing student confidence",
+                     "minimizing KL to the teacher"],
+    "may_claim": [
+        "a D2/D3 candidate's endpoint result against B on the shared "
+        "protocol, with that protocol's limits (SHARED_GO nominates, never "
+        "promotes)",
+        "descriptive rollout and rescoring diagnostics of the candidates that "
+        "were actually measured, labelled exploratory",
+    ],
+    "may_not_claim": [
+        "that a lower D2/D3 search objective means better reasoning or "
+        "higher fidelity",
+        "that the student reasons differently, or better, where it is "
+        "confident and far from the teacher, without rollout-level evidence "
+        "linking those positions to correct completions",
+        "any confidence or per-position statement about B or q2, whose "
+        "checkpoints are retired and whose generations carry no "
+        "log-probabilities",
+        "a mechanism from the exploratory diagnostics alone",
+    ],
+    "validation": ("Top-K confidence is a proxy for structure selection; its "
+                   "usefulness is established only by independent behavioural "
+                   "evidence after recovery training"),
+}
+
+
 # --- the contract record -------------------------------------------------------
 
 def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
@@ -260,12 +401,18 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                 "(state.objective.raw_kl.*), which separates the effect of the "
                 "aggregation from the effect of confidence"),
         },
+        "scientific_motivation": SCIENTIFIC_MOTIVATION,
         "d2": {"objective": D2_OBJECTIVE.as_dict(),
                "objective_hash": D2_OBJECTIVE.objective_hash,
                "formula": "L(x) = (1/T_x) sum_{t in T_x} (1 - c_t) KL_t, minimized",
                "hypothesis": (
-                   "a position the student is confident about needs less "
-                   "fidelity to the reference, even where its KL is large")},
+                   "The more certain the student is of its own prediction at a "
+                   "position, the weaker the KL penalty for differing from the "
+                   "teacher there should be. This does NOT assume the student "
+                   "is right where it is confident; it tests whether relaxing "
+                   "strict imitation of the teacher's distribution helps a "
+                   "small model keep computation and reasoning suited to its "
+                   "own capacity.")},
         "d3": {"objective_template": template,
                "reward_scale": None if d3 is None else d3.reward_scale,
                "objective_hash": None if d3 is None else d3.objective_hash,
@@ -275,8 +422,13 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                "formula": ("L(x) = (1/T_x) sum_{t in T_x} [KL_t - lambda c_t], "
                            "minimized (S = -L maximized)"),
                "hypothesis": (
-                   "student self-confidence earns a positive reward of its own "
-                   "that can offset part of a KL penalty"),
+                   "The student's own predictive certainty may carry "
+                   "structural-selection value independent of the teacher KL: "
+                   "even where its token distribution differs from the "
+                   "teacher's, a student that is certain of its own "
+                   "distribution earns a separate confidence reward. Whether "
+                   "that signal is useful is decided by task correctness after "
+                   "recovery training, not by the reward."),
                "lambda_rule": lambda_rule(),
                "lambda_record": LAMBDA_RECORD},
         "ranking": {"policy": OBJECTIVE_PARETO_V1.qualified_id,
@@ -315,6 +467,22 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
         "independence": (
             "D3's definition, K and lambda rule are fixed in this record before "
             "D2 runs; no D2 behavioural or search result may adjust them"),
+        "measurement_distinctions": MEASUREMENT_DISTINCTIONS,
+        "calibration_this_round": (
+            "the frozen TEACHER-NATIVE calibration profiles, unchanged, so the "
+            "objective is the only variable. No student-prefix calibration is "
+            "introduced in D2 or D3"),
+        "behavioural_diagnostics": BEHAVIOURAL_DIAGNOSTICS,
+        "claim_boundary": CLAIM_BOUNDARY,
+        "revision": 2,
+        "revision_history": [
+            {"revision": 1, "date": "2026-10-13",
+             "change": "D2/D3 objectives, identities, ranking, lambda rule"},
+            {"revision": 2, "date": "2026-10-13",
+             "change": ("capacity-aware motivation, hypotheses, measurement "
+                        "distinctions, behavioural diagnostics and claim "
+                        "boundary (maintainer supplement). Objective "
+                        "identities, ranking and lambda rule unchanged")}],
     }
     out = {**science, "contract_hash": sha256_json(science),
            "authorizes": "nothing"}

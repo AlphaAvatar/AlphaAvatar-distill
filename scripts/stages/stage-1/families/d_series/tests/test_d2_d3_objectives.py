@@ -150,3 +150,36 @@ def test_the_committed_contract_is_current():
     path = REPO / O.CONTRACT
     committed = json.loads(path.read_text())
     assert committed == json.loads(json.dumps(O.contract(REPO)))
+
+
+class TestTheContractStatesWhyAndWhereTheClaimsStop:
+
+    def test_the_four_quantities_are_kept_apart(self):
+        record = O.contract(REPO)
+        assert set(record["measurement_distinctions"]) == {
+            "student_entropy_on_teacher_native_prefixes",
+            "student_entropy_on_student_rollout_prefixes",
+            "student_teacher_distribution_fit",
+            "autonomous_rollout_correctness"}
+        assert "teacher-native" in record["calibration_this_round"].lower() \
+            or "TEACHER-NATIVE" in record["calibration_this_round"]
+
+    def test_the_boundary_refuses_claims_the_evidence_cannot_carry(self):
+        boundary = O.contract(REPO)["claim_boundary"]
+        joined = " ".join(boundary["may_not_claim"])
+        assert "lower D2/D3 search objective" in joined
+        assert "B or q2" in joined
+        assert set(boundary["not_the_goal"]) == {
+            "maximizing student confidence", "minimizing KL to the teacher"}
+
+    def test_mechanism_analyses_are_limited_to_measured_candidates(self):
+        diag = O.contract(REPO)["behavioural_diagnostics"]
+        for analysis in diag["analyses"]:
+            if "rollout_rescoring" in analysis["instrument"]:
+                assert analysis["arms"] == "new D2/D3 candidates only"
+        assert "NOT available" in diag["historical_units"]
+
+    def test_the_objective_identities_did_not_move_with_the_text(self):
+        record = O.contract(REPO)
+        assert record["d2"]["objective_hash"] == O.D2_OBJECTIVE.objective_hash
+        assert record["revision"] == 2
