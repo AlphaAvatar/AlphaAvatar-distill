@@ -1166,3 +1166,10 @@ carry the round-0 parent-KL diagnostic's cost. The earlier plan omitted it.
 
 The CPU toy runs stage V end to end through the same function.
 
+**Executed on 2026-10-14:** run `d2val_20261014_103301`, $0.6532.
+
+- Validation PASS; scored_v1 PASS.
+- Campaign CLOSED; evidence adopted.
+- The review, findings and re-pricing are in
+  [`../analyses/d2_stage_v_evidence_review.md`](../analyses/d2_stage_v_evidence_review.md).
+

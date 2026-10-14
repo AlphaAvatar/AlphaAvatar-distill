@@ -93,12 +93,17 @@ class TestTheIssuerRefuses:
                             granted_utc="t", run_id="r1",
                             prediction_rows="scored_v1", live_rate=1.09)
 
-    def test_stage_ls_pass_on_the_superseded_objective_does_not_count(self):
-        """Stage L's PASS was measured on the SUPERSEDED objective: with no
-        D2 GPU validation booked, scored_v1 is refused for the new D2."""
+    def test_stage_ls_pass_on_the_superseded_objective_does_not_count(
+            self, monkeypatch, tmp_path):
+        """Stage L's PASS was measured on the SUPERSEDED objective: in a tree
+        with no D2 GPU validation booked, scored_v1 is refused for the new
+        D2 -- stage L's verdict alone unlocks nothing."""
         from stages.d_series import d2_budget as BUD
         assert BUD.calibration_evidence()["d2_scored_rows_equivalence"] == "PASS"
-        assert BUD.d2_validation_evidence()["scored_rows_equivalence"] is None
+        none = BUD.d2_validation_evidence(tmp_path)
+        assert none["scored_rows_equivalence"] is None
+        monkeypatch.setattr(BUD, "d2_validation_evidence",
+                            lambda *a, **k: none)
         with pytest.raises(A.D2AuthorizationRefused, match="superseded"):
             A.build_payload(grant=self._approved(), session_commit="a" * 40,
                             granted_utc="t", run_id="r1",

@@ -634,17 +634,34 @@ class TestTheSearchPriceComesFromD1sRecords:
         ev["depth"]["overhead_seconds_per_candidate"] = 1000.0
         ev["round0_candidates_measured"] = 36
         basis = BUD.telemetry_basis(BUD.d1_search_telemetry(), 551.99)
-        ov = BUD.teacher_confidence_overhead(ev, basis)
+        #: validation=False: the PROVISIONAL model (what the registered plan
+        #: uses), independent of whether an adopted Stage V now exists.
+        ov = BUD.teacher_confidence_overhead(ev, basis, validation=False)
         assert ov["source"].startswith("provisional")
         assert ov["depth_seconds_per_candidate"]["bound"] < 1000.0
         assert ov["depth_seconds_per_expansion"]["round0_candidates"] == 36
         assert ov["one_time_minutes"]["profiles"] == 2
-        unknown = BUD.teacher_confidence_overhead(None, basis)
+        unknown = BUD.teacher_confidence_overhead(None, basis,
+                                                  validation=False)
         assert unknown["depth_seconds_per_expansion"]["round0_candidates"] \
             == 260
-        d2 = BUD.priced_from_records(1.09, 400, ev)
+        d2 = BUD.priced_from_records(
+            1.09, 400, ev, overhead=lambda e, b: BUD.teacher_confidence_overhead(
+                e, b, validation=False))
         assert d2["priced"]["one_time_minutes"] == \
             ov["one_time_minutes"]["bound"]
+
+    def test_the_adopted_stage_v_prices_the_redesigned_d2(self):
+        """Once Stage V is booked and ADOPTED, the D2 price reads its
+        measurements -- and only then."""
+        from stages.d_series import d2_budget as BUD
+        adopted = BUD.adopted_validation()
+        if adopted is None:
+            pytest.skip("no adopted Stage V in this tree")
+        record = json.loads((REPO / BUD.RECORD).read_text())
+        src = record["steps"]["d2_search"]["objective_overhead"]["source"]
+        assert src.startswith("measured once") and \
+            adopted["evidence_session"] in src
 
     def test_d3_is_priced_with_its_own_search_in_the_programme(self):
         from stages.d_series import d2_budget as BUD

@@ -359,14 +359,97 @@ ROOT_STORE_CANDIDATE_EQUIVALENTS = {"expected": 2.0, "bound": 5.0}
 PARENT_KL_DIAGNOSTIC_FRACTION = {"expected": 0.5, "bound": 1.0}
 
 
-def teacher_confidence_overhead(evidence: dict[str, Any] | None,
-                                basis: dict[str, Any]) -> dict[str, Any]:
-    """The redesigned D2's added seconds, labelled PROVISIONAL throughout.
+def adopted_validation(repo_root: str | Path | None = None
+                       ) -> dict[str, Any] | None:
+    """The ADOPTED Stage V record (validation PASS, identities, hashes), or
+    None. Nothing else may price the redesigned D2 as measured."""
+    ev = d2_validation_evidence(repo_root)
+    if not ev.get("usable"):
+        return None
+    root = Path(repo_root) if repo_root is not None else REPO_ROOT
+    doc = json.loads((root / ev["evidence_session"]).read_text())
+    return {"record": doc["V_d2_validation"],
+            "evidence_session": ev["evidence_session"],
+            "evidence_session_sha256": ev["evidence_session_sha256"]}
 
-    Never reads stage L's objective timing: that measured another objective.
-    Reads from stage L only the round-0 candidate count it measured (falling
-    back, conservatively, to every candidate of an expansion).
+
+def measured_teacher_confidence_overhead(validation: dict[str, Any]
+                                         ) -> dict[str, Any]:
+    """The redesigned D2's added seconds, MEASURED by the adopted Stage V.
+
+    Expected = the measurement; bound = the measurement x
+    MEASURED_OVERHEAD_BOUND_FACTOR (one timing is not a bound), applied to the
+    ADDED work only:
+
+    * per DEPTH candidate: the objective's own seconds (c x KL, stored lookups)
+      over the round's candidates (V4, unsynchronized: an upper estimate);
+    * per DEPTH expansion: the round-0 parent-KL reductions (V4);
+    * per state evaluation: D2 minus KL-only on B (V6), floored at 0;
+    * the statistics operators: full- over narrow-scope seconds (V3), the
+      excess carrying the margin;
+    * once: the formal (bsz=3) root-store builds of every profile (V1).
     """
+    v = validation["record"]
+    f = MEASURED_OVERHEAD_BOUND_FACTOR
+    t = (v["V4_depth_root_vs_parent"].get("timing") or {})
+    cands = max(1, int(t.get("candidate_subsets") or 0))
+    per_cand = float(t.get("objective_seconds") or 0.0) / cands
+    per_exp = float(t.get("parent_kl_seconds") or 0.0)
+    se = max(0.0, float(v["V6_state_evaluation"][
+        "overhead_seconds_per_evaluation"]))
+    ratios = []
+    for op in v["V3_weighted_statistics"]["operators"].values():
+        arms = op["arms"]
+        ratios.append(float(arms["full_scope"]["seconds"])
+                      / max(1e-9, float(arms["narrow_scope"]["seconds"])))
+    excess_mean = max(0.0, sum(ratios) / len(ratios) - 1.0)
+    excess_max = max(0.0, max(ratios) - 1.0)
+    builds = [float(p["builds"]["bsz3_formal"]["seconds"]) for p in
+              v["V1_root_stores_and_validity"]["profiles"].values()]
+    src = (f"measured once: {validation['evidence_session']} (Stage V, "
+           "adopted); the bound adds a variation margin")
+    return {
+        "source": src,
+        "depth_seconds_per_candidate": {"expected": round(per_cand, 4),
+                                        "bound": round(per_cand * f, 4)},
+        "state_eval_seconds_per_evaluation": {"expected": round(se, 4),
+                                              "bound": round(se * f, 4)},
+        "depth_seconds_per_expansion": {
+            "what": "the round-0 parent-KL diagnostic",
+            "round0_candidates": cands, "round0_source": "Stage V's V4 round",
+            "expected": round(per_exp, 2), "bound": round(per_exp * f, 2)},
+        "operator_cell_factor": {
+            "what": ("the weighted activation statistics: Stage V's full- over "
+                     "narrow-scope operator seconds"),
+            "ratios": [round(r, 4) for r in ratios],
+            "expected": round(1.0 + excess_mean, 4),
+            "bound": round(1.0 + excess_max * f, 4)},
+        "one_time_minutes": {
+            "what": "root reference store builds, one per calibration profile",
+            "profiles": len(builds),
+            "expected": round(sum(builds) / 60, 2),
+            "bound": round(sum(builds) / 60 * f, 2)},
+        "bound_factor_on_one_measurement": f,
+    }
+
+
+def teacher_confidence_overhead(evidence: dict[str, Any] | None,
+                                basis: dict[str, Any],
+                                validation: Any = None) -> dict[str, Any]:
+    """The redesigned D2's added seconds: MEASURED once an adopted Stage V
+    exists, PROVISIONAL until then and labelled so.
+
+    `validation`: None looks the adopted Stage V up; False forces the
+    provisional model (the REGISTERED plan, which must never move after its
+    session); a dict is an adopted record. Never reads stage L's objective
+    timing: that measured another objective. Reads from stage L only the
+    round-0 candidate count it measured (falling back, conservatively, to
+    every candidate of an expansion).
+    """
+    if validation is None:
+        validation = adopted_validation()
+    if validation:
+        return measured_teacher_confidence_overhead(validation)
     per_cand = basis["depth"]["loop_seconds_per_candidate_mean"]
     per_cand_max = basis["depth"]["loop_seconds_per_candidate_max"]
     dist = basis["depth"]["distortion_seconds_per_candidate"]
@@ -855,16 +938,27 @@ def programme_scenarios(limits: dict[str, float],
     #: proposed grant is held as outstanding engineering, so no scenario
     #: spends money the validation needs. Read from its plan record.
     plan_path = REPO_ROOT / D2_VALIDATION_PLAN
+    camp_path = REPO_ROOT / D2_VALIDATION_CAMPAIGN
     if plan_path.is_file():
         plan = json.loads(plan_path.read_text())
         grant = float(plan["totals"]["proposed_grant_usd"])
+        camp = (json.loads(camp_path.read_text()) if camp_path.is_file()
+                else {})
+        booked = round(sum(float(r.get("cost_usd") or 0)
+                           for r in camp.get("subruns") or []), 4)
+        #: Once CLOSED its cost is inside the live limits, like R0's and the
+        #: reference calibration's; until then the unspent grant is held.
+        closed = str(camp.get("status", "")).startswith("COMPLETE and CLOSED")
         eng["d2_gpu_validation"] = grant
-        outstanding["d2_gpu_validation"] = grant
+        outstanding["d2_gpu_validation"] = (0.0 if closed
+                                            else round(grant - booked, 4))
         eng_state["d2_gpu_validation"] = {
-            "grant_usd": grant, "booked_usd": 0.0, "closed": False,
-            "outstanding_usd": grant, "status": plan["status"],
-            "owner": D2_VALIDATION_PLAN}
-        eng_exp += float(plan["totals"]["expected"]["all_in_usd"])
+            "grant_usd": grant, "booked_usd": booked, "closed": closed,
+            "outstanding_usd": outstanding["d2_gpu_validation"],
+            "status": camp.get("status") or plan["status"],
+            "owner": D2_VALIDATION_CAMPAIGN}
+        if not closed:
+            eng_exp += float(plan["totals"]["expected"]["all_in_usd"])
     engineering = {"expected": round(eng_exp, 2),
                    "hard_with_reserves": round(sum(outstanding.values()), 2),
                    "campaigns": eng_state,

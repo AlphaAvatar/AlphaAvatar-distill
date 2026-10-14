@@ -192,71 +192,77 @@
     }
    },
    "objective_overhead": {
-    "source": "provisional -- the redesigned D2 is not measured; stage L measured the superseded objective, which prices D3 only",
+    "source": "measured once: logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/runs/d2val_20261014_103301/out/adoption_all_v1/adoption.json (Stage V, adopted); the bound adds a variation margin",
     "depth_seconds_per_candidate": {
-     "expected": 0.3425,
-     "bound": 0.6851
+     "expected": 0.775,
+     "bound": 1.1625
     },
     "state_eval_seconds_per_evaluation": {
-     "expected": 0.4032,
-     "bound": 1.0969
+     "expected": 0.697,
+     "bound": 1.0455
     },
     "depth_seconds_per_expansion": {
      "what": "the round-0 parent-KL diagnostic",
      "round0_candidates": 36,
-     "round0_source": "stage L's measured root round",
-     "expected": 39.13,
-     "bound": 100.2
+     "round0_source": "Stage V's V4 round",
+     "expected": 27.2,
+     "bound": 40.8
     },
     "operator_cell_factor": {
-     "what": "the weighted activation statistics of the non-DEPTH operators, on their whole end-to-end cells",
-     "expected": 1.05,
-     "bound": 1.1
+     "what": "the weighted activation statistics: Stage V's full- over narrow-scope operator seconds",
+     "ratios": [
+      1.0349,
+      1.022,
+      1.0236
+     ],
+     "expected": 1.0268,
+     "bound": 1.0524
     },
     "one_time_minutes": {
      "what": "root reference store builds, one per calibration profile",
      "profiles": 2,
-     "expected": 0.46,
-     "bound": 1.58
-    }
+     "expected": 0.18,
+     "bound": 0.28
+    },
+    "bound_factor_on_one_measurement": 1.5
    },
    "expected": {
-    "minutes": 589.5,
-    "gpu_usd": 10.71,
-    "disk_usd": 0.55,
-    "all_in_usd": 11.25
+    "minutes": 615.4,
+    "gpu_usd": 11.18,
+    "disk_usd": 0.57,
+    "all_in_usd": 11.75
    },
    "hard": {
-    "minutes": 1322.0,
-    "gpu_usd": 24.02,
-    "disk_usd": 1.22,
-    "all_in_usd": 25.24
+    "minutes": 1353.6,
+    "gpu_usd": 24.59,
+    "disk_usd": 1.25,
+    "all_in_usd": 25.84
    },
    "depth_cell_minutes": {
-    "root_max": 27.6329,
-    "deeper_max": 27.2931
+    "root_max": 28.7108,
+    "deeper_max": 28.371
    },
    "priced_by": {
     "expansions_max": 92,
-    "structural_minutes_max": 1225.47,
+    "structural_minutes_max": 1258.31,
     "session_overhead_minutes": 95.0,
-    "hard_ceiling_minutes": 1322.05,
-    "hard_ceiling_usd": 25.24,
-    "one_time_minutes": 1.58
+    "hard_ceiling_minutes": 1353.59,
+    "hard_ceiling_usd": 25.84,
+    "one_time_minutes": 0.28
    },
    "pricing_in_force": "cache_fix_validated",
    "container_disk_gb": 400,
    "hard_records_max": {
-    "minutes": 1826.3,
-    "gpu_usd": 33.18,
-    "disk_usd": 1.69,
-    "all_in_usd": 34.87
+    "minutes": 1857.9,
+    "gpu_usd": 33.75,
+    "disk_usd": 1.72,
+    "all_in_usd": 35.47
    },
    "hard_if_cache_fix_validated": {
-    "minutes": 1322.0,
-    "gpu_usd": 24.02,
-    "disk_usd": 1.22,
-    "all_in_usd": 25.24
+    "minutes": 1353.6,
+    "gpu_usd": 24.59,
+    "disk_usd": 1.25,
+    "all_in_usd": 25.84
    },
    "calibration_evidence": {
     "usable": true,
@@ -307,8 +313,8 @@
     "validated_by": "stage L's DEPTH pair, which runs under a deliberately hoarded pool and records reference_cache.mode; or D2's own first DEPTH expansions",
     "until_validated": "the planning bound prices DEPTH at D1's measured recompute-mode maxima",
     "depth_cell_minutes_if_validated": {
-     "root_max": 27.6329,
-     "deeper_max": 27.2931
+     "root_max": 28.7108,
+     "deeper_max": 28.371
     }
    },
    "previous_model_superseded": {
@@ -425,10 +431,10 @@
   }
  },
  "totals": {
-  "expected_usd": 37.23,
-  "hard_ceiling_usd": 59.4,
+  "expected_usd": 37.73,
+  "hard_ceiling_usd": 60.0,
   "teardown_reserves_usd": 1.5,
-  "hard_plus_reserves_usd": 60.9,
+  "hard_plus_reserves_usd": 61.5,
   "rescoring": "MEASURED by stage L and inside the behavioural ceilings with the one-measurement margin"
  },
  "per_session_cap_usd": 30.0,

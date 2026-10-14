@@ -10964,3 +10964,44 @@ on a paid pod.
   launcher's report is tested on a stage-V record.
 - **Science unchanged.** The executable commit is re-pinned in the
   authorization record.
+
+## 2026-10-14 — Stage V executed: validation PASS, campaign CLOSED ($0.6532 of $1.70)
+
+- **Execution.** Run `d2val_20261014_103301` on L40S pod `pln3gsuw6lvlzb`
+  at $1.09/h, executed commit `d09fc8f7`, under the conditional grant. The
+  first acquisition attempt was a $0 capacity refusal.
+  - Wall time 35.7 min; cost **$0.6532** all-in.
+  - Teardown was provider-confirmed and hashed. The campaign is booked and
+    CLOSED.
+  - The evidence is adopted: identities, executed commit and recomputed
+    verdicts all match.
+- **Verdicts.**
+  - **Arithmetic PASS**: entropy ≤ 2.3e-6 nats, confidence ≤ 2.1e-7,
+    reduction ≤ 4.8e-9 relative, raw-KL control 0.0.
+  - **Integrity PASS**: all four operators; the full-scope denominators equal
+    the weight sum exactly.
+  - **Row equivalence PASS**: DEPTH 0.0 relative with the same choice; state
+    evaluation 8.0e-7. D2 may run scored_v1.
+- **Findings** (descriptive; owner `families/d_series/analyses/d2_stage_v_evidence_review.md`).
+  - c_T has a narrow range: median ≈ 0.999, IQR 0.042–0.055, ESS ≥ 99.4%.
+  - It is uncorrelated with B's KL (Spearman ≈ 0). The weighted objective is
+    96–97% of the raw KL.
+  - On a non-root DEPTH round, weighted and unweighted root-KL rankings
+    agree at ρ = 0.999 with the same choice. Root and parent rankings differ:
+    ρ = 0.81, different choice.
+  - Full-scope selections move only slightly: FFN Jaccard 0.984, ATTENTION
+    35/36 layers identical, WIDTH subspace overlap 0.989.
+  - BF16 bsz 1-vs-3 drift is real (store entropy max 1.07 nats, state
+    objective max 0.235) and stays a diagnostic.
+- **Re-priced from the measurements.**
+  - The D2 search is $11.75 expected and $25.84 bound.
+  - The programme at hard: D2 + D3 fits; adding a fresh confirmation is
+    short by **$4.79**.
+  - Project remaining $119.49; engineering remaining $3.68.
+- **Recommendation.** Engineering GO for the formal D2 search. Before
+  approving preregistration v2, the maintainer should decide whether to
+  accept that D2, as frozen, mainly tests the root reference with a small
+  weighting effect, or to hold for a new scientific version. Nothing is
+  changed autonomously.
+- **Still not authorized:** the D2 search, recovery, screening, confirmation,
+  D3, and cap changes.

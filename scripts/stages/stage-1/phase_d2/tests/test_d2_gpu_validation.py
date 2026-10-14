@@ -565,8 +565,16 @@ class TestTheRecords:
             assert grant[key] == prop[key], key
         assert grant["all_in_ceiling_usd"] == 1.70
         assert grant["session_cap_usd"] == 1.40
-        assert ecb.derive(REPO / V.CAMPAIGN, session_cap_usd=1.40,
-                          rate_usd_per_hour=1.09)["session_ceiling"] <= 1.40
+        camp = json.loads((REPO / V.CAMPAIGN).read_text())
+        if str(camp["status"]).startswith("COMPLETE and CLOSED"):
+            #: CONSUMED: a closed campaign funds no further session.
+            with pytest.raises(ecb.BudgetError, match="closed"):
+                ecb.derive(REPO / V.CAMPAIGN, session_cap_usd=1.40,
+                           rate_usd_per_hour=1.09)
+            assert camp["booked_usd"] <= grant["all_in_ceiling_usd"]
+        else:
+            assert ecb.derive(REPO / V.CAMPAIGN, session_cap_usd=1.40,
+                              rate_usd_per_hour=1.09)["session_ceiling"] <= 1.40
 
     def test_the_cap_covers_the_core_and_v5_is_extended(self):
         plan = json.loads((REPO / V.PLAN).read_text())
@@ -884,3 +892,35 @@ def test_the_launchers_report_reads_a_stage_v_record(toy_run):
     partial = R.lines({"status": "FAILED", "V_d2_validation": {
         "V1_root_stores_and_validity": {"failed": "boom"}, "verdicts": {}}})
     assert any("not reached" in l for l in partial)
+
+
+def test_the_measured_reprice_reads_only_the_adopted_record():
+    """Each added term from its own Stage V measurement, with the margin on
+    the added work only; the registered plan stays provisional."""
+    from stages.d_series import d2_budget as BUD
+    rec = {"V4_depth_root_vs_parent": {"timing": {
+               "candidate_subsets": 30, "objective_seconds": 3.0,
+               "parent_kl_seconds": 12.0}},
+           "V6_state_evaluation": {"overhead_seconds_per_evaluation": -0.2},
+           "V3_weighted_statistics": {"operators": {
+               k: {"arms": {"full_scope": {"seconds": 44.0 * r},
+                            "narrow_scope": {"seconds": 44.0}}}
+               for k, r in (("a", 1.02), ("b", 1.0), ("c", 0.99))}},
+           "V1_root_stores_and_validity": {"profiles": {
+               "p": {"builds": {"bsz3_formal": {"seconds": 30.0}}},
+               "q": {"builds": {"bsz3_formal": {"seconds": 30.0}}}}}}
+    ov = BUD.measured_teacher_confidence_overhead(
+        {"record": rec, "evidence_session": "x"})
+    f = BUD.MEASURED_OVERHEAD_BOUND_FACTOR
+    assert ov["depth_seconds_per_candidate"] == {"expected": 0.1,
+                                                 "bound": round(0.1 * f, 4)}
+    assert ov["depth_seconds_per_expansion"]["expected"] == 12.0
+    assert ov["state_eval_seconds_per_evaluation"]["expected"] == 0.0
+    assert ov["operator_cell_factor"]["bound"] == pytest.approx(1 + 0.02 * f,
+                                                                abs=1e-4)
+    assert ov["one_time_minutes"]["expected"] == 1.0
+    assert ov["source"].startswith("measured once")
+    basis = BUD.telemetry_basis(BUD.d1_search_telemetry(), 551.99)
+    assert BUD.teacher_confidence_overhead(
+        None, basis, validation=False)["source"].startswith("provisional")
+

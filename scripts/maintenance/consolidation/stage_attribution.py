@@ -926,8 +926,8 @@ STAGE_1 = [
         id="phase_d2",
         kind="experiment",
         stage_id="1",
-        status=("PREREGISTRATION v2 DRAFT — not approved; GPU validation "
-                "proposed, not granted"),
+        status=("PREREGISTRATION v2 DRAFT — not approved; Stage V GPU "
+                "validation PASS (closed)"),
         title="D2 — frozen-teacher-confidence-weighted root-reference KL search",
         question=("Under the capacity limit, does weighting each scored "
                   "position's root-reference KL -- and the structural "
@@ -963,6 +963,11 @@ STAGE_1 = [
               "scripts/stages/stage-1/phase_d2/d2_gpu_validation_plan.py; run "
               "as stage V of topk_adoption_driver.py",
               field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/families/d_series/analyses/"
+              "d2_stage_v_evidence_review.md",
+              "the Stage V GPU evidence review: validation PASS, scored_v1 "
+              "PASS, the teacher-confidence diagnostics, the re-priced D2 "
+              "search and the recommendation for the formal decision"),
             E("logs/stages/stage-1/families/d_series/plans/"
               "d2_d3_objective_contract_v1.json",
               "the objective contract D2's preregistration reads its "

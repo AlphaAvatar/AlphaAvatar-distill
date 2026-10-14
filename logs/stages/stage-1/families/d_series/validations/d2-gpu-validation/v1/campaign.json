@@ -2,7 +2,7 @@
  "schema": "aadistill.engineering_campaign/v1",
  "campaign_id": "d_series_d2_gpu_validation",
  "_contract": "Cumulative cost of the D2 GPU validation across every resource and subrun. A rerun does NOT reset it.",
- "status": "OPEN -- granted $1.70 cumulative all-in (authorization.json, 2026-10-14T10:30:20Z); executable commit d09fc8f7",
+ "status": "COMPLETE and CLOSED -- Stage V validation PASS (arithmetic, integrity, scored_rows_equivalence), run d2val_20261014_103301, $0.6532 of the $1.70 grant; provider teardown confirmed; evidence booked by sha256",
  "authorization": "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/authorization.json",
  "package_id": "phase_c1.execution_package.2026-09-11",
  "_package_id": "the GPU ENGINEERING book, as for R0 and the reference calibration",
@@ -39,8 +39,54 @@
     "live_price_usd_per_hour": "28b478ce49706c4e6689e2f3a9a964ee5642134488d4a25280a7d9b6fce123cd",
     "required_inputs.jsonl": "1cc0f12d949720a984ab41745aaa14a3def096b4325f6ba38469190a9ec6b769"
    }
+  },
+  {
+   "subrun_id": "d2val_20261014_103301",
+   "run_id": "d2val_20261014_103301",
+   "cost_usd": 0.6532,
+   "cost_record": {
+    "elapsed_minutes": 35.683,
+    "rate_usd_per_hour": 1.09,
+    "_rate_is": "the LIVE securePrice quoted immediately before creation",
+    "container_disk_gb": 60,
+    "gpu_usd": 0.6482,
+    "container_disk_usd": 0.005,
+    "all_in_usd": 0.6532,
+    "pod_id": "pln3gsuw6lvlzb",
+    "script_exit": 0,
+    "_basis": "wall clock from pod creation to confirmed teardown x the live secure rate, plus container disk billed separately"
+   },
+   "pod_id": "pln3gsuw6lvlzb",
+   "teardown_confirmed": true,
+   "teardown_evidence": {
+    "path": "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/runs/d2val_20261014_103301/teardown_confirmed",
+    "sha256": "9599915bd8cd62b6b42e6c37b5b681a76991a7c5be1fde9971278ce65b99d550"
+   },
+   "outcome": "stage V session: launcher rc=0",
+   "notes": "",
+   "evidence": "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/runs/d2val_20261014_103301",
+   "evidence_sha256": {
+    "cost.json": "0665a2bbc1b17ac8009ca3a5da33240f7a65a83b5f2a75b7d71c2831d8837179",
+    "launch.log": "8d1b98f0c2d75de22786d4bef2296c8a867abd49de5cde38b434289962d76677",
+    "live_price_usd_per_hour": "28b478ce49706c4e6689e2f3a9a964ee5642134488d4a25280a7d9b6fce123cd",
+    "out/adoption_all_v1/adoption.json": "a75e41043e8b63c600f360286ffa6074ef5860e18c967fee0e2da32df1238660",
+    "out/adoption_all_v1/journal.jsonl": "2e5d972d4555336fb5a609972c8cefc8d24076f4a649deccaa7d9c371368a6f9",
+    "out/adoption_all_v1.log": "8a2334d85913ddfd18f68954374c2e3dc5a416e511d41af0d19a2a3926567322",
+    "out/host_gpu.txt": "ef160069ef064a34334c31f4a8210a3e890756409629801d99642ec5cef7c305",
+    "out/preflight_all_v1/adoption.json": "4ffbbc27b61a9230bbce72a430f30e9f9951085abd23122685d164024a15aa36",
+    "out/preflight_all_v1/journal.jsonl": "ae5291d7784a28c05574f634aa872073cf6b77660932a8701161d6388d532a9c",
+    "out/preflight_all_v1.log": "61f63d080b4c258bc3c6bbe81d9fa2b070fa4218fe8c8f09b01ba946658fd066",
+    "out/runtime.txt": "8df33ef6ed783d31a27fd57b2ded72ebdba4106c422742000225213fba2be4b7",
+    "pod_id": "cefec8bdde3e014b7fb18325c52a89b8f55ee251ea9efb18f91777048b7f1da5",
+    "pod_start_epoch": "b838fdf6620658f17e646bffc5a9daaa38d41e31253b718255bbc13b492fa41b",
+    "required_inputs.jsonl": "1cc0f12d949720a984ab41745aaa14a3def096b4325f6ba38469190a9ec6b769",
+    "teardown_confirmed": "9599915bd8cd62b6b42e6c37b5b681a76991a7c5be1fde9971278ce65b99d550",
+    "watchdog.jsonl": "1a611c93db7c702564860eca30547f6e74f2c0686c47a9ec19053e5d6862ef88"
+   },
+   "evidence_session": "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/runs/d2val_20261014_103301/out/adoption_all_v1/adoption.json",
+   "evidence_session_sha256": "a75e41043e8b63c600f360286ffa6074ef5860e18c967fee0e2da32df1238660"
   }
  ],
- "booked_usd": 0.0,
+ "booked_usd": 0.6532,
  "authorizes": "nothing by itself"
 }

@@ -29,20 +29,20 @@
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
   "_owner": "derived by scripts/maintenance/consolidation/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
-  "_package_spent_usd": 149.4273,
+  "_package_spent_usd": 150.0805,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 590.0,
-  "cumulative_spend_usd": 469.8589,
-  "engineering_remaining_usd": 4.3367,
+  "cumulative_spend_usd": 470.5121,
+  "engineering_remaining_usd": 3.6835,
   "formal_remaining_usd": 127.9624,
   "full_ceiling_sessions_fundable": 4,
   "ledger": "logs/budget/ledger.md",
-  "package_remaining_usd": 132.2991,
+  "package_remaining_usd": 131.6459,
   "per_session_ceiling_usd": 30.0,
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 120.1411,
+  "remaining_usd": 119.4879,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -76,7 +76,7 @@
   "behavioural_design": "D1 (complete): Top-4, 10 + 6 probes, owner d1_design.json. D2: shared protocol, K=4 prepared, 8 + 3 probes, no B/q2 training, owner families/d_series/plans/d2_budget_v1.json.",
   "behavioural_pricing": "Owner: d1_design.json :: budget.chain; attempt bounds: the run's governance/authorization.json :: money.attempt_bounds.",
   "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2 (redesigned 2026-10-14): the search awaits the D2 GPU validation grant, prereg v2 approval, phase_d2 in funds_formal_sessions_of and its own grant. Owner: decisions.md 2026-10-14.",
-  "d2_owed_engineering": "D2 GPU validation executable (stage V; proposal validations/d2-gpu-validation/v1, not granted); behavioural driver with the token-id wrapper and rescoring.",
+  "d2_owed_engineering": "behavioural driver with the token-id wrapper and rescoring (Stage V done: d2_stage_v_evidence_review.md).",
   "execution_wiring": "D1 COMPLETE and CLOSED. D2 redesigned (contract rev 6): root store, weighted statistics, $0-tested; R0/stage L evidence: d2_gpu_evidence_review.md.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
   "incumbent": "B = C1's PROMOTED TREATMENT, 53e30566..., attention.activation_importance_v1; state_id null, built as a fixed path, rebuilt on the pod. DERIVED from C1's verdict by phase_d_series/incumbent.py. The design named C1's BEATEN arm c313d1b4... until 2026-10-08. Owner: phase_d1/analyses/d1_control_arm_identity.json.",
@@ -127,7 +127,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Stage V D2 GPU validation GRANTED $1.70 (engineering only), executable commit d09fc8f7: launch, book, close, then re-price D2 and review the formal search. Owner: decisions.md, d2_d3_objective_design.md s11.6.",
+ "next": "Stage V DONE: validation PASS + scored_v1 PASS ($0.6532, CLOSED). D2 search re-priced $11.75/$25.84. Next: maintainer decides prereg v2 (narrow c_T range: D2 mainly tests the root reference) and the D2 search grant. Owner: d2_stage_v_evidence_review.md.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Maintainer: approve D2 preregistration 489f49ba, add phase_d2 to funds_formal_sessions_of, choose rows, decide the $0.68 programme shortfall, then grant the D2 search.",
@@ -157,7 +157,7 @@
    "blocker": "none; see the top-level blocker.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line."
   },
   "c2": {

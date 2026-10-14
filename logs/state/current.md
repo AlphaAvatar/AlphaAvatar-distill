@@ -9,7 +9,7 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**NOTHING IS RUNNING AND NOTHING IS BILLING** (until the Stage V session below starts). The provider reports 0 pods
+**NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods (2026-10-14 11:09 UTC, after Stage V's confirmed teardown). The provider reports 0 pods
 (2026-10-13 17:51 UTC, after the reference calibration's confirmed teardown).
 
 **D2 REDESIGNED (maintainer scientific decision, 2026-10-14; contract
@@ -39,7 +39,7 @@ protocol work and $0 engineering only.
 - **Price.**
   - D2 search: $11.25 expected, $25.24 bound.
   - D2 GPU validation, PROPOSED and not granted: $0.77 expected, a $1.40 cap,
-    a $1.70 grant, GRANTED 2026-10-14 (conditional, engineering only). The executable commit is `d09fc8f7`.
+    a $1.70 grant, GRANTED 2026-10-14 and **EXECUTED**. Run `d2val_20261014_103301` cost $0.6532 and gave **validation PASS**, with scored_v1 PASS. The campaign is CLOSED and the evidence adopted. Findings: the c_T range is narrow (IQR ≈ 0.05), weighted and unweighted DEPTH rankings agree at ρ 0.999, and root vs parent differ (ρ 0.81). Re-priced D2 search: $11.75 expected, $25.84 bound. Owner: `families/d_series/analyses/d2_stage_v_evidence_review.md`.
   - The final review's three $0 issues are closed (2026-10-14 decisions
     entry): full-scope integrity gate, evidence adoption, append-only
     booking with teardown evidence.
@@ -99,12 +99,12 @@ and `logs/budget/decisions.md`.
   stop taken from `soft_stop_minutes`, and a cache-regression guard. All of
   it is now on preregistration v2.
 - **Open maintainer decisions:**
-  - the D2 GPU validation grant (a proposal, $1.70:
-    `validations/d2-gpu-validation/v1/authorization.proposed.json`);
+  - whether to accept that D2, as frozen, mainly tests the root reference
+    (Stage V findings);
   - approve preregistration v2;
   - add `phase_d2` to `funds_formal_sessions_of`;
   - choose `all_v1` or `scored_v1` (scored_v1 needs the new validation);
-  - handle the $5.24 shortfall;
+  - handle the $4.79 shortfall (re-derived after Stage V);
   - then the D2 search grant.
 
 **NEXT ROUND: R0 → D2 → D3 ON A SHARED BEHAVIOURAL EVALUATION (maintainer
@@ -3790,9 +3790,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$127.9624` of `$256.6523` |
-| GPU engineering | `$4.3367` of `$25.0741` |
-| package | `$132.2991` of `$281.7264` |
-| project cap | `$469.8589` spent of `$590.0000`, leaving `$120.1411` |
+| GPU engineering | `$3.6835` of `$25.0741` |
+| package | `$131.6459` of `$281.7264` |
+| project cap | `$470.5121` spent of `$590.0000`, leaving `$119.4879` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 4.** 5 ceilings cost `$150.0000` and the formal allowance has `$127.9624`. Dividing the PACKAGE balance instead gives 4, which is the error: the engineering allowance cannot pay for a formal probe.
 

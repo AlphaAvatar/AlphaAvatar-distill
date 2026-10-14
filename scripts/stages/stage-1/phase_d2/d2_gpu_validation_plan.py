@@ -69,7 +69,10 @@ EXECUTED_PATHS = (
 EXECUTED_PATH_EXCEPTIONS = (
     "scripts/stages/stage-1/phase_d2/d2_gpu_validation_plan.py",
     "scripts/stages/stage-1/phase_d2/d2val_acquire.sh",
-    "scripts/shared/pod/book_engineering_subrun.py")
+    "scripts/shared/pod/book_engineering_subrun.py",
+    #: Prices from the booked evidence after the session; stage V never
+    #: imports it.
+    "scripts/stages/stage-1/families/d_series/d2_budget.py")
 LAUNCHER = "scripts/stages/stage-1/phase_d1/topk_adoption_launch.sh"
 
 
@@ -123,8 +126,11 @@ def build() -> dict[str, Any]:
         BUD.d1_search_telemetry(),
         float(BUD._read(f"{BUD.D1_SEARCH_RUN}/closeout/outcome.json")["cost"][
             "elapsed_minutes"]))
-    diag = BUD.teacher_confidence_overhead(BUD.calibration_evidence(),
-                                           basis)["depth_seconds_per_expansion"]
+    #: PROVISIONAL, always: this is the REGISTERED plan, and a measured
+    #: re-pricing after its own session must not move its hash.
+    diag = BUD.teacher_confidence_overhead(BUD.calibration_evidence(), basis,
+                                           validation=False)[
+        "depth_seconds_per_expansion"]
     stats_ops = _root_operator_seconds(BUD)
     stats_s = 2 * sum(stats_ops.values())
     depth_exp = (L["depth_round_seconds"] + diag["expected"]) / 60
