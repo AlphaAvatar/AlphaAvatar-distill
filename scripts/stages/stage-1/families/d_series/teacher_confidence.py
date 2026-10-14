@@ -4,8 +4,10 @@ Run BEFORE the formal D2 search, on the ROOT reference store of each
 calibration profile (`aadistill.initialization.scoring.reference_store`), and
 -- when a candidate's per-position root KL is supplied (B's, in the D2 GPU
 validation) -- against that KL. Generic over the store: it reads whichever
-confidence the store holds -- version 2's full-vocabulary one, or version 3's
-Top-200 + tail one, which its union store declares in its identity.
+confidence the store holds -- the full-vocabulary one, or the Top-K + tail
+one a union store declares -- and states its definition and normalizer from
+the store's DECLARED identity (:func:`confidence_definition`), never from a
+constant here.
 Everything here is DESCRIPTIVE: the D2 preregistration in force freezes the
 objective, the scope and every rule before this runs, and no result below may
 change a definition, a threshold-free mapping or the scope. Nothing in this
@@ -115,6 +117,54 @@ def _item_tags(item: Mapping[str, Any], n: int) -> dict[str, torch.Tensor]:
                                       where=f"item {item.get('item_id')!r}: ")
 
 
+class ConfidenceDefinitionError(ValueError):
+    """A store whose declared confidence this report cannot state."""
+
+
+def confidence_definition(store: Any) -> dict[str, Any]:
+    """What the store's per-position confidence IS, from its declared identity.
+
+    The entropy definition and the confidence mapping are named in the
+    store's identity (`root_reference_identity`); the category count follows
+    from them and the store's own ``top_k`` and vocabulary. An undeclared or
+    unknown pair is refused rather than described as either known one -- a
+    report that names the wrong normalizer misstates every range it prints.
+    """
+    from aadistill.initialization.scoring.objective import (
+        REFERENCE_CONFIDENCE_MAPPING, REFERENCE_ENTROPY_DEFINITION,
+        REFERENCE_TOPK_CONFIDENCE_MAPPING, REFERENCE_TOPK_ENTROPY_DEFINITION,
+    )
+    from aadistill.initialization.scoring.support import topk_tail_categories
+
+    ident = getattr(store, "identity", None) or {}
+    entropy = ident.get("entropy_definition")
+    mapping = ident.get("confidence_mapping")
+    vocab = int(store.vocab_size)
+    if (entropy, mapping) == (REFERENCE_ENTROPY_DEFINITION,
+                              REFERENCE_CONFIDENCE_MAPPING):
+        categories = vocab
+        formula = ("c_T = 1 - H_T / log|V|, H_T the full-vocabulary Shannon "
+                   "entropy")
+    elif (entropy, mapping) == (REFERENCE_TOPK_ENTROPY_DEFINITION,
+                                REFERENCE_TOPK_CONFIDENCE_MAPPING):
+        k = int(store.top_k)
+        categories = topk_tail_categories(k, vocab)
+        formula = ("c_T = 1 - H_T^{K+1} / log(K+1), H_T^{K+1} the Shannon "
+                   "entropy of the Top-K entries and one tail bucket in "
+                   "absolute probabilities" if k < vocab else
+                   "c_T = 1 - H_T / log|V| (Top-K covers the vocabulary: no "
+                   "tail bucket)")
+    else:
+        raise ConfidenceDefinitionError(
+            f"the store declares entropy {entropy!r} and mapping {mapping!r}; "
+            "this report states no such confidence")
+    return {"entropy_definition": entropy, "confidence_mapping": mapping,
+            "top_k": int(store.top_k), "vocab_size": vocab,
+            "categories": int(categories),
+            "log_categories_nats": math.log(int(categories)),
+            "formula": formula}
+
+
 def validity_report(store: Any, items: Sequence[Mapping[str, Any]], *,
                     policy: Any,
                     kl: Mapping[str, torch.Tensor] | None = None,
@@ -130,6 +180,7 @@ def validity_report(store: Any, items: Sequence[Mapping[str, Any]], *,
     from aadistill.initialization.scoring.positions import PREDICTION_AXIS
 
     store.require_items(items)
+    definition = confidence_definition(store)
     conf, ent, tlp, top1 = [], [], [], []
     group: dict[str, list[torch.Tensor]] = {}
     group_kl: dict[str, list[torch.Tensor]] = {}
@@ -192,13 +243,16 @@ def validity_report(store: Any, items: Sequence[Mapping[str, Any]], *,
     c = torch.cat(conf)
     total = float(c.sum())
     report: dict[str, Any] = {
-        "schema": "aadistill.d_series.teacher_confidence_validity/v1",
+        #: v2: the definition and normalizer are read from the store's
+        #: declared identity. v1 printed the full-vocabulary definition and
+        #: log|V| for every store, including Top-K + tail ones (erratum:
+        #: validations/d2v3-gpu-validation/v1/erratum_validity_report.json).
+        "schema": "aadistill.d_series.teacher_confidence_validity/v2",
         "store_identity_hash": store.identity_hash,
         "policy": policy.qualified_id,
         "items": len(items),
-        "definition": "c_T = 1 - H_T / log|V|, H_T full-vocabulary Shannon",
-        "vocab_size": int(store.vocab_size),
-        "log_vocab_nats": math.log(int(store.vocab_size)),
+        "definition": definition["formula"],
+        "confidence_definition": definition,
         "distribution": {
             "confidence": _stats(c),
             "entropy_nats": {k: v for k, v in _stats(torch.cat(ent)).items()
@@ -272,15 +326,17 @@ def risks(report: Mapping[str, Any]) -> list[str]:
     Statements, not verdicts: no threshold here gates anything.
     """
     out = []
+    cd = report["confidence_definition"]
     d = report["distribution"]["confidence"]
     q = d.get("quantiles") or {}
     if q:
         out.append(
             f"dynamic range: c_T IQR {q['q75'] - q['q25']:.4f} "
             f"(q25 {q['q25']:.4f}, q75 {q['q75']:.4f}), min {d['min']:.4f}; "
-            f"normalised by log|V| = {report['log_vocab_nats']:.3f} nats, a "
-            "narrow range means the weighting moves the objective and the "
-            "statistics only modestly")
+            f"normalised by log({cd['categories']}) = "
+            f"{cd['log_categories_nats']:.3f} nats ({cd['confidence_mapping']}"
+            "), a narrow range means the weighting moves the objective and "
+            "the statistics only modestly")
         out.append(
             f"effective sample size: {d['effective_sample_size']:.1f} of "
             f"{d['positions']} scored positions "
@@ -306,5 +362,6 @@ def risks(report: Mapping[str, Any]) -> list[str]:
     return out
 
 
-__all__ = ["SPAN_TAGS", "STRUCTURAL_TAGS", "TOKEN_CLASSES", "risks",
-           "spearman", "token_class", "validity_report"]
+__all__ = ["ConfidenceDefinitionError", "SPAN_TAGS", "STRUCTURAL_TAGS",
+           "TOKEN_CLASSES", "confidence_definition", "risks", "spearman",
+           "token_class", "validity_report"]

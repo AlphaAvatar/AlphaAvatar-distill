@@ -1,0 +1,15 @@
+{
+ "schema": "aadistill.engineering_campaign/v1",
+ "campaign_id": "d_series_d2v3_gpu_validation_r2",
+ "_contract": "Cumulative cost of D2 version 3's GPU validation, revision 2, across every resource and subrun. A rerun does NOT reset it; revision 1's spend is in its own closed campaign.",
+ "status": "PROPOSED -- not granted: authorization.json does not exist, so engineering_campaign_budget.py refuses and the launcher creates nothing",
+ "authorization": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/authorization.json",
+ "package_id": "phase_c1.execution_package.2026-09-11",
+ "_package_id": "the GPU ENGINEERING book, as for R0, the reference calibration and Stage V",
+ "plan": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/plan.json",
+ "teardown_reserve_usd": 0.3,
+ "inherited_spend": [],
+ "subruns": [],
+ "booked_usd": 0.0,
+ "authorizes": "nothing by itself"
+}

@@ -3,7 +3,7 @@
 # Runs on the DEV BOX, never on the pod.
 #
 #   tmux new-session -d -s d2val "bash scripts/stages/stage-1/phase_d2/d2val_acquire.sh"
-#   tmux new-session -d -s d2v3val "ACQ_VALIDATION_DIR=logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1 ACQ_STAGES=W ACQ_RUN_PREFIX=d2v3val bash scripts/stages/stage-1/phase_d2/d2val_acquire.sh"
+#   tmux new-session -d -s d2v3val "ACQ_VALIDATION_DIR=logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2 ACQ_STAGES=W ACQ_RUN_PREFIX=d2v3val bash scripts/stages/stage-1/phase_d2/d2val_acquire.sh"
 #
 # The validation directory owns the grant (authorization.json: commit, session
 # cap, status) and the campaign; the defaults are Stage V's, unchanged.

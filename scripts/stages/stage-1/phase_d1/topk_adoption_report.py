@@ -214,7 +214,21 @@ def lines(doc: dict) -> list[str]:
             out.append(f"   W1 {pid}: c_T median "
                        f"{(c.get('quantiles') or {}).get('q50')}, IQR "
                        f"{c.get('iqr')}, ESS {c.get('effective_fraction')}")
-        ua = (ww.get("W3_union_numerics") or {}).get("union_arithmetic") or {}
+        w3 = ww.get("W3_union_numerics") or {}
+        ka = w3.get("kl_arithmetic") or {}
+        if ka:
+            for part in ("teacher_topk", "union"):
+                x = ka.get(part) or {}
+                out.append(f"   W3 {part} KL vs float64: max "
+                           f"{x.get('max_abs_difference')}, violations "
+                           f"{x.get('position_violations')}")
+            cr = ka.get("float32_crossings") or {}
+            out.append(f"   W3 fp64 bounds {ka.get('bounds_hold')}; float32 "
+                       f"crossings lower {(cr.get('lower') or {}).get('count')}"
+                       f" / upper {(cr.get('upper') or {}).get('count')}, "
+                       f"anomalies {(ka.get('anomalies') or {}).get('total')}")
+        #: Revision 1's record (historical).
+        ua = w3.get("union_arithmetic") or {}
         if ua:
             out.append(f"   W3 union vs float64: max {ua.get('max_abs_difference')}"
                        f", violations {ua.get('position_violations')}, bounds "

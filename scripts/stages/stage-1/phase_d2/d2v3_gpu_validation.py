@@ -15,15 +15,18 @@ version 3's weighted statistics, and DEPTH-style bypasses of it).
 never mixed** (the plan imports these constants, and the premises refuse a
 plan whose registered tolerances differ from the code's):
 
-1. **ARITHMETIC** -- one set of inputs, two computations. The union KL in
-   float32 against a float64 oracle on the SAME logits -- the teacher's side
-   is the FLOAT32 HEAD distribution the root store defines (never the model's
-   native bf16 logits, which are a different distribution); the KL bounds in
-   float64; the retrieval of candidate-only entries against the full head's
-   log-softmax; the K+1 confidence against float64 on the same sketch; the
-   `c x KL` item mean against float64 on the same (KL, c); and, inside ONE
-   version-3 state evaluation, ``state.objective.raw_kl.* ==
-   state.teacher_kl.*``. GATED by :data:`ARITHMETIC_TOLERANCES`.
+1. **ARITHMETIC** -- the float32 computation against float64. BOTH partition
+   KLs the reduction returns (teacher Top-K + tail, and union) against a
+   float64 oracle on the float32 HEAD distribution the root store defines
+   (never the model's native bf16 logits, which are a different
+   distribution), each from one registered error budget; the float64 order
+   ``KL_T <= KL_U <= KL_full``; float32 crossings of that order inside the
+   combined bound (:func:`kl_arithmetic`, revision 2); the retrieval of
+   candidate-only entries against the full head's log-softmax; the K+1
+   confidence against float64 on the same sketch; the `c x KL` item mean
+   against float64 on the same (KL, c); and, inside ONE version-3 state
+   evaluation, ``state.objective.raw_kl.* == state.teacher_kl.*``. GATED by
+   :data:`ARITHMETIC_TOLERANCES`.
 2. **EXECUTION DRIFT and NUMERICAL-PROTOCOL DIFFERENCE** -- bsz 1 vs 3, and
    the float32 head against the native bf16 forward (logits, Top-K support
    agreement, teacher probabilities, KL, confidence). REPORTED, NEVER GATED:
@@ -56,34 +59,97 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
+#: REVISION 2 of stage W (maintainer corrective authorization, 2026-10-14):
+#: revision 1 (`.../v1/`, run d2v3val_20261014_170824) is FAIL, kept as is,
+#: and adopts nothing -- its plan hash is not this plan's. Only the KL
+#: arithmetic gate (:func:`kl_arithmetic`) and the validity report's stated
+#: definition changed; the objective, support, steps and sample did not.
 VALIDATION_DIR = ("logs/stages/stage-1/families/d_series/validations/"
-                  "d2v3-gpu-validation/v1")
+                  "d2v3-gpu-validation/v2")
+SUPERSEDED_VALIDATION_DIR = ("logs/stages/stage-1/families/d_series/"
+                             "validations/d2v3-gpu-validation/v1")
 PLAN = f"{VALIDATION_DIR}/plan.json"
 CAMPAIGN = f"{VALIDATION_DIR}/campaign.json"
 AUTHORIZATION = f"{VALIDATION_DIR}/authorization.json"
 AUTHORIZATION_PROPOSED = f"{VALIDATION_DIR}/authorization.proposed.json"
 RECORD_KEY = "W_d2v3_validation"
 
-#: CLASS 1. Per position, |KL_U(float32) - KL_U(float64)| <= abs + rel * KL64:
-#: the float32 floor is ABSOLUTE (each log probability carries the rounding of
-#: its row's log-normalizer, ~4 eps |log Z|, measured 1.6e-5 at most on real
-#: logits at $0), so a purely relative gate would fail every near-zero KL and
-#: a purely absolute one would pass a relative error on a large one. The
-#: retrieval differs from the full head only by float32 summation order
-#: (measured <= 6e-5 nats). The confidence divides an entropy of at most
-#: log(K+1) by log(K+1): 1e-5. The c x KL item mean and the raw-KL control are
-#: Stage V's, unchanged.
+#: CLASS 1. The KL family, revision 2. BOTH partition KLs the reduction
+#: returns -- the teacher Top-K + tail KL (``KL_T``) and the union KL
+#: (``KL_U``) -- are checked per position against the float64 oracle,
+#: ``|KL32 - KL64| <= abs + rel * KL64``, from ONE error budget
+#: (:data:`KL_ERROR_BUDGET`). The float64 oracle's own order
+#: ``KL_T <= KL_U <= KL_full`` is exact mathematics, checked at a float64
+#: summation slack. A float32 CROSSING of that order is explained exactly when
+#: it lies inside the combined bound the triangle inequality gives from the
+#: two accuracy gates and the exact order; one beyond it is an anomaly.
+#: Revision 1's ``4 eps |log Z_teacher|`` slack -- one log-normalizer's
+#: rounding, ~10x tighter than the tolerance registered for the same quantity
+#: and with no relative term -- is gone. The retrieval differs from the full
+#: head by float32 summation order per entry; the confidence divides an
+#: entropy of at most log(K+1) by log(K+1); the c x KL item mean and the
+#: raw-KL control are Stage V's, unchanged.
 ARITHMETIC_TOLERANCES = {
+    "teacher_topk_kl_abs_nats_vs_float64": 1e-4,
+    "teacher_topk_kl_rel_vs_float64": 1e-4,
     "union_kl_abs_nats_vs_float64": 1e-4,
     "union_kl_rel_vs_float64": 1e-4,
+    "fp64_bound_slack_rel": 1e-12,
+    "float32_crossings_beyond_combined_bound": 0,
     "retrieval_abs_nats_vs_full_head": 2e-4,
     "confidence_abs_vs_float64": 1e-5,
-    "bound_violations_beyond_float32_slack": 0,
     "item_objective_relative_vs_float64": 1e-5,
     "raw_kl_control_relative": 1e-6,
 }
 #: The float64 oracle's own bound check: exact up to float64 summation.
-ORACLE_BOUND_SLACK = 1e-12
+ORACLE_BOUND_SLACK = ARITHMETIC_TOLERANCES["fp64_bound_slack_rel"]
+#: The KL family's error budget, REGISTERED with the tolerances (the plan
+#: copies it). Statements of where float32 error comes from and how it
+#: reaches a KL -- not fitted constants.
+KL_ERROR_BUDGET = {
+    "compared": (
+        "KL_T and KL_U as union_forward_kl_terms reduces them in float32 from "
+        "the root store's teacher inputs (sketch, tail, retrieved entries) and "
+        "the candidate's logits, against the float64 oracle on the float32 "
+        "head logits recomputed from the store's hidden state and the same "
+        "candidate logits"),
+    "sources": {
+        "log_softmax_rounding": (
+            "z - logsumexp(z) in float32: about eps (|z - max| + log sum) per "
+            "entry, <= ~2e-5 nats for logits spanning <= 80 nats"),
+        "teacher_input_path": (
+            "the store forms its sketch per 512-row block and candidate-only "
+            "entries through the head's row gather; the oracle recomputes the "
+            "head per item. Per entry this is bounded by the retrieval "
+            "tolerance. KL_T reads no retrieved entry and no subtraction"),
+        "reduction": (
+            "float32 sums over <= 2K+1 buckets: <= (2K+1) eps sum|terms| "
+            "worst case, ~sqrt(2K+1) eps sum|terms| typical"),
+        "union_tail": (
+            "p_tail_U = tail_T - sum_E p (log1mexp): its absolute error is "
+            "<= d * tail_T for a relative input error d, entering KL_U as at "
+            "most d * tail_T * (1 + |log p_tail_U / q_tail_U|)")},
+    "propagation": (
+        "a teacher log-probability error d per bucket moves the KL by "
+        "p (1 + log p/q) d, at most d (3 + KL) in total because "
+        "sum p |log p/q| <= KL + 2; a candidate error d moves it by at most d"),
+    "tolerance": (
+        "abs 1e-4 + rel 1e-4 x KL64 for BOTH partitions. KL_U's value was "
+        "registered before revision 1 and held at all 46,056 positions there; "
+        "KL_T takes the same value because its float32 sources are a subset "
+        "of KL_U's (no retrieved entry, no tail subtraction)"),
+    "fp64_bounds": (
+        "coarser partition <= finer <= full is exact; float64 tree summation "
+        "errs by <= ~log2|V| x 2.2e-16 x (KL + 2), so 1e-12 x (1 + KL_full) is "
+        "a ~250x margin"),
+    "crossings": (
+        "lower KL32_T - KL32_U <= tol_T + tol_U + slack and upper "
+        "KL32_U - KL64_full <= tol_U + slack follow from the two accuracy "
+        "gates and the exact float64 order; a crossing beyond its bound is "
+        "an anomaly, counted rather than assumed away"),
+    "not_assumed": (
+        "no slack is derived from one log-normalizer alone"),
+}
 INTEGRITY_TOLERANCES = {"statistics_denominator_relative": 1e-9}
 #: CLASS 3. R0's registered tolerances, carried over unchanged.
 ROW_EQUIVALENCE_TOLERANCES = {"depth_candidate_relative": 1e-5,
@@ -207,49 +273,261 @@ def oracle_kls(p_z, candidates: Sequence[tuple[Any, Any]], st, *,
     return outs
 
 
-def union_arithmetic(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-    """The float32 union KL against the float64 oracle on the SAME logits,
-    the oracle's own bounds, and the float32 union KL against the float64
-    full KL with float32 slack. ``rows``: one entry per (item, candidate)
-    with ``kl32``, ``kl_ref32``, ``oracle`` (:func:`oracle_kls`) and
-    ``log_z_ref`` (the teacher's per-row log-normalizer, for the slack)."""
+#: Per-position records kept in full: every float32 crossing and every
+#: position whose error exceeds this fraction of its tolerance.
+POSITION_RECORD_FRACTION = 0.5
+POSITION_RECORD_CAP = 2000
+ERROR_RATIO_BINS = (0.0, 0.01, 0.1, 0.25, 0.5, 0.75, 1.0, 2.0, math.inf)
+
+
+def kl_tolerance(kl64, abs_: float, rel: float):
+    """``abs + rel * |KL64|``: the per-position float32 allowance."""
+    return abs_ + rel * kl64.abs()
+
+
+def combined_bounds(tol_topk, tol_union, slack):
+    """``(lower, upper)``: the largest float32 crossings of the float64 order
+    the two accuracy gates allow. ``KL32_T - KL32_U = (KL32_T - KL64_T) +
+    (KL64_T - KL64_U) + (KL64_U - KL32_U) <= tol_T + slack + tol_U``, and
+    ``KL32_U - KL64_full <= tol_U + slack`` (the full KL has no float32
+    side)."""
+    return tol_topk + tol_union + slack, tol_union + slack
+
+
+class HeadLogitsRetrieval:
+    """A teacher retrieval over float32 head logits ALREADY computed: ``log p
+    = z[ids] - log_z`` from the same tensor a sketch was formed from, so a
+    reduction over it reads exactly one set of teacher inputs (the
+    same-input attribution of :func:`kl_arithmetic`)."""
+
+    def __init__(self, logits, log_z) -> None:
+        self.logits, self.log_z = logits, log_z
+
+    @property
+    def rows(self) -> int:
+        return int(self.logits.shape[0])
+
+    def log_probs(self, token_ids, start: int = 0, stop: int | None = None):
+        stop = self.rows if stop is None else int(stop)
+        z = self.logits[start:stop]
+        return (z.gather(-1, token_ids.to(z.device).long()).float()
+                - self.log_z[start:stop].to(z.device).float()[:, None])
+
+
+def _ratio_histogram(a, tol) -> dict[str, int]:
+    import torch
+
+    r = (a / tol).double()
+    r = r[torch.isfinite(r)]
+    out = {}
+    for lo, hi in zip(ERROR_RATIO_BINS[:-1], ERROR_RATIO_BINS[1:]):
+        out[f"[{lo},{hi})"] = int(((r >= lo) & (r < hi)).sum())
+    return out
+
+
+def kl_arithmetic(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """The KL family's arithmetic gate (revision 2), per position.
+
+    ``rows``: one entry per (item, candidate) with ``item_id``, ``layer``,
+    ``kl32_topk`` / ``kl32_union`` (the reduction's float32 outputs on the
+    store's inputs), ``oracle`` (:func:`oracle_kls`: ``topk``, ``union``,
+    ``full``), ``log_z_ref`` (the teacher's log-normalizer, only for the
+    revision-1 comparison count) and optionally ``same_input`` (the same
+    reduction on the head logits the oracle reads: ``kl32_topk``,
+    ``kl32_union``, ``support_agrees``). Gated: each partition's accuracy,
+    the float64 order, and float32 crossings within the combined bound.
+    Everything else is recorded for attribution."""
     import torch
 
     t = ARITHMETIC_TOLERANCES
-    eps = float(torch.finfo(torch.float32).eps)
-    worst_excess, err_max, violations, oracle_viol, f32_viol = 0.0, 0.0, 0, 0, 0
-    positions = 0
-    for r in rows:
-        o = r["oracle"]
-        k32 = r["kl32"].double().to(o["union"].device)
-        k64 = o["union"]
-        finite = torch.isfinite(k32) & torch.isfinite(k64)
-        diff = (k32 - k64).abs()
-        allowed = t["union_kl_abs_nats_vs_float64"] + \
-            t["union_kl_rel_vs_float64"] * k64.abs()
-        bad = finite & (diff > allowed)
-        violations += int(bad.sum())
-        violations += int((torch.isfinite(k32) != torch.isfinite(k64)).sum())
-        if bool(finite.any()):
-            err_max = max(err_max, float(diff[finite].max()))
-            worst_excess = max(worst_excess,
-                               float((diff - allowed)[finite].max()))
-        slack64 = ORACLE_BOUND_SLACK * (1 + o["full"].abs())
-        oracle_viol += int(((o["topk"] - o["union"]) > slack64).sum()
-                           + ((o["union"] - o["full"]) > slack64).sum())
-        slack32 = 4 * eps * r["log_z_ref"].double().abs().to(k64.device)
-        f32_viol += int((((r["kl_ref32"].double().to(k64.device) - k32)
-                          > slack32) | ((k32 - o["full"]) > slack32)).sum())
-        positions += int(k64.numel())
-    return {"positions": positions, "max_abs_difference": err_max,
-            "position_violations": violations,
-            "max_excess_over_tolerance": worst_excess,
-            "oracle_bound_violations": oracle_viol,
-            "float32_bound_violations_beyond_slack": f32_viol,
-            "within_tolerance": (positions > 0 and violations == 0),
-            "bounds_hold": (positions > 0 and oracle_viol == 0
-                            and f32_viol <= t[
-                                "bound_violations_beyond_float32_slack"])}
+    tols = {"topk": (t["teacher_topk_kl_abs_nats_vs_float64"],
+                     t["teacher_topk_kl_rel_vs_float64"]),
+            "union": (t["union_kl_abs_nats_vs_float64"],
+                      t["union_kl_rel_vs_float64"])}
+    eps32 = float(torch.finfo(torch.float32).eps)
+
+    def cat(get) -> Any:
+        parts = [get(r).detach().double().reshape(-1).cpu() for r in rows]
+        return torch.cat(parts) if parts else torch.zeros(0,
+                                                          dtype=torch.float64)
+
+    k32 = {"topk": cat(lambda r: r["kl32_topk"]),
+           "union": cat(lambda r: r["kl32_union"])}
+    k64 = {"topk": cat(lambda r: r["oracle"]["topk"]),
+           "union": cat(lambda r: r["oracle"]["union"])}
+    full = cat(lambda r: r["oracle"]["full"])
+    n = int(full.numel())
+    where = [(str(r.get("item_id")), r.get("layer"), j)
+             for r in rows for j in range(int(r["oracle"]["full"].numel()))]
+
+    part: dict[str, Any] = {}
+    allow: dict[str, Any] = {}
+    errs: dict[str, Any] = {}
+    finite_all = torch.isfinite(full)
+    for name in ("topk", "union"):
+        a32, a64 = k32[name], k64[name]
+        both = torch.isfinite(a32) & torch.isfinite(a64)
+        mismatch = torch.isfinite(a32) != torch.isfinite(a64)
+        finite_all &= both
+        e = torch.where(both, a32 - a64, torch.zeros_like(a64))
+        tol = kl_tolerance(torch.where(both, a64, torch.zeros_like(a64)),
+                           *tols[name])
+        bad = both & (e.abs() > tol)
+        allow[name], errs[name] = tol, e
+        excess = (e.abs() - tol)[both]
+        part[name] = {
+            "positions": int(both.sum()),
+            "position_violations": int(bad.sum()),
+            "finiteness_mismatches": int(mismatch.sum()),
+            "max_abs_difference": (float(e.abs()[both].max())
+                                   if bool(both.any()) else None),
+            "max_excess_over_tolerance": (float(excess.max())
+                                          if int(excess.numel()) else None),
+            "abs_difference": _q(e.abs()[both]),
+            "signed_difference": _q(e[both]),
+            "error_over_tolerance_histogram": _ratio_histogram(
+                e.abs()[both], tol[both]),
+            "within_tolerance": (n > 0 and int(bad.sum()) == 0
+                                 and int(mismatch.sum()) == 0)}
+
+    #: The float64 oracle's exact order, at its summation slack (read at
+    #: call time: the registered value is the module's).
+    slack = float(ORACLE_BOUND_SLACK) * (1.0 + full.abs())
+    fin = finite_all
+    lo64 = torch.where(fin, k64["topk"] - k64["union"], torch.zeros_like(full))
+    up64 = torch.where(fin, k64["union"] - full, torch.zeros_like(full))
+    fp64 = {"lower_violations": int((fin & (lo64 > slack)).sum()),
+            "upper_violations": int((fin & (up64 > slack)).sum()),
+            "max_lower_excess": float((lo64 - slack)[fin].max())
+            if bool(fin.any()) else None,
+            "max_upper_excess": float((up64 - slack)[fin].max())
+            if bool(fin.any()) else None}
+    fp64["hold"] = (n > 0 and fp64["lower_violations"] == 0
+                    and fp64["upper_violations"] == 0)
+
+    #: Float32 crossings of that order, against the COMBINED bound.
+    lo32 = torch.where(fin, k32["topk"] - k32["union"], torch.zeros_like(full))
+    up32 = torch.where(fin, k32["union"] - full, torch.zeros_like(full))
+    bound_lo, bound_up = combined_bounds(allow["topk"], allow["union"], slack)
+
+    def side(c, bound) -> dict[str, Any]:
+        crossed = fin & (c > 0)
+        beyond = fin & (c > bound)
+        out = {"count": int(crossed.sum()), "beyond_combined_bound":
+               int(beyond.sum()),
+               "max_magnitude": float(c[crossed].max())
+               if bool(crossed.any()) else 0.0}
+        if bool(crossed.any()):
+            j = int(torch.where(crossed, c, torch.full_like(c, -1.0)).argmax())
+            item, layer, pos = where[j]
+            out["at_max"] = {
+                "item_id": item, "layer": layer, "position": pos,
+                "kl64_topk": float(k64["topk"][j]),
+                "kl64_union": float(k64["union"][j]),
+                "kl64_full": float(full[j]),
+                "kl32_topk": float(k32["topk"][j]),
+                "kl32_union": float(k32["union"][j]),
+                "combined_bound": float(bound[j])}
+        return out
+
+    crossings = {"lower": side(lo32, bound_lo), "upper": side(up32, bound_up),
+                 "lower_is": "KL32_T - KL32_U > 0",
+                 "upper_is": "KL32_U - KL64_full > 0",
+                 "combined_bound": KL_ERROR_BUDGET["crossings"]}
+    beyond = (crossings["lower"]["beyond_combined_bound"]
+              + crossings["upper"]["beyond_combined_bound"])
+    mism = sum(part[x]["finiteness_mismatches"] for x in part)
+    anomalies = {"fp64_bound_violations": fp64["lower_violations"]
+                 + fp64["upper_violations"],
+                 "float32_crossings_beyond_combined_bound": beyond,
+                 "finiteness_mismatches": mism}
+    anomalies["total"] = sum(anomalies.values())
+
+    #: Per-position records: every crossing and every position above
+    #: POSITION_RECORD_FRACTION of a tolerance, worst first.
+    ratio = torch.maximum(errs["topk"].abs() / allow["topk"],
+                          errs["union"].abs() / allow["union"])
+    keep = fin & ((lo32 > 0) | (up32 > 0)
+                  | (ratio > POSITION_RECORD_FRACTION))
+    idx = torch.nonzero(keep).flatten()
+    idx = idx[torch.argsort(ratio[idx], descending=True)]
+    recorded = []
+    for j in idx[:POSITION_RECORD_CAP].tolist():
+        item, layer, pos = where[j]
+        recorded.append({
+            "item_id": item, "layer": layer, "position": pos,
+            "kl64_topk": float(k64["topk"][j]),
+            "kl64_union": float(k64["union"][j]), "kl64_full": float(full[j]),
+            "kl32_topk": float(k32["topk"][j]),
+            "kl32_union": float(k32["union"][j]),
+            "err_topk": float(errs["topk"][j]),
+            "err_union": float(errs["union"][j]),
+            "tol_topk": float(allow["topk"][j]),
+            "tol_union": float(allow["union"][j]),
+            "lower_crossing": float(lo32[j]), "upper_crossing": float(up32[j])})
+
+    #: ATTRIBUTION (not gated): the same reduction on the head logits the
+    #: oracle reads separates float32 reduction error from the store's
+    #: teacher-input path.
+    same = [r for r in rows if r.get("same_input")]
+    attribution: dict[str, Any] = {"rows": len(same)}
+    if same:
+        agree = torch.cat([r["same_input"]["support_agrees"].detach()
+                           .reshape(-1).bool().cpu() for r in same])
+        s_or = {x: torch.cat([r["oracle"][x].detach().double().reshape(-1)
+                              .cpu() for r in same]) for x in ("topk", "union")}
+        s32 = {x: torch.cat([r["same_input"][f"kl32_{x}"].detach().double()
+                             .reshape(-1).cpu() for r in same])
+               for x in ("topk", "union")}
+        st32 = {x: torch.cat([r[f"kl32_{x}"].detach().double().reshape(-1)
+                              .cpu() for r in same]) for x in ("topk", "union")}
+        for x in ("topk", "union"):
+            ok = agree & torch.isfinite(s32[x]) & torch.isfinite(s_or[x])
+            okp = torch.isfinite(s32[x]) & torch.isfinite(st32[x])
+            attribution[x] = {
+                "reduction_only_abs_vs_float64": _q(
+                    (s32[x] - s_or[x]).abs()[ok]),
+                "store_path_minus_same_input_abs": _q(
+                    (st32[x] - s32[x]).abs()[okp])}
+        attribution["support_agreement_fraction"] = float(
+            agree.double().mean()) if int(agree.numel()) else None
+    attribution["_is"] = (
+        "DIAGNOSTIC: reduction_only is float32 rounding alone (one set of "
+        "teacher inputs); store_path_minus_same_input is what the store's "
+        "teacher-input path adds. Never gated")
+
+    #: Revision 1's gate on the same numbers, for continuity only.
+    log_z = cat(lambda r: r["log_z_ref"])
+    slack_r1 = 4 * eps32 * log_z.abs()
+    r1 = int((fin & ((lo32 > slack_r1) | (up32 > slack_r1))).sum())
+
+    return {
+        "positions": n,
+        "tolerances_applied": {k: v for k, v in t.items() if k.startswith((
+            "teacher_topk_kl", "union_kl", "fp64_bound",
+            "float32_crossings"))},
+        "teacher_topk": part["topk"], "union": part["union"],
+        "fp64_bounds": fp64, "float32_crossings": crossings,
+        "anomalies": anomalies,
+        "positions_recorded": recorded,
+        "positions_recorded_total": int(idx.numel()),
+        "positions_recorded_omitted": max(0, int(idx.numel())
+                                          - POSITION_RECORD_CAP),
+        "positions_recorded_rule": (
+            f"every float32 crossing and every position above "
+            f"{POSITION_RECORD_FRACTION} of a tolerance, worst first, at most "
+            f"{POSITION_RECORD_CAP}; the histograms cover every position"),
+        "same_input_attribution": attribution,
+        "revision_1_slack_count": {
+            "count": r1, "_is": ("how many positions revision 1's 4 eps "
+                                 "|log Z_teacher| slack would flag on these "
+                                 "numbers -- continuity only, never gated")},
+        "within_tolerance": (part["topk"]["within_tolerance"]
+                             and part["union"]["within_tolerance"]),
+        "bounds_hold": fp64["hold"],
+        "crossings_within_combined_bound": (
+            n > 0 and beyond <= t["float32_crossings_beyond_combined_bound"]),
+    }
 
 
 def confidence_arithmetic(store: Any, items: Sequence[Mapping[str, Any]], *,
@@ -563,11 +841,15 @@ def verdicts(result: Mapping[str, Any]) -> dict[str, Any]:
                                       or {}).get("within_tolerance")
     if not w1.get("profiles"):
         arith["confidence"] = _tri(w1, lambda s: None)
-    arith["union_kl_vs_float64"] = _tri(
-        w3, lambda s: (s.get("union_arithmetic") or {}).get(
+    kl = lambda s: s.get("kl_arithmetic") or {}                  # noqa: E731
+    arith["teacher_topk_kl_vs_float64"] = _tri(
+        w3, lambda s: (kl(s).get("teacher_topk") or {}).get(
             "within_tolerance"))
-    arith["kl_bounds"] = _tri(
-        w3, lambda s: (s.get("union_arithmetic") or {}).get("bounds_hold"))
+    arith["union_kl_vs_float64"] = _tri(
+        w3, lambda s: (kl(s).get("union") or {}).get("within_tolerance"))
+    arith["kl_fp64_bounds"] = _tri(w3, lambda s: kl(s).get("bounds_hold"))
+    arith["float32_crossings_within_combined_bound"] = _tri(
+        w3, lambda s: kl(s).get("crossings_within_combined_bound"))
     arith["retrieval_vs_full_head"] = _tri(
         w3, lambda s: (s.get("retrieval") or {}).get("within_tolerance"))
     arith["objective_reduction"] = _tri(
@@ -1005,7 +1287,8 @@ def stage_W(*, env: Environment, journal, out: Path, deadline=None,
         build_root_reference_store, root_reference_identity,
     )
     from aadistill.initialization.scoring.support import (
-        deterministic_topk, sketch_forward_kl_terms, union_forward_kl_terms,
+        deterministic_topk, sketch_forward_kl_terms,
+        sketch_reference_deterministic, union_forward_kl_terms,
     )
     from aadistill.initialization.statistics.contribution import (
         bypassed_blocks,
@@ -1186,6 +1469,16 @@ def stage_W(*, env: Environment, journal, out: Path, deadline=None,
                 retrieval = store.retrieval_item(item)
                 z_head, s = _timed(env, lambda: head.logits(retrieval.hidden))
                 timing["head_logits_seconds"] += s
+                #: The SAME-INPUT twin of the store's teacher side: a sketch
+                #: and a retrieval formed from z_head itself, the tensor the
+                #: oracle reads (attribution only).
+                targets = item["input_ids"].reshape(-1)[1:].to(z_head.device)
+                sk_same, log_z_same = sketch_reference_deterministic(
+                    z_head, targets, top_k=k)
+                retr_same = HeadLogitsRetrieval(z_head, log_z_same)
+                same_support = (sk_same.support_indices.sort(-1).values
+                                == sk.support_indices.to(z_head.device)
+                                .sort(-1).values).all(-1)
                 with torch.no_grad():
                     native = teacher(ids).logits[0, :-1]
                 cands, terms_all, scs = [], [], []
@@ -1198,9 +1491,13 @@ def stage_W(*, env: Environment, journal, out: Path, deadline=None,
                         sk.tail_log_prob, cand, retrieval, top_k=k,
                         has_tail=store.has_tail))
                     timing["union_seconds"] += s
+                    terms_same = union_forward_kl_terms(
+                        sk_same.support_indices, sk_same.support_log_probs,
+                        sk_same.tail_log_prob, cand, retr_same, top_k=k,
+                        has_tail=store.has_tail)
                     _, sc = deterministic_topk(cand, k)
                     cands.append(cand)
-                    terms_all.append(terms)
+                    terms_all.append((terms, terms_same))
                     scs.append(sc)
                 #: ONE float64 pass of the teacher per row block, shared by
                 #: the native-bf16 comparison and every candidate.
@@ -1212,11 +1509,17 @@ def stage_W(*, env: Environment, journal, out: Path, deadline=None,
                                                 top_k=k))
                 del native
                 logp_head = None
-                for cand, terms, sc, oracle in zip(cands, terms_all, scs,
-                                                   oracles[1:]):
-                    rows.append({"kl32": terms.kl, "kl_ref32":
-                                 terms.kl_reference_topk, "oracle": oracle,
-                                 "log_z_ref": retrieval.log_z})
+                for layer, cand, (terms, terms_same), sc, oracle in zip(
+                        layers, cands, terms_all, scs, oracles[1:]):
+                    rows.append({
+                        "item_id": str(item["item_id"]), "layer": layer,
+                        "kl32_topk": terms.kl_reference_topk,
+                        "kl32_union": terms.kl, "oracle": oracle,
+                        "log_z_ref": retrieval.log_z,
+                        "same_input": {
+                            "kl32_topk": terms_same.kl_reference_topk,
+                            "kl32_union": terms_same.kl,
+                            "support_agrees": same_support}})
                     full = oracle["full"]
                     keep_r = full > 1e-6
                     stats["ratio_union_full"].append(
@@ -1256,6 +1559,7 @@ def stage_W(*, env: Environment, journal, out: Path, deadline=None,
                         "confidence": store.per_position(item,
                                                          "confidence").cpu()})
                 del cands, terms_all, scs, oracles, z_head, logp_head
+                del sk_same, log_z_same, retr_same
                 n_items += 1
                 partial["items_done"] = n_items
                 partial["timing_so_far"] = {kk: round(vv, 3)
@@ -1263,7 +1567,7 @@ def stage_W(*, env: Environment, journal, out: Path, deadline=None,
                 _free(env)
         record: dict[str, Any] = {
             "items": n_items, "bypass_layers": layers, "child_depth": depth,
-            "union_arithmetic": union_arithmetic(rows),
+            "kl_arithmetic": kl_arithmetic(rows),
             "retrieval": retrieval_arithmetic(retr_err),
             "objective_reduction": objective_reduction_arithmetic(
                 objective, per_item_red),
@@ -1278,7 +1582,8 @@ def stage_W(*, env: Environment, journal, out: Path, deadline=None,
                           / max(1, ties["rows"])},
             "float32_head_vs_native_bf16": summarize_protocol_difference(prot),
             "timing": {kk: round(vv, 3) for kk, vv in timing.items()},
-            "rows_per_candidate": sum(int(r["kl32"].numel()) for r in rows)
+            "rows_per_candidate": sum(int(r["kl32_union"].numel())
+                                      for r in rows)
             // max(1, len(layers)),
         }
         del rows
@@ -1500,5 +1805,6 @@ __all__ = ["ARITHMETIC_TOLERANCES", "CORE_STEPS", "D2V3ValidationError",
            "objective_reduction_arithmetic", "oracle_kls", "premises",
            "production_environment", "protocol_difference", "raw_kl_control",
            "rankings_v3", "retrieval_arithmetic", "sample_items",
-           "stage_W", "union_arithmetic",
-           "verdicts"]
+           "stage_W", "kl_arithmetic", "kl_tolerance", "combined_bounds",
+           "HeadLogitsRetrieval",
+           "KL_ERROR_BUDGET", "verdicts"]

@@ -246,10 +246,19 @@ def calibration_evidence(repo_root: str | Path | None = None) -> dict[str, Any]:
 #: from it and nowhere else.
 D2_VALIDATION_CAMPAIGN = ("logs/stages/stage-1/families/d_series/validations/"
                           "d2-gpu-validation/v1/campaign.json")
+#: Version 3's validation IN FORCE: the stage module's revision (its
+#: VALIDATION_DIR). Only its campaign's evidence can be adopted.
 D2V3_VALIDATION_CAMPAIGN = ("logs/stages/stage-1/families/d_series/"
-                            "validations/d2v3-gpu-validation/v1/campaign.json")
+                            "validations/d2v3-gpu-validation/v2/campaign.json")
 D2V3_VALIDATION_PLAN = ("logs/stages/stage-1/families/d_series/validations/"
-                        "d2v3-gpu-validation/v1/plan.json")
+                        "d2v3-gpu-validation/v2/plan.json")
+#: Revision 1: FAIL, CLOSED, adopts nothing; still a booked engineering
+#: grant the programme accounts for.
+D2V3_R1_VALIDATION_CAMPAIGN = ("logs/stages/stage-1/families/d_series/"
+                               "validations/d2v3-gpu-validation/v1/"
+                               "campaign.json")
+D2V3_R1_VALIDATION_PLAN = ("logs/stages/stage-1/families/d_series/"
+                           "validations/d2v3-gpu-validation/v1/plan.json")
 D2_VALIDATION_PLAN = ("logs/stages/stage-1/families/d_series/validations/"
                       "d2-gpu-validation/v1/plan.json")
 
@@ -1312,7 +1321,9 @@ def programme_scenarios(limits: dict[str, float],
     #: the validation needs. Read from its plan record and campaign.
     for name, plan_rel, camp_rel in (
             ("d2_gpu_validation", D2_VALIDATION_PLAN, D2_VALIDATION_CAMPAIGN),
-            ("d2v3_gpu_validation", D2V3_VALIDATION_PLAN,
+            ("d2v3_gpu_validation", D2V3_R1_VALIDATION_PLAN,
+             D2V3_R1_VALIDATION_CAMPAIGN),
+            ("d2v3_gpu_validation_r2", D2V3_VALIDATION_PLAN,
              D2V3_VALIDATION_CAMPAIGN)):
         plan_path, camp_path = REPO_ROOT / plan_rel, REPO_ROOT / camp_rel
         if not plan_path.is_file():
@@ -1444,7 +1455,8 @@ def programme_scenarios(limits: dict[str, float],
                          "(the one budget authority)"),
         "engineering_grants": eng,
         "_engineering_grants_are": ("R0, the reference calibration and the "
-                                    "D2 GPU validations, versions 2 and 3; "
+                                    "D2 GPU validations (version 2; version "
+                                    "3's revisions 1 and 2); "
                                     "each one's state is its campaign's "
                                     "status under `engineering.campaigns`"),
         "engineering_fits_allowance": (engineering["hard_with_reserves"]

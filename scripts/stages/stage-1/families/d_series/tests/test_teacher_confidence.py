@@ -58,7 +58,9 @@ def test_the_distribution_is_over_scored_positions_only(setup):
     assert d["effective_sample_size"] == pytest.approx(
         float(c.sum() ** 2 / (c * c).sum()))
     assert sum(rep["distribution"]["histogram_20_bins_0_1"]) == scored
-    assert rep["log_vocab_nats"] == pytest.approx(
+    cd = rep["confidence_definition"]
+    assert cd["categories"] == TEACHER_GEOMETRY["vocab_size"]
+    assert cd["log_categories_nats"] == pytest.approx(
         math.log(TEACHER_GEOMETRY["vocab_size"]))
 
 
@@ -143,3 +145,90 @@ def test_it_decides_nothing(setup):
     rep = TC.validity_report(store, items, policy=SUPERVISED_TARGET_V1)
     assert rep["decides"].startswith("nothing")
     assert all(isinstance(r, str) for r in rep["risks"])
+
+
+# --- the stated definition is the store's declared one (schema v2) ------------------
+
+K_UNION = 8
+
+
+@pytest.fixture(scope="module")
+def union_setup(setup):
+    """A Top-K + tail (union-form) store over the same items."""
+    from aadistill.initialization.scoring.objective import (
+        FORM_REFERENCE_TOPK_CONFIDENCE_WEIGHTED_UNION_KL, KL_REFERENCE_ROOT,
+        ScoringObjective,
+    )
+    from aadistill.initialization.scoring.support import (
+        reference_student_union_topk_tail,
+    )
+    _, items = setup
+    objective = ScoringObjective(
+        "objective.toy_union", 1,
+        FORM_REFERENCE_TOPK_CONFIDENCE_WEIGHTED_UNION_KL,
+        entropy_top_k=K_UNION, kl_reference=KL_REFERENCE_ROOT)
+    support = reference_student_union_topk_tail(K_UNION)
+    store = build_root_reference_store(
+        build_tiny_model(TEACHER_GEOMETRY), items, support=support,
+        identity=root_reference_identity(
+            root_identity={"teacher_id": "toy"}, profile_hash="p",
+            support=support, objective=objective),
+        micro_batch_size=1, packing="original_order_v1", device="cpu")
+    return store, items
+
+
+def _normalizer_reproduces_the_numbers(store, items, categories):
+    """The stated normalizer is the one the store's confidences use."""
+    for item in items:
+        h = store.per_position(item, "entropy").double()
+        c = store.per_position(item, "confidence").double()
+        assert torch.allclose(
+            c, (1.0 - h / math.log(categories)).clamp(0.0, 1.0), atol=1e-6)
+
+
+def test_a_full_vocabulary_store_states_log_vocabulary(setup):
+    store, items = setup
+    rep = TC.validity_report(store, items, policy=SUPERVISED_TARGET_V1)
+    cd = rep["confidence_definition"]
+    assert rep["schema"].endswith("/v2")
+    assert cd["confidence_mapping"] == "one_minus_entropy_over_log_vocabulary/v1"
+    assert "log|V|" in rep["definition"]
+    _normalizer_reproduces_the_numbers(store, items, cd["categories"])
+
+
+def test_a_topk_tail_store_states_log_k_plus_one(union_setup):
+    """REGRESSION (D2 v3 Stage W revision 1): a Top-K + tail store's report
+    printed the full-vocabulary definition and log|V|."""
+    store, items = union_setup
+    rep = TC.validity_report(store, items, policy=SUPERVISED_TARGET_V1)
+    cd = rep["confidence_definition"]
+    assert cd["confidence_mapping"] == "one_minus_entropy_over_log_categories/v1"
+    assert cd["categories"] == K_UNION + 1
+    assert cd["log_categories_nats"] == pytest.approx(math.log(K_UNION + 1))
+    assert "K+1" in rep["definition"] and "log|V|" not in rep["definition"]
+    assert "log_vocab_nats" not in rep
+    assert f"log({K_UNION + 1})" in rep["risks"][0]
+    _normalizer_reproduces_the_numbers(store, items, cd["categories"])
+
+
+def test_the_two_definitions_never_coincide(setup, union_setup):
+    full = TC.confidence_definition(setup[0])
+    topk = TC.confidence_definition(union_setup[0])
+    assert full["categories"] != topk["categories"]
+    assert full["formula"] != topk["formula"]
+
+
+@pytest.mark.parametrize("entropy,mapping", [
+    (None, None),
+    ("reference_full_vocabulary_shannon_entropy/v1",
+     "one_minus_entropy_over_log_categories/v1"),
+    ("reference_topk_plus_tail_absolute_shannon_entropy/v1",
+     "one_minus_entropy_over_log_vocabulary/v1"),
+    ("something_else/v1", "one_minus_entropy_over_log_vocabulary/v1")])
+def test_an_undeclared_or_mixed_definition_is_refused(setup, entropy, mapping):
+    class Fake:
+        identity = {"entropy_definition": entropy,
+                    "confidence_mapping": mapping}
+        vocab_size, top_k = 100, 8
+    with pytest.raises(TC.ConfidenceDefinitionError):
+        TC.confidence_definition(Fake())

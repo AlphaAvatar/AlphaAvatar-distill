@@ -133,10 +133,13 @@ class TestTheOracle:
             TeacherRetrieval(hidden, log_z, head), top_k=K, has_tail=True)
         _, sc = deterministic_topk(cand, K)
         (o,) = W.oracle_kls(z, [(cand, sc)], sk.support_indices)
-        rows = [{"kl32": terms.kl, "kl_ref32": terms.kl_reference_topk,
+        rows = [{"item_id": "x", "layer": 0, "kl32_topk":
+                 terms.kl_reference_topk, "kl32_union": terms.kl,
                  "oracle": o, "log_z_ref": log_z}]
-        ua = W.union_arithmetic(rows)
-        assert ua["within_tolerance"] and ua["bounds_hold"], ua
+        ka = W.kl_arithmetic(rows)
+        assert ka["within_tolerance"] and ka["bounds_hold"], ka
+        assert ka["crossings_within_combined_bound"]
+        assert ka["anomalies"]["total"] == 0
 
     def test_comparing_against_the_native_bf16_teacher_is_caught(self):
         """THE NUMERICAL-PROTOCOL GUARD: the oracle must use the float32 HEAD
@@ -163,10 +166,11 @@ class TestTheOracle:
             TeacherRetrieval(hidden, log_z, head), top_k=K, has_tail=True)
         _, sc = deterministic_topk(cand, K)
         (wrong,) = W.oracle_kls(native, [(cand, sc)], sk.support_indices)
-        ua = W.union_arithmetic([{"kl32": terms.kl,
-                                  "kl_ref32": terms.kl_reference_topk,
-                                  "oracle": wrong, "log_z_ref": log_z}])
-        assert not ua["within_tolerance"]
+        ka = W.kl_arithmetic([{"item_id": "x", "layer": 0,
+                               "kl32_topk": terms.kl_reference_topk,
+                               "kl32_union": terms.kl, "oracle": wrong,
+                               "log_z_ref": log_z}])
+        assert not ka["within_tolerance"]
 
     def test_the_retrieval_gate_is_the_registered_tolerance(self):
         tol = W.ARITHMETIC_TOLERANCES["retrieval_abs_nats_vs_full_head"]
@@ -238,8 +242,9 @@ def _passing() -> dict:
             a: {"integrity": {"passed": True}}
             for a in ("full_scope", "narrow_scope")}},
         "W3_union_numerics": {
-            "union_arithmetic": {"within_tolerance": True,
-                                 "bounds_hold": True},
+            "kl_arithmetic": {"teacher_topk": dict(ok), "union": dict(ok),
+                              "bounds_hold": True,
+                              "crossings_within_combined_bound": True},
             "retrieval": dict(ok), "objective_reduction": dict(ok)},
         "W4_depth_union_all_v1": {
             "reference": "root_reference",
@@ -264,14 +269,30 @@ class TestVerdicts:
         assert v["scored_rows_equivalence"]["verdict"] == "PASS"
 
     @pytest.mark.parametrize("path", [
-        ("W3_union_numerics", "union_arithmetic", "within_tolerance"),
-        ("W3_union_numerics", "union_arithmetic", "bounds_hold"),
+        ("W3_union_numerics", "kl_arithmetic", "teacher_topk",
+         "within_tolerance"),
+        ("W3_union_numerics", "kl_arithmetic", "union", "within_tolerance"),
+        ("W3_union_numerics", "kl_arithmetic", "bounds_hold"),
+        ("W3_union_numerics", "kl_arithmetic",
+         "crossings_within_combined_bound"),
         ("W3_union_numerics", "retrieval", "within_tolerance"),
         ("W6_state_evaluation", "raw_kl_control", "within_tolerance")])
     def test_an_arithmetic_breach_fails(self, path):
         rec = _passing()
-        rec[path[0]][path[1]][path[2]] = False
+        node = rec
+        for key in path[:-1]:
+            node = node[key]
+        node[path[-1]] = False
         assert W.verdicts(rec)["validation"] == "FAIL"
+
+    def test_a_revision_1_record_does_not_pass_revision_2(self):
+        """Revision 1's W3 carried `union_arithmetic`; revision 2's gates
+        do not read it, so such a record is never a revision-2 PASS."""
+        rec = _passing()
+        rec["W3_union_numerics"].pop("kl_arithmetic")
+        rec["W3_union_numerics"]["union_arithmetic"] = {
+            "within_tolerance": True, "bounds_hold": True}
+        assert W.verdicts(rec)["validation"] == "INCOMPLETE"
 
     def test_a_teacher_forward_during_evaluation_fails_integrity(self):
         rec = _passing()
@@ -446,9 +467,18 @@ class TestTheRehearsalThroughTheDriver:
         w3 = doc[W.RECORD_KEY]["W3_union_numerics"]
         assert w3["items"] == 2 * W.NUMERICS_SAMPLE["items_per_profile"] or \
             w3["items"] > 0
-        ua = w3["union_arithmetic"]
-        assert ua["position_violations"] == 0 and ua["bounds_hold"]
-        assert ua["oracle_bound_violations"] == 0
+        ka = w3["kl_arithmetic"]
+        assert ka["teacher_topk"]["position_violations"] == 0
+        assert ka["union"]["position_violations"] == 0
+        assert ka["bounds_hold"] and ka["crossings_within_combined_bound"]
+        assert ka["anomalies"]["total"] == 0
+        assert ka["positions"] == len(w3["bypass_layers"]) * w3[
+            "rows_per_candidate"]
+        #: the same-input attribution ran on every row
+        att = ka["same_input_attribution"]
+        assert att["rows"] == w3["items"] * len(w3["bypass_layers"])
+        assert att["support_agreement_fraction"] is not None
+        assert "reduction_only_abs_vs_float64" in att["union"]
         for key in ("union_size", "union_overlap", "ratio_union_full",
                     "p_tail_union"):
             assert key in w3["union_statistics"]
@@ -498,7 +528,8 @@ class TestTheRehearsalThroughTheDriver:
         _, doc, _ = rehearsal
         text = "\n".join(R.lines(doc))
         assert "W  D2 v3 GPU validation" in text and "validation=PASS" in text
-        assert "W4 choices" in text and "W3 union vs float64" in text
+        assert "W4 choices" in text and "W3 union KL vs float64" in text
+        assert "W3 teacher_topk KL vs float64" in text
 
     def test_its_record_is_adoptable_only_under_its_identities(
             self, rehearsal, tmp_path):
@@ -509,7 +540,7 @@ class TestTheRehearsalThroughTheDriver:
         assert not ev["usable"]
         assert any("executable commit" in r for r in ev["reasons"])
         bad = json.loads(json.dumps(doc))
-        bad[W.RECORD_KEY]["W3_union_numerics"]["union_arithmetic"][
+        bad[W.RECORD_KEY]["W3_union_numerics"]["kl_arithmetic"]["union"][
             "within_tolerance"] = False
         ev = W.adopt(bad, REPO)
         assert not ev["usable"]
@@ -584,6 +615,38 @@ class TestTheRecords:
         assert plan["execution_order"] == list(W.STEP_ORDER)
         assert plan["numerics_sample"]["items_per_profile"] == 8
         assert plan["numerics_sample"]["bypass_candidates"] == 3
+        assert acc["arithmetic"]["kl_error_budget"] == W.KL_ERROR_BUDGET
+        assert plan["version"] == P.REVISION == 2
+
+    def test_revision_1_stays_frozen_and_adopts_nothing(self):
+        """Revision 1's plan, grant, campaign and FAIL evidence are kept as
+        they were; under revision 2 its record is not adoptable."""
+        v1 = REPO / W.SUPERSEDED_VALIDATION_DIR
+        plan = json.loads((REPO / W.PLAN).read_text())
+        sup = plan["revision"]["supersedes"]
+        assert sup["validation_dir"] == W.SUPERSEDED_VALIDATION_DIR
+        assert sup["plan_sha256"] == hashlib.sha256(
+            (v1 / "plan.json").read_bytes()).hexdigest() == (
+            "931c750249947a25e7244260e0e53e2d0056641c157134e545057e73fdb36aae")
+        camp = json.loads((v1 / "campaign.json").read_text())
+        assert camp["status"].startswith("COMPLETE and CLOSED")
+        booked = camp["subruns"][-1]
+        doc_bytes = (REPO / booked["evidence_session"]).read_bytes()
+        assert hashlib.sha256(doc_bytes).hexdigest() == \
+            booked["evidence_session_sha256"]
+        ev = W.adopt(json.loads(doc_bytes), REPO)
+        assert not ev["usable"]
+        assert any("identities differ" in r for r in ev["reasons"])
+        erratum = json.loads((v1 / "erratum_validity_report.json").read_text())
+        assert erratum["applies_to"]["evidence_sha256"] == \
+            booked["evidence_session_sha256"]
+
+    def test_the_budget_reads_this_revisions_campaign(self):
+        from stages.d_series import d2_budget as BUD
+        assert BUD.D2V3_VALIDATION_CAMPAIGN == W.CAMPAIGN
+        assert BUD.D2V3_VALIDATION_PLAN == W.PLAN
+        assert BUD.D2V3_R1_VALIDATION_CAMPAIGN == \
+            f"{W.SUPERSEDED_VALIDATION_DIR}/campaign.json"
 
     def test_the_premises_resolve_on_this_host(self):
         from stages.d_series import objectives as O

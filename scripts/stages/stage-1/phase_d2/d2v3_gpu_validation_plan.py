@@ -4,7 +4,11 @@
     PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python \
         scripts/stages/stage-1/phase_d2/d2v3_gpu_validation_plan.py [--write]
 
-Writes, under ``validations/d2v3-gpu-validation/v1/``:
+REVISION 2 (the stage module's ``VALIDATION_DIR``). Revision 1's records under
+``v1/`` -- plan, grant, campaign and its FAIL evidence -- are frozen: this
+builder no longer writes them, and a revision-1 session adopts nothing here.
+
+Writes, under the revision's directory:
 
 * ``plan.json`` -- REGISTERED BEFORE ANY SESSION: the steps of stage W
   (`d2v3_gpu_validation.py`), what each measures and why only a GPU can, the
@@ -44,7 +48,10 @@ for _extra in ("src", "scripts", "scripts/stages/stage-1"):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-SCHEMA = "aadistill.d2v3_gpu_validation_plan/v1"
+SCHEMA = "aadistill.d2v3_gpu_validation_plan/v2"
+REVISION = 2
+#: Run ids of this revision: d2v3r2val_<utc>, never revision 1's prefix.
+RUN_PREFIX = f"d2v3r{REVISION}val"
 #: A step's planning bound over its derived expectation (Stage V's factor).
 STEP_BOUND_FACTOR = 1.5
 BRANCH = "exec/d1-behavioural-readiness"
@@ -55,7 +62,7 @@ BRANCH = "exec/d1-behavioural-readiness"
 EXECUTABLE_COMMIT = "4248d7dbce4b2e97de32700fb06542a19f4e3339"
 EXECUTED_PATHS = (
     "src", "scripts", "configs",
-    "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1/"
+    "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/"
     "plan.json",
     "logs/stages/stage-1/families/d_series/plans/"
     "d2_d3_objective_contract_v1.json",
@@ -112,6 +119,43 @@ def _adopted() -> dict[str, Any]:
         raise RuntimeError("version 2's Stage V is not adopted; this plan's "
                            "bounds rest on its measured step durations")
     return v
+
+
+def revision_block() -> dict[str, Any]:
+    """What revision 2 changes against revision 1, and what it does not."""
+    from stages.phase_d2 import d2v3_gpu_validation as W
+
+    v1 = REPO_ROOT / W.SUPERSEDED_VALIDATION_DIR
+    return {
+        "number": REVISION,
+        "decided_by": ("maintainer, post-Stage-W independent review and "
+                       "corrective authorization, 2026-10-14"),
+        "supersedes": {
+            "validation_dir": W.SUPERSEDED_VALIDATION_DIR,
+            "plan_sha256": hashlib.sha256(
+                (v1 / "plan.json").read_bytes()).hexdigest(),
+            "campaign": f"{W.SUPERSEDED_VALIDATION_DIR}/campaign.json",
+            "run": "d2v3val_20261014_170824",
+            "verdict": "validation FAIL (arithmetic: kl_bounds)",
+            "status": ("kept as is -- evidence, plan, grant and campaign "
+                       "unchanged; adopts nothing; its spend stays booked "
+                       "in its own campaign")},
+        "changed": [
+            "the KL arithmetic gate: both partition KLs against float64 from "
+            "one error budget; the float64 order; float32 crossings within "
+            "the combined bound, per side, with per-position records "
+            "(d2v3_gpu_validation.kl_arithmetic) -- replacing revision 1's "
+            "4 eps |log Z_teacher| slack",
+            "the teacher-confidence validity report states the definition "
+            "and normalizer the store declares (schema v2); revision 1's "
+            "printed text is corrected by an erratum, its numbers unchanged",
+            "the W3 price gains the same-input attribution pass"],
+        "unchanged": [
+            "the objective, support, contract and preregistration v3 (DRAFT) "
+            "identities", "the steps W1-W6, the sample and the formal "
+            "topology", "every other registered tolerance",
+            "the scientific decision rubric"],
+    }
 
 
 def build() -> dict[str, Any]:
@@ -202,6 +246,14 @@ def build() -> dict[str, Any]:
         return parts
 
     w3e, w3b = w3_seconds("expected"), w3_seconds("bound")
+    #: Revision 2's attribution pass: one more reduction per sampled
+    #: candidate row on head-logit inputs, and one sketch per sampled row
+    #: (priced at the store build's per-row rate, forward included).
+    for which, parts in (("expected", w3e), ("bound", w3b)):
+        parts["same_input_attribution"] = (
+            sample_rows * n_cands * union_row_s(which)
+            + sample_rows * build_s / build_rows)
+        parts["total"] = sum(v_ for k_, v_ in parts.items() if k_ != "total")
     #: W6: the suite store, built at every version-3 evaluator's priming.
     suite_rows = float(geo["state_suite_rows"])
     suite_store = {w: build_s * suite_rows / build_rows
@@ -235,16 +287,20 @@ def build() -> dict[str, Any]:
          "integrity (denominator = weight sum)"),
         ("W3_union_numerics",
          f"on {n_items} items ({W.NUMERICS_SAMPLE['items_per_profile']} per "
-         f"profile) and {n_cands} bypass candidates of W2's child: the "
-         "float32 union KL against a float64 oracle on the SAME float32-head "
-         "teacher distribution; KL_{S_T+tail} <= KL_U <= KL_full; retrieval "
-         "against the full head; union size, overlap and tails; bf16 ties and "
-         "the tie spill; the float32 head against the native bf16 forward; "
-         "component timings; the child's union KL over the first profile for "
-         "the confidence's weighted contributions",
-         "real 151,936-entry bf16 tails and ties on the real teacher",
+         f"profile) and {n_cands} bypass candidates of W2's child: BOTH "
+         "float32 partition KLs (teacher Top-K + tail, union) against a "
+         "float64 oracle on the float32-head teacher distribution, each from "
+         "the registered error budget; the float64 order KL_T <= KL_U <= "
+         "KL_full; float32 crossings of it against the combined bound, per "
+         "side, with per-position records; a same-input attribution pass; "
+         "retrieval against the full head; union size, overlap and tails; "
+         "bf16 ties and the tie spill; the float32 head against the native "
+         "bf16 forward; component timings; the child's union KL over the "
+         "first profile for the confidence's weighted contributions",
+         f"real {vocab:,}-entry bf16 tails and ties on the real teacher",
          m_(w3e["total"]), m_(w3b["total"] * f),
-         "arithmetic (union KL vs float64; bounds; retrieval; reduction)"),
+         "arithmetic (both KLs vs float64; float64 order; crossings within "
+         "the combined bound; retrieval; reduction)"),
         ("W4_depth_union_all_v1",
          "one DEPTH round on W2's child under version 3 at all_v1 with the "
          "SYNCHRONIZED phase split: the objective's seconds per candidate, "
@@ -296,7 +352,8 @@ def build() -> dict[str, Any]:
     science = {
         "schema": SCHEMA,
         "validation_id": "d2v3_gpu_validation",
-        "version": 1,
+        "version": REVISION,
+        "revision": revision_block(),
         "_contract": (
             "REGISTERED BEFORE ANY SESSION. Stage W of topk_adoption_driver.py "
             "(phase_d2/d2v3_gpu_validation.py) on ONE L40S, on the launcher, "
@@ -377,15 +434,29 @@ def build() -> dict[str, Any]:
         "acceptance": {
             "arithmetic": {
                 "gate": True, "tolerances": dict(W.ARITHMETIC_TOLERANCES),
-                "what": ("one set of inputs, two computations: the float32 "
-                         "union KL against a float64 oracle on the SAME "
-                         "float32-head teacher distribution and the same "
-                         "candidate logits (per position |d| <= abs + rel x "
-                         "KL64); the float64 bounds; retrieval against the "
+                "what": ("the float32 computation against float64: the "
+                         "teacher Top-K + tail KL and the union KL, each per "
+                         "position |d| <= abs + rel x KL64, against a float64 "
+                         "oracle on the float32-head teacher distribution and "
+                         "the same candidate logits; the float64 order "
+                         "KL_T <= KL_U <= KL_full at the float64 slack; "
+                         "float32 crossings of that order within the combined "
+                         "bound (count beyond it: 0); retrieval against the "
                          "full head's log-softmax; the K+1 confidence against "
                          "float64 on the same sketch; the c x KL item mean; "
                          "the raw-KL control inside ONE version-3 "
                          "evaluation"),
+                "kl_error_budget": dict(W.KL_ERROR_BUDGET),
+                "recorded_per_position": (
+                    "per side: crossing counts, the largest crossing with its "
+                    "float64 values, beyond-bound counts; per partition: "
+                    "error distributions and error/tolerance histograms over "
+                    "every position; full records of every crossing and "
+                    "every position above half a tolerance (capped, the cap "
+                    "stated); a same-input attribution separating float32 "
+                    "rounding from the store's teacher-input path; anomalies "
+                    "= float64 violations + crossings beyond the bound + "
+                    "finiteness mismatches"),
                 "teacher_distribution": ("the float32 head distribution the "
                                          "root store defines -- never the "
                                          "native bf16 logits")},
@@ -502,6 +573,7 @@ def build() -> dict[str, Any]:
             "the float32-head vs native-bf16 protocol difference"],
         "does_not": ["run a D2 search, recovery training or a behavioural "
                      "probe", "rebuild B", "touch D1, D3 or their records",
+                     "re-judge, rewrite or adopt revision 1's evidence",
                      "repeat Stage V's version-2 measurements",
                      "change K, the mapping, the tail formula or a tolerance "
                      "on its results"],
@@ -541,7 +613,7 @@ def proposed_authorization(plan: dict[str, Any], plan_sha256: str
     cap = t["proposed_session_cap_usd"]
     return {
         "schema": "aadistill.engineering_authorization/v1",
-        "authorization_id": "d_series_d2v3_gpu_validation",
+        "authorization_id": f"d_series_d2v3_gpu_validation_r{REVISION}",
         "book": "ENGINEERING",
         "status": "PROPOSED -- NOT GRANTED",
         "all_in_ceiling_usd": t["proposed_grant_usd"],
@@ -556,8 +628,12 @@ def proposed_authorization(plan: dict[str, Any], plan_sha256: str
         "rate_rule": ("re-quoted live at launch; the launcher derives the "
                       "session ceiling and timeout from the live rate and "
                       "refuses if the cap no longer buys the work"),
-        "covers": ["stage W of topk_adoption_driver.py on one L40S pod: the "
-                   "steps of plan.json, nothing else"],
+        "covers": ["stage W (revision 2) of topk_adoption_driver.py on one "
+                   "L40S pod: the steps of plan.json, nothing else"],
+        "relation_to_revision_1": (
+            "a NEW grant with its own campaign; revision 1's $0.2538 stays "
+            "booked in its closed campaign and inside the project's spend, "
+            "and its unspent remainder is not carried over"),
         "does_not_cover": [
             "a D2 search, recovery training or a behavioural probe",
             "a second pod for a failed step without a recorded engineering "
@@ -573,11 +649,11 @@ def proposed_authorization(plan: dict[str, Any], plan_sha256: str
         "branch": BRANCH,
         "command": (
             f"ACQ_VALIDATION_DIR={W.VALIDATION_DIR} ACQ_STAGES=W "
-            f"ACQ_RUN_PREFIX=d2v3val bash {ACQUIRE}"),
+            f"ACQ_RUN_PREFIX={RUN_PREFIX} bash {ACQUIRE}"),
         "launcher_command": (
             f"ADOPT_CAMPAIGN={W.CAMPAIGN} ADOPT_COMMIT={EXECUTABLE_COMMIT} "
             f"ADOPT_BRANCH={BRANCH} ADOPT_STAGES=W ADOPT_PREDICTION_ROWS=all_v1 "
-            f"SESSION_CAP={cap:.2f} bash {LAUNCHER} d2v3val_<utc>"),
+            f"SESSION_CAP={cap:.2f} bash {LAUNCHER} {RUN_PREFIX}_<utc>"),
         "activation": (
             "the maintainer's grant is recorded by writing this record as "
             "authorization.json with status GRANTED, granted_utc, granted_by "
@@ -596,9 +672,11 @@ def campaign() -> dict[str, Any]:
 
     return {
         "schema": "aadistill.engineering_campaign/v1",
-        "campaign_id": "d_series_d2v3_gpu_validation",
-        "_contract": ("Cumulative cost of D2 version 3's GPU validation across "
-                      "every resource and subrun. A rerun does NOT reset it."),
+        "campaign_id": f"d_series_d2v3_gpu_validation_r{REVISION}",
+        "_contract": ("Cumulative cost of D2 version 3's GPU validation, "
+                      f"revision {REVISION}, across every resource and subrun. "
+                      "A rerun does NOT reset it; revision 1's spend is in "
+                      "its own closed campaign."),
         "status": ("PROPOSED -- not granted: authorization.json does not "
                    "exist, so engineering_campaign_budget.py refuses and the "
                    "launcher creates nothing"),
