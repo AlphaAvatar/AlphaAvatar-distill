@@ -11058,7 +11058,7 @@ on a paid pod.
   maintainer decides preregistration v3, the search grant and the programme
   shortfall.
 
-## 2026-10-15 — D2 v3 W-series built at $0; the $1.22 GPU validation proposed
+## 2026-10-14 — D2 v3 W-series built at $0; the $1.22 GPU validation proposed
 
 - **Context.** The maintainer's independent review of `8b460ab5` passed the
   v3 protocol in principle and authorized the W1–W6 engineering at $0; no
@@ -11095,3 +11095,23 @@ on a paid pod.
   D2 + D3 fits; with a fresh confirmation $10.80 short (not addressed here).
 - **Still not authorized:** the $1.22 W session, preregistration v3, the D2
   search, recovery, behaviour, D3, cap changes.
+
+## 2026-10-14 — D2 v3 Stage W engineering authorization ($1.22)
+
+- **Decision.** The maintainer, after an independent review of `a23ff86e`
+  (Engineering GO), authorized D2 v3's Stage W GPU engineering validation and
+  confirmed it directly: one L40S, $0.28 expected, $0.92 session cap, $1.22
+  cumulative all-in including the $0.30 teardown reserve, executable commit
+  `4248d7db`, W0–W7 only.
+- **Recorded.** `validations/d2v3-gpu-validation/v1/authorization.json`
+  (GRANTED; equal to the proposal on money, plan, commit and command); the
+  campaign is OPEN.
+- **Live pre-launch checks (17:01 UTC).** L40S $1.09/h secure (stock Low);
+  0 provider pods; project remaining $119.49 of $590; engineering remaining
+  $3.68; package remaining $131.65; no pending reconciliation; campaign
+  booked $0; the executable commit is on the remote branch; the launcher's
+  budget derivation returns a $0.92 session ceiling (3,038 s).
+- **Not covered.** The D2 search, recovery, behavioural evaluation, D3,
+  approval of preregistration v3, any cap change. Preregistration v3
+  (`b5281092…`) stays DRAFT; the protocol, K = 200, K = 4, the tolerances and
+  the formal topology are frozen for the session.

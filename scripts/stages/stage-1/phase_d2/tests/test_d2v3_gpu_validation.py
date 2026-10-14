@@ -609,14 +609,35 @@ class TestTheRecords:
         assert t["bound"]["all_in_usd"] <= auth["session_cap_usd"]
         assert "ADOPT_STAGES=W" in auth["launcher_command"]
         assert auth["executable_commit"] == P.EXECUTABLE_COMMIT
-        assert not (REPO / W.AUTHORIZATION).exists()
         spec = importlib.util.spec_from_file_location(
             "ecb", REPO / "scripts/shared/pod/engineering_campaign_budget.py")
         ecb = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(ecb)
-        with pytest.raises(ecb.BudgetError, match="authorization.json"):
-            ecb.derive(REPO / W.CAMPAIGN, session_cap_usd=1.0,
-                       rate_usd_per_hour=1.09)
+        path = REPO / W.AUTHORIZATION
+        if not path.exists():
+            with pytest.raises(ecb.BudgetError, match="authorization.json"):
+                ecb.derive(REPO / W.CAMPAIGN, session_cap_usd=1.0,
+                           rate_usd_per_hour=1.09)
+            return
+        #: ASSERT THE GRANT: exactly the proposal's money, plan, commit and
+        #: command; only grant fields are added.
+        grant = json.loads(path.read_text())
+        assert grant["status"] == "GRANTED" and grant["granted_utc"]
+        for key in ("all_in_ceiling_usd", "session_cap_usd", "plan",
+                    "plan_sha256", "campaign", "executable_commit", "command",
+                    "launcher_command", "book"):
+            assert grant[key] == auth[key], key
+        assert grant["all_in_ceiling_usd"] == 1.22
+        assert grant["session_cap_usd"] == 0.92
+        camp = json.loads((REPO / W.CAMPAIGN).read_text())
+        if str(camp["status"]).startswith("COMPLETE and CLOSED"):
+            with pytest.raises(ecb.BudgetError, match="closed"):
+                ecb.derive(REPO / W.CAMPAIGN, session_cap_usd=0.92,
+                           rate_usd_per_hour=1.09)
+            assert camp["booked_usd"] <= grant["all_in_ceiling_usd"]
+        else:
+            assert ecb.derive(REPO / W.CAMPAIGN, session_cap_usd=0.92,
+                              rate_usd_per_hour=1.09)["session_ceiling"] <= 0.92
 
     def test_every_executed_path_is_the_executable_commits(self):
         """What the pod checks out is what this tree carries, outside the

@@ -2,7 +2,7 @@
  "schema": "aadistill.engineering_campaign/v1",
  "campaign_id": "d_series_d2v3_gpu_validation",
  "_contract": "Cumulative cost of D2 version 3's GPU validation across every resource and subrun. A rerun does NOT reset it.",
- "status": "PROPOSED -- not granted: authorization.json does not exist, so engineering_campaign_budget.py refuses and the launcher creates nothing",
+ "status": "OPEN -- granted $1.22 cumulative all-in (authorization.json, 2026-10-14T17:01:31Z); executable commit 4248d7db",
  "authorization": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1/authorization.json",
  "package_id": "phase_c1.execution_package.2026-09-11",
  "_package_id": "the GPU ENGINEERING book, as for R0, the reference calibration and Stage V",
