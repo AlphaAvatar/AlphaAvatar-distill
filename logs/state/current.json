@@ -127,7 +127,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "D2 redesigned 2026-10-14 (teacher-confidence-weighted root KL, full scope). Next: grant or decline the D2 GPU validation ($1.70 proposal), then prereg v2 approval. Owner: decisions.md, d2_d3_objective_design.md s11.6.",
+ "next": "D2 redesigned 2026-10-14; Stage V ready at executable commit 043a8139 (review issues closed). Next: grant or decline the $1.70 D2 GPU validation, then prereg v2 approval. Owner: decisions.md, d2_d3_objective_design.md s11.6.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Maintainer: approve D2 preregistration 489f49ba, add phase_d2 to funds_formal_sessions_of, choose rows, decide the $0.68 programme shortfall, then grant the D2 search.",
@@ -157,7 +157,7 @@
    "blocker": "none; see the top-level blocker.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line."
   },
   "c2": {

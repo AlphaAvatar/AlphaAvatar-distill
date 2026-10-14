@@ -472,6 +472,29 @@ class TestTheRecords:
         assert f"SESSION_CAP={t['proposed_session_cap_usd']:.2f}" in \
             auth["command"]
 
+    def test_the_executable_commit_carries_this_trees_session(self):
+        """The commit a grant runs executes exactly what was reviewed: every
+        executed path and record is identical between it and HEAD."""
+        import subprocess
+        commit = P.EXECUTABLE_COMMIT
+
+        def git(*a):
+            return subprocess.run(["git", "-C", str(REPO), *a],
+                                  capture_output=True, text=True)
+        if git("cat-file", "-e", f"{commit}^{{commit}}").returncode:
+            pytest.skip("the executable commit is not in this checkout")
+        assert git("merge-base", "--is-ancestor", commit, "HEAD").returncode == 0
+        changed = [p for p in git("diff", "--name-only", commit, "HEAD", "--",
+                                  *P.EXECUTED_PATHS).stdout.split()
+                   if p not in P.EXECUTED_PATH_EXCEPTIONS
+                   and "/tests/" not in p and not p.startswith("tests/")]
+        assert changed == [], (
+            f"{changed} differ between the executable commit {commit[:12]} and "
+            "this tree: re-pin EXECUTABLE_COMMIT before any grant runs it")
+        auth = json.loads((REPO / V.AUTHORIZATION_PROPOSED).read_text())
+        assert auth["executable_commit"] == commit
+        assert f"ADOPT_COMMIT={commit}" in auth["command"]
+
     def test_the_launcher_cannot_derive_a_budget_without_the_grant(self):
         """THE PAID BOUNDARY: no authorization.json, no ceiling, no pod."""
         import importlib.util

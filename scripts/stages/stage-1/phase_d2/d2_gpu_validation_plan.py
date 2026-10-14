@@ -49,6 +49,24 @@ ANALYSIS_MINUTES_PER_PROFILE = {"expected": 0.25, "bound": 1.0}
 #: WIDTH's overlap diagnostic: two float64 normal-equation solves.
 WIDTH_OVERLAP_MINUTES = {"expected": 0.25, "bound": 1.0}
 BRANCH = "exec/d1-behavioural-readiness"
+#: THE COMMIT A GRANT RUNS: the pod checks out exactly this. Typed because it is
+#: a historical identity a record cannot contain of itself (the record lands in
+#: a later commit); `tests/test_d2_gpu_validation.py` checks that every path the
+#: session executes or reads is identical between it and the current tree.
+EXECUTABLE_COMMIT = "043a8139e4e85fde62cca9e9877a50fc25b89a29"
+#: What the session executes or reads, for that check.
+EXECUTED_PATHS = (
+    "src", "scripts", "configs",
+    "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/"
+    "plan.json",
+    "logs/stages/stage-1/families/d_series/plans/"
+    "d2_d3_objective_contract_v1.json",
+    "logs/stages/stage-1/phase_d2/plans/d2_preregistration_v2.json",
+    "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
+)
+#: Inside those, what may differ: this builder (it names the commit) and tests.
+EXECUTED_PATH_EXCEPTIONS = (
+    "scripts/stages/stage-1/phase_d2/d2_gpu_validation_plan.py",)
 LAUNCHER = "scripts/stages/stage-1/phase_d1/topk_adoption_launch.sh"
 
 
@@ -351,16 +369,23 @@ def proposed_authorization(plan: dict[str, Any], plan_sha256: str
             "subruns"],
         "plan": V.PLAN, "plan_sha256": plan_sha256,
         "campaign": V.CAMPAIGN,
+        "executable_commit": EXECUTABLE_COMMIT,
+        "_executable_commit_is": (
+            "the commit the pod checks out; every executed path and record is "
+            "identical between it and the commit carrying this proposal "
+            "(tested)"),
+        "branch": BRANCH,
         "command": (
-            f"ADOPT_CAMPAIGN={V.CAMPAIGN} ADOPT_COMMIT=<this grant's commit> "
+            f"ADOPT_CAMPAIGN={V.CAMPAIGN} ADOPT_COMMIT={EXECUTABLE_COMMIT} "
             f"ADOPT_BRANCH={BRANCH} ADOPT_STAGES=V ADOPT_PREDICTION_ROWS=all_v1 "
             f"SESSION_CAP={t['proposed_session_cap_usd']:.2f} "
             f"bash {LAUNCHER} d2val_<utc>"),
         "activation": (
             "the maintainer's grant is recorded by writing this record as "
-            "authorization.json with status GRANTED, granted_utc and "
-            "granted_by; until then engineering_campaign_budget.py cannot "
-            "read a ceiling and the launcher creates nothing"),
+            "authorization.json with status GRANTED, granted_utc, granted_by "
+            "and the live pre-launch checks; until then "
+            "engineering_campaign_budget.py cannot read a ceiling and the "
+            "launcher creates nothing. The run id replaces d2val_<utc>"),
         "on_ordinary_failure": ("repair and retry inside this ceiling (AGENTS.md "
                                 "P12.1); a deterministic paid failure is never "
                                 "retried unchanged"),

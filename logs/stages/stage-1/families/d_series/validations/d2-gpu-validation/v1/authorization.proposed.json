@@ -19,8 +19,11 @@
  "plan": "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/plan.json",
  "plan_sha256": "93dba1ae0a50de007376a95145111f0cea72364dddc598a71aa5c4f26cbae302",
  "campaign": "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/campaign.json",
- "command": "ADOPT_CAMPAIGN=logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/campaign.json ADOPT_COMMIT=<this grant's commit> ADOPT_BRANCH=exec/d1-behavioural-readiness ADOPT_STAGES=V ADOPT_PREDICTION_ROWS=all_v1 SESSION_CAP=1.40 bash scripts/stages/stage-1/phase_d1/topk_adoption_launch.sh d2val_<utc>",
- "activation": "the maintainer's grant is recorded by writing this record as authorization.json with status GRANTED, granted_utc and granted_by; until then engineering_campaign_budget.py cannot read a ceiling and the launcher creates nothing",
+ "executable_commit": "043a8139e4e85fde62cca9e9877a50fc25b89a29",
+ "_executable_commit_is": "the commit the pod checks out; every executed path and record is identical between it and the commit carrying this proposal (tested)",
+ "branch": "exec/d1-behavioural-readiness",
+ "command": "ADOPT_CAMPAIGN=logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/campaign.json ADOPT_COMMIT=043a8139e4e85fde62cca9e9877a50fc25b89a29 ADOPT_BRANCH=exec/d1-behavioural-readiness ADOPT_STAGES=V ADOPT_PREDICTION_ROWS=all_v1 SESSION_CAP=1.40 bash scripts/stages/stage-1/phase_d1/topk_adoption_launch.sh d2val_<utc>",
+ "activation": "the maintainer's grant is recorded by writing this record as authorization.json with status GRANTED, granted_utc, granted_by and the live pre-launch checks; until then engineering_campaign_budget.py cannot read a ceiling and the launcher creates nothing. The run id replaces d2val_<utc>",
  "on_ordinary_failure": "repair and retry inside this ceiling (AGENTS.md P12.1); a deterministic paid failure is never retried unchanged",
  "authorizes": "nothing -- a proposal"
 }

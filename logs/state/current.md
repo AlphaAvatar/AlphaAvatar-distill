@@ -39,7 +39,10 @@ protocol work and $0 engineering only.
 - **Price.**
   - D2 search: $11.25 expected, $25.24 bound.
   - D2 GPU validation, PROPOSED and not granted: $0.77 expected, a $1.40 cap,
-    a $1.70 grant.
+    a $1.70 grant. The executable commit is `043a8139`.
+  - The final review's three $0 issues are closed (2026-10-14 decisions
+    entry): full-scope integrity gate, evidence adoption, append-only
+    booking with teardown evidence.
   - Programme: D2 + D3 fits; adding a fresh confirmation is short by $5.24
     at hard.
 - Owners:
