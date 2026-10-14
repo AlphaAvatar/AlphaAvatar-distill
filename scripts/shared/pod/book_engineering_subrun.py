@@ -18,8 +18,17 @@ What a launcher left in the run directory becomes, in the validation record:
   file and its sha256, which `d2_budget` and `derive_budget.py` read and
   nothing else.
 
-A subrun id is booked ONCE: rebooking replaces its row, never adds a second.
-A run without ``cost.json`` is refused -- an unpriced subrun is not a free one.
+THE LEDGER ONLY GROWS. A subrun id names ONE billed run: rebooking it with
+the same run, cost and evidence is idempotent (the row is unchanged); naming
+a DIFFERENT run, cost or evidence under a booked id is refused -- a billed
+run must never be replaced or drop out of the cumulative cost. A run without
+``cost.json`` is refused -- an unpriced subrun is not a free one.
+
+TEARDOWN IS EVIDENCE. The launcher's extensionless ``teardown_confirmed``
+(written only when the provider stops listing the pod) is copied and hashed
+like every other record. A run without it is still booked -- its cost is real
+-- but carries a ``resource_risk`` and blocks ``--close``: a campaign whose
+resources are not confirmed released is not closed safely.
 """
 from __future__ import annotations
 
@@ -33,6 +42,11 @@ from typing import Any, Sequence
 
 REPO = Path(__file__).resolve().parents[3]
 SMALL = (".json", ".jsonl", ".log", ".txt")
+#: Launcher markers with no extension that ARE evidence.
+MARKERS = ("teardown_confirmed", "pod_id", "pod_start_epoch",
+           "live_price_usd_per_hour")
+TEARDOWN = "teardown_confirmed"
+TEARDOWN_CONTENT = "confirmed"
 MAX_BYTES = 5_000_000
 
 
@@ -59,22 +73,35 @@ def book(*, run_dir: Path, validation_dir: Path, subrun_id: str, outcome: str,
     copied: dict[str, str] = {}
     for p in sorted(run_dir.rglob("*")):
         rel = p.relative_to(run_dir)
-        if (not p.is_file() or p.suffix not in SMALL or "work" in rel.parts
+        small = p.suffix in SMALL or (len(rel.parts) == 1
+                                      and p.name in MARKERS)
+        if (not p.is_file() or not small or "work" in rel.parts
                 or p.stat().st_size > MAX_BYTES):
             continue
         out = dst / rel
         out.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(p, out)
         copied[str(rel)] = _sha(out)
+    marker = dst / TEARDOWN
+    confirmed = (TEARDOWN in copied and marker.read_text().strip()
+                 == TEARDOWN_CONTENT)
     row: dict[str, Any] = {
         "subrun_id": subrun_id, "run_id": run_dir.name,
         "cost_usd": float(cost["all_in_usd"]),
         "cost_record": cost,
         "pod_id": cost.get("pod_id"),
-        "teardown_confirmed": (run_dir / "teardown_confirmed").is_file(),
+        "teardown_confirmed": confirmed,
+        "teardown_evidence": ({"path": str(marker.relative_to(repo)),
+                               "sha256": copied[TEARDOWN]}
+                              if confirmed else None),
         "outcome": outcome, "notes": notes,
         "evidence": str(dst.relative_to(repo)),
         "evidence_sha256": copied}
+    if not confirmed:
+        row["resource_risk"] = (
+            f"no provider teardown confirmation for pod {cost.get('pod_id')!r}: "
+            "reconcile against the provider (it must not list the pod) before "
+            "the campaign may close; the cost is booked regardless")
     if evidence_session:
         ev = dst / evidence_session
         if not ev.is_file():
@@ -82,15 +109,40 @@ def book(*, run_dir: Path, validation_dir: Path, subrun_id: str, outcome: str,
                                "run; nothing to bind")
         row["evidence_session"] = str(ev.relative_to(repo))
         row["evidence_session_sha256"] = _sha(ev)
-    subruns = [r for r in campaign.get("subruns") or []
-               if r.get("subrun_id") != subrun_id]
-    subruns.append(row)
+    subruns = list(campaign.get("subruns") or [])
+    prior = [r for r in subruns if r.get("subrun_id") == subrun_id]
+    if prior:
+        old = prior[0]
+        same = (old.get("run_id") == row["run_id"]
+                and float(old.get("cost_usd", -1)) == row["cost_usd"]
+                and old.get("evidence_sha256") == row["evidence_sha256"]
+                and old.get("evidence_session_sha256")
+                == row.get("evidence_session_sha256"))
+        if not same:
+            raise BookingError(
+                f"subrun {subrun_id!r} is already booked for run "
+                f"{old.get('run_id')!r} at ${old.get('cost_usd')}; booking "
+                f"run {row['run_id']!r} under it would replace a billed run. "
+                "Give the new run its own subrun id")
+        row = old                                  # idempotent: unchanged
+    else:
+        subruns.append(row)
     campaign["subruns"] = subruns
     campaign["booked_usd"] = round(sum(float(r["cost_usd"]) for r in subruns), 4)
-    if close:
-        campaign["status"] = close
+    #: THE COST IS WRITTEN FIRST, whatever happens to the close below.
     camp_path.write_text(json.dumps(campaign, indent=1, ensure_ascii=False)
                          + "\n")
+    if close:
+        risky = [r["subrun_id"] for r in subruns
+                 if not r.get("teardown_confirmed")]
+        if risky:
+            raise BookingError(
+                f"cannot close: subruns {risky} have no provider teardown "
+                "confirmation. Their cost is booked; reconcile the resources "
+                "first")
+        campaign["status"] = close
+        camp_path.write_text(json.dumps(campaign, indent=1, ensure_ascii=False)
+                             + "\n")
     return row
 
 

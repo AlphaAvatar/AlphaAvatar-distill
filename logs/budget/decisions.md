@@ -10901,3 +10901,44 @@ on a paid pod.
 - **Next.** The maintainer decides whether to grant the $1.70 engineering
   validation. It is written as `authorization.json` from the proposal; the
   launch command is in the proposal.
+
+## 2026-10-14 — Stage V final review: three $0 fixes before the paid validation
+
+- **Context.** The final independent review of `161c5ea7` accepts the
+  protocol and the $1.70 proposal in principle. It names three evidence and
+  safety defects to close before any paid session. The review is not a
+  grant.
+- **(1) Full-scope integrity.** `verdicts()` now gates every statistics
+  operator.
+  - Gated: FFN, WIDTH and ATTENTION executed both arms. The full arm is
+    weighted by this session's root store, declares the D2 objective, and its
+    collector's denominator equals the weight sum (1e-9 relative). The narrow
+    arm is unweighted. Both children reach the target, finite.
+  - V3 records each operator's failure against that operator. A partial V3
+    is FAIL even when V4 runs on FFN's child.
+  - Integrity is tri-state.
+  - Selection overlaps stay diagnostics, with no threshold.
+- **(2) Adoption.** `d2_gpu_validation.adopt` decides what counts as
+  evidence; `d2_validation_evidence` reads through it. A run is adopted only
+  when:
+  - it is COMPLETE;
+  - its objective, contract, preregistration and plan identities equal the
+    committed records;
+  - its verdicts, recomputed from its measurements, equal the recorded ones;
+  - validation is PASS.
+
+  `scored_v1` additionally needs row equivalence PASS. A failed run is booked
+  and billed and unlocks nothing.
+- **(3) Booking.** `book_engineering_subrun.py` is append-only.
+  - The same subrun, run, cost and evidence rebooks idempotently. A different
+    run under a booked id is refused.
+  - `teardown_confirmed` is copied and hashed.
+  - A run without it is booked with a `resource_risk` and blocks `--close`.
+- **Unchanged.** The D2 objective, root KL, full scope, teacher entropy,
+  D2/D3, K = 4, the registered arithmetic tolerances, drift as a diagnostic,
+  and R0 / stage-L history.
+- **Plan.** `plan.json` gains the integrity tolerance and the adoption rule.
+  The proposal stays $0.77 expected, $1.40 cap and $1.70 all-in. The
+  preregistration and the contract are unchanged.
+- **Next.** The maintainer decides whether to grant the $1.70 against the
+  executable commit named in `authorization.proposed.json`.

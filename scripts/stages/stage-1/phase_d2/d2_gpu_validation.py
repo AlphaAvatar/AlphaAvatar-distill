@@ -71,6 +71,25 @@ ARITHMETIC_TOLERANCES = {
     "item_objective_relative_vs_float64": 1e-5,
     "raw_kl_control_relative": 1e-6,
 }
+#: INTEGRITY of the full-scope statistics: the denominator a weighted
+#: collector divided by is the sum of the very weights the policy and the root
+#: store produced -- two float64 sums of one vector in different orders.
+INTEGRITY_TOLERANCES = {"statistics_denominator_relative": 1e-9}
+#: The three statistics operators the full scope weights. EVERY one must
+#: execute and verify, or the validation is not complete: FFN's child alone is
+#: enough for V4 to run, and must not be enough for a PASS.
+REQUIRED_STATISTICS_OPERATORS = ("ffn.activation_importance_v0",
+                                 "attention.activation_importance_v1",
+                                 "width.global_pca_v0")
+#: Where each operator reports the denominator it divided by (weighted only).
+DENOMINATOR_EVIDENCE = {
+    "ffn.activation_importance_v0": ("local_metrics_detail",
+                                     "stats_token_weight"),
+    "width.global_pca_v0": ("local_metrics_detail", "stats_token_weight"),
+    "attention.activation_importance_v1": ("trace",
+                                           "calibration_token_weight"),
+}
+
 #: CLASS 3. R0's registered tolerances, carried over unchanged.
 ROW_EQUIVALENCE_TOLERANCES = {"depth_candidate_relative": 1e-5,
                               "depth_choice": "exact",
@@ -336,6 +355,61 @@ def depth_table_consistency(outcome_artifacts: Mapping[str, Any]
             "consistent": not missing and worst <= 1e-12}
 
 
+def statistics_integrity(impl, arm_label: str, outcome, ctx, *, target,
+                         store_identity_hash: str, objective_hash: str
+                         ) -> dict[str, Any]:
+    """Did one statistics-operator arm compute what its scope declares?
+
+    Full scope: weighted by the ROOT store this session built, the objective
+    declared in its config, the collector's denominator equal to the sum of
+    the weights. Narrow scope: none of that. Both: the child reaches the
+    target in every field the operator modifies, with finite parameters.
+    Selection overlap and effect size are NOT here -- they are diagnostics.
+    """
+    import torch
+
+    sp = outcome.trace.get("scoring_positions") or {}
+    source = sp.get("token_weights_multiplied_by")
+    where, key = DENOMINATOR_EVIDENCE[impl.impl_id]
+    bag = (dict(outcome.local_metrics.detail or {}) if where ==
+           "local_metrics_detail" else dict(outcome.trace))
+    denominator = bag.get(key)
+    child_spec = ctx.adapter.spec_of(outcome.model)
+    checks: dict[str, Any] = {
+        "reaches_target": all(child_spec[f] == target[f]
+                              for f in impl.modifies),
+        "child_finite": all(bool(torch.isfinite(p).all())
+                            for p in outcome.model.parameters()),
+    }
+    declared = (ctx.config or {}).get("scoring_objective")
+    if arm_label == "full_scope":
+        total = float(((sp.get("token_axis") or {}).get("weight_total")) or 0)
+        checks.update({
+            "weighted_by_this_sessions_root_store":
+                source == f"root_reference_confidence:{store_identity_hash}",
+            "config_declares_the_d2_objective": (
+                declared is not None
+                and objective_sha(declared) == objective_hash),
+            "denominator_is_the_weight_sum": (
+                denominator is not None and total > 0
+                and abs(float(denominator) - total) / total
+                <= INTEGRITY_TOLERANCES["statistics_denominator_relative"]),
+        })
+        detail = {"denominator": denominator, "weight_total": total}
+    else:
+        checks.update({"unweighted": source is None,
+                       "config_declares_no_objective": declared is None,
+                       "no_weighted_denominator": denominator is None})
+        detail = {}
+    return {"checks": checks, **detail, "passed": all(checks.values())}
+
+
+def objective_sha(declared: Mapping[str, Any]) -> str:
+    from aadistill.infrastructure.manifest import sha256_json
+
+    return sha256_json(dict(declared))
+
+
 # --- verdicts -------------------------------------------------------------------
 
 def verdicts(result: Mapping[str, Any]) -> dict[str, Any]:
@@ -361,19 +435,40 @@ def verdicts(result: Mapping[str, Any]) -> dict[str, Any]:
         arithmetic = "INCOMPLETE"
     else:
         arithmetic = "PASS"
+    v4 = result.get("V4_depth_root_vs_parent") or {}
+    v3 = result.get("V3_weighted_statistics")
+
+    def measured(step: Any) -> bool:
+        return bool(step) and "skipped" not in step
+
+    def ran(step: Any) -> bool:
+        return measured(step) and "failed" not in step
+
+    #: TRI-STATE: None = not measured (INCOMPLETE), False = measured and
+    #: wrong (FAIL). A step that failed outright is False, never None.
     integ = {
         "teacher_identity": (result.get("premises") or {}).get(
             "teacher_revision") is not None,
-        "b_identity_verified": bool(v2.get("b_identity_verified")),
-        "stores_match_declaration": bool(v1.get("stores_match_declaration")),
-        "depth_reads_the_root": ((result.get("V4_depth_root_vs_parent") or {})
-                                 .get("reference") == "root_reference"),
-        "depth_table_consistent": bool(
-            ((result.get("V4_depth_root_vs_parent") or {}).get(
-                "table_consistency") or {}).get("consistent")),
+        "b_identity_verified": (v2.get("b_identity_verified") is True
+                                if ran(v2) else
+                                (False if measured(v2) else None)),
+        "stores_match_declaration": (v1.get("stores_match_declaration") is True
+                                     if ran(v1) else
+                                     (False if measured(v1) else None)),
+        "full_scope_statistics_operators": _v3_integrity(v3),
+        "depth_reads_the_root": (v4.get("reference") == "root_reference"
+                                 if ran(v4) else
+                                 (False if measured(v4) else None)),
+        "depth_table_consistent": ((v4.get("table_consistency") or {}).get(
+            "consistent") is True if ran(v4) else
+            (False if measured(v4) else None)),
     }
-    integrity = "PASS" if all(integ.values()) else (
-        "INCOMPLETE" if not result.get("V4_depth_root_vs_parent") else "FAIL")
+    if any(v is False for v in integ.values()):
+        integrity = "FAIL"
+    elif any(v is None for v in integ.values()):
+        integrity = "INCOMPLETE"
+    else:
+        integrity = "PASS"
     se = (v6.get("scored_rows") or {})
     dp = ((result.get("V5_depth_scored_rows") or {}).get("agreement") or {})
     if "within_tolerance" not in se or "within_tolerance" not in dp:
@@ -385,7 +480,10 @@ def verdicts(result: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "arithmetic": {"verdict": arithmetic, "checks": arith,
                        "tolerances": ARITHMETIC_TOLERANCES},
-        "integrity": {"verdict": integrity, "checks": integ},
+        "integrity": {"verdict": integrity, "checks": integ,
+                      "tolerances": INTEGRITY_TOLERANCES,
+                      "required_operators": list(
+                          REQUIRED_STATISTICS_OPERATORS)},
         "scored_rows_equivalence": {
             "verdict": rows, "tolerances": ROW_EQUIVALENCE_TOLERANCES,
             "state_eval_within": se.get("within_tolerance"),
@@ -397,6 +495,24 @@ def verdicts(result: Mapping[str, Any]) -> dict[str, Any]:
                              else "INCOMPLETE")),
         "not_gated": list(EXECUTION_DIAGNOSTICS) + list(SCIENCE_DIAGNOSTICS),
     }
+
+
+def _v3_integrity(v3: Any) -> bool | None:
+    """Every required operator executed both arms and verified."""
+    if not v3 or "skipped" in v3:
+        return None
+    if "failed" in v3:
+        return False
+    ops = v3.get("operators") or {}
+    for impl_id in REQUIRED_STATISTICS_OPERATORS:
+        op = ops.get(impl_id)
+        if not op or "failed" in op:
+            return False
+        for arm in ("full_scope", "narrow_scope"):
+            if not ((op.get("arms") or {}).get(arm) or {}).get(
+                    "integrity", {}).get("passed"):
+                return False
+    return True
 
 
 # --- the environment: what the stage runs on ---------------------------------
@@ -521,7 +637,8 @@ def premises(repo: Path) -> dict[str, Any]:
                                 "objective this code declares")
     plan = json.loads((repo / PLAN).read_text())
     for key, mine in (("arithmetic", ARITHMETIC_TOLERANCES),
-                      ("row_equivalence", ROW_EQUIVALENCE_TOLERANCES)):
+                      ("row_equivalence", ROW_EQUIVALENCE_TOLERANCES),
+                      ("integrity", INTEGRITY_TOLERANCES)):
         if plan["acceptance"][key]["tolerances"] != mine:
             raise D2ValidationError(
                 f"the plan registers {key} tolerances "
@@ -546,6 +663,64 @@ def premises(repo: Path) -> dict[str, Any]:
             "teacher_revision": binding.get("revision"),
             "root_teacher": D1S.root_teacher_identity(repo),
             "step_bounds_s": dict(plan["step_bounds_s"])}
+
+
+def expected_identities(repo: Path) -> dict[str, str]:
+    """The identities a booked session must carry to count as THIS
+    validation: the objective, and the contract, preregistration and plan
+    records as committed in `repo`."""
+    from stages.d_series import objectives as O
+    from stages.phase_d2 import d2_session as S
+
+    return {"objective_hash": O.D2_OBJECTIVE.objective_hash,
+            "contract_hash": json.loads((repo / O.CONTRACT).read_text())[
+                "contract_hash"],
+            "preregistration_hash": S.preregistration(repo)[
+                "preregistration_hash"],
+            "plan_sha256": _sha256(repo / PLAN)}
+
+
+def adopt(doc: Mapping[str, Any], repo: Path) -> dict[str, Any]:
+    """Whether a session record is ADOPTABLE engineering evidence.
+
+    Never from the record's own words: the verdicts are RECOMPUTED here from
+    its measurements with this code, and must equal what it recorded; every
+    identity must equal the committed one; the outer run must be COMPLETE.
+    Failed, incomplete or mismatched runs stay booked and billed -- they are
+    simply not evidence anything may rest on.
+    """
+    v = doc.get(RECORD_KEY) or {}
+    want = expected_identities(repo)
+    got = {k: (v.get("premises") or {}).get(k) for k in want}
+    recomputed = verdicts(v) if v else {}
+    recorded = v.get("verdicts") or {}
+
+    def flat(vs: Mapping[str, Any]) -> dict[str, Any]:
+        return {k: (x.get("verdict") if isinstance(x, dict) else x)
+                for k, x in vs.items() if k != "not_gated"}
+
+    reasons = []
+    if doc.get("status") != "COMPLETE":
+        reasons.append(f"the run is {doc.get('status')!r}, not COMPLETE")
+    if not v:
+        reasons.append("no stage-V record")
+    mismatched = sorted(k for k in want if got[k] != want[k])
+    if mismatched:
+        reasons.append(f"identities differ from the committed records: "
+                       f"{mismatched}")
+    if v and flat(recomputed) != flat(recorded):
+        reasons.append("the recorded verdicts are not what the record's "
+                       "measurements derive")
+    if v and recomputed.get("validation") != "PASS":
+        reasons.append(f"validation is {recomputed.get('validation')}, not "
+                       "PASS")
+    ok = not reasons
+    return {"usable": ok, "reasons": reasons,
+            "validation": recomputed.get("validation") if v else None,
+            "scored_rows_equivalence": (
+                (recomputed.get("scored_rows_equivalence") or {}).get("verdict")
+                if ok else None),
+            "identities": {"expected": want, "recorded": got}}
 
 
 def _sha256(path: Path) -> str:
@@ -878,46 +1053,61 @@ def stage_V(*, env: Environment, journal, out: Path, deadline=None,
         pid, store = next(iter(keep["stores"].items()))
         profile, items = keep["items"][pid]
         out_: dict[str, Any] = {"profile": pid, "operators": {}}
-        for impl_id, artifact in (("ffn.activation_importance_v0",
-                                   "kept_neurons"),
-                                  ("attention.activation_importance_v1",
-                                   "kept_heads"),
-                                  ("width.global_pca_v0", None)):
+        artifacts = {"ffn.activation_importance_v0": "kept_neurons",
+                     "attention.activation_importance_v1": "kept_heads",
+                     "width.global_pca_v0": None}
+        for impl_id in REQUIRED_STATISTICS_OPERATORS:
             impl = get_implementation(impl_id)
-            arms, children = {}, {}
-            for label, objective in (("full_scope", O.D2_OBJECTIVE),
-                                     ("narrow_scope",
-                                      O.D2_NARROW_SCOPE_COMPARISON)):
-                ctx = _context(env, impl, teacher, profile, items, objective,
-                               store, "all_v1", work / f"v3-{impl_id}-{label}",
-                               env.target_spec)
-                outcome, timing = _timed_execute(env, impl, ctx)
-                arms[label] = {
-                    **timing,
-                    "config_declares_objective":
-                        "scoring_objective" in ctx.config,
-                    "local_metrics": dict(outcome.local_metrics.values),
-                    "weighted": bool((outcome.trace.get("scoring_positions")
-                                      or {}).get(
-                                          "token_weights_multiplied_by"))}
-                children[label] = outcome
-            if artifact:
-                overlap = jaccard_per_layer(
-                    children["full_scope"].artifacts[artifact],
-                    children["narrow_scope"].artifacts[artifact])
-            else:
-                emb = env.adapter.embedding
-                overlap = projection_overlap(
-                    emb(teacher).weight.detach(),
-                    emb(children["full_scope"].model).weight.detach(),
-                    emb(children["narrow_scope"].model).weight.detach())
-            out_["operators"][impl_id] = {"arms": arms,
-                                          "selection_overlap": overlap,
-                                          "_class": "SCIENCE DIAGNOSTIC"}
-            if impl_id.startswith("ffn."):
-                keep["ffn_child"] = children["full_scope"].model
+            arms: dict[str, Any] = {}
+            children: dict[str, Any] = {}
+            #: ONE OPERATOR'S FAILURE IS RECORDED AGAINST THAT OPERATOR and the
+            #: others still run; the verdict then refuses a PASS.
+            try:
+                for label, objective in (("full_scope", O.D2_OBJECTIVE),
+                                         ("narrow_scope",
+                                          O.D2_NARROW_SCOPE_COMPARISON)):
+                    ctx = _context(env, impl, teacher, profile, items,
+                                   objective, store, "all_v1",
+                                   work / f"v3-{impl_id}-{label}",
+                                   env.target_spec)
+                    outcome, timing = _timed_execute(env, impl, ctx)
+                    arms[label] = {
+                        **timing,
+                        "config_declares_objective":
+                            "scoring_objective" in ctx.config,
+                        "local_metrics": dict(outcome.local_metrics.values),
+                        "weighted": bool((outcome.trace.get(
+                            "scoring_positions") or {}).get(
+                                "token_weights_multiplied_by")),
+                        "integrity": statistics_integrity(
+                            impl, label, outcome, ctx, target=env.target_spec,
+                            store_identity_hash=store.identity_hash,
+                            objective_hash=O.D2_OBJECTIVE.objective_hash)}
+                    children[label] = outcome
+                artifact = artifacts[impl_id]
+                if artifact:
+                    overlap = jaccard_per_layer(
+                        children["full_scope"].artifacts[artifact],
+                        children["narrow_scope"].artifacts[artifact])
+                else:
+                    emb = env.adapter.embedding
+                    overlap = projection_overlap(
+                        emb(teacher).weight.detach(),
+                        emb(children["full_scope"].model).weight.detach(),
+                        emb(children["narrow_scope"].model).weight.detach())
+                out_["operators"][impl_id] = {
+                    "arms": arms, "selection_overlap": overlap,
+                    "_overlap_class": "SCIENCE DIAGNOSTIC -- no threshold"}
+                if impl_id.startswith("ffn.") and arms["full_scope"][
+                        "integrity"]["passed"]:
+                    keep["ffn_child"] = children["full_scope"].model
+            except Exception as exc:                       # noqa: BLE001
+                out_["operators"][impl_id] = {
+                    "arms": arms, "failed": f"{type(exc).__name__}: {exc}",
+                    "traceback": traceback.format_exc()}
             del children
             _free(env)
+        out_["full_scope_integrity"] = _v3_integrity(out_)
         return out_
 
     def depth_round(rows: str):
@@ -993,7 +1183,9 @@ def stage_V(*, env: Environment, journal, out: Path, deadline=None,
 
 
 __all__ = ["ARITHMETIC_TOLERANCES", "CORE_STEPS", "D2ValidationError",
-           "Environment", "EXECUTION_DIAGNOSTICS", "RECORD_KEY",
+           "Environment", "EXECUTION_DIAGNOSTICS", "INTEGRITY_TOLERANCES",
+           "RECORD_KEY", "REQUIRED_STATISTICS_OPERATORS",
            "ROW_EQUIVALENCE_TOLERANCES", "SCIENCE_DIAGNOSTICS", "STEP_ORDER",
-           "entropy_arithmetic", "premises", "production_environment",
+           "adopt", "entropy_arithmetic", "expected_identities", "premises",
+           "production_environment",
            "reduction_arithmetic", "stage_V", "verdicts"]

@@ -35,6 +35,7 @@ from aadistill.initialization.operators._common import (
     copy_module_except,
 )
 from aadistill.initialization.calibration.profiles import CalibrationNeed
+from aadistill.initialization.statistics.collect import RESIDUAL_WEIGHT
 from aadistill.initialization.operators.base import (
     OperatorContext,
     OperatorImplementation,
@@ -143,7 +144,13 @@ class FFNActivationImportanceV0(OperatorImplementation):
                     "op.ffn.retained_importance_mean": mean_share,
                     "op.ffn.retained_importance_min": min(retained_shares),
                 },
-                detail={"per_layer_retained_share": retained_shares}),
+                #: The weighted denominator, ONLY when the pass was weighted,
+                #: so an unweighted record is key-for-key the historical one.
+                detail={"per_layer_retained_share": retained_shares,
+                        **({} if RESIDUAL_WEIGHT not in state else
+                           {"stats_tokens": int(state["residual_count"][0]),
+                            "stats_token_weight":
+                                float(state[RESIDUAL_WEIGHT][0])})}),
             trace={"source": "activation_importance_topk",
                    #: Execution evidence, not identity -- `OperatorStep.identity()`
                    #: does not read `trace` and neither knob changes the estimand.

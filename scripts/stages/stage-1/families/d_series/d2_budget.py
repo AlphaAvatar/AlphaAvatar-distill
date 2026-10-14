@@ -252,15 +252,17 @@ D2_VALIDATION_PLAN = ("logs/stages/stage-1/families/d_series/validations/"
 
 def d2_validation_evidence(repo_root: str | Path | None = None
                            ) -> dict[str, Any]:
-    """The D2 GPU validation's verified evidence, or why there is none.
+    """The D2 GPU validation's ADOPTABLE evidence, or why there is none.
 
     Usable only when a session is booked with its evidence sha256, the bytes
-    hash to it, it COMPLETED, and it measured the objective D2 now declares.
-    Stage L's verdicts belong to the superseded objective and never count.
+    hash to it, and `d2_gpu_validation.adopt` accepts the record: COMPLETE,
+    the objective, contract, preregistration and plan identities of this
+    tree, verdicts recomputed from its measurements equal to the recorded
+    ones, and validation PASS. A failed or incomplete run stays booked and
+    billed and is never adopted. Stage L's verdicts belong to the superseded
+    objective and never count.
     """
     import hashlib
-
-    from stages.d_series import objectives as O
 
     root = Path(repo_root) if repo_root is not None else REPO_ROOT
     out: dict[str, Any] = {"usable": False, "campaign": D2_VALIDATION_CAMPAIGN,
@@ -281,18 +283,17 @@ def d2_validation_evidence(repo_root: str | Path | None = None
     if hashlib.sha256(raw).hexdigest() != row["evidence_session_sha256"]:
         return {**out, "why": "the evidence does not hash to what was booked"}
     doc = json.loads(raw)
-    #: Stage V's record inside the driver's adoption.json.
-    v = doc.get("V_d2_validation") or {}
-    verdicts = v.get("verdicts") or {}
-    ok = (doc.get("status") == "COMPLETE"
-          and (v.get("premises") or {}).get("objective_hash")
-          == O.D2_OBJECTIVE.objective_hash)
-    return {**out, "usable": ok,
-            "validation": verdicts.get("validation") if ok else None,
-            "scored_rows_equivalence": (
-                (verdicts.get("scored_rows_equivalence") or {}).get("verdict")
-                if ok else None),
-            "why": None if ok else "incomplete, or another objective"}
+    #: ADOPTION is stage V's own rule (`d2_gpu_validation.adopt`): verdicts
+    #: recomputed from the measurements, identities against the committed
+    #: records of THIS tree, the run COMPLETE, validation PASS. The
+    #: scored-rows verdict exists only for an adoptable run.
+    from stages.phase_d2 import d2_gpu_validation as V
+
+    verdict = V.adopt(doc, REPO_ROOT)
+    return {**out, **verdict,
+            "evidence_session": row["evidence_session"],
+            "evidence_session_sha256": row["evidence_session_sha256"],
+            "why": None if verdict["usable"] else "; ".join(verdict["reasons"])}
 
 
 def objective_overhead(evidence: dict[str, Any] | None,

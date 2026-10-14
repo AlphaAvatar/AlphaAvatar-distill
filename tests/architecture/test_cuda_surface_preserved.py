@@ -2023,6 +2023,12 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "every metric, hash and identity) so the D2 GPU validation can "
             "measure the diagnostic's cost apart from the decision's. No "
             "score, choice or path changes.",
+        "src/aadistill/initialization/operators/ffn/dense/activation_importance.py":
+            "under weighted statistics only, the local-metric detail adds "
+            "`stats_tokens` and `stats_token_weight` (the denominator the "
+            "collector divided by), as WIDTH already does, so the D2 GPU "
+            "validation's integrity gate can check it against the weight sum. "
+            "Unweighted records are key-for-key unchanged; no selection moves.",
      }),
 )
 

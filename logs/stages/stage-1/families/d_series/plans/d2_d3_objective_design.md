@@ -1087,12 +1087,42 @@ The arithmetic class compares:
 - the `c × KL` item mean against float64, on the SAME (KL, c);
 - the raw-KL control.
 
-**Integrity is gated too:**
+**Integrity is gated too, and it is tri-state.** An unmeasured check gives
+INCOMPLETE; a check that was measured wrong, or a step that failed, gives FAIL.
+It covers:
 
 - the teacher binding and B's identities;
 - every store's identity against its declaration;
+- **every one of FFN, WIDTH and ATTENTION**:
+  - executed both arms;
+  - the full-scope arm is weighted by this session's root store, declares the
+    D2 objective, and its collector's denominator equals the weight sum to
+    1e-9 relative;
+  - the narrow arm is unweighted;
+  - both children reach the target with finite parameters.
+
+  A missing or failed operator is FAIL even though V4 can still run on FFN's
+  child.
 - DEPTH reads the root;
 - every decision score equals the recorded objective.
+
+**Adoption is stricter than booking** (`d2_gpu_validation.adopt`). A booked
+run counts as evidence only when all of these hold:
+
+- it is COMPLETE;
+- its objective, contract, preregistration and plan identities equal the
+  committed records;
+- its verdicts, recomputed from its measurements, equal the recorded ones;
+- validation is PASS.
+
+`scored_v1` additionally needs row equivalence PASS. Any other run stays
+booked and billed, and unlocks nothing.
+
+**Booking is append-only.**
+
+- A booked subrun id is never reused for another run.
+- The provider's teardown confirmation is copied and hashed.
+- A run without it is booked with a `resource_risk` and blocks closing.
 
 **Diagnostics are recorded as measured and never gate:**
 

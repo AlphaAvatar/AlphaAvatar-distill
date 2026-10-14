@@ -135,9 +135,23 @@ class TestDiagnostics:
 
 # --- the verdicts: the predicate, table-tested -----------------------------------
 
+def _v3(ok=True, failed_ops=(), missing_ops=(), arm_fails=()):
+    ops = {}
+    for impl_id in V.REQUIRED_STATISTICS_OPERATORS:
+        if impl_id in missing_ops:
+            continue
+        if impl_id in failed_ops:
+            ops[impl_id] = {"arms": {}, "failed": "RuntimeError: boom"}
+            continue
+        ops[impl_id] = {"arms": {
+            arm: {"integrity": {"passed": ok and (impl_id, arm) not in arm_fails}}
+            for arm in ("full_scope", "narrow_scope")}}
+    return {"operators": ops}
+
+
 def _record(*, entropy=True, reduction=True, raw=True, b=True, stores=True,
             ref="root_reference", consistent=True, se=True, dp=True,
-            v5=True):
+            v5=True, v3="ok"):
     rec = {"premises": {"teacher_revision": "r"},
            "V1_root_stores_and_validity": {
                "profiles": {"p": {"arithmetic": {"within_tolerance": entropy}}},
@@ -153,6 +167,10 @@ def _record(*, entropy=True, reduction=True, raw=True, b=True, stores=True,
                "table_consistency": {"consistent": consistent}}}
     if v5:
         rec["V5_depth_scored_rows"] = {"agreement": {"within_tolerance": dp}}
+    if v3 == "ok":
+        rec["V3_weighted_statistics"] = _v3()
+    elif v3 is not None:
+        rec["V3_weighted_statistics"] = v3
     return rec
 
 
@@ -188,6 +206,30 @@ class TestVerdicts:
         assert v["validation"] == "PASS"
         assert V.verdicts(_record(v5=False))[
             "scored_rows_equivalence"]["verdict"] == "INCOMPLETE"
+
+    @pytest.mark.parametrize("v3", [
+        _v3(failed_ops=("attention.activation_importance_v1",)),
+        _v3(failed_ops=("width.global_pca_v0",)),
+        _v3(missing_ops=("width.global_pca_v0",)),
+        _v3(arm_fails=(("attention.activation_importance_v1", "full_scope"),)),
+        _v3(arm_fails=(("ffn.activation_importance_v0", "narrow_scope"),)),
+        {"failed": "RuntimeError: V3 died"}],
+        ids=["attention_failed", "width_failed", "width_missing",
+             "attention_full_arm_wrong", "ffn_narrow_arm_wrong",
+             "step_failed"])
+    def test_a_partial_full_scope_is_never_a_pass(self, v3):
+        """FFN's child exists and V4 ran on it -- and still no PASS."""
+        v = V.verdicts(_record(v3=v3))
+        assert v["integrity"]["checks"]["full_scope_statistics_operators"] \
+            is False
+        assert v["integrity"]["verdict"] == "FAIL"
+        assert v["validation"] == "FAIL"
+
+    def test_an_unmeasured_v3_is_incomplete(self):
+        for v3 in (None, {"skipped": "deadline"}):
+            v = V.verdicts(_record(v3=v3))
+            assert v["integrity"]["verdict"] == "INCOMPLETE"
+            assert v["validation"] == "INCOMPLETE"
 
     def test_drift_and_diagnostics_never_gate(self):
         v = V.verdicts(_record())
@@ -332,6 +374,18 @@ class TestTheStageEndToEnd:
         assert "subspace_overlap" in ops["width.global_pca_v0"][
             "selection_overlap"]
 
+    def test_v3_verifies_every_operators_scope_and_denominator(self, toy_run):
+        v3 = toy_run[0]["V3_weighted_statistics"]
+        assert v3["full_scope_integrity"] is True
+        for impl_id in V.REQUIRED_STATISTICS_OPERATORS:
+            full = v3["operators"][impl_id]["arms"]["full_scope"]["integrity"]
+            narrow = v3["operators"][impl_id]["arms"]["narrow_scope"][
+                "integrity"]
+            assert full["passed"] and narrow["passed"], (impl_id, full, narrow)
+            assert full["denominator"] == pytest.approx(full["weight_total"],
+                                                        rel=1e-12)
+            assert 0 < full["weight_total"]
+
     def test_v4_reports_three_metrics_on_a_non_root_parent(self, toy_run):
         v4 = toy_run[0]["V4_depth_root_vs_parent"]
         assert v4["reference"] == "root_reference"
@@ -345,6 +399,30 @@ class TestTheStageEndToEnd:
         rows = r["table"]
         assert any(abs(x["parent_kl"] - x["root_kl_unweighted"]) > 1e-6
                    for x in rows)
+
+    def test_a_failing_width_cannot_pass_though_v4_runs(self, tmp_path,
+                                                       monkeypatch):
+        """The reviewed failure mode, for real: FFN verifies and keeps its
+        child, WIDTH raises, V4 runs on FFN's child -- validation FAILS."""
+        from aadistill.initialization.operators.width.residual import (
+            global_pca,
+        )
+        from stages.phase_d1.topk_adoption_driver import Journal
+
+        def boom(self, ctx):
+            raise RuntimeError("WIDTH broke")
+        monkeypatch.setattr(global_pca.WidthGlobalPCAV0, "apply", boom)
+        rec = V.stage_V(env=toy_environment(),
+                        journal=Journal(tmp_path / "j.jsonl"), out=tmp_path)
+        ops = rec["V3_weighted_statistics"]["operators"]
+        assert "failed" in ops["width.global_pca_v0"]
+        assert "failed" not in ops["ffn.activation_importance_v0"]
+        assert "failed" not in rec["V4_depth_root_vs_parent"]
+        v = rec["verdicts"]
+        assert v["integrity"]["checks"]["full_scope_statistics_operators"] \
+            is False
+        assert v["integrity"]["verdict"] == "FAIL"
+        assert v["validation"] == "FAIL"
 
     def test_a_missing_b_fails_its_step_and_the_rest_still_runs(self, tmp_path):
         from stages.phase_d1.topk_adoption_driver import Journal
@@ -427,7 +505,20 @@ class TestTheRecords:
 
 # --- booking and the budget's reader ---------------------------------------------------
 
-def _booked_tree(tmp_path, *, objective_hash=None, status="COMPLETE"):
+def _adoptable(*, objective_hash=None, tamper=None, **record_kw):
+    """A stage-V record that recomputes to PASS, with this tree's identities."""
+    rec = _record(**record_kw)
+    rec["premises"] = {**V.expected_identities(REPO), "teacher_revision": "r"}
+    if objective_hash:
+        rec["premises"]["objective_hash"] = objective_hash
+    rec["verdicts"] = V.verdicts(rec)
+    if tamper:
+        tamper(rec)
+    return rec
+
+
+def _booked_tree(tmp_path, *, objective_hash=None, status="COMPLETE",
+                 record=None, teardown=True):
     import importlib.util
     from stages.d_series import objectives as O
     from stages.d_series import d2_budget as BUD
@@ -436,14 +527,12 @@ def _booked_tree(tmp_path, *, objective_hash=None, status="COMPLETE"):
     (run / "out" / "adoption_all_v1" / "work").mkdir(parents=True)
     (run / "cost.json").write_text(json.dumps(
         {"all_in_usd": 0.91, "pod_id": "pod1", "elapsed_minutes": 50.0}))
-    (run / "teardown_confirmed").write_text("confirmed")
+    if teardown:
+        (run / "teardown_confirmed").write_text("confirmed")
     (run / "out" / "adoption_all_v1" / "work" / "big.json").write_text("{}")
     (run / "out" / "adoption_all_v1" / "adoption.json").write_text(json.dumps(
-        {"status": status, "V_d2_validation": {
-            "premises": {"objective_hash":
-                         objective_hash or O.D2_OBJECTIVE.objective_hash},
-            "verdicts": {"validation": "PASS",
-                         "scored_rows_equivalence": {"verdict": "PASS"}}}}))
+        {"status": status, "V_d2_validation": record or _adoptable(
+            objective_hash=objective_hash)}))
     vdir = tmp_path / Path(BUD.D2_VALIDATION_CAMPAIGN).parent
     vdir.mkdir(parents=True)
     (vdir / "campaign.json").write_text(json.dumps(P.campaign()))
@@ -452,6 +541,71 @@ def _booked_tree(tmp_path, *, objective_hash=None, status="COMPLETE"):
     book = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(book)
     return run, vdir, book
+
+
+def _adopted(tmp_path, **kw):
+    from stages.d_series import d2_budget as BUD
+    run, vdir, book = _booked_tree(tmp_path, **kw)
+    book.book(run_dir=run, validation_dir=vdir, subrun_id="s", outcome="x",
+              evidence_session="out/adoption_all_v1/adoption.json",
+              repo=tmp_path)
+    return BUD.d2_validation_evidence(tmp_path)
+
+
+class TestAdoption:
+    """No wrong evidence may enter pricing or the scored_v1 gate."""
+
+    def test_a_passing_run_is_adopted(self, tmp_path):
+        ev = _adopted(tmp_path)
+        assert ev["usable"] and ev["validation"] == "PASS"
+        assert ev["scored_rows_equivalence"] == "PASS"
+
+    def test_complete_but_validation_fail_is_not_adopted(self, tmp_path):
+        ev = _adopted(tmp_path, record=_adoptable(entropy=False))
+        assert not ev["usable"] and ev["scored_rows_equivalence"] is None
+        assert any("validation is FAIL" in r for r in ev["reasons"])
+
+    def test_complete_but_validation_incomplete_is_not_adopted(self, tmp_path):
+        ev = _adopted(tmp_path, record=_adoptable(v3=None))
+        assert not ev["usable"]
+
+    def test_validation_pass_with_rows_fail_is_adopted_without_scored_v1(
+            self, tmp_path):
+        ev = _adopted(tmp_path, record=_adoptable(dp=False))
+        assert ev["usable"] and ev["validation"] == "PASS"
+        assert ev["scored_rows_equivalence"] == "FAIL"
+
+    @pytest.mark.parametrize("field", ["preregistration_hash", "plan_sha256",
+                                       "contract_hash", "objective_hash"])
+    def test_an_identity_mismatch_is_not_adopted(self, tmp_path, field):
+        def tamper(rec):
+            rec["premises"][field] = "0" * 64
+        ev = _adopted(tmp_path, record=_adoptable(tamper=tamper))
+        assert not ev["usable"]
+        assert any(field in r for r in ev["reasons"])
+
+    def test_a_recorded_pass_the_measurements_contradict_is_refused(
+            self, tmp_path):
+        def tamper(rec):
+            rec["V1_root_stores_and_validity"]["profiles"]["p"][
+                "arithmetic"]["within_tolerance"] = False
+        ev = _adopted(tmp_path, record=_adoptable(tamper=tamper))
+        assert not ev["usable"]
+        assert any("not what the record" in r for r in ev["reasons"])
+
+    def test_the_authorization_gate_refuses_scored_v1_on_unadopted_evidence(
+            self, tmp_path, monkeypatch):
+        from stages.d_series import d2_budget as BUD
+        from stages.phase_d2 import d2_authorization as A
+        from stages.phase_d2 import d2_session as S
+        ev = _adopted(tmp_path, record=_adoptable(entropy=False))
+        monkeypatch.setattr(BUD, "d2_validation_evidence", lambda *a, **k: ev)
+        with pytest.raises(A.D2AuthorizationRefused, match="scored-rows"):
+            A.build_payload(
+                grant={"approves_preregistration_hash":
+                       S.preregistration_hash(), "granted_by": "t"},
+                session_commit="a" * 40, granted_utc="t", run_id="r1",
+                prediction_rows="scored_v1", live_rate=1.09)
 
 
 class TestBooking:
@@ -470,10 +624,57 @@ class TestBooking:
         ev = BUD.d2_validation_evidence(tmp_path)
         assert ev["usable"] and ev["scored_rows_equivalence"] == "PASS"
         assert ev["validation"] == "PASS"
-        book.book(run_dir=run, validation_dir=vdir, subrun_id="d2val_s1",
-                  outcome="rebooked", repo=tmp_path)
+        #: IDEMPOTENT: the same run, cost and evidence leave one row.
+        again = book.book(run_dir=run, validation_dir=vdir,
+                          subrun_id="d2val_s1", outcome="rebooked",
+                          evidence_session="out/adoption_all_v1/adoption.json",
+                          repo=tmp_path)
+        assert again["outcome"] == "ok"
         assert len(json.loads((vdir / "campaign.json").read_text())[
             "subruns"]) == 1
+
+    def test_a_booked_subrun_id_is_never_reused_for_another_run(self, tmp_path):
+        run, vdir, book = _booked_tree(tmp_path)
+        book.book(run_dir=run, validation_dir=vdir, subrun_id="s1",
+                  outcome="first", repo=tmp_path)
+        other = run.parent / "d2val_y"
+        import shutil
+        shutil.copytree(run, other)
+        (other / "cost.json").write_text(json.dumps(
+            {"all_in_usd": 0.40, "pod_id": "pod2"}))
+        with pytest.raises(book.BookingError, match="already booked"):
+            book.book(run_dir=other, validation_dir=vdir, subrun_id="s1",
+                      outcome="second", repo=tmp_path)
+        camp = json.loads((vdir / "campaign.json").read_text())
+        assert [r["run_id"] for r in camp["subruns"]] == ["d2val_x"]
+        assert camp["booked_usd"] == 0.91
+        book.book(run_dir=other, validation_dir=vdir, subrun_id="s2",
+                  outcome="second", repo=tmp_path)
+        camp = json.loads((vdir / "campaign.json").read_text())
+        assert camp["booked_usd"] == pytest.approx(1.31)
+
+    def test_teardown_confirmation_is_persisted_and_hashed(self, tmp_path):
+        run, vdir, book = _booked_tree(tmp_path)
+        row = book.book(run_dir=run, validation_dir=vdir, subrun_id="s",
+                        outcome="x", repo=tmp_path)
+        assert row["teardown_confirmed"] is True
+        assert "teardown_confirmed" in row["evidence_sha256"]
+        assert (tmp_path / row["teardown_evidence"]["path"]).read_text() == \
+            "confirmed"
+        assert "resource_risk" not in row
+
+    def test_a_run_without_teardown_is_booked_at_risk_and_blocks_closing(
+            self, tmp_path):
+        run, vdir, book = _booked_tree(tmp_path, teardown=False)
+        with pytest.raises(book.BookingError, match="teardown"):
+            book.book(run_dir=run, validation_dir=vdir, subrun_id="s",
+                      outcome="x", close="COMPLETE and CLOSED -- x",
+                      repo=tmp_path)
+        camp = json.loads((vdir / "campaign.json").read_text())
+        (row,) = camp["subruns"]
+        assert row["cost_usd"] == 0.91 and row["teardown_confirmed"] is False
+        assert "resource_risk" in row
+        assert not camp["status"].startswith("COMPLETE and CLOSED")
 
     def test_an_unpriced_run_is_refused(self, tmp_path):
         run, vdir, book = _booked_tree(tmp_path)

@@ -226,13 +226,27 @@ def build() -> dict[str, Any]:
                 "source": "R0's registered tolerances, unchanged"},
             "integrity": {
                 "gate": True,
+                "tolerances": dict(V.INTEGRITY_TOLERANCES),
+                "required_operators": list(V.REQUIRED_STATISTICS_OPERATORS),
                 "checks": ["the teacher binding and B's four identities",
                            "each root store's identity equals its "
                            "declaration at bsz=1 and bsz=3",
+                           ("EVERY full-scope statistics operator (FFN, WIDTH, "
+                            "ATTENTION) executed both arms; the full arm is "
+                            "weighted by this session's root store, declares "
+                            "the D2 objective, and divides by the weight sum "
+                            "(statistics_denominator_relative); the narrow arm "
+                            "is unweighted, declares no objective and carries "
+                            "no weighted denominator; both children reach the "
+                            "target with finite parameters. A missing or "
+                            "failed operator is FAIL even when V4 runs on "
+                            "FFN's child"),
                            "DEPTH reads the root reference",
                            "every DEPTH decision score equals the recorded "
                            "weighted objective, and every round-0 candidate "
-                           "carries its parent KL"]},
+                           "carries its parent KL"],
+                "states": ("tri-state: unmeasured -> INCOMPLETE, measured and "
+                           "wrong (or a step that failed) -> FAIL")},
             "diagnostics": {
                 "gate": False,
                 "execution": list(V.EXECUTION_DIAGNOSTICS),
@@ -244,6 +258,14 @@ def build() -> dict[str, Any]:
             "verdicts": ("arithmetic and integrity PASS -> validation PASS; "
                          "scored_rows_equivalence PASS -> D2 may run "
                          "scored_v1, otherwise all_v1"),
+            "adoption": ("d2_gpu_validation.adopt: a booked run is adoptable "
+                         "evidence only when COMPLETE, its objective, contract, "
+                         "preregistration and plan identities equal the "
+                         "committed records, its verdicts RECOMPUTED from its "
+                         "measurements equal the recorded ones, and validation "
+                         "is PASS; scored_v1 additionally needs "
+                         "scored_rows_equivalence PASS. Anything else stays "
+                         "booked and billed and unlocks nothing"),
         },
         "basis": {"stage_l": L, "step_bound_factor": f,
                   "d1_root_operator_seconds_max": stats_ops,
@@ -286,10 +308,14 @@ def build() -> dict[str, Any]:
                            "exit path; journal.jsonl"),
             "fetched_before_teardown": "JSON and logs only (the launcher)",
             "booking": ("scripts/shared/pod/book_engineering_subrun.py copies "
-                        "the small evidence into runs/<run>/, books cost.json's "
-                        "all-in cost and the evidence sha256 in campaign.json; "
+                        "the small evidence (teardown_confirmed included) into "
+                        "runs/<run>/, books cost.json's all-in cost and the "
+                        "evidence sha256 in campaign.json, append-only: a "
+                        "booked subrun id is never reused for another run, and "
+                        "a run without provider teardown confirmation is booked "
+                        "with a resource_risk and blocks closing. "
                         "derive_budget.py then counts it, and "
-                        "d2_budget.d2_validation_evidence reads it")},
+                        "d2_budget.d2_validation_evidence adopts it or not")},
         "authorizes": "nothing",
     }
 
