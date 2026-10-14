@@ -42,7 +42,7 @@ LOGIT_DEFINITION = "float32_affine_head_of_model_dtype_final_hidden/v1"
 #: :meth:`LinearOutputHead.token_logits`: both bound a transient, neither is
 #: semantics.
 _VOCAB_BLOCK = 32768
-_GATHER_BUDGET_ELEMENTS = 1 << 25
+_GATHER_BUDGET_ELEMENTS = 1 << 26
 
 
 class OutputHeadError(ValueError):
@@ -159,8 +159,11 @@ class LinearOutputHead:
         ids = token_ids.to(self.weight.device).long()
         if bool(((ids < 0) | (ids >= self.vocab_size)).any()):
             raise OutputHeadError("a token id outside the head's vocabulary")
-        #: rows * distinct <= rows * min(rows * M, V) <= budget.
-        rows = max(1, int(math.isqrt(max(1, _GATHER_BUDGET_ELEMENTS // max(1, m)))))
+        #: Two transients per block: the widened head rows [distinct, H] and
+        #: the product [rows, distinct], with distinct <= rows * M. Sizing
+        #: rows * M * H to the budget bounds the first, and the second is
+        #: then at most rows^2 * M, smaller still.
+        rows = max(1, _GATHER_BUDGET_ELEMENTS // max(1, m * self.hidden_size))
         for r0 in range(0, n, rows):
             r1 = min(r0 + rows, n)
             distinct, inverse = torch.unique(ids[r0:r1], return_inverse=True)

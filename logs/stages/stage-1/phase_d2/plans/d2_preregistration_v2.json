@@ -437,7 +437,7 @@
    ]
   }
  },
- "status": "DRAFT -- not approved, not authorized; supersedes v1 (never executed)",
+ "status": "SUPERSEDED BEFORE FORMAL SEARCH -- STAGE V ENGINEERING VALIDATION COMPLETED",
  "superseded_drafts": [
   {
    "preregistration_hash": "317596c4921e7d8bf77745d963581346582cf5f8128a84bffe388ddb0a8bcc03",
@@ -780,5 +780,12 @@
   },
   "enforceable_stop": "each session's authorization caps spend at the live rate; planning bounds are not the cap"
  },
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "superseded_by": "logs/stages/stage-1/phase_d2/plans/d2_preregistration_v3.json",
+ "superseded_on": "2026-10-14",
+ "superseded_because": "maintainer scientific decision 2026-10-14: D2 version 3, the teacher's Top-200 + tail confidence weighting the root-reference union Top-K KL (contract revision 8), an Evidence-Informed Pre-Search Scientific Revision. Version 2 was never approved; no D2 search, recovery or behavioural session ran under it. Its Stage V engineering validation (d2val_20261014_103301, $0.6532, validation PASS) completed and stays version 2's evidence",
+ "executed": {
+  "formal": false,
+  "engineering_validation": "Stage V, COMPLETE and CLOSED"
+ }
 }

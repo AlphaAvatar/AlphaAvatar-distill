@@ -3,10 +3,13 @@
 Run BEFORE the formal D2 search, on the ROOT reference store of each
 calibration profile (`aadistill.initialization.scoring.reference_store`), and
 -- when a candidate's per-position root KL is supplied (B's, in the D2 GPU
-validation) -- against that KL. Everything here is DESCRIPTIVE: the
-preregistration v2 freezes the objective, the scope and every rule before
-this runs, and no result below may change a definition, a threshold-free
-mapping or the scope. Nothing in this module decides anything.
+validation) -- against that KL. Generic over the store: it reads whichever
+confidence the store holds -- version 2's full-vocabulary one, or version 3's
+Top-200 + tail one, which its union store declares in its identity.
+Everything here is DESCRIPTIVE: the D2 preregistration in force freezes the
+objective, the scope and every rule before this runs, and no result below may
+change a definition, a threshold-free mapping or the scope. Nothing in this
+module decides anything.
 
 What it reports, over the scored positions of the frozen position policy:
 

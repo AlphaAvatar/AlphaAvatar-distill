@@ -470,10 +470,12 @@ class TestTheObjectiveKeyword:
         from stages.d_series import objectives as O
         from stages.d_series import scoring_protocol as SP
 
+        #: Stage V's production context ran VERSION 2 on the D-series
+        #: support; version 3 needs the union support and its store.
         impl = get_implementation("depth.causal_kl_greedy_v1")
         with pytest.raises(ContractViolation, match="ROOT"):
-            impl.execute(self._ctx(tmp_path / "a", O.D2_OBJECTIVE))
-        ctx = self._ctx(tmp_path / "b", O.D2_OBJECTIVE)
+            impl.execute(self._ctx(tmp_path / "a", O.D2_V2_OBJECTIVE))
+        ctx = self._ctx(tmp_path / "b", O.D2_V2_OBJECTIVE)
         ctx.root_reference = build_root_reference_store(
             ctx.model, ctx.calibration_items, support=SP.D_SERIES_SUPPORT,
             identity=root_reference_identity(

@@ -22,6 +22,7 @@ from stages.d_series import objectives as O  # noqa: E402
 
 from aadistill.initialization.scoring.objective import (  # noqa: E402
     FORM_KL_MINUS_CONFIDENCE_REWARD, FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL,
+    FORM_REFERENCE_TOPK_CONFIDENCE_WEIGHTED_UNION_KL,
     FORM_UNCERTAINTY_WEIGHTED_KL, KL_REFERENCE_ROOT,
 )
 
@@ -35,17 +36,50 @@ def _stage_l_premises() -> dict:
 
 class TestTheTwoObjectives:
 
-    def test_d2_is_the_teacher_confidence_form_at_full_scope(self):
+    def test_d2_is_the_union_kl_form_at_full_scope(self):
+        from stages.d_series import scoring_protocol as SP
         d = O.D2_OBJECTIVE.as_dict()
-        assert d["form"] == FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL
+        assert O.D2_OBJECTIVE is O.D2_V3_OBJECTIVE
+        assert d["form"] == FORM_REFERENCE_TOPK_CONFIDENCE_WEIGHTED_UNION_KL
         assert d["kl_reference"] == KL_REFERENCE_ROOT
         assert d["confidence_source"] == \
-            "reference_full_vocabulary_shannon_entropy/v1"
+            "reference_topk_plus_tail_absolute_shannon_entropy/v1"
+        assert d["confidence_top_k"] == SP.D_SERIES_TOP_K == 200
+        assert d["kl_support"] == "reference_student_union_topk_tail_v1"
+        assert O.D2_SUPPORT.as_dict()["top_k"] == d["confidence_top_k"]
         assert d["statistics_weighting"] != "none"
         assert d["denominator"] == "scored_position_count/v1"
-        assert "entropy_top_k" not in d and "reward_scale" not in d
-        assert O.D2_NARROW_SCOPE_COMPARISON.objective_hash != \
+        assert "reward_scale" not in d and "entropy_top_k" not in d
+        assert O.D2_V3_NARROW_SCOPE_COMPARISON.objective_hash != \
             O.D2_OBJECTIVE.objective_hash
+
+    def test_version_2_is_kept_exactly_as_stage_v_validated_it(self):
+        v2 = O.D2_V2_OBJECTIVE.as_dict()
+        assert v2["form"] == FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL
+        assert O.D2_V2_OBJECTIVE.objective_hash.startswith("079031e3")
+        assert O.D2_V2_OBJECTIVE.objective_hash != \
+            O.D2_OBJECTIVE.objective_hash
+        sup = O.D2_V2_SUPERSESSION
+        assert sup["status"] == ("SUPERSEDED BEFORE FORMAL SEARCH -- STAGE V "
+                                 "ENGINEERING VALIDATION COMPLETED")
+        assert sup["executed"]["d2_search"] is False
+        assert sup["contract_hash"] == O.REVISION_7_CONTRACT_HASH
+        assert sup["preregistration_hash"] == O.PREREGISTRATION_V2_HASH
+        plan = json.loads((REPO / "logs/stages/stage-1/families/d_series/"
+                           "validations/d2-gpu-validation/v1/plan.json"
+                           ).read_text())
+        assert plan["objective_hash"] == O.D2_V2_OBJECTIVE.objective_hash
+        assert plan["contract_hash"] == O.REVISION_7_CONTRACT_HASH
+
+    def test_d1_and_d3_keep_the_historical_support(self):
+        from stages.d_series import scoring_protocol as SP
+        assert SP.D_SERIES_SUPPORT.as_dict() == {
+            "support_id": "reference_topk_tail_v1", "top_k": 200}
+        assert SP.D2_V3_SUPPORT.support_id != SP.D_SERIES_SUPPORT.support_id
+        d3 = O.frozen_d3_objective(REPO)
+        assert O.ranking_identity(d3, SP.D_SERIES_SUPPORT)[
+            "ranking_identity_hash"] != O.ranking_identity(
+            O.D2_OBJECTIVE, O.D2_SUPPORT)["ranking_identity_hash"]
 
     def test_the_superseded_d2_is_kept_exactly_as_stage_l_ran_it(self):
         old = O.D2_STUDENT_UNCERTAINTY_SUPERSEDED.as_dict()
@@ -288,27 +322,50 @@ class TestTheContractStatesWhyAndWhereTheClaimsStop:
     def test_the_record_carries_the_objectives_it_declares(self):
         record = O.contract(REPO)
         assert record["d2"]["objective_hash"] == O.D2_OBJECTIVE.objective_hash
-        assert record["revision"] == 7
+        assert record["d2"]["version"] == 3
+        assert record["revision"] == 8
         assert record["revision_history"][-1]["supersedes_contract_hash"] == \
+            O.REVISION_7_CONTRACT_HASH
+        assert record["revision_history"][-2]["supersedes_contract_hash"] == \
             O.REVISION_6_CONTRACT_HASH
+        assert record["revision_history"][-1]["kind"] == \
+            "Evidence-Informed Pre-Search Scientific Revision"
+        assert record["d2_v2_superseded"]["objective_hash"] == \
+            O.D2_V2_OBJECTIVE.objective_hash
+        assert record["d2_v2_superseded"]["executed"]["d2_search"] is False
+        assert record["d2"]["ranking_identity"] == O.ranking_identity(
+            O.D2_OBJECTIVE, O.D2_SUPPORT)
         assert record["d2"]["objective"]["aggregation"] == \
             "kl_path_weighting_per_consumer/v2"
         assert record["d2_superseded"]["objective_hash"] == \
             O.D2_STUDENT_UNCERTAINTY_SUPERSEDED.objective_hash
         assert record["d2_superseded"]["executed"]["d2_search"] is False
 
-    def test_d2_declares_two_changes_and_a_frozen_full_scope(self):
+    def test_d2_declares_three_changes_and_a_frozen_full_scope(self):
         d2 = O.contract(REPO)["d2"]
         changes = d2["declared_changes"]["changes"]
-        assert len(changes) == 2
+        assert len(changes) == 3
         assert "PARENT" in changes[0]["change"] and "ROOT" in changes[0]["change"]
-        assert "confidence" in changes[1]["change"]
+        assert "UNITED" in changes[1]["change"]
+        assert "confidence" in changes[2]["change"]
         assert d2["scope"]["frozen_scope"] == "full"
         assert len(d2["scope"]["acts_directly_on"]) == 4
         assert d2["scope"]["narrow_scope_comparison"]["objective_hash"] == \
-            O.D2_NARROW_SCOPE_COMPARISON.objective_hash
+            O.D2_V3_NARROW_SCOPE_COMPARISON.objective_hash
         joined = " ".join(d2["claim_boundary"]["may_not_claim"])
         assert "one variable" in joined
+        assert "full-vocabulary KL" in joined
+
+    def test_d2_states_its_support_and_confidence_definitions(self):
+        d2 = O.contract(REPO)["d2"]
+        sup, conf = d2["distribution_support"], d2["teacher_confidence"]
+        assert sup["support"] == O.D2_SUPPORT.as_dict()
+        assert "D1 and D3 keep" in sup["applies_to"]
+        assert "KL_{S_T + tail} <= KL_U <= KL_full" in sup["bounds"]
+        assert "ABSOLUTE" in conf["definition"]
+        assert "201" in conf["categories"]
+        assert any("exp(-H)" in n for n in conf["not"])
+        assert "NOT this objective" in conf["theoretical_note_only"]
 
     def test_d3s_scope_names_three_places_and_excludes_three_operators(self):
         scope = O.contract(REPO)["d3"]["scope"]
@@ -365,13 +422,16 @@ class TestTheD2Budget:
         assert b["steps"]["d2_confirmation"]["n_probes"] == 3
         for k in ("d2_screening", "d2_confirmation"):
             assert b["steps"][k]["hard"]["all_in_usd"] <= b["per_session_cap_usd"]
-        #: The search is reported, not assumed: under D1's recompute-mode
-        #: maxima it may exceed the cap, and the flag must say so.
+        #: The search is reported, not assumed: with version 3's PROVISIONAL
+        #: union terms its planning bound may exceed the cap, and the flags
+        #: must say so rather than the cap being raised or K cut.
         search = b["steps"]["d2_search"]
         assert b["every_session_under_cap"] == (
             search["hard"]["all_in_usd"] <= b["per_session_cap_usd"])
-        assert search["hard_if_cache_fix_validated"]["all_in_usd"] <= \
-            b["per_session_cap_usd"]
+        assert search["hard_fits_per_session_cap"] == (
+            search["hard"]["all_in_usd"] <= b["per_session_cap_usd"])
+        assert search["hard_if_scored_v1_validated"]["all_in_usd"] <= \
+            search["hard"]["all_in_usd"]
 
     def test_the_unmeasured_diagnostic_is_not_in_any_ceiling(self):
         from stages.d_series import d2_budget as BUD
@@ -659,9 +719,19 @@ class TestTheSearchPriceComesFromD1sRecords:
         if adopted is None:
             pytest.skip("no adopted Stage V in this tree")
         record = json.loads((REPO / BUD.RECORD).read_text())
-        src = record["steps"]["d2_search"]["objective_overhead"]["source"]
-        assert src.startswith("measured once") and \
-            adopted["evidence_session"] in src
+        ov = record["steps"]["d2_search"]["objective_overhead"]
+        #: Version 2's terms are Stage V's measurements; version 3's union
+        #: terms stay PROVISIONAL until its own GPU validation.
+        assert ov["source"].startswith("version 2's terms: measured once")
+        assert adopted["evidence_session"] in ov["source"]
+        assert ov["union_terms"]["status"] == "PROVISIONAL -- not measured"
+        geo = ov["union_terms"]["geometry"]
+        assert adopted["evidence_session"] in geo["depth_rows_per_candidate"][
+            "source"]
+        added = ov["union_terms"]["added"]
+        for key in ("depth_seconds_per_candidate",
+                    "state_eval_seconds_per_evaluation", "one_time_minutes"):
+            assert ov[key]["bound"] >= added[key]["bound"] > 0
 
     def test_d3_is_priced_with_its_own_search_in_the_programme(self):
         from stages.d_series import d2_budget as BUD

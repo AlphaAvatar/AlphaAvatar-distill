@@ -1,0 +1,198 @@
+{
+ "schema": "aadistill.d2v3_gpu_validation_plan/v1",
+ "validation_id": "d2v3_gpu_validation",
+ "version": 1,
+ "objective": "objective.d2_teacher_topk_confidence_weighted_union_kl@v1",
+ "objective_hash": "90e851fd11875e4a2e80cbf504a4961ce669411d70732bddb7ffd1941815da28",
+ "support": {
+  "support_id": "reference_student_union_topk_tail_v1",
+  "top_k": 200,
+  "topk_tie_break": "value_desc_then_index_asc/v1"
+ },
+ "contract_hash": "1321017afdc7369dfab4d1ffd043254f8219c41286507b940fc0ae7ed5ddc4a2",
+ "preregistration_hash": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+ "formal_topology": {
+  "micro_batch_size": 3,
+  "calibration_batch_packing": "length_sorted_v1"
+ },
+ "stage_v_reuse": {
+  "campaign": "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/campaign.json",
+  "run": "d2val_20261014_103301",
+  "reused_mechanisms": [
+   "scripts/stages/stage-1/phase_d1/topk_adoption_launch.sh (launcher, remote payload, evidence fetch)",
+   "scripts/stages/stage-1/phase_d2/d2val_acquire.sh (one-pod acquisition loop with capacity-refusal booking at $0)",
+   "the CUDA device handoff (place_for_execution, require_execution_devices) and the executed-commit binding",
+   "the reference-cache guard under a deliberately hoarded pool",
+   "provider-confirmed teardown and scripts/shared/pod/book_engineering_subrun.py booking",
+   "adoption by verdicts RECOMPUTED from the measurements"
+  ],
+  "reused_measurements": [
+   "version 2's per-step durations (this plan's bound basis)",
+   "the weighted-statistics mechanism (denominators equal to the weight sum, full vs narrow scope timing): version 3 changes the weight VALUES, not the path"
+  ],
+  "not_reused": [
+   "any verdict on the union KL, the retrieval, the deterministic Top-K or the K+1 confidence",
+   "version 2's scored_v1 equivalence (a different objective)",
+   "version 2's teacher-confidence distribution"
+  ]
+ },
+ "steps": [
+  {
+   "id": "W0_setup",
+   "what": "pod setup, environment, teacher fetch and load, the $0 premises on the pod",
+   "why_gpu": "infrastructure",
+   "expected_minutes": 4.4,
+   "bound_minutes": 28.6,
+   "class": "core",
+   "gates": null
+  },
+  {
+   "id": "W1_union_stores_and_confidence",
+   "what": "the union root store of BOTH profiles at the formal bsz=3 and at bsz=1: identity against the declaration, build seconds and bytes; float32 head logits against the model's own bf16 logits; the K+1 confidence against float64 on identical sketches; the teacher-confidence validity report (distribution, IQR, ESS, spans, domains, token types)",
+   "why_gpu": "the real teacher's bf16 hidden states and its Top-200 + tail confidence are the question",
+   "expected_minutes": 0.57,
+   "bound_minutes": 1.68,
+   "class": "core",
+   "gates": "arithmetic (confidence); integrity (store identity)"
+  },
+  {
+   "id": "W2_ffn_child_weighted",
+   "what": "FFN at the root under version 3, full scope (weighted by the K+1 confidence) and narrow scope: the parent of W4/W5, the weighted denominator check and the selection overlap",
+   "why_gpu": "a real compressed parent, and the new weights on a real selection",
+   "expected_minutes": 1.49,
+   "bound_minutes": 2.23,
+   "class": "core",
+   "gates": "integrity (denominator = weight sum); overlap diagnostic"
+  },
+  {
+   "id": "W3_union_numerics",
+   "what": "on 16 items (8 per profile) and 3 bypass candidates of W2's child: KL_{S_T+tail} <= KL_U <= KL_full against the FULL teacher logits (float64 oracle), retrieval against the full head, union size and overlap, tail masses, bf16 tie frequency, torch.topk-vs-deterministic set differences",
+   "why_gpu": "real 151,936-entry bf16 tails and ties; the CPU check ran on a stand-in checkpoint",
+   "expected_minutes": 0.04,
+   "bound_minutes": 0.13,
+   "class": "core",
+   "gates": "arithmetic (union KL vs float64; retrieval; bounds)"
+  },
+  {
+   "id": "W4_depth_union_all_v1",
+   "what": "one DEPTH round on W2's child under version 3 at all_v1 with synchronized telemetry: the union terms' seconds per candidate, the rankings by weighted union KL, unweighted union KL, teacher Top-K + tail KL and parent KL, the cache modes",
+   "why_gpu": "the per-candidate price term is the question",
+   "expected_minutes": 3.17,
+   "bound_minutes": 5.26,
+   "class": "core",
+   "gates": "integrity (root store with retrieval, table consistency)"
+  },
+  {
+   "id": "W5_depth_union_scored_v1",
+   "what": "the same DEPTH round at scored_v1",
+   "why_gpu": "THIS objective's scored_v1 equivalence, which decides the price lever",
+   "expected_minutes": 2.79,
+   "bound_minutes": 4.55,
+   "class": "core",
+   "gates": "row equivalence (DEPTH)"
+  },
+  {
+   "id": "W6_state_evaluation",
+   "what": "W2's child under version 3 at bsz=3 all_v1, bsz=3 scored_v1 and bsz=1 all_v1, and KL-only on the historical support: the per-evaluation seconds, the raw-KL control, the scored_v1 equivalence, the suite store",
+   "why_gpu": "the per-evaluation price term on the real suite",
+   "expected_minutes": 0.61,
+   "bound_minutes": 1.84,
+   "class": "core",
+   "gates": "arithmetic (raw-KL control); row equivalence (state)"
+  },
+  {
+   "id": "W7_teardown",
+   "what": "evidence fetch and teardown",
+   "why_gpu": "infrastructure",
+   "expected_minutes": 1.0,
+   "bound_minutes": 2.0,
+   "class": "core",
+   "gates": null
+  }
+ ],
+ "numerics_sample": {
+  "items_per_profile": 8,
+  "bypass_candidates": 3
+ },
+ "acceptance": {
+  "arithmetic": {
+   "gate": true,
+   "tolerances": {
+    "union_kl_vs_float64_abs_nats": 0.0001,
+    "union_kl_vs_float64_rel": 0.0001,
+    "confidence_vs_float64_abs": 1e-05,
+    "retrieval_vs_full_head_abs_nats": 0.0002,
+    "bound_violations_beyond_float32_slack": 0
+   },
+   "what": "one set of inputs, two computations: the float32 union reduction against a float64 oracle on the SAME logits; retrieval against the full head's log-softmax at the same rows; the K+1 confidence against float64 on the same sketch",
+   "basis": "the $0 CPU check on real logits measured union error max 1.6e-5, retrieval max 6e-5 and no bound violation; the tolerances leave room for GPU summation order, never for a definition error"
+  },
+  "integrity": {
+   "gate": true,
+   "checks": [
+    "each union store matches its declared identity (support with K and tie-break, definitions, build)",
+    "DEPTH reads the ROOT store with retrieval; every decision score equals the recorded objective",
+    "the weighted FFN denominator equals the weight sum",
+    "the state evaluator forwards no teacher per evaluation"
+   ]
+  },
+  "row_equivalence": {
+   "gate": true,
+   "tolerances": {
+    "depth_max_relative": 1e-05,
+    "depth_same_choice": true,
+    "state_max_abs": 1e-05
+   },
+   "decides": "whether D2's search may run scored_v1"
+  },
+  "not_gated": [
+   "bsz=1 vs bsz=3 drift of the stores and metrics",
+   "union-vs-full approximation ratios and ranking stability",
+   "tie frequencies",
+   "the K+1 confidence's dynamic range"
+  ]
+ },
+ "hardware": {
+  "gpu": "1x NVIDIA L40S (48 GB)",
+  "rate_usd_per_hour_basis": 1.09,
+  "container_disk_gb": 60,
+  "peak_memory_estimate_bytes": 24064477080,
+  "_peak_is": "Stage V's measured V4 peak plus every union store and one block's transients"
+ },
+ "deliverables": [
+  "an adoption record with recomputed verdicts (arithmetic, integrity, row equivalence)",
+  "MEASURED union terms per DEPTH candidate and per state evaluation, replacing the provisional ones in d2_budget",
+  "the K+1 confidence's distribution on the real teacher",
+  "the union-vs-full ratios on real teacher logits"
+ ],
+ "does_not": [
+  "run a D2 search, recovery training or a behavioural probe",
+  "rebuild B",
+  "touch D1, D3 or their records",
+  "repeat Stage V's version-2 measurements"
+ ],
+ "prerequisites": [
+  "the driver stage implementing W1-W6 (as Stage V's d2_gpu_validation.py implements V1-V6), rehearsed at $0 on the CPU with a tiny model before any grant",
+  "maintainer approval of preregistration v3 and of this proposal's grant"
+ ],
+ "plan_hash": "3ae623c1ccd3633a04a6530e924ab7c6066c5905d951a12e94b96302d664c66e",
+ "status": "PROPOSAL -- registered, not granted, not run",
+ "totals": {
+  "expected": {
+   "minutes": 14.1,
+   "gpu_usd": 0.26,
+   "disk_usd": 0.0,
+   "all_in_usd": 0.26
+  },
+  "bound": {
+   "minutes": 46.3,
+   "gpu_usd": 0.84,
+   "disk_usd": 0.01,
+   "all_in_usd": 0.85
+  },
+  "teardown_reserve_usd": 0.3,
+  "proposed_session_cap_usd": 0.85,
+  "proposed_grant_usd": 1.15
+ },
+ "authorizes": "nothing"
+}

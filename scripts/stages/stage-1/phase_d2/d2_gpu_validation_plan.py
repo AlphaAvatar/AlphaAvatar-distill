@@ -111,7 +111,6 @@ def build() -> dict[str, Any]:
     from stages.d_series import d2_budget as BUD
     from stages.d_series import objectives as O
     from stages.phase_d2 import d2_gpu_validation as V
-    from stages.phase_d2 import d2_session as S
 
     L = _stage_l()
     budget = BUD.build()
@@ -199,8 +198,11 @@ def build() -> dict[str, Any]:
     step_bounds = {r["id"]: int(math.ceil(r["bound_minutes"] * 60))
                    for r in rows if r["id"] in V.STEP_ORDER}
     session_cap = math.ceil(cap["all_in_usd"] * 100) / 100
-    prereg = S.preregistration(REPO_ROOT)
-    contract = json.loads((REPO_ROOT / O.CONTRACT).read_text())
+    #: VERSION 2's identities, frozen: this plan registered, was granted for
+    #: and ran against them. The live contract and preregistration are
+    #: version 3's (revision 8) and must not move this record.
+    prereg = json.loads((REPO_ROOT / O.PREREGISTRATION_V2).read_text())
+    contract = {"contract_hash": O.REVISION_7_CONTRACT_HASH}
     return {
         "schema": SCHEMA,
         "validation_id": "d2_gpu_validation",
@@ -215,8 +217,8 @@ def build() -> dict[str, Any]:
             "search, no recovery training, no behavioural probe. AUTHORIZES "
             "NOTHING by itself: authorization.json does, and it does not exist "
             "until the maintainer grants."),
-        "objective": O.D2_OBJECTIVE.qualified_id,
-        "objective_hash": O.D2_OBJECTIVE.objective_hash,
+        "objective": O.D2_V2_OBJECTIVE.qualified_id,
+        "objective_hash": O.D2_V2_OBJECTIVE.objective_hash,
         "contract_hash": contract["contract_hash"],
         "preregistration_hash": prereg["preregistration_hash"],
         "formal_topology": {"micro_batch_size": 3,

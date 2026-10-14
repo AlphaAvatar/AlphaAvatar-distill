@@ -246,6 +246,10 @@ def calibration_evidence(repo_root: str | Path | None = None) -> dict[str, Any]:
 #: from it and nowhere else.
 D2_VALIDATION_CAMPAIGN = ("logs/stages/stage-1/families/d_series/validations/"
                           "d2-gpu-validation/v1/campaign.json")
+D2V3_VALIDATION_CAMPAIGN = ("logs/stages/stage-1/families/d_series/"
+                            "validations/d2v3-gpu-validation/v1/campaign.json")
+D2V3_VALIDATION_PLAN = ("logs/stages/stage-1/families/d_series/validations/"
+                        "d2v3-gpu-validation/v1/plan.json")
 D2_VALIDATION_PLAN = ("logs/stages/stage-1/families/d_series/validations/"
                       "d2-gpu-validation/v1/plan.json")
 
@@ -492,6 +496,181 @@ def teacher_confidence_overhead(evidence: dict[str, Any] | None,
     }
 
 
+#: D2 VERSION 3's ADDED WORK over version 2, every term PROVISIONAL until the
+#: version-3 GPU validation measures it. Not typed seconds: a stated
+#: bandwidth / FLOP model applied to MEASURED sizes -- Stage V's rows per
+#: DEPTH candidate, the frozen state suite's rows, the teacher's vocabulary
+#: and hidden size from its recorded spec -- so a reader can check every
+#: factor. Version 2's measured terms (Stage V, adopted) stay the base.
+TEACHER_SPEC_RECORD = "logs/shared/analyses/autoinit_v1_search_space.json"
+#: The positions D2 scores (its preregistration's; D1's treatment policy).
+D2_POSITION_POLICY = "positions.supervised_target_v1@v1"
+UNION_COST_MODEL = {
+    "effective_bytes_per_second": 432e9,
+    "_bandwidth_is": ("half the L40S's 864 GB/s nominal memory bandwidth: "
+                      "the reductions are bandwidth-bound and never reach "
+                      "the nominal figure"),
+    "full_row_passes": {"expected": 3.0, "bound": 9.0},
+    "_passes_are": ("extra float32-row-equivalent passes over each "
+                    "candidate row's vocabulary, beyond version 2's K+1 "
+                    "reduction: the 2K-candidate Top-K selection in the "
+                    "logits' own dtype, its ordering, the rare full-row tie "
+                    "spill and the second complement mask; the bound is 3x"),
+    "candidate_only_fraction_of_k": {"expected": 0.25, "bound": 1.0},
+    "_fraction_is": ("candidate-only entries per row, as a fraction of K, "
+                     "that the teacher retrieval reads: 0.23 measured at $0 "
+                     "on a stand-in checkpoint (mean union 246.9 at K=200); "
+                     "the bound gives no credit for overlap or for shared "
+                     "entries between rows"),
+    "retrieval_bytes_per_entry_per_hidden_unit": 10,
+    "_retrieval_bytes_are": ("a bf16 head row read (2) plus its float32 "
+                             "widening written and read (8), per hidden unit"),
+    "float32_flops_per_second": 40e12,
+    "_flops_are": ("under half the L40S's 91.6 TFLOPS float32 peak, for the "
+                   "union stores' float32 head GEMMs"),
+    "suite_store_forwards": {"expected": 1.0, "bound": 2.0},
+    "_suite_store_is": ("the state evaluator's teacher store, built once: "
+                        "one teacher pass over the suite, priced at that "
+                        "many state evaluations"),
+}
+
+
+def union_geometry(validation: dict[str, Any] | None,
+                   repo_root: str | Path | None = None) -> dict[str, Any]:
+    """The sizes version 3's added work scales with, all MEASURED or READ.
+
+    Rows per DEPTH candidate from Stage V's V5 round (forward rows, which an
+    all_v1 reduction covers, and the scored rows a scored_v1 one covers);
+    the state suite's prediction rows from the frozen asset; the teacher's
+    vocabulary and hidden size from its recorded spec; K from the support.
+    """
+    from aadistill.initialization.scoring.positions import get_position_policy
+    from stages.d_series import scoring_protocol as SP
+    from stages.phase_d1 import d1_session as D1S
+
+    root = Path(repo_root) if repo_root is not None else REPO_ROOT
+    teacher = json.loads((root / TEACHER_SPEC_RECORD).read_text())[
+        "teacher"]["spec"]
+    out: dict[str, Any] = {"vocab_size": int(teacher["vocab_size"]),
+                           "hidden_size": int(teacher["hidden_size"]),
+                           "top_k": int(SP.D2_V3_SUPPORT.top_k),
+                           "teacher_spec": TEACHER_SPEC_RECORD}
+    if validation:
+        t = validation["record"]["V5_depth_scored_rows"]["timing"]
+        cands = max(1, int(t["candidate_subsets"]))
+        out["depth_rows_per_candidate"] = {
+            "all_v1": round(int(t["forward_rows"]) / cands, 1),
+            "scored_v1": round(int(t["scored_rows"]) / cands, 1),
+            "source": f"{validation['evidence_session']} V5"}
+        stores = validation["record"]["V1_root_stores_and_validity"][
+            "profiles"]
+        out["store_rows"] = {k: int(v["decision"]["positions"])
+                             for k, v in sorted(stores.items())}
+    _, items, _ = D1S.load_state_eval_suite(root)
+    policy = get_position_policy(D2_POSITION_POLICY)
+    out["state_suite_rows"] = sum(int(i.input_ids.shape[1]) - 1
+                                  for i in items)
+    out["state_suite_scored_rows"] = sum(
+        int((policy.weights(i, axis="prediction").weights > 0).sum())
+        for i in items)
+    return out
+
+
+def union_kl_overhead(evidence: dict[str, Any] | None,
+                      basis: dict[str, Any],
+                      validation: Any = None,
+                      rows_mode: str = "all_v1") -> dict[str, Any]:
+    """D2 VERSION 3's added seconds: version 2's (MEASURED by the adopted
+    Stage V) plus the union work (PROVISIONAL, :data:`UNION_COST_MODEL` on
+    :func:`union_geometry`). Same shape as the other overhead functions, so
+    `priced_from_records` prices it with no second formula.
+
+    Credits nothing for what version 3 REMOVES -- the state evaluator no
+    longer forwards the teacher per evaluation -- so the bound stays a bound.
+    ``rows_mode="scored_v1"`` prices the union terms over the scored rows
+    only: a LEVER, valid once version 3's own scored_v1 equivalence passes on
+    a GPU, never the price in force before that.
+    """
+    if validation is None:
+        validation = adopted_validation()
+    base = teacher_confidence_overhead(evidence, basis,
+                                       validation=validation or False)
+    geo = union_geometry(validation or None)
+    m = UNION_COST_MODEL
+    bw = float(m["effective_bytes_per_second"])
+    v, h, k = geo["vocab_size"], geo["hidden_size"], geo["top_k"]
+
+    def per_row(which: str) -> float:
+        return (v * 4 * m["full_row_passes"][which]
+                + k * m["candidate_only_fraction_of_k"][which] * h
+                * m["retrieval_bytes_per_entry_per_hidden_unit"]) / bw
+
+    rows = (geo.get("depth_rows_per_candidate") or {}).get(rows_mode)
+    if rows is None:
+        #: The rows a DEPTH candidate reduces over are MEASURED by Stage V;
+        #: a price on an invented row count would not be a price.
+        raise RuntimeError("version 3's union terms scale with Stage V's "
+                           "measured rows per DEPTH candidate, and no adopted "
+                           "Stage V evidence exists")
+    suite = float(geo["state_suite_rows"] if rows_mode == "all_v1"
+                  else geo["state_suite_scored_rows"])
+    stores = geo.get("store_rows") or {}
+    gemm_s = (sum(stores.values()) + suite) * v * h * 2 / float(
+        m["float32_flops_per_second"])
+    se_mean = basis["state_evaluation"]["seconds_mean"]
+    se_max = basis["state_evaluation"]["seconds_max"]
+    added = {
+        "depth_seconds_per_candidate": {
+            "expected": round(rows * per_row("expected"), 4),
+            "bound": round(rows * per_row("bound"), 4)},
+        "state_eval_seconds_per_evaluation": {
+            "expected": round(suite * per_row("expected"), 4),
+            "bound": round(suite * per_row("bound"), 4)},
+        "one_time_minutes": {
+            "expected": round((m["suite_store_forwards"]["expected"] * se_mean
+                               + gemm_s) / 60, 2),
+            "bound": round((m["suite_store_forwards"]["bound"] * se_max
+                            + 3 * gemm_s) / 60, 2)},
+    }
+    out = {k2: (dict(v2) if isinstance(v2, dict) else v2)
+           for k2, v2 in base.items()}
+    for key, extra in added.items():
+        out[key] = {**out.get(key, {}),
+                    "expected": round(float(out.get(key, {}).get(
+                        "expected", 0.0)) + extra["expected"], 4),
+                    "bound": round(float(out.get(key, {}).get("bound", 0.0))
+                                   + extra["bound"], 4)}
+    out["source"] = (f"version 2's terms: {base['source']}; PLUS version 3's "
+                     "union terms, PROVISIONAL (UNION_COST_MODEL on measured "
+                     "sizes) until the version-3 GPU validation")
+    out["union_terms"] = {"added": added, "geometry": geo,
+                          "model": {k2: v2 for k2, v2 in m.items()
+                                    if not k2.startswith("_")},
+                          "status": "PROVISIONAL -- not measured"}
+    return out
+
+
+def union_memory(geo: dict[str, Any]) -> dict[str, Any]:
+    """Device bytes version 3 adds, from the same sizes: the union stores
+    (sketch + bf16 hidden states + float32 log-normalizers) and the
+    reducer's per-block transients. Reported, not priced."""
+    k, h, v = geo["top_k"], geo["hidden_size"], geo["vocab_size"]
+    per_row = k * 12 + 20 + h * 2 + 4
+    stores = {name: rows * per_row
+              for name, rows in (geo.get("store_rows") or {}).items()}
+    stores["state_suite"] = geo["state_suite_rows"] * per_row
+    chunk = 512
+    return {"store_bytes": stores,
+            "store_bytes_total": sum(stores.values()),
+            "transient_bytes_per_block": {
+                "candidate_float32_copy": chunk * v * 4,
+                "topk_2k_candidates": chunk * 2 * k * 12,
+                "retrieval_widened_head_rows_max": (1 << 26) * 4},
+            "_basis": ("per row: K x (8 B index + 4 B log-prob) + 5 float32 "
+                       "per-position values + H bf16 hidden + 1 float32 "
+                       "log-normalizer; blocks of 512 candidate rows")}
+
+
 def priced_from_records(rate: float, disk_gb: int,
                         evidence: dict[str, Any] | None = None,
                         depth_cell: str = "records_max",
@@ -677,9 +856,20 @@ def build(k_candidates: int = 4) -> dict[str, Any]:
     #: D2 search: priced from D1's own search records (see priced_from_records).
     disk_search = int(search["container_disk_gb"])
     evidence = calibration_evidence()
-    records = priced_from_records(rate, disk_search, evidence)
+    #: D2 VERSION 3: version 2's measured terms plus the union terms.
+    records = priced_from_records(rate, disk_search, evidence,
+                                  overhead=union_kl_overhead)
     cached = priced_from_records(rate, disk_search, evidence,
-                                 depth_cell="cached_validated")
+                                 depth_cell="cached_validated",
+                                 overhead=union_kl_overhead)
+    #: The scored_v1 LEVER: union terms over the scored rows only.
+    import functools
+    cached_scored = priced_from_records(
+        rate, disk_search, evidence, depth_cell="cached_validated",
+        overhead=functools.partial(union_kl_overhead, rows_mode="scored_v1"))
+    #: Version 2's price, for the record only: superseded before its search.
+    v2_cached = priced_from_records(rate, disk_search, evidence,
+                                    depth_cell="cached_validated")
     #: THE PRICE IN FORCE follows the verified evidence and nothing else.
     in_force = ("cache_fix_validated" if evidence["cache_fix_validated"]
                 else "records_max")
@@ -703,9 +893,28 @@ def build(k_candidates: int = 4) -> dict[str, Any]:
             "source": (f"{D1_SEARCH_RUN}/closeout/outcome.json: 92/92 "
                        "expansions, same space, support, beam and L40S"),
             "components": rec["basis"]},
+        "objective": "D2 version 3 (objective.d2_teacher_topk_confidence_"
+                     "weighted_union_kl@v1, union support)",
         "objective_overhead": rec["objective_overhead"],
         "expected": _usd(search_exp_min, rate, disk_search),
         "hard": _usd(search_hard_min, rate, disk_search),
+        "hard_fits_per_session_cap": _usd(search_hard_min, rate,
+                                          disk_search)["all_in_usd"] <= 30.0,
+        "hard_if_scored_v1_validated": {
+            **_usd(cached_scored["priced"]["hard_ceiling_minutes"], rate,
+                   disk_search),
+            "_is": ("a LEVER, not the price in force: the union terms over "
+                    "the scored rows only, valid once version 3's own "
+                    "scored_v1 equivalence passes on a GPU")},
+        "memory": union_memory(rec["objective_overhead"]["union_terms"][
+            "geometry"]),
+        "d2_v2_search_superseded": {
+            "expected": _usd(v2_cached["expected_minutes"], rate, disk_search),
+            "hard": _usd(v2_cached["priced"]["hard_ceiling_minutes"], rate,
+                         disk_search),
+            "_is": ("version 2's price at the cached DEPTH cell, for "
+                    "comparison only: version 2 was superseded before its "
+                    "search")},
         "depth_cell_minutes": rec["depth_cell_minutes"],
         "priced_by": rec["priced"],
         "pricing_in_force": in_force,
@@ -743,16 +952,16 @@ def build(k_candidates: int = 4) -> dict[str, Any]:
                     "the objective's overhead to the two paths it touches "
                     "instead of x1.10 on every structural minute")},
         "assumptions_not_measured": [
-            ("EVERY added term of the redesigned D2 (contract revision 6): "
-             "c_T x KL in DEPTH and state evaluation at +5% (expected) / +10% "
-             "(bound) of D1's paths; the round-0 parent-KL diagnostic at "
-             f"{PARENT_KL_DIAGNOSTIC_FRACTION} of D1's per-candidate reduction; "
-             "the weighted statistics at +5% / +10% of the FFN/WIDTH/ATTENTION "
-             "cells; the root stores at "
-             f"{ROOT_STORE_CANDIDATE_EQUIVALENTS} DEPTH-candidate evaluations "
-             "per profile. Stage L's objective timing measured the SUPERSEDED "
-             "objective and is not used here; the D2 GPU validation measures "
-             "these before the search is priced from them"),
+            ("version 3's UNION terms -- the candidate's deterministic Top-K, "
+             "the union reduction and the teacher retrieval per DEPTH "
+             "candidate and per state evaluation, and the union stores -- by "
+             "UNION_COST_MODEL on measured sizes, a 3x bound on the passes "
+             "and no credit for overlapping or shared candidate entries. "
+             "Version 2's terms (c_T x KL, the round-0 parent-KL diagnostic, "
+             "the weighted statistics, the store builds) are Stage V's "
+             "MEASUREMENTS with the one-measurement margin. The version-3 "
+             "GPU validation measures the union terms before the search is "
+             "priced from them"),
             "D2's trajectory has D1's size (92 expansions, 16 DEPTH): the "
             "beam schedule fixes the expansion count, not the operator mix",
             ("the reference cache fix (validated by stage L for D1's parent "
@@ -772,10 +981,10 @@ def build(k_candidates: int = 4) -> dict[str, Any]:
                           "driver's soft stop fails the search closed before "
                           "it, so spend stops at the cap whatever the runtime"),
             "proposal": "the planning bound, rounded up"},
-        "_basis": ("expected = D1's measured 551.99 min + the redesigned "
-                   "objective's expected added minutes over D1's trajectory; "
-                   "bound = D1's search_cost on the records-rebuilt cost "
-                   "model plus the one-time root stores"),
+        "_basis": ("expected = D1's measured 551.99 min + version 3's "
+                   "expected added minutes over D1's trajectory; bound = "
+                   "D1's search_cost on the records-rebuilt cost model plus "
+                   "the one-time stores"),
         "d3_search_for_programme_view": {
             "expected": _usd(d3_rec["expected_minutes"], rate, disk_search),
             "hard": _usd(d3_rec["priced"]["hard_ceiling_minutes"], rate,
@@ -937,9 +1146,14 @@ def programme_scenarios(limits: dict[str, float],
     #: THE REDESIGNED D2's GPU VALIDATION, a PROPOSAL until granted: its
     #: proposed grant is held as outstanding engineering, so no scenario
     #: spends money the validation needs. Read from its plan record.
-    plan_path = REPO_ROOT / D2_VALIDATION_PLAN
-    camp_path = REPO_ROOT / D2_VALIDATION_CAMPAIGN
-    if plan_path.is_file():
+    #: Version 2's (CLOSED) and version 3's (a PROPOSAL) GPU validations.
+    for name, plan_rel, camp_rel in (
+            ("d2_gpu_validation", D2_VALIDATION_PLAN, D2_VALIDATION_CAMPAIGN),
+            ("d2v3_gpu_validation", D2V3_VALIDATION_PLAN,
+             D2V3_VALIDATION_CAMPAIGN)):
+        plan_path, camp_path = REPO_ROOT / plan_rel, REPO_ROOT / camp_rel
+        if not plan_path.is_file():
+            continue
         plan = json.loads(plan_path.read_text())
         grant = float(plan["totals"]["proposed_grant_usd"])
         camp = (json.loads(camp_path.read_text()) if camp_path.is_file()
@@ -949,14 +1163,13 @@ def programme_scenarios(limits: dict[str, float],
         #: Once CLOSED its cost is inside the live limits, like R0's and the
         #: reference calibration's; until then the unspent grant is held.
         closed = str(camp.get("status", "")).startswith("COMPLETE and CLOSED")
-        eng["d2_gpu_validation"] = grant
-        outstanding["d2_gpu_validation"] = (0.0 if closed
-                                            else round(grant - booked, 4))
-        eng_state["d2_gpu_validation"] = {
+        eng[name] = grant
+        outstanding[name] = 0.0 if closed else round(grant - booked, 4)
+        eng_state[name] = {
             "grant_usd": grant, "booked_usd": booked, "closed": closed,
-            "outstanding_usd": outstanding["d2_gpu_validation"],
+            "outstanding_usd": outstanding[name],
             "status": camp.get("status") or plan["status"],
-            "owner": D2_VALIDATION_CAMPAIGN}
+            "owner": camp_rel if camp else plan_rel}
         if not closed:
             eng_exp += float(plan["totals"]["expected"]["all_in_usd"])
     engineering = {"expected": round(eng_exp, 2),
@@ -1066,9 +1279,10 @@ def programme_scenarios(limits: dict[str, float],
         "limits_owner": ("scripts/maintenance/consolidation/derive_budget.py "
                          "(the one budget authority)"),
         "engineering_grants": eng,
-        "_engineering_grants_are": ("R0 and the reference calibration "
-                                    "(granted, closed) and the D2 GPU "
-                                    "validation (PROPOSED, held)"),
+        "_engineering_grants_are": ("R0, the reference calibration and "
+                                    "version 2's D2 GPU validation (granted, "
+                                    "closed) and version 3's (PROPOSED, "
+                                    "held)"),
         "engineering_fits_allowance": (engineering["hard_with_reserves"]
                                        <= limits["engineering_remaining_usd"]),
         "engineering": engineering,
@@ -1090,12 +1304,16 @@ def programme_scenarios(limits: dict[str, float],
                 "how": ("the reference calibration's stage L DEPTH pair, "
                         "already in its plan, at no extra session")},
             "measure_the_objective_overhead": (
-                "the D2 GPU validation (a proposal) replaces every "
-                "provisional term of the redesigned D2's price -- the "
-                "+5%/+10% on DEPTH, state evaluation and the statistics "
-                "operators, the round-0 parent-KL diagnostic and the root "
-                "stores -- with measurements; stage L's timing priced the "
-                "superseded objective and now prices D3 only"),
+                "the version-3 GPU validation (a proposal) replaces the "
+                "provisional UNION terms of D2's price -- per DEPTH "
+                "candidate, per state evaluation and the union stores -- "
+                "with measurements; version 2's terms are already Stage V's "
+                "measurements, and stage L's timing prices D3 only"),
+            "scored_v1_for_version_3": {
+                "hard_usd": search["hard_if_scored_v1_validated"][
+                    "all_in_usd"],
+                "how": ("version 3's own scored_v1 equivalence, a step of "
+                        "its GPU validation")},
             "d3_at_k2": {"saves_hard_usd": round(k4 - k2, 2),
                          "cost": "narrower structural coverage for D3"},
             "scored_v1_after_r0": ("about 8% of DEPTH time if R0 passes; "

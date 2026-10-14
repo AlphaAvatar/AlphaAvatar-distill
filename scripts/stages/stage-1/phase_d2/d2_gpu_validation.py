@@ -635,12 +635,16 @@ def premises(repo: Path) -> dict[str, Any]:
     from stages.phase_c2 import baseline as BL
     from stages.phase_d1 import d1_session as D1S
     from stages.phase_d1.topk_adoption_driver import TEACHER_BINDING
-    from stages.phase_d2 import d2_session as S
 
     contract = json.loads((repo / O.CONTRACT).read_text())
-    if contract["d2"]["objective_hash"] != O.D2_OBJECTIVE.objective_hash:
-        raise D2ValidationError("the committed contract's D2 is not the "
-                                "objective this code declares")
+    #: Stage V validated D2 VERSION 2. The committed contract carries it as
+    #: its D2 (revision 7, when this ran) or as the superseded version 2
+    #: (revision 8 on): either way the same hash.
+    carried = {(contract.get(k) or {}).get("objective_hash")
+               for k in ("d2", "d2_v2_superseded")}
+    if O.D2_V2_OBJECTIVE.objective_hash not in carried:
+        raise D2ValidationError("the committed contract does not carry the "
+                                "objective this validation validated")
     plan = json.loads((repo / PLAN).read_text())
     for key, mine in (("arithmetic", ARITHMETIC_TOLERANCES),
                       ("row_equivalence", ROW_EQUIVALENCE_TOLERANCES),
@@ -650,19 +654,20 @@ def premises(repo: Path) -> dict[str, Any]:
                 f"the plan registers {key} tolerances "
                 f"{plan['acceptance'][key]['tolerances']} and the code applies "
                 f"{mine}; the registered ones are the ones that count")
-    if plan["objective_hash"] != O.D2_OBJECTIVE.objective_hash:
+    if plan["objective_hash"] != O.D2_V2_OBJECTIVE.objective_hash:
         raise D2ValidationError("the plan validates another objective")
     D1S._register_frozen_operators()
     spec = BL.frozen_baseline_spec(device="cuda")
     construction = BL.assert_frozen_construction(spec)
     inc = INC.standing_incumbent(repo)
-    prereg = S.preregistration(repo)
     binding = json.loads((repo / TEACHER_BINDING).read_text())
-    return {"objective_hash": O.D2_OBJECTIVE.objective_hash,
-            "objective": O.D2_OBJECTIVE.qualified_id,
+    return {"objective_hash": O.D2_V2_OBJECTIVE.objective_hash,
+            "objective": O.D2_V2_OBJECTIVE.qualified_id,
             "contract_revision": contract["revision"],
-            "contract_hash": contract["contract_hash"],
-            "preregistration_hash": prereg["preregistration_hash"],
+            #: THE PLAN'S identities: what this validation was registered,
+            #: granted and run against -- not whatever the tree says today.
+            "contract_hash": plan["contract_hash"],
+            "preregistration_hash": plan["preregistration_hash"],
             "plan_sha256": _sha256(repo / PLAN),
             "incumbent": {k: inc[k] for k in INC.IDENTITY_FIELDS},
             "b_spec_hash": spec.spec_hash, "construction": construction,
@@ -674,16 +679,22 @@ def premises(repo: Path) -> dict[str, Any]:
 
 def expected_identities(repo: Path) -> dict[str, str]:
     """The identities a booked session must carry to count as THIS
-    validation: the objective, and the contract, preregistration and plan
-    records as committed in `repo`."""
-    from stages.d_series import objectives as O
-    from stages.phase_d2 import d2_session as S
+    validation: the objective it validated (D2 version 2) and the contract
+    and preregistration hashes its PLAN registered, with the plan itself
+    bound by its sha256.
 
-    return {"objective_hash": O.D2_OBJECTIVE.objective_hash,
-            "contract_hash": json.loads((repo / O.CONTRACT).read_text())[
-                "contract_hash"],
-            "preregistration_hash": S.preregistration(repo)[
-                "preregistration_hash"],
+    From the plan, not from the live records: the contract and the D2
+    preregistration have since moved to version 3 (revision 8), and this
+    evidence is about version 2 -- which is exactly what keeps it
+    adoptable as version 2's evidence and unusable as anything else's."""
+    from stages.d_series import objectives as O
+
+    plan = json.loads((repo / PLAN).read_text())
+    if plan["objective_hash"] != O.D2_V2_OBJECTIVE.objective_hash:
+        raise D2ValidationError("the plan validates another objective")
+    return {"objective_hash": O.D2_V2_OBJECTIVE.objective_hash,
+            "contract_hash": plan["contract_hash"],
+            "preregistration_hash": plan["preregistration_hash"],
             "plan_sha256": _sha256(repo / PLAN)}
 
 
@@ -1081,7 +1092,7 @@ def stage_V(*, env: Environment, journal, out: Path, deadline=None,
                              i, axis=PREDICTION_AXIS).weights > 0}
                         for i in items]
             out_["profiles"][pid] = {
-                "reduction_arithmetic": reduction_arithmetic(O.D2_OBJECTIVE,
+                "reduction_arithmetic": reduction_arithmetic(O.D2_V2_OBJECTIVE,
                                                              per_item),
                 "validity_with_b_kl": TC.validity_report(
                     store, items, policy=env.policy, kl=kl,
@@ -1096,10 +1107,10 @@ def stage_V(*, env: Environment, journal, out: Path, deadline=None,
         values = {}
         for label, objective, rows, batch in (
                 ("kl_only", None, "all_v1", env.micro_batch_size),
-                ("d2", O.D2_OBJECTIVE, "all_v1", env.micro_batch_size),
-                ("d2_scored_v1", O.D2_OBJECTIVE, "scored_v1",
+                ("d2", O.D2_V2_OBJECTIVE, "all_v1", env.micro_batch_size),
+                ("d2_scored_v1", O.D2_V2_OBJECTIVE, "scored_v1",
                  env.micro_batch_size),
-                ("d2_bsz1", O.D2_OBJECTIVE, "all_v1", 1)):
+                ("d2_bsz1", O.D2_V2_OBJECTIVE, "all_v1", 1)):
             arms[label], values[label] = _state_evaluation(
                 env, teacher, keep["b_model"], suite, items, content,
                 objective=objective, rows=rows, batch=batch)
@@ -1138,7 +1149,7 @@ def stage_V(*, env: Environment, journal, out: Path, deadline=None,
             #: ONE OPERATOR'S FAILURE IS RECORDED AGAINST THAT OPERATOR and the
             #: others still run; the verdict then refuses a PASS.
             try:
-                for label, objective in (("full_scope", O.D2_OBJECTIVE),
+                for label, objective in (("full_scope", O.D2_V2_OBJECTIVE),
                                          ("narrow_scope",
                                           O.D2_NARROW_SCOPE_COMPARISON)):
                     ctx = _context(env, impl, teacher, profile, items,
@@ -1157,7 +1168,7 @@ def stage_V(*, env: Environment, journal, out: Path, deadline=None,
                         "integrity": statistics_integrity(
                             impl, label, outcome, ctx, target=env.target_spec,
                             store_identity_hash=store.identity_hash,
-                            objective_hash=O.D2_OBJECTIVE.objective_hash)}
+                            objective_hash=O.D2_V2_OBJECTIVE.objective_hash)}
                     children[label] = outcome
                 artifact = artifacts[impl_id]
                 if artifact:
@@ -1200,7 +1211,7 @@ def stage_V(*, env: Environment, journal, out: Path, deadline=None,
         spec = env.adapter.spec_of(parent)
         target = spec.replace(**{DEPTH_FIELD: int(spec[DEPTH_FIELD]) - 1})
         impl = get_implementation("depth.causal_kl_greedy_v1")
-        ctx = _context(env, impl, parent, profile, items, O.D2_OBJECTIVE,
+        ctx = _context(env, impl, parent, profile, items, O.D2_V2_OBJECTIVE,
                        store, rows, work / f"v4-depth-{rows}", target)
         hoarded = _hoard_allocator() if env.cuda else 0
         outcome, timing = _timed_execute(env, impl, ctx)

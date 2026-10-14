@@ -1,17 +1,20 @@
-"""The D2 formal search session: D1's search with TWO declared changes.
+"""The D2 formal search session: D1's search with THREE declared changes.
 
-D2 (preregistration v2, contract revision 6) minimizes the frozen teacher's
-full-vocabulary-confidence-weighted KL against the ROOT reference: DEPTH's
-reference moves from the parent to the root, and the teacher's confidence
-weights the KL and -- full scope -- the FFN/WIDTH/ATTENTION activation
-statistics. Every other term -- the frozen operators, the calibration
-profiles, the beam, the seed, the support, the position policy, the batch and
-the suite -- is D1's, and this module reuses D1's helpers for them rather
-than re-declaring them. What it owns:
+D2 VERSION 3 (preregistration v3, contract revision 8) minimizes the frozen
+teacher's Top-200 + tail confidence times the union Top-K KL against the ROOT
+reference: DEPTH's reference moves from the parent to the root, the KL
+support from the teacher's Top-200 + tail to the teacher's Top-200 united
+with the candidate's own Top-200 + tail, and the teacher's confidence weights
+the KL and -- full scope -- the FFN/WIDTH/ATTENTION activation statistics.
+Every other term -- the frozen operators, the calibration profiles, the beam,
+the seed, the position policy, the batch and the suite -- is D1's, and this
+module reuses D1's helpers for them rather than re-declaring them. What it
+owns:
 
-* the objective, handed to the search config AND the state evaluator, and the
-  ranking policy that ranks on it (`OBJECTIVE_PARETO_V1`) -- the core refuses
-  any disagreement among the three; the search builds the root reference
+* the objective and its support, handed to the search config AND the state
+  evaluator, and the ranking policy that ranks on it
+  (`OBJECTIVE_PARETO_V1`, under D2's versioned ranking identity) -- the core
+  refuses any disagreement among them; the search builds the root reference
   stores itself, from the teacher it is given;
 * the preregistration as the design every check reads, so the session is
   checked against the frozen record rather than against this module;
@@ -32,7 +35,7 @@ REPO = Path(__file__).resolve().parents[4]
 
 EXPERIMENT_ID = "phase_d2"
 STAGE_ID = "1"
-PREREGISTRATION = "logs/stages/stage-1/phase_d2/plans/d2_preregistration_v2.json"
+PREREGISTRATION = "logs/stages/stage-1/phase_d2/plans/d2_preregistration_v3.json"
 POD_WORKSPACE = "/workspace"
 STATUS_PATH = f"{POD_WORKSPACE}/autoinit_d2.status"
 DRIVER_JOB_ID = "autoinit_d2"
@@ -62,6 +65,13 @@ def objective():
     from stages.d_series import objectives as O
 
     return O.D2_OBJECTIVE
+
+
+def support():
+    """D2's KL support (version 3: the union support). D1 and D3 keep theirs."""
+    from stages.d_series import objectives as O
+
+    return O.D2_SUPPORT
 
 
 def ranking_policy():
@@ -113,6 +123,7 @@ class D2Session:
 
     def as_record(self) -> dict[str, Any]:
         from aadistill.initialization.scoring.positions import policy_config
+        from stages.d_series import objectives as O
         from stages.phase_d1 import d1_session as D1S
 
         cfg = self.config
@@ -129,6 +140,8 @@ class D2Session:
             "kl_reference": cfg.scoring_objective.kl_reference,
             "ranking_policy": {"id": cfg.policy.qualified_id,
                                "hash": cfg.policy.policy_hash},
+            "ranking_identity": O.ranking_identity(
+                cfg.scoring_objective, cfg.distribution_support),
             "position_policy": policy_config(cfg.position_policy),
             "distribution_support": cfg.distribution_support.as_dict(),
             "execution": {
@@ -167,7 +180,6 @@ def build_session(*, workdir: Path, run_id: str, device: str = "cuda",
     from aadistill.initialization.planning.search import SearchConfig
     from aadistill.initialization.specs.metrics import ReferenceStrategy
     from shared.calibration import register_builtin_profiles
-    from stages.d_series import scoring_protocol as SP
     from stages.phase_a3 import a3_session as A3S
     from stages.phase_d1 import d1_session as D1S
 
@@ -182,7 +194,7 @@ def build_session(*, workdir: Path, run_id: str, device: str = "cuda",
         suite, items, device=device,
         vocab_size=D1S.teacher_vocab_size(repo_root),
         suite_content_sha256=content, position_policy=policy,
-        distribution_support=SP.D_SERIES_SUPPORT, execution=exec_cfg,
+        distribution_support=support(), execution=exec_cfg,
         numerics=D1S.numerics(),
         #: RECOMPUTE, as every D-series search records: the O(T*K) sketch
         #: cache inside it is the Top-K saving, not this strategy.
@@ -194,7 +206,7 @@ def build_session(*, workdir: Path, run_id: str, device: str = "cuda",
         seed=spec.seed, workdir=Path(workdir),
         profiles=tuple(get_profile(p) for p in sorted(doc["search"]["profiles"])),
         policy=ranking_policy(), suite=suite, position_policy=policy,
-        distribution_support=SP.D_SERIES_SUPPORT,
+        distribution_support=support(),
         measurement_protocol_id=evaluator.measurement_protocol_id,
         allowed_impls=tuple(sorted(doc["search"]["frozen_implementations"]
                                    .values())),
@@ -208,28 +220,35 @@ def build_session(*, workdir: Path, run_id: str, device: str = "cuda",
 def assert_session_contract(session: D2Session,
                             repo_root: str | Path = REPO) -> dict[str, Any]:
     """Check a built session against the PREREGISTRATION. Raises, never warns."""
-    from stages.d_series import scoring_protocol as SP
+    from stages.d_series import objectives as O
     from stages.phase_d1 import search_space as d1
 
     doc = preregistration(repo_root)
     cfg, ev = session.config, session.evaluator
-    obj, pol = objective(), ranking_policy()
+    obj, pol, sup = objective(), ranking_policy(), support()
     problems: list[str] = []
 
     def check(ok: bool, message: str) -> None:
         if not ok:
             problems.append(message)
 
-    check(doc.get("version") == 2 and not str(doc.get("status", ""))
+    check(doc.get("version") == 3 and not str(doc.get("status", ""))
           .startswith("SUPERSEDED"),
-          "the preregistration is not the live v2 (v1 is SUPERSEDED -- NEVER "
-          "EXECUTED)")
-    check(obj.objective_hash != doc.get("supersedes", {}).get("objective_hash"),
-          "the session carries the SUPERSEDED student-uncertainty objective")
-    check(bool(obj.requires_root_reference)
+          "the preregistration is not the live v3 (v1 is SUPERSEDED -- NEVER "
+          "EXECUTED; v2 SUPERSEDED BEFORE FORMAL SEARCH)")
+    superseded = {s.get("objective_hash")
+                  for s in doc.get("supersedes", {}).values()
+                  if isinstance(s, dict)}
+    check(obj.objective_hash not in superseded,
+          "the session carries a SUPERSEDED D2 objective")
+    check(bool(obj.requires_root_reference) and bool(obj.uses_union_support)
           and (obj.weights_activation_statistics
                == (doc.get("scope_decision", {}).get("frozen") == "full")),
-          "the objective's KL reference or statistics scope is not the "
+          "the objective's KL reference, union support or statistics scope "
+          "is not the preregistered one")
+    check(doc["search"]["ranking_identity"]["ranking_identity_hash"]
+          == O.ranking_identity(obj, sup)["ranking_identity_hash"],
+          "the ranking identity (policy, objective, support) is not the "
           "preregistered one")
 
     check(bool(cfg.measurement_protocol_id),
@@ -239,11 +258,10 @@ def assert_session_contract(session: D2Session,
     check(getattr(ev, "suite_content_sha256", None) == session.suite_content_sha256
           and session.suite_content_sha256 not in (None, "", "unbound"),
           "the frozen suite's content hash is not bound into the evaluator")
-    for who, support in (("search", cfg.distribution_support),
-                         ("evaluator", ev.distribution_support)):
-        check(support.as_dict() == SP.D_SERIES_SUPPORT.as_dict()
-              == doc["search"]["support"],
-              f"the {who} reduces over {support}, not the preregistered support")
+    for who, used in (("search", cfg.distribution_support),
+                      ("evaluator", ev.distribution_support)):
+        check(used.as_dict() == sup.as_dict() == doc["search"]["support"],
+              f"the {who} reduces over {used}, not the preregistered support")
     want = position_policy()
     check(want.qualified_id == doc["search"]["position_policy"],
           "the session's position policy is not the preregistered one")
@@ -289,12 +307,12 @@ def assert_session_contract(session: D2Session,
     return {
         "checked": [
             "protocol id declared and equal to the evaluator's",
-            "suite content hash bound", "D-series support on both",
+            "suite content hash bound", "D2's union support on both",
             "supervised-target policy on both",
             "the D2 objective on both, equal to the preregistered hash",
-            "the live v2 preregistration, not the superseded objective",
-            "root KL reference and the frozen statistics scope",
-            "objective ranking policy, preregistered hash",
+            "the live v3 preregistration, no superseded objective",
+            "root KL reference, union support and the frozen statistics scope",
+            "objective ranking policy and the versioned ranking identity",
             "micro-batch, packing and row selection", "beam and seed",
             "D1's frozen operators and profiles", "preregistration revision"],
         "preregistration_hash": session.preregistration_hash,

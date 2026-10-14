@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.d_series.objective_contract/v1",
- "decided_by": "maintainer decisions 2026-10-13 (D3) and 2026-10-14 (D2 scientific redesign), logs/budget/decisions.md",
- "supersedes": "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md, sections 'D2 -- target-aware + reference-confidence weighting' and 'D3 -- target-aware + KL + pure student confidence'. Kept verbatim there as history, with a pointer here. Revision 6 also supersedes this contract's own revision-1..5 D2 (d2_superseded).",
+ "decided_by": "maintainer decisions 2026-10-13 (D3), 2026-10-14 (D2 scientific redesign, version 2) and 2026-10-14 (D2 version 3), logs/budget/decisions.md",
+ "supersedes": "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md, sections 'D2 -- target-aware + reference-confidence weighting' and 'D3 -- target-aware + KL + pure student confidence'. Kept verbatim there as history, with a pointer here. Revision 6 also supersedes this contract's own revision-1..5 D2 (d2_superseded); revision 8 supersedes revisions 6-7's D2 version 2 before any formal search (d2_v2_superseded).",
  "shared_with_d1": {
   "positions": "positions.supervised_target_v1@v1",
   "calibration_profiles": [
@@ -12,6 +12,7 @@
    "support_id": "reference_topk_tail_v1",
    "top_k": 200
   },
+  "kl_support_applies_to": "D1 and D3. D2 version 3 declares the union support instead (d2.distribution_support), a declared change",
   "geometry_operators_beam": "D1's, unchanged",
   "recovery_recipe": "e1_p1_kd_heavy@0.86M",
   "behavioural_protocol": "d_series_shared_eval@v1, unchanged by this contract"
@@ -32,12 +33,16 @@
    "motivation",
    "hypothesis",
    "declared_changes",
+   "distribution_support",
+   "teacher_confidence",
+   "revision_kind",
    "scope",
    "where_it_applies",
    "diagnostics_recorded",
    "degeneracy_watch",
    "claim_boundary",
-   "validity_checks_before_search"
+   "validity_checks_before_search",
+   "ranking_identity"
   ],
   "d3": [
    "objective_template",
@@ -65,57 +70,125 @@
    "calibration_this_round"
   ],
   "confidence_signals": {
-   "d2": "the FROZEN ORIGINAL TEACHER's full-vocabulary confidence, a weight on the root-reference KL",
+   "d2": "the FROZEN ORIGINAL TEACHER's Top-200 + tail confidence, a weight on the root-reference union Top-K KL",
    "d3": "the candidate STUDENT's own Top-200 confidence, a reward beside the parent-reference KL"
   }
  },
  "d2": {
   "objective": {
    "schema": "aadistill.scoring_objective/v1",
-   "objective_id": "objective.d2_teacher_confidence_weighted_kl",
+   "objective_id": "objective.d2_teacher_topk_confidence_weighted_union_kl",
    "version": 1,
-   "form": "reference_confidence_weighted_kl",
-   "confidence_source": "reference_full_vocabulary_shannon_entropy/v1",
-   "confidence_mapping": "one_minus_entropy_over_log_vocabulary/v1",
+   "form": "reference_topk_confidence_weighted_union_kl",
+   "confidence_source": "reference_topk_plus_tail_absolute_shannon_entropy/v1",
+   "confidence_top_k": 200,
+   "confidence_categories": "top_k entries + 1 tail bucket when top_k < |V|",
+   "confidence_mapping": "one_minus_entropy_over_log_categories/v1",
+   "kl_support": "reference_student_union_topk_tail_v1",
    "kl_reference": "root_reference/v1",
-   "statistics_weighting": "reference_confidence_token_weights/v1",
+   "statistics_weighting": "reference_topk_confidence_token_weights/v1",
    "denominator": "scored_position_count/v1",
    "aggregation": "kl_path_weighting_per_consumer/v2",
    "direction": "minimize"
   },
-  "objective_hash": "079031e3f5ecf0f804b4497c9dce83684c943e4418d10a2606a8caaa0c3c965d",
-  "formula": "L_D2(x) = (1/T_x) sum_{t in T_x} c_T(t) KL(p_T || q_C)_t, minimized; c_T(t) = 1 - H_T(t)/log|V|, H_T the frozen original teacher's full-vocabulary Shannon entropy (float32, chunked), KL on the Top-200 + tail support against the ROOT for every consumer",
+  "objective_hash": "90e851fd11875e4a2e80cbf504a4961ce669411d70732bddb7ffd1941815da28",
+  "version": 3,
+  "formula": "L_D2(x) = (1/T_x) sum_{t in T_x} c_T(t) KL_U(p_T || q_C)_t, minimized; c_T(t) = 1 - H^{K+1}_T(t)/log(K+1), H^{K+1}_T the frozen original teacher's Shannon entropy over its own Top-200 entries and one tail bucket at absolute probabilities; KL_U on the teacher's Top-200 united with the candidate's own Top-200 plus one tail, against the ROOT for every consumer",
   "motivation": {
-   "title": "teacher-certainty-weighted fidelity",
-   "premise": "Where the frozen original teacher is certain -- low full-vocabulary entropy -- its next-token distribution encodes a determinate fact, step or format the compressed student should keep. Where it is uncertain, several continuations are acceptable and the KL to its spread-out distribution is a weaker signal of structural damage.",
-   "consequence": "Under the same capacity limit, a structure that preserves the teacher's distribution at the teacher's certain positions may keep more of what matters for reasoning than one that minimizes the KL uniformly over every scored position.",
-   "question": "Does weighting the root-reference KL, and the structural operators' activation statistics, by the frozen teacher's confidence select an initialization that recovers more autonomous task correctness than the standing incumbent B?",
+   "title": "teacher-certainty-weighted fidelity, with the candidate's own probability moves scored",
+   "premise": "Where the frozen original teacher is certain, its next-token distribution encodes a determinate fact, step or format the compressed student should keep. Where it is uncertain, several continuations are acceptable and the KL to its spread-out distribution is a weaker signal of structural damage.",
+   "why_topk_plus_tail_confidence": "Stage V measured version 2's full-vocabulary confidence, normalised by log|V| (about 11.9 nats), sitting near 1 almost everywhere: IQR 0.042-0.055, ESS at least 99.4%, the weighted KL 96-97% of the raw. Most of that scale is spent on tail mass that does not decide the teacher's next token. The entropy of the teacher's own Top-K entries and one tail bucket, normalised by log(K+1), is a coarsening of the same entropy -- the same direction -- spread over the categories that hold the decision",
+   "why_union_support": "On the teacher Top-K + tail partition, a candidate that moves probability onto entries outside the teacher's Top-K is scored only through one tail bucket, so different redistributions of the tail look alike. Scoring the candidate's own Top-K entries individually, against the teacher's EXACT probability of each, closes that blind spot at O(T*K) instead of the full vocabulary's O(T*V)",
+   "question": "Does weighting each scored position's root-reference union Top-K KL -- and the structural operators' activation statistics -- by the frozen teacher's Top-K + tail confidence select an initialization that recovers more autonomous task correctness than the standing incumbent B?",
    "role_of_confidence": "c_T is a property of the frozen teacher at the calibration and evaluation positions. No candidate can change it, so a candidate cannot lower the objective by becoming confident. It is a PROXY for where fidelity matters; its value is decided by behavioural evidence after recovery, never assumed"
   },
-  "hypothesis": "Positions at which the frozen teacher is certain carry the information a small student most needs to preserve; spending the structural selection's fidelity budget there, rather than uniformly, selects initializations that recover more autonomous task correctness. This does NOT assume the teacher's uncertain positions are unimportant -- it tests whether down-weighting their KL, and their weight in the activation statistics, helps or hurts.",
+  "hypothesis": "Positions at which the frozen teacher is certain over its own Top-K carry the information a small student most needs to preserve, and a candidate's own high-probability moves away from the teacher are part of the damage to measure; spending the structural selection's fidelity budget accordingly selects initializations that recover more autonomous task correctness. This does NOT assume the teacher's uncertain positions are unimportant -- it tests whether down-weighting their KL, and their weight in the activation statistics, helps or hurts.",
   "declared_changes": {
    "changes": [
     {
      "change": "DEPTH's KL reference: the intact PARENT -> the frozen original teacher (the lineage ROOT)",
      "d1": "KL(parent || parent with S bypassed)",
-     "d2": "KL(root || parent with S bypassed), the root's Top-200 + tail sketch read from the root reference store built once per calibration mixture",
+     "d2": "KL(root || parent with S bypassed), the root's values read from the root reference store built once per calibration mixture",
      "where_it_is_inactive": "at the search root the parent IS the root, so the two references coincide; the change acts on DEPTH expansions of a compressed parent"
     },
     {
-     "change": "frozen-teacher confidence weighting c_T(t) = 1 - H_T(t)/log|V|",
+     "change": "KL support: the reference's Top-200 + tail -> the reference's Top-200 UNITED WITH the candidate's own Top-200, + one tail",
+     "d1": "reference_topk_tail_v1 (K=200)",
+     "d2": "reference_student_union_topk_tail_v1 (K=200, deterministic Top-K), applied to D2 only: D1 and D3 keep reference_topk_tail_v1",
+     "where_it_is_inactive": "where the candidate's Top-200 lies inside the teacher's, the union IS the teacher's Top-200 and the two KLs coincide"
+    },
+    {
+     "change": "frozen-teacher confidence weighting c_T(t) = 1 - H^{K+1}_T(t)/log(K+1)",
      "d1": "unweighted",
      "d2": "c_T multiplies the KL in DEPTH, state evaluation and the ranked metrics, and the activation statistics of the FFN, residual-WIDTH and ATTENTION operators"
     }
    ],
-   "not_one_variable": "D2 differs from D1 by both changes together. No claim attributes a D1-vs-D2 difference to the weighting alone. Descriptive separation only: every DEPTH round-0 candidate also records its parent-reference KL, and every candidate and state records the UNWEIGHTED root KL"
+   "not_one_variable": "D2 differs from D1 by all three changes together. No claim attributes a D1-vs-D2 difference to any one of them. Descriptive separation only: every DEPTH round-0 candidate also records its parent-reference KL; every candidate and state records the UNWEIGHTED root union KL and the root teacher-Top-K + tail KL of the same pair. No third, KL-only full search is run"
+  },
+  "distribution_support": {
+   "support": {
+    "support_id": "reference_student_union_topk_tail_v1",
+    "top_k": 200,
+    "topk_tie_break": "value_desc_then_index_asc/v1"
+   },
+   "applies_to": "D2 version 3 only; D1 and D3 keep reference_topk_tail_v1",
+   "definition": "S_T(t) = TopK(p_T(t), K), S_C(t) = TopK(q_C(t), K), U_t = S_T ∪ S_C (K..2K entries, deduplicated); KL_U = sum_{i in U} p_T(i) log(p_T(i)/q_C(i)) + p_T(not U) log(p_T(not U)/q_C(not U))",
+   "topk_tie_break": "value descending, then vocabulary index ascending, for both Top-Ks (deterministic_topk). Measured at $0 on real bf16 logits: 73% of positions tie at the 200th value and torch.topk's set differs on 61%",
+   "teacher_side": "S_T, its log-probabilities and its tail from the root store; the teacher's probability of candidate-only entries RETRIEVED exactly from its stored final hidden state and full-vocabulary log-normalizer through its output head -- no teacher forward per candidate, no O(T*V) cache, never a tail average or zero",
+   "teacher_logits": "float32 product of the model-dtype final hidden state and the output head (an exact widening), accumulated in float32; the model's own forward rounds the same product to bf16, which this definition does not",
+   "tails": "the teacher's: its own Top-K tail (complement logsumexp) minus the candidate-only entries' mass, in log space; the candidate's: its own complement logsumexp with U masked. Zero teacher mass contributes 0; teacher mass where the candidate has none is +inf and stays +inf",
+   "bounds": "KL_{S_T + tail} <= KL_U <= KL_full, for every pair, by the data-processing inequality (U refines the teacher's K+1 partition; the vocabulary refines U)",
+   "never": [
+    "reported as the full-vocabulary KL",
+    "a heuristic combination of KLs"
+   ],
+   "reverse_kl": "on the SAME union partition, roles swapped",
+   "exact_under_it": [
+    "target-token CE/NLL",
+    "top-1 agreement"
+   ]
+  },
+  "teacher_confidence": {
+   "definition": "H^{K+1}_T(t) = - sum_{i in S_T} p_T(i) log p_T(i) - p_T(tail) log p_T(tail), with ABSOLUTE full-softmax probabilities (never renormalized inside the Top-K) and 0 log 0 = 0; c_T(t) = 1 - H^{K+1}_T(t) / log(categories)",
+   "categories": "derived from the support: K + 1 when K < |V| (201 at K = 200), |V| otherwise -- not a typed constant",
+   "properties": [
+    "teacher-only",
+    "candidate-independent",
+    "computed once per position and stored",
+    "the same K as the union KL support"
+   ],
+   "not": [
+    "the full-vocabulary entropy (version 2)",
+    "a conditional (renormalized) Top-K entropy",
+    "a union-based confidence",
+    "exp(-H), a temperature, a threshold or a hard mask"
+   ],
+   "theoretical_note_only": "exp(-H) is a perplexity-style alternative mapping; it is NOT this objective and nothing computes it"
+  },
+  "revision_kind": {
+   "kind": "Evidence-Informed Pre-Search Scientific Revision",
+   "informed_by": [
+    "Stage V's adopted engineering evidence on version 2 (d2val_20261014_103301): the full-vocabulary confidence's narrow range (IQR 0.042-0.055, weighted KL 96-97% of raw) and the reference change dominating the DEPTH difference (rho 0.816, layer 26 vs 17)",
+    "the maintainer's scientific decision of 2026-10-14"
+   ],
+   "not_observed_before_it": [
+    "any formal D2 search result",
+    "any D2 recovery or behavioural result"
+   ],
+   "frozen_after_approval": "once the version-3 preregistration is approved, no definition, K, scope, support, rule or threshold changes post hoc",
+   "versions": {
+    "v1": "student-uncertainty KL, SUPERSEDED -- NEVER EXECUTED",
+    "v2": "SUPERSEDED BEFORE FORMAL SEARCH -- STAGE V ENGINEERING VALIDATION COMPLETED",
+    "v3": "this definition; DRAFT until approved"
+   }
   },
   "scope": {
    "frozen_scope": "full",
    "acts_directly_on": [
-    "DEPTH operator-local candidate evaluation: c_T-weighted root KL",
+    "DEPTH operator-local candidate evaluation: c_T-weighted root union KL",
     "FFN, residual WIDTH and ATTENTION activation statistics: every accumulator -- residual sum and second moment, FFN sum|a| and sum a^2, per-head attention-output second moment -- weighted by c_T, over a sum-of-weights denominator",
     "global state evaluation of every child (reference: the teacher)",
-    "beam ranking and pruning (OBJECTIVE_PARETO_V1)"
+    "beam ranking and pruning (OBJECTIVE_PARETO_V1, the version-3 ranking identity)"
    ],
    "denominators": {
     "kl_objective": "the fixed 1/T_x over the item's scored positions; never the sum of weights",
@@ -129,25 +202,28 @@
    "narrow_scope_comparison": {
     "objective": {
      "schema": "aadistill.scoring_objective/v1",
-     "objective_id": "objective.d2_teacher_confidence_weighted_kl_narrow_scope",
+     "objective_id": "objective.d2_teacher_topk_confidence_weighted_union_kl_narrow_scope",
      "version": 1,
-     "form": "reference_confidence_weighted_kl",
-     "confidence_source": "reference_full_vocabulary_shannon_entropy/v1",
-     "confidence_mapping": "one_minus_entropy_over_log_vocabulary/v1",
+     "form": "reference_topk_confidence_weighted_union_kl",
+     "confidence_source": "reference_topk_plus_tail_absolute_shannon_entropy/v1",
+     "confidence_top_k": 200,
+     "confidence_categories": "top_k entries + 1 tail bucket when top_k < |V|",
+     "confidence_mapping": "one_minus_entropy_over_log_categories/v1",
+     "kl_support": "reference_student_union_topk_tail_v1",
      "kl_reference": "root_reference/v1",
      "statistics_weighting": "none",
      "denominator": "scored_position_count/v1",
      "aggregation": "kl_path_weighting_per_consumer/v2",
      "direction": "minimize"
     },
-    "objective_hash": "5c4c3aaf9a773d1494e42fa7236714ecef4b2edce8086de2345735e5bbf14d11",
+    "objective_hash": "d034f7e96d08862d99d74981e69ec6e579c2fb9f36a2acb402c149700a8ef34e",
     "difference": "FFN, WIDTH and ATTENTION keep D1's target-aware statistics; their configs then declare no objective and their selections are D1's for the same parent",
     "status": "DOCUMENTED FOR COMPARISON ONLY; not wired, not frozen"
    },
    "full_scope_review": {
-    "implemented": "aadistill core: ActivePositions token multipliers, the collectors' token_weights path (process / process_batch, per-item and packed), the weighted denominators residual_weight / attn_token_weight, and a statistics cache key that carries the weighting store's identity so weighted and unweighted passes never share an entry",
+    "implemented": "aadistill core: the weighted statistics path of version 2, unchanged; the weight is now the union store's K+1 confidence, and the statistics cache key carries that store's identity so version-2, version-3 and unweighted passes never share an entry",
     "risks": [
-     "LOW DYNAMIC RANGE: normalised by log|V| (~11.9 nats at a 151,936 vocabulary), c_T sits near 1 wherever the teacher's entropy is a few nats, so the weighting may change the statistics and the ranking only modestly. Measured by the teacher-confidence validity check BEFORE the search; never re-defined post hoc",
+     "DYNAMIC RANGE: normalised by log(K+1) (5.30 nats at K = 200) instead of log|V| (11.93), and over K+1 categories, c_T is expected to spread more than version 2's; on a stand-in checkpoint at $0 its median was 0.70 against 0.86. The real teacher's distribution is measured by the version-3 GPU validation BEFORE the search; never re-defined post hoc",
      "WIDTH's projection is trace-normalised per collection point, so a near-uniform weighting cancels; the weighting acts through its non-uniformity only",
      "teacher-UNCERTAIN positions -- branch points in a reasoning chain -- lose weight in the structure selection as well as in the KL; whether that helps is the hypothesis, not an assumption",
      "the reduced effective sample size of the weighted statistics (reported as ESS by the validity check)"
@@ -158,34 +234,94 @@
   "fixed": [
    "the 1/T_x denominator over scored positions",
    "no dynamic weight sum in the KL objective",
-   "no threshold, exponent or hard mask on c_T",
-   "the candidate cannot affect c_T"
+   "no threshold, exponent, temperature or hard mask on c_T",
+   "the candidate cannot affect c_T",
+   "K = 200 for both the confidence and the support"
   ],
   "diagnostics_recorded": [
-   "the unweighted root (teacher) KL, beside the weighted objective, for every DEPTH candidate and every state (state.objective.raw_kl.*)",
-   "the teacher-confidence-weighted KL (the objective)",
-   "the PARENT-reference KL of every DEPTH round-0 candidate (op-local parent_kl; one parent reference pass per DEPTH expansion, round 0 only -- a documented, limited scope)",
+   "the unweighted root union KL, beside the weighted objective, for every DEPTH candidate and every state (state.objective.raw_kl.*)",
+   "the root teacher-Top-K + tail KL of the same pair, the union's lower bound (state.objective.kl_reference_topk.*)",
+   "the union's size and its overlap with the teacher's Top-200, and both masses outside it",
+   "the PARENT-reference KL of every DEPTH round-0 candidate (op-local parent_kl, on the parent's own Top-200 + tail; one parent reference pass per DEPTH expansion, round 0 only -- a documented, limited scope)",
    "reference entropy, reference confidence and weight quantiles and histograms; reference tail mass",
-   "D1's KL metrics, unchanged, beside them",
-   "the root reference store's identity, content digest and confidence distribution (weight sum, mean, ESS)"
+   "D1's KL metric names, now carrying the union KL, beside them",
+   "every root store's identity (with what it executed), content digest, retrieval bytes and confidence distribution (weight sum, mean, ESS)"
   ],
   "where_it_applies": {
-   "depth.causal_kl_greedy_v1": "OPERATOR-LOCAL: the candidate is the parent with S bypassed; its KL against the ROOT's stored sketch, weighted by the root's stored confidence",
-   "ffn / residual_width / attention activation operators": "FULL SCOPE: their activation statistics are weighted by the frozen teacher's confidence, which needs no candidate; their configs declare the objective and their state ids fork from D1's",
-   "state evaluation": "every child, against the original teacher, weighted by the teacher's own confidence",
+   "depth.causal_kl_greedy_v1": "OPERATOR-LOCAL: the candidate is the parent with S bypassed; its union KL against the ROOT store -- sketch, and retrieval for its own Top-K entries -- weighted by the root's stored confidence",
+   "ffn / residual_width / attention activation operators": "FULL SCOPE: their activation statistics are weighted by the frozen teacher's Top-K + tail confidence, which needs no candidate; their configs declare the objective and their state ids fork from D1's and from version 2's",
+   "state evaluation": "every child, against the original teacher's store built once per suite, weighted by the teacher's own confidence",
    "beam ranking and pruning": "beam.pareto_scoring_objective@v1"
   },
-  "degeneracy_watch": "the weight is the frozen teacher's, so no candidate can lower the objective by becoming confident; a candidate CAN be worse at the teacher's uncertain positions at a discount. The unweighted root KL is recorded on every candidate and state, and a low D2 objective is never read as higher fidelity. High raw KL is a registered DIAGNOSTIC FLAG (diagnostic_threshold_rule), never an elimination criterion and never a manual intervention",
+  "degeneracy_watch": "the weight is the frozen teacher's, so no candidate can lower the objective by becoming confident; a candidate CAN be worse at the teacher's uncertain positions at a discount. The unweighted root union KL and the teacher Top-K + tail KL are recorded on every candidate and state, and a low D2 objective is never read as higher fidelity. High raw KL is a registered DIAGNOSTIC FLAG (diagnostic_threshold_rule), never an elimination criterion and never a manual intervention",
   "claim_boundary": {
    "may_not_claim": [
-    "that D2 differs from D1 by one variable: it declares two changes, the DEPTH reference (parent -> root) and the teacher-confidence weighting (d2.declared_changes)",
+    "that D2 differs from D1 by one variable: it declares three changes, the DEPTH reference (parent -> root), the KL support (teacher Top-K -> teacher ∪ student Top-K) and the teacher-confidence weighting (d2.declared_changes); no D1-vs-D2 difference is attributed to any one of them",
+    "that the union Top-K + tail KL is the full-vocabulary KL: it is a lower bound on it and an upper bound on the teacher Top-K + tail KL of the same pair, by construction",
     "that a lower D2 objective means the student is closer to the teacher: it down-weights the teacher's uncertain positions by construction",
     "that the teacher's confident positions are the ones that matter for reasoning, without behavioural evidence after recovery",
     "that the full-scope weighting changed an FFN, WIDTH or ATTENTION selection, unless a measured selection overlap shows it",
-    "that D2 reads any student confidence: its weight is the frozen teacher's and no candidate can move it"
+    "that D2 reads any student confidence: its weight is the frozen teacher's and no candidate can move it. The candidate does choose part of the KL's partition -- its own Top-K -- which is the declared support change, not a confidence signal",
+    "anything about version 2's objective from version 3's results, or the reverse: version 2 was never searched"
    ]
   },
-  "validity_checks_before_search": "stages.d_series.teacher_confidence: distribution, thinking vs answer, domain and subtype, token types, relation to teacher token probability and to KL, weighted contributions, weight sum, mean, ESS and risks -- run on the root reference store before the formal search; their results never change a definition"
+  "validity_checks_before_search": "stages.d_series.teacher_confidence on the version-3 store: distribution, thinking vs answer, domain and subtype, token types, relation to teacher token probability and to KL, weighted contributions, weight sum, mean, ESS and risks; and the union numerics (bounds, retrieval, ties, union size) -- in the version-3 GPU validation before the formal search; their results never change a definition",
+  "ranking_identity": {
+   "schema": "aadistill.d_series.ranking_identity/v2",
+   "policy": "beam.pareto_scoring_objective@v1",
+   "policy_hash": "836ae1d3667d72a51bc96b7168c382f31b387eb4183f22bff1e2e53aded8642e",
+   "ranked_metrics": [
+    "state.objective.equal_domain_mean",
+    "state.objective.worst_domain",
+    "state.objective.critical_token"
+   ],
+   "objective_hash": "90e851fd11875e4a2e80cbf504a4961ce669411d70732bddb7ffd1941815da28",
+   "kl_support": {
+    "support_id": "reference_student_union_topk_tail_v1",
+    "top_k": 200,
+    "topk_tie_break": "value_desc_then_index_asc/v1"
+   },
+   "ranking_identity_hash": "c9a4e821e132f007e175816d664e7cbe092ccfe164fd0ac8acad26a1d1aad8d2"
+  }
+ },
+ "d2_v2_superseded": {
+  "status": "SUPERSEDED BEFORE FORMAL SEARCH -- STAGE V ENGINEERING VALIDATION COMPLETED",
+  "objective_id": "objective.d2_teacher_confidence_weighted_kl@v1",
+  "objective_hash": "079031e3f5ecf0f804b4497c9dce83684c943e4418d10a2606a8caaa0c3c965d",
+  "contract_revision": 7,
+  "contract_hash": "9ad4ec233dd0ca0f6896f3dc4fb6eab728ed162854299c7d74dd4ee0b9e5b0c0",
+  "preregistration": "logs/stages/stage-1/phase_d2/plans/d2_preregistration_v2.json",
+  "preregistration_hash": "721ffddc1b399ad104c9fc0c611ec509bf5bf7f3615ff5e879be2615e8c591dd",
+  "superseded_by": "objective.d2_teacher_topk_confidence_weighted_union_kl@v1",
+  "decided": "maintainer scientific decision 2026-10-14 (D2 version 3)",
+  "executed": {
+   "d2_search": false,
+   "d2_recovery": false,
+   "d2_behaviour": false,
+   "engineering_validation": {
+    "what": "Stage V: root stores, weighted statistics, root-vs-parent DEPTH, scored_v1 equivalence and state-evaluation overhead of version 2",
+    "run": "d2val_20261014_103301",
+    "verdict": "validation PASS (arithmetic, integrity, scored_v1)",
+    "cost_usd": 0.6532,
+    "campaign": "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/campaign.json",
+    "review": "logs/stages/stage-1/families/d_series/analyses/d2_stage_v_evidence_review.md"
+   }
+  },
+  "full_definition": "the revision-7 contract at 7f554206 (hash 9ad4ec233dd0...) and logs/stages/stage-1/phase_d2/plans/d2_preregistration_v2.json, both unchanged",
+  "objective": {
+   "schema": "aadistill.scoring_objective/v1",
+   "objective_id": "objective.d2_teacher_confidence_weighted_kl",
+   "version": 1,
+   "form": "reference_confidence_weighted_kl",
+   "confidence_source": "reference_full_vocabulary_shannon_entropy/v1",
+   "confidence_mapping": "one_minus_entropy_over_log_vocabulary/v1",
+   "kl_reference": "root_reference/v1",
+   "statistics_weighting": "reference_confidence_token_weights/v1",
+   "denominator": "scored_position_count/v1",
+   "aggregation": "kl_path_weighting_per_consumer/v2",
+   "direction": "minimize"
+  },
+  "formula": "L(x) = (1/T_x) sum_{t in T_x} c_T(t) KL(p_T || q_C)_t, c_T = 1 - H_T/log|V| (the teacher's full-vocabulary entropy), KL on the teacher's Top-200 + tail against the ROOT; full scope"
  },
  "d2_superseded": {
   "status": "SUPERSEDED -- NEVER EXECUTED",
@@ -355,6 +491,42 @@
    "state.objective.equal_domain_mean": 0.0001,
    "state.objective.worst_domain": 0.0001,
    "state.objective.critical_token": 0.0001
+  },
+  "identities": {
+   "_are": "the same policy, geometry and keys for D2 and D3; the objective and the support say what the ranked numbers are (aadistill.d_series.ranking_identity/v2)",
+   "d2": {
+    "schema": "aadistill.d_series.ranking_identity/v2",
+    "policy": "beam.pareto_scoring_objective@v1",
+    "policy_hash": "836ae1d3667d72a51bc96b7168c382f31b387eb4183f22bff1e2e53aded8642e",
+    "ranked_metrics": [
+     "state.objective.equal_domain_mean",
+     "state.objective.worst_domain",
+     "state.objective.critical_token"
+    ],
+    "objective_hash": "90e851fd11875e4a2e80cbf504a4961ce669411d70732bddb7ffd1941815da28",
+    "kl_support": {
+     "support_id": "reference_student_union_topk_tail_v1",
+     "top_k": 200,
+     "topk_tie_break": "value_desc_then_index_asc/v1"
+    },
+    "ranking_identity_hash": "c9a4e821e132f007e175816d664e7cbe092ccfe164fd0ac8acad26a1d1aad8d2"
+   },
+   "d3": {
+    "schema": "aadistill.d_series.ranking_identity/v2",
+    "policy": "beam.pareto_scoring_objective@v1",
+    "policy_hash": "836ae1d3667d72a51bc96b7168c382f31b387eb4183f22bff1e2e53aded8642e",
+    "ranked_metrics": [
+     "state.objective.equal_domain_mean",
+     "state.objective.worst_domain",
+     "state.objective.critical_token"
+    ],
+    "objective_hash": "7b2545389874b445628ac46ddef32bebee92622150560c1bd899dffb75033636",
+    "kl_support": {
+     "support_id": "reference_topk_tail_v1",
+     "top_k": 200
+    },
+    "ranking_identity_hash": "b34478aafc3bc7bc660859196bc782dcf6fdfa4a8b9adf3a70d1c6380b6336bd"
+   }
   }
  },
  "aggregation_control": {
@@ -394,12 +566,12 @@
  "independence": "D3's definition, K and lambda rule are fixed in this record before D2 runs; no D2 behavioural or search result may adjust them",
  "measurement_distinctions": {
   "student_entropy_on_teacher_native_prefixes": "what D3's search objective uses: the candidate student's own Top-200 conditional entropy on the frozen teacher-native calibration and state-eval sequences. D2 does NOT use it",
-  "teacher_entropy_on_teacher_native_prefixes": "what D2's search objective uses: the FROZEN ORIGINAL TEACHER's full-vocabulary Shannon entropy on the same sequences -- from the root reference store (calibration) and the state evaluator (state suite). Identical for every candidate; D3 does not use it",
+  "teacher_entropy_on_teacher_native_prefixes": "what D2's search objective uses: the FROZEN ORIGINAL TEACHER's Shannon entropy over its own Top-200 entries and one tail bucket (version 3; version 2 used its full-vocabulary entropy) on the same sequences -- from the root reference store (calibration) and the state evaluator's teacher store (state suite). Identical for every candidate; D3 does not use it",
   "student_entropy_on_student_rollout_prefixes": "a behavioural DIAGNOSTIC only: the student's own Top-K entropy at the positions of its own greedy rollout, by scripts/shared/evaluation/rollout_rescoring.py after generation. Never an input to selection in D2 or D3",
-  "student_teacher_distribution_fit": "the Top-K + tail KL: on teacher-native prefixes in the search -- against the intact PARENT in D1's and D3's DEPTH, against the ROOT teacher in D2's DEPTH, against the teacher in every state evaluation; on the student's own prefixes in the rollout diagnostic, beside the teacher's surprisal of the student's tokens",
+  "student_teacher_distribution_fit": "D1's and D3's: the teacher Top-K + tail KL, against the intact PARENT in DEPTH and the teacher in every state evaluation. D2's (version 3): the teacher ∪ student Top-K + tail KL, against the ROOT teacher everywhere, DEPTH included. All on teacher-native prefixes in the search; on the student's own prefixes in the rollout diagnostic, beside the teacher's surprisal of the student's tokens",
   "autonomous_rollout_correctness": "the primary behavioural endpoint, correct_overall on the shared protocol, after the frozen recovery recipe. The only quantity a D2/D3 promotion question is decided on"
  },
- "calibration_this_round": "the frozen TEACHER-NATIVE calibration profiles, unchanged. Between D1 and D3 the objective is the only variable; D2 declares two (d2.declared_changes). No student-prefix calibration is introduced in D2 or D3",
+ "calibration_this_round": "the frozen TEACHER-NATIVE calibration profiles, unchanged. Between D1 and D3 the objective is the only variable; D2 declares three (d2.declared_changes). No student-prefix calibration is introduced in D2 or D3",
  "behavioural_diagnostics": {
   "instruments": {
    "rollout_profile": "scripts/stages/stage-1/families/d_series/rollout_profile.py -- text-level, $0, from secured generations: generated length (engine count), reasoning/answer length, natural termination, degeneration, correctness by reasoning length, and paired same-prompt comparisons",
@@ -453,7 +625,7 @@
   ],
   "validation": "each objective's confidence signal is a proxy for structure selection; its usefulness is established only by independent behavioural evidence after recovery training"
  },
- "revision": 7,
+ "revision": 8,
  "revision_history": [
   {
    "revision": 1,
@@ -490,8 +662,15 @@
    "date": "2026-10-14",
    "supersedes_contract_hash": "741cd5c5faa433285741b4b44d6fe07d30df2f1191ca6f5f71a1e6f3e48c5493",
    "change": "independent review of 16d67285: D2 and D3 each own their definition, motivation, scope, where-it-applies, diagnostics and claim boundary (layout). Revision 6 still described the student's Top-K confidence as a shared D2/D3 signal and FFN/WIDTH/ATTENTION as never consuming an objective. No objective identity, ranking, rule, lambda or threshold changed"
+  },
+  {
+   "revision": 8,
+   "date": "2026-10-14",
+   "supersedes_contract_hash": "9ad4ec233dd0ca0f6896f3dc4fb6eab728ed162854299c7d74dd4ee0b9e5b0c0",
+   "kind": "Evidence-Informed Pre-Search Scientific Revision",
+   "change": "maintainer scientific decision: D2 VERSION 3 -- the frozen teacher's Top-200 + tail confidence weighting the root-reference union Top-K KL (objective.d2_teacher_topk_confidence_weighted_union_kl@v1, support reference_student_union_topk_tail_v1), full scope; three declared changes from D1. Version 2 SUPERSEDED BEFORE FORMAL SEARCH after its Stage V engineering validation (d2_v2_superseded); its hashes and records are unchanged. D3's objective, lambda (7.34), support, thresholds and ranking unchanged; ranking identities versioned with the support"
   }
  ],
- "contract_hash": "9ad4ec233dd0ca0f6896f3dc4fb6eab728ed162854299c7d74dd4ee0b9e5b0c0",
+ "contract_hash": "1321017afdc7369dfab4d1ffd043254f8219c41286507b940fc0ae7ed5ddc4a2",
  "authorizes": "nothing"
 }

@@ -60,31 +60,78 @@ class TestThePreregistration:
     def test_the_committed_record_is_what_the_writer_derives(self):
         assert W.main([]) == 0, "run write_d2_preregistration.py --write"
 
-    def test_it_keeps_d1s_space_and_declares_two_changes(self):
+    def test_it_keeps_d1s_space_and_declares_three_changes(self):
+        from stages.d_series import objectives as O
         doc = S.preregistration()
         d1 = json.loads((REPO / W.D1_DESIGN).read_text())["search_stage"]
-        assert doc["version"] == 2
+        assert doc["version"] == 3
         assert doc["search"]["frozen_implementations"] == \
             d1["frozen_implementations"]
         assert doc["search"]["profiles"] == d1["profiles"]
         assert doc["search"]["beam"] == d1["beam"]
         assert doc["search"]["ranking_policy"]["id"] == \
             "beam.pareto_scoring_objective@v1"
-        assert len(doc["declared_changes_from_d1"]["changes"]) == 2
+        assert doc["search"]["support"] == O.D2_SUPPORT.as_dict()
+        assert doc["search"]["support"]["support_id"] == \
+            "reference_student_union_topk_tail_v1"
+        assert doc["search"]["ranking_identity"] == \
+            O.ranking_identity(O.D2_OBJECTIVE, O.D2_SUPPORT)
+        assert len(doc["declared_changes_from_d1"]["changes"]) == 3
         assert "one_variable" not in doc
         assert doc["scope_decision"]["frozen"] == "full"
         assert doc["retention"]["k"] == 4
+        assert doc["revision_kind"]["kind"] == \
+            "Evidence-Informed Pre-Search Scientific Revision"
         assert doc["authorizes"] == "nothing"
+        assert doc["status"].startswith("DRAFT")
 
-    def test_the_superseded_draft_is_recorded_and_not_current(self):
+    def test_d3_and_d1_keep_their_support_and_identities(self):
+        from stages.d_series import objectives as O
+        from stages.d_series import scoring_protocol as SP
         doc = S.preregistration()
-        (old,) = doc["superseded_drafts"]
+        assert SP.D_SERIES_SUPPORT.support_id == "reference_topk_tail_v1"
+        d3 = O.frozen_d3_objective(REPO)
+        assert doc["d3_and_d1_untouched"]["d3_ranking_identity"] == \
+            O.ranking_identity(d3, SP.D_SERIES_SUPPORT)
+        assert O.ranking_identity(d3, SP.D_SERIES_SUPPORT)[
+            "ranking_identity_hash"] != doc["search"]["ranking_identity"][
+            "ranking_identity_hash"]
+
+    def test_v3_has_no_drafts_and_v2s_draft_stays_with_v2(self):
+        from stages.d_series import objectives as O
+        doc = S.preregistration()
+        assert doc["superseded_drafts"] == []
+        v2 = json.loads((REPO / W.SUPERSEDED_V2_RECORD).read_text())
+        (old,) = v2["superseded_drafts"]
         assert old["preregistration_hash"].startswith("317596c4")
         assert old["approved"] is False
-        assert doc["preregistration_hash"] != old["preregistration_hash"]
-        from stages.d_series import objectives as O
         assert old["contract_hash"] == O.REVISION_6_CONTRACT_HASH
-        assert doc["objective"]["contract_hash"] != old["contract_hash"]
+        assert doc["objective"]["contract_hash"] not in (
+            old["contract_hash"], O.REVISION_7_CONTRACT_HASH)
+
+    def test_v2_is_superseded_before_search_with_science_and_hash_intact(self):
+        from aadistill.infrastructure.manifest import sha256_json
+        from stages.d_series import objectives as O
+
+        v2 = json.loads((REPO / W.SUPERSEDED_V2_RECORD).read_text())
+        assert v2["status"] == ("SUPERSEDED BEFORE FORMAL SEARCH -- STAGE V "
+                                "ENGINEERING VALIDATION COMPLETED")
+        assert v2["superseded_by"] == W.RECORD
+        assert v2["executed"]["formal"] is False
+        science = {k: v for k, v in v2.items()
+                   if k not in (*W.NON_SCIENCE_KEYS,
+                                *W.SUPERSESSION_V2_FIELDS)}
+        assert sha256_json(science) == v2["preregistration_hash"] == \
+            O.PREREGISTRATION_V2_HASH
+        assert v2["objective"]["objective_hash"] == \
+            O.D2_V2_OBJECTIVE.objective_hash
+        assert v2["objective"]["contract_hash"] == O.REVISION_7_CONTRACT_HASH
+        v3 = S.preregistration()
+        assert v3["supersedes"]["v2"]["preregistration_hash"] == \
+            v2["preregistration_hash"]
+        assert v3["supersedes"]["v2"]["objective_hash"] == \
+            v2["objective"]["objective_hash"] != \
+            v3["objective"]["objective_hash"]
 
     def test_v1_is_superseded_with_its_science_and_hash_intact(self):
         from aadistill.infrastructure.manifest import sha256_json
@@ -92,18 +139,19 @@ class TestThePreregistration:
         v1 = json.loads((REPO / W.SUPERSEDED_RECORD).read_text())
         assert v1["status"] == "SUPERSEDED -- NEVER EXECUTED"
         assert v1["executed"] is False
-        assert v1["superseded_by"] == W.RECORD
+        #: v1 was superseded by VERSION 2, and still says so.
+        assert v1["superseded_by"] == W.SUPERSEDED_V2_RECORD
         science = {k: v for k, v in v1.items()
                    if k not in ("status", "preregistration_hash", "budget",
                                 "authorizes", *W.SUPERSESSION_FIELDS)}
         assert sha256_json(science) == v1["preregistration_hash"]
         assert v1["preregistration_hash"].startswith("489f49ba")
-        v2 = S.preregistration()
-        assert v2["supersedes"]["preregistration_hash"] == \
+        v3 = S.preregistration()
+        assert v3["supersedes"]["v1"]["preregistration_hash"] == \
             v1["preregistration_hash"]
-        assert v2["supersedes"]["objective_hash"] == \
+        assert v3["supersedes"]["v1"]["objective_hash"] == \
             v1["objective"]["objective_hash"]
-        assert v2["objective"]["objective_hash"] != \
+        assert v3["objective"]["objective_hash"] != \
             v1["objective"]["objective_hash"]
 
     def test_the_hash_covers_the_science_not_the_status(self):

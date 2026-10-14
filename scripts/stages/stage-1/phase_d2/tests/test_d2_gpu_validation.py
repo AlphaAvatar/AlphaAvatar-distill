@@ -70,7 +70,7 @@ class TestArithmetic:
         per_item = [{"kl": torch.rand(30, generator=g) * 5,
                      "confidence": torch.rand(30, generator=g),
                      "scored": torch.arange(30) >= 7} for _ in range(5)]
-        out = V.reduction_arithmetic(O.D2_OBJECTIVE, per_item)
+        out = V.reduction_arithmetic(O.D2_V2_OBJECTIVE, per_item)
         assert out["items"] == 5 and out["within_tolerance"], out
 
     def test_the_raw_kl_control_is_relative_and_strict(self):
@@ -588,12 +588,30 @@ class TestTheRecords:
             round(core, 1))
 
     def test_the_premises_resolve_on_this_host(self):
+        """Stage V validated VERSION 2: its premises carry version 2's
+        objective and the identities its plan registered, whatever revision
+        the live contract has reached since."""
         out = V.premises(REPO)
         from stages.d_series import objectives as O
-        assert out["objective_hash"] == O.D2_OBJECTIVE.objective_hash
-        assert out["contract_revision"] == 7
+        plan = json.loads((REPO / V.PLAN).read_text())
+        assert out["objective_hash"] == O.D2_V2_OBJECTIVE.objective_hash
+        assert out["contract_hash"] == plan["contract_hash"] == \
+            O.REVISION_7_CONTRACT_HASH
+        assert out["preregistration_hash"] == plan["preregistration_hash"] \
+            == O.PREREGISTRATION_V2_HASH
         assert out["plan_sha256"] == hashlib.sha256(
             (REPO / V.PLAN).read_bytes()).hexdigest()
+
+    def test_the_closed_evidence_stays_version_2s(self):
+        """Adoption binds the plan's identities, so the booked session stays
+        adoptable as version 2's evidence after the contract moved on -- and
+        is never read as version 3's."""
+        from stages.d_series import d2_budget as BUD
+        from stages.d_series import objectives as O
+        want = V.expected_identities(REPO)
+        assert want["objective_hash"] == O.D2_V2_OBJECTIVE.objective_hash
+        assert want["objective_hash"] != O.D2_OBJECTIVE.objective_hash
+        assert BUD.d2_validation_evidence(REPO)["usable"]
 
 
 # --- booking and the budget's reader ---------------------------------------------------
