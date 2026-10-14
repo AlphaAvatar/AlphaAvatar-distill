@@ -439,6 +439,76 @@ class TestTheStageEndToEnd:
         assert rec["verdicts"]["validation"] != "PASS"
 
 
+# --- the V3 -> V4 device handoff ---------------------------------------------------
+
+def _toy_store(model, items):
+    from aadistill.initialization.scoring.reference_store import (
+        build_root_reference_store, root_reference_identity,
+    )
+    from aadistill.initialization.scoring.support import reference_topk_tail
+    sup = reference_topk_tail(8)
+    return build_root_reference_store(
+        model, items, support=sup,
+        identity=root_reference_identity(root_identity={"teacher_id": "t"},
+                                         profile_hash="p", support=sup),
+        micro_batch_size=1, packing="original_order_v1", device="cpu")
+
+
+class TestTheDeviceHandoff:
+    """ChildBuilder builds children on the HOST (its generic contract); V4
+    must not run DEPTH there against a store on the accelerator. `meta`
+    stands in for CUDA: a non-host device with no host fallback."""
+
+    def test_a_host_child_is_refused_for_a_non_host_target(self):
+        child = build_tiny_model(TEACHER_GEOMETRY)
+        store = _toy_store(child, _calib("test.balanced@v1", 101))
+        with pytest.raises(V.D2ValidationError, match="parent"):
+            V.require_execution_devices("meta", parent=child, store=store)
+
+    def test_placement_moves_the_child_and_the_store_must_follow(self):
+        child = build_tiny_model(TEACHER_GEOMETRY)
+        store = _toy_store(child, _calib("test.balanced@v1", 101))
+        moved = V.place_for_execution(child, "meta")
+        assert (moved["from"], moved["to"]) == ("cpu", "meta")
+        with pytest.raises(V.D2ValidationError) as err:
+            V.require_execution_devices("meta", parent=child, store=store)
+        assert "root_sketch" in str(err.value)
+        assert "parent" not in str(err.value)
+
+    def test_one_device_everywhere_passes(self):
+        child = build_tiny_model(TEACHER_GEOMETRY)
+        store = _toy_store(child, _calib("test.balanced@v1", 101))
+        out = V.require_execution_devices("cpu", parent=child, store=store)
+        assert set(out.values()) == {"cpu"}
+
+    def test_the_stage_places_and_verifies_before_depth(self, toy_run):
+        for name in ("V4_depth_root_vs_parent", "V5_depth_scored_rows"):
+            rec = toy_run[0][name]
+            assert rec["device_placement"]["to"] == "cpu"
+            assert set(rec["execution_devices"]) == {
+                "parent_and_candidate_forwards", "root_sketch",
+                "root_confidence"}
+
+    def test_depth_is_never_reached_without_the_handoff(self, monkeypatch,
+                                                        tmp_path):
+        """Mutation: a stage that skipped placement and checked nothing
+        would run DEPTH on whatever device the child happened to be on."""
+        from stages.phase_d1.topk_adoption_driver import Journal
+        calls = []
+
+        def spy(expected, *, parent, store):
+            calls.append(expected)
+            raise V.D2ValidationError("refused")
+        monkeypatch.setattr(V, "require_execution_devices", spy)
+        rec = V.stage_V(env=toy_environment(),
+                        journal=Journal(tmp_path / "j.jsonl"), out=tmp_path)
+        #: V4 asks and is refused; V5 never reaches DEPTH without V4's table.
+        assert calls == ["cpu"]
+        assert "failed" in rec["V4_depth_root_vs_parent"]
+        assert "failed" in rec["V5_depth_scored_rows"]
+        assert rec["verdicts"]["integrity"]["verdict"] == "FAIL"
+
+
 # --- the records: plan, PROPOSED grant, campaign ------------------------------------
 
 class TestTheRecords:
@@ -484,7 +554,9 @@ class TestTheRecords:
         if git("cat-file", "-e", f"{commit}^{{commit}}").returncode:
             pytest.skip("the executable commit is not in this checkout")
         assert git("merge-base", "--is-ancestor", commit, "HEAD").returncode == 0
-        changed = [p for p in git("diff", "--name-only", commit, "HEAD", "--",
+        #: Against the WORKING TREE, not HEAD: an uncommitted edit to an
+        #: executed path is as much a divergence as a committed one.
+        changed = [p for p in git("diff", "--name-only", commit, "--",
                                   *P.EXECUTED_PATHS).stdout.split()
                    if p not in P.EXECUTED_PATH_EXCEPTIONS
                    and "/tests/" not in p and not p.startswith("tests/")]
@@ -531,7 +603,9 @@ class TestTheRecords:
 def _adoptable(*, objective_hash=None, tamper=None, **record_kw):
     """A stage-V record that recomputes to PASS, with this tree's identities."""
     rec = _record(**record_kw)
-    rec["premises"] = {**V.expected_identities(REPO), "teacher_revision": "r"}
+    rec["premises"] = {**V.expected_identities(REPO), "teacher_revision": "r",
+                       "source": {"commit": "c" * 40,
+                                  "tracked_tree_clean": True}}
     if objective_hash:
         rec["premises"]["objective_hash"] = objective_hash
     rec["verdicts"] = V.verdicts(rec)
@@ -540,8 +614,19 @@ def _adoptable(*, objective_hash=None, tamper=None, **record_kw):
     return rec
 
 
+def _mirror_records(root: Path) -> None:
+    """A second repository root holding this tree's committed records."""
+    import shutil
+    from stages.d_series import objectives as O
+    from stages.phase_d2 import d2_session as S
+    for rel in (O.CONTRACT, S.PREREGISTRATION, V.PLAN):
+        dst = root / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(REPO / rel, dst)
+
+
 def _booked_tree(tmp_path, *, objective_hash=None, status="COMPLETE",
-                 record=None, teardown=True):
+                 record=None, teardown=True, mirror=True):
     import importlib.util
     from stages.d_series import objectives as O
     from stages.d_series import d2_budget as BUD
@@ -556,8 +641,10 @@ def _booked_tree(tmp_path, *, objective_hash=None, status="COMPLETE",
     (run / "out" / "adoption_all_v1" / "adoption.json").write_text(json.dumps(
         {"status": status, "V_d2_validation": record or _adoptable(
             objective_hash=objective_hash)}))
+    if mirror:
+        _mirror_records(tmp_path)
     vdir = tmp_path / Path(BUD.D2_VALIDATION_CAMPAIGN).parent
-    vdir.mkdir(parents=True)
+    vdir.mkdir(parents=True, exist_ok=True)
     (vdir / "campaign.json").write_text(json.dumps(P.campaign()))
     spec = importlib.util.spec_from_file_location(
         "book", REPO / "scripts/shared/pod/book_engineering_subrun.py")
@@ -615,6 +702,57 @@ class TestAdoption:
         ev = _adopted(tmp_path, record=_adoptable(tamper=tamper))
         assert not ev["usable"]
         assert any("not what the record" in r for r in ev["reasons"])
+
+    def test_identities_come_from_the_callers_repository_root(self, tmp_path):
+        """REGRESSION: adoption read the GLOBAL tree's records. A run is now
+        judged against the records of the root it is booked in -- a second
+        worktree whose plan differs refuses this tree's evidence."""
+        from stages.d_series import d2_budget as BUD
+        run, vdir, book = _booked_tree(tmp_path)
+        plan = tmp_path / V.PLAN
+        doc = json.loads(plan.read_text())
+        doc["version"] = 99
+        plan.write_text(json.dumps(doc))
+        book.book(run_dir=run, validation_dir=vdir, subrun_id="s",
+                  outcome="x",
+                  evidence_session="out/adoption_all_v1/adoption.json",
+                  repo=tmp_path)
+        ev = BUD.d2_validation_evidence(tmp_path)
+        assert not ev["usable"]
+        assert any("plan_sha256" in r for r in ev["reasons"])
+        assert ev["identities"]["expected"]["plan_sha256"] == hashlib.sha256(
+            plan.read_bytes()).hexdigest()
+
+    def test_a_tree_without_the_records_cannot_adopt(self, tmp_path):
+        from stages.d_series import d2_budget as BUD
+        run, vdir, book = _booked_tree(tmp_path, mirror=False)
+        book.book(run_dir=run, validation_dir=vdir, subrun_id="s",
+                  outcome="x",
+                  evidence_session="out/adoption_all_v1/adoption.json",
+                  repo=tmp_path)
+        with pytest.raises(Exception):
+            BUD.d2_validation_evidence(tmp_path)
+
+    @pytest.mark.parametrize("executed,ok", [("c" * 40, True),
+                                             ("d" * 40, False)])
+    def test_the_executed_commit_must_be_the_authorized_one(
+            self, tmp_path, executed, ok):
+        from stages.d_series import d2_budget as BUD
+
+        def tamper(rec):
+            rec["premises"]["source"]["commit"] = executed
+        run, vdir, book = _booked_tree(tmp_path,
+                                       record=_adoptable(tamper=tamper))
+        (tmp_path / V.AUTHORIZATION).write_text(json.dumps(
+            {"executable_commit": "c" * 40, "status": "GRANTED"}))
+        book.book(run_dir=run, validation_dir=vdir, subrun_id="s",
+                  outcome="x",
+                  evidence_session="out/adoption_all_v1/adoption.json",
+                  repo=tmp_path)
+        ev = BUD.d2_validation_evidence(tmp_path)
+        assert ev["usable"] is ok
+        if not ok:
+            assert any("executable commit" in r for r in ev["reasons"])
 
     def test_the_authorization_gate_refuses_scored_v1_on_unadopted_evidence(
             self, tmp_path, monkeypatch):
@@ -729,3 +867,17 @@ def test_the_driver_knows_stage_v_and_runs_it_under_all_v1_only():
     assert '{"C", "D", "P", "L", "V"}' in src
     assert "stage V compares all_v1 against scored_v1 internally" in src
     assert "D2V.premises(repo)" in src and "D2V.stage_V(" in src
+
+
+def test_the_launchers_report_reads_a_stage_v_record(toy_run):
+    """The launcher prints this before teardown; a crash there would be the
+    first time the success path ran, on a paid pod."""
+    from stages.phase_d1 import topk_adoption_report as R
+    lines = R.lines({"status": "COMPLETE", "V_d2_validation": toy_run[0],
+                     "elapsed_seconds": 1.0})
+    text = "\n".join(lines)
+    assert "V  D2 GPU validation" in text and "validation=PASS" in text
+    assert "V4 choices" in text
+    partial = R.lines({"status": "FAILED", "V_d2_validation": {
+        "V1_root_stores_and_validity": {"failed": "boom"}, "verdicts": {}}})
+    assert any("not reached" in l for l in partial)

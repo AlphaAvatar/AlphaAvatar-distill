@@ -289,7 +289,12 @@ def d2_validation_evidence(repo_root: str | Path | None = None
     #: scored-rows verdict exists only for an adoptable run.
     from stages.phase_d2 import d2_gpu_validation as V
 
-    verdict = V.adopt(doc, REPO_ROOT)
+    #: THE CALLER'S tree: its committed contract, preregistration and plan,
+    #: and -- once granted -- the executable commit its authorization binds.
+    auth_path = root / V.AUTHORIZATION
+    expected_commit = (json.loads(auth_path.read_text()).get(
+        "executable_commit") if auth_path.is_file() else None)
+    verdict = V.adopt(doc, root, expected_commit=expected_commit)
     return {**out, **verdict,
             "evidence_session": row["evidence_session"],
             "evidence_session_sha256": row["evidence_session_sha256"],

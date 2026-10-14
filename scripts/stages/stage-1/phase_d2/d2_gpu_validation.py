@@ -228,20 +228,23 @@ def store_drift(a: Any, b: Any, items: Sequence[Mapping[str, Any]]
         ent.append((ea.double() - eb.double()).abs().cpu())
         conf.append((a.per_position(item, "confidence").double()
                      - b.per_position(item, "confidence").double()).abs().cpu())
-        ia, ib = a.sketch_item(item).support_indices, b.sketch_item(item).support_indices
-        for ra, rb in zip(ia.cpu().tolist(), ib.cpu().tolist()):
-            sa, sb = set(ra), set(rb)
-            jac.append(len(sa & sb) / max(1, len(sa | sb)))
-    e, c = torch.cat(ent), torch.cat(conf)
+        #: Vectorized: Top-K indices are distinct per position, so the
+        #: intersection is a sorted membership count and |A u B| = 2K - |A n B|.
+        ia = a.sketch_item(item).support_indices.sort(-1).values
+        ib = b.sketch_item(item).support_indices.to(ia.device).sort(-1).values
+        k = int(ia.shape[-1])
+        pos = torch.searchsorted(ib, ia).clamp(max=k - 1)
+        inter = (ib.gather(-1, pos) == ia).sum(-1).double()
+        jac.append((inter / (2 * k - inter)).cpu())
+    e, c, j = torch.cat(ent), torch.cat(conf), torch.cat(jac)
     q = torch.tensor([0.5, 0.99], dtype=torch.float64)
     return {"positions": int(e.numel()),
             "entropy_abs": {"max": float(e.max()),
                             "p50": float(torch.quantile(e, q)[0]),
                             "p99": float(torch.quantile(e, q)[1])},
             "confidence_abs_max": float(c.max()),
-            "topk_support_jaccard_mean": sum(jac) / max(1, len(jac)),
-            "topk_support_identical_fraction": (
-                sum(1 for j in jac if j == 1.0) / max(1, len(jac))),
+            "topk_support_jaccard_mean": float(j.mean()),
+            "topk_support_identical_fraction": float((j == 1.0).double().mean()),
             "_class": "EXECUTION DRIFT -- reported, never gated"}
 
 
@@ -601,8 +604,11 @@ def production_environment(repo: Path, teacher_path: str, numerics: Any,
     try:
         from transformers import AutoTokenizer
 
+        import functools
+
         tok = AutoTokenizer.from_pretrained(teacher_path)
-        decode = (lambda t: tok.decode([int(t)]))
+        decode = functools.lru_cache(maxsize=None)(
+            lambda t: tok.decode([int(t)]))
     except Exception:                                   # noqa: BLE001
         decode = None
     return Environment(
@@ -662,7 +668,8 @@ def premises(repo: Path) -> dict[str, Any]:
             "b_spec_hash": spec.spec_hash, "construction": construction,
             "teacher_revision": binding.get("revision"),
             "root_teacher": D1S.root_teacher_identity(repo),
-            "step_bounds_s": dict(plan["step_bounds_s"])}
+            "step_bounds_s": dict(plan["step_bounds_s"]),
+            "source": source_commit(repo)}
 
 
 def expected_identities(repo: Path) -> dict[str, str]:
@@ -680,7 +687,8 @@ def expected_identities(repo: Path) -> dict[str, str]:
             "plan_sha256": _sha256(repo / PLAN)}
 
 
-def adopt(doc: Mapping[str, Any], repo: Path) -> dict[str, Any]:
+def adopt(doc: Mapping[str, Any], repo: Path,
+          expected_commit: str | None = None) -> dict[str, Any]:
     """Whether a session record is ADOPTABLE engineering evidence.
 
     Never from the record's own words: the verdicts are RECOMPUTED here from
@@ -711,6 +719,10 @@ def adopt(doc: Mapping[str, Any], repo: Path) -> dict[str, Any]:
     if v and flat(recomputed) != flat(recorded):
         reasons.append("the recorded verdicts are not what the record's "
                        "measurements derive")
+    executed = ((v.get("premises") or {}).get("source") or {}).get("commit")
+    if expected_commit is not None and executed != expected_commit:
+        reasons.append(f"the session executed {executed!r}, not the "
+                       f"authorized executable commit {expected_commit!r}")
     if v and recomputed.get("validation") != "PASS":
         reasons.append(f"validation is {recomputed.get('validation')}, not "
                        "PASS")
@@ -720,13 +732,76 @@ def adopt(doc: Mapping[str, Any], repo: Path) -> dict[str, Any]:
             "scored_rows_equivalence": (
                 (recomputed.get("scored_rows_equivalence") or {}).get("verdict")
                 if ok else None),
-            "identities": {"expected": want, "recorded": got}}
+            "identities": {"expected": want, "recorded": got},
+            "executed_commit": executed, "expected_commit": expected_commit}
 
 
 def _sha256(path: Path) -> str:
     import hashlib
 
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+# --- the device handoff ---------------------------------------------------------
+
+def place_for_execution(model: Any, device: str) -> dict[str, Any]:
+    """Move an operator's child to the session's compute device, timed.
+
+    `ChildBuilder` builds every child on the HOST -- the generic contract every
+    structural operator relies on, and the search moves a child to its device
+    by checkpoint and reload. Stage V hands V3's child straight to V4, so the
+    move happens here, at the validation's own boundary, explicitly and once.
+    """
+    import torch
+
+    from aadistill.initialization.device import model_device
+
+    before = model_device(model)
+    t0 = time.time()
+    model.to(device)
+    if str(device).startswith("cuda"):
+        torch.cuda.synchronize()
+    return {"from": str(before), "to": str(model_device(model)),
+            "seconds": round(time.time() - t0, 3)}
+
+
+def require_execution_devices(expected: str, *, parent: Any, store: Any
+                              ) -> dict[str, str]:
+    """The parent (hence every candidate forward), the root sketch and the
+    confidence weights all on the expected device TYPE, or a refusal.
+
+    DEPTH derives its compute device from the parent it is handed, so a parent
+    left on the host would run the whole round on the CPU against a GPU
+    store: silently, until a cross-device op raised mid-round.
+    """
+    import torch
+
+    from aadistill.initialization.device import model_device
+
+    entry = next(iter(store.entries.values()))
+    devices = {"parent_and_candidate_forwards": model_device(parent),
+               "root_sketch": entry.support_indices.device,
+               "root_confidence": entry.confidence.device}
+    want = torch.device(expected).type
+    wrong = {k: str(v) for k, v in devices.items() if v.type != want}
+    if wrong:
+        raise D2ValidationError(
+            f"DEPTH would not run on {expected}: {wrong}. Refusing a silent "
+            "device fallback")
+    return {k: str(v) for k, v in devices.items()}
+
+
+def source_commit(repo: Path) -> dict[str, Any]:
+    """The commit this process executes, and whether the tree is clean."""
+    import subprocess
+
+    def git(*a):
+        r = subprocess.run(["git", "-C", str(repo), *a], capture_output=True,
+                           text=True)
+        return r.stdout.strip() if r.returncode == 0 else None
+    status = git("status", "--porcelain", "--untracked-files=no")
+    return {"commit": git("rev-parse", "HEAD"),
+            "tracked_tree_clean": status == "" if status is not None else None}
 
 
 # --- the stage ------------------------------------------------------------------
@@ -1119,6 +1194,9 @@ def stage_V(*, env: Environment, journal, out: Path, deadline=None,
         pid, store = next(iter(keep["stores"].items()))
         profile, items = keep["items"][pid]
         parent = keep["ffn_child"]
+        placement = place_for_execution(parent, env.device)
+        devices = require_execution_devices(env.device, parent=parent,
+                                            store=store)
         spec = env.adapter.spec_of(parent)
         target = spec.replace(**{DEPTH_FIELD: int(spec[DEPTH_FIELD]) - 1})
         impl = get_implementation("depth.causal_kl_greedy_v1")
@@ -1133,6 +1211,8 @@ def stage_V(*, env: Environment, journal, out: Path, deadline=None,
         record = {
             **timing, "prediction_rows": rows, "profile": pid,
             "parent": "V3's full-scope FFN child (a non-root parent)",
+            "device_placement": placement,
+            "execution_devices": devices,
             "hoarded_gib": round(hoarded / 2**30, 3),
             "reference": outcome.local_metrics.reference,
             "reference_cache": dict(art.get("reference_cache") or {}),
@@ -1186,6 +1266,8 @@ __all__ = ["ARITHMETIC_TOLERANCES", "CORE_STEPS", "D2ValidationError",
            "Environment", "EXECUTION_DIAGNOSTICS", "INTEGRITY_TOLERANCES",
            "RECORD_KEY", "REQUIRED_STATISTICS_OPERATORS",
            "ROW_EQUIVALENCE_TOLERANCES", "SCIENCE_DIAGNOSTICS", "STEP_ORDER",
-           "adopt", "entropy_arithmetic", "expected_identities", "premises",
+           "adopt", "entropy_arithmetic", "expected_identities",
+           "place_for_execution", "premises", "require_execution_devices",
+           "source_commit",
            "production_environment",
            "reduction_arithmetic", "stage_V", "verdicts"]

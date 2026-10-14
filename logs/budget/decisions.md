@@ -10942,3 +10942,25 @@ on a paid pod.
   preregistration and the contract are unchanged.
 - **Next.** The maintainer decides whether to grant the $1.70 against the
   executable commit named in `authorization.proposed.json`.
+
+## 2026-10-14 — Stage V conditional engineering authorization ($1.70) and its pre-launch fixes
+
+- **Decision (maintainer).** The Stage V D2 GPU engineering validation is
+  GRANTED $1.70 cumulative all-in. That is one L40S, a $1.40 session cap and
+  $0.77 expected, with the $0.30 teardown reserve inside. It is conditional on
+  three $0 fixes and on re-binding the executable commit. Ordinary repairs and
+  retries stay inside the $1.70.
+- **Not granted:** a D2 search, recovery, screening, confirmation, D3, or any
+  cap change.
+- **Fixes ($0):**
+  1. V3 → V4 device handoff. V4 and V5 place V3's host-built FFN child on the
+     session device. They refuse a parent, root sketch or confidence on any
+     other device, and record the devices, transfer time and peak VRAM.
+     `ChildBuilder`'s generic contract is unchanged.
+  2. `d2_validation_evidence` adopts against the caller's repository root.
+  3. The premises record the executed commit. Adoption requires it to equal
+     the granted `executable_commit`.
+- **Also:** the drift Jaccard is vectorized, token decoding is cached, and the
+  launcher's report is tested on a stage-V record.
+- **Science unchanged.** The executable commit is re-pinned in the
+  authorization record.

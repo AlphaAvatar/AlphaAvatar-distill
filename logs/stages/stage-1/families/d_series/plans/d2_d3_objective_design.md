@@ -1118,6 +1118,21 @@ run counts as evidence only when all of these hold:
 `scored_v1` additionally needs row equivalence PASS. Any other run stays
 booked and billed, and unlocks nothing.
 
+**The device handoff is explicit.** `ChildBuilder` builds every child on the
+host; that generic contract is unchanged. Before DEPTH runs, V4 and V5:
+
+- move V3's FFN child to the session's device, timed;
+- refuse to run unless the parent (and so every candidate forward), the root
+  sketch and the confidence weights are all on that device type.
+
+There is no silent CPU DEPTH. The record carries the devices, the transfer
+time and the peak VRAM.
+
+**The executed commit is bound.** The premises record the commit the pod runs.
+Adoption judges a run against the contract, preregistration and plan of the
+repository root it is booked in. Once a grant exists, it also requires the
+executed commit to equal the authorization's `executable_commit`.
+
 **Booking is append-only.**
 
 - A booked subrun id is never reused for another run.
