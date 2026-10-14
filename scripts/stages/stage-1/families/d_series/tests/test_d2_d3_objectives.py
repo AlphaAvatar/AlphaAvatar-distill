@@ -430,8 +430,11 @@ class TestTheD2Budget:
             search["hard"]["all_in_usd"] <= b["per_session_cap_usd"])
         assert search["hard_fits_per_session_cap"] == (
             search["hard"]["all_in_usd"] <= b["per_session_cap_usd"])
-        assert search["hard_if_scored_v1_validated"]["all_in_usd"] <= \
-            search["hard"]["all_in_usd"]
+        modes = search["by_prediction_rows"]
+        assert modes["scored_v1"]["hard"]["all_in_usd"] <= \
+            modes["all_v1"]["hard"]["all_in_usd"]
+        assert search["hard"] == modes[search["prediction_rows_in_force"]][
+            "hard"]
 
     def test_the_unmeasured_diagnostic_is_not_in_any_ceiling(self):
         from stages.d_series import d2_budget as BUD

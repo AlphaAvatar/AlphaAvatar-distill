@@ -251,39 +251,63 @@ class D2Authorization(SpendAuthorization):
             action_policy=D2_SEARCH_POLICY)
 
 
-def session_ceiling(repo_root: str | Path = REPO) -> dict[str, Any]:
-    """D2's search price IN FORCE, from `d2_budget.py`. No second formula.
+def session_ceiling(repo_root: str | Path = REPO,
+                    prediction_rows: str = "all_v1") -> dict[str, Any]:
+    """D2's search price IN FORCE for the row selection the session DECLARES,
+    from `d2_budget.py`. No second formula.
 
     `records_max` until the verified stage-L evidence validates the reference
     cache fix, `cache_fix_validated` after; the budget record says which and
-    carries the evidence it rests on.
+    carries the evidence it rests on. The row selection prices itself: a
+    scored_v1 session takes scored_v1's lower bound ONLY while version 3's
+    own scored-rows equivalence is adopted, and is refused otherwise -- never
+    priced at the cheaper bound on another objective's evidence.
     """
     from stages.d_series import d2_budget as BUD
 
     budget = BUD.build()
     search = budget["steps"]["d2_search"]
-    priced = search["priced_by"]
+    modes = search["by_prediction_rows"]
+    if prediction_rows not in modes:
+        raise D2AuthorizationRefused(
+            f"prediction_rows {prediction_rows!r} has no price; priced: "
+            f"{sorted(modes)}")
+    mode = modes[prediction_rows]
+    if not mode["eligible"]:
+        raise D2AuthorizationRefused(
+            f"prediction_rows={prediction_rows!r} is not priceable: its "
+            f"eligibility is {mode['eligibility']}; the search would be "
+            "priced at a discount no adopted evidence supports")
+    priced = mode["priced_by"]
     rate = float(budget["rate_usd_per_hour_basis"])
     hard_min = float(priced["hard_ceiling_minutes"])
-    exp_min = float(search["expected"]["minutes"])
-    disk_usd = float(search["hard"]["disk_usd"])
-    return {"hard_ceiling_usd": float(search["hard"]["all_in_usd"]),
-            "expected_usd": float(search["expected"]["all_in_usd"]),
+    exp_min = float(mode["expected"]["minutes"])
+    disk_usd = float(mode["hard"]["disk_usd"])
+    eligibility = mode["eligibility"]
+    return {"hard_ceiling_usd": float(mode["hard"]["all_in_usd"]),
+            "expected_usd": float(mode["expected"]["all_in_usd"]),
             "hard_ceiling_minutes": hard_min, "expected_minutes": exp_min,
             "session_overhead_minutes": float(priced["session_overhead_minutes"]),
             "container_disk_usd": disk_usd,
             "container_disk_gb": int(search["container_disk_gb"]),
             "price_per_hour": rate,
+            "prediction_rows": prediction_rows,
+            "prediction_rows_in_force": search["prediction_rows_in_force"],
+            "scored_rows_evidence_sha256": (
+                eligibility.get("evidence_session_sha256")
+                if isinstance(eligibility, dict) else None),
             "pricing_in_force": search["pricing_in_force"],
             "calibration_evidence_sha256": (search["calibration_evidence"]
                                             .get("evidence_session_sha256")),
-            "_basis": f"{BUD.RECORD} :: steps.d2_search ({search['pricing_in_force']})"}
+            "_basis": (f"{BUD.RECORD} :: steps.d2_search.by_prediction_rows."
+                       f"{prediction_rows} ({search['pricing_in_force']})")}
 
 
 def reprice_at(rate_usd_per_hour: float,
-               repo_root: str | Path = REPO) -> dict[str, Any]:
+               repo_root: str | Path = REPO,
+               prediction_rows: str = "all_v1") -> dict[str, Any]:
     """The SAME accepted minute bound, costed at the live rate."""
-    accepted = session_ceiling(repo_root)
+    accepted = session_ceiling(repo_root, prediction_rows)
     minutes, exp_min = accepted["hard_ceiling_minutes"], accepted["expected_minutes"]
     disk_per_hour = (accepted["container_disk_usd"] / (minutes / 60.0)
                      if minutes else 0.0)
@@ -347,7 +371,7 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
     quote = ({"gpu": "NVIDIA L40S", "usd_per_hour": float(live_rate),
               "_quoted": "supplied by the caller (tests only)"}
              if live_rate is not None else live_secure_price())
-    priced = reprice_at(quote["usd_per_hour"], root)
+    priced = reprice_at(quote["usd_per_hour"], root, prediction_rows)
     failed = check_the_four_conditions(ceiling=priced["hard_ceiling_usd"],
                                        money=money)
     if failed:
@@ -386,7 +410,8 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
         prediction_rows=prediction_rows,
         pricing={k: priced[k] for k in (
             "pricing_in_force", "calibration_evidence_sha256",
-            "hard_ceiling_minutes", "expected_minutes", "_basis")},
+            "hard_ceiling_minutes", "expected_minutes", "prediction_rows",
+            "scored_rows_evidence_sha256", "_basis")},
         money={**money, "derived_session": priced, "live_quote": quote},
         one_use=("ONE grant, ONE issuance, ONE launcher session; a retry is a "
                  "new authorization"),

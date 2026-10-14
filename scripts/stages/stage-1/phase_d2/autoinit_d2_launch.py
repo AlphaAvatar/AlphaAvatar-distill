@@ -102,6 +102,26 @@ def driver_command(ctx: Any, plan: Any) -> str:
             f"--device cuda --deadline-s {driver_deadline_seconds(ctx, plan)}")
 
 
+#: The search's APPEND-ONLY journals, relayed off the pod on every poll. The
+#: runner relays only the run log, the status file and the evidence document,
+#: which this driver writes once at the end; D1's search lost every state's
+#: evidence when the provider deleted its pod mid-beam (d1_search_20261006_
+#: 101725: 39 of 92 expansions, recovered only from by-hand snapshots). With
+#: these, a pod lost mid-run still leaves every completed state's record --
+#: identity, artifact digest, evaluation -- and the per-expansion telemetry.
+SEARCH_RELAY_STREAMS = (
+    ("search/states.jsonl", "states.jsonl"),
+    ("search/telemetry.jsonl", "telemetry.jsonl"),
+    ("journal.jsonl", "journal.jsonl"),
+)
+
+
+def search_relay_streams(ctx: Any) -> tuple[tuple[str, str], ...]:
+    """``(remote, local)`` for each append-only search journal."""
+    return tuple((f"{REPO}/{EVIDENCE_DIR}/{remote}", local)
+                 for remote, local in SEARCH_RELAY_STREAMS)
+
+
 # --- products: the committed Top-K -----------------------------------------
 
 class SelectionUnreadable(RuntimeError):
@@ -289,14 +309,16 @@ def prechecks(args) -> tuple:
             bundle_staged_gate)
 
 
-def budget_spec(repo_root: Path) -> BudgetSpec:
-    """DECOMPOSES the priced bound so the plan lands exactly on it."""
+def budget_spec(repo_root: Path, prediction_rows: str = "all_v1") -> BudgetSpec:
+    """DECOMPOSES the priced bound so the plan lands exactly on it -- the
+    bound of the row selection the session runs, so the watchdog's hard
+    terminate and the driver's soft stop are that selection's."""
     from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
 
     from stages.phase_d1.d1_authorization import live_money
     from stages.phase_d2.d2_authorization import session_ceiling
 
-    priced = session_ceiling(repo_root)
+    priced = session_ceiling(repo_root, prediction_rows)
     overhead = float(priced["session_overhead_minutes"])
     accepted_hard = float(priced["hard_ceiling_minutes"])
     expected_total = float(priced["expected_minutes"])
@@ -330,9 +352,9 @@ def spec(args) -> SessionSpec:
         session_id="autoinit-d2-search",
         schema="aadistill.autoinit.d2_search_session/v1",
         description=("D2: ONE formal beam search over D1's frozen space "
-                     "minimizing the frozen-teacher-confidence-weighted root "
-                     "KL (preregistration v2). Commits "
-                     "the preregistered Top-K and stops."),
+                     "minimizing the frozen teacher's Top-K confidence times "
+                     "the root-reference union Top-K KL (preregistration v3). "
+                     "Commits the preregistered Top-K and stops."),
         authorization_path=auth_path_for(getattr(args, "run_id", None)),
         authorization_loader=D2Authorization.load,
         commands=ExecutionCommands(
@@ -344,7 +366,8 @@ def spec(args) -> SessionSpec:
         #: THE PREREGISTRATION HASH is the plan hash: the dispatch branch calls
         #: `require_plan` with it.
         plan_hash=S.preregistration_hash(REPO_ROOT),
-        budget=budget_spec(REPO_ROOT),
+        budget=budget_spec(REPO_ROOT,
+                           getattr(args, "prediction_rows", "all_v1")),
         setup=SetupManifest(
             env={"SESSION_KIND": SESSION_KIND},
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
@@ -376,7 +399,8 @@ def spec(args) -> SessionSpec:
             report_names=("d2_search.json", "journal.jsonl",
                           "stage1_selection.json"),
             fetch_products=fetch_selected_checkpoints,
-            products_secured=all_selected_leaves_secured),
+            products_secured=all_selected_leaves_secured,
+            extra_relay_streams=search_relay_streams),
         teardown=TeardownPolicy(
             note="delete the pod, verify from the provider that it is gone, STOP"),
     )
@@ -426,7 +450,8 @@ def resolve_operational_defaults(args) -> dict[str, Any]:
     """Price, disk, record path and poll limit from the priced session."""
     from stages.phase_d2.d2_authorization import session_ceiling
 
-    priced = session_ceiling(REPO_ROOT)
+    priced = session_ceiling(REPO_ROOT,
+                             getattr(args, "prediction_rows", "all_v1"))
     resolved: dict[str, Any] = {}
     if getattr(args, "max_price", None) is None:
         args.max_price = resolved["max_price"] = float(priced["price_per_hour"])

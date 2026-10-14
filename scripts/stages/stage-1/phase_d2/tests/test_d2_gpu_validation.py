@@ -776,7 +776,11 @@ class TestAdoption:
         from stages.phase_d2 import d2_authorization as A
         from stages.phase_d2 import d2_session as S
         ev = _adopted(tmp_path, record=_adoptable(entropy=False))
-        monkeypatch.setattr(BUD, "d2_validation_evidence", lambda *a, **k: ev)
+        assert ev["scored_rows_equivalence"] is None
+        #: The gate reads the evidence of the objective it prices -- stage
+        #: W's for version 3 -- so an unadopted record is offered THERE.
+        monkeypatch.setattr(BUD, "d2v3_validation_evidence",
+                            lambda *a, **k: ev)
         with pytest.raises(A.D2AuthorizationRefused, match="scored-rows"):
             A.build_payload(
                 grant={"approves_preregistration_hash":

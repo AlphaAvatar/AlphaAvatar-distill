@@ -114,9 +114,15 @@ class TestTheIssuerRefuses:
     def test_a_passed_equivalence_lets_scored_rows_through_that_gate(
             self, monkeypatch):
         from stages.d_series import d2_budget as BUD
-        #: VERSION 3's own evidence (stage W) is what opens the gate.
+        from stages.phase_d1 import d1_authorization as D1A
+        #: VERSION 3's own evidence (stage W) is what opens the gate. The
+        #: funding scope is held closed, so the refusal that follows is the
+        #: NEXT gate's -- whatever the live config's scope is.
         monkeypatch.setattr(BUD, "d2v3_validation_evidence", lambda *a, **k: {
             "scored_rows_equivalence": "PASS"})
+        real = D1A.live_money
+        monkeypatch.setattr(D1A, "live_money", lambda root: {
+            **real(root), "funds_formal_sessions_of": ["phase_d1"]})
         with pytest.raises(A.D2AuthorizationRefused) as err:
             A.build_payload(grant=self._approved(), session_commit="a" * 40,
                             granted_utc="t", run_id="r1",
@@ -135,14 +141,96 @@ class TestTheIssuerRefuses:
     def test_the_ceiling_is_the_budget_price_in_force(self):
         from stages.d_series import d2_budget as BUD
         record = json.loads((REPO / BUD.RECORD).read_text())
-        ceiling = A.session_ceiling(REPO)
-        assert ceiling["pricing_in_force"] == \
-            record["steps"]["d2_search"]["pricing_in_force"]
-        assert ceiling["hard_ceiling_usd"] == \
-            record["steps"]["d2_search"]["hard"]["all_in_usd"]
-        assert A.reprice_at(ceiling["price_per_hour"], REPO)[
-            "hard_ceiling_usd"] == pytest.approx(ceiling["hard_ceiling_usd"],
-                                                 abs=0.01)
+        search = record["steps"]["d2_search"]
+        for rows in S.PREDICTION_ROWS:
+            ceiling = A.session_ceiling(REPO, rows)
+            mode = search["by_prediction_rows"][rows]
+            assert ceiling["pricing_in_force"] == search["pricing_in_force"]
+            assert ceiling["prediction_rows"] == rows
+            assert ceiling["hard_ceiling_usd"] == mode["hard"]["all_in_usd"]
+            assert ceiling["hard_ceiling_minutes"] == \
+                mode["priced_by"]["hard_ceiling_minutes"]
+            assert A.reprice_at(ceiling["price_per_hour"], REPO, rows)[
+                "hard_ceiling_usd"] == pytest.approx(
+                    ceiling["hard_ceiling_usd"], abs=0.01)
+        #: The record's headline price is the selection IN FORCE.
+        in_force = search["prediction_rows_in_force"]
+        assert search["hard"] == search["by_prediction_rows"][in_force]["hard"]
+
+
+class TestTheRowSelectionPrice:
+    """The session is priced by the row selection it DECLARES, and scored_v1's
+    lower bound exists only on version 3's own adopted equivalence."""
+
+    def test_scored_rows_reduce_the_bound(self):
+        a = A.session_ceiling(REPO, "all_v1")
+        sc = A.session_ceiling(REPO, "scored_v1")
+        assert sc["hard_ceiling_minutes"] < a["hard_ceiling_minutes"]
+        assert sc["hard_ceiling_usd"] < a["hard_ceiling_usd"]
+        assert sc["scored_rows_evidence_sha256"]
+
+    def test_without_adopted_evidence_the_discount_is_refused(
+            self, monkeypatch):
+        from stages.d_series import d2_budget as BUD
+        monkeypatch.setattr(BUD, "d2v3_validation_evidence", lambda *a, **k: {
+            "scored_rows_equivalence": None})
+        with pytest.raises(A.D2AuthorizationRefused, match="not priceable"):
+            A.session_ceiling(REPO, "scored_v1")
+        assert A.session_ceiling(REPO, "all_v1")["hard_ceiling_usd"] > 0
+        #: and the record's price in force falls back to all_v1 rather than
+        #: claiming a saving it cannot show
+        search = BUD.build()["steps"]["d2_search"]
+        assert search["prediction_rows_in_force"] == "all_v1"
+        assert search["hard"] == search["by_prediction_rows"]["all_v1"]["hard"]
+
+    @pytest.mark.parametrize("rows", ["all_v1", "scored_v1"])
+    def test_the_launch_plan_lands_on_the_declared_rows_bound(self, rows):
+        ceiling = A.session_ceiling(REPO, rows)
+        plan = L.budget_spec(REPO, rows).plan(
+            price_per_hour=ceiling["price_per_hour"],
+            authorized_usd=ceiling["hard_ceiling_usd"])
+        assert plan.hard_terminate_minutes == pytest.approx(
+            ceiling["hard_ceiling_minutes"], abs=0.05)
+        assert plan.soft_stop_minutes < plan.hard_terminate_minutes
+        args = SimpleNamespace(prediction_rows=rows, run_id="d2_search_x",
+                               max_price=None, disk_gb=None, out=None,
+                               poll_limit_min=None)
+        resolved = L.resolve_operational_defaults(args)
+        assert resolved["poll_limit_min"] == pytest.approx(
+            ceiling["hard_ceiling_minutes"] + 120.0, abs=0.1)
+
+    def test_the_spec_prices_the_rows_it_launches(self):
+        args = L.build_parser().parse_args([
+            "--scr", "/tmp/x", "--session-commit", "a" * 40, "--bundle", "b",
+            "--run-id", "d2_search_x", "--prediction-rows", "scored_v1"])
+        spec = L.spec(args)
+        want = L.budget_spec(REPO, "scored_v1")
+        assert spec.budget == want
+        assert spec.budget != L.budget_spec(REPO, "all_v1")
+
+    def test_the_issued_payload_binds_rows_and_price(self, monkeypatch,
+                                                     tmp_path):
+        from stages.phase_d1 import d1_authorization as D1A
+        real = D1A.live_money
+        monkeypatch.setattr(D1A, "live_money", lambda root: {
+            **real(root), "funds_formal_sessions_of": sorted(set(
+                real(root)["funds_formal_sessions_of"]) | {S.EXPERIMENT_ID})})
+        grant = {"approves_preregistration_hash": S.preregistration_hash(),
+                 "granted_by": "test"}
+        out = {}
+        for rows in S.PREDICTION_ROWS:
+            out[rows] = A.build_payload(
+                grant=grant, session_commit="a" * 40, granted_utc="t",
+                run_id="d2_search_x", prediction_rows=rows, live_rate=1.09,
+                workdir=tmp_path / rows)
+            assert out[rows]["prediction_rows"] == rows
+            assert out[rows]["pricing"]["prediction_rows"] == rows
+            assert out[rows]["hard_cap_usd"] == pytest.approx(
+                A.reprice_at(1.09, REPO, rows)["hard_ceiling_usd"])
+        assert out["scored_v1"]["config_hash"] != out["all_v1"]["config_hash"]
+        assert out["scored_v1"]["measurement_protocol_id"] != \
+            out["all_v1"]["measurement_protocol_id"]
+        assert out["scored_v1"]["hard_cap_usd"] < out["all_v1"]["hard_cap_usd"]
 
 
 class TestTheLauncher:
@@ -201,6 +289,29 @@ class TestTheLauncher:
                      "audit/autoinit_d2/search/states.jsonl"):
             assert need in patterns
         assert not any(e["required"] for e in doc["entries"])
+
+    def test_the_search_journals_are_relayed_while_it_runs(self):
+        """REGRESSION for D1's pod lost mid-beam: the append-only journals
+        stream off the pod on every poll, and they are the same files both
+        artifact specs collect."""
+        relay = L.search_relay_streams(None)
+        remotes = {r for r, _ in relay}
+        for spec_name in ("d2_search_artifacts.json",
+                          "d2_search_artifacts_failed.json"):
+            doc = json.loads((REPO / "configs/stages/stage-1/phase_d2"
+                              / spec_name).read_text())
+            patterns = {e["pattern"] for e in doc["entries"]}
+            for want in ("audit/autoinit_d2/search/states.jsonl",
+                         "audit/autoinit_d2/search/telemetry.jsonl",
+                         "audit/autoinit_d2/journal.jsonl"):
+                assert want in patterns
+                assert f"{L.REPO}/artifacts/{want}" in remotes
+        assert len({local for _, local in relay}) == len(relay)
+        args = L.build_parser().parse_args([
+            "--scr", "/tmp/x", "--session-commit", "a" * 40, "--bundle", "b",
+            "--run-id", "d2_search_x"])
+        assert L.spec(args).artifacts.extra_relay_streams is \
+            L.search_relay_streams
 
     def test_the_driver_record_is_the_evidence_file_the_runner_fetches(self):
         assert L.AUDIT_DIRNAME in L.EVIDENCE_DIR

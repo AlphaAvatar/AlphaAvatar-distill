@@ -195,8 +195,8 @@
    "objective_overhead": {
     "source": "measured once: logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/runs/d2v3r2val_20261014_185259/out/adoption_all_v1/adoption.json (stage W, adopted); the bound adds a variation margin",
     "depth_seconds_per_candidate": {
-     "expected": 0.4495,
-     "bound": 0.6742
+     "expected": 0.3337,
+     "bound": 0.5005
     },
     "state_eval_seconds_per_evaluation": {
      "expected": 0.0,
@@ -206,8 +206,8 @@
      "what": "the round-0 parent-KL diagnostic",
      "round0_candidates": 36,
      "round0_source": "stage W's W4 round",
-     "expected": 27.54,
-     "bound": 41.32
+     "expected": 23.22,
+     "bound": 34.84
     },
     "operator_cell_factor": {
      "what": "the weighted activation statistics: the larger of Stage V's factor and W2's FFN full/narrow ratio",
@@ -222,8 +222,8 @@
     "bound_factor_on_one_measurement": 1.5,
     "union_terms": {
      "status": "MEASURED (stage W, adopted)",
-     "rows_mode": "all_v1",
-     "rows_per_candidate": 62161.0,
+     "rows_mode": "scored_v1",
+     "rows_per_candidate": 44746.0,
      "geometry": {
       "vocab_size": 151936,
       "hidden_size": 2560,
@@ -245,24 +245,75 @@
     }
    },
    "expected": {
-    "minutes": 592.6,
-    "gpu_usd": 10.77,
-    "disk_usd": 0.55,
-    "all_in_usd": 11.32
+    "minutes": 583.5,
+    "gpu_usd": 10.6,
+    "disk_usd": 0.54,
+    "all_in_usd": 11.14
    },
    "hard": {
-    "minutes": 1273.6,
-    "gpu_usd": 23.14,
-    "disk_usd": 1.18,
-    "all_in_usd": 24.32
-   },
-   "hard_fits_per_session_cap": true,
-   "hard_if_scored_v1_validated": {
     "minutes": 1240.9,
     "gpu_usd": 22.54,
     "disk_usd": 1.15,
-    "all_in_usd": 23.69,
-    "_is": "a LEVER, not the price in force: the union terms over the scored rows only, valid once version 3's own scored_v1 equivalence passes on a GPU"
+    "all_in_usd": 23.69
+   },
+   "hard_fits_per_session_cap": true,
+   "prediction_rows_decided": "scored_v1",
+   "prediction_rows_in_force": "scored_v1",
+   "_prediction_rows_are": "expected, hard and priced_by above are the in-force selection's; by_prediction_rows holds both, each with its eligibility",
+   "by_prediction_rows": {
+    "all_v1": {
+     "expected": {
+      "minutes": 592.6,
+      "gpu_usd": 10.77,
+      "disk_usd": 0.55,
+      "all_in_usd": 11.32
+     },
+     "hard": {
+      "minutes": 1273.6,
+      "gpu_usd": 23.14,
+      "disk_usd": 1.18,
+      "all_in_usd": 24.32
+     },
+     "priced_by": {
+      "expansions_max": 92,
+      "structural_minutes_max": 1178.02,
+      "session_overhead_minutes": 95.0,
+      "hard_ceiling_minutes": 1273.56,
+      "hard_ceiling_usd": 24.32,
+      "one_time_minutes": 0.54
+     },
+     "eligible": true,
+     "eligibility": "always"
+    },
+    "scored_v1": {
+     "expected": {
+      "minutes": 583.5,
+      "gpu_usd": 10.6,
+      "disk_usd": 0.54,
+      "all_in_usd": 11.14
+     },
+     "hard": {
+      "minutes": 1240.9,
+      "gpu_usd": 22.54,
+      "disk_usd": 1.15,
+      "all_in_usd": 23.69
+     },
+     "priced_by": {
+      "expansions_max": 92,
+      "structural_minutes_max": 1145.32,
+      "session_overhead_minutes": 95.0,
+      "hard_ceiling_minutes": 1240.86,
+      "hard_ceiling_usd": 23.69,
+      "one_time_minutes": 0.54
+     },
+     "eligible": true,
+     "eligibility": {
+      "rule": "version 3's own scored-rows equivalence, adopted from stage W (d2v3_validation_evidence)",
+      "verdict": "PASS",
+      "evidence_session": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/runs/d2v3r2val_20261014_185259/out/adoption_all_v1/adoption.json",
+      "evidence_session_sha256": "5edc0b92354662ac505c5c0c7c5a8a2988ba73091b22814faa121a22d6fef2ac"
+     }
+    }
    },
    "memory": {
     "store_bytes": {
@@ -279,7 +330,7 @@
     "_basis": "per row: K x (8 B index + 4 B log-prob) + 5 float32 per-position values + H bf16 hidden + 1 float32 log-normalizer; blocks of 512 candidate rows"
    },
    "cap_compliance_plan": {
-    "now": "the planning bound rests on PROVISIONAL union terms (3x pass bound, no overlap credit); it decides nothing until measured",
+    "now": "the planning bound rests on stage W's MEASURED union terms (adopted) at scored_v1",
     "steps": [
      "1. re-price from the adopted stage W (measured union terms with the one-measurement margin), at the live rate with every teardown reserve -- d2v3_validation_evidence",
      "2. if version 3's scored_v1 equivalence PASSES in stage W, price DEPTH and state evaluation at scored_v1 and RE-DERIVE (the provisional lever is not a reliable bound by itself)",
@@ -307,30 +358,30 @@
     "_is": "version 2's price at the cached DEPTH cell, for comparison only: version 2 was superseded before its search"
    },
    "depth_cell_minutes": {
-    "root_max": 26.5861,
-    "deeper_max": 26.2463
+    "root_max": 25.7254,
+    "deeper_max": 25.3856
    },
    "priced_by": {
     "expansions_max": 92,
-    "structural_minutes_max": 1178.02,
+    "structural_minutes_max": 1145.32,
     "session_overhead_minutes": 95.0,
-    "hard_ceiling_minutes": 1273.56,
-    "hard_ceiling_usd": 24.32,
+    "hard_ceiling_minutes": 1240.86,
+    "hard_ceiling_usd": 23.69,
     "one_time_minutes": 0.54
    },
    "pricing_in_force": "cache_fix_validated",
    "container_disk_gb": 400,
    "hard_records_max": {
-    "minutes": 1777.8,
-    "gpu_usd": 32.3,
-    "disk_usd": 1.65,
-    "all_in_usd": 33.94
+    "minutes": 1745.1,
+    "gpu_usd": 31.7,
+    "disk_usd": 1.62,
+    "all_in_usd": 33.32
    },
    "hard_if_cache_fix_validated": {
-    "minutes": 1273.6,
-    "gpu_usd": 23.14,
-    "disk_usd": 1.18,
-    "all_in_usd": 24.32
+    "minutes": 1240.9,
+    "gpu_usd": 22.54,
+    "disk_usd": 1.15,
+    "all_in_usd": 23.69
    },
    "calibration_evidence": {
     "usable": true,
@@ -381,8 +432,8 @@
     "validated_by": "stage L's DEPTH pair, which runs under a deliberately hoarded pool and records reference_cache.mode; or D2's own first DEPTH expansions",
     "until_validated": "the planning bound prices DEPTH at D1's measured recompute-mode maxima",
     "depth_cell_minutes_if_validated": {
-     "root_max": 26.5861,
-     "deeper_max": 26.2463
+     "root_max": 25.7254,
+     "deeper_max": 25.3856
     }
    },
    "previous_model_superseded": {
@@ -499,10 +550,10 @@
   }
  },
  "totals": {
-  "expected_usd": 37.3,
-  "hard_ceiling_usd": 58.48,
+  "expected_usd": 37.12,
+  "hard_ceiling_usd": 57.85,
   "teardown_reserves_usd": 1.5,
-  "hard_plus_reserves_usd": 59.98,
+  "hard_plus_reserves_usd": 59.35,
   "rescoring": "MEASURED by stage L and inside the behavioural ceilings with the one-measurement margin"
  },
  "per_session_cap_usd": 30.0,

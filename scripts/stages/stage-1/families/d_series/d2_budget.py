@@ -49,6 +49,13 @@ R0_PLAN = ("logs/stages/stage-1/families/d_series/validations/prediction-rows-r0
 #: Container-disk billing, $/GB/month, as the launchers price it.
 DISK_USD_PER_GB_MONTH = 0.10
 TEARDOWN_RESERVE_USD = 0.30
+#: THE D2 SEARCH'S ROW SELECTION, a maintainer decision (2026-10-14, on the
+#: adopted Stage W revision 2): scored_v1. It prices the search ONLY while
+#: version 3's OWN scored-rows equivalence is adopted (`d2v3_validation_
+#: evidence`); otherwise the price in force is all_v1 and no discount is
+#: claimed. Stage V's verdict on version 2 never stands in for it.
+D2_SEARCH_PREDICTION_ROWS = "scored_v1"
+PREDICTION_ROWS_MODES = ("all_v1", "scored_v1")
 #: The D2 objective's overhead is ESTIMATED at +3-7% of DEPTH and +5-10% of
 #: state evaluation and not yet measured. Applied ONLY to the two paths the
 #: objective touches -- the DEPTH scoring loop and the state evaluation --
@@ -1000,17 +1007,26 @@ def build(k_candidates: int = 4) -> dict[str, Any]:
     #: D2 search: priced from D1's own search records (see priced_from_records).
     disk_search = int(search["container_disk_gb"])
     evidence = calibration_evidence()
-    #: D2 VERSION 3: version 2's measured terms plus the union terms.
+    import functools
+
+    #: THE ROW SELECTION IN FORCE: the decided one when its own evidence is
+    #: adopted, all_v1 otherwise -- read from the booked stage-W record.
+    w_ev = d2v3_validation_evidence()
+    eligible = {"all_v1": True,
+                "scored_v1": w_ev.get("scored_rows_equivalence") == "PASS"}
+    rows_in_force = (D2_SEARCH_PREDICTION_ROWS
+                     if eligible[D2_SEARCH_PREDICTION_ROWS] else "all_v1")
+
+    def overhead_for(rows: str):
+        return functools.partial(union_kl_overhead, rows_mode=rows)
+
+    #: D2 VERSION 3: version 2's measured terms plus the union terms, over
+    #: the rows the search will reduce.
     records = priced_from_records(rate, disk_search, evidence,
-                                  overhead=union_kl_overhead)
+                                  overhead=overhead_for(rows_in_force))
     cached = priced_from_records(rate, disk_search, evidence,
                                  depth_cell="cached_validated",
-                                 overhead=union_kl_overhead)
-    #: The scored_v1 LEVER: union terms over the scored rows only.
-    import functools
-    cached_scored = priced_from_records(
-        rate, disk_search, evidence, depth_cell="cached_validated",
-        overhead=functools.partial(union_kl_overhead, rows_mode="scored_v1"))
+                                 overhead=overhead_for(rows_in_force))
     #: Version 2's price, for the record only: superseded before its search.
     v2_cached = priced_from_records(rate, disk_search, evidence,
                                     depth_cell="cached_validated")
@@ -1018,6 +1034,29 @@ def build(k_candidates: int = 4) -> dict[str, Any]:
     in_force = ("cache_fix_validated" if evidence["cache_fix_validated"]
                 else "records_max")
     rec = cached if in_force == "cache_fix_validated" else records
+    cell = ("cached_validated" if in_force == "cache_fix_validated"
+            else "records_max")
+    #: BOTH row selections at the DEPTH cell in force: a session is priced
+    #: by the selection it DECLARES (`d2_authorization.session_ceiling`), and
+    #: scored_v1's is refused there unless its evidence is adopted.
+    by_rows = {}
+    for rows in PREDICTION_ROWS_MODES:
+        r_ = (rec if rows == rows_in_force else priced_from_records(
+            rate, disk_search, evidence, depth_cell=cell,
+            overhead=overhead_for(rows)))
+        by_rows[rows] = {
+            "expected": _usd(r_["expected_minutes"], rate, disk_search),
+            "hard": _usd(r_["priced"]["hard_ceiling_minutes"], rate,
+                         disk_search),
+            "priced_by": r_["priced"],
+            "eligible": eligible[rows],
+            "eligibility": ("always" if rows == "all_v1" else {
+                "rule": ("version 3's own scored-rows equivalence, adopted "
+                         "from stage W (d2v3_validation_evidence)"),
+                "verdict": w_ev.get("scored_rows_equivalence"),
+                "evidence_session": w_ev.get("evidence_session"),
+                "evidence_session_sha256": w_ev.get(
+                    "evidence_session_sha256")})}
     #: D3's search, for the programme view only: the same machinery with the
     #: STUDENT-confidence overhead stage L measured (on the superseded D2,
     #: whose per-position work D3 shares).
@@ -1044,18 +1083,22 @@ def build(k_candidates: int = 4) -> dict[str, Any]:
         "hard": _usd(search_hard_min, rate, disk_search),
         "hard_fits_per_session_cap": _usd(search_hard_min, rate,
                                           disk_search)["all_in_usd"] <= 30.0,
-        "hard_if_scored_v1_validated": {
-            **_usd(cached_scored["priced"]["hard_ceiling_minutes"], rate,
-                   disk_search),
-            "_is": ("a LEVER, not the price in force: the union terms over "
-                    "the scored rows only, valid once version 3's own "
-                    "scored_v1 equivalence passes on a GPU")},
+        "prediction_rows_decided": D2_SEARCH_PREDICTION_ROWS,
+        "prediction_rows_in_force": rows_in_force,
+        "_prediction_rows_are": ("expected, hard and priced_by above are the "
+                                 "in-force selection's; by_prediction_rows "
+                                 "holds both, each with its eligibility"),
+        "by_prediction_rows": by_rows,
         "memory": union_memory(geo_for_memory(rec)),
         #: WHAT HAPPENS IF THE BOUND DOES NOT FIT ONE SESSION, in order, each
         #: step verifiable before money moves. The cap, K and the science are
         #: never the lever.
         "cap_compliance_plan": {
-            "now": ("the planning bound rests on PROVISIONAL union terms (3x "
+            #: DERIVED from the evidence the price reads, never restated.
+            "now": (f"the planning bound rests on stage W's MEASURED union "
+                    f"terms (adopted) at {rows_in_force}"
+                    if adopted_v3_validation() is not None else
+                    "the planning bound rests on PROVISIONAL union terms (3x "
                     "pass bound, no overlap credit); it decides nothing until "
                     "measured"),
             "steps": [
@@ -1491,8 +1534,9 @@ def programme_scenarios(limits: dict[str, float],
                 "stage_w_not_adopted_because": w_ev.get("why"),
                 "stage_w_evidence_session": w_ev.get("evidence_session")},
             "scored_v1_for_version_3": {
-                "hard_usd": search["hard_if_scored_v1_validated"][
-                    "all_in_usd"],
+                "in_force": search["prediction_rows_in_force"] == "scored_v1",
+                "hard_usd": {rows: search["by_prediction_rows"][rows]["hard"][
+                    "all_in_usd"] for rows in PREDICTION_ROWS_MODES},
                 "how": ("version 3's own scored_v1 equivalence, a step of "
                         "its GPU validation")},
             "d3_at_k2": {"saves_hard_usd": round(k4 - k2, 2),
