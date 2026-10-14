@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
-# Stage V capacity acquisition. Runs on the DEV BOX, never on the pod.
+# GPU-validation capacity acquisition (Stage V, and stage W by parameter).
+# Runs on the DEV BOX, never on the pod.
 #
 #   tmux new-session -d -s d2val "bash scripts/stages/stage-1/phase_d2/d2val_acquire.sh"
+#   tmux new-session -d -s d2v3val "ACQ_VALIDATION_DIR=logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1 ACQ_STAGES=W ACQ_RUN_PREFIX=d2v3val bash scripts/stages/stage-1/phase_d2/d2val_acquire.sh"
+#
+# The validation directory owns the grant (authorization.json: commit, session
+# cap, status) and the campaign; the defaults are Stage V's, unchanged.
 #
 # ONE launcher invocation per attempt, each with a FRESH run id, at the grant's
 # executable commit and session cap. It retries ONLY a provider capacity
@@ -13,9 +18,12 @@
 # resource at any instant.
 set -u
 cd "$(dirname "$0")/../../../.." || exit 2
-VDIR=logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1
+VDIR=${ACQ_VALIDATION_DIR:-logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1}
+STAGES=${ACQ_STAGES:-V}
+PREFIX=${ACQ_RUN_PREFIX:-d2val}
+case "$STAGES" in V|W) ;; *) echo "ACQ_STAGES must be V or W, got $STAGES" >&2; exit 4 ;; esac
 RUNS=artifacts/stages/stage-1/phase_d1/qualification/topk_adoption
-ACQ=${ACQ_LOG:-${RUNS}/d2val_acquire.log}
+ACQ=${ACQ_LOG:-${RUNS}/${PREFIX}_acquire.log}
 MAX_ATTEMPTS=${MAX_ATTEMPTS:-40}
 SLEEP_SECONDS=${SLEEP_SECONDS:-180}
 PY=.venv/bin/python
@@ -53,10 +61,10 @@ for i in $(seq 1 "$MAX_ATTEMPTS"); do
     say "attempt ${i}: provider lists pods=${LIVE}; refusing to create another. STOP"
     break
   fi
-  RUN=d2val_$(date -u +%Y%m%d_%H%M%S)
+  RUN=${PREFIX}_$(date -u +%Y%m%d_%H%M%S)
   say "attempt ${i}/${MAX_ATTEMPTS}: ${RUN}"
   ADOPT_CAMPAIGN="$VDIR/campaign.json" ADOPT_COMMIT="$COMMIT" \
-  ADOPT_BRANCH=exec/d1-behavioural-readiness ADOPT_STAGES=V \
+  ADOPT_BRANCH=exec/d1-behavioural-readiness ADOPT_STAGES="$STAGES" \
   ADOPT_PREDICTION_ROWS=all_v1 SESSION_CAP="$CAP" \
     bash scripts/stages/stage-1/phase_d1/topk_adoption_launch.sh "$RUN" \
     > "$RUNS/${RUN}.stdout" 2>&1
@@ -70,7 +78,7 @@ for i in $(seq 1 "$MAX_ATTEMPTS"); do
   fi
   EV=""
   [ -f "$RUNS/$RUN/out/adoption_all_v1/adoption.json" ] && EV=out/adoption_all_v1/adoption.json
-  book "$RUN" "stage V session: launcher rc=${RC}" "$EV"
+  book "$RUN" "stage ${STAGES} session: launcher rc=${RC}" "$EV"
   say "attempt ${i}: a pod existed (launcher rc=${RC}); booked; STOP for review"
   break
 done

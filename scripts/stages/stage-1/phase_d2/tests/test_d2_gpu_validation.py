@@ -893,7 +893,7 @@ def test_the_driver_knows_stage_v_and_runs_it_under_all_v1_only():
     scored_v1 base mode before anything resident."""
     src = (REPO / "scripts/stages/stage-1/phase_d1/topk_adoption_driver.py"
            ).read_text()
-    assert '{"C", "D", "P", "L", "V"}' in src
+    assert '{"C", "D", "P", "L", "V", "W"}' in src
     assert "stage V compares all_v1 against scored_v1 internally" in src
     assert "D2V.premises(repo)" in src and "D2V.stage_V(" in src
 

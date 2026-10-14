@@ -1740,7 +1740,15 @@ def d2_rows_verdict(result: dict[str, Any]) -> dict[str, Any]:
 
 # --- main -------------------------------------------------------------------
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None, *,
+         hooks: Mapping[str, Any] | None = None) -> int:
+    """The driver. ``hooks`` is for the $0 REHEARSAL only and replaces the
+    three host-specific pieces -- ``environment`` (the CUDA probe),
+    ``fetch_teacher`` and a stage's environment factory (``"W"``) -- so a CPU
+    toy runs this same function end to end: the same premises, protocol
+    bindings, journal, deadline, flushes and adoption record. The pod passes
+    none and gets the production pieces."""
+    hooks = dict(hooks or {})
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", default=None)
     ap.add_argument("--repo", default=str(REPO_DEFAULT))
@@ -1754,8 +1762,10 @@ def main(argv: list[str] | None = None) -> int:
                          "DEPTH operator invocation per profile, ~25 min each) "
                          "and L (the D-series reference calibration: B rebuilt, "
                          "lambda and thresholds, then objective-overhead "
-                         "timing), and V (the redesigned D2's GPU validation, "
-                         "phase_d2/d2_gpu_validation.py). A "
+                         "timing), V (the redesigned D2's GPU validation, "
+                         "phase_d2/d2_gpu_validation.py) and W (D2 version "
+                         "3's GPU validation, phase_d2/d2v3_gpu_validation.py)"
+                         ". A "
                          "subrun that needs only D builds its candidate with "
                          "depth.positional_v0 instead of repeating the search.")
     ap.add_argument("--prediction-rows", default="all_v1",
@@ -1799,7 +1809,8 @@ def main(argv: list[str] | None = None) -> int:
     deadline = None
     try:
         with journal.stage("environment") as st:
-            record["environment"] = environment(repo)
+            record["environment"] = (hooks.get("environment")
+                                     or environment)(repo)
             st.result = {"gpu": record["environment"]["gpu_name"]}
 
         with journal.stage("register_and_policy") as st:
@@ -1867,13 +1878,13 @@ def main(argv: list[str] | None = None) -> int:
                 "stage C compares full-vocabulary against Top-K logit BLOCKS and "
                 "its observer reshapes them as [B, T, V]; it is defined on the "
                 "all-rows path only. Run C under --prediction-rows all_v1.")
-        unknown = wanted - {"C", "D", "P", "L", "V"}
+        unknown = wanted - {"C", "D", "P", "L", "V", "W"}
         if unknown:
             raise AdoptionError(
                 f"--stages names {sorted(unknown)}; known: C (DEPTH dual "
                 "scoring), D (state evaluation), P (one real DEPTH operator "
                 "invocation), L (the D-series reference calibration), V (the "
-                "D2 GPU validation). A typo "
+                "D2 GPU validation), W (D2 version 3's GPU validation). A typo "
                 "would silently run less than intended and look like a clean "
                 "result.")
 
@@ -1912,8 +1923,23 @@ def main(argv: list[str] | None = None) -> int:
                 record["V_premises"] = D2V.premises(repo)
                 st.result = {"objective": record["V_premises"]["objective"]}
 
+        #: Stage W's premises: the version-3 objective, support, contract,
+        #: the DRAFT preregistration bound by its hash, the plan's REGISTERED
+        #: tolerances against the code's, the teacher binding. W runs its own
+        #: scored_v1 arms, so its base mode is all_v1.
+        if "W" in wanted:
+            if args.prediction_rows != "all_v1":
+                raise AdoptionError(
+                    "stage W compares all_v1 against scored_v1 internally; run "
+                    "it under --prediction-rows all_v1")
+            from stages.phase_d2 import d2v3_gpu_validation as D2W
+
+            with journal.stage("d2v3_validation_premises") as st:
+                record["W_premises"] = D2W.premises(repo)
+                st.result = {"objective": record["W_premises"]["objective"]}
+
         with journal.stage("teacher_fetch_verify") as st:
-            teacher_path = fetch_teacher(repo)
+            teacher_path = (hooks.get("fetch_teacher") or fetch_teacher)(repo)
             st.result = {"path": teacher_path}
 
         if args.check_only:
@@ -1969,6 +1995,23 @@ def main(argv: list[str] | None = None) -> int:
                 st.result = {"verdicts": {
                     k: v.get("verdict") if isinstance(v, dict) else v
                     for k, v in record[D2V.RECORD_KEY]["verdicts"].items()
+                    if k != "not_gated"}}
+            flush()
+
+        if "W" in wanted:
+            #: ALONE on the pod when asked for, like V.
+            with journal.stage("W_d2v3_validation") as st:
+                def w_flush(partial: dict[str, Any]) -> None:
+                    record[D2W.RECORD_KEY] = partial
+                    flush()
+                record[D2W.RECORD_KEY] = D2W.stage_W(
+                    env=(hooks.get("W") or D2W.production_environment)(
+                        repo, teacher_path, numerics),
+                    journal=journal, out=out, deadline=deadline,
+                    flush=w_flush, premises_record=record["W_premises"])
+                st.result = {"verdicts": {
+                    k: v.get("verdict") if isinstance(v, dict) else v
+                    for k, v in record[D2W.RECORD_KEY]["verdicts"].items()
                     if k != "not_gated"}}
             flush()
 

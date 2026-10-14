@@ -190,6 +190,38 @@ def lines(doc: dict) -> list[str]:
                  .get("rankings") or {})
         if ranks:
             out.append(f"   V4 choices: {ranks.get('choice')}")
+    ww = doc.get("W_d2v3_validation") or {}
+    if ww:
+        verdicts = ww.get("verdicts") or {}
+        out.append("W  D2 v3 GPU validation: " + ", ".join(
+            f"{k}={(v or {}).get('verdict')}" for k, v in verdicts.items()
+            if isinstance(v, dict)) + f", validation={verdicts.get('validation')}")
+        for name in ("W1_union_stores_and_confidence", "W2_ffn_child_weighted",
+                     "W3_union_numerics", "W4_depth_union_all_v1",
+                     "W5_depth_union_scored_v1", "W6_state_evaluation"):
+            step = ww.get(name)
+            if step is None:
+                out.append(f"   {name}: not reached")
+            elif "failed" in step or "skipped" in step:
+                out.append(f"   {name}: "
+                           f"{str(step.get('failed') or step.get('skipped'))[:150]}")
+            else:
+                out.append(f"   {name}: ok in {step.get('wall_seconds')}s, "
+                           f"peak {_gib(step.get('step_peak_memory_bytes'))}")
+        for pid, prof in ((ww.get("W1_union_stores_and_confidence") or {})
+                          .get("profiles") or {}).items():
+            c = prof.get("confidence") or {}
+            out.append(f"   W1 {pid}: c_T median "
+                       f"{(c.get('quantiles') or {}).get('q50')}, IQR "
+                       f"{c.get('iqr')}, ESS {c.get('effective_fraction')}")
+        ua = (ww.get("W3_union_numerics") or {}).get("union_arithmetic") or {}
+        if ua:
+            out.append(f"   W3 union vs float64: max {ua.get('max_abs_difference')}"
+                       f", violations {ua.get('position_violations')}, bounds "
+                       f"{ua.get('bounds_hold')}")
+        ranks = ((ww.get("W4_depth_union_all_v1") or {}).get("rankings") or {})
+        if ranks:
+            out.append(f"   W4 choices: {ranks.get('choice')}")
     for stage in doc.get("stages") or []:
         if stage.get("status") == "failed":
             out.append(f"stage {stage['stage']} FAILED after "

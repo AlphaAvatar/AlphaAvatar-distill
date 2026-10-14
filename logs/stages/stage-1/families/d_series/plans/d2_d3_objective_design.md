@@ -1318,3 +1318,34 @@ booking, adoption) and skips the B rebuild: W1 union stores + K+1 confidence
 validity, W2 a weighted FFN child, W3 union numerics against the full teacher
 logits, W4/W5 one DEPTH round at all_v1 and scored_v1, W6 state evaluation.
 Its driver stage is the remaining $0 engineering before a grant.
+
+### 12.7 The W-series: version 3's minimal GPU validation (built and rehearsed at $0)
+
+Stage `W` of `topk_adoption_driver.py`
+(`scripts/stages/stage-1/phase_d2/d2v3_gpu_validation.py`) reuses Stage V's
+launcher, acquisition loop (now parametrized: `ACQ_STAGES=W`), device handoff,
+cache guard, teardown, booking and adoption, and skips the B rebuild: the
+candidates are the teacher's own compressed variants.
+
+| step | what it measures on the real teacher | gate |
+| --- | --- | --- |
+| W1 | union stores of both profiles at bsz 3 and 1: identity incl. the executed build, build time, peak memory; K+1 confidence vs float64 on the same head logits; the real c_T distribution (IQR, ESS, spans, domains, tokens); bsz 1-vs-3 drift | arithmetic, integrity |
+| W2 | full-scope (K+1-weighted) vs narrow FFN at the root: weighted denominator = weight sum, selection overlap; the parent for W3–W6 | integrity |
+| W3 | 16 items × 3 bypass candidates: float32 union KL vs a float64 oracle on the SAME float32-head teacher distribution; `KL_TopK ≤ KL_U ≤ KL_full`; retrieval vs the full head; union size/overlap/tails; bf16 ties and spill; float32 head vs native bf16 (logits, Top-K agreement, probabilities, KL, confidence) as a protocol difference; synchronized component timings; the child's union KL for weighted contributions | arithmetic |
+| W4 / W5 | one DEPTH round at all_v1 / scored_v1 on the FFN child, synchronized split: objective seconds per candidate, store hits, four-way rankings (parent, teacher-Top-K, unweighted union, weighted union) | integrity; row equivalence |
+| W6 | state evaluation of the child: v3 at bsz 3 all_v1 / scored_v1 / bsz 1, suite store priming timed, teacher forwards during evaluation counted (must be 0); `raw_kl.* == teacher_kl.*` inside ONE v3 evaluation; the historical `reference_topk_tail_v1` KL beside it as a diagnostic the control refuses | arithmetic, integrity, row equivalence |
+
+- **The teacher distribution is the float32 head** in every gated comparison;
+  the native bf16 forward is reported only as a numerical-protocol difference.
+- **The raw-KL control never crosses supports**: `raw_kl_control` refuses two
+  evaluations with different protocol ids or supports, and
+  `require_objective_support` is never bypassed to build a KL-only union run.
+- **Rehearsal**: the CPU toy (a bf16 tiny teacher) runs the driver's own
+  `main()` with only the CUDA probe, the teacher fetch and the stage
+  environment injected; every step, verdict, flush, deadline skip and
+  failure-evidence path executes.
+- **A scientific GO / HOLD / NO-GO rubric** is registered in the plan before
+  any number exists, referenced to version 2's Stage V values; it recommends,
+  it never changes K, the mapping, the tail or the support.
+- **The D2 search's scored_v1 gate now reads stage W's evidence**; Stage V's
+  PASS was version 2's and no longer unlocks scored_v1.

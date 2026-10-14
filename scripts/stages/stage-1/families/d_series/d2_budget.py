@@ -256,29 +256,56 @@ D2_VALIDATION_PLAN = ("logs/stages/stage-1/families/d_series/validations/"
 
 def d2_validation_evidence(repo_root: str | Path | None = None
                            ) -> dict[str, Any]:
-    """The D2 GPU validation's ADOPTABLE evidence, or why there is none.
+    """Version 2's GPU validation (Stage V): its ADOPTABLE evidence, or why
+    there is none.
 
     Usable only when a session is booked with its evidence sha256, the bytes
     hash to it, and `d2_gpu_validation.adopt` accepts the record: COMPLETE,
-    the objective, contract, preregistration and plan identities of this
-    tree, verdicts recomputed from its measurements equal to the recorded
-    ones, and validation PASS. A failed or incomplete run stays booked and
-    billed and is never adopted. Stage L's verdicts belong to the superseded
-    objective and never count.
+    the objective, contract, preregistration and plan identities its plan
+    registered, verdicts recomputed from its measurements equal to the
+    recorded ones, and validation PASS. A failed or incomplete run stays
+    booked and billed and is never adopted. Stage L's verdicts belong to the
+    superseded objective and never count. VERSION 2's evidence: it decides
+    nothing about version 3 (`d2v3_validation_evidence`).
     """
+    from stages.phase_d2 import d2_gpu_validation as V
+
+    return _booked_validation_evidence(repo_root, D2_VALIDATION_CAMPAIGN, V,
+                                       "the D2 GPU validation")
+
+
+def d2v3_validation_evidence(repo_root: str | Path | None = None
+                             ) -> dict[str, Any]:
+    """Version 3's GPU validation (stage W): the same rule, its own campaign,
+    plan identities and adoption (`d2v3_gpu_validation.adopt`). The only
+    evidence that may price version 3's union terms as measured or let a D2
+    search run scored_v1."""
+    from stages.phase_d2 import d2v3_gpu_validation as W
+
+    return _booked_validation_evidence(repo_root, D2V3_VALIDATION_CAMPAIGN, W,
+                                       "the D2 v3 GPU validation")
+
+
+def _booked_validation_evidence(repo_root: str | Path | None,
+                                campaign_rel: str, stage: Any, what: str
+                                ) -> dict[str, Any]:
+    """ONE adoption path for every booked GPU validation: the last booked
+    session with an evidence hash, its bytes verified, judged by the stage's
+    own `adopt` against the caller's tree and the granted executable
+    commit."""
     import hashlib
 
     root = Path(repo_root) if repo_root is not None else REPO_ROOT
-    out: dict[str, Any] = {"usable": False, "campaign": D2_VALIDATION_CAMPAIGN,
+    out: dict[str, Any] = {"usable": False, "campaign": campaign_rel,
                            "scored_rows_equivalence": None}
     try:
-        campaign = json.loads((root / D2_VALIDATION_CAMPAIGN).read_text())
+        campaign = json.loads((root / campaign_rel).read_text())
     except (OSError, ValueError):
-        return {**out, "why": "the D2 GPU validation has not run (no campaign)"}
+        return {**out, "why": f"{what} has not run (no campaign)"}
     booked = [r for r in campaign.get("subruns") or []
               if r.get("evidence_session") and r.get("evidence_session_sha256")]
     if not booked:
-        return {**out, "why": "no D2 GPU validation session is booked"}
+        return {**out, "why": f"no session of {what} is booked"}
     row = booked[-1]
     try:
         raw = (root / row["evidence_session"]).read_bytes()
@@ -287,18 +314,12 @@ def d2_validation_evidence(repo_root: str | Path | None = None
     if hashlib.sha256(raw).hexdigest() != row["evidence_session_sha256"]:
         return {**out, "why": "the evidence does not hash to what was booked"}
     doc = json.loads(raw)
-    #: ADOPTION is stage V's own rule (`d2_gpu_validation.adopt`): verdicts
-    #: recomputed from the measurements, identities against the committed
-    #: records of THIS tree, the run COMPLETE, validation PASS. The
-    #: scored-rows verdict exists only for an adoptable run.
-    from stages.phase_d2 import d2_gpu_validation as V
-
     #: THE CALLER'S tree: its committed contract, preregistration and plan,
     #: and -- once granted -- the executable commit its authorization binds.
-    auth_path = root / V.AUTHORIZATION
+    auth_path = root / stage.AUTHORIZATION
     expected_commit = (json.loads(auth_path.read_text()).get(
         "executable_commit") if auth_path.is_file() else None)
-    verdict = V.adopt(doc, root, expected_commit=expected_commit)
+    verdict = stage.adopt(doc, root, expected_commit=expected_commit)
     return {**out, **verdict,
             "evidence_session": row["evidence_session"],
             "evidence_session_sha256": row["evidence_session_sha256"],
@@ -576,10 +597,109 @@ def union_geometry(validation: dict[str, Any] | None,
     return out
 
 
+def adopted_v3_validation(repo_root: str | Path | None = None
+                          ) -> dict[str, Any] | None:
+    """The ADOPTED stage-W record (version 3's GPU validation), or None."""
+    from stages.phase_d2 import d2v3_gpu_validation as W
+
+    ev = d2v3_validation_evidence(repo_root)
+    if not ev.get("usable"):
+        return None
+    root = Path(repo_root) if repo_root is not None else REPO_ROOT
+    doc = json.loads((root / ev["evidence_session"]).read_text())
+    return {"record": doc[W.RECORD_KEY],
+            "evidence_session": ev["evidence_session"],
+            "evidence_session_sha256": ev["evidence_session_sha256"],
+            "scored_rows_equivalence": ev["scored_rows_equivalence"]}
+
+
+def measured_union_overhead(w: dict[str, Any], base: dict[str, Any],
+                            rows_mode: str = "all_v1") -> dict[str, Any]:
+    """Version 3's added seconds, MEASURED by the adopted stage W.
+
+    Expected = the measurement; bound = x MEASURED_OVERHEAD_BOUND_FACTOR (one
+    timing is not a bound), each term from its own synchronized measurement:
+
+    * per DEPTH candidate: W4's (or W5's, at scored_v1) objective seconds per
+      candidate, plus the union reduction's excess over the K+1 one per row
+      (W3's component timing) times W4's rows per candidate;
+    * per DEPTH expansion: W4's round-0 parent-KL seconds;
+    * per state evaluation: the version-3 evaluation over the historical
+      KL-only one (W6), floored at 0;
+    * the statistics operators: the larger of Stage V's factor and W2's FFN
+      full- over narrow-scope ratio;
+    * once: the union stores (W1, bsz=3) and the suite store (W6's priming).
+    """
+    r = w["record"]
+    f = MEASURED_OVERHEAD_BOUND_FACTOR
+    depth = r["W4_depth_union_all_v1" if rows_mode == "all_v1"
+              else "W5_depth_union_scored_v1"]
+    comp = r["W3_union_numerics"]["component_timing"]
+    t = depth.get("timing") or {}
+    cands = max(1, int(t.get("candidate_subsets") or 0))
+    #: The rows a candidate's reduction covers: W5's own count at scored_v1;
+    #: at all_v1 every padded forward row, which Stage V's V5 measured on
+    #: the same mixture and batching (the all_v1 path does not count them).
+    geo_rows = ((base.get("_geometry") or {}).get("depth_rows_per_candidate")
+                or {})
+    if rows_mode == "scored_v1" and t.get("scored_rows"):
+        rows = float(t["scored_rows"]) / cands
+    else:
+        rows = float(geo_rows.get(rows_mode) or 0.0)
+    if not rows:
+        raise RuntimeError("no measured row count for the union reduction's "
+                           f"{rows_mode} term")
+    per_cand = (float(depth["objective_seconds_per_candidate"])
+                + max(0.0, float(comp["union_minus_k_plus_1_per_row_s"]))
+                * rows)
+    runs = r["W6_state_evaluation"]["runs"]
+    label = "d2v3" if rows_mode == "all_v1" else "d2v3_scored_v1"
+    se = max(0.0, float(runs[label]["seconds"])
+             - float(runs["historical_reference_topk_kl"]["seconds"]))
+    arms = r["W2_ffn_child_weighted"]["arms"]
+    ffn_ratio = (float(arms["full_scope"]["seconds"])
+                 / max(1e-9, float(arms["narrow_scope"]["seconds"])))
+    base_factor = base.get("operator_cell_factor") or {}
+    builds = [float(p["builds"]["bsz3_formal"]["seconds"]) for p in
+              r["W1_union_stores_and_confidence"]["profiles"].values()]
+    one = sum(builds) + float(runs["d2v3"]["prime_seconds"])
+    src = (f"measured once: {w['evidence_session']} (stage W, adopted); the "
+           "bound adds a variation margin")
+    return {
+        "source": src,
+        "depth_seconds_per_candidate": {"expected": round(per_cand, 4),
+                                        "bound": round(per_cand * f, 4)},
+        "state_eval_seconds_per_evaluation": {"expected": round(se, 4),
+                                              "bound": round(se * f, 4)},
+        "depth_seconds_per_expansion": {
+            "what": "the round-0 parent-KL diagnostic",
+            "round0_candidates": cands, "round0_source": "stage W's W4 round",
+            "expected": round(float(t.get("parent_kl_seconds") or 0.0), 2),
+            "bound": round(float(t.get("parent_kl_seconds") or 0.0) * f, 2)},
+        "operator_cell_factor": {
+            "what": ("the weighted activation statistics: the larger of "
+                     "Stage V's factor and W2's FFN full/narrow ratio"),
+            "expected": round(max(float(base_factor.get("expected", 1.0)),
+                                  ffn_ratio), 4),
+            "bound": round(max(float(base_factor.get("bound", 1.0)),
+                               1.0 + max(0.0, ffn_ratio - 1.0) * f), 4)},
+        "one_time_minutes": {
+            "what": "the union stores (both profiles) and the suite store",
+            "expected": round(one / 60, 2), "bound": round(one / 60 * f, 2)},
+        "bound_factor_on_one_measurement": f,
+        "union_terms": {"status": "MEASURED (stage W, adopted)",
+                        "rows_mode": rows_mode,
+                        "rows_per_candidate": rows,
+                        "geometry": base.get("_geometry") or {},
+                        "evidence_session": w["evidence_session"]},
+    }
+
+
 def union_kl_overhead(evidence: dict[str, Any] | None,
                       basis: dict[str, Any],
                       validation: Any = None,
-                      rows_mode: str = "all_v1") -> dict[str, Any]:
+                      rows_mode: str = "all_v1",
+                      w_validation: Any = None) -> dict[str, Any]:
     """D2 VERSION 3's added seconds: version 2's (MEASURED by the adopted
     Stage V) plus the union work (PROVISIONAL, :data:`UNION_COST_MODEL` on
     :func:`union_geometry`). Same shape as the other overhead functions, so
@@ -596,6 +716,15 @@ def union_kl_overhead(evidence: dict[str, Any] | None,
     base = teacher_confidence_overhead(evidence, basis,
                                        validation=validation or False)
     geo = union_geometry(validation or None)
+    #: MEASURED once stage W is adopted (None looks it up; False forces the
+    #: provisional model -- what the REGISTERED W plan must use, so that its
+    #: own session cannot move it).
+    if w_validation is None:
+        w_validation = adopted_v3_validation()
+    if w_validation:
+        return measured_union_overhead(w_validation, {**base,
+                                                      "_geometry": geo},
+                                       rows_mode=rows_mode)
     m = UNION_COST_MODEL
     bw = float(m["effective_bytes_per_second"])
     v, h, k = geo["vocab_size"], geo["hidden_size"], geo["top_k"]
@@ -648,6 +777,12 @@ def union_kl_overhead(evidence: dict[str, Any] | None,
                                     if not k2.startswith("_")},
                           "status": "PROVISIONAL -- not measured"}
     return out
+
+
+def geo_for_memory(priced: dict[str, Any]) -> dict[str, Any]:
+    """The sizes the memory estimate uses, measured or provisional alike."""
+    terms = priced["objective_overhead"].get("union_terms") or {}
+    return terms.get("geometry") or union_geometry(adopted_validation())
 
 
 def union_memory(geo: dict[str, Any]) -> dict[str, Any]:
@@ -906,8 +1041,37 @@ def build(k_candidates: int = 4) -> dict[str, Any]:
             "_is": ("a LEVER, not the price in force: the union terms over "
                     "the scored rows only, valid once version 3's own "
                     "scored_v1 equivalence passes on a GPU")},
-        "memory": union_memory(rec["objective_overhead"]["union_terms"][
-            "geometry"]),
+        "memory": union_memory(geo_for_memory(rec)),
+        #: WHAT HAPPENS IF THE BOUND DOES NOT FIT ONE SESSION, in order, each
+        #: step verifiable before money moves. The cap, K and the science are
+        #: never the lever.
+        "cap_compliance_plan": {
+            "now": ("the planning bound rests on PROVISIONAL union terms (3x "
+                    "pass bound, no overlap credit); it decides nothing until "
+                    "measured"),
+            "steps": [
+                ("1. re-price from the adopted stage W (measured union terms "
+                 "with the one-measurement margin), at the live rate with "
+                 "every teardown reserve -- d2v3_validation_evidence"),
+                ("2. if version 3's scored_v1 equivalence PASSES in stage W, "
+                 "price DEPTH and state evaluation at scored_v1 and RE-DERIVE "
+                 "(the provisional lever is not a reliable bound by itself)"),
+                ("3. if one session still cannot finish under $30: a "
+                 "TWO-SESSION run on the core's exact journal resume (state "
+                 "ids are content-derived; restored states re-derive their "
+                 "artifact identity from the files). Before any grant it "
+                 "needs, built and verified at $0: durable persistence of the "
+                 "journal and the beam-frontier checkpoints at the end of "
+                 "session 1 (with sizes priced against the large-artifact "
+                 "backend's capacity, P8.2.1), a transfer preflight (P8.4), "
+                 "and a $0 rehearsal in which a resumed search reproduces the "
+                 "uninterrupted search's state ids, materialization ids and "
+                 "measurements exactly"),
+                ("4. otherwise: a maintainer decision. Never a raised cap, a "
+                 "smaller K or a narrower search taken autonomously")],
+            "never": ["an interrupted search reported as complete",
+                      "a resumed search whose replay does not reproduce every "
+                      "restored state's identity"]},
         "d2_v2_search_superseded": {
             "expected": _usd(v2_cached["expected_minutes"], rate, disk_search),
             "hard": _usd(v2_cached["priced"]["hard_ceiling_minutes"], rate,

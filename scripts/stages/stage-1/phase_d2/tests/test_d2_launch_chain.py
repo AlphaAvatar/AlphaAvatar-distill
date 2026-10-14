@@ -112,7 +112,8 @@ class TestTheIssuerRefuses:
     def test_a_passed_equivalence_lets_scored_rows_through_that_gate(
             self, monkeypatch):
         from stages.d_series import d2_budget as BUD
-        monkeypatch.setattr(BUD, "d2_validation_evidence", lambda *a, **k: {
+        #: VERSION 3's own evidence (stage W) is what opens the gate.
+        monkeypatch.setattr(BUD, "d2v3_validation_evidence", lambda *a, **k: {
             "scored_rows_equivalence": "PASS"})
         with pytest.raises(A.D2AuthorizationRefused) as err:
             A.build_payload(grant=self._approved(), session_commit="a" * 40,

@@ -788,6 +788,19 @@
      },
      "_basis": "per row: K x (8 B index + 4 B log-prob) + 5 float32 per-position values + H bf16 hidden + 1 float32 log-normalizer; blocks of 512 candidate rows"
     },
+    "cap_compliance_plan": {
+     "now": "the planning bound rests on PROVISIONAL union terms (3x pass bound, no overlap credit); it decides nothing until measured",
+     "steps": [
+      "1. re-price from the adopted stage W (measured union terms with the one-measurement margin), at the live rate with every teardown reserve -- d2v3_validation_evidence",
+      "2. if version 3's scored_v1 equivalence PASSES in stage W, price DEPTH and state evaluation at scored_v1 and RE-DERIVE (the provisional lever is not a reliable bound by itself)",
+      "3. if one session still cannot finish under $30: a TWO-SESSION run on the core's exact journal resume (state ids are content-derived; restored states re-derive their artifact identity from the files). Before any grant it needs, built and verified at $0: durable persistence of the journal and the beam-frontier checkpoints at the end of session 1 (with sizes priced against the large-artifact backend's capacity, P8.2.1), a transfer preflight (P8.4), and a $0 rehearsal in which a resumed search reproduces the uninterrupted search's state ids, materialization ids and measurements exactly",
+      "4. otherwise: a maintainer decision. Never a raised cap, a smaller K or a narrower search taken autonomously"
+     ],
+     "never": [
+      "an interrupted search reported as complete",
+      "a resumed search whose replay does not reproduce every restored state's identity"
+     ]
+    },
     "d2_v2_search_superseded": {
      "expected": {
       "minutes": 615.4,
