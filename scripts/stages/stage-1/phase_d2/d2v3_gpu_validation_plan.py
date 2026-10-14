@@ -52,7 +52,7 @@ BRANCH = "exec/d1-behavioural-readiness"
 #: record cannot contain the commit that carries it; the tests check that
 #: every path the session executes or reads is identical between it and the
 #: current tree (`EXECUTED_PATHS`, minus `EXECUTED_PATH_EXCEPTIONS`).
-EXECUTABLE_COMMIT = "0000000000000000000000000000000000000000"
+EXECUTABLE_COMMIT = "4248d7dbce4b2e97de32700fb06542a19f4e3339"
 EXECUTED_PATHS = (
     "src", "scripts", "configs",
     "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1/"

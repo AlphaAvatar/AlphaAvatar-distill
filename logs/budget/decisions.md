@@ -11057,3 +11057,41 @@ on a paid pod.
 - **Revisit when:** the v3 GPU validation's measurements exist; then the
   maintainer decides preregistration v3, the search grant and the programme
   shortfall.
+
+## 2026-10-15 — D2 v3 W-series built at $0; the $1.22 GPU validation proposed
+
+- **Context.** The maintainer's independent review of `8b460ab5` passed the
+  v3 protocol in principle and authorized the W1–W6 engineering at $0; no
+  paid GPU, preregistration v3 stays DRAFT.
+- **Done.** Stage W of `topk_adoption_driver.py`
+  (`phase_d2/d2v3_gpu_validation.py`), executable commit **`4248d7db`**:
+  - W1 union stores, K+1 confidence vs float64, the real c_T distribution,
+    bsz drift; W2 K+1-weighted FFN child; W3 union KL vs a float64 oracle on
+    the **float32-head** teacher distribution (16 items × 3 candidates),
+    bounds, retrieval, ties, float32-head vs native-bf16 as a protocol
+    difference, synchronized component timings; W4/W5 DEPTH all_v1/scored_v1;
+    W6 state evaluation with the raw-KL control inside one v3 evaluation (a
+    cross-support control is refused; the historical Top-K KL is a
+    diagnostic only).
+  - CPU rehearsal through the driver's own `main()` (bf16 toy teacher):
+    every step, verdict, flush, deadline skip and failure-evidence path.
+  - Stage V's mechanisms reused; the acquisition loop is parametrized
+    (`ACQ_STAGES=W`); no B rebuild.
+- **Corrections found while building it.**
+  - The D2 search grant's scored_v1 gate read Stage V's — version 2's —
+    PASS; it now requires stage W's (version 3's own) equivalence.
+  - The earlier proposal's step bounds were not measurement-based; W3 and W6
+    are now priced from their parts (forwards, float32 GEMM, float64 oracle,
+    suite stores). Proposal **$0.28 expected, $0.92 cap, $1.22 grant** (was
+    $0.85 / $1.15).
+- **Registered before any number exists:** the arithmetic/integrity/row
+  tolerances, the step bounds, and a scientific **GO / HOLD / NO-GO**
+  recommendation rubric referenced to version 2's Stage V values. The rubric
+  recommends; it never changes K, the mapping, the tail or the support.
+- **Price.** Unchanged and still provisional: D2 v3 search $12.36 expected,
+  $30.70 bound; a cap-compliance plan is recorded (re-price from stage W, the
+  scored_v1 lever only if v3's own equivalence passes, else a verified
+  two-session journal resume, else a maintainer decision). Programme at hard:
+  D2 + D3 fits; with a fresh confirmation $10.80 short (not addressed here).
+- **Still not authorized:** the $1.22 W session, preregistration v3, the D2
+  search, recovery, behaviour, D3, cap changes.

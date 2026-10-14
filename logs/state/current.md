@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-14 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-15 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -35,9 +35,14 @@ protocol and engineering work only.
   cap (provisional union terms); programme at hard: D2 + D3 fits, adding a
   fresh confirmation is $10.80 short. Owners `d2_budget_v1.json`,
   `d_series_programme_budget.json`.
-- **Proposed, not granted:** the minimal v3 GPU validation, $1.15 grant
-  (`validations/d2v3-gpu-validation/v1/plan.json`); its driver stage is the
-  next $0 step.
+- **Stage W built and rehearsed at $0** (executable commit `4248d7db`):
+  W1–W6 on Stage V's infrastructure, no B rebuild; the CPU rehearsal runs the
+  driver's own `main()`. The D2 search's scored_v1 gate now needs stage W's
+  evidence (Stage V's PASS was version 2's).
+- **Proposed, not granted:** the v3 GPU validation, $0.28 expected, $0.92
+  cap, **$1.22 grant** (`validations/d2v3-gpu-validation/v1/
+  authorization.proposed.json`). A GO / HOLD / NO-GO rubric is registered in
+  its plan before any result.
 - Owners:
   - [`d2_d3_objective_design.md` §12](../stages/stage-1/families/d_series/plans/d2_d3_objective_design.md);
   - `logs/budget/decisions.md`, entry for 2026-10-14 (D2 version 3).
@@ -92,7 +97,7 @@ and `logs/budget/decisions.md`.
   stop taken from `soft_stop_minutes`, and a cache-regression guard. All of
   it is now on preregistration v3.
 - **Open maintainer decisions:**
-  - grant the v3 GPU validation (after its driver stage is built at $0);
+  - grant the $1.22 v3 GPU validation (stage W, built and rehearsed);
   - approve preregistration v3;
   - add `phase_d2` to `funds_formal_sessions_of`;
   - choose `all_v1` or `scored_v1` (needs v3's own equivalence);
