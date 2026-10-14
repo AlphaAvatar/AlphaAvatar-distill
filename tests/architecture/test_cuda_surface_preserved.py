@@ -1931,6 +1931,8 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
      "D2 scientific redesign: frozen-teacher-confidence-weighted root KL",
      {
         "src/aadistill/initialization/scoring/objective.py":
+            "the consumption rules `objective_consumed_by`, "
+            "`statistics_weighted_by_root`, `root_reference_needed`; "
             "new generic form `reference_confidence_weighted_kl` (g = c x KL, "
             "c = 1 - H/log|V| from the REFERENCE's full-vocabulary entropy, "
             "`full_vocabulary_entropy` float32 and chunked), with "
@@ -1990,10 +1992,11 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "(diagnostic `parent_kl`, one parent reference pass). Every other "
             "path unchanged.",
         "src/aadistill/initialization/planning/operator_config.py":
-            "`objective_consumed_by`, `statistics_weighted_by_root`, "
-            "`root_reference_needed`: one rule for which implementation reads "
-            "the objective and the root. Configs of every existing objective "
-            "unchanged.",
+            "`scoring_objective_config` asks `objective_consumed_by` (defined "
+            "in scoring/objective.py beside `statistics_weighted_by_root` and "
+            "`root_reference_needed`, re-exported here; kept out of planning "
+            "so operators -> planning is no package cycle). Configs of every "
+            "existing objective unchanged.",
         "src/aadistill/initialization/planning/metrics.py":
             "under the reference-confidence form the state evaluator computes "
             "the teacher's full-vocabulary entropy once per item and the "
