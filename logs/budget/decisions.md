@@ -11171,3 +11171,43 @@ on a paid pod.
 - **Unchanged.** Preregistration v3 (`b5281092…`) stays DRAFT. The D2
   search, recovery, behaviour, D3 and caps are not authorized.
 - **Owner:** `logs/stages/stage-1/families/d_series/analyses/d2v3_stage_w_evidence_review.md`.
+
+## 2026-10-14 — D2 v3 on HOLD, not terminated; Stage W revision 2 built and proposed
+
+- **Maintainer decision** (independent review of `193313fe`):
+  - D2 v3 stays on **HOLD and is not terminated**. One parent, one profile
+    and one DEPTH round do not settle whether a full search is worth running.
+    Beam search, later states, WIDTH/ATTENTION paths and recovered correctness
+    are unknown.
+  - Nor may the weighting be claimed to improve student correctness.
+  - The protocol is frozen: no v4, no change to K, the mapping, the support or
+    the beam. Preregistration v3 stays DRAFT.
+- **Revision 1 is kept as is.** `d2v3val_20261014_170824`, validation FAIL:
+  - plan `931c7502…` and evidence `66a80d17…` are unchanged;
+  - the campaign stays CLOSED;
+  - the unspent $0.9662 is not reused.
+  - A versioned erratum (`validations/d2v3-gpu-validation/v1/erratum_validity_report.json`)
+    corrects the validity report's stated definition. Its numbers are
+    unaffected.
+- **Revision 2** (executable commit `7ef64f3b`, plan `31377a77…`):
+  - **Accuracy.** Both partition KLs are checked against float64 at
+    abs 1e-4 + rel 1e-4 × KL64, from one registered error budget.
+  - **Order.** The float64 order is checked at a 1e-12 × (1 + KL) slack.
+  - **Crossings.** Float32 crossings are checked against the combined
+    triangle-inequality bound. Each side is recorded with its counts, maximum
+    magnitude and float64 values. Every position near a tolerance is recorded
+    in full.
+  - **Attribution.** A same-input pass separates float32 rounding from the
+    store's teacher-input path.
+  - **Validity report.** The teacher-confidence report (schema v2) reads its
+    definition from the store's declared identity.
+  - **Tests.** A predicate table, seven mutants (including revision 1's
+    slack), an independent oracle, and float32 extremes on both paths.
+  - **Unchanged.** Steps, sample, objective, support and every other
+    tolerance.
+- **Proposed grant** (`v2/authorization.proposed.json`): $0.28 expected,
+  $0.92 cap, **$1.22** all-in. It is a new grant with a new campaign. The
+  programme holds it as outstanding engineering, so the shortfall for D2 + D3
+  + a fresh confirmation at hard is $11.13 until the grant closes.
+- **Not covered:** the D2 search, recovery, behavioural screening and
+  confirmation, D3, and approval of preregistration v3.

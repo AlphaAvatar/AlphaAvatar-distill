@@ -37,8 +37,8 @@ protocol and engineering work only.
     The union terms are provisional.
   - Stage W's measured terms would give $24.90 (all_v1) or $24.21
     (scored_v1); they are NOT ADOPTED.
-  - Programme at hard: D2 + D3 fits. Adding a fresh confirmation is $9.91
-    short.
+  - Programme at hard: D2 + D3 fits. Adding a fresh confirmation is $11.13
+    short while revision 2's $1.22 grant is held ($9.91 without it).
   - Owners: `d2_budget_v1.json`, `d_series_programme_budget.json`.
 - **Stage W built and rehearsed at $0** (executable commit `4248d7db`):
   W1–W6 on Stage V's infrastructure, no B rebuild; the CPU rehearsal runs the
@@ -57,11 +57,23 @@ protocol and engineering work only.
   - c_T IQR 0.123 / 0.095, against v2's 0.042–0.055.
   - Neither the weighting nor the union moves the DEPTH choice (ρ 0.997 and
     1.000). The root reference alone moves it (26 → 17).
-  - **Recommendation: HOLD.** The maintainer decides between stopping D2 v3
-    and running it as a root-reference search after a prospectively
-    registered bounds gate and a new Stage W grant.
+  - **Maintainer decision: HOLD, NOT terminated.** One round on one parent
+    does not settle a full search. The protocol is frozen and there is no v4.
   - Owner:
     [`d2v3_stage_w_evidence_review.md`](../stages/stage-1/families/d_series/analyses/d2v3_stage_w_evidence_review.md).
+- **Stage W REVISION 2 built at $0** (executable commit `7ef64f3b`, plan
+  `31377a77…`, `validations/d2v3-gpu-validation/v2/`).
+  - **The corrected KL gate.** Both partition KLs are checked against
+    float64 from one error budget; the float64 order is checked; float32
+    crossings are checked against the combined bound, per side, with
+    per-position records.
+  - **The validity report** now states the store's declared definition.
+    Revision 1 has an erratum.
+  - **Tests:** a predicate table, mutants, an independent oracle, and
+    extremes.
+  - **Grant:** PROPOSED, the same shape ($0.28 expected, $0.92 cap, $1.22
+    all-in) as a new grant with a new campaign. Revision 1 stays FAIL and
+    CLOSED.
 - Owners:
   - [`d2_d3_objective_design.md` §12](../stages/stage-1/families/d_series/plans/d2_d3_objective_design.md);
   - `logs/budget/decisions.md`, entry for 2026-10-14 (D2 version 3).
@@ -116,12 +128,9 @@ and `logs/budget/decisions.md`.
   stop taken from `soft_stop_minutes`, and a cache-regression guard. All of
   it is now on preregistration v3.
 - **Open maintainer decisions, in order:**
-  1. **On the Stage W HOLD:** stop D2 v3, or run it as a root-reference
-     search. Running it needs, first:
-     - a prospectively registered bounds gate;
-     - a new Stage W grant, to obtain an adoptable PASS (the same shape is
-       about $0.28 expected and $1.22 all-in).
-  2. Only if D2 v3 runs:
+  1. **The Stage W revision 2 session:** the $1.22 grant is proposed; it is
+     recorded as `authorization.json` only on the maintainer's confirmation.
+  2. After an adoptable revision-2 PASS, if D2 v3 proceeds:
      - approve preregistration v3;
      - add `phase_d2` to `funds_formal_sessions_of`;
      - choose `all_v1` or `scored_v1`, which needs an adopted v3

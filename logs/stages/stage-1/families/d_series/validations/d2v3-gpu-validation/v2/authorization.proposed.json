@@ -21,11 +21,11 @@
  "plan": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/plan.json",
  "plan_sha256": "31377a77fa11dfce870b0de057029fc55eb21d67abac846f9cd27ff314636367",
  "campaign": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/campaign.json",
- "executable_commit": "4248d7dbce4b2e97de32700fb06542a19f4e3339",
+ "executable_commit": "7ef64f3b92d0a243474563dbd151954d316a16fd",
  "_executable_commit_is": "the commit the pod checks out; every executed path and record is identical between it and the commit carrying this proposal (tested: test_d2v3_gpu_validation.py)",
  "branch": "exec/d1-behavioural-readiness",
  "command": "ACQ_VALIDATION_DIR=logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2 ACQ_STAGES=W ACQ_RUN_PREFIX=d2v3r2val bash scripts/stages/stage-1/phase_d2/d2val_acquire.sh",
- "launcher_command": "ADOPT_CAMPAIGN=logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/campaign.json ADOPT_COMMIT=4248d7dbce4b2e97de32700fb06542a19f4e3339 ADOPT_BRANCH=exec/d1-behavioural-readiness ADOPT_STAGES=W ADOPT_PREDICTION_ROWS=all_v1 SESSION_CAP=0.92 bash scripts/stages/stage-1/phase_d1/topk_adoption_launch.sh d2v3r2val_<utc>",
+ "launcher_command": "ADOPT_CAMPAIGN=logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/campaign.json ADOPT_COMMIT=7ef64f3b92d0a243474563dbd151954d316a16fd ADOPT_BRANCH=exec/d1-behavioural-readiness ADOPT_STAGES=W ADOPT_PREDICTION_ROWS=all_v1 SESSION_CAP=0.92 bash scripts/stages/stage-1/phase_d1/topk_adoption_launch.sh d2v3r2val_<utc>",
  "activation": "the maintainer's grant is recorded by writing this record as authorization.json with status GRANTED, granted_utc, granted_by and the live pre-launch checks; until then engineering_campaign_budget.py cannot read a ceiling and the launcher creates nothing",
  "on_ordinary_failure": "repair and retry inside this ceiling (AGENTS.md P12.1); a deterministic paid failure is never retried unchanged",
  "authorizes": "nothing -- a proposal"
