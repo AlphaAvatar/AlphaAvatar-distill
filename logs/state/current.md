@@ -12,42 +12,35 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 **NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods (2026-10-14 11:09 UTC, after Stage V's confirmed teardown). The provider reports 0 pods
 (2026-10-13 17:51 UTC, after the reference calibration's confirmed teardown).
 
-**D2 REDESIGNED (maintainer scientific decision, 2026-10-14; contract
-revision 7, preregistration v2 DRAFT `721ffddc…`).** The decision covers
-protocol work and $0 engineering only.
-- **The new objective.** D2 minimizes
-  `(1/T_x) Σ c_T(t) KL(p_T ‖ q_C)_t`, where `c_T = 1 − H_T/log|V|` is the
-  frozen original teacher's full-vocabulary confidence.
-  - The KL is measured against the ROOT for every consumer, DEPTH included.
-  - The scope is FULL: the FFN/WIDTH/ATTENTION statistics are weighted too.
-  - Identity: `objective.d2_teacher_confidence_weighted_kl@v1`
-    (`079031e3…`).
-  - D2 declares two changes from D1, not one variable.
-- **What it supersedes.** The student-uncertainty D2 (`063bafd4…`) and
-  preregistration v1 (`489f49ba…`) are SUPERSEDED -- NEVER EXECUTED.
-- **What is implemented.**
-  - Root reference store, weighted statistics, validity checks and CPU tests
-    are built.
-  - The GPU validation is executable as stage V of the Top-K adoption driver,
-    on the stage-L/R0 launcher and campaign chain. It is run end to end on a
-    CPU toy.
-  - Every new cost term is provisional.
-- **Numeric acceptance is registered in three classes:**
-  - arithmetic on identical inputs (gated);
-  - bsz=1 vs bsz=3 drift (reported only);
-  - all_v1 vs scored_v1 at the formal bsz=3 (R0's tolerances).
-- **Price.**
-  - D2 search: $11.25 expected, $25.24 bound.
-  - D2 GPU validation, PROPOSED and not granted: $0.77 expected, a $1.40 cap,
-    a $1.70 grant, GRANTED 2026-10-14 and **EXECUTED**. Run `d2val_20261014_103301` cost $0.6532 and gave **validation PASS**, with scored_v1 PASS. The campaign is CLOSED and the evidence adopted. Findings: the c_T range is narrow (IQR ≈ 0.05), weighted and unweighted DEPTH rankings agree at ρ 0.999, and root vs parent differ (ρ 0.81). Re-priced D2 search: $11.75 expected, $25.84 bound. Owner: `families/d_series/analyses/d2_stage_v_evidence_review.md`.
-  - The final review's three $0 issues are closed (2026-10-14 decisions
-    entry): full-scope integrity gate, evidence adoption, append-only
-    booking with teardown evidence.
-  - Programme: D2 + D3 fits; adding a fresh confirmation is short by $5.24
-    at hard.
+**D2 VERSION 3 (maintainer scientific decision, 2026-10-14; contract
+revision 8 `1321017a…`, preregistration v3 DRAFT `b5281092…`).** An
+Evidence-Informed Pre-Search Scientific Revision; the decision covers $0
+protocol and engineering work only.
+- **The objective.** `(1/T_x) Σ c_T(t) KL_U(t)`: `c_T = 1 − H^{K+1}/log(K+1)`
+  is the frozen teacher's Top-200 + tail confidence; `KL_U` is on the
+  teacher's Top-200 ∪ the candidate's own Top-200 + one tail
+  (`reference_student_union_topk_tail_v1`), with exact retrieval of the
+  teacher's candidate-only entries. Root reference for every consumer; full
+  scope. Identity `objective.d2_teacher_topk_confidence_weighted_union_kl@v1`
+  (`90e851fd…`). Three declared changes from D1.
+- **Superseded.** Version 2 (`079031e3…`, prereg v2 `721ffddc…`): SUPERSEDED
+  BEFORE FORMAL SEARCH — its Stage V validation (`d2val_20261014_103301`,
+  $0.6532, PASS) stays version 2's adopted evidence. The student-uncertainty
+  D2 and prereg v1: SUPERSEDED — NEVER EXECUTED.
+- **Implemented and verified at $0.** Core support/objective/store/head,
+  DEPTH, state evaluation, weighted statistics and the beam's metrics;
+  oracle, consumer and refusal tests; a real-logits check on a stand-in
+  checkpoint (0 bound violations, 73% bf16 boundary ties).
+- **Price.** D2 v3 search $12.36 expected, $30.70 planning bound vs the $30
+  cap (provisional union terms); programme at hard: D2 + D3 fits, adding a
+  fresh confirmation is $10.80 short. Owners `d2_budget_v1.json`,
+  `d_series_programme_budget.json`.
+- **Proposed, not granted:** the minimal v3 GPU validation, $1.15 grant
+  (`validations/d2v3-gpu-validation/v1/plan.json`); its driver stage is the
+  next $0 step.
 - Owners:
-  - [`d2_d3_objective_design.md` §11](../stages/stage-1/families/d_series/plans/d2_d3_objective_design.md);
-  - `logs/budget/decisions.md`, entry for 2026-10-14.
+  - [`d2_d3_objective_design.md` §12](../stages/stage-1/families/d_series/plans/d2_d3_objective_design.md);
+  - `logs/budget/decisions.md`, entry for 2026-10-14 (D2 version 3).
 
 **D3 OBJECTIVE (maintainer decision, 2026-10-13; unchanged by the D2
 redesign).** D3 reads the candidate student's own Top-200 conditional entropy,
@@ -97,14 +90,14 @@ and `logs/budget/decisions.md`.
   `d2_budget_v1.json` and `d_series_programme_budget.json`.
 - **D2 launch chain built at $0:** typed grant, launcher, pod branch, a soft
   stop taken from `soft_stop_minutes`, and a cache-regression guard. All of
-  it is now on preregistration v2.
+  it is now on preregistration v3.
 - **Open maintainer decisions:**
-  - whether to accept that D2, as frozen, mainly tests the root reference
-    (Stage V findings);
-  - approve preregistration v2;
+  - grant the v3 GPU validation (after its driver stage is built at $0);
+  - approve preregistration v3;
   - add `phase_d2` to `funds_formal_sessions_of`;
-  - choose `all_v1` or `scored_v1` (scored_v1 needs the new validation);
-  - handle the $4.79 shortfall (re-derived after Stage V);
+  - choose `all_v1` or `scored_v1` (needs v3's own equivalence);
+  - the search price against the cap, and the $10.80 programme shortfall,
+    both re-derived from the v3 validation's measurements;
   - then the D2 search grant.
 
 **NEXT ROUND: R0 → D2 → D3 ON A SHARED BEHAVIOURAL EVALUATION (maintainer

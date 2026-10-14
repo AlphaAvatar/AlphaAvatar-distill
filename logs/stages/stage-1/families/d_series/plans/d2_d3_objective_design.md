@@ -1,14 +1,17 @@
 # D2 / D3 scientific objectives: definition, student identity, implementation
 
-**Status:** contract revision 7 (2026-10-14; revision 6 redesigned D2, revision 7 separated D2's and D3's sections): **D2 REDESIGNED** by maintainer
-scientific decision -- see [§11](#11-d2-revision-6-the-frozen-teachers-confidence-weighting-a-root-reference-kl),
-which is the current D2. The student-uncertainty D2 described in §0-§10
+**Status:** contract revision 8 (2026-10-14): **D2 VERSION 3** by maintainer
+scientific decision -- see [§12](#12-d2-version-3-teacher-top-k-confidence--union-top-k-kl),
+which is the current D2, an Evidence-Informed Pre-Search Scientific Revision.
+D2 version 2 (§11, `objective.d2_teacher_confidence_weighted_kl@v1`,
+`079031e3…`, revision 7 `9ad4ec23…`, preregistration v2 `721ffddc…`) is
+**SUPERSEDED BEFORE FORMAL SEARCH -- STAGE V ENGINEERING VALIDATION
+COMPLETED**. The student-uncertainty D2 described in §0-§10
 (`objective.d2_student_uncertainty_weighted_kl@v2`, `063bafd4…`) is
 **SUPERSEDED -- NEVER EXECUTED**; those sections are kept as history and
 remain the current description of **D3**, which is unchanged (`7b254538…`,
-λ = 7.34, thresholds frozen from stage L, `refcal_20261013_170714`). GPU
-evidence: [`../analyses/d2_gpu_evidence_review.md`](../analyses/d2_gpu_evidence_review.md).
-Authorizes nothing.
+λ = 7.34, `reference_topk_tail_v1`, thresholds frozen from stage L,
+`refcal_20261013_170714`). Authorizes nothing.
 
 **Revision 4, after the post-revision-3 review.** The objective identities,
 the ranking and the λ rule are unchanged.
@@ -910,6 +913,9 @@ which this decision leaves unchanged.
 
 ## 11. D2, revision 6: the frozen teacher's confidence weighting a root-reference KL
 
+**SUPERSEDED BEFORE FORMAL SEARCH by §12 (D2 version 3).** Kept as the
+record of what Stage V validated; nothing below is edited.
+
 **Maintainer scientific decision, 2026-10-14.** It supersedes the
 student-uncertainty D2 of revisions 1-5, which was never executed: no D2
 search, recovery or behavioural session ran under it. Stage L measured it as
@@ -1173,3 +1179,142 @@ The CPU toy runs stage V end to end through the same function.
 - The review, findings and re-pricing are in
   [`../analyses/d2_stage_v_evidence_review.md`](../analyses/d2_stage_v_evidence_review.md).
 
+
+## 12. D2 version 3: teacher Top-K confidence × union Top-K KL
+
+**Maintainer scientific decision, 2026-10-14 — an Evidence-Informed Pre-Search
+Scientific Revision.** Stage V's adopted evidence on version 2 informed it
+(the full-vocabulary confidence's narrow range: IQR 0.042–0.055, weighted KL
+96–97% of raw; the reference change dominating DEPTH: ρ 0.816, layer 26 vs 17).
+No formal D2 search, recovery or behavioural result exists. Once the
+version-3 preregistration is approved, nothing below changes post hoc.
+
+| owner | what it holds |
+| --- | --- |
+| [`d2_d3_objective_contract_v1.json`](d2_d3_objective_contract_v1.json), revision 8 (`1321017a…`) | `d2` (version 3: objective, formula, motivation, three declared changes, `distribution_support`, `teacher_confidence`, `revision_kind`, scope, diagnostics, claim boundary, `ranking_identity`); `d2_v2_superseded`; `d2_superseded`; `d3` unchanged |
+| [`../../../phase_d2/plans/d2_preregistration_v3.json`](../../../phase_d2/plans/d2_preregistration_v3.json) (`b5281092…`) | the frozen design, DRAFT; v2 and v1 stamped SUPERSEDED with science and hashes intact |
+| `src/aadistill/initialization/scoring/support.py` | `reference_student_union_topk_tail_v1`, `deterministic_topk`, `union_forward_kl_terms`, `distortion_on_union_support`, `topk_tail_entropy` |
+| `src/aadistill/initialization/scoring/objective.py` | the form `reference_topk_confidence_weighted_union_kl`, `reference_topk_confidence`, `require_objective_support` |
+| `src/aadistill/initialization/scoring/output_head.py`, `Capability.OUTPUT_HEAD_LINEAR` | the float32 head: every entry's logits, or chosen entries' |
+| `src/aadistill/initialization/scoring/reference_store.py` | the union store: sketch, K+1 confidence, final hidden states, log-normalizers, executed-build identity |
+| [`../analyses/d2v3_real_logits_check.json`](../analyses/d2v3_real_logits_check.json) | the $0 CPU numerics on real logits (a stand-in checkpoint) |
+| [`../validations/d2v3-gpu-validation/v1/plan.json`](../validations/d2v3-gpu-validation/v1/plan.json) | the minimal GPU validation: a PROPOSAL, priced, not granted |
+| `d2_budget.py` → [`d2_budget_v1.json`](d2_budget_v1.json), [`d_series_programme_budget.json`](d_series_programme_budget.json) | the re-estimated price and the programme scenarios |
+
+### 12.1 Definition
+
+```text
+S_T(t) = TopK(p_T(t), K)    S_C(t) = TopK(q_C(t), K)    K = 200, both deterministic
+U_t    = S_T(t) ∪ S_C(t)    (K..2K entries, deduplicated)
+
+KL_U(t)  = Σ_{i∈U} p_T(i) log(p_T(i)/q_C(i)) + p_T(Ū) log(p_T(Ū)/q_C(Ū))
+
+H_T^{K+1}(t) = − Σ_{i∈S_T} p_T(i) log p_T(i) − p_T(tail) log p_T(tail)   absolute p, 0 log 0 = 0
+c_T(t)       = 1 − H_T^{K+1}(t) / log(K+1)                               categories derived: K+1 when K < |V|
+
+L_D2(x) = (1/T_x) Σ_{t∈T_x} c_T(t) · KL_U(t)       minimized; reference = the frozen teacher (root)
+```
+
+- **Confidence and KL supports are separate.** The confidence is the
+  teacher's alone (its own Top-K + tail), candidate-independent and stored once.
+  The KL's support is the union, which the candidate co-defines — the declared
+  support change, not a confidence signal.
+- **No** full-vocabulary entropy, conditional (renormalized) Top-K entropy,
+  union-based confidence, Σc denominator, hard mask, threshold, temperature,
+  exponent or `exp(−H)`. `exp(−H)` appears only as a theoretical note in the
+  contract.
+- **Bounds:** `KL_{S_T+tail} ≤ KL_U ≤ KL_full` for every pair (U refines the
+  teacher's K+1 partition; the vocabulary refines U). KL_U is never reported as
+  the full KL.
+- **Ties:** value descending, then index ascending (`TOPK_TIE_BREAK`), in the
+  support identity. On real bf16 logits 73% of positions tie at the 200th value
+  and `torch.topk`'s set differs from the deterministic one on 60%.
+
+### 12.2 Retrieval: the teacher's probability of candidate-only entries
+
+The root store keeps, per scored-or-not prediction position, the teacher's
+final normalized hidden state `h` (model dtype) and its float32
+full-vocabulary log-normalizer `log Z`. The teacher's logits are DEFINED as
+`post(float32(h) · float32(W)ᵀ + b)` — the output head of the adapter's
+`OUTPUT_HEAD_LINEAR` capability (scale, bias, soft-cap and tying carried
+there), an exact widening accumulated in float32. The sketch (Top-K, log
+probabilities, tail, entropy, confidence) is formed from those logits, and a
+candidate-only entry `j` is retrieved as `logit_j(h) − log Z` by the SAME
+definition: one float32 GEMM per block of rows over the block's distinct
+entries. **Correctness:** both are values of one distribution `softmax(z)`;
+retrieval and the full-head log-softmax differ only by float32 summation order
+(measured ≤ 6e-5 nats on real logits). The teacher's mass outside U is its own
+Top-K tail (a complement logsumexp at build) minus the candidate-only entries'
+mass, in log space (relative to the tail, never to 1); the candidate's is its
+own complement logsumexp with U masked. No teacher forward per candidate; no
+`O(T·V)` cache. The model's own bf16 logits differ from this definition by
+their bf16 rounding (≤ 0.125 nats measured), which is why the store's identity
+names the logit definition.
+
+### 12.3 Consumers — one objective everywhere
+
+| consumer | v3 behaviour |
+| --- | --- |
+| DEPTH (all three paths: per item, batched block, scored rows) | `c_T · KL_U` against the root store with retrieval; records raw union KL, teacher-Top-K KL (lower bound), union size/overlap, both union tail masses; round-0 parent KL (parent's Top-K + tail) as a diagnostic |
+| FFN / WIDTH / ATTENTION | full scope, `Σ w x / Σ w`, `w` = policy weight × the K+1 `c_T`; the store identity (new schema and definitions) enters the statistics cache key |
+| State evaluation | teacher union store built once at `prime_reference` (no teacher forward per evaluation); `state.teacher_kl.*` and `state.critical_token_kl` are the union KL; `state.objective.*` the weighted objective with D1's aggregation; `raw_kl` equals the KL metrics |
+| Beam | `OBJECTIVE_PARETO_V1` unchanged (geometry, keys, epsilon); the ranking identity is versioned (`aadistill.d_series.ranking_identity/v2`) with the objective AND the support |
+
+`require_objective_support` makes the union support and the union form travel
+together at one K, in the search, the fixed path, DEPTH and the state
+evaluator. D3 keeps `reference_topk_tail_v1`, the parent-reference DEPTH and
+its identities; D1 is untouched.
+
+### 12.4 Three declared changes from D1
+
+1. DEPTH's KL reference: parent → root.
+2. KL support: teacher Top-200 + tail → teacher ∪ student Top-200 + tail.
+3. Frozen-teacher K+1 confidence weighting (KL, state evaluation, ranking and
+   the statistics operators).
+
+Not single-variable; no third KL-only full search. The built-in controls are
+the unweighted union KL, the teacher-Top-K KL and the round-0 parent KL.
+
+### 12.5 Evidence so far ($0)
+
+- Core tests (`tests/initialization/test_union_kl_objective.py`): float64
+  small-vocabulary oracle for union/lower-bound/reverse KL, both tails, dedup,
+  `+inf`/zero-mass/NaN, float32 vs float64 at K=200, ties (bf16 and spill),
+  confidence definition and candidate-invariance, retrieval vs full head
+  (bias/scale/soft-cap), store identity and refusals, DEPTH and state
+  evaluation against independent first-principles computations, all_v1 vs
+  scored_v1, bsz 1 vs 3, weight changes reaching every consumer, the
+  statistics cache key; six mutations of the new gates were all caught.
+- Real logits (`d2v3_real_logits_check.json`; a local 28-layer compressed
+  Qwen3 checkpoint stands in for the teacher, whose weights are not on the
+  box): 21,416 candidate positions — **0 bound violations**; union vs float64
+  oracle max 1.6e-5; mean `KL_U/KL_full` 0.9875 (teacher-Top-K 0.9831), median
+  0.9995; mean union size 248.7 (overlap 151.3); candidate rankings identical
+  under all three KLs. The K+1 confidence spreads more than version 2's on the
+  same positions (p10–p90 0.47–0.91 vs 0.75–0.96; ESS 0.95 vs 0.99; Spearman
+  0.998). The real teacher is more confident than the stand-in; its
+  distribution is a GPU validation deliverable.
+
+### 12.6 Cost, and the minimal GPU validation
+
+Version 2's terms are Stage V's MEASUREMENTS; version 3's union terms are
+PROVISIONAL (`UNION_COST_MODEL`: bandwidth on measured sizes — 62,161 rows per
+DEPTH candidate, 74,022 suite rows, |V| 151,936, H 2,560 — 3× bound on the
+passes, no overlap credit). Memory adds 1.34 GB of union stores; the estimated
+peak is 22.4 GB on the 48 GB L40S.
+
+| | expected | planning bound |
+| --- | --- | --- |
+| D2 v3 search (cached DEPTH cell) | **$12.36** | **$30.70** (cap $30) |
+| … if v3's scored_v1 equivalence passes | — | $29.34 |
+| D2 v2 search (superseded, for comparison) | $11.75 | $25.84 |
+| v3 GPU validation (proposal) | $0.26 | $0.85 cap, $1.15 grant |
+
+The planning bound exceeds the per-session cap by $0.70 on provisional terms;
+the cap and K are unchanged, and the GPU validation's measurements replace
+those terms before any search grant. The minimal validation reuses every Stage V
+mechanism (launcher, acquisition, device handoff, cache guard, teardown,
+booking, adoption) and skips the B rebuild: W1 union stores + K+1 confidence
+validity, W2 a weighted FFN child, W3 union numerics against the full teacher
+logits, W4/W5 one DEPTH round at all_v1 and scored_v1, W6 state evaluation.
+Its driver stage is the remaining $0 engineering before a grant.

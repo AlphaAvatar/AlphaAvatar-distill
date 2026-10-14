@@ -11005,3 +11005,55 @@ on a paid pod.
   changed autonomously.
 - **Still not authorized:** the D2 search, recovery, screening, confirmation,
   D3, and cap changes.
+
+## 2026-10-14 — D2 version 3: teacher Top-K confidence × union Top-K KL (Evidence-Informed Pre-Search Scientific Revision)
+
+- **Context.** Stage V's adopted evidence on version 2 showed the
+  full-vocabulary confidence moving the objective only 3–4% (IQR 0.042–0.055)
+  and the root reference dominating the D1→D2 difference. The maintainer
+  decided a new scientific version before any formal search. This round is
+  authorized for $0 protocol and engineering work only: no pod, no paid GPU,
+  no D2 search, recovery or behavioural probe.
+- **Decision.** D2 version 3 minimizes `(1/T_x) Σ c_T(t) KL_U(t)`:
+  - `c_T = 1 − H^{K+1}_T / log(K+1)`, the frozen teacher's entropy over its
+    own Top-200 and one tail at absolute probabilities (categories derived);
+  - `KL_U` on the teacher's Top-200 ∪ the candidate's own Top-200 + one tail
+    (`reference_student_union_topk_tail_v1`, deterministic tie-break), the
+    teacher's probability of candidate-only entries retrieved exactly from
+    its stored final hidden state and log-normalizer through its output head;
+  - the root as reference for every consumer; full scope; fixed `1/T_x`.
+  - Identities: objective `90e851fd…`, contract revision 8 `1321017a…`,
+    preregistration v3 `b5281092…` (DRAFT), ranking identity
+    `c9a4e821…` (`ranking_identity/v2`, policy + objective + support).
+  - Three declared changes from D1 (DEPTH reference, KL support, weighting);
+    not single-variable; no third KL-only search.
+- **Supersession.** Version 2 (`079031e3…`, revision 7 `9ad4ec23…`,
+  preregistration v2 `721ffddc…`) is SUPERSEDED BEFORE FORMAL SEARCH — STAGE V
+  ENGINEERING VALIDATION COMPLETED. Its science, hashes and records are
+  unchanged; only status fields are stamped. Stage V's adoption now binds the
+  identities its own plan registered, so its evidence stays version 2's.
+- **Untouched.** D1 (no objective, `reference_topk_tail_v1`), D3 (`7b254538…`,
+  λ = 7.34, its support, parent-reference DEPTH and ranking identity), R0,
+  stage L and Stage V records.
+- **Evidence at $0.** Core oracle and consumer tests; real-logits check on a
+  stand-in checkpoint (`analyses/d2v3_real_logits_check.json`): 0 bound
+  violations over 21,416 positions, union error ≤ 1.6e-5, retrieval ≤ 6e-5,
+  73% bf16 boundary ties.
+- **Price** (version 2's measured terms + provisional union terms): D2 v3
+  search $12.36 expected, **$30.70 planning bound** against the $30 cap
+  ($29.34 if v3's scored_v1 equivalence passes). Programme at hard: D2 + D3
+  fits ($4.70 left); with a fresh confirmation **$10.80 short**; fits at
+  expected. The cap and K are unchanged.
+- **Proposed, not granted:** the minimal v3 GPU validation
+  (`validations/d2v3-gpu-validation/v1/plan.json`): $0.26 expected, $0.85
+  cap, $1.15 grant; no B rebuild; Stage V's mechanisms reused. Its driver stage
+  is the next $0 engineering step.
+- **Alternatives considered.** Approving version 2 as frozen (would test mainly
+  the root reference); a teacher-only K+1 KL with the new confidence (keeps the
+  tail blind spot); full-vocabulary KL (O(T·V) reference state).
+- **Risks.** The provisional union terms may price the search above the cap;
+  the real teacher's K+1 confidence range is unmeasured; bf16 drift between
+  bsz 1 and 3 remains a diagnostic.
+- **Revisit when:** the v3 GPU validation's measurements exist; then the
+  maintainer decides preregistration v3, the search grant and the programme
+  shortfall.
