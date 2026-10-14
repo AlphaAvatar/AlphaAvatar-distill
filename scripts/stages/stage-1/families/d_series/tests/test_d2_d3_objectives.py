@@ -257,10 +257,13 @@ def test_the_committed_contract_is_current():
 
 class TestTheContractStatesWhyAndWhereTheClaimsStop:
 
-    def test_the_four_quantities_are_kept_apart(self):
+    def test_the_five_quantities_are_kept_apart(self):
+        """Revision 7 adds the TEACHER's entropy -- D2's -- beside the
+        student's -- D3's -- so neither can be read as the other's."""
         record = O.contract(REPO)
         assert set(record["measurement_distinctions"]) == {
             "student_entropy_on_teacher_native_prefixes",
+            "teacher_entropy_on_teacher_native_prefixes",
             "student_entropy_on_student_rollout_prefixes",
             "student_teacher_distribution_fit",
             "autonomous_rollout_correctness"}
@@ -285,7 +288,9 @@ class TestTheContractStatesWhyAndWhereTheClaimsStop:
     def test_the_record_carries_the_objectives_it_declares(self):
         record = O.contract(REPO)
         assert record["d2"]["objective_hash"] == O.D2_OBJECTIVE.objective_hash
-        assert record["revision"] == 6
+        assert record["revision"] == 7
+        assert record["revision_history"][-1]["supersedes_contract_hash"] == \
+            O.REVISION_6_CONTRACT_HASH
         assert record["d2"]["objective"]["aggregation"] == \
             "kl_path_weighting_per_consumer/v2"
         assert record["d2_superseded"]["objective_hash"] == \
@@ -302,14 +307,42 @@ class TestTheContractStatesWhyAndWhereTheClaimsStop:
         assert len(d2["scope"]["acts_directly_on"]) == 4
         assert d2["scope"]["narrow_scope_comparison"]["objective_hash"] == \
             O.D2_NARROW_SCOPE_COMPARISON.objective_hash
-        joined = " ".join(O.contract(REPO)["claim_boundary"]["may_not_claim"])
+        joined = " ".join(d2["claim_boundary"]["may_not_claim"])
         assert "one variable" in joined
 
-    def test_the_scope_names_three_places_and_excludes_three_operators(self):
-        scope = O.contract(REPO)["objective_scope"]
+    def test_d3s_scope_names_three_places_and_excludes_three_operators(self):
+        scope = O.contract(REPO)["d3"]["scope"]
+        assert scope["applies_to"] == "D3 only"
         assert len(scope["acts_directly_on"]) == 3
         assert "FFN" in scope["does_not_act_on"][0]
         assert "INTERMEDIATE" in scope["intermediate_vs_final_student"]
+
+    def test_d2_and_d3_never_share_a_confidence_signal(self):
+        """Revision 7: nothing shared says the student's confidence is D2's,
+        nothing D3's says the teacher's is, and the old shared keys are gone."""
+        c = O.contract(REPO)
+        for gone in ("objective_scope", "where_each_objective_applies",
+                     "diagnostics_recorded", "d2_degeneracy_watch",
+                     "scientific_motivation"):
+            assert gone not in c, gone
+        assert c["d3"]["motivation"]["applies_to"] == "D3 only"
+        assert "D2 reads no student confidence" in \
+            c["d3"]["motivation"]["role_of_confidence"]
+        md = c["measurement_distinctions"]
+        assert "D2 does NOT use it" in \
+            md["student_entropy_on_teacher_native_prefixes"]
+        assert "D2" in md["teacher_entropy_on_teacher_native_prefixes"]
+        d2_text = json.dumps(c["d2"]).lower()
+        assert "student's own top" not in d2_text
+        assert "full scope" in json.dumps(
+            c["d2"]["where_it_applies"]).lower()
+        assert "not operator-local" in json.dumps(
+            c["d3"]["where_it_applies"]).lower()
+        shared = " ".join(c["claim_boundary"]["may_not_claim"])
+        assert "one variable" not in shared and "all four operators" not in shared
+        assert "one variable" in " ".join(c["d2"]["claim_boundary"]["may_not_claim"])
+        assert "all four operators" in " ".join(
+            c["d3"]["claim_boundary"]["may_not_claim"])
 
     def test_lambda_and_thresholds_precede_d2(self):
         assert "BEFORE D2" in O.lambda_rule()["when"]

@@ -2013,6 +2013,17 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "a replay without the root needs them supplied; the weighted "
             "statistics key term as in the search.",
      }),
+    ("16d6728583adbcbb69abf738d9d171b850abbe45",
+     "D2 revision-6 review: GPU validation chain and acceptance protocol",
+     {
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "under a root-reference objective, the round-0 parent-KL "
+            "diagnostic's reductions are timed into "
+            "`artifacts.timing.parent_kl_seconds` (operational only, outside "
+            "every metric, hash and identity) so the D2 GPU validation can "
+            "measure the diagnostic's cost apart from the decision's. No "
+            "score, choice or path changes.",
+     }),
 )
 
 

@@ -168,6 +168,28 @@ def lines(doc: dict) -> list[str]:
         verdict = lc.get("d2_scored_rows_equivalence") or {}
         if verdict:
             out.append(f"   D2 scored-rows equivalence: {verdict.get('verdict')}")
+    vv = doc.get("V_d2_validation") or {}
+    if vv:
+        verdicts = vv.get("verdicts") or {}
+        out.append("V  D2 GPU validation: " + ", ".join(
+            f"{k}={(v or {}).get('verdict')}" for k, v in verdicts.items()
+            if isinstance(v, dict)) + f", validation={verdicts.get('validation')}")
+        for name in ("V1_root_stores_and_validity",
+                     "V2_b_rebuild_and_kl_relation", "V6_state_evaluation",
+                     "V3_weighted_statistics", "V4_depth_root_vs_parent",
+                     "V5_depth_scored_rows"):
+            step = vv.get(name)
+            if step is None:
+                out.append(f"   {name}: not reached")
+            elif "failed" in step or "skipped" in step:
+                out.append(f"   {name}: "
+                           f"{str(step.get('failed') or step.get('skipped'))[:150]}")
+            else:
+                out.append(f"   {name}: ok in {step.get('wall_seconds')}s")
+        ranks = ((vv.get("V4_depth_root_vs_parent") or {})
+                 .get("rankings") or {})
+        if ranks:
+            out.append(f"   V4 choices: {ranks.get('choice')}")
     for stage in doc.get("stages") or []:
         if stage.get("status") == "failed":
             out.append(f"stage {stage['stage']} FAILED after "

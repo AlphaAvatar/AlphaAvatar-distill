@@ -47,8 +47,27 @@ RECORD = "logs/stages/stage-1/phase_d2/plans/d2_preregistration_v2.json"
 SUPERSEDED_RECORD = "logs/stages/stage-1/phase_d2/plans/d2_preregistration_v1.json"
 SUPERSEDED_HASH_PREFIX = "489f49ba"
 #: The D2 GPU validation plan (a PROPOSAL; its own grant runs it).
-GPU_VALIDATION_PLAN = ("logs/stages/stage-1/phase_d2/plans/"
-                       "d2_gpu_validation_plan.json")
+GPU_VALIDATION_PLAN = ("logs/stages/stage-1/families/d_series/validations/"
+                       "d2-gpu-validation/v1/plan.json")
+#: The record's fields that are NOT science: its hash covers everything else.
+NON_SCIENCE_KEYS = ("status", "preregistration_hash", "budget", "authorizes",
+                    "superseded_drafts")
+#: Earlier DRAFTS of this version, never approved: kept by hash so a reader
+#: holding one can find what replaced it. Outside the science hash.
+SUPERSEDED_DRAFTS = (
+    {"preregistration_hash":
+         "317596c4921e7d8bf77745d963581346582cf5f8128a84bffe388ddb0a8bcc03",
+     "contract_hash":
+         "741cd5c5faa433285741b4b44d6fe07d30df2f1191ca6f5f71a1e6f3e48c5493",
+     "commit": "16d6728583adbcbb69abf738d9d171b850abbe45",
+     "superseded_on": "2026-10-14",
+     "why": ("independent review of 16d67285: contract revision 7 separates "
+             "D2's and D3's motivation, scope, diagnostics and claim boundary; "
+             "the D2 GPU validation's numeric acceptance protocol is "
+             "registered in three classes. No objective, rule, scope, K or "
+             "budget figure of D2 changed"),
+     "approved": False},
+)
 D1_DESIGN = "logs/stages/stage-1/phase_d1/plans/d1_design.json"
 D1_SEARCH = ("logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/"
              "evidence/d1_search.json")
@@ -108,6 +127,7 @@ def build() -> dict[str, Any]:
             "contract": O.CONTRACT,
             "contract_hash": contract["contract_hash"],
             "scope": d2["scope"],
+            "where_it_applies": d2["where_it_applies"],
             "aggregation_control": contract["aggregation_control"],
         },
         #: TWO declared changes. Never "one variable".
@@ -282,12 +302,14 @@ def build() -> dict[str, Any]:
              "owner": BUD.SCENARIO_RECORD},
             {"what": "a grant per paid session", "why": "nothing here pays"},
         ],
-        "claim_boundary": contract["claim_boundary"],
+        "claim_boundary": {"shared_with_d3": contract["claim_boundary"],
+                           "d2": d2["claim_boundary"]},
     }
     return {
         **science,
         "status": ("DRAFT -- not approved, not authorized; supersedes v1 "
                    "(never executed)"),
+        "superseded_drafts": list(SUPERSEDED_DRAFTS),
         "preregistration_hash": sha256_json(science),
         "budget": {"owner": BUD.RECORD,
                    "steps": {k: budget["steps"][k]

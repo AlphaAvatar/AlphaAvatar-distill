@@ -277,6 +277,10 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             timing["objective_seconds"] = 0.0
         if parent_sketches is not None:
             timing["parent_kl_diagnostic"] = "round 0 candidates only"
+            #: The diagnostic's own reductions, so its cost can be measured
+            #: apart from the decision's. Unsynchronized like every split here
+            #: unless AADISTILL_DEPTH_SYNC_TELEMETRY=1.
+            timing["parent_kl_seconds"] = 0.0
 
         def objective_values(kl, log_z, cand_logits, tail_log, mask, weights,
                              group, components, histogram, joint,
@@ -388,6 +392,7 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                             components, histogram, joint, rows=rows,
                             ref=root_ref(group, rows=rows))
                     if parent_kl is not None:
+                        tp = time.perf_counter()
                         pi, pl, pt = parent_sketches.sketch_rows(
                             group, rows, adapter)
                         pkl = sketch_forward_kl(pi, pl, pt, abls,
@@ -396,6 +401,7 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                                 scatter_rows(pkl, rows), mask,
                                 weights=batch_weights).tolist()):
                             parent_kl.setdefault(item["subtype"], []).append(v)
+                        timing["parent_kl_seconds"] += time.perf_counter() - tp
                     for item, value in zip(group.items, values.tolist()):
                         per_subtype.setdefault(item["subtype"], []).append(value)
                         timing["distortion_calls"] += 1
@@ -479,6 +485,7 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                             kl, log_z, abls, tail, mask, batch_weights, group,
                             components, histogram, joint, ref=root_ref(group))
                         if parent_kl is not None:
+                            tp = time.perf_counter()
                             pidx, plp, ptail = prefs
                             for item, v in zip(group.items,
                                                sketch_forward_kl_mean_batch(
@@ -488,6 +495,8 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                                                    ).tolist()):
                                 parent_kl.setdefault(item["subtype"],
                                                      []).append(v)
+                            timing["parent_kl_seconds"] += (
+                                time.perf_counter() - tp)
                     elif sketches is not None:
                         idx, lp, tail = refs
                         values = sketch_forward_kl_mean_batch(
@@ -527,9 +536,11 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                         group, components, histogram, joint,
                         ref=root_ref(group, item=group.items[0]))
                     if parent_kl is not None:
+                        tp = time.perf_counter()
                         parent_kl.setdefault(group.items[0]["subtype"],
                                              []).append(sketch_forward_kl_mean(
                             prefs, abls, weights=item_w))
+                        timing["parent_kl_seconds"] += time.perf_counter() - tp
                     per_subtype.setdefault(group.items[0]["subtype"], []).append(
                         float(value[0]))
                     timing["distortion_calls"] += 1

@@ -246,8 +246,8 @@ def calibration_evidence(repo_root: str | Path | None = None) -> dict[str, Any]:
 #: from it and nowhere else.
 D2_VALIDATION_CAMPAIGN = ("logs/stages/stage-1/families/d_series/validations/"
                           "d2-gpu-validation/v1/campaign.json")
-D2_VALIDATION_PLAN = ("logs/stages/stage-1/phase_d2/plans/"
-                      "d2_gpu_validation_plan.json")
+D2_VALIDATION_PLAN = ("logs/stages/stage-1/families/d_series/validations/"
+                      "d2-gpu-validation/v1/plan.json")
 
 
 def d2_validation_evidence(repo_root: str | Path | None = None
@@ -281,11 +281,17 @@ def d2_validation_evidence(repo_root: str | Path | None = None
     if hashlib.sha256(raw).hexdigest() != row["evidence_session_sha256"]:
         return {**out, "why": "the evidence does not hash to what was booked"}
     doc = json.loads(raw)
+    #: Stage V's record inside the driver's adoption.json.
+    v = doc.get("V_d2_validation") or {}
+    verdicts = v.get("verdicts") or {}
     ok = (doc.get("status") == "COMPLETE"
-          and doc.get("objective_hash") == O.D2_OBJECTIVE.objective_hash)
+          and (v.get("premises") or {}).get("objective_hash")
+          == O.D2_OBJECTIVE.objective_hash)
     return {**out, "usable": ok,
-            "scored_rows_equivalence": (doc.get("scored_rows_equivalence")
-                                        or {}).get("verdict") if ok else None,
+            "validation": verdicts.get("validation") if ok else None,
+            "scored_rows_equivalence": (
+                (verdicts.get("scored_rows_equivalence") or {}).get("verdict")
+                if ok else None),
             "why": None if ok else "incomplete, or another objective"}
 
 

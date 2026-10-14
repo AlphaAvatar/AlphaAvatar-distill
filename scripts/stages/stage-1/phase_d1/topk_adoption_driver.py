@@ -1754,7 +1754,8 @@ def main(argv: list[str] | None = None) -> int:
                          "DEPTH operator invocation per profile, ~25 min each) "
                          "and L (the D-series reference calibration: B rebuilt, "
                          "lambda and thresholds, then objective-overhead "
-                         "timing). A "
+                         "timing), and V (the redesigned D2's GPU validation, "
+                         "phase_d2/d2_gpu_validation.py). A "
                          "subrun that needs only D builds its candidate with "
                          "depth.positional_v0 instead of repeating the search.")
     ap.add_argument("--prediction-rows", default="all_v1",
@@ -1866,12 +1867,13 @@ def main(argv: list[str] | None = None) -> int:
                 "stage C compares full-vocabulary against Top-K logit BLOCKS and "
                 "its observer reshapes them as [B, T, V]; it is defined on the "
                 "all-rows path only. Run C under --prediction-rows all_v1.")
-        unknown = wanted - {"C", "D", "P", "L"}
+        unknown = wanted - {"C", "D", "P", "L", "V"}
         if unknown:
             raise AdoptionError(
                 f"--stages names {sorted(unknown)}; known: C (DEPTH dual "
                 "scoring), D (state evaluation), P (one real DEPTH operator "
-                "invocation), L (the D-series reference calibration). A typo "
+                "invocation), L (the D-series reference calibration), V (the "
+                "D2 GPU validation). A typo "
                 "would silently run less than intended and look like a clean "
                 "result.")
 
@@ -1894,6 +1896,21 @@ def main(argv: list[str] | None = None) -> int:
             with journal.stage("reference_calibration_premises") as st:
                 record["L_premises"] = _reference_calibration_premises(repo)
                 st.result = {"pool": record["L_premises"]["pool"]}
+
+        #: Stage V's premises: the D2 objective, contract, preregistration and
+        #: the plan's REGISTERED tolerances against the code's, B's identities
+        #: and $0 construction gate, the teacher binding. Only when V is asked
+        #: for. V runs its own scored_v1 arms, so its base mode is all_v1.
+        if "V" in wanted:
+            if args.prediction_rows != "all_v1":
+                raise AdoptionError(
+                    "stage V compares all_v1 against scored_v1 internally; run "
+                    "it under --prediction-rows all_v1")
+            from stages.phase_d2 import d2_gpu_validation as D2V
+
+            with journal.stage("d2_validation_premises") as st:
+                record["V_premises"] = D2V.premises(repo)
+                st.result = {"objective": record["V_premises"]["objective"]}
 
         with journal.stage("teacher_fetch_verify") as st:
             teacher_path = fetch_teacher(repo)
@@ -1935,6 +1952,24 @@ def main(argv: list[str] | None = None) -> int:
                     flush=l_flush)
                 st.result = {"lambda": record["L_reference_calibration"][
                     "calibration"]["reward_scale"]}
+            flush()
+
+        if "V" in wanted:
+            #: ALONE on the pod when asked for: the stores, B and the operator
+            #: children need the GPU to themselves.
+            with journal.stage("V_d2_validation") as st:
+                def v_flush(partial: dict[str, Any]) -> None:
+                    record[D2V.RECORD_KEY] = partial
+                    flush()
+                record[D2V.RECORD_KEY] = D2V.stage_V(
+                    env=D2V.production_environment(repo, teacher_path,
+                                                   numerics),
+                    journal=journal, out=out, deadline=deadline,
+                    flush=v_flush, premises_record=record["V_premises"])
+                st.result = {"verdicts": {
+                    k: v.get("verdict") if isinstance(v, dict) else v
+                    for k, v in record[D2V.RECORD_KEY]["verdicts"].items()
+                    if k != "not_gated"}}
             flush()
 
         if "C" in wanted:

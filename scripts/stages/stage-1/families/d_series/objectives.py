@@ -61,6 +61,11 @@ from aadistill.initialization.scoring.objective import (  # noqa: E402
 )
 
 SCHEMA = "aadistill.d_series.objective_contract/v1"
+#: The revision-6 contract (commit 16d67285), superseded by revision 7. Typed
+#: because it is a HISTORICAL identity the revision-7 record cites, not a
+#: value this module derives.
+REVISION_6_CONTRACT_HASH = (
+    "741cd5c5faa433285741b4b44d6fe07d30df2f1191ca6f5f71a1e6f3e48c5493")
 CONTRACT = "logs/stages/stage-1/families/d_series/plans/d2_d3_objective_contract_v1.json"
 #: The B-vs-teacher REFERENCE CALIBRATION: D3's lambda AND the diagnostic
 #: thresholds, measured once BEFORE D2's formal search and never revised.
@@ -380,8 +385,11 @@ def lambda_from_reference(item_kl: Sequence[float],
 
 # --- why, what is measured where, and what may be claimed ----------------------
 
-#: Maintainer supplement 2026-10-13: the reason the student's confidence enters.
+#: Maintainer supplement 2026-10-13: the reason the STUDENT's confidence
+#: enters -- D3's motivation. D2's is `D2_MOTIVATION` (the frozen teacher's
+#: confidence) and the two are never one signal.
 SCIENTIFIC_MOTIVATION = {
+    "applies_to": "D3 only",
     "title": "capacity-aware student reasoning",
     "premise": (
         "The teacher (Qwen3-4B-Thinking) and the ~0.6B student differ in "
@@ -398,26 +406,34 @@ SCIENTIFIC_MOTIVATION = {
         "Which structural initialization, under the capacity limit, best lets "
         "the student keep and recover its own effective reasoning ability?"),
     "role_of_confidence": (
-        "the student's Top-K confidence is a CANDIDATE PROXY signal for "
-        "structure selection. Its value is decided by independent behavioural "
-        "evidence, never assumed"),
+        "D3 ONLY: the candidate student's own Top-200 confidence is a "
+        "CANDIDATE PROXY signal for structure selection, entering as a reward. "
+        "D2 reads no student confidence (d2.motivation). Its value is decided "
+        "by independent behavioural evidence, never assumed"),
 }
 
-#: Four quantities that are NOT the same, and where each is measured.
+#: Quantities that are NOT the same, and where each is measured.
 MEASUREMENT_DISTINCTIONS = {
     "student_entropy_on_teacher_native_prefixes": (
-        "what the D2/D3 search objectives use: the student's own Top-K "
-        "entropy on the frozen teacher-native calibration and state-eval "
-        "sequences"),
+        "what D3's search objective uses: the candidate student's own Top-200 "
+        "conditional entropy on the frozen teacher-native calibration and "
+        "state-eval sequences. D2 does NOT use it"),
+    "teacher_entropy_on_teacher_native_prefixes": (
+        "what D2's search objective uses: the FROZEN ORIGINAL TEACHER's "
+        "full-vocabulary Shannon entropy on the same sequences -- from the "
+        "root reference store (calibration) and the state evaluator (state "
+        "suite). Identical for every candidate; D3 does not use it"),
     "student_entropy_on_student_rollout_prefixes": (
         "a behavioural DIAGNOSTIC only: the student's own Top-K entropy at the "
         "positions of its own greedy rollout, by "
         "scripts/shared/evaluation/rollout_rescoring.py after generation. "
-        "Never an input to selection in D2/D3"),
+        "Never an input to selection in D2 or D3"),
     "student_teacher_distribution_fit": (
-        "the Top-K + tail KL: on teacher-native prefixes in the search; on "
-        "the student's own prefixes in the rollout diagnostic, beside the "
-        "teacher's surprisal of the student's tokens"),
+        "the Top-K + tail KL: on teacher-native prefixes in the search -- "
+        "against the intact PARENT in D1's and D3's DEPTH, against the ROOT "
+        "teacher in D2's DEPTH, against the teacher in every state "
+        "evaluation; on the student's own prefixes in the rollout diagnostic, "
+        "beside the teacher's surprisal of the student's tokens"),
     "autonomous_rollout_correctness": (
         "the primary behavioural endpoint, correct_overall on the shared "
         "protocol, after the frozen recovery recipe. The only quantity a "
@@ -502,34 +518,55 @@ CLAIM_BOUNDARY = {
         "descriptive rollout and rescoring diagnostics of the candidates that "
         "were actually measured, labelled exploratory",
     ],
+    #: SHARED by D2 and D3. Each experiment adds its own list
+    #: (`D2_CLAIM_BOUNDARY`, `D3_CLAIM_BOUNDARY`).
     "may_not_claim": [
         "that a lower D2/D3 search objective means better reasoning or "
         "higher fidelity",
-        "that the student reasons differently, or better, where it is "
-        "confident and far from the teacher, without rollout-level evidence "
-        "linking those positions to correct completions",
         "any confidence or per-position statement about B or q2, whose "
         "checkpoints are retired and whose generations carry no "
         "log-probabilities",
         "a mechanism from the exploratory diagnostics alone",
-        "that the local selection rules of all four operators use student "
-        "confidence (only DEPTH's does, under D3; see objective_scope)",
+        "that the family-wise bound across D1-D3 is an unconditional "
+        "guarantee: it is a nominal accounting bound, conditional on each "
+        "test's nominal level, which adaptive reuse of the observed "
+        "confirmation data can violate",
+    ],
+    "validation": ("each objective's confidence signal is a proxy for "
+                   "structure selection; its usefulness is established only "
+                   "by independent behavioural evidence after recovery "
+                   "training"),
+}
+
+#: D2's own boundary: the frozen TEACHER's full-vocabulary confidence.
+D2_CLAIM_BOUNDARY = {
+    "may_not_claim": [
         "that D2 differs from D1 by one variable: it declares two changes, "
         "the DEPTH reference (parent -> root) and the teacher-confidence "
         "weighting (d2.declared_changes)",
         "that a lower D2 objective means the student is closer to the "
         "teacher: it down-weights the teacher's uncertain positions by "
         "construction",
+        "that the teacher's confident positions are the ones that matter for "
+        "reasoning, without behavioural evidence after recovery",
+        "that the full-scope weighting changed an FFN, WIDTH or ATTENTION "
+        "selection, unless a measured selection overlap shows it",
+        "that D2 reads any student confidence: its weight is the frozen "
+        "teacher's and no candidate can move it",
+    ],
+}
+
+#: D3's own boundary: the candidate STUDENT's Top-200 confidence reward.
+D3_CLAIM_BOUNDARY = {
+    "may_not_claim": [
+        "that the student reasons differently, or better, where it is "
+        "confident and far from the teacher, without rollout-level evidence "
+        "linking those positions to correct completions",
+        "that the local selection rules of all four operators use student "
+        "confidence (only DEPTH's does; see d3.scope)",
         "that confidence read on intermediate search candidates describes the "
         "final recovered student's capacity adaptation",
-        "that the family-wise bound across D1-D3 is an unconditional "
-        "guarantee: it is a nominal accounting bound, conditional on each "
-        "test's nominal level, which adaptive reuse of the observed "
-        "confirmation data can violate",
     ],
-    "validation": ("Top-K confidence is a proxy for structure selection; its "
-                   "usefulness is established only by independent behavioural "
-                   "evidence after recovery training"),
 }
 
 
@@ -659,10 +696,12 @@ D2_SCOPE = {
     },
 }
 
-#: Where the objectives act, and where they do not. Stated as data so no
-#: summary can say "all four operators" by accident. D3's scope; D2's is
-#: D2_SCOPE above and is different.
+#: Where D3's objective acts, and where it does not. Stated as data so no
+#: summary can say "all four operators" by accident. D3's ONLY: D2's is
+#: D2_SCOPE above, it is different, and the contract files each under its
+#: own experiment.
 OBJECTIVE_SCOPE = {
+    "applies_to": "D3 only",
     "acts_directly_on": [
         "DEPTH's operator-local candidate evaluation (depth.causal_kl_greedy_v1)",
         "global state evaluation of every child",
@@ -808,9 +847,29 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                 "state.teacher_kl.* and state.critical_token_kl"),
             "matches_objective_identity_field": "kl_path_weighting_per_consumer/v2",
         },
-        #: D3's motivation (the student's own confidence); D2's is
-        #: `d2.motivation`.
-        "scientific_motivation": SCIENTIFIC_MOTIVATION,
+        #: WHAT IS WHOSE. Each experiment owns its definition, motivation,
+        #: scope, diagnostics and claim boundary under its own key; only the
+        #: keys listed as shared apply to both (revision 7).
+        "layout": {
+            "d2": ["objective", "formula", "motivation", "hypothesis",
+                   "declared_changes", "scope", "where_it_applies",
+                   "diagnostics_recorded", "degeneracy_watch",
+                   "claim_boundary", "validity_checks_before_search"],
+            "d3": ["objective_template", "formula", "motivation", "hypothesis",
+                   "scope", "where_it_applies", "diagnostics_recorded",
+                   "claim_boundary", "lambda_rule"],
+            "shared": ["shared_with_d1", "aggregation_difference_from_d1",
+                       "measurement_distinctions", "behavioural_diagnostics",
+                       "claim_boundary", "aggregation_control",
+                       "rollout_rescoring_integration", "ranking",
+                       "diagnostic_threshold_rule", "diagnostic_thresholds",
+                       "independence", "calibration_this_round"],
+            "confidence_signals": {
+                "d2": ("the FROZEN ORIGINAL TEACHER's full-vocabulary "
+                       "confidence, a weight on the root-reference KL"),
+                "d3": ("the candidate STUDENT's own Top-200 confidence, a "
+                       "reward beside the parent-reference KL")},
+        },
         "d2": {"objective": D2_OBJECTIVE.as_dict(),
                "objective_hash": D2_OBJECTIVE.objective_hash,
                "formula": (
@@ -840,12 +899,30 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                    "D1's KL metrics, unchanged, beside them",
                    "the root reference store's identity, content digest and "
                    "confidence distribution (weight sum, mean, ESS)"],
+               "where_it_applies": {
+                   "depth.causal_kl_greedy_v1": (
+                       "OPERATOR-LOCAL: the candidate is the parent with S "
+                       "bypassed; its KL against the ROOT's stored sketch, "
+                       "weighted by the root's stored confidence"),
+                   "ffn / residual_width / attention activation operators": (
+                       "FULL SCOPE: their activation statistics are weighted "
+                       "by the frozen teacher's confidence, which needs no "
+                       "candidate; their configs declare the objective and "
+                       "their state ids fork from D1's"),
+                   "state evaluation": (
+                       "every child, against the original teacher, weighted "
+                       "by the teacher's own confidence"),
+                   "beam ranking and pruning": OBJECTIVE_PARETO_V1.qualified_id},
                "degeneracy_watch": (
-                   "the weight is candidate-independent, so a candidate cannot "
-                   "game it; it CAN degrade at the teacher's uncertain "
-                   "positions at a discount. The unweighted root KL is recorded "
-                   "on every candidate and state, and a low D2 objective is "
-                   "never read as higher fidelity"),
+                   "the weight is the frozen teacher's, so no candidate can "
+                   "lower the objective by becoming confident; a candidate CAN "
+                   "be worse at the teacher's uncertain positions at a "
+                   "discount. The unweighted root KL is recorded on every "
+                   "candidate and state, and a low D2 objective is never read "
+                   "as higher fidelity. High raw KL is a registered DIAGNOSTIC "
+                   "FLAG (diagnostic_threshold_rule), never an elimination "
+                   "criterion and never a manual intervention"),
+               "claim_boundary": D2_CLAIM_BOUNDARY,
                "validity_checks_before_search": (
                    "stages.d_series.teacher_confidence: distribution, "
                    "thinking vs answer, domain and subtype, token types, "
@@ -866,7 +943,34 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                           "measured on the reference pair BEFORE D2's formal "
                           "search, with the diagnostic thresholds"),
                "formula": ("L(x) = (1/T_x) sum_{t in T_x} [KL_t - lambda c_t], "
-                           "minimized (S = -L maximized)"),
+                           "minimized (S = -L maximized); c_t = 1 - "
+                           "H^(200)_C(t)/log 200, the candidate student's own "
+                           "Top-200 conditional entropy; KL against the "
+                           "parent in DEPTH and the teacher in state "
+                           "evaluation"),
+               "motivation": SCIENTIFIC_MOTIVATION,
+               "scope": OBJECTIVE_SCOPE,
+               "where_it_applies": {
+                   "depth.causal_kl_greedy_v1": (
+                       "OPERATOR-LOCAL, exactly: the candidate is the parent "
+                       "with S bypassed, and its KL against the parent and its "
+                       "own Top-K entropy come from the same forward"),
+                   "ffn / residual_width / attention activation operators": (
+                       "NOT operator-local -- no candidate exists until it is "
+                       "made, so there is no candidate KL or confidence to "
+                       "weight; they keep D1's statistic and their state ids "
+                       "do not fork"),
+                   "state evaluation": (
+                       "every child, against the original teacher; the student "
+                       "is the child itself"),
+                   "beam ranking and pruning": OBJECTIVE_PARETO_V1.qualified_id},
+               "diagnostics_recorded": [
+                   "raw KL", "student Top-200 entropy, confidence and Top-K "
+                   "mass", "confidence reward", "objective",
+                   "scored positions per item",
+                   "confidence histogram and quantiles", "reference tail mass",
+                   "D1's KL metrics, unchanged, beside them"],
+               "claim_boundary": D3_CLAIM_BOUNDARY,
                "hypothesis": (
                    "The student's own predictive certainty may carry "
                    "structural-selection value independent of the teacher KL: "
@@ -885,44 +989,6 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                     "policy_hash": OBJECTIVE_PARETO_V1.policy_hash,
                     "objectives": [o.key for o in OBJECTIVE_PARETO_V1.objectives],
                     "epsilon": dict(OBJECTIVE_PARETO_V1.epsilon)},
-        #: D3's scope. D2's is `d2.scope`.
-        "objective_scope": OBJECTIVE_SCOPE,
-        "where_each_objective_applies": {
-            "depth.causal_kl_greedy_v1": (
-                "OPERATOR-LOCAL, exactly: the candidate is the parent with S "
-                "bypassed. D3: its KL against the parent and its own Top-K "
-                "entropy come from the same forward. D2: its KL against the "
-                "ROOT's stored sketch, weighted by the root's stored "
-                "confidence"),
-            "ffn / residual_width / attention activation operators": (
-                "D3: NOT operator-local -- no candidate exists until it is "
-                "made, so there is no candidate KL or confidence to weight; "
-                "they keep D1's statistic and their state ids do not fork. "
-                "D2 (full scope): their activation statistics are weighted by "
-                "the frozen teacher's confidence, which needs no candidate; "
-                "their configs declare the objective and their state ids "
-                "fork from D1's"),
-            "state evaluation": (
-                "every child, against the original teacher; the student is the "
-                "child itself"),
-            "beam ranking and pruning": OBJECTIVE_PARETO_V1.qualified_id,
-        },
-        "diagnostics_recorded": [
-            "raw KL", "D3: student Top-K entropy, confidence and Top-K mass",
-            "D2: reference (teacher) entropy and confidence; DEPTH round-0 "
-            "parent-reference KL",
-            "confidence weight (D2) / confidence reward (D3)",
-            "objective", "scored positions per item",
-            "confidence histogram and quantiles",
-            "reference tail mass", "D1's KL metrics, unchanged, beside them"],
-        "d2_degeneracy_watch": (
-            "D2's weight is the frozen teacher's, so no candidate can lower "
-            "the objective by becoming confident; a candidate CAN be worse at "
-            "the teacher's uncertain positions at a discount. Raw (unweighted) "
-            "KL is recorded on every candidate and state, and a low D2 score "
-            "is never read as higher fidelity. High raw KL is a registered "
-            "DIAGNOSTIC FLAG (diagnostic_threshold_rule), never an elimination "
-            "criterion and never a manual intervention"),
         "aggregation_control": AGGREGATION_CONTROL,
         "rollout_rescoring_integration": ROLLOUT_RESCORING_INTEGRATION,
         "independence": (
@@ -930,12 +996,14 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
             "D2 runs; no D2 behavioural or search result may adjust them"),
         "measurement_distinctions": MEASUREMENT_DISTINCTIONS,
         "calibration_this_round": (
-            "the frozen TEACHER-NATIVE calibration profiles, unchanged, so the "
-            "objective is the only variable. No student-prefix calibration is "
+            "the frozen TEACHER-NATIVE calibration profiles, unchanged. Between "
+            "D1 and D3 the objective is the only variable; D2 declares two "
+            "(d2.declared_changes). No student-prefix calibration is "
             "introduced in D2 or D3"),
         "behavioural_diagnostics": BEHAVIOURAL_DIAGNOSTICS,
+        #: SHARED; d2.claim_boundary and d3.claim_boundary add each one's own.
         "claim_boundary": CLAIM_BOUNDARY,
-        "revision": 6,
+        "revision": 7,
         "revision_history": [
             {"revision": 1, "date": "2026-10-13",
              "change": "D2/D3 objectives, identities, ranking, lambda rule"},
@@ -973,7 +1041,16 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                         "(objective.d2_teacher_confidence_weighted_kl@v1), full "
                         "scope; the student-uncertainty D2 is SUPERSEDED and was "
                         "NEVER EXECUTED (d2_superseded). D3's objective, lambda "
-                        "(7.34), thresholds, ranking and both rules unchanged")}],
+                        "(7.34), thresholds, ranking and both rules unchanged")},
+            {"revision": 7, "date": "2026-10-14",
+             "supersedes_contract_hash": REVISION_6_CONTRACT_HASH,
+             "change": ("independent review of 16d67285: D2 and D3 each own "
+                        "their definition, motivation, scope, where-it-applies, "
+                        "diagnostics and claim boundary (layout). Revision 6 "
+                        "still described the student's Top-K confidence as a "
+                        "shared D2/D3 signal and FFN/WIDTH/ATTENTION as never "
+                        "consuming an objective. No objective identity, "
+                        "ranking, rule, lambda or threshold changed")}],
     }
     out = {**science, "contract_hash": sha256_json(science),
            "authorizes": "nothing"}

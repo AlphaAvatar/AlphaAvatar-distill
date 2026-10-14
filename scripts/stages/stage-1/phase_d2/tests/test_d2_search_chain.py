@@ -76,6 +76,16 @@ class TestThePreregistration:
         assert doc["retention"]["k"] == 4
         assert doc["authorizes"] == "nothing"
 
+    def test_the_superseded_draft_is_recorded_and_not_current(self):
+        doc = S.preregistration()
+        (old,) = doc["superseded_drafts"]
+        assert old["preregistration_hash"].startswith("317596c4")
+        assert old["approved"] is False
+        assert doc["preregistration_hash"] != old["preregistration_hash"]
+        from stages.d_series import objectives as O
+        assert old["contract_hash"] == O.REVISION_6_CONTRACT_HASH
+        assert doc["objective"]["contract_hash"] != old["contract_hash"]
+
     def test_v1_is_superseded_with_its_science_and_hash_intact(self):
         from aadistill.infrastructure.manifest import sha256_json
 
@@ -98,9 +108,7 @@ class TestThePreregistration:
 
     def test_the_hash_covers_the_science_not_the_status(self):
         doc = S.preregistration()
-        science = {k: v for k, v in doc.items()
-                   if k not in ("status", "preregistration_hash", "budget",
-                                "authorizes")}
+        science = {k: v for k, v in doc.items() if k not in W.NON_SCIENCE_KEYS}
         from aadistill.infrastructure.manifest import sha256_json
         assert sha256_json(science) == doc["preregistration_hash"]
 
