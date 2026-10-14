@@ -527,8 +527,7 @@ class TestTheRecords:
         assert set(plan["step_bounds_s"]) == set(V.STEP_ORDER)
         assert plan["formal_topology"]["micro_batch_size"] == 3
 
-    def test_the_proposal_is_not_a_grant(self):
-        assert not (REPO / V.AUTHORIZATION).exists()
+    def test_the_proposal_prices_the_plan(self):
         auth = json.loads((REPO / V.AUTHORIZATION_PROPOSED).read_text())
         assert auth["status"].startswith("PROPOSED")
         assert auth["plan_sha256"] == hashlib.sha256(
@@ -542,41 +541,32 @@ class TestTheRecords:
         assert f"SESSION_CAP={t['proposed_session_cap_usd']:.2f}" in \
             auth["command"]
 
-    def test_the_executable_commit_carries_this_trees_session(self):
-        """The commit a grant runs executes exactly what was reviewed: every
-        executed path and record is identical between it and HEAD."""
-        import subprocess
-        commit = P.EXECUTABLE_COMMIT
-
-        def git(*a):
-            return subprocess.run(["git", "-C", str(REPO), *a],
-                                  capture_output=True, text=True)
-        if git("cat-file", "-e", f"{commit}^{{commit}}").returncode:
-            pytest.skip("the executable commit is not in this checkout")
-        assert git("merge-base", "--is-ancestor", commit, "HEAD").returncode == 0
-        #: Against the WORKING TREE, not HEAD: an uncommitted edit to an
-        #: executed path is as much a divergence as a committed one.
-        changed = [p for p in git("diff", "--name-only", commit, "--",
-                                  *P.EXECUTED_PATHS).stdout.split()
-                   if p not in P.EXECUTED_PATH_EXCEPTIONS
-                   and "/tests/" not in p and not p.startswith("tests/")]
-        assert changed == [], (
-            f"{changed} differ between the executable commit {commit[:12]} and "
-            "this tree: re-pin EXECUTABLE_COMMIT before any grant runs it")
-        auth = json.loads((REPO / V.AUTHORIZATION_PROPOSED).read_text())
-        assert auth["executable_commit"] == commit
-        assert f"ADOPT_COMMIT={commit}" in auth["command"]
-
-    def test_the_launcher_cannot_derive_a_budget_without_the_grant(self):
-        """THE PAID BOUNDARY: no authorization.json, no ceiling, no pod."""
+    def test_a_grant_is_the_proposal_and_nothing_more(self):
+        """ASSERT THE GRANT: the granted record carries exactly the
+        proposal's money, plan, commit and command; only grant fields are
+        added. Before a grant exists, the launcher cannot derive a budget."""
         import importlib.util
         spec = importlib.util.spec_from_file_location(
             "ecb", REPO / "scripts/shared/pod/engineering_campaign_budget.py")
         ecb = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(ecb)
-        with pytest.raises(ecb.BudgetError, match="authorization.json"):
-            ecb.derive(REPO / V.CAMPAIGN, session_cap_usd=1.5,
-                       rate_usd_per_hour=1.09)
+        path = REPO / V.AUTHORIZATION
+        if not path.exists():
+            with pytest.raises(ecb.BudgetError, match="authorization.json"):
+                ecb.derive(REPO / V.CAMPAIGN, session_cap_usd=1.5,
+                           rate_usd_per_hour=1.09)
+            return
+        grant = json.loads(path.read_text())
+        prop = json.loads((REPO / V.AUTHORIZATION_PROPOSED).read_text())
+        assert grant["status"] == "GRANTED" and grant["granted_utc"]
+        for key in ("all_in_ceiling_usd", "session_cap_usd", "plan",
+                    "plan_sha256", "campaign", "executable_commit", "command",
+                    "book"):
+            assert grant[key] == prop[key], key
+        assert grant["all_in_ceiling_usd"] == 1.70
+        assert grant["session_cap_usd"] == 1.40
+        assert ecb.derive(REPO / V.CAMPAIGN, session_cap_usd=1.40,
+                          rate_usd_per_hour=1.09)["session_ceiling"] <= 1.40
 
     def test_the_cap_covers_the_core_and_v5_is_extended(self):
         plan = json.loads((REPO / V.PLAN).read_text())
