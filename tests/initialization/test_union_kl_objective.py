@@ -633,6 +633,10 @@ class TestTheStore:
                                     kl_reference=KL_REFERENCE_ROOT))):
             assert other != base
         store = _store(root, _items())
+        #: RESUME: a store rebuilt from the same root, mixture and execution
+        #: (a resumed search rebuilds it) declares the same identity, so the
+        #: statistics cache keys it enters still match.
+        assert _store(root, _items()).identity_hash == store.identity_hash
         build = store.identity["build"]
         assert build["output_head"]["logit_definition"].startswith("float32")
         assert build["adapter"]["capabilities"] == [

@@ -73,7 +73,7 @@ from aadistill.initialization.scoring.support import (
 
 SCHEMA = "aadistill.root_reference_store/v1"
 #: The union-support store: same per-item views plus retrieval state.
-UNION_SCHEMA = "aadistill.root_reference_store/v2_union_retrieval"
+UNION_SCHEMA = "aadistill.root_reference_store/v2"
 RETRIEVAL_DEFINITION = "final_hidden_state_and_full_vocab_log_normalizer/v1"
 
 

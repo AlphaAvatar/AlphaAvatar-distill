@@ -168,7 +168,8 @@ class DistributionSupport:
             return {"support_id": self.support_id}
         if self.is_union:
             #: The tie-break is serialized for the union support ONLY, so the
-            #: reference-Top-K identity every D1/D3 record cites is unchanged.
+            #: reference-Top-K identity every historical record cites is
+            #: unchanged.
             return {"support_id": self.support_id, "top_k": int(self.top_k),
                     "topk_tie_break": TOPK_TIE_BREAK}
         return {"support_id": self.support_id, "top_k": int(self.top_k)}
@@ -246,8 +247,9 @@ def deterministic_topk(values: torch.Tensor, k: int
     ``torch.topk`` returns *a* valid Top-K, and when several entries tie at the
     K-th value which of them it admits is unspecified -- it can differ between
     devices, kernels and batch shapes. bf16 logits tie there often (measured
-    on real 151,936-entry bf16 logits at K=200: 73% of rows tie at the K-th
-    value and ``torch.topk``'s set differs from this one on 61%), so a support
+    on real bf16 logits of a six-figure vocabulary at a Top-K of a few
+    hundred: most rows tie at the K-th value, and ``torch.topk``'s set differs
+    from this one on more than half of them), so a support
     defined by ``torch.topk`` alone would let the kernel choose the partition.
     Here the SET is fixed -- every entry strictly above the K-th value, then
     the lowest-index entries equal to it -- and so is the ORDER.
@@ -637,7 +639,8 @@ def sketch_reference(logits: torch.Tensor, targets: torch.Tensor, *,
     """Reduce ``[T, V]`` reference logits to an ``O(T*K)`` sketch.
 
     The ``reference_topk_tail_v1`` sketch, selected by ``torch.topk``: every
-    D1/D3 decision was made on exactly this arithmetic, and the union support's
+    recorded decision on that support was made on exactly this arithmetic, and
+    the union support's
     sketch (:func:`sketch_reference_deterministic`) is a separate entry point so
     that nothing here moves.
 
