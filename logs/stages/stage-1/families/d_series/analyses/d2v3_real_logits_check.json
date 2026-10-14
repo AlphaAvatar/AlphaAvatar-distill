@@ -395,11 +395,11 @@
   "topk_vs_full_item_spearman_min": 1.0
  },
  "store": {
-  "identity_hash": "76ad905a9f5490602ac95accf188501b16a6fe6b6b87f30233adbf7f2c4cba75",
+  "identity_hash": "29cf6b276a1f3aba2d7781fa05faed20e3939f821bf495ddf0c14dcde0a3d06f",
   "decision": {
    "mode": "root_reference_store",
    "cached": true,
-   "identity_hash": "76ad905a9f5490602ac95accf188501b16a6fe6b6b87f30233adbf7f2c4cba75",
+   "identity_hash": "29cf6b276a1f3aba2d7781fa05faed20e3939f821bf495ddf0c14dcde0a3d06f",
    "distribution_support": {
     "support_id": "reference_student_union_topk_tail_v1",
     "top_k": 200,
@@ -424,8 +424,8 @@
    }
   }
  },
- "seconds": 86.2,
- "git_commit": "3ac465e73fdd78d9bc9ed00d49f82a019a4c7980",
+ "seconds": 82.4,
+ "git_commit": "15f0819b137c904a8fbed7e7e76369282834326d",
  "threads": 12,
  "torch": "2.13.0+cpu"
 }
