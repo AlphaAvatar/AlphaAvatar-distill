@@ -193,6 +193,11 @@ class OperatorContext:
     #: like the support, and consumed only by implementations that declare
     #: `consumes_scoring_objective`; `None` is the historical KL-only objective.
     scoring_objective: Any = None
+    #: The ROOT reference store for this invocation's calibration mixture
+    #: (`scoring.reference_store`), when the objective reads the root
+    #: reference: DEPTH's KL reference and the confidence weights of the
+    #: activation statistics. `None` everywhere else.
+    root_reference: Any = None
 
     def cached_stats(self, collect):
         """Statistics for this parent under this profile, collected at most once."""
@@ -253,6 +258,11 @@ class OperatorImplementation(ABC):
     #: implementation's signature hash, and the objective an invocation used is
     #: bound where it varies -- in the hashed operator config.
     consumes_scoring_objective: bool = False
+    #: Whether this implementation's ACTIVATION STATISTICS take the root
+    #: reference's confidence as token weights when the objective declares
+    #: `weights_activation_statistics`. Not part of `signature()`, for the
+    #: same reason as the flag above.
+    consumes_reference_weighted_statistics: bool = False
     deterministic: bool = True
     requires_seed: bool = False
     produces: tuple[str, ...] = ()
@@ -372,17 +382,29 @@ class OperatorImplementation(ABC):
         #: that consumes one must be handed the object its config declares; one
         #: that does not must not declare it, because its state id would then
         #: name an objective its selection never read.
+        from aadistill.initialization.planning.operator_config import (
+            objective_consumed_by,
+            root_reference_needed,
+        )
+
         declared_objective = (ctx.config or {}).get("scoring_objective")
         actual_objective = (None if ctx.scoring_objective is None
                             else ctx.scoring_objective.as_dict())
-        if self.consumes_scoring_objective:
+        if objective_consumed_by(self, ctx.scoring_objective):
+            if (root_reference_needed(self, ctx.scoring_objective)
+                    and ctx.root_reference is None):
+                raise ContractViolation(
+                    f"{self.impl_id}: {ctx.scoring_objective.qualified_id} "
+                    "reads the ROOT reference and no root reference store was "
+                    "handed to this invocation")
             if declared_objective != actual_objective:
                 raise ContractViolation(
                     f"{self.impl_id}: config declares scoring objective "
                     f"{declared_objective!r} but was handed "
                     f"{actual_objective!r}. The declared value is what the "
                     "state id is derived from.")
-        elif declared_objective is not None:
+        if not objective_consumed_by(self, ctx.scoring_objective) and \
+                declared_objective is not None:
             raise ContractViolation(
                 f"{self.impl_id} does not consume a scoring objective, so its "
                 "config may not declare one; the state id would name an "

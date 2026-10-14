@@ -60,17 +60,41 @@ class TestThePreregistration:
     def test_the_committed_record_is_what_the_writer_derives(self):
         assert W.main([]) == 0, "run write_d2_preregistration.py --write"
 
-    def test_it_changes_one_variable_from_d1(self):
+    def test_it_keeps_d1s_space_and_declares_two_changes(self):
         doc = S.preregistration()
         d1 = json.loads((REPO / W.D1_DESIGN).read_text())["search_stage"]
+        assert doc["version"] == 2
         assert doc["search"]["frozen_implementations"] == \
             d1["frozen_implementations"]
         assert doc["search"]["profiles"] == d1["profiles"]
         assert doc["search"]["beam"] == d1["beam"]
         assert doc["search"]["ranking_policy"]["id"] == \
             "beam.pareto_scoring_objective@v1"
+        assert len(doc["declared_changes_from_d1"]["changes"]) == 2
+        assert "one_variable" not in doc
+        assert doc["scope_decision"]["frozen"] == "full"
         assert doc["retention"]["k"] == 4
         assert doc["authorizes"] == "nothing"
+
+    def test_v1_is_superseded_with_its_science_and_hash_intact(self):
+        from aadistill.infrastructure.manifest import sha256_json
+
+        v1 = json.loads((REPO / W.SUPERSEDED_RECORD).read_text())
+        assert v1["status"] == "SUPERSEDED -- NEVER EXECUTED"
+        assert v1["executed"] is False
+        assert v1["superseded_by"] == W.RECORD
+        science = {k: v for k, v in v1.items()
+                   if k not in ("status", "preregistration_hash", "budget",
+                                "authorizes", *W.SUPERSESSION_FIELDS)}
+        assert sha256_json(science) == v1["preregistration_hash"]
+        assert v1["preregistration_hash"].startswith("489f49ba")
+        v2 = S.preregistration()
+        assert v2["supersedes"]["preregistration_hash"] == \
+            v1["preregistration_hash"]
+        assert v2["supersedes"]["objective_hash"] == \
+            v1["objective"]["objective_hash"]
+        assert v2["objective"]["objective_hash"] != \
+            v1["objective"]["objective_hash"]
 
     def test_the_hash_covers_the_science_not_the_status(self):
         doc = S.preregistration()
@@ -170,20 +194,45 @@ class TestTheDriverDecisions:
 
     def test_objective_telemetry_sums_what_the_cost_model_reads(self, tmp_path):
         rows = [
-            {"impl_id": "depth.causal_kl_greedy_v1", "operator_seconds": 100.0,
+            {"event": "root_reference_built", "profile": "p",
+             "build_seconds": 3.0, "identity_hash": "i"},
+            {"event": "expansion",
+             "impl_id": "depth.causal_kl_greedy_v1", "operator_seconds": 100.0,
              "operator_timing": {"objective_seconds": 4.0},
-             "reference_cache": {"mode": "cached"},
+             "reference_cache": {"mode": "root_reference_store"},
+             "parent_reference_cache": {"mode": "cached"},
              "state_evaluation_seconds": {"seconds": 10.0}},
-            {"impl_id": "ffn.activation_importance_v0", "operator_seconds": 9.0,
+            {"event": "expansion",
+             "impl_id": "ffn.activation_importance_v0", "operator_seconds": 9.0,
              "operator_timing": {}, "state_evaluation_seconds": {"seconds": 11.0}}]
         path = tmp_path / "telemetry.jsonl"
         path.write_text("".join(json.dumps(r) + "\n" for r in rows))
         out = DRV.objective_telemetry(path)
+        assert out["expansions"] == 2
         assert out["depth_expansions"] == 1
         assert out["depth_objective_seconds"] == 4.0
         assert out["state_evaluation_seconds"] == 21.0
-        assert out["depth_cache_modes"] == ["cached"]
+        assert out["depth_cache_modes"] == ["root_reference_store"]
+        assert out["depth_parent_kl_cache_modes"] == ["cached"]
+        assert out["root_reference_builds"] == [
+            {"profile": "p", "build_seconds": 3.0, "identity_hash": "i"}]
         assert DRV.objective_telemetry(tmp_path / "absent") == {"available": False}
+
+    @pytest.mark.parametrize("modes,regressed", [
+        ({"reference_cache": "root_reference_store",
+          "parent_reference_cache": "cached"}, None),
+        ({"reference_cache": "cached"}, None),
+        ({"reference_cache": "root_reference_store",
+          "parent_reference_cache": "recomputed"}, "parent_reference_cache"),
+        ({"reference_cache": "recomputed"}, "reference_cache")])
+    def test_the_cache_guard_watches_both_references(self, tmp_path, modes,
+                                                     regressed):
+        row = {"event": "expansion", "impl_id": "depth.causal_kl_greedy_v1",
+               "state_id": "s", **{k: {"mode": v} for k, v in modes.items()}}
+        path = tmp_path / "telemetry.jsonl"
+        path.write_text(json.dumps(row) + "\n")
+        hit = DRV.cache_regression(path)
+        assert (hit and hit["reference"]) == regressed
 
     def test_the_driver_uses_d1s_terminal_markers(self):
         from stages.phase_d1 import autoinit_d1_driver as D1

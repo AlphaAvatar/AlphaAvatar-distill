@@ -4,12 +4,19 @@
     PYTHONPATH=src:scripts .venv/bin/python \
         scripts/stages/stage-1/phase_d2/write_d2_preregistration.py [--write]
 
+VERSION 2 (contract revision 6): the redesigned D2 -- the frozen teacher's
+full-vocabulary confidence weighting the root-reference KL, full scope.
+Version 1 (`d2_preregistration_v1.json`, hash 489f49ba...) froze the
+student-uncertainty D2 and is SUPERSEDED -- NEVER EXECUTED; its file is kept,
+its science and hash unchanged, its status field says so (`supersede_v1`).
+
 Assembled from the owners of each fact, never restated:
 
-* the objective, the ranking policy and the claim boundary -- the D2/D3
-  objective contract (`stages.d_series.objectives`);
+* the objective, its two declared changes from D1, its scope, the ranking
+  policy and the claim boundary -- the D2/D3 objective contract
+  (`stages.d_series.objectives`);
 * the search space, seed, beam, profiles and frozen operators -- D1's design
-  and D1's search record, because D2 changes ONE thing: what is minimized;
+  and D1's search record, which D2 keeps;
 * the behavioural rungs, comparator units, alpha and outcomes -- the shared
   evaluation protocol (`stages.d_series.shared_evaluation`);
 * the price -- `stages.d_series.d2_budget`.
@@ -34,8 +41,14 @@ for _extra in ("src", "scripts", "scripts/stages/stage-1"):
 
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-SCHEMA = "aadistill.phase_d2.preregistration/v1"
-RECORD = "logs/stages/stage-1/phase_d2/plans/d2_preregistration_v1.json"
+SCHEMA = "aadistill.phase_d2.preregistration/v2"
+RECORD = "logs/stages/stage-1/phase_d2/plans/d2_preregistration_v2.json"
+#: The superseded version: kept, never rewritten except its status fields.
+SUPERSEDED_RECORD = "logs/stages/stage-1/phase_d2/plans/d2_preregistration_v1.json"
+SUPERSEDED_HASH_PREFIX = "489f49ba"
+#: The D2 GPU validation plan (a PROPOSAL; its own grant runs it).
+GPU_VALIDATION_PLAN = ("logs/stages/stage-1/phase_d2/plans/"
+                       "d2_gpu_validation_plan.json")
 D1_DESIGN = "logs/stages/stage-1/phase_d1/plans/d1_design.json"
 D1_SEARCH = ("logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/"
              "evidence/d1_search.json")
@@ -64,41 +77,65 @@ def build() -> dict[str, Any]:
     budget = BUD.build(k_candidates=K_CANDIDATES)
     stage = design["search_stage"]
 
+    d2 = contract["d2"]
     science = {
         "schema": SCHEMA,
         "experiment_id": "phase_d2",
         "stage_id": "1",
-        "version": 1,
+        "version": 2,
+        "supersedes": {
+            "record": SUPERSEDED_RECORD,
+            "preregistration_hash": _read(SUPERSEDED_RECORD)[
+                "preregistration_hash"],
+            "objective": contract["d2_superseded"]["objective_id"],
+            "objective_hash": contract["d2_superseded"]["objective_hash"],
+            "status": contract["d2_superseded"]["status"],
+        },
         "question": (
             "Under the capacity limit, does weighting each scored position's "
-            "KL by the candidate student's own Top-200 uncertainty select a "
-            "structural initialization that, after the frozen recovery "
-            "recipe, recovers more autonomous task correctness than the "
-            "standing incumbent B?"),
-        "motivation": contract["scientific_motivation"],
-        "hypothesis": contract["d2"]["hypothesis"],
+            "root-reference KL -- and the structural operators' activation "
+            "statistics -- by the FROZEN ORIGINAL TEACHER's full-vocabulary "
+            "confidence select a structural initialization that, after the "
+            "frozen recovery recipe, recovers more autonomous task "
+            "correctness than the standing incumbent B?"),
+        "motivation": d2["motivation"],
+        "hypothesis": d2["hypothesis"],
         "objective": {
-            "definition": contract["d2"]["objective"],
-            "objective_hash": contract["d2"]["objective_hash"],
-            "formula": contract["d2"]["formula"],
+            "definition": d2["objective"],
+            "objective_hash": d2["objective_hash"],
+            "formula": d2["formula"],
+            "fixed": d2["fixed"],
             "contract": O.CONTRACT,
             "contract_hash": contract["contract_hash"],
-            "scope": contract["objective_scope"],
+            "scope": d2["scope"],
             "aggregation_control": contract["aggregation_control"],
         },
-        "one_variable": {
-            "changed_from_d1": ("the scoring objective of DEPTH, state "
-                                "evaluation and the beam ranking -- and only "
-                                "that"),
-            "unchanged": [
-                "root teacher and target geometry",
-                "frozen operator set and calibration-profile assignment space",
-                "beam schedule and width",
-                "search seed",
-                "position policy positions.supervised_target_v1@v1",
-                "reference Top-200 + tail support",
-                "micro-batch 3, length_sorted_v1",
-                "recovery recipe and behavioural protocol"],
+        #: TWO declared changes. Never "one variable".
+        "declared_changes_from_d1": d2["declared_changes"],
+        "unchanged_from_d1": [
+            "root teacher and target geometry",
+            "frozen operator set and calibration-profile assignment space",
+            "beam schedule and width",
+            "search seed",
+            "position policy positions.supervised_target_v1@v1 (binary)",
+            "reference Top-200 + tail support",
+            "micro-batch 3, length_sorted_v1",
+            "recovery recipe and behavioural protocol"],
+        "scope_decision": {
+            "frozen": d2["scope"]["frozen_scope"],
+            "objective_hash": d2["objective_hash"],
+            "narrow_scope_comparison": d2["scope"]["narrow_scope_comparison"],
+            "review": d2["scope"]["full_scope_review"],
+        },
+        "teacher_confidence_validity": {
+            "checks": d2["validity_checks_before_search"],
+            "when": ("in the D2 GPU validation session, on the root reference "
+                     "stores of both profiles, BEFORE the formal search is "
+                     "authorized"),
+            "owner": "scripts/stages/stage-1/families/d_series/teacher_confidence.py",
+            "rule": ("descriptive; a result may inform the maintainer's "
+                     "authorization decision but never changes a definition, "
+                     "the scope or any rule in this record"),
         },
         "search": {
             "frozen_implementations": stage["frozen_implementations"],
@@ -110,16 +147,41 @@ def build() -> dict[str, Any]:
             "position_policy": "positions.supervised_target_v1@v1",
             "ranking_policy": {"id": O.OBJECTIVE_PARETO_V1.qualified_id,
                                "hash": O.OBJECTIVE_PARETO_V1.policy_hash},
-            "measurer": ("StateEvaluator with the SAME scoring objective; "
-                         "BeamSearch refuses any mismatch"),
+            #: The RANKING IDENTITY: the generic objective-ranking policy
+            #: (shared with D3 by design -- same shape, same epsilon) bound
+            #: to the objective whose metrics it ranks. New for D2 v2
+            #: because the objective is new; the policy is not forked.
+            "ranking_identity": {
+                "policy_hash": O.OBJECTIVE_PARETO_V1.policy_hash,
+                "objective_hash": d2["objective_hash"],
+                "ranking_identity_hash": sha256_json({
+                    "policy_hash": O.OBJECTIVE_PARETO_V1.policy_hash,
+                    "objective_hash": d2["objective_hash"]})},
+            "root_reference": {
+                "what": ("one store per calibration profile, built once from "
+                         "the frozen teacher: Top-200 + tail sketch, "
+                         "full-vocabulary entropy and confidence, target "
+                         "log-probability and top-1 (diagnostics)"),
+                "identity": ("root teacher id + sha256, profile hash, support, "
+                             "entropy definition, confidence mapping and row "
+                             "set; a declaration, not a tensor hash -- the "
+                             "content digest is evidence"),
+                "consumers": ["DEPTH's KL reference and weights",
+                              "FFN / WIDTH / ATTENTION statistics weights"]},
+            "measurer": ("StateEvaluator with the SAME scoring objective "
+                         "(teacher full-vocabulary entropy computed once per "
+                         "item); BeamSearch refuses any mismatch"),
             "execution": {
                 "micro_batch_size": SP.D_SERIES_MICRO_BATCH_SIZE,
                 "calibration_batch_packing": SP.D_SERIES_BATCH_PACKING,
                 "prediction_rows": (
-                    "all_v1, unless R0's verdict is PASS and recorded before "
-                    "the search authorization, then scored_v1. An execution "
-                    "choice validated equivalent, recorded in the run's "
-                    "execution fingerprint; it changes no estimand")},
+                    "all_v1, unless the D2 GPU validation's scored_v1 "
+                    "equivalence for THIS objective passes under R0's "
+                    "tolerances before the search authorization, then "
+                    "scored_v1. R0 (KL path) and stage L (the superseded "
+                    "objective) do not establish it for this objective. An "
+                    "execution choice, recorded in the run's execution "
+                    "fingerprint; it changes no estimand")},
             "stops_at": "commit_top_k; the search trains nothing",
         },
         "retention": {
@@ -132,14 +194,26 @@ def build() -> dict[str, Any]:
         },
         "search_diagnostics": {
             "kl_only_control": (
-                "every state carries state.objective.raw_kl.* (equal to D1's "
-                "state.teacher_kl.*) beside the objective; the D1 ranking of "
-                "D2's complete leaves under PARETO_V1 on those raw-KL metrics "
-                "is reported, never used"),
-            "per_candidate": ("DEPTH records objective, raw KL, entropy, "
-                              "confidence, uncertainty weight, Top-K mass, "
-                              "reference tail mass and joint histograms for "
-                              "every candidate subset"),
+                "every state carries state.objective.raw_kl.* (the unweighted "
+                "teacher KL, equal to D1's state.teacher_kl.*) beside the "
+                "objective; the D1 ranking of D2's complete leaves under "
+                "PARETO_V1 on those raw-KL metrics is reported, never used"),
+            "per_candidate": ("DEPTH records the weighted objective, the "
+                              "unweighted root KL, reference entropy, "
+                              "reference confidence, the weight, reference "
+                              "tail mass and joint histograms for every "
+                              "candidate subset, and the PARENT-reference KL "
+                              "for every round-0 candidate"),
+            "parent_kl_scope": (
+                "round 0 of every DEPTH expansion only: one parent reference "
+                "pass per expansion and one extra reduction per round-0 "
+                "candidate. Enough to set the D1-style parent ranking of the "
+                "first removal beside the root one; the later rounds are not "
+                "covered, by design"),
+            "root_reference_evidence": (
+                "each store's identity, content digest, build seconds and "
+                "confidence distribution (weight sum, mean, ESS) in the "
+                "search record and the telemetry"),
             "flags": ("diagnostic_threshold_rule, thresholds from the "
                       "reference calibration frozen BEFORE this search; "
                       "computed offline; never a selection rule"),
@@ -182,20 +256,26 @@ def build() -> dict[str, Any]:
         },
         "prerequisites": [
             {"what": "reference calibration record", "why": (
-                "diagnostic thresholds must be frozen before any D2 candidate "
-                "exists; D3's lambda is measured in the same pass"),
+                "diagnostic thresholds frozen before any D2 candidate exists "
+                "(done: stage L, refcal_20261013_170714)"),
              "owner": O.REFERENCE_CALIBRATION},
-            {"what": "R0 verdict", "why": "only to use scored_v1",
-             "owner": ("logs/stages/stage-1/families/d_series/validations/"
-                       "prediction-rows-r0/v1")},
+            {"what": "the D2 GPU validation (a proposal; its own grant)",
+             "why": (
+                 "the redesigned objective is unmeasured on a GPU: root "
+                 "store build on both profiles and the teacher-confidence "
+                 "validity checks; root-vs-parent DEPTH on a compressed "
+                 "parent; batch 1 vs 3; all_v1 vs scored_v1 for THIS "
+                 "objective; the weighted FFN/WIDTH/ATTENTION statistics; "
+                 "state-evaluation cost. Its measurements replace the "
+                 "provisional terms of the search price"),
+             "owner": GPU_VALIDATION_PLAN},
             {"what": "maintainer approval of this preregistration", "why": (
-                "freezes K and every rule above")},
+                "freezes K, the full scope and every rule above")},
             {"what": "a search price under the per-session ceiling", "why": (
-                "priced from D1's own search records, the planning bound "
-                "exceeds the per-session ceiling while DEPTH is priced at D1's "
-                "recompute-mode maxima; it fits once the reference cache's "
-                "allocator-hoard fix is shown on a GPU (the reference "
-                "calibration's stage L), or by a maintainer cap decision"),
+                "the redesigned D2 is priced from D1's records at the cached "
+                "DEPTH cell (validated by stage L) plus PROVISIONAL added "
+                "terms; it fits the ceiling, and is re-derived from the GPU "
+                "validation's measurements before the search grant"),
              "owner": BUD.RECORD},
             {"what": "the programme reservation decision", "why": (
                 "D2 must not strand D3 or a fresh confirmation"),
@@ -206,7 +286,8 @@ def build() -> dict[str, Any]:
     }
     return {
         **science,
-        "status": "DRAFT -- not approved, not authorized",
+        "status": ("DRAFT -- not approved, not authorized; supersedes v1 "
+                   "(never executed)"),
         "preregistration_hash": sha256_json(science),
         "budget": {"owner": BUD.RECORD,
                    "steps": {k: budget["steps"][k]
@@ -219,21 +300,54 @@ def build() -> dict[str, Any]:
     }
 
 
+#: The machine-readable supersession stamped on v1, OUTSIDE its science: v1's
+#: `preregistration_hash` covers only its science, so it stays verifiable.
+SUPERSESSION_FIELDS = {
+    "status": "SUPERSEDED -- NEVER EXECUTED",
+    "superseded_by": RECORD,
+    "superseded_on": "2026-10-14",
+    "superseded_because": (
+        "maintainer scientific decision 2026-10-14: D2 redesigned as the "
+        "frozen-teacher-confidence-weighted root-reference KL (contract "
+        "revision 6). No D2 search, recovery or behavioural session ran "
+        "under this version"),
+    "executed": False,
+}
+
+
+def supersede_v1(root: Path = REPO_ROOT) -> dict[str, Any]:
+    """v1 with its status fields replaced and its science untouched."""
+    doc = json.loads((root / SUPERSEDED_RECORD).read_text())
+    science = {k: v for k, v in doc.items()
+               if k not in ("status", "preregistration_hash", "budget",
+                            "authorizes", *SUPERSESSION_FIELDS)}
+    if sha256_json(science) != doc["preregistration_hash"] or not doc[
+            "preregistration_hash"].startswith(SUPERSEDED_HASH_PREFIX):
+        raise RuntimeError(f"{SUPERSEDED_RECORD}'s science no longer hashes "
+                           "to its recorded preregistration_hash")
+    return {**doc, **SUPERSESSION_FIELDS, "authorizes": "nothing"}
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--write", action="store_true")
     args = ap.parse_args(argv)
-    body = json.dumps(build(), indent=1, ensure_ascii=False) + "\n"
-    path = REPO_ROOT / RECORD
-    if args.write:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(body)
-        print(f"wrote {RECORD}")
-        return 0
-    same = path.is_file() and path.read_text() == body
-    print(f"{RECORD}: {'current' if same else 'STALE (run with --write)'}")
-    return 0 if same else 1
+    bodies = {RECORD: json.dumps(build(), indent=1, ensure_ascii=False) + "\n",
+              SUPERSEDED_RECORD: json.dumps(supersede_v1(), indent=1,
+                                            ensure_ascii=False) + "\n"}
+    stale = 0
+    for rel, body in bodies.items():
+        path = REPO_ROOT / rel
+        if args.write:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(body)
+            print(f"wrote {rel}")
+            continue
+        same = path.is_file() and path.read_text() == body
+        stale += not same
+        print(f"{rel}: {'current' if same else 'STALE (run with --write)'}")
+    return 0 if args.write or not stale else 1
 
 
 if __name__ == "__main__":

@@ -1,13 +1,18 @@
-"""The D2 formal search session: D1's search with ONE thing changed.
+"""The D2 formal search session: D1's search with TWO declared changes.
 
-D2 minimizes the student-uncertainty-weighted KL instead of the KL. Every other
-term -- the frozen operators, the calibration profiles, the beam, the seed, the
-support, the position policy, the batch and the suite -- is D1's, and this
-module reuses D1's helpers for them rather than re-declaring them. What it owns:
+D2 (preregistration v2, contract revision 6) minimizes the frozen teacher's
+full-vocabulary-confidence-weighted KL against the ROOT reference: DEPTH's
+reference moves from the parent to the root, and the teacher's confidence
+weights the KL and -- full scope -- the FFN/WIDTH/ATTENTION activation
+statistics. Every other term -- the frozen operators, the calibration
+profiles, the beam, the seed, the support, the position policy, the batch and
+the suite -- is D1's, and this module reuses D1's helpers for them rather
+than re-declaring them. What it owns:
 
 * the objective, handed to the search config AND the state evaluator, and the
   ranking policy that ranks on it (`OBJECTIVE_PARETO_V1`) -- the core refuses
-  any disagreement among the three;
+  any disagreement among the three; the search builds the root reference
+  stores itself, from the teacher it is given;
 * the preregistration as the design every check reads, so the session is
   checked against the frozen record rather than against this module;
 * the row selection (`prediction_rows`), an execution choice the
@@ -27,7 +32,7 @@ REPO = Path(__file__).resolve().parents[4]
 
 EXPERIMENT_ID = "phase_d2"
 STAGE_ID = "1"
-PREREGISTRATION = "logs/stages/stage-1/phase_d2/plans/d2_preregistration_v1.json"
+PREREGISTRATION = "logs/stages/stage-1/phase_d2/plans/d2_preregistration_v2.json"
 POD_WORKSPACE = "/workspace"
 STATUS_PATH = f"{POD_WORKSPACE}/autoinit_d2.status"
 DRIVER_JOB_ID = "autoinit_d2"
@@ -94,6 +99,8 @@ class D2Session:
     suite_content_sha256: str
     preregistration_hash: str
     prediction_rows: str
+    #: Filled by the driver from `BeamSearch.root_reference_evidence()`.
+    root_reference_evidence: Any = None
 
     def measurer(self):
         """The evaluator as the search's measurer, attributes VISIBLE.
@@ -117,6 +124,9 @@ class D2Session:
             "config_hash": cfg.config_hash,
             "scoring_objective": cfg.scoring_objective.as_dict(),
             "objective_hash": cfg.scoring_objective.objective_hash,
+            "statistics_weighted": bool(
+                cfg.scoring_objective.weights_activation_statistics),
+            "kl_reference": cfg.scoring_objective.kl_reference,
             "ranking_policy": {"id": cfg.policy.qualified_id,
                                "hash": cfg.policy.policy_hash},
             "position_policy": policy_config(cfg.position_policy),
@@ -210,6 +220,18 @@ def assert_session_contract(session: D2Session,
         if not ok:
             problems.append(message)
 
+    check(doc.get("version") == 2 and not str(doc.get("status", ""))
+          .startswith("SUPERSEDED"),
+          "the preregistration is not the live v2 (v1 is SUPERSEDED -- NEVER "
+          "EXECUTED)")
+    check(obj.objective_hash != doc.get("supersedes", {}).get("objective_hash"),
+          "the session carries the SUPERSEDED student-uncertainty objective")
+    check(bool(obj.requires_root_reference)
+          and (obj.weights_activation_statistics
+               == (doc.get("scope_decision", {}).get("frozen") == "full")),
+          "the objective's KL reference or statistics scope is not the "
+          "preregistered one")
+
     check(bool(cfg.measurement_protocol_id),
           "SearchConfig.measurement_protocol_id is unset")
     check(cfg.measurement_protocol_id == ev.measurement_protocol_id,
@@ -270,6 +292,8 @@ def assert_session_contract(session: D2Session,
             "suite content hash bound", "D-series support on both",
             "supervised-target policy on both",
             "the D2 objective on both, equal to the preregistered hash",
+            "the live v2 preregistration, not the superseded objective",
+            "root KL reference and the frozen statistics scope",
             "objective ranking policy, preregistered hash",
             "micro-batch, packing and row selection", "beam and seed",
             "D1's frozen operators and profiles", "preregistration revision"],

@@ -50,6 +50,38 @@ class SurgeryError(RuntimeError):
     """A child model was built incorrectly."""
 
 
+def statistics_positions(ctx: Any, impl: Any) -> Any:
+    """The positions -- and weights -- ``impl``'s activation statistics read.
+
+    The policy's :class:`~aadistill.initialization.scoring.batches.ActivePositions`,
+    with its token weights multiplied by the ROOT reference's per-token
+    confidence when the run's objective declares
+    ``weights_activation_statistics`` and ``impl`` consumes it. Otherwise the
+    policy alone, exactly as before. One helper so FFN, WIDTH and ATTENTION
+    cannot each decide differently which statistic is weighted.
+    """
+    from aadistill.initialization.planning.operator_config import (
+        statistics_weighted_by_root,
+    )
+    from aadistill.initialization.scoring.batches import active_positions
+
+    items = ctx.calibration_items
+    objective = ctx.scoring_objective
+    if not statistics_weighted_by_root(impl, objective):
+        return active_positions(items, ctx.position_policy)
+    store = ctx.root_reference
+    if store is None:
+        raise SurgeryError(
+            f"{impl.impl_id}: {objective.qualified_id} weights the activation "
+            "statistics by the root reference's confidence and no root "
+            "reference store was handed to this invocation")
+    store.require_items(items)
+    return active_positions(
+        items, ctx.position_policy,
+        token_multipliers=[store.token_confidence(item) for item in items],
+        multiplier_source=f"root_reference_confidence:{store.identity_hash}")
+
+
 class ChildBuilder:
     """A new model at ``new_spec``, with assignment coverage tracking."""
 
@@ -180,6 +212,14 @@ def collect_activation_stats(adapter: ArchitectureAdapter, model: Any,
     try:
         if reference_path:
             for index, item in enumerate(items):
+                #: CONTINUOUS WEIGHTS take their own keyword; a mask cannot
+                #: carry them (`token_mask_for_item` refuses by name).
+                if active is not None and active.token_weighted:
+                    collector.process(
+                        item["input_ids"].to(device),
+                        token_weights=active.token_weights_for_item(
+                            index).to(device))
+                    continue
                 mask = (None if active is None
                         else active.token_mask_for_item(index))
                 #: Called WITHOUT the keyword when there is no restriction, so a
@@ -202,6 +242,11 @@ def collect_activation_stats(adapter: ArchitectureAdapter, model: Any,
             for packed in packed_batches(items, max(int(batch_size), 1),
                                          packing=packing, pad_id=resolved_pad,
                                          device=device):
+                if active is not None and active.token_weighted:
+                    collector.process_batch(
+                        packed.batch, token_weights=active.token_weights_for(
+                            packed.batch, packed.original_indices))
+                    continue
                 mask = (None if active is None else active.token_mask_for(
                     packed.batch, packed.original_indices))
                 if mask is None:

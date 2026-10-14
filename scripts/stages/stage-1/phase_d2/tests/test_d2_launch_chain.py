@@ -86,9 +86,20 @@ class TestTheIssuerRefuses:
     @pytest.mark.parametrize("verdict", ["INCOMPLETE", "FAIL", None])
     def test_scored_rows_need_d2s_own_equivalence(self, monkeypatch, verdict):
         from stages.d_series import d2_budget as BUD
-        monkeypatch.setattr(BUD, "calibration_evidence", lambda *a, **k: {
-            "d2_scored_rows_equivalence": verdict})
+        monkeypatch.setattr(BUD, "d2_validation_evidence", lambda *a, **k: {
+            "scored_rows_equivalence": verdict})
         with pytest.raises(A.D2AuthorizationRefused, match="scored-rows"):
+            A.build_payload(grant=self._approved(), session_commit="a" * 40,
+                            granted_utc="t", run_id="r1",
+                            prediction_rows="scored_v1", live_rate=1.09)
+
+    def test_stage_ls_pass_on_the_superseded_objective_does_not_count(self):
+        """Stage L's PASS was measured on the SUPERSEDED objective: with no
+        D2 GPU validation booked, scored_v1 is refused for the new D2."""
+        from stages.d_series import d2_budget as BUD
+        assert BUD.calibration_evidence()["d2_scored_rows_equivalence"] == "PASS"
+        assert BUD.d2_validation_evidence()["scored_rows_equivalence"] is None
+        with pytest.raises(A.D2AuthorizationRefused, match="superseded"):
             A.build_payload(grant=self._approved(), session_commit="a" * 40,
                             granted_utc="t", run_id="r1",
                             prediction_rows="scored_v1", live_rate=1.09)
@@ -96,8 +107,8 @@ class TestTheIssuerRefuses:
     def test_a_passed_equivalence_lets_scored_rows_through_that_gate(
             self, monkeypatch):
         from stages.d_series import d2_budget as BUD
-        monkeypatch.setattr(BUD, "calibration_evidence", lambda *a, **k: {
-            "d2_scored_rows_equivalence": "PASS"})
+        monkeypatch.setattr(BUD, "d2_validation_evidence", lambda *a, **k: {
+            "scored_rows_equivalence": "PASS"})
         with pytest.raises(A.D2AuthorizationRefused) as err:
             A.build_payload(grant=self._approved(), session_commit="a" * 40,
                             granted_utc="t", run_id="r1",

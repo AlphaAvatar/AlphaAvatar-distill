@@ -65,6 +65,12 @@ from aadistill.initialization.planning.isolation import (
 from aadistill.initialization.planning.operator_config import (
     hashed_operator_config,
     operator_config_hash,
+    root_reference_needed,
+    statistics_weighted_by_root,
+)
+from aadistill.initialization.scoring.reference_store import (
+    build_root_reference_store,
+    root_reference_identity,
 )
 from aadistill.initialization.scoring.content import scoring_content_config
 from aadistill.initialization.scoring.protocol_identity import (
@@ -438,6 +444,14 @@ class BeamSearch:
         self.store = StateStore(self.workdir / "states.jsonl")
 
         self._root_model: Any | None = None
+        #: ONE ROOT REFERENCE STORE PER PROFILE, built from the root on first
+        #: need and kept for the run: nothing in it depends on a candidate, and
+        #: rebuilding it per expansion would re-forward the root over the
+        #: mixture for every DEPTH invocation and every weighted statistics
+        #: pass. Evidence for each (identity, content digest, build seconds,
+        #: confidence distribution) is in `root_reference_evidence()`.
+        self._root_references: dict[str, Any] = {}
+        self._root_reference_seconds: dict[str, float] = {}
         self._root_spec = root_spec
         self.states: dict[str, InitializationState] = {}
         self.levels: list[LevelRecord] = []
@@ -525,6 +539,14 @@ class BeamSearch:
                     "this search's scoring objective and its measurer's "
                     "differ; operators would choose under one objective and "
                     "the beam would prune under another")
+        if (objective is not None
+                and (objective.requires_root_reference
+                     or objective.weights_activation_statistics)
+                and self.config.distribution_support.is_full_vocab):
+            raise SearchError(
+                f"{objective.qualified_id} reads a stored ROOT reference, which "
+                "holds Top-K sketches; this search reduces over the full "
+                "vocabulary. Declare a Top-K support")
         ranked_on_objective = [o.key for o in config.policy.objectives
                                if o.key.startswith(OBJECTIVE_METRIC_PREFIX)]
         if objective is None and ranked_on_objective:
@@ -595,6 +617,56 @@ class BeamSearch:
         if self._root_model is None:
             self._root_model = self.root_loader()
         return self._root_model
+
+    def _weights_statistics(self, impl: OperatorImplementation) -> bool:
+        return statistics_weighted_by_root(impl, self.config.scoring_objective)
+
+    def _needs_root_reference(self, impl: OperatorImplementation) -> bool:
+        return root_reference_needed(impl, self.config.scoring_objective)
+
+    def root_reference_for(self, profile: CalibrationProfile) -> Any:
+        """The ROOT's reference store over ``profile``'s mixture, built once.
+
+        From the root model whatever the parent being expanded: a DEPTH
+        expansion three levels down still measures its candidates against the
+        frozen original, and the statistics weights are the original's
+        confidence, never a compressed parent's.
+        """
+        key = profile.profile_hash
+        store = self._root_references.get(key)
+        if store is None:
+            from aadistill.initialization.device import model_device
+
+            root = self.root_model()
+            support = self.config.distribution_support
+            started = time.perf_counter()
+            store = build_root_reference_store(
+                root, self.calibration_for(profile), support=support,
+                identity=root_reference_identity(
+                    root_identity={"teacher_id": self.root_teacher_id,
+                                   "teacher_sha256": self.root_teacher_sha256},
+                    profile_hash=profile.profile_hash, support=support),
+                micro_batch_size=self.execution.micro_batch_size,
+                packing=self.execution.calibration_batch_packing,
+                device=model_device(root))
+            self._root_reference_seconds[key] = time.perf_counter() - started
+            self._root_references[key] = store
+            #: EVIDENCE at the moment of completion, so a search that later
+            #: fails still says what its weights and references were.
+            self.telemetry.record("root_reference_built", profile=key,
+                                  **self.root_reference_evidence()[key])
+        return store
+
+    def root_reference_evidence(self) -> dict[str, Any]:
+        """Per profile hash: what each built store is and what it held."""
+        return {key: {"identity": store.identity,
+                      "identity_hash": store.identity_hash,
+                      "content_sha256": store.content_digest(),
+                      "build_seconds": round(
+                          self._root_reference_seconds.get(key, 0.0), 4),
+                      "decision": store.decision(),
+                      "confidence": store.confidence_report()}
+                for key, store in sorted(self._root_references.items())}
 
     def root_state(self) -> InitializationState:
         if self._root_spec is None:
@@ -893,7 +965,7 @@ class BeamSearch:
             device=self.config.device, workdir=self.workdir,
             config=dict(operator_config),
             stats_cache=self.stats_cache,
-            stats_cache_key=self._stats_key(parent, profile),
+            stats_cache_key=self._stats_key(parent, profile, impl),
             execution=self.execution,
             position_policy=self.config.position_policy,
             #: THE OBJECT, whose declaration went into `operator_config` above.
@@ -901,6 +973,8 @@ class BeamSearch:
             #: two, so passing one without the other fails closed.
             distribution_support=self.config.distribution_support,
             scoring_objective=self.config.scoring_objective,
+            root_reference=(self.root_reference_for(profile)
+                            if self._needs_root_reference(impl) else None),
             deadline=self.deadline)
 
         # Before the expansion, so a budget already spent does not buy one more
@@ -958,6 +1032,12 @@ class BeamSearch:
             operator_timing=dict(outcome.artifacts.get("timing", {})),
             reference_cache=dict(outcome.artifacts.get("reference_cache", {})),
             reference_counters=dict(outcome.artifacts.get("reference_counters", {})),
+            #: ABSENT unless the operator kept a second, diagnostic reference
+            #: (DEPTH under a root-reference objective), so every historical
+            #: row keeps its shape.
+            **({"parent_reference_cache":
+                    dict(outcome.artifacts["parent_reference_cache"])}
+               if "parent_reference_cache" in outcome.artifacts else {}),
             #: Recorded, not just undone. A mutation silently restored is a
             #: mutation nobody knows about, and the next reader wondering why a
             #: historical digest depends on execution order deserves to find
@@ -1049,7 +1129,8 @@ class BeamSearch:
         return base / state.materialization.materialization_id
 
     def _stats_key(self, parent: InitializationState,
-                   profile: CalibrationProfile) -> str | None:
+                   profile: CalibrationProfile,
+                   impl: OperatorImplementation | None = None) -> str | None:
         """Cache key for an activation pass on ``parent`` under ``profile``.
 
         Returns ``None`` for the root, whose identity is a published revision
@@ -1074,11 +1155,20 @@ class BeamSearch:
             #: which tokens entered the accumulators at all, so a cache shared
             #: across policies would hand a target-aware operator the
             #: full-sequence statistic.
+            #:
+            #: And WHICH TOKEN WEIGHTS: a weighted pass is not the unweighted
+            #: pass, and the composite operator -- which does not weight --
+            #: shares this cache with FFN and WIDTH, which do. The term is
+            #: ABSENT for an unweighted pass, so every existing key is unchanged.
             numerical_config={"device": self.config.device,
                               "accumulation": self.config.stats_spec.accumulation_dtype,
                               **self.execution.as_fingerprint(),
                               "position_policy_hash":
-                                  self.config.position_policy.policy_hash})
+                                  self.config.position_policy.policy_hash,
+                              **({"token_weighting":
+                                      self.root_reference_for(profile).identity_hash}
+                                 if impl is not None
+                                 and self._weights_statistics(impl) else {})})
 
     def _load_state_model(self, state: InitializationState) -> Any:
         if state.parent_id is None:

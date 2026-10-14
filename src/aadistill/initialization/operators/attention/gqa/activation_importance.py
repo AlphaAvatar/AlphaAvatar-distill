@@ -48,6 +48,7 @@ from typing import Any
 import torch
 
 from aadistill.initialization.operators.attention.gqa._statistics import (
+    ATTN_TOKEN_WEIGHT,
     AttentionHeadStatsCollector,
     head_write_energy,
 )
@@ -64,6 +65,7 @@ from aadistill.initialization.operators._common import (
     ChildBuilder,
     copy_embeddings_and_final_norm,
     copy_module_except,
+    statistics_positions,
 )
 from aadistill.initialization.operators.attention.gqa._common import (
     attention_out_projection,
@@ -78,7 +80,6 @@ from aadistill.initialization.calibration.packing import (
 )
 from aadistill.initialization.calibration.batching import resolve_pad_id
 from aadistill.initialization.calibration.profiles import CalibrationNeed
-from aadistill.initialization.scoring.batches import active_positions
 from aadistill.initialization.operators.base import (
     OperatorContext,
     OperatorImplementation,
@@ -135,6 +136,10 @@ class AttentionActivationImportanceV1(OperatorImplementation):
                            "tie_word_embeddings"})
     calibration = CalibrationNeed.ACTIVATION_STATS
     objective = "retained share of realized attention-output write energy"
+    #: Under an objective that declares `weights_activation_statistics`, the
+    #: write-energy mean is `sum_t w_t ||W_o,h a_h(t)||^2 / sum_t w_t` with
+    #: `w_t` the root reference's confidence (`statistics_positions`).
+    consumes_reference_weighted_statistics = True
     deterministic = True
     requires_seed = False
     produces = ("kept_heads",)
@@ -197,7 +202,9 @@ class AttentionActivationImportanceV1(OperatorImplementation):
         #: positions whose next-token prediction the item supervises. It arrives
         #: through the hashed config, so it forks the state id — unlike the two
         #: knobs above it.
-        active = active_positions(ctx.calibration_items, ctx.position_policy)
+        #: Under a confidence-weighted objective the token weights carry the
+        #: ROOT reference's confidence too (`statistics_positions`).
+        active = statistics_positions(ctx, self)
         #: THE REFERENCE PATH IS `bsz1 + original_order`, and it is exactly the
         #: loop this operator has always run: one item per `process` call, in
         #: the mixture's own order. Keeping that condition explicit is what
@@ -230,13 +237,21 @@ class AttentionActivationImportanceV1(OperatorImplementation):
                     #: Called WITHOUT the keyword when nothing is restricted, so
                     #: the unrestricted call is the call this loop always made and
                     #: the frozen C1 selection is reproduced by construction.
-                    admitted = (None if active is None
-                                else active.token_mask_for_item(index))
-                    if admitted is None:
-                        collector.process(item["input_ids"].to(compute))
+                    #: CONTINUOUS WEIGHTS take their own keyword; a mask
+                    #: cannot carry them.
+                    if active is not None and active.token_weighted:
+                        collector.process(
+                            item["input_ids"].to(compute),
+                            token_weights=active.token_weights_for_item(
+                                index).to(compute))
                     else:
-                        collector.process(item["input_ids"].to(compute),
-                                          active_mask=admitted.to(compute))
+                        admitted = (None if active is None
+                                    else active.token_mask_for_item(index))
+                        if admitted is None:
+                            collector.process(item["input_ids"].to(compute))
+                        else:
+                            collector.process(item["input_ids"].to(compute),
+                                              active_mask=admitted.to(compute))
                     #: One item per forward and no padding by construction, so
                     #: executed and valid advance together on this path. They
                     #: are still counted separately: a path on which they
@@ -260,6 +275,12 @@ class AttentionActivationImportanceV1(OperatorImplementation):
                     #: value to attribute back. A consumer that did aggregate
                     #: per item would have to read it, which is why
                     #: `PackedBatch` carries it.
+                    if active is not None and active.token_weighted:
+                        collector.process_batch(
+                            packed.batch,
+                            token_weights=active.token_weights_for(
+                                packed.batch, packed.original_indices))
+                        continue
                     admitted = (None if active is None else
                                 active.token_mask_for(packed.batch,
                                                       packed.original_indices))
@@ -361,6 +382,9 @@ class AttentionActivationImportanceV1(OperatorImplementation):
                    "score": "mean_t ||W_o,h a_h(t)||^2",
                    "stats_spec": ATTENTION_STATS_SPEC.spec_hash,
                    "calibration_tokens": int(stats["attn_token_count"]),
+                   **({} if ATTN_TOKEN_WEIGHT not in stats else
+                      {"calibration_token_weight":
+                           float(stats[ATTN_TOKEN_WEIGHT])}),
                    "kept_q_heads_per_layer": kept_per_layer,
                    "selection_margin_per_layer": margins,
                    "head_scores_per_layer": head_scores,

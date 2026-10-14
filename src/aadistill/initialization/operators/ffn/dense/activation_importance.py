@@ -30,11 +30,11 @@ from aadistill.initialization.device import model_device, stats_to
 from aadistill.initialization.operators._common import (
     ChildBuilder,
     collect_activation_stats,
+    statistics_positions,
     copy_embeddings_and_final_norm,
     copy_module_except,
 )
 from aadistill.initialization.calibration.profiles import CalibrationNeed
-from aadistill.initialization.scoring.batches import active_positions
 from aadistill.initialization.operators.base import (
     OperatorContext,
     OperatorImplementation,
@@ -61,6 +61,9 @@ class FFNActivationImportanceV0(OperatorImplementation):
                            "tie_word_embeddings"})
     calibration = CalibrationNeed.ACTIVATION_STATS
     objective = "retained share of total activation importance"
+    #: Under an objective that declares `weights_activation_statistics`,
+    #: `E[|a_j|]` is the root-confidence-weighted mean (`statistics_positions`).
+    consumes_reference_weighted_statistics = True
     deterministic = True
     requires_seed = False
     produces = ("kept_neurons",)
@@ -93,7 +96,7 @@ class FFNActivationImportanceV0(OperatorImplementation):
         #: only the positions whose next-token prediction the item supervises.
         #: The restriction travels in the HASHED config, so two searches that
         #: protect different positions are different states.
-        active = active_positions(ctx.calibration_items, ctx.position_policy)
+        active = statistics_positions(ctx, self)
         state = stats_to(ctx.cached_stats(lambda: collect_activation_stats(
             adapter, parent, ctx.calibration_items,
             compute, batch_size=batch_size, packing=packing,

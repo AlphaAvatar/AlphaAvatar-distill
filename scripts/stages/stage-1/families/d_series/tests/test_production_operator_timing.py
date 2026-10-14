@@ -402,7 +402,7 @@ class TestTheObjectiveKeyword:
     """
 
     @staticmethod
-    def _ctx(tmp_path, objective=None, layers=5):
+    def _ctx(tmp_path, objective=None, layers=5, root_reference=None):
         from aadistill.initialization.adapters import register_builtin_adapters
         from aadistill.initialization.operators.register import (
             register_builtin_operators,
@@ -425,7 +425,7 @@ class TestTheObjectiveKeyword:
             target_spec=parent.replace(num_hidden_layers=layers),
             profile=None, items=_toy_items(), seed=0, device="cpu",
             workdir=tmp_path / "w", policy=SUPERVISED_TARGET_V1,
-            objective=objective)
+            objective=objective, root_reference=root_reference)
 
     def test_the_default_is_d1s_kl_only_context(self, tmp_path):
         ctx = self._ctx(tmp_path)
@@ -435,9 +435,11 @@ class TestTheObjectiveKeyword:
     def test_the_objective_reaches_config_and_context(self, tmp_path):
         from stages.d_series import objectives as O
 
-        ctx = self._ctx(tmp_path, O.D2_OBJECTIVE)
-        assert ctx.scoring_objective is O.D2_OBJECTIVE
-        assert ctx.config["scoring_objective"] == O.D2_OBJECTIVE.as_dict()
+        #: Stage L's objective: the superseded D2, which stage L measured.
+        obj = O.D2_STUDENT_UNCERTAINTY_SUPERSEDED
+        ctx = self._ctx(tmp_path, obj)
+        assert ctx.scoring_objective is obj
+        assert ctx.config["scoring_objective"] == obj.as_dict()
 
     def test_one_round_runs_with_the_objective_and_reports_its_seconds(
             self, tmp_path):
@@ -446,13 +448,43 @@ class TestTheObjectiveKeyword:
 
         impl = get_implementation("depth.causal_kl_greedy_v1")
         plain = impl.execute(self._ctx(tmp_path / "a"))
-        with_obj = impl.execute(self._ctx(tmp_path / "b", O.D2_OBJECTIVE))
+        with_obj = impl.execute(self._ctx(
+            tmp_path / "b", O.D2_STUDENT_UNCERTAINTY_SUPERSEDED))
         assert len(with_obj.artifacts["search_rounds"]) == 1
         assert with_obj.artifacts["timing"]["candidate_subsets"] == \
             plain.artifacts["timing"]["candidate_subsets"] == \
             GEOMETRY["num_hidden_layers"]
         assert with_obj.artifacts["timing"].get("objective_seconds") is not None
         assert plain.artifacts["timing"].get("objective_seconds") is None
+
+    def test_the_redesigned_d2_runs_on_a_root_store_and_refuses_without(
+            self, tmp_path):
+        """The production context carries the root store the redesigned D2
+        reads; without one, execution is a contract violation."""
+        from aadistill.initialization.operators.base import (
+            ContractViolation, get_implementation,
+        )
+        from aadistill.initialization.scoring.reference_store import (
+            build_root_reference_store, root_reference_identity,
+        )
+        from stages.d_series import objectives as O
+        from stages.d_series import scoring_protocol as SP
+
+        impl = get_implementation("depth.causal_kl_greedy_v1")
+        with pytest.raises(ContractViolation, match="ROOT"):
+            impl.execute(self._ctx(tmp_path / "a", O.D2_OBJECTIVE))
+        ctx = self._ctx(tmp_path / "b", O.D2_OBJECTIVE)
+        ctx.root_reference = build_root_reference_store(
+            ctx.model, ctx.calibration_items, support=SP.D_SERIES_SUPPORT,
+            identity=root_reference_identity(
+                root_identity={"teacher_id": "toy"}, profile_hash="p",
+                support=SP.D_SERIES_SUPPORT),
+            micro_batch_size=ctx.execution.micro_batch_size,
+            packing=ctx.execution.calibration_batch_packing, device="cpu")
+        out = impl.execute(ctx)
+        assert out.local_metrics.reference == "root_reference"
+        rec = next(iter(out.artifacts["objective_candidates"].values()))
+        assert "reference_confidence" in rec and "parent_kl" in rec
 
 
 class TestStageLPremises:

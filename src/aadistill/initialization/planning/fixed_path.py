@@ -60,6 +60,12 @@ from aadistill.initialization.scoring.content import scoring_content_report
 from aadistill.initialization.planning.operator_config import (
     hashed_operator_config,
     operator_config_hash,
+    root_reference_needed,
+    statistics_weighted_by_root,
+)
+from aadistill.initialization.scoring.reference_store import (
+    build_root_reference_store,
+    root_reference_identity,
 )
 from aadistill.initialization.scoring.positions import resolve_position_policy
 from aadistill.initialization.statistics.spec import (
@@ -524,8 +530,17 @@ def materialize_fixed_path(
     on_step: Callable[[StepResult], None] | None = None,
     deadline: Any = None,
     execution: ExecutionConfig = DEFAULT_EXECUTION,
+    root_identity: Mapping[str, Any] | None = None,
+    root_references: Mapping[str, Any] | None = None,
 ) -> list[StepResult]:
     """Apply every step in order, identifying and gating each intermediate.
+
+    Under an objective that reads the ROOT reference (its KL reference or its
+    statistics weights), every store a step needs is built from the root
+    BEFORE the first step runs -- the root is freed after step 0 -- unless the
+    caller supplies them (`root_references`, keyed by profile hash).
+    `root_identity` is what a built store declares as its root; it defaults
+    to the spec's repo id and revision.
 
     `calibration_items` may be supplied to avoid re-resolving (the resolver
     verifies a content hash on every call); when omitted the profiles are
@@ -553,7 +568,8 @@ def materialize_fixed_path(
         parent_spec=adapter.spec_of(model), parent_digest=None,
         workdir=workdir, repo_root=repo_root, stats_cache=stats_cache,
         calibration_items=calibration_items, on_step=on_step,
-        deadline=deadline, execution=execution)
+        deadline=deadline, execution=execution, root_model=model,
+        root_identity=root_identity, root_references=root_references)
 
 
 def _run_steps(
@@ -571,6 +587,9 @@ def _run_steps(
     on_step: Callable[[StepResult], None] | None,
     deadline: Any,
     execution: ExecutionConfig = DEFAULT_EXECUTION,
+    root_model: Any = None,
+    root_identity: Mapping[str, Any] | None = None,
+    root_references: Mapping[str, Any] | None = None,
 ) -> list[StepResult]:
     """The step loop, walked by ORIGINAL index.
 
@@ -591,7 +610,7 @@ def _run_steps(
         for key, items in dict(calibration_items or {}).items()}
     results: list[StepResult] = []
 
-    for i in indices:
+    def step_inputs(i: int) -> tuple[Any, Any, Sequence[Any]]:
         step = spec.steps[i]
         impl = get_implementation(step.impl_id)
         # One place decides what an operator is actually invoked with, exactly as
@@ -609,16 +628,51 @@ def _run_steps(
         else:
             profile = profile_for(impl, get_profile(step.profile_id))
         if profile.is_null:
-            items: Sequence[Any] = ()
-        else:
-            if profile.qualified_id not in resolved:
-                # `resolve()` hands back the RAW frozen evidence — tokens under
-                # `ids`, because that is what the pinned content hash is defined
-                # over. The operators read `input_ids`. One boundary converts.
-                resolved[profile.qualified_id] = prepare_calibration_items(
-                    profile.resolve(repo_root),
-                    profile_id=profile.qualified_id)
-            items = resolved[profile.qualified_id]
+            return impl, profile, ()
+        if profile.qualified_id not in resolved:
+            # `resolve()` hands back the RAW frozen evidence — tokens under
+            # `ids`, because that is what the pinned content hash is defined
+            # over. The operators read `input_ids`. One boundary converts.
+            resolved[profile.qualified_id] = prepare_calibration_items(
+                profile.resolve(repo_root),
+                profile_id=profile.qualified_id)
+        return impl, profile, resolved[profile.qualified_id]
+
+    #: THE ROOT REFERENCES, BUILT WHILE THE ROOT IS STILL HERE. A replay frees
+    #: the root after step 0, and a weighted FFN at step 1 still needs the
+    #: ROOT's confidence -- so every store the path will read is built up
+    #: front, or must be supplied. A suffix replay never holds the root.
+    stores: dict[str, Any] = dict(root_references or {})
+    for i in indices:
+        impl, profile, items = step_inputs(i)
+        if (not root_reference_needed(impl, spec.scoring_objective)
+                or profile.profile_hash in stores):
+            continue
+        if root_model is None:
+            raise FixedPathError(
+                f"{spec.path_id} step {i} ({impl.impl_id}) reads the ROOT "
+                f"reference over {profile.qualified_id} under "
+                f"{spec.scoring_objective.qualified_id}, and this execution "
+                "does not hold the root. Supply `root_references` built from "
+                "the root over that mixture")
+        support = spec.distribution_support
+        stores[profile.profile_hash] = build_root_reference_store(
+            root_model, items, support=support,
+            identity=root_reference_identity(
+                root_identity=dict(root_identity or {
+                    "teacher_id": spec.root_repo_id,
+                    "teacher_revision": spec.root_revision}),
+                profile_hash=profile.profile_hash, support=support),
+            micro_batch_size=execution.micro_batch_size,
+            packing=execution.calibration_batch_packing,
+            device=model_device(root_model))
+
+    for i in indices:
+        step = spec.steps[i]
+        impl, profile, items = step_inputs(i)
+        root_reference = (stores[profile.profile_hash]
+                          if root_reference_needed(impl, spec.scoring_objective)
+                          else None)
 
         ok, reason = impl.applicable(parent_spec, spec.target_spec, adapter)
         if not ok:
@@ -704,7 +758,11 @@ def _run_steps(
                         "device": spec.device,
                         "accumulation": spec.stats_spec.accumulation_dtype,
                         **execution.as_fingerprint(),
-                        "position_policy_hash": position_policy.policy_hash})),
+                        "position_policy_hash": position_policy.policy_hash,
+                        **({"token_weighting": root_reference.identity_hash}
+                           if statistics_weighted_by_root(
+                               impl, spec.scoring_objective) else {})})),
+            root_reference=root_reference,
             deadline=deadline,
         )
 
@@ -883,8 +941,12 @@ def materialize_fixed_path_suffix(
     on_step: Callable[[StepResult], None] | None = None,
     deadline: Any = None,
     execution: ExecutionConfig = DEFAULT_EXECUTION,
+    root_references: Mapping[str, Any] | None = None,
 ) -> tuple[list[StepResult], dict[str, Any]]:
     """Execute the tail of a frozen path from an ALREADY-VERIFIED parent.
+
+    A suffix never holds the root, so a step that reads the ROOT reference is
+    refused unless `root_references` (keyed by profile hash) supplies it.
 
     Two arms that share a prefix should not both compute it. The incumbent arm's
     replay already produced, gated and wrote the shared parent; the treatment arm
@@ -941,7 +1003,8 @@ def materialize_fixed_path_suffix(
         parent_digest=reident.artifact_digest,
         workdir=workdir, repo_root=repo_root, stats_cache=stats_cache,
         calibration_items=calibration_items, on_step=on_step,
-        deadline=deadline, execution=execution)
+        deadline=deadline, execution=execution,
+        root_references=root_references)
 
     evidence = {
         **premise,

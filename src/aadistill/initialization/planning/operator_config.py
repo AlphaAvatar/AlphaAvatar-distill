@@ -97,18 +97,59 @@ def distribution_support_config(support: Any) -> dict[str, Any]:
     return {"distribution_support": support.as_dict()}
 
 
+def objective_consumed_by(implementation: Any, objective: Any) -> bool:
+    """Whether `implementation`'s SELECTION reads `objective`. One rule.
+
+    A KL-scored operator (`consumes_scoring_objective`) reads any objective.
+    An activation-statistics operator (`consumes_reference_weighted_statistics`)
+    reads one only when that objective weights the activation statistics by
+    the root reference's confidence -- under every other objective its
+    statistics, and so its child, are the historical ones, and its config must
+    not move.
+    """
+    if objective is None:
+        return False
+    if getattr(implementation, "consumes_scoring_objective", False):
+        return True
+    return bool(getattr(implementation, "consumes_reference_weighted_statistics",
+                        False)
+                and getattr(objective, "weights_activation_statistics", False))
+
+
+def statistics_weighted_by_root(implementation: Any, objective: Any) -> bool:
+    """Whether `implementation`'s activation statistics are weighted by the
+    root reference's confidence under `objective`."""
+    return bool(objective is not None
+                and getattr(objective, "weights_activation_statistics", False)
+                and getattr(implementation,
+                            "consumes_reference_weighted_statistics", False))
+
+
+def root_reference_needed(implementation: Any, objective: Any) -> bool:
+    """Whether an invocation of `implementation` must be handed the ROOT
+    reference store: a KL-scored operator under an objective whose reference
+    is the root, or a weighted-statistics operator under an objective that
+    weights them. One rule for the search, the fixed-path replay and
+    `OperatorImplementation.execute`."""
+    if objective is None:
+        return False
+    return bool((getattr(implementation, "consumes_scoring_objective", False)
+                 and getattr(objective, "requires_root_reference", False))
+                or statistics_weighted_by_root(implementation, objective))
+
+
 def scoring_objective_config(implementation: Any,
                              objective: Any) -> dict[str, Any]:
     """The run's scoring objective as hashed config, for an operator that uses it.
 
     `{}` when no objective is declared, and `{}` for an implementation that
-    does not declare `consumes_scoring_objective`: an operator whose selection
-    never reads the objective produces the same child under any objective, and
-    forking its state id would manufacture byte-identical states under two
-    names -- the reason a weight-only operator carries no position policy.
+    does not consume it (:func:`objective_consumed_by`): an operator whose
+    selection never reads the objective produces the same child under any
+    objective, and forking its state id would manufacture byte-identical
+    states under two names -- the reason a weight-only operator carries no
+    position policy.
     """
-    if objective is None or not getattr(implementation,
-                                        "consumes_scoring_objective", False):
+    if not objective_consumed_by(implementation, objective):
         return {}
     return objective_config(objective)
 

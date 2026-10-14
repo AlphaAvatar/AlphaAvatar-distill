@@ -9,6 +9,8 @@
        preregistration -- before the teacher is resident;
     B  the root teacher once; the evaluator primed with that object;
     C  the beam search, minimizing the D2 objective, under the wall clock;
+       the ROOT reference stores (one per profile) are built from the teacher
+       on first need and their evidence is recorded;
     D  commit the preregistered Top-K by the objective ranking, and record the
        KL-only control: D1's ranking of the SAME complete leaves on the raw KL
        every state carries. Reported, never used.
@@ -75,8 +77,19 @@ def load_authorization(path: str, *, contract: dict[str, Any],
             "pricing": dict(auth.pricing)}
 
 
+#: Reference modes the cached price holds for: the parent sketch cache, and
+#: the ROOT reference store, which is computed once and never recomputes.
+CACHED_MODES = ("cached", "root_reference_store")
+
+
 def cache_regression(telemetry_path: Path) -> dict[str, Any] | None:
-    """The first DEPTH expansion whose reference cache was NOT cached, or None."""
+    """The first DEPTH expansion with a reference that was NOT cached, or None.
+
+    Under the redesigned D2 a DEPTH expansion holds two references: the ROOT
+    store (the objective's; never recomputed) and the intact parent's sketch
+    cache for the round-0 parent-KL diagnostic, which CAN fall back to
+    recomputing under memory pressure. Either regressing breaks the price.
+    """
     if not telemetry_path.is_file():
         return None
     for line in telemetry_path.read_text().splitlines():
@@ -88,10 +101,15 @@ def cache_regression(telemetry_path: Path) -> dict[str, Any] | None:
             continue
         if not str(row.get("impl_id", "")).startswith("depth."):
             continue
-        mode = (row.get("reference_cache") or {}).get("mode")
-        if mode != "cached":
-            return {"state_id": row.get("state_id"), "mode": mode,
-                    "operator_seconds": row.get("operator_seconds")}
+        fields = ["reference_cache"] + (["parent_reference_cache"]
+                                        if "parent_reference_cache" in row
+                                        else [])
+        for field in fields:
+            mode = (row.get(field) or {}).get("mode")
+            if mode not in CACHED_MODES:
+                return {"state_id": row.get("state_id"), "mode": mode,
+                        "reference": field,
+                        "operator_seconds": row.get("operator_seconds")}
     return None
 
 
@@ -161,7 +179,13 @@ def _run_search(session, teacher, deadline) -> tuple[dict[str, Any], Any]:
         execution=session.evaluator.execution,
         numerics=D1S.numerics(),
         deadline=deadline)
-    result = search.run()
+    try:
+        result = search.run()
+    finally:
+        #: The ROOT reference stores' identities, content digests and
+        #: confidence distributions, written whether or not the search
+        #: completes (the same evidence is in the telemetry at build time).
+        session.root_reference_evidence = search.root_reference_evidence()
     return {"n_states": len(result.states), "n_leaves": len(result.leaves),
             "n_complete_leaves": len(result.complete_leaves),
             "resumed": list(result.resumed),
@@ -179,11 +203,20 @@ def objective_telemetry(telemetry_path: Path) -> dict[str, Any]:
     """
     if not telemetry_path.is_file():
         return {"available": False}
-    rows = [json.loads(l) for l in telemetry_path.read_text().splitlines()
-            if l.strip()]
+    events = [json.loads(l) for l in telemetry_path.read_text().splitlines()
+              if l.strip()]
+    rows = [r for r in events if r.get("event", "expansion") == "expansion"]
+    stores = [r for r in events if r.get("event") == "root_reference_built"]
     depth = [r for r in rows if str(r.get("impl_id", "")).startswith("depth.")]
     return {
         "available": True, "expansions": len(rows),
+        "root_reference_builds": [
+            {"profile": r.get("profile"),
+             "build_seconds": r.get("build_seconds"),
+             "identity_hash": r.get("identity_hash")} for r in stores],
+        "depth_parent_kl_cache_modes": sorted(
+            {str((r.get("parent_reference_cache") or {}).get("mode"))
+             for r in depth if "parent_reference_cache" in r}),
         "depth_expansions": len(depth),
         "depth_operator_seconds": round(sum(float(r.get("operator_seconds") or 0)
                                             for r in depth), 2),
@@ -325,6 +358,8 @@ def main(argv: list[str] | None = None) -> int:
                 record["search"], result = _run_search(session, teacher,
                                                        deadline)
             finally:
+                record["root_reference"] = getattr(
+                    session, "root_reference_evidence", None)
                 if deadline is not None:
                     record["deadline"].update(deadline.as_dict())
                     record["deadline"]["cache_regression"] = deadline.regression

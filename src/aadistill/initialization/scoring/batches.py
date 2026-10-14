@@ -58,11 +58,39 @@ class ActivePositions:
     once and reshaped per batch.
     """
 
-    def __init__(self, items: Sequence[Any], policy: ScoringPositionPolicy) -> None:
+    def __init__(self, items: Sequence[Any], policy: ScoringPositionPolicy, *,
+                 token_multipliers: Sequence[torch.Tensor] | None = None,
+                 multiplier_source: str | None = None) -> None:
+        """``token_multipliers``: optional per-item ``[L_i]`` non-negative
+        factors applied to the policy's TOKEN-axis weights -- e.g. the root
+        reference's confidence. The prediction axis is untouched: the KL
+        objectives carry their weights in their own integrand and keep the
+        policy's binary scored set and fixed denominator."""
         self.policy = policy
         self.n_items = len(items)
         self._token = weights_for_items(items, policy, axis=TOKEN_AXIS)
         self._prediction = weights_for_items(items, policy, axis=PREDICTION_AXIS)
+        self.multiplier_source = None
+        if token_multipliers is not None:
+            if len(token_multipliers) != self.n_items:
+                raise ScoringPositionError(
+                    f"{len(token_multipliers)} token multipliers for "
+                    f"{self.n_items} items")
+            out = []
+            for w, m in zip(self._token, token_multipliers):
+                m = torch.as_tensor(m, dtype=WEIGHT_DTYPE).reshape(-1)
+                if int(m.numel()) != w.n_positions:
+                    raise ScoringPositionError(
+                        f"{w.where()}: a token multiplier over "
+                        f"{int(m.numel())} positions for {w.n_positions}")
+                weighted = PositionWeights(
+                    axis=TOKEN_AXIS, weights=w.weights * m,
+                    policy_id=w.policy_id, item_id=w.item_id,
+                    domain=w.domain, subtype=w.subtype)
+                weighted.require_nonempty()
+                out.append(weighted)
+            self._token = out
+            self.multiplier_source = str(multiplier_source or "unnamed")
 
     # --- what kind of restriction is this? ---------------------------------
 
@@ -90,23 +118,20 @@ class ActivePositions:
     def require_binary_token_weights(self) -> None:
         """Refuse a continuous policy where only a mask can be honoured.
 
-        The activation collectors accumulate ``sum_t x_t`` against an ``int64``
-        position count; a continuous ``w_t`` needs ``sum_t w_t x_t`` over
-        ``sum_t w_t``, which is a new ``StatsSpec`` quantity and three divisor
-        call sites. Refusing by name is the honest boundary — rounding a
-        confidence weight to a mask would run a different experiment than the one
-        that was preregistered and would report it as the right one.
+        A mask is ``w_t in {0, 1}``; a continuous ``w_t`` needs ``sum_t w_t x_t``
+        over ``sum_t w_t``, which the collectors accept through their separate
+        ``token_weights`` keyword (:meth:`token_weights_for`) and never through
+        a mask. Refusing by name is the honest boundary — rounding a confidence
+        weight to a mask would run a different experiment than the one that was
+        preregistered and would report it as the right one.
         """
         if self.token_form not in (FORM_ALL, FORM_SELECT):
             raise ScoringPositionError(
-                f"{self.policy.qualified_id} assigns continuous position weights, "
-                "and the activation-statistics collectors implement only the "
-                "binary form: their divisor is an integer token count. Weighted "
-                "activation statistics need a weighted denominator in StatsSpec "
-                "(`uncentered_moment`, `ffn_neuron_importance` and "
-                "`residual_covariance` all divide by `residual_count`), which no "
-                "experiment has yet asked for. Refusing rather than rounding the "
-                "weights to a mask")
+                f"{self.policy.qualified_id} assigns continuous position weights "
+                "and a binary mask was asked for. A mask cannot carry them: "
+                "weighted activation statistics take `token_weights_for` / "
+                "`token_weights_for_item` and divide by the weight sum. Refusing "
+                "rather than rounding the weights to a mask")
 
     # --- the two batch shapes ----------------------------------------------
 
@@ -132,6 +157,29 @@ class ActivePositions:
             length = min(w.n_positions, width)
             mask[row, :length] = w.active_mask()[:length].to(mask.device)
         return mask
+
+    @property
+    def token_weighted(self) -> bool:
+        """True when the token weights are continuous: the collectors then
+        accumulate ``sum_t w_t f(x_t)`` against ``sum_t w_t``."""
+        return self.token_form == FORM_WEIGHTED
+
+    def token_weights_for(self, batch: Any,
+                          original_indices: Sequence[int]) -> torch.Tensor:
+        """``[B, T_max]`` float64 token weights in ROW order, zero on padding."""
+        rows, width = _batch_shape(batch)
+        out = torch.zeros(rows, width, dtype=WEIGHT_DTYPE,
+                          device=batch.input_ids.device)
+        for row, index in enumerate(_checked_indices(original_indices, rows,
+                                                    self.n_items)):
+            w = self._token[index]
+            length = min(w.n_positions, width)
+            out[row, :length] = w.weights[:length].to(out.device)
+        return out
+
+    def token_weights_for_item(self, index: int) -> torch.Tensor:
+        """``[T]`` float64 token weights of one item, for the per-item path."""
+        return self._token[index].weights
 
     def prediction_weights_for(self, batch: Any,
                                original_indices: Sequence[int],
@@ -182,6 +230,8 @@ class ActivePositions:
         return {
             "position_policy": self.policy.qualified_id,
             "position_policy_hash": self.policy.policy_hash,
+            **({} if self.multiplier_source is None else
+               {"token_weights_multiplied_by": self.multiplier_source}),
             "n_items": self.n_items,
             "token_axis": {
                 "form": self.token_form,
@@ -251,7 +301,9 @@ def _checked_indices(original_indices: Sequence[int], rows: int,
     return index
 
 
-def active_positions(items: Sequence[Any], policy: ScoringPositionPolicy,
+def active_positions(items: Sequence[Any], policy: ScoringPositionPolicy, *,
+                     token_multipliers: Sequence[torch.Tensor] | None = None,
+                     multiplier_source: str | None = None,
                      ) -> ActivePositions | None:
     """:class:`ActivePositions` for ``items``, or ``None`` when there are none.
 
@@ -260,7 +312,8 @@ def active_positions(items: Sequence[Any], policy: ScoringPositionPolicy,
     """
     if not items:
         return None
-    return ActivePositions(items, policy)
+    return ActivePositions(items, policy, token_multipliers=token_multipliers,
+                           multiplier_source=multiplier_source)
 
 
 def consecutive_indices(batch: Any) -> tuple[int, ...]:

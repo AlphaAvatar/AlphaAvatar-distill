@@ -48,9 +48,9 @@ from aadistill.initialization.calibration.packing import (
 from aadistill.initialization.execution import ExecutionConfig
 from aadistill.initialization.scoring.content import scoring_content_identity
 from aadistill.initialization.scoring.objective import (
-    COMPONENTS as OBJECTIVE_COMPONENTS, ObjectiveError, add_joint_histograms,
-    confidence_histogram, item_component_means, position_terms,
-    require_binary_scoring_weights,
+    ObjectiveError, add_joint_histograms, confidence_from_vocabulary_entropy,
+    confidence_histogram, full_vocabulary_entropy, item_component_means,
+    position_terms, require_binary_scoring_weights,
 )
 from aadistill.initialization.scoring.protocol_identity import (
     PROTOCOL_FIELD,
@@ -236,6 +236,10 @@ class StateEvaluator:
         #: `[T, K]`, and conflating the two would inherit a refusal that does not
         #: apply.
         self._ref_sketches: dict[str, ReferenceDistributionSketch] = {}
+        #: Per-item reference FULL-vocabulary entropy, ``[T]`` float32, for an
+        #: objective weighted by the reference's confidence. A property of the
+        #: teacher alone, so computed once per item like the sketch; ``O(T)``.
+        self._ref_entropy: dict[str, torch.Tensor] = {}
         self._sketch_cache_bytes = 0
         self.cache_budget_bytes = int(cache_budget_bytes)
         self.scoring_objective = scoring_objective
@@ -370,6 +374,23 @@ class StateEvaluator:
             self._ref_sketches[item.item_id] = sketch
             self._sketch_cache_bytes += sketch.bytes_held()
         return sketch
+
+    @torch.no_grad()
+    def _reference_entropy_for(self, item: SuiteItem,
+                               ref_logits: torch.Tensor) -> torch.Tensor:
+        """The reference's full-vocabulary entropy at the rows ``ref_logits``
+        holds -- all prediction rows, or the scored ones -- computed once.
+
+        Cached under the same rule as the sketch: the rows an item's
+        reference is read at are fixed by the policy, so the per-item value
+        cannot differ between evaluations.
+        """
+        hit = self._ref_entropy.get(item.item_id)
+        if hit is not None and int(hit.shape[0]) == int(ref_logits.shape[0]):
+            return hit.to(ref_logits.device)
+        entropy = full_vocabulary_entropy(ref_logits, chunk=self.chunk)
+        self._ref_entropy[item.item_id] = entropy
+        return entropy
 
     @torch.no_grad()
     def _reference_for(self, item: SuiteItem) -> torch.Tensor:
@@ -652,7 +673,13 @@ class StateEvaluator:
                     sketch, cand, targets, tags=tags, weights=weights,
                     chunk=self.chunk, position_sink=sink)
                 if objective_acc is not None:
-                    objective_acc.add_item(item, cand, sketch, weights, tags)
+                    entropy = (self._reference_entropy_for(item, ref)
+                               if self.scoring_objective.uses_reference_confidence
+                               else None)
+                    objective_acc.add_item(
+                        item, cand, sketch, weights, tags,
+                        reference_entropy=entropy,
+                        vocab_size=int(ref.shape[-1]))
             if full_tags is not None:
                 _restore_unselected_counts(sums, select, full_tags)
             per_subtype.setdefault(item.subtype, DistortionSums()).merge(sums)
@@ -747,7 +774,12 @@ class StateEvaluator:
 
 
 class _ObjectiveAccumulator:
-    """Student-confidence objective terms, aggregated with the KL path's weighting.
+    """Objective terms, aggregated with the KL path's weighting.
+
+    Generic over the objective's form: the student-confidence forms carry the
+    student's Top-K entropy and confidence, the reference-confidence form the
+    reference's full-vocabulary entropy and confidence
+    (:meth:`ScoringObjective.components`).
 
     PER ITEM, every component is a fixed-denominator mean over the item's
     ``T_x`` scored positions; those per-item values are recorded. ACROSS
@@ -770,6 +802,8 @@ class _ObjectiveAccumulator:
 
     def __init__(self, objective: Any, critical_tags: Sequence[str]) -> None:
         self.objective = objective
+        self.names = tuple(objective.components())
+        self.confidence_key = objective.confidence_key()
         self.critical_tags = tuple(critical_tags)
         #: sub-type -> component -> [sum over scored positions, count]
         self.per_subtype: dict[str, dict[str, list[float]]] = {}
@@ -796,25 +830,33 @@ class _ObjectiveAccumulator:
     @torch.no_grad()
     def add_item(self, item: Any, cand: torch.Tensor, sketch: Any,
                  weights: torch.Tensor | None,
-                 tags: Mapping[str, torch.Tensor]) -> None:
+                 tags: Mapping[str, torch.Tensor], *,
+                 reference_entropy: torch.Tensor | None = None,
+                 vocab_size: int | None = None) -> None:
         kl = torch.cat(self._kl)
         log_z = torch.cat(self._log_z)
+        conf = None
+        if reference_entropy is not None:
+            reference_entropy = reference_entropy.to(kl.device)
+            conf = confidence_from_vocabulary_entropy(reference_entropy,
+                                                      int(vocab_size))
         terms = position_terms(
             self.objective, kl, cand, log_z,
             sketch.tail_log_prob.to(kl.device)
-            if sketch.top_k < sketch.vocab_size else None)
+            if sketch.top_k < sketch.vocab_size else None,
+            reference_entropy=reference_entropy, reference_confidence=conf)
         mask = torch.ones(1, int(kl.shape[0]), dtype=torch.bool,
                           device=kl.device)
         w = None if weights is None else weights.to(kl.device)[None]
         means, counts = item_component_means(
-            {k: v[None] for k, v in terms.items()}, mask, w)
+            {k: v[None] for k, v in terms.items()}, mask, w, names=self.names)
         scored = mask[0] if w is None else (w[0] > 0)
         n_scored = int(counts[0])
-        record = {name: float(means[name][0]) for name in OBJECTIVE_COMPONENTS}
+        record = {name: float(means[name][0]) for name in self.names}
         record["scored_positions"] = n_scored
         self.per_item[item.item_id] = record
         bucket = self.per_subtype.setdefault(item.subtype, {})
-        for name in OBJECTIVE_COMPONENTS:
+        for name in self.names:
             acc = bucket.setdefault(name, [0.0, 0])
             acc[0] += float(terms[name][scored].double().sum())
             acc[1] += n_scored
@@ -830,10 +872,10 @@ class _ObjectiveAccumulator:
                     acc[0] += float(terms[name][m].double().sum())
                     acc[1] += n
         for i, h in enumerate(confidence_histogram(
-                terms["student_confidence"], scored)):
+                terms[self.confidence_key], scored)):
             self.histogram[i] += h
         self.joint = add_joint_histograms(self.joint, terms, scored)
-        self.confidences.append(terms["student_confidence"][scored].float().cpu())
+        self.confidences.append(terms[self.confidence_key][scored].float().cpu())
         self.components.append(terms["component"][scored].float().cpu())
         self._kl, self._log_z = [], []
 
@@ -842,7 +884,7 @@ class _ObjectiveAccumulator:
         name_of = {"component": self.objective.component_name()}
         values: dict[str, float] = {}
         per_domain_all: dict[str, dict[str, float]] = {}
-        for name in OBJECTIVE_COMPONENTS:
+        for name in self.names:
             by_subtype = {sub: c[name][0] / c[name][1]
                           for sub, c in self.per_subtype.items()}
             primary, per_domain = domain_balanced_score(by_subtype, domain_map)

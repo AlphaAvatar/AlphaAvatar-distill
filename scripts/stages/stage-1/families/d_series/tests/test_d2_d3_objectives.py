@@ -21,18 +21,48 @@ from stages.d_series import reference_calibration as CAL  # noqa: E402
 from stages.d_series import objectives as O  # noqa: E402
 
 from aadistill.initialization.scoring.objective import (  # noqa: E402
-    FORM_KL_MINUS_CONFIDENCE_REWARD, FORM_UNCERTAINTY_WEIGHTED_KL,
+    FORM_KL_MINUS_CONFIDENCE_REWARD, FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL,
+    FORM_UNCERTAINTY_WEIGHTED_KL, KL_REFERENCE_ROOT,
 )
+
+
+def _stage_l_premises() -> dict:
+    """What stage L recorded it ran, from its booked, hash-verified evidence."""
+    from stages.d_series import d2_budget as BUD
+    ev = BUD.calibration_evidence(REPO)
+    return json.loads((REPO / ev["evidence_session"]).read_text())["L_premises"]
 
 
 class TestTheTwoObjectives:
 
-    def test_d2_is_the_uncertainty_weighted_form_at_k_200(self):
+    def test_d2_is_the_teacher_confidence_form_at_full_scope(self):
         d = O.D2_OBJECTIVE.as_dict()
-        assert d["form"] == FORM_UNCERTAINTY_WEIGHTED_KL
-        assert d["entropy_top_k"] == 200
+        assert d["form"] == FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL
+        assert d["kl_reference"] == KL_REFERENCE_ROOT
+        assert d["confidence_source"] == \
+            "reference_full_vocabulary_shannon_entropy/v1"
+        assert d["statistics_weighting"] != "none"
         assert d["denominator"] == "scored_position_count/v1"
-        assert "reward_scale" not in d
+        assert "entropy_top_k" not in d and "reward_scale" not in d
+        assert O.D2_NARROW_SCOPE_COMPARISON.objective_hash != \
+            O.D2_OBJECTIVE.objective_hash
+
+    def test_the_superseded_d2_is_kept_exactly_as_stage_l_ran_it(self):
+        old = O.D2_STUDENT_UNCERTAINTY_SUPERSEDED.as_dict()
+        assert old["form"] == FORM_UNCERTAINTY_WEIGHTED_KL
+        assert old["entropy_top_k"] == 200
+        assert O.D2_STUDENT_UNCERTAINTY_SUPERSEDED.objective_hash == \
+            _stage_l_premises()["d2_objective_hash"]
+        assert O.D2_STUDENT_UNCERTAINTY_SUPERSEDED.objective_hash.startswith(
+            "063bafd4")
+        assert O.D2_SUPERSESSION["status"] == "SUPERSEDED -- NEVER EXECUTED"
+        assert O.D2_OBJECTIVE.objective_hash != \
+            O.D2_STUDENT_UNCERTAINTY_SUPERSEDED.objective_hash
+
+    def test_d3_is_unchanged_by_the_redesign(self):
+        d3 = O.frozen_d3_objective(REPO)
+        assert d3.objective_hash.startswith("7b2545389874")
+        assert d3.reward_scale == 7.34
 
     def test_d3_is_the_reward_form_and_distinct_from_d2(self):
         d3 = O.d3_objective(0.5)
@@ -255,9 +285,25 @@ class TestTheContractStatesWhyAndWhereTheClaimsStop:
     def test_the_record_carries_the_objectives_it_declares(self):
         record = O.contract(REPO)
         assert record["d2"]["objective_hash"] == O.D2_OBJECTIVE.objective_hash
-        assert record["revision"] == 5
+        assert record["revision"] == 6
         assert record["d2"]["objective"]["aggregation"] == \
             "kl_path_weighting_per_consumer/v2"
+        assert record["d2_superseded"]["objective_hash"] == \
+            O.D2_STUDENT_UNCERTAINTY_SUPERSEDED.objective_hash
+        assert record["d2_superseded"]["executed"]["d2_search"] is False
+
+    def test_d2_declares_two_changes_and_a_frozen_full_scope(self):
+        d2 = O.contract(REPO)["d2"]
+        changes = d2["declared_changes"]["changes"]
+        assert len(changes) == 2
+        assert "PARENT" in changes[0]["change"] and "ROOT" in changes[0]["change"]
+        assert "confidence" in changes[1]["change"]
+        assert d2["scope"]["frozen_scope"] == "full"
+        assert len(d2["scope"]["acts_directly_on"]) == 4
+        assert d2["scope"]["narrow_scope_comparison"]["objective_hash"] == \
+            O.D2_NARROW_SCOPE_COMPARISON.objective_hash
+        joined = " ".join(O.contract(REPO)["claim_boundary"]["may_not_claim"])
+        assert "one variable" in joined
 
     def test_the_scope_names_three_places_and_excludes_three_operators(self):
         scope = O.contract(REPO)["objective_scope"]
@@ -459,7 +505,9 @@ class TestTheSearchPriceComesFromD1sRecords:
         session = {
             "status": "COMPLETE",
             "L_premises": {
-                "d2_objective_hash": objective_hash or O.D2_OBJECTIVE.objective_hash,
+                "d2_objective_hash": (
+                    objective_hash
+                    or O.D2_STUDENT_UNCERTAINTY_SUPERSEDED.objective_hash),
                 "lambda_rule_hash": O.lambda_rule()["rule_hash"],
                 "threshold_rule_hash": O.diagnostic_threshold_rule()["rule_hash"]},
             "L_reference_calibration": {
@@ -530,12 +578,47 @@ class TestTheSearchPriceComesFromD1sRecords:
         assert search["hard"] == want
 
     def test_only_depth_and_state_evaluation_carry_the_overhead(self, tmp_path):
+        """D3's pricing: the student-confidence overhead stage L measured."""
         from stages.d_series import d2_budget as BUD
         ev = BUD.calibration_evidence(self._evidence_repo(tmp_path))
         ev["depth"]["overhead_seconds_per_candidate"] = 0.0
         ev["state_eval"]["overhead_seconds_per_evaluation"] = 0.0
-        with_zero = BUD.priced_from_records(1.09, 400, ev)
-        provisional = BUD.priced_from_records(1.09, 400)
+        with_zero = BUD.priced_from_records(1.09, 400, ev,
+                                            overhead=BUD.objective_overhead)
+        provisional = BUD.priced_from_records(1.09, 400,
+                                              overhead=BUD.objective_overhead)
         assert with_zero["expected_added_minutes"] == 0.0
         assert provisional["priced"]["hard_ceiling_minutes"] > \
             with_zero["priced"]["hard_ceiling_minutes"]
+
+    def test_the_redesigned_d2_is_never_priced_from_stage_ls_objective(
+            self, tmp_path):
+        """Stage L timed the SUPERSEDED objective. Even with its evidence
+        verified, the redesigned D2's added work stays provisional; only
+        stage L's measured round-0 candidate count is read."""
+        from stages.d_series import d2_budget as BUD
+        ev = BUD.calibration_evidence(self._evidence_repo(tmp_path))
+        ev["depth"]["overhead_seconds_per_candidate"] = 1000.0
+        ev["round0_candidates_measured"] = 36
+        basis = BUD.telemetry_basis(BUD.d1_search_telemetry(), 551.99)
+        ov = BUD.teacher_confidence_overhead(ev, basis)
+        assert ov["source"].startswith("provisional")
+        assert ov["depth_seconds_per_candidate"]["bound"] < 1000.0
+        assert ov["depth_seconds_per_expansion"]["round0_candidates"] == 36
+        assert ov["one_time_minutes"]["profiles"] == 2
+        unknown = BUD.teacher_confidence_overhead(None, basis)
+        assert unknown["depth_seconds_per_expansion"]["round0_candidates"] \
+            == 260
+        d2 = BUD.priced_from_records(1.09, 400, ev)
+        assert d2["priced"]["one_time_minutes"] == \
+            ov["one_time_minutes"]["bound"]
+
+    def test_d3_is_priced_with_its_own_search_in_the_programme(self):
+        from stages.d_series import d2_budget as BUD
+        record = json.loads((REPO / BUD.RECORD).read_text())
+        d3 = record["steps"]["d2_search"]["d3_search_for_programme_view"]
+        assert d3["objective_overhead"]["source"].startswith("measured once")
+        s = BUD.programme_scenarios(TestTheProgrammeScenarios.LIMITS)
+        pricing = s["search_pricing"][s["search_pricing_in_force"]]
+        assert pricing["d3_block"]["search_hard_usd"] == \
+            d3["hard"]["all_in_usd"]

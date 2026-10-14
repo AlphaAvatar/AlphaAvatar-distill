@@ -20,12 +20,14 @@ from __future__ import annotations
 
 import torch
 
+from aadistill.initialization.statistics.collect import statistics_denominator
+
 
 def uncentered_moment(state: dict[str, torch.Tensor], point: int) -> torch.Tensor:
-    n = int(state["residual_count"][0])
-    if n < 2:
-        raise ValueError(f"Need at least 2 tokens, have {n}")
-    return state["residual_sqsum"][point].to(torch.float64) / n
+    count = int(state["residual_count"][0])
+    if count < 2:
+        raise ValueError(f"Need at least 2 tokens, have {count}")
+    return state["residual_sqsum"][point].to(torch.float64) / statistics_denominator(state)
 
 
 def stream_projection(
@@ -101,7 +103,7 @@ def ffn_neuron_importance(
     post-SwiGLU intermediate activation); the column norm weights it by how
     strongly the neuron can write to the residual stream.
     """
-    n = int(state["residual_count"][0])
+    n = statistics_denominator(state)
     mean_abs = state["ffn_abs_sum"][layer].to(torch.float64) / n
     col_norms = w_down.to(torch.float64).norm(dim=0)
     return mean_abs * col_norms

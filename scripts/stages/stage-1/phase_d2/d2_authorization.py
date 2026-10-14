@@ -326,12 +326,13 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
             "only run under the revision the maintainer approved")
     if prediction_rows != "all_v1":
         from stages.d_series import d2_budget as BUD
-        verdict = BUD.calibration_evidence().get("d2_scored_rows_equivalence")
+        verdict = BUD.d2_validation_evidence().get("scored_rows_equivalence")
         if verdict != "PASS":
             raise D2AuthorizationRefused(
-                f"prediction_rows={prediction_rows!r} needs the D2 objective's "
-                f"own scored-rows equivalence (stage L), which is {verdict!r}; "
-                "R0's KL-only verdict does not extend to it")
+                f"prediction_rows={prediction_rows!r} needs THIS objective's "
+                "own scored-rows equivalence (the D2 GPU validation), which "
+                f"is {verdict!r}; R0's KL-only verdict and stage L's verdict "
+                "on the superseded objective do not extend to it")
 
     money = live_money(root)
     if S.EXPERIMENT_ID not in money["funds_formal_sessions_of"]:

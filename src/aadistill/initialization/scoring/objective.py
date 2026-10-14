@@ -28,6 +28,21 @@ on the reference's support, and NOT a ``K+1``-bucket entropy: the mass outside
 ``kl_minus_student_confidence_reward``
     ``g_t = KL_t - lambda * c_t``. Confidence is a separate reward, never a
     weight on the KL; ``lambda > 0`` is part of the identity.
+``reference_confidence_weighted_kl``
+    ``g_t = c^ref_t * KL_t``, where ``c^ref_t`` is the REFERENCE's own
+    confidence, ``1 - H_ref(t) / log |V|`` from the reference's full-vocabulary
+    Shannon entropy. The candidate's logits never enter the weight. The KL's
+    reference is declared in the identity (``kl_reference``); this form
+    requires the ROOT reference -- the frozen original model at the root of
+    the lineage -- for every consumer, including DEPTH, whose historical KL is
+    taken against the parent. A position the reference is unsure of is
+    penalized less; one it is sure of more. Optionally the same weights also
+    weight the activation statistics the structural operators read
+    (``statistics_weighting``).
+
+The reference's entropy is a FULL-vocabulary quantity while the KL stays the
+declared support's (e.g. reference Top-K + tail): two different reductions over
+the same positions, never to be read as one another.
 
 Both are MINIMIZED, and both are averaged per item over a FIXED denominator,
 the number of scored positions ``T_x``::
@@ -68,7 +83,10 @@ SCHEMA = "aadistill.scoring_objective/v1"
 
 FORM_UNCERTAINTY_WEIGHTED_KL = "student_uncertainty_weighted_kl"
 FORM_KL_MINUS_CONFIDENCE_REWARD = "kl_minus_student_confidence_reward"
-FORMS = (FORM_UNCERTAINTY_WEIGHTED_KL, FORM_KL_MINUS_CONFIDENCE_REWARD)
+FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL = "reference_confidence_weighted_kl"
+#: The forms that read the CANDIDATE's own confidence.
+STUDENT_FORMS = (FORM_UNCERTAINTY_WEIGHTED_KL, FORM_KL_MINUS_CONFIDENCE_REWARD)
+FORMS = (*STUDENT_FORMS, FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL)
 
 #: Every definitional choice, named so it is part of the identity rather than
 #: of the reader's assumptions. Changing any of them is a new objective.
@@ -84,6 +102,20 @@ DENOMINATOR = "scored_position_count/v1"
 #: against D1 and was replaced before any run used it.
 AGGREGATION = "kl_path_weighting_per_consumer/v2"
 DIRECTION = "minimize"
+
+#: The reference-confidence form's definitional choices, serialized ONLY for
+#: that form so every student-confidence identity stays byte-identical.
+REFERENCE_ENTROPY_DEFINITION = "reference_full_vocabulary_shannon_entropy/v1"
+REFERENCE_CONFIDENCE_MAPPING = "one_minus_entropy_over_log_vocabulary/v1"
+#: The KL's reference for every consumer: the frozen model at the root of the
+#: lineage. The only value this form accepts; a parent-referenced variant
+#: would be a different, undeclared objective.
+KL_REFERENCE_ROOT = "root_reference/v1"
+KL_REFERENCES = (KL_REFERENCE_ROOT,)
+#: Activation statistics weighted by the same reference confidence, on the
+#: token axis: token ``j`` feeds prediction ``j`` and carries its weight; the
+#: last token feeds no prediction inside the item and carries zero.
+STATISTICS_WEIGHTING = "reference_confidence_token_weights/v1"
 
 #: Rows per reduction block. A transient bound, not semantics: Top-K over a
 #: ``[rows, V]`` block allocates proportionally to it.
@@ -101,9 +133,18 @@ class ScoringObjective:
     objective_id: str
     version: int
     form: str
-    entropy_top_k: int
+    #: The student's Top-K for the student-confidence forms; absent (None) for
+    #: the reference-confidence form, which reads no student entropy.
+    entropy_top_k: int | None = None
     #: ``lambda`` of the reward form; must be absent for the weighted form.
     reward_scale: float | None = None
+    #: The KL's reference, declared. Required by the reference-confidence form
+    #: and absent from the student forms (their consumers keep their
+    #: historical references), so their identities do not move.
+    kl_reference: str | None = None
+    #: Whether the reference confidence also weights the activation statistics
+    #: of the structural operators. Reference-confidence form only.
+    weights_activation_statistics: bool = False
 
     def __post_init__(self) -> None:
         if not self.objective_id:
@@ -111,7 +152,24 @@ class ScoringObjective:
         if self.form not in FORMS:
             raise ObjectiveError(f"unknown objective form {self.form!r}; "
                                  f"known: {FORMS}")
-        if int(self.entropy_top_k) < 2:
+        if self.form == FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL:
+            if self.entropy_top_k is not None or self.reward_scale is not None:
+                raise ObjectiveError(
+                    f"{self.objective_id}: the reference-confidence form reads "
+                    "no student Top-K and has no reward; entropy_top_k and "
+                    "reward_scale would be identity fields that change nothing")
+            if self.kl_reference not in KL_REFERENCES:
+                raise ObjectiveError(
+                    f"{self.objective_id}: the reference-confidence form needs "
+                    f"kl_reference in {KL_REFERENCES}, got "
+                    f"{self.kl_reference!r}")
+            return
+        if self.kl_reference is not None or self.weights_activation_statistics:
+            raise ObjectiveError(
+                f"{self.objective_id}: kl_reference and "
+                "weights_activation_statistics belong to the "
+                "reference-confidence form")
+        if self.entropy_top_k is None or int(self.entropy_top_k) < 2:
             raise ObjectiveError(
                 "entropy_top_k must be at least 2: log K normalizes the "
                 "entropy, and log 1 = 0")
@@ -130,7 +188,45 @@ class ScoringObjective:
     def qualified_id(self) -> str:
         return f"{self.objective_id}@v{self.version}"
 
+    @property
+    def uses_reference_confidence(self) -> bool:
+        return self.form == FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL
+
+    @property
+    def uses_student_confidence(self) -> bool:
+        return self.form in STUDENT_FORMS
+
+    @property
+    def requires_root_reference(self) -> bool:
+        """The KL's reference is the lineage root for EVERY consumer."""
+        return self.kl_reference == KL_REFERENCE_ROOT
+
+    def components(self) -> tuple[str, ...]:
+        """The per-position quantities this objective's records carry."""
+        return (REFERENCE_COMPONENTS if self.uses_reference_confidence
+                else COMPONENTS)
+
+    def confidence_key(self) -> str:
+        return ("reference_confidence" if self.uses_reference_confidence
+                else "student_confidence")
+
     def as_dict(self) -> dict[str, Any]:
+        if self.uses_reference_confidence:
+            return {
+                "schema": SCHEMA,
+                "objective_id": self.objective_id,
+                "version": int(self.version),
+                "form": self.form,
+                "confidence_source": REFERENCE_ENTROPY_DEFINITION,
+                "confidence_mapping": REFERENCE_CONFIDENCE_MAPPING,
+                "kl_reference": self.kl_reference,
+                "statistics_weighting": (STATISTICS_WEIGHTING
+                                         if self.weights_activation_statistics
+                                         else "none"),
+                "denominator": DENOMINATOR,
+                "aggregation": AGGREGATION,
+                "direction": DIRECTION,
+            }
         out = {
             "schema": SCHEMA,
             "objective_id": self.objective_id,
@@ -153,14 +249,25 @@ class ScoringObjective:
 
     def component_name(self) -> str:
         """What the second component is called in records: weight or reward."""
+        if self.form == FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL:
+            return "reference_confidence_weight"
         return ("uncertainty_weight" if self.form == FORM_UNCERTAINTY_WEIGHTED_KL
                 else "confidence_reward")
 
     def integrand(self, kl: torch.Tensor, confidence: torch.Tensor
                   ) -> tuple[torch.Tensor, torch.Tensor]:
-        """``(g, component)`` per position. ``+inf`` KL stays ``+inf``."""
+        """``(g, component)`` per position. ``+inf`` KL stays ``+inf``.
+
+        ``confidence`` is the student's for the student forms and the
+        reference's for the reference-confidence form; the caller supplies the
+        one the form declares.
+        """
         kl = kl.float()
         conf = confidence.float()
+        if self.form == FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL:
+            weight = conf
+            g = torch.where(torch.isposinf(kl), kl, weight * kl)
+            return g, weight
         if self.form == FORM_UNCERTAINTY_WEIGHTED_KL:
             weight = 1.0 - conf
             #: `weight * kl` is NaN at weight 0 and kl +inf; resolved to +inf
@@ -223,6 +330,38 @@ def student_topk_terms(cand_logits: torch.Tensor, log_z: torch.Tensor, *,
     return entropy.reshape(lead), mass.reshape(lead)
 
 
+@torch.no_grad()
+def full_vocabulary_entropy(logits: torch.Tensor, *,
+                            chunk: int = DEFAULT_ROW_CHUNK) -> torch.Tensor:
+    """Shannon entropy of ``softmax(logits)`` over the FULL last dimension.
+
+    ``logits`` ``[..., V]``; returns float32 ``[...]``. Each block of rows is
+    promoted to float32 once and reduced there (``-sum p log p`` with
+    ``0 log 0 = 0``); no ``[rows, V]`` float32 copy outlives its block. ``V``
+    is read from the tensor, never assumed.
+    """
+    vocab = int(logits.shape[-1])
+    lead = logits.shape[:-1]
+    flat = logits.reshape(-1, vocab)
+    out = torch.empty(flat.shape[0], dtype=torch.float32, device=logits.device)
+    step = max(1, int(chunk))
+    for start in range(0, int(flat.shape[0]), step):
+        stop = min(start + step, int(flat.shape[0]))
+        p = torch.softmax(flat[start:stop].float(), dim=-1)
+        out[start:stop] = torch.special.entr(p).sum(dim=-1)
+        del p
+    return out.reshape(lead)
+
+
+def confidence_from_vocabulary_entropy(entropy: torch.Tensor,
+                                       vocab_size: int) -> torch.Tensor:
+    """``c = 1 - H / log |V|``, clamped to ``[0, 1]`` against rounding only."""
+    v = int(vocab_size)
+    if v < 2:
+        raise ObjectiveError(f"a vocabulary of {v} has no entropy scale")
+    return (1.0 - entropy.float() / math.log(v)).clamp(0.0, 1.0)
+
+
 def confidence_from_entropy(entropy: torch.Tensor, top_k: int) -> torch.Tensor:
     """``c = 1 - H_K / log K``, clamped to ``[0, 1]`` against rounding only.
 
@@ -279,6 +418,10 @@ def fixed_denominator_item_means(values: torch.Tensor,
 #: The per-position quantities every record carries, in a fixed order.
 COMPONENTS = ("objective", "raw_kl", "student_entropy", "student_confidence",
               "component", "student_topk_mass", "reference_tail_mass")
+#: The reference-confidence form's: no student quantity at all.
+REFERENCE_COMPONENTS = ("objective", "raw_kl", "reference_entropy",
+                        "reference_confidence", "component",
+                        "reference_tail_mass")
 
 #: Confidence histogram edges: ten equal bins on [0, 1].
 CONFIDENCE_BINS = 10
@@ -292,17 +435,39 @@ KL_GRID_EDGES = (1e-3, 3e-3, 1e-2, 3e-2, 0.1, 0.3, 1.0, 3.0, 10.0)
 @torch.no_grad()
 def position_terms(objective: ScoringObjective, kl: torch.Tensor,
                    cand_logits: torch.Tensor, log_z: torch.Tensor,
-                   reference_tail_log: torch.Tensor | None,
+                   reference_tail_log: torch.Tensor | None, *,
+                   reference_entropy: torch.Tensor | None = None,
+                   reference_confidence: torch.Tensor | None = None,
                    ) -> dict[str, torch.Tensor]:
-    """Every per-position component, same leading shape as ``kl``."""
+    """Every per-position component, same leading shape as ``kl``.
+
+    The reference-confidence form takes the reference's entropy and confidence
+    from the caller -- aligned to ``kl`` position for position -- and reads
+    nothing of the candidate but the KL already computed from it.
+    """
+    tail = (torch.zeros_like(kl, dtype=torch.float32)
+            if reference_tail_log is None
+            else reference_tail_log.to(kl.device).float().exp())
+    if objective.uses_reference_confidence:
+        if reference_confidence is None or reference_entropy is None:
+            raise ObjectiveError(
+                f"{objective.qualified_id} weights by the reference's "
+                "confidence and none was supplied")
+        conf = reference_confidence.to(kl.device).float()
+        if tuple(conf.shape) != tuple(kl.shape):
+            raise ObjectiveError(
+                f"reference confidence {tuple(conf.shape)} is not aligned with "
+                f"the KL {tuple(kl.shape)}")
+        g, component = objective.integrand(kl, conf)
+        return {"objective": g, "raw_kl": kl.float(),
+                "reference_entropy": reference_entropy.to(kl.device).float(),
+                "reference_confidence": conf, "component": component,
+                "reference_tail_mass": tail}
     entropy, mass = student_topk_terms(cand_logits, log_z,
                                        top_k=objective.entropy_top_k)
     entropy = entropy.to(kl.device)
     conf = confidence_from_entropy(entropy, objective.entropy_top_k)
     g, component = objective.integrand(kl, conf)
-    tail = (torch.zeros_like(kl, dtype=torch.float32)
-            if reference_tail_log is None
-            else reference_tail_log.to(kl.device).float().exp())
     return {"objective": g, "raw_kl": kl.float(), "student_entropy": entropy,
             "student_confidence": conf, "component": component,
             "student_topk_mass": mass.to(kl.device), "reference_tail_mass": tail}
@@ -310,12 +475,13 @@ def position_terms(objective: ScoringObjective, kl: torch.Tensor,
 
 def item_component_means(terms: Mapping[str, torch.Tensor],
                          prediction_mask: torch.Tensor,
-                         weights: torch.Tensor | None = None
+                         weights: torch.Tensor | None = None,
+                         names: tuple[str, ...] = COMPONENTS,
                          ) -> tuple[dict[str, torch.Tensor], torch.Tensor]:
     """Each component's per-item fixed-denominator mean, and ``T_x``."""
     out: dict[str, torch.Tensor] = {}
     counts = None
-    for name in COMPONENTS:
+    for name in names:
         out[name], counts = fixed_denominator_item_means(
             terms[name], prediction_mask, weights)
     return out, counts
@@ -344,10 +510,15 @@ def add_joint_histograms(acc: dict[str, Any] | None,
     the student's actual probability. Threshold-free by construction: the
     records carry the grid, and any registered threshold is applied afterwards.
     """
-    keep = scored.to(terms["student_confidence"].device).bool()
-    conf = terms["student_confidence"][keep].float()
+    conf_key = ("student_confidence" if "student_confidence" in terms
+                else "reference_confidence")
+    keep = scored.to(terms[conf_key].device).bool()
+    conf = terms[conf_key][keep].float()
     kl = terms["raw_kl"][keep].float()
-    mass = terms["student_topk_mass"][keep].float()
+    #: The reference-confidence form has no student Top-K mass; its second
+    #: grid is then recorded empty rather than invented.
+    mass = (terms["student_topk_mass"][keep].float()
+            if "student_topk_mass" in terms else None)
     n_kl = len(KL_GRID_EDGES) + 1
     if acc is None:
         acc = {"confidence_edges": [i / CONFIDENCE_BINS
@@ -361,13 +532,17 @@ def add_joint_histograms(acc: dict[str, Any] | None,
     if conf.numel() == 0:
         return acc
     c_bin = torch.clamp((conf * CONFIDENCE_BINS).long(), 0, CONFIDENCE_BINS - 1)
-    m_bin = torch.clamp((mass * CONFIDENCE_BINS).long(), 0, CONFIDENCE_BINS - 1)
     edges = torch.tensor(KL_GRID_EDGES, dtype=kl.dtype, device=kl.device)
     k_bin = torch.bucketize(kl, edges, right=True)
     ck = torch.bincount(c_bin * n_kl + k_bin,
                         minlength=CONFIDENCE_BINS * n_kl).tolist()
-    cm = torch.bincount(c_bin * CONFIDENCE_BINS + m_bin,
-                        minlength=CONFIDENCE_BINS ** 2).tolist()
+    if mass is None:
+        cm = [0] * (CONFIDENCE_BINS ** 2)
+    else:
+        m_bin = torch.clamp((mass * CONFIDENCE_BINS).long(), 0,
+                            CONFIDENCE_BINS - 1)
+        cm = torch.bincount(c_bin * CONFIDENCE_BINS + m_bin,
+                            minlength=CONFIDENCE_BINS ** 2).tolist()
     for i in range(CONFIDENCE_BINS):
         for j in range(n_kl):
             acc["confidence_x_kl"][i][j] += int(ck[i * n_kl + j])
@@ -380,9 +555,14 @@ def add_joint_histograms(acc: dict[str, Any] | None,
 __all__ = ["AGGREGATION", "COMPONENTS", "CONFIDENCE_BINS",
            "CONFIDENCE_MAPPING", "DENOMINATOR", "DIRECTION",
            "ENTROPY_DEFINITION", "FORM_KL_MINUS_CONFIDENCE_REWARD",
+           "FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL",
            "FORM_UNCERTAINTY_WEIGHTED_KL", "FORMS", "KL_GRID_EDGES",
+           "KL_REFERENCE_ROOT", "KL_REFERENCES", "REFERENCE_COMPONENTS",
+           "REFERENCE_CONFIDENCE_MAPPING", "REFERENCE_ENTROPY_DEFINITION",
+           "STATISTICS_WEIGHTING", "STUDENT_FORMS",
            "ObjectiveError", "ScoringObjective", "add_joint_histograms",
-           "confidence_from_entropy", "confidence_histogram",
-           "fixed_denominator_item_means", "item_component_means",
+           "confidence_from_entropy", "confidence_from_vocabulary_entropy",
+           "confidence_histogram", "fixed_denominator_item_means",
+           "full_vocabulary_entropy", "item_component_means",
            "objective_config", "position_terms",
            "require_binary_scoring_weights", "student_topk_terms"]

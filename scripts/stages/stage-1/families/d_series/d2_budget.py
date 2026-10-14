@@ -9,8 +9,11 @@ Every figure comes from a committed owner:
 * R0 -- its registered plan;
 * the reference calibration session -- R0's measured setup components, D1's
   bounding arm-materialization minutes and a conservative compute allowance;
-* the D2 search -- D1's PRICED search (the same space and support), with an
-  explicit, provisional factor for the objective's unmeasured overhead;
+* the D2 search -- D1's PRICED search (the same space and support), plus the
+  redesigned D2's added work (contract revision 6), every term of which is
+  PROVISIONAL until a GPU validation measures it: stage L measured the
+  SUPERSEDED student-uncertainty objective, whose per-position work the new D2
+  does not do, so that timing prices D3 (which shares it) and never D2;
 * D2 behaviour -- D1's priced behavioural conventions (per-probe bounding
   minutes, overrun factor, session overhead, minutes per arm), applied to the
   shared protocol's field: K new candidates and NO B/q2 probes or arms.
@@ -105,6 +108,8 @@ def telemetry_basis(rows: Sequence[dict[str, Any]], elapsed_minutes: float
     depth = [r for r in rows if r["impl_id"] == DEPTH_IMPL]
     loop = [float(r["operator_timing"]["item_seconds"]) for r in depth]
     cands = [int(r["operator_timing"]["candidate_subsets"]) for r in depth]
+    dist = [float(r["operator_timing"]["distortion_seconds"])
+            / int(r["operator_timing"]["candidate_subsets"]) for r in depth]
     se = [float((r.get("state_evaluation_seconds") or {}).get("seconds") or 0)
           for r in rows]
     total_cells = sum(cell(r) for r in rows) / 60
@@ -122,6 +127,14 @@ def telemetry_basis(rows: Sequence[dict[str, Any]], elapsed_minutes: float
                   "scoring_loop_minutes": round(sum(loop) / 60, 2),
                   "loop_seconds_per_candidate_mean": round(
                       sum(loop) / max(1, sum(cands)), 4),
+                  "loop_seconds_per_candidate_max": round(
+                      max(l / c for l, c in zip(loop, cands)), 4),
+                  #: The KL reduction per candidate, UNATTRIBUTED (no sync):
+                  #: it carries the forward's async tail, so it over-states.
+                  "distortion_seconds_per_candidate": {
+                      "mean": round(sum(dist) / len(dist), 4),
+                      "max": round(max(dist), 4)},
+                  "profiles": len({r["profile"] for r in depth}),
                   "reference_cache_modes": sorted(
                       {str((r.get("reference_cache") or {}).get("mode"))
                        for r in depth}),
@@ -190,8 +203,12 @@ def calibration_evidence(repo_root: str | Path | None = None) -> dict[str, Any]:
     checks = {
         "session_complete": doc.get("status") == "COMPLETE",
         "stage_l_ran": bool(lc.get("calibration")),
-        "d2_objective": prem.get("d2_objective_hash")
-        == O.D2_OBJECTIVE.objective_hash,
+        #: Stage L measured the 2026-10-13 D2, SUPERSEDED on 2026-10-14. The
+        #: check binds the evidence to what it measured; its objective timing
+        #: then prices D3 (the same student Top-K entropy work), never the
+        #: redesigned D2 -- see `teacher_confidence_overhead`.
+        "stage_l_objective_is_the_superseded_d2": prem.get("d2_objective_hash")
+        == O.D2_STUDENT_UNCERTAINTY_SUPERSEDED.objective_hash,
         "lambda_rule": prem.get("lambda_rule_hash") == O.lambda_rule()["rule_hash"],
         "threshold_rule": prem.get("threshold_rule_hash")
         == O.diagnostic_threshold_rule()["rule_hash"],
@@ -201,12 +218,19 @@ def calibration_evidence(repo_root: str | Path | None = None) -> dict[str, Any]:
     depth = lc.get("timing_depth_one_round") or {}
     state = lc.get("timing_state_eval") or {}
     usable = all(checks.values())
+    #: Round 0's candidate count at the root, as measured: the KL-only arm's
+    #: one-round invocation. The redesigned D2's parent-KL diagnostic runs on
+    #: exactly the round-0 candidates of every DEPTH expansion.
+    round0 = (((depth.get("arms") or {}).get("kl_only") or {})
+              .get("candidate_subsets"))
     return {**out, "checks": checks, "usable": usable,
             "cache_fix_validated": bool(usable and depth.get(
                 "cache_fix_validated") is True),
             "depth": {k: depth.get(k) for k in (
                 "overhead_seconds_per_candidate", "same_cache_mode",
                 "cache_fix_validated", "skipped", "failed")},
+            "round0_candidates_measured": round0,
+            "objective_measured": "the superseded D2 (student Top-K entropy)",
             "state_eval": {k: state.get(k) for k in (
                 "overhead_seconds_per_evaluation", "skipped", "failed")},
             "d2_scored_rows_equivalence": (lc.get("d2_scored_rows_equivalence")
@@ -216,14 +240,66 @@ def calibration_evidence(repo_root: str | Path | None = None) -> dict[str, Any]:
             "why": None if usable else "an identity or completion check failed"}
 
 
+#: The REDESIGNED D2's own GPU validation (a proposal until granted). Its
+#: campaign books the session the way the calibration campaign does; the
+#: scored-rows verdict and the measured overheads of THIS objective are read
+#: from it and nowhere else.
+D2_VALIDATION_CAMPAIGN = ("logs/stages/stage-1/families/d_series/validations/"
+                          "d2-gpu-validation/v1/campaign.json")
+D2_VALIDATION_PLAN = ("logs/stages/stage-1/phase_d2/plans/"
+                      "d2_gpu_validation_plan.json")
+
+
+def d2_validation_evidence(repo_root: str | Path | None = None
+                           ) -> dict[str, Any]:
+    """The D2 GPU validation's verified evidence, or why there is none.
+
+    Usable only when a session is booked with its evidence sha256, the bytes
+    hash to it, it COMPLETED, and it measured the objective D2 now declares.
+    Stage L's verdicts belong to the superseded objective and never count.
+    """
+    import hashlib
+
+    from stages.d_series import objectives as O
+
+    root = Path(repo_root) if repo_root is not None else REPO_ROOT
+    out: dict[str, Any] = {"usable": False, "campaign": D2_VALIDATION_CAMPAIGN,
+                           "scored_rows_equivalence": None}
+    try:
+        campaign = json.loads((root / D2_VALIDATION_CAMPAIGN).read_text())
+    except (OSError, ValueError):
+        return {**out, "why": "the D2 GPU validation has not run (no campaign)"}
+    booked = [r for r in campaign.get("subruns") or []
+              if r.get("evidence_session") and r.get("evidence_session_sha256")]
+    if not booked:
+        return {**out, "why": "no D2 GPU validation session is booked"}
+    row = booked[-1]
+    try:
+        raw = (root / row["evidence_session"]).read_bytes()
+    except OSError as exc:
+        return {**out, "why": f"evidence unreadable: {exc}"}
+    if hashlib.sha256(raw).hexdigest() != row["evidence_session_sha256"]:
+        return {**out, "why": "the evidence does not hash to what was booked"}
+    doc = json.loads(raw)
+    ok = (doc.get("status") == "COMPLETE"
+          and doc.get("objective_hash") == O.D2_OBJECTIVE.objective_hash)
+    return {**out, "usable": ok,
+            "scored_rows_equivalence": (doc.get("scored_rows_equivalence")
+                                        or {}).get("verdict") if ok else None,
+            "why": None if ok else "incomplete, or another objective"}
+
+
 def objective_overhead(evidence: dict[str, Any] | None,
                        basis: dict[str, Any]) -> dict[str, Any]:
-    """Seconds the D2 objective adds per DEPTH candidate and per evaluation.
+    """Seconds a STUDENT-CONFIDENCE objective adds per DEPTH candidate and
+    per evaluation: the student's Top-K entropy at every scored position.
 
-    MEASURED when the verified stage-L evidence carries both timings on one
-    cache mode -- expected = the measurement, bound = the measurement x
-    MEASURED_OVERHEAD_BOUND_FACTOR, because one timing is not a bound.
-    Otherwise PROVISIONAL, from the estimate, and labelled so.
+    Stage L measured it on the superseded D2; D3 does the same per-position
+    work, so this prices D3. MEASURED when the verified stage-L evidence
+    carries both timings on one cache mode -- expected = the measurement,
+    bound = the measurement x MEASURED_OVERHEAD_BOUND_FACTOR, because one
+    timing is not a bound. Otherwise PROVISIONAL, from the estimate, and
+    labelled so.
     """
     per_cand = basis["depth"]["loop_seconds_per_candidate_mean"]
     se_mean = basis["state_evaluation"]["seconds_mean"]
@@ -256,9 +332,75 @@ def objective_overhead(evidence: dict[str, Any] | None,
             "bound_factor_on_one_measurement": f}
 
 
+#: THE REDESIGNED D2's ADDED WORK, every term PROVISIONAL (not measured).
+#: The new objective computes no student entropy; what it adds over D1 is
+#: (1) the root reference store, built once per calibration profile -- one
+#: root forward, a full-vocabulary entropy and a sketch over the mixture,
+#: bounded at this many DEPTH candidate evaluations; (2) the round-0
+#: parent-KL diagnostic, one extra sketch-KL reduction per round-0 candidate
+#: of every DEPTH expansion, bounded by D1's per-candidate reduction time
+#: (unattributed, so it carries the forward's async tail: conservative) and
+#: expected at half of it; (3) c_T x KL and stored lookups in DEPTH and state
+#: evaluation, and the weighted activation statistics in FFN/WIDTH/ATTENTION,
+#: priced at the generic provisional +5% / +10% on the paths they touch.
+ROOT_STORE_CANDIDATE_EQUIVALENTS = {"expected": 2.0, "bound": 5.0}
+PARENT_KL_DIAGNOSTIC_FRACTION = {"expected": 0.5, "bound": 1.0}
+
+
+def teacher_confidence_overhead(evidence: dict[str, Any] | None,
+                                basis: dict[str, Any]) -> dict[str, Any]:
+    """The redesigned D2's added seconds, labelled PROVISIONAL throughout.
+
+    Never reads stage L's objective timing: that measured another objective.
+    Reads from stage L only the round-0 candidate count it measured (falling
+    back, conservatively, to every candidate of an expansion).
+    """
+    per_cand = basis["depth"]["loop_seconds_per_candidate_mean"]
+    per_cand_max = basis["depth"]["loop_seconds_per_candidate_max"]
+    dist = basis["depth"]["distortion_seconds_per_candidate"]
+    se_mean = basis["state_evaluation"]["seconds_mean"]
+    round0 = (evidence or {}).get("round0_candidates_measured")
+    round0_src = ("stage L's measured root round" if round0 else
+                  "UNKNOWN -- every candidate of an expansion, conservatively")
+    round0 = int(round0 or max(basis["depth"]["candidates_per_expansion"]))
+    profiles = int(basis["depth"]["profiles"])
+    e, b = OBJECTIVE_OVERHEAD_EXPECTED - 1, OBJECTIVE_OVERHEAD_PROVISIONAL - 1
+    return {
+        "source": ("provisional -- the redesigned D2 is not measured; stage L "
+                   "measured the superseded objective, which prices D3 only"),
+        "depth_seconds_per_candidate": {
+            "expected": round(per_cand * e, 4),
+            "bound": round(per_cand * b, 4)},
+        "state_eval_seconds_per_evaluation": {
+            "expected": round(se_mean * e, 4),
+            "bound": round(basis["state_evaluation"]["seconds_max"] * b, 4)},
+        "depth_seconds_per_expansion": {
+            "what": "the round-0 parent-KL diagnostic",
+            "round0_candidates": round0, "round0_source": round0_src,
+            "expected": round(round0 * dist["mean"]
+                              * PARENT_KL_DIAGNOSTIC_FRACTION["expected"], 2),
+            "bound": round(round0 * dist["max"]
+                           * PARENT_KL_DIAGNOSTIC_FRACTION["bound"], 2)},
+        "operator_cell_factor": {
+            "what": ("the weighted activation statistics of the non-DEPTH "
+                     "operators, on their whole end-to-end cells"),
+            "expected": OBJECTIVE_OVERHEAD_EXPECTED,
+            "bound": OBJECTIVE_OVERHEAD_PROVISIONAL},
+        "one_time_minutes": {
+            "what": "root reference store builds, one per calibration profile",
+            "profiles": profiles,
+            "expected": round(profiles * per_cand
+                              * ROOT_STORE_CANDIDATE_EQUIVALENTS["expected"]
+                              / 60, 2),
+            "bound": round(profiles * per_cand_max
+                           * ROOT_STORE_CANDIDATE_EQUIVALENTS["bound"] / 60, 2)},
+    }
+
+
 def priced_from_records(rate: float, disk_gb: int,
                         evidence: dict[str, Any] | None = None,
-                        depth_cell: str = "records_max") -> dict[str, Any]:
+                        depth_cell: str = "records_max",
+                        overhead: Any = None) -> dict[str, Any]:
     """D2's search priced by D1's machinery on a cost model rebuilt from D1's
     own search telemetry, plus the objective's added seconds.
 
@@ -283,8 +425,13 @@ def priced_from_records(rate: float, disk_gb: int,
     outcome = _read(f"{D1_SEARCH_RUN}/closeout/outcome.json")
     elapsed = float(outcome["cost"]["elapsed_minutes"])
     basis = telemetry_basis(d1_search_telemetry(), elapsed)
-    ov = objective_overhead(evidence, basis)
+    #: Which objective's added work: the redesigned D2's (default) or a
+    #: student-confidence objective's (D3, `objective_overhead`).
+    ov = (overhead or teacher_confidence_overhead)(evidence, basis)
     cands = max(basis["depth"]["candidates_per_expansion"])
+    per_exp = ov.get("depth_seconds_per_expansion") or {}
+    cell_factor = ov.get("operator_cell_factor") or {}
+    one_time = ov.get("one_time_minutes") or {}
     W._ensure_the_frozen_operators_are_registered()
     frozen = d1.cost_model()
     minutes = {k: dict(v) for k, v in frozen.minutes.items()}
@@ -298,30 +445,50 @@ def priced_from_records(rate: float, disk_gb: int,
             dep = (measured[DEPTH_IMPL] if depth_cell == "records_max" else
                    _read(D1_DESIGN)["budget"]["topk_production_basis"][
                        "depth_cell_after"])
-            extra = cands * ov["depth_seconds_per_candidate"]["bound"] / 60
+            extra = (cands * ov["depth_seconds_per_candidate"]["bound"]
+                     + float(per_exp.get("bound", 0.0))) / 60
             cell.update({k: round(dep[k] + extra + add("bound"), 4)
                          for k in ("root_max", "deeper_max")})
             cell.update({"root_mean": cell["root_max"],
                          "deeper_mean": cell["deeper_max"]})
         else:
-            cell.update({k: round(v + add("bound"), 4) for k, v in cell.items()})
+            f = float(cell_factor.get("bound", 1.0))
+            cell.update({k: round(v * f + add("bound"), 4)
+                         for k, v in cell.items()})
     model = dataclasses.replace(frozen, minutes=minutes, source=(
         f"{frozen.source} -- DEPTH rebuilt from D1's search telemetry "
         f"({D1_TELEMETRY}), plus the D2 objective's added seconds "
         f"({ov['source']})"))
     with W._measured_cost_model(model):
         priced = d1.search_cost(price_per_hour=rate, container_disk_gb=disk_gb)
-    exp_added = (basis["depth"]["expansions"] * cands
-                 * ov["depth_seconds_per_candidate"]["expected"]
-                 + basis["state_evaluation"]["evaluations"]
-                 * ov["state_eval_seconds_per_evaluation"]["expected"]) / 60
+    priced = {k: priced[k] for k in (
+        "expansions_max", "structural_minutes_max",
+        "session_overhead_minutes", "hard_ceiling_minutes", "hard_ceiling_usd")}
+    #: A ONE-TIME term (the root stores) joins the hard ceiling once, outside
+    #: the per-expansion cells, and its dollars are re-derived with it.
+    if one_time:
+        priced["one_time_minutes"] = float(one_time["bound"])
+        priced["hard_ceiling_minutes"] = round(
+            priced["hard_ceiling_minutes"] + float(one_time["bound"]), 2)
+        priced["hard_ceiling_usd"] = _usd(priced["hard_ceiling_minutes"],
+                                          rate, disk_gb)["all_in_usd"]
+    non_depth_minutes = sum(
+        n * v for impl, by in basis["counts"].items() if impl != DEPTH_IMPL
+        for w, n in by.items()
+        for v in [basis["cells_minutes"][impl][f"{w}_mean"]])
+    exp_added = ((basis["depth"]["expansions"] * cands
+                  * ov["depth_seconds_per_candidate"]["expected"]
+                  + basis["depth"]["expansions"]
+                  * float(per_exp.get("expected", 0.0))
+                  + basis["state_evaluation"]["evaluations"]
+                  * ov["state_eval_seconds_per_evaluation"]["expected"]) / 60
+                 + non_depth_minutes
+                 * (float(cell_factor.get("expected", 1.0)) - 1.0)
+                 + float(one_time.get("expected", 0.0)))
     return {"basis": basis, "objective_overhead": ov, "depth_cell": depth_cell,
             "depth_cell_minutes": {k: minutes[DEPTH_IMPL][k]
                                    for k in ("root_max", "deeper_max")},
-            "priced": {k: priced[k] for k in (
-                "expansions_max", "structural_minutes_max",
-                "session_overhead_minutes", "hard_ceiling_minutes",
-                "hard_ceiling_usd")},
+            "priced": priced,
             "expected_minutes": round(elapsed + exp_added, 2),
             "expected_added_minutes": round(exp_added, 2)}
 #: The rescoring diagnostic's estimate per probe, NOT a bound.
@@ -422,6 +589,14 @@ def build(k_candidates: int = 4) -> dict[str, Any]:
     in_force = ("cache_fix_validated" if evidence["cache_fix_validated"]
                 else "records_max")
     rec = cached if in_force == "cache_fix_validated" else records
+    #: D3's search, for the programme view only: the same machinery with the
+    #: STUDENT-confidence overhead stage L measured (on the superseded D2,
+    #: whose per-position work D3 shares).
+    d3_rec = priced_from_records(rate, disk_search, evidence,
+                                 depth_cell=("cached_validated"
+                                             if in_force == "cache_fix_validated"
+                                             else "records_max"),
+                                 overhead=objective_overhead)
     search_exp_min = rec["expected_minutes"]
     search_hard_min = rec["priced"]["hard_ceiling_minutes"]
     d2_search = {
@@ -472,13 +647,24 @@ def build(k_candidates: int = 4) -> dict[str, Any]:
                     "records model takes DEPTH from that search, and applies "
                     "the objective's overhead to the two paths it touches "
                     "instead of x1.10 on every structural minute")},
-        "assumptions_not_measured": (
-            [] if rec["objective_overhead"]["source"].startswith("measured")
-            else ["the objective's added seconds per DEPTH candidate and per "
-                  "state evaluation: +5% of D1's mean (expected) and +10% "
-                  "(planning bound) until stage L measures them"]) + [
+        "assumptions_not_measured": [
+            ("EVERY added term of the redesigned D2 (contract revision 6): "
+             "c_T x KL in DEPTH and state evaluation at +5% (expected) / +10% "
+             "(bound) of D1's paths; the round-0 parent-KL diagnostic at "
+             f"{PARENT_KL_DIAGNOSTIC_FRACTION} of D1's per-candidate reduction; "
+             "the weighted statistics at +5% / +10% of the FFN/WIDTH/ATTENTION "
+             "cells; the root stores at "
+             f"{ROOT_STORE_CANDIDATE_EQUIVALENTS} DEPTH-candidate evaluations "
+             "per profile. Stage L's objective timing measured the SUPERSEDED "
+             "objective and is not used here; the D2 GPU validation measures "
+             "these before the search is priced from them"),
             "D2's trajectory has D1's size (92 expansions, 16 DEPTH): the "
-            "beam schedule fixes the expansion count, not the operator mix"],
+            "beam schedule fixes the expansion count, not the operator mix",
+            ("the reference cache fix (validated by stage L for D1's parent "
+             "reference) also holds the redesigned DEPTH, whose parent "
+             "reference is now the round-0 diagnostic and whose root "
+             "reference is a resident store; the driver's cache guard still "
+             "stops the search on the first recomputing expansion")],
         "hard_is": ("a PLANNING BOUND from D1's measured maxima, not a proven "
                     "bound on runtime. What bounds MONEY is the enforceable "
                     "stop below; the bound decides only whether the search is "
@@ -491,9 +677,18 @@ def build(k_candidates: int = 4) -> dict[str, Any]:
                           "driver's soft stop fails the search closed before "
                           "it, so spend stops at the cap whatever the runtime"),
             "proposal": "the planning bound, rounded up"},
-        "_basis": ("expected = D1's measured 551.99 min + the objective's "
-                   "expected added minutes over D1's trajectory; bound = "
-                   "D1's search_cost on the records-rebuilt cost model")}
+        "_basis": ("expected = D1's measured 551.99 min + the redesigned "
+                   "objective's expected added minutes over D1's trajectory; "
+                   "bound = D1's search_cost on the records-rebuilt cost "
+                   "model plus the one-time root stores"),
+        "d3_search_for_programme_view": {
+            "expected": _usd(d3_rec["expected_minutes"], rate, disk_search),
+            "hard": _usd(d3_rec["priced"]["hard_ceiling_minutes"], rate,
+                         disk_search),
+            "objective_overhead": d3_rec["objective_overhead"],
+            "_basis": ("D3 does the student Top-K entropy work stage L "
+                       "measured on the superseded D2; priced with that "
+                       "measurement and its one-measurement margin")}}
 
     #: D2 behaviour on the shared protocol: K candidates, no B/q2 probes.
     probe_bound = float(screening["minutes_per_probe_bounding"])
@@ -644,6 +839,20 @@ def programme_scenarios(limits: dict[str, float],
     eng_exp = sum(
         0.0 if eng_state[n]["closed"] else steps[n]["expected"]["all_in_usd"]
         for n in eng)
+    #: THE REDESIGNED D2's GPU VALIDATION, a PROPOSAL until granted: its
+    #: proposed grant is held as outstanding engineering, so no scenario
+    #: spends money the validation needs. Read from its plan record.
+    plan_path = REPO_ROOT / D2_VALIDATION_PLAN
+    if plan_path.is_file():
+        plan = json.loads(plan_path.read_text())
+        grant = float(plan["totals"]["proposed_grant_usd"])
+        eng["d2_gpu_validation"] = grant
+        outstanding["d2_gpu_validation"] = grant
+        eng_state["d2_gpu_validation"] = {
+            "grant_usd": grant, "booked_usd": 0.0, "closed": False,
+            "outstanding_usd": grant, "status": plan["status"],
+            "owner": D2_VALIDATION_PLAN}
+        eng_exp += float(plan["totals"]["expected"]["all_in_usd"])
     engineering = {"expected": round(eng_exp, 2),
                    "hard_with_reserves": round(sum(outstanding.values()), 2),
                    "campaigns": eng_state,
@@ -670,6 +879,23 @@ def programme_scenarios(limits: dict[str, float],
                      steps[n].get("rescoring_provisional_not_a_bound",
                                   {}).get("all_in_usd", 0.0) for n in hard), 2)}
 
+        #: D3 is priced with ITS OWN search (the student-confidence overhead
+        #: stage L measured), at the same DEPTH cell as D2's price under
+        #: consideration, and D2's behavioural blocks (the same protocol).
+        d3_search_hard = (search["d3_search_for_programme_view"]["hard"]
+                          ["all_in_usd"] + (search_hard_usd
+                                            - search["hard"]["all_in_usd"]))
+        d3_hard = dict(hard, d2_search=d3_search_hard)
+        d3_block = {"expected": round(
+                        search["d3_search_for_programme_view"]["expected"][
+                            "all_in_usd"]
+                        + sum(steps[n]["expected"]["all_in_usd"]
+                              for n in ("d2_screening", "d2_confirmation")), 2),
+                    "hard_with_reserves": round(sum(
+                        v + TEARDOWN_RESERVE_USD for v in d3_hard.values()), 2),
+                    "rescoring_estimate": block["rescoring_estimate"],
+                    "search_hard_usd": round(d3_search_hard, 2)}
+
         def scenario(blocks):
             remaining = limits["project_remaining_usd"]
             exp_ = round(engineering["expected"]
@@ -681,7 +907,8 @@ def programme_scenarios(limits: dict[str, float],
             #: (1) hard ceilings + teardown reserves -- bounds the launchers
             #: enforce; (2) the rescoring diagnostic -- an UNMEASURED estimate;
             #: (3) their sum -- a conservative planning view, not a ceiling.
-            return {"blocks": ["engineering (R0 + reference calibration)"]
+            return {"blocks": ["engineering (R0 + reference calibration + the "
+                       "proposed D2 GPU validation)"]
                     + [n for n, _ in blocks],
                     "expected_usd": exp_,
                     "hard_with_reserves_usd": hard_,
@@ -695,22 +922,22 @@ def programme_scenarios(limits: dict[str, float],
                     "fits_project_conservative": hard_ + resc <= remaining,
                     "fits_project_at_expected": exp_ <= remaining}
 
-        needed = (block["hard_with_reserves"]
+        needed = (d3_block["hard_with_reserves"]
                   + fresh_block["hard_with_reserves"])
         left = (limits["project_remaining_usd"]
                 - engineering["hard_with_reserves"]
                 - block["hard_with_reserves"])
-        estimates = 2 * block["rescoring_estimate"]
+        estimates = block["rescoring_estimate"] + d3_block["rescoring_estimate"]
         return {
             "search_hard_usd": search_hard_usd,
             "search_fits_per_session_cap": (search_hard_usd
                                             <= limits["per_session_cap_usd"]),
-            "d2_block": block, "d3_block": dict(block),
+            "d2_block": block, "d3_block": d3_block,
             "scenarios": {
                 "A_d2": scenario([("d2", block)]),
-                "B_d2_d3": scenario([("d2", block), ("d3", block)]),
+                "B_d2_d3": scenario([("d2", block), ("d3", d3_block)]),
                 "C_d2_d3_fresh_confirmation": scenario(
-                    [("d2", block), ("d3", block),
+                    [("d2", block), ("d3", d3_block),
                      ("fresh_confirmation", fresh_block)])},
             "reservation_rule": {
                 "left_after_d2_at_hard_usd": round(left, 2),
@@ -733,6 +960,9 @@ def programme_scenarios(limits: dict[str, float],
         "limits_owner": ("scripts/maintenance/consolidation/derive_budget.py "
                          "(the one budget authority)"),
         "engineering_grants": eng,
+        "_engineering_grants_are": ("R0 and the reference calibration "
+                                    "(granted, closed) and the D2 GPU "
+                                    "validation (PROPOSED, held)"),
         "engineering_fits_allowance": (engineering["hard_with_reserves"]
                                        <= limits["engineering_remaining_usd"]),
         "engineering": engineering,
@@ -754,8 +984,12 @@ def programme_scenarios(limits: dict[str, float],
                 "how": ("the reference calibration's stage L DEPTH pair, "
                         "already in its plan, at no extra session")},
             "measure_the_objective_overhead": (
-                "stage L's two timing pairs replace the provisional "
-                "+5%/+10% on the DEPTH loop and the state evaluation"),
+                "the D2 GPU validation (a proposal) replaces every "
+                "provisional term of the redesigned D2's price -- the "
+                "+5%/+10% on DEPTH, state evaluation and the statistics "
+                "operators, the round-0 parent-KL diagnostic and the root "
+                "stores -- with measurements; stage L's timing priced the "
+                "superseded objective and now prices D3 only"),
             "d3_at_k2": {"saves_hard_usd": round(k4 - k2, 2),
                          "cost": "narrower structural coverage for D3"},
             "scored_v1_after_r0": ("about 8% of DEPTH time if R0 passes; "

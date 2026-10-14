@@ -31,8 +31,8 @@ from aadistill.initialization.scoring.rows import (
     scatter_rows, scored_prediction_logits, scored_rows, split_rows,
 )
 from aadistill.initialization.scoring.objective import (
-    COMPONENTS as OBJECTIVE_COMPONENTS, add_joint_histograms,
-    confidence_histogram, item_component_means, position_terms,
+    add_joint_histograms, confidence_histogram, item_component_means,
+    position_terms,
 )
 from aadistill.initialization.scoring.support import (
     SUPPORT_REFERENCE_TOPK_TAIL_V1, ReferenceDistributionSketch,
@@ -169,7 +169,36 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         #: Per candidate subset: every component's domain-balanced value, so a
         #: low objective can always be read against the raw KL it came from.
         objective_candidates: dict[str, dict[str, Any]] = {}
-        if support.is_full_vocab:
+        #: THE KL'S REFERENCE. Historically the intact PARENT: this operator
+        #: measured how far bypassing S moves the model it is handed. An
+        #: objective declaring the ROOT reference measures instead how far the
+        #: candidate is from the frozen original model -- read from the root
+        #: reference store built once for this mixture, never re-forwarded --
+        #: and weights by that root's own confidence. The parent still
+        #: produces every candidate; it is just not what they are compared to.
+        root_store = None
+        parent_sketches = None
+        if objective is not None and objective.requires_root_reference:
+            root_store = ctx.root_reference
+            if root_store is None:
+                raise OperatorError(
+                    f"{self.impl_id}: {objective.qualified_id} measures KL "
+                    "against the ROOT reference and no root reference store "
+                    "was handed to this invocation")
+            root_store.require_items(items)
+            root_store.require_identity(
+                support=support.as_dict(),
+                profile_hash=(None if ctx.profile is None
+                              else ctx.profile.profile_hash))
+            sketches = _RootSketches(root_store)
+            reference = None
+            #: The DIAGNOSTIC parent reference: round 0's candidates are also
+            #: reduced against the intact parent, so the record can set the
+            #: historical parent-KL ranking beside the root one. One parent
+            #: forward over the mixture, cached; not a decision input.
+            parent_sketches = _ReferenceSketches(model, items, compute,
+                                                 top_k=support.top_k)
+        elif support.is_full_vocab:
             reference = _ReferenceLogits(model, items, compute)
             sketches = None
         else:
@@ -208,6 +237,9 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         if select_rows:
             #: The reference state now holds only the scored rows; size it so.
             sketches.restrict_to_scored(active)
+            if parent_sketches is not None:
+                parent_sketches.restrict_to_scored(active)
+        components_of = (() if objective is None else objective.components())
 
         # Operational timings, kept OUT of every returned metric and hash.
         #
@@ -243,41 +275,69 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                            "scored_rows": 0, "forward_rows": 0})
         if objective is not None:
             timing["objective_seconds"] = 0.0
+        if parent_sketches is not None:
+            timing["parent_kl_diagnostic"] = "round 0 candidates only"
 
         def objective_values(kl, log_z, cand_logits, tail_log, mask, weights,
                              group, components, histogram, joint,
-                             rows=None) -> torch.Tensor:
+                             rows=None, ref=None) -> torch.Tensor:
             """Per-item objective means from one group's per-position KL.
 
             `cand_logits` are the candidate's -- the student whose confidence
-            this reads. Every component is averaged over the same scored
-            positions with the same fixed denominator, and kept per sub-type.
-            On the row path the inputs are the selected ROWS and only the
-            per-row scalars are scattered back; no ``[B, T, V]`` block is built.
+            the student forms read. The reference-confidence form reads `ref`
+            instead: the root's ``(entropy, confidence)`` aligned to `kl`, and
+            nothing of the candidate but its KL. Every component is averaged
+            over the same scored positions with the same fixed denominator,
+            and kept per sub-type. On the row path the inputs are the selected
+            ROWS and only the per-row scalars are scattered back; no
+            ``[B, T, V]`` block is built.
             """
             t0 = time.perf_counter()
-            terms = position_terms(objective, kl, cand_logits, log_z,
-                                   tail_log if sketches.has_tail else None)
+            terms = position_terms(
+                objective, kl, cand_logits, log_z,
+                tail_log if sketches.has_tail else None,
+                reference_entropy=None if ref is None else ref[0],
+                reference_confidence=None if ref is None else ref[1])
             if rows is not None:
                 terms = {k: scatter_rows(v.float(), rows)
                          for k, v in terms.items()}
-            means, _ = item_component_means(terms, mask, weights)
+            means, _ = item_component_means(terms, mask, weights,
+                                            names=components_of)
             scored = mask.bool() if weights is None else (
                 mask.bool() & (weights.to(mask.device) > 0))
-            hist = confidence_histogram(terms["student_confidence"], scored)
+            hist = confidence_histogram(terms[objective.confidence_key()],
+                                        scored)
             for i, h in enumerate(hist):
                 histogram[i] += h
             joint[0] = add_joint_histograms(joint[0], terms, scored)
             host = {k: v.tolist() for k, v in means.items()}
             for row, item in enumerate(group.items):
                 bucket = components.setdefault(item["subtype"], {})
-                for name in OBJECTIVE_COMPONENTS:
+                for name in components_of:
                     bucket.setdefault(name, []).append(host[name][row])
             timing["objective_seconds"] += time.perf_counter() - t0
             return means["objective"]
 
+        def root_ref(group, rows=None, item=None):
+            """The root's (entropy, confidence) aligned to one path's KL."""
+            if root_store is None:
+                return None
+            if item is not None:
+                return (root_store.per_position(item, "entropy")[None],
+                        root_store.per_position(item, "confidence")[None])
+            if rows is not None:
+                return (root_store.per_position_rows(group, rows, "entropy"),
+                        root_store.per_position_rows(group, rows, "confidence"))
+            return (root_store.per_position_block(group, "entropy"),
+                    root_store.per_position_block(group, "confidence"))
+
         def score(skip: frozenset[int]) -> float:
             per_subtype: dict[str, list[float]] = {}
+            #: Round 0 only, and only under the root reference: the same
+            #: candidate logits reduced against the intact parent as well.
+            parent_kl: dict[str, list[float]] | None = (
+                {} if parent_sketches is not None and progress["rounds"] == 0
+                else None)
             components: dict[str, dict[str, list[float]]] = {}
             histogram = [0] * 10
             joint: list[Any] = [None]
@@ -325,7 +385,17 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                             idx, lp, tail, abls, has_tail=sketches.has_tail)
                         values = objective_values(
                             kl, log_z, abls, tail, mask, batch_weights, group,
-                            components, histogram, joint, rows=rows)
+                            components, histogram, joint, rows=rows,
+                            ref=root_ref(group, rows=rows))
+                    if parent_kl is not None:
+                        pi, pl, pt = parent_sketches.sketch_rows(
+                            group, rows, adapter)
+                        pkl = sketch_forward_kl(pi, pl, pt, abls,
+                                                has_tail=parent_sketches.has_tail)
+                        for item, v in zip(group.items, masked_item_means(
+                                scatter_rows(pkl, rows), mask,
+                                weights=batch_weights).tolist()):
+                            parent_kl.setdefault(item["subtype"], []).append(v)
                     for item, value in zip(group.items, values.tolist()):
                         per_subtype.setdefault(item["subtype"], []).append(value)
                         timing["distortion_calls"] += 1
@@ -350,6 +420,12 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                 if sketches is not None:
                     refs = (sketches.sketch_block(group) if batch_size > 1
                             else sketches.sketch_item(group.items[0]))
+                    #: The parent's reference too, OUTSIDE the bypass, when the
+                    #: round-0 diagnostic is on.
+                    prefs = (None if parent_kl is None else
+                             (parent_sketches.sketch_block(group)
+                              if batch_size > 1 else
+                              parent_sketches.sketch_item(group.items[0])))
                 elif batch_size > 1:
                     refs = reference.reference_block(group)
                 else:
@@ -401,7 +477,17 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                             idx, lp, tail, abls, has_tail=sketches.has_tail)
                         values = objective_values(
                             kl, log_z, abls, tail, mask, batch_weights, group,
-                            components, histogram, joint)
+                            components, histogram, joint, ref=root_ref(group))
+                        if parent_kl is not None:
+                            pidx, plp, ptail = prefs
+                            for item, v in zip(group.items,
+                                               sketch_forward_kl_mean_batch(
+                                                   pidx, plp, ptail, abls, mask,
+                                                   has_tail=parent_sketches.has_tail,
+                                                   weights=batch_weights
+                                                   ).tolist()):
+                                parent_kl.setdefault(item["subtype"],
+                                                     []).append(v)
                     elif sketches is not None:
                         idx, lp, tail = refs
                         values = sketch_forward_kl_mean_batch(
@@ -438,7 +524,12 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                         torch.ones(1, int(kl.shape[0]), dtype=torch.bool,
                                    device=dev),
                         None if item_w is None else item_w.to(dev)[None],
-                        group, components, histogram, joint)
+                        group, components, histogram, joint,
+                        ref=root_ref(group, item=group.items[0]))
+                    if parent_kl is not None:
+                        parent_kl.setdefault(group.items[0]["subtype"],
+                                             []).append(sketch_forward_kl_mean(
+                            prefs, abls, weights=item_w))
                     per_subtype.setdefault(group.items[0]["subtype"], []).append(
                         float(value[0]))
                     timing["distortion_calls"] += 1
@@ -466,12 +557,17 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             primary, _ = domain_balanced_score(means, domains)
             if objective is not None:
                 record = {}
-                for name in OBJECTIVE_COMPONENTS:
+                for name in components_of:
                     by_subtype = {sub: sum(c[name]) / len(c[name])
                                   for sub, c in components.items()}
                     record[name], _ = domain_balanced_score(by_subtype, domains)
                 record["confidence_histogram"] = histogram
                 record["joint_histograms"] = joint[0]
+                if parent_kl is not None:
+                    #: Same aggregation as the KL the decision reads.
+                    record["parent_kl"], _ = domain_balanced_score(
+                        {sub: sum(v) / len(v) for sub, v in parent_kl.items()},
+                        domains)
                 objective_candidates[_subset_key(skip)] = record
             return primary
 
@@ -533,7 +629,8 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             local_metrics=OperatorLocalMetrics(
                 impl_id=self.impl_id,
                 objective=self.objective,
-                reference="parent_state",
+                reference=("root_reference" if root_store is not None
+                           else "parent_state"),
                 values=values,
                 detail={"removal_order": result["removal_order"],
                         **({} if objective is None else
@@ -565,6 +662,9 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                        **({} if objective is None else
                           {"objective_candidates": objective_candidates}),
                        "reference_cache": (reference or sketches).decision(),
+                       **({} if parent_sketches is None else
+                          {"parent_reference_cache": parent_sketches.decision(),
+                           "parent_kl_diagnostic": "round 0 candidates only"}),
                        # Operational only. `artifacts` is already excluded from
                        # the trace and from state identity — see the note above
                        # — which is exactly why the timings belong here and in
@@ -664,6 +764,37 @@ def _forward_logits(model, item, device: str, skip=frozenset()):
         return model(ids).logits[0, :-1]
     with bypassed_blocks(model, skip):
         return model(ids).logits[0, :-1]
+
+
+class _RootSketches:
+    """The ROOT reference store behind the parent cache's interface.
+
+    Every view -- per item, per padded block, per selected row -- reads the
+    values the store computed once from the root; nothing is forwarded here.
+    """
+
+    def __init__(self, store) -> None:
+        self.store = store
+        self.has_tail = store.has_tail
+
+    def restrict_to_scored(self, active) -> None:
+        """Nothing to restrict: the store holds every row and the selection
+        happens per batch, from the same rows the candidate scores."""
+
+    def sketch_block(self, batch):
+        return self.store.sketch_block(batch)
+
+    def sketch_item(self, item):
+        return self.store.sketch_item(item)
+
+    def sketch_rows(self, batch, rows, adapter):
+        return self.store.sketch_rows(batch, rows)
+
+    def decision(self) -> dict[str, Any]:
+        return self.store.decision()
+
+    def counters(self) -> dict[str, int]:
+        return self.store.counters()
 
 
 class _ReferenceSketches:

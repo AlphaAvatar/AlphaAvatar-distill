@@ -330,7 +330,8 @@ def spec(args) -> SessionSpec:
         session_id="autoinit-d2-search",
         schema="aadistill.autoinit.d2_search_session/v1",
         description=("D2: ONE formal beam search over D1's frozen space "
-                     "minimizing the student-uncertainty-weighted KL. Commits "
+                     "minimizing the frozen-teacher-confidence-weighted root "
+                     "KL (preregistration v2). Commits "
                      "the preregistered Top-K and stops."),
         authorization_path=auth_path_for(getattr(args, "run_id", None)),
         authorization_loader=D2Authorization.load,

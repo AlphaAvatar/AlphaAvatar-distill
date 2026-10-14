@@ -1927,6 +1927,89 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "Top-K sketch cache also records `memory_after_probe` beside "
             "`memory_before` (diagnostic only).",
      }),
+    ("ceaa2c6bf894a297a26c434c481c612a15cd6bdc",
+     "D2 scientific redesign: frozen-teacher-confidence-weighted root KL",
+     {
+        "src/aadistill/initialization/scoring/objective.py":
+            "new generic form `reference_confidence_weighted_kl` (g = c x KL, "
+            "c = 1 - H/log|V| from the REFERENCE's full-vocabulary entropy, "
+            "`full_vocabulary_entropy` float32 and chunked), with "
+            "`kl_reference` and `weights_activation_statistics` identity "
+            "fields that the student forms refuse; `entropy_top_k` becomes "
+            "optional. The student forms' as_dict, hashes and arithmetic are "
+            "unchanged (D2-superseded 063bafd4 and D3 7b254538 tested).",
+        "src/aadistill/initialization/scoring/reference_store.py":
+            "NEW: the ROOT reference store -- the root's Top-K + tail sketch, "
+            "full-vocabulary entropy and confidence per calibration item, "
+            "built once from the root over the canonical batches.",
+        "src/aadistill/initialization/scoring/batches.py":
+            "ActivePositions takes optional per-item token multipliers and "
+            "serves continuous token weights (`token_weights_for`, "
+            "`token_weights_for_item`); the mask accessors still refuse "
+            "continuous weights. Without multipliers nothing changes.",
+        "src/aadistill/initialization/calibration/batching.py":
+            "`active_weights`: the weighted sibling of `active_rows`.",
+        "src/aadistill/initialization/statistics/collect.py":
+            "`token_weights` path: every accumulator weighted, zero weights "
+            "dropped like padding, `residual_weight` in the state only when "
+            "weighted; `statistics_denominator`; `residual_covariance` divides "
+            "by it. Unweighted passes are byte-identical (no new op on their "
+            "path).",
+        "src/aadistill/initialization/transforms/project.py":
+            "`uncentered_moment` and `ffn_neuron_importance` divide by "
+            "`statistics_denominator` (the integer count when unweighted).",
+        "src/aadistill/initialization/operators/attention/gqa/_statistics.py":
+            "`token_weights` path for the per-head second moment and "
+            "`attn_token_weight`; `head_write_energy` divides by it when "
+            "present. Unweighted passes unchanged.",
+        "src/aadistill/initialization/operators/_common.py":
+            "`statistics_positions` (the policy's positions, times the root "
+            "store's confidence when the objective weights statistics); "
+            "`collect_activation_stats` routes continuous weights to the "
+            "collectors' `token_weights`.",
+        "src/aadistill/initialization/operators/ffn/dense/activation_importance.py":
+            "`consumes_reference_weighted_statistics = True` (NOT in "
+            "signature()); positions from `statistics_positions`. Under every "
+            "objective that does not weight statistics, unchanged.",
+        "src/aadistill/initialization/operators/width/residual/global_pca.py":
+            "as FFN; the local-metric detail adds `stats_token_weight` only "
+            "when weighted.",
+        "src/aadistill/initialization/operators/attention/gqa/activation_importance.py":
+            "as FFN; the weighted loop on both the per-item and packed paths; "
+            "the trace adds `calibration_token_weight` only when weighted.",
+        "src/aadistill/initialization/operators/base.py":
+            "OperatorContext.root_reference (default None); the class flag "
+            "`consumes_reference_weighted_statistics`; `execute` uses "
+            "`objective_consumed_by` and refuses a root-reading objective "
+            "handed no store.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "under an objective whose KL reference is the ROOT: the reference "
+            "sketch and the weights come from the store on all three row "
+            "paths, the local reference becomes `root_reference`, and round 0 "
+            "also reduces every candidate against the intact parent "
+            "(diagnostic `parent_kl`, one parent reference pass). Every other "
+            "path unchanged.",
+        "src/aadistill/initialization/planning/operator_config.py":
+            "`objective_consumed_by`, `statistics_weighted_by_root`, "
+            "`root_reference_needed`: one rule for which implementation reads "
+            "the objective and the root. Configs of every existing objective "
+            "unchanged.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "under the reference-confidence form the state evaluator computes "
+            "the teacher's full-vocabulary entropy once per item and the "
+            "accumulator records the form's own components; the student forms "
+            "are unchanged.",
+        "src/aadistill/initialization/planning/search.py":
+            "one root store per profile, built from the root on first need, "
+            "handed to the consuming operators; the statistics cache key adds "
+            "the weighting store's identity only for weighted passes; "
+            "telemetry records store builds and a DEPTH parent-reference "
+            "cache. A root-reading objective on full_vocab_v1 is refused.",
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "builds every store a replay needs from the root before step 0; "
+            "a replay without the root needs them supplied; the weighted "
+            "statistics key term as in the search.",
+     }),
 )
 
 
@@ -2013,6 +2096,9 @@ CURRENT_CUDA_SURFACE = (
     #: The student Top-K entropy DEPTH runs per candidate under a declared
     #: scoring objective. CPU-verified; owes the GPU validation with D2.
     "src/aadistill/initialization/scoring/objective.py",
+    #: The root forward over the mixture that the redesigned D2's DEPTH and
+    #: weighted statistics read. CPU-verified; owes the D2 GPU validation.
+    "src/aadistill/initialization/scoring/reference_store.py",
 )
 
 #: Backwards-compatible alias for the constraint that a declared core change may

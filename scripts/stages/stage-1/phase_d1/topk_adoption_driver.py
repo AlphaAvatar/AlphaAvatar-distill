@@ -509,7 +509,7 @@ def _depth_operator_premises(repo: Path) -> dict[str, Any]:
 def production_operator_context(*, adapter, model, target_spec, profile, items,
                                 seed: int, device: str, workdir: Path, policy,
                                 observer=None, prediction_rows: str = "all_v1",
-                                objective=None):
+                                objective=None, root_reference=None):
     """An `OperatorContext` built the way `BeamSearch._expand_one` builds one.
 
     Separate from the stage so that the construction -- not a paraphrase of it --
@@ -551,7 +551,10 @@ def production_operator_context(*, adapter, model, target_spec, profile, items,
             #: pre-vocabulary row selection R0 measures. Default = D1's path.
             prediction_rows=prediction_rows),
         position_policy=policy, score_observer=observer,
-        scoring_objective=objective)
+        scoring_objective=objective,
+        #: The ROOT reference store, for an objective that reads the root
+        #: (`BeamSearch.root_reference_for`); None everywhere else.
+        root_reference=root_reference)
 
 
 def stage_P_production_operator_invocation(*, repo: Path, teacher_path: str,
@@ -1268,7 +1271,10 @@ def _reference_calibration_premises(repo: Path) -> dict[str, Any]:
             "policy": policy.qualified_id,
             "lambda_rule_hash": O.lambda_rule()["rule_hash"],
             "threshold_rule_hash": O.diagnostic_threshold_rule()["rule_hash"],
-            "d2_objective_hash": O.D2_OBJECTIVE.objective_hash,
+            #: The objective stage L MEASURED: the 2026-10-13 D2, superseded on
+            #: 2026-10-14 and never executed as a search. Stage L is closed;
+            #: its evidence stays bound to what it ran.
+            "d2_objective_hash": O.D2_STUDENT_UNCERTAINTY_SUPERSEDED.objective_hash,
             "contract_hash": contract["contract_hash"],
             "tolerances": {"d2_rows": D2_ROWS_TOLERANCES,
                            "cache_equivalence": CACHE_EQUIVALENCE},
@@ -1372,7 +1378,7 @@ def _state_eval_objective_timing(*, repo: Path, teacher, student, numerics,
     runs, values = _state_evaluations(
         repo=repo, teacher=teacher, student=student, numerics=numerics,
         arms=(("kl_only", None, prediction_rows),
-              ("d2_objective", O.D2_OBJECTIVE, prediction_rows),
+              ("d2_objective", O.D2_STUDENT_UNCERTAINTY_SUPERSEDED, prediction_rows),
               ("kl_only_again", None, prediction_rows)))
     keep["d2_values"] = values["d2_objective"]
     ids = {r["arm"]: r["measurement_protocol_id"] for r in runs}
@@ -1399,7 +1405,7 @@ def _d2_rows_state_eval(*, repo: Path, teacher, student, numerics,
         raise AdoptionError("the all_v1 D2 evaluation did not run")
     runs, values = _state_evaluations(
         repo=repo, teacher=teacher, student=student, numerics=numerics,
-        arms=(("d2_objective_scored_v1", O.D2_OBJECTIVE, "scored_v1"),))
+        arms=(("d2_objective_scored_v1", O.D2_STUDENT_UNCERTAINTY_SUPERSEDED, "scored_v1"),))
     return {"runs": runs, **objective_agreement(
         keep["d2_values"], values["d2_objective_scored_v1"],
         D2_ROWS_TOLERANCES["state_eval_absolute"])}
@@ -1654,7 +1660,7 @@ def stage_L_reference_calibration(*, repo: Path, teacher_path: str,
 
     def depth_pair() -> dict[str, Any]:
         a = arm("kl_only", None, prediction_rows)
-        b = arm("d2_objective", O.D2_OBJECTIVE, prediction_rows)
+        b = arm("d2_objective", O.D2_STUDENT_UNCERTAINTY_SUPERSEDED, prediction_rows)
         n = max(1, a["candidate_subsets"])
         return {"profile": D1_DEPTH_PROFILES[0], "arms": {"kl_only": a,
                                                          "d2_objective": b},
@@ -1691,7 +1697,7 @@ def stage_L_reference_calibration(*, repo: Path, teacher_path: str,
     def d2_rows_depth() -> dict[str, Any]:
         if "d2_objective" not in tables:
             raise AdoptionError("the all_v1 D2 arm did not run")
-        r = arm("d2_objective_scored_v1", O.D2_OBJECTIVE, "scored_v1")
+        r = arm("d2_objective_scored_v1", O.D2_STUDENT_UNCERTAINTY_SUPERSEDED, "scored_v1")
         agree = table_agreement(
             tables["d2_objective"], tables["d2_objective_scored_v1"],
             relative_tolerance=D2_ROWS_TOLERANCES["depth_candidate_relative"])

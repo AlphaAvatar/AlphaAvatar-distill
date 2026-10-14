@@ -42,16 +42,16 @@ from aadistill.infrastructure.manifest import sha256_json
 class StatsSpec:
     """What is collected, independent of what it is collected from.
 
-    **A D2 capability gap is recorded here rather than in a snapshot.** The
-    activation collectors implement only the BINARY form of a scoring-position
-    policy: `token_counts` is a count of ACTIVE positions, so a weight is
-    effectively 0 or 1. D2's planned continuous `c_ref(t)` needs a WEIGHTED
-    denominator — the sum of the weights, not the number of non-zero ones —
-    which is a change to the quantities below and therefore to `spec_hash`.
-
-    Noted at the thing it constrains because the next person to add a quantity
-    here is the one who needs to know. It is not a plan and authorizes nothing;
-    D2 is NOT STARTED.
+    **Continuous token weights do not change this spec.** A weighted pass
+    (`ActivationStatsCollector(..., token_weights=...)`) accumulates the same
+    quantities with each position multiplied by its weight, and adds
+    `residual_weight` -- the weighted denominator -- to the state. Which
+    weights were applied is part of the statistics cache key's
+    `numerical_config` (the search adds the weighting store's identity), and
+    the objective that asked for them is in every consuming operator's hashed
+    config, so an unweighted and a weighted state can never share a cache
+    entry or a state id. Keeping `spec_hash` fixed keeps every existing
+    SearchConfig hash where it is.
     """
 
     spec_id: str = "residual_moments_and_ffn_magnitude"

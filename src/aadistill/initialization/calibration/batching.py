@@ -274,6 +274,28 @@ def active_rows(mask: Any, shape: Any, device: Any = None):
     return m if device is None else m.to(device)
 
 
+def active_weights(weights: Any, shape: Any, device: Any = None):
+    """Continuous token weights reshaped to ``[B, T]`` float64, or ``None``.
+
+    The weighted sibling of :func:`active_rows`, with the same refusal of a
+    mis-shaped array, plus a refusal of a negative or non-finite weight: a
+    weight enters both a numerator and a denominator, and either would turn a
+    weighted mean into something else.
+    """
+    if weights is None:
+        return None
+    rows, width = int(shape[0]), int(shape[1])
+    w = weights if weights.dim() == 2 else weights.reshape(1, -1)
+    if tuple(w.shape) != (rows, width):
+        raise BatchingError(
+            f"token weights have shape {tuple(weights.shape)}, which is not "
+            f"the ({rows}, {width}) of the tokens being processed")
+    w = w.to(torch.float64)
+    if bool((w < 0).any()) or not bool(torch.isfinite(w).all()):
+        raise BatchingError("token weights must be finite and non-negative")
+    return w if device is None else w.to(device)
+
+
 def micro_batches(items: Sequence[Mapping[str, Any]], batch_size: int, *,
                   pad_id: int, device: Any = None) -> Iterator[ItemBatch]:
     """Consecutive groups of ``batch_size`` items, in the mixture's own order.

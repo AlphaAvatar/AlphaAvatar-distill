@@ -1,1 +1,1 @@
-"""Phase D2 — student-uncertainty-weighted KL search. Instance data, never core."""
+"""Phase D2 — frozen-teacher-confidence-weighted root-reference KL search. Instance data, never core."""
