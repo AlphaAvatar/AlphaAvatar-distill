@@ -1360,3 +1360,15 @@ candidates are the teacher's own compressed variants.
 - The diagnosis (a slack calibrated on a CPU stand-in), the five questions,
   the price in force and the HOLD recommendation are in
   [`../analyses/d2v3_stage_w_evidence_review.md`](../analyses/d2v3_stage_w_evidence_review.md).
+
+**Revision 2, executed on 2026-10-14:** run `d2v3r2val_20261014_185259`,
+$0.2493, executable commit `7ef64f3b`.
+
+- The corrected KL gate: both partition KLs are checked against float64 from
+  one error budget, the float64 order is checked, and float32 crossings are
+  checked against the combined bound.
+- Validation PASS with 0 anomalies; scored_v1 PASS.
+- Adopted; the campaign is CLOSED.
+- The search is re-priced at $24.32.
+- The review is in
+  [`../analyses/d2v3_stage_w_r2_evidence_review.md`](../analyses/d2v3_stage_w_r2_evidence_review.md).

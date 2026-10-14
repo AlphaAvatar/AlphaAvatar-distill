@@ -86,8 +86,10 @@ class TestTheIssuerRefuses:
     @pytest.mark.parametrize("verdict", ["INCOMPLETE", "FAIL", None])
     def test_scored_rows_need_d2s_own_equivalence(self, monkeypatch, verdict):
         from stages.d_series import d2_budget as BUD
-        monkeypatch.setattr(BUD, "d2_validation_evidence", lambda *a, **k: {
-            "scored_rows_equivalence": verdict})
+        #: The gate reads VERSION 3's evidence (stage W); patching Stage V's
+        #: reader would only pass while no stage W was adopted.
+        monkeypatch.setattr(BUD, "d2v3_validation_evidence",
+                            lambda *a, **k: {"scored_rows_equivalence": verdict})
         with pytest.raises(A.D2AuthorizationRefused, match="scored-rows"):
             A.build_payload(grant=self._approved(), session_commit="a" * 40,
                             granted_utc="t", run_id="r1",
@@ -100,9 +102,9 @@ class TestTheIssuerRefuses:
         D2 -- stage L's verdict alone unlocks nothing."""
         from stages.d_series import d2_budget as BUD
         assert BUD.calibration_evidence()["d2_scored_rows_equivalence"] == "PASS"
-        none = BUD.d2_validation_evidence(tmp_path)
+        none = BUD.d2v3_validation_evidence(tmp_path)
         assert none["scored_rows_equivalence"] is None
-        monkeypatch.setattr(BUD, "d2_validation_evidence",
+        monkeypatch.setattr(BUD, "d2v3_validation_evidence",
                             lambda *a, **k: none)
         with pytest.raises(A.D2AuthorizationRefused, match="superseded"):
             A.build_payload(grant=self._approved(), session_commit="a" * 40,

@@ -669,54 +669,37 @@
     },
     "objective": "D2 version 3 (objective.d2_teacher_topk_confidence_weighted_union_kl@v1, union support)",
     "objective_overhead": {
-     "source": "version 2's terms: measured once: logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/runs/d2val_20261014_103301/out/adoption_all_v1/adoption.json (Stage V, adopted); the bound adds a variation margin; PLUS version 3's union terms, PROVISIONAL (UNION_COST_MODEL on measured sizes) until the version-3 GPU validation",
+     "source": "measured once: logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/runs/d2v3r2val_20261014_185259/out/adoption_all_v1/adoption.json (stage W, adopted); the bound adds a variation margin",
      "depth_seconds_per_candidate": {
-      "expected": 1.2215,
-      "bound": 2.6863
+      "expected": 0.4495,
+      "bound": 0.6742
      },
      "state_eval_seconds_per_evaluation": {
-      "expected": 1.2287,
-      "bound": 2.86
+      "expected": 0.0,
+      "bound": 0.0
      },
      "depth_seconds_per_expansion": {
       "what": "the round-0 parent-KL diagnostic",
       "round0_candidates": 36,
-      "round0_source": "Stage V's V4 round",
-      "expected": 27.2,
-      "bound": 40.8
+      "round0_source": "stage W's W4 round",
+      "expected": 27.54,
+      "bound": 41.32
      },
      "operator_cell_factor": {
-      "what": "the weighted activation statistics: Stage V's full- over narrow-scope operator seconds",
-      "ratios": [
-       1.0349,
-       1.022,
-       1.0236
-      ],
-      "expected": 1.0268,
-      "bound": 1.0524
+      "what": "the weighted activation statistics: the larger of Stage V's factor and W2's FFN full/narrow ratio",
+      "expected": 1.0404,
+      "bound": 1.0606
      },
      "one_time_minutes": {
-      "what": "root reference store builds, one per calibration profile",
-      "profiles": 2,
-      "expected": 0.37,
-      "bound": 0.82
+      "what": "the union stores (both profiles) and the suite store",
+      "expected": 0.36,
+      "bound": 0.54
      },
      "bound_factor_on_one_measurement": 1.5,
      "union_terms": {
-      "added": {
-       "depth_seconds_per_candidate": {
-        "expected": 0.4465,
-        "bound": 1.5238
-       },
-       "state_eval_seconds_per_evaluation": {
-        "expected": 0.5317,
-        "bound": 1.8145
-       },
-       "one_time_minutes": {
-        "expected": 0.19,
-        "bound": 0.54
-       }
-      },
+      "status": "MEASURED (stage W, adopted)",
+      "rows_mode": "all_v1",
+      "rows_per_candidate": 62161.0,
       "geometry": {
        "vocab_size": 151936,
        "hidden_size": 2560,
@@ -734,44 +717,27 @@
        "state_suite_rows": 74022,
        "state_suite_scored_rows": 54014
       },
-      "model": {
-       "effective_bytes_per_second": 432000000000.0,
-       "full_row_passes": {
-        "expected": 3.0,
-        "bound": 9.0
-       },
-       "candidate_only_fraction_of_k": {
-        "expected": 0.25,
-        "bound": 1.0
-       },
-       "retrieval_bytes_per_entry_per_hidden_unit": 10,
-       "float32_flops_per_second": 40000000000000.0,
-       "suite_store_forwards": {
-        "expected": 1.0,
-        "bound": 2.0
-       }
-      },
-      "status": "PROVISIONAL -- not measured"
+      "evidence_session": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/runs/d2v3r2val_20261014_185259/out/adoption_all_v1/adoption.json"
      }
     },
     "expected": {
-     "minutes": 647.4,
-     "gpu_usd": 11.76,
-     "disk_usd": 0.6,
-     "all_in_usd": 12.36
+     "minutes": 592.6,
+     "gpu_usd": 10.77,
+     "disk_usd": 0.55,
+     "all_in_usd": 11.32
     },
     "hard": {
-     "minutes": 1607.8,
-     "gpu_usd": 29.21,
-     "disk_usd": 1.49,
-     "all_in_usd": 30.7
+     "minutes": 1273.6,
+     "gpu_usd": 23.14,
+     "disk_usd": 1.18,
+     "all_in_usd": 24.32
     },
-    "hard_fits_per_session_cap": false,
+    "hard_fits_per_session_cap": true,
     "hard_if_scored_v1_validated": {
-     "minutes": 1536.8,
-     "gpu_usd": 27.92,
-     "disk_usd": 1.42,
-     "all_in_usd": 29.34,
+     "minutes": 1240.9,
+     "gpu_usd": 22.54,
+     "disk_usd": 1.15,
+     "all_in_usd": 23.69,
      "_is": "a LEVER, not the price in force: the union terms over the scored rows only, valid once version 3's own scored_v1 equivalence passes on a GPU"
     },
     "memory": {
@@ -817,30 +783,30 @@
      "_is": "version 2's price at the cached DEPTH cell, for comparison only: version 2 was superseded before its search"
     },
     "depth_cell_minutes": {
-     "root_max": 35.3442,
-     "deeper_max": 35.0044
+     "root_max": 26.5861,
+     "deeper_max": 26.2463
     },
     "priced_by": {
      "expansions_max": 92,
-     "structural_minutes_max": 1512.01,
+     "structural_minutes_max": 1178.02,
      "session_overhead_minutes": 95.0,
-     "hard_ceiling_minutes": 1607.83,
-     "hard_ceiling_usd": 30.7,
-     "one_time_minutes": 0.82
+     "hard_ceiling_minutes": 1273.56,
+     "hard_ceiling_usd": 24.32,
+     "one_time_minutes": 0.54
     },
     "pricing_in_force": "cache_fix_validated",
     "container_disk_gb": 400,
     "hard_records_max": {
-     "minutes": 2112.1,
-     "gpu_usd": 38.37,
-     "disk_usd": 1.96,
-     "all_in_usd": 40.33
+     "minutes": 1777.8,
+     "gpu_usd": 32.3,
+     "disk_usd": 1.65,
+     "all_in_usd": 33.94
     },
     "hard_if_cache_fix_validated": {
-     "minutes": 1607.8,
-     "gpu_usd": 29.21,
-     "disk_usd": 1.49,
-     "all_in_usd": 30.7
+     "minutes": 1273.6,
+     "gpu_usd": 23.14,
+     "disk_usd": 1.18,
+     "all_in_usd": 24.32
     },
     "calibration_evidence": {
      "usable": true,
@@ -891,8 +857,8 @@
      "validated_by": "stage L's DEPTH pair, which runs under a deliberately hoarded pool and records reference_cache.mode; or D2's own first DEPTH expansions",
      "until_validated": "the planning bound prices DEPTH at D1's measured recompute-mode maxima",
      "depth_cell_minutes_if_validated": {
-      "root_max": 35.3442,
-      "deeper_max": 35.0044
+      "root_max": 26.5861,
+      "deeper_max": 26.2463
      }
     },
     "previous_model_superseded": {

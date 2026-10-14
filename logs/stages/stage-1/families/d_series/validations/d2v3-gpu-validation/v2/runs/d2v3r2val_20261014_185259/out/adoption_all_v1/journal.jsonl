@@ -1,0 +1,20 @@
+{"stage": "environment", "status": "start", "t": 0.0}
+{"seconds": 1.703, "stage": "environment", "status": "ok", "t": 1.703}
+{"stage": "register_and_policy", "status": "start", "t": 1.704}
+{"seconds": 0.042, "stage": "register_and_policy", "status": "ok", "t": 1.746}
+{"stage": "bind_full_vocab", "status": "start", "t": 1.746}
+{"seconds": 0.043, "stage": "bind_full_vocab", "status": "ok", "t": 1.789}
+{"stage": "bind_reference_topk_tail", "status": "start", "t": 1.789}
+{"seconds": 0.038, "stage": "bind_reference_topk_tail", "status": "ok", "t": 1.827}
+{"stage": "d2v3_validation_premises", "status": "start", "t": 1.83}
+{"seconds": 0.021, "stage": "d2v3_validation_premises", "status": "ok", "t": 1.851}
+{"stage": "teacher_fetch_verify", "status": "start", "t": 1.852}
+{"seconds": 8.225, "stage": "teacher_fetch_verify", "status": "ok", "t": 10.077}
+{"stage": "W_d2v3_validation", "status": "start", "t": 10.082}
+{"stage": "W.W1_union_stores_and_confidence", "status": "ok", "t": 43.974}
+{"stage": "W.W2_ffn_child_weighted", "status": "ok", "t": 139.612}
+{"stage": "W.W3_union_numerics", "status": "ok", "t": 158.902}
+{"stage": "W.W4_depth_union_all_v1", "status": "ok", "t": 354.423}
+{"stage": "W.W5_depth_union_scored_v1", "status": "ok", "t": 522.352}
+{"stage": "W.W6_state_evaluation", "status": "ok", "t": 573.43}
+{"seconds": 563.914, "stage": "W_d2v3_validation", "status": "ok", "t": 573.996}

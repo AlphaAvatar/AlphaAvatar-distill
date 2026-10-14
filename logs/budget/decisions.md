@@ -11211,3 +11211,45 @@ on a paid pod.
   + a fresh confirmation at hard is $11.13 until the grant closes.
 - **Not covered:** the D2 search, recovery, behavioural screening and
   confirmation, D3, and approval of preregistration v3.
+
+## 2026-10-14 — D2 v3 Stage W revision 2 executed: validation PASS, ADOPTED, campaign CLOSED ($0.2493 of $1.22)
+
+- **Run.** `d2v3r2val_20261014_185259` on L40S pod `ehienq52s3pjzp`
+  ($1.09/h), on the first attempt.
+  - Executed commit `7ef64f3b`, which equals the grant's.
+  - Provider teardown confirmed and hashed; booking append-only.
+  - 0 pods and 0 volumes at 19:07:31 UTC. The acquisition loop exited, and
+    no observer is left.
+  - Stage W across both revisions: $0.5031.
+- **Verdicts.** Recomputed verdicts equal the recorded ones:
+  - arithmetic PASS (9/9);
+  - integrity PASS;
+  - scored_v1 PASS;
+  - validation PASS.
+  - `d2v3_validation_evidence` adopts it.
+- **KL gate.**
+  - Teacher-Top-K and union KL: max |float32 − float64| 1.146e-4, 0
+    violations, worst excess −9.08e-5.
+  - Float64 order: 0 violations.
+  - Crossings: 89 lower (max 4.8e-7) and 15,266 upper (max 1.01e-4), all
+    within the combined bound.
+  - **0 anomalies.**
+  - Attribution: the float32 reduction alone is ≤ 3.4e-5; the largest error
+    comes from the store's teacher input path.
+  - Revision 1's slack would flag the same 175 positions, so these numbers
+    reproduce revision 1's.
+- **Re-pricing** (adopted measured terms):
+  - D2 v3 search: $11.32 expected, **$24.32** bound (fits $30); $23.69 at
+    scored_v1, now eligible; $33.94 if the cache regresses.
+  - Programme at hard: D2 + D3 + a fresh confirmation is **$3.78 short**. The
+    reservation rule is not yet satisfied.
+- **Registered rubric, literal outcome: "between".** It is not GO: the
+  choices do not differ, ρ is 0.997, and the IQR is 0.123/0.095. It is not
+  HOLD: IQR > 0.06 and ESS < 0.99.
+- **Recommendation:** proceed to the maintainer's review of preregistration
+  v3 and the formal search, with the claim boundary stated. Settle the $3.78
+  reservation shortfall first.
+- **Not authorized:** the D2 search, recovery, behaviour, D3 and caps.
+  Preregistration v3 (`b5281092…`) stays DRAFT; its non-science budget block
+  was re-derived and its hash is unchanged.
+- **Owner:** `logs/stages/stage-1/families/d_series/analyses/d2v3_stage_w_r2_evidence_review.md`.

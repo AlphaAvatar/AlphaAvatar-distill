@@ -704,8 +704,18 @@ class TestTheRecords:
 
     def test_every_executed_path_is_the_executable_commits(self):
         """What the pod checks out is what this tree carries, outside the
-        declared exceptions (this builder, tests, dev-box tools)."""
+        declared exceptions (this builder, tests, dev-box tools) -- while the
+        grant can still run a session. Once its campaign is CLOSED it funds
+        none (engineering_campaign_budget refuses), the tree moves on, and
+        what DID run is bound by the booked evidence's executed commit."""
         commit = P.EXECUTABLE_COMMIT
+        camp = json.loads((REPO / W.CAMPAIGN).read_text())
+        if str(camp.get("status", "")).startswith("COMPLETE and CLOSED"):
+            from stages.d_series import d2_budget as BUD
+            ev = BUD.d2v3_validation_evidence()
+            if ev.get("evidence_session"):
+                assert ev["executed_commit"] == commit
+            return
         have = subprocess.run(["git", "cat-file", "-e", f"{commit}^{{commit}}"],
                               cwd=REPO, capture_output=True)
         if have.returncode != 0:

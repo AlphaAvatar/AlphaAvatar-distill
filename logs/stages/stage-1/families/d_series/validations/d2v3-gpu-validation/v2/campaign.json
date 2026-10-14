@@ -2,14 +2,61 @@
  "schema": "aadistill.engineering_campaign/v1",
  "campaign_id": "d_series_d2v3_gpu_validation_r2",
  "_contract": "Cumulative cost of D2 version 3's GPU validation, revision 2, across every resource and subrun. A rerun does NOT reset it; revision 1's spend is in its own closed campaign.",
- "status": "OPEN -- granted $1.22 cumulative all-in (authorization.json, 2026-10-14T18:52:11Z); executable commit 7ef64f3b",
+ "status": "COMPLETE and CLOSED -- Stage W revision 2 validation PASS (arithmetic, integrity, scored_rows_equivalence), ADOPTED; run d2v3r2val_20261014_185259, $0.2493 of the $1.22 grant; 0 KL anomalies; provider teardown confirmed and 0 pods/volumes listed at 2026-10-14T19:07:31Z; evidence booked by sha256",
  "authorization": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/authorization.json",
  "package_id": "phase_c1.execution_package.2026-09-11",
  "_package_id": "the GPU ENGINEERING book, as for R0, the reference calibration and Stage V",
  "plan": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/plan.json",
  "teardown_reserve_usd": 0.3,
  "inherited_spend": [],
- "subruns": [],
- "booked_usd": 0.0,
+ "subruns": [
+  {
+   "subrun_id": "d2v3r2val_20261014_185259",
+   "run_id": "d2v3r2val_20261014_185259",
+   "cost_usd": 0.2493,
+   "cost_record": {
+    "elapsed_minutes": 13.617,
+    "rate_usd_per_hour": 1.09,
+    "_rate_is": "the LIVE securePrice quoted immediately before creation",
+    "container_disk_gb": 60,
+    "gpu_usd": 0.2474,
+    "container_disk_usd": 0.0019,
+    "all_in_usd": 0.2493,
+    "pod_id": "ehienq52s3pjzp",
+    "script_exit": 0,
+    "_basis": "wall clock from pod creation to confirmed teardown x the live secure rate, plus container disk billed separately"
+   },
+   "pod_id": "ehienq52s3pjzp",
+   "teardown_confirmed": true,
+   "teardown_evidence": {
+    "path": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/runs/d2v3r2val_20261014_185259/teardown_confirmed",
+    "sha256": "9599915bd8cd62b6b42e6c37b5b681a76991a7c5be1fde9971278ce65b99d550"
+   },
+   "outcome": "stage W session: launcher rc=0",
+   "notes": "",
+   "evidence": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/runs/d2v3r2val_20261014_185259",
+   "evidence_sha256": {
+    "cost.json": "928443253faf3fca7a25999c115251cb187a2945f9359f8d96e8eee1ae8d105f",
+    "launch.log": "8a9d8c4c60ac3863cfba817f84c4c7c2574269091878e92eeec5784f03a30c2e",
+    "live_price_usd_per_hour": "28b478ce49706c4e6689e2f3a9a964ee5642134488d4a25280a7d9b6fce123cd",
+    "out/adoption_all_v1/adoption.json": "5edc0b92354662ac505c5c0c7c5a8a2988ba73091b22814faa121a22d6fef2ac",
+    "out/adoption_all_v1/journal.jsonl": "3cb0c17c5c1f382bc0b2af51ba16a30a07dc7386a46d11692f5fbcc30511fa12",
+    "out/adoption_all_v1.log": "482c5786ada754b50dd0b345832a5e86a0ab2b39766f5a105d359d1a275f21b1",
+    "out/host_gpu.txt": "ef160069ef064a34334c31f4a8210a3e890756409629801d99642ec5cef7c305",
+    "out/preflight_all_v1/adoption.json": "faf82489e8e409ff4f1622baabf429441bbbe33b6ccf1728516b383e4c33d427",
+    "out/preflight_all_v1/journal.jsonl": "c30a36b3edb9527187d37fb562856d2ea1c44a66a9e312ecbd5a667ded834977",
+    "out/preflight_all_v1.log": "535a7f888fb6954102c9314e4d86552a6ff26d4c1d7bb1ed5027bf623c26fa5c",
+    "out/runtime.txt": "8df33ef6ed783d31a27fd57b2ded72ebdba4106c422742000225213fba2be4b7",
+    "pod_id": "8a4e2457142ec8eb9e47c2043a1c55558b655f20f65beb46f6b9ccb4a8978488",
+    "pod_start_epoch": "53f25016d25f7972a05833351338257c47b5fa24c187c8d2759e200f88c55303",
+    "required_inputs.jsonl": "1cc0f12d949720a984ab41745aaa14a3def096b4325f6ba38469190a9ec6b769",
+    "teardown_confirmed": "9599915bd8cd62b6b42e6c37b5b681a76991a7c5be1fde9971278ce65b99d550",
+    "watchdog.jsonl": "b86af6b33b5ed209968cb0db9020994409682a1977aace250303e71cd5f08c45"
+   },
+   "evidence_session": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/runs/d2v3r2val_20261014_185259/out/adoption_all_v1/adoption.json",
+   "evidence_session_sha256": "5edc0b92354662ac505c5c0c7c5a8a2988ba73091b22814faa121a22d6fef2ac"
+  }
+ ],
+ "booked_usd": 0.2493,
  "authorizes": "nothing by itself"
 }

@@ -720,18 +720,35 @@ class TestTheSearchPriceComesFromD1sRecords:
             pytest.skip("no adopted Stage V in this tree")
         record = json.loads((REPO / BUD.RECORD).read_text())
         ov = record["steps"]["d2_search"]["objective_overhead"]
-        #: Version 2's terms are Stage V's measurements; version 3's union
-        #: terms stay PROVISIONAL until its own GPU validation.
-        assert ov["source"].startswith("version 2's terms: measured once")
-        assert adopted["evidence_session"] in ov["source"]
-        assert ov["union_terms"]["status"] == "PROVISIONAL -- not measured"
+        w = BUD.adopted_v3_validation()
+        if w is None:
+            #: Version 2's terms are Stage V's measurements; version 3's
+            #: union terms stay PROVISIONAL until its own GPU validation.
+            assert ov["source"].startswith("version 2's terms: measured once")
+            assert adopted["evidence_session"] in ov["source"]
+            assert ov["union_terms"]["status"] == "PROVISIONAL -- not measured"
+        else:
+            #: Once stage W is ADOPTED its measurements price version 3 whole.
+            assert ov["source"].startswith("measured once")
+            assert w["evidence_session"] in ov["source"]
+            assert ov["union_terms"]["status"] == "MEASURED (stage W, adopted)"
+        #: Either way the rows a candidate reduces over are Stage V's.
         geo = ov["union_terms"]["geometry"]
         assert adopted["evidence_session"] in geo["depth_rows_per_candidate"][
             "source"]
-        added = ov["union_terms"]["added"]
-        for key in ("depth_seconds_per_candidate",
-                    "state_eval_seconds_per_evaluation", "one_time_minutes"):
-            assert ov[key]["bound"] >= added[key]["bound"] > 0
+        if w is None:
+            added = ov["union_terms"]["added"]
+            for key in ("depth_seconds_per_candidate",
+                        "state_eval_seconds_per_evaluation",
+                        "one_time_minutes"):
+                assert ov[key]["bound"] >= added[key]["bound"] > 0
+        else:
+            #: Measured: the bound is the measurement times the margin.
+            f = BUD.MEASURED_OVERHEAD_BOUND_FACTOR
+            for key in ("depth_seconds_per_candidate",
+                        "state_eval_seconds_per_evaluation"):
+                assert ov[key]["bound"] == pytest.approx(
+                    ov[key]["expected"] * f, abs=1e-3)
 
     def test_d3_is_priced_with_its_own_search_in_the_programme(self):
         from stages.d_series import d2_budget as BUD

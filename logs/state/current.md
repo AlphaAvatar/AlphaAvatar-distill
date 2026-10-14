@@ -10,8 +10,8 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 ## Right now
 
 **NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods
-and 0 volumes (2026-10-14 17:29:40 UTC, after Stage W's confirmed teardown).
-No acquisition loop or watcher is running.
+and 0 volumes (2026-10-14 19:07:31 UTC, after Stage W revision 2's confirmed
+teardown). No acquisition loop or watcher is running.
 
 **D2 VERSION 3 (maintainer scientific decision, 2026-10-14; contract
 revision 8 `1321017a…`, preregistration v3 DRAFT `b5281092…`).** An
@@ -32,13 +32,11 @@ protocol and engineering work only.
   DEPTH, state evaluation, weighted statistics and the beam's metrics;
   oracle, consumer and refusal tests; a real-logits check on a stand-in
   checkpoint (0 bound violations, 73% bf16 boundary ties).
-- **Price in force (unchanged, because Stage W is not adopted).**
-  - D2 v3 search: $12.36 expected, $30.70 planning bound against the $30 cap.
-    The union terms are provisional.
-  - Stage W's measured terms would give $24.90 (all_v1) or $24.21
-    (scored_v1); they are NOT ADOPTED.
-  - Programme at hard: D2 + D3 fits. Adding a fresh confirmation is $11.13
-    short while revision 2's $1.22 grant is held ($9.91 without it).
+- **Price in force** (Stage W revision 2's measured terms, adopted):
+  - D2 v3 search: $11.32 expected, **$24.32** bound (fits the $30 cap);
+    $23.69 at scored_v1, now eligible; $33.94 if the cache regresses.
+  - Programme at hard: D2 + D3 fits. Adding a fresh confirmation is **$3.78
+    short**, so the reservation rule is not yet satisfied.
   - Owners: `d2_budget_v1.json`, `d_series_programme_budget.json`.
 - **Stage W built and rehearsed at $0** (executable commit `4248d7db`):
   W1–W6 on Stage V's infrastructure, no B rebuild; the CPU rehearsal runs the
@@ -71,9 +69,19 @@ protocol and engineering work only.
     Revision 1 has an erratum.
   - **Tests:** a predicate table, mutants, an independent oracle, and
     extremes.
-  - **Grant:** PROPOSED, the same shape ($0.28 expected, $0.92 cap, $1.22
-    all-in) as a new grant with a new campaign. Revision 1 stays FAIL and
-    CLOSED.
+  - **Grant:** a new grant, $1.22 all-in, $0.92 cap, with its own campaign.
+    Revision 1 stays FAIL and CLOSED.
+- **Stage W REVISION 2 EXECUTED 2026-10-14:** run
+  `d2v3r2val_20261014_185259`, **$0.2493** ($0.5031 for Stage W in total).
+  - **Validation PASS, ADOPTED.** Arithmetic 9/9, integrity, scored_v1.
+  - **0 KL anomalies:** both KLs ≤ 1.146e-4 from float64, the float64 order
+    is exact, and every crossing is inside the combined bound.
+  - The campaign is CLOSED.
+  - **Rubric, literal: "between".** **Recommendation:** proceed to the
+    maintainer's preregistration v3 / formal-search review, with the claim
+    boundary stated, once the $3.78 reservation shortfall is settled.
+  - Owner:
+    [`d2v3_stage_w_r2_evidence_review.md`](../stages/stage-1/families/d_series/analyses/d2v3_stage_w_r2_evidence_review.md).
 - Owners:
   - [`d2_d3_objective_design.md` §12](../stages/stage-1/families/d_series/plans/d2_d3_objective_design.md);
   - `logs/budget/decisions.md`, entry for 2026-10-14 (D2 version 3).
@@ -127,16 +135,14 @@ and `logs/budget/decisions.md`.
 - **D2 launch chain built at $0:** typed grant, launcher, pod branch, a soft
   stop taken from `soft_stop_minutes`, and a cache-regression guard. All of
   it is now on preregistration v3.
-- **Open maintainer decisions, in order:**
-  1. **The Stage W revision 2 session:** the $1.22 grant is proposed; it is
-     recorded as `authorization.json` only on the maintainer's confirmation.
-  2. After an adoptable revision-2 PASS, if D2 v3 proceeds:
+- **Open maintainer decisions, in order** (Stage W revision 2 is done):
+  1. The $3.78 programme reservation shortfall, which must be settled before
+     any formal D2 session, never by splitting stages.
+  2. If D2 v3 proceeds:
      - approve preregistration v3;
      - add `phase_d2` to `funds_formal_sessions_of`;
-     - choose `all_v1` or `scored_v1`, which needs an adopted v3
-       equivalence;
-     - settle the search price against the cap and the $9.91 programme
-       shortfall, both re-derived from adopted evidence;
+     - choose `all_v1` ($24.32) or `scored_v1` ($23.69); v3's own
+       equivalence has passed and been adopted;
      - then the D2 search grant.
 
 **NEXT ROUND: R0 → D2 → D3 ON A SHARED BEHAVIOURAL EVALUATION (maintainer
@@ -3822,9 +3828,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$127.9624` of `$256.6523` |
-| GPU engineering | `$3.4297` of `$25.0741` |
-| package | `$131.3921` of `$281.7264` |
-| project cap | `$470.7659` spent of `$590.0000`, leaving `$119.2341` |
+| GPU engineering | `$3.1804` of `$25.0741` |
+| package | `$131.1428` of `$281.7264` |
+| project cap | `$471.0152` spent of `$590.0000`, leaving `$118.9848` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 4.** 5 ceilings cost `$150.0000` and the formal allowance has `$127.9624`. Dividing the PACKAGE balance instead gives 4, which is the error: the engineering allowance cannot pay for a formal probe.
 
