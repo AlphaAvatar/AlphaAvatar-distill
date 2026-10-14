@@ -40,9 +40,30 @@ on the reference's support, and NOT a ``K+1``-bucket entropy: the mass outside
     weight the activation statistics the structural operators read
     (``statistics_weighting``).
 
-The reference's entropy is a FULL-vocabulary quantity while the KL stays the
-declared support's (e.g. reference Top-K + tail): two different reductions over
-the same positions, never to be read as one another.
+``reference_topk_confidence_weighted_union_kl``
+    ``g_t = c^ref_t * KL^U_t``. Same shape as the form above, with BOTH
+    ingredients redefined, and declared as a separate form rather than a
+    parameter of it:
+
+    * ``c^ref_t = 1 - H^{K+1}_ref(t) / log(K+1)``, where ``H^{K+1}`` is the
+      Shannon entropy of the reference's own Top-K entries and ONE tail bucket,
+      at their ABSOLUTE probabilities (never renormalized inside the Top-K;
+      ``0 log 0 = 0``). The number of categories is derived from the support,
+      ``K + 1`` when ``K < |V|``; still candidate-independent, so it is
+      computed once and stored with the reference;
+    * ``KL^U_t`` is the forward KL on the reference ∪ candidate Top-K support
+      plus one tail (``reference_student_union_topk_tail_v1``), whose top_k
+      equals the confidence's ``K``. See
+      :mod:`aadistill.initialization.scoring.support`.
+
+    Its KL's reference is the ROOT for every consumer, and it may weight the
+    activation statistics, exactly as above. ``exp(-H)`` and every other
+    transform of the entropy are NOT this form.
+
+The reference's entropy is a FULL-vocabulary quantity under the first
+reference form and a ``K+1``-category one under the second, while the KL stays
+the declared support's: different reductions over the same positions, never to
+be read as one another.
 
 Both are MINIMIZED, and both are averaged per item over a FIXED denominator,
 the number of scored positions ``T_x``::
@@ -78,15 +99,24 @@ from typing import Any
 import torch
 
 from aadistill.infrastructure.manifest import sha256_json
+from aadistill.initialization.scoring.support import (
+    SUPPORT_REFERENCE_STUDENT_UNION_TOPK_TAIL_V1, topk_tail_categories,
+    topk_tail_entropy,
+)
 
 SCHEMA = "aadistill.scoring_objective/v1"
 
 FORM_UNCERTAINTY_WEIGHTED_KL = "student_uncertainty_weighted_kl"
 FORM_KL_MINUS_CONFIDENCE_REWARD = "kl_minus_student_confidence_reward"
 FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL = "reference_confidence_weighted_kl"
+FORM_REFERENCE_TOPK_CONFIDENCE_WEIGHTED_UNION_KL = (
+    "reference_topk_confidence_weighted_union_kl")
 #: The forms that read the CANDIDATE's own confidence.
 STUDENT_FORMS = (FORM_UNCERTAINTY_WEIGHTED_KL, FORM_KL_MINUS_CONFIDENCE_REWARD)
-FORMS = (*STUDENT_FORMS, FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL)
+#: The forms whose weight is the REFERENCE's own confidence.
+REFERENCE_FORMS = (FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL,
+                   FORM_REFERENCE_TOPK_CONFIDENCE_WEIGHTED_UNION_KL)
+FORMS = (*STUDENT_FORMS, *REFERENCE_FORMS)
 
 #: Every definitional choice, named so it is part of the identity rather than
 #: of the reader's assumptions. Changing any of them is a new objective.
@@ -116,6 +146,17 @@ KL_REFERENCES = (KL_REFERENCE_ROOT,)
 #: token axis: token ``j`` feeds prediction ``j`` and carries its weight; the
 #: last token feeds no prediction inside the item and carries zero.
 STATISTICS_WEIGHTING = "reference_confidence_token_weights/v1"
+
+#: The union-KL form's definitional choices, serialized ONLY for that form.
+REFERENCE_TOPK_ENTROPY_DEFINITION = (
+    "reference_topk_plus_tail_absolute_shannon_entropy/v1")
+REFERENCE_TOPK_CATEGORIES = "top_k entries + 1 tail bucket when top_k < |V|"
+REFERENCE_TOPK_CONFIDENCE_MAPPING = "one_minus_entropy_over_log_categories/v1"
+REFERENCE_TOPK_STATISTICS_WEIGHTING = (
+    "reference_topk_confidence_token_weights/v1")
+#: The KL support the union form is defined on, by id; its top_k is the
+#: confidence's K.
+UNION_KL_SUPPORT = SUPPORT_REFERENCE_STUDENT_UNION_TOPK_TAIL_V1
 
 #: Rows per reduction block. A transient bound, not semantics: Top-K over a
 #: ``[rows, V]`` block allocates proportionally to it.
@@ -152,6 +193,21 @@ class ScoringObjective:
         if self.form not in FORMS:
             raise ObjectiveError(f"unknown objective form {self.form!r}; "
                                  f"known: {FORMS}")
+        if self.form == FORM_REFERENCE_TOPK_CONFIDENCE_WEIGHTED_UNION_KL:
+            k = self.entropy_top_k
+            if (not isinstance(k, int) or isinstance(k, bool) or k < 1):
+                raise ObjectiveError(
+                    f"{self.objective_id}: the union form needs the "
+                    f"reference's confidence Top-K as an integer >= 1, got "
+                    f"{k!r}; it is the experiment's and has no default")
+            if self.reward_scale is not None:
+                raise ObjectiveError(
+                    f"{self.objective_id}: the union form has no reward term")
+            if self.kl_reference not in KL_REFERENCES:
+                raise ObjectiveError(
+                    f"{self.objective_id}: the union form needs kl_reference "
+                    f"in {KL_REFERENCES}, got {self.kl_reference!r}")
+            return
         if self.form == FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL:
             if self.entropy_top_k is not None or self.reward_scale is not None:
                 raise ObjectiveError(
@@ -190,7 +246,24 @@ class ScoringObjective:
 
     @property
     def uses_reference_confidence(self) -> bool:
-        return self.form == FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL
+        return self.form in REFERENCE_FORMS
+
+    @property
+    def uses_union_support(self) -> bool:
+        """The KL is the reference ∪ candidate Top-K + tail KL, and the weight
+        the reference's Top-K + tail confidence."""
+        return self.form == FORM_REFERENCE_TOPK_CONFIDENCE_WEIGHTED_UNION_KL
+
+    @property
+    def reference_confidence_definition(self) -> tuple[str, str] | None:
+        """``(entropy definition, mapping)`` of the reference confidence this
+        form weights by, or ``None`` for a student form."""
+        if self.form == FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL:
+            return REFERENCE_ENTROPY_DEFINITION, REFERENCE_CONFIDENCE_MAPPING
+        if self.uses_union_support:
+            return (REFERENCE_TOPK_ENTROPY_DEFINITION,
+                    REFERENCE_TOPK_CONFIDENCE_MAPPING)
+        return None
 
     @property
     def uses_student_confidence(self) -> bool:
@@ -203,6 +276,8 @@ class ScoringObjective:
 
     def components(self) -> tuple[str, ...]:
         """The per-position quantities this objective's records carry."""
+        if self.uses_union_support:
+            return UNION_COMPONENTS
         return (REFERENCE_COMPONENTS if self.uses_reference_confidence
                 else COMPONENTS)
 
@@ -211,6 +286,25 @@ class ScoringObjective:
                 else "student_confidence")
 
     def as_dict(self) -> dict[str, Any]:
+        if self.uses_union_support:
+            return {
+                "schema": SCHEMA,
+                "objective_id": self.objective_id,
+                "version": int(self.version),
+                "form": self.form,
+                "confidence_source": REFERENCE_TOPK_ENTROPY_DEFINITION,
+                "confidence_top_k": int(self.entropy_top_k),
+                "confidence_categories": REFERENCE_TOPK_CATEGORIES,
+                "confidence_mapping": REFERENCE_TOPK_CONFIDENCE_MAPPING,
+                "kl_support": UNION_KL_SUPPORT,
+                "kl_reference": self.kl_reference,
+                "statistics_weighting": (REFERENCE_TOPK_STATISTICS_WEIGHTING
+                                         if self.weights_activation_statistics
+                                         else "none"),
+                "denominator": DENOMINATOR,
+                "aggregation": AGGREGATION,
+                "direction": DIRECTION,
+            }
         if self.uses_reference_confidence:
             return {
                 "schema": SCHEMA,
@@ -249,7 +343,7 @@ class ScoringObjective:
 
     def component_name(self) -> str:
         """What the second component is called in records: weight or reward."""
-        if self.form == FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL:
+        if self.form in REFERENCE_FORMS:
             return "reference_confidence_weight"
         return ("uncertainty_weight" if self.form == FORM_UNCERTAINTY_WEIGHTED_KL
                 else "confidence_reward")
@@ -264,7 +358,7 @@ class ScoringObjective:
         """
         kl = kl.float()
         conf = confidence.float()
-        if self.form == FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL:
+        if self.form in REFERENCE_FORMS:
             weight = conf
             g = torch.where(torch.isposinf(kl), kl, weight * kl)
             return g, weight
@@ -321,6 +415,57 @@ def root_reference_needed(implementation: Any, objective: Any) -> bool:
                  and getattr(objective, "requires_root_reference", False))
                 or statistics_weighted_by_root(implementation, objective))
 
+
+
+def require_objective_support(objective: Any, support: Any) -> None:
+    """An objective and a run's distribution support that belong together.
+
+    The union support exists for the union-KL form and the union-KL form is
+    defined on it, at the same ``K``: the support's retrieval needs the root
+    store only that form requests, and the form's confidence ``K`` is the KL's.
+    Every other pairing keeps its historical rule (checked where it always
+    was). Raises :class:`ObjectiveError`.
+    """
+    union_support = bool(getattr(support, "is_union", False))
+    union_form = bool(getattr(objective, "uses_union_support", False))
+    if union_support and not union_form:
+        raise ObjectiveError(
+            f"distribution support {support} reads the reference's "
+            "probability of candidate-only entries from the ROOT reference "
+            "store, which only the union-KL objective form requests; "
+            f"declared objective: "
+            f"{None if objective is None else objective.qualified_id}")
+    if union_form:
+        if not union_support:
+            raise ObjectiveError(
+                f"{objective.qualified_id} is defined on the "
+                f"{UNION_KL_SUPPORT} support; this run declares {support}")
+        if int(support.top_k) != int(objective.entropy_top_k):
+            raise ObjectiveError(
+                f"{objective.qualified_id} weights by the reference's "
+                f"Top-{objective.entropy_top_k} confidence and its KL is on "
+                f"the union of Top-{objective.entropy_top_k} sets; the "
+                f"support declares top_k={support.top_k}")
+
+
+def reference_topk_confidence(support_log_probs: torch.Tensor,
+                              tail_log_prob: torch.Tensor, *, top_k: int,
+                              vocab_size: int
+                              ) -> tuple[torch.Tensor, torch.Tensor]:
+    """``(H^{K+1}, c)`` of the union form, from the reference's own sketch.
+
+    ``c = 1 - H^{K+1} / log(categories)`` with the categories derived from
+    ``top_k`` and the vocabulary (:func:`topk_tail_categories`); clamped to
+    ``[0, 1]`` against rounding only. Candidate-independent: the sketch is the
+    reference's.
+    """
+    categories = topk_tail_categories(top_k, vocab_size)
+    if categories < 2:
+        raise ObjectiveError(f"{categories} categories have no entropy scale")
+    entropy = topk_tail_entropy(support_log_probs, tail_log_prob,
+                                has_tail=int(top_k) < int(vocab_size))
+    conf = (1.0 - entropy.double() / math.log(categories)).clamp(0.0, 1.0)
+    return entropy, conf.float()
 
 
 def objective_config(objective: ScoringObjective | None) -> dict[str, Any]:
@@ -467,6 +612,13 @@ COMPONENTS = ("objective", "raw_kl", "student_entropy", "student_confidence",
 REFERENCE_COMPONENTS = ("objective", "raw_kl", "reference_entropy",
                         "reference_confidence", "component",
                         "reference_tail_mass")
+#: The union-KL form's: the reference-confidence components, with ``raw_kl``
+#: the UNWEIGHTED union KL, plus the union reduction's own evidence -- the
+#: reference-Top-K + tail KL of the same pair (its lower bound), the union's
+#: size and overlap with the reference's Top-K, and both masses outside it.
+UNION_DIAGNOSTICS = ("kl_reference_topk", "union_size", "union_overlap",
+                     "reference_union_tail_mass", "candidate_union_tail_mass")
+UNION_COMPONENTS = (*REFERENCE_COMPONENTS, *UNION_DIAGNOSTICS)
 
 #: Confidence histogram edges: ten equal bins on [0, 1].
 CONFIDENCE_BINS = 10
@@ -483,12 +635,17 @@ def position_terms(objective: ScoringObjective, kl: torch.Tensor,
                    reference_tail_log: torch.Tensor | None, *,
                    reference_entropy: torch.Tensor | None = None,
                    reference_confidence: torch.Tensor | None = None,
+                   union: Mapping[str, torch.Tensor] | None = None,
                    ) -> dict[str, torch.Tensor]:
     """Every per-position component, same leading shape as ``kl``.
 
-    The reference-confidence form takes the reference's entropy and confidence
-    from the caller -- aligned to ``kl`` position for position -- and reads
-    nothing of the candidate but the KL already computed from it.
+    The reference-confidence forms take the reference's entropy and confidence
+    from the caller -- aligned to ``kl`` position for position -- and read
+    nothing of the candidate but the KL already computed from it. The union
+    form also takes ``union``, the union reduction's per-position evidence
+    (:meth:`~aadistill.initialization.scoring.support.UnionKLTerms.diagnostics`)
+    aligned the same way, and refuses to run without it: a union-form record
+    missing its lower bound and union size would not say what it measured.
     """
     tail = (torch.zeros_like(kl, dtype=torch.float32)
             if reference_tail_log is None
@@ -504,10 +661,23 @@ def position_terms(objective: ScoringObjective, kl: torch.Tensor,
                 f"reference confidence {tuple(conf.shape)} is not aligned with "
                 f"the KL {tuple(kl.shape)}")
         g, component = objective.integrand(kl, conf)
-        return {"objective": g, "raw_kl": kl.float(),
-                "reference_entropy": reference_entropy.to(kl.device).float(),
-                "reference_confidence": conf, "component": component,
-                "reference_tail_mass": tail}
+        out = {"objective": g, "raw_kl": kl.float(),
+               "reference_entropy": reference_entropy.to(kl.device).float(),
+               "reference_confidence": conf, "component": component,
+               "reference_tail_mass": tail}
+        if objective.uses_union_support:
+            if union is None:
+                raise ObjectiveError(
+                    f"{objective.qualified_id} needs the union reduction's "
+                    "per-position evidence and none was supplied")
+            for name in UNION_DIAGNOSTICS:
+                value = union[name].to(kl.device).float()
+                if tuple(value.shape) != tuple(kl.shape):
+                    raise ObjectiveError(
+                        f"union evidence {name!r} {tuple(value.shape)} is not "
+                        f"aligned with the KL {tuple(kl.shape)}")
+                out[name] = value
+        return out
     entropy, mass = student_topk_terms(cand_logits, log_z,
                                        top_k=objective.entropy_top_k)
     entropy = entropy.to(kl.device)
@@ -601,10 +771,17 @@ __all__ = ["AGGREGATION", "COMPONENTS", "CONFIDENCE_BINS",
            "CONFIDENCE_MAPPING", "DENOMINATOR", "DIRECTION",
            "ENTROPY_DEFINITION", "FORM_KL_MINUS_CONFIDENCE_REWARD",
            "FORM_REFERENCE_CONFIDENCE_WEIGHTED_KL",
+           "FORM_REFERENCE_TOPK_CONFIDENCE_WEIGHTED_UNION_KL",
            "FORM_UNCERTAINTY_WEIGHTED_KL", "FORMS", "KL_GRID_EDGES",
            "KL_REFERENCE_ROOT", "KL_REFERENCES", "REFERENCE_COMPONENTS",
            "REFERENCE_CONFIDENCE_MAPPING", "REFERENCE_ENTROPY_DEFINITION",
+           "REFERENCE_FORMS", "REFERENCE_TOPK_CATEGORIES",
+           "REFERENCE_TOPK_CONFIDENCE_MAPPING",
+           "REFERENCE_TOPK_ENTROPY_DEFINITION",
+           "REFERENCE_TOPK_STATISTICS_WEIGHTING", "UNION_COMPONENTS",
+           "UNION_DIAGNOSTICS", "UNION_KL_SUPPORT",
            "STATISTICS_WEIGHTING", "STUDENT_FORMS",
+           "reference_topk_confidence", "require_objective_support",
            "ObjectiveError", "ScoringObjective", "add_joint_histograms",
            "confidence_from_entropy", "confidence_from_vocabulary_entropy",
            "confidence_histogram", "fixed_denominator_item_means",

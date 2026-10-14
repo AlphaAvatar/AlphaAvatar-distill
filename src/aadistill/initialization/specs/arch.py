@@ -72,6 +72,11 @@ class Capability:
     #: caller can run the backbone over a whole sequence and project only the
     #: rows it will score. See ``ArchitectureAdapter.final_hidden_states``.
     OUTPUT_HEAD = "output_head"
+    #: The output head is ``post(h @ W.T + b)`` with an elementwise ``post``
+    #: (a logit scale, a final soft-cap), so the logit of ANY chosen entry is a
+    #: function of the final hidden state and that entry's head row alone. See
+    #: ``ArchitectureAdapter.linear_output_head``.
+    OUTPUT_HEAD_LINEAR = "output_head.linear"
 
 
 @dataclass(frozen=True)
@@ -293,6 +298,20 @@ class ArchitectureAdapter(ABC):
         """
         raise UnsupportedCapability(
             f"{self.family} adapter does not factor its output head")
+
+    def linear_output_head(self, model: Any) -> Any:
+        """The output head as a
+        :class:`~aadistill.initialization.scoring.output_head.LinearOutputHead`.
+
+        Requires ``Capability.OUTPUT_HEAD_LINEAR``: the family's logits are an
+        affine map of ``final_hidden_states`` followed by an elementwise
+        post-process, and this returns that map's parameters (weight, bias,
+        logit scale, final soft-cap, tying). A family whose head is anything
+        else -- an adaptive softmax, a mixture of heads -- must not declare it.
+        """
+        raise UnsupportedCapability(
+            f"{self.family} adapter does not describe its output head as a "
+            "linear map")
 
     def head_groups(self, spec: ArchSpec) -> tuple[int, int, int]:
         """(query heads, key/value heads, head dim) for grouped attention."""

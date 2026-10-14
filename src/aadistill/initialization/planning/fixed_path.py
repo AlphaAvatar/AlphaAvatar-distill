@@ -279,6 +279,17 @@ class FixedPathSpec:
                     f"applied at step {kinds.index(impl.kind)}. A fixed path applies "
                     "each structural kind at most once.")
             kinds.append(impl.kind)
+        #: The union support and the union-KL form travel together, at one K.
+        if (self.scoring_objective is not None
+                or getattr(self.distribution_support, "is_union", False)):
+            from aadistill.initialization.scoring.objective import (
+                ObjectiveError, require_objective_support,
+            )
+            try:
+                require_objective_support(self.scoring_objective,
+                                          self.distribution_support)
+            except ObjectiveError as exc:
+                raise FixedPathError(f"{self.path_id}: {exc}") from exc
 
     @property
     def kinds(self) -> tuple[str, ...]:
@@ -662,7 +673,8 @@ def _run_steps(
                 root_identity=dict(root_identity or {
                     "teacher_id": spec.root_repo_id,
                     "teacher_revision": spec.root_revision}),
-                profile_hash=profile.profile_hash, support=support),
+                profile_hash=profile.profile_hash, support=support,
+                objective=spec.scoring_objective),
             micro_batch_size=execution.micro_batch_size,
             packing=execution.calibration_batch_packing,
             device=model_device(root_model))

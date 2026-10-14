@@ -31,13 +31,14 @@ from aadistill.initialization.scoring.rows import (
     scatter_rows, scored_prediction_logits, scored_rows, split_rows,
 )
 from aadistill.initialization.scoring.objective import (
-    add_joint_histograms, confidence_histogram, item_component_means,
-    position_terms,
+    ObjectiveError, add_joint_histograms, confidence_histogram,
+    item_component_means, position_terms, require_objective_support,
 )
 from aadistill.initialization.scoring.support import (
     SUPPORT_REFERENCE_TOPK_TAIL_V1, ReferenceDistributionSketch,
     masked_item_means, sketch_forward_kl, sketch_forward_kl_mean,
     sketch_forward_kl_mean_batch, sketch_forward_kl_terms, sketch_reference,
+    union_forward_kl_terms,
 )
 from aadistill.initialization.statistics.contribution import (
     bypassed_blocks,
@@ -166,6 +167,14 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                 f"{self.impl_id}: scoring objective {objective.qualified_id} "
                 "is defined on the reference Top-K + tail KL; full_vocab_v1 is "
                 "the KL-only oracle path")
+        #: THE UNION SUPPORT AND THE UNION-KL FORM COME TOGETHER, at one K:
+        #: the reference's probability of a candidate-only entry is retrieved
+        #: from the ROOT store, which only that form requests.
+        try:
+            require_objective_support(objective, support)
+        except ObjectiveError as exc:
+            raise OperatorError(f"{self.impl_id}: {exc}") from exc
+        union = support.is_union
         #: Per candidate subset: every component's domain-balanced value, so a
         #: low objective can always be read against the raw KL it came from.
         objective_candidates: dict[str, dict[str, Any]] = {}
@@ -190,6 +199,12 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                 support=support.as_dict(),
                 profile_hash=(None if ctx.profile is None
                               else ctx.profile.profile_hash))
+            if union and not root_store.retrieves:
+                raise OperatorError(
+                    f"{self.impl_id}: {objective.qualified_id} needs the "
+                    "root's probability of candidate-only entries and root "
+                    f"reference {root_store.identity_hash[:12]} holds no "
+                    "retrieval state")
             sketches = _RootSketches(root_store)
             reference = None
             #: The DIAGNOSTIC parent reference: round 0's candidates are also
@@ -282,9 +297,27 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             #: unless AADISTILL_DEPTH_SYNC_TELEMETRY=1.
             timing["parent_kl_seconds"] = 0.0
 
+        def reference_kl(idx, lp, tail, abls, retrieval):
+            """``(kl, log_z, union evidence | None)`` against the reference.
+
+            Under the union support: the KL on the root's Top-K ∪ the
+            candidate's own Top-K + one tail, the root's probabilities of
+            candidate-only entries retrieved from the store (`retrieval()`).
+            Otherwise the reference-support KL, unchanged.
+            """
+            if union:
+                terms = union_forward_kl_terms(
+                    idx, lp, tail, abls, retrieval(), top_k=support.top_k,
+                    has_tail=sketches.has_tail)
+                return terms.kl, terms.log_z, terms.diagnostics()
+            kl, log_z = sketch_forward_kl_terms(idx, lp, tail, abls,
+                                                has_tail=sketches.has_tail)
+            return kl, log_z, None
+
         def objective_values(kl, log_z, cand_logits, tail_log, mask, weights,
                              group, components, histogram, joint,
-                             rows=None, ref=None) -> torch.Tensor:
+                             rows=None, ref=None, union_terms=None
+                             ) -> torch.Tensor:
             """Per-item objective means from one group's per-position KL.
 
             `cand_logits` are the candidate's -- the student whose confidence
@@ -301,7 +334,8 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                 objective, kl, cand_logits, log_z,
                 tail_log if sketches.has_tail else None,
                 reference_entropy=None if ref is None else ref[0],
-                reference_confidence=None if ref is None else ref[1])
+                reference_confidence=None if ref is None else ref[1],
+                union=union_terms)
             if rows is not None:
                 terms = {k: scatter_rows(v.float(), rows)
                          for k, v in terms.items()}
@@ -385,12 +419,14 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                         values = masked_item_means(scatter_rows(kl, rows), mask,
                                                    weights=batch_weights)
                     else:
-                        kl, log_z = sketch_forward_kl_terms(
-                            idx, lp, tail, abls, has_tail=sketches.has_tail)
+                        kl, log_z, uterms = reference_kl(
+                            idx, lp, tail, abls,
+                            lambda: root_store.retrieval_rows(group, rows))
                         values = objective_values(
                             kl, log_z, abls, tail, mask, batch_weights, group,
                             components, histogram, joint, rows=rows,
-                            ref=root_ref(group, rows=rows))
+                            ref=root_ref(group, rows=rows),
+                            union_terms=uterms)
                     if parent_kl is not None:
                         tp = time.perf_counter()
                         pi, pl, pt = parent_sketches.sketch_rows(
@@ -479,11 +515,13 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                     mask = group.prediction_mask().to(abls.device)
                     if sketches is not None and objective is not None:
                         idx, lp, tail = refs
-                        kl, log_z = sketch_forward_kl_terms(
-                            idx, lp, tail, abls, has_tail=sketches.has_tail)
+                        kl, log_z, uterms = reference_kl(
+                            idx, lp, tail, abls,
+                            lambda: root_store.retrieval_block(group))
                         values = objective_values(
                             kl, log_z, abls, tail, mask, batch_weights, group,
-                            components, histogram, joint, ref=root_ref(group))
+                            components, histogram, joint, ref=root_ref(group),
+                            union_terms=uterms)
                         if parent_kl is not None:
                             tp = time.perf_counter()
                             pidx, plp, ptail = prefs
@@ -520,11 +558,11 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                             support=support)
                 elif sketches is not None and objective is not None:
                     dev = abls.device
-                    kl, log_z = sketch_forward_kl_terms(
+                    kl, log_z, uterms = reference_kl(
                         refs.support_indices.to(dev),
                         refs.support_log_probs.to(dev),
                         refs.tail_log_prob.to(dev), abls,
-                        has_tail=sketches.has_tail)
+                        lambda: root_store.retrieval_item(group.items[0]))
                     item_w = (None if active is None else
                               active.prediction_weights_for_item(indices[0]))
                     value = objective_values(
@@ -534,7 +572,9 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                                    device=dev),
                         None if item_w is None else item_w.to(dev)[None],
                         group, components, histogram, joint,
-                        ref=root_ref(group, item=group.items[0]))
+                        ref=root_ref(group, item=group.items[0]),
+                        union_terms=(None if uterms is None else
+                                     {k: v[None] for k, v in uterms.items()}))
                     if parent_kl is not None:
                         tp = time.perf_counter()
                         parent_kl.setdefault(group.items[0]["subtype"],

@@ -50,7 +50,10 @@ from aadistill.initialization.scoring.content import scoring_content_identity
 from aadistill.initialization.scoring.objective import (
     ObjectiveError, add_joint_histograms, confidence_from_vocabulary_entropy,
     confidence_histogram, full_vocabulary_entropy, item_component_means,
-    position_terms, require_binary_scoring_weights,
+    position_terms, require_binary_scoring_weights, require_objective_support,
+)
+from aadistill.initialization.scoring.reference_store import (
+    build_root_reference_store, root_reference_identity,
 )
 from aadistill.initialization.scoring.protocol_identity import (
     PROTOCOL_FIELD,
@@ -64,7 +67,8 @@ from aadistill.initialization.scoring.rows import (
 )
 from aadistill.initialization.scoring.support import (
     FULL_VOCAB_V1, DistributionSupport, ReferenceDistributionSketch,
-    distortion_on_reference_support, sketch_reference,
+    distortion_on_reference_support, distortion_on_union_support,
+    sketch_reference,
 )
 from aadistill.initialization.specs.arch import adapter_for_config
 from aadistill.initialization.scoring.positions import (
@@ -243,6 +247,16 @@ class StateEvaluator:
         self._sketch_cache_bytes = 0
         self.cache_budget_bytes = int(cache_budget_bytes)
         self.scoring_objective = scoring_objective
+        #: THE UNION SUPPORT AND THE UNION-KL FORM COME TOGETHER: the KL needs
+        #: the teacher's probability of candidate-only entries, which only the
+        #: teacher store built at `prime_reference` can retrieve.
+        try:
+            require_objective_support(scoring_objective, distribution_support)
+        except ObjectiveError as exc:
+            raise MeasurementError(str(exc)) from exc
+        #: The teacher's union-support store over the suite, built once at
+        #: `prime_reference`; `None` on every other support.
+        self._union_store = None
         if scoring_objective is not None:
             if distribution_support.is_full_vocab:
                 raise MeasurementError(
@@ -314,8 +328,31 @@ class StateEvaluator:
 
     @torch.no_grad()
     def prime_reference(self, teacher) -> None:
-        """Bind the original teacher, and cache its logits only if asked to."""
+        """Bind the original teacher, and cache its logits only if asked to.
+
+        Under the union support the teacher is forwarded ONCE here, over the
+        suite in the evaluator's own execution grouping, into a store of its
+        sketch, ``K+1`` confidence, final hidden states and log-normalizers;
+        no evaluation forwards it again.
+        """
         self._teacher = teacher
+        if self.distribution_support.is_union:
+            items = [{"input_ids": i.input_ids, "item_id": i.item_id}
+                     for i in self.items]
+            self._union_store = build_root_reference_store(
+                teacher, items, support=self.distribution_support,
+                identity=root_reference_identity(
+                    root_identity={"bound_by": "StateEvaluator.prime_reference",
+                                   "suite": self.suite.qualified_id},
+                    profile_hash=self.measurement_protocol_id,
+                    support=self.distribution_support,
+                    objective=self.scoring_objective),
+                micro_batch_size=(1 if self._reference_path else
+                                  int(self.execution.micro_batch_size)),
+                packing=self.execution.calibration_batch_packing,
+                device=self.device, chunk=self.chunk)
+            self._ref_ready = True
+            return
         if self.reference_strategy is ReferenceStrategy.CACHE_IN_MEMORY:
             for item in self.items:
                 ids = item.input_ids.to(self.device)
@@ -593,6 +630,107 @@ class StateEvaluator:
             del cand_rows, ref_rows
 
     @torch.no_grad()
+    def _candidate_logits(self, model):
+        """``(item, candidate rows, selection)`` per item, NO teacher forward.
+
+        The union support's iteration: the teacher's side was stored at
+        `prime_reference`. Same forwards and groups as `_logit_pairs` and
+        `_scored_logit_pairs` on the candidate side.
+        """
+        adapter = adapter_for_config(model.config)
+        if self._reference_path:
+            for item in self.items:
+                ids = item.input_ids.to(self.device)
+                if self._row_select is not None:
+                    yield (item, self._scored_rows_of(model, item, ids),
+                           self._row_select[item.item_id])
+                else:
+                    yield item, model(ids).logits[0, :-1].float(), None
+            return
+        for packed in self._ensure_groups(model):
+            batch = packed.batch
+            ids = batch.input_ids.to(self.device)
+            attn = batch.attention_mask.to(self.device)
+            members = []
+            for row, index in enumerate(packed.original_indices):
+                item = self.items[index]
+                if batch.items[row]["item_id"] != item.item_id:
+                    raise MeasurementError(
+                        f"row {row} of a packed group claims item "
+                        f"{batch.items[row]['item_id']!r} at suite index "
+                        f"{index}, which holds {item.item_id!r}")
+                members.append(item)
+            if self._row_select is not None:
+                rows = torch.zeros(int(ids.shape[0]), int(ids.shape[1]) - 1,
+                                   dtype=torch.bool, device=self.device)
+                for row, item in enumerate(members):
+                    select = self._row_select[item.item_id]
+                    rows[row, :int(select.numel())] = select.to(self.device)
+                cand_rows = split_rows(scored_prediction_logits(
+                    adapter, model, ids, attn, rows), rows)
+                for row, item in enumerate(members):
+                    yield (item, cand_rows[row],
+                           self._row_select[item.item_id])
+            else:
+                block = model(ids, attention_mask=attn).logits[:, :-1]
+                cand_rows = batch.split_predictions(block)
+                for row, item in enumerate(members):
+                    yield item, cand_rows[row], None
+                del block
+            del cand_rows
+
+    @torch.no_grad()
+    def _union_pairs(self, model):
+        """`_candidate_logits` in `_logit_pairs`' shape, with ``ref = None``."""
+        for item, cand, select in self._candidate_logits(model):
+            yield item, None, cand, select
+
+    @torch.no_grad()
+    def _union_item(self, item: SuiteItem, cand: torch.Tensor,
+                    select: torch.Tensor | None,
+                    objective_acc: Any) -> DistortionSums:
+        """One item's six quantities on the union support, from the store.
+
+        The same targets, tags and weights as the other supports, selected the
+        same way; the teacher's sketch, confidence, hidden state and
+        log-normalizer are the store's at exactly those rows.
+        """
+        store = self._union_store
+        key = {"item_id": item.item_id, "input_ids": item.input_ids}
+        dev = cand.device
+        targets = item.input_ids[0, 1:].to(dev)
+        tags = {name: mask.to(dev) for name, mask in item.tags.items()}
+        weights = (None if self._weights is None
+                   else self._weights[item.item_id].to(dev))
+        full_tags = None
+        rows = None
+        if select is not None:
+            rows = select.to(dev)
+            targets = targets[rows]
+            full_tags = tags
+            tags = {name: mask[rows] for name, mask in tags.items()}
+            weights = None if weights is None else weights[rows]
+        sketch = store.sketch_item(key, rows)
+        retrieval = store.retrieval_item(key)
+        if rows is not None:
+            retrieval = retrieval.select(rows)
+        sink = None if objective_acc is None else objective_acc.sink()
+        sums = distortion_on_union_support(
+            sketch, retrieval, cand, targets, tags=tags, weights=weights,
+            chunk=self.chunk, position_sink=sink)
+        if objective_acc is not None:
+            pick = ((lambda t: t) if rows is None else
+                    (lambda t: t[rows.to(t.device)]))
+            objective_acc.add_item(
+                item, cand, sketch, weights, tags,
+                reference_entropy=pick(store.per_position(key, "entropy")),
+                reference_confidence=pick(store.per_position(key, "confidence")),
+                vocab_size=int(cand.shape[-1]))
+        if full_tags is not None:
+            _restore_unselected_counts(sums, select.to(dev), full_tags)
+        return sums
+
+    @torch.no_grad()
     def _reference_rows(self, batch, ids) -> list[torch.Tensor]:
         """The intact teacher's per-row logits for one group.
 
@@ -622,7 +760,17 @@ class StateEvaluator:
         objective_acc = (None if self.scoring_objective is None
                          else _ObjectiveAccumulator(self.scoring_objective,
                                                     self.suite.critical_tags))
-        for item, ref, cand, select in self._logit_pairs(model):
+        pairs = (self._union_pairs(model) if self._union_store is not None
+                 else self._logit_pairs(model))
+        for item, ref, cand, select in pairs:
+            if ref is None:
+                #: THE UNION SUPPORT: the teacher's side is the store.
+                sums = self._union_item(item, cand, select, objective_acc)
+                per_subtype.setdefault(item.subtype,
+                                       DistortionSums()).merge(sums)
+                totals.merge(sums)
+                del cand
+                continue
             if cand.shape != ref.shape:
                 raise MeasurementError(
                     f"item {item.item_id}: candidate logits {tuple(cand.shape)} do not "
@@ -767,6 +915,10 @@ class StateEvaluator:
                     #: that binds it lives on the state, not here.
                     "execution": self.execution.as_trace(),
                     "reference_path": self._reference_path,
+                    **({} if self._union_store is None else
+                       {"union_reference": {
+                           "identity_hash": self._union_store.identity_hash,
+                           "decision": self._union_store.decision()}}),
                     **({} if objective_detail is None
                        else {"objective": objective_detail})},
             runtime=dict(runtime or {}),
@@ -817,14 +969,18 @@ class _ObjectiveAccumulator:
         self.components: list[torch.Tensor] = []
         self._kl: list[torch.Tensor] = []
         self._log_z: list[torch.Tensor] = []
+        self._union: list[dict[str, torch.Tensor]] = []
 
     def sink(self):
-        self._kl, self._log_z = [], []
+        self._kl, self._log_z, self._union = [], [], []
 
         def take(start: int, stop: int, kl: torch.Tensor,
-                 log_z: torch.Tensor) -> None:
+                 log_z: torch.Tensor, union: Any = None) -> None:
             self._kl.append(kl.detach())
             self._log_z.append(log_z.detach())
+            if union is not None:
+                self._union.append({k: v.detach() for k, v in
+                                    union.diagnostics().items()})
         return take
 
     @torch.no_grad()
@@ -832,19 +988,29 @@ class _ObjectiveAccumulator:
                  weights: torch.Tensor | None,
                  tags: Mapping[str, torch.Tensor], *,
                  reference_entropy: torch.Tensor | None = None,
+                 reference_confidence: torch.Tensor | None = None,
                  vocab_size: int | None = None) -> None:
         kl = torch.cat(self._kl)
         log_z = torch.cat(self._log_z)
         conf = None
-        if reference_entropy is not None:
+        if reference_confidence is not None:
+            #: The union form's K+1 confidence, stored with the teacher.
+            conf = reference_confidence.to(kl.device)
+            reference_entropy = reference_entropy.to(kl.device)
+        elif reference_entropy is not None:
             reference_entropy = reference_entropy.to(kl.device)
             conf = confidence_from_vocabulary_entropy(reference_entropy,
                                                       int(vocab_size))
+        union = None
+        if self._union:
+            union = {k: torch.cat([u[k] for u in self._union])
+                     for k in self._union[0]}
         terms = position_terms(
             self.objective, kl, cand, log_z,
             sketch.tail_log_prob.to(kl.device)
             if sketch.top_k < sketch.vocab_size else None,
-            reference_entropy=reference_entropy, reference_confidence=conf)
+            reference_entropy=reference_entropy, reference_confidence=conf,
+            union=union)
         mask = torch.ones(1, int(kl.shape[0]), dtype=torch.bool,
                           device=kl.device)
         w = None if weights is None else weights.to(kl.device)[None]
@@ -877,7 +1043,7 @@ class _ObjectiveAccumulator:
         self.joint = add_joint_histograms(self.joint, terms, scored)
         self.confidences.append(terms[self.confidence_key][scored].float().cpu())
         self.components.append(terms["component"][scored].float().cpu())
-        self._kl, self._log_z = [], []
+        self._kl, self._log_z, self._union = [], [], []
 
     def finish(self, domain_map: Mapping[str, Sequence[str]]
                ) -> tuple[dict[str, float], dict[str, Any]]:

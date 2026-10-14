@@ -68,6 +68,10 @@ from aadistill.initialization.planning.operator_config import (
     root_reference_needed,
     statistics_weighted_by_root,
 )
+from aadistill.initialization.scoring.objective import (
+    ObjectiveError,
+    require_objective_support,
+)
 from aadistill.initialization.scoring.reference_store import (
     build_root_reference_store,
     root_reference_identity,
@@ -547,6 +551,11 @@ class BeamSearch:
                 f"{objective.qualified_id} reads a stored ROOT reference, which "
                 "holds Top-K sketches; this search reduces over the full "
                 "vocabulary. Declare a Top-K support")
+        try:
+            require_objective_support(objective,
+                                      self.config.distribution_support)
+        except ObjectiveError as exc:
+            raise SearchError(str(exc)) from exc
         ranked_on_objective = [o.key for o in config.policy.objectives
                                if o.key.startswith(OBJECTIVE_METRIC_PREFIX)]
         if objective is None and ranked_on_objective:
@@ -645,7 +654,8 @@ class BeamSearch:
                 identity=root_reference_identity(
                     root_identity={"teacher_id": self.root_teacher_id,
                                    "teacher_sha256": self.root_teacher_sha256},
-                    profile_hash=profile.profile_hash, support=support),
+                    profile_hash=profile.profile_hash, support=support,
+                    objective=self.config.scoring_objective),
                 micro_batch_size=self.execution.micro_batch_size,
                 packing=self.execution.calibration_batch_packing,
                 device=model_device(root))

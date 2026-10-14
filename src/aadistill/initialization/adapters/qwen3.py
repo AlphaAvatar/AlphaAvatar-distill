@@ -56,6 +56,7 @@ class Qwen3Adapter(ArchitectureAdapter):
         Capability.ACTIVATION_STATS,
         Capability.LOGIT_COMPARABLE,
         Capability.OUTPUT_HEAD,
+        Capability.OUTPUT_HEAD_LINEAR,
     })
     structural_fields = QWEN3_STRUCTURAL_FIELDS
 
@@ -232,6 +233,19 @@ class Qwen3Adapter(ArchitectureAdapter):
     def output_logits(self, model: Any, hidden: Any) -> Any:
         #: No softcapping or logit scale in this family.
         return model.lm_head(hidden)
+
+    def linear_output_head(self, model: Any) -> Any:
+        from aadistill.initialization.scoring.output_head import (
+            LinearOutputHead,
+        )
+
+        #: `lm_head` is a plain `nn.Linear` (no bias in this family, read
+        #: rather than assumed) with nothing after it: `output_logits` above.
+        head = model.lm_head
+        return LinearOutputHead(
+            weight=head.weight.detach(),
+            bias=None if head.bias is None else head.bias.detach(),
+            tied=bool(getattr(model.config, "tie_word_embeddings", False)))
 
     def head_groups(self, spec: ArchSpec) -> tuple[int, int, int]:
         return spec["num_attention_heads"], spec["num_key_value_heads"], spec["head_dim"]

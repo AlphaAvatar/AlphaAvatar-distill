@@ -30,6 +30,23 @@ the tensors depend on kernels and devices and are recorded only as evidence
 (:meth:`RootReferenceStore.content_digest`). A replay on other hardware must
 reproduce the identity, not the bits.
 
+**The union-support store** (an objective of the union-KL form, on
+``reference_student_union_topk_tail_v1``) keeps two more per-position values:
+the root's final hidden state ``[T, H]`` (in the model's dtype, exactly what
+its output head reads) and its float32 full-vocabulary log-normalizer ``[T]``.
+With the root's output head (an adapter capability,
+:data:`~aadistill.initialization.specs.arch.Capability.OUTPUT_HEAD_LINEAR`)
+they recover the root's log probability of ANY entry at any stored position --
+which the union KL needs for the candidate-only entries -- without a teacher
+forward per candidate and without ``O(T*V)`` logits. Its sketch, entropy and
+confidence are all formed from the float32 head logits
+(:data:`~aadistill.initialization.scoring.output_head.LOGIT_DEFINITION`), its
+Top-K by :func:`~aadistill.initialization.scoring.support.deterministic_topk`,
+and its confidence is the ``K+1``-category one the union form declares. The
+identity gains a ``build`` block stating what the builder actually did (head,
+adapter capability, dtype, device type, micro-batch, packing): bf16 forwards
+are batch-shape dependent, so the execution is part of what these values are.
+
 Nothing here names an experiment, a model family, a vocabulary or a size.
 """
 from __future__ import annotations
@@ -45,13 +62,19 @@ import torch
 from aadistill.infrastructure.manifest import sha256_json
 from aadistill.initialization.scoring.objective import (
     REFERENCE_CONFIDENCE_MAPPING, REFERENCE_ENTROPY_DEFINITION,
-    confidence_from_vocabulary_entropy, full_vocabulary_entropy,
+    REFERENCE_TOPK_CATEGORIES, REFERENCE_TOPK_CONFIDENCE_MAPPING,
+    REFERENCE_TOPK_ENTROPY_DEFINITION, confidence_from_vocabulary_entropy,
+    full_vocabulary_entropy, reference_topk_confidence,
 )
 from aadistill.initialization.scoring.support import (
-    DistributionSupport, ReferenceDistributionSketch, sketch_reference,
+    DistributionSupport, ReferenceDistributionSketch, TeacherRetrieval,
+    sketch_reference, sketch_reference_deterministic,
 )
 
 SCHEMA = "aadistill.root_reference_store/v1"
+#: The union-support store: same per-item views plus retrieval state.
+UNION_SCHEMA = "aadistill.root_reference_store/v2_union_retrieval"
+RETRIEVAL_DEFINITION = "final_hidden_state_and_full_vocab_log_normalizer/v1"
 
 
 class ReferenceStoreError(RuntimeError):
@@ -74,6 +97,10 @@ class _Entry:
     target_log_prob: torch.Tensor      # [T] float32
     top1_token: torch.Tensor           # [T] long
     content_sha256: str
+    #: Union-support stores only: the root's final hidden state [T, H] in the
+    #: model's dtype, and its float32 full-vocabulary log-normalizer [T].
+    hidden: torch.Tensor | None = None
+    log_z: torch.Tensor | None = None
 
 
 @dataclass
@@ -86,10 +113,19 @@ class RootReferenceStore:
     has_tail: bool
     entries: dict[str, _Entry] = field(default_factory=dict)
     hits: int = 0
+    #: The root's output head (a `LinearOutputHead`), for union-support
+    #: stores; `None` otherwise. Retrieval refuses without it.
+    head: Any = None
+    head_checksum: float | None = None
 
     @property
     def identity_hash(self) -> str:
         return sha256_json(self.identity)
+
+    @property
+    def retrieves(self) -> bool:
+        """Whether this store can recover the root's probability of any entry."""
+        return self.head is not None
 
     # --- binding -----------------------------------------------------------
 
@@ -111,6 +147,7 @@ class RootReferenceStore:
                 raise ReferenceStoreError(
                     f"item {item['item_id']!r} has content the root reference "
                     f"{self.identity_hash[:12]} was not built from")
+        self.verify_head()
 
     def require_identity(self, **expected: Any) -> None:
         """The store's declared identity agrees with what a consumer expects."""
@@ -130,14 +167,20 @@ class RootReferenceStore:
 
     # --- per-item, per-block and per-row views (DEPTH's three paths) -------
 
-    def sketch_item(self, item: Mapping[str, Any]) -> ReferenceDistributionSketch:
+    def sketch_item(self, item: Mapping[str, Any],
+                    rows: torch.Tensor | None = None
+                    ) -> ReferenceDistributionSketch:
+        """One item's sketch; at the rows a ``[T]`` bool mask keeps, when given."""
         e = self._entry(item)
         self.hits += 1
+        pick = ((lambda t: t) if rows is None else
+                (lambda t: t[rows.to(t.device).bool()]))
         return ReferenceDistributionSketch(
-            support_indices=e.support_indices,
-            support_log_probs=e.support_log_probs,
-            tail_log_prob=e.tail_log_prob, top1_token=e.top1_token,
-            target_log_prob=e.target_log_prob, top_k=self.top_k,
+            support_indices=pick(e.support_indices),
+            support_log_probs=pick(e.support_log_probs),
+            tail_log_prob=pick(e.tail_log_prob),
+            top1_token=pick(e.top1_token),
+            target_log_prob=pick(e.target_log_prob), top_k=self.top_k,
             vocab_size=self.vocab_size)
 
     def sketch_block(self, batch: Any):
@@ -200,6 +243,64 @@ class RootReferenceStore:
     def per_position(self, item: Mapping[str, Any], name: str) -> torch.Tensor:
         return getattr(self._entry(item), name).float()
 
+    # --- retrieval views (union support) -----------------------------------
+    #
+    # Each is aligned to the sketch view of the same name: the same rows in the
+    # same order, so position n of the sketch, of the retrieval and of the
+    # candidate is the same prediction of the same item.
+
+    def _require_retrieval(self) -> None:
+        if self.head is None:
+            raise ReferenceStoreError(
+                f"root reference {self.identity_hash[:12]} holds no retrieval "
+                "state; it was built for a support that needs none")
+
+    def verify_head(self) -> None:
+        """The head still holds the weights the store was built from.
+
+        Checked once per consumer invocation (`require_items`), not per view:
+        the probe synchronizes with the device."""
+        if (self.head is not None and self.head_checksum is not None
+                and self.head.checksum() != self.head_checksum):
+            raise ReferenceStoreError(
+                f"root reference {self.identity_hash[:12]}: the output head "
+                "no longer holds the weights the store was built from")
+
+    def retrieval_item(self, item: Mapping[str, Any]) -> TeacherRetrieval:
+        self._require_retrieval()
+        e = self._entry(item)
+        return TeacherRetrieval(e.hidden, e.log_z, self.head)
+
+    def retrieval_block(self, batch: Any) -> TeacherRetrieval:
+        """``[B * W]`` rows, row-major, zero on padding (never read)."""
+        self._require_retrieval()
+        entries = [self._entry(item) for item in batch.items]
+        width = int(batch.input_ids.shape[1]) - 1
+        h0 = entries[0].hidden
+        hidden = torch.zeros(len(entries), width, int(h0.shape[-1]),
+                             dtype=h0.dtype, device=h0.device)
+        log_z = torch.zeros(len(entries), width, dtype=torch.float32,
+                            device=h0.device)
+        for i, e in enumerate(entries):
+            n = int(e.hidden.shape[0])
+            hidden[i, :n] = e.hidden
+            log_z[i, :n] = e.log_z
+        return TeacherRetrieval(hidden.reshape(-1, int(h0.shape[-1])),
+                                log_z.reshape(-1), self.head)
+
+    def retrieval_rows(self, batch: Any, rows: torch.Tensor
+                       ) -> TeacherRetrieval:
+        """The selected rows, row-major -- `sketch_rows`' order."""
+        self._require_retrieval()
+        hid, lz = [], []
+        for i, item in enumerate(batch.items):
+            e = self._entry(item)
+            n = int(e.hidden.shape[0])
+            sel = rows[i, :n].to(e.hidden.device)
+            hid.append(e.hidden[sel])
+            lz.append(e.log_z[sel])
+        return TeacherRetrieval(torch.cat(hid), torch.cat(lz), self.head)
+
     # --- token-axis weights for activation statistics ----------------------
 
     def token_confidence(self, item: Mapping[str, Any]) -> torch.Tensor:
@@ -219,16 +320,27 @@ class RootReferenceStore:
             for t in (e.support_indices, e.support_log_probs, e.tail_log_prob,
                       e.entropy, e.target_log_prob, e.top1_token):
                 h.update(t.detach().cpu().contiguous().numpy().tobytes())
+            for t in (e.hidden, e.log_z):
+                if t is not None:
+                    h.update(t.detach().cpu().contiguous().view(torch.uint8)
+                             .numpy().tobytes())
         return h.hexdigest()
 
     def decision(self) -> dict[str, Any]:
         positions = sum(int(e.entropy.shape[0]) for e in self.entries.values())
-        return {"mode": "root_reference_store", "cached": True,
-                "identity_hash": self.identity_hash,
-                "distribution_support": self.identity.get("support"),
-                "top_k": self.top_k, "has_tail": self.has_tail,
-                "items_total": len(self.entries), "positions": positions,
-                "sketch_bytes": positions * (self.top_k * 12 + 4 * 5)}
+        out = {"mode": "root_reference_store", "cached": True,
+               "identity_hash": self.identity_hash,
+               "distribution_support": self.identity.get("support"),
+               "top_k": self.top_k, "has_tail": self.has_tail,
+               "items_total": len(self.entries), "positions": positions,
+               "sketch_bytes": positions * (self.top_k * 12 + 4 * 5)}
+        if self.retrieves:
+            out["retrieval_bytes"] = sum(
+                e.hidden.numel() * e.hidden.element_size()
+                + e.log_z.numel() * e.log_z.element_size()
+                for e in self.entries.values())
+            out["output_head"] = self.head.identity()
+        return out
 
     def counters(self) -> dict[str, int]:
         return {"reference_hits": self.hits, "reference_fills": 0,
@@ -275,8 +387,29 @@ class RootReferenceStore:
 
 def root_reference_identity(*, root_identity: Mapping[str, Any],
                             profile_hash: str,
-                            support: DistributionSupport) -> dict[str, Any]:
-    """What a store means: the root, the mixture, the support, the definitions."""
+                            support: DistributionSupport,
+                            objective: Any = None) -> dict[str, Any]:
+    """What a store means: the root, the mixture, the support, the definitions.
+
+    Without an objective, or under the full-vocabulary reference-confidence
+    form, the historical identity, byte for byte. Under the union-KL form the
+    union store's: its own schema, the ``K+1``-category confidence and the
+    retrieval definition. The builder appends what it actually executed.
+    """
+    if objective is not None and getattr(objective, "uses_union_support",
+                                         False):
+        if not getattr(support, "is_union", False):
+            raise ReferenceStoreError(
+                f"{objective.qualified_id} needs the union support; "
+                f"got {support}")
+        return {"schema": UNION_SCHEMA, "root": dict(root_identity),
+                "profile_hash": str(profile_hash),
+                "support": support.as_dict(),
+                "entropy_definition": REFERENCE_TOPK_ENTROPY_DEFINITION,
+                "confidence_categories": REFERENCE_TOPK_CATEGORIES,
+                "confidence_mapping": REFERENCE_TOPK_CONFIDENCE_MAPPING,
+                "retrieval": RETRIEVAL_DEFINITION,
+                "rows": "all_real_prediction_positions/v1"}
     return {"schema": SCHEMA, "root": dict(root_identity),
             "profile_hash": str(profile_hash), "support": support.as_dict(),
             "entropy_definition": REFERENCE_ENTROPY_DEFINITION,
@@ -308,6 +441,15 @@ def build_root_reference_store(model: Any, items: Sequence[Mapping[str, Any]], *
     items = list(items)
     if not items:
         raise ReferenceStoreError("a root reference over no items")
+    if support.is_union:
+        return _build_union_store(
+            model, items, support=support, identity=identity,
+            micro_batch_size=micro_batch_size, packing=packing,
+            device=device, chunk=chunk)
+    if identity.get("schema") == UNION_SCHEMA:
+        raise ReferenceStoreError(
+            "a union-store identity declared for a non-union support; the "
+            "store would not hold what its identity says")
     keys = [str(i["item_id"]) for i in items]
     store: RootReferenceStore | None = None
 
@@ -364,6 +506,120 @@ def build_root_reference_store(model: Any, items: Sequence[Mapping[str, Any]], *
     return store
 
 
-__all__ = ["ReferenceStoreError", "RootReferenceStore", "SCHEMA",
-           "build_root_reference_store", "item_content_sha256",
-           "root_reference_identity"]
+def _root_forwards(model: Any, items: Sequence[Mapping[str, Any]], *,
+                   micro_batch_size: int, packing: str, device: Any, run):
+    """Yield ``(item, prediction-row tensor)`` for every item, running
+    ``run(ids, attention_mask)`` -> ``[B, T, *]`` under the execution protocol:
+    one unpadded item per forward at ``micro_batch_size <= 1``, else the
+    canonical packed batches. The ``[B, T, *]`` output dies with its batch."""
+    from aadistill.initialization.calibration.batching import resolve_pad_id
+    from aadistill.initialization.calibration.packing import packed_batches
+
+    if int(micro_batch_size) <= 1:
+        for item in items:
+            ids = item["input_ids"].to(device)
+            yield item, run(ids, None)[0, :-1]
+        return
+    for packed in packed_batches(items, int(micro_batch_size),
+                                 packing=packing, pad_id=resolve_pad_id(model),
+                                 device=device):
+        batch = packed.batch
+        block = run(batch.input_ids.to(device),
+                    batch.attention_mask.to(device))
+        for row, (item, length) in enumerate(zip(batch.items, batch.lengths)):
+            yield item, block[row, :int(length) - 1]
+        del block
+
+
+@torch.no_grad()
+def _build_union_store(model: Any, items: Sequence[Mapping[str, Any]], *,
+                       support: DistributionSupport,
+                       identity: Mapping[str, Any], micro_batch_size: int,
+                       packing: str, device: Any, chunk: int
+                       ) -> RootReferenceStore:
+    """The union-support store: one ROOT forward per batch, to final hidden
+    states; float32 head logits per block of rows; deterministic sketch,
+    ``K+1`` confidence, and the hidden state and log-normalizer kept."""
+    from aadistill.initialization.specs.arch import (
+        Capability, adapter_for_config,
+    )
+
+    if identity.get("schema") != UNION_SCHEMA:
+        raise ReferenceStoreError(
+            "the union support's store needs the union identity "
+            "(root_reference_identity with the union-KL objective); a "
+            "historical identity would describe a different store")
+    if identity.get("support") != support.as_dict():
+        raise ReferenceStoreError(
+            f"the declared identity names support {identity.get('support')} "
+            f"and the store is built for {support.as_dict()}")
+    adapter = adapter_for_config(model.config)
+    adapter.requires(Capability.OUTPUT_HEAD, Capability.OUTPUT_HEAD_LINEAR)
+    head = adapter.linear_output_head(model)
+    vocab = head.vocab_size
+    k = max(1, min(int(support.top_k), vocab))
+    dtype = next(model.parameters()).dtype
+    build = {"output_head": head.identity(),
+             "adapter": {"family": adapter.family,
+                         "adapter_version": adapter.adapter_version,
+                         "capabilities": [Capability.OUTPUT_HEAD,
+                                          Capability.OUTPUT_HEAD_LINEAR]},
+             "model_dtype": str(dtype).replace("torch.", ""),
+             "device_type": torch.device(device).type,
+             "micro_batch_size": int(micro_batch_size),
+             "calibration_batch_packing": str(packing),
+             "effective_top_k": k, "vocab_size": vocab}
+    store = RootReferenceStore(identity={**dict(identity), "build": build},
+                               vocab_size=vocab, top_k=k, has_tail=k < vocab,
+                               head=head, head_checksum=head.checksum())
+    keys = [str(i["item_id"]) for i in items]
+    step = max(1, int(chunk))
+    for item, hidden in _root_forwards(
+            model, items, micro_batch_size=micro_batch_size, packing=packing,
+            device=device,
+            run=lambda ids, attn: adapter.final_hidden_states(model, ids, attn)):
+        key = str(item["item_id"])
+        content = item_content_sha256(item)
+        if key in store.entries:
+            if store.entries[key].content_sha256 != content:
+                raise ReferenceStoreError(
+                    f"item id {key!r} names two different contents in one "
+                    "mixture; a store keyed by it would conflate them")
+            continue
+        targets = item["input_ids"].reshape(-1)[1:].to(hidden.device)
+        parts = []
+        for start in range(0, int(hidden.shape[0]), step):
+            stop = min(start + step, int(hidden.shape[0]))
+            logits = head.logits(hidden[start:stop])
+            parts.append(sketch_reference_deterministic(
+                logits, targets[start:stop], top_k=k, chunk=step))
+            del logits
+        sk = [p[0] for p in parts]
+        support_indices = torch.cat([x.support_indices for x in sk])
+        support_log_probs = torch.cat([x.support_log_probs for x in sk])
+        tail = torch.cat([x.tail_log_prob for x in sk])
+        entropy, confidence = reference_topk_confidence(
+            support_log_probs, tail, top_k=k, vocab_size=vocab)
+        store.entries[key] = _Entry(
+            support_indices=support_indices,
+            support_log_probs=support_log_probs, tail_log_prob=tail,
+            entropy=entropy, confidence=confidence,
+            target_log_prob=torch.cat([x.target_log_prob for x in sk]),
+            top1_token=torch.cat([x.top1_token for x in sk]),
+            content_sha256=content,
+            #: A COPY of the row slice: a view would keep the whole padded
+            #: [B, T, H] batch alive for the life of the store.
+            hidden=hidden.detach().clone(),
+            log_z=torch.cat([p[1] for p in parts]))
+    missing = sorted(set(keys) - set(store.entries))
+    if missing:
+        raise ReferenceStoreError(f"items not stored: {missing[:5]}")
+    if not math.isfinite(sum(float(e.confidence.sum())
+                             for e in store.entries.values())):
+        raise ReferenceStoreError("a non-finite root confidence")
+    return store
+
+
+__all__ = ["RETRIEVAL_DEFINITION", "ReferenceStoreError", "RootReferenceStore",
+           "SCHEMA", "UNION_SCHEMA", "build_root_reference_store",
+           "item_content_sha256", "root_reference_identity"]

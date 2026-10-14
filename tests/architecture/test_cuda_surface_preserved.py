@@ -2030,6 +2030,53 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "validation's integrity gate can check it against the weight sum. "
             "Unweighted records are key-for-key unchanged; no selection moves.",
      }),
+    ("7f55420695c087d15fcd54ff071ce52605d6781d",
+     "D2 v3: teacher Top-K confidence x union Top-K KL",
+     {
+        "src/aadistill/initialization/scoring/support.py":
+            "a THIRD support, reference_student_union_topk_tail_v1: "
+            "deterministic Top-K (value desc, index asc), the union-support "
+            "forward/reverse KL with exact retrieval of the reference's "
+            "candidate-only entries, the K+1 Top-K-plus-tail entropy, and the "
+            "union six-quantity reducer. reference_topk_tail_v1's sketch and "
+            "reducers keep their arithmetic (sketch_reference factored into a "
+            "shared body; same operations).",
+        "src/aadistill/initialization/scoring/objective.py":
+            "a new form, reference_topk_confidence_weighted_union_kl (K+1 "
+            "reference confidence x union KL), its components and its "
+            "support-pairing rule. Every existing form's identity, integrand "
+            "and components are unchanged.",
+        "src/aadistill/initialization/scoring/output_head.py":
+            "NEW: the output head as a value (float32 logits of every entry, "
+            "or of chosen entries) behind Capability.OUTPUT_HEAD_LINEAR.",
+        "src/aadistill/initialization/scoring/reference_store.py":
+            "the union store: root final hidden states and float32 "
+            "log-normalizers kept for retrieval, deterministic sketch from the "
+            "float32 head, K+1 confidence, a union identity with the "
+            "executed build. The historical store and identity are unchanged.",
+        "src/aadistill/initialization/specs/arch.py":
+            "Capability.OUTPUT_HEAD_LINEAR and "
+            "ArchitectureAdapter.linear_output_head (raises by default).",
+        "src/aadistill/initialization/adapters/qwen3.py":
+            "Qwen3 declares OUTPUT_HEAD_LINEAR and returns its lm_head as a "
+            "LinearOutputHead. No existing method changes.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "under the union support (only with the union form), every DEPTH "
+            "path reduces the union KL against the root store with "
+            "retrieval and records its evidence; the support/objective "
+            "pairing is refused otherwise. Other supports unchanged.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "under the union support the state evaluator builds a teacher "
+            "union store once at prime_reference and evaluates candidates "
+            "against it (no teacher forward per evaluation); pairing refused "
+            "otherwise. Other supports unchanged.",
+        "src/aadistill/initialization/planning/search.py":
+            "root stores carry the objective in their identity; the "
+            "support/objective pairing is refused at construction.",
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "root stores carry the objective in their identity; a fixed path "
+            "refuses an unpaired support/objective.",
+     }),
 )
 
 
@@ -2119,6 +2166,10 @@ CURRENT_CUDA_SURFACE = (
     #: The root forward over the mixture that the redesigned D2's DEPTH and
     #: weighted statistics read. CPU-verified; owes the D2 GPU validation.
     "src/aadistill/initialization/scoring/reference_store.py",
+    #: D2 v3's float32 head logits and candidate-only retrieval, run per DEPTH
+    #: candidate and per state evaluation. CPU-verified; owes the D2 v3 GPU
+    #: validation.
+    "src/aadistill/initialization/scoring/output_head.py",
 )
 
 #: Backwards-compatible alias for the constraint that a declared core change may
