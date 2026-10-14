@@ -1,0 +1,18 @@
+[17:05:22] re-querying NVIDIA L40S securePrice
+{"data":{"gpuTypes":[{"id":"NVIDIA L40S","securePrice":1.09,"lowestPrice":{"stockStatus":"Low"}}]}}
+[17:05:22] live securePrice $1.09/h (stock Low)
+[17:05:23] calibration mixtures required by the pilot's own steps (4):
+[17:05:23]   state_eval.items -> artifacts/stages/stage-1/state_eval_v1/items.jsonl
+[17:05:23]   state_eval.manifest -> artifacts/stages/stage-1/state_eval_v1/manifest.json
+[17:05:23]   calib.domain_balanced@v1 -> artifacts/stages/stage-1/e8_calibration_v1/items.jsonl
+[17:05:23]   calib.reasoning_heavy@v2 -> artifacts/stages/stage-1/reasoning_heavy_v2/items.jsonl
+[17:05:23] budget: campaign $1.2200 - spent $0.0000 = $1.2200
+[17:05:23]         less $0.30 reserve, capped at $0.92 -> session $0.92
+[17:05:23] creating NVIDIA L40S at the live $1.09/h, useful runtime 3038s
+warning: 'runpodctl create pod' is deprecated, use 'runpodctl pod create' instead
+Error: There are no longer any instances available.
+[17:05:23] provider refused the create:
+[17:05:23]   Error: There are no longer any instances available.
+[17:05:23] FAILED to create a pod; nothing billed
+[17:05:23] cost: 0.0 USD all-in
+[17:05:23] exit 3

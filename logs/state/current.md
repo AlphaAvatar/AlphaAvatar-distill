@@ -9,8 +9,9 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods (2026-10-14 11:09 UTC, after Stage V's confirmed teardown). The provider reports 0 pods
-(2026-10-13 17:51 UTC, after the reference calibration's confirmed teardown).
+**NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods
+and 0 volumes (2026-10-14 17:29:40 UTC, after Stage W's confirmed teardown).
+No acquisition loop or watcher is running.
 
 **D2 VERSION 3 (maintainer scientific decision, 2026-10-14; contract
 revision 8 `1321017a…`, preregistration v3 DRAFT `b5281092…`).** An
@@ -31,18 +32,36 @@ protocol and engineering work only.
   DEPTH, state evaluation, weighted statistics and the beam's metrics;
   oracle, consumer and refusal tests; a real-logits check on a stand-in
   checkpoint (0 bound violations, 73% bf16 boundary ties).
-- **Price.** D2 v3 search $12.36 expected, $30.70 planning bound vs the $30
-  cap (provisional union terms); programme at hard: D2 + D3 fits, adding a
-  fresh confirmation is $10.80 short. Owners `d2_budget_v1.json`,
-  `d_series_programme_budget.json`.
+- **Price in force (unchanged, because Stage W is not adopted).**
+  - D2 v3 search: $12.36 expected, $30.70 planning bound against the $30 cap.
+    The union terms are provisional.
+  - Stage W's measured terms would give $24.90 (all_v1) or $24.21
+    (scored_v1); they are NOT ADOPTED.
+  - Programme at hard: D2 + D3 fits. Adding a fresh confirmation is $9.91
+    short.
+  - Owners: `d2_budget_v1.json`, `d_series_programme_budget.json`.
 - **Stage W built and rehearsed at $0** (executable commit `4248d7db`):
   W1–W6 on Stage V's infrastructure, no B rebuild; the CPU rehearsal runs the
   driver's own `main()`. The D2 search's scored_v1 gate now needs stage W's
   evidence (Stage V's PASS was version 2's).
-- **GRANTED 2026-10-14 17:01 UTC:** the v3 GPU validation, $0.28 expected,
-  $0.92 cap, **$1.22 cumulative** (`validations/d2v3-gpu-validation/v1/
-  authorization.json`), executable commit `4248d7db`. A GO / HOLD / NO-GO
-  rubric is registered in its plan before any result.
+- **Stage W EXECUTED 2026-10-14:** run `d2v3val_20261014_170824`, **$0.2538**
+  of the $1.22 grant. The campaign is CLOSED.
+  - **Validation FAIL, not adopted.** The arithmetic gate `kl_bounds` failed:
+    175 float32 positions fall outside a `4·eps·|log Z|` slack.
+  - The float64 oracle bounds hold exactly, and every float32 union KL is
+    within its registered tolerance.
+  - Diagnosis: a gate-definition defect (the slack was calibrated on a CPU
+    stand-in). It is not rerun, because fixing it would relax a registered
+    tolerance after the FAIL. Integrity PASS; scored_v1 PASS.
+- **Science (descriptive).**
+  - c_T IQR 0.123 / 0.095, against v2's 0.042–0.055.
+  - Neither the weighting nor the union moves the DEPTH choice (ρ 0.997 and
+    1.000). The root reference alone moves it (26 → 17).
+  - **Recommendation: HOLD.** The maintainer decides between stopping D2 v3
+    and running it as a root-reference search after a prospectively
+    registered bounds gate and a new Stage W grant.
+  - Owner:
+    [`d2v3_stage_w_evidence_review.md`](../stages/stage-1/families/d_series/analyses/d2v3_stage_w_evidence_review.md).
 - Owners:
   - [`d2_d3_objective_design.md` §12](../stages/stage-1/families/d_series/plans/d2_d3_objective_design.md);
   - `logs/budget/decisions.md`, entry for 2026-10-14 (D2 version 3).
@@ -96,14 +115,20 @@ and `logs/budget/decisions.md`.
 - **D2 launch chain built at $0:** typed grant, launcher, pod branch, a soft
   stop taken from `soft_stop_minutes`, and a cache-regression guard. All of
   it is now on preregistration v3.
-- **Open maintainer decisions:**
-  - (granted) the $1.22 v3 GPU validation -- the session follows;
-  - approve preregistration v3;
-  - add `phase_d2` to `funds_formal_sessions_of`;
-  - choose `all_v1` or `scored_v1` (needs v3's own equivalence);
-  - the search price against the cap, and the $10.80 programme shortfall,
-    both re-derived from the v3 validation's measurements;
-  - then the D2 search grant.
+- **Open maintainer decisions, in order:**
+  1. **On the Stage W HOLD:** stop D2 v3, or run it as a root-reference
+     search. Running it needs, first:
+     - a prospectively registered bounds gate;
+     - a new Stage W grant, to obtain an adoptable PASS (the same shape is
+       about $0.28 expected and $1.22 all-in).
+  2. Only if D2 v3 runs:
+     - approve preregistration v3;
+     - add `phase_d2` to `funds_formal_sessions_of`;
+     - choose `all_v1` or `scored_v1`, which needs an adopted v3
+       equivalence;
+     - settle the search price against the cap and the $9.91 programme
+       shortfall, both re-derived from adopted evidence;
+     - then the D2 search grant.
 
 **NEXT ROUND: R0 → D2 → D3 ON A SHARED BEHAVIOURAL EVALUATION (maintainer
 decision, 2026-10-13).** D2/D3 do not retrain B or q2.
@@ -3788,9 +3813,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$127.9624` of `$256.6523` |
-| GPU engineering | `$3.6835` of `$25.0741` |
-| package | `$131.6459` of `$281.7264` |
-| project cap | `$470.5121` spent of `$590.0000`, leaving `$119.4879` |
+| GPU engineering | `$3.4297` of `$25.0741` |
+| package | `$131.3921` of `$281.7264` |
+| project cap | `$470.7659` spent of `$590.0000`, leaving `$119.2341` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 4.** 5 ceilings cost `$150.0000` and the formal allowance has `$127.9624`. Dividing the PACKAGE balance instead gives 4, which is the error: the engineering allowance cannot pay for a formal probe.
 

@@ -11115,3 +11115,59 @@ on a paid pod.
   approval of preregistration v3, any cap change. Preregistration v3
   (`b5281092…`) stays DRAFT; the protocol, K = 200, K = 4, the tolerances and
   the formal topology are frozen for the session.
+
+## 2026-10-14 — D2 v3 Stage W executed: validation FAIL, not adopted, campaign CLOSED ($0.2538 of $1.22)
+
+- **Run.** `d2v3val_20261014_170824` on L40S pod `20ji79950u9arw`
+  ($1.09/h), after two $0 capacity refusals. Executed commit `4248d7db`,
+  which equals the grant's. Provider teardown was confirmed and hashed, and
+  booking is append-only. 0 pods were listed at 17:29:40 UTC. The acquisition
+  loop has exited and no observer is left running.
+- **Verdicts,** recomputed from the measurements and equal to the recorded
+  ones:
+  - arithmetic **FAIL**, on `kl_bounds` only;
+  - integrity PASS;
+  - scored_v1 PASS;
+  - validation **FAIL**.
+- **Adoption is refused,** so the price in force keeps the provisional union
+  terms.
+- **The FAIL.**
+  - 175 of 46,056 float32 positions fall outside the registered
+    `4·eps·|log Z_teacher|` slack, against a registered maximum of 0.
+  - The float64 oracle bounds hold with 0 violations.
+  - Every float32 union KL is within its registered abs + rel tolerance
+    (max 1.15e-4).
+  - **Diagnosis:** the slack was calibrated at $0 on a CPU stand-in (1.6e-5).
+    It is about ten times tighter than the plan's own float32 tolerance for
+    the same quantity, and it has no relative term. This is a gate-definition
+    defect, not an error in the union KL. Every upper-bound violation is
+    provably within the registered tolerance.
+- **No rerun under this grant.** The repair changes a registered tolerance
+  after its FAIL was seen, and the grant forbids relaxing a tolerance post
+  hoc. The FAIL record is kept unchanged. The campaign is CLOSED, and the
+  unspent $0.9662 lapses.
+- **Measured, descriptive:**
+  - c_T IQR 0.123 / 0.095 and ESS 0.975 / 0.981, against v2's 0.042–0.055
+    and ≥ 0.994;
+  - the weighted objective is 84.9% of the raw KL mass, and
+    Spearman(c_T, KL) = −0.72 on W2's child;
+  - DEPTH round 0: parent → root changes the choice from 26 to 17
+    (ρ 0.804);
+  - root teacher-Top-K vs union: identical order;
+  - unweighted vs weighted: ρ 0.997, same choice and same top 3;
+  - FFN full-scope weighted vs D1 narrow: overlap 0.964;
+  - state evaluation: 0 teacher forwards, 5.3 s faster.
+- **Price.**
+  - In force, unchanged: D2 v3 search $12.36 expected, $30.70 bound.
+  - Counterfactual on the measured terms (not adopted): $24.90 all_v1 and
+    $24.21 scored_v1 if the cache holds; $34.53 if it regresses.
+  - Programme at hard: D2 + D3 + a fresh confirmation is now $9.91 short
+    (was $10.87), because the closed campaign counts at its bill.
+- **Recommendation to the maintainer: HOLD.**
+  - Neither the weighting nor the union moves the measured DEPTH selection.
+    A v3 search would mainly re-test the root reference.
+  - Options: stop D2 v3; or run it with that claim boundary after a
+    prospectively registered bounds gate and a new Stage W grant.
+- **Unchanged.** Preregistration v3 (`b5281092…`) stays DRAFT. The D2
+  search, recovery, behaviour, D3 and caps are not authorized.
+- **Owner:** `logs/stages/stage-1/families/d_series/analyses/d2v3_stage_w_evidence_review.md`.

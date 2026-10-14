@@ -2,10 +2,10 @@
  "schema": "aadistill.d_series.programme_budget/v2",
  "_contract": "A DATED planning snapshot of D2, D3 and one fresh independent confirmation against the live limits from the budget authority. Re-derive before every authorization; it permits nothing.",
  "limits": {
-  "project_remaining_usd": 119.4879,
+  "project_remaining_usd": 119.2341,
   "project_cap_usd": 590.0,
   "formal_remaining_usd": 127.9624,
-  "engineering_remaining_usd": 3.6835,
+  "engineering_remaining_usd": 3.4297,
   "per_session_cap_usd": 30.0
  },
  "limits_owner": "scripts/maintenance/consolidation/derive_budget.py (the one budget authority)",
@@ -15,11 +15,11 @@
   "d2_gpu_validation": 1.7,
   "d2v3_gpu_validation": 1.22
  },
- "_engineering_grants_are": "R0, the reference calibration and version 2's D2 GPU validation (granted, closed) and version 3's (PROPOSED, held)",
+ "_engineering_grants_are": "R0, the reference calibration and the D2 GPU validations, versions 2 and 3; each one's state is its campaign's status under `engineering.campaigns`",
  "engineering_fits_allowance": true,
  "engineering": {
-  "expected": 0.28,
-  "hard_with_reserves": 1.22,
+  "expected": 0.0,
+  "hard_with_reserves": 0.0,
   "campaigns": {
    "r0": {
     "grant_usd": 4.0,
@@ -43,10 +43,10 @@
    },
    "d2v3_gpu_validation": {
     "grant_usd": 1.22,
-    "booked_usd": 0,
-    "closed": false,
-    "outstanding_usd": 1.22,
-    "status": "PROPOSED -- not granted: authorization.json does not exist, so engineering_campaign_budget.py refuses and the launcher creates nothing",
+    "booked_usd": 0.2538,
+    "closed": true,
+    "outstanding_usd": 0.0,
+    "status": "COMPLETE and CLOSED -- Stage W validation FAIL, NOT ADOPTED: arithmetic FAIL on kl_bounds alone (175 of 46,056 float32 positions beyond the registered 4*eps*|log Z_teacher| slack; the float64 oracle bounds hold with 0 violations and every float32 union KL is within its registered abs+rel tolerance), integrity PASS, scored_rows_equivalence PASS; run d2v3val_20261014_170824, $0.2538 of the $1.22 grant; provider teardown confirmed and 0 pods listed at 2026-10-14T17:29:40Z; evidence booked by sha256; no rerun under this grant -- the diagnosed repair changes a registered tolerance, which is the maintainer's decision (d2v3_stage_w_evidence_review.md)",
     "owner": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1/campaign.json"
    }
   },
@@ -76,62 +76,62 @@
    "scenarios": {
     "A_d2": {
      "blocks": [
-      "engineering (R0 + reference calibration + the proposed D2 GPU validation)",
+      "engineering (the D-series GPU validations' outstanding grants)",
       "d2"
      ],
-     "expected_usd": 36.22,
-     "hard_with_reserves_usd": 71.83,
+     "expected_usd": 35.94,
+     "hard_with_reserves_usd": 70.61,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 71.83,
-     "project_remaining_after_hard_usd": 47.66,
-     "project_remaining_after_conservative_usd": 47.66,
+     "conservative_planning_usd": 70.61,
+     "project_remaining_after_hard_usd": 48.62,
+     "project_remaining_after_conservative_usd": 48.62,
      "fits_project_at_hard": true,
      "fits_project_conservative": true,
      "fits_project_at_expected": true
     },
     "B_d2_d3": {
      "blocks": [
-      "engineering (R0 + reference calibration + the proposed D2 GPU validation)",
+      "engineering (the D-series GPU validations' outstanding grants)",
       "d2",
       "d3"
      ],
-     "expected_usd": 70.6,
-     "hard_with_reserves_usd": 134.12,
+     "expected_usd": 70.32,
+     "hard_with_reserves_usd": 132.9,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 134.12,
-     "project_remaining_after_hard_usd": -14.63,
-     "project_remaining_after_conservative_usd": -14.63,
+     "conservative_planning_usd": 132.9,
+     "project_remaining_after_hard_usd": -13.67,
+     "project_remaining_after_conservative_usd": -13.67,
      "fits_project_at_hard": false,
      "fits_project_conservative": false,
      "fits_project_at_expected": true
     },
     "C_d2_d3_fresh_confirmation": {
      "blocks": [
-      "engineering (R0 + reference calibration + the proposed D2 GPU validation)",
+      "engineering (the D-series GPU validations' outstanding grants)",
       "d2",
       "d3",
       "fresh_confirmation"
      ],
-     "expected_usd": 82.83,
-     "hard_with_reserves_usd": 149.62,
+     "expected_usd": 82.55,
+     "hard_with_reserves_usd": 148.4,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 149.62,
-     "project_remaining_after_hard_usd": -30.13,
-     "project_remaining_after_conservative_usd": -30.13,
+     "conservative_planning_usd": 148.4,
+     "project_remaining_after_hard_usd": -29.17,
+     "project_remaining_after_conservative_usd": -29.17,
      "fits_project_at_hard": false,
      "fits_project_conservative": false,
      "fits_project_at_expected": true
     }
    },
    "reservation_rule": {
-    "left_after_d2_at_hard_usd": 47.66,
+    "left_after_d2_at_hard_usd": 48.62,
     "needed_for_d3_and_fresh_at_hard_usd": 77.79,
     "satisfied": false,
-    "shortfall_usd": 30.13,
+    "shortfall_usd": 29.17,
     "conservative_with_unverified_estimates": {
      "estimates_usd": 0.0,
      "satisfied": false,
-     "shortfall_usd": 30.13
+     "shortfall_usd": 29.17
     }
    }
   },
@@ -152,62 +152,62 @@
    "scenarios": {
     "A_d2": {
      "blocks": [
-      "engineering (R0 + reference calibration + the proposed D2 GPU validation)",
+      "engineering (the D-series GPU validations' outstanding grants)",
       "d2"
      ],
-     "expected_usd": 36.22,
-     "hard_with_reserves_usd": 62.2,
+     "expected_usd": 35.94,
+     "hard_with_reserves_usd": 60.98,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 62.2,
-     "project_remaining_after_hard_usd": 57.29,
-     "project_remaining_after_conservative_usd": 57.29,
+     "conservative_planning_usd": 60.98,
+     "project_remaining_after_hard_usd": 58.25,
+     "project_remaining_after_conservative_usd": 58.25,
      "fits_project_at_hard": true,
      "fits_project_conservative": true,
      "fits_project_at_expected": true
     },
     "B_d2_d3": {
      "blocks": [
-      "engineering (R0 + reference calibration + the proposed D2 GPU validation)",
+      "engineering (the D-series GPU validations' outstanding grants)",
       "d2",
       "d3"
      ],
-     "expected_usd": 70.6,
-     "hard_with_reserves_usd": 114.86,
+     "expected_usd": 70.32,
+     "hard_with_reserves_usd": 113.64,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 114.86,
-     "project_remaining_after_hard_usd": 4.63,
-     "project_remaining_after_conservative_usd": 4.63,
+     "conservative_planning_usd": 113.64,
+     "project_remaining_after_hard_usd": 5.59,
+     "project_remaining_after_conservative_usd": 5.59,
      "fits_project_at_hard": true,
      "fits_project_conservative": true,
      "fits_project_at_expected": true
     },
     "C_d2_d3_fresh_confirmation": {
      "blocks": [
-      "engineering (R0 + reference calibration + the proposed D2 GPU validation)",
+      "engineering (the D-series GPU validations' outstanding grants)",
       "d2",
       "d3",
       "fresh_confirmation"
      ],
-     "expected_usd": 82.83,
-     "hard_with_reserves_usd": 130.36,
+     "expected_usd": 82.55,
+     "hard_with_reserves_usd": 129.14,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 130.36,
-     "project_remaining_after_hard_usd": -10.87,
-     "project_remaining_after_conservative_usd": -10.87,
+     "conservative_planning_usd": 129.14,
+     "project_remaining_after_hard_usd": -9.91,
+     "project_remaining_after_conservative_usd": -9.91,
      "fits_project_at_hard": false,
      "fits_project_conservative": false,
      "fits_project_at_expected": true
     }
    },
    "reservation_rule": {
-    "left_after_d2_at_hard_usd": 57.29,
+    "left_after_d2_at_hard_usd": 58.25,
     "needed_for_d3_and_fresh_at_hard_usd": 68.16,
     "satisfied": false,
-    "shortfall_usd": 10.87,
+    "shortfall_usd": 9.91,
     "conservative_with_unverified_estimates": {
      "estimates_usd": 0.0,
      "satisfied": false,
-     "shortfall_usd": 10.87
+     "shortfall_usd": 9.91
     }
    }
   }
@@ -218,7 +218,12 @@
    "saves_hard_usd_per_search": 9.63,
    "how": "the reference calibration's stage L DEPTH pair, already in its plan, at no extra session"
   },
-  "measure_the_objective_overhead": "the version-3 GPU validation (a proposal) replaces the provisional UNION terms of D2's price -- per DEPTH candidate, per state evaluation and the union stores -- with measurements; version 2's terms are already Stage V's measurements, and stage L's timing prices D3 only",
+  "measure_the_objective_overhead": {
+   "how": "an ADOPTED version-3 GPU validation (stage W) replaces the provisional UNION terms of D2's price -- per DEPTH candidate, per state evaluation and the union stores -- with measurements; version 2's terms are already Stage V's measurements, and stage L's timing prices D3 only",
+   "stage_w_adopted": false,
+   "stage_w_not_adopted_because": "validation is FAIL, not PASS",
+   "stage_w_evidence_session": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1/runs/d2v3val_20261014_170824/out/adoption_all_v1/adoption.json"
+  },
   "scored_v1_for_version_3": {
    "hard_usd": 29.34,
    "how": "version 3's own scored_v1 equivalence, a step of its GPU validation"

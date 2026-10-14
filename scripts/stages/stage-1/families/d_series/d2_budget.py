@@ -1307,10 +1307,9 @@ def programme_scenarios(limits: dict[str, float],
     eng_exp = sum(
         0.0 if eng_state[n]["closed"] else steps[n]["expected"]["all_in_usd"]
         for n in eng)
-    #: THE REDESIGNED D2's GPU VALIDATION, a PROPOSAL until granted: its
-    #: proposed grant is held as outstanding engineering, so no scenario
-    #: spends money the validation needs. Read from its plan record.
-    #: Version 2's (CLOSED) and version 3's (a PROPOSAL) GPU validations.
+    #: THE D2 GPU VALIDATIONS (versions 2 and 3): an unclosed one's unspent
+    #: grant is held as outstanding engineering, so no scenario spends money
+    #: the validation needs. Read from its plan record and campaign.
     for name, plan_rel, camp_rel in (
             ("d2_gpu_validation", D2_VALIDATION_PLAN, D2_VALIDATION_CAMPAIGN),
             ("d2v3_gpu_validation", D2V3_VALIDATION_PLAN,
@@ -1346,6 +1345,7 @@ def programme_scenarios(limits: dict[str, float],
                    "hard_with_reserves": round(fresh["hard"]["all_in_usd"]
                                                + TEARDOWN_RESERVE_USD, 2),
                    "rescoring_estimate": 0.0}
+    w_ev = d2v3_validation_evidence()
     k2 = build(k_candidates=2)["steps"]["d2_screening"]["hard"]["all_in_usd"]
     k4 = steps["d2_screening"]["hard"]["all_in_usd"]
     search = steps["d2_search"]
@@ -1390,8 +1390,8 @@ def programme_scenarios(limits: dict[str, float],
             #: (1) hard ceilings + teardown reserves -- bounds the launchers
             #: enforce; (2) the rescoring diagnostic -- an UNMEASURED estimate;
             #: (3) their sum -- a conservative planning view, not a ceiling.
-            return {"blocks": ["engineering (R0 + reference calibration + the "
-                       "proposed D2 GPU validation)"]
+            return {"blocks": ["engineering (the D-series GPU validations' "
+                       "outstanding grants)"]
                     + [n for n, _ in blocks],
                     "expected_usd": exp_,
                     "hard_with_reserves_usd": hard_,
@@ -1443,10 +1443,10 @@ def programme_scenarios(limits: dict[str, float],
         "limits_owner": ("scripts/maintenance/consolidation/derive_budget.py "
                          "(the one budget authority)"),
         "engineering_grants": eng,
-        "_engineering_grants_are": ("R0, the reference calibration and "
-                                    "version 2's D2 GPU validation (granted, "
-                                    "closed) and version 3's (PROPOSED, "
-                                    "held)"),
+        "_engineering_grants_are": ("R0, the reference calibration and the "
+                                    "D2 GPU validations, versions 2 and 3; "
+                                    "each one's state is its campaign's "
+                                    "status under `engineering.campaigns`"),
         "engineering_fits_allowance": (engineering["hard_with_reserves"]
                                        <= limits["engineering_remaining_usd"]),
         "engineering": engineering,
@@ -1467,12 +1467,17 @@ def programme_scenarios(limits: dict[str, float],
                     - search["hard_if_cache_fix_validated"]["all_in_usd"], 2),
                 "how": ("the reference calibration's stage L DEPTH pair, "
                         "already in its plan, at no extra session")},
-            "measure_the_objective_overhead": (
-                "the version-3 GPU validation (a proposal) replaces the "
-                "provisional UNION terms of D2's price -- per DEPTH "
-                "candidate, per state evaluation and the union stores -- "
-                "with measurements; version 2's terms are already Stage V's "
-                "measurements, and stage L's timing prices D3 only"),
+            "measure_the_objective_overhead": {
+                "how": ("an ADOPTED version-3 GPU validation (stage W) "
+                        "replaces the provisional UNION terms of D2's price "
+                        "-- per DEPTH candidate, per state evaluation and the "
+                        "union stores -- with measurements; version 2's terms "
+                        "are already Stage V's measurements, and stage L's "
+                        "timing prices D3 only"),
+                #: Derived from the booked evidence, never restated.
+                "stage_w_adopted": w_ev["usable"],
+                "stage_w_not_adopted_because": w_ev.get("why"),
+                "stage_w_evidence_session": w_ev.get("evidence_session")},
             "scored_v1_for_version_3": {
                 "hard_usd": search["hard_if_scored_v1_validated"][
                     "all_in_usd"],

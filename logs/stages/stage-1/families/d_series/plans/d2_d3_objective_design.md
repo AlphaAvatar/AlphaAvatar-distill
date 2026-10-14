@@ -1349,3 +1349,14 @@ candidates are the teacher's own compressed variants.
   it never changes K, the mapping, the tail or the support.
 - **The D2 search's scored_v1 gate now reads stage W's evidence**; Stage V's
   PASS was version 2's and no longer unlocks scored_v1.
+
+**Executed on 2026-10-14:** run `d2v3val_20261014_170824`, $0.2538.
+
+- Validation FAIL on one arithmetic gate. 175 float32 positions fall outside
+  the `4·eps·|log Z|` bound slack, while the float64 oracle bounds hold
+  exactly.
+- Integrity PASS; scored_v1 PASS.
+- Not adopted; the campaign is CLOSED.
+- The diagnosis (a slack calibrated on a CPU stand-in), the five questions,
+  the price in force and the HOLD recommendation are in
+  [`../analyses/d2v3_stage_w_evidence_review.md`](../analyses/d2v3_stage_w_evidence_review.md).
