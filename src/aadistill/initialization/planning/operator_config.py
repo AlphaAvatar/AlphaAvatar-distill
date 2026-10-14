@@ -45,7 +45,14 @@ from typing import Any
 from aadistill.infrastructure.manifest import sha256_json
 from aadistill.initialization.calibration.profiles import consumes_calibration
 from aadistill.initialization.scoring.content import scoring_content_config
-from aadistill.initialization.scoring.objective import objective_config
+#: The consumption rules live beside the objective (the operators ask too);
+#: re-exported here for the planning layer's callers.
+from aadistill.initialization.scoring.objective import (  # noqa: F401
+    objective_config,
+    objective_consumed_by,
+    root_reference_needed,
+    statistics_weighted_by_root,
+)
 from aadistill.initialization.scoring.positions import policy_config
 
 #: Keys the EXECUTOR owns and a caller may not declare. `n_calibration_items`
@@ -95,47 +102,6 @@ def distribution_support_config(support: Any) -> dict[str, Any]:
     if support is None or support.is_full_vocab:
         return {}
     return {"distribution_support": support.as_dict()}
-
-
-def objective_consumed_by(implementation: Any, objective: Any) -> bool:
-    """Whether `implementation`'s SELECTION reads `objective`. One rule.
-
-    A KL-scored operator (`consumes_scoring_objective`) reads any objective.
-    An activation-statistics operator (`consumes_reference_weighted_statistics`)
-    reads one only when that objective weights the activation statistics by
-    the root reference's confidence -- under every other objective its
-    statistics, and so its child, are the historical ones, and its config must
-    not move.
-    """
-    if objective is None:
-        return False
-    if getattr(implementation, "consumes_scoring_objective", False):
-        return True
-    return bool(getattr(implementation, "consumes_reference_weighted_statistics",
-                        False)
-                and getattr(objective, "weights_activation_statistics", False))
-
-
-def statistics_weighted_by_root(implementation: Any, objective: Any) -> bool:
-    """Whether `implementation`'s activation statistics are weighted by the
-    root reference's confidence under `objective`."""
-    return bool(objective is not None
-                and getattr(objective, "weights_activation_statistics", False)
-                and getattr(implementation,
-                            "consumes_reference_weighted_statistics", False))
-
-
-def root_reference_needed(implementation: Any, objective: Any) -> bool:
-    """Whether an invocation of `implementation` must be handed the ROOT
-    reference store: a KL-scored operator under an objective whose reference
-    is the root, or a weighted-statistics operator under an objective that
-    weights them. One rule for the search, the fixed-path replay and
-    `OperatorImplementation.execute`."""
-    if objective is None:
-        return False
-    return bool((getattr(implementation, "consumes_scoring_objective", False)
-                 and getattr(objective, "requires_root_reference", False))
-                or statistics_weighted_by_root(implementation, objective))
 
 
 def scoring_objective_config(implementation: Any,

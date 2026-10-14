@@ -60,7 +60,7 @@ def statistics_positions(ctx: Any, impl: Any) -> Any:
     policy alone, exactly as before. One helper so FFN, WIDTH and ATTENTION
     cannot each decide differently which statistic is weighted.
     """
-    from aadistill.initialization.planning.operator_config import (
+    from aadistill.initialization.scoring.objective import (
         statistics_weighted_by_root,
     )
     from aadistill.initialization.scoring.batches import active_positions

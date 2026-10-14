@@ -278,6 +278,51 @@ class ScoringObjective:
         return kl - reward, reward
 
 
+#: WHICH IMPLEMENTATION READS AN OBJECTIVE, AND WHICH NEEDS THE ROOT. Here,
+#: beside the objective, because both the operators and the planning layer
+#: ask -- and an operators -> planning import would be a package cycle.
+def objective_consumed_by(implementation: Any, objective: Any) -> bool:
+    """Whether `implementation`'s SELECTION reads `objective`. One rule.
+
+    A KL-scored operator (`consumes_scoring_objective`) reads any objective.
+    An activation-statistics operator (`consumes_reference_weighted_statistics`)
+    reads one only when that objective weights the activation statistics by
+    the root reference's confidence -- under every other objective its
+    statistics, and so its child, are the historical ones, and its config must
+    not move.
+    """
+    if objective is None:
+        return False
+    if getattr(implementation, "consumes_scoring_objective", False):
+        return True
+    return bool(getattr(implementation, "consumes_reference_weighted_statistics",
+                        False)
+                and getattr(objective, "weights_activation_statistics", False))
+
+
+def statistics_weighted_by_root(implementation: Any, objective: Any) -> bool:
+    """Whether `implementation`'s activation statistics are weighted by the
+    root reference's confidence under `objective`."""
+    return bool(objective is not None
+                and getattr(objective, "weights_activation_statistics", False)
+                and getattr(implementation,
+                            "consumes_reference_weighted_statistics", False))
+
+
+def root_reference_needed(implementation: Any, objective: Any) -> bool:
+    """Whether an invocation of `implementation` must be handed the ROOT
+    reference store: a KL-scored operator under an objective whose reference
+    is the root, or a weighted-statistics operator under an objective that
+    weights them. One rule for the search, the fixed-path replay and
+    `OperatorImplementation.execute`."""
+    if objective is None:
+        return False
+    return bool((getattr(implementation, "consumes_scoring_objective", False)
+                 and getattr(objective, "requires_root_reference", False))
+                or statistics_weighted_by_root(implementation, objective))
+
+
+
 def objective_config(objective: ScoringObjective | None) -> dict[str, Any]:
     """An objective as hashed config, or ``{}`` when none is declared."""
     if objective is None:
@@ -564,5 +609,6 @@ __all__ = ["AGGREGATION", "COMPONENTS", "CONFIDENCE_BINS",
            "confidence_from_entropy", "confidence_from_vocabulary_entropy",
            "confidence_histogram", "fixed_denominator_item_means",
            "full_vocabulary_entropy", "item_component_means",
-           "objective_config", "position_terms",
-           "require_binary_scoring_weights", "student_topk_terms"]
+           "objective_config", "objective_consumed_by", "position_terms",
+           "require_binary_scoring_weights", "root_reference_needed",
+           "statistics_weighted_by_root", "student_topk_terms"]

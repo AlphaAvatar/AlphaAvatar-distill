@@ -447,7 +447,7 @@ class BeamSearch:
         #: ONE ROOT REFERENCE STORE PER PROFILE, built from the root on first
         #: need and kept for the run: nothing in it depends on a candidate, and
         #: rebuilding it per expansion would re-forward the root over the
-        #: mixture for every DEPTH invocation and every weighted statistics
+        #: mixture for every KL-scored invocation and every weighted statistics
         #: pass. Evidence for each (identity, content digest, build seconds,
         #: confidence distribution) is in `root_reference_evidence()`.
         self._root_references: dict[str, Any] = {}
@@ -627,7 +627,7 @@ class BeamSearch:
     def root_reference_for(self, profile: CalibrationProfile) -> Any:
         """The ROOT's reference store over ``profile``'s mixture, built once.
 
-        From the root model whatever the parent being expanded: a DEPTH
+        From the root model whatever the parent being expanded: a KL-scored
         expansion three levels down still measures its candidates against the
         frozen original, and the statistics weights are the original's
         confidence, never a compressed parent's.
@@ -1033,7 +1033,7 @@ class BeamSearch:
             reference_cache=dict(outcome.artifacts.get("reference_cache", {})),
             reference_counters=dict(outcome.artifacts.get("reference_counters", {})),
             #: ABSENT unless the operator kept a second, diagnostic reference
-            #: (DEPTH under a root-reference objective), so every historical
+            #: (a KL-scored operator under a root-reference objective), so every historical
             #: row keeps its shape.
             **({"parent_reference_cache":
                     dict(outcome.artifacts["parent_reference_cache"])}

@@ -75,7 +75,7 @@
   "authorizes": "nothing",
   "behavioural_design": "D1 (complete): Top-4, 10 + 6 probes, owner d1_design.json. D2: shared protocol, K=4 prepared, 8 + 3 probes, no B/q2 training, owner families/d_series/plans/d2_budget_v1.json.",
   "behavioural_pricing": "Owner: d1_design.json :: budget.chain; attempt bounds: the run's governance/authorization.json :: money.attempt_bounds.",
-  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2 (redesigned 2026-10-14): search not authorized; pending the D2 GPU validation grant, prereg v2 approval, phase_d2 in funds_formal_sessions_of and the search grant. Owner: decisions.md 2026-10-14.",
+  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2 (redesigned 2026-10-14): the search awaits the D2 GPU validation grant, prereg v2 approval, phase_d2 in funds_formal_sessions_of and its own grant. Owner: decisions.md 2026-10-14.",
   "d2_owed_engineering": "D2 GPU validation (proposal, plans/d2_gpu_validation_plan.json); behavioural driver with the token-id wrapper and rescoring.",
   "execution_wiring": "D1 COMPLETE and CLOSED. D2 redesigned (contract rev 6): root store, weighted statistics, $0-tested; R0/stage L evidence: d2_gpu_evidence_review.md.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
@@ -157,7 +157,7 @@
    "blocker": "none; see the top-level blocker.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line."
   },
   "c2": {

@@ -370,9 +370,11 @@ def statistics_denominator(state: dict[str, torch.Tensor],
     """What a mean over this state divides by: ``sum_t w_t`` when the pass was
     weighted, else the integer position count -- the one place the choice is
     made, so the three divisor call sites cannot disagree."""
+    #: No tensor factory here: the state's own tensors are read in place, so
+    #: nothing is allocated off the statistics' device.
     if weight_key in state:
-        return float(torch.as_tensor(state[weight_key]).reshape(-1)[0])
-    return int(torch.as_tensor(state[count_key]).reshape(-1)[0])
+        return float(state[weight_key].reshape(-1)[0])
+    return int(state[count_key].reshape(-1)[0])
 
 
 def _ffn_out_projections_via_adapter(model):

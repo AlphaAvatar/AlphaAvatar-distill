@@ -382,7 +382,7 @@ class OperatorImplementation(ABC):
         #: that consumes one must be handed the object its config declares; one
         #: that does not must not declare it, because its state id would then
         #: name an objective its selection never read.
-        from aadistill.initialization.planning.operator_config import (
+        from aadistill.initialization.scoring.objective import (
             objective_consumed_by,
             root_reference_needed,
         )
