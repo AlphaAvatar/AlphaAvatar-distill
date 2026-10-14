@@ -13,8 +13,8 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 (2026-10-13 17:51 UTC, after the reference calibration's confirmed teardown).
 
 **D2 REDESIGNED (maintainer scientific decision, 2026-10-14; contract
-revision 6, preregistration v2 DRAFT).** The decision covers protocol work and
-$0 engineering only.
+revision 7, preregistration v2 DRAFT `721ffddc…`).** The decision covers
+protocol work and $0 engineering only.
 - **The new objective.** D2 minimizes
   `(1/T_x) Σ c_T(t) KL(p_T ‖ q_C)_t`, where `c_T = 1 − H_T/log|V|` is the
   frozen original teacher's full-vocabulary confidence.
@@ -25,12 +25,22 @@ $0 engineering only.
   - D2 declares two changes from D1, not one variable.
 - **What it supersedes.** The student-uncertainty D2 (`063bafd4…`) and
   preregistration v1 (`489f49ba…`) are SUPERSEDED -- NEVER EXECUTED.
-- **What is implemented.** Root reference store, weighted statistics,
-  validity checks and CPU tests are built. Every new cost term is provisional.
+- **What is implemented.**
+  - Root reference store, weighted statistics, validity checks and CPU tests
+    are built.
+  - The GPU validation is executable as stage V of the Top-K adoption driver,
+    on the stage-L/R0 launcher and campaign chain. It is run end to end on a
+    CPU toy.
+  - Every new cost term is provisional.
+- **Numeric acceptance is registered in three classes:**
+  - arithmetic on identical inputs (gated);
+  - bsz=1 vs bsz=3 drift (reported only);
+  - all_v1 vs scored_v1 at the formal bsz=3 (R0's tolerances).
 - **Price.**
   - D2 search: $11.25 expected, $25.24 bound.
-  - D2 GPU validation (a proposal): $1.35 bound, grant $1.65.
-  - Programme: D2 + D3 fits; adding a fresh confirmation is short by $5.19
+  - D2 GPU validation, PROPOSED and not granted: $0.77 expected, a $1.40 cap,
+    a $1.70 grant.
+  - Programme: D2 + D3 fits; adding a fresh confirmation is short by $5.24
     at hard.
 - Owners:
   - [`d2_d3_objective_design.md` §11](../stages/stage-1/families/d_series/plans/d2_d3_objective_design.md);
@@ -86,11 +96,12 @@ and `logs/budget/decisions.md`.
   stop taken from `soft_stop_minutes`, and a cache-regression guard. All of
   it is now on preregistration v2.
 - **Open maintainer decisions:**
-  - the D2 GPU validation grant (a proposal);
+  - the D2 GPU validation grant (a proposal, $1.70:
+    `validations/d2-gpu-validation/v1/authorization.proposed.json`);
   - approve preregistration v2;
   - add `phase_d2` to `funds_formal_sessions_of`;
   - choose `all_v1` or `scored_v1` (scored_v1 needs the new validation);
-  - handle the $5.19 shortfall;
+  - handle the $5.24 shortfall;
   - then the D2 search grant.
 
 **NEXT ROUND: R0 → D2 → D3 ON A SHARED BEHAVIOURAL EVALUATION (maintainer

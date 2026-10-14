@@ -76,14 +76,14 @@
   "behavioural_design": "D1 (complete): Top-4, 10 + 6 probes, owner d1_design.json. D2: shared protocol, K=4 prepared, 8 + 3 probes, no B/q2 training, owner families/d_series/plans/d2_budget_v1.json.",
   "behavioural_pricing": "Owner: d1_design.json :: budget.chain; attempt bounds: the run's governance/authorization.json :: money.attempt_bounds.",
   "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2 (redesigned 2026-10-14): the search awaits the D2 GPU validation grant, prereg v2 approval, phase_d2 in funds_formal_sessions_of and its own grant. Owner: decisions.md 2026-10-14.",
-  "d2_owed_engineering": "D2 GPU validation (proposal, plans/d2_gpu_validation_plan.json); behavioural driver with the token-id wrapper and rescoring.",
+  "d2_owed_engineering": "D2 GPU validation executable (stage V; proposal validations/d2-gpu-validation/v1, not granted); behavioural driver with the token-id wrapper and rescoring.",
   "execution_wiring": "D1 COMPLETE and CLOSED. D2 redesigned (contract rev 6): root store, weighted statistics, $0-tested; R0/stage L evidence: d2_gpu_evidence_review.md.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
   "incumbent": "B = C1's PROMOTED TREATMENT, 53e30566..., attention.activation_importance_v1; state_id null, built as a fixed path, rebuilt on the pod. DERIVED from C1's verdict by phase_d_series/incumbent.py. The design named C1's BEATEN arm c313d1b4... until 2026-10-08. Owner: phase_d1/analyses/d1_control_arm_identity.json.",
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
   "scoring_protocol": "reference_topk_tail_v1, K=200: reference-defined support plus one K+1 tail bucket from the COMPLEMENT's logits, carried by SearchConfig.distribution_support -- an OPTIONAL term, absent under the historical full-vocab contract, folded into one measurement_protocol_id. Owner: scripts/stages/stage-1/families/d_series/scoring_protocol.py",
   "seeds": "MATERIALIZED and HASH-BOUND in plans/d1_behavioural_preregistration.json (2 screening, 3 confirmation, 6 exclusions), before any candidate result exists. Owner: the preregistration.",
-  "state": "D1 COMPLETE / NO-GO. D2 REDESIGNED (079031e3, prereg v2 DRAFT; v1 SUPERSEDED, never executed), $25.24 search bound, not authorized; D3 lambda 7.34 FROZEN (7b254538). Owner: phase_d2/plans/, families/d_series/plans/."
+  "state": "D1 COMPLETE / NO-GO. D2 REDESIGNED (079031e3, contract rev 7, prereg v2 DRAFT 721ffddc; v1 SUPERSEDED, never executed), $25.24 search bound, not authorized; D3 lambda 7.34 FROZEN (7b254538). Owner: phase_d2/plans/, families/d_series/plans/."
  },
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
  "dirty": false,
@@ -127,7 +127,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "D2 redesigned 2026-10-14 (teacher-confidence-weighted root KL, full scope). Next: grant or decline the D2 GPU validation ($1.65), then prereg v2 approval. Owner: decisions.md, d2_d3_objective_design.md s11.",
+ "next": "D2 redesigned 2026-10-14 (teacher-confidence-weighted root KL, full scope). Next: grant or decline the D2 GPU validation ($1.70 proposal), then prereg v2 approval. Owner: decisions.md, d2_d3_objective_design.md s11.6.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Maintainer: approve D2 preregistration 489f49ba, add phase_d2 to funds_formal_sessions_of, choose rows, decide the $0.68 programme shortfall, then grant the D2 search.",
@@ -157,7 +157,7 @@
    "blocker": "none; see the top-level blocker.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line."
   },
   "c2": {

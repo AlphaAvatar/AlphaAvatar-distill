@@ -1,0 +1,26 @@
+{
+ "schema": "aadistill.engineering_authorization/v1",
+ "authorization_id": "d_series_d2_gpu_validation",
+ "book": "ENGINEERING",
+ "status": "PROPOSED -- NOT GRANTED",
+ "all_in_ceiling_usd": 1.7,
+ "session_cap_usd": 1.4,
+ "_ceiling_composition": "setup and every core step at its bound ($1.4, 76.4 min at $1.09/h incl. disk), rounded up to the cent, + the $0.3 teardown reserve",
+ "rate_basis_usd_per_hour": 1.09,
+ "rate_rule": "re-quoted live at launch; the launcher derives the session ceiling and timeout from the live rate and refuses if the cap no longer buys the work",
+ "covers": [
+  "stage V of topk_adoption_driver.py on one L40S pod: the steps of plan.json, nothing else"
+ ],
+ "does_not_cover": [
+  "a D2 search, recovery training or a behavioural probe",
+  "a second pod for a failed step without a recorded engineering cause",
+  "any spend above the all-in ceiling, cumulative across subruns"
+ ],
+ "plan": "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/plan.json",
+ "plan_sha256": "531944eed6448dccfd4cd0acd6e82ee5af6f1a0fd35cf469133d8d82135ecd86",
+ "campaign": "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/campaign.json",
+ "command": "ADOPT_CAMPAIGN=logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/campaign.json ADOPT_COMMIT=<this grant's commit> ADOPT_BRANCH=exec/d1-behavioural-readiness ADOPT_STAGES=V ADOPT_PREDICTION_ROWS=all_v1 SESSION_CAP=1.40 bash scripts/stages/stage-1/phase_d1/topk_adoption_launch.sh d2val_<utc>",
+ "activation": "the maintainer's grant is recorded by writing this record as authorization.json with status GRANTED, granted_utc and granted_by; until then engineering_campaign_budget.py cannot read a ceiling and the launcher creates nothing",
+ "on_ordinary_failure": "repair and retry inside this ceiling (AGENTS.md P12.1); a deterministic paid failure is never retried unchanged",
+ "authorizes": "nothing -- a proposal"
+}

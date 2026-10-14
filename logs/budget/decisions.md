@@ -10860,3 +10860,44 @@ on a paid pod.
   - Approve preregistration v2.
   - Add `phase_d2` to `funds_formal_sessions_of`.
   - Decide the $5.19 programme shortfall.
+
+## 2026-10-14 — D2 revision-6 review: contract revision 7, the GPU validation chain, its acceptance protocol
+
+- **Context.** An independent review of `16d67285` passed the D2 redesign in
+  principle and asked for $0 engineering before any paid validation. The
+  review is not a paid authorization.
+- **Contract revision 7 (`9ad4ec23…`).**
+  - D2 and D3 each own their objective, motivation, scope, where-it-applies,
+    diagnostics and claim boundary.
+  - Revision 6 still described the student's Top-200 confidence as a shared
+    signal, and FFN/WIDTH/ATTENTION as never consuming an objective.
+  - The D2 objective (`079031e3…`), D3 (`7b254538…`, λ = 7.34), the ranking
+    and the rules are unchanged.
+- **Preregistration v2** is regenerated as `721ffddc…`, still DRAFT. The
+  superseded draft `317596c4…` is recorded under `superseded_drafts`.
+- **The GPU validation is stage V of `topk_adoption_driver.py`**
+  (`phase_d2/d2_gpu_validation.py`). It runs on the stage-L/R0 launcher,
+  remote payload, campaign and watchdog chain.
+  - Booking moved in-tree: `scripts/shared/pod/book_engineering_subrun.py`.
+  - The plan, proposed grant and campaign are in
+    `families/d_series/validations/d2-gpu-validation/v1/`. That moves the plan
+    from `phase_d2/plans/d2_gpu_validation_plan.json`.
+- **Numeric acceptance is registered in three classes:**
+  - **arithmetic on identical inputs** (gated);
+  - **bsz=1 vs bsz=3 execution drift** (reported, never gated);
+  - **all_v1 vs scored_v1 at the formal bsz=3** (R0's tolerances; decides
+    scored_v1 only).
+
+  Integrity is gated. The diagnostics are recorded as measured and never
+  change a definition.
+- **Proposed grant.** Not granted.
+  - $0.77 expected and a $1.40 session cap, which covers the core steps at
+    their bounds.
+  - $1.70 all-in, with the $0.30 reserve.
+  - This is $0.05 above the earlier proposal: V4/V5 now price the round-0
+    parent-KL diagnostic.
+  - The programme shortfall (D2 + D3 + fresh confirmation, at hard) is
+    $5.24.
+- **Next.** The maintainer decides whether to grant the $1.70 engineering
+  validation. It is written as `authorization.json` from the proposal; the
+  launch command is in the proposal.

@@ -12,13 +12,13 @@
  "engineering_grants": {
   "r0": 4.0,
   "reference_calibration": 1.76,
-  "d2_gpu_validation": 1.65
+  "d2_gpu_validation": 1.7
  },
  "_engineering_grants_are": "R0 and the reference calibration (granted, closed) and the D2 GPU validation (PROPOSED, held)",
  "engineering_fits_allowance": true,
  "engineering": {
-  "expected": 0.72,
-  "hard_with_reserves": 1.65,
+  "expected": 0.77,
+  "hard_with_reserves": 1.7,
   "campaigns": {
    "r0": {
     "grant_usd": 4.0,
@@ -33,12 +33,12 @@
     "outstanding_usd": 0.0
    },
    "d2_gpu_validation": {
-    "grant_usd": 1.65,
+    "grant_usd": 1.7,
     "booked_usd": 0.0,
     "closed": false,
-    "outstanding_usd": 1.65,
-    "status": "PROPOSAL -- not granted, not run",
-    "owner": "logs/stages/stage-1/phase_d2/plans/d2_gpu_validation_plan.json"
+    "outstanding_usd": 1.7,
+    "status": "PROPOSAL -- registered, not granted, not run (authorization.proposed.json)",
+    "owner": "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/plan.json"
    }
   },
   "_closed_campaigns_are": "already inside the live limits through their recorded cost"
@@ -70,12 +70,12 @@
       "engineering (R0 + reference calibration + the proposed D2 GPU validation)",
       "d2"
      ],
-     "expected_usd": 35.55,
-     "hard_with_reserves_usd": 66.8,
+     "expected_usd": 35.6,
+     "hard_with_reserves_usd": 66.85,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 66.8,
-     "project_remaining_after_hard_usd": 53.34,
-     "project_remaining_after_conservative_usd": 53.34,
+     "conservative_planning_usd": 66.85,
+     "project_remaining_after_hard_usd": 53.29,
+     "project_remaining_after_conservative_usd": 53.29,
      "fits_project_at_hard": true,
      "fits_project_conservative": true,
      "fits_project_at_expected": true
@@ -86,12 +86,12 @@
       "d2",
       "d3"
      ],
-     "expected_usd": 69.93,
-     "hard_with_reserves_usd": 129.09,
+     "expected_usd": 69.98,
+     "hard_with_reserves_usd": 129.14,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 129.09,
-     "project_remaining_after_hard_usd": -8.95,
-     "project_remaining_after_conservative_usd": -8.95,
+     "conservative_planning_usd": 129.14,
+     "project_remaining_after_hard_usd": -9.0,
+     "project_remaining_after_conservative_usd": -9.0,
      "fits_project_at_hard": false,
      "fits_project_conservative": false,
      "fits_project_at_expected": true
@@ -103,26 +103,26 @@
       "d3",
       "fresh_confirmation"
      ],
-     "expected_usd": 82.16,
-     "hard_with_reserves_usd": 144.59,
+     "expected_usd": 82.21,
+     "hard_with_reserves_usd": 144.64,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 144.59,
-     "project_remaining_after_hard_usd": -24.45,
-     "project_remaining_after_conservative_usd": -24.45,
+     "conservative_planning_usd": 144.64,
+     "project_remaining_after_hard_usd": -24.5,
+     "project_remaining_after_conservative_usd": -24.5,
      "fits_project_at_hard": false,
      "fits_project_conservative": false,
      "fits_project_at_expected": true
     }
    },
    "reservation_rule": {
-    "left_after_d2_at_hard_usd": 53.34,
+    "left_after_d2_at_hard_usd": 53.29,
     "needed_for_d3_and_fresh_at_hard_usd": 77.79,
     "satisfied": false,
-    "shortfall_usd": 24.45,
+    "shortfall_usd": 24.5,
     "conservative_with_unverified_estimates": {
      "estimates_usd": 0.0,
      "satisfied": false,
-     "shortfall_usd": 24.45
+     "shortfall_usd": 24.5
     }
    }
   },
@@ -146,12 +146,12 @@
       "engineering (R0 + reference calibration + the proposed D2 GPU validation)",
       "d2"
      ],
-     "expected_usd": 35.55,
-     "hard_with_reserves_usd": 57.17,
+     "expected_usd": 35.6,
+     "hard_with_reserves_usd": 57.22,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 57.17,
-     "project_remaining_after_hard_usd": 62.97,
-     "project_remaining_after_conservative_usd": 62.97,
+     "conservative_planning_usd": 57.22,
+     "project_remaining_after_hard_usd": 62.92,
+     "project_remaining_after_conservative_usd": 62.92,
      "fits_project_at_hard": true,
      "fits_project_conservative": true,
      "fits_project_at_expected": true
@@ -162,12 +162,12 @@
       "d2",
       "d3"
      ],
-     "expected_usd": 69.93,
-     "hard_with_reserves_usd": 109.83,
+     "expected_usd": 69.98,
+     "hard_with_reserves_usd": 109.88,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 109.83,
-     "project_remaining_after_hard_usd": 10.31,
-     "project_remaining_after_conservative_usd": 10.31,
+     "conservative_planning_usd": 109.88,
+     "project_remaining_after_hard_usd": 10.26,
+     "project_remaining_after_conservative_usd": 10.26,
      "fits_project_at_hard": true,
      "fits_project_conservative": true,
      "fits_project_at_expected": true
@@ -179,26 +179,26 @@
       "d3",
       "fresh_confirmation"
      ],
-     "expected_usd": 82.16,
-     "hard_with_reserves_usd": 125.33,
+     "expected_usd": 82.21,
+     "hard_with_reserves_usd": 125.38,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 125.33,
-     "project_remaining_after_hard_usd": -5.19,
-     "project_remaining_after_conservative_usd": -5.19,
+     "conservative_planning_usd": 125.38,
+     "project_remaining_after_hard_usd": -5.24,
+     "project_remaining_after_conservative_usd": -5.24,
      "fits_project_at_hard": false,
      "fits_project_conservative": false,
      "fits_project_at_expected": true
     }
    },
    "reservation_rule": {
-    "left_after_d2_at_hard_usd": 62.97,
+    "left_after_d2_at_hard_usd": 62.92,
     "needed_for_d3_and_fresh_at_hard_usd": 68.16,
     "satisfied": false,
-    "shortfall_usd": 5.19,
+    "shortfall_usd": 5.24,
     "conservative_with_unverified_estimates": {
      "estimates_usd": 0.0,
      "satisfied": false,
-     "shortfall_usd": 5.19
+     "shortfall_usd": 5.24
     }
    }
   }

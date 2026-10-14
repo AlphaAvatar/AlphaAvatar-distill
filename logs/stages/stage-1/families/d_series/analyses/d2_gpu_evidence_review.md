@@ -7,7 +7,7 @@
 > prices **D3**, which does the same student Top-K entropy work, and never
 > the redesigned D2. The redesigned D2 is priced provisionally until its own
 > GPU validation runs
-> ([`../../../phase_d2/plans/d2_gpu_validation_plan.json`](../../../phase_d2/plans/d2_gpu_validation_plan.json)).
+> ([`../validations/d2-gpu-validation/v1/plan.json`](../validations/d2-gpu-validation/v1/plan.json)).
 > Objective-independent findings still hold: R0's PASS, the validated cache
 > fix, λ, the thresholds and the rescoring cost.
 

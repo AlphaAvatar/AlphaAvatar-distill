@@ -42,7 +42,7 @@
    "the candidate cannot affect c_T"
   ],
   "contract": "logs/stages/stage-1/families/d_series/plans/d2_d3_objective_contract_v1.json",
-  "contract_hash": "741cd5c5faa433285741b4b44d6fe07d30df2f1191ca6f5f71a1e6f3e48c5493",
+  "contract_hash": "9ad4ec233dd0ca0f6896f3dc4fb6eab728ed162854299c7d74dd4ee0b9e5b0c0",
   "scope": {
    "frozen_scope": "full",
    "acts_directly_on": [
@@ -88,6 +88,12 @@
     ],
     "blockers": "none found; the full scope is frozen"
    }
+  },
+  "where_it_applies": {
+   "depth.causal_kl_greedy_v1": "OPERATOR-LOCAL: the candidate is the parent with S bypassed; its KL against the ROOT's stored sketch, weighted by the root's stored confidence",
+   "ffn / residual_width / attention activation operators": "FULL SCOPE: their activation statistics are weighted by the frozen teacher's confidence, which needs no candidate; their configs declare the objective and their state ids fork from D1's",
+   "state evaluation": "every child, against the original teacher, weighted by the teacher's own confidence",
+   "beam ranking and pruning": "beam.pareto_scoring_objective@v1"
   },
   "aggregation_control": {
    "issue": "revision 2 averaged state-evaluation items EQUALLY, where D1's KL-only state metrics weight items by scored positions within a sub-type and pool critical classes over items. That changed length weighting as well as the integrand, so a D1-vs-D2 ranking change could not be attributed to confidence",
@@ -381,7 +387,7 @@
   {
    "what": "the D2 GPU validation (a proposal; its own grant)",
    "why": "the redesigned objective is unmeasured on a GPU: root store build on both profiles and the teacher-confidence validity checks; root-vs-parent DEPTH on a compressed parent; batch 1 vs 3; all_v1 vs scored_v1 for THIS objective; the weighted FFN/WIDTH/ATTENTION statistics; state-evaluation cost. Its measurements replace the provisional terms of the search price",
-   "owner": "logs/stages/stage-1/phase_d2/plans/d2_gpu_validation_plan.json"
+   "owner": "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/plan.json"
   },
   {
    "what": "maintainer approval of this preregistration",
@@ -403,30 +409,46 @@
   }
  ],
  "claim_boundary": {
-  "goal": "structural initializations that, under the capacity limit, help the student keep and recover its own effective reasoning",
-  "not_the_goal": [
-   "maximizing student confidence",
-   "minimizing KL to the teacher"
-  ],
-  "may_claim": [
-   "a D2/D3 candidate's endpoint result against B on the shared protocol, with that protocol's limits (SHARED_GO nominates, never promotes)",
-   "descriptive rollout and rescoring diagnostics of the candidates that were actually measured, labelled exploratory"
-  ],
-  "may_not_claim": [
-   "that a lower D2/D3 search objective means better reasoning or higher fidelity",
-   "that the student reasons differently, or better, where it is confident and far from the teacher, without rollout-level evidence linking those positions to correct completions",
-   "any confidence or per-position statement about B or q2, whose checkpoints are retired and whose generations carry no log-probabilities",
-   "a mechanism from the exploratory diagnostics alone",
-   "that the local selection rules of all four operators use student confidence (only DEPTH's does, under D3; see objective_scope)",
-   "that D2 differs from D1 by one variable: it declares two changes, the DEPTH reference (parent -> root) and the teacher-confidence weighting (d2.declared_changes)",
-   "that a lower D2 objective means the student is closer to the teacher: it down-weights the teacher's uncertain positions by construction",
-   "that confidence read on intermediate search candidates describes the final recovered student's capacity adaptation",
-   "that the family-wise bound across D1-D3 is an unconditional guarantee: it is a nominal accounting bound, conditional on each test's nominal level, which adaptive reuse of the observed confirmation data can violate"
-  ],
-  "validation": "Top-K confidence is a proxy for structure selection; its usefulness is established only by independent behavioural evidence after recovery training"
+  "shared_with_d3": {
+   "goal": "structural initializations that, under the capacity limit, help the student keep and recover its own effective reasoning",
+   "not_the_goal": [
+    "maximizing student confidence",
+    "minimizing KL to the teacher"
+   ],
+   "may_claim": [
+    "a D2/D3 candidate's endpoint result against B on the shared protocol, with that protocol's limits (SHARED_GO nominates, never promotes)",
+    "descriptive rollout and rescoring diagnostics of the candidates that were actually measured, labelled exploratory"
+   ],
+   "may_not_claim": [
+    "that a lower D2/D3 search objective means better reasoning or higher fidelity",
+    "any confidence or per-position statement about B or q2, whose checkpoints are retired and whose generations carry no log-probabilities",
+    "a mechanism from the exploratory diagnostics alone",
+    "that the family-wise bound across D1-D3 is an unconditional guarantee: it is a nominal accounting bound, conditional on each test's nominal level, which adaptive reuse of the observed confirmation data can violate"
+   ],
+   "validation": "each objective's confidence signal is a proxy for structure selection; its usefulness is established only by independent behavioural evidence after recovery training"
+  },
+  "d2": {
+   "may_not_claim": [
+    "that D2 differs from D1 by one variable: it declares two changes, the DEPTH reference (parent -> root) and the teacher-confidence weighting (d2.declared_changes)",
+    "that a lower D2 objective means the student is closer to the teacher: it down-weights the teacher's uncertain positions by construction",
+    "that the teacher's confident positions are the ones that matter for reasoning, without behavioural evidence after recovery",
+    "that the full-scope weighting changed an FFN, WIDTH or ATTENTION selection, unless a measured selection overlap shows it",
+    "that D2 reads any student confidence: its weight is the frozen teacher's and no candidate can move it"
+   ]
+  }
  },
  "status": "DRAFT -- not approved, not authorized; supersedes v1 (never executed)",
- "preregistration_hash": "317596c4921e7d8bf77745d963581346582cf5f8128a84bffe388ddb0a8bcc03",
+ "superseded_drafts": [
+  {
+   "preregistration_hash": "317596c4921e7d8bf77745d963581346582cf5f8128a84bffe388ddb0a8bcc03",
+   "contract_hash": "741cd5c5faa433285741b4b44d6fe07d30df2f1191ca6f5f71a1e6f3e48c5493",
+   "commit": "16d6728583adbcbb69abf738d9d171b850abbe45",
+   "superseded_on": "2026-10-14",
+   "why": "independent review of 16d67285: contract revision 7 separates D2's and D3's motivation, scope, diagnostics and claim boundary; the D2 GPU validation's numeric acceptance protocol is registered in three classes. No objective, rule, scope, K or budget figure of D2 changed",
+   "approved": false
+  }
+ ],
+ "preregistration_hash": "721ffddc1b399ad104c9fc0c611ec509bf5bf7f3615ff5e879be2615e8c591dd",
  "budget": {
   "owner": "logs/stages/stage-1/families/d_series/plans/d2_budget_v1.json",
   "steps": {

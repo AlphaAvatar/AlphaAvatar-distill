@@ -80,7 +80,7 @@
   },
   "objectives": {
     "contract": "logs/stages/stage-1/families/d_series/plans/d2_d3_objective_contract_v1.json",
-    "contract_hash": "741cd5c5faa433285741b4b44d6fe07d30df2f1191ca6f5f71a1e6f3e48c5493",
+    "contract_hash": "9ad4ec233dd0ca0f6896f3dc4fb6eab728ed162854299c7d74dd4ee0b9e5b0c0",
     "design": "logs/stages/stage-1/families/d_series/plans/d2_d3_objective_design.md",
     "d2_objective_hash": "079031e3f5ecf0f804b4497c9dce83684c943e4418d10a2606a8caaa0c3c965d",
     "d3_status": "FROZEN"

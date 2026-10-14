@@ -1,6 +1,6 @@
 # D2 / D3 scientific objectives: definition, student identity, implementation
 
-**Status:** contract revision 6 (2026-10-14): **D2 REDESIGNED** by maintainer
+**Status:** contract revision 7 (2026-10-14; revision 6 redesigned D2, revision 7 separated D2's and D3's sections): **D2 REDESIGNED** by maintainer
 scientific decision -- see [§11](#11-d2-revision-6-the-frozen-teachers-confidence-weighting-a-root-reference-kl),
 which is the current D2. The student-uncertainty D2 described in §0-§10
 (`objective.d2_student_uncertainty_weighted_kl@v2`, `063bafd4…`) is
@@ -918,12 +918,12 @@ per-position work, and never the new D2.
 
 | owner | what it holds |
 | --- | --- |
-| [`d2_d3_objective_contract_v1.json`](d2_d3_objective_contract_v1.json), revision 6 | `d2` (the new objective, motivation, two declared changes, scope, diagnostics); `d2_superseded` (the old one, `SUPERSEDED -- NEVER EXECUTED`) |
+| [`d2_d3_objective_contract_v1.json`](d2_d3_objective_contract_v1.json), revision 7 (`9ad4ec23…`) | `d2` and `d3` each own their objective, motivation, scope, where-it-applies, diagnostics and claim boundary (`layout`); shared keys apply to both; `d2_superseded` (the old D2, `SUPERSEDED -- NEVER EXECUTED`) |
 | [`../../../phase_d2/plans/d2_preregistration_v2.json`](../../../phase_d2/plans/d2_preregistration_v2.json) | the frozen design, DRAFT; v1 (`489f49ba…`) is stamped SUPERSEDED with its science and hash intact |
 | `src/aadistill/initialization/scoring/objective.py` | the generic form `reference_confidence_weighted_kl`, the full-vocabulary entropy and the confidence mapping |
 | `src/aadistill/initialization/scoring/reference_store.py` | the ROOT reference store, built once per calibration mixture |
 | `scripts/stages/stage-1/families/d_series/teacher_confidence.py` | the validity checks, descriptive |
-| [`../../../phase_d2/plans/d2_gpu_validation_plan.json`](../../../phase_d2/plans/d2_gpu_validation_plan.json) | the minimal GPU validation: a PROPOSAL, priced, not granted |
+| [`../validations/d2-gpu-validation/v1/plan.json`](../validations/d2-gpu-validation/v1/plan.json) | the GPU validation (stage V of `topk_adoption_driver.py`, `phase_d2/d2_gpu_validation.py`): registered plan and numeric acceptance protocol; a PROPOSAL, priced, not granted |
 
 ### 11.1 Definition
 
@@ -1028,7 +1028,7 @@ D2 GPU validation. It reports:
 | --- | --- | --- |
 | D2 search (`cache_fix_validated` DEPTH cell) | $11.25 | **$25.24** (cap $30) |
 | for comparison: D3 search, measured student-entropy overhead | $10.80 | $22.38 |
-| D2 GPU validation (proposal) | $0.72 | $1.35 (grant $1.65) |
+| D2 GPU validation (proposal, §11.6) | $0.77 | $1.40 core cap, $1.54 with V5 (grant $1.70) |
 
 The new D2's added work over D1, with the source of each estimate:
 
@@ -1047,10 +1047,77 @@ engineering.
 
 | scenario | hard ceiling | expected | outcome |
 | --- | --- | --- | --- |
-| D2 | $57.17 | $35.55 | fits; $62.97 left |
-| D2 + D3 | $109.83 | $69.93 | fits; $10.31 left |
-| D2 + D3 + one fresh confirmation | $125.33 | $82.16 | **short by $5.19** at hard; fits at expected |
+| D2 | $57.22 | $35.60 | fits; $62.92 left |
+| D2 + D3 | $109.88 | $69.98 | fits; $10.26 left |
+| D2 + D3 + one fresh confirmation | $125.38 | $82.21 | **short by $5.24** at hard; fits at expected |
 
-The reservation rule is short by the same $5.19. **K stays 4 and the cap is
+The reservation rule is short by the same $5.24. **K stays 4 and the cap is
 unchanged.** The levers are listed in the scenario record; none is applied.
+
+### 11.6 The GPU validation: stage V, and its numeric acceptance protocol
+
+The redesigned D2 has never run on a GPU. Its validation is **stage `V` of
+`phase_d1/topk_adoption_driver.py`**, implemented in
+`phase_d2/d2_gpu_validation.py`. It reuses the chain stage L and R0 ran on:
+
+- the same launcher, with a live quote, a campaign-derived ceiling, a
+  watchdog, evidence fetched before teardown, and teardown on every exit path;
+- the same remote payload and `$0` preflight;
+- the same `adoption.json`, flushed after every step.
+
+**The plan is registered in
+[`validations/d2-gpu-validation/v1/plan.json`](../validations/d2-gpu-validation/v1/plan.json).**
+The proposed grant is `authorization.proposed.json`. **No `authorization.json`
+exists**, so `engineering_campaign_budget.py` cannot read a ceiling and the
+launcher creates nothing. A test pins this.
+
+**Numeric acceptance falls into three classes, never mixed:**
+
+| class | what | gate |
+| --- | --- | --- |
+| arithmetic | one set of inputs, two computations; details below | **gated**: entropy 1e-4 nats, confidence 1e-5, item mean 1e-5 relative, raw-KL 1e-6 relative |
+| execution drift | the real BF16 model at bsz=1 vs bsz=3 (root store, state evaluation) | **never**: a different GEMM shape is a different computation, and D2 is frozen at bsz=3 |
+| row equivalence | `all_v1` vs `scored_v1` at the formal bsz=3: one DEPTH round and the state evaluation | R0's 1e-5; decides `scored_v1` only |
+
+The arithmetic class compares:
+
+- float32 chunked entropy against float64, on the SAME teacher logits;
+- chunk sizes 512 and 64;
+- the confidence mapping;
+- the `c × KL` item mean against float64, on the SAME (KL, c);
+- the raw-KL control.
+
+**Integrity is gated too:**
+
+- the teacher binding and B's identities;
+- every store's identity against its declaration;
+- DEPTH reads the root;
+- every decision score equals the recorded objective.
+
+**Diagnostics are recorded as measured and never gate:**
+
+- per profile:
+  - the confidence distribution, with IQR, ESS and histogram;
+  - the validity report, including B's KL;
+- on V3's full-scope FFN child, a non-root parent: parent KL, unweighted root
+  KL and weighted root KL of the same DEPTH candidates, with rank agreement,
+  each metric's choice and top-3 overlap;
+- the full- vs narrow-scope selection overlap:
+  - FFN and ATTENTION: per-layer Jaccard;
+  - WIDTH: subspace overlap.
+
+A narrow dynamic range or an unchanged ranking is a finding. It is not a
+reason to change anything.
+
+**Cost, derived from stage L, R0 and D1's records:**
+
+- expected 42.2 min, $0.77;
+- core bound 76.4 min, giving the **session cap of $1.40**;
+- with the extended V5, 84.1 min and $1.54;
+- **proposed grant $1.70**.
+
+This is $0.05 above the earlier $1.35 / $1.65 proposal, because V4 and V5 now
+carry the round-0 parent-KL diagnostic's cost. The earlier plan omitted it.
+
+The CPU toy runs stage V end to end through the same function.
 
