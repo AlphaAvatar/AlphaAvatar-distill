@@ -64,9 +64,12 @@ EXECUTED_PATHS = (
     "logs/stages/stage-1/phase_d2/plans/d2_preregistration_v2.json",
     "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
 )
-#: Inside those, what may differ: this builder (it names the commit) and tests.
+#: Inside those, what may differ: this builder (it names the commit), tests,
+#: and the DEV-BOX-ONLY tools that run before or after the pod -- never on it.
 EXECUTED_PATH_EXCEPTIONS = (
-    "scripts/stages/stage-1/phase_d2/d2_gpu_validation_plan.py",)
+    "scripts/stages/stage-1/phase_d2/d2_gpu_validation_plan.py",
+    "scripts/stages/stage-1/phase_d2/d2val_acquire.sh",
+    "scripts/shared/pod/book_engineering_subrun.py")
 LAUNCHER = "scripts/stages/stage-1/phase_d1/topk_adoption_launch.sh"
 
 

@@ -83,11 +83,22 @@ def book(*, run_dir: Path, validation_dir: Path, subrun_id: str, outcome: str,
         shutil.copy2(p, out)
         copied[str(rel)] = _sha(out)
     marker = dst / TEARDOWN
-    confirmed = (TEARDOWN in copied and marker.read_text().strip()
-                 == TEARDOWN_CONTENT)
+    #: NO RESOURCE EXISTED when the provider refused the create: the launcher
+    #: records no pod id anywhere, so nothing bills and nothing needs tearing
+    #: down. Its cost.json still prices the second between quote and refusal
+    #: with no pod; that is not a bill.
+    no_resource = (cost.get("pod_id") in (None, "")
+                   and not (run_dir / "pod_id").is_file())
+    confirmed = (None if no_resource else
+                 TEARDOWN in copied
+                 and marker.read_text().strip() == TEARDOWN_CONTENT)
     row: dict[str, Any] = {
         "subrun_id": subrun_id, "run_id": run_dir.name,
-        "cost_usd": float(cost["all_in_usd"]),
+        "cost_usd": 0.0 if no_resource else float(cost["all_in_usd"]),
+        **({"resource": ("none created: the provider refused the create; "
+                         f"cost.json's ${cost.get('all_in_usd')} is the "
+                         "launcher's wall-clock formula over no pod")}
+           if no_resource else {}),
         "cost_record": cost,
         "pod_id": cost.get("pod_id"),
         "teardown_confirmed": confirmed,
@@ -97,7 +108,7 @@ def book(*, run_dir: Path, validation_dir: Path, subrun_id: str, outcome: str,
         "outcome": outcome, "notes": notes,
         "evidence": str(dst.relative_to(repo)),
         "evidence_sha256": copied}
-    if not confirmed:
+    if confirmed is False:
         row["resource_risk"] = (
             f"no provider teardown confirmation for pod {cost.get('pod_id')!r}: "
             "reconcile against the provider (it must not list the pod) before "
@@ -134,7 +145,7 @@ def book(*, run_dir: Path, validation_dir: Path, subrun_id: str, outcome: str,
                          + "\n")
     if close:
         risky = [r["subrun_id"] for r in subruns
-                 if not r.get("teardown_confirmed")]
+                 if r.get("teardown_confirmed") is False]
         if risky:
             raise BookingError(
                 f"cannot close: subruns {risky} have no provider teardown "

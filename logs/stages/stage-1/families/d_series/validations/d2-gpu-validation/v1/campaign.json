@@ -9,7 +9,38 @@
  "plan": "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/plan.json",
  "teardown_reserve_usd": 0.3,
  "inherited_spend": [],
- "subruns": [],
+ "subruns": [
+  {
+   "subrun_id": "d2val_20261014_103104",
+   "run_id": "d2val_20261014_103104",
+   "cost_usd": 0.0,
+   "resource": "none created: the provider refused the create; cost.json's $0.0003 is the launcher's wall-clock formula over no pod",
+   "cost_record": {
+    "elapsed_minutes": 0.017,
+    "rate_usd_per_hour": 1.09,
+    "_rate_is": "the LIVE securePrice quoted immediately before creation",
+    "container_disk_gb": 60,
+    "gpu_usd": 0.0003,
+    "container_disk_usd": 0.0,
+    "all_in_usd": 0.0003,
+    "pod_id": null,
+    "script_exit": 3,
+    "_basis": "wall clock from pod creation to confirmed teardown x the live secure rate, plus container disk billed separately"
+   },
+   "pod_id": null,
+   "teardown_confirmed": null,
+   "teardown_evidence": null,
+   "outcome": "provider capacity refusal: no pod created, $0",
+   "notes": "",
+   "evidence": "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/runs/d2val_20261014_103104",
+   "evidence_sha256": {
+    "cost.json": "9e00eaafdbc5f4b95134e627769bb71be4c341fb2f02769f596996e3261cf43c",
+    "launch.log": "95124c859e8ec3d3ead2ff891796601a9ece3c555a62ba2d6140f1b495ad8bb3",
+    "live_price_usd_per_hour": "28b478ce49706c4e6689e2f3a9a964ee5642134488d4a25280a7d9b6fce123cd",
+    "required_inputs.jsonl": "1cc0f12d949720a984ab41745aaa14a3def096b4325f6ba38469190a9ec6b769"
+   }
+  }
+ ],
  "booked_usd": 0.0,
  "authorizes": "nothing by itself"
 }

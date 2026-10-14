@@ -827,6 +827,19 @@ class TestBooking:
         assert "resource_risk" in row
         assert not camp["status"].startswith("COMPLETE and CLOSED")
 
+    def test_a_capacity_refusal_is_booked_at_zero_with_no_resource(
+            self, tmp_path):
+        run, vdir, book = _booked_tree(tmp_path, teardown=False)
+        (run / "cost.json").write_text(json.dumps(
+            {"all_in_usd": 0.0003, "pod_id": None, "script_exit": 3}))
+        row = book.book(run_dir=run, validation_dir=vdir, subrun_id="r",
+                        outcome="capacity", close="COMPLETE and CLOSED -- x",
+                        repo=tmp_path)
+        assert row["cost_usd"] == 0.0 and row["teardown_confirmed"] is None
+        assert "resource_risk" not in row and "none created" in row["resource"]
+        camp = json.loads((vdir / "campaign.json").read_text())
+        assert camp["status"].startswith("COMPLETE and CLOSED")
+
     def test_an_unpriced_run_is_refused(self, tmp_path):
         run, vdir, book = _booked_tree(tmp_path)
         (run / "cost.json").unlink()
