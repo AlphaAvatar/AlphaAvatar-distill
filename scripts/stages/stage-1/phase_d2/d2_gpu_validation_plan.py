@@ -53,7 +53,7 @@ BRANCH = "exec/d1-behavioural-readiness"
 #: a historical identity a record cannot contain of itself (the record lands in
 #: a later commit); `tests/test_d2_gpu_validation.py` checks that every path the
 #: session executes or reads is identical between it and the current tree.
-EXECUTABLE_COMMIT = "043a8139e4e85fde62cca9e9877a50fc25b89a29"
+EXECUTABLE_COMMIT = "d09fc8f754dd38f87c3b1250b559ada1847609f5"
 #: What the session executes or reads, for that check.
 EXECUTED_PATHS = (
     "src", "scripts", "configs",

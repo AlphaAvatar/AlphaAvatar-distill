@@ -127,7 +127,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "D2 redesigned 2026-10-14; Stage V ready at executable commit 043a8139 (review issues closed). Next: grant or decline the $1.70 D2 GPU validation, then prereg v2 approval. Owner: decisions.md, d2_d3_objective_design.md s11.6.",
+ "next": "Stage V D2 GPU validation GRANTED $1.70 (engineering only), executable commit d09fc8f7: launch, book, close, then re-price D2 and review the formal search. Owner: decisions.md, d2_d3_objective_design.md s11.6.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Maintainer: approve D2 preregistration 489f49ba, add phase_d2 to funds_formal_sessions_of, choose rows, decide the $0.68 programme shortfall, then grant the D2 search.",

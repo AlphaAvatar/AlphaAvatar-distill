@@ -9,7 +9,7 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods
+**NOTHING IS RUNNING AND NOTHING IS BILLING** (until the Stage V session below starts). The provider reports 0 pods
 (2026-10-13 17:51 UTC, after the reference calibration's confirmed teardown).
 
 **D2 REDESIGNED (maintainer scientific decision, 2026-10-14; contract
@@ -39,7 +39,7 @@ protocol work and $0 engineering only.
 - **Price.**
   - D2 search: $11.25 expected, $25.24 bound.
   - D2 GPU validation, PROPOSED and not granted: $0.77 expected, a $1.40 cap,
-    a $1.70 grant. The executable commit is `043a8139`.
+    a $1.70 grant, GRANTED 2026-10-14 (conditional, engineering only). The executable commit is `d09fc8f7`.
   - The final review's three $0 issues are closed (2026-10-14 decisions
     entry): full-scope integrity gate, evidence adoption, append-only
     booking with teardown evidence.
