@@ -568,7 +568,25 @@ inside the item. That follows from defining the statistic over supervised
 
 ### D2 — target-aware + reference-confidence weighting
 
-> **SUPERSEDED 2026-10-13 (maintainer decision).** This reference-confidence
+> **REDESIGNED 2026-10-14 (maintainer scientific decision; contract revision
+> 6, preregistration v2).** D2 is again a reference-confidence weighting, and
+> its reference is the **frozen original teacher for every consumer**,
+> DEPTH included. The text below says "the intact parent" for the
+> operator-local comparison; that no longer holds.
+>
+> `L_D2(x) = (1/T_x) Σ c_T(t) KL(p_T ‖ q_C)_t`, with
+> `c_T = 1 − H_T/log|V|` taken from the teacher's full vocabulary. The scope
+> is full: the FFN/WIDTH/ATTENTION statistics are weighted too, which closes
+> the collector gap described below.
+>
+> The 2026-10-13 student-uncertainty D2 that superseded this text was itself
+> superseded and never executed. Owners:
+> [`d2_d3_objective_contract_v1.json`](../../families/d_series/plans/d2_d3_objective_contract_v1.json)
+> and
+> [`d2_preregistration_v2.json`](../../phase_d2/plans/d2_preregistration_v2.json).
+>
+> **SUPERSEDED 2026-10-13 (maintainer decision), itself superseded on
+> 2026-10-14.** This reference-confidence
 > definition is no longer D2. D2 now weights the KL by the **candidate
 > student's own Top-200 uncertainty**: `L(x) = (1/T_x) Σ (1 − c_s(t)) KL_t`,
 > where `c_s = 1 − H_s^(200)/log 200`, with a fixed per-item denominator. The

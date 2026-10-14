@@ -309,7 +309,7 @@
   ],
   "validation": "Top-K confidence is a proxy for structure selection; its usefulness is established only by independent behavioural evidence after recovery training"
  },
- "status": "DRAFT -- not approved, not authorized",
+ "status": "SUPERSEDED -- NEVER EXECUTED",
  "preregistration_hash": "489f49ba49560b769fdb0f9ac6b13f1e97cd6db076ce1ac893c9a0c20ee4e7d8",
  "budget": {
   "owner": "logs/stages/stage-1/families/d_series/plans/d2_budget_v1.json",
@@ -581,5 +581,9 @@
   },
   "enforceable_stop": "each session's authorization caps spend at the live rate; planning bounds are not the cap"
  },
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "superseded_by": "logs/stages/stage-1/phase_d2/plans/d2_preregistration_v2.json",
+ "superseded_on": "2026-10-14",
+ "superseded_because": "maintainer scientific decision 2026-10-14: D2 redesigned as the frozen-teacher-confidence-weighted root-reference KL (contract revision 6). No D2 search, recovery or behavioural session ran under this version",
+ "executed": false
 }

@@ -168,6 +168,12 @@
       ],
       "scoring_loop_minutes": 474.97,
       "loop_seconds_per_candidate_mean": 6.8505,
+      "loop_seconds_per_candidate_max": 9.4603,
+      "distortion_seconds_per_candidate": {
+       "mean": 2.174,
+       "max": 2.7833
+      },
+      "profiles": 2,
       "reference_cache_modes": [
        "cached",
        "recomputed"
@@ -186,53 +192,71 @@
     }
    },
    "objective_overhead": {
-    "source": "measured once: logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/runs/refcal_20261013_170714/out/adoption_all_v1/adoption.json (stage L); the bound adds a variation margin",
+    "source": "provisional -- the redesigned D2 is not measured; stage L measured the superseded objective, which prices D3 only",
     "depth_seconds_per_candidate": {
-     "expected": 0.1843,
-     "bound": 0.2764
+     "expected": 0.3425,
+     "bound": 0.6851
     },
     "state_eval_seconds_per_evaluation": {
-     "expected": 0.466,
-     "bound": 0.699
+     "expected": 0.4032,
+     "bound": 1.0969
     },
-    "bound_factor_on_one_measurement": 1.5
+    "depth_seconds_per_expansion": {
+     "what": "the round-0 parent-KL diagnostic",
+     "round0_candidates": 36,
+     "round0_source": "stage L's measured root round",
+     "expected": 39.13,
+     "bound": 100.2
+    },
+    "operator_cell_factor": {
+     "what": "the weighted activation statistics of the non-DEPTH operators, on their whole end-to-end cells",
+     "expected": 1.05,
+     "bound": 1.1
+    },
+    "one_time_minutes": {
+     "what": "root reference store builds, one per calibration profile",
+     "profiles": 2,
+     "expected": 0.46,
+     "bound": 1.58
+    }
    },
    "expected": {
-    "minutes": 565.5,
-    "gpu_usd": 10.27,
-    "disk_usd": 0.52,
-    "all_in_usd": 10.8
+    "minutes": 589.5,
+    "gpu_usd": 10.71,
+    "disk_usd": 0.55,
+    "all_in_usd": 11.25
    },
    "hard": {
-    "minutes": 1172.1,
-    "gpu_usd": 21.29,
-    "disk_usd": 1.09,
-    "all_in_usd": 22.38
+    "minutes": 1322.0,
+    "gpu_usd": 24.02,
+    "disk_usd": 1.22,
+    "all_in_usd": 25.24
    },
    "depth_cell_minutes": {
-    "root_max": 24.1853,
-    "deeper_max": 23.8455
+    "root_max": 27.6329,
+    "deeper_max": 27.2931
    },
    "priced_by": {
     "expansions_max": 92,
-    "structural_minutes_max": 1077.14,
+    "structural_minutes_max": 1225.47,
     "session_overhead_minutes": 95.0,
-    "hard_ceiling_minutes": 1172.14,
-    "hard_ceiling_usd": 22.3792
+    "hard_ceiling_minutes": 1322.05,
+    "hard_ceiling_usd": 25.24,
+    "one_time_minutes": 1.58
    },
    "pricing_in_force": "cache_fix_validated",
    "container_disk_gb": 400,
    "hard_records_max": {
-    "minutes": 1676.4,
-    "gpu_usd": 30.45,
-    "disk_usd": 1.55,
-    "all_in_usd": 32.01
+    "minutes": 1826.3,
+    "gpu_usd": 33.18,
+    "disk_usd": 1.69,
+    "all_in_usd": 34.87
    },
    "hard_if_cache_fix_validated": {
-    "minutes": 1172.1,
-    "gpu_usd": 21.29,
-    "disk_usd": 1.09,
-    "all_in_usd": 22.38
+    "minutes": 1322.0,
+    "gpu_usd": 24.02,
+    "disk_usd": 1.22,
+    "all_in_usd": 25.24
    },
    "calibration_evidence": {
     "usable": true,
@@ -244,7 +268,7 @@
     "checks": {
      "session_complete": true,
      "stage_l_ran": true,
-     "d2_objective": true,
+     "stage_l_objective_is_the_superseded_d2": true,
      "lambda_rule": true,
      "threshold_rule": true,
      "incumbent": true
@@ -256,6 +280,8 @@
      "skipped": null,
      "failed": null
     },
+    "round0_candidates_measured": 36,
+    "objective_measured": "the superseded D2 (student Top-K entropy)",
     "state_eval": {
      "overhead_seconds_per_evaluation": 0.466,
      "skipped": null,
@@ -281,8 +307,8 @@
     "validated_by": "stage L's DEPTH pair, which runs under a deliberately hoarded pool and records reference_cache.mode; or D2's own first DEPTH expansions",
     "until_validated": "the planning bound prices DEPTH at D1's measured recompute-mode maxima",
     "depth_cell_minutes_if_validated": {
-     "root_max": 24.1853,
-     "deeper_max": 23.8455
+     "root_max": 27.6329,
+     "deeper_max": 27.2931
     }
    },
    "previous_model_superseded": {
@@ -291,7 +317,9 @@
     "why": "D1's design priced DEPTH from a8's one CACHED invocation (1194 s); D1's own search then recomputed the reference cache in 15 of 16 DEPTH expansions, up to 2486 s. The records model takes DEPTH from that search, and applies the objective's overhead to the two paths it touches instead of x1.10 on every structural minute"
    },
    "assumptions_not_measured": [
-    "D2's trajectory has D1's size (92 expansions, 16 DEPTH): the beam schedule fixes the expansion count, not the operator mix"
+    "EVERY added term of the redesigned D2 (contract revision 6): c_T x KL in DEPTH and state evaluation at +5% (expected) / +10% (bound) of D1's paths; the round-0 parent-KL diagnostic at {'expected': 0.5, 'bound': 1.0} of D1's per-candidate reduction; the weighted statistics at +5% / +10% of the FFN/WIDTH/ATTENTION cells; the root stores at {'expected': 2.0, 'bound': 5.0} DEPTH-candidate evaluations per profile. Stage L's objective timing measured the SUPERSEDED objective and is not used here; the D2 GPU validation measures these before the search is priced from them",
+    "D2's trajectory has D1's size (92 expansions, 16 DEPTH): the beam schedule fixes the expansion count, not the operator mix",
+    "the reference cache fix (validated by stage L for D1's parent reference) also holds the redesigned DEPTH, whose parent reference is now the round-0 diagnostic and whose root reference is a resident store; the driver's cache guard still stops the search on the first recomputing expansion"
    ],
    "hard_is": "a PLANNING BOUND from D1's measured maxima, not a proven bound on runtime. What bounds MONEY is the enforceable stop below; the bound decides only whether the search is expected to FINISH inside it",
    "enforceable_stop": {
@@ -300,7 +328,34 @@
     "mechanism": "the launcher's session cap: the watchdog kills the pod at the plan's hard-terminate minutes and the driver's soft stop fails the search closed before it, so spend stops at the cap whatever the runtime",
     "proposal": "the planning bound, rounded up"
    },
-   "_basis": "expected = D1's measured 551.99 min + the objective's expected added minutes over D1's trajectory; bound = D1's search_cost on the records-rebuilt cost model"
+   "_basis": "expected = D1's measured 551.99 min + the redesigned objective's expected added minutes over D1's trajectory; bound = D1's search_cost on the records-rebuilt cost model plus the one-time root stores",
+   "d3_search_for_programme_view": {
+    "expected": {
+     "minutes": 565.5,
+     "gpu_usd": 10.27,
+     "disk_usd": 0.52,
+     "all_in_usd": 10.8
+    },
+    "hard": {
+     "minutes": 1172.1,
+     "gpu_usd": 21.29,
+     "disk_usd": 1.09,
+     "all_in_usd": 22.38
+    },
+    "objective_overhead": {
+     "source": "measured once: logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/runs/refcal_20261013_170714/out/adoption_all_v1/adoption.json (stage L); the bound adds a variation margin",
+     "depth_seconds_per_candidate": {
+      "expected": 0.1843,
+      "bound": 0.2764
+     },
+     "state_eval_seconds_per_evaluation": {
+      "expected": 0.466,
+      "bound": 0.699
+     },
+     "bound_factor_on_one_measurement": 1.5
+    },
+    "_basis": "D3 does the student Top-K entropy work stage L measured on the superseded D2; priced with that measurement and its one-measurement margin"
+   }
   },
   "d2_screening": {
    "n_probes": 8,
@@ -370,10 +425,10 @@
   }
  },
  "totals": {
-  "expected_usd": 36.78,
-  "hard_ceiling_usd": 56.54,
+  "expected_usd": 37.23,
+  "hard_ceiling_usd": 59.4,
   "teardown_reserves_usd": 1.5,
-  "hard_plus_reserves_usd": 58.04,
+  "hard_plus_reserves_usd": 60.9,
   "rescoring": "MEASURED by stage L and inside the behavioural ceilings with the one-measurement margin"
  },
  "per_session_cap_usd": 30.0,

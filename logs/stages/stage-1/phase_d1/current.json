@@ -58,7 +58,7 @@
     "formal_funding": "priced in the frozen design (logs/stages/stage-1/phase_d1/plans/d1_design.json :: pricing); the budget terms live with the C1 grant the design cites",
     "one_use_execution_authorization": "none outstanding — a chain is built fresh per attempt and consumed by it (P12.1)",
     "open_scientific_blockers": [],
-    "maintainer_pause": "R0 PASS ($1.5074) and reference calibration DONE ($0.8069; lambda 7.34, cache fix validated, D2 scored-rows PASS). D2 search priced $10.80 / $22.38 (cache_fix_validated); not authorized. Owner: d2_gpu_evidence_review.md, decisions.md."
+    "maintainer_pause": "D2 redesigned 2026-10-14 (teacher-confidence-weighted root KL, full scope). Next: grant or decline the D2 GPU validation ($1.65), then prereg v2 approval. Owner: decisions.md, d2_d3_objective_design.md s11."
   },
   "runs": {
     "root": "logs/stages/stage-1/phase_d1/runs",
@@ -98,7 +98,7 @@
     ]
   },
   "active_run": null,
-  "next_scientific_action": "R0 PASS ($1.5074) and reference calibration DONE ($0.8069; lambda 7.34, cache fix validated, D2 scored-rows PASS). D2 search priced $10.80 / $22.38 (cache_fix_validated); not authorized. Owner: d2_gpu_evidence_review.md, decisions.md.",
+  "next_scientific_action": "D2 redesigned 2026-10-14 (teacher-confidence-weighted root KL, full scope). Next: grant or decline the D2 GPU validation ($1.65), then prereg v2 approval. Owner: decisions.md, d2_d3_objective_design.md s11.",
   "_next_owner": "logs/state/current.json :: next",
   "authorizes": "nothing"
 }

@@ -1,9 +1,13 @@
 # D2 / D3 scientific objectives: definition, student identity, implementation
 
-**Status:** contract revision 5 (`a01b1be7…`): D3's λ = 7.34 and the
-diagnostic thresholds FROZEN from the reference calibration (stage L,
-`refcal_20261013_170714`), 2026-10-13. GPU evidence:
-[`../analyses/d2_gpu_evidence_review.md`](../analyses/d2_gpu_evidence_review.md).
+**Status:** contract revision 6 (2026-10-14): **D2 REDESIGNED** by maintainer
+scientific decision -- see [§11](#11-d2-revision-6-the-frozen-teachers-confidence-weighting-a-root-reference-kl),
+which is the current D2. The student-uncertainty D2 described in §0-§10
+(`objective.d2_student_uncertainty_weighted_kl@v2`, `063bafd4…`) is
+**SUPERSEDED -- NEVER EXECUTED**; those sections are kept as history and
+remain the current description of **D3**, which is unchanged (`7b254538…`,
+λ = 7.34, thresholds frozen from stage L, `refcal_20261013_170714`). GPU
+evidence: [`../analyses/d2_gpu_evidence_review.md`](../analyses/d2_gpu_evidence_review.md).
 Authorizes nothing.
 
 **Revision 4, after the post-revision-3 review.** The objective identities,
@@ -873,7 +877,7 @@ The original 15:
 | --- | --- | --- |
 | R0: `scored_v1` GPU equivalence (KL path) | **DONE, PASS** -- `r0_20261013_154325`, $1.5074 | — |
 | reference calibration, stage `L` | **DONE** -- `refcal_20261013_170714`, $0.8069: λ 7.34, thresholds, overhead, cache fix validated, both equivalences PASS | — |
-| D2 preregistration | draft `phase_d2/plans/d2_preregistration_v1.json` (`489f49ba…`), accepted in principle; its exact revision needs approval in the search grant | — |
+| D2 preregistration | draft `phase_d2/plans/d2_preregistration_v1.json` (`489f49ba…`), accepted in principle -- **SUPERSEDED 2026-10-14, never executed; the current draft is v2 (§11)** | — |
 | D2 session, driver, launcher, grant type | **built, $0-tested**: `d2_session.py`, `autoinit_d2_driver.py`, `autoinit_d2_launch.py`, `d2_authorization.py`, pod branch `SESSION_KIND=d2` | — |
 | D2 search price | `d2_budget.py`, switched by the booked, hash-verified stage-L evidence to `cache_fix_validated` | $10.80 expected / $22.38 bound (records price $32.01) |
 | `phase_d2` in `funds_formal_sessions_of` | **owed: maintainer amendment**; the issuer refuses without it | — |
@@ -903,3 +907,150 @@ The original 15:
 
 Behavioural screening and confirmation run on `d_series_shared_eval@v1`,
 which this decision leaves unchanged.
+
+## 11. D2, revision 6: the frozen teacher's confidence weighting a root-reference KL
+
+**Maintainer scientific decision, 2026-10-14.** It supersedes the
+student-uncertainty D2 of revisions 1-5, which was never executed: no D2
+search, recovery or behavioural session ran under it. Stage L measured it as
+an engineering arm only. That measurement now prices D3, which does the same
+per-position work, and never the new D2.
+
+| owner | what it holds |
+| --- | --- |
+| [`d2_d3_objective_contract_v1.json`](d2_d3_objective_contract_v1.json), revision 6 | `d2` (the new objective, motivation, two declared changes, scope, diagnostics); `d2_superseded` (the old one, `SUPERSEDED -- NEVER EXECUTED`) |
+| [`../../../phase_d2/plans/d2_preregistration_v2.json`](../../../phase_d2/plans/d2_preregistration_v2.json) | the frozen design, DRAFT; v1 (`489f49ba…`) is stamped SUPERSEDED with its science and hash intact |
+| `src/aadistill/initialization/scoring/objective.py` | the generic form `reference_confidence_weighted_kl`, the full-vocabulary entropy and the confidence mapping |
+| `src/aadistill/initialization/scoring/reference_store.py` | the ROOT reference store, built once per calibration mixture |
+| `scripts/stages/stage-1/families/d_series/teacher_confidence.py` | the validity checks, descriptive |
+| [`../../../phase_d2/plans/d2_gpu_validation_plan.json`](../../../phase_d2/plans/d2_gpu_validation_plan.json) | the minimal GPU validation: a PROPOSAL, priced, not granted |
+
+### 11.1 Definition
+
+```text
+L_D2(x) = (1/T_x) Σ_{t∈T_x} c_T(t) · KL(p_T ‖ q_C)_t        minimized
+c_T(t)  = 1 − H_T(t) / log|V|
+```
+
+- `H_T` is the full-vocabulary Shannon entropy of the **frozen original
+  teacher**. It is computed in float32 and in row chunks, and no `[T, V]`
+  float32 copy outlives its chunk.
+- The KL is the D-series Top-200 + tail KL, measured against the **root**
+  (the teacher) for every consumer.
+- `T_x` is the item's scored positions under the binary supervised-target
+  policy. The denominator is fixed: no dynamic weight sum, threshold,
+  exponent or hard mask.
+- The weight is a property of the teacher alone, so **no candidate can move
+  it**.
+- Aggregation is D1's, per consumer:
+  - DEPTH: per item, then sub-type, then domain.
+  - State evaluation: `T_x`-weighted sub-types and pooled critical classes.
+  - The beam ranks on `state.objective.*` (`OBJECTIVE_PARETO_V1`).
+- The new identities are:
+  - objective `objective.d2_teacher_confidence_weighted_kl@v1`, `079031e3…`;
+  - the narrow-scope comparison `5c4c3aaf…`;
+  - the ranking identity = policy hash + objective hash, in the
+    preregistration.
+
+  The SearchConfig, measurement protocol and operator configs all move with
+  the objective.
+
+### 11.2 Two declared changes from D1, never "one variable"
+
+1. **DEPTH's reference changes from the parent to the root.** D1 measured
+   `KL(parent ‖ parent with S bypassed)`; D2 measures `KL(root ‖ parent with
+   S bypassed)`. At the search root the two coincide. A CPU test pins this:
+   there the root KL of every round-0 candidate equals D1's DEPTH score.
+2. **Teacher-confidence weighting.** It applies to DEPTH, state evaluation,
+   the ranked metrics and, under the full scope, the activation statistics.
+
+The two changes are only separated descriptively:
+
+- every DEPTH round-0 candidate also records its parent-reference KL;
+- every candidate and state records the unweighted root KL.
+
+### 11.3 Scope: FULL, frozen
+
+The FFN, residual-WIDTH and ATTENTION operators' activation statistics are
+weighted by `c_T`:
+
+- the residual sum and second moment;
+- FFN `Σ|a|` and `Σa²`;
+- the per-head attention-output second moment.
+
+All of them use the denominator `Σ w`. Two details of the weighting:
+
+- Token `j` carries the `c_T` of prediction `j`, which is the logits its
+  state produces.
+- The item's last token carries 0. The supervised-target token weights
+  already are the prediction weights followed by that trailing zero.
+
+**Review.** No technical blocker was found.
+
+- **Implementation.** `ActivePositions` gained token multipliers, and the
+  collectors gained a `token_weights` path on both the per-item and the
+  packed path. They use the denominators `residual_weight` and
+  `attn_token_weight`, which appear only in weighted states.
+- **Cache isolation.** The statistics cache key carries the weighting
+  store's identity, so a weighted pass and an unweighted one (the composite
+  operator's) can never share an entry.
+- **Identity.** `StatsSpec` is unchanged, so no historical hash moves.
+
+These are risks, not blockers. The validity checks measure each of them
+before the search:
+
+- **Low dynamic range.** With `log|V| ≈ 11.9` nats, `c_T` may sit near 1.
+- WIDTH's trace normalization cancels any uniform part of the weighting.
+- Teacher-uncertain branch points lose weight.
+- The effective sample size of the weighted statistics drops.
+
+**The narrow scope is documented for comparison only.** Under it, the
+statistics stay D1's and their state ids equal D1's. It is not wired.
+
+### 11.4 Validity checks before the formal search (descriptive)
+
+`teacher_confidence.validity_report` runs on each profile's root store in the
+D2 GPU validation. It reports:
+
+- the distribution, histogram, weight sum, mean and ESS;
+- thinking vs answer (`reasoning` / `final_answer`) and the structural tags;
+- domain and sub-type;
+- the predicted token's type;
+- the relation to the teacher's own target probability and top-1;
+- with B's root KL: Spearman(`c_T`, KL), and each group's share of the
+  weighted objective against its share of the unweighted KL.
+
+**No result may change a definition, the scope or a rule.**
+
+### 11.5 Cost (re-estimated; every new term PROVISIONAL)
+
+| | expected | planning bound |
+| --- | --- | --- |
+| D2 search (`cache_fix_validated` DEPTH cell) | $11.25 | **$25.24** (cap $30) |
+| for comparison: D3 search, measured student-entropy overhead | $10.80 | $22.38 |
+| D2 GPU validation (proposal) | $0.72 | $1.35 (grant $1.65) |
+
+The new D2's added work over D1, with the source of each estimate:
+
+| added work | estimate |
+| --- | --- |
+| `c_T × KL` and stored lookups | +5% expected / +10% bound on DEPTH and state evaluation |
+| the round-0 parent-KL diagnostic | 36 candidates × D1's per-candidate reduction (0.5× expected, 1.0× bound) |
+| weighted statistics | +5% / +10% on the FFN, WIDTH and ATTENTION cells |
+| two root stores | 2× / 5× candidate evaluations per profile |
+
+None of these is measured. The GPU validation replaces them.
+
+**Programme**, with live limits of $120.14 remaining and $30 per session, at
+hard ceilings with reserves. The proposed validation grant is held as
+engineering.
+
+| scenario | hard ceiling | expected | outcome |
+| --- | --- | --- | --- |
+| D2 | $57.17 | $35.55 | fits; $62.97 left |
+| D2 + D3 | $109.83 | $69.93 | fits; $10.31 left |
+| D2 + D3 + one fresh confirmation | $125.33 | $82.16 | **short by $5.19** at hard; fits at expected |
+
+The reservation rule is short by the same $5.19. **K stays 4 and the cap is
+unchanged.** The levers are listed in the scenario record; none is applied.
+

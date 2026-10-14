@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-13 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-14 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -12,14 +12,37 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 **NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods
 (2026-10-13 17:51 UTC, after the reference calibration's confirmed teardown).
 
-**D2/D3 OBJECTIVES CORRECTED (maintainer decision, 2026-10-13).** Both read
-the candidate student's own Top-200 conditional entropy,
+**D2 REDESIGNED (maintainer scientific decision, 2026-10-14; contract
+revision 6, preregistration v2 DRAFT).** The decision covers protocol work and
+$0 engineering only.
+- **The new objective.** D2 minimizes
+  `(1/T_x) Σ c_T(t) KL(p_T ‖ q_C)_t`, where `c_T = 1 − H_T/log|V|` is the
+  frozen original teacher's full-vocabulary confidence.
+  - The KL is measured against the ROOT for every consumer, DEPTH included.
+  - The scope is FULL: the FFN/WIDTH/ATTENTION statistics are weighted too.
+  - Identity: `objective.d2_teacher_confidence_weighted_kl@v1`
+    (`079031e3…`).
+  - D2 declares two changes from D1, not one variable.
+- **What it supersedes.** The student-uncertainty D2 (`063bafd4…`) and
+  preregistration v1 (`489f49ba…`) are SUPERSEDED -- NEVER EXECUTED.
+- **What is implemented.** Root reference store, weighted statistics,
+  validity checks and CPU tests are built. Every new cost term is provisional.
+- **Price.**
+  - D2 search: $11.25 expected, $25.24 bound.
+  - D2 GPU validation (a proposal): $1.35 bound, grant $1.65.
+  - Programme: D2 + D3 fits; adding a fresh confirmation is short by $5.19
+    at hard.
+- Owners:
+  - [`d2_d3_objective_design.md` §11](../stages/stage-1/families/d_series/plans/d2_d3_objective_design.md);
+  - `logs/budget/decisions.md`, entry for 2026-10-14.
+
+**D3 OBJECTIVE (maintainer decision, 2026-10-13; unchanged by the D2
+redesign).** D3 reads the candidate student's own Top-200 conditional entropy,
 `c_s = 1 − H_s/log 200`.
-- D2 minimizes `(1/T_x) Σ (1 − c_s) KL`, with a fixed denominator.
-- D3 minimizes `(1/T_x) Σ [KL − λ c_s]`, with λ frozen by a registered rule
-  before D3. λ is measured by the reference calibration (proposed $1.52 grant).
-- The generic core support is implemented and bound into identity, and is
-  absent when undeclared, so D1, R0 and the shared protocol are unchanged.
+- D3 minimizes `(1/T_x) Σ [KL − λ c_s]`, with λ = 7.34 frozen by a registered
+  rule (`7b254538…`).
+- The generic core support is bound into identity, and is absent when
+  undeclared, so D1, R0 and the shared protocol are unchanged.
 - DEPTH and state evaluation use it exactly. FFN/WIDTH/ATTENTION keep D1's
   local statistic, because no candidate exists at their selection.
 - Motivation (contract revision 2): **capacity-aware student reasoning**.
@@ -50,24 +73,24 @@ and `logs/budget/decisions.md`.
   - **The cache fix is validated on the GPU**: with a 34.9 GiB hoard, the
     reference was cached with 0 recomputes.
   - Cached and recomputed references are EXACT.
-  - The D2 objective adds +0.184 s per DEPTH candidate and +0.466 s per
-    state evaluation.
-  - The D2 scored-rows equivalence PASSES.
+  - The objective since superseded (the old D2) adds +0.184 s per DEPTH
+    candidate and +0.466 s per state evaluation. That measurement now prices
+    D3.
+  - Its scored-rows equivalence PASSES. It does not extend to the new D2.
   - Rescoring costs 1.83 min/probe.
 - **Both sessions are closed:** pods deleted and confirmed, $2.3143 of the
   $5.76 granted.
-- **D2 price**, switched automatically by the booked evidence:
-  - search $10.80 expected, $22.38 bound;
-  - D2 $52.66 at hard;
-  - D2 + D3 $105.32 fits the $120.14 remainder;
-  - with a fresh confirmation, short by $0.68.
+- **D2 price** (redesigned D2): see the D2 paragraph above. The owners are
+  `d2_budget_v1.json` and `d_series_programme_budget.json`.
 - **D2 launch chain built at $0:** typed grant, launcher, pod branch, a soft
-  stop taken from `soft_stop_minutes`, and the cache-regression guard.
+  stop taken from `soft_stop_minutes`, and a cache-regression guard. All of
+  it is now on preregistration v2.
 - **Open maintainer decisions:**
-  - approve the preregistration revision (`489f49ba…`);
+  - the D2 GPU validation grant (a proposal);
+  - approve preregistration v2;
   - add `phase_d2` to `funds_formal_sessions_of`;
-  - choose `all_v1` or `scored_v1`;
-  - handle the $0.68 shortfall;
+  - choose `all_v1` or `scored_v1` (scored_v1 needs the new validation);
+  - handle the $5.19 shortfall;
   - then the D2 search grant.
 
 **NEXT ROUND: R0 → D2 → D3 ON A SHARED BEHAVIOURAL EVALUATION (maintainer

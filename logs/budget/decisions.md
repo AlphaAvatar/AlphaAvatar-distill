@@ -10792,3 +10792,71 @@ on a paid pod.
     applied.
 
   The D2 search is not authorized.
+
+## 2026-10-14 — D2 scientific redesign: teacher-confidence-weighted root-reference KL
+
+- **Context.** This is a maintainer scientific decision. It authorizes
+  scientific protocol revision and $0 engineering only. It authorizes no pod,
+  no paid GPU validation, no formal search, no recovery training and no
+  behavioural probe.
+- **Decision.** D2 now minimizes
+  `L_D2(x) = (1/T_x) Σ_{t∈T_x} c_T(t) KL(p_T ‖ q_C)_t`.
+  - `c_T = 1 − H_T/log|V|`, the frozen original teacher's full-vocabulary
+    confidence.
+  - The KL is Top-200 + tail against the ROOT for every consumer, DEPTH
+    included.
+  - The `1/T_x` denominator is fixed. There are no thresholds, exponents or
+    masks, and the candidate cannot move the weight.
+  - **The scope is FULL:** the FFN/WIDTH/ATTENTION activation statistics are
+    weighted too, with weighted numerators over `Σw`. The narrow scope is
+    documented for comparison only.
+  - **Two declared changes from D1:** the DEPTH reference (parent → root) and
+    the confidence weighting. It is not "one variable".
+- **Identities.**
+  - The objective is `objective.d2_teacher_confidence_weighted_kl@v1`
+    (`079031e3…`).
+  - Contract revision 6.
+  - Preregistration v2 (`d2_preregistration_v2.json`), DRAFT.
+  - The SearchConfig, measurement protocol, operator configs and ranking
+    identity (`OBJECTIVE_PARETO_V1` + objective hash) all move with it.
+  - D3 (`7b254538…`, λ = 7.34) is unchanged. D1 and R0 are unchanged.
+- **Superseded, never executed.**
+  - The student-uncertainty D2 (`063bafd4…`) and preregistration v1
+    (`489f49ba…`) are stamped `SUPERSEDED -- NEVER EXECUTED` outside their
+    hashes.
+  - Stage L's measurement of the old objective now prices D3 only.
+  - Stage L's scored_v1 PASS does not extend to the new D2: the D2
+    authorization refuses scored_v1 until the new D2's own GPU validation
+    passes it.
+- **Engineering ($0).**
+  - A root reference store, built once per calibration mixture.
+  - A full-vocabulary entropy computed in float32 and in chunks.
+  - DEPTH on the root reference, with a round-0 parent-KL diagnostic.
+  - A state-evaluator objective that reads the teacher's own entropy.
+  - Generic continuous-weight activation statistics: `token_weights`,
+    weighted denominators, and the weighting identity in the statistics
+    cache key.
+  - Stores are built up front in the search and the fixed-path replay. A
+    suffix replay refuses to run without them.
+  - The validity analysis `teacher_confidence.py`.
+  - CPU tests for all of it.
+- **Cost, re-estimated. Every new term is PROVISIONAL.**
+  - **D2 search:** $11.25 expected, $25.24 planning bound, under the $30 cap.
+  - **D2 GPU validation (proposal):** $0.72 expected, $1.35 bound, grant
+    $1.65.
+  - **Programme at hard, with reserves and the validation held:**
+
+    | scenario | hard | outcome |
+    | --- | --- | --- |
+    | D2 | $57.17 | fits |
+    | D2 + D3 | $109.83 | fits, $10.31 left |
+    | D2 + D3 + fresh confirmation | $125.33 | **$5.19 short** |
+
+    K stays 4 and the cap is unchanged. The levers are recorded and none is
+    applied.
+- **Next, needing a maintainer decision.**
+  - Grant (or not) the D2 GPU validation
+    (`phase_d2/plans/d2_gpu_validation_plan.json`).
+  - Approve preregistration v2.
+  - Add `phase_d2` to `funds_formal_sessions_of`.
+  - Decide the $5.19 programme shortfall.

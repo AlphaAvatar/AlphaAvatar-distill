@@ -1,5 +1,16 @@
 # D2 GPU evidence review — R0 and the reference calibration (2026-10-13)
 
+> **Read with the 2026-10-14 D2 redesign (contract revision 6).** In this
+> review, "the D2 objective" means the student-uncertainty D2 (`063bafd4…`).
+> That objective is now SUPERSEDED and was never executed. Its measured
+> overhead and its scored_v1 PASS therefore apply to it alone. The overhead
+> prices **D3**, which does the same student Top-K entropy work, and never
+> the redesigned D2. The redesigned D2 is priced provisionally until its own
+> GPU validation runs
+> ([`../../../phase_d2/plans/d2_gpu_validation_plan.json`](../../../phase_d2/plans/d2_gpu_validation_plan.json)).
+> Objective-independent findings still hold: R0's PASS, the validated cache
+> fix, λ, the thresholds and the rescoring cost.
+
 **Status:** both engineering sessions COMPLETE and CLOSED; no resource billing.
 This record reviews their evidence before the D2 search is priced or
 authorized. It authorizes nothing.

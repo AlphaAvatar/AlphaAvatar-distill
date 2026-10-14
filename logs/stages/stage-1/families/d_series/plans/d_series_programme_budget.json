@@ -11,12 +11,14 @@
  "limits_owner": "scripts/maintenance/consolidation/derive_budget.py (the one budget authority)",
  "engineering_grants": {
   "r0": 4.0,
-  "reference_calibration": 1.76
+  "reference_calibration": 1.76,
+  "d2_gpu_validation": 1.65
  },
+ "_engineering_grants_are": "R0 and the reference calibration (granted, closed) and the D2 GPU validation (PROPOSED, held)",
  "engineering_fits_allowance": true,
  "engineering": {
-  "expected": 0.0,
-  "hard_with_reserves": 0.0,
+  "expected": 0.72,
+  "hard_with_reserves": 1.65,
   "campaigns": {
    "r0": {
     "grant_usd": 4.0,
@@ -29,6 +31,14 @@
     "booked_usd": 0.8069,
     "closed": true,
     "outstanding_usd": 0.0
+   },
+   "d2_gpu_validation": {
+    "grant_usd": 1.65,
+    "booked_usd": 0.0,
+    "closed": false,
+    "outstanding_usd": 1.65,
+    "status": "PROPOSAL -- not granted, not run",
+    "owner": "logs/stages/stage-1/phase_d2/plans/d2_gpu_validation_plan.json"
    }
   },
   "_closed_campaigns_are": "already inside the live limits through their recorded cost"
@@ -41,152 +51,154 @@
  "reservation_rule": "authorize D2's formal sessions only if the project remainder after engineering and D2 at hard ceilings still covers D3 and one fresh confirmation at theirs",
  "search_pricing": {
   "records_max": {
-   "search_hard_usd": 32.01,
+   "search_hard_usd": 34.87,
    "search_fits_per_session_cap": false,
    "d2_block": {
-    "expected": 34.38,
-    "hard_with_reserves": 62.29,
+    "expected": 34.83,
+    "hard_with_reserves": 65.15,
     "rescoring_estimate": 0.0
    },
    "d3_block": {
     "expected": 34.38,
     "hard_with_reserves": 62.29,
-    "rescoring_estimate": 0.0
+    "rescoring_estimate": 0.0,
+    "search_hard_usd": 32.01
    },
    "scenarios": {
     "A_d2": {
      "blocks": [
-      "engineering (R0 + reference calibration)",
+      "engineering (R0 + reference calibration + the proposed D2 GPU validation)",
       "d2"
      ],
-     "expected_usd": 34.38,
-     "hard_with_reserves_usd": 62.29,
+     "expected_usd": 35.55,
+     "hard_with_reserves_usd": 66.8,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 62.29,
-     "project_remaining_after_hard_usd": 57.85,
-     "project_remaining_after_conservative_usd": 57.85,
+     "conservative_planning_usd": 66.8,
+     "project_remaining_after_hard_usd": 53.34,
+     "project_remaining_after_conservative_usd": 53.34,
      "fits_project_at_hard": true,
      "fits_project_conservative": true,
      "fits_project_at_expected": true
     },
     "B_d2_d3": {
      "blocks": [
-      "engineering (R0 + reference calibration)",
+      "engineering (R0 + reference calibration + the proposed D2 GPU validation)",
       "d2",
       "d3"
      ],
-     "expected_usd": 68.76,
-     "hard_with_reserves_usd": 124.58,
+     "expected_usd": 69.93,
+     "hard_with_reserves_usd": 129.09,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 124.58,
-     "project_remaining_after_hard_usd": -4.44,
-     "project_remaining_after_conservative_usd": -4.44,
+     "conservative_planning_usd": 129.09,
+     "project_remaining_after_hard_usd": -8.95,
+     "project_remaining_after_conservative_usd": -8.95,
      "fits_project_at_hard": false,
      "fits_project_conservative": false,
      "fits_project_at_expected": true
     },
     "C_d2_d3_fresh_confirmation": {
      "blocks": [
-      "engineering (R0 + reference calibration)",
+      "engineering (R0 + reference calibration + the proposed D2 GPU validation)",
       "d2",
       "d3",
       "fresh_confirmation"
      ],
-     "expected_usd": 80.99,
-     "hard_with_reserves_usd": 140.08,
+     "expected_usd": 82.16,
+     "hard_with_reserves_usd": 144.59,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 140.08,
-     "project_remaining_after_hard_usd": -19.94,
-     "project_remaining_after_conservative_usd": -19.94,
+     "conservative_planning_usd": 144.59,
+     "project_remaining_after_hard_usd": -24.45,
+     "project_remaining_after_conservative_usd": -24.45,
      "fits_project_at_hard": false,
      "fits_project_conservative": false,
      "fits_project_at_expected": true
     }
    },
    "reservation_rule": {
-    "left_after_d2_at_hard_usd": 57.85,
+    "left_after_d2_at_hard_usd": 53.34,
     "needed_for_d3_and_fresh_at_hard_usd": 77.79,
     "satisfied": false,
-    "shortfall_usd": 19.94,
+    "shortfall_usd": 24.45,
     "conservative_with_unverified_estimates": {
      "estimates_usd": 0.0,
      "satisfied": false,
-     "shortfall_usd": 19.94
+     "shortfall_usd": 24.45
     }
    }
   },
   "cache_fix_validated": {
-   "search_hard_usd": 22.38,
+   "search_hard_usd": 25.24,
    "search_fits_per_session_cap": true,
    "d2_block": {
-    "expected": 34.38,
-    "hard_with_reserves": 52.66,
+    "expected": 34.83,
+    "hard_with_reserves": 55.52,
     "rescoring_estimate": 0.0
    },
    "d3_block": {
     "expected": 34.38,
     "hard_with_reserves": 52.66,
-    "rescoring_estimate": 0.0
+    "rescoring_estimate": 0.0,
+    "search_hard_usd": 22.38
    },
    "scenarios": {
     "A_d2": {
      "blocks": [
-      "engineering (R0 + reference calibration)",
+      "engineering (R0 + reference calibration + the proposed D2 GPU validation)",
       "d2"
      ],
-     "expected_usd": 34.38,
-     "hard_with_reserves_usd": 52.66,
+     "expected_usd": 35.55,
+     "hard_with_reserves_usd": 57.17,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 52.66,
-     "project_remaining_after_hard_usd": 67.48,
-     "project_remaining_after_conservative_usd": 67.48,
+     "conservative_planning_usd": 57.17,
+     "project_remaining_after_hard_usd": 62.97,
+     "project_remaining_after_conservative_usd": 62.97,
      "fits_project_at_hard": true,
      "fits_project_conservative": true,
      "fits_project_at_expected": true
     },
     "B_d2_d3": {
      "blocks": [
-      "engineering (R0 + reference calibration)",
+      "engineering (R0 + reference calibration + the proposed D2 GPU validation)",
       "d2",
       "d3"
      ],
-     "expected_usd": 68.76,
-     "hard_with_reserves_usd": 105.32,
+     "expected_usd": 69.93,
+     "hard_with_reserves_usd": 109.83,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 105.32,
-     "project_remaining_after_hard_usd": 14.82,
-     "project_remaining_after_conservative_usd": 14.82,
+     "conservative_planning_usd": 109.83,
+     "project_remaining_after_hard_usd": 10.31,
+     "project_remaining_after_conservative_usd": 10.31,
      "fits_project_at_hard": true,
      "fits_project_conservative": true,
      "fits_project_at_expected": true
     },
     "C_d2_d3_fresh_confirmation": {
      "blocks": [
-      "engineering (R0 + reference calibration)",
+      "engineering (R0 + reference calibration + the proposed D2 GPU validation)",
       "d2",
       "d3",
       "fresh_confirmation"
      ],
-     "expected_usd": 80.99,
-     "hard_with_reserves_usd": 120.82,
+     "expected_usd": 82.16,
+     "hard_with_reserves_usd": 125.33,
      "unverified_diagnostic_estimate_usd": 0.0,
-     "conservative_planning_usd": 120.82,
-     "project_remaining_after_hard_usd": -0.68,
-     "project_remaining_after_conservative_usd": -0.68,
+     "conservative_planning_usd": 125.33,
+     "project_remaining_after_hard_usd": -5.19,
+     "project_remaining_after_conservative_usd": -5.19,
      "fits_project_at_hard": false,
      "fits_project_conservative": false,
      "fits_project_at_expected": true
     }
    },
    "reservation_rule": {
-    "left_after_d2_at_hard_usd": 67.48,
+    "left_after_d2_at_hard_usd": 62.97,
     "needed_for_d3_and_fresh_at_hard_usd": 68.16,
     "satisfied": false,
-    "shortfall_usd": 0.68,
+    "shortfall_usd": 5.19,
     "conservative_with_unverified_estimates": {
      "estimates_usd": 0.0,
      "satisfied": false,
-     "shortfall_usd": 0.68
+     "shortfall_usd": 5.19
     }
    }
   }
@@ -197,7 +209,7 @@
    "saves_hard_usd_per_search": 9.63,
    "how": "the reference calibration's stage L DEPTH pair, already in its plan, at no extra session"
   },
-  "measure_the_objective_overhead": "stage L's two timing pairs replace the provisional +5%/+10% on the DEPTH loop and the state evaluation",
+  "measure_the_objective_overhead": "the D2 GPU validation (a proposal) replaces every provisional term of the redesigned D2's price -- the +5%/+10% on DEPTH, state evaluation and the statistics operators, the round-0 parent-KL diagnostic and the root stores -- with measurements; stage L's timing priced the superseded objective and now prices D3 only",
   "d3_at_k2": {
    "saves_hard_usd": 9.66,
    "cost": "narrower structural coverage for D3"
