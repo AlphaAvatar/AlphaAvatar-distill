@@ -924,6 +924,35 @@ print(f'  {a.authorization_id}: rung {a.rung}, '
       f'contract {a.contract_hash[:12]}, battery {a.battery_role}, '
       f'probes {a.n_probes}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "d2_screening" ]; then
+  # D2 BEHAVIOURAL SCREENING. Its own TYPE: the search's D2 artifact denies
+  # recovery and must not buy training; D1's behavioural artifact binds D1's
+  # design and must not buy a D2 field. Eight probes from the four committed
+  # D2 initializations, compared with B's IMPORTED units -- so the flags below
+  # refuse a beam, the confirmation, a re-selection, retraining B or q2, a
+  # promotion and any automatic follow-on. The plan hash is the
+  # preregistration's.
+  #
+  # This branch exists because a missing one is not a type error: SESSION_KIND
+  # falls through to `spend` (Phase B attempt 2, $0.2300).
+  cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_d2.d2_screening_authorization import D2ScreeningAuthorization
+a = D2ScreeningAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.allows_recovery_training is True, 'every screening probe is a training run'
+assert a.authorizes_d2_screening is True, 'this session needs a D2 screening authorization'
+assert a.allows_beam_search is False, 'a screening grant must not authorize a beam'
+assert a.authorizes_d2_confirmation is False, 'the confirmation is a separate grant naming its candidate'
+assert a.authorizes_candidate_reselection is False, 'the field is the committed Top-4'
+assert a.authorizes_reference_retraining is False, 'B and q2 are imported units, never retrained'
+assert a.authorizes_promotion is False, 'screening nominates at most'
+assert a.automatic_followon_start is False, 'nothing chains off screening'
+print(f'  {a.authorization_id}: hard \${a.hard_cap_usd:.4f}, '
+      f'probes {a.n_probes}, seeds {list(a.seeds)}, '
+      f'contract {a.contract_hash[:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "c2" ]; then
   # A SEVENTH type. Phase-C2 Search-1's grant measures a harness containing the
   # C2 launcher, driver, search space and baseline rule, none of which appear in

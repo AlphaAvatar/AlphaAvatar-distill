@@ -919,6 +919,43 @@ def priced_from_records(rate: float, disk_gb: int,
 #: The rescoring diagnostic's estimate per probe, NOT a bound.
 RESCORING_MINUTES_PER_PROBE_ESTIMATE = 5.0
 
+#: The D2 search's measured staging, the basis of a relay-staged arm's price:
+#: its setup staged the root teacher (three shards, 8,045,568,320 bytes) inside
+#: the setup window between these two timestamps of its closeout.
+D2_SEARCH_CLOSEOUT = ("logs/stages/stage-1/phase_d2/runs/"
+                      "d2_search_20261015_051722/closeout/outcome.json")
+TEACHER_STAGED_BYTES = 8_045_568_320
+ARM_BYTES = 1_192_135_096
+#: The bound multiplies the one-measurement expectation by this margin; the
+#: identity check of a staged arm is ~10 s of hashing on top.
+RELAY_ARM_BOUND_FACTOR = 3.0
+ARM_VERIFY_MINUTES = 0.25
+
+
+def relay_arm_minutes() -> dict[str, Any]:
+    """Minutes to stage and verify ONE relay-persisted arm on a pod."""
+    from datetime import datetime
+
+    ex = _read(D2_SEARCH_CLOSEOUT)["execution"]
+    stamp = "%Y-%m-%dT%H:%M:%SZ"
+    setup_s = (datetime.strptime(ex["setup_complete_utc"], stamp)
+               - datetime.strptime(ex["pod_created_utc"], stamp)).total_seconds()
+    floor_mb_s = TEACHER_STAGED_BYTES / setup_s / 1e6
+    pull = ARM_BYTES / (floor_mb_s * 1e6) / 60
+    expected = round(pull + ARM_VERIFY_MINUTES, 2)
+    return {"expected_minutes_per_arm": expected,
+            "hard_minutes_per_arm": round(expected * RELAY_ARM_BOUND_FACTOR, 2),
+            "pull_rate_floor_mb_per_s": round(floor_mb_s, 1),
+            "_basis": (f"the D2 search's setup staged the {TEACHER_STAGED_BYTES:,}"
+                       f"-byte teacher within {setup_s / 60:.2f} min "
+                       f"({D2_SEARCH_CLOSEOUT}), so a pod pulls at least "
+                       f"{floor_mb_s:.1f} MB/s; one {ARM_BYTES:,}-byte arm plus "
+                       f"its identity check, x{RELAY_ARM_BOUND_FACTOR} for the "
+                       "bound"),
+            "replaces": ("D1's 22-minute on-pod rematerialization per arm: a "
+                         "D2 arm is a persisted search product, not a path to "
+                         "replay")}
+
 
 def _read(rel: str) -> dict[str, Any]:
     return json.loads((REPO_ROOT / rel).read_text())
@@ -1223,14 +1260,28 @@ def build(k_candidates: int = 4) -> dict[str, Any]:
     resc = (evidence.get("rescoring") or {}) if evidence["usable"] else {}
     resc_measured = resc.get("projected_minutes_per_probe")
 
+    #: HOW THE ARMS REACH THE POD. D1 rebuilt every arm on the pod along its
+    #: digest-pinned path (`minutes_per_arm_materialization`, 22 min each). A
+    #: D2 arm is a committed search product persisted on the relay
+    #: (`phase_d2/d2_product_durability.py`), so the pod PULLS it during setup
+    #: and verifies its four identities: priced from the D2 search's own
+    #: measured setup, which staged the 8.05 GB teacher inside a 3.67-minute
+    #: setup -- a pull rate of at least 36.6 MB/s.
+    relay = relay_arm_minutes()
+    hard_arm = relay["hard_minutes_per_arm"]
+    exp_arm = relay["expected_minutes_per_arm"]
+
     def behaviour(n_probes: int, n_arms: int) -> dict[str, Any]:
-        fixed = sess_over + n_arms * per_arm
+        fixed = sess_over + n_arms * hard_arm
+        fixed_exp = sess_over + n_arms * exp_arm
         probes = n_probes * probe_bound
         if resc_measured is not None:
             r_exp = n_probes * float(resc_measured)
             r_hard = r_exp * MEASURED_OVERHEAD_BOUND_FACTOR * overrun
-            return {"n_probes": n_probes, "n_arms_materialized": n_arms,
-                    "expected": _usd(fixed + probes + r_exp, rate, disk_beh),
+            return {"n_probes": n_probes, "n_arms_staged_from_relay": n_arms,
+                    "arm_staging": relay,
+                    "expected": _usd(fixed_exp + probes + r_exp, rate,
+                                     disk_beh),
                     "hard": _usd(fixed + probes * overrun + r_hard, rate,
                                  disk_beh),
                     "rescoring": {"source": "measured once (stage L)",
@@ -1239,8 +1290,9 @@ def build(k_candidates: int = 4) -> dict[str, Any]:
                                   "hard": _usd(r_hard, rate, disk_beh)},
                     "rescoring_provisional_not_a_bound": _usd(0.0, rate,
                                                               disk_beh)}
-        return {"n_probes": n_probes, "n_arms_materialized": n_arms,
-                "expected": _usd(fixed + probes, rate, disk_beh),
+        return {"n_probes": n_probes, "n_arms_staged_from_relay": n_arms,
+                "arm_staging": relay,
+                "expected": _usd(fixed_exp + probes, rate, disk_beh),
                 "hard": _usd(fixed + probes * overrun, rate, disk_beh),
                 "rescoring": {"source": "estimate", "in_ceilings": False,
                               "minutes_per_probe":
@@ -1305,27 +1357,75 @@ SCENARIO_RECORD = ("logs/stages/stage-1/families/d_series/plans/"
                    "d_series_programme_budget.json")
 
 
-#: A D2 formal search's closeout. Once one records a COMPLETE search, that
-#: search is spent rather than planned: its actual all-in cost is already
-#: inside the live limits through the closeout (derive_budget books it), so the
-#: programme carries only the D2 work still ahead -- planning the search at its
-#: hard ceiling as well would count it twice.
-D2_SEARCH_CLOSEOUTS = "logs/stages/stage-1/phase_d2/runs/d2_search_*/closeout/outcome.json"
+#: A D2 formal search's run directories. Once one satisfies the search
+#: completion CONTRACT (`stages.d_series.search_completion`), that search is
+#: spent rather than planned: its actual all-in cost is already inside the live
+#: limits through the closeout (derive_budget books it), so the programme
+#: carries only the D2 work still ahead -- planning the search at its hard
+#: ceiling as well would count it twice.
+#:
+#: The first version released the reservation on the closeout's
+#: `classification` starting with "COMPLETE FORMAL SEARCH": a sentence, not
+#: evidence. Releasing ~$24 of reservation is a money decision, so it now
+#: needs every clause -- the grant, the terminal, the full trajectory, the
+#: committed Top-K, the secured checkpoints, the manifest and archive, the
+#: teardown, a cost the budget authority books, no unsettled resource.
+D2_SEARCH_RUNS = "logs/stages/stage-1/phase_d2/runs"
+D2_SEARCH_PATTERN = "d2_search_*"
 
 
-def completed_d2_search(repo_root: str | Path | None = None
-                        ) -> dict[str, Any] | None:
+def d2_search_completion_spec(repo_root: str | Path | None = None):
+    """D2's instance of the generic search-completion contract."""
+    from stages.d_series.search_completion import (
+        SearchCompletionSpec, budget_authority_booking,
+    )
+    from stages.phase_d2 import d2_session as S
+    from stages.phase_d2.d2_authorization import D2Authorization
+
     root = Path(repo_root) if repo_root else REPO_ROOT
-    for path in sorted(root.glob(D2_SEARCH_CLOSEOUTS)):
-        doc = json.loads(path.read_text())
-        if str(doc.get("classification", "")).startswith("COMPLETE FORMAL SEARCH"):
-            return {"run_id": doc["run_id"],
-                    "closeout": path.relative_to(root).as_posix(),
-                    "booked_all_in_usd": (doc.get("money") or {}).get("all_in_usd"),
-                    "authorized_hard_usd": (doc.get("money") or {}).get(
-                        "authorized_hard_usd"),
-                    "_inside_the_live_limits": True}
-    return None
+    prereg = S.preregistration(root)
+    return SearchCompletionSpec(
+        experiment_id=S.EXPERIMENT_ID,
+        closeout_schema="aadistill.phase_d2.search_closeout/v1",
+        k=int(prereg["retention"]["k"]),
+        preregistration_hash=str(prereg["preregistration_hash"]),
+        load_authorization=D2Authorization.load,
+        evidence_filename="d2_search.json",
+        booked_cost=budget_authority_booking(root))
+
+
+def d2_search_completion(repo_root: str | Path | None = None,
+                         spec: Any = None) -> dict[str, Any]:
+    """Every D2 search run assessed against the contract; see the module."""
+    from stages.d_series.search_completion import completion
+
+    root = Path(repo_root) if repo_root else REPO_ROOT
+    return completion(root / D2_SEARCH_RUNS,
+                      spec or d2_search_completion_spec(root),
+                      pattern=D2_SEARCH_PATTERN)
+
+
+def completed_d2_search(repo_root: str | Path | None = None,
+                        spec: Any = None) -> dict[str, Any] | None:
+    """The one D2 search that satisfies EVERY clause, else None.
+
+    None keeps the search's hard ceiling reserved. A run that claims
+    completion and fails a clause, or two runs that both pass, also give None:
+    a contradictory record is a reason to keep the money aside.
+    """
+    root = Path(repo_root) if repo_root else REPO_ROOT
+    status = d2_search_completion(root, spec)
+    done = status["complete"]
+    if done is None:
+        return None
+    return {"run_id": done["run_id"],
+            "closeout": f"{D2_SEARCH_RUNS}/{done['run_id']}/closeout/outcome.json",
+            "booked_all_in_usd": done["booked_all_in_usd"],
+            "authorized_hard_usd": done["authorized_hard_usd"],
+            "contract": {"clauses": done["clauses"], "all_satisfied": True,
+                         "owner": "scripts/stages/stage-1/families/d_series/"
+                                  "search_completion.py"},
+            "_inside_the_live_limits": True}
 
 
 def d1_priced_confirmation(rate: float) -> dict[str, Any]:
@@ -1427,6 +1527,7 @@ def programme_scenarios(limits: dict[str, float],
     k4 = steps["d2_screening"]["hard"]["all_in_usd"]
     search = steps["d2_search"]
     searched = completed_d2_search()
+    contract = d2_search_completion()
 
     def under(search_hard_usd: float) -> dict[str, Any]:
         hard = {"d2_screening": steps["d2_screening"]["hard"]["all_in_usd"],
@@ -1532,6 +1633,15 @@ def programme_scenarios(limits: dict[str, float],
                                        <= limits["engineering_remaining_usd"]),
         "engineering": engineering,
         "d2_search_completed": searched,
+        "d2_search_contract": {
+            "runs": [{"run_id": r["run_id"], "complete": r["complete"],
+                      "failed_clauses": r["failed_clauses"]}
+                     for r in contract["runs"]],
+            "contradictions": contract["contradictions"],
+            "rule": ("a search leaves the plan only when exactly one run "
+                     "satisfies every clause of stages.d_series."
+                     "search_completion; otherwise its hard ceiling stays "
+                     "reserved")},
         "fresh_confirmation": fresh_block,
         "reservation_rule": (
             "authorize D2's formal sessions only if the project remainder "

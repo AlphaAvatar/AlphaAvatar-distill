@@ -1,0 +1,803 @@
+{
+ "schema": "aadistill.phase_d2.candidate_differences/v1",
+ "recorded_utc": "2026-10-15T15:14:13Z",
+ "descriptive_only": "does not read back into the frozen candidate set or its order; no rule consumes it",
+ "inputs": {
+  "selection": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/stage1_selection.json",
+  "journal": "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/store/extracted/audit/autoinit_d2/search/states.jsonl",
+  "checkpoints": "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products"
+ },
+ "candidates": [
+  {
+   "quality_order": 1,
+   "state_id": "59013099b902f213649b8aa4c676dedd",
+   "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+   "ffn_profile": "calib.reasoning_heavy@v2",
+   "attention_profile": "calib.domain_balanced@v1",
+   "ffn_kept_per_layer": [
+    3072
+   ],
+   "q_heads_kept_per_layer": [
+    16
+   ],
+   "ffn_mask_sha256": "68f5ec0b994cb5fc24df48ee084d2fe047cffe7a488ae22d35b496b6d67cebac",
+   "attention_mask_sha256": "962f8f1106d2e851630fabac0a83e888591f7d0fe02a31aa39eef6c076dfe262"
+  },
+  {
+   "quality_order": 2,
+   "state_id": "c2cb27efcf68b4f18bf7284aea84877a",
+   "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)",
+   "ffn_profile": "calib.domain_balanced@v1",
+   "attention_profile": "calib.reasoning_heavy@v2",
+   "ffn_kept_per_layer": [
+    3072
+   ],
+   "q_heads_kept_per_layer": [
+    16
+   ],
+   "ffn_mask_sha256": "562acffe2c96242d8071b15d1aaddd7eb0be09ea65cbedd25d8bf40db79bef5f",
+   "attention_mask_sha256": "243a7fac1397115d84e1668094a736c043577c572df4047192f7974a57405f69"
+  },
+  {
+   "quality_order": 3,
+   "state_id": "30fe791a85d70ac713e75893fea107ae",
+   "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)->ATTENTION(calib.reasoning_heavy@v2)",
+   "ffn_profile": "calib.reasoning_heavy@v2",
+   "attention_profile": "calib.reasoning_heavy@v2",
+   "ffn_kept_per_layer": [
+    3072
+   ],
+   "q_heads_kept_per_layer": [
+    16
+   ],
+   "ffn_mask_sha256": "68f5ec0b994cb5fc24df48ee084d2fe047cffe7a488ae22d35b496b6d67cebac",
+   "attention_mask_sha256": "beefab4ef6c869cc45c7bc7f302d7c4051842df7fdb249cda73483b24270697f"
+  },
+  {
+   "quality_order": 4,
+   "state_id": "3a4173e4eff45b0d73fd82bd0b263f03",
+   "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)",
+   "ffn_profile": "calib.domain_balanced@v1",
+   "attention_profile": "calib.domain_balanced@v1",
+   "ffn_kept_per_layer": [
+    3072
+   ],
+   "q_heads_kept_per_layer": [
+    16
+   ],
+   "ffn_mask_sha256": "562acffe2c96242d8071b15d1aaddd7eb0be09ea65cbedd25d8bf40db79bef5f",
+   "attention_mask_sha256": "6ef221193947c76a90dcf68bc1dd1dbf05bdfe2b7c18ab8f13643c4b62b34aed"
+  }
+ ],
+ "distinct_ffn_masks": 2,
+ "distinct_attention_masks": 4,
+ "mask_overlap": {
+  "59013099~c2cb27ef": {
+   "ffn_profiles": [
+    "calib.reasoning_heavy@v2",
+    "calib.domain_balanced@v1"
+   ],
+   "attention_profiles": [
+    "calib.domain_balanced@v1",
+    "calib.reasoning_heavy@v2"
+   ],
+   "ffn_neurons": {
+    "kept_per_layer": [
+     3072
+    ],
+    "shared_total": 83861,
+    "kept_total": 86016,
+    "shared_fraction": 0.974947,
+    "jaccard_mean": 0.951196,
+    "jaccard_min": 0.90926,
+    "layers_identical": 0,
+    "n_layers": 28
+   },
+   "attention_q_heads": {
+    "kept_per_layer": [
+     16
+    ],
+    "shared_total": 430,
+    "kept_total": 448,
+    "shared_fraction": 0.959821,
+    "jaccard_mean": 0.926704,
+    "jaccard_min": 0.777778,
+    "layers_identical": 15,
+    "n_layers": 28
+   }
+  },
+  "59013099~30fe791a": {
+   "ffn_profiles": [
+    "calib.reasoning_heavy@v2",
+    "calib.reasoning_heavy@v2"
+   ],
+   "attention_profiles": [
+    "calib.domain_balanced@v1",
+    "calib.reasoning_heavy@v2"
+   ],
+   "ffn_neurons": {
+    "kept_per_layer": [
+     3072
+    ],
+    "shared_total": 86016,
+    "kept_total": 86016,
+    "shared_fraction": 1.0,
+    "jaccard_mean": 1.0,
+    "jaccard_min": 1.0,
+    "layers_identical": 28,
+    "n_layers": 28
+   },
+   "attention_q_heads": {
+    "kept_per_layer": [
+     16
+    ],
+    "shared_total": 438,
+    "kept_total": 448,
+    "shared_fraction": 0.977679,
+    "jaccard_mean": 0.95845,
+    "jaccard_min": 0.777778,
+    "layers_identical": 19,
+    "n_layers": 28
+   }
+  },
+  "59013099~3a4173e4": {
+   "ffn_profiles": [
+    "calib.reasoning_heavy@v2",
+    "calib.domain_balanced@v1"
+   ],
+   "attention_profiles": [
+    "calib.domain_balanced@v1",
+    "calib.domain_balanced@v1"
+   ],
+   "ffn_neurons": {
+    "kept_per_layer": [
+     3072
+    ],
+    "shared_total": 83861,
+    "kept_total": 86016,
+    "shared_fraction": 0.974947,
+    "jaccard_mean": 0.951196,
+    "jaccard_min": 0.90926,
+    "layers_identical": 0,
+    "n_layers": 28
+   },
+   "attention_q_heads": {
+    "kept_per_layer": [
+     16
+    ],
+    "shared_total": 434,
+    "kept_total": 448,
+    "shared_fraction": 0.96875,
+    "jaccard_mean": 0.943437,
+    "jaccard_min": 0.684211,
+    "layers_identical": 18,
+    "n_layers": 28
+   }
+  },
+  "c2cb27ef~30fe791a": {
+   "ffn_profiles": [
+    "calib.domain_balanced@v1",
+    "calib.reasoning_heavy@v2"
+   ],
+   "attention_profiles": [
+    "calib.reasoning_heavy@v2",
+    "calib.reasoning_heavy@v2"
+   ],
+   "ffn_neurons": {
+    "kept_per_layer": [
+     3072
+    ],
+    "shared_total": 83861,
+    "kept_total": 86016,
+    "shared_fraction": 0.974947,
+    "jaccard_mean": 0.951196,
+    "jaccard_min": 0.90926,
+    "layers_identical": 0,
+    "n_layers": 28
+   },
+   "attention_q_heads": {
+    "kept_per_layer": [
+     16
+    ],
+    "shared_total": 434,
+    "kept_total": 448,
+    "shared_fraction": 0.96875,
+    "jaccard_mean": 0.941643,
+    "jaccard_min": 0.777778,
+    "layers_identical": 15,
+    "n_layers": 28
+   }
+  },
+  "c2cb27ef~3a4173e4": {
+   "ffn_profiles": [
+    "calib.domain_balanced@v1",
+    "calib.domain_balanced@v1"
+   ],
+   "attention_profiles": [
+    "calib.reasoning_heavy@v2",
+    "calib.domain_balanced@v1"
+   ],
+   "ffn_neurons": {
+    "kept_per_layer": [
+     3072
+    ],
+    "shared_total": 86016,
+    "kept_total": 86016,
+    "shared_fraction": 1.0,
+    "jaccard_mean": 1.0,
+    "jaccard_min": 1.0,
+    "layers_identical": 28,
+    "n_layers": 28
+   },
+   "attention_q_heads": {
+    "kept_per_layer": [
+     16
+    ],
+    "shared_total": 439,
+    "kept_total": 448,
+    "shared_fraction": 0.979911,
+    "jaccard_mean": 0.963979,
+    "jaccard_min": 0.684211,
+    "layers_identical": 22,
+    "n_layers": 28
+   }
+  },
+  "30fe791a~3a4173e4": {
+   "ffn_profiles": [
+    "calib.reasoning_heavy@v2",
+    "calib.domain_balanced@v1"
+   ],
+   "attention_profiles": [
+    "calib.reasoning_heavy@v2",
+    "calib.domain_balanced@v1"
+   ],
+   "ffn_neurons": {
+    "kept_per_layer": [
+     3072
+    ],
+    "shared_total": 83861,
+    "kept_total": 86016,
+    "shared_fraction": 0.974947,
+    "jaccard_mean": 0.951196,
+    "jaccard_min": 0.90926,
+    "layers_identical": 0,
+    "n_layers": 28
+   },
+   "attention_q_heads": {
+    "kept_per_layer": [
+     16
+    ],
+    "shared_total": 430,
+    "kept_total": 448,
+    "shared_fraction": 0.959821,
+    "jaccard_mean": 0.926704,
+    "jaccard_min": 0.777778,
+    "layers_identical": 15,
+    "n_layers": 28
+   }
+  }
+ },
+ "weights": {
+  "pairs": {
+   "59013099~c2cb27ef": {
+    "families": {
+     "down_proj": {
+      "tensors": 28,
+      "bitwise_identical": 0,
+      "positional_relative_frobenius_difference": 1.320861,
+      "unshared_norm_fraction": 0.153616
+     },
+     "embed_tokens": {
+      "tensors": 1,
+      "bitwise_identical": 1,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "final_norm": {
+      "tensors": 1,
+      "bitwise_identical": 1,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "gate_proj": {
+      "tensors": 28,
+      "bitwise_identical": 0,
+      "positional_relative_frobenius_difference": 1.274796,
+      "unshared_norm_fraction": 0.147431
+     },
+     "input_layernorm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "k_norm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "k_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "o_proj": {
+      "tensors": 28,
+      "bitwise_identical": 15,
+      "positional_relative_frobenius_difference": 0.315917,
+      "unshared_norm_fraction": 0.194942
+     },
+     "post_attention_layernorm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "q_norm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "q_proj": {
+      "tensors": 28,
+      "bitwise_identical": 15,
+      "positional_relative_frobenius_difference": 0.343374,
+      "unshared_norm_fraction": 0.281276
+     },
+     "up_proj": {
+      "tensors": 28,
+      "bitwise_identical": 0,
+      "positional_relative_frobenius_difference": 1.312566,
+      "unshared_norm_fraction": 0.149231
+     },
+     "v_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     }
+    },
+    "shared_units": {
+     "attention_heads": {
+      "shared_o_proj": 430,
+      "bitwise_identical_o_proj": 430,
+      "shared_q_proj": 430,
+      "bitwise_identical_q_proj": 430
+     },
+     "ffn_neurons": {
+      "shared": 251583,
+      "bitwise_identical": 251583
+     }
+    }
+   },
+   "59013099~30fe791a": {
+    "families": {
+     "down_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0,
+      "unshared_norm_fraction": 0.0
+     },
+     "embed_tokens": {
+      "tensors": 1,
+      "bitwise_identical": 1,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "final_norm": {
+      "tensors": 1,
+      "bitwise_identical": 1,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "gate_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0,
+      "unshared_norm_fraction": 0.0
+     },
+     "input_layernorm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "k_norm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "k_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "o_proj": {
+      "tensors": 28,
+      "bitwise_identical": 19,
+      "positional_relative_frobenius_difference": 0.235509,
+      "unshared_norm_fraction": 0.150705
+     },
+     "post_attention_layernorm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "q_norm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "q_proj": {
+      "tensors": 28,
+      "bitwise_identical": 19,
+      "positional_relative_frobenius_difference": 0.262696,
+      "unshared_norm_fraction": 0.23827
+     },
+     "up_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0,
+      "unshared_norm_fraction": 0.0
+     },
+     "v_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     }
+    },
+    "shared_units": {
+     "attention_heads": {
+      "shared_o_proj": 438,
+      "bitwise_identical_o_proj": 438,
+      "shared_q_proj": 438,
+      "bitwise_identical_q_proj": 438
+     },
+     "ffn_neurons": {
+      "shared": 258048,
+      "bitwise_identical": 258048
+     }
+    }
+   },
+   "59013099~3a4173e4": {
+    "families": {
+     "down_proj": {
+      "tensors": 28,
+      "bitwise_identical": 0,
+      "positional_relative_frobenius_difference": 1.320861,
+      "unshared_norm_fraction": 0.153616
+     },
+     "embed_tokens": {
+      "tensors": 1,
+      "bitwise_identical": 1,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "final_norm": {
+      "tensors": 1,
+      "bitwise_identical": 1,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "gate_proj": {
+      "tensors": 28,
+      "bitwise_identical": 0,
+      "positional_relative_frobenius_difference": 1.274796,
+      "unshared_norm_fraction": 0.147431
+     },
+     "input_layernorm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "k_norm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "k_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "o_proj": {
+      "tensors": 28,
+      "bitwise_identical": 18,
+      "positional_relative_frobenius_difference": 0.279855,
+      "unshared_norm_fraction": 0.170224
+     },
+     "post_attention_layernorm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "q_norm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "q_proj": {
+      "tensors": 28,
+      "bitwise_identical": 18,
+      "positional_relative_frobenius_difference": 0.285831,
+      "unshared_norm_fraction": 0.265746
+     },
+     "up_proj": {
+      "tensors": 28,
+      "bitwise_identical": 0,
+      "positional_relative_frobenius_difference": 1.312566,
+      "unshared_norm_fraction": 0.149231
+     },
+     "v_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     }
+    },
+    "shared_units": {
+     "attention_heads": {
+      "shared_o_proj": 434,
+      "bitwise_identical_o_proj": 434,
+      "shared_q_proj": 434,
+      "bitwise_identical_q_proj": 434
+     },
+     "ffn_neurons": {
+      "shared": 251583,
+      "bitwise_identical": 251583
+     }
+    }
+   },
+   "c2cb27ef~30fe791a": {
+    "families": {
+     "down_proj": {
+      "tensors": 28,
+      "bitwise_identical": 0,
+      "positional_relative_frobenius_difference": 1.320346,
+      "unshared_norm_fraction": 0.156075
+     },
+     "embed_tokens": {
+      "tensors": 1,
+      "bitwise_identical": 1,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "final_norm": {
+      "tensors": 1,
+      "bitwise_identical": 1,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "gate_proj": {
+      "tensors": 28,
+      "bitwise_identical": 0,
+      "positional_relative_frobenius_difference": 1.274153,
+      "unshared_norm_fraction": 0.150742
+     },
+     "input_layernorm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "k_norm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "k_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "o_proj": {
+      "tensors": 28,
+      "bitwise_identical": 15,
+      "positional_relative_frobenius_difference": 0.278687,
+      "unshared_norm_fraction": 0.167319
+     },
+     "post_attention_layernorm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "q_norm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "q_proj": {
+      "tensors": 28,
+      "bitwise_identical": 15,
+      "positional_relative_frobenius_difference": 0.237277,
+      "unshared_norm_fraction": 0.155297
+     },
+     "up_proj": {
+      "tensors": 28,
+      "bitwise_identical": 0,
+      "positional_relative_frobenius_difference": 1.312156,
+      "unshared_norm_fraction": 0.151263
+     },
+     "v_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     }
+    },
+    "shared_units": {
+     "attention_heads": {
+      "shared_o_proj": 434,
+      "bitwise_identical_o_proj": 434,
+      "shared_q_proj": 434,
+      "bitwise_identical_q_proj": 434
+     },
+     "ffn_neurons": {
+      "shared": 251583,
+      "bitwise_identical": 251583
+     }
+    }
+   },
+   "c2cb27ef~3a4173e4": {
+    "families": {
+     "down_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0,
+      "unshared_norm_fraction": 0.0
+     },
+     "embed_tokens": {
+      "tensors": 1,
+      "bitwise_identical": 1,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "final_norm": {
+      "tensors": 1,
+      "bitwise_identical": 1,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "gate_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0,
+      "unshared_norm_fraction": 0.0
+     },
+     "input_layernorm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "k_norm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "k_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "o_proj": {
+      "tensors": 28,
+      "bitwise_identical": 22,
+      "positional_relative_frobenius_difference": 0.248647,
+      "unshared_norm_fraction": 0.141833
+     },
+     "post_attention_layernorm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "q_norm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "q_proj": {
+      "tensors": 28,
+      "bitwise_identical": 22,
+      "positional_relative_frobenius_difference": 0.281097,
+      "unshared_norm_fraction": 0.177598
+     },
+     "up_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0,
+      "unshared_norm_fraction": 0.0
+     },
+     "v_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     }
+    },
+    "shared_units": {
+     "attention_heads": {
+      "shared_o_proj": 439,
+      "bitwise_identical_o_proj": 439,
+      "shared_q_proj": 439,
+      "bitwise_identical_q_proj": 439
+     },
+     "ffn_neurons": {
+      "shared": 258048,
+      "bitwise_identical": 258048
+     }
+    }
+   },
+   "30fe791a~3a4173e4": {
+    "families": {
+     "down_proj": {
+      "tensors": 28,
+      "bitwise_identical": 0,
+      "positional_relative_frobenius_difference": 1.320861,
+      "unshared_norm_fraction": 0.153616
+     },
+     "embed_tokens": {
+      "tensors": 1,
+      "bitwise_identical": 1,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "final_norm": {
+      "tensors": 1,
+      "bitwise_identical": 1,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "gate_proj": {
+      "tensors": 28,
+      "bitwise_identical": 0,
+      "positional_relative_frobenius_difference": 1.274796,
+      "unshared_norm_fraction": 0.147431
+     },
+     "input_layernorm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "k_norm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "k_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "o_proj": {
+      "tensors": 28,
+      "bitwise_identical": 15,
+      "positional_relative_frobenius_difference": 0.327833,
+      "unshared_norm_fraction": 0.19141
+     },
+     "post_attention_layernorm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "q_norm": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     },
+     "q_proj": {
+      "tensors": 28,
+      "bitwise_identical": 15,
+      "positional_relative_frobenius_difference": 0.293294,
+      "unshared_norm_fraction": 0.204959
+     },
+     "up_proj": {
+      "tensors": 28,
+      "bitwise_identical": 0,
+      "positional_relative_frobenius_difference": 1.312566,
+      "unshared_norm_fraction": 0.149231
+     },
+     "v_proj": {
+      "tensors": 28,
+      "bitwise_identical": 28,
+      "positional_relative_frobenius_difference": 0.0
+     }
+    },
+    "shared_units": {
+     "attention_heads": {
+      "shared_o_proj": 430,
+      "bitwise_identical_o_proj": 430,
+      "shared_q_proj": 430,
+      "bitwise_identical_q_proj": 430
+     },
+     "ffn_neurons": {
+      "shared": 251583,
+      "bitwise_identical": 251583
+     }
+    }
+   }
+  },
+  "head_dim": 128,
+  "n_tensors": 310,
+  "_reading": "shared_units: every unit both candidates kept, aligned by original index; bitwise_identical == shared means the two differ ONLY in which units they kept. unshared_norm_fraction: the Frobenius-norm share of A's tensor carried by units B did not keep -- the aligned size of the difference, in norm terms"
+ }
+}

@@ -286,6 +286,33 @@ CLASSIFY: dict[str, dict] = {
         reconstruction=None,
         reconstruction_cost="not reconstructible: retraining is a new draw",
         disposition="keep"),
+    "aad-artifacts/phase_d2/d2_search_20261015_051722/products": dict(
+        experiment="phase_d2", role="D2 v3 committed Top-4 initialization",
+        retention="reproducibility_required", status="active",
+        why="the four initializations the D2 formal search committed "
+            "(stage1_selection.json of d2_search_20261015_051722); every D2 "
+            "behavioural probe trains FROM one of them. A second copy is on "
+            "the relay under stage1/phase_d2/d2_search_20261015_051722/, "
+            "round-trip verified "
+            "(logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/"
+            "evidence/product_durability.json)",
+        never_delete="open consumers: D2 screening and, for the advancing "
+                     "candidate, the shared confirmation; not retirable until "
+                     "that behavioural evidence is complete and reproducible",
+        reconstruction="the relay copy (byte-exact, verified); otherwise a "
+                       "replay of the search path under the D2 v3 objective",
+        reconstruction_cost="$0 from the relay", disposition="keep"),
+    "aad-artifacts/phase_d2/d2_search_20261015_051722/store": dict(
+        experiment="phase_d2", role="D2 search evidence store (no weights)",
+        retention="reproducibility_required", status="active",
+        why="the session archive whose states.jsonl (118 MB, sha256 1a91541d...) "
+            "carries every state's selection, FFN kept-neuron and attention "
+            "head masks and DEPTH candidate tables; the run's manifest pins "
+            "it and the relay holds the archive too",
+        never_delete="the only full state journal of the D2 search",
+        reconstruction=None,
+        reconstruction_cost="not reconstructible without a new paid search",
+        disposition="keep"),
     "stages/stage-1/families/d_series/batteries/d_series_behavioural_v1": dict(
         experiment="d_series", role="D-series behavioural battery family v1 (42 batteries)",
         retention="reproducibility_required", status="active",
@@ -568,6 +595,46 @@ def scientific_artifacts(entries: list[dict]) -> dict:
                 "finalist-rematerialization/v1/campaign.json)")
             out[key]["materialization"] = (
                 "local bytes retained; replay is the fallback"
+                if row["copies"] else out[key]["reconstruction"])
+
+    # --- the D2 committed Top-4, from the search's selection record ---
+    d2_run = "d2_search_20261015_051722"
+    d2_sel_rel = (f"logs/stages/stage-1/phase_d2/runs/{d2_run}/evidence/"
+                  "stage1_selection.json")
+    d2_sel = REPO_ROOT / d2_sel_rel
+    if d2_sel.is_file():
+        durability_rel = (f"logs/stages/stage-1/phase_d2/runs/{d2_run}/"
+                          "evidence/product_durability.json")
+        durable = REPO_ROOT / durability_rel
+        relay_ok = set()
+        if durable.is_file():
+            relay_ok = {r["state_id"] for r in json.loads(durable.read_text())[
+                "relay_verification"]["restored_checkpoints"] if r.get("matched")}
+        for i, m in enumerate(json.loads(d2_sel.read_text())["selected"], 1):
+            key = f"d2_candidate_c{i}"
+            row = {
+                "artifact_id": key,
+                "role": f"D2 v3 committed candidate c{i} (quality order {i})",
+                "identity": {k: m[k] for k in (
+                    "state_id", "path", "artifact_digest", "weights_digest",
+                    "single_shard_sha256", "arch_signature")},
+                "identity_owner": d2_sel_rel,
+                "creating_run": d2_run,
+                "relay_copy": (f"stage1/phase_d2/{d2_run}/products/"
+                               f"{m['state_id']}/" if m["state_id"] in relay_ok
+                               else None),
+                "durability_record": durability_rel if durable.is_file() else None,
+                "retention": "reproducibility_required",
+                "consumers": ["phase_d2 screening (declared, not authorized)",
+                              "phase_d2 shared confirmation, if this candidate "
+                              "advances"],
+            }
+            out[key] = attach(
+                row, m["single_shard_sha256"],
+                "restore the relay copy (round-trip verified); a replay of the "
+                "search path is the fallback")
+            out[key]["materialization"] = (
+                "local bytes retained; the relay copy is the second source"
                 if row["copies"] else out[key]["reconstruction"])
 
     # --- the D-series battery family, from the canonical manifest ---

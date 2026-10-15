@@ -3444,8 +3444,8 @@
    "experiment_id": "phase_d2",
    "run_id": "d2_search_20261015_051722",
    "root": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722",
-   "n_files": 14,
-   "digest": "98c95664015543261d22c0aeb60b23849217c208cb5c4de52d5796e9ca5758e1",
+   "n_files": 19,
+   "digest": "f6cb3a33e4e139dc33a0fb1c97cc9a49f5b6fbc7f8c80b5eeca6eaefba1ee2fd",
    "why": "no run manifest; its closeout states: COMPLETE FORMAL SEARCH: 92/92 expansions, 12 complete leaves, Top-4 committed and secured"
   }
  ],

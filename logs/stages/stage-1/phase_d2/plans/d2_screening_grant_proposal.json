@@ -1,0 +1,175 @@
+{
+ "schema": "aadistill.phase_d2.screening_grant_proposal/v1",
+ "status": "PROPOSED -- awaiting the maintainer's decision",
+ "authorizes": "nothing",
+ "recorded_utc": "2026-10-15T15:57:05Z",
+ "would_authorize": "ONE D2 behavioural SCREENING session: the eight frozen probes (c1..c4 x seeds 516448251, 614923639) from the four committed initializations, the rollout-rescoring diagnostic on each, stopping at preservation; the ranking and the one-or-none selection computed off-pod at $0. A replacement after a pre-science failure is a new one-use authorization netted against the same envelope.",
+ "would_not_authorize": [
+  "the shared confirmation (a separate grant naming the advancing candidate)",
+  "retraining, regenerating or re-evaluating B or q2",
+  "any change to K, the seeds, the SESOI, the rule or the battery",
+  "re-screening or adding seeds",
+  "D3",
+  "a fresh confirmation",
+  "any promotion"
+ ],
+ "bound_identities": {
+  "preregistration_hash": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+  "shared_protocol": {
+   "id": "d_series_shared_eval@v1",
+   "protocol_hash": "5ed198aed960e987f137ec6342ef7fa6ac24c8484b991bac8cd6a210f7ae742d",
+   "rung": "shared_screening"
+  },
+  "contract_hash": "6d4283e77e1b26549328d96eaf8f71773a3b2ef4e15804d26dd938eb0674455e",
+  "selection_sha256": "5a2647638ed78014edfceaacbf3f24ce7dd6d12db1307ee733064f22154689d0",
+  "arms": [
+   {
+    "arm": "c1",
+    "state_id": "59013099b902f213649b8aa4c676dedd",
+    "artifact_digest": "65ef3557728de5011b7bc6f99df2d8637152a9a01dae13bc54914c5621bf9da9"
+   },
+   {
+    "arm": "c2",
+    "state_id": "c2cb27efcf68b4f18bf7284aea84877a",
+    "artifact_digest": "ce7f8e2b2a3dcbd97c2b8b48076e6aa2b61f033dddb81a6a90e5219f5a147a81"
+   },
+   {
+    "arm": "c3",
+    "state_id": "30fe791a85d70ac713e75893fea107ae",
+    "artifact_digest": "fadacaa27d55b1144ad11f17204e3e106a10e188d5894745f68851983e5364b1"
+   },
+   {
+    "arm": "c4",
+    "state_id": "3a4173e4eff45b0d73fd82bd0b263f03",
+    "artifact_digest": "cc2fa665c634b684bcf38348cc0eb8d95abcbde8af03e2cd2c093d274805cef0"
+   }
+  ],
+  "seeds": [
+   516448251,
+   614923639
+  ],
+  "n_probes": 8,
+  "battery": {
+   "role": "d1_screening",
+   "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+   "item_ids_sha256": "d7b95cddd0b889c62485b542aab224e998d0bafacb74ee6fc30fa13f93e8ac53"
+  },
+  "recovery": {
+   "recipe_id": "e1_p1_kd_heavy@0.86M",
+   "recipe_digest": "a4b0dcab5348e951a005c9bf2cc0a7ff622c88d45b0859d1d24d7ea2a82bea90",
+   "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+   "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef"
+  },
+  "evaluation_protocol_hash": "e47508268ff52aa575d6a276735907f48a9589d0d5b2ffca492ad7b82dedc414",
+  "comparator_units": [
+   "d1_screening_B_s516448251",
+   "d1_screening_B_s614923639"
+  ],
+  "host_image_identity_required": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+  "host_admission_self_check": true
+ },
+ "price": {
+  "live_rate_usd_per_hour": 1.09,
+  "quote": {
+   "gpu": "NVIDIA L40S",
+   "usd_per_hour": 1.09,
+   "stock_status": "Low",
+   "_quoted": "live, immediately before issuance"
+  },
+  "expected_usd": 15.0704,
+  "hard_ceiling_usd": 19.4558,
+  "hard_ceiling_minutes": 1055.0,
+  "expected_minutes": 817.2,
+  "teardown_reserve_usd": 0.3,
+  "decomposition": {
+   "session_overhead_minutes": 82.0,
+   "arm_staging": {
+    "expected_minutes_per_arm": 1.12,
+    "hard_minutes_per_arm": 3.36,
+    "pull_rate_floor_mb_per_s": 22.9,
+    "_basis": "the D2 search's setup staged the 8,045,568,320-byte teacher within 5.85 min (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json), so a pod pulls at least 22.9 MB/s; one 1,192,135,096-byte arm plus its identity check, x3.0 for the bound",
+    "replaces": "D1's 22-minute on-pod rematerialization per arm: a D2 arm is a persisted search product, not a path to replay"
+   },
+   "probes": 8,
+   "rescoring": {
+    "source": "measured once (stage L)",
+    "minutes_per_probe": 1.83,
+    "in_ceilings": true,
+    "hard": {
+     "minutes": 28.5,
+     "gpu_usd": 0.52,
+     "disk_usd": 0.01,
+     "all_in_usd": 0.53
+    }
+   }
+  },
+  "basis": "logs/stages/stage-1/families/d_series/plans/d2_budget_v1.json :: steps.d2_screening",
+  "previous_planning_figure": {
+   "expected_usd": 16.61,
+   "hard_usd": 20.83,
+   "source": "logs/stages/stage-1/families/d_series/plans/d2_budget_v1.json at 7dd31165",
+   "why_lower_now": "the arms are staged from the relay (persisted and round-trip verified) instead of four 22-minute on-pod re-materializations"
+  }
+ },
+ "funding_checks": {
+  "four_conditions_failed": [],
+  "fundable": true,
+  "phase_d2_funded": true,
+  "per_session_cap_usd": 30.0,
+  "limits_now": {
+   "project_remaining_usd": 118.4484,
+   "project_cap_usd": 595.0,
+   "formal_remaining_usd": 122.426,
+   "per_session_cap_usd": 30.0
+  },
+  "proposed_cumulative_envelope_usd": 25.0,
+  "programme_reservation": {
+   "in_force": "cache_fix_validated",
+   "left_after_d2_at_hard_usd": 90.18,
+   "needed_for_d3_and_fresh_at_hard_usd": 66.45,
+   "left_if_the_whole_envelope_is_spent_usd": 84.94,
+   "satisfied_at_hard": true,
+   "satisfied_with_the_whole_envelope": true,
+   "owner": "logs/stages/stage-1/families/d_series/plans/d_series_programme_budget.json"
+  }
+ },
+ "issuance_and_launch": [
+  "1. commit and push this tree; it is the executable commit",
+  "2. the maintainer writes the grant (template below) to logs/budget/approvals/autoinit_d2_screening_grant.json",
+  "3. issue: PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-1/phase_d2/issue_d2_screening_authorization.py --grant <grant> --run-id d2_screening_<utc>  (quotes the live rate, derives and nets the ceiling, binds the contract hash)",
+  "4. commit the authorization alone; stage the bundle: scripts/stages/stage-1/phase_d1/stage_d1_bundle.py --experiment-id phase_d2 --session-commit <sha> --run-id <run>",
+  "5. dry run (all $0 gates, creates nothing), then the launch in a durable tmux session: scripts/stages/stage-1/phase_d2/autoinit_d2_screening_launch.py --scr <scr> --session-commit <sha> --bundle aad_autoinit_<sha8>.bundle --run-id <run>",
+  "6. after ALL_DONE: rank_d2_screening.py --run <run> --store <scr>/store --write (off-pod, $0)"
+ ],
+ "failure_semantics": {
+  "before_any_training": "ordinary engineering: preserve, tear down, repair, a new authorization netted against the envelope (P12.1)",
+  "after_training_began": "every trained checkpoint is preserved off-pod and identity-verified while the pod runs; a replacement pod restores them (--restore-trained) and RESUMES each at evaluation -- never retrains a frozen unit; a complete valid probe is never re-run",
+  "runtime_mismatch": "a training runtime or attested evaluation protocol other than the shared rung's stops the session before it generates; the host admission redraws non-matching hosts first",
+  "diagnostics": "the token-id sidecar and the rescoring never block, alter or re-run a scored probe; a wrapper failure falls back to the plain generator"
+ },
+ "statistical_integrity": {
+  "comparator": "B's imported screening rows",
+  "statistic": "pooled seed-mean correct_overall delta vs B, C0's guardrail vetoes",
+  "selection": "exactly one candidate advances, or none",
+  "tie_break": "the experiment's frozen quality position, then state id",
+  "field": "frozen by the experiment's own retention decision before any behavioural datum; its size is that experiment's preregistered choice",
+  "q2_screening_rows": "DESCRIPTIVE ONLY. q2 advanced on these prompts and seeds, so its screening estimate is inflated by the winner's curse (screening +0.00825 vs B, confirmation -0.000392). Never a ranking comparator",
+  "endpoint": "correct_overall",
+  "guardrails": {
+   "usable_pooled_min_delta": -0.05,
+   "usable_per_seed_min_delta": -0.1,
+   "role": "veto only; never positive credit"
+  },
+  "sesoi_for_the_confirmation": 0.01,
+  "_not_eight_independent_architectures": "the four candidates are near-siblings of one lineage; the paired seeds are the replicate, and eight probes are not eight independent tests",
+  "_frozen": "no seed is added, no SESOI moves and no candidate is re-screened because candidates land close together"
+ },
+ "grant_template": {
+  "rung": "screening",
+  "approves_preregistration_hash": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+  "cumulative_envelope_usd": 25.0,
+  "granted_by": "<maintainer, date, decision reference>",
+  "covers": "ONE D2 screening session of the eight frozen probes; not the confirmation, not B/q2, not a promotion"
+ }
+}

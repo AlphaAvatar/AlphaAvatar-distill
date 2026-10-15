@@ -153,7 +153,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def probe_config(probe: Any, *, audit: Path, frozen_recipe: Path,
-                 pack_dir: str, overrides: frozenset[str]) -> Path:
+                 pack_dir: str, overrides: frozenset[str],
+                 out_root: str = "artifacts/stages/stage-3/d1_behavioural",
+                 experiment: str = "D1") -> Path:
     """This probe's training config: the frozen recipe plus the allowed set.
 
     The override set is C1's, unchanged, and a derived config that differs
@@ -166,12 +168,13 @@ def probe_config(probe: Any, *, audit: Path, frozen_recipe: Path,
     derived = {
         **frozen,
         "run_name": probe.probe_id,
-        "out_dir": f"artifacts/stages/stage-3/d1_behavioural/{probe.probe_id}",
+        "out_dir": f"{out_root}/{probe.probe_id}",
         "data_dir": pack_dir,
         "seed": probe.seed,
         "student_path": probe.checkpoint_dir,
         "_purpose": (
-            f"D1 {probe.rung} probe, arm {probe.arm_id}, seed {probe.seed}. "
+            f"{experiment} {probe.rung} probe, arm {probe.arm_id}, seed "
+            f"{probe.seed}. "
             "Identical recovery; the only intended difference between probes "
             f"at one seed is the initialization. Derived from "
             f"{frozen_recipe.name} by overriding run identity, pack path, "
@@ -268,7 +271,12 @@ def battery_protocol_fields(contract: dict[str, Any]) -> dict[str, str]:
 def build_attested_protocol(package: Path, *, image_digest: str | None,
                             scoring: dict[str, Any],
                             battery_fields: dict[str, str],
-                            out: Path) -> Any:
+                            out: Path,
+                            report_name: str = (
+                                "d1_behavioural_attested_protocol.json"),
+                            schema: str = (
+                                "aadistill.phase_d1."
+                                "behavioural_attested_protocol/v1")) -> Any:
     """This session's evaluation-protocol attestation, from a REAL package.
 
     C1's mechanism, reused: the shared engine probe observes the actual vLLM
@@ -326,7 +334,7 @@ def build_attested_protocol(package: Path, *, image_digest: str | None,
         scoring_digest=scoring["digest"],
         **battery_fields)
     report = {
-        "schema": "aadistill.phase_d1.behavioural_attested_protocol/v1",
+        "schema": schema,
         "generation_protocol_fingerprint": gen.fingerprint,
         "evaluation_protocol_hash": attested.evaluation_protocol_hash,
         "scoring_contract": scoring,
@@ -334,8 +342,7 @@ def build_attested_protocol(package: Path, *, image_digest: str | None,
         "engine_probe": "engine_probe.json",
     }
     report["report_sha256"] = sha256_json(report)
-    (out / "d1_behavioural_attested_protocol.json").write_text(
-        json.dumps(report, indent=2) + "\n")
+    (out / report_name).write_text(json.dumps(report, indent=2) + "\n")
     return attested
 
 
@@ -437,7 +444,9 @@ def child_env(image_digest: str | None) -> dict[str, str]:
     return env
 
 
-def probe_local_need_bytes(repo_root: Path) -> dict[str, Any]:
+def probe_local_need_bytes(repo_root: Path,
+                           num_parameters: int | None = None
+                           ) -> dict[str, Any]:
     """Local bytes ONE probe needs: its transient set plus what it retains.
 
     C2's derivation, through its one owner: `training_dtypes` reads the SAME
@@ -452,7 +461,10 @@ def probe_local_need_bytes(repo_root: Path) -> dict[str, Any]:
     from stages.phase_d1 import behavioural as D1B
 
     tr = training_dtypes(repo_root)
-    params = int(D1B.design(repo_root)["incumbent"]["num_parameters"])
+    #: The caller's own field geometry when it has one; D1's design
+    #: otherwise (all five D1 arms share one target geometry).
+    params = int(num_parameters if num_parameters is not None else
+                 D1B.design(repo_root)["incumbent"]["num_parameters"])
     ck = COST.CheckpointFootprint(
         params, tr["save_dtype"],
         extra_bytes=int(tr["checkpoint_extra_bytes"]))
@@ -471,7 +483,9 @@ def probe_local_need_bytes(repo_root: Path) -> dict[str, Any]:
 
 
 def require_probe_headroom(name: str, record: dict[str, Any],
-                           save: Any) -> dict[str, Any]:
+                           save: Any, *,
+                           num_parameters: int | None = None
+                           ) -> dict[str, Any]:
     """Refuse BEFORE training if the disk cannot hold this probe.
 
     C2 attempt5 reached ENOSPC at probe 11 of 12 because completed workdirs
@@ -481,7 +495,7 @@ def require_probe_headroom(name: str, record: dict[str, Any],
     """
     from aadistill.runtime.leaf_durability import free_bytes_at
 
-    need = probe_local_need_bytes(REPO_ROOT)
+    need = probe_local_need_bytes(REPO_ROOT, num_parameters)
     root = REPO_ROOT / "artifacts"
     root.mkdir(parents=True, exist_ok=True)
     free = free_bytes_at(root)
@@ -502,8 +516,11 @@ def require_probe_headroom(name: str, record: dict[str, Any],
     return row
 
 
-def release_acked_probe_workdirs(record: dict[str, Any],
-                                 save: Any) -> dict[str, Any]:
+def release_acked_probe_workdirs(
+        record: dict[str, Any], save: Any, *,
+        ack_rel: str = "artifacts/audit/autoinit_d1_behavioural/release_acks",
+        roots_rel: tuple[str, ...] = ("artifacts/stages/stage-3/d1_behavioural",
+                                      EVAL_PACKAGES_REL)) -> dict[str, Any]:
     """Release the local bytes of every SCORED probe whose CHECKPOINT is acked.
 
     THE ACKNOWLEDGEMENT BOUNDARY: the launcher writes an ack only after the
@@ -530,7 +547,7 @@ def release_acked_probe_workdirs(record: dict[str, Any],
     import shutil
 
     out = {"released": [], "failed": [], "kept": [], "freed_gib": 0.0}
-    ack_dir = REPO_ROOT / "artifacts/audit/autoinit_d1_behavioural/release_acks"
+    ack_dir = REPO_ROOT / ack_rel
     try:
         acked: dict[str, str] = {}
         for p in (ack_dir.glob("*.json") if ack_dir.is_dir() else ()):
@@ -544,8 +561,7 @@ def release_acked_probe_workdirs(record: dict[str, Any],
         record.setdefault("probe_workdirs_released", []).append(out)
         save()
         return out
-    roots = (REPO_ROOT / "artifacts/stages/stage-3/d1_behavioural",
-             REPO_ROOT / EVAL_PACKAGES_REL)
+    roots = tuple(REPO_ROOT / rel for rel in roots_rel)
     freed = 0
     for entry in record.get("probes", []):
         probe_id = str(entry.get("probe_id") or "")

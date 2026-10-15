@@ -23,6 +23,20 @@ Writes, under --out-dir:
 * `search_analysis.json` -- operator timing, cache modes and counters, the beam
   trajectory level by level, leaf rank correlations, and (with --d1-states) the
   metric-alignment check on states D1 and D2 share by artifact digest.
+
+VERSION 2 (2026-10-15, erratum to the version-1 files committed at 7dd31165,
+which are kept unchanged): the leaf and summary files are written as
+`complete_leaf_ranking_v2.json` and `search_analysis_v2.json`.
+
+* Version 1 labelled `state.teacher_kl.equal_domain_mean` of a D2 state as
+  "d1_metric_teacher_kl". Under D2 v3 that field is the UNWEIGHTED UNION-support
+  KL (it equals `state.objective.raw_kl`), not D1's historical teacher Top-K +
+  tail KL. Version 2 names every KL by what it is and states each one's
+  support, reference and teacher-logit numerical protocol (`METRICS`).
+* Version 1's alignment table listed two rows that were two D2 STATE RECORDS of
+  ONE artifact (the two root DEPTH expansions produced identical bytes). Version
+  2 groups by artifact: records, unique artifacts and independent comparisons
+  are counted separately.
 """
 from __future__ import annotations
 
@@ -39,6 +53,56 @@ TOPK = "state.objective.kl_reference_topk.equal_domain_mean"
 CONF = "state.objective.reference_confidence_weight.equal_domain_mean"
 D1KL = "state.teacher_kl.equal_domain_mean"
 DOMAINS = ("code", "general", "rag_multihop", "reasoning_math", "tool")
+ANALYSIS_VERSION = 2
+
+#: What each KL in these files IS. Four quantities that look alike and are not:
+#: a reader comparing two of them must compare these rows first.
+METRICS = {
+    "d2_objective": {
+        "field": OBJ,
+        "what": "teacher-confidence-weighted union KL (D2 v3's objective)",
+        "support": "reference_student_union_topk_tail_v1: teacher Top-200 "
+                   "UNION candidate Top-200, + one tail; deterministic "
+                   "tie-break (value desc, index asc)",
+        "reference": "the root (original) teacher",
+        "weighting": "c_T(t) = 1 - H^{K+1}_T(t)/log(K+1), the frozen "
+                     "teacher's Top-K + tail confidence; denominator 1/T_x",
+        "teacher_logits": "root reference store: float32 product of the "
+                          "model-dtype final hidden state and the output head, "
+                          "accumulated in float32 (never rounded to bf16); "
+                          "candidate-only entries retrieved from the stored "
+                          "hidden state and log-normalizer",
+        "prediction_rows": "scored_v1 (this search)"},
+    "d2_unweighted_union_kl": {
+        "field": RAW,
+        "same_as": D1KL + " OF A D2 STATE (under v3 the evaluator's KL is the "
+                   "union-support KL, so the two fields are equal)",
+        "what": "the same union KL, UNWEIGHTED",
+        "support": "as d2_objective", "reference": "the root teacher",
+        "weighting": "none", "teacher_logits": "as d2_objective",
+        "prediction_rows": "scored_v1 (this search)"},
+    "d2_root_teacher_topk_kl": {
+        "field": TOPK,
+        "what": "teacher Top-K + tail KL of the same pair (D2's built-in "
+                "KL-only control on D1's support family)",
+        "support": "reference_topk_tail_v1 shape: teacher Top-200 + one tail, "
+                   "with D2's deterministic tie-break",
+        "reference": "the root teacher", "weighting": "none",
+        "teacher_logits": "as d2_objective (float32 head product from the "
+                          "root store)",
+        "prediction_rows": "scored_v1 (this search)"},
+    "d1_historical_teacher_topk_kl": {
+        "field": D1KL + " OF A D1 STATE (D1's journal)",
+        "what": "D1's state-evaluation KL",
+        "support": "reference_topk_tail_v1: teacher Top-200 + one tail, "
+                   "torch.topk (no deterministic tie-break)",
+        "reference": "the root teacher at state evaluation",
+        "weighting": "none",
+        "teacher_logits": "the teacher's own forward: bf16 logits from the "
+                          "model, upcast to float32 (teacher(ids).logits"
+                          ".float())",
+        "prediction_rows": "all_v1 (D1's search)"},
+}
 
 
 def jsonl(path: Path) -> list[dict]:
@@ -193,7 +257,11 @@ def leaf_ranking(states: dict[str, dict], selection: dict | None) -> dict:
             "objective_critical_token": v.get("state.objective.critical_token"),
             "raw_union_kl_equal_domain_mean": v.get(RAW),
             "root_teacher_topk_kl_equal_domain_mean": v.get(TOPK),
-            "d1_metric_teacher_kl_equal_domain_mean": v.get(D1KL),
+            #: v1 called this "d1_metric_teacher_kl". It is D2's own
+            #: evaluator field, which under v3 is the UNION-support KL.
+            "d2_state_teacher_kl_equal_domain_mean_is_union_kl": v.get(D1KL),
+            "state_teacher_kl_equals_raw_union_kl": (
+                v.get(D1KL) is not None and v.get(D1KL) == v.get(RAW)),
             "reference_confidence_weight_mean": v.get(CONF),
             "objective_over_raw": (v[OBJ] / v[RAW]) if v.get(RAW) else None,
             "per_domain": {dom: {"objective": v.get(f"state.objective.domain.{dom}"),
@@ -291,20 +359,81 @@ def depth_choices(states: dict[str, dict]) -> list[dict]:
 
 
 def d1_alignment(states: dict[str, dict], d1_states: Path) -> dict:
-    """States D1 and D2 share by artifact digest, measured by both evaluators."""
-    d1 = {r.get("artifact_digest"): r for r in last_records(d1_states).values()}
-    rows = []
+    """Artifacts D1 and D2 both measured, grouped BY ARTIFACT.
+
+    One artifact measured by both evaluators is ONE comparison, however many
+    state records name it; version 1 counted records.
+    """
+    d1_records = last_records(d1_states)
+    d1_by: dict[str, list[dict]] = collections.defaultdict(list)
+    for r in d1_records.values():
+        d1_by[r.get("artifact_digest")].append(r)
+    d2_by: dict[str, list[dict]] = collections.defaultdict(list)
     for r in states.values():
-        twin = d1.get(r.get("artifact_digest"))
-        if twin is None:
-            continue
-        rows.append({"path": r.get("path_label"),
-                     "artifact_digest": r.get("artifact_digest"),
-                     "d1_teacher_kl": vals(twin).get(D1KL),
-                     "d2_root_teacher_topk_kl": vals(r).get(TOPK),
-                     "d2_raw_union_kl": vals(r).get(RAW),
-                     "d2_objective": vals(r).get(OBJ)})
-    return {"shared_states": len(rows), "rows": rows}
+        if r.get("artifact_digest") in d1_by:
+            d2_by[r.get("artifact_digest")].append(r)
+    artifacts = []
+    for digest, d2_rows in sorted(d2_by.items()):
+        d1_rows = d1_by[digest]
+        d1_vals = sorted({vals(t).get(D1KL) for t in d1_rows} - {None})
+        d2_topk = sorted({vals(r).get(TOPK) for r in d2_rows} - {None})
+        one = (len(d1_vals) == 1 and len(d2_topk) == 1)
+        artifacts.append({
+            "artifact_digest": digest,
+            "d2_state_records": [{"state_id": r["state_id"],
+                                  "path": r.get("path_label")}
+                                 for r in d2_rows],
+            "d1_state_records": [{"state_id": t["state_id"],
+                                  "path": t.get("path_label")}
+                                 for t in d1_rows],
+            "d1_historical_teacher_topk_kl": d1_vals,
+            "d2_root_teacher_topk_kl": d2_topk,
+            "d2_unweighted_union_kl": sorted(
+                {vals(r).get(RAW) for r in d2_rows} - {None}),
+            "d2_objective": sorted({vals(r).get(OBJ) for r in d2_rows}
+                                   - {None}),
+            "abs_difference_root_topk_vs_d1": (
+                abs(d2_topk[0] - d1_vals[0]) if one else None),
+            "rel_difference_root_topk_vs_d1": (
+                abs(d2_topk[0] - d1_vals[0]) / abs(d1_vals[0])
+                if one and d1_vals[0] else None)})
+    return {
+        "n_d2_state_records": sum(len(a["d2_state_records"]) for a in artifacts),
+        "n_d1_state_records": sum(len(a["d1_state_records"]) for a in artifacts),
+        "n_unique_artifacts": len(artifacts),
+        "independent_comparisons": len(artifacts),
+        "artifacts": artifacts,
+        "compares": ("d2_root_teacher_topk_kl against "
+                     "d1_historical_teacher_topk_kl: the same support FAMILY "
+                     "under different teacher-logit numerical protocols, "
+                     "tie-breaks and prediction rows (see METRICS); an "
+                     "agreement on one artifact is one comparison, not a "
+                     "validation of the two evaluators in general")}
+
+
+def cross_search_proxy(leaves: dict, d1_states: Path) -> dict:
+    """Best complete leaf of each search, each on ITS OWN evaluator's KL."""
+    d1_leaves = [r for r in last_records(d1_states).values()
+                 if r.get("is_complete_leaf") and vals(r).get(D1KL) is not None]
+    d1_best = min(d1_leaves, key=lambda r: vals(r)[D1KL])
+    d2 = sorted(leaves["leaves"],
+                key=lambda x: x["root_teacher_topk_kl_equal_domain_mean"])
+    return {
+        "d2_best_root_teacher_topk_kl": d2[0][
+            "root_teacher_topk_kl_equal_domain_mean"],
+        "d2_best_unweighted_union_kl": min(
+            x["raw_union_kl_equal_domain_mean"] for x in leaves["leaves"]),
+        "d1_best_historical_teacher_topk_kl": vals(d1_best)[D1KL],
+        "d1_best_state_id": d1_best["state_id"],
+        "comparable_as": ("an approximately comparable step-0 PROXY: same "
+                          "support family, different teacher-logit numerical "
+                          "protocol (float32 head product vs bf16 forward "
+                          "logits upcast), tie-break and prediction rows; the "
+                          "one shared artifact agrees to the difference shown "
+                          "in d1_metric_alignment. Not behaviour, not a "
+                          "D1-vs-D2 verdict"),
+        "not_comparable": ("d2_unweighted_union_kl and the D2 objective: a "
+                           "different support (and weighting) from D1's KL")}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -319,18 +448,24 @@ def main(argv: list[str] | None = None) -> int:
     selection = json.loads(a.selection.read_text()) if a.selection else None
     leaves = leaf_ranking(states, selection)
     depth = depth_choices(states)
-    summary = {"schema": "aadistill.phase_d2.search_analysis/v1",
+    leaves["schema"] = "aadistill.phase_d2.complete_leaf_ranking/v2"
+    leaves["metrics"] = METRICS
+    summary = {"schema": "aadistill.phase_d2.search_analysis/v2",
+               "metrics": METRICS,
                "inputs_sha256": {name: _sha256(a.dir / name) for name in (
                    "states.jsonl", "telemetry.jsonl")},
                "operator_timing": operator_timing(tel), "beam": beam(states),
                "leaf_spearman": leaves["spearman"], "top4": leaves["top4"]}
     if a.d1_states:
         summary["d1_metric_alignment"] = d1_alignment(states, a.d1_states)
+        summary["cross_search_proxy"] = cross_search_proxy(leaves, a.d1_states)
     if a.out_dir:
         a.out_dir.mkdir(parents=True, exist_ok=True)
-        for name, doc in (("complete_leaf_ranking.json", leaves),
+        #: Version 2 writes NEW files; the version-1 files are frozen derived
+        #: evidence and are corrected by the erratum, never overwritten.
+        for name, doc in (("complete_leaf_ranking_v2.json", leaves),
                           ("depth_choices.json", depth),
-                          ("search_analysis.json", summary)):
+                          ("search_analysis_v2.json", summary)):
             (a.out_dir / name).write_text(json.dumps(doc, indent=1) + "\n")
     print(json.dumps({"leaves": leaves["n_complete_leaves"],
                       "depth_expansions": len(depth),

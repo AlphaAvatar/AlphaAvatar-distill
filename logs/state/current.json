@@ -75,8 +75,8 @@
   "authorizes": "nothing",
   "behavioural_design": "D1 (complete): Top-4, 10 + 6 probes, owner d1_design.json. D2: shared protocol, K=4 prepared, 8 + 3 probes, no B/q2 training, owner families/d_series/plans/d2_budget_v1.json.",
   "behavioural_pricing": "Owner: d1_design.json :: budget.chain; attempt bounds: the run's governance/authorization.json :: money.attempt_bounds.",
-  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2 v3: search COMPLETE; screening/confirmation and D3 need their own grants. Owner: decisions.md 2026-10-15.",
-  "d2_owed_engineering": "the behavioural driver with the token-id wrapper and rescoring.",
+  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2 v3: search COMPLETE; screening chain built at $0, grant PROPOSED (phase_d2/plans/d2_screening_grant_proposal.json), not authorized. Owner: decisions.md 2026-10-15.",
+  "d2_owed_engineering": "none at $0; the screening chain is built (d2_screening_readiness_review.md).",
   "execution_wiring": "D1 COMPLETE and CLOSED. D2 v3 search COMPLETE: phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
   "incumbent": "B = C1's PROMOTED TREATMENT, 53e30566..., attention.activation_importance_v1; state_id null, built as a fixed path, rebuilt on the pod. DERIVED from C1's verdict by phase_d_series/incumbent.py. The design named C1's BEATEN arm c313d1b4... until 2026-10-08. Owner: phase_d1/analyses/d1_control_arm_identity.json.",
@@ -127,7 +127,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "D2 v3 search COMPLETE 2026-10-15 (d2_search_20261015_051722, $5.5364); programme re-derived. Next: the maintainer's D2 screening decision (own grant) and the D2 behavioural session chain at $0. Owner: decisions.md 2026-10-15.",
+ "next": "D2 screening chain built at $0; grant PROPOSED ($19.46 hard at $1.09/h, $25 envelope). Next: the maintainer's screening decision. Owner: decisions.md 2026-10-15.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Await the D2 screening decision; build the D2 behavioural chain at $0; then screening -> confirmation -> D3, each granted separately.",

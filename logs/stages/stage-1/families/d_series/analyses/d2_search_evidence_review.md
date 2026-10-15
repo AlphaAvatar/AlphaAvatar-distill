@@ -1,5 +1,11 @@
 # D2 v3 formal search: evidence review (2026-10-15)
 
+> **Erratum v1 (2026-10-15, after the maintainer's independent review of
+> 7dd31165).** Section 4's "Proxy comparison with D1" is corrected below, in
+> the section *Erratum v1*; the text of the review is kept as written. The
+> record is
+> `logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/derived_evidence_erratum_v1.json`.
+
 **Status:**
 
 - The D2 v3 formal search `d2_search_20261015_051722` is **COMPLETE**. It ran
@@ -317,3 +323,44 @@ lineage.
 - the cumulative formal allowance;
 - that the screening rule advances exactly one candidate or none;
 - that confirmation is a further separate grant.
+
+## Erratum v1 (2026-10-15)
+
+Raised by the maintainer's independent review of `7dd31165`. It corrects
+derived evidence only: the search's raw records, ranking, Top-4 and every
+digest are unchanged. The version-1 derived files stay as committed; their
+corrections are `complete_leaf_ranking_v2.json` and `search_analysis_v2.json`
+(`analyze_d2_search.py`, ANALYSIS_VERSION 2).
+
+- **E1. One artifact, not two states.** The "two states D1 and D2 share" are
+  two D2 state records and two D1 state records of **one** artifact
+  (`e63a36e4…`): in both searches the root DEPTH expansion under each profile
+  produced identical bytes. That is **one** comparison. On it, D2's root
+  teacher-top-k KL is 0.511197 and D1's historical teacher-top-k KL is
+  0.511240: |Δ| = 4.3e-5 (8.4e-5 relative), under different teacher-logit
+  protocols. It is agreement on one artifact, not a reproduction of D1's
+  metric and not a validation of either evaluator in general.
+- **E2. The leaf field "d1_metric_teacher_kl" was mislabelled.** It was read
+  from the D2 state's `state.teacher_kl.*`, which under D2 v3 is the
+  **unweighted union-support KL** (equal to `state.objective.raw_kl.*`), not
+  D1's teacher Top-K + tail KL. Version 2 names it as what it is and asserts
+  the equality per leaf.
+- **E3. The cross-search numbers are a cross-protocol proxy.** D2's best leaf
+  on its root teacher-top-k KL is 7.2009; D1's best leaf on its historical
+  teacher-top-k KL is 7.4341. Same support family; different teacher-logit
+  protocol, tie-break and prediction rows. Not behaviour, not a D1-vs-D2
+  verdict. D2's unweighted union KL (7.2054) and objective (6.6132) are on a
+  different support and are not to be set against D1's number.
+
+The four quantities, kept apart:
+
+| Quantity | Field | Support | Reference | Weighting | Teacher logits |
+|---|---|---|---|---|---|
+| D2 objective | `state.objective.*` | teacher Top-200 ∪ candidate Top-200 + tail, deterministic tie-break | root teacher | c_T (teacher Top-K + tail confidence) | float32 head product from the root store (never rounded to bf16) |
+| D2 unweighted union KL | `state.objective.raw_kl.*` = D2's `state.teacher_kl.*` | as above | root teacher | none | as above |
+| D2 root teacher-top-k KL | `state.objective.kl_reference_topk.*` | teacher Top-200 + tail, deterministic tie-break | root teacher | none | as above |
+| D1 historical teacher-top-k KL | D1's `state.teacher_kl.*` | teacher Top-200 + tail, `torch.topk` | root teacher at state evaluation | none | the teacher's own forward, bf16 logits upcast to float32 |
+
+D2's search used `scored_v1` prediction rows (its equivalence adopted under
+Stage W's tolerances); D1's used `all_v1`.
+

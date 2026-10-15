@@ -418,7 +418,13 @@ class TestTheD2Budget:
         from stages.d_series import d2_budget as BUD
         b = BUD.build(k_candidates=4)
         assert b["steps"]["d2_screening"]["n_probes"] == 8
-        assert b["steps"]["d2_screening"]["n_arms_materialized"] == 4
+        #: The four arms are STAGED from the relay (persisted search
+        #: products), not rebuilt on the pod; the confirmation stages one.
+        assert b["steps"]["d2_screening"]["n_arms_staged_from_relay"] == 4
+        assert b["steps"]["d2_confirmation"]["n_arms_staged_from_relay"] == 1
+        staging = b["steps"]["d2_screening"]["arm_staging"]
+        assert 0 < staging["expected_minutes_per_arm"] < \
+            staging["hard_minutes_per_arm"] < 22.0
         assert b["steps"]["d2_confirmation"]["n_probes"] == 3
         for k in ("d2_screening", "d2_confirmation"):
             assert b["steps"][k]["hard"]["all_in_usd"] <= b["per_session_cap_usd"]
@@ -529,9 +535,21 @@ class TestTheProgrammeScenarios:
             if c["closed"]:
                 assert c["outstanding_usd"] == 0.0
 
-    def test_only_a_complete_search_closeout_counts_as_searched(self, tmp_path):
+    def test_a_completion_sentence_does_not_release_the_search(self, tmp_path):
+        """The reservation is released by the completion CONTRACT only.
+
+        Its clauses are tested clause by clause in test_search_completion.py;
+        this pins that the budget uses it: a closeout that merely SAYS
+        "COMPLETE FORMAL SEARCH" releases nothing, and is reported as a
+        contradiction rather than silently ignored.
+        """
+        import shutil
+
         from stages.d_series import d2_budget as BUD
-        assert BUD.completed_d2_search(tmp_path) is None
+        prereg = REPO / "logs/stages/stage-1/phase_d2/plans/d2_preregistration_v3.json"
+        (tmp_path / prereg.relative_to(REPO)).parent.mkdir(parents=True)
+        shutil.copy(prereg, tmp_path / prereg.relative_to(REPO))
+        spec = BUD.d2_search_completion_spec(REPO)
 
         def closeout(run_id: str, classification: str) -> None:
             path = (tmp_path / "logs/stages/stage-1/phase_d2/runs" / run_id
@@ -541,12 +559,14 @@ class TestTheProgrammeScenarios:
                 "run_id": run_id, "classification": classification,
                 "money": {"all_in_usd": 5.5, "authorized_hard_usd": 23.7}}))
 
+        assert BUD.completed_d2_search(tmp_path, spec) is None
         closeout("d2_search_a", "FAILED FORMAL SEARCH: stage C")
-        assert BUD.completed_d2_search(tmp_path) is None
+        assert BUD.completed_d2_search(tmp_path, spec) is None
         closeout("d2_search_b", "COMPLETE FORMAL SEARCH: 92/92 expansions")
-        got = BUD.completed_d2_search(tmp_path)
-        assert got["run_id"] == "d2_search_b"
-        assert got["booked_all_in_usd"] == 5.5
+        assert BUD.completed_d2_search(tmp_path, spec) is None
+        status = BUD.d2_search_completion(tmp_path, spec)
+        assert [c.split()[0] for c in status["contradictions"]] == [
+            "d2_search_b"]
 
     def test_the_reservation_rule_is_reported_not_assumed(self):
         for pricing in self._scen()["search_pricing"].values():

@@ -960,18 +960,25 @@
    },
    "d2_screening": {
     "n_probes": 8,
-    "n_arms_materialized": 4,
+    "n_arms_staged_from_relay": 4,
+    "arm_staging": {
+     "expected_minutes_per_arm": 1.12,
+     "hard_minutes_per_arm": 3.36,
+     "pull_rate_floor_mb_per_s": 22.9,
+     "_basis": "the D2 search's setup staged the 8,045,568,320-byte teacher within 5.85 min (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json), so a pod pulls at least 22.9 MB/s; one 1,192,135,096-byte arm plus its identity check, x3.0 for the bound",
+     "replaces": "D1's 22-minute on-pod rematerialization per arm: a D2 arm is a persisted search product, not a path to replay"
+    },
     "expected": {
-     "minutes": 900.8,
-     "gpu_usd": 16.36,
-     "disk_usd": 0.25,
-     "all_in_usd": 16.61
+     "minutes": 817.2,
+     "gpu_usd": 14.85,
+     "disk_usd": 0.23,
+     "all_in_usd": 15.07
     },
     "hard": {
-     "minutes": 1129.5,
-     "gpu_usd": 20.52,
-     "disk_usd": 0.31,
-     "all_in_usd": 20.83
+     "minutes": 1055.0,
+     "gpu_usd": 19.17,
+     "disk_usd": 0.29,
+     "all_in_usd": 19.46
     },
     "rescoring": {
      "source": "measured once (stage L)",
@@ -993,18 +1000,25 @@
    },
    "d2_confirmation": {
     "n_probes": 3,
-    "n_arms_materialized": 1,
+    "n_arms_staged_from_relay": 1,
+    "arm_staging": {
+     "expected_minutes_per_arm": 1.12,
+     "hard_minutes_per_arm": 3.36,
+     "pull_rate_floor_mb_per_s": 22.9,
+     "_basis": "the D2 search's setup staged the 8,045,568,320-byte teacher within 5.85 min (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json), so a pod pulls at least 22.9 MB/s; one 1,192,135,096-byte arm plus its identity check, x3.0 for the bound",
+     "replaces": "D1's 22-minute on-pod rematerialization per arm: a D2 arm is a persisted search product, not a path to replay"
+    },
     "expected": {
-     "minutes": 378.0,
-     "gpu_usd": 6.87,
-     "disk_usd": 0.11,
-     "all_in_usd": 6.97
+     "minutes": 357.2,
+     "gpu_usd": 6.49,
+     "disk_usd": 0.1,
+     "all_in_usd": 6.59
     },
     "hard": {
-     "minutes": 463.8,
-     "gpu_usd": 8.43,
-     "disk_usd": 0.13,
-     "all_in_usd": 8.55
+     "minutes": 445.2,
+     "gpu_usd": 8.09,
+     "disk_usd": 0.12,
+     "all_in_usd": 8.21
     },
     "rescoring": {
      "source": "measured once (stage L)",

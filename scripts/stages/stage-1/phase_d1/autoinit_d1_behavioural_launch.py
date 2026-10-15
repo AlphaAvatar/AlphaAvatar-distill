@@ -38,7 +38,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 for extra in ("src", "scripts", "scripts/pod", "scripts/autoinit"):
@@ -177,7 +177,39 @@ def driver_command(ctx: Any, plan: Any) -> str:
 STORE_SUBDIR = "store"
 
 
-def evidence_locations(ctx: SessionContext) -> tuple[Path, ...]:
+class BehaviouralLayout(NamedTuple):
+    """WHERE one behavioural session's evidence and probes live, pod and host.
+
+    The durability functions below were written for D1 and are the project's
+    tested answer to "a finished probe must survive the pod". Another
+    experiment's behavioural session reuses them by passing its own layout, so
+    two experiments never share a path; every default is D1's (`D1_LAYOUT`)
+    and D1's behaviour is unchanged.
+
+    A `NamedTuple`, not a dataclass: this module is loaded by file path in
+    tests without a `sys.modules` entry, which a dataclass with postponed
+    annotations cannot survive.
+    """
+
+    evidence_dir: str
+    evidence_filename: str
+    attested_name: str
+    pod_probe_root: str
+    release_ack_rel: str
+    #: Per scored probe, secured BESIDE the strict three (result, rows,
+    #: admission) on a best-effort basis: (local name, remote path under
+    #: `evidence_dir` with `{probe_id}`, recursive). A diagnostic that must
+    #: never gate the release or the teardown goes here.
+    extra_probe_files: tuple[tuple[str, str, bool], ...] = ()
+
+
+def _layout(layout: "BehaviouralLayout | None") -> "BehaviouralLayout":
+    return layout if layout is not None else D1_LAYOUT
+
+
+def evidence_locations(ctx: SessionContext,
+                       layout: BehaviouralLayout | None = None
+                       ) -> tuple[Path, ...]:
     """Where the driver's live evidence can be read off-pod, newest first.
 
     The runner mirrors the driver's evidence to `<scr>/relay/` during the run
@@ -185,20 +217,23 @@ def evidence_locations(ctx: SessionContext) -> tuple[Path, ...]:
     GUESSED this path, found no evidence, and reported no finished work on a
     pod holding two completed leaves.
     """
+    lay = _layout(layout)
     scr = Path(ctx.args.scr)
-    return (scr / "relay" / "d1_behavioural.json",
-            scr / STORE_SUBDIR / "d1_behavioural.json",
-            scr / STORE_SUBDIR / "extracted" / EVIDENCE_DIR
-                / "d1_behavioural.json")
+    name = lay.evidence_filename
+    return (scr / "relay" / name,
+            scr / STORE_SUBDIR / name,
+            scr / STORE_SUBDIR / "extracted" / lay.evidence_dir / name)
 
 
-def finished_probes(ctx: SessionContext) -> list[dict] | None:
+def finished_probes(ctx: SessionContext,
+                    layout: BehaviouralLayout | None = None
+                    ) -> list[dict] | None:
     """What the driver says it SCORED, or None when that is UNKNOWN.
 
     `[]` means the driver ran and finished nothing; `None` means its evidence
     could not be read -- different claims, never reported as one.
     """
-    for path in evidence_locations(ctx):
+    for path in evidence_locations(ctx, layout):
         if not path.is_file():
             continue
         try:
@@ -208,7 +243,7 @@ def finished_probes(ctx: SessionContext) -> list[dict] | None:
         ctx.evidence["probe_evidence_read_from"] = str(path)
         return [p for p in record.get("probes", []) if p.get("scored")]
     ctx.evidence["probe_evidence_unreadable"] = [
-        str(p) for p in evidence_locations(ctx)]
+        str(p) for p in evidence_locations(ctx, layout)]
     return None
 
 
@@ -228,7 +263,8 @@ def probe_store(ctx: SessionContext) -> Path:
     return Path(ctx.args.scr) / STORE_SUBDIR / "probes"
 
 
-def secure_probe_evidence(ctx: SessionContext) -> None:
+def secure_probe_evidence(ctx: SessionContext,
+                          layout: BehaviouralLayout | None = None) -> None:
     """Pull each SCORED probe's evidence off-pod, while the next trains.
 
     Idempotent: a probe whose result, per-sample rows and generations all
@@ -246,6 +282,8 @@ def secure_probe_evidence(ctx: SessionContext) -> None:
     below was never reached, and the provider-disappearance repair protected
     every window except the first one it was written for.
     """
+    lay = _layout(layout)
+    evidence_dir = lay.evidence_dir
     try:
         #: Trained-checkpoint durability FIRST (P8.2.1: persist at the moment
         #: of completion, not at a closeout that may never come), and BEFORE
@@ -264,8 +302,8 @@ def secure_probe_evidence(ctx: SessionContext) -> None:
         #: hashes. Keeping the weights lets a replacement RE-EVALUATE every
         #: probe under its own single attested protocol. The bytes are released
         #: at a SUCCESSFUL terminal instead, where there is no further consumer.
-        preserve_trained_unscored(ctx)
-        units = finished_probes(ctx) or []
+        preserve_trained_unscored(ctx, lay)
+        units = finished_probes(ctx, lay) or []
         store = probe_store(ctx)
         secured = ctx.evidence.setdefault("probe_evidence_secured", {})
         for unit in units:
@@ -276,18 +314,21 @@ def secure_probe_evidence(ctx: SessionContext) -> None:
             dest = store / probe_id
             dest.mkdir(parents=True, exist_ok=True)
             want = {
-                "result.json": (f"{REPO}/{EVIDENCE_DIR}/results/"
+                "result.json": (f"{REPO}/{evidence_dir}/results/"
                                 f"{probe_id}.json", False),
-                "per_sample.jsonl": (f"{REPO}/{EVIDENCE_DIR}/per_sample/"
+                "per_sample.jsonl": (f"{REPO}/{evidence_dir}/per_sample/"
                                      f"{probe_id}.jsonl", False),
                 #: The probe's generation-admission record: the raw evidence
                 #: that THIS probe's protocol was observed comparable, not
                 #: just the hash the result carries.
-                "admission.json": (f"{REPO}/{EVIDENCE_DIR}/"
+                "admission.json": (f"{REPO}/{evidence_dir}/"
                                    f"{probe_id}_generation_admission.json",
                                    False),
-                "generations": (f"{REPO}/{EVIDENCE_DIR}/generations/"
+                "generations": (f"{REPO}/{evidence_dir}/generations/"
                                 f"{probe_id}", True),
+                **{name: (f"{REPO}/{evidence_dir}/"
+                          + remote.format(probe_id=probe_id), recursive)
+                   for name, remote, recursive in lay.extra_probe_files},
             }
             for name, (remote, recursive) in want.items():
                 if state.get(name):
@@ -316,17 +357,16 @@ def secure_probe_evidence(ctx: SessionContext) -> None:
                     and state.get("admission.json") and checkpoint
                     and not state.get("release_acked")):
                 state["release_acked"] = write_release_ack(
-                    ctx, probe_id, checkpoint_sha256=checkpoint)
+                    ctx, probe_id, checkpoint_sha256=checkpoint, layout=lay)
         #: The session-level protocol evidence, once: the attestation and the
         #: engine probe are what an auditor reconstructs the protocol identity
         #: from, and the recorded hash alone is not that.
         store = Path(ctx.args.scr) / STORE_SUBDIR
         store.mkdir(parents=True, exist_ok=True)
-        for name in ("d1_behavioural_attested_protocol.json",
-                     "engine_probe.json"):
+        for name in (lay.attested_name, "engine_probe.json"):
             target = store / name
             if not target.is_file():
-                rc = _scp_from_pod(ctx, f"{REPO}/{EVIDENCE_DIR}/{name}",
+                rc = _scp_from_pod(ctx, f"{REPO}/{evidence_dir}/{name}",
                                    target)
                 if rc == 0 and target.is_file():
                     ctx.say(f"  secured {name}")
@@ -369,7 +409,8 @@ def _scp_to_pod(ctx: SessionContext, sources: list[str], remote_dir: str, *,
 
 
 def write_release_ack(ctx: SessionContext, probe_id: str, *,
-                      checkpoint_sha256: str) -> bool:
+                      checkpoint_sha256: str,
+                      layout: BehaviouralLayout | None = None) -> bool:
     """Tell the pod this probe's evidence AND checkpoint are durable.
 
     C2's mechanism, under D1's ack path, extended by the checkpoint: the ack
@@ -381,7 +422,7 @@ def write_release_ack(ctx: SessionContext, probe_id: str, *,
     """
     import tempfile
 
-    ack_dir = f"{REPO}/{M.RELEASE_ACK_REL}"
+    ack_dir = f"{REPO}/{_layout(layout).release_ack_rel}"
     payload = json.dumps({
         "schema": "aadistill.phase_d1.behavioural_release_ack/v2",
         "probe_id": probe_id,
@@ -477,12 +518,21 @@ def prune_preserved_scored(ctx: SessionContext) -> None:
 #: expression over its own REPO_ROOT.
 POD_PROBE_ROOT = f"{REPO}/artifacts/stages/stage-3/d1_behavioural"
 
+#: D1's own layout: every name above, once, as the defaults the durability
+#: functions read when a caller passes none.
+D1_LAYOUT = BehaviouralLayout(
+    evidence_dir=EVIDENCE_DIR, evidence_filename="d1_behavioural.json",
+    attested_name="d1_behavioural_attested_protocol.json",
+    pod_probe_root=POD_PROBE_ROOT, release_ack_rel=M.RELEASE_ACK_REL)
+
 #: A trained probe's small records beside `run_completion.json`: the event
 #: stream and the run manifest the trainer writes in the probe's root.
 TRAINING_RECORDS = ("train_log.jsonl", "run_manifest.json")
 
 
-def trained_probes_to_preserve(ctx: SessionContext) -> list[dict] | None:
+def trained_probes_to_preserve(ctx: SessionContext,
+                               layout: BehaviouralLayout | None = None
+                               ) -> list[dict] | None:
     """Every probe that FINISHED TRAINING, or None if the record is unknown.
 
     THIS USED TO EXCLUDE SCORED PROBES, and that is the defect. The filter was
@@ -508,7 +558,7 @@ def trained_probes_to_preserve(ctx: SessionContext) -> list[dict] | None:
     The bytes are released at a successful terminal, by
     `prune_preserved_scored`, where no attempt needs them again.
     """
-    for path in evidence_locations(ctx):
+    for path in evidence_locations(ctx, layout):
         if not path.is_file():
             continue
         try:
@@ -575,7 +625,9 @@ def training_provenance(ctx: SessionContext, unit: dict) -> dict[str, str]:
     }
 
 
-def preserve_trained_unscored(ctx: SessionContext) -> None:
+def preserve_trained_unscored(ctx: SessionContext,
+                              layout: BehaviouralLayout | None = None
+                              ) -> None:
     """Fetch every trained-but-unscored probe's checkpoint off-pod. Verified.
 
     DOWNLOAD, which is the direction that works: the search secured four
@@ -590,8 +642,9 @@ def preserve_trained_unscored(ctx: SessionContext) -> None:
     import hashlib
     import shutil
 
+    lay = _layout(layout)
     try:
-        units = trained_probes_to_preserve(ctx)
+        units = trained_probes_to_preserve(ctx, lay)
         if not units:
             return
         store = Path(getattr(ctx.args, "ckpt_store", None)
@@ -603,7 +656,7 @@ def preserve_trained_unscored(ctx: SessionContext) -> None:
                 continue
             remote_model = str(unit["model_dir"])
             tag = Path(remote_model).parent.name
-            remote_root = f"{POD_PROBE_ROOT}/{probe_id}"
+            remote_root = f"{lay.pod_probe_root}/{probe_id}"
             dest = store / probe_id
             want = str(unit.get("trained_sha256") or "")
             #: ALREADY DURABLE HERE -- a probe this session RESUMED from this
@@ -715,7 +768,8 @@ def preserve_trained_unscored(ctx: SessionContext) -> None:
             f"preserve_trained_unscored: {type(exc).__name__}: {exc}")
 
 
-def restore_trained_probes(ctx: SessionContext) -> bool:
+def restore_trained_probes(ctx: SessionContext,
+                           layout: BehaviouralLayout | None = None) -> bool:
     """Put preserved trained-unscored probes back on a REPLACEMENT pod.
 
     The other half of P8.4 state 2. `--restore-trained` names a local
@@ -741,7 +795,7 @@ def restore_trained_probes(ctx: SessionContext) -> bool:
             ctx.say(f"  restore {probe_dir.name}: no preserved_identity.json; "
                     "refusing to push unverifiable bytes")
             return False
-        remote_root = f"{POD_PROBE_ROOT}/{probe_dir.name}"
+        remote_root = f"{_layout(layout).pod_probe_root}/{probe_dir.name}"
         #: PUSH, deliberately without the LocalAsset machinery: its 600 s
         #: per-asset cap exists for small science inputs, and a 1.2 GiB
         #: checkpoint at the measured ~0.72 MB/s uplink is ~28 minutes --
@@ -758,7 +812,8 @@ def restore_trained_probes(ctx: SessionContext) -> bool:
     return True
 
 
-def fetch_probe_evidence(ctx: SessionContext) -> list:
+def fetch_probe_evidence(ctx: SessionContext,
+                         layout: BehaviouralLayout | None = None) -> list:
     """Closeout sweep: anything the poll loop did not already secure.
 
     Runs at the terminal, after `ev["terminal"]` is set, which is what lets
@@ -767,7 +822,7 @@ def fetch_probe_evidence(ctx: SessionContext) -> list:
     resumes instead of retraining.
     """
     #: Preserves every trained checkpoint first, then the scored evidence.
-    secure_probe_evidence(ctx)
+    secure_probe_evidence(ctx, layout)
     #: Release only on a completed rung, and only per probe whose result,
     #: per-sample rows and admission record are all confirmed off-pod -- so a
     #: probe whose evidence did not come home keeps its weights even on a
@@ -794,8 +849,9 @@ def probe_fetch_ok(entry: object) -> bool:
         for piece in ("result.json", "per_sample.jsonl", "admission.json"))
 
 
-def probes_evidence_secured(ctx: SessionContext,
-                            fetched: list) -> tuple[bool, str]:
+def probes_evidence_secured(ctx: SessionContext, fetched: list,
+                            layout: BehaviouralLayout | None = None
+                            ) -> tuple[bool, str]:
     """Teardown may not proceed while a scored probe's evidence is only on
     the pod.
 
@@ -806,7 +862,8 @@ def probes_evidence_secured(ctx: SessionContext,
     required final archive, so a generations directory the poll hook missed is
     reported rather than blocking alone.
     """
-    units = finished_probes(ctx)
+    lay = _layout(layout)
+    units = finished_probes(ctx, lay)
     if units is None:
         return False, (
             "the driver evidence could not be read, so what it finished is "
@@ -814,7 +871,7 @@ def probes_evidence_secured(ctx: SessionContext,
             "were scored' are different findings, and treating the first as "
             "the second is how a pod holding finished work gets deleted with "
             f"every check green. Looked in: "
-            f"{[str(p) for p in evidence_locations(ctx)]}")
+            f"{[str(p) for p in evidence_locations(ctx, lay)]}")
     #: THE TRAINED-BUT-UNSCORED WEIGHTS FIRST (P8.4 state 2), and BEFORE the
     #: "nothing scored" early return: the session that dies during its FIRST
     #: probe's generation has zero scored probes and one trained checkpoint,
@@ -828,7 +885,7 @@ def probes_evidence_secured(ctx: SessionContext,
     #: checkpoints rather than retraining them. A scored probe's weights are
     #: what lets a replacement RE-EVALUATE it under its own attested
     #: protocol instead of spending 61 minutes recreating bytes that existed.
-    trained = trained_probes_to_preserve(ctx)
+    trained = trained_probes_to_preserve(ctx, lay)
     if trained is None:
         return False, (
             "the driver evidence could not be read while deciding whether any "
@@ -871,8 +928,7 @@ def probes_evidence_secured(ctx: SessionContext,
             "measurements this session already paid for.")
     #: And the session-level protocol evidence itself: the attestation every
     #: admission was compared against.
-    attested = Path(ctx.args.scr) / STORE_SUBDIR / \
-        "d1_behavioural_attested_protocol.json"
+    attested = Path(ctx.args.scr) / STORE_SUBDIR / lay.attested_name
     if not attested.is_file():
         return False, (
             f"{len(want)} probes scored and the attested evaluation protocol "

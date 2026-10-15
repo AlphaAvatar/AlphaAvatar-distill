@@ -64,6 +64,11 @@ D1_BEHAVIOURAL_POD: tuple[str, ...] = (
     "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py",
     "scripts/stages/stage-1/phase_d1/score_d1_screening.py",
     "scripts/stages/stage-1/phase_d1/score_d1_confirmation.py",
+    #: D2's screening chain spawns these bare too: its driver from the
+    #: launcher, the token-id wrapper under the vLLM interpreter and the
+    #: rescoring diagnostic under the trainer's.
+    "scripts/stages/stage-1/phase_d2/autoinit_d2_screening_driver.py",
+    "scripts/stages/stage-1/phase_d2/rescore_d2_probe.py",
 )
 
 

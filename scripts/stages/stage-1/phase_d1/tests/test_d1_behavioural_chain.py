@@ -1520,7 +1520,9 @@ class TestTrainedUnscoredDurabilityRunsDuringTheSession:
         src = (REPO / "scripts/stages/stage-1/phase_d1/"
                       "autoinit_d1_behavioural_launch.py").read_text()
         poll = src.split("def secure_probe_evidence(", 1)[1].split("\ndef ", 1)[0]
-        assert "preserve_trained_unscored(ctx)" in poll
+        #: `(ctx, lay)` since the layout parameter (2026-10-15): the same
+        #: call, under the session's own paths.
+        assert "preserve_trained_unscored(ctx" in poll
         assert "prune_preserved_scored" not in poll, (
             "releasing from the poll hook is what made a replacement retrain")
         terminal = src.split("def fetch_probe_evidence(", 1)[1].split("\ndef ", 1)[0]

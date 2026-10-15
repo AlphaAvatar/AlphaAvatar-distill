@@ -565,5 +565,16 @@
  "what_this_authorizes": {
   "nothing_further": "this session committed a candidate set and stopped. It trained nothing, evaluated no behaviour and computed no promotion decision.",
   "next_rung": "D2 Top-4 recovery screening (and any confirmation) needs its own maintainer authorization after the programme budget is re-derived from actual spend; NOT started."
- }
+ },
+ "errata": [
+  {
+   "recorded_utc": "2026-10-15T15:12:06Z",
+   "record": "evidence/derived_evidence_erratum_v1.json",
+   "affects": [
+    "findings_descriptive.d1_metric_comparison",
+    "evidence_in_tree: complete_leaf_ranking.json, search_analysis.json (superseded by their _v2 files)"
+   ],
+   "summary": "one shared artifact (two state records), not two; the leaf field labelled D1's metric is D2's unweighted union KL; D1-vs-D2 KL numbers are a cross-protocol proxy. Additive: the text above is kept as written."
+  }
+ ]
 }

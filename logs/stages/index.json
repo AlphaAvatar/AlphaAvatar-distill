@@ -858,7 +858,7 @@
    "experiment_id": "phase_d2",
    "stage_id": "1",
    "classification": "experiment",
-   "status": "FORMAL SEARCH COMPLETE 2026-10-15 (d2_search_20261015_051722: 92/92, 12 leaves, Top-4 committed and secured, $5.5364); screening/confirmation NOT authorized; preregistration v3 APPROVED 2026-10-14; Stage W revision 2 PASS, adopted (revision 1 FAIL, closed); version 2 superseded before formal search",
+   "status": "FORMAL SEARCH COMPLETE 2026-10-15 (d2_search_20261015_051722: 92/92, 12 leaves, Top-4 committed and secured, $5.5364); screening chain BUILT at $0 and a one-use grant PROPOSED; screening/confirmation NOT authorized; preregistration v3 APPROVED 2026-10-14; Stage W revision 2 PASS, adopted (revision 1 FAIL, closed); version 2 superseded before formal search",
    "title": "D2 \u2014 teacher Top-K confidence x union Top-K KL search",
    "question": "Under the capacity limit, does weighting each scored position's root-reference union Top-K KL -- and the structural operators' activation statistics -- by the frozen original teacher's Top-200 + tail confidence select a structural initialization that, after the frozen recovery recipe, recovers more autonomous task correctness than the standing incumbent B? Three declared changes from D1 (DEPTH reference parent -> root, KL support teacher Top-K -> teacher \u222a student Top-K, and the weighting); operators, profiles, beam, seed and the shared behavioural protocol are D1's.",
    "canonical_path": "logs/stages/stage-1/phase_d2",
@@ -873,6 +873,34 @@
     {
      "path": "logs/stages/stage-1/families/d_series/analyses/d2_search_evidence_review.md",
      "says": "the D2 search evidence review: Top-4 and ranking evidence, raw vs weighted union KL, DEPTH reference attribution, beam trajectory and timing, the four budget limits, integrity, teardown and readiness for screening"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/derived_evidence_erratum_v1.json",
+     "says": "erratum v1 to the search's derived evidence: one shared artifact (two state records), the mislabelled union-KL field, the cross-protocol proxy; raw records, ranking and digests unchanged",
+     "field": "schema",
+     "equals": "aadistill.phase_d2.derived_evidence_erratum/v1"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json",
+     "says": "the committed Top-4 and the evidence archive verified at rest, persisted on the relay and restored byte-exactly into an independent directory",
+     "field": "schema",
+     "equals": "aadistill.phase_d2.product_durability/v1"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_d2/analyses/d2_screening_inputs.json",
+     "says": "the screening rung's $0 input verification: the four initializations at all four identities, B's (and q2's) imported screening units re-hashed and re-scored byte-exactly, the contract hash",
+     "field": "all_verified",
+     "equals": true
+    },
+    {
+     "path": "logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json",
+     "says": "the D2 screening one-use authorization PROPOSAL: bound identities, the live-rate price, the four money conditions, the programme reservation and the grant template",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "logs/stages/stage-1/families/d_series/analyses/d2_screening_readiness_review.md",
+     "says": "the D2 screening readiness review: executable commit, the frozen eight-probe plan, identity checks, B reuse, the session contract, durability and failure semantics, the re-derived cost and reservation, the proposal"
     },
     {
      "path": "logs/stages/stage-1/phase_d2/plans/d2_preregistration_v3.json",

@@ -928,6 +928,7 @@ STAGE_1 = [
         stage_id="1",
         status=("FORMAL SEARCH COMPLETE 2026-10-15 (d2_search_20261015_051722: "
                 "92/92, 12 leaves, Top-4 committed and secured, $5.5364); "
+                "screening chain BUILT at $0 and a one-use grant PROPOSED; "
                 "screening/confirmation NOT authorized; preregistration v3 "
                 "APPROVED 2026-10-14; Stage W revision 2 PASS, adopted "
                 "(revision 1 FAIL, closed); version 2 superseded before formal "
@@ -961,6 +962,37 @@ STAGE_1 = [
               "vs weighted union KL, DEPTH reference attribution, beam "
               "trajectory and timing, the four budget limits, integrity, "
               "teardown and readiness for screening"),
+            E("logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/"
+              "evidence/derived_evidence_erratum_v1.json",
+              "erratum v1 to the search's derived evidence: one shared "
+              "artifact (two state records), the mislabelled union-KL field, "
+              "the cross-protocol proxy; raw records, ranking and digests "
+              "unchanged",
+              field="schema",
+              equals="aadistill.phase_d2.derived_evidence_erratum/v1"),
+            E("logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/"
+              "evidence/product_durability.json",
+              "the committed Top-4 and the evidence archive verified at rest, "
+              "persisted on the relay and restored byte-exactly into an "
+              "independent directory",
+              field="schema",
+              equals="aadistill.phase_d2.product_durability/v1"),
+            E("logs/stages/stage-1/phase_d2/analyses/d2_screening_inputs.json",
+              "the screening rung's $0 input verification: the four "
+              "initializations at all four identities, B's (and q2's) imported "
+              "screening units re-hashed and re-scored byte-exactly, the "
+              "contract hash", field="all_verified", equals=True),
+            E("logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json",
+              "the D2 screening one-use authorization PROPOSAL: bound "
+              "identities, the live-rate price, the four money conditions, "
+              "the programme reservation and the grant template",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/families/d_series/analyses/"
+              "d2_screening_readiness_review.md",
+              "the D2 screening readiness review: executable commit, the "
+              "frozen eight-probe plan, identity checks, B reuse, the session "
+              "contract, durability and failure semantics, the re-derived "
+              "cost and reservation, the proposal"),
             E("logs/stages/stage-1/phase_d2/plans/d2_preregistration_v3.json",
               "the versioned preregistration v3 (contract revision 8): "
               "objective, support and contract hashes, the three declared "

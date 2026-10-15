@@ -13,6 +13,31 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 0 volumes and $0/h (2026-10-15 about 10:12 UTC, after the D2 search's
 confirmed teardown). No acquisition loop or watcher is running.
 
+**D2 SCREENING CHAIN BUILT AT $0; GRANT PROPOSED, NOT AUTHORIZED
+(2026-10-15).** This round followed the maintainer's independent review of
+`7dd31165`.
+- **Chain.** `phase_d2/autoinit_d2_screening_{launch,driver}.py`, the
+  contract `d2_screening.py`, the grant type and issuer, the off-pod
+  `rank_d2_screening.py` and the rescoring diagnostic. It reuses D1's probe
+  functions and durability functions. The arms are staged from the relay.
+- **Plan.** Eight probes: c1–c4 × seeds 516448251, 614923639. The comparator
+  is B's two imported units. Contract `6d4283e7…`.
+- **Inputs verified at $0.** All four identities of each arm. B's units
+  re-hashed and re-scored byte-exactly.
+- **Durability.** The Top-4 is on the relay, restored and re-identified.
+- **Price at the live $1.09/h.** $15.07 expected, **$19.46** hard. D2
+  remaining is $28.27; the reservation holds with $23.73 to spare.
+- **Search records.**
+  - Completion is now a 9-clause contract (`search_completion.py`). Project
+    remaining is still $118.4484.
+  - An erratum corrects the D1/D2 metric-alignment analysis: one artifact,
+    not two; the "D1 metric" field was D2's union KL.
+- **Owners.**
+  [`d2_screening_readiness_review.md`](../stages/stage-1/families/d_series/analyses/d2_screening_readiness_review.md);
+  [`d2_screening_grant_proposal.json`](../stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json);
+  `decisions.md` 2026-10-15.
+- **Not authorized:** any pod or probe; the confirmation; D3; a promotion.
+
 **D2 v3 FORMAL SEARCH COMPLETE (2026-10-15).** Run `d2_search_20261015_051722`
 (session commit `d64490ee`, scored_v1, L40S at $1.09/h).
 - **Result.**
@@ -30,20 +55,20 @@ confirmed teardown). No acquisition loop or watcher is running.
     control (4/4).
   - The root reference changed DEPTH's first removed layer in 12/12 non-root
     expansions; the weighting changed 13 of 112 greedy choices.
-  - On D1's own metric, D2's best leaf scores 7.2009 against D1's 7.4341.
-    That is a proxy, not behaviour.
+  - D2's best root teacher-top-k KL is 7.2009, against D1's 7.4341 on its
+    own evaluator. That is a cross-protocol proxy (erratum v1), not
+    behaviour.
 - **Owners.**
   [`closeout/outcome.json`](../stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json);
   [`d2_search_evidence_review.md`](../stages/stage-1/families/d_series/analyses/d2_search_evidence_review.md).
-- **Programme, re-derived from actual spend.**
-  - D2 remaining (screening + confirmation) is $29.98 at hard.
-  - After it, $88.47 is left against $68.16 for D3 plus a fresh confirmation.
+- **Programme, re-derived from actual spend.** Superseded by the chain
+  paragraph above:
+  - D2 remaining is now $28.27.
+  - After it, $90.18 is left against $66.45.
   - Project remaining is $118.4484 of $595.
   - Owners: `derive_budget.py`, `d_series_programme_budget.json`.
 - **Not authorized:** D2 screening and confirmation; D3; a fresh confirmation;
   any promotion.
-  - Screening also needs a D2 behavioural session chain, built at $0; D1's is
-    bound to D1.
 
 **D2 VERSION 3 (maintainer scientific decision, 2026-10-14; contract
 revision 8 `1321017a…`, preregistration v3 `b5281092…`, APPROVED 2026-10-14).** An

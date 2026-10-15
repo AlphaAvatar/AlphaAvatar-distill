@@ -11351,3 +11351,64 @@ on a paid pod.
     to D1.
 - **Revisit when** the maintainer decides on D2 screening. The frozen field is
   four near-siblings.
+
+## 2026-10-15 — D2 screening chain built at $0; search evidence corrected and made durable; screening grant PROPOSED, not authorized
+
+- **Context.** This is the maintainer's Post-D2-v3-Search Independent Review of
+  `7dd31165`. It accepted the search as COMPLETE and kept K = 4. It
+  authorized $0 work only: the screening driver, launcher and governance;
+  verification of inputs and evidence durability; tests; and a grant proposal.
+  No pod and no probe.
+- **Budget contract (autonomous, $0).** A completed D2 search now leaves the
+  programme plan only when exactly one run satisfies nine machine-readable
+  clauses (`families/d_series/search_completion.py`):
+  - the grant's identity;
+  - the terminal state;
+  - the full trajectory;
+  - the committed Top-K;
+  - the secured checkpoints;
+  - the manifest and archive;
+  - the teardown;
+  - a cost the budget authority books;
+  - no unsettled resource.
+
+  The old string-prefix rule is gone. Mutation tests cover every clause and
+  every missing record. The real run passes, and project remaining stays
+  $118.4484.
+- **Erratum to derived evidence** (`evidence/derived_evidence_erratum_v1.json`).
+  - The two "shared" D1/D2 states are one artifact. That is one comparison,
+    |Δ| 4.3e-5 under different teacher-logit protocols.
+  - The leaf field labelled D1's metric is D2's unweighted union KL.
+  - The 7.2009 vs 7.4341 comparison is a cross-protocol proxy.
+  - The v1 files are frozen. The `_v2` files and the review's erratum section
+    correct them. Raw data, ranking and digests are unchanged.
+- **Durability.**
+  - The four committed checkpoints and the evidence archive are on the relay
+    (`stage1/phase_d2/d2_search_20261015_051722/`). They were restored into an
+    independent directory and re-identified at all four identities.
+  - `states.jsonl` re-expanded from the archive matches the manifest.
+  - They are registered in the checkpoint registry with their consumers, and
+    are not retirable while screening and the confirmation are open.
+- **Screening chain.**
+  - New files: `d2_screening.py` (contract), `d2_screening_authorization.py`
+    with its issuer, `autoinit_d2_screening_launch.py`,
+    `autoinit_d2_screening_driver.py`, `rescore_d2_probe.py`,
+    `rank_d2_screening.py` (off-pod), the setup branch, artifact specs and the
+    pod preflight.
+  - It reuses D1's probe functions and durability functions. D1's are now
+    parameterized by path, with D1's defaults unchanged.
+  - The arms come from the relay, not from re-materialization.
+  - Host admission requires the protocol's exact image identity
+    (`…@595.91.07`).
+  - The training runtime and the attested evaluation protocol must equal the
+    shared rung's before training and before generation.
+  - The token-id sidecar and the rescoring are failure-isolated diagnostics.
+- **Price (live $1.09/h).** Screening is expected $15.0704 and hard $19.4558,
+  plus $0.30 reserve. All four money conditions pass.
+  - D2 remaining is $28.27 at hard. After it, $90.18 remains against $66.45
+    for D3 plus a fresh confirmation.
+- **Proposal.** `logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json`
+  asks for one screening session within a $25.00 cumulative envelope.
+- **Not authorized:** any pod; the eight probes; the shared confirmation;
+  B/q2 retraining; D3; a fresh confirmation; any promotion.
+- **Revisit when** the maintainer decides on the screening grant.
