@@ -99,7 +99,7 @@
     "580.126.20": 1
    }
   },
-  "reading": "across every pod this project created whose location and driver are both recorded, AU is where 595.91.07 lives (11 of 12); NL has never carried it, SE once in 44, US about one in ten. AU is therefore the draw that can satisfy the frozen identity, and it has no L40S capacity right now."
+  "reading": "deduplicated by pod id, among pods whose host driver is recorded, 595.91.07 was carried by: AU 9 of 10; NL 0 of 3; SE 1 of 44; US 5 of 38; IE 1 of 3; IS 0 of 13. AU is the draw that can satisfy the frozen identity, and it has no L40S capacity right now. (The commit that added this record said '11 of 12' for AU: that count double-counted repeated create records; this field and the evidence file are the corrected figures.)"
  },
  "next": "one AU-constrained attempt with a long $0 create window (no pod and no billing until AU capacity appears); if AU stays unavailable for that whole window, stop and report the comparability problem -- no other driver, torch, transformers or vLLM is substituted",
  "science": "no measurement began; protocol, field, seeds and envelope untouched",
