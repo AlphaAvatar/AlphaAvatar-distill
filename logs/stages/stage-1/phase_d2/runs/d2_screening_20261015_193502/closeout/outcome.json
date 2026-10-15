@@ -1,0 +1,109 @@
+{
+ "schema": "aadistill.phase_d2.screening_closeout/v1",
+ "run_id": "d2_screening_20261015_193502",
+ "stage_id": "1",
+ "experiment_id": "phase_d2",
+ "outcome": "NO PROVIDER RESOURCE. Twelve create calls constrained to AU (--country-code AU), 300 s apart from 19:36 to 20:31 UTC, each answered 'no longer any instances available with the requested specifications'. The provider's own availability listing showed OC-AU-1 L40S unavailable (only EU-NL-1 offered L40S). Nothing was created or billed; no measurement began.",
+ "classification": "PRE-PROVIDER TRANSIENT (capacity in the constrained country), $0",
+ "recorded_utc": "2026-10-15T20:33:10Z",
+ "session_commit": "ce5ebe149f54498ea39b3f26760bfca2e2cbf7cc",
+ "authorized_base_commit": "65017e2066a3d2b605677b6c8baa5ed20e27e363",
+ "authorization_sha256": "674520c7277b76beaf70ace05f3b1a318689834f80aa766e493a76a7a3167c3e",
+ "authorization_file_sha256": "0dc523ecf12826bcf8ab3798d58d2f0c95f93ff6e66f413ecb27fb06761862f2",
+ "contract_hash": "6d4283e77e1b26549328d96eaf8f71773a3b2ef4e15804d26dd938eb0674455e",
+ "provider_resource_created": false,
+ "provider_teardown_verified": true,
+ "provider_evidence": {
+  "draws": [
+   {
+    "draw": 1,
+    "pod_id": null,
+    "outcome": "create_failed",
+    "price_per_hour": 1.09,
+    "elapsed_minutes_at_release": 0.0,
+    "cumulative_usd_at_release": 0.0,
+    "watchdog_journal": null,
+    "release": {
+     "pod_id": null,
+     "why": "create_failed",
+     "confirmed_not_billing": true,
+     "provider_resource_created": false,
+     "raw_responses": [
+      "create_raw_d1_a1.txt",
+      "create_raw_d1_a10.txt",
+      "create_raw_d1_a11.txt",
+      "create_raw_d1_a12.txt",
+      "create_raw_d1_a2.txt",
+      "create_raw_d1_a3.txt",
+      "create_raw_d1_a4.txt",
+      "create_raw_d1_a5.txt",
+      "create_raw_d1_a6.txt",
+      "create_raw_d1_a7.txt",
+      "create_raw_d1_a8.txt",
+      "create_raw_d1_a9.txt"
+     ],
+     "rule": "no id was returned, so no resource exists and nothing is billing; the raw provider response is kept beside this record"
+    }
+   }
+  ],
+  "pod_list_after": "[]",
+  "raw_responses": [
+   "evidence/provider/create_raw_d1_a1.txt",
+   "evidence/provider/create_raw_d1_a12.txt"
+  ],
+  "_teardown": "nothing to tear down: no pod id was ever returned"
+ },
+ "money": {
+  "all_in_usd": 0.0,
+  "gpu_usd": 0.0,
+  "disk_usd": 0.0,
+  "elapsed_minutes": 0.0,
+  "_basis": "no provider resource existed"
+ },
+ "host_location_evidence": {
+  "record": "evidence/host_location_driver_history.json",
+  "by_location": {
+   "AU": {
+    "595.91.07": 9,
+    "580.178.04": 1
+   },
+   "IE": {
+    "580.159.03": 2,
+    "595.91.07": 1,
+    "unknown": 3
+   },
+   "IS": {
+    "unknown": 4,
+    "580.159.03": 13
+   },
+   "NL": {
+    "580.159.04": 1,
+    "580.126.20": 1,
+    "580.173.02": 1,
+    "unknown": 1
+   },
+   "SE": {
+    "580.126.09": 42,
+    "unknown": 6,
+    "595.91.07": 1,
+    "580.159.04": 1
+   },
+   "US": {
+    "580.167.08": 3,
+    "595.91.07": 5,
+    "580.159.03": 23,
+    "unknown": 18,
+    "580.178.04": 4,
+    "580.126.09": 1,
+    "580.159.04": 1,
+    "580.126.20": 1
+   }
+  },
+  "reading": "across every pod this project created whose location and driver are both recorded, AU is where 595.91.07 lives (11 of 12); NL has never carried it, SE once in 44, US about one in ten. AU is therefore the draw that can satisfy the frozen identity, and it has no L40S capacity right now."
+ },
+ "next": "one AU-constrained attempt with a long $0 create window (no pod and no billing until AU capacity appears); if AU stays unavailable for that whole window, stop and report the comparability problem -- no other driver, torch, transformers or vLLM is substituted",
+ "science": "no measurement began; protocol, field, seeds and envelope untouched",
+ "one_use": "consumed; the next attempt is a new authorization netted against the same envelope",
+ "observers": "closed in the terminal path: the launcher exited (LAUNCH_EXIT=11), its tmux session ended, the milestone waiter ended on it; no watchdog was started because no pod id existed",
+ "what_this_authorizes": "nothing"
+}

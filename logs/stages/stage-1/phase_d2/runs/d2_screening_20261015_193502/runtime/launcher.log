@@ -1,0 +1,94 @@
+[19:36:06] budget: expected 817 min $14.85 · soft $18.62 · hard $19.17 (authorized $19.46)
+[19:36:07] NVIDIA L40S $1.09/h, stock None
+[19:36:07] account funds OK: the provider account holds $136.6069 against the $30.0000 this session must be able to fund
+[19:36:07] run d2_screening_20261015_193502, preregistration b52810921a4c
+[19:36:10] contract verified at $0: 6d4283e77e1b2654, 8 probes
+[19:36:11] 12 arm files on the relay at their pins
+[19:36:11] session commit ce5ebe149f54 verified: harness digests to 84d499fa20b1…, carries the authorization and only logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_193502/governance/authorization.json differs from the authorized base
+[19:36:11] no previous attempt failed deterministically; 2 prior log(s) read
+[19:36:17] aad_autoinit_ce5ebe14.bundle round-trips
+[19:36:18] precheck OK: 18 relay inputs (18 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[19:36:18] DRY RUN: every pre-provider gate passed; stopping before provider creation. Nothing was created and nothing bills.
+[19:36:34] budget: expected 817 min $14.85 · soft $18.62 · hard $19.17 (authorized $19.46)
+[19:36:35] NVIDIA L40S $1.09/h, stock None
+[19:36:35] account funds OK: the provider account holds $136.6069 against the $30.0000 this session must be able to fund
+[19:36:35] run d2_screening_20261015_193502, preregistration b52810921a4c
+[19:36:39] contract verified at $0: 6d4283e77e1b2654, 8 probes
+[19:36:39] 12 arm files on the relay at their pins
+[19:36:40] session commit ce5ebe149f54 verified: harness digests to 84d499fa20b1…, carries the authorization and only logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_193502/governance/authorization.json differs from the authorized base
+[19:36:40] no previous attempt failed deterministically; 2 prior log(s) read
+[19:36:45] aad_autoinit_ce5ebe14.bundle round-trips
+[19:36:46] precheck OK: 18 relay inputs (18 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[19:36:46] attempt 1: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[19:41:47] attempt 2: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[19:46:48] attempt 3: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[19:51:48] attempt 4: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[19:56:49] attempt 5: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[20:01:50] attempt 6: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[20:06:50] attempt 7: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[20:11:51] attempt 8: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[20:16:52] attempt 9: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[20:21:52] attempt 10: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[20:26:53] attempt 11: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[20:31:53] attempt 12: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[20:31:53] ABORT: could not create a pod

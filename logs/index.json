@@ -743,7 +743,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 89,
+  "runs_unrecorded": 90,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -838,8 +838,8 @@
    },
    "phase_d2": {
     "recorded": 0,
-    "unrecorded": 3,
-    "total": 3
+    "unrecorded": 4,
+    "total": 4
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -3455,6 +3455,14 @@
    "n_files": 19,
    "digest": "77cc197853ed739ec81c6d9d4961845e003a5be0e53933d7931b8c75a498a572",
    "why": "no run manifest; its closeout states: PRE-SCIENCE ACQUISITION FAILURE (host identity), cost booked below. The frozen identity was enforced, never substituted."
+  },
+  {
+   "experiment_id": "phase_d2",
+   "run_id": "d2_screening_20261015_193502",
+   "root": "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_193502",
+   "n_files": 8,
+   "digest": "4df37f95b66bd7b4817e5406efb6c86d901b5d7a2cbb38650a4fa0cc1492d17c",
+   "why": "no run manifest; its closeout states: PRE-PROVIDER TRANSIENT (capacity in the constrained country), $0"
   },
   {
    "experiment_id": "phase_d2",
