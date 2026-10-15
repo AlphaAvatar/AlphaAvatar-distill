@@ -600,6 +600,19 @@ class TestDeadlineAndFailureEvidence:
 class TestTheRecords:
 
     def test_they_are_what_the_builder_derives(self):
+        """While the grant can run a session the records are the builder's.
+        Once the campaign is CLOSED the plan is FROZEN: it is what the session
+        executed against, bound by the booked evidence's plan_sha256, and a
+        later non-science change upstream (the preregistration's status) must
+        not rewrite it."""
+        camp = json.loads((REPO / W.CAMPAIGN).read_text())
+        if str(camp.get("status", "")).startswith("COMPLETE and CLOSED"):
+            from stages.d_series import d2_budget as BUD
+            ev = BUD.d2v3_validation_evidence()
+            assert ev["usable"], ev.get("why")
+            assert ev["identities"]["recorded"]["plan_sha256"] == \
+                hashlib.sha256((REPO / W.PLAN).read_bytes()).hexdigest()
+            return
         assert P.main([]) == 0, "run d2v3_gpu_validation_plan.py --write"
 
     def test_the_plan_registers_the_codes_tolerances_and_steps(self):
@@ -654,7 +667,8 @@ class TestTheRecords:
         out = W.premises(REPO)
         assert out["objective_hash"] == O.D2_OBJECTIVE.objective_hash
         assert out["preregistration_hash"] == S.preregistration_hash(REPO)
-        assert out["preregistration_status"].startswith("DRAFT")
+        assert out["preregistration_status"].startswith(
+            ("DRAFT", "APPROVED"))
         assert out["plan_sha256"] == hashlib.sha256(
             (REPO / W.PLAN).read_bytes()).hexdigest()
 

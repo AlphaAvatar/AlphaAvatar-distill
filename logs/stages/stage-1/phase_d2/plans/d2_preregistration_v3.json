@@ -574,7 +574,7 @@
    ]
   }
  },
- "status": "DRAFT -- not approved, not authorized; supersedes v2 (superseded before formal search) and v1 (never executed)",
+ "status": "APPROVED 2026-10-14 by the maintainer (review of 7211e142; logs/budget/decisions.md) -- each paid session still needs its own grant; supersedes v2 (superseded before formal search) and v1 (never executed)",
  "superseded_drafts": [],
  "preregistration_hash": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
  "budget": {

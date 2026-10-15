@@ -1,0 +1,27 @@
+{
+ "_contract": "WHAT THE MAINTAINER DECIDED, and only that. Every other field of the authorization -- identities, stages, plan hash, row selection's price, ceiling -- is DERIVED by d2_authorization.build_payload from the tree it binds, and this grant is REFUSED if it states one (GRANT_MAY_NOT_STATE).",
+ "_one_use": "ONE grant, ONE issuance, ONE launcher session. A run id is never reused to reset spend; an ordinary pre-science engineering failure is repaired and re-issued inside the accepted range (AGENTS.md P12.1).",
+ "approves_preregistration_hash": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+ "granted_by": "maintainer, 2026-10-14 UTC: Post-Stage-W-R2 Scientific Approval and Conditional D2 Search Authorization (independent review of 7211e142), confirmed by the maintainer directly. Scientific GO for the D2 v3 Full Search as an explicit research-investment decision; the registered Stage W rubric's literal result was BETWEEN and is not rewritten as GO.",
+ "covers": "ONE D2 v3 formal SEARCH session under preregistration v3: the frozen original teacher; Top-200 + tail teacher confidence; the teacher-union-candidate Top-200 + tail KL against the root reference; full scope (DEPTH, FFN, WIDTH, ATTENTION, state evaluation, beam); beam width 6; bsz 3, length_sorted_v1, scored_v1; the preregistered Top-4 quality retention committed and fetched. It trains nothing and runs no behavioural probe.",
+ "accepted_range": {
+  "hardware": "NVIDIA L40S preferred",
+  "expected_usd": "about 11.14 at scored_v1 (re-derived at the live rate)",
+  "planning_hard_ceiling_usd": "about 23.69 at 1.09/h, scored_v1",
+  "teardown_reserve_usd": 0.3,
+  "per_session_envelope_usd": 30.0,
+  "project_cap_usd": 595.0,
+  "rule": "the issuer re-derives the exact ceiling at the live quote; a ceiling above this range is not authorized and needs a new maintainer decision"
+ },
+ "does_not_authorize": [
+  "D2 recovery training",
+  "D2 behavioural screening",
+  "D2 confirmation",
+  "the D3 full search",
+  "a fresh independent confirmation",
+  "any promotion",
+  "a change of protocol, K, mapping, support or beam"
+ ],
+ "decision_record": "logs/budget/decisions.md 2026-10-14 (D2 v3 GO: preregistration approved, $595 cap, formal search granted)",
+ "authorizes": "nothing by itself: a launch needs the issued one-use authorization"
+}

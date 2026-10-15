@@ -32,11 +32,13 @@ protocol and engineering work only.
   DEPTH, state evaluation, weighted statistics and the beam's metrics;
   oracle, consumer and refusal tests; a real-logits check on a stand-in
   checkpoint (0 bound violations, 73% bf16 boundary ties).
-- **Price in force** (Stage W revision 2's measured terms, adopted):
-  - D2 v3 search: $11.32 expected, **$24.32** bound (fits the $30 cap);
-    $23.69 at scored_v1, now eligible; $33.94 if the cache regresses.
-  - Programme at hard: D2 + D3 fits. Adding a fresh confirmation is **$3.78
-    short**, so the reservation rule is not yet satisfied.
+- **Price in force** (Stage W revision 2's measured terms, adopted;
+  row selection scored_v1):
+  - D2 v3 search: $11.14 expected, **$23.69** bound (fits the $30 cap).
+    all_v1 would be $24.32. If the cache regresses: $33.32, and the driver
+    stops.
+  - Programme at hard, at the $595 cap: D2 + D3 + a fresh confirmation
+    leaves $1.85. The reservation rule is satisfied.
   - Owners: `d2_budget_v1.json`, `d_series_programme_budget.json`.
 - **Stage W built and rehearsed at $0** (executable commit `4248d7db`):
   W1–W6 on Stage V's infrastructure, no B rebuild; the CPU rehearsal runs the
@@ -135,15 +137,17 @@ and `logs/budget/decisions.md`.
 - **D2 launch chain built at $0:** typed grant, launcher, pod branch, a soft
   stop taken from `soft_stop_minutes`, and a cache-regression guard. All of
   it is now on preregistration v3.
-- **Open maintainer decisions, in order** (Stage W revision 2 is done):
-  1. The $3.78 programme reservation shortfall, which must be settled before
-     any formal D2 session, never by splitting stages.
-  2. If D2 v3 proceeds:
-     - approve preregistration v3;
-     - add `phase_d2` to `funds_formal_sessions_of`;
-     - choose `all_v1` ($24.32) or `scored_v1` ($23.69); v3's own
-       equivalence has passed and been adopted;
-     - then the D2 search grant.
+- **D2 v3 GO (maintainer, 2026-10-14).**
+  - Preregistration v3 is APPROVED (hash unchanged).
+  - The project cap moved $590 → $595 and `phase_d2` is on the formal book.
+    The reservation rule holds: $1.85 is left at hard for D2 + D3 + a fresh
+    confirmation.
+  - ONE formal search is granted: scored_v1, about $23.69 hard at $1.09/h,
+    search and Top-4 only.
+  - The rubric's literal BETWEEN stays as recorded.
+  - Owner: `logs/budget/decisions.md` 2026-10-14.
+- **Not authorized:** D2 recovery, screening and confirmation; D3; a fresh
+  confirmation.
 
 **NEXT ROUND: R0 → D2 → D3 ON A SHARED BEHAVIOURAL EVALUATION (maintainer
 decision, 2026-10-13).** D2/D3 do not retrain B or q2.
@@ -3830,7 +3834,7 @@ these by hand; run the deriver.**
 | formal sessions | `$127.9624` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$131.1428` of `$281.7264` |
-| project cap | `$471.0152` spent of `$590.0000`, leaving `$118.9848` |
+| project cap | `$471.0152` spent of `$595.0000`, leaving `$123.9848` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 4.** 5 ceilings cost `$150.0000` and the formal allowance has `$127.9624`. Dividing the PACKAGE balance instead gives 4, which is the error: the engineering allowance cannot pay for a formal probe.
 

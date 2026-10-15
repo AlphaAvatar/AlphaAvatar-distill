@@ -24,9 +24,9 @@ Assembled from the owners of each fact, never restated:
   evaluation protocol (`stages.d_series.shared_evaluation`);
 * the price -- `stages.d_series.d2_budget`.
 
-The record has a hash over its science. It is DRAFT until the maintainer
-approves it; approval is recorded in decisions.md and does not edit this
-record's science. AUTHORIZES NOTHING: every paid session needs its own grant.
+The record has a hash over its science. It was DRAFT until the maintainer
+approved it (2026-10-14); approval is recorded in decisions.md and in the
+status field, and does not edit this record's science. AUTHORIZES NOTHING: every paid session needs its own grant.
 """
 from __future__ import annotations
 
@@ -337,9 +337,13 @@ def build() -> dict[str, Any]:
     }
     return {
         **science,
-        "status": ("DRAFT -- not approved, not authorized; supersedes v2 "
-                   "(superseded before formal search) and v1 (never "
-                   "executed)"),
+        #: APPROVED by the maintainer on 2026-10-14 (Post-Stage-W-R2 review
+        #: of 7211e142; decisions.md). Status is outside the science hash:
+        #: approval edits no science.
+        "status": ("APPROVED 2026-10-14 by the maintainer (review of "
+                   "7211e142; logs/budget/decisions.md) -- each paid session "
+                   "still needs its own grant; supersedes v2 (superseded "
+                   "before formal search) and v1 (never executed)"),
         "superseded_drafts": list(SUPERSEDED_DRAFTS),
         "preregistration_hash": sha256_json(science),
         "budget": {"owner": BUD.RECORD,

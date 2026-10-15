@@ -11253,3 +11253,59 @@ on a paid pod.
   Preregistration v3 (`b5281092…`) stays DRAFT; its non-science budget block
   was re-derived and its hash is unchanged.
 - **Owner:** `logs/stages/stage-1/families/d_series/analyses/d2v3_stage_w_r2_evidence_review.md`.
+
+## 2026-10-14 — D2 v3 GO: preregistration v3 approved, project cap $590 → $595, one formal search granted
+
+- **Decision** (maintainer, Post-Stage-W-R2 independent review of `7211e142`,
+  confirmed directly).
+  - **Scientific GO for the D2 v3 Full Search under the frozen protocol.**
+    This is the maintainer's research-investment decision. The registered
+    Stage W rubric's literal result was BETWEEN and is **not** rewritten as GO.
+  - **Preregistration v3 `b5281092…` APPROVED.** Its status field records
+    this; the hash is unchanged.
+  - Frozen and unchanged:
+    - the objective `90e851fd…`;
+    - Top-200 + tail teacher confidence;
+    - teacher ∪ candidate Top-200 + tail KL against the root reference;
+    - full scope; beam width 6; Top-4 quality retention;
+    - bsz 3, length_sorted_v1, scored_v1;
+    - recovery, behavioural protocol, seeds, statistics and guardrails.
+  - No v4, no KL-only search, no formula change.
+  - **Attribution.** D2 changes three things against D1: the DEPTH reference,
+    the KL support and the weighting. Stage W's single-round DEPTH difference
+    came mainly from the root reference. That does not show the full beam and
+    the recovered behaviour are determined by it.
+- **Budget amendment** (`configs/stages/stage-1/phase_c1/authorization.json`,
+  `_amendment_2026_10_14_d2v3_search`):
+  - project cumulative cap $590 → **$595** (+$5.00);
+  - `phase_d2` is added to `funds_formal_sessions_of`;
+  - formal, engineering, package and the $30 per-session envelope are
+    unchanged;
+  - no history is rewritten.
+  - Derived after it: spent $471.0152; project remaining **$123.9848**.
+  - The programme reservation now holds (scored_v1 price in force): D2 at hard
+    leaves $70.01 against $68.16 needed for D3 and a fresh confirmation, so
+    D2 + D3 + fresh is $122.13, with $1.85 left. The $5 is not free budget.
+- **Row selection.** `scored_v1` is approved. `d2_budget` / `d2_authorization`
+  now price the declared selection, and scored_v1's price exists only on the
+  adopted stage-W equivalence. Hard $23.69 against all_v1's $24.32; the $0.63
+  saving is real only on that evidence.
+- **Search durability, checked at $0.**
+  - Root cause of D1's loss: the account balance. It is now gated before
+    create, at max($30, hard + $5); the live balance is $142.30.
+  - The search's append-only journals (`states.jsonl`, `telemetry.jsonl`,
+    `journal.jsonl`) are now relayed off the pod on every poll.
+  - The Top-4 checkpoints are fetched before teardown and re-identified from
+    the bytes that arrived. The teardown gate refuses deletion until all 4 are
+    secured.
+  - The success-path artifact spec matched all 5 classes on a driver-shaped
+    tree.
+  - Restore requires bytes and digest matches; no resume is planned.
+- **Grant** (`logs/budget/approvals/autoinit_d2_grant.json`): ONE formal D2
+  search session, search and Top-4 only.
+  - About $11.14 expected; about $23.69 planning hard at $1.09/h; $0.30
+    teardown reserve; ≤ $30 per session; ≤ $595 cumulative.
+  - The issuer re-derives the exact ceiling at the live quote. A ceiling
+    above that range stops and needs a new decision.
+- **Not authorized:** D2 recovery, screening and confirmation; D3; a fresh
+  confirmation; any promotion.

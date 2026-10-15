@@ -8,7 +8,7 @@
   "_the_2026_09_17_raise_is_an_accounting_envelope": "NOT a spend authorization and NOT permission to launch either C2 session. It is the project's cumulative accounting bound, which the C2 chain's ceilings must fit inside; each session still needs its own grant, readiness record, one-use authorization and bundle. The headroom is NOT transferable to C3, C4 or any unrelated experiment, and the C1 formal/engineering/package allowances below did NOT move.",
   "_why_restated": "so a mis-priced session is REFUSED rather than mirrored. A ceiling that only echoes its source is not an independent check, and this is the last place a mis-priced session can be stopped before a grant exists. Amended 2026-09-04 for the approved repricing to the secure L40S rate of $1.09/h; every minute assumption is unchanged. The superseded triple at $0.99/h was 13.7578 / 12.2070 / 13.4277.",
   "_why_this_experiments_config_owns_a_project_number": "historical: the cap was first stated with C1's approved package and derive_budget.py reads it from here (scripts/consolidate/derive_budget.py :: project_balance). It is a PROJECT fact living in one experiment's config, which is poor ownership; it is left in place because moving it would repoint every consumer during a round whose purpose is a governance chain, and a cap with two owners is worse than a cap with an awkward one.",
-  "cumulative_cap_usd": 590.0,
+  "cumulative_cap_usd": 595.0,
   "hard_ceiling_usd": 15.1475,
   "planning_floor_usd": 13.4401,
   "soft_stop_usd": 14.7841
@@ -74,12 +74,14 @@
     "phase_c1",
     "phase_c3",
     "phase_a3",
-    "phase_d1"
+    "phase_d1",
+    "phase_d2"
    ],
    "phase_a3": "the 2026-10-02 PHASE amendment funds A3 from this allowance, and A3's own pricing gate makes `remaining formal allowance >= derived session ceiling` one of four conditions its authorization must satisfy. A session that must pass a formal-allowance gate is a session that spends it -- and until this line existed, A3's $2.7400 of pre-science pods reached the project cumulative while the formal book reported them as never having happened, which is the exact defect the phase_c3 entry above was added to fix.",
    "phase_c1": "the package was approved for it on 2026-09-11",
    "phase_c3": "the 2026-09-28 amendment funds formal C3 from this allowance and makes `remaining formal allowance >= derived session ceiling` one of the three conditions a C3 authorization must satisfy. A session that must pass a formal-allowance gate is a session that spends the formal allowance.",
-   "phase_d1": "the 2026-10-05 PHASE amendment funds D1's formal sessions from this allowance. D1's issuance gate makes `remaining formal allowance >= derived session ceiling` one of its four conditions, and a session that must pass a formal-allowance gate is a session that spends it. Without this line D1's formal spend would reach the project cumulative while the formal book reported it as never having happened -- the defect the phase_c3 and phase_a3 entries were added to fix."
+   "phase_d1": "the 2026-10-05 PHASE amendment funds D1's formal sessions from this allowance. D1's issuance gate makes `remaining formal allowance >= derived session ceiling` one of its four conditions, and a session that must pass a formal-allowance gate is a session that spends it. Without this line D1's formal spend would reach the project cumulative while the formal book reported it as never having happened -- the defect the phase_c3 and phase_a3 entries were added to fix.",
+   "phase_d2": "the 2026-10-14 maintainer amendment (top-level _amendment_2026_10_14_d2v3_search) puts D2's formal sessions on THIS package's formal book: the D2 authorization refuses a phase outside this list, and a session that must pass the formal-allowance gate is a session that spends it. Scope only -- no allowance moved"
   },
   "gpu_engineering_allowance_usd": 25.0741,
   "limits_do_not_transfer": "the engineering allowance, the per-session ceiling, the package total and the project cap bind SEPARATELY. An unspent engineering allowance does not raise the per-session ceiling, and the $0.6577 margin is for real accounting corrections, not spending. The attempt COUNT is no longer one of these limits -- see _attempts_amendment_2026_09_11b -- but the money is unchanged, and money is what now bounds how many sessions are possible.",
@@ -210,6 +212,39 @@
    "package_total_usd": 181.7264,
    "gpu_engineering_allowance_usd": 25.0741,
    "per_attempt_hard_ceiling_usd": 30.0
+  }
+ },
+ "_amendment_2026_10_14_d2v3_search": {
+  "granted_by": "maintainer, 2026-10-14 UTC, Post-Stage-W-R2 Scientific Approval and Conditional D2 Search Authorization (review of 7211e142), confirmed by the maintainer directly",
+  "added_usd": 5.0,
+  "raised": [
+   "accepted_pricing.cumulative_cap_usd"
+  ],
+  "scope_added": {
+   "execution_package.funds_formal_sessions_of.experiment_ids": "phase_d2"
+  },
+  "why": "D2 + D3 + one fresh confirmation at hard ceilings with teardown reserves were $3.15 over the project remainder at the $590 cap (scored_v1 search price in force); the reservation rule must hold before D2's formal sessions",
+  "is_not": "an authorization of any additional GPU session, a free experimental budget, or a transfer between books: D3 and the fresh confirmation stay reserved by the programme reservation rule",
+  "deliberately_unchanged": {
+   "formal_allowance_usd": 256.6523,
+   "gpu_engineering_allowance_usd": 25.0741,
+   "package_total_usd": 281.7264,
+   "per_attempt_hard_ceiling_usd": 30.0,
+   "_why": "the maintainer's terms: only the project cap and the funding scope move"
+  },
+  "historical_spend_is_not_reset": "every campaign, closed grant and recorded cost stays exactly as incurred",
+  "before": {
+   "cumulative_cap_usd": 590.0,
+   "formal_allowance_usd": 256.6523,
+   "package_total_usd": 281.7264,
+   "gpu_engineering_allowance_usd": 25.0741,
+   "per_attempt_hard_ceiling_usd": 30.0,
+   "funds_formal_sessions_of": [
+    "phase_c1",
+    "phase_c3",
+    "phase_a3",
+    "phase_d1"
+   ]
   }
  }
 }

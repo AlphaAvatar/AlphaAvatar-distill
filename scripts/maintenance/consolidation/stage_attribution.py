@@ -926,10 +926,10 @@ STAGE_1 = [
         id="phase_d2",
         kind="experiment",
         stage_id="1",
-        status=("PREREGISTRATION v3 DRAFT — not approved; v3 GPU validation "
-                "Stage W revision 2 PASS, adopted, closed (revision 1 FAIL, "
-                "closed); version 2 superseded before formal search (its "
-                "Stage V validation PASS, closed)"),
+        status=("PREREGISTRATION v3 APPROVED 2026-10-14; ONE formal search "
+                "granted (scored_v1, Top-4); Stage W revision 2 PASS, adopted "
+                "(revision 1 FAIL, closed); version 2 superseded before formal "
+                "search"),
         title="D2 — teacher Top-K confidence x union Top-K KL search",
         question=("Under the capacity limit, does weighting each scored "
                   "position's root-reference union Top-K KL -- and the "

@@ -83,7 +83,9 @@ class TestThePreregistration:
         assert doc["revision_kind"]["kind"] == \
             "Evidence-Informed Pre-Search Scientific Revision"
         assert doc["authorizes"] == "nothing"
-        assert doc["status"].startswith("DRAFT")
+        #: Approved by the maintainer 2026-10-14; approval is a status, never
+        #: a science edit, so the hash a grant approves is unchanged by it.
+        assert doc["status"].startswith("APPROVED 2026-10-14")
 
     def test_d3_and_d1_keep_their_support_and_identities(self):
         from stages.d_series import objectives as O
