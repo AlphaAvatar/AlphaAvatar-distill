@@ -2077,6 +2077,19 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "root stores carry the objective in their identity; a fixed path "
             "refuses an unpaired support/objective.",
      }),
+    ("8e8ae8490c7a8de9d70f33d0ffc2685329706a4c",
+     "D2 screening final review: host placement for exact image admission",
+     {
+        "src/aadistill/infrastructure/session_runner.py":
+            "`SessionRunner.placement()` and its one use in `create`: an "
+            "OPTIONAL `--country-code` a launcher may declare, passed to the "
+            "provider create. THIS IS A DECLARED SEMANTIC CHANGE to the create "
+            "command line, inert by default: a launcher declaring no country "
+            "produces the command it always did. It narrows where hosts are "
+            "drawn; host admission still decides what is accepted. Five "
+            "screening draws landed in SE/US on 580.x drivers while the "
+            "protocol's 595.91.07 hosts were in AU.",
+     }),
 )
 
 

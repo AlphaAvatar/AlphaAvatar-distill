@@ -129,3 +129,41 @@ def test_the_flags_reach_the_provider_command_line():
     assert '"--volume-in-gb"' not in head, (
         "create still hardcodes the ephemeral volume beside the helper that "
         "decides it; one of the two will be wrong")
+
+
+def test_placement_is_absent_unless_a_launcher_declares_it():
+    """`--country-code` narrows where a pod is drawn. Every launcher that
+    declares none must get the command line it always got."""
+    assert _runner().placement() == ()
+    assert _runner(country_code=None).placement() == ()
+    assert _runner(country_code="  ").placement() == ()
+    assert _runner(country_code="AU").placement() == ("--country-code", "AU")
+
+
+def test_create_passes_the_placement_to_the_provider(monkeypatch, tmp_path):
+    """Read from the create call the runner actually makes, not from the
+    helper: a flag that is computed and never sent is the failure here."""
+    import subprocess
+    from types import SimpleNamespace
+
+    sent = []
+
+    def fake_run(cmd, **kwargs):
+        sent.append(cmd)
+        return SimpleNamespace(stdout="{}", stderr="no instances", returncode=1)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    r = SessionRunner.__new__(SessionRunner)
+    r.a = _Args(image="img", gpu="NVIDIA L40S", disk_gb=20, country_code="AU",
+                create_attempts=1, create_retry_seconds=0, max_price=1.0)
+    r.ws = "/some/declared/workspace"
+    r.cli = "runpodctl"
+    r.scr = tmp_path
+    r.draw = 1
+    r.plan = SimpleNamespace(hard_terminate_minutes=10)
+    r.spec = SimpleNamespace(session_id="s", commands=SimpleNamespace(
+        min_cuda_version=None))
+    r.say = lambda _m: None
+    assert r.create() is False
+    cmd = sent[0]
+    assert cmd[cmd.index("--country-code") + 1] == "AU"

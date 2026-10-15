@@ -11458,3 +11458,33 @@ on a paid pod.
 - **Revisit when** the screening rung completes, or its envelope cannot fund
   a full session plus the reserve.
 
+## 2026-10-15 — D2 screening attempts 1–2: no admitted host; draws constrained to the protocol hosts' country
+
+- **Context.** Two attempts under the $25.00 screening grant ended before
+  setup:
+  - `d2_screening_20261015_183412` hit provider capacity. No pod id, $0.
+  - `d2_screening_20261015_183734` drew five L40S hosts, and host admission
+    refused all five: 580.126.09 four times in SE, 580.167.08 once in US. It
+    is booked at **$0.4518** (conservative; the provider balance moved
+    $0.1393).
+
+  No measurement began in either.
+- **Diagnosis.**
+  - The protocol's 595.91.07 hosts — B's two screening/confirmation
+    sessions — were in **AU**.
+  - Every unconstrained draw since 2026-10-06 that landed in SE carried
+    580.126.09 (the D1 search's, the D2 search's and four today).
+- **Decision (ordinary engineering, P12.1).** The launcher may now constrain
+  the provider create to a country.
+  - `SessionRunner.placement()` passes `--country-code` only when a launcher
+    declares it, so every other launcher's command is unchanged.
+  - The next attempt asks for AU. Host admission still requires the exact
+    595.91.07 identity: this narrows where hosts are drawn, never what is
+    accepted.
+  - If AU offers no capacity or its hosts are refused too, the session stops
+    and the comparability problem is reported. No other driver, torch,
+    transformers or vLLM is substituted.
+- **Money.** The envelope remainder is $25.00 − $0.4518 = $24.5482, which
+  still covers the session's $19.4558 hard ceiling plus the $0.30 reserve.
+- **Revisit when** an AU-constrained attempt is refused or finds no capacity.
+

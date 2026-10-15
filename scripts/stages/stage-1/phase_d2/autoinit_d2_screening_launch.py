@@ -482,6 +482,11 @@ def build_parser() -> argparse.ArgumentParser:
     #: FIVE draws: admission wants one exact host driver, which the D1 and D2
     #: sessions drew on 6 of 10 hosts; a refused draw costs one startup.
     ap.add_argument("--host-draws", type=int, default=5)
+    #: WHERE the provider draws. Host admission wants one exact image identity
+    #: and the protocol's 595.91.07 hosts were in AU (B's two sessions), while
+    #: the unconstrained draws of 2026-10-15 landed in SE and US on 580.x
+    #: (d2_screening_20261015_183734). Narrows the draw; admission decides.
+    ap.add_argument("--country-code", default=None)
     ap.add_argument("--setup-timeout-s", type=float, default=5400.0)
     ap.add_argument("--poll-seconds", type=float, default=120.0)
     ap.add_argument("--poll-limit-min", type=float, default=None)

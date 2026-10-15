@@ -1,0 +1,5 @@
+{"time": "2026-10-15T18:49:24Z", "event": "watchdog_start", "pod_id": "pqon2mafp0mk1l", "hard_terminate_minutes": 1055.0, "authorized_usd": 19.4558, "price_per_hour": 1.09, "session_start_epoch": 1792089859.8024452}
+{"time": "2026-10-15T18:49:25Z", "event": "poll", "at_epoch": 1792090164.857, "elapsed_minutes": 5.08, "accrued_usd": 0.0924, "pod_exists": true, "pod_billing": true, "desired_status": "RUNNING", "poll_error": null, "over_hard_limit": false, "action": "none"}
+{"time": "2026-10-15T18:50:26Z", "event": "poll", "at_epoch": 1792090225.58, "elapsed_minutes": 6.1, "accrued_usd": 0.1107, "pod_exists": true, "pod_billing": true, "desired_status": "RUNNING", "poll_error": null, "over_hard_limit": false, "action": "none"}
+{"time": "2026-10-15T18:51:26Z", "event": "poll", "at_epoch": 1792090286.191, "elapsed_minutes": 7.11, "accrued_usd": 0.1291, "pod_exists": false, "pod_billing": false, "desired_status": "TERMINATED", "poll_error": null, "over_hard_limit": false, "action": "none"}
+{"time": "2026-10-15T18:51:26Z", "event": "watchdog_end", "reason": "pod_gone", "ticks": 3}
