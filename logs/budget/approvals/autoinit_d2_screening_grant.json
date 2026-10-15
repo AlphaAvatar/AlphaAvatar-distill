@@ -1,0 +1,33 @@
+{
+ "_contract": "WHAT THE MAINTAINER DECIDED, and only that. Every other field of the authorization -- identities, stages, plan hash, contract hash, seeds, probe count, battery, harness, ceiling -- is DERIVED by d2_screening_authorization.build_payload from the tree it binds, and this grant is REFUSED if it states one (GRANT_MAY_NOT_STATE).",
+ "_one_use": "ONE issuance, ONE launcher session per authorization. A replacement after a pre-science engineering failure is a NEW one-use authorization netted against this cumulative envelope; it is issued only while the envelope's remainder holds a full session's hard ceiling plus the teardown reserve, and never over an earlier attempt whose cost is not booked or whose teardown is not verified (AGENTS.md P12.1).",
+ "rung": "screening",
+ "approves_preregistration_hash": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+ "cumulative_envelope_usd": 25.0,
+ "granted_by": "maintainer, 2026-10-15 UTC: D2 Behavioural Screening Final Independent Review and Conditional Grant (independent review of 8e8ae849). Conditional approval of a $25.00 cumulative all-in grant, to be issued only after the three $0 repairs (ranking evidence gate, durable training records, cumulative retry reserve), their tests, commit, push and the executable-commit rebinding.",
+ "covers": "ONE frozen screening rung of d_series_shared_eval@v1: the four committed D2 v3 initializations x the two frozen seeds = 8 probes; the frozen e1_p1_kd_heavy@0.86M recovery training; the frozen generation and scoring; the failure-isolated diagnostic rescoring; durable evidence preservation; the off-pod ranking against B's two imported units (q2 descriptive), exactly one candidate advancing or none.",
+ "accepted_range": {
+  "hardware": "NVIDIA L40S on the protocol's exact image identity (host driver 595.91.07)",
+  "expected_session_usd": "about 15.0704 at 1.09/h (re-derived at the live rate)",
+  "planning_hard_ceiling_usd": "about 19.4558 at 1.09/h (re-derived at the live rate)",
+  "teardown_reserve_usd": 0.3,
+  "cumulative_envelope_usd": 25.0,
+  "per_session_envelope_usd": 30.0,
+  "project_cap_usd": 595.0,
+  "rule": "$25 is a cumulative envelope, not a session ceiling, and is never spent to fill it; each issuance requires remaining envelope >= derived session hard ceiling + teardown reserve; host redraws are paid time inside the same ledger; the D3/fresh-confirmation reservation is never drawn on"
+ },
+ "runtime_rule": "keep B's training and evaluation runtime identity: the driver checks the training runtime digest before the first probe trains and the attested evaluation protocol before any generation; on a mismatch the session stops and the scientific comparability problem is reported -- no other torch, transformers, vLLM or NVIDIA driver is substituted",
+ "does_not_authorize": [
+  "the D2 shared confirmation",
+  "retraining, regenerating or re-evaluating B or q2 (no logits or confidence for them)",
+  "any change to K, the seeds, the SESOI, the selection rule or the battery",
+  "re-screening or adding seeds",
+  "D3",
+  "a fresh independent confirmation",
+  "any promotion or automatic follow-on",
+  "a project-cap change"
+ ],
+ "stop_boundary": "after screening, stop at the confirmation authorization boundary",
+ "decision_record": "logs/budget/decisions.md 2026-10-15 (D2 screening: conditional $25.00 cumulative grant; three $0 repairs before issuance)",
+ "authorizes": "nothing by itself: a launch needs the issued one-use authorization"
+}

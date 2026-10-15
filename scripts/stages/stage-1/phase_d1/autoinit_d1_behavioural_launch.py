@@ -201,6 +201,16 @@ class BehaviouralLayout(NamedTuple):
     #: `evidence_dir` with `{probe_id}`, recursive). A diagnostic that must
     #: never gate the release or the teardown goes here.
     extra_probe_files: tuple[tuple[str, str, bool], ...] = ()
+    #: Per TRAINED probe, the training records a later consumer READS -- names
+    #: in the probe's root on the pod (`pod_probe_root/<probe_id>/`). When
+    #: declared they are STRICT: each is secured into
+    #: `store/probes/<id>/training/` on its own, independent of the checkpoint
+    #: copy, verified against the sha256 the driver recorded for it at training
+    #: completion (`training_records_sha256`); the release ack, the scored
+    #: evidence gate and the prune of the preserved copy all require them, and
+    #: the preserved resume set carries them so a replacement pod restores
+    #: them. D1 declares none, so its records stay best effort as before.
+    required_training_records: tuple[str, ...] = ()
 
 
 def _layout(layout: "BehaviouralLayout | None") -> "BehaviouralLayout":
@@ -303,6 +313,9 @@ def secure_probe_evidence(ctx: SessionContext,
         #: probe under its own single attested protocol. The bytes are released
         #: at a SUCCESSFUL terminal instead, where there is no further consumer.
         preserve_trained_unscored(ctx, lay)
+        #: At the moment of completion, not only once scored (P8.2.1).
+        for trained in trained_probes_to_preserve(ctx, lay) or []:
+            secure_training_records(ctx, trained, lay)
         units = finished_probes(ctx, lay) or []
         store = probe_store(ctx)
         secured = ctx.evidence.setdefault("probe_evidence_secured", {})
@@ -353,8 +366,13 @@ def secure_probe_evidence(ctx: SessionContext,
             #: a 45-minute transfer can fail), and a replacement attempt then
             #: had nothing to resume and retrained the probe.
             checkpoint = durable_checkpoint_sha256(ctx, unit)
+            #: A release deletes the probe's root on the pod -- which holds
+            #: the training records too -- so a layout that requires them acks
+            #: only once they are durable off-pod as well.
+            secure_training_records(ctx, unit, lay)
             if (state.get("result.json") and state.get("per_sample.jsonl")
                     and state.get("admission.json") and checkpoint
+                    and training_records_ok(ctx, probe_id, lay)
                     and not state.get("release_acked")):
                 state["release_acked"] = write_release_ack(
                     ctx, probe_id, checkpoint_sha256=checkpoint, layout=lay)
@@ -453,7 +471,8 @@ def write_release_ack(ctx: SessionContext, probe_id: str, *,
     return ok
 
 
-def prune_preserved_scored(ctx: SessionContext) -> None:
+def prune_preserved_scored(ctx: SessionContext,
+                           layout: BehaviouralLayout | None = None) -> None:
     """Release preserved weights ONCE THE RUNG HAS COMPLETED SUCCESSFULLY.
 
     Called from the terminal path, never from the poll hook. P8.4 says to keep
@@ -490,6 +509,14 @@ def prune_preserved_scored(ctx: SessionContext) -> None:
             dest = Path(row.get("dest") or "")
             if not dest.is_dir() or not dest.resolve().is_relative_to(store):
                 continue
+            #: The preserved copy may hold the ONLY off-pod copy of a required
+            #: training record; it is kept until the records are verified
+            #: beside the scored evidence.
+            if not training_records_ok(ctx, probe_id, layout):
+                row["prune_withheld"] = (
+                    "the required training records are not durable and "
+                    "verified beside the scored evidence")
+                continue
             #: The WEIGHTS have no consumer; the small training records do.
             #: They move beside the probe's scored evidence before the copy
             #: goes, so the run keeps its training log and completion record.
@@ -499,7 +526,9 @@ def prune_preserved_scored(ctx: SessionContext) -> None:
                 if (dest / name).is_file():
                     records = probe_store(ctx) / probe_id / "training"
                     records.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(dest / name, records / name)
+                    #: Never over a copy already secured (and verified) there.
+                    if not (records / name).is_file():
+                        shutil.copy2(dest / name, records / name)
                     kept.append(name)
             row["training_records_kept"] = kept
             shutil.rmtree(dest)
@@ -528,6 +557,98 @@ D1_LAYOUT = BehaviouralLayout(
 #: A trained probe's small records beside `run_completion.json`: the event
 #: stream and the run manifest the trainer writes in the probe's root.
 TRAINING_RECORDS = ("train_log.jsonl", "run_manifest.json")
+
+
+def _sha256_or_none(path: Path) -> str | None:
+    import hashlib
+
+    return hashlib.sha256(path.read_bytes()).hexdigest() \
+        if path.is_file() else None
+
+
+def _required_record_digests(unit: dict, layout: BehaviouralLayout
+                             ) -> dict[str, str]:
+    """{name: the sha256 the driver recorded} for the layout's required
+    records; a name the driver recorded no digest for maps to "", which
+    nothing matches."""
+    recorded = unit.get("training_records_sha256") or {}
+    return {name: str(recorded.get(name) or "")
+            for name in layout.required_training_records}
+
+
+def _records_match(root: Path, digests: dict[str, str]) -> bool:
+    return all(want and _sha256_or_none(root / name) == want
+               for name, want in digests.items())
+
+
+def training_record_status(ctx: SessionContext, probe_id: str,
+                           layout: BehaviouralLayout | None = None
+                           ) -> dict[str, bool]:
+    """Per required record: is it in `store/probes/<id>/training/`, re-hashed
+    on disk now to the digest it was verified at when secured?"""
+    lay = _layout(layout)
+    row = (ctx.evidence.get("training_records_secured") or {}).get(
+        probe_id) or {}
+    root = probe_store(ctx) / probe_id / "training"
+    return {name: bool(row.get(name))
+            and _sha256_or_none(root / name) == row.get(name)
+            for name in lay.required_training_records}
+
+
+def training_records_ok(ctx: SessionContext, probe_id: str,
+                        layout: BehaviouralLayout | None = None) -> bool:
+    """All required training records durable and verified; trivially true for
+    a layout that requires none (D1)."""
+    return all(training_record_status(ctx, probe_id, layout).values())
+
+
+def secure_training_records(ctx: SessionContext, unit: dict,
+                            layout: BehaviouralLayout | None = None) -> None:
+    """Secure ONE trained probe's required training records off-pod.
+
+    Into `store/probes/<id>/training/`, beside the scored evidence and
+    independent of the preserved checkpoint copy, which a successful terminal
+    prunes. From that copy when it already holds the recorded bytes, else from
+    the pod. Each is verified against the digest the driver recorded at
+    training completion; a record the driver gave no digest for stays
+    unsecured, because unverifiable bytes are not evidence. Idempotent; MUST
+    NOT raise (poll loop).
+    """
+    import shutil
+
+    lay = _layout(layout)
+    if not lay.required_training_records:
+        return
+    probe_id = str(unit.get("probe_id") or "")
+    try:
+        if not probe_id:
+            return
+        digests = _required_record_digests(unit, lay)
+        row = ctx.evidence.setdefault("training_records_secured",
+                                      {}).setdefault(probe_id, {})
+        root = probe_store(ctx) / probe_id / "training"
+        dest = str(((ctx.evidence.get("trained_unscored_preserved") or {}).get(
+            probe_id) or {}).get("dest") or "")
+        for name, want in digests.items():
+            target = root / name
+            if row.get(name) and _sha256_or_none(target) == row[name]:
+                continue
+            row[name] = None
+            if not want:
+                continue
+            root.mkdir(parents=True, exist_ok=True)
+            if _sha256_or_none(target) != want:
+                if dest and _sha256_or_none(Path(dest) / name) == want:
+                    shutil.copy2(Path(dest) / name, target)
+                else:
+                    _scp_from_pod(ctx, f"{lay.pod_probe_root}/{probe_id}/{name}",
+                                  target)
+            if _sha256_or_none(target) == want:
+                row[name] = want
+                ctx.say(f"  probe {probe_id}: secured training/{name}")
+    except Exception as exc:                                    # noqa: BLE001
+        ctx.evidence.setdefault("on_poll_errors", []).append(
+            f"secure_training_records {probe_id}: {type(exc).__name__}: {exc}")
 
 
 def trained_probes_to_preserve(ctx: SessionContext,
@@ -570,7 +691,8 @@ def trained_probes_to_preserve(ctx: SessionContext,
     return None
 
 
-def _already_preserved(dest: Path, tag: str, want: str) -> dict | None:
+def _already_preserved(dest: Path, tag: str, want: str, *,
+                       records: dict[str, str] | None = None) -> dict | None:
     """The completeness row of a VERIFIED copy already at `dest`, else None.
 
     The same four checks a fresh preservation makes, re-run against the bytes
@@ -598,6 +720,8 @@ def _already_preserved(dest: Path, tag: str, want: str) -> dict | None:
         "weights_digest": shard.is_file() and hashlib.sha256(
             shard.read_bytes()).hexdigest() == want,
     }
+    if records:
+        completeness["training_records"] = _records_match(dest, records)
     return {"completeness": completeness} if all(completeness.values()) \
         else None
 
@@ -664,7 +788,8 @@ def preserve_trained_unscored(ctx: SessionContext,
             #: restarted. Re-fetching would cost a transfer for identical
             #: bytes and, worse, rewrite the sidecar's provenance with THIS
             #: run's id, claiming a training session that never happened.
-            existing = _already_preserved(dest, tag, want)
+            existing = _already_preserved(
+                dest, tag, want, records=_required_record_digests(unit, lay))
             if existing is not None:
                 preserved[probe_id] = {**existing, "dest": str(dest),
                                        "verified": True,
@@ -710,6 +835,14 @@ def preserve_trained_unscored(ctx: SessionContext,
             #: would restore an incomplete set that `trained_checkpoint_state`
             #: then reads as "never finished training" and RETRAINS, which is
             #: exactly what P8.4 state 2 forbids.
+            #: THE TRAINING RECORDS travel too. Best effort for a layout that
+            #: requires none: they are the probe's metric log (P4), not a resume
+            #: input, so a failed fetch must not unverify a durable checkpoint.
+            #: Attempt 8 kept no train_log for the eight probes whose workdirs
+            #: the pod released, because nothing here fetched one.
+            records = {name: _scp_from_pod(ctx, f"{remote_root}/{name}",
+                                           dest / name) == 0
+                       for name in TRAINING_RECORDS}
             latest = dest / "checkpoints" / "latest.txt"
             completeness = {
                 "transfers_ok": all(rc == 0 for rc in rcs.values()),
@@ -720,15 +853,14 @@ def preserve_trained_unscored(ctx: SessionContext,
                                  / "config.json").is_file(),
                 "weights_digest": bool(want) and got == want,
             }
+            #: A layout that REQUIRES training records makes them part of the
+            #: resume set: a replacement pod restores this directory, and the
+            #: records it lacks could then never be secured again.
+            required = _required_record_digests(unit, lay)
+            if required:
+                completeness["training_records"] = _records_match(dest,
+                                                                  required)
             verified = all(completeness.values())
-            #: THE TRAINING RECORDS travel too, best effort and OUTSIDE the
-            #: resume set: they are the probe's metric log (P4), not a resume
-            #: input, so a failed fetch must not unverify a durable checkpoint.
-            #: Attempt 8 kept no train_log for the eight probes whose workdirs
-            #: the pod released, because nothing here fetched one.
-            records = {name: _scp_from_pod(ctx, f"{remote_root}/{name}",
-                                           dest / name) == 0
-                       for name in TRAINING_RECORDS}
             row = {"rcs": rcs, "trained_sha256": want,
                    "arrived_sha256": got, "completeness": completeness,
                    "verified": verified, "training_records": records,
@@ -827,11 +959,17 @@ def fetch_probe_evidence(ctx: SessionContext,
     #: per-sample rows and admission record are all confirmed off-pod -- so a
     #: probe whose evidence did not come home keeps its weights even on a
     #: nominally successful terminal.
-    prune_preserved_scored(ctx)
-    return [
-        {"probe_id": probe_id, **state}
-        for probe_id, state in sorted(
-            (ctx.evidence.get("probe_evidence_secured") or {}).items())]
+    prune_preserved_scored(ctx, layout)
+    lay = _layout(layout)
+    out = []
+    for probe_id, state in sorted(
+            (ctx.evidence.get("probe_evidence_secured") or {}).items()):
+        entry = {"probe_id": probe_id, **state}
+        if lay.required_training_records:
+            entry["training_records"] = training_record_status(ctx, probe_id,
+                                                               lay)
+        out.append(entry)
+    return out
 
 
 def probe_fetch_ok(entry: object) -> bool:
@@ -846,7 +984,8 @@ def probe_fetch_ok(entry: object) -> bool:
     """
     return isinstance(entry, dict) and all(
         entry.get(piece) is True
-        for piece in ("result.json", "per_sample.jsonl", "admission.json"))
+        for piece in ("result.json", "per_sample.jsonl", "admission.json")) \
+        and all((entry.get("training_records") or {}).values())
 
 
 def probes_evidence_secured(ctx: SessionContext, fetched: list,
@@ -926,6 +1065,17 @@ def probes_evidence_secured(ctx: SessionContext, fetched: list,
             f"their result, per-sample rows and generation admission "
             f"off-pod; missing {missing}. Deleting the pod now would destroy "
             "measurements this session already paid for.")
+    #: The training records a layout REQUIRES are strict beside them: the
+    #: off-pod ranking verifies each probe's training identity from them.
+    if lay.required_training_records:
+        no_records = sorted(probe_id for probe_id in want
+                            if not training_records_ok(ctx, probe_id, lay))
+        if no_records:
+            return False, (
+                f"the required training records "
+                f"{list(lay.required_training_records)} of {no_records} are "
+                "not durable and verified off-pod; the ranking reads them, and "
+                "the pod's probe root may hold the only copy.")
     #: And the session-level protocol evidence itself: the attestation every
     #: admission was compared against.
     attested = Path(ctx.args.scr) / STORE_SUBDIR / lay.attested_name

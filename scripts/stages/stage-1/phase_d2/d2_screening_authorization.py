@@ -15,8 +15,10 @@ promotion, or an automatic follow-on start.
 
 The money is D1's four conditions (imported) plus the funding scope, and the
 CUMULATIVE ENVELOPE: a replacement attempt after a pre-science failure is a new
-one-use authorization whose ceiling is narrowed to what the envelope has left
-after every earlier screening subrun's booked cost (AGENTS.md P12.1).
+one-use authorization, issued only while what the envelope has left after every
+earlier screening subrun's booked cost still holds a full session's hard
+ceiling PLUS the teardown reserve; an earlier attempt whose cost is not booked
+or whose teardown is not verified refuses the issuance (AGENTS.md P12.1).
 """
 from __future__ import annotations
 
@@ -320,32 +322,75 @@ def reprice_at(rate_usd_per_hour: float,
             "accepted_at_price_per_hour": accepted["price_per_hour"]}
 
 
-def consumed_by_prior_subruns(repo_root: str | Path = REPO) -> dict[str, Any]:
-    """Every earlier screening subrun's booked cost, from its closeout.
+def _subrun_cost(run: Path) -> tuple[float | None, str]:
+    """(booked all-in cost, basis) of ONE earlier screening subrun, or
+    (None, why it is unknown).
 
-    Fails closed: a prior subrun directory without a readable booked cost is an
-    UNKNOWN, and an unknown is refused rather than counted as free.
+    FAIL CLOSED. Exactly two things count as known:
+
+    * a closeout that books `money.all_in_usd` AND states
+      `provider_teardown_verified: true` -- a cost with the resource possibly
+      still billing is not a closed cost;
+    * a record that no provider resource was ever created: a closeout saying
+      so, or a session record with `provider_resource_created: false` and no
+      pod id on it or on any host draw (a dry run, a pre-provider refusal).
+
+    Everything else is UNKNOWN: an issued authorization with no session record
+    (it may have been launched from elsewhere), a session record with a pod id
+    and no closeout, an unreadable record, a closeout without a booked cost or
+    without verified teardown. A potentially paid attempt is never read as $0.
+    """
+    closeout = run / "closeout" / "outcome.json"
+    session = run / "runtime" / "session.json"
+    if closeout.is_file():
+        try:
+            doc = json.loads(closeout.read_text())
+        except (OSError, json.JSONDecodeError) as exc:
+            return None, f"closeout unreadable ({type(exc).__name__})"
+        cost = (doc.get("money") or {}).get("all_in_usd")
+        if doc.get("provider_resource_created") is False and not cost:
+            return 0.0, "closeout: no provider resource was created"
+        if isinstance(cost, bool) or not isinstance(cost, (int, float)):
+            return None, "the closeout books no money.all_in_usd"
+        if doc.get("provider_teardown_verified") is not True:
+            return None, ("the closeout does not state "
+                          "provider_teardown_verified: true")
+        return float(cost), "closeout money.all_in_usd"
+    if session.is_file():
+        try:
+            ev = json.loads(session.read_text())
+        except (OSError, json.JSONDecodeError) as exc:
+            return None, f"session record unreadable ({type(exc).__name__})"
+        pods = [ev.get("pod_id"), *((d or {}).get("pod_id")
+                                    for d in ev.get("draws") or [])]
+        if ev.get("provider_resource_created") is False and not any(pods):
+            return 0.0, "session record: nothing was created at the provider"
+        return None, "a session record and no closeout"
+    if run.is_dir() and any(run.rglob("*")):
+        return None, ("an issued authorization with no session record and no "
+                      "closeout")
+    return 0.0, "an empty run directory"
+
+
+def consumed_by_prior_subruns(repo_root: str | Path = REPO) -> dict[str, Any]:
+    """Every earlier screening subrun's booked cost (`_subrun_cost`).
+
+    Fails closed: one UNKNOWN anywhere refuses the whole issuance, because the
+    envelope's remainder is then unknown.
     """
     root = Path(repo_root) / RUNS_ROOT
     rows, unknown = [], []
     for run in sorted(root.glob(f"{RUN_PREFIX}*")):
-        closeout = run / "closeout/outcome.json"
-        if not closeout.is_file():
-            if (run / "runtime/session.json").is_file():
-                unknown.append(run.name)
-            continue
-        doc = json.loads(closeout.read_text())
-        cost = (doc.get("money") or {}).get("all_in_usd")
-        if cost is None and doc.get("provider_resource_created") is False:
-            cost = 0.0
+        cost, basis = _subrun_cost(run)
         if cost is None:
-            unknown.append(run.name)
+            unknown.append(f"{run.name}: {basis}")
             continue
-        rows.append({"run_id": run.name, "all_in_usd": float(cost)})
+        rows.append({"run_id": run.name, "all_in_usd": cost, "basis": basis})
     if unknown:
         raise D2ScreeningRefused(
-            f"earlier screening subruns {unknown} have no booked cost; the "
-            "envelope's remainder is unknown and nothing is issued over it")
+            f"earlier screening subruns have no booked cost: {unknown}. The "
+            "envelope's remainder is unknown and nothing is issued over it; "
+            "close each one out (cost booked, teardown verified) first")
     return {"subruns": rows,
             "consumed_usd": round(sum(r["all_in_usd"] for r in rows), 4)}
 
@@ -359,6 +404,7 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
     from stages.phase_d1.d1_authorization import (
         check_the_four_conditions, live_money, live_secure_price,
     )
+    from stages.d_series import d2_budget as BUD
     from stages.phase_d2 import d2_screening as SC
 
     root = Path(repo_root)
@@ -401,14 +447,19 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
              {"subruns": [], "consumed_usd": round(float(consumed_usd), 4),
               "_source": "supplied by the caller"})
     remaining = round(float(envelope) - spent["consumed_usd"], 4)
-    hard = min(priced["hard_ceiling_usd"], remaining)
-    if hard < priced["hard_ceiling_usd"]:
+    hard = priced["hard_ceiling_usd"]
+    #: THE ENVELOPE MUST HOLD THE SESSION AND ITS TEARDOWN. A ceiling that
+    #: fits only without the reserve leaves a session that reaches its hard
+    #: stop owing a teardown the grant cannot pay for.
+    reserve = float(BUD.TEARDOWN_RESERVE_USD)
+    required = round(hard + reserve, 4)
+    if remaining < required:
         raise D2ScreeningRefused(
             f"the envelope has ${remaining:.4f} left after "
-            f"${spent['consumed_usd']:.4f} of earlier subruns, below the "
-            f"session's derived ${priced['hard_ceiling_usd']:.4f}. The probe "
-            "schedule does not shrink to fit; a larger envelope is a "
-            "maintainer decision")
+            f"${spent['consumed_usd']:.4f} of earlier subruns; a session needs "
+            f"its derived ${hard:.4f} hard ceiling plus the ${reserve:.2f} "
+            f"teardown reserve, ${required:.4f}. The probe schedule does not "
+            "shrink to fit; a larger envelope is a maintainer decision")
     failed = check_the_four_conditions(ceiling=hard, money=money)
     if failed:
         raise D2ScreeningRefused(
@@ -443,7 +494,9 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
             "rescoring", "_basis", "accepted_at_price_per_hour")},
         money={**money, "derived_session": priced, "live_quote": quote,
                "cumulative_envelope_usd": float(envelope),
-               "prior_subruns": spent, "envelope_remaining_usd": remaining},
+               "prior_subruns": spent, "envelope_remaining_usd": remaining,
+               "teardown_reserve_usd": reserve,
+               "envelope_required_for_this_session_usd": required},
         rate_usd_per_hour=quote["usd_per_hour"],
         hard_runtime_minutes=hard_minutes,
         one_use=("ONE grant issuance, ONE launcher session; a replacement "

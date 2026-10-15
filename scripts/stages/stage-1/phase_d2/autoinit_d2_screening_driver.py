@@ -343,6 +343,14 @@ def main(argv: list[str] | None = None) -> int:
                 entry["trained_sha256"] = _hashlib.sha256(
                     shard.read_bytes()).hexdigest()
                 entry["trained_bytes"] = shard.stat().st_size
+            #: The records the off-pod ranking reads, digested HERE so every
+            #: off-pod copy is verified against what this pod holds. A resumed
+            #: probe's were restored with its preserved checkpoint.
+            entry["training_records_sha256"] = {
+                name: _hashlib.sha256((model_root / name).read_bytes()
+                                      ).hexdigest()
+                for name in SC.TRAINING_RECORDS
+                if (model_root / name).is_file()}
             #: Announced BEFORE evaluation: the launcher preserves trained
             #: weights off-pod from this flag.
             save()

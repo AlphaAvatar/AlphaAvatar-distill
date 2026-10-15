@@ -815,6 +815,67 @@ def rank_screening(field: Sequence[FieldArm],
 
 # --- the audit -------------------------------------------------------------
 
+def scored_evidence_checks(probe_dir: Path, result: Mapping[str, Any]
+                           ) -> dict[str, Any]:
+    """ONE scored unit's per-sample rows and raw generations, checked against
+    the result that claims them.
+
+    Shared by the imported units' audit and by a new candidate's off-pod
+    verification, so "verified scored evidence" means one thing in both.
+    """
+    checks: dict[str, Any] = {}
+    rows_path = probe_dir / "per_sample.jsonl"
+    checks["per_sample_present"] = rows_path.is_file()
+    if rows_path.is_file():
+        data = rows_path.read_bytes()
+        checks["per_sample_sha256"] = (hashlib.sha256(data).hexdigest()
+                                       == result.get("per_sample_sha256"))
+        rows = [json.loads(x) for x in data.decode().splitlines() if x.strip()]
+        checks["per_sample_rows"] = len(rows) == result.get("per_sample_rows")
+        checks["per_sample_pairable"] = (
+            len({r["id"] for r in rows}) == len(rows)
+            and all({"id", "set", "seed", "correct", "usable", "scorable"}
+                    <= set(r) for r in rows))
+    gens = {}
+    for name, g in sorted((result.get("generations") or {}).items()):
+        path = probe_dir / "generations" / Path(g["path"]).name
+        gens[name] = path.is_file() and _sha256(path) == g["sha256"]
+    checks["generations_sha256"] = all(gens.values()) and len(gens) == 7
+    return checks
+
+
+def rescore_unit(rung: str, generations: Path, *, label: str, seed: int,
+                 screening_arm: str | None, repo_root: Path = REPO_ROOT,
+                 extra_args: Sequence[str] = ()) -> dict[str, Any]:
+    """Re-run the rung's PINNED scorer on stored generations, in a scratch
+    directory. Nothing is regenerated: this is the frozen scoring semantics
+    applied again to the bytes the unit was scored from.
+    """
+    scorer = repo_root / RUNGS[rung]["scorer"]
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp)
+        cmd = [sys.executable, str(scorer),
+               "--generations", str(generations),
+               "--label", label, "--seed", str(seed),
+               "--out", str(out / "result.json"),
+               "--per-sample", str(out / "rows.jsonl")]
+        if RUNGS[rung]["d1_rung"] == "screening" and screening_arm is not None:
+            cmd += ["--screening-arm", screening_arm]
+        cmd += list(extra_args)
+        proc = subprocess.run(cmd, capture_output=True, text=True,
+                              cwd=repo_root,
+                              env={"PYTHONPATH": "src:scripts",
+                                   "PATH": "/usr/bin:/bin"})
+        ok = proc.returncode == 0 and (out / "rows.jsonl").is_file()
+        return {
+            "rc": proc.returncode,
+            "rows_sha256": _sha256(out / "rows.jsonl") if ok else None,
+            "result": (json.loads((out / "result.json").read_text())
+                       if ok and (out / "result.json").is_file() else None),
+            "error": (proc.stderr.strip().splitlines()[-1:]
+                      if proc.returncode != 0 else None)}
+
+
 def _verify_unit(unit: HistoricalUnit, store: Path, repo_root: Path, *,
                  rescore: bool) -> dict[str, Any]:
     probe_dir = store / "store" / "probes" / unit.probe_id
@@ -827,46 +888,17 @@ def _verify_unit(unit: HistoricalUnit, store: Path, repo_root: Path, *,
     checks["durable_result_equals_committed"] = (
         durable_result.is_file()
         and durable_result.read_bytes() == committed.read_bytes())
-    rows_path = probe_dir / "per_sample.jsonl"
-    checks["per_sample_present"] = rows_path.is_file()
-    if rows_path.is_file():
-        data = rows_path.read_bytes()
-        checks["per_sample_sha256"] = (hashlib.sha256(data).hexdigest()
-                                       == unit.result["per_sample_sha256"])
-        rows = [json.loads(x) for x in data.decode().splitlines() if x.strip()]
-        checks["per_sample_rows"] = len(rows) == int(unit.result["per_sample_rows"])
-        checks["per_sample_pairable"] = (
-            len({r["id"] for r in rows}) == len(rows)
-            and all({"id", "set", "seed", "correct", "usable", "scorable"}
-                    <= set(r) for r in rows))
-    gens = {}
-    for name, g in sorted(unit.result["generations"].items()):
-        path = probe_dir / "generations" / Path(g["path"]).name
-        gens[name] = path.is_file() and _sha256(path) == g["sha256"]
-    checks["generations_sha256"] = all(gens.values()) and len(gens) == 7
+    checks.update(scored_evidence_checks(probe_dir, unit.result))
     checks["checkpoint_bytes_present"] = any(
         p.suffix == ".safetensors" for p in probe_dir.rglob("*"))
-    if rescore and rows_path.is_file():
-        scorer = repo_root / RUNGS[unit.rung]["scorer"]
-        with tempfile.TemporaryDirectory() as tmp:
-            out = Path(tmp)
-            cmd = [sys.executable, str(scorer),
-                   "--generations", str(probe_dir / "generations"),
-                   "--label", unit.probe_id, "--seed", str(unit.seed),
-                   "--out", str(out / "result.json"),
-                   "--per-sample", str(out / "rows.jsonl")]
-            if RUNGS[unit.rung]["d1_rung"] == "screening":
-                cmd += ["--screening-arm", unit.arm]
-            proc = subprocess.run(cmd, capture_output=True, text=True,
-                                  cwd=repo_root,
-                                  env={"PYTHONPATH": "src:scripts",
-                                       "PATH": "/usr/bin:/bin"})
-            checks["rescore_reproduces_per_sample"] = (
-                proc.returncode == 0 and (out / "rows.jsonl").is_file()
-                and _sha256(out / "rows.jsonl")
-                == unit.result["per_sample_sha256"])
-            if proc.returncode != 0:
-                checks["rescore_error"] = proc.stderr.strip().splitlines()[-1:]
+    if rescore and (probe_dir / "per_sample.jsonl").is_file():
+        again = rescore_unit(
+            unit.rung, probe_dir / "generations", label=unit.probe_id,
+            seed=unit.seed, screening_arm=unit.arm, repo_root=repo_root)
+        checks["rescore_reproduces_per_sample"] = (
+            again["rows_sha256"] == unit.result["per_sample_sha256"])
+        if again["rc"] != 0:
+            checks["rescore_error"] = again["error"]
     verified = all(v for k, v in checks.items()
                    if k not in ("checkpoint_bytes_present", "rescore_error"))
     return {"checks": checks, "result_verified": verified}

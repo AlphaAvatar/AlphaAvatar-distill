@@ -56,6 +56,12 @@ CALIBRATION_REL = ("logs/stages/stage-1/families/d_series/analyses/"
 POD_ARMS_REL = "artifacts/stages/stage-1/phase_d2/arms"
 #: Every arm is a weight-only checkpoint directory of exactly these files.
 ARM_FILES = ("model.safetensors", "config.json", "generation_config.json")
+#: The training records the OFF-POD RANKING reads, in each probe's root: the run
+#: manifest (training identity and the trained config, hash-bound) and the
+#: completion record (training provenance, bound into the scored result). The
+#: driver digests them at training completion and the launcher secures them
+#: against those digests before the pod may release the probe.
+TRAINING_RECORDS = ("run_manifest.json", "run_completion.json")
 
 
 class D2ScreeningError(RuntimeError):

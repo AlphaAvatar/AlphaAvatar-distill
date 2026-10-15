@@ -11412,3 +11412,49 @@ on a paid pod.
 - **Not authorized:** any pod; the eight probes; the shared confirmation;
   B/q2 retraining; D3; a fresh confirmation; any promotion.
 - **Revisit when** the maintainer decides on the screening grant.
+
+## 2026-10-15 — D2 screening: conditional $25.00 cumulative grant; three $0 repairs before issuance
+
+- **Context.** The maintainer's D2 Behavioural Screening Final Independent
+  Review of `8e8ae849` confirmed the $0 preparation: the four committed D2 v3
+  initializations, the two frozen seeds, eight probes,
+  `e1_p1_kd_heavy@0.86M`, `d_series_shared_eval@v1`, B's two imported units as
+  the comparator (q2 descriptive), the off-pod frozen ranking, and exactly one
+  candidate advancing or none. No protocol change; K stays 4; B and q2 are not
+  retrained.
+- **Decision.** A **$25.00 cumulative all-in grant** for ONE frozen screening
+  rung (`approvals/autoinit_d2_screening_grant.json`), issued only after three
+  $0 repairs, their tests, commit, push and the executable-commit rebinding:
+  - **A.** The off-pod ranking verifies each candidate unit's label, seed,
+    arm and initialization against the frozen unit, its admission record,
+    its rows and generations by the shared protocol's checks, a re-score by the
+    pinned scorer reproducing every figure, and its training records against
+    the protocol's recovery block. Self-hash-valid but contradictory records
+    are refused.
+  - **B.** The run manifest and completion record the ranking reads are
+    required, digest-verified training records under D2's layout. They are
+    secured independently of the checkpoint copy, are part of the resume set,
+    and gate the release, "evidence complete" and the prune. D1's default
+    layout is unchanged.
+  - **C.** An issuance requires the envelope's remainder to cover the derived
+    session hard ceiling PLUS the $0.30 teardown reserve. Any earlier attempt
+    without a booked cost and verified teardown (or a record that nothing was
+    created) refuses the issuance; a potentially paid attempt is never $0.
+- **Money.** Expected about $15.07 and planning hard about $19.46 at the live
+  rate, each re-derived at issuance; reserve $0.30; per-session cap $30;
+  project cap $595. The $25 is cumulative, not a session ceiling, and is not
+  spent to fill it. Host redraws are paid time in the same ledger. The
+  D3/fresh-confirmation reservation is never drawn on.
+- **Runtime.** B's training and evaluation runtime identity is kept. On a
+  mismatch the session stops before training or generation, and the
+  comparability problem is reported. No other torch, transformers, vLLM or
+  driver is substituted.
+- **Correction.** The readiness review now marks the pod-side identity,
+  training-runtime and evaluation-protocol checks as mandatory gates still to
+  run, not as completed verification.
+- **Not authorized:** the D2 shared confirmation; B/q2 retraining or
+  regeneration; D3; a fresh confirmation; any promotion; a cap change.
+  Screening stops at the confirmation authorization boundary.
+- **Revisit when** the screening rung completes, or its envelope cannot fund
+  a full session plus the reserve.
+

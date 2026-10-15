@@ -13,30 +13,26 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 0 volumes and $0/h (2026-10-15 about 10:12 UTC, after the D2 search's
 confirmed teardown). No acquisition loop or watcher is running.
 
-**D2 SCREENING CHAIN BUILT AT $0; GRANT PROPOSED, NOT AUTHORIZED
-(2026-10-15).** This round followed the maintainer's independent review of
-`7dd31165`.
-- **Chain.** `phase_d2/autoinit_d2_screening_{launch,driver}.py`, the
-  contract `d2_screening.py`, the grant type and issuer, the off-pod
-  `rank_d2_screening.py` and the rescoring diagnostic. It reuses D1's probe
-  functions and durability functions. The arms are staged from the relay.
-- **Plan.** Eight probes: c1–c4 × seeds 516448251, 614923639. The comparator
-  is B's two imported units. Contract `6d4283e7…`.
-- **Inputs verified at $0.** All four identities of each arm. B's units
-  re-hashed and re-scored byte-exactly.
-- **Durability.** The Top-4 is on the relay, restored and re-identified.
-- **Price at the live $1.09/h.** $15.07 expected, **$19.46** hard. D2
-  remaining is $28.27; the reservation holds with $23.73 to spare.
-- **Search records.**
-  - Completion is now a 9-clause contract (`search_completion.py`). Project
-    remaining is still $118.4484.
-  - An erratum corrects the D1/D2 metric-alignment analysis: one artifact,
-    not two; the "D1 metric" field was D2's union KL.
+**D2 SCREENING GRANTED CONDITIONALLY (2026-10-15 UTC).** The maintainer's
+Final Independent Review of `8e8ae849` approved a **$25.00 cumulative
+all-in grant** for ONE frozen screening rung: eight probes, c1–c4 × seeds
+516448251 and 614923639, against B's two imported units.
+- **Issued only after three $0 repairs:**
+  - A: the off-pod ranking's full unit verification;
+  - B: durable, digest-verified training records;
+  - C: the envelope must cover the session hard ceiling plus the teardown
+    reserve, and any attempt without booked cost and verified teardown blocks
+    issuance.
+
+  All three are done and tested.
+- **Price.** About $15.07 expected and $19.46 hard at $1.09/h, re-derived at
+  issuance.
 - **Owners.**
-  [`d2_screening_readiness_review.md`](../stages/stage-1/families/d_series/analyses/d2_screening_readiness_review.md);
-  [`d2_screening_grant_proposal.json`](../stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json);
-  `decisions.md` 2026-10-15.
-- **Not authorized:** any pod or probe; the confirmation; D3; a promotion.
+  [`autoinit_d2_screening_grant.json`](../budget/approvals/autoinit_d2_screening_grant.json);
+  [`d2_screening_readiness_review.md`](../stages/stage-1/families/d_series/analyses/d2_screening_readiness_review.md)
+  §9–10; `decisions.md` 2026-10-15.
+- **Not authorized:** the confirmation; B/q2 retraining; D3; a promotion.
+  Screening stops at the confirmation boundary.
 
 **D2 v3 FORMAL SEARCH COMPLETE (2026-10-15).** Run `d2_search_20261015_051722`
 (session commit `d64490ee`, scored_v1, L40S at $1.09/h).

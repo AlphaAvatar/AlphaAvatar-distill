@@ -1,5 +1,13 @@
 # D2 behavioural screening: readiness review (2026-10-15)
 
+> **Correction and addendum, 2026-10-15 (UTC), after the maintainer's Final
+> Independent Review of `8e8ae849`.** Sections 3 and 5 below used to read as
+> if the pod-side checks had happened. No pod has been created, so they are
+> **mandatory gates the driver will run, not verification facts**; the text
+> now says so. What was done at `$0` keeps its evidence. Section 10 records
+> the three `$0` repairs the review required before issuance; section 9 the
+> conditional grant.
+
 Prepared under the maintainer's Post-D2-v3-Search Independent Review of
 `7dd31165`. That review authorized **$0 work only**: the screening chain, the
 verification of its inputs, evidence durability, tests, and a grant proposal.
@@ -72,10 +80,16 @@ Descriptive structure, which never feeds a rule
 
 For each arm, all four identities (`artifact_digest`, `weights_digest`,
 `single_shard_sha256`, `arch_signature`) were recomputed from bytes and
-compared exactly. This happened at three points:
+compared exactly.
+
+**Done at $0 (evidence below):**
 1. at rest on the dev host;
-2. after a relay round trip into an independent directory;
-3. on the pod, by the driver, before anything trains (the staged relay copy).
+2. after a relay round trip into an independent directory.
+
+**Pending, a MANDATORY GATE of the paid session (not yet executed; no pod has
+existed):**
+3. on the pod, by the driver, on the staged relay copy, before anything
+   trains. A mismatch refuses the session before training.
 
 Evidence: `phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json`
 and `phase_d2/analyses/d2_screening_inputs.json`.
@@ -98,6 +112,17 @@ regenerated or re-evaluated, and no confidence or logits are computed for
 them.
 
 ## 5. Session, training and evaluation contract
+
+Everything in this section that runs on the pod is a **mandatory gate still
+to be executed**. None of it has happened: no pod has been created. What
+has been verified at `$0` is the dev-host side (the contract re-derived, the
+arms hashed, the relay round trip, B's units, the CPU launcher rehearsal of
+the `$0` gates). The pod-side gates are:
+- the arms' four identities on the staged copy (step 3);
+- the training runtime digest before the first probe trains (step 3);
+- the attested evaluation protocol before any generation (step 5);
+- per probe, the trained checkpoint's identity before the pod may release it
+  (section 6).
 
 The pod runs these steps in order:
 1. Setup on an admitted host only. The image identity must equal the
@@ -189,12 +214,69 @@ See `logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json`.
   - a grant that states any derived field;
   - an envelope already narrowed below the session's price.
 
-## 9. Not authorized
+## 9. Authorization
 
-- Creating any pod.
-- Running any of the eight probes.
-- The shared confirmation.
-- Retraining B or q2.
-- D3.
-- A fresh confirmation.
-- Any promotion.
+**At the time of this review (`8e8ae849`), not authorized:** creating any pod;
+running any of the eight probes.
+
+**Since then (2026-10-15 UTC):** the maintainer conditionally approved a
+**$25.00 cumulative all-in grant** for ONE frozen screening rung
+(`logs/budget/approvals/autoinit_d2_screening_grant.json`), to be issued only
+after the three `$0` repairs of section 10, their tests, commit and push, with
+the executable commit rebound.
+
+**Still not authorized:** the shared confirmation; retraining, regenerating or
+re-evaluating B or q2; D3; a fresh confirmation; any promotion; a project-cap
+change. After screening the programme stops at the confirmation
+authorization boundary.
+
+## 10. The three `$0` repairs required before issuance
+
+**A. The off-pod ranking's evidence gate** (`rank_d2_screening.verify_unit`).
+A candidate unit verifies only when, from its secured files:
+- the result's self-hash holds and it is the session's record;
+- its label, seed, screening arm and initialization digest equal the FROZEN
+  unit's (contract), and the session entry names the same probe, arm, seed and
+  committed state;
+- its admission record names this probe, is comparable, carries the shared
+  rung's evaluation protocol hash, and its generation fingerprint is the
+  result's and the session's;
+- its rows and per-stratum generations match the result by the shared
+  protocol's own checks (`shared_evaluation.scored_evidence_checks`, now also
+  what B's audit calls), every row carries the frozen label and seed, and the
+  counts match;
+- the pinned scorer, re-run on the stored generations
+  (`shared_evaluation.rescore_unit`), reproduces the rows byte-exactly and every
+  non-volatile field of the result (shown on B's real unit: a dev-host re-score
+  of a pod-scored result differs only in timestamps, command, paths and the
+  hash over them);
+- its secured run manifest and completion record equal the digests the driver
+  recorded, the completion is the one bound into the result, training completed
+  every step, the config hash is bound end to end, and the manifest shows the
+  protocol's recovery block, recipe digest and the committed candidate at the
+  frozen seed.
+
+A record whose self-hash holds but whose arm, seed, initialization, training
+or scores contradict the frozen unit is refused. Mutation tests re-seal the
+edited records so only the targeted check can refuse, and a meta-test requires
+every check to be falsifiable.
+
+**B. The training records the ranking reads are durable.** D2's layout now
+declares `run_manifest.json` and `run_completion.json` as REQUIRED training
+records (D1 declares none; its behaviour is unchanged). The driver digests them
+at training completion; the launcher secures them into
+`store/probes/<id>/training/` against those digests, independent of the
+checkpoint copy; they are part of the preserved resume set; and the release
+ack, the scored-evidence gate and `probe_fetch_ok` all require them. A
+successful terminal no longer prunes a preserved copy while the records beside
+the evidence are missing or do not re-hash, and the prune never writes over a
+verified copy.
+
+**C. The cumulative retry reserve.** An issuance now requires
+`remaining envelope >= derived session hard ceiling + $0.30 teardown reserve`.
+An earlier subrun counts as known only when its closeout books
+`money.all_in_usd` AND states `provider_teardown_verified: true`, or when a
+record shows nothing was ever created at the provider. An issued authorization
+with no session record, a session record with a pod id and no closeout, an
+unreadable record, or a closeout without a booked cost or verified teardown is
+UNKNOWN, and nothing is issued over it.

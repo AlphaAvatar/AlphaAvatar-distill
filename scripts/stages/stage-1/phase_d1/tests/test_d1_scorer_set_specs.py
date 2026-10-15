@@ -417,7 +417,7 @@ class TestPreservedWeightsSurviveAFailureAndAreReleasedOnSuccess:
         assert "prune_preserved_scored" not in inspect.getsource(
             mod.secure_probe_evidence), (
             "releasing mid-rung is what made a replacement attempt retrain")
-        assert "prune_preserved_scored(ctx)" in inspect.getsource(
+        assert "prune_preserved_scored(ctx" in inspect.getsource(
             mod.fetch_probe_evidence), "it must still have a caller"
 
     def test_the_release_refuses_unless_the_rung_completed(self):

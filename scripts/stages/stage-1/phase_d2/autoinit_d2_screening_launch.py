@@ -84,14 +84,17 @@ DRIVER = "scripts/stages/stage-1/phase_d2/autoinit_d2_screening_driver.py"
 STORE_SUBDIR = D1L.STORE_SUBDIR
 
 #: D2's layout for D1's durability functions. The rescoring diagnostic is
-#: secured beside the strict evidence, never as a gate.
+#: secured beside the strict evidence, never as a gate; the training records
+#: the off-pod ranking reads are STRICT (secured, verified, and required before
+#: a release, a prune or "evidence complete").
 LAYOUT = D1L.BehaviouralLayout(
     evidence_dir=EVIDENCE_DIR, evidence_filename=EVIDENCE_FILENAME,
     attested_name=ATTESTED_NAME,
     pod_probe_root=f"{REPO}/{PROBE_ROOT_REL}",
     release_ack_rel=RELEASE_ACK_REL,
     extra_probe_files=(("rescoring.json", "rescoring/{probe_id}.json",
-                        False),))
+                        False),),
+    required_training_records=SC.TRAINING_RECORDS)
 
 #: Both battery roles travel (~11 MiB), because the cheap preflight re-hashes
 #: the screening role and shows the two roles disjoint on the pod.

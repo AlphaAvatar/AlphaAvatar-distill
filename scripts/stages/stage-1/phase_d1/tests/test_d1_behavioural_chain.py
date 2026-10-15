@@ -1526,7 +1526,7 @@ class TestTrainedUnscoredDurabilityRunsDuringTheSession:
         assert "prune_preserved_scored" not in poll, (
             "releasing from the poll hook is what made a replacement retrain")
         terminal = src.split("def fetch_probe_evidence(", 1)[1].split("\ndef ", 1)[0]
-        assert "prune_preserved_scored(ctx)" in terminal, (
+        assert "prune_preserved_scored(ctx" in terminal, (
             "the release must still have a caller, at the terminal")
 
     def test_pruning_requires_a_COMPLETED_RUNG_and_durable_evidence(
