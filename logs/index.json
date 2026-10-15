@@ -743,7 +743,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 87,
+  "runs_unrecorded": 89,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -838,8 +838,8 @@
    },
    "phase_d2": {
     "recorded": 0,
-    "unrecorded": 1,
-    "total": 1
+    "unrecorded": 3,
+    "total": 3
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -3439,6 +3439,22 @@
    "n_files": 5,
    "digest": "7b14bb77094bc51818cb6b6d6b08345f516e2d83f16eedc963f20b4ea4e24ef1",
    "why": "no run manifest; its closeout states: ENGINEERING COMPLETE -- a digest-pinned rematerialization, not a measurement. It decided nothing, ranked nothing and selected nothing."
+  },
+  {
+   "experiment_id": "phase_d2",
+   "run_id": "d2_screening_20261015_183412",
+   "root": "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183412",
+   "n_files": 6,
+   "digest": "5d793bf772857c4f6b91a2d218f382472f62b91bfb0e58017401a5ed9b6ce886",
+   "why": "no run manifest; its closeout states: PRE-PROVIDER TRANSIENT (provider capacity), $0. Not a deterministic failure: nothing in code, config or environment caused it (AGENTS.md P12.1)."
+  },
+  {
+   "experiment_id": "phase_d2",
+   "run_id": "d2_screening_20261015_183734",
+   "root": "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183734",
+   "n_files": 19,
+   "digest": "77cc197853ed739ec81c6d9d4961845e003a5be0e53933d7931b8c75a498a572",
+   "why": "no run manifest; its closeout states: PRE-SCIENCE ACQUISITION FAILURE (host identity), cost booked below. The frozen identity was enforced, never substituted."
   },
   {
    "experiment_id": "phase_d2",
