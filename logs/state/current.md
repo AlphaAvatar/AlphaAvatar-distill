@@ -9,9 +9,17 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods,
-0 volumes and $0/h (2026-10-15 about 10:12 UTC, after the D2 search's
-confirmed teardown). No acquisition loop or watcher is running.
+**D2 SCREENING IS RUNNING (paid).** Run `d2_screening_20261015_203346`,
+pod `7stah5j2s98e69` (AU, `…@595.91.07`, $1.09/h), launched 2026-10-15
+21:40 UTC in tmux `d2screen` with a milestone waiter. The driver's
+training-runtime gate passed (`9bd30885…`). Owner: the run's
+`runtime/session.json` once closed.
+- **Earlier attempts.** Three were closed out first:
+  - 183412: no capacity, $0;
+  - 183734: five SE/US hosts on 580.x refused, $0.4518;
+  - 193502: no AU capacity, $0.
+- **Why AU.** It is where the protocol's driver lives:
+  `…/d2_screening_20261015_193502/evidence/host_location_driver_history.json`.
 
 **D2 SCREENING GRANTED CONDITIONALLY (2026-10-15 UTC).** The maintainer's
 Final Independent Review of `8e8ae849` approved a **$25.00 cumulative
