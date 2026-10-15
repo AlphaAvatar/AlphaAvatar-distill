@@ -1305,6 +1305,29 @@ SCENARIO_RECORD = ("logs/stages/stage-1/families/d_series/plans/"
                    "d_series_programme_budget.json")
 
 
+#: A D2 formal search's closeout. Once one records a COMPLETE search, that
+#: search is spent rather than planned: its actual all-in cost is already
+#: inside the live limits through the closeout (derive_budget books it), so the
+#: programme carries only the D2 work still ahead -- planning the search at its
+#: hard ceiling as well would count it twice.
+D2_SEARCH_CLOSEOUTS = "logs/stages/stage-1/phase_d2/runs/d2_search_*/closeout/outcome.json"
+
+
+def completed_d2_search(repo_root: str | Path | None = None
+                        ) -> dict[str, Any] | None:
+    root = Path(repo_root) if repo_root else REPO_ROOT
+    for path in sorted(root.glob(D2_SEARCH_CLOSEOUTS)):
+        doc = json.loads(path.read_text())
+        if str(doc.get("classification", "")).startswith("COMPLETE FORMAL SEARCH"):
+            return {"run_id": doc["run_id"],
+                    "closeout": path.relative_to(root).as_posix(),
+                    "booked_all_in_usd": (doc.get("money") or {}).get("all_in_usd"),
+                    "authorized_hard_usd": (doc.get("money") or {}).get(
+                        "authorized_hard_usd"),
+                    "_inside_the_live_limits": True}
+    return None
+
+
 def d1_priced_confirmation(rate: float) -> dict[str, Any]:
     """A fresh independent confirmation priced as D1's: 2 arms x 3 seeds.
 
@@ -1403,11 +1426,13 @@ def programme_scenarios(limits: dict[str, float],
     k2 = build(k_candidates=2)["steps"]["d2_screening"]["hard"]["all_in_usd"]
     k4 = steps["d2_screening"]["hard"]["all_in_usd"]
     search = steps["d2_search"]
+    searched = completed_d2_search()
 
     def under(search_hard_usd: float) -> dict[str, Any]:
-        hard = {"d2_search": search_hard_usd,
-                "d2_screening": steps["d2_screening"]["hard"]["all_in_usd"],
+        hard = {"d2_screening": steps["d2_screening"]["hard"]["all_in_usd"],
                 "d2_confirmation": steps["d2_confirmation"]["hard"]["all_in_usd"]}
+        if searched is None:
+            hard = {"d2_search": search_hard_usd, **hard}
         block = {"expected": round(sum(steps[n]["expected"]["all_in_usd"]
                                        for n in hard), 2),
                  "hard_with_reserves": round(sum(v + TEARDOWN_RESERVE_USD
@@ -1432,6 +1457,7 @@ def programme_scenarios(limits: dict[str, float],
                         v + TEARDOWN_RESERVE_USD for v in d3_hard.values()), 2),
                     "rescoring_estimate": block["rescoring_estimate"],
                     "search_hard_usd": round(d3_search_hard, 2)}
+        block["sessions"] = sorted(hard)
 
         def scenario(blocks):
             remaining = limits["project_remaining_usd"]
@@ -1505,6 +1531,7 @@ def programme_scenarios(limits: dict[str, float],
         "engineering_fits_allowance": (engineering["hard_with_reserves"]
                                        <= limits["engineering_remaining_usd"]),
         "engineering": engineering,
+        "d2_search_completed": searched,
         "fresh_confirmation": fresh_block,
         "reservation_rule": (
             "authorize D2's formal sessions only if the project remainder "

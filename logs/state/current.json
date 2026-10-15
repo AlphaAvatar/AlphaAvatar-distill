@@ -29,20 +29,20 @@
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
   "_owner": "derived by scripts/maintenance/consolidation/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
-  "_package_spent_usd": 150.5836,
+  "_package_spent_usd": 156.12,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 595.0,
-  "cumulative_spend_usd": 471.0152,
+  "cumulative_spend_usd": 476.5516,
   "engineering_remaining_usd": 3.1804,
-  "formal_remaining_usd": 127.9624,
+  "formal_remaining_usd": 122.426,
   "full_ceiling_sessions_fundable": 4,
   "ledger": "logs/budget/ledger.md",
-  "package_remaining_usd": 131.1428,
+  "package_remaining_usd": 125.6064,
   "per_session_ceiling_usd": 30.0,
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 123.9848,
+  "remaining_usd": 118.4484,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -75,9 +75,9 @@
   "authorizes": "nothing",
   "behavioural_design": "D1 (complete): Top-4, 10 + 6 probes, owner d1_design.json. D2: shared protocol, K=4 prepared, 8 + 3 probes, no B/q2 training, owner families/d_series/plans/d2_budget_v1.json.",
   "behavioural_pricing": "Owner: d1_design.json :: budget.chain; attempt bounds: the run's governance/authorization.json :: money.attempt_bounds.",
-  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2 v3: NONE OPEN for the granted search (prereg v3 approved, phase_d2 funded, reservation rule satisfied at the $595 cap). Screening/confirmation and D3 need their own grants. Owner: decisions.md 2026-10-14.",
+  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2 v3: search COMPLETE; screening/confirmation and D3 need their own grants. Owner: decisions.md 2026-10-15.",
   "d2_owed_engineering": "the behavioural driver with the token-id wrapper and rescoring.",
-  "execution_wiring": "D1 COMPLETE and CLOSED. D2 v3 (contract rev 8): union store, K+1 confidence, full scope; Stage W revision 2 PASS and adopted; the launch chain prices the declared row selection and relays the search journals live; issuer scripts/stages/stage-1/phase_d2/issue_d2_authorization.py.",
+  "execution_wiring": "D1 COMPLETE and CLOSED. D2 v3 search COMPLETE: phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
   "incumbent": "B = C1's PROMOTED TREATMENT, 53e30566..., attention.activation_importance_v1; state_id null, built as a fixed path, rebuilt on the pod. DERIVED from C1's verdict by phase_d_series/incumbent.py. The design named C1's BEATEN arm c313d1b4... until 2026-10-08. Owner: phase_d1/analyses/d1_control_arm_identity.json.",
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
@@ -102,7 +102,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-14T00:00:00Z",
+ "generated_utc": "2026-10-15T00:00:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -127,10 +127,10 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "D2 v3 GO (maintainer 2026-10-14): preregistration v3 approved, project cap $595, phase_d2 on the formal book, ONE formal search granted (scored_v1, ~$23.69 hard). Next: the formal D2 search session; then re-derive the programme and prepare D2 screening/confirmation for their own grants. Owner: decisions.md 2026-10-14.",
+ "next": "D2 v3 search COMPLETE 2026-10-15 (d2_search_20261015_051722, $5.5364); programme re-derived. Next: the maintainer's D2 screening decision (own grant) and the D2 behavioural session chain at $0. Owner: decisions.md 2026-10-15.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "Run the granted D2 v3 formal search (one session, search + Top-4 only), close it out, re-derive the programme budget from its actual spend, then prepare D2 behavioural screening/confirmation for separate grants.",
+  "next_work": "Await the D2 screening decision; build the D2 behavioural chain at $0; then screening -> confirmation -> D3, each granted separately.",
   "not_next": "no paid resource without its own grant; no retraining or regeneration of B/q2; no rerun of D1 or change to its records; no third KL-only search. Owner: decisions.md 2026-10-13.",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 COMPLETE / NO-GO (q2 did not confirm; B stands).",
   "then": "nothing is queued."
@@ -200,7 +200,7 @@
   "logs/README.md -- START HERE, the index"
  ],
  "running": {
-  "_verified": "provider query 2026-10-12 16:09 UTC: 0 pods, 0 network volumes, $0/h. Last pod wzr7llw0shqc2k deleted by its launcher 16:06:59Z.",
+  "_verified": "provider query 2026-10-15 ~10:12 UTC: 0 pods, 0 volumes, $0/h; last pod ricuwbh64pqlwd deleted 10:09:22Z.",
   "network_volumes": 0,
   "paid_compute": false,
   "pod_id": null,

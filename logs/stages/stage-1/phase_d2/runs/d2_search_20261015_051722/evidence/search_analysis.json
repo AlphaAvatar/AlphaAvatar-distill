@@ -1,0 +1,417 @@
+{
+ "schema": "aadistill.phase_d2.search_analysis/v1",
+ "inputs_sha256": {
+  "states.jsonl": "1a91541db17fa29eabdc5f6d6f435d2773e2bd050b168a38a90b1ffb9b091f85",
+  "telemetry.jsonl": "59ca70af90de102db4119c9796b245a1565de376a891a1f918282a5f7442e426"
+ },
+ "operator_timing": {
+  "per_impl": {
+   "attention.activation_importance_v1": {
+    "expansions": 28,
+    "operator_minutes_total": 8.4,
+    "operator_minutes_mean": 0.3,
+    "operator_minutes_min": 0.11,
+    "operator_minutes_max": 0.68,
+    "per_expansion_overhead_minutes_total": 4.07
+   },
+   "depth.causal_kl_greedy_v1": {
+    "expansions": 14,
+    "operator_minutes_total": 224.68,
+    "operator_minutes_mean": 16.05,
+    "operator_minutes_min": 13.79,
+    "operator_minutes_max": 20.11,
+    "per_expansion_overhead_minutes_total": 2.41
+   },
+   "ffn.activation_importance_v0": {
+    "expansions": 20,
+    "operator_minutes_total": 10.08,
+    "operator_minutes_mean": 0.5,
+    "operator_minutes_min": 0.19,
+    "operator_minutes_max": 0.78,
+    "per_expansion_overhead_minutes_total": 2.81
+   },
+   "width.global_pca_v0": {
+    "expansions": 30,
+    "operator_minutes_total": 12.59,
+    "operator_minutes_mean": 0.42,
+    "operator_minutes_min": 0.24,
+    "operator_minutes_max": 0.81,
+    "per_expansion_overhead_minutes_total": 3.52
+   }
+  },
+  "expansions": 92,
+  "operator_minutes_total": 255.76,
+  "depth_cache": {
+   "reference_cache_modes": {
+    "root_reference_store": 14
+   },
+   "parent_reference_cache_modes": {
+    "cached": 14
+   },
+   "reference_counters_summed": {
+    "reference_hits": 939120,
+    "reference_fills": 0,
+    "reference_recomputes": 0
+   },
+   "objective_seconds_total": 214.72,
+   "parent_kl_seconds_total": 339.37,
+   "ablated_seconds_total": 8881.21,
+   "distortion_seconds_total": 4202.17
+  },
+  "root_reference_stores": [
+   {
+    "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+    "build_seconds": 6.7885,
+    "identity_hash": "c9fc8c52e7a5416d05c1d4c0c1148ab17f3bf5fb4eba9916df962fbc831e99ee",
+    "content_sha256": "7ff2c6183fb43963ce22704726c9decc9200afc2c6291a90155fcaee7d5902a4",
+    "mode": "root_reference_store",
+    "teacher_confidence": {
+     "positions": 59763,
+     "mean": 0.8957092513695576,
+     "sd": 0.15890767576523945,
+     "min": 0.16388997435569763,
+     "effective_fraction": 0.9694866290910845,
+     "quantiles": {
+      "q01": 0.3276633149385452,
+      "q05": 0.5323700308799745,
+      "q10": 0.6602098345756531,
+      "q25": 0.8437122106552124,
+      "q50": 0.9864133596420288,
+      "q75": 0.9999974370002747,
+      "q90": 1.0,
+      "q95": 1.0,
+      "q99": 1.0
+     }
+    }
+   },
+   {
+    "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+    "build_seconds": 6.0356,
+    "identity_hash": "141ae34781d666756ce8f0d459ef458beefbe55ac622076859b3dc99c1d21d58",
+    "content_sha256": "1ec533f1dc0d1e5e2716060efdf6ecdb9cd8ce979b60228f315ad69da0c89014",
+    "mode": "root_reference_store",
+    "teacher_confidence": {
+     "positions": 44324,
+     "mean": 0.8959953763362771,
+     "sd": 0.16024156706498377,
+     "min": 0.16388997435569763,
+     "effective_fraction": 0.9690075304217196,
+     "quantiles": {
+      "q01": 0.3256494873762131,
+      "q05": 0.5267949908971786,
+      "q10": 0.6584515333175659,
+      "q25": 0.8459256291389465,
+      "q50": 0.9872230887413025,
+      "q75": 0.9999975562095642,
+      "q90": 1.0,
+      "q95": 1.0,
+      "q99": 1.0
+     }
+    }
+   }
+  ]
+ },
+ "beam": {
+  "distinct_states_in_journal": 92,
+  "levels": [
+   {
+    "depth": 1,
+    "states": 8,
+    "expanded": 8,
+    "complete_leaves": 0,
+    "evaluated": 8,
+    "invalid": 0,
+    "pruned": 0,
+    "expanded_states": [
+     {
+      "state_id": "cadd35f298e4b18eb3f642070536af75",
+      "path": "DEPTH(calib.domain_balanced@v1)",
+      "objective": 0.436324411138057,
+      "raw_union_kl": 0.5114494790171649
+     },
+     {
+      "state_id": "7745def0c1991963785804486c2aa052",
+      "path": "DEPTH(calib.reasoning_heavy@v2)",
+      "objective": 0.436324411138057,
+      "raw_union_kl": 0.5114494790171649
+     },
+     {
+      "state_id": "8f5784a4e03880e2d5171cef6f69c93b",
+      "path": "FFN(calib.domain_balanced@v1)",
+      "objective": 1.3388604755003164,
+      "raw_union_kl": 1.5734516093504658
+     },
+     {
+      "state_id": "79718967dab059df38c1d2eaea564702",
+      "path": "FFN(calib.reasoning_heavy@v2)",
+      "objective": 1.3692438117687256,
+      "raw_union_kl": 1.610132919429534
+     },
+     {
+      "state_id": "6dd62a2ce89543346fa41ea2b209cc3a",
+      "path": "ATTENTION(calib.domain_balanced@v1)",
+      "objective": 2.332125724385844,
+      "raw_union_kl": 2.617882572560183
+     },
+     {
+      "state_id": "1805f70b3584cb6727ab5bf2e0b355dc",
+      "path": "ATTENTION(calib.reasoning_heavy@v2)",
+      "objective": 2.540755708927025,
+      "raw_union_kl": 2.8423195152856877
+     },
+     {
+      "state_id": "fa0006c1e087b4420242827e0b918331",
+      "path": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+      "objective": 11.561783105924244,
+      "raw_union_kl": 12.588758506772995
+     },
+     {
+      "state_id": "c69d19c94daabdc101fc761ac3d9638c",
+      "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+      "objective": 11.738864343149107,
+      "raw_union_kl": 12.825020017041458
+     }
+    ],
+    "best_not_expanded": []
+   },
+   {
+    "depth": 2,
+    "states": 48,
+    "expanded": 6,
+    "complete_leaves": 0,
+    "evaluated": 48,
+    "invalid": 0,
+    "pruned": 42,
+    "expanded_states": [
+     {
+      "state_id": "00f2bb2cbefd81f451f0b9efbabf50ae",
+      "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)",
+      "objective": 1.6940008600556482,
+      "raw_union_kl": 1.946314457997611
+     },
+     {
+      "state_id": "30b7cac9b2f5a90cc4610114eacdd8e3",
+      "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)",
+      "objective": 1.7057438970679573,
+      "raw_union_kl": 1.9881832584833972
+     },
+     {
+      "state_id": "1064b05a3985daedcb4d3f72475f8d31",
+      "path": "DEPTH(calib.reasoning_heavy@v2)->FFN(calib.reasoning_heavy@v2)",
+      "objective": 2.4423421060383026,
+      "raw_union_kl": 2.843998187572288
+     },
+     {
+      "state_id": "1217806e4f6d155825e80f2296563f33",
+      "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)",
+      "objective": 2.8519240486990145,
+      "raw_union_kl": 3.13972201440044
+     },
+     {
+      "state_id": "86a5a06a218dd5f332b1ec06d83c9e35",
+      "path": "ATTENTION(calib.reasoning_heavy@v2)->DEPTH(calib.domain_balanced@v1)",
+      "objective": 2.9159773744019533,
+      "raw_union_kl": 3.208077267720867
+     },
+     {
+      "state_id": "53221017ad19fd068bd27eb806864de4",
+      "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)",
+      "objective": 5.43702297342669,
+      "raw_union_kl": 5.967471646126191
+     }
+    ],
+    "best_not_expanded": [
+     {
+      "state_id": "d1b9334884daf5c871d7734639a5c1d4",
+      "path": "FFN(calib.reasoning_heavy@v2)->DEPTH(calib.domain_balanced@v1)",
+      "objective": 1.7210733381589232,
+      "raw_union_kl": 2.0042991637899745,
+      "prune_reason": "pruned: epsilon-dominated (front 1) and the beam of 6 was already full"
+     },
+     {
+      "state_id": "4a10cccadd7a9f0eaabee77e6dd07d94",
+      "path": "FFN(calib.reasoning_heavy@v2)->DEPTH(calib.reasoning_heavy@v2)",
+      "objective": 1.7210733381589232,
+      "raw_union_kl": 2.0042991637899745,
+      "prune_reason": "pruned: epsilon-dominated (front 1) and the beam of 6 was already full"
+     },
+     {
+      "state_id": "1ce932000e07b50b94601917a0050701",
+      "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)",
+      "objective": 2.4423421060383026,
+      "raw_union_kl": 2.843998187572288,
+      "prune_reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full"
+     },
+     {
+      "state_id": "d07c9666cadba3d5b96099ca88de14b9",
+      "path": "DEPTH(calib.reasoning_heavy@v2)->FFN(calib.domain_balanced@v1)",
+      "objective": 2.4533888111681565,
+      "raw_union_kl": 2.851370508359958,
+      "prune_reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full"
+     },
+     {
+      "state_id": "20be0395af8a49f0fd6e0d41114b02f2",
+      "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+      "objective": 2.4533888111681565,
+      "raw_union_kl": 2.851370508359958,
+      "prune_reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full"
+     },
+     {
+      "state_id": "b36e9df44ca19b8d25b8229a42b26b1f",
+      "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)",
+      "objective": 2.885742228174953,
+      "raw_union_kl": 3.182039042404173,
+      "prune_reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full"
+     }
+    ]
+   },
+   {
+    "depth": 3,
+    "states": 24,
+    "expanded": 6,
+    "complete_leaves": 0,
+    "evaluated": 24,
+    "invalid": 0,
+    "pruned": 18,
+    "expanded_states": [
+     {
+      "state_id": "cee5df24ea73619896e0fd46c224d90c",
+      "path": "ATTENTION(calib.reasoning_heavy@v2)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+      "objective": 4.379326942034572,
+      "raw_union_kl": 4.803746827821853
+     },
+     {
+      "state_id": "b52d26dcfe153a56c06bc5db8c61cbf5",
+      "path": "ATTENTION(calib.reasoning_heavy@v2)->DEPTH(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)",
+      "objective": 4.380744858764328,
+      "raw_union_kl": 4.812059594276683
+     },
+     {
+      "state_id": "a60bb77f2afe0467436a3a8a872230fd",
+      "path": "DEPTH(calib.reasoning_heavy@v2)->FFN(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+      "objective": 6.179560622148759,
+      "raw_union_kl": 6.775445808788589
+     },
+     {
+      "state_id": "f49e22f009c817bf04e72595cb5fc689",
+      "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+      "objective": 6.183588294046318,
+      "raw_union_kl": 6.984490879554718
+     },
+     {
+      "state_id": "4f854e2a8c4d94a85b0758250eaf6b8b",
+      "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+      "objective": 6.268629910696759,
+      "raw_union_kl": 6.909541064535153
+     },
+     {
+      "state_id": "7d45646c2676ef902b53afed15ea9444",
+      "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)",
+      "objective": 6.277614301462079,
+      "raw_union_kl": 7.102078797010935
+     }
+    ],
+    "best_not_expanded": [
+     {
+      "state_id": "25fb26e7b55f8a5601277ac29a137c16",
+      "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+      "objective": 4.718583475123951,
+      "raw_union_kl": 5.163628914740395,
+      "prune_reason": "pruned: epsilon-dominated (front 1) and the beam of 6 was already full"
+     },
+     {
+      "state_id": "df7201318d0dfdd1d023ce592070c9c1",
+      "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)",
+      "objective": 4.737406706704816,
+      "raw_union_kl": 5.179507770450118,
+      "prune_reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full"
+     },
+     {
+      "state_id": "3c7e0c66ec056c640e11edb49f160fb5",
+      "path": "DEPTH(calib.reasoning_heavy@v2)->FFN(calib.reasoning_heavy@v2)->ATTENTION(calib.reasoning_heavy@v2)",
+      "objective": 6.242605758355511,
+      "raw_union_kl": 6.832567438572481,
+      "prune_reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full"
+     },
+     {
+      "state_id": "f86c8374d465b2cea2caa5cfb816e791",
+      "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+      "objective": 6.3288677474306425,
+      "raw_union_kl": 6.905816671281306,
+      "prune_reason": "pruned: epsilon-dominated (front 3) and the beam of 6 was already full"
+     },
+     {
+      "state_id": "570421d6c928b44f6af3c080e807db6d",
+      "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+      "objective": 6.424849139176031,
+      "raw_union_kl": 7.037424891637369,
+      "prune_reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full"
+     },
+     {
+      "state_id": "a19612dc193b6ab1b53371032156c032",
+      "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+      "objective": 6.488018714580638,
+      "raw_union_kl": 7.181714056756673,
+      "prune_reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full"
+     }
+    ]
+   },
+   {
+    "depth": 4,
+    "states": 12,
+    "expanded": 0,
+    "complete_leaves": 12,
+    "evaluated": 12,
+    "invalid": 0,
+    "pruned": 0,
+    "expanded_states": [],
+    "best_not_expanded": []
+   }
+  ]
+ },
+ "leaf_spearman": {
+  "objective_vs_raw_union_kl": 0.993,
+  "objective_vs_root_teacher_topk_kl": 0.993
+ },
+ "top4": {
+  "committed_quality_order": [
+   "59013099b902f213649b8aa4c676dedd",
+   "c2cb27efcf68b4f18bf7284aea84877a",
+   "30fe791a85d70ac713e75893fea107ae",
+   "3a4173e4eff45b0d73fd82bd0b263f03"
+  ],
+  "by_objective_equal_domain_mean": [
+   "59013099b902f213649b8aa4c676dedd",
+   "c2cb27efcf68b4f18bf7284aea84877a",
+   "3a4173e4eff45b0d73fd82bd0b263f03",
+   "30fe791a85d70ac713e75893fea107ae"
+  ],
+  "by_raw_union_kl_equal_domain_mean": [
+   "59013099b902f213649b8aa4c676dedd",
+   "c2cb27efcf68b4f18bf7284aea84877a",
+   "3a4173e4eff45b0d73fd82bd0b263f03",
+   "30fe791a85d70ac713e75893fea107ae"
+  ]
+ },
+ "d1_metric_alignment": {
+  "shared_states": 2,
+  "rows": [
+   {
+    "path": "DEPTH(calib.domain_balanced@v1)",
+    "artifact_digest": "e63a36e4e03bed659a6d742831dab1996b7c681d6cee27935496a6f53d63a0d7",
+    "d1_teacher_kl": 0.511239766528942,
+    "d2_root_teacher_topk_kl": 0.5111969017394147,
+    "d2_raw_union_kl": 0.5114494790171649,
+    "d2_objective": 0.436324411138057
+   },
+   {
+    "path": "DEPTH(calib.reasoning_heavy@v2)",
+    "artifact_digest": "e63a36e4e03bed659a6d742831dab1996b7c681d6cee27935496a6f53d63a0d7",
+    "d1_teacher_kl": 0.511239766528942,
+    "d2_root_teacher_topk_kl": 0.5111969017394147,
+    "d2_raw_union_kl": 0.5114494790171649,
+    "d2_objective": 0.436324411138057
+   }
+  ]
+ }
+}

@@ -926,8 +926,10 @@ STAGE_1 = [
         id="phase_d2",
         kind="experiment",
         stage_id="1",
-        status=("PREREGISTRATION v3 APPROVED 2026-10-14; ONE formal search "
-                "granted (scored_v1, Top-4); Stage W revision 2 PASS, adopted "
+        status=("FORMAL SEARCH COMPLETE 2026-10-15 (d2_search_20261015_051722: "
+                "92/92, 12 leaves, Top-4 committed and secured, $5.5364); "
+                "screening/confirmation NOT authorized; preregistration v3 "
+                "APPROVED 2026-10-14; Stage W revision 2 PASS, adopted "
                 "(revision 1 FAIL, closed); version 2 superseded before formal "
                 "search"),
         title="D2 — teacher Top-K confidence x union Top-K KL search",
@@ -945,6 +947,20 @@ STAGE_1 = [
         canonical_config=("logs/stages/stage-1/phase_d2/plans/"
                           "d2_preregistration_v3.json"),
         evidence=[
+            E("logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/"
+              "closeout/outcome.json",
+              "the D2 v3 formal search closeout: 92/92 expansions, 12 complete "
+              "leaves, the committed Top-4 with digests, products secured and "
+              "re-identified, provider teardown, $5.5364 all-in",
+              field="classification",
+              equals=("COMPLETE FORMAL SEARCH: 92/92 expansions, 12 complete "
+                      "leaves, Top-4 committed and secured")),
+            E("logs/stages/stage-1/families/d_series/analyses/"
+              "d2_search_evidence_review.md",
+              "the D2 search evidence review: Top-4 and ranking evidence, raw "
+              "vs weighted union KL, DEPTH reference attribution, beam "
+              "trajectory and timing, the four budget limits, integrity, "
+              "teardown and readiness for screening"),
             E("logs/stages/stage-1/phase_d2/plans/d2_preregistration_v3.json",
               "the versioned preregistration v3 (contract revision 8): "
               "objective, support and contract hashes, the three declared "

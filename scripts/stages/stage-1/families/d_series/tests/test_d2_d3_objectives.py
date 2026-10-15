@@ -501,15 +501,23 @@ class TestTheProgrammeScenarios:
         from stages.d_series import d2_budget as BUD
         return BUD.programme_scenarios(limits or self.LIMITS)
 
-    def test_reserves_are_counted_once_per_session(self):
+    def test_reserves_are_counted_once_per_session(self, monkeypatch):
         from stages.d_series import d2_budget as BUD
-        s = self._scen()
         b = BUD.build()["steps"]
-        expected = round(sum(b[k]["hard"]["all_in_usd"] + BUD.TEARDOWN_RESERVE_USD
-                             for k in ("d2_search", "d2_screening",
-                                       "d2_confirmation")), 2)
-        assert s["search_pricing"][s["search_pricing_in_force"]]["d2_block"][
-            "hard_with_reserves"] == expected
+        #: A COMPLETE D2 search is inside the live limits through its closeout,
+        #: so the D2 block plans only the sessions still ahead of it.
+        for searched, sessions in (
+                (None, ("d2_search", "d2_screening", "d2_confirmation")),
+                ({"run_id": "d2_search_x"}, ("d2_screening", "d2_confirmation"))):
+            monkeypatch.setattr(BUD, "completed_d2_search",
+                                lambda *a, _s=searched, **k: _s)
+            s = self._scen()
+            block = s["search_pricing"][s["search_pricing_in_force"]]["d2_block"]
+            assert block["sessions"] == sorted(sessions)
+            assert block["hard_with_reserves"] == round(sum(
+                b[k]["hard"]["all_in_usd"] + BUD.TEARDOWN_RESERVE_USD
+                for k in sessions), 2)
+            assert s["d2_search_completed"] == searched
         #: R0's and the calibration's reserves are INSIDE their grants, and a
         #: CLOSED campaign holds nothing: its recorded cost is already inside
         #: the live limits, so subtracting its grant would count it twice.
@@ -520,6 +528,25 @@ class TestTheProgrammeScenarios:
         for c in camps.values():
             if c["closed"]:
                 assert c["outstanding_usd"] == 0.0
+
+    def test_only_a_complete_search_closeout_counts_as_searched(self, tmp_path):
+        from stages.d_series import d2_budget as BUD
+        assert BUD.completed_d2_search(tmp_path) is None
+
+        def closeout(run_id: str, classification: str) -> None:
+            path = (tmp_path / "logs/stages/stage-1/phase_d2/runs" / run_id
+                    / "closeout/outcome.json")
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps({
+                "run_id": run_id, "classification": classification,
+                "money": {"all_in_usd": 5.5, "authorized_hard_usd": 23.7}}))
+
+        closeout("d2_search_a", "FAILED FORMAL SEARCH: stage C")
+        assert BUD.completed_d2_search(tmp_path) is None
+        closeout("d2_search_b", "COMPLETE FORMAL SEARCH: 92/92 expansions")
+        got = BUD.completed_d2_search(tmp_path)
+        assert got["run_id"] == "d2_search_b"
+        assert got["booked_all_in_usd"] == 5.5
 
     def test_the_reservation_rule_is_reported_not_assumed(self):
         for pricing in self._scen()["search_pricing"].values():

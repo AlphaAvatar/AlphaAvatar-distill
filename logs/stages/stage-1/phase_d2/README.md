@@ -5,11 +5,11 @@ Everything this experiment produced, in one place.
 | area | what it holds |
 | --- | --- |
 | [`plans/`](plans/) | protocol, preregistration, pricing — what was registered before running |
-| runs | registered from components; see the index |
+| [`runs/`](runs/) | one directory per execution attempt |
 
 ## Runs
 
-* none recorded
+* [`d2_search_20261015_051722`](runs/d2_search_20261015_051722/)
 
 Canonical list, always the index rather than this file.
 Nothing here authorizes anything.

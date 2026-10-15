@@ -1,0 +1,90 @@
+{
+  "root": "/workspace/aad/artifacts",
+  "created_utc": "2026-10-15T09:56:21+00:00",
+  "ok": true,
+  "specs": [
+    {
+      "artifact_class": "d2_search_record",
+      "pattern": "audit/autoinit_d2/d2_search.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 512,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "d2_stage1_selection",
+      "pattern": "audit/autoinit_d2/stage1_selection.json",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 256,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "d2_state_journal",
+      "pattern": "audit/autoinit_d2/search/states.jsonl",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "d2_search_telemetry",
+      "pattern": "audit/autoinit_d2/search/telemetry.jsonl",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    },
+    {
+      "artifact_class": "d2_search_journal",
+      "pattern": "audit/autoinit_d2/journal.jsonl",
+      "required": true,
+      "min_matches": 1,
+      "min_bytes": 1,
+      "lifecycle": "final_required"
+    }
+  ],
+  "entries": [
+    {
+      "path": "audit/autoinit_d2/d2_search.json",
+      "artifact_class": "d2_search_record",
+      "size_bytes": 20089,
+      "sha256": "c99b801ee432320f046c51af80f130e0e0915e610b19329459a5c2b5699aa40d",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_d2/stage1_selection.json",
+      "artifact_class": "d2_stage1_selection",
+      "size_bytes": 19883,
+      "sha256": "71a530b8c193128d9da42e28d532496a4566a790a619c78daa483803ec1f337b",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_d2/search/states.jsonl",
+      "artifact_class": "d2_state_journal",
+      "size_bytes": 117746986,
+      "sha256": "1a91541db17fa29eabdc5f6d6f435d2773e2bd050b168a38a90b1ffb9b091f85",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_d2/search/telemetry.jsonl",
+      "artifact_class": "d2_search_telemetry",
+      "size_bytes": 111431,
+      "sha256": "59ca70af90de102db4119c9796b245a1565de376a891a1f918282a5f7442e426",
+      "lifecycle": "final_required"
+    },
+    {
+      "path": "audit/autoinit_d2/journal.jsonl",
+      "artifact_class": "d2_search_journal",
+      "size_bytes": 1333,
+      "sha256": "d54722fa5b69dae395701399597f69ba7f4e5c0f095f61627764d4fdbcd511cb",
+      "lifecycle": "final_required"
+    }
+  ],
+  "missing": [],
+  "appended_during_archive": [],
+  "completion_markers": [],
+  "completion_marker_failures": [],
+  "still_being_written": [],
+  "final_streams_quiescent": true
+}

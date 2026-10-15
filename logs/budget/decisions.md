@@ -11309,3 +11309,45 @@ on a paid pod.
     above that range stops and needs a new decision.
 - **Not authorized:** D2 recovery, screening and confirmation; D3; a fresh
   confirmation; any promotion.
+
+## 2026-10-15 — D2 v3 formal search COMPLETE; programme re-derived from actual spend; screening not authorized
+
+- **Context.** The one D2 search granted on 2026-10-14 ran as
+  `d2_search_20261015_051722` (session commit `d64490ee`, scored_v1, L40S at
+  $1.09/h).
+  - It completed 92/92 expansions and 12 complete leaves, and committed the
+    preregistered Top-4 by the objective ranking with no lineage diversity.
+  - All four checkpoints were fetched off-pod and re-identified before the
+    teardown gate allowed deletion; their sha256 were recomputed on the dev
+    box.
+  - The provider confirms 0 pods.
+  - Closeout: `logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json`.
+  - Review: `logs/stages/stage-1/families/d_series/analyses/d2_search_evidence_review.md`.
+- **Cost.** $5.5364 all-in (GPU $5.2679 + 400 GB disk $0.2685, 289.98 min),
+  against $11.14 expected and the $23.6923 hard cap. The provider debit was
+  $5.5053; the larger derived figure is booked.
+  - After the session: formal remaining $122.4260; engineering $3.1804;
+    package $125.6064; project $118.4484 of $595.
+- **Decision (accounting, autonomous).** `d2_budget.programme_scenarios` now
+  carries a COMPLETE D2 search through its closeout (`d2_search_completed`)
+  instead of planning it again at its hard ceiling. Its actual cost is already
+  inside the live limits, so the old view counted it twice.
+  - D2 remaining = screening + confirmation = $29.98 at hard with reserves.
+  - After it, $88.47 remains against $68.16 for D3 plus a fresh confirmation.
+    The reservation holds with $20.31 to spare.
+- **Descriptive results (proxy only, not behaviour).**
+  - The Top-4 by the objective, by the raw union KL and by D1's PARETO_V1
+    (KL-only control) are the same four states (4/4). Across leaves,
+    Spearman(objective, raw union KL) = 0.993.
+  - The root reference changed DEPTH's first removed layer in 12/12 non-root
+    expansions. The weighting changed 13 of 112 greedy choices.
+  - The Top-4 is one lineage, WIDTH(dom) → DEPTH(dom), with removed layers
+    4 9 13 18 30 32 34 35.
+  - On D1's own state metric, D2's best leaf scores 7.2009 against D1's best
+    of 7.4341.
+- **Not authorized:** D2 recovery screening and confirmation; D3; a fresh
+  confirmation; any promotion. Each needs a separate maintainer grant.
+  - Screening also needs a D2 behavioural session chain first; D1's is bound
+    to D1.
+- **Revisit when** the maintainer decides on D2 screening. The frozen field is
+  four near-siblings.
