@@ -464,7 +464,7 @@ class TestPreservedWeightsSurviveAFailureAndAreReleasedOnSuccess:
             def say(self, *a, **k): pass
 
         ctx = Ctx()
-        mod.evidence_locations = lambda _c: [record]
+        mod.evidence_locations = lambda _c, _layout=None: [record]
         ok, note = mod.probes_evidence_secured(ctx, [])
         assert ok is False, (
             "a SCORED probe whose weights are not preserved off-pod must "
