@@ -11488,3 +11488,38 @@ on a paid pod.
   still covers the session's $19.4558 hard ceiling plus the $0.30 reserve.
 - **Revisit when** an AU-constrained attempt is refused or finds no capacity.
 
+## 2026-10-16 — D2 screening COMPLETE: c4 advances by the frozen rule; confirmation NOT recommended; stopped at the confirmation boundary
+
+- **Context.** Attempt 4, `d2_screening_20261015_203346`, ran on an admitted
+  AU host (`…@595.91.07`) under the $25.00 cumulative grant.
+  - All eight probes trained, generated, scored and verified off-pod; the
+    runtime and evaluation identities equal the shared protocol's.
+  - The pod was torn down and confirmed gone.
+  - Cost is $12.5212 all-in; the rung total over four attempts is $12.9730
+    ($12.0270 of the envelope unspent).
+- **Result** (owner `…/evidence/d2_screening_ranking.json`).
+  - The frozen rule advances **c4** (`3a4173e4…`), pooled correct 0.02765 vs
+    B's 0.02175 (Δ +0.0059). It leads c3 by 0.0006, and no candidate was
+    vetoed.
+  - All four candidates raise usable rollout over B by +7.5 to +10.4 points.
+    That is descriptive; the guardrail is veto-only.
+- **Budget.** The completed rung leaves the programme plan through the new
+  contract `families/d_series/screening_completion.py` (seven clauses, mutation
+  tested).
+  - Project remaining is $105.4754.
+  - D2 now holds only the confirmation, $8.51 at hard.
+  - After it, $96.97 remains against $66.45 for D3 plus a fresh confirmation.
+- **Recommendation (the maintainer's to decide).** Do not fund the shared
+  confirmation of c4.
+  - Its screening Δ (+0.0059) is already below the registered SESOI (0.01)
+    before winner's-curse shrinkage.
+  - q2 screened higher on these rows (+0.00825) and confirmed at −0.0004.
+  - The paired evidence is +3 and +7 net prompts of 850.
+  - The usable-rollout gain and the near-floor correctness (2–3% for every
+    arm) are inputs to a future preregistration, not a re-reading of this
+    one.
+- **Stopped at the confirmation authorization boundary.** Not started: the
+  shared confirmation; D3; a fresh confirmation; any promotion.
+- **Revisit when** the maintainer decides on the confirmation, or on what D3's
+  preregistration should measure.
+

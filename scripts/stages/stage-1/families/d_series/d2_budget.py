@@ -1428,6 +1428,54 @@ def completed_d2_search(repo_root: str | Path | None = None,
             "_inside_the_live_limits": True}
 
 
+D2_SCREENING_PATTERN = "d2_screening_*"
+
+
+def d2_screening_completion(repo_root: str | Path | None = None,
+                            spec: Any = None) -> dict[str, Any]:
+    """Every D2 screening attempt against `screening_completion`'s contract."""
+    from stages.d_series.screening_completion import (
+        ScreeningCompletionSpec, completion,
+    )
+    from stages.d_series.search_completion import budget_authority_booking
+    from stages.phase_d2 import d2_screening as SC
+    from stages.phase_d2 import d2_screening_authorization as A
+
+    root = Path(repo_root) if repo_root else REPO_ROOT
+    if spec is None:
+        contract = SC.session_contract(root, verify_bytes=False)
+        spec = ScreeningCompletionSpec(
+            experiment_id=SC.EXPERIMENT_ID,
+            closeout_schema="aadistill.phase_d2.screening_closeout/v1",
+            contract_hash=SC.contract_hash(contract),
+            probe_ids=tuple(p["probe_id"] for p in contract["probes"]),
+            load_authorization=A.D2ScreeningAuthorization.load,
+            ranking_filename="d2_screening_ranking.json",
+            disk_gb=int(A.session_ceiling(root)["container_disk_gb"]),
+            booked_cost=budget_authority_booking(root),
+            attempt_cost=A._subrun_cost)
+    return completion(root / D2_SEARCH_RUNS, spec,
+                      pattern=D2_SCREENING_PATTERN)
+
+
+def completed_d2_screening(repo_root: str | Path | None = None,
+                           spec: Any = None) -> dict[str, Any] | None:
+    """The one screening attempt satisfying EVERY clause, else None (the
+    screening's hard ceiling stays reserved)."""
+    status = d2_screening_completion(repo_root, spec)
+    done = status["complete"]
+    if done is None:
+        return None
+    return {"run_id": done["run_id"],
+            "closeout": f"{D2_SEARCH_RUNS}/{done['run_id']}/closeout/outcome.json",
+            "booked_all_in_usd": done["booked_all_in_usd"],
+            "authorized_hard_usd": done["authorized_hard_usd"],
+            "contract": {"clauses": done["clauses"], "all_satisfied": True,
+                         "owner": "scripts/stages/stage-1/families/d_series/"
+                                  "screening_completion.py"},
+            "_inside_the_live_limits": True}
+
+
 def d1_priced_confirmation(rate: float) -> dict[str, Any]:
     """A fresh independent confirmation priced as D1's: 2 arms x 3 seeds.
 
@@ -1528,10 +1576,17 @@ def programme_scenarios(limits: dict[str, float],
     search = steps["d2_search"]
     searched = completed_d2_search()
     contract = d2_search_completion()
+    screened = completed_d2_screening()
+    screening_contract = d2_screening_completion()
+    #: D3 runs its own screening and confirmation whatever D2 has completed.
+    behaviour_hard = {
+        "d2_screening": steps["d2_screening"]["hard"]["all_in_usd"],
+        "d2_confirmation": steps["d2_confirmation"]["hard"]["all_in_usd"]}
 
     def under(search_hard_usd: float) -> dict[str, Any]:
-        hard = {"d2_screening": steps["d2_screening"]["hard"]["all_in_usd"],
-                "d2_confirmation": steps["d2_confirmation"]["hard"]["all_in_usd"]}
+        hard = dict(behaviour_hard)
+        if screened is not None:
+            hard.pop("d2_screening")
         if searched is None:
             hard = {"d2_search": search_hard_usd, **hard}
         block = {"expected": round(sum(steps[n]["expected"]["all_in_usd"]
@@ -1548,7 +1603,7 @@ def programme_scenarios(limits: dict[str, float],
         d3_search_hard = (search["d3_search_for_programme_view"]["hard"]
                           ["all_in_usd"] + (search_hard_usd
                                             - search["hard"]["all_in_usd"]))
-        d3_hard = dict(hard, d2_search=d3_search_hard)
+        d3_hard = dict(behaviour_hard, d2_search=d3_search_hard)
         d3_block = {"expected": round(
                         search["d3_search_for_programme_view"]["expected"][
                             "all_in_usd"]
@@ -1642,6 +1697,16 @@ def programme_scenarios(limits: dict[str, float],
                      "satisfies every clause of stages.d_series."
                      "search_completion; otherwise its hard ceiling stays "
                      "reserved")},
+        "d2_screening_completed": screened,
+        "d2_screening_contract": {
+            "runs": [{"run_id": r["run_id"], "complete": r["complete"],
+                      "failed_clauses": r["failed_clauses"]}
+                     for r in screening_contract["runs"]],
+            "contradictions": screening_contract["contradictions"],
+            "rule": ("the screening rung leaves the plan only when exactly "
+                     "one attempt satisfies every clause of stages.d_series."
+                     "screening_completion and every other attempt's cost is "
+                     "known; otherwise its hard ceiling stays reserved")},
         "fresh_confirmation": fresh_block,
         "reservation_rule": (
             "authorize D2's formal sessions only if the project remainder "

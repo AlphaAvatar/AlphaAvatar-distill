@@ -379,6 +379,451 @@
       "utc": "2026-10-15T21:47:31+00:00",
       "elapsed_min": 7.05,
       "msg": "driver detached, pid 3291, confirmed by descriptor_probe \u2014 $0.13"
+    },
+    {
+      "utc": "2026-10-15T21:49:41+00:00",
+      "elapsed_min": 9.21,
+      "msg": "  2026-10-15T21:47:29Z MARKER:DRIVER_START \u2014 $0.17"
+    },
+    {
+      "utc": "2026-10-15T22:53:03+00:00",
+      "elapsed_min": 72.58,
+      "msg": "  trained-unscored d2_screening_c1_s516448251: preserved and verified (e7f181aeffff)"
+    },
+    {
+      "utc": "2026-10-15T22:53:03+00:00",
+      "elapsed_min": 72.58,
+      "msg": "  probe d2_screening_c1_s516448251: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-15T22:53:03+00:00",
+      "elapsed_min": 72.58,
+      "msg": "  probe d2_screening_c1_s516448251: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-15T22:53:05+00:00",
+      "elapsed_min": 72.62,
+      "msg": "  secured d2_screening_attested_protocol.json"
+    },
+    {
+      "utc": "2026-10-15T22:53:08+00:00",
+      "elapsed_min": 72.67,
+      "msg": "  secured engine_probe.json"
+    },
+    {
+      "utc": "2026-10-15T23:10:53+00:00",
+      "elapsed_min": 90.43,
+      "msg": "  probe d2_screening_c1_s516448251: secured result.json"
+    },
+    {
+      "utc": "2026-10-15T23:10:57+00:00",
+      "elapsed_min": 90.49,
+      "msg": "  probe d2_screening_c1_s516448251: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-15T23:11:00+00:00",
+      "elapsed_min": 90.53,
+      "msg": "  probe d2_screening_c1_s516448251: secured admission.json"
+    },
+    {
+      "utc": "2026-10-15T23:11:12+00:00",
+      "elapsed_min": 90.73,
+      "msg": "  probe d2_screening_c1_s516448251: secured generations"
+    },
+    {
+      "utc": "2026-10-15T23:11:19+00:00",
+      "elapsed_min": 90.86,
+      "msg": "  probe d2_screening_c1_s516448251: release ack delivered"
+    },
+    {
+      "utc": "2026-10-15T23:13:36+00:00",
+      "elapsed_min": 93.14,
+      "msg": "  probe d2_screening_c1_s516448251: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-16T00:17:10+00:00",
+      "elapsed_min": 156.7,
+      "msg": "  trained-unscored d2_screening_c1_s614923639: preserved and verified (6cd797827fc9)"
+    },
+    {
+      "utc": "2026-10-16T00:17:10+00:00",
+      "elapsed_min": 156.7,
+      "msg": "  probe d2_screening_c1_s614923639: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-16T00:17:10+00:00",
+      "elapsed_min": 156.7,
+      "msg": "  probe d2_screening_c1_s614923639: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-16T00:34:56+00:00",
+      "elapsed_min": 174.46,
+      "msg": "  probe d2_screening_c1_s614923639: secured result.json"
+    },
+    {
+      "utc": "2026-10-16T00:34:59+00:00",
+      "elapsed_min": 174.53,
+      "msg": "  probe d2_screening_c1_s614923639: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-16T00:35:02+00:00",
+      "elapsed_min": 174.57,
+      "msg": "  probe d2_screening_c1_s614923639: secured admission.json"
+    },
+    {
+      "utc": "2026-10-16T00:35:17+00:00",
+      "elapsed_min": 174.81,
+      "msg": "  probe d2_screening_c1_s614923639: secured generations"
+    },
+    {
+      "utc": "2026-10-16T00:35:24+00:00",
+      "elapsed_min": 174.94,
+      "msg": "  probe d2_screening_c1_s614923639: release ack delivered"
+    },
+    {
+      "utc": "2026-10-16T00:37:43+00:00",
+      "elapsed_min": 177.25,
+      "msg": "  probe d2_screening_c1_s614923639: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-16T01:41:12+00:00",
+      "elapsed_min": 240.74,
+      "msg": "  trained-unscored d2_screening_c2_s516448251: preserved and verified (391a589695d7)"
+    },
+    {
+      "utc": "2026-10-16T01:41:12+00:00",
+      "elapsed_min": 240.74,
+      "msg": "  probe d2_screening_c2_s516448251: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-16T01:41:12+00:00",
+      "elapsed_min": 240.74,
+      "msg": "  probe d2_screening_c2_s516448251: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-16T01:58:59+00:00",
+      "elapsed_min": 258.51,
+      "msg": "  probe d2_screening_c2_s516448251: secured result.json"
+    },
+    {
+      "utc": "2026-10-16T01:59:03+00:00",
+      "elapsed_min": 258.58,
+      "msg": "  probe d2_screening_c2_s516448251: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-16T01:59:05+00:00",
+      "elapsed_min": 258.62,
+      "msg": "  probe d2_screening_c2_s516448251: secured admission.json"
+    },
+    {
+      "utc": "2026-10-16T01:59:17+00:00",
+      "elapsed_min": 258.83,
+      "msg": "  probe d2_screening_c2_s516448251: secured generations"
+    },
+    {
+      "utc": "2026-10-16T01:59:21+00:00",
+      "elapsed_min": 258.89,
+      "msg": "  probe d2_screening_c2_s516448251: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-16T01:59:26+00:00",
+      "elapsed_min": 258.98,
+      "msg": "  probe d2_screening_c2_s516448251: release ack delivered"
+    },
+    {
+      "utc": "2026-10-16T03:05:07+00:00",
+      "elapsed_min": 324.66,
+      "msg": "  trained-unscored d2_screening_c2_s614923639: preserved and verified (53ab97422ec8)"
+    },
+    {
+      "utc": "2026-10-16T03:05:07+00:00",
+      "elapsed_min": 324.66,
+      "msg": "  probe d2_screening_c2_s614923639: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-16T03:05:07+00:00",
+      "elapsed_min": 324.66,
+      "msg": "  probe d2_screening_c2_s614923639: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-16T03:25:06+00:00",
+      "elapsed_min": 344.64,
+      "msg": "  probe d2_screening_c2_s614923639: secured result.json"
+    },
+    {
+      "utc": "2026-10-16T03:25:11+00:00",
+      "elapsed_min": 344.71,
+      "msg": "  probe d2_screening_c2_s614923639: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-16T03:25:13+00:00",
+      "elapsed_min": 344.76,
+      "msg": "  probe d2_screening_c2_s614923639: secured admission.json"
+    },
+    {
+      "utc": "2026-10-16T03:25:25+00:00",
+      "elapsed_min": 344.96,
+      "msg": "  probe d2_screening_c2_s614923639: secured generations"
+    },
+    {
+      "utc": "2026-10-16T03:25:29+00:00",
+      "elapsed_min": 345.02,
+      "msg": "  probe d2_screening_c2_s614923639: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-16T03:25:34+00:00",
+      "elapsed_min": 345.11,
+      "msg": "  probe d2_screening_c2_s614923639: release ack delivered"
+    },
+    {
+      "utc": "2026-10-16T04:31:19+00:00",
+      "elapsed_min": 410.85,
+      "msg": "  trained-unscored d2_screening_c3_s516448251: preserved and verified (225e6ab63d9e)"
+    },
+    {
+      "utc": "2026-10-16T04:31:19+00:00",
+      "elapsed_min": 410.85,
+      "msg": "  probe d2_screening_c3_s516448251: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-16T04:31:19+00:00",
+      "elapsed_min": 410.85,
+      "msg": "  probe d2_screening_c3_s516448251: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-16T04:44:39+00:00",
+      "elapsed_min": 424.19,
+      "msg": "  probe d2_screening_c3_s516448251: secured result.json"
+    },
+    {
+      "utc": "2026-10-16T04:44:43+00:00",
+      "elapsed_min": 424.25,
+      "msg": "  probe d2_screening_c3_s516448251: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-16T04:44:46+00:00",
+      "elapsed_min": 424.3,
+      "msg": "  probe d2_screening_c3_s516448251: secured admission.json"
+    },
+    {
+      "utc": "2026-10-16T04:44:58+00:00",
+      "elapsed_min": 424.5,
+      "msg": "  probe d2_screening_c3_s516448251: secured generations"
+    },
+    {
+      "utc": "2026-10-16T04:45:02+00:00",
+      "elapsed_min": 424.56,
+      "msg": "  probe d2_screening_c3_s516448251: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-16T04:45:07+00:00",
+      "elapsed_min": 424.65,
+      "msg": "  probe d2_screening_c3_s516448251: release ack delivered"
+    },
+    {
+      "utc": "2026-10-16T05:50:52+00:00",
+      "elapsed_min": 490.41,
+      "msg": "  trained-unscored d2_screening_c3_s614923639: preserved and verified (7fce338d5627)"
+    },
+    {
+      "utc": "2026-10-16T05:50:52+00:00",
+      "elapsed_min": 490.41,
+      "msg": "  probe d2_screening_c3_s614923639: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-16T05:50:52+00:00",
+      "elapsed_min": 490.41,
+      "msg": "  probe d2_screening_c3_s614923639: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-16T06:08:44+00:00",
+      "elapsed_min": 508.27,
+      "msg": "  probe d2_screening_c3_s614923639: secured result.json"
+    },
+    {
+      "utc": "2026-10-16T06:08:48+00:00",
+      "elapsed_min": 508.33,
+      "msg": "  probe d2_screening_c3_s614923639: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-16T06:08:50+00:00",
+      "elapsed_min": 508.38,
+      "msg": "  probe d2_screening_c3_s614923639: secured admission.json"
+    },
+    {
+      "utc": "2026-10-16T06:09:03+00:00",
+      "elapsed_min": 508.58,
+      "msg": "  probe d2_screening_c3_s614923639: secured generations"
+    },
+    {
+      "utc": "2026-10-16T06:09:10+00:00",
+      "elapsed_min": 508.7,
+      "msg": "  probe d2_screening_c3_s614923639: release ack delivered"
+    },
+    {
+      "utc": "2026-10-16T06:11:27+00:00",
+      "elapsed_min": 510.99,
+      "msg": "  probe d2_screening_c3_s614923639: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-16T07:14:59+00:00",
+      "elapsed_min": 574.51,
+      "msg": "  trained-unscored d2_screening_c4_s516448251: preserved and verified (86260d5833b5)"
+    },
+    {
+      "utc": "2026-10-16T07:14:59+00:00",
+      "elapsed_min": 574.51,
+      "msg": "  probe d2_screening_c4_s516448251: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-16T07:14:59+00:00",
+      "elapsed_min": 574.51,
+      "msg": "  probe d2_screening_c4_s516448251: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-16T07:32:46+00:00",
+      "elapsed_min": 592.29,
+      "msg": "  probe d2_screening_c4_s516448251: secured result.json"
+    },
+    {
+      "utc": "2026-10-16T07:32:49+00:00",
+      "elapsed_min": 592.36,
+      "msg": "  probe d2_screening_c4_s516448251: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-16T07:32:52+00:00",
+      "elapsed_min": 592.4,
+      "msg": "  probe d2_screening_c4_s516448251: secured admission.json"
+    },
+    {
+      "utc": "2026-10-16T07:33:04+00:00",
+      "elapsed_min": 592.6,
+      "msg": "  probe d2_screening_c4_s516448251: secured generations"
+    },
+    {
+      "utc": "2026-10-16T07:33:08+00:00",
+      "elapsed_min": 592.67,
+      "msg": "  probe d2_screening_c4_s516448251: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-16T07:33:13+00:00",
+      "elapsed_min": 592.75,
+      "msg": "  probe d2_screening_c4_s516448251: release ack delivered"
+    },
+    {
+      "utc": "2026-10-16T08:38:59+00:00",
+      "elapsed_min": 658.51,
+      "msg": "  trained-unscored d2_screening_c4_s614923639: preserved and verified (500ec8186e02)"
+    },
+    {
+      "utc": "2026-10-16T08:38:59+00:00",
+      "elapsed_min": 658.51,
+      "msg": "  probe d2_screening_c4_s614923639: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-16T08:38:59+00:00",
+      "elapsed_min": 658.51,
+      "msg": "  probe d2_screening_c4_s614923639: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-16T08:52:19+00:00",
+      "elapsed_min": 671.86,
+      "msg": "  probe d2_screening_c4_s614923639: secured result.json"
+    },
+    {
+      "utc": "2026-10-16T08:52:23+00:00",
+      "elapsed_min": 671.92,
+      "msg": "  probe d2_screening_c4_s614923639: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-16T08:52:26+00:00",
+      "elapsed_min": 671.97,
+      "msg": "  probe d2_screening_c4_s614923639: secured admission.json"
+    },
+    {
+      "utc": "2026-10-16T08:52:38+00:00",
+      "elapsed_min": 672.17,
+      "msg": "  probe d2_screening_c4_s614923639: secured generations"
+    },
+    {
+      "utc": "2026-10-16T08:52:45+00:00",
+      "elapsed_min": 672.29,
+      "msg": "  probe d2_screening_c4_s614923639: release ack delivered"
+    },
+    {
+      "utc": "2026-10-16T08:54:58+00:00",
+      "elapsed_min": 674.51,
+      "msg": "  2026-10-16T08:53:37Z MARKER:ALL_DONE \u2014 $12.25"
+    },
+    {
+      "utc": "2026-10-16T08:54:58+00:00",
+      "elapsed_min": 674.51,
+      "msg": "polling ended: ALL_DONE \u2014 $12.25"
+    },
+    {
+      "utc": "2026-10-16T08:58:51+00:00",
+      "elapsed_min": 678.38,
+      "msg": "  manifest rc=0\n252 file(s) across 11 class(es) -> /workspace/manifest.json\n  final_required: 252 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-10-16T08:59:15+00:00",
+      "elapsed_min": 678.79,
+      "msg": "  probe d2_screening_c4_s614923639: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-16T08:59:15+00:00",
+      "elapsed_min": 678.79,
+      "msg": "  probe d2_screening_c1_s516448251: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-16T08:59:15+00:00",
+      "elapsed_min": 678.79,
+      "msg": "  probe d2_screening_c1_s614923639: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-16T08:59:16+00:00",
+      "elapsed_min": 678.79,
+      "msg": "  probe d2_screening_c2_s516448251: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-16T08:59:16+00:00",
+      "elapsed_min": 678.8,
+      "msg": "  probe d2_screening_c2_s614923639: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-16T08:59:16+00:00",
+      "elapsed_min": 678.8,
+      "msg": "  probe d2_screening_c3_s516448251: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-16T08:59:16+00:00",
+      "elapsed_min": 678.8,
+      "msg": "  probe d2_screening_c3_s614923639: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-16T08:59:16+00:00",
+      "elapsed_min": 678.8,
+      "msg": "  probe d2_screening_c4_s516448251: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-16T08:59:16+00:00",
+      "elapsed_min": 678.81,
+      "msg": "  probe d2_screening_c4_s614923639: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-16T08:59:16+00:00",
+      "elapsed_min": 678.81,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-10-16T08:59:16+00:00",
+      "elapsed_min": 678.81,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-10-16T08:59:28+00:00",
+      "elapsed_min": 678.99,
+      "msg": "pod deleted \u2014 679.0 min, $12.34; provider confirms gone: True"
     }
   ],
   "stages": {
@@ -1268,5 +1713,548 @@
     "started_utc": "2026-10-15T21:47:29Z",
     "start_channel_closed": true,
     "confirmed_by": "descriptor_probe"
-  }
+  },
+  "probe_evidence_read_from": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/relay/d2_screening.json",
+  "probe_evidence_secured": {
+    "d2_screening_c1_s516448251": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    },
+    "d2_screening_c1_s614923639": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    },
+    "d2_screening_c2_s516448251": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    },
+    "d2_screening_c2_s614923639": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    },
+    "d2_screening_c3_s516448251": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    },
+    "d2_screening_c3_s614923639": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    },
+    "d2_screening_c4_s516448251": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    },
+    "d2_screening_c4_s614923639": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    }
+  },
+  "trained_unscored_preserved": {
+    "d2_screening_c1_s516448251": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "e7f181aeffffaf5c8aadf50019187e336a4681243c650942b0f66474cbd66a91",
+      "arrived_sha256": "e7f181aeffffaf5c8aadf50019187e336a4681243c650942b0f66474cbd66a91",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/products/trained_unscored/d2_screening_c1_s516448251",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d2_screening_c1_s614923639": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "6cd797827fc9a57a58ce033ccbea21c641e2d4d73e5d681d208570abe8bb2d90",
+      "arrived_sha256": "6cd797827fc9a57a58ce033ccbea21c641e2d4d73e5d681d208570abe8bb2d90",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/products/trained_unscored/d2_screening_c1_s614923639",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d2_screening_c2_s516448251": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "391a589695d7a1417055279ed3b852a1165712b04764988ae7914059a72fc83a",
+      "arrived_sha256": "391a589695d7a1417055279ed3b852a1165712b04764988ae7914059a72fc83a",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/products/trained_unscored/d2_screening_c2_s516448251",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d2_screening_c2_s614923639": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "53ab97422ec8aad2ad911b17a41ff6f8e2c722ebfa509a5db648bec394bb657a",
+      "arrived_sha256": "53ab97422ec8aad2ad911b17a41ff6f8e2c722ebfa509a5db648bec394bb657a",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/products/trained_unscored/d2_screening_c2_s614923639",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d2_screening_c3_s516448251": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "225e6ab63d9e541b2af2bc632895dcac5ffa65d4e6e48d5b5c4074d4ee6c7d78",
+      "arrived_sha256": "225e6ab63d9e541b2af2bc632895dcac5ffa65d4e6e48d5b5c4074d4ee6c7d78",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/products/trained_unscored/d2_screening_c3_s516448251",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d2_screening_c3_s614923639": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "7fce338d56276d65fe02e3ef9535f471522c54e671472468d2f7b7e548c80718",
+      "arrived_sha256": "7fce338d56276d65fe02e3ef9535f471522c54e671472468d2f7b7e548c80718",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/products/trained_unscored/d2_screening_c3_s614923639",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d2_screening_c4_s516448251": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "86260d5833b5bd8081d8c6bfbaed7500c101f5dd4b3a434f634c1e2b8900e5f7",
+      "arrived_sha256": "86260d5833b5bd8081d8c6bfbaed7500c101f5dd4b3a434f634c1e2b8900e5f7",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/products/trained_unscored/d2_screening_c4_s516448251",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d2_screening_c4_s614923639": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "500ec8186e02b8dea54b594bf1dc2be3fc93d6e61b04c4d6efcb88668e133e78",
+      "arrived_sha256": "500ec8186e02b8dea54b594bf1dc2be3fc93d6e61b04c4d6efcb88668e133e78",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/products/trained_unscored/d2_screening_c4_s614923639",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    }
+  },
+  "training_records_secured": {
+    "d2_screening_c1_s516448251": {
+      "run_manifest.json": "309ade86523866cf94ad666ac1b5fa4e37e3ea670c0d357712842b59e1b9aeb2",
+      "run_completion.json": "a5a0cb482555aa8dd41f3b592b7a02535b8d9702201270e5de6e3fffa4996ac3"
+    },
+    "d2_screening_c1_s614923639": {
+      "run_manifest.json": "d5fbdcb759f6273f7e5bd28ada2ad61656780c862156d7ed6ccd45aa87092a8f",
+      "run_completion.json": "dd7a36d5c20e6117fd01263dc427701063233c6ba59e864fcb7318cde326160b"
+    },
+    "d2_screening_c2_s516448251": {
+      "run_manifest.json": "f31d7bc4a420534d9d0f72175c1b01e3ed81b56305767c8fff5a820bcb2cc4c0",
+      "run_completion.json": "10bb4006a31c92a6a2e5f515ab6978860c3497c39091427de192715ca375b6ca"
+    },
+    "d2_screening_c2_s614923639": {
+      "run_manifest.json": "ec1aedfcb599b41b0b8792099857784f7d67c4ed56b8dc94664e8a4b996b803d",
+      "run_completion.json": "7c58a028e15c33275fc716a958d60085c06480c5b18c38a04f7429d5d60d2ee7"
+    },
+    "d2_screening_c3_s516448251": {
+      "run_manifest.json": "e8251f44dd0bd2ba59e27d8927faf7c77c3592f7b9afd81613650aad2b11f938",
+      "run_completion.json": "43d779de598f2132fa9b62765657b58c9c9eec17d637fd745e43c57fedfaad4d"
+    },
+    "d2_screening_c3_s614923639": {
+      "run_manifest.json": "6a7a59079b4099b5fc94990c84569960748d8c422e50095b511be145fab395aa",
+      "run_completion.json": "ecab4368e4f3fc2b23d726124621b76e7f9e1e8b37dd2a387add76b9fe18ba25"
+    },
+    "d2_screening_c4_s516448251": {
+      "run_manifest.json": "462b020d5bc6b63d2aefc24653b400695fe5e360b89a4208786db5594c22b722",
+      "run_completion.json": "5512219c70ca1b88bcdcb86b57ce5643dda8ebf48ac898eb6d3747193845cc1d"
+    },
+    "d2_screening_c4_s614923639": {
+      "run_manifest.json": "6f090be2c0900e180a796be7bc2782fb14677781665aa4bea3550a1cce9a4549",
+      "run_completion.json": "6876b5cd805c1b1ecc14c414988410ab8d1cbe2fff2257cc1e54f8e5df1a2502"
+    }
+  },
+  "release_acks": [
+    {
+      "probe_id": "d2_screening_c1_s516448251",
+      "delivered": true
+    },
+    {
+      "probe_id": "d2_screening_c1_s614923639",
+      "delivered": true
+    },
+    {
+      "probe_id": "d2_screening_c2_s516448251",
+      "delivered": true
+    },
+    {
+      "probe_id": "d2_screening_c2_s614923639",
+      "delivered": true
+    },
+    {
+      "probe_id": "d2_screening_c3_s516448251",
+      "delivered": true
+    },
+    {
+      "probe_id": "d2_screening_c3_s614923639",
+      "delivered": true
+    },
+    {
+      "probe_id": "d2_screening_c4_s516448251",
+      "delivered": true
+    },
+    {
+      "probe_id": "d2_screening_c4_s614923639",
+      "delivered": true
+    }
+  ],
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "fetched_reports": [
+    "d2_screening.json"
+  ],
+  "checkpoints_fetched": [
+    {
+      "probe_id": "d2_screening_c1_s516448251",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    },
+    {
+      "probe_id": "d2_screening_c1_s614923639",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    },
+    {
+      "probe_id": "d2_screening_c2_s516448251",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    },
+    {
+      "probe_id": "d2_screening_c2_s614923639",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    },
+    {
+      "probe_id": "d2_screening_c3_s516448251",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    },
+    {
+      "probe_id": "d2_screening_c3_s614923639",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    },
+    {
+      "probe_id": "d2_screening_c4_s516448251",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    },
+    {
+      "probe_id": "d2_screening_c4_s614923639",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    }
+  ],
+  "required_products_secured": {
+    "ok": true,
+    "why": "all 8 scored probes' results and per-sample rows off-pod; 8 trained checkpoint(s) preserved and identity-verified, reusable by a replacement attempt"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 252,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 678.99,
+    "actual_usd": 12.3351,
+    "authorized_usd": 19.4558,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-16T08:59:28+00:00"
 }

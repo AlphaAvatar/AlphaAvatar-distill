@@ -9,10 +9,10 @@ What a finished screening session owes the repository, in one command:
 
 1. the SMALL evidence copied into the run directory -- the driver's session
    record, the attested protocol and engine probe, and per probe the result,
-   admission, training records (run manifest, completion record) and the
-   rescoring diagnostic. The per-sample rows, raw generations and preserved
-   checkpoints stay in the durable store `<scr>/store`, named here with their
-   sha256;
+   admission and training records (run manifest, completion record, train
+   log). The per-sample rows, raw generations, per-sample rescoring rows and
+   preserved checkpoints stay in the durable store `<scr>/store`, named here
+   with their sha256;
 2. the RANKING, by `rank_d2_screening.rank_run` -- the frozen rule against B's
    imported units, refusing a field any unit of which fails verification;
 3. the DIAGNOSTICS, descriptive only and never read by the rule: per probe the
@@ -76,7 +76,6 @@ def evidence_plan(run_dir: Path, scr: Path, record: dict[str, Any]
         src = store / "probes" / pid
         plan += [(src / "result.json", ev / "results" / f"{pid}.json"),
                  (src / "admission.json", ev / "admissions" / f"{pid}.json"),
-                 (src / "rescoring.json", ev / "rescoring" / f"{pid}.json"),
                  (store / "extracted" / "audit" / AUDIT / "configs"
                   / f"{pid}.json", ev / "configs" / f"{pid}.json")]
         plan += [(src / "training" / name, ev / "training" / pid / name)
@@ -106,9 +105,48 @@ def durable_store(scr: Path, record: dict[str, Any]) -> dict[str, Any]:
                             sorted((result.get("generations") or {}).items())},
             "generations_present": sorted(
                 p.name for p in (src / "generations").glob("*.jsonl")),
+            "rescoring_sha256": _sha(src / "rescoring.json"),
             "trained_sha256": probe.get("trained_sha256"),
             "trained_bytes": probe.get("trained_bytes")}
     return {"path": str(scr), "probes": out}
+
+
+def rollout_profile(gen_dir: Path) -> dict[str, Any]:
+    """Text-level rollout behaviour of one unit, from its stored generations.
+
+    DESCRIPTIVE ONLY: length, natural termination, context-limit hits and
+    degeneration, as the generator recorded them per sample (P18)."""
+    rows = []
+    for path in sorted(gen_dir.glob("*.generations.jsonl")):
+        rows += [json.loads(x) for x in path.read_text().splitlines()
+                 if x.strip()]
+    if not rows:
+        return {"n": 0}
+    toks = sorted(int(r.get("generated_tokens") or 0) for r in rows)
+    rate = lambda key: round(sum(1 for r in rows if r.get(key))  # noqa: E731
+                             / len(rows), 4)
+    return {"n": len(rows),
+            "generated_tokens_mean": round(statistics.fmean(toks), 1),
+            "generated_tokens_median": statistics.median(toks),
+            "generated_tokens_p90": toks[int(0.9 * (len(toks) - 1))],
+            "natural_termination_rate": rate("natural_termination"),
+            "context_limit_rate": rate("context_limit_reached"),
+            "degeneration_rate": rate("degeneration_triggered")}
+
+
+def reference_profiles(repo_root: Path) -> dict[str, Any]:
+    """B's and q2's imported screening units, from D1's durable store."""
+    from stages.d_series import shared_evaluation as SE
+    from stages.phase_d2 import d2_screening as SC
+
+    store = SE.durable_store(SC.SHARED_RUNG, repo_root) / "store" / "probes"
+    out = {}
+    for unit in SE.historical_units(repo_root):
+        if unit.rung == SC.SHARED_RUNG:
+            out[unit.probe_id] = {"arm": unit.arm, "seed": unit.seed,
+                                  **rollout_profile(store / unit.probe_id
+                                                    / "generations")}
+    return out
 
 
 def diagnostics(scr: Path, record: dict[str, Any]) -> dict[str, Any]:
@@ -142,7 +180,11 @@ def diagnostics(scr: Path, record: dict[str, Any]) -> dict[str, Any]:
                 "mean_over_samples_of_position_means": means,
                 "thresholds_from": doc.get("thresholds_from")})
         probes[pid] = row
+    for probe in record.get("probes", []):
+        probes[probe["probe_id"]]["rollout_profile"] = rollout_profile(
+            scr / "store" / "probes" / probe["probe_id"] / "generations")
     return {"schema": "aadistill.phase_d2.screening_diagnostics/v1",
+            "reference_rollout_profiles": reference_profiles(REPO_ROOT),
             "_role": ("DESCRIPTIVE ONLY. Never read by the screening rule, "
                       "never a guardrail: the token-id sidecar's alignment "
                       "and the rescoring of each candidate's own rollouts "

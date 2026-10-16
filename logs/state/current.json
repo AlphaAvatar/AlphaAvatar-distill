@@ -29,20 +29,20 @@
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
   "_owner": "derived by scripts/maintenance/consolidation/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
-  "_package_spent_usd": 156.5718,
+  "_package_spent_usd": 169.093,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 595.0,
-  "cumulative_spend_usd": 477.0034,
+  "cumulative_spend_usd": 489.5246,
   "engineering_remaining_usd": 3.1804,
-  "formal_remaining_usd": 121.9742,
-  "full_ceiling_sessions_fundable": 4,
+  "formal_remaining_usd": 109.453,
+  "full_ceiling_sessions_fundable": 3,
   "ledger": "logs/budget/ledger.md",
-  "package_remaining_usd": 125.1546,
+  "package_remaining_usd": 112.6334,
   "per_session_ceiling_usd": 30.0,
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 117.9966,
+  "remaining_usd": 105.4754,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -75,7 +75,7 @@
   "authorizes": "nothing",
   "behavioural_design": "D1 (complete): Top-4, 10 + 6 probes, owner d1_design.json. D2: shared protocol, K=4 prepared, 8 + 3 probes, no B/q2 training, owner families/d_series/plans/d2_budget_v1.json.",
   "behavioural_pricing": "Owner: d1_design.json :: budget.chain; attempt bounds: the run's governance/authorization.json :: money.attempt_bounds.",
-  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2 v3: search COMPLETE; screening GRANTED conditionally ($25.00 cumulative, approvals/autoinit_d2_screening_grant.json); the three $0 repairs are done. Owner: decisions.md 2026-10-15.",
+  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2: search COMPLETE; screening COMPLETE (c4 advances; confirmation not recommended; awaiting the maintainer). Owner: decisions.md 2026-10-16.",
   "d2_owed_engineering": "none at $0; the screening chain is built (d2_screening_readiness_review.md).",
   "execution_wiring": "D1 COMPLETE and CLOSED. D2 v3 search COMPLETE: phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
@@ -127,10 +127,10 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "D2 screening: issue the one-use authorization on the executable commit, stage, dry-run, launch; rank off-pod; stop at the confirmation boundary. Owner: decisions.md 2026-10-15.",
+ "next": "Maintainer decision: fund the D2 shared confirmation of c4 or not (recommendation: not). Owner: d2_screening_result_review.md.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "Run the granted D2 screening (8 probes, $25 cumulative); rank off-pod; stop at the confirmation boundary. Confirmation and D3 are granted separately.",
+  "next_work": "Await the confirmation decision; D3's preregistration is the next design question. Each is granted separately.",
   "not_next": "no paid resource without its own grant; no retraining or regeneration of B/q2; no rerun of D1 or change to its records; no third KL-only search. Owner: decisions.md 2026-10-13.",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 COMPLETE / NO-GO (q2 did not confirm; B stands).",
   "then": "nothing is queued."
@@ -200,12 +200,12 @@
   "logs/README.md -- START HERE, the index"
  ],
  "running": {
-  "_verified": "launcher log 2026-10-15 21:49 UTC: pod 7stah5j2s98e69 (AU, @595.91.07) admitted, setup done, driver started; runtime digest equals the protocol's",
+  "_verified": "provider query 2026-10-16 ~09:05 UTC: 0 pods, $0/h; last pod 7stah5j2s98e69 deleted 08:59:28Z, provider confirms gone",
   "network_volumes": 0,
-  "paid_compute": true,
-  "pod_id": "7stah5j2s98e69",
-  "pods": 1,
-  "run_id": "d2_screening_20261015_203346"
+  "paid_compute": false,
+  "pod_id": null,
+  "pods": 0,
+  "run_id": null
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

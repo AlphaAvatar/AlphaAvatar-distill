@@ -743,7 +743,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 90,
+  "runs_unrecorded": 91,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -838,8 +838,8 @@
    },
    "phase_d2": {
     "recorded": 0,
-    "unrecorded": 4,
-    "total": 4
+    "unrecorded": 5,
+    "total": 5
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -3461,8 +3461,16 @@
    "run_id": "d2_screening_20261015_193502",
    "root": "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_193502",
    "n_files": 8,
-   "digest": "4df37f95b66bd7b4817e5406efb6c86d901b5d7a2cbb38650a4fa0cc1492d17c",
+   "digest": "cde4826836540d3cd5375d12a9021cb92fe95b0f169fb3b6e85883a507dff38b",
    "why": "no run manifest; its closeout states: PRE-PROVIDER TRANSIENT (capacity in the constrained country), $0"
+  },
+  {
+   "experiment_id": "phase_d2",
+   "run_id": "d2_screening_20261015_203346",
+   "root": "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346",
+   "n_files": 60,
+   "digest": "65a7682cc050b2bffdd112e90859a9c052c72bed9e466ff4cdf2cf051f7739fd",
+   "why": "no run manifest; its closeout states: COMPLETE SCREENING RUNG: every frozen probe trained, generated, scored and verified off-pod; the frozen rule applied"
   },
   {
    "experiment_id": "phase_d2",

@@ -512,18 +512,31 @@ class TestTheProgrammeScenarios:
         b = BUD.build()["steps"]
         #: A COMPLETE D2 search is inside the live limits through its closeout,
         #: so the D2 block plans only the sessions still ahead of it.
-        for searched, sessions in (
-                (None, ("d2_search", "d2_screening", "d2_confirmation")),
-                ({"run_id": "d2_search_x"}, ("d2_screening", "d2_confirmation"))):
+        #: Likewise a COMPLETE screening rung (its own contract).
+        for searched, screened, sessions in (
+                (None, None,
+                 ("d2_search", "d2_screening", "d2_confirmation")),
+                ({"run_id": "d2_search_x"}, None,
+                 ("d2_screening", "d2_confirmation")),
+                ({"run_id": "d2_search_x"}, {"run_id": "d2_screening_x"},
+                 ("d2_confirmation",))):
             monkeypatch.setattr(BUD, "completed_d2_search",
                                 lambda *a, _s=searched, **k: _s)
+            monkeypatch.setattr(BUD, "completed_d2_screening",
+                                lambda *a, _s=screened, **k: _s)
             s = self._scen()
-            block = s["search_pricing"][s["search_pricing_in_force"]]["d2_block"]
+            view = s["search_pricing"][s["search_pricing_in_force"]]
+            block = view["d2_block"]
             assert block["sessions"] == sorted(sessions)
             assert block["hard_with_reserves"] == round(sum(
                 b[k]["hard"]["all_in_usd"] + BUD.TEARDOWN_RESERVE_USD
                 for k in sessions), 2)
             assert s["d2_search_completed"] == searched
+            assert s["d2_screening_completed"] == screened
+            #: D3 prices its own behavioural rungs whatever D2 completed.
+            assert view["d3_block"]["hard_with_reserves"] > sum(
+                b[k]["hard"]["all_in_usd"] for k in ("d2_screening",
+                                                     "d2_confirmation"))
         #: R0's and the calibration's reserves are INSIDE their grants, and a
         #: CLOSED campaign holds nothing: its recorded cost is already inside
         #: the live limits, so subtracting its grant would count it twice.
