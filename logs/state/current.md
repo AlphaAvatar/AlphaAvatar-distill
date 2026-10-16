@@ -9,9 +9,13 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods
-and $0/h (2026-10-16 about 09:05 UTC). Pod `7stah5j2s98e69` was deleted at
-08:59:28Z and the provider confirms it gone. No watcher is armed.
+**D2 SHARED CONFIRMATION OF c4 IS RUNNING (paid).** Run
+`d2_confirmation_20261016_105802`, pod `tvohx8nubg6kmi` (AU, `…@595.91.07`,
+$1.09/h), launched 2026-10-16 11:00 UTC in tmux `d2confirm` with a milestone
+waiter.
+- Draw 1 (AU, 580.178.04) was refused by host admission.
+- The training-runtime gate passed (`9bd30885…`).
+- Grant: $12.00 cumulative; this session's hard ceiling is $8.2078.
 
 **D2 SCREENING COMPLETE (2026-10-16); STOPPED AT THE CONFIRMATION BOUNDARY.**
 Run `d2_screening_20261015_203346`: eight probes on an admitted AU host

@@ -200,12 +200,12 @@
   "logs/README.md -- START HERE, the index"
  ],
  "running": {
-  "_verified": "provider query 2026-10-16 ~09:05 UTC: 0 pods, $0/h; last pod 7stah5j2s98e69 deleted 08:59:28Z, provider confirms gone",
+  "_verified": "launcher log 2026-10-16 11:12 UTC: pod tvohx8nubg6kmi (AU, @595.91.07) admitted on draw 2, setup done, driver started; runtime digest equals the protocol's",
   "network_volumes": 0,
-  "paid_compute": false,
-  "pod_id": null,
-  "pods": 0,
-  "run_id": null
+  "paid_compute": true,
+  "pod_id": "tvohx8nubg6kmi",
+  "pods": 1,
+  "run_id": "d2_confirmation_20261016_105802"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {
