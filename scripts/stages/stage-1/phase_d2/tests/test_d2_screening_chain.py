@@ -1113,3 +1113,50 @@ class TestTheCandidateDifferencesAreDescriptive:
                     if isinstance(n, ast.Constant) and isinstance(n.value, str)
                     and id(n) not in docs]
             assert not any("candidate_differences" in v for v in code), rel
+
+
+# --- the closeout ----------------------------------------------------------------
+
+class TestTheCloseoutBooksAllInAndOnlyVerifiedTeardown:
+
+    def test_the_money_is_gpu_plus_disk_ceiled(self):
+        from stages.phase_d2 import closeout_d2_screening as C
+
+        session = {"cost": {"actual_usd": 15.0, "elapsed_minutes": 825.0},
+                   "account_balance": {"client_balance_usd": 136.0}}
+        got = C.money(session, disk_gb=120, balance_after=120.5)
+        disk = 120 * 0.10 / 730.0 * 825.0 / 60.0
+        assert got["disk_usd"] == pytest.approx(round(disk, 4))
+        assert got["all_in_usd"] >= 15.0 + disk
+        assert got["all_in_usd"] - (15.0 + disk) < 1e-4
+        assert got["provider_balance_cross_check"]["measured_delta_usd"] == 15.5
+
+    @pytest.mark.parametrize("gone,state,verified", [
+        (True, {"exists": False, "billing": False}, True),
+        (True, {"exists": True, "billing": False}, False),
+        (True, {"exists": False, "billing": True}, False),
+        (False, {"exists": False, "billing": False}, False),
+        (True, {}, False),
+    ])
+    def test_teardown_is_verified_only_when_the_provider_says_gone(
+            self, tmp_path, monkeypatch, gone, state, verified):
+        from stages.phase_d2 import closeout_d2_screening as C
+
+        run = "d2_screening_t"
+        run_dir = tmp_path / C.RUNS_REL / run
+        (run_dir / "runtime").mkdir(parents=True)
+        (run_dir / "governance").mkdir(parents=True)
+        (run_dir / "runtime" / "session.json").write_text(json.dumps({
+            "provider_confirms_gone": gone, "final_pod_state": state,
+            "provider_resource_created": True}))
+        (run_dir / "governance" / "authorization.json").write_text(json.dumps({
+            "authorized_session_commit": "a" * 40,
+            "authorization_sha256": "b" * 64, "contract_hash": "c" * 64}))
+        scr = tmp_path / "scr"
+        (scr / "store").mkdir(parents=True)
+        (scr / "store" / "d2_screening.json").write_text(json.dumps(
+            {"status": "FAILED", "probes": []}))
+        monkeypatch.setattr(C, "REPO_ROOT", tmp_path)
+        doc = C.build(run, scr, balance_after=None, disk_gb=120)[0]
+        assert doc["provider_teardown_verified"] is verified
+        assert doc["ranking"] is None and "INCOMPLETE" in doc["classification"]
