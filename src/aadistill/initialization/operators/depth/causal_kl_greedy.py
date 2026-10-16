@@ -30,6 +30,10 @@ import torch
 from aadistill.initialization.scoring.rows import (
     scatter_rows, scored_prediction_logits, scored_rows, split_rows,
 )
+from aadistill.initialization.scoring.kl_reference import (
+    KL_REFERENCE_KEY, ROOT_REFERENCE_V1, KLReferenceError,
+    validate_kl_reference,
+)
 from aadistill.initialization.scoring.objective import (
     ObjectiveError, add_joint_histograms, confidence_histogram,
     item_component_means, position_terms, require_objective_support,
@@ -98,6 +102,12 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
     #: the candidate here is the parent with S bypassed, so its logits are the
     #: student's and its own Top-K is read from them. See `scoring.objective`.
     consumes_scoring_objective = True
+    #: The KL's reference may be DECLARED (`scoring.kl_reference`): the intact
+    #: parent by default, or the stored lineage root under
+    #: ``kl_reference: root_reference/v1``. The same greedy removal, the same
+    #: reducer and the same candidates either way; only the distribution each
+    #: candidate is compared with changes.
+    accepts_kl_reference = True
     deterministic = True
     requires_seed = False
     produces = ("depth_map", "search_rounds")
@@ -175,9 +185,28 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         except ObjectiveError as exc:
             raise OperatorError(f"{self.impl_id}: {exc}") from exc
         union = support.is_union
+        #: A DECLARED KL REFERENCE (`scoring.kl_reference`). Absent, the
+        #: historical parent. Validated where the config was built and again
+        #: in `execute`; checked here because this is where it is read.
+        try:
+            kl_reference = validate_kl_reference(
+                self, ctx.config, objective_consumed=objective is not None)
+        except KLReferenceError as exc:
+            raise OperatorError(f"{self.impl_id}: {exc}") from exc
+        declared_root = kl_reference == ROOT_REFERENCE_V1
+        if declared_root and support.is_full_vocab:
+            raise OperatorError(
+                f"{self.impl_id}: {KL_REFERENCE_KEY}={kl_reference!r} reads "
+                "a stored root reference of Top-K sketches; full_vocab_v1 is "
+                "the KL-only oracle path")
         #: Per candidate subset: every component's domain-balanced value, so a
         #: low objective can always be read against the raw KL it came from.
         objective_candidates: dict[str, dict[str, Any]] = {}
+        #: Per candidate subset under a DECLARED root reference: the decision
+        #: KL (against the root) and the same candidate's KL against the
+        #: intact parent. The parent value is a diagnostic and is never read
+        #: by the selection.
+        reference_candidates: dict[str, dict[str, float]] = {}
         #: THE KL'S REFERENCE. Historically the intact PARENT: this operator
         #: measured how far bypassing S moves the model it is handed. An
         #: objective declaring the ROOT reference measures instead how far the
@@ -187,7 +216,36 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         #: produces every candidate; it is just not what they are compared to.
         root_store = None
         parent_sketches = None
-        if objective is not None and objective.requires_root_reference:
+        #: Under a DECLARED root reference the parent-KL diagnostic covers
+        #: EVERY round's candidates, not round 0's only: the intact parent is
+        #: one cached reference, so the diagnostic costs reductions, not
+        #: forwards, and it is what lets the record set the parent-reference
+        #: ranking beside the root one at every decision.
+        parent_kl_every_round = False
+        if declared_root:
+            root_store = ctx.root_reference
+            if root_store is None:
+                raise OperatorError(
+                    f"{self.impl_id}: its config declares "
+                    f"{KL_REFERENCE_KEY}={kl_reference!r} and no root "
+                    "reference store was handed to this invocation")
+            root_store.require_items(items)
+            root_store.require_identity(
+                support=support.as_dict(),
+                profile_hash=(None if ctx.profile is None
+                              else ctx.profile.profile_hash))
+            dtype = next(model.parameters()).dtype
+            root_store.require_execution(
+                micro_batch_size=ctx.execution.micro_batch_size,
+                packing=ctx.execution.calibration_batch_packing,
+                device_type=torch.device(compute).type,
+                model_dtype=str(dtype).replace("torch.", ""))
+            sketches = _RootSketches(root_store)
+            reference = None
+            parent_sketches = _ReferenceSketches(model, items, compute,
+                                                 top_k=support.top_k)
+            parent_kl_every_round = True
+        elif objective is not None and objective.requires_root_reference:
             root_store = ctx.root_reference
             if root_store is None:
                 raise OperatorError(
@@ -291,7 +349,9 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         if objective is not None:
             timing["objective_seconds"] = 0.0
         if parent_sketches is not None:
-            timing["parent_kl_diagnostic"] = "round 0 candidates only"
+            timing["parent_kl_diagnostic"] = (
+                "every round's candidates" if parent_kl_every_round
+                else "round 0 candidates only")
             #: The diagnostic's own reductions, so its cost can be measured
             #: apart from the decision's. Unsynchronized like every split here
             #: unless AADISTILL_DEPTH_SYNC_TELEMETRY=1.
@@ -374,7 +434,8 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             #: Round 0 only, and only under the root reference: the same
             #: candidate logits reduced against the intact parent as well.
             parent_kl: dict[str, list[float]] | None = (
-                {} if parent_sketches is not None and progress["rounds"] == 0
+                {} if parent_sketches is not None
+                and (parent_kl_every_round or progress["rounds"] == 0)
                 else None)
             components: dict[str, dict[str, list[float]]] = {}
             histogram = [0] * 10
@@ -522,19 +583,6 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                             kl, log_z, abls, tail, mask, batch_weights, group,
                             components, histogram, joint, ref=root_ref(group),
                             union_terms=uterms)
-                        if parent_kl is not None:
-                            tp = time.perf_counter()
-                            pidx, plp, ptail = prefs
-                            for item, v in zip(group.items,
-                                               sketch_forward_kl_mean_batch(
-                                                   pidx, plp, ptail, abls, mask,
-                                                   has_tail=parent_sketches.has_tail,
-                                                   weights=batch_weights
-                                                   ).tolist()):
-                                parent_kl.setdefault(item["subtype"],
-                                                     []).append(v)
-                            timing["parent_kl_seconds"] += (
-                                time.perf_counter() - tp)
                     elif sketches is not None:
                         idx, lp, tail = refs
                         values = sketch_forward_kl_mean_batch(
@@ -543,6 +591,19 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                     else:
                         values = forward_kl_mean_batch(
                             refs, abls, mask, weights=batch_weights, chunk=512)
+                    #: THE PARENT-KL DIAGNOSTIC, from the SAME candidate logits,
+                    #: after the decision value exists and never feeding it.
+                    if parent_kl is not None:
+                        tp = time.perf_counter()
+                        pidx, plp, ptail = prefs
+                        for item, v in zip(group.items,
+                                           sketch_forward_kl_mean_batch(
+                                               pidx, plp, ptail, abls, mask,
+                                               has_tail=parent_sketches.has_tail,
+                                               weights=batch_weights
+                                               ).tolist()):
+                            parent_kl.setdefault(item["subtype"], []).append(v)
+                        timing["parent_kl_seconds"] += time.perf_counter() - tp
                     #: ONE host transfer for the whole batch.
                     for item, value in zip(group.items, values.tolist()):
                         per_subtype.setdefault(item["subtype"], []).append(value)
@@ -585,13 +646,17 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                         float(value[0]))
                     timing["distortion_calls"] += 1
                 elif sketches is not None:
+                    item_w = (None if active is None else
+                              active.prediction_weights_for_item(indices[0]))
                     per_subtype.setdefault(group.items[0]["subtype"], []).append(
-                        sketch_forward_kl_mean(
-                            refs, abls,
-                            weights=(None if active is None else
-                                     active.prediction_weights_for_item(
-                                         indices[0]))))
+                        sketch_forward_kl_mean(refs, abls, weights=item_w))
                     timing["distortion_calls"] += 1
+                    if parent_kl is not None:
+                        tp = time.perf_counter()
+                        parent_kl.setdefault(group.items[0]["subtype"],
+                                             []).append(sketch_forward_kl_mean(
+                            prefs, abls, weights=item_w))
+                        timing["parent_kl_seconds"] += time.perf_counter() - tp
                 else:
                     per_subtype.setdefault(group.items[0]["subtype"], []).append(
                         forward_kl_mean(
@@ -606,6 +671,16 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             timing["item_seconds"] += time.perf_counter() - item_started
             means = {k: sum(v) / len(v) for k, v in per_subtype.items()}
             primary, _ = domain_balanced_score(means, domains)
+            if declared_root:
+                #: The decision KL and, beside it, the parent-reference KL of
+                #: the same candidate under the same aggregation.
+                diagnostic, _ = domain_balanced_score(
+                    {sub: sum(v) / len(v) for sub, v in parent_kl.items()},
+                    domains)
+                reference_candidates[_subset_key(skip)] = {
+                    "round": progress["rounds"],
+                    "root_reference_kl": float(primary),
+                    "parent_reference_kl": float(diagnostic)}
             if objective is not None:
                 record = {}
                 for name in components_of:
@@ -668,6 +743,10 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         final_score = result["rounds"][-1]["chosen_score"] if result["rounds"] else 0.0
         values = {"op.depth.causal_kl.final": float(final_score),
                   "op.depth.causal_kl.evaluations": float(result["evaluations"])}
+        if declared_root and result["rounds"]:
+            chosen = reference_candidates[_subset_key(result["removed"])]
+            values["op.depth.parent_kl_diagnostic.final"] = float(
+                chosen["parent_reference_kl"])
         if objective is not None and result["rounds"]:
             #: Under an objective the chosen score IS the objective, so the KL
             #: key carries the chosen subset's raw KL and the objective has its
@@ -685,7 +764,9 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                 values=values,
                 detail={"removal_order": result["removal_order"],
                         **({} if objective is None else
-                           {"scoring_objective": objective.qualified_id})}),
+                           {"scoring_objective": objective.qualified_id}),
+                        **({KL_REFERENCE_KEY: kl_reference}
+                           if declared_root else {})}),
             trace={"micro_batch_size": batch_size,
                    #: Execution evidence, recorded even at the default so a run's
                    #: trace states which grouping its forwards used.
@@ -700,6 +781,10 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                                          else active.report()),
                    **({} if objective is None else
                       {"scoring_objective": objective.as_dict()}),
+                   #: Recorded only when declared, so a parent-reference
+                   #: trace is unchanged field for field.
+                   **({KL_REFERENCE_KEY: kl_reference} if declared_root
+                      else {}),
                    "kept_layers": kept, "removed_layers": result["removed"],
                    "removal_order": result["removal_order"],
                    "source": "causal_kl_greedy"},
@@ -712,10 +797,15 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             artifacts={"search_rounds": result["rounds"],
                        **({} if objective is None else
                           {"objective_candidates": objective_candidates}),
+                       **({"reference_candidates": reference_candidates}
+                          if declared_root else {}),
                        "reference_cache": (reference or sketches).decision(),
                        **({} if parent_sketches is None else
                           {"parent_reference_cache": parent_sketches.decision(),
-                           "parent_kl_diagnostic": "round 0 candidates only"}),
+                           "parent_kl_diagnostic": (
+                               "every round's candidates"
+                               if parent_kl_every_round
+                               else "round 0 candidates only")}),
                        # Operational only. `artifacts` is already excluded from
                        # the trace and from state identity — see the note above
                        # — which is exactly why the timings belong here and in

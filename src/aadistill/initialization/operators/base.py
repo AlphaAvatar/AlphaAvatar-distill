@@ -263,6 +263,12 @@ class OperatorImplementation(ABC):
     #: `weights_activation_statistics`. Not part of `signature()`, for the
     #: same reason as the flag above.
     consumes_reference_weighted_statistics: bool = False
+    #: Whether this implementation's KL-scored selection may be told which
+    #: model to measure against (`scoring.kl_reference`): the intact parent,
+    #: by default, or the stored lineage root. Not part of `signature()`, for
+    #: the same reason as the two flags above -- the reference an invocation
+    #: used is bound in its hashed operator config.
+    accepts_kl_reference: bool = False
     deterministic: bool = True
     requires_seed: bool = False
     produces: tuple[str, ...] = ()
@@ -382,10 +388,31 @@ class OperatorImplementation(ABC):
         #: that consumes one must be handed the object its config declares; one
         #: that does not must not declare it, because its state id would then
         #: name an objective its selection never read.
+        from aadistill.initialization.scoring.kl_reference import (
+            KLReferenceError, requests_root_reference, validate_kl_reference,
+        )
         from aadistill.initialization.scoring.objective import (
             objective_consumed_by,
             root_reference_needed,
         )
+
+        #: A DECLARED KL REFERENCE, by the same two-sides rule: the config
+        #: names it (and so the state id), and the store it needs must have
+        #: been handed in -- a declaration with no store behind it would
+        #: record a reference the selection never read.
+        try:
+            validate_kl_reference(
+                self, ctx.config,
+                objective_consumed=objective_consumed_by(
+                    self, ctx.scoring_objective))
+        except KLReferenceError as exc:
+            raise ContractViolation(f"{self.impl_id}: {exc}") from exc
+        if requests_root_reference(self, ctx.config) and \
+                ctx.root_reference is None:
+            raise ContractViolation(
+                f"{self.impl_id}: its config declares the ROOT as its KL "
+                "reference and no root reference store was handed to this "
+                "invocation")
 
         declared_objective = (ctx.config or {}).get("scoring_objective")
         actual_objective = (None if ctx.scoring_objective is None

@@ -403,12 +403,20 @@ def statistics_weighted_by_root(implementation: Any, objective: Any) -> bool:
                             "consumes_reference_weighted_statistics", False))
 
 
-def root_reference_needed(implementation: Any, objective: Any) -> bool:
+def root_reference_needed(implementation: Any, objective: Any,
+                          config: Mapping[str, Any] | None = None) -> bool:
     """Whether an invocation of `implementation` must be handed the ROOT
     reference store: a KL-scored operator under an objective whose reference
-    is the root, or a weighted-statistics operator under an objective that
-    weights them. One rule for the search, the fixed-path replay and
-    `OperatorImplementation.execute`."""
+    is the root, a weighted-statistics operator under an objective that
+    weights them, or an operator whose `config` declares the root as its KL
+    reference (`scoring.kl_reference`). One rule for the search, the
+    fixed-path replay and `OperatorImplementation.execute`."""
+    from aadistill.initialization.scoring.kl_reference import (
+        requests_root_reference,
+    )
+
+    if requests_root_reference(implementation, config):
+        return True
     if objective is None:
         return False
     return bool((getattr(implementation, "consumes_scoring_objective", False)

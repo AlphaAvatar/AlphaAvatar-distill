@@ -158,6 +158,33 @@ class RootReferenceStore:
                 f"root reference {self.identity_hash[:12]} does not match its "
                 f"consumer: {bad}")
 
+    def require_execution(self, *, micro_batch_size: int, packing: str,
+                          device_type: str, model_dtype: str) -> None:
+        """The store was built under the numerical protocol its consumer runs.
+
+        Only a store whose identity declares an ``execution`` block can answer
+        (:func:`root_reference_identity` with ``execution=``); one that declares
+        none is refused rather than assumed to agree. bf16 forwards are
+        batch-shape dependent, so the micro-batch, the packing, the device
+        type and the dtype are part of what the stored values are.
+        """
+        declared = self.identity.get("execution")
+        if not isinstance(declared, Mapping):
+            raise ReferenceStoreError(
+                f"root reference {self.identity_hash[:12]} declares no "
+                "execution protocol, so it cannot be shown to hold the values "
+                "its consumer would compute")
+        want = {"micro_batch_size": int(micro_batch_size),
+                "calibration_batch_packing": str(packing),
+                "device_type": str(device_type),
+                "model_dtype": str(model_dtype)}
+        bad = {k: (declared.get(k), v) for k, v in want.items()
+               if declared.get(k) != v}
+        if bad:
+            raise ReferenceStoreError(
+                f"root reference {self.identity_hash[:12]} was built under "
+                f"another execution protocol than its consumer runs: {bad}")
+
     def _entry(self, item: Mapping[str, Any]) -> _Entry:
         entry = self.entries.get(str(item["item_id"]))
         if entry is None:
@@ -330,6 +357,10 @@ class RootReferenceStore:
         positions = sum(int(e.entropy.shape[0]) for e in self.entries.values())
         out = {"mode": "root_reference_store", "cached": True,
                "identity_hash": self.identity_hash,
+               #: The declaration itself, so a consumer's record states which
+               #: root, mixture, support and execution its KL was measured
+               #: against without a second lookup.
+               "identity": dict(self.identity),
                "distribution_support": self.identity.get("support"),
                "top_k": self.top_k, "has_tail": self.has_tail,
                "items_total": len(self.entries), "positions": positions,
@@ -385,16 +416,37 @@ class RootReferenceStore:
                                        if float((c * c).sum()) > 0 else 0.0)}
 
 
+def store_execution(*, micro_batch_size: int, packing: str, device: Any,
+                    model: Any) -> dict[str, Any]:
+    """The numerical protocol a store is built under, as identity.
+
+    Passed to :func:`root_reference_identity` by a caller that binds it; the
+    consumer checks it with :meth:`RootReferenceStore.require_execution`.
+    """
+    dtype = next(model.parameters()).dtype
+    return {"micro_batch_size": int(micro_batch_size),
+            "calibration_batch_packing": str(packing),
+            "device_type": torch.device(device).type,
+            "model_dtype": str(dtype).replace("torch.", "")}
+
+
 def root_reference_identity(*, root_identity: Mapping[str, Any],
                             profile_hash: str,
                             support: DistributionSupport,
-                            objective: Any = None) -> dict[str, Any]:
+                            objective: Any = None,
+                            execution: Mapping[str, Any] | None = None,
+                            ) -> dict[str, Any]:
     """What a store means: the root, the mixture, the support, the definitions.
 
     Without an objective, or under the full-vocabulary reference-confidence
     form, the historical identity, byte for byte. Under the union-KL form the
     union store's: its own schema, the ``K+1``-category confidence and the
     retrieval definition. The builder appends what it actually executed.
+
+    ``execution`` (:func:`store_execution`) binds the numerical protocol into
+    a non-union identity; absent, the identity is the historical one. A
+    consumer that needs the binding asks for it with
+    :meth:`RootReferenceStore.require_execution`.
     """
     if objective is not None and getattr(objective, "uses_union_support",
                                          False):
@@ -414,7 +466,8 @@ def root_reference_identity(*, root_identity: Mapping[str, Any],
             "profile_hash": str(profile_hash), "support": support.as_dict(),
             "entropy_definition": REFERENCE_ENTROPY_DEFINITION,
             "confidence_mapping": REFERENCE_CONFIDENCE_MAPPING,
-            "rows": "all_real_prediction_positions/v1"}
+            "rows": "all_real_prediction_positions/v1",
+            **({} if execution is None else {"execution": dict(execution)})}
 
 
 @torch.no_grad()
@@ -622,4 +675,4 @@ def _build_union_store(model: Any, items: Sequence[Mapping[str, Any]], *,
 
 __all__ = ["RETRIEVAL_DEFINITION", "ReferenceStoreError", "RootReferenceStore",
            "SCHEMA", "UNION_SCHEMA", "build_root_reference_store",
-           "item_content_sha256", "root_reference_identity"]
+           "item_content_sha256", "root_reference_identity", "store_execution"]

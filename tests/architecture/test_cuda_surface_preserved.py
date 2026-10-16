@@ -2090,6 +2090,61 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "screening draws landed in SE/US on 580.x drivers while the "
             "protocol's 595.91.07 hosts were in AU.",
      }),
+    ("ee52376c4cc07dc06e9e2a1aaf9ac0d66837febf",
+     "new D3: a declared, versioned DEPTH KL reference",
+     {
+        "src/aadistill/initialization/scoring/kl_reference.py":
+            "NEW MODULE: the `kl_reference` operator-config key. THIS IS A "
+            "DECLARED SEMANTIC CHANGE by construction. Absent means the "
+            "historical parent reference and is never written, so no recorded "
+            "config or state id moves; `root_reference/v1` declares the stored "
+            "lineage root. The explicit default, an unknown value, an operator "
+            "that does not accept one and a declaration beside a consumed "
+            "objective are refused.",
+        "src/aadistill/initialization/scoring/objective.py":
+            "`root_reference_needed` takes the operator CONFIG and answers True "
+            "for a declared root KL reference. THIS IS A DECLARED SEMANTIC "
+            "CHANGE, inert without a declaration: every objective-driven "
+            "answer is unchanged.",
+        "src/aadistill/initialization/scoring/reference_store.py":
+            "`root_reference_identity(execution=)` binds the numerical "
+            "protocol into a non-union identity (absent: the historical "
+            "identity byte for byte); `store_execution`; "
+            "`RootReferenceStore.require_execution`; `decision()` carries the "
+            "identity. THIS IS A DECLARED SEMANTIC CHANGE to what a store can "
+            "declare and refuse.",
+        "src/aadistill/initialization/planning/operator_config.py":
+            "`hashed_operator_config` validates a declared KL reference where "
+            "every caller builds the config. THIS IS A DECLARED SEMANTIC "
+            "CHANGE: one new refusal class; undeclared configs are unchanged "
+            "(q2's four recorded config hashes re-derive).",
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "THIS IS A DECLARED SEMANTIC CHANGE, in four parts. (a) A step's "
+            "declared KL reference reaches `root_reference_needed`, and the "
+            "store acquisition is one function (`_acquire_root_references`) "
+            "that binds the execution protocol into a store read only by a "
+            "declared reference. (b) A SUPPLIED store is checked: profile, "
+            "support and, given `root_identity`, its root. (c) "
+            "`FixedPathSpec` refuses an undeclarable reference at "
+            "construction. (d) `SELECTION_ARTIFACTS` gains DEPTH's round "
+            "tables and per-candidate records, and `StepResult.operations` "
+            "carries timing and cache decisions, both presence-filtered.",
+        "src/aadistill/initialization/operators/base.py":
+            "`accepts_kl_reference` (outside `signature()`, so no "
+            "implementation identity moves) and `execute` refusing an "
+            "undeclarable reference or a declared root with no store. THIS IS "
+            "A DECLARED SEMANTIC CHANGE: new refusals only.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "THIS IS A DECLARED SEMANTIC CHANGE. Under a declared "
+            "`root_reference/v1` the decision KL is measured against the "
+            "stored ROOT (fail-closed on items, profile, support and "
+            "execution) and the intact parent's KL of EVERY candidate is "
+            "recorded as a diagnostic the selection never reads. The parent "
+            "path is unchanged: the round-0 parent diagnostic under an "
+            "objective moved from inside its branch to after it, computing "
+            "the same values. Owes GPU execution: the D3 structural session "
+            "is that run.",
+     }),
 )
 
 

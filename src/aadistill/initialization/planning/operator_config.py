@@ -45,6 +45,10 @@ from typing import Any
 from aadistill.infrastructure.manifest import sha256_json
 from aadistill.initialization.calibration.profiles import consumes_calibration
 from aadistill.initialization.scoring.content import scoring_content_config
+from aadistill.initialization.scoring.kl_reference import (
+    KLReferenceError,
+    validate_kl_reference,
+)
 #: The consumption rules live beside the objective (the operators ask too);
 #: re-exported here for the planning layer's callers.
 from aadistill.initialization.scoring.objective import (  # noqa: F401
@@ -141,13 +145,25 @@ def hashed_operator_config(*, implementation: Any, policy: Any,
             f"{sorted(overlap)}; these describe the run, not the operator, and "
             "a caller that could override them would plan against a different "
             "corpus than it executes on")
-    return {
+    config = {
         "n_calibration_items": len(items),
         **position_policy_config(implementation, policy, items),
         **distribution_support_config(support),
         **scoring_objective_config(implementation, objective),
         **extra,
     }
+    #: A declared KL REFERENCE is validated where every caller builds the
+    #: config, so the search and a fixed-path replay refuse the same
+    #: declarations: an implementation that reads no KL reference, the
+    #: historical default spelled out, and a declaration beside a consumed
+    #: objective that already decides the reference.
+    try:
+        validate_kl_reference(
+            implementation, config,
+            objective_consumed=objective_consumed_by(implementation, objective))
+    except KLReferenceError as exc:
+        raise ValueError(str(exc)) from exc
+    return config
 
 
 def operator_config_hash(operator_config: Mapping[str, Any]) -> str:
