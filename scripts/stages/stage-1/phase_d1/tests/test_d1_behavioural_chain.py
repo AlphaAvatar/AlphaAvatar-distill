@@ -36,12 +36,22 @@ from stages.phase_d1.behavioural_governance import (  # noqa: E402
 HEAD = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
                       text=True, cwd=REPO).stdout.strip() or ("0" * 40)
 
+#: THE PROJECT CAP IN FORCE, read from the grant terms that own it
+#: (`configs/stages/stage-1/phase_c1/authorization.json`) through the issuer's
+#: own money function. The test grants below are INPUTS to issuance against the
+#: live tree, and issuance cross-checks a stated cap against the live terms --
+#: so a grant built today must name today's cap. Typing the figure made 23
+#: mechanism tests expire when the 2026-10-14 amendment raised it ($590 ->
+#: $595). The recorded D1 grants keep the $590 they named, in their own
+#: records; nothing here restates them.
+LIVE_CAP_USD = BA.live_money(REPO)["project_cap_usd"]
+
 GRANT = {
     "granted_by": "maintainer-test",
     "covers": "ONE formal D1 behavioural SCREENING session",
     "rung": "screening",
     "hard_cap_usd": 25.0053,
-    "cumulative_cap_usd": 590.0,
+    "cumulative_cap_usd": LIVE_CAP_USD,
     "granted_utc": "2026-10-10",
     "does_not_authorize": ["a beam", "D2", "D3"],
 }
@@ -2578,7 +2588,7 @@ class TestTheRaisedCumulativeEnvelopeAndNarrowedAttemptBounds:
         "previous_envelope_usd": 25.0053,
         "additional_authorized_usd": 4.9947,
         "cumulative_envelope_usd": 30.0,
-        "cumulative_cap_usd": 590.0,
+        "cumulative_cap_usd": LIVE_CAP_USD,
         "granted_utc": "2026-10-11",
     }
 
@@ -2875,7 +2885,7 @@ class TestPhaseLevelFundingBoundsEachSessionByItsOwnCeiling:
         "previous_phase_allowance_usd": 30.0,
         "additional_authorized_usd": 100.0,
         "phase_allowance_usd": 130.0,
-        "cumulative_cap_usd": 590.0,
+        "cumulative_cap_usd": LIVE_CAP_USD,
         "granted_utc": "2026-10-10",
     }
 

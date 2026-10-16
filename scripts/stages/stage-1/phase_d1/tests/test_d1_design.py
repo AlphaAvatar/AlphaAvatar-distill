@@ -38,6 +38,42 @@ for extra in ("src", "scripts", "scripts/data", "scripts/autoinit"):
 from stages.phase_d1 import selection_noise as noise  # noqa: E402
 
 DESIGN = REPO / "logs/stages/stage-1/phase_d1/plans/d1_design.json"
+
+
+def _pin_recorded_money(monkeypatch) -> None:
+    """The D1 design writer's two MONEY inputs, pinned to what it recorded.
+
+    The live position becomes the committed snapshot's own position, and the
+    grant terms' cap and funded list become their values before the
+    2026-10-14 amendment, read from that amendment's `before` block. Nothing
+    scientific is pinned: every other input is read from the tree as usual.
+    """
+    from stages.phase_d1 import write_d1_design as W
+
+    position = json.loads(DESIGN.read_text())["budget"]["position"]
+    monkeypatch.setattr(W, "_derived_budget", lambda: {
+        "project": {"cap_usd": position["project_cap_usd"],
+                    "remaining_usd": position["project_remaining_usd"]},
+        "formal": {"remaining_usd": position["formal_remaining_usd"]},
+        "engineering": {"remaining_usd": position["engineering_remaining_usd"]},
+        "package": {"remaining_usd": position["package_remaining_usd"]},
+        "full_ceiling_sessions_fundable":
+            position["full_ceiling_sessions_fundable"]})
+    real_load = W._load
+
+    def load(rel: str):
+        doc = real_load(rel)
+        if rel != W.BUDGET_TERMS:
+            return doc
+        before = doc["_amendment_2026_10_14_d2v3_search"]["before"]
+        doc = json.loads(json.dumps(doc))
+        doc["accepted_pricing"]["cumulative_cap_usd"] = \
+            before["cumulative_cap_usd"]
+        doc["execution_package"]["funds_formal_sessions_of"][
+            "experiment_ids"] = list(before["funds_formal_sessions_of"])
+        return doc
+
+    monkeypatch.setattr(W, "_load", load)
 CAPACITY = REPO / "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json"
 
 
@@ -663,21 +699,35 @@ class TestTheCommittedRecords:
         for note in notes.values():
             assert "SEPARATE constraint from the project-level cap" in note
 
-    def test_the_budget_position_is_derived_not_restated(self):
+    def test_the_budget_position_is_derived_not_restated(self, monkeypatch):
         """The writer calls `derive_budget.derive()`; a hand-copied balance
-        expires the next time anything spends."""
-        doc = json.loads(DESIGN.read_text())["budget"]["position"]
-        import importlib.util
+        expires the next time anything spends.
 
-        spec = importlib.util.spec_from_file_location(
-            "_derive_budget", REPO / "scripts/maintenance/consolidation/derive_budget.py")
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        live = module.derive()
-        assert doc["project_remaining_usd"] == \
-            pytest.approx(float(live["project"]["remaining_usd"]))
-        assert doc["formal_remaining_usd"] == \
-            pytest.approx(float(live["formal"]["remaining_usd"]))
+        Asserted on the MECHANISM, not on today's balance. D1 is closed and its
+        committed design is a dated snapshot: comparing its position with the
+        live deriver expired the moment D2 spent. What must hold for good is
+        that the position the writer emits IS whatever the deriver returns --
+        checked with a sentinel no hand-copied figure could equal -- and that
+        the committed snapshot regenerates under the money it recorded
+        (`test_the_design_regenerates_byte_identically`).
+        """
+        from stages.phase_d1 import write_d1_design as W
+
+        sentinel = {"project": {"cap_usd": 1234.5, "remaining_usd": 321.0625},
+                    "formal": {"remaining_usd": 210.125},
+                    "engineering": {"remaining_usd": 7.25},
+                    "package": {"remaining_usd": 205.5},
+                    "full_ceiling_sessions_fundable": 9}
+        monkeypatch.setattr(W, "_derived_budget", lambda: sentinel)
+        position = W.budget()["position"]
+        assert position["project_cap_usd"] == 1234.5
+        assert position["project_remaining_usd"] == 321.0625
+        assert position["formal_remaining_usd"] == 210.125
+        assert position["engineering_remaining_usd"] == 7.25
+        assert position["package_remaining_usd"] == 205.5
+        assert position["full_ceiling_sessions_fundable"] == 9
+        #: And the deriver the writer calls is the budget authority, by path.
+        assert "derive_budget" in position["_derived_by"]
 
     def test_the_capacity_record_states_zero_and_names_the_binding_stratum(self):
         doc = json.loads(CAPACITY.read_text())
@@ -710,9 +760,20 @@ class TestTheCommittedRecords:
             SUPERVISED_TARGET_V1.policy_hash
         assert policy["control"]["policy_hash"] == ALL_POSITIONS_V1.policy_hash
 
-    def test_the_design_regenerates_byte_identically(self):
+    def test_the_design_regenerates_byte_identically(self, monkeypatch):
         """A committed verdict expires silently; this is how a reader knows the
-        record still describes the tree."""
+        record still describes the tree.
+
+        Under the MONEY THE RECORD WAS WRITTEN WITH. D1 is closed; its design's
+        `budget` block is a dated snapshot (excluded from `design_hash`), and
+        regenerating it against today's ledger rewrote only money after D2
+        spent. So the two money inputs are pinned to their historical values
+        -- the position to the snapshot's own, the grant terms to the cap and
+        funded list in force before the 2026-10-14 amendment, as that
+        amendment's `before` block records them -- and every other byte must
+        still regenerate from the tree. The frozen record is not edited.
+        """
+        _pin_recorded_money(monkeypatch)
         from stages.phase_d1 import write_d1_design
 
         assert (json.dumps(write_d1_design.build(), indent=1, sort_keys=True)
@@ -1037,7 +1098,23 @@ class TestThePhaseFundingAmendment:
         #: project cap, the formal allowance and the package total by exactly
         #: that much each. The maintainer's terms left the engineering
         #: allowance and the per-session limit alone, and said so.
-        assert ap["cumulative_cap_usd"] == 590.0
+        #: The cap the 2026-10-10 decision set was $590.0000. It is a decision
+        #: snapshot, so it is asserted where it is now recorded -- the 2026-10-14
+        #: amendment's `before` block -- and the CURRENT cap is derived from
+        #: that amendment (+$5.00, the cap alone), not typed: a later raise is
+        #: a later decision, not a reason to edit this one.
+        d2v3 = json.loads((REPO / "configs/stages/stage-1/phase_c1"
+                                  "/authorization.json").read_text())[
+            "_amendment_2026_10_14_d2v3_search"]
+        assert d2v3["before"]["cumulative_cap_usd"] == 590.0
+        assert d2v3["raised"] == ["accepted_pricing.cumulative_cap_usd"]
+        assert ap["cumulative_cap_usd"] == \
+            d2v3["before"]["cumulative_cap_usd"] + d2v3["added_usd"]
+        for figure in ("formal_allowance_usd", "package_total_usd",
+                       "gpu_engineering_allowance_usd",
+                       "per_attempt_hard_ceiling_usd"):
+            assert ep[figure] == d2v3["deliberately_unchanged"][figure] == \
+                d2v3["before"][figure]
         assert ep["formal_allowance_usd"] == 256.6523
         assert ep["package_total_usd"] == 281.7264
         #: 2026-10-08: +$5.0741, the derived shortfall and nothing more.
