@@ -22,9 +22,10 @@ Run `d2_screening_20261015_203346`: eight probes on an admitted AU host
 - **Programme.** Project remaining is $105.4754. D2 now holds only the
   confirmation ($8.51 at hard), and the D3 plus fresh-confirmation reservation
   holds with $30.52 to spare.
-- **Recommendation.** Do not fund the shared confirmation: c4's Δ is below the
-  0.01 SESOI, and q2's larger screening Δ failed to confirm. The maintainer
-  decides.
+- **Executor's recommendation, not adopted.** It advised against funding the
+  shared confirmation (c4's Δ is below the 0.01 SESOI). The maintainer has
+  decided to run it: **c4 shared confirmation GRANTED, $12.00 cumulative**
+  (`decisions.md` 2026-10-16), under the registered verdict.
 - **Owners.**
   [`d2_screening_result_review.md`](../stages/stage-1/families/d_series/analyses/d2_screening_result_review.md);
   `decisions.md` 2026-10-16.

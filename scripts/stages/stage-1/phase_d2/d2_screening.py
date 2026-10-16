@@ -43,6 +43,11 @@ STAGE_ID = "1"
 RUNG = "screening"
 #: The shared protocol's name for the rung this session measures on.
 SHARED_RUNG = "shared_screening"
+#: Each D2 behavioural rung's name in the shared protocol. The helpers below
+#: take the rung so the confirmation contract (`d2_confirmation.py`) reads the
+#: same owners through the same code; the default is this module's rung.
+SHARED_RUNGS = {"screening": "shared_screening",
+                "confirmation": "shared_confirmation"}
 #: The search whose committed field this rung measures. One search, one field.
 SEARCH_RUN_ID = "d2_search_20261015_051722"
 SEARCH_RUN_REL = f"logs/stages/stage-1/phase_d2/runs/{SEARCH_RUN_ID}"
@@ -138,14 +143,16 @@ def arms(repo_root: Path = REPO_ROOT, *,
         for i, row in enumerate(rows, start=1))
 
 
-def seeds(repo_root: Path = REPO_ROOT) -> tuple[int, ...]:
-    """The preregistration's screening seeds, which must be the shared rung's.
+def seeds(repo_root: Path = REPO_ROOT, rung: str = RUNG) -> tuple[int, ...]:
+    """The preregistration's seeds for the rung, which must be the shared
+    rung's.
 
     A D2 probe is paired with B's imported unit AT THE SAME SEED; a seed the
     protocol did not import has no comparator row.
     """
-    declared = tuple(int(s) for s in behaviour(repo_root)["screening"]["seeds"])
-    shared = tuple(int(s) for s in protocol(repo_root)["rungs"][SHARED_RUNG]["seeds"])
+    declared = tuple(int(s) for s in behaviour(repo_root)[rung]["seeds"])
+    shared = tuple(int(s) for s in
+                   protocol(repo_root)["rungs"][SHARED_RUNGS[rung]]["seeds"])
     if sorted(declared) != sorted(shared):
         raise D2ScreeningError(f"the preregistration's seeds {declared} are "
                                f"not the shared rung's {shared}")
@@ -171,14 +178,15 @@ def probes(repo_root: Path = REPO_ROOT, *,
     return out
 
 
-def battery(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
-    """The realized `d1_screening` role, re-hashed, and it must be the one the
-    preregistration and the shared rung both name."""
+def battery(repo_root: Path = REPO_ROOT, rung: str = RUNG) -> dict[str, Any]:
+    """The rung's realized role (`d1_screening`, `d1_confirmation`), re-hashed,
+    and it must be the one the preregistration and the shared rung both
+    name."""
     from stages.phase_d1 import behavioural as D1B
 
-    want = behaviour(repo_root)["screening"]["battery"]
+    want = behaviour(repo_root)[rung]["battery"]
     identity = D1B.battery_role(want["role"], repo_root)
-    shared = protocol(repo_root)["rungs"][SHARED_RUNG]["reuses_battery"]
+    shared = protocol(repo_root)["rungs"][SHARED_RUNGS[rung]]["reuses_battery"]
     for key in ("role", "family_content_id", "item_ids_sha256", "n_prompts",
                 "n_scorable"):
         if not (identity[key] == want[key] == shared[key]):
@@ -220,9 +228,11 @@ def recovery(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                 "every probe and for B's imported units")}
 
 
-def comparator_units(repo_root: Path = REPO_ROOT) -> dict[str, list[dict]]:
-    """B's imported screening units (the comparator) and q2's (descriptive)."""
-    units = protocol(repo_root)["rungs"][SHARED_RUNG]["reference_units"]
+def comparator_units(repo_root: Path = REPO_ROOT, rung: str = RUNG
+                     ) -> dict[str, list[dict]]:
+    """B's imported units of the rung (the comparator) and q2's
+    (descriptive)."""
+    units = protocol(repo_root)["rungs"][SHARED_RUNGS[rung]]["reference_units"]
     out: dict[str, list[dict]] = {"B": [], "q2": []}
     for u in units:
         out.setdefault(u["arm"], []).append(
@@ -230,16 +240,17 @@ def comparator_units(repo_root: Path = REPO_ROOT) -> dict[str, list[dict]]:
                                "initialization_digest", "trained_sha256",
                                "result_sha256", "per_sample_sha256",
                                "correct_overall", "usable_rollout_rate")})
-    if sorted(r["seed"] for r in out["B"]) != sorted(seeds(repo_root)):
+    if sorted(r["seed"] for r in out["B"]) != sorted(seeds(repo_root, rung)):
         raise D2ScreeningError("B's imported units do not cover the seeds")
     return out
 
 
-def evaluation_identity(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
+def evaluation_identity(repo_root: Path = REPO_ROOT, rung: str = RUNG
+                        ) -> dict[str, Any]:
     """What a D2 probe's generations must be admitted under: the shared rung's
     evaluation protocol, the same scorer bytes and the same battery."""
-    rung = protocol(repo_root)["rungs"][SHARED_RUNG]
-    return {k: rung[k] for k in (
+    record = protocol(repo_root)["rungs"][SHARED_RUNGS[rung]]
+    return {k: record[k] for k in (
         "evaluation_protocol_hash", "generation_protocol_fingerprint",
         "scoring_digest", "generation_source_digest", "generation_runtime_digest",
         "scorer")}

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Issue D2's ONE-USE behavioural SCREENING authorization, from a logged command.
+"""Issue D2's ONE-USE behavioural authorization (screening or the shared
+confirmation), from a logged command.
+
+    ... --rung confirmation --grant logs/budget/approvals/
+        autoinit_d2_confirmation_grant.json --run-id d2_confirmation_<utc>
 
     PYTHONPATH=src:scripts python \
         scripts/stages/stage-1/phase_d2/issue_d2_screening_authorization.py \
@@ -51,6 +55,8 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--grant", required=True, type=Path,
                     help="the maintainer's screening grant document")
     ap.add_argument("--run-id", required=True)
+    ap.add_argument("--rung", default="screening",
+                    choices=("screening", "confirmation"))
     ap.add_argument("--porcelain", action="store_true")
     return ap
 
@@ -73,23 +79,34 @@ def main(argv=None) -> int:
     try:
         payload = A.build_payload(grant=grant, session_commit=commit,
                                   granted_utc=granted_utc, run_id=args.run_id,
-                                  repo_root=REPO_ROOT)
+                                  repo_root=REPO_ROOT, rung=args.rung)
     except A.D2ScreeningRefused as exc:
         raise SystemExit(f"refusing to issue: {exc}") from None
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=1) + "\n")
 
-    reloaded = A.D2ScreeningAuthorization.load(out)
+    contract = A.contract_module(args.rung)
+    kind = (A.D2ConfirmationAuthorization if args.rung == "confirmation"
+            else A.D2ScreeningAuthorization)
+    reloaded = kind.load(out)
     reloaded.require_plan(SC.preregistration(REPO_ROOT)["preregistration_hash"])
     reloaded.require_run_id(args.run_id)
     reloaded.require_session_commit(commit)
     reloaded.require_harness(REPO_ROOT)
-    reloaded.require_contract(SC.contract_hash(SC.session_contract(REPO_ROOT)))
+    reloaded.require_contract(contract.contract_hash(
+        contract.session_contract(REPO_ROOT)))
+    screening = args.rung == "screening"
     for claim, ok in (
             ("allows recovery training", reloaded.allows_recovery_training),
-            ("authorizes D2 screening", reloaded.authorizes_d2_screening),
+            ("authorizes its rung", reloaded.authorizes_d2_screening
+             if screening else reloaded.authorizes_d2_confirmation),
+            ("refuses the other rung", not (reloaded.authorizes_d2_confirmation
+                                            if screening else
+                                            reloaded.authorizes_d2_screening)),
             ("refuses a beam", not reloaded.allows_beam_search),
-            ("refuses the confirmation", not reloaded.authorizes_d2_confirmation),
+            ("refuses a fresh confirmation",
+             not reloaded.authorizes_fresh_confirmation),
+            ("refuses D3", not reloaded.authorizes_d3),
             ("refuses re-selection",
              not reloaded.authorizes_candidate_reselection),
             ("refuses B/q2 retraining",
@@ -113,8 +130,9 @@ def main(argv=None) -> int:
         "harness_digest": payload["harness_source_digest"]}
     print(json.dumps(summary, indent=None if args.porcelain else 1))
     if not args.porcelain:
-        print("authorizes ONE D2 screening session (8 probes); NOT the "
-              "confirmation, NOT B/q2 retraining, NOT a promotion.")
+        print(f"authorizes ONE D2 {args.rung} session "
+              f"({reloaded.n_probes} probes); NOT B/q2 retraining, NOT a "
+              "promotion.")
     return 0
 
 

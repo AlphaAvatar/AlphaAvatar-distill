@@ -859,7 +859,10 @@ def rescore_unit(rung: str, generations: Path, *, label: str, seed: int,
                "--label", label, "--seed", str(seed),
                "--out", str(out / "result.json"),
                "--per-sample", str(out / "rows.jsonl")]
-        if RUNGS[rung]["d1_rung"] == "screening" and screening_arm is not None:
+        #: Both rungs' scorers take the arm label this way (the confirmation
+        #: scorer records it as `confirmation_arm`); no per-sample row
+        #: carries it, so it changes no row and no row digest.
+        if screening_arm is not None:
             cmd += ["--screening-arm", screening_arm]
         cmd += list(extra_args)
         proc = subprocess.run(cmd, capture_output=True, text=True,

@@ -1,4 +1,12 @@
-"""D2's ONE-USE behavioural SCREENING authorization. Its own type and schema.
+"""D2's ONE-USE behavioural authorizations: SCREENING and the SHARED
+CONFIRMATION. One type per rung, one schema each, one module.
+
+Both rungs run the same chain (driver, launcher, durability) on different
+frozen facts, so the governance differs only where the decision differs: what
+the policy permits, which price step and design cell bound the session, which
+run-id prefix the cumulative envelope nets, and which entry points form the
+harness. `RUNG_GOVERNANCE` names those per rung; everything below takes the
+rung, and the screening's values are the defaults.
 
 The grant says what the maintainer decided -- that the screening rung of the
 approved preregistration may run, under a stated cumulative envelope. Every
@@ -25,7 +33,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, ClassVar, Mapping, NamedTuple
 
 from aadistill.governance.authorization import (
     ActionPolicy, AuthorizationError, SpendAuthorization,
@@ -89,6 +97,81 @@ STAGE_CONDITIONS = {
           "checkpoint off-pod; the ranking and selection are computed off-pod "
           "at $0"),
 }
+CONFIRMATION_SCHEMA = "aadistill.phase_d2.confirmation_authorization/v1"
+D2_CONFIRMATION_POLICY = ActionPolicy(
+    policy_id="phase_d2_confirmation",
+    allowed=frozenset({"recovery_training", "d2_confirmation"}),
+    wire_claims={
+        "allows_recovery_training": "recovery_training",
+        "authorizes_d2_confirmation": "d2_confirmation",
+        "authorizes_d2_screening": "behavioural_screening",
+        "allows_beam_search": "beam_search",
+        "authorizes_candidate_reselection": "candidate_reselection",
+        "authorizes_reference_retraining": "reference_retraining",
+        "authorizes_fresh_confirmation": "fresh_confirmation",
+        "authorizes_d3": "d3",
+        "authorizes_promotion": "promotion",
+        "automatic_followon_start": "automatic_followon_start",
+    },
+    wire_schema=CONFIRMATION_SCHEMA,
+    plan_hash_key="plan_hash",
+    enforcement=(
+        "the launcher loads this artifact, refuses a planned hard threshold "
+        "above hard_cap_usd, a harness whose derived closure differs, a "
+        "preregistration or contract other than the bound one; the driver "
+        "re-derives the contract on the pod and refuses a mismatch before "
+        "training"),
+    refusal_notes={
+        "behavioural_screening": ("the screening rung is COMPLETE; its frozen "
+                                  "ranking named the candidate"),
+        "beam_search": "the D2 search is COMPLETE",
+        "candidate_reselection": ("the candidate is the one the frozen "
+                                  "screening advanced, bound by its ranking"),
+        "reference_retraining": ("B and q2 are IMPORTED units; nothing about "
+                                 "them is retrained, regenerated or "
+                                 "re-evaluated"),
+        "fresh_confirmation": ("a SHARED_GO only nominates; the fresh "
+                               "independent confirmation is its own grant"),
+        "d3": "D3 is its own search and grant",
+        "promotion": "the shared confirmation never promotes",
+        "automatic_followon_start": ("nothing chains off the verdict; the next "
+                                     "step is a maintainer decision"),
+    },
+)
+CONFIRMATION_STAGE_CONDITIONS = {
+    "A": ("setup on an admitted host; the candidate's INITIAL checkpoint "
+          "staged from the relay and verified at all four identities; the "
+          "contract re-derived and equal to the bound hash; the training "
+          "runtime equal to the protocol's"),
+    "B": ("the three probes: frozen recipe from the candidate's initial "
+          "checkpoint at each confirmation seed, packaged, generated through "
+          "the unchanged generator (token-id sidecar), admitted against the "
+          "shared confirmation rung's evaluation protocol, scored by its "
+          "pinned scorer"),
+    "C": ("per probe, after scoring: the rollout rescoring diagnostic, "
+          "failure-isolated"),
+    "D": ("stop at preservation: every probe's evidence and trained "
+          "checkpoint off-pod; the verdict is computed off-pod at $0"),
+}
+
+
+class RungGovernance(NamedTuple):
+    """What differs between the two rungs' grants, and nothing else."""
+
+    rung: str
+    schema: str
+    policy: ActionPolicy
+    run_prefix: str
+    stage_conditions: Mapping[str, str]
+    contract_module: str
+    budget_step: str
+    design_cell: str
+    entry_points: tuple[str, ...]
+    declared_inputs: tuple[str, ...]
+    #: The claim a loaded artifact of this rung must carry True.
+    required_claim: str
+
+
 GRANT_MAY_NOT_STATE = (
     "authorization_id", "plan_id", "plan_hash", "authorized_stages",
     "stage_conditions", "expected_usd", "per_launch_hard_usd", "hard_cap_usd",
@@ -118,21 +201,77 @@ DECLARED_INPUTS: tuple[str, ...] = (
 )
 SOURCE_ROOTS: tuple[str, ...] = ("src", "scripts", "scripts/stages/stage-1")
 
+CONFIRMATION_ENTRY_POINTS: tuple[str, ...] = (
+    "scripts/stages/stage-1/phase_d2/autoinit_d2_confirmation_launch.py",
+    "scripts/stages/stage-1/phase_d2/autoinit_d2_screening_driver.py",
+    "scripts/stages/stage-1/phase_d2/rescore_d2_probe.py",
+    "scripts/stages/stage-1/phase_d2/d2_confirmation.py",
+    "scripts/stages/stage-1/phase_d2/d2_screening.py",
+    "scripts/stages/stage-1/phase_d2/d2_screening_authorization.py",
+    "scripts/stages/stage-1/phase_d1/score_d1_confirmation.py",
+    "scripts/shared/evaluation/uncapped_eval_token_ids.py",
+    "scripts/shared/evaluation/uncapped_eval.py",
+    "scripts/shared/training/train_stage3.py",
+    "scripts/shared/pod/autoinit_engine_probe.py",
+    "scripts/shared/pod/collect_artifacts.py",
+)
+CONFIRMATION_DECLARED_INPUTS: tuple[str, ...] = (
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "configs/stages/stage-1/phase_c1/authorization.json",
+    "configs/stages/stage-1/phase_d2/d2_confirmation_artifacts.json",
+    "configs/stages/stage-1/phase_d2/d2_confirmation_artifacts_failed.json",
+    "configs/stages/stage-3/recipes/recovery.json",
+    "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json",
+)
+
+RUNG_GOVERNANCE: dict[str, RungGovernance] = {
+    "screening": RungGovernance(
+        rung="screening", schema=SCHEMA, policy=D2_SCREENING_POLICY,
+        run_prefix=RUN_PREFIX, stage_conditions=STAGE_CONDITIONS,
+        contract_module="stages.phase_d2.d2_screening",
+        budget_step="d2_screening", design_cell="screening",
+        entry_points=ENTRY_POINTS, declared_inputs=DECLARED_INPUTS,
+        required_claim="authorizes_d2_screening"),
+    "confirmation": RungGovernance(
+        rung="confirmation", schema=CONFIRMATION_SCHEMA,
+        policy=D2_CONFIRMATION_POLICY, run_prefix="d2_confirmation_",
+        stage_conditions=CONFIRMATION_STAGE_CONDITIONS,
+        contract_module="stages.phase_d2.d2_confirmation",
+        budget_step="d2_confirmation", design_cell="confirmation",
+        entry_points=CONFIRMATION_ENTRY_POINTS,
+        declared_inputs=CONFIRMATION_DECLARED_INPUTS,
+        required_claim="authorizes_d2_confirmation"),
+}
+
+
+def governance(rung: str) -> RungGovernance:
+    if rung not in RUNG_GOVERNANCE:
+        raise D2ScreeningRefused(f"no D2 behavioural rung {rung!r}")
+    return RUNG_GOVERNANCE[rung]
+
+
+def contract_module(rung: str):
+    import importlib
+
+    return importlib.import_module(governance(rung).contract_module)
+
 
 class D2ScreeningRefused(AuthorizationError):
     """A screening condition does not hold. An `AuthorizationError`, so the
     runner reports a refusal rather than an unhandled error."""
 
 
-def current_executable(repo_root: str | Path = REPO) -> dict[str, Any]:
+def current_executable(repo_root: str | Path = REPO,
+                       rung: str = "screening") -> dict[str, Any]:
     from aadistill.governance.closure import ClosureError, derive
 
+    gov = governance(rung)
     try:
-        return derive(repo_root, "phase_d2_screening", ENTRY_POINTS,
-                      DECLARED_INPUTS, roots=SOURCE_ROOTS)
+        return derive(repo_root, f"phase_d2_{rung}", gov.entry_points,
+                      gov.declared_inputs, roots=SOURCE_ROOTS)
     except ClosureError as exc:
         raise D2ScreeningRefused(
-            f"cannot derive the D2 screening executable set: {exc}") from exc
+            f"cannot derive the D2 {rung} executable set: {exc}") from exc
 
 
 @dataclass(frozen=True)
@@ -160,9 +299,13 @@ class D2ScreeningAuthorization(SpendAuthorization):
     authorizes_reference_retraining: bool = False
     authorizes_promotion: bool = False
     automatic_followon_start: bool = False
+    authorizes_fresh_confirmation: bool = False
+    authorizes_d3: bool = False
+    #: Which rung this artifact is for; the type below fixes it per class.
+    RUNG: ClassVar[str] = "screening"
 
     def require_harness(self, repo_root: str | Path = REPO) -> dict[str, Any]:
-        observed = current_executable(repo_root)
+        observed = current_executable(repo_root, self.RUNG)
         if not self.harness_source_digest:
             raise D2ScreeningRefused("no harness_source_digest is bound")
         recorded = set(self.harness_source_files)
@@ -209,7 +352,7 @@ class D2ScreeningAuthorization(SpendAuthorization):
 
     def as_dict(self) -> dict[str, Any]:
         payload = dict(super().as_dict())
-        payload["schema"] = SCHEMA
+        payload["schema"] = governance(self.RUNG).schema
         payload.update({
             "preregistration_hash": self.preregistration_hash,
             "shared_protocol_hash": self.shared_protocol_hash,
@@ -239,9 +382,11 @@ class D2ScreeningAuthorization(SpendAuthorization):
         if not stated or stated != sha256_json(check):
             raise D2ScreeningRefused(
                 f"{path} does not match its own authorization_sha256")
-        if raw.get("schema") != SCHEMA:
+        gov = governance(cls.RUNG)
+        if raw.get("schema") != gov.schema:
             raise D2ScreeningRefused(
-                f"{path} declares schema {raw.get('schema')!r}, not {SCHEMA!r}")
+                f"{path} declares schema {raw.get('schema')!r}, not "
+                f"{gov.schema!r}")
         missing = [f for f in (
             "authorization_id", "granted_utc", "hard_cap_usd",
             "authorized_session_commit", "preregistration_hash",
@@ -250,10 +395,11 @@ class D2ScreeningAuthorization(SpendAuthorization):
             "hard_runtime_minutes") if not raw.get(f)]
         if missing:
             raise D2ScreeningRefused(f"{path} omits {missing}")
-        D2_SCREENING_POLICY.check_claims(raw, where=str(path))
+        gov.policy.check_claims(raw, where=str(path))
         if not raw.get("allows_recovery_training") or \
-                not raw.get("authorizes_d2_screening"):
-            raise D2ScreeningRefused(f"{path} does not authorize D2 screening")
+                not raw.get(gov.required_claim):
+            raise D2ScreeningRefused(
+                f"{path} does not authorize D2 {cls.RUNG}")
         return cls(
             authorization_id=raw["authorization_id"],
             granted_utc=raw["granted_utc"], granted_by=raw.get("granted_by", ""),
@@ -281,17 +427,98 @@ class D2ScreeningAuthorization(SpendAuthorization):
             rate_usd_per_hour=raw.get("rate_usd_per_hour"),
             hard_runtime_minutes=float(raw["hard_runtime_minutes"]),
             one_use=raw.get("one_use", ""),
-            action_policy=D2_SCREENING_POLICY)
+            **{claim: bool(raw.get(claim)) for claim in gov.policy.wire_claims},
+            action_policy=gov.policy)
 
 
-def session_ceiling(repo_root: str | Path = REPO) -> dict[str, Any]:
-    """The screening price in force, from `d2_budget.py`. No second formula."""
+@dataclass(frozen=True)
+class D2ConfirmationAuthorization(D2ScreeningAuthorization):
+    """Permits exactly one D2 shared-confirmation session of the candidate
+    the frozen screening advanced."""
+
+    RUNG: ClassVar[str] = "confirmation"
+    authorizes_d2_screening: bool = False
+    authorizes_d2_confirmation: bool = True
+
+
+def confirmation_preconditions(repo_root: str | Path = REPO, *,
+                               envelope_remaining_usd: float,
+                               programme_check: Any = None) -> dict[str, Any]:
+    """What must already be true before a confirmation is issued.
+
+    The screening rung COMPLETE by its contract and naming the candidate this
+    tree's confirmation contract reads; every screening attempt's cost known;
+    and the programme reservation for D3 plus one fresh confirmation intact,
+    both at the session's hard ceiling and with this envelope's whole
+    remainder held. `programme_check` substitutes the programme reading
+    (tests only).
+    """
+    from stages.d_series import d2_budget as BUD
+    from stages.phase_d2 import d2_confirmation as CF
+
+    root = Path(repo_root)
+    done = BUD.completed_d2_screening(root)
+    if done is None or done["run_id"] != CF.SCREENING_RUN_ID:
+        raise D2ScreeningRefused(
+            f"the screening rung is not complete by its contract as "
+            f"{CF.SCREENING_RUN_ID} (got {done and done['run_id']!r}); its "
+            "frozen ranking is what names the candidate")
+    screening_spent = consumed_by_prior_subruns(root, "screening")
+    view = programme_check() if programme_check else _programme(root)
+    rule = view["reservation_rule"]
+    held = round(rule["left_after_d2_at_hard_usd"]
+                 - max(0.0, envelope_remaining_usd
+                       - view["d2_confirmation_hard_with_reserve_usd"]), 2)
+    if not rule["satisfied"] or held < rule["needed_for_d3_and_fresh_at_hard_usd"]:
+        raise D2ScreeningRefused(
+            f"the D3 + fresh-confirmation reservation "
+            f"(${rule['needed_for_d3_and_fresh_at_hard_usd']:.2f}) would not "
+            f"hold: ${rule['left_after_d2_at_hard_usd']:.2f} at the session's "
+            f"hard ceiling, ${held:.2f} with the envelope's remainder held")
+    return {"screening_completed": done,
+            "screening_attempts": screening_spent,
+            "programme_reservation": {**rule,
+                                      "left_with_the_envelope_held_usd": held}}
+
+
+def _programme(root: Path) -> dict[str, Any]:
+    """The programme view against the budget authority's live limits."""
+    import importlib.util
+
     from stages.d_series import d2_budget as BUD
 
+    spec = importlib.util.spec_from_file_location(
+        "derive_budget", root / "scripts/maintenance/consolidation/"
+                                "derive_budget.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    live = mod.derive(root)
+    limits = {"project_remaining_usd": float(live["project"]["remaining_usd"]),
+              "project_cap_usd": float(live["project"]["cap_usd"]),
+              "formal_remaining_usd": float(live["formal"]["remaining_usd"]),
+              "engineering_remaining_usd": float(
+                  live["engineering"]["remaining_usd"]),
+              "per_session_cap_usd": float(live["per_session_ceiling_usd"])}
     budget = BUD.build()
-    step = budget["steps"]["d2_screening"]
+    view = BUD.programme_scenarios(limits, budget)
+    in_force = view["search_pricing"][view["search_pricing_in_force"]]
+    return {"reservation_rule": in_force["reservation_rule"],
+            "d2_confirmation_hard_with_reserve_usd": round(
+                budget["steps"]["d2_confirmation"]["hard"]["all_in_usd"]
+                + BUD.TEARDOWN_RESERVE_USD, 2),
+            "limits": limits}
+
+
+def session_ceiling(repo_root: str | Path = REPO,
+                    rung: str = "screening") -> dict[str, Any]:
+    """The rung's price in force, from `d2_budget.py`. No second formula."""
+    from stages.d_series import d2_budget as BUD
+
+    gov = governance(rung)
+    budget = BUD.build()
+    step = budget["steps"][gov.budget_step]
     design = json.loads((Path(repo_root) / BUD.D1_DESIGN).read_text())
-    cell = design["budget"]["chain"]["sessions"]["screening"]
+    cell = design["budget"]["chain"]["sessions"][gov.design_cell]
     return {"hard_ceiling_usd": float(step["hard"]["all_in_usd"]),
             "expected_usd": float(step["expected"]["all_in_usd"]),
             "hard_ceiling_minutes": float(step["hard"]["minutes"]),
@@ -303,13 +530,13 @@ def session_ceiling(repo_root: str | Path = REPO) -> dict[str, Any]:
             "n_probes": int(step["n_probes"]),
             "arm_staging": step.get("arm_staging"),
             "rescoring": step.get("rescoring"),
-            "_basis": f"{BUD.RECORD} :: steps.d2_screening"}
+            "_basis": f"{BUD.RECORD} :: steps.{gov.budget_step}"}
 
 
-def reprice_at(rate_usd_per_hour: float,
-               repo_root: str | Path = REPO) -> dict[str, Any]:
+def reprice_at(rate_usd_per_hour: float, repo_root: str | Path = REPO,
+               rung: str = "screening") -> dict[str, Any]:
     """The SAME accepted minute bound, costed at the live rate."""
-    accepted = session_ceiling(repo_root)
+    accepted = session_ceiling(repo_root, rung)
     minutes, exp_min = (accepted["hard_ceiling_minutes"],
                         accepted["expected_minutes"])
     disk_per_hour = accepted["container_disk_usd"] / (minutes / 60.0)
@@ -372,7 +599,8 @@ def _subrun_cost(run: Path) -> tuple[float | None, str]:
     return 0.0, "an empty run directory"
 
 
-def consumed_by_prior_subruns(repo_root: str | Path = REPO) -> dict[str, Any]:
+def consumed_by_prior_subruns(repo_root: str | Path = REPO,
+                              rung: str = "screening") -> dict[str, Any]:
     """Every earlier screening subrun's booked cost (`_subrun_cost`).
 
     Fails closed: one UNKNOWN anywhere refuses the whole issuance, because the
@@ -380,7 +608,7 @@ def consumed_by_prior_subruns(repo_root: str | Path = REPO) -> dict[str, Any]:
     """
     root = Path(repo_root) / RUNS_ROOT
     rows, unknown = [], []
-    for run in sorted(root.glob(f"{RUN_PREFIX}*")):
+    for run in sorted(root.glob(f"{governance(rung).run_prefix}*")):
         cost, basis = _subrun_cost(run)
         if cost is None:
             unknown.append(f"{run.name}: {basis}")
@@ -388,7 +616,7 @@ def consumed_by_prior_subruns(repo_root: str | Path = REPO) -> dict[str, Any]:
         rows.append({"run_id": run.name, "all_in_usd": cost, "basis": basis})
     if unknown:
         raise D2ScreeningRefused(
-            f"earlier screening subruns have no booked cost: {unknown}. The "
+            f"earlier {rung} subruns have no booked cost: {unknown}. The "
             "envelope's remainder is unknown and nothing is issued over it; "
             "close each one out (cost booked, teardown verified) first")
     return {"subruns": rows,
@@ -399,23 +627,27 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
                   granted_utc: str, run_id: str,
                   repo_root: str | Path = REPO,
                   live_rate: float | None = None,
-                  consumed_usd: float | None = None) -> dict[str, Any]:
-    """The screening authorization payload, derived from the tree it binds."""
+                  consumed_usd: float | None = None,
+                  rung: str = "screening",
+                  programme_check: Any = None) -> dict[str, Any]:
+    """The rung's authorization payload, derived from the tree it binds."""
     from stages.phase_d1.d1_authorization import (
         check_the_four_conditions, live_money, live_secure_price,
     )
     from stages.d_series import d2_budget as BUD
-    from stages.phase_d2 import d2_screening as SC
 
+    gov = governance(rung)
+    SC = contract_module(rung)
+    RUN_PREFIX = gov.run_prefix
     root = Path(repo_root)
     for f in GRANT_MAY_NOT_STATE:
         if f in grant:
             raise D2ScreeningRefused(
                 f"the grant states {f!r}, which this module DERIVES")
-    if grant.get("rung") != "screening":
+    if grant.get("rung") != rung:
         raise D2ScreeningRefused(
             f"the grant funds rung {grant.get('rung')!r}; this is the "
-            "screening issuer")
+            f"{rung} issuer")
     if not session_commit or len(session_commit) != 40:
         raise D2ScreeningRefused(f"{session_commit!r} is not a full commit id")
     run_id = str(run_id or "").strip()
@@ -431,9 +663,9 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
     envelope = grant.get("cumulative_envelope_usd")
     if envelope is None or float(envelope) <= 0:
         raise D2ScreeningRefused(
-            "the grant states no cumulative_envelope_usd: a screening grant "
-            "funds the rung's attempts cumulatively, and an unbounded one is "
-            "not a grant")
+            "the grant states no cumulative_envelope_usd: a rung's grant "
+            "funds its attempts cumulatively, and an unbounded one is not a "
+            "grant")
 
     money = live_money(root)
     if SC.EXPERIMENT_ID not in money["funds_formal_sessions_of"]:
@@ -442,8 +674,8 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
     quote = ({"gpu": "NVIDIA L40S", "usd_per_hour": float(live_rate),
               "_quoted": "supplied by the caller (tests only)"}
              if live_rate is not None else live_secure_price())
-    priced = reprice_at(quote["usd_per_hour"], root)
-    spent = (consumed_by_prior_subruns(root) if consumed_usd is None else
+    priced = reprice_at(quote["usd_per_hour"], root, rung)
+    spent = (consumed_by_prior_subruns(root, rung) if consumed_usd is None else
              {"subruns": [], "consumed_usd": round(float(consumed_usd), 4),
               "_source": "supplied by the caller"})
     remaining = round(float(envelope) - spent["consumed_usd"], 4)
@@ -463,21 +695,29 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
     failed = check_the_four_conditions(ceiling=hard, money=money)
     if failed:
         raise D2ScreeningRefused(
-            f"at ${quote['usd_per_hour']:.4f}/h the screening session is not "
+            f"at ${quote['usd_per_hour']:.4f}/h the {rung} session is not "
             "fundable:\n  - " + "\n  - ".join(failed))
+    preconditions = None
+    if rung == "confirmation":
+        preconditions = confirmation_preconditions(
+            root, envelope_remaining_usd=remaining,
+            programme_check=programme_check)
 
     contract = SC.session_contract(root)
-    closure = current_executable(root)
+    closure = current_executable(root, rung)
     hard_minutes = priced["hard_ceiling_minutes"]
-    auth = D2ScreeningAuthorization(
-        authorization_id=f"autoinit.v1.{SC.EXPERIMENT_ID}.screening",
+    cls = D2ConfirmationAuthorization if rung == "confirmation" \
+        else D2ScreeningAuthorization
+    auth = cls(
+        authorization_id=f"autoinit.v1.{SC.EXPERIMENT_ID}.{rung}",
         granted_utc=granted_utc,
         granted_by=str(grant.get("granted_by") or "")[:4000],
-        plan_id=f"autoinit.v1.{SC.EXPERIMENT_ID}.screening",
+        plan_id=f"autoinit.v1.{SC.EXPERIMENT_ID}.{rung}",
         plan_hash=prereg["preregistration_hash"],
         expected_usd=priced["expected_usd"], hard_cap_usd=hard,
         per_launch_hard_usd=hard,
-        authorized_stages=AUTHORIZED_STAGES, stage_conditions=STAGE_CONDITIONS,
+        authorized_stages=AUTHORIZED_STAGES,
+        stage_conditions=dict(gov.stage_conditions),
         scope_note=str(grant.get("covers") or "")[:4000],
         authorized_session_commit=session_commit,
         harness_source_digest=closure["digest"],
@@ -496,18 +736,24 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
                "cumulative_envelope_usd": float(envelope),
                "prior_subruns": spent, "envelope_remaining_usd": remaining,
                "teardown_reserve_usd": reserve,
-               "envelope_required_for_this_session_usd": required},
+               "envelope_required_for_this_session_usd": required,
+               **({"confirmation_preconditions": preconditions}
+                  if preconditions else {})},
         rate_usd_per_hour=quote["usd_per_hour"],
         hard_runtime_minutes=hard_minutes,
         one_use=("ONE grant issuance, ONE launcher session; a replacement "
                  "attempt is a new authorization netted against the "
                  "cumulative envelope"),
-        action_policy=D2_SCREENING_POLICY)
+        action_policy=gov.policy)
     payload = auth.as_dict()
     payload["authorizes"] = (
         "ONE D2 behavioural SCREENING session: the eight frozen probes and "
         "their diagnostics, stopping at preservation. Not a confirmation, not "
-        "B/q2 retraining, not D3, not a promotion.")
+        "B/q2 retraining, not D3, not a promotion." if rung == "screening" else
+        "ONE D2 SHARED CONFIRMATION session: the advancing candidate's three "
+        "frozen probes from its initial checkpoint and their diagnostics, "
+        "stopping at preservation; the verdict off-pod. Not a fresh "
+        "confirmation, not B/q2 retraining, not D3, not a promotion.")
     payload["harness"] = {"n_files": closure["n_files"],
                           "entry_points": list(closure["entry_points"]),
                           "digest": closure["digest"]}
@@ -516,6 +762,8 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
     return payload
 
 
-__all__ = ["D2ScreeningAuthorization", "D2ScreeningRefused",
+__all__ = ["D2ConfirmationAuthorization", "D2ScreeningAuthorization",
+           "D2ScreeningRefused", "RUNG_GOVERNANCE", "confirmation_preconditions",
+           "governance",
            "D2_SCREENING_POLICY", "build_payload", "consumed_by_prior_subruns",
            "current_executable", "reprice_at", "session_ceiling"]

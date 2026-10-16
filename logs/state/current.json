@@ -75,7 +75,7 @@
   "authorizes": "nothing",
   "behavioural_design": "D1 (complete): Top-4, 10 + 6 probes, owner d1_design.json. D2: shared protocol, K=4 prepared, 8 + 3 probes, no B/q2 training, owner families/d_series/plans/d2_budget_v1.json.",
   "behavioural_pricing": "Owner: d1_design.json :: budget.chain; attempt bounds: the run's governance/authorization.json :: money.attempt_bounds.",
-  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2: search COMPLETE; screening COMPLETE (c4 advances; confirmation not recommended; awaiting the maintainer). Owner: decisions.md 2026-10-16.",
+  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2: search and screening COMPLETE; c4's shared confirmation GRANTED by the maintainer ($12.00 cumulative). Owner: decisions.md 2026-10-16.",
   "d2_owed_engineering": "none at $0; the screening chain is built (d2_screening_readiness_review.md).",
   "execution_wiring": "D1 COMPLETE and CLOSED. D2 v3 search COMPLETE: phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
@@ -127,10 +127,10 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Maintainer decision: fund the D2 shared confirmation of c4 or not (recommendation: not). Owner: d2_screening_result_review.md.",
+ "next": "D2 shared confirmation of c4: issue, stage, dry-run, launch (AU), verdict off-pod; stop at the next scientific boundary. Owner: decisions.md 2026-10-16.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "Await the confirmation decision; D3's preregistration is the next design question. Each is granted separately.",
+  "next_work": "Run c4's shared confirmation; then the maintainer decides between a fresh independent confirmation and D3.",
   "not_next": "no paid resource without its own grant; no retraining or regeneration of B/q2; no rerun of D1 or change to its records; no third KL-only search. Owner: decisions.md 2026-10-13.",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 COMPLETE / NO-GO (q2 did not confirm; B stands).",
   "then": "nothing is queued."

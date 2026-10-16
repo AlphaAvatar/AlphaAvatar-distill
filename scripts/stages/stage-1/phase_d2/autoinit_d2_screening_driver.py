@@ -1,9 +1,18 @@
 #!/usr/bin/env python3
-"""Train and score D2's eight screening probes; stop at preservation.
+"""Train and score ONE D2 behavioural rung's probes; stop at preservation.
 
     /opt/train/bin/python scripts/stages/stage-1/phase_d2/autoinit_d2_screening_driver.py \
-        --out artifacts/audit/autoinit_d2_screening --run-id <id> \
-        --authorization <governance/authorization.json> --arm-root <staged arms>
+        --rung screening|confirmation --out artifacts/audit/autoinit_d2_<rung> \
+        --run-id <id> --authorization <governance/authorization.json> \
+        --arm-root <staged arms>
+
+ONE DRIVER, TWO RUNGS. The screening rung trains the four committed
+initializations at the two shared screening seeds (`d2_screening.py`); the
+shared confirmation trains the one candidate the frozen screening advanced at
+the three confirmation seeds, from its INITIAL checkpoint (`d2_confirmation.py`).
+The rung picks the contract module, the pinned scorer and the paths below;
+every step of the probe loop is the same code. What follows describes the
+screening; the confirmation differs only in those facts.
 
 Four committed D2 initializations x the two shared screening seeds. The seed is
 the REPLICATE and the initialization the TREATMENT; the comparator is B's two
@@ -58,13 +67,37 @@ SUCCESS_MARKER = "ALL_DONE"
 FAILURE_MARKER = "RUN_FAILED"
 CHECK_ONLY_MARKER = "CHECK_ONLY_OK"
 
-EVIDENCE_FILENAME = "d2_screening.json"
-ATTESTED_NAME = "d2_screening_attested_protocol.json"
-ATTESTED_SCHEMA = "aadistill.phase_d2.screening_attested_protocol/v1"
-PROBE_ROOT_REL = "artifacts/stages/stage-3/d2_screening"
-EVAL_PACKAGES_REL = "artifacts/stages/stage-3/d2_screening_eval"
-ACK_REL = "artifacts/audit/autoinit_d2_screening/release_acks"
-SCORER = REPO_ROOT / "scripts/stages/stage-1/phase_d1/score_d1_screening.py"
+
+
+def rung_layout(rung: str) -> dict[str, Any]:
+    """Every path and pin that differs between the two rungs. The launcher's
+    layout is built from the same function, so the two never disagree."""
+    if rung not in ("screening", "confirmation"):
+        raise ValueError(f"no D2 behavioural rung {rung!r}")
+    return {
+        "rung": rung,
+        "contract_module": f"stages.phase_d2.d2_{rung}",
+        "audit_dirname": f"autoinit_d2_{rung}",
+        "evidence_filename": f"d2_{rung}.json",
+        "attested_name": f"d2_{rung}_attested_protocol.json",
+        "attested_schema": f"aadistill.phase_d2.{rung}_attested_protocol/v1",
+        "session_schema": f"aadistill.phase_d2.{rung}_session/v1",
+        "probe_root_rel": f"artifacts/stages/stage-3/d2_{rung}",
+        "eval_packages_rel": f"artifacts/stages/stage-3/d2_{rung}_eval",
+        "ack_rel": f"artifacts/audit/autoinit_d2_{rung}/release_acks",
+        "status": f"/workspace/autoinit_d2_{rung}.status",
+        "scorer": REPO_ROOT / f"scripts/stages/stage-1/phase_d1/score_d1_{rung}.py",
+    }
+
+
+_SCREENING = rung_layout("screening")
+EVIDENCE_FILENAME = _SCREENING["evidence_filename"]
+ATTESTED_NAME = _SCREENING["attested_name"]
+ATTESTED_SCHEMA = _SCREENING["attested_schema"]
+PROBE_ROOT_REL = _SCREENING["probe_root_rel"]
+EVAL_PACKAGES_REL = _SCREENING["eval_packages_rel"]
+ACK_REL = _SCREENING["ack_rel"]
+SCORER = _SCREENING["scorer"]
 TOKEN_ID_WRAPPER = REPO_ROOT / "scripts/shared/evaluation/uncapped_eval_token_ids.py"
 RESCORER = REPO_ROOT / "scripts/stages/stage-1/phase_d2/rescore_d2_probe.py"
 
@@ -75,6 +108,8 @@ class D2ScreeningDriverError(RuntimeError):
 
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--rung", default="screening",
+                    choices=("screening", "confirmation"))
     ap.add_argument("--out", required=True)
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--authorization", default=None)
@@ -91,7 +126,8 @@ def build_parser() -> argparse.ArgumentParser:
     return ap
 
 
-def training_runtime(image_digest: str | None) -> dict[str, Any]:
+def training_runtime(image_digest: str | None,
+                     rung: str = "screening") -> dict[str, Any]:
     """The runtime fingerprint the trainer will observe, observed HERE first.
 
     The driver runs under the trainer's interpreter, so this is the same
@@ -101,8 +137,9 @@ def training_runtime(image_digest: str | None) -> dict[str, Any]:
     from aadistill.initialization.planning.recovery import (
         RuntimeEnvironmentFingerprint,
     )
-    from stages.phase_d2 import d2_screening as SC
+    import importlib
 
+    SC = importlib.import_module(rung_layout(rung)["contract_module"])
     observed = RuntimeEnvironmentFingerprint.observe(image_digest=image_digest)
     want = SC.protocol(REPO_ROOT)["recovery"]["training_runtime_digest"]
     row = {"observed": observed.as_dict(), "digest": observed.digest,
@@ -189,24 +226,27 @@ def main(argv: list[str] | None = None) -> int:
     D1D.RUN_ID_FOR_PROVENANCE[0] = str(args.run_id or "")
     out = REPO_ROOT / args.out
     out.mkdir(parents=True, exist_ok=True)
-    status = args.status or "/workspace/autoinit_d2_screening.status"
+    L = rung_layout(args.rung)
+    status = args.status or L["status"]
     record: dict[str, Any] = {
-        "schema": "aadistill.phase_d2.screening_session/v1",
-        "run_id": args.run_id, "rung": "screening",
+        "schema": L["session_schema"],
+        "run_id": args.run_id, "rung": args.rung,
         "started_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "status": "RUNNING", "probes": []}
-    evidence = out / EVIDENCE_FILENAME
+    evidence = out / L["evidence_filename"]
 
     def save() -> None:
         evidence.write_text(json.dumps(record, indent=2, default=str) + "\n")
 
     D1D.mark(status, "DRIVER_START")
     try:
-        from aadistill.infrastructure.manifest import sha256_json
-        from stages.phase_d2 import d2_screening as SC
+        import importlib
 
+        from aadistill.infrastructure.manifest import sha256_json
+
+        SC = importlib.import_module(L["contract_module"])
         #: Cheap refusals first: battery bytes, role disjointness, pack digest.
-        record["cheap_preflight"] = D1D.cheap_preflight("screening", REPO_ROOT)
+        record["cheap_preflight"] = D1D.cheap_preflight(args.rung, REPO_ROOT)
         save()
         #: The CONTRACT, re-derived on THIS tree with THESE staged arms (four
         #: identities hashed) and the protocol's source pins compared.
@@ -218,10 +258,12 @@ def main(argv: list[str] | None = None) -> int:
         save()
         if args.authorization:
             from stages.phase_d2.d2_screening_authorization import (
-                D2ScreeningAuthorization,
+                D2ConfirmationAuthorization, D2ScreeningAuthorization,
             )
 
-            auth = D2ScreeningAuthorization.load(args.authorization)
+            auth = (D2ConfirmationAuthorization
+                    if args.rung == "confirmation"
+                    else D2ScreeningAuthorization).load(args.authorization)
             auth.require_run_id(args.run_id)
             auth.require_plan(contract["preregistration_hash"])
             auth.require_contract(record["contract_hash"])
@@ -234,7 +276,7 @@ def main(argv: list[str] | None = None) -> int:
             save()
         elif not args.check_only:
             raise D2ScreeningDriverError(
-                "a formal screening session runs under its one-use "
+                f"a formal {args.rung} session runs under its one-use "
                 "authorization; --authorization may be omitted only with "
                 "--check-only")
 
@@ -251,7 +293,7 @@ def main(argv: list[str] | None = None) -> int:
         probes = SC.probes(REPO_ROOT, arm_root=args.arm_root)
         record["schedule"] = [p.probe_id for p in probes]
         arms = {a.arm_id: a for a in SC.arms(REPO_ROOT, arm_root=args.arm_root)}
-        for path in (SCORER, TOKEN_ID_WRAPPER, RESCORER):
+        for path in (L["scorer"], TOKEN_ID_WRAPPER, RESCORER):
             if not path.is_file():
                 raise D2ScreeningDriverError(f"{path} is missing")
         if args.check_only:
@@ -259,8 +301,9 @@ def main(argv: list[str] | None = None) -> int:
             save()
             return 0
 
-        record["training_runtime"] = training_runtime(args.image_digest)
-        scoring = D1D.d1_scoring_contract("screening", REPO_ROOT)
+        record["training_runtime"] = training_runtime(args.image_digest,
+                                                      args.rung)
+        scoring = D1D.d1_scoring_contract(args.rung, REPO_ROOT)
         battery_fields = D1D.battery_protocol_fields(contract)
         record["scoring_contract"] = {k: scoring[k]
                                       for k in ("contract", "digest")}
@@ -290,9 +333,9 @@ def main(argv: list[str] | None = None) -> int:
             save()
             print(f"[{index + 1}/{len(probes)}] {probe.probe_id}", flush=True)
             D1D.release_acked_probe_workdirs(
-                record, save, ack_rel=ACK_REL,
-                roots_rel=(PROBE_ROOT_REL, EVAL_PACKAGES_REL))
-            model_root = REPO_ROOT / PROBE_ROOT_REL / probe.probe_id
+                record, save, ack_rel=L["ack_rel"],
+                roots_rel=(L["probe_root_rel"], L["eval_packages_rel"]))
+            model_root = REPO_ROOT / L["probe_root_rel"] / probe.probe_id
             resumed = D1D.trained_checkpoint_state(model_root)
             if resumed is not None:
                 entry.update({"resumed_from_trained": resumed, "trained": True,
@@ -305,7 +348,7 @@ def main(argv: list[str] | None = None) -> int:
                 config = D1D.probe_config(
                     probe, audit=out, frozen_recipe=FROZEN_RECIPE,
                     pack_dir=PACK_DIR, overrides=C1_PROBE_OVERRIDES,
-                    out_root=PROBE_ROOT_REL, experiment="D2")
+                    out_root=L["probe_root_rel"], experiment="D2")
                 entry["config"] = str(config.relative_to(REPO_ROOT))
                 import gc
 
@@ -355,7 +398,7 @@ def main(argv: list[str] | None = None) -> int:
             #: weights off-pod from this flag.
             save()
 
-            package_dir = REPO_ROOT / EVAL_PACKAGES_REL / probe.probe_id
+            package_dir = REPO_ROOT / L["eval_packages_rel"] / probe.probe_id
             entry["package_dir"] = str(package_dir)
             build_evaluation_package(
                 model_dir, tokenizer_source=TOKENIZER_SOURCE, dest=package_dir,
@@ -364,7 +407,8 @@ def main(argv: list[str] | None = None) -> int:
                 attested = D1D.build_attested_protocol(
                     package_dir, image_digest=args.image_digest,
                     scoring=scoring, battery_fields=battery_fields, out=out,
-                    report_name=ATTESTED_NAME, schema=ATTESTED_SCHEMA)
+                    report_name=L["attested_name"],
+                    schema=L["attested_schema"])
                 record["attested_evaluation_protocol_hash"] = \
                     attested.evaluation_protocol_hash
                 want = contract["evaluation"]["evaluation_protocol_hash"]
@@ -408,7 +452,7 @@ def main(argv: list[str] | None = None) -> int:
             result_path = out / "results" / f"{probe.probe_id}.json"
             per_sample = out / "per_sample" / f"{probe.probe_id}.jsonl"
             score = subprocess.run(
-                ["/opt/train/bin/python", str(SCORER),
+                ["/opt/train/bin/python", str(L["scorer"]),
                  "--generations", str(gen_dir), "--label", probe.probe_id,
                  "--seed", str(probe.seed), "--out", str(result_path),
                  "--per-sample", str(per_sample),
@@ -471,9 +515,10 @@ def main(argv: list[str] | None = None) -> int:
             save()
 
         record["_ranking"] = (
-            "NOT COMPUTED HERE. The frozen screening rule is applied off-pod "
-            "at $0 by rank_d2_screening.py, from the secured rows and B's "
-            "imported units.")
+            "NOT COMPUTED HERE. The frozen rule (the screening ranking, or "
+            "the confirmation verdict) is applied off-pod at $0 by "
+            "rank_d2_screening.py / verdict_d2_confirmation.py, from the "
+            "secured rows and B's imported units.")
         record["status"] = "COMPLETE"
         save()
     except BaseException as exc:                                  # noqa: BLE001

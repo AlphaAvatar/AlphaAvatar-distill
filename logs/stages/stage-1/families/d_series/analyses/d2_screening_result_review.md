@@ -138,6 +138,11 @@ landed in SE and US on 580.x and were refused. The record is
 
 ## 8. Scientific recommendation on the shared confirmation
 
+> **Added 2026-10-16 (UTC).** This section is the EXECUTOR's recommendation,
+> not a maintainer decision. The maintainer has since decided to run c4's
+> shared confirmation (`decisions.md` 2026-10-16, $12.00 cumulative). The
+> screening evidence and the frozen ranking are unchanged.
+
 **Recommendation: do not fund the shared confirmation of c4.** It is the
 maintainer's decision, and nothing here starts it.
 

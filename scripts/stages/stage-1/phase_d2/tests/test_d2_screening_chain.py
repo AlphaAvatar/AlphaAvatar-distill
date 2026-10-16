@@ -1157,7 +1157,7 @@ class TestTheCloseoutBooksAllInAndOnlyVerifiedTeardown:
         (scr / "store" / "d2_screening.json").write_text(json.dumps(
             {"status": "FAILED", "probes": []}))
         monkeypatch.setattr(C, "REPO_ROOT", tmp_path)
-        monkeypatch.setattr(C, "reference_profiles", lambda root: {})
+        monkeypatch.setattr(C, "reference_profiles", lambda *a, **k: {})
         doc = C.build(run, scr, balance_after=None, disk_gb=120)[0]
         assert doc["provider_teardown_verified"] is verified
         assert doc["ranking"] is None and "INCOMPLETE" in doc["classification"]

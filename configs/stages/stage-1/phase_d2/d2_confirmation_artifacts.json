@@ -1,0 +1,79 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_d2_confirmation",
+ "note": "success spec: every permanent artifact a D2 shared-confirmation session must not lose -- the session record with its contract and arm verification, every probe's result, per-sample rows, admission and complete raw generations (P18, with the engine token-id sidecars beside them), the attested protocol and engine probe, and each candidate's rollout-rescoring diagnostic (optional: a failed diagnostic never blocks a scored probe). Trained probe checkpoints are NOT here: they are preserved off-pod by the launcher during the run and released at a successful terminal (no consumer remains -- the verdict reads scores and nothing retrains from them).",
+ "patterns_are_relative_to": "the collector's --root, which SessionRunner sets to <checkout>/artifacts. So `audit/autoinit_d2_confirmation/x` is <checkout>/artifacts/audit/autoinit_d2_confirmation/x.",
+ "one_authoritative_layout": "artifacts/audit/autoinit_d2_confirmation/ is where the driver writes and where the relay, the report fetch, the launcher's poll hook (D1's durability functions under D2's layout) and this spec all read.",
+ "entries": [
+  {
+   "artifact_class": "d2_confirmation_record",
+   "pattern": "audit/autoinit_d2_confirmation/d2_confirmation.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_bytes": 512
+  },
+  {
+   "artifact_class": "d2_confirmation_results",
+   "pattern": "audit/autoinit_d2_confirmation/results/*.json",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_confirmation_per_sample",
+   "pattern": "audit/autoinit_d2_confirmation/per_sample/*.jsonl",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_confirmation_generations",
+   "pattern": "audit/autoinit_d2_confirmation/generations/*/*",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_confirmation_probe_configs",
+   "pattern": "audit/autoinit_d2_confirmation/configs/*.json",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_confirmation_attested_protocol",
+   "pattern": "audit/autoinit_d2_confirmation/d2_confirmation_attested_protocol.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_bytes": 256
+  },
+  {
+   "artifact_class": "d2_confirmation_engine_probe",
+   "pattern": "audit/autoinit_d2_confirmation/engine_probe.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_bytes": 128
+  },
+  {
+   "artifact_class": "d2_confirmation_generation_admissions",
+   "pattern": "audit/autoinit_d2_confirmation/*_generation_admission.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "d2_confirmation_rescoring",
+   "pattern": "audit/autoinit_d2_confirmation/rescoring/*.json",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_confirmation_tails",
+   "pattern": "audit/autoinit_d2_confirmation/*_tail.log",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_confirmation_release_acks",
+   "pattern": "audit/autoinit_d2_confirmation/release_acks/*.json",
+   "required": false,
+   "lifecycle": "final_required"
+  }
+ ]
+}

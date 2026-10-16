@@ -3,7 +3,11 @@
 
     PYTHONPATH=src:scripts .venv/bin/python \
         scripts/stages/stage-1/phase_d2/closeout_d2_screening.py \
-        --run d2_screening_<utc> --scr <scr> [--write]
+        --run d2_screening_<utc> --scr <scr> [--rung confirmation] [--write]
+
+ONE CLOSEOUT, TWO RUNGS: the screening records its frozen RANKING, the shared
+confirmation its frozen VERDICT (`verdict_d2_confirmation.verdict_run`); the
+rest is the same.
 
 What a finished screening session owes the repository, in one command:
 
@@ -45,6 +49,18 @@ for _extra in ("src", "scripts", "scripts/stages/stage-1"):
 
 RUNS_REL = "logs/stages/stage-1/phase_d2/runs"
 AUDIT = "autoinit_d2_screening"
+
+
+def _names(rung: str) -> dict[str, str]:
+    return {"audit": f"autoinit_d2_{rung}",
+            "record": f"d2_{rung}.json",
+            "attested": f"d2_{rung}_attested_protocol.json",
+            "rule_file": ("d2_screening_ranking.json" if rung == "screening"
+                          else "d2_confirmation_verdict.json"),
+            "diagnostics": f"d2_{rung}_diagnostics.json",
+            "schema": f"aadistill.phase_d2.{rung}_closeout/v1",
+            "shared_rung": ("shared_screening" if rung == "screening"
+                            else "shared_confirmation")}
 DISK_USD_PER_GB_MONTH = 0.10
 HOURS_PER_MONTH = 730.0
 
@@ -54,29 +70,30 @@ def _sha(path: Path) -> str | None:
         else None
 
 
-def _session_record(scr: Path) -> dict[str, Any]:
+def _session_record(scr: Path, rung: str = "screening") -> dict[str, Any]:
     """The driver's own record: the closeout fetch first, the live mirror
     second."""
-    for path in (scr / "store" / "d2_screening.json",
-                 scr / "relay" / "d2_screening.json"):
+    name = _names(rung)["record"]
+    for path in (scr / "store" / name, scr / "relay" / name):
         if path.is_file():
             return json.loads(path.read_text())
     raise SystemExit(f"no driver record under {scr}")
 
 
-def evidence_plan(run_dir: Path, scr: Path, record: dict[str, Any]
-                  ) -> list[tuple[Path, Path]]:
+def evidence_plan(run_dir: Path, scr: Path, record: dict[str, Any],
+                  rung: str = "screening") -> list[tuple[Path, Path]]:
     """(source, destination) for every small file the run directory keeps."""
     store = scr / "store"
     ev = run_dir / "evidence"
     plan = [(store / name, ev / name) for name in (
-        "d2_screening_attested_protocol.json", "engine_probe.json")]
+        _names(rung)["attested"], "engine_probe.json")]
     for probe in record.get("probes", []):
         pid = probe["probe_id"]
         src = store / "probes" / pid
         plan += [(src / "result.json", ev / "results" / f"{pid}.json"),
                  (src / "admission.json", ev / "admissions" / f"{pid}.json"),
-                 (store / "extracted" / "audit" / AUDIT / "configs"
+                 (store / "extracted" / "audit" / _names(rung)["audit"]
+                  / "configs"
                   / f"{pid}.json", ev / "configs" / f"{pid}.json")]
         plan += [(src / "training" / name, ev / "training" / pid / name)
                  for name in ("run_manifest.json", "run_completion.json",
@@ -134,22 +151,23 @@ def rollout_profile(gen_dir: Path) -> dict[str, Any]:
             "degeneration_rate": rate("degeneration_triggered")}
 
 
-def reference_profiles(repo_root: Path) -> dict[str, Any]:
+def reference_profiles(repo_root: Path,
+                       shared_rung: str = "shared_screening") -> dict[str, Any]:
     """B's and q2's imported screening units, from D1's durable store."""
     from stages.d_series import shared_evaluation as SE
-    from stages.phase_d2 import d2_screening as SC
 
-    store = SE.durable_store(SC.SHARED_RUNG, repo_root) / "store" / "probes"
+    store = SE.durable_store(shared_rung, repo_root) / "store" / "probes"
     out = {}
     for unit in SE.historical_units(repo_root):
-        if unit.rung == SC.SHARED_RUNG:
+        if unit.rung == shared_rung:
             out[unit.probe_id] = {"arm": unit.arm, "seed": unit.seed,
                                   **rollout_profile(store / unit.probe_id
                                                     / "generations")}
     return out
 
 
-def diagnostics(scr: Path, record: dict[str, Any]) -> dict[str, Any]:
+def diagnostics(scr: Path, record: dict[str, Any],
+                rung: str = "screening") -> dict[str, Any]:
     """Descriptive only: alignment and rescoring, per probe."""
     probes = {}
     for probe in record.get("probes", []):
@@ -184,7 +202,8 @@ def diagnostics(scr: Path, record: dict[str, Any]) -> dict[str, Any]:
         probes[probe["probe_id"]]["rollout_profile"] = rollout_profile(
             scr / "store" / "probes" / probe["probe_id"] / "generations")
     return {"schema": "aadistill.phase_d2.screening_diagnostics/v1",
-            "reference_rollout_profiles": reference_profiles(REPO_ROOT),
+            "reference_rollout_profiles": reference_profiles(
+                REPO_ROOT, _names(rung)["shared_rung"]),
             "_role": ("DESCRIPTIVE ONLY. Never read by the screening rule, "
                       "never a guardrail: the token-id sidecar's alignment "
                       "and the rescoring of each candidate's own rollouts "
@@ -214,32 +233,38 @@ def money(session: dict[str, Any], *, disk_gb: int,
 
 
 def build(run: str, scr: Path, *, balance_after: float | None,
+          rung: str = "screening",
           disk_gb: int) -> tuple[dict[str, Any], list[tuple[Path, Path]],
                                  dict[str, Any], dict[str, Any] | None,
                                  str | None]:
     from stages.phase_d2 import rank_d2_screening as R
+    from stages.phase_d2 import verdict_d2_confirmation as V
+
+    names = _names(rung)
 
     run_dir = REPO_ROOT / RUNS_REL / run
     session = json.loads((run_dir / "runtime" / "session.json").read_text())
     auth = json.loads((run_dir / "governance" / "authorization.json"
                        ).read_text())
-    record = _session_record(scr)
-    plan = evidence_plan(run_dir, scr, record)
-    diag = diagnostics(scr, record)
+    record = _session_record(scr, rung)
+    plan = evidence_plan(run_dir, scr, record, rung)
+    diag = diagnostics(scr, record, rung)
     ranking, refused = None, None
     try:
-        ranking = R.rank_run(record, scr / "store", REPO_ROOT)
-    except R.RankingRefused as exc:
+        ranking = (R.rank_run(record, scr / "store", REPO_ROOT)
+                   if rung == "screening" else
+                   V.verdict_run(record, scr / "store", REPO_ROOT))
+    except (R.RankingRefused, V.VerdictRefused) as exc:
         refused = str(exc)
     gone = bool(session.get("provider_confirms_gone"))
     state = session.get("final_pod_state") or {}
     complete = (record.get("status") == "COMPLETE" and ranking is not None)
     doc = {
-        "schema": "aadistill.phase_d2.screening_closeout/v1",
+        "schema": names["schema"],
         "run_id": run, "stage_id": "1", "experiment_id": "phase_d2",
         "classification": (
-            "COMPLETE SCREENING RUNG: every frozen probe trained, generated, "
-            "scored and verified off-pod; the frozen rule applied"
+            f"COMPLETE {rung.upper()} RUNG: every frozen probe trained, "
+            "generated, scored and verified off-pod; the frozen rule applied"
             if complete else
             f"INCOMPLETE: driver status {record.get('status')!r}; "
             f"ranking {'refused: ' + str(refused) if refused else 'absent'}"),
@@ -278,11 +303,14 @@ def build(run: str, scr: Path, *, balance_after: float | None,
         "durable_store": durable_store(scr, record),
         "required_products_secured": session.get("required_products_secured"),
         "artifact_loss_risk": session.get("artifact_loss_risk"),
-        "ranking": ("evidence/d2_screening_ranking.json" if ranking
-                    else None),
+        "ranking": (f"evidence/{names['rule_file']}" if ranking else None),
         "ranking_refused": refused,
-        "selection": (ranking or {}).get("selection"),
-        "diagnostics": "evidence/d2_screening_diagnostics.json",
+        **({"selection": (ranking or {}).get("selection")}
+           if rung == "screening" else
+           {"outcome": (ranking or {}).get("outcome"),
+            "decision": ((ranking or {}).get("verdict") or {}).get(
+                "primary_vs_B", {}).get("decision")}),
+        "diagnostics": f"evidence/{names['diagnostics']}",
         "what_this_authorizes": (
             "nothing. Screening nominates at most one candidate for the "
             "shared confirmation, which needs its own maintainer grant; it "
@@ -297,16 +325,21 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--scr", required=True)
     ap.add_argument("--balance-after", type=float, default=None)
     ap.add_argument("--disk-gb", type=int, default=120)
+    ap.add_argument("--rung", default="screening",
+                    choices=("screening", "confirmation"))
     ap.add_argument("--write", action="store_true")
     args = ap.parse_args(argv)
     scr = Path(args.scr)
     doc, plan, diag, ranking, refused = build(
-        args.run, scr, balance_after=args.balance_after, disk_gb=args.disk_gb)
+        args.run, scr, balance_after=args.balance_after, disk_gb=args.disk_gb,
+        rung=args.rung)
+    names = _names(args.rung)
     run_dir = REPO_ROOT / RUNS_REL / args.run
     present = [(s, d) for s, d in plan if s.is_file()]
     print(json.dumps({"copy": len(present), "missing": [
         str(s) for s, _ in plan if not s.is_file()][:12],
-        "selection": doc["selection"], "ranking_refused": refused,
+        "selection": doc.get("selection") or doc.get("outcome"),
+        "ranking_refused": refused,
         "money": doc["money"],
         "provider_teardown_verified": doc["provider_teardown_verified"]},
         indent=1, default=str))
@@ -315,13 +348,13 @@ def main(argv: list[str] | None = None) -> int:
     for src, dest in present:
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, dest)
-    record = _session_record(scr)
-    (run_dir / "evidence" / "d2_screening.json").write_text(
+    record = _session_record(scr, args.rung)
+    (run_dir / "evidence" / names["record"]).write_text(
         json.dumps(record, indent=2, default=str) + "\n")
-    (run_dir / "evidence" / "d2_screening_diagnostics.json").write_text(
+    (run_dir / "evidence" / names["diagnostics"]).write_text(
         json.dumps(diag, indent=1) + "\n")
     if ranking is not None:
-        (run_dir / "evidence" / "d2_screening_ranking.json").write_text(
+        (run_dir / "evidence" / names["rule_file"]).write_text(
             json.dumps(ranking, indent=1) + "\n")
     (run_dir / "closeout").mkdir(parents=True, exist_ok=True)
     (run_dir / "closeout" / "outcome.json").write_text(

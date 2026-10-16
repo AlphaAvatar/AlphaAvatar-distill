@@ -11523,3 +11523,48 @@ on a paid pod.
 - **Revisit when** the maintainer decides on the confirmation, or on what D3's
   preregistration should measure.
 
+## 2026-10-16 — Maintainer decision: run c4's D2 shared confirmation ($12.00 cumulative); the executor's recommendation is not adopted
+
+- **Record governance (additive).** The 2026-10-16 screening entry above
+  carries the EXECUTOR's recommendation not to fund the confirmation. It was
+  advice to the maintainer, never a maintainer decision. It is not rewritten;
+  this entry records what the maintainer decided.
+- **Context.** The maintainer's D2 Screening Independent Review of `6bc472f6`
+  accepts the screening as COMPLETE and its frozen result unchanged:
+  `ONE_CANDIDATE_ADVANCES: c4` (`3a4173e4…`). The screening evidence and the
+  frozen ranking are untouched.
+- **Decision.** Run c4's shared confirmation. D2 is not stopped early because
+  the screening Δ is below the SESOI. The maintainer's reasons:
+  - the frozen screening rule selected the best unvetoed candidate and did not
+    register Δ ≥ SESOI as an entry condition for the confirmation;
+  - two fixed seeds (1,700 scorable prompt-seeds) leave the screening
+    estimate highly uncertain;
+  - q2's screening→confirmation drop argues for an independent confirmation,
+    not for a presumed failure;
+  - the budget covers it without touching the D3 + fresh-confirmation
+    reservation.
+
+  This is a research-investment decision, not a claim that c4 is better than
+  B.
+- **Frozen protocol.** Candidate c4 only, from its INITIAL committed
+  checkpoint. Seeds 396880939, 766527341, 1004399678. The `d1_confirmation`
+  battery (950 prompts, 850 scorable), `e1_p1_kd_heavy@0.86M`, and the shared
+  confirmation rung's generation and scoring. Comparator: B's three imported
+  units; q2 is descriptive.
+  - The verdict is registered: `correct_overall`, SESOI 0.01, one-sided α
+    0.025, the frozen bootstrap at seed 450870042, ≥ 2 of 3 seed deltas
+    positive, the usable-rollout veto. The outcomes are SHARED_GO / NO_GO /
+    INCONCLUSIVE, and INCONCLUSIVE is terminal.
+- **Grant.** $12.00 cumulative all-in
+  (`approvals/autoinit_d2_confirmation_grant.json`).
+  - About $6.59 expected and $8.21 hard, each re-derived at the live rate.
+    Reserve $0.30, per-session cap $30, project cap $595.
+  - Issuance requires: the screening complete by its contract; every attempt's
+    cost known; remainder ≥ hard ceiling + reserve; and the D3 +
+    fresh-confirmation reservation intact with the envelope's remainder held.
+- **Not authorized:** c1/c2/c3, re-screening, B/q2 retraining, reuse of
+  screening-trained weights, D3, a fresh confirmation, any promotion, a cap
+  change. Stop at the next scientific authorization boundary after the
+  verdict.
+- **Revisit when** the confirmation verdict is recorded.
+

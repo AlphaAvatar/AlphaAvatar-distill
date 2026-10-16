@@ -953,6 +953,32 @@ print(f'  {a.authorization_id}: hard \${a.hard_cap_usd:.4f}, '
       f'probes {a.n_probes}, seeds {list(a.seeds)}, '
       f'contract {a.contract_hash[:12]}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "d2_confirmation" ]; then
+  # D2 SHARED CONFIRMATION. Its own TYPE: a screening artifact must not buy the
+  # confirmation, and this one must not buy a screening, a re-selection, a
+  # fresh confirmation, D3 or a promotion. Three probes of the ONE candidate
+  # the frozen screening advanced, compared with B's IMPORTED confirmation
+  # units. The plan hash is the preregistration's.
+  cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_d2.d2_screening_authorization import D2ConfirmationAuthorization
+a = D2ConfirmationAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.allows_recovery_training is True, 'every confirmation probe is a training run'
+assert a.authorizes_d2_confirmation is True, 'this session needs a D2 confirmation authorization'
+assert a.authorizes_d2_screening is False, 'the screening is complete; this grant buys none'
+assert a.allows_beam_search is False, 'a confirmation grant must not authorize a beam'
+assert a.authorizes_candidate_reselection is False, 'the candidate is the frozen screening\'s'
+assert a.authorizes_reference_retraining is False, 'B and q2 are imported units, never retrained'
+assert a.authorizes_fresh_confirmation is False, 'a SHARED_GO only nominates'
+assert a.authorizes_d3 is False, 'D3 is its own grant'
+assert a.authorizes_promotion is False, 'the shared confirmation never promotes'
+assert a.automatic_followon_start is False, 'nothing chains off the verdict'
+print(f'  {a.authorization_id}: hard \${a.hard_cap_usd:.4f}, '
+      f'probes {a.n_probes}, seeds {list(a.seeds)}, '
+      f'contract {a.contract_hash[:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "c2" ]; then
   # A SEVENTH type. Phase-C2 Search-1's grant measures a harness containing the
   # C2 launcher, driver, search space and baseline rule, none of which appear in

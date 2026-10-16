@@ -94,8 +94,13 @@ def rescore_matches(result: dict[str, Any], again: dict[str, Any] | None
 def verify_unit(probe_dir: Path, session_probe: dict[str, Any],
                 expected: dict[str, Any], *, repo_root: Path = REPO_ROOT,
                 config_path: Path | None = None,
-                rescore: Any = None) -> dict[str, Any]:
+                rescore: Any = None,
+                shared_rung: str = SC.SHARED_RUNG) -> dict[str, Any]:
     """One candidate unit, from its secured files. Never trusts the record.
+
+    `shared_rung` is the shared protocol's rung the unit is admitted and
+    re-scored under (the screening's by default; the confirmation's verdict
+    passes its own).
 
     `expected` is the FROZEN unit, read from the contract: `probe_id`, `arm`,
     `seed`, and the arm's committed `state_id` and `artifact_digest`. A record
@@ -109,7 +114,7 @@ def verify_unit(probe_dir: Path, session_probe: dict[str, Any],
     from stages.d_series import shared_evaluation as SE
 
     record = SC.protocol(repo_root)
-    rung = record["rungs"][SC.SHARED_RUNG]
+    rung = record["rungs"][shared_rung]
     block = record["recovery"]
     pid, seed, arm = expected["probe_id"], int(expected["seed"]), expected["arm"]
     result = _read_json(probe_dir / "result.json") or {}
@@ -126,7 +131,10 @@ def verify_unit(probe_dir: Path, session_probe: dict[str, Any],
     checks["label_is_the_frozen_probe"] = result.get("label") == pid
     checks["seed_is_the_frozen_seed"] = (
         type(result.get("seed")) is int and result["seed"] == seed)
-    checks["arm_is_the_frozen_arm"] = result.get("screening_arm") == arm
+    #: Each rung's scorer records the arm label under its own field.
+    arm_field = ("confirmation_arm" if shared_rung == "shared_confirmation"
+                 else "screening_arm")
+    checks["arm_is_the_frozen_arm"] = result.get(arm_field) == arm
     checks["initialization_is_the_committed_candidate"] = (
         result.get("initialization_artifact_digest")
         == expected["artifact_digest"])
@@ -167,7 +175,7 @@ def verify_unit(probe_dir: Path, session_probe: dict[str, Any],
 
     # -- the scores: the pinned scorer, re-run on the stored generations -----
     run = rescore or SE.rescore_unit
-    again = run(SC.SHARED_RUNG, probe_dir / "generations", label=pid,
+    again = run(shared_rung, probe_dir / "generations", label=pid,
                 seed=seed, screening_arm=arm, repo_root=repo_root,
                 extra_args=("--init-digest", str(expected["artifact_digest"]),
                             "--generation-fingerprint", str(fingerprint)))

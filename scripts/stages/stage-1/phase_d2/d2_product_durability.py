@@ -336,6 +336,47 @@ def verify_remote(scr: Path, repo_root: Path = REPO_ROOT, *,
             "checked_utc": _now()}
 
 
+RESTORE_RECORD_REL = ("logs/stages/stage-1/phase_d2/analyses/"
+                      "d2_candidate_relay_restore.json")
+
+
+def restore_candidate(state_id: str, repo_root: Path = REPO_ROOT, *,
+                      scratch: Path | None = None) -> dict[str, Any]:
+    """ONE committed product, downloaded from the relay into a NEW directory
+    and re-identified at all four identities -- the bytes a pod would stage,
+    checked by the predicate the pod's driver applies before training."""
+    from huggingface_hub import hf_hub_download
+
+    rows = {r["state_id"]: r for r in selected_rows(repo_root)}
+    if state_id not in rows:
+        raise DurabilityError(f"{state_id} is not a committed product")
+    listing = remote_listing()
+    tmp = Path(tempfile.mkdtemp(prefix="d2-candidate-", dir=scratch))
+    try:
+        into = tmp / "products" / state_id
+        into.mkdir(parents=True)
+        objects = []
+        for name in CHECKPOINT_FILES:
+            remote = f"{RELAY_PREFIX}/products/{state_id}/{name}"
+            got = hf_hub_download(_relay(), remote, repo_type="model",
+                                  token=_token(), cache_dir=str(tmp / "hf"))
+            shutil.copy(got, into / name)
+            Path(got).unlink(missing_ok=True)
+            objects.append({"remote": remote,
+                            "lfs_sha256": (listing.get(remote) or {}).get(
+                                "lfs_sha256"),
+                            "downloaded_sha256": _sha256(into / name),
+                            "bytes": (into / name).stat().st_size})
+        identity = identify(into, rows[state_id])
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    return {"schema": "aadistill.phase_d2.candidate_relay_restore/v1",
+            "state_id": state_id, "relay": _relay(), "objects": objects,
+            "identity": identity,
+            "restore_dir": "an independent temporary directory, deleted after",
+            "checked_utc": _now()}
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -405,7 +446,10 @@ def record(scr: Path, repo_root: Path = REPO_ROOT, *,
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("action", choices=("verify-local", "capacity", "upload",
-                                       "verify-remote", "record"))
+                                       "verify-remote", "record",
+                                       "restore-candidate"))
+    ap.add_argument("--state", default=None,
+                    help="with `restore-candidate`: the committed state id")
     ap.add_argument("--scr", default=str(DEFAULT_SCR))
     ap.add_argument("--scratch", default=None,
                     help="where the restore round trip downloads to")
@@ -422,6 +466,12 @@ def main(argv: list[str] | None = None) -> int:
         out = upload(scr)
     elif args.action == "verify-remote":
         out = verify_remote(scr, scratch=scratch)
+    elif args.action == "restore-candidate":
+        out = restore_candidate(args.state, scratch=scratch)
+        if args.write:
+            (REPO_ROOT / RESTORE_RECORD_REL).write_text(
+                json.dumps(out, indent=1) + "\n")
+            print(f"wrote {RESTORE_RECORD_REL}")
     else:
         out = record(scr, scratch=scratch)
         if args.write:

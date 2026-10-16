@@ -1,5 +1,9 @@
-"""When a D-series behavioural SCREENING rung counts as complete -- for the
-budget. `$0`.
+"""When a D-series behavioural rung (SCREENING, or the SHARED CONFIRMATION)
+counts as complete -- for the budget. `$0`.
+
+The confirmation is the same contract over its own records: its frozen rule's
+output is the verdict file (`outcome`), where the screening's is the ranking
+file (`selection.outcome`); `ScreeningCompletionSpec.outcome_key` names which.
 
 The search's rule, for a screening rung (`search_completion.py` says why a
 release of reservation is a machine-readable contract and never a sentence).
@@ -62,6 +66,8 @@ class ScreeningCompletionSpec:
     booked_cost: Callable[[str, str], tuple[float, str] | None]
     #: (run_id) -> (cost, basis) or (None, why) for every attempt of the rung.
     attempt_cost: Callable[[Path], tuple[float | None, str]]
+    #: Where the frozen rule's outcome sits in the rule's output file.
+    outcome_key: tuple[str, ...] = ("selection", "outcome")
 
 
 def _json(path: Path) -> Any:
@@ -136,8 +142,10 @@ def assess(run_dir: Path, spec: ScreeningCompletionSpec) -> dict[str, Any]:
                    and u.get("checks")
                    and all(v is True for v in u["checks"].values()))]
     need(c, not bad, f"units not verified: {bad}")
-    need(c, bool((ranking.get("selection") or {}).get("outcome")),
-         "the ranking carries no selection outcome")
+    node: Any = ranking
+    for key in spec.outcome_key:
+        node = (node or {}).get(key) if isinstance(node, dict) else None
+    need(c, bool(node), "the rule's output carries no outcome")
 
     c = "products_secured"
     need(c, (runtime.get("required_products_secured") or {}).get("ok") is True,
