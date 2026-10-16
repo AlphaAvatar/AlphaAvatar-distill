@@ -29,20 +29,20 @@
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
   "_owner": "derived by scripts/maintenance/consolidation/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
-  "_package_spent_usd": 169.093,
+  "_package_spent_usd": 174.119,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 595.0,
-  "cumulative_spend_usd": 489.5246,
+  "cumulative_spend_usd": 494.5506,
   "engineering_remaining_usd": 3.1804,
-  "formal_remaining_usd": 109.453,
+  "formal_remaining_usd": 104.427,
   "full_ceiling_sessions_fundable": 3,
   "ledger": "logs/budget/ledger.md",
-  "package_remaining_usd": 112.6334,
+  "package_remaining_usd": 107.6074,
   "per_session_ceiling_usd": 30.0,
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 105.4754,
+  "remaining_usd": 100.4494,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -75,9 +75,9 @@
   "authorizes": "nothing",
   "behavioural_design": "D1 (complete): Top-4, 10 + 6 probes, owner d1_design.json. D2: shared protocol, K=4 prepared, 8 + 3 probes, no B/q2 training, owner families/d_series/plans/d2_budget_v1.json.",
   "behavioural_pricing": "Owner: d1_design.json :: budget.chain; attempt bounds: the run's governance/authorization.json :: money.attempt_bounds.",
-  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2: search and screening COMPLETE; c4's shared confirmation GRANTED by the maintainer ($12.00 cumulative). Owner: decisions.md 2026-10-16.",
+  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2: COMPLETE -- c4's shared confirmation NO_GO (d2_confirmation_20261016_105802). Next: the maintainer's D3 decision. Owner: decisions.md 2026-10-16.",
   "d2_owed_engineering": "none at $0; the screening chain is built (d2_screening_readiness_review.md).",
-  "execution_wiring": "D1 COMPLETE and CLOSED. D2 v3 search COMPLETE: phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json.",
+  "execution_wiring": "D1 COMPLETE and CLOSED. D2 COMPLETE: search, screening (c4) and shared confirmation (NO_GO); phase_d2/runs/*/closeout/outcome.json.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
   "incumbent": "B = C1's PROMOTED TREATMENT, 53e30566..., attention.activation_importance_v1; state_id null, built as a fixed path, rebuilt on the pod. DERIVED from C1's verdict by phase_d_series/incumbent.py. The design named C1's BEATEN arm c313d1b4... until 2026-10-08. Owner: phase_d1/analyses/d1_control_arm_identity.json.",
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
@@ -127,10 +127,10 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "D2 shared confirmation of c4: issue, stage, dry-run, launch (AU), verdict off-pod; stop at the next scientific boundary. Owner: decisions.md 2026-10-16.",
+ "next": "Maintainer decision on D3 (and its design: endpoint, recovery budget) -- D2 is complete with a NO_GO. Owner: d2_confirmation_result_review.md.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "Run c4's shared confirmation; then the maintainer decides between a fresh independent confirmation and D3.",
+  "next_work": "Await the D3 decision; a $0 design pass on what D3 measures is recommended before its preregistration is frozen.",
   "not_next": "no paid resource without its own grant; no retraining or regeneration of B/q2; no rerun of D1 or change to its records; no third KL-only search. Owner: decisions.md 2026-10-13.",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 COMPLETE / NO-GO (q2 did not confirm; B stands).",
   "then": "nothing is queued."
@@ -200,12 +200,12 @@
   "logs/README.md -- START HERE, the index"
  ],
  "running": {
-  "_verified": "launcher log 2026-10-16 11:12 UTC: pod tvohx8nubg6kmi (AU, @595.91.07) admitted on draw 2, setup done, driver started; runtime digest equals the protocol's",
+  "_verified": "provider query 2026-10-16 ~15:40 UTC: 0 pods, $0/h; last pod tvohx8nubg6kmi deleted 15:32:41Z, provider confirms gone; watchdog ended pod_gone",
   "network_volumes": 0,
-  "paid_compute": true,
-  "pod_id": "tvohx8nubg6kmi",
-  "pods": 1,
-  "run_id": "d2_confirmation_20261016_105802"
+  "paid_compute": false,
+  "pod_id": null,
+  "pods": 0,
+  "run_id": null
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

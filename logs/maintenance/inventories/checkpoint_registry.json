@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.checkpoint_registry/v2",
-  "created_utc": "2026-10-15T16:04:41+00:00",
+  "created_utc": "2026-10-16T15:51:39+00:00",
   "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --relay",
   "hashed": true,
   "scope": "every checkpoint and weight artifact in the three storage areas: local artifacts/, the relay, and anything git tracks",
@@ -190,9 +190,10 @@
       "durability_record": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json",
       "retention": "reproducibility_required",
       "consumers": [
-        "phase_d2 screening (declared, not authorized)",
-        "phase_d2 shared confirmation, if this candidate advances"
+        "phase_d2 screening: COMPLETE (d2_screening_20261015_203346); c4 advanced",
+        "phase_d2 shared confirmation: not this candidate"
       ],
+      "open_consumers": [],
       "local_copies": [
         "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd"
       ],
@@ -221,9 +222,10 @@
       "durability_record": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json",
       "retention": "reproducibility_required",
       "consumers": [
-        "phase_d2 screening (declared, not authorized)",
-        "phase_d2 shared confirmation, if this candidate advances"
+        "phase_d2 screening: COMPLETE (d2_screening_20261015_203346); c4 advanced",
+        "phase_d2 shared confirmation: not this candidate"
       ],
+      "open_consumers": [],
       "local_copies": [
         "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a"
       ],
@@ -252,9 +254,10 @@
       "durability_record": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json",
       "retention": "reproducibility_required",
       "consumers": [
-        "phase_d2 screening (declared, not authorized)",
-        "phase_d2 shared confirmation, if this candidate advances"
+        "phase_d2 screening: COMPLETE (d2_screening_20261015_203346); c4 advanced",
+        "phase_d2 shared confirmation: not this candidate"
       ],
+      "open_consumers": [],
       "local_copies": [
         "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae"
       ],
@@ -283,9 +286,10 @@
       "durability_record": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json",
       "retention": "reproducibility_required",
       "consumers": [
-        "phase_d2 screening (declared, not authorized)",
-        "phase_d2 shared confirmation, if this candidate advances"
+        "phase_d2 screening: COMPLETE (d2_screening_20261015_203346); c4 advanced",
+        "phase_d2 shared confirmation: COMPLETE, NO_GO (d2_confirmation_20261016_105802)"
       ],
+      "open_consumers": [],
       "local_copies": [
         "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03"
       ],
@@ -349,7 +353,7 @@
     "total_bytes": 79187260734,
     "total_human": "73.749 GiB",
     "artifacts_tree_bytes": 8092951430,
-    "external_store_tree_bytes": 73286297984,
+    "external_store_tree_bytes": 73532789373,
     "by_store": {
       "external_store": {
         "units": 48,
@@ -372,9 +376,9 @@
   "relay": {
     "repo": "AlphaAvatar/aadistill-artifacts",
     "queried": true,
-    "queried_utc": "2026-10-15T15:58:47+00:00",
-    "n_files": 1384,
-    "total_bytes": 75667073767,
+    "queried_utc": "2026-10-16T15:46:03+00:00",
+    "n_files": 1389,
+    "total_bytes": 75829886805,
     "by_prefix": {
       "stage3": {
         "files": 180,
@@ -385,8 +389,8 @@
         "bytes": 12140681449
       },
       "transfer": {
-        "files": 587,
-        "bytes": 11909542735
+        "files": 592,
+        "bytes": 12072355403
       },
       "a3_preserved_probes": {
         "files": 12,
@@ -458,7 +462,7 @@
       },
       ".gitattributes": {
         "files": 1,
-        "bytes": 51914
+        "bytes": 52284
       },
       "c1_preserved_probes": {
         "files": 18,
@@ -469,7 +473,7 @@
     "files": [
       {
         "path": ".gitattributes",
-        "size_bytes": 51914,
+        "size_bytes": 52284,
         "sha256": null
       },
       {
@@ -4068,6 +4072,11 @@
         "sha256": "ace5181075e3bbdf9a185d5101fb84b62903b3daf1f39bd411476d239c17fdc2"
       },
       {
+        "path": "transfer/aad_autoinit_39e5bdf9.bundle",
+        "size_bytes": 32414223,
+        "sha256": "46f3f67a546b1338c3986fc66e592210174e4cbca8a765de5769b37bd6c9aaf3"
+      },
+      {
         "path": "transfer/aad_autoinit_3a0a3321.bundle",
         "size_bytes": 12753272,
         "sha256": "200bdf7f29c3eb045ba2e6ed973f9f7127546469ca0c2bb9e15faaee91ab2f66"
@@ -4183,6 +4192,11 @@
         "sha256": "f24c8cf1c16c073c59349c6ac67eb7d03eb4857d6d106632bae04d58e89f9e95"
       },
       {
+        "path": "transfer/aad_autoinit_56c0a362.bundle",
+        "size_bytes": 32741350,
+        "sha256": "8c3249d618656d0b08a6d75150809e079c2242206705ef45ee85e3a8e2122555"
+      },
+      {
         "path": "transfer/aad_autoinit_56fed7a8.bundle",
         "size_bytes": 14144737,
         "sha256": "5e24dccd42bd683751702a7487ccb23d5a22e1b349a2f5ae20f8bd7e3a54d02e"
@@ -4196,6 +4210,11 @@
         "path": "transfer/aad_autoinit_5b0396c7.bundle",
         "size_bytes": 12705285,
         "sha256": "7ba0cfee94db3ba4439745dc834bdf9e5ef7bd38bb04175b2d286c9644e19636"
+      },
+      {
+        "path": "transfer/aad_autoinit_5b9d138b.bundle",
+        "size_bytes": 32730848,
+        "sha256": "306f1ed1c31b33f99eaf7d13633ffdb4daa90a66a11859161645447b9c0f9a4a"
       },
       {
         "path": "transfer/aad_autoinit_5ea67b16.bundle",
@@ -4698,6 +4717,11 @@
         "sha256": "fda46d2f293489a3762ebf2dfd7bbecdcddcf05345af3dcf876ef886bb2b4f39"
       },
       {
+        "path": "transfer/aad_autoinit_ce5ebe14.bundle",
+        "size_bytes": 32399375,
+        "sha256": "6d67ce7965146bbbfeaee6af60de669205c7caad29f967c2013e75d7ca3cd867"
+      },
+      {
         "path": "transfer/aad_autoinit_cf041844.bundle",
         "size_bytes": 18486128,
         "sha256": "7bf1a60c433d15799b9b05ecd5e5e6e209783cada4417f4f51011940f3962b64"
@@ -4801,6 +4825,11 @@
         "path": "transfer/aad_autoinit_e2eec882.bundle",
         "size_bytes": 22915371,
         "sha256": "ca90eb60f3ee4dad89bf89ef5a203fa581e35a545f4ed4c52071da3fb0cca0bc"
+      },
+      {
+        "path": "transfer/aad_autoinit_e3ce7b73.bundle",
+        "size_bytes": 32526872,
+        "sha256": "6bfbc192759cb85eba3aca041c48b71c21d7bcb5ed824074da1117e80d815679"
       },
       {
         "path": "transfer/aad_autoinit_e477fb02.bundle",
@@ -9869,18 +9898,18 @@
       "weights_sha256": "52c511c67badbecb5a75bff585bf4db66ce198dc6f30f398965a06a1fcb19d52",
       "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/phase_d2/analyses/d2_screening_inputs.json",
         "logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/candidate_differences.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/complete_leaf_ranking.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/complete_leaf_ranking_v2.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/d2_search.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/search_analysis.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/search_analysis_v2.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/stage1_selection.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/runtime/session.json"
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183412/runtime/session.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183734/runtime/session.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_193502/runtime/session.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/closeout/outcome.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c3_s516448251.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c3_s614923639.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening_ranking.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/training/d2_screening_c3_s516448251/run_manifest.json"
       ],
       "relay_path": "stage1/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/model.safetensors",
       "relay_verified": true,
@@ -9890,7 +9919,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "the relay copy (byte-exact, verified); otherwise a replay of the search path under the D2 v3 objective",
       "reconstruction_cost": "$0 from the relay",
-      "never_delete_clause": "open consumers: D2 screening and, for the advancing candidate, the shared confirmation; not retirable until that behavioural evidence is complete and reproducible",
+      "never_delete_clause": "no open consumer remains: D2 screening (d2_screening_20261015_203346) and c4's shared confirmation (d2_confirmation_20261016_105802, NO_GO) are complete and their evidence durable. Retained until the maintainer's next D-series decision; then retirable under the standing policy (AGENTS.md 2.5) after a consumer audit, with a tombstone",
       "protected": true,
       "disposition": "keep"
     },
@@ -9920,18 +9949,18 @@
       "weights_sha256": "5d6c0a5a2c04bfc4cf75fd301e06b93affc557ab142229585f0a10c8029d0fbe",
       "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
       "referenced_by": [
+        "logs/budget/approvals/autoinit_d2_confirmation_grant.json",
+        "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/stages/stage-1/phase_d2/analyses/d2_candidate_relay_restore.json",
         "logs/stages/stage-1/phase_d2/analyses/d2_screening_inputs.json",
         "logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/candidate_differences.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/complete_leaf_ranking.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/complete_leaf_ranking_v2.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/d2_search.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/search_analysis.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/search_analysis_v2.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/stage1_selection.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/runtime/session.json"
+        "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/closeout/outcome.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/configs/d2_confirmation_c4_s1004399678.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/configs/d2_confirmation_c4_s396880939.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/configs/d2_confirmation_c4_s766527341.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/d2_confirmation.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/d2_confirmation_verdict.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/training/d2_confirmation_c4_s1004399678/run_manifest.json"
       ],
       "relay_path": "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/model.safetensors",
       "relay_verified": true,
@@ -9941,7 +9970,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "the relay copy (byte-exact, verified); otherwise a replay of the search path under the D2 v3 objective",
       "reconstruction_cost": "$0 from the relay",
-      "never_delete_clause": "open consumers: D2 screening and, for the advancing candidate, the shared confirmation; not retirable until that behavioural evidence is complete and reproducible",
+      "never_delete_clause": "no open consumer remains: D2 screening (d2_screening_20261015_203346) and c4's shared confirmation (d2_confirmation_20261016_105802, NO_GO) are complete and their evidence durable. Retained until the maintainer's next D-series decision; then retirable under the standing policy (AGENTS.md 2.5) after a consumer audit, with a tombstone",
       "protected": true,
       "disposition": "keep"
     },
@@ -9971,18 +10000,18 @@
       "weights_sha256": "7b52fb15a7b397d8e00e5cd39e2f667a83bd4d5d9aa2b857d11fe5dfc3cac138",
       "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/phase_d2/analyses/d2_screening_inputs.json",
         "logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/candidate_differences.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/complete_leaf_ranking.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/complete_leaf_ranking_v2.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/d2_search.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/search_analysis.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/search_analysis_v2.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/stage1_selection.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/runtime/session.json"
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183412/runtime/session.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183734/runtime/session.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_193502/runtime/session.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/closeout/outcome.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c1_s516448251.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c1_s614923639.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening_ranking.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/training/d2_screening_c1_s516448251/run_manifest.json"
       ],
       "relay_path": "stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/model.safetensors",
       "relay_verified": true,
@@ -9992,7 +10021,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "the relay copy (byte-exact, verified); otherwise a replay of the search path under the D2 v3 objective",
       "reconstruction_cost": "$0 from the relay",
-      "never_delete_clause": "open consumers: D2 screening and, for the advancing candidate, the shared confirmation; not retirable until that behavioural evidence is complete and reproducible",
+      "never_delete_clause": "no open consumer remains: D2 screening (d2_screening_20261015_203346) and c4's shared confirmation (d2_confirmation_20261016_105802, NO_GO) are complete and their evidence durable. Retained until the maintainer's next D-series decision; then retirable under the standing policy (AGENTS.md 2.5) after a consumer audit, with a tombstone",
       "protected": true,
       "disposition": "keep"
     },
@@ -10022,18 +10051,18 @@
       "weights_sha256": "9a0f41e98a38ca69a86a45197f97c5fdb06ecb37db2f3480c77730dbd567d728",
       "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-1/phase_d2/analyses/d2_screening_inputs.json",
         "logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/candidate_differences.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/complete_leaf_ranking.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/complete_leaf_ranking_v2.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/d2_search.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/search_analysis.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/search_analysis_v2.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/stage1_selection.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/runtime/session.json"
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183412/runtime/session.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183734/runtime/session.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_193502/runtime/session.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/closeout/outcome.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c2_s516448251.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c2_s614923639.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening_ranking.json",
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/training/d2_screening_c2_s516448251/run_manifest.json"
       ],
       "relay_path": "stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/model.safetensors",
       "relay_verified": true,
@@ -10043,7 +10072,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "the relay copy (byte-exact, verified); otherwise a replay of the search path under the D2 v3 objective",
       "reconstruction_cost": "$0 from the relay",
-      "never_delete_clause": "open consumers: D2 screening and, for the advancing candidate, the shared confirmation; not retirable until that behavioural evidence is complete and reproducible",
+      "never_delete_clause": "no open consumer remains: D2 screening (d2_screening_20261015_203346) and c4's shared confirmation (d2_confirmation_20261016_105802, NO_GO) are complete and their evidence durable. Retained until the maintainer's next D-series decision; then retirable under the standing policy (AGENTS.md 2.5) after a consumer audit, with a tombstone",
       "protected": true,
       "disposition": "keep"
     },

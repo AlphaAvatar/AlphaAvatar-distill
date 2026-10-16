@@ -1,0 +1,81 @@
+[10:59:29] budget: expected 357 min $6.49 · soft $7.54 · hard $8.09 (authorized $8.21)
+[10:59:29] NVIDIA L40S $1.09/h, stock Low
+[10:59:30] account funds OK: the provider account holds $124.0875 against the $30.0000 this session must be able to fund
+[10:59:30] run d2_confirmation_20261016_105802, preregistration b52810921a4c
+[10:59:31] contract verified at $0: 6ea59b765e28cb8c, 3 probes
+[10:59:31] 3 arm files on the relay at their pins
+[10:59:31] session commit e3ce7b73ba5f verified: harness digests to 515f00e857c1…, carries the authorization and only logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/governance/authorization.json differs from the authorized base
+[10:59:31] no previous attempt failed deterministically; 0 prior log(s) read
+[10:59:37] aad_autoinit_e3ce7b73.bundle round-trips
+[10:59:38] precheck OK: 9 relay inputs (9 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[10:59:38] DRY RUN: every pre-provider gate passed; stopping before provider creation. Nothing was created and nothing bills.
+[10:59:56] budget: expected 357 min $6.49 · soft $7.54 · hard $8.09 (authorized $8.21)
+[10:59:57] NVIDIA L40S $1.09/h, stock Low
+[10:59:57] account funds OK: the provider account holds $124.0875 against the $30.0000 this session must be able to fund
+[10:59:57] run d2_confirmation_20261016_105802, preregistration b52810921a4c
+[10:59:58] contract verified at $0: 6ea59b765e28cb8c, 3 probes
+[10:59:59] 3 arm files on the relay at their pins
+[10:59:59] session commit e3ce7b73ba5f verified: harness digests to 515f00e857c1…, carries the authorization and only logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/governance/authorization.json differs from the authorized base
+[10:59:59] no previous attempt failed deterministically; 0 prior log(s) read
+[11:00:05] aad_autoinit_e3ce7b73.bundle round-trips
+[11:00:06] precheck OK: 9 relay inputs (9 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[11:00:08] watchdog detached — hard 445 min = $8.09
+[11:00:08] created zqbvdvlkb63vke at $1.09/h
+[11:01:03]   starting (60s) — $0.02
+[11:02:08] TCP 22 at 160.250.71.215:23739 after 2.0 min
+[11:02:11] draw 1: ssh reachable — $0.04
+[11:02:42] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.178.04
+[11:02:42] draw 1: host NOT admitted — image identity 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.178.04' is not the shared protocol's 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07'; probes trained here would not be paired with B's imported units. Redraw.
+[11:02:42] HOST_NOT_ADMITTED on draw 1 — abandoning zqbvdvlkb63vke and redrawing
+[11:02:53] watchdog detached — hard 445 min = $8.09
+[11:02:53] created tvohx8nubg6kmi at $1.09/h
+[11:03:49]   starting (60s) — $0.07
+[11:04:54]   starting (120s) — $0.09
+[11:05:15] TCP 22 at 160.250.71.213:27240 after 5.1 min
+[11:05:18] draw 2: ssh reachable — $0.09
+[11:05:50] draw 2: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[11:05:50] draw 2: host admitted — image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07 is the protocol's
+[11:05:50] draw 2: running setup
+[11:09:52] draw 2: setup complete — $0.18
+[11:09:57] driver detached, pid 3008, confirmed by descriptor_probe — $0.18
+[11:12:06]   2026-10-16T11:09:54Z MARKER:DRIVER_START — $0.22
+[12:17:40]   trained-unscored d2_confirmation_c4_s396880939: preserved and verified (7078cf9ebf5b)
+[12:17:40]   probe d2_confirmation_c4_s396880939: secured training/run_manifest.json
+[12:17:40]   probe d2_confirmation_c4_s396880939: secured training/run_completion.json
+[12:17:43]   secured d2_confirmation_attested_protocol.json
+[12:17:46]   secured engine_probe.json
+[12:37:43]   probe d2_confirmation_c4_s396880939: secured result.json
+[12:37:47]   probe d2_confirmation_c4_s396880939: secured per_sample.jsonl
+[12:37:50]   probe d2_confirmation_c4_s396880939: secured admission.json
+[12:38:02]   probe d2_confirmation_c4_s396880939: secured generations
+[12:38:06]   probe d2_confirmation_c4_s396880939: secured rescoring.json
+[12:38:11]   probe d2_confirmation_c4_s396880939: release ack delivered
+[13:43:53]   trained-unscored d2_confirmation_c4_s766527341: preserved and verified (cc7fc5719b28)
+[13:43:53]   probe d2_confirmation_c4_s766527341: secured training/run_manifest.json
+[13:43:53]   probe d2_confirmation_c4_s766527341: secured training/run_completion.json
+[13:57:13]   probe d2_confirmation_c4_s766527341: secured result.json
+[13:57:17]   probe d2_confirmation_c4_s766527341: secured per_sample.jsonl
+[13:57:19]   probe d2_confirmation_c4_s766527341: secured admission.json
+[13:57:31]   probe d2_confirmation_c4_s766527341: secured generations
+[13:57:39]   probe d2_confirmation_c4_s766527341: release ack delivered
+[13:59:55]   probe d2_confirmation_c4_s766527341: secured rescoring.json
+[15:05:36]   trained-unscored d2_confirmation_c4_s1004399678: preserved and verified (cb58cf0e3d0e)
+[15:05:36]   probe d2_confirmation_c4_s1004399678: secured training/run_manifest.json
+[15:05:36]   probe d2_confirmation_c4_s1004399678: secured training/run_completion.json
+[15:25:35]   probe d2_confirmation_c4_s1004399678: secured result.json
+[15:25:39]   probe d2_confirmation_c4_s1004399678: secured per_sample.jsonl
+[15:25:41]   probe d2_confirmation_c4_s1004399678: secured admission.json
+[15:25:56]   probe d2_confirmation_c4_s1004399678: secured generations
+[15:26:03]   probe d2_confirmation_c4_s1004399678: release ack delivered
+[15:28:16]   2026-10-16T15:26:12Z MARKER:ALL_DONE — $4.87
+[15:28:16] polling ended: ALL_DONE — $4.87
+[15:32:09]   manifest rc=0
+97 file(s) across 11 class(es) -> /workspace/manifest.json
+  final_required: 97 · mutable_snapshot: 0 · final_streams_quiescent: True
+[15:32:29]   probe d2_confirmation_c4_s1004399678: secured rescoring.json
+[15:32:29]   probe d2_confirmation_c4_s396880939: pruned preserved trained copy (now scored)
+[15:32:30]   probe d2_confirmation_c4_s766527341: pruned preserved trained copy (now scored)
+[15:32:30]   probe d2_confirmation_c4_s1004399678: pruned preserved trained copy (now scored)
+[15:32:30] teardown gate: allowed=True failed=None
+[15:32:30] deleting pod (gate passed)
+[15:32:41] pod deleted — 272.5 min, $4.95; provider confirms gone: True

@@ -540,10 +540,12 @@ class TestAConfirmationFailureResumesItsOwnTrainedProbe:
 
 class TestTheConfirmationLeavesThePlanOnlyByContract:
 
-    def test_no_confirmation_attempt_yet_keeps_it_reserved(self):
+    def test_until_it_completes_the_confirmation_stays_reserved(
+            self, monkeypatch):
         from stages.d_series import d2_budget as BUD
 
-        assert BUD.completed_d2_confirmation() is None
+        monkeypatch.setattr(BUD, "completed_d2_confirmation",
+                            lambda *a, **k: None)
         budget = BUD.build()
         view = BUD.programme_scenarios(
             {"project_remaining_usd": 100.0, "project_cap_usd": 595.0,
@@ -552,3 +554,24 @@ class TestTheConfirmationLeavesThePlanOnlyByContract:
         block = view["search_pricing"][view["search_pricing_in_force"]][
             "d2_block"]
         assert block["sessions"] == ["d2_confirmation"]
+
+
+# --- the exploratory rescoring join -------------------------------------------
+
+class TestTheExploratoryJoinIsArithmetic:
+
+    def test_contrast_means_difference_and_correlation(self):
+        from stages.phase_d2 import explore_d2_rescoring as X
+
+        samples = [{"correct": c, "hchk": 0.0,
+                    **{f"{a}.{b}": v for a, b in X.QUANTITIES}}
+                   for c, v in ((True, 1.0), (True, 2.0), (False, 3.0),
+                                (False, 5.0))]
+        got = X.contrast(samples)
+        row = got["all.kl_teacher_student"]
+        assert (got["n"], got["n_correct"]) == (4, 2)
+        assert (row["mean_correct"], row["mean_incorrect"],
+                row["difference"]) == (1.5, 4.0, -2.5)
+        assert -1.0 < row["point_biserial_r"] < 0.0
+        #: A constant quantity has no correlation to report.
+        assert "point_biserial_r" not in got["hchk"]

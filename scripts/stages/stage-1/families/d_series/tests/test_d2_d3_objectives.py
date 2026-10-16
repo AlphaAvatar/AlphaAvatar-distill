@@ -513,17 +513,21 @@ class TestTheProgrammeScenarios:
         #: A COMPLETE D2 search is inside the live limits through its closeout,
         #: so the D2 block plans only the sessions still ahead of it.
         #: Likewise a COMPLETE screening rung (its own contract).
-        for searched, screened, sessions in (
-                (None, None,
+        for searched, screened, confirmed, sessions in (
+                (None, None, None,
                  ("d2_search", "d2_screening", "d2_confirmation")),
-                ({"run_id": "d2_search_x"}, None,
+                ({"run_id": "d2_search_x"}, None, None,
                  ("d2_screening", "d2_confirmation")),
+                ({"run_id": "d2_search_x"}, {"run_id": "d2_screening_x"}, None,
+                 ("d2_confirmation",)),
                 ({"run_id": "d2_search_x"}, {"run_id": "d2_screening_x"},
-                 ("d2_confirmation",))):
+                 {"run_id": "d2_confirmation_x"}, ())):
             monkeypatch.setattr(BUD, "completed_d2_search",
                                 lambda *a, _s=searched, **k: _s)
             monkeypatch.setattr(BUD, "completed_d2_screening",
                                 lambda *a, _s=screened, **k: _s)
+            monkeypatch.setattr(BUD, "completed_d2_confirmation",
+                                lambda *a, _s=confirmed, **k: _s)
             s = self._scen()
             view = s["search_pricing"][s["search_pricing_in_force"]]
             block = view["d2_block"]

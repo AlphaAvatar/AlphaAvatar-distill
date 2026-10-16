@@ -66,9 +66,13 @@ def test_the_real_attempt_satisfies_every_clause(run):
     assert got["booked_all_in_usd"] == BOOKED
 
 
-def test_the_d2_budget_releases_the_real_rung_and_keeps_d3s_blocks():
+def test_the_d2_budget_releases_the_real_rung_and_keeps_d3s_blocks(
+        monkeypatch):
     from stages.d_series import d2_budget as BUD
 
+    #: This test is about the screening's release; the confirmation's own
+    #: state is pinned so the D2 block reads exactly what the screening frees.
+    monkeypatch.setattr(BUD, "completed_d2_confirmation", lambda *a, **k: None)
     done = BUD.completed_d2_screening()
     assert done["run_id"] == RUN and done["booked_all_in_usd"] == BOOKED
     budget = BUD.build()
@@ -178,3 +182,61 @@ def test_missing_records_never_raise(run):
         (run / rel).unlink()
     got = SC.assess(run, _spec())
     assert got["complete"] is False and len(got["failed_clauses"]) >= 5
+
+
+
+# --- the same contract over the real CONFIRMATION -------------------------------
+
+CONF_RUN = "d2_confirmation_20261016_105802"
+CONF_BOOKED = 5.026
+
+
+def _conf_spec(booked=(CONF_BOOKED, "money.all_in_usd")):
+    from stages.phase_d2 import d2_confirmation as CF
+    from stages.phase_d2 import d2_screening_authorization as A
+
+    contract = CF.session_contract(REPO, verify_bytes=False)
+    return SC.ScreeningCompletionSpec(
+        experiment_id="phase_d2",
+        closeout_schema="aadistill.phase_d2.confirmation_closeout/v1",
+        contract_hash=CF.contract_hash(contract),
+        probe_ids=tuple(p["probe_id"] for p in contract["probes"]),
+        load_authorization=A.D2ConfirmationAuthorization.load,
+        ranking_filename="d2_confirmation_verdict.json", disk_gb=120,
+        booked_cost=lambda e, r: booked if r == CONF_RUN else None,
+        attempt_cost=A._subrun_cost, outcome_key=("outcome",))
+
+
+@pytest.fixture
+def conf_run(tmp_path):
+    for d in sorted(RUNS.glob("d2_confirmation_*")):
+        shutil.copytree(d, tmp_path / "runs" / d.name)
+    return tmp_path / "runs" / CONF_RUN
+
+
+def test_the_real_confirmation_satisfies_every_clause(conf_run):
+    got = SC.assess(conf_run, _conf_spec())
+    assert got["complete"] is True, got["problems"]
+    assert got["booked_all_in_usd"] == CONF_BOOKED
+
+
+@pytest.mark.parametrize("rel,fn,clause", [
+    (RANKING.replace("d2_screening_ranking", "d2_confirmation_verdict"),
+     _set("outcome", value=None), "every_unit_verified"),
+    (CLOSEOUT, _set("schema", value="aadistill.phase_d2.screening_closeout/v1"),
+     "authorized_identity"),
+    (CLOSEOUT, _set("money", "all_in_usd", value=1.0), "cost_closed"),
+    (RUNTIME, _set("provider_confirms_gone", value=False), "provider_teardown"),
+])
+def test_the_confirmation_keeps_its_reservation_on_a_bad_record(
+        conf_run, rel, fn, clause):
+    _edit(conf_run / rel, fn)
+    got = SC.assess(conf_run, _conf_spec())
+    assert got["complete"] is False and clause in got["failed_clauses"]
+
+
+def test_the_d2_budget_releases_the_real_confirmation():
+    from stages.d_series import d2_budget as BUD
+
+    done = BUD.completed_d2_confirmation()
+    assert done["run_id"] == CONF_RUN and done["booked_all_in_usd"] == CONF_BOOKED

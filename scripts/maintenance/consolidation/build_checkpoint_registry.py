@@ -296,9 +296,13 @@ CLASSIFY: dict[str, dict] = {
             "round-trip verified "
             "(logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/"
             "evidence/product_durability.json)",
-        never_delete="open consumers: D2 screening and, for the advancing "
-                     "candidate, the shared confirmation; not retirable until "
-                     "that behavioural evidence is complete and reproducible",
+        never_delete="no open consumer remains: D2 screening "
+                     "(d2_screening_20261015_203346) and c4's shared "
+                     "confirmation (d2_confirmation_20261016_105802, NO_GO) "
+                     "are complete and their evidence durable. Retained "
+                     "until the maintainer's next D-series decision; then "
+                     "retirable under the standing policy (AGENTS.md 2.5) "
+                     "after a consumer audit, with a tombstone",
         reconstruction="the relay copy (byte-exact, verified); otherwise a "
                        "replay of the search path under the D2 v3 objective",
         reconstruction_cost="$0 from the relay", disposition="keep"),
@@ -625,9 +629,13 @@ def scientific_artifacts(entries: list[dict]) -> dict:
                                else None),
                 "durability_record": durability_rel if durable.is_file() else None,
                 "retention": "reproducibility_required",
-                "consumers": ["phase_d2 screening (declared, not authorized)",
-                              "phase_d2 shared confirmation, if this candidate "
-                              "advances"],
+                "consumers": [
+                    "phase_d2 screening: COMPLETE "
+                    "(d2_screening_20261015_203346); c4 advanced",
+                    ("phase_d2 shared confirmation: COMPLETE, NO_GO "
+                     "(d2_confirmation_20261016_105802)" if i == 4 else
+                     "phase_d2 shared confirmation: not this candidate")],
+                "open_consumers": [],
             }
             out[key] = attach(
                 row, m["single_shard_sha256"],

@@ -11568,3 +11568,39 @@ on a paid pod.
   verdict.
 - **Revisit when** the confirmation verdict is recorded.
 
+## 2026-10-16 — D2 shared confirmation of c4: NO_GO (frozen verdict); D2 complete; stopped at the scientific boundary
+
+- **Context.** The confirmation ran once, as `d2_confirmation_20261016_105802`,
+  under the maintainer's $12.00 grant.
+  - Host: an admitted AU host (`…@595.91.07`); draw 1 (AU, 580.178.04) was
+    refused.
+  - Probes: three, from c4's INITIAL checkpoint, every identity equal to the
+    shared protocol's.
+  - Verification and teardown: every unit verified off-pod; the pod was torn
+    down and confirmed gone.
+  - Cost: $5.0260 all-in.
+- **Verdict.** The registered rule gives **NO_GO**. Owner:
+  `…/evidence/d2_confirmation_verdict.json`.
+  - Δ (c4 − B) is −0.0106, with one-sided 97.5% UCB −0.0016 < SESOI 0.01.
+  - Seed deltas are −0.0094, −0.0176 and −0.0047, so 0 of 3 are positive.
+  - The usable guardrail passed (+0.067 pooled).
+  - The verdict is terminal for c4 on these rows. Screening's +0.0059 was a
+    selected, optimistic estimate.
+  - The usable-rollout gain is secondary evidence and does not replace the
+    endpoint.
+- **Budget.** The confirmation leaves the programme plan by the rung
+  completion contract; D2 is complete, at $23.5354 measured.
+  - Project remaining is $100.4494; formal $104.4270; package $107.6074.
+  - D3 plus a fresh confirmation needs $66.45 at hard, leaving $34.00 spare.
+- **Evidence.** Both behavioural archives have a second, relay copy, restored
+  and re-hashed. The checkpoint registry records no open consumer for the
+  four D2 initializations; they are retained pending the next decision.
+- **Executor's recommendation (the maintainer's to decide).**
+  - No fresh confirmation for c4: it is undefined after a NO_GO.
+  - Before D3, a $0 design pass on what it measures. Two candidates (q2, c4)
+    raised usable rollout over B without raising correctness at the 0.86M
+    recovery budget, where correctness is 2–6% for every arm.
+  - Owner: `d2_confirmation_result_review.md` §7.
+- **Not authorized:** D3, a fresh confirmation, any promotion, a cap change.
+- **Revisit when** the maintainer decides D3's design and grant.
+

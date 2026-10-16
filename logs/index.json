@@ -743,7 +743,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 91,
+  "runs_unrecorded": 92,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -838,8 +838,8 @@
    },
    "phase_d2": {
     "recorded": 0,
-    "unrecorded": 5,
-    "total": 5
+    "unrecorded": 6,
+    "total": 6
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -3442,6 +3442,14 @@
   },
   {
    "experiment_id": "phase_d2",
+   "run_id": "d2_confirmation_20261016_105802",
+   "root": "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802",
+   "n_files": 34,
+   "digest": "c44f31ba28cf81bb11c87f6ce0839c31058fa9703d3a0d0f0b1e190a32b49cd8",
+   "why": "no run manifest; its closeout states: COMPLETE CONFIRMATION RUNG: every frozen probe trained, generated, scored and verified off-pod; the frozen rule applied"
+  },
+  {
+   "experiment_id": "phase_d2",
    "run_id": "d2_screening_20261015_183412",
    "root": "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183412",
    "n_files": 6,
@@ -3468,8 +3476,8 @@
    "experiment_id": "phase_d2",
    "run_id": "d2_screening_20261015_203346",
    "root": "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346",
-   "n_files": 60,
-   "digest": "65a7682cc050b2bffdd112e90859a9c052c72bed9e466ff4cdf2cf051f7739fd",
+   "n_files": 61,
+   "digest": "25d328665dff3ad8aa82e7c5517a50d205988c4589ec23610d5305e25e86e4db",
    "why": "no run manifest; its closeout states: COMPLETE SCREENING RUNG: every frozen probe trained, generated, scored and verified off-pod; the frozen rule applied"
   },
   {
