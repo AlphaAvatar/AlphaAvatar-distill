@@ -83,7 +83,7 @@
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
   "scoring_protocol": "reference_topk_tail_v1, K=200: reference-defined support plus one K+1 tail bucket from the COMPLEMENT's logits, carried by SearchConfig.distribution_support -- an OPTIONAL term, absent under the historical full-vocab contract, folded into one measurement_protocol_id. Owner: scripts/stages/stage-1/families/d_series/scoring_protocol.py",
   "seeds": "MATERIALIZED and HASH-BOUND in plans/d1_behavioural_preregistration.json (2 screening, 3 confirmation, 6 exclusions), before any candidate result exists. Owner: the preregistration.",
-  "state": "D1 COMPLETE / NO-GO. D2 VERSION 3 (90e851fd, contract rev 8 1321017a, prereg v3 APPROVED b5281092): Stage W revision 2 PASS and adopted; ONE formal search GRANTED (scored_v1, $23.69 hard at $1.09/h). D3 lambda 7.34 FROZEN (7b254538). Owner: phase_d2/plans/, families/d_series/."
+  "state": "D1 COMPLETE / NO-GO. D2 v3 COMPLETE / NO_GO (search, screening -> c4, shared confirmation). D3 REDEFINED 2026-10-16; the student-confidence D3 (7b254538) CANCELLED, unexecuted. Owner: decisions.md 2026-10-16."
  },
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
  "dirty": false,
@@ -118,21 +118,21 @@
  "latest_verification": {
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py:readiness_view",
   "latest_sweep": {
+   "describes_head": false,
    "kind": "launch_bound",
-   "verdict": "PASS",
    "swept_base_commit": "e80eb60b6d027499a2655b6fabef59647feff643",
-   "describes_head": false
+   "verdict": "PASS"
   },
   "launch_bound_failures": 1,
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Maintainer decision on D3 (and its design: endpoint, recovery budget) -- D2 is complete with a NO_GO. Owner: d2_confirmation_result_review.md.",
+ "next": "The new D3's defining instruction (treatment, structural-ablation procedure, $0 boundary) is needed before its $0 implementation. Objective clarified: fluid reasoning (AGENTS.md P10.2). Owner: decisions.md 2026-10-16.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "Await the D3 decision; a $0 design pass on what D3 measures is recommended before its preregistration is frozen.",
+  "next_work": "D3 $0 implementation once its defining instruction is on record: structural ablation first; three recovery probes only if the initialization changes. Forward Stage 0/2/4 design: docs/shared/REASONING_TRANSFER_DESIGN.md (authorizes nothing).",
   "not_next": "no paid resource without its own grant; no retraining or regeneration of B/q2; no rerun of D1 or change to its records; no third KL-only search. Owner: decisions.md 2026-10-13.",
-  "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 COMPLETE / NO-GO (q2 did not confirm; B stands).",
+  "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 COMPLETE / NO-GO (q2 did not confirm; B stands). D2 COMPLETE / NO_GO (c4).",
   "then": "nothing is queued."
  },
  "phase_b_result": {
@@ -157,7 +157,7 @@
    "blocker": "none; see the top-level blocker.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line."
   },
   "c2": {
@@ -215,11 +215,11 @@
   "C2": "CLOSED WITHOUT PROMOTION",
   "C3": "COMPLETE / NO_GO",
   "D1": "COMPLETE / NO-GO 2026-10-12 -- q2 advanced from screening and did not confirm against B",
-  "D2": "NOT STARTED / NOT AUTHORIZED -- owes its own engineering and a maintainer decision",
-  "D3": "NOT STARTED",
+  "D2": "COMPLETE / NO_GO 2026-10-16 -- c4 advanced from screening and did not confirm against B",
+  "D3": "REDEFINED 2026-10-16: fixed-q2 DEPTH teacher-reference ablation; the student-confidence D3 is CANCELLED, unexecuted. Its defining instruction is NOT on record; $0 work only",
   "F1": "SKIPPED by maintainer instruction 2026-10-03; ffn.activation_importance_v0 carried forward",
-  "_next_is_not_null_because": "the 2026-10-03 D-series directive orders D1, D2, D3; D1 is complete, so D2 is next in order, though not authorized.",
-  "next_scientific_stage": "D2"
+  "_next_is_not_null_because": "the D-series directive orders D1, D2, D3; D1 and D2 are complete, so D3 is next, within its $0 boundary only.",
+  "next_scientific_stage": "D3"
  },
  "storage": {
   "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json",

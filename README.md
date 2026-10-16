@@ -6,6 +6,12 @@ AlphaAvatar-distill is an agent-guided model compression and distillation framew
 
 The goal is to make distillation reproducible and automated, producing efficient student models with long-context and multi-turn comprehension, strong reasoning and self-correction, and reliable accuracy across sustained interactions and long-running agentic workloads such as AlphaAvatar—including RAG, tool use, quantized inference, and low-latency deployment.
 
+The capability prioritized for transfer is **fluid reasoning and adaptive problem-solving**: using
+the information a task supplies, or that interaction acquires, to infer rules, build abstractions,
+reason compositionally and generalize to unseen cases. Broad retention of factual knowledge,
+which can be retrieved, is lower priority; the knowledge reasoning depends on stays a supporting
+capability ([`AGENTS.md`](./AGENTS.md) P10.2).
+
 **Positioning: teacher checkpoint → arbitrary requested target size.** The framework is
 not a fixed recipe for one teacher/student pair. It takes a teacher checkpoint, a target
 architecture, a calibration pool and a search budget, and produces an initialized student
@@ -37,6 +43,7 @@ has exactly one owner:
 | which checkpoints exist, and why | [`logs/maintenance/inventories/checkpoint_registry.json`](./logs/maintenance/inventories/checkpoint_registry.json) |
 | what was deleted, and how to rebuild it | [`logs/maintenance/inventories/checkpoint_tombstones.json`](./logs/maintenance/inventories/checkpoint_tombstones.json) |
 | the working contract for coding agents | [`AGENTS.md`](./AGENTS.md) |
+| the forward design for reasoning-transfer data and evaluation (Stage 0, 2, 4) | [`docs/shared/REASONING_TRANSFER_DESIGN.md`](./docs/shared/REASONING_TRANSFER_DESIGN.md) |
 
 **Research direction.** A **Teacher-Adaptive AutoInitializer**: search over
 initialization operators, operator order and calibration configuration, with

@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-15 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-16 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -14,6 +14,33 @@ and $0/h (2026-10-16 about 15:40 UTC). Pod `tvohx8nubg6kmi` was deleted at
 15:32:41Z, the provider confirms it gone, and its watchdog ended on
 `pod_gone`. No watcher is armed.
 
+**THE PRIMARY TARGET IS FLUID REASONING (maintainer clarification,
+2026-10-16).** The project prioritizes fluid reasoning and adaptive
+problem-solving over broad factual-knowledge retention.
+- **Where it is written.** AGENTS.md P10.2 holds the capability taxonomy,
+  the no-proxy rule, the ARC-AGI policy and evaluation isolation. Stage
+  clauses are in §4.2, §4.4, §4.5 and §4.6.
+- **Capability scope.** Re-declared for future mixtures: `code_math` and
+  `multihop_qa` are now mixed-capability groups.
+- **Forward design.**
+  [`REASONING_TRANSFER_DESIGN.md`](../../docs/shared/REASONING_TRANSFER_DESIGN.md)
+  covers Stage 0, 2 and 4 and the capability-aligned evaluation they need
+  first.
+- **Unchanged.** Frozen D1/D2 evidence and every historical verdict.
+- **Authorizes nothing.** No data experiment, dataset download or
+  generation, and no paid GPU.
+
+**D3 IS REDEFINED: fixed-q2 DEPTH teacher-reference ablation (2026-10-16).**
+The student-confidence D3 is cancelled and unexecuted.
+- **Probe plan.** Structural ablation first. If the initialization is
+  byte-identical to q2's, no retraining. Otherwise three recovery probes on
+  D1's three confirmation seeds and battery, compared with historical q2 and
+  B. The comparison is exploratory, not a fresh confirmation.
+- **Blocked.** The instruction that defines the treatment and the $0
+  boundary is not on record, and is needed before implementation starts.
+- **Programme snapshot.** It still prices the cancelled D3.
+- **Owner.** `decisions.md` 2026-10-16.
+
 **D2 COMPLETE: c4's SHARED CONFIRMATION is NO_GO (2026-10-16).** Run
 `d2_confirmation_20261016_105802`: three probes from c4's initial checkpoint
 on an admitted AU host, every identity equal to the protocol's.
@@ -22,8 +49,7 @@ on an admitted AU host, every identity equal to the protocol's.
 - **Cost.** $5.0260; D2's measured total is $23.5354.
 - **Budget.** Project remaining $100.4494; the D3 plus fresh-confirmation
   reservation holds with $34.00 to spare.
-- **Next.** The maintainer's D3 decision. The executor recommends a $0
-  design pass on D3's endpoint and recovery budget first.
+- **Next.** D3 as redefined above.
 - **Owners.**
   [`d2_confirmation_result_review.md`](../stages/stage-1/families/d_series/analyses/d2_confirmation_result_review.md);
   `decisions.md` 2026-10-16.

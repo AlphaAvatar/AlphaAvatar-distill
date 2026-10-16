@@ -4504,6 +4504,12 @@ The $0 full-subset audit ran (`scripts/autoinit/audit_tool_rendering.py`, all 20
 
 ## 2026-07-30 — Capability scope for the dense baseline, and where refusal sits
 
+> **REFINED 2026-10-16** by "Maintainer clarification: the primary target is
+> fluid reasoning" below. The primary target is now fluid reasoning and adaptive
+> problem-solving (AGENTS.md P10.2), and `code_math` and `multihop_qa` are
+> re-declared as mixed-capability groups for future mixtures. This table stays
+> the record of how the frozen mixtures were classified when they were built.
+
 - **Context:** The maintainer added the alignment-tax / selective-capability-transfer principle (AGENTS.md P3, P10, P10.1). It changes both the framing of the 2026-07-29 refusal decision and the standing of the mixture as a whole. The earlier record reached a defensible conclusion by an invalid route: it excluded refusal because the teacher's refusals are ~6× longer than the public targets, and length is now explicitly not a reason to reject a target.
 - **Decision:** Declare the capability scope of the `qwen3-4b-thinking-distill` recipe, and classify every Stage 2 data group against it:
 
@@ -11604,3 +11610,118 @@ on a paid pod.
 - **Not authorized:** D3, a fresh confirmation, any promotion, a cap change.
 - **Revisit when** the maintainer decides D3's design and grant.
 
+## 2026-10-16 — Maintainer clarification: the primary target is fluid reasoning; the recipe's capability scope is re-declared
+
+- **Context.** The maintainer clarified the project's long-term scientific
+  objective. The project prioritizes the selective preservation of **fluid
+  reasoning and adaptive problem-solving** over broad retention of factual or
+  domain knowledge. The intended capability is: given unfamiliar problems, use
+  the information supplied by the task or acquired through interaction to
+  infer rules, construct abstractions, reason compositionally, generalize to
+  unseen cases, and derive correct solutions or actions.
+  - Supporting knowledge remains: conceptual priors, language understanding,
+    and the knowledge reasoning needs.
+  - ARC-AGI-1/2/3 exemplify the direction. They are not an optimization target,
+    and static and interactive protocols are not conflated.
+- **Decision. Where it is written:**
+  - `AGENTS.md`:
+    - P3 and P10.1 are refined, not erased; the selective-distillation and
+      alignment-tax principles stand.
+    - **P10.2** is new. It holds the objective, the capability taxonomy, the
+      rule that no proxy is interchangeable, the ARC-AGI policy, and the
+      evaluation and data-isolation rules.
+    - Stage 0 (§4.2) gains reasoning-oriented calibration.
+    - Stage 2 (§4.4) gains reasoning-transfer data priorities.
+    - Stage 3 (§4.5) is clarified: usable rollout is a recovery-readiness
+      criterion, not the ultimate objective.
+    - Stage 4 (§4.6) gains reasoning-oriented online data.
+  - The forward design for Stage 0, 2 and 4:
+    `docs/shared/REASONING_TRANSFER_DESIGN.md`.
+- **Capability scope of `qwen3-4b-thinking-distill`, re-declared for future
+  mixtures.** It refines the 2026-07-30 table:
+
+  | group | class | note |
+  | --- | --- | --- |
+  | self-contained, verifiable reasoning tasks: rule induction, symbolic/spatial transformation, compositional and counterfactual reasoning, in-context rule adaptation, generated tasks of controlled difficulty | **primary capability transfer** | in no mixture yet; each needs its own data authorization |
+  | interactive environments with verifiable outcomes (Stage 4) | **primary capability transfer** | none collected |
+  | `code_math` | **mixed**: task-contained deduction plus supporting knowledge and procedure | was primary on 2026-07-30; reported by set and axis, never as a fluid-reasoning measure |
+  | `multihop_qa` | **mixed**: deduction over evidence plus reading and retrieval | was primary on 2026-07-30 |
+  | `rag_evidence`, `tool_calling`, `instruction`, `long_context` | **supporting capability** | unchanged |
+  | `short_realtime`, `refusal_uncertainty` | **evaluation-only** | unchanged |
+
+- **Interpretation corrected.** c4 answered 3 of 900 GSM8K + MATH prompt-seed
+  observations correctly in the D2 confirmation. This stays factually valid,
+  but it is not a measure of general fluid reasoning: math, RAG, knowledge QA
+  and code mix knowledge, procedure, comprehension and reasoning. Neither
+  overall correctness, NLL, teacher KL nor usable rollout is a proxy for fluid
+  reasoning.
+- **Unchanged.**
+  - The frozen D1/D2 evidence, metrics, preregistrations and verdicts.
+  - Every historical Stage 2/3 verdict.
+  - The mixture manifests v0/v1 and the Stage-3 pilot, together with its
+    builder's `IN_SCOPE_GROUPS`, which describes that frozen pilot.
+  - Nothing ARC-specific or model-specific enters `src/aadistill`.
+- **Alternatives considered.**
+  - Keep math correctness as the reasoning endpoint. Rejected: it mixes
+    arithmetic, conventions and procedure with reasoning.
+  - Optimize directly for ARC-AGI. Rejected: it is a reference, not a target,
+    and its evaluation data must never be trained on.
+- **Expected upside.** Data volume, mixture and evaluation effort are aimed at
+  the capability the project actually wants, rather than at knowledge that
+  can be retrieved.
+- **Risks.**
+  - No capability-aligned battery exists yet, so no current measurement can
+    say whether any initialization or mixture improves fluid reasoning.
+  - Generated curricula can leak their generator into evaluation unless
+    family and lineage isolation is enforced.
+  - Too little supporting knowledge can starve reasoning; that is measured,
+    not assumed.
+- **Not authorized.** No Stage-0, 2 or 4 data experiment, no substantial
+  dataset download or generation, and no paid GPU execution.
+- **Revisit when** a capability-aligned evaluation is designed (the design's
+  §2), or a data experiment is proposed under its own authorization.
+
+## 2026-10-16 — Maintainer: the new D3 is a fixed-q2 DEPTH teacher-reference ablation; its probe plan is three recovery probes
+
+- **Context.** In the same clarification, the maintainer stated that:
+  - the new D3 is the **fixed-q2 DEPTH teacher-reference ablation**;
+  - the original student-confidence D3 (objective `7b254538…`, λ 7.34) is
+    cancelled and unexecuted.
+
+  The maintainer also corrected the new D3's probe plan. An earlier instruction
+  had proposed five behavioural probes, inherited from D1's two screening and
+  three confirmation seeds. The new D3 has one predefined treatment, not a
+  Top-K candidate field.
+- **Decision: the probe plan.**
+  1. First complete the structural ablation.
+  2. If the final initialization is byte-identical to q2's, do not retrain.
+  3. If it changes, propose **three recovery probes** on D1's three historical
+     confirmation seeds and the corresponding battery.
+  4. Compare against the historical q2 and B results with per-seed, paired and
+     per-domain evidence.
+  5. These reused-battery comparisons are **exploratory**, not a fresh
+     independent confirmation.
+  6. The two historical screening seeds are optional supplementary evidence.
+     Any rule for adding them is registered before any D3 behavioural outcome
+     is observed.
+- **Claim boundary.**
+  - The historical batteries measure the mixed-domain protocol, not the
+    clarified fluid-reasoning objective.
+  - An improvement in the old overall correctness or usable rollout is not a
+    demonstration of superior fluid reasoning.
+  - A capability-aligned, contamination-controlled evaluation is designed
+    separately. The historical B/q2 checkpoints are retired, so a new battery
+    cannot reuse their scores.
+- **Gap on record.**
+  - The repository holds no record of the instruction that defined the new D3
+    and cancelled the original, or of the boundary it set for the $0
+    implementation. This session did not receive it. This entry records what
+    the clarification states.
+  - The D3 treatment, its structural-ablation procedure and its implementation
+    boundary must be supplied before the $0 implementation starts.
+  - The programme snapshot `d_series_programme_budget.json` still prices the
+    cancelled D3 (screening plus confirmation). It is re-derived when the new
+    D3 is defined.
+- **Not authorized.** Paid GPU execution, behavioural probes, the fresh
+  independent confirmation, any promotion.
+- **Revisit when** the new D3's defining instruction is on record.
