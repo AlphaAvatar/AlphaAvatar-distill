@@ -69,11 +69,23 @@ CHECK_ONLY_MARKER = "CHECK_ONLY_OK"
 
 
 
+#: Rungs OWNED by another experiment's contract module, which declares its
+#: own `RUNG_LAYOUT` (same keys). The probe loop is this file's either way.
+EXTERNAL_RUNGS = {"d3_probes": "stages.phase_d3.d3_probes"}
+RUNGS = ("screening", "confirmation", *EXTERNAL_RUNGS)
+
+
 def rung_layout(rung: str) -> dict[str, Any]:
-    """Every path and pin that differs between the two rungs. The launcher's
+    """Every path and pin that differs between the rungs. The launcher's
     layout is built from the same function, so the two never disagree."""
+    if rung in EXTERNAL_RUNGS:
+        import importlib
+
+        owned = dict(importlib.import_module(EXTERNAL_RUNGS[rung]).RUNG_LAYOUT)
+        owned["scorer"] = REPO_ROOT / owned.pop("scorer_rel")
+        return owned
     if rung not in ("screening", "confirmation"):
-        raise ValueError(f"no D2 behavioural rung {rung!r}")
+        raise ValueError(f"no behavioural rung {rung!r}")
     return {
         "rung": rung,
         "contract_module": f"stages.phase_d2.d2_{rung}",
@@ -87,7 +99,23 @@ def rung_layout(rung: str) -> dict[str, Any]:
         "ack_rel": f"artifacts/audit/autoinit_d2_{rung}/release_acks",
         "status": f"/workspace/autoinit_d2_{rung}.status",
         "scorer": REPO_ROOT / f"scripts/stages/stage-1/phase_d1/score_d1_{rung}.py",
+        #: The D1 rung the battery helpers and the scorer key on, the label
+        #: a probe config carries, and the one-use type that funds the rung.
+        "battery_rung": rung,
+        "experiment": "D2",
+        "authorization": ("stages.phase_d2.d2_screening_authorization:"
+                          + ("D2ConfirmationAuthorization"
+                             if rung == "confirmation"
+                             else "D2ScreeningAuthorization")),
     }
+
+
+def authorization_type(layout: dict[str, Any]):
+    """The rung's one-use authorization type, from its layout."""
+    import importlib
+
+    module, name = layout["authorization"].split(":")
+    return getattr(importlib.import_module(module), name)
 
 
 _SCREENING = rung_layout("screening")
@@ -108,8 +136,7 @@ class D2ScreeningDriverError(RuntimeError):
 
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--rung", default="screening",
-                    choices=("screening", "confirmation"))
+    ap.add_argument("--rung", default="screening", choices=RUNGS)
     ap.add_argument("--out", required=True)
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--authorization", default=None)
@@ -246,7 +273,8 @@ def main(argv: list[str] | None = None) -> int:
 
         SC = importlib.import_module(L["contract_module"])
         #: Cheap refusals first: battery bytes, role disjointness, pack digest.
-        record["cheap_preflight"] = D1D.cheap_preflight(args.rung, REPO_ROOT)
+        record["cheap_preflight"] = D1D.cheap_preflight(L["battery_rung"],
+                                                        REPO_ROOT)
         save()
         #: The CONTRACT, re-derived on THIS tree with THESE staged arms (four
         #: identities hashed) and the protocol's source pins compared.
@@ -257,13 +285,7 @@ def main(argv: list[str] | None = None) -> int:
             REPO_ROOT, arm_root=args.arm_root)
         save()
         if args.authorization:
-            from stages.phase_d2.d2_screening_authorization import (
-                D2ConfirmationAuthorization, D2ScreeningAuthorization,
-            )
-
-            auth = (D2ConfirmationAuthorization
-                    if args.rung == "confirmation"
-                    else D2ScreeningAuthorization).load(args.authorization)
+            auth = authorization_type(L).load(args.authorization)
             auth.require_run_id(args.run_id)
             auth.require_plan(contract["preregistration_hash"])
             auth.require_contract(record["contract_hash"])
@@ -303,7 +325,7 @@ def main(argv: list[str] | None = None) -> int:
 
         record["training_runtime"] = training_runtime(args.image_digest,
                                                       args.rung)
-        scoring = D1D.d1_scoring_contract(args.rung, REPO_ROOT)
+        scoring = D1D.d1_scoring_contract(L["battery_rung"], REPO_ROOT)
         battery_fields = D1D.battery_protocol_fields(contract)
         record["scoring_contract"] = {k: scoring[k]
                                       for k in ("contract", "digest")}
@@ -313,8 +335,10 @@ def main(argv: list[str] | None = None) -> int:
                 f"shared rung's {contract['evaluation']['scoring_digest'][:12]}")
         save()
         attested = None
-        num_parameters = int(SC.selection(REPO_ROOT)["selected"][0][
-            "num_parameters"])
+        num_parameters = (int(SC.num_parameters(REPO_ROOT))
+                          if hasattr(SC, "num_parameters") else
+                          int(SC.selection(REPO_ROOT)["selected"][0][
+                              "num_parameters"]))
         from stages.phase_d1 import behavioural as D1B
 
         battery_root = REPO_ROOT / contract["battery"]["root"]
@@ -348,7 +372,7 @@ def main(argv: list[str] | None = None) -> int:
                 config = D1D.probe_config(
                     probe, audit=out, frozen_recipe=FROZEN_RECIPE,
                     pack_dir=PACK_DIR, overrides=C1_PROBE_OVERRIDES,
-                    out_root=L["probe_root_rel"], experiment="D2")
+                    out_root=L["probe_root_rel"], experiment=L["experiment"])
                 entry["config"] = str(config.relative_to(REPO_ROOT))
                 import gc
 

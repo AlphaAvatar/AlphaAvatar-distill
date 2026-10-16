@@ -158,6 +158,11 @@ class TestASessionWithItsOwnStagedViewHasItsOwnEntry:
         #: machine. Revisit if a maintainer makes the launch-bound sweep
         #: mandatory for every formal session.
         "autoinit_d2_launch",
+        #: The new D3's structural session (2026-10-16), for D2's reason: the
+        #: typed grant binds the harness by membership and digest, the
+        #: session-commit gate and the bundle round trip bind the tree, and
+        #: the pod's blocking gate runs the structural preflight.
+        "autoinit_d3_structural_launch",
     })
 
     def test_every_session_launcher_is_either_registered_or_named(self):

@@ -192,6 +192,7 @@
   "hard_with_reserves": 15.5,
   "rescoring_estimate": 0.0
  },
+ "d3_block_status": "SUPERSEDED 2026-10-16: the student-confidence D3 priced here is cancelled and unexecuted; the new D3 (fixed-q2 DEPTH teacher-reference ablation) is priced by logs/stages/stage-1/phase_d3/plans/d3_budget_v1.json and does not inherit this reservation",
  "reservation_rule": "authorize D2's formal sessions only if the project remainder after engineering and D2 at hard ceilings still covers D3 and one fresh confirmation at theirs",
  "search_pricing": {
   "records_max": {

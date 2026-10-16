@@ -11725,3 +11725,82 @@ on a paid pod.
 - **Not authorized.** Paid GPU execution, behavioural probes, the fresh
   independent confirmation, any promotion.
 - **Revisit when** the new D3's defining instruction is on record.
+
+## 2026-10-16 — New D3 defined (maintainer): fixed-q2 DEPTH teacher-reference ablation; $0 readiness built; stopped at the paid boundary
+
+- **Context.** The maintainer supplied the complete definition of the new D3
+  that the earlier entry recorded as missing. The cancellation of the
+  student-confidence D3 and the probe-plan correction stand as recorded
+  above; they are not restated or rewritten here.
+- **Question.** On D1-q2's exact path, does choosing DEPTH's layers by
+  `KL(T ‖ C(S))` (the original teacher) instead of `KL(P ‖ C(S))` (the parent
+  after q2's FFN step) give a better initialization for recovery?
+- **What differs from q2.** One declared variable. Everything else is q2's:
+  - the reference-defined Top-200 + tail;
+  - the supervised positions and the aggregation;
+  - the calibration data;
+  - the greedy removal, the 36 → 28 geometry and the tie-break;
+  - FFN, WIDTH and ATTENTION and their own rules;
+  - D1's evaluator.
+
+  No D2 weighting, reward, union support or path is introduced. The
+  reference's own Top-K defines the support, so the support's token ids
+  change with the reference; that is part of the declared switch.
+- **Decision: what was built at $0.**
+  - **Core.** A versioned, generic `kl_reference` operator-config key
+    (`scoring/kl_reference.py`):
+    - absent is the historical parent, with no recorded hash moved;
+    - `root_reference/v1` makes DEPTH read the stored teacher reference
+      through the existing store, built by `materialize_fixed_path` from the
+      root before step 0 and bound to the root, mixture, support and
+      execution protocol;
+    - missing, mismatched, unbound or conflicting declarations are refused;
+    - the parent-reference KL of every candidate is recorded as a diagnostic.
+
+    It is declared in the CUDA-surface guard.
+  - **D3 records.**
+    - The registration: `phase_d3/plans/d3_registration_v1.json`,
+      `43156f21…`; treatment path `5948a3c9…`; DEPTH config `b5dfa707…`.
+    - The control evidence (`d3_control_q2.json`).
+    - The structural outcome rule: NO_STRUCTURAL_CHANGE, STRUCTURAL_CHANGE or
+      UNEXPLAINED_BYTE_DIFFERENCE.
+    - The conditional three-probe rung (D1 confirmation seeds and battery,
+      q2 primary, B anchor) with an EXPLORATORY descriptive rule: no alpha,
+      no SHARED_GO, no promotion, no screening seeds.
+  - **Sessions.**
+    - The structural driver and launcher, `SESSION_KIND d3_structural`, with
+      AU host admission to the protocol image.
+    - The probes as a third rung of the shared behavioural driver.
+    - Two one-use authorization types, the issuer, the setup branches and
+      the artifact specs.
+    - The pod preflights, the closeout with relay durability, and the
+      exploratory analysis.
+- **Price.** Owner: `d3_budget_v1.json`.
+
+  | Session | Expected | Hard | Hard + reserve |
+  |---|---|---|---|
+  | Structural | $0.86 | $3.02 | $3.32 |
+  | Probes | $6.59 | $8.21 | $8.51 |
+
+  The old D3/fresh reservation is not transferred. Live limits: project
+  $100.4494, formal $104.4270, package $107.6074, engineering $3.1804. Both
+  sessions at hard with reserves leave $88.62.
+- **Proposed, not granted** (`d3_grant_proposal.json`).
+  - Structural envelope $7.00 now.
+  - Probes envelope $12.00 after STRUCTURAL_CHANGE.
+  - Adding `phase_d3` to `funds_formal_sessions_of` is a maintainer
+    amendment.
+- **D1 test debt.** 27 historical D1 tests were repaired, test files only:
+  - 24 chain tests had test grants typing the $590 cap; they now derive the
+    live cap;
+  - 3 design tests now assert the recorded snapshot (the 2026-10-14
+    amendment's `before`) or pin the recorded money for regeneration.
+
+  No frozen record was edited. The stale D-series objective navigation is
+  regenerated: its generator reads the current D3 from the registration.
+- **Not authorized:** paid structural or behavioural execution, a Full
+  Search, reopening D1/D2, the cancelled D3, data downloads or generation,
+  Stage-0/2/4 experiments, promotion, cap changes.
+- **Revisit when** the maintainer decides the structural grant and the
+  funding amendment. Owner of the readiness facts:
+  `phase_d3/analyses/d3_readiness_review.md`.

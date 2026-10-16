@@ -48,6 +48,11 @@ SESSION_LAUNCHERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     #: D2's search, added WITH its launcher (2026-10-13) so every structural
     #: check that reads this list covers it from the first commit.
     ("autoinit_d2_launch", ()),
+    #: The new D3's structural session, added WITH its launcher (2026-10-16).
+    #: Its probes launcher is not listed: its spec exists only once a
+    #: structural run completed with STRUCTURAL_CHANGE (it names that run's
+    #: product), and the D3 chain tests build it from a fixture product.
+    ("autoinit_d3_structural_launch", ()),
 )
 
 

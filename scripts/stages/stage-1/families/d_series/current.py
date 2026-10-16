@@ -99,14 +99,31 @@ def _objectives(repo_root: Path) -> dict[str, Any] | None:
     if not path.is_file():
         return None
     record = json.loads(path.read_text())
-    return {
+    out = {
         "contract": objectives.CONTRACT,
         "contract_hash": record["contract_hash"],
         "design": "logs/stages/stage-1/families/d_series/plans/"
                   "d2_d3_objective_design.md",
         "d2_objective_hash": record["d2"]["objective_hash"],
-        "d3_status": record["d3"]["status"].split(":")[0],
     }
+    #: The D3 this contract describes (the student-confidence objective) was
+    #: CANCELLED by the maintainer on 2026-10-16 and replaced by a separately
+    #: registered experiment. The contract is a frozen record and keeps its
+    #: own text; the navigation reads the CURRENT D3 from its registration.
+    from stages.phase_d3 import d3_design as D
+
+    reg_path = repo_root / D.REGISTRATION
+    if reg_path.is_file():
+        reg = json.loads(reg_path.read_text())
+        out["d3_in_this_contract"] = {
+            "objective_hash": record["d3"]["objective_hash"],
+            "status": reg["replaces"]["status"]}
+        out["d3"] = {"name": reg["name"], "registration": D.REGISTRATION,
+                     "registration_hash": reg["registration_hash"],
+                     "status": reg["status"].split(" -- ")[0]}
+    else:
+        out["d3_status"] = record["d3"]["status"].split(":")[0]
+    return out
 
 
 def _shared_evaluation(repo_root: Path) -> dict[str, Any] | None:

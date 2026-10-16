@@ -1770,6 +1770,16 @@ def programme_scenarios(limits: dict[str, float],
             "rule": ("the confirmation rung leaves the plan by the same "
                      "contract as the screening's, over its verdict file")},
         "fresh_confirmation": fresh_block,
+        #: The D3 priced in every block below is the CANCELLED
+        #: student-confidence D3 (its search plus its own screening and
+        #: confirmation). It is kept because this snapshot is D2's programme
+        #: view; it funds nothing, and its reservation does not transfer.
+        "d3_block_status": (
+            "SUPERSEDED 2026-10-16: the student-confidence D3 priced here is "
+            "cancelled and unexecuted; the new D3 (fixed-q2 DEPTH "
+            "teacher-reference ablation) is priced by "
+            "logs/stages/stage-1/phase_d3/plans/d3_budget_v1.json and does "
+            "not inherit this reservation"),
         "reservation_rule": (
             "authorize D2's formal sessions only if the project remainder "
             "after engineering and D2 at hard ceilings still covers D3 and one "

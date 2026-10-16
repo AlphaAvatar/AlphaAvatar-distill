@@ -30,16 +30,27 @@ problem-solving over broad factual-knowledge retention.
 - **Authorizes nothing.** No data experiment, dataset download or
   generation, and no paid GPU.
 
-**D3 IS REDEFINED: fixed-q2 DEPTH teacher-reference ablation (2026-10-16).**
-The student-confidence D3 is cancelled and unexecuted.
-- **Probe plan.** Structural ablation first. If the initialization is
-  byte-identical to q2's, no retraining. Otherwise three recovery probes on
-  D1's three confirmation seeds and battery, compared with historical q2 and
-  B. The comparison is exploratory, not a fresh confirmation.
-- **Blocked.** The instruction that defines the treatment and the $0
-  boundary is not on record, and is needed before implementation starts.
-- **Programme snapshot.** It still prices the cancelled D3.
-- **Owner.** `decisions.md` 2026-10-16.
+**D3: $0 READINESS COMPLETE; STOPPED AT THE PAID AUTHORIZATION BOUNDARY
+(2026-10-16).** The fixed-q2 DEPTH teacher-reference ablation (the
+student-confidence D3 is cancelled and unexecuted).
+- **The question.** On D1-q2's exact path, does choosing DEPTH's layers by
+  `KL(T ‖ C(S))` instead of `KL(P ‖ C(S))` give a better initialization?
+- **What differs from q2.** One declared variable: a generic
+  `kl_reference: root_reference/v1` on the DEPTH step. Everything else is
+  q2's.
+- **Identities.** Registration `43156f21…`, treatment path `5948a3c9…`,
+  control path `2221484a…`.
+- **Price.**
+  - Structural session: expected $0.86, hard $3.02 (+$0.30 reserve).
+  - Conditional three probes: expected $6.59, hard $8.21 (+$0.30).
+- **Proposed envelopes.** $7.00 structural; $12.00 probes, only after
+  STRUCTURAL_CHANGE.
+- **Needs from the maintainer.** The structural grant and adding `phase_d3`
+  to `funds_formal_sessions_of`.
+- **Programme.** The old D3/fresh reservation is not transferred.
+- **Owners.**
+  [`d3_readiness_review.md`](../stages/stage-1/phase_d3/analyses/d3_readiness_review.md);
+  `phase_d3/plans/`; `decisions.md` 2026-10-16.
 
 **D2 COMPLETE: c4's SHARED CONFIRMATION is NO_GO (2026-10-16).** Run
 `d2_confirmation_20261016_105802`: three probes from c4's initial checkpoint

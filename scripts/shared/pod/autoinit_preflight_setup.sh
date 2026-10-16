@@ -979,6 +979,58 @@ print(f'  {a.authorization_id}: hard \${a.hard_cap_usd:.4f}, '
       f'probes {a.n_probes}, seeds {list(a.seeds)}, '
       f'contract {a.contract_hash[:12]}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "d3_structural" ]; then
+  # D3 STRUCTURAL. Its own TYPE: q2's fixed path from the teacher with ONE
+  # declared change (DEPTH's KL against the stored teacher reference). It
+  # trains nothing, so `allows_recovery_training` is ABSENT/False by type and
+  # the probes are a separate grant; it materializes a fixed path, so
+  # `allows_fixed_path_materialization` is TRUE. The flags below refuse a beam
+  # or Full Search, reopening D1/D2, the cancelled student-confidence D3,
+  # retraining q2/B, the screening seeds, a fresh confirmation, a promotion
+  # and any automatic follow-on. The plan hash is the D3 registration's.
+  cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_d3.d3_authorization import D3StructuralAuthorization
+a = D3StructuralAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_d3_structural is True, 'this session needs a D3 structural authorization'
+assert a.allows_fixed_path_materialization is True, 'the structural session materializes a fixed path'
+assert a.authorizes_recovery_training is False, 'the structural session trains nothing'
+assert a.authorizes_d3_probes is False, 'the probes are a separate grant after STRUCTURAL_CHANGE'
+assert a.authorizes_beam_search is False, 'no beam or Full Search is part of D3'
+assert a.authorizes_reopen_d1_d2 is False, 'D1 and D2 are complete'
+assert a.authorizes_cancelled_d3 is False, 'the student-confidence D3 is cancelled'
+assert a.authorizes_promotion is False, 'nothing is promoted'
+assert a.authorizes_automatic_followon_start is False, 'nothing chains off the outcome'
+print(f'  {a.authorization_id}: hard \${a.hard_cap_usd:.4f}, '
+      f'treatment {a.contract_hash[:12]}, registration {a.plan_hash[:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "d3_probes" ]; then
+  # D3 PROBES. Its own TYPE: three recovery probes from the D3 initial
+  # checkpoint (the structural session's product, staged from the relay) at
+  # the D1 confirmation seeds; a structural grant must not buy training and
+  # this one must not buy another structural run. The flags refuse retraining
+  # q2/B, the screening seeds, a fresh confirmation, a promotion and any
+  # automatic follow-on. The plan hash is the D3 registration's.
+  cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_d3.d3_authorization import D3ProbesAuthorization
+a = D3ProbesAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_d3_probes is True, 'this session needs a D3 probes authorization'
+assert a.allows_recovery_training is True, 'every probe is a training run'
+assert a.authorizes_d3_structural is False, 'the structural session is complete'
+assert a.authorizes_fixed_path_materialization is False, 'the initialization is staged, not rebuilt'
+assert a.authorizes_reference_retraining is False, 'q2 and B are imported units'
+assert a.authorizes_screening_seeds is False, 'the screening seeds are not part of the design'
+assert a.authorizes_fresh_confirmation is False, 'the comparison is exploratory'
+assert a.authorizes_promotion is False, 'nothing is promoted'
+assert a.authorizes_automatic_followon_start is False, 'nothing chains off the comparison'
+print(f'  {a.authorization_id}: hard \${a.hard_cap_usd:.4f}, '
+      f'probes {a.n_probes}, seeds {list(a.seeds)}, contract {a.contract_hash[:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "c2" ]; then
   # A SEVENTH type. Phase-C2 Search-1's grant measures a harness containing the
   # C2 launcher, driver, search space and baseline rule, none of which appear in
