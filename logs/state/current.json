@@ -24,7 +24,7 @@
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "blocker": "D1 BLOCKED NO TIMES and COMPLETE. The D-series is CLOSED (maintainer decision 2026-10-17). NOTHING IS RUNNING. Owner: logs/stages/stage-1/families/d_series/closeout/programme_closeout.json.",
- "branch": "exec/d1-behavioural-readiness",
+ "branch": "main (squash of exec/d1-behavioural-readiness, 2026-10-17); work continues on stage0/calibration-volume-mixture",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
@@ -233,7 +233,7 @@
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
   "core": "3680 passed / 32 skipped / 0 failed, 12m18s (2026-10-17, D-series closure). GREEN.",
   "d1_launch": "1029 passed / 13 skipped / 0 failed, 2m38s: phase_d1 + docs + integration. GREEN, and the accepted out-of-tree source-screen failure is NOT in it.",
-  "integration": "SQUASH AND MERGE, AGENTS.md P12.2. DONE 2026-10-05: main 4500d775 squashes prep/d-series-topk-tail, which is PRESERVED -- 637 cited commit hashes resolve only there. Ranges: decisions.md.",
+  "integration": "SQUASH AND MERGE, AGENTS.md P12.2. LATEST 2026-10-17: main squashes exec/d1-behavioural-readiness (PRESERVED; base c8f714af; tested tree 27c279b6; tip named by the squash commit). Earlier: c8f714af, 4500d775. Ranges: decisions.md.",
   "known_red": "ONE, pre-existing (bc31175f), out-of-tree, NOT core and NOT in the D1 launch suite: phase_d_series test_source_evidence::test_it_regenerates_identically. Its screen is nondeterministic across processes. Diagnosis: current.md.",
   "next_work": "none owed.",
   "d_series_closure": "experiment suites 2026-10-17: d_series 465, phase_d1 721, phase_d2 365 (2 skipped), phase_d3 129, shared 319, migration 39; all green."

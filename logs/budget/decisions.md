@@ -12143,3 +12143,25 @@ on a paid pod.
   - The next programme, Stage-0 calibration data-volume and mixture
     experiments with this baseline, is designed and authorized separately.
     Handoff: `docs/shared/STAGE0_HANDOFF.md`.
+
+## 2026-10-17 — Maintainer: squash-merge the D-series branch into `main`
+
+- **Decision.** The maintainer instructed squash-and-merge of
+  `exec/d1-behavioural-readiness` into `main` (AGENTS.md P12.2).
+- **The range.** 149 commits on top of `c8f714af` (`main` before; the merge
+  base), collapsed into one single-parent commit on `main`.
+  - They carry D1's behavioural rungs, D2, D3, the D-series closure, the
+    forward baseline D1 + `scored_v1`, and the Stage-0 handoff.
+  - The squash commit names the branch tip. A record on the branch cannot
+    carry its own hash.
+- **Tested tree.** `27c279b6`: core 3680 passed / 32 skipped / 0 failed, and
+  every touched experiment suite green. The tip adds only pre-integration
+  state records.
+- **Reachability.** Every commit hash cited by the records was checked before
+  the squash: zero unreachable.
+- **The source branch is NOT deleted.** It is where this round's commit
+  hashes live.
+- **Where work continues.** `stage0/calibration-volume-mixture`, cut fresh
+  from the squash commit.
+- **What a merge is not.** It records work. It is not a release, a promotion,
+  a grant or a public claim, and no scientific result moved.

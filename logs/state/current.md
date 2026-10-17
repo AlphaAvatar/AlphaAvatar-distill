@@ -790,6 +790,43 @@ invocation with `tee` and `PIPESTATUS[0]`.
 
 ## What `main` carries
 
+**The D-series and its closure, integrated 2026-10-17 (UTC) by SQUASH AND
+MERGE per AGENTS.md P12.2, on the maintainer's instruction.** One commit on
+`main` collapses the 149-commit range on top of `c8f714af`:
+- D1's behavioural rungs: screening, then the NO-GO confirmation;
+- D2: search, screening, and the NO_GO shared confirmation;
+- D3: structural STRUCTURAL_CHANGE, probes INCONCLUSIVE;
+- the D-series closure and the forward baseline D1 + `scored_v1`;
+- the Stage-0 handoff.
+
+```text
+source branch : exec/d1-behavioural-readiness   (NOT deleted -- P12.2)
+merge base    : c8f714afb346aaea3e269230c94cef526cb6f76b   (main before)
+branch tip    : named by the squash commit; a record on the branch cannot
+                carry its own hash
+squash commit : `git log -1 main`
+tested tree   : 27c279b6b10d93f75e0a3a7d5b11131cf03345d8
+```
+
+- **What was tested.** The tested tree is the closure commit `27c279b6`:
+  - core 3680 passed / 32 skipped / 0 failed;
+  - every touched experiment suite green.
+- **The honest limit.** The tip adds only pre-integration records on top:
+  this section, `current.json`, `decisions.md`, the handoff's `main` line and
+  the regenerated log inventory. Nothing executable changed after
+  `27c279b6`.
+- **Reachability.** Every commit hash the records cite was checked before the
+  squash: zero unreachable. The source branch is where this round's commit
+  hashes live, so it is kept permanently.
+- **Where work continues.** On `stage0/calibration-volume-mixture`, cut fresh from the squash commit.
+  Continuing on the old branch would re-apply the whole range.
+- **Earlier integrations** (`git log main` owns the hashes):
+  - `c8f714af`, 2026-10-10: the six-tree information architecture, source
+    `migration/info-architecture`;
+  - `4500d775`, 2026-10-05: the Top-K protocol, source
+    `prep/d-series-topk-tail`;
+  - `06cab9c8`, 2026-10-03: the test-suite boundary, described below.
+
 **The test-suite boundary refactor, integrated 2026-10-03 by SQUASH AND MERGE
 per AGENTS.md P12.2.** One commit on `main` collapsing six:
 

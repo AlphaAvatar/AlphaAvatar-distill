@@ -8,13 +8,12 @@ this page derived a figure itself, it says so.
 
 ## 0. Where to start reading
 
-- **Branch:** `exec/d1-behavioural-readiness`.
-  - `main` is at `c8f714af` (2026-10-10, the six-tree information
-    architecture). It carries none of D1's behavioural rungs, D2 or D3, and
-    integrating this branch is a maintainer decision (squash and merge,
-    AGENTS.md P12.2).
-  - This page arrives in the D-series closure commit, whose parent is
-    `f36e322d`; run `git log -1 -- docs/shared/STAGE0_HANDOFF.md` to find it.
+- **Branch:** `main` carries everything below. The D-series branch
+  `exec/d1-behavioural-readiness` was squash-merged on 2026-10-17 (P12.2) and
+  is preserved: records cite its commit hashes.
+  - New work starts on `stage0/calibration-volume-mixture`, cut from that squash commit.
+  - The tested tree is `27c279b6`. Run `git log -1 main` for the squash
+    commit.
 - **Inspect, in this order:**
 
 | what | where | sha256 |

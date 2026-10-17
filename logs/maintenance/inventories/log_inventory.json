@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-17T19:01:54+00:00",
+  "created_utc": "2026-10-17T19:14:25+00:00",
   "command": "scripts/maintenance/consolidation/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 3864,
-    "bytes": 132581908,
+    "bytes": 132585068,
     "by_disposition": {
       "keep_canonical": 286,
       "keep_immutable": 3309,
@@ -7546,8 +7546,8 @@
     },
     {
       "path": "docs/shared/STAGE0_HANDOFF.md",
-      "size_bytes": 12747,
-      "sha256": "5a851b406b39ce307c7e6f63958ad55a5d2bac7bf2807b97b875a7bc59214aa1",
+      "size_bytes": 12682,
+      "sha256": "d33ca28cace0f58bdbad4a7588c797a754974539eaf837875195a3529d102585",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -8712,8 +8712,8 @@
     },
     {
       "path": "logs/budget/decisions.md",
-      "size_bytes": 1108754,
-      "sha256": "7169b513c1a1b797dd7b4e9cbdf9741d2a38a5b67b21e9e1ad0010645cbf4531",
+      "size_bytes": 1109934,
+      "sha256": "a862f2b4e0c42d04b67ea7bd5fdac377fb11496a9b36816fc402b206a9fd0278",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -65987,8 +65987,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 17376,
-      "sha256": "cab5a985358ecf0ec8494b3f2ababc55a5b721ad589b55103fb2a02f1dd61de4",
+      "size_bytes": 17501,
+      "sha256": "a66a3b56fee9a1d58cfd7465d7098dbf31cc896c358a0a8efb8c69c979097f99",
       "category": "living_state",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -66062,8 +66062,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 255820,
-      "sha256": "7124cb0d86778a61db75bc1fb7e246f54b80fb36fa8a11d184c3d49325cad660",
+      "size_bytes": 257740,
+      "sha256": "9a97304706636438fd850abd1b9217b26b380b120da805d26a7d2797ad659497",
       "category": "living_state",
       "in_paid_attempt_chain": false,
       "referenced_by": [
