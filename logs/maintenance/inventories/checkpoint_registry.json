@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.checkpoint_registry/v2",
-  "created_utc": "2026-10-17T10:11:31+00:00",
+  "created_utc": "2026-10-17T15:50:20+00:00",
   "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash",
   "hashed": true,
   "scope": "every checkpoint and weight artifact in the three storage areas: local artifacts/, the relay, and anything git tracks",
@@ -316,10 +316,11 @@
       "durability_record": "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/evidence/product_durability.json",
       "retention": "reproducibility_required",
       "consumers": [
-        "phase_d3 three-probe rung (proposable, not granted)"
+        "phase_d3 three-probe rung: COMPLETE (d3_probes_20261017_110022)",
+        "a capability-aligned evaluation of both DEPTH references (registered carry-forward; not designed)"
       ],
       "open_consumers": [
-        "phase_d3 three-probe rung"
+        "a capability-aligned evaluation of both DEPTH references (not designed)"
       ],
       "local_copies": [
         "/home/ecs-user/aad-artifacts/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de"
@@ -374,7 +375,7 @@
       "consumers": [
         "phase_d1 screening + confirmation (paused)",
         "phase_d2 (complete)",
-        "phase_d3 three-probe rung (d1_confirmation; proposable, not granted)"
+        "phase_d3 three-probe rung (d1_confirmation; complete)"
       ],
       "_identity_survives_zero_copies": "derived from the family manifest, not from the bytes"
     }
@@ -385,7 +386,7 @@
     "total_bytes": 80379397455,
     "total_human": "74.859 GiB",
     "artifacts_tree_bytes": 8092951430,
-    "external_store_tree_bytes": 74732038518,
+    "external_store_tree_bytes": 74806001584,
     "by_store": {
       "external_store": {
         "units": 49,
@@ -408,9 +409,9 @@
   "relay": {
     "repo": "AlphaAvatar/aadistill-artifacts",
     "queried": true,
-    "queried_utc": "2026-10-17T09:59:10+00:00",
-    "n_files": 1395,
-    "total_bytes": 77070569132,
+    "queried_utc": "2026-10-17T15:38:32+00:00",
+    "n_files": 1397,
+    "total_bytes": 77108393341,
     "by_prefix": {
       "stage3": {
         "files": 180,
@@ -421,16 +422,16 @@
         "bytes": 12140681449
       },
       "transfer": {
-        "files": 593,
-        "bytes": 12105087501
+        "files": 594,
+        "bytes": 12138363836
       },
       "a3_preserved_probes": {
         "files": 12,
         "bytes": 9536946368
       },
       "stage1": {
-        "files": 30,
-        "bytes": 8409669006
+        "files": 31,
+        "bytes": 8414216806
       },
       "permanent_controls": {
         "files": 18,
@@ -494,7 +495,7 @@
       },
       ".gitattributes": {
         "files": 1,
-        "bytes": 52358
+        "bytes": 52432
       },
       "c1_preserved_probes": {
         "files": 18,
@@ -505,7 +506,7 @@
     "files": [
       {
         "path": ".gitattributes",
-        "size_bytes": 52358,
+        "size_bytes": 52432,
         "sha256": null
       },
       {
@@ -2774,6 +2775,11 @@
         "sha256": "9a0f41e98a38ca69a86a45197f97c5fdb06ecb37db2f3480c77730dbd567d728"
       },
       {
+        "path": "stage1/phase_d3/d3_probes_20261017_110022/d3_probes_artifacts.tar.gz",
+        "size_bytes": 4547800,
+        "sha256": "c58b2d704439fe231404dd7e9bae8dbf86aabed5435ed3335370bb7702720898"
+      },
+      {
         "path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/config.json",
         "size_bytes": 1419,
         "sha256": null
@@ -4727,6 +4733,11 @@
         "path": "transfer/aad_autoinit_c023ba38.bundle",
         "size_bytes": 18507756,
         "sha256": "a560c4794c931b2ce505e7502f094b909e077979475ffdfaa7f8993deee005fd"
+      },
+      {
+        "path": "transfer/aad_autoinit_c10ad811.bundle",
+        "size_bytes": 33276335,
+        "sha256": "1e379ddea1e2db52866b77c845fb6030007981bb2cf550a89488575f624e6e30"
       },
       {
         "path": "transfer/aad_autoinit_c338a76b.bundle",
@@ -10164,12 +10175,18 @@
       "weights_sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856",
       "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
       "referenced_by": [
+        "logs/budget/approvals/autoinit_d3_probes_grant.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/evidence/d3_structural.json",
-        "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/evidence/product.json",
-        "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/evidence/product_durability.json",
-        "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/runtime/session.json"
+        "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/closeout/outcome.json",
+        "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/configs/d3_probes_d3_s1004399678.json",
+        "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/configs/d3_probes_d3_s396880939.json",
+        "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/configs/d3_probes_d3_s766527341.json",
+        "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/d3_probes.json",
+        "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/d3_probes_comparison.json",
+        "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/results/d3_probes_d3_s1004399678.json",
+        "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/results/d3_probes_d3_s396880939.json",
+        "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/results/d3_probes_d3_s766527341.json",
+        "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/training/d3_probes_d3_s1004399678/run_manifest.json"
       ],
       "relay_path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors",
       "relay_verified": true,
@@ -10179,7 +10196,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "the relay copy (byte-exact, verified); otherwise the registered fixed path, whose step 0 reproduced q2's pinned digest",
       "reconstruction_cost": "$0 from the relay; otherwise one structural session (about $0.56)",
-      "never_delete_clause": "open consumer: the D3 three-probe rung, whose contract names this product (proposable, not granted). Retirable only after that decision, under the standing policy (AGENTS.md 2.5), with a consumer audit and a tombstone",
+      "never_delete_clause": "the three-probe rung is COMPLETE (d3_probes_20261017_110022, INCONCLUSIVE vs q2 and B); the registration carries both DEPTH references to a future capability-aligned evaluation, which would train from these bytes. Retained until the maintainer decides that; then retirable under the standing policy (AGENTS.md 2.5) after a consumer audit, with a tombstone",
       "protected": true,
       "disposition": "keep"
     },

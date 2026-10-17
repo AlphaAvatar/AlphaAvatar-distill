@@ -11972,3 +11972,65 @@ on a paid pod.
 - **Does not authorize.** D1/D2 reruns, a Full Search, extra seeds, a fresh
   confirmation, promotion, the cancelled D3, data work, Stage-0/2/4, or a cap
   change.
+
+## 2026-10-17 — D3 three probes: COMPLETE; vs q2 and vs B both INCONCLUSIVE (exploratory); stopped at the scientific review boundary
+
+- **Run.** `d3_probes_20261017_110022`, session commit `c10ad811`
+  (executable `8db0fff7`, contract `5297bf31`). Pod `6gqbeysqtywflq` was
+  admitted on the first AU draw (`…@595.91.07`).
+- **Probes.** Three of `e1_p1_kd_heavy@0.86M` (1023 steps each), all from
+  the D3 initialization `4f3e3eb7…`, at seeds 396880939, 766527341 and
+  1004399678, on `d1_confirmation` (950 prompts, 850 scorable).
+  - Every unit was generated, scored, secured off-pod and release-acked.
+  - The preserved trained copies were pruned once their probes were scored
+    (P8.4).
+  - The pod was deleted after 273.3 min; the provider confirms it gone.
+- **Closeout: COMPLETE** (`closeout_d3_probes.py`), with all nine proofs.
+  - Each unit was re-scored by the pinned scorer, which reproduced every row
+    and figure. The training identity is the protocol's.
+  - Each unit is aligned id-for-id with q2's and B's imported units at its
+    seed.
+  - The session archive verifies against its 97-file manifest. The second
+    relay copy matched (`c58b2d70…`).
+- **Exploratory comparison.** The registered rule: correct_overall over the
+  850 scorable prompts, a two-sided 95% stratified prompt-cluster bootstrap,
+  and seed signs.
+
+  | Comparison | Δ | 95% interval | per seed (396…, 766…, 1004…) | label |
+  |---|---|---|---|---|
+  | D3 − q2 (primary) | −0.0067 | [−0.0157, +0.0024] | −0.0059, −0.0165, +0.0024 | INCONCLUSIVE |
+  | D3 − B (anchor) | −0.0071 | [−0.0161, +0.0020] | −0.0129, −0.0059, −0.0024 | INCONCLUSIVE |
+
+  - **Mean correct_overall.** D3 0.0333, q2 0.0400, B 0.0404.
+  - **Usable (descriptive).** Against q2, +0.0018 [−0.020, +0.024]. Against
+    B, +0.0968 [+0.074, +0.120]. D3's usable rate is 0.691; q2's is 0.689,
+    B's 0.594.
+  - **correct_given_usable.** D3 0.0465, q2 0.0553, B 0.0627.
+  - **Per domain** (correct, then usable, D3 / q2 / B):
+    - reasoning_math: 0.011/0.012/0.011, then 0.71/0.71/0.59;
+    - rag_multihop: 0.074/0.090/0.093, then 0.81/0.88/0.82;
+    - general: 0.009/0.016/0.009;
+    - tool: 0.013/0.010/0.017, with usable 0.64/0.46/0.63;
+    - code: unscorable; usable 0.50/0.44/0.19.
+  - **Mean generation length.** 633 / 568 / 640 tokens. No arm hit the
+    context limit.
+- **Reading.** Neither label is an improvement. The point estimates are
+  slightly negative against both comparators, but both intervals contain zero
+  and the effect sizes are under one percentage point.
+  - Against B, all three seed deltas are negative; against q2, two of three.
+  - Usable rollout matches q2 and exceeds B, as q2 does.
+  - On this mixed-domain battery, choosing DEPTH by the teacher reference
+    does not separate from the parent reference.
+  - Nothing here measures fluid reasoning (P10.2). No claim follows about
+    rule induction, composition or interactive reasoning.
+  - As registered, both references are carried to a future capability-aligned
+    evaluation.
+- **Money.**
+  - All-in $5.0395: GPU $4.9646 + disk $0.0749. The provider balance moved
+    $4.9883.
+  - Probes envelope: $6.9605 of $12.00 left. D3 total: $5.5966.
+  - Limits after: project $94.8528, formal $98.8304, package $102.0108,
+    engineering $3.1804 (unchanged).
+- **Stop.** At the scientific review boundary. The following are not
+  authorized: more seeds, a fresh confirmation, promotion, D1/D2 reruns,
+  a Full Search, or a cap change.

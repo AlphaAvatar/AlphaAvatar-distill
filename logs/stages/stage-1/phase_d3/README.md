@@ -10,6 +10,7 @@ Everything this experiment produced, in one place.
 
 ## Runs
 
+* [`d3_probes_20261017_110022`](runs/d3_probes_20261017_110022/)
 * [`d3_structural_20261017_083554`](runs/d3_structural_20261017_083554/)
 
 Canonical list, always the index rather than this file.

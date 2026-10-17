@@ -222,8 +222,8 @@ def envelope(run: str, this_usd: float, envelope_usd: float | None,
     closeout, with this run counted once."""
     from stages.phase_d3 import d3_authorization as A
 
-    booked = A.consumed_by_prior_subruns(repo_root, "probes")["subruns"]
-    prior = [s for s in booked if s["run_id"] != run]
+    prior = A.consumed_by_prior_subruns(repo_root, "probes",
+                                        exclude=run)["subruns"]
     consumed = round(sum(float(s["all_in_usd"]) for s in prior) + this_usd, 4)
     return {"cumulative_envelope_usd": envelope_usd,
             "prior_attempts": prior, "this_attempt_usd": this_usd,

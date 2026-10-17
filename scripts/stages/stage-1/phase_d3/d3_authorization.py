@@ -434,13 +434,19 @@ def reprice_at(rate_usd_per_hour: float, repo_root: str | Path = REPO,
 
 
 def consumed_by_prior_subruns(repo_root: str | Path = REPO,
-                              rung: str = "structural") -> dict[str, Any]:
-    """Every earlier subrun of the rung's booked cost; one unknown refuses."""
+                              rung: str = "structural",
+                              exclude: str | None = None) -> dict[str, Any]:
+    """Every earlier subrun of the rung's booked cost; one unknown refuses.
+
+    `exclude` is the run a closeout is booking right now: it has no closeout
+    yet by definition, and is counted by the caller, once."""
     from stages.phase_d2.d2_screening_authorization import _subrun_cost
 
     root = Path(repo_root) / RUNS_ROOT
     rows, unknown = [], []
     for run in sorted(root.glob(f"{governance(rung).run_prefix}*")):
+        if run.name == exclude:
+            continue
         cost, basis = _subrun_cost(run)
         if cost is None:
             unknown.append(f"{run.name}: {basis}")

@@ -1078,12 +1078,11 @@ STAGE_1 = [
         id="phase_d3",
         kind="experiment",
         stage_id="1",
-        status=("REGISTERED 2026-10-16; STRUCTURAL session 2026-10-17 "
-                "(d3_structural_20261017_083554): STRUCTURAL_CHANGE, admitted "
-                "and re-derived off-pod, $0.5571; the three probes GRANTED "
-                "2026-10-17 ($12.00 cumulative) once the D3 probes closeout "
-                "exists. Replaces the cancelled, unexecuted "
-                "student-confidence D3"),
+        status=("COMPLETE 2026-10-17. Structural "
+                "(d3_structural_20261017_083554): STRUCTURAL_CHANGE, admitted, "
+                "$0.5571. Three probes (d3_probes_20261017_110022): closeout "
+                "COMPLETE, INCONCLUSIVE vs q2 and vs B (exploratory), $5.0395. "
+                "Replaces the cancelled, unexecuted student-confidence D3"),
         title="D3 — fixed-q2 DEPTH teacher-reference ablation",
         question=("Given D1-q2's exact structural path, does choosing the "
                   "DEPTH layers by minimizing KL against the original teacher "
@@ -1125,6 +1124,13 @@ STAGE_1 = [
               "session; the live limits; the old D3 reservation not "
               "transferred",
               field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/"
+              "evidence/d3_probes_comparison.json",
+              "the three probes' exploratory comparison with q2 and B: "
+              "verified units, deltas, intervals, seed signs, labels, "
+              "per-set and per-domain profiles",
+              field="schema",
+              equals="aadistill.phase_d3.probes_exploratory_comparison/v1"),
             E("logs/stages/stage-1/phase_d3/analyses/d3_readiness_review.md",
               "the $0 readiness review: design and treatment identity, the "
               "core mechanism, outcomes, the conditional probes, price and "

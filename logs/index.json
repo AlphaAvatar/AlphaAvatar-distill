@@ -743,7 +743,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 93,
+  "runs_unrecorded": 94,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -843,8 +843,8 @@
    },
    "phase_d3": {
     "recorded": 0,
-    "unrecorded": 1,
-    "total": 1
+    "unrecorded": 2,
+    "total": 2
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -3492,6 +3492,14 @@
    "n_files": 19,
    "digest": "f6cb3a33e4e139dc33a0fb1c97cc9a49f5b6fbc7f8c80b5eeca6eaefba1ee2fd",
    "why": "no run manifest; its closeout states: COMPLETE FORMAL SEARCH: 92/92 expansions, 12 complete leaves, Top-4 committed and secured"
+  },
+  {
+   "experiment_id": "phase_d3",
+   "run_id": "d3_probes_20261017_110022",
+   "root": "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022",
+   "n_files": 31,
+   "digest": "9e83ba1539546cb34b0195f3604c6a2f40976be50d5fc08953d59f81bd936651",
+   "why": "no run manifest; its closeout states: COMPLETE: three registered probes trained from the D3 initialization, generated, scored, verified off-pod and paired with q2's and B's imported units; the registered EXPLORATORY comparison applied"
   },
   {
    "experiment_id": "phase_d3",

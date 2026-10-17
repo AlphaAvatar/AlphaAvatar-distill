@@ -12,13 +12,13 @@
   },
   "limits": {
    "engineering_remaining_usd": 3.1804,
-   "formal_remaining_usd": 103.8699,
-   "package_remaining_usd": 107.0503,
+   "formal_remaining_usd": 98.8304,
+   "package_remaining_usd": 102.0108,
    "per_session_cap_usd": 30.0,
    "project_cap_usd": 595.0,
-   "project_remaining_usd": 99.8923
+   "project_remaining_usd": 94.8528
   },
-  "project_remaining_after_remaining_at_hard_usd": 91.38,
+  "project_remaining_after_remaining_at_hard_usd": 94.85,
   "quote": {
    "_quoted": "live, immediately before issuance",
    "gpu": "NVIDIA L40S",
@@ -26,12 +26,10 @@
    "usd_per_hour": 1.09
   },
   "spent_by_rung_usd": {
-   "probes": 0,
+   "probes": 5.0395,
    "structural": 0.5571
   },
-  "still_to_fund_at_hard_with_reserves_usd": {
-   "probes": 8.51
-  }
+  "still_to_fund_at_hard_with_reserves_usd": {}
  },
  "probes": {
   "conditional_on": "STRUCTURAL_CHANGE",
@@ -66,17 +64,20 @@
   },
   "phase_d3_funded": true,
   "rungs_spent": [
-   "structural"
+   "structural",
+   "probes"
   ],
   "spent_by_rung_usd": {
-   "probes": 0,
+   "probes": 5.0395,
    "structural": 0.5571
   },
   "structural_outcomes": {
    "d3_structural_20261017_083554": "STRUCTURAL_CHANGE"
   },
   "subruns": {
-   "probes": [],
+   "probes": [
+    "d3_probes_20261017_110022"
+   ],
    "structural": [
     "d3_structural_20261017_083554"
    ]

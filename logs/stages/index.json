@@ -151,7 +151,7 @@
     "pipeline_activity": 4,
     "experiments": 15,
     "experiments_with_logs": 15,
-    "runs": 231,
+    "runs": 232,
     "canonical_configs": 18,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
@@ -978,7 +978,7 @@
    "experiment_id": "phase_d3",
    "stage_id": "1",
    "classification": "experiment",
-   "status": "REGISTERED 2026-10-16; STRUCTURAL session 2026-10-17 (d3_structural_20261017_083554): STRUCTURAL_CHANGE, admitted and re-derived off-pod, $0.5571; the three probes GRANTED 2026-10-17 ($12.00 cumulative) once the D3 probes closeout exists. Replaces the cancelled, unexecuted student-confidence D3",
+   "status": "COMPLETE 2026-10-17. Structural (d3_structural_20261017_083554): STRUCTURAL_CHANGE, admitted, $0.5571. Three probes (d3_probes_20261017_110022): closeout COMPLETE, INCONCLUSIVE vs q2 and vs B (exploratory), $5.0395. Replaces the cancelled, unexecuted student-confidence D3",
    "title": "D3 \u2014 fixed-q2 DEPTH teacher-reference ablation",
    "question": "Given D1-q2's exact structural path, does choosing the DEPTH layers by minimizing KL against the original teacher instead of the FFN-compressed parent give a better initialization for downstream recovery? One declared change: DEPTH's KL reference (kl_reference: root_reference/v1); every operator, profile, position policy, support, aggregation, geometry and tie-break is q2's.",
    "canonical_path": "logs/stages/stage-1/phase_d3",
@@ -1007,6 +1007,12 @@
      "says": "the price: the structural session from q2's measured replay and search DEPTH, the probes as D2's shared confirmation session; the live limits; the old D3 reservation not transferred",
      "field": "authorizes",
      "equals": "nothing"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/evidence/d3_probes_comparison.json",
+     "says": "the three probes' exploratory comparison with q2 and B: verified units, deltas, intervals, seed signs, labels, per-set and per-domain profiles",
+     "field": "schema",
+     "equals": "aadistill.phase_d3.probes_exploratory_comparison/v1"
     },
     {
      "path": "logs/stages/stage-1/phase_d3/analyses/d3_readiness_review.md",

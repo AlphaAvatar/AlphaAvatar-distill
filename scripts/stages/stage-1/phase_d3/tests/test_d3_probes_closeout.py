@@ -288,3 +288,29 @@ class TestTheDeriverBooksD3ProbesRuns:
         for doc in (complete[0], incomplete):
             assert isinstance(doc["money"]["all_in_usd"], float)
             assert "budget" not in doc and "cost" not in doc
+
+
+class TestTheEnvelopeNetsEveryOtherSubrun:
+    """The run being closed has no closeout yet; it must not refuse its own
+    closeout (it did, on the first real run), and an EARLIER unbooked run
+    still must."""
+
+    def _runs(self, tmp_path, *names):
+        root = tmp_path / "logs/stages/stage-1/phase_d3/runs"
+        for name in names:
+            (root / name / "runtime").mkdir(parents=True)
+            (root / name / "runtime" / "session.json").write_text("{}")
+        return tmp_path
+
+    def test_the_run_being_closed_is_counted_once(self, tmp_path):
+        repo = self._runs(tmp_path, "d3_probes_now")
+        env = C.envelope("d3_probes_now", 4.5, 12.0, repo)
+        assert env["prior_attempts"] == [] and env["consumed_usd"] == 4.5
+        assert env["remaining_usd"] == 7.5
+
+    def test_an_earlier_unbooked_run_still_refuses(self, tmp_path):
+        from stages.phase_d3.d3_authorization import D3AuthorizationRefused
+
+        repo = self._runs(tmp_path, "d3_probes_before", "d3_probes_now")
+        with pytest.raises(D3AuthorizationRefused, match="d3_probes_before"):
+            C.envelope("d3_probes_now", 4.5, 12.0, repo)

@@ -317,10 +317,13 @@ CLASSIFY: dict[str, dict] = {
             "stage1/phase_d3/d3_structural_20261017_083554/, round-trip "
             "verified (logs/stages/stage-1/phase_d3/runs/"
             "d3_structural_20261017_083554/evidence/product_durability.json)",
-        never_delete="open consumer: the D3 three-probe rung, whose contract "
-                     "names this product (granted 2026-10-17, $12.00). "
-                     "Retirable only after that decision, under the standing "
-                     "policy (AGENTS.md 2.5), with a consumer audit and a "
+        never_delete="the three-probe rung is COMPLETE "
+                     "(d3_probes_20261017_110022, INCONCLUSIVE vs q2 and B); "
+                     "the registration carries both DEPTH references to a "
+                     "future capability-aligned evaluation, which would train "
+                     "from these bytes. Retained until the maintainer decides "
+                     "that; then retirable under the standing policy "
+                     "(AGENTS.md 2.5) after a consumer audit, with a "
                      "tombstone",
         reconstruction="the relay copy (byte-exact, verified); otherwise the "
                        "registered fixed path, whose step 0 reproduced q2's "
@@ -692,9 +695,13 @@ def scientific_artifacts(entries: list[dict]) -> dict:
                                       f"{d3_run}/evidence/"
                                       "product_durability.json"),
                 "retention": "reproducibility_required",
-                "consumers": ["phase_d3 three-probe rung (granted "
-                              "2026-10-17)"],
-                "open_consumers": ["phase_d3 three-probe rung"],
+                "consumers": ["phase_d3 three-probe rung: COMPLETE "
+                              "(d3_probes_20261017_110022)",
+                              "a capability-aligned evaluation of both DEPTH "
+                              "references (registered carry-forward; not "
+                              "designed)"],
+                "open_consumers": ["a capability-aligned evaluation of both "
+                                   "DEPTH references (not designed)"],
             }
             out["d3_initial_checkpoint"] = attach(
                 row, ident["single_shard_sha256"],
@@ -754,7 +761,7 @@ def scientific_artifacts(entries: list[dict]) -> dict:
             "consumers": ["phase_d1 screening + confirmation (paused)",
                           "phase_d2 (complete)",
                           "phase_d3 three-probe rung (d1_confirmation; "
-                          "granted 2026-10-17)"],
+                          "complete)"],
             "_identity_survives_zero_copies": (
                 "derived from the family manifest, not from the bytes"),
         }
