@@ -76,6 +76,14 @@ def build(repo_root: Path = REPO) -> dict[str, Any]:
 
     active = [r for r in runs if _is_active(r)]
 
+    #: The D-series programme's terminal record, when it exists, is what a
+    #: finished D1 is waiting on: nothing. Read, not restated.
+    closeout_rel = ("logs/stages/stage-1/families/d_series/closeout/"
+                    "programme_closeout.json")
+    closeout_p = repo_root / closeout_rel
+    programme = (json.loads(closeout_p.read_text()).get("status")
+                 if closeout_p.is_file() else None)
+
     readiness = {
         "_contract": (
             "The battery-readiness answers a reviewer needs, each DERIVED "
@@ -93,6 +101,8 @@ def build(repo_root: Path = REPO) -> dict[str, Any]:
         "d1_evidence_blocker": ("CLOSED" if family_ready and not open_blockers
                                 else "OPEN"),
         "d1_screening": ("ACTIVE: " + ", ".join(active) if active else
+                         f"CLOSED — {programme} ({closeout_rel})" if programme
+                         else
                          "PAUSED — no open blocker, no outstanding one-use "
                          "authorization, no active run; the gate is the "
                          "maintainer decision in logs/state/current.json :: next"),
@@ -105,6 +115,7 @@ def build(repo_root: Path = REPO) -> dict[str, Any]:
                               "the family manifest)"),
             "blockers": "d1_session.open_blockers()",
             "pause": "logs/state/current.json :: next",
+            "programme": closeout_rel,
         },
     }
 

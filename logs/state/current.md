@@ -10,9 +10,45 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 ## Right now
 
 **NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods,
-0 network volumes and $0/h (2026-10-17 about 15:36 UTC). Pod
-`6gqbeysqtywflq` (D3 probes) was deleted at 15:35:28Z, the provider confirms
-it gone, and its watchdog ended on `pod_gone`. No watcher is armed.
+0 network volumes and $0/h (2026-10-17 17:47 UTC). No D-series tmux
+session, watchdog or monitor is alive. The last pod, `6gqbeysqtywflq` (D3
+probes), was deleted at 15:35:28Z.
+
+**THE D-SERIES IS CLOSED (maintainer final decision, 2026-10-17). D1 +
+`scored_v1` IS THE OFFICIAL FORWARD BASELINE.** It is a selection, not a
+verdict: D1's NO-GO, D2's NO_GO and D3's STRUCTURAL_CHANGE with INCONCLUSIVE
+probes all stand unchanged.
+- **The baseline.** `stage1_init.d1_target_aware.scored_v1@v1`.
+  - Its record is
+    [`configs/shared/baselines/initialization_forward_baseline_v1.json`](../../configs/shared/baselines/initialization_forward_baseline_v1.json),
+    selected by its sha256 in `selection.json`.
+  - Forward work resolves it through `shared.forward_baseline`, which uses
+    the generic `aadistill.initialization.baseline`.
+  - Its terms:
+    - D1's four operators;
+    - `positions.supervised_target_v1@v1`;
+    - `reference_topk_tail_v1`, K=200;
+    - DEPTH against the parent and state evaluation against the teacher;
+    - beam width 6 with `delayed_prune` and `pareto@v2`;
+    - micro-batch 3, `length_sorted_v1`, **`scored_v1`**.
+- **Identities kept apart.** The historical reference initialization is D1-q2
+  (`afd50c9f…`, digest `3a4b4ede…`), materialized under `all_v1`. The forward
+  profile (fingerprint `e627f461…`) is **NOT MATERIALIZED**, and the resolver
+  never offers q2's digest as its expectation. B stays the archived historical
+  comparator.
+- **Authorities.** All 11 D-series grants are CLOSED, and every D-series
+  issuer refuses them. D3's unspent $6.4429 (structural) and $6.9605
+  (probes) are closed, not transferred.
+- **Checkpoints.** q2 is canonical and protected. The other D-series
+  initializations and duplicates (14 units, 16.69 GB) have no consumer and
+  are retirement-eligible. None was deleted.
+- **Owners.**
+  [`programme_closeout.json`](../stages/stage-1/families/d_series/closeout/programme_closeout.json)
+  and `decisions.md` 2026-10-17 (last entry).
+- **Next.** Stage-0 calibration data-volume and mixture experiments on this
+  baseline. They are **NOT authorized**; they are designed and authorized in
+  new conversations. Start at
+  [`STAGE0_HANDOFF.md`](../../docs/shared/STAGE0_HANDOFF.md).
 
 **THE PRIMARY TARGET IS FLUID REASONING (maintainer clarification,
 2026-10-16).** The project prioritizes fluid reasoning and adaptive
@@ -45,8 +81,8 @@ cancelled and unexecuted).
   - Usable is on par with q2 (0.691 vs 0.689) and above B (0.594).
 - **Reading.** On this mixed-domain battery the teacher reference does not
   separate from the parent reference. Nothing here measures fluid reasoning.
-- **Money.** D3 total $5.5966. The probes envelope has $6.9605 left; it does
-  not transfer.
+- **Money.** D3 total $5.5966. Both D3 envelopes were closed unspent by the
+  D-series closure.
 - **Owners.** `phase_d3/runs/*/closeout/outcome.json`,
   `d3_probes_20261017_110022/evidence/d3_probes_comparison.json`,
   `decisions.md` 2026-10-17.
@@ -1797,15 +1833,13 @@ C3  COMPLETE / NO_GO                    <- canonical verdict, 2026-10-01
       PRIMARY verdict                   NO_GO   UCB +0.005490 < SESOI +0.010
       incumbent after C3                B, unchanged; causal-KL does not promote
       B1 vs B3 protocol choice          a post-C3 maintainer decision, open
-A-bsz3  DESIGNED, NOT FUNDED           <- the shortened design, 2026-10-01
-      $0 padding/forward analysis       MEASURED  67 forwards -> 23
-      implementation + driver           complete, toy-scale executed
-      16-probe non-inferiority design   WITHDRAWN for scope
-      step 1, structural/runtime        unrun; fits the engineering allowance
-      step 2, <=3 treatment probes      conditional on step 1; formal book, overspent
-FFN     NOT STARTED                     <- next after A-bsz3
-D1/D2/D3  DIRECTIVE RECEIVED            <- global scoring/search; not designed
-Stage-0 v2  DIRECTIVE RECEIVED          <- after the best D-method is established
+A3  COMPLETE 2026-10-03                 <- DISTINCT_NUMERICAL_MATERIALIZATION_PROTOCOL
+FFN CLOSED: SKIPPED                     <- maintainer instruction, 2026-10-03
+D1  COMPLETE / NO-GO 2026-10-12         q2 did not confirm against B
+D2  COMPLETE / NO_GO 2026-10-16         c4 did not confirm against B
+D3  COMPLETE 2026-10-17                 STRUCTURAL_CHANGE; probes INCONCLUSIVE
+D-series  CLOSED 2026-10-17             <- forward baseline: D1 + scored_v1 (a selection)
+Stage-0  NEXT PROGRAMME, NOT AUTHORIZED <- calibration volume/mixture; docs/shared/STAGE0_HANDOFF.md
 C4  NOT AUTHORIZED
 ```
 

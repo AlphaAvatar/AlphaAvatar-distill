@@ -1,0 +1,290 @@
+{
+ "schema": "aadistill.d_series.programme_closeout/v1",
+ "status": "CLOSED -- MAINTAINER SELECTED D1 + scored_v1 AS FORWARD BASELINE",
+ "decided_utc": "2026-10-17",
+ "decision_record": "logs/budget/decisions.md 2026-10-17 (D-series closed; D1 + scored_v1 adopted as the forward baseline)",
+ "_contract": "The terminal record of the D-series programme. Outcomes are READ from each terminal run's closeout and bound by its sha256; money is computed by the budget deriver; each closed authority is bound by the sha256 of its file at closure. AUTHORIZES NOTHING.",
+ "scientific_outcomes": {
+  "phase_d1": "COMPLETE / historical NO-GO (q2 advanced from screening and did not confirm against B)",
+  "phase_d2": "COMPLETE / NO_GO (c4 advanced from screening and did not confirm against B)",
+  "phase_d3": "structural STRUCTURAL_CHANGE; behavioural comparison INCONCLUSIVE vs q2 and vs B (exploratory)",
+  "student_confidence_d3": "CANCELLED / NEVER EXECUTED",
+  "_unchanged": "every verdict above is the run's own and is not rewritten, re-analysed or upgraded by the selection below. D1's NO-GO stays NO-GO."
+ },
+ "terminal_runs": {
+  "phase_d1": {
+   "search": {
+    "run_id": "d1_search_20261006_210210",
+    "closeout": "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/closeout/outcome.json",
+    "closeout_sha256": "4de71a8159646974e8e9654ae57eeb89f78b168e6f08f62bdd1abfbb208ec20b",
+    "classification": "COMPLETE FORMAL SEARCH: 92/92 expansions, 12 complete leaves, Top-4 committed and secured"
+   },
+   "screening": {
+    "run_id": "d1_behavioural_20261011_135910",
+    "closeout": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/closeout/outcome.json",
+    "closeout_sha256": "1f8e7bb3577bdf444aa95c9e301333b9c00042106bccf567aa9a4c132365476b",
+    "classification": "VALID SCREENING RESULT. One candidate advances to confirmation; this is a ranking input, not evidence that may promote."
+   },
+   "confirmation": {
+    "run_id": "d1_behavioural_20261012_064341",
+    "closeout": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/closeout/outcome.json",
+    "closeout_sha256": "eb9bcb699e19a111223c1e5aa9da2322a40daa1d917a633d3fff5f4accdbba14",
+    "classification": "VALID CONFIRMATION RESULT: NO-GO. q2 does not confirm against B on the preregistered endpoint; B remains the standing incumbent. Nothing is promoted.",
+    "verdict": "NO-GO",
+    "delta": -0.000392156862745098
+   }
+  },
+  "phase_d2": {
+   "search": {
+    "run_id": "d2_search_20261015_051722",
+    "closeout": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json",
+    "closeout_sha256": "d9c83e9e8b4fb7c0f31d1b06dcd28ec1335f5eac42300b4f0fdff76dc021f6ec",
+    "classification": "COMPLETE FORMAL SEARCH: 92/92 expansions, 12 complete leaves, Top-4 committed and secured"
+   },
+   "screening": {
+    "run_id": "d2_screening_20261015_203346",
+    "closeout": "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/closeout/outcome.json",
+    "closeout_sha256": "6d3be492220d52e6c6dfbe3966a83f91eeb5bec94c3d8c34c459e3d339b9be63",
+    "classification": "COMPLETE SCREENING RUNG: every frozen probe trained, generated, scored and verified off-pod; the frozen rule applied"
+   },
+   "confirmation": {
+    "run_id": "d2_confirmation_20261016_105802",
+    "closeout": "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/closeout/outcome.json",
+    "closeout_sha256": "fb4c97b36f64433c2224d9b5d5b604849cdf7780fe8a11eb1ef799d7b264e27b",
+    "classification": "COMPLETE CONFIRMATION RUNG: every frozen probe trained, generated, scored and verified off-pod; the frozen rule applied",
+    "verdict": "NO-GO",
+    "delta": -0.010588235294117647
+   }
+  },
+  "phase_d3": {
+   "structural": {
+    "run_id": "d3_structural_20261017_083554",
+    "closeout": "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/closeout/outcome.json",
+    "closeout_sha256": "9c20f6db836aab4902c4594cf5966d0fa63dcab160eb40fad691d639a6eb41fb",
+    "classification": "COMPLETE: STRUCTURAL_CHANGE, re-derived off-pod from the step records",
+    "structural_outcome": "STRUCTURAL_CHANGE"
+   },
+   "probes": {
+    "run_id": "d3_probes_20261017_110022",
+    "closeout": "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/closeout/outcome.json",
+    "closeout_sha256": "038a7978c6c56d31b11726249cc48d6d85ef1713ee2a907d1000b95e4e4f6296",
+    "classification": "COMPLETE: three registered probes trained from the D3 initialization, generated, scored, verified off-pod and paired with q2's and B's imported units; the registered EXPLORATORY comparison applied",
+    "labels": {
+     "vs_q2": "INCONCLUSIVE",
+     "vs_B": "INCONCLUSIVE"
+    },
+    "deltas": {
+     "vs_q2": -0.006666666666666667,
+     "vs_B": -0.007058823529411765
+    }
+   }
+  }
+ },
+ "maintainer_selection": {
+  "decision": "ADOPT D1's initialization methodology together with prediction_rows=scored_v1 as the official forward baseline. A selection, not a verdict.",
+  "selection": "configs/shared/baselines/selection.json",
+  "selection_sha256": "7217d7e49a694b3fe3e17c3b3d567fa9987cf111b89229e76489639dc1eb7184",
+  "resolved_by": "shared.forward_baseline.selected()",
+  "historical_comparator": "B (C1's promoted treatment) stays the archived comparator every historical D-series record names; stages.d_series.incumbent.standing_incumbent() is unchanged."
+ },
+ "closed_authorities": [
+  {
+   "path": "logs/budget/approvals/autoinit_d1_grant.json",
+   "sha256_at_closure": "309ec6346421b552632f0545aa247adc8a7e34bf3a592e373c71eb1791b81d21",
+   "status": "CLOSED",
+   "phase": "phase_d1",
+   "rung": "search",
+   "issuer": "scripts/stages/stage-1/phase_d1/issue_d1_authorization.py"
+  },
+  {
+   "path": "logs/budget/approvals/autoinit_d1_replay_authorization.json",
+   "sha256_at_closure": "fba2fa4fb162ecc3058ee13098f7a9f760ae234e98a4c76657e389cf88f2ecea",
+   "status": "CLOSED",
+   "phase": "phase_d1",
+   "rung": "finalist rematerialization (engineering)",
+   "issuer": "scripts/stages/stage-1/phase_d1/issue_d1_replay_authorization.py"
+  },
+  {
+   "path": "logs/budget/approvals/autoinit_d1_behavioural_phase_grant.json",
+   "sha256_at_closure": "2aece29ea2c72cb21b935cde5c75af975fb78989c962014e989cff733bf751c2",
+   "status": "CLOSED",
+   "phase": "phase_d1",
+   "rung": "behavioural (phase allowance)",
+   "issuer": "scripts/stages/stage-1/phase_d1/issue_d1_behavioural_authorization.py"
+  },
+  {
+   "path": "logs/budget/approvals/autoinit_d1_behavioural_screening_grant.json",
+   "sha256_at_closure": "b959bf137212121714ae30373c4a26c4505199a2a018f172ac540fe2bf4c38b2",
+   "status": "CLOSED",
+   "phase": "phase_d1",
+   "rung": "screening",
+   "issuer": "scripts/stages/stage-1/phase_d1/issue_d1_behavioural_authorization.py"
+  },
+  {
+   "path": "logs/budget/approvals/autoinit_d1_behavioural_screening_grant_amendment.json",
+   "sha256_at_closure": "49cff3e4d3957ee978505abdf850577ad629b568ef0f4cc1cd868c0090143362",
+   "status": "CLOSED",
+   "phase": "phase_d1",
+   "rung": "screening",
+   "issuer": "scripts/stages/stage-1/phase_d1/issue_d1_behavioural_authorization.py"
+  },
+  {
+   "path": "logs/budget/approvals/autoinit_d1_behavioural_confirmation_grant.json",
+   "sha256_at_closure": "482f310d093c7b3f52f4cc4c69c5b1685f0739a0d7939550fe894935ffdbd072",
+   "status": "CLOSED",
+   "phase": "phase_d1",
+   "rung": "confirmation",
+   "issuer": "scripts/stages/stage-1/phase_d1/issue_d1_behavioural_authorization.py"
+  },
+  {
+   "path": "logs/budget/approvals/autoinit_d2_grant.json",
+   "sha256_at_closure": "b368fb59b791f3299ed52c5b9234ba8458dcab1aa5eea6ebf77935bc8e2a3c18",
+   "status": "CLOSED",
+   "phase": "phase_d2",
+   "rung": "search",
+   "issuer": "scripts/stages/stage-1/phase_d2/issue_d2_authorization.py"
+  },
+  {
+   "path": "logs/budget/approvals/autoinit_d2_screening_grant.json",
+   "sha256_at_closure": "6a062be6d60fa54df21afab1bad757d37f74194ed99e5908a6798ad66894c2b6",
+   "status": "CLOSED",
+   "phase": "phase_d2",
+   "rung": "screening",
+   "issuer": "scripts/stages/stage-1/phase_d2/issue_d2_screening_authorization.py"
+  },
+  {
+   "path": "logs/budget/approvals/autoinit_d2_confirmation_grant.json",
+   "sha256_at_closure": "f7c1d715dbe8478dac7a7da835e743952c7cd1fd7b7b21f99fe86b32f1c8e2ce",
+   "status": "CLOSED",
+   "phase": "phase_d2",
+   "rung": "confirmation",
+   "issuer": "scripts/stages/stage-1/phase_d2/issue_d2_screening_authorization.py"
+  },
+  {
+   "path": "logs/budget/approvals/autoinit_d3_structural_grant.json",
+   "sha256_at_closure": "832446fa7b3001aa87617fe20db6bda905a5b3e89ecd66b0a4432e10fb401b36",
+   "status": "CLOSED",
+   "phase": "phase_d3",
+   "rung": "structural",
+   "issuer": "scripts/stages/stage-1/phase_d3/issue_d3_authorization.py",
+   "cumulative_envelope_usd": 7.0,
+   "spent_usd": 0.5571,
+   "unspent_usd": 6.4429,
+   "unspent_disposition": "CLOSED UNSPENT: not spent, not transferred, not repurposed. It funds nothing from this decision on."
+  },
+  {
+   "path": "logs/budget/approvals/autoinit_d3_probes_grant.json",
+   "sha256_at_closure": "0a9e0c149de1b793c732ca077b0ed5fa812234adf7b5cb3f25c64a422f6df4ed",
+   "status": "CLOSED",
+   "phase": "phase_d3",
+   "rung": "probes",
+   "issuer": "scripts/stages/stage-1/phase_d3/issue_d3_authorization.py",
+   "cumulative_envelope_usd": 12.0,
+   "spent_usd": 5.0395,
+   "unspent_usd": 6.9605,
+   "unspent_disposition": "CLOSED UNSPENT: not spent, not transferred, not repurposed. It funds nothing from this decision on."
+  }
+ ],
+ "funding_scope": "phase_d1, phase_d2 and phase_d3 stay in the C1 package's funds_formal_sessions_of: they attribute money already spent. No cap or allowance changed.",
+ "money": {
+  "run_closeouts_by_rung_usd": {
+   "phase_d1:d1_behavioural": {
+    "usd": 40.8301,
+    "sessions": 9
+   },
+   "phase_d1:d1_replay": {
+    "usd": 0.0,
+    "sessions": 2
+   },
+   "phase_d1:d1_search": {
+    "usd": 18.4506,
+    "sessions": 6
+   },
+   "phase_d2:d2_confirmation": {
+    "usd": 5.026,
+    "sessions": 1
+   },
+   "phase_d2:d2_screening": {
+    "usd": 12.973,
+    "sessions": 4
+   },
+   "phase_d2:d2_search": {
+    "usd": 5.5364,
+    "sessions": 1
+   },
+   "phase_d3:d3_probes": {
+    "usd": 5.0395,
+    "sessions": 1
+   },
+   "phase_d3:d3_structural": {
+    "usd": 0.5571,
+    "sessions": 1
+   }
+  },
+  "_d1_replay_books_zero": "the two d1_replay runs book $0 in their own closeouts; their cost is the finalist-rematerialization campaign's, listed below",
+  "run_closeouts_usd": 88.4127,
+  "engineering_campaigns": [
+   {
+    "campaign": "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/campaign.json",
+    "usd": 0.6532
+   },
+   {
+    "campaign": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1/campaign.json",
+    "usd": 0.2538
+   },
+   {
+    "campaign": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/campaign.json",
+    "usd": 0.2493
+   },
+   {
+    "campaign": "logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/campaign.json",
+    "usd": 1.5074
+   },
+   {
+    "campaign": "logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/campaign.json",
+    "usd": 0.8069
+   },
+   {
+    "campaign": "logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json",
+    "usd": 3.449
+   },
+   {
+    "campaign": "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/campaign.json",
+    "usd": 3.2258
+   },
+   {
+    "campaign": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/campaign.json",
+    "usd": 3.6878
+   }
+  ],
+  "engineering_campaigns_usd": 13.8332,
+  "d_series_total_usd": 102.2459,
+  "limits_after": {
+   "project_remaining_usd": 94.8528,
+   "formal_remaining_usd": 98.8304,
+   "package_remaining_usd": 102.0108,
+   "engineering_remaining_usd": 3.1804,
+   "cumulative_spend_usd": 500.1472,
+   "pending_reconciliation": []
+  },
+  "_derived_by": "scripts/maintenance/consolidation/derive_budget.py"
+ },
+ "provider": {
+  "queried_utc": "2026-10-17T17:47:02Z",
+  "how": "runpodctl pod list; runpodctl network-volume list; runpodctl user",
+  "pods": [],
+  "network_volumes": [],
+  "current_spend_per_hr_usd": 0,
+  "client_balance_usd": 113.4773,
+  "watchers": "none: no D-series tmux session, watchdog or monitor process is alive on the development host",
+  "late_settlement": "the balance read 113.5254 at the D3 probes teardown (2026-10-17 ~15:36 UTC) and 113.4773 now, a further 0.0481 debited after the pod was gone (container-disk settlement). The probes run's provider-side total is therefore 4.9883 + 0.0481 = 5.0364, inside its booked all-in 5.0395; nothing is unbooked.",
+  "created_during_closure": "nothing"
+ },
+ "pending": [],
+ "not_pending": [
+  "no further D-series stage, probe, rerun, seed or confirmation",
+  "no rematerialization: the forward profile has no checkpoint of its own yet, and none is owed for this closure",
+  "no Stage-0 experiment: designed and authorized separately"
+ ],
+ "authorizes": "nothing"
+}

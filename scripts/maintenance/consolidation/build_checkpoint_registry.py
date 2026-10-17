@@ -75,6 +75,13 @@ WEIGHT_SUFFIXES = (".safetensors", ".bin", ".pt", ".pth", ".gguf", ".ckpt")
 LOCAL_ROOTS = ((REPO_ROOT / "artifacts", "repo_artifacts"),
                (Path("/home/ecs-user/aad-artifacts"), "external_store"))
 
+#: Shared by every D-series row the programme closure made consumer-less.
+D_SERIES_CLOSED = (
+    "The D-series is CLOSED (maintainer decision 2026-10-17, "
+    "logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): "
+    "every consumer is terminal and the measurement evidence is durable in "
+    "the run records")
+
 #: path suffix -> classification. `disposition` is the proposal a deletion pass
 #: reads; `never_delete` records which clause of the retention rule protects it.
 CLASSIFY: dict[str, dict] = {
@@ -232,34 +239,53 @@ CLASSIFY: dict[str, dict] = {
         reconstruction_cost="paid GPU", disposition="keep"),
     "aad-artifacts/phase_d1/d1_search_20261006_210210/products": dict(
         experiment="phase_d1", role="D1 behavioural finalist or retained search leaf",
-        retention="reproducibility_required", status="active",
+        retention="diagnostic", status="closed",
         why="the completed D1 search's retained products: finalists q1 and q3 "
             "of the frozen quality-order top-4, plus the search's own "
-            "lineage-retained leaves. The paused D1 screening consumes the "
-            "finalists; identities are bound by "
-            "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-        never_delete="D1 finalists are frozen scientific inputs of a paused experiment",
+            "lineage-retained leaves; identities bound by "
+            "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json. "
+            + D_SERIES_CLOSED + ". Not the forward baseline's reference "
+            "(that is q2). Retirement-eligible under AGENTS.md 2.5",
+        never_delete=None,
         reconstruction="byte-exact replay from the committed search record "
                        "(proved twice by the finalist-rematerialization campaign)",
-        reconstruction_cost="paid GPU (~$0.5-1 per finalist)", disposition="keep"),
+        reconstruction_cost="paid GPU (~$0.5-1 per finalist)", disposition="retire"),
     "aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products": dict(
         experiment="phase_d1", role="out-of-band duplicate of the D1 search products",
         retention="duplicate", status="active",
         why="a second transport copy of the same product set; the canonical "
-            "copy is products/ one level up, hash-verified",
+            "copy is products/ one level up, hash-verified. " + D_SERIES_CLOSED,
         never_delete=None, reconstruction="byte-identical to products/",
-        reconstruction_cost="$0 (copy)", disposition="review"),
+        reconstruction_cost="$0 (copy)", disposition="retire"),
+    #: q2 BEFORE its directory: `classify` takes the first match, and q2 is the
+    #: one product in that directory with a live consumer.
+    "aad-artifacts/phase_d1/d1_replay_002/products/afd50c9ff0e3d20542bb5473ea745b55": dict(
+        experiment="phase_d1",
+        role="the forward baseline's HISTORICAL reference initialization: "
+             "D1 finalist q2, materialized under the all_v1 execution profile",
+        retention="canonical", status="active",
+        why="the maintainer selected D1 + scored_v1 as the official forward "
+            "baseline (2026-10-17); configs/shared/baselines/"
+            "initialization_forward_baseline_v1.json names this checkpoint as "
+            "the existing reference initialization of the method. Reproduced "
+            "EXACTLY by the finalist-rematerialization campaign. Its digest is "
+            "NOT the expected digest of a scored_v1 materialization",
+        never_delete="the selected forward baseline's historical reference "
+                     "initialization (its only local copy)",
+        reconstruction="byte-exact replay from the committed search record "
+                       "(scripts/stages/stage-1/phase_d1/autoinit_d1_replay_driver.py)",
+        reconstruction_cost="paid GPU (~$0.5-1)", disposition="keep"),
     "aad-artifacts/phase_d1/d1_replay_002/products": dict(
         experiment="phase_d1", role="D1 behavioural finalist (rematerialized)",
-        retention="reproducibility_required", status="active",
-        why="finalists q2 and q4 of the frozen quality-order top-4, which the "
-            "search did not retain; reproduced EXACTLY by the "
-            "finalist-rematerialization campaign and secured off-pod. The "
-            "paused D1 screening consumes them; identities are bound by "
-            "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-        never_delete="D1 finalists are frozen scientific inputs of a paused experiment",
+        retention="diagnostic", status="closed",
+        why="finalist q4 of the frozen quality-order top-4, which the search "
+            "did not retain; reproduced EXACTLY by the "
+            "finalist-rematerialization campaign. Identities are bound by "
+            "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json. "
+            + D_SERIES_CLOSED + ". Retirement-eligible under AGENTS.md 2.5",
+        never_delete=None,
         reconstruction="byte-exact replay from the committed search record",
-        reconstruction_cost="paid GPU (~$0.5-1 per finalist)", disposition="keep"),
+        reconstruction_cost="paid GPU (~$0.5-1 per finalist)", disposition="retire"),
     "aad-artifacts/phase_d1/d1_behavioural_20261011_135910": dict(
         experiment="phase_d1", role="D1 screening rung evidence store (no weights)",
         retention="reproducibility_required", status="active",
@@ -288,49 +314,43 @@ CLASSIFY: dict[str, dict] = {
         disposition="keep"),
     "aad-artifacts/phase_d2/d2_search_20261015_051722/products": dict(
         experiment="phase_d2", role="D2 v3 committed Top-4 initialization",
-        retention="reproducibility_required", status="active",
+        retention="diagnostic", status="closed",
         why="the four initializations the D2 formal search committed "
             "(stage1_selection.json of d2_search_20261015_051722); every D2 "
             "behavioural probe trains FROM one of them. A second copy is on "
             "the relay under stage1/phase_d2/d2_search_20261015_051722/, "
             "round-trip verified "
             "(logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/"
-            "evidence/product_durability.json)",
-        never_delete="no open consumer remains: D2 screening "
-                     "(d2_screening_20261015_203346) and c4's shared "
-                     "confirmation (d2_confirmation_20261016_105802, NO_GO) "
-                     "are complete and their evidence durable. Retained "
-                     "until the maintainer's next D-series decision; then "
-                     "retirable under the standing policy (AGENTS.md 2.5) "
-                     "after a consumer audit, with a tombstone",
+            "evidence/product_durability.json). D2 screening and c4's shared "
+            "confirmation (NO_GO) are complete. " + D_SERIES_CLOSED
+            + ". Retirement-eligible under AGENTS.md 2.5",
+        never_delete=None,
         reconstruction="the relay copy (byte-exact, verified); otherwise a "
                        "replay of the search path under the D2 v3 objective",
-        reconstruction_cost="$0 from the relay", disposition="keep"),
+        reconstruction_cost="$0 from the relay", disposition="retire"),
     "aad-artifacts/phase_d3/d3_structural_20261017_083554/products": dict(
         experiment="phase_d3",
         role="D3 initial checkpoint: q2's fixed path with teacher-referenced "
              "DEPTH",
-        retention="reproducibility_required", status="active",
+        retention="diagnostic", status="closed",
         why="the product of d3_structural_20261017_083554 (STRUCTURAL_CHANGE, "
-            "admitted, re-derived off-pod); the conditional three-probe rung "
-            "trains FROM it. A second copy is on the relay under "
+            "admitted, re-derived off-pod); the three-probe rung "
+            "(d3_probes_20261017_110022, INCONCLUSIVE vs q2 and B) trained FROM "
+            "it and is complete. The registration's carry-forward to a "
+            "capability-aligned evaluation is NOT an authorized consumer: none "
+            "is designed or authorized, and the adopted baseline keeps DEPTH's "
+            "parent reference. " + D_SERIES_CLOSED + ". Retirement-eligible "
+            "under AGENTS.md 2.5. A second copy is on the relay under "
             "stage1/phase_d3/d3_structural_20261017_083554/, round-trip "
             "verified (logs/stages/stage-1/phase_d3/runs/"
             "d3_structural_20261017_083554/evidence/product_durability.json)",
-        never_delete="the three-probe rung is COMPLETE "
-                     "(d3_probes_20261017_110022, INCONCLUSIVE vs q2 and B); "
-                     "the registration carries both DEPTH references to a "
-                     "future capability-aligned evaluation, which would train "
-                     "from these bytes. Retained until the maintainer decides "
-                     "that; then retirable under the standing policy "
-                     "(AGENTS.md 2.5) after a consumer audit, with a "
-                     "tombstone",
+        never_delete=None,
         reconstruction="the relay copy (byte-exact, verified); otherwise the "
                        "registered fixed path, whose step 0 reproduced q2's "
                        "pinned digest",
         reconstruction_cost="$0 from the relay; otherwise one structural "
                             "session (about $0.56)",
-        disposition="keep"),
+        disposition="retire"),
     "aad-artifacts/phase_d2/d2_search_20261015_051722/store": dict(
         experiment="phase_d2", role="D2 search evidence store (no weights)",
         retention="reproducibility_required", status="active",
@@ -466,6 +486,34 @@ IDENTITY_VERIFIED_MEANS = (
 TOMBSTONES_REL = "logs/maintenance/inventories/checkpoint_tombstones.json"
 
 
+FORWARD_SELECTION_REL = "configs/shared/baselines/selection.json"
+
+
+def forward_baseline_references() -> dict[str, dict]:
+    """semantic state id -> the forward baseline's record of that artifact.
+
+    DERIVED from the selected baseline record through the one resolver every
+    forward consumer uses, so the registry protects exactly what the baseline
+    names and states the execution profile it was materialized under. Raises
+    if the selection does not resolve: a registry that silently dropped the
+    baseline's protection would be the worse failure.
+    """
+    from shared.forward_baseline import selected
+
+    b = selected(REPO_ROOT)
+    return {a.semantic_state_id: {
+        "baseline": b.qualified_id,
+        "selection": FORWARD_SELECTION_REL,
+        "record_sha256": b.record_sha256,
+        "materialized_under": a.execution.as_trace() | {
+            "prediction_rows": a.execution.prediction_rows},
+        "numerical_execution_fingerprint": a.numerical_execution_fingerprint,
+        "forward_profile_fingerprint": b.execution_fingerprint,
+        "is_the_forward_profile_artifact": (
+            a.numerical_execution_fingerprint == b.execution_fingerprint),
+    } for a in b.reference_artifacts}
+
+
 def _tombstones() -> dict[str, dict]:
     """Deleted-weight records, keyed by every digest they name.
 
@@ -571,8 +619,13 @@ def scientific_artifacts(entries: list[dict]) -> dict:
             "derived_by": "stages.d_series.incumbent.standing_incumbent()",
             "selected_because": b["selected_because"],
             "retention": "reproducibility_required",
-            "consumers": ["phase_d1 screening arm B (paused)",
-                          "phase_c2 / phase_c3 behavioural baselines"],
+            "status": ("ARCHIVED scientific comparator: the historical "
+                       "incumbent every C2/C3/D-series record names. Not the "
+                       "forward baseline (configs/shared/baselines/)"),
+            "consumers": ["phase_c2 / phase_c3 behavioural baselines (closed)",
+                          "phase_d1 / phase_d2 / phase_d3 comparator arm B "
+                          "(D-series closed 2026-10-17)"],
+            "open_consumers": [],
         }
         out["standing_incumbent_B"] = attach(
             row, b["single_shard_sha256"],
@@ -590,6 +643,7 @@ def scientific_artifacts(entries: list[dict]) -> dict:
     retention_rel = ("logs/stages/stage-1/phase_d1/decisions/"
                      "post_search_finalist_retention.json")
     rp = REPO_ROOT / retention_rel
+    forward = forward_baseline_references()
     if rp.is_file():
         block = json.loads(rp.read_text())["the_frozen_behavioural_finalists"]
         for m in block["members"]:
@@ -611,10 +665,20 @@ def scientific_artifacts(entries: list[dict]) -> dict:
                 "creating_run": ("d1_search_20261006_210210" if secured
                                  else "d1_replay_002 (rematerialized, exact)"),
                 "availability_at_decision": m["availability"],
-                "retention": "reproducibility_required",
-                "consumers": ["phase_d1 screening (paused; "
-                              "logs/stages/stage-1/phase_d1/current.json)"],
+                "retention": "diagnostic",
+                "consumers": ["phase_d1 screening and confirmation: COMPLETE "
+                              "(D-series closed 2026-10-17)"],
+                "open_consumers": [],
             }
+            ref = forward.get(m["state_id"])
+            if ref is not None:
+                row["retention"] = "canonical"
+                row["role"] += (" -- the forward baseline's HISTORICAL "
+                                "reference initialization")
+                row["forward_baseline"] = ref
+                row["open_consumers"] = [
+                    f"forward baseline {ref['baseline']}: its historical "
+                    "reference initialization"]
             out[key] = attach(
                 row, m["single_shard_sha256"],
                 "byte-exact replay from the committed search record; both "
@@ -653,7 +717,7 @@ def scientific_artifacts(entries: list[dict]) -> dict:
                                f"{m['state_id']}/" if m["state_id"] in relay_ok
                                else None),
                 "durability_record": durability_rel if durable.is_file() else None,
-                "retention": "reproducibility_required",
+                "retention": "diagnostic",
                 "consumers": [
                     "phase_d2 screening: COMPLETE "
                     "(d2_screening_20261015_203346); c4 advanced",
@@ -694,14 +758,15 @@ def scientific_artifacts(entries: list[dict]) -> dict:
                 "durability_record": (f"logs/stages/stage-1/phase_d3/runs/"
                                       f"{d3_run}/evidence/"
                                       "product_durability.json"),
-                "retention": "reproducibility_required",
+                "retention": "diagnostic",
                 "consumers": ["phase_d3 three-probe rung: COMPLETE "
-                              "(d3_probes_20261017_110022)",
-                              "a capability-aligned evaluation of both DEPTH "
-                              "references (registered carry-forward; not "
-                              "designed)"],
-                "open_consumers": ["a capability-aligned evaluation of both "
-                                   "DEPTH references (not designed)"],
+                              "(d3_probes_20261017_110022)"],
+                "open_consumers": [],
+                "_no_carried_forward_consumer": (
+                    "the registration's carry-forward to a capability-aligned "
+                    "evaluation is not an authorized consumer: none is designed "
+                    "or authorized, and the adopted forward baseline keeps "
+                    "DEPTH's parent reference (D-series closed 2026-10-17)"),
             }
             out["d3_initial_checkpoint"] = attach(
                 row, ident["single_shard_sha256"],

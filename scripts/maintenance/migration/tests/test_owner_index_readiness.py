@@ -101,9 +101,11 @@ def test_the_index_and_current_json_agree_about_readiness(d1_row):
     assert r["d1_screening_battery"] == "AVAILABLE"
     assert r["original_c1_pool_capacity"] == "EXHAUSTED, HISTORICAL ONLY"
     # the index's stable status and the live readiness must not contradict:
-    # the index says DESIGNED, the live record says why it is not running.
-    assert d1_row["status"].startswith("DESIGNED")
-    assert r["d1_screening"].startswith("PAUSED")
+    # since the 2026-10-17 closure the index says COMPLETE and the live
+    # record says the programme is CLOSED, naming the closeout.
+    assert d1_row["status"].startswith("COMPLETE")
+    assert r["d1_screening"].startswith("CLOSED")
+    assert "programme_closeout.json" in r["d1_screening"]
 
 
 def test_the_four_gates_stay_separate_in_the_live_record(d1_row):

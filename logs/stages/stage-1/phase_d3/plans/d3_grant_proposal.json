@@ -83,7 +83,7 @@
    ]
   }
  },
- "status": "PROPOSED -- the maintainer's to decide; nothing is issued, nothing is launched",
+ "status": "CLOSED -- the D-series programme closed 2026-10-17 (logs/stages/stage-1/families/d_series/closeout/programme_closeout.json); both D3 grants were decided and are closed. Nothing is proposed.",
  "structural": {
   "decide_now": false,
   "envelope_holds": "one session at hard plus its reserve, and 1 corrected pre-science attempt",

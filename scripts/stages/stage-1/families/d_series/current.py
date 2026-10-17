@@ -87,8 +87,22 @@ def build(repo_root: Path = REPO) -> dict[str, Any]:
         },
         "shared_evaluation": _shared_evaluation(repo_root),
         "objectives": _objectives(repo_root),
+        "programme": _programme(repo_root),
         "authorizes": "nothing",
     }
+
+
+def _programme(repo_root: Path) -> dict[str, Any] | None:
+    """The D-series programme's terminal state. Navigation only."""
+    from stages.d_series import programme_closeout as PC
+
+    path = repo_root / PC.CLOSEOUT
+    if not path.is_file():
+        return None
+    record = json.loads(path.read_text())
+    return {"status": record["status"], "decided_utc": record["decided_utc"],
+            "closeout": PC.CLOSEOUT,
+            "forward_baseline": record["maintainer_selection"]["selection"]}
 
 
 def _objectives(repo_root: Path) -> dict[str, Any] | None:

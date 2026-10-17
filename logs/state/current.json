@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "D1 BLOCKED NO TIMES and COMPLETE: screening advanced q2; confirmation returned NO-GO. NOTHING IS RUNNING. Owner: runs/d1_behavioural_20261012_064341/closeout/outcome.json.",
+ "blocker": "D1 BLOCKED NO TIMES and COMPLETE. The D-series is CLOSED (maintainer decision 2026-10-17). NOTHING IS RUNNING. Owner: logs/stages/stage-1/families/d_series/closeout/programme_closeout.json.",
  "branch": "exec/d1-behavioural-readiness",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -73,17 +73,13 @@
  },
  "d_series": {
   "authorizes": "nothing",
-  "behavioural_design": "D1 (complete): Top-4, 10 + 6 probes, owner d1_design.json. D2: shared protocol, K=4 prepared, 8 + 3 probes, no B/q2 training, owner families/d_series/plans/d2_budget_v1.json.",
-  "behavioural_pricing": "Owner: d1_design.json :: budget.chain; attempt bounds: the run's governance/authorization.json :: money.attempt_bounds.",
-  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2: complete. D3: complete; next is a maintainer decision. Owner: decisions.md 2026-10-17.",
-  "d2_owed_engineering": "none at $0; the screening chain is built (d2_screening_readiness_review.md).",
-  "execution_wiring": "D1 COMPLETE and CLOSED. D2 COMPLETE: search, screening (c4) and shared confirmation (NO_GO); phase_d2/runs/*/closeout/outcome.json.",
-  "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
-  "incumbent": "B = C1's PROMOTED TREATMENT, 53e30566..., attention.activation_importance_v1; state_id null, built as a fixed path, rebuilt on the pod. DERIVED from C1's verdict by phase_d_series/incumbent.py. The design named C1's BEATEN arm c313d1b4... until 2026-10-08. Owner: phase_d1/analyses/d1_control_arm_identity.json.",
-  "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
-  "scoring_protocol": "reference_topk_tail_v1, K=200: reference-defined support plus one K+1 tail bucket from the COMPLEMENT's logits, carried by SearchConfig.distribution_support -- an OPTIONAL term, absent under the historical full-vocab contract, folded into one measurement_protocol_id. Owner: scripts/stages/stage-1/families/d_series/scoring_protocol.py",
-  "seeds": "MATERIALIZED and HASH-BOUND in plans/d1_behavioural_preregistration.json (2 screening, 3 confirmation, 6 exclusions), before any candidate result exists. Owner: the preregistration.",
-  "state": "D1 COMPLETE / NO-GO. D2 v3 COMPLETE / NO_GO. D3 COMPLETE: STRUCTURAL_CHANGE; three probes INCONCLUSIVE vs q2 and B (exploratory; $5.5966 total). Owner: decisions.md 2026-10-17."
+  "state": "CLOSED 2026-10-17 -- MAINTAINER SELECTED D1 + scored_v1 AS FORWARD BASELINE (a selection, not a verdict). D1 COMPLETE / NO-GO; D2 COMPLETE / NO_GO; D3 STRUCTURAL_CHANGE, probes INCONCLUSIVE vs q2 and B; student-confidence D3 CANCELLED, never executed.",
+  "owner": "logs/stages/stage-1/families/d_series/closeout/programme_closeout.json owns every outcome, closed authority and dollar.",
+  "blockers": "none: the programme is closed. D1's design records ENVELOPE RESOLVED_FITS and no open blocker (owner d1_design.json).",
+  "authorities": "all 11 D-series grants CLOSED and refused by every D-series issuer. D3 structural $6.4429 and probes $6.9605 closed unspent, not transferred.",
+  "incumbent": "B = C1's promoted treatment 53e30566..., attention.activation_importance_v1: the ARCHIVED historical comparator, derived by stages.d_series.incumbent. Not the forward baseline.",
+  "scoring_protocol": "reference_topk_tail_v1, K=200. Owner: scripts/stages/stage-1/families/d_series/scoring_protocol.py",
+  "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json"
  },
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
  "dirty": false,
@@ -102,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-15T00:00:00Z",
+ "generated_utc": "2026-10-17T18:00:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -127,13 +123,13 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Maintainer review of the D3 result (both references carried to a capability-aligned evaluation, per registration). Owner: decisions.md 2026-10-17.",
+ "next": "Stage-0 calibration data-volume and mixture experiments with the forward baseline, to be designed and authorized in new conversations. NOT authorized. Handoff: docs/shared/STAGE0_HANDOFF.md.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "A maintainer decision on the D-series result. Forward Stage 0/2/4 design and the capability-aligned evaluation: docs/shared/REASONING_TRANSFER_DESIGN.md (authorizes nothing).",
-  "not_next": "no paid resource without its own grant; no retraining or regeneration of B/q2; no rerun of D1 or change to its records; no third KL-only search. Owner: decisions.md 2026-10-13.",
-  "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 COMPLETE / NO-GO. D2 COMPLETE / NO_GO (c4). D3 COMPLETE (STRUCTURAL_CHANGE; probes INCONCLUSIVE).",
-  "then": "nothing is queued."
+  "next_work": "Design of the Stage-0 calibration volume/mixture programme and its capability-aligned evaluation: docs/shared/STAGE0_HANDOFF.md and docs/shared/REASONING_TRANSFER_DESIGN.md (authorize nothing).",
+  "not_next": "no paid resource without its own grant; no D-series stage, probe, rerun or rematerialization; no Stage-0 data download or generation until authorized. Owner: decisions.md 2026-10-17.",
+  "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D-series CLOSED 2026-10-17 (D1 NO-GO, D2 NO_GO, D3 STRUCTURAL_CHANGE + INCONCLUSIVE probes); forward baseline D1 + scored_v1.",
+  "then": "NOTHING is queued or authorized."
  },
  "phase_b_result": {
   "authorizes": "nothing",
@@ -197,10 +193,11 @@
   "run": null
  },
  "read_order": [
-  "logs/README.md -- START HERE, the index"
+  "logs/README.md -- START HERE, the index",
+  "docs/shared/STAGE0_HANDOFF.md -- the next programme's handoff"
  ],
  "running": {
-  "_verified": "provider query 2026-10-17 ~15:36 UTC: 0 pods, 0 volumes, $0/h; pod 6gqbeysqtywflq deleted 15:35:28Z, provider confirms gone; watchdog ended pod_gone",
+  "_verified": "provider query 2026-10-17 17:47 UTC: 0 pods, 0 volumes, $0/h; no D-series tmux session, watchdog or monitor alive",
   "network_volumes": 0,
   "paid_compute": false,
   "pod_id": null,
@@ -214,12 +211,13 @@
   "C1": "COMPLETE / GO",
   "C2": "CLOSED WITHOUT PROMOTION",
   "C3": "COMPLETE / NO_GO",
-  "D1": "COMPLETE / NO-GO 2026-10-12 -- q2 advanced from screening and did not confirm against B",
+  "D1": "COMPLETE / NO-GO 2026-10-12 -- q2 advanced from screening and did not confirm against B; method + scored_v1 SELECTED as forward baseline 2026-10-17",
   "D2": "COMPLETE / NO_GO 2026-10-16 -- c4 advanced from screening and did not confirm against B",
   "D3": "COMPLETE 2026-10-17: STRUCTURAL_CHANGE (admitted); probes INCONCLUSIVE vs q2 and B (exploratory). Student-confidence D3 CANCELLED",
   "F1": "CLOSED: SKIPPED by maintainer instruction 2026-10-03; ffn.activation_importance_v0 carried forward",
   "next_scientific_stage": null,
-  "_next_is_null_because": "the D-series directive ordered D1, D2, D3 and all three are complete; no further stage is ordered. What follows is a maintainer decision."
+  "_next_is_null_because": "the D-series is CLOSED and no stage is authorized. The next programme (Stage-0 calibration volume and mixture) is designed and authorized separately.",
+  "D_series": "CLOSED 2026-10-17 by maintainer decision"
  },
  "storage": {
   "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json",
@@ -233,10 +231,19 @@
  "test_suites": {
   "boundary_guard": "tests/architecture/test_core_suite_boundary.py, four rules in its docstring. Specific-experiment imports from core: 0.",
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
-  "core": "3148 passed / 14 skipped / 0 failed, 4m12s. GREEN.",
+  "core": "3680 passed / 32 skipped / 0 failed, 12m18s (2026-10-17, D-series closure). GREEN.",
   "d1_launch": "1029 passed / 13 skipped / 0 failed, 2m38s: phase_d1 + docs + integration. GREEN, and the accepted out-of-tree source-screen failure is NOT in it.",
   "integration": "SQUASH AND MERGE, AGENTS.md P12.2. DONE 2026-10-05: main 4500d775 squashes prep/d-series-topk-tail, which is PRESERVED -- 637 cited commit hashes resolve only there. Ranges: decisions.md.",
   "known_red": "ONE, pre-existing (bc31175f), out-of-tree, NOT core and NOT in the D1 launch suite: phase_d_series test_source_evidence::test_it_regenerates_identically. Its screen is nondeterministic across processes. Diagnosis: current.md.",
-  "next_work": "none owed."
+  "next_work": "none owed.",
+  "d_series_closure": "experiment suites 2026-10-17: d_series 465, phase_d1 721, phase_d2 365 (2 skipped), phase_d3 129, shared 319, migration 39; all green."
+ },
+ "forward_baseline": {
+  "_derived_by": "render_log_navigation.py, via shared.forward_baseline",
+  "baseline": "stage1_init.d1_target_aware.scored_v1@v1",
+  "owner": "configs/shared/baselines/selection.json",
+  "execution": "micro_batch_size=3, length_sorted_v1, prediction_rows=scored_v1",
+  "historical_reference": "d1_q2 afd50c9f/3a4b4ede under prediction_rows=all_v1",
+  "forward_materialization": null
  }
 }

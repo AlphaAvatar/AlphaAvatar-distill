@@ -1884,6 +1884,24 @@ Baselines to compare when practical:
 * ordinary SVD for local low-rank cases;
 * activation-aware SVD for local linear compression cases.
 
+**Forward baseline (maintainer decision 2026-10-17).** New initialization work
+runs the selected forward baseline unless its own registered protocol declares
+a deviation.
+- **Where the method lives.** One versioned record under
+  `configs/shared/baselines/`, resolved by `shared.forward_baseline` through the
+  generic `aadistill.initialization.baseline`. The record holds the operators,
+  scoring positions, distribution support, KL references, execution profile
+  and search.
+- **Read it, don't copy it.** Take every term from the resolver; never retype
+  one into an experiment.
+- **Identities do not cross profiles.** A recorded artifact is the expected
+  artifact only for the execution fingerprint it was materialized under. A
+  historical reference initialization is not the expected artifact of a new
+  materialization under a different profile.
+- **Historical comparators are a separate question.** `standing_incumbent()`
+  keeps answering for past rounds, and selecting a baseline rewrites no
+  historical verdict.
+
 Default action policy:
 
 * **Act directly** for implementing initialization code, toy-model shape checks, small CPU/GPU dry runs, local baseline scaffolding, and metadata logging.

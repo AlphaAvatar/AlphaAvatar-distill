@@ -35,7 +35,9 @@ def test_the_seven_answers_a_reviewer_needs():
     assert r["d1_confirmation_battery"] == "AVAILABLE"
     assert r["original_c1_pool_capacity"] == "EXHAUSTED, HISTORICAL ONLY"
     assert r["d1_evidence_blocker"] == "CLOSED"
-    assert r["d1_screening"].startswith("PAUSED"), r["d1_screening"]
+    #: PAUSED until the D-series closed (2026-10-17); CLOSED since, naming
+    #: the programme closeout it is derived from.
+    assert r["d1_screening"].startswith("CLOSED"), r["d1_screening"]
 
 
 def test_the_answers_are_derived_not_retyped():

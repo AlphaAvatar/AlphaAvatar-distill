@@ -368,10 +368,21 @@ def proposal(doc: dict[str, Any]) -> dict[str, Any]:
     p_env = float(math.ceil(totals["probes_hard_with_reserve_usd"]
                             * (1 + REPLACEMENT_ATTEMPTS) / 1.5))
     st = state()
+    #: Once the D-series programme is closed, nothing here is proposed any
+    #: more: both grants were decided, spent from and closed. Derived from the
+    #: programme's own record, so the proposal cannot outlive it.
+    from stages.d_series import programme_closeout as PC
+
+    closed = PC.closed_authorities(REPO_ROOT)
+    status = ("PROPOSED -- the maintainer's to decide; nothing is "
+              "issued, nothing is launched")
+    if closed:
+        status = (f"CLOSED -- the D-series programme closed "
+                  f"{PC.DECIDED_UTC} ({PC.CLOSEOUT}); both D3 grants were "
+                  "decided and are closed. Nothing is proposed.")
     return {
         "schema": "aadistill.phase_d3.grant_proposal/v1",
-        "status": ("PROPOSED -- the maintainer's to decide; nothing is "
-                   "issued, nothing is launched"),
+        "status": status,
         "state": {**st, "_derived_from": (
             "the funding scope, the grant files under logs/budget/approvals/ "
             "and each rung's booked closeouts; this proposal is the price "

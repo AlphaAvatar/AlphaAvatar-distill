@@ -1,0 +1,13 @@
+{
+ "schema": "aadistill.initialization.baseline_selection/v1",
+ "_contract": "WHICH baseline record is in force, per role, bound by the record's sha256: editing a record without re-selecting it fails at resolution. Resolved by aadistill.initialization.baseline.resolve_selection; record paths are relative to this file. AUTHORIZES NOTHING.",
+ "selections": {
+  "initialization": {
+   "record": "initialization_forward_baseline_v1.json",
+   "sha256": "333af13d9f2441fc658ee064f1a6ec6b15ebf5be5ee8ab31320763bbe41ce266",
+   "selected_utc": "2026-10-17",
+   "decision_record": "logs/budget/decisions.md 2026-10-17"
+  }
+ },
+ "authorizes": "nothing"
+}

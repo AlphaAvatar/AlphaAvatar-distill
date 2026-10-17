@@ -12034,3 +12034,112 @@ on a paid pod.
 - **Stop.** At the scientific review boundary. The following are not
   authorized: more seeds, a fresh confirmation, promotion, D1/D2 reruns,
   a Full Search, or a cap change.
+
+## 2026-10-17 — Maintainer final decision: D-series CLOSED; D1 + scored_v1 adopted as the forward baseline
+
+- **Decision (maintainer, final).** CLOSE D1, D2 and D3, and ADOPT D1's
+  initialization methodology together with `prediction_rows="scored_v1"` as
+  the official forward baseline.
+  - It is a baseline **selection**, not a verdict. D1's confirmation stays
+    **NO-GO**: q2 scored 102/2550 correct against B's 103/2550 on the three
+    confirmation seeds.
+  - The maintainer's stated grounds:
+    - equivalent measured correctness;
+    - materially higher usable rollout (about 68.91% vs 59.40%);
+    - target-aware scoring, so no structural decision is optimized on
+      irrelevant positions;
+    - Top-200 + tail cuts reference storage and reference-side KL work;
+    - `scored_v1` removes output-head work at unscored positions;
+    - D2 established no improvement worth adopting;
+    - D3 established no behavioural advantage.
+  - `scored_v1` is **mandatory** in the forward profile. R0's GPU evidence is
+    sufficient, and no further validation is owed.
+- **The baseline.** Defined in one versioned record,
+  `configs/shared/baselines/initialization_forward_baseline_v1.json`
+  (`stage1_init.d1_target_aware.scored_v1@v1`), selected by its sha256 in
+  `configs/shared/baselines/selection.json`.
+  - **Operators.** `ffn.activation_importance_v0`,
+    `depth.causal_kl_greedy_v1`, `width.global_pca_v0`,
+    `attention.activation_importance_v1`. Each is bound by its signature
+    hash.
+  - **Scoring.** `positions.supervised_target_v1@v1`, with
+    `reference_topk_tail_v1` at K=200.
+  - **KL references.** DEPTH uses the intact current parent; state
+    evaluation uses the lineage root (the original teacher).
+  - **Search.** `beam.delayed_prune@v1` (width 6, warm-up 1) with
+    `beam.pareto_multi_objective@v2`.
+  - **Execution.** Micro-batch 3, `length_sorted_v1`, `scored_v1`. The
+    fingerprint is `e627f461…` under cuda/bf16/fp32.
+  - **Resolution.** `aadistill.initialization.baseline` is the generic
+    resolver: it names no experiment and checks every term against what the
+    core ships. `shared.forward_baseline` is this project's single entry
+    point.
+  - **Derived views.** The checkpoint registry's q2 row and
+    `current.json :: forward_baseline`.
+  - **Core defaults unchanged.** `ExecutionConfig` still defaults to
+    `all_v1`, so every historical identity stays byte-identical. Forward work
+    takes its profile from the record.
+- **Identities kept apart.**
+  - **Historical reference initialization:** D1-q2, state `afd50c9f…`,
+    digest `3a4b4ede…`.
+    - It was materialized under `all_v1`, fingerprint `956a6951…`.
+    - Its identity is unchanged.
+    - The finalist-rematerialization campaign reproduced it exactly.
+  - **Forward profile:** **NOT MATERIALIZED.**
+    - The resolver's `reference_artifact_for` returns q2 only for q2's own
+      fingerprint.
+    - For the forward profile it returns nothing, so q2's digest can never
+      become a `scored_v1` expectation.
+  - **B:** stays the archived historical comparator. `standing_incumbent()`
+    and every D1/D2/D3 comparator are untouched.
+- **Programme closeout.** Recorded in
+  `logs/stages/stage-1/families/d_series/closeout/programme_closeout.json`
+  (`programme_closeout.py`).
+  - Each phase's outcome is read from its terminal closeouts and bound by
+    sha256. D1 NO-GO, D2 NO_GO, D3 STRUCTURAL_CHANGE with INCONCLUSIVE
+    probes, and the student-confidence D3 cancelled and never executed. None
+    of these is rewritten.
+- **Authorities.** All 11 D-series grants and authorizations are CLOSED.
+  - Each is bound by the sha256 of its file at closure. The grant files are
+    not edited.
+  - Every D-series issuer (D1 search, behavioural and replay; D2 search and
+    screening/confirmation; D3) now runs `refuse_closed_authority` first.
+    The check matches by path and by content.
+  - D3 structural ($6.4429 of $7.00) and D3 probes ($6.9605 of $12.00) are
+    closed unspent: not spent, transferred or repurposed.
+  - `phase_d1/d2/d3` stay in `funds_formal_sessions_of`, because they
+    attribute money already spent. No cap or allowance changed.
+- **Money.** Re-derived from the ledgers.
+  - D-series total $102.2459:
+    - run closeouts $88.4127;
+    - D-series engineering campaigns $13.8332.
+  - Limits after:
+    - project $94.8528;
+    - formal $98.8304;
+    - package $102.0108;
+    - engineering $3.1804.
+- **Provider at closure (17:47 UTC).** 0 pods, 0 network volumes, $0/h, and
+  no D-series watcher alive.
+  - A late $0.0481 container-disk settlement takes the probes run to $5.0364
+    on the provider side, inside its booked $5.0395.
+  - Nothing was created.
+- **Checkpoint registry.**
+  - q2 is **canonical**: the baseline's historical reference initialization.
+    Its record is derived from the baseline.
+  - B: archived comparator, no open consumer.
+  - D1 q1/q3/q4, the D2 Top-4, the D3 initialization and the D1 out-of-band
+    duplicates have no open consumer. They are unprotected and
+    retirement-eligible under AGENTS.md 2.5.
+    - In total, 14 units and 16.69 GB.
+    - None was deleted in this closure.
+  - The registration's carry-forward to a capability-aligned evaluation is
+    not an authorized consumer.
+- **Not authorized.**
+  - No further D-series stage, probe, seed, rerun, confirmation or
+    rematerialization.
+  - No GPU validation.
+  - No Stage-0 experiment, dataset construction, download or generation.
+  - No new grant.
+  - The next programme, Stage-0 calibration data-volume and mixture
+    experiments with this baseline, is designed and authorized separately.
+    Handoff: `docs/shared/STAGE0_HANDOFF.md`.

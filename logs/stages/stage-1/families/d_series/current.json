@@ -94,5 +94,11 @@
       "status": "REGISTERED"
     }
   },
+  "programme": {
+    "status": "CLOSED -- MAINTAINER SELECTED D1 + scored_v1 AS FORWARD BASELINE",
+    "decided_utc": "2026-10-17",
+    "closeout": "logs/stages/stage-1/families/d_series/closeout/programme_closeout.json",
+    "forward_baseline": "configs/shared/baselines/selection.json"
+  },
   "authorizes": "nothing"
 }

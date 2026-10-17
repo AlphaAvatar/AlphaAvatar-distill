@@ -165,12 +165,23 @@ verifier identity, policy identity and token-level rollout record (AGENTS.md
 
 ## 6. Relation to the D-series
 
-The new D3 (fixed-q2 DEPTH teacher-reference ablation, decision 2026-10-16) is
-measured on D1's historical confirmation battery.
-- Its comparisons with q2 and B are exploratory measurements of the
-  mixed-domain protocol.
-- An improvement there in correctness or usable rollout is not a
-  demonstration of fluid reasoning.
+**The D-series is CLOSED (maintainer decision 2026-10-17).** D1's
+initialization method together with `prediction_rows=scored_v1` is the
+official forward baseline. That baseline is the **fixed initialization
+method** the §3 Stage-0 study varies calibration data under.
+- **Owner.** `configs/shared/baselines/selection.json`, resolved through
+  `shared.forward_baseline`.
+- **A selection, not a verdict.** D1's confirmation stays NO-GO.
+- **Every D-series measurement is mixed-domain.** That includes D3's
+  exploratory comparisons with q2 and B, both INCONCLUSIVE. None of them is
+  fluid-reasoning evidence, and none is imported into §2's batteries.
+- **No measurement for the forward profile yet.** Its `scored_v1` profile has
+  no materialized checkpoint. The existing reference initialization, D1-q2,
+  was produced under `all_v1`. A Stage-0 study materializes its own
+  initializations and records their own identities.
+- **The Stage-0 handoff.** Current calibration pools, effective scored
+  positions and their limitations are in
+  [`STAGE0_HANDOFF.md`](STAGE0_HANDOFF.md).
 
 ## 7. Order of work and core boundary
 

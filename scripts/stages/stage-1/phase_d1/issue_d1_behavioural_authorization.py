@@ -37,6 +37,7 @@ for extra in ("src", "scripts", "scripts/autoinit", "scripts/stages/stage-1"):
 
 from aadistill.governance.grant import refuse_a_future_dated_grant  # noqa: E402
 
+from stages.d_series.programme_closeout import refuse_closed_authority  # noqa: E402
 from stages.phase_d1 import behavioural as B  # noqa: E402
 from stages.phase_d1 import behavioural_authorization as BA  # noqa: E402
 from stages.phase_d1 import d1_session as D1S  # noqa: E402
@@ -155,6 +156,9 @@ def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
     if not args.grant.is_file():
         raise SystemExit(f"no grant at {args.grant}")
+    #: The D-series is CLOSED (maintainer decision 2026-10-17): a closed
+    #: authority issues nothing, whatever else about it would still pass.
+    refuse_closed_authority(args.grant, repo_root=REPO_ROOT)
     grant = json.loads(args.grant.read_text())
 
     #: A hand-written grant's date field says `utc`; hold it to that.

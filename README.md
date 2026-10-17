@@ -303,6 +303,10 @@ regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json) with
 
 Design choices worth knowing:
 
+- **One selected forward initialization baseline.** By maintainer selection (2026-10-17), new Stage-1 work runs D1's target-aware search, with `prediction_rows=scored_v1`.
+  - **Method:** four operators with scoring restricted to supervised target positions, and Top-200 + tail KL against the parent for DEPTH and against the teacher for state evaluation.
+  - **Selection, not a record.** D1's own confirmation did not beat the incumbent on correctness. It was chosen for comparable correctness, a higher usable-rollout rate and lower scoring cost.
+  - **Owner:** [`configs/shared/baselines/`](./configs/shared/baselines/selection.json); next programme: [Stage-0 handoff](./docs/shared/STAGE0_HANDOFF.md).
 - **Sufficient statistics, not activation dumps.** Stage 0 caches exactly what Stage 1 consumes (second moments, neuron importances, token frequencies) in float64, so the cache is O(1) in token count and the centering step stays numerically sound.
 - **One global projection, transplanted sandwich-style.** Every teacher linear becomes `Pᵀ·W·P` with the preceding RMSNorm folded in exactly; Q heads are subsampled per GQA group, FFN neurons kept by activation importance, depth compressed by merging middle-band layer pairs. Attempt 1 in the table above is what happened when the merge band was wrong — the recipe is evidence-driven, not assumed.
 - **Loss masks are computed from character offsets.** The Thinking-2507 chat template is *not* prefix-stable (it injects an empty think block into the final assistant turn), so the usual per-turn prefix diffing miscounts spans. The loader renders the conversation once and maps assistant character spans to tokens.
@@ -432,6 +436,7 @@ AlphaAvatar-distill/
 ├── configs/                # owner-first: stages/stage-<n>/<experiment>/ for
 │                           # experiment-owned specs and authorizations; stage-level
 │                           # registries at stages/stage-<n>/; shared/ and maintenance/
+│                           # (shared/baselines/ = the selected forward baseline)
 ├── data/                   # owner-first: data/stages/stage-<n>/<dataset>/ — manifests
 │                           # tracked, heavy files gitignored, rebuildable
 ├── tests/                  # the CORE suite; experiment suites live with their

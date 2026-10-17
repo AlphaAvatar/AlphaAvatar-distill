@@ -38,6 +38,7 @@ for _extra in ("src", "scripts", "scripts/stages/stage-1"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
 
+from stages.d_series.programme_closeout import refuse_closed_authority  # noqa: E402
 from aadistill.governance.authorization import (  # noqa: E402
     harness_source_digest,
 )
@@ -259,6 +260,9 @@ def main(argv=None) -> int:
     ap.add_argument("--dry-run", action="store_true",
                     help="print the money and the pricing, write nothing")
     args = ap.parse_args(argv)
+    #: The D-series is CLOSED (maintainer decision 2026-10-17), and this
+    #: campaign's authorization with it: nothing is re-issued under it.
+    refuse_closed_authority(REPO_ROOT / AUTH_REL, repo_root=REPO_ROOT)
 
     money = campaign_money(REPO_ROOT)
     priced = priced_session(args.rate)
