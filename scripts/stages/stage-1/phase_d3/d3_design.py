@@ -69,12 +69,30 @@ STRUCTURAL_CHANGE = "STRUCTURAL_CHANGE"
 UNEXPLAINED_BYTE_DIFFERENCE = "UNEXPLAINED_BYTE_DIFFERENCE"
 STRUCTURAL_OUTCOMES = (NO_STRUCTURAL_CHANGE, STRUCTURAL_CHANGE,
                        UNEXPLAINED_BYTE_DIFFERENCE)
+#: NOT an outcome: the driver status of a run whose parent-reference
+#: comparability gate failed (`parent_reference_admission`). Its evidence is
+#: kept; it is never classified and proposes nothing.
+INADMISSIBLE = "INADMISSIBLE"
+#: The gate's tolerance and the GPU evidence it was fixed from, before any D3
+#: execution (`write_d3_admission.py`).
+ADMISSION = ("logs/stages/stage-1/phase_d3/plans/"
+             "d3_parent_reference_admission_v1.json")
 IDENTITIES = ("artifact_digest", "weights_digest", "single_shard_sha256",
               "arch_signature")
 
 
 class D3DesignError(RuntimeError):
     """The D3 design cannot be built or does not hold as registered."""
+
+
+class D3Inadmissible(RuntimeError):
+    """The treated DEPTH step's parent-reference diagnostic does not reproduce
+    q2's round 0: the run cannot support a structural conclusion."""
+
+    def __init__(self, admission: Mapping[str, Any]):
+        self.admission = dict(admission)
+        super().__init__("parent-reference comparability gate failed: "
+                         + "; ".join(self.admission.get("failures") or []))
 
 
 def _treatment_config() -> dict[str, str]:
@@ -384,9 +402,8 @@ def depth_evidence(depth_step: Mapping[str, Any],
     candidates tested, the teacher-reference KL each scored (the DECISION),
     the parent-reference KL of the same candidate (the DIAGNOSTIC), the layer
     chosen, and which layer the parent reference would have chosen at that
-    same state. Round 0's parent diagnostic is checked against the control's
-    recorded round-0 table: the same candidates of the same parent under the
-    same reduction, so it says whether the treatment's parent is q2's.
+    same state. Whether round 0's parent diagnostic reproduces q2 is the
+    separate, fail-closed `parent_reference_admission`.
     """
     selection = depth_step.get("selection") or {}
     rounds = selection.get("search_rounds") or []
@@ -421,12 +438,6 @@ def depth_evidence(depth_step: Mapping[str, Any],
                       "chosen_teacher_reference_kl": r["chosen_score"],
                       "parent_reference_would_choose": by_parent,
                       "candidates": rows})
-    ctrl_round0 = {e["candidate"]: e["score"]
-                   for e in control["depth"]["rounds"][0]["table"]}
-    mine_round0 = {c["candidate"]: c["parent_reference_kl"]
-                   for c in table[0]["candidates"]}
-    diffs = [abs(mine_round0[c] - ctrl_round0[c]) for c in ctrl_round0
-             if c in mine_round0]
     return {
         "removal_order": trace.get("removal_order"),
         "kept_layers": trace.get("kept_layers"),
@@ -436,25 +447,124 @@ def depth_evidence(depth_step: Mapping[str, Any],
         "rounds": table,
         "rounds_where_the_parent_reference_would_choose_differently":
             disagreements,
-        "round0_parent_diagnostic_vs_control": {
-            "candidates_compared": len(diffs),
-            "candidates_expected": len(ctrl_round0),
-            "max_abs_difference": max(diffs) if diffs else None,
-            "exact": bool(diffs) and max(diffs) == 0.0,
-            "_reads": ("round 0's candidates are single layers of the SAME "
-                       "parent under the SAME reduction, so this compares the "
-                       "treatment's parent-reference diagnostic with q2's own "
-                       "recorded DEPTH scores; a gross difference would mean "
-                       "the parent is not q2's FFN prefix")},
         "kl_reference": trace.get("kl_reference"),
     }
+
+
+# --- the parent-reference comparability gate -------------------------------------
+
+def admission_record(repo_root: str | Path = REPO) -> dict[str, Any]:
+    """The committed gate, checked against itself, the registration and the
+    control record it compares with."""
+    from aadistill.infrastructure.manifest import sha256_json
+
+    path = Path(repo_root) / ADMISSION
+    if not path.is_file():
+        raise D3DesignError(f"{ADMISSION} is missing; the structural session "
+                            "has no comparability gate")
+    doc = json.loads(path.read_text())
+    body = {k: v for k, v in doc.items() if k != "admission_hash"}
+    control = Path(repo_root) / CONTROL_RECORD
+    problems = [why for ok, why in (
+        (doc.get("admission_hash") == sha256_json(body),
+         "the record does not match its own admission_hash"),
+        (doc.get("registration_hash") == registration_hash(repo_root),
+         "it binds another registration"),
+        (doc.get("control_record_sha256")
+         == hashlib.sha256(control.read_bytes()).hexdigest(),
+         "it was fixed against another control record"))
+        if not ok]
+    if problems:
+        raise D3DesignError(f"{ADMISSION}: " + "; ".join(problems))
+    return doc
+
+
+def parent_reference_admission(depth_step: Mapping[str, Any],
+                               control: Mapping[str, Any],
+                               admission: Mapping[str, Any]) -> dict[str, Any]:
+    """Whether the treated DEPTH step's parent is q2's, measured. FAIL-CLOSED.
+
+    Round 0's candidates are single layers of the step's parent under q2's
+    reduction, so the parent-reference KL the step records beside each
+    teacher-reference decision must reproduce q2's recorded round-0 scores
+    within the tolerance `admission` fixed from GPU evidence, and its argmin
+    must be q2's first removed layer. An absent, partial or non-finite
+    diagnostic is a failure, never a pass. Returns the verdict and the
+    per-candidate comparison; it raises only when `admission` and `control`
+    disagree with each other, which is a harness defect.
+    """
+    import math
+
+    expected = admission["expected"]
+    tol = admission["tolerance"]
+    atol, rtol = float(tol["atol"]), float(tol["rtol"])
+    q2 = {int(e["candidate"]): float(e["score"])
+          for e in control["depth"]["rounds"][0]["table"]}
+    first = int(control["depth"]["removal_order"][0])
+    if (len(q2), first) != (int(expected["n_round0_candidates"]),
+                            int(expected["first_removed_layer"])):
+        raise D3DesignError("the admission record and the control record "
+                            "describe different round-0 tables")
+    selection = depth_step.get("selection") or {}
+    rounds = selection.get("search_rounds") or []
+    cands = selection.get("reference_candidates") or {}
+    failures: list[str] = []
+    r0 = rounds[0] if rounds else None
+    if r0 is None or r0.get("round") != 0 or r0.get("removed_before"):
+        failures.append("the step carries no round-0 table")
+        tested: list[int] = []
+    else:
+        tested = [int(e["candidate"]) for e in r0.get("table") or []]
+    if r0 is not None and len(tested) != len(set(tested)):
+        failures.append("round 0 tests a candidate twice")
+    if r0 is not None and set(tested) != set(q2):
+        failures.append(
+            f"round 0 tests {sorted(set(tested) ^ set(q2))} unlike q2")
+    rows, missing = [], []
+    for c in sorted(q2):
+        rec = cands.get(str(c)) or {}
+        value = rec.get("parent_reference_kl")
+        if rec.get("round") != 0 or not isinstance(value, (int, float)) \
+                or not math.isfinite(value):
+            missing.append(c)
+            continue
+        bound = atol + rtol * abs(q2[c])
+        diff = abs(float(value) - q2[c])
+        rows.append({"candidate": c, "q2": q2[c], "d3": float(value),
+                     "abs_difference": diff, "tolerance": bound,
+                     "within": diff <= bound})
+    if missing:
+        failures.append(f"no finite round-0 parent-reference KL for "
+                        f"{len(missing)} of {len(q2)} candidates: {missing}")
+    outside = [r["candidate"] for r in rows if not r["within"]]
+    if outside:
+        failures.append(f"{len(outside)} candidates differ from q2 beyond "
+                        f"tolerance: {outside}")
+    argmin = (min(rows, key=lambda r: (r["d3"], r["candidate"]))["candidate"]
+              if rows and not missing else None)
+    if argmin != first:
+        failures.append(f"the parent-reference argmin is {argmin}, q2 "
+                        f"removed {first} first")
+    return {
+        "admissible": not failures, "failures": failures,
+        "admission_hash": admission["admission_hash"],
+        "atol": atol, "rtol": rtol,
+        "candidates_expected": len(q2), "candidates_compared": len(rows),
+        "max_abs_difference": max((r["abs_difference"] for r in rows),
+                                  default=None),
+        "max_fraction_of_tolerance": max(
+            (r["abs_difference"] / r["tolerance"] for r in rows), default=None),
+        "n_bit_identical": sum(r["abs_difference"] == 0.0 for r in rows),
+        "parent_reference_argmin": argmin, "q2_first_removed": first,
+        "candidates": rows}
 
 
 __all__ = ["CONTROL_ARTIFACT_DIGEST", "CONTROL_STATE_ID", "D3DesignError",
            "EXPERIMENT_ID", "NO_STRUCTURAL_CHANGE", "REGISTRATION",
            "STRUCTURAL_CHANGE", "STRUCTURAL_OUTCOMES", "TREATMENT_PATH_ID",
            "UNEXPLAINED_BYTE_DIFFERENCE", "classify_structure", "control_leaf",
-           "depth_evidence",
+           "ADMISSION", "D3Inadmissible", "INADMISSIBLE", "admission_record",
+           "parent_reference_admission", "depth_evidence",
            "control_spec", "execution", "operator_config_hashes",
            "registered_treatment_spec", "registration", "registration_hash",
            "root_identity", "treatment_contract", "treatment_spec"]

@@ -19,7 +19,8 @@ Pinned here against independent computations:
 * fail-closed store handling: missing, another mixture, another profile,
   another execution protocol, no execution binding;
 * the fixed-path mechanism: stores built while the root is held, bound to the
-  execution, checked when supplied to a suffix.
+  execution, and a supplied store checked against the path's root whether or
+  not the caller declares one -- through the real suffix entry point too.
 """
 from __future__ import annotations
 
@@ -582,3 +583,161 @@ class TestTheFixedPath:
                        root_identity={"teacher_id": "test/teacher@deadbeef"},
                        root_references={
                            registered_profile.profile_hash: store})
+
+
+# --- 6. a supplied store is checked against the path's root, declared or not --------
+
+def _supplied_store(model, root, profile_hash, bsz=3):
+    items = prepare_calibration_items(make_items(), profile_id=PROFILE_ID)
+    support = reference_topk_tail(K)
+    ex = _execution(bsz)
+    return build_root_reference_store(
+        model, items, support=support,
+        identity=root_reference_identity(
+            root_identity=root, profile_hash=profile_hash, support=support,
+            execution=store_execution(
+                micro_batch_size=ex.micro_batch_size,
+                packing=ex.calibration_batch_packing, device="cpu",
+                model=model)),
+        micro_batch_size=bsz, packing=ex.calibration_batch_packing,
+        device="cpu")
+
+
+#: The spec's OWN root, in the form `path_root_identity` derives from it.
+SPEC_ROOT = {"teacher_id": "test/teacher", "teacher_revision": "deadbeef"}
+
+
+class TestASuppliedStoreWithoutADeclaredRoot:
+    """`root_identity` omitted: the store must declare the spec's own root."""
+
+    def _run(self, store_root, profile, tmp_path, **kw):
+        from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER
+        from aadistill.initialization.planning.fixed_path import _run_steps
+        model = build_tiny_model(GEOMETRY)
+        store = _supplied_store(model, store_root, profile.profile_hash)
+        return _run_steps(_spec(), adapter=QWEN3_ADAPTER, model=model,
+                          indices=[0], parent_spec=QWEN3_ADAPTER.spec_of(model),
+                          parent_digest="f" * 64, workdir=tmp_path,
+                          repo_root=".", stats_cache=None,
+                          calibration_items={PROFILE_ID: make_items()},
+                          on_step=None, deadline=None,
+                          execution=_execution(3),
+                          root_references={profile.profile_hash: store}, **kw)
+
+    def test_another_root_is_refused(self, registered_profile, tmp_path):
+        from aadistill.initialization.planning.fixed_path import FixedPathError
+        with pytest.raises(FixedPathError, match="no root_identity"):
+            self._run({"teacher_id": "another/root",
+                       "teacher_revision": "deadbeef"},
+                      registered_profile, tmp_path)
+
+    def test_the_right_teacher_in_another_form_is_refused(
+            self, registered_profile, tmp_path):
+        """A store keyed by content hash may well be the right teacher; with
+        nothing declared, the executor cannot tell, so it refuses."""
+        from aadistill.initialization.planning.fixed_path import FixedPathError
+        with pytest.raises(FixedPathError, match="declares root"):
+            self._run({"teacher_id": "test/teacher@deadbeef",
+                       "teacher_sha256": "cd" * 32},
+                      registered_profile, tmp_path)
+
+    def test_the_specs_own_root_is_accepted(self, registered_profile,
+                                            tmp_path):
+        out = self._run(dict(SPEC_ROOT), registered_profile, tmp_path)
+        assert out[0].trace[KL_REFERENCE_KEY] == ROOT_REFERENCE_V1
+
+    def test_a_declared_root_is_still_what_the_store_must_match(
+            self, registered_profile, tmp_path):
+        """Declaring a root replaces the default; it does not widen it."""
+        from aadistill.initialization.planning.fixed_path import FixedPathError
+        with pytest.raises(FixedPathError, match="declares root"):
+            self._run(dict(SPEC_ROOT), registered_profile, tmp_path,
+                      root_identity={"teacher_id": "test/teacher@deadbeef",
+                                     "teacher_sha256": "cd" * 32})
+
+
+class TestASuffixReplayChecksTheSuppliedStore:
+    """The real suffix entry point, with `root_identity` omitted.
+
+    A two-step path, FFN then a DEPTH that declares the root as its KL
+    reference. The FFN parent is produced by a pinned run, so the suffix's
+    premise is a genuinely gated step and only the store decides the result.
+    """
+
+    @pytest.fixture
+    def suffix(self, registered_profile, tmp_path):
+        import types
+
+        from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER
+        from aadistill.initialization.planning.fixed_path import (
+            FixedPathSpec, FixedPathStep, VerifiedSuffix,
+            materialize_fixed_path,
+        )
+
+        def spec(pin=None):
+            return FixedPathSpec(
+                path_id="test.klref.suffix", family="qwen3",
+                target_spec=ArchSpec.of("qwen3", {
+                    **GEOMETRY, "num_hidden_layers": 4,
+                    "intermediate_size": 24}),
+                steps=(FixedPathStep("ffn.activation_importance_v0",
+                                     PROFILE_ID,
+                                     expected_artifact_digest=pin),
+                       FixedPathStep("depth.causal_kl_greedy_v1", PROFILE_ID,
+                                     config=DECLARED)),
+                root_repo_id="test/teacher", root_revision="deadbeef",
+                position_policy=SUPERVISED_TARGET_V1,
+                distribution_support=reference_topk_tail(K))
+
+        items = {PROFILE_ID: make_items()}
+        probe = materialize_fixed_path(
+            spec(), adapter=QWEN3_ADAPTER,
+            root_loader=lambda: build_tiny_model(GEOMETRY),
+            workdir=tmp_path / "probe", calibration_items=items,
+            execution=_execution(3))
+        pinned = spec(probe[0].identity.artifact_digest)
+        gated = materialize_fixed_path(
+            pinned, adapter=QWEN3_ADAPTER,
+            root_loader=lambda: build_tiny_model(GEOMETRY),
+            workdir=tmp_path / "gated", calibration_items=items,
+            execution=_execution(3))
+        verified = VerifiedSuffix(
+            start_index=1, parent=gated[0],
+            expected_parent_artifact_digest=probe[0].identity.artifact_digest,
+            expected_path_hash=pinned.spec_hash,
+            prefix_reference_steps=pinned.steps[:1],
+            expected_suffix_steps=(("depth.causal_kl_greedy_v1", PROFILE_ID),))
+        return types.SimpleNamespace(spec=pinned, verified=verified,
+                                     items=items, full=gated,
+                                     profile=registered_profile,
+                                     tmp=tmp_path)
+
+    def _replay(self, s, store_root):
+        from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER
+        from aadistill.initialization.planning.fixed_path import (
+            materialize_fixed_path_suffix,
+        )
+        #: Built from the ROOT, as a store must be; only its declaration varies.
+        store = _supplied_store(build_tiny_model(GEOMETRY), store_root,
+                                s.profile.profile_hash)
+        return materialize_fixed_path_suffix(
+            s.spec, adapter=QWEN3_ADAPTER,
+            root_loader=lambda: QWEN3_ADAPTER.load(
+                s.verified.parent.checkpoint_path, device="cpu"),
+            workdir=s.tmp / "suffix", verified=s.verified,
+            calibration_items=s.items, execution=_execution(3),
+            root_references={s.profile.profile_hash: store})
+
+    def test_a_store_of_another_root_is_refused(self, suffix):
+        from aadistill.initialization.planning.fixed_path import FixedPathError
+        with pytest.raises(FixedPathError, match="no root_identity"):
+            self._replay(suffix, {"teacher_id": "another/root",
+                                  "teacher_revision": "deadbeef"})
+
+    def test_the_specs_own_root_replays_the_full_paths_step(self, suffix):
+        """The positive control: the same suffix with the right store
+        reproduces the whole-path run's DEPTH step byte for byte."""
+        results, _ = self._replay(suffix, dict(SPEC_ROOT))
+        assert [r.index for r in results] == [1]
+        assert results[0].identity.artifact_digest == \
+            suffix.full[1].identity.artifact_digest

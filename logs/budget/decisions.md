@@ -11804,3 +11804,67 @@ on a paid pod.
 - **Revisit when** the maintainer decides the structural grant and the
   funding amendment. Owner of the readiness facts:
   `phase_d3/analyses/d3_readiness_review.md`.
+
+## 2026-10-17 — Maintainer: D3 structural GO ($7.00 cumulative) after two $0 repairs; phase_d3 on the formal book
+
+- **Context.** The maintainer's independent review of `0375d7d8` (D3
+  Independent Review / Conditional Structural Grant) accepted the registered
+  Fixed-q2 DEPTH Teacher-Reference Ablation:
+  - registration `43156f21…`, treatment path `5948a3c9…`;
+  - control `KL(P_parent ‖ C(S))`, treatment `KL(T_root ‖ C(S))`.
+
+  The original student-confidence D3 stays cancelled and unexecuted.
+- **Decision.**
+  - **Science: GO** for the structural ablation, subject to two `$0`
+    execution-integrity repairs.
+  - **Funding scope.** `phase_d3` is added to
+    `execution_package.funds_formal_sessions_of` as an additive amendment,
+    recorded at top-level `_amendment_2026_10_17_d3_structural`. Nothing else
+    moves: project cap $595, formal $256.6523, engineering $25.0741, package
+    $281.7264, per session $30. No historical D1/D2 funding changes.
+  - **Grant.** The STRUCTURAL rung gets a **$7.00** cumulative all-in envelope
+    (`approvals/autoinit_d3_structural_grant.json`). It is not a spending
+    target; every issuance must fit its freshly priced hard ceiling plus the
+    teardown reserve.
+- **The two repairs.**
+  - **A: a fail-closed parent-reference comparability gate.** The treated
+    DEPTH step's round-0 parent diagnostic must cover exactly q2's 36
+    candidates, each finite, within `|d3 − q2| ≤ atol + rtol·|q2|`, with argmin
+    26.
+    - The tolerance was fixed before execution in
+      `phase_d3/plans/d3_parent_reference_admission_v1.json` from existing GPU
+      evidence. q2's own DEPTH repeated bit-identically (260 of 260). The
+      root's DEPTH, D1 decision vs D2 diagnostic, moved by at most 4.95e-05
+      abs and 4.43e-04 rel, giving `atol` 5e-05 and `rtol` 5e-04, rounded up.
+      All 29 other round-0 tables in both journals are refused.
+    - A failure is INADMISSIBLE, not a fourth outcome. The driver stops before
+      WIDTH, the closeout re-derives off-pod, and the probes refuse.
+    - Stated residual: D3's 595.91.07 driver has digest-level evidence only.
+  - **B: a supplied root store is always checked.** With no `root_identity`
+    declared, it must declare the spec's own root. There are negative tests,
+    including the real suffix entry point.
+
+  Both are execution validity. The treatment objective, the registration and
+  the frozen D1/D2 records are unchanged.
+- **Alternatives considered.**
+  - An exact tolerance (0). Rejected: the cross-session evidence on the same
+    quantity is nonzero, and a tolerance that cannot be relaxed after a FAIL
+    must be fixed from GPU measurements beforehand
+    (cf. 2026-10-14 Stage W).
+  - Widening the tolerance for the driver change. Rejected: no measurement
+    supports any particular widening.
+- **Risks.** A driver effect beyond the tolerance would make the run
+  inadmissible, costing one structural session and producing no conclusion.
+  That direction is conservative.
+- **Does not authorize.**
+  - The three-probe session.
+  - Screening seeds.
+  - A Full Search.
+  - The cancelled D3.
+  - D1/D2 reruns.
+  - A fresh confirmation.
+  - Promotion.
+  - Stage-0/2/4 data work, data generation or downloads.
+  - A cap change.
+- **Revisit when.** The structural session closes. On STRUCTURAL_CHANGE, stop
+  at the separate probe funding boundary.

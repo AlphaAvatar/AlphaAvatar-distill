@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-16 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-17 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -30,8 +30,8 @@ problem-solving over broad factual-knowledge retention.
 - **Authorizes nothing.** No data experiment, dataset download or
   generation, and no paid GPU.
 
-**D3: $0 READINESS COMPLETE; STOPPED AT THE PAID AUTHORIZATION BOUNDARY
-(2026-10-16).** The fixed-q2 DEPTH teacher-reference ablation (the
+**D3: STRUCTURAL RUNG GRANTED ($7.00 CUMULATIVE, 2026-10-17); THE TWO $0
+REPAIRS ARE IN.** The fixed-q2 DEPTH teacher-reference ablation (the
 student-confidence D3 is cancelled and unexecuted).
 - **The question.** On D1-q2's exact path, does choosing DEPTH's layers by
   `KL(T ‖ C(S))` instead of `KL(P ‖ C(S))` give a better initialization?
@@ -40,17 +40,21 @@ student-confidence D3 is cancelled and unexecuted).
   q2's.
 - **Identities.** Registration `43156f21…`, treatment path `5948a3c9…`,
   control path `2221484a…`.
-- **Price.**
-  - Structural session: expected $0.86, hard $3.02 (+$0.30 reserve).
-  - Conditional three probes: expected $6.59, hard $8.21 (+$0.30).
-- **Proposed envelopes.** $7.00 structural; $12.00 probes, only after
+- **Review repairs.**
+  - A fail-closed parent-reference comparability gate. Round 0 must
+    reproduce q2 within `atol` 5e-05 + `rtol` 5e-04 and choose layer 26, or
+    the run is INADMISSIBLE. The tolerance was fixed from GPU evidence in
+    `plans/d3_parent_reference_admission_v1.json`.
+  - A supplied root store is checked even with no `root_identity`.
+- **Funding.** `phase_d3` is on the formal book (top-level
+  `_amendment_2026_10_17_d3_structural`); no cap or allowance moved.
+- **Grant.** `approvals/autoinit_d3_structural_grant.json`. Structural
+  expected $0.86, hard $3.02 (+$0.30 reserve).
+- **Not granted.** The three probes: proposable only after an admitted
   STRUCTURAL_CHANGE.
-- **Needs from the maintainer.** The structural grant and adding `phase_d3`
-  to `funds_formal_sessions_of`.
-- **Programme.** The old D3/fresh reservation is not transferred.
 - **Owners.**
-  [`d3_readiness_review.md`](../stages/stage-1/phase_d3/analyses/d3_readiness_review.md);
-  `phase_d3/plans/`; `decisions.md` 2026-10-16.
+  [`d3_readiness_review.md`](../stages/stage-1/phase_d3/analyses/d3_readiness_review.md)
+  §8; `phase_d3/plans/`; `decisions.md` 2026-10-17.
 
 **D2 COMPLETE: c4's SHARED CONFIRMATION is NO_GO (2026-10-16).** Run
 `d2_confirmation_20261016_105802`: three probes from c4's initial checkpoint

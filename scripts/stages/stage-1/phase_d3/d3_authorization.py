@@ -99,7 +99,9 @@ STRUCTURAL_STAGE_CONDITIONS = {
           "agreement; the staged teacher verified"),
     "C": ("q2's fixed path from the teacher with DEPTH under the declared "
           "teacher reference: the teacher reference built first; step 0 "
-          "pinned to q2's FFN digest; every step persisted on completion"),
+          "pinned to q2's FFN digest; every step persisted on completion; "
+          "the parent-reference comparability gate on the DEPTH step, which "
+          "stops an inadmissible run before WIDTH"),
     "D": ("the structural comparison and outcome; the product's four "
           "identities; the product and evidence secured off-pod"),
 }
@@ -146,6 +148,7 @@ STRUCTURAL_DECLARED_INPUTS: tuple[str, ...] = (
     "scripts/stages/stage-1/families/d_series/scoring_protocol.py",
     "logs/stages/stage-1/phase_d3/plans/d3_registration_v1.json",
     "logs/stages/stage-1/phase_d3/plans/d3_control_q2.json",
+    "logs/stages/stage-1/phase_d3/plans/d3_parent_reference_admission_v1.json",
     "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
 )
 PROBES_ENTRY_POINTS: tuple[str, ...] = (

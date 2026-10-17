@@ -1,0 +1,38 @@
+{
+ "_contract": "WHAT THE MAINTAINER DECIDED, and only that. Every other field of the authorization -- identities, stages, registration and contract hashes, harness, ceiling -- is DERIVED by d3_authorization.build_payload(rung='structural') from the tree it binds, and this grant is REFUSED if it states one.",
+ "_one_use": "ONE issuance, ONE launcher session per authorization. A replacement after a pre-science engineering failure is a NEW one-use authorization netted against this cumulative envelope (prefix d3_structural_), issued only while the remainder holds a full session's freshly priced hard ceiling plus the teardown reserve, and never over an attempt whose cost is not booked or whose teardown is not verified.",
+ "rung": "structural",
+ "approves_registration_hash": "43156f21a011803bcb76be8f2c3f5f9616e9034d8f7ea811b9f5de6b9eea17d9",
+ "_registration_hash_as_quoted": "the review text quotes '43156f21a011803bcb76be8f2c3f5f9616e9034d8f7ea811b9eea17d9' (57 characters: the full hash with 'f5de6b9' dropped after character 50; the other 57 match in order). The reviewed HEAD 0375d7d8 carries exactly one D3 registration, this one, and the treatment path the review quotes in full (5948a3c9...0705) is its registered treatment.",
+ "cumulative_envelope_usd": 7.0,
+ "granted_by": "maintainer, 2026-10-17 UTC: D3 Independent Review / Conditional Structural Grant (review of 0375d7d8f28f818db1d77235188cca072111cdaf). Accepts the registered Fixed-q2 DEPTH Teacher-Reference Ablation (control KL(P_parent || C(S)), treatment KL(T_root || C(S)); treatment path 5948a3c99ac12213fe4a9b8cd82362f5a1934d38e48e0589e5ff4f6913f60705): GO for the structural ablation, subject to two $0 execution-integrity repairs (A: a fail-closed parent-reference numerical comparability gate; B: a supplied root reference checked against the path's root when no root_identity is declared), and conditionally authorizes the D3 STRUCTURAL rung at a cumulative all-in envelope of $7.00.",
+ "covers": "Exactly the registered q2 fixed-path structural ablation: teacher-reference construction; the pinned FFN prefix; DEPTH greedy selection under the teacher reference with the diagnostic parent-reference KL; WIDTH and ATTENTION recomputed; the structural classification; product durability, evidence collection and teardown; an ordinary corrected pre-science retry inside the cumulative envelope.",
+ "accepted_range": {
+  "hardware": "NVIDIA L40S on the protocol's exact image identity (host driver 595.91.07); AU hosts preferred, admission never relaxed for capacity",
+  "expected_session_usd": "about 0.8589 at 1.09/h (re-derived at the live rate at issuance)",
+  "planning_hard_ceiling_usd": "about 3.0151 at 1.09/h (re-derived at the live rate at issuance)",
+  "teardown_reserve_usd": 0.3,
+  "cumulative_envelope_usd": 7.0,
+  "per_session_envelope_usd": 30.0,
+  "project_cap_usd": 595.0,
+  "rule": "$7.00 is the structural rung's cumulative ceiling, not a spending target; every issuance needs remainder >= freshly priced hard ceiling + reserve; host refusals and paid time are in the same ledger"
+ },
+ "prerequisites": "the two $0 repairs committed with their targeted regressions; the clean executable commit and harness closure bound; registration, treatment path and reference identities re-derived; live L40S re-pricing; the four financial constraints; provider balance; no open resource or unsettled cost; one one-use authorization for one run id; bundle round trip, watchdog, collection, durability and teardown gates",
+ "on_result": "NO_STRUCTURAL_CHANGE: stop, no recovery. STRUCTURAL_CHANGE: preserve and verify the new initialization, stop at the separate three-probe funding boundary. UNEXPLAINED_BYTE_DIFFERENCE: investigate, never read as a method effect. Comparability gate failed: scientifically INADMISSIBLE, evidence preserved. A scientifically valid completed structural result is never rerun to seek another outcome.",
+ "does_not_authorize": [
+  "the conditional three-probe recovery session",
+  "any additional screening seeds",
+  "a Full Search",
+  "the cancelled Student-Confidence D3",
+  "D1 or D2 reruns",
+  "a fresh independent confirmation",
+  "any promotion",
+  "Stage-0/2/4 data experiments",
+  "new dataset generation or downloads",
+  "a budget-cap increase"
+ ],
+ "funding_scope": "configs/stages/stage-1/phase_c1/authorization.json :: _amendment_2026_10_17_d3_structural (phase_d3 added to funds_formal_sessions_of; no cap, allowance or limit changed)",
+ "stop_boundary": "after the structural result, report and stop at the next scientific authorization boundary",
+ "decision_record": "logs/budget/decisions.md 2026-10-17 (D3 structural grant, $7.00 cumulative; phase_d3 funding scope)",
+ "authorizes": "nothing by itself: a launch needs the issued one-use authorization"
+}

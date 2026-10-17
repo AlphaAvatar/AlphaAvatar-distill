@@ -1078,11 +1078,11 @@ STAGE_1 = [
         id="phase_d3",
         kind="experiment",
         stage_id="1",
-        status=("REGISTERED 2026-10-16; $0 readiness built; NO paid session "
-                "authorized (the structural grant is PROPOSED; the three "
-                "probes are conditional on STRUCTURAL_CHANGE and separately "
-                "authorized). Replaces the cancelled, unexecuted "
-                "student-confidence D3"),
+        status=("REGISTERED 2026-10-16; the structural rung GRANTED "
+                "2026-10-17 ($7.00 cumulative) after two $0 repairs; the "
+                "three probes are conditional on an admitted "
+                "STRUCTURAL_CHANGE and separately authorized. Replaces the "
+                "cancelled, unexecuted student-confidence D3"),
         title="D3 — fixed-q2 DEPTH teacher-reference ablation",
         question=("Given D1-q2's exact structural path, does choosing the "
                   "DEPTH layers by minimizing KL against the original teacher "
@@ -1109,6 +1109,15 @@ STAGE_1 = [
               "parent-reference table, from the D1 search journal and "
               "checked against the committed replay plan",
               field="schema", equals="aadistill.phase_d3.control_record/v1"),
+            E("logs/stages/stage-1/phase_d3/plans/"
+              "d3_parent_reference_admission_v1.json",
+              "the parent-reference comparability gate's tolerance and the "
+              "GPU evidence it was fixed from before execution: q2's DEPTH "
+              "repeated bit-identically, the root's DEPTH across the D1 and "
+              "D2 searches, and every other round-0 table refused. Generated "
+              "by scripts/stages/stage-1/phase_d3/write_d3_admission.py",
+              field="schema",
+              equals="aadistill.phase_d3.parent_reference_admission/v1"),
             E("logs/stages/stage-1/phase_d3/plans/d3_budget_v1.json",
               "the price: the structural session from q2's measured replay "
               "and search DEPTH, the probes as D2's shared confirmation "

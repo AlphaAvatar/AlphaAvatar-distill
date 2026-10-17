@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import copy
 import json
+import re
 import shlex
 import sys
 from pathlib import Path
@@ -226,15 +227,6 @@ def _depth_step(control_record, *, removal=None, shift=0.0):
 
 class TestTheDepthEvidence:
 
-    def test_round_zero_diagnostic_is_compared_with_q2s_table(
-            self, control_record):
-        ev = D.depth_evidence(_depth_step(control_record), control_record)
-        check = ev["round0_parent_diagnostic_vs_control"]
-        assert check["candidates_compared"] == 36 and check["exact"] is True
-        shifted = D.depth_evidence(_depth_step(control_record, shift=1e-3),
-                                   control_record)
-        assert shifted["round0_parent_diagnostic_vs_control"]["exact"] is False
-
     def test_every_round_reports_what_the_parent_would_have_chosen(
             self, control_record):
         ev = D.depth_evidence(_depth_step(control_record), control_record)
@@ -260,6 +252,301 @@ class TestTheDepthEvidence:
                   "structural": {"outcome": D.STRUCTURAL_CHANGE}}
         with pytest.raises(C.CloseoutRefused, match="re-derivation"):
             C.rederive(record)
+
+
+# --- 3b. the parent-reference comparability gate -----------------------------------
+
+@pytest.fixture(scope="module")
+def admission():
+    return D.admission_record(REPO)
+
+
+def _r0_candidates(step):
+    return {k: v for k, v in step["selection"]["reference_candidates"].items()
+            if v["round"] == 0}
+
+
+class TestTheAdmissionRecord:
+    """The tolerance is fixed from the evidence the record carries."""
+
+    def test_it_binds_the_registration_and_the_control(self, admission):
+        assert admission["registration_hash"] == D.registration_hash(REPO)
+        assert admission["fixed_before_execution"] is True
+
+    def test_the_tolerance_is_the_evidence_rounded_up(self, admission):
+        from stages.phase_d3.write_d3_admission import ceil_one_significant
+
+        rows = [r for p in admission["evidence"]["cross_session"]
+                for r in p["rows"]]
+        max_abs = max(abs(r["other"] - r["base"]) for r in rows)
+        max_rel = max(abs(r["other"] - r["base"]) / abs(r["base"])
+                      for r in rows)
+        tol = admission["tolerance"]
+        assert tol["atol"] == ceil_one_significant(max_abs) == 5e-05
+        assert tol["rtol"] == ceil_one_significant(max_rel) == 5e-04
+        assert all(abs(r["other"] - r["base"])
+                   <= tol["atol"] + tol["rtol"] * abs(r["base"]) for r in rows)
+
+    @pytest.mark.parametrize("x,want", [(4.949e-05, 5e-05), (4.432e-04, 5e-04),
+                                        (1e-05, 1e-05), (1.01e-05, 2e-05)])
+    def test_rounding_is_up_at_one_significant_figure(self, x, want):
+        from stages.phase_d3.write_d3_admission import ceil_one_significant
+
+        assert ceil_one_significant(x) == want
+
+    def test_the_same_execution_repeat_is_exact(self, admission):
+        rep = admission["evidence"]["same_execution_repeat"]
+        assert rep["candidates"] == 260 and rep["max_abs_difference"] == 0.0
+
+    def test_every_other_parents_table_was_refused(self, admission):
+        disc = admission["discrimination"]
+        assert disc["tables_checked"] == disc["tables_refused"] > 0
+        assert disc["min_violations"] > 0
+        #: q2's own parent under the other profile: argmin ALSO 26, so only
+        #: the numerical check refuses it.
+        assert [o["argmin"] for o in disc["same_parent_other_profile"]] == [26]
+
+    def test_the_driver_change_is_stated_not_measured(self, admission):
+        drv = admission["evidence"]["host_drivers"]
+        assert drv["d1_search"]["drivers"] == drv["d2_search"]["drivers"]
+        assert drv["d1_replay_reproduced"]["differ"] == []
+
+    def test_an_edited_record_is_refused(self, tmp_path):
+        for rel in (D.REGISTRATION, D.CONTROL_RECORD, D.ADMISSION):
+            (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
+            (tmp_path / rel).write_bytes((REPO / rel).read_bytes())
+        D.admission_record(tmp_path)
+        doc = json.loads((tmp_path / D.ADMISSION).read_text())
+        doc["tolerance"]["rtol"] = 0.5
+        (tmp_path / D.ADMISSION).write_text(json.dumps(doc))
+        with pytest.raises(D.D3DesignError, match="own admission_hash"):
+            D.admission_record(tmp_path)
+
+
+class TestTheAdmissionGate:
+    """The predicate, tabled: each mutation must be refused on its own."""
+
+    def test_q2s_own_table_is_admitted(self, control_record, admission):
+        v = D.parent_reference_admission(_depth_step(control_record),
+                                         control_record, admission)
+        assert v["admissible"] is True and v["failures"] == []
+        assert v["n_bit_identical"] == 36 and v["parent_reference_argmin"] == 26
+
+    def test_the_measured_cross_session_variation_is_admitted(
+            self, control_record, admission):
+        pair = next(p for p in admission["evidence"]["cross_session"]
+                    if p["profile_id"] == "calib.reasoning_heavy@v2")
+        step = _depth_step(control_record)
+        for r in pair["rows"]:
+            _r0_candidates(step)[str(r["candidate"])]["parent_reference_kl"] \
+                += r["other"] - r["base"]
+        v = D.parent_reference_admission(step, control_record, admission)
+        assert v["admissible"] is True and v["n_bit_identical"] < 36
+
+    @pytest.mark.parametrize("factor,admitted", [(0.99, True), (1.01, False)])
+    def test_the_boundary_is_the_tolerance(self, control_record, admission,
+                                           factor, admitted):
+        step = _depth_step(control_record)
+        rec = _r0_candidates(step)["0"]
+        tol = admission["tolerance"]
+        rec["parent_reference_kl"] += factor * (
+            tol["atol"] + tol["rtol"] * abs(rec["parent_reference_kl"]))
+        v = D.parent_reference_admission(step, control_record, admission)
+        assert v["admissible"] is admitted
+
+    def _mutate(self, control_record, how):
+        step = _depth_step(control_record)
+        r0 = step["selection"]["search_rounds"][0]
+        cands = step["selection"]["reference_candidates"]
+        if how == "no_diagnostic":
+            step["selection"]["reference_candidates"] = {}
+        elif how == "no_rounds":
+            step["selection"]["search_rounds"] = []
+        elif how == "partial":
+            del cands["35"]
+        elif how == "nan":
+            cands["3"]["parent_reference_kl"] = float("nan")
+        elif how == "another_round":
+            cands["3"]["round"] = 1
+        elif how == "missing_candidate":
+            r0["table"] = [e for e in r0["table"] if e["candidate"] != 35]
+        elif how == "duplicate_candidate":
+            r0["table"].append(dict(r0["table"][0]))
+        elif how == "shifted":
+            for k in _r0_candidates(step):
+                cands[k]["parent_reference_kl"] += 1e-3
+        return step
+
+    @pytest.mark.parametrize("how,match", [
+        ("no_diagnostic", "no finite"), ("no_rounds", "no round-0 table"),
+        ("partial", "1 of 36"), ("nan", "1 of 36"), ("another_round", "1 of 36"),
+        ("missing_candidate", r"\[35\] unlike q2"),
+        ("duplicate_candidate", "twice"), ("shifted", "beyond tolerance")])
+    def test_each_failure_is_refused(self, control_record, admission, how,
+                                     match):
+        v = D.parent_reference_admission(self._mutate(control_record, how),
+                                         control_record, admission)
+        assert v["admissible"] is False
+        assert any(re.search(match, f) for f in v["failures"]), v["failures"]
+
+    def test_a_moved_argmin_is_refused_on_its_own(self, control_record,
+                                                  admission):
+        """With a tolerance wide enough to pass every number, the argmin
+        check alone must still refuse a parent that chooses another layer."""
+        loose = json.loads(json.dumps(admission))
+        loose["tolerance"]["rtol"] = 1.0
+        step = self._mutate(control_record, "none")
+        _r0_candidates(step)["29"]["parent_reference_kl"] = 0.01
+        v = D.parent_reference_admission(step, control_record, loose)
+        assert v["failures"] == ["the parent-reference argmin is 29, q2 "
+                                 "removed 26 first"]
+
+    def test_records_that_disagree_are_a_harness_error(self, control_record,
+                                                       admission):
+        bad = json.loads(json.dumps(admission))
+        bad["expected"]["first_removed_layer"] = 29
+        with pytest.raises(D.D3DesignError, match="different round-0"):
+            D.parent_reference_admission(_depth_step(control_record),
+                                         control_record, bad)
+
+
+class _Row:
+    def __init__(self, row):
+        self._row = row
+
+    def as_dict(self):
+        return dict(self._row)
+
+
+class TestTheDriverStopsAnInadmissibleRun:
+
+    @pytest.fixture
+    def run(self, tmp_path, monkeypatch, control_record):
+        import aadistill.initialization.planning.fixed_path as FP
+        from stages.phase_d1 import autoinit_d1_driver as D1D
+        from stages.phase_d1 import d1_session as D1S
+        from stages.phase_d1 import replay_specs as R
+        from stages.phase_d3 import autoinit_d3_structural_driver as DR
+
+        monkeypatch.setattr(DR, "probe_environment", lambda: {})
+        monkeypatch.setattr(D1S, "verify_staged_teacher", lambda path: {})
+        monkeypatch.setattr(R, "teacher_config", lambda *a: {})
+        monkeypatch.setattr(R, "root_state_from_plan", lambda *a, **k: {
+            "chosen_candidate": "x", "config_overrides": {}})
+        monkeypatch.setattr(R, "verify_execution_config", lambda *a, **k: {})
+        monkeypatch.setattr(D1D, "resolve_root_teacher_path",
+                            lambda: {"path": "/nowhere"})
+        seen = []
+
+        def go(depth_step):
+            def fake(spec, *, on_step, **kw):
+                for i, kind in enumerate(("ffn", "depth", "width", "attn")):
+                    row = {"index": i, "impl_id": kind, "seconds": 1.0,
+                           "artifact_digest": f"{i}" * 64}
+                    if i == 1:
+                        row.update(depth_step)
+                    seen.append(i)
+                    on_step(_Row(row))
+                raise RuntimeError("the fake stops after the path")
+
+            monkeypatch.setattr(FP, "materialize_fixed_path", fake)
+            auth = tmp_path / "auth.json"
+            auth.write_text(json.dumps(_issue()))
+            out = tmp_path / "out"
+            rc = DR.main(["--out", str(out), "--run-id", "d3_structural_test",
+                          "--authorization", str(auth),
+                          "--status", str(tmp_path / "status")])
+            return rc, json.loads((out / DR.EVIDENCE_FILENAME).read_text())
+        return go, seen
+
+    def test_an_inadmissible_depth_step_stops_before_width(
+            self, run, control_record, tmp_path):
+        go, seen = run
+        step = TestTheAdmissionGate()._mutate(control_record, "shifted")
+        rc, doc = go(step)
+        assert rc == 1 and doc["status"] == D.INADMISSIBLE
+        assert seen == [0, 1] and len(doc["steps"]) == 2
+        assert doc["admission"]["admissible"] is False
+        assert "structural" not in doc
+        assert "RUN_FAILED" in (tmp_path / "status").read_text()
+
+    def test_an_admitted_step_continues(self, run, control_record):
+        go, seen = run
+        rc, doc = go(_depth_step(control_record))
+        assert doc["admission"]["admissible"] is True
+        assert seen == [0, 1, 2, 3] and doc["status"] == "FAILED"
+
+
+class TestTheCloseoutRederivesTheAdmission:
+
+    def _record(self, control_record, step, *, pod_admissible=None):
+        steps = [{"index": i, **ident} for i, ident in enumerate(
+            _identities([s["artifact_digest"]
+                         for s in control_record["steps"]]))][:2]
+        steps[1].update(step)
+        verdict = D.parent_reference_admission(
+            steps[1], control_record, D.admission_record(REPO))
+        if pod_admissible is not None:
+            verdict = {**verdict, "admissible": pod_admissible, "failures": []}
+        return {"status": D.INADMISSIBLE, "steps": steps, "admission": verdict}
+
+    def test_an_inadmissible_run_is_rederived(self, control_record):
+        from stages.phase_d3 import closeout_d3_structural as C
+
+        step = TestTheAdmissionGate()._mutate(control_record, "shifted")
+        v = C.rederive_admission(self._record(control_record, step))
+        assert v["admissible"] is False
+
+    def test_a_pod_verdict_it_cannot_rederive_is_refused(self, control_record):
+        from stages.phase_d3 import closeout_d3_structural as C
+
+        step = TestTheAdmissionGate()._mutate(control_record, "shifted")
+        with pytest.raises(C.CloseoutRefused, match="admission"):
+            C.rederive_admission(self._record(control_record, step,
+                                              pod_admissible=True))
+
+    def test_no_depth_step_means_nothing_to_admit(self, control_record):
+        from stages.phase_d3 import closeout_d3_structural as C
+
+        assert C.rederive_admission({"steps": [{"index": 0}]}) is None
+
+
+def _closeout_repo(tmp_path, **over):
+    for rel in (D.REGISTRATION,):
+        (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / rel).write_bytes((REPO / rel).read_bytes())
+    reg = D.registration(REPO)
+    doc = {"structural_outcome": D.STRUCTURAL_CHANGE,
+           "registration_hash": reg["registration_hash"],
+           "treatment_path_hash": reg["treatment"]["treatment_path_hash"],
+           "scientifically_admissible": True,
+           "admission": {"admissible": True},
+           "provider_teardown_verified": True,
+           "product": {"relay_verified": True, "identities": {}, "files": {},
+                       "relay": {}}, **over}
+    out = (tmp_path / "logs/stages/stage-1/phase_d3/runs/d3_structural_x"
+           / "closeout" / "outcome.json")
+    out.parent.mkdir(parents=True)
+    out.write_text(json.dumps(doc))
+    return tmp_path
+
+
+class TestTheProbesNeedAnAdmittedRun:
+
+    def test_an_admitted_structural_change_names_the_product(self, tmp_path):
+        from stages.phase_d3 import d3_probes as P
+
+        assert P.structural_product(_closeout_repo(tmp_path))["run_id"] == \
+            "d3_structural_x"
+
+    @pytest.mark.parametrize("over", [{"scientifically_admissible": False},
+                                      {"admission": None},
+                                      {"admission": {"admissible": False}}])
+    def test_an_unadmitted_run_names_nothing(self, tmp_path, over):
+        from stages.phase_d3 import d3_probes as P
+
+        with pytest.raises(P.D3ProbesError, match="comparability"):
+            P.structural_product(_closeout_repo(tmp_path, **over))
 
 
 # --- 4. the structural driver, launcher and grant ---------------------------------
@@ -351,9 +638,10 @@ def _money(funded: bool = True):
     from stages.phase_d1.d1_authorization import live_money
 
     money = dict(live_money(REPO))
-    if funded:
-        money["funds_formal_sessions_of"] = [
-            *money["funds_formal_sessions_of"], D.EXPERIMENT_ID]
+    others = [x for x in money["funds_formal_sessions_of"]
+              if x != D.EXPERIMENT_ID]
+    money["funds_formal_sessions_of"] = (
+        [*others, D.EXPERIMENT_ID] if funded else others)
     return money
 
 
@@ -425,6 +713,31 @@ class TestTheStructuralGrant:
 
         with pytest.raises(D3AuthorizationRefused, match="funds_formal"):
             _issue(money=_money(funded=False))
+
+    def test_the_amended_scope_reaches_the_deriver_and_the_issuer(self):
+        """The 2026-10-17 amendment: phase_d3 is on the formal book, read by
+        both consumers from the one config, and nothing else moved."""
+        sys.path.insert(0, str(REPO / "scripts/maintenance/consolidation"))
+        import derive_budget as B
+        from stages.phase_d1.d1_authorization import live_money
+
+        cfg = json.loads((REPO / "configs/stages/stage-1/phase_c1/"
+                          "authorization.json").read_text())
+        assert D.EXPERIMENT_ID in B.funded_experiment_ids(
+            cfg["execution_package"])
+        assert D.EXPERIMENT_ID in live_money(REPO)["funds_formal_sessions_of"]
+        amendment = cfg["_amendment_2026_10_17_d3_structural"]
+        assert amendment["added_usd"] == 0.0 and amendment["raised"] == []
+        kept = amendment["deliberately_unchanged"]
+        assert kept["cumulative_cap_usd"] == \
+            cfg["accepted_pricing"]["cumulative_cap_usd"]
+        for key in ("formal_allowance_usd", "gpu_engineering_allowance_usd",
+                    "package_total_usd", "per_attempt_hard_ceiling_usd"):
+            assert kept[key] == cfg["execution_package"][key], key
+        assert amendment["before"]["funds_formal_sessions_of"] + \
+            [D.EXPERIMENT_ID] == \
+            cfg["execution_package"]["funds_formal_sessions_of"][
+                "experiment_ids"]
 
     def test_an_edited_artifact_is_refused(self, tmp_path):
         from stages.phase_d3.d3_authorization import (

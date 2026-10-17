@@ -218,3 +218,52 @@ reopening D1/D2, the cancelled D3, data work, promotion, cap changes.
 **Interpretation.** Results on the mixed-domain battery are not fluid-reasoning
 evidence (AGENTS.md P10.2). If the battery cannot separate the two
 references, both are carried to a future capability-aligned evaluation.
+
+## 8. Addendum 2026-10-17 UTC: the review's two repairs and the grant
+
+The maintainer's independent review of `0375d7d8` accepted the design (GO for
+the structural ablation), required two `$0` execution-integrity repairs, added
+`phase_d3` to the formal book and granted the structural rung `$7.00`
+cumulative. Decision: `logs/budget/decisions.md`, 2026-10-17. Grant:
+`logs/budget/approvals/autoinit_d3_structural_grant.json`.
+
+**A. The parent-reference comparability gate** (`d3_design.parent_reference_admission`).
+The informational `round0_parent_diagnostic_vs_control` is replaced by a
+fail-closed admission requirement on the treated DEPTH step:
+- round 0 tests exactly q2's 36 candidates, each once;
+- every candidate carries a finite round-0 parent-reference KL;
+- every one agrees with q2's recorded score within `|d3 − q2| ≤ atol + rtol·|q2|`;
+- the parent-reference argmin is q2's first removed layer, 26.
+
+An absent or partial diagnostic fails. The driver checks the moment DEPTH is
+persisted and stops an inadmissible run before WIDTH, with status
+`INADMISSIBLE`. That is not a fourth outcome: nothing is classified and
+nothing is proposed. The closeout re-derives the verdict off-pod and refuses a
+disagreement, and the probes contract refuses any run that was not admitted.
+
+The tolerance is fixed in `plans/d3_parent_reference_admission_v1.json`
+(`write_d3_admission.py`) from GPU evidence that already exists:
+
+| Evidence | What it shows |
+|---|---|
+| q2's own DEPTH, run by two D1 search sessions | 260 of 260 candidates bit-identical |
+| The root's DEPTH, D1 decision vs D2 diagnostic, same driver and execution shape; code, cache mode, row policy and store residency differ | max abs 4.95e-05, max rel 4.43e-04, argmin unchanged |
+| Tolerance: those maxima rounded up at one significant figure | `atol` 5e-05, `rtol` 5e-04; the evidence uses at most 46% of it |
+| Every other round-0 table over the same candidates in both journals (29) | all refused, the closest with 34 of 36 candidates outside |
+
+q2's own parent under the other profile chooses layer 26 as well. The argmin
+check alone would admit it; the numerical check refuses it.
+
+**Residual, stated in the record.** D3 runs on the protocol's 595.91.07 driver,
+and q2's scores came from 580.126.09. No score-level DEPTH measurement exists on
+595.91.07. `d1_replay_002` there reproduced all four of q2's step identities,
+FFN's included, which is digest-level evidence only. A driver effect beyond the
+tolerance makes the run inadmissible; it cannot make one admissible.
+
+**B. A supplied root reference is always checked**
+(`fixed_path._acquire_root_references`). With no `root_identity` declared, a
+supplied store must declare the spec's own root (`teacher_id` = repo id,
+`teacher_revision`). Any other root, or the right teacher declared in another
+form, is refused. No production caller supplies stores to the fixed path, so
+no historical execution changes. The negative tests include the real suffix
+entry point with `root_identity` omitted.

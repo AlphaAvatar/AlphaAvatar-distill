@@ -11,9 +11,12 @@ What a finished structural session owes the repository:
    record, the product record, every step's persisted result (DEPTH's round
    tables and both references' KL), the stage journal, the launcher log and
    the watchdog journals;
-2. the OUTCOME RE-DERIVED here from those step records -- `depth_evidence` and
-   `classify_structure` run again against the committed control record -- and
-   required equal to what the pod recorded; a disagreement refuses the closeout;
+2. the ADMISSION and the OUTCOME RE-DERIVED here from those step records --
+   `parent_reference_admission`, `depth_evidence` and `classify_structure` run
+   again against the committed control and admission records -- and required
+   equal to what the pod recorded; a disagreement refuses the closeout. An
+   INADMISSIBLE run is closed as exactly that: no outcome, no product, no
+   probe proposal;
 3. for a new initialization, the PRODUCT re-identified from the bytes that came
    home, at all four identities, and (`upload`) made durable on the relay:
    uploaded once, its LFS oids checked, downloaded into an independent
@@ -82,6 +85,32 @@ def evidence_plan(run_dir: Path, scr: Path) -> list[tuple[Path, Path]]:
              for p in sorted(scr.glob("create_raw_*.txt"))
              if '"id"' in p.read_text(errors="replace")]
     return plan
+
+
+def rederive_admission(record: dict[str, Any]) -> dict[str, Any] | None:
+    """The comparability verdict from the persisted DEPTH step record.
+
+    None when the DEPTH step never completed: there was nothing to admit.
+    """
+    from stages.phase_d3 import d3_design as D
+
+    control = json.loads((REPO_ROOT / D.CONTROL_RECORD).read_text())
+    steps = record.get("steps") or []
+    leaf = D.control_leaf(REPO_ROOT)
+    at = D.treated_index(leaf)
+    if len(steps) <= at:
+        return None
+    verdict = D.parent_reference_admission(steps[at], control,
+                                           D.admission_record(REPO_ROOT))
+    pod = record.get("admission") or {}
+    if (pod.get("admissible"), pod.get("failures"), pod.get(
+            "admission_hash")) != (verdict["admissible"], verdict["failures"],
+                                   verdict["admission_hash"]):
+        raise CloseoutRefused(
+            f"the pod recorded admission {pod.get('admissible')!r} "
+            f"{pod.get('failures')!r} and the off-pod re-derivation gives "
+            f"{verdict['admissible']!r} {verdict['failures']!r}")
+    return verdict
 
 
 def rederive(record: dict[str, Any]) -> dict[str, Any]:
@@ -262,12 +291,22 @@ def build(run: str, scr: Path, *, balance_after: float | None,
         raise CloseoutRefused(f"no driver record under {scr}")
     reg = D.registration(REPO_ROOT)
     plan = evidence_plan(run_dir, scr)
-    derived, refused = None, None
-    if record.get("status") == "COMPLETE":
-        try:
-            derived = rederive(record)
-        except (CloseoutRefused, D.D3DesignError) as exc:
-            refused = str(exc)
+    derived, refused, admission = None, None, None
+    try:
+        admission = rederive_admission(record)
+    except (CloseoutRefused, D.D3DesignError) as exc:
+        refused = str(exc)
+    status = record.get("status")
+    if status == "COMPLETE" and refused is None:
+        if not (admission or {}).get("admissible"):
+            refused = "a COMPLETE record without an admitted comparison"
+        else:
+            try:
+                derived = rederive(record)
+            except (CloseoutRefused, D.D3DesignError) as exc:
+                refused = str(exc)
+    inadmissible = (status == D.INADMISSIBLE and refused is None
+                    and admission is not None and not admission["admissible"])
     outcome = (derived or {}).get("structural", {}).get("outcome")
     product_doc = _read_first(scr, "product.json")
     product = None
@@ -290,7 +329,10 @@ def build(run: str, scr: Path, *, balance_after: float | None,
         "classification": (
             f"COMPLETE: {outcome}, re-derived off-pod from the step records"
             if outcome else
-            f"INCOMPLETE: driver status {record.get('status')!r}"
+            "INADMISSIBLE: the parent-reference comparability gate failed, "
+            "re-derived off-pod; no structural conclusion, no probe proposal"
+            if inadmissible else
+            f"INCOMPLETE: driver status {status!r}"
             + (f"; re-derivation refused: {refused}" if refused else "")),
         "recorded_utc": datetime.now(timezone.utc).strftime(
             "%Y-%m-%dT%H:%M:%SZ"),
@@ -302,12 +344,16 @@ def build(run: str, scr: Path, *, balance_after: float | None,
         "driver_status": record.get("status"),
         "runner_terminal": session.get("terminal"),
         "structural_outcome": outcome,
+        "scientifically_admissible": (None if admission is None
+                                      else admission["admissible"]),
+        "admission": ({k: v for k, v in admission.items()
+                       if k != "candidates"} if admission else None),
         "rederivation_refused": refused,
         "depth": ({k: derived["depth"][k] for k in (
             "removal_order", "kept_layers", "control_removal_order",
             "control_kept_layers",
-            "rounds_where_the_parent_reference_would_choose_differently",
-            "round0_parent_diagnostic_vs_control")} if derived else None),
+            "rounds_where_the_parent_reference_would_choose_differently")}
+                  if derived else None),
         "structural": (derived or {}).get("structural"),
         "teacher_reference": record.get("teacher_reference"),
         "execution": record.get("execution"),
@@ -328,6 +374,8 @@ def build(run: str, scr: Path, *, balance_after: float | None,
         "required_products_secured": session.get("required_products_secured"),
         "artifact_loss_risk": session.get("artifact_loss_risk"),
         "what_this_authorizes": (
+            "nothing. An INADMISSIBLE run proposes nothing and is not rerun "
+            "to seek agreement." if inadmissible else
             "nothing. A STRUCTURAL_CHANGE makes the three-probe rung "
             "proposable; the probes need their own maintainer grant."),
     }
@@ -363,6 +411,8 @@ def main(argv: list[str] | None = None) -> int:
                       "missing": [str(s) for s, _ in plan
                                   if not s.is_file()][:12],
                       "structural_outcome": doc["structural_outcome"],
+                      "scientifically_admissible":
+                          doc["scientifically_admissible"],
                       "rederivation_refused": doc["rederivation_refused"],
                       "money": doc["money"],
                       "provider_teardown_verified":

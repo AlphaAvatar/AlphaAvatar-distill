@@ -94,7 +94,8 @@ def structural_product(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
     """The ONE completed structural run's product, or refuse.
 
     Requires exactly one `d3_structural_*` run whose closeout states the
-    registered treatment, outcome STRUCTURAL_CHANGE, verified teardown, and a
+    registered treatment, an admitted parent-reference comparison, outcome
+    STRUCTURAL_CHANGE, verified teardown, and a
     product whose four identities and relay round trip its durability record
     verified. A run in any other state names no initialization.
     """
@@ -123,6 +124,10 @@ def structural_product(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
         (doc.get("treatment_path_hash")
          == reg["treatment"]["treatment_path_hash"],
          "the closeout's treatment is not the registered one"),
+        (doc.get("scientifically_admissible") is True
+         and (doc.get("admission") or {}).get("admissible") is True,
+         "the structural run did not pass the parent-reference "
+         "comparability gate"),
         (doc.get("provider_teardown_verified") is True,
          "the structural run's teardown is not verified"),
         ((doc.get("product") or {}).get("relay_verified") is True,

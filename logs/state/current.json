@@ -75,7 +75,7 @@
   "authorizes": "nothing",
   "behavioural_design": "D1 (complete): Top-4, 10 + 6 probes, owner d1_design.json. D2: shared protocol, K=4 prepared, 8 + 3 probes, no B/q2 training, owner families/d_series/plans/d2_budget_v1.json.",
   "behavioural_pricing": "Owner: d1_design.json :: budget.chain; attempt bounds: the run's governance/authorization.json :: money.attempt_bounds.",
-  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2: COMPLETE -- c4's shared confirmation NO_GO (d2_confirmation_20261016_105802). Next: the maintainer's D3 decision. Owner: decisions.md 2026-10-16.",
+  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2: complete. D3: none for the structural rung (granted, phase_d3 funded); probes need their own grant. Owner: decisions.md 2026-10-17.",
   "d2_owed_engineering": "none at $0; the screening chain is built (d2_screening_readiness_review.md).",
   "execution_wiring": "D1 COMPLETE and CLOSED. D2 COMPLETE: search, screening (c4) and shared confirmation (NO_GO); phase_d2/runs/*/closeout/outcome.json.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
@@ -83,7 +83,7 @@
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
   "scoring_protocol": "reference_topk_tail_v1, K=200: reference-defined support plus one K+1 tail bucket from the COMPLEMENT's logits, carried by SearchConfig.distribution_support -- an OPTIONAL term, absent under the historical full-vocab contract, folded into one measurement_protocol_id. Owner: scripts/stages/stage-1/families/d_series/scoring_protocol.py",
   "seeds": "MATERIALIZED and HASH-BOUND in plans/d1_behavioural_preregistration.json (2 screening, 3 confirmation, 6 exclusions), before any candidate result exists. Owner: the preregistration.",
-  "state": "D1 COMPLETE / NO-GO. D2 v3 COMPLETE / NO_GO (search, screening -> c4, shared confirmation). D3 REGISTERED (43156f21) and $0-ready; structural grant PROPOSED. Owner: phase_d3/plans/, decisions.md 2026-10-16."
+  "state": "D1 COMPLETE / NO-GO. D2 v3 COMPLETE / NO_GO. D3 REGISTERED (43156f21); structural rung GRANTED $7.00 after two $0 repairs. Owner: phase_d3/plans/, decisions.md 2026-10-17."
  },
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
  "dirty": false,
@@ -127,7 +127,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Maintainer decision on the D3 structural grant ($7.00 proposed envelope; expected $0.86, hard $3.02) and the phase_d3 funding amendment. Owner: phase_d3/analyses/d3_readiness_review.md.",
+ "next": "The D3 structural session under its $7.00 grant, then stop at the next scientific boundary. Owner: phase_d3/analyses/d3_readiness_review.md section 8.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "On a structural grant: issue, launch (AU), close out; then STRUCTURAL_CHANGE -> propose the three-probe grant ($12.00), NO_STRUCTURAL_CHANGE -> no training. Forward Stage 0/2/4 design: docs/shared/REASONING_TRANSFER_DESIGN.md (authorizes nothing).",
@@ -216,7 +216,7 @@
   "C3": "COMPLETE / NO_GO",
   "D1": "COMPLETE / NO-GO 2026-10-12 -- q2 advanced from screening and did not confirm against B",
   "D2": "COMPLETE / NO_GO 2026-10-16 -- c4 advanced from screening and did not confirm against B",
-  "D3": "REGISTERED 2026-10-16 (fixed-q2 DEPTH teacher-reference ablation; the student-confidence D3 CANCELLED, unexecuted). $0 readiness complete; NO paid session authorized",
+  "D3": "REGISTERED 2026-10-16 (fixed-q2 DEPTH teacher-reference ablation; the student-confidence D3 CANCELLED, unexecuted). Structural rung granted 2026-10-17; probes not granted",
   "F1": "SKIPPED by maintainer instruction 2026-10-03; ffn.activation_importance_v0 carried forward",
   "_next_is_not_null_because": "the D-series directive orders D1, D2, D3; D1 and D2 are complete, so D3 is next, within its $0 boundary only.",
   "next_scientific_stage": "D3"

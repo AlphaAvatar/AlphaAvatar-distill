@@ -16,7 +16,11 @@
            support and the execution protocol);
          - step 0, q2's FFN prefix, must reproduce q2's pinned digest;
          - step 1, DEPTH 36 -> 28 under KL(T || C(S)), recording every round,
-           every candidate, both references' KL and the cache behaviour;
+           every candidate, both references' KL and the cache behaviour; the
+           moment it is persisted, the PARENT-REFERENCE COMPARABILITY GATE:
+           round 0's parent diagnostic must reproduce q2's recorded round 0
+           within the committed tolerance and choose q2's first layer, or the
+           run stops INADMISSIBLE -- evidence kept, nothing classified;
          - steps 2-3, WIDTH and ATTENTION, recomputed on the actual new parent;
        every step's record is persisted the moment it completes;
     D  the structural comparison with the control and the outcome
@@ -152,11 +156,13 @@ def main(argv: list[str] | None = None) -> int:
             control = json.loads((REPO / D.CONTROL_RECORD).read_text())
             contract = D.treatment_contract(
                 D.control_spec(leaf, device=args.device), spec)
+            admission = D.admission_record(REPO)
             record.update({
                 "registration_hash": reg["registration_hash"],
                 "treatment_path_hash": spec.spec_hash,
                 "control_path_hash": contract["control_path_hash"],
-                "contract": contract, "root_identity": D.root_identity(leaf)})
+                "contract": contract, "root_identity": D.root_identity(leaf),
+                "admission_hash": admission["admission_hash"]})
             st.result = {"registration": reg["registration_hash"][:16],
                          "treatment": spec.spec_hash[:16]}
             save()
@@ -212,6 +218,7 @@ def main(argv: list[str] | None = None) -> int:
             workdir = Path(args.workdir or (REPO / POD_WORKDIR_REL))
             steps_journal = out / STEPS_JOURNAL
             overrides = dict(root_state["config_overrides"])
+            at = D.treated_index(leaf)
 
             def on_step(result) -> None:
                 row = result.as_dict()
@@ -221,6 +228,18 @@ def main(argv: list[str] | None = None) -> int:
                 save()
                 say(f"step {row['index']} {row['impl_id']}: "
                     f"{row['artifact_digest'][:16]} in {row['seconds']:.1f} s")
+                if row["index"] == at:
+                    #: After the step is persisted and before WIDTH runs: an
+                    #: inadmissible run spends nothing more.
+                    verdict = D.parent_reference_admission(row, control,
+                                                           admission)
+                    record["admission"] = verdict
+                    save()
+                    say(f"admission: {verdict['admissible']} (max |d| "
+                        f"{verdict['max_abs_difference']}, argmin "
+                        f"{verdict['parent_reference_argmin']})")
+                    if not verdict["admissible"]:
+                        raise D.D3Inadmissible(verdict)
 
             deadline = (Deadline(seconds=float(args.deadline_s))
                         if args.deadline_s > 0 else None)
@@ -248,7 +267,10 @@ def main(argv: list[str] | None = None) -> int:
 
         with journal.stage("D", "structural_comparison") as st:
             steps = record["steps"]
-            at = D.treated_index(leaf)
+            if (record.get("admission") or {}).get("admissible") is not True:
+                raise D3StructuralDriverError(
+                    "no admitted parent-reference comparison; nothing is "
+                    "classified without one")
             depth = D.depth_evidence(steps[at], control)
             outcome = D.classify_structure(
                 control=control, depth_kept=depth["kept_layers"],
@@ -295,6 +317,13 @@ def main(argv: list[str] | None = None) -> int:
                          product["identities"]["artifact_digest"][:16]}
             save()
         record["status"] = "COMPLETE"
+    except D.D3Inadmissible as exc:
+        #: Not a failure to repair and not an outcome: the run cannot carry a
+        #: structural conclusion. The step records and the verdict are kept.
+        record["status"] = D.INADMISSIBLE
+        record["inadmissible"] = {"failures": exc.admission["failures"]}
+        journal.event(stage="driver", status="inadmissible",
+                      error=str(exc)[:400])
     except BaseException as exc:                                  # noqa: BLE001
         record["status"] = "FAILED"
         record["failure"] = {"type": type(exc).__name__, "message": str(exc),

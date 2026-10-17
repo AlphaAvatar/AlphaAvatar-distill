@@ -598,8 +598,8 @@ def materialize_fixed_path(
     statistics weights), every store a step needs is built from the root
     BEFORE the first step runs -- the root is freed after step 0 -- unless the
     caller supplies them (`root_references`, keyed by profile hash).
-    `root_identity` is what a built store declares as its root; it defaults
-    to the spec's repo id and revision.
+    `root_identity` is what a built store declares as its root, and what a
+    supplied one must declare; it defaults to the spec's repo id and revision.
 
     `calibration_items` may be supplied to avoid re-resolving (the resolver
     verifies a content hash on every call); when omitted the profiles are
@@ -910,13 +910,20 @@ def _acquire_root_references(
                 store = stores[key]
                 store.require_identity(profile_hash=key,
                                        support=support.as_dict())
-                if root_identity is not None and \
-                        dict(store.identity.get("root") or {}) != root:
+                #: ALWAYS against this path's root: the caller's declared one,
+                #: or the spec's own when none is declared. Omitting
+                #: `root_identity` is never a way past the check -- a store
+                #: that declares its root in any other form is refused, and
+                #: the caller must state the root it was built under.
+                if dict(store.identity.get("root") or {}) != root:
                     raise FixedPathError(
                         f"{spec.path_id} step {i} ({impl.impl_id}): the "
                         f"supplied root reference over {profile.qualified_id} "
                         f"declares root {store.identity.get('root')}, and "
-                        f"this path's root is {root}")
+                        f"this path's root is {root}"
+                        + ("" if root_identity is not None else
+                           " (the spec's own: no root_identity was declared; "
+                           "pass the root the store was built under)"))
                 checked.add(key)
             continue
         if root_model is None:
@@ -1070,8 +1077,9 @@ def materialize_fixed_path_suffix(
     """Execute the tail of a frozen path from an ALREADY-VERIFIED parent.
 
     A suffix never holds the root, so a step that reads the ROOT reference is
-    refused unless `root_references` (keyed by profile hash) supplies it; with
-    `root_identity`, each supplied store's declared root must be that one.
+    refused unless `root_references` (keyed by profile hash) supplies it, and
+    each supplied store's declared root must be `root_identity` -- or, when
+    none is given, the spec's own root.
 
     Two arms that share a prefix should not both compute it. The incumbent arm's
     replay already produced, gated and wrote the shared parent; the treatment arm
