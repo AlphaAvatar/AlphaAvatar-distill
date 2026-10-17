@@ -427,12 +427,12 @@ class TestWeightValidation:
 
 
 class TestContinuousWeightsAreRefusedWhereOnlyAMaskWorks:
-    """The boundary the activation collectors declare, asserted by name.
+    """A MASK cannot carry continuous weights, asserted by name.
 
-    A confidence-weighted policy is the D2 direction and the API expresses it.
-    The collectors do not implement it — their divisor is an integer token count
-    — and the refusal has to be explicit, because rounding a confidence weight to
-    a mask would run a different experiment and report it as the right one.
+    The collectors accept continuous weights through their own `token_weights`
+    keyword (`token_weights_for`), with a weight-sum denominator. The mask
+    accessors must still refuse, because rounding a confidence weight to a
+    mask would run a different experiment and report it as the right one.
     """
 
     class Confidence(ScoringPositionPolicy):
@@ -451,8 +451,16 @@ class TestContinuousWeightsAreRefusedWhereOnlyAMaskWorks:
 
     def test_the_token_mask_refuses_with_what_is_owed(self):
         active = ActivePositions([item(8)], self.Confidence())
-        with pytest.raises(ScoringPositionError, match="StatsSpec"):
+        with pytest.raises(ScoringPositionError, match="token_weights_for"):
             active.require_binary_token_weights()
+        with pytest.raises(ScoringPositionError, match="token_weights_for"):
+            active.token_mask_for_item(0)
+
+    def test_the_continuous_token_weights_are_available(self):
+        active = ActivePositions([item(8)], self.Confidence())
+        assert active.token_weighted
+        assert torch.equal(active.token_weights_for_item(0),
+                           torch.linspace(0.1, 0.9, 8, dtype=WEIGHT_DTYPE))
 
     def test_but_the_prediction_weights_are_available(self):
         """A weighted next-token objective needs no schema change, because its

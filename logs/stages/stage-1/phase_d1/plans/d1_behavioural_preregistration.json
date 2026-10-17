@@ -1,0 +1,334 @@
+{
+ "_contract": "The EXECUTION preregistration for D1's behavioural rungs: the frozen design revision, the five arms' content identities, the materialized seeds, the realized batteries, the frozen recovery recipe, the probe schedules and the decision rules, hash-bound BEFORE any candidate behavioural result exists. It AUTHORIZES NOTHING: funding is the maintainer's, the one-use authorization binds money per run, and this document is what both are checked against.",
+ "_generated_by": "scripts/stages/stage-1/phase_d1/write_d1_behavioural_preregistration.py",
+ "arm_materialization": {
+  "adoption_requires": [
+   "artifact_digest",
+   "weights_digest",
+   "single_shard_sha256",
+   "arch_signature"
+  ],
+  "how": "ON THE POD, each arm along a digest-pinned path: the four candidates replay the completed search's recorded operator sequences (the machinery d1_replay_002 validated byte-exactly), and B is built from phase_c2.baseline.frozen_baseline_spec, its one construction owner. A digest mismatch after a completed path is a scientific stop condition, never a substitution.",
+  "plan_path": "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
+  "plan_sha256": "fe58c3a5be23e54f71ca823966f5437214a387598bea0c5fc9c5fa5d30f45c6c"
+ },
+ "arms": {
+  "_verified_at_writing": "all four candidates' secured bytes hashed against all four recorded identities on this host, and the incumbent's construction pins compared against the design, as a precondition of writing this document",
+  "candidates_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+  "incumbent_c1_arm": "treatment",
+  "incumbent_construction": "stages.phase_c2.baseline.frozen_baseline_spec",
+  "incumbent_impl_id": "attention.activation_importance_v1",
+  "incumbent_owner": "logs/stages/stage-1/phase_d1/plans/d1_design.json :: incumbent",
+  "incumbent_profile_id": "calib.domain_balanced@v1",
+  "members": [
+   {
+    "arm": "q1",
+    "construction": null,
+    "identities": {
+     "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+     "artifact_digest": "a7736a705b3ee76d8e008964163e0157f6dd50cdbce60cbd12423719e6745ff6",
+     "single_shard_sha256": "46fec7ddd33f27d01040165ef0df05fd956ff83035b7e049248b0165408ca00d",
+     "weights_digest": "fcc98b1c2bfd6ede83fb708ba2cd164fb41936e0a2674a8386448bbf3ab2466d"
+    },
+    "quality_position": 1,
+    "role": "candidate",
+    "state_id": "e5e3edb0477b25147de952153da8fc21"
+   },
+   {
+    "arm": "q2",
+    "construction": null,
+    "identities": {
+     "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+     "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+     "single_shard_sha256": "ca2d7368e3adce3e167a4376dcab425902530e7a77106146d336d676d2370c5d",
+     "weights_digest": "0597e60c1a7fac06930e3e84c8f5341b1f7eb9470fc30b16efbf02f37208fdef"
+    },
+    "quality_position": 2,
+    "role": "candidate",
+    "state_id": "afd50c9ff0e3d20542bb5473ea745b55"
+   },
+   {
+    "arm": "q3",
+    "construction": null,
+    "identities": {
+     "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+     "artifact_digest": "9e04b4095713599c319a723c7f342005e484e38e5db4a5a7f08620fdd4cdb18a",
+     "single_shard_sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099",
+     "weights_digest": "8ab8e46ecbe955e314699b4ceab379ff6a7f2e7440b5aa840f14588e913b7876"
+    },
+    "quality_position": 3,
+    "role": "candidate",
+    "state_id": "56388d47b6a71e1b49e44929e48d4061"
+   },
+   {
+    "arm": "q4",
+    "construction": null,
+    "identities": {
+     "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+     "artifact_digest": "253ebdee1f82265bbba700885387e1a411134ea12dc5850454c17fee15e34a4f",
+     "single_shard_sha256": "973d40e93f784eed6e811c599c7585dc6bb03b8e5dd99f904fac8acceb36f005",
+     "weights_digest": "4f055824408c50eeadddb700ebce56f61d14185b4d123954801ec1911486c892"
+    },
+    "quality_position": 4,
+    "role": "candidate",
+    "state_id": "3fcaf42eaa91b3ed02eab6c2f3213bfc"
+   },
+   {
+    "arm": "B",
+    "construction": "stages.phase_c2.baseline.frozen_baseline_spec",
+    "identities": {
+     "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+     "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+     "single_shard_sha256": "b24f0b63afd3b99f14d34d4fc508abbb26f65421dc5784f3738bd9565608d010",
+     "weights_digest": "85c5c50de3cd7e5242097e05e6f09057d9b27ae98ec49050219e75a2f49e2335"
+    },
+    "quality_position": null,
+    "role": "incumbent",
+    "state_id": null
+   }
+  ],
+  "n_arms": 5,
+  "retention_rule": "quality_only"
+ },
+ "authorizes": "nothing",
+ "batteries": {
+  "_sesoi_population_note": "D-series absolute scores are not directly interchangeable with historical C1 absolute scores (three strata draw from prospectively widened sources); the SESOI is carried forward as an explicit assumption about the within-family PAIRED difference, which both rungs estimate on one role under one protocol.",
+  "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
+  "d1_confirmation": {
+   "files": [
+    {
+     "n_items": 100,
+     "path": "d1_confirmation/code.jsonl",
+     "sha256": "f551de3d96eb3ee7edfa7f57b777786f1b2cff0ab321082aa25c24bd8ef5569c"
+    },
+    {
+     "n_items": 150,
+     "path": "d1_confirmation/gsm8k.jsonl",
+     "sha256": "ba3be0eef00cdc1ecc02662ba0e57f37cef94710c5e86803673fc4105cc41459"
+    },
+    {
+     "n_items": 150,
+     "path": "d1_confirmation/knowledge.jsonl",
+     "sha256": "df3999c8ed92a41d81d9b243a435fb0f06792f41d2495e12b5ec0e39c3ac01fc"
+    },
+    {
+     "n_items": 150,
+     "path": "d1_confirmation/math_verified.jsonl",
+     "sha256": "622e4b535a6ced8c94a845fc9d5cad0b5239ca3e2865920e0e2647118aeac162"
+    },
+    {
+     "n_items": 150,
+     "path": "d1_confirmation/multihop.jsonl",
+     "sha256": "5bcda4212f1aba2d663dc4db3441e5cb2c56ea8bceae91cae2382fac4540614a"
+    },
+    {
+     "n_items": 150,
+     "path": "d1_confirmation/rag.jsonl",
+     "sha256": "85fdcfed5c345fc393c223bb1922af52860259d7f9a882c7471ab551b5bb09de"
+    },
+    {
+     "n_items": 100,
+     "path": "d1_confirmation/tool.jsonl",
+     "sha256": "af99595882a9c8e2632e176a881f4bc81cb0d008039db4b5026c5bf8896df12a"
+    }
+   ],
+   "item_ids_sha256": "7d200ffe666add66721c3cb233f6f9b876825ee5277438669926e3633fe8547b",
+   "n_prompts": 950,
+   "n_scorable": 850,
+   "per_stratum": {
+    "code": 100,
+    "gsm8k": 150,
+    "knowledge": 150,
+    "math_verified": 150,
+    "multihop": 150,
+    "rag": 150,
+    "tool": 100
+   },
+   "role": "d1_confirmation"
+  },
+  "d1_screening": {
+   "files": [
+    {
+     "n_items": 100,
+     "path": "d1_screening/code.jsonl",
+     "sha256": "c8b21743f2bf6048fa98ddc394f919f2a63f430fd056afe209e3a85edfbe3fa1"
+    },
+    {
+     "n_items": 150,
+     "path": "d1_screening/gsm8k.jsonl",
+     "sha256": "c1fc5fe39b824d28a627adf92ed5589272e6052055879e11ef4e23896aad37f5"
+    },
+    {
+     "n_items": 150,
+     "path": "d1_screening/knowledge.jsonl",
+     "sha256": "e82949b0fd49c890cd9aac113ca0ad4e639fbdab5c5e3658b5b9cc2e3947b69c"
+    },
+    {
+     "n_items": 150,
+     "path": "d1_screening/math_verified.jsonl",
+     "sha256": "2d7c38a8ad6deaee0d3e1d8db2e10f07824a7db15d136905fc8b47898be627ba"
+    },
+    {
+     "n_items": 150,
+     "path": "d1_screening/multihop.jsonl",
+     "sha256": "038b4a7f2635a508c9e07fb3b632167297cfb16f1635265bab974143895e5a2b"
+    },
+    {
+     "n_items": 150,
+     "path": "d1_screening/rag.jsonl",
+     "sha256": "cbd5cd94666992c39dacedb654214a1f8d630c0512c5cc44a43593c9006bf8f4"
+    },
+    {
+     "n_items": 100,
+     "path": "d1_screening/tool.jsonl",
+     "sha256": "c4b713de5c9893155db6850ca524bd52dba46095902a5da1b3d228c7d1557a71"
+    }
+   ],
+   "item_ids_sha256": "d7b95cddd0b889c62485b542aab224e998d0bafacb74ee6fc30fa13f93e8ac53",
+   "n_prompts": 950,
+   "n_scorable": 850,
+   "per_stratum": {
+    "code": 100,
+    "gsm8k": 150,
+    "knowledge": 150,
+    "math_verified": 150,
+    "multihop": 150,
+    "rag": 150,
+    "tool": 100
+   },
+   "role": "d1_screening"
+  },
+  "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+  "family_id": "d_series_behavioural_v1",
+  "roles_disjoint": true
+ },
+ "c0_materialization_requirement": {
+  "quote": "the seed values MUST be materialized and hash-bound in the execution preregistration BEFORE any candidate behavioural result exists",
+  "satisfied_because": "this document binds the derived values below, and at its writing no behavioural probe has trained, no behavioural authorization has been issued (the schema has no instance) and no provider resource exists -- each checkable from committed records rather than asserted."
+ },
+ "confirmation": {
+  "_candidate_binding": "the advancing candidate is screening's mechanical output and CANNOT be named here without pre-selecting it. It is bound at confirmation issuance: the authorization type requires `advancing_candidate` on a confirmation artifact and forbids it on a screening one, and the probe schedule refuses a confirmation field that is not {that candidate, B}.",
+  "arms": "the advancing candidate and B",
+  "n_arms": 2,
+  "n_probes": 6,
+  "seeds": [
+   396880939,
+   766527341,
+   1004399678
+  ],
+  "verdict": {
+   "_implementation_owed": "the off-pod verdict computation (stratified prompt-cluster bootstrap, seeds as fixed blocks) is OWED BEFORE THE CONFIRMATION LAUNCH and does not block screening; it consumes evidence screening does not produce.",
+   "computed": "OFF-POD at $0 from the secured per-sample rows. The confirmation driver ends at preservation -- A3 lost its decision artifact to an on-pod aggregation stage.",
+   "endpoint": "correct_overall",
+   "estimand": "prompt-mean of the seed-mean paired difference (candidate - B) over the three fixed confirmation seeds",
+   "guardrails": "usable_rollout vetoes only, reported with every component and never positive ranking credit",
+   "inference": "stratified PROMPT-cluster bootstrap, seeds as fixed blocks; the interval is conditional on those three seed pairs and is not a seed-population claim",
+   "rule": "three-way GO / NO-GO / INCONCLUSIVE, no forced winner",
+   "sesoi": 0.01
+  }
+ },
+ "design": {
+  "design_hash": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+  "open_blockers": [],
+  "path": "logs/stages/stage-1/phase_d1/plans/d1_design.json"
+ },
+ "endpoint_chain": {
+  "_all_are_complete_results": "a NO_CANDIDATE_ADVANCES screening and an INCONCLUSIVE or NO_GO confirmation are complete, reportable endpoints; nothing reruns a valid measurement looking for another result.",
+  "confirmation_outcomes": [
+   "GO",
+   "NO_GO",
+   "INCONCLUSIVE"
+  ],
+  "screening_outcomes": [
+   "ONE_CANDIDATE_ADVANCES",
+   "NO_CANDIDATE_ADVANCES"
+  ]
+ },
+ "experiment_id": "phase_d1",
+ "generated_utc": "2026-10-09T18:12:38+00:00",
+ "out_of_scope": [
+  "another beam search or any re-opening of the completed D1 search",
+  "re-selection of the candidate field",
+  "re-measurement of B's standing state evaluation",
+  "a promotion decision outside the frozen three-way rule",
+  "automatic follow-on starts (confirmation is separately authorized and its artifact names the advancing candidate)",
+  "D2 or D3 work of any kind"
+ ],
+ "preregistration_sha256": "aa70338a22bdaae1067105261614a63bed4b0f7737f0a6cc3b59d2555835e3de",
+ "pricing_reference": {
+  "_not_money_authorization": "the priced cells live in the design and the live ceiling is derived at issuance against the live secure rate and the four budget conditions; this document authorizes no spend.",
+  "owner": "logs/stages/stage-1/phase_d1/plans/d1_design.json :: budget.chain.sessions"
+ },
+ "recovery_recipe": {
+  "_identical_recovery": "a derived probe config may differ from the frozen recipe only inside the allowed override set -- run identity, pack path, seed and student_path -- so the only intended difference between two probes at one seed is the initialization.",
+  "allowed_override_set": [
+   "_purpose",
+   "data_dir",
+   "out_dir",
+   "run_name",
+   "seed",
+   "student_path"
+  ],
+  "block_len": 8192,
+  "ce_weight": 0.25,
+  "kd_scope": "all",
+  "kd_weight": 1.0,
+  "pack": "artifacts/stage3/ladder_uniform_probe",
+  "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+  "recipe_id": "e1_p1_kd_heavy@0.86M",
+  "temperature": 1.0,
+  "tokens": 860000
+ },
+ "schema": "aadistill.phase_d1.behavioural_execution_preregistration/v1",
+ "screening": {
+  "_contract_hash_note": "informational: the location-free contract as this tree derives it today. The one-use authorization binds the live value at issuance, and the driver recomputes and compares it on the pod.",
+  "contract_hash_at_preregistration": "1011b6da6f0b4f0e337fbe95e967556d64fcad1cd14963402dd21545aeb5226c",
+  "n_probes": 10,
+  "probe_ids": [
+   "d1_screening_q1_s614923639",
+   "d1_screening_q1_s516448251",
+   "d1_screening_q2_s614923639",
+   "d1_screening_q2_s516448251",
+   "d1_screening_q3_s614923639",
+   "d1_screening_q3_s516448251",
+   "d1_screening_q4_s614923639",
+   "d1_screening_q4_s516448251",
+   "d1_screening_B_s614923639",
+   "d1_screening_B_s516448251"
+  ],
+  "ranking": {
+   "delta": "arm pooled correct_overall minus B's, paired on the same role and seeds",
+   "guardrail_vetoes": {
+    "_veto_only": "usable_rollout never earns positive ranking credit; a candidate can only be removed for being materially less usable than the incumbent",
+    "per_seed_usable_delta_min": -0.1,
+    "pooled_usable_delta_min": -0.05
+   },
+   "pooling": "seed mean over the preregistered screening seeds",
+   "selection": "exactly one surviving candidate advances (advance_one); if every candidate is vetoed, NONE advances and the rung says so -- no forced winner",
+   "tie_break": "frozen quality position, then state id -- both fixed before any behavioural datum existed"
+  }
+ },
+ "seeds": {
+  "_excluded_because": "sa/sb/sc selected the incumbent B (C0), and C1's three materialized confirmation seeds measured B's standing result; a rung that reused either would compare a fresh candidate against the incumbent on the incumbent's own seeds.",
+  "confirmation": [
+   396880939,
+   766527341,
+   1004399678
+  ],
+  "derivation_rule": "H_i = SHA256(design_hash + ':phase-d1:<rung>-seed:' + decimal(i)); seed_i = uint32_be(H_i[0:4]) mod 2**31, advancing past collisions with the exclusion set, earlier draws of the rung, and (for confirmation) every screening seed. The base is the design_hash bound above, so the values are fixed by a document that predates every D1 behavioural result.",
+  "excluded": [
+   20260726,
+   20260801,
+   20260813,
+   696460635,
+   1635674081,
+   1656475568
+  ],
+  "owner": "stages.phase_d1.behavioural.derive_seeds",
+  "screening": [
+   614923639,
+   516448251
+  ]
+ },
+ "stage_id": "1"
+}

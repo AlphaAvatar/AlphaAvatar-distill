@@ -44,13 +44,14 @@
     "d1_confirmation_battery": "AVAILABLE",
     "original_c1_pool_capacity": "EXHAUSTED, HISTORICAL ONLY",
     "d1_evidence_blocker": "CLOSED",
-    "d1_screening": "PAUSED — no open blocker, no outstanding one-use authorization, no active run; the gate is the maintainer decision in logs/state/current.json :: next",
+    "d1_screening": "CLOSED — CLOSED -- MAINTAINER SELECTED D1 + scored_v1 AS FORWARD BASELINE (logs/stages/stage-1/families/d_series/closeout/programme_closeout.json)",
     "_owners": {
       "family_status": "logs/stages/stage-1/families/d_series/current.json",
       "battery_roles": "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
       "pool_capacity": "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json (record_role: historical_analysis; superseded for readiness by the family manifest)",
       "blockers": "d1_session.open_blockers()",
-      "pause": "logs/state/current.json :: next"
+      "pause": "logs/state/current.json :: next",
+      "programme": "logs/stages/stage-1/families/d_series/closeout/programme_closeout.json"
     }
   },
   "gates": {
@@ -58,11 +59,20 @@
     "formal_funding": "priced in the frozen design (logs/stages/stage-1/phase_d1/plans/d1_design.json :: pricing); the budget terms live with the C1 grant the design cites",
     "one_use_execution_authorization": "none outstanding — a chain is built fresh per attempt and consumed by it (P12.1)",
     "open_scientific_blockers": [],
-    "maintainer_pause": "D-series execution readiness, on a FRESH branch from the integrated main (P12.2: the squash commit is not an ancestor of the old branch). D1 stays PAUSED before behavioural screening pending that readiness process: no execution grant, no screening authorization, no resource."
+    "maintainer_pause": "Stage-0 calibration data-volume and mixture experiments with the forward baseline, to be designed and authorized in new conversations. NOT authorized. Handoff: docs/shared/STAGE0_HANDOFF.md."
   },
   "runs": {
     "root": "logs/stages/stage-1/phase_d1/runs",
     "all": [
+      "d1_behavioural_20261010_082900",
+      "d1_behavioural_20261010_090343",
+      "d1_behavioural_20261010_103442",
+      "d1_behavioural_20261010_132919",
+      "d1_behavioural_20261010_200001",
+      "d1_behavioural_20261011_083610",
+      "d1_behavioural_20261011_114853",
+      "d1_behavioural_20261011_135910",
+      "d1_behavioural_20261012_064341",
       "d1_replay_001",
       "d1_replay_002",
       "d1_search_20261005_173304",
@@ -74,13 +84,22 @@
       "runner_iface"
     ],
     "with_closeout": [
+      "d1_behavioural_20261010_082900",
+      "d1_behavioural_20261010_090343",
+      "d1_behavioural_20261010_103442",
+      "d1_behavioural_20261010_132919",
+      "d1_behavioural_20261010_200001",
+      "d1_behavioural_20261011_083610",
+      "d1_behavioural_20261011_114853",
+      "d1_behavioural_20261011_135910",
+      "d1_behavioural_20261012_064341",
       "d1_search_20261006_055409",
       "d1_search_20261006_101725",
       "d1_search_20261006_210210"
     ]
   },
   "active_run": null,
-  "next_scientific_action": "D-series execution readiness, on a FRESH branch from the integrated main (P12.2: the squash commit is not an ancestor of the old branch). D1 stays PAUSED before behavioural screening pending that readiness process: no execution grant, no screening authorization, no resource.",
+  "next_scientific_action": "Stage-0 calibration data-volume and mixture experiments with the forward baseline, to be designed and authorized in new conversations. NOT authorized. Handoff: docs/shared/STAGE0_HANDOFF.md.",
   "_next_owner": "logs/state/current.json :: next",
   "authorizes": "nothing"
 }

@@ -1,0 +1,888 @@
+{
+  "schema": "aadistill.phase_d1.behavioural_session/v1",
+  "run_id": "d1_behavioural_20261012_064341",
+  "rung": "confirmation",
+  "started_utc": "2026-10-12T06:50:23+00:00",
+  "status": "COMPLETE",
+  "probes": [
+    {
+      "probe_id": "d1_confirmation_q2_s396880939",
+      "arm": "q2",
+      "seed": 396880939,
+      "index": 0,
+      "trained": true,
+      "scored": true,
+      "config": "artifacts/audit/autoinit_d1_behavioural/configs/d1_confirmation_q2_s396880939.json",
+      "device_handoff": "0.01 GiB allocated and 0.02 GiB reserved after the release; the pre-release figure was allocator reservation, not a model leak",
+      "train_seconds": 3684.8,
+      "train_rc": 0,
+      "model_dir": "/workspace/aad/artifacts/stages/stage-3/d1_behavioural/d1_confirmation_q2_s396880939/checkpoints/step_001023/model",
+      "trained_sha256": "1f46be0949d67c008209ba8f4614be63643bf84d9dea4589927d7e294bb0c3dd",
+      "trained_bytes": 2384234968,
+      "package_dir": "/workspace/aad/artifacts/stages/stage-3/d1_behavioural_eval/d1_confirmation_q2_s396880939",
+      "generate_seconds": 1384.0,
+      "generate_rc": 0,
+      "generation_admission": {
+        "comparable": true,
+        "generation_fingerprint": "ceac09472e33432abe0230ac49579db3ddd51e3856cfc02abf8433f7eb9b7f75",
+        "evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73"
+      },
+      "result": "artifacts/audit/autoinit_d1_behavioural/results/d1_confirmation_q2_s396880939.json",
+      "correct_overall": 0.0353,
+      "usable_rollout_rate": 0.6958,
+      "n": 950,
+      "n_scorable": 850,
+      "result_sha256": "d7bd0500a4e0e8b917b441d3a4f7db6d8a950dba913449cdacc3419a9682aee6",
+      "workdir_released": true
+    },
+    {
+      "probe_id": "d1_confirmation_q2_s766527341",
+      "arm": "q2",
+      "seed": 766527341,
+      "index": 1,
+      "trained": true,
+      "scored": true,
+      "config": "artifacts/audit/autoinit_d1_behavioural/configs/d1_confirmation_q2_s766527341.json",
+      "device_handoff": "0.01 GiB allocated and 0.02 GiB reserved after the release; the pre-release figure was allocator reservation, not a model leak",
+      "train_seconds": 3682.6,
+      "train_rc": 0,
+      "model_dir": "/workspace/aad/artifacts/stages/stage-3/d1_behavioural/d1_confirmation_q2_s766527341/checkpoints/step_001023/model",
+      "trained_sha256": "6ac63a97422e69a0cb2d34c97ed3f71e050854f72dec44ae1c30df3c416cf4ed",
+      "trained_bytes": 2384234968,
+      "package_dir": "/workspace/aad/artifacts/stages/stage-3/d1_behavioural_eval/d1_confirmation_q2_s766527341",
+      "generate_seconds": 1209.9,
+      "generate_rc": 0,
+      "generation_admission": {
+        "comparable": true,
+        "generation_fingerprint": "ceac09472e33432abe0230ac49579db3ddd51e3856cfc02abf8433f7eb9b7f75",
+        "evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73"
+      },
+      "result": "artifacts/audit/autoinit_d1_behavioural/results/d1_confirmation_q2_s766527341.json",
+      "correct_overall": 0.0576,
+      "usable_rollout_rate": 0.7137,
+      "n": 950,
+      "n_scorable": 850,
+      "result_sha256": "a23af66d70b32d3e272253c09cd6c3478a4a079866c274311465902b7f3f3a44",
+      "workdir_released": true
+    },
+    {
+      "probe_id": "d1_confirmation_q2_s1004399678",
+      "arm": "q2",
+      "seed": 1004399678,
+      "index": 2,
+      "trained": true,
+      "scored": true,
+      "config": "artifacts/audit/autoinit_d1_behavioural/configs/d1_confirmation_q2_s1004399678.json",
+      "device_handoff": "0.01 GiB allocated and 0.02 GiB reserved after the release; the pre-release figure was allocator reservation, not a model leak",
+      "train_seconds": 3676.6,
+      "train_rc": 0,
+      "model_dir": "/workspace/aad/artifacts/stages/stage-3/d1_behavioural/d1_confirmation_q2_s1004399678/checkpoints/step_001023/model",
+      "trained_sha256": "5bbe8c0a0af654a0db5a0980aa5cdc1946f0b08fed6888421fdde364ece1baff",
+      "trained_bytes": 2384234968,
+      "package_dir": "/workspace/aad/artifacts/stages/stage-3/d1_behavioural_eval/d1_confirmation_q2_s1004399678",
+      "generate_seconds": 1208.7,
+      "generate_rc": 0,
+      "generation_admission": {
+        "comparable": true,
+        "generation_fingerprint": "ceac09472e33432abe0230ac49579db3ddd51e3856cfc02abf8433f7eb9b7f75",
+        "evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73"
+      },
+      "result": "artifacts/audit/autoinit_d1_behavioural/results/d1_confirmation_q2_s1004399678.json",
+      "correct_overall": 0.0271,
+      "usable_rollout_rate": 0.6579,
+      "n": 950,
+      "n_scorable": 850,
+      "result_sha256": "aabefd1da08226b776cb9af50546bcddc38db4c10f095e04fddfe088829fc4f9",
+      "workdir_released": true
+    },
+    {
+      "probe_id": "d1_confirmation_B_s396880939",
+      "arm": "B",
+      "seed": 396880939,
+      "index": 3,
+      "trained": true,
+      "scored": true,
+      "config": "artifacts/audit/autoinit_d1_behavioural/configs/d1_confirmation_B_s396880939.json",
+      "device_handoff": "0.01 GiB allocated and 0.02 GiB reserved after the release; the pre-release figure was allocator reservation, not a model leak",
+      "train_seconds": 3688.4,
+      "train_rc": 0,
+      "model_dir": "/workspace/aad/artifacts/stages/stage-3/d1_behavioural/d1_confirmation_B_s396880939/checkpoints/step_001023/model",
+      "trained_sha256": "bd6ac2cbae400fcddd75f00663b56f3ecdc5cf185d68c8ddc458d04f10c21891",
+      "trained_bytes": 2384234968,
+      "package_dir": "/workspace/aad/artifacts/stages/stage-3/d1_behavioural_eval/d1_confirmation_B_s396880939",
+      "generate_seconds": 1584.9,
+      "generate_rc": 0,
+      "generation_admission": {
+        "comparable": true,
+        "generation_fingerprint": "ceac09472e33432abe0230ac49579db3ddd51e3856cfc02abf8433f7eb9b7f75",
+        "evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73"
+      },
+      "result": "artifacts/audit/autoinit_d1_behavioural/results/d1_confirmation_B_s396880939.json",
+      "correct_overall": 0.0424,
+      "usable_rollout_rate": 0.6147,
+      "n": 950,
+      "n_scorable": 850,
+      "result_sha256": "7a19a94ba876e6bde3e2e03ed431e038d401dcee5ae0df745b3a2f9b42292b9f",
+      "workdir_released": true
+    },
+    {
+      "probe_id": "d1_confirmation_B_s766527341",
+      "arm": "B",
+      "seed": 766527341,
+      "index": 4,
+      "trained": true,
+      "scored": true,
+      "config": "artifacts/audit/autoinit_d1_behavioural/configs/d1_confirmation_B_s766527341.json",
+      "device_handoff": "0.01 GiB allocated and 0.02 GiB reserved after the release; the pre-release figure was allocator reservation, not a model leak",
+      "train_seconds": 3684.8,
+      "train_rc": 0,
+      "model_dir": "/workspace/aad/artifacts/stages/stage-3/d1_behavioural/d1_confirmation_B_s766527341/checkpoints/step_001023/model",
+      "trained_sha256": "0e0d08d7af6f288e6ea5e96778c011fddb18dd0532dc7314341490d124ec08ec",
+      "trained_bytes": 2384234968,
+      "package_dir": "/workspace/aad/artifacts/stages/stage-3/d1_behavioural_eval/d1_confirmation_B_s766527341",
+      "generate_seconds": 1445.8,
+      "generate_rc": 0,
+      "generation_admission": {
+        "comparable": true,
+        "generation_fingerprint": "ceac09472e33432abe0230ac49579db3ddd51e3856cfc02abf8433f7eb9b7f75",
+        "evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73"
+      },
+      "result": "artifacts/audit/autoinit_d1_behavioural/results/d1_confirmation_B_s766527341.json",
+      "correct_overall": 0.0471,
+      "usable_rollout_rate": 0.6,
+      "n": 950,
+      "n_scorable": 850,
+      "result_sha256": "a99e32f2e870296ddb2ed85956101d8a4536742f271096d20f0f149e8de352e1"
+    },
+    {
+      "probe_id": "d1_confirmation_B_s1004399678",
+      "arm": "B",
+      "seed": 1004399678,
+      "index": 5,
+      "trained": true,
+      "scored": true,
+      "config": "artifacts/audit/autoinit_d1_behavioural/configs/d1_confirmation_B_s1004399678.json",
+      "device_handoff": "0.01 GiB allocated and 0.02 GiB reserved after the release; the pre-release figure was allocator reservation, not a model leak",
+      "train_seconds": 3682.2,
+      "train_rc": 0,
+      "model_dir": "/workspace/aad/artifacts/stages/stage-3/d1_behavioural/d1_confirmation_B_s1004399678/checkpoints/step_001023/model",
+      "trained_sha256": "3a33d94ee8fa71c765b65daabd7fdf731d8fe490412e8f5491feb905f8784ff4",
+      "trained_bytes": 2384234968,
+      "package_dir": "/workspace/aad/artifacts/stages/stage-3/d1_behavioural_eval/d1_confirmation_B_s1004399678",
+      "generate_seconds": 1778.6,
+      "generate_rc": 0,
+      "generation_admission": {
+        "comparable": true,
+        "generation_fingerprint": "ceac09472e33432abe0230ac49579db3ddd51e3856cfc02abf8433f7eb9b7f75",
+        "evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73"
+      },
+      "result": "artifacts/audit/autoinit_d1_behavioural/results/d1_confirmation_B_s1004399678.json",
+      "correct_overall": 0.0318,
+      "usable_rollout_rate": 0.5674,
+      "n": 950,
+      "n_scorable": 850,
+      "result_sha256": "4077b7d30a2d30e1c149301e7e8b9da3267a732c20e380fc90dde39786131419"
+    }
+  ],
+  "cheap_preflight": {
+    "battery": {
+      "role": "d1_confirmation",
+      "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+      "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
+      "item_ids_sha256": "7d200ffe666add66721c3cb233f6f9b876825ee5277438669926e3633fe8547b",
+      "n_prompts": 950,
+      "n_scorable": 850
+    },
+    "roles_disjoint": true,
+    "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"
+  },
+  "arm_materialization": {
+    "schema": "aadistill.phase_d1.behavioural_arm_materialization/v1",
+    "rung": "confirmation",
+    "arm_root": "/workspace/aad_arms",
+    "device": "cuda",
+    "root_state": {
+      "schema": "aadistill.phase_d1.root_state_derivation/v1",
+      "candidate_set": [
+        "teacher_as_published",
+        "session_driver_use_cache_false"
+      ],
+      "derived_from": "the session driver's root loader and the one in-place config mutation a shipped operator performs; non-root parents reload from disk and cannot carry sibling state",
+      "chosen_candidate": "session_driver_use_cache_false",
+      "config_overrides": {
+        "use_cache": false
+      },
+      "evidence": [
+        {
+          "candidate": "teacher_as_published",
+          "overrides": {},
+          "explains_every_step_0": false,
+          "steps": [
+            {
+              "state_id": "6d6006a0f66c94a331a5747b228179ec",
+              "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+              "impl_id": "ffn.activation_importance_v0",
+              "recorded_config_sha256": "94ecfd1cee0fbb64ad9313de67eeefc0cd96358cf68ac186e2f31cfa0147bd2d",
+              "reconstructed_config_sha256": "d39b2e9b0f33f4b2f1f23eef194c902ec580a8625695ae346d2146dea858a5fe",
+              "matches": false
+            }
+          ]
+        },
+        {
+          "candidate": "session_driver_use_cache_false",
+          "overrides": {
+            "use_cache": false
+          },
+          "explains_every_step_0": true,
+          "steps": [
+            {
+              "state_id": "6d6006a0f66c94a331a5747b228179ec",
+              "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+              "impl_id": "ffn.activation_importance_v0",
+              "recorded_config_sha256": "94ecfd1cee0fbb64ad9313de67eeefc0cd96358cf68ac186e2f31cfa0147bd2d",
+              "reconstructed_config_sha256": "94ecfd1cee0fbb64ad9313de67eeefc0cd96358cf68ac186e2f31cfa0147bd2d",
+              "matches": true
+            }
+          ]
+        }
+      ],
+      "lineage_verified": [
+        {
+          "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+          "index": 1,
+          "impl_id": "depth.causal_kl_greedy_v1",
+          "recorded_config_sha256": "2089b4a3e0e84a6ba28af766662433ec8da35bcea8354263a57cb4f5cd181ca4",
+          "reconstructed_config_sha256": "2089b4a3e0e84a6ba28af766662433ec8da35bcea8354263a57cb4f5cd181ca4",
+          "matches": true
+        },
+        {
+          "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+          "index": 2,
+          "impl_id": "width.global_pca_v0",
+          "recorded_config_sha256": "e01c73a6b0f796f1b5bc8bf867f8c2663b7bea6587cf4ec0e0b6e45eadedf591",
+          "reconstructed_config_sha256": "e01c73a6b0f796f1b5bc8bf867f8c2663b7bea6587cf4ec0e0b6e45eadedf591",
+          "matches": true
+        },
+        {
+          "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+          "index": 3,
+          "impl_id": "attention.activation_importance_v1",
+          "recorded_config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+          "reconstructed_config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+          "matches": true
+        }
+      ],
+      "_lineage_scope": "1 step-0 identities discriminate the candidate; 3 later identities confirm it explains the whole config lineage. WEIGHTS are not checked here -- that is what the digest-pinned replay on the GPU is for.",
+      "agreed_with_plan": true
+    },
+    "execution_agreement": {
+      "schema": "aadistill.phase_d1.execution_agreement/v1",
+      "n_steps": 4,
+      "all_match": true,
+      "using": {
+        "micro_batch_size": 3,
+        "calibration_batch_packing": "length_sorted_v1"
+      },
+      "owner": "stages.phase_d1.d1_session.execution",
+      "steps": [
+        {
+          "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+          "index": 0,
+          "impl_id": "ffn.activation_importance_v0",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+          "index": 1,
+          "impl_id": "depth.causal_kl_greedy_v1",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+          "index": 2,
+          "impl_id": "width.global_pca_v0",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+          "index": 3,
+          "impl_id": "attention.activation_importance_v1",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        }
+      ],
+      "_why_a_separate_check": "micro_batch_size and calibration_batch_packing are excluded from `config_hash` by design, because they do not change the estimand. They DO change which neurons a top-k keeps when the scores near the cutoff are dense, so a replay must carry them even though no identity does."
+    },
+    "arms": [
+      {
+        "arm": "q2",
+        "reused": false,
+        "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+        "spec_hash": "2221484a60c2313cc9f21608d62d0b9332c4f4c6c7458cf44e44cf6ad7345d36",
+        "intermediates_released": {
+          "arm": "afd50c9ff0e3d20542bb5473ea745b55",
+          "removed_steps": [
+            "ffn.activation_importance_v0",
+            "depth.causal_kl_greedy_v1",
+            "width.global_pca_v0"
+          ],
+          "freed_gib": 8.716,
+          "failed": [],
+          "kept": "/workspace/aad_arms/afd50c9ff0e3d20542bb5473ea745b55/steps/03_attention"
+        },
+        "seconds": 948.4,
+        "checkpoint_path": "/workspace/aad_arms/afd50c9ff0e3d20542bb5473ea745b55/steps/03_attention",
+        "identity": {
+          "expected": {
+            "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+            "weights_digest": "0597e60c1a7fac06930e3e84c8f5341b1f7eb9470fc30b16efbf02f37208fdef",
+            "single_shard_sha256": "ca2d7368e3adce3e167a4376dcab425902530e7a77106146d336d676d2370c5d",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          },
+          "actual": {
+            "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+            "weights_digest": "0597e60c1a7fac06930e3e84c8f5341b1f7eb9470fc30b16efbf02f37208fdef",
+            "single_shard_sha256": "ca2d7368e3adce3e167a4376dcab425902530e7a77106146d336d676d2370c5d",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          },
+          "differ": []
+        },
+        "adopted": true
+      },
+      {
+        "reused": false,
+        "arm": "B",
+        "spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+        "construction": {
+          "path_id": "autoinit.v1.phase_c1.treatment",
+          "path_label": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+          "spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+          "expected_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+          "steps": [
+            {
+              "impl_id": "depth.causal_kl_greedy_v1",
+              "profile_id": "calib.domain_balanced@v1",
+              "expected_artifact_digest": null,
+              "label": ""
+            },
+            {
+              "impl_id": "ffn.activation_importance_v0",
+              "profile_id": "calib.domain_balanced@v1",
+              "expected_artifact_digest": null,
+              "label": ""
+            },
+            {
+              "impl_id": "width.global_pca_v0",
+              "profile_id": "calib.reasoning_heavy@v2",
+              "expected_artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+              "label": "pre-ATTENTION parent b8820f41d062"
+            },
+            {
+              "impl_id": "attention.activation_importance_v1",
+              "profile_id": "calib.domain_balanced@v1",
+              "expected_artifact_digest": null,
+              "label": "treatment ATTENTION"
+            }
+          ],
+          "verified": true
+        },
+        "execution": {
+          "micro_batch_size": 1,
+          "calibration_batch_packing": "original_order_v1"
+        },
+        "intermediates_released": {
+          "arm": "B",
+          "removed_steps": [
+            "depth.causal_kl_greedy_v1",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ],
+          "freed_gib": 10.64,
+          "failed": [],
+          "kept": "/workspace/aad_arms/B/steps/03_attention"
+        },
+        "seconds": 1279.8,
+        "checkpoint_path": "/workspace/aad_arms/B/steps/03_attention",
+        "identity": {
+          "verified": [
+            "arch_signature",
+            "artifact_digest",
+            "single_shard_sha256",
+            "weights_digest"
+          ],
+          "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+          "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+          "single_shard_sha256": "b24f0b63afd3b99f14d34d4fc508abbb26f65421dc5784f3738bd9565608d010",
+          "weights_digest": "85c5c50de3cd7e5242097e05e6f09057d9b27ae98ec49050219e75a2f49e2335"
+        },
+        "adopted": true
+      }
+    ],
+    "build_order": [
+      "B",
+      "q2"
+    ],
+    "n_arms": 2
+  },
+  "contract": {
+    "schema": "aadistill.phase_d1.behavioural_contract/v1",
+    "rung": "confirmation",
+    "advancing_candidate": "q2",
+    "design_hash": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+    "recovery_recipe": {
+      "recipe_id": "e1_p1_kd_heavy@0.86M",
+      "declared_in_design": "E1_KD_HEAVY_0860K",
+      "tokens": 860000,
+      "pack": "artifacts/stage3/ladder_uniform_probe",
+      "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+      "ce_weight": 0.25,
+      "kd_weight": 1.0,
+      "temperature": 1.0,
+      "kd_scope": "all",
+      "block_len": 8192
+    },
+    "seeds": [
+      396880939,
+      766527341,
+      1004399678
+    ],
+    "n_probes": 6,
+    "n_probes_declared": 6,
+    "probes": [
+      {
+        "probe_id": "d1_confirmation_q2_s396880939",
+        "arm": "q2",
+        "seed": 396880939
+      },
+      {
+        "probe_id": "d1_confirmation_q2_s766527341",
+        "arm": "q2",
+        "seed": 766527341
+      },
+      {
+        "probe_id": "d1_confirmation_q2_s1004399678",
+        "arm": "q2",
+        "seed": 1004399678
+      },
+      {
+        "probe_id": "d1_confirmation_B_s396880939",
+        "arm": "B",
+        "seed": 396880939
+      },
+      {
+        "probe_id": "d1_confirmation_B_s766527341",
+        "arm": "B",
+        "seed": 766527341
+      },
+      {
+        "probe_id": "d1_confirmation_B_s1004399678",
+        "arm": "B",
+        "seed": 1004399678
+      }
+    ],
+    "arms": {
+      "n_arms": 5,
+      "arms": [
+        {
+          "arm": "q1",
+          "role": "candidate",
+          "quality_position": 1,
+          "state_id": "e5e3edb0477b25147de952153da8fc21",
+          "identities": {
+            "artifact_digest": "a7736a705b3ee76d8e008964163e0157f6dd50cdbce60cbd12423719e6745ff6",
+            "weights_digest": "fcc98b1c2bfd6ede83fb708ba2cd164fb41936e0a2674a8386448bbf3ab2466d",
+            "single_shard_sha256": "46fec7ddd33f27d01040165ef0df05fd956ff83035b7e049248b0165408ca00d",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          }
+        },
+        {
+          "arm": "q2",
+          "role": "candidate",
+          "quality_position": 2,
+          "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+          "identities": {
+            "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+            "weights_digest": "0597e60c1a7fac06930e3e84c8f5341b1f7eb9470fc30b16efbf02f37208fdef",
+            "single_shard_sha256": "ca2d7368e3adce3e167a4376dcab425902530e7a77106146d336d676d2370c5d",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          }
+        },
+        {
+          "arm": "q3",
+          "role": "candidate",
+          "quality_position": 3,
+          "state_id": "56388d47b6a71e1b49e44929e48d4061",
+          "identities": {
+            "artifact_digest": "9e04b4095713599c319a723c7f342005e484e38e5db4a5a7f08620fdd4cdb18a",
+            "weights_digest": "8ab8e46ecbe955e314699b4ceab379ff6a7f2e7440b5aa840f14588e913b7876",
+            "single_shard_sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          }
+        },
+        {
+          "arm": "q4",
+          "role": "candidate",
+          "quality_position": 4,
+          "state_id": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+          "identities": {
+            "artifact_digest": "253ebdee1f82265bbba700885387e1a411134ea12dc5850454c17fee15e34a4f",
+            "weights_digest": "4f055824408c50eeadddb700ebce56f61d14185b4d123954801ec1911486c892",
+            "single_shard_sha256": "973d40e93f784eed6e811c599c7585dc6bb03b8e5dd99f904fac8acceb36f005",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          }
+        },
+        {
+          "arm": "B",
+          "role": "incumbent",
+          "quality_position": null,
+          "state_id": null,
+          "identities": {
+            "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+            "weights_digest": "85c5c50de3cd7e5242097e05e6f09057d9b27ae98ec49050219e75a2f49e2335",
+            "single_shard_sha256": "b24f0b63afd3b99f14d34d4fc508abbb26f65421dc5784f3738bd9565608d010",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          }
+        }
+      ],
+      "_location_free": "paths are execution configuration and differ between the dev host and the pod; the identities bind the field either way"
+    },
+    "battery": {
+      "family_id": "d_series_behavioural_v1",
+      "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+      "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
+      "role": "d1_confirmation",
+      "item_ids_sha256": "7d200ffe666add66721c3cb233f6f9b876825ee5277438669926e3633fe8547b",
+      "n_prompts": 950,
+      "n_scorable": 850,
+      "per_stratum": {
+        "code": 100,
+        "gsm8k": 150,
+        "knowledge": 150,
+        "math_verified": 150,
+        "multihop": 150,
+        "rag": 150,
+        "tool": 100
+      },
+      "root": "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1/d1_confirmation",
+      "files": [
+        {
+          "path": "d1_confirmation/code.jsonl",
+          "sha256": "f551de3d96eb3ee7edfa7f57b777786f1b2cff0ab321082aa25c24bd8ef5569c",
+          "n_items": 100
+        },
+        {
+          "path": "d1_confirmation/gsm8k.jsonl",
+          "sha256": "ba3be0eef00cdc1ecc02662ba0e57f37cef94710c5e86803673fc4105cc41459",
+          "n_items": 150
+        },
+        {
+          "path": "d1_confirmation/knowledge.jsonl",
+          "sha256": "df3999c8ed92a41d81d9b243a435fb0f06792f41d2495e12b5ec0e39c3ac01fc",
+          "n_items": 150
+        },
+        {
+          "path": "d1_confirmation/math_verified.jsonl",
+          "sha256": "622e4b535a6ced8c94a845fc9d5cad0b5239ca3e2865920e0e2647118aeac162",
+          "n_items": 150
+        },
+        {
+          "path": "d1_confirmation/multihop.jsonl",
+          "sha256": "5bcda4212f1aba2d663dc4db3441e5cb2c56ea8bceae91cae2382fac4540614a",
+          "n_items": 150
+        },
+        {
+          "path": "d1_confirmation/rag.jsonl",
+          "sha256": "85fdcfed5c345fc393c223bb1922af52860259d7f9a882c7471ab551b5bb09de",
+          "n_items": 150
+        },
+        {
+          "path": "d1_confirmation/tool.jsonl",
+          "sha256": "af99595882a9c8e2632e176a881f4bc81cb0d008039db4b5026c5bf8896df12a",
+          "n_items": 100
+        }
+      ],
+      "_capacity_blocker": "CLOSED",
+      "_not_the_exhausted_pool": "`d1_evidence_capacity.json` reports batteries_remaining 0 for the ORIGINAL C1 source populations, binding on MATH-500. This role was drawn from prospectively widened sources preserving the frozen stratum balance exactly, and the family's own record carries capacity_source_blocker CLOSED."
+    },
+    "roles_disjoint": {
+      "disjoint": true,
+      "per_stratum_screening_ids": {
+        "code": 100,
+        "gsm8k": 150,
+        "knowledge": 150,
+        "math_verified": 150,
+        "multihop": 150,
+        "rag": 150,
+        "tool": 100
+      }
+    },
+    "endpoint": "correct_overall",
+    "estimand": "prompt-mean of the seed-mean paired difference (candidate - B) over the three fixed confirmation seeds",
+    "inference": "stratified PROMPT-cluster bootstrap, seeds as fixed blocks; the interval is conditional on those three seed pairs and is not a seed-population claim",
+    "guardrails": "usable_rollout vetoes only, reported with every component and never positive ranking credit",
+    "rule": "three-way GO / NO-GO / INCONCLUSIVE, no forced winner",
+    "sesoi": 0.01,
+    "_sesoi_is_carried_forward_not_remeasured": "0.010 is C0's, and D-series absolute scores are not directly interchangeable with the historical C1 absolute scores because three capacity-limited strata draw from wider populations. The SESOI is carried forward as an explicit assumption about the within-family PAIRED difference, which is what this rung estimates: both arms are measured on the same role under the same protocol.",
+    "_decides_nothing": "this contract is derived from frozen records. The candidate field is the retention decision's, the recipe and seed counts are the design's, the battery is the realized family's, and the endpoint and SESOI are C0's."
+  },
+  "contract_hash": "8536ecb6618d7800270fe6e50c9b7f5338a580032a410eaf3bb0dfa81c181fcd",
+  "arm_verification": {
+    "n_arms": 2,
+    "arms": [
+      {
+        "arm": "q2",
+        "role": "candidate",
+        "obtained_by": "secured bytes on this host, hashed here",
+        "quality_position": 2,
+        "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+        "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+        "identities_checked": [
+          "arch_signature",
+          "artifact_digest",
+          "single_shard_sha256",
+          "weights_digest"
+        ],
+        "checkpoint_dir": "/workspace/aad_arms/afd50c9ff0e3d20542bb5473ea745b55/steps/03_attention",
+        "num_parameters": 596049920
+      },
+      {
+        "arm": "B",
+        "role": "incumbent",
+        "obtained_by": "secured bytes on this host, hashed here",
+        "quality_position": null,
+        "state_id": null,
+        "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+        "identities_checked": [
+          "arch_signature",
+          "artifact_digest",
+          "single_shard_sha256",
+          "weights_digest"
+        ],
+        "checkpoint_dir": "/workspace/aad_arms/B/steps/03_attention",
+        "num_parameters": 596049920
+      }
+    ]
+  },
+  "authorization": {
+    "path": "/workspace/aad/logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/governance/authorization.json",
+    "authorization_id": "autoinit.v1.phase_d1_behavioural_confirmation",
+    "rung": "confirmation",
+    "contract_hash": "8536ecb6618d7800270fe6e50c9b7f5338a580032a410eaf3bb0dfa81c181fcd"
+  },
+  "schedule": [
+    "d1_confirmation_q2_s396880939",
+    "d1_confirmation_q2_s766527341",
+    "d1_confirmation_q2_s1004399678",
+    "d1_confirmation_B_s396880939",
+    "d1_confirmation_B_s766527341",
+    "d1_confirmation_B_s1004399678"
+  ],
+  "scoring_contract": {
+    "contract": "c1_confirmation_scoring@v1",
+    "digest": "812d3361ac6dc13661bdec09db74f6a2cacf696ae7dc037bcdedb1264fb67139"
+  },
+  "probe_workdirs_released": [
+    {
+      "released": [],
+      "failed": [],
+      "kept": [],
+      "freed_gib": 0.0
+    },
+    {
+      "released": [],
+      "failed": [],
+      "kept": [
+        "d1_confirmation_q2_s396880939"
+      ],
+      "freed_gib": 0.0
+    },
+    {
+      "released": [
+        "d1_confirmation_q2_s396880939"
+      ],
+      "failed": [],
+      "kept": [
+        "d1_confirmation_q2_s766527341"
+      ],
+      "freed_gib": 7.734
+    },
+    {
+      "released": [
+        "d1_confirmation_q2_s766527341"
+      ],
+      "failed": [],
+      "kept": [
+        "d1_confirmation_q2_s1004399678"
+      ],
+      "freed_gib": 7.734
+    },
+    {
+      "released": [
+        "d1_confirmation_q2_s1004399678"
+      ],
+      "failed": [],
+      "kept": [
+        "d1_confirmation_B_s396880939"
+      ],
+      "freed_gib": 7.734
+    },
+    {
+      "released": [
+        "d1_confirmation_B_s396880939"
+      ],
+      "failed": [],
+      "kept": [
+        "d1_confirmation_B_s766527341"
+      ],
+      "freed_gib": 7.734
+    }
+  ],
+  "probe_headroom": [
+    {
+      "probe": "d1_confirmation_q2_s396880939",
+      "free_gib": 66.11,
+      "need_gib": 15.545,
+      "transient_bytes": 9536798720,
+      "retained_bytes": 4769999360,
+      "package_bytes": 2384999680,
+      "need_bytes": 16691797760,
+      "checkpoint": {
+        "num_parameters": 596049920,
+        "save_dtype": "float32",
+        "bytes_per_parameter": 4,
+        "extra_bytes": 800000,
+        "bytes": 2384999680,
+        "gib": 2.221
+      },
+      "keep_last": 1
+    },
+    {
+      "probe": "d1_confirmation_q2_s766527341",
+      "free_gib": 60.459,
+      "need_gib": 15.545,
+      "transient_bytes": 9536798720,
+      "retained_bytes": 4769999360,
+      "package_bytes": 2384999680,
+      "need_bytes": 16691797760,
+      "checkpoint": {
+        "num_parameters": 596049920,
+        "save_dtype": "float32",
+        "bytes_per_parameter": 4,
+        "extra_bytes": 800000,
+        "bytes": 2384999680,
+        "gib": 2.221
+      },
+      "keep_last": 1
+    },
+    {
+      "probe": "d1_confirmation_q2_s1004399678",
+      "free_gib": 60.412,
+      "need_gib": 15.545,
+      "transient_bytes": 9536798720,
+      "retained_bytes": 4769999360,
+      "package_bytes": 2384999680,
+      "need_bytes": 16691797760,
+      "checkpoint": {
+        "num_parameters": 596049920,
+        "save_dtype": "float32",
+        "bytes_per_parameter": 4,
+        "extra_bytes": 800000,
+        "bytes": 2384999680,
+        "gib": 2.221
+      },
+      "keep_last": 1
+    },
+    {
+      "probe": "d1_confirmation_B_s396880939",
+      "free_gib": 60.364,
+      "need_gib": 15.545,
+      "transient_bytes": 9536798720,
+      "retained_bytes": 4769999360,
+      "package_bytes": 2384999680,
+      "need_bytes": 16691797760,
+      "checkpoint": {
+        "num_parameters": 596049920,
+        "save_dtype": "float32",
+        "bytes_per_parameter": 4,
+        "extra_bytes": 800000,
+        "bytes": 2384999680,
+        "gib": 2.221
+      },
+      "keep_last": 1
+    },
+    {
+      "probe": "d1_confirmation_B_s766527341",
+      "free_gib": 58.085,
+      "need_gib": 15.545,
+      "transient_bytes": 9536798720,
+      "retained_bytes": 4769999360,
+      "package_bytes": 2384999680,
+      "need_bytes": 16691797760,
+      "checkpoint": {
+        "num_parameters": 596049920,
+        "save_dtype": "float32",
+        "bytes_per_parameter": 4,
+        "extra_bytes": 800000,
+        "bytes": 2384999680,
+        "gib": 2.221
+      },
+      "keep_last": 1
+    },
+    {
+      "probe": "d1_confirmation_B_s1004399678",
+      "free_gib": 58.038,
+      "need_gib": 15.545,
+      "transient_bytes": 9536798720,
+      "retained_bytes": 4769999360,
+      "package_bytes": 2384999680,
+      "need_bytes": 16691797760,
+      "checkpoint": {
+        "num_parameters": 596049920,
+        "save_dtype": "float32",
+        "bytes_per_parameter": 4,
+        "extra_bytes": 800000,
+        "bytes": 2384999680,
+        "gib": 2.221
+      },
+      "keep_last": 1
+    }
+  ],
+  "attested_evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73",
+  "_verdict": "NOT COMPUTED HERE, deliberately. The confirmation verdict is derived off-pod at $0 from the secured per-sample rows under the frozen decision rule; this session's product is the six probes' evidence.",
+  "ended_utc": "2026-10-12T16:02:31+00:00"
+}

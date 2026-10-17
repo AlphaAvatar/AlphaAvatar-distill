@@ -1,0 +1,673 @@
+{
+  "schema": "aadistill.phase_d1.screening_result/v1",
+  "created_utc": "2026-10-11T22:45:50.491852+00:00",
+  "command": "/workspace/aad/scripts/stages/stage-1/phase_d1/score_d1_screening.py --generations /workspace/aad/artifacts/audit/autoinit_d1_behavioural/generations/d1_screening_q3_s614923639 --label d1_screening_q3_s614923639 --seed 614923639 --out /workspace/aad/artifacts/audit/autoinit_d1_behavioural/results/d1_screening_q3_s614923639.json --per-sample /workspace/aad/artifacts/audit/autoinit_d1_behavioural/per_sample/d1_screening_q3_s614923639.jsonl --screening-arm q3 --init-digest 9e04b4095713599c319a723c7f342005e484e38e5db4a5a7f08620fdd4cdb18a --trained-run /workspace/aad/artifacts/stages/stage-3/d1_behavioural/d1_screening_q3_s614923639/run_completion.json --generation-fingerprint ceac09472e33432abe0230ac49579db3ddd51e3856cfc02abf8433f7eb9b7f75",
+  "label": "d1_screening_q3_s614923639",
+  "seed": 614923639,
+  "arm": null,
+  "initialization_artifact_digest": "9e04b4095713599c319a723c7f342005e484e38e5db4a5a7f08620fdd4cdb18a",
+  "trained_run": {
+    "run_completion": "/workspace/aad/artifacts/stages/stage-3/d1_behavioural/d1_screening_q3_s614923639/run_completion.json",
+    "run_completion_sha256": "dd38df8ecdbe1fb3db76195a48dc7e414ed68a0dd2e18c2490e8a135dabb2181",
+    "final_step": 1023,
+    "config_sha256": "67f4743c1bc1859bfcc1a0871024b608b124edbc9d941e56c484bb019e1c9f4e"
+  },
+  "battery": {
+    "family_id": "d_series_behavioural_v1",
+    "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+    "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
+    "role": "d1_screening",
+    "item_ids_sha256": "d7b95cddd0b889c62485b542aab224e998d0bafacb74ee6fc30fa13f93e8ac53",
+    "n_prompts": 950,
+    "n_scorable": 850,
+    "per_stratum": {
+      "code": 100,
+      "gsm8k": 150,
+      "knowledge": 150,
+      "math_verified": 150,
+      "multihop": 150,
+      "rag": 150,
+      "tool": 100
+    },
+    "files": [
+      {
+        "path": "d1_screening/code.jsonl",
+        "sha256": "c8b21743f2bf6048fa98ddc394f919f2a63f430fd056afe209e3a85edfbe3fa1",
+        "n_items": 100
+      },
+      {
+        "path": "d1_screening/gsm8k.jsonl",
+        "sha256": "c1fc5fe39b824d28a627adf92ed5589272e6052055879e11ef4e23896aad37f5",
+        "n_items": 150
+      },
+      {
+        "path": "d1_screening/knowledge.jsonl",
+        "sha256": "e82949b0fd49c890cd9aac113ca0ad4e639fbdab5c5e3658b5b9cc2e3947b69c",
+        "n_items": 150
+      },
+      {
+        "path": "d1_screening/math_verified.jsonl",
+        "sha256": "2d7c38a8ad6deaee0d3e1d8db2e10f07824a7db15d136905fc8b47898be627ba",
+        "n_items": 150
+      },
+      {
+        "path": "d1_screening/multihop.jsonl",
+        "sha256": "038b4a7f2635a508c9e07fb3b632167297cfb16f1635265bab974143895e5a2b",
+        "n_items": 150
+      },
+      {
+        "path": "d1_screening/rag.jsonl",
+        "sha256": "cbd5cd94666992c39dacedb654214a1f8d630c0512c5cc44a43593c9006bf8f4",
+        "n_items": 150
+      },
+      {
+        "path": "d1_screening/tool.jsonl",
+        "sha256": "c4b713de5c9893155db6850ca524bd52dba46095902a5da1b3d228c7d1557a71",
+        "n_items": 100
+      }
+    ],
+    "may_not": [
+      "be read as a confirmation result or as evidence that may promote. This is a RANKING input measured on the screening role, on seeds disjoint from the confirmation seeds and prompts disjoint from the confirmation prompts. The screening estimate of the advancing candidate is inflated by the winner's curse; the design records the inflation and the confirmation rung is what estimates the effect."
+    ]
+  },
+  "scoring_contract": {
+    "contract": "c1_confirmation_scoring@v1",
+    "contract_id": "c1_confirmation_scoring",
+    "version": 1,
+    "digest": "ab418881e4c8867f0552da138488d263e73f0ba55ad169422b25365322953247",
+    "files": [
+      {
+        "path": "scripts/shared/evaluation/audit_tool_scoring.py",
+        "sha256": "8bea5061bc158679bea122626f1c0fea1e4e206ff5dc672a01ae7b118c4169d1",
+        "bytes": 10295
+      },
+      {
+        "path": "scripts/shared/evaluation/score_recovery_search.py",
+        "sha256": "8bb7a9d48d5e43eb7946c1e6eb8a480ad5b984e19888cb0ed925ed44abe75882",
+        "bytes": 22206
+      },
+      {
+        "path": "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py",
+        "sha256": "a30ff69ca85d9d78d963c0a6fa8596e9fcd3e0f9f385e0f03ca11ef9a31e4d06",
+        "bytes": 14995
+      },
+      {
+        "path": "scripts/stages/stage-1/phase_c1/scoring.py",
+        "sha256": "f147a9e6e97b28028813b4b1f8089ca117b9c05e6230989dfb24545aaf87c0c4",
+        "bytes": 12166
+      },
+      {
+        "path": "src/aadistill/data/tools.py",
+        "sha256": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+        "bytes": 6043
+      },
+      {
+        "path": "src/aadistill/data/verify.py",
+        "sha256": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+        "bytes": 7594
+      },
+      {
+        "path": "src/aadistill/evaluation/behavior.py",
+        "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+        "bytes": 19983
+      },
+      {
+        "path": "src/aadistill/evaluation/capability.py",
+        "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+        "bytes": 19568
+      },
+      {
+        "path": "src/aadistill/evaluation/strict_answer.py",
+        "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+        "bytes": 7628
+      },
+      {
+        "path": "src/aadistill/evaluation/usable_rollout.py",
+        "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+        "bytes": 6155
+      },
+      {
+        "path": "src/aadistill/initialization/planning/recovery.py",
+        "sha256": "1fcd5647e1c790107d0845529b2ef93cea9de87820a8d2ff971b298477bb0d8f",
+        "bytes": 111306
+      }
+    ],
+    "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
+    "semantic_parent": "recovery_search_scoring@v2",
+    "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+    "semantic_delta": "battery and result-schema binding only; correctness, usability, row composition, aggregation and capability semantics are the imported frozen implementations and are unchanged, which the historical numerical-equivalence gate demonstrates rather than asserts",
+    "closure_note": "wider than RECOVERY_SCORING_FILES_V2, which omits audit_tool_scoring.py, data/tools.py and data/verify.py although all three decide numbers. The historical contract is not rewritten; the hole is not repeated."
+  },
+  "generation_protocol_fingerprint": "ceac09472e33432abe0230ac49579db3ddd51e3856cfc02abf8433f7eb9b7f75",
+  "metric_contract": {
+    "contract": "c1_confirmation_scoring@v1",
+    "defined_by": "source, not the battery manifest",
+    "correct_overall": {
+      "numerator": "correct on scorable prompts",
+      "denominator": "n_scorable",
+      "denominator_value": 850
+    },
+    "usable_rollout_rate": {
+      "numerator": "usable on ALL prompts",
+      "denominator": "n",
+      "denominator_value": 950
+    },
+    "correct_given_usable": {
+      "numerator": "correct on scorable prompts",
+      "denominator": "usable_scorable",
+      "role": "diagnostic; never reorders"
+    },
+    "scorable_sets": [
+      "gsm8k",
+      "knowledge",
+      "math_verified",
+      "multihop",
+      "rag",
+      "tool"
+    ],
+    "behaviour_only_sets": [
+      "code"
+    ],
+    "correct_implies_usable": "by construction, via the frozen score_recovery_row contract",
+    "tool_usability": "generic usable_rollout AND tool_call_emitted AND tool_call_parsed AND tool_name_valid",
+    "capability_schema": "CAPABILITY_SCHEMA_V1 (six scorable capabilities)",
+    "no_weighted_scalar": "usable_rollout_rate and correct_overall are reported separately and are never combined; usable_rollout is blind to correctness by construction"
+  },
+  "tool_usable_gate": {
+    "definition": "generic usable_rollout AND tool_call_emitted AND tool_call_parsed AND tool_name_valid",
+    "excluded": {
+      "tool_args_schema_ok": "the xLAM `required` reconstruction is interpretive; kept diagnostic",
+      "tool_call_exact_match": "that is correctness; folding it in would collapse the two axes"
+    },
+    "multi_call": "the frozen scorer's own all-calls semantics; no second interpretation is defined here"
+  },
+  "missing_sets": [],
+  "row_contract": {
+    "n": 950,
+    "usable": 580,
+    "correct": 20,
+    "scorable": 850,
+    "correct_but_unusable": 0
+  },
+  "n": 950,
+  "usable": 580,
+  "correct": 20,
+  "n_scorable": 850,
+  "usable_scorable": 535,
+  "usable_rollout_rate": 0.6105,
+  "correct_overall": 0.0235,
+  "correct_given_usable": 0.0374,
+  "scorable": null,
+  "non_empty": 0.8368,
+  "natural_termination": 0.7905,
+  "no_severe_repetition": 0.7905,
+  "no_context_limit": 1.0,
+  "protocol_valid": 0.6326,
+  "first_failure": {
+    "non_empty": 155,
+    "protocol_valid": 146,
+    "natural_termination": 48,
+    "tool_not_structurally_executable": 21
+  },
+  "tool_structurally_executable": 0.73,
+  "tool_call_emitted": 0.94,
+  "tool_call_parsed": 0.81,
+  "tool_name_valid": 0.73,
+  "per_set": {
+    "code": {
+      "n": 100,
+      "usable": 45,
+      "correct": 0,
+      "n_scorable": 0,
+      "usable_scorable": 0,
+      "usable_rollout_rate": 0.45,
+      "correct_overall": null,
+      "correct_given_usable": null,
+      "scorable": false,
+      "non_empty": 0.65,
+      "natural_termination": 0.62,
+      "no_severe_repetition": 0.62,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.45,
+      "first_failure": {
+        "non_empty": 35,
+        "protocol_valid": 15,
+        "natural_termination": 5
+      },
+      "missing_generations": 0
+    },
+    "gsm8k": {
+      "n": 150,
+      "usable": 104,
+      "correct": 0,
+      "n_scorable": 150,
+      "usable_scorable": 104,
+      "usable_rollout_rate": 0.6933,
+      "correct_overall": 0.0,
+      "correct_given_usable": 0.0,
+      "scorable": true,
+      "non_empty": 0.7333,
+      "natural_termination": 0.7067,
+      "no_severe_repetition": 0.7067,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.6933,
+      "first_failure": {
+        "non_empty": 40,
+        "natural_termination": 4,
+        "protocol_valid": 2
+      },
+      "missing_generations": 0
+    },
+    "knowledge": {
+      "n": 150,
+      "usable": 30,
+      "correct": 1,
+      "n_scorable": 150,
+      "usable_scorable": 30,
+      "usable_rollout_rate": 0.2,
+      "correct_overall": 0.0067,
+      "correct_given_usable": 0.0333,
+      "scorable": true,
+      "non_empty": 0.9267,
+      "natural_termination": 0.7733,
+      "no_severe_repetition": 0.7733,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.2,
+      "first_failure": {
+        "protocol_valid": 84,
+        "natural_termination": 25,
+        "non_empty": 11
+      },
+      "missing_generations": 0
+    },
+    "math_verified": {
+      "n": 150,
+      "usable": 69,
+      "correct": 0,
+      "n_scorable": 150,
+      "usable_scorable": 69,
+      "usable_rollout_rate": 0.46,
+      "correct_overall": 0.0,
+      "correct_given_usable": 0.0,
+      "scorable": true,
+      "non_empty": 0.8133,
+      "natural_termination": 0.7333,
+      "no_severe_repetition": 0.7333,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.46,
+      "first_failure": {
+        "protocol_valid": 41,
+        "non_empty": 28,
+        "natural_termination": 12
+      },
+      "missing_generations": 0
+    },
+    "multihop": {
+      "n": 150,
+      "usable": 119,
+      "correct": 10,
+      "n_scorable": 150,
+      "usable_scorable": 119,
+      "usable_rollout_rate": 0.7933,
+      "correct_overall": 0.0667,
+      "correct_given_usable": 0.084,
+      "scorable": true,
+      "non_empty": 0.8,
+      "natural_termination": 0.8,
+      "no_severe_repetition": 0.8,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.7933,
+      "first_failure": {
+        "non_empty": 30,
+        "protocol_valid": 1
+      },
+      "missing_generations": 0
+    },
+    "rag": {
+      "n": 150,
+      "usable": 140,
+      "correct": 9,
+      "n_scorable": 150,
+      "usable_scorable": 140,
+      "usable_rollout_rate": 0.9333,
+      "correct_overall": 0.06,
+      "correct_given_usable": 0.0643,
+      "scorable": true,
+      "non_empty": 0.9467,
+      "natural_termination": 0.9467,
+      "no_severe_repetition": 0.9467,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.9333,
+      "first_failure": {
+        "non_empty": 8,
+        "protocol_valid": 2
+      },
+      "missing_generations": 0
+    },
+    "tool": {
+      "n": 100,
+      "usable": 73,
+      "correct": 0,
+      "n_scorable": 100,
+      "usable_scorable": 73,
+      "usable_rollout_rate": 0.73,
+      "correct_overall": 0.0,
+      "correct_given_usable": 0.0,
+      "scorable": true,
+      "non_empty": 0.97,
+      "natural_termination": 0.95,
+      "no_severe_repetition": 0.95,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.94,
+      "first_failure": {
+        "tool_not_structurally_executable": 21,
+        "non_empty": 3,
+        "natural_termination": 2,
+        "protocol_valid": 1
+      },
+      "tool_structurally_executable": 0.73,
+      "tool_call_emitted": 0.94,
+      "tool_call_parsed": 0.81,
+      "tool_name_valid": 0.73,
+      "missing_generations": 0
+    }
+  },
+  "per_domain": {
+    "code": {
+      "n": 100,
+      "usable": 45,
+      "correct": 0,
+      "n_scorable": 0,
+      "usable_scorable": 0,
+      "usable_rollout_rate": 0.45,
+      "correct_overall": null,
+      "correct_given_usable": null,
+      "scorable": null,
+      "non_empty": 0.65,
+      "natural_termination": 0.62,
+      "no_severe_repetition": 0.62,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.45,
+      "first_failure": {
+        "non_empty": 35,
+        "protocol_valid": 15,
+        "natural_termination": 5
+      }
+    },
+    "general": {
+      "n": 150,
+      "usable": 30,
+      "correct": 1,
+      "n_scorable": 150,
+      "usable_scorable": 30,
+      "usable_rollout_rate": 0.2,
+      "correct_overall": 0.0067,
+      "correct_given_usable": 0.0333,
+      "scorable": null,
+      "non_empty": 0.9267,
+      "natural_termination": 0.7733,
+      "no_severe_repetition": 0.7733,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.2,
+      "first_failure": {
+        "protocol_valid": 84,
+        "natural_termination": 25,
+        "non_empty": 11
+      }
+    },
+    "rag_multihop": {
+      "n": 300,
+      "usable": 259,
+      "correct": 19,
+      "n_scorable": 300,
+      "usable_scorable": 259,
+      "usable_rollout_rate": 0.8633,
+      "correct_overall": 0.0633,
+      "correct_given_usable": 0.0734,
+      "scorable": null,
+      "non_empty": 0.8733,
+      "natural_termination": 0.8733,
+      "no_severe_repetition": 0.8733,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.8633,
+      "first_failure": {
+        "non_empty": 38,
+        "protocol_valid": 3
+      }
+    },
+    "reasoning_math": {
+      "n": 300,
+      "usable": 173,
+      "correct": 0,
+      "n_scorable": 300,
+      "usable_scorable": 173,
+      "usable_rollout_rate": 0.5767,
+      "correct_overall": 0.0,
+      "correct_given_usable": 0.0,
+      "scorable": null,
+      "non_empty": 0.7733,
+      "natural_termination": 0.72,
+      "no_severe_repetition": 0.72,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.5767,
+      "first_failure": {
+        "non_empty": 68,
+        "protocol_valid": 43,
+        "natural_termination": 16
+      }
+    },
+    "tool": {
+      "n": 100,
+      "usable": 73,
+      "correct": 0,
+      "n_scorable": 100,
+      "usable_scorable": 73,
+      "usable_rollout_rate": 0.73,
+      "correct_overall": 0.0,
+      "correct_given_usable": 0.0,
+      "scorable": null,
+      "non_empty": 0.97,
+      "natural_termination": 0.95,
+      "no_severe_repetition": 0.95,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.94,
+      "first_failure": {
+        "tool_not_structurally_executable": 21,
+        "non_empty": 3,
+        "natural_termination": 2,
+        "protocol_valid": 1
+      },
+      "tool_structurally_executable": 0.73,
+      "tool_call_emitted": 0.94,
+      "tool_call_parsed": 0.81,
+      "tool_name_valid": 0.73
+    }
+  },
+  "per_capability": {
+    "gsm8k": {
+      "n": 150,
+      "usable": 104,
+      "correct": 0,
+      "n_scorable": 150,
+      "usable_scorable": 104,
+      "usable_rollout_rate": 0.6933,
+      "correct_overall": 0.0,
+      "correct_given_usable": 0.0,
+      "scorable": true,
+      "non_empty": 0.7333,
+      "natural_termination": 0.7067,
+      "no_severe_repetition": 0.7067,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.6933,
+      "first_failure": {
+        "non_empty": 40,
+        "natural_termination": 4,
+        "protocol_valid": 2
+      },
+      "missing_generations": 0
+    },
+    "math_verified": {
+      "n": 150,
+      "usable": 69,
+      "correct": 0,
+      "n_scorable": 150,
+      "usable_scorable": 69,
+      "usable_rollout_rate": 0.46,
+      "correct_overall": 0.0,
+      "correct_given_usable": 0.0,
+      "scorable": true,
+      "non_empty": 0.8133,
+      "natural_termination": 0.7333,
+      "no_severe_repetition": 0.7333,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.46,
+      "first_failure": {
+        "protocol_valid": 41,
+        "non_empty": 28,
+        "natural_termination": 12
+      },
+      "missing_generations": 0
+    },
+    "multihop": {
+      "n": 150,
+      "usable": 119,
+      "correct": 10,
+      "n_scorable": 150,
+      "usable_scorable": 119,
+      "usable_rollout_rate": 0.7933,
+      "correct_overall": 0.0667,
+      "correct_given_usable": 0.084,
+      "scorable": true,
+      "non_empty": 0.8,
+      "natural_termination": 0.8,
+      "no_severe_repetition": 0.8,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.7933,
+      "first_failure": {
+        "non_empty": 30,
+        "protocol_valid": 1
+      },
+      "missing_generations": 0
+    },
+    "rag": {
+      "n": 150,
+      "usable": 140,
+      "correct": 9,
+      "n_scorable": 150,
+      "usable_scorable": 140,
+      "usable_rollout_rate": 0.9333,
+      "correct_overall": 0.06,
+      "correct_given_usable": 0.0643,
+      "scorable": true,
+      "non_empty": 0.9467,
+      "natural_termination": 0.9467,
+      "no_severe_repetition": 0.9467,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.9333,
+      "first_failure": {
+        "non_empty": 8,
+        "protocol_valid": 2
+      },
+      "missing_generations": 0
+    },
+    "knowledge": {
+      "n": 150,
+      "usable": 30,
+      "correct": 1,
+      "n_scorable": 150,
+      "usable_scorable": 30,
+      "usable_rollout_rate": 0.2,
+      "correct_overall": 0.0067,
+      "correct_given_usable": 0.0333,
+      "scorable": true,
+      "non_empty": 0.9267,
+      "natural_termination": 0.7733,
+      "no_severe_repetition": 0.7733,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.2,
+      "first_failure": {
+        "protocol_valid": 84,
+        "natural_termination": 25,
+        "non_empty": 11
+      },
+      "missing_generations": 0
+    },
+    "tool": {
+      "n": 100,
+      "usable": 73,
+      "correct": 0,
+      "n_scorable": 100,
+      "usable_scorable": 73,
+      "usable_rollout_rate": 0.73,
+      "correct_overall": 0.0,
+      "correct_given_usable": 0.0,
+      "scorable": true,
+      "non_empty": 0.97,
+      "natural_termination": 0.95,
+      "no_severe_repetition": 0.95,
+      "no_context_limit": 1.0,
+      "protocol_valid": 0.94,
+      "first_failure": {
+        "tool_not_structurally_executable": 21,
+        "non_empty": 3,
+        "natural_termination": 2,
+        "protocol_valid": 1
+      },
+      "tool_structurally_executable": 0.73,
+      "tool_call_emitted": 0.94,
+      "tool_call_parsed": 0.81,
+      "tool_name_valid": 0.73,
+      "missing_generations": 0
+    }
+  },
+  "generations": {
+    "code": {
+      "path": "artifacts/audit/autoinit_d1_behavioural/generations/d1_screening_q3_s614923639/code.generations.jsonl",
+      "sha256": "41563552cb8c99e492e90841ff2830339a5c910d5110b9ce5c9e2efd398dc396",
+      "n": 100
+    },
+    "gsm8k": {
+      "path": "artifacts/audit/autoinit_d1_behavioural/generations/d1_screening_q3_s614923639/gsm8k.generations.jsonl",
+      "sha256": "7399a3cc2dc37e598f08fc9cfa0123e1653dd32b08d269c12970a602379b7c41",
+      "n": 150
+    },
+    "knowledge": {
+      "path": "artifacts/audit/autoinit_d1_behavioural/generations/d1_screening_q3_s614923639/knowledge.generations.jsonl",
+      "sha256": "160de1849854d709c29c3e581110271fa6834e3de69dccfb21053df891d93bf9",
+      "n": 150
+    },
+    "math_verified": {
+      "path": "artifacts/audit/autoinit_d1_behavioural/generations/d1_screening_q3_s614923639/math_verified.generations.jsonl",
+      "sha256": "7fa5192f8e484695c58c8937d2bdf3132cacf9e384c91c560fa1bff28698d39b",
+      "n": 150
+    },
+    "multihop": {
+      "path": "artifacts/audit/autoinit_d1_behavioural/generations/d1_screening_q3_s614923639/multihop.generations.jsonl",
+      "sha256": "96608e41081531b1bbfb2be777823e6a534423bb8b969cc9bc53e624e4f90a93",
+      "n": 150
+    },
+    "rag": {
+      "path": "artifacts/audit/autoinit_d1_behavioural/generations/d1_screening_q3_s614923639/rag.generations.jsonl",
+      "sha256": "c22c6783f7ecccd6ebc53366eb79834a018751fd04f68b34c8598057f4ab3fc4",
+      "n": 150
+    },
+    "tool": {
+      "path": "artifacts/audit/autoinit_d1_behavioural/generations/d1_screening_q3_s614923639/tool.generations.jsonl",
+      "sha256": "ed6139d88326fa8b02319883c2fb28b359be29a1eefff719053be530755ca4a5",
+      "n": 100
+    }
+  },
+  "per_sample_path": "/workspace/aad/artifacts/audit/autoinit_d1_behavioural/per_sample/d1_screening_q3_s614923639.jsonl",
+  "no_weighted_scalar": "usable_rollout_rate and correct_overall are reported separately and are never combined; usable_rollout is blind to correctness by construction, which is why correctness is a separate axis",
+  "capability_schema_enforced": true,
+  "role": "D1_SCREENING",
+  "screening_arm": "q3",
+  "may_not": [
+    "be read as a confirmation result or as evidence that may promote. This is a RANKING input measured on the screening role, on seeds disjoint from the confirmation seeds and prompts disjoint from the confirmation prompts. The screening estimate of the advancing candidate is inflated by the winner's curse; the design records the inflation and the confirmation rung is what estimates the effect."
+  ],
+  "_metric_semantics": "c1_confirmation_scoring@v1, reused unchanged. The protocol requires every rung to share the mixture and the metric exactly; only the battery differs.",
+  "_absolute_scores_are_not_interchangeable_with_c1s": "three capacity-limited strata of the D-series family draw from wider source populations than C1's, so a D1 absolute score is not directly comparable with a historical C1 absolute score. The estimand is the within-family PAIRED difference, and both arms of this rung are measured on this same role under the same protocol.",
+  "per_sample_sha256": "1889f3697b98a9f9eec8d07439f87b4da6168343c80f89b6a1c3ba06fdabbdfb",
+  "per_sample_rows": 950,
+  "result_sha256": "11267247886efdc718ff484bbef02b089a91d0e866f63bdfbb037a6355160c19"
+}

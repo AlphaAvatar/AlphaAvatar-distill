@@ -1,0 +1,20 @@
+{"stage": "environment", "status": "start", "t": 0.0}
+{"seconds": 1.65, "stage": "environment", "status": "ok", "t": 1.65}
+{"stage": "register_and_policy", "status": "start", "t": 1.651}
+{"seconds": 0.037, "stage": "register_and_policy", "status": "ok", "t": 1.688}
+{"stage": "bind_full_vocab", "status": "start", "t": 1.689}
+{"seconds": 0.046, "stage": "bind_full_vocab", "status": "ok", "t": 1.735}
+{"stage": "bind_reference_topk_tail", "status": "start", "t": 1.736}
+{"seconds": 0.04, "stage": "bind_reference_topk_tail", "status": "ok", "t": 1.776}
+{"stage": "d2_validation_premises", "status": "start", "t": 1.779}
+{"seconds": 0.028, "stage": "d2_validation_premises", "status": "ok", "t": 1.808}
+{"stage": "teacher_fetch_verify", "status": "start", "t": 1.808}
+{"seconds": 8.036, "stage": "teacher_fetch_verify", "status": "ok", "t": 9.845}
+{"stage": "V_d2_validation", "status": "start", "t": 9.846}
+{"stage": "V.V1_root_stores_and_validity", "status": "ok", "t": 37.689}
+{"stage": "V.V2_b_rebuild_and_kl_relation", "status": "ok", "t": 1282.424}
+{"stage": "V.V6_state_evaluation", "status": "ok", "t": 1316.88}
+{"stage": "V.V3_weighted_statistics", "status": "ok", "t": 1589.63}
+{"stage": "V.V4_depth_root_vs_parent", "status": "ok", "t": 1763.632}
+{"stage": "V.V5_depth_scored_rows", "status": "ok", "t": 1919.458}
+{"seconds": 1910.19, "stage": "V_d2_validation", "status": "ok", "t": 1920.036}

@@ -1,0 +1,132 @@
+{
+ "schema": "aadistill.d_series.validation_plan/v1",
+ "validation_id": "prediction_rows_r0",
+ "version": 1,
+ "_contract": "REGISTERED BEFORE ANY R0 SESSION. Engineering validation of ExecutionConfig.prediction_rows='scored_v1' against the historical all-rows path. Every gate below is read by scripts/stages/stage-1/phase_d1/prediction_rows_r0_compare.py; changing a tolerance changes this file's hash, which the verdict records. AUTHORIZES NOTHING: a session needs the maintainer's grant (authorization.json, absent until then).",
+ "question": "does selecting prediction rows before the output head change any D-series decision or measured value beyond the registered bounds, and what does it save in wall time and peak memory?",
+ "declared_in": "logs/stages/stage-1/phase_d1/analyses/d1_followup_technical_review_and_next_round.md, section 6 (R0 row); the tolerances are carried over unchanged",
+ "stages": [
+  "D",
+  "P"
+ ],
+ "modes_in_order": [
+  "all_v1",
+  "scored_v1"
+ ],
+ "one_session": "both modes on ONE pod, oracle first. Two pods would add a host/driver difference to a 1e-5 equivalence comparison",
+ "tolerances": {
+  "depth_removal_order": "exact, per profile, both vs the oracle and oracle vs history",
+  "depth_candidate_relative": 1e-05,
+  "state_eval_ranked_absolute": 1e-05,
+  "state_eval_ranked_metrics_owner": "aadistill.initialization.planning.ranking.PARETO_V1",
+  "timing_and_memory": "reported, never gated",
+  "_if_a_gate_fails": "diagnose as an engineering or numerical defect first (e.g. a GEMM shape that rounds differently); the tolerances are not relaxed after the fact"
+ },
+ "historical_oracle": {
+  "record": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a8/adoption.json",
+  "carries": "the all-rows protocol ids and both profiles' removal orders"
+ },
+ "hardware": {
+  "gpu": "NVIDIA L40S",
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "disk_gb": 60,
+  "peak_memory_gib_measured": 20.49,
+  "_peak_from": "a3 stage D; stage P peaked at 16.29 GiB (a8). A 24 GB card is too tight"
+ },
+ "time_and_money": {
+  "rate_usd_per_hour_basis": 1.09,
+  "_rate_is_re_quoted_live_at_launch": true,
+  "expected": {
+   "components_minutes": [
+    [
+     "pod create to ssh",
+     1.6,
+     "a8 launch log"
+    ],
+    [
+     "push + setup",
+     2.8,
+     "a8 (wheelhouse 65 s, teacher 17 s, preflight 12 s)"
+    ],
+    [
+     "driver preamble x2",
+     0.36,
+     "a8/a5"
+    ],
+    [
+     "stage D x2 (positional candidate + two state evaluations)",
+     2.0,
+     "a3: 60.6 s"
+    ],
+    [
+     "stage P all_v1 (two DEPTH invocations)",
+     39.9,
+     "a8: 1194.26 + 1188.77 s"
+    ],
+    [
+     "stage P scored_v1, -8% expected",
+     36.7,
+     "design estimate, NOT a measurement"
+    ]
+   ],
+   "minutes": 83.4,
+   "all_in_usd": 1.53
+  },
+  "ceiling_cached_path": {
+   "components_minutes": [
+    [
+     "pod startup bound",
+     15.0,
+     "launcher's own 15-min port bound"
+    ],
+    [
+     "non-driver overhead, max observed",
+     13.6,
+     "a2"
+    ],
+    [
+     "driver preamble x2, max",
+     0.49,
+     "a5"
+    ],
+    [
+     "stage D x2",
+     2.0,
+     "a3"
+    ],
+    [
+     "stage P all_v1, max invocation x2",
+     39.95,
+     "a8 max 1194.26 s x2"
+    ],
+    [
+     "stage P scored_v1, NO saving assumed",
+     39.95,
+     "same as all_v1"
+    ]
+   ],
+   "minutes": 111.0,
+   "all_in_usd": 2.03,
+   "_basis": "maxima of measured components, no scored_v1 saving"
+  },
+  "hard_ceiling_with_recompute_fallback": {
+   "minutes": 196.7,
+   "all_in_usd": 3.6,
+   "_basis": "all four DEPTH invocations at the slowest measured one, 2484.66 s, when the reference cache fell back to recompute (logs/stages/stage-1/phase_d1/runs/d1_search_20261006_101725/evidence/telemetry_partial_oob_39expansions.jsonl). a8 cached both invocations, so this is the bound, not the expectation"
+  },
+  "teardown_reserve_usd": 0.3,
+  "proposed_grant": {
+   "all_in_ceiling_usd": 4.0,
+   "session_cap_usd": 3.6,
+   "_why": "the session cap gives the launcher 198 min of useful runtime, covering the hard ceiling; the grant adds the teardown reserve. Drawn from the GPU engineering book, which held $6.6510 at the last derivation"
+  },
+  "_previous_estimate_corrected": "'about $1.5, about one hour' priced the expectation and stopped there; the work alone is ~83 min, and a ceiling has to be built from maxima"
+ },
+ "command": "ADOPT_CAMPAIGN=logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/campaign.json ADOPT_COMMIT=<sha> ADOPT_BRANCH=<branch> ADOPT_STAGES=D,P ADOPT_PREDICTION_ROWS='all_v1 scored_v1' SESSION_CAP=3.60 nohup bash scripts/stages/stage-1/phase_d1/topk_adoption_launch.sh r0_<utc> > LOG 2>&1 &",
+ "outputs": {
+  "per_mode": "<OUT>/out/adoption_<mode>/adoption.json",
+  "verdict": "<OUT>/r0_comparison.json (computed off-pod by the launcher)"
+ },
+ "on_pass": "scored_v1 becomes ELIGIBLE for D2/D3 preregistrations to name; it is a new execution fingerprint, never the historical one",
+ "authorizes": "nothing"
+}

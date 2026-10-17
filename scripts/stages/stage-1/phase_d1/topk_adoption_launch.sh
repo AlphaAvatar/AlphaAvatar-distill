@@ -30,7 +30,10 @@
 set -uo pipefail
 
 RUN_ID="${1:?usage: $0 <run-id>}"
-REPO_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+#: FOUR levels: scripts/stages/stage-1/phase_d1/. Two levels was right before
+#: the information-architecture move and has resolved to `scripts/stages` since,
+#: so every `.venv`, budget and watchdog path below pointed nowhere.
+REPO_DIR="$(cd "$(dirname "$0")/../../../.." && pwd)"
 OUT="${REPO_DIR}/artifacts/stages/stage-1/phase_d1/qualification/topk_adoption/${RUN_ID}"
 BRANCH="${ADOPT_BRANCH:-prep/d-series-topk-tail}"
 COMMIT="${ADOPT_COMMIT:?ADOPT_COMMIT must name the exact source to run}"
@@ -46,8 +49,20 @@ GPU="NVIDIA L40S"
 #: fallback for a bound that does not fit.
 DISK_GB=60
 
-CAMPAIGN="logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/campaign.json"
+#: NAMED BY THE CALLER, never a constant. This used to be the Top-K adoption
+#: campaign, which closed with money unspent; a new validation drawing on it
+#: would have been charged to a book that no longer authorizes anything.
+CAMPAIGN="${ADOPT_CAMPAIGN:?ADOPT_CAMPAIGN must name the campaign record that funds this session}"
 SESSION_CAP="${SESSION_CAP:-3.00}"
+#: The execution modes to run, in order, ONE pod. Several modes in one session
+#: keep a host/driver difference out of an equivalence comparison; the oracle
+#: (all_v1) goes first so a session that cannot finish still leaves it.
+MODES="${ADOPT_PREDICTION_ROWS:-all_v1}"
+for m in $MODES; do
+  case "$m" in all_v1|scored_v1) ;; *)
+    echo "ADOPT_PREDICTION_ROWS names an unknown mode: $m" >&2; exit 4 ;;
+  esac
+done
 
 mkdir -p "$OUT"
 LOG="${OUT}/launch.log"
@@ -368,7 +383,7 @@ say "setup + adoption validation (bounded at ${MAX_SECONDS}s)"
 #: ceiling cannot disagree about what is affordable. Minus 300s so the
 #: driver stops itself before the ssh timeout cuts it mid-write.
 DRIVER_DEADLINE=$(python3 -c "print(max(60, ${MAX_SECONDS} - 300))")
-timeout "${MAX_SECONDS}" $SSH "HF_TOKEN=${HF_TOKEN} ADOPT_DEADLINE_S=${DRIVER_DEADLINE} ADOPT_STAGES=${ADOPT_STAGES:-C,D,P} bash -s" < "$REMOTE_SH" >>"$LOG" 2>&1
+timeout "${MAX_SECONDS}" $SSH "HF_TOKEN=${HF_TOKEN} ADOPT_DEADLINE_S=${DRIVER_DEADLINE} ADOPT_STAGES=${ADOPT_STAGES:-C,D,P} ADOPT_PREDICTION_ROWS='${MODES}' bash -s" < "$REMOTE_SH" >>"$LOG" 2>&1
 RC=$?
 say "remote finished rc=${RC}"
 
@@ -398,11 +413,25 @@ fi
 # as the session's, on a run whose real work had never started.
 #: FROM THE RUN DIRECTORY BY PATH, not a bare find: `find | head -1` once
 #: matched a preflight's toy summary and reported its verdict as the session's.
-SUMMARY="${OUT}/out/adoption/adoption.json"
-if [ -f "$SUMMARY" ]; then
-  "${REPO_DIR}/.venv/bin/python" "${REPO_DIR}/scripts/stages/stage-1/phase_d1/topk_adoption_report.py" \
-      "$SUMMARY" 2>&1 | while read -r l; do say "$l"; done
-else
-  say "no adoption.json retrieved; the driver's journal is in out/"
+#: One record per mode, each in its own directory.
+for m in $MODES; do
+  SUMMARY="${OUT}/out/adoption_${m}/adoption.json"
+  if [ -f "$SUMMARY" ]; then
+    say "--- ${m}"
+    "${REPO_DIR}/.venv/bin/python" "${REPO_DIR}/scripts/stages/stage-1/phase_d1/topk_adoption_report.py" \
+        "$SUMMARY" 2>&1 | while read -r l; do say "$l"; done
+  else
+    say "no adoption.json retrieved for ${m}; the driver's journal is in out/"
+  fi
+done
+#: The equivalence verdict, OFF-POD at $0, under the tolerances the plan
+#: registered before the session. Recomputable from the two records.
+if [ -f "${OUT}/out/adoption_all_v1/adoption.json" ] \
+   && [ -f "${OUT}/out/adoption_scored_v1/adoption.json" ]; then
+  PYTHONPATH="${REPO_DIR}/src:${REPO_DIR}/scripts" "${REPO_DIR}/.venv/bin/python" \
+      "${REPO_DIR}/scripts/stages/stage-1/phase_d1/prediction_rows_r0_compare.py" \
+      --oracle "${OUT}/out/adoption_all_v1/adoption.json" \
+      --treatment "${OUT}/out/adoption_scored_v1/adoption.json" \
+      --out "${OUT}/r0_comparison.json" 2>&1 | while read -r l; do say "$l"; done
 fi
 exit "$RC"

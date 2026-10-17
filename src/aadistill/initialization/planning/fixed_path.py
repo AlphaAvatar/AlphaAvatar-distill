@@ -60,6 +60,13 @@ from aadistill.initialization.scoring.content import scoring_content_report
 from aadistill.initialization.planning.operator_config import (
     hashed_operator_config,
     operator_config_hash,
+    root_reference_needed,
+    statistics_weighted_by_root,
+)
+from aadistill.initialization.scoring.reference_store import (
+    build_root_reference_store,
+    root_reference_identity,
+    store_execution,
 )
 from aadistill.initialization.scoring.positions import resolve_position_policy
 from aadistill.initialization.statistics.spec import (
@@ -256,6 +263,10 @@ class FixedPathSpec:
     #: with each other and with nothing else.
     position_policy: Any = None
     distribution_support: Any = None
+    #: The run's `ScoringObjective`, for a path a student-confidence search
+    #: produced. Same contract as the two above: it changes what a consuming
+    #: operator computes, so a replay must run under the one that ran.
+    scoring_objective: Any = None
 
     def __post_init__(self) -> None:
         if not self.steps:
@@ -269,6 +280,42 @@ class FixedPathSpec:
                     f"applied at step {kinds.index(impl.kind)}. A fixed path applies "
                     "each structural kind at most once.")
             kinds.append(impl.kind)
+        #: A DECLARED KL REFERENCE is refused at construction when it cannot
+        #: run: an operator that reads no KL reference, the default spelled
+        #: out, or a declaration beside an objective that already decides it.
+        from aadistill.initialization.scoring.kl_reference import (
+            KL_REFERENCE_KEY, KLReferenceError, validate_kl_reference,
+        )
+        from aadistill.initialization.scoring.objective import (
+            objective_consumed_by,
+        )
+        for i, s in enumerate(self.steps):
+            impl = get_implementation(s.impl_id)
+            try:
+                validate_kl_reference(
+                    impl, s.config,
+                    objective_consumed=objective_consumed_by(
+                        impl, self.scoring_objective))
+            except KLReferenceError as exc:
+                raise FixedPathError(f"{self.path_id} step {i}: {exc}") from exc
+            if (s.config and KL_REFERENCE_KEY in s.config
+                    and (self.distribution_support is None
+                         or self.distribution_support.is_full_vocab)):
+                raise FixedPathError(
+                    f"{self.path_id} step {i}: a stored root reference holds "
+                    "Top-K sketches, and this path reduces over the full "
+                    "vocabulary. Declare a Top-K distribution support")
+        #: The union support and the union-KL form travel together, at one K.
+        if (self.scoring_objective is not None
+                or getattr(self.distribution_support, "is_union", False)):
+            from aadistill.initialization.scoring.objective import (
+                ObjectiveError, require_objective_support,
+            )
+            try:
+                require_objective_support(self.scoring_objective,
+                                          self.distribution_support)
+            except ObjectiveError as exc:
+                raise FixedPathError(f"{self.path_id}: {exc}") from exc
 
     @property
     def kinds(self) -> tuple[str, ...]:
@@ -303,6 +350,8 @@ class FixedPathSpec:
                      self.distribution_support.as_dict()}),
             **({} if self.position_policy is None
                else {"position_policy": self.position_policy.policy_hash}),
+            **({} if self.scoring_objective is None
+               else {"scoring_objective": self.scoring_objective.as_dict()}),
         }
 
     @property
@@ -344,6 +393,11 @@ class StepResult:
     selection: Mapping[str, Any] = field(default_factory=dict)
     digest_expected: str | None = None
     digest_matches: bool | None = None
+    #: OPERATIONAL evidence the operator reported -- wall-clock split, which
+    #: reference cache ran and how, its hit counters. Never identity, never a
+    #: selection input; serialized only when present, so a step whose
+    #: operator reports none serializes exactly as before.
+    operations: Mapping[str, Any] = field(default_factory=dict)
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -364,6 +418,8 @@ class StepResult:
             "selection": dict(self.selection),
             "digest_expected": self.digest_expected,
             "digest_matches": self.digest_matches,
+            **({"operations": dict(self.operations)} if self.operations
+               else {}),
         }
 
 
@@ -380,11 +436,26 @@ class StepResult:
 #: comprehension below filters on presence.
 SELECTION_ARTIFACTS = ("kept_blocks", "removed_blocks", "kept_neurons",
                        "kept_heads", "projection_diagnostics",
-                       "causal_head_evidence")
+                       "causal_head_evidence", "search_rounds",
+                       "objective_candidates", "reference_candidates")
+#: DEPTH's greedy ROUND TABLES (`search_rounds`) and its per-candidate records
+#: under an objective or a declared root reference are the same kind of thing
+#: as `causal_head_evidence`: the scoring landscape a removal was chosen from.
+#: Presence-filtered, like every key here.
+
+#: Execution evidence an operator reports beside its result: the timing split,
+#: the reference cache decision(s) and their counters. Kept apart from the
+#: selection because none of it is a property of the child.
+OPERATION_ARTIFACTS = ("timing", "reference_cache", "parent_reference_cache",
+                       "reference_counters", "parent_kl_diagnostic")
 
 
 def _selection_evidence(artifacts: Mapping[str, Any]) -> dict[str, Any]:
     return {k: artifacts[k] for k in SELECTION_ARTIFACTS if k in artifacts}
+
+
+def _operation_evidence(artifacts: Mapping[str, Any]) -> dict[str, Any]:
+    return {k: artifacts[k] for k in OPERATION_ARTIFACTS if k in artifacts}
 
 
 def verify_root_placement(model: Any, device: str) -> dict[str, Any]:
@@ -518,8 +589,17 @@ def materialize_fixed_path(
     on_step: Callable[[StepResult], None] | None = None,
     deadline: Any = None,
     execution: ExecutionConfig = DEFAULT_EXECUTION,
+    root_identity: Mapping[str, Any] | None = None,
+    root_references: Mapping[str, Any] | None = None,
 ) -> list[StepResult]:
     """Apply every step in order, identifying and gating each intermediate.
+
+    Under an objective that reads the ROOT reference (its KL reference or its
+    statistics weights), every store a step needs is built from the root
+    BEFORE the first step runs -- the root is freed after step 0 -- unless the
+    caller supplies them (`root_references`, keyed by profile hash).
+    `root_identity` is what a built store declares as its root, and what a
+    supplied one must declare; it defaults to the spec's repo id and revision.
 
     `calibration_items` may be supplied to avoid re-resolving (the resolver
     verifies a content hash on every call); when omitted the profiles are
@@ -547,7 +627,8 @@ def materialize_fixed_path(
         parent_spec=adapter.spec_of(model), parent_digest=None,
         workdir=workdir, repo_root=repo_root, stats_cache=stats_cache,
         calibration_items=calibration_items, on_step=on_step,
-        deadline=deadline, execution=execution)
+        deadline=deadline, execution=execution, root_model=model,
+        root_identity=root_identity, root_references=root_references)
 
 
 def _run_steps(
@@ -565,6 +646,9 @@ def _run_steps(
     on_step: Callable[[StepResult], None] | None,
     deadline: Any,
     execution: ExecutionConfig = DEFAULT_EXECUTION,
+    root_model: Any = None,
+    root_identity: Mapping[str, Any] | None = None,
+    root_references: Mapping[str, Any] | None = None,
 ) -> list[StepResult]:
     """The step loop, walked by ORIGINAL index.
 
@@ -585,7 +669,7 @@ def _run_steps(
         for key, items in dict(calibration_items or {}).items()}
     results: list[StepResult] = []
 
-    for i in indices:
+    def step_inputs(i: int) -> tuple[Any, Any, Sequence[Any]]:
         step = spec.steps[i]
         impl = get_implementation(step.impl_id)
         # One place decides what an operator is actually invoked with, exactly as
@@ -603,16 +687,36 @@ def _run_steps(
         else:
             profile = profile_for(impl, get_profile(step.profile_id))
         if profile.is_null:
-            items: Sequence[Any] = ()
-        else:
-            if profile.qualified_id not in resolved:
-                # `resolve()` hands back the RAW frozen evidence — tokens under
-                # `ids`, because that is what the pinned content hash is defined
-                # over. The operators read `input_ids`. One boundary converts.
-                resolved[profile.qualified_id] = prepare_calibration_items(
-                    profile.resolve(repo_root),
-                    profile_id=profile.qualified_id)
-            items = resolved[profile.qualified_id]
+            return impl, profile, ()
+        if profile.qualified_id not in resolved:
+            # `resolve()` hands back the RAW frozen evidence — tokens under
+            # `ids`, because that is what the pinned content hash is defined
+            # over. The operators read `input_ids`. One boundary converts.
+            resolved[profile.qualified_id] = prepare_calibration_items(
+                profile.resolve(repo_root),
+                profile_id=profile.qualified_id)
+        return impl, profile, resolved[profile.qualified_id]
+
+    #: THE ROOT REFERENCES, BUILT WHILE THE ROOT IS STILL HERE. A replay frees
+    #: the root after step 0, and a weighted FFN at step 1 still needs the
+    #: ROOT's confidence -- so every store the path will read is built up
+    #: front, or must be supplied. A suffix replay never holds the root.
+    #:
+    #: A step needs one under an objective that reads the root, or when its
+    #: own config declares the root as its KL reference (`scoring.
+    #: kl_reference`) -- one rule, `root_reference_needed`, for both.
+    stores = _acquire_root_references(
+        spec, indices=indices, step_inputs=step_inputs, root_model=root_model,
+        execution=execution, root_identity=root_identity,
+        supplied=root_references)
+
+    for i in indices:
+        step = spec.steps[i]
+        impl, profile, items = step_inputs(i)
+        root_reference = (stores[profile.profile_hash]
+                          if root_reference_needed(impl, spec.scoring_objective,
+                                                   step.config)
+                          else None)
 
         ok, reason = impl.applicable(parent_spec, spec.target_spec, adapter)
         if not ok:
@@ -629,7 +733,7 @@ def _run_steps(
         operator_config = hashed_operator_config(
             implementation=impl, policy=spec.position_policy,
             support=spec.distribution_support, items=items,
-            declared=step.config)
+            declared=step.config, objective=spec.scoring_objective)
         #: PINNED INPUTS, CHECKED BEFORE THE OPERATOR RUNS. The output pin is
         #: what the path exists for, but it only speaks afterwards: the DEPTH
         #: operator takes half an hour to tell you its inputs were wrong. This
@@ -680,6 +784,7 @@ def _run_steps(
             #: reference support.
             **({} if spec.distribution_support is None
                else {"distribution_support": spec.distribution_support}),
+            scoring_objective=spec.scoring_objective,
             stats_cache=cache,
             stats_cache_key=(
                 None if parent_digest is None else stats_cache_key(
@@ -697,7 +802,11 @@ def _run_steps(
                         "device": spec.device,
                         "accumulation": spec.stats_spec.accumulation_dtype,
                         **execution.as_fingerprint(),
-                        "position_policy_hash": position_policy.policy_hash})),
+                        "position_policy_hash": position_policy.policy_hash,
+                        **({"token_weighting": root_reference.identity_hash}
+                           if statistics_weighted_by_root(
+                               impl, spec.scoring_objective) else {})})),
+            root_reference=root_reference,
             deadline=deadline,
         )
 
@@ -731,6 +840,7 @@ def _run_steps(
                    **({"scoring_content": scoring_content}
                       if scoring_content is not None else {})},
             selection=_selection_evidence(outcome.artifacts),
+            operations=_operation_evidence(outcome.artifacts),
             digest_expected=step.expected_artifact_digest,
             digest_matches=(None if step.expected_artifact_digest is None
                             else identity.artifact_digest == step.expected_artifact_digest),
@@ -755,6 +865,91 @@ def _run_steps(
         parent_digest = identity.artifact_digest
 
     return results
+
+
+def path_root_identity(spec: FixedPathSpec,
+                       root_identity: Mapping[str, Any] | None = None
+                       ) -> dict[str, Any]:
+    """The root a path's stores declare: the caller's, or the spec's own."""
+    return dict(root_identity or {"teacher_id": spec.root_repo_id,
+                                  "teacher_revision": spec.root_revision})
+
+
+def _acquire_root_references(
+    spec: FixedPathSpec, *, indices: Sequence[int] | range,
+    step_inputs: Callable[[int], tuple[Any, Any, Sequence[Any]]],
+    root_model: Any, execution: ExecutionConfig,
+    root_identity: Mapping[str, Any] | None,
+    supplied: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    """Every root reference store the steps in `indices` read, keyed by profile.
+
+    Built from `root_model` with the search's own builder and identity
+    (`build_root_reference_store`, `root_reference_identity`), or taken from
+    `supplied` -- and a supplied store is CHECKED, not trusted: its declared
+    root, mixture and support must be the ones this path would have built it
+    from, so a suffix replay cannot silently measure against another root.
+
+    A store read only by a declared KL reference (no scoring objective on the
+    path) binds the numerical protocol it was built under into its identity;
+    the consumer refuses one built under another. Under an objective the
+    identity stays the historical one, byte for byte.
+    """
+    root = path_root_identity(spec, root_identity)
+    support = spec.distribution_support
+    stores: dict[str, Any] = dict(supplied or {})
+    checked: set[str] = set()
+    for i in indices:
+        impl, profile, items = step_inputs(i)
+        if not root_reference_needed(impl, spec.scoring_objective,
+                                     spec.steps[i].config):
+            continue
+        key = profile.profile_hash
+        if key in stores:
+            if key not in checked and supplied and key in supplied:
+                store = stores[key]
+                store.require_identity(profile_hash=key,
+                                       support=support.as_dict())
+                #: ALWAYS against this path's root: the caller's declared one,
+                #: or the spec's own when none is declared. Omitting
+                #: `root_identity` is never a way past the check -- a store
+                #: that declares its root in any other form is refused, and
+                #: the caller must state the root it was built under.
+                if dict(store.identity.get("root") or {}) != root:
+                    raise FixedPathError(
+                        f"{spec.path_id} step {i} ({impl.impl_id}): the "
+                        f"supplied root reference over {profile.qualified_id} "
+                        f"declares root {store.identity.get('root')}, and "
+                        f"this path's root is {root}"
+                        + ("" if root_identity is not None else
+                           " (the spec's own: no root_identity was declared; "
+                           "pass the root the store was built under)"))
+                checked.add(key)
+            continue
+        if root_model is None:
+            why = (spec.scoring_objective.qualified_id
+                   if spec.scoring_objective is not None
+                   else "its declared KL reference")
+            raise FixedPathError(
+                f"{spec.path_id} step {i} ({impl.impl_id}) reads the ROOT "
+                f"reference over {profile.qualified_id} under {why}, and "
+                "this execution does not hold the root. Supply "
+                "`root_references` built from the root over that mixture")
+        device = model_device(root_model)
+        stores[key] = build_root_reference_store(
+            root_model, items, support=support,
+            identity=root_reference_identity(
+                root_identity=root, profile_hash=key, support=support,
+                objective=spec.scoring_objective,
+                execution=(None if spec.scoring_objective is not None
+                           else store_execution(
+                               micro_batch_size=execution.micro_batch_size,
+                               packing=execution.calibration_batch_packing,
+                               device=device, model=root_model))),
+            micro_batch_size=execution.micro_batch_size,
+            packing=execution.calibration_batch_packing,
+            device=device)
+    return stores
 
 
 class FixedPathSuffixRefused(FixedPathError):
@@ -876,8 +1071,15 @@ def materialize_fixed_path_suffix(
     on_step: Callable[[StepResult], None] | None = None,
     deadline: Any = None,
     execution: ExecutionConfig = DEFAULT_EXECUTION,
+    root_references: Mapping[str, Any] | None = None,
+    root_identity: Mapping[str, Any] | None = None,
 ) -> tuple[list[StepResult], dict[str, Any]]:
     """Execute the tail of a frozen path from an ALREADY-VERIFIED parent.
+
+    A suffix never holds the root, so a step that reads the ROOT reference is
+    refused unless `root_references` (keyed by profile hash) supplies it, and
+    each supplied store's declared root must be `root_identity` -- or, when
+    none is given, the spec's own root.
 
     Two arms that share a prefix should not both compute it. The incumbent arm's
     replay already produced, gated and wrote the shared parent; the treatment arm
@@ -934,7 +1136,8 @@ def materialize_fixed_path_suffix(
         parent_digest=reident.artifact_digest,
         workdir=workdir, repo_root=repo_root, stats_cache=stats_cache,
         calibration_items=calibration_items, on_step=on_step,
-        deadline=deadline, execution=execution)
+        deadline=deadline, execution=execution,
+        root_references=root_references, root_identity=root_identity)
 
     evidence = {
         **premise,

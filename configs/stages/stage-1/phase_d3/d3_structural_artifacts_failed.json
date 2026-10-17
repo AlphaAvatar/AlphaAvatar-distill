@@ -1,0 +1,32 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_d3_structural",
+ "note": "FAILURE spec: what a stopped D3 structural session still owes -- the session record, every completed step's result and the journal. Nothing is required: an early refusal may have produced none of it, and demanding it would block collecting what the run has.",
+ "patterns_are_relative_to": "the collector's --root, which SessionRunner sets to <checkout>/artifacts",
+ "entries": [
+  {
+   "artifact_class": "d3_structural_record",
+   "pattern": "audit/autoinit_d3_structural/d3_structural.json",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d3_structural_product",
+   "pattern": "audit/autoinit_d3_structural/product.json",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d3_structural_steps",
+   "pattern": "audit/autoinit_d3_structural/steps.jsonl",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d3_structural_journal",
+   "pattern": "audit/autoinit_d3_structural/journal.jsonl",
+   "required": false,
+   "lifecycle": "final_required"
+  }
+ ]
+}

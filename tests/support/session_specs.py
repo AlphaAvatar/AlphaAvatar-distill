@@ -45,6 +45,17 @@ SESSION_LAUNCHERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     #: setup on an asset it had not declared, which is precisely the class the
     #: local-asset check exists to catch at $0.
     ("autoinit_d1_replay_launch", ()),
+    #: D2's search, added WITH its launcher (2026-10-13) so every structural
+    #: check that reads this list covers it from the first commit.
+    ("autoinit_d2_launch", ()),
+    #: The new D3's structural session, added WITH its launcher (2026-10-16).
+    ("autoinit_d3_structural_launch", ()),
+    #: Its probes session, added once its spec could exist: it names the
+    #: product of d3_structural_20261017_083554 (admitted STRUCTURAL_CHANGE,
+    #: 2026-10-17), so every structural check covers it before any grant.
+    #: Its own rung prefix for the run id: both D3 rungs file under one
+    #: experiment's run layout, and only the run id separates their paths.
+    ("autoinit_d3_probes_launch", ("--run-id", "d3_probes_spec_check")),
 )
 
 

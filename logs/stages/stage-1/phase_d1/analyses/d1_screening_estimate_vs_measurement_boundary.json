@@ -1,0 +1,89 @@
+{
+ "schema": "aadistill.phase_d1.boundary/v1",
+ "title": "The raised envelope funds the measured work but not the design's superseded ESTIMATE of it, and both ways to close the $0.94 gap are maintainer decisions",
+ "status": "OPEN -- requires a maintainer decision. No provider resource has been created and nothing bills.",
+ "record_role": "decision_required",
+ "recorded_utc": "2026-10-10",
+ "_contract": "A planning fact and the arithmetic behind it. It changes no frozen value, proposes no protocol change, and authorizes nothing. Every accounting condition the 2026-10-11 decision set is DISCHARGED; what remains is a $0.94 gap between the authorized remainder and what the launcher's planning rule demands.",
+
+ "every_precondition_is_discharged": {
+  "run_index": "the four behavioural closeouts were absent from logs/index.json; regenerated through its owner record_run_index.py and all four are now discovered by derive_budget.",
+  "all_in_reconciliation": "measured by provider account-balance bracketing at $8.3305, against $8.2180 GPU-only -- a $0.1125 understatement. RunPod exposes no per-pod billing surface. Owner: reconcile_d1_behavioural_spend.py.",
+  "precedence": "derive_budget prefers money.all_in_usd over cost.actual_usd; no closeout stated both, so no historical total moved.",
+  "booked_everywhere": "formal remaining 68.7925 -> 60.462, cumulative 426.7145 -> 435.045, project remaining 63.2855 -> 54.955. Each moved by exactly $8.3305.",
+  "chain_double_charge": "provisional_shortfall_usd compared the WHOLE chain ceiling including the COMPLETED search, so booking the subruns correctly opened a funding blocker. It now compares only outstanding work, with completion derived from each session's committed product. open_blockers is empty.",
+  "design_hash": "UNCHANGED at f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2. Money is excluded from the hashed preimage by construction.",
+  "continuation_identity": "resolved against the frozen design before any score existed: all ten probes train fresh in ONE session. See d1_screening_continuation_identity.json.",
+  "sweep": "launch_bound on ca2f6df2, clean tree, grant final: 18/18 pod-preflight checks passed under the simulated pod environment.",
+  "authorization": "issued at the live $1.09/h on swept commit aa32fba0; all four cumulative conditions pass; launch readiness binds seven facts with no open blockers; bundle staged and verified.",
+  "no_snapshot_overwrite": "no balance snapshot was hand-edited and the frozen design was not modified to make the grant acceptable."
+ },
+
+ "the_gap": {
+  "granted_cumulative_all_in_usd": 30.0,
+  "reconciled_consumed_usd": 8.3305,
+  "remaining_usd": 21.6695,
+  "remaining_minutes": 1174.0,
+  "what_the_launcher_demands_minutes": 1225.88,
+  "_how": "the launcher's plan is expected x (1 + 0.10 contingency) + a 30-minute artifact-recovery reserve, and `expected` is the design's priced cell: 1087.16 x 1.10 + 30 = 1225.88.",
+  "shortfall_minutes": 51.88,
+  "shortfall_usd": 0.9406,
+  "cumulative_needed_usd": 30.9406,
+  "the_launchers_own_words": "the accepted 1174.00-minute bound cannot hold the expected 1087.16 min plus a 10% contingency and a 30-minute recovery reserve -- it is short by 51.88 min, and that bound is the AUTHORIZED 1174.00 rather than the design's 1355.71. Obtain a larger authorization or a smaller session; do not shrink the reserve to fit.",
+  "_caught_at_zero": "by the dry run, which created nothing. That is what the dry run is for."
+ },
+
+ "why_the_gap_exists_at_all": {
+  "the_money_covers_the_WORK": {
+   "measured_expected_minutes": 981.7,
+   "with_the_same_reserves": "981.7 x 1.10 + 30 = 1109.87 min = $20.47 all-in",
+   "cumulative": "$28.80 against $30.00 granted -- it FITS, with $1.20 spare",
+   "_basis": "attempt 132919's own phase markers; see d1_screening_budget_boundary.json :: the_measured_cost_model"
+  },
+  "the_money_does_not_cover_the_ESTIMATE_of_the_work": {
+   "design_expected_minutes": 1087.16,
+   "where_the_105_minute_difference_is": {
+    "session_overhead": "design 82.0 min, MEASURED 14.7 (5.0 boot+setup, 2.3 driver start, 5.2 attestation, 2.2 teardown)",
+    "arm_materialization": "design 110.0 min (22.0/arm), MEASURED 92.0 (18.4/arm), twice, on two different pods",
+    "per_probe": "design 89.516 min, MEASURED 87.5 (60.9 train + 24.6 generate + ~2 score, the score term estimated)"
+   },
+   "_the_training_term_is_remarkably_stable": "3653.0 s and 3654.3 s across two sessions of the same frozen unit -- a 1.3-second difference in an hour of work. The variable term is generation, which is uncapped by P18."
+  },
+  "so": "the design's cell is a PRE-RUN estimate that is conservative in a way the campaign has now quantified, and the launcher plans from it. The gap is between the remainder and the estimate, not between the remainder and the work."
+ },
+
+ "the_two_ways_to_close_it_and_why_neither_is_mine": [
+  {
+   "option": "A -- raise the cumulative envelope by about $1, to ~$31.00",
+   "cost": "$30.9406 is the figure the launcher's rule demands; $31.00 would carry it with a little slack.",
+   "blocked_by": "the 2026-10-11 decision: 'No additional budget increase ... is authorized.'",
+   "additional_complication": "it would also exceed the $30.00 PER-SESSION limit the amendment was explicitly required to preserve, so it is not only a larger number but a second limit to move."
+  },
+  {
+   "option": "B -- re-price the design's screening cell from attempt 4's measurements",
+   "cost": "nothing. The cell is a cost model, `design_hash` excludes it by construction, and the measured basis makes the plan fit with $1.20 spare.",
+   "why_it_is_scientifically_the_cleaner_act": "the design's own stated principle is that 'MEASURED COMPATIBILITY IS AUTHORITATIVE, and the provisional comparison does not get a veto over it ... a superseded estimate outvoting a measurement is backwards.' That is exactly this situation.",
+   "blocked_by": "the same decision, in terms: 'Do not manually overwrite balance snapshots or modify the frozen D1 design to make the new grant acceptable.' Re-pricing the cell so the grant becomes sufficient is precisely what that forbids, however well-founded the new numbers are.",
+   "what_it_would_change": "budget.chain.sessions.screening (expected_minutes, hard_ceiling_minutes, hard_ceiling_usd, fixed_minutes, session_overhead_minutes, arm_materialization_minutes) and the chain totals. It would NOT change design_hash, the probe schedule, the arms, the seeds, the battery, the SESOI or the decision rule."
+  }
+ ],
+
+ "what_is_NOT_proposed": [
+  "shrinking the probe schedule. Ten paired probes is frozen and a partial schedule yields no verdict.",
+  "thinning the 10% contingency or the 30-minute artifact-recovery reserve. The launcher refuses rather than doing this, deliberately, and that refusal is now regression-pinned.",
+  "applying a smaller overrun factor than the design's. A factor of 1.22 instead of 1.30 would fit, and choosing it to make the run affordable is the definition of shrinking a run to fit.",
+  "carrying a preserved probe to save 61 minutes. Forbidden by protocol_uniformity, independently of money."
+ ],
+
+ "state_of_the_prepared_chain": {
+  "run_id": "d1_behavioural_20261010_200001",
+  "swept_commit": "ca2f6df222d8",
+  "authorization_commit": "aa32fba0bcad",
+  "authorization_sha256": "5f7032144f8af9c59fd7d93f7d8b79d10bbbde945bc71aeba8596eb806a7bb0d",
+  "bundle": "aad_autoinit_ee9832d8.bundle, 30203530 bytes, sha256 5a7b4eb19d75522e3efdb438f1c317def24a97c9aaf8b86128e089eb46af1407, staged",
+  "cost": "$0.0000 -- no provider resource was created",
+  "_one_use": "this chain is CONSUMED. Whichever option is chosen, the next attempt needs a fresh run identity, a fresh sweep, a fresh issuance and a fresh bundle; the authorization artifact refuses to be reissued into an existing run."
+ },
+
+ "authorizes": "nothing"
+}

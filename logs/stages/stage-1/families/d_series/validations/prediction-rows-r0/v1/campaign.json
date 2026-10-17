@@ -1,0 +1,67 @@
+{
+ "schema": "aadistill.engineering_campaign/v1",
+ "campaign_id": "d_series_prediction_rows_r0",
+ "_contract": "Cumulative cost of R0 across every resource and subrun. A rerun does NOT reset it.",
+ "status": "COMPLETE and CLOSED -- R0 PASS (run r0_20261013_154325, $1.5074 of the $4.00 grant); scored_v1 is ELIGIBLE for the KL path",
+ "authorization": "logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/authorization.json",
+ "package_id": "phase_c1.execution_package.2026-09-11",
+ "_package_id": "the GPU ENGINEERING book, as for the Top-K adoption validation",
+ "plan": "logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/plan.json",
+ "teardown_reserve_usd": 0.3,
+ "inherited_spend": [],
+ "subruns": [
+  {
+   "subrun_id": "r0_s0a",
+   "run_id": "r0_20261013_153143",
+   "cost_usd": 0.0,
+   "outcome": "PROVIDER REFUSED CREATE -- no L40S capacity; no pod existed, nothing billed",
+   "notes": "launcher's nominal 0.0003 is elapsed-time arithmetic without a resource"
+  },
+  {
+   "subrun_id": "r0_s0b",
+   "run_id": "r0_20261013_153323",
+   "cost_usd": 0.0,
+   "outcome": "PROVIDER REFUSED CREATE -- no L40S capacity; nothing billed",
+   "notes": "capacity wait loop, try 1"
+  },
+  {
+   "subrun_id": "r0_s1",
+   "run_id": "r0_20261013_154325",
+   "cost_usd": 1.5074,
+   "pod_id": "2xmyzes6r0vcge",
+   "rate_usd_per_hour": 1.09,
+   "outcome": "COMPLETE -- R0 PASS",
+   "notes": "both modes on one L40S pod; all registered gates pass; scored_v1 DEPTH 0.95/0.963 of all_v1, peak -2.4/-2.0 GiB",
+   "evidence": "logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/runs/r0_20261013_154325",
+   "evidence_sha256": {
+    "cost.json": "a397f5c2e20abe31b41f6b94a00d0c00e0e98469cab870e8e6b04e6221311c56",
+    "launch.log": "159976b506ab7990ac9eea6986522f57390f15fab53f4a3c540ed0745468b09a",
+    "out/adoption_all_v1/P_progress.json": "93b141d04872642b239807afe0f99c84c2c3f95a71887e02e12ba34a5e0a473a",
+    "out/adoption_all_v1/adoption.json": "0660834a8672cff8ee2f4bae7ef2e71ca8e17a81cb6e91bd4b63f71d355f2014",
+    "out/adoption_all_v1/candidate/positional_candidate/config.json": "da0a616dc12ab6b0e07ffed75fed7b6f3febdeadeccd300286505fffa9460df7",
+    "out/adoption_all_v1/candidate/positional_candidate/generation_config.json": "0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83",
+    "out/adoption_all_v1/journal.jsonl": "dbc3a1e146662dac2f1ad14d7c5c17266f6ee4b1f57dffca87d6941c335861fb",
+    "out/adoption_all_v1.log": "6152119bb75896ba8923dc53319f2b17caa0c52535fd76d2f972d246a480f3ef",
+    "out/adoption_scored_v1/P_progress.json": "bded2f62e1eaae000fc055c46d2fc1aa18049dc42318282411fe133c99277be5",
+    "out/adoption_scored_v1/adoption.json": "486459f205dbff298c040217b75b56608b67685a0f9e5c69d5f5134e1f0faf6e",
+    "out/adoption_scored_v1/candidate/positional_candidate/config.json": "da0a616dc12ab6b0e07ffed75fed7b6f3febdeadeccd300286505fffa9460df7",
+    "out/adoption_scored_v1/candidate/positional_candidate/generation_config.json": "0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83",
+    "out/adoption_scored_v1/journal.jsonl": "16d4da2f5ab96c9e3b02a5e7ff2d231e3091106cecc5e451b0aa070bfde3327f",
+    "out/adoption_scored_v1.log": "31a1c7cd410ffb299ba518397a4f7e73a98d18a52e6741c51224f51eba5390bf",
+    "out/host_gpu.txt": "7853c0d8b47c15bfa4c1800e33b839347e6976c9ceea547c8d8795aee7947bf5",
+    "out/preflight_all_v1/adoption.json": "076309cea732f0681a8ddb13276208dd0e2207da59d8b8893d62e83b37f29dcf",
+    "out/preflight_all_v1/journal.jsonl": "0f3ed7233a04b869909b57c4286a265018d641b07ad4149a5ee836c3bd275d69",
+    "out/preflight_all_v1.log": "6b951f1bcb3862b8b8d54856ba125e71e1210633ba6170c0bddd27fec2d8c6c1",
+    "out/preflight_scored_v1/adoption.json": "88cd8d1741984ca2d49d9b84ecdd3359b0d24d98cf11d626727281859a481950",
+    "out/preflight_scored_v1/journal.jsonl": "b5aed25e9b4156aabad55e583df7b81bc8eb2d5ecf677f69de23f8d376f4da38",
+    "out/preflight_scored_v1.log": "cfdd4d83d47bde60a64ccbff353eceed6d3ec2797ec5e93ca15c5d00908b680a",
+    "out/runtime.txt": "8df33ef6ed783d31a27fd57b2ded72ebdba4106c422742000225213fba2be4b7",
+    "r0_comparison.json": "07bf44308d33c76fc8eb44180d2ad2242e1d4f8a9bf88f6d78f9caf038553040",
+    "required_inputs.jsonl": "1cc0f12d949720a984ab41745aaa14a3def096b4325f6ba38469190a9ec6b769",
+    "watchdog.jsonl": "472beecc7f1f700c80becc10309d35a51d240164c738dbeafe36ae838c668cbe"
+   }
+  }
+ ],
+ "authorizes": "nothing by itself",
+ "booked_usd": 1.5074
+}

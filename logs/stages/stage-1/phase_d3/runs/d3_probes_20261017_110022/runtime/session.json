@@ -1,0 +1,1497 @@
+{
+  "schema": "aadistill.autoinit.d3_probes_session/v1",
+  "session_id": "autoinit-d3-probes",
+  "session_spec": {
+    "session_id": "autoinit-d3-probes",
+    "schema": "aadistill.autoinit.d3_probes_session/v1",
+    "description": "D3 PROBES on d_series_shared_eval@v1: the D3 initialization (the structural session's product), staged from the relay and verified at all four identities, trained under the frozen recovery recipe at the three D1 confirmation seeds, generated through the unchanged generator, admitted against the shared confirmation rung's evaluation protocol, scored by its pinned scorer and rollout-rescored as a diagnostic. Stops at preservation; the exploratory comparison with q2 and B is computed off-pod.",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/governance/authorization.json",
+    "authorization_type": "_D3Authorization.load",
+    "plan_id": "autoinit.v1.phase_d3.probes",
+    "plan_hash": "43156f21a011803bcb76be8f2c3f5f9616e9034d8f7ea811b9f5de6b9eea17d9",
+    "status_path": "/workspace/autoinit_d3_probes.status",
+    "run_log_path": "/workspace/autoinit_d3_probes_run.log",
+    "driver_job_id": "autoinit_d3_probes_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "autoinit_d3_probes",
+      "evidence_filename": "d3_probes.json",
+      "archive_basename": "d3_probes_artifacts.tar.gz",
+      "spec_success": "configs/stages/stage-1/phase_d3/d3_probes_artifacts.json",
+      "spec_failed": "configs/stages/stage-1/phase_d3/d3_probes_artifacts_failed.json",
+      "report_names": [
+        "d3_probes.json"
+      ]
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "d3_probes"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_AUTH_PATH",
+        "SESSION_PLAN_HASH",
+        "SESSION_KIND",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors",
+          "dest": "artifacts/stages/stage-1/phase_d3/arms/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de",
+          "sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/config.json",
+          "dest": "artifacts/stages/stage-1/phase_d3/arms/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de",
+          "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/generation_config.json",
+          "dest": "artifacts/stages/stage-1/phase_d3/arms/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de",
+          "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [
+        "d1_screening:artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1",
+        "d1_confirmation:artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 2700,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [],
+      "test_paths": [
+        "scripts/stages/stage-1/phase_d3/tests/probes_pod_preflight"
+      ],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "TEACHER_READY",
+        "VLLM_READY",
+        "TESTS_OK",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 6,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-10-17T11:02:01+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 357 min $6.49 \u00b7 soft $7.54 \u00b7 hard $8.09 (authorized $8.21)"
+    },
+    {
+      "utc": "2026-10-17T11:02:01+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Medium"
+    },
+    {
+      "utc": "2026-10-17T11:02:02+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $118.5137 against the $30.0000 this session must be able to fund"
+    },
+    {
+      "utc": "2026-10-17T11:02:02+00:00",
+      "elapsed_min": 0.0,
+      "msg": "run d3_probes_20261017_110022, registration 43156f21a011"
+    },
+    {
+      "utc": "2026-10-17T11:02:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "contract verified at $0: 5297bf3149b137d5, 3 probes"
+    },
+    {
+      "utc": "2026-10-17T11:02:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "3 product files on the relay at their pins"
+    },
+    {
+      "utc": "2026-10-17T11:02:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "session commit c10ad81189c1 verified: harness digests to b1b2cbea4f04\u2026, carries the authorization and only logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "utc": "2026-10-17T11:02:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "no previous attempt failed deterministically; 0 prior log(s) read"
+    },
+    {
+      "utc": "2026-10-17T11:02:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "aad_autoinit_c10ad811.bundle round-trips"
+    },
+    {
+      "utc": "2026-10-17T11:02:10+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 9 relay inputs (9 from AlphaAvatar/aadistill-artifacts), 2 local assets"
+    },
+    {
+      "utc": "2026-10-17T11:02:11+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 445 min = $8.09"
+    },
+    {
+      "utc": "2026-10-17T11:02:11+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created 6gqbeysqtywflq at $1.09/h"
+    },
+    {
+      "utc": "2026-10-17T11:03:06+00:00",
+      "elapsed_min": 0.92,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-10-17T11:04:00+00:00",
+      "elapsed_min": 1.82,
+      "msg": "TCP 22 at 160.250.71.213:52612 after 1.8 min"
+    },
+    {
+      "utc": "2026-10-17T11:04:03+00:00",
+      "elapsed_min": 1.86,
+      "msg": "draw 1: ssh reachable \u2014 $0.03"
+    },
+    {
+      "utc": "2026-10-17T11:04:34+00:00",
+      "elapsed_min": 2.39,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+    },
+    {
+      "utc": "2026-10-17T11:04:34+00:00",
+      "elapsed_min": 2.39,
+      "msg": "draw 1: host admitted \u2014 image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07 is the protocol's"
+    },
+    {
+      "utc": "2026-10-17T11:04:34+00:00",
+      "elapsed_min": 2.39,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-17T11:08:14+00:00",
+      "elapsed_min": 6.06,
+      "msg": "draw 1: setup complete \u2014 $0.11"
+    },
+    {
+      "utc": "2026-10-17T11:08:19+00:00",
+      "elapsed_min": 6.14,
+      "msg": "driver detached, pid 2895, confirmed by descriptor_probe \u2014 $0.11"
+    },
+    {
+      "utc": "2026-10-17T11:10:29+00:00",
+      "elapsed_min": 8.3,
+      "msg": "  2026-10-17T11:08:16Z MARKER:DRIVER_START \u2014 $0.15"
+    },
+    {
+      "utc": "2026-10-17T12:16:01+00:00",
+      "elapsed_min": 73.84,
+      "msg": "  trained-unscored d3_probes_d3_s396880939: preserved and verified (ccc432ed01ee)"
+    },
+    {
+      "utc": "2026-10-17T12:16:01+00:00",
+      "elapsed_min": 73.84,
+      "msg": "  probe d3_probes_d3_s396880939: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-17T12:16:01+00:00",
+      "elapsed_min": 73.84,
+      "msg": "  probe d3_probes_d3_s396880939: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-17T12:16:04+00:00",
+      "elapsed_min": 73.89,
+      "msg": "  secured d3_probes_attested_protocol.json"
+    },
+    {
+      "utc": "2026-10-17T12:16:07+00:00",
+      "elapsed_min": 73.93,
+      "msg": "  secured engine_probe.json"
+    },
+    {
+      "utc": "2026-10-17T12:36:04+00:00",
+      "elapsed_min": 93.89,
+      "msg": "  probe d3_probes_d3_s396880939: secured result.json"
+    },
+    {
+      "utc": "2026-10-17T12:36:08+00:00",
+      "elapsed_min": 93.96,
+      "msg": "  probe d3_probes_d3_s396880939: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-17T12:36:11+00:00",
+      "elapsed_min": 94.0,
+      "msg": "  probe d3_probes_d3_s396880939: secured admission.json"
+    },
+    {
+      "utc": "2026-10-17T12:36:26+00:00",
+      "elapsed_min": 94.25,
+      "msg": "  probe d3_probes_d3_s396880939: secured generations"
+    },
+    {
+      "utc": "2026-10-17T12:36:30+00:00",
+      "elapsed_min": 94.32,
+      "msg": "  probe d3_probes_d3_s396880939: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-17T12:36:35+00:00",
+      "elapsed_min": 94.4,
+      "msg": "  probe d3_probes_d3_s396880939: release ack delivered"
+    },
+    {
+      "utc": "2026-10-17T13:42:17+00:00",
+      "elapsed_min": 160.11,
+      "msg": "  trained-unscored d3_probes_d3_s766527341: preserved and verified (e626c722a897)"
+    },
+    {
+      "utc": "2026-10-17T13:42:17+00:00",
+      "elapsed_min": 160.11,
+      "msg": "  probe d3_probes_d3_s766527341: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-17T13:42:17+00:00",
+      "elapsed_min": 160.11,
+      "msg": "  probe d3_probes_d3_s766527341: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-17T14:00:03+00:00",
+      "elapsed_min": 177.87,
+      "msg": "  probe d3_probes_d3_s766527341: secured result.json"
+    },
+    {
+      "utc": "2026-10-17T14:00:07+00:00",
+      "elapsed_min": 177.93,
+      "msg": "  probe d3_probes_d3_s766527341: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-17T14:00:10+00:00",
+      "elapsed_min": 177.98,
+      "msg": "  probe d3_probes_d3_s766527341: secured admission.json"
+    },
+    {
+      "utc": "2026-10-17T14:00:22+00:00",
+      "elapsed_min": 178.18,
+      "msg": "  probe d3_probes_d3_s766527341: secured generations"
+    },
+    {
+      "utc": "2026-10-17T14:00:26+00:00",
+      "elapsed_min": 178.25,
+      "msg": "  probe d3_probes_d3_s766527341: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-17T14:00:31+00:00",
+      "elapsed_min": 178.33,
+      "msg": "  probe d3_probes_d3_s766527341: release ack delivered"
+    },
+    {
+      "utc": "2026-10-17T15:06:13+00:00",
+      "elapsed_min": 244.04,
+      "msg": "  trained-unscored d3_probes_d3_s1004399678: preserved and verified (d52f4c6439bf)"
+    },
+    {
+      "utc": "2026-10-17T15:06:13+00:00",
+      "elapsed_min": 244.04,
+      "msg": "  probe d3_probes_d3_s1004399678: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-17T15:06:13+00:00",
+      "elapsed_min": 244.04,
+      "msg": "  probe d3_probes_d3_s1004399678: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-17T15:28:24+00:00",
+      "elapsed_min": 266.23,
+      "msg": "  probe d3_probes_d3_s1004399678: secured result.json"
+    },
+    {
+      "utc": "2026-10-17T15:28:28+00:00",
+      "elapsed_min": 266.29,
+      "msg": "  probe d3_probes_d3_s1004399678: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-17T15:28:31+00:00",
+      "elapsed_min": 266.34,
+      "msg": "  probe d3_probes_d3_s1004399678: secured admission.json"
+    },
+    {
+      "utc": "2026-10-17T15:28:43+00:00",
+      "elapsed_min": 266.54,
+      "msg": "  probe d3_probes_d3_s1004399678: secured generations"
+    },
+    {
+      "utc": "2026-10-17T15:28:51+00:00",
+      "elapsed_min": 266.66,
+      "msg": "  probe d3_probes_d3_s1004399678: release ack delivered"
+    },
+    {
+      "utc": "2026-10-17T15:31:03+00:00",
+      "elapsed_min": 268.88,
+      "msg": "  2026-10-17T15:29:39Z MARKER:ALL_DONE \u2014 $4.88"
+    },
+    {
+      "utc": "2026-10-17T15:31:03+00:00",
+      "elapsed_min": 268.88,
+      "msg": "polling ended: ALL_DONE \u2014 $4.88"
+    },
+    {
+      "utc": "2026-10-17T15:34:56+00:00",
+      "elapsed_min": 272.75,
+      "msg": "  manifest rc=0\n97 file(s) across 11 class(es) -> /workspace/manifest.json\n  final_required: 97 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-10-17T15:35:16+00:00",
+      "elapsed_min": 273.09,
+      "msg": "  probe d3_probes_d3_s1004399678: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-17T15:35:16+00:00",
+      "elapsed_min": 273.09,
+      "msg": "  probe d3_probes_d3_s396880939: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-17T15:35:16+00:00",
+      "elapsed_min": 273.09,
+      "msg": "  probe d3_probes_d3_s766527341: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-17T15:35:17+00:00",
+      "elapsed_min": 273.1,
+      "msg": "  probe d3_probes_d3_s1004399678: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-17T15:35:17+00:00",
+      "elapsed_min": 273.1,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-10-17T15:35:17+00:00",
+      "elapsed_min": 273.1,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-10-17T15:35:28+00:00",
+      "elapsed_min": 273.28,
+      "msg": "pod deleted \u2014 273.3 min, $4.96; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.phase_d3.probes_authorization/v1",
+    "authorization_id": "autoinit.v1.phase_d3.probes",
+    "version": 1,
+    "granted_utc": "2026-10-17T11:00:22+00:00",
+    "granted_by": "maintainer, 2026-10-17 UTC: D3 Structural PASS / Conditional Three-Probe Grant (independent review of 721e803c1297794acb83099c924b17c045afbdb8). Accepts d3_structural_20261017_083554 as STRUCTURAL_CHANGE, ADMITTED, complete and terminal (not to be rerun), and conditionally approves a cumulative all-in envelope of $12.00 for the new D3 three-probe behavioural rung, executable only after the required $0 D3 probes closeout repair has passed testing and been committed.",
+    "plan_id": "autoinit.v1.phase_d3.probes",
+    "plan_hash": "43156f21a011803bcb76be8f2c3f5f9616e9034d8f7ea811b9f5de6b9eea17d9",
+    "expected_usd": 6.5854,
+    "hard_cap_usd": 8.2078,
+    "authorized_stages": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "stage_conditions": {
+      "A": "setup on an admitted host; the D3 initial checkpoint staged from the relay and verified at all four identities; the contract re-derived and equal to the bound hash; the training runtime equal to the protocol's",
+      "B": "the three probes: frozen recipe from the D3 initial checkpoint at each D1 confirmation seed, packaged, generated through the unchanged generator (token-id sidecar), admitted against the shared confirmation rung's evaluation protocol, scored by its pinned scorer",
+      "C": "per probe, the rollout rescoring diagnostic, failure-isolated",
+      "D": "stop at preservation; the exploratory comparison with q2 and B is computed off-pod at $0"
+    },
+    "scope_note": "Exactly the three registered recovery probes: e1_p1_kd_heavy@0.86M from the D3 initial checkpoint 4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de, independently at seeds 396880939, 766527341 and 1004399678, on the d1_confirmation battery (950 prompts, 850 scorable, per seed); their generation, scoring, evidence preservation, the off-pod exploratory comparison with q2 (primary) and B (anchor) through their registered imported units, and the closeout. ONE D3 probes session at a time; ordinary pre-science engineering retries only inside this envelope.",
+    "allows_recovery_training": true,
+    "authorizes_d3_probes": true,
+    "authorizes_beam_search": false,
+    "authorizes_reopen_d1_d2": false,
+    "authorizes_cancelled_d3": false,
+    "authorizes_reference_retraining": false,
+    "authorizes_screening_seeds": false,
+    "authorizes_fresh_confirmation": false,
+    "authorizes_promotion": false,
+    "authorizes_automatic_followon_start": false,
+    "authorizes_d3_structural": false,
+    "authorizes_fixed_path_materialization": false,
+    "authorized_session_commit": "8db0fff7e712a71be1b6eaa66cd48decb7a68592",
+    "harness_source_digest": "b1b2cbea4f04bb8f4b8a8195ed47c701430f9740e126d9e6737eb89fbcca9fa1",
+    "harness_source_files": [
+      "configs/stages/stage-1/phase_c1/authorization.json",
+      "configs/stages/stage-1/phase_d3/d3_probes_artifacts.json",
+      "configs/stages/stage-1/phase_d3/d3_probes_artifacts_failed.json",
+      "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json",
+      "configs/stages/stage-3/recipes/recovery.json",
+      "logs/stages/stage-1/phase_d3/plans/d3_registration_v1.json",
+      "scripts/maintenance/consolidation/derive_budget.py",
+      "scripts/shared/__init__.py",
+      "scripts/shared/calibration.py",
+      "scripts/shared/data/battery_render.py",
+      "scripts/shared/deployment.py",
+      "scripts/shared/evaluation/__init__.py",
+      "scripts/shared/evaluation/audit_tool_scoring.py",
+      "scripts/shared/evaluation/evidence_reuse.py",
+      "scripts/shared/evaluation/load_state_eval.py",
+      "scripts/shared/evaluation/rollout_rescoring.py",
+      "scripts/shared/evaluation/score_recovery_search.py",
+      "scripts/shared/evaluation/uncapped_eval.py",
+      "scripts/shared/evaluation/uncapped_eval_token_ids.py",
+      "scripts/shared/pod/autoinit_engine_probe.py",
+      "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "scripts/shared/pod/autoinit_science_inputs.py",
+      "scripts/shared/pod/collect_artifacts.py",
+      "scripts/shared/pod/verify_frozen_assets.py",
+      "scripts/shared/pod/watchdog.py",
+      "scripts/shared/recipes.py",
+      "scripts/shared/recovery_policy.py",
+      "scripts/shared/run_layout.py",
+      "scripts/shared/search_cost_model.py",
+      "scripts/shared/source_sets.py",
+      "scripts/shared/training/train_stage3.py",
+      "scripts/shared/validation/renderer_parity_gate.py",
+      "scripts/stages/stage-1/families/d_series/__init__.py",
+      "scripts/stages/stage-1/families/d_series/battery_family.py",
+      "scripts/stages/stage-1/families/d_series/d2_budget.py",
+      "scripts/stages/stage-1/families/d_series/identity.py",
+      "scripts/stages/stage-1/families/d_series/incumbent.py",
+      "scripts/stages/stage-1/families/d_series/math_source.py",
+      "scripts/stages/stage-1/families/d_series/objectives.py",
+      "scripts/stages/stage-1/families/d_series/reference_calibration.py",
+      "scripts/stages/stage-1/families/d_series/scoring_protocol.py",
+      "scripts/stages/stage-1/families/d_series/screening_completion.py",
+      "scripts/stages/stage-1/families/d_series/search_completion.py",
+      "scripts/stages/stage-1/families/d_series/shared_evaluation.py",
+      "scripts/stages/stage-1/families/d_series/teacher_confidence.py",
+      "scripts/stages/stage-1/phase_a/phase_a_frozen.py",
+      "scripts/stages/stage-1/phase_a/plan.py",
+      "scripts/stages/stage-1/phase_a3/__init__.py",
+      "scripts/stages/stage-1/phase_a3/a3_session.py",
+      "scripts/stages/stage-1/phase_a3/a_bsz3.py",
+      "scripts/stages/stage-1/phase_c1/__init__.py",
+      "scripts/stages/stage-1/phase_c1/authorization.py",
+      "scripts/stages/stage-1/phase_c1/authorization_payload.py",
+      "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+      "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
+      "scripts/stages/stage-1/phase_c1/build_c1_confirmation_battery.py",
+      "scripts/stages/stage-1/phase_c1/bundle.py",
+      "scripts/stages/stage-1/phase_c1/isolation.py",
+      "scripts/stages/stage-1/phase_c1/packaging.py",
+      "scripts/stages/stage-1/phase_c1/pod_environment.py",
+      "scripts/stages/stage-1/phase_c1/probe_results.py",
+      "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py",
+      "scripts/stages/stage-1/phase_c1/scoring.py",
+      "scripts/stages/stage-1/phase_c1/session.py",
+      "scripts/stages/stage-1/phase_c2/__init__.py",
+      "scripts/stages/stage-1/phase_c2/baseline.py",
+      "scripts/stages/stage-1/phase_c2/behavioural.py",
+      "scripts/stages/stage-1/phase_c2/full_search_space.py",
+      "scripts/stages/stage-1/phase_c2/replay_specs.py",
+      "scripts/stages/stage-1/phase_c2/search_space.py",
+      "scripts/stages/stage-1/phase_c2/selection_pricing.py",
+      "scripts/stages/stage-1/phase_c3/__init__.py",
+      "scripts/stages/stage-1/phase_c3/session.py",
+      "scripts/stages/stage-1/phase_d1/__init__.py",
+      "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py",
+      "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_launch.py",
+      "scripts/stages/stage-1/phase_d1/autoinit_d1_driver.py",
+      "scripts/stages/stage-1/phase_d1/autoinit_d1_launch.py",
+      "scripts/stages/stage-1/phase_d1/behavioural.py",
+      "scripts/stages/stage-1/phase_d1/behavioural_authorization.py",
+      "scripts/stages/stage-1/phase_d1/behavioural_governance.py",
+      "scripts/stages/stage-1/phase_d1/behavioural_materialize.py",
+      "scripts/stages/stage-1/phase_d1/behavioural_verdict.py",
+      "scripts/stages/stage-1/phase_d1/d1_authorization.py",
+      "scripts/stages/stage-1/phase_d1/d1_qualification_driver.py",
+      "scripts/stages/stage-1/phase_d1/d1_session.py",
+      "scripts/stages/stage-1/phase_d1/replay_specs.py",
+      "scripts/stages/stage-1/phase_d1/score_d1_confirmation.py",
+      "scripts/stages/stage-1/phase_d1/score_d1_screening.py",
+      "scripts/stages/stage-1/phase_d1/search_space.py",
+      "scripts/stages/stage-1/phase_d1/selection_noise.py",
+      "scripts/stages/stage-1/phase_d1/topk_adoption_driver.py",
+      "scripts/stages/stage-1/phase_d1/write_d1_behavioural_preregistration.py",
+      "scripts/stages/stage-1/phase_d1/write_d1_design.py",
+      "scripts/stages/stage-1/phase_d2/__init__.py",
+      "scripts/stages/stage-1/phase_d2/autoinit_d2_screening_driver.py",
+      "scripts/stages/stage-1/phase_d2/autoinit_d2_screening_launch.py",
+      "scripts/stages/stage-1/phase_d2/closeout_d2_screening.py",
+      "scripts/stages/stage-1/phase_d2/d2_authorization.py",
+      "scripts/stages/stage-1/phase_d2/d2_confirmation.py",
+      "scripts/stages/stage-1/phase_d2/d2_gpu_validation.py",
+      "scripts/stages/stage-1/phase_d2/d2_product_durability.py",
+      "scripts/stages/stage-1/phase_d2/d2_screening.py",
+      "scripts/stages/stage-1/phase_d2/d2_screening_authorization.py",
+      "scripts/stages/stage-1/phase_d2/d2_session.py",
+      "scripts/stages/stage-1/phase_d2/d2v3_gpu_validation.py",
+      "scripts/stages/stage-1/phase_d2/rank_d2_screening.py",
+      "scripts/stages/stage-1/phase_d2/rescore_d2_probe.py",
+      "scripts/stages/stage-1/phase_d2/verdict_d2_confirmation.py",
+      "scripts/stages/stage-1/phase_d2/write_d2_preregistration.py",
+      "scripts/stages/stage-1/phase_d3/__init__.py",
+      "scripts/stages/stage-1/phase_d3/autoinit_d3_probes_launch.py",
+      "scripts/stages/stage-1/phase_d3/autoinit_d3_structural_driver.py",
+      "scripts/stages/stage-1/phase_d3/autoinit_d3_structural_launch.py",
+      "scripts/stages/stage-1/phase_d3/closeout_d3_structural.py",
+      "scripts/stages/stage-1/phase_d3/d3_authorization.py",
+      "scripts/stages/stage-1/phase_d3/d3_budget.py",
+      "scripts/stages/stage-1/phase_d3/d3_design.py",
+      "scripts/stages/stage-1/phase_d3/d3_probes.py",
+      "src/aadistill/data/dataset.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/data/ladder.py",
+      "src/aadistill/data/tools.py",
+      "src/aadistill/data/verify.py",
+      "src/aadistill/evaluation/__init__.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/capability.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/governance/closure.py",
+      "src/aadistill/governance/grant.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/bundle_transport.py",
+      "src/aadistill/infrastructure/env.py",
+      "src/aadistill/infrastructure/failure_signature.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/watchdog.py",
+      "src/aadistill/initialization/adapters/__init__.py",
+      "src/aadistill/initialization/adapters/qwen3.py",
+      "src/aadistill/initialization/calibration/batching.py",
+      "src/aadistill/initialization/calibration/datasets.py",
+      "src/aadistill/initialization/calibration/items.py",
+      "src/aadistill/initialization/calibration/packing.py",
+      "src/aadistill/initialization/calibration/profiles.py",
+      "src/aadistill/initialization/device.py",
+      "src/aadistill/initialization/execution.py",
+      "src/aadistill/initialization/operators/_common.py",
+      "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/_common.py",
+      "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+      "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+      "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+      "src/aadistill/initialization/operators/base.py",
+      "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+      "src/aadistill/initialization/operators/depth/__init__.py",
+      "src/aadistill/initialization/operators/depth/_common.py",
+      "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+      "src/aadistill/initialization/operators/depth/positional.py",
+      "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+      "src/aadistill/initialization/operators/register.py",
+      "src/aadistill/initialization/operators/width/residual/global_pca.py",
+      "src/aadistill/initialization/planning/__init__.py",
+      "src/aadistill/initialization/planning/fixed_path.py",
+      "src/aadistill/initialization/planning/generation.py",
+      "src/aadistill/initialization/planning/generation_compat.py",
+      "src/aadistill/initialization/planning/isolation.py",
+      "src/aadistill/initialization/planning/metrics.py",
+      "src/aadistill/initialization/planning/operator_config.py",
+      "src/aadistill/initialization/planning/ranking.py",
+      "src/aadistill/initialization/planning/recovery.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/stage1_selection.py",
+      "src/aadistill/initialization/scoring/batches.py",
+      "src/aadistill/initialization/scoring/content.py",
+      "src/aadistill/initialization/scoring/kl_reference.py",
+      "src/aadistill/initialization/scoring/objective.py",
+      "src/aadistill/initialization/scoring/output_head.py",
+      "src/aadistill/initialization/scoring/positions.py",
+      "src/aadistill/initialization/scoring/protocol_identity.py",
+      "src/aadistill/initialization/scoring/reference_store.py",
+      "src/aadistill/initialization/scoring/rows.py",
+      "src/aadistill/initialization/scoring/support.py",
+      "src/aadistill/initialization/specs/arch.py",
+      "src/aadistill/initialization/specs/artifact.py",
+      "src/aadistill/initialization/specs/materialization.py",
+      "src/aadistill/initialization/specs/metrics.py",
+      "src/aadistill/initialization/specs/state.py",
+      "src/aadistill/initialization/statistics/collect.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/statistics/spec.py",
+      "src/aadistill/initialization/transforms/project.py",
+      "src/aadistill/initialization/transforms/sandwich.py",
+      "src/aadistill/models/student.py",
+      "src/aadistill/models/teacher.py",
+      "src/aadistill/models/tokenizer_contract.py",
+      "src/aadistill/runtime/__init__.py",
+      "src/aadistill/runtime/cost.py",
+      "src/aadistill/runtime/cpu_test_env.py",
+      "src/aadistill/runtime/device_handoff.py",
+      "src/aadistill/runtime/hub_capacity.py",
+      "src/aadistill/runtime/leaf_durability.py",
+      "src/aadistill/runtime/pod_environment.py",
+      "src/aadistill/runtime/run_layout.py",
+      "src/aadistill/runtime/staging_contract.py",
+      "src/aadistill/runtime/telemetry.py",
+      "src/aadistill/training/lora.py",
+      "src/aadistill/training/train.py"
+    ],
+    "per_launch_hard_usd": 8.2078,
+    "provenance_commit": "8db0fff7e712a71be1b6eaa66cd48decb7a68592",
+    "enforcement": "the launcher loads this artifact, refuses a planned hard threshold above hard_cap_usd, a harness whose derived closure differs, a registration or contract other than the bound one; the driver re-derives the contract on the pod and refuses a mismatch before any work",
+    "registration_hash": "43156f21a011803bcb76be8f2c3f5f9616e9034d8f7ea811b9f5de6b9eea17d9",
+    "contract_hash": "5297bf3149b137d5813d0a0a7d18c635a8a5e6f2be2715923d9f6ee4667da18d",
+    "run_id": "d3_probes_20261017_110022",
+    "seeds": [
+      396880939,
+      766527341,
+      1004399678
+    ],
+    "n_probes": 3,
+    "pricing": {
+      "hard_ceiling_minutes": 445.2,
+      "expected_minutes": 357.2,
+      "_basis": "logs/stages/stage-1/phase_d3/plans/d3_budget_v1.json :: steps.d3_probes",
+      "accepted_at_price_per_hour": 1.09
+    },
+    "money": {
+      "per_session_envelope_usd": 30.0,
+      "project_cap_usd": 595.0,
+      "formal_allowance_usd": 256.6523,
+      "package_total_usd": 281.7264,
+      "formal_remaining_usd": 103.8699,
+      "package_remaining_usd": 107.0503,
+      "project_remaining_usd": 99.8923,
+      "cumulative_spend_usd": 495.1077,
+      "funds_formal_sessions_of": [
+        "phase_c1",
+        "phase_c3",
+        "phase_a3",
+        "phase_d1",
+        "phase_d2",
+        "phase_d3"
+      ],
+      "_derived_by": "scripts/maintenance/consolidation/derive_budget.py",
+      "derived_session": {
+        "hard_ceiling_usd": 8.2078,
+        "expected_usd": 6.5854,
+        "hard_ceiling_minutes": 445.2,
+        "expected_minutes": 357.2,
+        "container_disk_usd": 0.12,
+        "container_disk_gb": 120,
+        "session_overhead_minutes": 82.0,
+        "price_per_hour": 1.09,
+        "_basis": "logs/stages/stage-1/phase_d3/plans/d3_budget_v1.json :: steps.d3_probes",
+        "accepted_at_price_per_hour": 1.09
+      },
+      "live_quote": {
+        "gpu": "NVIDIA L40S",
+        "usd_per_hour": 1.09,
+        "stock_status": "Medium",
+        "_quoted": "live, immediately before issuance"
+      },
+      "cumulative_envelope_usd": 12.0,
+      "prior_subruns": {
+        "subruns": [],
+        "consumed_usd": 0
+      },
+      "envelope_remaining_usd": 12.0,
+      "teardown_reserve_usd": 0.3,
+      "envelope_required_for_this_session_usd": 8.5078
+    },
+    "rate_usd_per_hour": 1.09,
+    "hard_runtime_minutes": 445.2,
+    "one_use": "ONE grant issuance, ONE launcher session; a replacement attempt is a new authorization netted against the cumulative envelope",
+    "authorization_sha256": "455abde6c360edf1915e1ce0c75d8589045688bf8e1640063c37ebccf75148bb"
+  },
+  "session_plan_hash": "43156f21a011803bcb76be8f2c3f5f9616e9034d8f7ea811b9f5de6b9eea17d9",
+  "harness_source_digest": "b1b2cbea4f04bb8f4b8a8195ed47c701430f9740e126d9e6737eb89fbcca9fa1",
+  "harness_source_files": [
+    "configs/stages/stage-1/phase_c1/authorization.json",
+    "configs/stages/stage-1/phase_d3/d3_probes_artifacts.json",
+    "configs/stages/stage-1/phase_d3/d3_probes_artifacts_failed.json",
+    "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json",
+    "configs/stages/stage-3/recipes/recovery.json",
+    "logs/stages/stage-1/phase_d3/plans/d3_registration_v1.json",
+    "scripts/maintenance/consolidation/derive_budget.py",
+    "scripts/shared/__init__.py",
+    "scripts/shared/calibration.py",
+    "scripts/shared/data/battery_render.py",
+    "scripts/shared/deployment.py",
+    "scripts/shared/evaluation/__init__.py",
+    "scripts/shared/evaluation/audit_tool_scoring.py",
+    "scripts/shared/evaluation/evidence_reuse.py",
+    "scripts/shared/evaluation/load_state_eval.py",
+    "scripts/shared/evaluation/rollout_rescoring.py",
+    "scripts/shared/evaluation/score_recovery_search.py",
+    "scripts/shared/evaluation/uncapped_eval.py",
+    "scripts/shared/evaluation/uncapped_eval_token_ids.py",
+    "scripts/shared/pod/autoinit_engine_probe.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/autoinit_science_inputs.py",
+    "scripts/shared/pod/collect_artifacts.py",
+    "scripts/shared/pod/verify_frozen_assets.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/shared/recipes.py",
+    "scripts/shared/recovery_policy.py",
+    "scripts/shared/run_layout.py",
+    "scripts/shared/search_cost_model.py",
+    "scripts/shared/source_sets.py",
+    "scripts/shared/training/train_stage3.py",
+    "scripts/shared/validation/renderer_parity_gate.py",
+    "scripts/stages/stage-1/families/d_series/__init__.py",
+    "scripts/stages/stage-1/families/d_series/battery_family.py",
+    "scripts/stages/stage-1/families/d_series/d2_budget.py",
+    "scripts/stages/stage-1/families/d_series/identity.py",
+    "scripts/stages/stage-1/families/d_series/incumbent.py",
+    "scripts/stages/stage-1/families/d_series/math_source.py",
+    "scripts/stages/stage-1/families/d_series/objectives.py",
+    "scripts/stages/stage-1/families/d_series/reference_calibration.py",
+    "scripts/stages/stage-1/families/d_series/scoring_protocol.py",
+    "scripts/stages/stage-1/families/d_series/screening_completion.py",
+    "scripts/stages/stage-1/families/d_series/search_completion.py",
+    "scripts/stages/stage-1/families/d_series/shared_evaluation.py",
+    "scripts/stages/stage-1/families/d_series/teacher_confidence.py",
+    "scripts/stages/stage-1/phase_a/phase_a_frozen.py",
+    "scripts/stages/stage-1/phase_a/plan.py",
+    "scripts/stages/stage-1/phase_a3/__init__.py",
+    "scripts/stages/stage-1/phase_a3/a3_session.py",
+    "scripts/stages/stage-1/phase_a3/a_bsz3.py",
+    "scripts/stages/stage-1/phase_c1/__init__.py",
+    "scripts/stages/stage-1/phase_c1/authorization.py",
+    "scripts/stages/stage-1/phase_c1/authorization_payload.py",
+    "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+    "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
+    "scripts/stages/stage-1/phase_c1/build_c1_confirmation_battery.py",
+    "scripts/stages/stage-1/phase_c1/bundle.py",
+    "scripts/stages/stage-1/phase_c1/isolation.py",
+    "scripts/stages/stage-1/phase_c1/packaging.py",
+    "scripts/stages/stage-1/phase_c1/pod_environment.py",
+    "scripts/stages/stage-1/phase_c1/probe_results.py",
+    "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py",
+    "scripts/stages/stage-1/phase_c1/scoring.py",
+    "scripts/stages/stage-1/phase_c1/session.py",
+    "scripts/stages/stage-1/phase_c2/__init__.py",
+    "scripts/stages/stage-1/phase_c2/baseline.py",
+    "scripts/stages/stage-1/phase_c2/behavioural.py",
+    "scripts/stages/stage-1/phase_c2/full_search_space.py",
+    "scripts/stages/stage-1/phase_c2/replay_specs.py",
+    "scripts/stages/stage-1/phase_c2/search_space.py",
+    "scripts/stages/stage-1/phase_c2/selection_pricing.py",
+    "scripts/stages/stage-1/phase_c3/__init__.py",
+    "scripts/stages/stage-1/phase_c3/session.py",
+    "scripts/stages/stage-1/phase_d1/__init__.py",
+    "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py",
+    "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_launch.py",
+    "scripts/stages/stage-1/phase_d1/autoinit_d1_driver.py",
+    "scripts/stages/stage-1/phase_d1/autoinit_d1_launch.py",
+    "scripts/stages/stage-1/phase_d1/behavioural.py",
+    "scripts/stages/stage-1/phase_d1/behavioural_authorization.py",
+    "scripts/stages/stage-1/phase_d1/behavioural_governance.py",
+    "scripts/stages/stage-1/phase_d1/behavioural_materialize.py",
+    "scripts/stages/stage-1/phase_d1/behavioural_verdict.py",
+    "scripts/stages/stage-1/phase_d1/d1_authorization.py",
+    "scripts/stages/stage-1/phase_d1/d1_qualification_driver.py",
+    "scripts/stages/stage-1/phase_d1/d1_session.py",
+    "scripts/stages/stage-1/phase_d1/replay_specs.py",
+    "scripts/stages/stage-1/phase_d1/score_d1_confirmation.py",
+    "scripts/stages/stage-1/phase_d1/score_d1_screening.py",
+    "scripts/stages/stage-1/phase_d1/search_space.py",
+    "scripts/stages/stage-1/phase_d1/selection_noise.py",
+    "scripts/stages/stage-1/phase_d1/topk_adoption_driver.py",
+    "scripts/stages/stage-1/phase_d1/write_d1_behavioural_preregistration.py",
+    "scripts/stages/stage-1/phase_d1/write_d1_design.py",
+    "scripts/stages/stage-1/phase_d2/__init__.py",
+    "scripts/stages/stage-1/phase_d2/autoinit_d2_screening_driver.py",
+    "scripts/stages/stage-1/phase_d2/autoinit_d2_screening_launch.py",
+    "scripts/stages/stage-1/phase_d2/closeout_d2_screening.py",
+    "scripts/stages/stage-1/phase_d2/d2_authorization.py",
+    "scripts/stages/stage-1/phase_d2/d2_confirmation.py",
+    "scripts/stages/stage-1/phase_d2/d2_gpu_validation.py",
+    "scripts/stages/stage-1/phase_d2/d2_product_durability.py",
+    "scripts/stages/stage-1/phase_d2/d2_screening.py",
+    "scripts/stages/stage-1/phase_d2/d2_screening_authorization.py",
+    "scripts/stages/stage-1/phase_d2/d2_session.py",
+    "scripts/stages/stage-1/phase_d2/d2v3_gpu_validation.py",
+    "scripts/stages/stage-1/phase_d2/rank_d2_screening.py",
+    "scripts/stages/stage-1/phase_d2/rescore_d2_probe.py",
+    "scripts/stages/stage-1/phase_d2/verdict_d2_confirmation.py",
+    "scripts/stages/stage-1/phase_d2/write_d2_preregistration.py",
+    "scripts/stages/stage-1/phase_d3/__init__.py",
+    "scripts/stages/stage-1/phase_d3/autoinit_d3_probes_launch.py",
+    "scripts/stages/stage-1/phase_d3/autoinit_d3_structural_driver.py",
+    "scripts/stages/stage-1/phase_d3/autoinit_d3_structural_launch.py",
+    "scripts/stages/stage-1/phase_d3/closeout_d3_structural.py",
+    "scripts/stages/stage-1/phase_d3/d3_authorization.py",
+    "scripts/stages/stage-1/phase_d3/d3_budget.py",
+    "scripts/stages/stage-1/phase_d3/d3_design.py",
+    "scripts/stages/stage-1/phase_d3/d3_probes.py",
+    "src/aadistill/data/dataset.py",
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/data/ladder.py",
+    "src/aadistill/data/tools.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/__init__.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/capability.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/governance/closure.py",
+    "src/aadistill/governance/grant.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/bundle_transport.py",
+    "src/aadistill/infrastructure/env.py",
+    "src/aadistill/infrastructure/failure_signature.py",
+    "src/aadistill/infrastructure/log_relay.py",
+    "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/watchdog.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/calibration/batching.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/items.py",
+    "src/aadistill/initialization/calibration/packing.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/execution.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+    "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+    "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+    "src/aadistill/initialization/operators/depth/__init__.py",
+    "src/aadistill/initialization/operators/depth/_common.py",
+    "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+    "src/aadistill/initialization/operators/depth/positional.py",
+    "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+    "src/aadistill/initialization/operators/register.py",
+    "src/aadistill/initialization/operators/width/residual/global_pca.py",
+    "src/aadistill/initialization/planning/__init__.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/planning/generation.py",
+    "src/aadistill/initialization/planning/generation_compat.py",
+    "src/aadistill/initialization/planning/isolation.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/planning/operator_config.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/recovery.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/scoring/batches.py",
+    "src/aadistill/initialization/scoring/content.py",
+    "src/aadistill/initialization/scoring/kl_reference.py",
+    "src/aadistill/initialization/scoring/objective.py",
+    "src/aadistill/initialization/scoring/output_head.py",
+    "src/aadistill/initialization/scoring/positions.py",
+    "src/aadistill/initialization/scoring/protocol_identity.py",
+    "src/aadistill/initialization/scoring/reference_store.py",
+    "src/aadistill/initialization/scoring/rows.py",
+    "src/aadistill/initialization/scoring/support.py",
+    "src/aadistill/initialization/specs/arch.py",
+    "src/aadistill/initialization/specs/artifact.py",
+    "src/aadistill/initialization/specs/materialization.py",
+    "src/aadistill/initialization/specs/metrics.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/statistics/spec.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
+    "src/aadistill/models/student.py",
+    "src/aadistill/models/teacher.py",
+    "src/aadistill/models/tokenizer_contract.py",
+    "src/aadistill/runtime/__init__.py",
+    "src/aadistill/runtime/cost.py",
+    "src/aadistill/runtime/cpu_test_env.py",
+    "src/aadistill/runtime/device_handoff.py",
+    "src/aadistill/runtime/hub_capacity.py",
+    "src/aadistill/runtime/leaf_durability.py",
+    "src/aadistill/runtime/pod_environment.py",
+    "src/aadistill/runtime/run_layout.py",
+    "src/aadistill/runtime/staging_contract.py",
+    "src/aadistill/runtime/telemetry.py",
+    "src/aadistill/training/lora.py",
+    "src/aadistill/training/train.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 8.2078,
+    "expected_minutes": 357.2,
+    "soft_stop_minutes": 415.20000000000005,
+    "artifact_recovery_reserve_minutes": 30.0,
+    "hard_terminate_minutes": 445.20000000000005,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "unused: three probes from one relay-staged arm, every phase named below from the priced step",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 61.5
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 20.5
+      },
+      {
+        "name": "probes_train_eval_score_rescore_expected",
+        "minutes": 275.2
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "probe_overrun_risk",
+        "minutes": 22.28
+      }
+    ],
+    "notes": [],
+    "soft_stop_reserve_minutes": 22.28,
+    "expected_usd": 6.4891,
+    "soft_stop_usd": 7.5428,
+    "artifact_recovery_reserve_usd": 0.545,
+    "hard_terminate_usd": 8.0878
+  },
+  "quoted_price_per_hour": 1.09,
+  "stock_status": "Medium",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 118.5137436087,
+    "current_spend_per_hr": 0.0,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 30.0,
+    "ok": true,
+    "why": "the provider account holds $118.5137 against the $30.0000 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "prechecks": [
+    {
+      "check": "run_identity_gate",
+      "ok": true,
+      "message": "run d3_probes_20261017_110022, registration 43156f21a011"
+    },
+    {
+      "check": "functools.partial(<function contract_gate at 0x7f4f84702980>, rung=Rung(name='d3_probes', session_kind='d3_probes', contract=<module 'stages.phase_d3.d3_probes' from '/home/ecs-user/AlphaAvatar-distill/scripts/stages/stage-1/phase_d3/d3_probes.py'>, authorization_type=<class 'stages.phase_d3.d3_authorization.D3ProbesAuthorization'>, test_paths=('scripts/stages/stage-1/phase_d3/tests/probes_pod_preflight',), audit_dirname='autoinit_d3_probes', evidence_dir='artifacts/audit/autoinit_d3_probes', evidence_filename='d3_probes.json', attested_name='d3_probes_attested_protocol.json', status='/workspace/autoinit_d3_probes.status', run_log='/workspace/autoinit_d3_probes_run.log', probe_root_rel='artifacts/stages/stage-3/d3_probes', eval_packages_rel='artifacts/stages/stage-3/d3_probes_eval', release_ack_rel='artifacts/audit/autoinit_d3_probes/release_acks', run_prefix='d3_probes_', layout=BehaviouralLayout(evidence_dir='artifacts/audit/autoinit_d3_probes', evidence_filename='d3_probes.json', attested_name='d3_probes_attested_protocol.json', pod_probe_root='/workspace/aad/artifacts/stages/stage-3/d3_probes', release_ack_rel='artifacts/audit/autoinit_d3_probes/release_acks', extra_probe_files=(('rescoring.json', 'rescoring/{probe_id}.json', False),), required_training_records=('run_manifest.json', 'run_completion.json')), description=\"D3 PROBES on d_series_shared_eval@v1: the D3 initialization (the structural session's product), staged from the relay and verified at all four identities, trained under the frozen recovery recipe at the three D1 confirmation seeds, generated through the unchanged generator, admitted against the shared confirmation rung's evaluation protocol, scored by its pinned scorer and rollout-rescored as a diagnostic. Stops at preservation; the exploratory comparison with q2 and B is computed off-pod.\"))",
+      "ok": true,
+      "message": "contract verified at $0: 5297bf3149b137d5, 3 probes"
+    },
+    {
+      "check": "relay_arm_gate",
+      "ok": true,
+      "message": "3 product files on the relay at their pins"
+    },
+    {
+      "check": "session_commit_and_lineage",
+      "ok": true,
+      "message": "session commit c10ad81189c1 verified: harness digests to b1b2cbea4f04\u2026, carries the authorization and only logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "check": "same_failure_gate",
+      "ok": true,
+      "message": "no previous attempt failed deterministically; 0 prior log(s) read"
+    },
+    {
+      "check": "bundle_staged_gate",
+      "ok": true,
+      "message": "aad_autoinit_c10ad811.bundle round-trips"
+    }
+  ],
+  "d2_d3_probes_contract_check": {
+    "contract_hash": "5297bf3149b137d5813d0a0a7d18c635a8a5e6f2be2715923d9f6ee4667da18d",
+    "n_probes": 3,
+    "seeds": [
+      396880939,
+      766527341,
+      1004399678
+    ],
+    "evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73"
+  },
+  "d3_probes_relay_arm": [
+    {
+      "repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors",
+      "dest": "artifacts/stages/stage-1/phase_d3/arms/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de",
+      "sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856",
+      "also_stage_to": null
+    },
+    {
+      "repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/config.json",
+      "dest": "artifacts/stages/stage-1/phase_d3/arms/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de",
+      "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+      "also_stage_to": null
+    },
+    {
+      "repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/generation_config.json",
+      "dest": "artifacts/stages/stage-1/phase_d3/arms/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de",
+      "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+      "also_stage_to": null
+    }
+  ],
+  "session_commit_check": {
+    "session_commit": "c10ad81189c1896550a6eab21d52aa209dcc5893",
+    "authorized_session_commit": "8db0fff7e712a71be1b6eaa66cd48decb7a68592",
+    "harness_digest_at_commit": "b1b2cbea4f04bb8f4b8a8195ed47c701430f9740e126d9e6737eb89fbcca9fa1",
+    "authorized_harness_digest": "b1b2cbea4f04bb8f4b8a8195ed47c701430f9740e126d9e6737eb89fbcca9fa1",
+    "harness_matches": true,
+    "commit_carries_this_authorization": true,
+    "rule": "the pod checks out this commit from a bundle; its harness must digest to the authorized value and it must carry the authorization the driver will load",
+    "lineage": {
+      "authorized_base": "8db0fff7e712a71be1b6eaa66cd48decb7a68592",
+      "session_commit": "c10ad81189c1896550a6eab21d52aa209dcc5893",
+      "descends_from_base": true,
+      "changed_paths": [
+        "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/governance/authorization.json"
+      ],
+      "unexpected_paths": [],
+      "ok": true,
+      "reason": "only logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/governance/authorization.json differs from the authorized base"
+    }
+  },
+  "same_failure_rule": {
+    "prior_attempts_read": 0,
+    "previous_deterministic_signature": null,
+    "corrective_change": true,
+    "corrective_change_basis": "no prior probes attempt exists"
+  },
+  "bundle_staged_check": {
+    "session_commit": "c10ad81189c1896550a6eab21d52aa209dcc5893",
+    "canonical_bundle_name": "aad_autoinit_c10ad811.bundle",
+    "relay_repo": "AlphaAvatar/aadistill-artifacts",
+    "relay_path": "transfer/aad_autoinit_c10ad811.bundle",
+    "n_harness_files": 216,
+    "bytes": 33276335,
+    "remote_sha256": "1e379ddea1e2db52866b77c845fb6030007981bb2cf550a89488575f624e6e30",
+    "local_sha256": "1e379ddea1e2db52866b77c845fb6030007981bb2cf550a89488575f624e6e30",
+    "bundle_verify_rc": 0,
+    "roundtrip_head": "c10ad81189c1896550a6eab21d52aa209dcc5893",
+    "authorization_sha256": "4f3e3536e48220719da4122cde2277f736927b0b63094abe2aec50cbbe050fcc",
+    "authorization_matches": true,
+    "roundtrip_harness_digest": "b1b2cbea4f04bb8f4b8a8195ed47c701430f9740e126d9e6737eb89fbcca9fa1",
+    "expected_harness_digest": "b1b2cbea4f04bb8f4b8a8195ed47c701430f9740e126d9e6737eb89fbcca9fa1",
+    "ok": true,
+    "answers": "a pod can obtain the exact authorized code from the relay right now, not merely that a local file once existed"
+  },
+  "precheck": {
+    "relay_needed": [
+      "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+      "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+      "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+      "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors",
+      "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/config.json",
+      "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/generation_config.json"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 9
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1396
+    },
+    "local_assets": [
+      "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1/d1_screening",
+      "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1/d1_confirmation"
+    ],
+    "local_missing": []
+  },
+  "pod_id": "6gqbeysqtywflq",
+  "actual_price_per_hour": 1.09,
+  "terminate_after_utc": "2026-10-17T18:27:22Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-artifacts/phase_d3/d3_probes_20261017_110022/watchdog_6gqbeysqtywflq.jsonl"
+  ],
+  "watchdog_owns_pod": "6gqbeysqtywflq",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "595.91.07"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+  },
+  "host_admission": [
+    {
+      "draw": 1,
+      "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+      "admitted": true,
+      "reason": "image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07 is the protocol's"
+    }
+  ],
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_c10ad811.bundle",
+    "SESSION_ASSETS": "d1_screening:artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1,d1_confirmation:artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1",
+    "SESSION_AUTH_PATH": "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/governance/authorization.json",
+    "SESSION_COMMIT": "c10ad81189c1896550a6eab21d52aa209dcc5893",
+    "SESSION_KIND": "d3_probes",
+    "SESSION_PLAN_HASH": "43156f21a011803bcb76be8f2c3f5f9616e9034d8f7ea811b9f5de6b9eea17d9",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/phase_d3/arms/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de\",\"path\":\"stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/phase_d3/arms/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de\",\"path\":\"stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/phase_d3/arms/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de\",\"path\":\"stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633\"}]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV TEACHER_READY VLLM_READY TESTS_OK AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/autoinit_d3_probes.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "scripts/stages/stage-1/phase_d3/tests/probes_pod_preflight",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "2700",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "autoinit_d3_probes_driver",
+    "pid": 2895,
+    "workdir": "/workspace/aad",
+    "command": "/opt/train/bin/python /workspace/aad/scripts/stages/stage-1/phase_d2/autoinit_d2_screening_driver.py --rung d3_probes --out '/workspace/aad/artifacts/audit/autoinit_d3_probes' --run-id 'd3_probes_20261017_110022' --authorization '/workspace/aad/logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/governance/authorization.json' --arm-root '/workspace/aad/artifacts/stages/stage-1/phase_d3/arms' --status '/workspace/autoinit_d3_probes.status' --device cuda --image-digest 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07'",
+    "log_path": "/workspace/autoinit_d3_probes_run.log",
+    "status_path": "/workspace/autoinit_d3_probes.status",
+    "pid_path": "/workspace/jobs/autoinit_d3_probes_driver.pid",
+    "descriptor_path": "/workspace/jobs/autoinit_d3_probes_driver.job.json",
+    "exit_path": "/workspace/jobs/autoinit_d3_probes_driver.exit",
+    "started_utc": "2026-10-17T11:08:16Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "probe_evidence_read_from": "/home/ecs-user/aad-artifacts/phase_d3/d3_probes_20261017_110022/relay/d3_probes.json",
+  "probe_evidence_secured": {
+    "d3_probes_d3_s396880939": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    },
+    "d3_probes_d3_s766527341": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    },
+    "d3_probes_d3_s1004399678": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    }
+  },
+  "trained_unscored_preserved": {
+    "d3_probes_d3_s396880939": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "ccc432ed01ee71023704a660b07e093dfa8814a360b4099a3fe58193b43993f9",
+      "arrived_sha256": "ccc432ed01ee71023704a660b07e093dfa8814a360b4099a3fe58193b43993f9",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d3/d3_probes_20261017_110022/products/trained_unscored/d3_probes_d3_s396880939",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d3_probes_d3_s766527341": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "e626c722a897bb7a07ae7356620a35ade9f17fb2802e667369dbdb27b7ce8838",
+      "arrived_sha256": "e626c722a897bb7a07ae7356620a35ade9f17fb2802e667369dbdb27b7ce8838",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d3/d3_probes_20261017_110022/products/trained_unscored/d3_probes_d3_s766527341",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d3_probes_d3_s1004399678": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "d52f4c6439bf8948c075d52d862f972a0bd7eac81ae36298707ae326ecc455c5",
+      "arrived_sha256": "d52f4c6439bf8948c075d52d862f972a0bd7eac81ae36298707ae326ecc455c5",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d3/d3_probes_20261017_110022/products/trained_unscored/d3_probes_d3_s1004399678",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    }
+  },
+  "training_records_secured": {
+    "d3_probes_d3_s396880939": {
+      "run_manifest.json": "502395f2cd368add6798c3f208cd72473171d126023f7649443d68cc01593aaf",
+      "run_completion.json": "546fd6b1c237c41b661202b433e3e9b7f2bc6ff60842ab4bb4b9f3fec9a2ae25"
+    },
+    "d3_probes_d3_s766527341": {
+      "run_manifest.json": "d87a4d9bc5fd17d336cef1e3c55cf9d59165449648c0057b0df15569dec0a828",
+      "run_completion.json": "8368eccf468448e04aab7c064a65d7025dc2632adb78cd1b00677f4e950a2855"
+    },
+    "d3_probes_d3_s1004399678": {
+      "run_manifest.json": "286862b45c1adecc490550195d516095eda0fa24949460b0ee5e0447477a9ec0",
+      "run_completion.json": "90fa2d2e0963b3c4e38b5e56605acbabed30034c47c581d4a0f77d9a5a6ffcf6"
+    }
+  },
+  "release_acks": [
+    {
+      "probe_id": "d3_probes_d3_s396880939",
+      "delivered": true
+    },
+    {
+      "probe_id": "d3_probes_d3_s766527341",
+      "delivered": true
+    },
+    {
+      "probe_id": "d3_probes_d3_s1004399678",
+      "delivered": true
+    }
+  ],
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "fetched_reports": [
+    "d3_probes.json"
+  ],
+  "checkpoints_fetched": [
+    {
+      "probe_id": "d3_probes_d3_s1004399678",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    },
+    {
+      "probe_id": "d3_probes_d3_s396880939",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    },
+    {
+      "probe_id": "d3_probes_d3_s766527341",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    }
+  ],
+  "required_products_secured": {
+    "ok": true,
+    "why": "all 3 scored probes' results and per-sample rows off-pod; 3 trained checkpoint(s) preserved and identity-verified, reusable by a replacement attempt"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 97,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 273.28,
+    "actual_usd": 4.9646,
+    "authorized_usd": 8.2078,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-17T15:35:28+00:00"
+}

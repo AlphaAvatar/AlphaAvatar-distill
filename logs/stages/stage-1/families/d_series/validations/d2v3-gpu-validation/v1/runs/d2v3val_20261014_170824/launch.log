@@ -1,0 +1,323 @@
+[17:08:24] re-querying NVIDIA L40S securePrice
+{"data":{"gpuTypes":[{"id":"NVIDIA L40S","securePrice":1.09,"lowestPrice":{"stockStatus":"Low"}}]}}
+[17:08:24] live securePrice $1.09/h (stock Low)
+[17:08:25] calibration mixtures required by the pilot's own steps (4):
+[17:08:25]   state_eval.items -> artifacts/stages/stage-1/state_eval_v1/items.jsonl
+[17:08:25]   state_eval.manifest -> artifacts/stages/stage-1/state_eval_v1/manifest.json
+[17:08:25]   calib.domain_balanced@v1 -> artifacts/stages/stage-1/e8_calibration_v1/items.jsonl
+[17:08:25]   calib.reasoning_heavy@v2 -> artifacts/stages/stage-1/reasoning_heavy_v2/items.jsonl
+[17:08:25] budget: campaign $1.2200 - spent $0.0000 = $1.2200
+[17:08:25]         less $0.30 reserve, capped at $0.92 -> session $0.92
+[17:08:25] creating NVIDIA L40S at the live $1.09/h, useful runtime 3038s
+warning: 'runpodctl create pod' is deprecated, use 'runpodctl pod create' instead
+pod "20ji79950u9arw" created for $1.090 / hr
+[17:08:26] pod 20ji79950u9arw (confirmed by the provider)
+[17:08:26] watchdog pid 3782065, hard deadline 62 min
+[17:08:37] waiting for a public port 22 mapping...
+[17:08:48] waiting for a public port 22 mapping...
+[17:08:59] waiting for a public port 22 mapping...
+[17:09:10] waiting for a public port 22 mapping...
+[17:09:21] waiting for a public port 22 mapping...
+[17:09:32] waiting for a public port 22 mapping...
+[17:09:43] waiting for a public port 22 mapping...
+[17:09:54] ssh 160.250.71.213:42011
+[17:09:56] pushing the calibration mixtures
+Warning: Permanently added '[160.250.71.213]:42011' (ECDSA) to the list of known hosts.
+Warning: Permanently added '[160.250.71.213]:42011' (ECDSA) to the list of known hosts.
+Warning: Permanently added '[160.250.71.213]:42011' (ECDSA) to the list of known hosts.
+[17:10:04]   pushed artifacts/stages/stage-1/state_eval_v1/items.jsonl
+Warning: Permanently added '[160.250.71.213]:42011' (ECDSA) to the list of known hosts.
+Warning: Permanently added '[160.250.71.213]:42011' (ECDSA) to the list of known hosts.
+[17:10:09]   pushed artifacts/stages/stage-1/state_eval_v1/manifest.json
+Warning: Permanently added '[160.250.71.213]:42011' (ECDSA) to the list of known hosts.
+Warning: Permanently added '[160.250.71.213]:42011' (ECDSA) to the list of known hosts.
+[17:10:16]   pushed artifacts/stages/stage-1/e8_calibration_v1/items.jsonl
+Warning: Permanently added '[160.250.71.213]:42011' (ECDSA) to the list of known hosts.
+Warning: Permanently added '[160.250.71.213]:42011' (ECDSA) to the list of known hosts.
+[17:10:22]   pushed artifacts/stages/stage-1/reasoning_heavy_v2/items.jsonl
+[17:10:22] pushed 4/4 required mixtures
+[17:10:22] setup + adoption validation (bounded at 3038s)
+Warning: Permanently added '[160.250.71.213]:42011' (ECDSA) to the list of known hosts.
+[pod 17:10:24] host: NVIDIA L40S, 595.91.07, 46068 MiB
+[pod 17:10:24] bootstrap: huggingface_hub==1.23.0 into the image python
+WARNING: huggingface-hub 1.23.0 does not provide the extra 'hf-transfer'
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+  huggingface_hub 1.23.0
+[pod 17:10:26]   hf_transfer enabled
+[pod 17:10:30] source 4248d7dbce4b2e97de32700fb06542a19f4e3339
+[pod 17:10:30] staging the pushed calibration mixtures
+[pod 17:10:30]   artifacts/stages/stage-1/state_eval_v1/items.jsonl (907397 B)
+[pod 17:10:30]   artifacts/stages/stage-1/state_eval_v1/manifest.json (10722 B)
+[pod 17:10:30]   artifacts/stages/stage-1/e8_calibration_v1/items.jsonl (733975 B)
+[pod 17:10:30]   artifacts/stages/stage-1/reasoning_heavy_v2/items.jsonl (780834 B)
+[pod 17:10:30] fetching the root teacher at 768f209d9ea81521153ed38c47d515654e938aea
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/constants.py:298: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files:  80%|████████  | 8/10 [00:04<00:01,  1.75it/s]Fetching 10 files: 100%|██████████| 10/10 [00:13<00:00,  1.37s/it]
+  root at /workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea
+[pod 17:10:44] building /opt/train offline from the relay wheelhouse
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/constants.py:298: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Fetching 91 files:   0%|          | 0/91 [00:00<?, ?it/s]Fetching 91 files:   9%|▉         | 8/91 [00:02<00:26,  3.15it/s]Fetching 91 files:  18%|█▊        | 16/91 [00:05<00:25,  3.00it/s]Fetching 91 files:  26%|██▋       | 24/91 [00:07<00:19,  3.41it/s]Fetching 91 files:  35%|███▌      | 32/91 [00:09<00:18,  3.25it/s]Fetching 91 files:  44%|████▍     | 40/91 [00:13<00:17,  2.97it/s]Fetching 91 files:  51%|█████     | 46/91 [00:30<00:29,  1.53it/s]Fetching 91 files:  52%|█████▏    | 47/91 [00:30<00:28,  1.52it/s]Fetching 91 files:  53%|█████▎    | 48/91 [00:34<00:30,  1.39it/s]Fetching 91 files:  54%|█████▍    | 49/91 [00:35<00:30,  1.38it/s]Fetching 91 files:  55%|█████▍    | 50/91 [00:36<00:29,  1.39it/s]Fetching 91 files:  56%|█████▌    | 51/91 [00:37<00:29,  1.38it/s]Fetching 91 files:  57%|█████▋    | 52/91 [00:41<00:31,  1.25it/s]Fetching 91 files:  58%|█████▊    | 53/91 [00:46<00:33,  1.15it/s]Fetching 91 files:  59%|█████▉    | 54/91 [00:46<00:32,  1.16it/s]Fetching 91 files:  60%|██████    | 55/91 [00:50<00:32,  1.10it/s]Fetching 91 files:  62%|██████▏   | 56/91 [00:50<00:31,  1.10it/s]Fetching 91 files:  63%|██████▎   | 57/91 [00:51<00:30,  1.11it/s]Fetching 91 files:  65%|██████▍   | 59/91 [00:51<00:27,  1.15it/s]Fetching 91 files:  67%|██████▋   | 61/91 [00:52<00:25,  1.17it/s]Fetching 91 files:  69%|██████▉   | 63/91 [00:52<00:23,  1.19it/s]Fetching 91 files:  71%|███████▏  | 65/91 [00:54<00:21,  1.19it/s]Fetching 91 files:  74%|███████▎  | 67/91 [00:54<00:19,  1.22it/s]Fetching 91 files:  76%|███████▌  | 69/91 [00:55<00:17,  1.25it/s]Fetching 91 files:  78%|███████▊  | 71/91 [00:55<00:15,  1.27it/s]Fetching 91 files:  80%|████████  | 73/91 [00:56<00:13,  1.29it/s]Fetching 91 files:  82%|████████▏ | 75/91 [00:56<00:12,  1.32it/s]Fetching 91 files:  85%|████████▍ | 77/91 [00:58<00:10,  1.32it/s]Fetching 91 files:  87%|████████▋ | 79/91 [00:59<00:09,  1.33it/s]Fetching 91 files:  89%|████████▉ | 81/91 [00:59<00:07,  1.35it/s]Fetching 91 files:  91%|█████████ | 83/91 [01:00<00:05,  1.38it/s]Fetching 91 files:  93%|█████████▎| 85/91 [01:01<00:04,  1.38it/s]Fetching 91 files:  96%|█████████▌| 87/91 [01:03<00:02,  1.38it/s]Fetching 91 files:  98%|█████████▊| 89/91 [01:03<00:01,  1.39it/s]Fetching 91 files: 100%|██████████| 91/91 [01:05<00:00,  1.39it/s]Fetching 91 files: 100%|██████████| 91/91 [01:05<00:00,  1.39it/s]
+[pod 17:11:51] wheelhouse: 91 wheels, 3.9G
+Using CPython 3.12.3 interpreter at: /usr/local/bin/python
+Creating virtual environment at: /opt/train
+Activate with: source /opt/train/bin/activate
+Using Python 3.12.3 environment at: /opt/train
+Resolved 82 packages in 53ms
+Prepared 82 packages in 4.99s
+Installed 82 packages in 1.91s
+ + aiohappyeyeballs==2.7.1
+ + aiohttp==3.14.1
+ + aiosignal==1.4.0
+ + annotated-doc==0.0.4
+ + anyio==4.14.1
+ + attrs==26.1.0
+ + certifi==2026.6.17
+ + charset-normalizer==3.4.9
+ + click==8.4.2
+ + contourpy==1.3.3
+ + cuda-bindings==12.9.7
+ + cuda-pathfinder==1.6.0
+ + cuda-toolkit==12.8.1
+ + cycler==0.12.1
+ + datasets==5.0.0
+ + dill==0.4.1
+ + filelock==3.29.7
+ + fonttools==4.63.0
+ + frozenlist==1.8.0
+ + fsspec==2026.4.0
+ + h11==0.16.0
+ + hf-xet==1.5.1
+ + httpcore==1.0.9
+ + httpx==0.28.1
+ + huggingface-hub==1.23.0
+ + idna==3.18
+ + iniconfig==2.3.0
+ + jinja2==3.1.6
+ + kiwisolver==1.5.0
+ + markdown-it-py==4.2.0
+ + markupsafe==3.0.3
+ + matplotlib==3.11.0
+ + mdurl==0.1.2
+ + mpmath==1.3.0
+ + multidict==6.7.1
+ + multiprocess==0.70.19
+ + networkx==3.6.1
+ + numpy==2.5.1
+ + nvidia-cublas-cu12==12.8.4.1
+ + nvidia-cuda-cupti-cu12==12.8.90
+ + nvidia-cuda-nvrtc-cu12==12.8.93
+ + nvidia-cuda-runtime-cu12==12.8.90
+ + nvidia-cudnn-cu12==9.19.0.56
+ + nvidia-cufft-cu12==11.3.3.83
+ + nvidia-cufile-cu12==1.13.1.3
+ + nvidia-curand-cu12==10.3.9.90
+ + nvidia-cusolver-cu12==11.7.3.90
+ + nvidia-cusparse-cu12==12.5.8.93
+ + nvidia-cusparselt-cu12==0.7.1
+ + nvidia-nccl-cu12==2.28.9
+ + nvidia-nvjitlink-cu12==12.8.93
+ + nvidia-nvshmem-cu12==3.4.5
+ + nvidia-nvtx-cu12==12.8.90
+ + packaging==26.2
+ + pandas==3.0.3
+ + pillow==12.3.0
+ + pluggy==1.6.0
+ + propcache==0.5.2
+ + pyarrow==25.0.0
+ + pygments==2.20.0
+ + pyparsing==3.3.2
+ + pytest==9.1.1
+ + python-dateutil==2.9.0.post0
+ + pyyaml==6.0.3
+ + regex==2026.7.10
+ + requests==2.34.2
+ + rich==15.0.0
+ + safetensors==0.8.0
+ + setuptools==81.0.0
+ + shellingham==1.5.4
+ + six==1.17.0
+ + sympy==1.14.0
+ + tokenizers==0.22.2
+ + torch==2.11.0+cu128
+ + tqdm==4.68.4
+ + transformers==5.13.1
+ + triton==3.6.0
+ + typer==0.26.8
+ + typing-extensions==4.16.0
+ + urllib3==2.7.0
+ + xxhash==3.8.1
+ + yarl==1.24.2
+Using Python 3.12.3 environment at: /opt/train
+Resolved 1 package in 1ms
+   Building aadistill @ file:///workspace/repo
+      Built aadistill @ file:///workspace/repo
+Prepared 1 package in 274ms
+Installed 1 package in 3ms
+ + aadistill==0.0.1 (from file:///workspace/repo)
+/opt/train/lib/python3.12/site-packages/huggingface_hub/constants.py:298: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+{
+ "torch": "2.11.0+cu128",
+ "transformers": "5.13.1",
+ "cuda": "12.8",
+ "cuda_available": true,
+ "device": "NVIDIA L40S",
+ "capability": [
+  8,
+  9
+ ],
+ "bf16_supported": true
+}
+[pod 17:12:05] preflight: everything but the two expensive path runs, on THIS interpreter
+[pod 17:12:17] preflight ok (all_v1)
+[pod 17:12:17] ADOPTION all_v1: stages W, deadline 2625s
+[    0.000] environment start {}
+/opt/train/lib/python3.12/site-packages/huggingface_hub/constants.py:298: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+[    1.832] environment ok {"seconds": 1.832}
+[    1.833] register_and_policy start {}
+[    1.876] register_and_policy ok {"seconds": 0.044}
+[    1.877] bind_full_vocab start {}
+[    1.925] bind_full_vocab ok {"seconds": 0.049}
+[    1.926] bind_reference_topk_tail start {}
+[    1.969] bind_reference_topk_tail ok {"seconds": 0.043}
+[    1.971] d2v3_validation_premises start {}
+[    1.992] d2v3_validation_premises ok {"seconds": 0.021}
+[    1.993] teacher_fetch_verify start {}
+Fetching 13 files:   0%|          | 0/13 [00:00<?, ?it/s]Fetching 13 files: 100%|██████████| 13/13 [00:00<00:00, 11736.11it/s]
+[   10.746] teacher_fetch_verify ok {"seconds": 8.754}
+[   10.748] W_d2v3_validation start {}
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 9635.57it/s]
+[   45.958] W.W1_union_stores_and_confidence ok {}
+[  148.990] W.W2_ffn_child_weighted ok {}
+[  167.338] W.W3_union_numerics ok {}
+depth.causal_kl_greedy_v1: round 0 candidate 1/36 (layer 0) score 14.192678 · 1 evals · 0.2 min · 6.59 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/36 (layer 1) score 2.621556 · 2 evals · 0.2 min · 8.71 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/36 (layer 2) score 1.660944 · 3 evals · 0.3 min · 9.74 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/36 (layer 3) score 1.658117 · 4 evals · 0.4 min · 10.36 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/36 (layer 4) score 1.559452 · 5 evals · 0.5 min · 10.76 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/36 (layer 5) score 1.590148 · 6 evals · 0.5 min · 11.05 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 7/36 (layer 6) score 9.081642 · 7 evals · 0.6 min · 11.28 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 8/36 (layer 7) score 1.497606 · 8 evals · 0.7 min · 11.44 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 9/36 (layer 8) score 1.434643 · 9 evals · 0.8 min · 11.57 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 10/36 (layer 9) score 1.430211 · 10 evals · 0.9 min · 11.68 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 11/36 (layer 10) score 1.407934 · 11 evals · 0.9 min · 11.76 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 12/36 (layer 11) score 1.424984 · 12 evals · 1.0 min · 11.84 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 13/36 (layer 12) score 1.425842 · 13 evals · 1.1 min · 11.90 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 14/36 (layer 13) score 1.458644 · 14 evals · 1.2 min · 11.95 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 15/36 (layer 14) score 1.424237 · 15 evals · 1.2 min · 12.00 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 16/36 (layer 15) score 1.430483 · 16 evals · 1.3 min · 12.04 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 17/36 (layer 16) score 1.406367 · 17 evals · 1.4 min · 12.08 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 18/36 (layer 17) score 1.374145 · 18 evals · 1.5 min · 12.12 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 19/36 (layer 18) score 1.388834 · 19 evals · 1.6 min · 12.15 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 20/36 (layer 19) score 1.542651 · 20 evals · 1.6 min · 12.18 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 21/36 (layer 20) score 1.415748 · 21 evals · 1.7 min · 12.20 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 22/36 (layer 21) score 1.430819 · 22 evals · 1.8 min · 12.22 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 23/36 (layer 22) score 1.519248 · 23 evals · 1.9 min · 12.24 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 24/36 (layer 23) score 1.419742 · 24 evals · 2.0 min · 12.26 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 25/36 (layer 24) score 1.492072 · 25 evals · 2.0 min · 12.28 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 26/36 (layer 25) score 1.466943 · 26 evals · 2.1 min · 12.30 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 27/36 (layer 26) score 1.446047 · 27 evals · 2.2 min · 12.31 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 28/36 (layer 27) score 1.463970 · 28 evals · 2.3 min · 12.33 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 29/36 (layer 28) score 1.454964 · 29 evals · 2.3 min · 12.34 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 30/36 (layer 29) score 1.415813 · 30 evals · 2.4 min · 12.35 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 31/36 (layer 30) score 1.402242 · 31 evals · 2.5 min · 12.36 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 32/36 (layer 31) score 1.406667 · 32 evals · 2.6 min · 12.37 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 33/36 (layer 32) score 1.414913 · 33 evals · 2.7 min · 12.38 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 34/36 (layer 33) score 1.506434 · 34 evals · 2.7 min · 12.39 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 35/36 (layer 34) score 1.579796 · 35 evals · 2.8 min · 12.40 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 36/36 (layer 35) score 1.621346 · 36 evals · 2.9 min · 12.41 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 17 score 1.374145; runner-up 18 margin 1.469e-02
+[  362.155] W.W4_depth_union_all_v1 ok {}
+depth.causal_kl_greedy_v1: round 0 candidate 1/36 (layer 0) score 14.192678 · 1 evals · 0.1 min · 7.89 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 2/36 (layer 1) score 2.621556 · 2 evals · 0.2 min · 10.25 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 3/36 (layer 2) score 1.660944 · 3 evals · 0.3 min · 11.39 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 4/36 (layer 3) score 1.658117 · 4 evals · 0.3 min · 12.05 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 5/36 (layer 4) score 1.559452 · 5 evals · 0.4 min · 12.49 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 6/36 (layer 5) score 1.590148 · 6 evals · 0.5 min · 12.80 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 7/36 (layer 6) score 9.081642 · 7 evals · 0.5 min · 13.04 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 8/36 (layer 7) score 1.497606 · 8 evals · 0.6 min · 13.21 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 9/36 (layer 8) score 1.434643 · 9 evals · 0.7 min · 13.35 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 10/36 (layer 9) score 1.430211 · 10 evals · 0.7 min · 13.46 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 11/36 (layer 10) score 1.407934 · 11 evals · 0.8 min · 13.56 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 12/36 (layer 11) score 1.424984 · 12 evals · 0.9 min · 13.63 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 13/36 (layer 12) score 1.425842 · 13 evals · 0.9 min · 13.70 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 14/36 (layer 13) score 1.458644 · 14 evals · 1.0 min · 13.76 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 15/36 (layer 14) score 1.424237 · 15 evals · 1.1 min · 13.81 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 16/36 (layer 15) score 1.430483 · 16 evals · 1.2 min · 13.86 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 17/36 (layer 16) score 1.406367 · 17 evals · 1.2 min · 13.90 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 18/36 (layer 17) score 1.374145 · 18 evals · 1.3 min · 13.94 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 19/36 (layer 18) score 1.388834 · 19 evals · 1.4 min · 13.97 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 20/36 (layer 19) score 1.542651 · 20 evals · 1.4 min · 14.00 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 21/36 (layer 20) score 1.415748 · 21 evals · 1.5 min · 14.02 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 22/36 (layer 21) score 1.430819 · 22 evals · 1.6 min · 14.04 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 23/36 (layer 22) score 1.519248 · 23 evals · 1.6 min · 14.06 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 24/36 (layer 23) score 1.419742 · 24 evals · 1.7 min · 14.08 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 25/36 (layer 24) score 1.492072 · 25 evals · 1.8 min · 14.10 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 26/36 (layer 25) score 1.466943 · 26 evals · 1.8 min · 14.11 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 27/36 (layer 26) score 1.446047 · 27 evals · 1.9 min · 14.13 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 28/36 (layer 27) score 1.463970 · 28 evals · 2.0 min · 14.14 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 29/36 (layer 28) score 1.454964 · 29 evals · 2.0 min · 14.16 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 30/36 (layer 29) score 1.415813 · 30 evals · 2.1 min · 14.17 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 31/36 (layer 30) score 1.402242 · 31 evals · 2.2 min · 14.18 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 32/36 (layer 31) score 1.406667 · 32 evals · 2.3 min · 14.19 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 33/36 (layer 32) score 1.414913 · 33 evals · 2.3 min · 14.20 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 34/36 (layer 33) score 1.506434 · 34 evals · 2.4 min · 14.21 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 35/36 (layer 34) score 1.579796 · 35 evals · 2.5 min · 14.22 eval/min
+depth.causal_kl_greedy_v1: round 0 candidate 36/36 (layer 35) score 1.621346 · 36 evals · 2.5 min · 14.23 eval/min
+depth.causal_kl_greedy_v1: ROUND 0 chose layer 17 score 1.374145; runner-up 18 margin 1.469e-02
+[  533.226] W.W5_depth_union_scored_v1 ok {}
+[  584.815] W.W6_state_evaluation ok {}
+[  585.406] W_d2v3_validation ok {"seconds": 574.658}
+
+wrote /workspace/out/adoption_all_v1/adoption.json  status=COMPLETE
+[pod 17:22:04] adoption all_v1 rc=0
+[pod 17:22:04]   status: COMPLETE
+[pod 17:22:04]   gpu: NVIDIA L40S cc8.9 torch 2.11.0+cu128 cuda 12.8 bf16=True
+[pod 17:22:04]   protocol: reference_topk_tail_v1 K=200
+[pod 17:22:04]   bound full_vocab: d463a1dc6afbd778 support=full_vocab_v1 suite=a1197205e43a
+[pod 17:22:04]   bound reference_topk_tail: 9c9b0b43dc00b695 support=reference_topk_tail_v1(top_k=200) suite=a1197205e43a
+[pod 17:22:04]   W  D2 v3 GPU validation: arithmetic=FAIL, integrity=PASS, scored_rows_equivalence=PASS, validation=FAIL
+[pod 17:22:04]   W1_union_stores_and_confidence: ok in 29.424s, peak 9.481GiB
+[pod 17:22:04]   W2_ffn_child_weighted: ok in 103.028s, peak 13.138GiB
+[pod 17:22:04]   W3_union_numerics: ok in 18.345s, peak 13.699GiB
+[pod 17:22:04]   W4_depth_union_all_v1: ok in 194.813s, peak 21.112GiB
+[pod 17:22:04]   W5_depth_union_scored_v1: ok in 171.065s, peak 18.721GiB
+[pod 17:22:04]   W6_state_evaluation: ok in 51.584s, peak 18.531GiB
+[pod 17:22:04]   W1 calib.domain_balanced@v1: c_T median 0.997098833322525, IQR 0.12298664450645447, ESS 0.974616127393951
+[pod 17:22:04]   W1 calib.reasoning_heavy@v2: c_T median 0.9989670515060425, IQR 0.0949057936668396, ESS 0.9809523932476776
+[pod 17:22:04]   W3 union vs float64: max 0.00011455713758823372, violations 0, bounds False
+[pod 17:22:04]   W4 choices: {'parent_kl': '26', 'root_teacher_topk_kl': '17', 'root_union_kl_teacher_weighted': '17', 'root_union_kl_unweighted': '17'}
+[pod 17:22:04]   elapsed: 585.411s
+[17:22:04] remote finished rc=0
+[17:22:04] fetching evidence (JSON and logs only; checkpoints stay on the pod)
+Warning: Permanently added '[160.250.71.213]:42011' (ECDSA) to the list of known hosts.
+Warning: Permanently added '[160.250.71.213]:42011' (ECDSA) to the list of known hosts.
+[17:22:10] evidence: 192K, 8 files
+[17:22:10] --- all_v1
+[17:22:10] status: COMPLETE
+[17:22:10] gpu: NVIDIA L40S cc8.9 torch 2.11.0+cu128 cuda 12.8 bf16=True
+[17:22:10] protocol: reference_topk_tail_v1 K=200
+[17:22:10] bound full_vocab: d463a1dc6afbd778 support=full_vocab_v1 suite=a1197205e43a
+[17:22:10] bound reference_topk_tail: 9c9b0b43dc00b695 support=reference_topk_tail_v1(top_k=200) suite=a1197205e43a
+[17:22:10] W  D2 v3 GPU validation: arithmetic=FAIL, integrity=PASS, scored_rows_equivalence=PASS, validation=FAIL
+[17:22:10] W1_union_stores_and_confidence: ok in 29.424s, peak 9.481GiB
+[17:22:10] W2_ffn_child_weighted: ok in 103.028s, peak 13.138GiB
+[17:22:10] W3_union_numerics: ok in 18.345s, peak 13.699GiB
+[17:22:10] W4_depth_union_all_v1: ok in 194.813s, peak 21.112GiB
+[17:22:10] W5_depth_union_scored_v1: ok in 171.065s, peak 18.721GiB
+[17:22:10] W6_state_evaluation: ok in 51.584s, peak 18.531GiB
+[17:22:10] W1 calib.domain_balanced@v1: c_T median 0.997098833322525, IQR 0.12298664450645447, ESS 0.974616127393951
+[17:22:10] W1 calib.reasoning_heavy@v2: c_T median 0.9989670515060425, IQR 0.0949057936668396, ESS 0.9809523932476776
+[17:22:10] W3 union vs float64: max 0.00011455713758823372, violations 0, bounds False
+[17:22:10] W4 choices: {'parent_kl': '26', 'root_teacher_topk_kl': '17', 'root_union_kl_teacher_weighted': '17', 'root_union_kl_unweighted': '17'}
+[17:22:10] elapsed: 585.411s
+[17:22:10] stopping watchdog 3782065
+[17:22:10] teardown: removing pod 20ji79950u9arw
+warning: 'runpodctl remove pod' is deprecated, use 'runpodctl pod delete <id>' instead
+pod "20ji79950u9arw" removed
+[17:22:17] teardown: provider confirms 20ji79950u9arw is gone (attempt 1)
+[17:22:17] cost: 0.2538 USD all-in
+[17:22:17] exit 0

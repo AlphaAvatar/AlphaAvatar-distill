@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-10 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-17 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,43 +9,424 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**D1 IS PAUSED BEFORE BEHAVIOURAL SCREENING.** The control-arm decision is
-resolved and the two corrections it implies are made. The migration that
-blocked it has been reviewed and integrated, so the remaining gate is D1's own
-execution-readiness process (maintainer, 2026-10-10): no execution grant is
-issued, no screening authorization exists, and no resource has been created.
-**Future D-series work starts on a FRESH branch cut from the integrated
-`main`** — P12.2, because a squash commit is not an ancestor of the source
-branch's commits and continuing there would re-apply the whole range.
+**NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods,
+0 network volumes and $0/h (2026-10-17 17:47 UTC). No D-series tmux
+session, watchdog or monitor is alive. The last pod, `6gqbeysqtywflq` (D3
+probes), was deleted at 15:35:28Z.
 
-**THE SIX-TREE INFORMATION-ARCHITECTURE MIGRATION IS COMPLETE AND INTEGRATED**
-into `main` by squash-merge, on maintainer authorization of 2026-10-10 after
-independent review returned GO. Its source branch `migration/info-architecture`
-is **preserved and must never be deleted**: committed records cite commit
-hashes that are reachable only there, and every one of them was verified
-reachable before the integration. Round 1 (2026-10-08)
-made `scripts/`, `logs/` and `artifacts/` owner-first; round 2 (2026-10-09)
-finished the architecture across `configs/`, `data/` and `docs/` —
-`configs/stages/stage-{n}/{experiment}/`, `data/stages/stage-{n}/`,
-`docs/{stages,shared,maintenance}` — each round with its own declarative move
-map (`scripts/maintenance/migration/info_architecture.py`, `…_v2.py`), the
-old→new table extended to 731 pairs in `logs/index.json ::
-historical_paths.map`, the ownership index projected into all six trees
-(`{scripts,artifacts,configs,data,docs}/index.json`), derived `current.json`
-live-state records (D1's now answers battery readiness mechanically), and
-hash-anchored records at
-`logs/maintenance/source-relocations/info-architecture/{v1,v2}/`. The
-checkpoint registry was rebuilt **hashed** with the four D1 finalists'
-scientific identities bound and byte-verified. No scientific identity moved:
-the D1 design regenerates byte-identically (`design_hash f9c6688f…`), the
-allocation rule is still `f6047343…`, all 42 battery digests and all four
-finalists re-verified after their physical moves — the finalists in the
-durable store at `/home/ecs-user/aad-artifacts/phase_d1/`, out of scratch.
+**THE D-SERIES IS CLOSED (maintainer final decision, 2026-10-17). D1 +
+`scored_v1` IS THE OFFICIAL FORWARD BASELINE.** It is a selection, not a
+verdict: D1's NO-GO, D2's NO_GO and D3's STRUCTURAL_CHANGE with INCONCLUSIVE
+probes all stand unchanged.
+- **The baseline.** `stage1_init.d1_target_aware.scored_v1@v1`.
+  - Its record is
+    [`configs/shared/baselines/initialization_forward_baseline_v1.json`](../../configs/shared/baselines/initialization_forward_baseline_v1.json),
+    selected by its sha256 in `selection.json`.
+  - Forward work resolves it through `shared.forward_baseline`, which uses
+    the generic `aadistill.initialization.baseline`.
+  - Its terms:
+    - D1's four operators;
+    - `positions.supervised_target_v1@v1`;
+    - `reference_topk_tail_v1`, K=200;
+    - DEPTH against the parent and state evaluation against the teacher;
+    - beam width 6 with `delayed_prune` and `pareto@v2`;
+    - micro-batch 3, `length_sorted_v1`, **`scored_v1`**.
+- **Identities kept apart.** The historical reference initialization is D1-q2
+  (`afd50c9f…`, digest `3a4b4ede…`), materialized under `all_v1`. The forward
+  profile (fingerprint `e627f461…`) is **NOT MATERIALIZED**, and the resolver
+  never offers q2's digest as its expectation. B stays the archived historical
+  comparator.
+- **Authorities.** All 11 D-series grants are CLOSED, and every D-series
+  issuer refuses them. D3's unspent $6.4429 (structural) and $6.9605
+  (probes) are closed, not transferred.
+- **Checkpoints.** q2 is canonical and protected. The other D-series
+  initializations and duplicates (14 units, 16.69 GB) have no consumer and
+  are retirement-eligible. None was deleted.
+- **Owners.**
+  [`programme_closeout.json`](../stages/stage-1/families/d_series/closeout/programme_closeout.json)
+  and `decisions.md` 2026-10-17 (last entry).
+- **Next.** Stage-0 calibration data-volume and mixture experiments on this
+  baseline. They are **NOT authorized**; they are designed and authorized in
+  new conversations. Start at
+  [`STAGE0_HANDOFF.md`](../../docs/shared/STAGE0_HANDOFF.md).
 
-**Nothing is running and nothing is billing.** An account-wide provider query
-returns **0 pods and 0 network volumes** at a spend rate of `$0/h`, against a
-balance of `$186.6019`. No behavioural authorization was issued, no pod was
-created, and no screening or confirmation work ran.
+**THE PRIMARY TARGET IS FLUID REASONING (maintainer clarification,
+2026-10-16).** The project prioritizes fluid reasoning and adaptive
+problem-solving over broad factual-knowledge retention.
+- **Where it is written.** AGENTS.md P10.2 holds the capability taxonomy,
+  the no-proxy rule, the ARC-AGI policy and evaluation isolation. Stage
+  clauses are in §4.2, §4.4, §4.5 and §4.6.
+- **Capability scope.** Re-declared for future mixtures: `code_math` and
+  `multihop_qa` are now mixed-capability groups.
+- **Forward design.**
+  [`REASONING_TRANSFER_DESIGN.md`](../../docs/shared/REASONING_TRANSFER_DESIGN.md)
+  covers Stage 0, 2 and 4 and the capability-aligned evaluation they need
+  first.
+- **Unchanged.** Frozen D1/D2 evidence and every historical verdict.
+- **Authorizes nothing.** No data experiment, dataset download or
+  generation, and no paid GPU.
+
+**D3 COMPLETE (2026-10-17): STRUCTURAL_CHANGE; THREE PROBES INCONCLUSIVE vs q2
+AND vs B (exploratory). STOPPED AT THE SCIENTIFIC REVIEW BOUNDARY.** The
+fixed-q2 DEPTH teacher-reference ablation (the student-confidence D3 is
+cancelled and unexecuted).
+- **Structural.** `d3_structural_20261017_083554`: STRUCTURAL_CHANGE,
+  admitted, $0.5571. The treatment keeps layers 26 and 30 and drops 8 and 31.
+- **Probes.** `d3_probes_20261017_110022`. Closeout COMPLETE (all nine
+  proofs), $5.0395.
+  - **vs q2:** Δ −0.0067 [−0.0157, +0.0024]; seeds −0.0059, −0.0165,
+    +0.0024.
+  - **vs B:** Δ −0.0071 [−0.0161, +0.0020]; seeds −0.0129, −0.0059, −0.0024.
+  - Both labels are INCONCLUSIVE.
+  - Usable is on par with q2 (0.691 vs 0.689) and above B (0.594).
+- **Reading.** On this mixed-domain battery the teacher reference does not
+  separate from the parent reference. Nothing here measures fluid reasoning.
+- **Money.** D3 total $5.5966. Both D3 envelopes were closed unspent by the
+  D-series closure.
+- **Owners.** `phase_d3/runs/*/closeout/outcome.json`,
+  `d3_probes_20261017_110022/evidence/d3_probes_comparison.json`,
+  `decisions.md` 2026-10-17.
+
+**D2 COMPLETE: c4's SHARED CONFIRMATION is NO_GO (2026-10-16).** Run
+`d2_confirmation_20261016_105802`: three probes from c4's initial checkpoint
+on an admitted AU host, every identity equal to the protocol's.
+- **Verdict.** Δ vs B −0.0106, one-sided UCB −0.0016 < SESOI 0.01; 0 of 3
+  seeds positive. The usable guardrail passed (+0.067).
+- **Cost.** $5.0260; D2's measured total is $23.5354.
+- **Budget.** Project remaining $100.4494; the D3 plus fresh-confirmation
+  reservation holds with $34.00 to spare.
+- **Next.** D3 as redefined above.
+- **Owners.**
+  [`d2_confirmation_result_review.md`](../stages/stage-1/families/d_series/analyses/d2_confirmation_result_review.md);
+  `decisions.md` 2026-10-16.
+
+**D2 SCREENING COMPLETE (2026-10-16); STOPPED AT THE CONFIRMATION BOUNDARY.**
+Run `d2_screening_20261015_203346`: eight probes on an admitted AU host
+(`…@595.91.07`), every identity equal to the shared protocol's.
+- **Selection.** By the frozen rule, **c4** (`3a4173e4…`) advances: Δ +0.0059
+  vs B. It leads c3 by 0.0006, and no candidate was vetoed.
+- **Cost.** $12.5212; the rung total is $12.9730 of the $25 envelope.
+- **Programme.** Project remaining is $105.4754. D2 now holds only the
+  confirmation ($8.51 at hard), and the D3 plus fresh-confirmation reservation
+  holds with $30.52 to spare.
+- **Executor's recommendation, not adopted.** It advised against funding the
+  shared confirmation (c4's Δ is below the 0.01 SESOI). The maintainer has
+  decided to run it: **c4 shared confirmation GRANTED, $12.00 cumulative**
+  (`decisions.md` 2026-10-16), under the registered verdict.
+- **Owners.**
+  [`d2_screening_result_review.md`](../stages/stage-1/families/d_series/analyses/d2_screening_result_review.md);
+  `decisions.md` 2026-10-16.
+
+**D2 SCREENING GRANT (2026-10-15 UTC).** The record is kept below. Its three
+$0 repairs are done, and attempts 1–3 are closed out:
+- 183412: no capacity, $0;
+- 183734: five SE/US hosts on 580.x refused, $0.4518;
+- 193502: no AU capacity, $0.
+
+**D2 v3 FORMAL SEARCH COMPLETE (2026-10-15).** Run `d2_search_20261015_051722`
+(session commit `d64490ee`, scored_v1, L40S at $1.09/h).
+- **Result.**
+  - 92/92 expansions and 12 complete leaves.
+  - The preregistered Top-4 is committed by the objective ranking, with no
+    lineage diversity.
+  - All four checkpoints were fetched before teardown and re-identified
+    (MATCHED). Their sha256 were recomputed on the dev box; the bytes live at
+    `<scr>/products`, outside git.
+  - The provider confirms the pod is gone.
+- **Cost.** **$5.5364** all-in, against $11.14 expected and $23.69 hard.
+- **What the proxy shows (descriptive).**
+  - The Top-4 is one lineage, WIDTH(dom) → DEPTH(dom).
+  - It is identical under the objective, the raw union KL and the KL-only
+    control (4/4).
+  - The root reference changed DEPTH's first removed layer in 12/12 non-root
+    expansions; the weighting changed 13 of 112 greedy choices.
+  - D2's best root teacher-top-k KL is 7.2009, against D1's 7.4341 on its
+    own evaluator. That is a cross-protocol proxy (erratum v1), not
+    behaviour.
+- **Owners.**
+  [`closeout/outcome.json`](../stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json);
+  [`d2_search_evidence_review.md`](../stages/stage-1/families/d_series/analyses/d2_search_evidence_review.md).
+- **Programme, re-derived from actual spend.** Superseded by the chain
+  paragraph above:
+  - D2 remaining is now $28.27.
+  - After it, $90.18 is left against $66.45.
+  - Project remaining is $118.4484 of $595.
+  - Owners: `derive_budget.py`, `d_series_programme_budget.json`.
+- **Not authorized:** D2 screening and confirmation; D3; a fresh confirmation;
+  any promotion.
+
+**D2 VERSION 3 (maintainer scientific decision, 2026-10-14; contract
+revision 8 `1321017a…`, preregistration v3 `b5281092…`, APPROVED 2026-10-14).** An
+Evidence-Informed Pre-Search Scientific Revision; the decision covers $0
+protocol and engineering work only.
+- **The objective.** `(1/T_x) Σ c_T(t) KL_U(t)`: `c_T = 1 − H^{K+1}/log(K+1)`
+  is the frozen teacher's Top-200 + tail confidence; `KL_U` is on the
+  teacher's Top-200 ∪ the candidate's own Top-200 + one tail
+  (`reference_student_union_topk_tail_v1`), with exact retrieval of the
+  teacher's candidate-only entries. Root reference for every consumer; full
+  scope. Identity `objective.d2_teacher_topk_confidence_weighted_union_kl@v1`
+  (`90e851fd…`). Three declared changes from D1.
+- **Superseded.** Version 2 (`079031e3…`, prereg v2 `721ffddc…`): SUPERSEDED
+  BEFORE FORMAL SEARCH — its Stage V validation (`d2val_20261014_103301`,
+  $0.6532, PASS) stays version 2's adopted evidence. The student-uncertainty
+  D2 and prereg v1: SUPERSEDED — NEVER EXECUTED.
+- **Implemented and verified at $0.** Core support/objective/store/head,
+  DEPTH, state evaluation, weighted statistics and the beam's metrics;
+  oracle, consumer and refusal tests; a real-logits check on a stand-in
+  checkpoint (0 bound violations, 73% bf16 boundary ties).
+- **Price in force** (Stage W revision 2's measured terms, adopted;
+  row selection scored_v1):
+  - D2 v3 search: $11.14 expected, **$23.69** bound (fits the $30 cap).
+    all_v1 would be $24.32. If the cache regresses: $33.32, and the driver
+    stops.
+  - Programme at hard, at the $595 cap: before the search, D2 + D3 + a
+    fresh confirmation left $1.85. After the search's actual $5.54, it
+    leaves $20.31 (re-derived 2026-10-15).
+  - Owners: `d2_budget_v1.json`, `d_series_programme_budget.json`.
+- **Stage W built and rehearsed at $0** (executable commit `4248d7db`):
+  W1–W6 on Stage V's infrastructure, no B rebuild; the CPU rehearsal runs the
+  driver's own `main()`. The D2 search's scored_v1 gate now needs stage W's
+  evidence (Stage V's PASS was version 2's).
+- **Stage W EXECUTED 2026-10-14:** run `d2v3val_20261014_170824`, **$0.2538**
+  of the $1.22 grant. The campaign is CLOSED.
+  - **Validation FAIL, not adopted.** The arithmetic gate `kl_bounds` failed:
+    175 float32 positions fall outside a `4·eps·|log Z|` slack.
+  - The float64 oracle bounds hold exactly, and every float32 union KL is
+    within its registered tolerance.
+  - Diagnosis: a gate-definition defect (the slack was calibrated on a CPU
+    stand-in). It is not rerun, because fixing it would relax a registered
+    tolerance after the FAIL. Integrity PASS; scored_v1 PASS.
+- **Science (descriptive).**
+  - c_T IQR 0.123 / 0.095, against v2's 0.042–0.055.
+  - Neither the weighting nor the union moves the DEPTH choice (ρ 0.997 and
+    1.000). The root reference alone moves it (26 → 17).
+  - **Maintainer decision: HOLD, NOT terminated.** One round on one parent
+    does not settle a full search. The protocol is frozen and there is no v4.
+  - Owner:
+    [`d2v3_stage_w_evidence_review.md`](../stages/stage-1/families/d_series/analyses/d2v3_stage_w_evidence_review.md).
+- **Stage W REVISION 2 built at $0** (executable commit `7ef64f3b`, plan
+  `31377a77…`, `validations/d2v3-gpu-validation/v2/`).
+  - **The corrected KL gate.** Both partition KLs are checked against
+    float64 from one error budget; the float64 order is checked; float32
+    crossings are checked against the combined bound, per side, with
+    per-position records.
+  - **The validity report** now states the store's declared definition.
+    Revision 1 has an erratum.
+  - **Tests:** a predicate table, mutants, an independent oracle, and
+    extremes.
+  - **Grant:** a new grant, $1.22 all-in, $0.92 cap, with its own campaign.
+    Revision 1 stays FAIL and CLOSED.
+- **Stage W REVISION 2 EXECUTED 2026-10-14:** run
+  `d2v3r2val_20261014_185259`, **$0.2493** ($0.5031 for Stage W in total).
+  - **Validation PASS, ADOPTED.** Arithmetic 9/9, integrity, scored_v1.
+  - **0 KL anomalies:** both KLs ≤ 1.146e-4 from float64, the float64 order
+    is exact, and every crossing is inside the combined bound.
+  - The campaign is CLOSED.
+  - **Rubric, literal: "between".** **Recommendation:** proceed to the
+    maintainer's preregistration v3 / formal-search review, with the claim
+    boundary stated, once the $3.78 reservation shortfall is settled.
+  - Owner:
+    [`d2v3_stage_w_r2_evidence_review.md`](../stages/stage-1/families/d_series/analyses/d2v3_stage_w_r2_evidence_review.md).
+- Owners:
+  - [`d2_d3_objective_design.md` §12](../stages/stage-1/families/d_series/plans/d2_d3_objective_design.md);
+  - `logs/budget/decisions.md`, entry for 2026-10-14 (D2 version 3).
+
+**D3 OBJECTIVE (maintainer decision, 2026-10-13; unchanged by the D2
+redesign).** D3 reads the candidate student's own Top-200 conditional entropy,
+`c_s = 1 − H_s/log 200`.
+- D3 minimizes `(1/T_x) Σ [KL − λ c_s]`, with λ = 7.34 frozen by a registered
+  rule (`7b254538…`).
+- The generic core support is bound into identity, and is absent when
+  undeclared, so D1, R0 and the shared protocol are unchanged.
+- DEPTH and state evaluation use it exactly. FFN/WIDTH/ATTENTION keep D1's
+  local statistic, because no candidate exists at their selection.
+- Motivation (contract revision 2): **capacity-aware student reasoning**.
+  - Confidence is a proxy for structure selection, judged only by behaviour
+    after recovery.
+  - Teacher-native calibration is kept.
+  - Own-rollout diagnostics apply to new candidates only, because B/q2 have
+    no logits or checkpoints.
+  - The B/q2 text-level baseline is in `analyses/d1_rollout_profile.json`.
+- Owner:
+  [`d2_d3_objective_design.md`](../stages/stage-1/families/d_series/plans/d2_d3_objective_design.md).
+
+**R0 PASSED AND THE REFERENCE CALIBRATION IS DONE (2026-10-13); THE D2
+SEARCH IS NOT AUTHORIZED.**
+
+Owners:
+[`d2_gpu_evidence_review.md`](../stages/stage-1/families/d_series/analyses/d2_gpu_evidence_review.md)
+and `logs/budget/decisions.md`.
+
+- **R0** (`r0_20261013_154325`, $1.5074): `scored_v1` is equivalent on the
+  KL path.
+  - DEPTH removal orders are identical.
+  - Candidate scores differ by at most 1.65e-7 and state evaluation by
+    1.28e-7, against a tolerance of 1e-5.
+- **Reference calibration** (`refcal_20261013_170714`, $0.8069):
+  - λ = 7.34 and the thresholds are frozen; contract revision 5 is
+    `a01b1be7…`.
+  - **The cache fix is validated on the GPU**: with a 34.9 GiB hoard, the
+    reference was cached with 0 recomputes.
+  - Cached and recomputed references are EXACT.
+  - The objective since superseded (the old D2) adds +0.184 s per DEPTH
+    candidate and +0.466 s per state evaluation. That measurement now prices
+    D3.
+  - Its scored-rows equivalence PASSES. It does not extend to the new D2.
+  - Rescoring costs 1.83 min/probe.
+- **Both sessions are closed:** pods deleted and confirmed, $2.3143 of the
+  $5.76 granted.
+- **D2 price** (redesigned D2): see the D2 paragraph above. The owners are
+  `d2_budget_v1.json` and `d_series_programme_budget.json`.
+- **D2 launch chain built at $0:** typed grant, launcher, pod branch, a soft
+  stop taken from `soft_stop_minutes`, and a cache-regression guard. All of
+  it is now on preregistration v3.
+- **D2 v3 GO (maintainer, 2026-10-14).**
+  - Preregistration v3 is APPROVED (hash unchanged).
+  - The project cap moved $590 → $595 and `phase_d2` is on the formal book.
+    The reservation rule holds: $1.85 is left at hard for D2 + D3 + a fresh
+    confirmation.
+  - ONE formal search is granted: scored_v1, about $23.69 hard at $1.09/h,
+    search and Top-4 only.
+  - The rubric's literal BETWEEN stays as recorded.
+  - Owner: `logs/budget/decisions.md` 2026-10-14.
+- **Not authorized:** D2 recovery, screening and confirmation; D3; a fresh
+  confirmation.
+
+**NEXT ROUND: R0 → D2 → D3 ON A SHARED BEHAVIOURAL EVALUATION (maintainer
+decision, 2026-10-13).** D2/D3 do not retrain B or q2.
+- A new, versioned protocol `d_series_shared_eval@v1` (`protocol_hash`
+  `5ed198ae…`) reuses `d1_screening` / `d1_confirmation`, D1's seeds, recipe
+  and evaluation protocol, and imports B's and q2's ten measured units.
+- The $0 audit verified **10/10 units**: hashes match, and the raw generations
+  re-score byte-exactly. Re-derived through the shared path, D1's verdict and
+  ranking are identical. Checkpoints are retired, so the units are reusable
+  **as measured** only.
+- D2/D3 are controlled jointly at a one-sided α of 0.025 each. A pass on the
+  shared rows (`SHARED_GO`) nominates for a fresh confirmation on the
+  reserved d2/d3 battery and never promotes.
+- **R0 is done:** PASS, $1.5074 (see above).
+- Owner:
+  [`families/d_series/plans/d2_d3_shared_evaluation_design.md`](../stages/stage-1/families/d_series/plans/d2_d3_shared_evaluation_design.md).
+
+**THE D1 ROUTE IS KEPT (maintainer decision, 2026-10-12).** The NO-GO below
+stands and nothing is promoted.
+- B (`53e30566…`) stays the incumbent and the anchor of every formal comparison.
+- q2 (`3a4b4ede…`) is the **working initialization baseline** for method work.
+- Pre-vocabulary position selection is now implemented, opt-in and versioned,
+  as `ExecutionConfig.prediction_rows="scored_v1"`. Only scored rows reach the
+  output head; the historical path and every recorded identity are unchanged.
+  It is verified on CPU, and its GPU equivalence validation (R0) needs an
+  engineering grant.
+- Owner of the code review, the measured Top-K benefits, the Stage-0
+  teacher-native data gap and the next-round design:
+  [`analyses/d1_followup_technical_review_and_next_round.md`](../stages/stage-1/phase_d1/analyses/d1_followup_technical_review_and_next_round.md).
+
+**D1 CONFIRMATION IS COMPLETE. THE VERDICT IS `NO-GO`.** q2 does not confirm
+against B, so B remains the standing incumbent and nothing is promoted. The run
+was `d1_behavioural_20261012_064341` on pod `wzr7llw0shqc2k` (NVIDIA L40S,
+$1.09/h). All six probes were trained and evaluated uncapped on
+`d1_confirmation` at the three frozen confirmation seeds. They were scored in ONE
+session under ONE attested evaluation protocol (`c82260e0…`), and every
+generation admission was comparable. The teardown gate passed all twelve checks,
+and the launcher deleted the pod itself.
+
+```text
+probe                correct_overall    usable_rollout
+q2  s396880939     0.0353 (30/850)    0.6958
+q2  s766527341     0.0576 (49/850)    0.7137
+q2  s1004399678    0.0271 (23/850)    0.6579
+B   s396880939     0.0424 (36/850)    0.6147
+B   s766527341     0.0471 (40/850)    0.6000
+B   s1004399678    0.0318 (27/850)    0.5674
+
+pooled          q2 0.0400 (102/2550)   B 0.0404 (103/2550)
+delta q2 - B    -0.000392   one-sided 95% [-0.007843, +0.007451]   SESOI 0.010
+per-seed        -0.007059, +0.010588, -0.004706   (1 of 3 positive, 2 required)
+usable delta    +0.0951 pooled; +0.0811, +0.1137, +0.0905 per seed (guardrail: pass)
+verdict         NO-GO: the upper bound is below the SESOI; 0 vetoes
+```
+
+Owners: [`evidence/confirmation_verdict.json`](../stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/evidence/confirmation_verdict.json)
+(sha `4c0db018…`, verdict_sha256 `dea0678e…`) and the run's
+[`closeout/outcome.json`](../stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/closeout/outcome.json).
+The verdict was computed ONCE, off-pod, by `behavioural_verdict.py`. It read the
+durable store at a clean commit (`da7a0711`) and used C0's rule unchanged: the
+stratified prompt-cluster bootstrap with 20000 iterations and D1's own seed
+188612737. No measurement was repeated.
+
+**The usable-rollout gain is real but it is not the endpoint.** q2 raises the
+usable-rollout rate by about 9.5 points on every confirmation seed, as it did in
+screening. Under the frozen design that is a guardrail, and it passed. It cannot
+turn a NO-GO into a GO. A claim built on it needs its own preregistration.
+
+**D1 SCREENING IS COMPLETE.** In attempt 8 (`d1_behavioural_20261011_135910`),
+all ten probes trained, were evaluated uncapped on `d1_screening` and were
+scored in ONE session under ONE attested evaluation protocol, and every
+generation admission was comparable. The frozen rule **advanced q2**.
+
+```text
+probe              correct_overall   usable_rollout
+q1  s614923639   0.0306 (26/850)   0.6853
+q1  s516448251   0.0271 (23/850)   0.6368
+q2  s614923639   0.0376 (32/850)   0.7347
+q2  s516448251   0.0224 (19/850)   0.6789
+q3  s614923639   0.0235 (20/850)   0.6105
+q3  s516448251   0.0212 (18/850)   0.5474
+q4  s614923639   0.0200 (17/850)   0.5979
+q4  s516448251   0.0141 (12/850)   0.6474
+B   s614923639   0.0176 (15/850)   0.5453
+B   s516448251   0.0259 (22/850)   0.6284
+
+pooled over both seeds; B = 0.02175
+arm correct   delta_vs_B  guardrail
+q2  0.03000  +0.00825  pass  ADVANCES
+q1  0.02885  +0.00710  pass
+q3  0.02235  +0.00060  pass
+q4  0.01705  -0.00470  pass      (runner-up q1 by 0.00115)
+```
+
+Owner: the run's [`closeout/outcome.json`](../stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/closeout/outcome.json).
+`rank_screening_offpod.py` recomputed the ranking and the selection from the
+secured store, and both are identical. The screening delta carries the winner's
+curse, so only the confirmation rung estimates the effect. A GO would promote
+nothing on its own.
+
+```text
+subrun                         all-in      min   ended on
+d1_behavioural_20261010_082900  0.1712      9.4   root_loader seam called without its spec
+d1_behavioural_20261010_090343  1.4934     81.2   incumbent loader never supplied
+d1_behavioural_20261010_103442  3.1238    169.5   engine probe could not import its own dep
+d1_behavioural_20261010_132919  3.5421    192.3   evaluator had no image digest in its env
+d1_behavioural_20261010_200001  0.0000      0.0   budget boundary, no pod (funding model)
+d1_behavioural_20261011_083610  3.3565    182.8   scorer passed filenames, not set specs
+d1_behavioural_20261011_114853  0.6837     38.0   stopped by the maintainer, not a failure
+d1_behavioural_20261011_135910 18.1148    982.1   COMPLETE: 10/10 scored, q2 advances
+d1_behavioural_20261012_064341 10.3446    561.0   COMPLETE: 6/6 scored, confirmation NO-GO
+                               -------  -------
+                               40.8301   2216.3   of the $130.00 phase allowance
+```
+
+Owner of every figure: each run's `closeout/outcome.json`, summed by
+`behavioural_authorization.consumed_by_prior_subruns`. The project-wide books
+come from `derive_budget.py` (table near the end of this file).
+
+**Attempt 8 was the first D1 behavioural session to reach ALL_DONE, and its
+teardown gate blocked on two closeout links no earlier attempt had executed.**
+The artifact specs declared `results/`, `per_sample/` and `generations/` as
+bare directories, but the manifest counts files. And the per-probe fetch
+entries carry no `rc`, so the runner's fail-closed reader rejected all ten
+secured probes. The pod was held under its watchdog. Its whole evidence tree
+was pulled and verified byte-identical to the poll-secured copies, and only
+then was the pod deleted through the provider. Both links are repaired in
+`351f6e99`, and the archive chain was verified on the real output. One gap
+remains: the per-step `train_log.jsonl` survives only for the two B probes.
+Every probe's training identity is in its scored result, and preservation now
+keeps those records.
+
+**Frozen and unchanged:** design `f9c6688f…`, preregistration `aa70338a…`, arms
+q1–q4 plus standing incumbent B (`53e30566…`), seeds 614923639 and 516448251,
+the `d1_screening` battery, the recovery recipe, the scorers and the ranking
+rule.
 
 **THE CONTROL ARM WAS THE ARM C1 BEAT, and that is now corrected.** The design
 declared `fe9683e6` / `c313d1b4` — C1's `attention.weight_proxy_v0` arm. C1
@@ -93,8 +474,8 @@ excluded       20260726, 20260801, 20260813, 696460635, 1635674081, 1656475568
 
 C0 requires the seeds materialized and hash-bound **before** any candidate
 behavioural result exists, and none does: no probe trained, no authorization
-issued, no pod created. **Still owed before any launch:** an execution
-preregistration that hash-binds these values. It does not exist yet.
+issued, no pod created. The execution preregistration that hash-binds these
+values was written afterwards, before any launch (`aa70338a…`).
 
 **AND THE ARM-MATERIALIZATION COST WAS PRICED ONCE FOR FIVE ARMS.**
 `parent_replay_and_incumbent_rebuild: 22.0` sat in the *fixed* session
@@ -270,9 +651,17 @@ the selection semantics they ran under. `a2b2f04ae642ac69…` and
 `ea4fe4d356b8c8f4…` are retained as measurements and hashes, and their weight
 bytes are retired once q2 and q4 are secured.
 
-**Behavioural screening is BUILT and PAUSED.** Four candidates at two recovery
-seeds plus the incumbent at two matched seeds is ten screening probes, then one
-advancing candidate, then a fresh three-seed confirmation against B.
+**Behavioural screening is BUILT and EXERCISED ON REAL HARDWARE; its live
+state is the top of this section.** Four candidates at two recovery seeds plus
+the incumbent at two matched seeds is ten screening probes, then one advancing
+candidate, then a fresh three-seed confirmation against B. The first four
+subruns reached, in order, arm materialization, the incumbent's build, the
+engine probe, and a PASSING attestation plus a fully trained first probe,
+which the per-probe generation admission then correctly refused.
+The priced cell below (1355.71 min / $25.0053) is the PRE-RUN estimate; the
+MEASURED model is 981.7 min / $17.84 and lives in
+`analyses/d1_screening_budget_boundary.json`, which supersedes the estimate for
+planning while leaving the authorized cell untouched.
 
 What exists and is verified at `$0`: the five-arm field, with the four
 candidates' secured bytes hashed against all four recorded identities and the
@@ -292,9 +681,11 @@ about 1.756 GiB of private-storage headroom. B has no local bytes at all and is
 rebuilt from `phase_c2.baseline.frozen_baseline_spec`, the one owner of that
 construction, as C2's and C3's behavioural sessions did.
 
-**What does not exist, deliberately:** the launcher, the authorization issuer,
-the sweep contract and the execution preregistration. Building them is
-experimental execution, and D1 is paused before it.
+**The launcher, the authorization issuer, the sweep contract and the execution
+preregistration EXIST NOW** — built by the 2026-10-10 readiness round this
+document's "Right now" section describes. The paragraph that stood here said
+they did not exist, deliberately, because building them was gated on the
+maintainer's readiness process; that process is the one that built them.
 
 **Three attempts, and the two failures bought the gates the third needed.**
 
@@ -398,6 +789,44 @@ whole suite **twice**, once for a `tail -3` and once for an exit status; it is o
 invocation with `tee` and `PIPESTATUS[0]`.
 
 ## What `main` carries
+
+**The D-series and its closure, integrated 2026-10-17 (UTC) by SQUASH AND
+MERGE per AGENTS.md P12.2, on the maintainer's instruction.** One commit on
+`main` collapses everything on top of `c8f714af`: the 149 commits up to the
+tested tree `27c279b6`, plus the pre-integration record commits after it.
+- D1's behavioural rungs: screening, then the NO-GO confirmation;
+- D2: search, screening, and the NO_GO shared confirmation;
+- D3: structural STRUCTURAL_CHANGE, probes INCONCLUSIVE;
+- the D-series closure and the forward baseline D1 + `scored_v1`;
+- the Stage-0 handoff.
+
+```text
+source branch : exec/d1-behavioural-readiness   (NOT deleted -- P12.2)
+merge base    : c8f714afb346aaea3e269230c94cef526cb6f76b   (main before)
+branch tip    : named by the squash commit; a record on the branch cannot
+                carry its own hash
+squash commit : `git log -1 main`
+tested tree   : 27c279b6b10d93f75e0a3a7d5b11131cf03345d8
+```
+
+- **What was tested.** The tested tree is the closure commit `27c279b6`:
+  - core 3680 passed / 32 skipped / 0 failed;
+  - every touched experiment suite green.
+- **The honest limit.** The tip adds only pre-integration records on top:
+  this section, `current.json`, `decisions.md`, the handoff's `main` line and
+  the regenerated log inventory. Nothing executable changed after
+  `27c279b6`.
+- **Reachability.** Every commit hash the records cite was checked before the
+  squash: zero unreachable. The source branch is where this round's commit
+  hashes live, so it is kept permanently.
+- **Where work continues.** On `stage0/calibration-volume-mixture`, cut fresh from the squash commit.
+  Continuing on the old branch would re-apply the whole range.
+- **Earlier integrations** (`git log main` owns the hashes):
+  - `c8f714af`, 2026-10-10: the six-tree information architecture, source
+    `migration/info-architecture`;
+  - `4500d775`, 2026-10-05: the Top-K protocol, source
+    `prep/d-series-topk-tail`;
+  - `06cab9c8`, 2026-10-03: the test-suite boundary, described below.
 
 **The test-suite boundary refactor, integrated 2026-10-03 by SQUASH AND MERGE
 per AGENTS.md P12.2.** One commit on `main` collapsing six:
@@ -1442,15 +1871,13 @@ C3  COMPLETE / NO_GO                    <- canonical verdict, 2026-10-01
       PRIMARY verdict                   NO_GO   UCB +0.005490 < SESOI +0.010
       incumbent after C3                B, unchanged; causal-KL does not promote
       B1 vs B3 protocol choice          a post-C3 maintainer decision, open
-A-bsz3  DESIGNED, NOT FUNDED           <- the shortened design, 2026-10-01
-      $0 padding/forward analysis       MEASURED  67 forwards -> 23
-      implementation + driver           complete, toy-scale executed
-      16-probe non-inferiority design   WITHDRAWN for scope
-      step 1, structural/runtime        unrun; fits the engineering allowance
-      step 2, <=3 treatment probes      conditional on step 1; formal book, overspent
-FFN     NOT STARTED                     <- next after A-bsz3
-D1/D2/D3  DIRECTIVE RECEIVED            <- global scoring/search; not designed
-Stage-0 v2  DIRECTIVE RECEIVED          <- after the best D-method is established
+A3  COMPLETE 2026-10-03                 <- DISTINCT_NUMERICAL_MATERIALIZATION_PROTOCOL
+FFN CLOSED: SKIPPED                     <- maintainer instruction, 2026-10-03
+D1  COMPLETE / NO-GO 2026-10-12         q2 did not confirm against B
+D2  COMPLETE / NO_GO 2026-10-16         c4 did not confirm against B
+D3  COMPLETE 2026-10-17                 STRUCTURAL_CHANGE; probes INCONCLUSIVE
+D-series  CLOSED 2026-10-17             <- forward baseline: D1 + scored_v1 (a selection)
+Stage-0  NEXT PROGRAMME, NOT AUTHORIZED <- calibration volume/mixture; docs/shared/STAGE0_HANDOFF.md
 C4  NOT AUTHORIZED
 ```
 
@@ -3583,12 +4010,12 @@ these by hand; run the deriver.**
 
 | limit | remaining |
 | --- | --- |
-| formal sessions | `$68.7925` of `$156.6523` |
-| GPU engineering | `$6.6510` of `$25.0741` |
-| package | `$75.4435` of `$181.7264` |
-| project cap | `$426.7145` spent of `$490.0000`, leaving `$63.2855` |
+| formal sessions | `$98.8304` of `$256.6523` |
+| GPU engineering | `$3.1804` of `$25.0741` |
+| package | `$102.0108` of `$281.7264` |
+| project cap | `$500.1472` spent of `$595.0000`, leaving `$94.8528` |
 
-**Full-ceiling sessions the FORMAL allowance funds: 2.** 3 ceilings cost `$90.0000` and the formal allowance has `$68.7925`. Dividing the PACKAGE balance instead gives 2, which is the error: the engineering allowance cannot pay for a formal probe.
+**Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 
 *Generated by `scripts/maintenance/consolidation/render_log_navigation.py` from `derive_budget.py`; do not edit by hand.*
 

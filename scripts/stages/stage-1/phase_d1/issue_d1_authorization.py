@@ -38,6 +38,7 @@ for extra in ("src", "scripts", "scripts/autoinit"):
     if p not in sys.path:
         sys.path.insert(0, p)
 
+from stages.d_series.programme_closeout import refuse_closed_authority  # noqa: E402
 from stages.phase_d1 import d1_authorization as A  # noqa: E402
 from stages.phase_d1 import d1_session as D1S  # noqa: E402
 from shared.run_layout import rel_run_dir  # noqa: E402
@@ -82,6 +83,9 @@ def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
     if not args.grant.is_file():
         raise SystemExit(f"no grant at {args.grant}")
+    #: The D-series is CLOSED (maintainer decision 2026-10-17): a closed
+    #: authority issues nothing, whatever else about it would still pass.
+    refuse_closed_authority(args.grant, repo_root=REPO_ROOT)
     grant = json.loads(args.grant.read_text())
 
     if not args.allow_dirty:

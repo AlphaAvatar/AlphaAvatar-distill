@@ -1,0 +1,20 @@
+{"stage": "environment", "status": "start", "t": 0.0}
+{"seconds": 1.724, "stage": "environment", "status": "ok", "t": 1.724}
+{"stage": "register_and_policy", "status": "start", "t": 1.725}
+{"seconds": 0.036, "stage": "register_and_policy", "status": "ok", "t": 1.761}
+{"stage": "bind_full_vocab", "status": "start", "t": 1.762}
+{"seconds": 0.043, "stage": "bind_full_vocab", "status": "ok", "t": 1.805}
+{"stage": "bind_reference_topk_tail", "status": "start", "t": 1.805}
+{"seconds": 0.038, "stage": "bind_reference_topk_tail", "status": "ok", "t": 1.843}
+{"stage": "depth_operator_and_policy", "status": "start", "t": 1.844}
+{"seconds": 0.15, "stage": "depth_operator_and_policy", "status": "ok", "t": 1.993}
+{"stage": "teacher_fetch_verify", "status": "start", "t": 1.994}
+{"seconds": 8.266, "stage": "teacher_fetch_verify", "status": "ok", "t": 10.26}
+{"stage": "D_state_eval_both_supports", "status": "start", "t": 10.263}
+{"peak_gib": 18.543, "protocol": "52fa6135307c6ae3", "seconds": 10.362, "stage": "state_eval.full_vocab_v1", "status": "ok", "t": 56.209}
+{"peak_gib": 18.652, "protocol": "79e43b8c3949dac7", "seconds": 10.27, "stage": "state_eval.reference_topk_tail_v1", "status": "ok", "t": 66.603}
+{"seconds": 56.966, "stage": "D_state_eval_both_supports", "status": "ok", "t": 67.229}
+{"stage": "P_production_operator_invocation", "status": "start", "t": 67.231}
+{"candidates": 260, "invocation_s": 1107.99, "outside_loop_s": 28.55, "stage": "P.calib.domain_balanced@v1", "status": "ok", "t": 1176.435}
+{"candidates": 260, "invocation_s": 1111.22, "outside_loop_s": 27.71, "stage": "P.calib.reasoning_heavy@v2", "status": "ok", "t": 2290.002}
+{"seconds": 2223.639, "stage": "P_production_operator_invocation", "status": "ok", "t": 2290.87}

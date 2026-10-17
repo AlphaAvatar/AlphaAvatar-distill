@@ -1,0 +1,708 @@
+{
+ "schema": "aadistill.phase_d2.screening_diagnostics/v1",
+ "reference_rollout_profiles": {
+  "d1_screening_B_s516448251": {
+   "arm": "B",
+   "seed": 516448251,
+   "n": 950,
+   "generated_tokens_mean": 640.4,
+   "generated_tokens_median": 500.0,
+   "generated_tokens_p90": 1280,
+   "natural_termination_rate": 0.7621,
+   "context_limit_rate": 0.0,
+   "degeneration_rate": 0.2379
+  },
+  "d1_screening_B_s614923639": {
+   "arm": "B",
+   "seed": 614923639,
+   "n": 950,
+   "generated_tokens_mean": 596.4,
+   "generated_tokens_median": 570.0,
+   "generated_tokens_p90": 963,
+   "natural_termination_rate": 0.6389,
+   "context_limit_rate": 0.0,
+   "degeneration_rate": 0.3611
+  },
+  "d1_screening_q2_s516448251": {
+   "arm": "q2",
+   "seed": 516448251,
+   "n": 950,
+   "generated_tokens_mean": 590.2,
+   "generated_tokens_median": 456.0,
+   "generated_tokens_p90": 1024,
+   "natural_termination_rate": 0.8032,
+   "context_limit_rate": 0.0,
+   "degeneration_rate": 0.1968
+  },
+  "d1_screening_q2_s614923639": {
+   "arm": "q2",
+   "seed": 614923639,
+   "n": 950,
+   "generated_tokens_mean": 532.0,
+   "generated_tokens_median": 440.5,
+   "generated_tokens_p90": 768,
+   "natural_termination_rate": 0.8179,
+   "context_limit_rate": 0.0,
+   "degeneration_rate": 0.1821
+  }
+ },
+ "_role": "DESCRIPTIVE ONLY. Never read by the screening rule, never a guardrail: the token-id sidecar's alignment and the rescoring of each candidate's own rollouts against the pinned teacher.",
+ "probes": {
+  "d2_screening_c1_s516448251": {
+   "generation_via": "token_id_wrapper",
+   "token_id_sidecar": {
+    "code": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    },
+    "gsm8k": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "knowledge": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "math_verified": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "multihop": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "rag": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "tool": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    }
+   },
+   "rescoring_run": {
+    "rc": 0,
+    "written": true,
+    "seconds": 101.8
+   },
+   "n_samples": 950,
+   "n_rescored": 950,
+   "n_exact_engine_ids": 950,
+   "n_retokenized_approximation": 0,
+   "complete": true,
+   "failures": 0,
+   "mean_over_samples_of_position_means": {
+    "student_confidence": 0.860596,
+    "student_entropy": 0.738606,
+    "teacher_surprisal": 1.469036,
+    "kl_teacher_student": 1.224505,
+    "student_topk_mass": 0.988768
+   },
+   "thresholds_from": "ea5d3ff997f14174f6aefbe796d16f2a1423b9b27a76e13ff8724f9d543f8c06",
+   "rollout_profile": {
+    "n": 950,
+    "generated_tokens_mean": 544.1,
+    "generated_tokens_median": 428.5,
+    "generated_tokens_p90": 896,
+    "natural_termination_rate": 0.8095,
+    "context_limit_rate": 0.0,
+    "degeneration_rate": 0.1905
+   }
+  },
+  "d2_screening_c1_s614923639": {
+   "generation_via": "token_id_wrapper",
+   "token_id_sidecar": {
+    "code": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    },
+    "gsm8k": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "knowledge": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "math_verified": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "multihop": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "rag": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "tool": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    }
+   },
+   "rescoring_run": {
+    "rc": 0,
+    "written": true,
+    "seconds": 97.1
+   },
+   "n_samples": 950,
+   "n_rescored": 950,
+   "n_exact_engine_ids": 950,
+   "n_retokenized_approximation": 0,
+   "complete": true,
+   "failures": 0,
+   "mean_over_samples_of_position_means": {
+    "student_confidence": 0.854842,
+    "student_entropy": 0.769091,
+    "teacher_surprisal": 1.473829,
+    "kl_teacher_student": 1.232279,
+    "student_topk_mass": 0.988456
+   },
+   "thresholds_from": "ea5d3ff997f14174f6aefbe796d16f2a1423b9b27a76e13ff8724f9d543f8c06",
+   "rollout_profile": {
+    "n": 950,
+    "generated_tokens_mean": 496.5,
+    "generated_tokens_median": 394.0,
+    "generated_tokens_p90": 768,
+    "natural_termination_rate": 0.7895,
+    "context_limit_rate": 0.0,
+    "degeneration_rate": 0.2105
+   }
+  },
+  "d2_screening_c2_s516448251": {
+   "generation_via": "token_id_wrapper",
+   "token_id_sidecar": {
+    "code": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    },
+    "gsm8k": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "knowledge": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "math_verified": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "multihop": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "rag": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "tool": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    }
+   },
+   "rescoring_run": {
+    "rc": 0,
+    "written": true,
+    "seconds": 99.7
+   },
+   "n_samples": 950,
+   "n_rescored": 950,
+   "n_exact_engine_ids": 950,
+   "n_retokenized_approximation": 0,
+   "complete": true,
+   "failures": 0,
+   "mean_over_samples_of_position_means": {
+    "student_confidence": 0.860182,
+    "student_entropy": 0.740802,
+    "teacher_surprisal": 1.481856,
+    "kl_teacher_student": 1.226237,
+    "student_topk_mass": 0.98968
+   },
+   "thresholds_from": "ea5d3ff997f14174f6aefbe796d16f2a1423b9b27a76e13ff8724f9d543f8c06",
+   "rollout_profile": {
+    "n": 950,
+    "generated_tokens_mean": 529.7,
+    "generated_tokens_median": 405.0,
+    "generated_tokens_p90": 793,
+    "natural_termination_rate": 0.8021,
+    "context_limit_rate": 0.0,
+    "degeneration_rate": 0.1979
+   }
+  },
+  "d2_screening_c2_s614923639": {
+   "generation_via": "token_id_wrapper",
+   "token_id_sidecar": {
+    "code": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    },
+    "gsm8k": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "knowledge": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "math_verified": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "multihop": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "rag": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "tool": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    }
+   },
+   "rescoring_run": {
+    "rc": 0,
+    "written": true,
+    "seconds": 98.5
+   },
+   "n_samples": 950,
+   "n_rescored": 950,
+   "n_exact_engine_ids": 950,
+   "n_retokenized_approximation": 0,
+   "complete": true,
+   "failures": 0,
+   "mean_over_samples_of_position_means": {
+    "student_confidence": 0.863828,
+    "student_entropy": 0.721483,
+    "teacher_surprisal": 1.422741,
+    "kl_teacher_student": 1.199884,
+    "student_topk_mass": 0.990287
+   },
+   "thresholds_from": "ea5d3ff997f14174f6aefbe796d16f2a1423b9b27a76e13ff8724f9d543f8c06",
+   "rollout_profile": {
+    "n": 950,
+    "generated_tokens_mean": 520.3,
+    "generated_tokens_median": 428.5,
+    "generated_tokens_p90": 768,
+    "natural_termination_rate": 0.7726,
+    "context_limit_rate": 0.0,
+    "degeneration_rate": 0.2274
+   }
+  },
+  "d2_screening_c3_s516448251": {
+   "generation_via": "token_id_wrapper",
+   "token_id_sidecar": {
+    "code": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    },
+    "gsm8k": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "knowledge": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "math_verified": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "multihop": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "rag": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "tool": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    }
+   },
+   "rescoring_run": {
+    "rc": 0,
+    "written": true,
+    "seconds": 95.3
+   },
+   "n_samples": 950,
+   "n_rescored": 950,
+   "n_exact_engine_ids": 950,
+   "n_retokenized_approximation": 0,
+   "complete": true,
+   "failures": 0,
+   "mean_over_samples_of_position_means": {
+    "student_confidence": 0.852497,
+    "student_entropy": 0.78152,
+    "teacher_surprisal": 1.534167,
+    "kl_teacher_student": 1.279607,
+    "student_topk_mass": 0.988176
+   },
+   "thresholds_from": "ea5d3ff997f14174f6aefbe796d16f2a1423b9b27a76e13ff8724f9d543f8c06",
+   "rollout_profile": {
+    "n": 950,
+    "generated_tokens_mean": 468.4,
+    "generated_tokens_median": 371.0,
+    "generated_tokens_p90": 768,
+    "natural_termination_rate": 0.8432,
+    "context_limit_rate": 0.0,
+    "degeneration_rate": 0.1568
+   }
+  },
+  "d2_screening_c3_s614923639": {
+   "generation_via": "token_id_wrapper",
+   "token_id_sidecar": {
+    "code": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    },
+    "gsm8k": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "knowledge": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "math_verified": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "multihop": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "rag": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "tool": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    }
+   },
+   "rescoring_run": {
+    "rc": 0,
+    "written": true,
+    "seconds": 98.4
+   },
+   "n_samples": 950,
+   "n_rescored": 950,
+   "n_exact_engine_ids": 950,
+   "n_retokenized_approximation": 0,
+   "complete": true,
+   "failures": 0,
+   "mean_over_samples_of_position_means": {
+    "student_confidence": 0.864295,
+    "student_entropy": 0.719006,
+    "teacher_surprisal": 1.415621,
+    "kl_teacher_student": 1.19086,
+    "student_topk_mass": 0.990191
+   },
+   "thresholds_from": "ea5d3ff997f14174f6aefbe796d16f2a1423b9b27a76e13ff8724f9d543f8c06",
+   "rollout_profile": {
+    "n": 950,
+    "generated_tokens_mean": 504.5,
+    "generated_tokens_median": 422.0,
+    "generated_tokens_p90": 768,
+    "natural_termination_rate": 0.7737,
+    "context_limit_rate": 0.0,
+    "degeneration_rate": 0.2263
+   }
+  },
+  "d2_screening_c4_s516448251": {
+   "generation_via": "token_id_wrapper",
+   "token_id_sidecar": {
+    "code": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    },
+    "gsm8k": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "knowledge": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "math_verified": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "multihop": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "rag": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "tool": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    }
+   },
+   "rescoring_run": {
+    "rc": 0,
+    "written": true,
+    "seconds": 100.7
+   },
+   "n_samples": 950,
+   "n_rescored": 950,
+   "n_exact_engine_ids": 950,
+   "n_retokenized_approximation": 0,
+   "complete": true,
+   "failures": 0,
+   "mean_over_samples_of_position_means": {
+    "student_confidence": 0.857557,
+    "student_entropy": 0.75471,
+    "teacher_surprisal": 1.481643,
+    "kl_teacher_student": 1.23059,
+    "student_topk_mass": 0.989669
+   },
+   "thresholds_from": "ea5d3ff997f14174f6aefbe796d16f2a1423b9b27a76e13ff8724f9d543f8c06",
+   "rollout_profile": {
+    "n": 950,
+    "generated_tokens_mean": 532.0,
+    "generated_tokens_median": 402.5,
+    "generated_tokens_p90": 828,
+    "natural_termination_rate": 0.7989,
+    "context_limit_rate": 0.0,
+    "degeneration_rate": 0.2011
+   }
+  },
+  "d2_screening_c4_s614923639": {
+   "generation_via": "token_id_wrapper",
+   "token_id_sidecar": {
+    "code": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    },
+    "gsm8k": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "knowledge": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "math_verified": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "multihop": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "rag": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "tool": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    }
+   },
+   "rescoring_run": {
+    "rc": 0,
+    "written": true,
+    "seconds": 95.6
+   },
+   "n_samples": 950,
+   "n_rescored": 950,
+   "n_exact_engine_ids": 950,
+   "n_retokenized_approximation": 0,
+   "complete": true,
+   "failures": 0,
+   "mean_over_samples_of_position_means": {
+    "student_confidence": 0.855163,
+    "student_entropy": 0.767394,
+    "teacher_surprisal": 1.515823,
+    "kl_teacher_student": 1.250935,
+    "student_topk_mass": 0.989681
+   },
+   "thresholds_from": "ea5d3ff997f14174f6aefbe796d16f2a1423b9b27a76e13ff8724f9d543f8c06",
+   "rollout_profile": {
+    "n": 950,
+    "generated_tokens_mean": 476.6,
+    "generated_tokens_median": 377.0,
+    "generated_tokens_p90": 768,
+    "natural_termination_rate": 0.8316,
+    "context_limit_rate": 0.0,
+    "degeneration_rate": 0.1684
+   }
+  }
+ }
+}

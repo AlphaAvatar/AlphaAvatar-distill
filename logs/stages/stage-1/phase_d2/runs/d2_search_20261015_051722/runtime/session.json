@@ -1,0 +1,849 @@
+{
+  "schema": "aadistill.autoinit.d2_search_session/v1",
+  "session_id": "autoinit-d2-search",
+  "session_spec": {
+    "session_id": "autoinit-d2-search",
+    "schema": "aadistill.autoinit.d2_search_session/v1",
+    "description": "D2: ONE formal beam search over D1's frozen space minimizing the frozen teacher's Top-K confidence times the root-reference union Top-K KL (preregistration v3). Commits the preregistered Top-K and stops.",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/governance/authorization.json",
+    "authorization_type": "D2Authorization.load",
+    "plan_id": "autoinit.v1.phase_d2",
+    "plan_hash": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+    "status_path": "/workspace/autoinit_d2.status",
+    "run_log_path": "/workspace/autoinit_d2_run.log",
+    "driver_job_id": "autoinit_d2",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "autoinit_d2",
+      "evidence_filename": "d2_search.json",
+      "archive_basename": "d2_search_artifacts.tar.gz",
+      "spec_success": "configs/stages/stage-1/phase_d2/d2_search_artifacts.json",
+      "spec_failed": "configs/stages/stage-1/phase_d2/d2_search_artifacts_failed.json",
+      "report_names": [
+        "d2_search.json",
+        "journal.jsonl",
+        "stage1_selection.json"
+      ]
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "d2"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_AUTH_PATH",
+        "SESSION_PLAN_HASH",
+        "SESSION_KIND",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [],
+      "local_assets": [
+        "state_eval_v1:artifacts/stages/stage-1",
+        "e8_calibration_v1:artifacts/stages/stage-1",
+        "reasoning_heavy_v2:artifacts/stages/stage-1"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 2700,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [],
+      "test_paths": [
+        "scripts/stages/stage-1/phase_d2/tests"
+      ],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "TEACHER_READY",
+        "TESTS_OK",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 5,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-10-15T05:19:16+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 584 min $10.60 \u00b7 soft $22.00 \u00b7 hard $22.54 (authorized $23.69)"
+    },
+    {
+      "utc": "2026-10-15T05:19:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Low"
+    },
+    {
+      "utc": "2026-10-15T05:19:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $142.2981 against the $30.0000 this session must be able to fund"
+    },
+    {
+      "utc": "2026-10-15T05:19:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "run d2_search_20261015_051722, preregistration b52810921a4c, rows scored_v1"
+    },
+    {
+      "utc": "2026-10-15T05:19:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "session contract verified at $0: config 5dd1ee154ca5"
+    },
+    {
+      "utc": "2026-10-15T05:19:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "state-eval asset and both calibration mixtures verified"
+    },
+    {
+      "utc": "2026-10-15T05:19:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "session commit d64490eeab75 verified: harness digests to 4829cf214343\u2026, carries the authorization and only logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "utc": "2026-10-15T05:19:23+00:00",
+      "elapsed_min": 0.0,
+      "msg": "aad_autoinit_d64490ee.bundle round-trips"
+    },
+    {
+      "utc": "2026-10-15T05:19:23+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 0 relay inputs (), 3 local assets"
+    },
+    {
+      "utc": "2026-10-15T05:19:24+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 1241 min = $22.54"
+    },
+    {
+      "utc": "2026-10-15T05:19:24+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created ricuwbh64pqlwd at $1.09/h"
+    },
+    {
+      "utc": "2026-10-15T05:20:19+00:00",
+      "elapsed_min": 0.92,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-10-15T05:21:02+00:00",
+      "elapsed_min": 1.63,
+      "msg": "TCP 22 at 202.181.159.229:14285 after 1.6 min"
+    },
+    {
+      "utc": "2026-10-15T05:21:04+00:00",
+      "elapsed_min": 1.67,
+      "msg": "draw 1: ssh reachable \u2014 $0.03"
+    },
+    {
+      "utc": "2026-10-15T05:21:35+00:00",
+      "elapsed_min": 2.18,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+    },
+    {
+      "utc": "2026-10-15T05:21:35+00:00",
+      "elapsed_min": 2.18,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-15T05:25:15+00:00",
+      "elapsed_min": 5.86,
+      "msg": "draw 1: setup complete \u2014 $0.11"
+    },
+    {
+      "utc": "2026-10-15T05:25:20+00:00",
+      "elapsed_min": 5.94,
+      "msg": "driver detached, pid 1615, confirmed by descriptor_probe \u2014 $0.11"
+    },
+    {
+      "utc": "2026-10-15T05:27:39+00:00",
+      "elapsed_min": 8.25,
+      "msg": "  2026-10-15T05:25:18Z MARKER:DRIVER_START \u2014 $0.15"
+    },
+    {
+      "utc": "2026-10-15T09:55:58+00:00",
+      "elapsed_min": 276.57,
+      "msg": "  2026-10-15T09:55:06Z MARKER:ALL_DONE \u2014 $5.02"
+    },
+    {
+      "utc": "2026-10-15T09:55:58+00:00",
+      "elapsed_min": 276.57,
+      "msg": "polling ended: ALL_DONE \u2014 $5.02"
+    },
+    {
+      "utc": "2026-10-15T09:58:01+00:00",
+      "elapsed_min": 278.63,
+      "msg": "  manifest rc=0\n5 file(s) across 5 class(es) -> /workspace/manifest.json\n  final_required: 5 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-10-15T10:09:11+00:00",
+      "elapsed_min": 289.79,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-10-15T10:09:11+00:00",
+      "elapsed_min": 289.79,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-10-15T10:09:22+00:00",
+      "elapsed_min": 289.98,
+      "msg": "pod deleted \u2014 290.0 min, $5.27; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.phase_d2.authorization/v1",
+    "authorization_id": "autoinit.v1.phase_d2",
+    "version": 1,
+    "granted_utc": "2026-10-15T05:17:22+00:00",
+    "granted_by": "maintainer, 2026-10-14 UTC: Post-Stage-W-R2 Scientific Approval and Conditional D2 Search Authorization (independent review of 7211e142), confirmed by the maintainer directly. Scientific GO for the D2 v3 Full Search as an explicit research-investment decision; the registered Stage W rubric's literal result was BETWEEN and is not rewritten as GO.",
+    "plan_id": "autoinit.v1.phase_d2",
+    "plan_hash": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+    "expected_usd": 11.141,
+    "hard_cap_usd": 23.6923,
+    "authorized_stages": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "stage_conditions": {
+      "A": "setup; the session contract asserted against the preregistration",
+      "B": "the root teacher once; the evaluator primed with it",
+      "C": "the beam search minimizing the D2 objective, under the soft stop and the reference-cache regression guard",
+      "D": "commit the preregistered Top-K and record the KL-only control"
+    },
+    "scope_note": "ONE D2 v3 formal SEARCH session under preregistration v3: the frozen original teacher; Top-200 + tail teacher confidence; the teacher-union-candidate Top-200 + tail KL against the root reference; full scope (DEPTH, FFN, WIDTH, ATTENTION, state evaluation, beam); beam width 6; bsz 3, length_sorted_v1, scored_v1; the preregistered Top-4 quality retention committed and fetched. It trains nothing and runs no behavioural probe.",
+    "allows_beam_search": true,
+    "authorizes_d2_search": true,
+    "allows_recovery": false,
+    "allows_behavioural": false,
+    "automatic_followon_start": false,
+    "authorized_session_commit": "e0a7443e3abcbed2da5ee1289681c90bd29fcc34",
+    "harness_source_digest": "4829cf214343385e8d52186b5a8abe482a31a9f251224e992e9dcd021a7890a2",
+    "harness_source_files": [
+      "configs/stages/stage-1/phase_c1/authorization.json",
+      "configs/stages/stage-1/phase_d2/d2_search_artifacts.json",
+      "configs/stages/stage-1/phase_d2/d2_search_artifacts_failed.json",
+      "scripts/maintenance/consolidation/derive_budget.py",
+      "scripts/shared/__init__.py",
+      "scripts/shared/calibration.py",
+      "scripts/shared/deployment.py",
+      "scripts/shared/evaluation/__init__.py",
+      "scripts/shared/evaluation/evidence_reuse.py",
+      "scripts/shared/evaluation/load_state_eval.py",
+      "scripts/shared/evaluation/rollout_rescoring.py",
+      "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "scripts/shared/pod/collect_artifacts.py",
+      "scripts/shared/pod/watchdog.py",
+      "scripts/shared/recipes.py",
+      "scripts/shared/run_layout.py",
+      "scripts/shared/search_cost_model.py",
+      "scripts/shared/source_sets.py",
+      "scripts/stages/stage-1/families/d_series/__init__.py",
+      "scripts/stages/stage-1/families/d_series/d2_budget.py",
+      "scripts/stages/stage-1/families/d_series/incumbent.py",
+      "scripts/stages/stage-1/families/d_series/objectives.py",
+      "scripts/stages/stage-1/families/d_series/reference_calibration.py",
+      "scripts/stages/stage-1/families/d_series/scoring_protocol.py",
+      "scripts/stages/stage-1/families/d_series/shared_evaluation.py",
+      "scripts/stages/stage-1/families/d_series/teacher_confidence.py",
+      "scripts/stages/stage-1/phase_a/phase_a_frozen.py",
+      "scripts/stages/stage-1/phase_a3/__init__.py",
+      "scripts/stages/stage-1/phase_a3/a3_session.py",
+      "scripts/stages/stage-1/phase_a3/a_bsz3.py",
+      "scripts/stages/stage-1/phase_c1/isolation.py",
+      "scripts/stages/stage-1/phase_c1/probe_results.py",
+      "scripts/stages/stage-1/phase_c1/session.py",
+      "scripts/stages/stage-1/phase_c2/__init__.py",
+      "scripts/stages/stage-1/phase_c2/baseline.py",
+      "scripts/stages/stage-1/phase_c2/full_search_space.py",
+      "scripts/stages/stage-1/phase_c2/search_space.py",
+      "scripts/stages/stage-1/phase_c3/__init__.py",
+      "scripts/stages/stage-1/phase_c3/session.py",
+      "scripts/stages/stage-1/phase_d1/__init__.py",
+      "scripts/stages/stage-1/phase_d1/autoinit_d1_driver.py",
+      "scripts/stages/stage-1/phase_d1/autoinit_d1_launch.py",
+      "scripts/stages/stage-1/phase_d1/behavioural.py",
+      "scripts/stages/stage-1/phase_d1/behavioural_materialize.py",
+      "scripts/stages/stage-1/phase_d1/behavioural_verdict.py",
+      "scripts/stages/stage-1/phase_d1/d1_authorization.py",
+      "scripts/stages/stage-1/phase_d1/d1_qualification_driver.py",
+      "scripts/stages/stage-1/phase_d1/d1_session.py",
+      "scripts/stages/stage-1/phase_d1/replay_specs.py",
+      "scripts/stages/stage-1/phase_d1/search_space.py",
+      "scripts/stages/stage-1/phase_d1/selection_noise.py",
+      "scripts/stages/stage-1/phase_d1/topk_adoption_driver.py",
+      "scripts/stages/stage-1/phase_d1/write_d1_design.py",
+      "scripts/stages/stage-1/phase_d2/__init__.py",
+      "scripts/stages/stage-1/phase_d2/autoinit_d2_driver.py",
+      "scripts/stages/stage-1/phase_d2/autoinit_d2_launch.py",
+      "scripts/stages/stage-1/phase_d2/d2_authorization.py",
+      "scripts/stages/stage-1/phase_d2/d2_gpu_validation.py",
+      "scripts/stages/stage-1/phase_d2/d2_session.py",
+      "scripts/stages/stage-1/phase_d2/d2v3_gpu_validation.py",
+      "scripts/stages/stage-1/phase_d2/write_d2_preregistration.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/governance/closure.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/bundle_transport.py",
+      "src/aadistill/infrastructure/failure_signature.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/watchdog.py",
+      "src/aadistill/initialization/adapters/__init__.py",
+      "src/aadistill/initialization/adapters/qwen3.py",
+      "src/aadistill/initialization/calibration/batching.py",
+      "src/aadistill/initialization/calibration/datasets.py",
+      "src/aadistill/initialization/calibration/items.py",
+      "src/aadistill/initialization/calibration/packing.py",
+      "src/aadistill/initialization/calibration/profiles.py",
+      "src/aadistill/initialization/device.py",
+      "src/aadistill/initialization/execution.py",
+      "src/aadistill/initialization/operators/_common.py",
+      "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/_common.py",
+      "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+      "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+      "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+      "src/aadistill/initialization/operators/base.py",
+      "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+      "src/aadistill/initialization/operators/depth/__init__.py",
+      "src/aadistill/initialization/operators/depth/_common.py",
+      "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+      "src/aadistill/initialization/operators/depth/positional.py",
+      "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+      "src/aadistill/initialization/operators/register.py",
+      "src/aadistill/initialization/operators/width/residual/global_pca.py",
+      "src/aadistill/initialization/planning/__init__.py",
+      "src/aadistill/initialization/planning/fixed_path.py",
+      "src/aadistill/initialization/planning/generation.py",
+      "src/aadistill/initialization/planning/generation_compat.py",
+      "src/aadistill/initialization/planning/isolation.py",
+      "src/aadistill/initialization/planning/metrics.py",
+      "src/aadistill/initialization/planning/operator_config.py",
+      "src/aadistill/initialization/planning/ranking.py",
+      "src/aadistill/initialization/planning/recovery.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/stage1_selection.py",
+      "src/aadistill/initialization/scoring/batches.py",
+      "src/aadistill/initialization/scoring/content.py",
+      "src/aadistill/initialization/scoring/objective.py",
+      "src/aadistill/initialization/scoring/output_head.py",
+      "src/aadistill/initialization/scoring/positions.py",
+      "src/aadistill/initialization/scoring/protocol_identity.py",
+      "src/aadistill/initialization/scoring/reference_store.py",
+      "src/aadistill/initialization/scoring/rows.py",
+      "src/aadistill/initialization/scoring/support.py",
+      "src/aadistill/initialization/specs/arch.py",
+      "src/aadistill/initialization/specs/artifact.py",
+      "src/aadistill/initialization/specs/materialization.py",
+      "src/aadistill/initialization/specs/metrics.py",
+      "src/aadistill/initialization/specs/state.py",
+      "src/aadistill/initialization/statistics/collect.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/statistics/spec.py",
+      "src/aadistill/initialization/transforms/project.py",
+      "src/aadistill/initialization/transforms/sandwich.py",
+      "src/aadistill/models/student.py",
+      "src/aadistill/runtime/leaf_durability.py",
+      "src/aadistill/runtime/run_layout.py",
+      "src/aadistill/runtime/telemetry.py"
+    ],
+    "per_launch_hard_usd": 23.6923,
+    "provenance_commit": "e0a7443e3abcbed2da5ee1289681c90bd29fcc34",
+    "enforcement": "the launcher loads this artifact, refuses a planned hard threshold above hard_cap_usd, a harness whose derived closure differs in membership or digest, and a preregistration revision other than the bound one; the driver re-checks every bound identity before the root",
+    "preregistration_hash": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+    "run_id": "d2_search_20261015_051722",
+    "measurement_protocol_id": "4fecc463d39f889e4285d9a73831a556",
+    "config_hash": "5dd1ee154ca50338d636c90b44ba20abe49fea55d45195a188d1afc68a19a87e",
+    "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+    "objective_hash": "90e851fd11875e4a2e80cbf504a4961ce669411d70732bddb7ffd1941815da28",
+    "ranking_policy_hash": "836ae1d3667d72a51bc96b7168c382f31b387eb4183f22bff1e2e53aded8642e",
+    "prediction_rows": "scored_v1",
+    "pricing": {
+      "pricing_in_force": "cache_fix_validated",
+      "calibration_evidence_sha256": "6806eb846f7e8a50b6c9eb4165e24ad5c7474f586f1f259b947a3d89968b6155",
+      "hard_ceiling_minutes": 1240.86,
+      "expected_minutes": 583.5,
+      "prediction_rows": "scored_v1",
+      "scored_rows_evidence_sha256": "5edc0b92354662ac505c5c0c7c5a8a2988ba73091b22814faa121a22d6fef2ac",
+      "_basis": "logs/stages/stage-1/families/d_series/plans/d2_budget_v1.json :: steps.d2_search.by_prediction_rows.scored_v1 (cache_fix_validated)"
+    },
+    "money": {
+      "per_session_envelope_usd": 30.0,
+      "project_cap_usd": 595.0,
+      "formal_allowance_usd": 256.6523,
+      "package_total_usd": 281.7264,
+      "formal_remaining_usd": 127.9624,
+      "package_remaining_usd": 131.1428,
+      "project_remaining_usd": 123.9848,
+      "cumulative_spend_usd": 471.0152,
+      "funds_formal_sessions_of": [
+        "phase_c1",
+        "phase_c3",
+        "phase_a3",
+        "phase_d1",
+        "phase_d2"
+      ],
+      "_derived_by": "scripts/maintenance/consolidation/derive_budget.py",
+      "derived_session": {
+        "hard_ceiling_usd": 23.6923,
+        "expected_usd": 11.141,
+        "hard_ceiling_minutes": 1240.86,
+        "expected_minutes": 583.5,
+        "session_overhead_minutes": 95.0,
+        "container_disk_usd": 1.15,
+        "container_disk_gb": 400,
+        "price_per_hour": 1.09,
+        "prediction_rows": "scored_v1",
+        "prediction_rows_in_force": "scored_v1",
+        "scored_rows_evidence_sha256": "5edc0b92354662ac505c5c0c7c5a8a2988ba73091b22814faa121a22d6fef2ac",
+        "pricing_in_force": "cache_fix_validated",
+        "calibration_evidence_sha256": "6806eb846f7e8a50b6c9eb4165e24ad5c7474f586f1f259b947a3d89968b6155",
+        "_basis": "logs/stages/stage-1/families/d_series/plans/d2_budget_v1.json :: steps.d2_search.by_prediction_rows.scored_v1 (cache_fix_validated)",
+        "accepted_at_price_per_hour": 1.09
+      },
+      "live_quote": {
+        "gpu": "NVIDIA L40S",
+        "usd_per_hour": 1.09,
+        "stock_status": "Low",
+        "_quoted": "live, immediately before issuance"
+      }
+    },
+    "one_use": "ONE grant, ONE issuance, ONE launcher session; a retry is a new authorization",
+    "authorization_sha256": "9651ad046b4261ff440f424a7901e2d28fed82ace482eab2164190191fa25d81"
+  },
+  "session_plan_hash": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+  "harness_source_digest": "4829cf214343385e8d52186b5a8abe482a31a9f251224e992e9dcd021a7890a2",
+  "harness_source_files": [
+    "configs/stages/stage-1/phase_c1/authorization.json",
+    "configs/stages/stage-1/phase_d2/d2_search_artifacts.json",
+    "configs/stages/stage-1/phase_d2/d2_search_artifacts_failed.json",
+    "scripts/maintenance/consolidation/derive_budget.py",
+    "scripts/shared/__init__.py",
+    "scripts/shared/calibration.py",
+    "scripts/shared/deployment.py",
+    "scripts/shared/evaluation/__init__.py",
+    "scripts/shared/evaluation/evidence_reuse.py",
+    "scripts/shared/evaluation/load_state_eval.py",
+    "scripts/shared/evaluation/rollout_rescoring.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/collect_artifacts.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/shared/recipes.py",
+    "scripts/shared/run_layout.py",
+    "scripts/shared/search_cost_model.py",
+    "scripts/shared/source_sets.py",
+    "scripts/stages/stage-1/families/d_series/__init__.py",
+    "scripts/stages/stage-1/families/d_series/d2_budget.py",
+    "scripts/stages/stage-1/families/d_series/incumbent.py",
+    "scripts/stages/stage-1/families/d_series/objectives.py",
+    "scripts/stages/stage-1/families/d_series/reference_calibration.py",
+    "scripts/stages/stage-1/families/d_series/scoring_protocol.py",
+    "scripts/stages/stage-1/families/d_series/shared_evaluation.py",
+    "scripts/stages/stage-1/families/d_series/teacher_confidence.py",
+    "scripts/stages/stage-1/phase_a/phase_a_frozen.py",
+    "scripts/stages/stage-1/phase_a3/__init__.py",
+    "scripts/stages/stage-1/phase_a3/a3_session.py",
+    "scripts/stages/stage-1/phase_a3/a_bsz3.py",
+    "scripts/stages/stage-1/phase_c1/isolation.py",
+    "scripts/stages/stage-1/phase_c1/probe_results.py",
+    "scripts/stages/stage-1/phase_c1/session.py",
+    "scripts/stages/stage-1/phase_c2/__init__.py",
+    "scripts/stages/stage-1/phase_c2/baseline.py",
+    "scripts/stages/stage-1/phase_c2/full_search_space.py",
+    "scripts/stages/stage-1/phase_c2/search_space.py",
+    "scripts/stages/stage-1/phase_c3/__init__.py",
+    "scripts/stages/stage-1/phase_c3/session.py",
+    "scripts/stages/stage-1/phase_d1/__init__.py",
+    "scripts/stages/stage-1/phase_d1/autoinit_d1_driver.py",
+    "scripts/stages/stage-1/phase_d1/autoinit_d1_launch.py",
+    "scripts/stages/stage-1/phase_d1/behavioural.py",
+    "scripts/stages/stage-1/phase_d1/behavioural_materialize.py",
+    "scripts/stages/stage-1/phase_d1/behavioural_verdict.py",
+    "scripts/stages/stage-1/phase_d1/d1_authorization.py",
+    "scripts/stages/stage-1/phase_d1/d1_qualification_driver.py",
+    "scripts/stages/stage-1/phase_d1/d1_session.py",
+    "scripts/stages/stage-1/phase_d1/replay_specs.py",
+    "scripts/stages/stage-1/phase_d1/search_space.py",
+    "scripts/stages/stage-1/phase_d1/selection_noise.py",
+    "scripts/stages/stage-1/phase_d1/topk_adoption_driver.py",
+    "scripts/stages/stage-1/phase_d1/write_d1_design.py",
+    "scripts/stages/stage-1/phase_d2/__init__.py",
+    "scripts/stages/stage-1/phase_d2/autoinit_d2_driver.py",
+    "scripts/stages/stage-1/phase_d2/autoinit_d2_launch.py",
+    "scripts/stages/stage-1/phase_d2/d2_authorization.py",
+    "scripts/stages/stage-1/phase_d2/d2_gpu_validation.py",
+    "scripts/stages/stage-1/phase_d2/d2_session.py",
+    "scripts/stages/stage-1/phase_d2/d2v3_gpu_validation.py",
+    "scripts/stages/stage-1/phase_d2/write_d2_preregistration.py",
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/governance/closure.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/bundle_transport.py",
+    "src/aadistill/infrastructure/failure_signature.py",
+    "src/aadistill/infrastructure/log_relay.py",
+    "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/watchdog.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/calibration/batching.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/items.py",
+    "src/aadistill/initialization/calibration/packing.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/execution.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+    "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+    "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+    "src/aadistill/initialization/operators/depth/__init__.py",
+    "src/aadistill/initialization/operators/depth/_common.py",
+    "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+    "src/aadistill/initialization/operators/depth/positional.py",
+    "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+    "src/aadistill/initialization/operators/register.py",
+    "src/aadistill/initialization/operators/width/residual/global_pca.py",
+    "src/aadistill/initialization/planning/__init__.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/planning/generation.py",
+    "src/aadistill/initialization/planning/generation_compat.py",
+    "src/aadistill/initialization/planning/isolation.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/planning/operator_config.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/recovery.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/scoring/batches.py",
+    "src/aadistill/initialization/scoring/content.py",
+    "src/aadistill/initialization/scoring/objective.py",
+    "src/aadistill/initialization/scoring/output_head.py",
+    "src/aadistill/initialization/scoring/positions.py",
+    "src/aadistill/initialization/scoring/protocol_identity.py",
+    "src/aadistill/initialization/scoring/reference_store.py",
+    "src/aadistill/initialization/scoring/rows.py",
+    "src/aadistill/initialization/scoring/support.py",
+    "src/aadistill/initialization/specs/arch.py",
+    "src/aadistill/initialization/specs/artifact.py",
+    "src/aadistill/initialization/specs/materialization.py",
+    "src/aadistill/initialization/specs/metrics.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/statistics/spec.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
+    "src/aadistill/models/student.py",
+    "src/aadistill/runtime/leaf_durability.py",
+    "src/aadistill/runtime/run_layout.py",
+    "src/aadistill/runtime/telemetry.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 23.6923,
+    "expected_minutes": 583.5,
+    "soft_stop_minutes": 1210.8600000000001,
+    "artifact_recovery_reserve_minutes": 30.0,
+    "hard_terminate_minutes": 1240.8600000000001,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "unused: a D2 search trains nothing",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 71.25
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 23.75
+      },
+      {
+        "name": "beam_search_expected",
+        "minutes": 488.5
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "beam_composition_risk",
+        "minutes": 569.01
+      }
+    ],
+    "notes": [],
+    "soft_stop_reserve_minutes": 569.01,
+    "expected_usd": 10.6003,
+    "soft_stop_usd": 21.9973,
+    "artifact_recovery_reserve_usd": 0.545,
+    "hard_terminate_usd": 22.5423
+  },
+  "quoted_price_per_hour": 1.09,
+  "stock_status": "Low",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 142.2980604136,
+    "current_spend_per_hr": 0.0,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 30.0,
+    "ok": true,
+    "why": "the provider account holds $142.2981 against the $30.0000 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "prechecks": [
+    {
+      "check": "run_identity_gate",
+      "ok": true,
+      "message": "run d2_search_20261015_051722, preregistration b52810921a4c, rows scored_v1"
+    },
+    {
+      "check": "session_contract_gate",
+      "ok": true,
+      "message": "session contract verified at $0: config 5dd1ee154ca5"
+    },
+    {
+      "check": "staged_science_inputs_gate",
+      "ok": true,
+      "message": "state-eval asset and both calibration mixtures verified"
+    },
+    {
+      "check": "session_commit_and_lineage",
+      "ok": true,
+      "message": "session commit d64490eeab75 verified: harness digests to 4829cf214343\u2026, carries the authorization and only logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "check": "bundle_staged_gate",
+      "ok": true,
+      "message": "aad_autoinit_d64490ee.bundle round-trips"
+    }
+  ],
+  "d2_session_contract_check": {
+    "config_hash": "5dd1ee154ca50338d636c90b44ba20abe49fea55d45195a188d1afc68a19a87e",
+    "measurement_protocol_id": "4fecc463d39f889e4285d9a73831a556",
+    "objective_hash": "90e851fd11875e4a2e80cbf504a4961ce669411d70732bddb7ffd1941815da28",
+    "ranking_policy_hash": "836ae1d3667d72a51bc96b7168c382f31b387eb4183f22bff1e2e53aded8642e",
+    "problems": []
+  },
+  "session_commit_check": {
+    "session_commit": "d64490eeab7541eb20259dd541d84af344922dd4",
+    "authorized_session_commit": "e0a7443e3abcbed2da5ee1289681c90bd29fcc34",
+    "harness_digest_at_commit": "4829cf214343385e8d52186b5a8abe482a31a9f251224e992e9dcd021a7890a2",
+    "authorized_harness_digest": "4829cf214343385e8d52186b5a8abe482a31a9f251224e992e9dcd021a7890a2",
+    "harness_matches": true,
+    "commit_carries_this_authorization": true,
+    "rule": "the pod checks out this commit from a bundle; its harness must digest to the authorized value and it must carry the authorization the driver will load",
+    "lineage": {
+      "authorized_base": "e0a7443e3abcbed2da5ee1289681c90bd29fcc34",
+      "session_commit": "d64490eeab7541eb20259dd541d84af344922dd4",
+      "descends_from_base": true,
+      "changed_paths": [
+        "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/governance/authorization.json"
+      ],
+      "unexpected_paths": [],
+      "ok": true,
+      "reason": "only logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/governance/authorization.json differs from the authorized base"
+    }
+  },
+  "bundle_staged_check": {
+    "session_commit": "d64490eeab7541eb20259dd541d84af344922dd4",
+    "canonical_bundle_name": "aad_autoinit_d64490ee.bundle",
+    "relay_repo": "AlphaAvatar/aadistill-artifacts",
+    "relay_path": "transfer/aad_autoinit_d64490ee.bundle",
+    "n_harness_files": 134,
+    "bytes": 31959035,
+    "remote_sha256": "b9437033274f22a74443de5fb2449630ee3ccf1bebb325db9a94bd33b7cb2dbe",
+    "local_sha256": "b9437033274f22a74443de5fb2449630ee3ccf1bebb325db9a94bd33b7cb2dbe",
+    "bundle_verify_rc": 0,
+    "roundtrip_head": "d64490eeab7541eb20259dd541d84af344922dd4",
+    "authorization_sha256": "9e5931d08b58f6e9570851ab496504d4db5ab855ba4dcac6a834c019301333dc",
+    "authorization_matches": true,
+    "roundtrip_harness_digest": "4829cf214343385e8d52186b5a8abe482a31a9f251224e992e9dcd021a7890a2",
+    "expected_harness_digest": "4829cf214343385e8d52186b5a8abe482a31a9f251224e992e9dcd021a7890a2",
+    "ok": true,
+    "answers": "a pod can obtain the exact authorized code from the relay right now, not merely that a local file once existed"
+  },
+  "precheck": {
+    "relay_needed": [],
+    "relay_missing": [],
+    "relay_repos": {},
+    "relay_repo_files_listed": {},
+    "local_assets": [
+      "artifacts/stages/stage-1/state_eval_v1",
+      "artifacts/stages/stage-1/e8_calibration_v1",
+      "artifacts/stages/stage-1/reasoning_heavy_v2"
+    ],
+    "local_missing": []
+  },
+  "pod_id": "ricuwbh64pqlwd",
+  "actual_price_per_hour": 1.09,
+  "terminate_after_utc": "2026-10-16T02:00:14Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/watchdog_ricuwbh64pqlwd.jsonl"
+  ],
+  "watchdog_owns_pod": "ricuwbh64pqlwd",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "580.126.09"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_d64490ee.bundle",
+    "SESSION_ASSETS": "state_eval_v1:artifacts/stages/stage-1,e8_calibration_v1:artifacts/stages/stage-1,reasoning_heavy_v2:artifacts/stages/stage-1",
+    "SESSION_AUTH_PATH": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/governance/authorization.json",
+    "SESSION_COMMIT": "d64490eeab7541eb20259dd541d84af344922dd4",
+    "SESSION_KIND": "d2",
+    "SESSION_PLAN_HASH": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+    "SESSION_RELAY_INPUTS": "[]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV TEACHER_READY TESTS_OK AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/autoinit_d2.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "scripts/stages/stage-1/phase_d2/tests",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "2700",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "autoinit_d2",
+    "pid": 1615,
+    "workdir": "/workspace/aad",
+    "command": "/opt/train/bin/python /workspace/aad/scripts/stages/stage-1/phase_d2/autoinit_d2_driver.py --out '/workspace/aad/artifacts/audit/autoinit_d2' --run-id 'd2_search_20261015_051722' --authorization '/workspace/aad/logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/governance/authorization.json' --prediction-rows 'scored_v1' --status '/workspace/autoinit_d2.status' --device cuda --deadline-s 72300",
+    "log_path": "/workspace/autoinit_d2_run.log",
+    "status_path": "/workspace/autoinit_d2.status",
+    "pid_path": "/workspace/jobs/autoinit_d2.pid",
+    "descriptor_path": "/workspace/jobs/autoinit_d2.job.json",
+    "exit_path": "/workspace/jobs/autoinit_d2.exit",
+    "started_utc": "2026-10-15T05:25:18Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "fetched_reports": [
+    "d2_search.json",
+    "journal.jsonl",
+    "stage1_selection.json"
+  ],
+  "checkpoints_fetched": [
+    "ProductFetchResult(kind='transfer', detail='59013099b902f213649b8aa4c676dedd: rc=0, identity MATCHED (re-identified)', rc=0)",
+    "ProductFetchResult(kind='transfer', detail='c2cb27efcf68b4f18bf7284aea84877a: rc=0, identity MATCHED (re-identified)', rc=0)",
+    "ProductFetchResult(kind='transfer', detail='30fe791a85d70ac713e75893fea107ae: rc=0, identity MATCHED (re-identified)', rc=0)",
+    "ProductFetchResult(kind='transfer', detail='3a4173e4eff45b0d73fd82bd0b263f03: rc=0, identity MATCHED (re-identified)', rc=0)"
+  ],
+  "required_products_secured": {
+    "ok": true,
+    "why": "all 4 selected checkpoints secured and identity-verified"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 5,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 289.98,
+    "actual_usd": 5.2679,
+    "authorized_usd": 23.6923,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-15T10:09:22+00:00"
+}

@@ -1,0 +1,75 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_d2_screening",
+ "note": "failure spec: the same classes, none required -- a session that stopped early collects whatever exists, and the launcher's poll hook has already secured every scored probe and every trained checkpoint off-pod.",
+ "patterns_are_relative_to": "the collector's --root, which SessionRunner sets to <checkout>/artifacts. So `audit/autoinit_d2_screening/x` is <checkout>/artifacts/audit/autoinit_d2_screening/x.",
+ "one_authoritative_layout": "artifacts/audit/autoinit_d2_screening/ is where the driver writes and where the relay, the report fetch, the launcher's poll hook (D1's durability functions under D2's layout) and this spec all read.",
+ "entries": [
+  {
+   "artifact_class": "d2_screening_record",
+   "pattern": "audit/autoinit_d2_screening/d2_screening.json",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_screening_results",
+   "pattern": "audit/autoinit_d2_screening/results/*.json",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_screening_per_sample",
+   "pattern": "audit/autoinit_d2_screening/per_sample/*.jsonl",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_screening_generations",
+   "pattern": "audit/autoinit_d2_screening/generations/*/*",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_screening_probe_configs",
+   "pattern": "audit/autoinit_d2_screening/configs/*.json",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_screening_attested_protocol",
+   "pattern": "audit/autoinit_d2_screening/d2_screening_attested_protocol.json",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_screening_engine_probe",
+   "pattern": "audit/autoinit_d2_screening/engine_probe.json",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_screening_generation_admissions",
+   "pattern": "audit/autoinit_d2_screening/*_generation_admission.json",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_screening_rescoring",
+   "pattern": "audit/autoinit_d2_screening/rescoring/*.json",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_screening_tails",
+   "pattern": "audit/autoinit_d2_screening/*_tail.log",
+   "required": false,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_screening_release_acks",
+   "pattern": "audit/autoinit_d2_screening/release_acks/*.json",
+   "required": false,
+   "lifecycle": "final_required"
+  }
+ ]
+}

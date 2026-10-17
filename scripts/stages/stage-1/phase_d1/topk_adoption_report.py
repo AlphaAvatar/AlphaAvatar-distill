@@ -144,6 +144,98 @@ def lines(doc: dict) -> list[str]:
             out.append(f"   weighting setup: treatment "
                        f"{(wt.get('treatment') or {}).get('setup_seconds')}s vs "
                        f"control {(wt.get('control') or {}).get('setup_seconds')}s")
+    lc = doc.get("L_reference_calibration") or {}
+    if lc:
+        cal = lc.get("calibration") or {}
+        out.append(f"L  B rebuilt in {(lc.get('B') or {}).get('seconds')}s; "
+                   f"lambda {cal.get('reward_scale')}; thresholds "
+                   f"{cal.get('diagnostic_thresholds')}")
+        for name in ("state_eval", "d2_rows_state_eval", "depth_one_round",
+                     "depth_recompute_equivalence", "d2_rows_depth"):
+            t = lc.get(f"timing_{name}") or {}
+            agree = t.get("agreement") or {}
+            shown = {k: t.get(k) for k in (
+                "skipped", "failed", "overhead_factor",
+                "overhead_seconds_per_evaluation",
+                "overhead_seconds_per_candidate", "same_cache_mode",
+                "cache_fix_validated", "within_tolerance",
+                "max_abs_difference", "exact", "recompute_slowdown")
+                if t.get(k) is not None}
+            shown.update({f"agreement.{k}": agree.get(k) for k in (
+                "within_tolerance", "max_relative_difference", "choice_agrees")
+                if agree.get(k) is not None})
+            out.append(f"   {name}: {shown or 'not reached'}")
+        verdict = lc.get("d2_scored_rows_equivalence") or {}
+        if verdict:
+            out.append(f"   D2 scored-rows equivalence: {verdict.get('verdict')}")
+    vv = doc.get("V_d2_validation") or {}
+    if vv:
+        verdicts = vv.get("verdicts") or {}
+        out.append("V  D2 GPU validation: " + ", ".join(
+            f"{k}={(v or {}).get('verdict')}" for k, v in verdicts.items()
+            if isinstance(v, dict)) + f", validation={verdicts.get('validation')}")
+        for name in ("V1_root_stores_and_validity",
+                     "V2_b_rebuild_and_kl_relation", "V6_state_evaluation",
+                     "V3_weighted_statistics", "V4_depth_root_vs_parent",
+                     "V5_depth_scored_rows"):
+            step = vv.get(name)
+            if step is None:
+                out.append(f"   {name}: not reached")
+            elif "failed" in step or "skipped" in step:
+                out.append(f"   {name}: "
+                           f"{str(step.get('failed') or step.get('skipped'))[:150]}")
+            else:
+                out.append(f"   {name}: ok in {step.get('wall_seconds')}s")
+        ranks = ((vv.get("V4_depth_root_vs_parent") or {})
+                 .get("rankings") or {})
+        if ranks:
+            out.append(f"   V4 choices: {ranks.get('choice')}")
+    ww = doc.get("W_d2v3_validation") or {}
+    if ww:
+        verdicts = ww.get("verdicts") or {}
+        out.append("W  D2 v3 GPU validation: " + ", ".join(
+            f"{k}={(v or {}).get('verdict')}" for k, v in verdicts.items()
+            if isinstance(v, dict)) + f", validation={verdicts.get('validation')}")
+        for name in ("W1_union_stores_and_confidence", "W2_ffn_child_weighted",
+                     "W3_union_numerics", "W4_depth_union_all_v1",
+                     "W5_depth_union_scored_v1", "W6_state_evaluation"):
+            step = ww.get(name)
+            if step is None:
+                out.append(f"   {name}: not reached")
+            elif "failed" in step or "skipped" in step:
+                out.append(f"   {name}: "
+                           f"{str(step.get('failed') or step.get('skipped'))[:150]}")
+            else:
+                out.append(f"   {name}: ok in {step.get('wall_seconds')}s, "
+                           f"peak {_gib(step.get('step_peak_memory_bytes'))}")
+        for pid, prof in ((ww.get("W1_union_stores_and_confidence") or {})
+                          .get("profiles") or {}).items():
+            c = prof.get("confidence") or {}
+            out.append(f"   W1 {pid}: c_T median "
+                       f"{(c.get('quantiles') or {}).get('q50')}, IQR "
+                       f"{c.get('iqr')}, ESS {c.get('effective_fraction')}")
+        w3 = ww.get("W3_union_numerics") or {}
+        ka = w3.get("kl_arithmetic") or {}
+        if ka:
+            for part in ("teacher_topk", "union"):
+                x = ka.get(part) or {}
+                out.append(f"   W3 {part} KL vs float64: max "
+                           f"{x.get('max_abs_difference')}, violations "
+                           f"{x.get('position_violations')}")
+            cr = ka.get("float32_crossings") or {}
+            out.append(f"   W3 fp64 bounds {ka.get('bounds_hold')}; float32 "
+                       f"crossings lower {(cr.get('lower') or {}).get('count')}"
+                       f" / upper {(cr.get('upper') or {}).get('count')}, "
+                       f"anomalies {(ka.get('anomalies') or {}).get('total')}")
+        #: Revision 1's record (historical).
+        ua = w3.get("union_arithmetic") or {}
+        if ua:
+            out.append(f"   W3 union vs float64: max {ua.get('max_abs_difference')}"
+                       f", violations {ua.get('position_violations')}, bounds "
+                       f"{ua.get('bounds_hold')}")
+        ranks = ((ww.get("W4_depth_union_all_v1") or {}).get("rankings") or {})
+        if ranks:
+            out.append(f"   W4 choices: {ranks.get('choice')}")
     for stage in doc.get("stages") or []:
         if stage.get("status") == "failed":
             out.append(f"stage {stage['stage']} FAILED after "

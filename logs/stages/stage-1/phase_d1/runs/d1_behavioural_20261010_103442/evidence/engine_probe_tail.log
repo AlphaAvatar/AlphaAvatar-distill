@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/workspace/aad/scripts/shared/pod/autoinit_engine_probe.py", line 93, in <module>
+    main()
+  File "/workspace/aad/scripts/shared/pod/autoinit_engine_probe.py", line 44, in main
+    from shared.evaluation.uncapped_eval import engine_config, resolve_context, resolve_stop_ids
+ModuleNotFoundError: No module named 'shared'

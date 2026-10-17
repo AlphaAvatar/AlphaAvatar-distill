@@ -212,7 +212,8 @@ class TestTheArmsAreTheFrozenFieldAndNothingElse:
         """
         arms = B.arms(REPO)
         q1, q2 = arms[0], arms[1]
-        monkeypatch.setattr(B, "arms", lambda repo_root=REPO: (
+        monkeypatch.setattr(B, "arms",
+                            lambda repo_root=REPO, arm_root=None: (
             B.Arm(arm_id="q1", state_id=q1.state_id,
                   artifact_digest=q1.artifact_digest, quality_position=1,
                   checkpoint_dir=q2.checkpoint_dir, role="candidate",
@@ -229,7 +230,8 @@ class TestTheArmsAreTheFrozenFieldAndNothingElse:
         `require_arms_present` for both kinds of arm.
         """
         q1 = B.arms(REPO)[0]
-        monkeypatch.setattr(B, "arms", lambda repo_root=REPO: (
+        monkeypatch.setattr(B, "arms",
+                            lambda repo_root=REPO, arm_root=None: (
             B.Arm(arm_id="q1", state_id=q1.state_id,
                   artifact_digest=q1.artifact_digest, quality_position=1,
                   checkpoint_dir=q1.checkpoint_dir, role="candidate",
@@ -249,7 +251,8 @@ class TestTheArmsAreTheFrozenFieldAndNothingElse:
         """
         q1 = B.arms(REPO)[0]
         b = next(a for a in B.arms(REPO) if a.is_incumbent)
-        monkeypatch.setattr(B, "arms", lambda repo_root=REPO: (
+        monkeypatch.setattr(B, "arms",
+                            lambda repo_root=REPO, arm_root=None: (
             B.Arm(arm_id="B", state_id=None,
                   artifact_digest="f" * 64, quality_position=None,
                   checkpoint_dir=None, role="incumbent",

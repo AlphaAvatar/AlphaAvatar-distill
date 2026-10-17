@@ -188,6 +188,16 @@ class OperatorContext:
     #: because nothing between the driver's affordability check and the cost
     #: watchdog ever consulted a clock.
     deadline: Any = None
+    #: WHAT A KL-SCORED DECISION MINIMIZES, when it is not the KL alone: a
+    #: `ScoringObjective` adding the candidate student's own confidence. Run-level
+    #: like the support, and consumed only by implementations that declare
+    #: `consumes_scoring_objective`; `None` is the historical KL-only objective.
+    scoring_objective: Any = None
+    #: The ROOT reference store for this invocation's calibration mixture
+    #: (`scoring.reference_store`), when the objective reads the root
+    #: reference: DEPTH's KL reference and the confidence weights of the
+    #: activation statistics. `None` everywhere else.
+    root_reference: Any = None
 
     def cached_stats(self, collect):
         """Statistics for this parent under this profile, collected at most once."""
@@ -243,6 +253,22 @@ class OperatorImplementation(ABC):
     preserves: frozenset[str] = frozenset()
     calibration: CalibrationNeed = CalibrationNeed.NONE
     objective: str = ""
+    #: Whether this implementation's SELECTION reads a run's `ScoringObjective`.
+    #: Not part of `signature()`: adding it there would move every frozen
+    #: implementation's signature hash, and the objective an invocation used is
+    #: bound where it varies -- in the hashed operator config.
+    consumes_scoring_objective: bool = False
+    #: Whether this implementation's ACTIVATION STATISTICS take the root
+    #: reference's confidence as token weights when the objective declares
+    #: `weights_activation_statistics`. Not part of `signature()`, for the
+    #: same reason as the flag above.
+    consumes_reference_weighted_statistics: bool = False
+    #: Whether this implementation's KL-scored selection may be told which
+    #: model to measure against (`scoring.kl_reference`): the intact parent,
+    #: by default, or the stored lineage root. Not part of `signature()`, for
+    #: the same reason as the two flags above -- the reference an invocation
+    #: used is bound in its hashed operator config.
+    accepts_kl_reference: bool = False
     deterministic: bool = True
     requires_seed: bool = False
     produces: tuple[str, ...] = ()
@@ -358,6 +384,58 @@ class OperatorImplementation(ABC):
                 "state id is derived from, so a mismatch records a divergence "
                 "that was not the one computed. Under the full-vocabulary "
                 "contract the config key is ABSENT, not null.")
+        #: AND THE OBJECTIVE, by the same two-sides rule. An implementation
+        #: that consumes one must be handed the object its config declares; one
+        #: that does not must not declare it, because its state id would then
+        #: name an objective its selection never read.
+        from aadistill.initialization.scoring.kl_reference import (
+            KLReferenceError, requests_root_reference, validate_kl_reference,
+        )
+        from aadistill.initialization.scoring.objective import (
+            objective_consumed_by,
+            root_reference_needed,
+        )
+
+        #: A DECLARED KL REFERENCE, by the same two-sides rule: the config
+        #: names it (and so the state id), and the store it needs must have
+        #: been handed in -- a declaration with no store behind it would
+        #: record a reference the selection never read.
+        try:
+            validate_kl_reference(
+                self, ctx.config,
+                objective_consumed=objective_consumed_by(
+                    self, ctx.scoring_objective))
+        except KLReferenceError as exc:
+            raise ContractViolation(f"{self.impl_id}: {exc}") from exc
+        if requests_root_reference(self, ctx.config) and \
+                ctx.root_reference is None:
+            raise ContractViolation(
+                f"{self.impl_id}: its config declares the ROOT as its KL "
+                "reference and no root reference store was handed to this "
+                "invocation")
+
+        declared_objective = (ctx.config or {}).get("scoring_objective")
+        actual_objective = (None if ctx.scoring_objective is None
+                            else ctx.scoring_objective.as_dict())
+        if objective_consumed_by(self, ctx.scoring_objective):
+            if (root_reference_needed(self, ctx.scoring_objective)
+                    and ctx.root_reference is None):
+                raise ContractViolation(
+                    f"{self.impl_id}: {ctx.scoring_objective.qualified_id} "
+                    "reads the ROOT reference and no root reference store was "
+                    "handed to this invocation")
+            if declared_objective != actual_objective:
+                raise ContractViolation(
+                    f"{self.impl_id}: config declares scoring objective "
+                    f"{declared_objective!r} but was handed "
+                    f"{actual_objective!r}. The declared value is what the "
+                    "state id is derived from.")
+        if not objective_consumed_by(self, ctx.scoring_objective) and \
+                declared_objective is not None:
+            raise ContractViolation(
+                f"{self.impl_id} does not consume a scoring objective, so its "
+                "config may not declare one; the state id would name an "
+                "objective the selection never read")
         outcome = self.apply(ctx)
         if outcome.model is ctx.model:
             raise ContractViolation(

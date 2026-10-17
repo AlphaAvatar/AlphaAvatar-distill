@@ -1,0 +1,29 @@
+[18:35:27] budget: expected 817 min $14.85 · soft $18.62 · hard $19.17 (authorized $19.46)
+[18:35:27] NVIDIA L40S $1.09/h, stock Low
+[18:35:28] account funds OK: the provider account holds $136.7648 against the $30.0000 this session must be able to fund
+[18:35:28] run d2_screening_20261015_183412, preregistration b52810921a4c
+[18:35:31] contract verified at $0: 6d4283e77e1b2654, 8 probes
+[18:35:31] 12 arm files on the relay at their pins
+[18:35:32] session commit 5b9d138bd58a verified: harness digests to 20d3721417e2…, carries the authorization and only logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183412/governance/authorization.json differs from the authorized base
+[18:35:32] no previous attempt failed deterministically; 0 prior log(s) read
+[18:35:38] aad_autoinit_5b9d138b.bundle round-trips
+[18:35:38] precheck OK: 18 relay inputs (18 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[18:35:38] DRY RUN: every pre-provider gate passed; stopping before provider creation. Nothing was created and nothing bills.
+[18:36:01] budget: expected 817 min $14.85 · soft $18.62 · hard $19.17 (authorized $19.46)
+[18:36:01] NVIDIA L40S $1.09/h, stock Low
+[18:36:01] account funds OK: the provider account holds $136.7648 against the $30.0000 this session must be able to fund
+[18:36:01] run d2_screening_20261015_183412, preregistration b52810921a4c
+[18:36:05] contract verified at $0: 6d4283e77e1b2654, 8 probes
+[18:36:05] 12 arm files on the relay at their pins
+[18:36:06] session commit 5b9d138bd58a verified: harness digests to 20d3721417e2…, carries the authorization and only logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183412/governance/authorization.json differs from the authorized base
+[18:36:06] no previous attempt failed deterministically; 0 prior log(s) read
+[18:36:11] aad_autoinit_5b9d138b.bundle round-trips
+[18:36:12] precheck OK: 18 relay inputs (18 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[18:36:13] attempt 1: create failed — {"error":"There are no longer any instances available."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string          cloud type (SECURE or COMMUNITY) (default "SECURE")
+      --co
+[18:36:13] ABORT: could not create a pod

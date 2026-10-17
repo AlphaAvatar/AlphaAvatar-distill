@@ -47,6 +47,14 @@ from aadistill.initialization.calibration.packing import (
 )
 from aadistill.initialization.execution import ExecutionConfig
 from aadistill.initialization.scoring.content import scoring_content_identity
+from aadistill.initialization.scoring.objective import (
+    ObjectiveError, add_joint_histograms, confidence_from_vocabulary_entropy,
+    confidence_histogram, full_vocabulary_entropy, item_component_means,
+    position_terms, require_binary_scoring_weights, require_objective_support,
+)
+from aadistill.initialization.scoring.reference_store import (
+    build_root_reference_store, root_reference_identity,
+)
 from aadistill.initialization.scoring.protocol_identity import (
     PROTOCOL_FIELD,
     ReductionSemantics,
@@ -54,10 +62,15 @@ from aadistill.initialization.scoring.protocol_identity import (
     UNDECLARED_EXECUTION,
     measurement_protocol_id,
 )
+from aadistill.initialization.scoring.rows import (
+    scored_prediction_logits, split_rows,
+)
 from aadistill.initialization.scoring.support import (
     FULL_VOCAB_V1, DistributionSupport, ReferenceDistributionSketch,
-    distortion_on_reference_support, sketch_reference,
+    distortion_on_reference_support, distortion_on_union_support,
+    sketch_reference,
 )
+from aadistill.initialization.specs.arch import adapter_for_config
 from aadistill.initialization.scoring.positions import (
     ALL_POSITIONS_V1,
     PREDICTION_AXIS,
@@ -125,6 +138,11 @@ class StateEvaluator:
         #: `measurement_protocol_id` byte-identical -- see `ReductionSemantics`.
         #: `reference_topk_tail_v1` is a different measurement and moves the id.
         distribution_support: DistributionSupport = FULL_VOCAB_V1,
+        #: WHAT IS AVERAGED, when it is not the KL alone: a `ScoringObjective`
+        #: adding the candidate's own Top-K confidence. `None` keeps the
+        #: historical KL-only metrics and every protocol id byte-identical; a
+        #: declared objective ADDS `state.objective.*` and moves the id.
+        scoring_objective: Any = None,
     ) -> None:
         if not items:
             raise MeasurementError(f"{suite.qualified_id}: no items to score")
@@ -162,6 +180,30 @@ class StateEvaluator:
                 w.require_nonempty()
                 self._weights[item.item_id] = w.weights
         self.execution = execution
+        #: PRE-VOCABULARY ROW SELECTION (`ExecutionConfig.prediction_rows`). When
+        #: on, teacher and candidate project only the rows this policy weights;
+        #: per item, the same boolean vector selects both, so the two
+        #: distributions stay position-aligned. `None` keeps the historical
+        #: all-rows path untouched.
+        self._row_select: dict[str, torch.Tensor] | None = None
+        if execution.selects_prediction_rows:
+            if numerics is None:
+                #: The protocol id binds execution only through the declared
+                #: numerical environment; without one it records
+                #: `UNDECLARED_EXECUTION`, and a scored-row measurement would
+                #: then carry the SAME id as an all-rows one. A non-default
+                #: arithmetic path must be visible in the identity it reports.
+                raise MeasurementError(
+                    f"prediction_rows={execution.prediction_rows!r} needs a "
+                    "declared NumericalEnvironment (`numerics=`), so that the "
+                    "measurement protocol id records the row-selected path")
+            self._row_select = {
+                item.item_id: (
+                    torch.ones(int(item.input_ids.shape[1]) - 1,
+                               dtype=torch.bool)
+                    if self._weights is None
+                    else self._weights[item.item_id] > 0)
+                for item in self.items}
         self.batch_budget_bytes = int(batch_budget_bytes)
         self.numerics = numerics
         #: The suite's CONTENT identity, taken as a parameter rather than read
@@ -198,11 +240,38 @@ class StateEvaluator:
         #: `[T, K]`, and conflating the two would inherit a refusal that does not
         #: apply.
         self._ref_sketches: dict[str, ReferenceDistributionSketch] = {}
+        #: Per-item reference FULL-vocabulary entropy, ``[T]`` float32, for an
+        #: objective weighted by the reference's confidence. A property of the
+        #: teacher alone, so computed once per item like the sketch; ``O(T)``.
+        self._ref_entropy: dict[str, torch.Tensor] = {}
         self._sketch_cache_bytes = 0
         self.cache_budget_bytes = int(cache_budget_bytes)
+        self.scoring_objective = scoring_objective
+        #: THE UNION SUPPORT AND THE UNION-KL FORM COME TOGETHER: the KL needs
+        #: the teacher's probability of candidate-only entries, which only the
+        #: teacher store built at `prime_reference` can retrieve.
+        try:
+            require_objective_support(scoring_objective, distribution_support)
+        except ObjectiveError as exc:
+            raise MeasurementError(str(exc)) from exc
+        #: The teacher's union-support store over the suite, built once at
+        #: `prime_reference`; `None` on every other support.
+        self._union_store = None
+        if scoring_objective is not None:
+            if distribution_support.is_full_vocab:
+                raise MeasurementError(
+                    f"scoring objective {scoring_objective.qualified_id} is "
+                    "defined on the reference Top-K + tail KL; full_vocab_v1 "
+                    "is the KL-only oracle")
+            for weights in (self._weights or {}).values():
+                try:
+                    require_binary_scoring_weights(weights)
+                except ObjectiveError as exc:
+                    raise MeasurementError(str(exc)) from exc
         self.reduction = ReductionSemantics(
             chunk=int(chunk), reference_strategy=reference_strategy.value,
-            distribution_support=distribution_support)
+            distribution_support=distribution_support,
+            scoring_objective=scoring_objective)
         self.measurement_protocol_id = measurement_protocol_id(
             suite_structural_identity=suite.suite_hash,
             suite_content_identity=(suite_content_sha256
@@ -259,19 +328,56 @@ class StateEvaluator:
 
     @torch.no_grad()
     def prime_reference(self, teacher) -> None:
-        """Bind the original teacher, and cache its logits only if asked to."""
+        """Bind the original teacher, and cache its logits only if asked to.
+
+        Under the union support the teacher is forwarded ONCE here, over the
+        suite in the evaluator's own execution grouping, into a store of its
+        sketch, ``K+1`` confidence, final hidden states and log-normalizers;
+        no evaluation forwards it again.
+        """
         self._teacher = teacher
+        if self.distribution_support.is_union:
+            items = [{"input_ids": i.input_ids, "item_id": i.item_id}
+                     for i in self.items]
+            self._union_store = build_root_reference_store(
+                teacher, items, support=self.distribution_support,
+                identity=root_reference_identity(
+                    root_identity={"bound_by": "StateEvaluator.prime_reference",
+                                   "suite": self.suite.qualified_id},
+                    profile_hash=self.measurement_protocol_id,
+                    support=self.distribution_support,
+                    objective=self.scoring_objective),
+                micro_batch_size=(1 if self._reference_path else
+                                  int(self.execution.micro_batch_size)),
+                packing=self.execution.calibration_batch_packing,
+                device=self.device, chunk=self.chunk)
+            self._ref_ready = True
+            return
         if self.reference_strategy is ReferenceStrategy.CACHE_IN_MEMORY:
             for item in self.items:
                 ids = item.input_ids.to(self.device)
+                if self._row_select is not None:
+                    #: Only the scored rows: the others are never read.
+                    self._ref_logits[item.item_id] = self._scored_rows_of(
+                        teacher, item, ids)
+                    continue
                 #: On the COMPUTE DEVICE, not the host. See `_reference_for`.
                 self._ref_logits[item.item_id] = (
                     teacher(ids).logits[0, :-1].float())
         self._ref_ready = True
 
     @torch.no_grad()
-    def _sketch_for(self, item: SuiteItem,
-                    ref_logits: torch.Tensor) -> ReferenceDistributionSketch:
+    def _scored_rows_of(self, model, item: SuiteItem,
+                        ids: torch.Tensor) -> torch.Tensor:
+        """One item's scored-row logits, float32, as the per-item path reads them."""
+        rows = self._row_select[item.item_id].to(ids.device)[None, :]
+        return scored_prediction_logits(adapter_for_config(model.config), model,
+                                        ids, None, rows).float()
+
+    @torch.no_grad()
+    def _sketch_for(self, item: SuiteItem, ref_logits: torch.Tensor,
+                    targets: torch.Tensor | None = None,
+                    ) -> ReferenceDistributionSketch:
         """This item's reference sketch, cached when the strategy says to.
 
         **The sketch definition is science; the caching policy is execution**, and
@@ -291,8 +397,11 @@ class StateEvaluator:
         hit = self._ref_sketches.get(item.item_id)
         if hit is not None:
             return hit
+        #: `targets` is supplied only on the scored-row path, where the logits
+        #: hold the selected rows and the targets must be those rows' tokens.
         sketch = sketch_reference(
-            ref_logits, item.input_ids[0, 1:].to(ref_logits.device),
+            ref_logits, (item.input_ids[0, 1:].to(ref_logits.device)
+                         if targets is None else targets),
             top_k=int(self.distribution_support.top_k), chunk=self.chunk)
         #: Cached under the same policy as the logits it was built from. A
         #: strategy that declines to hold `[T, V]` may still hold `[T, K]`, so
@@ -302,6 +411,23 @@ class StateEvaluator:
             self._ref_sketches[item.item_id] = sketch
             self._sketch_cache_bytes += sketch.bytes_held()
         return sketch
+
+    @torch.no_grad()
+    def _reference_entropy_for(self, item: SuiteItem,
+                               ref_logits: torch.Tensor) -> torch.Tensor:
+        """The reference's full-vocabulary entropy at the rows ``ref_logits``
+        holds -- all prediction rows, or the scored ones -- computed once.
+
+        Cached under the same rule as the sketch: the rows an item's
+        reference is read at are fixed by the policy, so the per-item value
+        cannot differ between evaluations.
+        """
+        hit = self._ref_entropy.get(item.item_id)
+        if hit is not None and int(hit.shape[0]) == int(ref_logits.shape[0]):
+            return hit.to(ref_logits.device)
+        entropy = full_vocabulary_entropy(ref_logits, chunk=self.chunk)
+        self._ref_entropy[item.item_id] = entropy
+        return entropy
 
     @torch.no_grad()
     def _reference_for(self, item: SuiteItem) -> torch.Tensor:
@@ -322,6 +448,8 @@ class StateEvaluator:
         if self.reference_strategy is ReferenceStrategy.CACHE_IN_MEMORY:
             return self._ref_logits[item.item_id]
         ids = item.input_ids.to(self.device)
+        if self._row_select is not None:
+            return self._scored_rows_of(self._teacher, item, ids)
         return self._teacher(ids).logits[0, :-1].float()
 
     # --- how the two forwards are issued ------------------------------------
@@ -405,6 +533,9 @@ class StateEvaluator:
         numerical execution property, recorded in the fingerprint, and not a
         change of estimand.
         """
+        if self._row_select is not None:
+            yield from self._scored_logit_pairs(model)
+            return
         if self._reference_path:
             for item in self.items:
                 ids = item.input_ids.to(self.device)
@@ -412,7 +543,7 @@ class StateEvaluator:
                 # the intended suite that is ~0.5 GiB each rather than 33.8 GiB
                 # held for the whole run.
                 yield item, self._reference_for(item), \
-                    model(ids).logits[0, :-1].float()
+                    model(ids).logits[0, :-1].float(), None
             return
 
         by_id = {i.item_id: i for i in self.items}
@@ -448,8 +579,156 @@ class StateEvaluator:
                 #: at a time so the saving does not arise, and touching it to
                 #: tidy a batched path's memory would spend a budget for
                 #: nothing.
-                yield item, ref_rows[row], cand_rows[row]
+                yield item, ref_rows[row], cand_rows[row], None
             del cand_block, cand_rows, ref_rows
+
+    @torch.no_grad()
+    def _scored_logit_pairs(self, model):
+        """``(item, reference rows, candidate rows, selection)`` per item.
+
+        The scored-row twin of `_logit_pairs`: the same forwards in the same
+        groups, but only each item's selected prediction rows reach the output
+        head. The selection is returned so `evaluate` can hand the reducer the
+        matching targets, tags and weights.
+        """
+        if self._reference_path:
+            for item in self.items:
+                ids = item.input_ids.to(self.device)
+                yield (item, self._reference_for(item),
+                       self._scored_rows_of(model, item, ids),
+                       self._row_select[item.item_id])
+            return
+        adapter = adapter_for_config(model.config)
+        for packed in self._ensure_groups(model):
+            batch = packed.batch
+            ids = batch.input_ids.to(self.device)
+            attn = batch.attention_mask.to(self.device)
+            rows = torch.zeros(int(ids.shape[0]), int(ids.shape[1]) - 1,
+                               dtype=torch.bool, device=self.device)
+            members = []
+            for row, index in enumerate(packed.original_indices):
+                item = self.items[index]
+                if batch.items[row]["item_id"] != item.item_id:
+                    raise MeasurementError(
+                        f"row {row} of a packed group claims item "
+                        f"{batch.items[row]['item_id']!r} at suite index "
+                        f"{index}, which holds {item.item_id!r}")
+                select = self._row_select[item.item_id]
+                rows[row, :int(select.numel())] = select.to(self.device)
+                members.append(item)
+            cand_rows = split_rows(
+                scored_prediction_logits(adapter, model, ids, attn, rows), rows)
+            if self.reference_strategy is ReferenceStrategy.CACHE_IN_MEMORY:
+                ref_rows = [self._ref_logits[i.item_id] for i in members]
+            else:
+                ref_rows = split_rows(scored_prediction_logits(
+                    adapter_for_config(self._teacher.config), self._teacher,
+                    ids, attn, rows), rows)
+            for row, item in enumerate(members):
+                yield item, ref_rows[row], cand_rows[row], \
+                    self._row_select[item.item_id]
+            del cand_rows, ref_rows
+
+    @torch.no_grad()
+    def _candidate_logits(self, model):
+        """``(item, candidate rows, selection)`` per item, NO teacher forward.
+
+        The union support's iteration: the teacher's side was stored at
+        `prime_reference`. Same forwards and groups as `_logit_pairs` and
+        `_scored_logit_pairs` on the candidate side.
+        """
+        adapter = adapter_for_config(model.config)
+        if self._reference_path:
+            for item in self.items:
+                ids = item.input_ids.to(self.device)
+                if self._row_select is not None:
+                    yield (item, self._scored_rows_of(model, item, ids),
+                           self._row_select[item.item_id])
+                else:
+                    yield item, model(ids).logits[0, :-1].float(), None
+            return
+        for packed in self._ensure_groups(model):
+            batch = packed.batch
+            ids = batch.input_ids.to(self.device)
+            attn = batch.attention_mask.to(self.device)
+            members = []
+            for row, index in enumerate(packed.original_indices):
+                item = self.items[index]
+                if batch.items[row]["item_id"] != item.item_id:
+                    raise MeasurementError(
+                        f"row {row} of a packed group claims item "
+                        f"{batch.items[row]['item_id']!r} at suite index "
+                        f"{index}, which holds {item.item_id!r}")
+                members.append(item)
+            if self._row_select is not None:
+                rows = torch.zeros(int(ids.shape[0]), int(ids.shape[1]) - 1,
+                                   dtype=torch.bool, device=self.device)
+                for row, item in enumerate(members):
+                    select = self._row_select[item.item_id]
+                    rows[row, :int(select.numel())] = select.to(self.device)
+                cand_rows = split_rows(scored_prediction_logits(
+                    adapter, model, ids, attn, rows), rows)
+                for row, item in enumerate(members):
+                    yield (item, cand_rows[row],
+                           self._row_select[item.item_id])
+            else:
+                block = model(ids, attention_mask=attn).logits[:, :-1]
+                cand_rows = batch.split_predictions(block)
+                for row, item in enumerate(members):
+                    yield item, cand_rows[row], None
+                del block
+            del cand_rows
+
+    @torch.no_grad()
+    def _union_pairs(self, model):
+        """`_candidate_logits` in `_logit_pairs`' shape, with ``ref = None``."""
+        for item, cand, select in self._candidate_logits(model):
+            yield item, None, cand, select
+
+    @torch.no_grad()
+    def _union_item(self, item: SuiteItem, cand: torch.Tensor,
+                    select: torch.Tensor | None,
+                    objective_acc: Any) -> DistortionSums:
+        """One item's six quantities on the union support, from the store.
+
+        The same targets, tags and weights as the other supports, selected the
+        same way; the teacher's sketch, confidence, hidden state and
+        log-normalizer are the store's at exactly those rows.
+        """
+        store = self._union_store
+        key = {"item_id": item.item_id, "input_ids": item.input_ids}
+        dev = cand.device
+        targets = item.input_ids[0, 1:].to(dev)
+        tags = {name: mask.to(dev) for name, mask in item.tags.items()}
+        weights = (None if self._weights is None
+                   else self._weights[item.item_id].to(dev))
+        full_tags = None
+        rows = None
+        if select is not None:
+            rows = select.to(dev)
+            targets = targets[rows]
+            full_tags = tags
+            tags = {name: mask[rows] for name, mask in tags.items()}
+            weights = None if weights is None else weights[rows]
+        sketch = store.sketch_item(key, rows)
+        retrieval = store.retrieval_item(key)
+        if rows is not None:
+            retrieval = retrieval.select(rows)
+        sink = None if objective_acc is None else objective_acc.sink()
+        sums = distortion_on_union_support(
+            sketch, retrieval, cand, targets, tags=tags, weights=weights,
+            chunk=self.chunk, position_sink=sink)
+        if objective_acc is not None:
+            pick = ((lambda t: t) if rows is None else
+                    (lambda t: t[rows.to(t.device)]))
+            objective_acc.add_item(
+                item, cand, sketch, weights, tags,
+                reference_entropy=pick(store.per_position(key, "entropy")),
+                reference_confidence=pick(store.per_position(key, "confidence")),
+                vocab_size=int(cand.shape[-1]))
+        if full_tags is not None:
+            _restore_unselected_counts(sums, select.to(dev), full_tags)
+        return sums
 
     @torch.no_grad()
     def _reference_rows(self, batch, ids) -> list[torch.Tensor]:
@@ -478,7 +757,20 @@ class StateEvaluator:
 
         per_subtype: dict[str, DistortionSums] = {}
         totals = DistortionSums()
-        for item, ref, cand in self._logit_pairs(model):
+        objective_acc = (None if self.scoring_objective is None
+                         else _ObjectiveAccumulator(self.scoring_objective,
+                                                    self.suite.critical_tags))
+        pairs = (self._union_pairs(model) if self._union_store is not None
+                 else self._logit_pairs(model))
+        for item, ref, cand, select in pairs:
+            if ref is None:
+                #: THE UNION SUPPORT: the teacher's side is the store.
+                sums = self._union_item(item, cand, select, objective_acc)
+                per_subtype.setdefault(item.subtype,
+                                       DistortionSums()).merge(sums)
+                totals.merge(sums)
+                del cand
+                continue
             if cand.shape != ref.shape:
                 raise MeasurementError(
                     f"item {item.item_id}: candidate logits {tuple(cand.shape)} do not "
@@ -502,6 +794,16 @@ class StateEvaluator:
             #: host float vector meeting a CUDA tensor raises.
             weights = (None if self._weights is None
                        else self._weights[item.item_id].to(ref.device))
+            full_tags = None
+            if select is not None:
+                #: The reducer sees only the selected rows, so it gets exactly
+                #: their targets, tags and weights. Every weighted sum is over
+                #: the same non-zero-weight positions as on the all-rows path.
+                select = select.to(ref.device)
+                targets = targets[select]
+                full_tags = tags
+                tags = {name: mask[select] for name, mask in tags.items()}
+                weights = None if weights is None else weights[select]
             if self.distribution_support.is_full_vocab:
                 sums = distortion(ref, cand, targets, tags=tags,
                                   weights=weights, chunk=self.chunk)
@@ -510,9 +812,24 @@ class StateEvaluator:
                 #: `_sketch_for` honours that split -- it caches when the
                 #: reference strategy says to and recomputes otherwise, and the
                 #: numbers are identical either way.
+                sketch = (self._sketch_for(item, ref) if select is None
+                          else self._sketch_for(item, ref, targets))
+                #: The objective reads the per-position KL and log-normalizer
+                #: the reducer computes anyway; the sink cannot change a sum.
+                sink = None if objective_acc is None else objective_acc.sink()
                 sums = distortion_on_reference_support(
-                    self._sketch_for(item, ref), cand, targets, tags=tags,
-                    weights=weights, chunk=self.chunk)
+                    sketch, cand, targets, tags=tags, weights=weights,
+                    chunk=self.chunk, position_sink=sink)
+                if objective_acc is not None:
+                    entropy = (self._reference_entropy_for(item, ref)
+                               if self.scoring_objective.uses_reference_confidence
+                               else None)
+                    objective_acc.add_item(
+                        item, cand, sketch, weights, tags,
+                        reference_entropy=entropy,
+                        vocab_size=int(ref.shape[-1]))
+            if full_tags is not None:
+                _restore_unselected_counts(sums, select, full_tags)
             per_subtype.setdefault(item.subtype, DistortionSums()).merge(sums)
             totals.merge(sums)
             del ref, cand
@@ -547,6 +864,11 @@ class StateEvaluator:
         general = self.suite.general_domain
         if general and general in per_domain_ce:
             values["state.nll.general"] = float(per_domain_ce[general])
+
+        objective_detail = None
+        if objective_acc is not None:
+            objective_values, objective_detail = objective_acc.finish(domain_map)
+            values.update(objective_values)
 
         tagged = agg["tagged"]
         for tag, entry in tagged.items():
@@ -592,9 +914,231 @@ class StateEvaluator:
                     #: batch shape is a numerical condition and the fingerprint
                     #: that binds it lives on the state, not here.
                     "execution": self.execution.as_trace(),
-                    "reference_path": self._reference_path},
+                    "reference_path": self._reference_path,
+                    **({} if self._union_store is None else
+                       {"union_reference": {
+                           "identity_hash": self._union_store.identity_hash,
+                           "decision": self._union_store.decision()}}),
+                    **({} if objective_detail is None
+                       else {"objective": objective_detail})},
             runtime=dict(runtime or {}),
         )
+
+
+class _ObjectiveAccumulator:
+    """Objective terms, aggregated with the KL path's weighting.
+
+    Generic over the objective's form: the student-confidence forms carry the
+    student's Top-K entropy and confidence, the reference-confidence form the
+    reference's full-vocabulary entropy and confidence
+    (:meth:`ScoringObjective.components`).
+
+    PER ITEM, every component is a fixed-denominator mean over the item's
+    ``T_x`` scored positions; those per-item values are recorded. ACROSS
+    items, the objective uses exactly the weighting the KL-only metrics use,
+    so that switching the integrand is the ONLY difference between them:
+
+    * within a sub-type, items are weighted by ``T_x`` -- equivalently, the
+      integrand is pooled over the sub-type's scored positions and divided by
+      their COUNT (never by a sum of confidence weights);
+    * each critical-token class is pooled over every item's scored positions
+      of that class and divided by their count;
+    * then `domain_balanced_score`, and the unweighted mean over classes.
+
+    Consequence, and the check that it holds: the ``raw_kl`` component
+    aggregated here reproduces ``state.teacher_kl.*`` and
+    ``state.critical_token_kl`` of the same evaluation. A ranking difference
+    between the KL-only metrics and the objective is then attributable to the
+    integrand, not to how items were weighted.
+    """
+
+    def __init__(self, objective: Any, critical_tags: Sequence[str]) -> None:
+        self.objective = objective
+        self.names = tuple(objective.components())
+        self.confidence_key = objective.confidence_key()
+        self.critical_tags = tuple(critical_tags)
+        #: sub-type -> component -> [sum over scored positions, count]
+        self.per_subtype: dict[str, dict[str, list[float]]] = {}
+        #: class -> component -> [sum over scored class positions, count], for
+        #: the objective and for the raw KL (the KL-only control).
+        self.per_class: dict[str, dict[str, list[float]]] = {}
+        self.per_item: dict[str, dict[str, float]] = {}
+        self.histogram = [0] * 10
+        self.joint: dict[str, Any] | None = None
+        self.confidences: list[torch.Tensor] = []
+        self.components: list[torch.Tensor] = []
+        self._kl: list[torch.Tensor] = []
+        self._log_z: list[torch.Tensor] = []
+        self._union: list[dict[str, torch.Tensor]] = []
+
+    def sink(self):
+        self._kl, self._log_z, self._union = [], [], []
+
+        def take(start: int, stop: int, kl: torch.Tensor,
+                 log_z: torch.Tensor, union: Any = None) -> None:
+            self._kl.append(kl.detach())
+            self._log_z.append(log_z.detach())
+            if union is not None:
+                self._union.append({k: v.detach() for k, v in
+                                    union.diagnostics().items()})
+        return take
+
+    @torch.no_grad()
+    def add_item(self, item: Any, cand: torch.Tensor, sketch: Any,
+                 weights: torch.Tensor | None,
+                 tags: Mapping[str, torch.Tensor], *,
+                 reference_entropy: torch.Tensor | None = None,
+                 reference_confidence: torch.Tensor | None = None,
+                 vocab_size: int | None = None) -> None:
+        kl = torch.cat(self._kl)
+        log_z = torch.cat(self._log_z)
+        conf = None
+        if reference_confidence is not None:
+            #: The union form's K+1 confidence, stored with the teacher.
+            conf = reference_confidence.to(kl.device)
+            reference_entropy = reference_entropy.to(kl.device)
+        elif reference_entropy is not None:
+            reference_entropy = reference_entropy.to(kl.device)
+            conf = confidence_from_vocabulary_entropy(reference_entropy,
+                                                      int(vocab_size))
+        union = None
+        if self._union:
+            union = {k: torch.cat([u[k] for u in self._union])
+                     for k in self._union[0]}
+        terms = position_terms(
+            self.objective, kl, cand, log_z,
+            sketch.tail_log_prob.to(kl.device)
+            if sketch.top_k < sketch.vocab_size else None,
+            reference_entropy=reference_entropy, reference_confidence=conf,
+            union=union)
+        mask = torch.ones(1, int(kl.shape[0]), dtype=torch.bool,
+                          device=kl.device)
+        w = None if weights is None else weights.to(kl.device)[None]
+        means, counts = item_component_means(
+            {k: v[None] for k, v in terms.items()}, mask, w, names=self.names)
+        scored = mask[0] if w is None else (w[0] > 0)
+        n_scored = int(counts[0])
+        record = {name: float(means[name][0]) for name in self.names}
+        record["scored_positions"] = n_scored
+        self.per_item[item.item_id] = record
+        bucket = self.per_subtype.setdefault(item.subtype, {})
+        for name in self.names:
+            acc = bucket.setdefault(name, [0.0, 0])
+            acc[0] += float(terms[name][scored].double().sum())
+            acc[1] += n_scored
+        for tag in self.critical_tags:
+            if tag not in tags:
+                continue
+            m = tags[tag].to(kl.device).bool() & scored
+            n = int(m.sum())
+            if n:
+                cls = self.per_class.setdefault(tag, {})
+                for name in ("objective", "raw_kl"):
+                    acc = cls.setdefault(name, [0.0, 0])
+                    acc[0] += float(terms[name][m].double().sum())
+                    acc[1] += n
+        for i, h in enumerate(confidence_histogram(
+                terms[self.confidence_key], scored)):
+            self.histogram[i] += h
+        self.joint = add_joint_histograms(self.joint, terms, scored)
+        self.confidences.append(terms[self.confidence_key][scored].float().cpu())
+        self.components.append(terms["component"][scored].float().cpu())
+        self._kl, self._log_z, self._union = [], [], []
+
+    def finish(self, domain_map: Mapping[str, Sequence[str]]
+               ) -> tuple[dict[str, float], dict[str, Any]]:
+        name_of = {"component": self.objective.component_name()}
+        values: dict[str, float] = {}
+        per_domain_all: dict[str, dict[str, float]] = {}
+        for name in self.names:
+            by_subtype = {sub: c[name][0] / c[name][1]
+                          for sub, c in self.per_subtype.items()}
+            primary, per_domain = domain_balanced_score(by_subtype, domain_map)
+            label = name_of.get(name, name)
+            per_domain_all[label] = per_domain
+            if name == "objective":
+                values["state.objective.equal_domain_mean"] = float(primary)
+                values["state.objective.worst_domain"] = float(
+                    max(per_domain.values()))
+                for domain, score in per_domain.items():
+                    values[f"state.objective.domain.{domain}"] = float(score)
+            else:
+                values[f"state.objective.{label}.equal_domain_mean"] = float(
+                    primary)
+        values["state.objective.raw_kl.worst_domain"] = float(
+            max(per_domain_all["raw_kl"].values()))
+        class_means = {}
+        for name, prefix in (("objective", "state.objective.critical_token"),
+                             ("raw_kl", "state.objective.raw_kl.critical_token")):
+            means = {tag: c[name][0] / c[name][1]
+                     for tag, c in self.per_class.items() if c[name][1]}
+            if name == "objective":
+                class_means = means
+            for tag, v in means.items():
+                values[f"{prefix}.{tag}"] = float(v)
+            present = [means[t] for t in self.critical_tags if t in means]
+            if present:
+                values[prefix] = float(sum(present) / len(present))
+        counts = sorted(r["scored_positions"] for r in self.per_item.values())
+        conf = torch.cat(self.confidences) if self.confidences else None
+        comp = torch.cat(self.components) if self.components else None
+        qs = (0.05, 0.25, 0.5, 0.75, 0.95)
+
+        def quantiles(x: torch.Tensor | None) -> dict[str, float] | None:
+            if x is None or x.numel() == 0:
+                return None
+            q = torch.quantile(x.double(), torch.tensor(qs, dtype=torch.float64))
+            return {f"p{int(p * 100):02d}": float(v) for p, v in zip(qs, q)}
+
+        detail = {
+            "definition": self.objective.as_dict(),
+            "aggregation": OBJECTIVE_STATE_AGGREGATION,
+            "per_domain": per_domain_all,
+            "critical_classes": class_means,
+            "scored_positions": {
+                "items": len(counts), "total": int(sum(counts)),
+                "min": counts[0] if counts else 0,
+                "median": counts[len(counts) // 2] if counts else 0,
+                "max": counts[-1] if counts else 0},
+            "confidence_histogram": list(self.histogram),
+            "joint_histograms": self.joint,
+            "confidence_quantiles": quantiles(conf),
+            f"{name_of['component']}_quantiles": quantiles(comp),
+            "per_item": self.per_item,
+        }
+        return values, detail
+
+
+#: How the state evaluator aggregates a declared objective across items. Named
+#: so a record says it; it is the KL-only path's weighting by construction.
+OBJECTIVE_STATE_AGGREGATION = (
+    "per_item_fixed_denominator; sub-type = scored-position-pooled (items "
+    "weighted by T_x); critical class = pooled over items; then equal sub-type "
+    "and equal domain -- the KL-only metrics' weighting/v1")
+
+
+def _restore_unselected_counts(sums: DistortionSums, select: torch.Tensor,
+                               full_tags: Mapping[str, torch.Tensor]) -> None:
+    """Put back the two COUNTS a row-selected reduction cannot see.
+
+    Every weighted quantity is already exact: an unselected row has weight zero
+    and contributes nothing on either path. What it still contributes on the
+    all-rows path is to two counts that are evidence rather than estimand --
+    `positions` (predictions looked at) and each tag's position count -- so
+    they are restored from the full masks. A tag whose every position was
+    unselected is reported as the all-rows path reports it: present, with its
+    count, zero weight and no mean.
+    """
+    sums.positions = int(select.numel())
+    for name, mask in full_tags.items():
+        count = float(mask.sum())
+        if not count:
+            continue
+        entry = sums.tagged.get(name)
+        if entry is None:
+            sums.tagged[name] = [0.0, 0.0, count]
+        else:
+            entry[2] = count
 
 
 def _per_domain_ce(per_subtype: Mapping[str, DistortionSums],

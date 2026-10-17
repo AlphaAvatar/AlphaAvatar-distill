@@ -1,0 +1,660 @@
+[
+ {
+  "state_id": "cadd35f298e4b18eb3f642070536af75",
+  "parent_id": "68c056b6486e31bfee5ad95c1184cecd",
+  "depth": 1,
+  "path": "DEPTH(calib.domain_balanced@v1)",
+  "is_root_child": true,
+  "removed_layers": [
+   2,
+   3,
+   15,
+   16,
+   17,
+   26,
+   27,
+   32
+  ],
+  "removal_order": [
+   2,
+   3,
+   16,
+   32,
+   26,
+   15,
+   17,
+   27
+  ],
+  "round0": {
+   "argmin_objective": 2,
+   "argmin_raw_kl": 2,
+   "argmin_kl_reference_topk": 2,
+   "argmin_parent_kl": 2,
+   "spearman_objective_vs_raw_kl": 0.9987,
+   "spearman_objective_vs_kl_reference_topk": 0.9987,
+   "spearman_objective_vs_parent_kl": 0.9987
+  },
+  "rounds_objective_choice_is_raw_kl_argmin": 7,
+  "rounds": 8,
+  "parent_kl_diagnostic": "round 0 candidates only",
+  "reference_cache_mode": "root_reference_store",
+  "parent_reference_cache_mode": "cached",
+  "reference_counters": {
+   "reference_fills": 0,
+   "reference_hits": 17420,
+   "reference_recomputes": 0
+  },
+  "operator_wall_seconds": 1203.1439428329468
+ },
+ {
+  "state_id": "7745def0c1991963785804486c2aa052",
+  "parent_id": "68c056b6486e31bfee5ad95c1184cecd",
+  "depth": 1,
+  "path": "DEPTH(calib.reasoning_heavy@v2)",
+  "is_root_child": true,
+  "removed_layers": [
+   2,
+   3,
+   15,
+   16,
+   17,
+   26,
+   27,
+   32
+  ],
+  "removal_order": [
+   2,
+   3,
+   32,
+   16,
+   26,
+   15,
+   17,
+   27
+  ],
+  "round0": {
+   "argmin_objective": 2,
+   "argmin_raw_kl": 2,
+   "argmin_kl_reference_topk": 2,
+   "argmin_parent_kl": 2,
+   "spearman_objective_vs_raw_kl": 0.9969,
+   "spearman_objective_vs_kl_reference_topk": 0.9969,
+   "spearman_objective_vs_parent_kl": 0.9969
+  },
+  "rounds_objective_choice_is_raw_kl_argmin": 7,
+  "rounds": 8,
+  "parent_kl_diagnostic": "round 0 candidates only",
+  "reference_cache_mode": "root_reference_store",
+  "parent_reference_cache_mode": "cached",
+  "reference_counters": {
+   "reference_fills": 0,
+   "reference_hits": 16120,
+   "reference_recomputes": 0
+  },
+  "operator_wall_seconds": 1206.8346321582794
+ },
+ {
+  "state_id": "1217806e4f6d155825e80f2296563f33",
+  "parent_id": "6dd62a2ce89543346fa41ea2b209cc3a",
+  "depth": 2,
+  "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)",
+  "is_root_child": false,
+  "removed_layers": [
+   2,
+   3,
+   11,
+   15,
+   18,
+   21,
+   25,
+   26
+  ],
+  "removal_order": [
+   2,
+   21,
+   11,
+   15,
+   3,
+   25,
+   26,
+   18
+  ],
+  "round0": {
+   "argmin_objective": 2,
+   "argmin_raw_kl": 2,
+   "argmin_kl_reference_topk": 2,
+   "argmin_parent_kl": 11,
+   "spearman_objective_vs_raw_kl": 0.9892,
+   "spearman_objective_vs_kl_reference_topk": 0.9894,
+   "spearman_objective_vs_parent_kl": 0.6314
+  },
+  "rounds_objective_choice_is_raw_kl_argmin": 8,
+  "rounds": 8,
+  "parent_kl_diagnostic": "round 0 candidates only",
+  "reference_cache_mode": "root_reference_store",
+  "parent_reference_cache_mode": "cached",
+  "reference_counters": {
+   "reference_fills": 0,
+   "reference_hits": 69680,
+   "reference_recomputes": 0
+  },
+  "operator_wall_seconds": 1032.1549146175385
+ },
+ {
+  "state_id": "b36e9df44ca19b8d25b8229a42b26b1f",
+  "parent_id": "6dd62a2ce89543346fa41ea2b209cc3a",
+  "depth": 2,
+  "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)",
+  "is_root_child": false,
+  "removed_layers": [
+   2,
+   3,
+   8,
+   11,
+   15,
+   21,
+   25,
+   26
+  ],
+  "removal_order": [
+   2,
+   21,
+   11,
+   15,
+   26,
+   25,
+   3,
+   8
+  ],
+  "round0": {
+   "argmin_objective": 2,
+   "argmin_raw_kl": 2,
+   "argmin_kl_reference_topk": 2,
+   "argmin_parent_kl": 15,
+   "spearman_objective_vs_raw_kl": 0.9907,
+   "spearman_objective_vs_kl_reference_topk": 0.9938,
+   "spearman_objective_vs_parent_kl": 0.6309
+  },
+  "rounds_objective_choice_is_raw_kl_argmin": 8,
+  "rounds": 8,
+  "parent_kl_diagnostic": "round 0 candidates only",
+  "reference_cache_mode": "root_reference_store",
+  "parent_reference_cache_mode": "cached",
+  "reference_counters": {
+   "reference_fills": 0,
+   "reference_hits": 64480,
+   "reference_recomputes": 0
+  },
+  "operator_wall_seconds": 1028.3841922283173
+ },
+ {
+  "state_id": "86a5a06a218dd5f332b1ec06d83c9e35",
+  "parent_id": "1805f70b3584cb6727ab5bf2e0b355dc",
+  "depth": 2,
+  "path": "ATTENTION(calib.reasoning_heavy@v2)->DEPTH(calib.domain_balanced@v1)",
+  "is_root_child": false,
+  "removed_layers": [
+   2,
+   3,
+   11,
+   14,
+   15,
+   21,
+   25,
+   26
+  ],
+  "removal_order": [
+   2,
+   21,
+   14,
+   25,
+   26,
+   15,
+   11,
+   3
+  ],
+  "round0": {
+   "argmin_objective": 2,
+   "argmin_raw_kl": 2,
+   "argmin_kl_reference_topk": 2,
+   "argmin_parent_kl": 11,
+   "spearman_objective_vs_raw_kl": 0.991,
+   "spearman_objective_vs_kl_reference_topk": 0.991,
+   "spearman_objective_vs_parent_kl": 0.4376
+  },
+  "rounds_objective_choice_is_raw_kl_argmin": 6,
+  "rounds": 8,
+  "parent_kl_diagnostic": "round 0 candidates only",
+  "reference_cache_mode": "root_reference_store",
+  "parent_reference_cache_mode": "cached",
+  "reference_counters": {
+   "reference_fills": 0,
+   "reference_hits": 87100,
+   "reference_recomputes": 0
+  },
+  "operator_wall_seconds": 1032.054347038269
+ },
+ {
+  "state_id": "ed1eb35344e9af7de111cd45979d1297",
+  "parent_id": "1805f70b3584cb6727ab5bf2e0b355dc",
+  "depth": 2,
+  "path": "ATTENTION(calib.reasoning_heavy@v2)->DEPTH(calib.reasoning_heavy@v2)",
+  "is_root_child": false,
+  "removed_layers": [
+   2,
+   11,
+   14,
+   15,
+   18,
+   21,
+   25,
+   26
+  ],
+  "removal_order": [
+   2,
+   21,
+   14,
+   25,
+   26,
+   15,
+   11,
+   18
+  ],
+  "round0": {
+   "argmin_objective": 2,
+   "argmin_raw_kl": 2,
+   "argmin_kl_reference_topk": 2,
+   "argmin_parent_kl": 11,
+   "spearman_objective_vs_raw_kl": 0.9858,
+   "spearman_objective_vs_kl_reference_topk": 0.9858,
+   "spearman_objective_vs_parent_kl": 0.4311
+  },
+  "rounds_objective_choice_is_raw_kl_argmin": 8,
+  "rounds": 8,
+  "parent_kl_diagnostic": "round 0 candidates only",
+  "reference_cache_mode": "root_reference_store",
+  "parent_reference_cache_mode": "cached",
+  "reference_counters": {
+   "reference_fills": 0,
+   "reference_hits": 80600,
+   "reference_recomputes": 0
+  },
+  "operator_wall_seconds": 1028.6558141708374
+ },
+ {
+  "state_id": "00f2bb2cbefd81f451f0b9efbabf50ae",
+  "parent_id": "8f5784a4e03880e2d5171cef6f69c93b",
+  "depth": 2,
+  "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)",
+  "is_root_child": false,
+  "removed_layers": [
+   9,
+   10,
+   11,
+   17,
+   18,
+   20,
+   31,
+   32
+  ],
+  "removal_order": [
+   17,
+   18,
+   31,
+   10,
+   11,
+   32,
+   9,
+   20
+  ],
+  "round0": {
+   "argmin_objective": 17,
+   "argmin_raw_kl": 17,
+   "argmin_kl_reference_topk": 17,
+   "argmin_parent_kl": 26,
+   "spearman_objective_vs_raw_kl": 0.9974,
+   "spearman_objective_vs_kl_reference_topk": 0.9974,
+   "spearman_objective_vs_parent_kl": 0.8049
+  },
+  "rounds_objective_choice_is_raw_kl_argmin": 8,
+  "rounds": 8,
+  "parent_kl_diagnostic": "round 0 candidates only",
+  "reference_cache_mode": "root_reference_store",
+  "parent_reference_cache_mode": "cached",
+  "reference_counters": {
+   "reference_fills": 0,
+   "reference_hits": 34840,
+   "reference_recomputes": 0
+  },
+  "operator_wall_seconds": 897.4276125431061
+ },
+ {
+  "state_id": "30b7cac9b2f5a90cc4610114eacdd8e3",
+  "parent_id": "8f5784a4e03880e2d5171cef6f69c93b",
+  "depth": 2,
+  "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)",
+  "is_root_child": false,
+  "removed_layers": [
+   8,
+   10,
+   11,
+   16,
+   17,
+   18,
+   31,
+   32
+  ],
+  "removal_order": [
+   17,
+   18,
+   31,
+   10,
+   11,
+   32,
+   16,
+   8
+  ],
+  "round0": {
+   "argmin_objective": 17,
+   "argmin_raw_kl": 17,
+   "argmin_kl_reference_topk": 17,
+   "argmin_parent_kl": 26,
+   "spearman_objective_vs_raw_kl": 0.9977,
+   "spearman_objective_vs_kl_reference_topk": 0.9977,
+   "spearman_objective_vs_parent_kl": 0.7907
+  },
+  "rounds_objective_choice_is_raw_kl_argmin": 7,
+  "rounds": 8,
+  "parent_kl_diagnostic": "round 0 candidates only",
+  "reference_cache_mode": "root_reference_store",
+  "parent_reference_cache_mode": "cached",
+  "reference_counters": {
+   "reference_fills": 0,
+   "reference_hits": 32240,
+   "reference_recomputes": 0
+  },
+  "operator_wall_seconds": 907.1111254692078
+ },
+ {
+  "state_id": "d1b9334884daf5c871d7734639a5c1d4",
+  "parent_id": "79718967dab059df38c1d2eaea564702",
+  "depth": 2,
+  "path": "FFN(calib.reasoning_heavy@v2)->DEPTH(calib.domain_balanced@v1)",
+  "is_root_child": false,
+  "removed_layers": [
+   8,
+   10,
+   11,
+   16,
+   17,
+   18,
+   31,
+   32
+  ],
+  "removal_order": [
+   17,
+   31,
+   18,
+   10,
+   11,
+   32,
+   8,
+   16
+  ],
+  "round0": {
+   "argmin_objective": 17,
+   "argmin_raw_kl": 17,
+   "argmin_kl_reference_topk": 17,
+   "argmin_parent_kl": 26,
+   "spearman_objective_vs_raw_kl": 0.9972,
+   "spearman_objective_vs_kl_reference_topk": 0.9972,
+   "spearman_objective_vs_parent_kl": 0.7477
+  },
+  "rounds_objective_choice_is_raw_kl_argmin": 6,
+  "rounds": 8,
+  "parent_kl_diagnostic": "round 0 candidates only",
+  "reference_cache_mode": "root_reference_store",
+  "parent_reference_cache_mode": "cached",
+  "reference_counters": {
+   "reference_fills": 0,
+   "reference_hits": 52260,
+   "reference_recomputes": 0
+  },
+  "operator_wall_seconds": 902.1789577007294
+ },
+ {
+  "state_id": "4a10cccadd7a9f0eaabee77e6dd07d94",
+  "parent_id": "79718967dab059df38c1d2eaea564702",
+  "depth": 2,
+  "path": "FFN(calib.reasoning_heavy@v2)->DEPTH(calib.reasoning_heavy@v2)",
+  "is_root_child": false,
+  "removed_layers": [
+   8,
+   10,
+   11,
+   16,
+   17,
+   18,
+   31,
+   32
+  ],
+  "removal_order": [
+   17,
+   18,
+   31,
+   10,
+   11,
+   32,
+   8,
+   16
+  ],
+  "round0": {
+   "argmin_objective": 17,
+   "argmin_raw_kl": 17,
+   "argmin_kl_reference_topk": 17,
+   "argmin_parent_kl": 26,
+   "spearman_objective_vs_raw_kl": 0.9972,
+   "spearman_objective_vs_kl_reference_topk": 0.9972,
+   "spearman_objective_vs_parent_kl": 0.7784
+  },
+  "rounds_objective_choice_is_raw_kl_argmin": 8,
+  "rounds": 8,
+  "parent_kl_diagnostic": "round 0 candidates only",
+  "reference_cache_mode": "root_reference_store",
+  "parent_reference_cache_mode": "cached",
+  "reference_counters": {
+   "reference_fills": 0,
+   "reference_hits": 48360,
+   "reference_recomputes": 0
+  },
+  "operator_wall_seconds": 907.1318683624268
+ },
+ {
+  "state_id": "53221017ad19fd068bd27eb806864de4",
+  "parent_id": "c69d19c94daabdc101fc761ac3d9638c",
+  "depth": 2,
+  "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)",
+  "is_root_child": false,
+  "removed_layers": [
+   4,
+   9,
+   13,
+   18,
+   30,
+   32,
+   34,
+   35
+  ],
+  "removal_order": [
+   35,
+   4,
+   34,
+   9,
+   13,
+   32,
+   30,
+   18
+  ],
+  "round0": {
+   "argmin_objective": 35,
+   "argmin_raw_kl": 35,
+   "argmin_kl_reference_topk": 35,
+   "argmin_parent_kl": 8,
+   "spearman_objective_vs_raw_kl": 0.9992,
+   "spearman_objective_vs_kl_reference_topk": 0.9995,
+   "spearman_objective_vs_parent_kl": 0.0903
+  },
+  "rounds_objective_choice_is_raw_kl_argmin": 5,
+  "rounds": 8,
+  "parent_kl_diagnostic": "round 0 candidates only",
+  "reference_cache_mode": "root_reference_store",
+  "parent_reference_cache_mode": "cached",
+  "reference_counters": {
+   "reference_fills": 0,
+   "reference_hits": 121940,
+   "reference_recomputes": 0
+  },
+  "operator_wall_seconds": 829.2535347938538
+ },
+ {
+  "state_id": "d45daf057b25ad329837905866f7cf19",
+  "parent_id": "c69d19c94daabdc101fc761ac3d9638c",
+  "depth": 2,
+  "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)",
+  "is_root_child": false,
+  "removed_layers": [
+   4,
+   9,
+   13,
+   18,
+   30,
+   32,
+   34,
+   35
+  ],
+  "removal_order": [
+   35,
+   4,
+   34,
+   9,
+   13,
+   32,
+   30,
+   18
+  ],
+  "round0": {
+   "argmin_objective": 35,
+   "argmin_raw_kl": 35,
+   "argmin_kl_reference_topk": 35,
+   "argmin_parent_kl": 8,
+   "spearman_objective_vs_raw_kl": 0.9987,
+   "spearman_objective_vs_kl_reference_topk": 0.999,
+   "spearman_objective_vs_parent_kl": 0.1233
+  },
+  "rounds_objective_choice_is_raw_kl_argmin": 7,
+  "rounds": 8,
+  "parent_kl_diagnostic": "round 0 candidates only",
+  "reference_cache_mode": "root_reference_store",
+  "parent_reference_cache_mode": "cached",
+  "reference_counters": {
+   "reference_fills": 0,
+   "reference_hits": 112840,
+   "reference_recomputes": 0
+  },
+  "operator_wall_seconds": 839.9906017780304
+ },
+ {
+  "state_id": "ea99cdba29a4e6dc87bd276e5c953c95",
+  "parent_id": "fa0006c1e087b4420242827e0b918331",
+  "depth": 2,
+  "path": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->DEPTH(calib.domain_balanced@v1)",
+  "is_root_child": false,
+  "removed_layers": [
+   4,
+   7,
+   9,
+   10,
+   29,
+   30,
+   31,
+   35
+  ],
+  "removal_order": [
+   35,
+   4,
+   10,
+   29,
+   9,
+   7,
+   31,
+   30
+  ],
+  "round0": {
+   "argmin_objective": 35,
+   "argmin_raw_kl": 35,
+   "argmin_kl_reference_topk": 35,
+   "argmin_parent_kl": 11,
+   "spearman_objective_vs_raw_kl": 0.9992,
+   "spearman_objective_vs_kl_reference_topk": 0.9992,
+   "spearman_objective_vs_parent_kl": 0.0638
+  },
+  "rounds_objective_choice_is_raw_kl_argmin": 7,
+  "rounds": 8,
+  "parent_kl_diagnostic": "round 0 candidates only",
+  "reference_cache_mode": "root_reference_store",
+  "parent_reference_cache_mode": "cached",
+  "reference_counters": {
+   "reference_fills": 0,
+   "reference_hits": 104520,
+   "reference_recomputes": 0
+  },
+  "operator_wall_seconds": 827.1779935359955
+ },
+ {
+  "state_id": "052a48b4ea64b92b7786f7116a3aff75",
+  "parent_id": "fa0006c1e087b4420242827e0b918331",
+  "depth": 2,
+  "path": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->DEPTH(calib.reasoning_heavy@v2)",
+  "is_root_child": false,
+  "removed_layers": [
+   4,
+   7,
+   9,
+   10,
+   29,
+   30,
+   31,
+   35
+  ],
+  "removal_order": [
+   35,
+   4,
+   10,
+   29,
+   9,
+   7,
+   31,
+   30
+  ],
+  "round0": {
+   "argmin_objective": 35,
+   "argmin_raw_kl": 35,
+   "argmin_kl_reference_topk": 35,
+   "argmin_parent_kl": 11,
+   "spearman_objective_vs_raw_kl": 0.9985,
+   "spearman_objective_vs_kl_reference_topk": 0.9987,
+   "spearman_objective_vs_parent_kl": 0.1143
+  },
+  "rounds_objective_choice_is_raw_kl_argmin": 7,
+  "rounds": 8,
+  "parent_kl_diagnostic": "round 0 candidates only",
+  "reference_cache_mode": "root_reference_store",
+  "parent_reference_cache_mode": "cached",
+  "reference_counters": {
+   "reference_fills": 0,
+   "reference_hits": 96720,
+   "reference_recomputes": 0
+  },
+  "operator_wall_seconds": 839.3810539245605
+ }
+]

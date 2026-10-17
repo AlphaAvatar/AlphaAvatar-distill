@@ -117,6 +117,12 @@ class ReductionSemantics:
     #: serializes exactly as it did before this field, and only the new contract
     #: adds a key. See `support.DistributionSupport.as_dict`.
     distribution_support: Any | None = None
+    #: WHAT IS AVERAGED, when it is not the KL alone. Optional and versioned by
+    #: absence exactly like `distribution_support`: a per-position objective
+    #: that adds the student's own confidence to the KL is a different number,
+    #: so it moves the protocol id -- and an evaluator that declares none
+    #: serializes as it always did. See `aadistill.initialization.scoring.objective`.
+    scoring_objective: Any | None = None
 
     def as_dict(self) -> dict[str, Any]:
         out = {"chunk": int(self.chunk),
@@ -125,6 +131,8 @@ class ReductionSemantics:
         support = self.distribution_support
         if support is not None and not getattr(support, "is_full_vocab", False):
             out["distribution_support"] = support.as_dict()
+        if self.scoring_objective is not None:
+            out["scoring_objective"] = self.scoring_objective.as_dict()
         return out
 
 

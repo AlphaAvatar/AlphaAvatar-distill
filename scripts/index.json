@@ -150,6 +150,30 @@
    "live_state": "logs/stages/stage-1/phase_d1/current.json"
   },
   {
+   "logical_id": "phase_d2",
+   "kind": "experiment",
+   "stage_id": "1",
+   "scripts": "scripts/stages/stage-1/phase_d2",
+   "logs": "logs/stages/stage-1/phase_d2",
+   "artifacts": null,
+   "configs": "configs/stages/stage-1/phase_d2",
+   "data": null,
+   "docs": null,
+   "live_state": null
+  },
+  {
+   "logical_id": "phase_d3",
+   "kind": "experiment",
+   "stage_id": "1",
+   "scripts": "scripts/stages/stage-1/phase_d3",
+   "logs": "logs/stages/stage-1/phase_d3",
+   "artifacts": null,
+   "configs": "configs/stages/stage-1/phase_d3",
+   "data": null,
+   "docs": null,
+   "live_state": null
+  },
+  {
    "logical_id": "c2_full_search_perf",
    "kind": "engineering",
    "stage_id": "1",

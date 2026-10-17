@@ -1,0 +1,37 @@
+{
+ "schema": "aadistill.phase_d2.candidate_relay_restore/v1",
+ "state_id": "3a4173e4eff45b0d73fd82bd0b263f03",
+ "relay": "AlphaAvatar/aadistill-artifacts",
+ "objects": [
+  {
+   "remote": "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/model.safetensors",
+   "lfs_sha256": "5d6c0a5a2c04bfc4cf75fd301e06b93affc557ab142229585f0a10c8029d0fbe",
+   "downloaded_sha256": "5d6c0a5a2c04bfc4cf75fd301e06b93affc557ab142229585f0a10c8029d0fbe",
+   "bytes": 1192135096
+  },
+  {
+   "remote": "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/config.json",
+   "lfs_sha256": null,
+   "downloaded_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "bytes": 1419
+  },
+  {
+   "remote": "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/generation_config.json",
+   "lfs_sha256": null,
+   "downloaded_sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "bytes": 206
+  }
+ ],
+ "identity": {
+  "directory": "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/e6d5d891-efc8-46c5-a141-8c707098f7b0/scratchpad/restore/d2-candidate-o5y3jc39/products/3a4173e4eff45b0d73fd82bd0b263f03",
+  "matched": true,
+  "identities": {
+   "artifact_digest": "cc2fa665c634b684bcf38348cc0eb8d95abcbde8af03e2cd2c093d274805cef0",
+   "weights_digest": "322fff768bc63444d0710f0fda4ab58881fb0d5686fccbf91d4ebe22f1d9e3cf",
+   "single_shard_sha256": "5d6c0a5a2c04bfc4cf75fd301e06b93affc557ab142229585f0a10c8029d0fbe",
+   "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+  }
+ },
+ "restore_dir": "an independent temporary directory, deleted after",
+ "checked_utc": "2026-10-16T10:33:38Z"
+}

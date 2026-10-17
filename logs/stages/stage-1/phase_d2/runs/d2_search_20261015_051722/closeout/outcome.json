@@ -1,0 +1,580 @@
+{
+ "schema": "aadistill.phase_d2.search_closeout/v1",
+ "run_id": "d2_search_20261015_051722",
+ "stage_id": "1",
+ "experiment_id": "phase_d2",
+ "package_id": "phase_c1.execution_package.2026-09-11",
+ "outcome": "COMPLETE. The D2 v3 formal beam search ran its full 92-expansion trajectory under preregistration v3 (b52810921a4c, scored_v1), produced 12 complete leaves and committed the preregistered Top-4 by the objective ranking with no lineage diversity. All four checkpoints were fetched off-pod and re-identified (identity MATCHED) before the teardown gate allowed deletion; their sha256 were recomputed independently on the dev box. The pod is deleted and the provider reports 0 pods, 0 network volumes and $0/h.",
+ "classification": "COMPLETE FORMAL SEARCH: 92/92 expansions, 12 complete leaves, Top-4 committed and secured",
+ "recorded_utc": "2026-10-15T10:16:10Z",
+ "session_commit": "d64490eeab7541eb20259dd541d84af344922dd4",
+ "authorized_base_commit": "e0a7443e3abcbed2da5ee1289681c90bd29fcc34",
+ "authorization_sha256": "987bf0a10778b1afbbf428359c54f3852335c2653ff213404d7a1f4cc49ec720",
+ "authorization_file_sha256": "9e5931d08b58f6e9570851ab496504d4db5ab855ba4dcac6a834c019301333dc",
+ "preregistration_hash": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+ "prediction_rows": "scored_v1",
+ "cost": {
+  "actual_usd": 5.2679,
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 289.98,
+  "authorized_usd": 23.6923,
+  "within_authorization": true,
+  "_owner": "runtime/session.json :: cost (GPU only). derive_budget.py books money.all_in_usd ahead of it."
+ },
+ "money": {
+  "all_in_usd": 5.5364,
+  "gpu_usd": 5.2679,
+  "disk_usd": 0.2685,
+  "elapsed_minutes": 289.98,
+  "_basis": "GPU actual from the session record plus 400 GB container disk at $0.10/GB-month over the session's elapsed minutes, ceiled to the 4-decimal quantum",
+  "provider_balance_cross_check": {
+   "before_usd": 142.2980604136,
+   "after_usd": 136.7927943394,
+   "delta_usd": 5.5053,
+   "after_observed_utc": "2026-10-15T10:12Z, 0 pods, 0 network volumes, currentSpendPerHr 0",
+   "_why_not_booked": "the provider debit ($5.5053) is below the derived all-in; the larger figure is booked so a late settlement cannot make the ledger understate spend"
+  },
+  "provider_resources_created": 1,
+  "pod_id": "ricuwbh64pqlwd",
+  "gpu": "NVIDIA L40S",
+  "one_use_grant_consumed": true,
+  "provider_account_balance_at_launch_usd": 142.2980604136,
+  "provider_account_required_usd": 30.0,
+  "authorized_expected_usd": 11.141,
+  "authorized_hard_usd": 23.6923,
+  "per_session_cap_usd": 30.0
+ },
+ "execution": {
+  "terminal": "ALL_DONE",
+  "passed": true,
+  "pod_created_utc": "2026-10-15T05:19:24Z",
+  "setup_complete_utc": "2026-10-15T05:25:15Z",
+  "driver_start_utc": "2026-10-15T05:25:18Z",
+  "driver_end_utc": "2026-10-15T09:55:06Z",
+  "pod_deleted_utc": "2026-10-15T10:09:22+00:00",
+  "pod_test_gate": "scripts/stages/stage-1/phase_d2/tests, MARKER:TESTS_OK:149s",
+  "stages": {
+   "environment": {
+    "stage": "A",
+    "seconds": 1.065,
+    "status": "ok",
+    "result": {
+     "gpu": "NVIDIA L40S"
+    }
+   },
+   "session_and_contract": {
+    "stage": "A",
+    "seconds": 0.116,
+    "status": "ok",
+    "result": {
+     "config_hash": "5dd1ee154ca50338"
+    }
+   },
+   "authorization": {
+    "stage": "A",
+    "seconds": 0.004,
+    "status": "ok",
+    "result": {
+     "hard_cap_usd": 23.6923
+    }
+   },
+   "teacher_and_reference": {
+    "stage": "B",
+    "seconds": 16.092,
+    "status": "ok",
+    "result": {
+     "revision": "768f209d9ea8"
+    }
+   },
+   "beam_search": {
+    "stage": "C",
+    "seconds": 16170.76,
+    "status": "ok",
+    "result": {
+     "states": 93
+    }
+   },
+   "commit_top_k": {
+    "stage": "D",
+    "seconds": 0.077,
+    "status": "ok",
+    "result": {
+     "committed": [
+      "59013099b902f213649b8aa4c676dedd",
+      "c2cb27efcf68b4f18bf7284aea84877a",
+      "30fe791a85d70ac713e75893fea107ae",
+      "3a4173e4eff45b0d73fd82bd0b263f03"
+     ]
+    }
+   }
+  },
+  "deadline": {
+   "budget_minutes": 1205.0,
+   "cache_guard": true,
+   "cache_regression": null,
+   "elapsed_minutes": 269.8006,
+   "expired": false,
+   "fired_at": null,
+   "seconds_from_driver_start": 72300
+  },
+  "teardown_gate": {
+   "allowed": true,
+   "emergency": false,
+   "failed_check": null,
+   "reason": "every teardown check passed",
+   "checks": {
+    "training_complete": true,
+    "evaluation_complete": true,
+    "artifact_manifest_created": true,
+    "required_files_present": true,
+    "final_streams_quiescent": true,
+    "archive_created": true,
+    "archive_contents_verified": true,
+    "transfer_complete": true,
+    "local_hashes_verified": true,
+    "checkpoint_hashes_matched": true,
+    "required_products_secured": true,
+    "report_inputs_verified": true
+   },
+   "incomplete_event_streams": []
+  },
+  "final_pod_state": {
+   "exists": false,
+   "desired_status": "TERMINATED",
+   "billing": false
+  },
+  "provider_confirms_gone": true,
+  "watchdog": "ended itself on pod_gone at 2026-10-15T10:09:38Z after 287 ticks; last accrual $5.2724 at 290.22 min",
+  "image_identity": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09",
+  "environment": {
+   "bf16_supported": true,
+   "capability": "8.9",
+   "cuda_runtime": "12.8",
+   "device_count": 1,
+   "gpu_name": "NVIDIA L40S",
+   "torch": "2.11.0+cu128",
+   "total_memory_gib": 44.392
+  }
+ },
+ "identity_verified_on_the_device": {
+  "config_hash": "5dd1ee154ca50338d636c90b44ba20abe49fea55d45195a188d1afc68a19a87e",
+  "authorization_config_hash": "5dd1ee154ca50338d636c90b44ba20abe49fea55d45195a188d1afc68a19a87e",
+  "measurement_protocol_id": "4fecc463d39f889e4285d9a73831a556",
+  "objective_hash": "90e851fd11875e4a2e80cbf504a4961ce669411d70732bddb7ffd1941815da28",
+  "authorization_objective_hash": "90e851fd11875e4a2e80cbf504a4961ce669411d70732bddb7ffd1941815da28",
+  "ranking_policy_hash": "836ae1d3667d72a51bc96b7168c382f31b387eb4183f22bff1e2e53aded8642e",
+  "harness_source_digest": "4829cf214343385e8d52186b5a8abe482a31a9f251224e992e9dcd021a7890a2",
+  "root_teacher": {
+   "root_teacher_id": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+   "root_teacher_sha256": "6de20cc746dd42e96f93aeb4551b8d378e415a206309435d7eaefd39cfdf45f9",
+   "verified": [
+    "model-00001-of-00003.safetensors",
+    "model-00002-of-00003.safetensors",
+    "model-00003-of-00003.safetensors"
+   ]
+  },
+  "match": true
+ },
+ "root_reference_stores": [
+  {
+   "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+   "build_seconds": 6.7885,
+   "identity_hash": "c9fc8c52e7a5416d05c1d4c0c1148ab17f3bf5fb4eba9916df962fbc831e99ee",
+   "content_sha256": "7ff2c6183fb43963ce22704726c9decc9200afc2c6291a90155fcaee7d5902a4",
+   "mode": "root_reference_store",
+   "teacher_confidence": {
+    "positions": 59763,
+    "mean": 0.8957092513695576,
+    "sd": 0.15890767576523945,
+    "min": 0.16388997435569763,
+    "effective_fraction": 0.9694866290910845,
+    "quantiles": {
+     "q01": 0.3276633149385452,
+     "q05": 0.5323700308799745,
+     "q10": 0.6602098345756531,
+     "q25": 0.8437122106552124,
+     "q50": 0.9864133596420288,
+     "q75": 0.9999974370002747,
+     "q90": 1.0,
+     "q95": 1.0,
+     "q99": 1.0
+    }
+   }
+  },
+  {
+   "profile_hash": "6c67b8dff0e81a775371a62b1b293677e45c173f52aee119d036c95081782ddd",
+   "build_seconds": 6.0356,
+   "identity_hash": "141ae34781d666756ce8f0d459ef458beefbe55ac622076859b3dc99c1d21d58",
+   "content_sha256": "1ec533f1dc0d1e5e2716060efdf6ecdb9cd8ce979b60228f315ad69da0c89014",
+   "mode": "root_reference_store",
+   "teacher_confidence": {
+    "positions": 44324,
+    "mean": 0.8959953763362771,
+    "sd": 0.16024156706498377,
+    "min": 0.16388997435569763,
+    "effective_fraction": 0.9690075304217196,
+    "quantiles": {
+     "q01": 0.3256494873762131,
+     "q05": 0.5267949908971786,
+     "q10": 0.6584515333175659,
+     "q25": 0.8459256291389465,
+     "q50": 0.9872230887413025,
+     "q75": 0.9999975562095642,
+     "q90": 1.0,
+     "q95": 1.0,
+     "q99": 1.0
+    }
+   }
+  }
+ ],
+ "search_trajectory": {
+  "expansions": 92,
+  "states_journal": 92,
+  "n_states_with_root": 93,
+  "complete_leaves": 12,
+  "levels": [
+   {
+    "depth": 1,
+    "states": 8,
+    "expanded": 8,
+    "pruned": 0,
+    "complete_leaves": 0,
+    "evaluated": 8,
+    "invalid": 0
+   },
+   {
+    "depth": 2,
+    "states": 48,
+    "expanded": 6,
+    "pruned": 42,
+    "complete_leaves": 0,
+    "evaluated": 48,
+    "invalid": 0
+   },
+   {
+    "depth": 3,
+    "states": 24,
+    "expanded": 6,
+    "pruned": 18,
+    "complete_leaves": 0,
+    "evaluated": 24,
+    "invalid": 0
+   },
+   {
+    "depth": 4,
+    "states": 12,
+    "expanded": 0,
+    "pruned": 0,
+    "complete_leaves": 12,
+    "evaluated": 12,
+    "invalid": 0
+   }
+  ],
+  "beam": "beam.delayed_prune, width 6, warmup 1: all 8 root children expanded; 6 of 48 at depth 2 and 6 of 24 at depth 3 kept by epsilon-Pareto fronts with search-time lineage rotation; every pruned state was evaluated first",
+  "detail": "evidence/search_analysis.json :: beam"
+ },
+ "operator_timing": {
+  "per_impl": {
+   "attention.activation_importance_v1": {
+    "expansions": 28,
+    "operator_minutes_total": 8.4,
+    "operator_minutes_mean": 0.3,
+    "operator_minutes_min": 0.11,
+    "operator_minutes_max": 0.68,
+    "per_expansion_overhead_minutes_total": 4.07
+   },
+   "depth.causal_kl_greedy_v1": {
+    "expansions": 14,
+    "operator_minutes_total": 224.68,
+    "operator_minutes_mean": 16.05,
+    "operator_minutes_min": 13.79,
+    "operator_minutes_max": 20.11,
+    "per_expansion_overhead_minutes_total": 2.41
+   },
+   "ffn.activation_importance_v0": {
+    "expansions": 20,
+    "operator_minutes_total": 10.08,
+    "operator_minutes_mean": 0.5,
+    "operator_minutes_min": 0.19,
+    "operator_minutes_max": 0.78,
+    "per_expansion_overhead_minutes_total": 2.81
+   },
+   "width.global_pca_v0": {
+    "expansions": 30,
+    "operator_minutes_total": 12.59,
+    "operator_minutes_mean": 0.42,
+    "operator_minutes_min": 0.24,
+    "operator_minutes_max": 0.81,
+    "per_expansion_overhead_minutes_total": 3.52
+   }
+  },
+  "operator_minutes_total": 255.76,
+  "depth_cache": {
+   "reference_cache_modes": {
+    "root_reference_store": 14
+   },
+   "parent_reference_cache_modes": {
+    "cached": 14
+   },
+   "reference_counters_summed": {
+    "reference_hits": 939120,
+    "reference_fills": 0,
+    "reference_recomputes": 0
+   },
+   "objective_seconds_total": 214.72,
+   "parent_kl_seconds_total": 339.37,
+   "ablated_seconds_total": 8881.21,
+   "distortion_seconds_total": 4202.17
+  },
+  "cache_guard": {
+   "armed": true,
+   "regression": null
+  }
+ },
+ "committed_top_4": {
+  "_what_this_is": "THE AUTHORITATIVE SELECTION, in stage1_selection.json's order: the objective ranking policy's quality order (beam.pareto_scoring_objective@v1), top 4, lineage diversity NOT applied (preregistration v3 retention).",
+  "selection_sha256": "5a2647638ed78014edfceaacbf3f24ce7dd6d12db1307ee733064f22154689d0",
+  "ranking_policy": "beam.pareto_scoring_objective@v1",
+  "retention": "quality_only",
+  "arch_signature_shared_by_all_four": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+  "members": [
+   {
+    "selection_index": 1,
+    "quality_order": 1,
+    "front": 0,
+    "state_id": "59013099b902f213649b8aa4c676dedd",
+    "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+    "impl_ids": [
+     "width.global_pca_v0",
+     "depth.causal_kl_greedy_v1",
+     "ffn.activation_importance_v0",
+     "attention.activation_importance_v1"
+    ],
+    "removed_layers": [
+     4,
+     9,
+     13,
+     18,
+     30,
+     32,
+     34,
+     35
+    ],
+    "objectives": {
+     "state.objective.equal_domain_mean": 6.613224,
+     "state.objective.worst_domain": 8.349501,
+     "state.objective.critical_token": 11.859381
+    },
+    "raw_union_kl_equal_domain_mean": 7.205412,
+    "root_teacher_topk_kl_equal_domain_mean": 7.200941,
+    "artifact_digest": "65ef3557728de5011b7bc6f99df2d8637152a9a01dae13bc54914c5621bf9da9",
+    "weights_digest": "d2c20e26a92354ba68a8c41aaa8e4e055af7526087e6e4ad5b4b66f1ab7f2757",
+    "single_shard_sha256": "7b52fb15a7b397d8e00e5cd39e2f667a83bd4d5d9aa2b857d11fe5dfc3cac138",
+    "num_parameters": 596049920,
+    "selection_reason": "kept: quality order 1 of 12 (front 0), top 4 by the policy's own ordering; lineage diversity NOT applied"
+   },
+   {
+    "selection_index": 2,
+    "quality_order": 2,
+    "front": 0,
+    "state_id": "c2cb27efcf68b4f18bf7284aea84877a",
+    "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)",
+    "impl_ids": [
+     "width.global_pca_v0",
+     "depth.causal_kl_greedy_v1",
+     "ffn.activation_importance_v0",
+     "attention.activation_importance_v1"
+    ],
+    "removed_layers": [
+     4,
+     9,
+     13,
+     18,
+     30,
+     32,
+     34,
+     35
+    ],
+    "objectives": {
+     "state.objective.equal_domain_mean": 6.657811,
+     "state.objective.worst_domain": 8.119256,
+     "state.objective.critical_token": 12.282235
+    },
+    "raw_union_kl_equal_domain_mean": 7.265063,
+    "root_teacher_topk_kl_equal_domain_mean": 7.260288,
+    "artifact_digest": "ce7f8e2b2a3dcbd97c2b8b48076e6aa2b61f033dddb81a6a90e5219f5a147a81",
+    "weights_digest": "7c15910ea5aeff841618d6279d501a958037fd53831d5036a73c5f64ff0de475",
+    "single_shard_sha256": "9a0f41e98a38ca69a86a45197f97c5fdb06ecb37db2f3480c77730dbd567d728",
+    "num_parameters": 596049920,
+    "selection_reason": "kept: quality order 2 of 12 (front 0), top 4 by the policy's own ordering; lineage diversity NOT applied"
+   },
+   {
+    "selection_index": 3,
+    "quality_order": 3,
+    "front": 0,
+    "state_id": "30fe791a85d70ac713e75893fea107ae",
+    "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)->ATTENTION(calib.reasoning_heavy@v2)",
+    "impl_ids": [
+     "width.global_pca_v0",
+     "depth.causal_kl_greedy_v1",
+     "ffn.activation_importance_v0",
+     "attention.activation_importance_v1"
+    ],
+    "removed_layers": [
+     4,
+     9,
+     13,
+     18,
+     30,
+     32,
+     34,
+     35
+    ],
+    "objectives": {
+     "state.objective.equal_domain_mean": 6.671022,
+     "state.objective.worst_domain": 8.274803,
+     "state.objective.critical_token": 12.218841
+    },
+    "raw_union_kl_equal_domain_mean": 7.272571,
+    "root_teacher_topk_kl_equal_domain_mean": 7.267972,
+    "artifact_digest": "fadacaa27d55b1144ad11f17204e3e106a10e188d5894745f68851983e5364b1",
+    "weights_digest": "6d3f4b34af61759fc918647422488358e8796004c14661014a3f9c40d231a4cb",
+    "single_shard_sha256": "52c511c67badbecb5a75bff585bf4db66ce198dc6f30f398965a06a1fcb19d52",
+    "num_parameters": 596049920,
+    "selection_reason": "kept: quality order 3 of 12 (front 0), top 4 by the policy's own ordering; lineage diversity NOT applied"
+   },
+   {
+    "selection_index": 4,
+    "quality_order": 4,
+    "front": 1,
+    "state_id": "3a4173e4eff45b0d73fd82bd0b263f03",
+    "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)",
+    "impl_ids": [
+     "width.global_pca_v0",
+     "depth.causal_kl_greedy_v1",
+     "ffn.activation_importance_v0",
+     "attention.activation_importance_v1"
+    ],
+    "removed_layers": [
+     4,
+     9,
+     13,
+     18,
+     30,
+     32,
+     34,
+     35
+    ],
+    "objectives": {
+     "state.objective.equal_domain_mean": 6.661008,
+     "state.objective.worst_domain": 8.272393,
+     "state.objective.critical_token": 12.313076
+    },
+    "raw_union_kl_equal_domain_mean": 7.267718,
+    "root_teacher_topk_kl_equal_domain_mean": 7.262718,
+    "artifact_digest": "cc2fa665c634b684bcf38348cc0eb8d95abcbde8af03e2cd2c093d274805cef0",
+    "weights_digest": "322fff768bc63444d0710f0fda4ab58881fb0d5686fccbf91d4ebe22f1d9e3cf",
+    "single_shard_sha256": "5d6c0a5a2c04bfc4cf75fd301e06b93affc557ab142229585f0a10c8029d0fbe",
+    "num_parameters": 596049920,
+    "selection_reason": "kept: quality order 4 of 12 (front 1), top 4 by the policy's own ordering; lineage diversity NOT applied"
+   }
+  ]
+ },
+ "kl_only_control": {
+  "n_overlap": 4,
+  "overlap_with_committed": [
+   "30fe791a85d70ac713e75893fea107ae",
+   "3a4173e4eff45b0d73fd82bd0b263f03",
+   "59013099b902f213649b8aa4c676dedd",
+   "c2cb27efcf68b4f18bf7284aea84877a"
+  ],
+  "ranking_policy": "beam.pareto_multi_objective@v2",
+  "selected": [
+   "59013099b902f213649b8aa4c676dedd",
+   "c2cb27efcf68b4f18bf7284aea84877a",
+   "30fe791a85d70ac713e75893fea107ae",
+   "3a4173e4eff45b0d73fd82bd0b263f03"
+  ],
+  "used_for_selection": false,
+  "_what": "D1's PARETO_V1 ranking of the SAME 12 leaves on their raw union KL (state.teacher_kl.*). Reported only; never used for selection."
+ },
+ "products_secured": {
+  "required": 4,
+  "secured": 4,
+  "all_identity_verified": true,
+  "authorized_path": "the launcher's fetch_products, 1,192,135,096 bytes each; every one re-identified against the selection record: rc=0, identity MATCHED (re-identified)",
+  "independent_cross_check": "sha256 of each products/<state_id>/model.safetensors recomputed on the dev box after teardown equals the selection's single_shard_sha256 for all four",
+  "local_store": "<scr>/products/<state_id>/ -- 4 x 1.19 GB, <scr> = /home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722. NOT in git (AGENTS.md 2.5).",
+  "_durability_note": "a dev-box copy, as D1's Top-4. Preservation is not permission: these bytes travel to a pod only when a separately authorized screening session actually reads them (P8.4)."
+ },
+ "evidence_in_tree": {
+  "evidence/d2_search.json": "the driver's record (manifest sha256 c99b801ee432320f046c51af80f130e0e0915e610b19329459a5c2b5699aa40d)",
+  "evidence/stage1_selection.json": "the committed selection, hash-verified by stage1_selection.load",
+  "evidence/journal.jsonl": "the stage journal",
+  "evidence/telemetry.jsonl": "every expansion's operator timing, cache decision and counters, and both root-store builds (raw)",
+  "evidence/manifest.json": "5 of 5 required artifacts, none missing, final streams quiescent",
+  "evidence/complete_leaf_ranking.json": "all 12 complete leaves: the selection's order and reason, objective beside raw union KL and root teacher-top-k KL, per domain, digests (derived by analyze_d2_search.py)",
+  "evidence/depth_choices.json": "all 14 DEPTH expansions: removed layers and the round-0 argmin under each KL form (derived)",
+  "evidence/search_analysis.json": "operator timing, cache counters, beam levels, leaf rank correlations, D1 metric alignment (derived)",
+  "derivation": "PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-1/phase_d2/analyze_d2_search.py <extracted>/search --selection <extracted>/stage1_selection.json --d1-states <d1 oob states.jsonl> --out-dir evidence",
+  "out_of_tree": {
+   "archive": "<scr>/store/d2_search_artifacts.tar.gz",
+   "archive_sha256": "d8d957006d95a972ef99c971ddbdea026fb36b00ae2ce32ccb5adc2e9ed030b9",
+   "states_jsonl_sha256": "1a91541db17fa29eabdc5f6d6f435d2773e2bd050b168a38a90b1ffb9b091f85",
+   "states_jsonl_bytes": 117746986,
+   "why": "the full 92-state journal is 118 MB (FFN kept_neurons and DEPTH candidate tables); heavy bytes stay outside git"
+  }
+ },
+ "findings_descriptive": {
+  "_scope": "proxy (step-0 KL) facts about THIS search. Not behaviour, not a promotion, not a D1-vs-D2 verdict.",
+  "weighting_did_not_change_the_final_ranking": "the four committed leaves are the top four by the objective, by the raw union KL and by D1's PARETO_V1 ranking (KL-only control, 4/4 overlap); Spearman objective vs raw union KL over the 12 leaves = 0.993",
+  "depth_reference_is_where_d2_departs": "in all 12 non-root DEPTH expansions the parent-reference KL ranks a different layer first in round 0 than the root-referenced forms (objective, raw union KL and root teacher-top-k KL agree in 14/14); round-0 Spearman objective vs parent KL 0.06-0.80 off the root against >= 0.9858 vs raw union KL. The confidence weighting changed 13 of 112 greedy rounds' choices relative to the raw union KL.",
+  "single_lineage_top4": "all four finalists share RESIDUAL_WIDTH(domain_balanced)->DEPTH(domain_balanced) with the same removed layers [4, 9, 13, 18, 30, 32, 34, 35]; they differ only in the FFN and ATTENTION calibration profile. The next four leaves (quality order 5-8) are one other lineage, ATTENTION(reasoning_heavy)->DEPTH(domain_balanced).",
+  "d1_metric_comparison": "D2's root teacher-top-k KL reproduces D1's state.teacher_kl on the two states the searches share by artifact digest (0.511197 vs 0.511240). On that metric D2's best leaf is 7.2009 and its fourth 7.2680; D1's best leaf was 7.4341 and D1's committed Top-4 spanned 7.4341-15.2268 (lineage-rotated). A lower step-0 proxy is not recovered behaviour (AGENTS.md 4.2).",
+  "the_winning_lineage_was_kept_by_search_time_diversity": "RESIDUAL_WIDTH(domain_balanced)->DEPTH(domain_balanced) was the sixth of six states kept at depth 2 (objective 5.437) while better-scoring depth-2 states were pruned by the delayed-prune lineage rotation; it produced the best leaf. Along that path the objective was 11.74 after WIDTH, 5.44 after DEPTH and 6.61-6.67 at the leaves: the proxy is not monotone along a path"
+ },
+ "measured_cost_evidence": {
+  "session_minutes": {
+   "actual": 289.98,
+   "expected": 583.5,
+   "hard": 1240.86,
+   "used_fraction_of_hard": 0.234
+  },
+  "depth": {
+   "expansions": 14,
+   "assumed_by_the_plan": 16,
+   "mean_minutes": 16.05,
+   "min_minutes": 13.79,
+   "max_minutes": 20.11,
+   "priced_cell_max_minutes": {
+    "root": 25.7254,
+    "deeper": 25.3856
+   },
+   "d1_search_mean_minutes_off_root": 31.1
+  },
+  "where_this_applies": [
+   "D3 search pricing (same operator, root reference store, scored_v1)",
+   "a re-derived programme budget"
+  ],
+  "where_this_does_NOT_apply": [
+   "recovery screening",
+   "behavioural confirmation"
+  ]
+ },
+ "observers": "closed in the terminal path: the launcher's waiter tasks ended on LAUNCH_EXIT=0, the tmux session exited with the launcher, the watchdog ended on pod_gone; no monitor remains armed on this run",
+ "what_this_authorizes": {
+  "nothing_further": "this session committed a candidate set and stopped. It trained nothing, evaluated no behaviour and computed no promotion decision.",
+  "next_rung": "D2 Top-4 recovery screening (and any confirmation) needs its own maintainer authorization after the programme budget is re-derived from actual spend; NOT started."
+ },
+ "errata": [
+  {
+   "recorded_utc": "2026-10-15T15:12:06Z",
+   "record": "evidence/derived_evidence_erratum_v1.json",
+   "affects": [
+    "findings_descriptive.d1_metric_comparison",
+    "evidence_in_tree: complete_leaf_ranking.json, search_analysis.json (superseded by their _v2 files)"
+   ],
+   "summary": "one shared artifact (two state records), not two; the leaf field labelled D1's metric is D2's unweighted union KL; D1-vs-D2 KL numbers are a cross-protocol proxy. Additive: the text above is kept as written."
+  }
+ ]
+}

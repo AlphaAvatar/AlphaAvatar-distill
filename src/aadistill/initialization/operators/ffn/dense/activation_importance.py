@@ -30,11 +30,12 @@ from aadistill.initialization.device import model_device, stats_to
 from aadistill.initialization.operators._common import (
     ChildBuilder,
     collect_activation_stats,
+    statistics_positions,
     copy_embeddings_and_final_norm,
     copy_module_except,
 )
 from aadistill.initialization.calibration.profiles import CalibrationNeed
-from aadistill.initialization.scoring.batches import active_positions
+from aadistill.initialization.statistics.collect import RESIDUAL_WEIGHT
 from aadistill.initialization.operators.base import (
     OperatorContext,
     OperatorImplementation,
@@ -61,6 +62,9 @@ class FFNActivationImportanceV0(OperatorImplementation):
                            "tie_word_embeddings"})
     calibration = CalibrationNeed.ACTIVATION_STATS
     objective = "retained share of total activation importance"
+    #: Under an objective that declares `weights_activation_statistics`,
+    #: `E[|a_j|]` is the root-confidence-weighted mean (`statistics_positions`).
+    consumes_reference_weighted_statistics = True
     deterministic = True
     requires_seed = False
     produces = ("kept_neurons",)
@@ -93,7 +97,7 @@ class FFNActivationImportanceV0(OperatorImplementation):
         #: only the positions whose next-token prediction the item supervises.
         #: The restriction travels in the HASHED config, so two searches that
         #: protect different positions are different states.
-        active = active_positions(ctx.calibration_items, ctx.position_policy)
+        active = statistics_positions(ctx, self)
         state = stats_to(ctx.cached_stats(lambda: collect_activation_stats(
             adapter, parent, ctx.calibration_items,
             compute, batch_size=batch_size, packing=packing,
@@ -140,7 +144,13 @@ class FFNActivationImportanceV0(OperatorImplementation):
                     "op.ffn.retained_importance_mean": mean_share,
                     "op.ffn.retained_importance_min": min(retained_shares),
                 },
-                detail={"per_layer_retained_share": retained_shares}),
+                #: The weighted denominator, ONLY when the pass was weighted,
+                #: so an unweighted record is key-for-key the historical one.
+                detail={"per_layer_retained_share": retained_shares,
+                        **({} if RESIDUAL_WEIGHT not in state else
+                           {"stats_tokens": int(state["residual_count"][0]),
+                            "stats_token_weight":
+                                float(state[RESIDUAL_WEIGHT][0])})}),
             trace={"source": "activation_importance_topk",
                    #: Execution evidence, not identity -- `OperatorStep.identity()`
                    #: does not read `trace` and neither knob changes the estimand.

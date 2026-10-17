@@ -1,0 +1,85 @@
+[18:38:39] budget: expected 817 min $14.85 · soft $18.62 · hard $19.17 (authorized $19.46)
+[18:38:39] NVIDIA L40S $1.09/h, stock Low
+[18:38:40] account funds OK: the provider account holds $136.7648 against the $30.0000 this session must be able to fund
+[18:38:40] run d2_screening_20261015_183734, preregistration b52810921a4c
+[18:38:43] contract verified at $0: 6d4283e77e1b2654, 8 probes
+[18:38:43] 12 arm files on the relay at their pins
+[18:38:44] session commit 56c0a362fa55 verified: harness digests to 20d3721417e2…, carries the authorization and only logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183734/governance/authorization.json differs from the authorized base
+[18:38:44] no previous attempt failed deterministically; 1 prior log(s) read
+[18:38:49] aad_autoinit_56c0a362.bundle round-trips
+[18:38:50] precheck OK: 18 relay inputs (18 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[18:38:50] DRY RUN: every pre-provider gate passed; stopping before provider creation. Nothing was created and nothing bills.
+[18:39:06] budget: expected 817 min $14.85 · soft $18.62 · hard $19.17 (authorized $19.46)
+[18:39:06] NVIDIA L40S $1.09/h, stock Low
+[18:39:07] account funds OK: the provider account holds $136.7648 against the $30.0000 this session must be able to fund
+[18:39:07] run d2_screening_20261015_183734, preregistration b52810921a4c
+[18:39:10] contract verified at $0: 6d4283e77e1b2654, 8 probes
+[18:39:11] 12 arm files on the relay at their pins
+[18:39:11] session commit 56c0a362fa55 verified: harness digests to 20d3721417e2…, carries the authorization and only logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183734/governance/authorization.json differs from the authorized base
+[18:39:11] no previous attempt failed deterministically; 1 prior log(s) read
+[18:39:17] aad_autoinit_56c0a362.bundle round-trips
+[18:39:18] precheck OK: 18 relay inputs (18 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[18:39:18] attempt 1: create failed — {"error":"There are no longer any instances available."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string          cloud type (SECURE or COMMUNITY) (default "SECURE")
+      --co
+[18:44:19] watchdog detached — hard 1055 min = $19.17
+[18:44:19] created c6n0v702lin6wj at $1.09/h
+[18:45:13]   starting (60s) — $0.02
+[18:46:06] TCP 22 at 202.181.159.229:12385 after 1.8 min
+[18:46:09] draw 1: ssh reachable — $0.03
+[18:46:44] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09
+[18:46:44] draw 1: host NOT admitted — image identity 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09' is not the shared protocol's 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07'; probes trained here would not be paired with B's imported units. Redraw.
+[18:46:44] HOST_NOT_ADMITTED on draw 1 — abandoning c6n0v702lin6wj and redrawing
+[18:46:56] watchdog detached — hard 1055 min = $19.17
+[18:46:56] created fo67uxvr1usw6n at $1.09/h
+[18:47:28] TCP 22 at 202.181.159.229:10613 after 3.2 min
+[18:47:31] draw 2: ssh reachable — $0.06
+[18:48:03] draw 2: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09
+[18:48:03] draw 2: host NOT admitted — image identity 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09' is not the shared protocol's 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07'; probes trained here would not be paired with B's imported units. Redraw.
+[18:48:03] HOST_NOT_ADMITTED on draw 2 — abandoning fo67uxvr1usw6n and redrawing
+[18:48:15] watchdog detached — hard 1055 min = $19.17
+[18:48:15] created aqohnkptg9q2vb at $1.09/h
+[18:48:37] TCP 22 at 202.181.159.229:18383 after 4.3 min
+[18:48:39] draw 3: ssh reachable — $0.08
+[18:49:12] draw 3: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09
+[18:49:12] draw 3: host NOT admitted — image identity 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09' is not the shared protocol's 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07'; probes trained here would not be paired with B's imported units. Redraw.
+[18:49:12] HOST_NOT_ADMITTED on draw 3 — abandoning aqohnkptg9q2vb and redrawing
+[18:49:24] watchdog detached — hard 1055 min = $19.17
+[18:49:24] created pqon2mafp0mk1l at $1.09/h
+[18:50:08] TCP 22 at 202.181.159.229:19695 after 5.8 min
+[18:50:10] draw 4: ssh reachable — $0.11
+[18:50:42] draw 4: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09
+[18:50:42] draw 4: host NOT admitted — image identity 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09' is not the shared protocol's 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07'; probes trained here would not be paired with B's imported units. Redraw.
+[18:50:42] HOST_NOT_ADMITTED on draw 4 — abandoning pqon2mafp0mk1l and redrawing
+[18:50:53] attempt 1: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[18:55:54] attempt 2: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[19:00:55] attempt 3: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[19:05:56] watchdog detached — hard 1055 min = $19.17
+[19:05:56] created hp6i00wz32gqzq at $1.09/h
+[19:06:50]   starting (60s) — $0.41
+[19:07:53] TCP 22 at 64.247.206.209:14224 after 23.6 min
+[19:07:56] draw 5: ssh reachable — $0.43
+[19:08:38] draw 5: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.167.08
+[19:08:38] draw 5: host NOT admitted — image identity 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.167.08' is not the shared protocol's 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07'; probes trained here would not be paired with B's imported units. Redraw.
+[19:08:38] ABORT after draw 5: host_not_admitted
+[19:08:38] deleting pod (setup host_not_admitted)
+[19:08:49] pod deleted — 24.5 min, $0.45; provider confirms gone: True

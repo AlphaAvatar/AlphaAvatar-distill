@@ -1,0 +1,140 @@
+{
+ "_contract": "The new D3's price, from measured records; two separately authorized sessions. Re-derive before any authorization. AUTHORIZES NOTHING.",
+ "authorizes": "nothing",
+ "live": {
+  "fits": {
+   "probes_per_session_cap": true,
+   "remaining_formal_at_hard": true,
+   "remaining_package_at_hard": true,
+   "remaining_project_at_hard": true,
+   "structural_per_session_cap": true
+  },
+  "limits": {
+   "engineering_remaining_usd": 3.1804,
+   "formal_remaining_usd": 98.8304,
+   "package_remaining_usd": 102.0108,
+   "per_session_cap_usd": 30.0,
+   "project_cap_usd": 595.0,
+   "project_remaining_usd": 94.8528
+  },
+  "project_remaining_after_remaining_at_hard_usd": 94.85,
+  "quote": {
+   "_quoted": "live, immediately before issuance",
+   "gpu": "NVIDIA L40S",
+   "stock_status": "Medium",
+   "usd_per_hour": 1.09
+  },
+  "spent_by_rung_usd": {
+   "probes": 5.0395,
+   "structural": 0.5571
+  },
+  "still_to_fund_at_hard_with_reserves_usd": {}
+ },
+ "old_d3_reservation": "NOT TRANSFERRED. The cancelled student-confidence D3 was planned at a search plus its own screening and confirmation ($50.95 hard) and a fresh confirmation beside it; neither exists in this design and neither reservation funds it",
+ "rate_usd_per_hour_basis": 1.09,
+ "schema": "aadistill.phase_d3.budget/v1",
+ "steps": {
+  "d3_probes": {
+   "_basis": "logs/stages/stage-1/families/d_series/plans/d2_budget_v1.json :: steps.d2_confirmation",
+   "arm_staging": {
+    "_basis": "the D2 search's setup staged the 8,045,568,320-byte teacher within 5.85 min (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json), so a pod pulls at least 22.9 MB/s; one 1,192,135,096-byte arm plus its identity check, x3.0 for the bound",
+    "expected_minutes_per_arm": 1.12,
+    "hard_minutes_per_arm": 3.36,
+    "pull_rate_floor_mb_per_s": 22.9,
+    "replaces": "D1's 22-minute on-pod rematerialization per arm: a D2 arm is a persisted search product, not a path to replay"
+   },
+   "expected": {
+    "all_in_usd": 6.59,
+    "disk_usd": 0.1,
+    "gpu_usd": 6.49,
+    "minutes": 357.2
+   },
+   "hard": {
+    "all_in_usd": 8.21,
+    "disk_usd": 0.12,
+    "gpu_usd": 8.09,
+    "minutes": 445.2
+   },
+   "measured_same_shape_all_in_usd": 5.026,
+   "n_probes": 3,
+   "rescoring": {
+    "hard": {
+     "all_in_usd": 0.2,
+     "disk_usd": 0.0,
+     "gpu_usd": 0.19,
+     "minutes": 10.7
+    },
+    "in_ceilings": true,
+    "minutes_per_probe": 1.83,
+    "source": "measured once (stage L)"
+   },
+   "session_shape": "three probes, one relay-staged arm, the shared confirmation rung -- the D2 shared confirmation's session"
+  },
+  "d3_structural": {
+   "container_disk_gb": 120,
+   "expected": {
+    "all_in_usd": 0.8589,
+    "disk_usd": 0.0129,
+    "gpu_usd": 0.8459,
+    "minutes": 46.56
+   },
+   "hard": {
+    "all_in_usd": 3.0151,
+    "disk_usd": 0.0454,
+    "gpu_usd": 2.9696,
+    "minutes": 163.47
+   },
+   "measured": {
+    "replay_step_seconds": {
+     "attention.activation_importance_v1": 10.82,
+     "depth.causal_kl_greedy_v1": 843.53,
+     "ffn.activation_importance_v0": 59.92,
+     "width.global_pca_v0": 31.74
+    },
+    "search_depth": {
+     "candidate_subsets": 260,
+     "distortion_seconds": 554.9173,
+     "operator_seconds": 1819.5317,
+     "reference_mode": "recomputed"
+    },
+    "session_overhead": {
+     "_basis": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/runtime/session.json timeline (DRIVER_START, ALL_DONE, pod deleted); bound: d2_budget steps.d2_search.priced_by.session_overhead_minutes",
+     "bound_minutes": 95.0,
+     "collection_minutes_measured": 13.41,
+     "expected_minutes": 21.66,
+     "products_in_that_collection": 4,
+     "setup_to_driver_minutes": 8.25
+    }
+   },
+   "model": {
+    "depth_bound_seconds": 3011.8,
+    "depth_expected_seconds": 1271.8,
+    "draw_startup_minutes": 2.0,
+    "host_bound_factor": 1.25,
+    "other_operators_bound_seconds": 256.2,
+    "other_operators_expected_seconds": 102.5,
+    "parent_diagnostic_bound": "the search's measured distortion seconds, added whole",
+    "parent_diagnostic_fraction_expected": 0.5,
+    "refused_draws_reserved": 4,
+    "root_store_candidate_equivalents": {
+     "bound": 5.0,
+     "expected": 2.0
+    },
+    "teacher_minutes": {
+     "bound": 6.0,
+     "expected": 2.0
+    }
+   },
+   "session_overhead_minutes": 95.0
+  }
+ },
+ "teardown_reserve_usd": 0.3,
+ "totals": {
+  "both_expected_usd": 7.45,
+  "both_hard_with_reserves_usd": 11.83,
+  "probes_expected_usd": 6.59,
+  "probes_hard_with_reserve_usd": 8.51,
+  "structural_expected_usd": 0.8589,
+  "structural_hard_with_reserve_usd": 3.32
+ }
+}

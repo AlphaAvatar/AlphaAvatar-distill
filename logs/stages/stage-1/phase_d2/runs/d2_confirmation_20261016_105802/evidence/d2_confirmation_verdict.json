@@ -1,0 +1,352 @@
+{
+ "schema": "aadistill.phase_d2.confirmation_verdict/v1",
+ "run_id": "d2_confirmation_20261016_105802",
+ "contract_hash": "6ea59b765e28cb8c1c8520c90ba7fbf114e74bbbc38877a48dfebee350f3c1be",
+ "candidate": {
+  "arm": "c4",
+  "state_id": "3a4173e4eff45b0d73fd82bd0b263f03",
+  "ranking_rel": "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening_ranking.json",
+  "ranking_sha256": "dd2da3d17ed4f7682571bdb6217f9434ac745c2508a946ffb1b18de593da47b9",
+  "screening_contract_hash": "6d4283e77e1b26549328d96eaf8f71773a3b2ef4e15804d26dd938eb0674455e",
+  "screening_delta_vs_b": 0.0059,
+  "_screening_estimate_is_selected": "the maximum of four near-sibling estimates: optimistic by construction (winner's curse); the confirmation decides"
+ },
+ "units_verified": {
+  "d2_confirmation_c4_s396880939": {
+   "checks": {
+    "result_self_hash": true,
+    "result_is_the_session_record": true,
+    "label_is_the_frozen_probe": true,
+    "seed_is_the_frozen_seed": true,
+    "arm_is_the_frozen_arm": true,
+    "initialization_is_the_committed_candidate": true,
+    "session_entry_is_the_frozen_probe": true,
+    "admitted_under_the_shared_rung": true,
+    "admission_record_is_this_probes": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "rows_carry_the_frozen_unit": true,
+    "rows_counts_are_the_results": true,
+    "rescore_reproduces_per_sample": true,
+    "rescore_reproduces_the_result": true,
+    "training_records_are_the_sessions": true,
+    "completion_is_the_results": true,
+    "training_completed_every_step": true,
+    "config_is_bound_end_to_end": true,
+    "training_identity_is_the_protocols": true,
+    "recipe_digest_is_the_protocols": true,
+    "trained_from_the_candidate_at_the_seed": true,
+    "config_file_is_the_manifests": true
+   },
+   "training": {
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+    "device_class": "NVIDIA L40S",
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"
+   },
+   "verified": true,
+   "correct_overall": 0.0329,
+   "usable_rollout_rate": 0.6505,
+   "aligned_with_B": true,
+   "paired_vs_B": {
+    "both": 11,
+    "candidate_only": 17,
+    "reference_only": 25,
+    "neither": 797
+   },
+   "paired_vs_q2_descriptive": {
+    "both": 6,
+    "candidate_only": 22,
+    "reference_only": 24,
+    "neither": 798
+   }
+  },
+  "d2_confirmation_c4_s766527341": {
+   "checks": {
+    "result_self_hash": true,
+    "result_is_the_session_record": true,
+    "label_is_the_frozen_probe": true,
+    "seed_is_the_frozen_seed": true,
+    "arm_is_the_frozen_arm": true,
+    "initialization_is_the_committed_candidate": true,
+    "session_entry_is_the_frozen_probe": true,
+    "admitted_under_the_shared_rung": true,
+    "admission_record_is_this_probes": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "rows_carry_the_frozen_unit": true,
+    "rows_counts_are_the_results": true,
+    "rescore_reproduces_per_sample": true,
+    "rescore_reproduces_the_result": true,
+    "training_records_are_the_sessions": true,
+    "completion_is_the_results": true,
+    "training_completed_every_step": true,
+    "config_is_bound_end_to_end": true,
+    "training_identity_is_the_protocols": true,
+    "recipe_digest_is_the_protocols": true,
+    "trained_from_the_candidate_at_the_seed": true,
+    "config_file_is_the_manifests": true
+   },
+   "training": {
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+    "device_class": "NVIDIA L40S",
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"
+   },
+   "verified": true,
+   "correct_overall": 0.0294,
+   "usable_rollout_rate": 0.6874,
+   "aligned_with_B": true,
+   "paired_vs_B": {
+    "both": 7,
+    "candidate_only": 18,
+    "reference_only": 33,
+    "neither": 792
+   },
+   "paired_vs_q2_descriptive": {
+    "both": 15,
+    "candidate_only": 10,
+    "reference_only": 34,
+    "neither": 791
+   }
+  },
+  "d2_confirmation_c4_s1004399678": {
+   "checks": {
+    "result_self_hash": true,
+    "result_is_the_session_record": true,
+    "label_is_the_frozen_probe": true,
+    "seed_is_the_frozen_seed": true,
+    "arm_is_the_frozen_arm": true,
+    "initialization_is_the_committed_candidate": true,
+    "session_entry_is_the_frozen_probe": true,
+    "admitted_under_the_shared_rung": true,
+    "admission_record_is_this_probes": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "rows_carry_the_frozen_unit": true,
+    "rows_counts_are_the_results": true,
+    "rescore_reproduces_per_sample": true,
+    "rescore_reproduces_the_result": true,
+    "training_records_are_the_sessions": true,
+    "completion_is_the_results": true,
+    "training_completed_every_step": true,
+    "config_is_bound_end_to_end": true,
+    "training_identity_is_the_protocols": true,
+    "recipe_digest_is_the_protocols": true,
+    "trained_from_the_candidate_at_the_seed": true,
+    "config_file_is_the_manifests": true
+   },
+   "training": {
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+    "device_class": "NVIDIA L40S",
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"
+   },
+   "verified": true,
+   "correct_overall": 0.0271,
+   "usable_rollout_rate": 0.6463,
+   "aligned_with_B": true,
+   "paired_vs_B": {
+    "both": 5,
+    "candidate_only": 18,
+    "reference_only": 22,
+    "neither": 805
+   },
+   "paired_vs_q2_descriptive": {
+    "both": 3,
+    "candidate_only": 20,
+    "reference_only": 20,
+    "neither": 807
+   }
+  }
+ },
+ "outcome": "NO_GO",
+ "verdict": {
+  "outcome": "NO_GO",
+  "primary_vs_B": {
+   "decision": {
+    "verdict": "NO-GO",
+    "delta": -0.010588235294117647,
+    "lcb_one_sided": -0.019999999999999997,
+    "ucb_one_sided": -0.0015686274509803919,
+    "ci_two_sided": [
+     -0.021176470588235293,
+     1.3061447348531252e-19
+    ],
+    "sesoi": 0.01,
+    "criteria": {
+     "lcb_above_zero": false,
+     "point_at_or_above_sesoi": false,
+     "seed_robustness": {
+      "n_positive": 0,
+      "required": 2,
+      "passed": false
+     },
+     "guardrails_passed": true,
+     "ucb_below_sesoi": true
+    },
+    "per_seed_delta": [
+     -0.009411764705882352,
+     -0.01764705882352941,
+     -0.004705882352941176
+    ],
+    "usable": {
+     "pooled_delta": 0.06736842105263158,
+     "per_seed_delta": [
+      0.035789473684210524,
+      0.08736842105263158,
+      0.07894736842105263
+     ]
+    },
+    "vetoes": [],
+    "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds",
+    "no_forced_winner": true
+   },
+   "per_seed_delta": [
+    -0.009411764705882352,
+    -0.01764705882352941,
+    -0.004705882352941176
+   ],
+   "alpha_one_sided": 0.025,
+   "bootstrap_seed": 450870042,
+   "iterations": 20000,
+   "n_prompts_paired": 850,
+   "_boot_iterations_constant": 20000
+  },
+  "secondary_vs_q2_descriptive": {
+   "decision": {
+    "verdict": "NO-GO",
+    "delta": -0.010196078431372548,
+    "lcb_one_sided": -0.0192156862745098,
+    "ucb_one_sided": -0.0015686274509803912,
+    "ci_two_sided": [
+     -0.020392156862745096,
+     6.530723674265626e-20
+    ],
+    "sesoi": 0.01,
+    "criteria": {
+     "lcb_above_zero": false,
+     "point_at_or_above_sesoi": false,
+     "seed_robustness": {
+      "n_positive": 0,
+      "required": 2,
+      "passed": false
+     },
+     "guardrails_passed": true,
+     "ucb_below_sesoi": true
+    },
+    "per_seed_delta": [
+     -0.002352941176470588,
+     -0.02823529411764706,
+     0.0
+    ],
+    "usable": {
+     "pooled_delta": -0.027719298245614036,
+     "per_seed_delta": [
+      -0.045263157894736845,
+      -0.02631578947368421,
+      -0.011578947368421053
+     ]
+    },
+    "vetoes": [],
+    "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds",
+    "no_forced_winner": true
+   },
+   "per_seed_delta": [
+    -0.002352941176470588,
+    -0.02823529411764706,
+    0.0
+   ],
+   "alpha_one_sided": 0.025,
+   "bootstrap_seed": 450870042,
+   "iterations": 20000,
+   "n_prompts_paired": 850,
+   "_boot_iterations_constant": 20000,
+   "_role": "no decision role and no alpha: reported with its interval only"
+  },
+  "rule": {
+   "endpoint": "correct_overall",
+   "estimand": "prompt-mean of the seed-mean paired difference (candidate - B) over the three fixed confirmation seeds",
+   "sesoi": 0.01,
+   "alpha_one_sided": 0.025,
+   "bootstrap_seed": 450870042,
+   "bootstrap_iterations": 20000,
+   "seed_robustness_min_positive": 2,
+   "guardrails": {
+    "usable_pooled_min_delta": -0.05,
+    "usable_per_seed_min_delta": -0.1,
+    "role": "veto only; never positive credit"
+   },
+   "outcomes": {
+    "SHARED_GO": "one-sided (1 - per_experiment_alpha) LCB > 0 AND delta >= SESOI AND >= 2 of 3 seed deltas > 0 AND no guardrail veto. NOT a promotion: it nominates the candidate for a fresh independent confirmation on its reserved battery",
+    "NO_GO": "one-sided (1 - per_experiment_alpha) UCB < SESOI, or a guardrail veto. Terminal for that candidate",
+    "INCONCLUSIVE": "otherwise. Terminal; never rerun on these rows"
+   },
+   "secondary": "the candidate vs q2 on the shared confirmation rows, same bootstrap, reported with its interval. No decision role, so it consumes no alpha",
+   "_frozen": "no threshold moves because the screening margin was small, no seed is added, and an INCONCLUSIVE is terminal on these rows"
+  },
+  "_shared_go_is_not_a_promotion": "SHARED_GO nominates the candidate for a fresh independent confirmation on its reserved battery; nothing is promoted"
+ },
+ "per_seed_descriptive": {
+  "396880939": {
+   "candidate_correct_overall": 0.0329,
+   "candidate_usable_rollout_rate": 0.6505,
+   "B_correct_overall": 0.0424,
+   "B_usable_rollout_rate": 0.6147,
+   "B_unit": "d1_confirmation_B_s396880939",
+   "paired_vs_B": {
+    "both": 11,
+    "candidate_only": 17,
+    "reference_only": 25,
+    "neither": 797
+   }
+  },
+  "766527341": {
+   "candidate_correct_overall": 0.0294,
+   "candidate_usable_rollout_rate": 0.6874,
+   "B_correct_overall": 0.0471,
+   "B_usable_rollout_rate": 0.6,
+   "B_unit": "d1_confirmation_B_s766527341",
+   "paired_vs_B": {
+    "both": 7,
+    "candidate_only": 18,
+    "reference_only": 33,
+    "neither": 792
+   }
+  },
+  "1004399678": {
+   "candidate_correct_overall": 0.0271,
+   "candidate_usable_rollout_rate": 0.6463,
+   "B_correct_overall": 0.0318,
+   "B_usable_rollout_rate": 0.5674,
+   "B_unit": "d1_confirmation_B_s1004399678",
+   "paired_vs_B": {
+    "both": 5,
+    "candidate_only": 18,
+    "reference_only": 22,
+    "neither": 805
+   }
+  }
+ },
+ "comparator_units": [
+  "d1_confirmation_B_s1004399678",
+  "d1_confirmation_B_s396880939",
+  "d1_confirmation_B_s766527341"
+ ],
+ "_claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered recovery seeds; B's rows were already observed in D1 (adaptivity limits registered in the shared protocol). SHARED_GO nominates for a fresh independent confirmation and never promotes; NO_GO and INCONCLUSIVE are terminal for this candidate on these rows."
+}

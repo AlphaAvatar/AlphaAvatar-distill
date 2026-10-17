@@ -1,0 +1,33 @@
+{
+ "schema": "aadistill.evidence_erratum/v1",
+ "erratum_id": "d2v3_stage_w_r1_teacher_confidence_validity_definition",
+ "recorded_utc": "2026-10-14",
+ "applies_to": {
+  "evidence": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1/runs/d2v3val_20261014_170824/out/adoption_all_v1/adoption.json",
+  "evidence_sha256": "66a80d17f4d0feb5ba3f670f9918a0eaada115911dddd50d66aad230c90b917c",
+  "evidence_is": "UNCHANGED by this erratum: booked by sha256 in this directory's campaign",
+  "fields": [
+   "W_d2v3_validation.W1_union_stores_and_confidence.profiles.<both profiles>.validity.definition",
+   "W_d2v3_validation.W1_union_stores_and_confidence.profiles.<both profiles>.validity.log_vocab_nats",
+   "W_d2v3_validation.W1_union_stores_and_confidence.profiles.<both profiles>.validity.risks[0]",
+   "W_d2v3_validation.W3_union_numerics.validity_with_child_union_kl.definition",
+   "W_d2v3_validation.W3_union_numerics.validity_with_child_union_kl.log_vocab_nats",
+   "W_d2v3_validation.W3_union_numerics.validity_with_child_union_kl.risks[0]"
+  ]
+ },
+ "what_was_stated": {
+  "definition": "c_T = 1 - H_T / log|V|, H_T full-vocabulary Shannon",
+  "normalizer": "log|V| = 11.931 nats (|V| = 151936)"
+ },
+ "what_the_stores_declare": {
+  "entropy_definition": "reference_topk_plus_tail_absolute_shannon_entropy/v1",
+  "confidence_mapping": "one_minus_entropy_over_log_categories/v1",
+  "categories": 201,
+  "log_categories_nats": 5.303305,
+  "formula": "c_T = 1 - H_T^{K+1} / log(K+1), H_T^{K+1} the Shannon entropy of the Top-200 entries and one tail bucket in absolute probabilities"
+ },
+ "numbers_affected": "none. Every confidence value, quantile, IQR, ESS, histogram, group share, correlation and the weighted/unweighted KL ratio in these reports was read from the store's own per-position K+1 confidence and entropy; log|V| was used only in the risks[0] sentence. Consistency check: the reported maximum entropy, 4.2427 nats, maps to the reported minimum c_T 0.2000 under log(201) = 5.3033, and would map to 0.644 under log|V|",
+ "cause": "teacher_confidence.validity_report printed one fixed full-vocabulary definition and log|V| for every store, written for version 2's full-vocabulary store and not revisited when the union store declared another confidence",
+ "fixed_by": "validity_report schema v2: the definition, mapping, category count and normalizer are read from the store's declared identity (teacher_confidence.confidence_definition), an undeclared pair is refused; regression tests in families/d_series/tests/test_teacher_confidence.py",
+ "does_not": "change the evidence, its hash, the verdicts or the campaign"
+}

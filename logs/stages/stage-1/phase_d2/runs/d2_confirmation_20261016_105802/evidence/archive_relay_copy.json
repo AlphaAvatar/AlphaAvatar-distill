@@ -1,0 +1,13 @@
+{
+ "schema": "aadistill.phase_d2.evidence_archive_relay_copy/v1",
+ "run_id": "d2_confirmation_20261016_105802",
+ "local": "/home/ecs-user/aad-artifacts/phase_d2/d2_confirmation_20261016_105802/store/d2_confirmation_artifacts.tar.gz",
+ "relay": "AlphaAvatar/aadistill-artifacts",
+ "remote": "stage1/phase_d2/d2_confirmation_20261016_105802/d2_confirmation_artifacts.tar.gz",
+ "bytes": 4338735,
+ "sha256": "7e7a82e567369ab7b06b7472a35260957cf116369d854f91d9c81289c367122b",
+ "downloaded_sha256": "7e7a82e567369ab7b06b7472a35260957cf116369d854f91d9c81289c367122b",
+ "matched": true,
+ "checked_utc": "2026-10-16T15:53:09Z",
+ "_what": "the session's manifest-verified evidence archive (results, per-sample rows, raw generations, admissions, attestation, configs, rescoring) copied off the dev host; restored and re-hashed"
+}

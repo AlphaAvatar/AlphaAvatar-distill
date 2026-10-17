@@ -21,6 +21,13 @@ Everything below is recorded in the consolidated
 [experiment record](../stages/stage-3/history/EXPERIMENTS.md); per-run logs were merged into it on
 2026-07-31 and remain in git history at commit `866dac2`.
 
+**Declared capability scope (re-declared 2026-10-16).** Primary target: fluid
+reasoning and adaptive problem-solving (AGENTS.md P10.2). Supporting: the
+knowledge, language and procedure reasoning needs. Guard rail: autonomous
+rollout and protocol integrity. Math, RAG, knowledge-QA and code scores below are
+mixed-capability measurements, not fluid-reasoning results. Group-by-group
+classification: [decision 2026-10-16](../budget/decisions.md).
+
 **What passed.** Stage 0 collected 949,859 tokens of teacher sufficient
 statistics. Stage 1's PCA/sandwich init reached holdout NLL 11.748 against a
 random-init 12.129 and a teacher 2.6264, and its checkpoint

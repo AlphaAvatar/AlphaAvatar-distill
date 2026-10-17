@@ -1,0 +1,222 @@
+{
+ "schema": "aadistill.initialization.forward_baseline/v1",
+ "baseline_id": "stage1_init.d1_target_aware.scored_v1",
+ "version": 1,
+ "_contract": "THE OFFICIAL FORWARD BASELINE for structural initialization: the method a new execution runs unless its own registered protocol declares a deviation. Resolved through configs/shared/baselines/selection.json by aadistill.initialization.baseline (generic) and shared.forward_baseline (this project's entry point). Every method term below is checked against the core at load: an id the core does not ship or a hash that disagrees with the shipped object is refused. AUTHORIZES NOTHING: no run, no spend, no rematerialization.",
+ "selected": {
+  "decided_utc": "2026-10-17",
+  "decision": "Maintainer final decision: CLOSE the D-series (D1, D2, D3) and ADOPT the D1 initialization methodology together with prediction_rows=scored_v1 as the official forward baseline. scored_v1 is mandatory in the adopted forward profile; its R0 GPU equivalence validation is sufficient and no further validation is owed for adopting it.",
+  "decided_by": "maintainer",
+  "decision_record": "logs/budget/decisions.md 2026-10-17 (D-series closed; D1 + scored_v1 adopted as the forward baseline)",
+  "is_a_selection_not_a_verdict": "A maintainer engineering and scientific-baseline selection. It is NOT a retrospective claim that D1 passed its superiority test: D1's confirmation verdict was NO-GO (q2 102/2550 vs B 103/2550 correct on the three confirmation seeds) and stays NO-GO. Grounds as stated by the maintainer: equivalent measured correctness, materially higher usable rollout (about 68.91% vs 59.40%), scoring restricted to supervised target positions, a Top-200+tail reference that cuts storage and reference-side KL work, scored_v1 removing output-head work at unscored positions, D2 establishing no improvement worth adopting, and D3 establishing no behavioural advantage."
+ },
+ "method": {
+  "operators": {
+   "FFN": {
+    "impl_id": "ffn.activation_importance_v0",
+    "signature_hash": "accb896294568f641a44f2550997306faa01c6600c1870534f326524ccbf7316",
+    "selection": "activation magnitude multiplied by the down-projection column norm"
+   },
+   "DEPTH": {
+    "impl_id": "depth.causal_kl_greedy_v1",
+    "signature_hash": "8106604694621d305dc20324d5ce65d2cefe5491ef2c2ab93a1b5fe8f16b5ca9",
+    "selection": "greedy forward KL of the candidate against the intact current parent"
+   },
+   "RESIDUAL_WIDTH": {
+    "impl_id": "width.global_pca_v0",
+    "signature_hash": "acb56886de907b717346483a0d6707552537d5b11415b6861995ec286f8198b6",
+    "selection": "global PCA of the residual activation second moments"
+   },
+   "ATTENTION": {
+    "impl_id": "attention.activation_importance_v1",
+    "signature_hash": "1171f3b791e2394d4b730b887f936763edd5bb4d31b52090cdccacef809e0e90",
+    "selection": "per-head residual-write energy"
+   }
+  },
+  "_one_implementation_per_kind": "exactly one registered implementation per structural kind; operator ORDER and the calibration PROFILE per operator stay configuration-driven free variables of a search, registered by each experiment's protocol",
+  "position_policy": {
+   "qualified_id": "positions.supervised_target_v1@v1",
+   "policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12",
+   "semantics": "score the prediction positions whose targets belong to the item's `assistant` tag (for teacher-native thinking trajectories: the supervised reasoning and final-answer positions); an untemplated item with no such tag keeps every real prediction position; a present-but-empty tag fails closed. Unchanged from its historical definition.",
+   "coverage": {
+    "FFN activation importance": {
+     "supervised_target_v1": "restricts token-axis activation statistics",
+     "scored_v1": "not applicable: no vocabulary logits"
+    },
+    "DEPTH causal KL": {
+     "supervised_target_v1": "restricts prediction-axis KL scoring",
+     "scored_v1": "applied"
+    },
+    "RESIDUAL_WIDTH global PCA": {
+     "supervised_target_v1": "restricts token-axis residual second moments",
+     "scored_v1": "not applicable: no vocabulary logits"
+    },
+    "ATTENTION activation importance": {
+     "supervised_target_v1": "restricts token-axis head-output statistics",
+     "scored_v1": "not applicable: no vocabulary logits"
+    },
+    "global state evaluation and beam ranking": {
+     "supervised_target_v1": "restricts scored prediction positions",
+     "scored_v1": "applied"
+    }
+   },
+   "_two_mechanisms": "Target-aware selection applies to all four operators and to state evaluation (FFN, WIDTH and ATTENTION reach it through statistics_positions and the shared active-position machinery). scored_v1 is a different mechanism: pre-vocabulary ROW selection, which only paths that produce vocabulary logits have. The backbone always runs the complete causal sequence; only activation accumulation and, for KL consumers, output-head/vocabulary work at unscored positions are reduced."
+  },
+  "distribution_support": {
+   "support_id": "reference_topk_tail_v1",
+   "top_k": 200,
+   "semantics": "the reference distribution's Top-200 entries plus ONE aggregate complement tail bucket, under the existing numerical-stability contract. Not renormalized truncated Top-K KL. Not D2's teacher/student union support, confidence weighting or the cancelled student-confidence objective.",
+   "owner_of_k": "scripts/stages/stage-1/families/d_series/scoring_protocol.py (maintainer-selected 2026-10-04; never tuned against outcomes)"
+  },
+  "kl_reference": {
+   "operator_local": {
+    "DEPTH": "parent_state"
+   },
+   "state_evaluation": "lineage_root",
+   "semantics": "DEPTH scores KL(P_parent || C(S)) against the INTACT CURRENT PARENT (`parent_state`, expressed by omitting the operator's kl_reference key). Global state evaluation and beam ranking compare every state with the ORIGINAL TEACHER, the lineage root. D3's original-teacher reference for DEPTH (root_reference/v1) is NOT part of this baseline."
+  },
+  "search": {
+   "schedule": {
+    "qualified_id": "beam.delayed_prune@v1",
+    "schedule_hash": "9ff15b3c7ec4729ad1b57cbb3dea940a4a24d544783ab6f37d4a36d99a818c12",
+    "width": 6,
+    "warmup_levels": 1
+   },
+   "ranking": {
+    "qualified_id": "beam.pareto_multi_objective@v2",
+    "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4"
+   },
+   "free_variables": [
+    "operator order",
+    "calibration profile per operator"
+   ],
+   "matching_position_policy": "the same position policy in operator selection, state evaluation and beam ranking",
+   "contracts": "all existing scientific identity, materialization, checkpoint and evidence contracts, unchanged"
+  }
+ },
+ "execution": {
+  "micro_batch_size": 3,
+  "calibration_batch_packing": "length_sorted_v1",
+  "prediction_rows": "scored_v1"
+ },
+ "numerics": {
+  "device_type": "cuda",
+  "compute_dtype": "bfloat16",
+  "accumulation_dtype": "float32"
+ },
+ "numerical_execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+ "_execution_is_not_core": "the batch size and packing are this project's policy, carried here and in each experiment's records; src/aadistill keeps its generic defaults (prediction_rows all_v1, the historical path) so every historical identity stays byte-identical. A forward consumer takes its profile from this record, never from the core default.",
+ "reference_artifacts": [
+  {
+   "label": "d1_q2",
+   "role": "the existing HISTORICAL reference initialization of the adopted method: D1 quality-order finalist q2, produced under the historical all_v1 execution profile. It was NOT created under scored_v1, and its digest is never the expected digest of a scored_v1 materialization.",
+   "semantic_state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+   "materialization_id": "b7f189baf1091911876f4f85fdca4154",
+   "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+   "weights_digest": "0597e60c1a7fac06930e3e84c8f5341b1f7eb9470fc30b16efbf02f37208fdef",
+   "single_shard_sha256": "ca2d7368e3adce3e167a4376dcab425902530e7a77106146d336d676d2370c5d",
+   "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+   "operator_path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+   "execution": {
+    "micro_batch_size": 3,
+    "calibration_batch_packing": "length_sorted_v1",
+    "prediction_rows": "all_v1"
+   },
+   "numerical_execution_fingerprint": "956a695186c580cb636aa2eaa358c18e14bc07d8159022d5c088837a59d8531b",
+   "identity_owner": {
+    "path": "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/complete_leaves.jsonl",
+    "sha256": "8b77e34a48bc8c6f31852e858b21a804503e308ff531154eb584364cb54f85be"
+   },
+   "reconstruction": {
+    "path": "scripts/stages/stage-1/phase_d1/autoinit_d1_replay_driver.py",
+    "verified_by": {
+     "path": "logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json",
+     "sha256": "935afd5a8566ed4a7f7cb6d6a78742ddd87b1d510070fc2ddac19ea7c6a1f918"
+    },
+    "result": "reproduced EXACTLY (all four identities) by the finalist-rematerialization campaign, on host drivers 580.126.09 and 595.91.07"
+   },
+   "durable_copy": "/home/ecs-user/aad-artifacts/phase_d1/d1_replay_002/products/afd50c9ff0e3d20542bb5473ea745b55 (protected in logs/maintenance/inventories/checkpoint_registry.json)"
+  }
+ ],
+ "forward_materializations": [],
+ "_forward_materializations_is_empty": "NO checkpoint has been materialized under this forward profile. Its semantic state ids are shared with the historical path (execution is not science) but its materialization ids, fingerprint and bytes are not; a future authorized execution establishes its own identities and is recorded here only after it exists.",
+ "provenance": {
+  "scored_v1_validation": {
+   "campaign": {
+    "path": "logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/campaign.json",
+    "sha256": "d6bc5df3155ec7ddd10b7e4bf5ad5a67172715f6da9090e3894576b8e31193ba"
+   },
+   "plan": {
+    "path": "logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/plan.json",
+    "sha256": "1e1eac39445a19eacd5d820b9b04545d9cbbc928dee8b978cad369ae32aaa518"
+   },
+   "comparison": {
+    "path": "logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/runs/r0_20261013_154325/r0_comparison.json",
+    "sha256": "07bf44308d33c76fc8eb44180d2ad2242e1d4f8a9bf88f6d78f9caf038553040"
+   },
+   "result": "R0 on GPU: both calibration profiles' DEPTH removal orders identical under scored_v1 and all_v1 (260 candidates each; max relative score difference 1.65e-07); state-evaluation ranked drift at most 1.28e-07. Sufficient by maintainer decision; no further validation is owed."
+  },
+  "d1_design": {
+   "path": "logs/stages/stage-1/phase_d1/plans/d1_design.json",
+   "sha256": "52a5dc0fdd742ebe2e6b378926de6206db5b2d644ea901cacc52dcf8bcea6ac3"
+  },
+  "terminal_evidence": {
+   "d1_search": {
+    "path": "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/closeout/outcome.json",
+    "sha256": "4de71a8159646974e8e9654ae57eeb89f78b168e6f08f62bdd1abfbb208ec20b"
+   },
+   "d1_screening": {
+    "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/closeout/outcome.json",
+    "sha256": "1f8e7bb3577bdf444aa95c9e301333b9c00042106bccf567aa9a4c132365476b"
+   },
+   "d1_confirmation": {
+    "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/closeout/outcome.json",
+    "sha256": "eb9bcb699e19a111223c1e5aa9da2322a40daa1d917a633d3fff5f4accdbba14",
+    "verdict": "NO-GO"
+   },
+   "d2_search": {
+    "path": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json",
+    "sha256": "d9c83e9e8b4fb7c0f31d1b06dcd28ec1335f5eac42300b4f0fdff76dc021f6ec"
+   },
+   "d2_screening": {
+    "path": "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/closeout/outcome.json",
+    "sha256": "6d3be492220d52e6c6dfbe3966a83f91eeb5bec94c3d8c34c459e3d339b9be63"
+   },
+   "d2_confirmation": {
+    "path": "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/closeout/outcome.json",
+    "sha256": "fb4c97b36f64433c2224d9b5d5b604849cdf7780fe8a11eb1ef799d7b264e27b",
+    "verdict": "NO_GO"
+   },
+   "d3_structural": {
+    "path": "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/closeout/outcome.json",
+    "sha256": "9c20f6db836aab4902c4594cf5966d0fa63dcab160eb40fad691d639a6eb41fb",
+    "verdict": "STRUCTURAL_CHANGE"
+   },
+   "d3_probes": {
+    "path": "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/closeout/outcome.json",
+    "sha256": "038a7978c6c56d31b11726249cc48d6d85ef1713ee2a907d1000b95e4e4f6296",
+    "verdict": "INCONCLUSIVE vs q2 and vs B (exploratory)"
+   }
+  },
+  "programme_closeout": "logs/stages/stage-1/families/d_series/closeout/programme_closeout.json"
+ },
+ "incumbent_distinction": {
+  "historical_scientific_incumbent": "B = C1's promoted treatment arm (artifact digest 53e30566...), derived from C1's verdict by stages.d_series.incumbent.standing_incumbent(). It remains the comparator every historical D-series record names and is an ARCHIVED scientific comparator; nothing here rewrites it.",
+  "forward_baseline": "this record: the METHOD new executions use by default. Selecting it does not make q2 a confirmed winner over B, and historical code that asks for B to reproduce past experiments keeps asking standing_incumbent()."
+ },
+ "consumers": {
+  "resolution": "shared.forward_baseline (scripts/shared/forward_baseline.py) through aadistill.initialization.baseline.resolve_selection; the ONE entry point for forward work",
+  "authorized_future_consumers": "Stage-0 calibration data-volume and mixture experiments, and any later initialization search, once separately designed and authorized. None is authorized by this record.",
+  "derived_views": [
+   "logs/maintenance/inventories/checkpoint_registry.json (q2 protection and role)",
+   "logs/state/current.json :: forward_baseline"
+  ]
+ },
+ "what_this_may_not_be_used_to_claim": [
+  "that D1 passed its preregistered superiority test (it returned NO-GO)",
+  "that q2 was produced under scored_v1, or that a scored_v1 materialization will reproduce q2's digest",
+  "fluid-reasoning retention: every D-series measurement is on a mixed-domain battery (AGENTS.md P10.2)",
+  "that any Stage-0, 2 or 4 experiment is authorized"
+ ],
+ "authorizes": "nothing"
+}

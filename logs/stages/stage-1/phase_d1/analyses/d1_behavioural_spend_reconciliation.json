@@ -1,0 +1,54 @@
+{
+ "schema": "aadistill.phase_d1.behavioural_spend_reconciliation/v1",
+ "opening_balance_usd": 186.6018585956,
+ "closing_balance_usd": 178.2713915818,
+ "measured_all_in_usd": 8.3305,
+ "gpu_only_sum_usd": 8.218,
+ "subruns": [
+  {
+   "run_id": "d1_behavioural_20261010_082900",
+   "rung": "screening",
+   "balance_at_launch": 186.6018585956,
+   "gpu_usd": 0.1715,
+   "minutes": 9.44,
+   "disk_gb": 120.0,
+   "all_in_usd": 0.1712,
+   "residual_vs_gpu_usd": -0.0003,
+   "modelled_disk_usd": 0.0026
+  },
+  {
+   "run_id": "d1_behavioural_20261010_090343",
+   "rung": "screening",
+   "balance_at_launch": 186.4307067011,
+   "gpu_usd": 1.4743,
+   "minutes": 81.16,
+   "disk_gb": 120.0,
+   "all_in_usd": 1.4934,
+   "residual_vs_gpu_usd": 0.0191,
+   "modelled_disk_usd": 0.0222
+  },
+  {
+   "run_id": "d1_behavioural_20261010_103442",
+   "rung": "screening",
+   "balance_at_launch": 184.9373026984,
+   "gpu_usd": 3.0797,
+   "minutes": 169.53,
+   "disk_gb": 120.0,
+   "all_in_usd": 3.1238,
+   "residual_vs_gpu_usd": 0.0441,
+   "modelled_disk_usd": 0.0464
+  },
+  {
+   "run_id": "d1_behavioural_20261010_132919",
+   "rung": "screening",
+   "balance_at_launch": 181.8135052152,
+   "gpu_usd": 3.4925,
+   "minutes": 192.25,
+   "disk_gb": 120.0,
+   "all_in_usd": 3.5421,
+   "residual_vs_gpu_usd": 0.0496,
+   "modelled_disk_usd": 0.0527
+  }
+ ],
+ "_method": "consecutive launches bracket each subrun's charge; the last is closed by the balance read at reconciliation. RunPod exposes no per-pod billing surface."
+}

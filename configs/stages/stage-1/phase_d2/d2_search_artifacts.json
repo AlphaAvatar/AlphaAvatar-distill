@@ -1,0 +1,40 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_d2_search",
+ "note": "success spec: the D2 search's permanent EVIDENCE. The committed Top-K checkpoints are PRODUCTS, secured by the launcher's fetch_products/products_secured pair, not here.",
+ "patterns_are_relative_to": "the collector's --root, which SessionRunner sets to <checkout>/artifacts",
+ "entries": [
+  {
+   "artifact_class": "d2_search_record",
+   "pattern": "audit/autoinit_d2/d2_search.json",
+   "required": true,
+   "min_bytes": 512,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_stage1_selection",
+   "pattern": "audit/autoinit_d2/stage1_selection.json",
+   "required": true,
+   "min_bytes": 256,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_state_journal",
+   "pattern": "audit/autoinit_d2/search/states.jsonl",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_search_telemetry",
+   "pattern": "audit/autoinit_d2/search/telemetry.jsonl",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d2_search_journal",
+   "pattern": "audit/autoinit_d2/journal.jsonl",
+   "required": true,
+   "lifecycle": "final_required"
+  }
+ ]
+}

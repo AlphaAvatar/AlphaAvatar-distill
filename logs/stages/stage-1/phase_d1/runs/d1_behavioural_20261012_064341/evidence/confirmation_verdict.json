@@ -1,0 +1,106 @@
+{
+ "schema": "aadistill.phase_d1.confirmation_verdict/v1",
+ "_contract": "D1's confirmation verdict under the rule C0 froze and C1 and C3 already ran. Computed OFF-POD at $0 from secured per-sample rows, recomputable by anyone holding them.",
+ "rung": "confirmation",
+ "advancing_candidate": "q2",
+ "incumbent": "B",
+ "design_hash": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+ "preregistration_sha256": "aa70338a22bdaae1067105261614a63bed4b0f7737f0a6cc3b59d2555835e3de",
+ "plan": {
+  "plan_id": "autoinit.v1.phase_d1_behavioural.confirmation",
+  "seeds": [
+   396880939,
+   766527341,
+   1004399678
+  ],
+  "sesoi": 0.01,
+  "seed_robustness_min_positive": 2,
+  "usable_pooled_min_delta": -0.05,
+  "usable_per_seed_min_delta": -0.1,
+  "_every_value_read_from": "the frozen design and C0"
+ },
+ "inference": {
+  "method": "stratified prompt-cluster bootstrap",
+  "owner": "stages.phase_c1.isolation.stratified_cluster_bootstrap",
+  "iterations": 20000,
+  "bootstrap_seed": 188612737,
+  "bootstrap_seed_derivation": "SHA256(design_hash + ':phase-d1:confirmation-bootstrap')[0:4] as uint32 mod 2**31 -- domain-separated per phase, because C3 discovered that C1's default silently applies when a phase does not pass its own",
+  "seeds_are_fixed_blocks": true
+ },
+ "decision": {
+  "verdict": "NO-GO",
+  "delta": -0.000392156862745098,
+  "lcb_one_sided": -0.00784313725490196,
+  "ucb_one_sided": 0.007450980392156863,
+  "ci_two_sided": [
+   -0.009411764705882352,
+   0.009019607843137253
+  ],
+  "sesoi": 0.01,
+  "criteria": {
+   "lcb_above_zero": false,
+   "point_at_or_above_sesoi": false,
+   "seed_robustness": {
+    "n_positive": 1,
+    "required": 2,
+    "passed": false
+   },
+   "guardrails_passed": true,
+   "ucb_below_sesoi": true
+  },
+  "per_seed_delta": [
+   -0.007058823529411765,
+   0.010588235294117647,
+   -0.004705882352941176
+  ],
+  "usable": {
+   "pooled_delta": 0.09508771929824561,
+   "per_seed_delta": [
+    0.08105263157894736,
+    0.11368421052631579,
+    0.09052631578947369
+   ]
+  },
+  "vetoes": [],
+  "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds",
+  "no_forced_winner": true
+ },
+ "per_seed_delta": [
+  -0.007058823529411765,
+  0.010588235294117647,
+  -0.004705882352941176
+ ],
+ "battery": {
+  "role": "d1_confirmation",
+  "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+  "item_ids_sha256": "7d200ffe666add66721c3cb233f6f9b876825ee5277438669926e3633fe8547b",
+  "n_prompts": 950,
+  "n_scorable": 850
+ },
+ "inputs_consumed": {
+  "per_sample_sha256": {
+   "d1_confirmation_B_s396880939": "6d3c94a40c0140cb81c2da1e74c741dafed781b4d0c3fcbb16e14eb971de00da",
+   "d1_confirmation_B_s766527341": "8facfc12863e6c1aa13717dabef0adb9f7d920e369c693ddc7cb5c2814d8ff06",
+   "d1_confirmation_B_s1004399678": "9293e5ebac82a8ac27b9df64178e22b3010212c2a529473723f49586f5ff49c2",
+   "d1_confirmation_q2_s396880939": "b013d29359d4a58242ce248150de8ea868d9727e57b662873e323ef73d6f5aa3",
+   "d1_confirmation_q2_s766527341": "005775ff81ce7cef6bdf7c9233a30bc05fcf82c5e9625ac02bf2bc08aa2b8f3c",
+   "d1_confirmation_q2_s1004399678": "d02ef94fd4cd87203b1f5dad76bfd1cebdbe40844255bda87c871b3f6cac3723"
+  },
+  "n_probes": 6,
+  "n_prompts_paired": 850
+ },
+ "implementation": {
+  "commit": "da7a07114e75ea1c2e299b47f16d6c66c1d475ab",
+  "dirty": false,
+  "rule_owners": [
+   "stages.phase_c1.probe_results.decision_inputs",
+   "stages.phase_c1.isolation.paired_differences",
+   "stages.phase_c1.isolation.stratified_cluster_bootstrap",
+   "stages.phase_c1.isolation.decide"
+  ],
+  "_nothing_statistical_is_implemented_here": "the endpoint, estimand, inference and SESOI are C0's and are reused unchanged so D1 stays comparable with C1's GO and C3's NO_GO"
+ },
+ "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds",
+ "_what_this_verdict_is_about": "it confirms q2 against B, conditional on the three confirmation seeds, having been selected on disjoint screening prompts and disjoint screening seeds. It is not a statement about the other three finalists, and the interval is prompt uncertainty at these fixed seed pairs -- never a seed-population claim.",
+ "verdict_sha256": "dea0678e8e30ea18a6ec469edae46eda49c46c83386ba74da4f88b545ae6d863"
+}

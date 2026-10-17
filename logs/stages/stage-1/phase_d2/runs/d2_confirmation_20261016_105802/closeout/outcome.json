@@ -1,0 +1,277 @@
+{
+ "schema": "aadistill.phase_d2.confirmation_closeout/v1",
+ "run_id": "d2_confirmation_20261016_105802",
+ "stage_id": "1",
+ "experiment_id": "phase_d2",
+ "classification": "COMPLETE CONFIRMATION RUNG: every frozen probe trained, generated, scored and verified off-pod; the frozen rule applied",
+ "recorded_utc": "2026-10-16T15:44:07Z",
+ "session_commit": "e3ce7b73ba5fa157cb667a3101f31fd0e8e06ed9",
+ "authorized_base_commit": "cf5e0d58f55fe5af7fca4c20b9a09def3b06fc68",
+ "authorization_sha256": "602365969a458cb2f622db9ec32acf074cc96a0d58e8dee9bb9716d0d0fb9aba",
+ "authorization_file_sha256": "0e9983326218411442c7954839cb5dfd21bd2baeea8625a934140bca48f2fea0",
+ "contract_hash": "6ea59b765e28cb8c1c8520c90ba7fbf114e74bbbc38877a48dfebee350f3c1be",
+ "driver_status": "COMPLETE",
+ "runner_terminal": "ALL_DONE",
+ "provider_resource_created": true,
+ "provider_teardown_verified": true,
+ "teardown_evidence": {
+  "provider_confirms_gone": true,
+  "final_pod_state": {
+   "exists": false,
+   "desired_status": "TERMINATED",
+   "billing": false
+  },
+  "teardown_gate": {
+   "allowed": true,
+   "emergency": false,
+   "failed_check": null,
+   "reason": "every teardown check passed",
+   "checks": {
+    "training_complete": true,
+    "evaluation_complete": true,
+    "artifact_manifest_created": true,
+    "required_files_present": true,
+    "final_streams_quiescent": true,
+    "archive_created": true,
+    "archive_contents_verified": true,
+    "transfer_complete": true,
+    "local_hashes_verified": true,
+    "checkpoint_hashes_matched": true,
+    "required_products_secured": true,
+    "report_inputs_verified": true
+   },
+   "incomplete_event_streams": []
+  }
+ },
+ "pod": {
+  "pod_id": "tvohx8nubg6kmi",
+  "image_identity": {
+   "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "observed": [
+    "595.91.07"
+   ],
+   "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+  },
+  "draws": [
+   {
+    "draw": 1,
+    "pod_id": "zqbvdvlkb63vke",
+    "outcome": "host_not_admitted",
+    "price_per_hour": 1.09,
+    "elapsed_minutes_at_release": 2.75,
+    "cumulative_usd_at_release": 0.0499,
+    "watchdog_journal": "watchdog_zqbvdvlkb63vke.jsonl",
+    "release": {
+     "pod_id": "zqbvdvlkb63vke",
+     "why": "host_not_admitted",
+     "remove_returncode": 0,
+     "exists": false,
+     "desired_status": "TERMINATED",
+     "billing": false,
+     "confirmed_not_billing": true,
+     "confirmation_required": true,
+     "rule": "a zero returncode, a null runtime, a failed query or a cleared local pod_id are NOT evidence of release; only the provider reporting this resource not billing is"
+    }
+   }
+  ]
+ },
+ "runtime_comparability": {
+  "training_runtime": {
+   "observed": {
+    "version": 1,
+    "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+    "python_version": "3.12.3",
+    "torch_version": "2.11.0+cu128",
+    "transformers_version": "5.13.1",
+    "cuda_runtime": "12.8",
+    "attention_backend": "sdpa"
+   },
+   "digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+   "protocol_training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+   "matches": true
+  },
+  "attested_evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73",
+  "attested_matches_the_shared_rung": true,
+  "scoring_contract": {
+   "contract": "c1_confirmation_scoring@v1",
+   "digest": "812d3361ac6dc13661bdec09db74f6a2cacf696ae7dc037bcdedb1264fb67139"
+  },
+  "arm_verification": {
+   "n_arms": 1,
+   "arms": [
+    {
+     "arm": "c4",
+     "state_id": "3a4173e4eff45b0d73fd82bd0b263f03",
+     "checkpoint_dir": "/workspace/aad/artifacts/stages/stage-1/phase_d2/arms/3a4173e4eff45b0d73fd82bd0b263f03",
+     "identities_checked": [
+      "arch_signature",
+      "artifact_digest",
+      "single_shard_sha256",
+      "weights_digest"
+     ]
+    }
+   ]
+  }
+ },
+ "money": {
+  "all_in_usd": 5.026,
+  "gpu_usd": 4.9513,
+  "disk_usd": 0.0747,
+  "elapsed_minutes": 272.55,
+  "_basis": "the runner's GPU figure plus 120 GB container disk at $0.10/GB-month over the session's elapsed minutes, ceiled to the 4-decimal quantum",
+  "provider_balance_cross_check": {
+   "before_usd": 124.0875117028,
+   "after_usd": 119.0677406309,
+   "measured_delta_usd": 5.0198
+  }
+ },
+ "durable_store": {
+  "path": "/home/ecs-user/aad-artifacts/phase_d2/d2_confirmation_20261016_105802",
+  "probes": {
+   "d2_confirmation_c4_s396880939": {
+    "per_sample_sha256": "41a5a7a77485428696f9a1430f5c5c05739966faa3a1f9f0bca548dd6467a205",
+    "per_sample_sha256_in_result": "41a5a7a77485428696f9a1430f5c5c05739966faa3a1f9f0bca548dd6467a205",
+    "generations": {
+     "code": "178e7ae11002d92b7bdd1682b132285ccf93713ab0f5841bb4e427d9e6cbc770",
+     "gsm8k": "e8d67e733fd92016ce3394894b4ca08e0e4dc2c3cfc41f2710c0873c882125b5",
+     "knowledge": "e9291c7bbaff76571ea930fc36d09b2d2c8b6247b567f423a0e0aa4018819731",
+     "math_verified": "03f441558b3f1d25ea6f5833a0d0a18aa9e9f6ec73f6c1ba0cf4f94305e1d607",
+     "multihop": "b2a946860cb727a2954d6e8af3e59868788648582406f9c777ea27a555fa4e9a",
+     "rag": "47c65e8fcd0c10f069b9682fd04c0e271c563b8279df54f630be98099990b2c9",
+     "tool": "9e25fb1cbc6254785989bb4bfef74c264d412b2c58fd0440114641df8c88d340"
+    },
+    "generations_present": [
+     "code.generations.jsonl",
+     "code.token_ids.jsonl",
+     "gsm8k.generations.jsonl",
+     "gsm8k.token_ids.jsonl",
+     "knowledge.generations.jsonl",
+     "knowledge.token_ids.jsonl",
+     "math_verified.generations.jsonl",
+     "math_verified.token_ids.jsonl",
+     "multihop.generations.jsonl",
+     "multihop.token_ids.jsonl",
+     "rag.generations.jsonl",
+     "rag.token_ids.jsonl",
+     "tool.generations.jsonl",
+     "tool.token_ids.jsonl"
+    ],
+    "rescoring_sha256": "aecfe17cbfb08acc42097e2ba0a91395528c9444006389f838f37414af828148",
+    "trained_sha256": "7078cf9ebf5ba7dc6f5c5803a817e63def14919fd04fdd2d62be430fa6571f58",
+    "trained_bytes": 2384234968
+   },
+   "d2_confirmation_c4_s766527341": {
+    "per_sample_sha256": "60e5a4d1b4b77e65dfe9ef97a76bfa3979c7a5c2c66eef6c8133559bbe1648bd",
+    "per_sample_sha256_in_result": "60e5a4d1b4b77e65dfe9ef97a76bfa3979c7a5c2c66eef6c8133559bbe1648bd",
+    "generations": {
+     "code": "e8d20a0410d1b0484db1d278ff21c43a03beb9595b4de90d49dee0d7c3fe66c3",
+     "gsm8k": "5cd9b9dfcc47337ed7f0859fd3997743d0f6208169d57db4603279e1ad4ba809",
+     "knowledge": "123d07c791fcc0b695b0fa72c838584ce2f1f5eebbed4b001938700f2a2d895f",
+     "math_verified": "fe1294197527d4ea02d9018134def70dc57f9f7d39885deb185ab8905819d8d3",
+     "multihop": "b94394d568e0d6c6e27719f784c63b00f91c7cdbaf568ef23440b93b7fa2360c",
+     "rag": "952b9662fefcc15873abb716868e75515084ab83864d974f4474b4124e83d4fc",
+     "tool": "85e4dc2e231cc222be01d366bb58112200a940d0e408e4ee25630147382e8469"
+    },
+    "generations_present": [
+     "code.generations.jsonl",
+     "code.token_ids.jsonl",
+     "gsm8k.generations.jsonl",
+     "gsm8k.token_ids.jsonl",
+     "knowledge.generations.jsonl",
+     "knowledge.token_ids.jsonl",
+     "math_verified.generations.jsonl",
+     "math_verified.token_ids.jsonl",
+     "multihop.generations.jsonl",
+     "multihop.token_ids.jsonl",
+     "rag.generations.jsonl",
+     "rag.token_ids.jsonl",
+     "tool.generations.jsonl",
+     "tool.token_ids.jsonl"
+    ],
+    "rescoring_sha256": "c24828e6a4231f02c8103ae1b824351bc70c55cc96df3a6c121246bcc0ccef62",
+    "trained_sha256": "cc7fc5719b28081ec148ae9849fac95acb61c47de441a8e307d295665ca8e5b0",
+    "trained_bytes": 2384234968
+   },
+   "d2_confirmation_c4_s1004399678": {
+    "per_sample_sha256": "7a305173f04c40b8f4f40dfe3fde82b31da68476686d7412ac5be822a5dfb4cc",
+    "per_sample_sha256_in_result": "7a305173f04c40b8f4f40dfe3fde82b31da68476686d7412ac5be822a5dfb4cc",
+    "generations": {
+     "code": "b9007eee0747860d090f146b3243a77767d6ef4c49e9f1db0cc4e367baa10207",
+     "gsm8k": "a9fe9f49762d9b30ee98036ffbe64962271bd571d8859be2237da3fe1ab63742",
+     "knowledge": "cbc68db06e51900febfc9480adb1b5d2c3609910c2d159c5540d07d8cbd72d16",
+     "math_verified": "78f59a087fae8456783c4545130642b7a15825d06033b9dabacff056cd3c5e53",
+     "multihop": "ccf562b1eab7413cd858ff270d429e2d3efdbe1f68f6fea15be2c9e3e1438584",
+     "rag": "752144c0670a5b32613e2c0a5517abd0d644b27f25be3fbdd5119ec7f35ac089",
+     "tool": "c9fde877f62936fc5607bf1bd0216fa202bee994c5e228653e37c5233ea7fffd"
+    },
+    "generations_present": [
+     "code.generations.jsonl",
+     "code.token_ids.jsonl",
+     "gsm8k.generations.jsonl",
+     "gsm8k.token_ids.jsonl",
+     "knowledge.generations.jsonl",
+     "knowledge.token_ids.jsonl",
+     "math_verified.generations.jsonl",
+     "math_verified.token_ids.jsonl",
+     "multihop.generations.jsonl",
+     "multihop.token_ids.jsonl",
+     "rag.generations.jsonl",
+     "rag.token_ids.jsonl",
+     "tool.generations.jsonl",
+     "tool.token_ids.jsonl"
+    ],
+    "rescoring_sha256": "c08c2f0efbe4852a7412f1919cf35298d810d4106d50f0996ecf8da24dd4fa86",
+    "trained_sha256": "cb58cf0e3d0e7e4aa7ec4a7954dcc9e8f350bb82a01a23250dd6caec7a6e5627",
+    "trained_bytes": 2384234968
+   }
+  }
+ },
+ "required_products_secured": {
+  "ok": true,
+  "why": "all 3 scored probes' results and per-sample rows off-pod; 3 trained checkpoint(s) preserved and identity-verified, reusable by a replacement attempt"
+ },
+ "artifact_loss_risk": null,
+ "ranking": "evidence/d2_confirmation_verdict.json",
+ "ranking_refused": null,
+ "outcome": "NO_GO",
+ "decision": {
+  "verdict": "NO-GO",
+  "delta": -0.010588235294117647,
+  "lcb_one_sided": -0.019999999999999997,
+  "ucb_one_sided": -0.0015686274509803919,
+  "ci_two_sided": [
+   -0.021176470588235293,
+   1.3061447348531252e-19
+  ],
+  "sesoi": 0.01,
+  "criteria": {
+   "lcb_above_zero": false,
+   "point_at_or_above_sesoi": false,
+   "seed_robustness": {
+    "n_positive": 0,
+    "required": 2,
+    "passed": false
+   },
+   "guardrails_passed": true,
+   "ucb_below_sesoi": true
+  },
+  "per_seed_delta": [
+   -0.009411764705882352,
+   -0.01764705882352941,
+   -0.004705882352941176
+  ],
+  "usable": {
+   "pooled_delta": 0.06736842105263158,
+   "per_seed_delta": [
+    0.035789473684210524,
+    0.08736842105263158,
+    0.07894736842105263
+   ]
+  },
+  "vetoes": [],
+  "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds",
+  "no_forced_winner": true
+ },
+ "diagnostics": "evidence/d2_confirmation_diagnostics.json",
+ "what_this_authorizes": "nothing. Screening nominates at most one candidate for the shared confirmation, which needs its own maintainer grant; it never promotes."
+}

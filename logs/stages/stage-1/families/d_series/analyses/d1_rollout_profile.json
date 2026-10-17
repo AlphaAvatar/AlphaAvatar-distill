@@ -1,0 +1,1578 @@
+{
+ "schema": "aadistill.d_series.rollout_profile/v1",
+ "_contract": "DESCRIPTIVE text-level profile of the ten imported B/q2 units. No rule reads it and no claim is made from it. Student confidence, student-prefix KL and per-position quantities are NOT available for these units: their checkpoints are retired and their generations carry no ids or log-probabilities.",
+ "tokenizer": "Qwen/Qwen3-4B-Thinking-2507@768f209d (re-tokenization for reasoning/answer split only)",
+ "per_unit": {
+  "d1_screening_B_s516448251": {
+   "n": 950,
+   "n_scorable": 850,
+   "correct_rate_scorable": 0.0259,
+   "usable_rate": 0.6284,
+   "natural_termination_rate": 0.7621,
+   "degeneration_rate": 0.2379,
+   "context_limit_rate": 0.0,
+   "think_closed_rate": 0.7926,
+   "generated_tokens": {
+    "all": {
+     "p10": 223.0,
+     "p25": 294.0,
+     "p50": 500.0,
+     "p75": 768.0,
+     "p90": 1280.0,
+     "mean": 640.3789473684211,
+     "n": 950
+    },
+    "correct": {
+     "p10": 244.0,
+     "p25": 268.0,
+     "p50": 393.0,
+     "p75": 520.0,
+     "p90": 824.0,
+     "mean": 482.45454545454544,
+     "n": 22
+    },
+    "usable_incorrect": {
+     "p10": 222.0,
+     "p25": 290.0,
+     "p50": 429.0,
+     "p75": 637.0,
+     "p90": 855.0,
+     "mean": 497.23327305605784,
+     "n": 553
+    },
+    "unusable": {
+     "p10": 213.0,
+     "p25": 287.0,
+     "p50": 768.0,
+     "p75": 1024.0,
+     "p90": 2048.0,
+     "mean": 866.4447592067988,
+     "n": 353
+    }
+   },
+   "reasoning_tokens_think_closed": {
+    "all": {
+     "p10": 171.0,
+     "p25": 223.0,
+     "p50": 308.0,
+     "p75": 452.0,
+     "p90": 696.0,
+     "mean": 384.0092961487384,
+     "n": 753
+    },
+    "correct": {
+     "p10": 213.0,
+     "p25": 237.0,
+     "p50": 334.0,
+     "p75": 465.0,
+     "p90": 789.0,
+     "mean": 418.8181818181818,
+     "n": 22
+    },
+    "incorrect": {
+     "p10": 169.0,
+     "p25": 223.0,
+     "p50": 308.0,
+     "p75": 452.0,
+     "p90": 693.0,
+     "mean": 382.4344023323615,
+     "n": 686
+    }
+   },
+   "answer_tokens_think_closed": {
+    "p10": 18.0,
+    "p25": 27.0,
+    "p50": 50.0,
+    "p75": 115.0,
+    "p90": 245.0,
+    "mean": 97.2390438247012,
+    "n": 753
+   },
+   "correct_by_reasoning_length_quartile": {
+    "edges_reasoning_tokens": [
+     224,
+     308,
+     457
+    ],
+    "correct_rate": [
+     0.0272,
+     0.0351,
+     0.0281,
+     0.0343
+    ],
+    "n": [
+     184,
+     171,
+     178,
+     175
+    ]
+   },
+   "retokenization_exact_fraction": 0.8126
+  },
+  "d1_screening_B_s614923639": {
+   "n": 950,
+   "n_scorable": 850,
+   "correct_rate_scorable": 0.0176,
+   "usable_rate": 0.5453,
+   "natural_termination_rate": 0.6389,
+   "degeneration_rate": 0.3611,
+   "context_limit_rate": 0.0,
+   "think_closed_rate": 0.6537,
+   "generated_tokens": {
+    "all": {
+     "p10": 224.0,
+     "p25": 331.0,
+     "p50": 570.0,
+     "p75": 768.0,
+     "p90": 1001.0,
+     "mean": 596.3663157894737,
+     "n": 950
+    },
+    "correct": {
+     "p10": 167.0,
+     "p25": 203.0,
+     "p50": 325.0,
+     "p75": 442.0,
+     "p90": 694.0,
+     "mean": 348.3333333333333,
+     "n": 15
+    },
+    "usable_incorrect": {
+     "p10": 211.0,
+     "p25": 293.0,
+     "p50": 406.0,
+     "p75": 564.0,
+     "p90": 721.0,
+     "mean": 448.32832618025753,
+     "n": 466
+    },
+    "unusable": {
+     "p10": 260.0,
+     "p25": 768.0,
+     "p50": 768.0,
+     "p75": 768.0,
+     "p90": 1024.0,
+     "mean": 759.5694444444445,
+     "n": 432
+    }
+   },
+   "reasoning_tokens_think_closed": {
+    "all": {
+     "p10": 171.0,
+     "p25": 226.0,
+     "p50": 304.0,
+     "p75": 447.0,
+     "p90": 602.0,
+     "mean": 355.5507246376812,
+     "n": 621
+    },
+    "correct": {
+     "p10": 153.0,
+     "p25": 184.0,
+     "p50": 279.0,
+     "p75": 380.0,
+     "p90": 601.0,
+     "mean": 305.0,
+     "n": 15
+    },
+    "incorrect": {
+     "p10": 171.0,
+     "p25": 232.0,
+     "p50": 317.0,
+     "p75": 459.0,
+     "p90": 615.0,
+     "mean": 364.6596153846154,
+     "n": 520
+    }
+   },
+   "answer_tokens_think_closed": {
+    "p10": 5.0,
+    "p25": 24.0,
+    "p50": 52.0,
+    "p75": 117.0,
+    "p90": 254.0,
+    "mean": 95.98389694041867,
+    "n": 621
+   },
+   "correct_by_reasoning_length_quartile": {
+    "edges_reasoning_tokens": [
+     231,
+     315,
+     458
+    ],
+    "correct_rate": [
+     0.0519,
+     0.015,
+     0.0299,
+     0.015
+    ],
+    "n": [
+     135,
+     133,
+     134,
+     133
+    ]
+   },
+   "retokenization_exact_fraction": 0.8274
+  },
+  "d1_screening_q2_s516448251": {
+   "n": 950,
+   "n_scorable": 850,
+   "correct_rate_scorable": 0.0224,
+   "usable_rate": 0.6789,
+   "natural_termination_rate": 0.8032,
+   "degeneration_rate": 0.1968,
+   "context_limit_rate": 0.0,
+   "think_closed_rate": 0.8116,
+   "generated_tokens": {
+    "all": {
+     "p10": 227.0,
+     "p25": 303.0,
+     "p50": 457.0,
+     "p75": 768.0,
+     "p90": 1029.0,
+     "mean": 590.1568421052632,
+     "n": 950
+    },
+    "correct": {
+     "p10": 212.0,
+     "p25": 252.0,
+     "p50": 437.0,
+     "p75": 569.0,
+     "p90": 740.0,
+     "mean": 454.57894736842104,
+     "n": 19
+    },
+    "usable_incorrect": {
+     "p10": 236.0,
+     "p25": 303.0,
+     "p50": 404.0,
+     "p75": 550.0,
+     "p90": 708.0,
+     "mean": 451.994708994709,
+     "n": 567
+    },
+    "unusable": {
+     "p10": 205.0,
+     "p25": 259.0,
+     "p50": 768.0,
+     "p75": 1024.0,
+     "p90": 2048.0,
+     "mean": 817.9868852459016,
+     "n": 305
+    }
+   },
+   "reasoning_tokens_think_closed": {
+    "all": {
+     "p10": 161.0,
+     "p25": 214.0,
+     "p50": 301.0,
+     "p75": 407.0,
+     "p90": 580.0,
+     "mean": 346.10635538262,
+     "n": 771
+    },
+    "correct": {
+     "p10": 177.0,
+     "p25": 198.0,
+     "p50": 410.0,
+     "p75": 459.0,
+     "p90": 632.0,
+     "mean": 369.10526315789474,
+     "n": 19
+    },
+    "incorrect": {
+     "p10": 167.0,
+     "p25": 220.0,
+     "p50": 298.0,
+     "p75": 401.0,
+     "p90": 541.0,
+     "mean": 338.08670520231215,
+     "n": 692
+    }
+   },
+   "answer_tokens_think_closed": {
+    "p10": 10.0,
+    "p25": 31.0,
+    "p50": 62.0,
+    "p75": 143.0,
+    "p90": 311.0,
+    "mean": 116.87289234760051,
+    "n": 771
+   },
+   "correct_by_reasoning_length_quartile": {
+    "edges_reasoning_tokens": [
+     219,
+     299,
+     404
+    ],
+    "correct_rate": [
+     0.0335,
+     0.0,
+     0.0167,
+     0.0571
+    ],
+    "n": [
+     179,
+     177,
+     180,
+     175
+    ]
+   },
+   "retokenization_exact_fraction": 0.8242
+  },
+  "d1_screening_q2_s614923639": {
+   "n": 950,
+   "n_scorable": 850,
+   "correct_rate_scorable": 0.0376,
+   "usable_rate": 0.7347,
+   "natural_termination_rate": 0.8179,
+   "degeneration_rate": 0.1821,
+   "context_limit_rate": 0.0,
+   "think_closed_rate": 0.7853,
+   "generated_tokens": {
+    "all": {
+     "p10": 232.0,
+     "p25": 302.0,
+     "p50": 441.0,
+     "p75": 715.0,
+     "p90": 789.0,
+     "mean": 532.0157894736842,
+     "n": 950
+    },
+    "correct": {
+     "p10": 203.0,
+     "p25": 228.0,
+     "p50": 371.0,
+     "p75": 534.0,
+     "p90": 745.0,
+     "mean": 426.15625,
+     "n": 32
+    },
+    "usable_incorrect": {
+     "p10": 232.0,
+     "p25": 291.0,
+     "p50": 385.0,
+     "p75": 503.0,
+     "p90": 640.0,
+     "mean": 418.85619834710747,
+     "n": 605
+    },
+    "unusable": {
+     "p10": 232.0,
+     "p25": 445.0,
+     "p50": 768.0,
+     "p75": 768.0,
+     "p90": 1536.0,
+     "mean": 789.3571428571429,
+     "n": 252
+    }
+   },
+   "reasoning_tokens_think_closed": {
+    "all": {
+     "p10": 178.0,
+     "p25": 226.0,
+     "p50": 298.0,
+     "p75": 400.0,
+     "p90": 533.0,
+     "mean": 336.78016085790887,
+     "n": 746
+    },
+    "correct": {
+     "p10": 170.0,
+     "p25": 199.0,
+     "p50": 309.0,
+     "p75": 524.0,
+     "p90": 644.0,
+     "mean": 374.875,
+     "n": 32
+    },
+    "incorrect": {
+     "p10": 182.0,
+     "p25": 230.0,
+     "p50": 300.0,
+     "p75": 398.0,
+     "p90": 524.0,
+     "mean": 335.064914992272,
+     "n": 647
+    }
+   },
+   "answer_tokens_think_closed": {
+    "p10": 8.0,
+    "p25": 30.0,
+    "p50": 66.0,
+    "p75": 117.0,
+    "p90": 233.0,
+    "mean": 98.0603217158177,
+    "n": 746
+   },
+   "correct_by_reasoning_length_quartile": {
+    "edges_reasoning_tokens": [
+     226,
+     301,
+     401
+    ],
+    "correct_rate": [
+     0.0647,
+     0.0234,
+     0.0355,
+     0.0651
+    ],
+    "n": [
+     170,
+     171,
+     169,
+     169
+    ]
+   },
+   "retokenization_exact_fraction": 0.8474
+  },
+  "d1_confirmation_B_s1004399678": {
+   "n": 950,
+   "n_scorable": 850,
+   "correct_rate_scorable": 0.0318,
+   "usable_rate": 0.5674,
+   "natural_termination_rate": 0.6968,
+   "degeneration_rate": 0.3032,
+   "context_limit_rate": 0.0,
+   "think_closed_rate": 0.7284,
+   "generated_tokens": {
+    "all": {
+     "p10": 217.0,
+     "p25": 301.0,
+     "p50": 506.0,
+     "p75": 768.0,
+     "p90": 1148.0,
+     "mean": 632.1126315789473,
+     "n": 950
+    },
+    "correct": {
+     "p10": 247.0,
+     "p25": 301.0,
+     "p50": 386.0,
+     "p75": 637.0,
+     "p90": 761.0,
+     "mean": 448.44444444444446,
+     "n": 27
+    },
+    "usable_incorrect": {
+     "p10": 215.0,
+     "p25": 274.0,
+     "p50": 387.0,
+     "p75": 551.0,
+     "p90": 744.0,
+     "mean": 446.7408906882591,
+     "n": 494
+    },
+    "unusable": {
+     "p10": 206.0,
+     "p25": 415.0,
+     "p50": 768.0,
+     "p75": 1024.0,
+     "p90": 2048.0,
+     "mean": 851.1776155717762,
+     "n": 411
+    }
+   },
+   "reasoning_tokens_think_closed": {
+    "all": {
+     "p10": 165.0,
+     "p25": 214.0,
+     "p50": 306.0,
+     "p75": 424.0,
+     "p90": 604.0,
+     "mean": 365.20520231213874,
+     "n": 692
+    },
+    "correct": {
+     "p10": 206.0,
+     "p25": 253.0,
+     "p50": 281.0,
+     "p75": 437.0,
+     "p90": 613.0,
+     "mean": 359.6296296296296,
+     "n": 27
+    },
+    "incorrect": {
+     "p10": 163.0,
+     "p25": 210.0,
+     "p50": 300.0,
+     "p75": 423.0,
+     "p90": 603.0,
+     "mean": 357.91987179487177,
+     "n": 624
+    }
+   },
+   "answer_tokens_think_closed": {
+    "p10": 18.0,
+    "p25": 24.0,
+    "p50": 45.0,
+    "p75": 98.0,
+    "p90": 273.0,
+    "mean": 101.54046242774567,
+    "n": 692
+   },
+   "correct_by_reasoning_length_quartile": {
+    "edges_reasoning_tokens": [
+     210,
+     300,
+     423
+    ],
+    "correct_rate": [
+     0.0183,
+     0.0675,
+     0.0368,
+     0.0435
+    ],
+    "n": [
+     164,
+     163,
+     163,
+     161
+    ]
+   },
+   "retokenization_exact_fraction": 0.84
+  },
+  "d1_confirmation_B_s396880939": {
+   "n": 950,
+   "n_scorable": 850,
+   "correct_rate_scorable": 0.0424,
+   "usable_rate": 0.6147,
+   "natural_termination_rate": 0.7379,
+   "degeneration_rate": 0.2621,
+   "context_limit_rate": 0.0,
+   "think_closed_rate": 0.7516,
+   "generated_tokens": {
+    "all": {
+     "p10": 205.0,
+     "p25": 277.0,
+     "p50": 517.0,
+     "p75": 768.0,
+     "p90": 1792.0,
+     "mean": 673.0431578947369,
+     "n": 950
+    },
+    "correct": {
+     "p10": 167.0,
+     "p25": 224.0,
+     "p50": 501.0,
+     "p75": 648.0,
+     "p90": 916.0,
+     "mean": 491.3611111111111,
+     "n": 36
+    },
+    "usable_incorrect": {
+     "p10": 197.0,
+     "p25": 253.0,
+     "p50": 398.0,
+     "p75": 598.0,
+     "p90": 770.0,
+     "mean": 458.62523900573615,
+     "n": 523
+    },
+    "unusable": {
+     "p10": 216.0,
+     "p25": 350.0,
+     "p50": 768.0,
+     "p75": 1792.0,
+     "p90": 2048.0,
+     "mean": 983.8387978142076,
+     "n": 366
+    }
+   },
+   "reasoning_tokens_think_closed": {
+    "all": {
+     "p10": 148.0,
+     "p25": 193.0,
+     "p50": 286.0,
+     "p75": 445.0,
+     "p90": 641.0,
+     "mean": 354.45098039215685,
+     "n": 714
+    },
+    "correct": {
+     "p10": 142.0,
+     "p25": 180.0,
+     "p50": 395.0,
+     "p75": 531.0,
+     "p90": 774.0,
+     "mean": 415.52777777777777,
+     "n": 36
+    },
+    "incorrect": {
+     "p10": 149.0,
+     "p25": 193.0,
+     "p50": 282.0,
+     "p75": 432.0,
+     "p90": 615.0,
+     "mean": 344.4230769230769,
+     "n": 650
+    }
+   },
+   "answer_tokens_think_closed": {
+    "p10": 14.0,
+    "p25": 29.0,
+    "p50": 53.0,
+    "p75": 122.0,
+    "p90": 277.0,
+    "mean": 105.96918767507003,
+    "n": 714
+   },
+   "correct_by_reasoning_length_quartile": {
+    "edges_reasoning_tokens": [
+     193,
+     285,
+     439
+    ],
+    "correct_rate": [
+     0.0575,
+     0.0294,
+     0.0351,
+     0.0877
+    ],
+    "n": [
+     174,
+     170,
+     171,
+     171
+    ]
+   },
+   "retokenization_exact_fraction": 0.8116
+  },
+  "d1_confirmation_B_s766527341": {
+   "n": 950,
+   "n_scorable": 850,
+   "correct_rate_scorable": 0.0471,
+   "usable_rate": 0.6,
+   "natural_termination_rate": 0.7663,
+   "degeneration_rate": 0.2337,
+   "context_limit_rate": 0.0,
+   "think_closed_rate": 0.7926,
+   "generated_tokens": {
+    "all": {
+     "p10": 214.0,
+     "p25": 283.0,
+     "p50": 451.0,
+     "p75": 768.0,
+     "p90": 1280.0,
+     "mean": 613.6884210526316,
+     "n": 950
+    },
+    "correct": {
+     "p10": 265.0,
+     "p25": 302.0,
+     "p50": 373.0,
+     "p75": 527.0,
+     "p90": 655.0,
+     "mean": 448.225,
+     "n": 40
+    },
+    "usable_incorrect": {
+     "p10": 230.0,
+     "p25": 286.0,
+     "p50": 406.0,
+     "p75": 555.0,
+     "p90": 708.0,
+     "mean": 445.06007751937983,
+     "n": 516
+    },
+    "unusable": {
+     "p10": 194.0,
+     "p25": 268.0,
+     "p50": 768.0,
+     "p75": 1024.0,
+     "p90": 2048.0,
+     "mean": 833.0,
+     "n": 380
+    }
+   },
+   "reasoning_tokens_think_closed": {
+    "all": {
+     "p10": 170.0,
+     "p25": 223.0,
+     "p50": 304.0,
+     "p75": 424.0,
+     "p90": 555.0,
+     "mean": 352.48605577689244,
+     "n": 753
+    },
+    "correct": {
+     "p10": 228.0,
+     "p25": 258.0,
+     "p50": 330.0,
+     "p75": 406.0,
+     "p90": 570.0,
+     "mean": 384.35,
+     "n": 40
+    },
+    "incorrect": {
+     "p10": 169.0,
+     "p25": 218.0,
+     "p50": 302.0,
+     "p75": 419.0,
+     "p90": 541.0,
+     "mean": 339.22636103151865,
+     "n": 698
+    }
+   },
+   "answer_tokens_think_closed": {
+    "p10": 11.0,
+    "p25": 25.0,
+    "p50": 43.0,
+    "p75": 104.0,
+    "p90": 238.0,
+    "mean": 89.066401062417,
+    "n": 753
+   },
+   "correct_by_reasoning_length_quartile": {
+    "edges_reasoning_tokens": [
+     221,
+     304,
+     418
+    ],
+    "correct_rate": [
+     0.0215,
+     0.0745,
+     0.0722,
+     0.0489
+    ],
+    "n": [
+     186,
+     188,
+     180,
+     184
+    ]
+   },
+   "retokenization_exact_fraction": 0.8168
+  },
+  "d1_confirmation_q2_s1004399678": {
+   "n": 950,
+   "n_scorable": 850,
+   "correct_rate_scorable": 0.0271,
+   "usable_rate": 0.6579,
+   "natural_termination_rate": 0.8074,
+   "degeneration_rate": 0.1926,
+   "context_limit_rate": 0.0,
+   "think_closed_rate": 0.8042,
+   "generated_tokens": {
+    "all": {
+     "p10": 233.0,
+     "p25": 308.0,
+     "p50": 442.0,
+     "p75": 761.0,
+     "p90": 903.0,
+     "mean": 560.3357894736843,
+     "n": 950
+    },
+    "correct": {
+     "p10": 199.0,
+     "p25": 214.0,
+     "p50": 336.0,
+     "p75": 460.0,
+     "p90": 735.0,
+     "mean": 410.8695652173913,
+     "n": 23
+    },
+    "usable_incorrect": {
+     "p10": 233.0,
+     "p25": 306.0,
+     "p50": 408.0,
+     "p75": 544.0,
+     "p90": 715.0,
+     "mean": 453.0769230769231,
+     "n": 585
+    },
+    "unusable": {
+     "p10": 240.0,
+     "p25": 310.0,
+     "p50": 768.0,
+     "p75": 768.0,
+     "p90": 2048.0,
+     "mean": 763.5753846153846,
+     "n": 325
+    }
+   },
+   "reasoning_tokens_think_closed": {
+    "all": {
+     "p10": 182.0,
+     "p25": 233.0,
+     "p50": 314.0,
+     "p75": 433.0,
+     "p90": 585.0,
+     "mean": 359.184554973822,
+     "n": 764
+    },
+    "correct": {
+     "p10": 134.0,
+     "p25": 184.0,
+     "p50": 283.0,
+     "p75": 439.0,
+     "p90": 671.0,
+     "mean": 365.4347826086956,
+     "n": 23
+    },
+    "incorrect": {
+     "p10": 186.0,
+     "p25": 240.0,
+     "p50": 321.0,
+     "p75": 435.0,
+     "p90": 590.0,
+     "mean": 364.81240768094534,
+     "n": 677
+    }
+   },
+   "answer_tokens_think_closed": {
+    "p10": 5.0,
+    "p25": 21.0,
+    "p50": 48.0,
+    "p75": 92.0,
+    "p90": 175.0,
+    "mean": 79.7238219895288,
+    "n": 764
+   },
+   "correct_by_reasoning_length_quartile": {
+    "edges_reasoning_tokens": [
+     238,
+     321,
+     435
+    ],
+    "correct_rate": [
+     0.0508,
+     0.0281,
+     0.0175,
+     0.0345
+    ],
+    "n": [
+     177,
+     178,
+     171,
+     174
+    ]
+   },
+   "retokenization_exact_fraction": 0.86
+  },
+  "d1_confirmation_q2_s396880939": {
+   "n": 950,
+   "n_scorable": 850,
+   "correct_rate_scorable": 0.0353,
+   "usable_rate": 0.6958,
+   "natural_termination_rate": 0.7642,
+   "degeneration_rate": 0.2358,
+   "context_limit_rate": 0.0,
+   "think_closed_rate": 0.7663,
+   "generated_tokens": {
+    "all": {
+     "p10": 227.0,
+     "p25": 308.0,
+     "p50": 455.0,
+     "p75": 768.0,
+     "p90": 795.0,
+     "mean": 559.9273684210526,
+     "n": 950
+    },
+    "correct": {
+     "p10": 181.0,
+     "p25": 225.0,
+     "p50": 314.0,
+     "p75": 443.0,
+     "p90": 535.0,
+     "mean": 340.96666666666664,
+     "n": 30
+    },
+    "usable_incorrect": {
+     "p10": 220.0,
+     "p25": 279.0,
+     "p50": 384.0,
+     "p75": 521.0,
+     "p90": 668.0,
+     "mean": 418.45714285714286,
+     "n": 560
+    },
+    "unusable": {
+     "p10": 345.0,
+     "p25": 768.0,
+     "p50": 768.0,
+     "p75": 768.0,
+     "p90": 1792.0,
+     "mean": 886.4532871972318,
+     "n": 289
+    }
+   },
+   "reasoning_tokens_think_closed": {
+    "all": {
+     "p10": 175.0,
+     "p25": 224.0,
+     "p50": 300.0,
+     "p75": 398.0,
+     "p90": 496.0,
+     "mean": 327.27884615384613,
+     "n": 728
+    },
+    "correct": {
+     "p10": 138.0,
+     "p25": 186.0,
+     "p50": 294.0,
+     "p75": 399.0,
+     "p90": 453.0,
+     "mean": 291.6333333333333,
+     "n": 30
+    },
+    "incorrect": {
+     "p10": 177.0,
+     "p25": 224.0,
+     "p50": 302.0,
+     "p75": 400.0,
+     "p90": 498.0,
+     "mean": 328.7700964630225,
+     "n": 622
+    }
+   },
+   "answer_tokens_think_closed": {
+    "p10": 8.0,
+    "p25": 27.0,
+    "p50": 56.0,
+    "p75": 117.0,
+    "p90": 249.0,
+    "mean": 99.73489010989012,
+    "n": 728
+   },
+   "correct_by_reasoning_length_quartile": {
+    "edges_reasoning_tokens": [
+     224,
+     301,
+     400
+    ],
+    "correct_rate": [
+     0.0602,
+     0.0435,
+     0.0366,
+     0.0435
+    ],
+    "n": [
+     166,
+     161,
+     164,
+     161
+    ]
+   },
+   "retokenization_exact_fraction": 0.8516
+  },
+  "d1_confirmation_q2_s766527341": {
+   "n": 950,
+   "n_scorable": 850,
+   "correct_rate_scorable": 0.0576,
+   "usable_rate": 0.7137,
+   "natural_termination_rate": 0.8063,
+   "degeneration_rate": 0.1937,
+   "context_limit_rate": 0.0,
+   "think_closed_rate": 0.8189,
+   "generated_tokens": {
+    "all": {
+     "p10": 232.0,
+     "p25": 303.0,
+     "p50": 439.0,
+     "p75": 768.0,
+     "p90": 1024.0,
+     "mean": 583.0357894736842,
+     "n": 950
+    },
+    "correct": {
+     "p10": 210.0,
+     "p25": 286.0,
+     "p50": 372.0,
+     "p75": 529.0,
+     "p90": 712.0,
+     "mean": 414.14285714285717,
+     "n": 49
+    },
+    "usable_incorrect": {
+     "p10": 239.0,
+     "p25": 296.0,
+     "p50": 388.0,
+     "p75": 528.0,
+     "p90": 660.0,
+     "mean": 436.57876712328766,
+     "n": 584
+    },
+    "unusable": {
+     "p10": 217.0,
+     "p25": 331.0,
+     "p50": 768.0,
+     "p75": 1024.0,
+     "p90": 2048.0,
+     "mean": 890.5404411764706,
+     "n": 272
+    }
+   },
+   "reasoning_tokens_think_closed": {
+    "all": {
+     "p10": 183.0,
+     "p25": 233.0,
+     "p50": 312.0,
+     "p75": 426.0,
+     "p90": 531.0,
+     "mean": 349.61182519280203,
+     "n": 778
+    },
+    "correct": {
+     "p10": 179.0,
+     "p25": 223.0,
+     "p50": 349.0,
+     "p75": 436.0,
+     "p90": 530.0,
+     "mean": 337.51020408163265,
+     "n": 49
+    },
+    "incorrect": {
+     "p10": 183.0,
+     "p25": 233.0,
+     "p50": 306.0,
+     "p75": 412.0,
+     "p90": 519.0,
+     "mean": 342.2620790629575,
+     "n": 683
+    }
+   },
+   "answer_tokens_think_closed": {
+    "p10": 5.0,
+    "p25": 24.0,
+    "p50": 54.0,
+    "p75": 118.0,
+    "p90": 266.0,
+    "mean": 97.4228791773779,
+    "n": 778
+   },
+   "correct_by_reasoning_length_quartile": {
+    "edges_reasoning_tokens": [
+     233,
+     308,
+     417
+    ],
+    "correct_rate": [
+     0.0703,
+     0.0481,
+     0.0615,
+     0.0884
+    ],
+    "n": [
+     185,
+     187,
+     179,
+     181
+    ]
+   },
+   "retokenization_exact_fraction": 0.8347
+  }
+ },
+ "pooled_over_seeds": {
+  "shared_confirmation:B": {
+   "n": 2850,
+   "n_scorable": 2550,
+   "correct_rate_scorable": 0.0404,
+   "usable_rate": 0.594,
+   "natural_termination_rate": 0.7337,
+   "degeneration_rate": 0.2663,
+   "context_limit_rate": 0.0,
+   "think_closed_rate": 0.7575,
+   "generated_tokens": {
+    "all": {
+     "p10": 211.0,
+     "p25": 286.0,
+     "p50": 494.0,
+     "p75": 768.0,
+     "p90": 1280.0,
+     "mean": 639.6147368421052,
+     "n": 2850
+    },
+    "correct": {
+     "p10": 213.0,
+     "p25": 276.0,
+     "p50": 396.0,
+     "p75": 614.0,
+     "p90": 761.0,
+     "mean": 463.3592233009709,
+     "n": 103
+    },
+    "usable_incorrect": {
+     "p10": 213.0,
+     "p25": 273.0,
+     "p50": 398.0,
+     "p75": 564.0,
+     "p90": 746.0,
+     "mean": 450.22961513372474,
+     "n": 1533
+    },
+    "unusable": {
+     "p10": 203.0,
+     "p25": 328.0,
+     "p50": 768.0,
+     "p75": 1024.0,
+     "p90": 2048.0,
+     "mean": 887.1728608470181,
+     "n": 1157
+    }
+   },
+   "reasoning_tokens_think_closed": {
+    "all": {
+     "p10": 161.0,
+     "p25": 210.0,
+     "p50": 301.0,
+     "p75": 431.0,
+     "p90": 599.0,
+     "mean": 357.21259842519686,
+     "n": 2159
+    },
+    "correct": {
+     "p10": 159.0,
+     "p25": 246.0,
+     "p50": 331.0,
+     "p75": 464.0,
+     "p90": 657.0,
+     "mean": 388.7669902912621,
+     "n": 103
+    },
+    "incorrect": {
+     "p10": 160.0,
+     "p25": 208.0,
+     "p50": 296.0,
+     "p75": 423.0,
+     "p90": 576.0,
+     "mean": 346.854462474645,
+     "n": 1972
+    }
+   },
+   "answer_tokens_think_closed": {
+    "p10": 14.0,
+    "p25": 26.0,
+    "p50": 47.0,
+    "p75": 108.0,
+    "p90": 265.0,
+    "mean": 98.6544696618805,
+    "n": 2159
+   },
+   "correct_by_reasoning_length_quartile": {
+    "edges_reasoning_tokens": [
+     210,
+     297,
+     424
+    ],
+    "correct_rate": [
+     0.034,
+     0.055,
+     0.0521,
+     0.0579
+    ],
+    "n": [
+     530,
+     509,
+     518,
+     518
+    ]
+   },
+   "retokenization_exact_fraction": 0.8228
+  },
+  "shared_confirmation:q2": {
+   "n": 2850,
+   "n_scorable": 2550,
+   "correct_rate_scorable": 0.04,
+   "usable_rate": 0.6891,
+   "natural_termination_rate": 0.7926,
+   "degeneration_rate": 0.2074,
+   "context_limit_rate": 0.0,
+   "think_closed_rate": 0.7965,
+   "generated_tokens": {
+    "all": {
+     "p10": 230.0,
+     "p25": 306.0,
+     "p50": 444.0,
+     "p75": 768.0,
+     "p90": 956.0,
+     "mean": 567.7663157894737,
+     "n": 2850
+    },
+    "correct": {
+     "p10": 191.0,
+     "p25": 253.0,
+     "p50": 345.0,
+     "p75": 497.0,
+     "p90": 664.0,
+     "mean": 391.88235294117646,
+     "n": 102
+    },
+    "usable_incorrect": {
+     "p10": 229.0,
+     "p25": 295.0,
+     "p50": 396.0,
+     "p75": 533.0,
+     "p90": 680.0,
+     "mean": 436.2914979757085,
+     "n": 1729
+    },
+    "unusable": {
+     "p10": 243.0,
+     "p25": 395.0,
+     "p50": 768.0,
+     "p75": 780.0,
+     "p90": 2048.0,
+     "mean": 842.6343115124154,
+     "n": 886
+    }
+   },
+   "reasoning_tokens_think_closed": {
+    "all": {
+     "p10": 180.0,
+     "p25": 230.0,
+     "p50": 308.0,
+     "p75": 415.0,
+     "p90": 531.0,
+     "mean": 345.67136563876653,
+     "n": 2270
+    },
+    "correct": {
+     "p10": 146.0,
+     "p25": 207.0,
+     "p50": 294.0,
+     "p75": 429.0,
+     "p90": 526.0,
+     "mean": 330.3137254901961,
+     "n": 102
+    },
+    "incorrect": {
+     "p10": 182.0,
+     "p25": 231.0,
+     "p50": 310.0,
+     "p75": 415.0,
+     "p90": 531.0,
+     "mean": 345.7305751765893,
+     "n": 1982
+    }
+   },
+   "answer_tokens_think_closed": {
+    "p10": 6.0,
+    "p25": 24.0,
+    "p50": 52.0,
+    "p75": 105.0,
+    "p90": 238.0,
+    "mean": 92.20748898678414,
+    "n": 2270
+   },
+   "correct_by_reasoning_length_quartile": {
+    "edges_reasoning_tokens": [
+     231,
+     310,
+     416
+    ],
+    "correct_rate": [
+     0.0606,
+     0.0402,
+     0.0429,
+     0.0519
+    ],
+    "n": [
+     528,
+     523,
+     513,
+     520
+    ]
+   },
+   "retokenization_exact_fraction": 0.8488
+  },
+  "shared_screening:B": {
+   "n": 1900,
+   "n_scorable": 1700,
+   "correct_rate_scorable": 0.0218,
+   "usable_rate": 0.5868,
+   "natural_termination_rate": 0.7005,
+   "degeneration_rate": 0.2995,
+   "context_limit_rate": 0.0,
+   "think_closed_rate": 0.7232,
+   "generated_tokens": {
+    "all": {
+     "p10": 223.0,
+     "p25": 310.0,
+     "p50": 539.0,
+     "p75": 768.0,
+     "p90": 1024.0,
+     "mean": 618.3726315789473,
+     "n": 1900
+    },
+    "correct": {
+     "p10": 186.0,
+     "p25": 253.0,
+     "p50": 347.0,
+     "p75": 506.0,
+     "p90": 824.0,
+     "mean": 428.0810810810811,
+     "n": 37
+    },
+    "usable_incorrect": {
+     "p10": 218.0,
+     "p25": 292.0,
+     "p50": 417.0,
+     "p75": 601.0,
+     "p90": 799.0,
+     "mean": 474.8684985279686,
+     "n": 1019
+    },
+    "unusable": {
+     "p10": 234.0,
+     "p25": 405.0,
+     "p50": 768.0,
+     "p75": 768.0,
+     "p90": 1536.0,
+     "mean": 807.6292993630573,
+     "n": 785
+    }
+   },
+   "reasoning_tokens_think_closed": {
+    "all": {
+     "p10": 171.0,
+     "p25": 224.0,
+     "p50": 306.0,
+     "p75": 449.0,
+     "p90": 635.0,
+     "mean": 371.14701601164484,
+     "n": 1374
+    },
+    "correct": {
+     "p10": 174.0,
+     "p25": 222.0,
+     "p50": 288.0,
+     "p75": 415.0,
+     "p90": 671.0,
+     "mean": 372.6756756756757,
+     "n": 37
+    },
+    "incorrect": {
+     "p10": 170.0,
+     "p25": 226.0,
+     "p50": 311.0,
+     "p75": 457.0,
+     "p90": 638.0,
+     "mean": 374.7703150912106,
+     "n": 1206
+    }
+   },
+   "answer_tokens_think_closed": {
+    "p10": 10.0,
+    "p25": 25.0,
+    "p50": 51.0,
+    "p75": 116.0,
+    "p90": 249.0,
+    "mean": 96.67176128093159,
+    "n": 1374
+   },
+   "correct_by_reasoning_length_quartile": {
+    "edges_reasoning_tokens": [
+     226,
+     311,
+     457
+    ],
+    "correct_rate": [
+     0.0382,
+     0.0258,
+     0.029,
+     0.0259
+    ],
+    "n": [
+     314,
+     310,
+     310,
+     309
+    ]
+   },
+   "retokenization_exact_fraction": 0.82
+  },
+  "shared_screening:q2": {
+   "n": 1900,
+   "n_scorable": 1700,
+   "correct_rate_scorable": 0.03,
+   "usable_rate": 0.7068,
+   "natural_termination_rate": 0.8105,
+   "degeneration_rate": 0.1895,
+   "context_limit_rate": 0.0,
+   "think_closed_rate": 0.7984,
+   "generated_tokens": {
+    "all": {
+     "p10": 228.0,
+     "p25": 303.0,
+     "p50": 450.0,
+     "p75": 756.0,
+     "p90": 907.0,
+     "mean": 561.0863157894737,
+     "n": 1900
+    },
+    "correct": {
+     "p10": 208.0,
+     "p25": 246.0,
+     "p50": 401.0,
+     "p75": 567.0,
+     "p90": 740.0,
+     "mean": 436.7450980392157,
+     "n": 51
+    },
+    "usable_incorrect": {
+     "p10": 235.0,
+     "p25": 294.0,
+     "p50": 395.0,
+     "p75": 523.0,
+     "p90": 682.0,
+     "mean": 434.8882252559727,
+     "n": 1172
+    },
+    "unusable": {
+     "p10": 211.0,
+     "p25": 314.0,
+     "p50": 768.0,
+     "p75": 768.0,
+     "p90": 2048.0,
+     "mean": 805.0341113105925,
+     "n": 557
+    }
+   },
+   "reasoning_tokens_think_closed": {
+    "all": {
+     "p10": 172.0,
+     "p25": 221.0,
+     "p50": 299.0,
+     "p75": 404.0,
+     "p90": 554.0,
+     "mean": 341.520105471325,
+     "n": 1517
+    },
+    "correct": {
+     "p10": 171.0,
+     "p25": 198.0,
+     "p50": 345.0,
+     "p75": 459.0,
+     "p90": 632.0,
+     "mean": 372.72549019607845,
+     "n": 51
+    },
+    "incorrect": {
+     "p10": 175.0,
+     "p25": 223.0,
+     "p50": 298.0,
+     "p75": 399.0,
+     "p90": 533.0,
+     "mean": 336.6265870052278,
+     "n": 1339
+    }
+   },
+   "answer_tokens_think_closed": {
+    "p10": 9.0,
+    "p25": 30.0,
+    "p50": 64.0,
+    "p75": 129.0,
+    "p90": 282.0,
+    "mean": 107.62162162162163,
+    "n": 1517
+   },
+   "correct_by_reasoning_length_quartile": {
+    "edges_reasoning_tokens": [
+     222,
+     300,
+     403
+    ],
+    "correct_rate": [
+     0.046,
+     0.0143,
+     0.0259,
+     0.0609
+    ],
+    "n": [
+     348,
+     349,
+     348,
+     345
+    ]
+   },
+   "retokenization_exact_fraction": 0.8358
+  }
+ },
+ "q2_vs_b_paired": {
+  "shared_screening": {
+   "pairs_scorable": 1700,
+   "both_correct": 6,
+   "candidate_only_correct": 45,
+   "reference_only_correct": 31,
+   "neither_correct": 1618,
+   "generated_token_delta": {
+    "all": {
+     "p10": -574.0,
+     "p25": -271.0,
+     "p50": -15.0,
+     "p75": 120.0,
+     "p90": 451.0,
+     "mean": -57.28631578947368,
+     "n": 1900
+    },
+    "both_correct": {
+     "p10": -103.0,
+     "p25": 8.0,
+     "p50": 29.0,
+     "p75": 95.0,
+     "p90": 109.0,
+     "mean": 27.666666666666668,
+     "n": 6
+    },
+    "candidate_only_correct": {
+     "p10": -950.0,
+     "p25": -430.0,
+     "p50": -111.0,
+     "p75": 49.0,
+     "p90": 270.0,
+     "mean": -186.66666666666666,
+     "n": 45
+    }
+   },
+   "_reading": "candidate minus reference, same prompt and seed; descriptive, pooled over the seeds"
+  },
+  "shared_confirmation": {
+   "pairs_scorable": 2550,
+   "both_correct": 29,
+   "candidate_only_correct": 73,
+   "reference_only_correct": 74,
+   "neither_correct": 2374,
+   "generated_token_delta": {
+    "all": {
+     "p10": -623.0,
+     "p25": -251.0,
+     "p50": -8.0,
+     "p75": 145.0,
+     "p90": 472.0,
+     "mean": -71.84842105263158,
+     "n": 2850
+    },
+    "both_correct": {
+     "p10": -402.0,
+     "p25": -156.0,
+     "p50": -23.0,
+     "p75": 58.0,
+     "p90": 225.0,
+     "mean": -60.89655172413793,
+     "n": 29
+    },
+    "candidate_only_correct": {
+     "p10": -1001.0,
+     "p25": -235.0,
+     "p50": -85.0,
+     "p75": -6.0,
+     "p90": 105.0,
+     "mean": -250.1095890410959,
+     "n": 73
+    }
+   },
+   "_reading": "candidate minus reference, same prompt and seed; descriptive, pooled over the seeds"
+  }
+ },
+ "availability": {
+  "engine_generated_tokens": "exact, per sample",
+  "decoded_text_with_think_and_answer": "complete, per sample",
+  "token_ids": "NOT stored",
+  "per_token_logprobs_or_logits": "NOT stored",
+  "student_confidence_on_own_rollouts": "NOT obtainable: requires the trained checkpoint, retired",
+  "teacher_surprisal_on_these_rollouts": "obtainable on a GPU from the text by a teacher forward, as a re-tokenized approximation of the generated sequence; not computed"
+ },
+ "authorizes": "nothing"
+}

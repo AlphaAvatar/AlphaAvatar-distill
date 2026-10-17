@@ -1,0 +1,382 @@
+{
+ "schema": "aadistill.d_series.programme_budget/v2",
+ "_contract": "A DATED planning snapshot of D2, D3 and one fresh independent confirmation against the live limits from the budget authority. Re-derive before every authorization; it permits nothing.",
+ "limits": {
+  "project_remaining_usd": 100.4494,
+  "project_cap_usd": 595.0,
+  "formal_remaining_usd": 104.427,
+  "engineering_remaining_usd": 3.1804,
+  "per_session_cap_usd": 30.0
+ },
+ "limits_owner": "scripts/maintenance/consolidation/derive_budget.py (the one budget authority)",
+ "engineering_grants": {
+  "r0": 4.0,
+  "reference_calibration": 1.76,
+  "d2_gpu_validation": 1.7,
+  "d2v3_gpu_validation": 1.22,
+  "d2v3_gpu_validation_r2": 1.22
+ },
+ "_engineering_grants_are": "R0, the reference calibration and the D2 GPU validations (version 2; version 3's revisions 1 and 2); each one's state is its campaign's status under `engineering.campaigns`",
+ "engineering_fits_allowance": true,
+ "engineering": {
+  "expected": 0.0,
+  "hard_with_reserves": 0.0,
+  "campaigns": {
+   "r0": {
+    "grant_usd": 4.0,
+    "booked_usd": 1.5074,
+    "closed": true,
+    "outstanding_usd": 0.0
+   },
+   "reference_calibration": {
+    "grant_usd": 1.76,
+    "booked_usd": 0.8069,
+    "closed": true,
+    "outstanding_usd": 0.0
+   },
+   "d2_gpu_validation": {
+    "grant_usd": 1.7,
+    "booked_usd": 0.6532,
+    "closed": true,
+    "outstanding_usd": 0.0,
+    "status": "COMPLETE and CLOSED -- Stage V validation PASS (arithmetic, integrity, scored_rows_equivalence), run d2val_20261014_103301, $0.6532 of the $1.70 grant; provider teardown confirmed; evidence booked by sha256",
+    "owner": "logs/stages/stage-1/families/d_series/validations/d2-gpu-validation/v1/campaign.json"
+   },
+   "d2v3_gpu_validation": {
+    "grant_usd": 1.22,
+    "booked_usd": 0.2538,
+    "closed": true,
+    "outstanding_usd": 0.0,
+    "status": "COMPLETE and CLOSED -- Stage W validation FAIL, NOT ADOPTED: arithmetic FAIL on kl_bounds alone (175 of 46,056 float32 positions beyond the registered 4*eps*|log Z_teacher| slack; the float64 oracle bounds hold with 0 violations and every float32 union KL is within its registered abs+rel tolerance), integrity PASS, scored_rows_equivalence PASS; run d2v3val_20261014_170824, $0.2538 of the $1.22 grant; provider teardown confirmed and 0 pods listed at 2026-10-14T17:29:40Z; evidence booked by sha256; no rerun under this grant -- the diagnosed repair changes a registered tolerance, which is the maintainer's decision (d2v3_stage_w_evidence_review.md)",
+    "owner": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1/campaign.json"
+   },
+   "d2v3_gpu_validation_r2": {
+    "grant_usd": 1.22,
+    "booked_usd": 0.2493,
+    "closed": true,
+    "outstanding_usd": 0.0,
+    "status": "COMPLETE and CLOSED -- Stage W revision 2 validation PASS (arithmetic, integrity, scored_rows_equivalence), ADOPTED; run d2v3r2val_20261014_185259, $0.2493 of the $1.22 grant; 0 KL anomalies; provider teardown confirmed and 0 pods/volumes listed at 2026-10-14T19:07:31Z; evidence booked by sha256",
+    "owner": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/campaign.json"
+   }
+  },
+  "_closed_campaigns_are": "already inside the live limits through their recorded cost"
+ },
+ "d2_search_completed": {
+  "run_id": "d2_search_20261015_051722",
+  "closeout": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json",
+  "booked_all_in_usd": 5.5364,
+  "authorized_hard_usd": 23.6923,
+  "contract": {
+   "clauses": [
+    "authorized_identity",
+    "terminal_complete",
+    "full_search",
+    "top_k_committed",
+    "checkpoints_secured",
+    "manifest_and_archive",
+    "provider_teardown",
+    "cost_closed",
+    "no_unsettled_resources"
+   ],
+   "all_satisfied": true,
+   "owner": "scripts/stages/stage-1/families/d_series/search_completion.py"
+  },
+  "_inside_the_live_limits": true
+ },
+ "d2_search_contract": {
+  "runs": [
+   {
+    "run_id": "d2_search_20261015_051722",
+    "complete": true,
+    "failed_clauses": []
+   }
+  ],
+  "contradictions": [],
+  "rule": "a search leaves the plan only when exactly one run satisfies every clause of stages.d_series.search_completion; otherwise its hard ceiling stays reserved"
+ },
+ "d2_screening_completed": {
+  "run_id": "d2_screening_20261015_203346",
+  "closeout": "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/closeout/outcome.json",
+  "booked_all_in_usd": 12.5212,
+  "authorized_hard_usd": 19.4558,
+  "contract": {
+   "clauses": [
+    "authorized_identity",
+    "terminal_complete",
+    "every_unit_verified",
+    "products_secured",
+    "provider_teardown",
+    "cost_closed",
+    "no_unsettled_resources"
+   ],
+   "all_satisfied": true,
+   "owner": "scripts/stages/stage-1/families/d_series/screening_completion.py"
+  },
+  "_inside_the_live_limits": true
+ },
+ "d2_screening_contract": {
+  "runs": [
+   {
+    "run_id": "d2_screening_20261015_183412",
+    "complete": false,
+    "failed_clauses": [
+     "terminal_complete",
+     "every_unit_verified",
+     "products_secured",
+     "provider_teardown",
+     "cost_closed"
+    ]
+   },
+   {
+    "run_id": "d2_screening_20261015_183734",
+    "complete": false,
+    "failed_clauses": [
+     "terminal_complete",
+     "every_unit_verified",
+     "products_secured"
+    ]
+   },
+   {
+    "run_id": "d2_screening_20261015_193502",
+    "complete": false,
+    "failed_clauses": [
+     "terminal_complete",
+     "every_unit_verified",
+     "products_secured",
+     "provider_teardown",
+     "cost_closed"
+    ]
+   },
+   {
+    "run_id": "d2_screening_20261015_203346",
+    "complete": true,
+    "failed_clauses": []
+   }
+  ],
+  "contradictions": [],
+  "rule": "the screening rung leaves the plan only when exactly one attempt satisfies every clause of stages.d_series.screening_completion and every other attempt's cost is known; otherwise its hard ceiling stays reserved"
+ },
+ "d2_confirmation_completed": {
+  "run_id": "d2_confirmation_20261016_105802",
+  "closeout": "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/closeout/outcome.json",
+  "booked_all_in_usd": 5.026,
+  "authorized_hard_usd": 8.2078,
+  "contract": {
+   "clauses": [
+    "authorized_identity",
+    "terminal_complete",
+    "every_unit_verified",
+    "products_secured",
+    "provider_teardown",
+    "cost_closed",
+    "no_unsettled_resources"
+   ],
+   "all_satisfied": true,
+   "owner": "scripts/stages/stage-1/families/d_series/screening_completion.py"
+  },
+  "_inside_the_live_limits": true
+ },
+ "d2_confirmation_contract": {
+  "runs": [
+   {
+    "run_id": "d2_confirmation_20261016_105802",
+    "complete": true,
+    "failed_clauses": []
+   }
+  ],
+  "contradictions": [],
+  "rule": "the confirmation rung leaves the plan by the same contract as the screening's, over its verdict file"
+ },
+ "fresh_confirmation": {
+  "expected": 12.23,
+  "hard_with_reserves": 15.5,
+  "rescoring_estimate": 0.0
+ },
+ "d3_block_status": "SUPERSEDED 2026-10-16: the student-confidence D3 priced here is cancelled and unexecuted; the new D3 (fixed-q2 DEPTH teacher-reference ablation) is priced by logs/stages/stage-1/phase_d3/plans/d3_budget_v1.json and does not inherit this reservation",
+ "reservation_rule": "authorize D2's formal sessions only if the project remainder after engineering and D2 at hard ceilings still covers D3 and one fresh confirmation at theirs",
+ "search_pricing": {
+  "records_max": {
+   "search_hard_usd": 33.32,
+   "search_fits_per_session_cap": false,
+   "d2_block": {
+    "expected": 0,
+    "hard_with_reserves": 0,
+    "rescoring_estimate": 0,
+    "sessions": []
+   },
+   "d3_block": {
+    "expected": 32.46,
+    "hard_with_reserves": 60.58,
+    "rescoring_estimate": 0,
+    "search_hard_usd": 32.01
+   },
+   "scenarios": {
+    "A_d2": {
+     "blocks": [
+      "engineering (the D-series GPU validations' outstanding grants)",
+      "d2"
+     ],
+     "expected_usd": 0.0,
+     "hard_with_reserves_usd": 0.0,
+     "unverified_diagnostic_estimate_usd": 0,
+     "conservative_planning_usd": 0.0,
+     "project_remaining_after_hard_usd": 100.45,
+     "project_remaining_after_conservative_usd": 100.45,
+     "fits_project_at_hard": true,
+     "fits_project_conservative": true,
+     "fits_project_at_expected": true
+    },
+    "B_d2_d3": {
+     "blocks": [
+      "engineering (the D-series GPU validations' outstanding grants)",
+      "d2",
+      "d3"
+     ],
+     "expected_usd": 32.46,
+     "hard_with_reserves_usd": 60.58,
+     "unverified_diagnostic_estimate_usd": 0,
+     "conservative_planning_usd": 60.58,
+     "project_remaining_after_hard_usd": 39.87,
+     "project_remaining_after_conservative_usd": 39.87,
+     "fits_project_at_hard": true,
+     "fits_project_conservative": true,
+     "fits_project_at_expected": true
+    },
+    "C_d2_d3_fresh_confirmation": {
+     "blocks": [
+      "engineering (the D-series GPU validations' outstanding grants)",
+      "d2",
+      "d3",
+      "fresh_confirmation"
+     ],
+     "expected_usd": 44.69,
+     "hard_with_reserves_usd": 76.08,
+     "unverified_diagnostic_estimate_usd": 0.0,
+     "conservative_planning_usd": 76.08,
+     "project_remaining_after_hard_usd": 24.37,
+     "project_remaining_after_conservative_usd": 24.37,
+     "fits_project_at_hard": true,
+     "fits_project_conservative": true,
+     "fits_project_at_expected": true
+    }
+   },
+   "reservation_rule": {
+    "left_after_d2_at_hard_usd": 100.45,
+    "needed_for_d3_and_fresh_at_hard_usd": 76.08,
+    "satisfied": true,
+    "shortfall_usd": 0.0,
+    "conservative_with_unverified_estimates": {
+     "estimates_usd": 0,
+     "satisfied": true,
+     "shortfall_usd": 0.0
+    }
+   }
+  },
+  "cache_fix_validated": {
+   "search_hard_usd": 23.69,
+   "search_fits_per_session_cap": true,
+   "d2_block": {
+    "expected": 0,
+    "hard_with_reserves": 0,
+    "rescoring_estimate": 0,
+    "sessions": []
+   },
+   "d3_block": {
+    "expected": 32.46,
+    "hard_with_reserves": 50.95,
+    "rescoring_estimate": 0,
+    "search_hard_usd": 22.38
+   },
+   "scenarios": {
+    "A_d2": {
+     "blocks": [
+      "engineering (the D-series GPU validations' outstanding grants)",
+      "d2"
+     ],
+     "expected_usd": 0.0,
+     "hard_with_reserves_usd": 0.0,
+     "unverified_diagnostic_estimate_usd": 0,
+     "conservative_planning_usd": 0.0,
+     "project_remaining_after_hard_usd": 100.45,
+     "project_remaining_after_conservative_usd": 100.45,
+     "fits_project_at_hard": true,
+     "fits_project_conservative": true,
+     "fits_project_at_expected": true
+    },
+    "B_d2_d3": {
+     "blocks": [
+      "engineering (the D-series GPU validations' outstanding grants)",
+      "d2",
+      "d3"
+     ],
+     "expected_usd": 32.46,
+     "hard_with_reserves_usd": 50.95,
+     "unverified_diagnostic_estimate_usd": 0,
+     "conservative_planning_usd": 50.95,
+     "project_remaining_after_hard_usd": 49.5,
+     "project_remaining_after_conservative_usd": 49.5,
+     "fits_project_at_hard": true,
+     "fits_project_conservative": true,
+     "fits_project_at_expected": true
+    },
+    "C_d2_d3_fresh_confirmation": {
+     "blocks": [
+      "engineering (the D-series GPU validations' outstanding grants)",
+      "d2",
+      "d3",
+      "fresh_confirmation"
+     ],
+     "expected_usd": 44.69,
+     "hard_with_reserves_usd": 66.45,
+     "unverified_diagnostic_estimate_usd": 0.0,
+     "conservative_planning_usd": 66.45,
+     "project_remaining_after_hard_usd": 34.0,
+     "project_remaining_after_conservative_usd": 34.0,
+     "fits_project_at_hard": true,
+     "fits_project_conservative": true,
+     "fits_project_at_expected": true
+    }
+   },
+   "reservation_rule": {
+    "left_after_d2_at_hard_usd": 100.45,
+    "needed_for_d3_and_fresh_at_hard_usd": 66.45,
+    "satisfied": true,
+    "shortfall_usd": 0.0,
+    "conservative_with_unverified_estimates": {
+     "estimates_usd": 0,
+     "satisfied": true,
+     "shortfall_usd": 0.0
+    }
+   }
+  }
+ },
+ "search_pricing_in_force": "cache_fix_validated",
+ "levers_if_short": {
+  "validate_the_reference_cache_fix": {
+   "saves_hard_usd_per_search": 9.63,
+   "how": "the reference calibration's stage L DEPTH pair, already in its plan, at no extra session"
+  },
+  "measure_the_objective_overhead": {
+   "how": "an ADOPTED version-3 GPU validation (stage W) replaces the provisional UNION terms of D2's price -- per DEPTH candidate, per state evaluation and the union stores -- with measurements; version 2's terms are already Stage V's measurements, and stage L's timing prices D3 only",
+   "stage_w_adopted": true,
+   "stage_w_not_adopted_because": null,
+   "stage_w_evidence_session": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/runs/d2v3r2val_20261014_185259/out/adoption_all_v1/adoption.json"
+  },
+  "scored_v1_for_version_3": {
+   "in_force": true,
+   "hard_usd": {
+    "all_v1": 24.32,
+    "scored_v1": 23.69
+   },
+   "how": "version 3's own scored_v1 equivalence, a step of its GPU validation"
+  },
+  "d3_at_k2": {
+   "saves_hard_usd": 8.97,
+   "cost": "narrower structural coverage for D3"
+  },
+  "scored_v1_after_r0": "about 8% of DEPTH time if R0 passes; unmeasured",
+  "actual_spend_releases_headroom": "hard ceilings are worst cases; D1's sessions spent $10.03 of a $21.49 search ceiling and $10.34 of a $15.20 confirmation ceiling. Re-deriving after each session uses the actual spend",
+  "cap_increase": "a maintainer decision, never an autonomous one"
+ },
+ "authorizes": "nothing"
+}

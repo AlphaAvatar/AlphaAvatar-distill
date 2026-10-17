@@ -1,0 +1,156 @@
+{
+  "_what_this_is": "one complete pod-like sweep of D1's own declared pod selection \u2014 scripts/stages/stage-1/phase_d1/tests/behavioural_pod_preflight \u2014 under the environment the behavioural SessionRunner really hands setup: empty HOME, isolated HF_HOME, synthetic HF_TOKEN, every gitignored artifact this session does NOT stage hidden, and SESSION_KIND=d1_behavioural. It is the condition a fresh behavioural pod is actually in before its first arm materializes. RUN-OWNED: there is no pointer and no global readiness file, so no later run overwrites this evidence.",
+  "binding_rule": "this record binds the EXECUTABLE via two digests, and the REPOSITORY via swept_base_commit lineage. The digests ignore logs/ and docs/ so that paperwork does not invalidate a sweep; the lineage rule then permits exactly two post-sweep tracked paths -- this record, and (in an issued session) the canonical authorization artifact -- because the pod suite READS repository state and a documentation commit can change what it asserts.",
+  "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 18,
+    "skipped": 0
+  },
+  "d1_behavioural_harness_digest": "d86202bb60fa044172c36e0dcfc3edb03894d0fc9d26ba836b52b82608642c97",
+  "d1_behavioural_harness_n_files": 166,
+  "environment": {
+    "artifact_hiding": "manifest-derived positive staged view: 23 files visible from the C1 SetupManifest, 1839 hidden as the computed complement and 0 host-local store(s) hidden as well. NOT the simulator's generic default.",
+    "dev_hf_cache_visible": false,
+    "hf_home_mode": "isolated \u2014 $PODSIM_ENV_ROOT/hf, outside the dev cache",
+    "hf_hub_cache_resolution": "$HF_HOME/hub, set explicitly as HF_HUB_CACHE",
+    "home_mode": "empty \u2014 a fresh directory created by the simulator",
+    "host_local_rule": "an absolute path outside the repository named by a document the launcher's gates read. The session stages an asset's bytes, never the store it was frozen in, so a pod has none of these. Derived from those documents rather than listed, and hidden by rename for the duration of the sweep.",
+    "host_local_stores_hidden": [],
+    "token_mode": "synthetic, non-empty; never printed, never a real credential"
+  },
+  "evidence": {
+    "executions_of_this_tree": [
+      "exec-001",
+      "exec-002"
+    ],
+    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-a04f7d7eb88e/exec-002/junit.xml",
+    "junit_sha256": "aaed96aadaeb67cb12262d7bd81fbe6514737faf82c1e1ad1d83551613b39dca",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-a04f7d7eb88e/exec-002/pytest.log",
+    "pytest_log_sha256": "729498e5bb74791c449bd81daae53960afaea75639e4957a5f7dd233cc52234e"
+  },
+  "execution_id": "sweep-a04f7d7eb88e/exec-002",
+  "expected_environment_skips": [],
+  "failed_nodeids": [],
+  "findings": {
+    "all_skipped_nodeids": [],
+    "battery_staged_role_nodeid": null,
+    "battery_staged_role_outcome": null,
+    "counts": {
+      "error": 0,
+      "failed": 0,
+      "passed": 18,
+      "skipped": 0
+    },
+    "expected_environment_skips": [],
+    "failed_nodeids": [],
+    "known_non_environment_skips": [],
+    "n_skipped": 0,
+    "problems": [],
+    "skip_reasons": {},
+    "skip_set_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "skip_set_is_forensic_not_scientific": "the complete skip list exists so a pod/sweep divergence can be NAMED. The total is not a target and carries no scientific content; only the declared groups above express expectations.",
+    "unexpected_environment_skips": [],
+    "verdict": "PASS"
+  },
+  "invocation_realized": {
+    "declared_pytest_arguments": [
+      "scripts/stages/stage-1/phase_d1/tests/behavioural_pod_preflight",
+      "-q"
+    ],
+    "declared_test_ignores": [],
+    "declared_test_paths": [
+      "scripts/stages/stage-1/phase_d1/tests/behavioural_pod_preflight"
+    ],
+    "hidden_paths_passed": true,
+    "invoked_pytest_arguments": [
+      "scripts/stages/stage-1/phase_d1/tests/behavioural_pod_preflight",
+      "-q"
+    ],
+    "invoked_test_ignores": [],
+    "problems": [],
+    "rule": "a manifest fact that is hashed but not realized in the invocation is refused here, before any PASS record exists",
+    "setup_environment_keys": [
+      "BUNDLE_NAME",
+      "SESSION_ASSETS",
+      "SESSION_AUTH_PATH",
+      "SESSION_COMMIT",
+      "SESSION_KIND",
+      "SESSION_PLAN_HASH",
+      "SESSION_RELAY_INPUTS",
+      "SESSION_SETUP_MARKERS",
+      "SESSION_STATUS",
+      "SESSION_TEST_IGNORES",
+      "SESSION_TEST_PATHS",
+      "TEACHER_REVISION",
+      "TESTS_MAX_S",
+      "UV_MAX_S"
+    ],
+    "setup_environment_realized": true,
+    "staging_contract_digest": "d3fa750e69c30d74f353172e22c2bf28fbc2ad3986aa6dfc1438769ef61025c6"
+  },
+  "n_tests": 18,
+  "pod_test_environment_digest": "968dd62f2aab4c746d4d1baa509c929b58f42c50e58ad8a25fe3999ed668648a",
+  "pod_test_environment_n_files": 170,
+  "pod_test_environment_named_files": [
+    "conftest.py",
+    "scripts/conftest.py",
+    "scripts/shared/pod/simulate_pod_env.sh",
+    "scripts/stages/stage-1/phase_d1/tests/behavioural_pod_preflight/test_behavioural_pod_preflight.py"
+  ],
+  "problems": [],
+  "pytest_command": ".venv/bin/python -m pytest scripts/stages/stage-1/phase_d1/tests/behavioural_pod_preflight -q",
+  "pytest_command_note": "verbatim from PODSIM_CMD. Test SELECTION is the session's own SESSION_TEST_IGNORES; --junitxml is appended by the simulator as a reporting flag so every skip and pass can be named exactly.",
+  "record_kind": "launch_bound",
+  "record_kind_note": "diagnostic: proves the pod-like suite passes on this exact tree and that the readiness machinery works. A launch-bound record is the one a maintainer-approved launch rests on. It is produced on the final CLEAN PRE-AUTHORIZATION tree -- after the grant and all metadata are committed, BEFORE the authorization is issued -- because a sweep run after issuance adds a second path to the lineage diff and session_commit_gate refuses.",
+  "schema": "aadistill.autoinit.d1_behavioural_pod_environment/v1",
+  "seconds": 13.1,
+  "self_sha256": "af20a811aee6f09d72f878c7e56cf099f63b89aec5304dd772b31ef29f69e928",
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_a04f7d7e.bundle",
+    "SESSION_ASSETS": "reasoning_heavy_v2:artifacts/stages/stage-1,d1_screening:artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1,d1_confirmation:artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1",
+    "SESSION_AUTH_PATH": "logs/stages/stage-1/phase_d1/runs/spec_check/governance/authorization.json",
+    "SESSION_COMMIT": "a04f7d7eb88e172a7067e48f13145085fd8ef02d",
+    "SESSION_KIND": "d1_behavioural",
+    "SESSION_PLAN_HASH": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/e8_calibration_v1\",\"path\":\"e8_inputs_20260810/calibration_v1/items.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"}]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV TEACHER_READY VLLM_READY TESTS_OK AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/autoinit_d1_behavioural.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "scripts/stages/stage-1/phase_d1/tests/behavioural_pod_preflight",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "2700",
+    "UV_MAX_S": "1500"
+  },
+  "setup_environment_source": "SessionSpec.setup_environment(session_commit=<swept HEAD>, bundle=canonical_bundle_name(<swept HEAD>)) -- the same production method SessionRunner._launch calls. Not a reconstructed subset. No secret is stored: none of these keys carries one.",
+  "simulator": "scripts/shared/pod/simulate_pod_env.sh",
+  "simulator_command": "<SessionSpec.setup_environment: 14 keys> HIDDEN_PATHS_FILE=<1839 derived paths, contract d3fa750e69c3> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-a04f7d7eb88e/exec-002/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-a04f7d7eb88e/exec-002/pytest.log bash scripts/shared/pod/simulate_pod_env.sh",
+  "simulator_exit_code": 0,
+  "staging_contract": {
+    "digest": "d3fa750e69c30d74f353172e22c2bf28fbc2ad3986aa6dfc1438769ef61025c6",
+    "local_asset_destinations": [
+      "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1/d1_confirmation",
+      "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1/d1_screening",
+      "artifacts/stages/stage-1/reasoning_heavy_v2"
+    ],
+    "n_hidden_files": 1839,
+    "n_staged_files": 23,
+    "relay_file_destinations": [
+      "artifacts/shared/instruments/ladder_uniform_probe/audit.jsonl",
+      "artifacts/shared/instruments/ladder_uniform_probe/blocks.npz",
+      "artifacts/shared/instruments/ladder_uniform_probe/ladder.json",
+      "artifacts/stages/stage-1/e8_calibration_v1/items.jsonl",
+      "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+      "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+      "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json"
+    ],
+    "session_kind": "d1_behavioural",
+    "test_ignores": []
+  },
+  "staging_contract_digest": "d3fa750e69c30d74f353172e22c2bf28fbc2ad3986aa6dfc1438769ef61025c6",
+  "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
+  "swept_base_commit": "a04f7d7eb88e172a7067e48f13145085fd8ef02d",
+  "tree_clean": true,
+  "unexpected_environment_skips": [],
+  "verdict": "PASS"
+}

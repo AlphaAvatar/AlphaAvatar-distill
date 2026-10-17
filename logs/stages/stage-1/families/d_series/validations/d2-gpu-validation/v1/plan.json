@@ -1,0 +1,254 @@
+{
+ "schema": "aadistill.d_series.validation_plan/v1",
+ "validation_id": "d2_gpu_validation",
+ "version": 1,
+ "status": "PROPOSAL -- registered, not granted, not run (authorization.proposed.json)",
+ "_contract": "REGISTERED BEFORE ANY SESSION. Stage V of topk_adoption_driver.py (phase_d2/d2_gpu_validation.py) on ONE L40S, on the launcher, remote payload and campaign mechanism stage L and R0 ran on. Engineering validation of the redesigned D2 objective only: no D2 search, no recovery training, no behavioural probe. AUTHORIZES NOTHING by itself: authorization.json does, and it does not exist until the maintainer grants.",
+ "objective": "objective.d2_teacher_confidence_weighted_kl@v1",
+ "objective_hash": "079031e3f5ecf0f804b4497c9dce83684c943e4418d10a2606a8caaa0c3c965d",
+ "contract_hash": "9ad4ec233dd0ca0f6896f3dc4fb6eab728ed162854299c7d74dd4ee0b9e5b0c0",
+ "preregistration_hash": "721ffddc1b399ad104c9fc0c611ec509bf5bf7f3615ff5e879be2615e8c591dd",
+ "formal_topology": {
+  "micro_batch_size": 3,
+  "calibration_batch_packing": "length_sorted_v1",
+  "_frozen": "D2's search runs only this; every gate below is measured under it"
+ },
+ "execution_order": [
+  "V1_root_stores_and_validity",
+  "V2_b_rebuild_and_kl_relation",
+  "V6_state_evaluation",
+  "V3_weighted_statistics",
+  "V4_depth_root_vs_parent",
+  "V5_depth_scored_rows"
+ ],
+ "steps": [
+  {
+   "id": "V0_setup",
+   "what": "pod setup, environment, teacher fetch and load, the stage-V $0 premises on the pod",
+   "why_gpu": "infrastructure",
+   "expected_minutes": 4.4,
+   "bound_minutes": 28.6,
+   "class": "core",
+   "gates": null
+  },
+  {
+   "id": "V1_root_stores_and_validity",
+   "what": "the root store of BOTH profiles at the formal bsz=3 and at bsz=1; arithmetic on identical teacher logits; the teacher-confidence validity report per profile",
+   "why_gpu": "the real teacher's full-vocabulary entropy is the question",
+   "expected_minutes": 1.27,
+   "bound_minutes": 4.91,
+   "class": "core",
+   "gates": "arithmetic (entropy, confidence); integrity (identities)"
+  },
+  {
+   "id": "V2_b_rebuild_and_kl_relation",
+   "what": "rebuild B as stage L did; B's per-position root KL on both profiles; the c x KL reduction arithmetic on identical (KL, c); the validity report with B's KL",
+   "why_gpu": "the c_T-KL relation needs a real compressed student",
+   "expected_minutes": 21.99,
+   "bound_minutes": 24.58,
+   "class": "core",
+   "gates": "arithmetic (reduction); integrity (B identities)"
+  },
+  {
+   "id": "V6_state_evaluation",
+   "what": "B under KL-only and the D2 objective at bsz=3 all_v1, the D2 objective at bsz=3 scored_v1 and at bsz=1 all_v1",
+   "why_gpu": "the overhead, the raw-KL control and the scored_v1 equivalence of THIS objective on the real suite",
+   "expected_minutes": 0.7,
+   "bound_minutes": 1.05,
+   "class": "core",
+   "gates": "arithmetic (raw-KL control); row equivalence (state)"
+  },
+  {
+   "id": "V3_weighted_statistics",
+   "what": "FFN, WIDTH and ATTENTION at the root, full scope (weighted) vs narrow scope (unweighted): timing and selection overlap",
+   "why_gpu": "how far the teacher's confidence moves a REAL selection",
+   "expected_minutes": 4.59,
+   "bound_minutes": 7.51,
+   "class": "core",
+   "gates": "diagnostic only"
+  },
+  {
+   "id": "V4_depth_root_vs_parent",
+   "what": "one DEPTH round on V3's full-scope FFN child (a non-root parent) under the D2 objective at all_v1: parent KL, unweighted root KL and weighted root KL of the same candidates, their rankings, the confidence IQR/ESS, both cache modes",
+   "why_gpu": "the reference change acts only below the root",
+   "expected_minutes": 4.14,
+   "bound_minutes": 7.74,
+   "class": "core",
+   "gates": "integrity (root reference, table consistency); rankings diagnostic"
+  },
+  {
+   "id": "V5_depth_scored_rows",
+   "what": "the same DEPTH round at scored_v1",
+   "why_gpu": "THIS objective's scored_v1 equivalence (stage L's covers the superseded one)",
+   "expected_minutes": 4.14,
+   "bound_minutes": 7.74,
+   "class": "extended",
+   "gates": "row equivalence (DEPTH)"
+  },
+  {
+   "id": "V7_teardown",
+   "what": "evidence fetch and teardown",
+   "why_gpu": "infrastructure",
+   "expected_minutes": 1.0,
+   "bound_minutes": 2.0,
+   "class": "core",
+   "gates": null
+  }
+ ],
+ "step_bounds_s": {
+  "V1_root_stores_and_validity": 295,
+  "V2_b_rebuild_and_kl_relation": 1475,
+  "V6_state_evaluation": 63,
+  "V3_weighted_statistics": 451,
+  "V4_depth_root_vs_parent": 465,
+  "V5_depth_scored_rows": 465
+ },
+ "acceptance": {
+  "arithmetic": {
+   "gate": true,
+   "tolerances": {
+    "entropy_abs_nats_vs_float64": 0.0001,
+    "entropy_abs_nats_chunk_invariance": 0.0001,
+    "confidence_abs_vs_float64": 1e-05,
+    "item_objective_relative_vs_float64": 1e-05,
+    "raw_kl_control_relative": 1e-06
+   },
+   "what": "one set of inputs, two computations: float32 chunked entropy vs float64 on the SAME teacher logits, chunk 512 vs 64, the confidence mapping, the c x KL item mean vs float64 on the SAME (KL, c), the raw-KL control of one state evaluation",
+   "justification": "-- one set of inputs, two computations. The full-vocabulary\n   entropy in float32 chunks against float64 on the SAME teacher logits, at two\n   chunk sizes; the confidence mapping; the `c x KL` fixed-denominator item\n   mean against float64 on the SAME (KL, c); the state evaluator's raw KL\n   against D1's KL metric of the same evaluation. GATED by\n   :data:`ARITHMETIC_TOLERANCES`. Nothing about the model's execution can move\n   these, so a tolerance here is a statement about float32 arithmetic alone."
+  },
+  "execution_drift": {
+   "gate": false,
+   "metrics": [
+    "bsz1_vs_bsz3_root_store",
+    "bsz1_vs_bsz3_state_evaluation"
+   ],
+   "why_not_gated": "a different micro-batch is a different GEMM shape on BF16 and so a different computation; R0's 1e-5 compares two paths under ONE batch shape and does not transfer. D2's topology is frozen at bsz=3, so this drift cannot reach a D2 result: REPORTED, never gated"
+  },
+  "row_equivalence": {
+   "gate": "decides scored_v1 eligibility only",
+   "tolerances": {
+    "depth_candidate_relative": 1e-05,
+    "depth_choice": "exact",
+    "state_eval_absolute": 1e-05
+   },
+   "what": "all_v1 vs scored_v1 at the formal bsz=3: one DEPTH round (V4 vs V5) and the state evaluation (V6)",
+   "source": "R0's registered tolerances, unchanged"
+  },
+  "integrity": {
+   "gate": true,
+   "tolerances": {
+    "statistics_denominator_relative": 1e-09
+   },
+   "required_operators": [
+    "ffn.activation_importance_v0",
+    "attention.activation_importance_v1",
+    "width.global_pca_v0"
+   ],
+   "checks": [
+    "the teacher binding and B's four identities",
+    "each root store's identity equals its declaration at bsz=1 and bsz=3",
+    "EVERY full-scope statistics operator (FFN, WIDTH, ATTENTION) executed both arms; the full arm is weighted by this session's root store, declares the D2 objective, and divides by the weight sum (statistics_denominator_relative); the narrow arm is unweighted, declares no objective and carries no weighted denominator; both children reach the target with finite parameters. A missing or failed operator is FAIL even when V4 runs on FFN's child",
+    "DEPTH reads the root reference",
+    "every DEPTH decision score equals the recorded weighted objective, and every round-0 candidate carries its parent KL"
+   ],
+   "states": "tri-state: unmeasured -> INCOMPLETE, measured and wrong (or a step that failed) -> FAIL"
+  },
+  "diagnostics": {
+   "gate": false,
+   "execution": [
+    "bsz1_vs_bsz3_root_store",
+    "bsz1_vs_bsz3_state_evaluation",
+    "store_vs_recomputed_same_batch",
+    "timings_and_memory",
+    "cache_modes"
+   ],
+   "science": [
+    "teacher_confidence_validity_per_profile",
+    "root_vs_parent_vs_weighted_rankings",
+    "full_vs_narrow_selection_overlap"
+   ],
+   "rule": "recorded as measured -- including a narrow dynamic range of c_T or an unchanged ranking -- and never a reason to change a definition, a normalization, the scope or a tolerance after the fact"
+  },
+  "verdicts": "arithmetic and integrity PASS -> validation PASS; scored_rows_equivalence PASS -> D2 may run scored_v1, otherwise all_v1",
+  "adoption": "d2_gpu_validation.adopt: a booked run is adoptable evidence only when COMPLETE, its objective, contract, preregistration and plan identities equal the committed records, its verdicts RECOMPUTED from its measurements equal the recorded ones, and validation is PASS; scored_v1 additionally needs scored_rows_equivalence PASS. Anything else stays booked and billed and unlocks nothing"
+ },
+ "basis": {
+  "stage_l": {
+   "evidence_session": "logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/runs/refcal_20261013_170714/out/adoption_all_v1/adoption.json",
+   "depth_round_seconds": 209.217,
+   "round0_candidates": 36,
+   "state_eval_seconds": 8.378,
+   "b_rebuild_seconds": 1270.9
+  },
+  "step_bound_factor": 1.5,
+  "d1_root_operator_seconds_max": {
+   "attention.activation_importance_v1": 38.715,
+   "ffn.activation_importance_v0": 44.7407,
+   "width.global_pca_v0": 46.8394
+  },
+  "parent_kl_diagnostic_seconds_per_round": {
+   "expected": 39.13,
+   "bound": 100.2,
+   "round0_candidates": 36
+  },
+  "root_store_candidate_equivalents": {
+   "expected": 2.0,
+   "bound": 5.0
+  },
+  "analysis_minutes_per_profile": {
+   "expected": 0.25,
+   "bound": 1.0
+  },
+  "setup_and_b_rebuild": "d2_budget's reference-calibration components (R0's measured setup, stage L's measured B rebuild)"
+ },
+ "hardware": {
+  "gpu": "1x NVIDIA L40S (48 GB)",
+  "why": "the GPU stage L and R0 ran on: their timings are this plan's basis, and the 4B teacher plus B, one child and the stores fit",
+  "rate_usd_per_hour_basis": 1.09,
+  "container_disk_gb": 60
+ },
+ "totals": {
+  "expected": {
+   "minutes": 42.2,
+   "gpu_usd": 0.77,
+   "disk_usd": 0.01,
+   "all_in_usd": 0.77
+  },
+  "core_bound": {
+   "minutes": 76.4,
+   "gpu_usd": 1.39,
+   "disk_usd": 0.01,
+   "all_in_usd": 1.4
+  },
+  "every_step_bound": {
+   "minutes": 84.1,
+   "gpu_usd": 1.53,
+   "disk_usd": 0.01,
+   "all_in_usd": 1.54
+  },
+  "teardown_reserve_usd": 0.3,
+  "proposed_session_cap_usd": 1.4,
+  "proposed_grant_usd": 1.7,
+  "_grant_shape": "stage L's: the cap covers setup and every core step at its bound; the extended V5 runs inside it whenever earlier work beats its bound"
+ },
+ "deliverables": [
+  "root stores: identities, content digests, build seconds",
+  "the teacher-confidence validity report per profile, with B's KL",
+  "arithmetic, integrity and scored-rows verdicts",
+  "full- vs narrow-scope selection overlap per operator",
+  "DEPTH: parent KL, unweighted and weighted root KL of the same candidates on a non-root parent, with rankings",
+  "measured replacements for the PROVISIONAL terms of the D2 search price"
+ ],
+ "does_not": [
+  "run a D2 search",
+  "train",
+  "score behaviour",
+  "change any definition: results are descriptive"
+ ],
+ "evidence": {
+  "on_the_pod": "adoption.json (stage V under V_d2_validation), flushed after every step and written on every exit path; journal.jsonl",
+  "fetched_before_teardown": "JSON and logs only (the launcher)",
+  "booking": "scripts/shared/pod/book_engineering_subrun.py copies the small evidence (teardown_confirmed included) into runs/<run>/, books cost.json's all-in cost and the evidence sha256 in campaign.json, append-only: a booked subrun id is never reused for another run, and a run without provider teardown confirmation is booked with a resource_risk and blocks closing. derive_budget.py then counts it, and d2_budget.d2_validation_evidence adopts it or not"
+ },
+ "authorizes": "nothing"
+}

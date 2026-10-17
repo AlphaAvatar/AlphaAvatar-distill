@@ -1,0 +1,169 @@
+{
+ "schema": "aadistill.phase_d2.screening_inputs/v1",
+ "recorded_utc": "2026-10-15T15:23:58Z",
+ "all_verified": true,
+ "initializations": {
+  "n_arms": 4,
+  "arms": [
+   {
+    "arm": "c1",
+    "state_id": "59013099b902f213649b8aa4c676dedd",
+    "checkpoint_dir": "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd",
+    "identities_checked": [
+     "arch_signature",
+     "artifact_digest",
+     "single_shard_sha256",
+     "weights_digest"
+    ]
+   },
+   {
+    "arm": "c2",
+    "state_id": "c2cb27efcf68b4f18bf7284aea84877a",
+    "checkpoint_dir": "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a",
+    "identities_checked": [
+     "arch_signature",
+     "artifact_digest",
+     "single_shard_sha256",
+     "weights_digest"
+    ]
+   },
+   {
+    "arm": "c3",
+    "state_id": "30fe791a85d70ac713e75893fea107ae",
+    "checkpoint_dir": "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae",
+    "identities_checked": [
+     "arch_signature",
+     "artifact_digest",
+     "single_shard_sha256",
+     "weights_digest"
+    ]
+   },
+   {
+    "arm": "c4",
+    "state_id": "3a4173e4eff45b0d73fd82bd0b263f03",
+    "checkpoint_dir": "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03",
+    "identities_checked": [
+     "arch_signature",
+     "artifact_digest",
+     "single_shard_sha256",
+     "weights_digest"
+    ]
+   }
+  ]
+ },
+ "imported_units": [
+  {
+   "probe_id": "d1_screening_B_s516448251",
+   "arm": "B",
+   "seed": 516448251,
+   "role": "comparator",
+   "durable_store": "/home/ecs-user/aad-artifacts/phase_d1/d1_behavioural_20261011_135910",
+   "result_verified": true,
+   "checks": {
+    "result_self_hash": true,
+    "durable_result_equals_committed": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "checkpoint_bytes_present": false,
+    "rescore_reproduces_per_sample": true
+   },
+   "training_matches_the_recovery_block": true,
+   "training_fields_differing": [],
+   "evaluation_protocol_hash": "e47508268ff52aa575d6a276735907f48a9589d0d5b2ffca492ad7b82dedc414",
+   "evaluation_matches_the_rung": true,
+   "correct_overall": 0.0259,
+   "usable_rollout_rate": 0.6284,
+   "checkpoint_retired": true
+  },
+  {
+   "probe_id": "d1_screening_B_s614923639",
+   "arm": "B",
+   "seed": 614923639,
+   "role": "comparator",
+   "durable_store": "/home/ecs-user/aad-artifacts/phase_d1/d1_behavioural_20261011_135910",
+   "result_verified": true,
+   "checks": {
+    "result_self_hash": true,
+    "durable_result_equals_committed": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "checkpoint_bytes_present": false,
+    "rescore_reproduces_per_sample": true
+   },
+   "training_matches_the_recovery_block": true,
+   "training_fields_differing": [],
+   "evaluation_protocol_hash": "e47508268ff52aa575d6a276735907f48a9589d0d5b2ffca492ad7b82dedc414",
+   "evaluation_matches_the_rung": true,
+   "correct_overall": 0.0176,
+   "usable_rollout_rate": 0.5453,
+   "checkpoint_retired": true
+  },
+  {
+   "probe_id": "d1_screening_q2_s516448251",
+   "arm": "q2",
+   "seed": 516448251,
+   "role": "descriptive only (winner's curse)",
+   "durable_store": "/home/ecs-user/aad-artifacts/phase_d1/d1_behavioural_20261011_135910",
+   "result_verified": true,
+   "checks": {
+    "result_self_hash": true,
+    "durable_result_equals_committed": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "checkpoint_bytes_present": false,
+    "rescore_reproduces_per_sample": true
+   },
+   "training_matches_the_recovery_block": true,
+   "training_fields_differing": [],
+   "evaluation_protocol_hash": "e47508268ff52aa575d6a276735907f48a9589d0d5b2ffca492ad7b82dedc414",
+   "evaluation_matches_the_rung": true,
+   "correct_overall": 0.0224,
+   "usable_rollout_rate": 0.6789,
+   "checkpoint_retired": true
+  },
+  {
+   "probe_id": "d1_screening_q2_s614923639",
+   "arm": "q2",
+   "seed": 614923639,
+   "role": "descriptive only (winner's curse)",
+   "durable_store": "/home/ecs-user/aad-artifacts/phase_d1/d1_behavioural_20261011_135910",
+   "result_verified": true,
+   "checks": {
+    "result_self_hash": true,
+    "durable_result_equals_committed": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "checkpoint_bytes_present": false,
+    "rescore_reproduces_per_sample": true
+   },
+   "training_matches_the_recovery_block": true,
+   "training_fields_differing": [],
+   "evaluation_protocol_hash": "e47508268ff52aa575d6a276735907f48a9589d0d5b2ffca492ad7b82dedc414",
+   "evaluation_matches_the_rung": true,
+   "correct_overall": 0.0376,
+   "usable_rollout_rate": 0.7347,
+   "checkpoint_retired": true
+  }
+ ],
+ "rescored_with_the_pinned_scorer": true,
+ "contract_hash": "6d4283e77e1b26549328d96eaf8f71773a3b2ef4e15804d26dd938eb0674455e",
+ "shared_protocol_hash": "5ed198aed960e987f137ec6342ef7fa6ac24c8484b991bac8cd6a210f7ae742d",
+ "tree_matches_the_protocol": {
+  "trainer": [],
+  "generation": [],
+  "scoring": []
+ },
+ "_not_done": "nothing about B or q2 is retrained, regenerated or re-evaluated, and no logits or confidence are computed for them; their checkpoints are retired"
+}

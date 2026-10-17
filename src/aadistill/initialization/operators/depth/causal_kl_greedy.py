@@ -27,9 +27,22 @@ from typing import Any
 
 import torch
 
+from aadistill.initialization.scoring.rows import (
+    scatter_rows, scored_prediction_logits, scored_rows, split_rows,
+)
+from aadistill.initialization.scoring.kl_reference import (
+    KL_REFERENCE_KEY, ROOT_REFERENCE_V1, KLReferenceError,
+    validate_kl_reference,
+)
+from aadistill.initialization.scoring.objective import (
+    ObjectiveError, add_joint_histograms, confidence_histogram,
+    item_component_means, position_terms, require_objective_support,
+)
 from aadistill.initialization.scoring.support import (
     SUPPORT_REFERENCE_TOPK_TAIL_V1, ReferenceDistributionSketch,
-    sketch_forward_kl_mean, sketch_forward_kl_mean_batch, sketch_reference,
+    masked_item_means, sketch_forward_kl, sketch_forward_kl_mean,
+    sketch_forward_kl_mean_batch, sketch_forward_kl_terms, sketch_reference,
+    union_forward_kl_terms,
 )
 from aadistill.initialization.statistics.contribution import (
     bypassed_blocks,
@@ -84,6 +97,17 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                            "tie_word_embeddings"})
     calibration = CalibrationNeed.FORWARD_LOGITS
     objective = "forward KL(parent || parent-with-S-bypassed), domain-balanced"
+    #: Under a run's `ScoringObjective` the per-position quantity this averages
+    #: is that objective's integrand, formed from the SAME candidate forward:
+    #: the candidate here is the parent with S bypassed, so its logits are the
+    #: student's and its own Top-K is read from them. See `scoring.objective`.
+    consumes_scoring_objective = True
+    #: The KL's reference may be DECLARED (`scoring.kl_reference`): the intact
+    #: parent by default, or the stored lineage root under
+    #: ``kl_reference: root_reference/v1``. The same greedy removal, the same
+    #: reducer and the same candidates either way; only the distribution each
+    #: candidate is compared with changes.
+    accepts_kl_reference = True
     deterministic = True
     requires_seed = False
     produces = ("depth_map", "search_rounds")
@@ -130,7 +154,124 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         #: full-vocabulary path is unchanged and is what produced every frozen
         #: DEPTH decision; the sketch path holds O(T*K) instead of O(T*V).
         support = ctx.distribution_support
-        if support.is_full_vocab:
+        #: PRE-VOCABULARY ROW SELECTION, opt-in through the execution config.
+        #: Only on the reference-support path: the full-vocabulary path is the
+        #: oracle every Top-K comparison is measured against, and it stays on the
+        #: historical all-rows arithmetic so it remains one.
+        select_rows = ctx.execution.selects_prediction_rows
+        if select_rows:
+            if support.is_full_vocab:
+                raise OperatorError(
+                    f"{self.impl_id}: prediction_rows="
+                    f"{ctx.execution.prediction_rows!r} is implemented for the "
+                    "reference-support reduction only. full_vocab_v1 is the "
+                    "oracle the coarsened support is validated against, and it "
+                    "stays on the historical all-rows path")
+            adapter.requires(Capability.OUTPUT_HEAD)
+        #: A STUDENT-CONFIDENCE OBJECTIVE, when the run declares one. Defined on
+        #: the reference-support KL only: full_vocab_v1 is the oracle path and
+        #: stays the historical KL-only objective.
+        objective = ctx.scoring_objective
+        if objective is not None and support.is_full_vocab:
+            raise OperatorError(
+                f"{self.impl_id}: scoring objective {objective.qualified_id} "
+                "is defined on the reference Top-K + tail KL; full_vocab_v1 is "
+                "the KL-only oracle path")
+        #: THE UNION SUPPORT AND THE UNION-KL FORM COME TOGETHER, at one K:
+        #: the reference's probability of a candidate-only entry is retrieved
+        #: from the ROOT store, which only that form requests.
+        try:
+            require_objective_support(objective, support)
+        except ObjectiveError as exc:
+            raise OperatorError(f"{self.impl_id}: {exc}") from exc
+        union = support.is_union
+        #: A DECLARED KL REFERENCE (`scoring.kl_reference`). Absent, the
+        #: historical parent. Validated where the config was built and again
+        #: in `execute`; checked here because this is where it is read.
+        try:
+            kl_reference = validate_kl_reference(
+                self, ctx.config, objective_consumed=objective is not None)
+        except KLReferenceError as exc:
+            raise OperatorError(f"{self.impl_id}: {exc}") from exc
+        declared_root = kl_reference == ROOT_REFERENCE_V1
+        if declared_root and support.is_full_vocab:
+            raise OperatorError(
+                f"{self.impl_id}: {KL_REFERENCE_KEY}={kl_reference!r} reads "
+                "a stored root reference of Top-K sketches; full_vocab_v1 is "
+                "the KL-only oracle path")
+        #: Per candidate subset: every component's domain-balanced value, so a
+        #: low objective can always be read against the raw KL it came from.
+        objective_candidates: dict[str, dict[str, Any]] = {}
+        #: Per candidate subset under a DECLARED root reference: the decision
+        #: KL (against the root) and the same candidate's KL against the
+        #: intact parent. The parent value is a diagnostic and is never read
+        #: by the selection.
+        reference_candidates: dict[str, dict[str, float]] = {}
+        #: THE KL'S REFERENCE. Historically the intact PARENT: this operator
+        #: measured how far bypassing S moves the model it is handed. An
+        #: objective declaring the ROOT reference measures instead how far the
+        #: candidate is from the frozen original model -- read from the root
+        #: reference store built once for this mixture, never re-forwarded --
+        #: and weights by that root's own confidence. The parent still
+        #: produces every candidate; it is just not what they are compared to.
+        root_store = None
+        parent_sketches = None
+        #: Under a DECLARED root reference the parent-KL diagnostic covers
+        #: EVERY round's candidates, not round 0's only: the intact parent is
+        #: one cached reference, so the diagnostic costs reductions, not
+        #: forwards, and it is what lets the record set the parent-reference
+        #: ranking beside the root one at every decision.
+        parent_kl_every_round = False
+        if declared_root:
+            root_store = ctx.root_reference
+            if root_store is None:
+                raise OperatorError(
+                    f"{self.impl_id}: its config declares "
+                    f"{KL_REFERENCE_KEY}={kl_reference!r} and no root "
+                    "reference store was handed to this invocation")
+            root_store.require_items(items)
+            root_store.require_identity(
+                support=support.as_dict(),
+                profile_hash=(None if ctx.profile is None
+                              else ctx.profile.profile_hash))
+            dtype = next(model.parameters()).dtype
+            root_store.require_execution(
+                micro_batch_size=ctx.execution.micro_batch_size,
+                packing=ctx.execution.calibration_batch_packing,
+                device_type=torch.device(compute).type,
+                model_dtype=str(dtype).replace("torch.", ""))
+            sketches = _RootSketches(root_store)
+            reference = None
+            parent_sketches = _ReferenceSketches(model, items, compute,
+                                                 top_k=support.top_k)
+            parent_kl_every_round = True
+        elif objective is not None and objective.requires_root_reference:
+            root_store = ctx.root_reference
+            if root_store is None:
+                raise OperatorError(
+                    f"{self.impl_id}: {objective.qualified_id} measures KL "
+                    "against the ROOT reference and no root reference store "
+                    "was handed to this invocation")
+            root_store.require_items(items)
+            root_store.require_identity(
+                support=support.as_dict(),
+                profile_hash=(None if ctx.profile is None
+                              else ctx.profile.profile_hash))
+            if union and not root_store.retrieves:
+                raise OperatorError(
+                    f"{self.impl_id}: {objective.qualified_id} needs the "
+                    "root's probability of candidate-only entries and root "
+                    f"reference {root_store.identity_hash[:12]} holds no "
+                    "retrieval state")
+            sketches = _RootSketches(root_store)
+            reference = None
+            #: The DIAGNOSTIC parent reference: round 0's candidates are also
+            #: reduced against the intact parent, so the record can set the
+            #: historical parent-KL ranking beside the root one. One parent
+            #: forward over the mixture, cached; not a decision input.
+            parent_sketches = _ReferenceSketches(model, items, compute,
+                                                 top_k=support.top_k)
+        elif support.is_full_vocab:
             reference = _ReferenceLogits(model, items, compute)
             sketches = None
         else:
@@ -166,6 +307,12 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         #: from the hashed config and therefore forks the state, unlike the batch
         #: size and packing above it.
         active = active_positions(items, ctx.position_policy)
+        if select_rows:
+            #: The reference state now holds only the scored rows; size it so.
+            sketches.restrict_to_scored(active)
+            if parent_sketches is not None:
+                parent_sketches.restrict_to_scored(active)
+        components_of = (() if objective is None else objective.components())
 
         # Operational timings, kept OUT of every returned metric and hash.
         #
@@ -194,18 +341,194 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                   "calibration_batch_packing": packing,
                   "distortion_calls": 0, "split_is_attributed": bool(cuda_sync)
                   or torch.device(compute).type != "cuda"}
+        if select_rows:
+            #: How many prediction slots reached the output head, against how
+            #: many the forwards held. Telemetry only, like everything here.
+            timing.update({"prediction_rows": ctx.execution.prediction_rows,
+                           "scored_rows": 0, "forward_rows": 0})
+        if objective is not None:
+            timing["objective_seconds"] = 0.0
+        if parent_sketches is not None:
+            timing["parent_kl_diagnostic"] = (
+                "every round's candidates" if parent_kl_every_round
+                else "round 0 candidates only")
+            #: The diagnostic's own reductions, so its cost can be measured
+            #: apart from the decision's. Unsynchronized like every split here
+            #: unless AADISTILL_DEPTH_SYNC_TELEMETRY=1.
+            timing["parent_kl_seconds"] = 0.0
+
+        def reference_kl(idx, lp, tail, abls, retrieval):
+            """``(kl, log_z, union evidence | None)`` against the reference.
+
+            Under the union support: the KL on the root's Top-K ∪ the
+            candidate's own Top-K + one tail, the root's probabilities of
+            candidate-only entries retrieved from the store (`retrieval()`).
+            Otherwise the reference-support KL, unchanged.
+            """
+            if union:
+                terms = union_forward_kl_terms(
+                    idx, lp, tail, abls, retrieval(), top_k=support.top_k,
+                    has_tail=sketches.has_tail)
+                return terms.kl, terms.log_z, terms.diagnostics()
+            kl, log_z = sketch_forward_kl_terms(idx, lp, tail, abls,
+                                                has_tail=sketches.has_tail)
+            return kl, log_z, None
+
+        def objective_values(kl, log_z, cand_logits, tail_log, mask, weights,
+                             group, components, histogram, joint,
+                             rows=None, ref=None, union_terms=None
+                             ) -> torch.Tensor:
+            """Per-item objective means from one group's per-position KL.
+
+            `cand_logits` are the candidate's -- the student whose confidence
+            the student forms read. The reference-confidence form reads `ref`
+            instead: the root's ``(entropy, confidence)`` aligned to `kl`, and
+            nothing of the candidate but its KL. Every component is averaged
+            over the same scored positions with the same fixed denominator,
+            and kept per sub-type. On the row path the inputs are the selected
+            ROWS and only the per-row scalars are scattered back; no
+            ``[B, T, V]`` block is built.
+            """
+            t0 = time.perf_counter()
+            terms = position_terms(
+                objective, kl, cand_logits, log_z,
+                tail_log if sketches.has_tail else None,
+                reference_entropy=None if ref is None else ref[0],
+                reference_confidence=None if ref is None else ref[1],
+                union=union_terms)
+            if rows is not None:
+                terms = {k: scatter_rows(v.float(), rows)
+                         for k, v in terms.items()}
+            means, _ = item_component_means(terms, mask, weights,
+                                            names=components_of)
+            scored = mask.bool() if weights is None else (
+                mask.bool() & (weights.to(mask.device) > 0))
+            hist = confidence_histogram(terms[objective.confidence_key()],
+                                        scored)
+            for i, h in enumerate(hist):
+                histogram[i] += h
+            joint[0] = add_joint_histograms(joint[0], terms, scored)
+            host = {k: v.tolist() for k, v in means.items()}
+            for row, item in enumerate(group.items):
+                bucket = components.setdefault(item["subtype"], {})
+                for name in components_of:
+                    bucket.setdefault(name, []).append(host[name][row])
+            timing["objective_seconds"] += time.perf_counter() - t0
+            return means["objective"]
+
+        def root_ref(group, rows=None, item=None):
+            """The root's (entropy, confidence) aligned to one path's KL."""
+            if root_store is None:
+                return None
+            if item is not None:
+                return (root_store.per_position(item, "entropy")[None],
+                        root_store.per_position(item, "confidence")[None])
+            if rows is not None:
+                return (root_store.per_position_rows(group, rows, "entropy"),
+                        root_store.per_position_rows(group, rows, "confidence"))
+            return (root_store.per_position_block(group, "entropy"),
+                    root_store.per_position_block(group, "confidence"))
 
         def score(skip: frozenset[int]) -> float:
             per_subtype: dict[str, list[float]] = {}
+            #: Round 0 only, and only under the root reference: the same
+            #: candidate logits reduced against the intact parent as well.
+            parent_kl: dict[str, list[float]] | None = (
+                {} if parent_sketches is not None
+                and (parent_kl_every_round or progress["rounds"] == 0)
+                else None)
+            components: dict[str, dict[str, list[float]]] = {}
+            histogram = [0] * 10
+            joint: list[Any] = [None]
             timing["candidate_subsets"] += 1
             item_started = time.perf_counter()
             for group, indices in groups:
+                if select_rows:
+                    #: Same groups, same weights, same per-item means; only the
+                    #: rows that reach the output head differ. See
+                    #: `aadistill.initialization.scoring.rows`.
+                    t0 = time.perf_counter()
+                    batch_weights = (None if active is None else
+                                     active.prediction_weights_for(group, indices))
+                    mask = group.prediction_mask().to(compute)
+                    rows = scored_rows(mask, batch_weights)
+                    #: The reference first and OUTSIDE the bypass: it is the
+                    #: intact parent, at exactly the rows the candidate scores.
+                    idx, lp, tail = sketches.sketch_rows(group, rows, adapter)
+                    if cuda_sync:
+                        cuda_sync()
+                    t1 = time.perf_counter()
+                    ids = group.input_ids.to(compute)
+                    attn = group.attention_mask.to(compute)
+                    if skip:
+                        with bypassed_blocks(model, skip):
+                            abls = scored_prediction_logits(adapter, model, ids,
+                                                            attn, rows)
+                    else:
+                        abls = scored_prediction_logits(adapter, model, ids,
+                                                        attn, rows)
+                    if cuda_sync:
+                        cuda_sync()
+                    t2 = time.perf_counter()
+                    timing["reference_seconds"] += t1 - t0
+                    timing["ablated_seconds"] += t2 - t1
+                    timing["ablated_forwards"] += 1
+                    timing["ablated_items"] += len(group.items)
+                    if objective is None:
+                        kl = sketch_forward_kl(idx, lp, tail, abls,
+                                               has_tail=sketches.has_tail)
+                        values = masked_item_means(scatter_rows(kl, rows), mask,
+                                                   weights=batch_weights)
+                    else:
+                        kl, log_z, uterms = reference_kl(
+                            idx, lp, tail, abls,
+                            lambda: root_store.retrieval_rows(group, rows))
+                        values = objective_values(
+                            kl, log_z, abls, tail, mask, batch_weights, group,
+                            components, histogram, joint, rows=rows,
+                            ref=root_ref(group, rows=rows),
+                            union_terms=uterms)
+                    if parent_kl is not None:
+                        tp = time.perf_counter()
+                        pi, pl, pt = parent_sketches.sketch_rows(
+                            group, rows, adapter)
+                        pkl = sketch_forward_kl(pi, pl, pt, abls,
+                                                has_tail=parent_sketches.has_tail)
+                        for item, v in zip(group.items, masked_item_means(
+                                scatter_rows(pkl, rows), mask,
+                                weights=batch_weights).tolist()):
+                            parent_kl.setdefault(item["subtype"], []).append(v)
+                        timing["parent_kl_seconds"] += time.perf_counter() - tp
+                    for item, value in zip(group.items, values.tolist()):
+                        per_subtype.setdefault(item["subtype"], []).append(value)
+                        timing["distortion_calls"] += 1
+                    if ctx.score_observer is not None:
+                        #: Execution only, as on the all-rows path. `refs` and
+                        #: `abls` are ROW tensors here (`rows` says which), so an
+                        #: observer that reshapes them as `[B, T, ...]` blocks
+                        #: must not be attached to a row-selected invocation.
+                        ctx.score_observer(
+                            skip=frozenset(skip), group=group, indices=indices,
+                            refs=(idx, lp, tail), abls=abls, mask=mask,
+                            weights=batch_weights, values=values,
+                            support=support, rows=rows)
+                    timing["scored_rows"] += int(rows.sum())
+                    timing["forward_rows"] += int(mask.numel())
+                    timing["distortion_seconds"] += time.perf_counter() - t2
+                    del abls, kl
+                    continue
                 # Order matters: the reference is the UNBYPASSED parent, so when
                 # it is being recomputed it must not be taken inside the bypass.
                 t0 = time.perf_counter()
                 if sketches is not None:
                     refs = (sketches.sketch_block(group) if batch_size > 1
                             else sketches.sketch_item(group.items[0]))
+                    #: The parent's reference too, OUTSIDE the bypass, when the
+                    #: round-0 diagnostic is on.
+                    prefs = (None if parent_kl is None else
+                             (parent_sketches.sketch_block(group)
+                              if batch_size > 1 else
+                              parent_sketches.sketch_item(group.items[0])))
                 elif batch_size > 1:
                     refs = reference.reference_block(group)
                 else:
@@ -251,7 +574,16 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                     batch_weights = (None if active is None else
                                      active.prediction_weights_for(group, indices))
                     mask = group.prediction_mask().to(abls.device)
-                    if sketches is not None:
+                    if sketches is not None and objective is not None:
+                        idx, lp, tail = refs
+                        kl, log_z, uterms = reference_kl(
+                            idx, lp, tail, abls,
+                            lambda: root_store.retrieval_block(group))
+                        values = objective_values(
+                            kl, log_z, abls, tail, mask, batch_weights, group,
+                            components, histogram, joint, ref=root_ref(group),
+                            union_terms=uterms)
+                    elif sketches is not None:
                         idx, lp, tail = refs
                         values = sketch_forward_kl_mean_batch(
                             idx, lp, tail, abls, mask,
@@ -259,6 +591,19 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                     else:
                         values = forward_kl_mean_batch(
                             refs, abls, mask, weights=batch_weights, chunk=512)
+                    #: THE PARENT-KL DIAGNOSTIC, from the SAME candidate logits,
+                    #: after the decision value exists and never feeding it.
+                    if parent_kl is not None:
+                        tp = time.perf_counter()
+                        pidx, plp, ptail = prefs
+                        for item, v in zip(group.items,
+                                           sketch_forward_kl_mean_batch(
+                                               pidx, plp, ptail, abls, mask,
+                                               has_tail=parent_sketches.has_tail,
+                                               weights=batch_weights
+                                               ).tolist()):
+                            parent_kl.setdefault(item["subtype"], []).append(v)
+                        timing["parent_kl_seconds"] += time.perf_counter() - tp
                     #: ONE host transfer for the whole batch.
                     for item, value in zip(group.items, values.tolist()):
                         per_subtype.setdefault(item["subtype"], []).append(value)
@@ -272,14 +617,46 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                             refs=refs, abls=abls, mask=mask,
                             weights=batch_weights, values=values,
                             support=support)
-                elif sketches is not None:
+                elif sketches is not None and objective is not None:
+                    dev = abls.device
+                    kl, log_z, uterms = reference_kl(
+                        refs.support_indices.to(dev),
+                        refs.support_log_probs.to(dev),
+                        refs.tail_log_prob.to(dev), abls,
+                        lambda: root_store.retrieval_item(group.items[0]))
+                    item_w = (None if active is None else
+                              active.prediction_weights_for_item(indices[0]))
+                    value = objective_values(
+                        kl[None], log_z[None], abls[None],
+                        refs.tail_log_prob.to(dev)[None],
+                        torch.ones(1, int(kl.shape[0]), dtype=torch.bool,
+                                   device=dev),
+                        None if item_w is None else item_w.to(dev)[None],
+                        group, components, histogram, joint,
+                        ref=root_ref(group, item=group.items[0]),
+                        union_terms=(None if uterms is None else
+                                     {k: v[None] for k, v in uterms.items()}))
+                    if parent_kl is not None:
+                        tp = time.perf_counter()
+                        parent_kl.setdefault(group.items[0]["subtype"],
+                                             []).append(sketch_forward_kl_mean(
+                            prefs, abls, weights=item_w))
+                        timing["parent_kl_seconds"] += time.perf_counter() - tp
                     per_subtype.setdefault(group.items[0]["subtype"], []).append(
-                        sketch_forward_kl_mean(
-                            refs, abls,
-                            weights=(None if active is None else
-                                     active.prediction_weights_for_item(
-                                         indices[0]))))
+                        float(value[0]))
                     timing["distortion_calls"] += 1
+                elif sketches is not None:
+                    item_w = (None if active is None else
+                              active.prediction_weights_for_item(indices[0]))
+                    per_subtype.setdefault(group.items[0]["subtype"], []).append(
+                        sketch_forward_kl_mean(refs, abls, weights=item_w))
+                    timing["distortion_calls"] += 1
+                    if parent_kl is not None:
+                        tp = time.perf_counter()
+                        parent_kl.setdefault(group.items[0]["subtype"],
+                                             []).append(sketch_forward_kl_mean(
+                            prefs, abls, weights=item_w))
+                        timing["parent_kl_seconds"] += time.perf_counter() - tp
                 else:
                     per_subtype.setdefault(group.items[0]["subtype"], []).append(
                         forward_kl_mean(
@@ -294,6 +671,30 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             timing["item_seconds"] += time.perf_counter() - item_started
             means = {k: sum(v) / len(v) for k, v in per_subtype.items()}
             primary, _ = domain_balanced_score(means, domains)
+            if declared_root:
+                #: The decision KL and, beside it, the parent-reference KL of
+                #: the same candidate under the same aggregation.
+                diagnostic, _ = domain_balanced_score(
+                    {sub: sum(v) / len(v) for sub, v in parent_kl.items()},
+                    domains)
+                reference_candidates[_subset_key(skip)] = {
+                    "round": progress["rounds"],
+                    "root_reference_kl": float(primary),
+                    "parent_reference_kl": float(diagnostic)}
+            if objective is not None:
+                record = {}
+                for name in components_of:
+                    by_subtype = {sub: sum(c[name]) / len(c[name])
+                                  for sub, c in components.items()}
+                    record[name], _ = domain_balanced_score(by_subtype, domains)
+                record["confidence_histogram"] = histogram
+                record["joint_histograms"] = joint[0]
+                if parent_kl is not None:
+                    #: Same aggregation as the KL the decision reads.
+                    record["parent_kl"], _ = domain_balanced_score(
+                        {sub: sum(v) / len(v) for sub, v in parent_kl.items()},
+                        domains)
+                objective_candidates[_subset_key(skip)] = record
             return primary
 
         n_remove = ctx.parent_spec[DEPTH_FIELD] - ctx.target_spec[DEPTH_FIELD]
@@ -340,25 +741,50 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         child = _build_child_with_layers(ctx, kept)
 
         final_score = result["rounds"][-1]["chosen_score"] if result["rounds"] else 0.0
+        values = {"op.depth.causal_kl.final": float(final_score),
+                  "op.depth.causal_kl.evaluations": float(result["evaluations"])}
+        if declared_root and result["rounds"]:
+            chosen = reference_candidates[_subset_key(result["removed"])]
+            values["op.depth.parent_kl_diagnostic.final"] = float(
+                chosen["parent_reference_kl"])
+        if objective is not None and result["rounds"]:
+            #: Under an objective the chosen score IS the objective, so the KL
+            #: key carries the chosen subset's raw KL and the objective has its
+            #: own key -- the KL never silently means something else.
+            final = objective_candidates[_subset_key(result["removed"])]
+            values["op.depth.causal_kl.final"] = float(final["raw_kl"])
+            values["op.depth.objective.final"] = float(final["objective"])
         return OperatorOutcome(
             model=child,
             local_metrics=OperatorLocalMetrics(
                 impl_id=self.impl_id,
                 objective=self.objective,
-                reference="parent_state",
-                values={
-                    "op.depth.causal_kl.final": float(final_score),
-                    "op.depth.causal_kl.evaluations": float(result["evaluations"]),
-                },
-                detail={"removal_order": result["removal_order"]}),
+                reference=("root_reference" if root_store is not None
+                           else "parent_state"),
+                values=values,
+                detail={"removal_order": result["removal_order"],
+                        **({} if objective is None else
+                           {"scoring_objective": objective.qualified_id}),
+                        **({KL_REFERENCE_KEY: kl_reference}
+                           if declared_root else {})}),
             trace={"micro_batch_size": batch_size,
                    #: Execution evidence, recorded even at the default so a run's
                    #: trace states which grouping its forwards used.
                    "calibration_batch_packing": packing,
+                   #: Recorded only when it is not the historical path, so a
+                   #: trace of an all-rows run is unchanged field for field.
+                   **({"prediction_rows": ctx.execution.prediction_rows}
+                      if select_rows else {}),
                    #: SCIENCE evidence: what the policy named in the hashed config
                    #: actually restricted.
                    "scoring_positions": (None if active is None
                                          else active.report()),
+                   **({} if objective is None else
+                      {"scoring_objective": objective.as_dict()}),
+                   #: Recorded only when declared, so a parent-reference
+                   #: trace is unchanged field for field.
+                   **({KL_REFERENCE_KEY: kl_reference} if declared_root
+                      else {}),
                    "kept_layers": kept, "removed_layers": result["removed"],
                    "removal_order": result["removal_order"],
                    "source": "causal_kl_greedy"},
@@ -369,7 +795,17 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             # have free. The numbers are identical either way, so the decision
             # belongs with the byproducts.
             artifacts={"search_rounds": result["rounds"],
+                       **({} if objective is None else
+                          {"objective_candidates": objective_candidates}),
+                       **({"reference_candidates": reference_candidates}
+                          if declared_root else {}),
                        "reference_cache": (reference or sketches).decision(),
+                       **({} if parent_sketches is None else
+                          {"parent_reference_cache": parent_sketches.decision(),
+                           "parent_kl_diagnostic": (
+                               "every round's candidates"
+                               if parent_kl_every_round
+                               else "round 0 candidates only")}),
                        # Operational only. `artifacts` is already excluded from
                        # the trace and from state identity — see the note above
                        # — which is exactly why the timings belong here and in
@@ -379,6 +815,11 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                        "reference_counters": (reference or sketches).counters()},
         )
 
+
+
+def _subset_key(skip) -> str:
+    """A candidate subset as a record key: its layers, ascending."""
+    return ",".join(str(i) for i in sorted(int(x) for x in skip))
 
 
 def _domain_map(items) -> dict[str, list[str]]:
@@ -466,6 +907,37 @@ def _forward_logits(model, item, device: str, skip=frozenset()):
         return model(ids).logits[0, :-1]
 
 
+class _RootSketches:
+    """The ROOT reference store behind the parent cache's interface.
+
+    Every view -- per item, per padded block, per selected row -- reads the
+    values the store computed once from the root; nothing is forwarded here.
+    """
+
+    def __init__(self, store) -> None:
+        self.store = store
+        self.has_tail = store.has_tail
+
+    def restrict_to_scored(self, active) -> None:
+        """Nothing to restrict: the store holds every row and the selection
+        happens per batch, from the same rows the candidate scores."""
+
+    def sketch_block(self, batch):
+        return self.store.sketch_block(batch)
+
+    def sketch_item(self, item):
+        return self.store.sketch_item(item)
+
+    def sketch_rows(self, batch, rows, adapter):
+        return self.store.sketch_rows(batch, rows)
+
+    def decision(self) -> dict[str, Any]:
+        return self.store.decision()
+
+    def counters(self) -> dict[str, int]:
+        return self.store.counters()
+
+
 class _ReferenceSketches:
     """The intact parent's reference as ``O(T*K)`` sketches, not ``O(T*V)`` logits.
 
@@ -494,6 +966,8 @@ class _ReferenceSketches:
         self.vocab = int(model.config.vocab_size)
         self._cache: dict[str, tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = {}
         items = list(items)
+        self._items = items
+        self.scored_rows_only = False
         positions = sum(int(i["input_ids"].shape[1]) - 1 for i in items)
         self.positions = positions
         k = max(1, min(self.top_k, self.vocab))
@@ -507,6 +981,10 @@ class _ReferenceSketches:
             * next(model.parameters()).dtype.itemsize)
         self.memory_before = memory_snapshot(device)
         self.available_bytes, self.headroom_source = _available_memory_bytes(device)
+        #: AFTER the probe, which returns the allocator's hoard first: the pair
+        #: of snapshots is the evidence that the release happened and what it
+        #: freed. Diagnostic only, like `memory_before`.
+        self.memory_after_probe = memory_snapshot(device)
         budget = (None if self.available_bytes is None
                   else _ReferenceLogits.BUDGET_FRACTION * self.available_bytes)
         self.enabled = budget is None or self.estimate_bytes <= budget
@@ -547,6 +1025,68 @@ class _ReferenceSketches:
                 self.recomputes += 1
         del block
         return self._assemble(batch, cached)
+
+    def restrict_to_scored(self, active) -> None:
+        """Hold sketches for the SCORED rows only, and re-size the budget so.
+
+        Under pre-vocabulary row selection a position the policy gives weight
+        zero is never projected, so its sketch would never be read. The cache
+        decision is re-taken against the smaller footprint; the values do not
+        depend on it either way.
+        """
+        scored = 0
+        for index, item in enumerate(self._items):
+            weights = (None if active is None
+                       else active.prediction_weights_for_item(index))
+            scored += (int(item["input_ids"].shape[1]) - 1 if weights is None
+                       else int((weights > 0).sum()))
+        k = self.effective_top_k
+        self.scored_rows_only = True
+        self.positions = scored
+        self.estimate_bytes = scored * (k * 4 + k * 8) + scored * 4 * 3
+        budget = (None if self.available_bytes is None
+                  else _ReferenceLogits.BUDGET_FRACTION * self.available_bytes)
+        self.enabled = budget is None or self.estimate_bytes <= budget
+        self.mode = "cached" if self.enabled else "recomputed"
+
+    def sketch_rows(self, batch, rows, adapter):
+        """``([N, K] indices, [N, K] log probs, [N] tail)`` for the scored rows.
+
+        Row-major over the batch -- the order `scored_prediction_logits` returns
+        the candidate's rows in -- so position ``n`` of the reference and of the
+        candidate is the same prediction of the same item. Filled from the SAME
+        canonical batch the candidate forwards use, for the reason the class
+        docstring gives.
+        """
+        items = list(batch.items)
+        cached = [self._cache.get(item["item_id"]) for item in items]
+        if not all(c is not None for c in cached):
+            logits = scored_prediction_logits(
+                adapter, self.model, batch.input_ids.to(self.device),
+                batch.attention_mask.to(self.device), rows)
+            n = int(logits.shape[0])
+            sk = sketch_reference(
+                logits, torch.zeros(n, dtype=torch.long, device=logits.device),
+                top_k=self.top_k, chunk=512)
+            del logits
+            parts = list(zip(split_rows(sk.support_indices, rows),
+                             split_rows(sk.support_log_probs, rows),
+                             split_rows(sk.tail_log_prob, rows)))
+            for index, item in enumerate(items):
+                if cached[index] is not None:
+                    self.hits += 1
+                    continue
+                cached[index] = tuple(x.clone() for x in parts[index])
+                if self.enabled:
+                    self._cache[item["item_id"]] = cached[index]
+                    self.fills += 1
+                else:
+                    self.recomputes += 1
+        else:
+            self.hits += len(items)
+        return (torch.cat([c[0] for c in cached]),
+                torch.cat([c[1] for c in cached]),
+                torch.cat([c[2] for c in cached]))
 
     def _assemble(self, batch, rows):
         """Cached per-item sketches back into the canonical padded shapes.
@@ -608,6 +1148,7 @@ class _ReferenceSketches:
             "cached": self.enabled,
             "distribution_support": SUPPORT_REFERENCE_TOPK_TAIL_V1,
             "top_k": self.effective_top_k,
+            **({"scored_rows_only": True} if self.scored_rows_only else {}),
             "has_tail": self.has_tail,
             "items_total": len(self._cache) or None,
             "positions": self.positions,
@@ -618,6 +1159,7 @@ class _ReferenceSketches:
             "available_bytes": self.available_bytes,
             "headroom_source": self.headroom_source,
             "memory_before": self.memory_before,
+            "memory_after_probe": self.memory_after_probe,
         }
 
 
@@ -920,12 +1462,24 @@ def _available_memory_bytes(device: Any) -> tuple[int | None, str]:
     The fallback when it does not fit is **recompute**, never a silent move to
     the host: a host-resident reference would drag the whole reduction back with
     it, which is the failure that cost a full paid search.
+
+    **The allocator's hoard is returned first** (2026-10-13). `mem_get_info`
+    counts blocks PyTorch has reserved but holds unused as taken, and inside a
+    search the earlier operators and state evaluations leave tens of GiB of
+    them. D1's formal search shows it: 15 of its 16 DEPTH expansions fell back
+    to recompute with 0.12 GiB "free" and 36.0 GiB reclaimable by
+    `empty_cache()` -- the remedy `memory_snapshot` names -- for a 0.14 GiB
+    sketch, and the recomputed invocations took 1,336-2,486 s against the
+    cached one's 1,179 s. `empty_cache()` changes no tensor and no kernel, and
+    cached and recomputed references are the same numbers, so only the
+    admission decision and the wall clock move.
     """
     dev = torch.device(device) if not isinstance(device, torch.device) else device
     if dev.type == "cuda":                       # pragma: no cover - needs a GPU
         try:
+            torch.cuda.empty_cache()
             free, _total = torch.cuda.mem_get_info(dev)
-            return int(free), f"cuda.mem_get_info:{dev}"
+            return int(free), f"cuda.mem_get_info:{dev} after empty_cache"
         except Exception:                                          # noqa: BLE001
             return None, "cuda.mem_get_info unavailable"
     return _host_available_memory_bytes()

@@ -1,0 +1,30 @@
+[05:19:16] budget: expected 584 min $10.60 · soft $22.00 · hard $22.54 (authorized $23.69)
+[05:19:17] NVIDIA L40S $1.09/h, stock Low
+[05:19:17] account funds OK: the provider account holds $142.2981 against the $30.0000 this session must be able to fund
+[05:19:17] run d2_search_20261015_051722, preregistration b52810921a4c, rows scored_v1
+[05:19:17] session contract verified at $0: config 5dd1ee154ca5
+[05:19:17] state-eval asset and both calibration mixtures verified
+[05:19:17] session commit d64490eeab75 verified: harness digests to 4829cf214343…, carries the authorization and only logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/governance/authorization.json differs from the authorized base
+[05:19:23] aad_autoinit_d64490ee.bundle round-trips
+[05:19:23] precheck OK: 0 relay inputs (), 3 local assets
+[05:19:24] watchdog detached — hard 1241 min = $22.54
+[05:19:24] created ricuwbh64pqlwd at $1.09/h
+[05:20:19]   starting (60s) — $0.02
+[05:21:02] TCP 22 at 202.181.159.229:14285 after 1.6 min
+[05:21:04] draw 1: ssh reachable — $0.03
+[05:21:35] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09
+[05:21:35] draw 1: running setup
+[05:25:15] draw 1: setup complete — $0.11
+[05:25:20] driver detached, pid 1615, confirmed by descriptor_probe — $0.11
+[05:27:39]   2026-10-15T05:25:18Z MARKER:DRIVER_START — $0.15
+[09:55:58]   2026-10-15T09:55:06Z MARKER:ALL_DONE — $5.02
+[09:55:58] polling ended: ALL_DONE — $5.02
+[09:58:01]   manifest rc=0
+5 file(s) across 5 class(es) -> /workspace/manifest.json
+  final_required: 5 · mutable_snapshot: 0 · final_streams_quiescent: True
+[10:09:11] teardown gate: allowed=True failed=None
+[10:09:11] deleting pod (gate passed)
+[10:09:22] pod deleted — 290.0 min, $5.27; provider confirms gone: True
+
+autoinit-d2-search COMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/runtime/session.json. D2 formal search: the committed Top-K and the search evidence are what it owes.
+LAUNCH_EXIT=0

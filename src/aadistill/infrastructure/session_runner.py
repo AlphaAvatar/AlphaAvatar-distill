@@ -523,6 +523,20 @@ class SessionRunner:
         return True
 
     # -- 3. create ---------------------------------------------------------
+    def placement(self) -> tuple[str, ...]:
+        """Provider flags constraining WHERE a pod is drawn, or nothing.
+
+        OPTIONAL BY CONSTRUCTION, read with `getattr` like `attached_volume`:
+        a launcher that declares no `--country-code` produces exactly the
+        command it produced before. A session whose host admission requires
+        one exact image identity (image AND host driver) may ask the provider
+        to draw where such hosts are, instead of paying a startup per refused
+        host elsewhere. It narrows the draw only: admission still decides what
+        is accepted, so a wrong constraint costs capacity, never identity.
+        """
+        country = str(getattr(self.a, "country_code", "") or "").strip()
+        return ("--country-code", country) if country else ()
+
     def attached_volume(self) -> tuple[str, ...]:
         """Provider flags for a pre-existing network volume, or nothing.
 
@@ -577,6 +591,7 @@ class SessionRunner:
                  "--gpu-id", self.a.gpu, "--gpu-count", "1",
                  "--container-disk-in-gb", str(self.a.disk_gb),
                  *self.attached_volume(),
+                 *self.placement(),
                  *(("--min-cuda-version", self.spec.commands.min_cuda_version)
                    if self.spec.commands.min_cuda_version else ()),
                  "--ports", "22/tcp",

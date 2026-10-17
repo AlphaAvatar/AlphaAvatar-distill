@@ -1,0 +1,39 @@
+{
+ "schema": "aadistill.budget.grant/v2",
+ "granted_by": "maintainer, 2026-10-10 UTC (2026-10-11 local +08:00), after independent review of exec/d1-behavioural-readiness@a8751785b846054d7690b83415db036a9f360b5e",
+ "granted_utc": "2026-10-10",
+ "rung": "screening",
+ "_contract": "AMENDMENT to the 2026-10-10 one-use screening grant, not a second grant. It raises ONE number -- the cumulative all-in envelope for D1 behavioural SCREENING -- and changes nothing else. The frozen scientific design, design hash, preregistration, Top-4 field, standing incumbent B, recovery seeds, battery, SESOI and decision rule are untouched and may not be touched to fit a budget.",
+ "previous_envelope_usd": 25.0053,
+ "additional_authorized_usd": 4.9947,
+ "cumulative_envelope_usd": 30.0,
+ "_what_the_envelope_means": "CUMULATIVE and ALL-IN, across every resource and subrun of the screening session. All four historical subruns are charged against it. This is NOT a fresh $30 allowance: the maintainer authorized at most $4.9947 of ADDITIONAL cumulative budget. A new attempt receives its own run-specific one-use authorization whose cap is DERIVED as envelope minus reconciled consumed, and may not exceed it.",
+ "cumulative_cap_usd": 490.0,
+ "_preserved_unchanged": {
+  "project_cap_usd": 490.0,
+  "per_session_envelope_usd": 30.0,
+  "formal_allowance_usd": 156.6523,
+  "package_total_usd": 181.7264,
+  "_note": "the amendment must preserve all four, and the issuer checks the envelope against the per-session limit rather than assuming it."
+ },
+ "covers": "ONE formal D1 behavioural SCREENING session on the frozen design f9c6688f... and preregistration aa70338a..., continuing the session the 2026-10-10 grant opened: the d1_screening battery, arms q1-q4 plus standing incumbent B (53e30566...), seeds 614923639 and 516448251, exactly 10 paired recovery/evaluation probes, recovery recipe and scoring unchanged. Ordinary pre-science engineering failures inside the cumulative envelope are repaired and retried autonomously.",
+ "does_not_authorize": [
+  "any further budget increase beyond the $30.0000 cumulative all-in envelope",
+  "a change to the frozen scientific protocol, design hash, preregistration, arms, seeds, battery, SESOI or decision rule",
+  "substitution of checkpoint identities",
+  "a new formal measurement beyond this screening scope",
+  "the CONFIRMATION rung, which needs its own separate formal authorization",
+  "a rerun of the completed D1 structural search",
+  "re-running, resuming or pooling a scientific measurement once formal measurement has begun"
+ ],
+ "engineering_autonomy": "Diagnose and repair ordinary infrastructure failures autonomously within this cumulative envelope. Targeted regressions after a coherent repair round; no patch-by-patch full suite, no unnecessary canaries, no CPU-only requirement where CPU cannot answer the question.",
+ "_the_price_is_derived_not_asked": "This grant states NO per-attempt hard_cap_usd, deliberately -- the issuer refuses a grant that states both. The attempt's cap is derived from the live secure rate, the rung's priced cell, and the reconciled consumed total. A lower live rate lowers it. A figure above this envelope is a refusal and a return to the maintainer, never an automatic increase.",
+ "_accounting_conditions_discharged_before_issuance": {
+  "run_index": "the four behavioural closeouts were absent from logs/index.json; regenerated through its owner scripts/maintenance/architecture/record_run_index.py, and all four are now discovered by derive_budget.",
+  "all_in_reconciliation": "cost.actual_usd is GPU price x elapsed and is NOT all-in. Reconciled to provider-measured all-in by account-balance bracketing: $8.3305 across the four subruns, against $8.2180 GPU-only -- a $0.1125 understatement. Owner: scripts/stages/stage-1/phase_d1/reconcile_d1_behavioural_spend.py; record: logs/stages/stage-1/phase_d1/analyses/d1_behavioural_spend_reconciliation.json.",
+  "precedence": "derive_budget now prefers money.all_in_usd over cost.actual_usd. No closeout in the set stated both, so no historical total moved.",
+  "no_snapshot_overwrite": "no balance snapshot was hand-edited and the frozen D1 design was not modified. Every figure is derived."
+ },
+ "authorizes": "at most $4.9947 of additional cumulative all-in spending for D1 behavioural screening, and nothing else",
+ "_date_is_utc": "the decision arrived on the dev box's local 2026-10-11 (+08:00) while UTC was still 2026-10-10. Records in this repository are dated UTC, and the grant gate refuses a future-dated grant -- which is what caught this."
+}

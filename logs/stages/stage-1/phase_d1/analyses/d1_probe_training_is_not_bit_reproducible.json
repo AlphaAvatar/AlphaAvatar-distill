@@ -1,0 +1,40 @@
+{
+ "schema": "aadistill.phase_d1.finding/v1",
+ "title": "Retraining a frozen probe unit yields a DIFFERENT checkpoint",
+ "status": "OBSERVED 2026-10-10 (UTC), on two paid sessions of the same frozen unit",
+ "record_role": "standing_fact",
+ "_contract": "A fact about D1's behavioural probes that constrains how their evidence may be combined. It changes no frozen protocol value and authorizes nothing; it exists so nobody later pools two artifacts that share an (arm, seed) label and differ in bytes.",
+ "the_observation": {
+  "frozen_unit": "d1_screening_q1_s614923639 -- arm q1, seed 614923639, recipe e1_p1_kd_heavy@0.86M",
+  "trained_twice": [
+   {"run_id": "d1_behavioural_20261010_103442",
+    "trained_sha256": "aadfb955cee4cef96e46a7c9285080270af5a965021ec3dfc8cdb98764221bb1",
+    "train_seconds": 3654.3,
+    "fate": "never scored; preserved off-pod, identity-verified"},
+   {"run_id": "d1_behavioural_20261010_132919",
+    "trained_sha256": "71387681f3a9d2162ad9aebd88b6c44eb32cd99f65437d4a95250790f86ab6c6",
+    "train_seconds": 3653.0,
+    "fate": "trained in the session that went on to score"}
+  ],
+  "same": ["arm", "recovery seed", "recipe", "pack", "initialization checkpoint identity", "trainer", "GPU model", "image"],
+  "different": ["the trained weight bytes"],
+  "_runtime_difference": "1.3 seconds out of 3654 -- the two trainings did the same work"
+ },
+ "why": "recovery training runs on CUDA in bf16 autocast. Reduction order in GEMMs and atomics is not fixed across launches, so a seeded run is reproducible in distribution and not bit-for-bit. A3 established the same property one level down for the ATTENTION scorer, where batch shape moved a top-k selection.",
+ "what_it_does_NOT_mean": [
+  "it is NOT a defect in the recipe, the seed derivation or the trainer: a recovery seed fixes the data order and the initialization, not the floating-point reduction order",
+  "it does NOT invalidate either session. Attempt 103442 produced no measurement at all -- its probe was never scored -- so there is no result to have retried, pooled or selected between",
+  "it does NOT make a screening comparison unsound. Every probe a given session scores is trained inside that session, so the five arms are compared to each other under one training execution"
+ ],
+ "what_it_DOES_constrain": {
+  "never_pool_across_sessions": "the preserved checkpoint of 103442 and the probe of 132919 are TWO ARTIFACTS for one (arm, seed) label. A ranking or verdict that mixed one session's probe with another's would compare arms measured under different training executions, which is precisely the pooling the retry policy forbids.",
+  "the_preserved_copy_is_unused_evidence": "103442's probe remains evidence that the durability mechanism works, and insurance. It is NOT an input to any measurement and must not become one.",
+  "restore_rather_than_retrain_next_time": "103442's closeout chose to retrain rather than restore, on transport cost: ~53 minutes to upload 2.38 GiB at the measured ~0.72 MB/s against ~61 minutes to retrain. On cost that reasoning was right and the saving was ~8 minutes. THIS OBSERVATION IS THE ARGUMENT AGAINST IT: P8.4 state 2 says 'restore the existing checkpoint and resume at scoring. Do not retrain it', and the reason is visible here -- retraining does not recreate the unit, it creates a second one. If a future session fails after training probes, RESTORE. The marginal minutes are not worth a second artifact under one label."
+ },
+ "owners": {
+  "attempt_103442_closeout": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/closeout/outcome.json",
+  "attempt_132919_record": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/",
+  "preserved_identity": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/preserved_trained_q1_s614923639.json"
+ },
+ "authorizes": "nothing"
+}

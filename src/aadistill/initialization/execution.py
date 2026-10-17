@@ -45,6 +45,23 @@ from aadistill.initialization.calibration.packing import (
 #: is the reference path.
 DEFAULT_MICRO_BATCH_SIZE = 4
 
+#: WHICH prediction rows reach the output head and the vocabulary reductions.
+#:
+#: ``all_v1`` is the historical path: every slot of a forward -- padding and
+#: zero-weight positions included -- is projected to ``[.., V]`` logits, and the
+#: scoring weights are applied only when the per-position values are summed.
+#:
+#: ``scored_v1`` selects BEFORE the output head: the backbone still runs over
+#: the whole sequence (causal context is unchanged), and only the rows the
+#: reducer would give non-zero weight -- valid AND scored by the position policy
+#: -- are projected and normalized. The estimand is identical, because a
+#: zero-weight row contributes exactly zero under either path; what changes is
+#: the arithmetic path (a smaller output-head GEMM and a different row grouping),
+#: which is why it is an execution knob AND a fingerprint field.
+PREDICTION_ROWS_ALL_V1 = "all_v1"
+PREDICTION_ROWS_SCORED_V1 = "scored_v1"
+PREDICTION_ROW_POLICIES = (PREDICTION_ROWS_ALL_V1, PREDICTION_ROWS_SCORED_V1)
+
 
 class ExecutionError(ValueError):
     """An execution setting is not usable."""
@@ -78,7 +95,18 @@ class ExecutionConfig:
     #: and deliberately does not decide who hashes them.
     calibration_batch_packing: str = ORIGINAL_ORDER_V1
 
+    #: Pre-vocabulary row selection; see `PREDICTION_ROW_POLICIES`. The default
+    #: is the historical path and is OMITTED from the trace and the fingerprint,
+    #: so every execution identity recorded before this field existed is
+    #: byte-identical -- the same discipline `DistributionSupport.as_dict` and
+    #: `positions.policy_config` apply to their own historical defaults.
+    prediction_rows: str = PREDICTION_ROWS_ALL_V1
+
     def __post_init__(self) -> None:
+        if self.prediction_rows not in PREDICTION_ROW_POLICIES:
+            raise ExecutionError(
+                f"unknown prediction_rows {self.prediction_rows!r}; known: "
+                f"{list(PREDICTION_ROW_POLICIES)}")
         if self.calibration_batch_packing not in PACKING_POLICIES:
             raise ExecutionError(
                 f"unknown calibration_batch_packing "
@@ -93,10 +121,18 @@ class ExecutionConfig:
                 f"micro_batch_size must be >= 1, got {size}; 1 is the "
                 "one-item-per-forward reference path")
 
+    @property
+    def selects_prediction_rows(self) -> bool:
+        """True when only scored rows reach the output head."""
+        return self.prediction_rows == PREDICTION_ROWS_SCORED_V1
+
     def as_trace(self) -> dict[str, Any]:
         """What an operator records about how it ran. Evidence, not identity."""
-        return {"micro_batch_size": int(self.micro_batch_size),
-                "calibration_batch_packing": str(self.calibration_batch_packing)}
+        trace = {"micro_batch_size": int(self.micro_batch_size),
+                 "calibration_batch_packing": str(self.calibration_batch_packing)}
+        if self.prediction_rows != PREDICTION_ROWS_ALL_V1:
+            trace["prediction_rows"] = str(self.prediction_rows)
+        return trace
 
     #: Which of this config's fields affect the BYTES a materialization produces.
     #:
@@ -111,6 +147,11 @@ class ExecutionConfig:
     #: class, which is why `specs.materialization` asks rather than enumerates.
     FINGERPRINT_FIELDS = ("micro_batch_size", "calibration_batch_packing")
 
+    #: Byte-affecting fields that are ABSENT at their historical default. Present
+    #: in the fingerprint only when a run chose a non-default value, so adding one
+    #: forks no identity recorded before it existed.
+    OPTIONAL_FINGERPRINT_FIELDS = ("prediction_rows",)
+
     def as_fingerprint(self) -> dict[str, Any]:
         """The byte-affecting subset, for the numerical execution fingerprint."""
         trace = self.as_trace()
@@ -120,7 +161,10 @@ class ExecutionConfig:
                 f"{missing} are declared byte-affecting but `as_trace` does not "
                 "report them; a fingerprint field with no serialization is a "
                 "field no record can be checked against")
-        return {f: trace[f] for f in self.FINGERPRINT_FIELDS}
+        out = {f: trace[f] for f in self.FINGERPRINT_FIELDS}
+        out.update({f: trace[f] for f in self.OPTIONAL_FINGERPRINT_FIELDS
+                    if f in trace})
+        return out
 
 
 #: The value every caller gets unless it says otherwise.

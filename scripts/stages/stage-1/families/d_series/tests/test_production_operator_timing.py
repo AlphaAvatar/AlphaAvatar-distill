@@ -391,6 +391,222 @@ class TestTheRealOperatorRunsThroughThatBuilder:
                     "the reducer was handed weights the policy did not produce")
 
 
+class TestTheObjectiveKeyword:
+    """Stage L times the D2 objective through the SAME builder (2026-10-13).
+
+    The default must leave D1's KL-only context -- and so the Top-K adoption's
+    and R0's hashed configs -- exactly as they were; the objective must reach
+    both the hashed config and the context, because `execute` refuses a
+    disagreement; and the real operator must run with it and report the
+    objective's own seconds, which is what stage L's DEPTH pair reads.
+    """
+
+    @staticmethod
+    def _ctx(tmp_path, objective=None, layers=5, root_reference=None):
+        from aadistill.initialization.adapters import register_builtin_adapters
+        from aadistill.initialization.operators.register import (
+            register_builtin_operators,
+        )
+        from aadistill.initialization.scoring.positions import (
+            SUPERVISED_TARGET_V1,
+        )
+        from aadistill.initialization.specs.arch import get_adapter
+
+        register_builtin_adapters()
+        register_builtin_operators()
+        #: A vocabulary above the objective's Top-200: the student's own Top-K
+        #: entropy is refused when K exceeds V, as it should be.
+        model = build_tiny_model({**GEOMETRY, "vocab_size": 256})
+        model.config.use_cache = False
+        adapter = get_adapter("qwen3")
+        parent = adapter.spec_of(model)
+        return drv.production_operator_context(
+            adapter=adapter, model=model,
+            target_spec=parent.replace(num_hidden_layers=layers),
+            profile=None, items=_toy_items(), seed=0, device="cpu",
+            workdir=tmp_path / "w", policy=SUPERVISED_TARGET_V1,
+            objective=objective, root_reference=root_reference)
+
+    def test_the_default_is_d1s_kl_only_context(self, tmp_path):
+        ctx = self._ctx(tmp_path)
+        assert ctx.scoring_objective is None
+        assert "scoring_objective" not in ctx.config
+
+    def test_the_objective_reaches_config_and_context(self, tmp_path):
+        from stages.d_series import objectives as O
+
+        #: Stage L's objective: the superseded D2, which stage L measured.
+        obj = O.D2_STUDENT_UNCERTAINTY_SUPERSEDED
+        ctx = self._ctx(tmp_path, obj)
+        assert ctx.scoring_objective is obj
+        assert ctx.config["scoring_objective"] == obj.as_dict()
+
+    def test_one_round_runs_with_the_objective_and_reports_its_seconds(
+            self, tmp_path):
+        from aadistill.initialization.operators.base import get_implementation
+        from stages.d_series import objectives as O
+
+        impl = get_implementation("depth.causal_kl_greedy_v1")
+        plain = impl.execute(self._ctx(tmp_path / "a"))
+        with_obj = impl.execute(self._ctx(
+            tmp_path / "b", O.D2_STUDENT_UNCERTAINTY_SUPERSEDED))
+        assert len(with_obj.artifacts["search_rounds"]) == 1
+        assert with_obj.artifacts["timing"]["candidate_subsets"] == \
+            plain.artifacts["timing"]["candidate_subsets"] == \
+            GEOMETRY["num_hidden_layers"]
+        assert with_obj.artifacts["timing"].get("objective_seconds") is not None
+        assert plain.artifacts["timing"].get("objective_seconds") is None
+
+    def test_the_redesigned_d2_runs_on_a_root_store_and_refuses_without(
+            self, tmp_path):
+        """The production context carries the root store the redesigned D2
+        reads; without one, execution is a contract violation."""
+        from aadistill.initialization.operators.base import (
+            ContractViolation, get_implementation,
+        )
+        from aadistill.initialization.scoring.reference_store import (
+            build_root_reference_store, root_reference_identity,
+        )
+        from stages.d_series import objectives as O
+        from stages.d_series import scoring_protocol as SP
+
+        #: Stage V's production context ran VERSION 2 on the D-series
+        #: support; version 3 needs the union support and its store.
+        impl = get_implementation("depth.causal_kl_greedy_v1")
+        with pytest.raises(ContractViolation, match="ROOT"):
+            impl.execute(self._ctx(tmp_path / "a", O.D2_V2_OBJECTIVE))
+        ctx = self._ctx(tmp_path / "b", O.D2_V2_OBJECTIVE)
+        ctx.root_reference = build_root_reference_store(
+            ctx.model, ctx.calibration_items, support=SP.D_SERIES_SUPPORT,
+            identity=root_reference_identity(
+                root_identity={"teacher_id": "toy"}, profile_hash="p",
+                support=SP.D_SERIES_SUPPORT),
+            micro_batch_size=ctx.execution.micro_batch_size,
+            packing=ctx.execution.calibration_batch_packing, device="cpu")
+        out = impl.execute(ctx)
+        assert out.local_metrics.reference == "root_reference"
+        rec = next(iter(out.artifacts["objective_candidates"].values()))
+        assert "reference_confidence" in rec and "parent_kl" in rec
+
+
+class TestStageLPremises:
+    """Stage L's `$0` premises resolve on the dev box's staged inputs."""
+
+    def test_the_registered_pool_is_refused_when_it_moves(self):
+        from stages.d_series import reference_calibration as CAL
+
+        CAL.assert_registered_pool(dict(CAL.REGISTERED_POOL))
+        with pytest.raises(ValueError, match="registered"):
+            CAL.assert_registered_pool({"draws": 209, "unique": 146})
+
+    def test_the_timing_pairs_are_gated_on_their_whole_bound(self):
+        class Left:
+            def __init__(self, s):
+                self.s = s
+
+            def remaining(self):
+                return self.s
+
+        for name, bound in drv.L_STEP_BOUND_S.items():
+            assert drv._time_left(Left(bound), bound)
+            assert not drv._time_left(Left(bound - 1), bound)
+        assert drv._time_left(None, 10 ** 9)
+
+    def test_an_extended_step_never_starves_a_core_one(self):
+        b = drv.L_STEP_BOUND_S
+        assert drv.step_need_s("state_eval", set()) == b["state_eval"]
+        #: Before the DEPTH pair has run, the scored-rows state evaluation
+        #: must leave the pair its whole bound too.
+        assert drv.step_need_s("d2_rows_state_eval", {"state_eval"}) == \
+            b["d2_rows_state_eval"] + b["depth_one_round"]
+        assert drv.step_need_s("d2_rows_depth",
+                               {"state_eval", "depth_one_round"}) == \
+            b["d2_rows_depth"]
+        assert set(drv.L_CORE_STEPS) <= set(b)
+
+    def test_table_agreement_is_exact_or_says_how_far(self):
+        a = [("[1]", 2.0), ("[2]", 1.0), ("[3]", 3.0)]
+        same = drv.table_agreement(a, list(a), relative_tolerance=0.0)
+        assert same["within_tolerance"] and same["max_relative_difference"] == 0
+        moved = drv.table_agreement(a, [("[1]", 0.5), ("[2]", 1.0),
+                                        ("[3]", 3.0)], relative_tolerance=1e-5)
+        assert not moved["choice_agrees"] and not moved["within_tolerance"]
+        near = drv.table_agreement(a, [("[1]", 2.0 * (1 + 1e-7)), ("[2]", 1.0),
+                                       ("[3]", 3.0)], relative_tolerance=1e-5)
+        assert near["within_tolerance"] and near["max_relative_difference"] > 0
+        short = drv.table_agreement(a, a[:2], relative_tolerance=0.0)
+        assert not short["same_candidates"] and not short["within_tolerance"]
+
+    @staticmethod
+    def _arm(mode="cached", hoarded=40.0, before=0.12, after=36.0,
+             recomputes=0, fills=67):
+        return {"hoarded_gib": hoarded,
+                "cache": {"mode": mode, "sketch_bytes_estimate": 144148356,
+                          "memory_before_probe": {"driver_free_gib": before},
+                          "memory_after_probe": {"driver_free_gib": after}},
+                "counters": {"reference_recomputes": recomputes,
+                             "reference_fills": fills}}
+
+    def test_cache_fix_evidence_needs_the_whole_chain(self):
+        assert drv._cache_fix_evidence(self._arm())
+        for bad in (dict(mode="recomputed"), dict(hoarded=0.0),
+                    dict(before=20.0), dict(after=0.12), dict(recomputes=3),
+                    dict(fills=0)):
+            assert not drv._cache_fix_evidence(self._arm(**bad)), bad
+
+    def test_the_d2_rows_verdict_needs_both_comparisons(self):
+        ok = {"timing_d2_rows_state_eval": {"within_tolerance": True},
+              "timing_d2_rows_depth": {"agreement": {"within_tolerance": True}}}
+        assert drv.d2_rows_verdict(ok)["verdict"] == "PASS"
+        assert drv.d2_rows_verdict({**ok, "timing_d2_rows_depth": {
+            "skipped": "deadline"}})["verdict"] == "INCOMPLETE"
+        fail = {**ok, "timing_d2_rows_state_eval": {"within_tolerance": False}}
+        verdict = drv.d2_rows_verdict(fail)
+        assert verdict["verdict"] == "FAIL" and "all_v1" in verdict["consequence"]
+
+    def test_the_raw_kl_control_pairs_the_real_metric_names(self):
+        kl = {"state.teacher_kl.equal_domain_mean": 1.0,
+              "state.teacher_kl.worst_domain": 2.0,
+              "state.critical_token_kl": 3.0,
+              "state.critical_token_kl.digit": 4.0}
+        d2 = {"state.objective.raw_kl.equal_domain_mean": 1.0,
+              "state.objective.raw_kl.worst_domain": 2.0 + 1e-7,
+              "state.objective.raw_kl.critical_token": 3.0,
+              "state.objective.raw_kl.critical_token.digit": 4.5,
+              "state.objective.equal_domain_mean": 9.0}
+        out = drv.raw_kl_control(kl, d2)
+        assert out["metrics_compared"] == 4
+        assert out["max_abs_difference"] == pytest.approx(0.5)
+
+    def test_objective_agreement_compares_objective_metrics_only(self):
+        a = {"state.objective.equal_domain_mean": 1.0,
+             "state.objective.raw_kl.worst_domain": 2.0,
+             "state.teacher_kl.worst_domain": 7.0}
+        b = {**a, "state.objective.equal_domain_mean": 1.0 + 2e-6,
+             "state.teacher_kl.worst_domain": 9.0}
+        out = drv.objective_agreement(a, b, 1e-5)
+        assert out["metrics_compared"] == 2 and out["within_tolerance"]
+        assert not drv.objective_agreement(a, {**b, "state.objective.x": 1.0},
+                                           1e-5)["within_tolerance"]
+        assert not drv.objective_agreement(a, b, 1e-6)["within_tolerance"]
+
+    def test_the_premises_resolve(self):
+        mixture = REPO / "artifacts/stages/stage-1/state_eval_v1/items.jsonl"
+        if not mixture.is_file():
+            pytest.skip("state_eval_v1 is not staged on this host")
+        from aadistill.initialization.adapters import register_builtin_adapters
+        from shared.calibration import register_builtin_profiles
+
+        register_builtin_adapters()
+        register_builtin_profiles()
+        try:
+            premises = drv._reference_calibration_premises(REPO)
+        except FileNotFoundError as exc:
+            pytest.skip(f"a calibration mixture is not staged here: {exc}")
+        assert premises["pool"] == {"draws": 209, "unique": 147}
+        assert premises["incumbent"]["artifact_digest"].startswith("53e30566")
+
+
 class TestTheCeilingArm:
     """Which D1 arm the priced invocation must run, measured on the REAL items.
 

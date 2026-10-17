@@ -1,0 +1,33 @@
+{
+ "_contract": "WHAT THE MAINTAINER DECIDED, and only that. Every other field of the authorization -- identities, stages, plan hash, contract hash, seeds, probe count, battery, harness, ceiling -- is DERIVED by d2_screening_authorization.build_payload(rung='confirmation') from the tree it binds, and this grant is REFUSED if it states one.",
+ "_one_use": "ONE issuance, ONE launcher session per authorization. A replacement after a pre-science engineering failure is a NEW one-use authorization netted against this cumulative envelope (prefix d2_confirmation_), issued only while the remainder holds a full session's hard ceiling plus the teardown reserve and never over an attempt whose cost is not booked or whose teardown is not verified.",
+ "rung": "confirmation",
+ "approves_preregistration_hash": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+ "cumulative_envelope_usd": 12.0,
+ "granted_by": "maintainer, 2026-10-16 UTC: D2 Screening Independent Review / c4 Shared Confirmation (independent review of 6bc472f6). Accepts the screening as COMPLETE and its frozen result ONE_CANDIDATE_ADVANCES: c4 (3a4173e4eff45b0d73fd82bd0b263f03), and DECIDES to run c4's shared confirmation; the executor's recommendation not to fund it is not adopted. A research-investment decision, not a claim that c4 is better than B.",
+ "covers": "ONE D2 shared-confirmation session under d_series_shared_eval@v1: c4 only, from its INITIAL committed checkpoint, at seeds 396880939, 766527341, 1004399678; the frozen e1_p1_kd_heavy@0.86M recovery; the frozen d1_confirmation battery, generation and scoring; failure-isolated rescoring; durable evidence; the off-pod frozen verdict against B's three imported confirmation units (q2 descriptive).",
+ "accepted_range": {
+  "hardware": "NVIDIA L40S on the protocol's exact image identity (host driver 595.91.07); AU draws preferred, admission unchanged",
+  "expected_session_usd": "about 6.59 at 1.09/h (re-derived at the live rate)",
+  "planning_hard_ceiling_usd": "about 8.21 at 1.09/h (re-derived at the live rate)",
+  "teardown_reserve_usd": 0.3,
+  "cumulative_envelope_usd": 12.0,
+  "per_session_envelope_usd": 30.0,
+  "project_cap_usd": 595.0,
+  "rule": "$12 is the confirmation's cumulative ceiling, not a target; every issuance needs remainder >= derived hard ceiling + reserve; host refusals and paid time are in the same ledger; the D3 + fresh-confirmation reservation must hold at every issuance"
+ },
+ "verdict_rule": "the registered one: correct_overall, SESOI 0.01, one-sided alpha 0.025, the frozen prompt-cluster bootstrap at the registered seed, >= 2 of 3 seed deltas positive, the usable-rollout veto; SHARED_GO / NO_GO / INCONCLUSIVE, INCONCLUSIVE terminal; no threshold moves after the screening's small margin",
+ "does_not_authorize": [
+  "adding c1/c2/c3 or re-screening",
+  "retraining, regenerating or re-evaluating B or q2",
+  "reusing screening-trained weights in place of confirmation training",
+  "any change to seeds, SESOI, alpha, the bootstrap or the battery",
+  "D3",
+  "a fresh independent confirmation",
+  "any promotion",
+  "a cap change"
+ ],
+ "stop_boundary": "after the confirmation verdict, stop at the next scientific authorization boundary",
+ "decision_record": "logs/budget/decisions.md 2026-10-16 (maintainer decides to run c4's shared confirmation; $12.00 cumulative)",
+ "authorizes": "nothing by itself: a launch needs the issued one-use authorization"
+}

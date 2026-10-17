@@ -1,0 +1,39 @@
+{
+ "schema": "aadistill.engineering_authorization/v1",
+ "authorization_id": "d_series_reference_calibration",
+ "book": "ENGINEERING",
+ "all_in_ceiling_usd": 1.76,
+ "session_cap_usd": 1.42,
+ "_ceiling_composition": "the must-complete work plus both core stage-L steps at their bounds ($1.42, 77.3 min at $1.09/h incl. disk) + the $0.30 teardown reserve + $0.04 rounding. The reserve is INSIDE this figure",
+ "rate_basis_usd_per_hour": 1.09,
+ "rate_rule": "re-quoted live at launch; the launcher derives the session ceiling and timeout from the live rate and refuses if the cap no longer buys the work",
+ "order": "only after R0's session has closed (R0 first)",
+ "covers": [
+  "stage L of topk_adoption_driver.py on one L40S pod: B rebuilt, lambda and thresholds, the rescoring timing, the objective-overhead steps, the reference-cache fix evidence under a hoarded allocator, and the cached-vs-recomputed and D2 scored-rows equivalence steps"
+ ],
+ "does_not_cover": [
+  "any D2/D3 search, candidate or behavioural measurement",
+  "recording a D2 DEPTH table or choice",
+  "a second pod for a failed stage without a recorded engineering cause",
+  "any spend above the all-in ceiling, cumulative across subruns"
+ ],
+ "plan": "logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/plan.json",
+ "plan_sha256": "736c0a8338cd87646413b7b881f3a369b56535bd11ec04a4461dfc4a3e54dea2",
+ "campaign": "logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/campaign.json",
+ "command": "ADOPT_CAMPAIGN=logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/campaign.json ADOPT_COMMIT=<this grant's commit> ADOPT_BRANCH=exec/d1-behavioural-readiness ADOPT_STAGES=L ADOPT_PREDICTION_ROWS=all_v1 SESSION_CAP=1.42 bash scripts/stages/stage-1/phase_d1/topk_adoption_launch.sh refcal_<utc>",
+ "on_ordinary_failure": "repair and retry inside this ceiling (AGENTS.md P12.1); a deterministic paid failure is never retried unchanged",
+ "authorizes": "reference-calibration engineering sessions inside the all-in ceiling, cumulative across every subrun; a rerun never resets it",
+ "status": "GRANTED",
+ "granted_utc": "2026-10-13T17:06:59Z",
+ "decision_record": "logs/budget/decisions.md 2026-10-13 (post-48fcc638 review: R0 then the reference calibration)",
+ "granted_by": "maintainer, via the post-48fcc638 independent review ($1.76 / $1.42)",
+ "precondition_met": "R0 closed and reviewed first: run r0_20261013_154325, PASS, $1.5074 (prediction-rows-r0/v1/campaign.json)",
+ "programme_engineering_limit_usd": 5.76,
+ "pre_launch_checks": {
+  "engineering_remaining_usd": 5.1436,
+  "project_remaining_usd": 120.948,
+  "live_secure_usd_per_hour": 1.09,
+  "stock": "Low",
+  "checked_utc": "2026-10-13T17:06:59Z"
+ }
+}

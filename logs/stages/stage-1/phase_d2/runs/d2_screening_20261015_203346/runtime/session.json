@@ -1,0 +1,2260 @@
+{
+  "schema": "aadistill.autoinit.d2_screening_session/v1",
+  "session_id": "autoinit-d2-screening",
+  "session_spec": {
+    "session_id": "autoinit-d2-screening",
+    "schema": "aadistill.autoinit.d2_screening_session/v1",
+    "description": "D2 behavioural SCREENING on d_series_shared_eval@v1: the four committed D2 initializations, staged from the relay and verified at all four identities, each trained under the frozen recovery recipe at the two shared screening seeds, generated through the unchanged generator, admitted against the shared rung's evaluation protocol, scored by the pinned scorer, and rollout-rescored as a diagnostic. Stops at preservation; the ranking against B's imported units is computed off-pod.",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/governance/authorization.json",
+    "authorization_type": "D2ScreeningAuthorization.load",
+    "plan_id": "autoinit.v1.phase_d2.screening",
+    "plan_hash": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+    "status_path": "/workspace/autoinit_d2_screening.status",
+    "run_log_path": "/workspace/autoinit_d2_screening_run.log",
+    "driver_job_id": "autoinit_d2_screening_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "autoinit_d2_screening",
+      "evidence_filename": "d2_screening.json",
+      "archive_basename": "d2_screening_artifacts.tar.gz",
+      "spec_success": "configs/stages/stage-1/phase_d2/d2_screening_artifacts.json",
+      "spec_failed": "configs/stages/stage-1/phase_d2/d2_screening_artifacts_failed.json",
+      "report_names": [
+        "d2_screening.json"
+      ]
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "d2_screening"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_AUTH_PATH",
+        "SESSION_PLAN_HASH",
+        "SESSION_KIND",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/model.safetensors",
+          "dest": "artifacts/stages/stage-1/phase_d2/arms/59013099b902f213649b8aa4c676dedd",
+          "sha256": "7b52fb15a7b397d8e00e5cd39e2f667a83bd4d5d9aa2b857d11fe5dfc3cac138",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/config.json",
+          "dest": "artifacts/stages/stage-1/phase_d2/arms/59013099b902f213649b8aa4c676dedd",
+          "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/generation_config.json",
+          "dest": "artifacts/stages/stage-1/phase_d2/arms/59013099b902f213649b8aa4c676dedd",
+          "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/model.safetensors",
+          "dest": "artifacts/stages/stage-1/phase_d2/arms/c2cb27efcf68b4f18bf7284aea84877a",
+          "sha256": "9a0f41e98a38ca69a86a45197f97c5fdb06ecb37db2f3480c77730dbd567d728",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/config.json",
+          "dest": "artifacts/stages/stage-1/phase_d2/arms/c2cb27efcf68b4f18bf7284aea84877a",
+          "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/generation_config.json",
+          "dest": "artifacts/stages/stage-1/phase_d2/arms/c2cb27efcf68b4f18bf7284aea84877a",
+          "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/model.safetensors",
+          "dest": "artifacts/stages/stage-1/phase_d2/arms/30fe791a85d70ac713e75893fea107ae",
+          "sha256": "52c511c67badbecb5a75bff585bf4db66ce198dc6f30f398965a06a1fcb19d52",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/config.json",
+          "dest": "artifacts/stages/stage-1/phase_d2/arms/30fe791a85d70ac713e75893fea107ae",
+          "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/generation_config.json",
+          "dest": "artifacts/stages/stage-1/phase_d2/arms/30fe791a85d70ac713e75893fea107ae",
+          "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/model.safetensors",
+          "dest": "artifacts/stages/stage-1/phase_d2/arms/3a4173e4eff45b0d73fd82bd0b263f03",
+          "sha256": "5d6c0a5a2c04bfc4cf75fd301e06b93affc557ab142229585f0a10c8029d0fbe",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/config.json",
+          "dest": "artifacts/stages/stage-1/phase_d2/arms/3a4173e4eff45b0d73fd82bd0b263f03",
+          "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/generation_config.json",
+          "dest": "artifacts/stages/stage-1/phase_d2/arms/3a4173e4eff45b0d73fd82bd0b263f03",
+          "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [
+        "d1_screening:artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1",
+        "d1_confirmation:artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 2700,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [],
+      "test_paths": [
+        "scripts/stages/stage-1/phase_d2/tests/screening_pod_preflight"
+      ],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "TEACHER_READY",
+        "VLLM_READY",
+        "TESTS_OK",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 6,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-10-15T20:35:08+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 817 min $14.85 \u00b7 soft $18.62 \u00b7 hard $19.17 (authorized $19.46)"
+    },
+    {
+      "utc": "2026-10-15T20:35:08+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Low"
+    },
+    {
+      "utc": "2026-10-15T20:35:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $136.6069 against the $30.0000 this session must be able to fund"
+    },
+    {
+      "utc": "2026-10-15T20:35:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "run d2_screening_20261015_203346, preregistration b52810921a4c"
+    },
+    {
+      "utc": "2026-10-15T20:35:12+00:00",
+      "elapsed_min": 0.0,
+      "msg": "contract verified at $0: 6d4283e77e1b2654, 8 probes"
+    },
+    {
+      "utc": "2026-10-15T20:35:12+00:00",
+      "elapsed_min": 0.0,
+      "msg": "12 arm files on the relay at their pins"
+    },
+    {
+      "utc": "2026-10-15T20:35:13+00:00",
+      "elapsed_min": 0.0,
+      "msg": "session commit 39e5bdf9e71c verified: harness digests to 84d499fa20b1\u2026, carries the authorization and only logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "utc": "2026-10-15T20:35:13+00:00",
+      "elapsed_min": 0.0,
+      "msg": "no previous attempt failed deterministically; 3 prior log(s) read"
+    },
+    {
+      "utc": "2026-10-15T20:35:18+00:00",
+      "elapsed_min": 0.0,
+      "msg": "aad_autoinit_39e5bdf9.bundle round-trips"
+    },
+    {
+      "utc": "2026-10-15T20:35:19+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 18 relay inputs (18 from AlphaAvatar/aadistill-artifacts), 2 local assets"
+    },
+    {
+      "utc": "2026-10-15T20:35:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 1: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-15T20:40:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 2: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-15T20:45:21+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 3: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-15T20:50:22+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 4: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-15T20:55:22+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 5: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-15T21:00:23+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 6: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-15T21:05:23+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 7: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-15T21:10:24+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 8: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-15T21:15:25+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 9: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-15T21:20:25+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 10: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-15T21:25:26+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 11: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-15T21:30:26+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 12: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-15T21:35:27+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 13: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-15T21:40:28+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 1055 min = $19.17"
+    },
+    {
+      "utc": "2026-10-15T21:40:28+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created 7stah5j2s98e69 at $1.09/h"
+    },
+    {
+      "utc": "2026-10-15T21:41:23+00:00",
+      "elapsed_min": 0.92,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-10-15T21:42:17+00:00",
+      "elapsed_min": 1.82,
+      "msg": "TCP 22 at 160.250.71.209:35644 after 1.8 min"
+    },
+    {
+      "utc": "2026-10-15T21:42:20+00:00",
+      "elapsed_min": 1.86,
+      "msg": "draw 1: ssh reachable \u2014 $0.03"
+    },
+    {
+      "utc": "2026-10-15T21:42:53+00:00",
+      "elapsed_min": 2.42,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+    },
+    {
+      "utc": "2026-10-15T21:42:53+00:00",
+      "elapsed_min": 2.42,
+      "msg": "draw 1: host admitted \u2014 image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07 is the protocol's"
+    },
+    {
+      "utc": "2026-10-15T21:42:53+00:00",
+      "elapsed_min": 2.42,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-15T21:47:26+00:00",
+      "elapsed_min": 6.97,
+      "msg": "draw 1: setup complete \u2014 $0.13"
+    },
+    {
+      "utc": "2026-10-15T21:47:31+00:00",
+      "elapsed_min": 7.05,
+      "msg": "driver detached, pid 3291, confirmed by descriptor_probe \u2014 $0.13"
+    },
+    {
+      "utc": "2026-10-15T21:49:41+00:00",
+      "elapsed_min": 9.21,
+      "msg": "  2026-10-15T21:47:29Z MARKER:DRIVER_START \u2014 $0.17"
+    },
+    {
+      "utc": "2026-10-15T22:53:03+00:00",
+      "elapsed_min": 72.58,
+      "msg": "  trained-unscored d2_screening_c1_s516448251: preserved and verified (e7f181aeffff)"
+    },
+    {
+      "utc": "2026-10-15T22:53:03+00:00",
+      "elapsed_min": 72.58,
+      "msg": "  probe d2_screening_c1_s516448251: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-15T22:53:03+00:00",
+      "elapsed_min": 72.58,
+      "msg": "  probe d2_screening_c1_s516448251: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-15T22:53:05+00:00",
+      "elapsed_min": 72.62,
+      "msg": "  secured d2_screening_attested_protocol.json"
+    },
+    {
+      "utc": "2026-10-15T22:53:08+00:00",
+      "elapsed_min": 72.67,
+      "msg": "  secured engine_probe.json"
+    },
+    {
+      "utc": "2026-10-15T23:10:53+00:00",
+      "elapsed_min": 90.43,
+      "msg": "  probe d2_screening_c1_s516448251: secured result.json"
+    },
+    {
+      "utc": "2026-10-15T23:10:57+00:00",
+      "elapsed_min": 90.49,
+      "msg": "  probe d2_screening_c1_s516448251: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-15T23:11:00+00:00",
+      "elapsed_min": 90.53,
+      "msg": "  probe d2_screening_c1_s516448251: secured admission.json"
+    },
+    {
+      "utc": "2026-10-15T23:11:12+00:00",
+      "elapsed_min": 90.73,
+      "msg": "  probe d2_screening_c1_s516448251: secured generations"
+    },
+    {
+      "utc": "2026-10-15T23:11:19+00:00",
+      "elapsed_min": 90.86,
+      "msg": "  probe d2_screening_c1_s516448251: release ack delivered"
+    },
+    {
+      "utc": "2026-10-15T23:13:36+00:00",
+      "elapsed_min": 93.14,
+      "msg": "  probe d2_screening_c1_s516448251: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-16T00:17:10+00:00",
+      "elapsed_min": 156.7,
+      "msg": "  trained-unscored d2_screening_c1_s614923639: preserved and verified (6cd797827fc9)"
+    },
+    {
+      "utc": "2026-10-16T00:17:10+00:00",
+      "elapsed_min": 156.7,
+      "msg": "  probe d2_screening_c1_s614923639: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-16T00:17:10+00:00",
+      "elapsed_min": 156.7,
+      "msg": "  probe d2_screening_c1_s614923639: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-16T00:34:56+00:00",
+      "elapsed_min": 174.46,
+      "msg": "  probe d2_screening_c1_s614923639: secured result.json"
+    },
+    {
+      "utc": "2026-10-16T00:34:59+00:00",
+      "elapsed_min": 174.53,
+      "msg": "  probe d2_screening_c1_s614923639: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-16T00:35:02+00:00",
+      "elapsed_min": 174.57,
+      "msg": "  probe d2_screening_c1_s614923639: secured admission.json"
+    },
+    {
+      "utc": "2026-10-16T00:35:17+00:00",
+      "elapsed_min": 174.81,
+      "msg": "  probe d2_screening_c1_s614923639: secured generations"
+    },
+    {
+      "utc": "2026-10-16T00:35:24+00:00",
+      "elapsed_min": 174.94,
+      "msg": "  probe d2_screening_c1_s614923639: release ack delivered"
+    },
+    {
+      "utc": "2026-10-16T00:37:43+00:00",
+      "elapsed_min": 177.25,
+      "msg": "  probe d2_screening_c1_s614923639: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-16T01:41:12+00:00",
+      "elapsed_min": 240.74,
+      "msg": "  trained-unscored d2_screening_c2_s516448251: preserved and verified (391a589695d7)"
+    },
+    {
+      "utc": "2026-10-16T01:41:12+00:00",
+      "elapsed_min": 240.74,
+      "msg": "  probe d2_screening_c2_s516448251: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-16T01:41:12+00:00",
+      "elapsed_min": 240.74,
+      "msg": "  probe d2_screening_c2_s516448251: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-16T01:58:59+00:00",
+      "elapsed_min": 258.51,
+      "msg": "  probe d2_screening_c2_s516448251: secured result.json"
+    },
+    {
+      "utc": "2026-10-16T01:59:03+00:00",
+      "elapsed_min": 258.58,
+      "msg": "  probe d2_screening_c2_s516448251: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-16T01:59:05+00:00",
+      "elapsed_min": 258.62,
+      "msg": "  probe d2_screening_c2_s516448251: secured admission.json"
+    },
+    {
+      "utc": "2026-10-16T01:59:17+00:00",
+      "elapsed_min": 258.83,
+      "msg": "  probe d2_screening_c2_s516448251: secured generations"
+    },
+    {
+      "utc": "2026-10-16T01:59:21+00:00",
+      "elapsed_min": 258.89,
+      "msg": "  probe d2_screening_c2_s516448251: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-16T01:59:26+00:00",
+      "elapsed_min": 258.98,
+      "msg": "  probe d2_screening_c2_s516448251: release ack delivered"
+    },
+    {
+      "utc": "2026-10-16T03:05:07+00:00",
+      "elapsed_min": 324.66,
+      "msg": "  trained-unscored d2_screening_c2_s614923639: preserved and verified (53ab97422ec8)"
+    },
+    {
+      "utc": "2026-10-16T03:05:07+00:00",
+      "elapsed_min": 324.66,
+      "msg": "  probe d2_screening_c2_s614923639: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-16T03:05:07+00:00",
+      "elapsed_min": 324.66,
+      "msg": "  probe d2_screening_c2_s614923639: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-16T03:25:06+00:00",
+      "elapsed_min": 344.64,
+      "msg": "  probe d2_screening_c2_s614923639: secured result.json"
+    },
+    {
+      "utc": "2026-10-16T03:25:11+00:00",
+      "elapsed_min": 344.71,
+      "msg": "  probe d2_screening_c2_s614923639: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-16T03:25:13+00:00",
+      "elapsed_min": 344.76,
+      "msg": "  probe d2_screening_c2_s614923639: secured admission.json"
+    },
+    {
+      "utc": "2026-10-16T03:25:25+00:00",
+      "elapsed_min": 344.96,
+      "msg": "  probe d2_screening_c2_s614923639: secured generations"
+    },
+    {
+      "utc": "2026-10-16T03:25:29+00:00",
+      "elapsed_min": 345.02,
+      "msg": "  probe d2_screening_c2_s614923639: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-16T03:25:34+00:00",
+      "elapsed_min": 345.11,
+      "msg": "  probe d2_screening_c2_s614923639: release ack delivered"
+    },
+    {
+      "utc": "2026-10-16T04:31:19+00:00",
+      "elapsed_min": 410.85,
+      "msg": "  trained-unscored d2_screening_c3_s516448251: preserved and verified (225e6ab63d9e)"
+    },
+    {
+      "utc": "2026-10-16T04:31:19+00:00",
+      "elapsed_min": 410.85,
+      "msg": "  probe d2_screening_c3_s516448251: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-16T04:31:19+00:00",
+      "elapsed_min": 410.85,
+      "msg": "  probe d2_screening_c3_s516448251: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-16T04:44:39+00:00",
+      "elapsed_min": 424.19,
+      "msg": "  probe d2_screening_c3_s516448251: secured result.json"
+    },
+    {
+      "utc": "2026-10-16T04:44:43+00:00",
+      "elapsed_min": 424.25,
+      "msg": "  probe d2_screening_c3_s516448251: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-16T04:44:46+00:00",
+      "elapsed_min": 424.3,
+      "msg": "  probe d2_screening_c3_s516448251: secured admission.json"
+    },
+    {
+      "utc": "2026-10-16T04:44:58+00:00",
+      "elapsed_min": 424.5,
+      "msg": "  probe d2_screening_c3_s516448251: secured generations"
+    },
+    {
+      "utc": "2026-10-16T04:45:02+00:00",
+      "elapsed_min": 424.56,
+      "msg": "  probe d2_screening_c3_s516448251: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-16T04:45:07+00:00",
+      "elapsed_min": 424.65,
+      "msg": "  probe d2_screening_c3_s516448251: release ack delivered"
+    },
+    {
+      "utc": "2026-10-16T05:50:52+00:00",
+      "elapsed_min": 490.41,
+      "msg": "  trained-unscored d2_screening_c3_s614923639: preserved and verified (7fce338d5627)"
+    },
+    {
+      "utc": "2026-10-16T05:50:52+00:00",
+      "elapsed_min": 490.41,
+      "msg": "  probe d2_screening_c3_s614923639: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-16T05:50:52+00:00",
+      "elapsed_min": 490.41,
+      "msg": "  probe d2_screening_c3_s614923639: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-16T06:08:44+00:00",
+      "elapsed_min": 508.27,
+      "msg": "  probe d2_screening_c3_s614923639: secured result.json"
+    },
+    {
+      "utc": "2026-10-16T06:08:48+00:00",
+      "elapsed_min": 508.33,
+      "msg": "  probe d2_screening_c3_s614923639: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-16T06:08:50+00:00",
+      "elapsed_min": 508.38,
+      "msg": "  probe d2_screening_c3_s614923639: secured admission.json"
+    },
+    {
+      "utc": "2026-10-16T06:09:03+00:00",
+      "elapsed_min": 508.58,
+      "msg": "  probe d2_screening_c3_s614923639: secured generations"
+    },
+    {
+      "utc": "2026-10-16T06:09:10+00:00",
+      "elapsed_min": 508.7,
+      "msg": "  probe d2_screening_c3_s614923639: release ack delivered"
+    },
+    {
+      "utc": "2026-10-16T06:11:27+00:00",
+      "elapsed_min": 510.99,
+      "msg": "  probe d2_screening_c3_s614923639: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-16T07:14:59+00:00",
+      "elapsed_min": 574.51,
+      "msg": "  trained-unscored d2_screening_c4_s516448251: preserved and verified (86260d5833b5)"
+    },
+    {
+      "utc": "2026-10-16T07:14:59+00:00",
+      "elapsed_min": 574.51,
+      "msg": "  probe d2_screening_c4_s516448251: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-16T07:14:59+00:00",
+      "elapsed_min": 574.51,
+      "msg": "  probe d2_screening_c4_s516448251: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-16T07:32:46+00:00",
+      "elapsed_min": 592.29,
+      "msg": "  probe d2_screening_c4_s516448251: secured result.json"
+    },
+    {
+      "utc": "2026-10-16T07:32:49+00:00",
+      "elapsed_min": 592.36,
+      "msg": "  probe d2_screening_c4_s516448251: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-16T07:32:52+00:00",
+      "elapsed_min": 592.4,
+      "msg": "  probe d2_screening_c4_s516448251: secured admission.json"
+    },
+    {
+      "utc": "2026-10-16T07:33:04+00:00",
+      "elapsed_min": 592.6,
+      "msg": "  probe d2_screening_c4_s516448251: secured generations"
+    },
+    {
+      "utc": "2026-10-16T07:33:08+00:00",
+      "elapsed_min": 592.67,
+      "msg": "  probe d2_screening_c4_s516448251: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-16T07:33:13+00:00",
+      "elapsed_min": 592.75,
+      "msg": "  probe d2_screening_c4_s516448251: release ack delivered"
+    },
+    {
+      "utc": "2026-10-16T08:38:59+00:00",
+      "elapsed_min": 658.51,
+      "msg": "  trained-unscored d2_screening_c4_s614923639: preserved and verified (500ec8186e02)"
+    },
+    {
+      "utc": "2026-10-16T08:38:59+00:00",
+      "elapsed_min": 658.51,
+      "msg": "  probe d2_screening_c4_s614923639: secured training/run_manifest.json"
+    },
+    {
+      "utc": "2026-10-16T08:38:59+00:00",
+      "elapsed_min": 658.51,
+      "msg": "  probe d2_screening_c4_s614923639: secured training/run_completion.json"
+    },
+    {
+      "utc": "2026-10-16T08:52:19+00:00",
+      "elapsed_min": 671.86,
+      "msg": "  probe d2_screening_c4_s614923639: secured result.json"
+    },
+    {
+      "utc": "2026-10-16T08:52:23+00:00",
+      "elapsed_min": 671.92,
+      "msg": "  probe d2_screening_c4_s614923639: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-16T08:52:26+00:00",
+      "elapsed_min": 671.97,
+      "msg": "  probe d2_screening_c4_s614923639: secured admission.json"
+    },
+    {
+      "utc": "2026-10-16T08:52:38+00:00",
+      "elapsed_min": 672.17,
+      "msg": "  probe d2_screening_c4_s614923639: secured generations"
+    },
+    {
+      "utc": "2026-10-16T08:52:45+00:00",
+      "elapsed_min": 672.29,
+      "msg": "  probe d2_screening_c4_s614923639: release ack delivered"
+    },
+    {
+      "utc": "2026-10-16T08:54:58+00:00",
+      "elapsed_min": 674.51,
+      "msg": "  2026-10-16T08:53:37Z MARKER:ALL_DONE \u2014 $12.25"
+    },
+    {
+      "utc": "2026-10-16T08:54:58+00:00",
+      "elapsed_min": 674.51,
+      "msg": "polling ended: ALL_DONE \u2014 $12.25"
+    },
+    {
+      "utc": "2026-10-16T08:58:51+00:00",
+      "elapsed_min": 678.38,
+      "msg": "  manifest rc=0\n252 file(s) across 11 class(es) -> /workspace/manifest.json\n  final_required: 252 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-10-16T08:59:15+00:00",
+      "elapsed_min": 678.79,
+      "msg": "  probe d2_screening_c4_s614923639: secured rescoring.json"
+    },
+    {
+      "utc": "2026-10-16T08:59:15+00:00",
+      "elapsed_min": 678.79,
+      "msg": "  probe d2_screening_c1_s516448251: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-16T08:59:15+00:00",
+      "elapsed_min": 678.79,
+      "msg": "  probe d2_screening_c1_s614923639: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-16T08:59:16+00:00",
+      "elapsed_min": 678.79,
+      "msg": "  probe d2_screening_c2_s516448251: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-16T08:59:16+00:00",
+      "elapsed_min": 678.8,
+      "msg": "  probe d2_screening_c2_s614923639: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-16T08:59:16+00:00",
+      "elapsed_min": 678.8,
+      "msg": "  probe d2_screening_c3_s516448251: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-16T08:59:16+00:00",
+      "elapsed_min": 678.8,
+      "msg": "  probe d2_screening_c3_s614923639: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-16T08:59:16+00:00",
+      "elapsed_min": 678.8,
+      "msg": "  probe d2_screening_c4_s516448251: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-16T08:59:16+00:00",
+      "elapsed_min": 678.81,
+      "msg": "  probe d2_screening_c4_s614923639: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-16T08:59:16+00:00",
+      "elapsed_min": 678.81,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-10-16T08:59:16+00:00",
+      "elapsed_min": 678.81,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-10-16T08:59:28+00:00",
+      "elapsed_min": 678.99,
+      "msg": "pod deleted \u2014 679.0 min, $12.34; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.phase_d2.screening_authorization/v1",
+    "authorization_id": "autoinit.v1.phase_d2.screening",
+    "version": 1,
+    "granted_utc": "2026-10-15T20:33:46+00:00",
+    "granted_by": "maintainer, 2026-10-15 UTC: D2 Behavioural Screening Final Independent Review and Conditional Grant (independent review of 8e8ae849). Conditional approval of a $25.00 cumulative all-in grant, to be issued only after the three $0 repairs (ranking evidence gate, durable training records, cumulative retry reserve), their tests, commit, push and the executable-commit rebinding.",
+    "plan_id": "autoinit.v1.phase_d2.screening",
+    "plan_hash": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+    "expected_usd": 15.0704,
+    "hard_cap_usd": 19.4558,
+    "authorized_stages": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "stage_conditions": {
+      "A": "setup on an admitted host; the relay-staged arms verified at all four identities; the contract re-derived and equal to the bound hash; the training runtime equal to the protocol's",
+      "B": "the eight probes: frozen recipe from each arm's verified checkpoint at its seed, packaged, generated through the unchanged generator (token-id sidecar), admitted against the shared rung's evaluation protocol, scored by the pinned scorer",
+      "C": "per probe, after scoring: the rollout rescoring diagnostic on the candidate's own rollouts, failure-isolated",
+      "D": "stop at preservation: every probe's evidence and trained checkpoint off-pod; the ranking and selection are computed off-pod at $0"
+    },
+    "scope_note": "ONE frozen screening rung of d_series_shared_eval@v1: the four committed D2 v3 initializations x the two frozen seeds = 8 probes; the frozen e1_p1_kd_heavy@0.86M recovery training; the frozen generation and scoring; the failure-isolated diagnostic rescoring; durable evidence preservation; the off-pod ranking against B's two imported units (q2 descriptive), exactly one candidate advancing or none.",
+    "allows_recovery_training": true,
+    "authorizes_d2_screening": true,
+    "allows_beam_search": false,
+    "authorizes_d2_confirmation": false,
+    "authorizes_candidate_reselection": false,
+    "authorizes_reference_retraining": false,
+    "authorizes_promotion": false,
+    "automatic_followon_start": false,
+    "authorized_session_commit": "04bec599c0e05bd0ea5d470ee420f362d97078b6",
+    "harness_source_digest": "84d499fa20b16a8b6a7c8e2610c4a98f6fea803b73e931924b53244aa183e821",
+    "harness_source_files": [
+      "configs/stages/stage-1/phase_c1/authorization.json",
+      "configs/stages/stage-1/phase_d2/d2_screening_artifacts.json",
+      "configs/stages/stage-1/phase_d2/d2_screening_artifacts_failed.json",
+      "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json",
+      "configs/stages/stage-3/recipes/recovery.json",
+      "scripts/maintenance/consolidation/derive_budget.py",
+      "scripts/shared/__init__.py",
+      "scripts/shared/calibration.py",
+      "scripts/shared/data/battery_render.py",
+      "scripts/shared/deployment.py",
+      "scripts/shared/evaluation/__init__.py",
+      "scripts/shared/evaluation/audit_tool_scoring.py",
+      "scripts/shared/evaluation/evidence_reuse.py",
+      "scripts/shared/evaluation/load_state_eval.py",
+      "scripts/shared/evaluation/rollout_rescoring.py",
+      "scripts/shared/evaluation/score_recovery_search.py",
+      "scripts/shared/evaluation/uncapped_eval.py",
+      "scripts/shared/evaluation/uncapped_eval_token_ids.py",
+      "scripts/shared/pod/autoinit_engine_probe.py",
+      "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "scripts/shared/pod/autoinit_science_inputs.py",
+      "scripts/shared/pod/collect_artifacts.py",
+      "scripts/shared/pod/verify_frozen_assets.py",
+      "scripts/shared/pod/watchdog.py",
+      "scripts/shared/recipes.py",
+      "scripts/shared/recovery_policy.py",
+      "scripts/shared/run_layout.py",
+      "scripts/shared/search_cost_model.py",
+      "scripts/shared/source_sets.py",
+      "scripts/shared/training/train_stage3.py",
+      "scripts/shared/validation/renderer_parity_gate.py",
+      "scripts/stages/stage-1/families/d_series/__init__.py",
+      "scripts/stages/stage-1/families/d_series/battery_family.py",
+      "scripts/stages/stage-1/families/d_series/d2_budget.py",
+      "scripts/stages/stage-1/families/d_series/identity.py",
+      "scripts/stages/stage-1/families/d_series/incumbent.py",
+      "scripts/stages/stage-1/families/d_series/math_source.py",
+      "scripts/stages/stage-1/families/d_series/objectives.py",
+      "scripts/stages/stage-1/families/d_series/reference_calibration.py",
+      "scripts/stages/stage-1/families/d_series/scoring_protocol.py",
+      "scripts/stages/stage-1/families/d_series/search_completion.py",
+      "scripts/stages/stage-1/families/d_series/shared_evaluation.py",
+      "scripts/stages/stage-1/families/d_series/teacher_confidence.py",
+      "scripts/stages/stage-1/phase_a/phase_a_frozen.py",
+      "scripts/stages/stage-1/phase_a/plan.py",
+      "scripts/stages/stage-1/phase_a3/__init__.py",
+      "scripts/stages/stage-1/phase_a3/a3_session.py",
+      "scripts/stages/stage-1/phase_a3/a_bsz3.py",
+      "scripts/stages/stage-1/phase_c1/__init__.py",
+      "scripts/stages/stage-1/phase_c1/authorization.py",
+      "scripts/stages/stage-1/phase_c1/authorization_payload.py",
+      "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+      "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
+      "scripts/stages/stage-1/phase_c1/build_c1_confirmation_battery.py",
+      "scripts/stages/stage-1/phase_c1/bundle.py",
+      "scripts/stages/stage-1/phase_c1/isolation.py",
+      "scripts/stages/stage-1/phase_c1/packaging.py",
+      "scripts/stages/stage-1/phase_c1/pod_environment.py",
+      "scripts/stages/stage-1/phase_c1/probe_results.py",
+      "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py",
+      "scripts/stages/stage-1/phase_c1/scoring.py",
+      "scripts/stages/stage-1/phase_c1/session.py",
+      "scripts/stages/stage-1/phase_c2/__init__.py",
+      "scripts/stages/stage-1/phase_c2/baseline.py",
+      "scripts/stages/stage-1/phase_c2/behavioural.py",
+      "scripts/stages/stage-1/phase_c2/full_search_space.py",
+      "scripts/stages/stage-1/phase_c2/replay_specs.py",
+      "scripts/stages/stage-1/phase_c2/search_space.py",
+      "scripts/stages/stage-1/phase_c2/selection_pricing.py",
+      "scripts/stages/stage-1/phase_c3/__init__.py",
+      "scripts/stages/stage-1/phase_c3/session.py",
+      "scripts/stages/stage-1/phase_d1/__init__.py",
+      "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py",
+      "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_launch.py",
+      "scripts/stages/stage-1/phase_d1/behavioural.py",
+      "scripts/stages/stage-1/phase_d1/behavioural_authorization.py",
+      "scripts/stages/stage-1/phase_d1/behavioural_governance.py",
+      "scripts/stages/stage-1/phase_d1/behavioural_materialize.py",
+      "scripts/stages/stage-1/phase_d1/behavioural_verdict.py",
+      "scripts/stages/stage-1/phase_d1/d1_authorization.py",
+      "scripts/stages/stage-1/phase_d1/d1_qualification_driver.py",
+      "scripts/stages/stage-1/phase_d1/d1_session.py",
+      "scripts/stages/stage-1/phase_d1/replay_specs.py",
+      "scripts/stages/stage-1/phase_d1/score_d1_confirmation.py",
+      "scripts/stages/stage-1/phase_d1/score_d1_screening.py",
+      "scripts/stages/stage-1/phase_d1/search_space.py",
+      "scripts/stages/stage-1/phase_d1/selection_noise.py",
+      "scripts/stages/stage-1/phase_d1/topk_adoption_driver.py",
+      "scripts/stages/stage-1/phase_d1/write_d1_behavioural_preregistration.py",
+      "scripts/stages/stage-1/phase_d1/write_d1_design.py",
+      "scripts/stages/stage-1/phase_d2/__init__.py",
+      "scripts/stages/stage-1/phase_d2/autoinit_d2_screening_driver.py",
+      "scripts/stages/stage-1/phase_d2/autoinit_d2_screening_launch.py",
+      "scripts/stages/stage-1/phase_d2/d2_authorization.py",
+      "scripts/stages/stage-1/phase_d2/d2_gpu_validation.py",
+      "scripts/stages/stage-1/phase_d2/d2_product_durability.py",
+      "scripts/stages/stage-1/phase_d2/d2_screening.py",
+      "scripts/stages/stage-1/phase_d2/d2_screening_authorization.py",
+      "scripts/stages/stage-1/phase_d2/d2_session.py",
+      "scripts/stages/stage-1/phase_d2/d2v3_gpu_validation.py",
+      "scripts/stages/stage-1/phase_d2/rescore_d2_probe.py",
+      "scripts/stages/stage-1/phase_d2/write_d2_preregistration.py",
+      "src/aadistill/data/dataset.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/data/ladder.py",
+      "src/aadistill/data/tools.py",
+      "src/aadistill/data/verify.py",
+      "src/aadistill/evaluation/__init__.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/capability.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/governance/closure.py",
+      "src/aadistill/governance/grant.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/bundle_transport.py",
+      "src/aadistill/infrastructure/env.py",
+      "src/aadistill/infrastructure/failure_signature.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/watchdog.py",
+      "src/aadistill/initialization/adapters/__init__.py",
+      "src/aadistill/initialization/adapters/qwen3.py",
+      "src/aadistill/initialization/calibration/batching.py",
+      "src/aadistill/initialization/calibration/datasets.py",
+      "src/aadistill/initialization/calibration/items.py",
+      "src/aadistill/initialization/calibration/packing.py",
+      "src/aadistill/initialization/calibration/profiles.py",
+      "src/aadistill/initialization/device.py",
+      "src/aadistill/initialization/execution.py",
+      "src/aadistill/initialization/operators/_common.py",
+      "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/_common.py",
+      "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+      "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+      "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+      "src/aadistill/initialization/operators/base.py",
+      "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+      "src/aadistill/initialization/operators/depth/__init__.py",
+      "src/aadistill/initialization/operators/depth/_common.py",
+      "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+      "src/aadistill/initialization/operators/depth/positional.py",
+      "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+      "src/aadistill/initialization/operators/register.py",
+      "src/aadistill/initialization/operators/width/residual/global_pca.py",
+      "src/aadistill/initialization/planning/__init__.py",
+      "src/aadistill/initialization/planning/fixed_path.py",
+      "src/aadistill/initialization/planning/generation.py",
+      "src/aadistill/initialization/planning/generation_compat.py",
+      "src/aadistill/initialization/planning/isolation.py",
+      "src/aadistill/initialization/planning/metrics.py",
+      "src/aadistill/initialization/planning/operator_config.py",
+      "src/aadistill/initialization/planning/ranking.py",
+      "src/aadistill/initialization/planning/recovery.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/stage1_selection.py",
+      "src/aadistill/initialization/scoring/batches.py",
+      "src/aadistill/initialization/scoring/content.py",
+      "src/aadistill/initialization/scoring/objective.py",
+      "src/aadistill/initialization/scoring/output_head.py",
+      "src/aadistill/initialization/scoring/positions.py",
+      "src/aadistill/initialization/scoring/protocol_identity.py",
+      "src/aadistill/initialization/scoring/reference_store.py",
+      "src/aadistill/initialization/scoring/rows.py",
+      "src/aadistill/initialization/scoring/support.py",
+      "src/aadistill/initialization/specs/arch.py",
+      "src/aadistill/initialization/specs/artifact.py",
+      "src/aadistill/initialization/specs/materialization.py",
+      "src/aadistill/initialization/specs/metrics.py",
+      "src/aadistill/initialization/specs/state.py",
+      "src/aadistill/initialization/statistics/collect.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/statistics/spec.py",
+      "src/aadistill/initialization/transforms/project.py",
+      "src/aadistill/initialization/transforms/sandwich.py",
+      "src/aadistill/models/student.py",
+      "src/aadistill/models/teacher.py",
+      "src/aadistill/models/tokenizer_contract.py",
+      "src/aadistill/runtime/__init__.py",
+      "src/aadistill/runtime/cost.py",
+      "src/aadistill/runtime/cpu_test_env.py",
+      "src/aadistill/runtime/device_handoff.py",
+      "src/aadistill/runtime/hub_capacity.py",
+      "src/aadistill/runtime/leaf_durability.py",
+      "src/aadistill/runtime/pod_environment.py",
+      "src/aadistill/runtime/run_layout.py",
+      "src/aadistill/runtime/staging_contract.py",
+      "src/aadistill/runtime/telemetry.py",
+      "src/aadistill/training/lora.py",
+      "src/aadistill/training/train.py"
+    ],
+    "per_launch_hard_usd": 19.4558,
+    "provenance_commit": "04bec599c0e05bd0ea5d470ee420f362d97078b6",
+    "enforcement": "the launcher loads this artifact, refuses a planned hard threshold above hard_cap_usd, a harness whose derived closure differs in membership or digest, a preregistration other than the bound one and a contract other than the bound one; the driver re-derives the contract on the pod and refuses a mismatch before training",
+    "preregistration_hash": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+    "shared_protocol_hash": "5ed198aed960e987f137ec6342ef7fa6ac24c8484b991bac8cd6a210f7ae742d",
+    "contract_hash": "6d4283e77e1b26549328d96eaf8f71773a3b2ef4e15804d26dd938eb0674455e",
+    "run_id": "d2_screening_20261015_203346",
+    "seeds": [
+      516448251,
+      614923639
+    ],
+    "n_probes": 8,
+    "battery_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+    "selection_sha256": "5a2647638ed78014edfceaacbf3f24ce7dd6d12db1307ee733064f22154689d0",
+    "pricing": {
+      "hard_ceiling_minutes": 1055.0,
+      "expected_minutes": 817.2,
+      "arm_staging": {
+        "expected_minutes_per_arm": 1.12,
+        "hard_minutes_per_arm": 3.36,
+        "pull_rate_floor_mb_per_s": 22.9,
+        "_basis": "the D2 search's setup staged the 8,045,568,320-byte teacher within 5.85 min (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json), so a pod pulls at least 22.9 MB/s; one 1,192,135,096-byte arm plus its identity check, x3.0 for the bound",
+        "replaces": "D1's 22-minute on-pod rematerialization per arm: a D2 arm is a persisted search product, not a path to replay"
+      },
+      "rescoring": {
+        "source": "measured once (stage L)",
+        "minutes_per_probe": 1.83,
+        "in_ceilings": true,
+        "hard": {
+          "minutes": 28.5,
+          "gpu_usd": 0.52,
+          "disk_usd": 0.01,
+          "all_in_usd": 0.53
+        }
+      },
+      "_basis": "logs/stages/stage-1/families/d_series/plans/d2_budget_v1.json :: steps.d2_screening",
+      "accepted_at_price_per_hour": 1.09
+    },
+    "money": {
+      "per_session_envelope_usd": 30.0,
+      "project_cap_usd": 595.0,
+      "formal_allowance_usd": 256.6523,
+      "package_total_usd": 281.7264,
+      "formal_remaining_usd": 121.9742,
+      "package_remaining_usd": 125.1546,
+      "project_remaining_usd": 117.9966,
+      "cumulative_spend_usd": 477.0034,
+      "funds_formal_sessions_of": [
+        "phase_c1",
+        "phase_c3",
+        "phase_a3",
+        "phase_d1",
+        "phase_d2"
+      ],
+      "_derived_by": "scripts/maintenance/consolidation/derive_budget.py",
+      "derived_session": {
+        "hard_ceiling_usd": 19.4558,
+        "expected_usd": 15.0704,
+        "hard_ceiling_minutes": 1055.0,
+        "expected_minutes": 817.2,
+        "container_disk_usd": 0.29,
+        "container_disk_gb": 120,
+        "session_overhead_minutes": 82.0,
+        "price_per_hour": 1.09,
+        "n_probes": 8,
+        "arm_staging": {
+          "expected_minutes_per_arm": 1.12,
+          "hard_minutes_per_arm": 3.36,
+          "pull_rate_floor_mb_per_s": 22.9,
+          "_basis": "the D2 search's setup staged the 8,045,568,320-byte teacher within 5.85 min (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/closeout/outcome.json), so a pod pulls at least 22.9 MB/s; one 1,192,135,096-byte arm plus its identity check, x3.0 for the bound",
+          "replaces": "D1's 22-minute on-pod rematerialization per arm: a D2 arm is a persisted search product, not a path to replay"
+        },
+        "rescoring": {
+          "source": "measured once (stage L)",
+          "minutes_per_probe": 1.83,
+          "in_ceilings": true,
+          "hard": {
+            "minutes": 28.5,
+            "gpu_usd": 0.52,
+            "disk_usd": 0.01,
+            "all_in_usd": 0.53
+          }
+        },
+        "_basis": "logs/stages/stage-1/families/d_series/plans/d2_budget_v1.json :: steps.d2_screening",
+        "accepted_at_price_per_hour": 1.09
+      },
+      "live_quote": {
+        "gpu": "NVIDIA L40S",
+        "usd_per_hour": 1.09,
+        "stock_status": "Low",
+        "_quoted": "live, immediately before issuance"
+      },
+      "cumulative_envelope_usd": 25.0,
+      "prior_subruns": {
+        "subruns": [
+          {
+            "run_id": "d2_screening_20261015_183412",
+            "all_in_usd": 0.0,
+            "basis": "closeout: no provider resource was created"
+          },
+          {
+            "run_id": "d2_screening_20261015_183734",
+            "all_in_usd": 0.4518,
+            "basis": "closeout money.all_in_usd"
+          },
+          {
+            "run_id": "d2_screening_20261015_193502",
+            "all_in_usd": 0.0,
+            "basis": "closeout: no provider resource was created"
+          }
+        ],
+        "consumed_usd": 0.4518
+      },
+      "envelope_remaining_usd": 24.5482,
+      "teardown_reserve_usd": 0.3,
+      "envelope_required_for_this_session_usd": 19.7558
+    },
+    "rate_usd_per_hour": 1.09,
+    "hard_runtime_minutes": 1055.0,
+    "one_use": "ONE grant issuance, ONE launcher session; a replacement attempt is a new authorization netted against the cumulative envelope",
+    "authorization_sha256": "a350dc1bcfadefe6f89c7961fa2037932d2cfeb4a063a230062b3457aef88d2a"
+  },
+  "session_plan_hash": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+  "harness_source_digest": "84d499fa20b16a8b6a7c8e2610c4a98f6fea803b73e931924b53244aa183e821",
+  "harness_source_files": [
+    "configs/stages/stage-1/phase_c1/authorization.json",
+    "configs/stages/stage-1/phase_d2/d2_screening_artifacts.json",
+    "configs/stages/stage-1/phase_d2/d2_screening_artifacts_failed.json",
+    "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json",
+    "configs/stages/stage-3/recipes/recovery.json",
+    "scripts/maintenance/consolidation/derive_budget.py",
+    "scripts/shared/__init__.py",
+    "scripts/shared/calibration.py",
+    "scripts/shared/data/battery_render.py",
+    "scripts/shared/deployment.py",
+    "scripts/shared/evaluation/__init__.py",
+    "scripts/shared/evaluation/audit_tool_scoring.py",
+    "scripts/shared/evaluation/evidence_reuse.py",
+    "scripts/shared/evaluation/load_state_eval.py",
+    "scripts/shared/evaluation/rollout_rescoring.py",
+    "scripts/shared/evaluation/score_recovery_search.py",
+    "scripts/shared/evaluation/uncapped_eval.py",
+    "scripts/shared/evaluation/uncapped_eval_token_ids.py",
+    "scripts/shared/pod/autoinit_engine_probe.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/autoinit_science_inputs.py",
+    "scripts/shared/pod/collect_artifacts.py",
+    "scripts/shared/pod/verify_frozen_assets.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/shared/recipes.py",
+    "scripts/shared/recovery_policy.py",
+    "scripts/shared/run_layout.py",
+    "scripts/shared/search_cost_model.py",
+    "scripts/shared/source_sets.py",
+    "scripts/shared/training/train_stage3.py",
+    "scripts/shared/validation/renderer_parity_gate.py",
+    "scripts/stages/stage-1/families/d_series/__init__.py",
+    "scripts/stages/stage-1/families/d_series/battery_family.py",
+    "scripts/stages/stage-1/families/d_series/d2_budget.py",
+    "scripts/stages/stage-1/families/d_series/identity.py",
+    "scripts/stages/stage-1/families/d_series/incumbent.py",
+    "scripts/stages/stage-1/families/d_series/math_source.py",
+    "scripts/stages/stage-1/families/d_series/objectives.py",
+    "scripts/stages/stage-1/families/d_series/reference_calibration.py",
+    "scripts/stages/stage-1/families/d_series/scoring_protocol.py",
+    "scripts/stages/stage-1/families/d_series/search_completion.py",
+    "scripts/stages/stage-1/families/d_series/shared_evaluation.py",
+    "scripts/stages/stage-1/families/d_series/teacher_confidence.py",
+    "scripts/stages/stage-1/phase_a/phase_a_frozen.py",
+    "scripts/stages/stage-1/phase_a/plan.py",
+    "scripts/stages/stage-1/phase_a3/__init__.py",
+    "scripts/stages/stage-1/phase_a3/a3_session.py",
+    "scripts/stages/stage-1/phase_a3/a_bsz3.py",
+    "scripts/stages/stage-1/phase_c1/__init__.py",
+    "scripts/stages/stage-1/phase_c1/authorization.py",
+    "scripts/stages/stage-1/phase_c1/authorization_payload.py",
+    "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+    "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
+    "scripts/stages/stage-1/phase_c1/build_c1_confirmation_battery.py",
+    "scripts/stages/stage-1/phase_c1/bundle.py",
+    "scripts/stages/stage-1/phase_c1/isolation.py",
+    "scripts/stages/stage-1/phase_c1/packaging.py",
+    "scripts/stages/stage-1/phase_c1/pod_environment.py",
+    "scripts/stages/stage-1/phase_c1/probe_results.py",
+    "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py",
+    "scripts/stages/stage-1/phase_c1/scoring.py",
+    "scripts/stages/stage-1/phase_c1/session.py",
+    "scripts/stages/stage-1/phase_c2/__init__.py",
+    "scripts/stages/stage-1/phase_c2/baseline.py",
+    "scripts/stages/stage-1/phase_c2/behavioural.py",
+    "scripts/stages/stage-1/phase_c2/full_search_space.py",
+    "scripts/stages/stage-1/phase_c2/replay_specs.py",
+    "scripts/stages/stage-1/phase_c2/search_space.py",
+    "scripts/stages/stage-1/phase_c2/selection_pricing.py",
+    "scripts/stages/stage-1/phase_c3/__init__.py",
+    "scripts/stages/stage-1/phase_c3/session.py",
+    "scripts/stages/stage-1/phase_d1/__init__.py",
+    "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py",
+    "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_launch.py",
+    "scripts/stages/stage-1/phase_d1/behavioural.py",
+    "scripts/stages/stage-1/phase_d1/behavioural_authorization.py",
+    "scripts/stages/stage-1/phase_d1/behavioural_governance.py",
+    "scripts/stages/stage-1/phase_d1/behavioural_materialize.py",
+    "scripts/stages/stage-1/phase_d1/behavioural_verdict.py",
+    "scripts/stages/stage-1/phase_d1/d1_authorization.py",
+    "scripts/stages/stage-1/phase_d1/d1_qualification_driver.py",
+    "scripts/stages/stage-1/phase_d1/d1_session.py",
+    "scripts/stages/stage-1/phase_d1/replay_specs.py",
+    "scripts/stages/stage-1/phase_d1/score_d1_confirmation.py",
+    "scripts/stages/stage-1/phase_d1/score_d1_screening.py",
+    "scripts/stages/stage-1/phase_d1/search_space.py",
+    "scripts/stages/stage-1/phase_d1/selection_noise.py",
+    "scripts/stages/stage-1/phase_d1/topk_adoption_driver.py",
+    "scripts/stages/stage-1/phase_d1/write_d1_behavioural_preregistration.py",
+    "scripts/stages/stage-1/phase_d1/write_d1_design.py",
+    "scripts/stages/stage-1/phase_d2/__init__.py",
+    "scripts/stages/stage-1/phase_d2/autoinit_d2_screening_driver.py",
+    "scripts/stages/stage-1/phase_d2/autoinit_d2_screening_launch.py",
+    "scripts/stages/stage-1/phase_d2/d2_authorization.py",
+    "scripts/stages/stage-1/phase_d2/d2_gpu_validation.py",
+    "scripts/stages/stage-1/phase_d2/d2_product_durability.py",
+    "scripts/stages/stage-1/phase_d2/d2_screening.py",
+    "scripts/stages/stage-1/phase_d2/d2_screening_authorization.py",
+    "scripts/stages/stage-1/phase_d2/d2_session.py",
+    "scripts/stages/stage-1/phase_d2/d2v3_gpu_validation.py",
+    "scripts/stages/stage-1/phase_d2/rescore_d2_probe.py",
+    "scripts/stages/stage-1/phase_d2/write_d2_preregistration.py",
+    "src/aadistill/data/dataset.py",
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/data/ladder.py",
+    "src/aadistill/data/tools.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/__init__.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/capability.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/governance/closure.py",
+    "src/aadistill/governance/grant.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/bundle_transport.py",
+    "src/aadistill/infrastructure/env.py",
+    "src/aadistill/infrastructure/failure_signature.py",
+    "src/aadistill/infrastructure/log_relay.py",
+    "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/watchdog.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/calibration/batching.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/items.py",
+    "src/aadistill/initialization/calibration/packing.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/execution.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+    "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+    "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+    "src/aadistill/initialization/operators/depth/__init__.py",
+    "src/aadistill/initialization/operators/depth/_common.py",
+    "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+    "src/aadistill/initialization/operators/depth/positional.py",
+    "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+    "src/aadistill/initialization/operators/register.py",
+    "src/aadistill/initialization/operators/width/residual/global_pca.py",
+    "src/aadistill/initialization/planning/__init__.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/planning/generation.py",
+    "src/aadistill/initialization/planning/generation_compat.py",
+    "src/aadistill/initialization/planning/isolation.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/planning/operator_config.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/recovery.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/scoring/batches.py",
+    "src/aadistill/initialization/scoring/content.py",
+    "src/aadistill/initialization/scoring/objective.py",
+    "src/aadistill/initialization/scoring/output_head.py",
+    "src/aadistill/initialization/scoring/positions.py",
+    "src/aadistill/initialization/scoring/protocol_identity.py",
+    "src/aadistill/initialization/scoring/reference_store.py",
+    "src/aadistill/initialization/scoring/rows.py",
+    "src/aadistill/initialization/scoring/support.py",
+    "src/aadistill/initialization/specs/arch.py",
+    "src/aadistill/initialization/specs/artifact.py",
+    "src/aadistill/initialization/specs/materialization.py",
+    "src/aadistill/initialization/specs/metrics.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/statistics/spec.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
+    "src/aadistill/models/student.py",
+    "src/aadistill/models/teacher.py",
+    "src/aadistill/models/tokenizer_contract.py",
+    "src/aadistill/runtime/__init__.py",
+    "src/aadistill/runtime/cost.py",
+    "src/aadistill/runtime/cpu_test_env.py",
+    "src/aadistill/runtime/device_handoff.py",
+    "src/aadistill/runtime/hub_capacity.py",
+    "src/aadistill/runtime/leaf_durability.py",
+    "src/aadistill/runtime/pod_environment.py",
+    "src/aadistill/runtime/run_layout.py",
+    "src/aadistill/runtime/staging_contract.py",
+    "src/aadistill/runtime/telemetry.py",
+    "src/aadistill/training/lora.py",
+    "src/aadistill/training/train.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 19.4558,
+    "expected_minutes": 817.2,
+    "soft_stop_minutes": 1025.0,
+    "artifact_recovery_reserve_minutes": 30.0,
+    "hard_terminate_minutes": 1055.0,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "unused: eight probes from relay-staged arms, every phase named below from the priced step",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 61.5
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 20.5
+      },
+      {
+        "name": "probes_train_eval_score_rescore_expected",
+        "minutes": 735.2
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "probe_overrun_risk",
+        "minutes": 126.08
+      }
+    ],
+    "notes": [],
+    "soft_stop_reserve_minutes": 126.08,
+    "expected_usd": 14.8458,
+    "soft_stop_usd": 18.6208,
+    "artifact_recovery_reserve_usd": 0.545,
+    "hard_terminate_usd": 19.1658
+  },
+  "quoted_price_per_hour": 1.09,
+  "stock_status": "Low",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 136.6068617422,
+    "current_spend_per_hr": 0.0,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 30.0,
+    "ok": true,
+    "why": "the provider account holds $136.6069 against the $30.0000 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "prechecks": [
+    {
+      "check": "run_identity_gate",
+      "ok": true,
+      "message": "run d2_screening_20261015_203346, preregistration b52810921a4c"
+    },
+    {
+      "check": "contract_gate",
+      "ok": true,
+      "message": "contract verified at $0: 6d4283e77e1b2654, 8 probes"
+    },
+    {
+      "check": "relay_arms_gate",
+      "ok": true,
+      "message": "12 arm files on the relay at their pins"
+    },
+    {
+      "check": "session_commit_and_lineage",
+      "ok": true,
+      "message": "session commit 39e5bdf9e71c verified: harness digests to 84d499fa20b1\u2026, carries the authorization and only logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "check": "same_failure_gate",
+      "ok": true,
+      "message": "no previous attempt failed deterministically; 3 prior log(s) read"
+    },
+    {
+      "check": "bundle_staged_gate",
+      "ok": true,
+      "message": "aad_autoinit_39e5bdf9.bundle round-trips"
+    }
+  ],
+  "d2_screening_contract_check": {
+    "contract_hash": "6d4283e77e1b26549328d96eaf8f71773a3b2ef4e15804d26dd938eb0674455e",
+    "n_probes": 8,
+    "seeds": [
+      516448251,
+      614923639
+    ],
+    "evaluation_protocol_hash": "e47508268ff52aa575d6a276735907f48a9589d0d5b2ffca492ad7b82dedc414"
+  },
+  "d2_screening_relay_arms": [
+    {
+      "repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/model.safetensors",
+      "dest": "artifacts/stages/stage-1/phase_d2/arms/59013099b902f213649b8aa4c676dedd",
+      "sha256": "7b52fb15a7b397d8e00e5cd39e2f667a83bd4d5d9aa2b857d11fe5dfc3cac138",
+      "also_stage_to": null
+    },
+    {
+      "repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/config.json",
+      "dest": "artifacts/stages/stage-1/phase_d2/arms/59013099b902f213649b8aa4c676dedd",
+      "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+      "also_stage_to": null
+    },
+    {
+      "repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/generation_config.json",
+      "dest": "artifacts/stages/stage-1/phase_d2/arms/59013099b902f213649b8aa4c676dedd",
+      "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+      "also_stage_to": null
+    },
+    {
+      "repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/model.safetensors",
+      "dest": "artifacts/stages/stage-1/phase_d2/arms/c2cb27efcf68b4f18bf7284aea84877a",
+      "sha256": "9a0f41e98a38ca69a86a45197f97c5fdb06ecb37db2f3480c77730dbd567d728",
+      "also_stage_to": null
+    },
+    {
+      "repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/config.json",
+      "dest": "artifacts/stages/stage-1/phase_d2/arms/c2cb27efcf68b4f18bf7284aea84877a",
+      "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+      "also_stage_to": null
+    },
+    {
+      "repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/generation_config.json",
+      "dest": "artifacts/stages/stage-1/phase_d2/arms/c2cb27efcf68b4f18bf7284aea84877a",
+      "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+      "also_stage_to": null
+    },
+    {
+      "repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "stage1/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/model.safetensors",
+      "dest": "artifacts/stages/stage-1/phase_d2/arms/30fe791a85d70ac713e75893fea107ae",
+      "sha256": "52c511c67badbecb5a75bff585bf4db66ce198dc6f30f398965a06a1fcb19d52",
+      "also_stage_to": null
+    },
+    {
+      "repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "stage1/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/config.json",
+      "dest": "artifacts/stages/stage-1/phase_d2/arms/30fe791a85d70ac713e75893fea107ae",
+      "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+      "also_stage_to": null
+    },
+    {
+      "repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "stage1/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/generation_config.json",
+      "dest": "artifacts/stages/stage-1/phase_d2/arms/30fe791a85d70ac713e75893fea107ae",
+      "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+      "also_stage_to": null
+    },
+    {
+      "repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/model.safetensors",
+      "dest": "artifacts/stages/stage-1/phase_d2/arms/3a4173e4eff45b0d73fd82bd0b263f03",
+      "sha256": "5d6c0a5a2c04bfc4cf75fd301e06b93affc557ab142229585f0a10c8029d0fbe",
+      "also_stage_to": null
+    },
+    {
+      "repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/config.json",
+      "dest": "artifacts/stages/stage-1/phase_d2/arms/3a4173e4eff45b0d73fd82bd0b263f03",
+      "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+      "also_stage_to": null
+    },
+    {
+      "repo": "AlphaAvatar/aadistill-artifacts",
+      "path": "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/generation_config.json",
+      "dest": "artifacts/stages/stage-1/phase_d2/arms/3a4173e4eff45b0d73fd82bd0b263f03",
+      "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+      "also_stage_to": null
+    }
+  ],
+  "session_commit_check": {
+    "session_commit": "39e5bdf9e71cfa5f2bb8dfda3a8513aa0ac02271",
+    "authorized_session_commit": "04bec599c0e05bd0ea5d470ee420f362d97078b6",
+    "harness_digest_at_commit": "84d499fa20b16a8b6a7c8e2610c4a98f6fea803b73e931924b53244aa183e821",
+    "authorized_harness_digest": "84d499fa20b16a8b6a7c8e2610c4a98f6fea803b73e931924b53244aa183e821",
+    "harness_matches": true,
+    "commit_carries_this_authorization": true,
+    "rule": "the pod checks out this commit from a bundle; its harness must digest to the authorized value and it must carry the authorization the driver will load",
+    "lineage": {
+      "authorized_base": "04bec599c0e05bd0ea5d470ee420f362d97078b6",
+      "session_commit": "39e5bdf9e71cfa5f2bb8dfda3a8513aa0ac02271",
+      "descends_from_base": true,
+      "changed_paths": [
+        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/governance/authorization.json"
+      ],
+      "unexpected_paths": [],
+      "ok": true,
+      "reason": "only logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/governance/authorization.json differs from the authorized base"
+    }
+  },
+  "same_failure_rule": {
+    "prior_attempts_read": 3,
+    "previous_deterministic_signature": null,
+    "corrective_change": true,
+    "corrective_change_basis": "2 tracked path(s) changed since d2_screening_20261015_193502"
+  },
+  "bundle_staged_check": {
+    "session_commit": "39e5bdf9e71cfa5f2bb8dfda3a8513aa0ac02271",
+    "canonical_bundle_name": "aad_autoinit_39e5bdf9.bundle",
+    "relay_repo": "AlphaAvatar/aadistill-artifacts",
+    "relay_path": "transfer/aad_autoinit_39e5bdf9.bundle",
+    "n_harness_files": 198,
+    "bytes": 32414223,
+    "remote_sha256": "46f3f67a546b1338c3986fc66e592210174e4cbca8a765de5769b37bd6c9aaf3",
+    "local_sha256": "46f3f67a546b1338c3986fc66e592210174e4cbca8a765de5769b37bd6c9aaf3",
+    "bundle_verify_rc": 0,
+    "roundtrip_head": "39e5bdf9e71cfa5f2bb8dfda3a8513aa0ac02271",
+    "authorization_sha256": "610a58f4483276996b15e3c5efcbc083b654c0a8465a66c57e4a61c6f2ca28a8",
+    "authorization_matches": true,
+    "roundtrip_harness_digest": "84d499fa20b16a8b6a7c8e2610c4a98f6fea803b73e931924b53244aa183e821",
+    "expected_harness_digest": "84d499fa20b16a8b6a7c8e2610c4a98f6fea803b73e931924b53244aa183e821",
+    "ok": true,
+    "answers": "a pod can obtain the exact authorized code from the relay right now, not merely that a local file once existed"
+  },
+  "precheck": {
+    "relay_needed": [
+      "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+      "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+      "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+      "stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/model.safetensors",
+      "stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/config.json",
+      "stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/generation_config.json",
+      "stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/model.safetensors",
+      "stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/config.json",
+      "stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/generation_config.json",
+      "stage1/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/model.safetensors",
+      "stage1/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/config.json",
+      "stage1/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/generation_config.json",
+      "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/model.safetensors",
+      "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/config.json",
+      "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/generation_config.json"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 18
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1388
+    },
+    "local_assets": [
+      "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1/d1_screening",
+      "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1/d1_confirmation"
+    ],
+    "local_missing": []
+  },
+  "pod_id": "7stah5j2s98e69",
+  "actual_price_per_hour": 1.09,
+  "terminate_after_utc": "2026-10-16T14:10:19Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/watchdog_7stah5j2s98e69.jsonl"
+  ],
+  "watchdog_owns_pod": "7stah5j2s98e69",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "595.91.07"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+  },
+  "host_admission": [
+    {
+      "draw": 1,
+      "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+      "admitted": true,
+      "reason": "image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07 is the protocol's"
+    }
+  ],
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_39e5bdf9.bundle",
+    "SESSION_ASSETS": "d1_screening:artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1,d1_confirmation:artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1",
+    "SESSION_AUTH_PATH": "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/governance/authorization.json",
+    "SESSION_COMMIT": "39e5bdf9e71cfa5f2bb8dfda3a8513aa0ac02271",
+    "SESSION_KIND": "d2_screening",
+    "SESSION_PLAN_HASH": "b52810921a4c47d2dd00c92f067a15cb4502e04a2df7985a42e7f6b8eef491a8",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/phase_d2/arms/59013099b902f213649b8aa4c676dedd\",\"path\":\"stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"7b52fb15a7b397d8e00e5cd39e2f667a83bd4d5d9aa2b857d11fe5dfc3cac138\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/phase_d2/arms/59013099b902f213649b8aa4c676dedd\",\"path\":\"stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/phase_d2/arms/59013099b902f213649b8aa4c676dedd\",\"path\":\"stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/phase_d2/arms/c2cb27efcf68b4f18bf7284aea84877a\",\"path\":\"stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"9a0f41e98a38ca69a86a45197f97c5fdb06ecb37db2f3480c77730dbd567d728\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/phase_d2/arms/c2cb27efcf68b4f18bf7284aea84877a\",\"path\":\"stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/phase_d2/arms/c2cb27efcf68b4f18bf7284aea84877a\",\"path\":\"stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/phase_d2/arms/30fe791a85d70ac713e75893fea107ae\",\"path\":\"stage1/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"52c511c67badbecb5a75bff585bf4db66ce198dc6f30f398965a06a1fcb19d52\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/phase_d2/arms/30fe791a85d70ac713e75893fea107ae\",\"path\":\"stage1/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/phase_d2/arms/30fe791a85d70ac713e75893fea107ae\",\"path\":\"stage1/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/phase_d2/arms/3a4173e4eff45b0d73fd82bd0b263f03\",\"path\":\"stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"5d6c0a5a2c04bfc4cf75fd301e06b93affc557ab142229585f0a10c8029d0fbe\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/phase_d2/arms/3a4173e4eff45b0d73fd82bd0b263f03\",\"path\":\"stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/phase_d2/arms/3a4173e4eff45b0d73fd82bd0b263f03\",\"path\":\"stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633\"}]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV TEACHER_READY VLLM_READY TESTS_OK AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/autoinit_d2_screening.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "scripts/stages/stage-1/phase_d2/tests/screening_pod_preflight",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "2700",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "autoinit_d2_screening_driver",
+    "pid": 3291,
+    "workdir": "/workspace/aad",
+    "command": "/opt/train/bin/python /workspace/aad/scripts/stages/stage-1/phase_d2/autoinit_d2_screening_driver.py --out '/workspace/aad/artifacts/audit/autoinit_d2_screening' --run-id 'd2_screening_20261015_203346' --authorization '/workspace/aad/logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/governance/authorization.json' --arm-root '/workspace/aad/artifacts/stages/stage-1/phase_d2/arms' --status '/workspace/autoinit_d2_screening.status' --device cuda --image-digest 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07'",
+    "log_path": "/workspace/autoinit_d2_screening_run.log",
+    "status_path": "/workspace/autoinit_d2_screening.status",
+    "pid_path": "/workspace/jobs/autoinit_d2_screening_driver.pid",
+    "descriptor_path": "/workspace/jobs/autoinit_d2_screening_driver.job.json",
+    "exit_path": "/workspace/jobs/autoinit_d2_screening_driver.exit",
+    "started_utc": "2026-10-15T21:47:29Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "probe_evidence_read_from": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/relay/d2_screening.json",
+  "probe_evidence_secured": {
+    "d2_screening_c1_s516448251": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    },
+    "d2_screening_c1_s614923639": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    },
+    "d2_screening_c2_s516448251": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    },
+    "d2_screening_c2_s614923639": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    },
+    "d2_screening_c3_s516448251": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    },
+    "d2_screening_c3_s614923639": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    },
+    "d2_screening_c4_s516448251": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    },
+    "d2_screening_c4_s614923639": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true
+    }
+  },
+  "trained_unscored_preserved": {
+    "d2_screening_c1_s516448251": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "e7f181aeffffaf5c8aadf50019187e336a4681243c650942b0f66474cbd66a91",
+      "arrived_sha256": "e7f181aeffffaf5c8aadf50019187e336a4681243c650942b0f66474cbd66a91",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/products/trained_unscored/d2_screening_c1_s516448251",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d2_screening_c1_s614923639": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "6cd797827fc9a57a58ce033ccbea21c641e2d4d73e5d681d208570abe8bb2d90",
+      "arrived_sha256": "6cd797827fc9a57a58ce033ccbea21c641e2d4d73e5d681d208570abe8bb2d90",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/products/trained_unscored/d2_screening_c1_s614923639",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d2_screening_c2_s516448251": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "391a589695d7a1417055279ed3b852a1165712b04764988ae7914059a72fc83a",
+      "arrived_sha256": "391a589695d7a1417055279ed3b852a1165712b04764988ae7914059a72fc83a",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/products/trained_unscored/d2_screening_c2_s516448251",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d2_screening_c2_s614923639": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "53ab97422ec8aad2ad911b17a41ff6f8e2c722ebfa509a5db648bec394bb657a",
+      "arrived_sha256": "53ab97422ec8aad2ad911b17a41ff6f8e2c722ebfa509a5db648bec394bb657a",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/products/trained_unscored/d2_screening_c2_s614923639",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d2_screening_c3_s516448251": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "225e6ab63d9e541b2af2bc632895dcac5ffa65d4e6e48d5b5c4074d4ee6c7d78",
+      "arrived_sha256": "225e6ab63d9e541b2af2bc632895dcac5ffa65d4e6e48d5b5c4074d4ee6c7d78",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/products/trained_unscored/d2_screening_c3_s516448251",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d2_screening_c3_s614923639": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "7fce338d56276d65fe02e3ef9535f471522c54e671472468d2f7b7e548c80718",
+      "arrived_sha256": "7fce338d56276d65fe02e3ef9535f471522c54e671472468d2f7b7e548c80718",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/products/trained_unscored/d2_screening_c3_s614923639",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d2_screening_c4_s516448251": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "86260d5833b5bd8081d8c6bfbaed7500c101f5dd4b3a434f634c1e2b8900e5f7",
+      "arrived_sha256": "86260d5833b5bd8081d8c6bfbaed7500c101f5dd4b3a434f634c1e2b8900e5f7",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/products/trained_unscored/d2_screening_c4_s516448251",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d2_screening_c4_s614923639": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "500ec8186e02b8dea54b594bf1dc2be3fc93d6e61b04c4d6efcb88668e133e78",
+      "arrived_sha256": "500ec8186e02b8dea54b594bf1dc2be3fc93d6e61b04c4d6efcb88668e133e78",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true,
+        "training_records": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-artifacts/phase_d2/d2_screening_20261015_203346/products/trained_unscored/d2_screening_c4_s614923639",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    }
+  },
+  "training_records_secured": {
+    "d2_screening_c1_s516448251": {
+      "run_manifest.json": "309ade86523866cf94ad666ac1b5fa4e37e3ea670c0d357712842b59e1b9aeb2",
+      "run_completion.json": "a5a0cb482555aa8dd41f3b592b7a02535b8d9702201270e5de6e3fffa4996ac3"
+    },
+    "d2_screening_c1_s614923639": {
+      "run_manifest.json": "d5fbdcb759f6273f7e5bd28ada2ad61656780c862156d7ed6ccd45aa87092a8f",
+      "run_completion.json": "dd7a36d5c20e6117fd01263dc427701063233c6ba59e864fcb7318cde326160b"
+    },
+    "d2_screening_c2_s516448251": {
+      "run_manifest.json": "f31d7bc4a420534d9d0f72175c1b01e3ed81b56305767c8fff5a820bcb2cc4c0",
+      "run_completion.json": "10bb4006a31c92a6a2e5f515ab6978860c3497c39091427de192715ca375b6ca"
+    },
+    "d2_screening_c2_s614923639": {
+      "run_manifest.json": "ec1aedfcb599b41b0b8792099857784f7d67c4ed56b8dc94664e8a4b996b803d",
+      "run_completion.json": "7c58a028e15c33275fc716a958d60085c06480c5b18c38a04f7429d5d60d2ee7"
+    },
+    "d2_screening_c3_s516448251": {
+      "run_manifest.json": "e8251f44dd0bd2ba59e27d8927faf7c77c3592f7b9afd81613650aad2b11f938",
+      "run_completion.json": "43d779de598f2132fa9b62765657b58c9c9eec17d637fd745e43c57fedfaad4d"
+    },
+    "d2_screening_c3_s614923639": {
+      "run_manifest.json": "6a7a59079b4099b5fc94990c84569960748d8c422e50095b511be145fab395aa",
+      "run_completion.json": "ecab4368e4f3fc2b23d726124621b76e7f9e1e8b37dd2a387add76b9fe18ba25"
+    },
+    "d2_screening_c4_s516448251": {
+      "run_manifest.json": "462b020d5bc6b63d2aefc24653b400695fe5e360b89a4208786db5594c22b722",
+      "run_completion.json": "5512219c70ca1b88bcdcb86b57ce5643dda8ebf48ac898eb6d3747193845cc1d"
+    },
+    "d2_screening_c4_s614923639": {
+      "run_manifest.json": "6f090be2c0900e180a796be7bc2782fb14677781665aa4bea3550a1cce9a4549",
+      "run_completion.json": "6876b5cd805c1b1ecc14c414988410ab8d1cbe2fff2257cc1e54f8e5df1a2502"
+    }
+  },
+  "release_acks": [
+    {
+      "probe_id": "d2_screening_c1_s516448251",
+      "delivered": true
+    },
+    {
+      "probe_id": "d2_screening_c1_s614923639",
+      "delivered": true
+    },
+    {
+      "probe_id": "d2_screening_c2_s516448251",
+      "delivered": true
+    },
+    {
+      "probe_id": "d2_screening_c2_s614923639",
+      "delivered": true
+    },
+    {
+      "probe_id": "d2_screening_c3_s516448251",
+      "delivered": true
+    },
+    {
+      "probe_id": "d2_screening_c3_s614923639",
+      "delivered": true
+    },
+    {
+      "probe_id": "d2_screening_c4_s516448251",
+      "delivered": true
+    },
+    {
+      "probe_id": "d2_screening_c4_s614923639",
+      "delivered": true
+    }
+  ],
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "fetched_reports": [
+    "d2_screening.json"
+  ],
+  "checkpoints_fetched": [
+    {
+      "probe_id": "d2_screening_c1_s516448251",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    },
+    {
+      "probe_id": "d2_screening_c1_s614923639",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    },
+    {
+      "probe_id": "d2_screening_c2_s516448251",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    },
+    {
+      "probe_id": "d2_screening_c2_s614923639",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    },
+    {
+      "probe_id": "d2_screening_c3_s516448251",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    },
+    {
+      "probe_id": "d2_screening_c3_s614923639",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    },
+    {
+      "probe_id": "d2_screening_c4_s516448251",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    },
+    {
+      "probe_id": "d2_screening_c4_s614923639",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "rescoring.json": true,
+      "release_acked": true,
+      "training_records": {
+        "run_manifest.json": true,
+        "run_completion.json": true
+      }
+    }
+  ],
+  "required_products_secured": {
+    "ok": true,
+    "why": "all 8 scored probes' results and per-sample rows off-pod; 8 trained checkpoint(s) preserved and identity-verified, reusable by a replacement attempt"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 252,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 678.99,
+    "actual_usd": 12.3351,
+    "authorized_usd": 19.4558,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-16T08:59:28+00:00"
+}

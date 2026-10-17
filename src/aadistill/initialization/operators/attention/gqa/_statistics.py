@@ -50,7 +50,10 @@ import torch
 #: Imported rather than re-implemented. The two collectors restrict their
 #: accumulation identically and a second copy of the reshape/validate rule is a
 #: second chance for them to disagree about what a mask means.
-from aadistill.initialization.calibration.batching import active_rows
+from aadistill.initialization.calibration.batching import (
+    active_rows,
+    active_weights,
+)
 
 
 class AttentionHeadStatsCollector:
@@ -95,6 +98,13 @@ class AttentionHeadStatsCollector:
         #: See `_keep_valid`. `None` outside a padded forward, so a hook that
         #: fires from a caller running the model directly reads "no padding".
         self._valid_mask = None
+        #: Continuous token weights, the same contract as
+        #: `ActivationStatsCollector`: the kept rows' `w_t` for the forward in
+        #: flight; `sum_t w_t a_h a_h^T` against `sum_t w_t`.
+        self._row_weights = None
+        self._weighted: bool | None = None
+        self.token_weight = torch.zeros((), dtype=torch.float64,
+                                        device=self.device)
 
         self._hooks = [m.register_forward_pre_hook(self._make_hook(i))
                        for i, m in enumerate(modules)]
@@ -115,9 +125,16 @@ class AttentionHeadStatsCollector:
             flat = self._keep_valid(flat)
             a = flat.to(torch.float64).reshape(-1, self.num_heads, self.head_dim)
             # per head: sum_t a_h a_h^T  ->  (heads, head_dim, head_dim)
-            self.head_sqsum[idx] += torch.einsum("thi,thj->hij", a, a)
+            w = self._row_weights
+            if w is None:
+                self.head_sqsum[idx] += torch.einsum("thi,thj->hij", a, a)
+            else:
+                w = w.to(a.device)
+                self.head_sqsum[idx] += torch.einsum("t,thi,thj->hij", w, a, a)
             if idx == 0:
                 self.token_count += a.shape[0]
+                if w is not None:
+                    self.token_weight += w.sum()
         return hook
 
     def _keep_valid(self, flat: torch.Tensor) -> torch.Tensor:
@@ -145,31 +162,52 @@ class AttentionHeadStatsCollector:
 
     @torch.no_grad()
     def process(self, input_ids: torch.Tensor, *,
-                active_mask: torch.Tensor | None = None) -> None:
+                active_mask: torch.Tensor | None = None,
+                token_weights: torch.Tensor | None = None) -> None:
         """One unpadded sequence. The reference path, routed through the batched
         one so a single accumulation rule serves both.
 
         ``active_mask`` is an optional ``[1, T]`` or ``[T]`` bool over the token
-        positions the scoring policy admits.
+        positions the scoring policy admits; ``token_weights`` the continuous
+        alternative.
         """
         if input_ids.dim() == 1:
             input_ids = input_ids.unsqueeze(0)
         self._run(input_ids.to(self.device), attention_mask=None,
-                  active_mask=active_rows(active_mask, input_ids.shape, self.device))
+                  active_mask=active_rows(active_mask, input_ids.shape, self.device),
+                  token_weights=active_weights(token_weights, input_ids.shape,
+                                               self.device))
 
     @torch.no_grad()
     def process_batch(self, batch, *,
-                      active_mask: torch.Tensor | None = None) -> None:
+                      active_mask: torch.Tensor | None = None,
+                      token_weights: torch.Tensor | None = None) -> None:
         """A padded :class:`ItemBatch`. Same sufficient statistic, admitted tokens
-        only. ``active_mask`` is ``[B, T_max]`` in the batch's ROW order."""
+        only. ``active_mask`` / ``token_weights`` are ``[B, T_max]`` in the
+        batch's ROW order."""
         self._run(batch.input_ids.to(self.device),
                   attention_mask=batch.attention_mask.to(self.device),
                   active_mask=active_rows(active_mask, batch.input_ids.shape,
-                                       self.device))
+                                       self.device),
+                  token_weights=active_weights(token_weights,
+                                               batch.input_ids.shape,
+                                               self.device))
 
     def _run(self, input_ids: torch.Tensor,
              attention_mask: torch.Tensor | None,
-             active_mask: torch.Tensor | None = None) -> None:
+             active_mask: torch.Tensor | None = None,
+             token_weights: torch.Tensor | None = None) -> None:
+        if active_mask is not None and token_weights is not None:
+            raise ValueError(
+                "a pass is restricted by a binary `active_mask` OR weighted by "
+                "`token_weights`, not both; fold the mask into the weights")
+        weighted = token_weights is not None
+        if self._weighted is None:
+            self._weighted = weighted
+        elif self._weighted != weighted:
+            raise ValueError(
+                "this collector cannot mix weighted and unweighted passes; one "
+                "denominator cannot be both a count and a weight sum")
         #: ONE mask from two sources, exactly as `ActivationStatsCollector`
         #: combines them: padding says which positions exist, the policy says
         #: which existing ones this statistic may read.
@@ -179,12 +217,19 @@ class AttentionHeadStatsCollector:
         if active_mask is not None and not bool(active_mask.all()):
             flat = active_mask.reshape(-1).bool()
             valid = flat if valid is None else (valid & flat)
+        if weighted:
+            positive = token_weights.reshape(-1) > 0
+            if not bool(positive.all()):
+                valid = positive if valid is None else (valid & positive)
+            flat_w = token_weights.reshape(-1)
+            self._row_weights = flat_w if valid is None else flat_w[valid]
         self._valid_mask = valid
         try:
             self.model(input_ids, **({"attention_mask": attention_mask}
                                      if attention_mask is not None else {}))
         finally:
             self._valid_mask = None
+            self._row_weights = None
 
     def close(self) -> None:
         for h in self._hooks:
@@ -212,10 +257,18 @@ class AttentionHeadStatsCollector:
             raise ValueError(
                 "no tokens were processed; refusing to return an all-zero "
                 "attention statistic that would rank every head identically")
-        return {
+        state = {
             "attn_head_sqsum": self.head_sqsum.to("cpu"),
             "attn_token_count": torch.tensor(self.token_count, dtype=torch.int64),
         }
+        #: ONLY WHEN WEIGHTED, so an unweighted state is the historical one.
+        if self._weighted:
+            state[ATTN_TOKEN_WEIGHT] = self.token_weight.to("cpu")
+        return state
+
+
+#: The weighted denominator's state key. Present only in a weighted state.
+ATTN_TOKEN_WEIGHT = "attn_token_weight"
 
 
 def head_write_energy(state: dict[str, torch.Tensor], layer: int,
@@ -227,7 +280,9 @@ def head_write_energy(state: dict[str, torch.Tensor], layer: int,
     `<W_o,h^T W_o,h, M_h>_F / n_tokens`.
     """
     m = state["attn_head_sqsum"][layer].to(torch.float64)     # (heads, d, d)
-    n = int(state["attn_token_count"])
+    #: `sum_t w_t` for a weighted pass, else the admitted-token count.
+    n = (float(state[ATTN_TOKEN_WEIGHT]) if ATTN_TOKEN_WEIGHT in state
+         else int(state["attn_token_count"]))
     w = o_proj_weight.to(torch.float64)                        # (hidden, heads*d)
     if w.shape[-1] != num_heads * head_dim:
         raise ValueError(

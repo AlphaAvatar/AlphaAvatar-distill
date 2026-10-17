@@ -16,6 +16,11 @@
 # parent, which the prefix builds from the root teacher; fetching an artifact
 # no stage reads would be paying to move bytes nothing consumes.
 set -uo pipefail
+#: THE SESSION CLOCK starts here, with the launcher's ssh timeout. The driver
+#: deadline used to be counted from after setup, so it believed it had the
+#: setup minutes (up to ~14) that the ssh timeout had already spent -- and a
+#: stage gated on it could start work the timeout would cut.
+REMOTE_T0=$(date -u +%s)
 
 say() { echo "[pod $(date -u +%H:%M:%S)] $*"; }
 OUTROOT=/workspace/out
@@ -181,39 +186,60 @@ say "preflight: everything but the two expensive path runs, on THIS interpreter"
 # registry and both protocol bindings -- the exact things that are empty or
 # unstaged in a fresh interpreter and that have failed a paid session after the
 # stage before them succeeded. Seconds, before the root teacher is resident.
-PYTHONPATH=src:scripts:scripts/data /opt/train/bin/python \
-    scripts/stages/stage-1/phase_d1/topk_adoption_driver.py --check-only \
-    --out "${OUTROOT}/preflight" > "${OUTROOT}/preflight.log" 2>&1
-PRE_RC=$?
-if [ "$PRE_RC" -ne 0 ]; then
-  say "PREFLIGHT FAILED (rc=${PRE_RC}); the paid sequence would fail the same way"
-  tail -40 "${OUTROOT}/preflight.log"
-  note "preflight_failed"
-  exit 29
-fi
-say "preflight ok"
-/opt/train/bin/python scripts/stages/stage-1/phase_d1/topk_adoption_report.py \
-    "${OUTROOT}/preflight/adoption.json" 2>/dev/null | while read -r l; do
-  say "  $l"
+# ONCE PER MODE: the row-selected path binds different protocol ids.
+MODES="${ADOPT_PREDICTION_ROWS:-all_v1}"
+for MODE in $MODES; do
+  PYTHONPATH=src:scripts:scripts/data /opt/train/bin/python \
+      scripts/stages/stage-1/phase_d1/topk_adoption_driver.py --check-only \
+      --stages "${ADOPT_STAGES:-C,D,P}" \
+      --prediction-rows "$MODE" \
+      --out "${OUTROOT}/preflight_${MODE}" > "${OUTROOT}/preflight_${MODE}.log" 2>&1
+  PRE_RC=$?
+  if [ "$PRE_RC" -ne 0 ]; then
+    say "PREFLIGHT FAILED for ${MODE} (rc=${PRE_RC}); the paid sequence would fail the same way"
+    tail -40 "${OUTROOT}/preflight_${MODE}.log"
+    note "preflight_failed_${MODE}"
+    exit 29
+  fi
+  say "preflight ok (${MODE})"
 done
 
-# --- the qualification ------------------------------------------------------
-say "ADOPTION: one DEPTH path, two reductions from the same forwards"
+# --- the runs, one per mode, in order ---------------------------------------
 # The deadline is the launcher's remaining seconds, so the operator deadline and
-# the session ceiling cannot disagree about what is affordable.
-PYTHONPATH=src:scripts:scripts/data /opt/train/bin/python \
-    scripts/stages/stage-1/phase_d1/topk_adoption_driver.py \
-    --out "${OUTROOT}/adoption" \
-    --stages "${ADOPT_STAGES:-C,D,P}" \
-    --deadline-s "${ADOPT_DEADLINE_S:-0}" 2>&1 | tee "${OUTROOT}/adoption.log"
-RC=${PIPESTATUS[0]}
-say "adoption rc=${RC}"
-
-# Evidence is written stage by stage, so there is something to fetch on every
-# path out of here. Nothing below decides anything; the launcher collects.
-if [ -f "${OUTROOT}/adoption/adoption.json" ]; then
-  /opt/train/bin/python scripts/stages/stage-1/phase_d1/topk_adoption_report.py \
-      "${OUTROOT}/adoption/adoption.json" 2>/dev/null \
-    | while read -r l; do say "  $l"; done
-fi
+# the session ceiling cannot disagree about what is affordable. Each mode gets
+# what is LEFT when it starts, not a fresh copy of the whole -- counted from
+# REMOTE_T0, so setup is charged to it as the ssh timeout charges it.
+RC=0
+for MODE in $MODES; do
+  LEFT=0
+  if [ "${ADOPT_DEADLINE_S:-0}" -gt 0 ]; then
+    LEFT=$(( ADOPT_DEADLINE_S - ( $(date -u +%s) - REMOTE_T0 ) ))
+    if [ "$LEFT" -le 60 ]; then
+      say "no time left for ${MODE}; stopping with what the earlier modes recorded"
+      note "deadline_before_${MODE}"
+      RC=30
+      break
+    fi
+  fi
+  say "ADOPTION ${MODE}: stages ${ADOPT_STAGES:-C,D,P}, deadline ${LEFT}s"
+  PYTHONPATH=src:scripts:scripts/data /opt/train/bin/python \
+      scripts/stages/stage-1/phase_d1/topk_adoption_driver.py \
+      --out "${OUTROOT}/adoption_${MODE}" \
+      --stages "${ADOPT_STAGES:-C,D,P}" \
+      --prediction-rows "$MODE" \
+      --deadline-s "$LEFT" 2>&1 | tee "${OUTROOT}/adoption_${MODE}.log"
+  MRC=${PIPESTATUS[0]}
+  say "adoption ${MODE} rc=${MRC}"
+  # Evidence is written stage by stage, so there is something to fetch on every
+  # path out of here. Nothing below decides anything; the launcher collects.
+  if [ -f "${OUTROOT}/adoption_${MODE}/adoption.json" ]; then
+    /opt/train/bin/python scripts/stages/stage-1/phase_d1/topk_adoption_report.py \
+        "${OUTROOT}/adoption_${MODE}/adoption.json" 2>/dev/null \
+      | while read -r l; do say "  $l"; done
+  fi
+  if [ "$MRC" -ne 0 ]; then
+    RC=$MRC
+    break
+  fi
+done
 exit "$RC"

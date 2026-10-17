@@ -22,14 +22,24 @@ from __future__ import annotations
 from typing import Any
 
 from aadistill.initialization.scoring.support import (
-    DistributionSupport, reference_topk_tail,
+    DistributionSupport, reference_student_union_topk_tail,
+    reference_topk_tail,
 )
 
 #: The D-series' K. Maintainer-selected 2026-10-04; never tuned against outcomes.
 D_SERIES_TOP_K = 200
 
-#: The protocol every D-series round scores under.
+#: The protocol every D-series round scores under -- D1's and D3's, and D2's
+#: through version 2.
 D_SERIES_SUPPORT: DistributionSupport = reference_topk_tail(D_SERIES_TOP_K)
+
+#: D2 VERSION 3 ONLY (maintainer scientific decision 2026-10-14): the
+#: teacher's Top-K UNITED WITH the candidate's own Top-K, plus one tail, at
+#: the same K. A declared change of D2's KL support, not a replacement of the
+#: D-series protocol: D1 and D3 keep `D_SERIES_SUPPORT`, and nothing that
+#: scores them may read this.
+D2_V3_SUPPORT: DistributionSupport = reference_student_union_topk_tail(
+    D_SERIES_TOP_K)
 
 #: The execution protocol adopted alongside it, carried here so a round cannot
 #: pick up one and miss the other. These are EXECUTION knobs, not hashed science

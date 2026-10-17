@@ -1,0 +1,31 @@
+[08:37:31] budget: expected 47 min $0.85 · soft $2.79 · hard $2.97 (authorized $3.02)
+[08:37:32] NVIDIA L40S $1.09/h, stock Low
+[08:37:32] account funds OK: the provider account holds $119.0677 against the $30.0000 this session must be able to fund
+[08:37:32] run d3_structural_20261017_083554, registration 43156f21a011
+[08:37:32] treatment verified at $0: 5948a3c99ac12213
+[08:37:32] session commit 74dbf9423ab5 verified: harness digests to 067dafd9a143…, carries the authorization and only logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/governance/authorization.json differs from the authorized base
+[08:37:32] no previous attempt failed deterministically; 0 prior log(s) read
+[08:37:38] aad_autoinit_74dbf942.bundle round-trips
+[08:37:38] precheck OK: 0 relay inputs (), 3 local assets
+[08:37:39] watchdog detached — hard 163 min = $2.97
+[08:37:39] created 7gth4ukh0lwxgf at $1.09/h
+[08:38:34]   starting (60s) — $0.02
+[08:39:18] TCP 22 at 160.250.71.213:57832 after 1.6 min
+[08:39:20] draw 1: ssh reachable — $0.03
+[08:39:49] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[08:39:49] draw 1: host admitted — image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07 is the protocol's
+[08:39:49] draw 1: running setup
+[08:42:54] draw 1: setup complete — $0.10
+[08:42:59] driver detached, pid 1703, confirmed by descriptor_probe — $0.10
+[08:45:16]   2026-10-17T08:42:57Z MARKER:DRIVER_START — $0.14
+[09:03:47]   2026-10-17T09:02:07Z MARKER:ALL_DONE — $0.47
+[09:03:47] polling ended: ALL_DONE — $0.47
+[09:05:24]   manifest rc=0
+4 file(s) across 4 class(es) -> /workspace/manifest.json
+  final_required: 4 · mutable_snapshot: 0 · final_streams_quiescent: True
+[09:07:41] teardown gate: allowed=True failed=None
+[09:07:41] deleting pod (gate passed)
+[09:07:52] pod deleted — 30.2 min, $0.55; provider confirms gone: True
+
+autoinit-d3-structural COMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/runtime/session.json. D3 structural: the step records, DEPTH's round evidence, the structural outcome and -- for a new initialization -- the product are what it owes.
+LAUNCHER_EXIT=0

@@ -1,0 +1,73 @@
+{
+ "schema": "aadistill.phase_d1.behavioural_closeout/v1",
+ "run_id": "d1_behavioural_20261010_200001",
+ "stage_id": "stage-1",
+ "experiment_id": "phase_d1",
+ "rung": "screening",
+
+ "outcome": "PREPARED AND REFUSED AT $0, BEFORE ANY PROVIDER RESOURCE. The full chain was built on the raised envelope -- launch-bound sweep, one-use authorization, staged bundle, launch readiness -- and the launcher's dry run then refused to plan: the design's expected 1087.16 minutes plus a 10% contingency and a 30-minute artifact-recovery reserve need 1225.88 minutes, and only 1174.00 are authorized. Nothing was created, nothing billed, no probe trained and nothing was measured.",
+
+ "classification": "A BUDGET BOUNDARY, not an engineering failure and not a scientific one. Every accounting precondition the 2026-10-11 decision set is discharged and every $0 gate before the budget plan passed. The gap is $0.9406 between the authorized remainder and what the launcher's planning rule demands, and the two ways to close it are both reserved to the maintainer: a budget increase is not authorized, and re-pricing the frozen design's cell to make the grant sufficient is explicitly forbidden. See analyses/d1_screening_estimate_vs_measurement_boundary.json.",
+
+ "what_this_attempt_established": [
+  "the accounting repairs work end to end: the four closeouts are discovered through logs/index.json, booked ALL-IN at the provider-measured $8.3305, and the remainder derives to $21.6695 without any hand-edited figure.",
+  "the issuer narrows an attempt to the remainder rather than the design's cell, and records the envelope, the prior subruns and the derived bounds in the artifact.",
+  "the launch-bound sweep passes on the reconciled tree: 18/18 pod-preflight checks under the simulated pod environment, on ca2f6df2.",
+  "the launcher now refuses a plan that exceeds its authorization. It did NOT before, and that is the defect this dry run found: it would have armed a watchdog permitting $24.63 against a $20.82 authorization.",
+  "the recovery reserve has one owner again. The authorization was holding back 45 minutes for teardown while the launcher's spec already reserved 30 for artifact recovery inside the bound it enforces; 45 of the dry run's original $3.80 shortfall was that double count."
+ ],
+
+ "recorded_utc": "2026-10-10T22:20:00+00:00",
+ "session_commit": "aa32fba0bcad86152bdd4fd0856d16981c164b77",
+ "authorized_base_commit": "aa32fba0bcad86152bdd4fd0856d16981c164b77",
+ "authorization_sha256": "5f7032144f8af9c59fd7d93f7d8b79d10bbbde945bc71aeba8596eb806a7bb0d",
+ "swept_base_commit": "ca2f6df222d8",
+
+ "money": {
+  "provider_resources_created": 0,
+  "provider_resource_created": false,
+  "all_in_usd": 0.0,
+  "all_in_source": "no provider resource existed; the account balance is unchanged at $178.2713915818 across the whole attempt",
+  "authorized_usd": 21.6538,
+  "within_authorization": true,
+  "one_use_grant_consumed": true,
+  "_the_chain_is_consumed_even_at_zero": "P12.1: an invocation that ends before measurement begins consumed its one-use chain whether or not it spent anything. The next attempt needs a fresh run identity, sweep, issuance and bundle.",
+  "cumulative_after_this_attempt_usd": 8.3305,
+  "envelope_usd": 30.0,
+  "remaining_usd": 21.6695
+ },
+
+ "cost": {
+  "actual_usd": 0.0,
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 0.0,
+  "authorized_usd": 21.6538,
+  "within_authorization": true,
+  "_owner": "no session record of a provider resource exists; restated because derive_budget books from closeout/outcome.json"
+ },
+
+ "teardown": {
+  "pod_deleted": null,
+  "provider_confirms_gone": true,
+  "billing": false,
+  "_nothing_to_tear_down": "the dry run reported CREATED NOTHING: every pre-provider gate did not pass, so no provider resource was created. Verified independently at closeout: 0 live pods, $0.00/hr spend rate, balance unchanged."
+ },
+
+ "evidence": {
+  "governance": [
+   "governance/readiness.json -- the launch_bound sweep, 18/18 on ca2f6df2",
+   "governance/authorization.json -- the one-use artifact, $20.8238 over 1129 min as issued",
+   "governance/launch_readiness.json -- seven bound facts, no open blockers",
+   "governance/bundle.json -- aad_autoinit_ee9832d8.bundle, staged and verified"
+  ],
+  "runtime": "runtime/session.json -- the dry run's own record, carrying the BudgetError and CREATED NOTHING"
+ },
+
+ "observers": {
+  "monitors_stopped_in_this_terminal_path": [],
+  "watch_set_now_empty": true,
+  "_p12_3": "the dry run is synchronous and armed no watcher; nothing was left running"
+ },
+
+ "next_action": "MAINTAINER DECISION. Either raise the cumulative envelope by ~$1 to about $31.00 -- which also moves the $30.00 per-session limit the amendment preserved -- or authorize re-pricing the design's screening cell from attempt 132919's measurements, which costs nothing and which the design's own 'measurement is authoritative' principle favours, but which the 2026-10-11 decision forbids me to do to make a grant acceptable. The boundary record states both options and the arithmetic."
+}

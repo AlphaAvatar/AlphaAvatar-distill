@@ -1,0 +1,372 @@
+{
+ "authorizes": "nothing",
+ "behavioural_rung": {
+  "battery": {
+   "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+   "item_ids_sha256": "7d200ffe666add66721c3cb233f6f9b876825ee5277438669926e3633fe8547b",
+   "n_prompts": 950,
+   "n_scorable": 850,
+   "role": "d1_confirmation"
+  },
+  "comparators": {
+   "B": {
+    "role": "standing scientific anchor",
+    "units": [
+     "d1_confirmation_B_s396880939",
+     "d1_confirmation_B_s766527341",
+     "d1_confirmation_B_s1004399678"
+    ]
+   },
+   "q2": {
+    "role": "primary method comparison",
+    "units": [
+     "d1_confirmation_q2_s396880939",
+     "d1_confirmation_q2_s766527341",
+     "d1_confirmation_q2_s1004399678"
+    ]
+   }
+  },
+  "comparators_are_imported": "historical q2 and B units, verified by identity and per-sample hash; never retrained, regenerated or re-evaluated",
+  "conditional_on": "STRUCTURAL_CHANGE",
+  "evaluation": {
+   "evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73",
+   "generation_protocol_fingerprint": "ceac09472e33432abe0230ac49579db3ddd51e3856cfc02abf8433f7eb9b7f75",
+   "scoring_digest": "812d3361ac6dc13661bdec09db74f6a2cacf696ae7dc037bcdedb1264fb67139"
+  },
+  "exploratory_classification": {
+   "alpha": "NONE. The cancelled D3's alpha allocation in the shared protocol's family split is not inherited, and no interval here is a test",
+   "bootstrap_iterations": 20000,
+   "bootstrap_seeds": {
+    "B": 797122143,
+    "q2": 1120630935
+   },
+   "comparison": "D3 - q2 on correct_overall (primary method comparison); D3 - B reported the same way as the anchor",
+   "interval": "two-sided 95% stratified prompt-cluster bootstrap of the prompt-mean seed-mean paired difference (stages.phase_c1.isolation), seeds as fixed blocks -- DESCRIPTIVE",
+   "labels": {
+    "BEHAVIOURAL_IMPROVEMENT": "the interval's lower end is above 0 AND at least 2 of 3 seed differences are positive",
+    "BEHAVIOURAL_REGRESSION": "the interval's upper end is below 0 AND at least 2 of 3 seed differences are negative",
+    "INCONCLUSIVE": "otherwise"
+   },
+   "never": [
+    "SHARED_GO",
+    "a verdict contract of the cancelled D3",
+    "automatic promotion",
+    "a claim of fluid-reasoning superiority"
+   ],
+   "status": "EXPLORATORY. The battery and the q2/B results were observed before this design; nothing here is a fresh independent confirmation",
+   "usable_rollout": "reported with the same descriptive interval, separately; it never changes the correctness label"
+  },
+  "n_probes": 3,
+  "recovery": {
+   "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "recipe_digest": "a4b0dcab5348e951a005c9bf2cc0a7ff622c88d45b0859d1d24d7ea2a82bea90",
+   "recipe_id": "e1_p1_kd_heavy@0.86M",
+   "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+   "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+   "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef"
+  },
+  "reported": [
+   "per-seed and pooled correct_overall",
+   "paired per-sample counts (candidate-only / comparator-only / both)",
+   "usable_rollout_rate and every component",
+   "correct_given_usable",
+   "per-stratum (set and domain) correctness and usable rollout",
+   "natural termination, degeneration, context-limit hits",
+   "generated and reasoning lengths"
+  ],
+  "screening_seeds": "NOT part of this experiment. No rule for adding them is registered, so they are not added -- in particular not in response to any D3 outcome",
+  "seeds": [
+   396880939,
+   766527341,
+   1004399678
+  ],
+  "seeds_owner": "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json :: seeds.confirmation",
+  "separately_authorized": true,
+  "shared_protocol_hash": "5ed198aed960e987f137ec6342ef7fa6ac24c8484b991bac8cd6a210f7ae742d",
+  "start_from": "the new D3 INITIAL checkpoint, never q2's recovered weights"
+ },
+ "claim_boundary": [
+  "a structural-method comparison on the existing mixed-domain protocol, not a measurement of fluid reasoning (AGENTS.md P10.2)",
+  "the behavioural comparisons are exploratory on an observed battery, not a fresh independent confirmation",
+  "selecting an official initialization method needs appropriately independent evidence",
+  "if the batteries cannot separate the two methods, both are carried as candidates for a future capability-aligned evaluation",
+  "it isolates the DEPTH reference within q2's path, not every difference between the full D1 and D2 searches"
+ ],
+ "control": {
+  "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+  "control_path_hash": "2221484a60c2313cc9f21608d62d0b9332c4f4c6c7458cf44e44cf6ad7345d36",
+  "control_record": "logs/stages/stage-1/phase_d3/plans/d3_control_q2.json",
+  "control_record_sha256": "e364aaecd450359475b73fa7a543ccb803e88628d0ee2564819280add1b4978a",
+  "depth_kept_layers": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   12,
+   13,
+   14,
+   15,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   27,
+   28,
+   29,
+   31,
+   33,
+   34,
+   35
+  ],
+  "depth_removal_order": [
+   26,
+   32,
+   18,
+   17,
+   11,
+   10,
+   30,
+   16
+  ],
+  "final_identities": {
+   "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+   "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+   "single_shard_sha256": "ca2d7368e3adce3e167a4376dcab425902530e7a77106146d336d676d2370c5d",
+   "weights_digest": "0597e60c1a7fac06930e3e84c8f5341b1f7eb9470fc30b16efbf02f37208fdef"
+  },
+  "name": "D1-q2",
+  "path_label": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+  "replay_plan": "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
+  "replay_plan_sha256": "fe58c3a5be23e54f71ca823966f5437214a387598bea0c5fc9c5fa5d30f45c6c",
+  "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+  "steps": [
+   {
+    "expected_artifact_digest": "292e36f13829545b465ac2a19fa43d5f7c63d319bd841b269553a2717b3995f0",
+    "expected_config_hash": "464cb782ea8095306da61ce454c595f8eb423655501279359e07a18c7dfd2c1a",
+    "impl_id": "ffn.activation_importance_v0",
+    "index": 0,
+    "kind": "FFN",
+    "profile_id": "calib.domain_balanced@v1"
+   },
+   {
+    "expected_artifact_digest": "af818297c21636ae68631f15d92056cfc07bda804f8e0121e49a9510510646ea",
+    "expected_config_hash": "3a0f151e3f44b6173bd1021ff740e5e1df0467a1f62f718b81855ff6f7c487f8",
+    "impl_id": "depth.causal_kl_greedy_v1",
+    "index": 1,
+    "kind": "DEPTH",
+    "profile_id": "calib.reasoning_heavy@v2"
+   },
+   {
+    "expected_artifact_digest": "f928dfd5844bdc6b386b472405c859cde06749d2f423d261a744253084766941",
+    "expected_config_hash": "3a0f151e3f44b6173bd1021ff740e5e1df0467a1f62f718b81855ff6f7c487f8",
+    "impl_id": "width.global_pca_v0",
+    "index": 2,
+    "kind": "RESIDUAL_WIDTH",
+    "profile_id": "calib.reasoning_heavy@v2"
+   },
+   {
+    "expected_artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+    "expected_config_hash": "464cb782ea8095306da61ce454c595f8eb423655501279359e07a18c7dfd2c1a",
+    "impl_id": "attention.activation_importance_v1",
+    "index": 3,
+    "kind": "ATTENTION",
+    "profile_id": "calib.domain_balanced@v1"
+   }
+  ]
+ },
+ "decided_by": "maintainer decision 2026-10-16 (the D3 definition); logs/budget/decisions.md 2026-10-16",
+ "experiment_id": "phase_d3",
+ "identity_is_distinct_from_the_cancelled_d3": true,
+ "name": "Fixed-q2 DEPTH Teacher-Reference Ablation",
+ "pricing": "logs/stages/stage-1/phase_d3/plans/d3_budget_v1.json",
+ "question": "Given the exact D1-q2 structural initialization path, does choosing DEPTH layers by minimizing KL against the original Teacher, instead of the FFN-compressed Parent, produce a better initialization for downstream capability recovery?",
+ "registration_hash": "43156f21a011803bcb76be8f2c3f5f9616e9034d8f7ea811b9f5de6b9eea17d9",
+ "replaces": {
+  "objective_hash": "7b2545389874b445628ac46ddef32bebee92622150560c1bd899dffb75033636",
+  "objective_id": "objective.d3_kl_minus_student_confidence@v2",
+  "status": "CANCELLED -- NEVER EXECUTED (maintainer decision 2026-10-16)"
+ },
+ "schema": "aadistill.phase_d3.registration/v1",
+ "status": "REGISTERED -- $0 readiness only. No paid structural or behavioural session is authorized by this record.",
+ "structural_outcomes": {
+  "NO_STRUCTURAL_CHANGE": "the treatment keeps q2's layers and every downstream step reproduces q2's bytes (all four final identities equal): preserve the evidence, NO recovery training",
+  "STRUCTURAL_CHANGE": "the treatment keeps a different layer set and its initial checkpoint is new: propose the separately authorized three-probe behavioural rung",
+  "UNEXPLAINED_BYTE_DIFFERENCE": "the same layers and different bytes: diagnose the materialization; nothing is called a scientific effect",
+  "lower_teacher_kl_is_not_a_result": true,
+  "rule": "stages.phase_d3.d3_design.classify_structure"
+ },
+ "treatment": {
+  "contract": {
+   "_reference_support": "the Top-K support of a reference-defined sketch is the REFERENCE's own Top-K, so switching the reference from the parent to the teacher switches which token ids form the support. That is the declared reference switch itself, not D2's reference_student_union_topk_tail_v1",
+   "control_path_hash": "2221484a60c2313cc9f21608d62d0b9332c4f4c6c7458cf44e44cf6ad7345d36",
+   "differences": [
+    {
+     "control": null,
+     "declared": true,
+     "field": "config",
+     "step": 1,
+     "treatment": {
+      "kl_reference": "root_reference/v1"
+     }
+    },
+    {
+     "control": "af818297c21636ae68631f15d92056cfc07bda804f8e0121e49a9510510646ea",
+     "declared": true,
+     "field": "expected_artifact_digest",
+     "step": 1,
+     "treatment": null
+    },
+    {
+     "control": "3a0f151e3f44b6173bd1021ff740e5e1df0467a1f62f718b81855ff6f7c487f8",
+     "declared": true,
+     "field": "expected_config_hash",
+     "step": 1,
+     "treatment": "b5dfa707aada12497f4eac25f2e7da14d7e9c5cb4c3716f09e38260884429af9"
+    },
+    {
+     "control": "DEPTH(calib.reasoning_heavy@v2)",
+     "declared": true,
+     "field": "label",
+     "step": 1,
+     "treatment": "DEPTH(calib.reasoning_heavy@v2)+teacher_reference"
+    },
+    {
+     "control": "f928dfd5844bdc6b386b472405c859cde06749d2f423d261a744253084766941",
+     "declared": true,
+     "field": "expected_artifact_digest",
+     "step": 2,
+     "treatment": null
+    },
+    {
+     "control": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+     "declared": true,
+     "field": "label",
+     "step": 2,
+     "treatment": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)@d3"
+    },
+    {
+     "control": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+     "declared": true,
+     "field": "expected_artifact_digest",
+     "step": 3,
+     "treatment": null
+    },
+    {
+     "control": "ATTENTION(calib.domain_balanced@v1)",
+     "declared": true,
+     "field": "label",
+     "step": 3,
+     "treatment": "ATTENTION(calib.domain_balanced@v1)@d3"
+    }
+   ],
+   "treated_step": 1,
+   "treatment_config": {
+    "kl_reference": "root_reference/v1"
+   },
+   "treatment_path_hash": "5948a3c99ac12213fe4a9b8cd82362f5a1934d38e48e0589e5ff4f6913f60705",
+   "unchanged": [
+    "target_spec",
+    "root",
+    "seed",
+    "stats_spec",
+    "position_policy",
+    "distribution_support",
+    "scoring_objective (none)",
+    "every operator id and profile",
+    "step 0's output and input pins",
+    "steps 2-3's input pins"
+   ]
+  },
+  "declared_config": {
+   "kl_reference": "root_reference/v1"
+  },
+  "derived_config_hashes": [
+   {
+    "config_hash": "464cb782ea8095306da61ce454c595f8eb423655501279359e07a18c7dfd2c1a",
+    "impl_id": "ffn.activation_importance_v0",
+    "profile_id": "calib.domain_balanced@v1",
+    "step": 0
+   },
+   {
+    "config_hash": "b5dfa707aada12497f4eac25f2e7da14d7e9c5cb4c3716f09e38260884429af9",
+    "impl_id": "depth.causal_kl_greedy_v1",
+    "profile_id": "calib.reasoning_heavy@v2",
+    "step": 1
+   },
+   {
+    "config_hash": "3a0f151e3f44b6173bd1021ff740e5e1df0467a1f62f718b81855ff6f7c487f8",
+    "impl_id": "width.global_pca_v0",
+    "profile_id": "calib.reasoning_heavy@v2",
+    "step": 2
+   },
+   {
+    "config_hash": "464cb782ea8095306da61ce454c595f8eb423655501279359e07a18c7dfd2c1a",
+    "impl_id": "attention.activation_importance_v1",
+    "profile_id": "calib.domain_balanced@v1",
+    "step": 3
+   }
+  ],
+  "device": "cuda",
+  "downstream": "RESIDUAL_WIDTH and ATTENTION are recomputed on the actual new parent; q2's downstream digests are never forced onto changed weights",
+  "kl": "forward KL on the REFERENCE-defined Top-200 + aggregate tail (reference_topk_tail_v1, K=200), both arms",
+  "not_introduced_from_d2": [
+   "teacher-confidence weighting",
+   "student-confidence reward",
+   "reference_student_union_topk_tail_v1",
+   "confidence-weighted activation statistics",
+   "D2's beam-ranking objective",
+   "D2's structural path or selected initializations"
+  ],
+  "objective_control": "KL(P || C(S)) -- P: the 36-layer parent after q2's frozen FFN step",
+  "objective_treatment": "KL(T || C(S)) -- T: the original, uncompressed teacher",
+  "parent_reference_diagnostics": "every candidate of every round, from the same candidate logits, after the decision value; never read by the selection",
+  "path_id": "d3.fixed_q2_depth_teacher_reference",
+  "reference_support_note": "the Top-K support of a reference-defined sketch is the REFERENCE's own Top-K, so switching the reference from the parent to the teacher switches which token ids form the support. That is the declared reference switch itself, not D2's reference_student_union_topk_tail_v1",
+  "teacher_reference": {
+   "built_from": "the original teacher, before any compression, while the root is held (materialize_fixed_path)",
+   "execution": {
+    "calibration_batch_packing": "length_sorted_v1",
+    "micro_batch_size": 3,
+    "prediction_rows": "all_v1"
+   },
+   "fails_closed_on": [
+    "a missing store",
+    "another mixture or item content",
+    "another profile",
+    "another Top-K support",
+    "another root",
+    "another execution protocol",
+    "a store with no execution binding"
+   ],
+   "profile": "calib.reasoning_heavy@v2",
+   "root_identity": {
+    "teacher_id": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "teacher_sha256": "6de20cc746dd42e96f93aeb4551b8d378e415a206309435d7eaefd39cfdf45f9"
+   },
+   "rows": "every real prediction position; DEPTH's position policy selects among them"
+  },
+  "treated_step": 1,
+  "treated_step_config_hash": "b5dfa707aada12497f4eac25f2e7da14d7e9c5cb4c3716f09e38260884429af9",
+  "treatment_path_hash": "5948a3c99ac12213fe4a9b8cd82362f5a1934d38e48e0589e5ff4f6913f60705",
+  "unchanged": [
+   "scored positions (positions.supervised_target_v1@v1)",
+   "per-item mean, sub-type then domain-balanced aggregation",
+   "calibration data (calib.reasoning_heavy@v2)",
+   "greedy removal, candidate subsets, 36 -> 28 geometry",
+   "deterministic tie-break to the lower layer index",
+   "D1's state evaluator (not used to select; no search)",
+   "FFN, RESIDUAL_WIDTH and ATTENTION local selection rules",
+   "operator order, profiles, seed, target architecture"
+  ]
+ },
+ "version": 1
+}

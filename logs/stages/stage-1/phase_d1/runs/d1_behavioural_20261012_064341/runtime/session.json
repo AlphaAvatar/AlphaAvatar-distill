@@ -1,0 +1,1660 @@
+{
+  "schema": "aadistill.autoinit.d1_behavioural_session/v1",
+  "session_id": "autoinit-d1-behavioural",
+  "session_spec": {
+    "session_id": "autoinit-d1-behavioural",
+    "schema": "aadistill.autoinit.d1_behavioural_session/v1",
+    "description": "One D1 behavioural rung under the frozen design: the arms materialized on the pod along digest-pinned paths, the probes trained under the frozen recipe at the preregistered seeds, evaluated uncapped on the rung's own realized battery, scored by the rung's pinned scorer, and -- for screening -- mechanically ranked with exactly one candidate advanced, or none. It runs no beam, re-selects nothing, re-measures no frozen result, and computes no promotion.",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/governance/authorization.json",
+    "authorization_type": "D1BehaviouralAuthorization.load",
+    "plan_id": "autoinit.v1.phase_d1_behavioural",
+    "plan_hash": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+    "status_path": "/workspace/autoinit_d1_behavioural.status",
+    "run_log_path": "/workspace/autoinit_d1_behavioural_run.log",
+    "driver_job_id": "autoinit_d1_behavioural_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED",
+        "DIGEST_MISMATCH"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "autoinit_d1_behavioural",
+      "evidence_filename": "d1_behavioural.json",
+      "archive_basename": "d1_behavioural_artifacts.tar.gz",
+      "spec_success": "configs/stages/stage-1/phase_d1/d1_behavioural_artifacts.json",
+      "spec_failed": "configs/stages/stage-1/phase_d1/d1_behavioural_artifacts_failed.json",
+      "report_names": [
+        "d1_behavioural.json"
+      ]
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "d1_behavioural"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_AUTH_PATH",
+        "SESSION_PLAN_HASH",
+        "SESSION_KIND",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e8_inputs_20260810/calibration_v1/items.jsonl",
+          "dest": "artifacts/stages/stage-1/e8_calibration_v1",
+          "sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [
+        "reasoning_heavy_v2:artifacts/stages/stage-1",
+        "d1_screening:artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1",
+        "d1_confirmation:artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 2700,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [],
+      "test_paths": [
+        "scripts/stages/stage-1/phase_d1/tests/behavioural_pod_preflight"
+      ],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "TEACHER_READY",
+        "VLLM_READY",
+        "TESTS_OK",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 7,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-10-12T06:45:39+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 663 min $12.05 \u00b7 soft $14.42 \u00b7 hard $14.97 (authorized $15.20)"
+    },
+    {
+      "utc": "2026-10-12T06:45:40+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Low"
+    },
+    {
+      "utc": "2026-10-12T06:45:40+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $156.1013 against the $30.0000 this session must be able to fund"
+    },
+    {
+      "utc": "2026-10-12T06:45:40+00:00",
+      "elapsed_min": 0.0,
+      "msg": "run d1_behavioural_20261012_064341, confirmation rung confirming q2, design f9c6688f91dc, no open blockers"
+    },
+    {
+      "utc": "2026-10-12T06:45:41+00:00",
+      "elapsed_min": 0.0,
+      "msg": "contract verified at $0: 8536ecb6618d7800, 6 probes on d1_confirmation"
+    },
+    {
+      "utc": "2026-10-12T06:45:48+00:00",
+      "elapsed_min": 0.0,
+      "msg": "science inputs verified against their own pins: calib.domain_balanced@v1, calib.reasoning_heavy@v2, d1_confirmation, d1_screening, preregistration_sha256, replay_plan_sha256"
+    },
+    {
+      "utc": "2026-10-12T06:45:49+00:00",
+      "elapsed_min": 0.0,
+      "msg": "launch-readiness logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/governance/launch_readiness.json matches this invocation on 7 bound facts and reports no open blockers"
+    },
+    {
+      "utc": "2026-10-12T06:45:49+00:00",
+      "elapsed_min": 0.0,
+      "msg": "session commit d91bef1c4797 verified: harness digests to 9c00a7293186\u2026, carries the authorization and only logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "utc": "2026-10-12T06:45:49+00:00",
+      "elapsed_min": 0.0,
+      "msg": "no previous attempt failed deterministically; 0 prior log(s) read"
+    },
+    {
+      "utc": "2026-10-12T06:45:55+00:00",
+      "elapsed_min": 0.0,
+      "msg": "aad_autoinit_d91bef1c.bundle (30395158 bytes) round-trips to d91bef1c4797 carrying this authorization and harness 9c00a7293186"
+    },
+    {
+      "utc": "2026-10-12T06:45:56+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 7 relay inputs (7 from AlphaAvatar/aadistill-artifacts), 3 local assets"
+    },
+    {
+      "utc": "2026-10-12T06:45:57+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 824 min = $14.97"
+    },
+    {
+      "utc": "2026-10-12T06:45:57+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created wzr7llw0shqc2k at $1.09/h"
+    },
+    {
+      "utc": "2026-10-12T06:46:08+00:00",
+      "elapsed_min": 0.2,
+      "msg": "TCP 22 at 160.250.71.212:47052 after 0.2 min"
+    },
+    {
+      "utc": "2026-10-12T06:46:11+00:00",
+      "elapsed_min": 0.24,
+      "msg": "draw 1: ssh reachable \u2014 $0.00"
+    },
+    {
+      "utc": "2026-10-12T06:46:47+00:00",
+      "elapsed_min": 0.85,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+    },
+    {
+      "utc": "2026-10-12T06:46:47+00:00",
+      "elapsed_min": 0.85,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-12T06:50:21+00:00",
+      "elapsed_min": 4.4,
+      "msg": "draw 1: setup complete \u2014 $0.08"
+    },
+    {
+      "utc": "2026-10-12T06:50:25+00:00",
+      "elapsed_min": 4.48,
+      "msg": "driver detached, pid 2875, confirmed by descriptor_probe \u2014 $0.08"
+    },
+    {
+      "utc": "2026-10-12T06:52:35+00:00",
+      "elapsed_min": 6.64,
+      "msg": "  2026-10-12T06:50:24Z MARKER:MATERIALIZE_START \u2014 $0.12"
+    },
+    {
+      "utc": "2026-10-12T07:29:14+00:00",
+      "elapsed_min": 43.28,
+      "msg": "  2026-10-12T07:27:35Z MARKER:MATERIALIZE_DONE \u2014 $0.79"
+    },
+    {
+      "utc": "2026-10-12T08:34:51+00:00",
+      "elapsed_min": 108.91,
+      "msg": "  trained-unscored d1_confirmation_q2_s396880939: preserved and verified (1f46be0949d6)"
+    },
+    {
+      "utc": "2026-10-12T08:34:54+00:00",
+      "elapsed_min": 108.95,
+      "msg": "  secured d1_behavioural_attested_protocol.json"
+    },
+    {
+      "utc": "2026-10-12T08:34:56+00:00",
+      "elapsed_min": 109.0,
+      "msg": "  secured engine_probe.json"
+    },
+    {
+      "utc": "2026-10-12T08:54:55+00:00",
+      "elapsed_min": 128.97,
+      "msg": "  probe d1_confirmation_q2_s396880939: secured result.json"
+    },
+    {
+      "utc": "2026-10-12T08:54:59+00:00",
+      "elapsed_min": 129.04,
+      "msg": "  probe d1_confirmation_q2_s396880939: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-12T08:55:02+00:00",
+      "elapsed_min": 129.08,
+      "msg": "  probe d1_confirmation_q2_s396880939: secured admission.json"
+    },
+    {
+      "utc": "2026-10-12T08:55:11+00:00",
+      "elapsed_min": 129.23,
+      "msg": "  probe d1_confirmation_q2_s396880939: secured generations"
+    },
+    {
+      "utc": "2026-10-12T08:55:16+00:00",
+      "elapsed_min": 129.32,
+      "msg": "  probe d1_confirmation_q2_s396880939: release ack delivered"
+    },
+    {
+      "utc": "2026-10-12T10:00:59+00:00",
+      "elapsed_min": 195.04,
+      "msg": "  trained-unscored d1_confirmation_q2_s766527341: preserved and verified (6ac63a97422e)"
+    },
+    {
+      "utc": "2026-10-12T10:16:32+00:00",
+      "elapsed_min": 210.6,
+      "msg": "  probe d1_confirmation_q2_s766527341: secured result.json"
+    },
+    {
+      "utc": "2026-10-12T10:16:36+00:00",
+      "elapsed_min": 210.66,
+      "msg": "  probe d1_confirmation_q2_s766527341: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-12T10:16:39+00:00",
+      "elapsed_min": 210.7,
+      "msg": "  probe d1_confirmation_q2_s766527341: secured admission.json"
+    },
+    {
+      "utc": "2026-10-12T10:16:48+00:00",
+      "elapsed_min": 210.86,
+      "msg": "  probe d1_confirmation_q2_s766527341: secured generations"
+    },
+    {
+      "utc": "2026-10-12T10:16:53+00:00",
+      "elapsed_min": 210.94,
+      "msg": "  probe d1_confirmation_q2_s766527341: release ack delivered"
+    },
+    {
+      "utc": "2026-10-12T11:22:37+00:00",
+      "elapsed_min": 276.67,
+      "msg": "  trained-unscored d1_confirmation_q2_s1004399678: preserved and verified (5bbe8c0a0af6)"
+    },
+    {
+      "utc": "2026-10-12T11:38:10+00:00",
+      "elapsed_min": 292.22,
+      "msg": "  probe d1_confirmation_q2_s1004399678: secured result.json"
+    },
+    {
+      "utc": "2026-10-12T11:38:13+00:00",
+      "elapsed_min": 292.28,
+      "msg": "  probe d1_confirmation_q2_s1004399678: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-12T11:38:16+00:00",
+      "elapsed_min": 292.33,
+      "msg": "  probe d1_confirmation_q2_s1004399678: secured admission.json"
+    },
+    {
+      "utc": "2026-10-12T11:38:25+00:00",
+      "elapsed_min": 292.48,
+      "msg": "  probe d1_confirmation_q2_s1004399678: secured generations"
+    },
+    {
+      "utc": "2026-10-12T11:38:30+00:00",
+      "elapsed_min": 292.56,
+      "msg": "  probe d1_confirmation_q2_s1004399678: release ack delivered"
+    },
+    {
+      "utc": "2026-10-12T12:44:12+00:00",
+      "elapsed_min": 358.26,
+      "msg": "  trained-unscored d1_confirmation_B_s396880939: preserved and verified (bd6ac2cbae40)"
+    },
+    {
+      "utc": "2026-10-12T13:06:24+00:00",
+      "elapsed_min": 380.46,
+      "msg": "  probe d1_confirmation_B_s396880939: secured result.json"
+    },
+    {
+      "utc": "2026-10-12T13:06:28+00:00",
+      "elapsed_min": 380.52,
+      "msg": "  probe d1_confirmation_B_s396880939: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-12T13:06:31+00:00",
+      "elapsed_min": 380.57,
+      "msg": "  probe d1_confirmation_B_s396880939: secured admission.json"
+    },
+    {
+      "utc": "2026-10-12T13:06:40+00:00",
+      "elapsed_min": 380.72,
+      "msg": "  probe d1_confirmation_B_s396880939: secured generations"
+    },
+    {
+      "utc": "2026-10-12T13:06:45+00:00",
+      "elapsed_min": 380.8,
+      "msg": "  probe d1_confirmation_B_s396880939: release ack delivered"
+    },
+    {
+      "utc": "2026-10-12T14:12:28+00:00",
+      "elapsed_min": 446.53,
+      "msg": "  trained-unscored d1_confirmation_B_s766527341: preserved and verified (0e0d08d7af6f)"
+    },
+    {
+      "utc": "2026-10-12T14:32:27+00:00",
+      "elapsed_min": 466.51,
+      "msg": "  probe d1_confirmation_B_s766527341: secured result.json"
+    },
+    {
+      "utc": "2026-10-12T14:32:31+00:00",
+      "elapsed_min": 466.57,
+      "msg": "  probe d1_confirmation_B_s766527341: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-12T14:32:34+00:00",
+      "elapsed_min": 466.62,
+      "msg": "  probe d1_confirmation_B_s766527341: secured admission.json"
+    },
+    {
+      "utc": "2026-10-12T14:32:44+00:00",
+      "elapsed_min": 466.79,
+      "msg": "  probe d1_confirmation_B_s766527341: secured generations"
+    },
+    {
+      "utc": "2026-10-12T14:32:49+00:00",
+      "elapsed_min": 466.88,
+      "msg": "  probe d1_confirmation_B_s766527341: release ack delivered"
+    },
+    {
+      "utc": "2026-10-12T15:38:34+00:00",
+      "elapsed_min": 532.63,
+      "msg": "  trained-unscored d1_confirmation_B_s1004399678: preserved and verified (3a33d94ee8fa)"
+    },
+    {
+      "utc": "2026-10-12T16:02:56+00:00",
+      "elapsed_min": 557.0,
+      "msg": "  2026-10-12T16:02:31Z MARKER:ALL_DONE \u2014 $10.12"
+    },
+    {
+      "utc": "2026-10-12T16:02:56+00:00",
+      "elapsed_min": 557.0,
+      "msg": "polling ended: ALL_DONE \u2014 $10.12"
+    },
+    {
+      "utc": "2026-10-12T16:06:09+00:00",
+      "elapsed_min": 560.2,
+      "msg": "  manifest rc=0\n116 file(s) across 9 class(es) -> /workspace/manifest.json\n  final_required: 116 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-10-12T16:06:27+00:00",
+      "elapsed_min": 560.5,
+      "msg": "  probe d1_confirmation_B_s1004399678: secured result.json"
+    },
+    {
+      "utc": "2026-10-12T16:06:31+00:00",
+      "elapsed_min": 560.56,
+      "msg": "  probe d1_confirmation_B_s1004399678: secured per_sample.jsonl"
+    },
+    {
+      "utc": "2026-10-12T16:06:33+00:00",
+      "elapsed_min": 560.61,
+      "msg": "  probe d1_confirmation_B_s1004399678: secured admission.json"
+    },
+    {
+      "utc": "2026-10-12T16:06:42+00:00",
+      "elapsed_min": 560.76,
+      "msg": "  probe d1_confirmation_B_s1004399678: secured generations"
+    },
+    {
+      "utc": "2026-10-12T16:06:47+00:00",
+      "elapsed_min": 560.85,
+      "msg": "  probe d1_confirmation_B_s1004399678: release ack delivered"
+    },
+    {
+      "utc": "2026-10-12T16:06:47+00:00",
+      "elapsed_min": 560.85,
+      "msg": "  probe d1_confirmation_q2_s396880939: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-12T16:06:47+00:00",
+      "elapsed_min": 560.85,
+      "msg": "  probe d1_confirmation_q2_s766527341: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-12T16:06:47+00:00",
+      "elapsed_min": 560.85,
+      "msg": "  probe d1_confirmation_q2_s1004399678: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-12T16:06:47+00:00",
+      "elapsed_min": 560.85,
+      "msg": "  probe d1_confirmation_B_s396880939: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-12T16:06:48+00:00",
+      "elapsed_min": 560.85,
+      "msg": "  probe d1_confirmation_B_s766527341: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-12T16:06:48+00:00",
+      "elapsed_min": 560.85,
+      "msg": "  probe d1_confirmation_B_s1004399678: pruned preserved trained copy (now scored)"
+    },
+    {
+      "utc": "2026-10-12T16:06:48+00:00",
+      "elapsed_min": 560.85,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-10-12T16:06:48+00:00",
+      "elapsed_min": 560.85,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-10-12T16:06:59+00:00",
+      "elapsed_min": 561.04,
+      "msg": "pod deleted \u2014 561.0 min, $10.19; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.phase_d1.behavioural_authorization/v1",
+    "authorization_id": "autoinit.v1.phase_d1_behavioural_confirmation",
+    "version": 1,
+    "granted_utc": "2026-10-12T06:44:14+00:00",
+    "granted_by": "maintainer, 2026-10-11 UTC, formal execution instruction for D1 (\"\u5f53\u524d\u9636\u6bb5\u7ea7\u8d44\u91d1\u6388\u6743\u5df2\u7ecf\u6db5\u76d6\u8fd9\u4e00\u6761\u4ef6\u6267\u884c\uff0c\u4e0d\u9700\u8981\u518d\u4e3a\u666e\u901a\u7684 Confirmation \u542f\u52a8\u5355\u72ec\u5411\u7ef4\u62a4\u8005\u7533\u8bf7\u9636\u6bb5\u8d44\u91d1\u3002\u4f46\u4ecd\u7136\u9700\u8981\u751f\u6210\u5408\u6cd5\u7684\u3001\u72ec\u7acb\u7684\u4e00\u6b21\u6027 Confirmation Execution Authorization.\"), under the phase grant logs/budget/approvals/autoinit_d1_behavioural_phase_grant.json",
+    "plan_id": "autoinit.v1.phase_d1_behavioural",
+    "plan_hash": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+    "expected_usd": 12.2305,
+    "hard_cap_usd": 15.1982,
+    "authorized_stages": [
+      "preflight",
+      "materialize",
+      "contract",
+      "probes",
+      "preserve"
+    ],
+    "stage_conditions": {
+      "preflight": "the battery bytes against the manifest, the role disjointness, B's construction pins and the recovery pack's digest -- refused before any weights load",
+      "materialize": "every arm this rung trains from, built along its digest-pinned path and gated on its exact recorded identity; a mismatch is a scientific stop, not a retry",
+      "contract": "the location-free session contract recomputed on the pod and required equal to the hash this artifact binds, before any probe trains",
+      "probes": "each probe trained under the frozen recipe (overrides only inside C1's allowed set), evaluated uncapped through the pinned evaluation package, scored by the rung's own pinned scorer, and announced for durability the moment it finishes",
+      "preserve": "screening: the mechanical ranking and the one advancing candidate (or none). Confirmation: the probes' evidence and STOP -- the verdict is computed off-pod at $0. No promotion is computed in any session."
+    },
+    "scope_note": "D1 CONFIRMATION on the frozen design f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2 and preregistration aa70338a22bdaae1067105261614a63bed4b0f7737f0a6cc3b59d2555835e3de: the candidate screening's frozen rule advanced, plus standing incumbent B (53e30566...), the three frozen confirmation seeds, six probes on d1_confirmation in one session, and the GO / NO-GO / INCONCLUSIVE verdict computed off-pod under the frozen inference rule. Screening data are not used for statistical confirmation.",
+    "allows_recovery_training": true,
+    "authorizes_behavioural_selection": true,
+    "allows_beam_search": false,
+    "authorizes_d1_search": false,
+    "authorizes_candidate_reselection": false,
+    "authorizes_incumbent_remeasurement": false,
+    "automatic_followon_start": false,
+    "authorized_session_commit": "e733d8de985604d38b24224509329c2a73e3b848",
+    "harness_source_digest": "9c00a7293186631d9ab609fba84f6323858b2950860f79214a10310ce878a484",
+    "harness_source_files": [
+      "configs/stages/stage-1/phase_c1/authorization.json",
+      "configs/stages/stage-1/phase_d1/d1_behavioural_artifacts.json",
+      "configs/stages/stage-1/phase_d1/d1_behavioural_artifacts_failed.json",
+      "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
+      "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
+      "scripts/maintenance/consolidation/derive_budget.py",
+      "scripts/shared/calibration.py",
+      "scripts/shared/data/battery_render.py",
+      "scripts/shared/deployment.py",
+      "scripts/shared/evaluation/audit_tool_scoring.py",
+      "scripts/shared/evaluation/load_state_eval.py",
+      "scripts/shared/evaluation/score_recovery_search.py",
+      "scripts/shared/evaluation/uncapped_eval.py",
+      "scripts/shared/pod/autoinit_engine_probe.py",
+      "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "scripts/shared/pod/autoinit_science_inputs.py",
+      "scripts/shared/pod/collect_artifacts.py",
+      "scripts/shared/pod/verify_frozen_assets.py",
+      "scripts/shared/pod/watchdog.py",
+      "scripts/shared/recipes.py",
+      "scripts/shared/recovery_policy.py",
+      "scripts/shared/run_layout.py",
+      "scripts/shared/search_cost_model.py",
+      "scripts/shared/source_sets.py",
+      "scripts/shared/training/train_stage3.py",
+      "scripts/shared/validation/renderer_parity_gate.py",
+      "scripts/stages/stage-1/families/d_series/__init__.py",
+      "scripts/stages/stage-1/families/d_series/battery_family.py",
+      "scripts/stages/stage-1/families/d_series/identity.py",
+      "scripts/stages/stage-1/families/d_series/incumbent.py",
+      "scripts/stages/stage-1/families/d_series/math_source.py",
+      "scripts/stages/stage-1/families/d_series/scoring_protocol.py",
+      "scripts/stages/stage-1/phase_a/phase_a_frozen.py",
+      "scripts/stages/stage-1/phase_a/plan.py",
+      "scripts/stages/stage-1/phase_a3/__init__.py",
+      "scripts/stages/stage-1/phase_a3/a3_session.py",
+      "scripts/stages/stage-1/phase_a3/a_bsz3.py",
+      "scripts/stages/stage-1/phase_c1/__init__.py",
+      "scripts/stages/stage-1/phase_c1/authorization.py",
+      "scripts/stages/stage-1/phase_c1/authorization_payload.py",
+      "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+      "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
+      "scripts/stages/stage-1/phase_c1/build_c1_confirmation_battery.py",
+      "scripts/stages/stage-1/phase_c1/bundle.py",
+      "scripts/stages/stage-1/phase_c1/isolation.py",
+      "scripts/stages/stage-1/phase_c1/packaging.py",
+      "scripts/stages/stage-1/phase_c1/pod_environment.py",
+      "scripts/stages/stage-1/phase_c1/probe_results.py",
+      "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py",
+      "scripts/stages/stage-1/phase_c1/scoring.py",
+      "scripts/stages/stage-1/phase_c1/session.py",
+      "scripts/stages/stage-1/phase_c2/__init__.py",
+      "scripts/stages/stage-1/phase_c2/baseline.py",
+      "scripts/stages/stage-1/phase_c2/behavioural.py",
+      "scripts/stages/stage-1/phase_c2/full_search_space.py",
+      "scripts/stages/stage-1/phase_c2/replay_specs.py",
+      "scripts/stages/stage-1/phase_c2/search_space.py",
+      "scripts/stages/stage-1/phase_c2/selection_pricing.py",
+      "scripts/stages/stage-1/phase_c3/__init__.py",
+      "scripts/stages/stage-1/phase_c3/session.py",
+      "scripts/stages/stage-1/phase_d1/__init__.py",
+      "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py",
+      "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_launch.py",
+      "scripts/stages/stage-1/phase_d1/behavioural.py",
+      "scripts/stages/stage-1/phase_d1/behavioural_authorization.py",
+      "scripts/stages/stage-1/phase_d1/behavioural_governance.py",
+      "scripts/stages/stage-1/phase_d1/behavioural_materialize.py",
+      "scripts/stages/stage-1/phase_d1/d1_authorization.py",
+      "scripts/stages/stage-1/phase_d1/d1_session.py",
+      "scripts/stages/stage-1/phase_d1/replay_specs.py",
+      "scripts/stages/stage-1/phase_d1/score_d1_confirmation.py",
+      "scripts/stages/stage-1/phase_d1/score_d1_screening.py",
+      "scripts/stages/stage-1/phase_d1/search_space.py",
+      "scripts/stages/stage-1/phase_d1/selection_noise.py",
+      "scripts/stages/stage-1/phase_d1/write_d1_behavioural_preregistration.py",
+      "scripts/stages/stage-1/phase_d1/write_d1_design.py",
+      "src/aadistill/data/dataset.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/data/ladder.py",
+      "src/aadistill/data/tools.py",
+      "src/aadistill/data/verify.py",
+      "src/aadistill/evaluation/__init__.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/capability.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/governance/closure.py",
+      "src/aadistill/governance/grant.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/bundle_transport.py",
+      "src/aadistill/infrastructure/env.py",
+      "src/aadistill/infrastructure/failure_signature.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/watchdog.py",
+      "src/aadistill/initialization/adapters/__init__.py",
+      "src/aadistill/initialization/adapters/qwen3.py",
+      "src/aadistill/initialization/calibration/batching.py",
+      "src/aadistill/initialization/calibration/datasets.py",
+      "src/aadistill/initialization/calibration/items.py",
+      "src/aadistill/initialization/calibration/packing.py",
+      "src/aadistill/initialization/calibration/profiles.py",
+      "src/aadistill/initialization/device.py",
+      "src/aadistill/initialization/execution.py",
+      "src/aadistill/initialization/operators/_common.py",
+      "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/_common.py",
+      "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+      "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+      "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+      "src/aadistill/initialization/operators/base.py",
+      "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+      "src/aadistill/initialization/operators/depth/_common.py",
+      "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+      "src/aadistill/initialization/operators/depth/positional.py",
+      "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+      "src/aadistill/initialization/operators/register.py",
+      "src/aadistill/initialization/operators/width/residual/global_pca.py",
+      "src/aadistill/initialization/planning/__init__.py",
+      "src/aadistill/initialization/planning/fixed_path.py",
+      "src/aadistill/initialization/planning/generation.py",
+      "src/aadistill/initialization/planning/generation_compat.py",
+      "src/aadistill/initialization/planning/isolation.py",
+      "src/aadistill/initialization/planning/metrics.py",
+      "src/aadistill/initialization/planning/operator_config.py",
+      "src/aadistill/initialization/planning/ranking.py",
+      "src/aadistill/initialization/planning/recovery.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/stage1_selection.py",
+      "src/aadistill/initialization/scoring/batches.py",
+      "src/aadistill/initialization/scoring/content.py",
+      "src/aadistill/initialization/scoring/positions.py",
+      "src/aadistill/initialization/scoring/protocol_identity.py",
+      "src/aadistill/initialization/scoring/support.py",
+      "src/aadistill/initialization/specs/arch.py",
+      "src/aadistill/initialization/specs/artifact.py",
+      "src/aadistill/initialization/specs/materialization.py",
+      "src/aadistill/initialization/specs/metrics.py",
+      "src/aadistill/initialization/specs/state.py",
+      "src/aadistill/initialization/statistics/collect.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/statistics/spec.py",
+      "src/aadistill/initialization/transforms/project.py",
+      "src/aadistill/initialization/transforms/sandwich.py",
+      "src/aadistill/models/student.py",
+      "src/aadistill/models/teacher.py",
+      "src/aadistill/models/tokenizer_contract.py",
+      "src/aadistill/runtime/__init__.py",
+      "src/aadistill/runtime/cost.py",
+      "src/aadistill/runtime/cpu_test_env.py",
+      "src/aadistill/runtime/device_handoff.py",
+      "src/aadistill/runtime/leaf_durability.py",
+      "src/aadistill/runtime/pod_environment.py",
+      "src/aadistill/runtime/run_layout.py",
+      "src/aadistill/runtime/staging_contract.py",
+      "src/aadistill/runtime/telemetry.py",
+      "src/aadistill/training/lora.py",
+      "src/aadistill/training/train.py"
+    ],
+    "per_launch_hard_usd": 15.1982,
+    "provenance_commit": "e733d8de985604d38b24224509329c2a73e3b848",
+    "enforcement": "the launcher loads this artifact, refuses a pod whose priced hard threshold exceeds the bound all-in ceiling, refuses a harness whose derived closure differs from the bound one in membership or digest, refuses a plan hash that is not this design revision, refuses a rung whose probe schedule disagrees with the design's declared count, and has no code path to a beam search, a re-selection or a promotion outside the frozen decision rule",
+    "authorization_sha256": "20f7f2a79cd795987dd25f5a477d9c713246de8979111bb1549c115c67648a6d",
+    "rung": "confirmation",
+    "design_hash": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+    "contract_hash": "8536ecb6618d7800270fe6e50c9b7f5338a580032a410eaf3bb0dfa81c181fcd",
+    "battery_role": "d1_confirmation",
+    "battery_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+    "recipe_id": "e1_p1_kd_heavy@0.86M",
+    "n_probes": 6,
+    "seeds": [
+      396880939,
+      766527341,
+      1004399678
+    ],
+    "run_id": "d1_behavioural_20261012_064341",
+    "money": {
+      "per_session_envelope_usd": 30.0,
+      "project_cap_usd": 590.0,
+      "formal_allowance_usd": 256.6523,
+      "package_total_usd": 281.7264,
+      "formal_remaining_usd": 138.323,
+      "package_remaining_usd": 144.974,
+      "project_remaining_usd": 132.816,
+      "cumulative_spend_usd": 457.184,
+      "funds_formal_sessions_of": [
+        "phase_c1",
+        "phase_c3",
+        "phase_a3",
+        "phase_d1"
+      ],
+      "_derived_by": "scripts/maintenance/consolidation/derive_budget.py",
+      "derived_session": {
+        "rung": "confirmation",
+        "hard_ceiling_usd": 15.2025,
+        "gpu_hard_usd": 14.9735,
+        "disk_hard_usd": 0.229,
+        "expected_usd": 12.2305,
+        "hard_ceiling_minutes": 824.23,
+        "expected_minutes": 663.1,
+        "price_per_hour": 1.09,
+        "accepted_at_price_per_hour": 1.09,
+        "accepted_hard_ceiling_usd": 15.2025,
+        "container_disk_gb": 120,
+        "_what_moved": "ONLY the GPU rate. The accepted minute bound and the accepted container-disk dollars are unchanged; this is the dollar consequence of an already-accepted bound."
+      },
+      "live_quote": {
+        "gpu": "NVIDIA L40S",
+        "usd_per_hour": 1.09,
+        "stock_status": "Low",
+        "_quoted": "live, immediately before issuance"
+      },
+      "attempt_bounds": {
+        "hard_runtime_minutes": 824.0,
+        "gpu_hard_usd": 14.9693,
+        "disk_hard_usd": 0.2289,
+        "all_in_hard_usd": 15.1982,
+        "teardown_reserve_usd": 0.0,
+        "teardown_reserve_minutes": 0.0,
+        "remaining_usd": 15.2025,
+        "all_in_usd_per_minute": 0.018445,
+        "narrowed": true,
+        "priced_hard_ceiling_minutes": 824.23,
+        "_why": "the attempt's bound is min(the design's accepted minute bound, what the remaining envelope funds after holding back teardown). Both the GPU and the disk term scale with it."
+      },
+      "envelope": {
+        "envelope_usd": 130.0,
+        "envelope_source": "the grant's PHASE allowance; this session takes its own derived hard ceiling",
+        "consumed_usd": 30.4695,
+        "remaining_usd": 99.5305
+      },
+      "four_conditions": "all four checked at the LIVE rate; see check_the_four_conditions"
+    },
+    "rate_usd_per_hour": 1.09,
+    "hard_runtime_minutes": 824.0,
+    "gpu_hard_usd": 14.9693,
+    "disk_hard_usd": 0.2289,
+    "all_in_hard_usd": 15.1982,
+    "one_use": "ONE grant, ONE issuance, ONE launcher session. A failure is this session's result; a retry is a new grant and a new authorization.",
+    "advancing_candidate": "q2"
+  },
+  "session_plan_hash": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+  "harness_source_digest": "9c00a7293186631d9ab609fba84f6323858b2950860f79214a10310ce878a484",
+  "harness_source_files": [
+    "configs/stages/stage-1/phase_c1/authorization.json",
+    "configs/stages/stage-1/phase_d1/d1_behavioural_artifacts.json",
+    "configs/stages/stage-1/phase_d1/d1_behavioural_artifacts_failed.json",
+    "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
+    "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
+    "scripts/maintenance/consolidation/derive_budget.py",
+    "scripts/shared/calibration.py",
+    "scripts/shared/data/battery_render.py",
+    "scripts/shared/deployment.py",
+    "scripts/shared/evaluation/audit_tool_scoring.py",
+    "scripts/shared/evaluation/load_state_eval.py",
+    "scripts/shared/evaluation/score_recovery_search.py",
+    "scripts/shared/evaluation/uncapped_eval.py",
+    "scripts/shared/pod/autoinit_engine_probe.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/autoinit_science_inputs.py",
+    "scripts/shared/pod/collect_artifacts.py",
+    "scripts/shared/pod/verify_frozen_assets.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/shared/recipes.py",
+    "scripts/shared/recovery_policy.py",
+    "scripts/shared/run_layout.py",
+    "scripts/shared/search_cost_model.py",
+    "scripts/shared/source_sets.py",
+    "scripts/shared/training/train_stage3.py",
+    "scripts/shared/validation/renderer_parity_gate.py",
+    "scripts/stages/stage-1/families/d_series/__init__.py",
+    "scripts/stages/stage-1/families/d_series/battery_family.py",
+    "scripts/stages/stage-1/families/d_series/identity.py",
+    "scripts/stages/stage-1/families/d_series/incumbent.py",
+    "scripts/stages/stage-1/families/d_series/math_source.py",
+    "scripts/stages/stage-1/families/d_series/scoring_protocol.py",
+    "scripts/stages/stage-1/phase_a/phase_a_frozen.py",
+    "scripts/stages/stage-1/phase_a/plan.py",
+    "scripts/stages/stage-1/phase_a3/__init__.py",
+    "scripts/stages/stage-1/phase_a3/a3_session.py",
+    "scripts/stages/stage-1/phase_a3/a_bsz3.py",
+    "scripts/stages/stage-1/phase_c1/__init__.py",
+    "scripts/stages/stage-1/phase_c1/authorization.py",
+    "scripts/stages/stage-1/phase_c1/authorization_payload.py",
+    "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+    "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
+    "scripts/stages/stage-1/phase_c1/build_c1_confirmation_battery.py",
+    "scripts/stages/stage-1/phase_c1/bundle.py",
+    "scripts/stages/stage-1/phase_c1/isolation.py",
+    "scripts/stages/stage-1/phase_c1/packaging.py",
+    "scripts/stages/stage-1/phase_c1/pod_environment.py",
+    "scripts/stages/stage-1/phase_c1/probe_results.py",
+    "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py",
+    "scripts/stages/stage-1/phase_c1/scoring.py",
+    "scripts/stages/stage-1/phase_c1/session.py",
+    "scripts/stages/stage-1/phase_c2/__init__.py",
+    "scripts/stages/stage-1/phase_c2/baseline.py",
+    "scripts/stages/stage-1/phase_c2/behavioural.py",
+    "scripts/stages/stage-1/phase_c2/full_search_space.py",
+    "scripts/stages/stage-1/phase_c2/replay_specs.py",
+    "scripts/stages/stage-1/phase_c2/search_space.py",
+    "scripts/stages/stage-1/phase_c2/selection_pricing.py",
+    "scripts/stages/stage-1/phase_c3/__init__.py",
+    "scripts/stages/stage-1/phase_c3/session.py",
+    "scripts/stages/stage-1/phase_d1/__init__.py",
+    "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py",
+    "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_launch.py",
+    "scripts/stages/stage-1/phase_d1/behavioural.py",
+    "scripts/stages/stage-1/phase_d1/behavioural_authorization.py",
+    "scripts/stages/stage-1/phase_d1/behavioural_governance.py",
+    "scripts/stages/stage-1/phase_d1/behavioural_materialize.py",
+    "scripts/stages/stage-1/phase_d1/d1_authorization.py",
+    "scripts/stages/stage-1/phase_d1/d1_session.py",
+    "scripts/stages/stage-1/phase_d1/replay_specs.py",
+    "scripts/stages/stage-1/phase_d1/score_d1_confirmation.py",
+    "scripts/stages/stage-1/phase_d1/score_d1_screening.py",
+    "scripts/stages/stage-1/phase_d1/search_space.py",
+    "scripts/stages/stage-1/phase_d1/selection_noise.py",
+    "scripts/stages/stage-1/phase_d1/write_d1_behavioural_preregistration.py",
+    "scripts/stages/stage-1/phase_d1/write_d1_design.py",
+    "src/aadistill/data/dataset.py",
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/data/ladder.py",
+    "src/aadistill/data/tools.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/__init__.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/capability.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/governance/closure.py",
+    "src/aadistill/governance/grant.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/bundle_transport.py",
+    "src/aadistill/infrastructure/env.py",
+    "src/aadistill/infrastructure/failure_signature.py",
+    "src/aadistill/infrastructure/log_relay.py",
+    "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/watchdog.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/calibration/batching.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/items.py",
+    "src/aadistill/initialization/calibration/packing.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/execution.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+    "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+    "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+    "src/aadistill/initialization/operators/depth/_common.py",
+    "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+    "src/aadistill/initialization/operators/depth/positional.py",
+    "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+    "src/aadistill/initialization/operators/register.py",
+    "src/aadistill/initialization/operators/width/residual/global_pca.py",
+    "src/aadistill/initialization/planning/__init__.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/planning/generation.py",
+    "src/aadistill/initialization/planning/generation_compat.py",
+    "src/aadistill/initialization/planning/isolation.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/planning/operator_config.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/recovery.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/scoring/batches.py",
+    "src/aadistill/initialization/scoring/content.py",
+    "src/aadistill/initialization/scoring/positions.py",
+    "src/aadistill/initialization/scoring/protocol_identity.py",
+    "src/aadistill/initialization/scoring/support.py",
+    "src/aadistill/initialization/specs/arch.py",
+    "src/aadistill/initialization/specs/artifact.py",
+    "src/aadistill/initialization/specs/materialization.py",
+    "src/aadistill/initialization/specs/metrics.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/statistics/spec.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
+    "src/aadistill/models/student.py",
+    "src/aadistill/models/teacher.py",
+    "src/aadistill/models/tokenizer_contract.py",
+    "src/aadistill/runtime/__init__.py",
+    "src/aadistill/runtime/cost.py",
+    "src/aadistill/runtime/cpu_test_env.py",
+    "src/aadistill/runtime/device_handoff.py",
+    "src/aadistill/runtime/leaf_durability.py",
+    "src/aadistill/runtime/pod_environment.py",
+    "src/aadistill/runtime/run_layout.py",
+    "src/aadistill/runtime/staging_contract.py",
+    "src/aadistill/runtime/telemetry.py",
+    "src/aadistill/training/lora.py",
+    "src/aadistill/training/train.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 15.1982,
+    "expected_minutes": 663.1,
+    "soft_stop_minutes": 794.0000000000001,
+    "artifact_recovery_reserve_minutes": 30.0,
+    "hard_terminate_minutes": 824.0000000000001,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "unused: the generic arms x steps shape does not describe arm materializations followed by probes; every phase is named below, from the design's priced cell",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 61.5
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 20.5
+      },
+      {
+        "name": "arm_materialization",
+        "minutes": 44.0
+      },
+      {
+        "name": "probe_train_eval_score_expected",
+        "minutes": 537.1
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "probe_overrun_risk",
+        "minutes": 64.59
+      }
+    ],
+    "notes": [],
+    "soft_stop_reserve_minutes": 64.59,
+    "expected_usd": 12.0463,
+    "soft_stop_usd": 14.4243,
+    "artifact_recovery_reserve_usd": 0.545,
+    "hard_terminate_usd": 14.9693
+  },
+  "quoted_price_per_hour": 1.09,
+  "stock_status": "Low",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 156.1012673226,
+    "current_spend_per_hr": 0.0,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 30.0,
+    "ok": true,
+    "why": "the provider account holds $156.1013 against the $30.0000 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "d1_behavioural_run_identity": {
+    "run_id": "d1_behavioural_20261012_064341",
+    "rung": "confirmation",
+    "advancing_candidate": "q2",
+    "design_hash": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+    "contract_hash": "8536ecb6618d7800270fe6e50c9b7f5338a580032a410eaf3bb0dfa81c181fcd",
+    "open_blockers": []
+  },
+  "prechecks": [
+    {
+      "check": "run_identity_gate",
+      "ok": true,
+      "message": "run d1_behavioural_20261012_064341, confirmation rung confirming q2, design f9c6688f91dc, no open blockers"
+    },
+    {
+      "check": "behavioural_contract_gate",
+      "ok": true,
+      "message": "contract verified at $0: 8536ecb6618d7800, 6 probes on d1_confirmation"
+    },
+    {
+      "check": "staged_science_inputs_gate",
+      "ok": true,
+      "message": "science inputs verified against their own pins: calib.domain_balanced@v1, calib.reasoning_heavy@v2, d1_confirmation, d1_screening, preregistration_sha256, replay_plan_sha256"
+    },
+    {
+      "check": "launch_readiness_gate",
+      "ok": true,
+      "message": "launch-readiness logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/governance/launch_readiness.json matches this invocation on 7 bound facts and reports no open blockers"
+    },
+    {
+      "check": "session_commit_and_lineage",
+      "ok": true,
+      "message": "session commit d91bef1c4797 verified: harness digests to 9c00a7293186\u2026, carries the authorization and only logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "check": "same_failure_gate",
+      "ok": true,
+      "message": "no previous attempt failed deterministically; 0 prior log(s) read"
+    },
+    {
+      "check": "bundle_staged_gate",
+      "ok": true,
+      "message": "aad_autoinit_d91bef1c.bundle (30395158 bytes) round-trips to d91bef1c4797 carrying this authorization and harness 9c00a7293186"
+    }
+  ],
+  "d1_behavioural_contract_check": {
+    "contract_hash": "8536ecb6618d7800270fe6e50c9b7f5338a580032a410eaf3bb0dfa81c181fcd",
+    "authorized": "8536ecb6618d7800270fe6e50c9b7f5338a580032a410eaf3bb0dfa81c181fcd",
+    "n_probes": 6,
+    "battery_role": "d1_confirmation",
+    "battery_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+    "seeds": [
+      396880939,
+      766527341,
+      1004399678
+    ]
+  },
+  "d1_behavioural_staged_inputs": {
+    "local_assets": [
+      "reasoning_heavy_v2:artifacts/stages/stage-1",
+      "d1_screening:artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1",
+      "d1_confirmation:artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1"
+    ],
+    "relay_inputs": [
+      {
+        "repo": "AlphaAvatar/aadistill-artifacts",
+        "path": "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+        "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+        "sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+        "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+      },
+      {
+        "repo": "AlphaAvatar/aadistill-artifacts",
+        "path": "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+        "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+        "sha256": null,
+        "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+      },
+      {
+        "repo": "AlphaAvatar/aadistill-artifacts",
+        "path": "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+        "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+        "sha256": null,
+        "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+      },
+      {
+        "repo": "AlphaAvatar/aadistill-artifacts",
+        "path": "e8_inputs_20260810/calibration_v1/items.jsonl",
+        "dest": "artifacts/stages/stage-1/e8_calibration_v1",
+        "sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
+        "also_stage_to": null
+      },
+      {
+        "repo": "AlphaAvatar/aadistill-artifacts",
+        "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+        "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+        "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+        "also_stage_to": null
+      },
+      {
+        "repo": "AlphaAvatar/aadistill-artifacts",
+        "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+        "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+        "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+        "also_stage_to": null
+      },
+      {
+        "repo": "AlphaAvatar/aadistill-artifacts",
+        "path": "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+        "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+        "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+        "also_stage_to": null
+      }
+    ],
+    "verified": {
+      "d1_screening": {
+        "n_prompts": 950,
+        "item_ids_sha256": "d7b95cddd0b889c62485b542aab224e998d0bafacb74ee6fc30fa13f93e8ac53"
+      },
+      "d1_confirmation": {
+        "n_prompts": 950,
+        "item_ids_sha256": "7d200ffe666add66721c3cb233f6f9b876825ee5277438669926e3633fe8547b"
+      },
+      "calib.domain_balanced@v1": {
+        "n_items": 67,
+        "items_file_sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b"
+      },
+      "calib.reasoning_heavy@v2": {
+        "n_items": 62,
+        "items_file_sha256": "a2ff8c92c16aaf5c178db160690430f4972216d45a57ab0025835ecd0ca41fc4"
+      },
+      "replay_plan_sha256": "fe58c3a5be23e54f71ca823966f5437214a387598bea0c5fc9c5fa5d30f45c6c",
+      "preregistration_sha256": "aa70338a22bdaae1067105261614a63bed4b0f7737f0a6cc3b59d2555835e3de"
+    },
+    "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea"
+  },
+  "d1_behavioural_launch_readiness_check": {
+    "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/governance/launch_readiness.json",
+    "expected": {
+      "run_id": "d1_behavioural_20261012_064341",
+      "session_commit": "d91bef1c4797358e509546b6a5356de07ad3c032",
+      "rung": "confirmation",
+      "design_hash": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+      "harness_digest": "9c00a7293186631d9ab609fba84f6323858b2950860f79214a10310ce878a484",
+      "authorization_sha256": "c1a53ae65f83a9600f473659696d0958cef5f8d5325ea3aa21fb1435d0f29818",
+      "bundle_name": "aad_autoinit_d91bef1c.bundle"
+    },
+    "recorded": {
+      "run_id": "d1_behavioural_20261012_064341",
+      "session_commit": "d91bef1c4797358e509546b6a5356de07ad3c032",
+      "rung": "confirmation",
+      "design_hash": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+      "harness_digest": "9c00a7293186631d9ab609fba84f6323858b2950860f79214a10310ce878a484",
+      "authorization_sha256": "c1a53ae65f83a9600f473659696d0958cef5f8d5325ea3aa21fb1435d0f29818",
+      "bundle_name": "aad_autoinit_d91bef1c.bundle"
+    },
+    "disagree": [],
+    "recorded_ceiling_usd": 15.1982,
+    "authorized_ceiling_usd": 15.1982,
+    "open_blockers": [],
+    "authorizes": "nothing; this is an admission/consistency gate"
+  },
+  "session_commit_check": {
+    "session_commit": "d91bef1c4797358e509546b6a5356de07ad3c032",
+    "authorized_session_commit": "e733d8de985604d38b24224509329c2a73e3b848",
+    "harness_digest_at_commit": "9c00a7293186631d9ab609fba84f6323858b2950860f79214a10310ce878a484",
+    "authorized_harness_digest": "9c00a7293186631d9ab609fba84f6323858b2950860f79214a10310ce878a484",
+    "harness_matches": true,
+    "commit_carries_this_authorization": true,
+    "rule": "the pod checks out this commit from a bundle; its harness must digest to the authorized value and it must carry the authorization the driver will load",
+    "lineage": {
+      "authorized_base": "e733d8de985604d38b24224509329c2a73e3b848",
+      "session_commit": "d91bef1c4797358e509546b6a5356de07ad3c032",
+      "descends_from_base": true,
+      "changed_paths": [
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/governance/authorization.json"
+      ],
+      "unexpected_paths": [],
+      "ok": true,
+      "reason": "only logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/governance/authorization.json differs from the authorized base"
+    }
+  },
+  "same_failure_rule": {
+    "prior_attempts_read": 0,
+    "previous_deterministic_signature": null,
+    "corrective_change": true,
+    "corrective_change_basis": "no prior behavioural attempt exists"
+  },
+  "bundle_staged_check": {
+    "session_commit": "d91bef1c4797358e509546b6a5356de07ad3c032",
+    "canonical_bundle_name": "aad_autoinit_d91bef1c.bundle",
+    "relay_repo": "AlphaAvatar/aadistill-artifacts",
+    "relay_path": "transfer/aad_autoinit_d91bef1c.bundle",
+    "n_harness_files": 166,
+    "bytes": 30395158,
+    "remote_sha256": "20e56e5639d35629278d6bcc3bb6909a579d3cb365f1fa42fb514e68fe43f767",
+    "local_sha256": "20e56e5639d35629278d6bcc3bb6909a579d3cb365f1fa42fb514e68fe43f767",
+    "bundle_verify_rc": 0,
+    "roundtrip_head": "d91bef1c4797358e509546b6a5356de07ad3c032",
+    "authorization_sha256": "49de372a0a560fc7d20d3f93fece21b201504619543cf244803c4c5c81d82562",
+    "authorization_matches": true,
+    "roundtrip_harness_digest": "9c00a7293186631d9ab609fba84f6323858b2950860f79214a10310ce878a484",
+    "expected_harness_digest": "9c00a7293186631d9ab609fba84f6323858b2950860f79214a10310ce878a484",
+    "ok": true,
+    "answers": "a pod can obtain the exact authorized code from the relay right now, not merely that a local file once existed"
+  },
+  "precheck": {
+    "relay_needed": [
+      "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+      "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+      "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+      "e8_inputs_20260810/calibration_v1/items.jsonl",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 7
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1370
+    },
+    "local_assets": [
+      "artifacts/stages/stage-1/reasoning_heavy_v2",
+      "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1/d1_screening",
+      "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1/d1_confirmation"
+    ],
+    "local_missing": []
+  },
+  "pod_id": "wzr7llw0shqc2k",
+  "actual_price_per_hour": 1.09,
+  "terminate_after_utc": "2026-10-12T20:29:56Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261012_064341/watchdog_wzr7llw0shqc2k.jsonl"
+  ],
+  "watchdog_owns_pod": "wzr7llw0shqc2k",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "595.91.07"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_d91bef1c.bundle",
+    "SESSION_ASSETS": "reasoning_heavy_v2:artifacts/stages/stage-1,d1_screening:artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1,d1_confirmation:artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1",
+    "SESSION_AUTH_PATH": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/governance/authorization.json",
+    "SESSION_COMMIT": "d91bef1c4797358e509546b6a5356de07ad3c032",
+    "SESSION_KIND": "d1_behavioural",
+    "SESSION_PLAN_HASH": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/e8_calibration_v1\",\"path\":\"e8_inputs_20260810/calibration_v1/items.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"}]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV TEACHER_READY VLLM_READY TESTS_OK AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/autoinit_d1_behavioural.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "scripts/stages/stage-1/phase_d1/tests/behavioural_pod_preflight",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "2700",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "autoinit_d1_behavioural_driver",
+    "pid": 2875,
+    "workdir": "/workspace/aad",
+    "command": "/opt/train/bin/python /workspace/aad/scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py --out '/workspace/aad/artifacts/audit/autoinit_d1_behavioural' --run-id 'd1_behavioural_20261012_064341' --rung 'confirmation' --authorization '/workspace/aad/logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/governance/authorization.json' --arm-root '/workspace/aad_arms' --replay-plan '/workspace/aad/logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json' --status '/workspace/autoinit_d1_behavioural.status' --device cuda --image-digest 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07' --advancing-candidate 'q2'",
+    "log_path": "/workspace/autoinit_d1_behavioural_run.log",
+    "status_path": "/workspace/autoinit_d1_behavioural.status",
+    "pid_path": "/workspace/jobs/autoinit_d1_behavioural_driver.pid",
+    "descriptor_path": "/workspace/jobs/autoinit_d1_behavioural_driver.job.json",
+    "exit_path": "/workspace/jobs/autoinit_d1_behavioural_driver.exit",
+    "started_utc": "2026-10-12T06:50:23Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "probe_evidence_read_from": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261012_064341/relay/d1_behavioural.json",
+  "probe_evidence_secured": {
+    "d1_confirmation_q2_s396880939": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "release_acked": true
+    },
+    "d1_confirmation_q2_s766527341": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "release_acked": true
+    },
+    "d1_confirmation_q2_s1004399678": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "release_acked": true
+    },
+    "d1_confirmation_B_s396880939": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "release_acked": true
+    },
+    "d1_confirmation_B_s766527341": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "release_acked": true
+    },
+    "d1_confirmation_B_s1004399678": {
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "release_acked": true
+    }
+  },
+  "trained_unscored_preserved": {
+    "d1_confirmation_q2_s396880939": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "1f46be0949d67c008209ba8f4614be63643bf84d9dea4589927d7e294bb0c3dd",
+      "arrived_sha256": "1f46be0949d67c008209ba8f4614be63643bf84d9dea4589927d7e294bb0c3dd",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261012_064341/products/trained_unscored/d1_confirmation_q2_s396880939",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d1_confirmation_q2_s766527341": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "6ac63a97422e69a0cb2d34c97ed3f71e050854f72dec44ae1c30df3c416cf4ed",
+      "arrived_sha256": "6ac63a97422e69a0cb2d34c97ed3f71e050854f72dec44ae1c30df3c416cf4ed",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261012_064341/products/trained_unscored/d1_confirmation_q2_s766527341",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d1_confirmation_q2_s1004399678": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "5bbe8c0a0af654a0db5a0980aa5cdc1946f0b08fed6888421fdde364ece1baff",
+      "arrived_sha256": "5bbe8c0a0af654a0db5a0980aa5cdc1946f0b08fed6888421fdde364ece1baff",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261012_064341/products/trained_unscored/d1_confirmation_q2_s1004399678",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d1_confirmation_B_s396880939": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "bd6ac2cbae400fcddd75f00663b56f3ecdc5cf185d68c8ddc458d04f10c21891",
+      "arrived_sha256": "bd6ac2cbae400fcddd75f00663b56f3ecdc5cf185d68c8ddc458d04f10c21891",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261012_064341/products/trained_unscored/d1_confirmation_B_s396880939",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d1_confirmation_B_s766527341": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "0e0d08d7af6f288e6ea5e96778c011fddb18dd0532dc7314341490d124ec08ec",
+      "arrived_sha256": "0e0d08d7af6f288e6ea5e96778c011fddb18dd0532dc7314341490d124ec08ec",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261012_064341/products/trained_unscored/d1_confirmation_B_s766527341",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    },
+    "d1_confirmation_B_s1004399678": {
+      "rcs": {
+        "run_completion.json": 0,
+        "latest.txt": 0,
+        "model": 0
+      },
+      "trained_sha256": "3a33d94ee8fa71c765b65daabd7fdf731d8fe490412e8f5491feb905f8784ff4",
+      "arrived_sha256": "3a33d94ee8fa71c765b65daabd7fdf731d8fe490412e8f5491feb905f8784ff4",
+      "completeness": {
+        "transfers_ok": true,
+        "run_completion": true,
+        "latest_tag": true,
+        "model_config": true,
+        "weights_digest": true
+      },
+      "verified": true,
+      "training_records": {
+        "train_log.jsonl": true,
+        "run_manifest.json": true
+      },
+      "dest": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261012_064341/products/trained_unscored/d1_confirmation_B_s1004399678",
+      "training_records_kept": [
+        "run_completion.json",
+        "train_log.jsonl",
+        "run_manifest.json",
+        "preserved_identity.json"
+      ],
+      "pruned": true,
+      "_why": "validly scored and its evidence durable; the weights have no remaining consumer (P8.4)"
+    }
+  },
+  "release_acks": [
+    {
+      "probe_id": "d1_confirmation_q2_s396880939",
+      "delivered": true
+    },
+    {
+      "probe_id": "d1_confirmation_q2_s766527341",
+      "delivered": true
+    },
+    {
+      "probe_id": "d1_confirmation_q2_s1004399678",
+      "delivered": true
+    },
+    {
+      "probe_id": "d1_confirmation_B_s396880939",
+      "delivered": true
+    },
+    {
+      "probe_id": "d1_confirmation_B_s766527341",
+      "delivered": true
+    },
+    {
+      "probe_id": "d1_confirmation_B_s1004399678",
+      "delivered": true
+    }
+  ],
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "fetched_reports": [
+    "d1_behavioural.json"
+  ],
+  "checkpoints_fetched": [
+    {
+      "probe_id": "d1_confirmation_B_s1004399678",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "release_acked": true
+    },
+    {
+      "probe_id": "d1_confirmation_B_s396880939",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "release_acked": true
+    },
+    {
+      "probe_id": "d1_confirmation_B_s766527341",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "release_acked": true
+    },
+    {
+      "probe_id": "d1_confirmation_q2_s1004399678",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "release_acked": true
+    },
+    {
+      "probe_id": "d1_confirmation_q2_s396880939",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "release_acked": true
+    },
+    {
+      "probe_id": "d1_confirmation_q2_s766527341",
+      "result.json": true,
+      "per_sample.jsonl": true,
+      "admission.json": true,
+      "generations": true,
+      "release_acked": true
+    }
+  ],
+  "required_products_secured": {
+    "ok": true,
+    "why": "all 6 scored probes' results and per-sample rows off-pod; 6 trained checkpoint(s) preserved and identity-verified, reusable by a replacement attempt"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 116,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 561.04,
+    "actual_usd": 10.1922,
+    "authorized_usd": 15.1982,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-12T16:06:59+00:00"
+}

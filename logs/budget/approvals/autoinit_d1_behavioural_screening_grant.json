@@ -1,0 +1,24 @@
+{
+ "schema": "aadistill.phase_d1.behavioural_grant/v1",
+ "_contract": "The maintainer's ONE-USE grant for ONE formal D1 behavioural SCREENING session. It states the maintainer's decision and the figures the maintainer approved; everything identity- or price-shaped is DERIVED at issuance by behavioural_authorization.build_payload, which refuses a grant that states a derived field. Consumed by exactly one issuance into one run's governance/authorization.json.",
+ "_one_use": "ONE grant, ONE issuance, ONE launcher session. A failure is that session's result; a retry is a new grant and a new authorization.",
+ "granted_by": "maintainer, independent review of exec/d1-behavioural-readiness@508324c2781dc930c7cac98ea2195e60db47ec26, 2026-10-10: 'Engineering readiness: GO. Scientific screening design: GO. As maintainer, I authorize ONE formal D1 behavioural SCREENING session.'",
+ "granted_utc": "2026-10-10",
+ "rung": "screening",
+ "covers": "ONE formal D1 behavioural SCREENING session: the d1_screening battery, arms q1-q4 plus standing incumbent B (53e30566...), seeds 614923639 and 516448251, exactly 10 paired recovery/evaluation probes, under the frozen design f9c6688f... and preregistration aa70338a..., recovery recipe and scoring unchanged from the frozen design.",
+ "hard_cap_usd": 25.0053,
+ "cumulative_cap_usd": 490.0,
+ "_the_price_is_derived_not_asked": "The maintainer approved a MAXIMUM all-in ceiling of $25.0053 at the accepted $1.09/h L40S secure rate, inside the $30 per-session envelope and all four cumulative budget conditions. The issuer derives the actual ceiling from the LIVE secure rate at issuance; a lower live rate LOWERS it, and a figure above the approved maximum is a refusal and a return to the maintainer, never an automatic increase.",
+ "does_not_authorize": [
+  "re-running or re-opening the completed D1 structural search",
+  "the confirmation rung -- a separately granted, separately issued session whose artifact names the advancing candidate",
+  "re-selection of the frozen Top-4 candidate field or substitution of any checkpoint identity",
+  "re-measurement of B's standing state evaluation",
+  "a promotion decision outside the frozen three-way rule",
+  "any change to the frozen scientific protocol, experiment field, recovery seeds, batteries, SESOI or decision rules -- including to fit a budget",
+  "additional spending beyond the derived ceiling, or a second formal scientific session of any kind",
+  "D2 or D3 work of any kind"
+ ],
+ "engineering_autonomy": "Within this session's scope and ceiling, routine infrastructure or GPU execution failures are diagnosed and repaired autonomously (P12.1); ordinary engineering defects do not return to the maintainer.",
+ "after_screening": "If the frozen rule advances a candidate, prepare the separately authorized confirmation rung (that candidate and B, the three frozen confirmation seeds) and implement the off-pod stratified prompt-cluster bootstrap verdict under the already frozen inference rule, unchanged by screening outcomes."
+}

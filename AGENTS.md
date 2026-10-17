@@ -47,7 +47,7 @@ The algorithm core must not hard-code one model recipe. Model recipes may depend
 
 Semantic task categories such as refusal, uncertainty, tool use, or realtime interaction are data and evaluation concepts, not separate framework-level answer protocols. The algorithm core must not hard-code refusal-specific target text, generic word-count limits, or fallback-to-public-target rules. If a task explicitly requires a constrained form, express that requirement in the model recipe, dataset contract, or evaluation configuration, and validate it without weakening answer correctness or usefulness.
 
-Each model recipe must declare the capability scope it is trying to preserve or improve. AlphaAvatar-distill is a selective distillation framework, not an obligation to clone every capability, style, or alignment behavior of the teacher. For the current dense baseline, the primary objective is to transfer the teacher's strongest reasoning, problem-solving, and agent decision capabilities into the student under the deployment budget. Capabilities outside the declared target scope may be measured, but they must not silently receive equal weight or redefine success.
+Each model recipe must declare the capability scope it is trying to preserve or improve. AlphaAvatar-distill is a selective distillation framework, not an obligation to clone every capability, style, or alignment behavior of the teacher. For the current dense baseline, the primary objective is the selective preservation of the teacher's **fluid reasoning and adaptive problem-solving** — including interactive decision-making — under the deployment budget, not broad retention of factual or domain-specific knowledge (P10.2 defines the target and how it is measured). Capabilities outside the declared target scope may be measured, but they must not silently receive equal weight or redefine success.
 
 A recipe's dataset list is therefore a capability-selection decision, not a completeness checklist. Include only data groups that serve the declared target capability, a demonstrated supporting dependency, or a non-negotiable safety/deployment requirement. A group such as refusal may be omitted from training, or kept evaluation-only, when it is outside the recipe's target scope; the omission and its risks must be recorded. If such a group is included, it follows the same teacher-native protocol and quality rules as every other included group rather than receiving framework-level special handling.
 
@@ -650,6 +650,7 @@ Answer length may be logged as a workload characteristic because generated token
 
 Evaluation should eventually cover:
 
+- the capability axes of P10.2, each reported separately;
 - RAG reading;
 - evidence-grounded reasoning;
 - multi-hop QA;
@@ -668,7 +669,7 @@ Evaluation should eventually cover:
 
 Alignment, safety, refusal, style, and protocol objectives may consume limited student capacity or trade off against the target reasoning capability, especially for small students. Treat this cost as an explicit **alignment tax**: the measured loss in target capability, efficiency, or usable capacity caused by alignment- or behavior-shaping data, filters, losses, rewards, or post-training.
 
-AlphaAvatar-distill does not aim to preserve every teacher capability equally. Each model recipe must name its primary capability target and distinguish it from supporting capabilities, non-negotiable safety or usability constraints, and out-of-scope teacher behaviours. For the current dense baseline, top-tier reasoning and agent decision quality are the primary transfer target; broad teacher imitation is not.
+AlphaAvatar-distill does not aim to preserve every teacher capability equally. Each model recipe must name its primary capability target and distinguish it from supporting capabilities, non-negotiable safety or usability constraints, and out-of-scope teacher behaviours. For the current dense baseline, fluid reasoning and adaptive problem-solving (P10.2) are the primary transfer target; broad teacher imitation and broad factual-knowledge retention are not.
 
 Alignment tax also applies to data inclusion itself. Do not add refusal, style, safety, conversational, or other auxiliary slices merely for coverage or because the teacher has those behaviours. Each slice must justify the student capacity, tokens, and optimization pressure it consumes. An out-of-scope capability may remain an evaluation guard rail without becoming a training objective. When a safety or deployment requirement makes a slice mandatory, preserve the minimum requirement and measure its Pareto tradeoff against the primary reasoning target.
 
@@ -681,6 +682,93 @@ Before adding or increasing an alignment-oriented data slice, loss, reward, filt
 - the ablation or Pareto comparison that will measure the tax.
 
 Preserve minimum required safety, parseability, and deployment integrity, but do not sacrifice answer correctness, reasoning depth, or task usefulness merely to improve terseness, stylistic conformity, refusal frequency, or a broad average over teacher capabilities. Report target reasoning capability and alignment or behaviour axes separately. A change should be adopted only when the tradeoff is explicit and acceptable for the declared model recipe.
+
+### P10.2. The primary target is fluid reasoning, and it is measured as such
+
+**MAINTAINER DECISION 2026-10-16.** AlphaAvatar-distill prioritizes the
+**selective preservation of fluid reasoning and adaptive problem-solving**, not
+broad retention of factual or domain-specific knowledge. The intended
+capability:
+
+> Given unfamiliar problems, use the information supplied by the task or
+> acquired through interaction to infer rules, construct abstractions, reason
+> compositionally, generalize to unseen cases, and derive correct solutions or
+> actions.
+
+Priority goes to what cannot be recovered by looking information up. Broad
+factual knowledge is lower priority because much of it can be retrieved from
+external sources. This does **not** mean a student without prior knowledge:
+basic conceptual priors, language understanding, and the numerical, procedural
+and domain knowledge a reasoning task depends on remain **supporting**
+capabilities. Keep them where reasoning needs them; do not allocate data or
+capacity merely to imitate the teacher's whole knowledge distribution.
+
+**Capability taxonomy.** Place every evaluation and every data group on these
+axes, and report each axis separately:
+
+| axis | what it isolates | role |
+| --- | --- | --- |
+| task-contained deduction | multi-step reasoning over information fully supplied within the task | primary |
+| inductive rule discovery | inferring an unstated rule or abstraction from examples | primary |
+| compositional generalization | applying and combining rules in unseen compositions, conditionally or counterfactually | primary |
+| interactive adaptation and planning | exploring, acquiring information through actions and feedback, modelling an environment, planning over a long horizon | primary |
+| supporting knowledge | knowledge-dependent task performance: facts, conventions, learned procedures, domain skills | supporting |
+| autonomous rollout / protocol integrity | non-empty, terminating, non-degenerate, protocol-valid output (`usable_rollout`) | necessary guard rail, never evidence of correct reasoning by itself |
+
+The first three together are *static* fluid reasoning; the fourth is the
+*interactive* axis.
+
+**No proxy is interchangeable with fluid reasoning.** Overall mathematical
+correctness, language-model NLL, teacher KL and usable rollout each measure
+something else; none may be reported as a fluid-reasoning result, and none
+substitutes for another. Mixed-domain benchmarks — math, RAG, knowledge QA,
+code — measure mixtures of knowledge, retrieval, comprehension, learned
+procedure and reasoning: report them by set and axis, and never read their
+overall correctness as general fluid-reasoning capability. A teacher trace's
+length, fluency or low KL does not establish its reasoning quality, and a
+longer chain of thought is not better by default.
+
+**ARC-AGI is a reference, not a target to memorize.** ARC-AGI-1 (abstract
+pattern recognition, rule induction, analogy, generalization to unseen inputs),
+ARC-AGI-2 (symbolic interpretation, compositional and conditional rule
+application) and ARC-AGI-3 (interactive exploration, discovering unknown goals
+and rules, environment modelling, long-horizon planning, adaptation through
+feedback) exemplify the intended capabilities —
+<https://arcprize.org/arc-agi/2>, <https://arcprize.org/arc-agi/3>,
+<https://arcprize.org/blog/arc-agi-3-launch>. They are not an instruction to
+optimize exclusively for ARC.
+- ARC-AGI-1/2 are static problems and ARC-AGI-3 is an interactive environment
+  benchmark; their evaluation protocols are never conflated.
+- For a text-first student, separate input representation and parsing from the
+  underlying reasoning. A textual grid encoding or a custom environment adapter
+  may support research, but a result under a modified interface is never
+  presented as an official native benchmark score.
+- An official evaluation follows that benchmark's own permitted-data and
+  interface contract.
+
+**Evaluation and data isolation.** A capability claim needs a
+capability-aligned evaluation:
+- an independent measurement for each axis above, with primary reasoning
+  outcomes kept apart from supporting metrics and deployment guard rails;
+- held-out **task and rule families**, not only random held-out samples drawn
+  from the same templates;
+- content, transformation-family, generator and source-lineage isolation
+  between training or calibration data and evaluation, wherever applicable;
+- **never** official ARC-AGI evaluation tasks, their solutions, trajectories or
+  trivial derivatives in any training, calibration or development data;
+- a synthetic reasoning curriculum is allowed, but it must not become a way to
+  memorize the final test distribution.
+
+**Where this lives.** Task families, generators, batteries, rule-family splits
+and benchmark adapters are data and evaluation configuration (P3). Nothing
+ARC-specific or model-specific enters `src/aadistill`; the core supplies
+reusable mechanisms that take these as inputs.
+
+**History is not reinterpreted.** Earlier results were measured on mixed-domain
+batteries and remain valid as what they measured. Their records, metrics,
+preregistrations and verdicts are not rewritten, and they are not re-read as
+fluid-reasoning evidence. A new battery is measured anew: scores on another
+battery do not transfer to it.
 
 ### P11. Failed experiments must remain useful
 
@@ -1745,6 +1833,16 @@ Collect only what is needed under a logged cache budget:
 
 The initialization warm-up data should be small but diverse enough to support stable projection and structural initialization. It may include general text, instruction samples, reasoning snippets, RAG/evidence-reading examples, tool-format examples, code/math subsets, and refusal/uncertainty examples.
 
+**Reasoning-oriented calibration (maintainer decision 2026-10-16).** Stage 0 remains the collection of teacher signals for structural initialization, not a training stage. Future Stage-0 dataset-volume and mixture experiments:
+
+* prioritize coverage of abstract rule induction, analogy, compositional reasoning, contextual rule application, multi-step deduction and problem-solving, with diverse task structures and reasoning lengths;
+* keep the supporting language, numerical and procedural data the reasoning signal depends on, but do not allocate data merely to imitate the teacher's whole knowledge distribution;
+* account in **effective supervised/scored token positions**, not only raw token counts, and measure whether sampling preserves the reasoning positions and structural signals it is meant to carry;
+* measure how dataset size and mixture move DEPTH, FFN, WIDTH and ATTENTION selection, initialization stability and the downstream retained capabilities on the P10.2 axes;
+* compare calibration mixtures under controlled structural and training conditions.
+
+Teacher-native reasoning traces remain the signal source, but their length, fluency or low KL alone does not establish reasoning quality. Completed experiments' frozen calibration evidence is not changed.
+
 Default action policy:
 
 * **Act directly** for toy data collection, fake/tiny teacher dry runs, cache schema implementation, and deterministic validation scripts.
@@ -1785,6 +1883,24 @@ Baselines to compare when practical:
 * grouped PCA projection;
 * ordinary SVD for local low-rank cases;
 * activation-aware SVD for local linear compression cases.
+
+**Forward baseline (maintainer decision 2026-10-17).** New initialization work
+runs the selected forward baseline unless its own registered protocol declares
+a deviation.
+- **Where the method lives.** One versioned record under
+  `configs/shared/baselines/`, resolved by `shared.forward_baseline` through the
+  generic `aadistill.initialization.baseline`. The record holds the operators,
+  scoring positions, distribution support, KL references, execution profile
+  and search.
+- **Read it, don't copy it.** Take every term from the resolver; never retype
+  one into an experiment.
+- **Identities do not cross profiles.** A recorded artifact is the expected
+  artifact only for the execution fingerprint it was materialized under. A
+  historical reference initialization is not the expected artifact of a new
+  materialization under a different profile.
+- **Historical comparators are a separate question.** `standing_incumbent()`
+  keeps answering for past rounds, and selecting a baseline rewrites no
+  historical verdict.
 
 Default action policy:
 
@@ -1828,8 +1944,20 @@ The data should be organized by intended training use, not mixed into an opaque 
 
 The recommended groups below are candidates, not mandatory coverage requirements. Before adding a group to the training mixture, record why it is needed for the recipe's target capability or constraints, what capacity or compute it consumes, and how its alignment tax will be measured. Groups that are not required — including refusal or uncertainty for a reasoning-focused recipe — may be omitted from training and retained only for evaluation.
 
+**Reasoning-transfer priority (maintainer decision 2026-10-16).** Stage 2 data should transfer the teacher's problem-solving *process*, not simply its factual answers. Prioritize:
+
+* self-contained reasoning tasks with independently verifiable solutions;
+* novel rule induction from examples, and symbolic and spatial transformations;
+* compositional and counterfactual reasoning, and in-context adaptation to rules not supplied during training;
+* algorithmically generated tasks with controlled difficulty;
+* teacher reasoning trajectories that lead to verified correct results;
+* the supporting language and conceptual knowledge these tasks need.
+
+Data-quantity and mixture experiments treat raw quantity, effective reasoning-token count, difficulty, rule-family diversity, trajectory quality and mixture proportion as separate factors. A longer chain of thought is not better by default. The teacher-native thinking and output protocol is kept (P17) unless a separately authorized experiment changes it.
+
 Recommended data groups:
 
+* self-contained and generated reasoning tasks (rule induction, transformation, composition) — the primary-transfer candidates for a fluid-reasoning recipe (P10.2);
 * general instruction following;
 * RAG reading and evidence-grounded reasoning;
 * multi-hop QA;
@@ -1872,6 +2000,12 @@ Goal: recover the initialized student before full on-policy training.
 the offline student-*behaviour-recovery* stages. Their primary objective is to
 restore **stable autonomous rollout capability**, so the student can later produce
 usable trajectories for Stage 5/6 on-policy distillation.
+
+This usable-rollout objective is a **recovery-readiness** criterion: it says the
+student produces trajectories worth training on. It is not the programme's
+ultimate objective, which is reasoning transfer measured on the P10.2 axes
+(maintainer decision 2026-10-16), and a usable-rollout gain is never reported as
+a reasoning gain.
 
 Evaluation hierarchy — do not invert it:
 
@@ -1994,6 +2128,10 @@ Online data may include:
 * refusal/uncertainty comparisons;
 * realtime interaction rollouts;
 * code/math verifier outcomes.
+
+**Reasoning-oriented online data (maintainer decision 2026-10-16).** Prioritize trajectories that teach the student to reason and adapt during its own execution: exploration of unfamiliar tasks; reasoning from observations and feedback; corrective reasoning after failed attempts; hypothesis formation and testing; multi-step planning and action selection; interactive environments with verifiable outcomes. Keep successful **and** unsuccessful trajectories, with their feedback and provenance.
+
+Measure real task success, generalization to unseen tasks, improvement through feedback, and action/sample efficiency — for ARC-AGI-3-like tasks, environment completion and adaptation efficiency, not whether a well-formed response was produced. Do not reward valid formatting, natural termination, short answers or confident predictions by themselves. Policy identity, rollout evidence, feedback/verifier identity and the off-policy correction requirements of this section apply unchanged.
 
 Default action policy:
 

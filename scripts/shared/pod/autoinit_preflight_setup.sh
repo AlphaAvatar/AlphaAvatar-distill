@@ -868,6 +868,169 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'search {a.allows_beam_search}, arm {a.arm}, '
       f'protocol {a.measurement_protocol_id[:12]}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "d2" ]; then
+  # D2. Its own grant TYPE: a D1 artifact must not authorize a D2 search, and
+  # a missing branch would fall through to `spend`. Like D1's search it RUNS a
+  # beam, so `allows_beam_search` is asserted TRUE; recovery and behavioural
+  # work are separate grants. The plan hash is the preregistration's.
+  cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_d2.d2_authorization import D2Authorization
+a = D2Authorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_d2_search is True, 'a D2 session needs a D2 authorization'
+assert a.allows_beam_search is True, 'a D2 search session must authorize the search'
+assert a.allows_recovery is False, 'the D2 search commits a field and trains nothing'
+assert a.allows_behavioural is False, 'the behavioural rungs are separate sessions'
+assert a.automatic_followon_start is False, 'nothing chains off the D2 search'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, rows {a.prediction_rows}, '
+      f'pricing {a.pricing.get(\"pricing_in_force\")}, '
+      f'objective {a.objective_hash[:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "d1_behavioural" ]; then
+  # D1 BEHAVIOURAL. The ONLY D1 session that trains: ten screening probes (or
+  # six confirmation probes) under the frozen recovery recipe, from arms
+  # materialized on this pod along digest-pinned paths. Its artifact reports
+  # `allows_recovery_training` TRUE where the search's reports recovery False,
+  # and `allows_beam_search` False where the search's reports it True --
+  # delegating to the search's loader would refuse the one artifact that can
+  # authorize this session, and accepting the search's here would let a beam
+  # grant buy training.
+  #
+  # The flags below are the ones a careless reuse would set: this must not be
+  # able to buy a beam, a re-selection of the frozen Top-4, a re-measurement of
+  # B's standing result, or an automatic follow-on into the other rung.
+  #
+  # This branch exists because a missing one is not a type error: SESSION_KIND
+  # falls through to `spend`, and attempt 2 of Phase B proved what that costs
+  # ($0.2300, a KeyError one step after the test gate passed).
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_d1.behavioural_governance import D1BehaviouralAuthorization
+a = D1BehaviouralAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.allows_recovery_training is True, 'every behavioural probe is a training run'
+assert a.authorizes_behavioural_selection is True, 'this session needs a behavioural authorization'
+assert a.allows_beam_search is False, 'a behavioural grant must not authorize a beam'
+assert a.authorizes_d1_search is False, 'the D1 search is complete and consumed'
+assert a.authorizes_candidate_reselection is False, 'the Top-4 field is the retention decision, not this session'
+assert a.authorizes_incumbent_remeasurement is False, 'B stands; this session trains FROM its checkpoint'
+assert a.automatic_followon_start is False, 'the other rung is a separately authorized session'
+print(f'  {a.authorization_id}: rung {a.rung}, '
+      f'hard \${a.hard_cap_usd:.4f}, training {a.allows_recovery_training}, '
+      f'contract {a.contract_hash[:12]}, battery {a.battery_role}, '
+      f'probes {a.n_probes}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "d2_screening" ]; then
+  # D2 BEHAVIOURAL SCREENING. Its own TYPE: the search's D2 artifact denies
+  # recovery and must not buy training; D1's behavioural artifact binds D1's
+  # design and must not buy a D2 field. Eight probes from the four committed
+  # D2 initializations, compared with B's IMPORTED units -- so the flags below
+  # refuse a beam, the confirmation, a re-selection, retraining B or q2, a
+  # promotion and any automatic follow-on. The plan hash is the
+  # preregistration's.
+  #
+  # This branch exists because a missing one is not a type error: SESSION_KIND
+  # falls through to `spend` (Phase B attempt 2, $0.2300).
+  cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_d2.d2_screening_authorization import D2ScreeningAuthorization
+a = D2ScreeningAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.allows_recovery_training is True, 'every screening probe is a training run'
+assert a.authorizes_d2_screening is True, 'this session needs a D2 screening authorization'
+assert a.allows_beam_search is False, 'a screening grant must not authorize a beam'
+assert a.authorizes_d2_confirmation is False, 'the confirmation is a separate grant naming its candidate'
+assert a.authorizes_candidate_reselection is False, 'the field is the committed Top-4'
+assert a.authorizes_reference_retraining is False, 'B and q2 are imported units, never retrained'
+assert a.authorizes_promotion is False, 'screening nominates at most'
+assert a.automatic_followon_start is False, 'nothing chains off screening'
+print(f'  {a.authorization_id}: hard \${a.hard_cap_usd:.4f}, '
+      f'probes {a.n_probes}, seeds {list(a.seeds)}, '
+      f'contract {a.contract_hash[:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "d2_confirmation" ]; then
+  # D2 SHARED CONFIRMATION. Its own TYPE: a screening artifact must not buy the
+  # confirmation, and this one must not buy a screening, a re-selection, a
+  # fresh confirmation, D3 or a promotion. Three probes of the ONE candidate
+  # the frozen screening advanced, compared with B's IMPORTED confirmation
+  # units. The plan hash is the preregistration's.
+  cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_d2.d2_screening_authorization import D2ConfirmationAuthorization
+a = D2ConfirmationAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.allows_recovery_training is True, 'every confirmation probe is a training run'
+assert a.authorizes_d2_confirmation is True, 'this session needs a D2 confirmation authorization'
+assert a.authorizes_d2_screening is False, 'the screening is complete; this grant buys none'
+assert a.allows_beam_search is False, 'a confirmation grant must not authorize a beam'
+assert a.authorizes_candidate_reselection is False, 'the candidate is the frozen screening\'s'
+assert a.authorizes_reference_retraining is False, 'B and q2 are imported units, never retrained'
+assert a.authorizes_fresh_confirmation is False, 'a SHARED_GO only nominates'
+assert a.authorizes_d3 is False, 'D3 is its own grant'
+assert a.authorizes_promotion is False, 'the shared confirmation never promotes'
+assert a.automatic_followon_start is False, 'nothing chains off the verdict'
+print(f'  {a.authorization_id}: hard \${a.hard_cap_usd:.4f}, '
+      f'probes {a.n_probes}, seeds {list(a.seeds)}, '
+      f'contract {a.contract_hash[:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "d3_structural" ]; then
+  # D3 STRUCTURAL. Its own TYPE: q2's fixed path from the teacher with ONE
+  # declared change (DEPTH's KL against the stored teacher reference). It
+  # trains nothing, so `allows_recovery_training` is ABSENT/False by type and
+  # the probes are a separate grant; it materializes a fixed path, so
+  # `allows_fixed_path_materialization` is TRUE. The flags below refuse a beam
+  # or Full Search, reopening D1/D2, the cancelled student-confidence D3,
+  # retraining q2/B, the screening seeds, a fresh confirmation, a promotion
+  # and any automatic follow-on. The plan hash is the D3 registration's.
+  cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_d3.d3_authorization import D3StructuralAuthorization
+a = D3StructuralAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_d3_structural is True, 'this session needs a D3 structural authorization'
+assert a.allows_fixed_path_materialization is True, 'the structural session materializes a fixed path'
+assert a.authorizes_recovery_training is False, 'the structural session trains nothing'
+assert a.authorizes_d3_probes is False, 'the probes are a separate grant after STRUCTURAL_CHANGE'
+assert a.authorizes_beam_search is False, 'no beam or Full Search is part of D3'
+assert a.authorizes_reopen_d1_d2 is False, 'D1 and D2 are complete'
+assert a.authorizes_cancelled_d3 is False, 'the student-confidence D3 is cancelled'
+assert a.authorizes_promotion is False, 'nothing is promoted'
+assert a.authorizes_automatic_followon_start is False, 'nothing chains off the outcome'
+print(f'  {a.authorization_id}: hard \${a.hard_cap_usd:.4f}, '
+      f'treatment {a.contract_hash[:12]}, registration {a.plan_hash[:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "d3_probes" ]; then
+  # D3 PROBES. Its own TYPE: three recovery probes from the D3 initial
+  # checkpoint (the structural session's product, staged from the relay) at
+  # the D1 confirmation seeds; a structural grant must not buy training and
+  # this one must not buy another structural run. The flags refuse retraining
+  # q2/B, the screening seeds, a fresh confirmation, a promotion and any
+  # automatic follow-on. The plan hash is the D3 registration's.
+  cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_d3.d3_authorization import D3ProbesAuthorization
+a = D3ProbesAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_d3_probes is True, 'this session needs a D3 probes authorization'
+assert a.allows_recovery_training is True, 'every probe is a training run'
+assert a.authorizes_d3_structural is False, 'the structural session is complete'
+assert a.authorizes_fixed_path_materialization is False, 'the initialization is staged, not rebuilt'
+assert a.authorizes_reference_retraining is False, 'q2 and B are imported units'
+assert a.authorizes_screening_seeds is False, 'the screening seeds are not part of the design'
+assert a.authorizes_fresh_confirmation is False, 'the comparison is exploratory'
+assert a.authorizes_promotion is False, 'nothing is promoted'
+assert a.authorizes_automatic_followon_start is False, 'nothing chains off the comparison'
+print(f'  {a.authorization_id}: hard \${a.hard_cap_usd:.4f}, '
+      f'probes {a.n_probes}, seeds {list(a.seeds)}, contract {a.contract_hash[:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "c2" ]; then
   # A SEVENTH type. Phase-C2 Search-1's grant measures a harness containing the
   # C2 launcher, driver, search space and baseline rule, none of which appear in

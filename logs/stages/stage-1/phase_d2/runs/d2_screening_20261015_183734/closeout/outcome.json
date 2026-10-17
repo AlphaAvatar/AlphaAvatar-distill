@@ -1,0 +1,102 @@
+{
+ "schema": "aadistill.phase_d2.screening_closeout/v1",
+ "run_id": "d2_screening_20261015_183734",
+ "stage_id": "1",
+ "experiment_id": "phase_d2",
+ "outcome": "HOST NOT ADMITTED on all five draws. Every drawn L40S carried a host driver other than the shared protocol's 595.91.07 (580.126.09 x4 in SE, 580.167.08 x1 in US), so host admission refused each before setup and the session aborted after draw 5. No setup ran, no probe trained, generated or was scored.",
+ "classification": "PRE-SCIENCE ACQUISITION FAILURE (host identity), cost booked below. The frozen identity was enforced, never substituted.",
+ "recorded_utc": "2026-10-15T19:10:41Z",
+ "session_commit": "56c0a362fa555bb2925c0e66983855e03b82c154",
+ "authorized_base_commit": "6438963d8db816a42ffa90731d263c503fa9d829",
+ "authorization_sha256": "7754daf3e005b0bb44b1be350f8067b90ec2251c3e54f8c3061cd96da63c88d7",
+ "authorization_file_sha256": "09c38628c46fbe455563020a86277b30f186b0329bc8e7258996f3029cfc5b15",
+ "contract_hash": "6d4283e77e1b26549328d96eaf8f71773a3b2ef4e15804d26dd938eb0674455e",
+ "provider_resource_created": true,
+ "provider_teardown_verified": true,
+ "draws": [
+  {
+   "draw": 1,
+   "pod_id": "c6n0v702lin6wj",
+   "outcome": "host_not_admitted",
+   "location": "SE",
+   "host_driver": "580.126.09",
+   "cumulative_usd_at_release": 0.0471
+  },
+  {
+   "draw": 2,
+   "pod_id": "fo67uxvr1usw6n",
+   "outcome": "host_not_admitted",
+   "location": "SE",
+   "host_driver": "580.126.09",
+   "cumulative_usd_at_release": 0.071
+  },
+  {
+   "draw": 3,
+   "pod_id": "aqohnkptg9q2vb",
+   "outcome": "host_not_admitted",
+   "location": "SE",
+   "host_driver": "580.126.09",
+   "cumulative_usd_at_release": 0.0921
+  },
+  {
+   "draw": 4,
+   "pod_id": "pqon2mafp0mk1l",
+   "outcome": "host_not_admitted",
+   "location": "SE",
+   "host_driver": "580.126.09",
+   "cumulative_usd_at_release": 0.1192
+  },
+  {
+   "draw": 5,
+   "pod_id": "hp6i00wz32gqzq",
+   "outcome": "host_not_admitted",
+   "location": "US",
+   "host_driver": "580.167.08",
+   "released_by": "the session's terminal teardown"
+  }
+ ],
+ "teardown_evidence": {
+  "every_refused_draw": "released and confirmed not billing before the next create (draws[].release in the session record)",
+  "final_pod_state": {
+   "exists": false,
+   "desired_status": "TERMINATED",
+   "billing": false
+  },
+  "provider_confirms_gone": true,
+  "pod_list_after": "[]"
+ },
+ "money": {
+  "all_in_usd": 0.4518,
+  "gpu_usd": 0.445,
+  "disk_usd": 0.0067,
+  "elapsed_minutes": 24.5,
+  "_basis": "the runner's GPU figure (elapsed from the first create to the last teardown, INCLUDING ~10 minutes of capacity back-off when no pod existed) plus 120 GB container disk at $0.10/GB-month over the same minutes, ceiled to the 4-decimal quantum: a conservative over-count",
+  "provider_balance_cross_check": {
+   "before_usd": 136.7647662005,
+   "after_usd": 136.6254389755,
+   "measured_delta_usd": 0.1393,
+   "_note": "the account's own movement across the attempt, all five pods and their disk; smaller than the booked figure, which is kept as the conservative ledger entry"
+  }
+ },
+ "diagnosis": {
+  "root_cause": "the provider placed every request in a location whose L40S hosts do not run 595.91.07: SE (580.126.09, five times today counting the D2 search's draw) and US (580.167.08). B's two imported screening units were trained and generated on 595.91.07 hosts in AU (pods kz0r9zerjsvapk, wzr7llw0shqc2k, the D1 screening and confirmation sessions).",
+  "host_location_history": {
+   "AU": "595.91.07 (d1_behavioural_20261011_135910, d1_behavioural_20261012_064341)",
+   "SE": "580.126.09 (d1_search_20261006_210210, d2_search_20261015_051722, this run's draws 1-4)",
+   "US": "580.167.08 (this run's draw 5)"
+  },
+  "corrective_action": "the launcher may constrain the provider create to a country (runpodctl --country-code); the next attempt asks for AU. Host admission still requires the exact 595.91.07 identity, so this changes where hosts are drawn, never what is admitted. If AU has no capacity or its hosts are refused too, the session stops and the comparability problem is reported."
+ },
+ "science": "no measurement began; the frozen protocol, field, seeds and envelope are untouched",
+ "one_use": "this authorization's launcher session ran and ended; it is not reused. The next attempt is a new one-use authorization netted against the same $25.00 envelope.",
+ "observers": "closed in the terminal path: the launcher tore down the last pod and exited (LAUNCH_EXIT=11), its tmux session ended, every per-draw watchdog ended with its pod, and the milestone waiter ended on the terminal line",
+ "evidence_in_tree": {
+  "runtime/session.json": "the runner's record (draws, cost, teardown)",
+  "runtime/launcher.log": "the launcher's log",
+  "runtime/watchdog_*.jsonl": "the per-draw watchdog journals",
+  "evidence/provider/create_raw_*.txt": "the provider's raw create answers (location per pod)",
+  "governance/authorization.json": "the consumed one-use authorization",
+  "governance/bundle.json": "the staged bundle record"
+ },
+ "what_this_authorizes": "nothing"
+}

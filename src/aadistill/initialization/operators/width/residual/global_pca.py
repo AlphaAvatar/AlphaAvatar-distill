@@ -38,9 +38,10 @@ from aadistill.initialization.device import model_device, stats_to
 from aadistill.initialization.operators._common import (
     ChildBuilder,
     collect_activation_stats,
+    statistics_positions,
 )
 from aadistill.initialization.calibration.profiles import CalibrationNeed
-from aadistill.initialization.scoring.batches import active_positions
+from aadistill.initialization.statistics.collect import RESIDUAL_WEIGHT
 from aadistill.initialization.operators.base import (
     OperatorContext,
     OperatorImplementation,
@@ -70,6 +71,10 @@ class WidthGlobalPCAV0(OperatorImplementation):
                            "vocab_size", "tie_word_embeddings"})
     calibration = CalibrationNeed.ACTIVATION_STATS
     objective = "captured energy fraction of the residual second moment"
+    #: Under an objective that declares `weights_activation_statistics`, the
+    #: residual second moments are root-confidence weighted
+    #: (`statistics_positions`).
+    consumes_reference_weighted_statistics = True
     deterministic = True
     requires_seed = False
     produces = ("projection_diagnostics",)
@@ -108,7 +113,7 @@ class WidthGlobalPCAV0(OperatorImplementation):
         #: projection keeps the directions the stream actually uses, and this is
         #: what decides "actually uses": every real token under the incumbent
         #: policy, or only the positions whose prediction the item supervises.
-        active = active_positions(ctx.calibration_items, ctx.position_policy)
+        active = statistics_positions(ctx, self)
         state = stats_to(ctx.cached_stats(lambda: collect_activation_stats(
             adapter, parent, ctx.calibration_items,
             compute, batch_size=batch_size, packing=packing,
@@ -164,7 +169,10 @@ class WidthGlobalPCAV0(OperatorImplementation):
                     "op.width.orthonormality_error": float(proj_diag["orthonormality_error"]),
                     "op.width.min_kept_eigenvalue": float(proj_diag["min_kept_eigenvalue"]),
                 },
-                detail={"stats_tokens": int(state["residual_count"][0])}),
+                detail={"stats_tokens": int(state["residual_count"][0]),
+                        **({} if RESIDUAL_WEIGHT not in state else
+                           {"stats_token_weight":
+                                float(state[RESIDUAL_WEIGHT][0])})}),
             trace={"source": "global_activation_pca", "scale_compensation": scale,
                    "micro_batch_size": batch_size,
                    "calibration_batch_packing": packing,

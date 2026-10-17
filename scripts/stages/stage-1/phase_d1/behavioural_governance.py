@@ -29,8 +29,10 @@ else.
 """
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from aadistill.governance.authorization import (
@@ -38,6 +40,7 @@ from aadistill.governance.authorization import (
     AuthorizationError,
     SpendAuthorization,
 )
+from aadistill.infrastructure.manifest import sha256_json
 
 SCHEMA = "aadistill.phase_d1.behavioural_authorization/v1"
 
@@ -210,6 +213,25 @@ class D1BehaviouralAuthorization(SpendAuthorization):
                 "the arms, the battery, the recipe, the seeds or the probe "
                 "schedule is not what was authorized.")
 
+    def require_run_id(self, run_id: str) -> None:
+        """The launch must be the run this artifact was issued for.
+
+        The contract hash is not a function of the run id, so this is the one
+        place a run-id mismatch is caught at all -- and it is caught at `$0`,
+        where the search's equivalent check is caught before a provider is
+        contacted.
+        """
+        if not self.run_id:
+            raise D1BehaviouralRefused(
+                "this authorization binds no run_id, so it cannot say which "
+                "attempt it was issued for; a one-use artifact without a run "
+                "identity is reusable by accident")
+        if run_id != self.run_id:
+            raise D1BehaviouralRefused(
+                f"this authorization was issued for run {self.run_id!r} and "
+                f"the session declares {run_id!r}. One grant, one issuance, "
+                "one launcher session.")
+
     def require_advancing_candidate(self) -> str:
         """The candidate a confirmation rung is bound to. Screening has none."""
         if self.rung != "confirmation":
@@ -250,6 +272,103 @@ class D1BehaviouralAuthorization(SpendAuthorization):
         for wire, _action in self.action_policy.wire_claims.items():
             payload[wire] = bool(getattr(self, wire))
         return payload
+
+    @classmethod
+    def load(cls, path: str | Path) -> "D1BehaviouralAuthorization":
+        """Read an issued behavioural authorization back, self-hash verified.
+
+        An artifact the issuer can write and the loader cannot read fails on
+        the pod, after the money is committed -- so the loader exists before
+        the issuer does, and the issuer's last step is reading its own output
+        through this.
+        """
+        raw = json.loads(Path(path).read_text())
+        stated = raw.get("authorization_sha256")
+        check = dict(raw)
+        check.pop("authorization_sha256", None)
+        if not stated or stated != sha256_json(check):
+            raise D1BehaviouralRefused(
+                f"{path} does not match its own authorization_sha256; it has "
+                "been edited since it was granted")
+        if raw.get("schema") != SCHEMA:
+            raise D1BehaviouralRefused(
+                f"{path} declares schema {raw.get('schema')!r}, not "
+                f"{SCHEMA!r}. Another session's grant measures a different "
+                "harness and carries a ceiling derived for different work; it "
+                "cannot authorize a D1 behavioural rung.")
+        missing = [f for f in (
+            "authorization_id", "granted_utc", "hard_cap_usd",
+            "authorized_session_commit", "harness_source_digest",
+            "rung", "design_hash", "contract_hash", "battery_role",
+            "battery_content_id", "recipe_id", "n_probes", "seeds",
+            "run_id") if not raw.get(f)]
+        if missing:
+            raise D1BehaviouralRefused(f"{path} omits {missing}")
+        D1_BEHAVIOURAL_POLICY.check_claims(raw, where=str(path))
+        if not raw.get("allows_recovery_training") or not raw.get(
+                "authorizes_behavioural_selection"):
+            raise D1BehaviouralRefused(
+                f"{path} does not authorize a behavioural rung")
+        rung = str(raw["rung"])
+        if rung not in ("screening", "confirmation"):
+            raise D1BehaviouralRefused(
+                f"{path} names rung {rung!r}; there are two rungs and this is "
+                "neither")
+        advancing = str(raw.get("advancing_candidate") or "")
+        if rung == "screening" and advancing:
+            raise D1BehaviouralRefused(
+                f"{path} is a SCREENING artifact naming an advancing "
+                f"candidate {advancing!r}. Screening is what produces the "
+                "candidate; an artifact that pre-named one would be a "
+                "selection made before the measurement.")
+        if rung == "confirmation" and not advancing:
+            raise D1BehaviouralRefused(
+                f"{path} is a CONFIRMATION artifact naming no advancing "
+                "candidate; one that left it open would permit confirming "
+                "whichever candidate the session chose.")
+        return cls(
+            authorization_id=raw["authorization_id"],
+            granted_utc=raw["granted_utc"],
+            granted_by=raw.get("granted_by", ""),
+            plan_id=raw["plan_id"],
+            plan_hash=raw[D1_BEHAVIOURAL_POLICY.plan_hash_key],
+            expected_usd=float(raw["expected_usd"]),
+            hard_cap_usd=float(raw["hard_cap_usd"]),
+            authorized_stages=tuple(raw.get("authorized_stages") or ()),
+            stage_conditions=dict(raw.get("stage_conditions") or {}),
+            scope_note=raw.get("scope_note", ""),
+            authorized_session_commit=raw["authorized_session_commit"],
+            harness_source_digest=raw["harness_source_digest"],
+            #: No fallback: an artifact that names no harness gets none, and
+            #: `require_harness` then refuses.
+            harness_source_files=tuple(raw.get("harness_source_files") or ()),
+            per_launch_hard_usd=(float(raw["per_launch_hard_usd"])
+                                 if raw.get("per_launch_hard_usd") else None),
+            provenance_commit=raw.get("provenance_commit"),
+            version=int(raw.get("version", 1)),
+            action_policy=D1_BEHAVIOURAL_POLICY,
+            rung=rung,
+            design_hash=raw["design_hash"],
+            contract_hash=raw["contract_hash"],
+            battery_role=raw["battery_role"],
+            battery_content_id=raw["battery_content_id"],
+            recipe_id=raw["recipe_id"],
+            n_probes=int(raw["n_probes"]),
+            seeds=tuple(int(s) for s in raw["seeds"]),
+            advancing_candidate=advancing,
+            run_id=raw["run_id"],
+            money=dict(raw.get("money") or {}),
+            rate_usd_per_hour=(float(raw["rate_usd_per_hour"])
+                               if raw.get("rate_usd_per_hour") else None),
+            hard_runtime_minutes=(float(raw["hard_runtime_minutes"])
+                                  if raw.get("hard_runtime_minutes") else None),
+            gpu_hard_usd=(float(raw["gpu_hard_usd"])
+                          if raw.get("gpu_hard_usd") else None),
+            disk_hard_usd=(float(raw["disk_hard_usd"])
+                           if raw.get("disk_hard_usd") is not None else None),
+            all_in_hard_usd=(float(raw["all_in_hard_usd"])
+                             if raw.get("all_in_hard_usd") else None),
+            one_use=str(raw.get("one_use", "")))
 
 
 #: The module-level name for the policy, kept so callers read

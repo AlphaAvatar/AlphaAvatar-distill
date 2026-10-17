@@ -1,0 +1,110 @@
+{
+ "_contract": "LAUNCH-BOUND. Every fact a behavioural launch consumes, derived at $0 immediately before it. It AUTHORIZES NOTHING: the one-use artifact does that, and this is what launch_readiness_gate checks the live invocation against.",
+ "_generated_by": "scripts/stages/stage-1/phase_d1/write_d1_behavioural_launch_readiness.py",
+ "advancing_candidate": null,
+ "authorization": {
+  "authorization_sha256": "3997dcd2a78c557d6166ffbd551fa2d7cd126e6ad7cd8f873f5f2c8dc3979c04",
+  "battery_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+  "battery_role": "d1_screening",
+  "contract_hash": "1011b6da6f0b4f0e337fbe95e967556d64fcad1cd14963402dd21545aeb5226c",
+  "expected_usd": 20.0521,
+  "granted_utc": "2026-10-10T10:35:19+00:00",
+  "hard_cap_usd": 25.0053,
+  "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/authorization.json",
+  "preregistration_sha256": "aa70338a22bdaae1067105261614a63bed4b0f7737f0a6cc3b59d2555835e3de",
+  "replay_plan_sha256": "fe58c3a5be23e54f71ca823966f5437214a387598bea0c5fc9c5fa5d30f45c6c",
+  "run_id": "d1_behavioural_20261010_103442",
+  "rung": "screening",
+  "seeds": [
+   614923639,
+   516448251
+  ]
+ },
+ "authorizes": "nothing",
+ "balances_after_this_session": {
+  "formal_remaining_usd": 43.7872,
+  "package_remaining_usd": 50.4382,
+  "project_remaining_usd": 38.2802
+ },
+ "bundle": {
+  "_derived": "from the session commit; an alias fails at $0",
+  "_verified_by": "autoinit_d1_behavioural_launch.bundle_staged_gate, which downloads this object and round-trips it",
+  "local_record": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/bundle.json",
+  "local_sha256": "379b770f51a2c82881c530eb96890ed89fb79ce34c42594a0bfc0b33ef90dcdc",
+  "name": "aad_autoinit_d8b9b883.bundle",
+  "relay_repo": "AlphaAvatar/aadistill-artifacts",
+  "repo_path": "transfer/aad_autoinit_d8b9b883.bundle",
+  "staged": true
+ },
+ "derived_session": {
+  "accepted_cell": {
+   "_owner": "logs/stages/stage-1/phase_d1/plans/d1_design.json :: budget.chain.sessions.screening",
+   "arm_materialization_minutes": 110.0,
+   "container_disk_gb": 120,
+   "container_disk_usd": 0.3766,
+   "expected_minutes": 1087.16,
+   "gpu_usd": 24.6287,
+   "hard_ceiling_minutes": 1355.71,
+   "hard_ceiling_usd": 25.0053,
+   "n_arms": 5,
+   "n_probes": 10,
+   "overrun_factor": 1.3,
+   "price_per_hour": 1.09,
+   "probe_minutes": 895.16,
+   "session_overhead_minutes": 82.0
+  },
+  "hard_ceiling_minutes": 1355.71,
+  "hard_ceiling_usd": 25.0053
+ },
+ "design_hash": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+ "evidence_owed": {
+  "checkpoints": "NOT owed (P8.4): a scored probe's weights have no downstream consumer, and the arms rematerialize deterministically from their pinned paths",
+  "gate": "ArtifactPolicy.products_secured requires each scored probe's result and per-sample rows off-pod; the generations additionally travel in the required final archive",
+  "what": "every scored probe's result, per-sample rows and raw generations, plus the session record with its contract, materialization gates, ranking and selection"
+ },
+ "four_conditions": "ALL FOUR PASS",
+ "generated_utc": "2026-10-10T10:36:09+00:00",
+ "harness": {
+  "digest": "57d591ac865ad8757f1c25393468bfa7bc2fe78452366d6230cc6e05b8c70044",
+  "entry_points": [
+   "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_launch.py",
+   "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py",
+   "scripts/stages/stage-1/phase_d1/behavioural.py",
+   "scripts/stages/stage-1/phase_d1/behavioural_materialize.py",
+   "scripts/stages/stage-1/phase_d1/behavioural_governance.py",
+   "scripts/stages/stage-1/phase_d1/score_d1_screening.py",
+   "scripts/stages/stage-1/phase_d1/score_d1_confirmation.py",
+   "scripts/shared/pod/collect_artifacts.py"
+  ],
+  "n_files": 166
+ },
+ "launch_invocation": {
+  "_must_use": "d8b9b8837e28e54704c3d8cb926a6d33876f8ea6",
+  "command": "PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_launch.py --scr <scr> --session-commit d8b9b8837e28e54704c3d8cb926a6d33876f8ea6 --bundle aad_autoinit_d8b9b883.bundle --run-id d1_behavioural_20261010_103442 --rung screening",
+  "head_at_preparation": "d8b9b8837e28e54704c3d8cb926a6d33876f8ea6"
+ },
+ "lineage": {
+  "authorized_base": "bc8be594cdea651d94199eb370ef0626d93cf6c2",
+  "changed_paths": [
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/authorization.json"
+  ],
+  "descends_from_base": true,
+  "ok": true,
+  "reason": "only logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/authorization.json differs from the authorized base",
+  "session_commit": "d8b9b8837e28e54704c3d8cb926a6d33876f8ea6",
+  "unexpected_paths": []
+ },
+ "live_price": {
+  "_quoted": "live, immediately before issuance",
+  "gpu": "NVIDIA L40S",
+  "stock_status": "Medium",
+  "usd_per_hour": 1.09
+ },
+ "no_resource_exists": true,
+ "open_blockers": [],
+ "run_id": "d1_behavioural_20261010_103442",
+ "rung": "screening",
+ "schema": "aadistill.phase_d1.behavioural_launch_readiness/v1",
+ "session_commit": "d8b9b8837e28e54704c3d8cb926a6d33876f8ea6",
+ "stage_id": "1"
+}

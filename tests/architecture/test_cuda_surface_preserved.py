@@ -1784,6 +1784,367 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "NO CUDA SURFACE: filesystem reads and JSON parsing only; it "
             "issues no kernel and performs no reduction.",
      }),
+    ("69920a19cca4e61f7413faf161df16ab6796c68f",
+     "pre-vocabulary row selection: prediction_rows=scored_v1",
+     {
+        "src/aadistill/initialization/execution.py":
+            "ExecutionConfig gains `prediction_rows` (`all_v1` default, "
+            "`scored_v1`) and OPTIONAL_FINGERPRINT_FIELDS. At the default the "
+            "trace and the fingerprint carry no new key, so every recorded "
+            "execution identity is byte-identical; `scored_v1` forks the "
+            "fingerprint. Validation refuses an unknown value.",
+        "src/aadistill/initialization/specs/materialization.py":
+            "numerical_execution_fingerprint hashes OPTIONAL_FINGERPRINT_FIELDS "
+            "only when present; the five-field preimage is unchanged when they "
+            "are absent (a test derives it independently).",
+        "src/aadistill/initialization/specs/arch.py":
+            "Capability.OUTPUT_HEAD and two ArchitectureAdapter methods, "
+            "`final_hidden_states` and `output_logits`, whose defaults raise "
+            "UnsupportedCapability. No existing method changes.",
+        "src/aadistill/initialization/adapters/qwen3.py":
+            "Qwen3 declares OUTPUT_HEAD and implements the two methods as "
+            "`model.model(...).last_hidden_state` and `model.lm_head(...)` -- "
+            "the factorization Qwen3ForCausalLM.forward itself performs. No "
+            "existing method changes. ON THE HISTORICAL SURFACE: the 7027a8f4 "
+            "validation does NOT cover these two methods, and nothing here "
+            "claims it does.",
+        "src/aadistill/initialization/scoring/rows.py":
+            "NEW: scored-row selection -- backbone over the whole sequence, "
+            "output head on the selected prediction rows only (causal shift "
+            "`hidden[:, :-1]`), row-major split/scatter back to the dense "
+            "layout.",
+        "src/aadistill/initialization/scoring/support.py":
+            "the per-item reduction of `sketch_forward_kl_mean_batch` is split "
+            "out as `masked_item_means`, operation for operation, so the "
+            "scored-row path forms its per-item means with the same code. The "
+            "batched function is that call composed with `sketch_forward_kl`.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "a `scored_v1` branch on the reference-support path only: reference "
+            "sketches and candidate KL over the scored rows, per-item means via "
+            "`masked_item_means`; full_vocab_v1 + scored_v1 is refused. The "
+            "all-rows branches, trace and reference-cache decision are "
+            "unchanged field for field at the default. The operator signature "
+            "is unchanged: the capability is checked at run time, not "
+            "declared, so no DEPTH state id forks.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "StateEvaluator: a `scored_v1` path that projects only each item's "
+            "weighted rows for teacher and candidate, hands the reducer the "
+            "matching targets/tags/weights, and restores the two counts "
+            "(`positions`, per-tag positions) from the full masks; refused "
+            "without declared numerics. `_logit_pairs` yields a fourth element "
+            "(None on the historical paths). "
+            "CUDA: CPU-verified only (tests/initialization/"
+            "test_prediction_row_selection.py); the GPU equivalence of the "
+            "scored path is owed by the R0 validation in "
+            "phase_d1/analyses/d1_followup_technical_review_and_next_round.md.",
+     }),
+    ("d83def1a595836961a0e2e79daa3af77662da2b6",
+     "student-confidence scoring objectives (D2/D3 contract, 2026-10-13)",
+     {
+        "src/aadistill/initialization/scoring/objective.py":
+            "NEW: `ScoringObjective` with two forms (student-uncertainty-"
+            "weighted KL; KL minus a student-confidence reward), the student's "
+            "own Top-K conditional entropy, the fixed-denominator per-item "
+            "reducer and the binary-weight refusal. Generic: no K, lambda, "
+            "experiment or model value. Used only when an objective is "
+            "declared.",
+        "src/aadistill/initialization/scoring/support.py":
+            "`sketch_forward_kl_terms` returns the KL AND the candidate "
+            "log-normalizer it already computed; `sketch_forward_kl` is its "
+            "first element, operation for operation. "
+            "`distortion_on_reference_support` gains an optional "
+            "`position_sink` that reads each block's KL and log-normalizer; "
+            "absent, the arithmetic is unchanged.",
+        "src/aadistill/initialization/scoring/protocol_identity.py":
+            "ReductionSemantics gains an optional `scoring_objective`, "
+            "serialized only when set, so every existing measurement protocol "
+            "id is byte-identical.",
+        "src/aadistill/initialization/planning/operator_config.py":
+            "`scoring_objective_config`: the objective joins the hashed "
+            "operator config only for implementations declaring "
+            "`consumes_scoring_objective`; `{}` otherwise, so no historical "
+            "config hash moves.",
+        "src/aadistill/initialization/operators/base.py":
+            "OperatorContext.scoring_objective (default None); the class flag "
+            "`consumes_scoring_objective` (NOT in `signature()`, so no "
+            "implementation signature hash moves); `execute` refuses a "
+            "declared objective that disagrees with the handed one, or one "
+            "declared on a non-consuming operator.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "consumes a declared objective on all three reference-support row "
+            "paths: the candidate's own Top-K entropy from the SAME candidate "
+            "forward, per-item fixed-denominator means, per-candidate "
+            "component records in artifacts. Refused on full_vocab_v1. With "
+            "no objective the historical branches are unchanged.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "StateEvaluator(scoring_objective=...): `_ObjectiveAccumulator` "
+            "forms the objective from the reducer's position sink and the "
+            "candidate logits, adding `state.objective.*`; the KL metrics are "
+            "unchanged (tested equal). Refused on full_vocab_v1 and with "
+            "continuous position weights.",
+        "src/aadistill/initialization/planning/search.py":
+            "SearchConfig.scoring_objective (absent from as_dict when None); "
+            "plumbed to the operator config and context; refuses a measurer "
+            "or a measurement under another objective and a ranking policy "
+            "that does not rank on `state.objective.*` exactly when an "
+            "objective is declared.",
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "FixedPathSpec.scoring_objective (absent from as_dict when None), "
+            "passed to the operator config and context so a path replays "
+            "under the objective it ran with.",
+     }),
+    ("5fc5150dafea2ce06a1e5d1c26878a9c0e9ae4dc",
+     "D2/D3 independent review: KL-path aggregation and joint diagnostics",
+     {
+        "src/aadistill/initialization/scoring/objective.py":
+            "the objective identity's aggregation field becomes "
+            "`kl_path_weighting_per_consumer/v2` (was item-equal in state "
+            "evaluation); `add_joint_histograms` records confidence x KL-grid "
+            "and confidence x Top-K-mass counts over scored positions. No "
+            "threshold in code; nothing reads the grid to decide.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "`_ObjectiveAccumulator` aggregates across items with the KL-only "
+            "path's weighting (T_x-weighted within a sub-type, critical classes "
+            "pooled over items) and reports the raw KL under it, which equals "
+            "state.teacher_kl.* and state.critical_token_kl (tested). KL-only "
+            "metrics and every path without an objective unchanged.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "records the joint histograms per candidate subset under an "
+            "objective. No change without one.",
+     }),
+    ("88fdcddc5d99fe8e007717f53952adf46900c9cf",
+     "post-revision-3 review: the reference cache's hoarded-memory fallback",
+     {
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "`_available_memory_bytes` calls `torch.cuda.empty_cache()` before "
+            "`mem_get_info` on CUDA, so the reference-cache admission is no "
+            "longer sized against blocks the allocator holds unused (D1's "
+            "search: 15/16 DEPTH expansions recomputed with 36 GiB "
+            "reclaimable). THIS IS A DECLARED SEMANTIC CHANGE to the admission "
+            "decision and the wall clock; no tensor, kernel, score or identity "
+            "moves. GPU validation is owed: stage L's DEPTH pair runs under a "
+            "deliberately hoarded pool and records the cache mode. The "
+            "Top-K sketch cache also records `memory_after_probe` beside "
+            "`memory_before` (diagnostic only).",
+     }),
+    ("ceaa2c6bf894a297a26c434c481c612a15cd6bdc",
+     "D2 scientific redesign: frozen-teacher-confidence-weighted root KL",
+     {
+        "src/aadistill/initialization/scoring/objective.py":
+            "the consumption rules `objective_consumed_by`, "
+            "`statistics_weighted_by_root`, `root_reference_needed`; "
+            "new generic form `reference_confidence_weighted_kl` (g = c x KL, "
+            "c = 1 - H/log|V| from the REFERENCE's full-vocabulary entropy, "
+            "`full_vocabulary_entropy` float32 and chunked), with "
+            "`kl_reference` and `weights_activation_statistics` identity "
+            "fields that the student forms refuse; `entropy_top_k` becomes "
+            "optional. The student forms' as_dict, hashes and arithmetic are "
+            "unchanged (D2-superseded 063bafd4 and D3 7b254538 tested).",
+        "src/aadistill/initialization/scoring/reference_store.py":
+            "NEW: the ROOT reference store -- the root's Top-K + tail sketch, "
+            "full-vocabulary entropy and confidence per calibration item, "
+            "built once from the root over the canonical batches.",
+        "src/aadistill/initialization/scoring/batches.py":
+            "ActivePositions takes optional per-item token multipliers and "
+            "serves continuous token weights (`token_weights_for`, "
+            "`token_weights_for_item`); the mask accessors still refuse "
+            "continuous weights. Without multipliers nothing changes.",
+        "src/aadistill/initialization/calibration/batching.py":
+            "`active_weights`: the weighted sibling of `active_rows`.",
+        "src/aadistill/initialization/statistics/collect.py":
+            "`token_weights` path: every accumulator weighted, zero weights "
+            "dropped like padding, `residual_weight` in the state only when "
+            "weighted; `statistics_denominator`; `residual_covariance` divides "
+            "by it. Unweighted passes are byte-identical (no new op on their "
+            "path).",
+        "src/aadistill/initialization/transforms/project.py":
+            "`uncentered_moment` and `ffn_neuron_importance` divide by "
+            "`statistics_denominator` (the integer count when unweighted).",
+        "src/aadistill/initialization/operators/attention/gqa/_statistics.py":
+            "`token_weights` path for the per-head second moment and "
+            "`attn_token_weight`; `head_write_energy` divides by it when "
+            "present. Unweighted passes unchanged.",
+        "src/aadistill/initialization/operators/_common.py":
+            "`statistics_positions` (the policy's positions, times the root "
+            "store's confidence when the objective weights statistics); "
+            "`collect_activation_stats` routes continuous weights to the "
+            "collectors' `token_weights`.",
+        "src/aadistill/initialization/operators/ffn/dense/activation_importance.py":
+            "`consumes_reference_weighted_statistics = True` (NOT in "
+            "signature()); positions from `statistics_positions`. Under every "
+            "objective that does not weight statistics, unchanged.",
+        "src/aadistill/initialization/operators/width/residual/global_pca.py":
+            "as FFN; the local-metric detail adds `stats_token_weight` only "
+            "when weighted.",
+        "src/aadistill/initialization/operators/attention/gqa/activation_importance.py":
+            "as FFN; the weighted loop on both the per-item and packed paths; "
+            "the trace adds `calibration_token_weight` only when weighted.",
+        "src/aadistill/initialization/operators/base.py":
+            "OperatorContext.root_reference (default None); the class flag "
+            "`consumes_reference_weighted_statistics`; `execute` uses "
+            "`objective_consumed_by` and refuses a root-reading objective "
+            "handed no store.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "under an objective whose KL reference is the ROOT: the reference "
+            "sketch and the weights come from the store on all three row "
+            "paths, the local reference becomes `root_reference`, and round 0 "
+            "also reduces every candidate against the intact parent "
+            "(diagnostic `parent_kl`, one parent reference pass). Every other "
+            "path unchanged.",
+        "src/aadistill/initialization/planning/operator_config.py":
+            "`scoring_objective_config` asks `objective_consumed_by` (defined "
+            "in scoring/objective.py beside `statistics_weighted_by_root` and "
+            "`root_reference_needed`, re-exported here; kept out of planning "
+            "so operators -> planning is no package cycle). Configs of every "
+            "existing objective unchanged.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "under the reference-confidence form the state evaluator computes "
+            "the teacher's full-vocabulary entropy once per item and the "
+            "accumulator records the form's own components; the student forms "
+            "are unchanged.",
+        "src/aadistill/initialization/planning/search.py":
+            "one root store per profile, built from the root on first need, "
+            "handed to the consuming operators; the statistics cache key adds "
+            "the weighting store's identity only for weighted passes; "
+            "telemetry records store builds and a DEPTH parent-reference "
+            "cache. A root-reading objective on full_vocab_v1 is refused.",
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "builds every store a replay needs from the root before step 0; "
+            "a replay without the root needs them supplied; the weighted "
+            "statistics key term as in the search.",
+     }),
+    ("16d6728583adbcbb69abf738d9d171b850abbe45",
+     "D2 revision-6 review: GPU validation chain and acceptance protocol",
+     {
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "under a root-reference objective, the round-0 parent-KL "
+            "diagnostic's reductions are timed into "
+            "`artifacts.timing.parent_kl_seconds` (operational only, outside "
+            "every metric, hash and identity) so the D2 GPU validation can "
+            "measure the diagnostic's cost apart from the decision's. No "
+            "score, choice or path changes.",
+        "src/aadistill/initialization/operators/ffn/dense/activation_importance.py":
+            "under weighted statistics only, the local-metric detail adds "
+            "`stats_tokens` and `stats_token_weight` (the denominator the "
+            "collector divided by), as WIDTH already does, so the D2 GPU "
+            "validation's integrity gate can check it against the weight sum. "
+            "Unweighted records are key-for-key unchanged; no selection moves.",
+     }),
+    ("7f55420695c087d15fcd54ff071ce52605d6781d",
+     "D2 v3: teacher Top-K confidence x union Top-K KL",
+     {
+        "src/aadistill/initialization/scoring/support.py":
+            "a THIRD support, reference_student_union_topk_tail_v1: "
+            "deterministic Top-K (value desc, index asc), the union-support "
+            "forward/reverse KL with exact retrieval of the reference's "
+            "candidate-only entries, the K+1 Top-K-plus-tail entropy, and the "
+            "union six-quantity reducer. reference_topk_tail_v1's sketch and "
+            "reducers keep their arithmetic (sketch_reference factored into a "
+            "shared body; same operations).",
+        "src/aadistill/initialization/scoring/objective.py":
+            "a new form, reference_topk_confidence_weighted_union_kl (K+1 "
+            "reference confidence x union KL), its components and its "
+            "support-pairing rule. Every existing form's identity, integrand "
+            "and components are unchanged.",
+        "src/aadistill/initialization/scoring/output_head.py":
+            "NEW: the output head as a value (float32 logits of every entry, "
+            "or of chosen entries) behind Capability.OUTPUT_HEAD_LINEAR.",
+        "src/aadistill/initialization/scoring/reference_store.py":
+            "the union store: root final hidden states and float32 "
+            "log-normalizers kept for retrieval, deterministic sketch from the "
+            "float32 head, K+1 confidence, a union identity with the "
+            "executed build. The historical store and identity are unchanged.",
+        "src/aadistill/initialization/specs/arch.py":
+            "Capability.OUTPUT_HEAD_LINEAR and "
+            "ArchitectureAdapter.linear_output_head (raises by default).",
+        "src/aadistill/initialization/adapters/qwen3.py":
+            "Qwen3 declares OUTPUT_HEAD_LINEAR and returns its lm_head as a "
+            "LinearOutputHead. No existing method changes.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "under the union support (only with the union form), every DEPTH "
+            "path reduces the union KL against the root store with "
+            "retrieval and records its evidence; the support/objective "
+            "pairing is refused otherwise. Other supports unchanged.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "under the union support the state evaluator builds a teacher "
+            "union store once at prime_reference and evaluates candidates "
+            "against it (no teacher forward per evaluation); pairing refused "
+            "otherwise. Other supports unchanged.",
+        "src/aadistill/initialization/planning/search.py":
+            "root stores carry the objective in their identity; the "
+            "support/objective pairing is refused at construction.",
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "root stores carry the objective in their identity; a fixed path "
+            "refuses an unpaired support/objective.",
+     }),
+    ("8e8ae8490c7a8de9d70f33d0ffc2685329706a4c",
+     "D2 screening final review: host placement for exact image admission",
+     {
+        "src/aadistill/infrastructure/session_runner.py":
+            "`SessionRunner.placement()` and its one use in `create`: an "
+            "OPTIONAL `--country-code` a launcher may declare, passed to the "
+            "provider create. THIS IS A DECLARED SEMANTIC CHANGE to the create "
+            "command line, inert by default: a launcher declaring no country "
+            "produces the command it always did. It narrows where hosts are "
+            "drawn; host admission still decides what is accepted. Five "
+            "screening draws landed in SE/US on 580.x drivers while the "
+            "protocol's 595.91.07 hosts were in AU.",
+     }),
+    ("ee52376c4cc07dc06e9e2a1aaf9ac0d66837febf",
+     "new D3: a declared, versioned DEPTH KL reference",
+     {
+        "src/aadistill/initialization/scoring/kl_reference.py":
+            "NEW MODULE: the `kl_reference` operator-config key. THIS IS A "
+            "DECLARED SEMANTIC CHANGE by construction. Absent means the "
+            "historical parent reference and is never written, so no recorded "
+            "config or state id moves; `root_reference/v1` declares the stored "
+            "lineage root. The explicit default, an unknown value, an operator "
+            "that does not accept one and a declaration beside a consumed "
+            "objective are refused.",
+        "src/aadistill/initialization/scoring/objective.py":
+            "`root_reference_needed` takes the operator CONFIG and answers True "
+            "for a declared root KL reference. THIS IS A DECLARED SEMANTIC "
+            "CHANGE, inert without a declaration: every objective-driven "
+            "answer is unchanged.",
+        "src/aadistill/initialization/scoring/reference_store.py":
+            "`root_reference_identity(execution=)` binds the numerical "
+            "protocol into a non-union identity (absent: the historical "
+            "identity byte for byte); `store_execution`; "
+            "`RootReferenceStore.require_execution`; `decision()` carries the "
+            "identity. THIS IS A DECLARED SEMANTIC CHANGE to what a store can "
+            "declare and refuse.",
+        "src/aadistill/initialization/planning/operator_config.py":
+            "`hashed_operator_config` validates a declared KL reference where "
+            "every caller builds the config. THIS IS A DECLARED SEMANTIC "
+            "CHANGE: one new refusal class; undeclared configs are unchanged "
+            "(q2's four recorded config hashes re-derive).",
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "THIS IS A DECLARED SEMANTIC CHANGE, in four parts. (a) A step's "
+            "declared KL reference reaches `root_reference_needed`, and the "
+            "store acquisition is one function (`_acquire_root_references`) "
+            "that binds the execution protocol into a store read only by a "
+            "declared reference. (b) A SUPPLIED store is checked: profile, "
+            "support and, given `root_identity`, its root. (c) "
+            "`FixedPathSpec` refuses an undeclarable reference at "
+            "construction. (d) `SELECTION_ARTIFACTS` gains DEPTH's round "
+            "tables and per-candidate records, and `StepResult.operations` "
+            "carries timing and cache decisions, both presence-filtered.",
+        "src/aadistill/initialization/operators/base.py":
+            "`accepts_kl_reference` (outside `signature()`, so no "
+            "implementation identity moves) and `execute` refusing an "
+            "undeclarable reference or a declared root with no store. THIS IS "
+            "A DECLARED SEMANTIC CHANGE: new refusals only.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "THIS IS A DECLARED SEMANTIC CHANGE. Under a declared "
+            "`root_reference/v1` the decision KL is measured against the "
+            "stored ROOT (fail-closed on items, profile, support and "
+            "execution) and the intact parent's KL of EVERY candidate is "
+            "recorded as a diagnostic the selection never reads. The parent "
+            "path is unchanged: the round-0 parent diagnostic under an "
+            "objective moved from inside its branch to after it, computing "
+            "the same values. Owes GPU execution: the D3 structural session "
+            "is that run.",
+     }),
 )
 
 
@@ -1863,6 +2224,20 @@ CURRENT_CUDA_SURFACE = (
     "src/aadistill/initialization/operators/width/residual/global_pca.py",
     "src/aadistill/initialization/statistics/collect.py",
     "src/aadistill/initialization/statistics/contribution.py",
+    #: The reference-support reduction DEPTH runs on every candidate, and the
+    #: scored-row forward it runs under `prediction_rows="scored_v1"`.
+    "src/aadistill/initialization/scoring/support.py",
+    "src/aadistill/initialization/scoring/rows.py",
+    #: The student Top-K entropy DEPTH runs per candidate under a declared
+    #: scoring objective. CPU-verified; owes the GPU validation with D2.
+    "src/aadistill/initialization/scoring/objective.py",
+    #: The root forward over the mixture that the redesigned D2's DEPTH and
+    #: weighted statistics read. CPU-verified; owes the D2 GPU validation.
+    "src/aadistill/initialization/scoring/reference_store.py",
+    #: D2 v3's float32 head logits and candidate-only retrieval, run per DEPTH
+    #: candidate and per state evaluation. CPU-verified; owes the D2 v3 GPU
+    #: validation.
+    "src/aadistill/initialization/scoring/output_head.py",
 )
 
 #: Backwards-compatible alias for the constraint that a declared core change may

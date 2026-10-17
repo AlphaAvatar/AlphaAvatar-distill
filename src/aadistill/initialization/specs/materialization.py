@@ -97,6 +97,14 @@ FINGERPRINT_FIELDS: tuple[str, ...] = (
     "accumulation_dtype",
 )
 
+#: Byte-affecting fields that are ABSENT at their historical default, owned by
+#: ``ExecutionConfig.OPTIONAL_FINGERPRINT_FIELDS``. Hashed only when present, so
+#: every fingerprint computed before such a field existed is unchanged and a run
+#: that chose a non-default value gets a fingerprint of its own.
+OPTIONAL_FINGERPRINT_FIELDS: tuple[str, ...] = (
+    "prediction_rows",
+)
+
 #: WHAT BELONGS IN THE FINGERPRINT, AND WHAT DOES NOT. The list above is v1 and
 #: will grow; this is the rule for growing it, so that a future field is added
 #: deliberately rather than by whoever hits the problem first.
@@ -207,7 +215,8 @@ def numerical_execution_fingerprint(execution: Any,
             f"field in FINGERPRINT_FIELDS must be supplied by the execution "
             "config or the numerical environment; an absent one would make two "
             "differing materializations hash alike")
-    extra = sorted(set(fields) - set(FINGERPRINT_FIELDS))
+    extra = sorted(set(fields) - set(FINGERPRINT_FIELDS)
+                   - set(OPTIONAL_FINGERPRINT_FIELDS))
     if extra:
         raise MaterializationError(
             f"{extra} were offered to the fingerprint but are not declared in "
@@ -215,7 +224,9 @@ def numerical_execution_fingerprint(execution: Any,
             "fingerprint that absorbs whatever it is handed forks on runtime "
             "detail and stops being an identity")
     return sha256_json({"schema": FINGERPRINT_SCHEMA,
-                        **{f: fields[f] for f in FINGERPRINT_FIELDS}})
+                        **{f: fields[f] for f in FINGERPRINT_FIELDS},
+                        **{f: fields[f] for f in OPTIONAL_FINGERPRINT_FIELDS
+                           if f in fields}})
 
 
 def _execution_fingerprint_fields(execution: Any) -> Mapping[str, Any]:

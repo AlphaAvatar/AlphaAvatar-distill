@@ -1,0 +1,61 @@
+{
+ "schema": "aadistill.engineering_authorization/v1",
+ "authorization_id": "d_series_d2v3_gpu_validation_r2",
+ "book": "ENGINEERING",
+ "status": "GRANTED",
+ "all_in_ceiling_usd": 1.22,
+ "session_cap_usd": 0.92,
+ "_ceiling_composition": "setup and every step at its bound ($0.92, 50.1 min at $1.09/h incl. disk), rounded up to the cent, + the $0.3 teardown reserve",
+ "rate_basis_usd_per_hour": 1.09,
+ "rate_rule": "re-quoted live at launch; the launcher derives the session ceiling and timeout from the live rate and refuses if the cap no longer buys the work",
+ "covers": [
+  "stage W (revision 2) of topk_adoption_driver.py on one L40S pod: the steps of plan.json, nothing else"
+ ],
+ "relation_to_revision_1": "a NEW grant with its own campaign; revision 1's $0.2538 stays booked in its closed campaign and inside the project's spend, and its unspent remainder is not carried over",
+ "does_not_cover": [
+  "a D2 search, recovery training or a behavioural probe",
+  "a second pod for a failed step without a recorded engineering cause",
+  "any spend above the all-in ceiling, cumulative across subruns",
+  "approval of preregistration v3"
+ ],
+ "plan": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/plan.json",
+ "plan_sha256": "31377a77fa11dfce870b0de057029fc55eb21d67abac846f9cd27ff314636367",
+ "campaign": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/campaign.json",
+ "executable_commit": "7ef64f3b92d0a243474563dbd151954d316a16fd",
+ "_executable_commit_is": "the commit the pod checks out; every executed path and record is identical between it and the commit carrying this proposal (tested: test_d2v3_gpu_validation.py)",
+ "branch": "exec/d1-behavioural-readiness",
+ "command": "ACQ_VALIDATION_DIR=logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2 ACQ_STAGES=W ACQ_RUN_PREFIX=d2v3r2val bash scripts/stages/stage-1/phase_d2/d2val_acquire.sh",
+ "launcher_command": "ADOPT_CAMPAIGN=logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v2/campaign.json ADOPT_COMMIT=7ef64f3b92d0a243474563dbd151954d316a16fd ADOPT_BRANCH=exec/d1-behavioural-readiness ADOPT_STAGES=W ADOPT_PREDICTION_ROWS=all_v1 SESSION_CAP=0.92 bash scripts/stages/stage-1/phase_d1/topk_adoption_launch.sh d2v3r2val_<utc>",
+ "activation": "the maintainer's grant is recorded by writing this record as authorization.json with status GRANTED, granted_utc, granted_by and the live pre-launch checks; until then engineering_campaign_budget.py cannot read a ceiling and the launcher creates nothing",
+ "on_ordinary_failure": "repair and retry inside this ceiling (AGENTS.md P12.1); a deterministic paid failure is never retried unchanged",
+ "authorizes": "the stage W revision-2 session(s) of plan.json only -- no D2 search, recovery, behavioural probe, D3 or preregistration approval",
+ "granted_utc": "2026-10-14T18:52:11Z",
+ "granted_by": "maintainer, via the Post-Stage-W Independent Review and Corrective Authorization (review of 193313fe), confirmed by the maintainer directly: a NEW grant of $1.22 cumulative all-in incl. the $0.30 teardown reserve, $0.92 session cap, ~$0.28 expected, one L40S, the corrected Stage W (revision 2) only",
+ "decision_record": "logs/budget/decisions.md 2026-10-14 (D2 v3 on HOLD, not terminated; Stage W revision 2 built and proposed)",
+ "conditions_met": [
+  "the numeric gate corrected: kl_arithmetic (both partition KLs vs float64 from one error budget; the float64 order; crossings within the combined bound; per-side and per-position records)",
+  "new plan 31377a77, identities and a new campaign (validations/d2v3-gpu-validation/v2)",
+  "CPU rehearsal through the driver, the predicate table, seven mutants, the independent oracle and the float32 extremes pass",
+  "executable commit 7ef64f3b committed, pushed and bound here; every executed path identical between it and the tree carrying this record (tested)",
+  "live quote, engineering, project, package and per-session limits satisfied (below)",
+  "watchdog, deadline, teardown and append-only booking as revision 1 ran them",
+  "the D2 v3 objective, the validation scope and the budget caps unchanged"
+ ],
+ "pre_launch_checks": {
+  "checked_utc": "2026-10-14T18:52:11Z",
+  "live_secure_usd_per_hour": 1.09,
+  "stock": "Low",
+  "provider_pods_listed": 0,
+  "project_remaining_usd": 119.2341,
+  "project_cap_usd": 590.0,
+  "engineering_remaining_usd": 3.4297,
+  "package_remaining_usd": 131.3921,
+  "pending_reconciliation": [],
+  "per_session_ceiling_usd": 30.0,
+  "campaign_booked_usd": 0.0,
+  "revision_1_spend_usd": 0.2538,
+  "executable_commit_on_remote_branch": true,
+  "watchdog_and_teardown": "scripts/shared/pod/watchdog.py and the launcher's teardown trap, as Stage V and revision 1 ran them"
+ },
+ "one_use": "this grant funds stage W revision-2 sessions inside the $1.22 cumulative ceiling; a retry needs a recorded engineering cause and never resets the ledger or raises the session cap; revision 1's spend is not reset and its remainder is not carried over"
+}

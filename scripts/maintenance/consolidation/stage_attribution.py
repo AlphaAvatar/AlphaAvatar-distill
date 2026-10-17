@@ -860,7 +860,10 @@ STAGE_1 = [
         #: because a hand-written status cannot notice -- and the 2026-10-09
         #: review found it contradicting D1's own current.json. The index owns
         #: ownership and navigation; it points at readiness.
-        status="DESIGNED — see live_state for readiness",
+        status=("COMPLETE / historical NO-GO 2026-10-12. D-series CLOSED "
+                "2026-10-17; D1's method + scored_v1 SELECTED as the forward "
+                "baseline (a selection, not a verdict: configs/shared/"
+                "baselines/)"),
         title="D1 — target-aware search",
         question=("Does making structural scoring and global candidate "
                   "evaluation SUPERVISED-TARGET-AWARE produce a better "
@@ -921,6 +924,235 @@ STAGE_1 = [
             "held frozen and the scoring semantics are the variable, which is "
             "why it is a separate experiment from the C-series rather than "
             "another of its rungs."),
+    ),
+    dict(
+        id="phase_d2",
+        kind="experiment",
+        stage_id="1",
+        status=("COMPLETE / NO_GO 2026-10-16 (search d2_search_20261015_051722, "
+                "screening d2_screening_20261015_203346 advanced c4, shared "
+                "confirmation d2_confirmation_20261016_105802 NO_GO). D-series "
+                "CLOSED 2026-10-17; preregistration v3 approved 2026-10-14; "
+                "versions 1-2 superseded before formal search"),
+        title="D2 — teacher Top-K confidence x union Top-K KL search",
+        question=("Under the capacity limit, does weighting each scored "
+                  "position's root-reference union Top-K KL -- and the "
+                  "structural operators' activation statistics -- by the "
+                  "frozen original teacher's Top-200 + tail confidence "
+                  "select a structural initialization that, after the frozen "
+                  "recovery recipe, recovers more autonomous task correctness "
+                  "than the standing incumbent B? Three declared changes from "
+                  "D1 (DEPTH reference parent -> root, KL support teacher "
+                  "Top-K -> teacher ∪ student Top-K, and the weighting); "
+                  "operators, profiles, beam, seed and the shared behavioural "
+                  "protocol are D1's."),
+        canonical_config=("logs/stages/stage-1/phase_d2/plans/"
+                          "d2_preregistration_v3.json"),
+        evidence=[
+            E("logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/"
+              "closeout/outcome.json",
+              "the D2 v3 formal search closeout: 92/92 expansions, 12 complete "
+              "leaves, the committed Top-4 with digests, products secured and "
+              "re-identified, provider teardown, $5.5364 all-in",
+              field="classification",
+              equals=("COMPLETE FORMAL SEARCH: 92/92 expansions, 12 complete "
+                      "leaves, Top-4 committed and secured")),
+            E("logs/stages/stage-1/families/d_series/analyses/"
+              "d2_search_evidence_review.md",
+              "the D2 search evidence review: Top-4 and ranking evidence, raw "
+              "vs weighted union KL, DEPTH reference attribution, beam "
+              "trajectory and timing, the four budget limits, integrity, "
+              "teardown and readiness for screening"),
+            E("logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/"
+              "evidence/derived_evidence_erratum_v1.json",
+              "erratum v1 to the search's derived evidence: one shared "
+              "artifact (two state records), the mislabelled union-KL field, "
+              "the cross-protocol proxy; raw records, ranking and digests "
+              "unchanged",
+              field="schema",
+              equals="aadistill.phase_d2.derived_evidence_erratum/v1"),
+            E("logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/"
+              "evidence/product_durability.json",
+              "the committed Top-4 and the evidence archive verified at rest, "
+              "persisted on the relay and restored byte-exactly into an "
+              "independent directory",
+              field="schema",
+              equals="aadistill.phase_d2.product_durability/v1"),
+            E("logs/stages/stage-1/phase_d2/analyses/d2_screening_inputs.json",
+              "the screening rung's $0 input verification: the four "
+              "initializations at all four identities, B's (and q2's) imported "
+              "screening units re-hashed and re-scored byte-exactly, the "
+              "contract hash", field="all_verified", equals=True),
+            E("logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json",
+              "the D2 screening one-use authorization PROPOSAL: bound "
+              "identities, the live-rate price, the four money conditions, "
+              "the programme reservation and the grant template",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/families/d_series/analyses/"
+              "d2_screening_readiness_review.md",
+              "the D2 screening readiness review: executable commit, the "
+              "frozen eight-probe plan, identity checks, B reuse, the session "
+              "contract, durability and failure semantics, the re-derived "
+              "cost and reservation, the proposal"),
+            E("logs/stages/stage-1/phase_d2/plans/d2_preregistration_v3.json",
+              "the versioned preregistration v3 (contract revision 8): "
+              "objective, support and contract hashes, the three declared "
+              "changes from D1, the frozen full scope, the versioned ranking "
+              "identity, the teacher-confidence validity checks, retention "
+              "Top-K, the shared behavioural rungs and the prerequisites. "
+              "Generated by scripts/stages/stage-1/phase_d2/"
+              "write_d2_preregistration.py",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/phase_d2/plans/d2_preregistration_v2.json",
+              "preregistration v2 (the full-vocabulary teacher-confidence "
+              "D2), kept with its science and hash intact and stamped "
+              "superseded before formal search",
+              field="status", equals=("SUPERSEDED BEFORE FORMAL SEARCH -- "
+                                      "STAGE V ENGINEERING VALIDATION "
+                                      "COMPLETED")),
+            E("logs/stages/stage-1/phase_d2/plans/d2_preregistration_v1.json",
+              "preregistration v1 (the student-uncertainty D2), kept with its "
+              "science and hash intact and stamped superseded",
+              field="status", equals="SUPERSEDED -- NEVER EXECUTED"),
+            E("logs/stages/stage-1/families/d_series/validations/"
+              "d2v3-gpu-validation/v1/plan.json",
+              "version 3's minimal GPU validation (Stage W), revision 1, "
+              "reusing Stage V's mechanisms: granted $1.22, executed once "
+              "($0.2538), validation FAIL, closed, frozen",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/families/d_series/validations/"
+              "d2v3-gpu-validation/v2/plan.json",
+              "Stage W revision 2: the same steps with the corrected KL "
+              "arithmetic gate (both partition KLs against float64 from one "
+              "error budget, the float64 order, crossings within the "
+              "combined bound) and the validity report's stated definition. "
+              "Generated by scripts/stages/stage-1/phase_d2/"
+              "d2v3_gpu_validation_plan.py",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/families/d_series/analyses/"
+              "d2v3_stage_w_r2_evidence_review.md",
+              "the Stage W revision 2 GPU evidence review: validation PASS "
+              "with 0 KL anomalies, adopted; the literal rubric outcome, the "
+              "descriptive science, the re-priced search and the programme "
+              "reservation"),
+            E("logs/stages/stage-1/families/d_series/analyses/"
+              "d2v3_stage_w_evidence_review.md",
+              "the Stage W GPU evidence review (version 3): the float32 "
+              "bound-slack FAIL and its diagnosis, the five scientific "
+              "questions, the price in force and the HOLD recommendation"),
+            E("logs/stages/stage-1/families/d_series/analyses/"
+              "d2v3_real_logits_check.json",
+              "version 3's union-KL numerics on real logits at $0 (a stand-in "
+              "checkpoint): bounds, retrieval, ties, union size, confidence "
+              "range. Engineering evidence, not a D2 measurement",
+              field="bounds.upper_violations_beyond_float32_slack", equals=0),
+            E("logs/stages/stage-1/families/d_series/validations/"
+              "d2-gpu-validation/v1/plan.json",
+              "version 2's GPU validation plan (Stage V of "
+              "topk_adoption_driver.py): executed, PASS, closed; its "
+              "evidence stays version 2's and its mechanisms are reused",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/families/d_series/analyses/"
+              "d2_stage_v_evidence_review.md",
+              "the Stage V GPU evidence review (version 2): validation PASS, "
+              "scored_v1 PASS, the teacher-confidence diagnostics that "
+              "informed version 3"),
+            E("logs/stages/stage-1/families/d_series/plans/"
+              "d2_d3_objective_contract_v1.json",
+              "the objective contract D2's preregistration reads its "
+              "objective, support, scope, ranking identity and claim "
+              "boundary from",
+              field="d2.objective.objective_id",
+              equals="objective.d2_teacher_topk_confidence_weighted_union_kl"),
+        ],
+        external_material=[],
+        decisions=[],
+        canonical_log_destination="logs/stages/stage-1/phase_d2",
+        classification_reason=(
+            "Stage 1 for the reason D1 is: it varies how a Stage-1 "
+            "initialization is SCORED, measured through a Stage-3 recovery "
+            "probe. A separate experiment from D1 because its objective is a "
+            "different estimand, not a rerun -- D1 is complete and its "
+            "records are not edited."),
+    ),
+    dict(
+        id="phase_d3",
+        kind="experiment",
+        stage_id="1",
+        status=("COMPLETE 2026-10-17. Structural "
+                "(d3_structural_20261017_083554): STRUCTURAL_CHANGE, admitted, "
+                "$0.5571. Three probes (d3_probes_20261017_110022): closeout "
+                "COMPLETE, INCONCLUSIVE vs q2 and vs B (exploratory), $5.0395. "
+                "Replaces the cancelled, unexecuted student-confidence D3. "
+                "D-series CLOSED 2026-10-17; both D3 grants closed unspent"),
+        title="D3 — fixed-q2 DEPTH teacher-reference ablation",
+        question=("Given D1-q2's exact structural path, does choosing the "
+                  "DEPTH layers by minimizing KL against the original teacher "
+                  "instead of the FFN-compressed parent give a better "
+                  "initialization for downstream recovery? One declared "
+                  "change: DEPTH's KL reference (kl_reference: "
+                  "root_reference/v1); every operator, profile, position "
+                  "policy, support, aggregation, geometry and tie-break is "
+                  "q2's."),
+        canonical_config=("logs/stages/stage-1/phase_d3/plans/"
+                          "d3_registration_v1.json"),
+        evidence=[
+            E("logs/stages/stage-1/phase_d3/plans/d3_registration_v1.json",
+              "the registration: the control (D1-q2 by state id and digest), "
+              "the single-factor treatment and its derived identities, the "
+              "structural outcome rule, the conditional three-probe rung and "
+              "its exploratory classification rule, the claim boundary. "
+              "Generated by scripts/stages/stage-1/phase_d3/"
+              "write_d3_registration.py",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/phase_d3/plans/d3_control_q2.json",
+              "the control as evidence: q2's four pinned steps and its DEPTH "
+              "removal order, kept layers and every greedy round's "
+              "parent-reference table, from the D1 search journal and "
+              "checked against the committed replay plan",
+              field="schema", equals="aadistill.phase_d3.control_record/v1"),
+            E("logs/stages/stage-1/phase_d3/plans/"
+              "d3_parent_reference_admission_v1.json",
+              "the parent-reference comparability gate's tolerance and the "
+              "GPU evidence it was fixed from before execution: q2's DEPTH "
+              "repeated bit-identically, the root's DEPTH across the D1 and "
+              "D2 searches, and every other round-0 table refused. Generated "
+              "by scripts/stages/stage-1/phase_d3/write_d3_admission.py",
+              field="schema",
+              equals="aadistill.phase_d3.parent_reference_admission/v1"),
+            E("logs/stages/stage-1/phase_d3/plans/d3_budget_v1.json",
+              "the price: the structural session from q2's measured replay "
+              "and search DEPTH, the probes as D2's shared confirmation "
+              "session; the live limits; the old D3 reservation not "
+              "transferred",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/"
+              "evidence/d3_probes_comparison.json",
+              "the three probes' exploratory comparison with q2 and B: "
+              "verified units, deltas, intervals, seed signs, labels, "
+              "per-set and per-domain profiles",
+              field="schema",
+              equals="aadistill.phase_d3.probes_exploratory_comparison/v1"),
+            E("logs/stages/stage-1/phase_d3/analyses/d3_readiness_review.md",
+              "the $0 readiness review: design and treatment identity, the "
+              "core mechanism, outcomes, the conditional probes, price and "
+              "proposal, provider readiness and what stays unauthorized"),
+            E("logs/stages/stage-1/phase_d3/plans/d3_grant_proposal.json",
+              "the PROPOSED grants: the structural envelope now, the "
+              "conditional probes envelope after STRUCTURAL_CHANGE, and the "
+              "funding amendment D3 needs",
+              field="authorizes", equals="nothing"),
+        ],
+        external_material=[],
+        decisions=[],
+        canonical_log_destination="logs/stages/stage-1/phase_d3",
+        classification_reason=(
+            "Stage 1 for the reason D1 and D2 are: it varies how a Stage-1 "
+            "initialization is SELECTED -- here one operator's KL reference "
+            "on a frozen path -- and measures the result through a Stage-3 "
+            "recovery probe. A separate experiment from D2 because it is a "
+            "single-factor fixed-path ablation, not a search, and a "
+            "different estimand from the cancelled student-confidence D3."),
     ),
     dict(
         id="batching_refactor_cuda",
@@ -1147,10 +1379,21 @@ STAGE_1 = [
         id="d_series",
         kind="experiment-spanning",
         stage_id="1",
-        status="here by design, not by inheritance",
+        status=("CLOSED 2026-10-17 -- MAINTAINER SELECTED D1 + scored_v1 AS "
+                "FORWARD BASELINE; programme closeout in closeout/"),
         title="D-series family and source records, spanning D1/D2/D3",
         canonical_config=None,
         evidence=[
+            E("logs/stages/stage-1/families/d_series/closeout/programme_closeout.json",
+              "the terminal record of the D-series programme: each phase's "
+              "outcome read from its terminal closeouts and bound by sha256, "
+              "every closed authority bound by its file hash, the money from "
+              "the budget deriver, and the provider state at closure. "
+              "Generated by scripts/stages/stage-1/families/d_series/"
+              "programme_closeout.py, whose refuse_closed_authority every "
+              "D-series issuer runs",
+              field="status",
+              equals="CLOSED -- MAINTAINER SELECTED D1 + scored_v1 AS FORWARD BASELINE"),
             E("logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json",
               "the six-role behavioural battery family: the allocation rule "
               "frozen before any outcome, the per-stratum requirement, and the "

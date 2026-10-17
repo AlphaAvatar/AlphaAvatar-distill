@@ -1,0 +1,1314 @@
+{
+ "_what_this_is": "the control's recorded choices, extracted from the search journal and checked against the committed replay plan. Evidence only: it selects nothing and is read by the D3 structural comparison.",
+ "control_state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+ "depth": {
+  "evaluations": 260.0,
+  "final_parent_reference_kl": 0.5806302430505247,
+  "kept_layers": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   12,
+   13,
+   14,
+   15,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   27,
+   28,
+   29,
+   31,
+   33,
+   34,
+   35
+  ],
+  "reference": "parent_state",
+  "reference_cache_mode": "recomputed",
+  "removal_order": [
+   26,
+   32,
+   18,
+   17,
+   11,
+   10,
+   30,
+   16
+  ],
+  "removed_layers": [
+   10,
+   11,
+   16,
+   17,
+   18,
+   26,
+   30,
+   32
+  ],
+  "rounds": [
+   {
+    "chosen": 26,
+    "chosen_score": 0.06203400807166306,
+    "n_candidates": 36,
+    "removed_before": [],
+    "round": 0,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 14.037230587996925
+     },
+     {
+      "candidate": 1,
+      "score": 1.3626196781425814
+     },
+     {
+      "candidate": 2,
+      "score": 0.3161683710178321
+     },
+     {
+      "candidate": 3,
+      "score": 0.22978913618697053
+     },
+     {
+      "candidate": 4,
+      "score": 0.1593540211903163
+     },
+     {
+      "candidate": 5,
+      "score": 0.16516221989691254
+     },
+     {
+      "candidate": 6,
+      "score": 8.261323037793249
+     },
+     {
+      "candidate": 7,
+      "score": 0.1380485337692781
+     },
+     {
+      "candidate": 8,
+      "score": 0.11399135078768849
+     },
+     {
+      "candidate": 9,
+      "score": 0.12312803073724443
+     },
+     {
+      "candidate": 10,
+      "score": 0.11922891419337614
+     },
+     {
+      "candidate": 11,
+      "score": 0.10229493846955602
+     },
+     {
+      "candidate": 12,
+      "score": 0.13439589395299018
+     },
+     {
+      "candidate": 13,
+      "score": 0.14001854448298617
+     },
+     {
+      "candidate": 14,
+      "score": 0.11010789121573623
+     },
+     {
+      "candidate": 15,
+      "score": 0.10899130126393441
+     },
+     {
+      "candidate": 16,
+      "score": 0.10829824436167104
+     },
+     {
+      "candidate": 17,
+      "score": 0.08413951921077048
+     },
+     {
+      "candidate": 18,
+      "score": 0.0785638626891576
+     },
+     {
+      "candidate": 19,
+      "score": 0.18008121002921268
+     },
+     {
+      "candidate": 20,
+      "score": 0.07466990364184826
+     },
+     {
+      "candidate": 21,
+      "score": 0.07711896610952293
+     },
+     {
+      "candidate": 22,
+      "score": 0.15131291125919544
+     },
+     {
+      "candidate": 23,
+      "score": 0.09680168068773867
+     },
+     {
+      "candidate": 24,
+      "score": 0.13271893057690515
+     },
+     {
+      "candidate": 25,
+      "score": 0.0887783656267768
+     },
+     {
+      "candidate": 26,
+      "score": 0.06203400807166306
+     },
+     {
+      "candidate": 27,
+      "score": 0.07983010305139304
+     },
+     {
+      "candidate": 28,
+      "score": 0.09007401919252771
+     },
+     {
+      "candidate": 29,
+      "score": 0.06636525085568933
+     },
+     {
+      "candidate": 30,
+      "score": 0.07187742857730206
+     },
+     {
+      "candidate": 31,
+      "score": 0.08815241530466586
+     },
+     {
+      "candidate": 32,
+      "score": 0.07326554421075834
+     },
+     {
+      "candidate": 33,
+      "score": 0.1145955376836564
+     },
+     {
+      "candidate": 34,
+      "score": 0.16535315701148673
+     },
+     {
+      "candidate": 35,
+      "score": 0.2174464034101257
+     }
+    ]
+   },
+   {
+    "chosen": 32,
+    "chosen_score": 0.13479956967807444,
+    "n_candidates": 35,
+    "removed_before": [
+     26
+    ],
+    "round": 1,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 14.0792978753451
+     },
+     {
+      "candidate": 1,
+      "score": 1.440542558051348
+     },
+     {
+      "candidate": 2,
+      "score": 0.3644680710571702
+     },
+     {
+      "candidate": 3,
+      "score": 0.2995251550480019
+     },
+     {
+      "candidate": 4,
+      "score": 0.23257673082390276
+     },
+     {
+      "candidate": 5,
+      "score": 0.23247684207331223
+     },
+     {
+      "candidate": 6,
+      "score": 8.46358337972955
+     },
+     {
+      "candidate": 7,
+      "score": 0.2032436623263086
+     },
+     {
+      "candidate": 8,
+      "score": 0.17061700044346637
+     },
+     {
+      "candidate": 9,
+      "score": 0.18036867724717157
+     },
+     {
+      "candidate": 10,
+      "score": 0.17357076177371233
+     },
+     {
+      "candidate": 11,
+      "score": 0.1600506443836127
+     },
+     {
+      "candidate": 12,
+      "score": 0.19399704061894324
+     },
+     {
+      "candidate": 13,
+      "score": 0.198524125321646
+     },
+     {
+      "candidate": 14,
+      "score": 0.17337275948941286
+     },
+     {
+      "candidate": 15,
+      "score": 0.1692467894933782
+     },
+     {
+      "candidate": 16,
+      "score": 0.17237381751689387
+     },
+     {
+      "candidate": 17,
+      "score": 0.14451970339882717
+     },
+     {
+      "candidate": 18,
+      "score": 0.13865498856474762
+     },
+     {
+      "candidate": 19,
+      "score": 0.2519874943666193
+     },
+     {
+      "candidate": 20,
+      "score": 0.1396352909309781
+     },
+     {
+      "candidate": 21,
+      "score": 0.141987048947666
+     },
+     {
+      "candidate": 22,
+      "score": 0.2404243385752866
+     },
+     {
+      "candidate": 23,
+      "score": 0.17304636661699907
+     },
+     {
+      "candidate": 24,
+      "score": 0.24404507126453523
+     },
+     {
+      "candidate": 25,
+      "score": 0.1556623207770998
+     },
+     {
+      "candidate": 27,
+      "score": 0.1631926638535987
+     },
+     {
+      "candidate": 28,
+      "score": 0.1741241902581818
+     },
+     {
+      "candidate": 29,
+      "score": 0.13904949921239235
+     },
+     {
+      "candidate": 30,
+      "score": 0.14872099138407097
+     },
+     {
+      "candidate": 31,
+      "score": 0.15212989197646729
+     },
+     {
+      "candidate": 32,
+      "score": 0.13479956967807444
+     },
+     {
+      "candidate": 33,
+      "score": 0.20188419504615118
+     },
+     {
+      "candidate": 34,
+      "score": 0.24882032498596812
+     },
+     {
+      "candidate": 35,
+      "score": 0.2996451082499007
+     }
+    ]
+   },
+   {
+    "chosen": 18,
+    "chosen_score": 0.20526064091818325,
+    "n_candidates": 34,
+    "removed_before": [
+     26,
+     32
+    ],
+    "round": 2,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 14.17345505711136
+     },
+     {
+      "candidate": 1,
+      "score": 1.495784195258114
+     },
+     {
+      "candidate": 2,
+      "score": 0.45003680588454475
+     },
+     {
+      "candidate": 3,
+      "score": 0.37946490262640137
+     },
+     {
+      "candidate": 4,
+      "score": 0.2989071038755461
+     },
+     {
+      "candidate": 5,
+      "score": 0.3011955953549192
+     },
+     {
+      "candidate": 6,
+      "score": 8.58117818567214
+     },
+     {
+      "candidate": 7,
+      "score": 0.2672517688388018
+     },
+     {
+      "candidate": 8,
+      "score": 0.23574534286763815
+     },
+     {
+      "candidate": 9,
+      "score": 0.24273237850176269
+     },
+     {
+      "candidate": 10,
+      "score": 0.23861271363516723
+     },
+     {
+      "candidate": 11,
+      "score": 0.21966395028745586
+     },
+     {
+      "candidate": 12,
+      "score": 0.2525347695800663
+     },
+     {
+      "candidate": 13,
+      "score": 0.2647752336255277
+     },
+     {
+      "candidate": 14,
+      "score": 0.23344529360685923
+     },
+     {
+      "candidate": 15,
+      "score": 0.2330585261380254
+     },
+     {
+      "candidate": 16,
+      "score": 0.23821175608753586
+     },
+     {
+      "candidate": 17,
+      "score": 0.21085463597090195
+     },
+     {
+      "candidate": 18,
+      "score": 0.20526064091818325
+     },
+     {
+      "candidate": 19,
+      "score": 0.3238826147300849
+     },
+     {
+      "candidate": 20,
+      "score": 0.21085928326503275
+     },
+     {
+      "candidate": 21,
+      "score": 0.2174313068709557
+     },
+     {
+      "candidate": 22,
+      "score": 0.32632249423990617
+     },
+     {
+      "candidate": 23,
+      "score": 0.2563812440475226
+     },
+     {
+      "candidate": 24,
+      "score": 0.3047907776994626
+     },
+     {
+      "candidate": 25,
+      "score": 0.2679452744691314
+     },
+     {
+      "candidate": 27,
+      "score": 0.24705468723942575
+     },
+     {
+      "candidate": 28,
+      "score": 0.27099238065492715
+     },
+     {
+      "candidate": 29,
+      "score": 0.2367822448812542
+     },
+     {
+      "candidate": 30,
+      "score": 0.23328882292890746
+     },
+     {
+      "candidate": 31,
+      "score": 0.25967041752777387
+     },
+     {
+      "candidate": 33,
+      "score": 0.33598675978353604
+     },
+     {
+      "candidate": 34,
+      "score": 0.4256973143746232
+     },
+     {
+      "candidate": 35,
+      "score": 0.3533887206810891
+     }
+    ]
+   },
+   {
+    "chosen": 17,
+    "chosen_score": 0.2507873241273978,
+    "n_candidates": 33,
+    "removed_before": [
+     26,
+     32,
+     18
+    ],
+    "round": 3,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 14.178610918718125
+     },
+     {
+      "candidate": 1,
+      "score": 1.6340252464730138
+     },
+     {
+      "candidate": 2,
+      "score": 0.5013800413506029
+     },
+     {
+      "candidate": 3,
+      "score": 0.4460310333940131
+     },
+     {
+      "candidate": 4,
+      "score": 0.3698167224039169
+     },
+     {
+      "candidate": 5,
+      "score": 0.3798310077652622
+     },
+     {
+      "candidate": 6,
+      "score": 8.45237062139025
+     },
+     {
+      "candidate": 7,
+      "score": 0.32631228934263634
+     },
+     {
+      "candidate": 8,
+      "score": 0.2939012062376466
+     },
+     {
+      "candidate": 9,
+      "score": 0.30160890024307674
+     },
+     {
+      "candidate": 10,
+      "score": 0.3014218338515631
+     },
+     {
+      "candidate": 11,
+      "score": 0.27765417207877424
+     },
+     {
+      "candidate": 12,
+      "score": 0.32744898312862897
+     },
+     {
+      "candidate": 13,
+      "score": 0.346402979827673
+     },
+     {
+      "candidate": 14,
+      "score": 0.30649739769553197
+     },
+     {
+      "candidate": 15,
+      "score": 0.30287639248289294
+     },
+     {
+      "candidate": 16,
+      "score": 0.31415473758327234
+     },
+     {
+      "candidate": 17,
+      "score": 0.2507873241273978
+     },
+     {
+      "candidate": 19,
+      "score": 0.3696295503834694
+     },
+     {
+      "candidate": 20,
+      "score": 0.28464989927476836
+     },
+     {
+      "candidate": 21,
+      "score": 0.30937529735443126
+     },
+     {
+      "candidate": 22,
+      "score": 0.43134900906878065
+     },
+     {
+      "candidate": 23,
+      "score": 0.3384771759134028
+     },
+     {
+      "candidate": 24,
+      "score": 0.39643755802662095
+     },
+     {
+      "candidate": 25,
+      "score": 0.3439733562099983
+     },
+     {
+      "candidate": 27,
+      "score": 0.3128094747336568
+     },
+     {
+      "candidate": 28,
+      "score": 0.34257067607633224
+     },
+     {
+      "candidate": 29,
+      "score": 0.3066027250979758
+     },
+     {
+      "candidate": 30,
+      "score": 0.2997251253522336
+     },
+     {
+      "candidate": 31,
+      "score": 0.32613027545845935
+     },
+     {
+      "candidate": 33,
+      "score": 0.4066289793170511
+     },
+     {
+      "candidate": 34,
+      "score": 0.5031653295073788
+     },
+     {
+      "candidate": 35,
+      "score": 0.42683112559560304
+     }
+    ]
+   },
+   {
+    "chosen": 11,
+    "chosen_score": 0.3245825611580714,
+    "n_candidates": 32,
+    "removed_before": [
+     26,
+     32,
+     18,
+     17
+    ],
+    "round": 4,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 14.172825985319927
+     },
+     {
+      "candidate": 1,
+      "score": 1.6184793366044103
+     },
+     {
+      "candidate": 2,
+      "score": 0.5365529775028166
+     },
+     {
+      "candidate": 3,
+      "score": 0.4676015473256541
+     },
+     {
+      "candidate": 4,
+      "score": 0.39969008567598713
+     },
+     {
+      "candidate": 5,
+      "score": 0.412726895431023
+     },
+     {
+      "candidate": 6,
+      "score": 8.276103929019323
+     },
+     {
+      "candidate": 7,
+      "score": 0.37191892735867127
+     },
+     {
+      "candidate": 8,
+      "score": 0.3380050198760126
+     },
+     {
+      "candidate": 9,
+      "score": 0.34096999306586084
+     },
+     {
+      "candidate": 10,
+      "score": 0.3378816553727525
+     },
+     {
+      "candidate": 11,
+      "score": 0.3245825611580714
+     },
+     {
+      "candidate": 12,
+      "score": 0.36925096034758004
+     },
+     {
+      "candidate": 13,
+      "score": 0.4080130376142403
+     },
+     {
+      "candidate": 14,
+      "score": 0.3477944189553054
+     },
+     {
+      "candidate": 15,
+      "score": 0.3685095252746256
+     },
+     {
+      "candidate": 16,
+      "score": 0.3568952720266676
+     },
+     {
+      "candidate": 19,
+      "score": 0.4383379634461363
+     },
+     {
+      "candidate": 20,
+      "score": 0.339368803892417
+     },
+     {
+      "candidate": 21,
+      "score": 0.3551526707051665
+     },
+     {
+      "candidate": 22,
+      "score": 0.4969893248550651
+     },
+     {
+      "candidate": 23,
+      "score": 0.3815757739819145
+     },
+     {
+      "candidate": 24,
+      "score": 0.46678116346272025
+     },
+     {
+      "candidate": 25,
+      "score": 0.38794393630645857
+     },
+     {
+      "candidate": 27,
+      "score": 0.36559923347879986
+     },
+     {
+      "candidate": 28,
+      "score": 0.39453005092364296
+     },
+     {
+      "candidate": 29,
+      "score": 0.35370136520367756
+     },
+     {
+      "candidate": 30,
+      "score": 0.34169843285816337
+     },
+     {
+      "candidate": 31,
+      "score": 0.35690101257735485
+     },
+     {
+      "candidate": 33,
+      "score": 0.45951715511439745
+     },
+     {
+      "candidate": 34,
+      "score": 0.5537446927898847
+     },
+     {
+      "candidate": 35,
+      "score": 0.4744170388692444
+     }
+    ]
+   },
+   {
+    "chosen": 10,
+    "chosen_score": 0.3943778816235541,
+    "n_candidates": 31,
+    "removed_before": [
+     26,
+     32,
+     18,
+     17,
+     11
+    ],
+    "round": 5,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 14.117528057976475
+     },
+     {
+      "candidate": 1,
+      "score": 1.7026283086334204
+     },
+     {
+      "candidate": 2,
+      "score": 0.6253292683487593
+     },
+     {
+      "candidate": 3,
+      "score": 0.5947450956686128
+     },
+     {
+      "candidate": 4,
+      "score": 0.48311506481946437
+     },
+     {
+      "candidate": 5,
+      "score": 0.5279890599195441
+     },
+     {
+      "candidate": 6,
+      "score": 8.595394428053424
+     },
+     {
+      "candidate": 7,
+      "score": 0.48288798672099453
+     },
+     {
+      "candidate": 8,
+      "score": 0.41731987664686854
+     },
+     {
+      "candidate": 9,
+      "score": 0.41810134338221977
+     },
+     {
+      "candidate": 10,
+      "score": 0.3943778816235541
+     },
+     {
+      "candidate": 12,
+      "score": 0.4249205045090384
+     },
+     {
+      "candidate": 13,
+      "score": 0.5345530559148526
+     },
+     {
+      "candidate": 14,
+      "score": 0.4323836689896729
+     },
+     {
+      "candidate": 15,
+      "score": 0.4442726971435399
+     },
+     {
+      "candidate": 16,
+      "score": 0.4395384920511387
+     },
+     {
+      "candidate": 19,
+      "score": 0.5294293773005977
+     },
+     {
+      "candidate": 20,
+      "score": 0.42052400720331445
+     },
+     {
+      "candidate": 21,
+      "score": 0.43042250240876856
+     },
+     {
+      "candidate": 22,
+      "score": 0.5681123679101073
+     },
+     {
+      "candidate": 23,
+      "score": 0.460121706927055
+     },
+     {
+      "candidate": 24,
+      "score": 0.542605526401959
+     },
+     {
+      "candidate": 25,
+      "score": 0.457142839341663
+     },
+     {
+      "candidate": 27,
+      "score": 0.4384630684345776
+     },
+     {
+      "candidate": 28,
+      "score": 0.4656547268221436
+     },
+     {
+      "candidate": 29,
+      "score": 0.42851336556098235
+     },
+     {
+      "candidate": 30,
+      "score": 0.40917874768354573
+     },
+     {
+      "candidate": 31,
+      "score": 0.4279446366929691
+     },
+     {
+      "candidate": 33,
+      "score": 0.5354598557927626
+     },
+     {
+      "candidate": 34,
+      "score": 0.6375340361638797
+     },
+     {
+      "candidate": 35,
+      "score": 0.5545583283022042
+     }
+    ]
+   },
+   {
+    "chosen": 30,
+    "chosen_score": 0.4807354328478276,
+    "n_candidates": 30,
+    "removed_before": [
+     26,
+     32,
+     18,
+     17,
+     11,
+     10
+    ],
+    "round": 6,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 14.063425606741845
+     },
+     {
+      "candidate": 1,
+      "score": 1.8646175198910995
+     },
+     {
+      "candidate": 2,
+      "score": 0.6912170781914487
+     },
+     {
+      "candidate": 3,
+      "score": 0.6304143509428657
+     },
+     {
+      "candidate": 4,
+      "score": 0.5666061975089365
+     },
+     {
+      "candidate": 5,
+      "score": 0.5960116835007979
+     },
+     {
+      "candidate": 6,
+      "score": 9.454643296885584
+     },
+     {
+      "candidate": 7,
+      "score": 0.5672996625724694
+     },
+     {
+      "candidate": 8,
+      "score": 0.4892216881201345
+     },
+     {
+      "candidate": 9,
+      "score": 0.5099886971737118
+     },
+     {
+      "candidate": 12,
+      "score": 0.5446399605301967
+     },
+     {
+      "candidate": 13,
+      "score": 0.6683546044206461
+     },
+     {
+      "candidate": 14,
+      "score": 0.5226129960019991
+     },
+     {
+      "candidate": 15,
+      "score": 0.5515565321411807
+     },
+     {
+      "candidate": 16,
+      "score": 0.4949894778938712
+     },
+     {
+      "candidate": 19,
+      "score": 0.6127963660994334
+     },
+     {
+      "candidate": 20,
+      "score": 0.48902529512743936
+     },
+     {
+      "candidate": 21,
+      "score": 0.5136143522067209
+     },
+     {
+      "candidate": 22,
+      "score": 0.6418988868451735
+     },
+     {
+      "candidate": 23,
+      "score": 0.5292887286789127
+     },
+     {
+      "candidate": 24,
+      "score": 0.6225731950736724
+     },
+     {
+      "candidate": 25,
+      "score": 0.5225212873320007
+     },
+     {
+      "candidate": 27,
+      "score": 0.5042343932131604
+     },
+     {
+      "candidate": 28,
+      "score": 0.538671843007562
+     },
+     {
+      "candidate": 29,
+      "score": 0.497788170695
+     },
+     {
+      "candidate": 30,
+      "score": 0.4807354328478276
+     },
+     {
+      "candidate": 31,
+      "score": 0.494182959771572
+     },
+     {
+      "candidate": 33,
+      "score": 0.6033924552514268
+     },
+     {
+      "candidate": 34,
+      "score": 0.7086173267797927
+     },
+     {
+      "candidate": 35,
+      "score": 0.6383096513774379
+     }
+    ]
+   },
+   {
+    "chosen": 16,
+    "chosen_score": 0.5806302430505247,
+    "n_candidates": 29,
+    "removed_before": [
+     26,
+     32,
+     18,
+     17,
+     11,
+     10,
+     30
+    ],
+    "round": 7,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 13.97497751915787
+     },
+     {
+      "candidate": 1,
+      "score": 1.9629770674810465
+     },
+     {
+      "candidate": 2,
+      "score": 0.778985950787985
+     },
+     {
+      "candidate": 3,
+      "score": 0.7251015185302727
+     },
+     {
+      "candidate": 4,
+      "score": 0.6639959858493628
+     },
+     {
+      "candidate": 5,
+      "score": 0.6913429192587024
+     },
+     {
+      "candidate": 6,
+      "score": 8.662583149729503
+     },
+     {
+      "candidate": 7,
+      "score": 0.670573343309301
+     },
+     {
+      "candidate": 8,
+      "score": 0.5837937887551183
+     },
+     {
+      "candidate": 9,
+      "score": 0.6051340889380589
+     },
+     {
+      "candidate": 12,
+      "score": 0.6349960965651908
+     },
+     {
+      "candidate": 13,
+      "score": 0.7676162629738175
+     },
+     {
+      "candidate": 14,
+      "score": 0.6125928210715049
+     },
+     {
+      "candidate": 15,
+      "score": 0.6464802723415121
+     },
+     {
+      "candidate": 16,
+      "score": 0.5806302430505247
+     },
+     {
+      "candidate": 19,
+      "score": 0.7166516496177759
+     },
+     {
+      "candidate": 20,
+      "score": 0.5845821915839942
+     },
+     {
+      "candidate": 21,
+      "score": 0.6024587809077587
+     },
+     {
+      "candidate": 22,
+      "score": 0.7364211730672342
+     },
+     {
+      "candidate": 23,
+      "score": 0.6323521801117128
+     },
+     {
+      "candidate": 24,
+      "score": 0.7202417962751527
+     },
+     {
+      "candidate": 25,
+      "score": 0.6356203267936967
+     },
+     {
+      "candidate": 27,
+      "score": 0.6184019966383211
+     },
+     {
+      "candidate": 28,
+      "score": 0.6642885816587368
+     },
+     {
+      "candidate": 29,
+      "score": 0.7350737369962885
+     },
+     {
+      "candidate": 31,
+      "score": 0.6572616616595219
+     },
+     {
+      "candidate": 33,
+      "score": 0.8700692407490731
+     },
+     {
+      "candidate": 34,
+      "score": 0.9900217809482725
+     },
+     {
+      "candidate": 35,
+      "score": 0.7618374792808775
+     }
+    ]
+   }
+  ],
+  "scoring_positions": {
+   "n_items": 62,
+   "position_policy": "positions.supervised_target_v1@v1",
+   "position_policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12",
+   "prediction_axis": {
+    "active": 46825,
+    "form": "select",
+    "positions": 59763,
+    "weight_total": 46825.0
+   },
+   "token_axis": {
+    "active": 46825,
+    "form": "select",
+    "positions": 59825,
+    "weight_total": 46825.0
+   }
+  },
+  "step": 1
+ },
+ "final": {
+  "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+  "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+  "single_shard_sha256": "ca2d7368e3adce3e167a4376dcab425902530e7a77106146d336d676d2370c5d",
+  "weights_digest": "0597e60c1a7fac06930e3e84c8f5341b1f7eb9470fc30b16efbf02f37208fdef"
+ },
+ "num_parameters": 596049920,
+ "path_label": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+ "root_teacher_id": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+ "root_teacher_sha256": "6de20cc746dd42e96f93aeb4551b8d378e415a206309435d7eaefd39cfdf45f9",
+ "schema": "aadistill.phase_d3.control_record/v1",
+ "seed": 20260815,
+ "source": {
+  "journal_path": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/states.jsonl",
+  "journal_sha256": "42c3f11f52fc110baa055c6eca021daced1d1615cd1042f90b71b8226378c26c",
+  "replay_plan": "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
+  "replay_plan_sha256": "fe58c3a5be23e54f71ca823966f5437214a387598bea0c5fc9c5fa5d30f45c6c",
+  "reproduced_by": "phase_d1_replay d1_replay_002: all four pinned steps and all four identities, differ: []",
+  "search_run_id": "d1_search_20261006_210210",
+  "search_session_commit": "77aedc90f93f7f8b69e62bdf03de4dcc22ca273f"
+ },
+ "steps": [
+  {
+   "arch_signature": "781870802ea75969835419f9863e6694d0a42fa39a49df132f66e38dfa2d78cb",
+   "artifact_digest": "292e36f13829545b465ac2a19fa43d5f7c63d319bd841b269553a2717b3995f0",
+   "calibration_batch_packing": "length_sorted_v1",
+   "config_hash": "464cb782ea8095306da61ce454c595f8eb423655501279359e07a18c7dfd2c1a",
+   "config_sha256": "94ecfd1cee0fbb64ad9313de67eeefc0cd96358cf68ac186e2f31cfa0147bd2d",
+   "impl_id": "ffn.activation_importance_v0",
+   "index": 0,
+   "kind": "FFN",
+   "micro_batch_size": 3,
+   "profile_id": "calib.domain_balanced@v1",
+   "single_shard_sha256": "044b58822c2bbdb33d02271f24b7ec64b0eec618f2d131e7019c5c1279677c79",
+   "state_id": "6d6006a0f66c94a331a5747b228179ec",
+   "wall_seconds": 44.429039001464844,
+   "weights_digest": "56542ec27752c52b3d315f63f6fa61825b70154111c999f0f1123a07aeb47f85"
+  },
+  {
+   "arch_signature": "fe4d6974a27e1ddb7fc4e2277ad4111aba0eb4ac749d6ea6516d2beb4417f656",
+   "artifact_digest": "af818297c21636ae68631f15d92056cfc07bda804f8e0121e49a9510510646ea",
+   "calibration_batch_packing": "length_sorted_v1",
+   "config_hash": "3a0f151e3f44b6173bd1021ff740e5e1df0467a1f62f718b81855ff6f7c487f8",
+   "config_sha256": "2089b4a3e0e84a6ba28af766662433ec8da35bcea8354263a57cb4f5cd181ca4",
+   "impl_id": "depth.causal_kl_greedy_v1",
+   "index": 1,
+   "kind": "DEPTH",
+   "micro_batch_size": 3,
+   "profile_id": "calib.reasoning_heavy@v2",
+   "single_shard_sha256": "efa52b54fdc1f87424b039a9882211146d6f336ee384b6b1ee84c5a9b07607ed",
+   "state_id": "b5fceabc68e36eaaa449b825804a9097",
+   "wall_seconds": 1819.531674861908,
+   "weights_digest": "90c3a4a42289a5162da24b6da97bcf39ece5268c26743d7c434183e08a68044e"
+  },
+  {
+   "arch_signature": "efc22201b39b5e057ea83cb5eb1ecf5baa142de4de2d1c9893f504f2a28bcaa5",
+   "artifact_digest": "f928dfd5844bdc6b386b472405c859cde06749d2f423d261a744253084766941",
+   "calibration_batch_packing": "length_sorted_v1",
+   "config_hash": "3a0f151e3f44b6173bd1021ff740e5e1df0467a1f62f718b81855ff6f7c487f8",
+   "config_sha256": "e01c73a6b0f796f1b5bc8bf867f8c2663b7bea6587cf4ec0e0b6e45eadedf591",
+   "impl_id": "width.global_pca_v0",
+   "index": 2,
+   "kind": "RESIDUAL_WIDTH",
+   "micro_batch_size": 3,
+   "profile_id": "calib.reasoning_heavy@v2",
+   "single_shard_sha256": "d3f4573b5c26a6b6928a08a7c1cb0a98366a363f5930045896a5ba9e81f359d5",
+   "state_id": "21306b1d74d9d51962277111e1a4c5b5",
+   "wall_seconds": 27.224738597869873,
+   "weights_digest": "1f0e555b8b69ef309841a217c9d57ab77dc70b3f3fbcd7fbbe80e1a31bbce6de"
+  },
+  {
+   "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+   "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+   "calibration_batch_packing": "length_sorted_v1",
+   "config_hash": "464cb782ea8095306da61ce454c595f8eb423655501279359e07a18c7dfd2c1a",
+   "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+   "impl_id": "attention.activation_importance_v1",
+   "index": 3,
+   "kind": "ATTENTION",
+   "micro_batch_size": 3,
+   "profile_id": "calib.domain_balanced@v1",
+   "single_shard_sha256": "ca2d7368e3adce3e167a4376dcab425902530e7a77106146d336d676d2370c5d",
+   "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+   "wall_seconds": 6.688672065734863,
+   "weights_digest": "0597e60c1a7fac06930e3e84c8f5341b1f7eb9470fc30b16efbf02f37208fdef"
+  }
+ ]
+}

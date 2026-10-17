@@ -1,0 +1,13 @@
+{
+ "schema": "aadistill.phase_d3.evidence_archive_relay_copy/v1",
+ "run_id": "d3_probes_20261017_110022",
+ "local": "/home/ecs-user/aad-artifacts/phase_d3/d3_probes_20261017_110022/store/d3_probes_artifacts.tar.gz",
+ "relay": "AlphaAvatar/aadistill-artifacts",
+ "remote": "stage1/phase_d3/d3_probes_20261017_110022/d3_probes_artifacts.tar.gz",
+ "bytes": 4547800,
+ "sha256": "c58b2d704439fe231404dd7e9bae8dbf86aabed5435ed3335370bb7702720898",
+ "downloaded_sha256": "c58b2d704439fe231404dd7e9bae8dbf86aabed5435ed3335370bb7702720898",
+ "matched": true,
+ "checked_utc": "2026-10-17T15:36:09Z",
+ "_what": "the session's manifest-verified evidence archive (results, per-sample rows, raw generations, token-id sidecars, admissions, attestation, configs, training records, rescoring) copied off the dev host; restored and re-hashed"
+}

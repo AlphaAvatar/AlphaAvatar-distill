@@ -61,6 +61,41 @@ distribution on one fixed support. Its support policy — the *student's* top-k 
 is deliberately NOT adopted, for the reason above, and its stable-complement
 formulation is superseded here by the complement logsumexp, which needs no
 stabilisation because it never cancels.
+
+``reference_student_union_topk_tail_v1(top_k=N)``
+    A THIRD support, declared separately and never a silent replacement of the
+    second. With ``S_T = TopK(p, N)`` (the reference's) and ``S_C = TopK(q, N)``
+    (the compared distribution's own), the partition is every entry of
+    ``U = S_T ∪ S_C`` -- between ``N`` and ``2N`` entries, per position -- plus
+    ONE tail bucket holding everything outside ``U``::
+
+        KL_U = sum_{i in U} p_i (log p_i - log q_i)
+               + p(not U) (log p(not U) - log q(not U))
+
+    The compared distribution DOES move the partition here, and that is the
+    declared difference: an entry a candidate promotes into its own Top-N is
+    scored individually instead of disappearing into the tail. ``U`` refines
+    the reference ``K+1`` partition (``S_T`` is inside it, and its tail is a
+    subset of the reference's tail), and the full vocabulary refines ``U``, so
+    by the data-processing inequality, for every pair of distributions,
+
+        KL_{S_T + tail}  <=  KL_U  <=  KL_full
+
+    It is still NOT the full-vocabulary KL, and nothing may report it as one.
+    Both Top-N selections are DETERMINISTIC (:func:`deterministic_topk`): value
+    descending, then vocabulary index ascending, so a tie at the N-th value --
+    frequent in bf16 -- always admits the same entries.
+
+    The reference's probability of a candidate-only entry (``S_C \\ S_T``) is
+    not in a ``K+1`` sketch. It is recovered EXACTLY, never approximated from
+    the tail, by a caller-supplied :class:`TeacherRetrieval` (the reference's
+    final hidden state and full-vocabulary log-normalizer, projected through
+    its output head on just those entries); see
+    :mod:`aadistill.initialization.scoring.output_head`. The reference's mass
+    outside ``U`` is its own Top-N tail -- computed from its complement logits
+    when the sketch was built -- minus the candidate-only entries, which lie
+    inside that tail; the candidate's is reduced directly from its own
+    complement logits with ``U`` masked, never by subtraction.
 """
 from __future__ import annotations
 
@@ -75,6 +110,15 @@ from aadistill.initialization.statistics.contribution import (
 
 SUPPORT_FULL_VOCAB_V1 = "full_vocab_v1"
 SUPPORT_REFERENCE_TOPK_TAIL_V1 = "reference_topk_tail_v1"
+SUPPORT_REFERENCE_STUDENT_UNION_TOPK_TAIL_V1 = (
+    "reference_student_union_topk_tail_v1")
+#: The supports that take a caller-supplied ``top_k``.
+TOPK_SUPPORTS = (SUPPORT_REFERENCE_TOPK_TAIL_V1,
+                 SUPPORT_REFERENCE_STUDENT_UNION_TOPK_TAIL_V1)
+#: How both Top-K selections of the union support break ties. Part of the
+#: union support's identity: bf16 logits tie at the K-th value often enough
+#: that an unstated rule would make the partition depend on the kernel.
+TOPK_TIE_BREAK = "value_desc_then_index_asc/v1"
 
 
 @dataclass(frozen=True)
@@ -97,14 +141,14 @@ class DistributionSupport:
                     f"{SUPPORT_FULL_VOCAB_V1} reduces over every entry and takes "
                     f"no top_k; got {self.top_k!r}")
             return
-        if self.support_id != SUPPORT_REFERENCE_TOPK_TAIL_V1:
+        if self.support_id not in TOPK_SUPPORTS:
             raise ValueError(
                 f"unknown distribution support {self.support_id!r}; known: "
                 f"{SUPPORT_FULL_VOCAB_V1!r}, "
-                f"{SUPPORT_REFERENCE_TOPK_TAIL_V1!r}")
+                + ", ".join(repr(s) for s in TOPK_SUPPORTS))
         if not isinstance(self.top_k, int) or isinstance(self.top_k, bool):
             raise ValueError(
-                f"{SUPPORT_REFERENCE_TOPK_TAIL_V1} needs an integer top_k, got "
+                f"{self.support_id} needs an integer top_k, got "
                 f"{self.top_k!r}. It is an experiment-policy parameter and this "
                 "module has no default for it.")
         if self.top_k < 1:
@@ -114,9 +158,20 @@ class DistributionSupport:
     def is_full_vocab(self) -> bool:
         return self.support_id == SUPPORT_FULL_VOCAB_V1
 
+    @property
+    def is_union(self) -> bool:
+        """The reference ∪ candidate Top-K support, which needs retrieval."""
+        return self.support_id == SUPPORT_REFERENCE_STUDENT_UNION_TOPK_TAIL_V1
+
     def as_dict(self) -> dict[str, Any]:
         if self.is_full_vocab:
             return {"support_id": self.support_id}
+        if self.is_union:
+            #: The tie-break is serialized for the union support ONLY, so the
+            #: reference-Top-K identity every historical record cites is
+            #: unchanged.
+            return {"support_id": self.support_id, "top_k": int(self.top_k),
+                    "topk_tie_break": TOPK_TIE_BREAK}
         return {"support_id": self.support_id, "top_k": int(self.top_k)}
 
     def __str__(self) -> str:
@@ -132,6 +187,12 @@ FULL_VOCAB_V1 = DistributionSupport(SUPPORT_FULL_VOCAB_V1)
 def reference_topk_tail(top_k: int) -> DistributionSupport:
     """``reference_topk_tail_v1`` at a caller-supplied ``top_k``."""
     return DistributionSupport(SUPPORT_REFERENCE_TOPK_TAIL_V1, top_k=int(top_k))
+
+
+def reference_student_union_topk_tail(top_k: int) -> DistributionSupport:
+    """``reference_student_union_topk_tail_v1`` at a caller-supplied ``top_k``."""
+    return DistributionSupport(SUPPORT_REFERENCE_STUDENT_UNION_TOPK_TAIL_V1,
+                               top_k=int(top_k))
 
 
 # --- numerics ---------------------------------------------------------------
@@ -169,6 +230,353 @@ def complement_log_mass(z_owned: torch.Tensor, support: torch.Tensor,
     """
     z_owned.scatter_(-1, support, float("-inf"))
     return torch.logsumexp(z_owned, dim=-1) - log_z
+
+
+#: Rows per full-row tie-resolution block. Only rows whose ties at the K-th
+#: value reach past the 2K candidates take that path, so this bounds a rare
+#: transient (a few ``[rows, V]`` masks), not the common one.
+_TIE_ROWS = 64
+
+
+@torch.no_grad()
+def deterministic_topk(values: torch.Tensor, k: int
+                       ) -> tuple[torch.Tensor, torch.Tensor]:
+    """``(top values, indices)`` of the last dimension, ``[..., k]``, by a
+    STATED order: value descending, then vocabulary index ascending.
+
+    ``torch.topk`` returns *a* valid Top-K, and when several entries tie at the
+    K-th value which of them it admits is unspecified -- it can differ between
+    devices, kernels and batch shapes. bf16 logits tie there often (measured
+    on real bf16 logits of a six-figure vocabulary at a Top-K of a few
+    hundred: most rows tie at the K-th value, and ``torch.topk``'s set differs
+    from this one on more than half of them), so a support
+    defined by ``torch.topk`` alone would let the kernel choose the partition.
+    Here the SET is fixed -- every entry strictly above the K-th value, then
+    the lowest-index entries equal to it -- and so is the ORDER.
+
+    How, cheaply: one ``torch.topk`` of ``2K`` candidates in the input's own
+    dtype (ordering and equality survive exact widening, so bf16 selects what
+    a float32 copy would). When the smallest candidate is strictly below the
+    K-th value, every entry at or above it is a candidate and the answer is the
+    first K candidates in (value desc, index asc) order -- an ``[rows, 2K]``
+    sort. Only rows whose ties reach past ``2K`` candidates fall back to a
+    full-row mask-and-rank pass. NaN ranks as ``+inf`` for selection only; the
+    returned values are re-read from ``values``, NaN included.
+    """
+    vocab = int(values.shape[-1])
+    k = int(k)
+    if not 1 <= k <= vocab:
+        raise ValueError(f"top-k of {k} over a last dimension of {vocab}")
+    lead = values.shape[:-1]
+    original = values.reshape(-1, vocab)
+    flat = original
+    nan = torch.isnan(flat)
+    if bool(nan.any()):
+        #: SELECTION ONLY: a NaN ranks as +inf so the set is defined.
+        flat = torch.where(nan, torch.full_like(flat, float("inf")), flat)
+    k2 = min(vocab, 2 * k)
+    top = torch.topk(flat, k2, dim=-1, largest=True, sorted=True)
+    kth = top.values[:, k - 1:k]
+    #: Canonical order among the candidates: index ascending, then a STABLE
+    #: sort by value, which keeps index-ascending order among equal values.
+    cand = top.indices.sort(dim=-1).values
+    order = torch.sort(flat.gather(-1, cand), dim=-1, descending=True,
+                       stable=True).indices
+    idx = cand.gather(-1, order)[:, :k]
+    if k2 < vocab:
+        #: Ties at the K-th value that reach past the 2K candidates: only
+        #: there can an entry outside the candidates belong to the set.
+        spill = (top.values[:, -1] >= kth.squeeze(-1)).nonzero().squeeze(-1)
+        for start in range(0, int(spill.numel()), _TIE_ROWS):
+            rows = spill[start:start + _TIE_ROWS]
+            x = flat[rows]
+            cut = kth[rows]
+            above = x > cut
+            level = x == cut
+            need = k - above.sum(dim=-1, keepdim=True)
+            rank = level.cumsum(dim=-1, dtype=torch.int32)
+            keep = above | (level & (rank <= need))
+            #: `nonzero` is row-major: each row's k columns, index ascending.
+            sel = keep.nonzero()[:, 1].view(-1, k)
+            reorder = torch.sort(x.gather(-1, sel), dim=-1, descending=True,
+                                 stable=True).indices
+            idx[rows] = sel.gather(-1, reorder)
+    idx = idx.contiguous()
+    return original.gather(-1, idx).reshape(*lead, k), idx.reshape(*lead, k)
+
+
+def log1mexp(d: torch.Tensor) -> torch.Tensor:
+    """``log(1 - exp(d))`` for ``d <= 0``, stable at both ends.
+
+    ``-inf`` at ``d = 0`` (nothing left) and ``0`` at ``d = -inf`` (nothing
+    removed). The two branches are the standard split at ``-log 2``.
+    """
+    return torch.where(d > -0.6931471805599453,
+                       torch.log(-torch.expm1(d)),
+                       torch.log1p(-torch.exp(d)))
+
+
+def topk_tail_entropy(support_log_probs: torch.Tensor,
+                      tail_log_prob: torch.Tensor, *,
+                      has_tail: bool) -> torch.Tensor:
+    """Shannon entropy of the reference's ``K+1``-category distribution.
+
+    The categories are its own Top-K entries and, when ``K < |V|``, one tail
+    bucket; their probabilities are the ABSOLUTE full-softmax ones, never
+    renormalized inside the Top-K::
+
+        H^{K+1} = - sum_{i in S} p_i log p_i - p_tail log p_tail
+
+    with ``0 log 0 = 0``. Reduced in float64 from the stored float32 log
+    probabilities ([..., K] is small, so this costs nothing) and returned as
+    float32. The number of categories is the caller's to derive from the same
+    ``has_tail`` (:func:`topk_tail_categories`); nothing here assumes ``K``.
+    """
+    lp = support_log_probs.double()
+    h = -(torch.where(torch.isneginf(lp), torch.zeros_like(lp), lp.exp() * lp)
+          ).sum(dim=-1)
+    if has_tail:
+        t = tail_log_prob.double()
+        h = h - torch.where(torch.isneginf(t), torch.zeros_like(t), t.exp() * t)
+    return h.float()
+
+
+def topk_tail_categories(top_k: int, vocab_size: int) -> int:
+    """How many categories :func:`topk_tail_entropy` ranges over: ``K`` plus
+    one tail bucket when ``K < |V|``, else ``|V|``."""
+    k, v = int(top_k), int(vocab_size)
+    return k + 1 if k < v else v
+
+
+# --- teacher retrieval and the union support ---------------------------------
+
+@dataclass(frozen=True)
+class TeacherRetrieval:
+    """The reference's log probability of ANY vocabulary entry, at fixed rows.
+
+    ``hidden`` ``[N, H]`` is the reference's final (normalized) hidden state at
+    each row and ``log_z`` ``[N]`` its full-vocabulary log-normalizer under the
+    same logit definition; ``head`` is a
+    :class:`~aadistill.initialization.scoring.output_head.LinearOutputHead`
+    (anything with ``token_logits(hidden, token_ids)`` returning float32). A
+    retrieved log probability is ``head.token_logits(h, ids) - log_z`` -- the
+    same arithmetic the sketch's own log probabilities were formed with, so a
+    retrieved entry and a sketched one are values of one distribution.
+    """
+
+    hidden: torch.Tensor
+    log_z: torch.Tensor
+    head: Any
+
+    def __post_init__(self) -> None:
+        if self.hidden.ndim != 2 or self.log_z.ndim != 1:
+            raise ValueError(
+                f"retrieval needs [N, H] hidden and [N] log_z, got "
+                f"{tuple(self.hidden.shape)} and {tuple(self.log_z.shape)}")
+        if int(self.hidden.shape[0]) != int(self.log_z.shape[0]):
+            raise ValueError("hidden and log_z disagree on the row count")
+
+    @property
+    def rows(self) -> int:
+        return int(self.hidden.shape[0])
+
+    def log_probs(self, token_ids: torch.Tensor, start: int = 0,
+                  stop: int | None = None) -> torch.Tensor:
+        """``[n, M]`` float32 log probabilities of ``token_ids`` ``[n, M]`` at
+        rows ``start:stop``."""
+        stop = self.rows if stop is None else int(stop)
+        h = self.hidden[start:stop]
+        z = self.log_z[start:stop].to(h.device).float()
+        return (self.head.token_logits(h, token_ids.to(h.device))
+                - z[:, None])
+
+    def select(self, rows: torch.Tensor) -> TeacherRetrieval:
+        """The rows a boolean ``[N]`` mask keeps, in order."""
+        keep = rows.to(self.hidden.device).bool()
+        return TeacherRetrieval(self.hidden[keep], self.log_z[keep], self.head)
+
+
+@dataclass
+class UnionKLTerms:
+    """Per-position results of the union-support reduction, ``[N]`` each.
+
+    ``kl`` is the forward KL on ``S_T ∪ S_C`` + one tail -- the quantity a
+    union-support objective weights. Everything else is evidence: the
+    reference-Top-K + tail KL of the SAME pair (``kl_reference_topk``, the
+    lower bound), the candidate's log-normalizer, the union's size and
+    overlap, both tail masses, and -- when asked for -- the reverse KL on the
+    same partition.
+    """
+
+    kl: torch.Tensor
+    log_z: torch.Tensor
+    kl_reference_topk: torch.Tensor
+    union_size: torch.Tensor
+    overlap: torch.Tensor
+    reference_union_tail_log: torch.Tensor
+    candidate_union_tail_log: torch.Tensor
+    reverse_kl: torch.Tensor | None = None
+
+    def diagnostics(self) -> dict[str, torch.Tensor]:
+        """The per-position evidence a record carries beside the KL."""
+        return {"kl_reference_topk": self.kl_reference_topk,
+                "union_size": self.union_size,
+                "union_overlap": self.overlap,
+                "reference_union_tail_mass":
+                    self.reference_union_tail_log.exp(),
+                "candidate_union_tail_mass":
+                    self.candidate_union_tail_log.exp()}
+
+
+@torch.no_grad()
+def union_forward_kl_terms(support_indices: torch.Tensor,
+                           support_log_probs: torch.Tensor,
+                           tail_log_prob: torch.Tensor,
+                           cand_logits: torch.Tensor,
+                           retrieval: TeacherRetrieval, *,
+                           top_k: int, has_tail: bool,
+                           reverse: bool = False,
+                           chunk: int = 512) -> UnionKLTerms:
+    """Forward KL on ``S_T ∪ S_C`` plus one tail, per position.
+
+    ``support_indices`` / ``support_log_probs`` ``[..., K]`` and
+    ``tail_log_prob`` ``[...]`` are the reference's sketch (built with
+    :func:`deterministic_topk`); ``cand_logits`` is ``[..., V]``; ``retrieval``
+    covers the same positions flattened row-major (``[N, H]``). Generic over
+    leading dimensions like :func:`sketch_forward_kl_terms`, and reduced in
+    blocks of ``chunk`` rows so the transient is ``O(chunk * V)``.
+
+    Per row:
+
+    * ``S_C`` = the candidate's deterministic Top-``top_k`` of its own logits;
+      an entry of ``S_C`` already in ``S_T`` is the SAME bucket (dedup by
+      sorted search), the rest are candidate-only ``E``;
+    * reference log probabilities: stored on ``S_T``, retrieved on ``E``;
+    * candidate log probabilities: gathered from its logits against its own
+      full-vocabulary normalizer;
+    * the candidate's tail outside ``U`` from its complement logits with
+      ``S_T`` and ``S_C`` masked (no subtraction);
+    * the reference's tail outside ``U``: ``log(exp(tail_T) - sum_E p)`` in
+      log space, relative to its own Top-K tail -- the only subtraction, and
+      it is relative to the tail, not to one. Rounding that would make it
+      negative makes it zero.
+
+    Zero reference mass contributes exactly zero; reference mass where the
+    candidate has none is ``+inf`` and stays ``+inf`` (:func:`_term`). NaN
+    candidate logits propagate to NaN, never to a finite score.
+    """
+    vocab = int(cand_logits.shape[-1])
+    lead = tuple(cand_logits.shape[:-1])
+    k_t = int(support_indices.shape[-1])
+    idx_t = support_indices.reshape(-1, k_t)
+    lp_t = support_log_probs.reshape(-1, k_t)
+    tail_t = tail_log_prob.reshape(-1)
+    cand_all = cand_logits.reshape(-1, vocab)
+    n = int(cand_all.shape[0])
+    if retrieval.rows != n:
+        raise ValueError(
+            f"the retrieval covers {retrieval.rows} rows and the candidate "
+            f"{n}; they do not describe the same positions")
+    if int(idx_t.shape[0]) != n:
+        raise ValueError("the reference sketch and the candidate disagree on "
+                         "the position count")
+    k_c = max(1, min(int(top_k), vocab))
+    dev = cand_all.device
+    outs = {name: torch.empty(n, dtype=torch.float32, device=dev)
+            for name in ("kl", "log_z", "kl_ref", "size", "overlap",
+                         "p_tail_u", "q_tail_u", "rkl")}
+    step = max(1, int(chunk))
+    for start in range(0, n, step):
+        stop = min(start + step, n)
+        #: The candidate's Top-K selected in ITS OWN dtype (exact widening
+        #: preserves order and ties), before the float32 copy exists.
+        _, s_c = deterministic_topk(cand_all[start:stop], k_c)
+        #: OWNED: the tail is computed by masking this tensor.
+        cand = owned_float32(cand_all[start:stop])
+        log_z = torch.logsumexp(cand, dim=-1, keepdim=True)
+        st = idx_t[start:stop].to(dev)
+        p_t_log = lp_t[start:stop].to(dev).float()
+        q_t_log = cand.gather(-1, st) - log_z
+        q_c_log = cand.gather(-1, s_c) - log_z
+        #: DEDUP: an S_C entry inside S_T is one bucket, scored once, on the
+        #: reference's stored value.
+        st_sorted = st.sort(dim=-1).values
+        pos = torch.searchsorted(st_sorted, s_c).clamp(max=k_t - 1)
+        in_t = st_sorted.gather(-1, pos) == s_c
+        extra = ~in_t
+        #: RETRIEVAL ONLY FOR E: candidate-only entries first (stable), the
+        #: widest E in the block, and a row's columns past its own |E| filled
+        #: with its first E entry -- a duplicate, so the head reads no extra
+        #: column for it -- and masked below.
+        order = in_t.to(torch.int8).argsort(dim=-1, stable=True)
+        width = int(extra.sum(dim=-1).max()) if bool(extra.any()) else 0
+        p_c_log = torch.full_like(q_c_log, float("-inf"))
+        if width:
+            cols = order[:, :width]
+            ids_e = s_c.gather(-1, cols)
+            valid = extra.gather(-1, cols)
+            ids_e = torch.where(valid, ids_e, ids_e[:, :1])
+            got = retrieval.log_probs(ids_e, start, stop).to(dev).float()
+            p_c_log.scatter_(-1, cols, torch.where(
+                valid, got, torch.full_like(got, float("-inf"))))
+        kl_t = _term(p_t_log.exp(), p_t_log, q_t_log).sum(dim=-1)
+        #: `where` rather than a multiply: a non-E column must contribute an
+        #: exact zero whatever `_term` produced there.
+        kl_e = torch.where(extra, _term(p_c_log.exp(), p_c_log, q_c_log),
+                           torch.zeros_like(q_c_log)).sum(dim=-1)
+        size = k_t + extra.sum(dim=-1)
+        overlap = in_t.sum(dim=-1)
+        if has_tail:
+            tail = tail_t[start:stop].to(dev).float()
+            #: The candidate outside U, from its own complement logits.
+            cand.scatter_(-1, st, float("-inf"))
+            cand.scatter_(-1, s_c, float("-inf"))
+            q_tail_u = torch.logsumexp(cand, dim=-1) - log_z.squeeze(-1)
+            #: The reference outside U: its Top-K tail minus E's mass.
+            lse_e = torch.logsumexp(p_c_log, dim=-1)
+            d = (lse_e - tail).clamp(max=0.0)
+            p_tail_u = torch.where(torch.isneginf(tail), tail,
+                                   tail + log1mexp(d))
+            kl = kl_t + kl_e + _term(p_tail_u.exp(), p_tail_u, q_tail_u)
+            #: The reference-Top-K + tail KL of the same pair: the candidate's
+            #: mass outside S_T is its mass outside U plus its mass on E, an
+            #: ADDITION in log space -- no second vocabulary pass.
+            q_e = torch.where(extra, q_c_log,
+                              torch.full_like(q_c_log, float("-inf")))
+            q_tail_t = torch.logaddexp(q_tail_u, torch.logsumexp(q_e, dim=-1))
+            kl_ref = kl_t + _term(tail.exp(), tail, q_tail_t)
+        else:
+            #: K >= V: S_T is the vocabulary, E is empty, there is no tail.
+            q_tail_u = torch.full_like(kl_t, float("-inf"))
+            p_tail_u = torch.full_like(kl_t, float("-inf"))
+            kl = kl_t + kl_e
+            kl_ref = kl_t
+        if reverse:
+            #: Reverse KL on the SAME partition, roles swapped.
+            rkl = (_term(q_t_log.exp(), q_t_log, p_t_log).sum(dim=-1)
+                   + torch.where(extra, _term(q_c_log.exp(), q_c_log, p_c_log),
+                                 torch.zeros_like(q_c_log)).sum(dim=-1))
+            if has_tail:
+                rkl = rkl + _term(q_tail_u.exp(), q_tail_u, p_tail_u)
+            outs["rkl"][start:stop] = rkl
+        outs["kl"][start:stop] = kl
+        outs["log_z"][start:stop] = log_z.squeeze(-1)
+        outs["kl_ref"][start:stop] = kl_ref
+        outs["size"][start:stop] = size.float()
+        outs["overlap"][start:stop] = overlap.float()
+        outs["p_tail_u"][start:stop] = p_tail_u
+        outs["q_tail_u"][start:stop] = q_tail_u
+        del cand, log_z, s_c, q_t_log, q_c_log, p_c_log
+
+    def shaped(name: str) -> torch.Tensor:
+        return outs[name].reshape(lead)
+    return UnionKLTerms(
+        kl=shaped("kl"), log_z=shaped("log_z"),
+        kl_reference_topk=shaped("kl_ref"), union_size=shaped("size"),
+        overlap=shaped("overlap"),
+        reference_union_tail_log=shaped("p_tail_u"),
+        candidate_union_tail_log=shaped("q_tail_u"),
+        reverse_kl=shaped("rkl") if reverse else None)
 
 
 # --- the reference sketch ---------------------------------------------------
@@ -230,6 +638,12 @@ def sketch_reference(logits: torch.Tensor, targets: torch.Tensor, *,
                      ) -> ReferenceDistributionSketch:
     """Reduce ``[T, V]`` reference logits to an ``O(T*K)`` sketch.
 
+    The ``reference_topk_tail_v1`` sketch, selected by ``torch.topk``: every
+    recorded decision on that support was made on exactly this arithmetic, and
+    the union support's
+    sketch (:func:`sketch_reference_deterministic`) is a separate entry point so
+    that nothing here moves.
+
     ``logits`` is ``[T_pred, V]`` already aligned to the positions being scored
     and ``targets`` is ``[T_pred]``. The vocabulary comes from the tensor, never
     from a constant: this must work for any model this framework loads.
@@ -243,6 +657,27 @@ def sketch_reference(logits: torch.Tensor, targets: torch.Tensor, *,
     is the identity the correctness tests pin, so it is a supported input rather
     than an error.
     """
+    return _sketch(logits, targets, top_k=top_k, chunk=chunk,
+                   deterministic=False)[0]
+
+
+def sketch_reference_deterministic(
+        logits: torch.Tensor, targets: torch.Tensor, *, top_k: int,
+        chunk: int = 512) -> tuple[ReferenceDistributionSketch, torch.Tensor]:
+    """``(sketch, log_z)``: the union support's reference sketch.
+
+    The same reduction as :func:`sketch_reference` with the Top-K chosen by
+    :func:`deterministic_topk`, and the full-vocabulary log-normalizer
+    ``log_z`` ``[T]`` returned beside it -- a retrieved entry's log
+    probability is its logit minus exactly this value.
+    """
+    return _sketch(logits, targets, top_k=top_k, chunk=chunk,
+                   deterministic=True)
+
+
+def _sketch(logits: torch.Tensor, targets: torch.Tensor, *, top_k: int,
+            chunk: int, deterministic: bool
+            ) -> tuple[ReferenceDistributionSketch, torch.Tensor]:
     if logits.ndim != 2:
         raise ValueError(f"reference logits must be [T, V], got "
                          f"{tuple(logits.shape)}")
@@ -252,6 +687,7 @@ def sketch_reference(logits: torch.Tensor, targets: torch.Tensor, *,
     if t_pred == 0:
         raise ValueError("a sketch over zero positions measures nothing")
     k = max(1, min(int(top_k), vocab))
+    norm = torch.empty((t_pred,), dtype=torch.float32, device=logits.device)
 
     idx = torch.empty((t_pred, k), dtype=torch.long, device=logits.device)
     lp = torch.empty((t_pred, k), dtype=torch.float32, device=logits.device)
@@ -268,10 +704,15 @@ def sketch_reference(logits: torch.Tensor, targets: torch.Tensor, *,
         #: below is normalized against it, including the gold token's -- so CE
         #: stays exact whether or not the gold token is in the Top-K.
         log_z = torch.logsumexp(block, dim=-1, keepdim=True)
-        top = torch.topk(block, k, dim=-1, largest=True, sorted=True)
-        idx[start:stop] = top.indices
-        lp[start:stop] = top.values - log_z
-        top1[start:stop] = top.indices[:, 0]
+        norm[start:stop] = log_z.squeeze(-1)
+        if deterministic:
+            top_values, top_indices = deterministic_topk(block, k)
+        else:
+            top = torch.topk(block, k, dim=-1, largest=True, sorted=True)
+            top_values, top_indices = top.values, top.indices
+        idx[start:stop] = top_indices
+        lp[start:stop] = top_values - log_z
+        top1[start:stop] = top_indices[:, 0]
         #: EVERYTHING THAT NEEDS THE UNMODIFIED ROW IS CAPTURED FIRST. The gold
         #: token may be inside the support, so its logit must be read before the
         #: support is masked out.
@@ -282,17 +723,18 @@ def sketch_reference(logits: torch.Tensor, targets: torch.Tensor, *,
         #: destroyed by this and is not read again.
         if has_tail:
             tail[start:stop] = complement_log_mass(
-                block, top.indices, log_z.squeeze(-1))
+                block, top_indices, log_z.squeeze(-1))
         else:
             #: K >= V: the support IS the vocabulary and there is structurally no
             #: tail bucket. `-inf` records an empty one; no consumer reads it,
             #: because `has_tail` is false everywhere downstream.
             tail[start:stop] = float("-inf")
-        del block, log_z, top
+        del block, log_z, top_values, top_indices
 
     return ReferenceDistributionSketch(
         support_indices=idx, support_log_probs=lp, tail_log_prob=tail,
-        top1_token=top1, target_log_prob=tgt, top_k=k, vocab_size=vocab)
+        top1_token=top1, target_log_prob=tgt, top_k=k,
+        vocab_size=vocab), norm
 
 
 # --- the K+1 reduction ------------------------------------------------------
@@ -305,6 +747,7 @@ def distortion_on_reference_support(
     tags: Mapping[str, torch.Tensor] | None = None,
     weights: torch.Tensor | None = None,
     chunk: int = 512,
+    position_sink: Any = None,
 ) -> DistortionSums:
     """The six quantities, reduced on the reference's ``K+1`` partition.
 
@@ -327,6 +770,12 @@ def distortion_on_reference_support(
     ``weights`` and ``tags`` keep the semantics they have in the full reducer: a
     tag selects a diagnostic subset of positions, the weights say how much each
     position counts, and a tagged accumulator takes the product.
+
+    ``position_sink(start, stop, kl, cand_log_z)``, when given, receives each
+    block's per-position forward KL and candidate log-normalizer as soon as
+    they exist, so a per-position objective can be formed without a second
+    vocabulary-wide pass. It reads; it cannot change anything accumulated
+    here, and when absent nothing in this function's arithmetic differs.
     """
     if cand_logits.ndim != 2:
         raise ValueError(f"candidate logits must be [T, V], got "
@@ -413,6 +862,8 @@ def distortion_on_reference_support(
             kl = kl_support + _term(p_tail, p_tail_log, q_tail_log)
             #: Reverse KL on the SAME partition, roles swapped.
             rkl = rkl_support + _term(q_tail, q_tail_log, p_tail_log)
+        if position_sink is not None:
+            position_sink(start, stop, kl, cand_log_z.squeeze(-1))
 
         ref_ce = -sketch.target_log_prob[start:stop].to(device).float()
         agree = (cand_argmax
@@ -457,6 +908,108 @@ def distortion_on_reference_support(
     return out
 
 
+def distortion_on_union_support(
+    sketch: ReferenceDistributionSketch,
+    retrieval: TeacherRetrieval,
+    cand_logits: torch.Tensor,
+    targets: torch.Tensor,
+    *,
+    tags: Mapping[str, torch.Tensor] | None = None,
+    weights: torch.Tensor | None = None,
+    chunk: int = 512,
+    position_sink: Any = None,
+) -> DistortionSums:
+    """The six quantities, with both KL directions on ``S_T ∪ S_C`` + tail.
+
+    The union-support twin of :func:`distortion_on_reference_support`, with the
+    same output contract and the same split: ``kl`` / ``reverse_kl`` /
+    ``tagged`` on the union partition (both directions on the SAME partition),
+    ``ref_ce`` / ``abl_ce`` / ``top1_agree`` EXACT -- the reference's from the
+    sketch (built against its full normalizer), the candidate's from its own
+    logits. ``position_sink(start, stop, kl, cand_log_z, union=terms)``
+    receives each block's per-position values and the block's
+    :class:`UnionKLTerms`, read-only.
+    """
+    if cand_logits.ndim != 2:
+        raise ValueError(f"candidate logits must be [T, V], got "
+                         f"{tuple(cand_logits.shape)}")
+    t_pred = sketch.positions
+    if int(cand_logits.shape[0]) != t_pred or retrieval.rows != t_pred:
+        raise ValueError(
+            f"the sketch covers {t_pred} positions, the candidate "
+            f"{int(cand_logits.shape[0])} and the retrieval {retrieval.rows}; "
+            "they do not describe the same positions")
+    if int(cand_logits.shape[1]) != sketch.vocab_size:
+        raise ValueError(
+            f"the sketch was built at vocabulary {sketch.vocab_size} and the "
+            f"candidate has {int(cand_logits.shape[1])}; the two models are not "
+            "logit-comparable")
+    if int(targets.shape[0]) != t_pred:
+        raise ValueError("targets and the sketch disagree on the position count")
+    tags = dict(tags or {})
+    for name, mask in tags.items():
+        if int(mask.shape[0]) != t_pred:
+            raise ValueError(f"tag {name!r} mask has the wrong length")
+
+    device = cand_logits.device
+    out = DistortionSums()
+    w = _position_weights(weights, t_pred, device, "distortion_union")
+    out.weight = float(t_pred) if w is None else float(w.sum())
+    resident = _reduce_on_device(device)
+    acc = torch.zeros(5, dtype=torch.float64, device=device)
+    tag_acc = {name: torch.zeros(3, dtype=torch.float64, device=device)
+               for name in tags}
+    has_tail = sketch.top_k < sketch.vocab_size
+    step = max(1, int(chunk))
+    for start in range(0, t_pred, step):
+        stop = min(start + step, t_pred)
+        block = cand_logits[start:stop]
+        part = TeacherRetrieval(retrieval.hidden[start:stop],
+                                retrieval.log_z[start:stop], retrieval.head)
+        terms = union_forward_kl_terms(
+            sketch.support_indices[start:stop],
+            sketch.support_log_probs[start:stop],
+            sketch.tail_log_prob[start:stop], block, part,
+            top_k=sketch.top_k, has_tail=has_tail, reverse=True, chunk=step)
+        kl, rkl = terms.kl, terms.reverse_kl
+        if position_sink is not None:
+            position_sink(start, stop, kl, terms.log_z, union=terms)
+        tgt = targets[start:stop].to(device)
+        cand32 = block.float()
+        abl_ce = -(cand32.gather(1, tgt.view(-1, 1)).squeeze(1) - terms.log_z)
+        cand_argmax = cand32.argmax(dim=-1)
+        del cand32
+        ref_ce = -sketch.target_log_prob[start:stop].to(device).float()
+        agree = (cand_argmax
+                 == sketch.top1_token[start:stop].to(device)).float()
+        block_w = None if w is None else w[start:stop]
+        for slot, value in enumerate((kl, rkl, ref_ce, abl_ce, agree)):
+            acc[slot] += (value.sum() if block_w is None
+                          else (value * block_w).sum()).double()
+        for name, mask in tags.items():
+            m = mask[start:stop].to(device)
+            if block_w is None:
+                tag_acc[name][0] += (kl * m).sum().double()
+                tag_acc[name][1] += m.sum().double()
+            else:
+                tag_acc[name][0] += (kl * m * block_w).sum().double()
+                tag_acc[name][1] += (m * block_w).sum().double()
+            tag_acc[name][2] += m.sum().double()
+        del terms, kl, rkl
+
+    host = acc.cpu() if resident else acc
+    out.positions = t_pred
+    out.kl = float(host[0])
+    out.reverse_kl = float(host[1])
+    out.ref_ce = float(host[2])
+    out.abl_ce = float(host[3])
+    out.top1_agree = float(host[4])
+    for name, a in tag_acc.items():
+        h = a.cpu() if resident else a
+        out.tagged[name] = [float(h[0]), float(h[1]), float(h[2])]
+    return out
+
+
 def _term(p: torch.Tensor, p_log: torch.Tensor,
           q_log: torch.Tensor) -> torch.Tensor:
     """``p * (log p - log q)``, with ``p == 0`` contributing exactly zero.
@@ -480,6 +1033,27 @@ def sketch_forward_kl(support_indices: torch.Tensor,
                       cand_logits: torch.Tensor,
                       *, has_tail: bool) -> torch.Tensor:
     """Per-position forward KL on the reference's ``K+1`` partition.
+
+    The KL half of :func:`sketch_forward_kl_terms`, which also returns the
+    candidate's log-normalizer; the arithmetic is the same operations in the
+    same order either way.
+    """
+    return sketch_forward_kl_terms(support_indices, support_log_probs,
+                                   tail_log_prob, cand_logits,
+                                   has_tail=has_tail)[0]
+
+
+def sketch_forward_kl_terms(support_indices: torch.Tensor,
+                            support_log_probs: torch.Tensor,
+                            tail_log_prob: torch.Tensor,
+                            cand_logits: torch.Tensor,
+                            *, has_tail: bool
+                            ) -> tuple[torch.Tensor, torch.Tensor]:
+    """``(kl, log_z)``: the forward KL and the candidate's log-normalizer.
+
+    ``log_z`` ``[...]`` is returned because a student-confidence objective
+    needs it for the Top-K mass, and recomputing a vocabulary-wide reduction
+    the KL has already paid for would double this reducer's cost.
 
     Generic over leading dimensions: ``support_indices`` and
     ``support_log_probs`` are ``[..., K]``, ``tail_log_prob`` is ``[...]`` and
@@ -506,7 +1080,7 @@ def sketch_forward_kl(support_indices: torch.Tensor,
     kl = _term(p_log.exp(), p_log, q_log).sum(dim=-1)
     if not has_tail:
         #: K >= V: no tail bucket exists.
-        return kl
+        return kl, log_z.squeeze(-1)
     p_tail_log = tail_log_prob.float()
     #: The candidate's tail from ITS OWN complement logits on the reference
     #: support. NOT `1 - sum(support)`, which crosses float32 resolution once the
@@ -516,7 +1090,8 @@ def sketch_forward_kl(support_indices: torch.Tensor,
     #: UNCONDITIONAL. Only zero REFERENCE mass makes the forward term vanish, and
     #: `_term` is what decides that. A candidate with zero complement mass against
     #: a non-zero reference tail is `+inf`, and that is preserved.
-    return kl + _term(p_tail_log.exp(), p_tail_log, q_tail_log)
+    return (kl + _term(p_tail_log.exp(), p_tail_log, q_tail_log),
+            log_z.squeeze(-1))
 
 
 def sketch_forward_kl_mean(sketch: ReferenceDistributionSketch,
@@ -561,6 +1136,19 @@ def sketch_forward_kl_mean_batch(support_indices: torch.Tensor,
     """
     kl = sketch_forward_kl(support_indices, support_log_probs, tail_log_prob,
                            cand_logits, has_tail=has_tail)
+    return masked_item_means(kl, prediction_mask, weights=weights)
+
+
+def masked_item_means(kl: torch.Tensor, prediction_mask: torch.Tensor,
+                      *, weights: torch.Tensor | None = None) -> torch.Tensor:
+    """``[B]`` per-item weighted means of per-position values ``kl`` ``[B, T]``.
+
+    The reduction half of :func:`sketch_forward_kl_mean_batch`, separated so the
+    pre-vocabulary row path (:mod:`aadistill.initialization.scoring.rows`) forms
+    its per-item means with the SAME operations: it scatters its selected-row
+    values into the dense layout and calls this. A value at a position this
+    masks out is never read, which is what lets the row path leave zeros there.
+    """
     m = prediction_mask.to(kl.device).float()
     if weights is not None:
         m = m * weights.to(kl.device).float()

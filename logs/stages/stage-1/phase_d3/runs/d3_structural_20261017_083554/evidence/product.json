@@ -1,0 +1,28 @@
+{
+ "checkpoint_path": "/workspace/aad/artifacts/stages/stage-1/d3_structural/steps/03_attention",
+ "files": {
+  "config.json": {
+   "bytes": 1419,
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+  },
+  "generation_config.json": {
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+  },
+  "model.safetensors": {
+   "bytes": 1192135096,
+   "sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856"
+  }
+ },
+ "identities": {
+  "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+  "artifact_digest": "4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de",
+  "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+  "num_parameters": 596049920,
+  "single_shard_sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856",
+  "weights_digest": "e61ca76aaf1dee6146e4a872adc749c2fd842dbe90192afac5e6aaf021cf7f63"
+ },
+ "outcome": "STRUCTURAL_CHANGE",
+ "registration_hash": "43156f21a011803bcb76be8f2c3f5f9616e9034d8f7ea811b9f5de6b9eea17d9",
+ "treatment_path_hash": "5948a3c99ac12213fe4a9b8cd82362f5a1934d38e48e0589e5ff4f6913f60705"
+}

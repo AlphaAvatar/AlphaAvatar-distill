@@ -1,0 +1,644 @@
+{
+ "schema": "aadistill.phase_d2.screening_ranking/v1",
+ "run_id": "d2_screening_20261015_203346",
+ "contract_hash": "6d4283e77e1b26549328d96eaf8f71773a3b2ef4e15804d26dd938eb0674455e",
+ "units_verified": {
+  "d2_screening_c1_s516448251": {
+   "checks": {
+    "result_self_hash": true,
+    "result_is_the_session_record": true,
+    "label_is_the_frozen_probe": true,
+    "seed_is_the_frozen_seed": true,
+    "arm_is_the_frozen_arm": true,
+    "initialization_is_the_committed_candidate": true,
+    "session_entry_is_the_frozen_probe": true,
+    "admitted_under_the_shared_rung": true,
+    "admission_record_is_this_probes": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "rows_carry_the_frozen_unit": true,
+    "rows_counts_are_the_results": true,
+    "rescore_reproduces_per_sample": true,
+    "rescore_reproduces_the_result": true,
+    "training_records_are_the_sessions": true,
+    "completion_is_the_results": true,
+    "training_completed_every_step": true,
+    "config_is_bound_end_to_end": true,
+    "training_identity_is_the_protocols": true,
+    "recipe_digest_is_the_protocols": true,
+    "trained_from_the_candidate_at_the_seed": true,
+    "config_file_is_the_manifests": true
+   },
+   "training": {
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+    "device_class": "NVIDIA L40S",
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"
+   },
+   "verified": true,
+   "correct_overall": 0.0212,
+   "usable_rollout_rate": 0.6474,
+   "aligned_with_B": true,
+   "paired_vs_B": {
+    "both": 2,
+    "candidate_only": 16,
+    "reference_only": 20,
+    "neither": 812
+   },
+   "paired_vs_q2_descriptive": {
+    "both": 3,
+    "candidate_only": 15,
+    "reference_only": 16,
+    "neither": 816
+   }
+  },
+  "d2_screening_c1_s614923639": {
+   "checks": {
+    "result_self_hash": true,
+    "result_is_the_session_record": true,
+    "label_is_the_frozen_probe": true,
+    "seed_is_the_frozen_seed": true,
+    "arm_is_the_frozen_arm": true,
+    "initialization_is_the_committed_candidate": true,
+    "session_entry_is_the_frozen_probe": true,
+    "admitted_under_the_shared_rung": true,
+    "admission_record_is_this_probes": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "rows_carry_the_frozen_unit": true,
+    "rows_counts_are_the_results": true,
+    "rescore_reproduces_per_sample": true,
+    "rescore_reproduces_the_result": true,
+    "training_records_are_the_sessions": true,
+    "completion_is_the_results": true,
+    "training_completed_every_step": true,
+    "config_is_bound_end_to_end": true,
+    "training_identity_is_the_protocols": true,
+    "recipe_digest_is_the_protocols": true,
+    "trained_from_the_candidate_at_the_seed": true,
+    "config_file_is_the_manifests": true
+   },
+   "training": {
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+    "device_class": "NVIDIA L40S",
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"
+   },
+   "verified": true,
+   "correct_overall": 0.0165,
+   "usable_rollout_rate": 0.6758,
+   "aligned_with_B": true,
+   "paired_vs_B": {
+    "both": 1,
+    "candidate_only": 13,
+    "reference_only": 14,
+    "neither": 822
+   },
+   "paired_vs_q2_descriptive": {
+    "both": 2,
+    "candidate_only": 12,
+    "reference_only": 30,
+    "neither": 806
+   }
+  },
+  "d2_screening_c2_s516448251": {
+   "checks": {
+    "result_self_hash": true,
+    "result_is_the_session_record": true,
+    "label_is_the_frozen_probe": true,
+    "seed_is_the_frozen_seed": true,
+    "arm_is_the_frozen_arm": true,
+    "initialization_is_the_committed_candidate": true,
+    "session_entry_is_the_frozen_probe": true,
+    "admitted_under_the_shared_rung": true,
+    "admission_record_is_this_probes": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "rows_carry_the_frozen_unit": true,
+    "rows_counts_are_the_results": true,
+    "rescore_reproduces_per_sample": true,
+    "rescore_reproduces_the_result": true,
+    "training_records_are_the_sessions": true,
+    "completion_is_the_results": true,
+    "training_completed_every_step": true,
+    "config_is_bound_end_to_end": true,
+    "training_identity_is_the_protocols": true,
+    "recipe_digest_is_the_protocols": true,
+    "trained_from_the_candidate_at_the_seed": true,
+    "config_file_is_the_manifests": true
+   },
+   "training": {
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+    "device_class": "NVIDIA L40S",
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"
+   },
+   "verified": true,
+   "correct_overall": 0.0247,
+   "usable_rollout_rate": 0.6653,
+   "aligned_with_B": true,
+   "paired_vs_B": {
+    "both": 3,
+    "candidate_only": 18,
+    "reference_only": 19,
+    "neither": 810
+   },
+   "paired_vs_q2_descriptive": {
+    "both": 2,
+    "candidate_only": 19,
+    "reference_only": 17,
+    "neither": 812
+   }
+  },
+  "d2_screening_c2_s614923639": {
+   "checks": {
+    "result_self_hash": true,
+    "result_is_the_session_record": true,
+    "label_is_the_frozen_probe": true,
+    "seed_is_the_frozen_seed": true,
+    "arm_is_the_frozen_arm": true,
+    "initialization_is_the_committed_candidate": true,
+    "session_entry_is_the_frozen_probe": true,
+    "admitted_under_the_shared_rung": true,
+    "admission_record_is_this_probes": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "rows_carry_the_frozen_unit": true,
+    "rows_counts_are_the_results": true,
+    "rescore_reproduces_per_sample": true,
+    "rescore_reproduces_the_result": true,
+    "training_records_are_the_sessions": true,
+    "completion_is_the_results": true,
+    "training_completed_every_step": true,
+    "config_is_bound_end_to_end": true,
+    "training_identity_is_the_protocols": true,
+    "recipe_digest_is_the_protocols": true,
+    "trained_from_the_candidate_at_the_seed": true,
+    "config_file_is_the_manifests": true
+   },
+   "training": {
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+    "device_class": "NVIDIA L40S",
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"
+   },
+   "verified": true,
+   "correct_overall": 0.0282,
+   "usable_rollout_rate": 0.6874,
+   "aligned_with_B": true,
+   "paired_vs_B": {
+    "both": 4,
+    "candidate_only": 20,
+    "reference_only": 11,
+    "neither": 815
+   },
+   "paired_vs_q2_descriptive": {
+    "both": 8,
+    "candidate_only": 16,
+    "reference_only": 24,
+    "neither": 802
+   }
+  },
+  "d2_screening_c3_s516448251": {
+   "checks": {
+    "result_self_hash": true,
+    "result_is_the_session_record": true,
+    "label_is_the_frozen_probe": true,
+    "seed_is_the_frozen_seed": true,
+    "arm_is_the_frozen_arm": true,
+    "initialization_is_the_committed_candidate": true,
+    "session_entry_is_the_frozen_probe": true,
+    "admitted_under_the_shared_rung": true,
+    "admission_record_is_this_probes": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "rows_carry_the_frozen_unit": true,
+    "rows_counts_are_the_results": true,
+    "rescore_reproduces_per_sample": true,
+    "rescore_reproduces_the_result": true,
+    "training_records_are_the_sessions": true,
+    "completion_is_the_results": true,
+    "training_completed_every_step": true,
+    "config_is_bound_end_to_end": true,
+    "training_identity_is_the_protocols": true,
+    "recipe_digest_is_the_protocols": true,
+    "trained_from_the_candidate_at_the_seed": true,
+    "config_file_is_the_manifests": true
+   },
+   "training": {
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+    "device_class": "NVIDIA L40S",
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"
+   },
+   "verified": true,
+   "correct_overall": 0.0341,
+   "usable_rollout_rate": 0.7337,
+   "aligned_with_B": true,
+   "paired_vs_B": {
+    "both": 2,
+    "candidate_only": 27,
+    "reference_only": 20,
+    "neither": 801
+   },
+   "paired_vs_q2_descriptive": {
+    "both": 4,
+    "candidate_only": 25,
+    "reference_only": 15,
+    "neither": 806
+   }
+  },
+  "d2_screening_c3_s614923639": {
+   "checks": {
+    "result_self_hash": true,
+    "result_is_the_session_record": true,
+    "label_is_the_frozen_probe": true,
+    "seed_is_the_frozen_seed": true,
+    "arm_is_the_frozen_arm": true,
+    "initialization_is_the_committed_candidate": true,
+    "session_entry_is_the_frozen_probe": true,
+    "admitted_under_the_shared_rung": true,
+    "admission_record_is_this_probes": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "rows_carry_the_frozen_unit": true,
+    "rows_counts_are_the_results": true,
+    "rescore_reproduces_per_sample": true,
+    "rescore_reproduces_the_result": true,
+    "training_records_are_the_sessions": true,
+    "completion_is_the_results": true,
+    "training_completed_every_step": true,
+    "config_is_bound_end_to_end": true,
+    "training_identity_is_the_protocols": true,
+    "recipe_digest_is_the_protocols": true,
+    "trained_from_the_candidate_at_the_seed": true,
+    "config_file_is_the_manifests": true
+   },
+   "training": {
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+    "device_class": "NVIDIA L40S",
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"
+   },
+   "verified": true,
+   "correct_overall": 0.02,
+   "usable_rollout_rate": 0.6474,
+   "aligned_with_B": true,
+   "paired_vs_B": {
+    "both": 0,
+    "candidate_only": 17,
+    "reference_only": 15,
+    "neither": 818
+   },
+   "paired_vs_q2_descriptive": {
+    "both": 2,
+    "candidate_only": 15,
+    "reference_only": 30,
+    "neither": 803
+   }
+  },
+  "d2_screening_c4_s516448251": {
+   "checks": {
+    "result_self_hash": true,
+    "result_is_the_session_record": true,
+    "label_is_the_frozen_probe": true,
+    "seed_is_the_frozen_seed": true,
+    "arm_is_the_frozen_arm": true,
+    "initialization_is_the_committed_candidate": true,
+    "session_entry_is_the_frozen_probe": true,
+    "admitted_under_the_shared_rung": true,
+    "admission_record_is_this_probes": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "rows_carry_the_frozen_unit": true,
+    "rows_counts_are_the_results": true,
+    "rescore_reproduces_per_sample": true,
+    "rescore_reproduces_the_result": true,
+    "training_records_are_the_sessions": true,
+    "completion_is_the_results": true,
+    "training_completed_every_step": true,
+    "config_is_bound_end_to_end": true,
+    "training_identity_is_the_protocols": true,
+    "recipe_digest_is_the_protocols": true,
+    "trained_from_the_candidate_at_the_seed": true,
+    "config_file_is_the_manifests": true
+   },
+   "training": {
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+    "device_class": "NVIDIA L40S",
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"
+   },
+   "verified": true,
+   "correct_overall": 0.0294,
+   "usable_rollout_rate": 0.6726,
+   "aligned_with_B": true,
+   "paired_vs_B": {
+    "both": 2,
+    "candidate_only": 23,
+    "reference_only": 20,
+    "neither": 805
+   },
+   "paired_vs_q2_descriptive": {
+    "both": 5,
+    "candidate_only": 20,
+    "reference_only": 14,
+    "neither": 811
+   }
+  },
+  "d2_screening_c4_s614923639": {
+   "checks": {
+    "result_self_hash": true,
+    "result_is_the_session_record": true,
+    "label_is_the_frozen_probe": true,
+    "seed_is_the_frozen_seed": true,
+    "arm_is_the_frozen_arm": true,
+    "initialization_is_the_committed_candidate": true,
+    "session_entry_is_the_frozen_probe": true,
+    "admitted_under_the_shared_rung": true,
+    "admission_record_is_this_probes": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "rows_carry_the_frozen_unit": true,
+    "rows_counts_are_the_results": true,
+    "rescore_reproduces_per_sample": true,
+    "rescore_reproduces_the_result": true,
+    "training_records_are_the_sessions": true,
+    "completion_is_the_results": true,
+    "training_completed_every_step": true,
+    "config_is_bound_end_to_end": true,
+    "training_identity_is_the_protocols": true,
+    "recipe_digest_is_the_protocols": true,
+    "trained_from_the_candidate_at_the_seed": true,
+    "config_file_is_the_manifests": true
+   },
+   "training": {
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+    "device_class": "NVIDIA L40S",
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"
+   },
+   "verified": true,
+   "correct_overall": 0.0259,
+   "usable_rollout_rate": 0.6853,
+   "aligned_with_B": true,
+   "paired_vs_B": {
+    "both": 3,
+    "candidate_only": 19,
+    "reference_only": 12,
+    "neither": 816
+   },
+   "paired_vs_q2_descriptive": {
+    "both": 6,
+    "candidate_only": 16,
+    "reference_only": 26,
+    "neither": 802
+   }
+  }
+ },
+ "ranking": {
+  "seeds": [
+   516448251,
+   614923639
+  ],
+  "incumbent": {
+   "arm": "B",
+   "n_seeds": 2,
+   "seeds": [
+    516448251,
+    614923639
+   ],
+   "correct_overall": 0.02175,
+   "usable_rollout_rate": 0.58685,
+   "per_seed": {
+    "516448251": {
+     "correct_overall": 0.0259,
+     "usable_rollout_rate": 0.6284
+    },
+    "614923639": {
+     "correct_overall": 0.0176,
+     "usable_rollout_rate": 0.5453
+    }
+   }
+  },
+  "ranked": [
+   {
+    "arm": "c4",
+    "state_id": "3a4173e4eff45b0d73fd82bd0b263f03",
+    "quality_position": 4,
+    "correct_overall": 0.02765,
+    "incumbent_correct_overall": 0.02175,
+    "delta_vs_b": 0.0059,
+    "usable_rollout_rate": 0.6789499999999999,
+    "incumbent_usable_rollout_rate": 0.58685,
+    "delta_usable_pooled": 0.0921,
+    "delta_usable_per_seed": {
+     "516448251": 0.0442,
+     "614923639": 0.14
+    },
+    "vetoed": false,
+    "vetoes": [],
+    "per_seed": {
+     "516448251": {
+      "correct_overall": 0.0294,
+      "usable_rollout_rate": 0.6726
+     },
+     "614923639": {
+      "correct_overall": 0.0259,
+      "usable_rollout_rate": 0.6853
+     }
+    },
+    "screening_position": 0
+   },
+   {
+    "arm": "c3",
+    "state_id": "30fe791a85d70ac713e75893fea107ae",
+    "quality_position": 3,
+    "correct_overall": 0.027049999999999998,
+    "incumbent_correct_overall": 0.02175,
+    "delta_vs_b": 0.0053,
+    "usable_rollout_rate": 0.69055,
+    "incumbent_usable_rollout_rate": 0.58685,
+    "delta_usable_pooled": 0.1037,
+    "delta_usable_per_seed": {
+     "516448251": 0.1053,
+     "614923639": 0.1021
+    },
+    "vetoed": false,
+    "vetoes": [],
+    "per_seed": {
+     "516448251": {
+      "correct_overall": 0.0341,
+      "usable_rollout_rate": 0.7337
+     },
+     "614923639": {
+      "correct_overall": 0.02,
+      "usable_rollout_rate": 0.6474
+     }
+    },
+    "screening_position": 1
+   },
+   {
+    "arm": "c2",
+    "state_id": "c2cb27efcf68b4f18bf7284aea84877a",
+    "quality_position": 2,
+    "correct_overall": 0.02645,
+    "incumbent_correct_overall": 0.02175,
+    "delta_vs_b": 0.0047,
+    "usable_rollout_rate": 0.67635,
+    "incumbent_usable_rollout_rate": 0.58685,
+    "delta_usable_pooled": 0.0895,
+    "delta_usable_per_seed": {
+     "516448251": 0.0369,
+     "614923639": 0.1421
+    },
+    "vetoed": false,
+    "vetoes": [],
+    "per_seed": {
+     "516448251": {
+      "correct_overall": 0.0247,
+      "usable_rollout_rate": 0.6653
+     },
+     "614923639": {
+      "correct_overall": 0.0282,
+      "usable_rollout_rate": 0.6874
+     }
+    },
+    "screening_position": 2
+   },
+   {
+    "arm": "c1",
+    "state_id": "59013099b902f213649b8aa4c676dedd",
+    "quality_position": 1,
+    "correct_overall": 0.01885,
+    "incumbent_correct_overall": 0.02175,
+    "delta_vs_b": -0.0029,
+    "usable_rollout_rate": 0.6616,
+    "incumbent_usable_rollout_rate": 0.58685,
+    "delta_usable_pooled": 0.07475,
+    "delta_usable_per_seed": {
+     "516448251": 0.019,
+     "614923639": 0.1305
+    },
+    "vetoed": false,
+    "vetoes": [],
+    "per_seed": {
+     "516448251": {
+      "correct_overall": 0.0212,
+      "usable_rollout_rate": 0.6474
+     },
+     "614923639": {
+      "correct_overall": 0.0165,
+      "usable_rollout_rate": 0.6758
+     }
+    },
+    "screening_position": 3
+   }
+  ]
+ },
+ "selection": {
+  "arm": "c4",
+  "state_id": "3a4173e4eff45b0d73fd82bd0b263f03",
+  "quality_position": 4,
+  "correct_overall": 0.02765,
+  "incumbent_correct_overall": 0.02175,
+  "delta_vs_b": 0.0059,
+  "usable_rollout_rate": 0.6789499999999999,
+  "incumbent_usable_rollout_rate": 0.58685,
+  "delta_usable_pooled": 0.0921,
+  "delta_usable_per_seed": {
+   "516448251": 0.0442,
+   "614923639": 0.14
+  },
+  "vetoed": false,
+  "vetoes": [],
+  "per_seed": {
+   "516448251": {
+    "correct_overall": 0.0294,
+    "usable_rollout_rate": 0.6726
+   },
+   "614923639": {
+    "correct_overall": 0.0259,
+    "usable_rollout_rate": 0.6853
+   }
+  },
+  "screening_position": 0,
+  "advanced": true,
+  "outcome": "ONE_CANDIDATE_ADVANCES",
+  "margin_over_runner_up": 0.0006,
+  "runner_up": "c3",
+  "tie_broken": false,
+  "n_vetoed": 0,
+  "_the_confirmation_is_a_single_hypothesis": "one candidate advances, so the confirmation needs no multiplicity correction. That is a deliberate trade of breadth for a clean bound."
+ },
+ "q2_descriptive": {
+  "pooled_correct_overall": 0.03,
+  "units": [
+   "d1_screening_q2_s516448251",
+   "d1_screening_q2_s614923639"
+  ],
+  "_role": "DESCRIPTIVE ONLY: q2 advanced on these prompts and seeds, so its screening rows carry the winner's curse; never a ranking comparator"
+ },
+ "comparator_units": [
+  "d1_screening_B_s516448251",
+  "d1_screening_B_s614923639"
+ ],
+ "_this_is_not_a_verdict": "a ranking and a nomination for the SHARED confirmation (or none). The advancing candidate's screening estimate is inflated by the winner's curse, and B's rows were already observed in D1 (adaptivity and multiplicity limits registered in the shared protocol). No promotion follows from it.",
+ "statistical_integrity": {
+  "comparator": "B's imported screening rows",
+  "statistic": "pooled seed-mean correct_overall delta vs B, C0's guardrail vetoes",
+  "selection": "exactly one candidate advances, or none",
+  "tie_break": "the experiment's frozen quality position, then state id",
+  "field": "frozen by the experiment's own retention decision before any behavioural datum; its size is that experiment's preregistered choice",
+  "q2_screening_rows": "DESCRIPTIVE ONLY. q2 advanced on these prompts and seeds, so its screening estimate is inflated by the winner's curse (screening +0.00825 vs B, confirmation -0.000392). Never a ranking comparator",
+  "endpoint": "correct_overall",
+  "guardrails": {
+   "usable_pooled_min_delta": -0.05,
+   "usable_per_seed_min_delta": -0.1,
+   "role": "veto only; never positive credit"
+  },
+  "sesoi_for_the_confirmation": 0.01,
+  "_not_eight_independent_architectures": "the four candidates are near-siblings of one lineage; the paired seeds are the replicate, and eight probes are not eight independent tests",
+  "_frozen": "no seed is added, no SESOI moves and no candidate is re-screened because candidates land close together"
+ }
+}

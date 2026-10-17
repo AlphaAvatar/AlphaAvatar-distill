@@ -951,11 +951,41 @@ def main() -> int:
             #: three related numbers and remembering the third is the same
             #: defect this function was written to remove from `latest_run`.
             b["authorized_cap_usd"] = project["cap_usd"]
+            #: ONE CAP. The snapshot also carried a hand-maintained
+            #: `project_cap_usd` (465.0) beside this derived one (590.0) after
+            #: the cap was amended, so the state file contradicted itself, with
+            #: spend above one cap and below the other. Nothing reads that
+            #: key; the deriver is the budget authority, and this is its value.
+            b.pop("project_cap_usd", None)
             #: The per-experiment breakdown stays in the DERIVER. The snapshot
             #: is the minimal view and has a size guard; it carries the number,
             #: and `derive_budget.py --json` carries how it was reached.
         b["_package_spent_usd"] = spent
         new_snapshot["budget"] = b
+
+    #: The FORWARD BASELINE, through the one resolver every forward consumer
+    #: uses -- so the snapshot cannot name a baseline the resolver would refuse,
+    #: and cannot keep naming one after a re-selection.
+    if str(root / "scripts") not in sys.path:
+        sys.path.insert(0, str(root / "scripts"))
+    from shared.forward_baseline import SELECTION, selected
+
+    fb = selected(root)
+    ex = fb.execution
+    refs = [f"{a.label} {a.semantic_state_id[:8]}/{a.identities['artifact_digest'][:8]}"
+            f" under prediction_rows={a.execution.prediction_rows}"
+            for a in fb.reference_artifacts]
+    new_snapshot["forward_baseline"] = {
+        "_derived_by": "render_log_navigation.py, via shared.forward_baseline",
+        "baseline": fb.qualified_id,
+        "owner": SELECTION,
+        "execution": (f"micro_batch_size={ex.micro_batch_size}, "
+                      f"{ex.calibration_batch_packing}, "
+                      f"prediction_rows={ex.prediction_rows}"),
+        "historical_reference": "; ".join(refs) or None,
+        "forward_materialization": (fb.forward_materialization().label
+                                    if fb.forward_materialization() else None),
+    }
     snap_body = json.dumps(new_snapshot, indent=1) + "\n"
 
     state_p = root / STATE_MD

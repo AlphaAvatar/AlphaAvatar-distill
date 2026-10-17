@@ -286,3 +286,33 @@ def test_the_headroom_probe_measures_the_host_not_the_accelerator(monkeypatch):
     _, source = depth_module._host_available_memory_bytes()
     assert not called, "the accelerator was measured for a host-resident cache"
     assert source in {"cgroup.v2", "cgroup.v1", "proc.meminfo", "unknown"}
+
+
+# --- the allocator's hoard is returned before the headroom is read -----------
+
+
+def test_cuda_headroom_is_read_after_the_allocator_returns_its_hoard(monkeypatch):
+    """D1's search: 0.12 GiB "free", 36 GiB reclaimable, a 0.14 GiB sketch.
+
+    `mem_get_info` counts blocks the allocator reserved and holds unused as
+    taken, so 15 of 16 DEPTH expansions recomputed a reference that fitted. The
+    probe must return them (`empty_cache`) BEFORE it reads the driver, and say
+    so in its source. Simulated: no GPU is needed to pin the order.
+    """
+    calls: list[str] = []
+    state = {"free": int(0.12 * 2**30)}
+
+    def empty_cache():
+        calls.append("empty_cache")
+        state["free"] = int(36.1 * 2**30)
+
+    def mem_get_info(dev):
+        calls.append("mem_get_info")
+        return state["free"], 48 * 2**30
+
+    monkeypatch.setattr(depth_module.torch.cuda, "empty_cache", empty_cache)
+    monkeypatch.setattr(depth_module.torch.cuda, "mem_get_info", mem_get_info)
+    free, source = depth_module._available_memory_bytes("cuda:0")
+    assert calls == ["empty_cache", "mem_get_info"]
+    assert free == int(36.1 * 2**30)
+    assert source.endswith("after empty_cache")

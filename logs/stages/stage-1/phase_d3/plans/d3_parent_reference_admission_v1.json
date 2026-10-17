@@ -1,0 +1,770 @@
+{
+ "admission_hash": "068db562d059504bac1d77cab53d86e9bc2ccecc21570abffcd4f1d07ef707b5",
+ "checks": {
+  "argmin": "the parent-reference argmin (ties by candidate id) is q2's first removed layer",
+  "candidate_set": "round 0 tests exactly the control's round-0 candidates, each once",
+  "diagnostic_complete": "the treated DEPTH step carries round 0, and a finite parent-reference KL recorded at round 0 for every one of its candidates",
+  "numerical": "for every candidate: |d3 - q2| <= atol + rtol * |q2|"
+ },
+ "control_record": "logs/stages/stage-1/phase_d3/plans/d3_control_q2.json",
+ "control_record_sha256": "e364aaecd450359475b73fa7a543ccb803e88628d0ee2564819280add1b4978a",
+ "declared_utc": "2026-10-17T07:56:07Z",
+ "discrimination": {
+  "_reads": "every other DEPTH round-0 table over the same candidates in both journals is refused, including q2's own parent under the other profile, whose argmin is ALSO layer 26: the argmin check alone would not have caught it, the numerical check does",
+  "closest": {
+   "argmin": 26,
+   "journal": "d1",
+   "parent_state_id": "3695c4aebeabc6507c00adf9baac6bc6",
+   "profile_id": "calib.reasoning_heavy@v2",
+   "state_id": "f17464de323cf54a9a7ae4c6f144418e",
+   "violations": 34
+  },
+  "min_violations": 34,
+  "same_parent_other_profile": [
+   {
+    "argmin": 26,
+    "journal": "d1",
+    "parent_state_id": "6d6006a0f66c94a331a5747b228179ec",
+    "profile_id": "calib.domain_balanced@v1",
+    "state_id": "5cedae7c1d21b0e99385fcb0d2bc8ea5",
+    "violations": 35
+   }
+  ],
+  "tables_checked": 29,
+  "tables_refused": 29
+ },
+ "evidence": {
+  "_reads": "Same execution reproduces to the bit, so the expected difference is zero. Across sessions -- another code commit, cache mode and prediction-row policy, with a root store resident -- the same quantity moved by at most the maxima above, with the argmin unchanged. D3 holds q2's micro-batch, packing and all-row prediction",
+  "cross_session": [
+   {
+    "argmin_base": 2,
+    "argmin_other": 2,
+    "d1": {
+     "calibration_batch_packing": "length_sorted_v1",
+     "micro_batch_size": 3,
+     "prediction_rows": "all_v1",
+     "reference_cache_mode": "recomputed",
+     "state_id": "0c1dc924e75cfaba27c006596119625f",
+     "value": "round-0 decision score (parent_state reference)"
+    },
+    "d2": {
+     "calibration_batch_packing": "length_sorted_v1",
+     "micro_batch_size": 3,
+     "parent_reference_cache_mode": "cached",
+     "prediction_rows": "scored_v1",
+     "state_id": "7745def0c1991963785804486c2aa052",
+     "value": "round-0 parent-reference diagnostic, root reference store resident"
+    },
+    "max_abs_at_candidate": 22,
+    "max_abs_difference": 4.949018123465154e-05,
+    "max_rel_at_candidate": 26,
+    "max_rel_difference": 0.0004431653577732955,
+    "n": 36,
+    "n_bit_identical": 0,
+    "parent_state_id": "68c056b6486e31bfee5ad95c1184cecd",
+    "profile_id": "calib.reasoning_heavy@v2",
+    "rows": [
+     {
+      "abs_difference": 3.199749554383402e-05,
+      "base": 8.390666264602906,
+      "candidate": 0,
+      "other": 8.39069826209845,
+      "rel_difference": 3.813463023648018e-06
+     },
+     {
+      "abs_difference": 6.326005879686569e-07,
+      "base": 0.33891292852128596,
+      "candidate": 1,
+      "other": 0.338912295920698,
+      "rel_difference": 1.8665578522742174e-06
+     },
+     {
+      "abs_difference": 2.527750472242074e-06,
+      "base": 0.034977305309844595,
+      "candidate": 2,
+      "other": 0.03497983306031684,
+      "rel_difference": 7.226830225628107e-05
+     },
+     {
+      "abs_difference": 3.940815743799786e-06,
+      "base": 0.04836866086387382,
+      "candidate": 3,
+      "other": 0.04837260167961762,
+      "rel_difference": 8.147456790028997e-05
+     },
+     {
+      "abs_difference": 2.3558166577439255e-06,
+      "base": 0.05513289094663028,
+      "candidate": 4,
+      "other": 0.055130535129972534,
+      "rel_difference": 4.272978647218776e-05
+     },
+     {
+      "abs_difference": 1.476371679447197e-05,
+      "base": 0.07675893734031022,
+      "candidate": 5,
+      "other": 0.0767737010571047,
+      "rel_difference": 0.0001923387335212463
+     },
+     {
+      "abs_difference": 1.6306775944663343e-05,
+      "base": 1.4033691455279929,
+      "candidate": 6,
+      "other": 1.4033528387520482,
+      "rel_difference": 1.1619733835980987e-05
+     },
+     {
+      "abs_difference": 1.3966780720992e-05,
+      "base": 0.06597148765766514,
+      "candidate": 7,
+      "other": 0.06595752087694415,
+      "rel_difference": 0.00021170934924898905
+     },
+     {
+      "abs_difference": 6.969271317325276e-06,
+      "base": 0.07163566031157204,
+      "candidate": 8,
+      "other": 0.07164262958288936,
+      "rel_difference": 9.728773751806206e-05
+     },
+     {
+      "abs_difference": 2.393325266802915e-06,
+      "base": 0.08167083884123033,
+      "candidate": 9,
+      "other": 0.08167323216649713,
+      "rel_difference": 2.9304526569827265e-05
+     },
+     {
+      "abs_difference": 2.846184412402808e-05,
+      "base": 0.08702920212342599,
+      "candidate": 10,
+      "other": 0.08700074027930196,
+      "rel_difference": 0.0003270378611958674
+     },
+     {
+      "abs_difference": 1.3061381869100552e-05,
+      "base": 0.07365917107939408,
+      "candidate": 11,
+      "other": 0.07364610969752498,
+      "rel_difference": 0.00017732186878701426
+     },
+     {
+      "abs_difference": 2.09354863860145e-06,
+      "base": 0.10345483640667077,
+      "candidate": 12,
+      "other": 0.10345692995530938,
+      "rel_difference": 2.0236353478651464e-05
+     },
+     {
+      "abs_difference": 1.063270572157493e-06,
+      "base": 0.09940663466505487,
+      "candidate": 13,
+      "other": 0.09940557139448271,
+      "rel_difference": 1.0696173104945402e-05
+     },
+     {
+      "abs_difference": 7.194844265381861e-06,
+      "base": 0.0805150067092616,
+      "candidate": 14,
+      "other": 0.08050781186499621,
+      "rel_difference": 8.936028896280576e-05
+     },
+     {
+      "abs_difference": 1.0786646582647275e-05,
+      "base": 0.07394011284284821,
+      "candidate": 15,
+      "other": 0.07392932619626556,
+      "rel_difference": 0.0001458835558659903
+     },
+     {
+      "abs_difference": 2.3306789248556115e-07,
+      "base": 0.07020290837189971,
+      "candidate": 16,
+      "other": 0.0702031414397922,
+      "rel_difference": 3.3199179049802982e-06
+     },
+     {
+      "abs_difference": 2.45073398090212e-05,
+      "base": 0.08538147485760963,
+      "candidate": 17,
+      "other": 0.08535696751780061,
+      "rel_difference": 0.000287033456026521
+     },
+     {
+      "abs_difference": 9.328710057071588e-07,
+      "base": 0.09293274572169988,
+      "candidate": 18,
+      "other": 0.09293181285069417,
+      "rel_difference": 1.0038130246369472e-05
+     },
+     {
+      "abs_difference": 3.1770556164767427e-06,
+      "base": 0.11888920207616291,
+      "candidate": 19,
+      "other": 0.11888602502054643,
+      "rel_difference": 2.6722827313126842e-05
+     },
+     {
+      "abs_difference": 5.136342005260253e-06,
+      "base": 0.08325265082279586,
+      "candidate": 20,
+      "other": 0.08325778716480112,
+      "rel_difference": 6.169583736370161e-05
+     },
+     {
+      "abs_difference": 9.963004659302443e-06,
+      "base": 0.0893609191011272,
+      "candidate": 21,
+      "other": 0.0893509560964679,
+      "rel_difference": 0.0001114917433652131
+     },
+     {
+      "abs_difference": 4.949018123465154e-05,
+      "base": 0.11320252112777399,
+      "candidate": 22,
+      "other": 0.11325201130900864,
+      "rel_difference": 0.0004371826770429518
+     },
+     {
+      "abs_difference": 1.1429060276735292e-05,
+      "base": 0.12253652837964875,
+      "candidate": 23,
+      "other": 0.12254795743992548,
+      "rel_difference": 9.327063878719667e-05
+     },
+     {
+      "abs_difference": 7.4392576509818564e-06,
+      "base": 0.1370842508795161,
+      "candidate": 24,
+      "other": 0.13709169013716707,
+      "rel_difference": 5.426777768600312e-05
+     },
+     {
+      "abs_difference": 1.1667299191817082e-05,
+      "base": 0.09258323400616104,
+      "candidate": 25,
+      "other": 0.09259490130535286,
+      "rel_difference": 0.00012601956841387361
+     },
+     {
+      "abs_difference": 3.6321034436306854e-05,
+      "base": 0.08195819867059001,
+      "candidate": 26,
+      "other": 0.08199451970502632,
+      "rel_difference": 0.0004431653577732955
+     },
+     {
+      "abs_difference": 7.548330112946977e-06,
+      "base": 0.09449180547865765,
+      "candidate": 27,
+      "other": 0.0944993538087706,
+      "rel_difference": 7.988343618486448e-05
+     },
+     {
+      "abs_difference": 6.900041018775838e-06,
+      "base": 0.1043947003803121,
+      "candidate": 28,
+      "other": 0.10438780033929332,
+      "rel_difference": 6.609570211551777e-05
+     },
+     {
+      "abs_difference": 1.2493684790476633e-06,
+      "base": 0.10366305821230433,
+      "candidate": 29,
+      "other": 0.10366430758078338,
+      "rel_difference": 1.2052205487599334e-05
+     },
+     {
+      "abs_difference": 1.3196075212537628e-05,
+      "base": 0.11360844104624515,
+      "candidate": 30,
+      "other": 0.11359524497103261,
+      "rel_difference": 0.00011615400309177792
+     },
+     {
+      "abs_difference": 8.812904136748512e-06,
+      "base": 0.08759496202679137,
+      "candidate": 31,
+      "other": 0.08760377493092812,
+      "rel_difference": 0.00010060971467803181
+     },
+     {
+      "abs_difference": 1.5806440765986363e-07,
+      "base": 0.07312544676190198,
+      "candidate": 32,
+      "other": 0.07312560482630964,
+      "rel_difference": 2.161551343057427e-06
+     },
+     {
+      "abs_difference": 4.225459753939842e-06,
+      "base": 0.10843577123264267,
+      "candidate": 33,
+      "other": 0.10843999669239661,
+      "rel_difference": 3.8967397067471054e-05
+     },
+     {
+      "abs_difference": 1.6069234848758995e-05,
+      "base": 0.1675286299127891,
+      "candidate": 34,
+      "other": 0.16754469914763787,
+      "rel_difference": 9.591933544209253e-05
+     },
+     {
+      "abs_difference": 1.1927437467001978e-05,
+      "base": 0.17478597398441426,
+      "candidate": 35,
+      "other": 0.17477404654694725,
+      "rel_difference": 6.824024373984124e-05
+     }
+    ]
+   },
+   {
+    "argmin_base": 2,
+    "argmin_other": 2,
+    "d1": {
+     "calibration_batch_packing": "length_sorted_v1",
+     "micro_batch_size": 3,
+     "prediction_rows": "all_v1",
+     "reference_cache_mode": "cached",
+     "state_id": "20bd9506785d3d3e2468d5ed0f003203",
+     "value": "round-0 decision score (parent_state reference)"
+    },
+    "d2": {
+     "calibration_batch_packing": "length_sorted_v1",
+     "micro_batch_size": 3,
+     "parent_reference_cache_mode": "cached",
+     "prediction_rows": "scored_v1",
+     "state_id": "cadd35f298e4b18eb3f642070536af75",
+     "value": "round-0 parent-reference diagnostic, root reference store resident"
+    },
+    "max_abs_at_candidate": 0,
+    "max_abs_difference": 3.002088355685828e-08,
+    "max_rel_at_candidate": 2,
+    "max_rel_difference": 1.4536575409309558e-07,
+    "n": 36,
+    "n_bit_identical": 0,
+    "parent_state_id": "68c056b6486e31bfee5ad95c1184cecd",
+    "profile_id": "calib.domain_balanced@v1",
+    "rows": [
+     {
+      "abs_difference": 3.002088355685828e-08,
+      "base": 8.375654818885845,
+      "candidate": 0,
+      "other": 8.375654848906729,
+      "rel_difference": 3.5843028641970404e-09
+     },
+     {
+      "abs_difference": 8.54860887633535e-09,
+      "base": 0.3430838204348746,
+      "candidate": 1,
+      "other": 0.3430838289834835,
+      "rel_difference": 2.4916968878041504e-08
+     },
+     {
+      "abs_difference": 4.775378092958249e-09,
+      "base": 0.03285077783794928,
+      "candidate": 2,
+      "other": 0.03285078261332737,
+      "rel_difference": 1.4536575409309558e-07
+     },
+     {
+      "abs_difference": 5.455300211565373e-09,
+      "base": 0.04626665307940438,
+      "candidate": 3,
+      "other": 0.04626665853470459,
+      "rel_difference": 1.1790998156280732e-07
+     },
+     {
+      "abs_difference": 4.986489443581377e-09,
+      "base": 0.05331779983591867,
+      "candidate": 4,
+      "other": 0.05331780482240811,
+      "rel_difference": 9.35239161954714e-08
+     },
+     {
+      "abs_difference": 5.474443023900655e-09,
+      "base": 0.07219200486013116,
+      "candidate": 5,
+      "other": 0.07219201033457419,
+      "rel_difference": 7.583170788104787e-08
+     },
+     {
+      "abs_difference": 1.665872773060073e-08,
+      "base": 1.4233063418327627,
+      "candidate": 6,
+      "other": 1.4233063584914905,
+      "rel_difference": 1.1704246121147485e-08
+     },
+     {
+      "abs_difference": 4.858252786177353e-09,
+      "base": 0.06353601232113665,
+      "candidate": 7,
+      "other": 0.06353601717938943,
+      "rel_difference": 7.646455307301602e-08
+     },
+     {
+      "abs_difference": 4.897644484413988e-09,
+      "base": 0.06949356693181495,
+      "candidate": 8,
+      "other": 0.06949357182945944,
+      "rel_difference": 7.047622824166462e-08
+     },
+     {
+      "abs_difference": 4.808691986268876e-09,
+      "base": 0.07740380832403936,
+      "candidate": 9,
+      "other": 0.07740381313273134,
+      "rel_difference": 6.212474670675133e-08
+     },
+     {
+      "abs_difference": 5.0154726066731214e-09,
+      "base": 0.08387357580220557,
+      "candidate": 10,
+      "other": 0.08387358081767818,
+      "rel_difference": 5.979800620997528e-08
+     },
+     {
+      "abs_difference": 5.013043341550727e-09,
+      "base": 0.0730250882206812,
+      "candidate": 11,
+      "other": 0.07302509323372454,
+      "rel_difference": 6.864823396585777e-08
+     },
+     {
+      "abs_difference": 5.11190456631283e-09,
+      "base": 0.09935005780363079,
+      "candidate": 12,
+      "other": 0.09935006291553536,
+      "rel_difference": 5.1453463433475863e-08
+     },
+     {
+      "abs_difference": 5.157171537040206e-09,
+      "base": 0.0980702348199248,
+      "candidate": 13,
+      "other": 0.09807023997709634,
+      "rel_difference": 5.258651155990125e-08
+     },
+     {
+      "abs_difference": 4.8085821852117405e-09,
+      "base": 0.07997704456758785,
+      "candidate": 14,
+      "other": 0.07997704937617003,
+      "rel_difference": 6.012452962234748e-08
+     },
+     {
+      "abs_difference": 4.946249479442777e-09,
+      "base": 0.07395484587421959,
+      "candidate": 15,
+      "other": 0.07395485082046907,
+      "rel_difference": 6.688201998088434e-08
+     },
+     {
+      "abs_difference": 4.694229602253408e-09,
+      "base": 0.07180641190427489,
+      "candidate": 16,
+      "other": 0.0718064165985045,
+      "rel_difference": 6.537340437663539e-08
+     },
+     {
+      "abs_difference": 4.662402075528149e-09,
+      "base": 0.08552819954236202,
+      "candidate": 17,
+      "other": 0.08552820420476409,
+      "rel_difference": 5.451303897983807e-08
+     },
+     {
+      "abs_difference": 5.054878543520047e-09,
+      "base": 0.09496282484108702,
+      "candidate": 18,
+      "other": 0.09496282989596556,
+      "rel_difference": 5.3230077685441615e-08
+     },
+     {
+      "abs_difference": 4.778865705934443e-09,
+      "base": 0.1182956308069499,
+      "candidate": 19,
+      "other": 0.1182956355858156,
+      "rel_difference": 4.039765182649234e-08
+     },
+     {
+      "abs_difference": 4.7669565239605305e-09,
+      "base": 0.08198835623783286,
+      "candidate": 20,
+      "other": 0.08198836100478939,
+      "rel_difference": 5.814187212306687e-08
+     },
+     {
+      "abs_difference": 4.82001513701924e-09,
+      "base": 0.08939191509187237,
+      "candidate": 21,
+      "other": 0.08939191991188751,
+      "rel_difference": 5.39200344020539e-08
+     },
+     {
+      "abs_difference": 4.838254172301326e-09,
+      "base": 0.11061028110317386,
+      "candidate": 22,
+      "other": 0.11061028594142804,
+      "rel_difference": 4.374145083121479e-08
+     },
+     {
+      "abs_difference": 5.233003919080659e-09,
+      "base": 0.12450736148185122,
+      "candidate": 23,
+      "other": 0.12450736671485514,
+      "rel_difference": 4.20296748465226e-08
+     },
+     {
+      "abs_difference": 4.966174194098727e-09,
+      "base": 0.13575718736071643,
+      "candidate": 24,
+      "other": 0.13575719232689062,
+      "rel_difference": 3.658129849805485e-08
+     },
+     {
+      "abs_difference": 5.091943255930431e-09,
+      "base": 0.09165011888115787,
+      "candidate": 25,
+      "other": 0.09165012397310113,
+      "rel_difference": 5.55585013755751e-08
+     },
+     {
+      "abs_difference": 5.431838007163847e-09,
+      "base": 0.0786179385467809,
+      "candidate": 26,
+      "other": 0.0786179439786189,
+      "rel_difference": 6.909158529934846e-08
+     },
+     {
+      "abs_difference": 5.168833014379537e-09,
+      "base": 0.09115245937891528,
+      "candidate": 27,
+      "other": 0.0911524645477483,
+      "rel_difference": 5.670535989482203e-08
+     },
+     {
+      "abs_difference": 5.090900312421098e-09,
+      "base": 0.10284273084763065,
+      "candidate": 28,
+      "other": 0.10284273593853097,
+      "rel_difference": 4.950180018035164e-08
+     },
+     {
+      "abs_difference": 5.056606522391149e-09,
+      "base": 0.1012389335238025,
+      "candidate": 29,
+      "other": 0.10123893858040903,
+      "rel_difference": 4.9947251974975416e-08
+     },
+     {
+      "abs_difference": 5.586948612079645e-09,
+      "base": 0.11155837404492248,
+      "candidate": 30,
+      "other": 0.1115583796318711,
+      "rel_difference": 5.0080943361812395e-08
+     },
+     {
+      "abs_difference": 5.26486650109792e-09,
+      "base": 0.08702848196671105,
+      "candidate": 31,
+      "other": 0.08702848723157755,
+      "rel_difference": 6.049590182570075e-08
+     },
+     {
+      "abs_difference": 5.133882041707949e-09,
+      "base": 0.07466762488641984,
+      "candidate": 32,
+      "other": 0.07466763002030188,
+      "rel_difference": 6.875646640049579e-08
+     },
+     {
+      "abs_difference": 7.000744484120247e-09,
+      "base": 0.10831011859421,
+      "candidate": 33,
+      "other": 0.10831012559495448,
+      "rel_difference": 6.463610764151163e-08
+     },
+     {
+      "abs_difference": 7.504260629564996e-09,
+      "base": 0.16556533866745843,
+      "candidate": 34,
+      "other": 0.16556534617171906,
+      "rel_difference": 4.5325070391922224e-08
+     },
+     {
+      "abs_difference": 6.818621556270443e-09,
+      "base": 0.17684433240660016,
+      "candidate": 35,
+      "other": 0.17684433922522172,
+      "rel_difference": 3.8557195831377176e-08
+     }
+    ]
+   }
+  ],
+  "host_drivers": {
+   "_reads": "the cross-session pair shares q2's driver, so it does not measure a driver change. D3 runs the protocol's driver, where q2 was reproduced at every step identity, FFN's included, with no score-level measurement. A driver effect beyond the tolerance makes the run INADMISSIBLE; it cannot make one admissible",
+   "d1_replay": {
+    "drivers": [
+     "595.91.07"
+    ],
+    "image_identity": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07",
+    "run": "d1_replay_002",
+    "session_commit": null
+   },
+   "d1_replay_reproduced": {
+    "differ": [],
+    "identities": [
+     "artifact_digest",
+     "weights_digest",
+     "single_shard_sha256",
+     "arch_signature"
+    ],
+    "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+    "steps": 4
+   },
+   "d1_search": {
+    "drivers": [
+     "580.126.09"
+    ],
+    "image_identity": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09",
+    "run": "d1_search_20261006_210210",
+    "session_commit": "77aedc90f93f7f8b69e62bdf03de4dcc22ca273f"
+   },
+   "d2_search": {
+    "drivers": [
+     "580.126.09"
+    ],
+    "image_identity": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09",
+    "run": "d2_search_20261015_051722",
+    "session_commit": "d64490eeab7541eb20259dd541d84af344922dd4"
+   }
+  },
+  "same_execution_repeat": {
+   "candidates": 260,
+   "independent_executions": {
+    "_reads": "different wall times: two executions, not one row copied",
+    "wall_seconds": [
+     1831.1,
+     1819.5
+    ]
+   },
+   "max_abs_difference": 0.0,
+   "per_round": [
+    {
+     "chosen": [
+      26,
+      26
+     ],
+     "max_abs_difference": 0.0,
+     "n": 36,
+     "round": 0
+    },
+    {
+     "chosen": [
+      32,
+      32
+     ],
+     "max_abs_difference": 0.0,
+     "n": 35,
+     "round": 1
+    },
+    {
+     "chosen": [
+      18,
+      18
+     ],
+     "max_abs_difference": 0.0,
+     "n": 34,
+     "round": 2
+    },
+    {
+     "chosen": [
+      17,
+      17
+     ],
+     "max_abs_difference": 0.0,
+     "n": 33,
+     "round": 3
+    },
+    {
+     "chosen": [
+      11,
+      11
+     ],
+     "max_abs_difference": 0.0,
+     "n": 32,
+     "round": 4
+    },
+    {
+     "chosen": [
+      10,
+      10
+     ],
+     "max_abs_difference": 0.0,
+     "n": 31,
+     "round": 5
+    },
+    {
+     "chosen": [
+      30,
+      30
+     ],
+     "max_abs_difference": 0.0,
+     "n": 30,
+     "round": 6
+    },
+    {
+     "chosen": [
+      16,
+      16
+     ],
+     "max_abs_difference": 0.0,
+     "n": 29,
+     "round": 7
+    }
+   ],
+   "rounds": 8,
+   "sessions": [
+    "d1_search_20261006_101725",
+    "d1_search_20261006_210210"
+   ],
+   "state_id": "b5fceabc68e36eaaa449b825804a9097"
+  }
+ },
+ "expected": {
+  "first_removed_layer": 26,
+  "n_round0_candidates": 36,
+  "q2_round0_margin": 0.0043312427840262666,
+  "q2_smallest_round_margin": 0.003163545704593651
+ },
+ "experiment_id": "phase_d3",
+ "fixed_before_execution": true,
+ "journals": {
+  "d1": {
+   "path": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/states.jsonl",
+   "sha256": "42c3f11f52fc110baa055c6eca021daced1d1615cd1042f90b71b8226378c26c"
+  },
+  "d1_repeat": {
+   "path": "/home/ecs-user/AlphaAvatar-distill/logs/stages/stage-1/phase_d1/runs/d1_search_20261006_101725/evidence/states_partial_oob_38states.jsonl",
+   "sha256": "561f1c9c6e59a1bac1548e3a38ae08d3c937c75bf1243a87b4f50ea6138873a5"
+  },
+  "d2": {
+   "path": "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/relay/states.jsonl",
+   "sha256": "8f5303c3543fc90edac1ef7ecdaa695489fc28c9c4b3e5cb4fb4550d7478d7da"
+  }
+ },
+ "on_failure": "INADMISSIBLE: the driver stops after the DEPTH step, before WIDTH and ATTENTION; the closeout re-derives the verdict off-pod from the persisted step record; nothing is classified, nothing is proposed, nothing is retried to seek agreement",
+ "registration_hash": "43156f21a011803bcb76be8f2c3f5f9616e9034d8f7ea811b9f5de6b9eea17d9",
+ "schema": "aadistill.phase_d3.parent_reference_admission/v1",
+ "tolerance": {
+  "atol": 5e-05,
+  "form": "|d3 - q2| <= atol + rtol * |q2|, per candidate",
+  "from_max_abs_difference": 4.949018123465154e-05,
+  "from_max_rel_difference": 0.0004431653577732955,
+  "rtol": 0.0005,
+  "rule": "atol and rtol are the cross-session pairs' maximum absolute and relative (to the D1 side) differences, each rounded UP at one significant figure",
+  "tolerance_at_q2_first_removed": 8.101700403583152e-05,
+  "worst_evidence_fraction_of_tolerance": 0.4642551220582582
+ },
+ "what_this_is": "An EXECUTION-VALIDITY gate on the D3 structural session (maintainer review 2026-10-17, section 2A). It is not a scientific outcome and changes nothing in the treatment objective: a run that fails it is INADMISSIBLE -- its evidence is preserved, and it yields no structural conclusion and no probe proposal."
+}

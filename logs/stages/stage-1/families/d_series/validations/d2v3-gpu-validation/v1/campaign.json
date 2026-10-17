@@ -1,0 +1,122 @@
+{
+ "schema": "aadistill.engineering_campaign/v1",
+ "campaign_id": "d_series_d2v3_gpu_validation",
+ "_contract": "Cumulative cost of D2 version 3's GPU validation across every resource and subrun. A rerun does NOT reset it.",
+ "status": "COMPLETE and CLOSED -- Stage W validation FAIL, NOT ADOPTED: arithmetic FAIL on kl_bounds alone (175 of 46,056 float32 positions beyond the registered 4*eps*|log Z_teacher| slack; the float64 oracle bounds hold with 0 violations and every float32 union KL is within its registered abs+rel tolerance), integrity PASS, scored_rows_equivalence PASS; run d2v3val_20261014_170824, $0.2538 of the $1.22 grant; provider teardown confirmed and 0 pods listed at 2026-10-14T17:29:40Z; evidence booked by sha256; no rerun under this grant -- the diagnosed repair changes a registered tolerance, which is the maintainer's decision (d2v3_stage_w_evidence_review.md)",
+ "authorization": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1/authorization.json",
+ "package_id": "phase_c1.execution_package.2026-09-11",
+ "_package_id": "the GPU ENGINEERING book, as for R0, the reference calibration and Stage V",
+ "plan": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1/plan.json",
+ "teardown_reserve_usd": 0.3,
+ "inherited_spend": [],
+ "subruns": [
+  {
+   "subrun_id": "d2v3val_20261014_170220",
+   "run_id": "d2v3val_20261014_170220",
+   "cost_usd": 0.0,
+   "resource": "none created: the provider refused the create; cost.json's $0.0 is the launcher's wall-clock formula over no pod",
+   "cost_record": {
+    "elapsed_minutes": 0.0,
+    "rate_usd_per_hour": 1.09,
+    "_rate_is": "the LIVE securePrice quoted immediately before creation",
+    "container_disk_gb": 60,
+    "gpu_usd": 0.0,
+    "container_disk_usd": 0.0,
+    "all_in_usd": 0.0,
+    "pod_id": null,
+    "script_exit": 3,
+    "_basis": "wall clock from pod creation to confirmed teardown x the live secure rate, plus container disk billed separately"
+   },
+   "pod_id": null,
+   "teardown_confirmed": null,
+   "teardown_evidence": null,
+   "outcome": "provider capacity refusal: no pod created, $0",
+   "notes": "",
+   "evidence": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1/runs/d2v3val_20261014_170220",
+   "evidence_sha256": {
+    "cost.json": "d6f8eb2519325d4acfe762ba4049dd2acacff36a87195eca37ca1cd58d8b327c",
+    "launch.log": "49f5508bcb148722108cc43b244e6222ba922e4d7c02035e4fe83b5b76ff729a",
+    "live_price_usd_per_hour": "28b478ce49706c4e6689e2f3a9a964ee5642134488d4a25280a7d9b6fce123cd",
+    "required_inputs.jsonl": "1cc0f12d949720a984ab41745aaa14a3def096b4325f6ba38469190a9ec6b769"
+   }
+  },
+  {
+   "subrun_id": "d2v3val_20261014_170522",
+   "run_id": "d2v3val_20261014_170522",
+   "cost_usd": 0.0,
+   "resource": "none created: the provider refused the create; cost.json's $0.0 is the launcher's wall-clock formula over no pod",
+   "cost_record": {
+    "elapsed_minutes": 0.0,
+    "rate_usd_per_hour": 1.09,
+    "_rate_is": "the LIVE securePrice quoted immediately before creation",
+    "container_disk_gb": 60,
+    "gpu_usd": 0.0,
+    "container_disk_usd": 0.0,
+    "all_in_usd": 0.0,
+    "pod_id": null,
+    "script_exit": 3,
+    "_basis": "wall clock from pod creation to confirmed teardown x the live secure rate, plus container disk billed separately"
+   },
+   "pod_id": null,
+   "teardown_confirmed": null,
+   "teardown_evidence": null,
+   "outcome": "provider capacity refusal: no pod created, $0",
+   "notes": "",
+   "evidence": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1/runs/d2v3val_20261014_170522",
+   "evidence_sha256": {
+    "cost.json": "d6f8eb2519325d4acfe762ba4049dd2acacff36a87195eca37ca1cd58d8b327c",
+    "launch.log": "3345c7bfe4f35bcf341b8745bc7613276a0e8c488cc0ce4cea8be37a5ef54828",
+    "live_price_usd_per_hour": "28b478ce49706c4e6689e2f3a9a964ee5642134488d4a25280a7d9b6fce123cd",
+    "required_inputs.jsonl": "1cc0f12d949720a984ab41745aaa14a3def096b4325f6ba38469190a9ec6b769"
+   }
+  },
+  {
+   "subrun_id": "d2v3val_20261014_170824",
+   "run_id": "d2v3val_20261014_170824",
+   "cost_usd": 0.2538,
+   "cost_record": {
+    "elapsed_minutes": 13.867,
+    "rate_usd_per_hour": 1.09,
+    "_rate_is": "the LIVE securePrice quoted immediately before creation",
+    "container_disk_gb": 60,
+    "gpu_usd": 0.2519,
+    "container_disk_usd": 0.0019,
+    "all_in_usd": 0.2538,
+    "pod_id": "20ji79950u9arw",
+    "script_exit": 0,
+    "_basis": "wall clock from pod creation to confirmed teardown x the live secure rate, plus container disk billed separately"
+   },
+   "pod_id": "20ji79950u9arw",
+   "teardown_confirmed": true,
+   "teardown_evidence": {
+    "path": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1/runs/d2v3val_20261014_170824/teardown_confirmed",
+    "sha256": "9599915bd8cd62b6b42e6c37b5b681a76991a7c5be1fde9971278ce65b99d550"
+   },
+   "outcome": "stage W session: launcher rc=0",
+   "notes": "",
+   "evidence": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1/runs/d2v3val_20261014_170824",
+   "evidence_sha256": {
+    "cost.json": "471e816a919f89b7385e71f4c50ea0e8163a343640eb47a121415b5bc7bfbede",
+    "launch.log": "22840f5ce1d38b9270f2bd9573f8b91eb27b9b5da79dfbf3c2c4b8626f75b660",
+    "live_price_usd_per_hour": "28b478ce49706c4e6689e2f3a9a964ee5642134488d4a25280a7d9b6fce123cd",
+    "out/adoption_all_v1/adoption.json": "66a80d17f4d0feb5ba3f670f9918a0eaada115911dddd50d66aad230c90b917c",
+    "out/adoption_all_v1/journal.jsonl": "088bac6986c3a4cb5384750c7a3a2b841b70bfc5dfa1a6447528a5f23f0f6620",
+    "out/adoption_all_v1.log": "f95bf519da6021b33095519688225344d28fef6cdb75326195223312d5604664",
+    "out/host_gpu.txt": "7853c0d8b47c15bfa4c1800e33b839347e6976c9ceea547c8d8795aee7947bf5",
+    "out/preflight_all_v1/adoption.json": "515ffd9b783916bf38f3dd6cfacbb545ca826f2c1ed7b52afd16c1e480614c29",
+    "out/preflight_all_v1/journal.jsonl": "f7ee5392a769045c016d7049e953d8dfac8775005de7b2b4cb0f576bf4d61c0b",
+    "out/preflight_all_v1.log": "81eb6523aeb61ce27c88dfa18ce03edf810e5df1f14f3c724df6c7b4d339e414",
+    "out/runtime.txt": "8df33ef6ed783d31a27fd57b2ded72ebdba4106c422742000225213fba2be4b7",
+    "pod_id": "44b48db515d9b297690e1a395a9fdae42eabe7a5d7ecb6a07d3472dada1b7dac",
+    "pod_start_epoch": "97b14f20ca30a85d294bbdf594ee81caeba265ac908ff838c386b5ca26f40877",
+    "required_inputs.jsonl": "1cc0f12d949720a984ab41745aaa14a3def096b4325f6ba38469190a9ec6b769",
+    "teardown_confirmed": "9599915bd8cd62b6b42e6c37b5b681a76991a7c5be1fde9971278ce65b99d550",
+    "watchdog.jsonl": "ccda6f7ab0d208a100344182e8617e606dae17c9e655641e567b398d93f09e9d"
+   },
+   "evidence_session": "logs/stages/stage-1/families/d_series/validations/d2v3-gpu-validation/v1/runs/d2v3val_20261014_170824/out/adoption_all_v1/adoption.json",
+   "evidence_session_sha256": "66a80d17f4d0feb5ba3f670f9918a0eaada115911dddd50d66aad230c90b917c"
+  }
+ ],
+ "booked_usd": 0.2538,
+ "authorizes": "nothing by itself"
+}

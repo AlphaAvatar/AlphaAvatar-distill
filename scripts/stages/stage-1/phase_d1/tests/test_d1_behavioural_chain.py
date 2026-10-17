@@ -1,0 +1,3005 @@
+"""The D1 behavioural EXECUTION CHAIN: preregistration, issuance, launcher.
+
+What `test_d1_behavioural_contract.py` covers is the frozen science -- the
+arms, seeds, battery and ranking. This file covers the chain that was built to
+EXECUTE it: the committed preregistration and replay plan, the one-use
+authorization's build/load round trip and its refusals, the launcher's
+declaration, and the pod-side materialization module's own refusals. Everything
+here runs at `$0` on a CPU host.
+"""
+from __future__ import annotations
+
+import dataclasses
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+REPO = Path(__file__).resolve().parents[5]
+for _extra in ("src", "scripts", "scripts/pod", "scripts/autoinit",
+               "scripts/stages/stage-1", "tests"):
+    if str(REPO / _extra) not in sys.path:
+        sys.path.insert(0, str(REPO / _extra))
+
+from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
+
+from stages.phase_d1 import behavioural as B  # noqa: E402
+from stages.phase_d1 import behavioural_authorization as BA  # noqa: E402
+from stages.phase_d1 import behavioural_materialize as M  # noqa: E402
+from stages.phase_d1.behavioural_governance import (  # noqa: E402
+    D1BehaviouralAuthorization,
+    D1BehaviouralRefused,
+)
+
+HEAD = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
+                      text=True, cwd=REPO).stdout.strip() or ("0" * 40)
+
+#: THE PROJECT CAP IN FORCE, read from the grant terms that own it
+#: (`configs/stages/stage-1/phase_c1/authorization.json`) through the issuer's
+#: own money function. The test grants below are INPUTS to issuance against the
+#: live tree, and issuance cross-checks a stated cap against the live terms --
+#: so a grant built today must name today's cap. Typing the figure made 23
+#: mechanism tests expire when the 2026-10-14 amendment raised it ($590 ->
+#: $595). The recorded D1 grants keep the $590 they named, in their own
+#: records; nothing here restates them.
+LIVE_CAP_USD = BA.live_money(REPO)["project_cap_usd"]
+
+GRANT = {
+    "granted_by": "maintainer-test",
+    "covers": "ONE formal D1 behavioural SCREENING session",
+    "rung": "screening",
+    "hard_cap_usd": 25.0053,
+    "cumulative_cap_usd": LIVE_CAP_USD,
+    "granted_utc": "2026-10-10",
+    "does_not_authorize": ["a beam", "D2", "D3"],
+}
+
+#: The rate the design's cells were priced at; supplying it makes issuance a
+#: $0 operation with no network.
+ACCEPTED_RATE = 1.09
+
+
+def _screening_only_tree(root: Path) -> Path:
+    """The real SCREENING closeouts, copied to `root` at their own paths.
+
+    What the envelope tests mean by "confirmation has never run", built from
+    the repository's own records rather than typed, so the real derivation
+    still reads real money."""
+    for path in sorted(REPO.glob(BA.RUNS_GLOB)):
+        if json.loads(path.read_text()).get("rung") != "screening":
+            continue
+        dest = root / path.relative_to(REPO)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(path.read_bytes())
+    return root
+
+
+def _payload(**over):
+    #: `consumed_usd=0.0` states the assumption these tests are making: a
+    #: PRISTINE envelope. The real tree's envelope is partly spent by four
+    #: closed subruns, and issuance against it is refused -- which is asserted
+    #: on the real derivation by
+    #: TestTheEnvelopeIsNettedAgainstPriorSubruns, deliberately WITHOUT this
+    #: override, so no test here inherits the override silently.
+    kwargs = dict(grant=GRANT, session_commit=HEAD,
+                  granted_utc="2026-10-10T00:00:00+00:00",
+                  run_id="d1b_test", rung="screening", consumed_usd=0.0,
+                  live_rate=ACCEPTED_RATE, repo_root=REPO)
+    kwargs.update(over)
+    return BA.build_payload(**kwargs)
+
+
+class TestThePreregistrationBindsTheFrozenValues:
+    """C0: the seeds must be materialized and hash-bound in the execution
+    preregistration BEFORE any candidate behavioural result exists."""
+
+    @staticmethod
+    def _doc():
+        return json.loads((REPO / BA.PREREG_REL).read_text())
+
+    @staticmethod
+    def _writer():
+        import importlib.util
+
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "write_d1_behavioural_preregistration.py")
+        spec = importlib.util.spec_from_file_location("_prereg_w", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_it_exists_and_matches_its_own_hash(self):
+        doc = self._doc()
+        writer = self._writer()
+        assert doc["preregistration_sha256"] == \
+            writer.preregistration_identity(doc)
+
+    def test_this_tree_regenerates_it_identically(self):
+        """A preregistration an owner record has outrun names a session
+        nobody would run. The wall clock is outside the identity, so this is
+        a fixed point, not a race."""
+        writer = self._writer()
+        live = writer.preregistration_identity(writer.build(REPO))
+        assert live == self._doc()["preregistration_sha256"]
+
+    def test_it_binds_the_materialized_seeds(self):
+        doc = self._doc()
+        assert doc["seeds"]["screening"] == list(B.screening_seeds(REPO))
+        assert doc["seeds"]["confirmation"] == list(B.confirmation_seeds(REPO))
+        assert doc["seeds"]["excluded"] == list(B.excluded_seeds(REPO))
+
+    def test_it_binds_the_design_and_the_five_arms(self):
+        doc = self._doc()
+        assert doc["design"]["design_hash"] == B.design(REPO)["design_hash"]
+        members = {m["arm"]: m for m in doc["arms"]["members"]}
+        assert sorted(members) == ["B", "q1", "q2", "q3", "q4"]
+        for arm in B.arms(REPO):
+            bound = members[arm.arm_id]["identities"]
+            assert bound == dict(arm.identities)
+            for value in bound.values():
+                assert len(value) == 64
+        assert members["B"]["identities"]["artifact_digest"].startswith(
+            "53e30566")
+
+    def test_it_binds_the_replay_plan_by_hash(self):
+        doc = self._doc()
+        assert doc["arm_materialization"]["plan_sha256"] == \
+            M.plan_sha256(REPO)
+        assert doc["arm_materialization"]["plan_path"] == M.PLAN_REL
+
+    def test_it_binds_both_batteries_and_the_guardrails(self):
+        doc = self._doc()
+        for role in ("d1_screening", "d1_confirmation"):
+            identity = B.battery_role(role, REPO)
+            bound = doc["batteries"][role]
+            assert bound["item_ids_sha256"] == identity["item_ids_sha256"]
+            assert bound["files"] == identity["files"]
+        vetoes = doc["screening"]["ranking"]["guardrail_vetoes"]
+        assert vetoes["pooled_usable_delta_min"] == \
+            B.GUARDRAIL_POOLED_MIN_DELTA
+        assert vetoes["per_seed_usable_delta_min"] == \
+            B.GUARDRAIL_PER_SEED_MIN_DELTA
+
+    def test_the_confirmation_candidate_is_not_prenamed(self):
+        doc = self._doc()
+        text = doc["confirmation"]["_candidate_binding"]
+        assert "CANNOT be named here" in text
+        assert doc["confirmation"]["arms"] == "the advancing candidate and B"
+
+    def test_it_authorizes_nothing(self):
+        assert self._doc()["authorizes"] == "nothing"
+
+
+class TestTheReplayPlanIsPinnedAndCoversTheFrozenField:
+
+    @staticmethod
+    def _plan():
+        return json.loads((REPO / M.PLAN_REL).read_text())
+
+    def test_four_leaves_matching_the_retention_identities(self):
+        plan = self._plan()
+        assert plan["n_leaves"] == 4
+        decision = json.loads((REPO / B.RETENTION_REL).read_text())
+        members = {m["state_id"]: m for m in
+                   decision["the_frozen_behavioural_finalists"]["members"]}
+        for leaf in plan["leaves"]:
+            want = members[leaf["state_id"]]
+            for key in ("artifact_digest", "weights_digest",
+                        "single_shard_sha256", "arch_signature"):
+                assert leaf["expected"][key] == want[key], key
+
+    def test_every_step_is_digest_pinned(self):
+        for leaf in self._plan()["leaves"]:
+            assert len(leaf["steps"]) == 4
+            for step in leaf["steps"]:
+                assert len(step["expected_artifact_digest"]) == 64
+                assert len(step["expected_config_hash"]) == 64
+
+    def test_the_execution_agreement_is_the_searchs(self):
+        agreement = self._plan()["execution_agreement"]
+        assert agreement["using"] == {"micro_batch_size": 3,
+                                      "calibration_batch_packing":
+                                          "length_sorted_v1"}
+        assert agreement["n_steps"] == 16
+
+    def test_the_root_state_travels_and_is_rederivable(self):
+        root = self._plan()["root_state"]
+        assert root["chosen_candidate"] == "session_driver_use_cache_false"
+        assert root["config_overrides"] == {"use_cache": False}
+
+    def test_the_pod_loader_rejects_the_wrong_schema(self):
+        doc = dict(self._plan())
+        doc["schema"] = "aadistill.phase_d1.replay_plan/v1"
+        import tempfile
+
+        with tempfile.NamedTemporaryFile("w", suffix=".json",
+                                         delete=False) as handle:
+            json.dump(doc, handle)
+        with pytest.raises(M.D1MaterializeError, match="different leaf sets"):
+            M.load_plan(handle.name)
+
+
+class TestIssuanceDerivesEverythingAndRefusesTheRest:
+
+    def test_the_round_trip(self, tmp_path):
+        payload = _payload()
+        path = tmp_path / "authorization.json"
+        path.write_text(json.dumps(payload, indent=1))
+        auth = D1BehaviouralAuthorization.load(path)
+        auth.require_rung("screening")
+        auth.require_run_id("d1b_test")
+        auth.require_plan(B.design(REPO)["design_hash"])
+        auth.require_contract(sha256_json(B.session_contract("screening",
+                                                             REPO)))
+        assert auth.n_probes == 10
+        assert auth.seeds == tuple(B.screening_seeds(REPO))
+        assert auth.battery_role == "d1_screening"
+        assert payload["preregistration_sha256"] == json.loads(
+            (REPO / BA.PREREG_REL).read_text())["preregistration_sha256"]
+        assert payload["replay_plan_sha256"] == M.plan_sha256(REPO)
+
+    def test_the_accepted_rate_reproduces_the_accepted_ceiling(self):
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        assert priced["hard_ceiling_usd"] == pytest.approx(
+            priced["accepted_hard_ceiling_usd"], abs=5e-4)
+
+    def test_a_lower_live_rate_lowers_the_ceiling(self):
+        """The half an abort-if-higher launcher check cannot provide."""
+        lower = BA.reprice_rung_at(0.80, "screening", REPO)
+        assert lower["hard_ceiling_usd"] < lower["accepted_hard_ceiling_usd"]
+        #: And the grant naming the old figure is then refused.
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="carries the derived figure"):
+            _payload(live_rate=0.80)
+
+    def test_a_grant_stating_a_derived_field_is_refused(self):
+        for field in ("contract_hash", "plan_hash", "seeds", "n_probes"):
+            with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                               match="DERIVES"):
+                _payload(grant={**GRANT, field: "x"})
+
+    def test_a_grant_for_the_other_rung_is_refused(self):
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="neither grant covers the other"):
+            _payload(grant={**GRANT, "rung": "confirmation"})
+
+    def test_screening_refuses_an_advancing_candidate(self):
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="may not name"):
+            _payload(advancing_candidate="q1")
+
+    def test_confirmation_requires_one(self):
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="must name"):
+            _payload(grant={**GRANT, "rung": "confirmation"},
+                     rung="confirmation")
+
+    def test_an_unfundable_rate_is_refused_on_the_four_conditions(self):
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="not fundable"):
+            _payload(live_rate=2.50,
+                     grant={**GRANT, "hard_cap_usd": None})
+
+    def test_the_schedule_must_match_the_priced_cell(self, monkeypatch):
+        real = BA.session_cell
+
+        def fewer(rung, repo_root=REPO):
+            cell = dict(real(rung, repo_root))
+            cell["n_probes"] = 6
+            return cell
+
+        monkeypatch.setattr(BA, "session_cell", fewer)
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="different experiment at the same price"):
+            _payload()
+
+    def test_a_confirmation_payload_narrows_to_six_probes(self):
+        grant = {**GRANT, "rung": "confirmation",
+                 "hard_cap_usd": 15.2025,
+                 "covers": "ONE formal D1 behavioural CONFIRMATION session"}
+        #: A pristine envelope, as `_payload` states: this test is about the
+        #: payload's shape, and the real confirmation envelope is now spent.
+        payload = BA.build_payload(
+            grant=grant, session_commit=HEAD, granted_utc="t",
+            run_id="d1b_conf_test", rung="confirmation",
+            advancing_candidate="q1", consumed_usd=0.0,
+            live_rate=ACCEPTED_RATE, repo_root=REPO)
+        assert payload["n_probes"] == 6
+        assert payload["advancing_candidate"] == "q1"
+        assert payload["seeds"] == list(B.confirmation_seeds(REPO))
+        assert payload["battery_role"] == "d1_confirmation"
+
+
+class TestTheLoadedArtifactCannotBeSubstitutedOrEdited:
+
+    def test_an_edited_artifact_fails_its_self_hash(self, tmp_path):
+        payload = _payload()
+        payload["hard_cap_usd"] = 999.0
+        path = tmp_path / "edited.json"
+        path.write_text(json.dumps(payload))
+        with pytest.raises(D1BehaviouralRefused, match="edited since"):
+            D1BehaviouralAuthorization.load(path)
+
+    def test_a_screening_artifact_naming_a_candidate_is_refused(self,
+                                                                tmp_path):
+        payload = _payload()
+        body = {k: v for k, v in payload.items()
+                if k != "authorization_sha256"}
+        body["advancing_candidate"] = "q2"
+        body["authorization_sha256"] = sha256_json(body)
+        path = tmp_path / "pre_named.json"
+        path.write_text(json.dumps(body))
+        with pytest.raises(D1BehaviouralRefused, match="pre-named"):
+            D1BehaviouralAuthorization.load(path)
+
+    def test_the_search_schema_cannot_stand_in(self, tmp_path):
+        payload = _payload()
+        body = {k: v for k, v in payload.items()
+                if k != "authorization_sha256"}
+        body["schema"] = "aadistill.phase_d1.authorization/v1"
+        body["authorization_sha256"] = sha256_json(body)
+        path = tmp_path / "wrong_schema.json"
+        path.write_text(json.dumps(body))
+        with pytest.raises(D1BehaviouralRefused):
+            D1BehaviouralAuthorization.load(path)
+
+    def test_the_wrong_run_id_is_refused(self, tmp_path):
+        payload = _payload()
+        path = tmp_path / "authorization.json"
+        path.write_text(json.dumps(payload))
+        auth = D1BehaviouralAuthorization.load(path)
+        with pytest.raises(D1BehaviouralRefused, match="one-use|One grant"):
+            auth.require_run_id("some_other_run")
+
+
+class TestTheLauncherDeclaresTheSessionCompletely:
+
+    @staticmethod
+    def _launcher():
+        from support.session_specs import load_session_launcher
+
+        return load_session_launcher("autoinit_d1_behavioural_launch")
+
+    @staticmethod
+    def _spec(launcher):
+        from support.session_specs import session_args
+
+        return launcher.spec(session_args(launcher))
+
+    def test_the_spec_builds_and_names_its_own_kind(self):
+        launcher = self._launcher()
+        spec = self._spec(launcher)
+        assert spec.setup.env["SESSION_KIND"] == "d1_behavioural"
+        assert spec.session_id == "autoinit-d1-behavioural"
+        assert spec.plan_hash == B.design(REPO)["design_hash"]
+
+    def test_the_runner_reads_a_secured_probe_as_a_good_fetch(self):
+        """Attempt 8: all ten probes secured, and `checkpoint_hashes_matched`
+        was still False -- the runner's fail-closed default reads `rc`, which
+        the per-probe evidence entries never carry. The policy must say how
+        its own entries read, and stay fail-closed for a missing piece."""
+        spec = self._spec(self._launcher())
+        ok = spec.artifacts.fetch_result_ok
+        secured = {"probe_id": "p", "result.json": True,
+                   "per_sample.jsonl": True, "admission.json": True,
+                   "generations": True, "release_acked": True}
+        assert ok(secured)
+        for piece in ("result.json", "per_sample.jsonl", "admission.json"):
+            assert not ok({**secured, piece: False}), piece
+        assert not ok({"probe_id": "p"})
+        assert not ok(None)
+
+    def test_the_status_path_is_named_once(self):
+        """A driver writing markers to a path its launcher does not poll made
+        every marker invisible on a paid session."""
+        launcher = self._launcher()
+        spec = self._spec(launcher)
+
+        class _Auth:
+            rung = "screening"
+            advancing_candidate = ""
+
+        class _Args:
+            run_id = "d1b_probe"
+
+        class _Ctx:
+            auth = _Auth()
+            args = _Args()
+            image_digest = "sha256:test"
+
+        command = launcher.driver_command(_Ctx(), None)
+        assert f"--status '{launcher.STATUS}'" in command
+        assert spec.status_path == launcher.STATUS
+
+    def test_the_driver_command_parses_with_the_drivers_own_parser(self):
+        """C1 attempt 7 died at $0.4231 because its launcher emitted a flag
+        the driver's parser has no option for."""
+        import importlib.util
+        import shlex
+
+        launcher = self._launcher()
+
+        class _Auth:
+            rung = "confirmation"
+            advancing_candidate = "q3"
+
+        class _Args:
+            run_id = "d1b_probe"
+
+        class _Ctx:
+            auth = _Auth()
+            args = _Args()
+            image_digest = "sha256:test"
+
+        command = launcher.driver_command(_Ctx(), None)
+        tokens = shlex.split(command)
+        driver_index = next(i for i, t in enumerate(tokens)
+                            if t.endswith("autoinit_d1_behavioural_driver.py"))
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_driver.py")
+        module_spec = importlib.util.spec_from_file_location("_d1b_drv", src)
+        driver = importlib.util.module_from_spec(module_spec)
+        module_spec.loader.exec_module(driver)
+        parsed = driver.build_parser().parse_args(tokens[driver_index + 1:])
+        assert parsed.rung == "confirmation"
+        assert parsed.advancing_candidate == "q3"
+        assert parsed.arm_root == launcher.M.POD_ARM_ROOT
+        assert parsed.authorization.endswith("governance/authorization.json")
+
+    def test_the_budget_decomposes_the_accepted_bound_exactly(self):
+        """One total: expected x 1.1 + reserve + recovery == the accepted
+        hard bound, so the plan lands on the priced cell rather than beside
+        it."""
+        launcher = self._launcher()
+        for rung in ("screening", "confirmation"):
+            cell = BA.session_cell(rung, REPO)
+            budget = launcher.budget_spec(REPO, rung)
+            reserve = sum(p.minutes for p in budget.soft_stop_reserves)
+            total = (cell["expected_minutes"] * 1.1 + reserve
+                     + budget.artifact_recovery_reserve_minutes)
+            assert total == pytest.approx(cell["hard_ceiling_minutes"],
+                                          abs=0.05), rung
+            assert reserve >= 0
+
+    def test_the_account_requirement_is_the_two_term_rule(self):
+        launcher = self._launcher()
+        spec = self._spec(launcher)
+        cell = BA.session_cell("screening", REPO)
+        assert spec.budget.account_balance_required_usd == pytest.approx(
+            max(30.0, cell["hard_ceiling_usd"]
+                + launcher.ACCOUNT_OPERATIONAL_RESERVE_USD), abs=1e-4)
+
+    def test_both_batteries_travel_as_local_assets(self):
+        """`roles_are_disjoint` reads BOTH roles' realized item ids, on the
+        pod as on this host; a session that shipped one would refuse on the
+        other's absence after setup was paid for."""
+        spec = self._spec(self._launcher())
+        names = {a.dest_name for a in spec.setup.local_assets}
+        assert {"d1_screening", "d1_confirmation"} <= names
+
+    def test_products_secured_refuses_unknown_and_missing(self, tmp_path):
+        launcher = self._launcher()
+
+        class _Args:
+            scr = str(tmp_path)
+
+        class _Ctx:
+            args = _Args()
+            evidence = {}
+
+            @staticmethod
+            def say(_msg):
+                pass
+
+        ctx = _Ctx()
+        ok, why = launcher.probes_evidence_secured(ctx, [])
+        assert not ok and "UNKNOWN" in why
+
+        relay = tmp_path / "relay"
+        relay.mkdir()
+        (relay / "d1_behavioural.json").write_text(json.dumps({
+            "probes": [{"probe_id": "p1", "scored": True}]}))
+        ctx.evidence = {}
+        ok, why = launcher.probes_evidence_secured(ctx, [])
+        assert not ok and "p1" in why
+
+        ctx.evidence = {"probe_evidence_secured": {
+            "p1": {"result.json": True, "per_sample.jsonl": True,
+                   "admission.json": False, "generations": False}}}
+        ok, why = launcher.probes_evidence_secured(ctx, [])
+        assert not ok and "admission" in why
+
+        ctx.evidence = {"probe_evidence_secured": {
+            "p1": {"result.json": True, "per_sample.jsonl": True,
+                   "admission.json": True, "generations": False}}}
+        ok, why = launcher.probes_evidence_secured(ctx, [])
+        assert not ok and "attested" in why
+
+        store = tmp_path / "store"
+        store.mkdir(exist_ok=True)
+        (store / "d1_behavioural_attested_protocol.json").write_text("{}")
+        ok, why = launcher.probes_evidence_secured(ctx, [])
+        assert ok and "final archive" in why
+
+        (relay / "d1_behavioural.json").write_text(json.dumps({"probes": []}))
+        ctx.evidence = {}
+        ok, why = launcher.probes_evidence_secured(ctx, [])
+        assert ok and "no scored evidence is owed" in why
+
+
+class TestTheMaterializationModuleRefusesWhatItMust:
+
+    def test_a_plan_missing_a_frozen_leaf_is_refused(self, tmp_path):
+        plan = json.loads((REPO / M.PLAN_REL).read_text())
+        plan["leaves"] = plan["leaves"][:3]
+        path = tmp_path / "short_plan.json"
+        path.write_text(json.dumps(plan))
+        with pytest.raises(M.D1MaterializeError,
+                           match="does not describe the frozen field"):
+            M.materialize_arms("screening", plan_path=path,
+                               arm_root=tmp_path / "arms", device="cpu",
+                               repo_root=REPO, say=lambda _s: None)
+
+    def test_confirmation_requires_the_candidate(self, tmp_path):
+        with pytest.raises(M.D1MaterializeError, match="two arms, not five"):
+            M.materialize_arms("confirmation",
+                               plan_path=REPO / M.PLAN_REL,
+                               arm_root=tmp_path / "arms", device="cpu",
+                               repo_root=REPO, say=lambda _s: None)
+
+    def test_resolution_refuses_a_missing_row(self, tmp_path):
+        with pytest.raises(M.D1MaterializeError,
+                           match="no materialization row"):
+            M.resolve_arm_checkpoints("screening", tmp_path, {"arms": []},
+                                      repo_root=REPO)
+
+    def test_resolution_refuses_a_row_whose_bytes_are_absent(self, tmp_path):
+        with pytest.raises(M.D1MaterializeError,
+                           match="no checkpoint at"):
+            M.resolve_arm_checkpoints(
+                "confirmation", tmp_path,
+                {"arms": [
+                    {"arm": "q1", "state_id": "x",
+                     "checkpoint_path": str(tmp_path / "missing")},
+                    {"arm": "B", "checkpoint_path": str(tmp_path / "b")},
+                ]},
+                advancing_candidate="q1", repo_root=REPO)
+
+
+class TestTheConfirmationScorerIsItsOwnPinnedEntryPoint:
+
+    def test_it_pins_its_role_and_schema(self):
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "score_d1_confirmation.py").read_text()
+        assert 'ROLE = "d1_confirmation"' in src
+        assert "confirmation_result/v1" in src
+        assert '"--battery"' not in src
+        assert "THE BATTERY IS NOT AN ARGUMENT" in src
+
+    def test_the_metric_is_c1s_imported_unchanged(self):
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "score_d1_confirmation.py").read_text()
+        assert ("from stages.phase_c1.score_c1_confirmation import "
+                "build_result, score_battery") in src
+
+    def test_the_driver_dispatches_by_rung(self):
+        import importlib.util
+
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_driver.py")
+        module_spec = importlib.util.spec_from_file_location("_d1b_drv2", src)
+        driver = importlib.util.module_from_spec(module_spec)
+        module_spec.loader.exec_module(driver)
+        assert driver.SCORER.name == "score_d1_screening.py"
+        assert driver.CONFIRMATION_SCORER.name == "score_d1_confirmation.py"
+        assert driver.CONFIRMATION_SCORER.is_file()
+
+    def test_the_result_must_not_be_read_as_a_verdict(self):
+        import importlib.util
+
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "score_d1_confirmation.py")
+        module_spec = importlib.util.spec_from_file_location("_d1b_sc", src)
+        mod = importlib.util.module_from_spec(module_spec)
+        module_spec.loader.exec_module(mod)
+        text = " ".join(mod.MAY_NOT)
+        assert "verdict" in text and "off-pod" in text
+
+
+class TestTheContractIsLocationFreeAndNarrows:
+
+    def test_no_machine_local_path_enters_the_hash(self):
+        for rung, kwargs in (("screening", {}),
+                             ("confirmation",
+                              {"advancing_candidate": "q2"})):
+            contract = B.session_contract(rung, REPO, **kwargs)
+            text = json.dumps(contract)
+            assert "/home/" not in text, rung
+            assert "aad-artifacts" not in text, rung
+
+    def test_the_confirmation_contract_binds_its_candidate(self):
+        c = B.session_contract("confirmation", REPO,
+                               advancing_candidate="q3")
+        assert c["advancing_candidate"] == "q3"
+        assert c["n_probes"] == 6
+        arms = {row["arm"] for row in c["arms"]["arms"]}
+        assert arms == {"q1", "q2", "q3", "q4", "B"}
+        scheduled = {p["arm"] for p in c["probes"]}
+        assert scheduled == {"q3", "B"}
+
+    def test_two_candidates_bind_two_different_contracts(self):
+        one = sha256_json(B.session_contract("confirmation", REPO,
+                                             advancing_candidate="q1"))
+        two = sha256_json(B.session_contract("confirmation", REPO,
+                                             advancing_candidate="q2"))
+        assert one != two
+
+    def test_an_arm_root_does_not_move_the_hash_fields(self):
+        """Location is execution configuration. The full contract cannot be
+        built under a fake arm root (the incumbent's bytes do not exist on
+        this host), so the invariance is asserted where it lives: the bound
+        arm rows derive from frozen records alone."""
+        plain = B.session_contract("screening", REPO)["arms"]
+        field = B.arms(REPO, arm_root="/nonexistent/pod/root")
+        rooted = [{
+            "arm": a.arm_id, "role": a.role,
+            "quality_position": a.quality_position,
+            "state_id": a.state_id, "identities": dict(a.identities),
+        } for a in field]
+        assert plain["arms"] == rooted
+
+
+class TestTheIssuerCommandRefusesBeforeItQuotes:
+
+    @staticmethod
+    def _issuer():
+        import importlib.util
+
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "issue_d1_behavioural_authorization.py")
+        spec = importlib.util.spec_from_file_location("_d1b_issue", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_the_parser_builds(self):
+        parser = self._issuer().build_parser()
+        for action in parser._actions:
+            if action.required:
+                assert action.type in (None, str, Path), action.option_strings
+
+    def test_a_bare_selection_record_is_no_longer_accepted(self, tmp_path):
+        """The 2026-10-10 review's confirmation obligation: an arbitrary JSON
+        file containing `advanced: true` and an arm label is not evidence.
+        The full validation (schema, rung, contract hash, recomputed
+        selection) lives in TestTheConfirmationCandidateIsRecomputedNotTrusted."""
+        issuer = self._issuer()
+        record = tmp_path / "selection.json"
+        record.write_text(json.dumps({
+            "selection": {"advanced": True, "arm": "q2",
+                          "outcome": "ONE_CANDIDATE_ADVANCES"}}))
+        with pytest.raises(SystemExit, match="schema"):
+            issuer.advanced_arm_from(record)
+
+
+class TestTheSweepContractIsExpressible:
+    """AGENTS.md P8.3's launch-bound sweep must be EXPRESSIBLE through the
+    canonical recorder; the search's own sweep was once refused as an unknown
+    experiment."""
+
+    def test_the_registry_resolves_the_behavioural_entry(self):
+        from shared.pod.record_pod_environment import sweep_contract
+
+        contract = sweep_contract("phase_d1_behavioural", "d1b_probe", None,
+                                  "launch_bound")
+        assert contract.launcher_module == "autoinit_d1_behavioural_launch"
+        assert contract.session_id == "autoinit-d1-behavioural"
+        assert contract.record.record_path.endswith(
+            "runs/d1b_probe/governance/readiness.json")
+
+    def test_the_record_is_run_owned_with_no_pointer(self):
+        from stages.phase_d1 import behavioural_pod_environment as BP
+
+        contract = BP.sweep_contract(run_id="d1b_probe")
+        assert contract.pointer_path is None
+        with pytest.raises(BP.D1BehaviouralReadinessError):
+            BP.record_path_for(None)
+
+    def test_the_shell_has_a_dispatch_branch_for_this_kind(self):
+        """A missing dispatch entry is not a type error: it falls through to
+        `spend` and costs a paid pod. The dedicated suite checks the loader
+        semantics; this asserts the branch exists beside the experiment that
+        needs it."""
+        src = (REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
+               ).read_text()
+        assert '"$SESSION_KIND" = "d1_behavioural"' in src
+        assert "D1BehaviouralAuthorization" in src
+        branch = src.split('"$SESSION_KIND" = "d1_behavioural"', 1)[1]
+        branch = branch.split("elif", 1)[0]
+        assert "allows_recovery_training is True" in branch
+        assert "allows_beam_search is False" in branch
+        assert "automatic_followon_start is False" in branch
+
+
+class TestTheProducersOwnCheckpointLayoutIsWhatConsumersRead:
+    """The review finding: `materialize_fixed_path` writes a path's final
+    checkpoint under `workdir/steps/{i:02d}_{kind}/`, and the first version of
+    this chain verified `arm_root/<state_id>/config.json` -- a directory the
+    producer never writes -- AFTER paying for the materialization. These
+    exercise the actual layout end to end, not declarations about it."""
+
+    def test_final_checkpoint_is_the_last_step_directory(self, tmp_path):
+        dest = tmp_path / "state"
+        for index, kind in enumerate(("ffn", "depth", "residual_width",
+                                      "attention")):
+            (dest / "steps" / f"{index:02d}_{kind}").mkdir(parents=True)
+            (dest / "steps" / f"{index:02d}_{kind}" / "config.json"
+             ).write_text("{}")
+        found, complete = M.final_checkpoint_in(dest, n_steps=4)
+        assert complete and found.name == "03_attention"
+
+    def test_a_partial_path_is_not_adopted(self, tmp_path):
+        dest = tmp_path / "state"
+        for index, kind in enumerate(("ffn", "depth")):
+            (dest / "steps" / f"{index:02d}_{kind}").mkdir(parents=True)
+            (dest / "steps" / f"{index:02d}_{kind}" / "config.json"
+             ).write_text("{}")
+        found, complete = M.final_checkpoint_in(dest, n_steps=4)
+        assert found is not None and not complete
+
+    def test_a_flattened_restore_is_recognized(self, tmp_path):
+        dest = tmp_path / "state"
+        dest.mkdir()
+        (dest / "config.json").write_text("{}")
+        found, complete = M.final_checkpoint_in(dest, n_steps=4)
+        assert complete and found == dest
+
+    def test_nothing_there_is_nothing(self, tmp_path):
+        assert M.final_checkpoint_in(tmp_path / "absent", n_steps=4) == \
+            (None, False)
+
+    def test_the_step_layout_verifies_through_the_real_consumer(self,
+                                                                tmp_path):
+        """PRODUCER -> CONSUMER on real bytes: a pod-shaped
+        `arm_root/<state_id>/steps/03_attention` holding q1's actual secured
+        checkpoint must be found by the layout resolver AND pass the identity
+        gate at the FOUND path -- the exact seam the session would have died
+        on."""
+        q1 = B.arms(REPO)[0]
+        dest = tmp_path / q1.state_id
+        (dest / "steps").mkdir(parents=True)
+        (dest / "steps" / "03_attention").symlink_to(q1.checkpoint_dir)
+        found, complete = M.final_checkpoint_in(dest, n_steps=4)
+        assert complete and found.name == "03_attention"
+        identity = M._verify_bytes_at(found, dict(q1.identities),
+                                      what="q1-layout-test")
+        assert identity["artifact_digest"] == q1.identities["artifact_digest"]
+        #: And the CONTRACT verification consumes the resolved path, not the
+        #: guessed one, without moving the location-free hash.
+        resolved = {a.arm_id: a.checkpoint_dir for a in B.arms(REPO)
+                    if a.checkpoint_dir}
+        resolved["q1"] = str(found)
+        contract = B.session_contract("screening", REPO,
+                                      resolved_paths=resolved)
+        assert sha256_json(contract) == sha256_json(
+            B.session_contract("screening", REPO))
+
+    def test_resolution_consumes_the_rows_checkpoint_path(self, tmp_path):
+        inner = tmp_path / "steps" / "03_attention"
+        inner.mkdir(parents=True)
+        (inner / "config.json").write_text("{}")
+        rows = {"arms": [
+            *[{"arm": a.arm_id, "state_id": a.state_id,
+               "checkpoint_path": a.checkpoint_dir}
+              for a in B.arms(REPO) if not a.is_incumbent],
+            {"arm": "B", "checkpoint_path": str(inner)},
+        ]}
+        out = M.resolve_arm_checkpoints("screening", tmp_path, rows,
+                                        repo_root=REPO)
+        assert out["B"] == str(inner)
+        assert Path(out["q1"]).is_dir()
+
+
+class TestTheIncumbentRebuildsUnderItsHistoricalProtocol:
+    """A3's terminal finding: canonical B (53e30566...) reproduces exactly
+    only under A_bsz1. A rebuild under DEFAULT_EXECUTION (mbs=4) or the
+    candidates' bsz=3 policy is a THIRD protocol nothing measured B under."""
+
+    def test_the_execution_is_a_bsz1_read_from_its_owner(self):
+        from stages.phase_a3.a_bsz3 import A_BSZ1
+
+        execution = M.incumbent_execution()
+        assert execution is A_BSZ1
+        assert execution.as_fingerprint() == {
+            "micro_batch_size": 1,
+            "calibration_batch_packing": "original_order_v1"}
+
+    def test_materialize_incumbent_passes_it_to_the_producer(self,
+                                                             monkeypatch,
+                                                             tmp_path):
+        """And the capture BINDS AGAINST THE REAL SIGNATURE.
+
+        The first version of this test stubbed `def capture(spec, **kwargs)`,
+        which accepts anything -- so it proved the execution config was passed
+        and could not see that `root_loader`, a REQUIRED keyword-only
+        argument, was missing. Attempt 2 spent 81 minutes and $1.47 finding
+        that on a pod, after reproducing all four candidates byte-exactly. A
+        stub that is more permissive than the function it replaces tests the
+        stub.
+        """
+        import inspect
+
+        import aadistill.initialization.planning.fixed_path as FP
+        from stages.phase_a3.a_bsz3 import A_BSZ1
+
+        real = inspect.signature(FP.materialize_fixed_path)
+        captured = {}
+
+        class _Stop(RuntimeError):
+            pass
+
+        def capture(*args, **kwargs):
+            #: Raises TypeError exactly where the producer would.
+            bound = real.bind(*args, **kwargs)
+            captured["bound"] = bound
+            raise _Stop()
+
+        monkeypatch.setattr(FP, "materialize_fixed_path", capture)
+        with pytest.raises(_Stop):
+            M.materialize_incumbent(tmp_path / "B", device="cuda",
+                                    identities={"artifact_digest": "x" * 64},
+                                    repo_root=REPO)
+        bound = captured["bound"]
+        assert bound.arguments["execution"] is A_BSZ1
+        assert callable(bound.arguments["root_loader"])
+
+    def test_the_incumbents_root_is_the_teacher_as_published(self,
+                                                             monkeypatch,
+                                                             tmp_path):
+        """B's root carries NO config overrides, and that is C2's answer.
+
+        `materialize_b` calls `materialize_arm` with no `config_overrides`,
+        and THAT rebuild reproduced B's exact digest. The candidates'
+        `use_cache: False` belongs to the D1 SEARCH's beam, whose shared root
+        a causal-KL DEPTH step mutated in place; C1 built B as a standalone
+        fixed path, so applying the beam's override here would start B from a
+        config C1 never used.
+        """
+        import inspect
+
+        import aadistill.initialization.planning.fixed_path as FP
+        from stages.phase_d1 import replay_specs as R
+
+        real = inspect.signature(FP.materialize_fixed_path)
+        seen = {}
+
+        class _Stop(RuntimeError):
+            pass
+
+        def fake_load_root_model(spec, *, config_overrides, device):
+            seen["overrides"] = dict(config_overrides)
+            seen["spec"] = spec
+            seen["device"] = device
+            return "root"
+
+        def capture(*args, **kwargs):
+            bound = real.bind(*args, **kwargs)
+            bound.arguments["root_loader"]()
+            raise _Stop()
+
+        monkeypatch.setattr(R, "load_root_model", fake_load_root_model)
+        monkeypatch.setattr(FP, "materialize_fixed_path", capture)
+        with pytest.raises(_Stop):
+            M.materialize_incumbent(tmp_path / "B", device="cuda",
+                                    identities={"artifact_digest": "x" * 64},
+                                    repo_root=REPO)
+        assert seen["overrides"] == {}, (
+            "B's root must be the teacher as published; the candidates' beam "
+            "override would start it from a config C1 never used")
+        assert seen["device"] == "cuda"
+        assert getattr(seen["spec"], "root_repo_id", None)
+
+    def test_both_producers_satisfy_the_real_producer_signature(self):
+        """One structural check over BOTH arm paths, by binding.
+
+        Two separate call sites reach `materialize_fixed_path` -- the
+        candidate replay and B's frozen construction -- and each has now
+        shipped a defect the other did not have. Binding both against the
+        real signature is the check that covers the pair.
+        """
+        import inspect
+
+        import aadistill.initialization.planning.fixed_path as FP
+
+        real = inspect.signature(FP.materialize_fixed_path)
+        required = {name for name, p in real.parameters.items()
+                    if p.default is inspect.Parameter.empty
+                    and p.kind is not inspect.Parameter.VAR_KEYWORD}
+        assert "root_loader" in required and "adapter" in required
+        for source in (inspect.getsource(M.materialize_candidate),
+                       inspect.getsource(M.materialize_incumbent)):
+            call = source[source.index("materialize_fixed_path("):]
+            for name in required - {"spec"}:
+                assert f"{name}=" in call, (
+                    f"a producer call omits the required {name!r}")
+
+
+class TestFailureClassificationSeparatesHarnessFromScience:
+    """The stop condition is narrower than 'the comparison failed': only an
+    identity discrepancy AFTER the inputs were demonstrably reproduced is
+    scientific. A missing path or plan leaf is P12.1 ordinary engineering."""
+
+    def test_a_missing_plan_leaf_is_engineering_not_identity(self, tmp_path):
+        plan = json.loads((REPO / M.PLAN_REL).read_text())
+        plan["leaves"] = plan["leaves"][:3]
+        path = tmp_path / "short.json"
+        path.write_text(json.dumps(plan))
+        with pytest.raises(M.D1MaterializeError) as excinfo:
+            M.materialize_arms("screening", plan_path=path,
+                               arm_root=tmp_path / "arms", device="cpu",
+                               repo_root=REPO, say=lambda _s: None)
+        assert not isinstance(excinfo.value, M.D1ArmIdentityMismatch)
+
+    def test_a_mid_path_digest_divergence_is_the_identity_class(
+            self, monkeypatch, tmp_path):
+        import aadistill.initialization.planning.fixed_path as FP
+        from stages.phase_d1 import replay_specs as R
+
+        def diverge(spec, **kwargs):
+            raise FP.FixedPathDigestMismatch(0, "step 0 label", "y" * 64,
+                                             "x" * 64, {})
+
+        monkeypatch.setattr(FP, "materialize_fixed_path", diverge)
+        plan = M.load_plan(REPO / M.PLAN_REL)
+        leaf = R.leaves_from_plan(plan)[0]
+        with pytest.raises(M.D1ArmIdentityMismatch, match="verified"):
+            M.materialize_candidate(leaf, tmp_path / "x", device="cpu",
+                                    repo_root=REPO)
+
+    def test_the_driver_marks_mismatch_only_for_the_identity_class(self):
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_driver.py").read_text()
+        assert "except M.D1ArmIdentityMismatch:" in src
+        block = src.split("except M.D1ArmIdentityMismatch:", 1)[1]
+        assert "mismatch = True" in block.split("record[", 1)[0]
+        #: And the base class is NOT caught into the mismatch flag.
+        assert "except M.D1MaterializeError:" not in src
+
+
+class TestGenerationAdmissionGuardsTheScoringPath:
+
+    @staticmethod
+    def _driver():
+        import importlib.util
+
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_driver.py")
+        spec = importlib.util.spec_from_file_location("_d1b_drv3", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_the_scoring_contract_digests_the_rungs_own_scorer(self):
+        driver = self._driver()
+        screening = driver.d1_scoring_contract("screening", REPO)
+        confirmation = driver.d1_scoring_contract("confirmation", REPO)
+        assert screening["contract"].startswith("c1_confirmation_scoring@")
+        assert screening["digest"] != confirmation["digest"], (
+            "two rungs with two pinned scorers must not share one digest")
+        names = {e["path"] for e in screening["files"]}
+        assert ("scripts/stages/stage-1/phase_d1/score_d1_screening.py"
+                in names)
+
+    def test_the_battery_triple_is_the_familys_own_identity(self):
+        driver = self._driver()
+        contract = B.session_contract("screening", REPO)
+        fields = driver.battery_protocol_fields(contract)
+        battery = contract["battery"]
+        assert fields["battery_artifact"] == \
+            f"{battery['family_id']}:{battery['role']}"
+        assert fields["battery_manifest_sha256"] == \
+            battery["item_ids_sha256"]
+        assert fields["battery_content_sha256"] == \
+            battery["family_content_id"]
+
+    def test_admission_refuses_a_drifted_protocol_before_scoring(
+            self, tmp_path):
+        """A probe whose summaries cannot establish the protocol is refused
+        -- fail-closed, through the real observer."""
+        driver = self._driver()
+        gen_dir = tmp_path / "gen"
+        gen_dir.mkdir()
+        (gen_dir / "code.json").write_text(json.dumps({
+            "label": "p", "prompts": "code"}))
+        scoring = {"contract": "c1_confirmation_scoring@v1", "digest": "d"}
+        fields = {"battery_artifact": "a", "battery_manifest_sha256": "m",
+                  "battery_content_sha256": "c"}
+
+        class _Attested:
+            evaluation_protocol_hash = "x"
+
+        with pytest.raises(Exception) as excinfo:
+            driver.admit_generation("p", gen_dir, attested=_Attested(),
+                                    scoring=scoring, battery_fields=fields,
+                                    out=tmp_path)
+        assert "material generation field" in str(excinfo.value) or \
+            "not comparable" in str(excinfo.value)
+
+    def test_the_driver_admits_before_it_scores_and_binds_provenance(self):
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_driver.py").read_text()
+        assert src.index("build_attested_protocol(") < src.index(
+            '"--prompts"'), "the attestation must exist before generation"
+        assert src.index("admit_generation(\n") < src.index(
+            '"--trained-run"'), "admission must precede scoring"
+        assert '"--trained-run"' in src
+        assert '"--generation-fingerprint"' in src
+
+
+class TestTrainedButUnscoredProbesSurviveAndResume:
+    """P8.2.1 + P8.4 state 2 together: a trained, not-validly-scored probe's
+    weights are preserved at the moment the later stage fails, and a resumed
+    session scores them rather than retraining the frozen unit."""
+
+    @staticmethod
+    def _model_root(tmp_path, *, sha=None, sidecar_sha=None):
+        import hashlib
+
+        root = tmp_path / "probe"
+        model = root / "checkpoints" / "step100" / "model"
+        model.mkdir(parents=True)
+        (model / "config.json").write_text("{}")
+        shard = b"not-a-real-shard"
+        (model / "model.safetensors").write_bytes(shard)
+        (root / "checkpoints" / "latest.txt").write_text("step100")
+        (root / "run_completion.json").write_text(json.dumps(
+            {"final_step": 100}))
+        if sidecar_sha is not None:
+            (root / "preserved_identity.json").write_text(json.dumps(
+                {"trained_sha256": sidecar_sha}))
+        return root, hashlib.sha256(shard).hexdigest()
+
+    def test_a_completed_training_resumes_at_evaluation(self, tmp_path):
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        root, _sha = self._model_root(tmp_path)
+        state = driver.trained_checkpoint_state(root)
+        assert state is not None
+        assert state["model_dir"].endswith("checkpoints/step100/model")
+
+    def test_a_restored_probe_is_rehashed_against_its_sidecar(self, tmp_path):
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        root, sha = self._model_root(tmp_path)
+        (root / "preserved_identity.json").write_text(json.dumps(
+            {"trained_sha256": sha}))
+        state = driver.trained_checkpoint_state(root)
+        assert state and state.get("restored_sha256_verified")
+        (root / "preserved_identity.json").write_text(json.dumps(
+            {"trained_sha256": "f" * 64}))
+        with pytest.raises(driver.D1BehaviouralDriverError,
+                           match="nobody preserved"):
+            driver.trained_checkpoint_state(root)
+
+    def test_an_incomplete_training_retrains(self, tmp_path):
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        root, _sha = self._model_root(tmp_path)
+        (root / "run_completion.json").unlink()
+        assert driver.trained_checkpoint_state(root) is None
+
+    def test_teardown_refuses_while_a_trained_unscored_probe_is_pod_only(
+            self, tmp_path):
+        from support.session_specs import load_session_launcher
+
+        launcher = load_session_launcher("autoinit_d1_behavioural_launch")
+
+        class _Args:
+            scr = str(tmp_path)
+
+        class _Ctx:
+            args = _Args()
+            evidence = {}
+
+            @staticmethod
+            def say(_msg):
+                pass
+
+        relay = tmp_path / "relay"
+        relay.mkdir()
+        (relay / "d1_behavioural.json").write_text(json.dumps({
+            "probes": [{"probe_id": "p1", "trained": True, "scored": False,
+                        "model_dir": "/workspace/x/checkpoints/t/model",
+                        "trained_sha256": "a" * 64}]}))
+        ctx = _Ctx()
+        ok, why = launcher.probes_evidence_secured(ctx, [])
+        #: The PROPERTY, not the citation. The refusal used to quote "P8.4"
+        #: and now explains the reuse rule instead; what must hold is that it
+        #: refuses and names the unpreserved probe.
+        assert not ok
+        assert "not preserved off-pod" in why and "p1" in why
+
+        ctx.evidence = {"trained_unscored_preserved": {
+            "p1": {"verified": True}}}
+        ok, why = launcher.probes_evidence_secured(ctx, [])
+        assert ok and "preserved" in why
+
+    def test_a_restore_without_a_sidecar_is_refused(self, tmp_path):
+        from support.session_specs import load_session_launcher
+
+        launcher = load_session_launcher("autoinit_d1_behavioural_launch")
+        store = tmp_path / "preserved"
+        (store / "p1").mkdir(parents=True)
+
+        said = []
+
+        class _Args:
+            restore_trained = str(store)
+
+        class _Ctx:
+            args = _Args()
+            evidence = {}
+
+            @staticmethod
+            def say(msg):
+                said.append(msg)
+
+        assert launcher.restore_trained_probes(_Ctx()) is False
+        assert any("unverifiable" in s for s in said)
+
+    def test_every_trained_probe_is_fetched_including_scored_ones(self):
+        """REVERSED DELIBERATELY, 2026-10-11. This asserted P8.4 state 1 --
+        completed and validly scored contributes evidence, not checkpoint
+        bytes -- and two things were wrong with it.
+
+        The filter `trained and not scored` RACED: scoring follows training
+        immediately and the poll runs every 120 s, so a probe that trained and
+        scored inside one interval was never fetched at all and its weights
+        died with the pod. And a scored checkpoint does have a consumer here:
+        the project's standing rule that a replacement attempt resumes
+        preserved checkpoints instead of retraining them. Carrying the SCORES
+        forward instead is inadmissible -- a probe scored in an earlier
+        session was generated and evaluated under that session's attested
+        protocol, and protocol_uniformity's binding clause requires one
+        protocol identity across the field.
+
+        See logs/stages/stage-1/phase_d1/decisions/
+        reuse_preserved_checkpoints.md.
+        """
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_launch.py").read_text()
+        assert 'p.get("trained") and p.get("model_dir")' in src
+        assert 'if p.get("trained") and not p.get("scored")' not in src, (
+            "the scored-exclusion filter is back; it loses every probe that "
+            "scores inside one poll interval")
+
+
+class TestTheConfirmationCandidateIsRecomputedNotTrusted:
+
+    @staticmethod
+    def _issuer():
+        import importlib.util
+
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "issue_d1_behavioural_authorization.py")
+        spec = importlib.util.spec_from_file_location("_d1b_issue2", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    @staticmethod
+    def _screening_record(tmp_path, *, tamper_arm=None, tamper_contract=None):
+        seeds = B.screening_seeds(REPO)
+        table = {"q1": (0.40, 0.90), "q2": (0.45, 0.90), "q3": (0.42, 0.89),
+                 "q4": (0.38, 0.91), "B": (0.40, 0.90)}
+        probes = [{"probe_id": f"d1_screening_{arm}_s{seed}", "arm": arm,
+                   "seed": seed, "scored": True,
+                   "correct_overall": value[0],
+                   "usable_rollout_rate": value[1]}
+                  for arm, value in table.items() for seed in seeds]
+        rows = [{"arm": p["arm"], "seed": p["seed"],
+                 "correct_overall": p["correct_overall"],
+                 "usable_rollout_rate": p["usable_rollout_rate"]}
+                for p in probes]
+        selection = B.advance_one(B.rank_screening(rows, REPO))
+        if tamper_arm:
+            selection = dict(selection)
+            selection["arm"] = tamper_arm
+        record = {
+            "schema": "aadistill.phase_d1.behavioural_session/v1",
+            "rung": "screening", "status": "COMPLETE",
+            "contract_hash": tamper_contract or sha256_json(
+                B.session_contract("screening", REPO)),
+            "probes": probes, "selection": selection,
+        }
+        path = tmp_path / "d1_behavioural.json"
+        path.write_text(json.dumps(record))
+        return path
+
+    def test_a_consistent_record_yields_the_recomputed_arm(self, tmp_path):
+        issuer = self._issuer()
+        path = self._screening_record(tmp_path)
+        assert issuer.advanced_arm_from(path) == "q2"
+
+    def test_a_tampered_selection_is_refused_not_resolved(self, tmp_path):
+        issuer = self._issuer()
+        path = self._screening_record(tmp_path, tamper_arm="q4")
+        with pytest.raises(SystemExit, match="refused, not resolved"):
+            issuer.advanced_arm_from(path)
+
+    def test_a_record_from_another_field_is_refused(self, tmp_path):
+        issuer = self._issuer()
+        path = self._screening_record(tmp_path, tamper_contract="e" * 64)
+        with pytest.raises(SystemExit, match="not the frozen field"):
+            issuer.advanced_arm_from(path)
+
+    def test_a_bare_verdict_file_is_refused(self, tmp_path):
+        issuer = self._issuer()
+        path = tmp_path / "claim.json"
+        path.write_text(json.dumps({"selection": {"advanced": True,
+                                                  "arm": "q1"}}))
+        with pytest.raises(SystemExit, match="schema"):
+            issuer.advanced_arm_from(path)
+
+
+class TestDiskResidencyFollowsTheRealFreeCallSites:
+    """The 2026-10-10 second review: C2 attempt3 died at ENOSPC with five full
+    arm paths resident, and attempt5 at probe 11/12 under accumulated probe
+    workdirs. The same program shapes exist here, so the same releases do --
+    and a resource bound has to follow the real free() call sites."""
+
+    @staticmethod
+    def _steps(tmp_path, n=4):
+        from types import SimpleNamespace
+
+        results = []
+        for index, kind in enumerate(["ffn", "depth", "width", "attn"][:n]):
+            d = tmp_path / "steps" / f"{index:02d}_{kind}"
+            d.mkdir(parents=True)
+            (d / "model.safetensors").write_bytes(b"x" * 64)
+            results.append(SimpleNamespace(checkpoint_path=str(d),
+                                           impl_id=f"{kind}.v0"))
+        return results
+
+    def test_intermediates_are_released_and_the_final_is_kept(self, tmp_path):
+        results = self._steps(tmp_path)
+        out = M.release_intermediate_steps("q1", results, tmp_path)
+        assert out["removed_steps"] == ["ffn.v0", "depth.v0", "width.v0"]
+        assert not Path(results[0].checkpoint_path).exists()
+        assert Path(results[-1].checkpoint_path).is_dir()
+        assert out["failed"] == []
+
+    def test_nothing_outside_the_arms_workdir_is_touched(self, tmp_path):
+        from types import SimpleNamespace
+
+        outside = tmp_path / "elsewhere" / "step"
+        outside.mkdir(parents=True)
+        (outside / "x").write_bytes(b"x")
+        results = self._steps(tmp_path / "arm")
+        results.insert(0, SimpleNamespace(checkpoint_path=str(outside),
+                                          impl_id="outside.v0"))
+        out = M.release_intermediate_steps("q1", results, tmp_path / "arm")
+        assert outside.is_dir()
+        assert "outside.v0" not in out["removed_steps"]
+
+    def test_a_release_failure_is_reported_not_raised(self, tmp_path):
+        from types import SimpleNamespace
+
+        results = self._steps(tmp_path)
+        results.insert(0, SimpleNamespace(
+            checkpoint_path=str(tmp_path / "steps" / "99_gone"),
+            impl_id="gone.v0"))
+        out = M.release_intermediate_steps("q1", results, tmp_path)
+        assert any("gone.v0" in f for f in out["failed"])
+
+    def test_the_arm_loop_fails_closed_on_a_failed_release(self, monkeypatch,
+                                                           tmp_path):
+        """The 120 GB provision is derived on the assumption intermediates
+        are freed; a falsified assumption stops the session with the verified
+        arm preserved."""
+        def fake_candidate(leaf, dest, **kwargs):
+            return {"state_id": leaf.state_id, "spec_hash": "x",
+                    "seconds": 0.0, "checkpoint_path": str(dest),
+                    "identity": {}, "adopted": True,
+                    "intermediates_released": {
+                        "removed_steps": [], "freed_gib": 0.0,
+                        "failed": ["ffn.v0: Permission denied"],
+                        "kept": str(dest)}}
+
+        monkeypatch.setattr(M, "materialize_candidate", fake_candidate)
+        #: B first, and its spec hash is device-dependent; stubbed so this
+        #: test exercises the candidate loop's fail-closed release.
+        monkeypatch.setattr(
+            M, "materialize_incumbent",
+            lambda dest, **kw: {"arm": "B", "adopted": True,
+                                "checkpoint_path": str(dest),
+                                "intermediates_released": {
+                                    "removed_steps": [], "freed_gib": 0.0,
+                                    "failed": [], "kept": str(dest)}})
+        with pytest.raises(M.D1MaterializeError,
+                           match="NO FURTHER ARM"):
+            M.materialize_arms("screening", plan_path=REPO / M.PLAN_REL,
+                               arm_root=tmp_path, device="cpu",
+                               repo_root=REPO, say=lambda _s: None)
+
+    def test_the_probe_footprint_is_derived_not_typed(self):
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        need = driver.probe_local_need_bytes(REPO)
+        assert need["need_bytes"] == (need["transient_bytes"]
+                                      + need["retained_bytes"]
+                                      + need["package_bytes"])
+        #: fp32 training of a ~0.6B model: the working set alone is > 8 GiB,
+        #: so a derived value below that means the derivation broke.
+        assert need["transient_bytes"] > 8 * 2**30
+        assert need["checkpoint"]["num_parameters"] == int(
+            B.design(REPO)["incumbent"]["num_parameters"])
+
+    def test_headroom_refuses_before_training(self, monkeypatch, tmp_path):
+        import aadistill.runtime.leaf_durability as LD
+
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        monkeypatch.setattr(LD, "free_bytes_at", lambda _p: 1 * 2**30)
+        record: dict = {}
+        with pytest.raises(driver.D1BehaviouralDriverError,
+                           match="REFUSING before training"):
+            driver.require_probe_headroom("p1", record, lambda: None)
+        assert record["probe_headroom"][0]["free_gib"] == 1.0
+
+    def test_acked_scored_workdirs_release_and_the_bound_fails_closed(
+            self, monkeypatch, tmp_path):
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        monkeypatch.setattr(driver, "REPO_ROOT", tmp_path)
+        ack_dir = (tmp_path
+                   / "artifacts/audit/autoinit_d1_behavioural/release_acks")
+        ack_dir.mkdir(parents=True)
+        work = tmp_path / "artifacts/stages/stage-3/d1_behavioural"
+        pkg = tmp_path / driver.EVAL_PACKAGES_REL
+        ids = ("p_acked", "p_unacked", "p_unscored", "p_evidence_only",
+               "p_other_bytes")
+        for probe_id in ids:
+            (work / probe_id).mkdir(parents=True)
+            (work / probe_id / "w").write_bytes(b"x" * 32)
+            (pkg / probe_id).mkdir(parents=True)
+
+        def ack(probe_id, sha):
+            (ack_dir / f"{probe_id}.json").write_text(json.dumps(
+                {"probe_id": probe_id, "checkpoint_sha256": sha}))
+
+        ack("p_acked", "a" * 64)
+        ack("p_unscored", "c" * 64)
+        #: THE V1 SHAPE: evidence durable, checkpoint not named. It released
+        #: weights the preservation had not fetched; it must not any more.
+        (ack_dir / "p_evidence_only.json").write_text("{}")
+        ack("p_other_bytes", "f" * 64)
+        record = {"probes": [
+            {"probe_id": "p_acked", "scored": True, "trained_sha256": "a" * 64},
+            {"probe_id": "p_unacked", "scored": True, "trained_sha256": "b" * 64},
+            {"probe_id": "p_unscored", "scored": False,
+             "trained_sha256": "c" * 64},
+            {"probe_id": "p_evidence_only", "scored": True,
+             "trained_sha256": "d" * 64},
+            {"probe_id": "p_other_bytes", "scored": True,
+             "trained_sha256": "e" * 64},
+        ]}
+        out = driver.release_acked_probe_workdirs(record, lambda: None)
+        assert out["released"] == ["p_acked"]
+        assert not (work / "p_acked").exists()
+        assert not (pkg / "p_acked").exists()
+        #: Unacked stays; unscored stays even though acked -- an ack is not a
+        #: score. An ack that does not name THIS probe's trained digest stays
+        #: too: it is not evidence that the bytes about to be deleted survive.
+        for probe_id in ("p_unacked", "p_unscored", "p_evidence_only",
+                         "p_other_bytes"):
+            assert (work / probe_id).is_dir(), probe_id
+        assert out["kept"] == ["p_unacked", "p_evidence_only", "p_other_bytes"]
+
+    def test_packages_are_built_outside_the_audit_dir(self):
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_driver.py").read_text()
+        assert 'out / "packages"' not in src
+        assert "EVAL_PACKAGES_REL" in src
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        assert not driver.EVAL_PACKAGES_REL.startswith("artifacts/audit")
+
+    def test_release_runs_before_each_probe(self):
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_driver.py").read_text()
+        assert src.index("release_acked_probe_workdirs(record, save)") < \
+            src.index("require_probe_headroom(probe.probe_id")
+        assert src.index("require_probe_headroom(probe.probe_id") < \
+            src.index('"--config", str(config)')
+
+
+class TestProtocolEvidenceTravelsInTheArtifactContracts:
+    """Second-review finding 2: the raw protocol-identity evidence -- engine
+    probe, attestation, per-probe admissions -- must be collected, not just
+    the hashes results carry. And the specs must LOAD: an invented lifecycle
+    word makes the whole document unloadable and the collector exits 1 --
+    which is exactly what the committed failed specs would have done, on the
+    exact path (a failed session) they exist for."""
+
+    @staticmethod
+    def _load(rel):
+        import importlib.util
+
+        src = REPO / "scripts/shared/pod/collect_artifacts.py"
+        spec = importlib.util.spec_from_file_location("_collect", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod.load_specs(str(REPO / rel))
+
+    def test_all_four_d1_specs_load_through_the_real_loader(self):
+        for rel in (
+                "configs/stages/stage-1/phase_d1/d1_behavioural_artifacts.json",
+                "configs/stages/stage-1/phase_d1/"
+                "d1_behavioural_artifacts_failed.json",
+                "configs/stages/stage-1/phase_d1/d1_search_artifacts.json",
+                "configs/stages/stage-1/phase_d1/"
+                "d1_search_artifacts_failed.json"):
+            assert self._load(rel), rel
+
+    def test_the_success_spec_requires_the_protocol_evidence(self):
+        entries = {e.artifact_class: e for e in self._load(
+            "configs/stages/stage-1/phase_d1/d1_behavioural_artifacts.json")}
+        for cls in ("d1_behavioural_attested_protocol",
+                    "d1_behavioural_engine_probe",
+                    "d1_behavioural_generation_admissions"):
+            assert entries[cls].required, cls
+        assert "engine_probe.json" in entries[
+            "d1_behavioural_engine_probe"].pattern
+
+    def test_the_failed_spec_collects_them_optionally(self):
+        entries = {e.artifact_class: e for e in self._load(
+            "configs/stages/stage-1/phase_d1/"
+            "d1_behavioural_artifacts_failed.json")}
+        for cls in ("d1_behavioural_attested_protocol",
+                    "d1_behavioural_engine_probe",
+                    "d1_behavioural_generation_admissions"):
+            assert cls in entries and not entries[cls].required, cls
+
+    @staticmethod
+    def _driver_layout(root: Path) -> None:
+        """The tree the driver writes at ALL_DONE, as observed on attempt 8's
+        pod: per-probe files INSIDE results/, per_sample/, generations/<probe>/,
+        configs/ and release_acks/ -- directories, never files, at those
+        names."""
+        audit = root / "audit/autoinit_d1_behavioural"
+        probe = "d1_screening_q1_s614923639"
+        files = {
+            "d1_behavioural.json": "x" * 600,
+            "d1_behavioural_attested_protocol.json": "x" * 300,
+            "engine_probe.json": "x" * 200,
+            f"{probe}_generation_admission.json": "{}",
+            f"{probe}_train_tail.log": "t",
+            f"results/{probe}.json": "{}",
+            f"per_sample/{probe}.jsonl": "{}\n",
+            f"generations/{probe}/gsm8k.generations.jsonl": "{}\n",
+            f"generations/{probe}/gsm8k.json": "{}",
+            f"configs/{probe}.json": "{}",
+            f"release_acks/{probe}.json": "{}",
+        }
+        for rel, text in files.items():
+            (audit / rel).parent.mkdir(parents=True, exist_ok=True)
+            (audit / rel).write_text(text)
+
+    @pytest.mark.parametrize("rel", (
+        "configs/stages/stage-1/phase_d1/d1_behavioural_artifacts.json",
+        "configs/stages/stage-1/phase_d1/d1_behavioural_artifacts_failed.json"))
+    def test_every_class_matches_the_files_the_driver_writes(self, tmp_path,
+                                                             rel):
+        """Attempt 8 (2026-10-12) scored all ten probes and its teardown gate
+        then BLOCKED: results, per_sample and generations were declared as
+        bare directory paths, and the manifest counts FILES matched by the
+        glob, so a directory never satisfies a class. Every class of both
+        specs must now match real files in the driver's layout."""
+        from aadistill.infrastructure.artifact_gate import build_manifest
+
+        self._driver_layout(tmp_path)
+        specs = self._load(rel)
+        manifest = build_manifest(tmp_path, specs)
+        assert manifest.ok, manifest.missing
+        matched = {e.artifact_class for e in manifest.entries}
+        assert matched == {s.artifact_class for s in specs}, (
+            sorted({s.artifact_class for s in specs} - matched))
+
+    def test_the_poll_hook_pulls_the_admission_beside_the_result(self):
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_launch.py").read_text()
+        assert "_generation_admission.json" in src
+        #: And the ack is written only when all three strict pieces arrived
+        #: AND the checkpoint is durable -- the behaviour itself is driven
+        #: end to end in TestTheReleaseWaitsForTheDurableCheckpoint.
+        ack_block = src.split('state["release_acked"] = ', 1)[0]
+        tail = ack_block[ack_block.rfind("if ("):]
+        for piece in ("result.json", "per_sample.jsonl", "admission.json",
+                      "checkpoint"):
+            assert piece in tail, piece
+
+
+class TestTrainedUnscoredDurabilityRunsDuringTheSession:
+    """Second-review finding 3: closeout-only preservation repeats the C1
+    failure -- a provider disappearance between training and scoring loses a
+    completed checkpoint. Preservation now runs on every poll, and a preserved
+    copy is pruned the moment its probe is validly scored."""
+
+    def test_the_poll_hook_preserves_and_does_NOT_prune(self):
+        """The release moved OUT of the poll hook, 2026-10-11. Pruning
+        mid-rung deleted the weights a replacement attempt needs: a failure at
+        probe k left it with nothing for probes 1..k-1 and no admissible way
+        to reuse their measurements. It now runs at the terminal, gated on a
+        completed rung."""
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_launch.py").read_text()
+        poll = src.split("def secure_probe_evidence(", 1)[1].split("\ndef ", 1)[0]
+        #: `(ctx, lay)` since the layout parameter (2026-10-15): the same
+        #: call, under the session's own paths.
+        assert "preserve_trained_unscored(ctx" in poll
+        assert "prune_preserved_scored" not in poll, (
+            "releasing from the poll hook is what made a replacement retrain")
+        terminal = src.split("def fetch_probe_evidence(", 1)[1].split("\ndef ", 1)[0]
+        assert "prune_preserved_scored(ctx" in terminal, (
+            "the release must still have a caller, at the terminal")
+
+    def test_pruning_requires_a_COMPLETED_RUNG_and_durable_evidence(
+            self, tmp_path):
+        """A scored probe with durable evidence is NO LONGER enough, 2026-10-11.
+        Until the rung completes, those weights are what a replacement attempt
+        re-evaluates instead of retraining, so the release self-gates on the
+        terminal and is a no-op on every failure. The per-probe evidence and
+        containment guards are unchanged and still checked."""
+        from support.session_specs import load_session_launcher
+
+        launcher = load_session_launcher("autoinit_d1_behavioural_launch")
+        store = tmp_path / "products" / "trained_unscored"
+        kept = store / "p_kept"
+        kept.mkdir(parents=True)
+        (kept / "w").write_bytes(b"x")
+        pruned = store / "p_pruned"
+        pruned.mkdir(parents=True)
+        (pruned / "w").write_bytes(b"x")
+        (pruned / "run_completion.json").write_text("{}")
+        (pruned / "train_log.jsonl").write_text("{}\n")
+        outside = tmp_path / "elsewhere"
+        outside.mkdir()
+
+        class _Args:
+            scr = str(tmp_path)
+            ckpt_store = None
+
+        class _Ctx:
+            args = _Args()
+            evidence = {
+                #: THE RUNG COMPLETED. Without this the release is a no-op,
+                #: which is the whole point of the 2026-10-11 change -- a
+                #: failure must leave every trained probe's weights in place.
+                "terminal": "ALL_DONE",
+                "trained_unscored_preserved": {
+                    "p_pruned": {"verified": True, "dest": str(pruned)},
+                    "p_kept": {"verified": True, "dest": str(kept)},
+                    "p_outside": {"verified": True, "dest": str(outside)},
+                },
+                "probe_evidence_secured": {
+                    "p_pruned": {"result.json": True,
+                                 "per_sample.jsonl": True,
+                                 "admission.json": True},
+                    "p_outside": {"result.json": True,
+                                  "per_sample.jsonl": True,
+                                  "admission.json": True},
+                },
+            }
+
+            @staticmethod
+            def say(_msg):
+                pass
+
+        launcher.prune_preserved_scored(_Ctx())
+        assert not pruned.exists(), (
+            "completed rung + scored + durable evidence -> released")
+        #: Only the WEIGHTS go: the training records move beside the
+        #: probe's scored evidence first (attempt 8 lost eight train logs).
+        records = tmp_path / "store" / "probes" / "p_pruned" / "training"
+        assert sorted(p.name for p in records.iterdir()) == [
+            "run_completion.json", "train_log.jsonl"]
+        assert kept.is_dir(), "no durable evidence yet -> kept"
+        assert outside.is_dir(), "containment: never deletes outside the store"
+
+        #: AND THE NEW GATE: every failure terminal keeps the bytes, because
+        #: a replacement attempt re-evaluates them rather than retraining.
+        for terminal in ("RUN_FAILED", "POD_GONE", "POLL_LIMIT", ""):
+            again = store / "p_failed"
+            again.mkdir(parents=True, exist_ok=True)
+            (again / "w").write_bytes(b"x")
+            ctx = _Ctx()
+            ctx.evidence = {**_Ctx.evidence, "terminal": terminal,
+                            "trained_unscored_preserved": {
+                                "p_failed": {"verified": True,
+                                             "dest": str(again)}},
+                            "probe_evidence_secured": {
+                                "p_failed": {"result.json": True,
+                                             "per_sample.jsonl": True,
+                                             "admission.json": True}}}
+            launcher.prune_preserved_scored(ctx)
+            assert again.is_dir(), (
+                f"terminal {terminal!r} released weights a replacement needs")
+
+
+class TestTheFirstProbesTrainedWindowIsPreserved:
+    """Third review: `secure_probe_evidence` returned on zero scored probes,
+    so trained-unscored preservation never ran during the FIRST probe's
+    trained-but-unscored interval -- the exact provider-disappearance window
+    the repair was written for. These drive the REAL poll hook (a source
+    assertion cannot see a premature return), with only the transfers
+    simulated at `_scp_from_pod`."""
+
+    SHARD = b"trained-weights-of-probe-one"
+
+    def _run_hook(self, tmp_path, monkeypatch, *, fail_remote=None):
+        import hashlib
+
+        from support.session_specs import load_session_launcher
+
+        launcher = load_session_launcher("autoinit_d1_behavioural_launch")
+        sha = hashlib.sha256(self.SHARD).hexdigest()
+        model_dir = f"{launcher.POD_PROBE_ROOT}/p1/checkpoints/step100/model"
+        relay = tmp_path / "relay"
+        relay.mkdir()
+        #: ZERO scored probes, ONE completed training: the first probe's
+        #: window, verbatim.
+        (relay / "d1_behavioural.json").write_text(json.dumps({
+            "probes": [{"probe_id": "p1", "trained": True, "scored": False,
+                        "model_dir": model_dir, "trained_sha256": sha}]}))
+        remote_files = {
+            f"{launcher.POD_PROBE_ROOT}/p1/run_completion.json":
+                json.dumps({"final_step": 100}).encode(),
+            f"{launcher.POD_PROBE_ROOT}/p1/checkpoints/latest.txt":
+                b"step100",
+            f"{launcher.POD_PROBE_ROOT}/p1/train_log.jsonl":
+                b'{"step": 100}\n',
+        }
+        shard = self.SHARD
+
+        def fake_scp(ctx, remote, dest, *, recursive=False, limit_min=5):
+            if fail_remote and fail_remote in remote:
+                return 1
+            dest = Path(dest)
+            if recursive:
+                #: scp -r of `.../model` into the pre-created tag dir nests
+                #: it as `<tag>/model/`, which is what the real transfer does.
+                target = dest / "model" if remote.endswith("/model") else dest
+                target.mkdir(parents=True, exist_ok=True)
+                (target / "config.json").write_text("{}")
+                (target / "model.safetensors").write_bytes(shard)
+                return 0
+            data = remote_files.get(remote)
+            if data is None:
+                return 1
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(data)
+            return 0
+
+        monkeypatch.setattr(launcher, "_scp_from_pod", fake_scp)
+
+        class _Args:
+            scr = str(tmp_path)
+            ckpt_store = None
+            ckpt_fetch_limit_min = 45
+
+        class _Ctx:
+            args = _Args()
+            evidence = {}
+
+            @staticmethod
+            def say(_msg):
+                pass
+
+        ctx = _Ctx()
+        launcher.secure_probe_evidence(ctx)
+        return launcher, ctx, sha
+
+    def test_zero_scored_probes_still_preserve_the_trained_one(
+            self, tmp_path, monkeypatch):
+        launcher, ctx, sha = self._run_hook(tmp_path, monkeypatch)
+        assert not ctx.evidence.get("on_poll_errors"), \
+            ctx.evidence.get("on_poll_errors")
+        row = ctx.evidence["trained_unscored_preserved"]["p1"]
+        assert row["verified"] is True, row
+        assert all(row["completeness"].values()), row["completeness"]
+        assert row["arrived_sha256"] == sha
+        assert (Path(row["dest"]) / "preserved_identity.json").is_file()
+        #: The training log travels with the checkpoint; a record the pod
+        #: never wrote (run_manifest here) is reported, never fatal.
+        assert row["training_records"] == {"train_log.jsonl": True,
+                                           "run_manifest.json": False}
+        assert (Path(row["dest"]) / "train_log.jsonl").is_file()
+
+    def test_a_missing_training_log_does_not_unverify_the_checkpoint(
+            self, tmp_path, monkeypatch):
+        launcher, ctx, _sha = self._run_hook(
+            tmp_path, monkeypatch, fail_remote="train_log.jsonl")
+        row = ctx.evidence["trained_unscored_preserved"]["p1"]
+        assert row["verified"] is True
+        assert row["training_records"]["train_log.jsonl"] is False
+
+    def test_an_incomplete_transfer_is_not_durable(self, tmp_path,
+                                                   monkeypatch):
+        """A matching shard must not compensate for a failed transfer of the
+        other resume inputs: a set without its training-completion record
+        restores as 'never finished training' and RETRAINS the frozen unit."""
+        launcher, ctx, _sha = self._run_hook(
+            tmp_path, monkeypatch, fail_remote="run_completion.json")
+        row = ctx.evidence["trained_unscored_preserved"]["p1"]
+        assert row["verified"] is False
+        assert row["completeness"]["weights_digest"] is True
+        assert row["completeness"]["run_completion"] is False
+        assert not (Path(row["dest"]) / "preserved_identity.json").exists()
+        #: And the teardown gate therefore still refuses: unpreserved.
+        ok, why = launcher.probes_evidence_secured(ctx, [])
+        assert not ok and "p1" in why
+
+    def test_a_complete_preservation_resumes_at_evaluation_only(
+            self, tmp_path, monkeypatch):
+        launcher, ctx, sha = self._run_hook(tmp_path, monkeypatch)
+        row = ctx.evidence["trained_unscored_preserved"]["p1"]
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        state = driver.trained_checkpoint_state(Path(row["dest"]))
+        assert state is not None
+        assert state["model_dir"].endswith("checkpoints/step100/model")
+        assert state.get("restored_sha256_verified") is True
+        #: And the gate accepts teardown once the preservation is verified.
+        ok, why = launcher.probes_evidence_secured(ctx, [])
+        assert ok and "preserved" in why
+
+
+class TestTheReleaseWaitsForTheDurableCheckpoint:
+    """The real Poll -> Preservation -> ACK -> Release chain, then Restore ->
+    Resume on a replacement pod. Only the TRANSPORT is simulated: two local
+    directories stand in for the pod's repository and the dev box's scratch,
+    and every launcher and driver function between them is the production one.
+
+    The defect (2026-10-11): the ack was written on durable EVIDENCE alone,
+    inside the scored-evidence loop and before the checkpoint preservation ran,
+    so the driver could delete a scored probe's workdir -- the only on-pod copy
+    of its trained weights -- before the weights left the pod. A replacement
+    attempt then had nothing to resume and retrained the probe."""
+
+    SHARD = b"trained-weights-of-probe-one"
+    POD_REPO = "/workspace/aad/"
+
+    @classmethod
+    def _pod_with_a_scored_probe(cls, pod):
+        import hashlib
+
+        probe = pod / "artifacts/stages/stage-3/d1_behavioural/p1"
+        model = probe / "checkpoints/step100/model"
+        model.mkdir(parents=True)
+        (model / "config.json").write_text("{}")
+        (model / "model.safetensors").write_bytes(cls.SHARD)
+        (probe / "checkpoints/latest.txt").write_text("step100")
+        (probe / "run_completion.json").write_text('{"final_step": 100}')
+        (pod / "artifacts/stages/stage-3/d1_behavioural_eval/p1").mkdir(
+            parents=True)
+        audit = pod / "artifacts/audit/autoinit_d1_behavioural"
+        for rel, body in (("results/p1.json", '{"correct_overall": 0.5}'),
+                          ("per_sample/p1.jsonl", '{"id": 1}\n'),
+                          ("p1_generation_admission.json", "{}"),
+                          ("generations/p1/set.json", "{}"),
+                          ("d1_behavioural_attested_protocol.json", "{}"),
+                          ("engine_probe.json", "{}")):
+            (audit / rel).parent.mkdir(parents=True, exist_ok=True)
+            (audit / rel).write_text(body)
+        sha = hashlib.sha256(cls.SHARD).hexdigest()
+        return {"probe_id": "p1", "arm": "q1", "trained": True, "scored": True,
+                "model_dir": cls.POD_REPO + str(model.relative_to(pod)),
+                "trained_sha256": sha}
+
+    @classmethod
+    def _transport(cls, monkeypatch, launcher, pod, *, failing, calls):
+        import shutil
+
+        def local(remote):
+            assert remote.startswith(cls.POD_REPO), remote
+            return pod / remote[len(cls.POD_REPO):]
+
+        def scp_from(ctx, remote, dest, *, recursive=False, limit_min=5):
+            calls.append(remote)
+            src, dest = local(remote), Path(dest)
+            if any(f in remote for f in failing) or not src.exists():
+                return 1
+            if recursive:
+                #: scp -r semantics: into an existing directory it nests, and
+                #: it overwrites what is already there.
+                shutil.copytree(src, dest / src.name if dest.is_dir() else dest,
+                                dirs_exist_ok=True)
+            else:
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(src, dest)
+            return 0
+
+        def scp_to(ctx, sources, remote_dir, *, recursive=False, timeout=120):
+            target = local(remote_dir)
+            target.mkdir(parents=True, exist_ok=True)
+            for s in map(Path, sources):
+                if s.is_dir():
+                    shutil.copytree(s, target / s.name)
+                else:
+                    shutil.copy2(s, target / s.name)
+            return 0
+
+        monkeypatch.setattr(launcher, "_scp_from_pod", scp_from)
+        monkeypatch.setattr(launcher, "_scp_to_pod", scp_to)
+
+    @staticmethod
+    def _ctx(scr, *, run_id, restore=None, store=None):
+        class _Args:
+            pass
+
+        args = _Args()
+        args.scr, args.run_id, args.restore_trained = str(scr), run_id, restore
+        args.ckpt_store, args.ckpt_fetch_limit_min = store, 45
+
+        class _Ctx:
+            evidence = {"pod_id": f"pod_of_{run_id}"}
+            host = ""
+            target = None
+
+            @staticmethod
+            def say(_msg):
+                pass
+
+        ctx = _Ctx()
+        ctx.args = args
+        ctx.evidence = {"pod_id": f"pod_of_{run_id}"}
+        return ctx
+
+    @staticmethod
+    def _mirror(scr, probes):
+        (scr / "relay").mkdir(parents=True, exist_ok=True)
+        (scr / "relay/d1_behavioural.json").write_text(
+            json.dumps({"probes": probes}))
+
+    def test_no_ack_and_no_release_until_the_checkpoint_is_durable(
+            self, tmp_path, monkeypatch):
+        from support.session_specs import load_session_launcher
+
+        launcher = load_session_launcher("autoinit_d1_behavioural_launch")
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        pod, dev = tmp_path / "pod", tmp_path / "dev"
+        entry = self._pod_with_a_scored_probe(pod)
+        self._mirror(dev, [entry])
+        monkeypatch.setattr(driver, "REPO_ROOT", pod)
+        workdir = pod / "artifacts/stages/stage-3/d1_behavioural/p1"
+        ack = pod / "artifacts/audit/autoinit_d1_behavioural/release_acks/p1.json"
+
+        #: POLL 1: the evidence arrives, the checkpoint transfer FAILS.
+        calls: list = []
+        self._transport(monkeypatch, launcher, pod,
+                        failing={"/checkpoints/step100/model"}, calls=calls)
+        ctx = self._ctx(dev, run_id="run_A")
+        launcher.secure_probe_evidence(ctx)
+        assert not ctx.evidence.get("on_poll_errors"), ctx.evidence
+        secured = ctx.evidence["probe_evidence_secured"]["p1"]
+        assert secured["result.json"] and secured["per_sample.jsonl"] \
+            and secured["admission.json"], secured
+        assert ctx.evidence["trained_unscored_preserved"]["p1"]["verified"] \
+            is False
+        assert not ack.exists(), "acked on evidence alone -- the defect"
+        record = {"probes": [dict(entry)]}
+        out = driver.release_acked_probe_workdirs(record, lambda: None)
+        assert out["kept"] == ["p1"] and workdir.is_dir()
+
+        #: POLL 2: the transfer succeeds; preservation, ack and release follow
+        #: IN THAT ORDER, within one poll.
+        self._transport(monkeypatch, launcher, pod, failing=set(), calls=calls)
+        launcher.secure_probe_evidence(ctx)
+        row = ctx.evidence["trained_unscored_preserved"]["p1"]
+        assert row["verified"] is True, row
+        doc = json.loads(ack.read_text())
+        assert doc["checkpoint_sha256"] == entry["trained_sha256"]
+        out = driver.release_acked_probe_workdirs(record, lambda: None)
+        assert out["released"] == ["p1"]
+        assert not workdir.exists()
+        assert not (pod / driver.EVAL_PACKAGES_REL / "p1").exists()
+        #: The released bytes survive off-pod, provenance-stamped.
+        sidecar = json.loads(
+            (Path(row["dest"]) / "preserved_identity.json").read_text())
+        assert sidecar["trained_in_run"] == "run_A"
+
+        #: RESTORE onto a REPLACEMENT pod; the REAL resume consumer accepts
+        #: the bytes, and says they were trained elsewhere.
+        pod2 = tmp_path / "pod2"
+        self._transport(monkeypatch, launcher, pod2, failing=set(), calls=calls)
+        ctx_b = self._ctx(tmp_path / "dev_b", run_id="run_B",
+                          restore=str(Path(row["dest"]).parent))
+        assert launcher.restore_trained_probes(ctx_b) is True
+        monkeypatch.setattr(driver, "RUN_ID_FOR_PROVENANCE", ["run_B"])
+        state = driver.trained_checkpoint_state(
+            pod2 / "artifacts/stages/stage-3/d1_behavioural/p1")
+        assert state is not None and state["restored_sha256_verified"]
+        assert state["trained_in_run"] == "run_A"
+        assert state["_training_session_differs"] is True
+
+        #: RE-PRESERVED by the replacement session into ITS store: the
+        #: original provenance travels, not the resuming run's id.
+        resumed = {**entry, "resumed_from_trained": state,
+                   "model_dir": entry["model_dir"]}
+        self._mirror(tmp_path / "dev_b", [resumed])
+        launcher.preserve_trained_unscored(ctx_b)
+        row_b = ctx_b.evidence["trained_unscored_preserved"]["p1"]
+        assert row_b["verified"] is True, row_b
+        again = json.loads(
+            (Path(row_b["dest"]) / "preserved_identity.json").read_text())
+        assert again["trained_in_run"] == "run_A", (
+            "the replacement stamped its own run as the training session")
+
+    def test_an_already_durable_copy_is_not_fetched_again(
+            self, tmp_path, monkeypatch):
+        """A replacement whose store IS its restore source re-verifies the
+        bytes on disk instead of re-downloading them, and keeps the sidecar."""
+        from support.session_specs import load_session_launcher
+
+        launcher = load_session_launcher("autoinit_d1_behavioural_launch")
+        pod, dev = tmp_path / "pod", tmp_path / "dev"
+        entry = self._pod_with_a_scored_probe(pod)
+        self._mirror(dev, [entry])
+        calls: list = []
+        self._transport(monkeypatch, launcher, pod, failing=set(), calls=calls)
+        ctx = self._ctx(dev, run_id="run_A")
+        launcher.preserve_trained_unscored(ctx)
+        dest = Path(ctx.evidence["trained_unscored_preserved"]["p1"]["dest"])
+        before = (dest / "preserved_identity.json").read_text()
+
+        calls.clear()
+        later = self._ctx(dev, run_id="run_B")
+        launcher.preserve_trained_unscored(later)
+        row = later.evidence["trained_unscored_preserved"]["p1"]
+        assert row["verified"] and row["already_durable"]
+        assert calls == [], f"re-fetched identical bytes: {calls}"
+        assert (dest / "preserved_identity.json").read_text() == before
+
+        #: And a corrupted copy is NOT accepted as durable: it is re-fetched.
+        shard = dest / "checkpoints/step100/model/model.safetensors"
+        shard.write_bytes(b"corrupted")
+        third = self._ctx(dev, run_id="run_C")
+        launcher.preserve_trained_unscored(third)
+        assert calls, "a copy that no longer verifies must be fetched again"
+        assert third.evidence["trained_unscored_preserved"]["p1"]["verified"]
+
+
+class TestTheRootLoaderSeamCarriesTheSpec:
+    """The first paid screening subrun (sidscaxyh1c7o1, $0.17, 2 seconds of
+    driver) died on `'NoneType' object has no attribute 'root_repo_id'`:
+    materialize_arms bound `lambda: load_root(None)` where the replay driver
+    binds the leaf's own spec -- but the spec is built INSIDE
+    materialize_candidate, so only it can close over the value.
+    `--check-only` never reaches this seam (it materializes nothing), which is
+    exactly the injected-function blind spot. This drives the REAL wiring:
+    materialize_arms -> materialize_candidate -> the producer invoking the
+    loader -> load_root_model receiving a spec it can read the root off."""
+
+    def test_the_loader_receives_the_leafs_own_spec(self, monkeypatch,
+                                                    tmp_path):
+        import aadistill.initialization.planning.fixed_path as FP
+        from stages.phase_d1 import replay_specs as R
+
+        captured = {}
+
+        class _Stop(RuntimeError):
+            pass
+
+        def fake_load_root_model(spec, *, config_overrides, device):
+            captured["spec"] = spec
+            captured["overrides"] = dict(config_overrides)
+            return "sentinel-root"
+
+        def fake_materialize(spec, **kwargs):
+            #: The producer's real behaviour at the seam: call the loader
+            #: with NO arguments.
+            loader = kwargs["root_loader"]
+            captured["root"] = loader()
+            raise _Stop()
+
+        #: B is built FIRST now and its spec hash is DEVICE-DEPENDENT -- C1
+        #: froze the treatment path at `cuda`, so `assert_frozen_construction`
+        #: correctly refuses a `cpu` rebuild. Stubbed here so this test
+        #: exercises the CANDIDATE seam it is about, through the real
+        #: materialize_arms wiring that shipped the defect.
+        monkeypatch.setattr(
+            M, "materialize_incumbent",
+            lambda dest, **kw: {"arm": "B", "adopted": True,
+                                "checkpoint_path": str(dest),
+                                "intermediates_released": {
+                                    "removed_steps": [], "freed_gib": 0.0,
+                                    "failed": [], "kept": str(dest)}})
+        monkeypatch.setattr(R, "load_root_model", fake_load_root_model)
+        monkeypatch.setattr(FP, "materialize_fixed_path", fake_materialize)
+        with pytest.raises(_Stop):
+            M.materialize_arms("screening", plan_path=REPO / M.PLAN_REL,
+                               arm_root=tmp_path, device="cpu",
+                               repo_root=REPO, say=lambda _s: None)
+        spec = captured["spec"]
+        assert spec is not None, "the loader was handed None again"
+        assert getattr(spec, "root_repo_id", None), (
+            "the loader's spec carries no root_repo_id; load_root_model "
+            "reads the teacher identity off it")
+        assert getattr(spec, "root_revision", None)
+        assert captured["overrides"] == {"use_cache": False}
+        assert captured["root"] == "sentinel-root"
+
+
+class TestTheIncumbentsDeviceIsPartOfItsIdentity:
+    """`FixedPathSpec.as_dict` includes `device`, so B's spec hash is
+    device-dependent and C1 froze the treatment path at `cuda`.
+    `assert_frozen_construction` therefore refuses a `cpu` rebuild of B at
+    $0 -- which is exactly what it should do, and is how the B-first
+    reordering surfaced the fact. A pod builds on cuda; nothing may quietly
+    rebuild B somewhere else and call it B."""
+
+    def test_a_cpu_rebuild_of_b_is_refused_before_any_tensor_moves(
+            self, tmp_path):
+        from stages.phase_c2 import baseline as BL
+        from stages.phase_d1 import d1_session as D1S
+
+        D1S._register_frozen_operators()
+        with pytest.raises(BL.BaselineError, match="frozen treatment path"):
+            BL.assert_frozen_construction(
+                BL.frozen_baseline_spec(device="cpu"))
+
+    def test_the_cuda_construction_is_the_frozen_one(self):
+        from stages.phase_c2 import baseline as BL
+        from stages.phase_d1 import d1_session as D1S
+
+        D1S._register_frozen_operators()
+        spec = BL.frozen_baseline_spec(device="cuda")
+        evidence = BL.assert_frozen_construction(spec)
+        assert evidence["spec_hash"] == evidence["expected_spec_hash"]
+
+
+class TestEverySubprocessGetsTheLauncherSuppliedEnvironment:
+    """Screening attempt 132919: the attestation came from the engine probe,
+    which this driver passed `--image-digest`; generation came from
+    `uncapped_eval`, which reads `AADISTILL_IMAGE_DIGEST` from the environment
+    and found nothing, so it recorded `image_digest: null`. The two
+    `runtime_digest` values could not agree and the per-probe admission
+    refused the probe as NOT COMPARABLE -- the gate working, after 192 minutes
+    and $3.49. `autoinit_preflight_driver.child_env` is the precedent and its
+    docstring predicted exactly this.
+
+    The image digest cannot be observed inside a container, so it can only
+    arrive from the launcher. These checks are structural because the failure
+    is structural: a child that is spawned without the environment cannot be
+    detected by anything the child does."""
+
+    @staticmethod
+    def _driver_source() -> str:
+        return (REPO / "scripts/stages/stage-1/phase_d1/"
+                       "autoinit_d1_behavioural_driver.py").read_text()
+
+    def test_child_env_carries_the_digest_and_preserves_the_environment(self):
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        env = driver.child_env("sha256:deadbeef")
+        assert env["AADISTILL_IMAGE_DIGEST"] == "sha256:deadbeef"
+        #: `{**os.environ, ...}`: PATH, the CUDA variables and HF_HOME belong
+        #: to the pod, and replacing the environment wholesale would break the
+        #: children in a new way.
+        assert "PATH" in env
+        assert "AADISTILL_IMAGE_DIGEST" not in driver.child_env(None)
+
+    def test_every_subprocess_call_passes_an_env(self):
+        """AST over the driver: a `subprocess.run` that spawns a child and
+        does not pass `env=` is the defect, whichever child it is."""
+        import ast
+
+        tree = ast.parse(self._driver_source())
+        bare: list[str] = []
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            if ast.unparse(node.func) != "subprocess.run":
+                continue
+            keywords = {kw.arg for kw in node.keywords}
+            if "env" not in keywords:
+                bare.append(ast.unparse(node)[:90])
+        assert not bare, (
+            "these subprocess calls spawn a child without the "
+            f"launcher-supplied environment: {bare}")
+
+    def test_the_four_children_are_all_covered(self):
+        src = self._driver_source()
+        assert src.count("env=child_env") == 4, (
+            "the driver spawns the trainer, the engine probe, the evaluator "
+            "and the scorer; every one needs the environment")
+
+    def test_the_attesting_and_generating_sides_take_one_digest_source(self):
+        """The two sides of the comparison must read the SAME value. The
+        attestation receives it as `image_digest`, generation through
+        `child_env(args.image_digest)`; a second source is a second thing that
+        can disagree."""
+        src = self._driver_source()
+        assert "build_attested_protocol(\n" in src
+        attest = src.split("build_attested_protocol(\n", 1)[1][:200]
+        assert "image_digest=args.image_digest" in attest
+        #: and the evaluator's env comes from the same attribute
+        evaluate = src.split('str(UNCAPPED_EVAL),', 1)[1][:900]
+        assert "env=child_env(args.image_digest)" in evaluate
+
+    def test_the_launcher_supplies_it_on_the_command_line(self):
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_launch.py").read_text()
+        assert "--image-digest" in src
+        assert "ctx.image_digest" in src
+
+
+class TestARefusedAdmissionNamesTheFieldThatDiffered:
+    """The record must carry the DIAGNOSIS, not just the verdict.
+
+    Attempt 132919 refused probe 1 after 60.9 minutes of training and wrote
+    `reason: "NOT COMPARABLE: generation protocol differs"`. That sentence is
+    true and useless: it does not say which of the 28 material fields moved,
+    so finding the cause -- a null image digest on the evaluator side, because
+    the driver spawned it without `AADISTILL_IMAGE_DIGEST` -- meant reading
+    the engine probe's own output and reasoning about which side could have
+    observed what. `matched_against` had the answer the whole time in
+    `generation_comparison.mismatched_fields`, with both values; the first
+    version of the record threw it away.
+    """
+
+    @staticmethod
+    def _driver():
+        import importlib.util
+
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_driver.py")
+        spec = importlib.util.spec_from_file_location("_d1b_drv_adm", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    @staticmethod
+    def _summary(label: str, overrides: dict | None = None) -> dict:
+        """A summary carrying EVERY material field, derived from the contract.
+
+        Built by walking `SUMMARY_FIELD_PATHS` rather than by hand-listing
+        paths, so a field added to the fingerprint cannot leave this fixture
+        quietly incomplete -- the observer would then report it missing and
+        the test would fail for the right reason.
+        """
+        import sys
+
+        sys.path.insert(0, str(REPO / "src"))
+        from aadistill.initialization.planning.generation import (
+            NULLABLE_SUMMARY_FIELDS, SUMMARY_FIELD_PATHS,
+        )
+
+        out: dict = {"label": label, "prompts": label}
+        paths = {**SUMMARY_FIELD_PATHS, **NULLABLE_SUMMARY_FIELDS}
+        for field, path in paths.items():
+            value: object = f"v_{field}"
+            if field in NULLABLE_SUMMARY_FIELDS:
+                value = None
+            elif field == "stop_token_ids":
+                value = [151643, 151645]
+            node = out
+            parts = path.split(".")
+            for part in parts[:-1]:
+                node = node.setdefault(part, {})
+            node[parts[-1]] = value
+        for dotted, value in (overrides or {}).items():
+            node = out
+            parts = dotted.split(".")
+            for part in parts[:-1]:
+                node = node.setdefault(part, {})
+            node[parts[-1]] = value
+        return out
+
+    def _attested(self, summaries):
+        import sys
+
+        sys.path.insert(0, str(REPO / "src"))
+        from aadistill.initialization.planning.generation import (
+            RecoveryEvaluationProtocol, observe_generation_protocol,
+        )
+
+        return RecoveryEvaluationProtocol(
+            generation=observe_generation_protocol(summaries).protocol,
+            scoring_contract="c1_confirmation_scoring@v1",
+            scoring_digest="dig",
+            battery_artifact="a", battery_manifest_sha256="m",
+            battery_content_sha256="c")
+
+    #: The attempt-132919 shape: the runtime digest is the field that carries
+    #: the image digest, so a null digest on one side moves exactly this one.
+    def test_the_record_names_the_mismatched_field_and_both_values(
+            self, tmp_path):
+        driver = self._driver()
+        attested = self._attested([self._summary("code")])
+
+        gen = tmp_path / "gen"
+        gen.mkdir()
+        drifted = self._summary(
+            "code", {"identity.runtime_digest": "DIFFERENT_DIGEST"})
+        (gen / "code.json").write_text(json.dumps(drifted))
+
+        with pytest.raises(Exception) as excinfo:
+            driver.admit_generation(
+                "d1_screening_q1_s614923639", gen, attested=attested,
+                scoring={"contract": "c1_confirmation_scoring@v1",
+                         "digest": "dig"},
+                battery_fields={"battery_artifact": "a",
+                                "battery_manifest_sha256": "m",
+                                "battery_content_sha256": "c"},
+                out=tmp_path)
+        assert "admission record" in str(excinfo.value)
+
+        record = json.loads(
+            (tmp_path /
+             "d1_screening_q1_s614923639_generation_admission.json").read_text())
+        assert record["comparable"] is False
+        mismatched = record["comparison"]["generation_comparison"][
+            "mismatched_fields"]
+        fields = {m["field"] for m in mismatched}
+        assert fields == {"runtime_digest"}, (
+            "the record must name exactly the field that moved; got "
+            f"{sorted(fields)}")
+        pair = next(m for m in mismatched if m["field"] == "runtime_digest")
+        assert {pair["self"], pair["other"]} == {
+            "DIFFERENT_DIGEST", "v_runtime_digest"}, (
+            "both values must be recorded, so the reader can tell which side "
+            "was wrong without re-deriving it")
+
+    def test_both_protocols_are_recorded_whole_not_only_the_hashes(
+            self, tmp_path):
+        """Two hashes that differ prove nothing about why. The record carries
+        both materialized protocols so a later reader can diff them."""
+        driver = self._driver()
+        attested = self._attested([self._summary("code")])
+        gen = tmp_path / "gen"
+        gen.mkdir()
+        (gen / "code.json").write_text(json.dumps(
+            self._summary("code", {"engine.max_num_seqs": "moved"})))
+
+        with pytest.raises(Exception):
+            driver.admit_generation(
+                "p", gen, attested=attested,
+                scoring={"contract": "c1_confirmation_scoring@v1",
+                         "digest": "dig"},
+                battery_fields={"battery_artifact": "a",
+                                "battery_manifest_sha256": "m",
+                                "battery_content_sha256": "c"},
+                out=tmp_path)
+        record = json.loads(
+            (tmp_path / "p_generation_admission.json").read_text())
+        assert record["observed_generation"]["max_num_seqs"] == "moved"
+        assert record["attested_generation"]["max_num_seqs"] == \
+            "v_max_num_seqs"
+
+    def test_an_admitted_probe_records_the_same_comparison_shape(
+            self, tmp_path):
+        """The record is written on BOTH paths with the same keys, so a
+        consumer does not have to branch on the verdict to read it."""
+        driver = self._driver()
+        summaries = [self._summary("code")]
+        attested = self._attested(summaries)
+        gen = tmp_path / "gen"
+        gen.mkdir()
+        (gen / "code.json").write_text(json.dumps(summaries[0]))
+
+        admission = driver.admit_generation(
+            "p", gen, attested=attested,
+            scoring={"contract": "c1_confirmation_scoring@v1",
+                     "digest": "dig"},
+            battery_fields={"battery_artifact": "a",
+                            "battery_manifest_sha256": "m",
+                            "battery_content_sha256": "c"},
+            out=tmp_path)
+        assert admission["comparable"] is True
+        record = json.loads(
+            (tmp_path / "p_generation_admission.json").read_text())
+        assert record["comparison"]["generation_comparison"][
+            "mismatched_fields"] == []
+        assert set(record) >= {"comparable", "comparison",
+                               "observed_generation", "attested_generation",
+                               "generation_fingerprint", "n_summaries"}
+
+
+class TestTheEnvelopeIsNettedAgainstPriorSubruns:
+    """A relaunch's bound is the REMAINDER, not the whole envelope.
+
+    THE DEFECT. `per_launch_hard_usd` was set to the full `ceiling`, so
+    `SpendAuthorization.require_within_launch_limit` -- whose docstring is
+    *"One launch may not spend the cumulative allowance of several"* -- had a
+    per-launch limit identical to the cumulative cap and could never fire.
+    Four screening subruns each booked `within_authorization: true` at
+    $25.0053 while draining the envelope to $16.79, and a fifth would have
+    carried a $24.63 hard GPU bound against that $16.79 -- authorizing roughly
+    $8 of overspend past the maintainer's envelope with no check in the way.
+
+    The guard was present and correct; the two numbers it compared were the
+    same number. So these tests check the *difference*, and one of them
+    mutates the production assignment to prove the check is not vacuous.
+    """
+
+    def test_it_sums_the_real_closeouts_this_session_has_written(self):
+        #: DERIVED, never typed: the campaign writes a closeout per subrun and
+        #: a literal count goes stale the next time one lands -- which it did,
+        #: the moment attempt 200001 closed at $0.
+        on_disk = sorted(REPO.glob(BA.RUNS_GLOB))
+        spent = BA.consumed_by_prior_subruns(REPO)
+        assert spent["n_subruns"] == len(on_disk) > 0
+        for row in spent["subruns"]:
+            #: $0 is a legitimate settled figure -- a chain can be consumed
+            #: before any resource exists -- so the assertion is that the row
+            #: is identified and priced, not that it is expensive.
+            assert row["usd"] >= 0, row
+            assert row["run_id"], row
+        assert spent["consumed_usd"] == round(
+            sum(r["usd"] for r in spent["subruns"]), 4)
+        #: and the paid ones are the four that created a pod
+        paid = [r for r in spent["subruns"] if r["usd"] > 0]
+        #: DERIVED. A literal count expires the next time a subrun closes --
+        #: it read 4, then attempt 6 and 7 closed and made it 6.
+        on_disk_paid = 0
+        for path in sorted(REPO.glob(BA.RUNS_GLOB)):
+            doc = json.loads(path.read_text())
+            if float((doc.get("money") or {}).get("all_in_usd") or 0) > 0:
+                on_disk_paid += 1
+        assert len(paid) == on_disk_paid > 0
+        #: DERIVED from the closeouts, never typed: each new subrun moves
+        #: this figure, and a literal expires the next time one lands -- which
+        #: is exactly what happened when attempt 7 closed at $0.6837.
+        from_disk = 0.0
+        for path in sorted(REPO.glob(BA.RUNS_GLOB)):
+            doc = json.loads(path.read_text())
+            usd = (doc.get("money") or {}).get("all_in_usd")
+            if usd:
+                from_disk += float(usd)
+        assert round(sum(r["usd"] for r in paid), 4) == round(from_disk, 4)
+
+    def test_the_real_tree_refuses_a_further_issuance(self):
+        """NO `consumed_usd` OVERRIDE. This is the live state: the remainder
+        cannot fund a complete run, so issuance stops at $0."""
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        spent = BA.consumed_by_prior_subruns(REPO)
+        remaining = priced["hard_ceiling_usd"] - spent["consumed_usd"]
+        assert remaining < priced["expected_usd"], (
+            "premise changed: the remainder now covers a complete run, so "
+            "this test no longer describes the tree it guards")
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="cannot fund one"):
+            BA.build_payload(grant=GRANT, session_commit=HEAD,
+                             granted_utc="2026-10-10T00:00:00+00:00",
+                             run_id="d1b_fifth", rung="screening",
+                             live_rate=ACCEPTED_RATE, repo_root=REPO)
+
+    def test_the_refusal_does_not_offer_to_shrink_the_science(self):
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused) as excinfo:
+            BA.build_payload(grant=GRANT, session_commit=HEAD,
+                             granted_utc="2026-10-10T00:00:00+00:00",
+                             run_id="d1b_fifth", rung="screening",
+                             live_rate=ACCEPTED_RATE, repo_root=REPO)
+        message = str(excinfo.value)
+        assert "MAINTAINER decision" in message
+        assert "does not shrink" in message
+
+    def test_a_partly_spent_envelope_lowers_the_per_launch_bound(self):
+        """The arithmetic, at a spend small enough to still be fundable."""
+        payload = _payload(consumed_usd=2.0)
+        assert payload["envelope"]["one_use_ceiling_usd"] == 25.0053, (
+            "the ENVELOPE is unchanged; only what is left of it moves")
+        assert payload["per_launch_hard_usd"] == round(25.0053 - 2.0, 4)
+        assert payload["envelope"]["consumed_by_prior_subruns_usd"] == 2.0
+        assert payload["envelope"]["remaining_usd"] == \
+            payload["per_launch_hard_usd"]
+
+    def test_a_pristine_envelope_leaves_the_remainder_at_the_ceiling(self):
+        payload = _payload(consumed_usd=0.0)
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        assert payload["per_launch_hard_usd"] == priced["hard_ceiling_usd"], (
+            "with nothing spent the remainder IS the priced ceiling; the fix "
+            "must not penalise a first launch")
+
+    def test_the_attempt_cap_never_exceeds_the_launch_limit(self):
+        """The two are different quantities and must stay ordered: the
+        per-launch limit is what is LEFT of the envelope, the hard cap is what
+        THIS attempt may spend after holding back teardown."""
+        #: Explicit spends, so the ordering property is tested rather than
+        #: whatever the campaign happens to have spent today. $8.3305 is only
+        #: fundable under the RAISED envelope, so it is paired with the
+        #: amendment grant rather than the legacy one.
+        cases = [({}, 0.0), ({}, 2.0),
+                 ({"grant": TestTheRaisedCumulativeEnvelopeAndNarrowedAttemptBounds
+                   .AMENDMENT}, 8.3305)]
+        for extra, consumed in cases:
+            payload = _payload(consumed_usd=consumed, **extra)
+            assert payload["hard_cap_usd"] <= payload["per_launch_hard_usd"], (
+                f"at ${consumed} consumed the attempt's cap "
+                f"${payload['hard_cap_usd']} exceeds the per-launch limit "
+                f"${payload['per_launch_hard_usd']}")
+
+    def test_the_authorization_carries_the_remainder_not_the_ceiling(self):
+        """Read through the real loader, because that is what the launcher
+        reads -- a payload key nobody parses would prove nothing."""
+        import json as _json
+
+        from aadistill.governance.authorization import SpendAuthorization
+
+        from stages.phase_d1 import behavioural_governance as _BG
+        #: 2.0, not 5.0: at $1.09/h the screening cell expects $20.0521, so a
+        #: $5 prior spend would itself trip the refusal under test elsewhere.
+        payload = _payload(consumed_usd=2.0)
+        path = REPO / ".git" / "d1b_envelope_probe.json"
+        path.write_text(_json.dumps(payload))
+        try:
+            auth = SpendAuthorization.load(
+                path, policy=_BG.D1_BEHAVIOURAL_POLICY)
+            assert auth.per_launch_hard_usd == round(25.0053 - 2.0, 4)
+            #: And the core guard now actually BITES: a launch planning to
+            #: spend the full ceiling is refused by the remainder.
+            with pytest.raises(Exception, match="per-launch limit"):
+                auth.require_within_launch_limit(24.6287, what="planned hard")
+            #: while one inside the remainder passes.
+            auth.require_within_launch_limit(19.0, what="planned hard")
+        finally:
+            path.unlink(missing_ok=True)
+
+    def test_the_production_assignment_is_not_the_ceiling(self):
+        """MUTATION: the check is non-vacuous only if the old assignment would
+        break it. Two coinciding numbers are what hid this for four subruns.
+
+        Asserted BEHAVIOURALLY plus one narrow source check. The first version
+        pinned the literal `per_launch_hard_usd=remaining,` and phase-level
+        funding rewrote that line into a conditional -- a phrasing lock that
+        expired while the property it stood for still held."""
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "behavioural_authorization.py").read_text()
+        assert "per_launch_hard_usd=ceiling," not in src, (
+            "the per-launch bound is the unconditional priced ceiling again; "
+            "the guard is vacuous")
+        #: Under one-session funding with money spent, the bound MUST be
+        #: strictly below the priced ceiling -- which is the whole property.
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        partly = _payload(consumed_usd=2.0)
+        assert partly["per_launch_hard_usd"] < priced["hard_ceiling_usd"]
+        assert partly["per_launch_hard_usd"] == round(
+            priced["hard_ceiling_usd"] - 2.0, 4)
+
+    def test_a_closeout_without_a_settled_cost_is_refused(self, tmp_path):
+        """Silently counting an unpriced closeout as $0 would make the
+        remainder look larger than it is, which is the dangerous direction."""
+        run = (tmp_path / "logs/stages/stage-1/phase_d1/runs"
+                          "/d1_behavioural_x/closeout")
+        run.mkdir(parents=True)
+        (run / "outcome.json").write_text(json.dumps(
+            {"run_id": "d1_behavioural_x", "outcome": "FAILED"}))
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="no cost.actual_usd"):
+            BA.consumed_by_prior_subruns(tmp_path)
+
+    def test_an_unreadable_closeout_is_refused_not_skipped(self, tmp_path):
+        run = (tmp_path / "logs/stages/stage-1/phase_d1/runs"
+                          "/d1_behavioural_y/closeout")
+        run.mkdir(parents=True)
+        (run / "outcome.json").write_text("{not json")
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="unknown remainder"):
+            BA.consumed_by_prior_subruns(tmp_path)
+
+    def test_an_empty_tree_consumes_nothing(self, tmp_path):
+        spent = BA.consumed_by_prior_subruns(tmp_path)
+        assert spent == {"n_subruns": 0, "consumed_usd": 0, "subruns": [],
+                         "rung": None, "all_reconciled": True,
+                         "_source": BA.RUNS_GLOB}
+
+    def test_screenings_spend_is_not_charged_to_the_confirmation_envelope(self):
+        """THE TWO RUNGS ARE TWO ONE-USE GRANTS WITH TWO ENVELOPES.
+
+        Caught by the suite: the first version of this netting was
+        rung-blind, so screening's $8.2180 was subtracted from
+        confirmation's separate $15.2025 ceiling and refused a confirmation
+        issuance for money confirmation never had access to. A cumulative
+        rule applies within an envelope, not across two.
+        """
+        everything = BA.consumed_by_prior_subruns(REPO)
+        screening = BA.consumed_by_prior_subruns(REPO, rung="screening")
+        confirmation = BA.consumed_by_prior_subruns(REPO, rung="confirmation")
+        assert screening["consumed_usd"] + confirmation["consumed_usd"] == \
+            pytest.approx(everything["consumed_usd"], abs=1e-4), (
+            "the two rungs partition the phase's spend")
+        assert {r["rung"] for r in screening["subruns"]} == {"screening"}
+        assert {r["rung"] for r in confirmation["subruns"]} <= {"confirmation"}
+        #: Over the real screening closeouts alone -- confirmation never run --
+        #: confirmation's envelope is pristine however much screening spent.
+        alone = _screening_only_tree(self._tmp)
+        assert BA.consumed_by_prior_subruns(alone)["consumed_usd"] == \
+            screening["consumed_usd"] > 0
+        assert BA.consumed_by_prior_subruns(
+            alone, rung="confirmation")["consumed_usd"] == 0
+
+    @pytest.fixture(autouse=True)
+    def _tmp_root(self, tmp_path):
+        self._tmp = tmp_path
+
+    def test_a_confirmation_issuance_is_not_blocked_by_screening_spend(
+            self, monkeypatch):
+        """The end-to-end consequence, through the real payload builder."""
+        #: NO consumed_usd override: the real derivation, over the real
+        #: screening closeouts, must return 0 for a rung that has never run.
+        real = BA.consumed_by_prior_subruns
+        alone = _screening_only_tree(self._tmp)
+        monkeypatch.setattr(BA, "consumed_by_prior_subruns",
+                            lambda root=REPO, *, rung=None: real(alone, rung=rung))
+        payload = BA.build_payload(
+            grant={**GRANT, "rung": "confirmation", "hard_cap_usd": 15.2025,
+                   "covers": "ONE formal D1 behavioural CONFIRMATION session"},
+            session_commit=HEAD, granted_utc="t", run_id="d1b_conf_envelope",
+            rung="confirmation", advancing_candidate="q1",
+            live_rate=ACCEPTED_RATE, repo_root=REPO)
+        assert payload["rung"] == "confirmation"
+        assert payload["envelope"]["consumed_by_prior_subruns_usd"] == 0
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "confirmation", REPO)
+        assert payload["per_launch_hard_usd"] == priced["hard_ceiling_usd"]
+
+    def test_a_second_confirmation_is_refused_once_the_rung_has_run(self):
+        """The real confirmation closeout spends the confirmation envelope, so
+        the issuer refuses a repeat: a complete measurement is not re-run
+        looking for another result (P12.1)."""
+        spent = BA.consumed_by_prior_subruns(REPO, rung="confirmation")
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "confirmation", REPO)
+        if spent["n_subruns"] == 0 or (
+                priced["hard_ceiling_usd"] - spent["consumed_usd"]
+                >= priced["expected_usd"]):
+            pytest.skip("the confirmation envelope can still fund a run")
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="cannot fund one"):
+            BA.build_payload(
+                grant={**GRANT, "rung": "confirmation", "hard_cap_usd": 15.2025,
+                       "covers": "ONE formal D1 behavioural CONFIRMATION session"},
+                session_commit=HEAD, granted_utc="t", run_id="d1b_conf_again",
+                rung="confirmation", advancing_candidate="q2",
+                live_rate=ACCEPTED_RATE, repo_root=REPO)
+
+    def test_a_closeout_that_names_no_rung_is_refused(self, tmp_path):
+        """An unattributable spend makes BOTH remainders unknown, so it is a
+        refusal rather than a silent exclusion."""
+        run = (tmp_path / "logs/stages/stage-1/phase_d1/runs"
+                          "/d1_behavioural_z/closeout")
+        run.mkdir(parents=True)
+        (run / "outcome.json").write_text(json.dumps(
+            {"run_id": "d1_behavioural_z", "cost": {"actual_usd": 1.0}}))
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="names no rung"):
+            BA.consumed_by_prior_subruns(tmp_path, rung="screening")
+
+
+class TestTheRaisedCumulativeEnvelopeAndNarrowedAttemptBounds:
+    """The 2026-10-11 amendment: a CUMULATIVE envelope, and an attempt bound
+    derived from what is left of it rather than from the design's cell.
+
+    The maintainer's conditions, each checked: the envelope is cumulative and
+    all four historical subruns are charged against it; the per-session limit
+    is preserved; consumed is read ALL-IN rather than GPU-only; and the
+    launcher/watchdog bound is no greater than the remaining allowance with a
+    real teardown and evidence reserve, rather than the previous 1355-minute
+    estimate reused blindly.
+    """
+
+    AMENDMENT = {
+        "granted_by": "maintainer-test",
+        "covers": "ONE formal D1 behavioural SCREENING session",
+        "rung": "screening",
+        "previous_envelope_usd": 25.0053,
+        "additional_authorized_usd": 4.9947,
+        "cumulative_envelope_usd": 30.0,
+        "cumulative_cap_usd": LIVE_CAP_USD,
+        "granted_utc": "2026-10-11",
+    }
+
+    def test_consumed_is_read_all_in_not_gpu_only(self):
+        """The reconciliation must be what the issuer nets off. GPU-only
+        understated these four subruns by $0.1125."""
+        spent = BA.consumed_by_prior_subruns(REPO, rung="screening")
+        assert spent["all_reconciled"] is True, (
+            "every screening closeout must carry money.all_in_usd; one that "
+            "does not would be netted at its GPU-only figure")
+        assert {r["basis"] for r in spent["subruns"]} == {"money.all_in_usd"}
+        #: Derived, not typed -- see the note in the sibling test.
+        expected = 0.0
+        for path in sorted(REPO.glob(BA.RUNS_GLOB)):
+            doc = json.loads(path.read_text())
+            usd = (doc.get("money") or {}).get("all_in_usd")
+            if usd is not None and doc.get("rung") == "screening":
+                expected += float(usd)
+        assert spent["consumed_usd"] == round(expected, 4)
+
+    def test_the_envelope_is_cumulative_and_charges_every_subrun(self):
+        """The one-session envelope model, which the 2026-10-11 phase grant
+        SUPERSEDED but which remains a supported grant shape. Tested at an
+        explicit spend: the live campaign total has since grown past what a
+        $30 one-session envelope can fund, and that refusal is asserted
+        separately below rather than breaking the arithmetic here."""
+        payload = _payload(grant=self.AMENDMENT, consumed_usd=8.3305)
+        env = payload["envelope"]
+        assert env["one_use_ceiling_usd"] == 30.0
+        assert env["consumed_by_prior_subruns_usd"] == 8.3305
+        assert env["remaining_usd"] == round(30.0 - 8.3305, 4)
+        assert "CUMULATIVE" in env["envelope_source"]
+
+    def test_the_live_total_has_outgrown_the_one_session_envelope(self):
+        """The consequence, asserted rather than left to surprise a reader:
+        the campaign has spent past what a $30 ONE-SESSION envelope can fund,
+        which is precisely why the maintainer moved to a phase allowance."""
+        spent = BA.consumed_by_prior_subruns(REPO)
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        assert 30.0 - spent["consumed_usd"] < priced["expected_usd"]
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="cannot fund one"):
+            _payload(grant=self.AMENDMENT, consumed_usd=None)
+        assert spent["all_reconciled"] is True
+
+    def test_the_parts_of_the_amendment_must_sum_to_its_total(self):
+        bad = {**self.AMENDMENT, "additional_authorized_usd": 9.0}
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="do not sum to it"):
+            _payload(grant=bad, consumed_usd=None)
+
+    def test_the_per_session_limit_is_preserved_not_assumed(self):
+        """The amendment was required to preserve the $30 per-session limit,
+        so an envelope above it is refused rather than trusted."""
+        bad = {**self.AMENDMENT, "cumulative_envelope_usd": 31.0,
+               "additional_authorized_usd": 5.9947}
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="exceeds the"):
+            _payload(grant=bad, consumed_usd=None)
+
+    def test_a_grant_may_not_state_both_an_envelope_and_a_per_attempt_cap(self):
+        bad = {**self.AMENDMENT, "hard_cap_usd": 25.0053}
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="BOTH"):
+            _payload(grant=bad, consumed_usd=8.3305)
+
+    def test_the_attempt_bound_is_narrowed_below_the_designs_cell(self):
+        """THE MAINTAINER'S CONDITION: 1355.71 may not be reused when the
+        available budget is lower."""
+        payload = _payload(grant=self.AMENDMENT, consumed_usd=8.3305)
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        assert priced["hard_ceiling_minutes"] == 1355.71, "premise"
+        assert payload["hard_runtime_minutes"] < 1355.71, (
+            "the bound must be narrowed, not inherited")
+        assert payload["money"]["attempt_bounds"]["narrowed"] is True
+
+    def test_the_bound_costs_no_more_than_the_remaining_allowance(self):
+        """All-in at the authorized runtime, plus the reserve, must fit."""
+        payload = _payload(grant=self.AMENDMENT, consumed_usd=8.3305)
+        b = payload["money"]["attempt_bounds"]
+        committed = b["all_in_hard_usd"] + b["teardown_reserve_usd"]
+        assert committed <= b["remaining_usd"] + 1e-6, (
+            f"${committed:.4f} committed against ${b['remaining_usd']:.4f} "
+            "remaining -- the watchdog would permit more than was authorized")
+        #: and the ceiling the artifact carries is the narrowed figure
+        assert payload["hard_cap_usd"] == b["all_in_hard_usd"]
+        assert payload["all_in_hard_usd"] == b["all_in_hard_usd"]
+
+    def test_both_cost_terms_scale_with_the_narrowed_runtime(self):
+        """A bound that scaled only the GPU term would understate a long run
+        -- the same GPU-only-is-not-all-in error one level up."""
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        b = BA.narrow_to_remaining(priced, remaining_usd=21.6695)
+        ratio = b["hard_runtime_minutes"] / priced["hard_ceiling_minutes"]
+        assert b["gpu_hard_usd"] == pytest.approx(
+            priced["gpu_hard_usd"] * ratio, rel=1e-3)
+        assert b["disk_hard_usd"] == pytest.approx(
+            priced["disk_hard_usd"] * ratio, rel=1e-3)
+        assert b["all_in_hard_usd"] == pytest.approx(
+            b["gpu_hard_usd"] + b["disk_hard_usd"], abs=1e-4)
+
+    def test_the_minute_bound_is_floored_because_it_is_a_limit(self):
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        b = BA.narrow_to_remaining(priced, remaining_usd=21.6695)
+        assert b["hard_runtime_minutes"] == float(
+            int(b["hard_runtime_minutes"])), "a limit rounds DOWN"
+        #: one more minute would cost more than the remainder allows
+        over = (b["hard_runtime_minutes"] + 1) * b["all_in_usd_per_minute"]
+        assert over + b["teardown_reserve_usd"] > b["remaining_usd"]
+
+    def test_an_attempt_that_cannot_fund_its_teardown_is_refused(self):
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="cannot fund its own teardown"):
+            BA.narrow_to_remaining(priced, remaining_usd=0.10)
+
+    def test_the_frozen_cell_funds_its_bound_but_not_bound_plus_teardown(self):
+        """A true fact about the design's cell, surfaced by the reserve.
+
+        `hard_ceiling_usd` $25.0053 is exactly what 1355.71 minutes COST; it
+        holds nothing back for the teardown that happens after the bound is
+        reached and is billed too. So even a pristine envelope at the cell's
+        own price narrows slightly -- by the reserve, not by a shortfall. The
+        frozen design is NOT edited for this; the attempt's bound simply
+        reserves what the cell does not."""
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        b = BA.narrow_to_remaining(priced, remaining_usd=25.0053)
+        assert b["hard_runtime_minutes"] < priced["hard_ceiling_minutes"]
+        #: and the whole of the gap is the reserve, nothing else
+        lost_minutes = priced["hard_ceiling_minutes"] - b["hard_runtime_minutes"]
+        assert lost_minutes * b["all_in_usd_per_minute"] == pytest.approx(
+            b["teardown_reserve_usd"], abs=0.02)
+
+    def test_an_envelope_that_also_funds_teardown_keeps_the_full_bound(self):
+        """Non-vacuity in the other direction: the cap is a min(), so an
+        envelope with room for bound PLUS teardown is not narrowed at all."""
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        b = BA.narrow_to_remaining(priced, remaining_usd=26.0)
+        assert b["hard_runtime_minutes"] == priced["hard_ceiling_minutes"]
+        assert b["narrowed"] is False
+
+    def test_the_legacy_one_use_grant_shape_still_issues(self):
+        """Additive, not a replacement: a grant with no envelope field is
+        priced exactly as before."""
+        payload = _payload(consumed_usd=0.0)
+        assert payload["envelope"]["one_use_ceiling_usd"] == 25.0053
+        assert payload["envelope"]["envelope_source"].startswith(
+            "the rung's priced ceiling")
+        #: the design's bound less the teardown reserve the cell does not
+        #: itself hold back -- see the test above
+        assert 1300 < payload["hard_runtime_minutes"] < 1355.71
+
+    def test_the_remaining_allowance_funds_the_measured_need(self):
+        """The decision's premise, asserted so a later rate move cannot
+        quietly invalidate it."""
+        payload = _payload(grant=self.AMENDMENT, consumed_usd=8.3305)
+        b = payload["money"]["attempt_bounds"]
+        #: 981.7 min is the measured all-in need from attempt 132919's own
+        #: phase markers; see analyses/d1_screening_budget_boundary.json.
+        assert b["hard_runtime_minutes"] >= 981.7, (
+            "the authorized bound no longer covers a complete measured run")
+
+
+class TestTheLauncherPlansWithinWhatWasAuthorized:
+    """The watchdog bound may not exceed the authorization. Two consumers of
+    one derived quantity, and only one of them was reading it.
+
+    THE DEFECT. `budget_spec` built the runner's plan from the design's priced
+    cell alone -- 1355.71 minutes, $24.63 -- while the artifact for the same
+    run authorized 1129 minutes and $20.82. Nothing compared them, so the
+    runner would have armed a watchdog permitting $3.80 more than the
+    maintainer granted. The dry run caught it at $0, which is what dry runs
+    are for, and the maintainer's 2026-10-11 condition states it directly:
+    the launcher/watchdog hard bound must be no greater than the remaining
+    authorized all-in allowance.
+    """
+
+    @staticmethod
+    def _launcher():
+        import importlib.util
+
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_launch.py")
+        spec = importlib.util.spec_from_file_location("_d1b_lnch", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_an_uncapped_plan_still_lands_on_the_designs_bound(self):
+        """The unchanged behaviour, so the cap is visibly the new thing."""
+        m = self._launcher()
+        cell = BA.session_cell("screening", REPO)
+        plan = m.budget_spec(REPO, "screening").plan(
+            price_per_hour=ACCEPTED_RATE, authorized_usd=25.0053)
+        assert plan.hard_terminate_minutes == pytest.approx(
+            cell["hard_ceiling_minutes"], abs=0.02)
+
+    def test_the_cap_binds_when_it_is_below_the_designs_bound(self):
+        m = self._launcher()
+        cell = BA.session_cell("screening", REPO)
+        capped = cell["expected_minutes"] * 1.10 + 30.0 + 5.0
+        plan = m.budget_spec(
+            REPO, "screening", authorized_minutes=capped).plan(
+            price_per_hour=ACCEPTED_RATE, authorized_usd=25.0053)
+        assert plan.hard_terminate_minutes == pytest.approx(capped, abs=0.02)
+        assert plan.hard_terminate_minutes < cell["hard_ceiling_minutes"]
+
+    def test_a_cap_that_cannot_hold_the_reserves_refuses(self):
+        """It does NOT thin the contingency or the recovery reserve to fit --
+        the exact behaviour the maintainer's condition and the function's own
+        error message both require."""
+        m = self._launcher()
+        with pytest.raises(SystemExit, match="short by"):
+            m.budget_spec(REPO, "screening", authorized_minutes=600.0)
+
+    def test_the_refusal_says_the_bound_was_the_authorized_one(self):
+        m = self._launcher()
+        with pytest.raises(SystemExit) as excinfo:
+            m.budget_spec(REPO, "screening", authorized_minutes=600.0)
+        assert "AUTHORIZED" in str(excinfo.value), (
+            "a reader must be able to tell an authorized-bound shortfall from "
+            "a design that never fit its own cell")
+
+    def test_a_cap_above_the_designs_bound_changes_nothing(self):
+        m = self._launcher()
+        cell = BA.session_cell("screening", REPO)
+        plan = m.budget_spec(
+            REPO, "screening", authorized_minutes=99_999.0).plan(
+            price_per_hour=ACCEPTED_RATE, authorized_usd=25.0053)
+        assert plan.hard_terminate_minutes == pytest.approx(
+            cell["hard_ceiling_minutes"], abs=0.02)
+
+    def test_the_launcher_reads_the_authorization_the_spec_declares(self):
+        """Through the same path and loader, so the plan and the artifact
+        cannot be two different documents."""
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_launch.py").read_text()
+        assert "authorized_minutes=_authorized_minutes(args)" in src
+        assert "auth_path_for(getattr(args" in src
+        assert "D1BehaviouralAuthorization.load(path).hard_runtime_minutes" \
+            in src
+
+    def test_the_recovery_reserve_has_exactly_one_owner(self):
+        """THE OTHER HALF OF THE DEFECT. The authorization used to subtract a
+        45-minute teardown reserve of its own while the launcher's spec
+        already reserved 30 minutes for artifact recovery inside the bound it
+        enforces -- one concern, two reserves, and 45 of the dry run's $3.80
+        shortfall was the double count."""
+        assert BA.TEARDOWN_RESERVE_MINUTES == 0.0, (
+            "the authorization must not hold back a second teardown reserve")
+        m = self._launcher()
+        import inspect
+        body = inspect.getsource(m.budget_spec)
+        assert "recovery_reserve = 30.0" in body
+        assert BA.LAUNCHER_RECOVERY_MINUTES == 30.0, (
+            "the figure the issuer's refusal quotes must be the launcher's "
+            "actual reserve")
+
+    def test_the_authorized_bound_is_the_full_remainder(self):
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        bounds = BA.narrow_to_remaining(priced, remaining_usd=21.6695)
+        assert bounds["all_in_hard_usd"] == pytest.approx(21.6695, abs=0.02), (
+            "with the double count gone the attempt may plan against the "
+            "whole remainder; the recovery window lives inside the plan")
+
+    def test_a_remainder_below_the_recovery_window_is_refused(self):
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        rate = 1.09 / 60.0 + priced["disk_hard_usd"] / priced[
+            "hard_ceiling_minutes"]
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="artifact-recovery window"):
+            BA.narrow_to_remaining(
+                priced, remaining_usd=round(25.0 * rate, 4))
+
+
+class TestPhaseLevelFundingBoundsEachSessionByItsOwnCeiling:
+    """The 2026-10-10 +$100 decision's shape, and why it closes the gap.
+
+    Under one-session funding the issuer netted prior subruns off the session's
+    cap, so a fresh ten-probe run was bounded at the remainder of a $30
+    envelope four engineering subruns had drawn down -- $21.6695, against a
+    launcher plan needing $22.61. That $0.94 gap stopped attempt 200001.
+
+    Phase funding separates the two quantities the maintainer's terms separate:
+    the PHASE holds a cumulative allowance and is charged for every subrun as
+    actually incurred, while each SESSION is bounded by its own derived hard
+    ceiling and by the preserved $30 per-session limit.
+    """
+
+    GRANT = {
+        "granted_by": "maintainer-test",
+        "covers": "the remaining D1 behavioural phase",
+        "rung": "screening",
+        "previous_phase_allowance_usd": 30.0,
+        "additional_authorized_usd": 100.0,
+        "phase_allowance_usd": 130.0,
+        "cumulative_cap_usd": LIVE_CAP_USD,
+        "granted_utc": "2026-10-10",
+    }
+
+    def test_the_session_takes_its_own_derived_ceiling_not_the_remainder(self):
+        payload = _payload(grant=self.GRANT, consumed_usd=None)
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        #: Floored to whole minutes, so within one minute's cost of the cell.
+        assert payload["hard_cap_usd"] == pytest.approx(
+            priced["hard_ceiling_usd"], abs=0.02)
+        env = payload["envelope"]
+        assert env["one_use_ceiling_usd"] == 130.0
+        assert env["rung_priced_ceiling_usd"] == priced["hard_ceiling_usd"]
+        assert "PHASE allowance" in env["envelope_source"]
+
+    def test_prior_subruns_are_charged_to_the_phase_not_the_session(self):
+        payload = _payload(grant=self.GRANT, consumed_usd=None)
+        env = payload["envelope"]
+        spent = BA.consumed_by_prior_subruns(REPO)
+        assert env["consumed_by_prior_subruns_usd"] == spent["consumed_usd"]
+        assert env["remaining_usd"] == round(130.0 - spent["consumed_usd"], 4)
+        #: and the session's cap is UNAFFECTED by that spend -- the defect
+        #: this mode exists to fix.
+        assert payload["hard_cap_usd"] > env["remaining_usd"] - 100.0
+
+    def test_prior_spend_is_read_across_BOTH_rungs(self):
+        """One allowance funds screening and confirmation, so the phase
+        commitment must see every subrun, not just this rung's."""
+        payload = _payload(grant=self.GRANT, consumed_usd=None)
+        phase_wide = BA.consumed_by_prior_subruns(REPO)
+        assert payload["envelope"]["consumed_by_prior_subruns_usd"] == \
+            phase_wide["consumed_usd"]
+        assert payload["envelope"]["prior_subruns"], "non-vacuous"
+
+    def test_the_launchers_plan_fits_the_authorized_bound(self):
+        """THE WHOLE POINT. The same comparison the dry run made, which
+        refused under the old model and must pass under this one."""
+        import importlib.util
+
+        payload = _payload(grant=self.GRANT, consumed_usd=None)
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_launch.py")
+        spec = importlib.util.spec_from_file_location("_d1b_l2", src)
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        plan = m.budget_spec(
+            REPO, "screening",
+            authorized_minutes=payload["hard_runtime_minutes"]).plan(
+            price_per_hour=ACCEPTED_RATE,
+            authorized_usd=payload["hard_cap_usd"])
+        assert plan.hard_terminate_usd <= payload["hard_cap_usd"] + 1e-6
+        #: with the reserves INTACT, not thinned to fit
+        assert plan.artifact_recovery_reserve_minutes == 30.0
+        assert plan.soft_stop_minutes < plan.hard_terminate_minutes
+
+    def test_the_per_session_limit_is_still_enforced(self):
+        """Preserved by the amendment's terms, so a derived ceiling above it
+        is refused even though the $130 phase could easily afford $31.
+
+        Enforced by `check_the_four_conditions`, which is its OWNER. Phase
+        mode adds no second copy: this test originally asserted a duplicate
+        message and that is how the duplicate was found."""
+        import stages.phase_d1.behavioural_authorization as mod
+
+        real = mod.reprice_rung_at
+
+        def inflated(rate, rung, root=REPO):
+            out = dict(real(rate, rung, root))
+            out["hard_ceiling_usd"] = 31.0
+            return out
+
+        mod.reprice_rung_at = inflated
+        try:
+            with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                               match="per-session envelope"):
+                _payload(grant=self.GRANT, consumed_usd=None)
+        finally:
+            mod.reprice_rung_at = real
+
+    def test_a_phase_commitment_above_the_allowance_is_refused(self):
+        """The real safety check: everything spent plus what this session may
+        spend, against the allowance."""
+        tight = {**self.GRANT, "phase_allowance_usd": 20.0,
+                 "previous_phase_allowance_usd": 10.0,
+                 "additional_authorized_usd": 10.0}
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="phase allowance"):
+            _payload(grant=tight, consumed_usd=None)
+
+    def test_the_parts_of_the_amendment_must_sum_to_its_total(self):
+        bad = {**self.GRANT, "additional_authorized_usd": 50.0}
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="do not sum to it"):
+            _payload(grant=bad, consumed_usd=None)
+
+    def test_a_grant_may_not_state_both_funding_models(self):
+        both = {**self.GRANT, "cumulative_envelope_usd": 30.0}
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="BOTH a phase_allowance_usd"):
+            _payload(grant=both, consumed_usd=None)
+
+    def test_one_launch_may_not_plan_the_whole_phase_allowance(self):
+        """`per_launch_hard_usd` must be the SESSION's ceiling, not the
+        phase remainder -- otherwise core's require_within_launch_limit would
+        wave through five sessions' worth in one launch, which is the precise
+        thing its docstring says it prevents."""
+        payload = _payload(grant=self.GRANT, consumed_usd=None)
+        assert payload["per_launch_hard_usd"] == payload["hard_cap_usd"]
+        assert payload["per_launch_hard_usd"] < \
+            payload["envelope"]["remaining_usd"]
+
+    def test_the_one_session_model_still_behaves_as_before(self):
+        """Additive: a grant with no phase allowance is unchanged."""
+        payload = _payload(consumed_usd=0.0)
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        assert payload["envelope"]["one_use_ceiling_usd"] == \
+            priced["hard_ceiling_usd"]
+        assert payload["per_launch_hard_usd"] == priced["hard_ceiling_usd"]

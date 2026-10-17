@@ -1,0 +1,64 @@
+[11:02:01] budget: expected 357 min $6.49 · soft $7.54 · hard $8.09 (authorized $8.21)
+[11:02:01] NVIDIA L40S $1.09/h, stock Medium
+[11:02:02] account funds OK: the provider account holds $118.5137 against the $30.0000 this session must be able to fund
+[11:02:02] run d3_probes_20261017_110022, registration 43156f21a011
+[11:02:03] contract verified at $0: 5297bf3149b137d5, 3 probes
+[11:02:03] 3 product files on the relay at their pins
+[11:02:03] session commit c10ad81189c1 verified: harness digests to b1b2cbea4f04…, carries the authorization and only logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/governance/authorization.json differs from the authorized base
+[11:02:03] no previous attempt failed deterministically; 0 prior log(s) read
+[11:02:09] aad_autoinit_c10ad811.bundle round-trips
+[11:02:10] precheck OK: 9 relay inputs (9 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[11:02:11] watchdog detached — hard 445 min = $8.09
+[11:02:11] created 6gqbeysqtywflq at $1.09/h
+[11:03:06]   starting (60s) — $0.02
+[11:04:00] TCP 22 at 160.250.71.213:52612 after 1.8 min
+[11:04:03] draw 1: ssh reachable — $0.03
+[11:04:34] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[11:04:34] draw 1: host admitted — image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07 is the protocol's
+[11:04:34] draw 1: running setup
+[11:08:14] draw 1: setup complete — $0.11
+[11:08:19] driver detached, pid 2895, confirmed by descriptor_probe — $0.11
+[11:10:29]   2026-10-17T11:08:16Z MARKER:DRIVER_START — $0.15
+[12:16:01]   trained-unscored d3_probes_d3_s396880939: preserved and verified (ccc432ed01ee)
+[12:16:01]   probe d3_probes_d3_s396880939: secured training/run_manifest.json
+[12:16:01]   probe d3_probes_d3_s396880939: secured training/run_completion.json
+[12:16:04]   secured d3_probes_attested_protocol.json
+[12:16:07]   secured engine_probe.json
+[12:36:04]   probe d3_probes_d3_s396880939: secured result.json
+[12:36:08]   probe d3_probes_d3_s396880939: secured per_sample.jsonl
+[12:36:11]   probe d3_probes_d3_s396880939: secured admission.json
+[12:36:26]   probe d3_probes_d3_s396880939: secured generations
+[12:36:30]   probe d3_probes_d3_s396880939: secured rescoring.json
+[12:36:35]   probe d3_probes_d3_s396880939: release ack delivered
+[13:42:17]   trained-unscored d3_probes_d3_s766527341: preserved and verified (e626c722a897)
+[13:42:17]   probe d3_probes_d3_s766527341: secured training/run_manifest.json
+[13:42:17]   probe d3_probes_d3_s766527341: secured training/run_completion.json
+[14:00:03]   probe d3_probes_d3_s766527341: secured result.json
+[14:00:07]   probe d3_probes_d3_s766527341: secured per_sample.jsonl
+[14:00:10]   probe d3_probes_d3_s766527341: secured admission.json
+[14:00:22]   probe d3_probes_d3_s766527341: secured generations
+[14:00:26]   probe d3_probes_d3_s766527341: secured rescoring.json
+[14:00:31]   probe d3_probes_d3_s766527341: release ack delivered
+[15:06:13]   trained-unscored d3_probes_d3_s1004399678: preserved and verified (d52f4c6439bf)
+[15:06:13]   probe d3_probes_d3_s1004399678: secured training/run_manifest.json
+[15:06:13]   probe d3_probes_d3_s1004399678: secured training/run_completion.json
+[15:28:24]   probe d3_probes_d3_s1004399678: secured result.json
+[15:28:28]   probe d3_probes_d3_s1004399678: secured per_sample.jsonl
+[15:28:31]   probe d3_probes_d3_s1004399678: secured admission.json
+[15:28:43]   probe d3_probes_d3_s1004399678: secured generations
+[15:28:51]   probe d3_probes_d3_s1004399678: release ack delivered
+[15:31:03]   2026-10-17T15:29:39Z MARKER:ALL_DONE — $4.88
+[15:31:03] polling ended: ALL_DONE — $4.88
+[15:34:56]   manifest rc=0
+97 file(s) across 11 class(es) -> /workspace/manifest.json
+  final_required: 97 · mutable_snapshot: 0 · final_streams_quiescent: True
+[15:35:16]   probe d3_probes_d3_s1004399678: secured rescoring.json
+[15:35:16]   probe d3_probes_d3_s396880939: pruned preserved trained copy (now scored)
+[15:35:16]   probe d3_probes_d3_s766527341: pruned preserved trained copy (now scored)
+[15:35:17]   probe d3_probes_d3_s1004399678: pruned preserved trained copy (now scored)
+[15:35:17] teardown gate: allowed=True failed=None
+[15:35:17] deleting pod (gate passed)
+[15:35:28] pod deleted — 273.3 min, $4.96; provider confirms gone: True
+
+autoinit-d3-probes COMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/runtime/session.json. D3 probes: every scored probe's evidence and the session record are what it owes; the exploratory comparison is computed off-pod.
+LAUNCHER_EXIT=0

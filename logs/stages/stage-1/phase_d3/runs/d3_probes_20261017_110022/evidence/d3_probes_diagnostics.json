@@ -1,0 +1,320 @@
+{
+ "schema": "aadistill.phase_d3.probes_diagnostics/v1",
+ "reference_rollout_profiles": {
+  "d1_confirmation_B_s1004399678": {
+   "arm": "B",
+   "seed": 1004399678,
+   "n": 950,
+   "generated_tokens_mean": 632.1,
+   "generated_tokens_median": 505.5,
+   "generated_tokens_p90": 1147,
+   "natural_termination_rate": 0.6968,
+   "context_limit_rate": 0.0,
+   "degeneration_rate": 0.3032
+  },
+  "d1_confirmation_B_s396880939": {
+   "arm": "B",
+   "seed": 396880939,
+   "n": 950,
+   "generated_tokens_mean": 673.0,
+   "generated_tokens_median": 517.0,
+   "generated_tokens_p90": 1792,
+   "natural_termination_rate": 0.7379,
+   "context_limit_rate": 0.0,
+   "degeneration_rate": 0.2621
+  },
+  "d1_confirmation_B_s766527341": {
+   "arm": "B",
+   "seed": 766527341,
+   "n": 950,
+   "generated_tokens_mean": 613.7,
+   "generated_tokens_median": 449.0,
+   "generated_tokens_p90": 1280,
+   "natural_termination_rate": 0.7663,
+   "context_limit_rate": 0.0,
+   "degeneration_rate": 0.2337
+  },
+  "d1_confirmation_q2_s1004399678": {
+   "arm": "q2",
+   "seed": 1004399678,
+   "n": 950,
+   "generated_tokens_mean": 560.3,
+   "generated_tokens_median": 441.5,
+   "generated_tokens_p90": 899,
+   "natural_termination_rate": 0.8074,
+   "context_limit_rate": 0.0,
+   "degeneration_rate": 0.1926
+  },
+  "d1_confirmation_q2_s396880939": {
+   "arm": "q2",
+   "seed": 396880939,
+   "n": 950,
+   "generated_tokens_mean": 559.9,
+   "generated_tokens_median": 455.0,
+   "generated_tokens_p90": 791,
+   "natural_termination_rate": 0.7642,
+   "context_limit_rate": 0.0,
+   "degeneration_rate": 0.2358
+  },
+  "d1_confirmation_q2_s766527341": {
+   "arm": "q2",
+   "seed": 766527341,
+   "n": 950,
+   "generated_tokens_mean": 583.0,
+   "generated_tokens_median": 438.5,
+   "generated_tokens_p90": 1024,
+   "natural_termination_rate": 0.8063,
+   "context_limit_rate": 0.0,
+   "degeneration_rate": 0.1937
+  }
+ },
+ "_role": "DESCRIPTIVE ONLY. Never read by the screening rule, never a guardrail: the token-id sidecar's alignment and the rescoring of each candidate's own rollouts against the pinned teacher.",
+ "probes": {
+  "d3_probes_d3_s396880939": {
+   "generation_via": "token_id_wrapper",
+   "token_id_sidecar": {
+    "code": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    },
+    "gsm8k": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "knowledge": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "math_verified": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "multihop": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "rag": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "tool": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    }
+   },
+   "rescoring_run": {
+    "rc": 0,
+    "written": true,
+    "seconds": 113.5
+   },
+   "n_samples": 950,
+   "n_rescored": 950,
+   "n_exact_engine_ids": 950,
+   "n_retokenized_approximation": 0,
+   "complete": true,
+   "failures": 0,
+   "mean_over_samples_of_position_means": {
+    "student_confidence": 0.878808,
+    "student_entropy": 0.642115,
+    "teacher_surprisal": 1.360376,
+    "kl_teacher_student": 1.149763,
+    "student_topk_mass": 0.993904
+   },
+   "thresholds_from": "ea5d3ff997f14174f6aefbe796d16f2a1423b9b27a76e13ff8724f9d543f8c06",
+   "rollout_profile": {
+    "n": 950,
+    "generated_tokens_mean": 632.2,
+    "generated_tokens_median": 463.5,
+    "generated_tokens_p90": 1280,
+    "natural_termination_rate": 0.7863,
+    "context_limit_rate": 0.0,
+    "degeneration_rate": 0.2137
+   }
+  },
+  "d3_probes_d3_s766527341": {
+   "generation_via": "token_id_wrapper",
+   "token_id_sidecar": {
+    "code": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    },
+    "gsm8k": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "knowledge": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "math_verified": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "multihop": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "rag": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "tool": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    }
+   },
+   "rescoring_run": {
+    "rc": 0,
+    "written": true,
+    "seconds": 109.8
+   },
+   "n_samples": 950,
+   "n_rescored": 950,
+   "n_exact_engine_ids": 950,
+   "n_retokenized_approximation": 0,
+   "complete": true,
+   "failures": 0,
+   "mean_over_samples_of_position_means": {
+    "student_confidence": 0.866683,
+    "student_entropy": 0.706353,
+    "teacher_surprisal": 1.377801,
+    "kl_teacher_student": 1.155055,
+    "student_topk_mass": 0.992911
+   },
+   "thresholds_from": "ea5d3ff997f14174f6aefbe796d16f2a1423b9b27a76e13ff8724f9d543f8c06",
+   "rollout_profile": {
+    "n": 950,
+    "generated_tokens_mean": 608.1,
+    "generated_tokens_median": 445.5,
+    "generated_tokens_p90": 1209,
+    "natural_termination_rate": 0.7926,
+    "context_limit_rate": 0.0,
+    "degeneration_rate": 0.2074
+   }
+  },
+  "d3_probes_d3_s1004399678": {
+   "generation_via": "token_id_wrapper",
+   "token_id_sidecar": {
+    "code": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    },
+    "gsm8k": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "knowledge": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "math_verified": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "multihop": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "rag": {
+     "available": true,
+     "exact": true,
+     "rows": 150,
+     "rows_aligned": 150,
+     "reason_unavailable": null
+    },
+    "tool": {
+     "available": true,
+     "exact": true,
+     "rows": 100,
+     "rows_aligned": 100,
+     "reason_unavailable": null
+    }
+   },
+   "rescoring_run": {
+    "rc": 0,
+    "written": true,
+    "seconds": 115.5
+   },
+   "n_samples": 950,
+   "n_rescored": 950,
+   "n_exact_engine_ids": 950,
+   "n_retokenized_approximation": 0,
+   "complete": true,
+   "failures": 0,
+   "mean_over_samples_of_position_means": {
+    "student_confidence": 0.876923,
+    "student_entropy": 0.652103,
+    "teacher_surprisal": 1.257223,
+    "kl_teacher_student": 1.06121,
+    "student_topk_mass": 0.993508
+   },
+   "thresholds_from": "ea5d3ff997f14174f6aefbe796d16f2a1423b9b27a76e13ff8724f9d543f8c06",
+   "rollout_profile": {
+    "n": 950,
+    "generated_tokens_mean": 659.0,
+    "generated_tokens_median": 517.0,
+    "generated_tokens_p90": 1280,
+    "natural_termination_rate": 0.7347,
+    "context_limit_rate": 0.0,
+    "degeneration_rate": 0.2653
+   }
+  }
+ }
+}

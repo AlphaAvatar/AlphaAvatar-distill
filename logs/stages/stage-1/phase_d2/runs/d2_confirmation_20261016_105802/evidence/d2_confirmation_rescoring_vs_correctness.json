@@ -1,0 +1,248 @@
+{
+ "schema": "aadistill.phase_d2.rescoring_vs_correctness/v1",
+ "run_id": "d2_confirmation_20261016_105802",
+ "per_seed": {
+  "396880939": {
+   "n": 850,
+   "n_correct": 28,
+   "all.kl_teacher_student": {
+    "n": 850,
+    "mean_correct": 1.14845,
+    "mean_incorrect": 1.17311,
+    "difference": -0.02466,
+    "point_biserial_r": -0.0101
+   },
+   "all.teacher_surprisal": {
+    "n": 850,
+    "mean_correct": 1.41639,
+    "mean_incorrect": 1.37948,
+    "difference": 0.03691,
+    "point_biserial_r": 0.0115
+   },
+   "all.student_confidence": {
+    "n": 850,
+    "mean_correct": 0.8627,
+    "mean_incorrect": 0.86003,
+    "difference": 0.00268,
+    "point_biserial_r": 0.0101
+   },
+   "all.student_entropy": {
+    "n": 850,
+    "mean_correct": 0.72744,
+    "mean_incorrect": 0.74162,
+    "difference": -0.01418,
+    "point_biserial_r": -0.0101
+   },
+   "reasoning.kl_teacher_student": {
+    "n": 712,
+    "mean_correct": 1.1692,
+    "mean_incorrect": 1.42303,
+    "difference": -0.25382,
+    "point_biserial_r": -0.1272
+   },
+   "answer.student_confidence": {
+    "n": 712,
+    "mean_correct": 0.94963,
+    "mean_incorrect": 0.91754,
+    "difference": 0.03209,
+    "point_biserial_r": 0.1309
+   },
+   "answer.kl_teacher_student": {
+    "n": 712,
+    "mean_correct": 1.32078,
+    "mean_incorrect": 1.2342,
+    "difference": 0.08658,
+    "point_biserial_r": 0.0187
+   },
+   "hchk": {
+    "n": 850,
+    "mean_correct": 0.0028,
+    "mean_incorrect": 0.00212,
+    "difference": 0.00067,
+    "point_biserial_r": 0.035
+   }
+  },
+  "766527341": {
+   "n": 850,
+   "n_correct": 25,
+   "all.kl_teacher_student": {
+    "n": 850,
+    "mean_correct": 1.16022,
+    "mean_incorrect": 1.27008,
+    "difference": -0.10987,
+    "point_biserial_r": -0.0416
+   },
+   "all.teacher_surprisal": {
+    "n": 850,
+    "mean_correct": 1.43672,
+    "mean_incorrect": 1.53069,
+    "difference": -0.09397,
+    "point_biserial_r": -0.0273
+   },
+   "all.student_confidence": {
+    "n": 850,
+    "mean_correct": 0.86269,
+    "mean_incorrect": 0.85669,
+    "difference": 0.006,
+    "point_biserial_r": 0.0237
+   },
+   "all.student_entropy": {
+    "n": 850,
+    "mean_correct": 0.7275,
+    "mean_incorrect": 0.75928,
+    "difference": -0.03179,
+    "point_biserial_r": -0.0237
+   },
+   "reasoning.kl_teacher_student": {
+    "n": 765,
+    "mean_correct": 1.16298,
+    "mean_incorrect": 1.43749,
+    "difference": -0.27452,
+    "point_biserial_r": -0.1243
+   },
+   "answer.student_confidence": {
+    "n": 765,
+    "mean_correct": 0.92482,
+    "mean_incorrect": 0.92469,
+    "difference": 0.00013,
+    "point_biserial_r": 0.0005
+   },
+   "answer.kl_teacher_student": {
+    "n": 765,
+    "mean_correct": 1.28394,
+    "mean_incorrect": 1.3016,
+    "difference": -0.01766,
+    "point_biserial_r": -0.0034
+   },
+   "hchk": {
+    "n": 850,
+    "mean_correct": 0.00183,
+    "mean_incorrect": 0.00225,
+    "difference": -0.00042,
+    "point_biserial_r": -0.0186
+   }
+  },
+  "1004399678": {
+   "n": 850,
+   "n_correct": 23,
+   "all.kl_teacher_student": {
+    "n": 850,
+    "mean_correct": 1.07171,
+    "mean_incorrect": 1.1736,
+    "difference": -0.10189,
+    "point_biserial_r": -0.0343
+   },
+   "all.teacher_surprisal": {
+    "n": 850,
+    "mean_correct": 1.3141,
+    "mean_incorrect": 1.3867,
+    "difference": -0.07259,
+    "point_biserial_r": -0.0196
+   },
+   "all.student_confidence": {
+    "n": 850,
+    "mean_correct": 0.86878,
+    "mean_incorrect": 0.86353,
+    "difference": 0.00525,
+    "point_biserial_r": 0.0182
+   },
+   "all.student_entropy": {
+    "n": 850,
+    "mean_correct": 0.69523,
+    "mean_incorrect": 0.72305,
+    "difference": -0.02782,
+    "point_biserial_r": -0.0182
+   },
+   "reasoning.kl_teacher_student": {
+    "n": 691,
+    "mean_correct": 1.07586,
+    "mean_incorrect": 1.38895,
+    "difference": -0.31309,
+    "point_biserial_r": -0.1432
+   },
+   "answer.student_confidence": {
+    "n": 691,
+    "mean_correct": 0.94013,
+    "mean_incorrect": 0.91884,
+    "difference": 0.02129,
+    "point_biserial_r": 0.0824
+   },
+   "answer.kl_teacher_student": {
+    "n": 691,
+    "mean_correct": 1.24864,
+    "mean_incorrect": 1.23061,
+    "difference": 0.01803,
+    "point_biserial_r": 0.0043
+   },
+   "hchk": {
+    "n": 850,
+    "mean_correct": 0.00253,
+    "mean_incorrect": 0.00211,
+    "difference": 0.00042,
+    "point_biserial_r": 0.0187
+   }
+  }
+ },
+ "pooled": {
+  "n": 2550,
+  "n_correct": 76,
+  "all.kl_teacher_student": {
+   "n": 2550,
+   "mean_correct": 1.1291,
+   "mean_incorrect": 1.20561,
+   "difference": -0.07651,
+   "point_biserial_r": -0.0285
+  },
+  "all.teacher_surprisal": {
+   "n": 2550,
+   "mean_correct": 1.39212,
+   "mean_incorrect": 1.43232,
+   "difference": -0.04019,
+   "point_biserial_r": -0.0116
+  },
+  "all.student_confidence": {
+   "n": 2550,
+   "mean_correct": 0.86454,
+   "mean_incorrect": 0.86009,
+   "difference": 0.00445,
+   "point_biserial_r": 0.0166
+  },
+  "all.student_entropy": {
+   "n": 2550,
+   "mean_correct": 0.71771,
+   "mean_incorrect": 0.7413,
+   "difference": -0.02359,
+   "point_biserial_r": -0.0166
+  },
+  "reasoning.kl_teacher_student": {
+   "n": 2168,
+   "mean_correct": 1.13891,
+   "mean_incorrect": 1.41726,
+   "difference": -0.27836,
+   "point_biserial_r": -0.1308
+  },
+  "answer.student_confidence": {
+   "n": 2168,
+   "mean_correct": 0.93859,
+   "mean_incorrect": 0.92048,
+   "difference": 0.01811,
+   "point_biserial_r": 0.0717
+  },
+  "answer.kl_teacher_student": {
+   "n": 2168,
+   "mean_correct": 1.28683,
+   "mean_incorrect": 1.25689,
+   "difference": 0.02994,
+   "point_biserial_r": 0.0064
+  },
+  "hchk": {
+   "n": 2550,
+   "mean_correct": 0.0024,
+   "mean_incorrect": 0.00216,
+   "difference": 0.00024,
+   "point_biserial_r": 0.0111
+  }
+ },
+ "exact_engine_ids_fraction": 1.0,
+ "_role": "EXPLORATORY and DESCRIPTIVE: no decision reads it, it compares no arms, and its correct-sample counts are small"
+}

@@ -1,0 +1,30 @@
+{
+ "schema": "aadistill.engineering_authorization/v1",
+ "status": "PROPOSED -- NOT GRANTED. No pod may be created on this record.",
+ "authorization_id": "d_series_prediction_rows_r0",
+ "book": "ENGINEERING",
+ "all_in_ceiling_usd": 4.0,
+ "session_cap_usd": 3.6,
+ "_ceiling_composition": "the hard ceiling with the recompute fallback ($3.60, 196.7 min at $1.09/h incl. disk) + the $0.30 teardown reserve + $0.10 rounding. The reserve is INSIDE this figure; a programme total must not add it again",
+ "rate_basis_usd_per_hour": 1.09,
+ "rate_rule": "re-quoted live at launch; the launcher derives the session ceiling and timeout from the live rate and refuses if the cap no longer buys the work",
+ "covers": [
+  "stages D and P of topk_adoption_driver.py under all_v1 then scored_v1, on one L40S pod",
+  "the off-pod equivalence verdict under the registered plan's tolerances",
+  "wall time and peak memory of both modes"
+ ],
+ "does_not_cover": [
+  "any formal D2/D3 measurement",
+  "a search",
+  "recovery training or behaviour",
+  "relaxing a registered tolerance",
+  "a second pod for a failed mode without a recorded engineering cause"
+ ],
+ "plan": "logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/plan.json",
+ "plan_sha256": "1e1eac39445a19eacd5d820b9b04545d9cbbc928dee8b978cad369ae32aaa518",
+ "campaign": "logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/campaign.json",
+ "command": "ADOPT_CAMPAIGN=logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/campaign.json ADOPT_COMMIT=<the commit that records the grant> ADOPT_BRANCH=exec/d1-behavioural-readiness ADOPT_STAGES=D,P ADOPT_PREDICTION_ROWS='all_v1 scored_v1' SESSION_CAP=3.60 nohup bash scripts/stages/stage-1/phase_d1/topk_adoption_launch.sh r0_<utc> > artifacts/stages/stage-1/phase_d1/qualification/topk_adoption/r0_<utc>.log 2>&1 &",
+ "activation": "only on the maintainer's explicit confirmation: this record is copied to authorization.json with granted_utc and the decision reference, and the campaign status becomes OPEN. Until then the budget script cannot read an authorization and the launcher exits at $0",
+ "on_ordinary_failure": "repair and retry inside this ceiling (AGENTS.md P12.1); a deterministic paid failure is never retried unchanged",
+ "authorizes": "nothing while PROPOSED"
+}

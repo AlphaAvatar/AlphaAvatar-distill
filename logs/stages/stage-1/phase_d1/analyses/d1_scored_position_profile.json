@@ -1,0 +1,202 @@
+{
+ "schema": "aadistill.analysis.scored_position_profile/v1",
+ "policy": "positions.supervised_target_v1@v1",
+ "policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12",
+ "mixtures": [
+  {
+   "label": "calib.domain_balanced@v1",
+   "items": 67,
+   "prediction_positions": 59763,
+   "scored_positions": 44746,
+   "scored_fraction_of_positions": 0.7487,
+   "forward_slots_at_batch": {
+    "batch_size": 3,
+    "packing": "length_sorted_v1",
+    "slots": 62161,
+    "scored_fraction_of_slots": 0.7198
+   },
+   "by_domain": {
+    "code": {
+     "positions": 8622,
+     "scored": 7978,
+     "scored_fraction": 0.9253
+    },
+    "general": {
+     "positions": 8287,
+     "scored": 8287,
+     "scored_fraction": 1.0
+    },
+    "math": {
+     "positions": 16781,
+     "scored": 15546,
+     "scored_fraction": 0.9264
+    },
+    "rag_multihop": {
+     "positions": 17368,
+     "scored": 7486,
+     "scored_fraction": 0.431
+    },
+    "tool": {
+     "positions": 8705,
+     "scored": 5449,
+     "scored_fraction": 0.626
+    }
+   },
+   "tag_positions": {
+    "assistant": 36459,
+    "eos": 51,
+    "final_answer": 8560,
+    "reasoning": 27797,
+    "think_close": 51,
+    "tool_close": 8
+   }
+  },
+  {
+   "label": "calib.reasoning_heavy@v2",
+   "items": 62,
+   "prediction_positions": 59763,
+   "scored_positions": 46825,
+   "scored_fraction_of_positions": 0.7835,
+   "forward_slots_at_batch": {
+    "batch_size": 3,
+    "packing": "length_sorted_v1",
+    "slots": 61418,
+    "scored_fraction_of_slots": 0.7624
+   },
+   "by_domain": {
+    "code": {
+     "positions": 11952,
+     "scored": 11298,
+     "scored_fraction": 0.9453
+    },
+    "general": {
+     "positions": 5977,
+     "scored": 5977,
+     "scored_fraction": 1.0
+    },
+    "math": {
+     "positions": 20917,
+     "scored": 19300,
+     "scored_fraction": 0.9227
+    },
+    "rag_multihop": {
+     "positions": 14941,
+     "scored": 6893,
+     "scored_fraction": 0.4613
+    },
+    "tool": {
+     "positions": 5976,
+     "scored": 3357,
+     "scored_fraction": 0.5617
+    }
+   },
+   "tag_positions": {
+    "assistant": 40848,
+    "eos": 50,
+    "final_answer": 10523,
+    "reasoning": 30225,
+    "think_close": 50,
+    "tool_close": 5
+   }
+  }
+ ],
+ "state_eval": {
+  "label": "state_eval@v1",
+  "items": 80,
+  "prediction_positions": 74022,
+  "scored_positions": 54014,
+  "scored_fraction_of_positions": 0.7297,
+  "forward_slots_at_batch": {
+   "batch_size": 3,
+   "packing": "length_sorted_v1",
+   "slots": 75585,
+   "scored_fraction_of_slots": 0.7146
+  },
+  "by_domain": {
+   "code": {
+    "positions": 8996,
+    "scored": 8440,
+    "scored_fraction": 0.9382
+   },
+   "general": {
+    "positions": 8213,
+    "scored": 8213,
+    "scored_fraction": 1.0
+   },
+   "rag_multihop": {
+    "positions": 17004,
+    "scored": 7559,
+    "scored_fraction": 0.4445
+   },
+   "reasoning_math": {
+    "positions": 17532,
+    "scored": 16291,
+    "scored_fraction": 0.9292
+   },
+   "tool": {
+    "positions": 22277,
+    "scored": 13511,
+    "scored_fraction": 0.6065
+   }
+  },
+  "tag_positions": {
+   "assistant": 45801,
+   "eos": 70,
+   "final_answer": 10058,
+   "reasoning": 35603,
+   "think_close": 70,
+   "tool_close": 28
+  }
+ },
+ "corpus": {
+  "sessions_path": "artifacts/stages/stage-3/corpus_v2/sessions.jsonl",
+  "window_tokens": [
+   256,
+   2048
+  ],
+  "by_type": {
+   "code": {
+    "sessions": 1123,
+    "median_tokens": 4431,
+    "p90_tokens": 7285,
+    "max_tokens": 8175,
+    "admitted_by_window": 0.1443
+   },
+   "gsm8k": {
+    "sessions": 1698,
+    "median_tokens": 957,
+    "p90_tokens": 2191,
+    "max_tokens": 7960,
+    "admitted_by_window": 0.8881
+   },
+   "multihop_qa": {
+    "sessions": 1074,
+    "median_tokens": 2210,
+    "p90_tokens": 3735,
+    "max_tokens": 8178,
+    "admitted_by_window": 0.378
+   },
+   "openmath": {
+    "sessions": 579,
+    "median_tokens": 2771,
+    "p90_tokens": 7347,
+    "max_tokens": 8184,
+    "admitted_by_window": 0.3903
+   },
+   "rag_evidence": {
+    "sessions": 4100,
+    "median_tokens": 563,
+    "p90_tokens": 1044,
+    "max_tokens": 6870,
+    "admitted_by_window": 0.9629
+   },
+   "tool_calling": {
+    "sessions": 2600,
+    "median_tokens": 640,
+    "p90_tokens": 1100,
+    "max_tokens": 4500,
+    "admitted_by_window": 0.9712
+   }
+  }
+ }
+}

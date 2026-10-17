@@ -1,0 +1,6 @@
+{"time": "2026-10-15T19:05:56Z", "event": "watchdog_start", "pod_id": "hp6i00wz32gqzq", "hard_terminate_minutes": 1055.0, "authorized_usd": 19.4558, "price_per_hour": 1.09, "session_start_epoch": 1792089859.8024452}
+{"time": "2026-10-15T19:05:56Z", "event": "poll", "at_epoch": 1792091156.238, "elapsed_minutes": 21.61, "accrued_usd": 0.3925, "pod_exists": true, "pod_billing": true, "desired_status": "RUNNING", "poll_error": null, "over_hard_limit": false, "action": "none"}
+{"time": "2026-10-15T19:06:57Z", "event": "poll", "at_epoch": 1792091216.774, "elapsed_minutes": 22.62, "accrued_usd": 0.4109, "pod_exists": true, "pod_billing": true, "desired_status": "RUNNING", "poll_error": null, "over_hard_limit": false, "action": "none"}
+{"time": "2026-10-15T19:07:57Z", "event": "poll", "at_epoch": 1792091277.246, "elapsed_minutes": 23.62, "accrued_usd": 0.4292, "pod_exists": true, "pod_billing": true, "desired_status": "RUNNING", "poll_error": null, "over_hard_limit": false, "action": "none"}
+{"time": "2026-10-15T19:08:58Z", "event": "poll", "at_epoch": 1792091337.688, "elapsed_minutes": 24.63, "accrued_usd": 0.4475, "pod_exists": false, "pod_billing": false, "desired_status": "TERMINATED", "poll_error": null, "over_hard_limit": false, "action": "none"}
+{"time": "2026-10-15T19:08:58Z", "event": "watchdog_end", "reason": "pod_gone", "ticks": 4}

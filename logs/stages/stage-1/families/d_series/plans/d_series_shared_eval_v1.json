@@ -1,0 +1,453 @@
+{
+ "schema": "aadistill.d_series.shared_evaluation_protocol/v1",
+ "_contract": "The D-series shared behavioural evaluation protocol. A NEW identity beside the frozen family, not an edit of it. Derived from committed records by scripts/stages/stage-1/families/d_series/shared_evaluation.py. AUTHORIZES NOTHING: a paid D2/D3 run still needs its own preregistration and authorization, both bound to protocol_hash.",
+ "protocol_hash": "5ed198aed960e987f137ec6342ef7fa6ac24c8484b991bac8cd6a210f7ae742d",
+ "decided_by": "maintainer decision 2026-10-13, logs/budget/decisions.md",
+ "protocol_id": "d_series_shared_eval",
+ "version": 1,
+ "family_id": "d_series_behavioural_v1",
+ "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
+ "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+ "rungs": {
+  "shared_screening": {
+   "reuses_battery": {
+    "role": "d1_screening",
+    "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+    "item_ids_sha256": "d7b95cddd0b889c62485b542aab224e998d0bafacb74ee6fc30fa13f93e8ac53",
+    "n_prompts": 950,
+    "n_scorable": 850
+   },
+   "seeds": [
+    516448251,
+    614923639
+   ],
+   "seeds_owner": "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json :: seeds.screening",
+   "evaluation_protocol_hash": "e47508268ff52aa575d6a276735907f48a9589d0d5b2ffca492ad7b82dedc414",
+   "generation_protocol_fingerprint": "ceac09472e33432abe0230ac49579db3ddd51e3856cfc02abf8433f7eb9b7f75",
+   "scoring_digest": "33b8ff5ee50612d8500af07b6cc78b05ff7eadc671d5f04c1212f8e8cefc2a84",
+   "scoring_source_files": {
+    "scripts/shared/evaluation/audit_tool_scoring.py": "8bea5061bc158679bea122626f1c0fea1e4e206ff5dc672a01ae7b118c4169d1",
+    "scripts/shared/evaluation/score_recovery_search.py": "8bb7a9d48d5e43eb7946c1e6eb8a480ad5b984e19888cb0ed925ed44abe75882",
+    "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py": "a30ff69ca85d9d78d963c0a6fa8596e9fcd3e0f9f385e0f03ca11ef9a31e4d06",
+    "scripts/stages/stage-1/phase_c1/scoring.py": "f147a9e6e97b28028813b4b1f8089ca117b9c05e6230989dfb24545aaf87c0c4",
+    "scripts/stages/stage-1/phase_d1/score_d1_screening.py": "b49ff1b28be13b5e41c3e5221f6bd486467f61d80293eac2a41918bad9df0eaf",
+    "src/aadistill/data/tools.py": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+    "src/aadistill/data/verify.py": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+    "src/aadistill/evaluation/behavior.py": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+    "src/aadistill/evaluation/capability.py": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+    "src/aadistill/evaluation/strict_answer.py": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+    "src/aadistill/evaluation/usable_rollout.py": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+    "src/aadistill/initialization/planning/recovery.py": "1fcd5647e1c790107d0845529b2ef93cea9de87820a8d2ff971b298477bb0d8f"
+   },
+   "generation_source_digest": "89a90fd432770b1c57f897d7eb6d41532bf8066b1cf46a009de0c295d4404733",
+   "scorer": {
+    "path": "scripts/stages/stage-1/phase_d1/score_d1_screening.py",
+    "sha256": "b49ff1b28be13b5e41c3e5221f6bd486467f61d80293eac2a41918bad9df0eaf"
+   },
+   "generation_runtime_digest": "31776b4a465a96a5aa7aa6a087f465e2c8dceaebc50c6a8eb3d3a78abce6f7e5",
+   "source_run": "d1_behavioural_20261011_135910",
+   "reference_units": [
+    {
+     "probe_id": "d1_screening_B_s516448251",
+     "arm": "B",
+     "seed": 516448251,
+     "initialization_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+     "trained_sha256": "c401f096bee54aa90594984c8070a699393a72271807099e6bc3a6d810cd90ab",
+     "result_sha256": "0c57685b44f8a121e4efcc33a649f60b4b08ce8b7a7f0e19dc93d3e4da9697cc",
+     "per_sample_sha256": "ef9a352b45de937beeb311ea794c51f73e1b79f33496745edd9e8926c5abee15",
+     "generations_sha256": {
+      "code": "ec3c73dfcc87a941150359ca54a79d397d623e02fe1ea7174d4122eddd87e64b",
+      "gsm8k": "1fd31f46db9d7273a75c3ab0e670c0cbfea1b6346791c953191e9e7e1c058621",
+      "knowledge": "d5621f90f4affe3c97a746134bc6474c34ba551c82973a165c6ac5d8e72e58c4",
+      "math_verified": "48d7bd81895afaf70630834d964c1d46814911b4a317b99e52c911b33d64768e",
+      "multihop": "79d13a6cb085e1591b327afd831fad48b1ac4ca3b8a9fccc498f4b8fa52e9077",
+      "rag": "7c0c13461bbc69678805c53366cc106e3e09f4cd6787299a0d3436445ca9921b",
+      "tool": "e766c3d1fdce01a63d50f825347442736e31b53ade5e5b5bbc1cd8c9a7c68dff"
+     },
+     "correct_overall": 0.0259,
+     "usable_rollout_rate": 0.6284
+    },
+    {
+     "probe_id": "d1_screening_B_s614923639",
+     "arm": "B",
+     "seed": 614923639,
+     "initialization_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+     "trained_sha256": "1ed85ca4b9fbe0caa7abdcefe5678a86fd7888cd78d7c27fb10606cd9147737e",
+     "result_sha256": "e7ff3d434f848e9f21829465040d704951d484040883914a835d49182cd76d61",
+     "per_sample_sha256": "80069010258ec5e13391e5d6b3d1f1b7588035aea80cc1bcfb64b5fd675697bf",
+     "generations_sha256": {
+      "code": "2a47cd8d577a1eddb6a7bec2415d63a551b5aac0e62c5d4a8a12be3927ecbff3",
+      "gsm8k": "5a1ee869721ce82ea7022d182e7e553340a465a161dd7516ad07b8e5c4e5124e",
+      "knowledge": "fd7d5bfc4d70a8a6183637ba7cda7924b3edc9c87e79e9a2a84e0d5bd3382e69",
+      "math_verified": "f2a5f522d0596cca0da362d8f994fe2adee21ddb34e4b44faa143f226c829ec2",
+      "multihop": "26b4d0ace956679181edede1cffd414a0647f1e636701c8db17db1288003f142",
+      "rag": "03b02c4a9b4873eeb57c67363e0a08d1310a750984bfac5290bcc11df1edbaba",
+      "tool": "b265b091bafcc4e5b24ac932aaf1a69f6cb3e3c15697a1b51af347f1e43d6c6a"
+     },
+     "correct_overall": 0.0176,
+     "usable_rollout_rate": 0.5453
+    },
+    {
+     "probe_id": "d1_screening_q2_s516448251",
+     "arm": "q2",
+     "seed": 516448251,
+     "initialization_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+     "trained_sha256": "3dd9c6523d0628ee3596b0dbe706017a4346992cd274f68872c3ea1719793d83",
+     "result_sha256": "c1d6e35317f520a48b1681cbab800df2f8daee9b97e72b0cc88bd2d96b1eb510",
+     "per_sample_sha256": "baefebbb47d4e814cb58f1227182b917c05bb6b0ff59d7e3ce29c7838a975317",
+     "generations_sha256": {
+      "code": "077ba9ea6cb896c62b73744dfd0fe741d7d713cf5cf54ae6bb904346f1bc3488",
+      "gsm8k": "55e8cc56612e6414755686135a375b69ab540b6550c7d59e2a11c3d9a82a59fa",
+      "knowledge": "b7d66d6a4b989f516648ef0b1fc551b8eb808bb3fef2e9b7842c5427d6af4a07",
+      "math_verified": "c3a694193a7a7dbe4256475f4bbace38e21951616f1560d2b3cf0589ea75280b",
+      "multihop": "485db5394e54fee49e3248d02a2b4e84b5ee345ee44cd30bf6d50498ac2e5005",
+      "rag": "1e54d9fec95f7429619375e9b6529aa70acdee5224e498b7a9b1be878af55de7",
+      "tool": "65f9a4d4614a6a896f7fe528664223f3ecdeef288c7a2a64ed85f3ea670747f9"
+     },
+     "correct_overall": 0.0224,
+     "usable_rollout_rate": 0.6789
+    },
+    {
+     "probe_id": "d1_screening_q2_s614923639",
+     "arm": "q2",
+     "seed": 614923639,
+     "initialization_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+     "trained_sha256": "132455ab48509f748890c09a4b91ec891d2a51626aa848c025907671a508a251",
+     "result_sha256": "6d68aa5b8cf4625291f73e7806709a6fcb01b6a1858d73cfe90a83c96803b6f5",
+     "per_sample_sha256": "eae28d8e05008eb95591d6653ad4be9ec82b1f9653307252cdf7c3c70dde8f98",
+     "generations_sha256": {
+      "code": "27b798b169ba6651b29e14d0f73a56fcb164e79e4aeb909d518e6709aad2a73c",
+      "gsm8k": "745c6bdff1874f50dd0c8428689f0bb81acc8bc90ddfc9bf626d110add6531bc",
+      "knowledge": "8bc173e5c69de21f5a95939705ff99c93dc3408999078a9e15d78f5648cf3d09",
+      "math_verified": "502ab7482965222cb2597245ad0bad4a5d61eabe8a5fff8f4855c0b386c9f508",
+      "multihop": "42aedaf2e1f218fe2ffd56d0232298de4bf7f32e2c355a3bc8d92efbdeac68ce",
+      "rag": "becb81254616fe70ab575b2e9c8a232a551a7103c31e2b66fc4c694ce340e737",
+      "tool": "5d02756369e85df0975c285462a32662480eba32d27cc116d9087d3b30b3512a"
+     },
+     "correct_overall": 0.0376,
+     "usable_rollout_rate": 0.7347
+    }
+   ]
+  },
+  "shared_confirmation": {
+   "reuses_battery": {
+    "role": "d1_confirmation",
+    "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+    "item_ids_sha256": "7d200ffe666add66721c3cb233f6f9b876825ee5277438669926e3633fe8547b",
+    "n_prompts": 950,
+    "n_scorable": 850
+   },
+   "seeds": [
+    396880939,
+    766527341,
+    1004399678
+   ],
+   "seeds_owner": "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json :: seeds.confirmation",
+   "evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73",
+   "generation_protocol_fingerprint": "ceac09472e33432abe0230ac49579db3ddd51e3856cfc02abf8433f7eb9b7f75",
+   "scoring_digest": "812d3361ac6dc13661bdec09db74f6a2cacf696ae7dc037bcdedb1264fb67139",
+   "scoring_source_files": {
+    "scripts/shared/evaluation/audit_tool_scoring.py": "8bea5061bc158679bea122626f1c0fea1e4e206ff5dc672a01ae7b118c4169d1",
+    "scripts/shared/evaluation/score_recovery_search.py": "8bb7a9d48d5e43eb7946c1e6eb8a480ad5b984e19888cb0ed925ed44abe75882",
+    "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py": "a30ff69ca85d9d78d963c0a6fa8596e9fcd3e0f9f385e0f03ca11ef9a31e4d06",
+    "scripts/stages/stage-1/phase_c1/scoring.py": "f147a9e6e97b28028813b4b1f8089ca117b9c05e6230989dfb24545aaf87c0c4",
+    "scripts/stages/stage-1/phase_d1/score_d1_confirmation.py": "7481eaf0d13e2031a9f9cfd362673367aa4da82d0501eff3b6b2b21f744aaa41",
+    "src/aadistill/data/tools.py": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+    "src/aadistill/data/verify.py": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+    "src/aadistill/evaluation/behavior.py": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+    "src/aadistill/evaluation/capability.py": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+    "src/aadistill/evaluation/strict_answer.py": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+    "src/aadistill/evaluation/usable_rollout.py": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+    "src/aadistill/initialization/planning/recovery.py": "1fcd5647e1c790107d0845529b2ef93cea9de87820a8d2ff971b298477bb0d8f"
+   },
+   "generation_source_digest": "89a90fd432770b1c57f897d7eb6d41532bf8066b1cf46a009de0c295d4404733",
+   "scorer": {
+    "path": "scripts/stages/stage-1/phase_d1/score_d1_confirmation.py",
+    "sha256": "7481eaf0d13e2031a9f9cfd362673367aa4da82d0501eff3b6b2b21f744aaa41"
+   },
+   "generation_runtime_digest": "31776b4a465a96a5aa7aa6a087f465e2c8dceaebc50c6a8eb3d3a78abce6f7e5",
+   "source_run": "d1_behavioural_20261012_064341",
+   "reference_units": [
+    {
+     "probe_id": "d1_confirmation_B_s1004399678",
+     "arm": "B",
+     "seed": 1004399678,
+     "initialization_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+     "trained_sha256": "3a33d94ee8fa71c765b65daabd7fdf731d8fe490412e8f5491feb905f8784ff4",
+     "result_sha256": "4077b7d30a2d30e1c149301e7e8b9da3267a732c20e380fc90dde39786131419",
+     "per_sample_sha256": "9293e5ebac82a8ac27b9df64178e22b3010212c2a529473723f49586f5ff49c2",
+     "generations_sha256": {
+      "code": "0f7512f2e7b98999a6177e07a3a8b24b25eeba5fd400160af0d70598d63f075f",
+      "gsm8k": "bc5564e15a53fb125c65ae9df388bebc61eae4b81045ba449dff1caf2fd046e5",
+      "knowledge": "17cc355a18690cb9ea6928b77cf1a084c64a4afe033ba079660da0bb1342741d",
+      "math_verified": "019f68cc4de953f7fe04e175f944d3068537e7ad80028a345468b0eed4db139d",
+      "multihop": "6a073f80266356172bbffed4113e687ef9025cf146b339f66e75ed3bc665979f",
+      "rag": "9baf08acef9990155821460b5008ffb1312f52812ce36cb5c25bbedc36a8e363",
+      "tool": "0a6c0e8f34dde91d2d4209b9f7e7056fcc4b1733e6263df2f97bd2f4c96cea61"
+     },
+     "correct_overall": 0.0318,
+     "usable_rollout_rate": 0.5674
+    },
+    {
+     "probe_id": "d1_confirmation_B_s396880939",
+     "arm": "B",
+     "seed": 396880939,
+     "initialization_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+     "trained_sha256": "bd6ac2cbae400fcddd75f00663b56f3ecdc5cf185d68c8ddc458d04f10c21891",
+     "result_sha256": "7a19a94ba876e6bde3e2e03ed431e038d401dcee5ae0df745b3a2f9b42292b9f",
+     "per_sample_sha256": "6d3c94a40c0140cb81c2da1e74c741dafed781b4d0c3fcbb16e14eb971de00da",
+     "generations_sha256": {
+      "code": "6d77b95a4509bd0ed0a522575efb020877ff7f49bbf3a1e13f9052ad7379ef77",
+      "gsm8k": "b6ea308f446f2cbdd43fef92091f3147de014f8cca23bf305b392f9accbc94c1",
+      "knowledge": "982b223c90e8fe535f3556d22e75c4f66bbeebf359e48c6ac8d0c5d1e5b01c86",
+      "math_verified": "97c518ca610a3b9113440af4d3c277cbd23256da9de9c4fb71ae5fdefd67cb4f",
+      "multihop": "933320826b33a42b1319ac257e7e492ce2567a714a7e1da611cb5ff8cdbdeaa8",
+      "rag": "12fc56567a4e00dedaf32bfbe8120a4c65a38c20694b0136d1e0642e82cd2771",
+      "tool": "00328bcd8b37ad8d52515417556984725d4180aa92624ebdaddbc4fa16252737"
+     },
+     "correct_overall": 0.0424,
+     "usable_rollout_rate": 0.6147
+    },
+    {
+     "probe_id": "d1_confirmation_B_s766527341",
+     "arm": "B",
+     "seed": 766527341,
+     "initialization_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+     "trained_sha256": "0e0d08d7af6f288e6ea5e96778c011fddb18dd0532dc7314341490d124ec08ec",
+     "result_sha256": "a99e32f2e870296ddb2ed85956101d8a4536742f271096d20f0f149e8de352e1",
+     "per_sample_sha256": "8facfc12863e6c1aa13717dabef0adb9f7d920e369c693ddc7cb5c2814d8ff06",
+     "generations_sha256": {
+      "code": "d0bd5c2a9f9857675c8ab50b7c7fc9a65311b67c62eaf6b0902146815724dd78",
+      "gsm8k": "9f83ef452c991af7374a16d0a87fa754e1630b508f5d5870bad067a4ab62410a",
+      "knowledge": "d4fe6dcff3a45d3207f98dc9b5a188e410733464721c8575096de3982ad83de0",
+      "math_verified": "42e12a05008abe45458134aa42daf93934932fe41286d3e22487e168324ed83f",
+      "multihop": "e1913c3f9bd3c28c6174087d5849e4d3403425a7970be1d92f4eca04ad3a1e00",
+      "rag": "ad0400ba802f5c6d4c3dbc3a4b9a0cf6664e44322bd7123318f6fe8a644d289c",
+      "tool": "ff5ed80d16cc49d871910cdd2c76978fd9876d36f4fbc369d1c512dd4d06359a"
+     },
+     "correct_overall": 0.0471,
+     "usable_rollout_rate": 0.6
+    },
+    {
+     "probe_id": "d1_confirmation_q2_s1004399678",
+     "arm": "q2",
+     "seed": 1004399678,
+     "initialization_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+     "trained_sha256": "5bbe8c0a0af654a0db5a0980aa5cdc1946f0b08fed6888421fdde364ece1baff",
+     "result_sha256": "aabefd1da08226b776cb9af50546bcddc38db4c10f095e04fddfe088829fc4f9",
+     "per_sample_sha256": "d02ef94fd4cd87203b1f5dad76bfd1cebdbe40844255bda87c871b3f6cac3723",
+     "generations_sha256": {
+      "code": "6e3a93435154f702a320bf9276209cd034a57bdf906aca77404e68bb24d91a05",
+      "gsm8k": "cfceed237fd5668e1403513c17dc47510f21a21339478147eeb937a94c9d29ef",
+      "knowledge": "9469afbe6355bb8b9282d3587aa1440d40e80fc008dbf8a0e0464236ba5ca056",
+      "math_verified": "2e2585cb8d8ee2d08765a7d5b5df4a111d09a2d217f45a10bb11b852f7ed06cd",
+      "multihop": "9d7287637a587ec28306455ba1047d6b18aab4e5d63bdf3ae05151dcdc9ea39c",
+      "rag": "36a1365251e325af8ed698e6e11d1d91baf386e729a4d9b149a9652765b6d7b2",
+      "tool": "29745219ada0212f5ab1667b5bc4e5b360458df201c7bd1cbf9537d4f2b11a71"
+     },
+     "correct_overall": 0.0271,
+     "usable_rollout_rate": 0.6579
+    },
+    {
+     "probe_id": "d1_confirmation_q2_s396880939",
+     "arm": "q2",
+     "seed": 396880939,
+     "initialization_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+     "trained_sha256": "1f46be0949d67c008209ba8f4614be63643bf84d9dea4589927d7e294bb0c3dd",
+     "result_sha256": "d7bd0500a4e0e8b917b441d3a4f7db6d8a950dba913449cdacc3419a9682aee6",
+     "per_sample_sha256": "b013d29359d4a58242ce248150de8ea868d9727e57b662873e323ef73d6f5aa3",
+     "generations_sha256": {
+      "code": "ff5b38ac4af0885e17c88f559e8d526e9f970d3051a241837abca1b18f5219a2",
+      "gsm8k": "2efb62f294c20a5a243171190b56f2e380e1ce680ab23b444cb3befd16e12f8f",
+      "knowledge": "a1801f9810d12463c02c1857f0645001acedee3c1b38a8639afd4a12f929ac18",
+      "math_verified": "e6c6b68c0dc5253f4f1261026cb36762c41970e60bd477d412eca447e47aa2b2",
+      "multihop": "96023a41d2f197be072d3e8fe0e2532709db49bb5aee9907b3059395cc152224",
+      "rag": "38ba7df90509ea6e6051d30854c77895aa20fb76ae15bac94cbcba5d6cc96c54",
+      "tool": "70aa6f65d7d5784f6bc8a83ba5c516e908bc261c980520d8a50bfa1dace0c6a6"
+     },
+     "correct_overall": 0.0353,
+     "usable_rollout_rate": 0.6958
+    },
+    {
+     "probe_id": "d1_confirmation_q2_s766527341",
+     "arm": "q2",
+     "seed": 766527341,
+     "initialization_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+     "trained_sha256": "6ac63a97422e69a0cb2d34c97ed3f71e050854f72dec44ae1c30df3c416cf4ed",
+     "result_sha256": "a23af66d70b32d3e272253c09cd6c3478a4a079866c274311465902b7f3f3a44",
+     "per_sample_sha256": "005775ff81ce7cef6bdf7c9233a30bc05fcf82c5e9625ac02bf2bc08aa2b8f3c",
+     "generations_sha256": {
+      "code": "ddf5e962c57bcfa4876b89019e10612a1ae37714e5ced49c3ddb02633807bf15",
+      "gsm8k": "af7a274298ce77b71d553ed455981242f6cf38d1025718d7a571fc3ca82fab99",
+      "knowledge": "bf3a5634ffac371489bc5da1883b9891e21a86a2347f2989bf538eb48a1a5edc",
+      "math_verified": "faeb05a5200f9115f1cbf75009a443753fee4ede6cafc47d6b850404cb70566a",
+      "multihop": "f26c8a2cd3f036653bd8fd58beeb083fe8ede2f475089506b9ae8aa27fe423f8",
+      "rag": "04a71e5eb92ed68c49d9b7b0fd35b937d1315ca49043987ea8b9abc049bef007",
+      "tool": "65d93dbfd01750e0a6b1b84e5f9b528bff28a70851e7a5003beb084378d398c1"
+     },
+     "correct_overall": 0.0576,
+     "usable_rollout_rate": 0.7137
+    }
+   ]
+  }
+ },
+ "reference_arms": {
+  "B": {
+   "role": "standing_incumbent_and_primary_comparator",
+   "initialization_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342"
+  },
+  "q2": {
+   "role": "working_initialization_baseline_secondary_comparator",
+   "initialization_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b"
+  }
+ },
+ "recovery": {
+  "recipe_id": "e1_p1_kd_heavy@0.86M",
+  "allowed_override_set": [
+   "_purpose",
+   "data_dir",
+   "out_dir",
+   "run_name",
+   "seed",
+   "student_path"
+  ],
+  "recipe_digest": "a4b0dcab5348e951a005c9bf2cc0a7ff622c88d45b0859d1d24d7ea2a82bea90",
+  "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+  "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+  "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+  "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+  "device_class": "NVIDIA L40S",
+  "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+ },
+ "unit_identity": {
+  "training_keys": [
+   "initialization_digest",
+   "recipe_digest",
+   "data_digest",
+   "seed",
+   "teacher",
+   "trainer_source_digest",
+   "training_runtime_digest",
+   "device_class"
+  ],
+  "evaluation_keys": [
+   "evaluation_protocol_hash"
+  ],
+  "classifier": "scripts/shared/evaluation/evidence_reuse.py",
+  "_seed_is_one_field": "a matching seed is not a matching unit; the classifier compares every training field, and a result belongs to the trained bytes it measured"
+ },
+ "new_candidate_requirements": [
+  "trained under the recovery block above with every training key equal except initialization_digest",
+  "generated and scored under the rung's evaluation_protocol_hash: the same generation fingerprint, the same scorer bytes, the same battery",
+  "trained and generated on the pinned image and device class",
+  "per-sample rows secured off-pod; the verdict is computed off-pod from rows, never on the pod"
+ ],
+ "statistics": {
+  "endpoint": "correct_overall",
+  "estimand": "prompt-mean of the seed-mean paired difference (candidate - B) over the three fixed confirmation seeds",
+  "sesoi": 0.01,
+  "inference": "stratified prompt-cluster bootstrap, seeds as fixed blocks (stages.phase_c1.isolation)",
+  "bootstrap_iterations": 20000,
+  "bootstrap_seed_rule": "SHA256(protocol_hash + ':' + experiment + ':' + rung + '-bootstrap')[0:4] as uint32 mod 2**31, one per experiment and rung, never another phase's default",
+  "guardrails": {
+   "usable_pooled_min_delta": -0.05,
+   "usable_per_seed_min_delta": -0.1,
+   "role": "veto only; never positive credit"
+  },
+  "seed_robustness_min_positive": 2,
+  "comparator": "B",
+  "family": {
+   "members": [
+    "phase_d2",
+    "phase_d3"
+   ],
+   "family_alpha_one_sided": 0.05,
+   "method": "Bonferroni, equal fixed split",
+   "per_experiment_alpha_one_sided": 0.025,
+   "why_this_method": "D2 and D3 are both compared with the same B rows, so their statistics are positively dependent; Bonferroni holds under any dependence, and a fixed split needs no knowledge of which experiment reports first",
+   "d1_already_spent": {
+    "test": "q2 vs B on these rows, one-sided alpha 0.05",
+    "verdict": "NO-GO",
+    "union_bound_over_d1_d2_d3": 0.1,
+    "_meaning": "the probability that ANY of the three experiments falsely clears this battery is at most this bound. It is one reason a shared-confirmation pass nominates rather than promotes"
+   },
+   "_does_not_correct": "adaptive reuse. A multiplicity correction bounds the error rate of the comparisons it counts; it does not remove bias from choices made after seeing these prompts' outcomes. That is handled by what is frozen before any D2/D3 behavioural result, not by alpha"
+  },
+  "screening": {
+   "comparator": "B's imported screening rows",
+   "statistic": "pooled seed-mean correct_overall delta vs B, C0's guardrail vetoes",
+   "selection": "exactly one candidate advances, or none",
+   "tie_break": "the experiment's frozen quality position, then state id",
+   "field": "frozen by the experiment's own retention decision before any behavioural datum; its size is that experiment's preregistered choice",
+   "q2_screening_rows": "DESCRIPTIVE ONLY. q2 advanced on these prompts and seeds, so its screening estimate is inflated by the winner's curse (screening +0.00825 vs B, confirmation -0.000392). Never a ranking comparator"
+  },
+  "confirmation_outcomes": {
+   "SHARED_GO": "one-sided (1 - per_experiment_alpha) LCB > 0 AND delta >= SESOI AND >= 2 of 3 seed deltas > 0 AND no guardrail veto. NOT a promotion: it nominates the candidate for a fresh independent confirmation on its reserved battery",
+   "NO_GO": "one-sided (1 - per_experiment_alpha) UCB < SESOI, or a guardrail veto. Terminal for that candidate",
+   "INCONCLUSIVE": "otherwise. Terminal; never rerun on these rows"
+  },
+  "secondary_comparison": "the candidate vs q2 on the shared confirmation rows, same bootstrap, reported with its interval. No decision role, so it consumes no alpha"
+ },
+ "claim_boundary": {
+  "may_claim": [
+   "a paired comparison with B (and q2) on identical prompts, seeds, recovery recipe, generation and scoring protocol",
+   "an experiment-terminal NO_GO or INCONCLUSIVE",
+   "a nomination for fresh confirmation (SHARED_GO)"
+  ],
+  "may_not_claim": [
+   "a promotion, or evidence equivalent to a fresh independent confirmation",
+   "a seed-population or prompt-population generalization beyond these fixed blocks",
+   "that the cross-session component is zero: it is pinned, not measured"
+  ],
+  "promotion_requires": "a fresh confirmation on the experiment's reserved battery (d2_confirmation or d3_confirmation) with a common control measured there. How to obtain that control most cheaply is decided when a SHARED_GO exists, not before"
+ },
+ "session_boundary": {
+  "property_lost": "D1's single-session field: every probe of a rung trained and evaluated in one session on one host",
+  "pinned_instead": [
+   "training image digest",
+   "device class",
+   "trainer source digest",
+   "training runtime digest",
+   "generation protocol fingerprint (engine, sampling, context, template, tokenizer)",
+   "generation runtime digest",
+   "evaluation protocol hash (battery + scorer bytes)"
+  ],
+  "residual": "host, driver and CUDA reduction-order nondeterminism. Training is not bit-reproducible even within one session (logs/stages/stage-1/phase_d1/analyses/d1_probe_training_is_not_bit_reproducible.json), so this is the same kind of variation the seed blocks already carry, but it is not separable from an arm effect and is recorded per unit"
+ },
+ "reserved_independent_batteries": {
+  "d2_screening": {
+   "n_prompts": 950,
+   "n_scorable": 850,
+   "item_ids_sha256": "89758b3a0887e857aaf5c11f7fa87a1be4adecaa930eee266c4d64e800f63c55"
+  },
+  "d2_confirmation": {
+   "n_prompts": 950,
+   "n_scorable": 850,
+   "item_ids_sha256": "6b50625e764454c93bf62ee7b6289897cb9cba6c9a39382816250ad463850ddb"
+  },
+  "d3_screening": {
+   "n_prompts": 950,
+   "n_scorable": 850,
+   "item_ids_sha256": "91e8987d0b228e2b97ba6bf4507bba0bfe269b6ee99ec97af5f429cb63bb1f01"
+  },
+  "d3_confirmation": {
+   "n_prompts": 950,
+   "n_scorable": 850,
+   "item_ids_sha256": "60c08be46befd52293263895ef51108782b7c180a05c0073848b28e8c1c1cb95"
+  }
+ },
+ "d1_records_unchanged": {
+  "preregistration_sha256": "aa70338a22bdaae1067105261614a63bed4b0f7737f0a6cc3b59d2555835e3de",
+  "confirmation_verdict_sha256": "dea0678e8e30ea18a6ec469edae46eda49c46c83386ba74da4f88b545ae6d863",
+  "verdict": "NO-GO"
+ },
+ "errata": [
+  {
+   "date": "2026-10-13",
+   "source": "independent review",
+   "field": "statistics.family.d1_already_spent",
+   "correction": "`union_bound_over_d1_d2_d3` = 0.10 is a NOMINAL accounting bound: the sum of the three tests' nominal one-sided levels. It holds only if each test attains its nominal level, which adaptive reuse of the already-observed d1_confirmation rows can violate. It is not an unconditional guarantee, and its `_meaning` sentence (\"the probability that ANY of the three experiments falsely clears this battery is at most this bound\") must be read with that condition. No rule, alpha, outcome or identity changes."
+  }
+ ],
+ "authorizes": "nothing"
+}

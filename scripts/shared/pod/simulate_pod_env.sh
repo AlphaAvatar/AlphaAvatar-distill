@@ -45,7 +45,13 @@
 # scratch, not a retained artifact: see the WITHDRAWN `podsim_quarantine_residue`
 # entry in `logs/maintenance/inventories/checkpoint_tombstones.json` for why it must not be tombstoned.
 set -u
-PODSIM_ROOT=${PODSIM_ROOT:-"$(cd "$(dirname "$0")/../.." && pwd)"}
+# THREE levels up, not two: the information-architecture migration moved this
+# script from scripts/pod/ to scripts/shared/pod/, and the self-derived root
+# silently became scripts/ -- the first post-migration sweep then hid zero
+# paths, lost line 320's relative dirname, and reported the repo venv missing
+# from a directory that never had one. A self-locating script's depth is part
+# of any move of it.
+PODSIM_ROOT=${PODSIM_ROOT:-"$(cd "$(dirname "$0")/../../.." && pwd)"}
 cd "$PODSIM_ROOT" || exit 1
 HIDE=${HIDE_DIR:-/home/ecs-user/aad-scratch/podsim_hidden}
 LOCK=${PODSIM_LOCK:-"${HIDE}.lock"}
@@ -241,6 +247,18 @@ trap restore EXIT INT TERM
 #
 # and pin the cpu set the pod will have (`taskset -c 0-12`), since the suite's
 # behaviour depends on it.
+#
+# THE DERIVED SET TRAVELS IN A FILE. A single env string is capped by the
+# kernel at MAX_ARG_STRLEN (128 KiB), and the 2026-10-10 launch-bound sweep
+# died at execve with `Argument list too long` once the repository's gitignored
+# census passed ~1,850 paths (~152 KiB joined) -- for EVERY experiment, since
+# the complement is derived from one census. The recorder passes
+# HIDDEN_PATHS_FILE instead; an explicitly provided HIDDEN_PATHS env (tests,
+# hand runs, the heredoc above) still wins, so nothing invoking this script
+# directly changes meaning.
+if [ -z "${HIDDEN_PATHS:-}" ] && [ -n "${HIDDEN_PATHS_FILE:-}" ] && [ -f "${HIDDEN_PATHS_FILE}" ]; then
+  HIDDEN_PATHS="$(cat "$HIDDEN_PATHS_FILE")"
+fi
 HIDDEN_PATHS=${HIDDEN_PATHS:-"artifacts/audit
 artifacts/stages/stage-3/ladder_uniform
 artifacts/stages/stage-1/batteries/recovery_search_v1
@@ -322,8 +340,8 @@ if [ -n "${PODSIM_PYTHON:-}" ]; then
   PODSIM_PY="$PODSIM_PYTHON"
   [ -x "$PODSIM_PY" ] || {
     echo "REFUSING: PODSIM_PYTHON=$PODSIM_PY is not executable" >&2; exit 5; }
-elif [ -x "$PODSIM_SCRIPT_DIR/../../.venv/bin/python" ]; then
-  PODSIM_PY="$PODSIM_SCRIPT_DIR/../../.venv/bin/python"
+elif [ -x "$PODSIM_SCRIPT_DIR/../../../.venv/bin/python" ]; then
+  PODSIM_PY="$PODSIM_SCRIPT_DIR/../../../.venv/bin/python"
 else
   echo "REFUSING: no interpreter. Pass PODSIM_PYTHON=\$sys.executable, or run" >&2
   echo "  from a checkout whose .venv/bin/python exists. This script will NOT" >&2
@@ -422,7 +440,8 @@ echo "running: $PODSIM_CMD"
 _podsim_log="$PODSIM_LOG"
 _podsim_cmd="$PODSIM_CMD"
 unset PODSIM_JUNIT PODSIM_LOG PODSIM_CMD PODSIM_ROOT PODSIM_ENV_ROOT \
-      PODSIM_HF_TOKEN HIDE_DIR PODSIM_LOCK HIDDEN_PATHS PODSIM_PYTHON
+      PODSIM_HF_TOKEN HIDE_DIR PODSIM_LOCK HIDDEN_PATHS PODSIM_PYTHON \
+      HIDDEN_PATHS_FILE
 
 eval "$_podsim_cmd" > "$_podsim_log" 2>&1
 PODSIM_RC=$?

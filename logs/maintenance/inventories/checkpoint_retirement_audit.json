@@ -1,0 +1,336 @@
+{
+ "schema": "aadistill.maintenance.checkpoint_retirement_audit/v1",
+ "title": "Consumer and evidence audit for 26.66 GiB of historical stage-3 checkpoint weights",
+ "recorded_utc": "2026-10-11",
+ "_contract": "The audit AGENTS.md 2.5 requires before any weight deletion: a real consumer audit, the artifact hashes preserved, and a disposition per artifact. It deletes nothing. The LFS `file_oid` of every object is captured here so the identity survives the bytes.",
+ "_why_now": "The maintainer asked twice for consumer-less completed checkpoints to have their weights retired and their evidence kept, rather than holding HF quota indefinitely.",
+ "hf_usage_at_audit": {
+  "artifacts_repo_gib": 65.34,
+  "transport_repo_gib": 5.55,
+  "total_gib": 70.9,
+  "_not_currently_blocking": "both private repos accept a 2.22 GiB upload, so no execution is waiting on this space. That is why the audit is allowed to gate deletion on evidence rather than rush it."
+ },
+ "retained_and_NOT_audited_for_deletion": {
+  "stage1/qwen3_0p6b_init_v0": "472 referencing files including src/aadistill/runtime/staging_contract.py. THE anchor initialization every stage-3 run derives from.",
+  "permanent_controls/*": "92 referencing files including the device-canary launcher and the registry builder; the name states the intent.",
+  "e1_scaling_20260801/*": "34 referencing files including scripts/shared/pod/run_env.sh and live setup scripts.",
+  "a3_preserved_probes/*": "11 referencing files including autoinit_a3_driver.py and A3's resume-scoring tests, which read them."
+ },
+ "candidates": [
+  {
+   "artifact": "stage3/kdconf_ctrl_a",
+   "hf_repo": "AlphaAvatar/aadistill-artifacts",
+   "n_objects": 1,
+   "bytes": 2384234968,
+   "gib": 2.2205,
+   "lfs_objects": [
+    {
+     "file_oid": "1919f40b688472d9bdb1aefe46143e7f4b7e311b8cfd8aaabccd677c72536afe",
+     "filename": "stage3/kdconf_ctrl_a/step_001000/model/model.safetensors",
+     "size": 2384234968
+    }
+   ],
+   "log_references": [],
+   "code_or_config_references": [],
+   "reading_consumers": [],
+   "has_artifact_manifest_entry": false,
+   "disposition": "NOT_ELIGIBLE_EVIDENCE_NOT_DURABLE"
+  },
+  {
+   "artifact": "stage3/kdconf_ctrl_b",
+   "hf_repo": "AlphaAvatar/aadistill-artifacts",
+   "n_objects": 1,
+   "bytes": 2384234968,
+   "gib": 2.2205,
+   "lfs_objects": [
+    {
+     "file_oid": "b31349013baeed79d8ecb59ae2b5129cc42e295bed186f3f296f502d9bc13478",
+     "filename": "stage3/kdconf_ctrl_b/step_001000/model/model.safetensors",
+     "size": 2384234968
+    }
+   ],
+   "log_references": [],
+   "code_or_config_references": [],
+   "reading_consumers": [],
+   "has_artifact_manifest_entry": false,
+   "disposition": "NOT_ELIGIBLE_EVIDENCE_NOT_DURABLE"
+  },
+  {
+   "artifact": "stage3/kdconf_nothink_a",
+   "hf_repo": "AlphaAvatar/aadistill-artifacts",
+   "n_objects": 1,
+   "bytes": 2384234968,
+   "gib": 2.2205,
+   "lfs_objects": [
+    {
+     "file_oid": "0c49d80246e3a4157ad947053c9279777de2a89c75fde9f7ae0602863215e58b",
+     "filename": "stage3/kdconf_nothink_a/step_001000/model/model.safetensors",
+     "size": 2384234968
+    }
+   ],
+   "log_references": [],
+   "code_or_config_references": [],
+   "reading_consumers": [],
+   "has_artifact_manifest_entry": false,
+   "disposition": "NOT_ELIGIBLE_EVIDENCE_NOT_DURABLE"
+  },
+  {
+   "artifact": "stage3/kdconf_nothink_b",
+   "hf_repo": "AlphaAvatar/aadistill-artifacts",
+   "n_objects": 1,
+   "bytes": 2384234968,
+   "gib": 2.2205,
+   "lfs_objects": [
+    {
+     "file_oid": "1f4db5732e588110236a07f98bdb12faccd5f406b4550d46d5a9e0fa2b5ae694",
+     "filename": "stage3/kdconf_nothink_b/step_001000/model/model.safetensors",
+     "size": 2384234968
+    }
+   ],
+   "log_references": [],
+   "code_or_config_references": [],
+   "reading_consumers": [],
+   "has_artifact_manifest_entry": false,
+   "disposition": "NOT_ELIGIBLE_EVIDENCE_NOT_DURABLE"
+  },
+  {
+   "artifact": "stage3/s1_ext_v0",
+   "hf_repo": "AlphaAvatar/aadistill-artifacts",
+   "n_objects": 1,
+   "bytes": 2384234968,
+   "gib": 2.2205,
+   "lfs_objects": [
+    {
+     "file_oid": "8764e3b6a7c8652bda7a3a8c2600327a0a50de8124c0a76af42494d06fb08b47",
+     "filename": "stage3/s1_ext_v0/step_000660/model/model.safetensors",
+     "size": 2384234968
+    }
+   ],
+   "log_references": [
+    "logs/budget/decisions.md",
+    "logs/state/artifact_manifests.md",
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md",
+    "logs/stages/stage-3/README.md",
+    "logs/stages/index.json"
+   ],
+   "code_or_config_references": [
+    "scripts/maintenance/consolidation/__pycache__/stage_attribution.cpython-314.pyc",
+    "scripts/maintenance/consolidation/stage_attribution.py"
+   ],
+   "reading_consumers": [
+    "scripts/maintenance/consolidation/__pycache__/stage_attribution.cpython-314.pyc",
+    "scripts/maintenance/consolidation/stage_attribution.py"
+   ],
+   "has_artifact_manifest_entry": true,
+   "disposition": "NOT_ELIGIBLE_EVIDENCE_NOT_DURABLE"
+  },
+  {
+   "artifact": "stage3/s1_ffn_norm_v0",
+   "hf_repo": "AlphaAvatar/aadistill-artifacts",
+   "n_objects": 2,
+   "bytes": 2395657618,
+   "gib": 2.2311,
+   "lfs_objects": [
+    {
+     "file_oid": "dc64f244e203d607ed2ea63836400287878b26b96ebf42dc19ec70f154ace900",
+     "filename": "stage3/s1_ffn_norm_v0/step_000660/model/model.safetensors",
+     "size": 2384234968
+    },
+    {
+     "file_oid": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+     "filename": "stage3/s1_ffn_norm_v0/step_000660/model/tokenizer.json",
+     "size": 11422650
+    }
+   ],
+   "log_references": [
+    "logs/budget/decisions.md",
+    "logs/state/artifact_manifests.md",
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md"
+   ],
+   "code_or_config_references": [
+    "scripts/shared/evaluation/__pycache__/eval_behavior.cpython-314.pyc",
+    "scripts/shared/evaluation/eval_behavior.py"
+   ],
+   "reading_consumers": [
+    "scripts/shared/evaluation/__pycache__/eval_behavior.cpython-314.pyc",
+    "scripts/shared/evaluation/eval_behavior.py"
+   ],
+   "has_artifact_manifest_entry": true,
+   "disposition": "NOT_ELIGIBLE_EVIDENCE_NOT_DURABLE"
+  },
+  {
+   "artifact": "stage3/s2_blocks_v0",
+   "hf_repo": "AlphaAvatar/aadistill-artifacts",
+   "n_objects": 1,
+   "bytes": 2384234968,
+   "gib": 2.2205,
+   "lfs_objects": [
+    {
+     "file_oid": "9d7e4311dc6ed953b16b728cc81865eed5c57c920c8642678cd09fcf6a713d1b",
+     "filename": "stage3/s2_blocks_v0/step_000660/model/model.safetensors",
+     "size": 2384234968
+    }
+   ],
+   "log_references": [
+    "logs/budget/decisions.md",
+    "logs/state/artifact_manifests.md",
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md",
+    "logs/stages/stage-3/README.md",
+    "logs/stages/index.json"
+   ],
+   "code_or_config_references": [
+    "scripts/maintenance/consolidation/__pycache__/stage_attribution.cpython-314.pyc",
+    "scripts/maintenance/consolidation/stage_attribution.py"
+   ],
+   "reading_consumers": [
+    "scripts/maintenance/consolidation/__pycache__/stage_attribution.cpython-314.pyc",
+    "scripts/maintenance/consolidation/stage_attribution.py"
+   ],
+   "has_artifact_manifest_entry": true,
+   "disposition": "NOT_ELIGIBLE_EVIDENCE_NOT_DURABLE"
+  },
+  {
+   "artifact": "stage3/s2_blocks_v1",
+   "hf_repo": "AlphaAvatar/aadistill-artifacts",
+   "n_objects": 1,
+   "bytes": 2384234968,
+   "gib": 2.2205,
+   "lfs_objects": [
+    {
+     "file_oid": "f275fbfd13b43b61629f92b67a7b9586d34deeea977b6c8e197c708ecd4f591f",
+     "filename": "stage3/s2_blocks_v1/step_002700/model/model.safetensors",
+     "size": 2384234968
+    }
+   ],
+   "log_references": [
+    "logs/budget/decisions.md",
+    "logs/state/supported_models.md",
+    "logs/state/artifact_manifests.md",
+    "logs/stages/stage-3/history/EXPERIMENTS.md"
+   ],
+   "code_or_config_references": [
+    "scripts/shared/pod/AGENTS.md",
+    "src/aadistill/evaluation/__pycache__/behavior.cpython-314.pyc",
+    "src/aadistill/evaluation/behavior.py"
+   ],
+   "reading_consumers": [
+    "scripts/shared/pod/AGENTS.md",
+    "src/aadistill/evaluation/__pycache__/behavior.cpython-314.pyc",
+    "src/aadistill/evaluation/behavior.py"
+   ],
+   "has_artifact_manifest_entry": true,
+   "disposition": "NOT_ELIGIBLE_EVIDENCE_NOT_DURABLE"
+  },
+  {
+   "artifact": "stage3/s2v1_bl2048",
+   "hf_repo": "AlphaAvatar/aadistill-artifacts",
+   "n_objects": 1,
+   "bytes": 2384234968,
+   "gib": 2.2205,
+   "lfs_objects": [
+    {
+     "file_oid": "d4d262e07855cdc5cdfb489948d53db3dcc57725a36ea02fe78964a325206934",
+     "filename": "stage3/s2v1_bl2048/step_002700/model/model.safetensors",
+     "size": 2384234968
+    }
+   ],
+   "log_references": [
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md"
+   ],
+   "code_or_config_references": [],
+   "reading_consumers": [],
+   "has_artifact_manifest_entry": false,
+   "disposition": "NOT_ELIGIBLE_EVIDENCE_NOT_DURABLE"
+  },
+  {
+   "artifact": "stage3/s2v1_bl2048_seedB",
+   "hf_repo": "AlphaAvatar/aadistill-artifacts",
+   "n_objects": 1,
+   "bytes": 2384234968,
+   "gib": 2.2205,
+   "lfs_objects": [
+    {
+     "file_oid": "eecfe5a16fb2a730c6bc0d34ab3b50a36a602bbece696b71b65567698cb71172",
+     "filename": "stage3/s2v1_bl2048_seedB/step_002700/model/model.safetensors",
+     "size": 2384234968
+    }
+   ],
+   "log_references": [],
+   "code_or_config_references": [],
+   "reading_consumers": [],
+   "has_artifact_manifest_entry": false,
+   "disposition": "NOT_ELIGIBLE_EVIDENCE_NOT_DURABLE"
+  },
+  {
+   "artifact": "stage3/s2v1_from_init",
+   "hf_repo": "AlphaAvatar/aadistill-artifacts",
+   "n_objects": 1,
+   "bytes": 2384234968,
+   "gib": 2.2205,
+   "lfs_objects": [
+    {
+     "file_oid": "7487cd92999af5506a28496045900e4b53a1e393a71a00c2edb0e0822143f98a",
+     "filename": "stage3/s2v1_from_init/step_002700/model/model.safetensors",
+     "size": 2384234968
+    }
+   ],
+   "log_references": [
+    "logs/budget/decisions.md",
+    "logs/state/supported_models.md",
+    "logs/state/artifact_manifests.md",
+    "logs/stages/stage-3/history/EXPERIMENTS.md",
+    "logs/stages/stage-3/e2/plans/PROPOSAL.md",
+    "logs/stages/stage-3/README.md",
+    "logs/stages/index.json"
+   ],
+   "code_or_config_references": [
+    "scripts/maintenance/consolidation/__pycache__/stage_attribution.cpython-314.pyc",
+    "scripts/maintenance/consolidation/stage_attribution.py",
+    "scripts/shared/pod/hashes_ckpt.txt",
+    "configs/stages/stage-3/s2v1_from_init.json"
+   ],
+   "reading_consumers": [
+    "scripts/maintenance/consolidation/__pycache__/stage_attribution.cpython-314.pyc",
+    "scripts/maintenance/consolidation/stage_attribution.py",
+    "scripts/shared/pod/hashes_ckpt.txt"
+   ],
+   "has_artifact_manifest_entry": true,
+   "disposition": "NOT_ELIGIBLE_EVIDENCE_NOT_DURABLE"
+  },
+  {
+   "artifact": "stage3/s2v1_from_s1",
+   "hf_repo": "AlphaAvatar/aadistill-artifacts",
+   "n_objects": 1,
+   "bytes": 2384234968,
+   "gib": 2.2205,
+   "lfs_objects": [
+    {
+     "file_oid": "d2e0f66d2b070090384e86c038f1e6adac9ba79e20d0956b0dce1fc97d5b46ed",
+     "filename": "stage3/s2v1_from_s1/step_002700/model/model.safetensors",
+     "size": 2384234968
+    }
+   ],
+   "log_references": [
+    "logs/budget/decisions.md",
+    "logs/state/artifact_manifests.md"
+   ],
+   "code_or_config_references": [],
+   "reading_consumers": [],
+   "has_artifact_manifest_entry": true,
+   "disposition": "RETIRE_ELIGIBLE_PENDING_MEASUREMENT_CONFIRMATION"
+  }
+ ],
+ "totals": {
+  "n_artifacts": 12,
+  "n_objects": 13,
+  "gib": 26.6565,
+  "eligible_gib": 2.2205
+ },
+ "deletion_rule": "logs/maintenance/inventories/checkpoint_registry.json :: deletion_rule -- not protected, no never_delete clause, scientific status recorded elsewhere, hash in the registry, and a tombstone written.",
+ "what_remains_before_any_deletion": [
+  "confirm, per RETIRE_ELIGIBLE artifact, that its measurement/scorecard evidence is durable in logs (the artifact manifest REFERENCES scorecards for s1_ffn_norm_v0@660; the scorecards themselves must be located)",
+  "add each artifact's file_oid to the checkpoint registry, which the deletion rule requires and which does not currently track these HF-only objects",
+  "then delete with HfApi.permanently_delete_lfs_files(rewrite_history=True) matched on file_oid -- NOT oid -- and write a tombstone per artifact"
+ ],
+ "authorizes": "nothing; it deletes nothing"
+}

@@ -1,0 +1,82 @@
+{
+ "schema": "aadistill.phase_d2.screening_closeout/v1",
+ "run_id": "d2_screening_20261015_183412",
+ "stage_id": "1",
+ "experiment_id": "phase_d2",
+ "outcome": "NO PROVIDER RESOURCE. The one create call returned no pod id: the provider answered 'There are no longer any instances available.' for an L40S (SECURE, min CUDA 13.0, 120 GB container disk). Nothing was created, nothing billed, no setup ran, no probe trained, generated or was scored.",
+ "classification": "PRE-PROVIDER TRANSIENT (provider capacity), $0. Not a deterministic failure: nothing in code, config or environment caused it (AGENTS.md P12.1).",
+ "recorded_utc": "2026-10-15T18:37:25Z",
+ "session_commit": "b90ff90523420a8b7fd707b0ea15cfec35df887a",
+ "authorized_base_commit": "b90ff90523420a8b7fd707b0ea15cfec35df887a",
+ "session_commit_check": {
+  "session_commit": "5b9d138bd58a58d0be760a2c9eeb5e26293f792d",
+  "authorized_session_commit": "b90ff90523420a8b7fd707b0ea15cfec35df887a",
+  "harness_digest_at_commit": "20d3721417e21d9e3ae14dd5e7524f3fd866077585e192c04946d20af278a8af",
+  "authorized_harness_digest": "20d3721417e21d9e3ae14dd5e7524f3fd866077585e192c04946d20af278a8af",
+  "harness_matches": true,
+  "commit_carries_this_authorization": true,
+  "rule": "the pod checks out this commit from a bundle; its harness must digest to the authorized value and it must carry the authorization the driver will load",
+  "lineage": {
+   "authorized_base": "b90ff90523420a8b7fd707b0ea15cfec35df887a",
+   "session_commit": "5b9d138bd58a58d0be760a2c9eeb5e26293f792d",
+   "descends_from_base": true,
+   "changed_paths": [
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183412/governance/authorization.json"
+   ],
+   "unexpected_paths": [],
+   "ok": true,
+   "reason": "only logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183412/governance/authorization.json differs from the authorized base"
+  }
+ },
+ "authorization_sha256": "0acadfa33738009e0d0b6bbd262b1759d8345df831dbaf81e3cc1107b1be0113",
+ "authorization_file_sha256": "62fdcd143e13096957890cfe1c2709cb8f1c9fc4fa0735e5af1c6a2d2bde72c1",
+ "contract_hash": "6d4283e77e1b26549328d96eaf8f71773a3b2ef4e15804d26dd938eb0674455e",
+ "provider_resource_created": false,
+ "provider_teardown_verified": true,
+ "provider_evidence": {
+  "draws": [
+   {
+    "draw": 1,
+    "pod_id": null,
+    "outcome": "create_failed",
+    "price_per_hour": 1.09,
+    "elapsed_minutes_at_release": 0.0,
+    "cumulative_usd_at_release": 0.0,
+    "watchdog_journal": null,
+    "release": {
+     "pod_id": null,
+     "why": "create_failed",
+     "confirmed_not_billing": true,
+     "provider_resource_created": false,
+     "raw_responses": [
+      "create_raw_d1_a1.txt"
+     ],
+     "rule": "no id was returned, so no resource exists and nothing is billing; the raw provider response is kept beside this record"
+    }
+   }
+  ],
+  "raw_response": "evidence/provider_create_raw_d1_a1.txt",
+  "pod_list_after": "[]",
+  "account_balance_at_launch_usd": 136.7647662005,
+  "_teardown": "nothing to tear down: no pod id was ever returned, the draw is recorded confirmed_not_billing, and the provider lists no pod after the attempt"
+ },
+ "money": {
+  "all_in_usd": 0.0,
+  "gpu_usd": 0.0,
+  "disk_usd": 0.0,
+  "elapsed_minutes": 0.0,
+  "_basis": "no provider resource existed, so nothing was billed"
+ },
+ "science": "no measurement began: no probe trained, generated or scored. The frozen protocol, field, seeds and envelope are untouched.",
+ "one_use": "this authorization's one launcher session ran and ended; it is not reused. The next attempt is a NEW one-use authorization under a new run id, netted against the same $25.00 envelope (this attempt contributes $0).",
+ "corrective_action": "none to the code (a capacity transient); the next attempt asks the provider repeatedly at $0 (--create-attempts with a 300 s backoff) instead of once",
+ "observers": "closed in the terminal path: the tmux session exited with the launcher (LAUNCH_EXIT=11) and the milestone waiter ended on it; no watchdog was started because no pod id existed",
+ "evidence_in_tree": {
+  "runtime/session.json": "the runner's record",
+  "runtime/launcher.log": "the launcher's log (copied from <scr>/launch.log)",
+  "evidence/provider_create_raw_d1_a1.txt": "the provider's raw answer",
+  "governance/authorization.json": "the consumed one-use authorization",
+  "governance/bundle.json": "the staged bundle record"
+ },
+ "what_this_authorizes": "nothing"
+}

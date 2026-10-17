@@ -32,12 +32,19 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
 #: Below this, a session cannot reach a measurement: setup alone has taken 5,
 #: 8.5 and 150+ minutes on the same script and image in this project.
 MIN_USEFUL_USD = 0.60
+
+#: A campaign whose status says it is closed funds nothing. The Top-K adoption
+#: launcher named its campaign as a constant, that campaign closed with $4.31
+#: unspent, and this script -- which never read `status` -- would have handed a
+#: new, differently scoped validation $3.00 of it.
+CLOSED_STATUS = re.compile(r"^\s*(?:COMPLETE\s+and\s+)?CLOSED\b")
 
 
 class BudgetError(RuntimeError):
@@ -52,6 +59,12 @@ def derive(campaign_path: str | Path, *, session_cap_usd: float,
         campaign = json.loads(campaign_path.read_text())
     except (OSError, ValueError) as exc:
         raise BudgetError(f"cannot read {campaign_path}: {exc}") from exc
+
+    status = str(campaign.get("status") or "")
+    if CLOSED_STATUS.match(status):
+        raise BudgetError(
+            f"{campaign_path}: the campaign is closed ({status[:80]!r}); a new "
+            "piece of work needs its own campaign and authorization")
 
     auth_rel = campaign.get("authorization")
     if not isinstance(auth_rel, str):

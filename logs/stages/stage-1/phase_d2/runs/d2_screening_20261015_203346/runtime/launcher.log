@@ -1,0 +1,200 @@
+[20:34:40] budget: expected 817 min $14.85 · soft $18.62 · hard $19.17 (authorized $19.46)
+[20:34:40] NVIDIA L40S $1.09/h, stock Low
+[20:34:40] account funds OK: the provider account holds $136.6069 against the $30.0000 this session must be able to fund
+[20:34:40] run d2_screening_20261015_203346, preregistration b52810921a4c
+[20:34:44] contract verified at $0: 6d4283e77e1b2654, 8 probes
+[20:34:44] 12 arm files on the relay at their pins
+[20:34:44] session commit 39e5bdf9e71c verified: harness digests to 84d499fa20b1…, carries the authorization and only logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/governance/authorization.json differs from the authorized base
+[20:34:44] no previous attempt failed deterministically; 3 prior log(s) read
+[20:34:50] aad_autoinit_39e5bdf9.bundle round-trips
+[20:34:51] precheck OK: 18 relay inputs (18 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[20:34:51] DRY RUN: every pre-provider gate passed; stopping before provider creation. Nothing was created and nothing bills.
+[20:35:08] budget: expected 817 min $14.85 · soft $18.62 · hard $19.17 (authorized $19.46)
+[20:35:08] NVIDIA L40S $1.09/h, stock Low
+[20:35:09] account funds OK: the provider account holds $136.6069 against the $30.0000 this session must be able to fund
+[20:35:09] run d2_screening_20261015_203346, preregistration b52810921a4c
+[20:35:12] contract verified at $0: 6d4283e77e1b2654, 8 probes
+[20:35:12] 12 arm files on the relay at their pins
+[20:35:13] session commit 39e5bdf9e71c verified: harness digests to 84d499fa20b1…, carries the authorization and only logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/governance/authorization.json differs from the authorized base
+[20:35:13] no previous attempt failed deterministically; 3 prior log(s) read
+[20:35:18] aad_autoinit_39e5bdf9.bundle round-trips
+[20:35:19] precheck OK: 18 relay inputs (18 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[20:35:20] attempt 1: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[20:40:20] attempt 2: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[20:45:21] attempt 3: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[20:50:22] attempt 4: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[20:55:22] attempt 5: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[21:00:23] attempt 6: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[21:05:23] attempt 7: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[21:10:24] attempt 8: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[21:15:25] attempt 9: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[21:20:25] attempt 10: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[21:25:26] attempt 11: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[21:30:26] attempt 12: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[21:35:27] attempt 13: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[21:40:28] watchdog detached — hard 1055 min = $19.17
+[21:40:28] created 7stah5j2s98e69 at $1.09/h
+[21:41:23]   starting (60s) — $0.02
+[21:42:17] TCP 22 at 160.250.71.209:35644 after 1.8 min
+[21:42:20] draw 1: ssh reachable — $0.03
+[21:42:53] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[21:42:53] draw 1: host admitted — image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07 is the protocol's
+[21:42:53] draw 1: running setup
+[21:47:26] draw 1: setup complete — $0.13
+[21:47:31] driver detached, pid 3291, confirmed by descriptor_probe — $0.13
+[21:49:41]   2026-10-15T21:47:29Z MARKER:DRIVER_START — $0.17
+[22:53:03]   trained-unscored d2_screening_c1_s516448251: preserved and verified (e7f181aeffff)
+[22:53:03]   probe d2_screening_c1_s516448251: secured training/run_manifest.json
+[22:53:03]   probe d2_screening_c1_s516448251: secured training/run_completion.json
+[22:53:05]   secured d2_screening_attested_protocol.json
+[22:53:08]   secured engine_probe.json
+[23:10:53]   probe d2_screening_c1_s516448251: secured result.json
+[23:10:57]   probe d2_screening_c1_s516448251: secured per_sample.jsonl
+[23:11:00]   probe d2_screening_c1_s516448251: secured admission.json
+[23:11:12]   probe d2_screening_c1_s516448251: secured generations
+[23:11:19]   probe d2_screening_c1_s516448251: release ack delivered
+[23:13:36]   probe d2_screening_c1_s516448251: secured rescoring.json
+[00:17:10]   trained-unscored d2_screening_c1_s614923639: preserved and verified (6cd797827fc9)
+[00:17:10]   probe d2_screening_c1_s614923639: secured training/run_manifest.json
+[00:17:10]   probe d2_screening_c1_s614923639: secured training/run_completion.json
+[00:34:56]   probe d2_screening_c1_s614923639: secured result.json
+[00:34:59]   probe d2_screening_c1_s614923639: secured per_sample.jsonl
+[00:35:02]   probe d2_screening_c1_s614923639: secured admission.json
+[00:35:17]   probe d2_screening_c1_s614923639: secured generations
+[00:35:24]   probe d2_screening_c1_s614923639: release ack delivered
+[00:37:43]   probe d2_screening_c1_s614923639: secured rescoring.json
+[01:41:12]   trained-unscored d2_screening_c2_s516448251: preserved and verified (391a589695d7)
+[01:41:12]   probe d2_screening_c2_s516448251: secured training/run_manifest.json
+[01:41:12]   probe d2_screening_c2_s516448251: secured training/run_completion.json
+[01:58:59]   probe d2_screening_c2_s516448251: secured result.json
+[01:59:03]   probe d2_screening_c2_s516448251: secured per_sample.jsonl
+[01:59:05]   probe d2_screening_c2_s516448251: secured admission.json
+[01:59:17]   probe d2_screening_c2_s516448251: secured generations
+[01:59:21]   probe d2_screening_c2_s516448251: secured rescoring.json
+[01:59:26]   probe d2_screening_c2_s516448251: release ack delivered
+[03:05:07]   trained-unscored d2_screening_c2_s614923639: preserved and verified (53ab97422ec8)
+[03:05:07]   probe d2_screening_c2_s614923639: secured training/run_manifest.json
+[03:05:07]   probe d2_screening_c2_s614923639: secured training/run_completion.json
+[03:25:06]   probe d2_screening_c2_s614923639: secured result.json
+[03:25:11]   probe d2_screening_c2_s614923639: secured per_sample.jsonl
+[03:25:13]   probe d2_screening_c2_s614923639: secured admission.json
+[03:25:25]   probe d2_screening_c2_s614923639: secured generations
+[03:25:29]   probe d2_screening_c2_s614923639: secured rescoring.json
+[03:25:34]   probe d2_screening_c2_s614923639: release ack delivered
+[04:31:19]   trained-unscored d2_screening_c3_s516448251: preserved and verified (225e6ab63d9e)
+[04:31:19]   probe d2_screening_c3_s516448251: secured training/run_manifest.json
+[04:31:19]   probe d2_screening_c3_s516448251: secured training/run_completion.json
+[04:44:39]   probe d2_screening_c3_s516448251: secured result.json
+[04:44:43]   probe d2_screening_c3_s516448251: secured per_sample.jsonl
+[04:44:46]   probe d2_screening_c3_s516448251: secured admission.json
+[04:44:58]   probe d2_screening_c3_s516448251: secured generations
+[04:45:02]   probe d2_screening_c3_s516448251: secured rescoring.json
+[04:45:07]   probe d2_screening_c3_s516448251: release ack delivered
+[05:50:52]   trained-unscored d2_screening_c3_s614923639: preserved and verified (7fce338d5627)
+[05:50:52]   probe d2_screening_c3_s614923639: secured training/run_manifest.json
+[05:50:52]   probe d2_screening_c3_s614923639: secured training/run_completion.json
+[06:08:44]   probe d2_screening_c3_s614923639: secured result.json
+[06:08:48]   probe d2_screening_c3_s614923639: secured per_sample.jsonl
+[06:08:50]   probe d2_screening_c3_s614923639: secured admission.json
+[06:09:03]   probe d2_screening_c3_s614923639: secured generations
+[06:09:10]   probe d2_screening_c3_s614923639: release ack delivered
+[06:11:27]   probe d2_screening_c3_s614923639: secured rescoring.json
+[07:14:59]   trained-unscored d2_screening_c4_s516448251: preserved and verified (86260d5833b5)
+[07:14:59]   probe d2_screening_c4_s516448251: secured training/run_manifest.json
+[07:14:59]   probe d2_screening_c4_s516448251: secured training/run_completion.json
+[07:32:46]   probe d2_screening_c4_s516448251: secured result.json
+[07:32:49]   probe d2_screening_c4_s516448251: secured per_sample.jsonl
+[07:32:52]   probe d2_screening_c4_s516448251: secured admission.json
+[07:33:04]   probe d2_screening_c4_s516448251: secured generations
+[07:33:08]   probe d2_screening_c4_s516448251: secured rescoring.json
+[07:33:13]   probe d2_screening_c4_s516448251: release ack delivered
+[08:38:59]   trained-unscored d2_screening_c4_s614923639: preserved and verified (500ec8186e02)
+[08:38:59]   probe d2_screening_c4_s614923639: secured training/run_manifest.json
+[08:38:59]   probe d2_screening_c4_s614923639: secured training/run_completion.json
+[08:52:19]   probe d2_screening_c4_s614923639: secured result.json
+[08:52:23]   probe d2_screening_c4_s614923639: secured per_sample.jsonl
+[08:52:26]   probe d2_screening_c4_s614923639: secured admission.json
+[08:52:38]   probe d2_screening_c4_s614923639: secured generations
+[08:52:45]   probe d2_screening_c4_s614923639: release ack delivered
+[08:54:58]   2026-10-16T08:53:37Z MARKER:ALL_DONE — $12.25
+[08:54:58] polling ended: ALL_DONE — $12.25
+[08:58:51]   manifest rc=0
+252 file(s) across 11 class(es) -> /workspace/manifest.json
+  final_required: 252 · mutable_snapshot: 0 · final_streams_quiescent: True
+[08:59:15]   probe d2_screening_c4_s614923639: secured rescoring.json
+[08:59:15]   probe d2_screening_c1_s516448251: pruned preserved trained copy (now scored)
+[08:59:15]   probe d2_screening_c1_s614923639: pruned preserved trained copy (now scored)
+[08:59:16]   probe d2_screening_c2_s516448251: pruned preserved trained copy (now scored)
+[08:59:16]   probe d2_screening_c2_s614923639: pruned preserved trained copy (now scored)
+[08:59:16]   probe d2_screening_c3_s516448251: pruned preserved trained copy (now scored)
+[08:59:16]   probe d2_screening_c3_s614923639: pruned preserved trained copy (now scored)
+[08:59:16]   probe d2_screening_c4_s516448251: pruned preserved trained copy (now scored)
+[08:59:16]   probe d2_screening_c4_s614923639: pruned preserved trained copy (now scored)
+[08:59:16] teardown gate: allowed=True failed=None
+[08:59:16] deleting pod (gate passed)
+[08:59:28] pod deleted — 679.0 min, $12.34; provider confirms gone: True

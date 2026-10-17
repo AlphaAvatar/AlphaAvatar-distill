@@ -85,7 +85,83 @@ def build(repo_root: Path = REPO) -> dict[str, Any]:
                 "C1 pools could yield (zero); the realized family superseded "
                 "it for readiness on 2026-10-03 and it is kept as provenance"),
         },
+        "shared_evaluation": _shared_evaluation(repo_root),
+        "objectives": _objectives(repo_root),
+        "programme": _programme(repo_root),
         "authorizes": "nothing",
+    }
+
+
+def _programme(repo_root: Path) -> dict[str, Any] | None:
+    """The D-series programme's terminal state. Navigation only."""
+    from stages.d_series import programme_closeout as PC
+
+    path = repo_root / PC.CLOSEOUT
+    if not path.is_file():
+        return None
+    record = json.loads(path.read_text())
+    return {"status": record["status"], "decided_utc": record["decided_utc"],
+            "closeout": PC.CLOSEOUT,
+            "forward_baseline": record["maintainer_selection"]["selection"]}
+
+
+def _objectives(repo_root: Path) -> dict[str, Any] | None:
+    """Where D2's and D3's registered objectives live. Navigation only."""
+    from stages.d_series import objectives
+
+    path = repo_root / objectives.CONTRACT
+    if not path.is_file():
+        return None
+    record = json.loads(path.read_text())
+    out = {
+        "contract": objectives.CONTRACT,
+        "contract_hash": record["contract_hash"],
+        "design": "logs/stages/stage-1/families/d_series/plans/"
+                  "d2_d3_objective_design.md",
+        "d2_objective_hash": record["d2"]["objective_hash"],
+    }
+    #: The D3 this contract describes (the student-confidence objective) was
+    #: CANCELLED by the maintainer on 2026-10-16 and replaced by a separately
+    #: registered experiment. The contract is a frozen record and keeps its
+    #: own text; the navigation reads the CURRENT D3 from its registration.
+    from stages.phase_d3 import d3_design as D
+
+    reg_path = repo_root / D.REGISTRATION
+    if reg_path.is_file():
+        reg = json.loads(reg_path.read_text())
+        out["d3_in_this_contract"] = {
+            "objective_hash": record["d3"]["objective_hash"],
+            "status": reg["replaces"]["status"]}
+        out["d3"] = {"name": reg["name"], "registration": D.REGISTRATION,
+                     "registration_hash": reg["registration_hash"],
+                     "status": reg["status"].split(" -- ")[0]}
+    else:
+        out["d3_status"] = record["d3"]["status"].split(":")[0]
+    return out
+
+
+def _shared_evaluation(repo_root: Path) -> dict[str, Any] | None:
+    """Where the shared protocol lives and which identity it carries.
+
+    Navigation only: the protocol record owns its content and the audit owns
+    its verification. Absent before the protocol was written.
+    """
+    from stages.d_series import shared_evaluation as shared
+
+    path = repo_root / shared.RECORD
+    if not path.is_file():
+        return None
+    record = json.loads(path.read_text())
+    return {
+        "protocol_id": f"{record['protocol_id']}@v{record['version']}",
+        "protocol_hash": record["protocol_hash"],
+        "record": shared.RECORD,
+        "audit": shared.AUDIT,
+        "design": "logs/stages/stage-1/families/d_series/plans/"
+                  "d2_d3_shared_evaluation_design.md",
+        "reuses_roles": sorted(r["reuses_battery"]["role"]
+                               for r in record["rungs"].values()),
+        "reserved_roles": sorted(record["reserved_independent_batteries"]),
     }
 
 

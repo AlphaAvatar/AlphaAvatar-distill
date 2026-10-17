@@ -1,0 +1,4 @@
+{"profile_id": "state_eval.items", "items_path": "artifacts/stages/stage-1/state_eval_v1/items.jsonl", "size_bytes": 907397, "items_file_sha256": "2a4a1d3bf8ed165b4cfa881f75488bcbbdee5e74d34afddb91fecbf76d1e106d"}
+{"profile_id": "state_eval.manifest", "items_path": "artifacts/stages/stage-1/state_eval_v1/manifest.json", "size_bytes": 10722, "items_file_sha256": "a65d13352802d750228b43cfe1b3e057aad118cce2ae1216d76017769be2c9c6"}
+{"profile_id": "calib.domain_balanced@v1", "items_path": "artifacts/stages/stage-1/e8_calibration_v1/items.jsonl", "size_bytes": 733975, "items_file_sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b"}
+{"profile_id": "calib.reasoning_heavy@v2", "items_path": "artifacts/stages/stage-1/reasoning_heavy_v2/items.jsonl", "size_bytes": 780834, "items_file_sha256": "a2ff8c92c16aaf5c178db160690430f4972216d45a57ab0025835ecd0ca41fc4"}

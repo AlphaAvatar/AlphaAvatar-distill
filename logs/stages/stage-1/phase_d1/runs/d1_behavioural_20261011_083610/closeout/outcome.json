@@ -1,0 +1,87 @@
+{
+ "schema": "aadistill.phase_d1.behavioural_closeout/v1",
+ "run_id": "d1_behavioural_20261011_083610",
+ "stage_id": "stage-1",
+ "experiment_id": "phase_d1",
+ "rung": "screening",
+ "outcome": "LAUNCHED AND FAILED BEFORE SCIENCE, further than any prior attempt: five arms materialized and identity-verified, the generation-protocol ATTESTATION passed, the per-probe generation ADMISSION passed (comparable=true, zero mismatched fields), and probe 1 trained for 66 minutes. The SCORER then exited 1 on its first set. No probe was scored; no ranking and no selection exist.",
+ "classification": "ORDINARY ENGINEERING FAILURE before formal measurement. Repaired and relaunched autonomously inside the phase allowance, per the maintainer's standing instruction.",
+ "root_cause": {
+  "what": "TypeError: string indices must be integers, not 'str' at score_c1_confirmation.score_battery line 104, `spec[\"n\"]`",
+  "why": "both D-series scorers built their set mapping as {name: f\"{name}.jsonl\"} -- name to FILENAME -- while the shared score_battery reads spec[\"n\"] and spec[\"domain\"] out of each value. It derives the file path from the KEY, so the filename value was never read for anything.",
+  "both_scorers": "score_d1_screening.py AND score_d1_confirmation.py carried the identical defect, so repairing screening alone would have hit the same wall at the confirmation rung.",
+  "why_nothing_caught_it": "every test exercised battery_sets or score_battery, never the two together, and the scorers only ever execute as a pod subprocess."
+ },
+ "repair": {
+  "fix": "both scorers now build specs from battery_family.strata(), which owns the counts: {name: {\"n\": n, \"domain\": domain}}. Nothing invents an expected item count.",
+  "regression": "scripts/stages/stage-1/phase_d1/tests/test_d1_scorer_set_specs.py -- 12 tests running the REAL score_battery over the REAL 950-item battery with the REAL battery_sets() output, plus a mutation feeding the old filename shape and requiring TypeError.",
+  "downstream_verified_at_zero": "the whole post-scoring path to ALL_DONE: the real scorer CLI produces every one of the five keys the driver reads (correct_overall, usable_rollout_rate, n, n_scorable, result_sha256), the ranking rows carry the four fields rank_screening reads, and rank_screening/advance_one were already covered."
+ },
+ "what_this_run_established": [
+  "THE ATTEMPT-4 DEFECT IS EMPIRICALLY FIXED. The generation admission recorded comparable=true with the observed evaluation-protocol hash a01049908e188516... exactly equal to the attested one and zero mismatched fields across 7 summaries. child_env() carries AADISTILL_IMAGE_DIGEST to every subprocess.",
+  "five arms materialized and verified at their recorded identities for the third consecutive attempt, in 94 minutes against a measured 92.",
+  "the trained-but-unscored durability mechanism fired again: probe 1 preserved and identity-verified (f8ddbb103e34) before scoring was attempted."
+ ],
+ "the_preserved_probe": {
+  "probe_id": "d1_screening_q1_s614923639",
+  "trained_sha256": "f8ddbb103e343d51e5d974263e19b0aea55772a6ae19b34b4e59a027c81a9527",
+  "state": "trained, durable, not validly scored -- the THIRD artifact under this label after aadfb955 (attempt 3) and 71387681 (attempt 4). Archival evidence only; protocol_uniformity forbids importing it into a differently-trained field.",
+  "_standing_fact": "logs/stages/stage-1/phase_d1/analyses/d1_probe_training_is_not_bit_reproducible.json",
+  "tag": "step_001023",
+  "weight_bytes": 2384234968,
+  "weights_retired_utc": "2026-10-11",
+  "weights_retired_why": "trained but NEVER validly scored, and permanently unusable as science: protocol_uniformity requires every probe of a rung to be trained in ONE session, so a single probe from a failed session can never enter a comparison field. It had no possible consumer. The full sha256 above, the tag and the byte count are the identity, and they outlive the bytes."
+ },
+ "recorded_utc": "2026-10-11T12:00:00+00:00",
+ "session_commit": "fef6bb64654809e61b656b8074323a52418e60ed",
+ "authorized_base_commit": "afd75874bfd66c07bea6ff3a2c83fdf2cf409810",
+ "authorization_sha256": "15db6153a300a4165a44cc3010f9530585e1a3048274cbdbf738d8c77f7b0852",
+ "swept_base_commit": "786f275e6fdb",
+ "money": {
+  "provider_resources_created": 1,
+  "pod_id": "b9cwmt7haborw6",
+  "gpu": "NVIDIA L40S",
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 182.8,
+  "actual_usd": 3.32,
+  "all_in_usd": 3.3565,
+  "all_in_source": "provider account balance 178.2713915818 -> 174.9148915818",
+  "authorized_usd": 24.9922,
+  "within_authorization": true,
+  "one_use_grant_consumed": true,
+  "phase_allowance_usd": 130.0,
+  "phase_consumed_after_this_run_usd": 11.687
+ },
+ "cost": {
+  "actual_usd": 3.32,
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 182.8,
+  "authorized_usd": 24.9922,
+  "within_authorization": true,
+  "_owner": "runtime/session.json :: cost; all_in_usd above is the provider-measured figure derive_budget books"
+ },
+ "teardown": {
+  "pod_deleted": true,
+  "provider_confirms_gone": true,
+  "final_desired_status": "TERMINATED",
+  "billing": false,
+  "gate": "allowed=True failed=training_complete -- deletion permitted only after the trained-unscored probe was preserved"
+ },
+ "evidence": {
+  "secured": [
+   "evidence/d1_behavioural.json",
+   "evidence/d1_screening_q1_s614923639_generation_admission.json",
+   "evidence/d1_screening_q1_s614923639_score_tail.log",
+   "evidence/d1_screening_q1_s614923639_eval_tail.log"
+  ],
+  "_the_score_tail_is_the_diagnosis": "pulled off the pod before teardown; it carries the TypeError traceback naming score_battery line 104."
+ },
+ "observers": {
+  "monitors_stopped_in_this_terminal_path": [
+   "bzweb63o0",
+   "bpiofnfqe"
+  ],
+  "watch_set_now_empty": true
+ },
+ "next_action": "Relaunched as attempt 7 with both scorers repaired. No maintainer decision required: the phase allowance has $118.31 remaining."
+}
