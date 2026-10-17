@@ -1078,11 +1078,11 @@ STAGE_1 = [
         id="phase_d3",
         kind="experiment",
         stage_id="1",
-        status=("REGISTERED 2026-10-16; the structural rung GRANTED "
-                "2026-10-17 ($7.00 cumulative) after two $0 repairs; the "
-                "three probes are conditional on an admitted "
-                "STRUCTURAL_CHANGE and separately authorized. Replaces the "
-                "cancelled, unexecuted student-confidence D3"),
+        status=("REGISTERED 2026-10-16; STRUCTURAL session 2026-10-17 "
+                "(d3_structural_20261017_083554): STRUCTURAL_CHANGE, admitted "
+                "and re-derived off-pod, $0.5571; the three probes are "
+                "proposable and NOT authorized. Replaces the cancelled, "
+                "unexecuted student-confidence D3"),
         title="D3 — fixed-q2 DEPTH teacher-reference ablation",
         question=("Given D1-q2's exact structural path, does choosing the "
                   "DEPTH layers by minimizing KL against the original teacher "

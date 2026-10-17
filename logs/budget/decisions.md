@@ -11868,3 +11868,51 @@ on a paid pod.
   - A cap change.
 - **Revisit when.** The structural session closes. On STRUCTURAL_CHANGE, stop
   at the separate probe funding boundary.
+
+## 2026-10-17 — D3 structural session: STRUCTURAL_CHANGE (admitted, re-derived off-pod); stopped at the probe funding boundary
+
+- **Run.** `d3_structural_20261017_083554`, session commit `74dbf942`
+  (executable `60c06c05`). Pod `7gth4ukh0lwxgf` was admitted on the first AU
+  draw (`…@595.91.07`).
+- **Timing.** Setup took 3.1 min. The driver ran 19.2 min:
+  - the teacher reference store, then step 0;
+  - step 0 (FFN) reproduced q2's pinned digest `292e36f1…`;
+  - DEPTH took 1040 s, WIDTH 29 s, ATTENTION 8 s.
+- **Comparability gate: ADMITTED.** Round 0's parent-reference diagnostic
+  matched q2's recorded scores bit for bit at all 36 candidates (max |Δ| 0.0)
+  on the 595.91.07 driver; the parent-reference argmin was 26. The stated
+  driver residual did not materialize.
+- **Structural result: STRUCTURAL_CHANGE.**
+  - The pod's outcome was re-derived off-pod from the step records and agrees.
+  - Teacher-referenced removal order: `[17, 18, 31, 10, 11, 32, 8, 16]`.
+    q2's: `[26, 32, 18, 17, 11, 10, 30, 16]`.
+  - The treatment keeps layers 26 and 30 and removes 8 and 31; q2 does the
+    reverse. The other six removals are shared.
+  - At the treatment's own states, the parent reference would have chosen a
+    different layer in 7 of 8 rounds.
+  - The final state's KL: teacher reference 1.9677, parent reference 0.5939
+    (q2's own parent-greedy state: 0.5806). These are DEPTH-local numbers,
+    not evidence of downstream quality.
+- **Product: a new initialization.**
+  - Artifact `4f3e3eb734f405db…`, weights `e61ca76a…`, shard `a2a67b25…`,
+    arch `09147a5c…`; 596,049,920 parameters.
+  - It was fetched and re-identified at all four identities before teardown.
+  - It was uploaded to the relay
+    (`stage1/phase_d3/d3_structural_20261017_083554/products/…`); the LFS
+    oids match, and a restore into an independent directory re-identified at
+    all four identities.
+- **Money.**
+  - All-in $0.5571: GPU $0.5488 for 30.2 min at $1.09/h, plus container disk
+    $0.0083. The provider balance moved by $0.5528. The teardown is verified
+    by the provider.
+  - Structural envelope: $6.4429 of $7.00 remains. This is not a budget for
+    anything else, and a valid completed result is not rerun.
+  - Limits after: project $99.8923, formal $103.8699, package $107.0503,
+    engineering $3.1804 (unchanged). The deriver books the session on the
+    formal book via the 2026-10-17 scope amendment.
+- **Decision.** Stop at the separate three-probe funding boundary, as granted.
+  The probes are proposable, not authorized; the proposal record remains
+  `phase_d3/plans/d3_grant_proposal.json`. The probes contract and launcher
+  now build on this tree, because they name this product. That is `$0`
+  readiness only.
+- **Revisit when.** The maintainer decides on the three-probe rung.

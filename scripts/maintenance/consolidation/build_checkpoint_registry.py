@@ -306,6 +306,28 @@ CLASSIFY: dict[str, dict] = {
         reconstruction="the relay copy (byte-exact, verified); otherwise a "
                        "replay of the search path under the D2 v3 objective",
         reconstruction_cost="$0 from the relay", disposition="keep"),
+    "aad-artifacts/phase_d3/d3_structural_20261017_083554/products": dict(
+        experiment="phase_d3",
+        role="D3 initial checkpoint: q2's fixed path with teacher-referenced "
+             "DEPTH",
+        retention="reproducibility_required", status="active",
+        why="the product of d3_structural_20261017_083554 (STRUCTURAL_CHANGE, "
+            "admitted, re-derived off-pod); the conditional three-probe rung "
+            "trains FROM it. A second copy is on the relay under "
+            "stage1/phase_d3/d3_structural_20261017_083554/, round-trip "
+            "verified (logs/stages/stage-1/phase_d3/runs/"
+            "d3_structural_20261017_083554/evidence/product_durability.json)",
+        never_delete="open consumer: the D3 three-probe rung, whose contract "
+                     "names this product (proposable, not granted). "
+                     "Retirable only after that decision, under the standing "
+                     "policy (AGENTS.md 2.5), with a consumer audit and a "
+                     "tombstone",
+        reconstruction="the relay copy (byte-exact, verified); otherwise the "
+                       "registered fixed path, whose step 0 reproduced q2's "
+                       "pinned digest",
+        reconstruction_cost="$0 from the relay; otherwise one structural "
+                            "session (about $0.56)",
+        disposition="keep"),
     "aad-artifacts/phase_d2/d2_search_20261015_051722/store": dict(
         experiment="phase_d2", role="D2 search evidence store (no weights)",
         retention="reproducibility_required", status="active",
@@ -645,6 +667,44 @@ def scientific_artifacts(entries: list[dict]) -> dict:
                 "local bytes retained; the relay copy is the second source"
                 if row["copies"] else out[key]["reconstruction"])
 
+    # --- the D3 initial checkpoint, from the structural run's closeout ---
+    d3_run = "d3_structural_20261017_083554"
+    d3_rel = f"logs/stages/stage-1/phase_d3/runs/{d3_run}/closeout/outcome.json"
+    d3_close = REPO_ROOT / d3_rel
+    if d3_close.is_file():
+        doc = json.loads(d3_close.read_text())
+        product = doc.get("product") or {}
+        ident = product.get("identities") or {}
+        if ident:
+            relay = product.get("relay") or {}
+            row = {
+                "artifact_id": "d3_initial_checkpoint",
+                "role": ("D3 initial checkpoint: q2's fixed path with "
+                         "teacher-referenced DEPTH (STRUCTURAL_CHANGE)"),
+                "identity": {k: ident[k] for k in (
+                    "artifact_digest", "weights_digest",
+                    "single_shard_sha256", "arch_signature")},
+                "identity_owner": d3_rel,
+                "creating_run": d3_run,
+                "relay_copy": (f"{relay['prefix']}/"
+                               if product.get("relay_verified") else None),
+                "durability_record": (f"logs/stages/stage-1/phase_d3/runs/"
+                                      f"{d3_run}/evidence/"
+                                      "product_durability.json"),
+                "retention": "reproducibility_required",
+                "consumers": ["phase_d3 three-probe rung (proposable, not "
+                              "granted)"],
+                "open_consumers": ["phase_d3 three-probe rung"],
+            }
+            out["d3_initial_checkpoint"] = attach(
+                row, ident["single_shard_sha256"],
+                "restore the relay copy (round-trip verified); the registered "
+                "fixed path is the fallback")
+            out["d3_initial_checkpoint"]["materialization"] = (
+                "local bytes retained; the relay copy is the second source"
+                if row["copies"] else out["d3_initial_checkpoint"][
+                    "reconstruction"])
+
     # --- the D-series battery family, from the canonical manifest ---
     fam_rel = ("logs/stages/stage-1/families/d_series/analyses/"
                "autoinit_d_series_family_manifest.json")
@@ -692,7 +752,9 @@ def scientific_artifacts(entries: list[dict]) -> dict:
                 "scripts/stages/stage-1/families/d_series/build_batteries.py "
                 "over the frozen pools, then verify_batteries.py"),
             "consumers": ["phase_d1 screening + confirmation (paused)",
-                          "phase_d2 / phase_d3 (not designed)"],
+                          "phase_d2 (complete)",
+                          "phase_d3 three-probe rung (d1_confirmation; "
+                          "proposable, not granted)"],
             "_identity_survives_zero_copies": (
                 "derived from the family manifest, not from the bytes"),
         }

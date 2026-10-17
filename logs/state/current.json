@@ -29,20 +29,20 @@
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
   "_owner": "derived by scripts/maintenance/consolidation/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
-  "_package_spent_usd": 174.119,
+  "_package_spent_usd": 174.6761,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 595.0,
-  "cumulative_spend_usd": 494.5506,
+  "cumulative_spend_usd": 495.1077,
   "engineering_remaining_usd": 3.1804,
-  "formal_remaining_usd": 104.427,
+  "formal_remaining_usd": 103.8699,
   "full_ceiling_sessions_fundable": 3,
   "ledger": "logs/budget/ledger.md",
-  "package_remaining_usd": 107.6074,
+  "package_remaining_usd": 107.0503,
   "per_session_ceiling_usd": 30.0,
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 100.4494,
+  "remaining_usd": 99.8923,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -75,7 +75,7 @@
   "authorizes": "nothing",
   "behavioural_design": "D1 (complete): Top-4, 10 + 6 probes, owner d1_design.json. D2: shared protocol, K=4 prepared, 8 + 3 probes, no B/q2 training, owner families/d_series/plans/d2_budget_v1.json.",
   "behavioural_pricing": "Owner: d1_design.json :: budget.chain; attempt bounds: the run's governance/authorization.json :: money.attempt_bounds.",
-  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2: complete. D3: none for the structural rung (granted, phase_d3 funded); probes need their own grant. Owner: decisions.md 2026-10-17.",
+  "blockers": "D1: NONE OPEN, ENVELOPE RESOLVED_FITS (owner d1_design.json); complete. D2: complete. D3: structural done; the three probes need a maintainer grant. Owner: decisions.md 2026-10-17.",
   "d2_owed_engineering": "none at $0; the screening chain is built (d2_screening_readiness_review.md).",
   "execution_wiring": "D1 COMPLETE and CLOSED. D2 COMPLETE: search, screening (c4) and shared confirmation (NO_GO); phase_d2/runs/*/closeout/outcome.json.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
@@ -83,7 +83,7 @@
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
   "scoring_protocol": "reference_topk_tail_v1, K=200: reference-defined support plus one K+1 tail bucket from the COMPLEMENT's logits, carried by SearchConfig.distribution_support -- an OPTIONAL term, absent under the historical full-vocab contract, folded into one measurement_protocol_id. Owner: scripts/stages/stage-1/families/d_series/scoring_protocol.py",
   "seeds": "MATERIALIZED and HASH-BOUND in plans/d1_behavioural_preregistration.json (2 screening, 3 confirmation, 6 exclusions), before any candidate result exists. Owner: the preregistration.",
-  "state": "D1 COMPLETE / NO-GO. D2 v3 COMPLETE / NO_GO. D3 REGISTERED (43156f21); structural rung GRANTED $7.00 after two $0 repairs. Owner: phase_d3/plans/, decisions.md 2026-10-17."
+  "state": "D1 COMPLETE / NO-GO. D2 v3 COMPLETE / NO_GO. D3 structural d3_structural_20261017_083554: STRUCTURAL_CHANGE (admitted; $0.5571). Owner: its closeout, decisions.md 2026-10-17."
  },
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
  "dirty": false,
@@ -127,7 +127,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "The D3 structural session under its $7.00 grant, then stop at the next scientific boundary. Owner: phase_d3/analyses/d3_readiness_review.md section 8.",
+ "next": "Maintainer decision on the D3 three-probe rung ($12.00 proposed; plans/d3_grant_proposal.json) for the new initialization 4f3e3eb7. Owner: decisions.md 2026-10-17.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "On a structural grant: issue, launch (AU), close out; then STRUCTURAL_CHANGE -> propose the three-probe grant ($12.00), NO_STRUCTURAL_CHANGE -> no training. Forward Stage 0/2/4 design: docs/shared/REASONING_TRANSFER_DESIGN.md (authorizes nothing).",
@@ -200,7 +200,7 @@
   "logs/README.md -- START HERE, the index"
  ],
  "running": {
-  "_verified": "provider query 2026-10-16 ~15:40 UTC: 0 pods, $0/h; last pod tvohx8nubg6kmi deleted 15:32:41Z, provider confirms gone; watchdog ended pod_gone",
+  "_verified": "provider query 2026-10-17 ~09:08 UTC: 0 pods, 0 volumes, $0/h; pod 7gth4ukh0lwxgf deleted 09:07:52Z, provider confirms gone; watchdog ended pod_gone",
   "network_volumes": 0,
   "paid_compute": false,
   "pod_id": null,
@@ -216,7 +216,7 @@
   "C3": "COMPLETE / NO_GO",
   "D1": "COMPLETE / NO-GO 2026-10-12 -- q2 advanced from screening and did not confirm against B",
   "D2": "COMPLETE / NO_GO 2026-10-16 -- c4 advanced from screening and did not confirm against B",
-  "D3": "REGISTERED 2026-10-16 (fixed-q2 DEPTH teacher-reference ablation; the student-confidence D3 CANCELLED, unexecuted). Structural rung granted 2026-10-17; probes not granted",
+  "D3": "REGISTERED 2026-10-16 (fixed-q2 DEPTH teacher-reference ablation). Structural 2026-10-17: STRUCTURAL_CHANGE, admitted; probes NOT granted. Student-confidence D3 CANCELLED",
   "F1": "SKIPPED by maintainer instruction 2026-10-03; ffn.activation_importance_v0 carried forward",
   "_next_is_not_null_because": "the D-series directive orders D1, D2, D3; D1 and D2 are complete, so D3 is next, within its $0 boundary only.",
   "next_scientific_stage": "D3"

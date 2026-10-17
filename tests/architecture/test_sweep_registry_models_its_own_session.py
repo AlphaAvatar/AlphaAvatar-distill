@@ -163,6 +163,10 @@ class TestASessionWithItsOwnStagedViewHasItsOwnEntry:
         #: session-commit gate and the bundle round trip bind the tree, and
         #: the pod's blocking gate runs the structural preflight.
         "autoinit_d3_structural_launch",
+        #: Its probes session, for the same reason: the typed grant, the
+        #: session-commit gate and the bundle round trip bind the tree, and
+        #: the pod's blocking gate runs the probes preflight.
+        "autoinit_d3_probes_launch",
     })
 
     def test_every_session_launcher_is_either_registered_or_named(self):

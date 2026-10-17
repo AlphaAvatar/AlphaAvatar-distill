@@ -67,11 +67,10 @@ DEFAULT_KIND = "spend"
 #: authorization type whose ceiling prices a distinct amount of work.
 DEDICATED_KINDS = ("phase_a", "phase_b", "recovery_continuation", "continuation_b",
                    "c1", "d1", "d2", "d2_screening", "d2_confirmation",
-                   #: The D3 probes kind has its branch too; it joins this
-                   #: list once its launcher can be built on this tree (it
-                   #: names a structural run's product). Its branch is
-                   #: checked by the D3 chain tests until then.
-                   "d3_structural")
+                   #: The D3 probes kind joined once its launcher could be
+                   #: built on this tree: it names the product of
+                   #: d3_structural_20261017_083554 (admitted STRUCTURAL_CHANGE).
+                   "d3_structural", "d3_probes")
 #: `[a-z0-9_]`, not `[a-z_]`. The original class could not match a kind with a
 #: digit in it, so `c1`'s branch was invisible to this parser and its body was
 #: attributed to the preceding branch — the test reported 'no branch handles c1'
@@ -326,12 +325,10 @@ def test_a_launcher_that_refuses_to_build_is_recorded_not_swallowed():
     this pins is that it is RECORDED here rather than silently dropping a
     launcher out of the dispatch probe.
     """
-    #: The D3 probes launcher refuses on this tree by design too: its spec
-    #: names the product of a structural run that completed with
-    #: STRUCTURAL_CHANGE, and none exists yet (asserted directly in
-    #: `scripts/stages/stage-1/phase_d3/tests/test_d3_chain.py`). Each
-    #: refusal is pinned to the reason it is allowed.
-    expected = {"autoinit_c2_replay_launch": "ReplaySourceError",
-                "autoinit_d3_probes_launch": "D3ProbesError"}
+    #: The D3 probes launcher builds since d3_structural_20261017_083554
+    #: closed out with an admitted STRUCTURAL_CHANGE and a relay-verified
+    #: product; it refused here, by design, until then. Each refusal is pinned
+    #: to the reason it is allowed.
+    expected = {"autoinit_c2_replay_launch": "ReplaySourceError"}
     assert dict(UNBUILDABLE) == expected, (
         f"unexpected set of launchers that refused to build: {UNBUILDABLE}")

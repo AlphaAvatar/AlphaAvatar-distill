@@ -743,7 +743,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 92,
+  "runs_unrecorded": 93,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -840,6 +840,11 @@
     "recorded": 0,
     "unrecorded": 6,
     "total": 6
+   },
+   "phase_d3": {
+    "recorded": 0,
+    "unrecorded": 1,
+    "total": 1
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -3487,6 +3492,14 @@
    "n_files": 19,
    "digest": "f6cb3a33e4e139dc33a0fb1c97cc9a49f5b6fbc7f8c80b5eeca6eaefba1ee2fd",
    "why": "no run manifest; its closeout states: COMPLETE FORMAL SEARCH: 92/92 expansions, 12 complete leaves, Top-4 committed and secured"
+  },
+  {
+   "experiment_id": "phase_d3",
+   "run_id": "d3_structural_20261017_083554",
+   "root": "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554",
+   "n_files": 12,
+   "digest": "2a18d8d5ec3c8778a49e5e7f20aafbfc2538a1b6deafd8a749113d77e897ac2c",
+   "why": "no run manifest; its closeout states: COMPLETE: STRUCTURAL_CHANGE, re-derived off-pod from the step records"
   }
  ],
  "authorizes": "nothing"

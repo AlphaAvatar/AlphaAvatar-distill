@@ -1,7 +1,7 @@
 {
   "schema": "aadistill.checkpoint_registry/v2",
-  "created_utc": "2026-10-16T15:51:39+00:00",
-  "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --relay",
+  "created_utc": "2026-10-17T10:11:31+00:00",
+  "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash",
   "hashed": true,
   "scope": "every checkpoint and weight artifact in the three storage areas: local artifacts/, the relay, and anything git tracks",
   "deletion_rule": "a checkpoint may be deleted only if it is not protected, no never_delete clause applies, its scientific status is recorded elsewhere, its hash is in this registry, and a tombstone is written to logs/maintenance/inventories/checkpoint_tombstones.json",
@@ -301,6 +301,37 @@
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not",
       "materialization": "local bytes retained; the relay copy is the second source"
     },
+    "d3_initial_checkpoint": {
+      "artifact_id": "d3_initial_checkpoint",
+      "role": "D3 initial checkpoint: q2's fixed path with teacher-referenced DEPTH (STRUCTURAL_CHANGE)",
+      "identity": {
+        "artifact_digest": "4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de",
+        "weights_digest": "e61ca76aaf1dee6146e4a872adc749c2fd842dbe90192afac5e6aaf021cf7f63",
+        "single_shard_sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856",
+        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+      },
+      "identity_owner": "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/closeout/outcome.json",
+      "creating_run": "d3_structural_20261017_083554",
+      "relay_copy": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/",
+      "durability_record": "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/evidence/product_durability.json",
+      "retention": "reproducibility_required",
+      "consumers": [
+        "phase_d3 three-probe rung (proposable, not granted)"
+      ],
+      "open_consumers": [
+        "phase_d3 three-probe rung"
+      ],
+      "local_copies": [
+        "/home/ecs-user/aad-artifacts/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de"
+      ],
+      "copies": 1,
+      "all_copies_identity_verified": true,
+      "tombstone": null,
+      "lifecycle": "retained_local",
+      "reconstruction": "restore the relay copy (round-trip verified); the registered fixed path is the fallback",
+      "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not",
+      "materialization": "local bytes retained; the relay copy is the second source"
+    },
     "d_series_behavioural_v1": {
       "artifact_id": "d_series_behavioural_v1",
       "role": "the realized D-series behavioural battery family",
@@ -342,22 +373,23 @@
       "materialization": "rebuildable at $0 on CPU by scripts/stages/stage-1/families/d_series/build_batteries.py over the frozen pools, then verify_batteries.py",
       "consumers": [
         "phase_d1 screening + confirmation (paused)",
-        "phase_d2 / phase_d3 (not designed)"
+        "phase_d2 (complete)",
+        "phase_d3 three-probe rung (d1_confirmation; proposable, not granted)"
       ],
       "_identity_survives_zero_copies": "derived from the family manifest, not from the bytes"
     }
   },
   "local": {
-    "n_units": 53,
-    "n_weight_files": 47,
-    "total_bytes": 79187260734,
-    "total_human": "73.749 GiB",
+    "n_units": 54,
+    "n_weight_files": 48,
+    "total_bytes": 80379397455,
+    "total_human": "74.859 GiB",
     "artifacts_tree_bytes": 8092951430,
-    "external_store_tree_bytes": 73532789373,
+    "external_store_tree_bytes": 74732038518,
     "by_store": {
       "external_store": {
-        "units": 48,
-        "bytes": 72415110970
+        "units": 49,
+        "bytes": 73607247691
       },
       "repo_artifacts": {
         "units": 5,
@@ -365,20 +397,20 @@
       }
     },
     "proposed_disposition": {
-      "keep": 40,
+      "keep": 41,
       "review": 13
     },
     "proposed_disposition_bytes": {
-      "keep": 64342823911,
+      "keep": 65534960632,
       "review": 14844436823
     }
   },
   "relay": {
     "repo": "AlphaAvatar/aadistill-artifacts",
     "queried": true,
-    "queried_utc": "2026-10-16T15:46:03+00:00",
-    "n_files": 1389,
-    "total_bytes": 75829886805,
+    "queried_utc": "2026-10-17T09:59:10+00:00",
+    "n_files": 1395,
+    "total_bytes": 77070569132,
     "by_prefix": {
       "stage3": {
         "files": 180,
@@ -389,16 +421,16 @@
         "bytes": 12140681449
       },
       "transfer": {
-        "files": 592,
-        "bytes": 12072355403
+        "files": 593,
+        "bytes": 12105087501
       },
       "a3_preserved_probes": {
         "files": 12,
         "bytes": 9536946368
       },
       "stage1": {
-        "files": 25,
-        "bytes": 7201718851
+        "files": 30,
+        "bytes": 8409669006
       },
       "permanent_controls": {
         "files": 18,
@@ -462,7 +494,7 @@
       },
       ".gitattributes": {
         "files": 1,
-        "bytes": 52284
+        "bytes": 52358
       },
       "c1_preserved_probes": {
         "files": 18,
@@ -473,7 +505,7 @@
     "files": [
       {
         "path": ".gitattributes",
-        "size_bytes": 52284,
+        "size_bytes": 52358,
         "sha256": null
       },
       {
@@ -2667,6 +2699,16 @@
         "sha256": "eb008ee252ce9d35e7478c3cc346ef7db29acf3eb5bfb2486c6023e19abe4ef0"
       },
       {
+        "path": "stage1/phase_d2/d2_confirmation_20261016_105802/d2_confirmation_artifacts.tar.gz",
+        "size_bytes": 4338735,
+        "sha256": "7e7a82e567369ab7b06b7472a35260957cf116369d854f91d9c81289c367122b"
+      },
+      {
+        "path": "stage1/phase_d2/d2_screening_20261015_203346/d2_screening_artifacts.tar.gz",
+        "size_bytes": 11474699,
+        "sha256": "f297577621d0e40f1e81b3d79e29798f016369a0c612926ff5e914019a569835"
+      },
+      {
         "path": "stage1/phase_d2/d2_search_20261015_051722/d2_search_artifacts.tar.gz",
         "size_bytes": 26043743,
         "sha256": "d8d957006d95a972ef99c971ddbdea026fb36b00ae2ce32ccb5adc2e9ed030b9"
@@ -2730,6 +2772,21 @@
         "path": "stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/model.safetensors",
         "size_bytes": 1192135096,
         "sha256": "9a0f41e98a38ca69a86a45197f97c5fdb06ecb37db2f3480c77730dbd567d728"
+      },
+      {
+        "path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/config.json",
+        "size_bytes": 1419,
+        "sha256": null
+      },
+      {
+        "path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/generation_config.json",
+        "size_bytes": 206,
+        "sha256": null
+      },
+      {
+        "path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors",
+        "size_bytes": 1192135096,
+        "sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856"
       },
       {
         "path": "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
@@ -4330,6 +4387,11 @@
         "path": "transfer/aad_autoinit_74cfe3e3.bundle",
         "size_bytes": 12731568,
         "sha256": "ac7634cd85e5b03f41452b91bf355bd999b2a36f175e10db66d66728c27a7b71"
+      },
+      {
+        "path": "transfer/aad_autoinit_74dbf942.bundle",
+        "size_bytes": 32732098,
+        "sha256": "3ecbd0e484629c621da1b7185b432a16f33141a3d6557164c7c382486423f0ea"
       },
       {
         "path": "transfer/aad_autoinit_762ae5fa.bundle",
@@ -7417,7 +7479,7 @@
         "sha256": null
       }
     ],
-    "source": "huggingface_hub repo_info(files_metadata=True)"
+    "source": "carried forward from the previous registry (--relay not given)"
   },
   "repository_visible": {
     "rule": "AGENTS.md 2.5 \u2014 checkpoints, optimizer states, activation caches and large datasets are never committed",
@@ -10073,6 +10135,51 @@
       "reconstruction_recipe": "the relay copy (byte-exact, verified); otherwise a replay of the search path under the D2 v3 objective",
       "reconstruction_cost": "$0 from the relay",
       "never_delete_clause": "no open consumer remains: D2 screening (d2_screening_20261015_203346) and c4's shared confirmation (d2_confirmation_20261016_105802, NO_GO) are complete and their evidence durable. Retained until the maintainer's next D-series decision; then retirable under the standing policy (AGENTS.md 2.5) after a consumer audit, with a tombstone",
+      "protected": true,
+      "disposition": "keep"
+    },
+    {
+      "canonical_name": "4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de",
+      "kind": "checkpoint",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors"
+      ],
+      "experiment": "phase_d3",
+      "role": "D3 initial checkpoint: q2's fixed path with teacher-referenced DEPTH",
+      "retention": "reproducibility_required",
+      "status": "active",
+      "retention_reason": "the product of d3_structural_20261017_083554 (STRUCTURAL_CHANGE, admitted, re-derived off-pod); the conditional three-probe rung trains FROM it. A second copy is on the relay under stage1/phase_d3/d3_structural_20261017_083554/, round-trip verified (logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/evidence/product_durability.json)",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_bytes": 1192136721,
+      "size_human": "1.110 GiB",
+      "weights_sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856",
+      "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+      "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/closeout/outcome.json",
+        "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/evidence/d3_structural.json",
+        "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/evidence/product.json",
+        "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/evidence/product_durability.json",
+        "logs/stages/stage-1/phase_d3/runs/d3_structural_20261017_083554/runtime/session.json"
+      ],
+      "relay_path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": true,
+      "reconstruction_recipe": "the relay copy (byte-exact, verified); otherwise the registered fixed path, whose step 0 reproduced q2's pinned digest",
+      "reconstruction_cost": "$0 from the relay; otherwise one structural session (about $0.56)",
+      "never_delete_clause": "open consumer: the D3 three-probe rung, whose contract names this product (proposable, not granted). Retirable only after that decision, under the standing policy (AGENTS.md 2.5), with a consumer audit and a tombstone",
       "protected": true,
       "disposition": "keep"
     },

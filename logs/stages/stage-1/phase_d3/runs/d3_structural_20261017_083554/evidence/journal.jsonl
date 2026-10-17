@@ -1,0 +1,12 @@
+{"t": 0.0, "stage": "A", "name": "registration_and_contract", "status": "start"}
+{"t": 1.35, "stage": "A", "name": "registration_and_contract", "seconds": 1.35, "status": "ok", "result": {"registration": "43156f21a011803b", "treatment": "5948a3c99ac12213"}}
+{"t": 1.35, "stage": "A", "name": "authorization", "status": "start"}
+{"t": 1.359, "stage": "A", "name": "authorization", "seconds": 0.009, "status": "ok", "result": {"hard_cap_usd": 3.0151}}
+{"t": 1.359, "stage": "B", "name": "root_state_and_teacher", "status": "start"}
+{"t": 7.617, "stage": "B", "name": "root_state_and_teacher", "seconds": 6.258, "status": "ok", "result": {"root_state": "session_driver_use_cache_false"}}
+{"t": 7.617, "stage": "C", "name": "materialize_treatment", "status": "start"}
+{"t": 1149.599, "stage": "C", "name": "materialize_treatment", "seconds": 1141.982, "status": "ok", "result": {"steps": 4}}
+{"t": 1149.599, "stage": "D", "name": "structural_comparison", "status": "start"}
+{"t": 1149.63, "stage": "D", "name": "structural_comparison", "seconds": 0.032, "status": "ok", "result": {"outcome": "STRUCTURAL_CHANGE"}}
+{"t": 1149.631, "stage": "E", "name": "product", "status": "start"}
+{"t": 1150.413, "stage": "E", "name": "product", "seconds": 0.782, "status": "ok", "result": {"artifact_digest": "4f3e3eb734f405db"}}

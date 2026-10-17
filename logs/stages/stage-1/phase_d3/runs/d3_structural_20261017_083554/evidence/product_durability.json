@@ -1,0 +1,65 @@
+{
+ "schema": "aadistill.phase_d3.product_durability/v1",
+ "run_id": "d3_structural_20261017_083554",
+ "relay": "AlphaAvatar/aadistill-artifacts",
+ "prefix": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de",
+ "files": {
+  "model.safetensors": {
+   "path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors",
+   "sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856"
+  },
+  "config.json": {
+   "path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/config.json",
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49"
+  },
+  "generation_config.json": {
+   "path": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/generation_config.json",
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+  }
+ },
+ "objects": [
+  {
+   "remote": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors",
+   "sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856",
+   "lfs_sha256": "a2a67b25d7ef520cffce37c386deeb914b8355baabf946beec8a39195ced1856",
+   "matches_local": true
+  },
+  {
+   "remote": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/config.json",
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "lfs_sha256": null,
+   "matches_local": true
+  },
+  {
+   "remote": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/generation_config.json",
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "lfs_sha256": null,
+   "matches_local": true
+  }
+ ],
+ "uploaded": [
+  {
+   "remote": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/model.safetensors",
+   "uploaded": true,
+   "seconds": 1544.0
+  },
+  {
+   "remote": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/config.json",
+   "uploaded": true,
+   "seconds": 1.0
+  },
+  {
+   "remote": "stage1/phase_d3/d3_structural_20261017_083554/products/4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de/generation_config.json",
+   "uploaded": true,
+   "seconds": 1.0
+  }
+ ],
+ "restored_identities_checked": [
+  "arch_signature",
+  "artifact_digest",
+  "single_shard_sha256",
+  "weights_digest"
+ ],
+ "restore_dir": "an independent temporary directory, deleted after",
+ "checked_utc": "2026-10-17T09:35:56Z"
+}

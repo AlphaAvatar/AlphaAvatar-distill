@@ -6,11 +6,11 @@ Everything this experiment produced, in one place.
 | --- | --- |
 | [`analyses/`](analyses/) | working analyses and audits |
 | [`plans/`](plans/) | protocol, preregistration, pricing — what was registered before running |
-| runs | registered from components; see the index |
+| [`runs/`](runs/) | one directory per execution attempt |
 
 ## Runs
 
-* none recorded
+* [`d3_structural_20261017_083554`](runs/d3_structural_20261017_083554/)
 
 Canonical list, always the index rather than this file.
 Nothing here authorizes anything.

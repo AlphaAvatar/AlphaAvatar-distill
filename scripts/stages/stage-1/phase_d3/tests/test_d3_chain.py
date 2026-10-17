@@ -779,11 +779,24 @@ def product(monkeypatch):
 
 class TestTheProbesRung:
 
-    def test_without_a_structural_change_there_is_no_arm(self):
+    @pytest.mark.parametrize("outcome", [D.NO_STRUCTURAL_CHANGE,
+                                         D.UNEXPLAINED_BYTE_DIFFERENCE, None])
+    def test_without_a_structural_change_there_is_no_arm(self, tmp_path,
+                                                         outcome):
         from stages.phase_d3 import d3_probes as P
 
+        repo = _closeout_repo(tmp_path, structural_outcome=outcome)
         with pytest.raises(P.D3ProbesError, match="STRUCTURAL_CHANGE"):
-            P.arms(REPO)
+            P.structural_product(repo)
+
+    def test_the_completed_structural_run_names_its_product(self):
+        """The tree's own closeout: d3_structural_20261017_083554."""
+        from stages.phase_d3 import d3_probes as P
+
+        product = P.structural_product(REPO)
+        assert product["run_id"] == "d3_structural_20261017_083554"
+        assert product["identities"]["artifact_digest"].startswith(
+            "4f3e3eb734f405db")
 
     def test_three_probes_from_the_d3_initial_checkpoint(self, product):
         from stages.phase_d3 import d3_probes as P
