@@ -11916,3 +11916,59 @@ on a paid pod.
   now build on this tree, because they name this product. That is `$0`
   readiness only.
 - **Revisit when.** The maintainer decides on the three-probe rung.
+
+## 2026-10-17 — Maintainer: D3 structural PASS; three-probe rung granted ($12.00) after a $0 probes-closeout repair
+
+- **Context.** The maintainer's independent review of `721e803c` accepted
+  `d3_structural_20261017_083554`:
+  - STRUCTURAL_CHANGE, admitted, complete and terminal; it is not to be rerun;
+  - the D3 initialization is `4f3e3eb734f405db…`;
+  - it is a structural difference, not behavioural or fluid-reasoning
+    superiority.
+
+  The review found one execution-readiness gap: no D3 probes closeout. D2's
+  closeout is D2-specific in its CLI, record names and decision fields.
+- **Decision.**
+  - **Grant.** A cumulative all-in envelope of **$12.00** for the D3
+    three-probe rung (`approvals/autoinit_d3_probes_grant.json`). It is
+    executable only after the closeout repair is tested and committed.
+  - **Scope.** One session at a time, and pre-science retries only inside
+    the envelope. The structural grant's unspent $6.4429 does not transfer.
+- **The repair (`phase_d3/closeout_d3_probes.py`).**
+  - **Reuse.** D2's helpers are reused, given D3's layout: the evidence plan,
+    the rescoring diagnostics and the money model. D2's own rungs are
+    unchanged.
+  - **Analysis.** The scientific reading is `analyze_d3_probes.analyze_run`:
+    every unit is verified by D2's `verify_unit`, including the pinned
+    re-score; it must be aligned with BOTH q2 and B, and the session's arm
+    verification must cover the D3 initialization (added). Then the
+    registered exploratory comparison. D2's verdict contract is not used.
+  - **COMPLETE requires nine named proofs:**
+    - the authorization (it must load, and name the run, the registration
+      and the re-derived contract);
+    - driver complete, contract bound, all probes scored;
+    - units verified and paired;
+    - the archive verified against its manifest;
+    - a second durable relay copy, re-hashed (the `archive` action);
+    - evidence secured, and teardown verified.
+  - **Otherwise INCOMPLETE.** It names what is missing, books the money and
+    states no result. A run outside `d3_probes_`, or one whose grant does not
+    load, is refused.
+  - **Profiles.** The profiles now report per set and per domain, with
+    generation lengths for all three arms.
+  - **Test evidence (not a measurement).** A fully simulated closeout files
+    D2's three c4 confirmation units as a D3 run with a real
+    `D3ProbesAuthorization` and the real pinned scorer. It reproduces D2's
+    recorded deltas exactly (vs B −0.0106, vs q2 −0.0102, every seed delta).
+  - **Negatives.** Each missing proof yields INCOMPLETE.
+- **Records refreshed.** `d3_budget_v1.json` and `d3_grant_proposal.json` now
+  derive their state from the funding scope, the grant files and the booked
+  closeouts:
+  - structural spent $0.5571;
+  - probes $8.51 at hard plus reserve still to fund;
+  - project $91.38 left after the probes at hard.
+
+  The cancelled D3's reservation stays out.
+- **Does not authorize.** D1/D2 reruns, a Full Search, extra seeds, a fresh
+  confirmation, promotion, the cancelled D3, data work, Stage-0/2/4, or a cap
+  change.

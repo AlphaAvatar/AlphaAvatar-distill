@@ -1,0 +1,35 @@
+{
+ "_contract": "WHAT THE MAINTAINER DECIDED, and only that. Every other field of the authorization -- identities, stages, registration and contract hashes, seeds, probe count, harness, ceiling -- is DERIVED by d3_authorization.build_payload(rung='probes') from the tree it binds, and this grant is REFUSED if it states one.",
+ "_one_use": "ONE issuance, ONE launcher session per authorization. A replacement after a pre-science engineering failure is a NEW one-use authorization netted against this cumulative envelope (prefix d3_probes_), issued only while the remainder holds a full session's freshly priced hard ceiling plus the teardown reserve, and only after the previous attempt's actual cost is booked and its teardown verified.",
+ "rung": "probes",
+ "approves_registration_hash": "43156f21a011803bcb76be8f2c3f5f9616e9034d8f7ea811b9f5de6b9eea17d9",
+ "cumulative_envelope_usd": 12.0,
+ "granted_by": "maintainer, 2026-10-17 UTC: D3 Structural PASS / Conditional Three-Probe Grant (independent review of 721e803c1297794acb83099c924b17c045afbdb8). Accepts d3_structural_20261017_083554 as STRUCTURAL_CHANGE, ADMITTED, complete and terminal (not to be rerun), and conditionally approves a cumulative all-in envelope of $12.00 for the new D3 three-probe behavioural rung, executable only after the required $0 D3 probes closeout repair has passed testing and been committed.",
+ "covers": "Exactly the three registered recovery probes: e1_p1_kd_heavy@0.86M from the D3 initial checkpoint 4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de, independently at seeds 396880939, 766527341 and 1004399678, on the d1_confirmation battery (950 prompts, 850 scorable, per seed); their generation, scoring, evidence preservation, the off-pod exploratory comparison with q2 (primary) and B (anchor) through their registered imported units, and the closeout. ONE D3 probes session at a time; ordinary pre-science engineering retries only inside this envelope.",
+ "accepted_range": {
+  "hardware": "NVIDIA L40S on the protocol's exact image identity (host driver 595.91.07); AU draws preferred, admission unchanged",
+  "expected_session_usd": "about 6.59 at 1.09/h (re-derived at the live rate at issuance)",
+  "planning_hard_ceiling_usd": "about 8.21 at 1.09/h (re-derived at the live rate at issuance)",
+  "teardown_reserve_usd": 0.3,
+  "cumulative_envelope_usd": 12.0,
+  "per_session_envelope_usd": 30.0,
+  "project_cap_usd": 595.0,
+  "rule": "$12.00 is the probes rung's cumulative ceiling, not a target; every issuance needs remainder >= freshly priced hard ceiling + reserve; host refusals and paid time are in the same ledger. The structural grant's unspent $6.4429 is separate and does not transfer."
+ },
+ "statistical_boundary": "EXPLORATORY on a previously observed battery and reference measurements: the registered descriptive two-sided 95% stratified prompt-cluster bootstrap intervals and seed consistency; BEHAVIOURAL_IMPROVEMENT / BEHAVIOURAL_REGRESSION / INCONCLUSIVE are descriptive labels only; effect sizes and every seed delta reported; no rule change and no added screening seeds after outcomes; the mixed-domain battery does not measure fluid reasoning",
+ "does_not_authorize": [
+  "D1 or D2 reruns",
+  "a Full Search or any candidate ranking",
+  "extra seeds",
+  "a fresh independent confirmation",
+  "automatic promotion",
+  "the cancelled Student-Confidence D3",
+  "retraining or regenerating q2 or B",
+  "dataset downloads or generation",
+  "Stage-0/2/4 experiments",
+  "a budget-cap increase"
+ ],
+ "stop_boundary": "after the three probes, the off-pod reproduction and the terminal closeout, stop at the scientific review boundary",
+ "decision_record": "logs/budget/decisions.md 2026-10-17 (D3 three-probe grant, $12.00 cumulative, conditional on the $0 closeout repair)",
+ "authorizes": "nothing by itself: a launch needs the issued one-use authorization"
+}

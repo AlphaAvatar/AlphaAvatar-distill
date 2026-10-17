@@ -19,8 +19,10 @@ What the registration froze before any D3 outcome existed, applied here:
    signs, and the registered DESCRIPTIVE label (BEHAVIOURAL_IMPROVEMENT /
    BEHAVIOURAL_REGRESSION / INCONCLUSIVE); usable rollout the same way,
    separately, never moving the label;
-3. per stratum and per seed: usable and every component, correct_given_usable,
-   natural termination, degeneration, context-limit hits, lengths.
+3. per set, per domain and per seed: usable and every component,
+   correct_given_usable, natural termination, degeneration, context-limit
+   hits, and generation lengths from the stored generations (all three arms,
+   where their stores hold them).
 
 EXPLORATORY: the battery and q2/B were observed before this design; no alpha,
 no verdict contract, no SHARED_GO, no promotion; the mixed-domain battery does
@@ -151,8 +153,42 @@ def compare(candidate: Mapping[int, Sequence[Mapping[str, Any]]],
                 "seeds; descriptive, exploratory, no alpha")}
 
 
-def profile(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-    """One unit's behaviour, overall and per set."""
+def _lengths(gens: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """Generation length and termination, as the generator recorded them.
+    `generated_tokens` is the whole thinking-mode generation: the reasoning
+    and the final answer together (P18)."""
+    if not gens:
+        return {"n_generations": 0}
+    toks = sorted(int(g.get("generated_tokens") or 0) for g in gens)
+    n = len(gens)
+    return {"n_generations": n,
+            "generated_tokens_mean": round(statistics.fmean(toks), 1),
+            "generated_tokens_median": statistics.median(toks),
+            "generated_tokens_p90": toks[int(0.9 * (n - 1))],
+            "context_limit_reached_rate": round(
+                sum(bool(g.get("context_limit_reached")) for g in gens) / n, 4),
+            "degeneration_triggered_rate": round(
+                sum(bool(g.get("degeneration_triggered")) for g in gens) / n,
+                4)}
+
+
+def load_generations(gen_dir: Path) -> dict[str, dict[str, Any]]:
+    """id -> the generator's per-sample record (raw text dropped)."""
+    out: dict[str, dict[str, Any]] = {}
+    for path in sorted(Path(gen_dir).glob("*.generations.jsonl")):
+        for line in path.read_text().splitlines():
+            if line.strip():
+                g = json.loads(line)
+                g.pop("raw", None)
+                out[g["id"]] = g
+    return out
+
+
+def profile(rows: Sequence[Mapping[str, Any]],
+            generations: Mapping[str, Mapping[str, Any]] | None = None
+            ) -> dict[str, Any]:
+    """One unit's behaviour, overall, per set and per domain; with its
+    generation lengths when the stored generations are supplied."""
     def summarize(rs: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         n = len(rs)
         usable = [r for r in rs if r["usable"]]
@@ -169,18 +205,52 @@ def profile(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
                 "correct_given_usable": (round(sum(bool(r["correct"])
                                                    for r in us) / len(us), 4)
                                          if us else None)}
+    def with_lengths(rs: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+        out = summarize(rs)
+        if generations is not None:
+            out["lengths"] = _lengths([generations[r["id"]] for r in rs
+                                       if r["id"] in generations])
+        return out
+
     sets = sorted({r.get("set") for r in rows})
-    return {"overall": summarize(rows),
-            "per_set": {s: summarize([r for r in rows if r.get("set") == s])
-                        for s in sets}}
+    domains = sorted({r.get("domain") for r in rows if r.get("domain")})
+    return {"overall": with_lengths(rows),
+            "per_set": {s: with_lengths([r for r in rows if r.get("set") == s])
+                        for s in sets},
+            "per_domain": {d: with_lengths([r for r in rows
+                                            if r.get("domain") == d])
+                           for d in domains}}
+
+
+def reference_generations(arm: str, *, repo_root: Path = REPO_ROOT,
+                          evidence_root: Path | None = None
+                          ) -> dict[int, dict[str, dict[str, Any]]]:
+    """An imported arm's stored generations per seed, where its durable store
+    holds them (lengths only; never read by the label)."""
+    from stages.d_series import shared_evaluation as SE
+
+    store = SE.durable_store("shared_confirmation", repo_root, evidence_root)
+    out = {}
+    for unit in SE.historical_units(repo_root, evidence_root):
+        if unit.rung == "shared_confirmation" and unit.arm == arm:
+            gen_dir = store / "store" / "probes" / unit.probe_id / "generations"
+            if gen_dir.is_dir():
+                out[unit.seed] = load_generations(gen_dir)
+    return out
 
 
 def analyze(candidate: Mapping[int, Sequence[Mapping[str, Any]]], *,
             repo_root: Path = REPO_ROOT,
             evidence_root: Path | None = None,
-            registration: Mapping[str, Any] | None = None) -> dict[str, Any]:
+            registration: Mapping[str, Any] | None = None,
+            generations: Mapping[str, Mapping[int, Mapping[str, Any]]]
+            | None = None) -> dict[str, Any]:
     """Both comparisons and the per-seed profiles, from the candidate's rows
-    and the imported, hash-checked q2/B rows."""
+    and the imported, hash-checked q2/B rows.
+
+    `generations` (arm -> seed -> id -> record) adds lengths to the profiles;
+    descriptive only."""
+    gens = generations or {}
     from stages.d_series import shared_evaluation as SE
     from stages.phase_d3 import d3_design as D
 
@@ -198,8 +268,12 @@ def analyze(candidate: Mapping[int, Sequence[Mapping[str, Any]]], *,
             **compare(candidate, rows, seeds=seeds,
                       bootstrap_seed=int(rule["bootstrap_seeds"][arm]),
                       iterations=int(rule["bootstrap_iterations"]))}
-        out["profiles"][arm] = {str(s): profile(rows[s]) for s in seeds}
-    out["profiles"]["d3"] = {str(s): profile(candidate[s]) for s in seeds}
+        out["profiles"][arm] = {str(s): profile(rows[s],
+                                                (gens.get(arm) or {}).get(s))
+                                for s in seeds}
+    out["profiles"]["d3"] = {str(s): profile(candidate[s],
+                                             (gens.get("d3") or {}).get(s))
+                             for s in seeds}
     out["primary_label_vs_q2"] = out["comparisons"]["q2"]["correct_overall"][
         "label"]
     return out
@@ -220,11 +294,20 @@ def analyze_run(session: Mapping[str, Any], store: Path,
     if session.get("contract_hash") != P.contract_hash(contract):
         raise AnalysisRefused("the session ran under a different contract")
     digest = contract["initialization"]["identities"]["artifact_digest"]
+    #: D3's arm is keyed by its artifact digest (`d3_probes.arms`); a
+    #: contract that names another state id says so.
+    state_id = contract["initialization"].get("state_id", digest)
+    problems: list[str] = []
+    verified_arms = {a.get("state_id") for a in
+                     (session.get("arm_verification") or {}).get("arms", [])}
+    if verified_arms != {state_id}:
+        problems.append(f"the session's arm verification covers "
+                        f"{sorted(verified_arms)}, not the D3 initialization")
     reference = {arm: SE.load_reference_rows(
         "shared_confirmation", arm, repo_root=repo_root,
         evidence_root=evidence_root) for arm in ("q2", "B")}
     by_probe = {p["probe_id"]: p for p in session.get("probes", [])}
-    problems, units, rows_by_seed = [], {}, {}
+    units, rows_by_seed, d3_generations = {}, {}, {}
     for probe in contract["probes"]:
         pid, seed = probe["probe_id"], int(probe["seed"])
         if not by_probe.get(pid, {}).get("scored"):
@@ -233,7 +316,7 @@ def analyze_run(session: Mapping[str, Any], store: Path,
         unit = R.verify_unit(
             store / "probes" / pid, by_probe[pid],
             {"probe_id": pid, "arm": probe["arm"], "seed": seed,
-             "state_id": digest, "artifact_digest": digest},
+             "state_id": state_id, "artifact_digest": digest},
             repo_root=repo_root, rescore=rescore,
             shared_rung="shared_confirmation",
             config_path=(store / "extracted/audit/autoinit_d3_probes/configs"
@@ -245,12 +328,23 @@ def analyze_run(session: Mapping[str, Any], store: Path,
                 and unit["aligned_with_B"]):
             problems.append(
                 f"{pid}: {[k for k, v in unit['checks'].items() if v is not True]}")
+        unit["paired_vs_q2"] = R.paired_counts(unit["rows"],
+                                               reference["q2"][seed])
+        unit["paired_vs_B"] = R.paired_counts(unit["rows"],
+                                              reference["B"][seed])
         rows_by_seed[seed] = unit["rows"]
+        d3_generations[seed] = load_generations(store / "probes" / pid
+                                                / "generations")
         units[pid] = {k: v for k, v in unit.items() if k != "rows"}
     if problems:
         raise AnalysisRefused("not comparable: " + "; ".join(problems))
     result = analyze(rows_by_seed, repo_root=repo_root,
-                     evidence_root=evidence_root)
+                     evidence_root=evidence_root,
+                     generations={"d3": d3_generations, **{
+                         arm: reference_generations(
+                             arm, repo_root=repo_root,
+                             evidence_root=evidence_root)
+                         for arm in ("q2", "B")}})
     return {"schema": SCHEMA, "run_id": session["run_id"],
             "contract_hash": session["contract_hash"],
             "initialization": contract["initialization"],

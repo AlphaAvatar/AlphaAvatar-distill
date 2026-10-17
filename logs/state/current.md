@@ -30,30 +30,27 @@ problem-solving over broad factual-knowledge retention.
 - **Authorizes nothing.** No data experiment, dataset download or
   generation, and no paid GPU.
 
-**D3 STRUCTURAL: STRUCTURAL_CHANGE (2026-10-17); STOPPED AT THE PROBE FUNDING
-BOUNDARY.** The fixed-q2 DEPTH teacher-reference ablation (the
-student-confidence D3 is cancelled and unexecuted).
-- **The question.** On D1-q2's exact path, does choosing DEPTH's layers by
-  `KL(T ‖ C(S))` instead of `KL(P ‖ C(S))` give a better initialization?
-- **Run.** `d3_structural_20261017_083554`. One AU host at `…@595.91.07`,
-  30.2 min, $0.5571 all-in.
-- **Admitted.** Round 0's parent-reference diagnostic equals q2's to the bit
-  (36 of 36); the argmin is 26.
-- **Result.** STRUCTURAL_CHANGE, re-derived off-pod.
-  - Teacher-referenced removals `[17, 18, 31, 10, 11, 32, 8, 16]`, against
-    q2's `[26, 32, 18, 17, 11, 10, 30, 16]`.
-  - The treatment keeps 26 and 30 and drops 8 and 31.
-  - Step 0 reproduced q2's FFN digest.
-- **Product.** The new initialization `4f3e3eb734f405db…` is relay-durable and
-  re-identified after restore.
-- **Not established.** Whether it is a better initialization. That needs the
-  three-probe rung, which is proposable and NOT granted ($12.00 proposed;
-  `plans/d3_grant_proposal.json`).
-- **Envelope.** $6.4429 of $7.00 is left. A valid completed result is not
-  rerun.
-- **Owners.** The run's `closeout/outcome.json`;
-  [`d3_readiness_review.md`](../stages/stage-1/phase_d3/analyses/d3_readiness_review.md)
-  §8; `decisions.md` 2026-10-17.
+**D3: STRUCTURAL ACCEPTED; THE THREE-PROBE RUNG IS GRANTED ($12.00, 2026-10-17).**
+The fixed-q2 DEPTH teacher-reference ablation (the student-confidence D3 is
+cancelled and unexecuted).
+- **Structural (terminal; not rerun).** `d3_structural_20261017_083554`:
+  - STRUCTURAL_CHANGE, admitted, re-derived off-pod, $0.5571;
+  - removals `[17, 18, 31, 10, 11, 32, 8, 16]` against q2's
+    `[26, 32, 18, 17, 11, 10, 30, 16]`;
+  - initialization `4f3e3eb734f405db…`, relay-durable.
+
+  A structural difference only.
+- **Probes.**
+  - Grant: `approvals/autoinit_d3_probes_grant.json`.
+  - Price: expected $6.59, hard $8.21 (+$0.30), re-priced at issuance.
+  - Design: three seeds of `e1_p1_kd_heavy@0.86M` from `4f3e3eb7…` on
+    `d1_confirmation`, against q2's and B's imported units.
+  - Reading: exploratory only, with descriptive labels. The battery does not
+    measure fluid reasoning.
+- **Closeout.** `phase_d3/closeout_d3_probes.py`. COMPLETE requires nine
+  named proofs; anything less is INCOMPLETE, with money booked and no result.
+- **Owners.** `decisions.md` 2026-10-17; `phase_d3/plans/`; the runs'
+  `closeout/outcome.json`.
 
 **D2 COMPLETE: c4's SHARED CONFIRMATION is NO_GO (2026-10-16).** Run
 `d2_confirmation_20261016_105802`: three probes from c4's initial checkpoint

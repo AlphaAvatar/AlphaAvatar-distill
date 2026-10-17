@@ -288,19 +288,31 @@ def build(*, limits: dict[str, float] | None = None,
         "authorizes": "nothing",
     }
     if limits is not None:
-        both = doc["totals"]["both_hard_with_reserves_usd"]
+        #: What the live limits still have to fund: a rung whose session has
+        #: closed out is SPENT (its closeouts, already inside the limits),
+        #: not a future cost at its hard ceiling.
+        st = state()
+        ahead = {"structural": s_need, "probes": p_need}
+        for rung in st["rungs_spent"]:
+            ahead.pop(rung, None)
+        need = round(sum(ahead.values()), 2)
         doc["live"] = {
             "limits": limits, "quote": quote,
+            "spent_by_rung_usd": st["spent_by_rung_usd"],
+            "still_to_fund_at_hard_with_reserves_usd": ahead,
             "fits": {
                 "structural_per_session_cap": s["hard"]["all_in_usd"]
                 <= limits["per_session_cap_usd"],
                 "probes_per_session_cap": p["hard"]["all_in_usd"]
                 <= limits["per_session_cap_usd"],
-                "both_project_at_hard": both <= limits["project_remaining_usd"],
-                "both_formal_at_hard": both <= limits["formal_remaining_usd"],
-                "both_package_at_hard": both <= limits["package_remaining_usd"]},
-            "project_remaining_after_both_at_hard_usd": round(
-                limits["project_remaining_usd"] - both, 2)}
+                "remaining_project_at_hard": need
+                <= limits["project_remaining_usd"],
+                "remaining_formal_at_hard": need
+                <= limits["formal_remaining_usd"],
+                "remaining_package_at_hard": need
+                <= limits["package_remaining_usd"]},
+            "project_remaining_after_remaining_at_hard_usd": round(
+                limits["project_remaining_usd"] - need, 2)}
         if quote and float(quote.get("usd_per_hour", rate)) != rate:
             doc["live"]["note"] = ("the live quote differs from the basis "
                                    "rate; the issuer re-prices the accepted "
@@ -309,6 +321,33 @@ def build(*, limits: dict[str, float] | None = None,
 
 
 PROPOSAL = "logs/stages/stage-1/phase_d3/plans/d3_grant_proposal.json"
+GRANTS = {"structural": "logs/budget/approvals/autoinit_d3_structural_grant.json",
+          "probes": "logs/budget/approvals/autoinit_d3_probes_grant.json"}
+
+
+def state(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
+    """Where each rung stands, read from the records that own it: the
+    funding scope, the grant files, and each rung's booked closeouts."""
+    from stages.phase_d1.d1_authorization import live_money
+    from stages.phase_d3 import d3_authorization as A
+    from stages.phase_d3 import d3_design as D
+
+    spent = {r: A.consumed_by_prior_subruns(repo_root, r)
+             for r in ("structural", "probes")}
+    outcomes = {}
+    for run in sorted((repo_root / "logs/stages/stage-1/phase_d3/runs").glob(
+            "d3_structural_*/closeout/outcome.json")):
+        outcomes[run.parent.parent.name] = json.loads(run.read_text()).get(
+            "structural_outcome")
+    return {
+        "phase_d3_funded": D.EXPERIMENT_ID in live_money(repo_root)[
+            "funds_formal_sessions_of"],
+        "granted": {r: (repo_root / g).is_file() for r, g in GRANTS.items()},
+        "spent_by_rung_usd": {r: v["consumed_usd"] for r, v in spent.items()},
+        "subruns": {r: [x["run_id"] for x in v["subruns"]]
+                    for r, v in spent.items()},
+        "rungs_spent": [r for r, v in spent.items() if v["subruns"]],
+        "structural_outcomes": outcomes}
 #: Each envelope holds one complete session at its hard ceiling plus its
 #: teardown reserve, and a second (a corrected pre-science attempt, P12.1),
 #: rounded up to the dollar. The probes' is D2's confirmation grant for the
@@ -328,10 +367,15 @@ def proposal(doc: dict[str, Any]) -> dict[str, Any]:
                             * (1 + REPLACEMENT_ATTEMPTS)))
     p_env = float(math.ceil(totals["probes_hard_with_reserve_usd"]
                             * (1 + REPLACEMENT_ATTEMPTS) / 1.5))
+    st = state()
     return {
         "schema": "aadistill.phase_d3.grant_proposal/v1",
         "status": ("PROPOSED -- the maintainer's to decide; nothing is "
                    "issued, nothing is launched"),
+        "state": {**st, "_derived_from": (
+            "the funding scope, the grant files under logs/budget/approvals/ "
+            "and each rung's booked closeouts; this proposal is the price "
+            "basis, the grant files are the decisions")},
         "registration_hash": reg["registration_hash"],
         "treatment_path_hash": reg["treatment"]["treatment_path_hash"],
         "budget_record": RECORD,
@@ -341,9 +385,11 @@ def proposal(doc: dict[str, Any]) -> dict[str, Any]:
             "why": ("the issuer refuses a phase outside the formal book; "
                     "adding it is a maintainer amendment, never an "
                     "autonomous one"),
-            "changes_no_cap": True},
+            "changes_no_cap": True,
+            "made": st["phase_d3_funded"]},
         "structural": {
-            "decide_now": True,
+            "decide_now": not st["granted"]["structural"],
+            "granted": st["granted"]["structural"],
             "expected_all_in_usd": totals["structural_expected_usd"],
             "hard_all_in_usd": doc["steps"]["d3_structural"]["hard"][
                 "all_in_usd"],
@@ -361,7 +407,9 @@ def proposal(doc: dict[str, Any]) -> dict[str, Any]:
                 "covers": ("ONE D3 structural session at a time under this "
                            "cumulative envelope; no training, no probes")}},
         "probes": {
-            "decide_now": False,
+            "decide_now": (D.STRUCTURAL_CHANGE in st["structural_outcomes"]
+                           .values() and not st["granted"]["probes"]),
+            "granted": st["granted"]["probes"],
             "conditional_on": D.STRUCTURAL_CHANGE,
             "expected_all_in_usd": totals["probes_expected_usd"],
             "hard_all_in_usd": doc["steps"]["d3_probes"]["hard"]["all_in_usd"],

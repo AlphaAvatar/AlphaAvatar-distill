@@ -1080,9 +1080,10 @@ STAGE_1 = [
         stage_id="1",
         status=("REGISTERED 2026-10-16; STRUCTURAL session 2026-10-17 "
                 "(d3_structural_20261017_083554): STRUCTURAL_CHANGE, admitted "
-                "and re-derived off-pod, $0.5571; the three probes are "
-                "proposable and NOT authorized. Replaces the cancelled, "
-                "unexecuted student-confidence D3"),
+                "and re-derived off-pod, $0.5571; the three probes GRANTED "
+                "2026-10-17 ($12.00 cumulative) once the D3 probes closeout "
+                "exists. Replaces the cancelled, unexecuted "
+                "student-confidence D3"),
         title="D3 — fixed-q2 DEPTH teacher-reference ablation",
         question=("Given D1-q2's exact structural path, does choosing the "
                   "DEPTH layers by minimizing KL against the original teacher "

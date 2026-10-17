@@ -4,26 +4,33 @@
  "budget_record": "logs/stages/stage-1/phase_d3/plans/d3_budget_v1.json",
  "live": {
   "fits": {
-   "both_formal_at_hard": true,
-   "both_package_at_hard": true,
-   "both_project_at_hard": true,
    "probes_per_session_cap": true,
+   "remaining_formal_at_hard": true,
+   "remaining_package_at_hard": true,
+   "remaining_project_at_hard": true,
    "structural_per_session_cap": true
   },
   "limits": {
    "engineering_remaining_usd": 3.1804,
-   "formal_remaining_usd": 104.427,
-   "package_remaining_usd": 107.6074,
+   "formal_remaining_usd": 103.8699,
+   "package_remaining_usd": 107.0503,
    "per_session_cap_usd": 30.0,
    "project_cap_usd": 595.0,
-   "project_remaining_usd": 100.4494
+   "project_remaining_usd": 99.8923
   },
-  "project_remaining_after_both_at_hard_usd": 88.62,
+  "project_remaining_after_remaining_at_hard_usd": 91.38,
   "quote": {
    "_quoted": "live, immediately before issuance",
    "gpu": "NVIDIA L40S",
-   "stock_status": "Low",
+   "stock_status": "Medium",
    "usd_per_hour": 1.09
+  },
+  "spent_by_rung_usd": {
+   "probes": 0,
+   "structural": 0.5571
+  },
+  "still_to_fund_at_hard_with_reserves_usd": {
+   "probes": 8.51
   }
  },
  "probes": {
@@ -37,6 +44,7 @@
    "granted_by": "<the maintainer's decision, verbatim>",
    "rung": "probes"
   },
+  "granted": true,
   "hard_all_in_usd": 8.21,
   "hard_with_teardown_reserve_usd": 8.51,
   "measured_same_shape_all_in_usd": 5.026,
@@ -45,13 +53,38 @@
  "registration_hash": "43156f21a011803bcb76be8f2c3f5f9616e9034d8f7ea811b9f5de6b9eea17d9",
  "required_amendment": {
   "changes_no_cap": true,
+  "made": true,
   "what": "add 'phase_d3' to funds_formal_sessions_of in configs/stages/stage-1/phase_c1/authorization.json",
   "why": "the issuer refuses a phase outside the formal book; adding it is a maintainer amendment, never an autonomous one"
  },
  "schema": "aadistill.phase_d3.grant_proposal/v1",
+ "state": {
+  "_derived_from": "the funding scope, the grant files under logs/budget/approvals/ and each rung's booked closeouts; this proposal is the price basis, the grant files are the decisions",
+  "granted": {
+   "probes": true,
+   "structural": true
+  },
+  "phase_d3_funded": true,
+  "rungs_spent": [
+   "structural"
+  ],
+  "spent_by_rung_usd": {
+   "probes": 0,
+   "structural": 0.5571
+  },
+  "structural_outcomes": {
+   "d3_structural_20261017_083554": "STRUCTURAL_CHANGE"
+  },
+  "subruns": {
+   "probes": [],
+   "structural": [
+    "d3_structural_20261017_083554"
+   ]
+  }
+ },
  "status": "PROPOSED -- the maintainer's to decide; nothing is issued, nothing is launched",
  "structural": {
-  "decide_now": true,
+  "decide_now": false,
   "envelope_holds": "one session at hard plus its reserve, and 1 corrected pre-science attempt",
   "expected_all_in_usd": 0.8589,
   "grant_template": {
@@ -61,6 +94,7 @@
    "granted_by": "<the maintainer's decision, verbatim>",
    "rung": "structural"
   },
+  "granted": true,
   "hard_all_in_usd": 3.0151,
   "hard_with_teardown_reserve_usd": 3.32,
   "proposed_cumulative_envelope_usd": 7.0

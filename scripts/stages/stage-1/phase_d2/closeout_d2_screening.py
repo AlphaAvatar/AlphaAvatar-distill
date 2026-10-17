@@ -70,10 +70,11 @@ def _sha(path: Path) -> str | None:
         else None
 
 
-def _session_record(scr: Path, rung: str = "screening") -> dict[str, Any]:
+def _session_record(scr: Path, rung: str = "screening",
+                    names: dict[str, str] | None = None) -> dict[str, Any]:
     """The driver's own record: the closeout fetch first, the live mirror
     second."""
-    name = _names(rung)["record"]
+    name = (names or _names(rung))["record"]
     for path in (scr / "store" / name, scr / "relay" / name):
         if path.is_file():
             return json.loads(path.read_text())
@@ -81,18 +82,25 @@ def _session_record(scr: Path, rung: str = "screening") -> dict[str, Any]:
 
 
 def evidence_plan(run_dir: Path, scr: Path, record: dict[str, Any],
-                  rung: str = "screening") -> list[tuple[Path, Path]]:
-    """(source, destination) for every small file the run directory keeps."""
+                  rung: str = "screening",
+                  names: dict[str, str] | None = None
+                  ) -> list[tuple[Path, Path]]:
+    """(source, destination) for every small file the run directory keeps.
+
+    `names` is another experiment's layout of the same session shape (D3's
+    probes run D2's driver under their own audit and record names); D2's own
+    rungs leave it unset."""
+    names = names or _names(rung)
     store = scr / "store"
     ev = run_dir / "evidence"
     plan = [(store / name, ev / name) for name in (
-        _names(rung)["attested"], "engine_probe.json")]
+        names["attested"], "engine_probe.json")]
     for probe in record.get("probes", []):
         pid = probe["probe_id"]
         src = store / "probes" / pid
         plan += [(src / "result.json", ev / "results" / f"{pid}.json"),
                  (src / "admission.json", ev / "admissions" / f"{pid}.json"),
-                 (store / "extracted" / "audit" / _names(rung)["audit"]
+                 (store / "extracted" / "audit" / names["audit"]
                   / "configs"
                   / f"{pid}.json", ev / "configs" / f"{pid}.json")]
         plan += [(src / "training" / name, ev / "training" / pid / name)
@@ -167,8 +175,10 @@ def reference_profiles(repo_root: Path,
 
 
 def diagnostics(scr: Path, record: dict[str, Any],
-                rung: str = "screening") -> dict[str, Any]:
+                rung: str = "screening",
+                names: dict[str, str] | None = None) -> dict[str, Any]:
     """Descriptive only: alignment and rescoring, per probe."""
+    names = names or _names(rung)
     probes = {}
     for probe in record.get("probes", []):
         pid = probe["probe_id"]
@@ -201,9 +211,10 @@ def diagnostics(scr: Path, record: dict[str, Any],
     for probe in record.get("probes", []):
         probes[probe["probe_id"]]["rollout_profile"] = rollout_profile(
             scr / "store" / "probes" / probe["probe_id"] / "generations")
-    return {"schema": "aadistill.phase_d2.screening_diagnostics/v1",
+    return {"schema": names.get("diagnostics_schema",
+                                "aadistill.phase_d2.screening_diagnostics/v1"),
             "reference_rollout_profiles": reference_profiles(
-                REPO_ROOT, _names(rung)["shared_rung"]),
+                REPO_ROOT, names["shared_rung"]),
             "_role": ("DESCRIPTIVE ONLY. Never read by the screening rule, "
                       "never a guardrail: the token-id sidecar's alignment "
                       "and the rescoring of each candidate's own rollouts "

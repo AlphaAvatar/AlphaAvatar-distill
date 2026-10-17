@@ -56,6 +56,9 @@ from stages.phase_d3.d3_authorization import (  # noqa: E402
 )
 
 SESSION_KIND = "d3_probes"
+#: The session's evidence archive in `<scr>/store`; the closeout verifies it
+#: and copies it to the relay under this name.
+ARCHIVE_BASENAME = "d3_probes_artifacts.tar.gz"
 RUNG = "probes"
 REPO = "/workspace/aad"
 DRIVER = "scripts/stages/stage-1/phase_d2/autoinit_d2_screening_driver.py"
@@ -350,7 +353,7 @@ def spec(args) -> SessionSpec:
         artifacts=ArtifactPolicy(
             audit_dirname=PROBES.audit_dirname,
             evidence_filename=PROBES.evidence_filename,
-            archive_basename="d3_probes_artifacts.tar.gz",
+            archive_basename=ARCHIVE_BASENAME,
             spec_success="configs/stages/stage-1/phase_d3/d3_probes_artifacts.json",
             spec_failed=("configs/stages/stage-1/phase_d3/"
                          "d3_probes_artifacts_failed.json"),
