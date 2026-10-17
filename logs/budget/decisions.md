@@ -12148,8 +12148,10 @@ on a paid pod.
 
 - **Decision.** The maintainer instructed squash-and-merge of
   `exec/d1-behavioural-readiness` into `main` (AGENTS.md P12.2).
-- **The range.** 149 commits on top of `c8f714af` (`main` before; the merge
-  base), collapsed into one single-parent commit on `main`.
+- **The range.** Everything on top of `c8f714af` (`main` before; the merge
+  base): the 149 commits up to the tested tree `27c279b6`, plus the
+  pre-integration record commits after it. All collapse into one
+  single-parent commit on `main`.
   - They carry D1's behavioural rungs, D2, D3, the D-series closure, the
     forward baseline D1 + `scored_v1`, and the Stage-0 handoff.
   - The squash commit names the branch tip. A record on the branch cannot

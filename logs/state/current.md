@@ -792,7 +792,8 @@ invocation with `tee` and `PIPESTATUS[0]`.
 
 **The D-series and its closure, integrated 2026-10-17 (UTC) by SQUASH AND
 MERGE per AGENTS.md P12.2, on the maintainer's instruction.** One commit on
-`main` collapses the 149-commit range on top of `c8f714af`:
+`main` collapses everything on top of `c8f714af`: the 149 commits up to the
+tested tree `27c279b6`, plus the pre-integration record commits after it.
 - D1's behavioural rungs: screening, then the NO-GO confirmation;
 - D2: search, screening, and the NO_GO shared confirmation;
 - D3: structural STRUCTURAL_CHANGE, probes INCONCLUSIVE;
