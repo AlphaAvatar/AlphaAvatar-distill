@@ -232,7 +232,7 @@
  "test_suites": {
   "boundary_guard": "tests/architecture/test_core_suite_boundary.py, four rules in its docstring. Specific-experiment imports from core: 0.",
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
-  "core": "3680 passed / 32 skipped / 0 failed, 12m18s (2026-10-17, D-series closure). GREEN.",
+  "core": "3659 passed / 32 skipped / 25 failed, 12m18s (2026-10-18, Stage-0 volume). All 25 are tests/integration/test_simulator_restore.py refusing at its 20 GiB disk floor (18 GiB free on the dev box); that file passes 36/36 at PODSIM_MIN_FREE_GIB=15.",
   "d1_launch": "1029 passed / 13 skipped / 0 failed, 2m38s: phase_d1 + docs + integration. GREEN, and the accepted out-of-tree source-screen failure is NOT in it.",
   "integration": "SQUASH AND MERGE, AGENTS.md P12.2. LATEST 2026-10-17: main squashes exec/d1-behavioural-readiness (PRESERVED; base c8f714af; tested tree 27c279b6; tip named by the squash commit). Earlier: c8f714af, 4500d775. Ranges: decisions.md.",
   "known_red": "ONE, pre-existing (bc31175f), out-of-tree, NOT core and NOT in the D1 launch suite: phase_d_series test_source_evidence::test_it_regenerates_identically. Its screen is nondeterministic across processes. Diagnosis: current.md.",
