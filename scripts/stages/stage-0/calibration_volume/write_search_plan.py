@@ -66,7 +66,10 @@ def main(argv=None) -> int:
             raise SystemExit(f"--depth-profiles names profiles outside {t}: {depth_ids - set(ids)}")
         root = sum((depth_max * p["metadata"]["tokens"] / COST_TOKENS
                     if f"{p['profile_id']}@v{p['version']}" in depth_ids else 0.0)
-                   + 3 * other_max + 4 * OVERHEAD_MIN_PER_EXPANSION for p in prof)
+                   # FFN/WIDTH/ATTENTION are activation passes over the same
+                   # calibration tokens, so they scale too (never below one call)
+                   + 3 * other_max * max(1.0, p["metadata"]["tokens"] / COST_TOKENS)
+                   + 4 * OVERHEAD_MIN_PER_EXPANSION for p in prof)
         if args.max_depth == 1:
             bound = root
         else:

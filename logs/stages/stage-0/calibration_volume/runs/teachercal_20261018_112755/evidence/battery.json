@@ -1,0 +1,101 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.battery_record/v1",
+ "started_utc": "2026-10-18T11:32:30Z",
+ "commit": "33596bae3126542589d1f3cf51236b1d611036ce",
+ "gpu": {
+  "name": "NVIDIA A100-SXM4-80GB",
+  "memory": "81920 MiB",
+  "driver": "580.126.16"
+ },
+ "runs": [
+  {
+   "label": "teacher_cal",
+   "mode": "generate",
+   "tasks": "calibration",
+   "rc": 0,
+   "seconds": 2783.4,
+   "records_sha256": "599e8791be220332ed826269b7d881772ce4b87d129511a952998cedf01700a3",
+   "summary": {
+    "identity": {
+     "label": "teacher_cal",
+     "model": "Qwen/Qwen3-4B-Thinking-2507",
+     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+     "mode": "generate",
+     "tasks_file": "data/stages/stage-0/calibration_volume/tasks/calibration_v2.jsonl",
+     "tasks_sha256": "a888a171bbad787fbaed791692b45d136d2f487c47a12c54fc7eb1b2bbe8db25",
+     "context_resolution": {
+      "resolved_context": 262144,
+      "context_source": "config:max_position_embeddings",
+      "config_max_position_embeddings": 262144,
+      "rope_scaling_factor": null,
+      "architectural_context": 262144,
+      "trained_context": null,
+      "context_len_override": null,
+      "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+      "note": null
+     },
+     "session_limit": 16384,
+     "effective_limit": 16384,
+     "stop_ids": [
+      151643,
+      151645
+     ],
+     "sampling": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "min_p": 0.0
+     },
+     "seed_base": 20261018,
+     "system_message": "You are a helpful Assistant.",
+     "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+     "tokenizer_sha256": null,
+     "degeneration_check_every": 256,
+     "engine": {
+      "max_model_len": 16384,
+      "gpu_memory_utilization": 0.9,
+      "dtype": "bfloat16",
+      "dtype_engine": "torch.bfloat16",
+      "max_num_seqs": 256,
+      "max_num_batched_tokens": 8192,
+      "vllm_version": "0.27.1",
+      "enforce_eager": false,
+      "init_seconds": 160.2
+     },
+     "libraries": {
+      "transformers": "5.15.0",
+      "tokenizers": "0.22.2",
+      "safetensors": "0.8.0",
+      "numpy": "2.3.5",
+      "datasets": null,
+      "vllm": "0.27.1"
+     },
+     "image_digest": null,
+     "runner_sha256": "cc4592c2f80d7642bd2714dd6ab4db19e8cddbbd808db08bd31f43097150f376"
+    },
+    "n_tasks": 672,
+    "turns": 1011,
+    "output_tokens": 4528160,
+    "generation_seconds": 2603.7,
+    "output_tokens_per_second": 1739.1,
+    "ends": {
+     "answered": 574,
+     "degeneration": 17,
+     "episode_done": 71,
+     "length_limited": 10
+    }
+   },
+   "status": "ok"
+  }
+ ],
+ "stages": {
+  "A_contract": {
+   "status": "ok",
+   "plan_hash": "a312b22c9dff047896d99a444bd80f0a4bd4dd521bcbefb2511f63045aaf07be",
+   "authorization_id": "stage0.calibration_volume.battery.teachercal_20261018_112755"
+  }
+ },
+ "finished_utc": "2026-10-18T12:18:54Z",
+ "terminal": "ALL_DONE",
+ "failed_runs": []
+}

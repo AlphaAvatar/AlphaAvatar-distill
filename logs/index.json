@@ -743,7 +743,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 96,
+  "runs_unrecorded": 97,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -763,8 +763,8 @@
    },
    "calibration_volume": {
     "recorded": 0,
-    "unrecorded": 2,
-    "total": 2
+    "unrecorded": 3,
+    "total": 3
    },
    "continuation_b": {
     "recorded": 5,
@@ -2776,6 +2776,14 @@
    "root": "logs/stages/stage-0/calibration_volume/runs/battery_20261018_092345",
    "n_files": 15,
    "digest": "bc6a41e1b0321f09a425d500882124afddf4c2a5d683c5b67c7b48acd04eb0e4",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "teachercal_20261018_112755",
+   "root": "logs/stages/stage-0/calibration_volume/runs/teachercal_20261018_112755",
+   "n_files": 7,
+   "digest": "f8a8bd263a3a9e7a654523113a912b63ceac90eb1079ea5b8cb5b9b171227d00",
    "why": "no run manifest; its closeout states: SESSION_ENDED"
   },
   {

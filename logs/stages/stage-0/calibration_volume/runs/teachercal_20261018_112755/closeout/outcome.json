@@ -1,0 +1,48 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "teachercal_20261018_112755",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "prerequisites",
+ "recorded_utc": "2026-10-18T12:22:43+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": "ALL_DONE",
+ "passed": true,
+ "outcome": "Teacher-native calibration sessions on calibration_v2 (672 prompts: 600 static, 72 interactive episodes), generated with the asynchronous runner at the teacher's official sampling preset under a 16384-token data-construction limit. ALL_DONE; the unit was secured off-pod and hash-checked before teardown.",
+ "provider_resource_created": true,
+ "pod_id": "wg8cbjbwvga8ku",
+ "provider_confirms_gone": true,
+ "final_pod_state": {
+  "exists": false,
+  "desired_status": "TERMINATED",
+  "billing": false
+ },
+ "money": {
+  "all_in_usd": 1.6169,
+  "gpu_usd": 1.5985,
+  "disk_usd": 0.0183,
+  "elapsed_minutes": 53.58,
+  "price_per_hour": 1.79,
+  "authorized_usd": 5.0,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.10/GB-month over the elapsed minutes, ceiled to the 4-decimal quantum"
+ },
+ "session_record_sha256": "af76d086bf20c457da1fe9eeccc258d3920f737921aa50378fc7eb2282a1fdde",
+ "units": {
+  "extracted": {},
+  "teacher_cal": {
+   "teacher_cal.jsonl": {
+    "sha256": "599e8791be220332ed826269b7d881772ce4b87d129511a952998cedf01700a3",
+    "bytes": 59193209
+   },
+   "teacher_cal.log": {
+    "sha256": "5f6cf91521743e7552165232f7b85ef5b5f46be466bb67407625e6dc66863095",
+    "bytes": 18212
+   },
+   "teacher_cal.summary.json": {
+    "sha256": "0acbf1f43c90bfb6a1fb95f54e00418f46ab8c2acb6981ec1e4b6428ee49d7d2",
+    "bytes": 2005
+   }
+  }
+ },
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/teachercal_20261018_112755"
+}

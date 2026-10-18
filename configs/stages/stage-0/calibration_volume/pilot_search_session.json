@@ -1,0 +1,80 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.session_plan/v1",
+ "session_kind": "search",
+ "name": "pilot_search",
+ "purpose": "Root-level selection-stability pilot (exploratory H1/H3): every forward-baseline operator applied to the teacher under nine independently resampled base-pool profiles (1x/2x/4x of 45k UESP, three resamples); DEPTH on resamples 1-2 at 1x and 2x.",
+ "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+ "profiles_doc": "configs/stages/stage-0/calibration_volume/profiles.json",
+ "profiles_doc_sha256": "e112bf8b37313ba091e1542d70086d9d1b4d8d68a8f9342429d47dc7b0e1d4af",
+ "profile_items_dir": "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1",
+ "treatments_doc": "configs/stages/stage-0/calibration_volume/pilot_search_session.json",
+ "treatments": [
+  {
+   "treatment": "pilot_root",
+   "max_depth": 1,
+   "bound_minutes": 224.9,
+   "profile_tokens": {
+    "calib.s0v_base_d1_r1@v1": 75660,
+    "calib.s0v_base_d1_r2@v1": 81057,
+    "calib.s0v_base_d1_r3@v1": 76418,
+    "calib.s0v_base_d2_r1@v1": 133955,
+    "calib.s0v_base_d2_r2@v1": 132671,
+    "calib.s0v_base_d2_r3@v1": 133879,
+    "calib.s0v_base_d4_r1@v1": 236895,
+    "calib.s0v_base_d4_r2@v1": 234026,
+    "calib.s0v_base_d4_r3@v1": 240945
+   }
+  }
+ ],
+ "search": {
+  "finalists_k": 0
+ },
+ "cost_source": {
+  "path": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/search_analysis.json",
+  "depth_max_minutes": 20.11,
+  "at_tokens": 59830,
+  "other_operator_max_minutes": 0.81,
+  "overhead_minutes_per_expansion": 0.5
+ },
+ "hardware": {
+  "gpu": "NVIDIA L40S",
+  "why": "the hardware every D-series search ran on; the operator costs above were measured on it"
+ },
+ "contingency_fraction": 0.2,
+ "reserve_minutes": 30,
+ "authorizes": "nothing",
+ "treatments_by_id": {
+  "pilot_root": {
+   "profile_hashes": {
+    "calib.s0v_base_d1_r1@v1": "5d2c2ccafbbe17128d4d5b8b3535572cdaff627dc30aec4e50b10b403e93404b",
+    "calib.s0v_base_d1_r2@v1": "7ee445720bde921ceb775a241a5d12abfbeb9b37af4a0f919453c9bc583b8914",
+    "calib.s0v_base_d1_r3@v1": "b643f640864efb4b0c68902df073f19eb8e5e27e789f7ac76de9dfd6b7fc29ca",
+    "calib.s0v_base_d2_r1@v1": "1a3abe693529b40cb19eccd7e52c1a6fa2f833cf31fa8d8702056c722b0aa5bd",
+    "calib.s0v_base_d2_r2@v1": "036d123340a74c0270182470d7bd46da634d65594c59816e5e44907c4451a2c2",
+    "calib.s0v_base_d2_r3@v1": "6c6fe195a200244a4b74fe48a25428f3f8bf129339f90e995785ec33c4967d7e",
+    "calib.s0v_base_d4_r1@v1": "2e8a6b66079a45bf11be764b25e8452217947cafab52cb97faae3ff2c4184409",
+    "calib.s0v_base_d4_r2@v1": "b0e6dcff4803877b02e9c8f5d684adcb8ca3ee8ad43f2dfb9bb14f3ce3bea494",
+    "calib.s0v_base_d4_r3@v1": "29d6c491ddae8315ab2999838eb9e055260d363fb1d89bd4c02889a1f88d0b7a"
+   },
+   "profiles": [
+    "calib.s0v_base_d1_r1@v1",
+    "calib.s0v_base_d1_r2@v1",
+    "calib.s0v_base_d1_r3@v1",
+    "calib.s0v_base_d2_r1@v1",
+    "calib.s0v_base_d2_r2@v1",
+    "calib.s0v_base_d2_r3@v1",
+    "calib.s0v_base_d4_r1@v1",
+    "calib.s0v_base_d4_r2@v1",
+    "calib.s0v_base_d4_r3@v1"
+   ],
+   "impl_profiles": {
+    "depth.causal_kl_greedy_v1": [
+     "calib.s0v_base_d1_r1@v1",
+     "calib.s0v_base_d1_r2@v1",
+     "calib.s0v_base_d2_r1@v1",
+     "calib.s0v_base_d2_r2@v1"
+    ]
+   }
+  }
+ }
+}

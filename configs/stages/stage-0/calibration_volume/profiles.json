@@ -1,0 +1,863 @@
+{
+ "schema": "aadistill.calibration_profiles/v1",
+ "_contract": "Stage-0 calibration-volume profiles, built by build_volume_profiles.py from the design named below; data, registered by search_session.register_stage0_profiles. AUTHORIZES NOTHING.",
+ "design": "configs/stages/stage-0/calibration_volume/pilot_design.json",
+ "design_sha256": "37fb914c6619be6938e621e250e568d6d31cf0144d472d209329250b2dcfe6d9",
+ "created_utc": "2026-10-18T12:24:49+00:00",
+ "profiles": [
+  {
+   "profile_id": "calib.s0v_base_d1_r1",
+   "version": 1,
+   "description": "Stage-0 volume treatment d1_r1, profile base: dose 1 x 45000 UESP, sampling seed 267182578",
+   "sources": [
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "inductive_rule_discovery",
+     "n_items": 2,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "compositional_generalization",
+     "n_items": 3,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "task_contained_deduction",
+     "n_items": 5,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "abstract_analogical",
+     "n_items": 2,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "supporting",
+     "n_items": 19,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    }
+   ],
+   "domain_weights": {
+    "inductive_rule_discovery": 0.18,
+    "compositional_generalization": 0.18,
+    "task_contained_deduction": 0.18,
+    "abstract_analogical": 0.18,
+    "supporting": 0.28
+   },
+   "token_budget": 45000,
+   "sample_rule": "stratified nested sampling: generator/subtype cells, seed-keyed per-cell shuffles, whole units, quota = dose x reference x domain weight split equally over the domain's cells (build_volume_profiles.py)",
+   "seed": 267182578,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1/calib.s0v_base_d1_r1.items.jsonl",
+   "rendered_manifest_sha256": null,
+   "content_sha256": "ce95a13ccdd773cb343ffae0bda90e789794a4e34470e575783dba3c29048485",
+   "items_file_sha256": "e2af24dce0e190695e48c2ac635b7fef125306371581f91dd7f4867eea25d25d",
+   "leakage_exclusions": [
+    "dev_v1 and final evaluation families (generator family split)",
+    "recovery rung 0.86M sessions",
+    "state_eval@v1 sessions",
+    "d_series_behavioural_v1 prompts"
+   ],
+   "leakage_proof_path": "artifacts/stages/stage-0/calibration_volume/base_pool_v1/manifest.json",
+   "metadata": {
+    "treatment": "d1_r1",
+    "dose": 1,
+    "uesp": 64049,
+    "n_items": 31,
+    "n_units": 31,
+    "tokens": 75660,
+    "n_rule_families": 10
+   },
+   "is_null": false
+  },
+  {
+   "profile_id": "calib.s0v_base_d1_r2",
+   "version": 1,
+   "description": "Stage-0 volume treatment d1_r2, profile base: dose 1 x 45000 UESP, sampling seed 620952786",
+   "sources": [
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "inductive_rule_discovery",
+     "n_items": 3,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "compositional_generalization",
+     "n_items": 3,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "task_contained_deduction",
+     "n_items": 4,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "abstract_analogical",
+     "n_items": 2,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "supporting",
+     "n_items": 22,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    }
+   ],
+   "domain_weights": {
+    "inductive_rule_discovery": 0.18,
+    "compositional_generalization": 0.18,
+    "task_contained_deduction": 0.18,
+    "abstract_analogical": 0.18,
+    "supporting": 0.28
+   },
+   "token_budget": 45000,
+   "sample_rule": "stratified nested sampling: generator/subtype cells, seed-keyed per-cell shuffles, whole units, quota = dose x reference x domain weight split equally over the domain's cells (build_volume_profiles.py)",
+   "seed": 620952786,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1/calib.s0v_base_d1_r2.items.jsonl",
+   "rendered_manifest_sha256": null,
+   "content_sha256": "850a623affc85ff233c96939c710a9f065012f6c2435e8e87ad4ae4a31708f95",
+   "items_file_sha256": "21e97983f94602c85572a8c27c860011816e8261e48e21e44a53f945a97e763d",
+   "leakage_exclusions": [
+    "dev_v1 and final evaluation families (generator family split)",
+    "recovery rung 0.86M sessions",
+    "state_eval@v1 sessions",
+    "d_series_behavioural_v1 prompts"
+   ],
+   "leakage_proof_path": "artifacts/stages/stage-0/calibration_volume/base_pool_v1/manifest.json",
+   "metadata": {
+    "treatment": "d1_r2",
+    "dose": 1,
+    "uesp": 67767,
+    "n_items": 34,
+    "n_units": 34,
+    "tokens": 81057,
+    "n_rule_families": 11
+   },
+   "is_null": false
+  },
+  {
+   "profile_id": "calib.s0v_base_d1_r3",
+   "version": 1,
+   "description": "Stage-0 volume treatment d1_r3, profile base: dose 1 x 45000 UESP, sampling seed 1547666477",
+   "sources": [
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "inductive_rule_discovery",
+     "n_items": 4,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "compositional_generalization",
+     "n_items": 3,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "task_contained_deduction",
+     "n_items": 6,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "abstract_analogical",
+     "n_items": 2,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "supporting",
+     "n_items": 12,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    }
+   ],
+   "domain_weights": {
+    "inductive_rule_discovery": 0.18,
+    "compositional_generalization": 0.18,
+    "task_contained_deduction": 0.18,
+    "abstract_analogical": 0.18,
+    "supporting": 0.28
+   },
+   "token_budget": 45000,
+   "sample_rule": "stratified nested sampling: generator/subtype cells, seed-keyed per-cell shuffles, whole units, quota = dose x reference x domain weight split equally over the domain's cells (build_volume_profiles.py)",
+   "seed": 1547666477,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1/calib.s0v_base_d1_r3.items.jsonl",
+   "rendered_manifest_sha256": null,
+   "content_sha256": "e35beb14088d5468ec8b1962ccdaf343cf73b3624a67e668182f95dad4dd6292",
+   "items_file_sha256": "d8c11c5c483345c410a7670afd1ee393204a21fc489a563d241a253d1950d8a4",
+   "leakage_exclusions": [
+    "dev_v1 and final evaluation families (generator family split)",
+    "recovery rung 0.86M sessions",
+    "state_eval@v1 sessions",
+    "d_series_behavioural_v1 prompts"
+   ],
+   "leakage_proof_path": "artifacts/stages/stage-0/calibration_volume/base_pool_v1/manifest.json",
+   "metadata": {
+    "treatment": "d1_r3",
+    "dose": 1,
+    "uesp": 66986,
+    "n_items": 27,
+    "n_units": 27,
+    "tokens": 76418,
+    "n_rule_families": 12
+   },
+   "is_null": false
+  },
+  {
+   "profile_id": "calib.s0v_base_d2_r1",
+   "version": 1,
+   "description": "Stage-0 volume treatment d2_r1, profile base: dose 2 x 45000 UESP, sampling seed 267182578",
+   "sources": [
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "inductive_rule_discovery",
+     "n_items": 5,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "compositional_generalization",
+     "n_items": 6,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "task_contained_deduction",
+     "n_items": 7,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "abstract_analogical",
+     "n_items": 4,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "supporting",
+     "n_items": 34,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    }
+   ],
+   "domain_weights": {
+    "inductive_rule_discovery": 0.18,
+    "compositional_generalization": 0.18,
+    "task_contained_deduction": 0.18,
+    "abstract_analogical": 0.18,
+    "supporting": 0.28
+   },
+   "token_budget": 90000,
+   "sample_rule": "stratified nested sampling: generator/subtype cells, seed-keyed per-cell shuffles, whole units, quota = dose x reference x domain weight split equally over the domain's cells (build_volume_profiles.py)",
+   "seed": 267182578,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1/calib.s0v_base_d2_r1.items.jsonl",
+   "rendered_manifest_sha256": null,
+   "content_sha256": "ba893545bb656f4cff83893de89ed09a67de845c26c13318fda363f275b83e2a",
+   "items_file_sha256": "4fb7ff4e405cc03d8b24fe28c89f8d377b7c0647dfe9e3507de1a5660b03d70e",
+   "leakage_exclusions": [
+    "dev_v1 and final evaluation families (generator family split)",
+    "recovery rung 0.86M sessions",
+    "state_eval@v1 sessions",
+    "d_series_behavioural_v1 prompts"
+   ],
+   "leakage_proof_path": "artifacts/stages/stage-0/calibration_volume/base_pool_v1/manifest.json",
+   "metadata": {
+    "treatment": "d2_r1",
+    "dose": 2,
+    "uesp": 111457,
+    "n_items": 56,
+    "n_units": 56,
+    "tokens": 133955,
+    "n_rule_families": 15
+   },
+   "is_null": false
+  },
+  {
+   "profile_id": "calib.s0v_base_d2_r2",
+   "version": 1,
+   "description": "Stage-0 volume treatment d2_r2, profile base: dose 2 x 45000 UESP, sampling seed 620952786",
+   "sources": [
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "inductive_rule_discovery",
+     "n_items": 6,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "compositional_generalization",
+     "n_items": 6,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "task_contained_deduction",
+     "n_items": 7,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "abstract_analogical",
+     "n_items": 3,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "supporting",
+     "n_items": 33,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    }
+   ],
+   "domain_weights": {
+    "inductive_rule_discovery": 0.18,
+    "compositional_generalization": 0.18,
+    "task_contained_deduction": 0.18,
+    "abstract_analogical": 0.18,
+    "supporting": 0.28
+   },
+   "token_budget": 90000,
+   "sample_rule": "stratified nested sampling: generator/subtype cells, seed-keyed per-cell shuffles, whole units, quota = dose x reference x domain weight split equally over the domain's cells (build_volume_profiles.py)",
+   "seed": 620952786,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1/calib.s0v_base_d2_r2.items.jsonl",
+   "rendered_manifest_sha256": null,
+   "content_sha256": "5e535e0740c66bfff27f7f128a6d98fd48b01af03827801e33e10742ce081e7a",
+   "items_file_sha256": "124615d33fd7ac72c079ed186b3f451bf06885285f39d27d85471a194492552b",
+   "leakage_exclusions": [
+    "dev_v1 and final evaluation families (generator family split)",
+    "recovery rung 0.86M sessions",
+    "state_eval@v1 sessions",
+    "d_series_behavioural_v1 prompts"
+   ],
+   "leakage_proof_path": "artifacts/stages/stage-0/calibration_volume/base_pool_v1/manifest.json",
+   "metadata": {
+    "treatment": "d2_r2",
+    "dose": 2,
+    "uesp": 113887,
+    "n_items": 55,
+    "n_units": 55,
+    "tokens": 132671,
+    "n_rule_families": 15
+   },
+   "is_null": false
+  },
+  {
+   "profile_id": "calib.s0v_base_d2_r3",
+   "version": 1,
+   "description": "Stage-0 volume treatment d2_r3, profile base: dose 2 x 45000 UESP, sampling seed 1547666477",
+   "sources": [
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "inductive_rule_discovery",
+     "n_items": 7,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "compositional_generalization",
+     "n_items": 6,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "task_contained_deduction",
+     "n_items": 8,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "abstract_analogical",
+     "n_items": 3,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "supporting",
+     "n_items": 23,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    }
+   ],
+   "domain_weights": {
+    "inductive_rule_discovery": 0.18,
+    "compositional_generalization": 0.18,
+    "task_contained_deduction": 0.18,
+    "abstract_analogical": 0.18,
+    "supporting": 0.28
+   },
+   "token_budget": 90000,
+   "sample_rule": "stratified nested sampling: generator/subtype cells, seed-keyed per-cell shuffles, whole units, quota = dose x reference x domain weight split equally over the domain's cells (build_volume_profiles.py)",
+   "seed": 1547666477,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1/calib.s0v_base_d2_r3.items.jsonl",
+   "rendered_manifest_sha256": null,
+   "content_sha256": "1452b8924f5b9adf4cb092cfcfb755d82f30726bd9ffa176e7d1ae3d3c499aa1",
+   "items_file_sha256": "e8944be0aa3bbc3a44cebc43c341757f5da477b0229885e97b5cf99c01235e37",
+   "leakage_exclusions": [
+    "dev_v1 and final evaluation families (generator family split)",
+    "recovery rung 0.86M sessions",
+    "state_eval@v1 sessions",
+    "d_series_behavioural_v1 prompts"
+   ],
+   "leakage_proof_path": "artifacts/stages/stage-0/calibration_volume/base_pool_v1/manifest.json",
+   "metadata": {
+    "treatment": "d2_r3",
+    "dose": 2,
+    "uesp": 116817,
+    "n_items": 47,
+    "n_units": 47,
+    "tokens": 133879,
+    "n_rule_families": 17
+   },
+   "is_null": false
+  },
+  {
+   "profile_id": "calib.s0v_base_d4_r1",
+   "version": 1,
+   "description": "Stage-0 volume treatment d4_r1, profile base: dose 4 x 45000 UESP, sampling seed 267182578",
+   "sources": [
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "inductive_rule_discovery",
+     "n_items": 9,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "compositional_generalization",
+     "n_items": 12,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "task_contained_deduction",
+     "n_items": 13,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "abstract_analogical",
+     "n_items": 7,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "supporting",
+     "n_items": 64,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    }
+   ],
+   "domain_weights": {
+    "inductive_rule_discovery": 0.18,
+    "compositional_generalization": 0.18,
+    "task_contained_deduction": 0.18,
+    "abstract_analogical": 0.18,
+    "supporting": 0.28
+   },
+   "token_budget": 180000,
+   "sample_rule": "stratified nested sampling: generator/subtype cells, seed-keyed per-cell shuffles, whole units, quota = dose x reference x domain weight split equally over the domain's cells (build_volume_profiles.py)",
+   "seed": 267182578,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1/calib.s0v_base_d4_r1.items.jsonl",
+   "rendered_manifest_sha256": null,
+   "content_sha256": "7a3cbddb7b97f1e4cdaee084b4666d9955344cadb96bfa4849e37bf8cffb40a8",
+   "items_file_sha256": "ee43dc1fad9b3a7fc1dee71866d5e808850c45962856967611747b33ab89d81b",
+   "leakage_exclusions": [
+    "dev_v1 and final evaluation families (generator family split)",
+    "recovery rung 0.86M sessions",
+    "state_eval@v1 sessions",
+    "d_series_behavioural_v1 prompts"
+   ],
+   "leakage_proof_path": "artifacts/stages/stage-0/calibration_volume/base_pool_v1/manifest.json",
+   "metadata": {
+    "treatment": "d4_r1",
+    "dose": 4,
+    "uesp": 200139,
+    "n_items": 105,
+    "n_units": 105,
+    "tokens": 236895,
+    "n_rule_families": 20
+   },
+   "is_null": false
+  },
+  {
+   "profile_id": "calib.s0v_base_d4_r2",
+   "version": 1,
+   "description": "Stage-0 volume treatment d4_r2, profile base: dose 4 x 45000 UESP, sampling seed 620952786",
+   "sources": [
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "inductive_rule_discovery",
+     "n_items": 11,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "compositional_generalization",
+     "n_items": 11,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "task_contained_deduction",
+     "n_items": 11,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "abstract_analogical",
+     "n_items": 6,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "supporting",
+     "n_items": 58,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    }
+   ],
+   "domain_weights": {
+    "inductive_rule_discovery": 0.18,
+    "compositional_generalization": 0.18,
+    "task_contained_deduction": 0.18,
+    "abstract_analogical": 0.18,
+    "supporting": 0.28
+   },
+   "token_budget": 180000,
+   "sample_rule": "stratified nested sampling: generator/subtype cells, seed-keyed per-cell shuffles, whole units, quota = dose x reference x domain weight split equally over the domain's cells (build_volume_profiles.py)",
+   "seed": 620952786,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1/calib.s0v_base_d4_r2.items.jsonl",
+   "rendered_manifest_sha256": null,
+   "content_sha256": "6ffd1b460c0d145c14c56cebcdb5e5b0e76842aff7cc62a7d6b9831e0eae9853",
+   "items_file_sha256": "ec818773d33aa57161f494a8c83d77ca3e91ab11659a5f5d22137156b9cf0de9",
+   "leakage_exclusions": [
+    "dev_v1 and final evaluation families (generator family split)",
+    "recovery rung 0.86M sessions",
+    "state_eval@v1 sessions",
+    "d_series_behavioural_v1 prompts"
+   ],
+   "leakage_proof_path": "artifacts/stages/stage-0/calibration_volume/base_pool_v1/manifest.json",
+   "metadata": {
+    "treatment": "d4_r2",
+    "dose": 4,
+    "uesp": 199443,
+    "n_items": 97,
+    "n_units": 97,
+    "tokens": 234026,
+    "n_rule_families": 18
+   },
+   "is_null": false
+  },
+  {
+   "profile_id": "calib.s0v_base_d4_r3",
+   "version": 1,
+   "description": "Stage-0 volume treatment d4_r3, profile base: dose 4 x 45000 UESP, sampling seed 1547666477",
+   "sources": [
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "inductive_rule_discovery",
+     "n_items": 11,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "compositional_generalization",
+     "n_items": 11,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "task_contained_deduction",
+     "n_items": 14,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "abstract_analogical",
+     "n_items": 6,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "supporting",
+     "n_items": 53,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    }
+   ],
+   "domain_weights": {
+    "inductive_rule_discovery": 0.18,
+    "compositional_generalization": 0.18,
+    "task_contained_deduction": 0.18,
+    "abstract_analogical": 0.18,
+    "supporting": 0.28
+   },
+   "token_budget": 180000,
+   "sample_rule": "stratified nested sampling: generator/subtype cells, seed-keyed per-cell shuffles, whole units, quota = dose x reference x domain weight split equally over the domain's cells (build_volume_profiles.py)",
+   "seed": 1547666477,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1/calib.s0v_base_d4_r3.items.jsonl",
+   "rendered_manifest_sha256": null,
+   "content_sha256": "3203558ff0d30e2b9e5d42c017bd66d4ffabe3a59e14e95df31d232b3a0e644e",
+   "items_file_sha256": "a4cdc8c609812d0cc3ad17d37dd97267047567e0d1c8df62a2653b18113ffc61",
+   "leakage_exclusions": [
+    "dev_v1 and final evaluation families (generator family split)",
+    "recovery rung 0.86M sessions",
+    "state_eval@v1 sessions",
+    "d_series_behavioural_v1 prompts"
+   ],
+   "leakage_proof_path": "artifacts/stages/stage-0/calibration_volume/base_pool_v1/manifest.json",
+   "metadata": {
+    "treatment": "d4_r3",
+    "dose": 4,
+    "uesp": 208275,
+    "n_items": 95,
+    "n_units": 95,
+    "tokens": 240945,
+    "n_rule_families": 22
+   },
+   "is_null": false
+  }
+ ],
+ "treatments": {
+  "d1_r1": {
+   "profiles": [
+    "calib.s0v_base_d1_r1@v1"
+   ],
+   "dose": 1,
+   "sampling_seed": 267182578
+  },
+  "d1_r2": {
+   "profiles": [
+    "calib.s0v_base_d1_r2@v1"
+   ],
+   "dose": 1,
+   "sampling_seed": 620952786
+  },
+  "d1_r3": {
+   "profiles": [
+    "calib.s0v_base_d1_r3@v1"
+   ],
+   "dose": 1,
+   "sampling_seed": 1547666477
+  },
+  "d2_r1": {
+   "profiles": [
+    "calib.s0v_base_d2_r1@v1"
+   ],
+   "dose": 2,
+   "sampling_seed": 267182578
+  },
+  "d2_r2": {
+   "profiles": [
+    "calib.s0v_base_d2_r2@v1"
+   ],
+   "dose": 2,
+   "sampling_seed": 620952786
+  },
+  "d2_r3": {
+   "profiles": [
+    "calib.s0v_base_d2_r3@v1"
+   ],
+   "dose": 2,
+   "sampling_seed": 1547666477
+  },
+  "d4_r1": {
+   "profiles": [
+    "calib.s0v_base_d4_r1@v1"
+   ],
+   "dose": 4,
+   "sampling_seed": 267182578
+  },
+  "d4_r2": {
+   "profiles": [
+    "calib.s0v_base_d4_r2@v1"
+   ],
+   "dose": 4,
+   "sampling_seed": 620952786
+  },
+  "d4_r3": {
+   "profiles": [
+    "calib.s0v_base_d4_r3@v1"
+   ],
+   "dose": 4,
+   "sampling_seed": 1547666477
+  },
+  "pilot_root": {
+   "profiles": [
+    "calib.s0v_base_d1_r1@v1",
+    "calib.s0v_base_d1_r2@v1",
+    "calib.s0v_base_d1_r3@v1",
+    "calib.s0v_base_d2_r1@v1",
+    "calib.s0v_base_d2_r2@v1",
+    "calib.s0v_base_d2_r3@v1",
+    "calib.s0v_base_d4_r1@v1",
+    "calib.s0v_base_d4_r2@v1",
+    "calib.s0v_base_d4_r3@v1"
+   ],
+   "members": [
+    "d1_r1",
+    "d1_r2",
+    "d1_r3",
+    "d2_r1",
+    "d2_r2",
+    "d2_r3",
+    "d4_r1",
+    "d4_r2",
+    "d4_r3"
+   ]
+  }
+ }
+}
