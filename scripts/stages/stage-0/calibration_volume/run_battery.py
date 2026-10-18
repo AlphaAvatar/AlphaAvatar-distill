@@ -58,7 +58,14 @@ def request_seed(base: int, task_id: str, turn: int) -> int:
 def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
                  seed_base, system, check_every, degeneration_check,
                  split_generation, template_opens_think, label, log=print):
-    """Generate every task's turns through `eng`; returns (episodes, rounds, tokens).
+    """Generate every task's turns through `eng`; returns (episodes, turns, tokens).
+
+    ASYNCHRONOUS: one engine pass for everything. A finished turn is processed
+    at once -- its episode's environment is stepped and the next turn submitted
+    -- so no episode waits for another's slowest turn. `make_sampling` must
+    return DELTA output (each step carries only the new tokens), and each
+    request accumulates its own tokens: a cumulative output copies every running
+    request's whole token list on every scheduler step.
 
     `eng` is a vLLM engine (add_request / step / has_unfinished_requests /
     abort_request) and `make_sampling(max_tokens, seed)` builds its sampling
@@ -74,102 +81,109 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
             "turns": [], "done": False, "end": None,
             "max_turns": max_turns(t["env"]) if env else 1}
 
-    rnd, out_tokens = 0, 0
+    pending: dict[str, dict] = {}
+    n_turns, out_tokens = 0, 0
     t_gen = time.time()
-    while True:
-        active = [e for e in episodes.values() if not e["done"]]
-        if not active:
-            break
-        rnd += 1
-        pending = {}
-        for e in active:
-            tid = e["task"]["task_id"]
-            prompt = tok.apply_chat_template(e["history"], tokenize=False,
-                                             add_generation_prompt=True)
-            p_ids = tok(prompt, add_special_tokens=False).input_ids
-            allowance = limit - len(p_ids)
-            if allowance <= 0:
-                e["done"], e["end"] = True, "context_exhausted"
-                continue
-            seed = request_seed(seed_base, tid, len(e["turns"])) if mode == "generate" else None
-            sp = make_sampling(allowance, seed)
-            rid = f"{tid}::{len(e['turns'])}"
-            eng.add_request(rid, {"prompt_token_ids": p_ids}, sp)
-            pending[rid] = {"ep": e, "p_ids": p_ids, "allowance": allowance,
-                            "preopened": template_opens_think(prompt),
-                            "gen": [], "n": 0, "last": 0, "degen": None,
-                            "finish": None, "t0": time.time(), "ttft": None,
-                            "seed": seed}
-        done = {}
-        while eng.has_unfinished_requests():
-            for out in eng.step():
-                st = pending.get(out.request_id)
-                if st is None or out.request_id in done:
-                    continue
-                st["n"] = len(out.outputs[0].token_ids)
-                if st["ttft"] is None and st["n"]:
-                    st["ttft"] = time.time() - st["t0"]
-                if out.finished:
-                    st["gen"] = list(out.outputs[0].token_ids)
-                    st["finish"] = out.outputs[0].finish_reason
-                    done[out.request_id] = st
-                    continue
-                if st["n"] - st["last"] >= check_every:
-                    st["last"] = st["n"]
-                    st["gen"] = list(out.outputs[0].token_ids)
-                    d = degeneration_check(st["gen"])
-                    if d:
-                        st["degen"], st["finish"] = d, "degeneration"
-                        eng.abort_request(out.request_id)
-                        done[out.request_id] = st
-        for rid, st in {**pending, **done}.items():
-            e, gen = st["ep"], st["gen"]
-            out_tokens += len(gen)
-            raw = tok.decode(gen, skip_special_tokens=False)
-            hit = len(gen) >= st["allowance"]
-            eos = bool(gen) and gen[-1] in stop_ids
-            reason = ("eos" if eos else "degeneration" if st["degen"] else
-                      ("context_limit" if limit == ctx else "length_limited")
-                      if hit else st["finish"] or "unknown")
-            parts = split_generation(raw, think_preopened=st["preopened"])
-            turn = {
-                "turn": len(e["turns"]), "prompt_tokens": len(st["p_ids"]),
-                "generation_allowance": st["allowance"], "generated_tokens": len(gen),
-                "stop_reason": reason, "natural_termination": reason == "eos",
-                "context_limit_reached": reason == "context_limit",
-                "length_limited": reason == "length_limited",
-                "right_censored": reason in ("context_limit", "degeneration"),
-                "degeneration_triggered": st["degen"] is not None,
-                "degeneration_kind": (st["degen"] or {}).get("kind"),
-                "think_preopened": st["preopened"], "seed": st["seed"],
-                "ttft_seconds": round(st["ttft"], 3) if st["ttft"] else None,
-                "seconds": round(time.time() - st["t0"], 2),
-                "raw": raw, "answer": parts["answer"],
-                "prompt_token_ids": st["p_ids"] if mode == "generate" else None,
-                "output_token_ids": gen,
-            }
-            e["turns"].append(turn)
-            e["history"].append({"role": "assistant", "content": parts["answer"],
-                                 "reasoning_content": parts.get("think", "")})
-            if reason != "eos":
-                e["done"], e["end"] = True, reason
-                continue
-            if e["env"] is None:
-                e["done"], e["end"] = True, "answered"
-                continue
-            obs = e["env"].step(parts["answer"])
-            turn["observation"] = obs
-            if obs is None or e["env"].done:
-                e["done"], e["end"] = True, "episode_done"
-            elif len(e["turns"]) >= e["max_turns"]:
-                e["done"], e["end"] = True, "turn_limit"
-            else:
-                e["history"].append({"role": "user", "content": obs})
-        log(f"[{label}] round {rnd}: {len(pending)} turns, "
-              f"{sum(not e['done'] for e in episodes.values())} episodes active, "
-              f"{out_tokens:,} tokens, {time.time() - t_gen:.0f}s", flush=True)
+    last_log = time.time()
 
-    return episodes, rnd, out_tokens
+    def submit(e) -> None:
+        tid = e["task"]["task_id"]
+        prompt = tok.apply_chat_template(e["history"], tokenize=False,
+                                         add_generation_prompt=True)
+        p_ids = tok(prompt, add_special_tokens=False).input_ids
+        allowance = limit - len(p_ids)
+        if allowance <= 0:
+            e["done"], e["end"] = True, "context_exhausted"
+            return
+        seed = request_seed(seed_base, tid, len(e["turns"])) if mode == "generate" else None
+        rid = f"{tid}::{len(e['turns'])}"
+        eng.add_request(rid, {"prompt_token_ids": p_ids}, make_sampling(allowance, seed))
+        pending[rid] = {"ep": e, "p_ids": p_ids, "allowance": allowance,
+                        "preopened": template_opens_think(prompt), "gen": [],
+                        "last": 0, "degen": None, "finish": None, "t0": time.time(),
+                        "ttft": None, "seed": seed}
+
+    def finish(st) -> None:
+        nonlocal n_turns, out_tokens
+        e, gen = st["ep"], st["gen"]
+        n_turns += 1
+        out_tokens += len(gen)
+        raw = tok.decode(gen, skip_special_tokens=False)
+        hit = len(gen) >= st["allowance"]
+        eos = bool(gen) and gen[-1] in stop_ids
+        reason = ("eos" if eos else "degeneration" if st["degen"] else
+                  ("context_limit" if limit == ctx else "length_limited")
+                  if hit else st["finish"] or "unknown")
+        parts = split_generation(raw, think_preopened=st["preopened"])
+        turn = {
+            "turn": len(e["turns"]), "prompt_tokens": len(st["p_ids"]),
+            "generation_allowance": st["allowance"], "generated_tokens": len(gen),
+            "stop_reason": reason, "natural_termination": reason == "eos",
+            "context_limit_reached": reason == "context_limit",
+            "length_limited": reason == "length_limited",
+            "right_censored": reason in ("context_limit", "degeneration"),
+            "degeneration_triggered": st["degen"] is not None,
+            "degeneration_kind": (st["degen"] or {}).get("kind"),
+            "think_preopened": st["preopened"], "seed": st["seed"],
+            "ttft_seconds": round(st["ttft"], 3) if st["ttft"] else None,
+            "seconds": round(time.time() - st["t0"], 2),
+            "raw": raw, "answer": parts["answer"],
+            "prompt_token_ids": st["p_ids"] if mode == "generate" else None,
+            "output_token_ids": gen,
+        }
+        e["turns"].append(turn)
+        e["history"].append({"role": "assistant", "content": parts["answer"],
+                             "reasoning_content": parts.get("think", "")})
+        if reason != "eos":
+            e["done"], e["end"] = True, reason
+            return
+        if e["env"] is None:
+            e["done"], e["end"] = True, "answered"
+            return
+        obs = e["env"].step(parts["answer"])
+        turn["observation"] = obs
+        if obs is None or e["env"].done:
+            e["done"], e["end"] = True, "episode_done"
+        elif len(e["turns"]) >= e["max_turns"]:
+            e["done"], e["end"] = True, "turn_limit"
+        else:
+            e["history"].append({"role": "user", "content": obs})
+            submit(e)
+
+    for e in episodes.values():
+        submit(e)
+    while eng.has_unfinished_requests():
+        for out in eng.step():
+            st = pending.get(out.request_id)
+            if st is None:
+                continue
+            st["gen"].extend(out.outputs[0].token_ids)
+            if st["ttft"] is None and st["gen"]:
+                st["ttft"] = time.time() - st["t0"]
+            if out.finished:
+                st["finish"] = out.outputs[0].finish_reason
+                pending.pop(out.request_id)
+                finish(st)
+                continue
+            if len(st["gen"]) - st["last"] >= check_every:
+                st["last"] = len(st["gen"])
+                d = degeneration_check(st["gen"])
+                if d:
+                    st["degen"], st["finish"] = d, "degeneration"
+                    eng.abort_request(out.request_id)
+                    pending.pop(out.request_id)
+                    finish(st)
+        if time.time() - last_log > 60:
+            last_log = time.time()
+            log(f"[{label}] {n_turns} turns done, {len(pending)} running, "
+                f"{sum(not e['done'] for e in episodes.values())} episodes active, "
+                f"{out_tokens:,} tokens, {time.time() - t_gen:.0f}s", flush=True)
+    for st in list(pending.values()):   # anything the engine dropped
+        pending.pop(f"{st['ep']['task']['task_id']}::{len(st['ep']['turns'])}", None)
+        finish(st)
+    log(f"[{label}] {n_turns} turns, {out_tokens:,} tokens, {time.time() - t_gen:.0f}s",
+        flush=True)
+    return episodes, n_turns, out_tokens
 
 
 def main(argv=None) -> int:
@@ -228,12 +242,15 @@ def main(argv=None) -> int:
     engine = engine_config(llm, ctx, args.gpu_mem_util)
     print(f"[{args.label}] engine ready in {init_s}s", flush=True)
 
+    from vllm.sampling_params import RequestOutputKind
+
     def make_sampling(max_tokens, seed):
         params = {k: v for k, v in sampling.items() if k != "detokenize"}
         if seed is not None:
             params["seed"] = seed
         return SamplingParams(max_tokens=max_tokens, stop_token_ids=stop_ids,
-                              detokenize=False, **params)
+                              detokenize=False, output_kind=RequestOutputKind.DELTA,
+                              **params)
 
     t_gen = time.time()
     episodes, rnd, out_tokens = run_episodes(
@@ -272,7 +289,7 @@ def main(argv=None) -> int:
                    "env_result": e["env"].result() if e["env"] else None,
                    "messages": e["history"]}
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-    summary = {"identity": identity, "n_tasks": len(episodes), "rounds": rnd,
+    summary = {"identity": identity, "n_tasks": len(episodes), "turns": rnd,
                "output_tokens": out_tokens, "generation_seconds": gen_s,
                "output_tokens_per_second": round(out_tokens / gen_s, 1) if gen_s else None,
                "ends": {k: sum(e["end"] == k for e in episodes.values())

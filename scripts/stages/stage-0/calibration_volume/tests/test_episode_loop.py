@@ -82,7 +82,7 @@ def test_static_tasks_end_answered_and_score():
     tasks = [t for t in tasks if not t["interactive"]]
     by_id = {t["task_id"]: t for t in tasks}
     eps, rounds, _ = _run(tasks, lambda rid, p: f"think</think>\\boxed{{{by_id[rid.split('::')[0]]['answer']}}}")
-    assert rounds == 1
+    assert rounds == len(tasks), "one turn per static task"
     assert all(e["end"] == "answered" for e in eps.values())
     rows = S.score({t["task_id"]: t for t in tasks}, _records(eps))
     assert all(r["correct"] for r in rows)
