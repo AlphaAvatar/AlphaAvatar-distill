@@ -1155,6 +1155,50 @@ STAGE_1 = [
             "different estimand from the cancelled student-confidence D3."),
     ),
     dict(
+        id="calibration_volume",
+        kind="experiment",
+        stage_id="0",
+        status=("IN PROGRESS 2026-10-18. Prerequisites done: $0 data audit; "
+                "capability battery dev_v1 valid (teacher 638/720) with the "
+                "fixed-recipe students at its floor (0/720 on both 0.86M "
+                "seeds), so H2 is not resolvable under the fixed recovery; "
+                "base_pool_v1 built; root-level selection pilot running"),
+        title="Stage-0 calibration volume dose-response (first Stage-0 study)",
+        question=("With teacher, geometry, the forward-baseline method and the "
+                  "recovery recipe fixed, does more independent, "
+                  "capability-aligned Stage-0 calibration data stabilize the "
+                  "AutoInitializer's structural selection (H1), improve the "
+                  "recovered student's reasoning on unseen rule families "
+                  "(H2), and saturate (H3)?"),
+        canonical_config="configs/stages/stage-0/calibration_volume/pilot_design.json",
+        evidence=[
+            E("logs/stages/stage-0/calibration_volume/audit/data_audit.json",
+              "the $0 audit of corpus_v2, the D1 profiles, state_eval@v1, the "
+              "0.86M recovery rung and the historical batteries: "
+              "independence, effective signal, length selection, quality, "
+              "contamination",
+              field="schema", equals="aadistill.stage0.calibration_data_audit/v1"),
+            E("logs/stages/stage-0/calibration_volume/design/dev_analysis.json",
+              "the dev battery's solvability (teacher), floor (two 0.86M "
+              "controls, the 2.96M reference) and resolution",
+              field="schema", equals="aadistill.stage0.dev_analysis/v1"),
+            E("logs/stages/stage-0/calibration_volume/plans/pilot_analysis_plan.json",
+              "the root-level pilot's analysis plan, frozen before its result",
+              field="authorizes", equals="nothing"),
+        ],
+        external_material=[],
+        decisions=["logs/budget/decisions.md -- 2026-10-18: Stage-0 "
+                   "calibration-volume programme started; battery valid, "
+                   "students at floor, root-level pilot"],
+        canonical_log_destination="logs/stages/stage-0/calibration_volume",
+        classification_reason=(
+            "Stage 0 by subject and product: it varies the teacher-signal "
+            "calibration data a Stage-1 initialization is built from (AGENTS.md "
+            "4.2, reasoning-oriented calibration). The Stage-1 search and any "
+            "Stage-3 probe are its instruments, as Stage-3 probes were for "
+            "Stage-1 experiments."),
+    ),
+    dict(
         id="batching_refactor_cuda",
         kind="engineering",
         stage_id="1",
