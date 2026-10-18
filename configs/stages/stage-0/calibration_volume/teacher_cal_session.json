@@ -1,0 +1,42 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.session_plan/v1",
+ "session_kind": "battery",
+ "purpose": "Data construction only: teacher-native calibration sessions on the calibration-split families (calibration_v1), regenerated with the asynchronous runner after the battery session's round-synchronous runner was stopped before this unit to protect its completed measurements from the hard stop.",
+ "tasks": {
+  "calibration": {
+   "path": "data/stages/stage-0/calibration_volume/tasks/calibration_v1.jsonl",
+   "sha256": "c8a267ad23164da7e55604a990b973626efecb9f368ba83faed1fb9b892435d3"
+  }
+ },
+ "teacher": {
+  "id": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+ },
+ "students": [],
+ "runs": [
+  {
+   "label": "teacher_cal",
+   "model": "teacher",
+   "tasks": "calibration",
+   "mode": "generate",
+   "session_limit": 16384,
+   "seed_base": 20261018
+  }
+ ],
+ "sampling": {
+  "generate": "teacher official preset T0.6/top_p0.95/top_k20/min_p0, one seeded request per turn"
+ },
+ "session_limit_note": "16384 tokens end to end is a DATA-CONSTRUCTION bound for calibration sessions, recorded per session as length_limited; it is never applied to a measurement",
+ "hardware": {
+  "gpu": "NVIDIA L40S",
+  "why": "generation is bounded by the 16384-token data-construction limit, which an L40S holds; no measurement runs here, so the teacher's 262144 context is not needed"
+ },
+ "setup_minutes": 20.0,
+ "budget_phases": {
+  "teacher_calibration_generation": 75.0,
+  "scoring": 5.0
+ },
+ "contingency_fraction": 0.3,
+ "reserve_minutes": 25.0,
+ "authorizes": "nothing"
+}

@@ -98,6 +98,16 @@ HARNESS = {
 }
 
 
+HARNESS["search"] = COMMON_HARNESS + (
+    "scripts/stages/stage-0/calibration_volume/search_driver.py",
+    "scripts/stages/stage-0/calibration_volume/search_session.py",
+    "scripts/shared/forward_baseline.py",
+    "src/aadistill/initialization/baseline.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/metrics.py",
+)
+
+
 def run_dir(run_id: str) -> Path:
     return EXPERIMENT_LOGS / "runs" / run_id
 
@@ -106,12 +116,14 @@ def authorization_path(run_id: str) -> Path:
     return run_dir(run_id) / "governance" / "authorization.json"
 
 
-def plan_doc(kind: str, repo_root: Path = REPO) -> dict:
-    return json.loads((repo_root / PLANS / f"{kind}_session.json").read_text())
+def plan_doc(plan: str, repo_root: Path = REPO) -> dict:
+    """The session plan named `plan` (`<plan>_session.json`); a kind's default
+    plan is named after the kind."""
+    return json.loads((repo_root / PLANS / f"{plan}_session.json").read_text())
 
 
-def plan_hash(kind: str, repo_root: Path = REPO) -> str:
-    return sha256_json(plan_doc(kind, repo_root))
+def plan_hash(plan: str, repo_root: Path = REPO) -> str:
+    return sha256_json(plan_doc(plan, repo_root))
 
 
 def grant(repo_root: Path = REPO) -> dict:
@@ -173,7 +185,8 @@ def git_head(repo_root: Path = REPO) -> str:
 
 
 def issue(kind: str, run_id: str, *, phase: str, expected_usd: float,
-          hard_cap_usd: float, repo_root: Path = REPO, note: str = "") -> Path:
+          hard_cap_usd: float, plan: str | None = None, repo_root: Path = REPO,
+          note: str = "") -> Path:
     """Write a one-use authorization for `run_id`, after checking the envelope."""
     if kind not in SESSION_KINDS:
         raise AuthorizationError(f"unknown session kind {kind!r}")
@@ -201,10 +214,11 @@ def issue(kind: str, run_id: str, *, phase: str, expected_usd: float,
         authorization_id=f"stage0.calibration_volume.{kind}.{run_id}",
         granted_utc=datetime.now(timezone.utc).isoformat(timespec="seconds"),
         granted_by=g["granted_by"],
-        plan_id=f"stage0.calibration_volume.{kind}",
-        plan_hash=plan_hash(kind, repo_root),
+        plan_id=f"stage0.calibration_volume.{plan or kind}",
+        plan_hash=plan_hash(plan or kind, repo_root),
         expected_usd=round(expected_usd, 4), hard_cap_usd=round(hard_cap_usd, 4),
-        authorized_stages=(), stage_conditions={"phase": phase, "envelope": json.dumps(env)},
+        authorized_stages=(), stage_conditions={"phase": phase, "plan": plan or kind,
+                                                "envelope": json.dumps(env)},
         scope_note=note or g["phases"][phase]["scope"],
         authorized_session_commit=None,
         harness_source_digest=harness["digest"], harness_source_files=files,
@@ -212,5 +226,5 @@ def issue(kind: str, run_id: str, *, phase: str, expected_usd: float,
         provenance_commit=git_head(repo_root), action_policy=POLICIES[kind])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(auth.as_dict(), indent=1) + "\n")
-    load_for(kind, path).require_plan(plan_hash(kind, repo_root))
+    load_for(kind, path).require_plan(plan_hash(plan or kind, repo_root))
     return path

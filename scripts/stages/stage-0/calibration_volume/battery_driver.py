@@ -57,6 +57,7 @@ def main(argv=None) -> int:
     ap.add_argument("--auth", required=True)
     ap.add_argument("--plan-hash", required=True)
     ap.add_argument("--status", required=True)
+    ap.add_argument("--plan", default="battery", help="the session plan name")
     ap.add_argument("--only", nargs="*", default=None, help="labels (rehearsal)")
     args = ap.parse_args(argv)
 
@@ -83,8 +84,8 @@ def main(argv=None) -> int:
     try:
         auth = G.load_for("battery", args.auth)
         auth.require_plan(args.plan_hash)
-        auth.require_plan(G.plan_hash("battery", REPO))
-        plan = G.plan_doc("battery", REPO)
+        auth.require_plan(G.plan_hash(args.plan, REPO))
+        plan = G.plan_doc(args.plan, REPO)
         for role, t in plan["tasks"].items():
             if sha(REPO / t["path"]) != t["sha256"]:
                 raise SystemExit(f"{t['path']} does not hash to the plan's {t['sha256']}")
@@ -98,7 +99,7 @@ def main(argv=None) -> int:
     save()
     mark("CONTRACT_OK")
 
-    students = {s["label"]: s for s in plan["students"]}
+    students = {s["label"]: s for s in plan.get("students", [])}
     env = {**os.environ, "PYTHONPATH": "src:scripts"}
     for run in plan["runs"]:
         label = run["label"]

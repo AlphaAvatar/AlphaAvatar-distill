@@ -235,11 +235,13 @@ def main(argv=None) -> int:
         tasks = tasks[:args.limit]
 
     t0 = time.time()
-    llm = LLM(model=args.model, dtype="bfloat16", max_model_len=ctx,
+    # The engine is sized to what can be generated: the resolved context for a
+    # measurement, the data-construction session limit for generation.
+    llm = LLM(model=args.model, dtype="bfloat16", max_model_len=limit,
               gpu_memory_utilization=args.gpu_mem_util, **rev)
     eng = llm.llm_engine
     init_s = round(time.time() - t0, 1)
-    engine = engine_config(llm, ctx, args.gpu_mem_util)
+    engine = engine_config(llm, limit, args.gpu_mem_util)
     print(f"[{args.label}] engine ready in {init_s}s", flush=True)
 
     from vllm.sampling_params import RequestOutputKind
