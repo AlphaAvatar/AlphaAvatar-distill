@@ -1,0 +1,150 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.session_plan/v1",
+ "session_kind": "battery",
+ "purpose": "Evaluation-resolution check before any formal full search (maintainer amendment 2026-10-18): does eval-set-1's fluid_reasoning_720 resolve models in the student's capacity range? Measures (a) Qwen3-0.6B, the released model with exactly the student geometry, at its own configured context in its native thinking mode, and (b) two EXISTING recovered checkpoints that extend the recovery-dose ladder already measured on this set (0.86M x2: 0/720; 2.96M: 10/720) to 1.60M and 5.50M. No training; nothing is the formal endpoint.",
+ "tasks": {
+  "dev": {
+   "path": "data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.jsonl",
+   "sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+   "eval_set": "eval-set-1/fluid_reasoning_720/dev_v1"
+  }
+ },
+ "teacher": {
+  "id": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "_why_here": "the shared setup stages the teacher; no run in this plan uses it"
+ },
+ "references": [
+  {
+   "label": "qwen3_0p6b",
+   "id": "Qwen/Qwen3-0.6B",
+   "revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+   "role": "released Qwen3-0.6B: identical parameter geometry to the student (28 x 1024, 16/8 heads, FFN 3072, vocab 151,936), full pre- and post-training; the same-geometry anchor for what this battery can resolve at student scale",
+   "context": "configured max_position_embeddings (40,960) minus the prompt, per P18"
+  }
+ ],
+ "students": [
+  {
+   "label": "e1_r1600k_sa_pca",
+   "role": "E1 KD-heavy 1.60M rung, seed sa (positional PCA init, recipe family of the fixed 0.86M recipe)",
+   "recovery_tokens": "1.60M",
+   "dir": "artifacts/stages/stage-0/calibration_volume/students/e1_r1600k_sa_pca",
+   "relay_files": [
+    {
+     "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/chat_template.jinja",
+     "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+     "size": 4049
+    },
+    {
+     "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/config.json",
+     "sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+     "size": 1418
+    },
+    {
+     "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/generation_config.json",
+     "sha256": "0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83",
+     "size": 205
+    },
+    {
+     "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/model.safetensors",
+     "sha256": "6f77676ab8fde397ef7af75fda3e62171b5c84f315c439a1abb49917e46f6697",
+     "size": 2384234968
+    },
+    {
+     "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/tokenizer.json",
+     "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+     "size": 11422650
+    },
+    {
+     "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/tokenizer_config.json",
+     "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+     "size": 694
+    }
+   ]
+  },
+  {
+   "label": "e1_r5500k_sa_pca",
+   "role": "E1 KD-heavy 5.50M rung, seed sa: the most-recovered existing student",
+   "recovery_tokens": "5.50M",
+   "dir": "artifacts/stages/stage-0/calibration_volume/students/e1_r5500k_sa_pca",
+   "relay_files": [
+    {
+     "path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/chat_template.jinja",
+     "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+     "size": 4049
+    },
+    {
+     "path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/config.json",
+     "sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+     "size": 1418
+    },
+    {
+     "path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/generation_config.json",
+     "sha256": "0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83",
+     "size": 205
+    },
+    {
+     "path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/model.safetensors",
+     "sha256": "3069b329df3edfbd5edc0356516cd06ee7f02fe59663c19df7b30ef6acd8e397",
+     "size": 2384234968
+    },
+    {
+     "path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/tokenizer.json",
+     "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+     "size": 11422650
+    },
+    {
+     "path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/tokenizer_config.json",
+     "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+     "size": 694
+    }
+   ]
+  }
+ ],
+ "runs": [
+  {
+   "label": "qwen3_0p6b_dev",
+   "model": "reference:qwen3_0p6b",
+   "tasks": "dev",
+   "mode": "eval",
+   "trained_context": null
+  },
+  {
+   "label": "e1_r5500k_sa_pca_dev",
+   "model": "student:e1_r5500k_sa_pca",
+   "tasks": "dev",
+   "mode": "eval",
+   "trained_context": 8192
+  },
+  {
+   "label": "e1_r1600k_sa_pca_dev",
+   "model": "student:e1_r1600k_sa_pca",
+   "tasks": "dev",
+   "mode": "eval",
+   "trained_context": 8192
+  }
+ ],
+ "already_measured_on_this_set": {
+  "run": "logs/stages/stage-0/calibration_volume/runs/battery_20261018_092345",
+  "results": {
+   "teacher (262,144 ctx)": "638/720",
+   "ctl_r0860k_sa": "0/720",
+   "ctl_r0860k_sb": "0/720",
+   "e1_r2960k_sa_pca": "10/720"
+  },
+  "not_repeated": "complete valid measurements are never re-run (P12.1)"
+ },
+ "gpu": "NVIDIA A100-SXM4-80GB",
+ "gpu_why": "the previous battery session's measured per-student rates (13-19 min per 720 on this card) price this one; a 40,960-token reference context fits either card, and the A100 keeps the students' numbers on the hardware they were first measured on",
+ "setup_minutes": 25,
+ "budget_phases": {
+  "students_dev_2x": 40,
+  "reference_qwen3_0p6b_40k": 50,
+  "scoring": 5
+ },
+ "contingency_fraction": 0.25,
+ "reserve_minutes": 20,
+ "decision_use": "descriptive resolution evidence for the formal Stage-0 design's sequential resolution gate; it neither replaces nor pre-judges the formal 1x recovery measurement of a D1-initialized student",
+ "authorizes": "nothing",
+ "run_order_why": "the same-geometry reference is the decision-relevant anchor, so it runs first; then the most-recovered student; a hard stop can only cost the last unit, and every finished unit is secured off-pod as it completes"
+}

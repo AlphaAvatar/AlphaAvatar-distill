@@ -1,28 +1,41 @@
 #!/usr/bin/env python3
-"""The formal volume study, designed and priced -- a PROPOSAL, never a preregistration.
+"""The formal volume study as amended by the maintainer, designed and priced.
 
     PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-0/calibration_volume/write_formal_proposal.py \
-        --telemetry <a root-level search telemetry.jsonl on these profiles> --price-per-hour 1.79 \
-        --gpu "NVIDIA A100-SXM4-80GB"
+        --telemetry <a root-level search telemetry.jsonl on these profiles> \
+        --telemetry-gpu "NVIDIA A100-SXM4-80GB" --price-per-hour 1.79 --gpu "NVIDIA A100-SXM4-80GB"
 
 Writes `logs/stages/stage-0/calibration_volume/plans/formal_design_proposal.json`.
-The grant opens the formal phase only on `plans/volume_preregistration.json`;
-this file is not that, and it states why it cannot become it in this
-programme: its precondition (a fixed-recipe control that the capability
-battery can resolve) is computed here from the dev analysis and fails.
+It is a PROPOSAL, never a preregistration: the grant opens the formal phase only
+on `plans/volume_preregistration.json`, which needs the money below.
+
+**Maintainer amendment 2026-10-18.** No independent resamples: one D1 full
+search and one fixed recovery per dose, 1x / 2x / 4x, from one frozen base
+mixture and one nested draw, with the same teacher, geometry, forward
+baseline, recovery recipe, recovery seed and evaluation contract
+(`data/eval-set/eval-set-1`). The study can claim only comparisons between
+these three treatments; selection variance and statistical saturation are
+out of reach without resamples and are never claimed. Composition (realized
+UESP, sources, rule families) is recorded per dose as covariates, and a
+family-diversity change is never reported as a pure volume effect. The pilot's
+exploratory resampled measurements stand and are not repeated.
 
 Pricing is measured, never assumed:
 
 * a full search's trajectory is the forward baseline's measured one -- D2's
-  92 expansions, per implementation (`search_analysis.json`), whose two
-  profiles mirror a treatment's two mixtures;
-* each implementation's minutes are scaled by the ratio of its ROOT minutes on
-  this programme's profiles at the treatment's dose (the telemetry) to its
-  root minutes in D2 -- DEPTH per token, the activation operators at the
-  measured dose or the nearest measured one;
-* per-expansion overhead is the worst measured; session overheads, contingency
-  and reserves are `launch.search_budget`'s;
-* a recovery probe is the D3 probe session's measured cost per probe.
+  92 expansions per implementation (`search_analysis.json`); each
+  implementation's minutes are scaled by its ROOT minutes on this programme's
+  profiles at the dose (the pilot telemetry) over its D2 root minutes;
+* per-expansion overhead is the worst measured (1.25 min here, 0.14 in D2);
+* recovery is the fixed recipe's measured training time (D1 confirmation
+  probes, 1,023 steps) and evaluation is eval-set-1 at the measured per-model
+  rates; session overheads, contingency and reserves are the launcher's.
+
+The 4x search does not fit one $30 session. It is split into sessions over
+ONE search identity on a persistent network volume (the engine's journal
+resume is exact and tested: `tests/initialization/test_search.py ::
+test_resume_is_deterministic_and_recomputes_nothing`), never by changing the
+selected D1 baseline.
 """
 from __future__ import annotations
 
@@ -45,15 +58,22 @@ CONF = REPO / "configs/stages/stage-0/calibration_volume"
 D2_ANALYSIS = REPO / "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/search_analysis.json"
 D2_TELEMETRY = Path("/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/store/"
                     "extracted/audit/autoinit_d2/search/telemetry.jsonl")
-D2_TOKENS = 59830
-D3_PROBES = REPO / "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/closeout/outcome.json"
-D3_PROBES_USD = 5.0395      # that run's booked all-in cost (decisions.md 2026-10-17)
+D2_OVERHEAD_MIN = 0.14
+#: The fixed recipe's measured training time (1,023 steps, 0.86M rung) on an
+#: L40S; the A100 is not slower, so this bounds it there.
+PROBE_RECORD = REPO / "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/closeout/outcome.json"
+#: eval-set-1 per recovered student at its trained context (8,192), A100:
+#: fluid_reasoning_720 measured 13.0-18.8 min per student (battery_20261018_092345);
+#: the 996 static prompts of the other two components are bounded by the D1
+#: confirmation battery's 950 prompts at the same context (20.1-29.6 min, L40S).
+EVAL_MINUTES = {"fluid_reasoning_720": 19.0, "stage3_capability_846+stage3_legacy_150": 30.0}
+VOLUME_GB = 400                  # every materialized state of one 4x search (5-7 GB each)
+VOLUME_USD_PER_GB_MONTH = 0.07
 SESOI = {"pooled_primary": 0.05, "per_axis": 0.08}
-#: Three independent resamples per dose is the minimum the pilot's frozen
-#: reading rule can read: it calibrates an effect against the spread of the
-#: between-resample pairs at a dose, and two resamples give one pair and no
-#: spread -- exactly why the pilot's DEPTH carries no label.
-RESAMPLES = 3
+#: The resolution gate's floor: every fixed-recipe student measured so far sits
+#: inside it (0/720, 0/720, 10/720), and a student inside it cannot register a
+#: treatment difference the size of the SESOI on the static items.
+FLOOR_STATIC_RATE = 0.02
 
 
 def sha(p: Path) -> str:
@@ -67,8 +87,7 @@ def rel(p: Path) -> str:
 def d2_root_minutes() -> dict[str, float]:
     """D2's ROOT operator minutes per implementation (max over its two profiles)."""
     depth = {}
-    states = D2_TELEMETRY.with_name("states.jsonl")
-    for line in states.read_text().splitlines():
+    for line in D2_TELEMETRY.with_name("states.jsonl").read_text().splitlines():
         s = json.loads(line)
         depth[s["state_id"]] = s.get("depth")
     out: dict[str, float] = defaultdict(float)
@@ -99,13 +118,47 @@ def root_minutes_at(impl: str, t: int, m: dict, d2_root: dict) -> tuple[float, s
         rate = max(mins / tok for tok, mins in pts)
         return rate * t, "measured per-token rate"
     if pts:
-        # the dose's own resamples sit within a few percent of each other in tokens
         near = min((tok for tok, _ in pts), key=lambda x: abs(x - t))
         return (max(mins for tok, mins in pts if abs(tok - near) <= 0.15 * near),
                 "measured at this dose (max over its resamples)")
-    measured_ratio = max(max(v for _, v in pts2) / d2_root[k]
-                         for k, pts2 in m["per_impl"].items() if not k.startswith("depth."))
-    return d2_root[impl] * measured_ratio, f"D2 root x {measured_ratio:.2f} (not measured here)"
+    ratio = max(max(v for _, v in pts2) / d2_root[k]
+                for k, pts2 in m["per_impl"].items() if not k.startswith("depth."))
+    return d2_root[impl] * ratio, f"D2 root x {ratio:.2f} (not measured here)"
+
+
+def session_cost(minutes: float, price: float, *, setup: float = 20.0) -> dict:
+    """The launcher's own budget arithmetic for one session of `minutes` work."""
+    from stages.calibration_volume import launch
+    b = launch.search_budget({"treatments": [{"treatment": "w", "bound_minutes": minutes}],
+                              "contingency_fraction": 0.2, "reserve_minutes": 30})
+    plan = b.plan(price_per_hour=price, authorized_usd=1e6)
+    return {"work_minutes": round(minutes, 1), "expected_usd": round(plan.expected_usd, 2),
+            "hard_usd": round(plan.hard_terminate_usd, 2)}
+
+
+def split(minutes: float, price: float, cap: float) -> list[float]:
+    """Fewest equal parts whose sessions each fit the per-session hard cap."""
+    for n in range(1, 8):
+        if session_cost(minutes / n, price)["hard_usd"] <= cap:
+            return [minutes / n] * n
+    raise SystemExit("cannot split under the per-session cap")
+
+
+def sequence(sessions: list[dict], envelope: float) -> dict:
+    """Launch in order; each launch needs its HARD cap inside what is left after
+    the expected spend of everything before it (P12.1). The first that does not
+    fit is where the money runs out."""
+    left, rows = envelope, []
+    for s in sessions:
+        fits = s["hard_usd"] <= left + 1e-9
+        rows.append({"session": s["session"], "hard_usd": s["hard_usd"],
+                     "left_before_usd": round(left, 2), "fits": fits})
+        if not fits:
+            return {"envelope_usd": envelope, "completes": False,
+                    "first_unfundable": s["session"], "steps": rows}
+        left -= s["expected_usd"]
+    return {"envelope_usd": envelope, "completes": True, "left_after_usd": round(left, 2),
+            "steps": rows}
 
 
 def main(argv=None) -> int:
@@ -115,187 +168,235 @@ def main(argv=None) -> int:
     ap.add_argument("--price-per-hour", type=float, required=True)
     ap.add_argument("--gpu", required=True)
     args = ap.parse_args(argv)
-
-    from stages.calibration_volume import launch
+    price = args.price_per_hour
 
     prof_doc = json.loads((CONF / "profiles.json").read_text())
     tokens = {f"{p['profile_id']}@v{p['version']}": p["metadata"]["tokens"] for p in prof_doc["profiles"]}
-    dose_tokens = defaultdict(list)
+    by_dose = defaultdict(list)
     for p in prof_doc["profiles"]:
-        dose_tokens[p["metadata"]["dose"]].append(p["metadata"]["tokens"])
-    tel = Path(args.telemetry)
-    m = measured(tel, tokens)
+        by_dose[p["metadata"]["dose"]].append(p)
+    m = measured(Path(args.telemetry), tokens)
     d2 = json.loads(D2_ANALYSIS.read_text())["operator_timing"]["per_impl"]
     d2_root = d2_root_minutes()
+    n_exp = sum(v["expansions"] for v in d2.values())
+
+    probes = json.loads(PROBE_RECORD.read_text())["probes"]
+    train_min = max(p["train_minutes"] for p in probes)
+    recovery_eval_min = train_min + sum(EVAL_MINUTES.values())
+    cap = G.grant()["per_session_cap_usd"]
 
     searches = {}
-    for dose, toks in sorted(dose_tokens.items()):
-        t = max(toks)
-        impls, minutes = {}, 0.0
+    for dose, profs in sorted(by_dose.items()):
+        t = max(p["metadata"]["tokens"] for p in profs)
+        op_min, per_impl = 0.0, {}
         for impl, v in d2.items():
             root, basis = root_minutes_at(impl, t, m, d2_root)
             scale = root / d2_root[impl]
-            impls[impl] = {"d2_expansions": v["expansions"], "d2_operator_minutes": v["operator_minutes_total"],
-                           "root_minutes_here": round(root, 2), "basis": basis, "scale": round(scale, 3),
-                           "minutes": round(v["operator_minutes_total"] * scale, 1)}
-            minutes += v["operator_minutes_total"] * scale
-        n_exp = sum(v["expansions"] for v in d2.values())
-        search_minutes = minutes + n_exp * m["overhead"]
-        budget = launch.search_budget({"treatments": [{"treatment": f"d{dose}", "bound_minutes": search_minutes}],
-                                       "contingency_fraction": 0.2, "reserve_minutes": 30})
-        b = budget.plan(price_per_hour=args.price_per_hour, authorized_usd=1e6)
-        searches[f"{dose}x"] = {"profile_tokens_max": t, "per_impl": impls, "expansions": n_exp,
-                                "search_minutes": round(search_minutes, 1),
-                                "expected_usd": round(b.expected_usd, 2),
-                                "hard_usd": round(b.hard_terminate_usd, 2),
-                                "within_per_session_cap": b.hard_terminate_usd <= G.grant()["per_session_cap_usd"]}
+            per_impl[impl] = {"minutes": round(v["operator_minutes_total"] * scale, 1),
+                              "scale_vs_d2": round(scale, 3), "basis": basis}
+            op_min += v["operator_minutes_total"] * scale
+        searches[f"{dose}x"] = {
+            "profile_tokens_max": t, "per_impl": per_impl, "expansions": n_exp,
+            "search_minutes": round(op_min + n_exp * m["overhead"], 1),
+            "search_minutes_with_overhead_fix": round(op_min + n_exp * D2_OVERHEAD_MIN, 1),
+            "composition_at_this_dose_in_the_pilot_draws": [
+                {k: p["metadata"][k] for k in ("uesp", "tokens", "n_items", "n_units",
+                                               "n_rule_families")} for p in profs]}
 
-    probe_usd = D3_PROBES_USD / len(json.loads(D3_PROBES.read_text())["seeds"])
-    dev = json.loads((LOGS / "design/dev_analysis.json").read_text())
-    pair = dev["labels"]["pair"]
-    res = dev["seed_noise_and_resolution"]["all"]
-    fixed = {p: dev["rates"][p]["overall"] for p in pair}
-    resolvable = not (res["discordance_rate"] == 0 and all(r["correct"] == 0 for r in fixed.values()))
+    def units(minutes_key: str) -> list[dict]:
+        """The launch order. The 1x unit carries its own recovery and evaluation
+        (the resolution gate reads it before anything else is spent); every
+        later search is its own session, split where its hard cap exceeds the
+        per-session cap; the remaining recoveries share one closing session.
+        All sessions work on one network volume, which carries the journal,
+        the Top-1 initializations and the recovered students between them."""
+        out = []
+        w1 = searches["1x"][minutes_key] + recovery_eval_min
+        if session_cost(w1, price)["hard_usd"] <= cap:
+            out.append({"session": "1x: search + recovery + eval-set-1 (gate)",
+                        **session_cost(w1, price)})
+            later = ("2x", "4x")
+        else:
+            later = ("1x", "2x", "4x")
+        for dose in later:
+            parts = split(searches[dose][minutes_key], price, cap)
+            for i, w in enumerate(parts, 1):
+                tag = f" part {i}/{len(parts)} (one search identity, journal on the volume)" \
+                    if len(parts) > 1 else ""
+                out.append({"session": f"{dose}: search{tag}", **session_cost(w, price)})
+        rec = [d for d in ("1x", "2x", "4x") if d in later]
+        out.append({"session": f"{'+'.join(rec)}: recovery + eval-set-1",
+                    **session_cost(len(rec) * recovery_eval_min, price)})
+        return out
 
-    def design(doses, n_resamples, probes_per_treatment):
-        s = sum(searches[f"{d}x"]["expected_usd"] for d in doses) * n_resamples
-        h = max(searches[f"{d}x"]["hard_usd"] for d in doses)
-        p = len(doses) * n_resamples * probes_per_treatment * probe_usd
-        return {"doses": [f"{d}x" for d in doses], "resamples_per_dose": n_resamples,
-                "full_searches": len(doses) * n_resamples,
-                "recovery_probes": len(doses) * n_resamples * probes_per_treatment,
-                "searches_expected_usd": round(s, 2), "probes_expected_usd": round(p, 2),
-                "expected_usd": round(s + p, 2), "largest_session_hard_usd": h}
+    volume_days = 3
+    volume_usd = round(VOLUME_GB * VOLUME_USD_PER_GB_MONTH * volume_days / 30, 2)
+    variants = {}
+    for name, key in (("as_measured", "search_minutes"),
+                      ("with_overhead_fix", "search_minutes_with_overhead_fix")):
+        ss = units(key)
+        variants[name] = {"sessions": ss,
+                          "network_volume_usd": volume_usd,
+                          "expected_usd": round(sum(s["expected_usd"] for s in ss) + volume_usd, 2),
+                          "largest_session_hard_usd": max(s["hard_usd"] for s in ss),
+                          "sum_of_hard_caps_usd": round(sum(s["hard_usd"] for s in ss), 2)}
 
-    # the formal phase's own figures; a live session elsewhere does not move them
     g = G.grant()
-    formal_spent = sum(json.loads(o.read_text())["money"]["all_in_usd"]
-                       for o in (LOGS / "runs").glob("*/closeout/outcome.json")
-                       if json.loads(o.read_text()).get("phase") == "formal_volume")
-    programme_left = round(g["programme_ceiling_usd"] - sum(
-        json.loads(o.read_text())["money"]["all_in_usd"]
-        for o in (LOGS / "runs").glob("*/closeout/outcome.json")), 4)
-    formal_left = {"phase": "formal_volume",
-                   "phase_ceiling_usd": g["phases"]["formal_volume"]["ceiling_usd"],
-                   "phase_spent_usd": round(formal_spent, 4),
-                   "phase_remaining_usd": round(g["phases"]["formal_volume"]["ceiling_usd"]
-                                                - formal_spent, 4),
-                   "per_session_cap_usd": g["per_session_cap_usd"],
-                   "programme_remaining_usd": programme_left}
-    designs = {
-        "F_full": {"what": "the brief's study: 1x/2x/4x, three independent resamples each, one D1 "
-                           "full search per treatment, the fixed recovery on each Top-1 at two "
-                           "recovery seeds, capability battery final split",
-                   **design((1, 2, 4), RESAMPLES, 2)},
-        "MVP_A_h1_only": {"what": "H1 (and H3 at two doses) only: 1x/2x x three resamples, six "
-                                  "full searches, no recovery. Answers whether full-search "
-                                  "selection stabilizes with volume; says nothing about capability",
-                          **design((1, 2), RESAMPLES, 0)},
-        "MVP_B_h1_h2": {"what": "the smallest study that can address H2: 1x/2x x three resamples with "
-                                "two recovery seeds per Top-1 -- under a recovery recipe that first "
-                                "passes the precondition below, which the fixed 0.86M rung fails",
-                        **design((1, 2), RESAMPLES, 2)},
-    }
-    for d in designs.values():
-        d["fits_formal_phase"] = d["expected_usd"] <= formal_left["phase_remaining_usd"]
-        d["fits_programme_remainder"] = d["expected_usd"] <= programme_left
-        d["fits_per_session_cap"] = d["largest_session_hard_usd"] <= formal_left["per_session_cap_usd"]
-        d["gap_to_formal_phase_usd"] = round(max(0.0, d["expected_usd"]
-                                                 - formal_left["phase_remaining_usd"]), 2)
+    closeouts = [json.loads(o.read_text()) for o in (LOGS / "runs").glob("*/closeout/outcome.json")]
+    spent_by_phase = defaultdict(float)
+    for c in closeouts:
+        spent_by_phase[c.get("phase")] += (c.get("money") or {}).get("all_in_usd") or 0.0
+    phase_left = {p: round(v["ceiling_usd"] - spent_by_phase[p], 4) for p, v in g["phases"].items()}
+    programme_left = round(g["programme_ceiling_usd"] - sum(spent_by_phase.values()), 4)
+    envelopes = {"formal_phase_usd": phase_left["formal_volume"],
+                 "all_programme_phases_usd": programme_left}
+    for v in variants.values():
+        v["sequenced"] = {k: sequence(v["sessions"], e) for k, e in envelopes.items()}
+        v["gap_to_formal_phase_expected_usd"] = round(max(0.0, v["expected_usd"]
+                                                          - envelopes["formal_phase_usd"]), 2)
+        v["gap_to_programme_expected_usd"] = round(max(0.0, v["expected_usd"]
+                                                       - envelopes["all_programme_phases_usd"]), 2)
 
+    resolution = LOGS / "design/resolution_check.json"
     doc = {
-        "schema": "aadistill.stage0.calibration_volume.formal_design_proposal/v1",
-        "status": ("PROPOSAL -- NOT FROZEN AND NOT A PREREGISTRATION. The formal phase opens only "
-                   "on plans/volume_preregistration.json, which this programme does not write: "
-                   "the precondition below fails under the fixed recovery recipe."),
+        "schema": "aadistill.stage0.calibration_volume.formal_design_proposal/v2",
+        "status": ("PROPOSAL -- NOT FROZEN AND NOT A PREREGISTRATION. Amended by the maintainer "
+                   "2026-10-18 (single draw per dose). The formal phase opens only on "
+                   "plans/volume_preregistration.json; writing it needs the funding decision "
+                   "below."),
+        "supersedes": ("formal_design_proposal v1 (three independent resamples per dose), "
+                       "withdrawn by the maintainer's amendment; its record is in git history"),
         "fixed": {"method": "the forward baseline, resolved through shared.forward_baseline "
-                            "(stage1_init.d1_target_aware.scored_v1@v1)",
+                            "(stage1_init.d1_target_aware.scored_v1@v1) -- never edited to save cost",
                   "teacher_and_geometry": "as in configs/stages/stage-0/calibration_volume/pilot_search_session.json",
                   "recovery_recipe": "e1_p1_kd_heavy@0.86M (the D-series fixed recovery)",
-                  "state_evaluation": "state_eval@v1"},
+                  "recovery_seed": "one, identical for all three doses",
+                  "state_evaluation": "state_eval@v1",
+                  "evaluation_contract": ("data/eval-set/eval-set-1 at its registered identity, every "
+                                          "unit and capability reported separately (AGENTS.md P10.3)")},
         "treatments": {
-            "dose_unit": "unique effective scored positions (UESP) under positions.supervised_target_v1",
-            "doses": {f"{d}x": {"target_uesp": 45000 * d, "realized_tokens_max": max(t)}
-                      for d, t in sorted(dose_tokens.items())},
-            "resamples": "independent sampling seeds per dose; doses nested within a resample",
-            "per_treatment": ("one D1 full search (beam width 6, delayed_prune warm-up 1, "
-                              "pareto@v2) with operator order and the profile per operator FREE, "
-                              "over two mixtures at the treatment's dose and resample: base "
-                              "(0.72 static primary / 0.28 supporting, the pilot's) and a "
-                              "reasoning-heavy variant -- the D1 search's own two-profile shape"),
-            "hardware": f"{args.gpu}: the base pool's 8,192-token items put up to 22,141 scored rows "
-                        "into one micro-batch of 3; a 44 GiB card OOMs in DEPTH (pilot_20261018_122808)",
+            "doses": {f"{d}x": {"target_uesp": 45000 * d} for d in sorted(by_dose)},
+            "draws": ("ONE nested draw: the 2x set contains the 1x set and the 4x set the 2x "
+                      "set, from one frozen base mixture (the pilot's weights: 0.18 per static "
+                      "primary axis, 0.28 supporting) and its frozen reasoning-heavy variant; "
+                      "no independent resamples"),
+            "per_treatment": ("one D1 full search (beam width 6, delayed_prune warm-up 1, pareto@v2) "
+                              "with operator order and the profile per operator FREE over the two "
+                              "mixtures at that dose; the committed Top-1 recovered once under the "
+                              "fixed recipe and seed; eval-set-1 measured once"),
+            "covariates_recorded_per_dose": ["realized UESP", "tokens", "items and units",
+                                             "sources and subtypes", "distinct rule families",
+                                             "distinct generators"],
+            "covariate_rule": ("rule-family diversity rises with dose in the pilot draws (10-12, 15-17, "
+                               "18-22): any H1/H2 difference is reported as a volume+diversity "
+                               "contrast, never as a pure volume effect"),
+            "hardware": f"{args.gpu}: 8,192-token pool items OOM DEPTH on a 44 GiB card",
+        },
+        "claims": {
+            "allowed": "comparisons between these three specific treatments",
+            "not_allowed": ["selection variance or stability (needs resamples; the pilot's "
+                            "root-level resampled measurement remains the only one)",
+                            "statistical saturation (H3 is described, never tested)",
+                            "a pure volume effect where composition changed with dose"],
         },
         "endpoints": {
-            "H1": ("between-resample agreement at each dose of the committed Top-1: its operator "
-                   "order and per-step profile, and per operator FFN/ATTENTION per-layer Jaccard, "
-                   "DEPTH removed-set Jaccard, WIDTH subspace overlap; each beside chance"),
-            "H2": ("correctness of each treatment's recovered Top-1 on the capability battery's "
-                   "final split (evaluation families; the five evaluation-only generators "
-                   "reported separately), per P10.2 axis and pooled over the four static "
-                   "primary axes; interactive reported, not pooled"),
-            "H3": "the dose-response shape across 1x/2x/4x for H1 and H2",
+            "H1": ("descriptive: the committed Top-1 of each dose -- operator order, per-step profile, "
+                   "and per operator FFN/ATTENTION per-layer Jaccard, DEPTH removed-set Jaccard, WIDTH "
+                   "subspace overlap between doses (2x vs 1x, 4x vs 2x, 4x vs 1x), each beside chance; "
+                   "no stability claim"),
+            "H2": ("eval-set-1, every unit and capability separately; primary = fluid_reasoning_720 "
+                   "static items pooled over the four static axes and per axis, interactive "
+                   "separately; supporting and guard-rail units reported beside it; stage3_legacy_150 "
+                   "only as in-sample regression"),
+            "H3": "the 1x/2x/4x shape of H1 and H2, described",
         },
         "statistics": {
             "sesoi": SESOI,
-            "inference": ("rule-family cluster bootstrap (10,000 resamples, stratified by axis), "
-                          "tasks paired across treatments, recovery seeds and resamples averaged "
-                          "within treatment; 95% intervals on each dose contrast"),
+            "inference": ("task-paired contrasts 2x-1x, 4x-2x, 4x-1x with a rule-family cluster "
+                          "bootstrap (10,000 resamples, stratified by axis); the interval covers "
+                          "EVALUATION sampling only -- training-seed and selection variance are "
+                          "unmeasured with one draw and one seed, and every verdict says so"),
             "decision": {
-                "GO": "the 2x-1x (or 4x-1x) interval lies wholly above +SESOI",
+                "GO": "a contrast's interval lies wholly above +SESOI",
                 "NO-GO": "the interval lies wholly inside (-SESOI, +SESOI)",
                 "INCONCLUSIVE": "neither",
-                "SATURATION SUPPORTED": "2x-1x is GO and 4x-2x is NO-GO",
-                "EVALUATION NOT RESOLVABLE": "the precondition fails",
+                "EVALUATION NOT RESOLVABLE": "the resolution gate below fails",
+                "SATURATION": ("never declared; a 2x-1x GO with a 4x-2x NO-GO is reported as "
+                               "'consistent with saturation for these treatments' only"),
             },
-            "h1_reading": "the pilot's noise-calibrated rule (plans/pilot_analysis_plan.json), on full-search Top-1s",
         },
-        "precondition": {
-            "rule": ("before any formal spend, a control recovered under the fixed recipe must score "
-                     "above floor on dev_v1, with a seed-discordance-based minimal detectable effect "
-                     "at or below the pooled SESOI"),
-            "evidence": {"dev_analysis": rel(LOGS / "design/dev_analysis.json"),
-                         "fixed_recipe_controls": fixed,
-                         "seed_discordance_rate": res["discordance_rate"]},
-            "met": resolvable,
-            "why_not": (None if resolvable else
-                        "both 0.86M controls score 0/720 and never disagree, so no minimal "
-                        "detectable effect exists: every recovered treatment would score zero by "
-                        "construction"),
+        "resolution_gate": {
+            "before_any_search": ("the reference check (configs/.../resolution_session.json): does "
+                                  "fluid_reasoning_720 resolve models in the student's capacity range? "
+                                  f"result: {rel(resolution) if resolution.is_file() else 'PENDING'}"),
+            "after_the_1x_unit": (f"the 1x recovered D1-initialized student must answer at least "
+                                  f"{FLOOR_STATIC_RATE:.0%} of fluid_reasoning_720's static items; "
+                                  "below it H2 is EVALUATION NOT RESOLVABLE (measured on a D1 student, "
+                                  "not assumed from PCA students) and the 2x/4x sessions are not "
+                                  "launched without a new maintainer decision"),
+            "why": ("every fixed-recipe student measured so far is PCA-initialized and inside the floor "
+                    "(0/720, 0/720, 10/720); whether a D1-initialized one is has not been measured"),
         },
+        "split_execution_of_4x": {
+            "why": "its hard cap exceeds the $30 per-session cap",
+            "mechanism": [
+                "one network volume (the provider's persistent disk, ONE datacenter) holds the "
+                "search workdir: the state journal and every materialized state",
+                "part 1 runs the search with the treatment's plan; the watchdog's hard stop or a "
+                "planned stop ends it; nothing is collected but the journal tail and telemetry",
+                "part 2 attaches the same volume (same datacenter), runs the IDENTICAL plan, "
+                "config, seed, profiles and baseline resolution; the engine restores every "
+                "journaled state by content-derived id and hash-checks it from disk, and "
+                "continues the first unfinished expansion",
+                "identity check: part 2's search config hash, materialization protocol and "
+                "measurement protocol must equal part 1's; any declined restore "
+                "(telemetry `restore_declined`) is a stop condition, not a silent re-measure",
+                "the final record carries both sessions' run ids, n_resumed, and the volume id",
+            ],
+            "engineering_not_yet_built": [
+                "search_driver: --workdir on the volume and a resume mode that asserts the "
+                "identity check above (the engine already resumes)",
+                "launch: attach --network-volume-id / --volume-mount-path (SessionRunner "
+                "already supports both) and a 4x two-part plan",
+                "a $0 CPU test: stop a tiny-model search mid-tree, resume, and compare the final "
+                "journal with an uninterrupted run",
+                "creating the volume is a paid provider action inside the formal budget",
+            ],
+            "volume_usd_estimate": volume_usd,
+        },
+        "durable_artifacts": ("each dose's committed Top-1 init and its recovered student (~2.4 GB "
+                              "each) must survive a later failure (P8.2.1): the network volume is "
+                              "the durable store during the study; the HF relay's private quota "
+                              "is full, so archival retention after the study is a maintainer "
+                              "decision"),
         "pricing": {
-            "gpu": args.gpu, "price_per_hour": args.price_per_hour,
-            "telemetry": {"path": rel(tel), "sha256": sha(tel), "measured_on": args.telemetry_gpu,
-                          "expansions": m["expansions"], "overhead_minutes": round(m["overhead"], 3)},
+            "gpu": args.gpu, "price_per_hour": price,
+            "telemetry": {"path": rel(Path(args.telemetry)), "sha256": sha(Path(args.telemetry)),
+                          "measured_on": args.telemetry_gpu, "expansions": m["expansions"],
+                          "overhead_minutes": round(m["overhead"], 3)},
             "trajectory": {"path": rel(D2_ANALYSIS), "sha256": sha(D2_ANALYSIS)},
-            "probe_usd": round(probe_usd, 3),
-            "probe_source": f"{rel(D3_PROBES)}: ${D3_PROBES_USD} for its probes",
+            "recovery_minutes": {"train": train_min, "source": rel(PROBE_RECORD),
+                                 "eval_set_1": EVAL_MINUTES},
             "full_search_by_dose": searches,
         },
-        "designs": designs,
-        "cost_levers": {
-            "dominant_term": ("DEPTH: token-linear, and the pool's long teacher-native items make "
-                              "it the bulk of every search (see full_search_by_dose.per_impl)"),
-            "per_expansion_overhead": ("measured ~1.25 min per expansion here against D2's 0.14; the "
-                                       "reload validation runs on the host, where torch sizes its "
-                                       "pools from the host's CPU count rather than the pod's cgroup "
-                                       "grant (suspected, not measured). An execution knob worth "
-                                       "~115 min per full search"),
-            "item_length_bound": ("a data-design choice, not an execution knob: D1's [256, 2,048] "
-                                  "window keeps 66 of 572 verified teacher units and no analogy or "
-                                  "interactive unit (audit section C)"),
-            "faster_card": "an H100-class card is unmeasured on this workload; its price is ~2.2x the A100's",
+        "design": {"name": "F_single_draw", **variants},
+        "budget": {
+            "phase_remaining_usd": phase_left,
+            "programme_remaining_usd": programme_left,
+            "per_session_cap_usd": cap,
+            "reading": ("the formal phase alone cannot fund the study in either variant; see "
+                        "design.<variant>.sequenced for where the money runs out when every "
+                        "launch must fit its hard cap"),
         },
-        "formal_phase": formal_left,
         "authorizes": "nothing",
     }
     out = LOGS / "plans/formal_design_proposal.json"
     out.write_text(json.dumps(doc, indent=1) + "\n")
-    print(json.dumps({k: {x: v[x] for x in ("expected_usd", "largest_session_hard_usd",
-                                            "fits_formal_phase", "fits_per_session_cap")}
-                      for k, v in designs.items()}, indent=1))
-    print({k: (v["search_minutes"], v["expected_usd"], v["hard_usd"]) for k, v in searches.items()},
-          "precondition met:", resolvable)
+    for k, v in variants.items():
+        print(k, v["expected_usd"], "hard sum", v["sum_of_hard_caps_usd"],
+              {e: (s["completes"], s.get("first_unfundable")) for e, s in v["sequenced"].items()})
+    print({k: (v["search_minutes"], v["search_minutes_with_overhead_fix"]) for k, v in searches.items()})
+    print("envelopes", envelopes)
     return 0
 
 

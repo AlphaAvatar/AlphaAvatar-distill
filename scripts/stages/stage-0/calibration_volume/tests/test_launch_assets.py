@@ -33,3 +33,46 @@ def test_search_assets_land_on_the_paths_their_consumers_read():
                 assert str(Path(prof["items_path"]).parent) in landed, prof["items_path"]
         from stages.phase_d1 import d1_session as D1S
         assert str(D1S.STATE_EVAL_ROOT) in landed
+
+
+BATTERY_PLANS = sorted(p.name[: -len("_session.json")] for p in
+                       (REPO / "configs/stages/stage-0/calibration_volume").glob("*_session.json")
+                       if json.loads(p.read_text()).get("session_kind") == "battery")
+
+
+def test_every_battery_run_resolves_to_a_pinned_model_and_a_hashed_task_file():
+    """What `battery_driver` resolves on the pod, checked at $0: each run's model is
+    the teacher, a pinned `reference:` revision or a `student:` whose relay files are
+    staged into its directory, and each task file still hashes to the plan."""
+    import hashlib
+    assert BATTERY_PLANS
+    for name in BATTERY_PLANS:
+        plan = G.plan_doc(name)
+        staged = {(r.path, r.dest) for r in launch.battery_relay_inputs(name)}
+        refs = {r["label"]: r for r in plan.get("references", [])}
+        students = {s["label"]: s for s in plan.get("students", [])}
+        for role, t in plan["tasks"].items():
+            path = REPO / t["path"]
+            if not path.is_file():          # a historical plan's spelling; not re-launchable
+                continue
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == t["sha256"], (name, role)
+        for run in plan["runs"]:
+            model = run["model"]
+            if model == "teacher":
+                assert len(plan["teacher"]["revision"]) == 40
+            elif model.startswith("reference:"):
+                ref = refs[model.split(":", 1)[1]]
+                assert len(ref["revision"]) == 40 and run.get("trained_context") is None, ref
+            else:
+                s = students[model.split(":", 1)[1]]
+                assert {(f["path"], s["dir"]) for f in s["relay_files"]} <= staged, s["label"]
+                assert any(f["path"].endswith("model.safetensors") for f in s["relay_files"])
+
+
+def test_the_resolution_plan_reads_the_registered_fluid_set():
+    from shared import eval_sets as ES
+    plan = G.plan_doc("resolution")
+    unit = ES.unit_path("eval-set-1", "fluid_reasoning_720", "dev_v1")
+    assert REPO / plan["tasks"]["dev"]["path"] == unit
+    ident = ES.manifest("eval-set-1")["files"]["fluid_reasoning_720/dev_v1.jsonl"]
+    assert plan["tasks"]["dev"]["sha256"] == ident["sha256"]

@@ -100,6 +100,7 @@ def main(argv=None) -> int:
     mark("CONTRACT_OK")
 
     students = {s["label"]: s for s in plan.get("students", [])}
+    references = {r["label"]: r for r in plan.get("references", [])}
     env = {**os.environ, "PYTHONPATH": "src:scripts"}
     for run in plan["runs"]:
         label = run["label"]
@@ -112,6 +113,12 @@ def main(argv=None) -> int:
             if run["model"] == "teacher":
                 model = plan["teacher"]["id"]
                 extra = ["--revision", plan["teacher"]["revision"]]
+            elif run["model"].startswith("reference:"):
+                # a released model at a pinned revision, measured at its own
+                # configured context (no --trained-context): a resolution anchor
+                ref = references[run["model"].split(":", 1)[1]]
+                model = ref["id"]
+                extra = ["--revision", ref["revision"]]
             else:
                 s = students[run["model"].split(":", 1)[1]]
                 model = str(REPO / s["dir"])

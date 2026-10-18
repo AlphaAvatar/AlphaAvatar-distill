@@ -100,25 +100,36 @@ def main() -> int:
     teacher = rates[dev["labels"]["teacher"]]
     fixed = [rates[p] for p in pair]
     resolvable = not (res["discordance_rate"] == 0 and all(r["correct"] == 0 for r in fixed))
-    h2 = ("EVALUATION NOT RESOLVABLE under the fixed recovery recipe" if not resolvable
-          else "RESOLVABLE (the formal study's resolution must be computed)")
+    #: what the 720 can and cannot see is MEASURED per model; it is never
+    #: carried from the PCA-initialized students to a D1-initialized one
+    #: (maintainer amendment 2026-10-18)
+    h2 = ("NOT MEASURED: no D1-initialized recovered student exists yet; every fixed-recipe "
+          "student measured so far is PCA-initialized and sits at the floor of fluid_reasoning_720"
+          if not resolvable else "the fixed-recipe students resolve")
 
-    # --- the formal study's two preconditions, computed -------------------------
-    formal_left = proposal["formal_phase"]["phase_remaining_usd"]
-    cap = proposal["formal_phase"]["per_session_cap_usd"]
-    smallest = min(proposal["designs"].values(), key=lambda d: d["expected_usd"])
-    fundable = {k: d["expected_usd"] <= formal_left and d["largest_session_hard_usd"] <= cap
-                for k, d in proposal["designs"].items()}
-    budget = {"formal_phase_remaining_usd": formal_left, "per_session_cap_usd": cap,
-              "designs": {k: {x: d[x] for x in ("doses", "full_searches", "recovery_probes",
-                                                "expected_usd", "largest_session_hard_usd")}
-                          | {"fundable": fundable[k]} for k, d in proposal["designs"].items()},
-              "smallest_design_gap_usd": round(max(0.0, smallest["expected_usd"] - formal_left), 2),
-              "full_search_by_dose": {k: {x: v[x] for x in ("search_minutes", "expected_usd",
-                                                             "hard_usd", "within_per_session_cap")}
+    # --- the amended formal design (single draw per dose), read and computed ------
+    design = proposal["design"]
+    envelopes = {"formal_phase": proposal["budget"]["phase_remaining_usd"]["formal_volume"],
+                 "all_programme_phases": proposal["budget"]["programme_remaining_usd"]}
+    budget = {"design": design["name"], "per_session_cap_usd": proposal["budget"]["per_session_cap_usd"],
+              "envelopes_usd": envelopes,
+              "variants": {k: {"expected_usd": v["expected_usd"],
+                               "sum_of_hard_caps_usd": v["sum_of_hard_caps_usd"],
+                               "largest_session_hard_usd": v["largest_session_hard_usd"],
+                               "sessions": [(x["session"], x["expected_usd"], x["hard_usd"])
+                                            for x in v["sessions"]],
+                               "completes_in": {e: q["completes"] for e, q in v["sequenced"].items()},
+                               "first_unfundable": {e: q.get("first_unfundable")
+                                                    for e, q in v["sequenced"].items()},
+                               "gap_to_formal_phase_usd": v["gap_to_formal_phase_expected_usd"],
+                               "gap_to_programme_usd": v["gap_to_programme_expected_usd"]}
+                           for k, v in design.items() if isinstance(v, dict) and "sessions" in v},
+              "full_search_by_dose": {k: {x: v[x] for x in ("search_minutes",
+                                                             "search_minutes_with_overhead_fix")}
                                       for k, v in proposal["pricing"]["full_search_by_dose"].items()}}
-    if proposal["precondition"]["met"] != resolvable:
-        raise SystemExit("the proposal's precondition disagrees with the dev analysis; regenerate it")
+    fundable = {k: v["completes_in"]["formal_phase"] for k, v in budget["variants"].items()}
+    resolution_path = LOGS / "design/resolution_check.json"
+    resolution = load(resolution_path) if resolution_path.is_file() else None
 
     # --- the pilot verdict, read ----------------------------------------------
     h1 = None
@@ -150,8 +161,8 @@ def main() -> int:
                                          if r.startswith("calibration:")},
         },
         "capability_evaluation": {
-            "battery": bound(REPO / "data/stages/stage-0/calibration_volume/tasks/dev_v1.jsonl"),
-            "manifest": bound(REPO / "data/stages/stage-0/calibration_volume/tasks/dev_v1.manifest.json"),
+            "battery": bound(REPO / "data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.jsonl"),
+            "manifest": bound(REPO / "data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.manifest.json"),
             "analysis": bound(LOGS / "design/dev_analysis.json"),
             "floor_diagnostic": bound(LOGS / "design/floor_diagnostic.json"),
             "teacher": teacher, "fixed_recipe_students": dict(zip(pair, fixed)),
@@ -161,7 +172,7 @@ def main() -> int:
             "seed_discordance": res["discordance_rate"],
             "interactive_invalid_action_rate": {k: v["interactive"]["invalid_action_rate"]
                                                 for k, v in floor["runs"].items()},
-            "resolvable_under_fixed_recipe": resolvable,
+            "pca_fixed_recipe_students_off_floor": resolvable,
         },
         "base_pool": {"manifest": bound(pool_dir / "manifest.json"),
                       "n_items": pool["n_items"], "n_units": pool["n_units"],
@@ -177,18 +188,22 @@ def main() -> int:
             "H2_downstream_reasoning": h2,
             "H1_selection_stability": ("pilot (exploratory, root-level): " + json.dumps(
                 {k: v["label"] for k, v in h1.items()}) if h1 else "pilot not complete"),
-            "formal_volume_study": "NOT RUN: " + "; ".join(
-                ([] if resolvable else
-                 ["EVALUATION NOT RESOLVABLE -- under the fixed recovery recipe every recovered "
-                  "student scores 0 on the capability battery, so no initialization "
-                  "difference can reach the H2 endpoint"])
-                + ([] if any(fundable.values()) else
-                   [f"BUDGET INSUFFICIENT -- the smallest design ({smallest['full_searches']} "
-                    f"full searches) is priced at ${smallest['expected_usd']} against "
-                    f"${formal_left} left in the formal phase"])) if not (
-                resolvable and any(fundable.values())) else "not decided by this record",
+            "formal_volume_study": (
+                "NOT RUN: BUDGET INSUFFICIENT for the maintainer's amended design (1x/2x/4x, one full "
+                "search and one recovery each) -- "
+                + "; ".join(f"{k}: ${v['expected_usd']} expected, money runs out at "
+                            f"'{v['first_unfundable']['formal_phase']}' in the formal phase "
+                            f"(${envelopes['formal_phase']}) and "
+                            + (f"at '{v['first_unfundable']['all_programme_phases']}'"
+                               if v['first_unfundable']['all_programme_phases'] else "nowhere")
+                            + f" with every programme phase merged (${envelopes['all_programme_phases']})"
+                            for k, v in budget["variants"].items())
+                if not any(fundable.values()) else "fundable in the formal phase: needs a preregistration"),
+            "H2_resolution_evidence": (resolution["verdict"]["reading"] if resolution else
+                                       "reference check not run"),
         },
         "formal_design_proposal": bound(proposal_path),
+        "resolution_check": bound(resolution_path) if resolution else None,
         "budget_gap": budget,
         "pilot_by_operator": h1,
         "money": {"runs": runs, "programme_spent_usd": spent["spent_usd"],

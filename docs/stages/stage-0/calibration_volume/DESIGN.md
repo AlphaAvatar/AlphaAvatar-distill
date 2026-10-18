@@ -140,6 +140,68 @@ frozen in `logs/.../plans/pilot_analysis_plan.json`.
 - **Results and the terminal verdict:**
   `logs/stages/stage-0/calibration_volume/closeout/REPORT.md`.
 
+## 5a. The formal study, as amended by the maintainer (2026-10-18)
+
+The three-resamples-per-dose design is withdrawn. The formal comparison is:
+
+| dose | full search | recovery | evaluation |
+| --- | --- | --- | --- |
+| 1x (45,000 UESP) | one D1 full search | one, fixed recipe and seed | eval-set-1 |
+| 2x | one | one | eval-set-1 |
+| 4x | one | one | eval-set-1 |
+
+- **Fixed across doses:**
+  - the teacher and student geometry;
+  - the forward baseline, resolved;
+  - the recovery recipe `e1_p1_kd_heavy@0.86M` and its one seed;
+  - the evaluation contract, `data/eval-set/eval-set-1` at its registered
+    identity.
+- **One frozen base mixture and one nested draw:**
+  - the pilot's weights (0.18 per static primary axis, 0.28 supporting) and
+    their frozen reasoning-heavy variant;
+  - 1x ⊂ 2x ⊂ 4x;
+  - the operator order and the profile per operator stay free.
+- **Covariates per dose:** realized UESP, tokens, items/units,
+  sources/subtypes, distinct rule families and generators. Family diversity
+  rises with dose in the pilot draws, so every contrast is a
+  volume-plus-diversity contrast, never a pure volume effect.
+- **What it can claim:** comparisons between these three treatments only.
+  - No selection variance or stability. That needs resamples; the pilot's
+    root-level resampled measurement stands as the only one, and it is not
+    repeated.
+  - No statistical saturation.
+  - The H2 intervals cover evaluation sampling only.
+- **Resolution gate:**
+  - **Before any search:** the reference check
+    (`configs/.../resolution_session.json`) measures whether the 720 resolves
+    models at student scale.
+  - **After the 1x unit:** the recovered D1-initialized student must answer at
+    least 2% of the static fluid items, or H2 is EVALUATION NOT RESOLVABLE.
+    That verdict is measured on a D1 student, not assumed from the PCA
+    students, and 2x/4x are not launched without a new decision.
+- **The 4x search exceeds the $30 per-session cap. It is split, never
+  shrunk:**
+  - two sessions over ONE search identity;
+  - a persistent network volume in one datacenter holds the journal and every
+    materialized state;
+  - part 2 runs the identical plan, config, seed, profiles and baseline
+    resolution, and the engine's exact journal resume restores every finished
+    state from disk by content id and hash;
+  - a declined restore stops the run.
+
+  The driver/launcher support for this is specified, not yet built
+  (`plans/formal_design_proposal.json :: split_execution_of_4x`).
+- **Launch order:**
+  1. 1x search + recovery + eval-set-1, the gate;
+  2. the 2x search;
+  3. the 4x search, parts 1 and 2;
+  4. 2x and 4x recovery + eval-set-1.
+
+  All sessions share the volume, which also keeps every Top-1 and recovered
+  student durable.
+- **Price:** `plans/formal_design_proposal.json`; the verdict and the decision
+  it needs are in `closeout/REPORT.md`.
+
 ## 6. Sessions and money
 
 - **One governance type per session kind**
@@ -161,7 +223,8 @@ frozen in `logs/.../plans/pilot_analysis_plan.json`.
 | --- | --- |
 | executables (audit, generators, builders, runner, scorer, governance, launcher, drivers, closeouts) | `scripts/stages/stage-0/calibration_volume/` |
 | experiment tests | `pytest scripts/stages/stage-0/calibration_volume/tests` |
-| procedural task sets and manifests (dev, calibration prompts, final) | `data/stages/stage-0/calibration_volume/tasks/` |
+| calibration prompt sets and manifests | `data/stages/stage-0/calibration_volume/tasks/` |
+| the dev battery (`dev_v1`), since 2026-10-18 a registered evaluation set | `data/eval-set/eval-set-1/fluid_reasoning_720/` (old path resolves through `logs/index.json :: historical_paths`) |
 | audit inputs, session plans, artifact specs, pilot design, profile document | `configs/stages/stage-0/calibration_volume/` |
 | audit, design analyses, frozen plans, runs, programme closeout | `logs/stages/stage-0/calibration_volume/` (README generated) |
 | heavy bytes: raw generations, base pool, profile items, search records | `artifacts/stages/stage-0/calibration_volume/` (gitignored; each run's closeout names them by sha256) |
