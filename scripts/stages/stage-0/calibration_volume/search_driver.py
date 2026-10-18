@@ -113,6 +113,7 @@ def main(argv=None) -> int:
     ap.add_argument("--status", required=True)
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--check-only", action="store_true")
+    ap.add_argument("--plan", default="search", help="the session plan name the authorization binds")
     ap.add_argument("--treatments-doc", default=str(PREREG.relative_to(REPO)),
                     help="the document that freezes this treatment's profile hashes")
     ap.add_argument("--max-depth", type=int, default=None,
@@ -157,7 +158,7 @@ def main(argv=None) -> int:
         record["session"] = session.as_record()
         if not args.check_only:
             auth = G.load_for("search", args.auth)
-            auth.require_plan(G.plan_hash("search"))
+            auth.require_plan(G.plan_hash(args.plan))
             record["authorization_id"] = auth.authorization_id
         done(st, config_hash=session.config.config_hash[:16])
         save()

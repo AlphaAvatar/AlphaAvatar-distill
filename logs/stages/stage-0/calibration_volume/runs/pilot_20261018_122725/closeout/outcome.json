@@ -1,0 +1,15 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "pilot_20261018_122725",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "pilot",
+ "recorded_utc": "2026-10-18T12:28:08+00:00",
+ "status": "ABANDONED_BEFORE_LAUNCH",
+ "outcome": "A $0 stage-A rehearsal with the real authorization found the search driver verified it against plan 'search' while the session's plan is 'pilot_search' (the CPU check-only had skipped the authorization stage). The fix passes the plan name from the launcher, which moves the harness digest, so the run is closed unlaunched and a fresh run id is issued. No provider resource was created.",
+ "provider_resource_created": false,
+ "money": {
+  "all_in_usd": 0.0,
+  "_basis": "no provider resource existed"
+ }
+}

@@ -197,7 +197,7 @@ def driver_command(ctx: Any, plan: Any, *, kind: str) -> str:
             extra = f" --max-depth {t['max_depth']}" if t.get("max_depth") else ""
             steps.append(
                 f"{py} {REPO}/scripts/stages/stage-0/calibration_volume/search_driver.py "
-                f"--treatment {name} --run-id {run_id} --auth {auth} "
+                f"--treatment {name} --run-id {run_id} --auth {auth} --plan {ctx.args.plan} "
                 f"--treatments-doc {doc['treatments_doc']} --status '{status_path(kind)}'"
                 f"{extra} && mkdir -p {audit}/records && sha256sum {audit}/{name}/search_record.json"
                 f" | cut -d' ' -f1 > {audit}/records/{name}.done || FAIL=1")
