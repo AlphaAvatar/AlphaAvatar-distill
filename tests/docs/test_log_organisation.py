@@ -676,7 +676,10 @@ class TestTheStageMappingIsComplete:
         rows = {s["stage_id"]: s for s in attribution.stage_rows(REPO)}
         for sid in ("0", "2"):
             a = rows[sid]["activity"]
-            assert a["experiments"] == 0
+            # counted from the inventory: stage 0 gained its first study on 2026-10-18
+            assert a["experiments"] == sum(
+                1 for r in attribution.INVENTORY
+                if r["classification"] == "experiment" and r["stage_id"] == sid)
             assert a["pipeline_activity"] >= 1, (
                 f"stage-{sid} reports no work of its own")
             assert a["canonical_configs"] or a["canonical_data_manifests"], (

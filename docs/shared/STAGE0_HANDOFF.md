@@ -1,5 +1,12 @@
 # Stage-0 handoff: calibration data volume and mixture, on the adopted baseline
 
+> **Taken up 2026-10-18.** The volume programme ran and is TERMINAL. The
+> formal study was NOT RUN: H2 is not resolvable under the fixed recovery
+> recipe, and the budget cannot fund the smallest readable design.
+> - Results, the costed formal design and the minimum viable plan:
+>   [`logs/stages/stage-0/calibration_volume/closeout/REPORT.md`](../../logs/stages/stage-0/calibration_volume/closeout/REPORT.md).
+> - The page below is the handoff as written before that work.
+
 **Status: handoff only (2026-10-17 UTC).** It authorizes nothing. No Stage-0
 experiment is designed, no dataset is built, downloaded or generated, and no
 GPU resource or grant exists for this work. Design and authorization happen in

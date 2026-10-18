@@ -1158,11 +1158,12 @@ STAGE_1 = [
         id="calibration_volume",
         kind="experiment",
         stage_id="0",
-        status=("IN PROGRESS 2026-10-18. Prerequisites done: $0 data audit; "
-                "capability battery dev_v1 valid (teacher 638/720) with the "
-                "fixed-recipe students at its floor (0/720 on both 0.86M "
-                "seeds), so H2 is not resolvable under the fixed recovery; "
-                "base_pool_v1 built; root-level selection pilot running"),
+        status=("TERMINAL 2026-10-18 (formal study NOT RUN). H2: EVALUATION "
+                "NOT RESOLVABLE under the fixed recovery recipe (0.86M "
+                "controls 0/720, teacher 638/720). H1 root-level pilot "
+                "(exploratory): FFN and WIDTH stabilize with volume, "
+                "ATTENTION no detectable effect, DEPTH unlabeled. Budget "
+                "insufficient for the smallest readable formal design"),
         title="Stage-0 calibration volume dose-response (first Stage-0 study)",
         question=("With teacher, geometry, the forward-baseline method and the "
                   "recovery recipe fixed, does more independent, "
@@ -1185,11 +1186,23 @@ STAGE_1 = [
             E("logs/stages/stage-0/calibration_volume/plans/pilot_analysis_plan.json",
               "the root-level pilot's analysis plan, frozen before its result",
               field="authorizes", equals="nothing"),
+            E("logs/stages/stage-0/calibration_volume/design/pilot_structure_agreement.json",
+              "the pilot's root-level selection agreement under the frozen plan",
+              field="schema", equals="aadistill.stage0.structure_agreement/v2"),
+            E("logs/stages/stage-0/calibration_volume/plans/formal_design_proposal.json",
+              "the formal study designed and priced from measured telemetry; "
+              "its precondition and its budget gap",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-0/calibration_volume/closeout/programme_closeout.json",
+              "the programme's terminal record: every figure read from its "
+              "owner, every verdict computed",
+              field="authorizes", equals="nothing"),
         ],
         external_material=[],
         decisions=["logs/budget/decisions.md -- 2026-10-18: Stage-0 "
                    "calibration-volume programme started; battery valid, "
-                   "students at floor, root-level pilot"],
+                   "students at floor, root-level pilot; pilot attempt 1 OOM "
+                   "repaired on an 80 GB card; programme terminal"],
         canonical_log_destination="logs/stages/stage-0/calibration_volume",
         classification_reason=(
             "Stage 0 by subject and product: it varies the teacher-signal "

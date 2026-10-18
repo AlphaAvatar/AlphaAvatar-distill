@@ -1,0 +1,465 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.programme_closeout/v1",
+ "written_utc": "2026-10-18T17:32:24+00:00",
+ "repository": {
+  "branch": "stage0/calibration-volume-mixture",
+  "head_at_write": "b1f3a02062d7b5e5fc7804c7822e8c30fe6e6ee1",
+  "dirty_at_write": true
+ },
+ "data_audit": {
+  "owner": {
+   "path": "logs/stages/stage-0/calibration_volume/audit/data_audit.json",
+   "sha256": "0fc9e209ad2cc700e85b4b8a45c7856d9100a3790116c69b619cb492a7497bfa"
+  },
+  "corpus_v2_primary_axis_items": 0,
+  "corpus_v2_rule_families": 0,
+  "openmath_accepted_candidate_correct_rate": 0.6639,
+  "openmath_length_limited_candidates": 1541,
+  "window_admitted_share": {
+   "code": 0.1443,
+   "gsm8k": 0.8881,
+   "multihop_qa": 0.378,
+   "openmath": 0.3903,
+   "rag_evidence": 0.9629,
+   "tool_calling": 0.9712
+  },
+  "historical_profiles_uesp": {
+   "calibration:calib.domain_balanced@v1": 44746,
+   "calibration:calib.reasoning_heavy@v2": 32709
+  }
+ },
+ "capability_evaluation": {
+  "battery": {
+   "path": "data/stages/stage-0/calibration_volume/tasks/dev_v1.jsonl",
+   "sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4"
+  },
+  "manifest": {
+   "path": "data/stages/stage-0/calibration_volume/tasks/dev_v1.manifest.json",
+   "sha256": "95531de9b347a0987c7ff973c10980dc66ff45673699422fe0f84c776f4919b5"
+  },
+  "analysis": {
+   "path": "logs/stages/stage-0/calibration_volume/design/dev_analysis.json",
+   "sha256": "3486253d17208e4974c4b197f70baba1f3e9bd7a83f5fe3b7e89945669956918"
+  },
+  "floor_diagnostic": {
+   "path": "logs/stages/stage-0/calibration_volume/design/floor_diagnostic.json",
+   "sha256": "47e244eb4815e241f66bade7c2143f8a0101505e607396d8d31fa3ad486f27f3"
+  },
+  "teacher": {
+   "n": 720,
+   "correct": 638,
+   "rate": 0.8861
+  },
+  "fixed_recipe_students": {
+   "ctl_r0860k_sa_dev": {
+    "n": 720,
+    "correct": 0,
+    "rate": 0.0
+   },
+   "ctl_r0860k_sb_dev": {
+    "n": 720,
+    "correct": 0,
+    "rate": 0.0
+   }
+  },
+  "reference_2_96M": {
+   "n": 720,
+   "correct": 10,
+   "rate": 0.0139
+  },
+  "teacher_by_axis": {
+   "inductive_rule_discovery": 0.9722,
+   "compositional_generalization": 0.9375,
+   "task_contained_deduction": 0.9844,
+   "abstract_analogical": 0.7708,
+   "interactive_adaptation": 0.6944
+  },
+  "seed_discordance": 0.0,
+  "interactive_invalid_action_rate": {
+   "teacher_dev": 0.0027,
+   "ctl_r0860k_sa_dev": 0.9584,
+   "ctl_r0860k_sb_dev": 0.9065,
+   "e1_r2960k_sa_pca_dev": 0.8977
+  },
+  "resolvable_under_fixed_recipe": false
+ },
+ "base_pool": {
+  "manifest": {
+   "path": "artifacts/stages/stage-0/calibration_volume/base_pool_v1/manifest.json",
+   "sha256": "bbf84f5146a5616eab261c6ee23e585200e888b52b33bf2d9fb6f87f6df51884"
+  },
+  "n_items": 6593,
+  "n_units": 6539,
+  "max_tokens": 8192,
+  "dropped_units_over_max_tokens": 53
+ },
+ "pilot": {
+  "design": {
+   "path": "configs/stages/stage-0/calibration_volume/pilot_design.json",
+   "sha256": "37fb914c6619be6938e621e250e568d6d31cf0144d472d209329250b2dcfe6d9"
+  },
+  "plan": {
+   "path": "configs/stages/stage-0/calibration_volume/pilot_search_session.json",
+   "sha256": "5cd4afb50f931c9eef44449e2cbc06cba29fe384083a7b706c47266881947545"
+  },
+  "analysis_plan": {
+   "path": "logs/stages/stage-0/calibration_volume/plans/pilot_analysis_plan.json",
+   "sha256": "565486c076d8812e6c21b393d16fd6d1268d3eaccbe97c5b2e8bae1568969505"
+  },
+  "profiles": {
+   "path": "configs/stages/stage-0/calibration_volume/profiles.json",
+   "sha256": "e112bf8b37313ba091e1542d70086d9d1b4d8d68a8f9342429d47dc7b0e1d4af"
+  },
+  "covariates": {
+   "calib.s0v_base_d1_r1@v1": {
+    "dose": 1,
+    "uesp": 64049,
+    "tokens": 75660,
+    "n_rule_families": 10,
+    "n_units": 31,
+    "resample": 1
+   },
+   "calib.s0v_base_d1_r2@v1": {
+    "dose": 1,
+    "uesp": 67767,
+    "tokens": 81057,
+    "n_rule_families": 11,
+    "n_units": 34,
+    "resample": 2
+   },
+   "calib.s0v_base_d1_r3@v1": {
+    "dose": 1,
+    "uesp": 66986,
+    "tokens": 76418,
+    "n_rule_families": 12,
+    "n_units": 27,
+    "resample": 3
+   },
+   "calib.s0v_base_d2_r1@v1": {
+    "dose": 2,
+    "uesp": 111457,
+    "tokens": 133955,
+    "n_rule_families": 15,
+    "n_units": 56,
+    "resample": 1
+   },
+   "calib.s0v_base_d2_r2@v1": {
+    "dose": 2,
+    "uesp": 113887,
+    "tokens": 132671,
+    "n_rule_families": 15,
+    "n_units": 55,
+    "resample": 2
+   },
+   "calib.s0v_base_d2_r3@v1": {
+    "dose": 2,
+    "uesp": 116817,
+    "tokens": 133879,
+    "n_rule_families": 17,
+    "n_units": 47,
+    "resample": 3
+   },
+   "calib.s0v_base_d4_r1@v1": {
+    "dose": 4,
+    "uesp": 200139,
+    "tokens": 236895,
+    "n_rule_families": 20,
+    "n_units": 105,
+    "resample": 1
+   },
+   "calib.s0v_base_d4_r2@v1": {
+    "dose": 4,
+    "uesp": 199443,
+    "tokens": 234026,
+    "n_rule_families": 18,
+    "n_units": 97,
+    "resample": 2
+   },
+   "calib.s0v_base_d4_r3@v1": {
+    "dose": 4,
+    "uesp": 208275,
+    "tokens": 240945,
+    "n_rule_families": 22,
+    "n_units": 95,
+    "resample": 3
+   }
+  },
+  "agreement": {
+   "path": "logs/stages/stage-0/calibration_volume/design/pilot_structure_agreement.json",
+   "sha256": "46104d73450b72d2d60f1753d24ad2c07bf4381770d802b67193ce6611b21dc4"
+  }
+ },
+ "verdicts": {
+  "H2_downstream_reasoning": "EVALUATION NOT RESOLVABLE under the fixed recovery recipe",
+  "H1_selection_stability": "pilot (exploratory, root-level): {\"ATTENTION\": \"no detectable volume effect\", \"DEPTH\": null, \"FFN\": \"stabilizes with volume\", \"RESIDUAL_WIDTH\": \"stabilizes with volume\"}",
+  "formal_volume_study": "NOT RUN: EVALUATION NOT RESOLVABLE -- under the fixed recovery recipe every recovered student scores 0 on the capability battery, so no initialization difference can reach the H2 endpoint; BUDGET INSUFFICIENT -- the smallest design (6 full searches) is priced at $111.93 against $65.0 left in the formal phase"
+ },
+ "formal_design_proposal": {
+  "path": "logs/stages/stage-0/calibration_volume/plans/formal_design_proposal.json",
+  "sha256": "c6cceb115fcd33b85d4140744657f0721c2f9451c4d47a37a47fdc827979a5cf"
+ },
+ "budget_gap": {
+  "formal_phase_remaining_usd": 65.0,
+  "per_session_cap_usd": 30.0,
+  "designs": {
+   "F_full": {
+    "doses": [
+     "1x",
+     "2x",
+     "4x"
+    ],
+    "full_searches": 9,
+    "recovery_probes": 18,
+    "expected_usd": 247.74,
+    "largest_session_hard_usd": 43.58,
+    "fundable": false
+   },
+   "MVP_A_h1_only": {
+    "doses": [
+     "1x",
+     "2x"
+    ],
+    "full_searches": 6,
+    "recovery_probes": 0,
+    "expected_usd": 111.93,
+    "largest_session_hard_usd": 27.63,
+    "fundable": false
+   },
+   "MVP_B_h1_h2": {
+    "doses": [
+     "1x",
+     "2x"
+    ],
+    "full_searches": 6,
+    "recovery_probes": 12,
+    "expected_usd": 132.09,
+    "largest_session_hard_usd": 27.63,
+    "fundable": false
+   }
+  },
+  "smallest_design_gap_usd": 46.93,
+  "full_search_by_dose": {
+   "1x": {
+    "search_minutes": 486.2,
+    "expected_usd": 15.4,
+    "hard_usd": 19.82,
+    "within_per_session_cap": true
+   },
+   "2x": {
+    "search_minutes": 704.4,
+    "expected_usd": 21.91,
+    "hard_usd": 27.63,
+    "within_per_session_cap": true
+   },
+   "4x": {
+    "search_minutes": 1149.7,
+    "expected_usd": 35.19,
+    "hard_usd": 43.58,
+    "within_per_session_cap": false
+   }
+  }
+ },
+ "pilot_by_operator": {
+  "ATTENTION": {
+   "label": "no detectable volume effect",
+   "reading": {
+    "effect_4x_minus_1x": 0.0035,
+    "noise": 0.0186
+   },
+   "between_resamples": {
+    "1": {
+     "mean": 0.9558,
+     "min": 0.955,
+     "max": 0.9562,
+     "noise": 0.0012
+    },
+    "2": {
+     "mean": 0.9553,
+     "min": 0.9495,
+     "max": 0.9585,
+     "noise": 0.009
+    },
+    "4": {
+     "mean": 0.9593,
+     "min": 0.9524,
+     "max": 0.971,
+     "noise": 0.0186
+    }
+   }
+  },
+  "DEPTH": {
+   "label": null,
+   "reading": null,
+   "between_resamples": {
+    "1": {
+     "mean": 0.6,
+     "min": 0.6,
+     "max": 0.6,
+     "noise": 0.0
+    },
+    "2": {
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0,
+     "noise": 0.0
+    }
+   }
+  },
+  "FFN": {
+   "label": "stabilizes with volume",
+   "reading": {
+    "effect_4x_minus_1x": 0.035,
+    "noise": 0.0094
+   },
+   "between_resamples": {
+    "1": {
+     "mean": 0.9085,
+     "min": 0.9065,
+     "max": 0.9125,
+     "noise": 0.006
+    },
+    "2": {
+     "mean": 0.9289,
+     "min": 0.9248,
+     "max": 0.9349,
+     "noise": 0.0101
+    },
+    "4": {
+     "mean": 0.9435,
+     "min": 0.939,
+     "max": 0.9484,
+     "noise": 0.0094
+    }
+   }
+  },
+  "RESIDUAL_WIDTH": {
+   "label": "stabilizes with volume",
+   "reading": {
+    "effect_4x_minus_1x": 0.0565,
+    "noise": 0.0067
+   },
+   "between_resamples": {
+    "1": {
+     "mean": 0.8391,
+     "min": 0.8371,
+     "max": 0.842,
+     "noise": 0.0049
+    },
+    "2": {
+     "mean": 0.8645,
+     "min": 0.8625,
+     "max": 0.8674,
+     "noise": 0.0049
+    },
+    "4": {
+     "mean": 0.8956,
+     "min": 0.8933,
+     "max": 0.9,
+     "noise": 0.0067
+    }
+   }
+  }
+ },
+ "money": {
+  "runs": [
+   {
+    "run_id": "battery_20261018_091856",
+    "phase": "prerequisites",
+    "status": "ABANDONED_BEFORE_LAUNCH",
+    "terminal": null,
+    "usd": 0.0,
+    "provider_confirms_gone": null,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/battery_20261018_091856/closeout/outcome.json",
+     "sha256": "a003fbb16446cf3b1372db7c6bdb824e166dcbf96a94b782b48a977646448c5f"
+    }
+   },
+   {
+    "run_id": "battery_20261018_092345",
+    "phase": "prerequisites",
+    "status": "SESSION_ENDED",
+    "terminal": "RUN_FAILED",
+    "usd": 3.6303,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/battery_20261018_092345/closeout/outcome.json",
+     "sha256": "6ba161c2836487431f6648467964c3af932bb5f14f9936ab02b3e3e0ed5b03bc"
+    }
+   },
+   {
+    "run_id": "pilot_20261018_122600",
+    "phase": "pilot",
+    "status": "ABANDONED_BEFORE_LAUNCH",
+    "terminal": null,
+    "usd": 0.0,
+    "provider_confirms_gone": null,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_122600/closeout/outcome.json",
+     "sha256": "1ee0c6bb29b00704635b7966fa41b92ec59f2d108ad7ae4da111fed0186c11e2"
+    }
+   },
+   {
+    "run_id": "pilot_20261018_122725",
+    "phase": "pilot",
+    "status": "ABANDONED_BEFORE_LAUNCH",
+    "terminal": null,
+    "usd": 0.0,
+    "provider_confirms_gone": null,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_122725/closeout/outcome.json",
+     "sha256": "78eefb77e78cf6b3c1edca86026a1982d8edc1c1fbf7919510f85984e12ad68c"
+    }
+   },
+   {
+    "run_id": "pilot_20261018_122808",
+    "phase": "pilot",
+    "status": "SESSION_ENDED",
+    "terminal": "RUN_FAILED",
+    "usd": 1.2469,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_122808/closeout/outcome.json",
+     "sha256": "cf064240683bb837a452c134ce8cfa1afd2bee655e48b6021102cb6ffe387766"
+    }
+   },
+   {
+    "run_id": "pilot_20261018_134131",
+    "phase": "pilot",
+    "status": "SESSION_ENDED",
+    "terminal": "ALL_DONE",
+    "usd": 6.953,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/closeout/outcome.json",
+     "sha256": "9efc1b86bc31c8abfe06819746240cd2079c546e09f5224c14d4d6a120532d69"
+    }
+   },
+   {
+    "run_id": "teachercal_20261018_112755",
+    "phase": "prerequisites",
+    "status": "SESSION_ENDED",
+    "terminal": "ALL_DONE",
+    "usd": 1.6169,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/teachercal_20261018_112755/closeout/outcome.json",
+     "sha256": "7489b93395a4b5f600219831f9614db35e9ec6c6dbead6569f334d17fab41994"
+    }
+   }
+  ],
+  "programme_spent_usd": 13.4471,
+  "programme_ceiling_usd": 92.0,
+  "project": {
+   "cap_usd": 595.0,
+   "cumulative_spend_usd": 513.5943,
+   "remaining_usd": 81.4057
+  }
+ },
+ "provider": {
+  "queried_utc": "2026-10-18T17:32:24+00:00",
+  "pods": 0,
+  "network_volumes": 0,
+  "spend_per_hour": 0
+ },
+ "authorizes": "nothing"
+}

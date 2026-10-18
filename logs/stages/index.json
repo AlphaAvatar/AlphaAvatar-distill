@@ -89,7 +89,7 @@
     "pipeline_activity": 1,
     "experiments": 1,
     "experiments_with_logs": 1,
-    "runs": 3,
+    "runs": 7,
     "canonical_configs": 3,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
@@ -1040,7 +1040,7 @@
    "experiment_id": "calibration_volume",
    "stage_id": "0",
    "classification": "experiment",
-   "status": "IN PROGRESS 2026-10-18. Prerequisites done: $0 data audit; capability battery dev_v1 valid (teacher 638/720) with the fixed-recipe students at its floor (0/720 on both 0.86M seeds), so H2 is not resolvable under the fixed recovery; base_pool_v1 built; root-level selection pilot running",
+   "status": "TERMINAL 2026-10-18 (formal study NOT RUN). H2: EVALUATION NOT RESOLVABLE under the fixed recovery recipe (0.86M controls 0/720, teacher 638/720). H1 root-level pilot (exploratory): FFN and WIDTH stabilize with volume, ATTENTION no detectable effect, DEPTH unlabeled. Budget insufficient for the smallest readable formal design",
    "title": "Stage-0 calibration volume dose-response (first Stage-0 study)",
    "question": "With teacher, geometry, the forward-baseline method and the recovery recipe fixed, does more independent, capability-aligned Stage-0 calibration data stabilize the AutoInitializer's structural selection (H1), improve the recovered student's reasoning on unseen rule families (H2), and saturate (H3)?",
    "canonical_path": "logs/stages/stage-0/calibration_volume",
@@ -1063,11 +1063,29 @@
      "says": "the root-level pilot's analysis plan, frozen before its result",
      "field": "authorizes",
      "equals": "nothing"
+    },
+    {
+     "path": "logs/stages/stage-0/calibration_volume/design/pilot_structure_agreement.json",
+     "says": "the pilot's root-level selection agreement under the frozen plan",
+     "field": "schema",
+     "equals": "aadistill.stage0.structure_agreement/v2"
+    },
+    {
+     "path": "logs/stages/stage-0/calibration_volume/plans/formal_design_proposal.json",
+     "says": "the formal study designed and priced from measured telemetry; its precondition and its budget gap",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "logs/stages/stage-0/calibration_volume/closeout/programme_closeout.json",
+     "says": "the programme's terminal record: every figure read from its owner, every verdict computed",
+     "field": "authorizes",
+     "equals": "nothing"
     }
    ],
    "external_material": [],
    "decisions": [
-    "logs/budget/decisions.md -- 2026-10-18: Stage-0 calibration-volume programme started; battery valid, students at floor, root-level pilot"
+    "logs/budget/decisions.md -- 2026-10-18: Stage-0 calibration-volume programme started; battery valid, students at floor, root-level pilot; pilot attempt 1 OOM repaired on an 80 GB card; programme terminal"
    ],
    "classification_reason": "Stage 0 by subject and product: it varies the teacher-signal calibration data a Stage-1 initialization is built from (AGENTS.md 4.2, reasoning-oriented calibration). The Stage-1 search and any Stage-3 probe are its instruments, as Stage-3 probes were for Stage-1 experiments.",
    "canonical_scripts": "scripts/stages/stage-0/calibration_volume",

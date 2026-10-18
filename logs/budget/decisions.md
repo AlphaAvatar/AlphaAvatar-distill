@@ -12301,3 +12301,33 @@ on a paid pod.
   the programme ceiling ($92) and the $30 per-session cap are unchanged.
   The formal phase cannot open in this programme, because H2 is not
   resolvable under the fixed recovery recipe.
+
+## 2026-10-18 — Stage-0 calibration-volume programme terminal; formal study NOT RUN
+
+- **Context.** The prerequisites and the root-level pilot are complete:
+  - pilot attempt 2, `runs/pilot_20261018_134131`, A100-80GB, ALL_DONE, 31/31
+    states, $6.953;
+  - programme total $13.4471 of $92.
+- **Pilot (exploratory, frozen plan).**
+  - FFN and RESIDUAL_WIDTH **stabilize with volume**: 4x−1x is +0.035 and
+    +0.057, against between-resample noise of 0.009 and 0.007.
+  - ATTENTION has **no detectable volume effect** (0.956 at 1x).
+  - DEPTH is unlabeled (one pair per dose), with identical removed sets at 2x.
+- **Formal study: NOT RUN, on two independent grounds.**
+  1. **H2: EVALUATION NOT RESOLVABLE** under the fixed recovery recipe.
+  2. **Budget insufficient.**
+     - Priced from the pilot's A100 telemetry, a full D1 search on this pool
+       is $15.40 / $21.91 / $35.19 at 1x / 2x / 4x.
+     - The smallest readable design, H1 only at 1x/2x with three resamples,
+       is $111.93, against $65 in the formal phase and $81.41 in the project.
+- **Decision.** Stop at the terminal condition and report the gap and the
+  minimum viable plan (`calibration_volume/closeout/REPORT.md` section 10).
+  - No reduced, underpowered formal study is run.
+  - The unspent formal ($65), prerequisites ($6.75) and pilot ($6.80)
+    allowances are not transferred anywhere.
+- **Alternatives considered.**
+  - Two resamples per dose: no noise estimate, so H1 is unreadable.
+  - A 4x arm: its session exceeds the $30 per-session cap.
+  - Recovery probes under the fixed recipe: they score zero by construction.
+- **Revisit when.** The maintainer chooses a recovery recipe that makes H2
+  measurable and funds the study.

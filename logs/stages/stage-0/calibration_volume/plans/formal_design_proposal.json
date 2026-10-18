@@ -1,0 +1,288 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.formal_design_proposal/v1",
+ "status": "PROPOSAL -- NOT FROZEN AND NOT A PREREGISTRATION. The formal phase opens only on plans/volume_preregistration.json, which this programme does not write: the precondition below fails under the fixed recovery recipe.",
+ "fixed": {
+  "method": "the forward baseline, resolved through shared.forward_baseline (stage1_init.d1_target_aware.scored_v1@v1)",
+  "teacher_and_geometry": "as in configs/stages/stage-0/calibration_volume/pilot_search_session.json",
+  "recovery_recipe": "e1_p1_kd_heavy@0.86M (the D-series fixed recovery)",
+  "state_evaluation": "state_eval@v1"
+ },
+ "treatments": {
+  "dose_unit": "unique effective scored positions (UESP) under positions.supervised_target_v1",
+  "doses": {
+   "1x": {
+    "target_uesp": 45000,
+    "realized_tokens_max": 81057
+   },
+   "2x": {
+    "target_uesp": 90000,
+    "realized_tokens_max": 133955
+   },
+   "4x": {
+    "target_uesp": 180000,
+    "realized_tokens_max": 240945
+   }
+  },
+  "resamples": "independent sampling seeds per dose; doses nested within a resample",
+  "per_treatment": "one D1 full search (beam width 6, delayed_prune warm-up 1, pareto@v2) with operator order and the profile per operator FREE, over two mixtures at the treatment's dose and resample: base (0.72 static primary / 0.28 supporting, the pilot's) and a reasoning-heavy variant -- the D1 search's own two-profile shape",
+  "hardware": "NVIDIA A100-SXM4-80GB: the base pool's 8,192-token items put up to 22,141 scored rows into one micro-batch of 3; a 44 GiB card OOMs in DEPTH (pilot_20261018_122808)"
+ },
+ "endpoints": {
+  "H1": "between-resample agreement at each dose of the committed Top-1: its operator order and per-step profile, and per operator FFN/ATTENTION per-layer Jaccard, DEPTH removed-set Jaccard, WIDTH subspace overlap; each beside chance",
+  "H2": "correctness of each treatment's recovered Top-1 on the capability battery's final split (evaluation families; the five evaluation-only generators reported separately), per P10.2 axis and pooled over the four static primary axes; interactive reported, not pooled",
+  "H3": "the dose-response shape across 1x/2x/4x for H1 and H2"
+ },
+ "statistics": {
+  "sesoi": {
+   "pooled_primary": 0.05,
+   "per_axis": 0.08
+  },
+  "inference": "rule-family cluster bootstrap (10,000 resamples, stratified by axis), tasks paired across treatments, recovery seeds and resamples averaged within treatment; 95% intervals on each dose contrast",
+  "decision": {
+   "GO": "the 2x-1x (or 4x-1x) interval lies wholly above +SESOI",
+   "NO-GO": "the interval lies wholly inside (-SESOI, +SESOI)",
+   "INCONCLUSIVE": "neither",
+   "SATURATION SUPPORTED": "2x-1x is GO and 4x-2x is NO-GO",
+   "EVALUATION NOT RESOLVABLE": "the precondition fails"
+  },
+  "h1_reading": "the pilot's noise-calibrated rule (plans/pilot_analysis_plan.json), on full-search Top-1s"
+ },
+ "precondition": {
+  "rule": "before any formal spend, a control recovered under the fixed recipe must score above floor on dev_v1, with a seed-discordance-based minimal detectable effect at or below the pooled SESOI",
+  "evidence": {
+   "dev_analysis": "logs/stages/stage-0/calibration_volume/design/dev_analysis.json",
+   "fixed_recipe_controls": {
+    "ctl_r0860k_sa_dev": {
+     "n": 720,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "ctl_r0860k_sb_dev": {
+     "n": 720,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "seed_discordance_rate": 0.0
+  },
+  "met": false,
+  "why_not": "both 0.86M controls score 0/720 and never disagree, so no minimal detectable effect exists: every recovered treatment would score zero by construction"
+ },
+ "pricing": {
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "price_per_hour": 1.79,
+  "telemetry": {
+   "path": "artifacts/stages/stage-0/calibration_volume/pilot_20261018_134131/pilot_root/search/telemetry.jsonl",
+   "sha256": "2b8b7c233bf4921bd7c2b2870588310ec07bec96f936d416511f991e08970c76",
+   "measured_on": "NVIDIA A100-SXM4-80GB",
+   "expansions": 31,
+   "overhead_minutes": 1.253
+  },
+  "trajectory": {
+   "path": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/search_analysis.json",
+   "sha256": "3a54583e3a775c91ead9f7972f50c66012b692a71550869daa1f7818421c5130"
+  },
+  "probe_usd": 1.68,
+  "probe_source": "logs/stages/stage-1/phase_d3/runs/d3_probes_20261017_110022/closeout/outcome.json: $5.0395 for its probes",
+  "full_search_by_dose": {
+   "1x": {
+    "profile_tokens_max": 81057,
+    "per_impl": {
+     "attention.activation_importance_v1": {
+      "d2_expansions": 28,
+      "d2_operator_minutes": 8.4,
+      "root_minutes_here": 1.3,
+      "basis": "measured at this dose (max over its resamples)",
+      "scale": 1.913,
+      "minutes": 16.1
+     },
+     "depth.causal_kl_greedy_v1": {
+      "d2_expansions": 14,
+      "d2_operator_minutes": 224.68,
+      "root_minutes_here": 29.51,
+      "basis": "measured per-token rate",
+      "scale": 1.467,
+      "minutes": 329.6
+     },
+     "ffn.activation_importance_v0": {
+      "d2_expansions": 20,
+      "d2_operator_minutes": 10.08,
+      "root_minutes_here": 0.98,
+      "basis": "measured at this dose (max over its resamples)",
+      "scale": 1.247,
+      "minutes": 12.6
+     },
+     "width.global_pca_v0": {
+      "d2_expansions": 30,
+      "d2_operator_minutes": 12.59,
+      "root_minutes_here": 0.81,
+      "basis": "measured at this dose (max over its resamples)",
+      "scale": 0.999,
+      "minutes": 12.6
+     }
+    },
+    "expansions": 92,
+    "search_minutes": 486.2,
+    "expected_usd": 15.4,
+    "hard_usd": 19.82,
+    "within_per_session_cap": true
+   },
+   "2x": {
+    "profile_tokens_max": 133955,
+    "per_impl": {
+     "attention.activation_importance_v1": {
+      "d2_expansions": 28,
+      "d2_operator_minutes": 8.4,
+      "root_minutes_here": 1.26,
+      "basis": "measured at this dose (max over its resamples)",
+      "scale": 1.848,
+      "minutes": 15.5
+     },
+     "depth.causal_kl_greedy_v1": {
+      "d2_expansions": 14,
+      "d2_operator_minutes": 224.68,
+      "root_minutes_here": 48.77,
+      "basis": "measured per-token rate",
+      "scale": 2.425,
+      "minutes": 544.8
+     },
+     "ffn.activation_importance_v0": {
+      "d2_expansions": 20,
+      "d2_operator_minutes": 10.08,
+      "root_minutes_here": 1.08,
+      "basis": "measured at this dose (max over its resamples)",
+      "scale": 1.375,
+      "minutes": 13.9
+     },
+     "width.global_pca_v0": {
+      "d2_expansions": 30,
+      "d2_operator_minutes": 12.59,
+      "root_minutes_here": 0.96,
+      "basis": "measured at this dose (max over its resamples)",
+      "scale": 1.184,
+      "minutes": 14.9
+     }
+    },
+    "expansions": 92,
+    "search_minutes": 704.4,
+    "expected_usd": 21.91,
+    "hard_usd": 27.63,
+    "within_per_session_cap": true
+   },
+   "4x": {
+    "profile_tokens_max": 240945,
+    "per_impl": {
+     "attention.activation_importance_v1": {
+      "d2_expansions": 28,
+      "d2_operator_minutes": 8.4,
+      "root_minutes_here": 1.43,
+      "basis": "measured at this dose (max over its resamples)",
+      "scale": 2.107,
+      "minutes": 17.7
+     },
+     "depth.causal_kl_greedy_v1": {
+      "d2_expansions": 14,
+      "d2_operator_minutes": 224.68,
+      "root_minutes_here": 87.72,
+      "basis": "measured per-token rate",
+      "scale": 4.361,
+      "minutes": 979.9
+     },
+     "ffn.activation_importance_v0": {
+      "d2_expansions": 20,
+      "d2_operator_minutes": 10.08,
+      "root_minutes_here": 1.33,
+      "basis": "measured at this dose (max over its resamples)",
+      "scale": 1.704,
+      "minutes": 17.2
+     },
+     "width.global_pca_v0": {
+      "d2_expansions": 30,
+      "d2_operator_minutes": 12.59,
+      "root_minutes_here": 1.27,
+      "basis": "measured at this dose (max over its resamples)",
+      "scale": 1.561,
+      "minutes": 19.6
+     }
+    },
+    "expansions": 92,
+    "search_minutes": 1149.7,
+    "expected_usd": 35.19,
+    "hard_usd": 43.58,
+    "within_per_session_cap": false
+   }
+  }
+ },
+ "designs": {
+  "F_full": {
+   "what": "the brief's study: 1x/2x/4x, three independent resamples each, one D1 full search per treatment, the fixed recovery on each Top-1 at two recovery seeds, capability battery final split",
+   "doses": [
+    "1x",
+    "2x",
+    "4x"
+   ],
+   "resamples_per_dose": 3,
+   "full_searches": 9,
+   "recovery_probes": 18,
+   "searches_expected_usd": 217.5,
+   "probes_expected_usd": 30.24,
+   "expected_usd": 247.74,
+   "largest_session_hard_usd": 43.58,
+   "fits_formal_phase": false,
+   "fits_programme_remainder": false,
+   "fits_per_session_cap": false,
+   "gap_to_formal_phase_usd": 182.74
+  },
+  "MVP_A_h1_only": {
+   "what": "H1 (and H3 at two doses) only: 1x/2x x three resamples, six full searches, no recovery. Answers whether full-search selection stabilizes with volume; says nothing about capability",
+   "doses": [
+    "1x",
+    "2x"
+   ],
+   "resamples_per_dose": 3,
+   "full_searches": 6,
+   "recovery_probes": 0,
+   "searches_expected_usd": 111.93,
+   "probes_expected_usd": 0.0,
+   "expected_usd": 111.93,
+   "largest_session_hard_usd": 27.63,
+   "fits_formal_phase": false,
+   "fits_programme_remainder": false,
+   "fits_per_session_cap": true,
+   "gap_to_formal_phase_usd": 46.93
+  },
+  "MVP_B_h1_h2": {
+   "what": "the smallest study that can address H2: 1x/2x x three resamples with two recovery seeds per Top-1 -- under a recovery recipe that first passes the precondition below, which the fixed 0.86M rung fails",
+   "doses": [
+    "1x",
+    "2x"
+   ],
+   "resamples_per_dose": 3,
+   "full_searches": 6,
+   "recovery_probes": 12,
+   "searches_expected_usd": 111.93,
+   "probes_expected_usd": 20.16,
+   "expected_usd": 132.09,
+   "largest_session_hard_usd": 27.63,
+   "fits_formal_phase": false,
+   "fits_programme_remainder": false,
+   "fits_per_session_cap": true,
+   "gap_to_formal_phase_usd": 67.09
+  }
+ },
+ "cost_levers": {
+  "dominant_term": "DEPTH: token-linear, and the pool's long teacher-native items make it the bulk of every search (see full_search_by_dose.per_impl)",
+  "per_expansion_overhead": "measured ~1.25 min per expansion here against D2's 0.14; the reload validation runs on the host, where torch sizes its pools from the host's CPU count rather than the pod's cgroup grant (suspected, not measured). An execution knob worth ~115 min per full search",
+  "item_length_bound": "a data-design choice, not an execution knob: D1's [256, 2,048] window keeps 66 of 572 verified teacher units and no analogy or interactive unit (audit section C)",
+  "faster_card": "an H100-class card is unmeasured on this workload; its price is ~2.2x the A100's"
+ },
+ "formal_phase": {
+  "phase": "formal_volume",
+  "phase_ceiling_usd": 65.0,
+  "phase_spent_usd": 0,
+  "phase_remaining_usd": 65.0,
+  "per_session_cap_usd": 30.0,
+  "programme_remaining_usd": 78.5529
+ },
+ "authorizes": "nothing"
+}

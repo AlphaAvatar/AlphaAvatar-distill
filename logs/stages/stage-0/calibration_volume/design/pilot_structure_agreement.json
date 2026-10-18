@@ -1,0 +1,1280 @@
+{
+ "schema": "aadistill.stage0.structure_agreement/v2",
+ "plan": "logs/stages/stage-0/calibration_volume/plans/pilot_analysis_plan.json",
+ "structure": "artifacts/stages/stage-0/calibration_volume/pilot_20261018_134131/pilot_root/structure.json",
+ "covariates": {
+  "calib.s0v_base_d1_r1@v1": {
+   "dose": 1,
+   "uesp": 64049,
+   "tokens": 75660,
+   "n_rule_families": 10,
+   "n_units": 31,
+   "resample": 1
+  },
+  "calib.s0v_base_d1_r2@v1": {
+   "dose": 1,
+   "uesp": 67767,
+   "tokens": 81057,
+   "n_rule_families": 11,
+   "n_units": 34,
+   "resample": 2
+  },
+  "calib.s0v_base_d1_r3@v1": {
+   "dose": 1,
+   "uesp": 66986,
+   "tokens": 76418,
+   "n_rule_families": 12,
+   "n_units": 27,
+   "resample": 3
+  },
+  "calib.s0v_base_d2_r1@v1": {
+   "dose": 2,
+   "uesp": 111457,
+   "tokens": 133955,
+   "n_rule_families": 15,
+   "n_units": 56,
+   "resample": 1
+  },
+  "calib.s0v_base_d2_r2@v1": {
+   "dose": 2,
+   "uesp": 113887,
+   "tokens": 132671,
+   "n_rule_families": 15,
+   "n_units": 55,
+   "resample": 2
+  },
+  "calib.s0v_base_d2_r3@v1": {
+   "dose": 2,
+   "uesp": 116817,
+   "tokens": 133879,
+   "n_rule_families": 17,
+   "n_units": 47,
+   "resample": 3
+  },
+  "calib.s0v_base_d4_r1@v1": {
+   "dose": 4,
+   "uesp": 200139,
+   "tokens": 236895,
+   "n_rule_families": 20,
+   "n_units": 105,
+   "resample": 1
+  },
+  "calib.s0v_base_d4_r2@v1": {
+   "dose": 4,
+   "uesp": 199443,
+   "tokens": 234026,
+   "n_rule_families": 18,
+   "n_units": 97,
+   "resample": 2
+  },
+  "calib.s0v_base_d4_r3@v1": {
+   "dose": 4,
+   "uesp": 208275,
+   "tokens": 240945,
+   "n_rule_families": 22,
+   "n_units": 95,
+   "resample": 3
+  }
+ },
+ "by_operator": {
+  "ATTENTION": {
+   "between_resamples": {
+    "1": {
+     "pairs": [
+      {
+       "a": "calib.s0v_base_d1_r1@v1",
+       "b": "calib.s0v_base_d1_r2@v1",
+       "value": 0.9562,
+       "chance": 0.3333
+      },
+      {
+       "a": "calib.s0v_base_d1_r1@v1",
+       "b": "calib.s0v_base_d1_r3@v1",
+       "value": 0.955,
+       "chance": 0.3333
+      },
+      {
+       "a": "calib.s0v_base_d1_r2@v1",
+       "b": "calib.s0v_base_d1_r3@v1",
+       "value": 0.9562,
+       "chance": 0.3333
+      }
+     ],
+     "n_pairs": 3,
+     "mean": 0.9558,
+     "min": 0.955,
+     "max": 0.9562,
+     "noise": 0.0012
+    },
+    "2": {
+     "pairs": [
+      {
+       "a": "calib.s0v_base_d2_r1@v1",
+       "b": "calib.s0v_base_d2_r2@v1",
+       "value": 0.9495,
+       "chance": 0.3333
+      },
+      {
+       "a": "calib.s0v_base_d2_r1@v1",
+       "b": "calib.s0v_base_d2_r3@v1",
+       "value": 0.9579,
+       "chance": 0.3333
+      },
+      {
+       "a": "calib.s0v_base_d2_r2@v1",
+       "b": "calib.s0v_base_d2_r3@v1",
+       "value": 0.9585,
+       "chance": 0.3333
+      }
+     ],
+     "n_pairs": 3,
+     "mean": 0.9553,
+     "min": 0.9495,
+     "max": 0.9585,
+     "noise": 0.009
+    },
+    "4": {
+     "pairs": [
+      {
+       "a": "calib.s0v_base_d4_r1@v1",
+       "b": "calib.s0v_base_d4_r2@v1",
+       "value": 0.9524,
+       "chance": 0.3333
+      },
+      {
+       "a": "calib.s0v_base_d4_r1@v1",
+       "b": "calib.s0v_base_d4_r3@v1",
+       "value": 0.9546,
+       "chance": 0.3333
+      },
+      {
+       "a": "calib.s0v_base_d4_r2@v1",
+       "b": "calib.s0v_base_d4_r3@v1",
+       "value": 0.971,
+       "chance": 0.3333
+      }
+     ],
+     "n_pairs": 3,
+     "mean": 0.9593,
+     "min": 0.9524,
+     "max": 0.971,
+     "noise": 0.0186
+    }
+   },
+   "nested_to_largest": [
+    {
+     "profile": "calib.s0v_base_d1_r1@v1",
+     "dose": 1,
+     "resample": 1,
+     "vs": "calib.s0v_base_d4_r1@v1",
+     "value": 0.9775,
+     "chance": 0.3333
+    },
+    {
+     "profile": "calib.s0v_base_d1_r2@v1",
+     "dose": 1,
+     "resample": 2,
+     "vs": "calib.s0v_base_d4_r2@v1",
+     "value": 0.9706,
+     "chance": 0.3333
+    },
+    {
+     "profile": "calib.s0v_base_d1_r3@v1",
+     "dose": 1,
+     "resample": 3,
+     "vs": "calib.s0v_base_d4_r3@v1",
+     "value": 0.9716,
+     "chance": 0.3333
+    },
+    {
+     "profile": "calib.s0v_base_d2_r1@v1",
+     "dose": 2,
+     "resample": 1,
+     "vs": "calib.s0v_base_d4_r1@v1",
+     "value": 0.9869,
+     "chance": 0.3333
+    },
+    {
+     "profile": "calib.s0v_base_d2_r2@v1",
+     "dose": 2,
+     "resample": 2,
+     "vs": "calib.s0v_base_d4_r2@v1",
+     "value": 0.9742,
+     "chance": 0.3333
+    },
+    {
+     "profile": "calib.s0v_base_d2_r3@v1",
+     "dose": 2,
+     "resample": 3,
+     "vs": "calib.s0v_base_d4_r3@v1",
+     "value": 0.9873,
+     "chance": 0.3333
+    }
+   ],
+   "reference_contrast_descriptive": [
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d1_r1@v1",
+     "dose": 1,
+     "value": 0.8093,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d1_r2@v1",
+     "dose": 1,
+     "value": 0.7879,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d1_r3@v1",
+     "dose": 1,
+     "value": 0.7911,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d2_r1@v1",
+     "dose": 2,
+     "value": 0.8013,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d2_r2@v1",
+     "dose": 2,
+     "value": 0.7999,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d2_r3@v1",
+     "dose": 2,
+     "value": 0.7888,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d4_r1@v1",
+     "dose": 4,
+     "value": 0.8027,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d4_r2@v1",
+     "dose": 4,
+     "value": 0.808,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d4_r3@v1",
+     "dose": 4,
+     "value": 0.797,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d1_r1@v1",
+     "dose": 1,
+     "value": 0.8097,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d1_r2@v1",
+     "dose": 1,
+     "value": 0.7949,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d1_r3@v1",
+     "dose": 1,
+     "value": 0.7938,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d2_r1@v1",
+     "dose": 2,
+     "value": 0.8085,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d2_r2@v1",
+     "dose": 2,
+     "value": 0.8113,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d2_r3@v1",
+     "dose": 2,
+     "value": 0.7891,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d4_r1@v1",
+     "dose": 4,
+     "value": 0.8064,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d4_r2@v1",
+     "dose": 4,
+     "value": 0.8083,
+     "chance": 0.3333
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d4_r3@v1",
+     "dose": 4,
+     "value": 0.7969,
+     "chance": 0.3333
+    }
+   ],
+   "saturation_description": {
+    "nested_mean_by_dose": {
+     "1": 0.9732,
+     "2": 0.9828
+    },
+    "between_resamples_mean_at_largest": 0.9593,
+    "caveat": "nested profiles share units with their own largest dose"
+   },
+   "reading": {
+    "effect_4x_minus_1x": 0.0035,
+    "noise": 0.0186
+   },
+   "label": "no detectable volume effect"
+  },
+  "DEPTH": {
+   "between_resamples": {
+    "1": {
+     "pairs": [
+      {
+       "a": "calib.s0v_base_d1_r1@v1",
+       "b": "calib.s0v_base_d1_r2@v1",
+       "value": 0.6,
+       "same_greedy_choice": 0.75,
+       "chance": 0.125,
+       "removed_a": [
+        2,
+        3,
+        10,
+        11,
+        26,
+        27,
+        30,
+        32
+       ],
+       "removed_b": [
+        2,
+        3,
+        8,
+        16,
+        26,
+        27,
+        30,
+        32
+       ]
+      }
+     ],
+     "n_pairs": 1,
+     "mean": 0.6,
+     "min": 0.6,
+     "max": 0.6,
+     "noise": 0.0
+    },
+    "2": {
+     "pairs": [
+      {
+       "a": "calib.s0v_base_d2_r1@v1",
+       "b": "calib.s0v_base_d2_r2@v1",
+       "value": 1.0,
+       "same_greedy_choice": 0.75,
+       "chance": 0.125,
+       "removed_a": [
+        2,
+        3,
+        8,
+        16,
+        26,
+        27,
+        30,
+        32
+       ],
+       "removed_b": [
+        2,
+        3,
+        8,
+        16,
+        26,
+        27,
+        30,
+        32
+       ]
+      }
+     ],
+     "n_pairs": 1,
+     "mean": 1.0,
+     "min": 1.0,
+     "max": 1.0,
+     "noise": 0.0
+    }
+   },
+   "nested_to_largest": [
+    {
+     "profile": "calib.s0v_base_d1_r1@v1",
+     "dose": 1,
+     "resample": 1,
+     "vs": "calib.s0v_base_d2_r1@v1",
+     "value": 0.6,
+     "same_greedy_choice": 0.75,
+     "chance": 0.125,
+     "removed_a": [
+      2,
+      3,
+      10,
+      11,
+      26,
+      27,
+      30,
+      32
+     ],
+     "removed_b": [
+      2,
+      3,
+      8,
+      16,
+      26,
+      27,
+      30,
+      32
+     ]
+    },
+    {
+     "profile": "calib.s0v_base_d1_r2@v1",
+     "dose": 1,
+     "resample": 2,
+     "vs": "calib.s0v_base_d2_r2@v1",
+     "value": 1.0,
+     "same_greedy_choice": 0.75,
+     "chance": 0.125,
+     "removed_a": [
+      2,
+      3,
+      8,
+      16,
+      26,
+      27,
+      30,
+      32
+     ],
+     "removed_b": [
+      2,
+      3,
+      8,
+      16,
+      26,
+      27,
+      30,
+      32
+     ]
+    }
+   ],
+   "reference_contrast_descriptive": [
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d1_r1@v1",
+     "dose": 1,
+     "value": 0.4545,
+     "same_greedy_choice": 0.25,
+     "chance": 0.125,
+     "removed_a": [
+      2,
+      3,
+      10,
+      11,
+      26,
+      27,
+      30,
+      32
+     ],
+     "removed_b": [
+      2,
+      3,
+      15,
+      16,
+      17,
+      26,
+      27,
+      32
+     ]
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d1_r2@v1",
+     "dose": 1,
+     "value": 0.6,
+     "same_greedy_choice": 0.25,
+     "chance": 0.125,
+     "removed_a": [
+      2,
+      3,
+      8,
+      16,
+      26,
+      27,
+      30,
+      32
+     ],
+     "removed_b": [
+      2,
+      3,
+      15,
+      16,
+      17,
+      26,
+      27,
+      32
+     ]
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d2_r1@v1",
+     "dose": 2,
+     "value": 0.6,
+     "same_greedy_choice": 0.25,
+     "chance": 0.125,
+     "removed_a": [
+      2,
+      3,
+      8,
+      16,
+      26,
+      27,
+      30,
+      32
+     ],
+     "removed_b": [
+      2,
+      3,
+      15,
+      16,
+      17,
+      26,
+      27,
+      32
+     ]
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d2_r2@v1",
+     "dose": 2,
+     "value": 0.6,
+     "same_greedy_choice": 0.375,
+     "chance": 0.125,
+     "removed_a": [
+      2,
+      3,
+      8,
+      16,
+      26,
+      27,
+      30,
+      32
+     ],
+     "removed_b": [
+      2,
+      3,
+      15,
+      16,
+      17,
+      26,
+      27,
+      32
+     ]
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d1_r1@v1",
+     "dose": 1,
+     "value": 0.4545,
+     "same_greedy_choice": 0.25,
+     "chance": 0.125,
+     "removed_a": [
+      2,
+      3,
+      10,
+      11,
+      26,
+      27,
+      30,
+      32
+     ],
+     "removed_b": [
+      2,
+      3,
+      15,
+      16,
+      17,
+      26,
+      27,
+      32
+     ]
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d1_r2@v1",
+     "dose": 1,
+     "value": 0.6,
+     "same_greedy_choice": 0.25,
+     "chance": 0.125,
+     "removed_a": [
+      2,
+      3,
+      8,
+      16,
+      26,
+      27,
+      30,
+      32
+     ],
+     "removed_b": [
+      2,
+      3,
+      15,
+      16,
+      17,
+      26,
+      27,
+      32
+     ]
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d2_r1@v1",
+     "dose": 2,
+     "value": 0.6,
+     "same_greedy_choice": 0.25,
+     "chance": 0.125,
+     "removed_a": [
+      2,
+      3,
+      8,
+      16,
+      26,
+      27,
+      30,
+      32
+     ],
+     "removed_b": [
+      2,
+      3,
+      15,
+      16,
+      17,
+      26,
+      27,
+      32
+     ]
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d2_r2@v1",
+     "dose": 2,
+     "value": 0.6,
+     "same_greedy_choice": 0.375,
+     "chance": 0.125,
+     "removed_a": [
+      2,
+      3,
+      8,
+      16,
+      26,
+      27,
+      30,
+      32
+     ],
+     "removed_b": [
+      2,
+      3,
+      15,
+      16,
+      17,
+      26,
+      27,
+      32
+     ]
+    }
+   ],
+   "saturation_description": {
+    "nested_mean_by_dose": {
+     "1": 0.8
+    },
+    "between_resamples_mean_at_largest": 1.0,
+    "caveat": "nested profiles share units with their own largest dose"
+   },
+   "reading": null,
+   "label": null
+  },
+  "FFN": {
+   "between_resamples": {
+    "1": {
+     "pairs": [
+      {
+       "a": "calib.s0v_base_d1_r1@v1",
+       "b": "calib.s0v_base_d1_r2@v1",
+       "value": 0.9065,
+       "chance": 0.1875
+      },
+      {
+       "a": "calib.s0v_base_d1_r1@v1",
+       "b": "calib.s0v_base_d1_r3@v1",
+       "value": 0.9065,
+       "chance": 0.1875
+      },
+      {
+       "a": "calib.s0v_base_d1_r2@v1",
+       "b": "calib.s0v_base_d1_r3@v1",
+       "value": 0.9125,
+       "chance": 0.1875
+      }
+     ],
+     "n_pairs": 3,
+     "mean": 0.9085,
+     "min": 0.9065,
+     "max": 0.9125,
+     "noise": 0.006
+    },
+    "2": {
+     "pairs": [
+      {
+       "a": "calib.s0v_base_d2_r1@v1",
+       "b": "calib.s0v_base_d2_r2@v1",
+       "value": 0.9248,
+       "chance": 0.1875
+      },
+      {
+       "a": "calib.s0v_base_d2_r1@v1",
+       "b": "calib.s0v_base_d2_r3@v1",
+       "value": 0.9271,
+       "chance": 0.1875
+      },
+      {
+       "a": "calib.s0v_base_d2_r2@v1",
+       "b": "calib.s0v_base_d2_r3@v1",
+       "value": 0.9349,
+       "chance": 0.1875
+      }
+     ],
+     "n_pairs": 3,
+     "mean": 0.9289,
+     "min": 0.9248,
+     "max": 0.9349,
+     "noise": 0.0101
+    },
+    "4": {
+     "pairs": [
+      {
+       "a": "calib.s0v_base_d4_r1@v1",
+       "b": "calib.s0v_base_d4_r2@v1",
+       "value": 0.9431,
+       "chance": 0.1875
+      },
+      {
+       "a": "calib.s0v_base_d4_r1@v1",
+       "b": "calib.s0v_base_d4_r3@v1",
+       "value": 0.939,
+       "chance": 0.1875
+      },
+      {
+       "a": "calib.s0v_base_d4_r2@v1",
+       "b": "calib.s0v_base_d4_r3@v1",
+       "value": 0.9484,
+       "chance": 0.1875
+      }
+     ],
+     "n_pairs": 3,
+     "mean": 0.9435,
+     "min": 0.939,
+     "max": 0.9484,
+     "noise": 0.0094
+    }
+   },
+   "nested_to_largest": [
+    {
+     "profile": "calib.s0v_base_d1_r1@v1",
+     "dose": 1,
+     "resample": 1,
+     "vs": "calib.s0v_base_d4_r1@v1",
+     "value": 0.937,
+     "chance": 0.1875
+    },
+    {
+     "profile": "calib.s0v_base_d1_r2@v1",
+     "dose": 1,
+     "resample": 2,
+     "vs": "calib.s0v_base_d4_r2@v1",
+     "value": 0.9482,
+     "chance": 0.1875
+    },
+    {
+     "profile": "calib.s0v_base_d1_r3@v1",
+     "dose": 1,
+     "resample": 3,
+     "vs": "calib.s0v_base_d4_r3@v1",
+     "value": 0.9399,
+     "chance": 0.1875
+    },
+    {
+     "profile": "calib.s0v_base_d2_r1@v1",
+     "dose": 2,
+     "resample": 1,
+     "vs": "calib.s0v_base_d4_r1@v1",
+     "value": 0.9662,
+     "chance": 0.1875
+    },
+    {
+     "profile": "calib.s0v_base_d2_r2@v1",
+     "dose": 2,
+     "resample": 2,
+     "vs": "calib.s0v_base_d4_r2@v1",
+     "value": 0.9639,
+     "chance": 0.1875
+    },
+    {
+     "profile": "calib.s0v_base_d2_r3@v1",
+     "dose": 2,
+     "resample": 3,
+     "vs": "calib.s0v_base_d4_r3@v1",
+     "value": 0.9618,
+     "chance": 0.1875
+    }
+   ],
+   "reference_contrast_descriptive": [
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d1_r1@v1",
+     "dose": 1,
+     "value": 0.7244,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d1_r2@v1",
+     "dose": 1,
+     "value": 0.7164,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d1_r3@v1",
+     "dose": 1,
+     "value": 0.7151,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d2_r1@v1",
+     "dose": 2,
+     "value": 0.7196,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d2_r2@v1",
+     "dose": 2,
+     "value": 0.7274,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d2_r3@v1",
+     "dose": 2,
+     "value": 0.7165,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d4_r1@v1",
+     "dose": 4,
+     "value": 0.7244,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d4_r2@v1",
+     "dose": 4,
+     "value": 0.7262,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d4_r3@v1",
+     "dose": 4,
+     "value": 0.7218,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d1_r1@v1",
+     "dose": 1,
+     "value": 0.726,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d1_r2@v1",
+     "dose": 1,
+     "value": 0.7197,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d1_r3@v1",
+     "dose": 1,
+     "value": 0.7179,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d2_r1@v1",
+     "dose": 2,
+     "value": 0.7222,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d2_r2@v1",
+     "dose": 2,
+     "value": 0.7296,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d2_r3@v1",
+     "dose": 2,
+     "value": 0.7187,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d4_r1@v1",
+     "dose": 4,
+     "value": 0.7271,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d4_r2@v1",
+     "dose": 4,
+     "value": 0.7288,
+     "chance": 0.1875
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d4_r3@v1",
+     "dose": 4,
+     "value": 0.7242,
+     "chance": 0.1875
+    }
+   ],
+   "saturation_description": {
+    "nested_mean_by_dose": {
+     "1": 0.9417,
+     "2": 0.964
+    },
+    "between_resamples_mean_at_largest": 0.9435,
+    "caveat": "nested profiles share units with their own largest dose"
+   },
+   "reading": {
+    "effect_4x_minus_1x": 0.035,
+    "noise": 0.0094
+   },
+   "label": "stabilizes with volume"
+  },
+  "RESIDUAL_WIDTH": {
+   "between_resamples": {
+    "1": {
+     "pairs": [
+      {
+       "a": "calib.s0v_base_d1_r1@v1",
+       "b": "calib.s0v_base_d1_r2@v1",
+       "value": 0.8382,
+       "chance": 0.4
+      },
+      {
+       "a": "calib.s0v_base_d1_r1@v1",
+       "b": "calib.s0v_base_d1_r3@v1",
+       "value": 0.8371,
+       "chance": 0.4
+      },
+      {
+       "a": "calib.s0v_base_d1_r2@v1",
+       "b": "calib.s0v_base_d1_r3@v1",
+       "value": 0.842,
+       "chance": 0.4
+      }
+     ],
+     "n_pairs": 3,
+     "mean": 0.8391,
+     "min": 0.8371,
+     "max": 0.842,
+     "noise": 0.0049
+    },
+    "2": {
+     "pairs": [
+      {
+       "a": "calib.s0v_base_d2_r1@v1",
+       "b": "calib.s0v_base_d2_r2@v1",
+       "value": 0.8625,
+       "chance": 0.4
+      },
+      {
+       "a": "calib.s0v_base_d2_r1@v1",
+       "b": "calib.s0v_base_d2_r3@v1",
+       "value": 0.8635,
+       "chance": 0.4
+      },
+      {
+       "a": "calib.s0v_base_d2_r2@v1",
+       "b": "calib.s0v_base_d2_r3@v1",
+       "value": 0.8674,
+       "chance": 0.4
+      }
+     ],
+     "n_pairs": 3,
+     "mean": 0.8645,
+     "min": 0.8625,
+     "max": 0.8674,
+     "noise": 0.0049
+    },
+    "4": {
+     "pairs": [
+      {
+       "a": "calib.s0v_base_d4_r1@v1",
+       "b": "calib.s0v_base_d4_r2@v1",
+       "value": 0.8935,
+       "chance": 0.4
+      },
+      {
+       "a": "calib.s0v_base_d4_r1@v1",
+       "b": "calib.s0v_base_d4_r3@v1",
+       "value": 0.8933,
+       "chance": 0.4
+      },
+      {
+       "a": "calib.s0v_base_d4_r2@v1",
+       "b": "calib.s0v_base_d4_r3@v1",
+       "value": 0.9,
+       "chance": 0.4
+      }
+     ],
+     "n_pairs": 3,
+     "mean": 0.8956,
+     "min": 0.8933,
+     "max": 0.9,
+     "noise": 0.0067
+    }
+   },
+   "nested_to_largest": [
+    {
+     "profile": "calib.s0v_base_d1_r1@v1",
+     "dose": 1,
+     "resample": 1,
+     "vs": "calib.s0v_base_d4_r1@v1",
+     "value": 0.9089,
+     "chance": 0.4
+    },
+    {
+     "profile": "calib.s0v_base_d1_r2@v1",
+     "dose": 1,
+     "resample": 2,
+     "vs": "calib.s0v_base_d4_r2@v1",
+     "value": 0.9155,
+     "chance": 0.4
+    },
+    {
+     "profile": "calib.s0v_base_d1_r3@v1",
+     "dose": 1,
+     "resample": 3,
+     "vs": "calib.s0v_base_d4_r3@v1",
+     "value": 0.906,
+     "chance": 0.4
+    },
+    {
+     "profile": "calib.s0v_base_d2_r1@v1",
+     "dose": 2,
+     "resample": 1,
+     "vs": "calib.s0v_base_d4_r1@v1",
+     "value": 0.9478,
+     "chance": 0.4
+    },
+    {
+     "profile": "calib.s0v_base_d2_r2@v1",
+     "dose": 2,
+     "resample": 2,
+     "vs": "calib.s0v_base_d4_r2@v1",
+     "value": 0.955,
+     "chance": 0.4
+    },
+    {
+     "profile": "calib.s0v_base_d2_r3@v1",
+     "dose": 2,
+     "resample": 3,
+     "vs": "calib.s0v_base_d4_r3@v1",
+     "value": 0.9506,
+     "chance": 0.4
+    }
+   ],
+   "reference_contrast_descriptive": [
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d1_r1@v1",
+     "dose": 1,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d1_r2@v1",
+     "dose": 1,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d1_r3@v1",
+     "dose": 1,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d2_r1@v1",
+     "dose": 2,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d2_r2@v1",
+     "dose": 2,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d2_r3@v1",
+     "dose": 2,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d4_r1@v1",
+     "dose": 4,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d4_r2@v1",
+     "dose": 4,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.domain_balanced@v1",
+     "profile": "calib.s0v_base_d4_r3@v1",
+     "dose": 4,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d1_r1@v1",
+     "dose": 1,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d1_r2@v1",
+     "dose": 1,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d1_r3@v1",
+     "dose": 1,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d2_r1@v1",
+     "dose": 2,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d2_r2@v1",
+     "dose": 2,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d2_r3@v1",
+     "dose": 2,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d4_r1@v1",
+     "dose": 4,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d4_r2@v1",
+     "dose": 4,
+     "value": null,
+     "note": "projection not recovered"
+    },
+    {
+     "reference": "calib.reasoning_heavy@v2",
+     "profile": "calib.s0v_base_d4_r3@v1",
+     "dose": 4,
+     "value": null,
+     "note": "projection not recovered"
+    }
+   ],
+   "saturation_description": {
+    "nested_mean_by_dose": {
+     "1": 0.9101,
+     "2": 0.9511
+    },
+    "between_resamples_mean_at_largest": 0.8956,
+    "caveat": "nested profiles share units with their own largest dose"
+   },
+   "reading": {
+    "effect_4x_minus_1x": 0.0565,
+    "noise": 0.0067
+   },
+   "label": "stabilizes with volume"
+  }
+ }
+}

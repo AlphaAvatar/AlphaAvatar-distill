@@ -743,7 +743,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 97,
+  "runs_unrecorded": 101,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -763,8 +763,8 @@
    },
    "calibration_volume": {
     "recorded": 0,
-    "unrecorded": 3,
-    "total": 3
+    "unrecorded": 7,
+    "total": 7
    },
    "continuation_b": {
     "recorded": 5,
@@ -2776,6 +2776,38 @@
    "root": "logs/stages/stage-0/calibration_volume/runs/battery_20261018_092345",
    "n_files": 15,
    "digest": "bc6a41e1b0321f09a425d500882124afddf4c2a5d683c5b67c7b48acd04eb0e4",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "pilot_20261018_122600",
+   "root": "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_122600",
+   "n_files": 2,
+   "digest": "5c203984da3cc48adaf8fc7f8988636e275272bcfdeceb944298df992c81ea83",
+   "why": "no run manifest; its closeout states: ABANDONED_BEFORE_LAUNCH"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "pilot_20261018_122725",
+   "root": "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_122725",
+   "n_files": 2,
+   "digest": "b74b0999c022b002d845f1225c4f81372da1ce6bd81ec26eee7cc442b966c902",
+   "why": "no run manifest; its closeout states: ABANDONED_BEFORE_LAUNCH"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "pilot_20261018_122808",
+   "root": "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_122808",
+   "n_files": 8,
+   "digest": "891e02624ff0fce40b697823ebb4f61d27923ebbd3febf817ab69cf4f883ad8a",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "pilot_20261018_134131",
+   "root": "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131",
+   "n_files": 8,
+   "digest": "04cd6ff11117f15a4742cb5861b3f58141302d57d77f7b551fef2def6c8770ea",
    "why": "no run manifest; its closeout states: SESSION_ENDED"
   },
   {

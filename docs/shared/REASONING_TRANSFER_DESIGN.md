@@ -68,6 +68,11 @@ own authorization.
 
 ## 3. Stage 0: calibration volume and mixture
 
+> **Volume: run 2026-10-18, terminal.**
+> [`REPORT.md`](../../logs/stages/stage-0/calibration_volume/closeout/REPORT.md)
+> has the capability battery, the root-level H1 pilot, and why the formal
+> study (H2 and the budget) was not run.
+
 **Question.** How do calibration-set size and composition change which
 structure the AutoInitializer keeps, and what that structure retains on the
 primary axes?

@@ -23,8 +23,8 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "D1 BLOCKED NO TIMES and COMPLETE. The D-series is CLOSED (maintainer decision 2026-10-17). NOTHING IS RUNNING. Owner: logs/stages/stage-1/families/d_series/closeout/programme_closeout.json.",
- "branch": "main (squash of exec/d1-behavioural-readiness, 2026-10-17); work continues on stage0/calibration-volume-mixture",
+ "blocker": "BLOCKED NO. Stage-0 calibration volume TERMINAL 2026-10-18: formal study NOT RUN (H2 not resolvable under the fixed recovery recipe; budget insufficient). NOTHING IS RUNNING. Owner: logs/stages/stage-0/calibration_volume/closeout/programme_closeout.json.",
+ "branch": "main (squash of exec/d1-behavioural-readiness, 2026-10-17); Stage-0 work on stage0/calibration-volume-mixture",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
@@ -32,7 +32,7 @@
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 595.0,
-  "cumulative_spend_usd": 505.3944,
+  "cumulative_spend_usd": 513.5943,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 89.6056,
+  "remaining_usd": 81.4057,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -60,7 +60,7 @@
   "protocol": "12 probes: 6 screening, 6 confirmation. All executed and scored.",
   "why_b_stands": "no valid C2 challenger displaced it"
  },
- "commit": "c8f714afb346aaea3e269230c94cef526cb6f76b",
+ "commit": "32246d126ee8b6920a9282a0793dfa81d2f47fae",
  "cuda_engineering_validation": {
   "_what": "engineering evidence only; none authorizes anything.",
   "authorizes": "nothing",
@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-17T18:00:00Z",
+ "generated_utc": "2026-10-18T17:45:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,11 +123,11 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Stage-0 calibration data-volume and mixture experiments with the forward baseline, to be designed and authorized in new conversations. NOT authorized. Handoff: docs/shared/STAGE0_HANDOFF.md.",
+ "next": "A maintainer decision on the Stage-0 minimum viable plan: a reasoning-transfer recovery recipe validated by one ~$2 probe, then funding. NOT authorized. Owner: logs/stages/stage-0/calibration_volume/closeout/REPORT.md section 10.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "Design of the Stage-0 calibration volume/mixture programme and its capability-aligned evaluation: docs/shared/STAGE0_HANDOFF.md and docs/shared/REASONING_TRANSFER_DESIGN.md (authorize nothing).",
-  "not_next": "no paid resource without its own grant; no D-series stage, probe, rerun or rematerialization; no Stage-0 data download or generation until authorized. Owner: decisions.md 2026-10-17.",
+  "next_work": "Stage-0: the maintainer's choice of recovery recipe and budget for the formal volume study (REPORT.md section 10); the mixture study after it.",
+  "not_next": "no paid resource without its own grant; no D-series stage or rerun; no formal Stage-0 search until H2 is measurable and funded. Owner: decisions.md 2026-10-18.",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D-series CLOSED 2026-10-17 (D1 NO-GO, D2 NO_GO, D3 STRUCTURAL_CHANGE + INCONCLUSIVE probes); forward baseline D1 + scored_v1.",
   "then": "NOTHING is queued or authorized."
  },
@@ -153,7 +153,7 @@
    "blocker": "none; see the top-level blocker.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line."
   },
   "c2": {
@@ -197,7 +197,7 @@
   "docs/shared/STAGE0_HANDOFF.md -- the next programme's handoff"
  ],
  "running": {
-  "_verified": "provider query 2026-10-17 17:47 UTC: 0 pods, 0 volumes, $0/h; no D-series tmux session, watchdog or monitor alive",
+  "_verified": "provider query 2026-10-18 17:32 UTC: 0 pods, 0 volumes, $0/h; no tmux session, watchdog or monitor alive",
   "network_volumes": 0,
   "paid_compute": false,
   "pod_id": null,
@@ -217,7 +217,8 @@
   "F1": "CLOSED: SKIPPED by maintainer instruction 2026-10-03; ffn.activation_importance_v0 carried forward",
   "next_scientific_stage": null,
   "_next_is_null_because": "the D-series is CLOSED and no stage is authorized. The next programme (Stage-0 calibration volume and mixture) is designed and authorized separately.",
-  "D_series": "CLOSED 2026-10-17 by maintainer decision"
+  "D_series": "CLOSED 2026-10-17 by maintainer decision",
+  "S0_volume": "COMPLETE 2026-10-18 (terminal): formal NOT RUN (H2 not resolvable; budget gap). Root pilot (exploratory): FFN/WIDTH stabilize with volume, ATTENTION no effect"
  },
  "storage": {
   "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json",

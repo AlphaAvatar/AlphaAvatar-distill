@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-17 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-18 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -10,9 +10,39 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 ## Right now
 
 **NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods,
-0 network volumes and $0/h (2026-10-17 17:47 UTC). No D-series tmux
-session, watchdog or monitor is alive. The last pod, `6gqbeysqtywflq` (D3
-probes), was deleted at 15:35:28Z.
+0 network volumes and $0/h (2026-10-18 17:32 UTC). The last pod,
+`wm75q9fix8g15w` (Stage-0 pilot), was deleted at 17:30:07Z, and no tmux
+session, watchdog or monitor is alive.
+
+**STAGE-0 CALIBRATION VOLUME IS TERMINAL (2026-10-18). THE FORMAL STUDY WAS
+NOT RUN, FOR TWO INDEPENDENT REASONS.**
+- **H2: EVALUATION NOT RESOLVABLE.** On the project's new capability battery
+  (dev_v1, 720 procedural tasks over the P10.2 axes):
+  - the teacher scores 638/720;
+  - both 0.86M fixed-recipe controls score 0/720, with seed discordance 0;
+  - the 2.96M rung scores 10/720.
+
+  Making H2 measurable needs a recovery-recipe change, which is the
+  maintainer's (AGENTS.md §4.5).
+- **Budget insufficient.** On this pool a full D1 search costs $15.40 / $21.91
+  / $35.19 at 1x / 2x / 4x (A100, measured rates). The smallest readable
+  formal design, H1 only (1x/2x, three resamples), is $111.93, against $65
+  in the formal phase and $81.41 left in the project.
+- **H1 root-level pilot (exploratory).** 31/31 root states, under the frozen
+  plan:
+  - FFN and RESIDUAL_WIDTH **stabilize with volume** (+0.035 and +0.057 from
+    1x to 4x, at about 4x and 8x the between-resample noise);
+  - ATTENTION shows **no detectable volume effect** (0.956 at 1x);
+  - DEPTH is unlabeled (one pair per dose; identical removed sets at 2x).
+- **Money.** The programme spent $13.4471 of its $92. One L40S OOM attempt
+  ($1.2469) was repaired on an 80 GB card.
+- **Owners.**
+  [`REPORT.md`](../stages/stage-0/calibration_volume/closeout/REPORT.md),
+  [`programme_closeout.json`](../stages/stage-0/calibration_volume/closeout/programme_closeout.json)
+  and `decisions.md` 2026-10-18.
+- **Next.** A maintainer decision on the minimum viable plan in REPORT §10:
+  a reasoning-transfer recovery recipe validated by one ~$2 probe, then
+  funding. No Stage-0 formal session is authorized.
 
 **THE D-SERIES IS CLOSED (maintainer final decision, 2026-10-17). D1 +
 `scored_v1` IS THE OFFICIAL FORWARD BASELINE.** It is a selection, not a
@@ -45,10 +75,7 @@ probes all stand unchanged.
 - **Owners.**
   [`programme_closeout.json`](../stages/stage-1/families/d_series/closeout/programme_closeout.json)
   and `decisions.md` 2026-10-17 (last entry).
-- **Next.** Stage-0 calibration data-volume and mixture experiments on this
-  baseline. They are **NOT authorized**; they are designed and authorized in
-  new conversations. Start at
-  [`STAGE0_HANDOFF.md`](../../docs/shared/STAGE0_HANDOFF.md).
+- **Next.** Taken up by the Stage-0 calibration-volume programme above.
 
 **THE PRIMARY TARGET IS FLUID REASONING (maintainer clarification,
 2026-10-16).** The project prioritizes fluid reasoning and adaptive
@@ -1877,7 +1904,9 @@ D1  COMPLETE / NO-GO 2026-10-12         q2 did not confirm against B
 D2  COMPLETE / NO_GO 2026-10-16         c4 did not confirm against B
 D3  COMPLETE 2026-10-17                 STRUCTURAL_CHANGE; probes INCONCLUSIVE
 D-series  CLOSED 2026-10-17             <- forward baseline: D1 + scored_v1 (a selection)
-Stage-0  NEXT PROGRAMME, NOT AUTHORIZED <- calibration volume/mixture; docs/shared/STAGE0_HANDOFF.md
+S0 volume  TERMINAL 2026-10-18          formal NOT RUN: H2 not resolvable + budget gap
+      root-level pilot (exploratory)    FFN/WIDTH stabilize with volume; ATTENTION no effect
+S0 mixture  NOT AUTHORIZED              later; docs/shared/STAGE0_HANDOFF.md
 C4  NOT AUTHORIZED
 ```
 
@@ -4013,7 +4042,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$505.3944` spent of `$595.0000`, leaving `$89.6056` |
+| project cap | `$513.5943` spent of `$595.0000`, leaving `$81.4057` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

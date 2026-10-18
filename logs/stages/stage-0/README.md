@@ -55,11 +55,11 @@ What each one asked of this stage.
 
 | experiment | what it asked | logs | status |
 | --- | --- | --- | --- |
-| `calibration_volume` — Stage-0 calibration volume dose-response (first Stage-0 study) | With teacher, geometry, the forward-baseline method and the recovery recipe fixed, does more independent, capability-aligned Stage-0 calibration data stabilize the AutoInitializer's structural selection (H1), improve the recovered student's reasoning on unseen rule families (H2), and saturate (H3)? | [`calibration_volume/`](calibration_volume/) | IN PROGRESS 2026-10-18. Prerequisites done: $0 data audit; capability battery dev_v1 valid (teacher 638/720) with the fixed-recipe students at its floor (0/720 on both 0.86M seeds), so H2 is not resolvable under the fixed recovery; base_pool_v1 built; root-level selection pilot running |
+| `calibration_volume` — Stage-0 calibration volume dose-response (first Stage-0 study) | With teacher, geometry, the forward-baseline method and the recovery recipe fixed, does more independent, capability-aligned Stage-0 calibration data stabilize the AutoInitializer's structural selection (H1), improve the recovered student's reasoning on unseen rule families (H2), and saturate (H3)? | [`calibration_volume/`](calibration_volume/) | TERMINAL 2026-10-18 (formal study NOT RUN). H2: EVALUATION NOT RESOLVABLE under the fixed recovery recipe (0.86M controls 0/720, teacher 638/720). H1 root-level pilot (exploratory): FFN and WIDTH stabilize with volume, ATTENTION no detectable effect, DEPTH unlabeled. Budget insufficient for the smallest readable formal design |
 
 ## Runs
 
-**3** run(s) are registered for this stage's
+**7** run(s) are registered for this stage's
 experiments. An experiment's plans, analyses, results, history,
 validations and runs are all inside its own directory; the
 canonical run list, across every stage, is
@@ -88,7 +88,7 @@ copied here.
 * logs/budget/decisions.md — 2026-07-12: Stage 0 caches streaming sufficient statistics, not raw activations
 * logs/budget/decisions.md — 2026-08-10: the Stage 0 activation cache was lost; regenerate it and prove the initialization is unchanged
 * logs/budget/decisions.md — 2026-08-10: RESOLVED, the Stage 0 / initialization hash gate passed
-* logs/budget/decisions.md -- 2026-10-18: Stage-0 calibration-volume programme started; battery valid, students at floor, root-level pilot
+* logs/budget/decisions.md -- 2026-10-18: Stage-0 calibration-volume programme started; battery valid, students at floor, root-level pilot; pilot attempt 1 OOM repaired on an 80 GB card; programme terminal
 
 ## Current status
 

@@ -128,6 +128,17 @@ frozen in `logs/.../plans/pilot_analysis_plan.json`.
   admissible episodes, each larger than a 1× cell quota.
 - **Status.** Exploratory local-sensitivity evidence about H1/H3, never a
   substitute for the formal full search.
+- **Hardware: an 80 GB card.**
+  - With items up to 8,192 tokens, one `length_sorted_v1` micro-batch of 3
+    carries up to 22,141 scored rows.
+  - DEPTH's forward-KL sketch then holds a 12.5 GiB float32 logits tensor
+    plus its temporaries.
+  - The 44 GiB L40S OOMs (`runs/pilot_20261018_122808`); an A100-80GB does
+    not.
+  - The baseline's numerics declare cuda / bf16 / fp32 accumulation, not a
+    card.
+- **Results and the terminal verdict:**
+  `logs/stages/stage-0/calibration_volume/closeout/REPORT.md`.
 
 ## 6. Sessions and money
 
