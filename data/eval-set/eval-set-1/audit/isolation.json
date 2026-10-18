@@ -1,16 +1,15 @@
 {
  "schema": "aadistill.eval_set_isolation/v1",
  "eval_set_id": "eval-set-1",
- "created_utc": "2026-10-18T20:19:52+00:00",
+ "created_utc": "2026-10-18T20:59:02+00:00",
  "code_state": {
-  "git_commit": "e5fb30ae22124c0e3803c850d7fa429888922c9e",
+  "git_commit": "9f63a266cc7a64d635203e57a89b6fe8a64aa0bc",
   "git_commit_source": "git",
   "dirty": true,
-  "uncommitted_state_sha256": "6d8d1d523ec6b3885b18f7224d9d3c4b1757cfde83d47687564e5baf525d537c",
+  "uncommitted_state_sha256": "12a854ba7624801ebb7fdf6ae65b9d470b6e2fecb436371ba40ffaaf02d2d70a",
   "untracked_files": [
-   "configs/stages/stage-0/calibration_volume/resolution_session.json",
-   "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_201712/governance/authorization.json",
-   "scripts/stages/stage-0/calibration_volume/analyze_resolution.py"
+   "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_202715/runtime/launch.out",
+   "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_202715/runtime/session.json"
   ]
  },
  "keys": "shared.eval_sets.KEYS (prompt, content)",
@@ -172,7 +171,7 @@
    "held_out_overlap": 0
   },
   "stage0.profiles_pilot_v1": {
-   "used_for": "Stage-0 pilot search profiles",
+   "used_for": "Stage-0 search calibration profiles",
    "path": "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1",
    "present": true,
    "files": 9,

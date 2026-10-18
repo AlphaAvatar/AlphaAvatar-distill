@@ -198,6 +198,10 @@ def main(argv=None) -> int:
     ap.add_argument("--trained-context", type=int, default=None,
                     help="a student's training block length; omit for a model "
                          "whose configured context is its supported context")
+    ap.add_argument("--diagnostic-context-cap", type=int, default=None,
+                    help="cap the context BELOW the model's supported one, for a matched-"
+                         "allowance diagnostic only; recorded as context_source="
+                         "diagnostic_cap with the uncapped value, never as a P18 measurement")
     ap.add_argument("--session-limit", type=int, default=None,
                     help="generate mode only: the data-construction bound")
     ap.add_argument("--seed-base", type=int, default=20261018)
@@ -223,6 +227,16 @@ def main(argv=None) -> int:
     tok = AutoTokenizer.from_pretrained(args.model, **rev)
     cfg = AutoConfig.from_pretrained(args.model, **rev)
     ctx_info = resolve_context(cfg, None, args.trained_context)
+    if args.diagnostic_context_cap and args.diagnostic_context_cap < ctx_info["resolved_context"]:
+        ctx_info = {**ctx_info, "uncapped_context": ctx_info["resolved_context"],
+                    "uncapped_context_source": ctx_info["context_source"],
+                    "resolved_context": args.diagnostic_context_cap,
+                    "context_source": "diagnostic_cap",
+                    "not_a_p18_measurement": (
+                        "generation is capped below the model's supported context to match "
+                        "another model's measurement allowance; context-limit hits are "
+                        "right-censored and the result is a diagnostic, not this model's "
+                        "P18 score")}
     ctx = ctx_info["resolved_context"]
     stop_ids = resolve_stop_ids(args.model, tok, cfg, args.revision)
     limit = min(ctx, args.session_limit) if args.session_limit else ctx

@@ -12439,3 +12439,38 @@ on a paid pod.
     `stages.phase_c1.bundle.stage_bundle` before launch.
   - A fresh run id and authorization; the consumed one is not reused.
   - Nothing was measured, so nothing is pooled.
+
+## 2026-10-18 — Stage-0 resolution attempt 2: reference stopped, marker defect tore the pod down; repaired
+
+- **What happened.** `runs/resolution_20261018_202715` (A100,
+  $2.031) measured nothing completely.
+  - The Qwen3-0.6B reference at its own 40,960-token context finished
+    543/720 turns in the first minutes.
+  - For the next 40 minutes its long thinking tail added no finished turn
+    while the GPU sat at 100%: 177 sequences thrashing a 651k-token KV cache.
+    At about one finished turn per two minutes it could not end before the
+    session's hard stop, so the operator stopped that unit
+    (`runtime/operator_stop_qwen3_0p6b_dev.log`).
+  - The driver then marked `RUN_FAILED_UNIT:qwen3_0p6b_dev`. The launcher
+    ends a session on any status line that contains `MARKER:RUN_FAILED`, so
+    it tore the pod down while the 5.50M student was running.
+- **Class.** Two ordinary engineering failures before any measurement
+  completed. One is a harness defect (marker vocabulary). The other is a
+  wrong runtime assumption (the reference was priced at 50 min). Nothing
+  partial is used.
+- **Repairs.**
+  - **Markers:** per-unit markers are `UNIT_OK` / `UNIT_FAILED`, and a
+    regression test proves no unit marker contains a session marker.
+  - **Reference cap:** `run_battery --diagnostic-context-cap` records an
+    explicit `context_source: diagnostic_cap` with the uncapped value and a
+    not-a-P18-measurement statement, so a capped run can never pass for a
+    P18 score.
+  - **Plan v2** (`resolution_v2_session.json`; attempts 1–2 keep
+    `resolution_session.json`) measures Qwen3-0.6B at the STUDENTS' 8,192
+    allowance as a matched-allowance diagnostic, plus the two students.
+    - It is priced with the measured setup time: $2.83 expected, $4.59 hard.
+    - Its envelope is the $4.65 left in the prerequisites phase.
+- **What stays unmeasured.** Qwen3-0.6B's own P18 score on the 720 at
+  40,960 tokens. It is a multi-hour job on an 80 GB card unless concurrency
+  is sized to the KV cache, and it is not fundable from the prerequisites
+  phase. It is a decision item.

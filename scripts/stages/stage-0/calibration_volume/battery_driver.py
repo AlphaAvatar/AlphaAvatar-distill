@@ -34,6 +34,12 @@ for _p in ("src", "scripts"):
 from stages.calibration_volume import governance as G  # noqa: E402
 
 AUDIT = "artifacts/audit/stage0_calvol_battery"
+#: Per-unit markers. The launcher ends the session on any status line that
+#: CONTAINS `MARKER:<session marker>` (ALL_DONE / RUN_FAILED), so a unit marker
+#: must contain neither: `RUN_FAILED_UNIT:` did, and one stopped unit tore down
+#: a pod whose next unit was running (resolution_20261018_202715).
+UNIT_OK = "UNIT_OK"
+UNIT_FAILED = "UNIT_FAILED"
 VLLM_PY = "/opt/vllm/bin/python"
 
 
@@ -133,6 +139,8 @@ def main(argv=None) -> int:
                    "--mode", run["mode"], "--out", str(out), *extra]
             if run.get("trained_context"):
                 cmd += ["--trained-context", str(run["trained_context"])]
+            if run.get("diagnostic_context_cap"):
+                cmd += ["--diagnostic-context-cap", str(run["diagnostic_context_cap"])]
             if run.get("session_limit"):
                 cmd += ["--session-limit", str(run["session_limit"])]
             if run.get("seed_base") is not None:
@@ -156,12 +164,12 @@ def main(argv=None) -> int:
                 entry["score_stdout"] = rc.stdout[-2000:]
             entry["status"] = "ok"
             (audit / "records" / f"{label}.done").write_text(entry["records_sha256"] + "\n")
-            mark(f"RUN_OK:{label}")
+            mark(f"{UNIT_OK}:{label}")
         except BaseException as exc:  # noqa: BLE001
             entry.update({"status": "failed", "error": repr(exc),
                           "traceback": traceback.format_exc()[-4000:],
                           "seconds": round(time.time() - t0, 1)})
-            mark(f"RUN_FAILED_UNIT:{label}")
+            mark(f"{UNIT_FAILED}:{label}")
         record["runs"].append(entry)
         save()
 

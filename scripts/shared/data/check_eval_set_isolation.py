@@ -46,8 +46,8 @@ SOURCES = (
     ("stage0.calibration_v2", "Stage-0 calibration prompts", ("jsonl", STAGE0_TASKS / "calibration_v2.jsonl")),
     ("stage0.base_pool_v1", "Stage-0 calibration pool (searches)",
      ("rendered", REPO / "artifacts/stages/stage-0/calibration_volume/base_pool_v1/items.jsonl")),
-    ("stage0.profiles_pilot_v1", "Stage-0 pilot search profiles",
-     ("rendered_dir", REPO / "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1")),
+    *((f"stage0.{d.name}", "Stage-0 search calibration profiles", ("rendered_dir", d))
+      for d in sorted((REPO / "artifacts/stages/stage-0/calibration_volume").glob("profiles_*"))),
     ("stage1.state_eval_v1", "state evaluation suite of every D-series and Stage-0 search",
      ("rendered", REPO / "artifacts/stages/stage-1/state_eval_v1/items.jsonl")),
     ("stage1.reasoning_heavy_v2", "D-series calibration profile",

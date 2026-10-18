@@ -1,0 +1,29 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.battery_record/v1",
+ "started_utc": "2026-10-18T20:33:25Z",
+ "commit": "9f63a266cc7a64d635203e57a89b6fe8a64aa0bc",
+ "gpu": {
+  "name": "NVIDIA A100-SXM4-80GB",
+  "memory": "81920 MiB",
+  "driver": "595.91.07"
+ },
+ "runs": [
+  {
+   "label": "qwen3_0p6b_dev",
+   "mode": "eval",
+   "tasks": "dev",
+   "rc": -15,
+   "seconds": 3609.3,
+   "status": "failed",
+   "error": "RuntimeError('run_battery exited -15; see qwen3_0p6b_dev.log')",
+   "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/stages/stage-0/calibration_volume/battery_driver.py\", line 146, in main\n    raise RuntimeError(f\"run_battery exited {rc}; see {log.name}\")\nRuntimeError: run_battery exited -15; see qwen3_0p6b_dev.log\n"
+  }
+ ],
+ "stages": {
+  "A_contract": {
+   "status": "ok",
+   "plan_hash": "f90089fb5804c6530870bf31ad9bbcd3b2da0b3bf15f718b8af9e98cdb66159f",
+   "authorization_id": "stage0.calibration_volume.battery.resolution_20261018_202715"
+  }
+ }
+}

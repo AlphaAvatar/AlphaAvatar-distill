@@ -1,0 +1,10 @@
+2026-10-18T21:33Z operator stop of unit qwen3_0p6b_dev (Qwen/Qwen3-0.6B @ c1899de2, 40,960-token context).
+State at stop: 543 of 720 turns finished after 55 min; 177 open sequences; finished-turn token count flat
+for 40 min while the GPU stayed at 100%, i.e. the long thinking tail at 40,960 tokens was thrashing the
+651,184-token KV cache (vLLM recompute preemption). At ~1 finished turn per 2 min the unit could not finish
+before the session's 198-min hard stop, and leaving it would also have cost the two student units.
+Stopped by SIGTERM to the runner (pid 2384) and its EngineCore (pid 2820) only; the driver continued.
+No partial record exists (the runner writes at unit end); nothing from this unit is used.
+Consequence (harness defect, found here): the driver's per-unit marker RUN_FAILED_UNIT:<label> contains the
+session failure marker RUN_FAILED, so the launcher ended the session and tore the pod down while the
+5.50M student unit was running. See decisions.md 2026-10-18 (Stage-0 resolution attempt 2).

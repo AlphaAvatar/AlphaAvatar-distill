@@ -97,3 +97,17 @@ def test_a_launch_whose_bundle_is_not_on_the_relay_is_refused_at_zero_cost():
     assert not ok and "stage_bundle" in why
     alias = argparse.Namespace(bundle="resolution.bundle", session_commit=commit)
     assert not launch.bundle_on_relay(alias, api=Relay(True))[0]
+
+
+def test_no_unit_marker_can_end_the_session():
+    """The runner ends a session on any status line containing MARKER:<session
+    marker>. `RUN_FAILED_UNIT:` contained `RUN_FAILED`, so one stopped unit tore
+    the pod down under a running one (resolution_20261018_202715)."""
+    import argparse
+    from stages.calibration_volume import battery_driver as BD
+    session = launch.spec(argparse.Namespace(
+        session="battery", plan="battery", run_id="x", scr="/tmp/x"))
+    stops = (session.markers.success, *session.markers.failure)
+    for unit_marker in (BD.UNIT_OK, BD.UNIT_FAILED):
+        for stop in stops:
+            assert stop not in f"{unit_marker}:some_label", (unit_marker, stop)
