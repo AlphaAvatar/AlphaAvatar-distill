@@ -1,0 +1,40 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.authorization/v1",
+ "authorization_id": "stage0.calibration_volume.search.pilot_20261018_122725",
+ "version": 1,
+ "granted_utc": "2026-10-18T12:27:25+00:00",
+ "granted_by": "maintainer (task instruction of 2026-10-18 to the executing agent session)",
+ "plan_id": "stage0.calibration_volume.pilot_search",
+ "session_plan_hash": "a9e433290efe58eaa92aceb0f42f49bde4c5e19caf567169bc5b00e8a2c06561",
+ "expected_usd": 4.6307,
+ "hard_cap_usd": 8.0,
+ "authorized_stages": [],
+ "stage_conditions": {
+  "phase": "pilot",
+  "plan": "pilot_search",
+  "envelope": "{\"phase\": \"pilot\", \"phase_ceiling_usd\": 10.0, \"phase_spent_usd\": 0.0, \"phase_remaining_usd\": 10.0, \"programme_ceiling_usd\": 92.0, \"programme_spent_usd\": 5.2472, \"programme_remaining_usd\": 86.7528, \"per_session_cap_usd\": 30.0}"
+ },
+ "scope_note": "root-level selection-stability pilot (exploratory H1/H3)",
+ "authorizes_battery": false,
+ "authorizes_search": true,
+ "authorizes_probes": false,
+ "authorized_session_commit": null,
+ "harness_source_digest": "cb49becc15e866047c3d40c5a1135dc9ce24a51f7159e7062c40003b714bee15",
+ "harness_source_files": [
+  "scripts/shared/pod/autoinit_preflight_setup.sh",
+  "scripts/shared/pod/watchdog.py",
+  "scripts/shared/pod/collect_artifacts.py",
+  "scripts/stages/stage-0/calibration_volume/governance.py",
+  "scripts/stages/stage-0/calibration_volume/launch.py",
+  "scripts/stages/stage-0/calibration_volume/search_driver.py",
+  "scripts/stages/stage-0/calibration_volume/search_session.py",
+  "scripts/shared/forward_baseline.py",
+  "src/aadistill/initialization/baseline.py",
+  "src/aadistill/initialization/planning/search.py",
+  "src/aadistill/initialization/planning/metrics.py"
+ ],
+ "per_launch_hard_usd": 8.0,
+ "provenance_commit": "d633a720c3f512a3403a241888d340bf591fe4dd",
+ "enforcement": "the launcher refuses a pod unless this artifact is bound to the session plan and the harness on disk, and its hard cap covers the planned hard threshold; one artifact funds one run",
+ "authorization_sha256": "cc79acbffc96c9bfb53437a20a01356e9f4f8493c08d07fe8fed4fb7d764a25f"
+}
