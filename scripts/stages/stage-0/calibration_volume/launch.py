@@ -222,7 +222,10 @@ def search_assets(plan: dict) -> tuple:
 
     return (LocalAsset(repo_path=D1S.STATE_EVAL_ROOT, dest_name="state_eval_v1",
                        install_to="artifacts/stages/stage-1"),
-            LocalAsset(repo_path=plan["profile_items_dir"], dest_name="profiles",
+            # setup copies an asset to <install_to>/<dest_name>, so the name must
+            # be the directory's own: the profiles pin items under it by path
+            LocalAsset(repo_path=plan["profile_items_dir"],
+                       dest_name=Path(plan["profile_items_dir"]).name,
                        install_to=str(Path(plan["profile_items_dir"]).parent)))
 
 

@@ -1,0 +1,15 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "pilot_20261018_122600",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "pilot",
+ "recorded_utc": "2026-10-18T12:27:25+00:00",
+ "status": "ABANDONED_BEFORE_LAUNCH",
+ "outcome": "A $0 review before launch found the search session's profile asset would land at artifacts/stages/stage-0/calibration_volume/profiles while every profile pins its items under profiles_pilot_v1 (setup copies an asset to <install_to>/<dest_name>); stage A would have refused on a billing pod. The fix edits launch.py, which moves the harness digest this one-use authorization binds, so the run is closed unlaunched and a fresh run id is issued. No provider resource was created.",
+ "provider_resource_created": false,
+ "money": {
+  "all_in_usd": 0.0,
+  "_basis": "no provider resource existed"
+ }
+}
