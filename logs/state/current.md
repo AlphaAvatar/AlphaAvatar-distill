@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-18 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-18 22:55 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -10,39 +10,60 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 ## Right now
 
 **NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods,
-0 network volumes and $0/h (2026-10-18 17:32 UTC). The last pod,
-`wm75q9fix8g15w` (Stage-0 pilot), was deleted at 17:30:07Z, and no tmux
-session, watchdog or monitor is alive.
+0 network volumes and $0/h (2026-10-18 22:46 UTC). The last pod,
+`q8lzi7xqb5wcg5` (Stage-0 resolution check), was deleted at 22:43Z. Its
+watchdog ended on `pod_gone`, and no tmux session, launcher or monitor is
+alive.
 
-**STAGE-0 CALIBRATION VOLUME IS TERMINAL (2026-10-18). THE FORMAL STUDY WAS
-NOT RUN, FOR TWO INDEPENDENT REASONS.**
-- **H2: EVALUATION NOT RESOLVABLE.** On the project's new capability battery
-  (dev_v1, 720 procedural tasks over the P10.2 axes):
-  - the teacher scores 638/720;
-  - both 0.86M fixed-recipe controls score 0/720, with seed discordance 0;
-  - the 2.96M rung scores 10/720.
+**PERMANENT EVALUATION REGISTRY (maintainer decision 2026-10-18).**
+`data/eval-set/eval-set-1` is registered as a **candidate**: identity pinned
+and protected, NOT frozen (AGENTS.md P10.3).
+- **Components:**
+  - `fluid_reasoning_720` (the Stage-0 dev battery, development-exposed);
+  - `stage3_capability_846` (TriviaQA `knowledge` withheld: no license
+    basis);
+  - `stage3_legacy_150` (in-sample regression only).
+- **Verified:** every asset was proven against the record that froze it, and
+  the current scorers reproduce every historical verdict checked.
+- **Open maintainer decisions** (`data/eval-set/registry.json`):
+  - an independent audit found 6 defective 720 items; none was changed;
+  - TriviaQA's license;
+  - the behaviour set's duplicates and its Stage-2-train overlaps.
+- **Owners:** [`data/eval-set/README.md`](../../data/eval-set/README.md) and
+  `decisions.md` 2026-10-18.
 
-  Making H2 measurable needs a recovery-recipe change, which is the
-  maintainer's (AGENTS.md §4.5).
-- **Budget insufficient.** On this pool a full D1 search costs $15.40 / $21.91
-  / $35.19 at 1x / 2x / 4x (A100, measured rates). The smallest readable
-  formal design, H1 only (1x/2x, three resamples), is $111.93, against $65
-  in the formal phase and $81.41 left in the project.
-- **H1 root-level pilot (exploratory).** 31/31 root states, under the frozen
-  plan:
-  - FFN and RESIDUAL_WIDTH **stabilize with volume** (+0.035 and +0.057 from
-    1x to 4x, at about 4x and 8x the between-resample noise);
-  - ATTENTION shows **no detectable volume effect** (0.956 at 1x);
-  - DEPTH is unlabeled (one pair per dose; identical removed sets at 2x).
-- **Money.** The programme spent $13.4471 of its $92. One L40S OOM attempt
-  ($1.2469) was repaired on an 80 GB card.
+**STAGE-0 CALIBRATION VOLUME IS TERMINAL AGAIN (round 2, 2026-10-18). THE
+FORMAL STUDY WAS NOT RUN: THE MAINTAINER'S AMENDED DESIGN IS NOT FUNDABLE.**
+- **The design.** 1x/2x/4x, one D1 full search and one fixed recovery each.
+  - Priced at $86.98 expected; $77.82 with the per-expansion overhead fix.
+  - Available: $65 in the formal phase and $77.34 in the project.
+  - The 4x search splits across sessions on a network volume.
+- **Resolution check** (on `fluid_reasoning_720`):
+  - Qwen3-0.6B (exactly the student geometry, the students' 8,192-token
+    allowance) scores 257/720.
+  - Every PCA-initialized fixed-recipe student from 0.86M to 5.50M recovery
+    tokens scores 0–10/720.
+  - So the set resolves student-scale models on deduction, composition and
+    induction (not analogy or interactive), and the recipe keeps students at
+    the floor. A D1-initialized student is unmeasured; it is the formal
+    study's first gate.
+- **Money.** The programme spent $17.51 of $92: round 2 added $4.06 for three
+  resolution attempts, two of them repaired engineering failures.
+- **H1 root-level pilot (exploratory, round 1).** FFN and RESIDUAL_WIDTH
+  stabilize with volume, ATTENTION shows no detectable effect, DEPTH is
+  unlabeled.
 - **Owners.**
-  [`REPORT.md`](../stages/stage-0/calibration_volume/closeout/REPORT.md),
+  [`REPORT.md`](../stages/stage-0/calibration_volume/closeout/REPORT.md)
+  (round 2 first),
   [`programme_closeout.json`](../stages/stage-0/calibration_volume/closeout/programme_closeout.json)
   and `decisions.md` 2026-10-18.
-- **Next.** A maintainer decision on the minimum viable plan in REPORT §10:
-  a reasoning-transfer recovery recipe validated by one ~$2 probe, then
-  funding. No Stage-0 formal session is authorized.
+- **Next.** Maintainer decisions:
+  - fund the amended design (about $90, or about $81 with the overhead fix,
+    which needs a project-cap increase), or authorize a 1x/2x subset (about
+    $46.67);
+  - settle eval-set-1's open decisions.
+
+  No Stage-0 formal session is authorized.
 
 **THE D-SERIES IS CLOSED (maintainer final decision, 2026-10-17). D1 +
 `scored_v1` IS THE OFFICIAL FORWARD BASELINE.** It is a selection, not a
@@ -1904,7 +1925,7 @@ D1  COMPLETE / NO-GO 2026-10-12         q2 did not confirm against B
 D2  COMPLETE / NO_GO 2026-10-16         c4 did not confirm against B
 D3  COMPLETE 2026-10-17                 STRUCTURAL_CHANGE; probes INCONCLUSIVE
 D-series  CLOSED 2026-10-17             <- forward baseline: D1 + scored_v1 (a selection)
-S0 volume  TERMINAL 2026-10-18          formal NOT RUN: H2 not resolvable + budget gap
+S0 volume  TERMINAL 2026-10-18 (rnd 2)  formal NOT RUN: amended design not fundable
       root-level pilot (exploratory)    FFN/WIDTH stabilize with volume; ATTENTION no effect
 S0 mixture  NOT AUTHORIZED              later; docs/shared/STAGE0_HANDOFF.md
 C4  NOT AUTHORIZED
@@ -4042,7 +4063,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$513.5943` spent of `$595.0000`, leaving `$81.4057` |
+| project cap | `$517.6571` spent of `$595.0000`, leaving `$77.3429` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

@@ -118,8 +118,10 @@ def main() -> int:
                                "largest_session_hard_usd": v["largest_session_hard_usd"],
                                "sessions": [(x["session"], x["expected_usd"], x["hard_usd"])
                                             for x in v["sessions"]],
-                               "completes_in": {e: q["completes"] for e, q in v["sequenced"].items()},
-                               "first_unfundable": {e: q.get("first_unfundable")
+                               "min_sequential_envelope_usd": v["min_sequential_envelope_usd"],
+                               "completes_in": {e.removesuffix("_usd"): q["completes"]
+                                                for e, q in v["sequenced"].items()},
+                               "first_unfundable": {e.removesuffix("_usd"): q.get("first_unfundable")
                                                     for e, q in v["sequenced"].items()},
                                "gap_to_formal_phase_usd": v["gap_to_formal_phase_expected_usd"],
                                "gap_to_programme_usd": v["gap_to_programme_expected_usd"]}

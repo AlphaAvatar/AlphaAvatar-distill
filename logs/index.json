@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 101,
+  "runs_unrecorded": 104,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -766,8 +766,8 @@
    },
    "calibration_volume": {
     "recorded": 0,
-    "unrecorded": 7,
-    "total": 7
+    "unrecorded": 10,
+    "total": 10
    },
    "continuation_b": {
     "recorded": 5,
@@ -2815,6 +2815,30 @@
   },
   {
    "experiment_id": "calibration_volume",
+   "run_id": "resolution_20261018_201712",
+   "root": "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_201712",
+   "n_files": 4,
+   "digest": "e3d9840181bb6e18faafb425d6168922e7acd4bfbd55ed4b90273d73860810ad",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "resolution_20261018_202715",
+   "root": "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_202715",
+   "n_files": 6,
+   "digest": "f08cbc0db95790188750e748f6005071d73b2bd4a9fa9d8257efdfeb52cb14ce",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "resolution_20261018_213745",
+   "root": "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_213745",
+   "n_files": 11,
+   "digest": "3b1e94b273dceacb9379b294038c6e2177dc55f00ef0da1a4675893622a36b4b",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
    "run_id": "teachercal_20261018_112755",
    "root": "logs/stages/stage-0/calibration_volume/runs/teachercal_20261018_112755",
    "n_files": 7,
@@ -3147,7 +3171,7 @@
    "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5",
    "n_files": 5,
    "digest": "ad5acd8118d2ba20e22bc4e85d0a0b3949585ea0174155648fdaef478b0df841",
-   "why": "no run manifest; its closeout states: PRE-PROVIDER ABORT — NO PROVIDER RESOURCE, NO SPEND, NO MEASUREMENT"
+   "why": "no run manifest; its closeout states: PRE-PROVIDER ABORT \u2014 NO PROVIDER RESOURCE, NO SPEND, NO MEASUREMENT"
   },
   {
    "experiment_id": "phase_c2_baseline_completion",
@@ -3155,7 +3179,7 @@
    "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt7",
    "n_files": 15,
    "digest": "6a9719fbf4028963b5eefa255e664d5efe299dabaf370d38c0b0661c1abd95b4",
-   "why": "no run manifest; its closeout states: ABORTED BEFORE SETUP — ORCHESTRATOR KILLED, NO REBUILD, NO MEASUREMENT"
+   "why": "no run manifest; its closeout states: ABORTED BEFORE SETUP \u2014 ORCHESTRATOR KILLED, NO REBUILD, NO MEASUREMENT"
   },
   {
    "experiment_id": "phase_c2_behavioural",

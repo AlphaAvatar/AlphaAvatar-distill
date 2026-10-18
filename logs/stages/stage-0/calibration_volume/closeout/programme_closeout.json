@@ -1,9 +1,9 @@
 {
  "schema": "aadistill.stage0.calibration_volume.programme_closeout/v1",
- "written_utc": "2026-10-18T17:32:24+00:00",
+ "written_utc": "2026-10-18T22:46:01+00:00",
  "repository": {
   "branch": "stage0/calibration-volume-mixture",
-  "head_at_write": "b1f3a02062d7b5e5fc7804c7822e8c30fe6e6ee1",
+  "head_at_write": "8df69c633c940f36ca5a654e45fcb24426616508",
   "dirty_at_write": true
  },
  "data_audit": {
@@ -30,11 +30,11 @@
  },
  "capability_evaluation": {
   "battery": {
-   "path": "data/stages/stage-0/calibration_volume/tasks/dev_v1.jsonl",
+   "path": "data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.jsonl",
    "sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4"
   },
   "manifest": {
-   "path": "data/stages/stage-0/calibration_volume/tasks/dev_v1.manifest.json",
+   "path": "data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.manifest.json",
    "sha256": "95531de9b347a0987c7ff973c10980dc66ff45673699422fe0f84c776f4919b5"
   },
   "analysis": {
@@ -81,7 +81,7 @@
    "ctl_r0860k_sb_dev": 0.9065,
    "e1_r2960k_sa_pca_dev": 0.8977
   },
-  "resolvable_under_fixed_recipe": false
+  "pca_fixed_recipe_students_off_floor": false
  },
  "base_pool": {
   "manifest": {
@@ -190,72 +190,126 @@
   }
  },
  "verdicts": {
-  "H2_downstream_reasoning": "EVALUATION NOT RESOLVABLE under the fixed recovery recipe",
+  "H2_downstream_reasoning": "NOT MEASURED: no D1-initialized recovered student exists yet; every fixed-recipe student measured so far is PCA-initialized and sits at the floor of fluid_reasoning_720",
   "H1_selection_stability": "pilot (exploratory, root-level): {\"ATTENTION\": \"no detectable volume effect\", \"DEPTH\": null, \"FFN\": \"stabilizes with volume\", \"RESIDUAL_WIDTH\": \"stabilizes with volume\"}",
-  "formal_volume_study": "NOT RUN: EVALUATION NOT RESOLVABLE -- under the fixed recovery recipe every recovered student scores 0 on the capability battery, so no initialization difference can reach the H2 endpoint; BUDGET INSUFFICIENT -- the smallest design (6 full searches) is priced at $111.93 against $65.0 left in the formal phase"
+  "formal_volume_study": "NOT RUN: BUDGET INSUFFICIENT for the maintainer's amended design (1x/2x/4x, one full search and one recovery each) -- as_measured: $86.98 expected, money runs out at '4x: search part 2/2 (one search identity, journal on the volume)' in the formal phase ($65.0) and at '4x: search part 2/2 (one search identity, journal on the volume)' with every programme phase merged ($74.4901); with_overhead_fix: $77.82 expected, money runs out at '4x: search part 2/2 (one search identity, journal on the volume)' in the formal phase ($65.0) and at '2x+4x: recovery + eval-set-1' with every programme phase merged ($74.4901)",
+  "H2_resolution_evidence": "the set separates the same-geometry reference from the floor (static 0.4462, lower bound 0.3538); recovered students off the floor: none. Every student here is PCA-initialized; a D1-initialized student is unmeasured."
  },
  "formal_design_proposal": {
   "path": "logs/stages/stage-0/calibration_volume/plans/formal_design_proposal.json",
-  "sha256": "c6cceb115fcd33b85d4140744657f0721c2f9451c4d47a37a47fdc827979a5cf"
+  "sha256": "1609055f194b466f378e109a34b6abc7fc951034e18b5cbb54424796ff623477"
+ },
+ "resolution_check": {
+  "path": "logs/stages/stage-0/calibration_volume/design/resolution_check.json",
+  "sha256": "f273b0d3a8a4e190acf539bbe97f163fc2b1f171f1af16a514c3246eb501f15e"
  },
  "budget_gap": {
-  "formal_phase_remaining_usd": 65.0,
+  "design": "F_single_draw",
   "per_session_cap_usd": 30.0,
-  "designs": {
-   "F_full": {
-    "doses": [
-     "1x",
-     "2x",
-     "4x"
-    ],
-    "full_searches": 9,
-    "recovery_probes": 18,
-    "expected_usd": 247.74,
-    "largest_session_hard_usd": 43.58,
-    "fundable": false
-   },
-   "MVP_A_h1_only": {
-    "doses": [
-     "1x",
-     "2x"
-    ],
-    "full_searches": 6,
-    "recovery_probes": 0,
-    "expected_usd": 111.93,
+  "envelopes_usd": {
+   "formal_phase": 65.0,
+   "all_programme_phases": 74.4901
+  },
+  "variants": {
+   "as_measured": {
+    "expected_usd": 86.98,
+    "sum_of_hard_caps_usd": 107.74,
     "largest_session_hard_usd": 27.63,
-    "fundable": false
-   },
-   "MVP_B_h1_h2": {
-    "doses": [
-     "1x",
-     "2x"
+    "sessions": [
+     [
+      "1x: search + recovery + eval-set-1 (gate)",
+      18.7,
+      23.78
+     ],
+     [
+      "2x: search",
+      21.91,
+      27.63
+     ],
+     [
+      "4x: search part 1/2 (one search identity, journal on the volume)",
+      18.04,
+      23.0
+     ],
+     [
+      "4x: search part 2/2 (one search identity, journal on the volume)",
+      18.04,
+      23.0
+     ],
+     [
+      "2x+4x: recovery + eval-set-1",
+      7.49,
+      10.33
+     ]
     ],
-    "full_searches": 6,
-    "recovery_probes": 12,
-    "expected_usd": 132.09,
-    "largest_session_hard_usd": 27.63,
-    "fundable": false
+    "min_sequential_envelope_usd": 89.82,
+    "completes_in": {
+     "formal_phase": false,
+     "all_programme_phases": false
+    },
+    "first_unfundable": {
+     "formal_phase": "4x: search part 2/2 (one search identity, journal on the volume)",
+     "all_programme_phases": "4x: search part 2/2 (one search identity, journal on the volume)"
+    },
+    "gap_to_formal_phase_usd": 21.98,
+    "gap_to_programme_usd": 12.49
+   },
+   "with_overhead_fix": {
+    "expected_usd": 77.82,
+    "sum_of_hard_caps_usd": 96.72,
+    "largest_session_hard_usd": 23.96,
+    "sessions": [
+     [
+      "1x: search + recovery + eval-set-1 (gate)",
+      15.64,
+      20.11
+     ],
+     [
+      "2x: search",
+      18.85,
+      23.96
+     ],
+     [
+      "4x: search part 1/2 (one search identity, journal on the volume)",
+      16.52,
+      21.16
+     ],
+     [
+      "4x: search part 2/2 (one search identity, journal on the volume)",
+      16.52,
+      21.16
+     ],
+     [
+      "2x+4x: recovery + eval-set-1",
+      7.49,
+      10.33
+     ]
+    ],
+    "min_sequential_envelope_usd": 80.66,
+    "completes_in": {
+     "formal_phase": false,
+     "all_programme_phases": false
+    },
+    "first_unfundable": {
+     "formal_phase": "4x: search part 2/2 (one search identity, journal on the volume)",
+     "all_programme_phases": "2x+4x: recovery + eval-set-1"
+    },
+    "gap_to_formal_phase_usd": 12.82,
+    "gap_to_programme_usd": 3.33
    }
   },
-  "smallest_design_gap_usd": 46.93,
   "full_search_by_dose": {
    "1x": {
     "search_minutes": 486.2,
-    "expected_usd": 15.4,
-    "hard_usd": 19.82,
-    "within_per_session_cap": true
+    "search_minutes_with_overhead_fix": 383.7
    },
    "2x": {
     "search_minutes": 704.4,
-    "expected_usd": 21.91,
-    "hard_usd": 27.63,
-    "within_per_session_cap": true
+    "search_minutes_with_overhead_fix": 601.9
    },
    "4x": {
     "search_minutes": 1149.7,
-    "expected_usd": 35.19,
-    "hard_usd": 43.58,
-    "within_per_session_cap": false
+    "search_minutes_with_overhead_fix": 1047.3
    }
   }
  },
@@ -435,6 +489,42 @@
     }
    },
    {
+    "run_id": "resolution_20261018_201712",
+    "phase": "prerequisites",
+    "status": "SESSION_ENDED",
+    "terminal": null,
+    "usd": 0.0729,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_201712/closeout/outcome.json",
+     "sha256": "8b9657613fb3d70796494cc06895fec1bc8129af4c189e903d3d178d9f93de0c"
+    }
+   },
+   {
+    "run_id": "resolution_20261018_202715",
+    "phase": "prerequisites",
+    "status": "SESSION_ENDED",
+    "terminal": "RUN_FAILED",
+    "usd": 2.031,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_202715/closeout/outcome.json",
+     "sha256": "0df3608b3828459bf926db56f5303d8895662daa47bc917ad5ce882bdf09fd0c"
+    }
+   },
+   {
+    "run_id": "resolution_20261018_213745",
+    "phase": "prerequisites",
+    "status": "SESSION_ENDED",
+    "terminal": "ALL_DONE",
+    "usd": 1.9589,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_213745/closeout/outcome.json",
+     "sha256": "b623a62b43ae7b193be9129dd9259bf7f587107f0440b0c3b12a57ba9f107e0a"
+    }
+   },
+   {
     "run_id": "teachercal_20261018_112755",
     "phase": "prerequisites",
     "status": "SESSION_ENDED",
@@ -447,16 +537,16 @@
     }
    }
   ],
-  "programme_spent_usd": 13.4471,
+  "programme_spent_usd": 17.5099,
   "programme_ceiling_usd": 92.0,
   "project": {
    "cap_usd": 595.0,
-   "cumulative_spend_usd": 513.5943,
-   "remaining_usd": 81.4057
+   "cumulative_spend_usd": 517.6571,
+   "remaining_usd": 77.3429
   }
  },
  "provider": {
-  "queried_utc": "2026-10-18T17:32:24+00:00",
+  "queried_utc": "2026-10-18T22:46:02+00:00",
   "pods": 0,
   "network_volumes": 0,
   "spend_per_hour": 0

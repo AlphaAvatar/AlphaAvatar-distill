@@ -18,6 +18,9 @@ Everything this experiment produced, in one place.
 * [`pilot_20261018_122725`](runs/pilot_20261018_122725/)
 * [`pilot_20261018_122808`](runs/pilot_20261018_122808/)
 * [`pilot_20261018_134131`](runs/pilot_20261018_134131/)
+* [`resolution_20261018_201712`](runs/resolution_20261018_201712/)
+* [`resolution_20261018_202715`](runs/resolution_20261018_202715/)
+* [`resolution_20261018_213745`](runs/resolution_20261018_213745/)
 * [`teachercal_20261018_112755`](runs/teachercal_20261018_112755/)
 
 Canonical list, always the index rather than this file.

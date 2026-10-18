@@ -89,7 +89,7 @@
     "pipeline_activity": 1,
     "experiments": 1,
     "experiments_with_logs": 1,
-    "runs": 7,
+    "runs": 10,
     "canonical_configs": 3,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
@@ -1040,7 +1040,7 @@
    "experiment_id": "calibration_volume",
    "stage_id": "0",
    "classification": "experiment",
-   "status": "TERMINAL 2026-10-18 (formal study NOT RUN). H2: EVALUATION NOT RESOLVABLE under the fixed recovery recipe (0.86M controls 0/720, teacher 638/720). H1 root-level pilot (exploratory): FFN and WIDTH stabilize with volume, ATTENTION no detectable effect, DEPTH unlabeled. Budget insufficient for the smallest readable formal design",
+   "status": "TERMINAL 2026-10-18, round 2 (formal study NOT RUN). Design amended by the maintainer to 1x/2x/4x, one full search and one recovery each; priced $86.98 expected ($77.82 with the overhead fix) against $65 formal / $74.49 programme / $77.34 project: NOT FUNDABLE. Resolution check: same-geometry Qwen3-0.6B (8,192 allowance) 257/720 vs every PCA fixed-recipe student <2% (0.86M-5.50M); a D1-initialized student is unmeasured and is the formal study's first gate. H1 root-level pilot: FFN and WIDTH stabilize with volume, ATTENTION no detectable effect, DEPTH unlabeled",
    "title": "Stage-0 calibration volume dose-response (first Stage-0 study)",
    "question": "With teacher, geometry, the forward-baseline method and the recovery recipe fixed, does more independent, capability-aligned Stage-0 calibration data stabilize the AutoInitializer's structural selection (H1), improve the recovered student's reasoning on unseen rule families (H2), and saturate (H3)?",
    "canonical_path": "logs/stages/stage-0/calibration_volume",
@@ -1072,9 +1072,15 @@
     },
     {
      "path": "logs/stages/stage-0/calibration_volume/plans/formal_design_proposal.json",
-     "says": "the formal study designed and priced from measured telemetry; its precondition and its budget gap",
+     "says": "the amended formal study (one draw per dose) priced from measured telemetry; its resolution gate, split 4x execution and budget gap",
      "field": "authorizes",
      "equals": "nothing"
+    },
+    {
+     "path": "logs/stages/stage-0/calibration_volume/design/resolution_check.json",
+     "says": "whether eval-set-1's fluid_reasoning_720 resolves student-scale models: teacher, same-geometry reference, five recovered students",
+     "field": "schema",
+     "equals": "aadistill.stage0.resolution_check/v1"
     },
     {
      "path": "logs/stages/stage-0/calibration_volume/closeout/programme_closeout.json",
@@ -1085,7 +1091,7 @@
    ],
    "external_material": [],
    "decisions": [
-    "logs/budget/decisions.md -- 2026-10-18: Stage-0 calibration-volume programme started; battery valid, students at floor, root-level pilot; pilot attempt 1 OOM repaired on an 80 GB card; programme terminal"
+    "logs/budget/decisions.md -- 2026-10-18: Stage-0 calibration-volume programme started; battery valid, students at floor, root-level pilot; pilot attempt 1 OOM repaired on an 80 GB card; programme terminal; permanent evaluation registry; resolution attempts 1-2 repaired; design amended to one draw per dose, still NOT RUN"
    ],
    "classification_reason": "Stage 0 by subject and product: it varies the teacher-signal calibration data a Stage-1 initialization is built from (AGENTS.md 4.2, reasoning-oriented calibration). The Stage-1 search and any Stage-3 probe are its instruments, as Stage-3 probes were for Stage-1 experiments.",
    "canonical_scripts": "scripts/stages/stage-0/calibration_volume",

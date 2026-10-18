@@ -1,0 +1,31 @@
+bundle OK: transfer/aad_autoinit_8df69c63.bundle on the relay (34383346 bytes)
+[21:38:38] budget: expected 95 min $2.83 · soft $4.14 · hard $4.59 (authorized $4.64)
+[21:38:39] NVIDIA A100-SXM4-80GB $1.79/h, stock Low
+[21:38:39] account funds OK: the provider account holds $97.9535 against the $30.0000 this session must be able to fund
+[21:38:40] precheck OK: 12 relay inputs (12 from AlphaAvatar/aadistill-artifacts), 0 local assets
+[21:38:41] watchdog detached — hard 154 min = $4.59
+[21:38:41] created q8lzi7xqb5wcg5 at $1.79/h
+[21:39:34]   starting (60s) — $0.03
+[21:40:26] TCP 22 at 154.54.102.26:12726 after 1.7 min
+[21:40:29] draw 1: ssh reachable — $0.05
+[21:40:47] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.16
+[21:40:47] draw 1: running setup
+[21:43:07] draw 1: setup complete — $0.13
+[21:43:14] driver detached, pid 2121, confirmed by descriptor_probe — $0.14
+[21:45:27]   2026-10-18T21:43:11Z MARKER:CONTRACT_OK — $0.20
+[21:59:46]   2026-10-18T21:58:42Z MARKER:UNIT_OK:qwen3_0p6b_cap8192_dev — $0.63
+[22:00:14] unit qwen3_0p6b_cap8192_dev: SECURED
+[22:24:06]   2026-10-18T22:23:20Z MARKER:UNIT_OK:e1_r5500k_sa_pca_dev — $1.35
+[22:24:33] unit e1_r5500k_sa_pca_dev: SECURED
+[22:41:14]   2026-10-18T22:39:30Z MARKER:ALL_DONE — $1.87
+[22:41:14] polling ended: ALL_DONE — $1.87
+[22:42:30]   manifest rc=0
+19 file(s) across 3 class(es) -> /workspace/manifest.json
+  final_required: 19 · mutable_snapshot: 0 · final_streams_quiescent: True
+[22:43:18] unit e1_r1600k_sa_pca_dev: SECURED
+[22:43:25] teardown gate: allowed=True failed=None
+[22:43:25] deleting pod (gate passed)
+[22:43:36] pod deleted — 64.9 min, $1.94; provider confirms gone: True
+
+stage0-calvol-battery COMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-0/calibration_volume/runs/resolution_20261018_213745/runtime/session.json. 
+EXIT=0

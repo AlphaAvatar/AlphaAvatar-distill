@@ -12474,3 +12474,57 @@ on a paid pod.
   40,960 tokens. It is a multi-hour job on an 80 GB card unless concurrency
   is sized to the KV cache, and it is not fundable from the prerequisites
   phase. It is a decision item.
+
+## 2026-10-18 — Stage-0 volume design amended to one draw per dose; resolution check; formal study still NOT RUN
+
+- **Context.** Maintainer amendment of 2026-10-18 (task instruction to the
+  executing agent):
+  - no independent resamples;
+  - 1x / 2x / 4x, one D1 full search and one fixed recovery each;
+  - one frozen base mixture and one nested draw;
+  - eval-set-1 as the evaluation contract;
+  - claims limited to these three treatments;
+  - verify evaluation resolution with existing checkpoints and necessary
+    reference models before any full search, without inferring D1 students'
+    scores from PCA students';
+  - split the 4x search across sessions under one search identity rather than
+    edit the baseline.
+- **Resolution check** (`design/resolution_check.json`,
+  `runs/resolution_20261018_213745`, $1.9589):
+  - Qwen3-0.6B, exactly the student geometry, under the students' 8,192
+    allowance (a labelled matched-allowance diagnostic): 257/720, static
+    0.446 [0.354, 0.533].
+    - Per axis: deduction 114/192, composition 85/144, induction 56/144,
+      analogy 2/96, interactive 0/144.
+  - Existing PCA-initialized fixed-recipe-family students:
+    - 0.86M: 0 and 0;
+    - 1.60M: 7;
+    - 2.96M: 10;
+    - 5.50M: 2.
+  - **The 720 resolves student-scale models on deduction, composition and
+    induction.** It does not resolve analogy or interactive at that scale.
+  - **The recovery recipe, not the instrument, keeps students at the
+    floor.** More recovery tokens of that recipe do not lift it.
+  - No D1-initialized recovered student exists; that remains unmeasured.
+- **Design** (`plans/formal_design_proposal.json` v2, DESIGN.md section 5a):
+  - the resolution gate measures the 1x D1 student first; below 2% static,
+    H2 is EVALUATION NOT RESOLVABLE and 2x/4x stop;
+  - the 4x search runs as two sessions on one network volume (engine journal
+    resume), with the driver/launcher support specified but not yet built;
+  - covariates recorded per dose; no variance or saturation claims.
+- **Budget.**
+  - As measured: $86.98 expected, $89.82 minimum sequential envelope.
+  - With the ~1.25 min/expansion overhead fixed: $77.82 / $80.66.
+  - Available: formal phase $65, all programme phases $74.49, project
+    $77.34.
+  - **NOT FUNDABLE.** Per P12 a hard-cap increase is the maintainer's, so
+    nothing formal was authorized.
+  - A 1x/2x-only subset (about $46.67) would fit the formal phase. It is not
+    the specified design, so it was not run.
+- **Decision.** Stop at this terminal state:
+  - the registry, the amended design, the resolution evidence and the
+    pricing are committed;
+  - the formal phase stays unopened (no preregistration).
+- **Revisit when.** The maintainer funds the amended design (about $90, or
+  about $81 after the overhead fix), authorizes the 1x/2x subset, or changes
+  the recovery recipe.

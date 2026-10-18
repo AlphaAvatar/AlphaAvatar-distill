@@ -63,7 +63,7 @@
   }
  },
  "resolution_gate": {
-  "before_any_search": "the reference check (configs/.../resolution_session.json): does fluid_reasoning_720 resolve models in the student's capacity range? result: PENDING",
+  "before_any_search": "the reference check (configs/.../resolution_session.json): does fluid_reasoning_720 resolve models in the student's capacity range? result: logs/stages/stage-0/calibration_volume/design/resolution_check.json",
   "after_the_1x_unit": "the 1x recovered D1-initialized student must answer at least 2% of fluid_reasoning_720's static items; below it H2 is EVALUATION NOT RESOLVABLE (measured on a D1 student, not assumed from PCA students) and the 2x/4x sessions are not launched without a new maintainer decision",
   "why": "every fixed-recipe student measured so far is PCA-initialized and inside the floor (0/720, 0/720, 10/720); whether a D1-initialized one is has not been measured"
  },
@@ -335,39 +335,40 @@
      ]
     },
     "all_programme_phases_usd": {
-     "envelope_usd": 78.5529,
+     "envelope_usd": 74.4901,
      "completes": false,
      "first_unfundable": "4x: search part 2/2 (one search identity, journal on the volume)",
      "steps": [
       {
        "session": "1x: search + recovery + eval-set-1 (gate)",
        "hard_usd": 23.78,
-       "left_before_usd": 78.55,
+       "left_before_usd": 74.49,
        "fits": true
       },
       {
        "session": "2x: search",
        "hard_usd": 27.63,
-       "left_before_usd": 59.85,
+       "left_before_usd": 55.79,
        "fits": true
       },
       {
        "session": "4x: search part 1/2 (one search identity, journal on the volume)",
        "hard_usd": 23.0,
-       "left_before_usd": 37.94,
+       "left_before_usd": 33.88,
        "fits": true
       },
       {
        "session": "4x: search part 2/2 (one search identity, journal on the volume)",
        "hard_usd": 23.0,
-       "left_before_usd": 19.9,
+       "left_before_usd": 15.84,
        "fits": false
       }
      ]
     }
    },
+   "min_sequential_envelope_usd": 89.82,
    "gap_to_formal_phase_expected_usd": 21.98,
-   "gap_to_programme_expected_usd": 8.43
+   "gap_to_programme_expected_usd": 12.49
   },
   "with_overhead_fix": {
    "sessions": [
@@ -439,54 +440,55 @@
      ]
     },
     "all_programme_phases_usd": {
-     "envelope_usd": 78.5529,
-     "completes": true,
-     "left_after_usd": 3.53,
+     "envelope_usd": 74.4901,
+     "completes": false,
+     "first_unfundable": "2x+4x: recovery + eval-set-1",
      "steps": [
       {
        "session": "1x: search + recovery + eval-set-1 (gate)",
        "hard_usd": 20.11,
-       "left_before_usd": 78.55,
+       "left_before_usd": 74.49,
        "fits": true
       },
       {
        "session": "2x: search",
        "hard_usd": 23.96,
-       "left_before_usd": 62.91,
+       "left_before_usd": 58.85,
        "fits": true
       },
       {
        "session": "4x: search part 1/2 (one search identity, journal on the volume)",
        "hard_usd": 21.16,
-       "left_before_usd": 44.06,
+       "left_before_usd": 40.0,
        "fits": true
       },
       {
        "session": "4x: search part 2/2 (one search identity, journal on the volume)",
        "hard_usd": 21.16,
-       "left_before_usd": 27.54,
+       "left_before_usd": 23.48,
        "fits": true
       },
       {
        "session": "2x+4x: recovery + eval-set-1",
        "hard_usd": 10.33,
-       "left_before_usd": 11.02,
-       "fits": true
+       "left_before_usd": 6.96,
+       "fits": false
       }
      ]
     }
    },
+   "min_sequential_envelope_usd": 80.66,
    "gap_to_formal_phase_expected_usd": 12.82,
-   "gap_to_programme_expected_usd": 0.0
+   "gap_to_programme_expected_usd": 3.33
   }
  },
  "budget": {
   "phase_remaining_usd": {
-   "prerequisites": 6.7528,
+   "prerequisites": 2.69,
    "formal_volume": 65.0,
    "pilot": 6.8001
   },
-  "programme_remaining_usd": 78.5529,
+  "programme_remaining_usd": 74.4901,
   "per_session_cap_usd": 30.0,
   "reading": "the formal phase alone cannot fund the study in either variant; see design.<variant>.sequenced for where the money runs out when every launch must fit its hard cap"
  },

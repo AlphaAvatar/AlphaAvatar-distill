@@ -1,14 +1,133 @@
 # Stage-0 calibration volume: programme report
 
-**Terminal, 2026-10-18. The formal volume study was NOT RUN, for two
-independent reasons:**
-1. **H2 is not resolvable** under the fixed recovery recipe.
-2. **The budget cannot fund the smallest readable formal design.**
-
-The prerequisites and a root-level pilot of H1 ran to completion. Every figure
-below is read from
+Every figure below is read from
 [`programme_closeout.json`](programme_closeout.json), which derives it from the
 record that owns it. Where this page and that file disagree, the file is right.
+
+## Round 2 (maintainer amendment, 2026-10-18): evaluation registry and single-draw design
+
+**The formal study is still NOT RUN. The budget cannot fund even the amended
+design. Whether a D1-initialized student escapes the fluid-reasoning floor
+remains unmeasured, and is now the first thing the formal study measures.**
+
+### What changed
+
+- **Permanent evaluation registry.** `data/eval-set/eval-set-1` is registered
+  as a **candidate**, not frozen (AGENTS.md P10.3,
+  [`data/eval-set/eval-set-1/README.md`](../../../../../data/eval-set/eval-set-1/README.md)).
+  - **`fluid_reasoning_720`:** this programme's `dev_v1`, moved verbatim.
+    It is development-exposed.
+  - **`stage3_capability_846`:** the frozen Stage-3 battery plus the 76
+    behaviour prompts; TriviaQA withheld on license.
+  - **`stage3_legacy_150`:** in-sample only.
+  - **Provenance:** every asset was proven against the record that froze it;
+    no re-sampling.
+  - **Audit:** an independent audit of the 720 found 6 defective items. They
+    are open maintainer decisions, and no item was changed.
+- **Amended design** ([`plans/formal_design_proposal.json`](../plans/formal_design_proposal.json),
+  DESIGN.md section 5a):
+  - 1x / 2x / 4x, one D1 full search and one fixed recovery each, from one
+    frozen base mixture and one nested draw;
+  - comparisons between these treatments only, with no selection-variance or
+    saturation claim;
+  - composition covariates recorded per dose;
+  - the 4x search split into two sessions over one search identity on a
+    network volume, never by editing the baseline.
+
+### Resolution check ([`design/resolution_check.json`](../design/resolution_check.json))
+
+Before any search, the 720 was measured on models in the student's capacity
+range: `runs/resolution_20261018_213745`, A100-80GB, $1.9589. The pre-existing
+rows come from `runs/battery_20261018_092345`.
+
+| model on `fluid_reasoning_720` | all | static (95% family CI) | deduction | composition | induction | analogy | interactive |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| teacher (262,144 ctx) | 638 | 538/576 | 189/192 | 135/144 | 140/144 | 74/96 | 100/144 |
+| **Qwen3-0.6B, same geometry, capped at 8,192**[^cap] | **257** | 257/576 [0.354, 0.533] | 114 | 85 | 56 | 2 | 0 |
+| PCA student, 0.86M rung, sa / sb | 0 / 0 | 0/576 | 0 | 0 | 0 | 0 | 0 |
+| PCA student, 1.60M rung, sa | 7 | 7/576 [0.002, 0.026] | 6 | 0 | 1 | 0 | 0 |
+| PCA student, 2.96M rung, sa | 10 | 10/576 [0.004, 0.035] | 9 | 0 | 1 | 0 | 0 |
+| PCA student, 5.50M rung, sa | 2 | 2/576 [0, 0.009] | 2 | 0 | 0 | 0 | 0 |
+
+[^cap]: A matched-allowance **diagnostic**, not Qwen3-0.6B's P18 score. At its
+own 40,960-token context its thinking tail thrashed the KV cache and did not
+finish in 55 minutes (`runs/resolution_20261018_202715`).
+
+- **The instrument resolves at student scale on three static axes.**
+  - A released model with exactly the student's geometry, under exactly the
+    students' allowance, answers 44.6% of the static items.
+  - Every recovered student answers under 2%.
+  - The static reference-vs-5.50M contrast is +0.443, 95% CI [0.352, 0.530].
+- **It does not resolve analogy or interactive at this scale.** The reference
+  scores 2/96 and 0/144 there. Those axes need easier items to separate
+  0.6B-class models, which would be a new set.
+- **More recovery data of this kind does not help.** Students on the
+  KD-heavy recipe stay inside the floor band at every dose from 0.86M to
+  5.50M tokens. The best is 10/720 at 2.96M, and 5.50M scores *fewer* (2/720).
+- **This is not a claim about D1-initialized students.** Every student above
+  is PCA-initialized.
+  - Indirect evidence: D1-q2 probes under the same recipe scored
+    0.027–0.058 correct on the mixed D1 battery, comparable to the controls
+    there.
+  - The amended design's first unit (1x search + recovery + eval-set-1) is
+    therefore a measured gate: below 2% static correctness, H2 is
+    EVALUATION NOT RESOLVABLE and 2x/4x are not launched.
+- **Attempts.**
+  - Attempt 1 ($0.0729) failed in setup: the bundle was not staged.
+  - Attempt 2 ($2.031) measured nothing complete, because a unit marker
+    collided with the session marker.
+  - Both were repaired at the root: a $0 bundle-on-relay gate and renamed
+    unit markers, each with a regression test.
+
+### Budget for the amended design
+
+| variant | expected | minimum envelope for sequential launches[^seq] | formal phase | programme remainder | project remainder |
+| --- | --- | --- | --- | --- | --- |
+| as measured | $86.98 | $89.82 | $65.00 | $74.49 | $77.34 |
+| with the per-expansion overhead fix | $77.82 | $80.66 | $65.00 | $74.49 | $77.34 |
+
+[^seq]: Each launch must fit its hard cap after the expected spend of
+everything before it (P12.1).
+
+- **Sessions** (A100 at $1.79/h):
+  1. the 1x unit, $18.70 expected;
+  2. the 2x search, $21.91;
+  3. the 4x search in two parts, $18.04 each;
+  4. the 2x/4x recoveries + eval-set-1, $7.49;
+  5. a network volume, about $2.80.
+- **Neither variant fits.** Even with the overhead fix, the study needs about
+  $3.32 more than the whole project has left. As measured it needs $12.48
+  more.
+- **Programme spend.** $17.51 of $92. This round added $4.06 across the
+  three resolution attempts; the prerequisites phase has $2.69 left.
+
+### What needs the maintainer
+
+1. **Budget.** Raise the formal envelope to about $90 (as measured) or about
+   $81 (with the overhead fix), which also needs a project-cap increase.
+   The alternative is to authorize a smaller study:
+   - a two-dose 1x/2x subset is about $46.67 expected (the 1x unit $18.70,
+     the 2x search $21.91, one recovery $4.19, a two-day volume $1.87), which
+     fits the $65 formal phase;
+   - it cannot address H3, and it is not the design the maintainer
+     specified, so it was not run.
+2. **eval-set-1 open decisions** (`data/eval-set/registry.json`): the six
+   defective 720 items, the generator fixes, semantic duplicates, the
+   scorer's normalization gaps, the TriviaQA license, the behaviour-set
+   duplicates and the Stage-2-train overlaps. Freezing waits on these.
+3. **Optional:** Qwen3-0.6B's own P18 score on the 720 at 40,960 tokens. It is
+   a multi-hour run unless concurrency is sized to the KV cache, and it is not
+   fundable from the prerequisites phase.
+
+## Round 1 (2026-10-18): prerequisites, root-level pilot, terminal
+
+**The formal volume study was NOT RUN, for two independent reasons:**
+1. **H2 was judged not resolvable** under the fixed recovery recipe. Round 2
+   narrows this: it was measured only for PCA-initialized students.
+2. **The budget could not fund the smallest readable formal design** of that
+   round (three resamples per dose).
+
+The prerequisites and a root-level pilot of H1 ran to completion.
 
 ## Verdicts
 

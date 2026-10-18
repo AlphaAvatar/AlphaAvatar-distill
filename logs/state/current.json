@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Stage-0 calibration volume TERMINAL 2026-10-18: formal study NOT RUN (H2 not resolvable under the fixed recovery recipe; budget insufficient). NOTHING IS RUNNING. Owner: logs/stages/stage-0/calibration_volume/closeout/programme_closeout.json.",
+ "blocker": "BLOCKED NO. Stage-0 calibration volume TERMINAL (round 2, 2026-10-18): formal study NOT RUN; the maintainer's amended design is priced $86.98 vs $65 formal / $77.34 project. eval-set-1 registered (candidate). NOTHING IS RUNNING. Owner: logs/stages/stage-0/calibration_volume/closeout/programme_closeout.json.",
  "branch": "main (squash of exec/d1-behavioural-readiness, 2026-10-17); Stage-0 work on stage0/calibration-volume-mixture",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -32,7 +32,7 @@
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 595.0,
-  "cumulative_spend_usd": 513.5943,
+  "cumulative_spend_usd": 517.6571,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 81.4057,
+  "remaining_usd": 77.3429,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-18T17:45:00Z",
+ "generated_utc": "2026-10-18T22:55:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,11 +123,11 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "A maintainer decision on the Stage-0 minimum viable plan: a reasoning-transfer recovery recipe validated by one ~$2 probe, then funding. NOT authorized. Owner: logs/stages/stage-0/calibration_volume/closeout/REPORT.md section 10.",
+ "next": "Maintainer decisions: fund the amended Stage-0 design (~$90, ~$81 with the overhead fix; needs a project-cap increase) or authorize the 1x/2x subset (~$46.67); settle eval-set-1's open decisions. NOT authorized. Owner: REPORT.md round 2; data/eval-set/registry.json.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "Stage-0: the maintainer's choice of recovery recipe and budget for the formal volume study (REPORT.md section 10); the mixture study after it.",
-  "not_next": "no paid resource without its own grant; no D-series stage or rerun; no formal Stage-0 search until H2 is measurable and funded. Owner: decisions.md 2026-10-18.",
+  "next_work": "Stage-0: the maintainer's funding decision on the amended volume study (REPORT.md round 2) and eval-set-1's open decisions; the mixture study after it.",
+  "not_next": "no paid resource without its own grant; no D-series stage or rerun; no formal Stage-0 search until funded. Owner: decisions.md 2026-10-18.",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D-series CLOSED 2026-10-17 (D1 NO-GO, D2 NO_GO, D3 STRUCTURAL_CHANGE + INCONCLUSIVE probes); forward baseline D1 + scored_v1.",
   "then": "NOTHING is queued or authorized."
  },
@@ -197,7 +197,7 @@
   "docs/shared/STAGE0_HANDOFF.md -- the next programme's handoff"
  ],
  "running": {
-  "_verified": "provider query 2026-10-18 17:32 UTC: 0 pods, 0 volumes, $0/h; no tmux session, watchdog or monitor alive",
+  "_verified": "provider query 2026-10-18 22:46 UTC: 0 pods, 0 volumes, $0/h; no launcher, watchdog or monitor alive",
   "network_volumes": 0,
   "paid_compute": false,
   "pod_id": null,
@@ -218,7 +218,7 @@
   "next_scientific_stage": null,
   "_next_is_null_because": "the D-series is CLOSED and no stage is authorized. The next programme (Stage-0 calibration volume and mixture) is designed and authorized separately.",
   "D_series": "CLOSED 2026-10-17 by maintainer decision",
-  "S0_volume": "COMPLETE 2026-10-18 (terminal): formal NOT RUN (H2 not resolvable; budget gap). Root pilot (exploratory): FFN/WIDTH stabilize with volume, ATTENTION no effect"
+  "S0_volume": "COMPLETE 2026-10-18 (terminal, round 2): formal NOT RUN (amended design not fundable). Resolution: same-geometry ref 257/720, PCA students <2%. Pilot: FFN/WIDTH stabilize"
  },
  "storage": {
   "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json",
@@ -232,7 +232,7 @@
  "test_suites": {
   "boundary_guard": "tests/architecture/test_core_suite_boundary.py, four rules in its docstring. Specific-experiment imports from core: 0.",
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
-  "core": "3659 passed / 32 skipped / 25 failed, 12m18s (2026-10-18, Stage-0 volume). All 25 are tests/integration/test_simulator_restore.py refusing at its 20 GiB disk floor (18 GiB free on the dev box); that file passes 36/36 at PODSIM_MIN_FREE_GIB=15.",
+  "core": "3701 passed / 32 skipped / 0 failed, 12m18s (2026-10-18, eval registry + Stage-0 round 2), run with PODSIM_MIN_FREE_GIB=15: the simulator's 20 GiB disk floor exceeds the dev box's 17 GiB free.",
   "d1_launch": "1029 passed / 13 skipped / 0 failed, 2m38s: phase_d1 + docs + integration. GREEN, and the accepted out-of-tree source-screen failure is NOT in it.",
   "integration": "SQUASH AND MERGE, AGENTS.md P12.2. LATEST 2026-10-17: main squashes exec/d1-behavioural-readiness (PRESERVED; base c8f714af; tested tree 27c279b6; tip named by the squash commit). Earlier: c8f714af, 4500d775. Ranges: decisions.md.",
   "known_red": "ONE, pre-existing (bc31175f), out-of-tree, NOT core and NOT in the D1 launch suite: phase_d_series test_source_evidence::test_it_regenerates_identically. Its screen is nondeterministic across processes. Diagnosis: current.md.",

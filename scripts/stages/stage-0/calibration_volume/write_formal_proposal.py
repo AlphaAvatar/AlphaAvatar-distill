@@ -252,6 +252,13 @@ def main(argv=None) -> int:
                  "all_programme_phases_usd": programme_left}
     for v in variants.values():
         v["sequenced"] = {k: sequence(v["sessions"], e) for k, e in envelopes.items()}
+        # the smallest envelope in which every launch fits its hard cap after
+        # the expected spend of everything before it, the volume accruing throughout
+        need, spent = 0.0, 0.0
+        for x in v["sessions"]:
+            need = max(need, spent + x["hard_usd"])
+            spent += x["expected_usd"]
+        v["min_sequential_envelope_usd"] = round(need + v["network_volume_usd"], 2)
         v["gap_to_formal_phase_expected_usd"] = round(max(0.0, v["expected_usd"]
                                                           - envelopes["formal_phase_usd"]), 2)
         v["gap_to_programme_expected_usd"] = round(max(0.0, v["expected_usd"]

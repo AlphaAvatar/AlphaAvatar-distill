@@ -1158,12 +1158,16 @@ STAGE_1 = [
         id="calibration_volume",
         kind="experiment",
         stage_id="0",
-        status=("TERMINAL 2026-10-18 (formal study NOT RUN). H2: EVALUATION "
-                "NOT RESOLVABLE under the fixed recovery recipe (0.86M "
-                "controls 0/720, teacher 638/720). H1 root-level pilot "
-                "(exploratory): FFN and WIDTH stabilize with volume, "
-                "ATTENTION no detectable effect, DEPTH unlabeled. Budget "
-                "insufficient for the smallest readable formal design"),
+        status=("TERMINAL 2026-10-18, round 2 (formal study NOT RUN). "
+                "Design amended by the maintainer to 1x/2x/4x, one full "
+                "search and one recovery each; priced $86.98 expected "
+                "($77.82 with the overhead fix) against $65 formal / $74.49 "
+                "programme / $77.34 project: NOT FUNDABLE. Resolution check: "
+                "same-geometry Qwen3-0.6B (8,192 allowance) 257/720 vs every "
+                "PCA fixed-recipe student <2% (0.86M-5.50M); a D1-initialized "
+                "student is unmeasured and is the formal study's first gate. "
+                "H1 root-level pilot: FFN and WIDTH stabilize with volume, "
+                "ATTENTION no detectable effect, DEPTH unlabeled"),
         title="Stage-0 calibration volume dose-response (first Stage-0 study)",
         question=("With teacher, geometry, the forward-baseline method and the "
                   "recovery recipe fixed, does more independent, "
@@ -1190,9 +1194,13 @@ STAGE_1 = [
               "the pilot's root-level selection agreement under the frozen plan",
               field="schema", equals="aadistill.stage0.structure_agreement/v2"),
             E("logs/stages/stage-0/calibration_volume/plans/formal_design_proposal.json",
-              "the formal study designed and priced from measured telemetry; "
-              "its precondition and its budget gap",
+              "the amended formal study (one draw per dose) priced from measured "
+              "telemetry; its resolution gate, split 4x execution and budget gap",
               field="authorizes", equals="nothing"),
+            E("logs/stages/stage-0/calibration_volume/design/resolution_check.json",
+              "whether eval-set-1's fluid_reasoning_720 resolves student-scale "
+              "models: teacher, same-geometry reference, five recovered students",
+              field="schema", equals="aadistill.stage0.resolution_check/v1"),
             E("logs/stages/stage-0/calibration_volume/closeout/programme_closeout.json",
               "the programme's terminal record: every figure read from its "
               "owner, every verdict computed",
@@ -1202,7 +1210,9 @@ STAGE_1 = [
         decisions=["logs/budget/decisions.md -- 2026-10-18: Stage-0 "
                    "calibration-volume programme started; battery valid, "
                    "students at floor, root-level pilot; pilot attempt 1 OOM "
-                   "repaired on an 80 GB card; programme terminal"],
+                   "repaired on an 80 GB card; programme terminal; permanent "
+                   "evaluation registry; resolution attempts 1-2 repaired; "
+                   "design amended to one draw per dose, still NOT RUN"],
         canonical_log_destination="logs/stages/stage-0/calibration_volume",
         classification_reason=(
             "Stage 0 by subject and product: it varies the teacher-signal "
