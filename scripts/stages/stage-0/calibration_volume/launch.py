@@ -326,6 +326,33 @@ def spec(args) -> SessionSpec:
     )
 
 
+def bundle_on_relay(args, api=None) -> tuple[bool, str]:
+    """Can the pod obtain the session commit? Answered at $0, before any pod.
+
+    The setup clones `transfer/<--bundle>` from the relay. Resolution attempt 1
+    (resolution_20261018_201712) paid $0.07 for a 404 on it -- C1 attempt 1's
+    failure exactly -- because the bundle was never staged and nothing here
+    asked. The name must be the canonical one derived from the commit, and the
+    relay must hold an object under it."""
+    from stages.phase_c1 import bundle as B
+    try:
+        B.require_canonical_bundle_arg(args.bundle, args.session_commit)
+    except B.C1BundleError as exc:
+        return False, str(exc)
+    path = B.canonical_repo_path(args.session_commit)
+    try:
+        if api is None:
+            from huggingface_hub import HfApi
+            api = HfApi()
+        found = list(api.get_paths_info(B.RELAY_REPO, [path], repo_type="model"))
+    except Exception as exc:  # noqa: BLE001
+        return False, f"cannot ask the relay whether it holds {path}: {exc!r}"
+    if not found:
+        return False, (f"the relay holds no {path}; stage it first with "
+                       "stages.phase_c1.bundle.stage_bundle(<repo>, <commit>, workdir=...)")
+    return True, f"{path} on the relay ({getattr(found[0], 'size', '?')} bytes)"
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--session", required=True, choices=G.SESSION_KINDS)
@@ -371,6 +398,11 @@ def main(argv: list[str] | None = None) -> int:
     except AuthorizationError as exc:
         print(f"REFUSED at $0: {exc}\nNo provider resource was created.")
         return 11
+    ok, why = bundle_on_relay(args)
+    print(f"{'bundle OK' if ok else 'REFUSED at $0'}: {why}")
+    if not ok and not args.dry_run:
+        print("No provider resource was created.")
+        return 13
     if args.dry_run:
         runner = SessionRunner(session, args, REPO_ROOT)
         ok = runner.make_plan()

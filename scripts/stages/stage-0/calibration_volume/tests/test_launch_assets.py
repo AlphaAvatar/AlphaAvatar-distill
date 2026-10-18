@@ -76,3 +76,24 @@ def test_the_resolution_plan_reads_the_registered_fluid_set():
     assert REPO / plan["tasks"]["dev"]["path"] == unit
     ident = ES.manifest("eval-set-1")["files"]["fluid_reasoning_720/dev_v1.jsonl"]
     assert plan["tasks"]["dev"]["sha256"] == ident["sha256"]
+
+
+def test_a_launch_whose_bundle_is_not_on_the_relay_is_refused_at_zero_cost():
+    """Resolution attempt 1 paid for a 404 on an unstaged bundle (C1 attempt 1's
+    failure). The gate refuses a non-canonical name and a missing object."""
+    import argparse
+
+    class Relay:
+        def __init__(self, present):
+            self.present = present
+
+        def get_paths_info(self, repo, paths, repo_type):
+            return [type("Info", (), {"size": 1})()] if self.present else []
+
+    commit = "990ec4068927a23e86bbbd8355fd149eed8805e1"
+    good = argparse.Namespace(bundle="aad_autoinit_990ec406.bundle", session_commit=commit)
+    assert launch.bundle_on_relay(good, api=Relay(True))[0]
+    ok, why = launch.bundle_on_relay(good, api=Relay(False))
+    assert not ok and "stage_bundle" in why
+    alias = argparse.Namespace(bundle="resolution.bundle", session_commit=commit)
+    assert not launch.bundle_on_relay(alias, api=Relay(True))[0]

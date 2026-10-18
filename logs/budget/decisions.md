@@ -12420,3 +12420,22 @@ on a paid pod.
     PYTHONHASHSEED=14.
 - **Revisit when.** The maintainer settles the open decisions and declares
   the set frozen, or registers eval-set-2.
+
+## 2026-10-18 — Stage-0 resolution attempt 1 failed in setup (unstaged bundle); repaired
+
+- **What happened.** `runs/resolution_20261018_201712` created an A100 pod
+  and setup failed before any measurement: the pod could not fetch
+  `transfer/aad_autoinit_990ec406.bundle` (HTTP 404), because the session
+  bundle was never staged to the relay. Pod deleted after 2.4 min, provider
+  confirms gone, $0.0729 booked by its closeout.
+- **Class.** An ordinary engineering failure (P12.1), identical to C1 attempt
+  1's. The Stage-0 launcher checked contents (plan, harness, authorization)
+  but not whether the pod could obtain the commit.
+- **Repair.**
+  - **Root cause:** `launch.bundle_on_relay` refuses at $0 a non-canonical
+    `--bundle` or a relay without the object, using
+    `stages.phase_c1.bundle`'s derived name, with a regression test.
+  - **The failure itself:** the bundle is staged with
+    `stages.phase_c1.bundle.stage_bundle` before launch.
+  - A fresh run id and authorization; the consumed one is not reused.
+  - Nothing was measured, so nothing is pooled.

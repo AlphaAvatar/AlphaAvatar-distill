@@ -1,0 +1,32 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "resolution_20261018_201712",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "prerequisites",
+ "recorded_utc": "2026-10-18T20:26:41+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": null,
+ "passed": false,
+ "outcome": "Resolution-check attempt 1 FAILED IN SETUP before any measurement: the pod could not fetch the session's repository bundle (transfer/aad_autoinit_990ec406.bundle -> HTTP 404) because it was never staged to the relay. An ordinary engineering failure, the same one C1 attempt 1 recorded. Pod deleted after 2.4 min, provider confirms gone. Repair: stage the bundle with stages.phase_c1.bundle.stage_bundle and add a $0 pre-provider gate to the Stage-0 launcher that refuses a launch whose canonical bundle the relay does not hold; then a fresh run id and authorization.",
+ "provider_resource_created": true,
+ "pod_id": "92ldrjenk7piv2",
+ "provider_confirms_gone": true,
+ "final_pod_state": {
+  "exists": false,
+  "desired_status": "TERMINATED",
+  "billing": false
+ },
+ "money": {
+  "all_in_usd": 0.0729,
+  "gpu_usd": 0.072,
+  "disk_usd": 0.0008,
+  "elapsed_minutes": 2.41,
+  "price_per_hour": 1.79,
+  "authorized_usd": 6.5,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.10/GB-month over the elapsed minutes, ceiled to the 4-decimal quantum"
+ },
+ "session_record_sha256": "3f37d33ff35ddc99a49ba9245011ba4c83d771aa198ed8d81c2cf9d6240d4ebc",
+ "units": {},
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/resolution_20261018_201712"
+}
