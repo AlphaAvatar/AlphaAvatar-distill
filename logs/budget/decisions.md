@@ -12218,3 +12218,56 @@ on a paid pod.
 - **Not decided here.** The doses, the base mixture, the SESOI, the
   recovery seeds and the decision rules. They are frozen in the
   preregistration once the dev measurements exist.
+
+## 2026-10-18 — Stage-0: the capability battery is valid, the fixed-recipe students are at its floor; H2 is not resolvable, a root-level H1 pilot replaces the formal search for now
+
+- **Measured** (`runs/battery_20261018_092345`, $3.6303; analyses in
+  `logs/stages/stage-0/calibration_volume/design/`):
+  - **The battery is valid.** The teacher, measured at its own 262,144-token
+    context with greedy decoding, scores 638/720 on `dev_v1`.
+    - By axis: induction 0.972, composition 0.938, deduction 0.984,
+      analogy 0.771, interactive 0.694.
+    - Every difficulty stratum lies between 0.69 and 1.0.
+    - A few families are hard for the teacher too, e.g. `grid.gravity_down`
+      and `probe.floor_div`. They are task-validity items to revise before
+      any final battery.
+  - **The students are at its floor.**
+    - The two permanent 0.86M-rung controls (the recipe of every D-series
+      probe, seeds sa and sb) score **0/720 and 0/720**.
+    - Even a deliberately lenient reading credits at most 11/192 deduction
+      items, which are likely chance name matches, and about 0 elsewhere.
+    - 91–96% of their interactive turns contain no readable action.
+    - The 2.96M reference scores 10/720, 9 of them deduction.
+  - **No minimal detectable effect exists.** The seed discordance is exactly
+    0, so no comparison of initializations after this recovery can move.
+- **Consequence for H2.** EVALUATION NOT RESOLVABLE under the fixed
+  recovery recipe.
+  - The formal downstream comparison (searches, then recovery probes and
+    capability scoring) would spend its budget on outcomes that are zero by
+    construction. It is not run (maintainer brief: fix the evaluation before
+    any large recovery or full-search spend).
+  - Making H2 resolvable needs a recovery recipe that transfers task-contained
+    reasoning, e.g. verified teacher-native traces on calibration-split
+    families. That is a change to the recovery recipe, which AGENTS.md §4.5
+    reserves for the maintainer. It is reported as the minimum viable plan,
+    not executed.
+- **What still runs: H1 at the root.** Structural selection stability needs
+  no recovered student.
+  - Grant amendment: a `pilot` phase of $10, search sessions only, opened by
+    its committed plan; `formal_volume` lowered to $70; the programme ceiling
+    is unchanged.
+  - The pilot applies each forward-baseline operator to the teacher under
+    independently resampled base-pool profiles at three doses. DEPTH, the
+    token-linear expensive operator, runs on a subset through
+    `SearchConfig.impl_profiles`.
+  - It is exploratory evidence about H1/H3 and does not substitute for the
+    formal full search.
+- **Free reference.** At the root, the two historical D1 profiles (which
+  share 39 of 51 sessions) already agree: FFN Jaccard 0.907, ATTENTION 0.942,
+  DEPTH the identical removed set (D1 and D2 search journals, $0).
+- **Teacher calibration data.** The battery session's round-synchronous
+  runner was too slow for teacher generation at the teacher's measured ~4.5k
+  tokens per trace, so that unit was stopped before it produced anything
+  kept.
+  - It is regenerated on `calibration_v2`, a 672-prompt per-cell prefix of
+    v1, with the asynchronous runner (`runs/teachercal_20261018_112755`).

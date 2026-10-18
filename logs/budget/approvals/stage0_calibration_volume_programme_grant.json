@@ -6,10 +6,10 @@
  "decision_record": "logs/budget/decisions.md 2026-10-18 (Stage-0 calibration-volume programme started)",
  "decision": "Formally start the Stage-0 calibration-data experiments in the order data coverage audit -> capability-aligned evaluation -> calibration VOLUME experiment (this programme) -> calibration mixture experiment (later, not funded here). The maintainer approves the data audit, the design, the necessary engineering and the first calibration-volume study; once the data and evaluation prerequisites are complete, the scientific protocol is frozen and the budget is shown sufficient for an interpretable comparison, a new Stage-0 experiment identity and its authorization records may be created and the first formal study run inside the existing cumulative cap and the per-session hard cap.",
  "maintainer_words": [
-  "GPU 可以用于所有真正需要 GPU 的实验和验证，不要求先运行没有价值的 CPU 替代步骤。",
-  "不得把 D 系列关闭的 Grant 或未使用授权自动转给 Stage-0。",
-  "若现有预算无法完成最低有统计意义的正式对照，不应擅自缩成一个没有科学功效的实验并宣称结论；应给出实际缺口与最小可行方案。",
-  "在已经批准的范围内，普通失败由你自主修复并继续。"
+  "GPU \u53ef\u4ee5\u7528\u4e8e\u6240\u6709\u771f\u6b63\u9700\u8981 GPU \u7684\u5b9e\u9a8c\u548c\u9a8c\u8bc1\uff0c\u4e0d\u8981\u6c42\u5148\u8fd0\u884c\u6ca1\u6709\u4ef7\u503c\u7684 CPU \u66ff\u4ee3\u6b65\u9aa4\u3002",
+  "\u4e0d\u5f97\u628a D \u7cfb\u5217\u5173\u95ed\u7684 Grant \u6216\u672a\u4f7f\u7528\u6388\u6743\u81ea\u52a8\u8f6c\u7ed9 Stage-0\u3002",
+  "\u82e5\u73b0\u6709\u9884\u7b97\u65e0\u6cd5\u5b8c\u6210\u6700\u4f4e\u6709\u7edf\u8ba1\u610f\u4e49\u7684\u6b63\u5f0f\u5bf9\u7167\uff0c\u4e0d\u5e94\u64c5\u81ea\u7f29\u6210\u4e00\u4e2a\u6ca1\u6709\u79d1\u5b66\u529f\u6548\u7684\u5b9e\u9a8c\u5e76\u5ba3\u79f0\u7ed3\u8bba\uff1b\u5e94\u7ed9\u51fa\u5b9e\u9645\u7f3a\u53e3\u4e0e\u6700\u5c0f\u53ef\u884c\u65b9\u6848\u3002",
+  "\u5728\u5df2\u7ecf\u6279\u51c6\u7684\u8303\u56f4\u5185\uff0c\u666e\u901a\u5931\u8d25\u7531\u4f60\u81ea\u4e3b\u4fee\u590d\u5e76\u7ee7\u7eed\u3002"
  ],
  "funding": {
   "source": "the project cumulative cap ($595.00), derived by scripts/maintenance/consolidation/derive_budget.py",
@@ -22,19 +22,40 @@
  "per_session_cap_usd": 30.0,
  "phases": {
   "prerequisites": {
-   "session_kinds": ["battery"],
+   "session_kinds": [
+    "battery"
+   ],
    "ceiling_usd": 12.0,
    "scope": "capability-aligned dev-battery calibration (teacher solvability, student floor, seed variance) and teacher-native calibration-session generation for the Stage-0 base pool; development numbers only, never the formal endpoint",
    "requires_preregistration": null
   },
   "formal_volume": {
-   "session_kinds": ["search", "probes"],
-   "ceiling_usd": 80.0,
+   "session_kinds": [
+    "search",
+    "probes"
+   ],
+   "ceiling_usd": 70.0,
    "scope": "the frozen first calibration-volume study: D1 full searches per volume treatment, fixed recovery probes and capability evaluation, exactly as preregistered",
    "requires_preregistration": "logs/stages/stage-0/calibration_volume/plans/volume_preregistration.json"
+  },
+  "pilot": {
+   "session_kinds": [
+    "search"
+   ],
+   "ceiling_usd": 10.0,
+   "scope": "the fixed-parent (root-level) selection-stability pilot the maintainer's brief permits ('Fixed-Path Pilot \u6d4b\u91cf\u6027\u80fd\u548c\u5c40\u90e8\u7ed3\u6784\u654f\u611f\u6027'): each forward-baseline operator applied to the teacher under independently resampled base-pool profiles at several doses; exploratory evidence about H1/H3, never a substitute for the formal full search",
+   "requires_preregistration": "configs/stages/stage-0/calibration_volume/pilot_search_session.json"
   }
  },
  "retry_policy": "ordinary engineering failures before formal measurement are repaired and retried inside the phase envelope with a fresh run id (P12.1); a deterministic paid failure is not retried unchanged; after formal measurement begins only the preregistered retry contract applies",
  "stop_conditions": "a cumulative boundary, an unreconcilable provider resource, a change to frozen science, or a remaining envelope that cannot fund a corrected unit plus teardown",
- "authorizes": "the phases above, each run only through its own one-use authorization issued by scripts/stages/stage-0/calibration_volume/governance.py :: issue"
+ "authorizes": "the phases above, each run only through its own one-use authorization issued by scripts/stages/stage-0/calibration_volume/governance.py :: issue",
+ "amendments": [
+  {
+   "date": "2026-10-18",
+   "change": "added the `pilot` phase ($10, search sessions, opened only by its committed plan) and lowered `formal_volume` from $80 to $70; the programme ceiling ($92) and the per-session cap ($30) are unchanged",
+   "why": "the prerequisite battery session showed the recovered students at the floor of the capability battery under the fixed 0.86M recovery recipe (0/720 on both seeds), so the formal downstream comparison cannot resolve any initialization difference; the root-level pilot answers the structural question (H1) that needs no recovered student, at a fraction of a formal search's cost",
+   "record": "logs/budget/decisions.md 2026-10-18 (Stage-0 evaluation floor; root-level pilot)"
+  }
+ ]
 }
