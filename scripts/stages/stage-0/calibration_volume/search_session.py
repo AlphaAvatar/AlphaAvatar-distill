@@ -67,7 +67,11 @@ def treatment_profiles(treatment: str, doc_path: Path = PROFILES_DOC) -> tuple:
 
 
 def build_session(*, workdir: Path, run_id: str, profiles: tuple,
-                  device: str = "cuda", repo_root: Path = REPO) -> Stage0Session:
+                  device: str = "cuda", max_depth: int | None = None,
+                  repo_root: Path = REPO) -> Stage0Session:
+    """`max_depth=None` is the full search; `max_depth=1` expands only the
+    root's children -- every operator under every profile, applied to the
+    teacher -- which is the fixed-parent pilot of local selection sensitivity."""
     from aadistill.initialization.planning.metrics import StateEvaluator
     from aadistill.initialization.planning.search import SearchConfig
     from aadistill.initialization.specs.metrics import ReferenceStrategy
@@ -109,6 +113,7 @@ def build_session(*, workdir: Path, run_id: str, profiles: tuple,
         distribution_support=terms["distribution_support"],
         measurement_protocol_id=evaluator.measurement_protocol_id,
         allowed_impls=terms["allowed_impls"],
+        max_depth=max_depth,
         device=device)
     return Stage0Session(evaluator=evaluator, config=config,
                          suite_content_sha256=content, baseline=terms["baseline"],

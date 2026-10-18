@@ -113,6 +113,10 @@ def main(argv=None) -> int:
     ap.add_argument("--status", required=True)
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--check-only", action="store_true")
+    ap.add_argument("--treatments-doc", default=str(PREREG.relative_to(REPO)),
+                    help="the document that freezes this treatment's profile hashes")
+    ap.add_argument("--max-depth", type=int, default=None,
+                    help="1 = the root-level pilot: no complete leaf, no commit")
     args = ap.parse_args(argv)
 
     out = REPO / AUDIT / args.treatment
@@ -136,7 +140,7 @@ def main(argv=None) -> int:
     mark(status, f"DRIVER_START:{args.treatment}")
     try:
         st = stage("A_contract")
-        prereg = json.loads(PREREG.read_text())
+        prereg = json.loads((REPO / args.treatments_doc).read_text())
         treat = prereg["treatments"][args.treatment]
         profiles = SS.treatment_profiles(args.treatment)
         for p in profiles:
@@ -146,7 +150,8 @@ def main(argv=None) -> int:
                                    f"the preregistration froze {want}")
             p.resolve(str(REPO))   # checks items_file_sha256 and content_sha256
         session = SS.build_session(workdir=out / "search", run_id=args.run_id,
-                                   profiles=profiles, device=args.device)
+                                   profiles=profiles, device=args.device,
+                                   max_depth=args.max_depth)
         record["session"] = session.as_record()
         if not args.check_only:
             auth = G.load_for("search", args.auth)
@@ -188,6 +193,14 @@ def main(argv=None) -> int:
         save()
 
         st = stage("D_commit")
+        if args.max_depth is not None:
+            (out / "structure.json").write_text(json.dumps(
+                structural_record(out / "search" / "states.jsonl"), default=str) + "\n")
+            record["width_projections"] = width_projections(
+                out / "search" / "states.jsonl", teacher, out)
+            done(st, k=0, note="root-level pilot: no finalist is committed")
+            record["status"] = "COMPLETE"
+            return 0
         from aadistill.initialization.planning import stage1_selection
         k = int(prereg["search"]["finalists_k"])
         policy = session.config.policy
