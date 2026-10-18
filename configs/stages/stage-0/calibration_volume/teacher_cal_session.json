@@ -1,11 +1,11 @@
 {
  "schema": "aadistill.stage0.calibration_volume.session_plan/v1",
  "session_kind": "battery",
- "purpose": "Data construction only: teacher-native calibration sessions on the calibration-split families (calibration_v1), regenerated with the asynchronous runner after the battery session's round-synchronous runner was stopped before this unit to protect its completed measurements from the hard stop.",
+ "purpose": "Data construction only: teacher-native calibration sessions on calibration_v2 (a per-cell prefix of calibration_v1: the same instances), regenerated with the asynchronous runner. The battery session's round-synchronous runner was stopped before this unit to protect its completed measurements from the hard stop, and the teacher's measured ~4.5k tokens per trace (battery_20261018_092345 teacher_dev round 1: 3,221,916 tokens / 720 turns) makes 672 prompts sufficient for every planned consumer.",
  "tasks": {
   "calibration": {
-   "path": "data/stages/stage-0/calibration_volume/tasks/calibration_v1.jsonl",
-   "sha256": "c8a267ad23164da7e55604a990b973626efecb9f368ba83faed1fb9b892435d3"
+   "path": "data/stages/stage-0/calibration_volume/tasks/calibration_v2.jsonl",
+   "sha256": "a888a171bbad787fbaed791692b45d136d2f487c47a12c54fc7eb1b2bbe8db25"
   }
  },
  "teacher": {
@@ -28,15 +28,15 @@
  },
  "session_limit_note": "16384 tokens end to end is a DATA-CONSTRUCTION bound for calibration sessions, recorded per session as length_limited; it is never applied to a measurement",
  "hardware": {
-  "gpu": "NVIDIA L40S",
-  "why": "generation is bounded by the 16384-token data-construction limit, which an L40S holds; no measurement runs here, so the teacher's 262144 context is not needed"
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "why": "the teacher's long traces make generation KV-bound: 144 KiB per token, ~500k tokens of cache on 80 GB vs ~230k on a 48 GB card, i.e. about twice the concurrency per dollar; measured 1.9k tok/s on this card"
  },
- "setup_minutes": 20.0,
+ "setup_minutes": 15.0,
  "budget_phases": {
-  "teacher_calibration_generation": 75.0,
+  "teacher_calibration_generation": 55.0,
   "scoring": 5.0
  },
  "contingency_fraction": 0.3,
- "reserve_minutes": 25.0,
+ "reserve_minutes": 20.0,
  "authorizes": "nothing"
 }
