@@ -11,8 +11,8 @@
  "verified": true,
  "problems": [],
  "totals": {
-  "experiment_total": 30,
-  "single_stage": 30,
+  "experiment_total": 31,
+  "single_stage": 31,
   "true_cross_stage": 0,
   "stage_neutral": 2,
   "unresolved": 0,
@@ -87,14 +87,15 @@
    "groups": [],
    "activity": {
     "pipeline_activity": 1,
-    "experiments": 0,
-    "experiments_with_logs": 0,
-    "runs": 0,
-    "canonical_configs": 2,
+    "experiments": 1,
+    "experiments_with_logs": 1,
+    "runs": 3,
+    "canonical_configs": 3,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
    "canonical_configs": [
+    "configs/stages/stage-0/calibration_volume/pilot_design.json",
     "configs/stages/stage-0/qwen3_4b_thinking.json",
     "configs/stages/stage-0/qwen3_4b_thinking_v1.json"
    ],
@@ -1033,6 +1034,47 @@
    "canonical_configs": "configs/stages/stage-1/phase_d3",
    "canonical_data": null,
    "canonical_docs": null,
+   "live_state": null
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "stage_id": "0",
+   "classification": "experiment",
+   "status": "IN PROGRESS 2026-10-18. Prerequisites done: $0 data audit; capability battery dev_v1 valid (teacher 638/720) with the fixed-recipe students at its floor (0/720 on both 0.86M seeds), so H2 is not resolvable under the fixed recovery; base_pool_v1 built; root-level selection pilot running",
+   "title": "Stage-0 calibration volume dose-response (first Stage-0 study)",
+   "question": "With teacher, geometry, the forward-baseline method and the recovery recipe fixed, does more independent, capability-aligned Stage-0 calibration data stabilize the AutoInitializer's structural selection (H1), improve the recovered student's reasoning on unseen rule families (H2), and saturate (H3)?",
+   "canonical_path": "logs/stages/stage-0/calibration_volume",
+   "canonical_config": "configs/stages/stage-0/calibration_volume/pilot_design.json",
+   "evidence": [
+    {
+     "path": "logs/stages/stage-0/calibration_volume/audit/data_audit.json",
+     "says": "the $0 audit of corpus_v2, the D1 profiles, state_eval@v1, the 0.86M recovery rung and the historical batteries: independence, effective signal, length selection, quality, contamination",
+     "field": "schema",
+     "equals": "aadistill.stage0.calibration_data_audit/v1"
+    },
+    {
+     "path": "logs/stages/stage-0/calibration_volume/design/dev_analysis.json",
+     "says": "the dev battery's solvability (teacher), floor (two 0.86M controls, the 2.96M reference) and resolution",
+     "field": "schema",
+     "equals": "aadistill.stage0.dev_analysis/v1"
+    },
+    {
+     "path": "logs/stages/stage-0/calibration_volume/plans/pilot_analysis_plan.json",
+     "says": "the root-level pilot's analysis plan, frozen before its result",
+     "field": "authorizes",
+     "equals": "nothing"
+    }
+   ],
+   "external_material": [],
+   "decisions": [
+    "logs/budget/decisions.md -- 2026-10-18: Stage-0 calibration-volume programme started; battery valid, students at floor, root-level pilot"
+   ],
+   "classification_reason": "Stage 0 by subject and product: it varies the teacher-signal calibration data a Stage-1 initialization is built from (AGENTS.md 4.2, reasoning-oriented calibration). The Stage-1 search and any Stage-3 probe are its instruments, as Stage-3 probes were for Stage-1 experiments.",
+   "canonical_scripts": "scripts/stages/stage-0/calibration_volume",
+   "canonical_artifacts": "artifacts/stages/stage-0/calibration_volume",
+   "canonical_configs": "configs/stages/stage-0/calibration_volume",
+   "canonical_data": "data/stages/stage-0/calibration_volume",
+   "canonical_docs": "docs/stages/stage-0/calibration_volume",
    "live_state": null
   },
   {
