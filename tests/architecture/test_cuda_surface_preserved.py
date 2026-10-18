@@ -2145,6 +2145,30 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "the same values. Owes GPU execution: the D3 structural session "
             "is that run.",
      }),
+    #: Declared after the fact: the D-series closure squash (32246d12)
+    #: carried this module undeclared and left this check red on `main`.
+    ("f36e322d0a468d4ac1233514c9f18ac11dda9b03",
+     "D-series closure: a selected forward baseline",
+     {
+        "src/aadistill/initialization/baseline.py":
+            "NEW MODULE: a versioned baseline record plus a sha256-bound "
+            "selection, parsed into the objects a session is built from. THIS "
+            "IS A DECLARED SEMANTIC CHANGE by construction; it changes no "
+            "existing path. It refuses an operator id, objective, support or "
+            "hash the core does not ship, and returns a recorded artifact "
+            "only for the execution fingerprint it was materialized under.",
+     }),
+    ("32246d126ee8b6920a9282a0793dfa81d2f47fae",
+     "Stage-0 calibration volume: evaluation isolation by key",
+     {
+        "src/aadistill/evaluation/isolation.py":
+            "NEW MODULE: `key_overlaps` counts the shared keys between named "
+            "item roles under caller-supplied key functions, and "
+            "`require_disjoint` raises `IsolationViolation` for a required "
+            "pair that shares any. THIS IS A DECLARED SEMANTIC CHANGE by "
+            "construction; nothing existing calls it, and every key, role and "
+            "required pair comes from the caller.",
+     }),
 )
 
 

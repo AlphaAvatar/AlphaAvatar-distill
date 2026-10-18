@@ -12271,3 +12271,33 @@ on a paid pod.
   kept.
   - It is regenerated on `calibration_v2`, a 672-prompt per-cell prefix of
     v1, with the asynchronous runner (`runs/teachercal_20261018_112755`).
+
+## 2026-10-18 — Stage-0 pilot attempt 1 OOM; repaired on an 80 GB card
+
+- **What happened.** `runs/pilot_20261018_122808` (L40S, 44.4 GiB) completed
+  10 of 31 root states, then failed: CUDA OOM in DEPTH under
+  `calib.s0v_base_d1_r2@v1`, inside `sketch_forward_kl_terms`' `logsumexp`,
+  allocating 11.68 GiB on top of 25.38 GiB in use. Pod deleted, provider
+  confirms gone, $1.2469 booked by its closeout.
+- **Cause, reproduced at $0.** `base_pool_v1` admits items up to 8,192
+  tokens; D1's profiles never exceeded 2,048. Under `length_sorted_v1` at
+  micro-batch 3 that profile's longest batch holds 20,639 scored rows:
+  float32 x 151,936 vocabulary = 11.68 GiB, exactly the failed allocation.
+  The worst batch over all nine profiles is 22,141 rows (12.53 GiB).
+- **An ordinary engineering failure (P12.1), repaired by hardware, not by
+  science.** The baseline's numerics declare cuda / bf16 / fp32
+  accumulation, not a card, so an 80 GB GPU runs the same execution
+  profile; micro-batch, packing and the pool are unchanged. The pilot plan
+  is regenerated with `--gpu "NVIDIA A100-SXM4-80GB"` and priced from the
+  failed attempt's measured telemetry (DEPTH 33.5 min at 75,660 tokens,
+  1.27 min overhead per expansion): bound 284.3 min, $9.38 expected and
+  $12.59 hard at $1.79/h. Treatments, profile hashes and the DEPTH subset
+  are byte-identical.
+- **The failed attempt's states are evidence, not data.** None of its
+  decisions was inspected, and none is pooled with the replacement run,
+  which re-runs all 31 states on one card. The frozen pilot analysis plan
+  is unchanged and applies to the replacement.
+- **Money.** The grant moves $5 from `formal_volume` ($65) to `pilot` ($15);
+  the programme ceiling ($92) and the $30 per-session cap are unchanged.
+  The formal phase cannot open in this programme, because H2 is not
+  resolvable under the fixed recovery recipe.

@@ -1,0 +1,57 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "pilot_20261018_122808",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "pilot",
+ "recorded_utc": "2026-10-18T13:37:08+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": "RUN_FAILED",
+ "passed": false,
+ "outcome": "Root-level pilot attempt on an L40S (44.4 GiB). FAILED by an ordinary engineering failure after 10 of 31 root states (9 ATTENTION, DEPTH under d1_r1): CUDA OOM in DEPTH under calib.s0v_base_d1_r2@v1, in sketch_forward_kl_terms' logsumexp, allocating 11.68 GiB on top of 25.38 GiB in use. Cause reproduced at $0: base_pool_v1 admits items up to 8,192 tokens, so a length_sorted_v1 micro-batch of 3 holds up to 20,639 scored rows under this profile (float32 x 151,936 vocab = 11.68 GiB exactly); D1's profiles never exceeded 2,048 tokens. Repair: the same plan on an 80 GB GPU. The partial states are preserved as evidence and are not pooled with the replacement run; no decision in them was inspected.",
+ "provider_resource_created": true,
+ "pod_id": "nilz8lib2sk84x",
+ "provider_confirms_gone": true,
+ "final_pod_state": {
+  "exists": false,
+  "desired_status": "TERMINATED",
+  "billing": false
+ },
+ "money": {
+  "all_in_usd": 1.2469,
+  "gpu_usd": 1.2016,
+  "disk_usd": 0.0453,
+  "elapsed_minutes": 66.15,
+  "price_per_hour": 1.09,
+  "authorized_usd": 8.0,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.10/GB-month over the elapsed minutes, ceiled to the 4-decimal quantum"
+ },
+ "session_record_sha256": "9c54ef74885e18e23ee6b8a3c4800bdaa01a1e9cd38c658e4e4b61768c94afd5",
+ "units": {
+  "driver_log": {
+   "stage0_calvol_search_run.log": {
+    "sha256": "2dfbe1fdcc0eef75b9df5c354bca633b48eaf3f0c8fbf28664791ffbf7c4d214",
+    "bytes": 35435
+   }
+  },
+  "extracted": {
+   "audit/stage0_calvol_search/pilot_root/search/states.jsonl": {
+    "sha256": "3055e6bbd3e62e36d8b5048fb154f67b13417af8860f45b5e6c0c87f7ffc41e6",
+    "bytes": 404439
+   },
+   "audit/stage0_calvol_search/pilot_root/search/telemetry.jsonl": {
+    "sha256": "4cfbbcd596df55119f7a787a446a8cb583b1c4750729f2fa9fe850d86851fbe7",
+    "bytes": 9336
+   },
+   "audit/stage0_calvol_search/pilot_root/search_record.json": {
+    "sha256": "dcede770556c176f8e6d8f6ad49203bc53ffebadec477043cbbf870c8c6096cf",
+    "bytes": 6526
+   },
+   "audit/stage0_calvol_search/search_session.json": {
+    "sha256": "b76f70a6d53357fc63f12425722291b7bc3488831c1cd1934574c965d51cbdc2",
+    "bytes": 14
+   }
+  }
+ },
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/pilot_20261018_122808"
+}

@@ -12,7 +12,7 @@
   {
    "treatment": "pilot_root",
    "max_depth": 1,
-   "bound_minutes": 224.9,
+   "bound_minutes": 284.3,
    "profile_tokens": {
     "calib.s0v_base_d1_r1@v1": 75660,
     "calib.s0v_base_d1_r2@v1": 81057,
@@ -31,14 +31,29 @@
  },
  "cost_source": {
   "path": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/search_analysis.json",
-  "depth_max_minutes": 20.11,
-  "at_tokens": 59830,
-  "other_operator_max_minutes": 0.81,
-  "overhead_minutes_per_expansion": 0.5
+  "depth_max_minutes": 33.544,
+  "at_tokens": 75660,
+  "other_operator_max_minutes": 1.745,
+  "overhead_minutes_per_expansion": 1.274,
+  "measured": {
+   "telemetry": "artifacts/stages/stage-0/calibration_volume/pilot_20261018_122808/extracted/audit/stage0_calvol_search/pilot_root/search/telemetry.jsonl",
+   "telemetry_sha256": "4cfbbcd596df55119f7a787a446a8cb583b1c4750729f2fa9fe850d86851fbe7",
+   "expansions": 10,
+   "depth_minutes": 33.544,
+   "depth_at_tokens": 75660,
+   "other_operator_minutes": 1.745,
+   "per_impl_minutes": {
+    "attention.activation_importance_v1": 1.465,
+    "ffn.activation_importance_v0": 1.68,
+    "width.global_pca_v0": 1.745
+   },
+   "unmeasured_scaled_by": 2.154,
+   "overhead_minutes": 1.274
+  }
  },
  "hardware": {
-  "gpu": "NVIDIA L40S",
-  "why": "the hardware every D-series search ran on; the operator costs above were measured on it"
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "why": "80 GB holds the pool's longest micro-batches: base_pool_v1 admits 8,192-token items, so a length_sorted_v1 micro-batch of 3 carries up to 22,141 scored rows (12.53 GiB per float32 logits tensor); DEPTH's forward-KL sketch OOMed the 44.4 GiB L40S at 11.68 GiB on top of 25.38 GiB in use (pilot_20261018_122808). The baseline's numerics declare cuda/bf16/fp32 accumulation, not a card."
  },
  "contingency_fraction": 0.2,
  "reserve_minutes": 30,

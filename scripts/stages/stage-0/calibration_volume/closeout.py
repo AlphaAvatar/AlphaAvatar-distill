@@ -35,6 +35,8 @@ from stages.calibration_volume import governance as G  # noqa: E402
 
 DISK_USD_PER_GB_MONTH = 0.10
 ARTIFACT_ROOT = Path("artifacts/stages/stage-0/calibration_volume")
+#: A record larger than this stays in the artifact store; its hash is in `units`.
+EVIDENCE_MAX_BYTES = 2_000_000
 
 
 def ceil4(x: float) -> float:
@@ -100,19 +102,21 @@ def main(argv=None) -> int:
             ev.mkdir(parents=True, exist_ok=True)
             units = {}
             for unit in sorted(p for p in store.iterdir() if p.is_dir()):
-                files = {f.name: {"sha256": sha(f), "bytes": f.stat().st_size}
-                         for f in sorted(unit.iterdir()) if f.is_file()}
-                (dest / unit.name).mkdir(parents=True, exist_ok=True)
-                for f in unit.iterdir():
-                    if f.is_file():
-                        shutil.copy2(f, dest / unit.name / f.name)
+                # a search unit nests its journal under search/, so walk the tree
+                files = {}
+                for f in sorted(x for x in unit.rglob("*") if x.is_file()):
+                    rel = f.relative_to(unit)
+                    files[str(rel)] = {"sha256": sha(f), "bytes": f.stat().st_size}
+                    (dest / unit.name / rel).parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(f, dest / unit.name / rel)
                 # small, reviewable evidence goes into git; raw records stay outside
-                for name in ("score.summary.json", f"{unit.name}.summary.json"):
-                    if (unit / name).is_file():
+                for name in ("score.summary.json", f"{unit.name}.summary.json",
+                             "search_record.json", "structure.json"):
+                    if (unit / name).is_file() and (unit / name).stat().st_size <= EVIDENCE_MAX_BYTES:
                         (ev / unit.name).mkdir(exist_ok=True)
                         shutil.copy2(unit / name, ev / unit.name / name)
                 units[unit.name] = files
-            for name in ("battery.json",):
+            for name in ("battery.json", "search_session.json"):
                 if (store / name).is_file():
                     shutil.copy2(store / name, ev / name)
             doc["units"] = units

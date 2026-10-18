@@ -34,7 +34,7 @@
     "search",
     "probes"
    ],
-   "ceiling_usd": 70.0,
+   "ceiling_usd": 65.0,
    "scope": "the frozen first calibration-volume study: D1 full searches per volume treatment, fixed recovery probes and capability evaluation, exactly as preregistered",
    "requires_preregistration": "logs/stages/stage-0/calibration_volume/plans/volume_preregistration.json"
   },
@@ -42,7 +42,7 @@
    "session_kinds": [
     "search"
    ],
-   "ceiling_usd": 10.0,
+   "ceiling_usd": 15.0,
    "scope": "the fixed-parent (root-level) selection-stability pilot the maintainer's brief permits ('Fixed-Path Pilot \u6d4b\u91cf\u6027\u80fd\u548c\u5c40\u90e8\u7ed3\u6784\u654f\u611f\u6027'): each forward-baseline operator applied to the teacher under independently resampled base-pool profiles at several doses; exploratory evidence about H1/H3, never a substitute for the formal full search",
    "requires_preregistration": "configs/stages/stage-0/calibration_volume/pilot_search_session.json"
   }
@@ -56,6 +56,12 @@
    "change": "added the `pilot` phase ($10, search sessions, opened only by its committed plan) and lowered `formal_volume` from $80 to $70; the programme ceiling ($92) and the per-session cap ($30) are unchanged",
    "why": "the prerequisite battery session showed the recovered students at the floor of the capability battery under the fixed 0.86M recovery recipe (0/720 on both seeds), so the formal downstream comparison cannot resolve any initialization difference; the root-level pilot answers the structural question (H1) that needs no recovered student, at a fraction of a formal search's cost",
    "record": "logs/budget/decisions.md 2026-10-18 (Stage-0 evaluation floor; root-level pilot)"
+  },
+  {
+   "date": "2026-10-18",
+   "change": "moved $5 from `formal_volume` ($70 -> $65) to `pilot` ($10 -> $15); the programme ceiling ($92) and the per-session cap ($30) are unchanged",
+   "why": "the first pilot attempt (pilot_20261018_122808, $1.2469) failed by an ordinary engineering failure: CUDA OOM in DEPTH on the 44.4 GiB L40S, because the Stage-0 base pool's 8,192-token items put up to 22,141 scored rows (12.53 GiB of float32 logits) into one micro-batch of 3. The repair is the same frozen pilot on an 80 GB card, priced from that attempt's measured telemetry: $9.38 expected, $12.59 hard at $1.79/h, which the $8.75 left in the $10 pilot phase cannot fund. The formal phase cannot be opened in this programme (H2 is not resolvable under the fixed recovery recipe), so the move takes nothing a planned session needs",
+   "record": "logs/budget/decisions.md 2026-10-18 (Stage-0 pilot attempt 1 OOM; repaired on an 80 GB card)"
   }
  ]
 }

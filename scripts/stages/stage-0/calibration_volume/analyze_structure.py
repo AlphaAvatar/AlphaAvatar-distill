@@ -173,8 +173,20 @@ def main(argv=None) -> int:
             reading = {"effect_4x_minus_1x": round(effect, 4), "noise": round(noise, 4)}
         else:
             reading = None
+        # the plan's saturation reading is DESCRIBED, never labeled. A nested
+        # profile shares its units with its own 4x, so its agreement with that
+        # 4x is an upper bound on independent agreement, not a like-for-like one.
+        nested_by_dose = defaultdict(list)
+        for x in nested:
+            if x["value"] is not None:
+                nested_by_dose[str(x["dose"])].append(x["value"])
+        saturation = {"nested_mean_by_dose": {d: round(sum(v) / len(v), 4)
+                                              for d, v in sorted(nested_by_dose.items())},
+                      "between_resamples_mean_at_largest": hi.get("mean"),
+                      "caveat": "nested profiles share units with their own largest dose"}
         out["by_operator"][kind] = {"between_resamples": between, "nested_to_largest": nested,
                                     "reference_contrast_descriptive": reference,
+                                    "saturation_description": saturation,
                                     "reading": reading, "label": label}
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     Path(args.out).write_text(json.dumps(out, indent=1) + "\n")

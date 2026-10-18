@@ -143,3 +143,15 @@ frozen in `logs/.../plans/pilot_analysis_plan.json`.
 - **Booking.** Spend is booked from each run's
   `closeout/outcome.json :: money.all_in_usd`, which `derive_budget.py`
   discovers through `logs/index.json`.
+
+## 7. Where things live
+
+| what | where |
+| --- | --- |
+| executables (audit, generators, builders, runner, scorer, governance, launcher, drivers, closeouts) | `scripts/stages/stage-0/calibration_volume/` |
+| experiment tests | `pytest scripts/stages/stage-0/calibration_volume/tests` |
+| procedural task sets and manifests (dev, calibration prompts, final) | `data/stages/stage-0/calibration_volume/tasks/` |
+| audit inputs, session plans, artifact specs, pilot design, profile document | `configs/stages/stage-0/calibration_volume/` |
+| audit, design analyses, frozen plans, runs, programme closeout | `logs/stages/stage-0/calibration_volume/` (README generated) |
+| heavy bytes: raw generations, base pool, profile items, search records | `artifacts/stages/stage-0/calibration_volume/` (gitignored; each run's closeout names them by sha256) |
+| money | `logs/budget/approvals/stage0_calibration_volume_programme_grant.json` |
