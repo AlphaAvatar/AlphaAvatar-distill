@@ -1,0 +1,40 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.programme_grant/v1",
+ "grant_id": "stage0.calibration_volume.programme.2026-10-18",
+ "granted_utc": "2026-10-18",
+ "granted_by": "maintainer (task instruction of 2026-10-18 to the executing agent session)",
+ "decision_record": "logs/budget/decisions.md 2026-10-18 (Stage-0 calibration-volume programme started)",
+ "decision": "Formally start the Stage-0 calibration-data experiments in the order data coverage audit -> capability-aligned evaluation -> calibration VOLUME experiment (this programme) -> calibration mixture experiment (later, not funded here). The maintainer approves the data audit, the design, the necessary engineering and the first calibration-volume study; once the data and evaluation prerequisites are complete, the scientific protocol is frozen and the budget is shown sufficient for an interpretable comparison, a new Stage-0 experiment identity and its authorization records may be created and the first formal study run inside the existing cumulative cap and the per-session hard cap.",
+ "maintainer_words": [
+  "GPU 可以用于所有真正需要 GPU 的实验和验证，不要求先运行没有价值的 CPU 替代步骤。",
+  "不得把 D 系列关闭的 Grant 或未使用授权自动转给 Stage-0。",
+  "若现有预算无法完成最低有统计意义的正式对照，不应擅自缩成一个没有科学功效的实验并宣称结论；应给出实际缺口与最小可行方案。",
+  "在已经批准的范围内，普通失败由你自主修复并继续。"
+ ],
+ "funding": {
+  "source": "the project cumulative cap ($595.00), derived by scripts/maintenance/consolidation/derive_budget.py",
+  "project_remaining_at_grant_usd": 94.8528,
+  "not_transferred": "no D-series grant, authorization or unspent allowance (D3 structural $6.4429, D3 probes $6.9605) funds this programme; the C1 execution package's formal allowance does not list this experiment and is not drawn on",
+  "booked_by": "each run's closeout/outcome.json :: money.all_in_usd, discovered through logs/index.json by derive_budget.project_sessions"
+ },
+ "programme_ceiling_usd": 92.0,
+ "_programme_ceiling": "the project remainder at grant ($94.8528) less a $2.8528 settlement reserve, so a late provider settlement cannot push the project past its cap",
+ "per_session_cap_usd": 30.0,
+ "phases": {
+  "prerequisites": {
+   "session_kinds": ["battery"],
+   "ceiling_usd": 12.0,
+   "scope": "capability-aligned dev-battery calibration (teacher solvability, student floor, seed variance) and teacher-native calibration-session generation for the Stage-0 base pool; development numbers only, never the formal endpoint",
+   "requires_preregistration": null
+  },
+  "formal_volume": {
+   "session_kinds": ["search", "probes"],
+   "ceiling_usd": 80.0,
+   "scope": "the frozen first calibration-volume study: D1 full searches per volume treatment, fixed recovery probes and capability evaluation, exactly as preregistered",
+   "requires_preregistration": "logs/stages/stage-0/calibration_volume/plans/volume_preregistration.json"
+  }
+ },
+ "retry_policy": "ordinary engineering failures before formal measurement are repaired and retried inside the phase envelope with a fresh run id (P12.1); a deterministic paid failure is not retried unchanged; after formal measurement begins only the preregistered retry contract applies",
+ "stop_conditions": "a cumulative boundary, an unreconcilable provider resource, a change to frozen science, or a remaining envelope that cannot fund a corrected unit plus teardown",
+ "authorizes": "the phases above, each run only through its own one-use authorization issued by scripts/stages/stage-0/calibration_volume/governance.py :: issue"
+}
