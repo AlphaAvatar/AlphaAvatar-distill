@@ -12167,3 +12167,54 @@ on a paid pod.
   from the squash commit.
 - **What a merge is not.** It records work. It is not a release, a promotion,
   a grant or a public claim, and no scientific result moved.
+
+## 2026-10-18 — Maintainer: Stage-0 calibration-volume programme started; the $0 audit and the prerequisite battery session
+
+- **Decision (maintainer, 2026-10-18).** Formally start the Stage-0
+  calibration-data experiments in the order data coverage audit →
+  capability-aligned evaluation → calibration **volume** dose–response →
+  calibration mixture (later). The data audit, the design, the necessary
+  engineering and the first volume study are approved, inside the existing
+  project cap and the $30 per-session cap, with no D-series grant or unspent
+  allowance carried over. The forward baseline (D1 + `scored_v1`) is fixed and
+  is not re-validated; D1/D2/D3 are not reopened.
+- **Programme grant.**
+  `logs/budget/approvals/stage0_calibration_volume_programme_grant.json`:
+  - ceiling $92.00 (the $94.8528 project remainder less a $2.8528
+    settlement reserve), $30 per session;
+  - `prerequisites` ($12): battery sessions only, development numbers only;
+  - `formal_volume` ($80): search and probe sessions, opened only by a
+    committed `plans/volume_preregistration.json`.
+  - Each paid run needs its own one-use authorization
+    (`scripts/stages/stage-0/calibration_volume/governance.py :: issue`),
+    bound to the session plan hash and the harness digest. Spend is booked
+    from each run's `closeout/outcome.json :: money.all_in_usd`.
+- **The $0 audit** (`logs/stages/stage-0/calibration_volume/audit/data_audit.json`,
+  from the bytes):
+  - `corpus_v2` has **no** primary-axis content: no rule-induction,
+    compositional or interactive item, 0 rule families. Math and multihop are
+    mixed deduction + supporting knowledge.
+  - The 0.380 "openmath correctness" in the handoff counts the 42.8% of
+    candidates that hit the 8,192-token session limit as wrong; among
+    accepted trajectories it is 0.664.
+  - Correctness falls with length, e.g. GSM8K 0.911 inside the [256, 2048]
+    window vs 0.705 above it, so a longer trace is not a better signal.
+  - Calibration, state-eval, the 0.86M recovery rung and the D-series
+    batteries share no session or source prompt; one prompt text and a few
+    near-duplicates are shared, reported.
+- **Consequence: new targeted data.** A capability-aligned volume study cannot
+  be built from `corpus_v2`. Fifteen project-authored procedural generators
+  over the five P10.2 axes, with family splits by salted hash rank and five
+  evaluation-only generators, produce the dev battery (`dev_v1`, 720) and the
+  calibration prompts (`calibration_v1`, 3,072). No external data and no
+  ARC-AGI material.
+- **Prerequisite session** (`runs/battery_20261018_092345`, A100-SXM4-80GB at
+  $1.79/h, $9.00 hard): teacher solvability at its 262,144 context, the dev
+  floor of two 0.86M-rung recovered controls (seeds sa, sb) and a 2.96M
+  reference, and the teacher-native calibration sessions for the base pool.
+  - `battery_20261018_091856` was closed unlaunched at $0: a dry run found a
+    budget-spec defect whose fix moved the harness digest its authorization
+    bound.
+- **Not decided here.** The doses, the base mixture, the SESOI, the
+  recovery seeds and the decision rules. They are frozen in the
+  preregistration once the dev measurements exist.
