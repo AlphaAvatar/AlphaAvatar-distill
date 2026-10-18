@@ -190,6 +190,11 @@ def main(argv=None) -> int:
                                 "short_cells": census.get("_short_cells", [])}
         treatments[t_id] = {"profiles": ids, "dose": t["dose"],
                             "sampling_seed": t["sampling_seed"]}
+    #: A SEARCH treatment may run several design treatments' profiles together
+    #: (the root-level pilot expands all of them under one teacher).
+    for s_id, members in (design.get("search_treatments") or {}).items():
+        treatments[s_id] = {"profiles": [i for m in members for i in treatments[m]["profiles"]],
+                            "members": list(members)}
     doc = {"schema": "aadistill.calibration_profiles/v1",
            "_contract": "Stage-0 calibration-volume profiles, built by build_volume_profiles.py from the design named below; data, registered by search_session.register_stage0_profiles. AUTHORIZES NOTHING.",
            "design": args.design,
