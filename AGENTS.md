@@ -770,6 +770,52 @@ preregistrations and verdicts are not rewritten, and they are not re-read as
 fluid-reasoning evidence. A new battery is measured anew: scores on another
 battery do not transfer to it.
 
+### P10.3. One permanent evaluation registry for every stage
+
+**MAINTAINER DECISION 2026-10-18.** What a model is *judged* on lives once, in
+`data/eval-set/`, and does not change underneath the results that cite it.
+`data/eval-set/registry.json` names every set, its status and the history of its
+authorized identities; `data/eval-set/README.md` is the contract.
+
+* **Formal capability measurement reads the registered default set**
+  (`default_formal_measurement`, today `eval-set-1`) in every stage, unless a
+  registered protocol names another registered set. An experiment does not
+  re-sample, rebuild or construct online an internal evaluation set for itself.
+  An official full run of an external public benchmark happens only at the
+  stage that needs it, under that benchmark's own contract (P10.2).
+* **Every capability is reported separately.** Fluid reasoning and adaptive
+  problem-solving stay the primary target, but they are not the only thing
+  measured: supporting knowledge, evidence-grounded reading, uncertainty, safety,
+  tool use, interaction and rollout integrity are reported beside them, each on
+  its own. No pooled score across units or capabilities is defined, and none is
+  invented in a report.
+* **Unsupported is not zero.** A unit a model's modality or interface cannot take
+  is reported `unsupported`; a withheld unit without its verified copy is
+  `withheld`; an unrun one `not_run`. None is dropped silently or scored zero.
+* **A registered set does not change without the maintainer.** For a `candidate`
+  or `frozen` set, items, gold answers, weights, scoring semantics and data
+  identity change only by appending a new identity that cites an explicit
+  maintainer authorization. An agent never does this on its own, including to
+  repair a defect it has found: it records the defect and asks. New needs become
+  `eval-set-2`, `eval-set-3`, …; an old set is never silently rewritten.
+* **Exposure is part of the identity of a result.** Each component declares its
+  role and exposure. A development-exposed set is not a never-seen blind set; an
+  `in_sample_regression` component is made of training prompts and is never
+  reported as generalization or beside held-out numbers as one score (the
+  historical Stage-3 ~20% correctness came from such a set).
+* **Isolation is enforced, not assumed.** Training, calibration and search data
+  share no prompt or content key with a held-out unit
+  (`shared.eval_sets.require_disjoint`; data builders reserve
+  `shared.eval_sets.held_out_paths()`).
+* **Every read is verified.** Readers go through `shared.eval_sets`, which
+  refuses a set whose bytes differ from its authorized identity; the registered
+  conformance vectors pin scoring semantics. The core test
+  `tests/data/test_eval_set_registry.py`, CI and `.github/CODEOWNERS` make an
+  unauthorized change loud.
+* **The core stays agnostic.** `aadistill.evaluation.eval_registry` knows no set,
+  benchmark, stage or path; every instance is data, configuration or application
+  code (P3).
+
 ### P11. Failed experiments must remain useful
 
 A failed run should still help the next agent. Record what was tried, what failed, why it likely failed, what logs exist, and whether to retry, modify, or discard the approach.

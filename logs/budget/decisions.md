@@ -12331,3 +12331,92 @@ on a paid pod.
   - Recovery probes under the fixed recipe: they score zero by construction.
 - **Revisit when.** The maintainer chooses a recovery recipe that makes H2
   measurable and funds the study.
+
+## 2026-10-18 — Permanent evaluation registry; eval-set-1 registered as a candidate
+
+- **Context.** Maintainer decision of 2026-10-18 (task instruction to the
+  executing agent): one permanent, cross-stage evaluation registry in
+  `data/eval-set/`, whose first set `eval-set-1` holds the Stage-0 720
+  (`fluid_reasoning_720`), the historical Stage-3 846 including the 76
+  behaviour prompts (`stage3_capability_846`), and the historical 150 as
+  in-sample regression only (`stage3_legacy_150`). The maintainer's words fix
+  the rules: no item, answer, weight, scoring semantic or data identity of a
+  registered set changes without explicit maintainer authorization; new needs
+  become eval-set-2, -3, …; no re-sampling to stand in for a frozen asset;
+  duplicates are not independent items; no external data published without a
+  license basis.
+- **Decision (what was done).**
+  - **Assets proven, not re-sampled** (`data/eval-set/eval-set-1/audit/provenance.json`):
+    - the 720 matches its manifest and rebuilds from its generators byte
+      for byte under PYTHONHASHSEED=14;
+    - the battery manifest matches the sha256 recorded in
+      `logs/state/artifact_manifests.md`, and every set matches it in hash,
+      count and ids;
+    - the 150 re-derives to the binding inclusion mask `d6e24e0b…` from the
+      pack and sessions E6 recorded;
+    - every scored run's prompt ids equal the set's;
+    - the current scorers reproduce every historical per-sample verdict
+      checked (144 teacher episodes, 620 capability rows, 300 legacy rows).
+  - **Moves and copies.**
+    - `dev_v1` and `eval_behavior_v0` moved verbatim. Live readers moved
+      with them; frozen records keep their spellings and resolve through
+      `logs/index.json :: historical_paths`.
+    - Six battery files and the battery manifest were copied
+      byte-identically from the durable artifact, which stays.
+    - The 150 are re-derived as prompts plus source gold, never the teacher
+      targets.
+  - **Withheld:** TriviaQA `knowledge` (150). Its card license is
+    `unknown`, and the University of Washington disclaims copyright of the
+    questions; the Apache-2.0 the battery manifest recorded is the code
+    repository's license. Its identity is recorded and the local copy is
+    verified.
+  - **Status `candidate`:** identity pinned and protected; NOT frozen.
+    - Mechanism: `aadistill.evaluation.eval_registry` (generic) and
+      `shared.eval_sets`.
+    - Scoring semantics are pinned by conformance vectors.
+    - Guard: `tests/data/test_eval_set_registry.py`, the
+      `eval-set-integrity` CI workflow, and `.github/CODEOWNERS`.
+- **Independent quality audit of the 720** (`audit/fluid_reasoning_720_quality.json`):
+  - every static item was re-solved from its prompt with solvers that never
+    read the generator code, and every episode was simulated;
+  - 573/576 static golds were confirmed;
+  - six items are defective: two order.seating, one graph.unreachable, the
+    letter_analogy `ijk` leak, and two str.remove_vowels ambiguities;
+  - 6 of the teacher's 82 failures come from those defects;
+  - three generator bugs are behind them;
+  - 0 exact duplicates, about 705 independent items under semantic
+    equivalence;
+  - the five headline items were spot-checked by the registrant.
+- **Isolation** (`audit/isolation.json`):
+  - nothing any model was trained, calibrated or searched on in Stage 0, the
+    D-series or the Stage-3 corpus shares a key with a held-out unit;
+  - `stage2_v1` train shares 4 prompt texts with `eval_behavior_v0`;
+  - `eval_behavior_v0` also holds 2 exact duplicate pairs, which reports
+    count once.
+- **Open decisions for the maintainer** (they block `frozen`; no item was
+  changed; the full list is in `registry.json :: open_decisions`):
+  1. the six defective items, each a new identity whichever way it is
+     decided;
+  2. the generator fixes needed before another set is drawn;
+  3. whether semantically equivalent items count once;
+  4. the scorer's normalization gaps (`\emptyset` for "none", `\mathrm{}`,
+     the Unicode minus, bolded action lines);
+  5. TriviaQA's license: keep withheld, publish after review, or replace in a
+     new set;
+  6. the behaviour set's duplicates and Stage-2 overlaps, and its seven
+     prompts from the access-gated Salesforce/xlam-function-calling-60k
+     (CC-BY-4.0), public here since 2026-07-27;
+  7. enable "Require review from Code Owners" on `main`. That is a repository
+     setting, so the agent did not change it.
+- **Alternatives considered.**
+  - Copying the 720 and the 76 instead of moving them: two owners of one fact.
+  - Freezing scorer bytes: it would block every refactor; the conformance
+    vectors pin behaviour instead.
+  - Publishing TriviaQA under the recorded Apache-2.0: that license is not the
+    question text's.
+- **Risks.**
+  - The 720 is development-exposed and cannot be presented as a blind test.
+  - `graph_paths@v1` is hash-seed dependent for 4 items, so a rebuild needs
+    PYTHONHASHSEED=14.
+- **Revisit when.** The maintainer settles the open decisions and declares
+  the set frozen, or registers eval-set-2.

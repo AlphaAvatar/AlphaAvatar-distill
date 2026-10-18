@@ -70,7 +70,7 @@ def stage_diag_a(args) -> None:
     """The frozen battery on the pinned reference, under both protocols."""
     battery = REPO / "artifacts/stages/stage-3/eval/battery_v2"
     prompts = sorted(str(p) for p in battery.glob("*.jsonl"))
-    behavior = REPO / "data/stages/stage-3/eval_behavior_v0/prompts.jsonl"
+    behavior = REPO / "data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0/prompts.jsonl"
     if behavior.exists():
         prompts.append(str(behavior))
     for protocol, kwargs in (("project", "{}"),

@@ -306,7 +306,7 @@
      "says": "the treatment arm the canonical config points at by default"
     },
     {
-     "path": "data/stages/stage-3/eval_behavior_v0",
+     "path": "data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0",
      "says": "the behaviour evaluation set the stage is judged on \u2014 autonomous rollout, not held-out loss"
     }
    ],

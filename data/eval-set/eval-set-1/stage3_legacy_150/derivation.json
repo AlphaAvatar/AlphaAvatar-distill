@@ -1,0 +1,25 @@
+{
+ "rule": "shared.evaluation.diagnose_training_recall: rung_session_ids(pack, 860000) -> sessions with correct is True -> stratified_sample(n=150, seed=20260804); inclusion mask = sha256(json.dumps(sorted ids))",
+ "pack": {
+  "path": "artifacts/shared/instruments/ladder_uniform_probe",
+  "blocks_npz_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+  "ladder_json_sha256": "d4941722a099754ef5ba82d529c0fe2274a6b97af61b2fa52519ed22b84201f0"
+ },
+ "sessions": {
+  "path": "artifacts/stages/stage-3/corpus_v2/sessions.jsonl",
+  "sha256": "2b4edc2e2cc16cd56dae3d340345e1a17e2c4a8baa9837650a7bf5e340fa6fcd"
+ },
+ "rung_sessions": 1502,
+ "verified_correct": 758,
+ "sampled": 150,
+ "inclusion_mask_sha256": "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba",
+ "binding_record": "logs/stages/stage-3/e6/analyses/e6_registration.json",
+ "by_task": {
+  "gsm8k": 38,
+  "multihop_qa": 38,
+  "openmath": 37,
+  "rag_evidence": 37
+ },
+ "prompt_rendering": "the harness renders every non-assistant message with the model's chat template, tools passed through, add_generation_prompt=True (scripts/stages/stage-3/d0/run_three_mode_diagnostic.py, free mode)",
+ "fields_dropped": "every assistant message (the teacher's training target and reasoning)"
+}

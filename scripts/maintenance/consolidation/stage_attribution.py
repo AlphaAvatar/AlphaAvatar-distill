@@ -331,7 +331,7 @@ STAGES = [
               "/ rag_evidence, with per-arm token and packing statistics"),
             E("data/stages/stage-3/stage3_pilot/treatment",
               "the treatment arm the canonical config points at by default"),
-            E("data/stages/stage-3/eval_behavior_v0",
+            E("data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0",
               "the behaviour evaluation set the stage is judged on — "
               "autonomous rollout, not held-out loss"),
         ],

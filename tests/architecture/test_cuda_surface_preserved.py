@@ -2169,6 +2169,19 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "construction; nothing existing calls it, and every key, role and "
             "required pair comes from the caller.",
      }),
+    ("e5fb30ae22124c0e3803c850d7fa429888922c9e",
+     "Permanent evaluation registry",
+     {
+        "src/aadistill/evaluation/eval_registry.py":
+            "NEW MODULE: `verify` / `require_intact` compare an evaluation set's "
+            "files with the manifest the registry authorizes (sha256, size, "
+            "unlisted and withheld files, an authorization on every protected "
+            "identity) and raise `EvalSetIntegrityError`; `capability_table` "
+            "reports per capability without pooling and never scores an "
+            "unsupported, withheld or unrun unit as zero. THIS IS A DECLARED "
+            "SEMANTIC CHANGE by construction; it names no set, benchmark, stage "
+            "or path. NO CUDA SURFACE: hashing and JSON only.",
+     }),
 )
 
 

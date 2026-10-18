@@ -105,8 +105,13 @@ def build(role: str, per_cell: int, per_cell_interactive: int,
 
 
 def existing_sets(exclude: Path) -> dict[str, list[dict]]:
+    """Every built set a new one must be isolated from: the stage's own task
+    sets, and every task set registered as a permanent evaluation set (dev_v1
+    lives in data/eval-set/ since 2026-10-18)."""
+    from shared import eval_sets
     out: dict[str, list[dict]] = {}
-    for path in sorted(OUT_DIR.glob("*_v*.jsonl")):
+    paths = sorted(OUT_DIR.glob("*_v*.jsonl")) + eval_sets.registered_files(SCHEMA)
+    for path in paths:
         if path == exclude:
             continue
         rows = [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
@@ -127,6 +132,10 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
 
     out = OUT_DIR / f"{args.role}_v{args.version}.jsonl"
+    from shared import eval_sets
+    if any(p.name == out.name for p in eval_sets.registered_files(SCHEMA)):
+        raise SystemExit(f"{out.name} is a registered evaluation set (data/eval-set/); a "
+                         "registered set is never rebuilt -- bump --version")
     if out.exists():
         raise SystemExit(f"{out.relative_to(REPO)} exists; a built set is never "
                          "rewritten -- bump --version")

@@ -208,7 +208,7 @@ with the bundle, or unpack into a real checkout.
   one, or one edited after issuance.
 - **Regenerate the git bundle** at the current commit and re-upload it, then
   update `hashes_transfer.txt` — `setup.sh` verifies hashes and fails loudly on
-  a stale bundle. The tracked `data/eval_behavior_v0/prompts.jsonl` travels with
+  a stale bundle. The tracked `data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0/prompts.jsonl` travels with
   the bundle, so a stale bundle also means a stale prompt set.
 - **Stage any start checkpoint not already on the relay** and add its per-file
   sha256 to `hashes_ckpt.txt` (dev→HF upload measured ~680 KB/s; HF→pod is fast).

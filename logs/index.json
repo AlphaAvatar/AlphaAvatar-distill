@@ -87,10 +87,13 @@
    "configs/validation/c2_state_eval_certification.json": "configs/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification.json",
    "configs/validation/cuda_engineering.json": "configs/shared/validation/cuda_engineering.json",
    "configs/validation/cuda_engineering_deployment.json": "configs/shared/validation/cuda_engineering_deployment.json",
-   "data/eval_behavior_v0": "data/stages/stage-3/eval_behavior_v0",
+   "data/eval_behavior_v0": "data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0",
    "data/stage2": "data/stages/stage-2/stage2",
    "data/stage2_v1": "data/stages/stage-2/stage2_v1",
    "data/stage3_pilot": "data/stages/stage-3/stage3_pilot",
+   "data/stages/stage-0/calibration_volume/tasks/dev_v1.jsonl": "data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.jsonl",
+   "data/stages/stage-0/calibration_volume/tasks/dev_v1.manifest.json": "data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.manifest.json",
+   "data/stages/stage-3/eval_behavior_v0": "data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0",
    "data/warmup": "data/stages/stage-0/warmup",
    "docs/AUTOINIT_REFERENCE.md": "docs/stages/stage-1/AUTOINIT_REFERENCE.md",
    "docs/OPERATOR_PROMOTION_CYCLE.md": "docs/stages/stage-1/OPERATOR_PROMOTION_CYCLE.md",
@@ -3144,7 +3147,7 @@
    "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt5",
    "n_files": 5,
    "digest": "ad5acd8118d2ba20e22bc4e85d0a0b3949585ea0174155648fdaef478b0df841",
-   "why": "no run manifest; its closeout states: PRE-PROVIDER ABORT \u2014 NO PROVIDER RESOURCE, NO SPEND, NO MEASUREMENT"
+   "why": "no run manifest; its closeout states: PRE-PROVIDER ABORT — NO PROVIDER RESOURCE, NO SPEND, NO MEASUREMENT"
   },
   {
    "experiment_id": "phase_c2_baseline_completion",
@@ -3152,7 +3155,7 @@
    "root": "logs/stages/stage-1/phase_c2_baseline_completion/runs/attempt7",
    "n_files": 15,
    "digest": "6a9719fbf4028963b5eefa255e664d5efe299dabaf370d38c0b0661c1abd95b4",
-   "why": "no run manifest; its closeout states: ABORTED BEFORE SETUP \u2014 ORCHESTRATOR KILLED, NO REBUILD, NO MEASUREMENT"
+   "why": "no run manifest; its closeout states: ABORTED BEFORE SETUP — ORCHESTRATOR KILLED, NO REBUILD, NO MEASUREMENT"
   },
   {
    "experiment_id": "phase_c2_behavioural",

@@ -74,7 +74,7 @@ LOCAL_PREFIXES = {
     # directory would make this a changelog rather than a guard against `stage4/`.
     "artifacts/stages/stage-1",
     "artifacts/stages/stage-3/eval",
-    "data/stages/stage-3/eval_behavior_v0",
+    "data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0",
     "artifacts/stages/stage-1/qwen3_0p6b_init_v0",
     "artifacts/stages/stage-3",
     "artifacts/shared",
@@ -94,7 +94,9 @@ SCRIPTS = (sorted(POD.glob("e[0-9]*_setup.sh")) + sorted(POD.glob("e[0-9]*_drive
 # `stageN` names that are real. Anything else is almost certainly sed damage:
 # the project has stages 0-6 but only these directory families exist.
 VALID_STAGE_TOKENS = {"stage0", "stage1", "stage2", "stage3", "stage2_v1",
-                      "stage3_recovery_corpus_v2", "stage3_pilot"}
+                      "stage3_recovery_corpus_v2", "stage3_pilot",
+                      # eval-set-1 component directories (data/eval-set/), 2026-10-18
+                      "stage3_capability_846", "stage3_legacy_150"}
 
 
 @pytest.mark.parametrize("script", SCRIPTS, ids=lambda p: p.name)

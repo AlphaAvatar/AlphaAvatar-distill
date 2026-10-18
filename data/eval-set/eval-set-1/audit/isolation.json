@@ -1,0 +1,209 @@
+{
+ "schema": "aadistill.eval_set_isolation/v1",
+ "eval_set_id": "eval-set-1",
+ "created_utc": "2026-10-18T20:19:52+00:00",
+ "code_state": {
+  "git_commit": "e5fb30ae22124c0e3803c850d7fa429888922c9e",
+  "git_commit_source": "git",
+  "dirty": true,
+  "uncommitted_state_sha256": "6d8d1d523ec6b3885b18f7224d9d3c4b1757cfde83d47687564e5baf525d537c",
+  "untracked_files": [
+   "configs/stages/stage-0/calibration_volume/resolution_session.json",
+   "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_201712/governance/authorization.json",
+   "scripts/stages/stage-0/calibration_volume/analyze_resolution.py"
+  ]
+ },
+ "keys": "shared.eval_sets.KEYS (prompt, content)",
+ "units_compared": {
+  "fluid_reasoning_720/dev_v1": 720,
+  "stage3_capability_846/math_verified": 100,
+  "stage3_capability_846/gsm8k": 100,
+  "stage3_capability_846/multihop": 100,
+  "stage3_capability_846/rag": 100,
+  "stage3_capability_846/answerability_paired": 120,
+  "stage3_capability_846/safety_paired": 100,
+  "stage3_capability_846/knowledge": 150,
+  "stage3_capability_846/eval_behavior_v0": 76,
+  "stage3_legacy_150/items": 150
+ },
+ "units_not_readable": [],
+ "sources": {
+  "stage3.corpus_v2.sessions": {
+   "used_for": "training (Stage-3 recovery corpus; every rung)",
+   "path": "artifacts/stages/stage-3/corpus_v2/sessions.jsonl",
+   "present": true,
+   "files": 1,
+   "rows": 11174,
+   "unresolved_rendered_items": 0,
+   "plain_text_items_without_prompt": 0,
+   "overlaps": {
+    "stage3_legacy_150/items": {
+     "role": "in_sample_regression",
+     "overlap": {
+      "prompt": 150,
+      "content": 0
+     },
+     "examples": {
+      "prompt": [
+       "0081a1fffa6c2deb6559987b2b8b2891fa0ab9c114d2156ab4d40e57962f4ad5",
+       "01563484124d522faa7321ed3be94b32ff25445334ae6c0c7303610d56f7dfba",
+       "01ef90bbde0eef6313cbd36e15179ed39d5e6112777684820ccd6d6089775601",
+       "03691bf574107d3bf353dd1c7f2769e0991a6a207c34fb51c295869e81aad170",
+       "04306b99398e1e3f3a368e1c3985e60147905f2b7e029235923841d3b5393612"
+      ]
+     }
+    }
+   },
+   "held_out_overlap": 0
+  },
+  "stage2.stage2_v1.train": {
+   "used_for": "training (Stage-2 offline mixture)",
+   "path": "data/stages/stage-2/stage2_v1/train",
+   "present": true,
+   "files": 8,
+   "rows": 64484,
+   "unresolved_rendered_items": 0,
+   "plain_text_items_without_prompt": 0,
+   "overlaps": {
+    "stage3_capability_846/eval_behavior_v0": {
+     "role": "held_out",
+     "overlap": {
+      "prompt": 4,
+      "content": 0
+     },
+     "examples": {
+      "prompt": [
+       "3c3e3967756889d5eb1eb32620339a6d4bd3e6bd062e995940da14a40a8bfddb",
+       "554e3e0243e86034fc5c033eecb8b40ca841735d1220c026e9ff249add2159f7",
+       "8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4",
+       "f3b30256c37834cb1dcb2b724e1970e9aee46925a76b4d3fce7f59982aadecc0"
+      ]
+     }
+    },
+    "stage3_legacy_150/items": {
+     "role": "in_sample_regression",
+     "overlap": {
+      "prompt": 150,
+      "content": 0
+     },
+     "examples": {
+      "prompt": [
+       "0081a1fffa6c2deb6559987b2b8b2891fa0ab9c114d2156ab4d40e57962f4ad5",
+       "01563484124d522faa7321ed3be94b32ff25445334ae6c0c7303610d56f7dfba",
+       "01ef90bbde0eef6313cbd36e15179ed39d5e6112777684820ccd6d6089775601",
+       "03691bf574107d3bf353dd1c7f2769e0991a6a207c34fb51c295869e81aad170",
+       "04306b99398e1e3f3a368e1c3985e60147905f2b7e029235923841d3b5393612"
+      ]
+     }
+    }
+   },
+   "held_out_overlap": 4
+  },
+  "stage2.stage2_v1.val": {
+   "used_for": "held-out split of the Stage-2 mixture (eval_behavior_v0 was drawn from it)",
+   "path": "data/stages/stage-2/stage2_v1/val",
+   "present": true,
+   "files": 8,
+   "rows": 1916,
+   "unresolved_rendered_items": 0,
+   "plain_text_items_without_prompt": 0,
+   "overlaps": {
+    "stage3_capability_846/eval_behavior_v0": {
+     "role": "held_out",
+     "overlap": {
+      "prompt": 64,
+      "content": 0
+     },
+     "examples": {
+      "prompt": [
+       "08d693c3166cf04d9a594920d6d72dde2e21abe4a0d4c5d058797602e2139afe",
+       "0c9193dc428234035443b0c81068e50e2a0ebb3eb17e81cfe8cdd72e62ba7216",
+       "0cad12c23e045df84a88ac3f91c4e5ef9e93c7f8835d1c63542d1762079171f6",
+       "0f2361e195b11f663331c567d7f7abcead3862ff71e4027177032864a92ec555",
+       "0f7918eafd5092313826cf2dc573eb5aad4a3c495024af870ba9a1568c6753cc"
+      ]
+     }
+    }
+   },
+   "held_out_overlap": 64
+  },
+  "stage2.stage2_v1.calib": {
+   "used_for": "calibration split of the Stage-2 mixture",
+   "path": "data/stages/stage-2/stage2_v1/calib",
+   "present": true,
+   "files": 8,
+   "rows": 200,
+   "unresolved_rendered_items": 0,
+   "plain_text_items_without_prompt": 0,
+   "overlaps": {},
+   "held_out_overlap": 0
+  },
+  "stage0.calibration_v1": {
+   "used_for": "Stage-0 calibration prompts",
+   "path": "data/stages/stage-0/calibration_volume/tasks/calibration_v1.jsonl",
+   "present": true,
+   "files": 1,
+   "rows": 3072,
+   "unresolved_rendered_items": 0,
+   "plain_text_items_without_prompt": 0,
+   "overlaps": {},
+   "held_out_overlap": 0
+  },
+  "stage0.calibration_v2": {
+   "used_for": "Stage-0 calibration prompts",
+   "path": "data/stages/stage-0/calibration_volume/tasks/calibration_v2.jsonl",
+   "present": true,
+   "files": 1,
+   "rows": 672,
+   "unresolved_rendered_items": 0,
+   "plain_text_items_without_prompt": 0,
+   "overlaps": {},
+   "held_out_overlap": 0
+  },
+  "stage0.base_pool_v1": {
+   "used_for": "Stage-0 calibration pool (searches)",
+   "path": "artifacts/stages/stage-0/calibration_volume/base_pool_v1/items.jsonl",
+   "present": true,
+   "files": 1,
+   "rows": 6593,
+   "unresolved_rendered_items": 0,
+   "plain_text_items_without_prompt": 0,
+   "overlaps": {},
+   "held_out_overlap": 0
+  },
+  "stage0.profiles_pilot_v1": {
+   "used_for": "Stage-0 pilot search profiles",
+   "path": "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1",
+   "present": true,
+   "files": 9,
+   "rows": 318,
+   "unresolved_rendered_items": 229,
+   "plain_text_items_without_prompt": 0,
+   "overlaps": {},
+   "held_out_overlap": 0
+  },
+  "stage1.state_eval_v1": {
+   "used_for": "state evaluation suite of every D-series and Stage-0 search",
+   "path": "artifacts/stages/stage-1/state_eval_v1/items.jsonl",
+   "present": true,
+   "files": 1,
+   "rows": 70,
+   "unresolved_rendered_items": 0,
+   "plain_text_items_without_prompt": 10,
+   "overlaps": {},
+   "held_out_overlap": 0
+  },
+  "stage1.reasoning_heavy_v2": {
+   "used_for": "D-series calibration profile",
+   "path": "artifacts/stages/stage-1/reasoning_heavy_v2",
+   "present": true,
+   "files": 1,
+   "rows": 50,
+   "unresolved_rendered_items": 0,
+   "plain_text_items_without_prompt": 12,
+   "overlaps": {},
+   "held_out_overlap": 0
+  }
+ },
+ "verdict": "4 held-out key overlaps in training/calibration/search data"
+}

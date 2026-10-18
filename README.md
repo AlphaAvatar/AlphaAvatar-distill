@@ -193,6 +193,24 @@ construction (a terse well-formed reply scores perfectly), and its components ar
 **not independent** — `protocol_valid` subsumes two of them, and empirically
 `usable_rollout == protocol_valid` on 897/900 samples.
 
+### How capability is measured, in every stage
+
+Formal capability measurement reads one permanent, hash-verified evaluation set
+from [`data/eval-set/`](./data/eval-set/README.md) (AGENTS.md P10.3). Today that
+is `eval-set-1`, registered as a **candidate**: its identity is pinned and
+protected, and freezing waits on the maintainer decisions it lists.
+
+| component | items | role |
+| --- | --- | --- |
+| `fluid_reasoning_720` | 720 procedural tasks over five reasoning axes, held-out rule families | primary target; **development-exposed**, not a blind set |
+| `stage3_capability_846` | the frozen Stage-3 battery: math, GSM8K, multi-hop, RAG, answerability, safety and the 76 behaviour prompts (TriviaQA knowledge withheld from git pending a license review) | supporting capabilities and guard rails |
+| `stage3_legacy_150` | the fixed 150 prompts every Stage-3 arm was scored on | **in-sample** regression only: they are training prompts |
+
+Every unit and capability is reported on its own. A unit a model cannot take is
+`unsupported`, never zero, and no pooled score exists. **The ~20% correctness the
+Stage-3 arms reached was measured on `stage3_legacy_150`, prompts they were trained
+on**: it is recall, not reasoning on unseen problems.
+
 ### What has been ruled out
 
 | tried | result |
@@ -439,6 +457,8 @@ AlphaAvatar-distill/
 │                           # (shared/baselines/ = the selected forward baseline)
 ├── data/                   # owner-first: data/stages/stage-<n>/<dataset>/ — manifests
 │                           # tracked, heavy files gitignored, rebuildable
+│   └── eval-set/           #   permanent cross-stage evaluation sets: registry.json,
+│                           #   eval-set-<n>/ items tracked and hash-verified
 ├── tests/                  # the CORE suite; experiment suites live with their
 │                           # experiments under scripts/stages/.../tests/
 ├── logs/                   # project memory — read logs/README.md first

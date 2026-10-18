@@ -24,7 +24,7 @@ from stages.calibration_volume.tasks.interactive import (ButtonsEnv, ProbeFuncti
                                                        max_turns)
 
 REPO = Path(__file__).resolve().parents[5]
-DEV = REPO / "data/stages/stage-0/calibration_volume/tasks/dev_v1.jsonl"
+DEV = REPO / "data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.jsonl"
 
 
 def _tasks(path):
@@ -148,11 +148,15 @@ def test_isolation_refuses_a_planted_overlap():
 
 
 def test_built_sets_satisfy_their_declared_isolation():
-    d = Path(DEV).parent
-    for m in d.glob("*.manifest.json"):
+    from shared.run_layout import resolve_historical
+    stage_dir = REPO / "data/stages/stage-0/calibration_volume/tasks"
+    manifests = sorted(stage_dir.glob("*.manifest.json")) + sorted(Path(DEV).parent.glob("*.manifest.json"))
+    assert len(manifests) >= 3
+    for m in manifests:
         man = json.loads(m.read_text())
         assert all(c["overlap"] == 0 for c in man["isolation"]["checked"]), m.name
-        body = (REPO / man["file"]).read_bytes()
+        # a frozen manifest keeps the path it was written with; access resolves
+        body = (REPO / resolve_historical(man["file"])).read_bytes()
         import hashlib
         assert hashlib.sha256(body).hexdigest() == man["sha256"], m.name
     for t in _tasks(DEV):

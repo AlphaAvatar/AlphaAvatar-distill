@@ -123,7 +123,7 @@ REPORT_CMD=
 
 # Paths setup.sh checks exist after the bundle + data land.
 HOLDOUT=data/stages/stage-0/warmup/holdout_v1.jsonl
-BEHAVIOR_PROMPTS=data/stages/stage-3/eval_behavior_v0/prompts.jsonl
+BEHAVIOR_PROMPTS=data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0/prompts.jsonl
 # Formal behaviour measurement is UNRESTRICTED (AGENTS.md P18). This value is
 # used only for cheap smoke checks and is recorded as a censored measurement.
 BEHAVIOR_MAX_NEW_TOKENS=512
