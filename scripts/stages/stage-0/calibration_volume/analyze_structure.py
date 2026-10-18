@@ -1,25 +1,23 @@
 #!/usr/bin/env python3
-"""Structural selection agreement between calibration profiles (H1), at $0.
+"""Root-level structural selection agreement (the pilot's H1/H3 evidence), at $0.
 
     PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-0/calibration_volume/analyze_structure.py \
-        --structure <structure.json> --projections-dir <dir> --groups <plan.json> --out <json>
+        --structure <pilot structure.json> --projections-dir <dir> \
+        --profiles-doc configs/stages/stage-0/calibration_volume/profiles.json \
+        --reference-structure <D1 structure.json> --out <json>
 
-Reads the ROOT-level decisions of a search (each operator applied to the
-teacher under each profile, `structure.json` from `search_driver.py`) and asks,
-operator by operator, how much two profiles' decisions agree:
+Implements `logs/stages/stage-0/calibration_volume/plans/pilot_analysis_plan.json`
+(frozen before any result) and nothing else:
 
-* FFN `kept_neurons` and ATTENTION `kept_heads`: per-layer Jaccard, averaged
-  over layers;
-* DEPTH: Jaccard of the removed-layer sets, and the fraction of greedy rounds
-  that chose the same layer;
-* RESIDUAL_WIDTH: subspace overlap `||P1^T P2||_F^2 / k` of the recovered
-  projections (1 = the same k-dimensional subspace).
-
-Each agreement is reported beside its CHANCE level (a uniformly random
-selection of the same size), so "0.8" can be read as near-identical or as
-near-random. Pairs are grouped by the plan's (dose, resample) labels: agreement
-BETWEEN resamples at one dose is the selection noise H1 is about; agreement
-with the reference profiles is descriptive context, never a mixture verdict.
+* agreement per operator -- FFN `kept_neurons` and ATTENTION `kept_heads` as
+  per-layer Jaccard averaged over layers; DEPTH as the Jaccard of the removed
+  sets and the fraction of greedy rounds with the same choice; RESIDUAL_WIDTH as
+  the subspace overlap ||Q1^T Q2||_F^2 / k of the orthonormalized projections --
+  each beside its chance level;
+* groupings -- between resamples at each dose; each resample's 1x and 2x
+  against its own (nested) 4x; and a DESCRIPTIVE contrast with the historical
+  root decisions of the D1 profiles;
+* the plan's noise-calibrated reading rule.
 """
 from __future__ import annotations
 
@@ -29,6 +27,8 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
+CHANCE_N = {"FFN": 9728, "ATTENTION": 32, "DEPTH": 36}
+
 
 def jaccard(a, b) -> float:
     a, b = set(a), set(b)
@@ -36,104 +36,150 @@ def jaccard(a, b) -> float:
 
 
 def chance_jaccard(k: int, n: int) -> float:
-    """Expected Jaccard of two independent uniform k-subsets of n."""
-    e_inter = k * k / n
-    return e_inter / (2 * k - e_inter)
+    e = k * k / n
+    return e / (2 * k - e)
 
 
 def depth_removed(decision: dict) -> tuple[list[int], list[int]]:
-    """(removed set, greedy removal order). `chosen` is the ORIGINAL layer index:
-    D2's rounds reproduce its recorded removal order exactly."""
+    """(removed set, greedy order). `chosen` is the ORIGINAL layer index: D2's
+    rounds reproduce its recorded removal order exactly."""
     order = [int(r["chosen"]) for r in decision.get("search_rounds") or []]
     return sorted(order), order
 
 
-def per_layer_jaccard(a: list[list[int]], b: list[list[int]]) -> float:
+def per_layer(a, b) -> float:
     return sum(jaccard(x, y) for x, y in zip(a, b)) / max(1, min(len(a), len(b)))
+
+
+def load_roots(path: Path) -> dict[str, dict[str, dict]]:
+    """kind -> profile -> root decision record."""
+    out: dict[str, dict[str, dict]] = defaultdict(dict)
+    for r in json.loads(path.read_text()):
+        if r.get("depth") != 1:
+            continue
+        out[(r.get("applied_kinds") or ["?"])[0]][(r.get("profiles") or ["?"])[0]] = r
+    return out
+
+
+def agreement(kind: str, da: dict, db: dict, proj: dict, pa: str, pb: str) -> dict:
+    if kind == "FFN":
+        ka, kb = da["kept_neurons"], db["kept_neurons"]
+        return {"value": round(per_layer(ka, kb), 4),
+                "chance": round(chance_jaccard(len(ka[0]), CHANCE_N["FFN"]), 4)}
+    if kind == "ATTENTION":
+        ka, kb = da["kept_heads"], db["kept_heads"]
+        return {"value": round(per_layer(ka, kb), 4),
+                "chance": round(chance_jaccard(len(ka[0]), CHANCE_N["ATTENTION"]), 4)}
+    if kind == "DEPTH":
+        ra, oa = depth_removed(da)
+        rb, ob = depth_removed(db)
+        return {"value": round(jaccard(ra, rb), 4),
+                "same_greedy_choice": round(sum(x == y for x, y in zip(oa, ob)) / max(1, len(oa)), 4),
+                "chance": round(chance_jaccard(len(ra), CHANCE_N["DEPTH"]), 4),
+                "removed_a": ra, "removed_b": rb}
+    if kind == "RESIDUAL_WIDTH":
+        if pa in proj and pb in proj:
+            qa, qb = proj[pa], proj[pb]
+            k = qa.shape[1]
+            return {"value": round(float((qa.T @ qb).pow(2).sum() / k), 4),
+                    "chance": round(k / qa.shape[0], 4)}
+        return {"value": None, "note": "projection not recovered"}
+    return {"value": None}
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--structure", required=True)
     ap.add_argument("--projections-dir", default=None)
-    ap.add_argument("--groups", required=True,
-                    help="JSON {profile_qualified_id: {dose, resample, role}}")
+    ap.add_argument("--profiles-doc", required=True)
+    ap.add_argument("--reference-structure", default=None)
+    ap.add_argument("--reference-profiles", nargs="*",
+                    default=["calib.domain_balanced@v1", "calib.reasoning_heavy@v2"])
     ap.add_argument("--out", required=True)
     args = ap.parse_args(argv)
-    rows = json.loads(Path(args.structure).read_text())
-    groups = json.loads(Path(args.groups).read_text())
-    roots = [r for r in rows if r.get("depth") == 1]
-    by_kind: dict[str, dict[str, dict]] = defaultdict(dict)
-    for r in roots:
-        kind = (r.get("applied_kinds") or ["?"])[0]
-        prof = (r.get("profiles") or ["?"])[0]
-        by_kind[kind][prof] = r
+
+    doc = json.loads(Path(args.profiles_doc).read_text())
+    meta = {f"{p['profile_id']}@v{p['version']}": p["metadata"] for p in doc["profiles"]}
+    resample_of = {}
+    for t, tv in doc["treatments"].items():
+        if t.startswith("d") and "_r" in t:
+            for pid in tv["profiles"]:
+                resample_of[pid] = int(t.split("_r")[1])
+    roots = load_roots(Path(args.structure))
+    refs = load_roots(Path(args.reference_structure)) if args.reference_structure else {}
 
     proj = {}
     if args.projections_dir:
         import torch
         from safetensors.torch import load_file
-        for r in roots:
-            if r.get("applied_kinds") == ["RESIDUAL_WIDTH"]:
+        for kind_rows in (roots.get("RESIDUAL_WIDTH", {}),):
+            for pid, r in kind_rows.items():
                 f = Path(args.projections_dir) / f"width_projection_{r['state_id']}.safetensors"
                 if f.is_file():
-                    p = load_file(str(f))["P"].double()
-                    q, _ = torch.linalg.qr(p)
-                    proj[(r.get("profiles") or ["?"])[0]] = q
+                    q, _ = torch.linalg.qr(load_file(str(f))["P"].double())
+                    proj[pid] = q
 
-    def agree(kind, pa, pb) -> dict:
-        da = (by_kind[kind][pa].get("decision") or {})
-        db = (by_kind[kind][pb].get("decision") or {})
-        if kind == "FFN":
-            ka, kb = da["kept_neurons"], db["kept_neurons"]
-            k = len(ka[0])
-            return {"value": round(per_layer_jaccard(ka, kb), 4), "chance": round(
-                chance_jaccard(k, int(groups.get("_teacher_intermediate", 9728))), 4)}
-        if kind == "ATTENTION":
-            ka, kb = da["kept_heads"], db["kept_heads"]
-            k = len(ka[0])
-            return {"value": round(per_layer_jaccard(ka, kb), 4), "chance": round(
-                chance_jaccard(k, int(groups.get("_teacher_heads", 32))), 4)}
-        if kind == "DEPTH":
-            ra, oa = depth_removed(da)
-            rb, ob = depth_removed(db)
-            same = sum(x == y for x, y in zip(oa, ob)) / max(1, len(oa))
-            return {"value": round(jaccard(ra, rb), 4), "same_greedy_choice": round(same, 4),
-                    "chance": round(chance_jaccard(len(ra), int(groups.get("_teacher_layers", 36))), 4),
-                    "removed_a": ra, "removed_b": rb}
-        if kind == "RESIDUAL_WIDTH":
-            if pa in proj and pb in proj:
-                k = proj[pa].shape[1]
-                ov = float((proj[pa].T @ proj[pb]).pow(2).sum() / k)
-                n = proj[pa].shape[0]
-                return {"value": round(ov, 4), "chance": round(k / n, 4)}
-            return {"value": None, "note": "projection not recovered"}
-        return {"value": None}
-
-    out = {"schema": "aadistill.stage0.structure_agreement/v1", "structure": args.structure,
+    out = {"schema": "aadistill.stage0.structure_agreement/v2",
+           "plan": "logs/stages/stage-0/calibration_volume/plans/pilot_analysis_plan.json",
+           "structure": args.structure, "covariates": {
+               pid: {k: meta[pid].get(k) for k in ("dose", "uesp", "tokens", "n_rule_families",
+                                                     "n_units")} | {"resample": resample_of.get(pid)}
+               for pid in sorted(meta) if pid in resample_of},
            "by_operator": {}}
-    labelled = {p: g for p, g in groups.items() if not p.startswith("_")}
-    for kind, profs in sorted(by_kind.items()):
-        present = [p for p in profs if p in labelled]
-        pairs = []
-        for pa, pb in itertools.combinations(sorted(present), 2):
-            ga, gb = labelled[pa], labelled[pb]
-            pairs.append({"a": pa, "b": pb, "a_group": ga, "b_group": gb, **agree(kind, pa, pb)})
-        within = defaultdict(list)
-        for p in pairs:
-            if (p["a_group"].get("role") == p["b_group"].get("role") == "treatment"
-                    and p["a_group"]["dose"] == p["b_group"]["dose"] and p["value"] is not None):
-                within[str(p["a_group"]["dose"])].append(p["value"])
-        out["by_operator"][kind] = {
-            "pairs": pairs,
-            "between_resamples_by_dose": {d: {"n_pairs": len(v), "mean": round(sum(v) / len(v), 4),
-                                              "min": min(v), "max": max(v)}
-                                          for d, v in sorted(within.items(), key=lambda x: float(x[0]))},
-        }
+    for kind, profs in sorted(roots.items()):
+        pilot = [p for p in profs if p in resample_of]
+        dec = {p: profs[p].get("decision") or {} for p in pilot}
+        by_dose = defaultdict(list)
+        for p in pilot:
+            by_dose[meta[p]["dose"]].append(p)
+        between = {}
+        for d, ps in sorted(by_dose.items()):
+            pairs = [{"a": a, "b": b, **agreement(kind, dec[a], dec[b], proj, a, b)}
+                     for a, b in itertools.combinations(sorted(ps), 2)]
+            vals = [x["value"] for x in pairs if x["value"] is not None]
+            between[str(d)] = {"pairs": pairs, "n_pairs": len(vals),
+                               "mean": round(sum(vals) / len(vals), 4) if vals else None,
+                               "min": min(vals) if vals else None,
+                               "max": max(vals) if vals else None,
+                               "noise": round(max(vals) - min(vals), 4) if vals else None}
+        nested = []
+        top = max(by_dose) if by_dose else None
+        for p in pilot:
+            if meta[p]["dose"] == top:
+                continue
+            twin = [q for q in by_dose.get(top, []) if resample_of[q] == resample_of[p]]
+            if twin:
+                nested.append({"profile": p, "dose": meta[p]["dose"], "resample": resample_of[p],
+                               "vs": twin[0], **agreement(kind, dec[p], dec[twin[0]], proj, p, twin[0])})
+        reference = []
+        for rp in args.reference_profiles:
+            rdec = (refs.get(kind, {}).get(rp) or {}).get("decision")
+            if not rdec:
+                continue
+            for p in pilot:
+                reference.append({"reference": rp, "profile": p, "dose": meta[p]["dose"],
+                                  **agreement(kind, dec[p], rdec, proj, p, rp)})
+        lo, hi = between.get("1", {}), between.get(str(top), {})
+        label = None
+        if kind != "DEPTH" and lo.get("n_pairs") and hi.get("n_pairs"):
+            noise = max(lo["noise"], hi["noise"])
+            effect = hi["mean"] - lo["mean"]
+            mid = between.get("2", {}).get("mean")
+            between_ok = mid is not None and min(lo["mean"], hi["mean"]) <= mid <= max(lo["mean"], hi["mean"])
+            label = ("stabilizes with volume" if effect > noise and between_ok else
+                     "destabilizes" if effect < -noise else
+                     "no detectable volume effect" if abs(effect) <= noise else
+                     "effect exceeds noise but non-monotone")
+            reading = {"effect_4x_minus_1x": round(effect, 4), "noise": round(noise, 4)}
+        else:
+            reading = None
+        out["by_operator"][kind] = {"between_resamples": between, "nested_to_largest": nested,
+                                    "reference_contrast_descriptive": reference,
+                                    "reading": reading, "label": label}
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     Path(args.out).write_text(json.dumps(out, indent=1) + "\n")
-    print(json.dumps({k: v["between_resamples_by_dose"] for k, v in out["by_operator"].items()},
-                     indent=1))
+    print(json.dumps({k: {"between": {d: (v["mean"], v["noise"]) for d, v in o["between_resamples"].items()},
+                          "label": o["label"]} for k, o in out["by_operator"].items()}, indent=1))
     return 0
 
 
