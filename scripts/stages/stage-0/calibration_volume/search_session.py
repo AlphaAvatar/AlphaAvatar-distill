@@ -68,6 +68,7 @@ def treatment_profiles(treatment: str, doc_path: Path = PROFILES_DOC) -> tuple:
 
 def build_session(*, workdir: Path, run_id: str, profiles: tuple,
                   device: str = "cuda", max_depth: int | None = None,
+                  impl_profiles: dict | None = None,
                   repo_root: Path = REPO) -> Stage0Session:
     """`max_depth=None` is the full search; `max_depth=1` expands only the
     root's children -- every operator under every profile, applied to the
@@ -114,6 +115,8 @@ def build_session(*, workdir: Path, run_id: str, profiles: tuple,
         measurement_protocol_id=evaluator.measurement_protocol_id,
         allowed_impls=terms["allowed_impls"],
         max_depth=max_depth,
+        impl_profiles=({k: tuple(v) for k, v in impl_profiles.items()}
+                       if impl_profiles else None),
         device=device)
     return Stage0Session(evaluator=evaluator, config=config,
                          suite_content_sha256=content, baseline=terms["baseline"],

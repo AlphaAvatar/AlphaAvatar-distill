@@ -69,11 +69,18 @@ def load_units(pool_dir: Path) -> dict[str, dict]:
 
 
 def cells(design: dict, units: dict[str, dict]) -> dict[tuple, list[str]]:
-    want = design["cells"]  # {domain: {subtype: [families]}}
+    """{domain: {subtype: [families]}}; a family list of ["*"] POOLS the subtype's
+    families into one cell, so families are drawn within it per seed (their
+    count is then a covariate of the dose, reported per profile)."""
+    want = design["cells"]
     out: dict[tuple, list[str]] = defaultdict(list)
     for uid, u in sorted(units.items()):
         fams = want.get(u["domain"], {}).get(u["subtype"])
-        if fams is not None and u["family"] in fams:
+        if fams is None:
+            continue
+        if fams == ["*"]:
+            out[(u["domain"], u["subtype"], "*")].append(uid)
+        elif u["family"] in fams:
             out[(u["domain"], u["subtype"], u["family"])].append(uid)
     missing = [(d, s, f) for d, subs in want.items() for s, fams in subs.items()
                for f in fams if not out.get((d, s, f))]
@@ -134,6 +141,8 @@ def main(argv=None) -> int:
     for t_id, t in design["treatments"].items():
         ids = []
         for p_name, p in design["profiles"].items():
+            if t.get("profiles") and p_name not in t["profiles"]:
+                continue
             items, census = sample(design, units, cellmap, p["domain_weights"],
                                    t["dose"], t["sampling_seed"])
             pid = f"calib.s0v_{p_name}_{t_id}"
@@ -171,8 +180,13 @@ def main(argv=None) -> int:
                              "tokens": sum(it["n_tokens"] for it in items)},
                 "is_null": False})
             ids.append(f"{pid}@v1")
+            fams = {(it.get("generator_id"), it.get("family_id")) for it in items
+                    if it.get("family_id")}
+            profiles[-1]["metadata"]["n_rule_families"] = len(fams)
             report[f"{pid}"] = {"uesp": uesp, "items": len(items),
                                 "units": len({it["unit_id"] for it in items}),
+                                "rule_families": len(fams),
+                                "tokens": profiles[-1]["metadata"]["tokens"],
                                 "short_cells": census.get("_short_cells", [])}
         treatments[t_id] = {"profiles": ids, "dose": t["dose"],
                             "sampling_seed": t["sampling_seed"]}

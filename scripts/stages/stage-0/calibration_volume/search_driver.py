@@ -141,7 +141,8 @@ def main(argv=None) -> int:
     try:
         st = stage("A_contract")
         prereg = json.loads((REPO / args.treatments_doc).read_text())
-        treat = prereg["treatments"][args.treatment]
+        table = prereg.get("treatments_by_id") or prereg["treatments"]
+        treat = table[args.treatment]
         profiles = SS.treatment_profiles(args.treatment)
         for p in profiles:
             want = treat["profile_hashes"][p.qualified_id]
@@ -151,7 +152,8 @@ def main(argv=None) -> int:
             p.resolve(str(REPO))   # checks items_file_sha256 and content_sha256
         session = SS.build_session(workdir=out / "search", run_id=args.run_id,
                                    profiles=profiles, device=args.device,
-                                   max_depth=args.max_depth)
+                                   max_depth=args.max_depth,
+                                   impl_profiles=treat.get("impl_profiles"))
         record["session"] = session.as_record()
         if not args.check_only:
             auth = G.load_for("search", args.auth)
