@@ -1,0 +1,46 @@
+{
+ "schema": "aadistill.stage0.relay_copies/v1",
+ "repo": "AlphaAvatar/aadistill-artifacts",
+ "files": [
+  {
+   "local": "artifacts/stages/stage-0/calibration_volume/battery_20261018_092345/ctl_r0860k_sa_dev/ctl_r0860k_sa_dev.jsonl",
+   "relay": "stage0_calibration_volume/battery_20261018_092345/ctl_r0860k_sa_dev/ctl_r0860k_sa_dev.jsonl",
+   "bytes": 9429525,
+   "sha256": "ca13e652a65394cd19b33cc21e9dfa3747515c3e561b80ac031e66fd06930c85",
+   "relay_verified": true,
+   "verified_by": "download and sha256 (non-LFS object)"
+  },
+  {
+   "local": "artifacts/stages/stage-0/calibration_volume/battery_20261018_092345/ctl_r0860k_sb_dev/ctl_r0860k_sb_dev.jsonl",
+   "relay": "stage0_calibration_volume/battery_20261018_092345/ctl_r0860k_sb_dev/ctl_r0860k_sb_dev.jsonl",
+   "bytes": 9124813,
+   "sha256": "5b2dadfb303169ef6e9f05c1c2a08b18e17ecb541d852200926d88fd91049c4f",
+   "relay_verified": true,
+   "verified_by": "download and sha256 (non-LFS object)"
+  },
+  {
+   "local": "artifacts/stages/stage-0/calibration_volume/battery_20261018_092345/e1_r2960k_sa_pca_dev/e1_r2960k_sa_pca_dev.jsonl",
+   "relay": "stage0_calibration_volume/battery_20261018_092345/e1_r2960k_sa_pca_dev/e1_r2960k_sa_pca_dev.jsonl",
+   "bytes": 10907266,
+   "sha256": "4b54bba870e03cbbe1990a264fde43185fbc15e20a7a18f6a5518972de2eb4ae",
+   "relay_verified": true,
+   "verified_by": "LFS oid"
+  },
+  {
+   "local": "artifacts/stages/stage-0/calibration_volume/battery_20261018_092345/teacher_dev/teacher_dev.jsonl",
+   "relay": "stage0_calibration_volume/battery_20261018_092345/teacher_dev/teacher_dev.jsonl",
+   "bytes": 66095435,
+   "sha256": "98f08abca50a4456e9021b39f709bb7cd69e7500d107f79b0fcaba47cadf2adc",
+   "relay_verified": true,
+   "verified_by": "LFS oid"
+  },
+  {
+   "local": "artifacts/stages/stage-0/calibration_volume/teachercal_20261018_112755/teacher_cal/teacher_cal.jsonl",
+   "relay": "stage0_calibration_volume/teachercal_20261018_112755/teacher_cal/teacher_cal.jsonl",
+   "bytes": 59193209,
+   "sha256": "599e8791be220332ed826269b7d881772ce4b87d129511a952998cedf01700a3",
+   "relay_verified": true,
+   "verified_by": "LFS oid"
+  }
+ ]
+}
