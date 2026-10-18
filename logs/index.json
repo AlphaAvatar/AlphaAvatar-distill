@@ -743,7 +743,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 94,
+  "runs_unrecorded": 96,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -760,6 +760,11 @@
     "recorded": 3,
     "unrecorded": 0,
     "total": 3
+   },
+   "calibration_volume": {
+    "recorded": 0,
+    "unrecorded": 2,
+    "total": 2
    },
    "continuation_b": {
     "recorded": 5,
@@ -2757,6 +2762,22 @@
   }
  ],
  "unrecorded": [
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "battery_20261018_091856",
+   "root": "logs/stages/stage-0/calibration_volume/runs/battery_20261018_091856",
+   "n_files": 2,
+   "digest": "f41a4ac75b19fba00d3c7e93006a56444af62d90afdd2b6d9357d13cbd1605ad",
+   "why": "no run manifest; its closeout states: ABANDONED_BEFORE_LAUNCH"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "battery_20261018_092345",
+   "root": "logs/stages/stage-0/calibration_volume/runs/battery_20261018_092345",
+   "n_files": 15,
+   "digest": "bc6a41e1b0321f09a425d500882124afddf4c2a5d683c5b67c7b48acd04eb0e4",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3-attempt1",

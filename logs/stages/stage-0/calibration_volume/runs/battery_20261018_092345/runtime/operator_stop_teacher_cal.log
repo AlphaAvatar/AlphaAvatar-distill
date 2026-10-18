@@ -1,0 +1,8 @@
+2026-10-18T11:21:52Z teacher_dev terminal seen; stopping the teacher_cal unit (operator decision: regenerate with the asynchronous runner on calibration_v2)
+Warning: Permanently added '[154.54.102.46]:18026' (ECDSA) to the list of known hosts.
+root       12453 39.8  0.0 12379408 1476860 ?    SLl  11:21   0:20 /opt/vllm/bin/python scripts/stages/stage-0/calibration_volume/run_battery.py --model Qwen/Qwen3-4B-Thinking-2507 --label teacher_cal --tasks data/stages/stage-0/calibration_volume/tasks/calibration_v1.jsonl --mode generate --out /workspace/aad/artifacts/audit/stage0_calvol_battery/records/teacher_cal.jsonl --revision 768f209d9ea81521153ed38c47d515654e938aea --session-limit 16384 --seed-base 20261018
+SENT_TERM
+2026-10-18T10:23:16Z MARKER:RUN_OK:e1_r2960k_sa_pca_dev
+2026-10-18T11:21:05Z MARKER:RUN_OK:teacher_dev
+2026-10-18T11:21:55Z MARKER:RUN_FAILED_UNIT:teacher_cal
+2026-10-18T11:21:55Z MARKER:RUN_FAILED

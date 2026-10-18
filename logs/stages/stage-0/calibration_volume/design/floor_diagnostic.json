@@ -1,0 +1,182 @@
+{
+ "schema": "aadistill.stage0.floor_diagnostic/v1",
+ "_not_an_endpoint": true,
+ "runs": {
+  "teacher_dev": {
+   "records": "/home/ecs-user/aad-scratch/stage0_calvol/battery_20261018_092345/store/teacher_dev/teacher_dev.jsonl",
+   "by_axis": {
+    "abstract_analogical": {
+     "n": 96,
+     "usable": 88,
+     "boxed": 89,
+     "strict_correct": 74,
+     "lenient_upper_bound": 74
+    },
+    "compositional_generalization": {
+     "n": 144,
+     "usable": 142,
+     "boxed": 142,
+     "strict_correct": 135,
+     "lenient_upper_bound": 137
+    },
+    "inductive_rule_discovery": {
+     "n": 144,
+     "usable": 144,
+     "boxed": 144,
+     "strict_correct": 140,
+     "lenient_upper_bound": 141
+    },
+    "interactive_adaptation": {
+     "n": 144,
+     "success": 100
+    },
+    "task_contained_deduction": {
+     "n": 192,
+     "usable": 192,
+     "boxed": 192,
+     "strict_correct": 189,
+     "lenient_upper_bound": 169
+    }
+   },
+   "interactive": {
+    "ends": {
+     "episode_done": 142,
+     "degeneration": 2
+    },
+    "invalid_action_rate": 0.0027
+   }
+  },
+  "ctl_r0860k_sa_dev": {
+   "records": "/home/ecs-user/aad-scratch/stage0_calvol/battery_20261018_092345/store/ctl_r0860k_sa_dev/ctl_r0860k_sa_dev.jsonl",
+   "by_axis": {
+    "abstract_analogical": {
+     "n": 96,
+     "usable": 20,
+     "boxed": 1,
+     "strict_correct": 0,
+     "lenient_upper_bound": 0
+    },
+    "compositional_generalization": {
+     "n": 144,
+     "usable": 34,
+     "boxed": 5,
+     "strict_correct": 0,
+     "lenient_upper_bound": 2
+    },
+    "inductive_rule_discovery": {
+     "n": 144,
+     "usable": 41,
+     "boxed": 0,
+     "strict_correct": 0,
+     "lenient_upper_bound": 0
+    },
+    "interactive_adaptation": {
+     "n": 144,
+     "success": 0
+    },
+    "task_contained_deduction": {
+     "n": 192,
+     "usable": 101,
+     "boxed": 1,
+     "strict_correct": 0,
+     "lenient_upper_bound": 11
+    }
+   },
+   "interactive": {
+    "ends": {
+     "turn_limit": 72,
+     "degeneration": 72
+    },
+    "invalid_action_rate": 0.9584
+   }
+  },
+  "ctl_r0860k_sb_dev": {
+   "records": "/home/ecs-user/aad-scratch/stage0_calvol/battery_20261018_092345/store/ctl_r0860k_sb_dev/ctl_r0860k_sb_dev.jsonl",
+   "by_axis": {
+    "abstract_analogical": {
+     "n": 96,
+     "usable": 7,
+     "boxed": 2,
+     "strict_correct": 0,
+     "lenient_upper_bound": 0
+    },
+    "compositional_generalization": {
+     "n": 144,
+     "usable": 17,
+     "boxed": 6,
+     "strict_correct": 0,
+     "lenient_upper_bound": 1
+    },
+    "inductive_rule_discovery": {
+     "n": 144,
+     "usable": 33,
+     "boxed": 3,
+     "strict_correct": 0,
+     "lenient_upper_bound": 2
+    },
+    "interactive_adaptation": {
+     "n": 144,
+     "success": 0
+    },
+    "task_contained_deduction": {
+     "n": 192,
+     "usable": 32,
+     "boxed": 6,
+     "strict_correct": 0,
+     "lenient_upper_bound": 7
+    }
+   },
+   "interactive": {
+    "ends": {
+     "turn_limit": 40,
+     "degeneration": 104
+    },
+    "invalid_action_rate": 0.9065
+   }
+  },
+  "e1_r2960k_sa_pca_dev": {
+   "records": "/home/ecs-user/aad-scratch/stage0_calvol/battery_20261018_092345/store/e1_r2960k_sa_pca_dev/e1_r2960k_sa_pca_dev.jsonl",
+   "by_axis": {
+    "abstract_analogical": {
+     "n": 96,
+     "usable": 46,
+     "boxed": 28,
+     "strict_correct": 0,
+     "lenient_upper_bound": 1
+    },
+    "compositional_generalization": {
+     "n": 144,
+     "usable": 62,
+     "boxed": 51,
+     "strict_correct": 0,
+     "lenient_upper_bound": 0
+    },
+    "inductive_rule_discovery": {
+     "n": 144,
+     "usable": 73,
+     "boxed": 47,
+     "strict_correct": 1,
+     "lenient_upper_bound": 6
+    },
+    "interactive_adaptation": {
+     "n": 144,
+     "success": 0
+    },
+    "task_contained_deduction": {
+     "n": 192,
+     "usable": 107,
+     "boxed": 61,
+     "strict_correct": 9,
+     "lenient_upper_bound": 44
+    }
+   },
+   "interactive": {
+    "ends": {
+     "turn_limit": 46,
+     "degeneration": 98
+    },
+    "invalid_action_rate": 0.8977
+   }
+  }
+ }
+}
