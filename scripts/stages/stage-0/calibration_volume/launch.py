@@ -117,8 +117,8 @@ def battery_relay_inputs(repo_root: Path = REPO_ROOT) -> tuple[RelayInput, ...]:
 def battery_budget(args) -> BudgetSpec:
     """Priced from the plan's work, phase by phase; minutes are bounds, not hopes."""
     return BudgetSpec(
-        arms=0, steps_per_arm=0, step_seconds=0.0,
-        step_source="unused: no training in this session",
+        arms=0, steps_per_arm=0, step_seconds=1.0,
+        step_source="unused: no training in this session (arms=0)",
         below_floor_reason="no training steps; every phase is priced below",
         setup_minutes=25.0, transfer_minutes=10.0,
         other_phases=(
