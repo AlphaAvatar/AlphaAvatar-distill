@@ -1,0 +1,66 @@
+{
+ "schema": "aadistill.stage0.calibration_audit_inputs/v1",
+ "_contract": "The data roles the Stage-0 calibration-volume data audit reads, and the classifications it applies. Instance material: paths, role names and the capability classes of the 2026-10-16 scope declaration. The audit script reads everything from here and hardcodes none of it. AUTHORIZES NOTHING.",
+ "corpus": {
+  "id": "corpus_v2",
+  "sessions": "artifacts/stages/stage-3/corpus_v2/sessions.jsonl",
+  "sessions_sha256": "2b4edc2e2cc16cd56dae3d340345e1a17e2c4a8baa9837650a7bf5e340fa6fcd",
+  "candidates": "artifacts/stages/stage-3/corpus_v2/candidates.jsonl",
+  "candidates_sha256": "f7f5035ef8b42fb4bacd4f28692d214ff734f4ff820c1f6e37436e328546ecc7",
+  "manifest": "artifacts/stages/stage-3/corpus_v2/manifest.json",
+  "_provenance": "candidates.jsonl and manifest.json fetched 2026-10-18 from the relay prefix stage3_recovery_corpus_v2/ (the only copy of the rejected candidates); both sha256 equal the values the 2026-08-01 corpus record carries"
+ },
+ "calibration_window_tokens": [256, 2048],
+ "length_bins_tokens": [0, 256, 512, 1024, 2048, 4096, 8192],
+ "long_reasoning_threshold_tokens": 2048,
+ "teacher_parameters": 4022468096,
+ "_teacher_parameters_source": "Qwen/Qwen3-4B-Thinking-2507 config: 36 layers, hidden 2560, intermediate 9728, 32Q/8KV heads, vocab 151936, tied embeddings. Used only for the FLOP ESTIMATE 2 x parameters x forward slots; a measured cost is a search record's, not this audit's.",
+ "data_type_classes": {
+  "_owner": "logs/budget/decisions.md 2026-10-16 (capability scope re-declared). 'mixed' means a primary axis is present only entangled with supporting knowledge or procedure; never counted as primary-axis coverage.",
+  "gsm8k": {"class": "mixed", "axes": ["task_contained_deduction", "supporting_knowledge"]},
+  "openmath": {"class": "mixed", "axes": ["task_contained_deduction", "supporting_knowledge"]},
+  "code": {"class": "mixed", "axes": ["task_contained_deduction", "supporting_knowledge"]},
+  "multihop_qa": {"class": "mixed", "axes": ["task_contained_deduction", "supporting_knowledge"]},
+  "rag_evidence": {"class": "supporting", "axes": ["supporting_knowledge"]},
+  "tool_calling": {"class": "supporting", "axes": ["protocol_integrity"]},
+  "general": {"class": "supporting", "axes": ["supporting_knowledge"]}
+ },
+ "primary_axes": ["task_contained_deduction", "inductive_rule_discovery", "compositional_generalization", "interactive_adaptation"],
+ "source_lineage": {
+  "_what": "who authored the task content. A rule family is a hidden rule or transformation a task asks to infer; none of these sources carries one.",
+  "squad_v2": {"authorship": "human (crowd-written questions over Wikipedia)", "rule_families": null},
+  "hotpot_qa": {"authorship": "human (crowd-written multi-hop questions over Wikipedia)", "rule_families": null},
+  "gsm8k": {"authorship": "human (grade-school word problems)", "rule_families": null},
+  "openmath_instruct_2": {"authorship": "model-generated problems (Llama-3.1-405B augmentation of MATH/GSM8K)", "rule_families": null},
+  "mbpp": {"authorship": "human (crowd-written Python tasks)", "rule_families": null},
+  "magicoder_oss": {"authorship": "model-generated (OSS-Instruct)", "rule_families": null},
+  "glaive_fc_v2": {"authorship": "synthetic function-calling conversations", "rule_families": null},
+  "xlam_fc_60k": {"authorship": "synthetic function-calling queries", "rule_families": null},
+  "HuggingFaceFW/fineweb-edu": {"authorship": "web text", "rule_families": null}
+ },
+ "recovery_rung": {
+  "role": "recovery:e1_p1_kd_heavy@0.86M",
+  "ladder": "artifacts/shared/instruments/ladder_uniform_probe/ladder.json",
+  "audit": "artifacts/shared/instruments/ladder_uniform_probe/audit.jsonl",
+  "target_supervised_tokens": 860000,
+  "_why": "the frozen recovery recipe of every D-series probe (d1_behavioural_preregistration.json :: recovery_recipe, pack sha256 6f324cb0...)"
+ },
+ "roles": [
+  {"role": "calibration:calib.domain_balanced@v1", "kind": "items", "path": "artifacts/stages/stage-1/e8_calibration_v1/items.jsonl", "general_docs": "artifacts/stages/stage-1/e8_calibration_v1/general_docs.jsonl"},
+  {"role": "calibration:calib.reasoning_heavy@v2", "kind": "items", "path": "artifacts/stages/stage-1/reasoning_heavy_v2/items.jsonl", "general_docs": "artifacts/stages/stage-1/e8_calibration_v1/general_docs.jsonl"},
+  {"role": "state_eval:state_eval@v1", "kind": "items", "path": "artifacts/stages/stage-1/state_eval_v1/items.jsonl"},
+  {"role": "recovery:e1_p1_kd_heavy@0.86M", "kind": "recovery_rung"},
+  {"role": "evaluation:d_series_behavioural_v1", "kind": "battery_dir", "path": "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1", "recursive": true},
+  {"role": "evaluation:recovery_search_v2", "kind": "battery_dir", "path": "artifacts/stages/stage-1/batteries/recovery_search_v2"},
+  {"role": "evaluation:battery_v2", "kind": "battery_dir", "path": "artifacts/stages/stage-3/eval/battery_v2"},
+  {"role": "evaluation:eval_behavior_v0", "kind": "battery_file", "path": "data/stages/stage-3/eval_behavior_v0/prompts.jsonl"}
+ ],
+ "near_duplicate": {
+  "shingle_words": 5,
+  "num_hashes": 64,
+  "bands": 16,
+  "jaccard_threshold": 0.8,
+  "_why": "word 5-gram shingles of the normalized final user message; an LSH candidate pair is confirmed by exact MinHash agreement. 0.8 flags shared passages (SQuAD asks several questions of one paragraph) without flagging template-only overlap."
+ },
+ "authorizes": "nothing"
+}

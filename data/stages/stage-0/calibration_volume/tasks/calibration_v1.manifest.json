@@ -1,0 +1,445 @@
+{
+ "schema": "aadistill.stage0.task_set/v1",
+ "role": "calibration",
+ "version": 1,
+ "created_utc": "2026-10-18T09:04:50+00:00",
+ "command": "scripts/stages/stage-0/calibration_volume/build_task_sets.py --role calibration --per-cell 110 --per-cell-interactive 72 --version 1 --note calibration prompts for teacher-native generation; candidates for the Stage-0 base pool",
+ "note": "calibration prompts for teacher-native generation; candidates for the Stage-0 base pool",
+ "file": "data/stages/stage-0/calibration_volume/tasks/calibration_v1.jsonl",
+ "sha256": "c8a267ad23164da7e55604a990b973626efecb9f368ba83faed1fb9b892435d3",
+ "content_ids_sha256": "379e8fbecde4b85cd363132d1488be7e22be1890f043e080931e10a009e2f310",
+ "per_cell": 110,
+ "per_cell_interactive": 72,
+ "seed_range": [
+  2000000,
+  3000000
+ ],
+ "split_salt": "stage0.calibration_volume.family_split/v1",
+ "cal_fraction": 0.45,
+ "eval_only_generators": [
+  "code_breaker@v1",
+  "counterfactual_arith@v1",
+  "graph_paths@v1",
+  "letter_analogy@v1",
+  "sequence_induction@v1"
+ ],
+ "family_split": {
+  "list_induction@v1": {
+   "axis": "inductive_rule_discovery",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "list.append_sum",
+    "list.dedupe",
+    "list.duplicate_each",
+    "list.keep_even",
+    "list.min",
+    "list.mod_k",
+    "list.mul_k",
+    "list.pairwise_sums",
+    "list.sort_asc",
+    "list.square",
+    "list.swap_ends"
+   ],
+   "evaluation": [
+    "list.add_k",
+    "list.count_even",
+    "list.cumsum",
+    "list.drop_first",
+    "list.keep_gt",
+    "list.keep_odd",
+    "list.length",
+    "list.max",
+    "list.prepend_length",
+    "list.reverse",
+    "list.rotate_left",
+    "list.sort_desc",
+    "list.sum",
+    "list.take_first"
+   ]
+  },
+  "string_induction@v1": {
+   "axis": "inductive_rule_discovery",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "str.append_first",
+    "str.caesar",
+    "str.double_last",
+    "str.duplicate_each",
+    "str.keep_even_positions",
+    "str.mirror",
+    "str.sort_letters"
+   ],
+   "evaluation": [
+    "str.caesar_back",
+    "str.drop_last",
+    "str.first_k",
+    "str.remove_vowels",
+    "str.reverse",
+    "str.rotate_left",
+    "str.swap_ends",
+    "str.vowel_to_x",
+    "str.wrap_first"
+   ]
+  },
+  "sequence_induction@v1": {
+   "axis": "inductive_rule_discovery",
+   "interactive": false,
+   "eval_only_generator": true,
+   "calibration": [],
+   "evaluation": [
+    "seq.affine_recurrence",
+    "seq.alternating_steps",
+    "seq.arithmetic",
+    "seq.fibonacci_like",
+    "seq.geometric",
+    "seq.interleaved",
+    "seq.quadratic"
+   ]
+  },
+  "defined_ops@v1": {
+   "axis": "compositional_generalization",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "comp.chain3",
+    "comp.conditional_chain"
+   ],
+   "evaluation": [
+    "comp.chain2",
+    "comp.chain4",
+    "comp.conditional",
+    "comp.repeat"
+   ]
+  },
+  "scan_language@v1": {
+   "axis": "compositional_generalization",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "scan.rev_sur",
+    "scan.seq_rev",
+    "scan.sur_sur"
+   ],
+   "evaluation": [
+    "scan.rev_rev",
+    "scan.rev_seq",
+    "scan.seq_sur",
+    "scan.sur_rev",
+    "scan.sur_seq"
+   ]
+  },
+  "counterfactual_arith@v1": {
+   "axis": "compositional_generalization",
+   "interactive": false,
+   "eval_only_generator": true,
+   "calibration": [],
+   "evaluation": [
+    "cf.absdiff",
+    "cf.affine",
+    "cf.affine_minus",
+    "cf.concat",
+    "cf.min_plus",
+    "cf.product_plus",
+    "cf.square_sum"
+   ]
+  },
+  "ordering@v1": {
+   "axis": "task_contained_deduction",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "order.race"
+   ],
+   "evaluation": [
+    "order.ages",
+    "order.seating",
+    "order.taller"
+   ]
+  },
+  "entity_tracking@v1": {
+   "axis": "task_contained_deduction",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "track.move",
+    "track.move_remove"
+   ],
+   "evaluation": [
+    "track.add_remove",
+    "track.all",
+    "track.move_swap",
+    "track.swap"
+   ]
+  },
+  "knights_knaves@v1": {
+   "axis": "task_contained_deduction",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "kk.counting"
+   ],
+   "evaluation": [
+    "kk.identity",
+    "kk.mixed",
+    "kk.same_type"
+   ]
+  },
+  "graph_paths@v1": {
+   "axis": "task_contained_deduction",
+   "interactive": false,
+   "eval_only_generator": true,
+   "calibration": [],
+   "evaluation": [
+    "graph.reach_count",
+    "graph.shortest",
+    "graph.unreachable"
+   ]
+  },
+  "letter_analogy@v1": {
+   "axis": "abstract_analogical",
+   "interactive": false,
+   "eval_only_generator": true,
+   "calibration": [],
+   "evaluation": [
+    "letter.double_all",
+    "letter.double_last",
+    "letter.extend_run",
+    "letter.mirror_first",
+    "letter.pred_first",
+    "letter.reverse",
+    "letter.shrink_run",
+    "letter.succ_all",
+    "letter.succ_last",
+    "letter.swap_halves"
+   ]
+  },
+  "grid_transform@v1": {
+   "axis": "abstract_analogical",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "grid.fill_rows",
+    "grid.flip_h",
+    "grid.flip_v",
+    "grid.rotate_ccw",
+    "grid.rotate_cw"
+   ],
+   "evaluation": [
+    "grid.border",
+    "grid.count_cells",
+    "grid.gravity_down",
+    "grid.mirror_lr",
+    "grid.recolor",
+    "grid.shift_right",
+    "grid.transpose"
+   ]
+  },
+  "probe_function@v1": {
+   "axis": "interactive_adaptation",
+   "interactive": true,
+   "eval_only_generator": false,
+   "calibration": [
+    "probe.digit_sum",
+    "probe.threshold"
+   ],
+   "evaluation": [
+    "probe.affine",
+    "probe.floor_div",
+    "probe.mod_scale",
+    "probe.quadratic"
+   ]
+  },
+  "hidden_buttons@v1": {
+   "axis": "interactive_adaptation",
+   "interactive": true,
+   "eval_only_generator": false,
+   "calibration": [
+    "act.reverse"
+   ],
+   "evaluation": [
+    "act.additive",
+    "act.modular",
+    "act.multiply"
+   ]
+  },
+  "code_breaker@v1": {
+   "axis": "interactive_adaptation",
+   "interactive": true,
+   "eval_only_generator": true,
+   "calibration": [],
+   "evaluation": [
+    "code.exact_only",
+    "code.pegs",
+    "code.position_hints"
+   ]
+  }
+ },
+ "generator_source": {
+  "digest": "dcd602a2098160e0f4a9fbe02b0d2ca1b1de1542c5962573ef5786ec20b8219d",
+  "files": [
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/__init__.py",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/analogy.py",
+    "sha256": "b6fc482798cf074557ffe575fe65a5b7699f313e27126156e6e3df93ad0ff52e"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/common.py",
+    "sha256": "56d65f560ff5b020a6d92aac769129bb4a7c755d96c14a32cabc403e20c43b64"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/composition.py",
+    "sha256": "b246a2f0f4f052806b32678275a1a244cdacbfc1c3b3017dc41d3b6a8d8fdcd2"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/deduction.py",
+    "sha256": "0536a4280035feabd91865901c26d9e5f56d1e77fe25c6b8e50fba3f1e0ec90f"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/induction.py",
+    "sha256": "0085a394c4efc9376410e4d22a8406f4dedb4b236457997934e8f8382be366ed"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/interactive.py",
+    "sha256": "99b9f6f571eb37647bba45dda1838e99865ff6a4192107cc1c636c9a408c2e6e"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/registry.py",
+    "sha256": "64d9f0e87cbb267c3778728a29217680d05b1a9551b0377ef7d86ab0844b145f"
+   }
+  ]
+ },
+ "counts": {
+  "tasks": 3072,
+  "by_axis": {
+   "inductive_rule_discovery": 660,
+   "compositional_generalization": 660,
+   "task_contained_deduction": 990,
+   "abstract_analogical": 330,
+   "interactive_adaptation": 432
+  },
+  "by_generator": {
+   "list_induction@v1": 330,
+   "string_induction@v1": 330,
+   "defined_ops@v1": 330,
+   "scan_language@v1": 330,
+   "ordering@v1": 330,
+   "entity_tracking@v1": 330,
+   "knights_knaves@v1": 330,
+   "grid_transform@v1": 330,
+   "probe_function@v1": 216,
+   "hidden_buttons@v1": 216
+  },
+  "by_difficulty": {
+   "L1": 1024,
+   "L2": 1024,
+   "L3": 1024
+  },
+  "by_family": {
+   "list_induction@v1/list.append_sum": 30,
+   "list_induction@v1/list.dedupe": 30,
+   "list_induction@v1/list.duplicate_each": 30,
+   "list_induction@v1/list.keep_even": 30,
+   "list_induction@v1/list.min": 30,
+   "list_induction@v1/list.mod_k": 30,
+   "list_induction@v1/list.mul_k": 30,
+   "list_induction@v1/list.pairwise_sums": 30,
+   "list_induction@v1/list.sort_asc": 30,
+   "list_induction@v1/list.square": 30,
+   "list_induction@v1/list.swap_ends": 30,
+   "string_induction@v1/str.append_first": 48,
+   "string_induction@v1/str.caesar": 48,
+   "string_induction@v1/str.double_last": 48,
+   "string_induction@v1/str.duplicate_each": 48,
+   "string_induction@v1/str.keep_even_positions": 48,
+   "string_induction@v1/str.mirror": 45,
+   "string_induction@v1/str.sort_letters": 45,
+   "defined_ops@v1/comp.chain3": 165,
+   "defined_ops@v1/comp.conditional_chain": 165,
+   "scan_language@v1/scan.rev_sur": 111,
+   "scan_language@v1/scan.seq_rev": 111,
+   "scan_language@v1/scan.sur_sur": 108,
+   "ordering@v1/order.race": 330,
+   "entity_tracking@v1/track.move": 165,
+   "entity_tracking@v1/track.move_remove": 165,
+   "knights_knaves@v1/kk.counting": 330,
+   "grid_transform@v1/grid.fill_rows": 66,
+   "grid_transform@v1/grid.flip_h": 66,
+   "grid_transform@v1/grid.flip_v": 66,
+   "grid_transform@v1/grid.rotate_ccw": 66,
+   "grid_transform@v1/grid.rotate_cw": 66,
+   "probe_function@v1/probe.digit_sum": 108,
+   "probe_function@v1/probe.threshold": 108,
+   "hidden_buttons@v1/act.reverse": 216
+  },
+  "interactive": 432
+ },
+ "isolation": {
+  "checked": [
+   {
+    "a": "calibration",
+    "b": "dev",
+    "key": "family",
+    "overlap": 0
+   },
+   {
+    "a": "calibration",
+    "b": "dev",
+    "key": "content",
+    "overlap": 0
+   },
+   {
+    "a": "calibration",
+    "b": "dev",
+    "key": "prompt",
+    "overlap": 0
+   }
+  ],
+  "overlaps": {
+   "roles": {
+    "calibration": {
+     "family": 35,
+     "content": 3072,
+     "prompt": 2640,
+     "interactive_opening": 428
+    },
+    "dev": {
+     "family": 86,
+     "content": 720,
+     "prompt": 576,
+     "interactive_opening": 105
+    }
+   },
+   "keys": [
+    "family",
+    "content",
+    "prompt",
+    "interactive_opening"
+   ],
+   "pairs": [
+    {
+     "a": "calibration",
+     "b": "dev",
+     "overlap": {
+      "family": 0,
+      "content": 0,
+      "prompt": 0,
+      "interactive_opening": 2
+     },
+     "examples": {
+      "interactive_opening": [
+       "1274d5176491e388c87026685f77eef9f45c0acbe5f19fe8be12ef5770119d8b",
+       "30cc6a639106994add4e396b271586b15cca4cc8adc3e679045780835f0aca12"
+      ]
+     }
+    }
+   ]
+  }
+ },
+ "license": "project-generated procedural tasks; no external dataset, no ARC-AGI material",
+ "authorizes": "nothing"
+}
