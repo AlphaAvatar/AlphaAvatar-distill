@@ -221,6 +221,27 @@ def observed_stop_cause(state: "PodState", *,
     }
 
 
+#: How long a billing pod's driver may go unanswered before the session ends.
+#: `probe` reads UNKNOWN when nothing answers -- an ssh outage included -- and its
+#: contract is that on a pod still billing that is a reason to keep looking. The
+#: loop ended on the first one: dose_d2_20261019_135821 lost a running search to
+#: about 30 s of ssh failure while the provider reported the pod RUNNING. A crash
+#: still ends the session at once, because a dead driver reads EXITED:n.
+UNANSWERED_DRIVER_GRACE_S = 900.0
+
+
+def driver_terminal(live: str, unanswered_since: float | None, now: float,
+                    grace_s: float = UNANSWERED_DRIVER_GRACE_S
+                    ) -> tuple[str | None, float | None]:
+    """(terminal or None, when the current unanswered streak began)."""
+    if live == "ALIVE":
+        return None, None
+    if live != "UNKNOWN":
+        return f"DRIVER_{live}", unanswered_since
+    since = now if unanswered_since is None else unanswered_since
+    return (f"DRIVER_{live}" if now - since >= grace_s else None), since
+
+
 class SessionRunner:
     """Runs one `SessionSpec`. Not a base class; there is nothing to override."""
 
@@ -1105,7 +1126,7 @@ class SessionRunner:
                   in self.spec.artifacts.extra_relay_streams(self.context())]
         relay = LogRelay(target, tuple(specs), self.scr / "relay")
 
-        last, terminal = "", ""
+        last, terminal, unanswered_since = "", "", None
         deadline = time.time() + self.a.poll_limit_min * 60
         while time.time() < deadline:
             time.sleep(self.a.poll_seconds)
@@ -1155,10 +1176,14 @@ class SessionRunner:
                     f"{self.plan.hard_terminate_minutes:.0f} min)")
                 break
             live, _ = probe(target, job)
-            if live != "ALIVE":
-                terminal = f"DRIVER_{live}"
+            stop, unanswered_since = driver_terminal(live, unanswered_since, time.time())
+            if stop:
+                terminal = stop
                 self.say(f"driver no longer running: {live}")
                 break
+            if unanswered_since is not None:
+                self.say(f"  driver unanswered for {time.time() - unanswered_since:.0f} s "
+                         "on a billing pod; still looking")
         self.ev["terminal"] = terminal or "POLL_LIMIT"
         self.say(f"polling ended: {self.ev['terminal']} — ${self.usd():.2f}")
         relay.sync_once()

@@ -12809,3 +12809,36 @@ on a paid pod.
     It fails on the old code.
   - d2's authorization bound the old harness digest; d4's will bind the new
     one.
+
+## 2026-10-19 — Stage-0 dose d2 attempt 1 lost to the launcher's poll loop; the same dose resumes
+
+- **What happened.** `dose_d2_20261019_135821` cost $13.4238. It searched
+  from 14:14Z to 21:24Z; 53 of 92 expansions were done by 20:26Z. The loss
+  was not caused by the science.
+  - At 21:24:48Z ssh to the pod failed for about 30 s. The provider still
+    reported the pod RUNNING and billing.
+  - `remote.probe` returned UNKNOWN, meaning nothing answered.
+  - The poll loop in `aadistill.infrastructure.session_runner` treated any
+    non-ALIVE result as terminal. It ended as `DRIVER_UNKNOWN`, collection
+    failed (`manifest rc=255`), and the pod was deleted at 21:25:47Z.
+  - The probe's own docstring says the opposite: UNKNOWN on a billing pod is
+    a reason to keep looking.
+  - Whether the driver itself was still alive cannot be known now.
+- **What survived.** The search mirror on network volume `ugllmlv19t`
+  (restored by hand at about 17:30Z; see the entry above). Its last pass was
+  at about 21:23Z.
+- **Repair** (core, generic). `driver_terminal`:
+  - EXITED:n still ends the session at once, so a crash is caught as before.
+  - UNKNOWN on a billing pod is given `UNANSWERED_DRIVER_GRACE_S` = 900 s;
+    any answer resets the streak.
+  - The worst case on a wedged pod is 15 more minutes of billing, about $0.45
+    at $1.79/h.
+  - Regression: `tests/infrastructure/test_driver_liveness.py`.
+- **Next.** Formal measurement had begun, so under the preregistered
+  `retry_policy` the SAME dose resumes from the volume. The engine's journal
+  restore re-identifies every pulled state from its bytes, and a state whose
+  copy was cut short is rebuilt.
+  - This is one replacement endpoint, not a second measurement.
+  - Authorization: the dose plan's own figures ($18.57 expected, $24.36
+    hard). With d4 at $29.06 plus $5, the total fits the formal envelope's
+    remaining $54.40 after the volume reservation.

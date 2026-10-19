@@ -1,0 +1,32 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "dose_d2_20261019_135821",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-19T21:27:43+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": "DRIVER_UNKNOWN",
+ "passed": false,
+ "outcome": "Dose d2 attempt 1: FAILED mid-search (formal measurement begun), not by the science. V_retire OK (d1's 91 states, 273.0 GB). The search ran 14:14Z-21:24Z (53 of 92 expansions by 20:26Z). At 21:24:48Z ssh to the pod failed for about 30 s while the provider still reported it RUNNING and billing; the launcher's liveness probe returned UNKNOWN (no answer), the poll loop treated any non-ALIVE result as terminal (DRIVER_UNKNOWN), collection failed (manifest rc=255) and the pod was deleted at 21:25:47Z -- a launcher defect, contrary to remote.probe's own contract that UNKNOWN on a billing pod is not death. Whether the driver itself was alive is unknowable. Durable: the search mirror on network volume ugllmlv19t (restored by hand at about 17:30Z after the driver's mirror died at start; last pass about 21:23Z). Next: repair the poll loop, then resume the SAME dose from the volume journal (preregistered retry_policy).",
+ "provider_resource_created": true,
+ "pod_id": "cmxnaja12ewpzc",
+ "provider_confirms_gone": true,
+ "final_pod_state": {
+  "exists": false,
+  "desired_status": "TERMINATED",
+  "billing": false
+ },
+ "money": {
+  "all_in_usd": 13.4238,
+  "gpu_usd": 13.0253,
+  "disk_usd": 0.3984,
+  "elapsed_minutes": 436.6,
+  "price_per_hour": 1.79,
+  "authorized_usd": 24.36,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.10/GB-month over the elapsed minutes, ceiled to the 4-decimal quantum"
+ },
+ "session_record_sha256": "86cebb38d7e3323f6296b5b82447aaba5ba3c545ddc2c835330711cbd88c001f",
+ "units": {},
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/dose_d2_20261019_135821"
+}
