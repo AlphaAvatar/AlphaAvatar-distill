@@ -200,7 +200,7 @@
   "paid_compute": false,
   "pods": 0,
   "network_volumes": 1,
-  "_verified": "provider query 2026-10-19 13:47 UTC: 0 pods; volume ugllmlv19t (300 GB, EUR-IS-1) kept for the study"
+  "_verified": "provider query 2026-10-19 13:34 UTC: 0 pods; volume ugllmlv19t (300 GB, EUR-IS-1) kept for the study"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {
