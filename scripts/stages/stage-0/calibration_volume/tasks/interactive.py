@@ -25,13 +25,38 @@ _LINE = {
 }
 
 
-def last_action(text: str, kinds: tuple[str, ...]):
+#: Action protocol v2 (maintainer decision 2026-10-19): the same action lines,
+#: read after removing renderings that do not change the action -- markdown
+#: emphasis and code spans, `$`, `\\text{}`-style wrappers, a Unicode minus --
+#: and with a code GUESS whose digits are spaced or comma-separated read as one
+#: code. v1 read `**ANSWER:** 767` and `GUESS: 1 2 3 4` as no action / a 1-digit
+#: guess. The protocol is a GENERATION property as well as a scoring one: the
+#: environment answers the model with it, so an episode is replayed under the
+#: protocol it was generated under, never another.
+_LINE_V2 = {**_LINE, "guess": re.compile(r"GUESS:\s*(\d(?:[ ,]?\d)*)", re.I)}
+ACTION_PROTOCOLS = ("v1", "v2")
+
+
+def _normalize_actions(text: str) -> str:
+    from .common import normalize_v2
+    t = normalize_v2(text) or ""
+    return t.replace("*", "").replace("$", "")
+
+
+def last_action(text: str, kinds: tuple[str, ...], protocol: str = "v1"):
     """(kind, value) of the LAST action line in `text`, or (None, None)."""
+    if protocol not in ACTION_PROTOCOLS:
+        raise ValueError(f"unknown action protocol {protocol!r}")
+    lines = _LINE if protocol == "v1" else _LINE_V2
+    text = (text or "") if protocol == "v1" else _normalize_actions(text or "")
     best = (None, None, -1)
     for k in kinds:
-        for m in _LINE[k].finditer(text or ""):
+        for m in lines[k].finditer(text):
             if m.start() > best[2]:
-                best = (k, m.group(1), m.start())
+                val = m.group(1)
+                if protocol != "v1" and k == "guess":
+                    val = re.sub(r"[ ,]", "", val)
+                best = (k, val, m.start())
     return best[0], best[1]
 
 
@@ -39,6 +64,8 @@ def last_action(text: str, kinds: tuple[str, ...]):
 
 class ProbeFunctionEnv:
     """A hidden integer function; ask f(x) for chosen x, then answer f(target)."""
+
+    action_protocol = "v1"
 
     def __init__(self, spec: dict):
         self.spec, self.left = spec, spec["queries"]
@@ -64,7 +91,7 @@ class ProbeFunctionEnv:
 
     def step(self, reply: str) -> str | None:
         self.turns += 1
-        kind, val = last_action(reply, ("query", "answer"))
+        kind, val = last_action(reply, ("query", "answer"), self.action_protocol)
         if kind == "answer":
             self.done = True
             self.success = int(val) == self.f(self.spec, self.spec["target"])
@@ -97,6 +124,8 @@ class ProbeFunctionEnv:
 class ButtonsEnv:
     """A counter and buttons with hidden effects; reach the goal value."""
 
+    action_protocol = "v1"
+
     def __init__(self, spec: dict):
         self.spec, self.value = spec, spec["start"]
         self.left, self.done, self.success = spec["presses"], False, False
@@ -117,7 +146,7 @@ class ButtonsEnv:
 
     def step(self, reply: str) -> str | None:
         self.turns += 1
-        kind, val = last_action(reply, ("press",))
+        kind, val = last_action(reply, ("press",), self.action_protocol)
         if kind != "press" or val.upper() not in self.spec["buttons"]:
             self.invalid += 1
             return ("I could not find a valid PRESS line. End your reply with "
@@ -143,6 +172,8 @@ class ButtonsEnv:
 class CodeEnv:
     """Guess a hidden digit code from structured feedback."""
 
+    action_protocol = "v1"
+
     def __init__(self, spec: dict):
         self.spec, self.left = spec, spec["guesses"]
         self.done, self.success, self.invalid, self.turns, self.used = False, False, 0, 0, 0
@@ -167,7 +198,7 @@ class CodeEnv:
 
     def step(self, reply: str) -> str | None:
         self.turns += 1
-        kind, val = last_action(reply, ("guess",))
+        kind, val = last_action(reply, ("guess",), self.action_protocol)
         n, digits = self.spec["length"], self.spec["digits"]
         if kind != "guess" or len(val) != n or any(c not in digits for c in val):
             self.invalid += 1
@@ -192,8 +223,12 @@ ENVIRONMENTS = {"probe_function": ProbeFunctionEnv, "buttons": ButtonsEnv,
                 "code": CodeEnv}
 
 
-def make_env(spec: dict):
-    return ENVIRONMENTS[spec["kind"]](spec)
+def make_env(spec: dict, action_protocol: str = "v1"):
+    if action_protocol not in ACTION_PROTOCOLS:
+        raise ValueError(f"unknown action protocol {action_protocol!r}")
+    env = ENVIRONMENTS[spec["kind"]](spec)
+    env.action_protocol = action_protocol
+    return env
 
 
 def max_turns(spec: dict) -> int:

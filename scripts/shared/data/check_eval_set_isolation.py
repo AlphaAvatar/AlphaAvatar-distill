@@ -119,6 +119,19 @@ def main(argv=None) -> int:
            "code_state": code_state(REPO), "keys": "shared.eval_sets.KEYS (prompt, content)",
            "units_compared": {u: len(r) for u, r in units.items()},
            "units_not_readable": sorted(set(roles) - set(units)), "sources": {}}
+    #: Rows the set's own masks keep out of held-out correctness (a training
+    #: overlap the maintainer decided on): an overlap made only of them is
+    #: reported as masked, not counted.
+    from shared.evaluation.eval_set_scoring import unit_masks
+    masked_keys: dict[str, set] = {}
+    for cname, comp in m["components"].items():
+        for uname, mask in unit_masks(set_id, cname, comp).items():
+            ids = {i for i, why in mask["exclude"].items() if "training overlap" in why}
+            if ids and f"{cname}/{uname}" in units:
+                spec = comp["units"][uname]
+                masked_keys[f"{cname}/{uname}"] = {
+                    ES.prompt_key(ES.prompt_text(r)) for r in units[f"{cname}/{uname}"]
+                    if r[spec["id_field"]] in ids}
     held_out_hits = 0
     for name, used_for, (kind, path) in SOURCES:
         rows, info = load(kind, path, tasks, sessions)
@@ -132,9 +145,16 @@ def main(argv=None) -> int:
                     if any(p["overlap"].values()):
                         shared[unit] = {"role": roles[unit], "overlap": p["overlap"],
                                         "examples": p["examples"]}
+            for unit, v in shared.items():
+                ex = (v["examples"] or {}).get("prompt") or []
+                if (unit in masked_keys and not v["overlap"].get("content")
+                        and len(ex) == v["overlap"].get("prompt") and set(ex) <= masked_keys[unit]):
+                    v["masked_by_core"] = ("every overlapping prompt is outside held-out "
+                                           "correctness (core mask, maintainer 2026-10-19)")
             entry["overlaps"] = shared
             entry["held_out_overlap"] = sum(sum(v["overlap"].values()) for v in shared.values()
-                                            if v["role"] in ES.HELD_OUT_ROLES)
+                                            if v["role"] in ES.HELD_OUT_ROLES
+                                            and not v.get("masked_by_core"))
             held_out_hits += entry["held_out_overlap"] if "train" in used_for or \
                 "calibration" in used_for.lower() or "search" in used_for else 0
         out["sources"][name] = entry

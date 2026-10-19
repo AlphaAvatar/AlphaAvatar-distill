@@ -29,9 +29,11 @@ unit the model's interface cannot take (`--unsupported unit=reason`) is
 from __future__ import annotations
 
 import argparse
+import collections
 import json
 import sys
 from datetime import datetime, timezone
+from collections.abc import Mapping
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[3]
@@ -77,22 +79,46 @@ def _full_turn(t: dict) -> dict:
             "stop_reason": t.get("stop_reason")}
 
 
-def score_fluid(task: dict, record: dict) -> dict:
+def score_fluid(task: dict, record: dict, protocol: str = "v1") -> dict:
+    """`protocol` is the STATIC scoring protocol; an episode is always replayed
+    under the action protocol its record was generated with (absent: v1)."""
     from stages.calibration_volume import score_battery as SB
     rec = {"task_id": task["task_id"], "label": "conformance",
-           "turns": [_full_turn(t) for t in record["turns"]], "end": record.get("end")}
+           "turns": [_full_turn(t) for t in record["turns"]], "end": record.get("end"),
+           **({"action_protocol": record["action_protocol"]}
+              if record.get("action_protocol") else {})}
     if task["interactive"]:
         out = SB.score_episode(task, rec)
         return _plain({"correct": out["correct"], "success": out["env"].get("success")})
-    out = SB.score_static(task, rec)
+    out = SB.score_static(task, rec, protocol)
     return _plain({"correct": out["correct"], "extracted": out.get("extracted"),
                    "reason": out["reason"]})
 
 
 # -- stage3_capability_846 ----------------------------------------------------
-def score_capability(set_name: str, sample: dict, record: dict) -> dict:
+#: Capability protocol v2 (maintainer decision 2026-10-19): the v1 scorer,
+#: applied to the reply with the surface forms that do not change an answer
+#: normalized first (`tasks.common.normalize_v2`: Unicode minus and spaces,
+#: `\\text{}` / `\\mathrm{}` / `\\mathbf{}`-style wrappers, LaTeX spacing,
+#: markdown emphasis). An audit probe found `\\boxed{−12}`, `\\boxed{\\text{12}}`
+#: and `\\boxed{\\mathbf{12}}` scored wrong by the strict numeric rule. Applied to
+#: answer-correctness units only: the refusal classifier (safety_paired) and the
+#: behaviour scorer (tool-call JSON, format checks) keep v1, where rewriting the
+#: reply could change what they judge.
+CAPABILITY_V2_UNITS = frozenset({"math_verified", "gsm8k", "multihop", "rag",
+                                 "answerability_paired", "knowledge"})
+
+
+def normalized_record(record: dict) -> dict:
+    from stages.calibration_volume.tasks.common import normalize_v2
+    return {**record, "raw": normalize_v2(record.get("raw") or "")}
+
+
+def score_capability(set_name: str, sample: dict, record: dict, protocol: str = "v1") -> dict:
     from aadistill.evaluation.capability import SCORERS
     from aadistill.evaluation.strict_answer import score_numeric
+    if protocol == "v2" and set_name in CAPABILITY_V2_UNITS:
+        record = normalized_record(record)
     v = (score_numeric(record, sample["gsm8k_answer"]) if set_name == "gsm8k"
          else SCORERS[set_name](record, sample))
     return _plain({"correct": v["correct"], "reason": v.get("reason")})
@@ -106,20 +132,33 @@ def score_behavior(sample: dict, record: dict) -> dict:
 
 
 # -- stage3_legacy_150 --------------------------------------------------------
-def score_legacy(item: dict, record: dict) -> dict:
+def score_legacy(item: dict, record: dict, protocol: str = "v1") -> dict:
     from aadistill.evaluation.behavior import split_generation
     from stages.d0.run_three_mode_diagnostic import score
+    if protocol == "v2":
+        record = normalized_record(record)
     answer = split_generation(record["raw"], think_preopened=True)["answer"]
     return _plain({"correct": score(item, answer)})
 
 
 ADAPTERS = {
-    "fluid_reasoning_720": lambda unit, item, rec: score_fluid(item, rec),
-    "stage3_capability_846": lambda unit, item, rec: (
+    "fluid_reasoning_720": lambda unit, item, rec, p="v1": score_fluid(item, rec, p),
+    "stage3_capability_846": lambda unit, item, rec, p="v1": (
         score_behavior(item, rec) if unit == "eval_behavior_v0"
-        else score_capability(unit, item, rec)),
-    "stage3_legacy_150": lambda unit, item, rec: score_legacy(item, rec),
+        else score_capability(unit, item, rec, p)),
+    "stage3_legacy_150": lambda unit, item, rec, p="v1": score_legacy(item, rec, p),
 }
+
+
+def conformance_files(scorer: Mapping) -> dict[str, str]:
+    """{protocol: file}. A manifest written before scorer protocols were
+    versioned names one file, which pins v1."""
+    conf = scorer["conformance"]
+    return dict(conf) if isinstance(conf, Mapping) else {"v1": conf}
+
+
+def formal_protocol(scorer: Mapping) -> str:
+    return scorer.get("formal_protocol", "v1")
 
 
 def conformance(eval_set_id: str | None = None) -> dict:
@@ -129,20 +168,22 @@ def conformance(eval_set_id: str | None = None) -> dict:
     root = ES.set_root(eval_set_id)
     out = {}
     for cname, comp in m["components"].items():
-        path = root / comp["scorer"]["conformance"]
         index = {}
         for uname, spec in comp["units"].items():
             if spec.get("withheld"):
                 continue
             index[uname] = {r[spec["id_field"]]: r for r in ES.items(eval_set_id, cname, uname)}
-        rows = [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
-        diffs = []
-        for r in rows:
-            got = ADAPTERS[cname](r["unit"], index[r["unit"]][r["id"]], r["input"])
-            if got != r["expected"]:
-                diffs.append({"unit": r["unit"], "id": r["id"], "variant": r["variant"],
-                              "expected": r["expected"], "got": got})
-        out[cname] = {"vectors": len(rows), "differences": len(diffs), "examples": diffs[:5]}
+        for protocol, rel in conformance_files(comp["scorer"]).items():
+            rows = [json.loads(l) for l in (root / rel).read_text().splitlines() if l.strip()]
+            diffs = []
+            for r in rows:
+                got = ADAPTERS[cname](r["unit"], index[r["unit"]][r["id"]], r["input"], protocol)
+                if got != r["expected"]:
+                    diffs.append({"unit": r["unit"], "id": r["id"], "variant": r["variant"],
+                                  "expected": r["expected"], "got": got})
+            key = cname if protocol == "v1" and len(conformance_files(comp["scorer"])) == 1 \
+                else f"{cname}@{protocol}"
+            out[key] = {"vectors": len(rows), "differences": len(diffs), "examples": diffs[:5]}
     return out
 
 
@@ -155,23 +196,55 @@ def _slice(unit_key: str) -> tuple[str, str, tuple[str, str] | None]:
     return comp, unit, (field, value)
 
 
+def unit_masks(eval_set_id: str, cname: str, comp: Mapping) -> dict[str, dict]:
+    """Per unit: which rows the FORMAL numbers exclude, whether the unit is in the
+    formal core, and its verified duplicate / equivalence groups (each counted
+    once in independent statistics). A manifest without these files masks nothing."""
+    root = ES.set_root(eval_set_id)
+    out = {u: {"exclude": {}, "in_core": True, "groups": []} for u in comp["units"]}
+    for g in comp.get("duplicate_groups", []):
+        units = {x.split(":", 1)[0] for x in g}
+        if len(units) == 1:
+            out[units.pop()]["groups"].append([x.split(":", 1)[1] for x in g])
+    if comp.get("validity"):
+        v = json.loads((root / comp["validity"]["file"]).read_text())
+        out[v["unit"]]["exclude"].update({e["id"]: f"validity: {e['class']}" for e in v["excluded"]})
+    if comp.get("independence"):
+        d = json.loads((root / comp["independence"]["file"]).read_text())
+        out[d["unit"]]["groups"] += [g["ids"] for g in d["groups"]]
+    if comp.get("core"):
+        c = json.loads((root / comp["core"]["file"]).read_text())
+        for u, spec in c["units"].items():
+            out[u]["in_core"] = bool(spec.get("in_formal_core", True))
+            out[u]["exclude"].update({i: "outside the formal core"
+                                      for i in spec.get("excluded_from_core", {})})
+            out[u]["exclude"].update({i: "outside held-out correctness (training overlap)"
+                                      for i in spec.get("excluded_from_held_out", {})})
+    return out
+
+
 def unit_metrics(cname: str, uname: str, items: dict, recs: list[dict], id_field: str,
-                 repeat: set[str]) -> tuple[dict, list[dict]]:
-    """A unit's registered metrics, from the aggregator its scorer was frozen with.
+                 groups: list[list[str]], protocol: str = "v1",
+                 keep: set[str] | None = None) -> tuple[dict, list[dict]]:
+    """A unit's registered metrics over `keep` (default: every item), from the
+    aggregator its scorer was frozen with.
 
     Correctness units (fluid, legacy, the capability sets) headline their rate;
     the paired sets headline PAIR accuracy (`score_battery.aggregate`); the
     behaviour set has no single correctness and reports `behavior.aggregate`'s
-    per-group metrics with no headline, so nothing reads it as a zero."""
+    per-group metrics with no headline, so nothing reads it as a zero. Each
+    group in `groups` is ONE independent item (`rate_independent`)."""
+    keep = set(items) if keep is None else set(keep)
+    recs = [r for r in recs if r.get(id_field, r.get("id")) in keep]
     rows = []
     for rec in recs:
         rid = rec.get(id_field, rec.get("id"))
-        rows.append({"id": rid, **ADAPTERS[cname](uname, items[rid], rec)})
+        rows.append({"id": rid, **ADAPTERS[cname](uname, items[rid], rec, protocol)})
     if cname == "stage3_capability_846" and uname == "eval_behavior_v0":
         from aadistill.evaluation.behavior import aggregate, score_sample
         scored = [score_sample(items[r.get(id_field, r.get("id"))], r.get("raw", ""),
                                hit_cap=r.get("stop_reason") not in (None, "eos")) for r in recs]
-        return {"headline": None, "metrics": aggregate(scored)}, rows
+        return {"headline": None, "n_items": len(keep), "metrics": aggregate(scored)}, rows
     if cname == "stage3_capability_846":
         from aadistill.evaluation.capability import PAIRED_SETS, SCORERS
         from aadistill.evaluation.strict_answer import score_numeric
@@ -179,52 +252,86 @@ def unit_metrics(cname: str, uname: str, items: dict, recs: list[dict], id_field
         verdicts, ordered = [], []
         for rec in recs:
             sample = items[rec["id"]]
+            if protocol == "v2" and uname in CAPABILITY_V2_UNITS:
+                rec = normalized_record(rec)
             verdicts.append(score_numeric(rec, sample["gsm8k_answer"]) if uname == "gsm8k"
                             else SCORERS[uname](rec, sample))
             ordered.append(sample)
         agg = aggregate(uname, verdicts, ordered)
         head = "pair_correct" if uname in PAIRED_SETS else "correct"
-        return {"headline": head, "headline_value": agg.get(head), "metrics": agg}, rows
+        return {"headline": head, "headline_value": agg.get(head), "n_items": len(keep),
+                "metrics": agg}, rows
     correct = sum(bool(r.get("correct")) for r in rows)
+    repeat = {x for g in groups for x in [i for i in g if i in keep][1:]}
     indep = [r for r in rows if r["id"] not in repeat]
-    n_ind = len(set(items) - repeat)
-    return {"headline": "correct", "correct": correct, "rate": round(correct / len(items), 4),
+    n_ind = len(keep - repeat)
+    return {"headline": "correct", "n_items": len(keep), "correct": correct,
+            "rate": round(correct / len(keep), 4) if keep else None,
             "n_independent": n_ind,
-            "rate_independent": round(sum(bool(r.get("correct")) for r in indep) / n_ind, 4)}, rows
+            "rate_independent": round(sum(bool(r.get("correct")) for r in indep) / n_ind, 4)
+            if n_ind else None}, rows
 
 
 def report(generations: Path, label: str, unsupported: dict[str, str],
-           eval_set_id: str | None = None) -> dict:
+           eval_set_id: str | None = None, rows_out: Path | None = None) -> dict:
     """Per unit and per capability; generations are `<component>__<unit>.jsonl`
-    rows `{id, ...record}` (static) or `{task_id, turns}` (episodes)."""
-    eval_set_id = eval_set_id or ES.default_formal()
+    rows `{id, ...record}` (static) or `{task_id, turns}` (episodes).
+
+    Every unit is scored under its component's FORMAL protocol. A unit's row
+    carries the formal metrics (its validity / core / held-out exclusions
+    applied) and, when anything was excluded, the metrics over every registered
+    item beside them. A unit outside the formal core is still measured and
+    reported, flagged `in_formal_core: false`."""
+    eval_set_id = eval_set_id or default_formal_set()
     m = ES.manifest(eval_set_id)
     per_unit_rows: dict[str, list[dict]] = {}
+    all_rows: dict[str, list[dict]] = {}
+    formal_ids: dict[str, set] = {}
     outcomes: dict[str, dict] = {}
     for cname, comp in m["components"].items():
+        protocol = formal_protocol(comp["scorer"])
+        masks = unit_masks(eval_set_id, cname, comp)
         for uname, spec in comp["units"].items():
             key = f"{cname}/{uname}"
+            mask = masks[uname]
+            flags = {"in_formal_core": mask["in_core"], "protocol": protocol}
             if key in unsupported:
-                outcomes[key] = {"status": "unsupported", "reason": unsupported[key]}
+                outcomes[key] = {"status": "unsupported", "reason": unsupported[key], **flags}
                 continue
             gen = generations / f"{cname}__{uname}.jsonl"
             if not gen.is_file():
-                outcomes[key] = {"status": "not_run"}
+                outcomes[key] = {"status": "not_run", **flags}
                 continue
             try:
                 items = {r[spec["id_field"]]: r for r in ES.items(eval_set_id, cname, uname)}
             except FileNotFoundError:
-                outcomes[key] = {"status": "withheld", "reason": "no verified local copy"}
+                outcomes[key] = {"status": "withheld", "reason": "no verified local copy", **flags}
                 continue
             recs = [json.loads(l) for l in gen.read_text().splitlines() if l.strip()]
-            # a duplicate group inside this unit is ONE independent item
-            repeat = {x.split(":", 1)[1] for g in comp.get("duplicate_groups", [])
-                      if all(y.split(":", 1)[0] == uname for y in g) for x in g[1:]}
-            metrics, rows = unit_metrics(cname, uname, items, recs, spec["id_field"], repeat)
+            keep = set(items) - set(mask["exclude"])
+            formal_ids[key] = keep
+            formal, rows = unit_metrics(cname, uname, items, recs, spec["id_field"],
+                                        mask["groups"], protocol, keep)
             per_unit_rows[key] = rows
-            outcomes[key] = {"status": "measured", "n": len(rows),
-                             "missing": len(set(items) - {r["id"] for r in rows}), **metrics}
-    # capability slices of correctness units
+            all_rows[key] = rows
+            got = {r.get(spec["id_field"], r.get("id")) for r in recs}
+            outcomes[key] = {"status": "measured", **flags, "n": len(rows),
+                             "missing": len(keep - got), **formal}
+            if mask["exclude"]:
+                everything, all_rows[key] = unit_metrics(cname, uname, items, recs,
+                                                         spec["id_field"], mask["groups"],
+                                                         protocol)
+                outcomes[key]["excluded_from_formal"] = dict(sorted(
+                    collections.Counter(mask["exclude"].values()).items()))
+                outcomes[key]["all_registered_items"] = everything
+    if rows_out is not None:
+        #: Every scored row, formal flag included: the per-item evidence a paired
+        #: or clustered analysis reads, written once beside the report.
+        rows_out.mkdir(parents=True, exist_ok=True)
+        for key, rows in all_rows.items():
+            body = "".join(json.dumps({**r, "formal": r["id"] in formal_ids[key]},
+                                      ensure_ascii=False, sort_keys=True) + "\n" for r in rows)
+            (rows_out / f"{key.replace('/', '__')}.rows.jsonl").write_text(body)
     cap_outcomes = dict(outcomes)
     for cap, units in m["capabilities"].items():
         for u in units:
@@ -234,27 +341,40 @@ def report(generations: Path, label: str, unsupported: dict[str, str],
                 if sel is not None:
                     cap_outcomes[u] = outcomes.get(base, {"status": "not_run"})
                 continue
-            items = {r[m["components"][comp]["units"][unit]["id_field"]]: r
-                     for r in ES.items(eval_set_id, comp, unit)}
-            ids = {i for i, r in items.items() if str(r.get(sel[0])) == sel[1]}
+            spec = m["components"][comp]["units"][unit]
+            items = {r[spec["id_field"]]: r for r in ES.items(eval_set_id, comp, unit)}
+            ids = {i for i, r in items.items()
+                   if str(r.get(sel[0])) == sel[1] and i in formal_ids[base]}
+            flags = {k: outcomes[base][k] for k in ("in_formal_core", "protocol")}
             if outcomes[base].get("headline") is None:      # behaviour groups
-                cap_outcomes[u] = {"status": "measured", "n": len(ids),
-                                   "metrics": outcomes[base]["metrics"]["by_group"].get(sel[1])
-                                   if "by_group" in outcomes[base]["metrics"] else None}
+                from aadistill.evaluation.behavior import aggregate, score_sample
+                recs = [json.loads(l) for l in (generations / f"{comp}__{unit}.jsonl")
+                        .read_text().splitlines() if l.strip()]
+                scored = [score_sample(items[r["id"]], r.get("raw", ""),
+                                       hit_cap=r.get("stop_reason") not in (None, "eos"))
+                          for r in recs if r["id"] in ids]
+                cap_outcomes[u] = {"status": "measured", **flags, "n": len(ids),
+                                   "metrics": aggregate(scored) if scored else None}
                 continue
             rows = [r for r in per_unit_rows[base] if r["id"] in ids]
-            cap_outcomes[u] = {"status": "measured", "n": len(ids),
+            cap_outcomes[u] = {"status": "measured", **flags, "n": len(ids),
                                "correct": sum(bool(r.get("correct")) for r in rows),
                                "rate": round(sum(bool(r.get("correct")) for r in rows) / len(ids), 4)
                                if ids else None}
-    return {"schema": "aadistill.eval_set_report/v1", "label": label,
+    entry = ER.entry(ES.registry(), eval_set_id)
+    return {"schema": "aadistill.eval_set_report/v2", "label": label,
             "eval_set_id": eval_set_id,
-            "eval_set_identity": ER.current_identity(ER.entry(ES.registry(), eval_set_id)),
-            "eval_set_status": ER.entry(ES.registry(), eval_set_id)["status"],
+            "eval_set_identity": ER.current_identity(entry),
+            "eval_set_status": entry["status"],
             "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "formal_core": m.get("formal_core"),
             "units": outcomes,
             "capabilities": ER.capability_table(m["capabilities"], cap_outcomes),
             "pooled": "none by contract: units and capabilities are reported separately"}
+
+
+def default_formal_set() -> str:
+    return ES.default_formal()
 
 
 def main(argv=None) -> int:

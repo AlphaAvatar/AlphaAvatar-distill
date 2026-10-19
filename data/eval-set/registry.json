@@ -13,24 +13,34 @@
    "eval_set_id": "eval-set-1",
    "root": "eval-set-1",
    "manifest": "eval-set-1/manifest.json",
-   "status": "candidate",
+   "status": "frozen",
    "identity_history": [
     {
      "manifest_sha256": "0909906b67dc491c3c6e5062a64f52956d9d9035aff5fb8fca87de4c738412ac",
      "recorded_utc": "2026-10-18T20:19:44+00:00",
      "authorization": "logs/budget/decisions.md 2026-10-18 (Permanent evaluation registry; eval-set-1 registered as a candidate)",
      "change": "first registration"
+    },
+    {
+     "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+     "recorded_utc": "2026-10-19T05:24:45+00:00",
+     "authorization": "logs/budget/decisions.md 2026-10-19 (Maintainer: eval-set-1 finalization and the Stage-0 volume study authorized ($90 new-spend hard cap))",
+     "change": "validity mask v1 (6 items excluded; formal 714 = 570 static + 144 interactive), verified-equivalence independence groups, formal core (TriviaQA supplementary, xLAM outside the core, Stage-2-train overlaps outside held-out correctness), scorer protocol v2 with conformance vectors and the v1/v2 rescoring record; FROZEN"
     }
    ],
    "open_decisions": [
-    "fluid_reasoning_720 item defects (independent audit, audit/fluid_reasoning_720_quality.json; nothing changed): 3 wrong or underdetermined golds (82b5c880000f9eaa2c4e and 83f5811a86b339da4a0c, order.seating; f9010f2dd60a31946a20, graph.unreachable), 1 trivial leak (a68fc81fffe597f45d54, letter.double_all: query = worked example ijk), 2 highly plausible alternative rules (9fba439d2d0b78476103, d36815ef540363149b6c, str.remove_vowels); decide fix, drop or keep-and-annotate -- any of them is a new identity",
-    "fluid_reasoning_720 generator defects behind them (order.seating drops a fact; graph.unreachable gold counts unprinted towns; graph.shortest is hash-seed dependent): a fixed generator version is needed before any new set (eval-set-2 / a final split) is drawn from these generators",
-    "fluid_reasoning_720 independence: 0 exact duplicates, but ~705 independent items under the audit's semantic equivalence (6 kk.identity L1 items are one puzzle renamed, 3 letter.reverse share query and answer); decide whether those count once",
-    "fluid_reasoning_720 scorer normalization (scoring semantics, pinned): '\\emptyset' / 'nobody' for 'none', '\\mathrm{}' wrapping, a Unicode minus and markdown-bolded action lines are scored wrong; changing that is a new identity",
-    "stage3_capability_846/knowledge: TriviaQA has no recorded redistribution basis; withheld from the repository, identity recorded, local copy verified -- publish after review, keep withheld, or replace in a new set",
-    "stage3_capability_846/eval_behavior_v0: 2 exact duplicate pairs (glaive-003743=glaive-004818, everyday-000636=everyday-001567); 4 of its prompts also appear in the stage2_v1 TRAIN split (openmath-004228, openmath-000199, everyday-001567, smoltalk-423306; audit/isolation.json); 7 prompts from the access-gated Salesforce/xlam-function-calling-60k (CC-BY-4.0) are public here since 2026-07-27",
-    "enable 'Require review from Code Owners' on main so .github/CODEOWNERS binds (a repository setting)",
-    "freeze: the maintainer flips status to frozen once the above are decided"
+    "Salesforce/xlam-function-calling-60k: confirm its access/redistribution terms; until then its 7 prompts stay outside the formal core (they remain in git history since 2026-07-27; removing them from history would be a separate maintainer decision)",
+    "TriviaQA: a redistribution basis would let it enter a future set's core",
+    "enable 'Require review from Code Owners' and the eval-set-integrity status check on main (repository settings; see data/eval-set/README.md)"
+   ],
+   "decisions_applied": [
+    "fluid item defects: 6 excluded by validity_v1 (no item changed)",
+    "generator defects: fixed as ordering@v2, graph_paths@v2, string_induction@v2, letter_analogy@v2 (registry.GENERATORS_V2); v1 output byte-identical",
+    "independence: exact duplicates and verified renamings count once",
+    "scorer: protocol v2 (fluid, capability answer units, legacy) with conformance; historical results stay on v1",
+    "TriviaQA: withheld from git, outside the core, measured as supplementary when staged",
+    "behaviour: duplicate pairs collapsed; 4 Stage-2-train overlaps outside held-out correctness; xLAM prompts outside the core",
+    "frozen 2026-10-19"
    ]
   }
  ]

@@ -117,6 +117,27 @@ HARNESS["bench"] = HARNESS["search"] + (
 )
 
 
+HARNESS["dose"] = HARNESS["battery"] + (
+    "scripts/stages/stage-0/calibration_volume/dose_driver.py",
+    "scripts/stages/stage-0/calibration_volume/search_driver.py",
+    "scripts/stages/stage-0/calibration_volume/search_session.py",
+    "scripts/stages/stage-0/calibration_volume/volume_sync.py",
+    "scripts/shared/forward_baseline.py",
+    "scripts/shared/evaluation/eval_set_scoring.py",
+    "scripts/shared/eval_sets.py",
+    "scripts/shared/training/train_stage3.py",
+    "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+    "scripts/stages/stage-1/phase_c1/packaging.py",
+    "src/aadistill/evaluation/eval_registry.py",
+    "src/aadistill/initialization/baseline.py",
+    "src/aadistill/initialization/execution.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+)
+
+
 def run_dir(run_id: str) -> Path:
     return EXPERIMENT_LOGS / "runs" / run_id
 

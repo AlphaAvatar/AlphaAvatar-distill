@@ -1,10 +1,65 @@
 # eval-set-1
 
-**Status: `candidate`** — registered 2026-10-18 (maintainer decision of that
-date, `logs/budget/decisions.md`). Its identity is pinned and protected: no
-item, gold answer, weight, scoring semantic or file changes without a new
-identity authorized by the maintainer. It is **not frozen**: the open decisions
-below must be settled first, and no agent may settle them by editing items.
+**Status: `frozen`** — frozen 2026-10-19 by the maintainer's decision of that
+date (`logs/budget/decisions.md`, 2026-10-19). Identity history
+(`data/eval-set/registry.json`):
+
+| # | manifest sha256 | what |
+| --- | --- | --- |
+| 1 | `0909906b…` | registered 2026-10-18 as a `candidate`; every content file is carried unchanged into identity 2, and every result scored under it stays bound to it |
+| 2 | `62a1a5d3…` | 2026-10-19: validity mask, verified-equivalence groups, formal core, scorer protocol v2 with its conformance vectors; **frozen** |
+
+After the freeze, any change to an item, a gold answer, the validity mask,
+scoring semantics or the identity needs a new explicit maintainer
+authorization. New needs become `eval-set-2`.
+
+## The formal core
+
+Formal measurement **generates every item of every unit**; the masks decide
+which rows enter the FORMAL numbers, and every other row is still reported,
+beside them:
+
+| unit | formal rows | outside the formal numbers, still reported |
+| --- | --- | --- |
+| `fluid_reasoning_720/dev_v1` | **714** = 570 static + 144 interactive (`fluid_reasoning_720/validity_v1.json`) | the 6 defective items |
+| `stage3_capability_846/*` answer units, `safety_paired` | every item | — |
+| `stage3_capability_846/knowledge` | none: TriviaQA is **supplementary**, never in the core | the whole unit, when its verified local copy is staged |
+| `stage3_capability_846/eval_behavior_v0` | 65 (`stage3_capability_846/core_v1.json`) | the 7 Salesforce xLAM prompts (terms unconfirmed) and the 4 prompts that are also in the Stage-2 train split |
+| `stage3_legacy_150/items` | 150, **in-sample regression only** | — |
+
+Independent statistics count each verified duplicate or equivalence group
+once (`rate_independent`): the behaviour set's two exact duplicate pairs, the
+SQuAD item `rag` shares with `answerability_paired`, and 6 groups of
+knights-and-knaves items that are one puzzle under a re-derivable renaming of
+person names (`fluid_reasoning_720/independence_v1.json`: 708 independent of
+720, 702 of the formal 714).
+
+## Scoring protocols
+
+Each component's `scorer.formal_protocol` is **v2**; v1 stays frozen for the
+historical results.
+
+- **v2 accepts every rendering v1 accepted, and more.** It also accepts:
+  - a Unicode minus;
+  - `\text{}`, `\mathrm{}` and `\mathbf{}`-style wrappers, and LaTeX spacing;
+  - letter-spaced words;
+  - a per-token `\mathrm{}`;
+  - comma-separated grid rows;
+  - a name followed by a parenthetical;
+  - `\emptyset`, `nobody` or `no knights` for an empty set.
+- **v2 covers the answer units only.** It applies to fluid static items, to
+  math, gsm8k, multihop, rag, answerability and knowledge, and to the legacy
+  150. `safety_paired` and `eval_behavior_v0` keep v1.
+- **Interactive episodes use action protocol v2.** v2 reads an action line
+  through markdown emphasis, code spans and `$`, and reads spaced or
+  comma-separated code digits as one code. The environment that answers the
+  model and the scorer's replay use the same protocol, which is recorded per
+  episode. Historical episodes are v1 and replay as v1.
+- **Conformance vectors pin both protocols.** `conformance/*.jsonl` pins v1 and
+  `conformance/*.v2.jsonl` pins v2.
+- **Every historical generation has been re-scored under both.** The record is
+  `audit/rescoring_v1_v2.json`. v2 lost nothing v1 accepted. The only gains
+  were 3 letter-spaced answers of the Qwen3-0.6B reference, 257 → 260.
 
 The default set for formal capability measurement in every stage
 (`data/eval-set/registry.json :: default_formal_measurement`, AGENTS.md P10.3).
@@ -38,7 +93,10 @@ Built 2026-10-18 as Stage-0 `dev_v1`; moved here byte-identically.
 - **Quality review.** An independent audit is in
   `audit/fluid_reasoning_720_quality.json`. It re-solved every static item
   from the prompt alone and simulated every episode. 573 of 576 static golds
-  were confirmed. Its findings are open decisions, and **no item was changed**:
+  were confirmed. The maintainer's decision (2026-10-19): the six items below
+  are EXCLUDED from formal scoring by `validity_v1.json`, and **no item was
+  changed**. Every lower-severity finding is attached to its item there as an
+  annotation (71 items):
 
   | item | defect |
   | --- | --- |
@@ -52,9 +110,13 @@ Built 2026-10-18 as Stage-0 `dev_v1`; moved here byte-identically.
   - 0 exact duplicates; about 705 independent items under the audit's
     semantic equivalence.
   - Every episode is solvable within its budget.
-  - The scorer rejects some equivalent renderings, for example `\emptyset`
-    for "none". That is pinned scoring semantics, recorded rather than
-    changed.
+  - The v1 scorer rejects some equivalent renderings, for example
+    `\emptyset` for "none". Scorer protocol v2 accepts them (above).
+  - The generator defects behind the six are fixed in new versions:
+    `ordering@v2`, `graph_paths@v2` (deterministic under any hash seed),
+    `string_induction@v2` and `letter_analogy@v2`
+    (`tasks/registry.py :: GENERATORS_V2`). The v1 generators still rebuild
+    every frozen set byte for byte.
 - **Scoring.** Static: correct = usable rollout AND the canonicalized last
   `\boxed{}` of the final answer equals the gold. Interactive: correct = the
   environment's own success, re-derived by replaying the recorded answers.
@@ -129,17 +191,14 @@ with every unit, on prompt text and content hash.
   - Data builders now reserve every held-out unit
     (`shared.eval_sets.held_out_paths()`).
 
-## Open decisions (block freezing)
+## Open items (do not block the freeze)
 
-`registry.json :: open_decisions`, with the context in
-`logs/budget/decisions.md` (2026-10-18):
+`registry.json :: open_decisions`:
 
-1. the six item defects above: fix, drop, or keep annotated, each a new identity;
-2. the generator defects behind them, which must be fixed before any new set
-   is drawn from these generators;
-3. whether semantically equivalent items count once;
-4. the scorer's normalization gaps;
-5. TriviaQA's license;
-6. the behaviour set's two duplicate pairs and four Stage-2-train overlaps, and
-   its seven gated-source prompts;
-7. making `.github/CODEOWNERS` binding on `main`.
+1. Salesforce xLAM: until its access and redistribution terms are confirmed,
+   its 7 prompts stay outside the formal core. They have been in git history
+   since 2026-07-27; removing them from history would be a separate
+   maintainer decision.
+2. TriviaQA: a redistribution basis would let a future set put it in its core.
+3. Branch protection on `main` (repository settings): see
+   [`../README.md`](../README.md#protection).

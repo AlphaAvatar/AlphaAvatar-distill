@@ -199,6 +199,124 @@ def gold_key(task: dict) -> str:
     return CANON[task["answer_type"]](task["answer"])
 
 
+# --- answer canonicalization, protocol v2 ------------------------------------
+#
+# The v1 functions above are FROZEN: every historical score, and the
+# calibration builds' "verified correct" filter, were computed with them. v2
+# (maintainer decision 2026-10-19) stops rejecting renderings that mean the
+# same answer -- an audit of eval-set-1 found these scored wrong under v1:
+# `\mathrm{}` / `\mathbf{}` / `\operatorname{}` wrappers, letter-spaced
+# words, per-token `\mathrm{JUMP}`, grid rows separated by commas, a Unicode
+# minus, a name followed by a parenthetical, and `\emptyset` / `nobody` /
+# `no knights` for an empty set. Each v2 function normalizes those surface
+# forms and then applies the v1 rule unchanged, so v2 accepts a superset of v1
+# on every gold rendering; the conformance vectors pin both.
+
+_WRAPPERS = re.compile(r"\\(?:text(?:tt|rm|bf|it|sf)?|math(?:rm|bf|it|sf|tt)|operatorname"
+                       r"|boldsymbol|textnormal)\{([^{}]*)\}")
+_DASHES = {"\u2212": "-", "\ufe63": "-", "\uff0d": "-"}
+_SPACES = {"\u00a0": " ", "\u2009": " ", "\u202f": " ", "\u2007": " "}
+
+
+def normalize_v2(text: str | None) -> str | None:
+    """The surface forms v2 treats as the same answer, removed once, up front."""
+    if text is None:
+        return None
+    t = text
+    for a, b in {**_DASHES, **_SPACES}.items():
+        t = t.replace(a, b)
+    for _ in range(4):                      # nested wrappers, innermost first
+        t2 = _WRAPPERS.sub(r"\1", t)
+        if t2 == t:
+            break
+        t = t2
+    t = re.sub(r"\\[,;:! ]", "", t)       # LaTeX spacing commands
+    t = t.replace("**", "").replace("__", "").replace("`", "")
+    return t
+
+
+def canon_int_v2(text: str | None) -> str | None:
+    t = normalize_v2(text)
+    return canon_int(None if t is None else re.sub(r"(?<![\w)])-\s+(?=\d)", "-", t))
+
+
+def canon_int_list_v2(text: str | None) -> str | None:
+    return canon_int_list(normalize_v2(text))
+
+
+def canon_word_v2(text: str | None) -> str | None:
+    t = normalize_v2(text)
+    if t is None:
+        return None
+    core = t.strip().strip("$").strip().strip("\"'`").strip()
+    parts = core.split()
+    if len(parts) > 1 and all(len(p) == 1 and p.isalpha() for p in parts):
+        core = "".join(parts)               # letter-spaced: "i i j j k k"
+    return canon_word(core)
+
+
+def canon_token_seq_v2(text: str | None) -> str | None:
+    return canon_token_seq(normalize_v2(text))
+
+
+def canon_grid_v2(text: str | None) -> str | None:
+    t = normalize_v2(text)
+    if t is None:
+        return None
+    has_rows = re.search(r"/|\n|;|\\\\|\\begin\{", t)
+    parts = [re.sub(r"\s", "", p) for p in t.strip().strip("$").split(",")]
+    if not has_rows and len(parts) > 1 and all(len(p) > 1 and p.isdigit() for p in parts):
+        t = " / ".join(parts)               # rows separated by commas: "588, 818, 588"
+    return canon_grid(t)
+
+
+def canon_name_v2(text: str | None) -> str | None:
+    t = normalize_v2(text)
+    if t is None:
+        return None
+    t = re.sub(r"\s*\([^()]*\)\s*$", "", t.strip().strip("$").strip())   # "Kai (seat 2)"
+    return canon_name(t)
+
+
+#: Words that, with no name beside them, say "the set is empty".
+_EMPTY_WORDS = frozenset({"none", "nobody", "noone", "no", "one", "empty", "set",
+                          "emptyset", "varnothing", "knights", "knaves", "people",
+                          "person", "of", "them", "is", "are", "there", "the"})
+
+
+def canon_name_set_v2(text: str | None) -> str | None:
+    t = normalize_v2(text)
+    if t is None:
+        return None
+    t = t.replace("\u2205", " emptyset ")
+    words = [w.lower() for w in re.findall(r"[A-Za-z]+", t)]
+    if words and set(words) <= _EMPTY_WORDS and set(words) & {
+            "none", "nobody", "noone", "no", "empty", "emptyset", "varnothing"}:
+        return "[]"
+    if not words and re.search(r"\\\{\s*\\\}|\{\s*\}", t):
+        return "[]"
+    return canon_name_set(t)
+
+
+CANON_V2: dict[str, Callable[[str | None], str | None]] = {
+    "int": canon_int_v2,
+    "int_list": canon_int_list_v2,
+    "word": canon_word_v2,
+    "token_seq": canon_token_seq_v2,
+    "grid": canon_grid_v2,
+    "name": canon_name_v2,
+    "name_set": canon_name_set_v2,
+}
+
+#: Scoring protocol -> canonicalizers. The gold is canonicalized by the same
+#: protocol as the reply.
+CANON_BY_PROTOCOL = {"v1": CANON, "v2": CANON_V2}
+
+
+def gold_key_for(task: dict, protocol: str) -> str:
+    return CANON_BY_PROTOCOL[protocol][task["answer_type"]](task["answer"])
+
+
 def fmt_list(xs: list[int]) -> str:
     return "[" + ", ".join(str(x) for x in xs) + "]"
 

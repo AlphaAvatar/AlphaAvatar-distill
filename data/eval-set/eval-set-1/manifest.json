@@ -8,13 +8,25 @@
    "sha256": "8bbeda090fb6af6cceaba7507cedd68077e97ec96f9da3b5dfd75cada12ba27c",
    "bytes": 1229828
   },
+  "conformance/fluid_reasoning_720.v2.jsonl": {
+   "sha256": "ee33d2c72457e0354725e17128a3ef6a1067124a22c1d333b674fde0b24da506",
+   "bytes": 1532716
+  },
   "conformance/stage3_capability_846.jsonl": {
    "sha256": "7fb83ef270b9d8647bcedc1b460c9b5e2c65934eee94e35cf08e1b4ec37ba6c6",
    "bytes": 735394
   },
+  "conformance/stage3_capability_846.v2.jsonl": {
+   "sha256": "b8fd23dc6fcd55e5b38639995992eabd72de8acebe74b0f5ab795fb7fc01d9fd",
+   "bytes": 853780
+  },
   "conformance/stage3_legacy_150.jsonl": {
    "sha256": "3758992e02b1475a7883054ee16e5f421ed869159fd08ca68b525480285b07eb",
    "bytes": 532954
+  },
+  "conformance/stage3_legacy_150.v2.jsonl": {
+   "sha256": "70025a6c79c3f280a805a5a15e7933d662bb54d9c56cceb8502d1a39b3a97ff9",
+   "bytes": 557720
   },
   "fluid_reasoning_720/dev_v1.jsonl": {
    "sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
@@ -23,6 +35,14 @@
   "fluid_reasoning_720/dev_v1.manifest.json": {
    "sha256": "95531de9b347a0987c7ff973c10980dc66ff45673699422fe0f84c776f4919b5",
    "bytes": 12531
+  },
+  "fluid_reasoning_720/independence_v1.json": {
+   "sha256": "4e5a06d48624c14a1eb20aaa5267198b2dfd801d268b7cf13a3f67b8ef17a1c5",
+   "bytes": 4053
+  },
+  "fluid_reasoning_720/validity_v1.json": {
+   "sha256": "75f4858934c9cae664e20b5886d943d19351a4efc4072c90334b4b6b418f20bf",
+   "bytes": 63064
   },
   "stage3_capability_846/battery_v2/answerability_paired.jsonl": {
    "sha256": "1a4369323c3bc10b2ffcb97ac41cdb2bf20b670a28a3907d80d2d94a5acce81e",
@@ -51,6 +71,10 @@
   "stage3_capability_846/battery_v2/safety_paired.jsonl": {
    "sha256": "ee73e208660b365e2989024739359704517b943a7dcee6a96a811db528d1a73a",
    "bytes": 35908
+  },
+  "stage3_capability_846/core_v1.json": {
+   "sha256": "b92769e6a564c0b2d4fcc57744706a52a2ef8fc00aea87db502c4e30dad51eb2",
+   "bytes": 3053
   },
   "stage3_capability_846/eval_behavior_v0/manifest.json": {
    "sha256": "394a5ccb98b56783ac33772be2caa98609e6fae041204fd66c15b35bddb68731",
@@ -114,17 +138,23 @@
     ]
    },
    "scorer": {
-    "protocol_id": "stage0.calibration_volume.score_battery@v1",
+    "protocol_id": "stage0.calibration_volume.score_battery@v2",
+    "formal_protocol": "v2",
+    "historical_protocol_id": "stage0.calibration_volume.score_battery@v1",
     "adapter": "scripts/shared/evaluation/eval_set_scoring.py :: score_fluid",
-    "rule": "static: correct = usable_rollout AND canonical(last \\boxed{} of the final answer) == canonical(gold) by answer_type; interactive: correct = the environment's own success, re-derived by replaying the recorded final answers through a fresh environment",
-    "conformance": "conformance/fluid_reasoning_720.jsonl"
+    "rule": "static: correct = usable_rollout AND canonical(last \\boxed{} of the final answer) == canonical(gold) by answer_type; interactive: correct = the environment's own success, re-derived by replaying the recorded final answers through a fresh environment; v2: the reply's boxed answer and the gold are canonicalized by tasks.common.CANON_V2 (Unicode minus, LaTeX wrappers, letter-spaced words, per-token \\mathrm{}, comma-separated grid rows, a trailing parenthetical after a name, \\emptyset / nobody / 'no knights' for an empty set), a superset of v1",
+    "conformance": {
+     "v1": "conformance/fluid_reasoning_720.jsonl",
+     "v2": "conformance/fluid_reasoning_720.v2.jsonl"
+    }
    },
    "generation_protocol": {
     "runner": "scripts/stages/stage-0/calibration_volume/run_battery.py",
     "decoding": "greedy (temperature 0)",
     "thinking": "model-native chat template",
     "allowance": "per sample: supported context - rendered prompt (P18)",
-    "context": "the model's actual supported context; a recovered student at its trained context, a reference model at its configured context"
+    "context": "the model's actual supported context; a recovered student at its trained context, a reference model at its configured context",
+    "action_protocol": "v2 for formal measurement (tasks.interactive: markdown emphasis, code spans, $ and spaced/comma code digits read as the action); the environment and the replay use the SAME protocol, recorded per episode. Historical episodes are v1."
    },
    "exposure": {
     "status": "DEVELOPMENT-EXPOSED: not a never-seen blind set",
@@ -173,13 +203,28 @@
      "True": 144
     }
    },
-   "independent_items": 720,
+   "independent_items": 708,
    "quality_review": {
     "audit": "audit/fluid_reasoning_720_quality.json",
-    "status": "OPEN: maintainer decision required (see README)"
+    "status": "DECIDED by the maintainer 2026-10-19: 6 items excluded by validity_v1, the rest valid and annotated"
    },
    "duplicate_groups": [],
-   "duplicate_rule": "each group is ONE independent item: a report gives every unit's registered rate over all its items and, beside it, the rate over independent items (each group counted once)"
+   "duplicate_rule": "each group is ONE independent item: a report gives every unit's registered rate over all its items and, beside it, the rate over independent items (each group counted once)",
+   "validity": {
+    "file": "fluid_reasoning_720/validity_v1.json",
+    "formal": 714,
+    "excluded": 6,
+    "formal_static": 570,
+    "formal_interactive": 144
+   },
+   "independence": {
+    "file": "fluid_reasoning_720/independence_v1.json",
+    "items": 720,
+    "groups": 6,
+    "independent": 708,
+    "formal_items": 714,
+    "formal_independent": 702
+   }
   },
   "stage3_capability_846": {
    "role": "held_out",
@@ -261,11 +306,25 @@
     ]
    },
    "scorer": {
-    "protocol_id": "capability-v2 + eval_behavior_v0",
+    "protocol_id": "capability-v2 + eval_behavior_v0 / eval-set-1 capability scorer@v2",
     "adapter": "scripts/shared/evaluation/eval_set_scoring.py :: score_capability, score_behavior",
     "rule": "aadistill.evaluation.capability.SCORERS per set (deterministic; alias-set EM / numeric-then-symbolic math / evidence containment), strict_answer.score_numeric for gsm8k, aadistill.evaluation.behavior.score_sample for the 76; both paired sets are headlined by PAIR accuracy, never per-row",
     "rescoring_note": "numbers scored before the 2026-08-04 rescoring (e2diag_rescored_v2) used an earlier capability.py; compare only rescored numbers",
-    "conformance": "conformance/stage3_capability_846.jsonl"
+    "conformance": {
+     "v1": "conformance/stage3_capability_846.jsonl",
+     "v2": "conformance/stage3_capability_846.v2.jsonl"
+    },
+    "formal_protocol": "v2",
+    "historical_protocol_id": "capability-v2 + eval_behavior_v0",
+    "v2_units": [
+     "answerability_paired",
+     "gsm8k",
+     "knowledge",
+     "math_verified",
+     "multihop",
+     "rag"
+    ],
+    "v2_rule": "the v1 scorer applied to the reply after tasks.common.normalize_v2 (Unicode minus, LaTeX wrappers and spacing, markdown emphasis); safety_paired and eval_behavior_v0 keep v1"
    },
    "generation_protocol": {
     "decoding": "greedy",
@@ -321,7 +380,7 @@
    },
    "independent_items": 843,
    "quality_review": {
-    "status": "frozen 2026-08-03 by its own record; one known cross-set duplicate; knowledge withheld pending license review"
+    "status": "DECIDED by the maintainer 2026-10-19: TriviaQA outside the core (withheld, supplementary); xLAM prompts outside the core; 4 Stage-2-train overlaps outside held-out correctness"
    },
    "duplicate_groups": [
     [
@@ -337,7 +396,13 @@
      "rag:squad-val-57299021af94a219006aa50c"
     ]
    ],
-   "duplicate_rule": "each group is ONE independent item: a report gives every unit's registered rate over all its items and, beside it, the rate over independent items (each group counted once)"
+   "duplicate_rule": "each group is ONE independent item: a report gives every unit's registered rate over all its items and, beside it, the rate over independent items (each group counted once)",
+   "core": {
+    "file": "stage3_capability_846/core_v1.json",
+    "behaviour_items": 76,
+    "behaviour_core": 69,
+    "behaviour_core_held_out": 65
+   }
   },
   "stage3_legacy_150": {
    "role": "in_sample_regression",
@@ -356,10 +421,16 @@
     ]
    },
    "scorer": {
-    "protocol_id": "stage3.three_mode.free@v1",
+    "protocol_id": "stage3.three_mode.free@v2",
     "adapter": "scripts/shared/evaluation/eval_set_scoring.py :: score_legacy",
     "rule": "answer = text after </think>; numeric tasks: strict \\boxed{}/Final Answer extraction then numeric equality; free-form QA: normalized gold contained in the answer (run_three_mode_diagnostic.score); correct is reported beside usable_rollout, not conditioned on it",
-    "conformance": "conformance/stage3_legacy_150.jsonl"
+    "conformance": {
+     "v1": "conformance/stage3_legacy_150.jsonl",
+     "v2": "conformance/stage3_legacy_150.v2.jsonl"
+    },
+    "formal_protocol": "v2",
+    "historical_protocol_id": "stage3.three_mode.free@v1",
+    "v2_rule": "the v1 rule applied after tasks.common.normalize_v2"
    },
    "generation_protocol": {
     "decoding": "greedy",
@@ -447,5 +518,11 @@
    "stage3_legacy_150/items"
   ]
  },
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "frozen_utc": "2026-10-19",
+ "formal_core": {
+  "rule": "formal measurement generates EVERY item of every unit; the formal numbers are computed on the core: fluid_reasoning_720 validity_v1 (714 items), every capability unit except knowledge (TriviaQA, supplementary), eval_behavior_v0 without the xLAM prompts (and without the four Stage-2 train overlaps in held-out correctness), and stage3_legacy_150 only as in-sample regression. A non-core unit or row is reported beside, never inside, a formal number.",
+  "scoring": "each component's scorer.formal_protocol (v2)"
+ },
+ "identity_note": "identity 2 of eval-set-1: identity 1's content files are carried unchanged; the validity, independence and core files, the v2 conformance vectors and this manifest are new"
 }

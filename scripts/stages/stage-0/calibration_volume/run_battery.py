@@ -57,7 +57,8 @@ def request_seed(base: int, task_id: str, turn: int) -> int:
 
 def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
                  seed_base, system, check_every, degeneration_check,
-                 split_generation, template_opens_think, label, log=print):
+                 split_generation, template_opens_think, label, log=print,
+                 action_protocol="v1"):
     """Generate every task's turns through `eng`; returns (episodes, turns, tokens).
 
     ASYNCHRONOUS: one engine pass for everything. A finished turn is processed
@@ -74,7 +75,8 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
     """
     episodes = {}
     for t in tasks:
-        env = make_env(t["env"]) if t.get("interactive") else None
+        env = (make_env(t["env"], action_protocol=action_protocol)
+               if t.get("interactive") else None)
         episodes[t["task_id"]] = {
             "task": t, "env": env, "history": [{"role": "system", "content": system},
                                               *t["messages"]],
@@ -209,6 +211,9 @@ def main(argv=None) -> int:
     ap.add_argument("--check-every", type=int, default=256)
     ap.add_argument("--system", default="You are a helpful Assistant.")
     ap.add_argument("--limit", type=int, default=None, help="first N tasks (smoke)")
+    ap.add_argument("--action-protocol", default="v1", choices=("v1", "v2"),
+                    help="how the environment reads action lines (tasks/interactive.py); "
+                         "recorded per episode, and the scorer replays with it")
     args = ap.parse_args(argv)
     if args.mode == "eval" and args.session_limit:
         raise SystemExit("--session-limit is a data-construction bound; a measurement "
@@ -274,7 +279,8 @@ def main(argv=None) -> int:
         stop_ids=stop_ids, mode=args.mode, seed_base=args.seed_base,
         system=args.system, check_every=args.check_every,
         degeneration_check=degeneration.check, split_generation=split_generation,
-        template_opens_think=template_opens_think, label=args.label)
+        template_opens_think=template_opens_think, label=args.label,
+        action_protocol=args.action_protocol)
     gen_s = round(time.time() - t_gen, 1)
     identity = {
         "label": args.label, "model": args.model, "revision": args.revision,
@@ -283,6 +289,7 @@ def main(argv=None) -> int:
         "context_resolution": ctx_info, "session_limit": args.session_limit,
         "effective_limit": limit, "stop_ids": stop_ids, "sampling": sampling,
         "seed_base": args.seed_base if args.mode == "generate" else None,
+        "action_protocol": args.action_protocol,
         "system_message": args.system,
         "chat_template_sha256": hashlib.sha256((tok.chat_template or "").encode()).hexdigest(),
         "tokenizer_sha256": tokenizer_files_sha256(args.model),
@@ -303,6 +310,7 @@ def main(argv=None) -> int:
                    "interactive": t["interactive"], "end": e["end"],
                    "turns": e["turns"],
                    "env_result": e["env"].result() if e["env"] else None,
+                   **({"action_protocol": args.action_protocol} if e["env"] else {}),
                    "messages": e["history"]}
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
     summary = {"identity": identity, "n_tasks": len(episodes), "turns": rnd,

@@ -1,0 +1,111 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.design/v1",
+ "name": "formal_v1",
+ "question": "Does more calibration data (1x, 2x, 4x of 45,000 UESP), drawn as ONE nested sample from one frozen base mixture, change the D1 full search's structural selection and the recovered student's capabilities on eval-set-1? Single-draw treatment comparisons only (maintainer amendment 2026-10-18, authorization 2026-10-19).",
+ "pool": {
+  "dir": "artifacts/stages/stage-0/calibration_volume/base_pool_v1",
+  "items_sha256": "c9e18612f994795d0764ceb0d0d0f403bcf5acb7f9a746581fe45b12829c93d7",
+  "content_sha256": "f702f74ef49db55032bf8e438c37985ff539cdbe25d24355b8a7146e55b83341"
+ },
+ "reference_uesp": 45000,
+ "sample_rule": "stratified nested sampling: generator/subtype cells, seed-keyed per-cell shuffles, whole units, quota = dose x reference x domain weight split equally over the domain's cells (build_volume_profiles.py)",
+ "profiles": {
+  "base": {
+   "domain_weights": {
+    "inductive_rule_discovery": 0.18,
+    "compositional_generalization": 0.18,
+    "task_contained_deduction": 0.18,
+    "abstract_analogical": 0.18,
+    "supporting": 0.28
+   },
+   "_why": "the pilot's frozen base mixture: 0.18 per static primary axis, 0.28 supporting"
+  },
+  "rh": {
+   "domain_weights": {
+    "inductive_rule_discovery": 0.22,
+    "compositional_generalization": 0.22,
+    "task_contained_deduction": 0.22,
+    "abstract_analogical": 0.22,
+    "supporting": 0.12
+   },
+   "_why": "its frozen reasoning-heavy variant: the same equal weight on every static primary axis, the supporting share cut from 0.28 to 0.12 (the D-series reasoning_heavy halved its general share the same way). The search chooses the profile per operator freely, as in D1."
+  }
+ },
+ "excluded_domains": {
+  "interactive_adaptation": "13 admissible successful teacher episodes in base_pool_v1, ~16k scored positions each: too few for independent resampling and each larger than a 1x cell quota"
+ },
+ "cells": {
+  "abstract_analogical": {
+   "grid_transform@v1": [
+    "*"
+   ]
+  },
+  "compositional_generalization": {
+   "defined_ops@v1": [
+    "*"
+   ],
+   "scan_language@v1": [
+    "*"
+   ]
+  },
+  "inductive_rule_discovery": {
+   "list_induction@v1": [
+    "*"
+   ],
+   "string_induction@v1": [
+    "*"
+   ]
+  },
+  "supporting": {
+   "gsm8k": [
+    "*"
+   ],
+   "multihop_qa": [
+    "*"
+   ],
+   "openmath": [
+    "*"
+   ],
+   "rag_evidence": [
+    "*"
+   ]
+  },
+  "task_contained_deduction": {
+   "entity_tracking@v1": [
+    "*"
+   ],
+   "knights_knaves@v1": [
+    "*"
+   ],
+   "ordering@v1": [
+    "*"
+   ]
+  }
+ },
+ "treatments": {
+  "d1": {
+   "dose": 1,
+   "sampling_seed": 1308798386
+  },
+  "d2": {
+   "dose": 2,
+   "sampling_seed": 1308798386
+  },
+  "d4": {
+   "dose": 4,
+   "sampling_seed": 1308798386
+  }
+ },
+ "seed_derivation": "uint32_be(sha256('stage0.calibration_volume.formal_v1|draw|1')[:4]) mod 2**31 -- ONE draw for every dose, so 1x is a prefix of 2x and 2x of 4x in every cell, and the two profiles share each cell's order",
+ "leakage_exclusions": [
+  "dev_v1 and final evaluation families (generator family split)",
+  "recovery rung 0.86M sessions",
+  "state_eval@v1 sessions",
+  "d_series_behavioural_v1 prompts"
+ ],
+ "output": {
+  "items_dir": "artifacts/stages/stage-0/calibration_volume/profiles_formal_v1",
+  "profiles_doc": "configs/stages/stage-0/calibration_volume/profiles_formal.json"
+ },
+ "authorizes": "nothing"
+}

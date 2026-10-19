@@ -1,0 +1,564 @@
+{
+ "schema": "aadistill.eval_set_rescoring/v1",
+ "eval_set_id": "eval-set-1",
+ "rule": "every historical generation available locally, re-scored under the frozen v1 protocol and under v2, item by item; v2 must never reject what v1 accepted. Historical results stay bound to v1; v2 numbers are new numbers.",
+ "fluid_reasoning_720": {
+  "artifacts/stages/stage-0/calibration_volume/battery_20261018_092345/teacher_dev/teacher_dev.jsonl": {
+   "sha256": "98f08abca50a4456e9021b39f709bb7cd69e7500d107f79b0fcaba47cadf2adc",
+   "items": 720,
+   "correct_v1": 638,
+   "correct_v2": 638,
+   "gained": [],
+   "lost": [],
+   "interactive_turns_whose_action_would_parse_differently_under_v2": 0,
+   "_interactive": "episodes were generated under action protocol v1, so they replay under v1 under either scorer; the count above is the protocol change's footprint on these transcripts, not a rescoring"
+  },
+  "artifacts/stages/stage-0/calibration_volume/battery_20261018_092345/e1_r2960k_sa_pca_dev/e1_r2960k_sa_pca_dev.jsonl": {
+   "sha256": "4b54bba870e03cbbe1990a264fde43185fbc15e20a7a18f6a5518972de2eb4ae",
+   "items": 720,
+   "correct_v1": 10,
+   "correct_v2": 10,
+   "gained": [],
+   "lost": [],
+   "interactive_turns_whose_action_would_parse_differently_under_v2": 24,
+   "_interactive": "episodes were generated under action protocol v1, so they replay under v1 under either scorer; the count above is the protocol change's footprint on these transcripts, not a rescoring"
+  },
+  "artifacts/stages/stage-0/calibration_volume/battery_20261018_092345/ctl_r0860k_sa_dev/ctl_r0860k_sa_dev.jsonl": {
+   "sha256": "ca13e652a65394cd19b33cc21e9dfa3747515c3e561b80ac031e66fd06930c85",
+   "items": 720,
+   "correct_v1": 0,
+   "correct_v2": 0,
+   "gained": [],
+   "lost": [],
+   "interactive_turns_whose_action_would_parse_differently_under_v2": 15,
+   "_interactive": "episodes were generated under action protocol v1, so they replay under v1 under either scorer; the count above is the protocol change's footprint on these transcripts, not a rescoring"
+  },
+  "artifacts/stages/stage-0/calibration_volume/battery_20261018_092345/ctl_r0860k_sb_dev/ctl_r0860k_sb_dev.jsonl": {
+   "sha256": "5b2dadfb303169ef6e9f05c1c2a08b18e17ecb541d852200926d88fd91049c4f",
+   "items": 720,
+   "correct_v1": 0,
+   "correct_v2": 0,
+   "gained": [],
+   "lost": [],
+   "interactive_turns_whose_action_would_parse_differently_under_v2": 9,
+   "_interactive": "episodes were generated under action protocol v1, so they replay under v1 under either scorer; the count above is the protocol change's footprint on these transcripts, not a rescoring"
+  },
+  "artifacts/stages/stage-0/calibration_volume/resolution_20261018_213745/qwen3_0p6b_cap8192_dev/qwen3_0p6b_cap8192_dev.jsonl": {
+   "sha256": "537a36a811a62d2e94b1bf017bfe74a4a8ea52df89c52102b38651b7fba9cf1b",
+   "items": 720,
+   "correct_v1": 257,
+   "correct_v2": 260,
+   "gained": [
+    "1bc532accb57be88dc97",
+    "3ce5266cfcb0897ccf3b",
+    "8e116a41b54a6156744b"
+   ],
+   "lost": [],
+   "interactive_turns_whose_action_would_parse_differently_under_v2": 145,
+   "_interactive": "episodes were generated under action protocol v1, so they replay under v1 under either scorer; the count above is the protocol change's footprint on these transcripts, not a rescoring"
+  },
+  "artifacts/stages/stage-0/calibration_volume/resolution_20261018_213745/e1_r5500k_sa_pca_dev/e1_r5500k_sa_pca_dev.jsonl": {
+   "sha256": "111be37d6b65a528972d484a7aa443773986c1de197244e241bb5ad2bf2def69",
+   "items": 720,
+   "correct_v1": 2,
+   "correct_v2": 2,
+   "gained": [],
+   "lost": [],
+   "interactive_turns_whose_action_would_parse_differently_under_v2": 2,
+   "_interactive": "episodes were generated under action protocol v1, so they replay under v1 under either scorer; the count above is the protocol change's footprint on these transcripts, not a rescoring"
+  },
+  "artifacts/stages/stage-0/calibration_volume/resolution_20261018_213745/e1_r1600k_sa_pca_dev/e1_r1600k_sa_pca_dev.jsonl": {
+   "sha256": "9f64707825c8070f23e9a8c6e0bec0452b6ae54c1763626353859af732212e7a",
+   "items": 720,
+   "correct_v1": 7,
+   "correct_v2": 7,
+   "gained": [],
+   "lost": [],
+   "interactive_turns_whose_action_would_parse_differently_under_v2": 15,
+   "_interactive": "episodes were generated under action protocol v1, so they replay under v1 under either scorer; the count above is the protocol change's footprint on these transcripts, not a rescoring"
+  }
+ },
+ "stage3_capability_846": {
+  "artifacts/stages/stage-3/eval/e2diag_rescored_v2/_staged_ref_qwen3_0p6b_native": {
+   "answerability_paired": {
+    "sha256": "fc00820caddca5757e83609ad366b5a9d90b990192cec9babcdf2ec03cf41ee4",
+    "items": 120,
+    "correct_v1": 68,
+    "correct_v2": 68,
+    "gained": [],
+    "lost": []
+   },
+   "gsm8k": {
+    "sha256": "014cdca94d075d525f1ce98a2ae671fcc7a0f22bf01a7836757f0979e34ce76c",
+    "items": 100,
+    "correct_v1": 69,
+    "correct_v2": 69,
+    "gained": [],
+    "lost": []
+   },
+   "math_verified": {
+    "sha256": "49c8f8ba5d010163e67bacd5f7502db35928139c393553ccca0e86dc02beebe2",
+    "items": 100,
+    "correct_v1": 58,
+    "correct_v2": 58,
+    "gained": [],
+    "lost": []
+   },
+   "multihop": {
+    "sha256": "779042c904b51ff67151b6e1f1157a992854caa691c26b25e8908df0ec3cd156",
+    "items": 100,
+    "correct_v1": 52,
+    "correct_v2": 52,
+    "gained": [],
+    "lost": []
+   },
+   "rag": {
+    "sha256": "c578893a96f11e64c21cc29386fb65fc0239228f23e66160c55fb069494abe32",
+    "items": 100,
+    "correct_v1": 71,
+    "correct_v2": 71,
+    "gained": [],
+    "lost": []
+   }
+  },
+  "artifacts/stages/stage-3/eval/e2diag_rescored_v2/_staged_ref_qwen3_0p6b_project": {
+   "answerability_paired": {
+    "sha256": "09499c9b1002e97e49b70e30f453a64f5e668a82677aee4e1cd9a21c3365c3bd",
+    "items": 120,
+    "correct_v1": 67,
+    "correct_v2": 67,
+    "gained": [],
+    "lost": []
+   },
+   "gsm8k": {
+    "sha256": "96a11d0d4ac8de93233daed567bd54a8fdb024fc7e8fcd90551b4a17bfcc9fb5",
+    "items": 100,
+    "correct_v1": 70,
+    "correct_v2": 70,
+    "gained": [],
+    "lost": []
+   },
+   "math_verified": {
+    "sha256": "cbf4d0bf03bc69220c62dc9162fda60a360411fdb0ac55da021c5ab360eb62a3",
+    "items": 100,
+    "correct_v1": 62,
+    "correct_v2": 62,
+    "gained": [],
+    "lost": []
+   },
+   "multihop": {
+    "sha256": "685e48191d6e4f0dd052f31c5c113cf29d77d2480a9512b6d0d0c21f37239309",
+    "items": 100,
+    "correct_v1": 60,
+    "correct_v2": 60,
+    "gained": [],
+    "lost": []
+   },
+   "rag": {
+    "sha256": "9abb2af517adda9e77958bbb4cf8d0a7d3c99473962d683c1fdd20a2b473bdec",
+    "items": 100,
+    "correct_v1": 74,
+    "correct_v2": 74,
+    "gained": [],
+    "lost": []
+   }
+  },
+  "artifacts/stages/stage-3/eval/e2p1/d0_sa": {
+   "answerability_paired": {
+    "sha256": "98a762a4953f6c1acddbcb29b73a13abdb9fe7ba0bb7bd440a20e753a061fb67",
+    "items": 120,
+    "correct_v1": 8,
+    "correct_v2": 8,
+    "gained": [],
+    "lost": []
+   },
+   "gsm8k": {
+    "sha256": "4751f1ab273e65246028b807b46243356b256807f4ac22849a0094bb7c15d8f5",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "math_verified": {
+    "sha256": "a01b7ebe7b9ebeb1cbaa617dc5e0db2ea6ff37140eff74e8d9803e6ea3d60ff6",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "multihop": {
+    "sha256": "1da06f04893bd5f7ec77ed16380138e2fe88c66ddf55161a538c676033ac7712",
+    "items": 100,
+    "correct_v1": 1,
+    "correct_v2": 1,
+    "gained": [],
+    "lost": []
+   },
+   "rag": {
+    "sha256": "67bdc3b09df8153064866edf718e214f5bc442542bb32ad302964bf37e0adb3f",
+    "items": 100,
+    "correct_v1": 7,
+    "correct_v2": 7,
+    "gained": [],
+    "lost": []
+   }
+  },
+  "artifacts/stages/stage-3/eval/e2p1/d0_sb": {
+   "answerability_paired": {
+    "sha256": "49951eb171dcf05c458fa29b45488d6963eb5e751023e2a765a95642ada91b48",
+    "items": 120,
+    "correct_v1": 9,
+    "correct_v2": 9,
+    "gained": [],
+    "lost": []
+   },
+   "gsm8k": {
+    "sha256": "ac5cb90e6a65a69538de84d45d193cc250328fa439f52284723a10ce5e6c51c8",
+    "items": 100,
+    "correct_v1": 1,
+    "correct_v2": 1,
+    "gained": [],
+    "lost": []
+   },
+   "math_verified": {
+    "sha256": "3014c1918388955119500c55eb3ca91adc7632f2f105a7513ad7bf3de086cc2a",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "multihop": {
+    "sha256": "0b09cad0b36770a95c654d5ed32811a865cc3b4fe240af671ff5df471214cab6",
+    "items": 100,
+    "correct_v1": 3,
+    "correct_v2": 3,
+    "gained": [],
+    "lost": []
+   },
+   "rag": {
+    "sha256": "70f8bd4aa29cf87ae727f072fb0023ab3f4d0e066970d3df57400fe6e8b374ec",
+    "items": 100,
+    "correct_v1": 3,
+    "correct_v2": 3,
+    "gained": [],
+    "lost": []
+   }
+  },
+  "artifacts/stages/stage-3/eval/e2p1/e2_d1_sa_pca_step000508": {
+   "answerability_paired": {
+    "sha256": "fd149b36bf536765eb3245fdc7e34ee9a09e7b478f8ddd4b5a049f0554501ff0",
+    "items": 120,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "gsm8k": {
+    "sha256": "b71c1c7ecfd441843a625b54e967fd06b9ae1a8e945f696ae1280ed463e5fea3",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "math_verified": {
+    "sha256": "9dbf7581df91661c11cd023e8a832d7c01c97130c2bbb7111717c5acf6837b65",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "multihop": {
+    "sha256": "b5085acd84a0df2391da37ac67d0c8bab817aafa9df13471b2619bcdf3fcad7e",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "rag": {
+    "sha256": "2bb0b6d9b578dfce6b44bd6c6073990acbe8f7b892103050c809896bdfcc6f96",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   }
+  },
+  "artifacts/stages/stage-3/eval/e2p1/e2_d1_sa_pca_step000635": {
+   "answerability_paired": {
+    "sha256": "acb289a7a9e07a0d48eb255c41feff09bb9a77fd85eb5b54b927bd09aadb934b",
+    "items": 120,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "gsm8k": {
+    "sha256": "230bdbe137420fdb1a4e2fef783b406c04ff30eb5a14485a5d539eb9de4ee955",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "math_verified": {
+    "sha256": "c10b4048264e8f231f49a8bedb827d9e2197558da8328d081051dc967e187341",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "multihop": {
+    "sha256": "dc93e9db4b4fc7e8cbef483d9c3f757b3c9124162461731f30d023cef2d873c9",
+    "items": 100,
+    "correct_v1": 2,
+    "correct_v2": 2,
+    "gained": [],
+    "lost": []
+   },
+   "rag": {
+    "sha256": "136ce7b8e8ca4578d6206f1b57f5aa7000007a00a61c6cf6a00a19e5f0a8c83d",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   }
+  },
+  "artifacts/stages/stage-3/eval/e2p1/e2_d1_sa_pca_step001016": {
+   "answerability_paired": {
+    "sha256": "70234b91e0590f4631549ecfd6e8801ea2c6b4a684cce67efc09038f4624d1c2",
+    "items": 120,
+    "correct_v1": 9,
+    "correct_v2": 9,
+    "gained": [],
+    "lost": []
+   },
+   "gsm8k": {
+    "sha256": "fec6cbad307ba052a2b73237f14cf9ce6286f46b78d0d142c51341fd6c9b2b77",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "math_verified": {
+    "sha256": "e144dfef3487749c1bab8006da897dae81a80996ab2929aa88f71390bf7322b9",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "multihop": {
+    "sha256": "7932def7a39c3680fe3b25168bacb74fdea18489924812dad070145c34df5e5a",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "rag": {
+    "sha256": "0a6fb6ff02ac72cb0174297503eb4f7206bcac81e82fe78c54b387a086529852",
+    "items": 100,
+    "correct_v1": 6,
+    "correct_v2": 6,
+    "gained": [],
+    "lost": []
+   }
+  },
+  "artifacts/stages/stage-3/eval/e2p1/e2_d1_sa_pca_step001023": {
+   "answerability_paired": {
+    "sha256": "8e45163fa90d95b1507f47678fa1145e5501570cf43f8cb0fc5ba8cce73a0349",
+    "items": 120,
+    "correct_v1": 7,
+    "correct_v2": 7,
+    "gained": [],
+    "lost": []
+   },
+   "gsm8k": {
+    "sha256": "2b891311292b3c291948c8c0bd9d77c3e2d695b5f497324d523074497c8de948",
+    "items": 100,
+    "correct_v1": 1,
+    "correct_v2": 1,
+    "gained": [],
+    "lost": []
+   },
+   "math_verified": {
+    "sha256": "55ff6d00d6330ef108defd3598e874fd764a3f7522213b87d752139164f88814",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "multihop": {
+    "sha256": "22d9e0a79a27bb31e2e3a649caafce72b0bebceb3b45cbbd587f18a7652ebbad",
+    "items": 100,
+    "correct_v1": 4,
+    "correct_v2": 4,
+    "gained": [],
+    "lost": []
+   },
+   "rag": {
+    "sha256": "aac813af7bc742219561bb85c8d840234c4cc13334d994f75a8bc67f922abbfa",
+    "items": 100,
+    "correct_v1": 6,
+    "correct_v2": 6,
+    "gained": [],
+    "lost": []
+   }
+  },
+  "artifacts/stages/stage-3/eval/e2p1/e2_d1_sb_pca_step000127": {
+   "answerability_paired": {
+    "sha256": "5381efa125649324d4175053d98c2c1857f24ff61f9b7d0e5c93a8fd31276a08",
+    "items": 120,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "gsm8k": {
+    "sha256": "6204a6488c149cd9550bcbdcd9fe34cf70a7e07a00218900c4ee4bebf9e42b8c",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "math_verified": {
+    "sha256": "c3e683a6874e5e19f515493a024927a26960f3d2046f827d084f2c8fcbfc7a1b",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "multihop": {
+    "sha256": "f95404e2ccfcb54be3a6d5ef2931d8f19f748afa80b1cd7a533a8eb956bc9c87",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "rag": {
+    "sha256": "6d3800ccfedbe70628189745453620dc517147b27cda04fbebe548c497ce14af",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   }
+  },
+  "artifacts/stages/stage-3/eval/e2p1/e2_d1_sb_pca_step000254": {
+   "answerability_paired": {
+    "sha256": "b2fae5fc1ebd6cb49111b7d127b30dcd4baf167e9ba67c5a38c14befe0dda13e",
+    "items": 120,
+    "correct_v1": 1,
+    "correct_v2": 1,
+    "gained": [],
+    "lost": []
+   },
+   "gsm8k": {
+    "sha256": "25a68d53702afe6468e8740bcb68f1558eec5f699bdf58d72afd89dc98e4dfac",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "math_verified": {
+    "sha256": "e37c24682aa897d8c7ed280759bcb6758ef2afb41eb304b900c876c78d3f5a8d",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "multihop": {
+    "sha256": "bc8ec0bdcce303fca8cd67ef2ab5b32ae5b448e4958b16fe813ea65e3874c189",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "rag": {
+    "sha256": "35c6a69f7e54c9dc6e0dbef3d8c898ccfedf9d554640d3184000f7abb64ecef7",
+    "items": 100,
+    "correct_v1": 3,
+    "correct_v2": 3,
+    "gained": [],
+    "lost": []
+   }
+  },
+  "artifacts/stages/stage-3/eval/e2p1/e2_d1_sb_pca_step001023": {
+   "answerability_paired": {
+    "sha256": "df83c9be56587a22c4f28d03cf1bf0923113fdffd8c384cae5b297a311b5cc73",
+    "items": 120,
+    "correct_v1": 17,
+    "correct_v2": 17,
+    "gained": [],
+    "lost": []
+   },
+   "gsm8k": {
+    "sha256": "97f9eb7576d41fd6e6b2a51706b0aca2f66b34622db061261cdbdb73551f5b0b",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "math_verified": {
+    "sha256": "149885f39e4211607cd755d672c0885b1d50b86da1bf5d7647ab9178d3ef7205",
+    "items": 100,
+    "correct_v1": 0,
+    "correct_v2": 0,
+    "gained": [],
+    "lost": []
+   },
+   "multihop": {
+    "sha256": "737f114bfed047b9cb41f2857ae4055476ee5e59491538f560934ab59bb9d722",
+    "items": 100,
+    "correct_v1": 1,
+    "correct_v2": 1,
+    "gained": [],
+    "lost": []
+   },
+   "rag": {
+    "sha256": "8ad9a29043360b13149982d3b48254fd52a2eca11a3f1504cd928eecc331f637",
+    "items": 100,
+    "correct_v1": 4,
+    "correct_v2": 4,
+    "gained": [],
+    "lost": []
+   }
+  }
+ },
+ "stage3_legacy_150": {
+  "artifacts/audit/three_mode/E1-2.96M-sa/free.generations.jsonl": {
+   "sha256": "5fc77d696c5096738894af14d818aec67fd4510daf1a2d48f78874193b6fcff1",
+   "items": 150,
+   "correct_v1": 32,
+   "correct_v2": 32,
+   "gained": [],
+   "lost": []
+  },
+  "artifacts/audit/three_mode/P2-2.96M-sb/free.generations.jsonl": {
+   "sha256": "5f6049941260d0709d7cddd7789c4a03dace79b26983c80900adb3a5aedb8441",
+   "items": 150,
+   "correct_v1": 30,
+   "correct_v2": 30,
+   "gained": [],
+   "lost": []
+  }
+ },
+ "v2_rejects_something_v1_accepted": []
+}

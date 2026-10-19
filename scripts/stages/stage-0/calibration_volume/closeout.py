@@ -111,12 +111,16 @@ def main(argv=None) -> int:
                     shutil.copy2(f, dest / unit.name / rel)
                 # small, reviewable evidence goes into git; raw records stay outside
                 for name in ("score.summary.json", f"{unit.name}.summary.json",
-                             "search_record.json", "structure.json"):
+                             "search_record.json", "structure.json",
+                             # a formal dose unit: one directory per stage
+                             "dose_record.json", "search/search_record.json",
+                             "search/stage1_selection.json", "recovery/recovery_products.json",
+                             "recovery/recovery_config.json", "eval/report.json"):
                     if (unit / name).is_file() and (unit / name).stat().st_size <= EVIDENCE_MAX_BYTES:
-                        (ev / unit.name).mkdir(exist_ok=True)
+                        (ev / unit.name / name).parent.mkdir(parents=True, exist_ok=True)
                         shutil.copy2(unit / name, ev / unit.name / name)
                 units[unit.name] = files
-            for name in ("battery.json", "search_session.json"):
+            for name in ("battery.json", "search_session.json", "bench.json"):
                 if (store / name).is_file():
                     shutil.copy2(store / name, ev / name)
             doc["units"] = units

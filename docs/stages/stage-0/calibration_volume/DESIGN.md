@@ -140,67 +140,66 @@ frozen in `logs/.../plans/pilot_analysis_plan.json`.
 - **Results and the terminal verdict:**
   `logs/stages/stage-0/calibration_volume/closeout/REPORT.md`.
 
-## 5a. The formal study, as amended by the maintainer (2026-10-18)
+## 5a. The formal study (amended 2026-10-18, authorized 2026-10-19)
 
-The three-resamples-per-dose design is withdrawn. The formal comparison is:
+The three-resamples-per-dose design is withdrawn, and the "1x below 2% stops
+2x/4x" rule the previous round proposed is rejected by the maintainer: the
+study asks whether more calibration data helps, so a low 1x cannot cancel the
+larger doses. The frozen protocol is `plans/volume_preregistration.json`.
 
-| dose | full search | recovery | evaluation |
-| --- | --- | --- | --- |
-| 1x (45,000 UESP) | one D1 full search | one, fixed recipe and seed | eval-set-1 |
-| 2x | one | one | eval-set-1 |
-| 4x | one | one | eval-set-1 |
+| dose | profiles (one nested draw, `formal_design.json`) | full search | recovery | evaluation |
+| --- | --- | --- | --- | --- |
+| 1x (45,000 UESP) | `calib.s0v_base_d1`, `calib.s0v_rh_d1` | one D1 full search | one, fixed recipe and seed | every item of eval-set-1 |
+| 2x | `..._d2` | one | one | every item |
+| 4x | `..._d4` | one | one | every item |
 
 - **Fixed across doses:**
-  - the teacher and student geometry;
+  - the teacher, the student geometry and `state_eval@v1`;
   - the forward baseline, resolved;
-  - the recovery recipe `e1_p1_kd_heavy@0.86M` and its one seed;
-  - the evaluation contract, `data/eval-set/eval-set-1` at its registered
-    identity.
-- **One frozen base mixture and one nested draw:**
-  - the pilot's weights (0.18 per static primary axis, 0.28 supporting) and
-    their frozen reasoning-heavy variant;
-  - 1x ⊂ 2x ⊂ 4x;
-  - the operator order and the profile per operator stay free.
-- **Covariates per dose:** realized UESP, tokens, items/units,
-  sources/subtypes, distinct rule families and generators. Family diversity
-  rises with dose in the pilot draws, so every contrast is a
+  - the recovery recipe `e1_p1_kd_heavy@0.86M` at its own seed (20260726);
+  - the evaluation contract: eval-set-1 at its frozen identity (`62a1a5d3…`),
+    scorer protocol v2, action protocol v2, at the trained 8,192-token context.
+- **One draw.** One sampling seed for every dose, so 1x ⊂ 2x ⊂ 4x in every cell.
+  - Two mixtures share each cell's order:
+    - `base`: 0.18 per static primary axis, 0.28 supporting;
+    - `rh`: 0.22 per static primary axis, 0.12 supporting.
+  - Interactive episodes stay out of calibration, as in the pilot.
+  - The operator order and the profile per operator stay free search variables.
+- **Covariates per dose** (in `profiles_formal.json`): realized UESP, tokens,
+  items/units, distinct rule families (13–14, 16–17, 21–24). Every contrast is a
   volume-plus-diversity contrast, never a pure volume effect.
 - **What it can claim:** comparisons between these three treatments only.
-  - No selection variance or stability. That needs resamples; the pilot's
-    root-level resampled measurement stands as the only one, and it is not
-    repeated.
+  - No selection variance or cross-draw stability: the pilot's resampled
+    root-level measurement stands as the only one.
   - No statistical saturation.
-  - The H2 intervals cover evaluation sampling only.
-- **Resolution gate:**
-  - **Before any search:** the reference check
-    (`configs/.../resolution_session.json`) measures whether the 720 resolves
-    models at student scale.
-  - **After the 1x unit:** the recovered D1-initialized student must answer at
-    least 2% of the static fluid items, or H2 is EVALUATION NOT RESOLVABLE.
-    That verdict is measured on a D1 student, not assumed from the PCA
-    students, and 2x/4x are not launched without a new decision.
-- **The 4x search exceeds the $30 per-session cap. It is split, never
-  shrunk:**
-  - two sessions over ONE search identity;
-  - a persistent network volume in one datacenter holds the journal and every
-    materialized state;
-  - part 2 runs the identical plan, config, seed, profiles and baseline
-    resolution, and the engine's exact journal resume restores every finished
-    state from disk by content id and hash;
-  - a declined restore stops the run.
-
-  The driver/launcher support for this is specified, not yet built
-  (`plans/formal_design_proposal.json :: split_execution_of_4x`).
-- **Launch order:**
-  1. 1x search + recovery + eval-set-1, the gate;
-  2. the 2x search;
-  3. the 4x search, parts 1 and 2;
-  4. 2x and 4x recovery + eval-set-1.
-
-  All sessions share the volume, which also keeps every Top-1 and recovered
-  student durable.
-- **Price:** `plans/formal_design_proposal.json`; the verdict and the decision
-  it needs are in `closeout/REPORT.md`.
+  - The intervals cover evaluation sampling only.
+- **Execution** (search-cost bench, `runs/bench_20261019_051316`):
+  - **DEPTH prefix reuse** (`ExecutionConfig.depth_prefix_reuse`). A candidate
+    that bypasses block `c` starts from the input block `c` received in one
+    capture forward per round, instead of recomputing its prefix. It is
+    bit-identical on the A100: every candidate score, the removal order and
+    the child's bytes.
+  - **The save/reload check on the device**
+    (`BeamSearch(validate_on_search_device=True)`). The host forward was ~58 s
+    of each ~75 s of per-expansion overhead.
+  - **`prune_weights=False`.** Every state's bytes stay, so a resumed search
+    restores pruned states (`_restore` accepts a PRUNED record whose bytes are
+    on disk) instead of re-executing them.
+  - **Execution only.** These are execution options: no search identity,
+    numerics, state evaluation, ranking or resume rule changes.
+- **Durability.**
+  - A 300 GB network volume (EUR-IS-1) holds the search mirror, the Top-1 and
+    the recovered students. `volume_sync.py` pushes the search's journal and
+    every new state as the search runs.
+  - A replacement session pulls the mirror back and resumes: the journal
+    restores states, an existing trained student is evaluated rather than
+    retrained, and finished evaluation units are rescored rather than
+    regenerated.
+- **One session per dose** (`dose_driver.py`, launcher kind `dose`):
+  search → recovery → eval-set-1. With the $50 per-session cap the 4x dose
+  fits one session, so it is not split.
+- **Order:** 1x, 2x, 4x. Before each launch, its hard cap and the expected cost
+  of the remaining doses plus a $5 margin must fit what is left of the $90.
 
 ## 6. Sessions and money
 
@@ -224,7 +223,7 @@ The three-resamples-per-dose design is withdrawn. The formal comparison is:
 | executables (audit, generators, builders, runner, scorer, governance, launcher, drivers, closeouts) | `scripts/stages/stage-0/calibration_volume/` |
 | experiment tests | `pytest scripts/stages/stage-0/calibration_volume/tests` |
 | calibration prompt sets and manifests | `data/stages/stage-0/calibration_volume/tasks/` |
-| the dev battery (`dev_v1`), since 2026-10-18 a registered evaluation set | `data/eval-set/eval-set-1/fluid_reasoning_720/` (old path resolves through `logs/index.json :: historical_paths`) |
+| the dev battery (`dev_v1`), since 2026-10-18 a registered evaluation set (frozen 2026-10-19 as eval-set-1) | `data/eval-set/eval-set-1/fluid_reasoning_720/` (old path resolves through `logs/index.json :: historical_paths`) |
 | audit inputs, session plans, artifact specs, pilot design, profile document | `configs/stages/stage-0/calibration_volume/` |
 | audit, design analyses, frozen plans, runs, programme closeout | `logs/stages/stage-0/calibration_volume/` (README generated) |
 | heavy bytes: raw generations, base pool, profile items, search records | `artifacts/stages/stage-0/calibration_volume/` (gitignored; each run's closeout names them by sha256) |

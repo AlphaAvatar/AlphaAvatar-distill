@@ -38,6 +38,7 @@ for _p in ("src", "scripts"):
 
 AUDIT = "artifacts/audit/stage0_calvol_search"
 PREREG = REPO / "logs/stages/stage-0/calibration_volume/plans/volume_preregistration.json"
+SS_PROFILES_DOC = REPO / "configs/stages/stage-0/calibration_volume/profiles.json"
 
 
 def mark(status: Path, name: str) -> None:
@@ -118,6 +119,20 @@ def main(argv=None) -> int:
                     help="the document that freezes this treatment's profile hashes")
     ap.add_argument("--max-depth", type=int, default=None,
                     help="1 = the root-level pilot: no complete leaf, no commit")
+    ap.add_argument("--search-run-id", default=None,
+                    help="the SEARCH's run id (it enters config_hash); stable across the "
+                         "sessions of one search so a replacement session resumes the same "
+                         "search. Default: --run-id")
+    ap.add_argument("--profiles-doc", default=str(SS_PROFILES_DOC.relative_to(REPO)),
+                    help="the profile document the treatment's profiles are registered from")
+    ap.add_argument("--prefix-reuse", action="store_true",
+                    help="ExecutionConfig.depth_prefix_reuse: execution only, bit-identical "
+                         "(validated on CUDA by the bench session)")
+    ap.add_argument("--validate-on-device", action="store_true",
+                    help="BeamSearch(validate_on_search_device=True): execution only")
+    ap.add_argument("--keep-pruned-weights", action="store_true",
+                    help="SearchConfig.prune_weights=False, so a resumed run can restore "
+                         "pruned states instead of re-executing them")
     args = ap.parse_args(argv)
 
     out = REPO / AUDIT / args.treatment
@@ -125,6 +140,7 @@ def main(argv=None) -> int:
     status = Path(args.status)
     record = {"schema": "aadistill.stage0.calibration_volume.search_record/v1",
               "treatment": args.treatment, "run_id": args.run_id,
+              "search_run_id": args.search_run_id or args.run_id,
               "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
               "stages": {}, "status": "STARTED"}
 
@@ -144,18 +160,34 @@ def main(argv=None) -> int:
         prereg = json.loads((REPO / args.treatments_doc).read_text())
         table = prereg.get("treatments_by_id") or prereg["treatments"]
         treat = table[args.treatment]
-        profiles = SS.treatment_profiles(args.treatment)
+        profiles = SS.treatment_profiles(args.treatment, REPO / args.profiles_doc)
         for p in profiles:
             want = treat["profile_hashes"][p.qualified_id]
             if p.profile_hash != want:
                 raise RuntimeError(f"{p.qualified_id} hashes to {p.profile_hash}, "
                                    f"the preregistration froze {want}")
             p.resolve(str(REPO))   # checks items_file_sha256 and content_sha256
-        session = SS.build_session(workdir=out / "search", run_id=args.run_id,
+        session = SS.build_session(workdir=out / "search",
+                                   run_id=args.search_run_id or args.run_id,
                                    profiles=profiles, device=args.device,
                                    max_depth=args.max_depth,
-                                   impl_profiles=treat.get("impl_profiles"))
+                                   impl_profiles=treat.get("impl_profiles"),
+                                   prune_weights=not args.keep_pruned_weights)
         record["session"] = session.as_record()
+        #: THE SEARCH IDENTITY, bound before anything runs: a resumed or
+        #: replacement session must be the same search, or its journal is not
+        #: this search's journal.
+        want_hash = treat.get("search_config_hash")
+        if want_hash and session.config.config_hash != want_hash:
+            raise RuntimeError(f"search config hash {session.config.config_hash} != "
+                               f"the preregistered {want_hash}")
+        execution = session.evaluator.execution
+        if args.prefix_reuse:
+            import dataclasses
+            execution = dataclasses.replace(execution, depth_prefix_reuse=True)
+        record["execution"] = {"operators": execution.as_trace(),
+                               "validate_on_search_device": bool(args.validate_on_device),
+                               "prune_weights": session.config.prune_weights}
         if not args.check_only:
             auth = G.load_for("search", args.auth)
             auth.require_plan(G.plan_hash(args.plan))
@@ -189,10 +221,12 @@ def main(argv=None) -> int:
             calibration_loader=lambda prof: prepare_calibration_items(
                 prof.resolve(str(REPO)), profile_id=prof.qualified_id),
             measurer=lambda model, digest: session.evaluator.evaluate(model, digest),
-            execution=session.evaluator.execution,
-            numerics=session.numerics)
+            execution=execution,
+            numerics=session.numerics,
+            validate_on_search_device=args.validate_on_device)
         result = search.run()
-        done(st, n_states=len(result.states), n_complete_leaves=len(result.complete_leaves))
+        done(st, n_states=len(result.states), n_complete_leaves=len(result.complete_leaves),
+             n_resumed=len(result.resumed))
         save()
 
         st = stage("D_commit")

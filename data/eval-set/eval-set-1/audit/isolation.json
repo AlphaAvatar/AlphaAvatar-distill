@@ -1,15 +1,27 @@
 {
  "schema": "aadistill.eval_set_isolation/v1",
  "eval_set_id": "eval-set-1",
- "created_utc": "2026-10-18T20:59:02+00:00",
+ "created_utc": "2026-10-19T05:35:32+00:00",
  "code_state": {
-  "git_commit": "9f63a266cc7a64d635203e57a89b6fe8a64aa0bc",
+  "git_commit": "4b31c8f4be8d227b186283b5e160e7745de4bc84",
   "git_commit_source": "git",
   "dirty": true,
-  "uncommitted_state_sha256": "12a854ba7624801ebb7fdf6ae65b9d470b6e2fecb436371ba40ffaaf02d2d70a",
+  "uncommitted_state_sha256": "a31ae8be0c79b4c8b0318ac4d636fc161e9776fb128d52501f7e1325100f1137",
   "untracked_files": [
-   "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_202715/runtime/launch.out",
-   "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_202715/runtime/session.json"
+   "configs/stages/stage-0/calibration_volume/dose_artifacts.json",
+   "configs/stages/stage-0/calibration_volume/formal_design.json",
+   "configs/stages/stage-0/calibration_volume/profiles_formal.json",
+   "data/eval-set/eval-set-1/audit/rescoring_v1_v2.json",
+   "data/eval-set/eval-set-1/conformance/fluid_reasoning_720.v2.jsonl",
+   "data/eval-set/eval-set-1/conformance/stage3_capability_846.v2.jsonl",
+   "data/eval-set/eval-set-1/conformance/stage3_legacy_150.v2.jsonl",
+   "data/eval-set/eval-set-1/fluid_reasoning_720/independence_v1.json",
+   "data/eval-set/eval-set-1/fluid_reasoning_720/validity_v1.json",
+   "data/eval-set/eval-set-1/stage3_capability_846/core_v1.json",
+   "logs/stages/stage-0/calibration_volume/runs/bench_20261019_051316/runtime/session.json",
+   "scripts/shared/data/finalize_eval_set_1.py",
+   "scripts/stages/stage-0/calibration_volume/dose_driver.py",
+   "scripts/stages/stage-0/calibration_volume/write_formal_preregistration.py"
   ]
  },
  "keys": "shared.eval_sets.KEYS (prompt, content)",
@@ -77,7 +89,8 @@
        "8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4",
        "f3b30256c37834cb1dcb2b724e1970e9aee46925a76b4d3fce7f59982aadecc0"
       ]
-     }
+     },
+     "masked_by_core": "every overlapping prompt is outside held-out correctness (core mask, maintainer 2026-10-19)"
     },
     "stage3_legacy_150/items": {
      "role": "in_sample_regression",
@@ -96,7 +109,7 @@
      }
     }
    },
-   "held_out_overlap": 4
+   "held_out_overlap": 0
   },
   "stage2.stage2_v1.val": {
    "used_for": "held-out split of the Stage-2 mixture (eval_behavior_v0 was drawn from it)",
@@ -170,6 +183,17 @@
    "overlaps": {},
    "held_out_overlap": 0
   },
+  "stage0.profiles_formal_v1": {
+   "used_for": "Stage-0 search calibration profiles",
+   "path": "artifacts/stages/stage-0/calibration_volume/profiles_formal_v1",
+   "present": true,
+   "files": 6,
+   "rows": 145,
+   "unresolved_rendered_items": 160,
+   "plain_text_items_without_prompt": 0,
+   "overlaps": {},
+   "held_out_overlap": 0
+  },
   "stage0.profiles_pilot_v1": {
    "used_for": "Stage-0 search calibration profiles",
    "path": "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1",
@@ -204,5 +228,5 @@
    "held_out_overlap": 0
   }
  },
- "verdict": "4 held-out key overlaps in training/calibration/search data"
+ "verdict": "no training, calibration or search source shares a prompt or content key with a held-out unit"
 }

@@ -60,3 +60,64 @@ def test_held_out_units_are_reserved_by_the_corpus_builder():
     held = ES.held_out_paths()
     assert held and all((REPO / p).is_file() for p in held)
     assert not any("legacy_150" in p for p in held)     # in-sample units are training data
+
+
+# --- eval-set-1's frozen formal core (maintainer decision 2026-10-19) -----------
+
+def _es1():
+    return ES.manifest("eval-set-1")
+
+
+def test_eval_set_1_is_frozen_with_its_formal_core():
+    e = ER.entry(ES.registry(), "eval-set-1")
+    assert e["status"] == "frozen" and len(e["identity_history"]) >= 2
+    c = _es1()["components"]
+    v = c["fluid_reasoning_720"]["validity"]
+    assert (v["formal"], v["formal_static"], v["formal_interactive"], v["excluded"]) == (714, 570, 144, 6)
+    core = c["stage3_capability_846"]["core"]
+    assert (core["behaviour_items"], core["behaviour_core"], core["behaviour_core_held_out"]) == (76, 69, 65)
+    for comp in c.values():
+        assert comp["scorer"]["formal_protocol"] == "v2"
+
+
+def test_the_report_scores_exactly_the_formal_rows(tmp_path):
+    """Gold answers for every fluid item: the formal row counts 714, all correct,
+    and the six excluded items are reported beside it, never inside it."""
+    import json
+    import shared.evaluation.eval_set_scoring as S
+    from stages.calibration_volume.tasks.interactive import ButtonsEnv, ProbeFunctionEnv
+
+    def oracle(env):
+        if env["kind"] == "probe_function":
+            return [f"**ANSWER:** {ProbeFunctionEnv.f(env, env['target'])}"]
+        if env["kind"] == "code":
+            return ["GUESS: " + " ".join(env["code"])]
+        frontier = [(env["start"], [])]
+        for _ in range(env["presses"]):
+            nxt = []
+            for v, path in frontier:
+                for b in sorted(env["buttons"]):
+                    w = ButtonsEnv.apply(env, b, v)
+                    if w == env["goal"]:
+                        return [f"PRESS: **{x}**" for x in path + [b]]
+                    nxt.append((w, path + [b]))
+            frontier = nxt[:5000]
+        raise AssertionError("no oracle")
+
+    rows = []
+    for t in ES.items("eval-set-1", "fluid_reasoning_720", "dev_v1"):
+        replies = (oracle(t["env"]) if t["interactive"]
+                   else [f"\\boxed{{{t['answer']}}}"])
+        rows.append({"task_id": t["task_id"], "end": "env_done", "action_protocol": "v2",
+                     "turns": [S.synthetic_turn(r) for r in replies]})
+    (tmp_path / "fluid_reasoning_720__dev_v1.jsonl").write_text(
+        "".join(json.dumps(r) + "\n" for r in rows))
+    rep = S.report(tmp_path, "gold", {}, "eval-set-1", rows_out=tmp_path / "rows")
+    unit = rep["units"]["fluid_reasoning_720/dev_v1"]
+    assert (unit["n_items"], unit["correct"]) == (714, 714)
+    assert unit["all_registered_items"]["n_items"] == 720
+    assert sum(unit["excluded_from_formal"].values()) == 6
+    flagged = [json.loads(l) for l in (tmp_path / "rows/fluid_reasoning_720__dev_v1.rows.jsonl")
+               .read_text().splitlines()]
+    assert len(flagged) == 720 and sum(not r["formal"] for r in flagged) == 6
+    assert rep["units"]["stage3_capability_846/gsm8k"]["status"] == "not_run"

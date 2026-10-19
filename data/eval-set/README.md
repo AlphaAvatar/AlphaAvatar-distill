@@ -57,12 +57,59 @@ PYTHONPATH=src:scripts .venv/bin/python scripts/shared/evaluation/eval_set_scori
 .venv/bin/python -m pytest tests/data/test_eval_set_registry.py                    # both, in the core suite
 ```
 
-The same checks run in CI on every change under `data/eval-set/`
-(`.github/workflows/eval-set-integrity.yml`), and `.github/CODEOWNERS` routes
-such changes to the maintainer.
+The same checks run in CI on every pull request and every push to `main`
+(`.github/workflows/eval-set-integrity.yml`, job `verify`), and
+`.github/CODEOWNERS` routes changes to the sets and to the code that verifies
+them to the maintainer.
+
+## Protection
+
+What is in the repository, and so already enforced:
+
+- the identity check, refusing any read of a changed set;
+- the conformance vectors;
+- the guard tests, in the core suite;
+- the CI job;
+- the CODEOWNERS routing.
+
+Two repository settings make the routing and the CI job **binding** on `main`.
+They are the maintainer's to switch on (Settings → Branches → Add branch
+protection rule, or Rulesets):
+
+1. Branch name pattern `main`.
+2. Tick **Require a pull request before merging** and, under it, **Require
+   review from Code Owners**.
+3. Tick **Require status checks to pass before merging** and add the check
+   **`verify`** (from `eval-set-integrity`). It runs on every pull request, so
+   requiring it blocks no unrelated pull request.
+4. Optionally tick **Do not allow bypassing the above settings**.
+
+The same rule as one command, for an account with admin rights on the
+repository:
+
+```bash
+gh api -X PUT repos/AlphaAvatar/AlphaAvatar-distill/branches/main/protection \
+  -H "Accept: application/vnd.github+json" --input - <<'JSON'
+{"required_status_checks": {"strict": false, "contexts": ["verify"]},
+ "enforce_admins": false,
+ "required_pull_request_reviews": {"require_code_owner_reviews": true,
+                                   "required_approving_review_count": 1},
+ "restrictions": null}
+JSON
+```
+
+**One caveat decides whether this protects anything against an agent.** The
+code owner today is `@AlphaAvatar`, and the agents of this project push with
+that same account's token, which has admin rights. GitHub never lets an author
+approve their own pull request, and an admin can bypass a rule unless
+"Do not allow bypassing" is set. So for the review requirement to stop an
+agent's change, the agent has to push with a different account or token
+without admin rights. Without that, these settings record the rule but do not
+enforce it against that account. The settings were not changed from an
+agent's session: they shape the maintainer's own merge flow.
 
 ## Sets
 
 | set | status | components |
 | --- | --- | --- |
-| [`eval-set-1`](eval-set-1/README.md) | `candidate` | `fluid_reasoning_720` (held out, development-exposed) · `stage3_capability_846` (held out) · `stage3_legacy_150` (in-sample regression) |
+| [`eval-set-1`](eval-set-1/README.md) | `frozen` (2026-10-19) | `fluid_reasoning_720` (held out, development-exposed) · `stage3_capability_846` (held out) · `stage3_legacy_150` (in-sample regression) |

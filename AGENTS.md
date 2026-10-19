@@ -798,6 +798,13 @@ authorized identities; `data/eval-set/README.md` is the contract.
   maintainer authorization. An agent never does this on its own, including to
   repair a defect it has found: it records the defect and asks. New needs become
   `eval-set-2`, `eval-set-3`, …; an old set is never silently rewritten.
+* **Generate everything, score the formal rows.** A formal measurement generates
+  every item of every unit. The set's own validity mask and core decide which
+  rows enter the formal numbers, and every other row is reported beside them.
+  Each component's `scorer.formal_protocol` is the scoring protocol (eval-set-1:
+  v2, frozen 2026-10-19). An interactive episode is replayed under the action
+  protocol it was generated with. Historical results stay bound to the identity
+  and protocol they were scored under.
 * **Exposure is part of the identity of a result.** Each component declares its
   role and exposure. A development-exposed set is not a never-seen blind set; an
   `in_sample_regression` component is made of training prompts and is never

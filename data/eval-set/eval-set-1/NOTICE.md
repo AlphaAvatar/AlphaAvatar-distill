@@ -29,6 +29,12 @@ local copy is the durable artifact `artifacts/stages/stage-3/eval/battery_v2/kno
 The exact sample ids are public in `battery_v2/manifest.json`, so the file can
 be rebuilt from the source by `scripts/stages/stage-3/e2/build_capability_battery.py`.
 
+## Outside the formal core (still in the repository)
+
+| items | source | why |
+| --- | --- | --- |
+| 7 `eval_behavior_v0` prompts `xlam-*` | [Salesforce/xlam-function-calling-60k](https://huggingface.co/datasets/Salesforce/xlam-function-calling-60k) (CC-BY-4.0, access-gated) | the dataset is gated behind an access agreement whose redistribution terms have not been confirmed; maintainer decision 2026-10-19: they stay outside the public frozen core (`stage3_capability_846/core_v1.json`) until they are. They have been in this repository since 2026-07-27. |
+
 ## Attribution
 
 - HotpotQA: Yang et al., *HotpotQA: A Dataset for Diverse, Explainable Multi-hop Question Answering*, EMNLP 2018.

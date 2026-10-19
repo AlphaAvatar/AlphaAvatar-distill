@@ -42,8 +42,9 @@ from stages.calibration_volume import governance as G  # noqa: E402
 
 REPO = "/workspace/aad"
 AUDIT = {"battery": "stage0_calvol_battery", "search": "stage0_calvol_search",
-         "bench": "stage0_calvol_bench"}
-EVIDENCE = {"battery": "battery.json", "search": "search_session.json", "bench": "bench.json"}
+         "bench": "stage0_calvol_bench", "dose": "stage0_calvol_dose"}
+EVIDENCE = {"battery": "battery.json", "search": "search_session.json", "bench": "bench.json",
+            "dose": "dose_record.json"}
 #: What a finished search treatment brings home: its records, never the
 #: materialized states (5-7 GB each at the root) the search leaves on the pod.
 SEARCH_UNIT_FILES = ("search_record.json", "structure.json", "stage1_selection.json",
@@ -341,8 +342,139 @@ def bench_spec(args) -> SessionSpec:
     )
 
 
+#: What a finished dose unit brings home: records, journals, reports, the
+#: evaluation generations and per-item rows -- never a checkpoint (P8.4); the
+#: checkpoints live on the network volume, named in the records by sha256.
+DOSE_UNIT_FILES = {
+    "search": ("search_record.json", "structure.json", "stage1_selection.json",
+               "search/states.jsonl", "search/telemetry.jsonl"),
+    "recovery": ("recovery_products.json", "recovery_config.json", "recovery.log",
+                 "train_log.jsonl"),
+    "eval": ("report.json", "generations", "rows", "eval_fluid.log", "eval_capability.log"),
+}
+
+
+def secure_dose(ctx: SessionContext) -> None:
+    """Pull each finished stage's records off the pod. Idempotent; never raises."""
+    try:
+        if ctx.target is None:
+            return
+        t = ctx.args.treatment
+        audit = f"{REPO}/artifacts/audit/{AUDIT['dose']}/{t}"
+        search = f"{REPO}/artifacts/audit/{AUDIT['search']}/{t}"
+        res = ctx.target.run(f"cd {audit}/records 2>/dev/null && for f in *.done; do "
+                             f"[ -e \"$f\" ] && echo \"$f $(cat $f)\"; done", timeout=120)
+        secured = ctx.evidence.setdefault("units_secured", {})
+        for line in (getattr(res, "stdout", "") or "").splitlines():
+            name, _, digest = line.partition(" ")
+            name = name.removesuffix(".done")
+            if name not in DOSE_UNIT_FILES or secured.get(name, {}).get("sha256") == digest:
+                continue
+            dest = store(ctx) / t / name
+            dest.mkdir(parents=True, exist_ok=True)
+            base = search if name == "search" else audit
+            rcs = {}
+            files = list(DOSE_UNIT_FILES[name])
+            if name == "search":       # the root WIDTH projections the H1 analysis reads
+                ls = ctx.target.run(f"ls {search}/ | grep -E '^width_projection_' || true",
+                                    timeout=120)
+                files += (getattr(ls, "stdout", "") or "").split()
+            for f in files:
+                (dest / f).parent.mkdir(parents=True, exist_ok=True)
+                rcs[f] = _scp(ctx, f"{base}/{f}", dest / f, recursive=f in ("generations", "rows"),
+                              limit_min=30)
+            secured[name] = {"sha256": digest, "rc": rcs,
+                             "ok": all(rc == 0 for rc in rcs.values() if rc is not None)}
+            ctx.say(f"dose {t} unit {name}: {'SECURED' if secured[name]['ok'] else 'fetch incomplete'}")
+        _scp(ctx, f"{audit}/dose_record.json", store(ctx) / t / "dose_record.json")
+    except Exception as exc:  # noqa: BLE001
+        ctx.evidence.setdefault("secure_errors", []).append(repr(exc)[:300])
+
+
+def dose_products_secured(ctx: SessionContext, *_a, **_k) -> tuple[bool, str]:
+    secure_dose(ctx)
+    secured = ctx.evidence.get("units_secured", {})
+    bad = [k for k, v in secured.items() if not v.get("ok")]
+    if bad:
+        return False, f"finished units not secured off-pod: {bad}"
+    return True, f"{len(secured)} finished unit(s) secured off-pod; checkpoints are on the volume"
+
+
+def dose_driver_command(ctx: Any, plan: Any) -> str:
+    py = f"PYTHONPATH={REPO}/src:{REPO}/scripts /opt/train/bin/python"
+    auth = f"'{REPO}/{G.authorization_path(ctx.args.run_id)}'"
+    return (f"{py} {REPO}/scripts/stages/stage-0/calibration_volume/dose_driver.py "
+            f"--treatment {ctx.args.treatment} --run-id {ctx.args.run_id} --auth {auth} "
+            f"--plan {ctx.args.plan} --status '{status_path('dose')}' "
+            f"--volume '{ctx.args.volume_mount_path}'"
+            + (f" --image-digest '{ctx.args.image_digest}'" if getattr(ctx.args, "image_digest", None) else ""))
+
+
+def dose_spec(args) -> SessionSpec:
+    """One formal dose: search -> recovery -> every item of eval-set-1."""
+    from aadistill.infrastructure.session import LocalAsset
+    from shared.pod.autoinit_science_inputs import RECOVERY_LADDER
+    from stages.phase_c1.autoinit_c1_launch import C1_EVAL_TOKENIZER, C1_ROPE_INPUT
+    plan = G.plan_doc(args.plan)
+    if not getattr(args, "network_volume_id", "") or not getattr(args, "volume_mount_path", ""):
+        raise SystemExit("a dose session needs --network-volume-id and --volume-mount-path: "
+                         "its journal, states and checkpoints must survive the pod")
+    if getattr(args, "treatment", None) != plan["treatment"]:
+        raise SystemExit(f"--treatment {getattr(args, 'treatment', None)!r} is not the plan's "
+                         f"{plan['treatment']!r}")
+    assets = (*search_assets(plan),
+              LocalAsset(repo_path="artifacts/stages/stage-3/eval/battery_v2",
+                         dest_name="battery_v2", install_to="artifacts/stages/stage-3/eval"))
+    return SessionSpec(
+        session_id=f"stage0-calvol-dose-{plan['treatment']}",
+        schema="aadistill.stage0.calibration_volume.dose_session/v1",
+        description=f"Stage-0 calibration volume formal dose {plan['treatment']}",
+        authorization_path=str(G.authorization_path(args.run_id)),
+        authorization_loader=partial(G.load_for, "dose"),
+        commands=ExecutionCommands(
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
+            **deployment_commands()),
+        plan_id=f"stage0.calibration_volume.{args.plan}",
+        plan_hash=G.plan_hash(args.plan),
+        budget=battery_budget(args),
+        setup=SetupManifest(
+            env={"SESSION_KIND": "stage0_calvol"},
+            required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
+                          "SESSION_KIND", "TEACHER_REVISION"),
+            setup_markers=("ENV_READY", "REPO_READY", "ASSETS_STAGED", "TRAIN_ENV",
+                           "VLLM_READY", "TEACHER_READY", "SETUP_DONE"),
+            local_assets=assets,
+            relay_inputs=(*RECOVERY_LADDER, *C1_EVAL_TOKENIZER, *C1_ROPE_INPUT),
+            teacher_revision=plan["teacher_revision"],
+            uv_max_seconds=1500, tests_max_seconds=600),
+        driver_command=dose_driver_command,
+        driver_job_id=f"stage0_calvol_dose_{plan['treatment']}_driver",
+        status_path=status_path("dose"),
+        run_log_path="/workspace/stage0_calvol_dose_run.log",
+        markers=MarkerPolicy(
+            success="ALL_DONE", failure=("RUN_FAILED",),
+            products_eligible=lambda terminal, stages: True,
+            failure_note="every finished stage is on the network volume and its records off-pod"),
+        artifacts=ArtifactPolicy(
+            audit_dirname=AUDIT["dose"], evidence_filename=EVIDENCE["dose"],
+            archive_basename=f"stage0_calvol_dose_{plan['treatment']}",
+            spec_success="configs/stages/stage-0/calibration_volume/dose_artifacts.json",
+            spec_failed="configs/stages/stage-0/calibration_volume/dose_artifacts.json",
+            report_names=(),
+            on_poll=secure_dose,
+            products_secured=dose_products_secured),
+        teardown=TeardownPolicy(
+            note="delete the pod, verify from the provider that it is gone, STOP; "
+                 "the network volume is KEPT (it holds the study's states)"),
+    )
+
+
 def spec(args) -> SessionSpec:
     kind = args.session
+    if kind == "dose":
+        return dose_spec(args)
     if kind == "search":
         return search_spec(args)
     if kind == "bench":
@@ -449,6 +581,8 @@ def build_parser() -> argparse.ArgumentParser:
                     help="where the volume mounts; never the workspace root")
     ap.add_argument("--data-center-ids", default="",
                     help="the volume's datacenter; required with --network-volume-id")
+    ap.add_argument("--treatment", default=None, help="dose sessions: d1, d2 or d4")
+    ap.add_argument("--image-digest", default=None)
     ap.add_argument("--setup-timeout-s", type=float, default=3600.0)
     ap.add_argument("--poll-seconds", type=float, default=120.0)
     ap.add_argument("--poll-limit-min", type=float, default=420.0)
