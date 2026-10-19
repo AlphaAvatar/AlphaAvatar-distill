@@ -2182,6 +2182,42 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "SEMANTIC CHANGE by construction; it names no set, benchmark, stage "
             "or path. NO CUDA SURFACE: hashing and JSON only.",
      }),
+    ("537852364161b0d134f76095b89798f4fce930b8",
+     "Stage-0 search cost: DEPTH prefix reuse, device-side validation, pruned-state resume",
+     {
+        "src/aadistill/initialization/execution.py":
+            "NEW EXECUTION FIELD `depth_prefix_reuse` (default False): in "
+            "`as_trace` only when True, never in `as_fingerprint`, so no "
+            "materialization identity moves. THIS IS A DECLARED SEMANTIC CHANGE "
+            "of execution only; the claim that it moves no byte is the CUDA "
+            "bench's (runs/bench_20261019_051316: bit-identical tables, removal "
+            "order and child bytes).",
+        "src/aadistill/initialization/statistics/contribution.py":
+            "NEW `captured_block_inputs` (bypass + record each surviving "
+            "block's input), `resumed_after_block` (bypass up to the first "
+            "block after `start` and inject its recorded input), `has_suffix`; "
+            "`greedy_removal(score_round=...)` scores a round at once with the "
+            "same table, tie-break and callbacks. Default paths unchanged. THIS "
+            "IS A DECLARED SEMANTIC CHANGE; CUDA SURFACE: forward pre-hooks on "
+            "decoder blocks, validated bit-identical on an A100.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "`score_round` on the forward baseline's path only (scored rows, "
+            "KL-only, parent reference, no observer) when "
+            "`ExecutionConfig.depth_prefix_reuse`: the scored-rows branch's "
+            "arithmetic, line for line, per candidate and micro-batch, with "
+            "the prefix taken from one capture forward. The historical "
+            "per-candidate `score` is unchanged and remains the default. THIS "
+            "IS A DECLARED SEMANTIC CHANGE of execution; CUDA SURFACE.",
+        "src/aadistill/initialization/planning/search.py":
+            "`BeamSearch(validate_on_search_device=False)`: runtime only; when "
+            "True the produced child is moved to the search device for the "
+            "save/reload check and moved back. `_restore` also accepts a "
+            "PRUNED record whose checkpoint bytes are still on disk "
+            "(prune_weights=False), re-identified exactly like a MEASURED one. "
+            "THIS IS A DECLARED SEMANTIC CHANGE; identities, measurements and "
+            "rankings are unchanged (bench: same state id, digest and "
+            "evaluation).",
+     }),
 )
 
 

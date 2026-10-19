@@ -82,34 +82,23 @@ def test_eval_set_1_is_frozen_with_its_formal_core():
 
 def test_the_report_scores_exactly_the_formal_rows(tmp_path):
     """Gold answers for every fluid item: the formal row counts 714, all correct,
-    and the six excluded items are reported beside it, never inside it."""
+    and the six excluded items are reported beside it, never inside it. The
+    episodes replay the set's own registered v2 oracle vectors (data, so this
+    core test reaches into no experiment's code)."""
     import json
     import shared.evaluation.eval_set_scoring as S
-    from stages.calibration_volume.tasks.interactive import ButtonsEnv, ProbeFunctionEnv
 
-    def oracle(env):
-        if env["kind"] == "probe_function":
-            return [f"**ANSWER:** {ProbeFunctionEnv.f(env, env['target'])}"]
-        if env["kind"] == "code":
-            return ["GUESS: " + " ".join(env["code"])]
-        frontier = [(env["start"], [])]
-        for _ in range(env["presses"]):
-            nxt = []
-            for v, path in frontier:
-                for b in sorted(env["buttons"]):
-                    w = ButtonsEnv.apply(env, b, v)
-                    if w == env["goal"]:
-                        return [f"PRESS: **{x}**" for x in path + [b]]
-                    nxt.append((w, path + [b]))
-            frontier = nxt[:5000]
-        raise AssertionError("no oracle")
-
+    root = ES.set_root("eval-set-1")
+    oracle = {}
+    for line in (root / "conformance/fluid_reasoning_720.v2.jsonl").read_text().splitlines():
+        r = json.loads(line)
+        if r["variant"] == "oracle_markdown_actions_generated_v2":
+            oracle[r["id"]] = r["input"]
     rows = []
     for t in ES.items("eval-set-1", "fluid_reasoning_720", "dev_v1"):
-        replies = (oracle(t["env"]) if t["interactive"]
-                   else [f"\\boxed{{{t['answer']}}}"])
-        rows.append({"task_id": t["task_id"], "end": "env_done", "action_protocol": "v2",
-                     "turns": [S.synthetic_turn(r) for r in replies]})
+        rows.append({"task_id": t["task_id"], **oracle[t["task_id"]]} if t["interactive"] else
+                    {"task_id": t["task_id"], "end": "eos",
+                     "turns": [S.synthetic_turn(f"\\boxed{{{t['answer']}}}")]})
     (tmp_path / "fluid_reasoning_720__dev_v1.jsonl").write_text(
         "".join(json.dumps(r) + "\n" for r in rows))
     rep = S.report(tmp_path, "gold", {}, "eval-set-1", rows_out=tmp_path / "rows")
