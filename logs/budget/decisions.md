@@ -12686,3 +12686,66 @@ on a paid pod.
     pod exists.
 - **Retry.** A fresh run identity and a fresh one-use authorization (P12.1:
   an engineering failure before formal measurement).
+
+## 2026-10-19 — Stage-0 volume study: each later dose retires the COMPLETE earlier doses' search states
+
+- **Context.** `prune_weights=False` keeps every materialized state on network
+  volume `ugllmlv19t` (300 GB) so a lost pod resumes instead of recomputing.
+  Measured on d1 at 46/92 expansions: 50 states, 178 GB on the pod and 175 GB on
+  the volume; d1 is projected at about 265 GB (about 290 GB at worst) with its
+  recovery. Every dose's states have the same geometry, so d2 cannot fit beside
+  d1's.
+- **Decision (maintainer, 2026-10-19).** Retire, not expand. Before its search,
+  the d2 session deletes d1's states except the committed Top-1, and d4 does
+  the same for d1 and d2. The doses to retire are declared in the d2 and d4
+  plans (`retire_states_of`), so they are bound into each session's plan hash.
+  `dose_driver.retire_completed_states` refuses a dose whose volume record is
+  not `COMPLETE`. It keeps the journal, the records, the Top-1 and the
+  recovered student. It writes a tombstone (`<dose>/retired_states.json`, also
+  copied into the session's records) that names every retired state by id,
+  artifact digest, checkpoint sha256 and size.
+- **Alternatives considered.**
+  - Expand the volume to 900 GB (about $1.40/day).
+  - Expand to 600 GB and rotate (about $0.70/day).
+  - Both keep bytes that nothing reads.
+- **Why it is safe.**
+  - A COMPLETE dose has no resume left, and nothing reads its intermediate
+    states (P8.4; AGENTS.md 2.5).
+  - d2 cannot be authorized until d1 has a closeout, so d1's records are off
+    the pod first.
+  - The states are rebuildable: the search is deterministic from its journal
+    (about 5 h on an A100, about $9).
+- **Unchanged.** The preregistration, search identity, the d1 plan (its hash
+  `53d7aec7…` is bound by the running authorization) and the resume contract
+  of a dose in progress.
+- **Revisit when.** A later analysis needs a non-Top-1 state of a completed
+  dose.
+
+## 2026-10-19 — Stage-0 dose d1 attempt 2 failed in evaluation (legacy prompt shape); the same dose resumes
+
+- **What happened.** `dose_d1_20261019_055515` ($11.5053) finished the search
+  (COMPLETE, 92 expansions, 4.70 h against 5.24 h priced, 14 DEPTH) and the
+  recovery (model `65d2c7a1…`). Both are on the network volume, and their
+  records are off the pod. It then generated all of `fluid_reasoning_720` and
+  pushed it to the volume. `uncapped_eval` generated the 8 capability units
+  and the legacy 150, then raised `KeyError: 'prompt_text'` while scoring the
+  legacy rows. `dose_driver.legacy_prompts` builds those rows itself and left
+  out the field its in-run scorer reads. Those generations were pod-local and
+  are lost, so no capability or legacy endpoint exists.
+- **Why the $0 checks missed it.** They compared flags, file names and the
+  report contract. They never ran the in-run scorer on the rows the driver
+  builds.
+- **Repair.**
+  - `legacy_prompts` carries `shared.eval_sets.prompt_text`, the one spelling
+    every component uses.
+  - Regression: `tests/test_dose_eval_inputs.py`.
+  - A $0 rehearsal ran the whole eval tail with synthetic generations: all 9
+    prompt files scored in-run, and `eval_set_scoring.report` measured every
+    unit of eval-set-1 with none missing.
+- **Retry (preregistered `retry_policy`).** The SAME dose resumes from the
+  volume under a fresh run identity and authorization:
+  - search and recovery are restored, not recomputed;
+  - fluid's finished generation is rescored, not regenerated;
+  - the capability units and the legacy 150 are generated once, since no
+    complete endpoint of theirs ever existed.
+  - This yields one complete measurement of d1, never a second one.

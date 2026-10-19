@@ -32,5 +32,8 @@
    "record": "logs/stages/stage-0/calibration_volume/runs/netvol_20261019_051206"
   }
  },
+ "retire_states_of": [
+  "d1"
+ ],
  "authorizes": "nothing"
 }

@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Stage-0 calibration volume TERMINAL (round 2, 2026-10-18): formal study NOT RUN; the maintainer's amended design is priced $86.98 vs $65 formal / $77.34 project. eval-set-1 registered (candidate). NOTHING IS RUNNING. Owner: logs/stages/stage-0/calibration_volume/closeout/programme_closeout.json.",
+ "blocker": "BLOCKED NO. Stage-0 calibration-volume FORMAL STUDY in progress: d1 attempt 2 (dose_d1_20261019_055515, $11.5053) finished search and recovery and failed in evaluation; the same dose resumes from the network volume (preregistered retry_policy). Owner: .../plans/volume_preregistration.json; decisions.md 2026-10-19.",
  "branch": "main (squash of exec/d1-behavioural-readiness, 2026-10-17); Stage-0 work on stage0/calibration-volume-mixture",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -123,13 +123,13 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Maintainer decisions: fund the amended Stage-0 design (~$90, ~$81 with the overhead fix; needs a project-cap increase) or authorize the 1x/2x subset (~$46.67); settle eval-set-1's open decisions. NOT authorized. Owner: REPORT.md round 2; data/eval-set/registry.json.",
+ "next": "Stage-0 formal volume study (maintainer-authorized 2026-10-19, $90 cap): d1 → d2 → d4 under plans/volume_preregistration.json's order and budget rule, then its formal analysis. Owner: that file; decisions.md 2026-10-19.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "Stage-0: the maintainer's funding decision on the amended volume study (REPORT.md round 2) and eval-set-1's open decisions; the mixture study after it.",
-  "not_next": "no paid resource without its own grant; no D-series stage or rerun; no formal Stage-0 search until funded. Owner: decisions.md 2026-10-18.",
+  "next_work": "Stage-0 volume study d1 → d2 → d4 and its formal analysis; the mixture study after it.",
+  "not_next": "no paid resource outside a one-use dose authorization; no D-series stage or rerun. Owner: decisions.md 2026-10-19.",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D-series CLOSED 2026-10-17 (D1 NO-GO, D2 NO_GO, D3 STRUCTURAL_CHANGE + INCONCLUSIVE probes); forward baseline D1 + scored_v1.",
-  "then": "NOTHING is queued or authorized."
+  "then": "the volume study's formal analysis; nothing else is queued."
  },
  "phase_b_result": {
   "authorizes": "nothing",
@@ -197,12 +197,10 @@
   "docs/shared/STAGE0_HANDOFF.md -- the next programme's handoff"
  ],
  "running": {
-  "_verified": "provider query 2026-10-18 22:46 UTC: 0 pods, 0 volumes, $0/h; no launcher, watchdog or monitor alive",
-  "network_volumes": 0,
   "paid_compute": false,
-  "pod_id": null,
   "pods": 0,
-  "run_id": null
+  "network_volumes": 1,
+  "_verified": "provider query 2026-10-19 12:31 UTC: 0 pods; volume ugllmlv19t (300 GB, EUR-IS-1) kept for the study"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

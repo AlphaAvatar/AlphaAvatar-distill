@@ -79,14 +79,69 @@ def sync(mode: str, src: Path, dst: Path, log: Path) -> dict:
     return json.loads(lines[-1]) if lines else {"rc": out.returncode, "stderr": out.stderr[-500:]}
 
 
+def retire_completed_states(study_dir: Path, treatment: str) -> dict:
+    """Free the volume for the next dose: delete a COMPLETE dose's search states
+    except its committed Top-1, leaving a tombstone that names every retired
+    state by id, digest and size (maintainer 2026-10-19: one dose's states fill
+    most of the 300 GB volume; AGENTS.md 2.5).
+
+    The states exist so a lost pod resumes instead of recomputing; a dose whose
+    record says COMPLETE has no resume left and nothing else reads them. A dose
+    that is not COMPLETE is refused, never trimmed. Idempotent."""
+    prev = study_dir / treatment
+    tomb = prev / "retired_states.json"
+    if tomb.is_file() and json.loads(tomb.read_text()).get("status") == "retired":
+        return json.loads(tomb.read_text())
+    rec = prev / "dose_out" / "dose_record.json"
+    status = json.loads(rec.read_text()).get("status") if rec.is_file() else None
+    if status != "COMPLETE":
+        raise RuntimeError(f"dose {treatment} is {status or 'absent'} on the volume; only a "
+                           "COMPLETE dose's states may be retired")
+    unit = prev / "search_unit"
+    keep = {r["state_id"] for r in
+            json.loads((unit / "stage1_selection.json").read_text())["selected"]}
+    digests = {}
+    for line in (unit / "search" / "states.jsonl").read_text().splitlines():
+        if line.strip():
+            s = json.loads(line)
+            digests[s["state_id"]] = {
+                "artifact_digest": s.get("artifact_digest")
+                or (s.get("artifact") or {}).get("artifact_digest"),
+                "checkpoint_sha256": s.get("checkpoint_sha256")}
+    retired = []
+    for d in sorted((unit / "search" / "states").iterdir()):
+        if d.name in keep or not d.is_dir():
+            continue
+        retired.append({"state_id": d.name, **digests.get(d.name, {}),
+                        "bytes": sum(f.stat().st_size for f in d.rglob("*") if f.is_file())})
+    doc = {"schema": "aadistill.stage0.calibration_volume.retired_states/v1",
+           "treatment": treatment, "status": "retiring",
+           "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+           "why": ("the dose is COMPLETE, so its intermediate states have no resume or "
+                   "analysis consumer; the next dose needs the volume (maintainer decision "
+                   "2026-10-19). Rebuildable: the search is deterministic from its journal."),
+           "kept": sorted(keep), "retired": retired,
+           "retired_bytes": sum(r["bytes"] for r in retired),
+           "identities": "search_unit/search/states.jsonl, kept beside this file"}
+    tomb.write_text(json.dumps(doc, indent=1) + "\n")
+    for r in retired:
+        shutil.rmtree(unit / "search" / "states" / r["state_id"], ignore_errors=True)
+    doc["status"] = "retired"
+    tomb.write_text(json.dumps(doc, indent=1) + "\n")
+    return doc
+
+
 def legacy_prompts(dest: Path) -> Path:
     """The 150 in uncapped_eval's prompt shape: the item's own messages (system
-    included, so the evaluator does not inject a second one) and its tools."""
+    included, so the evaluator does not inject a second one), its tools, and the
+    `prompt_text` its in-run scorer reads (d1 attempt 2 died on that KeyError
+    after generating every capability unit)."""
     from shared import eval_sets as ES
     rows = []
     for it in ES.items(SET_ID, "stage3_legacy_150", "items"):
         rows.append({"id": it["id"], "group": it.get("data_type"), "source": it.get("source"),
-                     "messages": it["prompt_messages"], "tools": it.get("tools")})
+                     "messages": it["prompt_messages"], "tools": it.get("tools"),
+                     "prompt_text": ES.prompt_text(it)})
     dest.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
     return dest
 
@@ -165,6 +220,18 @@ def main(argv=None) -> int:
         vol.mkdir(parents=True, exist_ok=True)
         finish(st, "A_contract", eval_set_identity=es_identity,
                knowledge_staged=knowledge is not None)
+
+        # -- V: room on the volume (the plan names the doses to retire) -------
+        if plan.get("retire_states_of"):
+            st = stage("V_retire")
+            done = {}
+            for t in plan["retire_states_of"]:
+                doc = retire_completed_states(vol.parent, t)
+                shutil.copyfile(vol.parent / t / "retired_states.json",
+                                out / f"retired_states_{t}.json")
+                done[t] = {"retired": len(doc["retired"]), "bytes": doc["retired_bytes"],
+                           "kept": doc["kept"]}
+            finish(st, "V_retire", doses=done)
 
         # -- S: search (resumable) ------------------------------------------
         products = vol / "products.json"

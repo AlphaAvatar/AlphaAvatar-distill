@@ -279,6 +279,11 @@ def main(argv=None) -> int:
                                   "eval_set_1": sum(s["eval_minutes"].values()), "pushes": 10.0},
                 "contingency_fraction": 0.2, "reserve_minutes": 30, "mirror_seconds": 120,
                 "hardware": {"gpu": GPU, "container_disk_gb": DISK_GB, "network_volume": VOLUME},
+                #: One dose's kept states fill most of the volume, so each later
+                #: dose first retires the COMPLETE earlier ones' (maintainer
+                #: 2026-10-19). Absent for the first dose: its plan hash is bound.
+                **({"retire_states_of": prereg["execution_order"][:prereg["execution_order"].index(t)]}
+                   if prereg["execution_order"].index(t) else {}),
                 "authorizes": "nothing"}
         (CONF / f"dose_{t}_session.json").write_text(json.dumps(plan, indent=1) + "\n")
     return 0

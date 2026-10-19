@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-18 22:55 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-19 12:35 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,31 +9,46 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods,
-0 network volumes and $0/h (2026-10-18 22:46 UTC). The last pod,
-`q8lzi7xqb5wcg5` (Stage-0 resolution check), was deleted at 22:43Z. Its
-watchdog ended on `pod_gone`, and no tmux session, launcher or monitor is
-alive.
+**NOTHING IS RUNNING, AND NOTHING IS BILLING (provider query 2026-10-19 12:31Z:
+0 pods). STAGE-0 FORMAL VOLUME STUDY IN PROGRESS, DOSE d1 (1x) RESUMING.**
+Network volume `ugllmlv19t` (300 GB, EUR-IS-1) is kept: it holds d1's search states, its Top-1,
+its recovered student and its fluid generations.
+- **d1 attempt 2** (`dose_d1_20261019_055515`, $11.5053):
+  - search COMPLETE: 92 expansions in 4.70 h, Top-1
+    DEPTH→FFN→ATTENTION→RESIDUAL_WIDTH, 596M parameters;
+  - recovery COMPLETE;
+  - `fluid_reasoning_720` generated in full;
+  - then the run failed scoring the legacy 150 (`KeyError: 'prompt_text'`),
+    which is now repaired.
+- **Next.** The same dose resumes from the volume and evaluates the
+  capability and legacy units once (preregistered `retry_policy`). Then come
+  d2 and d4, each retiring the earlier COMPLETE doses' search states.
+- **Owners.** `runs/dose_d1_20261019_055515/closeout/outcome.json`,
+  `decisions.md` 2026-10-19, and
+  [`volume_preregistration.json`](../stages/stage-0/calibration_volume/plans/volume_preregistration.json)
+  (design, pricing, d1 → d2 → d4 order and budget rule).
 
-**PERMANENT EVALUATION REGISTRY (maintainer decision 2026-10-18).**
-`data/eval-set/eval-set-1` is registered as a **candidate**: identity pinned
-and protected, NOT frozen (AGENTS.md P10.3).
+**PERMANENT EVALUATION REGISTRY (maintainer decisions 2026-10-18/19).**
+`data/eval-set/eval-set-1` is **FROZEN** at identity 2 (`62a1a5d3`, 2026-10-19;
+AGENTS.md P10.3).
 - **Components:**
   - `fluid_reasoning_720` (the Stage-0 dev battery, development-exposed);
-  - `stage3_capability_846` (TriviaQA `knowledge` withheld: no license
-    basis);
+  - `stage3_capability_846` (TriviaQA withheld from git and outside the
+    formal core; measured as supplementary from a staged local copy);
   - `stage3_legacy_150` (in-sample regression only).
-- **Verified:** every asset was proven against the record that froze it, and
-  the current scorers reproduce every historical verdict checked.
-- **Open maintainer decisions** (`data/eval-set/registry.json`):
-  - an independent audit found 6 defective 720 items; none was changed;
-  - TriviaQA's license;
-  - the behaviour set's duplicates and its Stage-2-train overlaps.
+- **Frozen contents:** validity mask v1 (6 items excluded; formal 714 = 570
+  static + 144 interactive), verified-equivalence independence groups, the
+  formal core, scorer protocol v2 and action protocol v2 with conformance
+  vectors. Historical results stay on v1.
+- **Open maintainer decisions** (`data/eval-set/registry.json`): xLAM's
+  terms, a TriviaQA redistribution basis, and the Code Owners setting on
+  `main`.
 - **Owners:** [`data/eval-set/README.md`](../../data/eval-set/README.md) and
-  `decisions.md` 2026-10-18.
+  `decisions.md` 2026-10-18 and 2026-10-19.
 
-**STAGE-0 CALIBRATION VOLUME IS TERMINAL AGAIN (round 2, 2026-10-18). THE
-FORMAL STUDY WAS NOT RUN: THE MAINTAINER'S AMENDED DESIGN IS NOT FUNDABLE.**
+**STAGE-0 CALIBRATION VOLUME, ROUND 2 (2026-10-18; superseded 2026-10-19 by
+the preregistered formal study above, after the overhead fix and the
+maintainer's amendment made it fundable).**
 - **The design.** 1x/2x/4x, one D1 full search and one fixed recovery each.
   - Priced at $86.98 expected; $77.82 with the per-expansion overhead fix.
   - Available: $65 in the formal phase and $77.34 in the project.
@@ -63,7 +78,7 @@ FORMAL STUDY WAS NOT RUN: THE MAINTAINER'S AMENDED DESIGN IS NOT FUNDABLE.**
     $46.67);
   - settle eval-set-1's open decisions.
 
-  No Stage-0 formal session is authorized.
+  Resolved 2026-10-19: the study is preregistered and d1 is running.
 
 **THE D-SERIES IS CLOSED (maintainer final decision, 2026-10-17). D1 +
 `scored_v1` IS THE OFFICIAL FORWARD BASELINE.** It is a selection, not a
