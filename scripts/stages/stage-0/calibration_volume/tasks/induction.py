@@ -4,6 +4,10 @@ Three generators, each with a library of hidden rules. An instance is kept only
 when EVERY rule in its generator's library that is consistent with the shown
 examples agrees on the query: the answer is then determined by the examples
 under the library, not by a guess about which rule the author meant.
+
+`string_induction@v2` (maintainer-authorized 2026-10-19) adds the evidence the
+library check cannot supply: a letter-class rule must be SHOWN acting on every
+letter it changes in the query. v1, which built the frozen sets, is unchanged.
 """
 from __future__ import annotations
 
@@ -150,8 +154,17 @@ def _string_rules() -> dict[str, tuple[str, list[tuple[str, Callable[[str], str]
 
 STRING_RULES = _string_rules()
 
+#: Rules that change one letter class and leave the rest alone. Under them
+#: "change only the letters seen changed" fits the examples too, so v2 keeps an
+#: instance only when every letter the rule changes in the query is shown
+#: changed in some example -- the minimal-evidence reading then agrees with the
+#: gold (eval-set-1 audit: `str.remove_vowels` items showing only 'o' removed).
+#: The class's commonest wider reading counts 'y' as a vowel, so a query with a
+#: 'y' also needs an example that shows a 'y' left unchanged.
+_LETTER_CLASS_FAMILIES = frozenset({"str.remove_vowels", "str.vowel_to_x"})
 
-def _string_family(fid: str) -> Family:
+
+def _string_family(fid: str, version: int) -> Family:
     cls, variants = STRING_RULES[fid]
 
     def make(rng: random.Random, difficulty: str) -> dict:
@@ -167,6 +180,12 @@ def _string_family(fid: str) -> Family:
         gold = fn(query)
         if all(x == y for x, y in examples) or not gold or gold == query:
             raise Unsatisfiable
+        if version >= 2 and fid in _LETTER_CLASS_FAMILIES:
+            shown = {c for x, _y in examples for c in x if fn(c) != c}
+            if any(fn(c) != c and c not in shown for c in query):
+                raise Unsatisfiable
+            if "y" in query and not any(c == "y" == fn(c) for x, _y in examples for c in x):
+                raise Unsatisfiable
         answers = set()
         for _f, (_c, vs) in STRING_RULES.items():
             for _l, g in vs:
@@ -185,8 +204,13 @@ def _string_family(fid: str) -> Family:
 
 STRING_INDUCTION = Generator(
     "string_induction@v1", "inductive_rule_discovery", "word",
-    tuple(_string_family(f) for f in STRING_RULES),
+    tuple(_string_family(f, 1) for f in STRING_RULES),
     description="hidden letter-string rewrite from word pairs")
+
+STRING_INDUCTION_V2 = Generator(
+    "string_induction@v2", "inductive_rule_discovery", "word",
+    tuple(_string_family(f, 2) for f in STRING_RULES),
+    description="as string_induction@v1; letter-class rules shown on every query letter they change")
 
 
 # --- number sequences --------------------------------------------------------
@@ -321,3 +345,4 @@ SEQUENCE_INDUCTION = Generator(
     description="next term of a sequence under a hidden generating rule")
 
 GENERATORS = (LIST_INDUCTION, STRING_INDUCTION, SEQUENCE_INDUCTION)
+GENERATORS_V2 = (LIST_INDUCTION, STRING_INDUCTION_V2, SEQUENCE_INDUCTION)

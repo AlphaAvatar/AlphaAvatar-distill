@@ -1,0 +1,17 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "netvol_20261019_051206",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-19T05:13:00+00:00",
+ "status": "VOLUME_ACTIVE",
+ "outcome": "Network volume ugllmlv19t (300 GB, EUR-IS-1) is ACTIVE. Its cost is booked as a RESERVATION for six days ahead, so every authorization issued while it exists already counts it; this record is trued up to the actual storage cost when the volume is deleted.",
+ "provider_resource_created": true,
+ "money": {
+  "all_in_usd": 4.2,
+  "reserved_days": 6,
+  "_basis": "RESERVED, not actual: 300 GB x $0.07/GB-month x 144 h / 720 h = $4.20. Replaced by the actual (created -> deleted hours) at deletion."
+ },
+ "authorizes": "nothing"
+}

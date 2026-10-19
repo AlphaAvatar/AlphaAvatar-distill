@@ -102,7 +102,22 @@ class ExecutionConfig:
     #: `positions.policy_config` apply to their own historical defaults.
     prediction_rows: str = PREDICTION_ROWS_ALL_V1
 
+    #: DEPTH candidate scoring reuses the current model's prefix. A candidate
+    #: that bypasses block ``c`` computes every block before ``c`` exactly as
+    #: the unbypassed current model does, so its forward can start from the
+    #: hidden state block ``c`` received in ONE capture forward per round and
+    #: micro-batch, instead of recomputing that prefix once per candidate. Same
+    #: kernels, same shapes, same input tensor: the scores are claimed
+    #: BIT-IDENTICAL, which is why this is in the trace and not in the
+    #: fingerprint -- and the claim is tested, on CPU and on CUDA, not assumed.
+    #: Default off: the historical per-candidate path stays the reference.
+    depth_prefix_reuse: bool = False
+
     def __post_init__(self) -> None:
+        if not isinstance(self.depth_prefix_reuse, bool):
+            raise ExecutionError(
+                f"depth_prefix_reuse must be a bool, not "
+                f"{type(self.depth_prefix_reuse).__name__}")
         if self.prediction_rows not in PREDICTION_ROW_POLICIES:
             raise ExecutionError(
                 f"unknown prediction_rows {self.prediction_rows!r}; known: "
@@ -132,6 +147,8 @@ class ExecutionConfig:
                  "calibration_batch_packing": str(self.calibration_batch_packing)}
         if self.prediction_rows != PREDICTION_ROWS_ALL_V1:
             trace["prediction_rows"] = str(self.prediction_rows)
+        if self.depth_prefix_reuse:
+            trace["depth_prefix_reuse"] = True
         return trace
 
     #: Which of this config's fields affect the BYTES a materialization produces.

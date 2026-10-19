@@ -5,6 +5,10 @@ letters; grid transformations operate on small digit grids. Both keep an
 instance only when every rule in the library consistent with the demonstrations
 agrees on the query. These are this project's own generators and families; no
 ARC-AGI task, solution or trajectory is used or derived from (AGENTS.md P10.2).
+
+`letter_analogy@v2` (maintainer-authorized 2026-10-19) never asks about a
+string it has already worked as an example and never repeats a demonstration;
+v1, which built the frozen sets, is unchanged.
 """
 from __future__ import annotations
 
@@ -40,7 +44,7 @@ _LETTER_RULES = {
 _LKN = {"L1": (3, 3, 4, 1), "L2": (2, 3, 5, 1), "L3": (2, 4, 6, 2)}  # demos, lo, hi, max step
 
 
-def _letter_family(fid: str):
+def _letter_family(fid: str, version: int):
     cls, fn = _LETTER_RULES[fid]
 
     def make(rng: random.Random, difficulty: str) -> dict:
@@ -58,6 +62,10 @@ def _letter_family(fid: str):
             gold = fn(query)
         except (ValueError, IndexError):
             raise Unsatisfiable
+        if version >= 2:
+            inputs = [x for x, _y in demos]
+            if query in inputs or len(set(inputs)) != len(inputs):
+                raise Unsatisfiable
         answers = set()
         for _f, (_c, g) in _LETTER_RULES.items():
             try:
@@ -77,8 +85,14 @@ def _letter_family(fid: str):
 
 LETTER_ANALOGY = Generator(
     "letter_analogy@v1", "abstract_analogical", "word",
-    tuple(_letter_family(f) for f in _LETTER_RULES),
+    tuple(_letter_family(f, 1) for f in _LETTER_RULES),
     description="Copycat-style analogies over runs of consecutive letters")
+
+LETTER_ANALOGY_V2 = Generator(
+    "letter_analogy@v2", "abstract_analogical", "word",
+    tuple(_letter_family(f, 2) for f in _LETTER_RULES),
+    description="as letter_analogy@v1; the query is never a demonstration input, "
+                "and no demonstration repeats")
 
 # --- digit grids ---------------------------------------------------------------
 
@@ -228,3 +242,4 @@ GRID_TRANSFORM = Generator(
     description="infer a grid transformation from demonstrations (own generator, not ARC data)")
 
 GENERATORS = (LETTER_ANALOGY, GRID_TRANSFORM)
+GENERATORS_V2 = (LETTER_ANALOGY_V2, GRID_TRANSFORM)

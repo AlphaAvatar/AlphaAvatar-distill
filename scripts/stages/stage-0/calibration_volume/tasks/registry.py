@@ -12,6 +12,13 @@ Dev and final evaluation share the evaluation families and differ by seed
 range; calibration seeds are a third, disjoint range. The split is a pure
 function of the generator code and `SPLIT_SALT`, so it is reproducible without
 a stored table, and `split_table()` prints it for the record.
+
+Two rosters. `GENERATORS` is the v1 roster that built every historical set and
+is what the historical builders and audits iterate; it never changes.
+`GENERATORS_V2` (maintainer-authorized 2026-10-19) is the same roster with the
+four generators the eval-set-1 audit found defective replaced by their v2
+versions. A v2 generator keeps its v1 family ids, so the family split -- a
+function of family ids only -- is the same in both rosters.
 """
 from __future__ import annotations
 
@@ -27,11 +34,19 @@ GENERATORS: tuple[Generator, ...] = (
 
 BY_ID = {g.generator_id: g for g in GENERATORS}
 
+GENERATORS_V2: tuple[Generator, ...] = (
+    *induction.GENERATORS_V2, *composition.GENERATORS, *deduction.GENERATORS_V2,
+    *analogy.GENERATORS_V2, *interactive.GENERATORS)
+
+BY_ID_V2 = {g.generator_id: g for g in GENERATORS_V2}
+
 EVAL_ONLY_GENERATORS = frozenset({
     "sequence_induction@v1",
     "counterfactual_arith@v1",
     "graph_paths@v1",
+    "graph_paths@v2",
     "letter_analogy@v1",
+    "letter_analogy@v2",
     "code_breaker@v1",
 })
 

@@ -41,8 +41,9 @@ from shared.deployment import MAIN_RELAY, deployment_commands  # noqa: E402
 from stages.calibration_volume import governance as G  # noqa: E402
 
 REPO = "/workspace/aad"
-AUDIT = {"battery": "stage0_calvol_battery", "search": "stage0_calvol_search"}
-EVIDENCE = {"battery": "battery.json", "search": "search_session.json"}
+AUDIT = {"battery": "stage0_calvol_battery", "search": "stage0_calvol_search",
+         "bench": "stage0_calvol_bench"}
+EVIDENCE = {"battery": "battery.json", "search": "search_session.json", "bench": "bench.json"}
 #: What a finished search treatment brings home: its records, never the
 #: materialized states (5-7 GB each at the root) the search leaves on the pod.
 SEARCH_UNIT_FILES = ("search_record.json", "structure.json", "stage1_selection.json",
@@ -275,10 +276,77 @@ def search_spec(args) -> SessionSpec:
     )
 
 
+def secure_bench(ctx: SessionContext) -> None:
+    """The bench record is small and rewritten after every stage: pull it each poll."""
+    try:
+        if ctx.target is not None:
+            store(ctx).mkdir(parents=True, exist_ok=True)
+            _scp(ctx, f"{REPO}/artifacts/audit/{AUDIT['bench']}/bench.json",
+                 store(ctx) / "bench.json")
+    except Exception as exc:  # noqa: BLE001
+        ctx.evidence.setdefault("secure_errors", []).append(repr(exc)[:300])
+
+
+def bench_driver_command(ctx: Any, plan: Any) -> str:
+    py = f"PYTHONPATH={REPO}/src:{REPO}/scripts /opt/train/bin/python"
+    auth = f"'{REPO}/{G.authorization_path(ctx.args.run_id)}'"
+    return (f"{py} {REPO}/scripts/stages/stage-0/calibration_volume/bench_driver.py "
+            f"--auth {auth} --plan {ctx.args.plan} --status '{status_path('bench')}' "
+            f"--volume '{getattr(ctx.args, 'volume_mount_path', '') or ''}'")
+
+
+def bench_spec(args) -> SessionSpec:
+    """The search-cost validation: engineering only, one short session."""
+    plan = G.plan_doc(args.plan)
+    return SessionSpec(
+        session_id="stage0-calvol-bench",
+        schema="aadistill.stage0.calibration_volume.bench_session/v1",
+        description="Stage-0 calibration volume: search-cost optimization validation",
+        authorization_path=str(G.authorization_path(args.run_id)),
+        authorization_loader=partial(G.load_for, "bench"),
+        commands=ExecutionCommands(
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
+            **deployment_commands()),
+        plan_id=f"stage0.calibration_volume.{args.plan}",
+        plan_hash=G.plan_hash(args.plan),
+        budget=battery_budget(args),
+        setup=SetupManifest(
+            env={"SESSION_KIND": "stage0_calvol"},
+            required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
+                          "SESSION_KIND", "TEACHER_REVISION"),
+            setup_markers=("ENV_READY", "REPO_READY", "ASSETS_STAGED", "TRAIN_ENV",
+                           "TEACHER_READY", "SETUP_DONE"),
+            local_assets=search_assets(plan),
+            teacher_revision=plan["teacher_revision"],
+            uv_max_seconds=1500, tests_max_seconds=600),
+        driver_command=bench_driver_command,
+        driver_job_id="stage0_calvol_bench_driver",
+        status_path=status_path("bench"),
+        run_log_path="/workspace/stage0_calvol_bench_run.log",
+        markers=MarkerPolicy(
+            success="ALL_DONE", failure=("RUN_FAILED",),
+            products_eligible=lambda terminal, stages: True,
+            failure_note="the bench record is pulled after every stage"),
+        artifacts=ArtifactPolicy(
+            audit_dirname=AUDIT["bench"], evidence_filename=EVIDENCE["bench"],
+            archive_basename="stage0_calvol_bench",
+            spec_success="configs/stages/stage-0/calibration_volume/bench_artifacts.json",
+            spec_failed="configs/stages/stage-0/calibration_volume/bench_artifacts.json",
+            report_names=(EVIDENCE["bench"],),
+            on_poll=secure_bench),
+        teardown=TeardownPolicy(
+            note="delete the pod, verify from the provider that it is gone, STOP"),
+    )
+
+
 def spec(args) -> SessionSpec:
     kind = args.session
     if kind == "search":
         return search_spec(args)
+    if kind == "bench":
+        return bench_spec(args)
     if kind != "battery":
         raise SystemExit(f"session kind {kind!r} is not built yet")
     return SessionSpec(
@@ -375,6 +443,12 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--create-retry-seconds", type=float, default=300.0)
     ap.add_argument("--host-draws", type=int, default=3)
     ap.add_argument("--country-code", default=None)
+    ap.add_argument("--network-volume-id", default="",
+                    help="attach this network volume (its datacenter constrains the draw)")
+    ap.add_argument("--volume-mount-path", default="",
+                    help="where the volume mounts; never the workspace root")
+    ap.add_argument("--data-center-ids", default="",
+                    help="the volume's datacenter; required with --network-volume-id")
     ap.add_argument("--setup-timeout-s", type=float, default=3600.0)
     ap.add_argument("--poll-seconds", type=float, default=120.0)
     ap.add_argument("--poll-limit-min", type=float, default=420.0)

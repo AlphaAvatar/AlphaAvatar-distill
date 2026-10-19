@@ -3,6 +3,11 @@
 Every puzzle is checked by brute force: an instance is kept only when exactly
 one world satisfies the stated facts, so the answer follows from the prompt
 alone and needs no outside knowledge.
+
+`ordering@v2` and `graph_paths@v2` (maintainer-authorized 2026-10-19) repair
+defects the eval-set-1 audit found in v1, whose output stays byte-for-byte what
+built the frozen sets: v2 seating states the seat count and names everyone,
+and v2 graphs print every town and never draw from a hash-ordered collection.
 """
 from __future__ import annotations
 
@@ -21,7 +26,11 @@ _ORDINAL = {1: "first", 2: "second", 3: "third", 4: "fourth", 5: "fifth",
 _OKN = {"L1": (3, 0), "L2": (5, 1), "L3": (7, 2)}  # entities, redundant facts
 
 
-def _ordering_family(fid: str):
+def _and_list(xs: list[str]) -> str:
+    return ", ".join(xs[:-1]) + f" and {xs[-1]}"
+
+
+def _ordering_family(fid: str, version: int):
     def make(rng: random.Random, difficulty: str) -> dict:
         n, extra = _OKN[difficulty]
         names = rng.sample(PEOPLE, n)
@@ -105,7 +114,14 @@ def _ordering_family(fid: str):
         sols = [p for p in itertools.permutations(names) if all(c(p) for c in constraints)]
         if len(sols) != 1:
             raise Unsatisfiable
-        prompt = ("Read the facts and answer the question.\n\n" + "\n".join(facts)
+        # v1 seating can drop the only fact naming a person and never says how
+        # many seats there are; v2 states both, so the brute-forced universe
+        # (`names`, one per seat) is exactly the one the prompt describes.
+        intro = ""
+        if version >= 2 and fid == "order.seating":
+            intro = (f"{n} people sit in a row of {n} seats, numbered 1 to {n} from the "
+                     f"left, one person per seat: {_and_list(sorted(names))}.\n")
+        prompt = ("Read the facts and answer the question.\n\n" + intro + "\n".join(facts)
                   + f"\n\n{q} Answer with the name only.\n\n" + ANSWER_INSTRUCTION)
         return {"messages": user(prompt), "answer": gold, "answer_type": "name"}
 
@@ -113,11 +129,17 @@ def _ordering_family(fid: str):
     return Family(fid, cls, make)
 
 
+_ORDERING_FAMILIES = ("order.taller", "order.race", "order.seating", "order.ages")
+
 ORDERING = Generator(
     "ordering@v1", "task_contained_deduction", "name",
-    tuple(_ordering_family(f) for f in ("order.taller", "order.race",
-                                        "order.seating", "order.ages")),
+    tuple(_ordering_family(f, 1) for f in _ORDERING_FAMILIES),
     description="recover a total order (or a value chain) from stated relations")
+
+ORDERING_V2 = Generator(
+    "ordering@v2", "task_contained_deduction", "name",
+    tuple(_ordering_family(f, 2) for f in _ORDERING_FAMILIES),
+    description="as ordering@v1; seating states the seat count and names every person")
 
 # --- entity tracking ---------------------------------------------------------
 
@@ -290,7 +312,7 @@ def _bfs(adj, src):
     return dist
 
 
-def _graph_family(fid: str):
+def _graph_family(fid: str, version: int):
     def make(rng: random.Random, difficulty: str) -> dict:
         n, m = _GKN[difficulty]
         towns = rng.sample(_TOWNS, n)
@@ -298,13 +320,18 @@ def _graph_family(fid: str):
         while len(edges) < m:
             a, b = rng.sample(towns, 2)
             edges.add((a, b))
+        # v1 iterates the edge SET, so adjacency order -- and through BFS order
+        # the `graph.shortest` target drawn below -- follows PYTHONHASHSEED;
+        # v2 orders every collection before anything is drawn from it.
         adj = {}
-        for a, b in edges:
+        for a, b in (sorted(edges) if version >= 2 else edges):
             adj.setdefault(a, []).append(b)
         src = rng.choice(towns)
         dist = _bfs(adj, src)
         if fid == "graph.shortest":
             far = [t for t, d in dist.items() if d >= 2]
+            if version >= 2:
+                far.sort()
             if not far:
                 raise Unsatisfiable
             dst = rng.choice(far)
@@ -326,7 +353,10 @@ def _graph_family(fid: str):
             raise KeyError(fid)
         roads = sorted(edges)
         rng.shuffle(roads)
-        prompt = ("The roads below are all one-way.\n\n"
+        # v1 prints only towns on a road while `graph.unreachable` counts all n;
+        # v2 prints the whole universe the gold is computed over.
+        universe = f"There are {n} towns: {_and_list(sorted(towns))}.\n" if version >= 2 else ""
+        prompt = (universe + "The roads below are all one-way.\n\n"
                   + "\n".join(f"There is a road from {a} to {b}." for a, b in roads)
                   + f"\n\n{q}\n\n" + ANSWER_INSTRUCTION)
         return {"messages": user(prompt), "answer": ans, "answer_type": atype}
@@ -334,10 +364,17 @@ def _graph_family(fid: str):
     return Family(fid, "graph_search", make)
 
 
+_GRAPH_FAMILIES = ("graph.shortest", "graph.reach_count", "graph.unreachable")
+
 GRAPH_PATHS = Generator(
     "graph_paths@v1", "task_contained_deduction", "int",
-    tuple(_graph_family(f) for f in ("graph.shortest", "graph.reach_count",
-                                    "graph.unreachable")),
+    tuple(_graph_family(f, 1) for f in _GRAPH_FAMILIES),
     description="search a stated one-way road network")
 
+GRAPH_PATHS_V2 = Generator(
+    "graph_paths@v2", "task_contained_deduction", "int",
+    tuple(_graph_family(f, 2) for f in _GRAPH_FAMILIES),
+    description="as graph_paths@v1; every town printed, hash-seed independent")
+
 GENERATORS = (ORDERING, ENTITY_TRACKING, KNIGHTS_KNAVES, GRAPH_PATHS)
+GENERATORS_V2 = (ORDERING_V2, ENTITY_TRACKING, KNIGHTS_KNAVES, GRAPH_PATHS_V2)

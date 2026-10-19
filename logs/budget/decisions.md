@@ -12528,3 +12528,63 @@ on a paid pod.
 - **Revisit when.** The maintainer funds the amended design (about $90, or
   about $81 after the overhead fix), authorizes the 1x/2x subset, or changes
   the recovery recipe.
+
+## 2026-10-19 — Maintainer: eval-set-1 finalization and the Stage-0 volume study authorized ($90 new-spend hard cap)
+
+- **Context.** Maintainer authorization of 2026-10-19 (task instruction to the
+  executing agent), accepting the previous round's independent review.
+- **Budget** (re-derived from the books and the provider before anything was
+  written):
+  - project cumulative spend $517.6571 (`derive_budget.py`); Stage-0
+    programme spend $17.5099 (`governance.programme_spent`);
+  - provider balance $95.9995 at 2026-10-19T04:50Z, $0/h, 0 pods, 0 network
+    volumes;
+  - the $90 is the hard cap on ALL new spend from this authorization on
+    (GPU, storage, network volumes, failed retries, settlement); it is not
+    added to the earlier unused $77.3429;
+  - new project cap $607.6571; new Stage-0 programme ceiling $107.5099;
+    Stage-0 formal phase $90.00; Stage-0 per-session cap $50.00;
+  - funds only the current Stage-0 volume work and reopens no other
+    experiment or budget.
+- **eval-set-1, decided:**
+  - the six defective fluid items are excluded from formal scoring by a
+    versioned validity mask; formal valid set 714 = 570 static + 144
+    interactive; the original 720 and every historical result stay bound to
+    the original identity and scorer;
+  - Seating, Graph, String-induction and `graph.shortest` hash-seed defects
+    are fixed in NEW generator versions; no frozen item changes;
+  - exact duplicates count once in independent statistics; a semantic
+    near-duplicate counts once only with verifiable equivalence evidence;
+  - false rejections of semantically equivalent answers (math, text, LaTeX,
+    Unicode, action lines) are fixed under a NEW scorer protocol identity
+    with conformance tests and a reproducible old-vs-new rescoring record;
+  - `stage3_legacy_150` stays an in-sample regression unit; TriviaQA stays
+    out of public git and out of the formal core; the two behaviour duplicate
+    pairs enter the de-duplicated statistics; the four Stage-2-train overlaps
+    leave held-out correctness; the Salesforce xLAM items stay out of the
+    public frozen core until their access/redistribution terms are confirmed;
+  - other low-severity findings get a transparent validity classification,
+    with no silent change to items, gold or weights;
+  - then FREEZE eval-set-1; after the freeze any change to items, gold,
+    validity mask, scoring semantics or identity needs a new explicit
+    maintainer authorization.
+- **Design:** 1x / 2x / 4x, one D1 full search (D1 + scored_v1 forward
+  baseline) and one recovery at the same recipe and seed per dose, measured on
+  the fixed eval-set-1. No three-resample requirement. **The "1x below 2% stops
+  2x/4x" rule is rejected**: the study tests whether more calibration data
+  helps, so a low 1x cannot cancel the larger doses. Single-draw treatment
+  comparisons may be reported; cross-seed stability and statistical saturation
+  may not be claimed.
+- **Cost first:** before any formal full search, find and fix the real
+  bottleneck behind the ~1.25 min/expansion overhead without changing search
+  identity, operator numerics, state evaluation, ranking or the resume
+  contract; measure the gain; re-price; re-decide whether 4x must be split;
+  journal, materialized states, checkpoints and resume information must
+  survive a pod loss either way.
+- **Execution** is authorized once eval-set-1 is legally frozen, the protocol
+  and data identities are fixed, the forecast fits the $90 with margin, the
+  provider is checked live and the optimization and resume safety are
+  validated: run 1x, 2x, 4x. Ordinary failures are repaired autonomously; no
+  new paid session starts if forecast spend plus a safety margin does not fit
+  what is left; completing all three doses comparably comes first.
+- **Revisit when.** Any of the stop conditions above is reached.

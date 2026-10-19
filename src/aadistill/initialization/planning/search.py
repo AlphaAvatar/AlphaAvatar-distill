@@ -421,11 +421,16 @@ class BeamSearch:
         deadline: "Deadline | None" = None,
         execution: ExecutionConfig = DEFAULT_EXECUTION,
         numerics: NumericalEnvironment | None = None,
+        validate_on_search_device: bool = False,
     ) -> None:
         self.adapter = adapter
         self.config = config
         #: Runtime only. Never hashed — see `Deadline`.
         self.deadline = deadline
+        #: Runtime only: WHERE the save/reload check runs (see
+        #: `_materialize_and_measure`). Default: the produced model's device,
+        #: the historical behaviour.
+        self.validate_on_search_device = bool(validate_on_search_device)
         #: The declared numerical conditions, which together with `execution`
         #: form each state's materialization identity. DECLARED BY THE CALLER and
         #: not sniffed: a fingerprint resolved from whatever model happened to be
@@ -789,12 +794,31 @@ class BeamSearch:
         # memory model alone: the child is not duplicated into VRAM to be
         # checked, only the canonical reload goes there, and only after it has
         # been validated.
+        #:
+        #: `validate_on_search_device` moves the PRODUCED child to the search
+        #: device first, so both forwards still run on one backend -- the
+        #: accelerator -- and the reload lands where it is measured. On a pod
+        #: the host forward of a teacher-sized child was ~58 s of every ~75 s
+        #: of per-expansion overhead (two 5-token bf16 forwards on an
+        #: oversubscribed host), against seconds on the device. The child is
+        #: handed back to the host afterwards, so the memory model during
+        #: measurement is the historical one. Nothing the check compares, and
+        #: nothing hashed, depends on which device ran it.
+        produced_device = model_device(model)
+        moved = (self.validate_on_search_device
+                 and produced_device != torch.device(self.config.device))
+        if moved:
+            with self.telemetry.timed("validation_transfer_seconds"):
+                model.to(self.config.device)
         validation_device = model_device(model)
         with self.telemetry.timed("canonical_reload_seconds"):
             reloaded = self.adapter.load(str(ckpt_dir), device=validation_device)
         with self.telemetry.timed("validation_seconds"):
             checks = self._validate(state, model, reloaded, planned_spec,
                                     device=validation_device)
+        if moved:
+            with self.telemetry.timed("validation_transfer_seconds"):
+                model.to(produced_device)
         checks["n_shards"] = len(artifact.shards)
         checks["sharded"] = artifact.is_sharded
         checks["validation_device"] = str(validation_device)
@@ -1206,7 +1230,17 @@ class BeamSearch:
                 state.materialization.materialization_id)
         else:
             record = self._journal.get(state.state_id)
-        if record is None or record.get("validity") != StateValidity.MEASURED.value:
+        #: A PRUNED record is restorable too, when its bytes were kept
+        #: (`prune_weights=False`): it was measured exactly like a MEASURED one
+        #: and was pruned only by the ranking of its level, which a resumed run
+        #: re-derives from these same evaluations. Without this, a run resumed
+        #: after level L re-executes every pruned state of levels <= L --
+        #: hours of operator work for states it will prune again. The bytes
+        #: are re-identified below exactly as for a measured record; a pruned
+        #: state whose weights were released has no checkpoint and is still
+        #: declined.
+        if record is None or record.get("validity") not in (
+                StateValidity.MEASURED.value, StateValidity.PRUNED.value):
             return None
         #: THE A3 COLLISION, still refused — now as a structural assertion
         #: rather than the mechanism. A keyed hit cannot mismatch, so this fires

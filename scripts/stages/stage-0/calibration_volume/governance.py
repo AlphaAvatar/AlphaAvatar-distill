@@ -39,7 +39,7 @@ EXPERIMENT_LOGS = Path("logs/stages/stage-0/calibration_volume")
 PROGRAMME_GRANT = Path("logs/budget/approvals/stage0_calibration_volume_programme_grant.json")
 PLANS = Path("configs/stages/stage-0/calibration_volume")
 
-SESSION_KINDS = ("battery", "search", "probes")
+SESSION_KINDS = ("battery", "search", "probes", "bench", "dose")
 
 #: One policy per session kind: an artifact grants exactly its own kind, and
 #: loading it as another kind refuses on the claim it carries.
@@ -105,6 +105,15 @@ HARNESS["search"] = COMMON_HARNESS + (
     "src/aadistill/initialization/baseline.py",
     "src/aadistill/initialization/planning/search.py",
     "src/aadistill/initialization/planning/metrics.py",
+)
+
+
+HARNESS["bench"] = HARNESS["search"] + (
+    "scripts/stages/stage-0/calibration_volume/bench_driver.py",
+    "scripts/stages/stage-0/calibration_volume/volume_sync.py",
+    "src/aadistill/initialization/execution.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
 )
 
 
