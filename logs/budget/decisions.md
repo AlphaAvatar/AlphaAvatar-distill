@@ -12780,3 +12780,32 @@ on a paid pod.
 - **Next.** Every generation of d1 is now on the volume, so the next resume
   only rescores (preregistered `retry_policy`: finished units rescored, never
   regenerated).
+
+## 2026-10-19 — Stage-0 dose d2: the search mirror died at start; restored by hand, fixed for d4
+
+- **What failed.** In `dose_d2_20261019_135821` the dose driver starts the
+  `volume_sync.py push --loop 120` mirror before the search creates its
+  directory. With nothing on the volume to pull, the first pass found no
+  source and exited 1 (14:14:12Z, `mirror.log`).
+  - The search kept running normally, but every state stayed on the pod's
+    local disk only: 37 of 92 expansions and 111 GB by 17:20Z.
+  - The final push after the search still runs, so a pod that survives
+    loses nothing. A lost pod would have cost the whole search so far.
+  - d1 was not affected: its first pass found the directory the earlier
+    abandoned attempt had left.
+- **Repair on the live run** (17:3xZ). This was an execution-only action:
+  nothing in the running driver or the search was touched.
+  - A separate process on the pod, `/workspace/jobs/manual_mirror_d2.py`,
+    copies with the same rule as `volume_sync.sync`: add or replace by size
+    and mtime, never delete.
+  - It writes through its own temp suffix, so it cannot collide with the
+    driver's final push.
+  - It stops when the search process (pid 3443) exits.
+  - Its log is `audit/stage0_calvol_dose/d2/manual_mirror.log`.
+- **Fix for d4.** In loop mode, `volume_sync` now logs `waiting` and keeps
+  looping while the source is absent. A single pass still reports a missing
+  source exactly as before.
+  - Regression: `scripts/stages/stage-0/calibration_volume/tests/test_volume_sync.py`.
+    It fails on the old code.
+  - d2's authorization bound the old harness digest; d4's will bind the new
+    one.

@@ -67,17 +67,20 @@ def main(argv=None) -> int:
             with args.log.open("a") as f:
                 f.write(line + "\n")
 
-    if not args.src.is_dir():
+    if not args.src.is_dir() and not args.loop:
         log({"mode": args.mode, "error": f"no source {args.src}"})
         return 0 if args.mode == "pull" else 1
     while True:
         stop = args.until is not None and args.until.exists()
         t0 = time.time()
-        try:
-            res = sync(args.src, args.dst)
-            log({"mode": args.mode, **res, "seconds": round(time.time() - t0, 1)})
-        except OSError as exc:      # a full or flaky volume must not kill the search
-            log({"mode": args.mode, "error": repr(exc)[:300]})
+        if not args.src.is_dir():   #: a mirror starts before the search makes its directory
+            log({"mode": args.mode, "waiting": f"no source {args.src}"})
+        else:
+            try:
+                res = sync(args.src, args.dst)
+                log({"mode": args.mode, **res, "seconds": round(time.time() - t0, 1)})
+            except OSError as exc:      # a full or flaky volume must not kill the search
+                log({"mode": args.mode, "error": repr(exc)[:300]})
         if not args.loop or stop:
             return 0
         time.sleep(args.loop)
