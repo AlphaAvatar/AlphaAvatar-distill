@@ -42,6 +42,20 @@ axes, with no external dataset and no ARC-AGI material:
 | abstract / analogical | `grid_transform` | `letter_analogy` |
 | interactive adaptation | `probe_function`, `hidden_buttons` | `code_breaker` |
 
+- **Versions.**
+  - **v1 is frozen.** Every historical set (`dev_v1`, i.e. eval-set-1's 720,
+    and `calibration_v1`/`v2`) was drawn from it, and today's code rebuilds
+    each byte for byte under `PYTHONHASHSEED=14`.
+  - **v2 (2026-10-19, `registry.GENERATORS_V2`)** fixes what the eval-set-1
+    audit found:
+    - `ordering@v2` states every person and the seat count;
+    - `graph_paths@v2` prints every town and no longer depends on the hash
+      seed;
+    - `string_induction@v2` requires every changed query letter, and a kept
+      `y`, to be evidenced in the examples;
+    - `letter_analogy@v2` never asks a worked example and never repeats a
+      demonstration.
+  - New sets use v2 with fresh seeds.
 - **Uniqueness.** Every instance is seeded and deterministic. Static induction
   and analogy instances are kept only when every rule in the generator's
   library that fits the examples agrees on the query. Deduction instances are

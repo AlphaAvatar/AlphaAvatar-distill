@@ -196,6 +196,7 @@ def main(argv=None) -> int:
             cmd = [TRAIN_PY, "scripts/stages/stage-0/calibration_volume/search_driver.py",
                    "--treatment", args.treatment, "--run-id", args.run_id,
                    "--search-run-id", treat["search_run_id"], "--auth", args.auth,
+                   "--auth-kind", "dose",
                    "--plan", args.plan, "--treatments-doc", PREREG,
                    "--profiles-doc", prereg["profiles_doc"], "--status", args.status,
                    *(["--prefix-reuse"] if prereg["execution"]["depth_prefix_reuse"] else []),

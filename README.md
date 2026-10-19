@@ -197,17 +197,22 @@ construction (a terse well-formed reply scores perfectly), and its components ar
 
 Formal capability measurement reads one permanent, hash-verified evaluation set
 from [`data/eval-set/`](./data/eval-set/README.md) (AGENTS.md P10.3). Today that
-is `eval-set-1`, registered as a **candidate**: its identity is pinned and
-protected, and freezing waits on the maintainer decisions it lists.
+is `eval-set-1`, **frozen** on 2026-10-19 by the maintainer. Any further change
+to it needs a new maintainer authorization.
 
-| component | items | role |
+| component | items (formal rows) | role |
 | --- | --- | --- |
-| `fluid_reasoning_720` | 720 procedural tasks over five reasoning axes, held-out rule families | primary target; **development-exposed**, not a blind set |
-| `stage3_capability_846` | the frozen Stage-3 battery: math, GSM8K, multi-hop, RAG, answerability, safety and the 76 behaviour prompts (TriviaQA knowledge withheld from git pending a license review) | supporting capabilities and guard rails |
+| `fluid_reasoning_720` | 720 procedural tasks over five reasoning axes, held-out rule families (714 formal: 6 audited defects excluded by its validity mask) | primary target; **development-exposed**, not a blind set |
+| `stage3_capability_846` | the frozen Stage-3 battery: math, GSM8K, multi-hop, RAG, answerability, safety and the 76 behaviour prompts | supporting capabilities and guard rails. TriviaQA knowledge is never in git and is reported only as supplementary. The behaviour set's 7 xLAM prompts are outside the formal core, and its 4 Stage-2-train overlaps are outside held-out correctness |
 | `stage3_legacy_150` | the fixed 150 prompts every Stage-3 arm was scored on | **in-sample** regression only: they are training prompts |
 
-Every unit and capability is reported on its own. A unit a model cannot take is
-`unsupported`, never zero, and no pooled score exists. **The ~20% correctness the
+- **Every item is generated; the masks only decide which rows enter the formal
+  numbers.**
+- **The scoring is scorer protocol v2.** It accepts equivalent renderings v1
+  rejected (Unicode minus, LaTeX wrappers, spaced letters, markdown action
+  lines). Historical results stay on v1.
+- **Every unit and capability is reported on its own.** A unit a model cannot
+  take is `unsupported`, never zero, and no pooled score exists. **The ~20% correctness the
 Stage-3 arms reached was measured on `stage3_legacy_150`, prompts they were trained
 on**: it is recall, not reasoning on unseen problems.
 
@@ -458,7 +463,7 @@ AlphaAvatar-distill/
 ├── data/                   # owner-first: data/stages/stage-<n>/<dataset>/ — manifests
 │                           # tracked, heavy files gitignored, rebuildable
 │   └── eval-set/           #   permanent cross-stage evaluation sets: registry.json,
-│                           #   eval-set-<n>/ items tracked and hash-verified
+│                           #   eval-set-<n>/ items tracked and hash-verified (eval-set-1 frozen)
 ├── tests/                  # the CORE suite; experiment suites live with their
 │                           # experiments under scripts/stages/.../tests/
 ├── logs/                   # project memory — read logs/README.md first

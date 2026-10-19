@@ -12670,3 +12670,19 @@ on a paid pod.
   - **4x fits one session** under the $50 cap, so it is not split.
 - **Revisit when.** A dose's measured search time departs from its price by
   more than the contingency.
+
+## 2026-10-19 — Stage-0 dose d1 attempt 1 failed before measurement (authorization kind); repaired
+
+- **What happened.** `dose_d1_20261019_054503` ($0.2541) passed setup and its
+  contract stage. Its search subprocess then loaded the session's one-use DOSE
+  authorization as a `search` artifact, and the governance policy refused it.
+  No search ran; nothing was measured.
+- **Why the $0 checks missed it.** `search_driver --check-only` returned
+  before the authorization step.
+- **Repair.**
+  - `search_driver --auth-kind` (the dose driver passes `dose`).
+  - `--check-only` now loads and plan-binds a real authorization when one is
+    named, so the next attempt's exact artifact is verified at $0 before a
+    pod exists.
+- **Retry.** A fresh run identity and a fresh one-use authorization (P12.1:
+  an engineering failure before formal measurement).

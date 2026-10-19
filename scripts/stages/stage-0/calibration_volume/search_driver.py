@@ -115,6 +115,10 @@ def main(argv=None) -> int:
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--check-only", action="store_true")
     ap.add_argument("--plan", default="search", help="the session plan name the authorization binds")
+    ap.add_argument("--auth-kind", default="search", choices=("search", "dose"),
+                    help="the session kind whose authorization this search runs under: a "
+                         "dose session's search is authorized by the DOSE artifact "
+                         "(dose_20261019_054503 was refused loading it as 'search')")
     ap.add_argument("--treatments-doc", default=str(PREREG.relative_to(REPO)),
                     help="the document that freezes this treatment's profile hashes")
     ap.add_argument("--max-depth", type=int, default=None,
@@ -188,8 +192,10 @@ def main(argv=None) -> int:
         record["execution"] = {"operators": execution.as_trace(),
                                "validate_on_search_device": bool(args.validate_on_device),
                                "prune_weights": session.config.prune_weights}
-        if not args.check_only:
-            auth = G.load_for("search", args.auth)
+        #: also on --check-only when a real artifact is named, so the $0 check
+        #: reaches the line a paid session would otherwise die on
+        if not args.check_only or Path(args.auth).is_file():
+            auth = G.load_for(args.auth_kind, args.auth)
             auth.require_plan(G.plan_hash(args.plan))
             record["authorization_id"] = auth.authorization_id
         done(st, config_hash=session.config.config_hash[:16])
