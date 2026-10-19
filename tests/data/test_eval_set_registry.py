@@ -110,3 +110,22 @@ def test_the_report_scores_exactly_the_formal_rows(tmp_path):
                .read_text().splitlines()]
     assert len(flagged) == 720 and sum(not r["formal"] for r in flagged) == 6
     assert rep["units"]["stage3_capability_846/gsm8k"]["status"] == "not_run"
+
+
+def test_the_report_reads_generations_whose_text_holds_unicode_line_separators(tmp_path):
+    """`json.dumps(ensure_ascii=False)` writes U+2028/U+2029/U+0085 raw inside a
+    generation, and `str.splitlines()` breaks a JSONL record at each of them:
+    Stage-0 dose d1's report died on exactly that. Records are split on "\\n"."""
+    import json
+    import shared.evaluation.eval_set_scoring as S
+
+    items = ES.items("eval-set-1", "stage3_capability_846", "gsm8k")
+    with (tmp_path / "stage3_capability_846__gsm8k.jsonl").open("w") as f:
+        for it in items:
+            f.write(json.dumps({"id": it["id"], "think_preopened": False,
+                                "natural_termination": True, "degeneration_triggered": False,
+                                "degeneration_kind": None, "stop_reason": "eos",
+                                "raw": "<think>\na b c\x85d\n</think>\n\n1<|im_end|>"},
+                               ensure_ascii=False) + "\n")
+    unit = S.report(tmp_path, "sep", {}, "eval-set-1")["units"]["stage3_capability_846/gsm8k"]
+    assert (unit["status"], unit["n"], unit["missing"]) == ("measured", len(items), 0)

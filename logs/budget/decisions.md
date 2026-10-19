@@ -12749,3 +12749,34 @@ on a paid pod.
   - the capability units and the legacy 150 are generated once, since no
     complete endpoint of theirs ever existed.
   - This yields one complete measurement of d1, never a second one.
+
+## 2026-10-19 — Stage-0 dose d1 resume: the report's JSONL reader and the resume's unit markers repaired
+
+- **Attempt 3** (`dose_d1_20261019_122630`, $0): all six create calls were
+  refused for capacity. EUR-IS-1, the volume's datacenter, lists only the
+  A100-SXM4-80GB, and it showed none free. This was a provider transient.
+- **Attempt 4** (`dose_d1_20261019_125359`, $0.873):
+  - search and recovery were restored from the volume (recovery sha verified);
+  - fluid's generation was reused;
+  - the capability units and the legacy 150 were generated and pushed to the
+    volume.
+- **What failed.** `eval_set_scoring.report` then raised
+  `JSONDecodeError: Unterminated string`. It split JSONL with
+  `str.splitlines()`, which also breaks on U+2028, U+2029 and U+0085.
+  `json.dumps(ensure_ascii=False)` writes those raw inside a generation's text.
+  This was reproduced at $0, and no score was read.
+- **Repair.**
+  - `read_jsonl` splits on "\n" only, both in the report's readers and in
+    `score_battery`.
+  - Regression in `tests/data/test_eval_set_registry.py`; it fails with the
+    pod's exact error on the old reader.
+- **A false flag found on the way.** The resume re-marked the search and
+  recovery units it had restored, so the launcher went after files the
+  session never pulled and recorded `PRODUCTS_UNSECURED`. On a success that
+  flag blocks teardown and holds the pod to its hard stop (about 10 h).
+  - Restored units are no longer re-marked.
+  - The eval unit's two logs are written on every path, saying so when a
+    generation was restored rather than produced.
+- **Next.** Every generation of d1 is now on the volume, so the next resume
+  only rescores (preregistered `retry_policy`: finished units rescored, never
+  regenerated).

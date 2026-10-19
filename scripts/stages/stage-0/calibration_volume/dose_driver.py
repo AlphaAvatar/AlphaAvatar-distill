@@ -284,7 +284,10 @@ def main(argv=None) -> int:
             products.write_text(json.dumps(prod, indent=1) + "\n")
             finish(st, "S_search", pulled_before=pulled, final_push=final,
                    n_resumed=srec["stages"]["C_beam_search"].get("n_resumed"))
-        done_unit("search", search_unit / "search_record.json")
+        #: a unit restored from the volume was secured by the session that made
+        #: it; marking it here sends the launcher after files it never pulled
+        if not st.get("resumed_complete"):
+            done_unit("search", search_unit / "search_record.json")
         srec = json.loads((search_unit / "search_record.json").read_text())
         record["search"] = {"commit": srec.get("commit"), "session": srec.get("session")}
         save()
@@ -339,7 +342,8 @@ def main(argv=None) -> int:
             finish(st, "R_recovery", model_dir=str(model_dir), model_sha256=msha, pushed=pushed,
                    top1=top1, config=str(cfg.relative_to(REPO)))
         (out / "recovery_products.json").write_text(json.dumps(prod.get("recovery"), indent=1) + "\n")
-        done_unit("recovery", out / "recovery_products.json")
+        if not st.get("resumed_complete"):
+            done_unit("recovery", out / "recovery_products.json")
 
         # -- E: eval-set-1, every item --------------------------------------------
         st = stage("E_eval")
@@ -374,6 +378,9 @@ def main(argv=None) -> int:
             os.replace(tmp, fluid)
             sync("push", gens, vol / "generations", out / "sync.log")
             runs.append("fluid")
+        else:   #: the eval unit's log exists either way (the launcher fetches it)
+            (out / "eval_fluid.log").write_text(f"{fluid.name}: restored from the volume, "
+                                                "rescored, not regenerated\n")
         units = {u: ES.unit_path(SET_ID, "stage3_capability_846", u)
                  for u in m["components"]["stage3_capability_846"]["units"]}
         legacy = legacy_prompts(out / "legacy_150.prompts.jsonl")
@@ -400,6 +407,9 @@ def main(argv=None) -> int:
                 os.replace(raw / f"{k}.generations.jsonl", gens / f"{k}.jsonl")
             sync("push", gens, vol / "generations", out / "sync.log")
             runs.append("capability")
+        else:
+            (out / "eval_capability.log").write_text(
+                f"{sorted(todo)}: restored from the volume, rescored, not regenerated\n")
         import shared.evaluation.eval_set_scoring as S
         rep = S.report(gens, label, {}, SET_ID, rows_out=out / "rows")
         (out / "report.json").write_text(json.dumps(rep, indent=1) + "\n")

@@ -143,7 +143,7 @@ def main(argv=None) -> int:
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     for path in args.records:
-        records = [json.loads(l) for l in Path(path).read_text().splitlines() if l.strip()]
+        records = [json.loads(l) for l in Path(path).read_text().split("\n") if l.strip()]
         rows = score(tasks, records, args.protocol)
         label = records[0]["label"] if records else Path(path).stem
         body = "".join(json.dumps(r, sort_keys=True) + "\n" for r in rows)

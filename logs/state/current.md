@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-19 12:35 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-19 13:45 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,8 +9,10 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**NOTHING IS RUNNING, AND NOTHING IS BILLING (provider query 2026-10-19 12:31Z:
+**NOTHING IS RUNNING, AND NOTHING IS BILLING (provider query 2026-10-19 13:47Z:
 0 pods). STAGE-0 FORMAL VOLUME STUDY IN PROGRESS, DOSE d1 (1x) RESUMING.**
+The d1 resume generated every capability and legacy item onto the volume, then
+failed in the report's JSONL reader (repaired); the next resume only rescores.
 Network volume `ugllmlv19t` (300 GB, EUR-IS-1) is kept: it holds d1's search states, its Top-1,
 its recovered student and its fluid generations.
 - **d1 attempt 2** (`dose_d1_20261019_055515`, $11.5053):

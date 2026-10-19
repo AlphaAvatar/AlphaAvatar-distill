@@ -53,6 +53,13 @@ def _plain(x):
     return json.loads(json.dumps(x))
 
 
+def read_jsonl(path: Path) -> list[dict]:
+    """Records split on "\\n" only. `str.splitlines()` also breaks on U+2028,
+    U+2029 and U+0085, which `json.dumps(ensure_ascii=False)` writes raw inside
+    a generation's text: dose d1's report died on exactly that."""
+    return [json.loads(l) for l in path.read_text().split("\n") if l.strip()]
+
+
 # -- fluid_reasoning_720 ------------------------------------------------------
 #: The end-of-turn marker a terminated generation's decoded text ends with; the
 #: protocol check requires it, so a synthetic reply without it is unusable.
@@ -307,7 +314,7 @@ def report(generations: Path, label: str, unsupported: dict[str, str],
             except FileNotFoundError:
                 outcomes[key] = {"status": "withheld", "reason": "no verified local copy", **flags}
                 continue
-            recs = [json.loads(l) for l in gen.read_text().splitlines() if l.strip()]
+            recs = read_jsonl(gen)
             keep = set(items) - set(mask["exclude"])
             formal_ids[key] = keep
             formal, rows = unit_metrics(cname, uname, items, recs, spec["id_field"],
@@ -348,8 +355,7 @@ def report(generations: Path, label: str, unsupported: dict[str, str],
             flags = {k: outcomes[base][k] for k in ("in_formal_core", "protocol")}
             if outcomes[base].get("headline") is None:      # behaviour groups
                 from aadistill.evaluation.behavior import aggregate, score_sample
-                recs = [json.loads(l) for l in (generations / f"{comp}__{unit}.jsonl")
-                        .read_text().splitlines() if l.strip()]
+                recs = read_jsonl(generations / f"{comp}__{unit}.jsonl")
                 scored = [score_sample(items[r["id"]], r.get("raw", ""),
                                        hit_cap=r.get("stop_reason") not in (None, "eos"))
                           for r in recs if r["id"] in ids]
