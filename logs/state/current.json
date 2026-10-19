@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Stage-0 calibration-volume FORMAL STUDY in progress: d1 attempt 2 (dose_d1_20261019_055515, $11.5053) finished search and recovery and failed in evaluation; the same dose resumes from the network volume (preregistered retry_policy). Owner: .../plans/volume_preregistration.json; decisions.md 2026-10-19.",
+ "blocker": "BLOCKED NO. Stage-0 calibration-volume FORMAL STUDY in progress: dose d1 COMPLETE (dose_d1_20261019_133708 after attempts 2-5); d2 next, then d4 (no stop rule). Owner: .../plans/volume_preregistration.json; decisions.md 2026-10-19.",
  "branch": "main (squash of exec/d1-behavioural-readiness, 2026-10-17); Stage-0 work on stage0/calibration-volume-mixture",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -200,7 +200,7 @@
   "paid_compute": false,
   "pods": 0,
   "network_volumes": 1,
-  "_verified": "provider query 2026-10-19 13:34 UTC: 0 pods; volume ugllmlv19t (300 GB, EUR-IS-1) kept for the study"
+  "_verified": "provider query 2026-10-19 13:58 UTC: 0 pods; volume ugllmlv19t (300 GB, EUR-IS-1) kept for the study"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

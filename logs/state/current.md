@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-19 13:37 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-19 13:59 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,24 +9,24 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**NOTHING IS RUNNING, AND NOTHING IS BILLING (provider query 2026-10-19 13:34Z:
-0 pods). STAGE-0 FORMAL VOLUME STUDY IN PROGRESS, DOSE d1 (1x) RESUMING.**
-The d1 resume generated every capability and legacy item onto the volume, then
-failed in the report's JSONL reader (repaired); the next resume only rescores.
-Network volume `ugllmlv19t` (300 GB, EUR-IS-1) is kept: it holds d1's search states, its Top-1,
-its recovered student and its fluid generations.
-- **d1 attempt 2** (`dose_d1_20261019_055515`, $11.5053):
-  - search COMPLETE: 92 expansions in 4.70 h, Top-1
-    DEPTH→FFN→ATTENTION→RESIDUAL_WIDTH, 596M parameters;
-  - recovery COMPLETE;
-  - `fluid_reasoning_720` generated in full;
-  - then the run failed scoring the legacy 150 (`KeyError: 'prompt_text'`),
-    which is now repaired.
-- **Next.** The same dose resumes from the volume and evaluates the
-  capability and legacy units once (preregistered `retry_policy`). Then come
-  d2 and d4, each retiring the earlier COMPLETE doses' search states.
-- **Owners.** `runs/dose_d1_20261019_055515/closeout/outcome.json`,
-  `decisions.md` 2026-10-19, and
+**NOTHING IS RUNNING, AND NOTHING IS BILLING (provider query 2026-10-19 13:58Z:
+0 pods). STAGE-0 FORMAL VOLUME STUDY: DOSE d1 (1x) COMPLETE; d2 NEXT.**
+Network volume `ugllmlv19t` (300 GB, EUR-IS-1) is kept: it holds d1's states,
+its Top-1, its recovered student and its eval-set-1 generations.
+- **d1** cost $12.65 over attempts 2–5 ($12.91 with attempt 1):
+  - attempt 2 searched and recovered, then failed in evaluation;
+  - attempt 3 created no pod (capacity);
+  - attempt 4 generated, then failed in the report's JSONL reader;
+  - attempt 5 rescored.
+  - Search: 92 expansions in 4.70 h; Top-1 DEPTH→FFN→ATTENTION→RESIDUAL_WIDTH,
+    596M parameters.
+  - Formal headlines: `fluid_reasoning_720` 1/714; the capability units at or
+    near the floor; legacy (in-sample) 25/150.
+  - Report: `runs/dose_d1_20261019_133708/evidence/d1/eval/report.json`.
+- **Next.** d2 (2x), then d4 (4x). Each retires the earlier COMPLETE doses'
+  search states before its own search. The maintainer set no stop rule: a
+  low 1x does not cancel 2x/4x.
+- **Owners.** The run closeouts, `decisions.md` 2026-10-19, and
   [`volume_preregistration.json`](../stages/stage-0/calibration_volume/plans/volume_preregistration.json)
   (design, pricing, d1 → d2 → d4 order and budget rule).
 
