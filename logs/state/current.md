@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-19 14:21 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-19 21:35 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,21 +9,23 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**ONE POD IS BILLING: STAGE-0 FORMAL VOLUME STUDY, DOSE d2 (2x).** Run
-`dose_d2_20261019_135821`, pod `cmxnaja12ewpzc` (A100-SXM4-80GB, $1.79/h,
-EUR-IS-1), created 14:09Z.
-- **Who owns it.** The launcher in tmux `calvol_d2` (closeout, teardown) and its
-  watchdog (hard stop 792 min, $23.63 of the $24.36 authorization). Do not
-  create another pod while they are alive.
-- **Expected.** 623 min and $18.57 (search, recovery, all of eval-set-1).
-- **Mirror.** The driver's search mirror exited at start because the directory
-  did not exist yet. Since about 17:30Z a separate process on the pod
-  (`/workspace/jobs/manual_mirror_d2.py`) copies the states to the volume and
-  stops when the search ends. The fix for d4 is in `ef88b3ce`
-  (decisions.md 2026-10-19).
-- **Volume.** Its first stage retired d1's 91 intermediate search states
-  (273.0 GB; tombstone `d1/retired_states.json`). d1 keeps 9.1 GB on network
-  volume `ugllmlv19t`: its Top-1, recovered student, generations and records.
+**NO POD EXISTS: NOTHING IS RUNNING ON THE PROVIDER AND NOTHING IS BILLING
+(provider query 2026-10-19 21:33Z: 0 pods). STAGE-0 FORMAL VOLUME STUDY, DOSE
+d2 (2x) ATTEMPT 2 IS ACQUIRING A POD.** Run
+`dose_d2_20261019_213216`; the launcher in tmux `calvol_d2b` retries the create
+in EUR-IS-1 every 300 s, 36 times. Do not create another pod while it is alive.
+- **Why a second attempt.** Attempt 1 (`dose_d2_20261019_135821`, $13.42) was
+  lost mid-search at 21:25Z: about 30 s of ssh failure while the pod was still
+  RUNNING, and the launcher's poll loop took the unanswered probe for a dead
+  driver and deleted the pod. Fixed in `e5a2adee`: a 15-minute grace before
+  an unanswered driver ends the session.
+- **What it resumes from.** The search mirror on network volume `ugllmlv19t`.
+  - The driver's own mirror died at start; a hand-started mirror ran from about
+    17:30Z to 21:23Z. The fix for that is in `ef88b3ce`.
+  - At least 53 of 92 expansions were done.
+  - Preregistered `retry_policy`: journal restore, one replacement endpoint.
+- **Budget.** Authorization $24.36 hard, $18.57 expected. The resume should
+  cost far less, because only the remaining search, recovery and eval run.
 - **d1** cost $12.65 over attempts 2–5 ($12.91 with attempt 1):
   - attempt 2 searched and recovered, then failed in evaluation;
   - attempt 3 created no pod (capacity);
