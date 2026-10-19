@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-19 13:59 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-19 14:21 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,10 +9,16 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**NOTHING IS RUNNING, AND NOTHING IS BILLING (provider query 2026-10-19 13:58Z:
-0 pods). STAGE-0 FORMAL VOLUME STUDY: DOSE d1 (1x) COMPLETE; d2 NEXT.**
-Network volume `ugllmlv19t` (300 GB, EUR-IS-1) is kept: it holds d1's states,
-its Top-1, its recovered student and its eval-set-1 generations.
+**ONE POD IS BILLING: STAGE-0 FORMAL VOLUME STUDY, DOSE d2 (2x).** Run
+`dose_d2_20261019_135821`, pod `cmxnaja12ewpzc` (A100-SXM4-80GB, $1.79/h,
+EUR-IS-1), created 14:09Z.
+- **Who owns it.** The launcher in tmux `calvol_d2` (closeout, teardown) and its
+  watchdog (hard stop 792 min, $23.63 of the $24.36 authorization). Do not
+  create another pod while they are alive.
+- **Expected.** 623 min and $18.57 (search, recovery, all of eval-set-1).
+- **Volume.** Its first stage retired d1's 91 intermediate search states
+  (273.0 GB; tombstone `d1/retired_states.json`). d1 keeps 9.1 GB on network
+  volume `ugllmlv19t`: its Top-1, recovered student, generations and records.
 - **d1** cost $12.65 over attempts 2–5 ($12.91 with attempt 1):
   - attempt 2 searched and recovered, then failed in evaluation;
   - attempt 3 created no pod (capacity);
