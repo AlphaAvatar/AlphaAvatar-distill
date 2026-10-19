@@ -1,0 +1,362 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.preregistration/v1",
+ "study_id": "formal_v1",
+ "status": "PREREGISTERED before the first formal session. Frozen: changing a treatment, a profile, the method, the recipe, the seed, the evaluation contract or the analysis needs a new maintainer decision.",
+ "decisions": [
+  "logs/budget/decisions.md 2026-10-18 (Stage-0 volume design amended to one draw per dose; resolution check; formal study still NOT RUN)",
+  "logs/budget/decisions.md 2026-10-19 (Maintainer: eval-set-1 finalization and the Stage-0 volume study authorized ($90 new-spend hard cap))"
+ ],
+ "question": "Does more calibration data (1x, 2x, 4x of 45,000 UESP), drawn as ONE nested sample from one frozen base mixture, change the D1 full search's structural selection and the recovered student's capabilities on eval-set-1? Single-draw treatment comparisons only (maintainer amendment 2026-10-18, authorization 2026-10-19).",
+ "design": {
+  "file": "configs/stages/stage-0/calibration_volume/formal_design.json",
+  "sha256": "11e4fd92a6a3bcae4793a11ef86fcac7e249d5b9ce7338b345a2edec1b7b267d"
+ },
+ "profiles_doc": "configs/stages/stage-0/calibration_volume/profiles_formal.json",
+ "profiles_doc_sha256": "78c37018b1f48b7b8c7175ffb320464484ba859513a002e37a5a8a33cd33d7d4",
+ "profile_items_dir": "artifacts/stages/stage-0/calibration_volume/profiles_formal_v1",
+ "fixed": {
+  "method": "the forward baseline stage1_init.d1_target_aware.scored_v1@v1, resolved by shared.forward_baseline (operators, positions, support, KL references, beam width 6 delayed_prune warm-up 1, pareto@v2, micro-batch 3, length_sorted_v1, scored_v1) -- never edited to save cost",
+  "teacher": {
+   "id": "Qwen/Qwen3-4B-Thinking-2507",
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+  },
+  "geometry_and_state_evaluation": "the D-series target geometry and state_eval@v1 (stages.phase_a3.a3_session.path_spec, stages.phase_d1.d1_session)",
+  "operator_order_and_profile_per_operator": "free search variables over the dose's two profiles (base, rh), as in D1"
+ },
+ "execution": {
+  "depth_prefix_reuse": true,
+  "validate_on_search_device": true,
+  "prune_weights": false,
+  "why": "cost (maintainer 2026-10-19: optimize first, identity unchanged). Both options are execution only; the bench showed both bit-identical on this card (DEPTH tables, removal order, child bytes; state ids, digests and measurements). prune_weights=False keeps every state's bytes on the network volume so a resumed session restores instead of recomputing.",
+  "validated_by": {
+   "record": "logs/stages/stage-0/calibration_volume/runs/bench_20261019_051316/evidence/bench.json",
+   "sha256": "3aff4a2712764130a8b9ded7e3cfcecb37c88d4124ec53cbcf7765a84f967de7"
+  },
+  "hardware": "NVIDIA A100-SXM4-80GB",
+  "container_disk_gb": 400,
+  "network_volume": {
+   "id": "ugllmlv19t",
+   "data_center": "EUR-IS-1",
+   "size_gb": 300,
+   "mount": "/runpod-volume",
+   "record": "logs/stages/stage-0/calibration_volume/runs/netvol_20261019_051206"
+  }
+ },
+ "treatments_by_id": {
+  "d1": {
+   "dose": 1,
+   "profiles": [
+    "calib.s0v_base_d1@v1",
+    "calib.s0v_rh_d1@v1"
+   ],
+   "profile_hashes": {
+    "calib.s0v_base_d1@v1": "4455351e3fda24edd5e284fb323dbb507b3bf91799312d2d5e30abd9d9b003f4",
+    "calib.s0v_rh_d1@v1": "8507de50083afc72c6831c915f991ee6fd33e43456d5ed5965498acbd92f7664"
+   },
+   "profile_items_sha256": {
+    "calib.s0v_base_d1@v1": "63cab12a33ad2b3d67e93d42bbdc98405940589425ed6e3a4eeb145b6856a6cc",
+    "calib.s0v_rh_d1@v1": "e617ffdc4828ce5b49921a0b157990a473f75ad9922020b34740ea1414babea2"
+   },
+   "covariates": {
+    "calib.s0v_base_d1@v1": {
+     "treatment": "d1",
+     "dose": 1,
+     "uesp": 68756,
+     "n_items": 30,
+     "n_units": 30,
+     "tokens": 78813,
+     "n_rule_families": 13
+    },
+    "calib.s0v_rh_d1@v1": {
+     "treatment": "d1",
+     "dose": 1,
+     "uesp": 65459,
+     "n_items": 22,
+     "n_units": 22,
+     "tokens": 70645,
+     "n_rule_families": 14
+    }
+   },
+   "search_run_id": "stage0_calvol_formal_v1_d1",
+   "search_config_hash": "4c536119440ec237fa5af315e2ca187ad52c1ce1d7487fc543cd435c7355f5d7",
+   "measurement_protocol_id": "857357e82eb1bd1f367985eaa31399dc"
+  },
+  "d2": {
+   "dose": 2,
+   "profiles": [
+    "calib.s0v_base_d2@v1",
+    "calib.s0v_rh_d2@v1"
+   ],
+   "profile_hashes": {
+    "calib.s0v_base_d2@v1": "3334509a4c83df865843e22a67e6faa81b50909fc87394658178f31355119dad",
+    "calib.s0v_rh_d2@v1": "fc0025b995bc9e2da2a785398631f39c577e2a9109346e9c9c2089e793640846"
+   },
+   "profile_items_sha256": {
+    "calib.s0v_base_d2@v1": "53b8d654f260d9fee1bc8636975f10c0c8b2389d6f7b3dcd231613e44cd5e428",
+    "calib.s0v_rh_d2@v1": "00eed15f4a2083ce664439ceac41bc56309824261bb55ba79c2f076ecfa1720e"
+   },
+   "covariates": {
+    "calib.s0v_base_d2@v1": {
+     "treatment": "d2",
+     "dose": 2,
+     "uesp": 114613,
+     "n_items": 53,
+     "n_units": 53,
+     "tokens": 131116,
+     "n_rule_families": 16
+    },
+    "calib.s0v_rh_d2@v1": {
+     "treatment": "d2",
+     "dose": 2,
+     "uesp": 108494,
+     "n_items": 40,
+     "n_units": 40,
+     "tokens": 118655,
+     "n_rule_families": 17
+    }
+   },
+   "search_run_id": "stage0_calvol_formal_v1_d2",
+   "search_config_hash": "14ec481178ddc9d27f37343bcdb3f8a87cf663cc0b9567c9ec5e8ea8258373f5",
+   "measurement_protocol_id": "857357e82eb1bd1f367985eaa31399dc"
+  },
+  "d4": {
+   "dose": 4,
+   "profiles": [
+    "calib.s0v_base_d4@v1",
+    "calib.s0v_rh_d4@v1"
+   ],
+   "profile_hashes": {
+    "calib.s0v_base_d4@v1": "321e38fe8513d52d722c15890b3a0584081a422f41d48d2bc65fb66bf82afa6a",
+    "calib.s0v_rh_d4@v1": "5fbe3512128797a9cfc28b39252f889d07ab72fa400af20d5377fb2019fcbca2"
+   },
+   "profile_items_sha256": {
+    "calib.s0v_base_d4@v1": "2e8b99565a147e8253ca1768383fb9d4d728ceb105e283ad3653f043485e7e05",
+    "calib.s0v_rh_d4@v1": "3e8d10189f7c8b433ca051f086a9b825a79b7fc4182583f10a591ca9b2428267"
+   },
+   "covariates": {
+    "calib.s0v_base_d4@v1": {
+     "treatment": "d4",
+     "dose": 4,
+     "uesp": 203726,
+     "n_items": 85,
+     "n_units": 85,
+     "tokens": 228237,
+     "n_rule_families": 21
+    },
+    "calib.s0v_rh_d4@v1": {
+     "treatment": "d4",
+     "dose": 4,
+     "uesp": 215935,
+     "n_items": 75,
+     "n_units": 75,
+     "tokens": 236666,
+     "n_rule_families": 24
+    }
+   },
+   "search_run_id": "stage0_calvol_formal_v1_d4",
+   "search_config_hash": "ff2c3dccce20090864427029103f08d7d1c55ffb8d81982168a31daa1bd284c5",
+   "measurement_protocol_id": "857357e82eb1bd1f367985eaa31399dc"
+  }
+ },
+ "search": {
+  "finalists_k": 1,
+  "commit": "stage1_selection.commit of the ranking's Top-1 complete leaf"
+ },
+ "recovery": {
+  "recipe_id": "e1_p1_kd_heavy@0.86M",
+  "config": "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json",
+  "config_sha256": "19e1e3f68009f16f076ca777a38055bff01caa2084073b6c54a73870b5471265",
+  "seed": 20260726,
+  "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+  "rule": "the frozen recipe unchanged except run identity, pack path and student_path (the C1 override set); the same seed for every dose"
+ },
+ "evaluation": {
+  "eval_set_id": "eval-set-1",
+  "eval_set_identity": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+  "eval_set_status": "frozen",
+  "coverage": "EVERY item of every unit (720 + 846 + 150); masks decide formal rows, not generation",
+  "protocols": "each component's scorer.formal_protocol (v2)",
+  "action_protocol": "v2",
+  "trained_context": 8192,
+  "decoding": "greedy",
+  "report": "scripts/shared/evaluation/eval_set_scoring.py report (per unit and capability; no pooled score)"
+ },
+ "analysis": {
+  "H1": "descriptive: per dose, the committed Top-1's operator order and per-step profile; per operator FFN/ATTENTION per-layer kept-set Jaccard, DEPTH removed-set Jaccard, WIDTH subspace overlap, between doses (2x vs 1x, 4x vs 2x, 4x vs 1x), each beside chance; no stability claim",
+  "H2": "eval-set-1 formal rows, every unit and capability separately: fluid static items over the four static axes and per axis, interactive separately; capability units, behaviour, safety, legacy (in-sample) each separately; knowledge reported as supplementary",
+  "H3": "the 1x/2x/4x shape of H1 and H2, described",
+  "separation": "structure (H1), the Top-1's step-0 state evaluation against the teacher (KL and the other state_eval@v1 terms, from the search journal), the recovery's own training record, and the recovered student's capabilities (H2) are reported side by side and never combined into one number",
+  "statistics": {
+   "sesoi": {
+    "pooled_primary": 0.05,
+    "per_axis": 0.08
+   },
+   "contrasts": "task-paired 2x-1x, 4x-2x, 4x-1x per unit/axis",
+   "intervals": "rule-family cluster bootstrap (10,000 resamples, stratified by axis) for fluid; item-paired bootstrap for the capability units; intervals cover EVALUATION sampling only",
+   "labels": {
+    "GO": "interval wholly above +SESOI",
+    "NO-GO": "interval wholly inside (-SESOI, +SESOI)",
+    "INCONCLUSIVE": "neither"
+   },
+   "not_claimed": [
+    "cross-seed or cross-draw stability",
+    "statistical saturation",
+    "a pure volume effect (rule-family diversity rises with dose)"
+   ]
+  },
+  "no_stop_rule": "maintainer 2026-10-19: a low 1x does not cancel 2x/4x; all three doses run"
+ },
+ "execution_order": [
+  "d1",
+  "d2",
+  "d4"
+ ],
+ "budget_rule": "before each launch the session's hard cap must fit what is left of the $90 after everything already spent and the volume's reservation, AND the expected cost of the remaining doses plus a $5 margin must still fit; otherwise no new paid session",
+ "retry_policy": "before formal measurement: ordinary failures repaired and retried (P12.1). After it began: a failed session is preserved and the SAME dose resumes from the network volume -- journal restore, an existing trained student evaluated rather than retrained, finished evaluation units rescored rather than regenerated. Never a second complete measurement of a dose.",
+ "pricing": {
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "price_per_hour": 1.79,
+  "depth_speedup_measured": 1.376,
+  "overhead_minutes_measured": 0.438,
+  "basis": "write_formal_proposal.py's per-operator minutes (pilot telemetry on the same card, D2's 92-expansion trajectory), DEPTH divided by the bench's full-round prefix-reuse speedup, overhead replaced by the bench's device-validation expansion",
+  "sessions": [
+   {
+    "treatment": "d1",
+    "profile_tokens_max": 78813,
+    "per_impl": {
+     "attention.activation_importance_v1": {
+      "minutes": 16.1,
+      "basis": "measured at this dose (max over its resamples)"
+     },
+     "depth.causal_kl_greedy_v1": {
+      "minutes": 232.9,
+      "basis": "measured per-token rate; x 0.727 (prefix reuse, bench)"
+     },
+     "ffn.activation_importance_v0": {
+      "minutes": 12.6,
+      "basis": "measured at this dose (max over its resamples)"
+     },
+     "width.global_pca_v0": {
+      "minutes": 12.6,
+      "basis": "measured at this dose (max over its resamples)"
+     }
+    },
+    "expansions": 92,
+    "search_minutes": 314.5,
+    "recovery_minutes": 61.5,
+    "eval_minutes": {
+     "fluid_reasoning_720": 19.0,
+     "stage3_capability_846+stage3_legacy_150": 30.0
+    },
+    "work_minutes": 435.0,
+    "gpu_expected_usd": 13.87,
+    "gpu_hard_usd": 17.99,
+    "disk_usd_per_hour": 0.0556,
+    "expected_usd": 14.3,
+    "hard_usd": 18.55
+   },
+   {
+    "treatment": "d2",
+    "profile_tokens_max": 131116,
+    "per_impl": {
+     "attention.activation_importance_v1": {
+      "minutes": 15.5,
+      "basis": "measured at this dose (max over its resamples)"
+     },
+     "depth.causal_kl_greedy_v1": {
+      "minutes": 387.5,
+      "basis": "measured per-token rate; x 0.727 (prefix reuse, bench)"
+     },
+     "ffn.activation_importance_v0": {
+      "minutes": 13.9,
+      "basis": "measured at this dose (max over its resamples)"
+     },
+     "width.global_pca_v0": {
+      "minutes": 14.9,
+      "basis": "measured at this dose (max over its resamples)"
+     }
+    },
+    "expansions": 92,
+    "search_minutes": 472.1,
+    "recovery_minutes": 61.5,
+    "eval_minutes": {
+     "fluid_reasoning_720": 19.0,
+     "stage3_capability_846+stage3_legacy_150": 30.0
+    },
+    "work_minutes": 592.6,
+    "gpu_expected_usd": 18.57,
+    "gpu_hard_usd": 23.63,
+    "disk_usd_per_hour": 0.0556,
+    "expected_usd": 19.15,
+    "hard_usd": 24.36
+   },
+   {
+    "treatment": "d4",
+    "profile_tokens_max": 236666,
+    "per_impl": {
+     "attention.activation_importance_v1": {
+      "minutes": 17.7,
+      "basis": "measured at this dose (max over its resamples)"
+     },
+     "depth.causal_kl_greedy_v1": {
+      "minutes": 699.5,
+      "basis": "measured per-token rate; x 0.727 (prefix reuse, bench)"
+     },
+     "ffn.activation_importance_v0": {
+      "minutes": 17.2,
+      "basis": "measured at this dose (max over its resamples)"
+     },
+     "width.global_pca_v0": {
+      "minutes": 19.6,
+      "basis": "measured at this dose (max over its resamples)"
+     }
+    },
+    "expansions": 92,
+    "search_minutes": 794.3,
+    "recovery_minutes": 61.5,
+    "eval_minutes": {
+     "fluid_reasoning_720": 19.0,
+     "stage3_capability_846+stage3_legacy_150": 30.0
+    },
+    "work_minutes": 914.8,
+    "gpu_expected_usd": 28.19,
+    "gpu_hard_usd": 35.17,
+    "disk_usd_per_hour": 0.0556,
+    "expected_usd": 29.06,
+    "hard_usd": 36.26
+   }
+  ],
+  "sequence": {
+   "available_usd": 84.9243,
+   "steps": [
+    {
+     "treatment": "d1",
+     "hard_usd": 18.55,
+     "expected_usd": 14.3,
+     "left_before_usd": 84.92,
+     "fits": true
+    },
+    {
+     "treatment": "d2",
+     "hard_usd": 24.36,
+     "expected_usd": 19.15,
+     "left_before_usd": 70.62,
+     "fits": true
+    },
+    {
+     "treatment": "d4",
+     "hard_usd": 36.26,
+     "expected_usd": 29.06,
+     "left_before_usd": 51.47,
+     "fits": true
+    }
+   ],
+   "expected_left_after_usd": 22.41,
+   "per_session_cap_usd": 50.0,
+   "all_fit": true,
+   "split_4x": false
+  }
+ },
+ "written_utc": "2026-10-19T05:44:00+00:00",
+ "authorizes": "nothing by itself: each session runs only on its own one-use authorization"
+}

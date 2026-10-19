@@ -88,6 +88,10 @@ def search_identities() -> dict:
 def price(bench: dict, price_per_hour: float) -> dict:
     """The proposal's per-operator basis, re-priced by the bench's measurements."""
     speed = bench["stages"]["C_depth_speed"]
+    #: the MEASURED full-round wall-clock ratio, fixed per-expansion costs
+    #: (reference sketches, child build) included -- conservative: over the 8
+    #: rounds of a real expansion those costs amortize and the scoring loop
+    #: alone ran item_seconds_off / item_seconds_on faster
     depth_factor = 1.0 / float(speed["speedup"])
     over = bench["stages"]["D_overhead"]["device_validation"]["phases"]
     overhead_min = sum(v["seconds"] for v in over.values()) / 60 + 0.05   # + parent load
@@ -120,11 +124,22 @@ def price(bench: dict, price_per_hour: float) -> dict:
             op_min += mins
         search_min = op_min + n_exp * overhead_min
         work = search_min + train_min + sum(EVAL_MINUTES.values()) + 10.0   # + pushes
+        gpu_cost = WP.session_cost(work, price_per_hour)
+        #: container disk is billed beside the GPU ($0.10/GB-month, 720 h/month,
+        #: the dearer proration), over the same expected and hard windows
+        disk_per_hour = DISK_GB * 0.10 / 720
+        exp_h = gpu_cost["expected_usd"] / price_per_hour
+        hard_h = gpu_cost["hard_usd"] / price_per_hour
         sessions.append({"treatment": f"d{dose}", "profile_tokens_max": t,
                          "per_impl": per_impl, "expansions": n_exp,
                          "search_minutes": round(search_min, 1),
                          "recovery_minutes": train_min, "eval_minutes": dict(EVAL_MINUTES),
-                         **WP.session_cost(work, price_per_hour)})
+                         "work_minutes": gpu_cost["work_minutes"],
+                         "gpu_expected_usd": gpu_cost["expected_usd"],
+                         "gpu_hard_usd": gpu_cost["hard_usd"],
+                         "disk_usd_per_hour": round(disk_per_hour, 4),
+                         "expected_usd": round(gpu_cost["expected_usd"] + exp_h * disk_per_hour, 2),
+                         "hard_usd": round(gpu_cost["hard_usd"] + hard_h * disk_per_hour, 2)})
     return {"gpu": GPU, "price_per_hour": price_per_hour,
             "depth_speedup_measured": float(speed["speedup"]),
             "overhead_minutes_measured": round(overhead_min, 3),

@@ -201,7 +201,7 @@ def main(argv=None) -> int:
                     "tables_bit_identical": equal,
                     "kept_layers_equal": off.trace["kept_layers"] == on.trace["kept_layers"],
                     "child_weights_bit_identical": same_weights(off.model, on.model),
-                    "seconds": {"off": t_off, "on": t_on}, "peak_gib": {"off": m_off, "on": m_on},
+                    "path_seconds": {"off": t_off, "on": t_on}, "peak_gib": {"off": m_off, "on": m_on},
                     "first_difference": None if equal else next(
                         ([a, b] for a, b in zip(tables(off), tables(on)) if a != b), None),
                     "timing_on": on.artifacts["timing"]}
@@ -211,7 +211,7 @@ def main(argv=None) -> int:
             on, t_on, m_on = depth_run(session, teacher, profile, items_all, 1, True, out / "w")
             return {"items": len(items_all), "n_remove": 1,
                     "tables_bit_identical": tables(off) == tables(on),
-                    "seconds": {"off": t_off, "on": t_on},
+                    "path_seconds": {"off": t_off, "on": t_on},
                     "speedup": round(t_off / t_on, 3) if t_on else None,
                     "peak_gib": {"off": m_off, "on": m_on},
                     "timing_off": off.artifacts["timing"], "timing_on": on.artifacts["timing"]}

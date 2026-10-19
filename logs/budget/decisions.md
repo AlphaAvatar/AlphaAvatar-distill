@@ -12588,3 +12588,85 @@ on a paid pod.
   new paid session starts if forecast spend plus a safety margin does not fit
   what is left; completing all three doses comparably comes first.
 - **Revisit when.** Any of the stop conditions above is reached.
+
+## 2026-10-19 — eval-set-1 frozen (identity 2, 62a1a5d3)
+
+- **Context.** The maintainer's 2026-10-19 decisions on the independent audit
+  (entry above).
+- **Applied, with no frozen byte changed** (`scripts/shared/data/finalize_eval_set_1.py`):
+  - **Validity mask** (`fluid_reasoning_720/validity_v1.json`): the six audited
+    defects are excluded from formal scoring. The formal set is 714 =
+    570 static + 144 interactive. 71 items carry an annotation for a
+    lower-severity finding: minimal-evidence ambiguities, near-trivial items,
+    duplicated demonstrations, tight interactive budgets, probe prompt clarity.
+  - **Independence** (`independence_v1.json`): 6 knights-and-knaves groups
+    whose prompt and gold are identical under a re-derivable renaming of person
+    names count once (708 independent of 720, 702 of the formal 714). The
+    audit's looser "same query, different demonstrations" group is related, not
+    equivalent, and is counted separately.
+  - **Formal core** (`stage3_capability_846/core_v1.json`):
+    - TriviaQA is supplementary: never in git and never in the core.
+    - The 7 xLAM prompts are outside the core until the dataset's terms are
+      confirmed.
+    - The 4 Stage-2-train overlaps are outside held-out correctness.
+    - The behaviour set's exact duplicate pairs count once.
+  - **Scorer protocol v2** for fluid static items, the answer-correctness
+    capability units and the legacy 150, and **action protocol v2** for
+    episodes, with conformance vectors for v1 and v2.
+    - `audit/rescoring_v1_v2.json` re-scores every local historical
+      generation under both. v2 lost nothing v1 accepted. The only gains are 3
+      letter-spaced answers of the Qwen3-0.6B reference (257 → 260).
+    - The teacher stays at 638.
+  - **Generator v2 versions** (`ordering@v2`, `graph_paths@v2`,
+    `string_induction@v2`, `letter_analogy@v2`, `tasks/registry.py ::
+    GENERATORS_V2`). The v1 generators still rebuild `dev_v1`,
+    `calibration_v1` and `calibration_v2` byte for byte.
+- **Registry.** Status `frozen`. Identity 2 cites the 2026-10-19 authorization.
+  The remaining open items do not block the freeze:
+  - xLAM terms;
+  - a TriviaQA basis;
+  - branch protection on `main`, which is a repository setting. The exact steps
+    and the caveat that one shared admin account cannot bind the rule against
+    itself are in `data/eval-set/README.md`.
+- **Revisit when.** Any further change to eval-set-1 needs a new explicit
+  maintainer authorization; new needs become `eval-set-2`.
+
+## 2026-10-19 — Stage-0 search cost: the real bottleneck fixed and measured; the formal study preregistered and priced inside the $90
+
+- **Bench** (`runs/bench_20261019_051316`, A100-SXM4-80GB in EUR-IS-1 with the
+  study's network volume attached, $0.8757).
+- **Per-expansion overhead: 94.3 s → 23.3 s.**
+  - 77.5 s of it was the save/reload check, which ran two 5-token forwards
+    of a teacher-sized child on the host, with 255 torch threads on a
+    container. Run on the device it takes 0.1 s plus a 6.0 s transfer.
+  - The state id, artifact digest and state evaluation are identical either
+    way.
+- **DEPTH, the cost that dominates (about 80% of every search).** Prefix reuse
+  is BIT-identical on CUDA:
+  - 3 greedy rounds with non-trailing removals: every candidate score, the
+    removal order and the child's bytes;
+  - one full 1x round on 31 items.
+  - Speed: wall clock ×1.376 per round and ×1.65 on the scoring loop alone.
+- **Network volume.** 374 MB/s push, 469 MB/s pull, and a 7.3 GB checkpoint
+  round trip is bit-identical. A mirror off the critical path therefore costs
+  the search nothing.
+- **Unchanged.** Search identity, operator numerics, state evaluation, ranking
+  and the resume contract: the knobs are execution only. One addition to resume:
+  a PRUNED record whose bytes were kept (`prune_weights=False`) is restored
+  like a MEASURED one, so a resumed search does not re-execute pruned states.
+- **Preregistration** (`plans/volume_preregistration.json`):
+  - one nested draw (seed 1308798386, profiles base/rh);
+  - search identities bound by config hash and checked on the pod;
+  - recipe `e1_p1_kd_heavy@0.86M` at seed 20260726;
+  - every item of eval-set-1 at its frozen identity;
+  - the analysis, with no stop rule.
+- **Price.**
+  - Conservative: DEPTH divided by the full-round ×1.376, not the
+    scoring-loop ×1.65.
+  - Expected / hard, per dose: d1 $14.30 / $18.55, d2 $19.15 / $24.36,
+    d4 $29.06 / $36.26.
+  - About $62.51 expected against $84.92 available (after the bench and
+    the volume's $4.20 reservation).
+  - **4x fits one session** under the $50 cap, so it is not split.
+- **Revisit when.** A dose's measured search time departs from its price by
+  more than the contingency.
