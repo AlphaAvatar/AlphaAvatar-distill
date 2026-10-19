@@ -16,6 +16,11 @@ EUR-IS-1), created 14:09Z.
   watchdog (hard stop 792 min, $23.63 of the $24.36 authorization). Do not
   create another pod while they are alive.
 - **Expected.** 623 min and $18.57 (search, recovery, all of eval-set-1).
+- **Mirror.** The driver's search mirror exited at start because the directory
+  did not exist yet. Since about 17:30Z a separate process on the pod
+  (`/workspace/jobs/manual_mirror_d2.py`) copies the states to the volume and
+  stops when the search ends. The fix for d4 is in `ef88b3ce`
+  (decisions.md 2026-10-19).
 - **Volume.** Its first stage retired d1's 91 intermediate search states
   (273.0 GB; tombstone `d1/retired_states.json`). d1 keeps 9.1 GB on network
   volume `ugllmlv19t`: its Top-1, recovered student, generations and records.
