@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-20 02:35 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-20 05:05 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,24 +9,26 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**ONE POD IS BILLING: `bhttzctttg3hld` (A100-SXM4-80GB, EUR-IS-1, $1.79/h,
-created 2026-10-20 02:25Z). STAGE-0 FORMAL VOLUME STUDY, DOSE d2 (2x) ATTEMPT 3
-IS RESUMING FROM THE VOLUME JOURNAL.** Run `dose_d2_20261020_002929`; the
-launcher in tmux `calvol_d2c` owns the pod and its watchdog (hard 792 min =
-$23.63). Driver detached 02:29Z. Attempt 2 (`dose_d2_20261019_213216`) got no
-capacity in 36 tries and closed at $0. Do not create another pod while it is alive.
-- **Why a second attempt.** Attempt 1 (`dose_d2_20261019_135821`, $13.42) was
-  lost mid-search at 21:25Z: about 30 s of ssh failure while the pod was still
-  RUNNING, and the launcher's poll loop took the unanswered probe for a dead
-  driver and deleted the pod. Fixed in `e5a2adee`: a 15-minute grace before
-  an unanswered driver ends the session.
-- **What it resumes from.** The search mirror on network volume `ugllmlv19t`.
-  - The driver's own mirror died at start; a hand-started mirror ran from about
-    17:30Z to 21:23Z. The fix for that is in `ef88b3ce`.
-  - At least 53 of 92 expansions were done.
-  - Preregistered `retry_policy`: journal restore, one replacement endpoint.
-- **Budget.** Authorization $24.36 hard, $18.57 expected. The resume should
-  cost far less, because only the remaining search, recovery and eval run.
+**NO POD EXISTS: NOTHING IS RUNNING ON THE PROVIDER AND NOTHING IS BILLING
+(provider query 2026-10-20 04:52Z: 0 pods). STAGE-0 FORMAL VOLUME STUDY: d1
+AND d2 COMPLETE; DOSE d4 (4x), THE LAST DOSE, IS ACQUIRING A POD.** Run
+`dose_d4_20261020_045616`; the launcher in tmux `calvol_d4` retries the create
+in EUR-IS-1 every 300 s, 144 times (hard $35.17 = about 1179 min; authorized
+$36.26). `dose_d4_20261020_045426` was refused at $0 for a non-canonical
+`--bundle` and closed. Do not create another pod while the launcher is alive.
+- **d2** cost $17.93 over three attempts:
+  - attempt 1 (`dose_d2_20261019_135821`, $13.42) lost its pod mid-search to
+    the poll loop (fixed `e5a2adee`);
+  - attempt 2 got no capacity ($0);
+  - attempt 3 (`dose_d2_20261020_002929`, $4.51) resumed 71 of 92 expansions
+    from the volume journal, the one replacement endpoint `retry_policy` allows.
+  - Top-1 DEPTH→FFN→ATTENTION→RESIDUAL_WIDTH, 596M parameters (same
+    architecture as d1, other profile assignment and weights).
+  - Formal headlines: `fluid_reasoning_720` 0/714; the capability units at or
+    near the floor; legacy (in-sample) 23/150.
+  - Report: `runs/dose_d2_20261020_002929/evidence/d2/eval/report.json`.
+- **Budget** (2026-10-20 05:00Z): formal phase $35.04 spent of $90; programme
+  remaining $54.09; the d4 hard cap fits after the $4.20 volume reservation.
 - **d1** cost $12.65 over attempts 2–5 ($12.91 with attempt 1):
   - attempt 2 searched and recovered, then failed in evaluation;
   - attempt 3 created no pod (capacity);
@@ -37,8 +39,8 @@ capacity in 36 tries and closed at $0. Do not create another pod while it is ali
   - Formal headlines: `fluid_reasoning_720` 1/714; the capability units at or
     near the floor; legacy (in-sample) 25/150.
   - Report: `runs/dose_d1_20261019_133708/evidence/d1/eval/report.json`.
-- **Next.** d2 (2x), then d4 (4x). Each retires the earlier COMPLETE doses'
-  search states before its own search. The maintainer set no stop rule: a
+- **Next.** d4 (4x); it retires d1's and d2's search states (Top-1 kept)
+  before its own search. Then the formal analysis. The maintainer set no stop rule: a
   low 1x does not cancel 2x/4x.
 - **Owners.** The run closeouts, `decisions.md` 2026-10-19, and
   [`volume_preregistration.json`](../stages/stage-0/calibration_volume/plans/volume_preregistration.json)
