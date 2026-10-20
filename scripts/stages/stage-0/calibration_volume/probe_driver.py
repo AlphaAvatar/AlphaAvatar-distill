@@ -13,10 +13,12 @@ every item of eval-set-1. The recovery and the measurement are the dose
 session's own (`dose_driver.train_recovery`, `dose_driver.evaluate_all`), so a
 probe differs from a dose's Top-1 unit only in its student, seed and GPU.
 
-DURABILITY: each unit's recovered student and generations go to the session's
-network volume as they finish. A replacement session evaluates a trained student
-rather than retraining it and rescores finished generations rather than
-regenerating them (P8.4); a unit with a report on the volume is not touched.
+DURABILITY: each unit's recovered student (with its config and logs) and its
+generations go to the session's network volume as they finish, the unit's
+report.json last. A replacement session evaluates a trained student rather than
+retraining it and rescores finished generations rather than regenerating them
+(P8.4); a unit with a report on the volume is not rerun, only brought home again,
+since the session that made it may have died before its launcher fetched it.
 """
 from __future__ import annotations
 
@@ -40,9 +42,43 @@ from stages.calibration_volume.dose_driver import (PREREG, SET_ID, evaluate_all,
 
 AUDIT = "artifacts/audit/stage0_calvol_probes"
 WORK = "artifacts/stages/stage-0/calibration_volume/probes"
-#: what a finished unit keeps on the volume beside its recovered student
-UNIT_RECORDS = ("report.json", "rows", "recovery_products.json", "recovery_config.json",
+#: what a finished unit keeps on the volume beside its recovered student;
+#: report.json is pushed last, so its presence there means the rest landed
+UNIT_RECORDS = ("rows", "recovery_products.json", "recovery_config.json",
                 "recovery.log", "train_log.jsonl", "eval_fluid.log", "eval_capability.log")
+#: pushed as soon as the recovery finishes: a replacement session that restores
+#: the student restores these with it rather than losing them with the pod
+RECOVERY_RECORDS = ("recovery_config.json", "recovery.log", "train_log.jsonl")
+
+
+def push_files(out: Path, names, dst: Path, log: Path) -> dict:
+    """Push `names` from `out` to `dst` through a staging dir; the result has
+    "error" when nothing durable can be assumed."""
+    staged = out.parent / f".{out.name}.push"
+    shutil.rmtree(staged, ignore_errors=True)
+    staged.mkdir()
+    for name in names:
+        src = out / name
+        if src.is_dir():
+            shutil.copytree(src, staged / name)
+        elif src.is_file():
+            shutil.copyfile(src, staged / name)
+    res = sync("push", staged, dst, log)
+    shutil.rmtree(staged, ignore_errors=True)
+    if "copied" not in res and "error" not in res:
+        res = {**res, "error": "volume_sync reported no result"}
+    return res
+
+
+def restore_recovery(vdir: Path, rec_out: Path, out: Path, want: str) -> Path:
+    """The recovered student from the volume, verified against its record."""
+    from stages.phase_c1.autoinit_c1_driver import trained_model_dir
+    sync("pull", vdir / "recovery", rec_out, out / "sync.log")
+    sync("pull", vdir / "recovery_records", out, out / "sync.log")
+    model_dir = trained_model_dir(rec_out)
+    if sha(model_dir / "model.safetensors") != want:
+        raise RuntimeError("the recovered student on the volume does not hash to its record")
+    return model_dir
 
 
 def main(argv=None) -> int:
@@ -98,21 +134,31 @@ def main(argv=None) -> int:
             entry = record["units"].setdefault(label, {"t0": time.time()})
             mark(f"UNIT_START:{label}")
             if (vdir / "out" / "report.json").is_file():
+                #: the session that made it may have died before its launcher
+                #: fetched the records, so this one brings them home too
                 sync("pull", vdir / "out", out, out / "sync.log")
+                sync("pull", vdir / "generations", out / "generations", out / "sync.log")
                 entry.update(status="ok", restored_complete=True)
             else:
                 prod_path = vdir / "products.json"
                 prod = json.loads(prod_path.read_text()) if prod_path.is_file() else {}
                 rec_out = REPO / WORK / label / "recovery"
+                model_dir = None
                 if prod.get("recovery", {}).get("complete"):
-                    from stages.phase_c1.autoinit_c1_driver import trained_model_dir
-                    sync("pull", vdir / "recovery", rec_out, out / "sync.log")
-                    model_dir = trained_model_dir(rec_out)
-                    if sha(model_dir / "model.safetensors") != prod["recovery"]["model_sha256"]:
-                        raise RuntimeError(f"{label}: the recovered student on the volume does "
-                                           "not hash to its record")
-                    entry["recovery"] = "restored from the volume"
-                else:
+                    try:
+                        model_dir = restore_recovery(vdir, rec_out, out,
+                                                     prod["recovery"]["model_sha256"])
+                        entry["recovery"] = "restored from the volume"
+                    except Exception as exc:  # noqa: BLE001 -- not durable after all: retrain
+                        entry["recovery_restore_failed"] = repr(exc)[:300]
+                        prod.pop("recovery", None)
+                if model_dir is None:
+                    #: generations on the volume came from a student this unit no
+                    #: longer has; a new one never inherits them (no pooling)
+                    if (vdir / "generations").is_dir():
+                        moved = vdir / f"generations.superseded.{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}"
+                        (vdir / "generations").rename(moved)
+                        entry["generations_superseded"] = moved.name
                     cand = REPO / u["candidate_dir"]
                     shards = sorted(cand.glob("*.safetensors"))
                     if len(shards) != 1 or sha(shards[0]) != u["checkpoint_sha256"]:
@@ -132,33 +178,28 @@ def main(argv=None) -> int:
                                         "model_bytes": (model_dir / "model.safetensors").stat().st_size,
                                         "config_sha256": sha(cfg), "state_id": u["state_id"],
                                         "seed": int(u["seed"])}
-                    entry["recovery_pushed"] = sync("push", rec_out, vdir / "recovery", out / "sync.log")
-                    vdir.mkdir(parents=True, exist_ok=True)
-                    prod_path.write_text(json.dumps(prod, indent=1) + "\n")
+                    pushed = [sync("push", rec_out, vdir / "recovery", out / "sync.log"),
+                              push_files(out, RECOVERY_RECORDS, vdir / "recovery_records",
+                                         out / "sync.log")]
+                    entry["recovery_pushed"] = pushed
+                    #: only a recovery that reached the volume is one a replacement may restore
+                    if not any("error" in p for p in pushed):
+                        vdir.mkdir(parents=True, exist_ok=True)
+                        prod_path.write_text(json.dumps(prod, indent=1) + "\n")
                 (out / "recovery_products.json").write_text(json.dumps(prod["recovery"], indent=1) + "\n")
                 rep, runs = evaluate_all(model_dir, out, vdir / "generations", label, prereg, env)
                 (out / "report.json").write_text(json.dumps(rep, indent=1) + "\n")
                 for junk in ("package", "uncapped_in", "uncapped_out"):
                     shutil.rmtree(out / junk, ignore_errors=True)
-                staged = out.parent / f".{label}.records"
-                shutil.rmtree(staged, ignore_errors=True)
-                staged.mkdir()
-                for name in UNIT_RECORDS:
-                    src = out / name
-                    if src.is_dir():
-                        shutil.copytree(src, staged / name)
-                    elif src.is_file():
-                        shutil.copyfile(src, staged / name)
-                sync("push", staged, vdir / "out", out / "sync.log")
-                shutil.rmtree(staged, ignore_errors=True)
+                pushed = push_files(out, UNIT_RECORDS, vdir / "out", out / "sync.log")
+                if "error" not in pushed:
+                    pushed = push_files(out, ("report.json",), vdir / "out", out / "sync.log")
+                entry["records_pushed"] = pushed
                 shutil.rmtree(rec_out, ignore_errors=True)   # on the volume; the next unit needs the disk
                 entry.update(status="ok", generated=runs,
                              fluid_formal=rep["units"]["fluid_reasoning_720/dev_v1"].get("correct"))
-            #: a unit restored from the volume was secured by the session that made
-            #: it; marking it here sends the launcher after files it never pulled
-            if not entry.get("restored_complete"):
-                (audit / "records").mkdir(exist_ok=True)
-                (audit / "records" / f"{label}.done").write_text(sha(out / "report.json") + "\n")
+            (audit / "records").mkdir(exist_ok=True)
+            (audit / "records" / f"{label}.done").write_text(sha(out / "report.json") + "\n")
             entry["seconds"] = round(time.time() - entry.pop("t0"), 1)
             save()
             mark(f"UNIT_OK:{label}")
