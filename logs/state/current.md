@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-20 21:35 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-20 23:45 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,60 +9,42 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**STAGE-0 FORMAL VOLUME STUDY: d1 AND d2 COMPLETE. d4's SEARCH FINISHED BUT ITS
-SESSION FAILED ON A FULL VOLUME; THE THIRD RESUME ATTEMPT IS RUNNING. d1's
-TOP-4 PROBES ARE RUNNING.** At most two formal sessions at once (`decisions.md`
-2026-10-20).
-- `rzf92gbn3h40we`: L40S, US-TX-3, $1.09/h, created 09:40Z. Run
-  `probes_d1_20261020_093955`, tmux `calvol_probes_d1`, 7 units on volume
-  `b9jwu0g1eg`; watchdog hard $25.89 (authorized $26.00). 5 of 7 units
-  secured off-pod by 19:53Z (107-131 min a unit on the L40S); owner: the run's
-  `launch.log` until its closeout.
-- `9l10mpu9yw4c7f`: A100, EUR-IS-1, $1.79/h, created 21:23Z. **d4 resume**
-  `dose_d4_20261020_212310` (plan `dose_d4_resume`, preregistered
-  `retry_policy`: journal restore), tmux `calvol_d4r3`: $6.28 expected, $8.88
-  hard (authorized $9.00). V_release, V_optim and V_room passed at 21:28Z
-  (17.1 GB free of the 16 GB needed); then the search tail, d4's Top-4 to the
-  relay, recovery, eval-set-1.
-- **d4 attempt 1 failed after its search finished** (`dose_d4_20261020_054022`,
-  $23.6937, closeout). B_rebuild (d1's Top-2..4 byte-exact) and X_export_prior
-  (d1+d2 Top-4 on the relay, manifest `9068d6f8`) succeeded. The search ran
-  07:00Z-18:33Z; its final push hit `Disk quota exceeded` on the 300 GB volume
-  `ugllmlv19t`. Durable: the journal and states as of the 18:32:23Z mirror
-  pass. Repair `527dc295`: release the relayed d1/d2 Top-4, check the room,
-  fail a stage whose push fails, write `products.json` atomically.
-- **Two resume attempts ended before any measurement work.**
-  `dose_d4_20261020_185256` ($0.2592) wrote its tombstone to the full volume
-  before deleting (repair `2c1afe05`). `dose_d4_20261020_211335` ($0.2513)
-  released 9.54 GB, then V_room found 10.1 GB < 12 GB (repair `218ac900`:
-  retire d1's and d2's recovery optimizer states, 7.05 GB, and require the
-  measured 16 GB worst case).
-- **Budget.** Formal $59.71 closed of $126. With d1's probes ($26.00) held at
-  their cap, programme $39.41 remained before the resume's $9.00 (owner:
-  `governance.remaining_envelope`). Then d2's probes (~$21.8 hard) when the
-  resume closes; d4's when d1's probes close. d4 now totals about $24.2 + ~$6
-  against the ~$28.5 projected; the budget rule is re-checked from actuals
-  before each probe session.
-- **Stopped at $0 today.** `dose_d4_20261020_045426` (non-canonical
-  `--bundle`), `dose_d4_20261020_045616` (scope change),
-  `dose_d4_20261020_053929` (issued, never launched).
-- **d2** $17.93 over three attempts (the third resumed 71 of 92 expansions from
-  the volume journal). Formal: `fluid_reasoning_720` 0/714, capability units at
-  or near the floor, legacy (in-sample) 23/150. Report:
-  `runs/dose_d2_20261020_002929/evidence/d2/eval/report.json`.
-- **d1** $12.91 over five attempts. Formal: `fluid_reasoning_720` 1/714,
-  capability units at or near the floor, legacy (in-sample) 25/150. Report:
-  `runs/dose_d1_20261019_133708/evidence/d1/eval/report.json`.
+**STAGE-0 FORMAL VOLUME STUDY: d1, d2 AND d4 COMPLETE AND ANALYSED. THE TOP-4
+EXTENSION IS RUNNING: d1's 7 UNITS CLOSED, d4's AND d2's RUNNING.** At most two
+formal sessions at once (`decisions.md` 2026-10-20).
+- **Formal analysis** (preregistered, $0):
+  [`design/formal_analysis.json`](../stages/stage-0/calibration_volume/design/formal_analysis.json).
+  - H2: every fluid contrast (static pooled and each axis; 2x-1x, 4x-2x, 4x-1x)
+    is NO-GO, because it is at the floor: 1, 0 and 1 of 714 formal items correct.
+    Capability units are near the floor too. Usable over the 570 formal static
+    items: 60.2% (d1), 59.3% (d2), 56.1% (d4).
+  - H1: root selections agree far above chance (DEPTH removes the same 8 layers
+    at every dose). The Top-1 order changes at 4x: ATTENTION first, where 1x and
+    2x put DEPTH first.
+- **d4** `dose_d4_20261020_212310` closed ($4.0197, ALL_DONE). The journal
+  restore of the same dose (90 of 90 states restored) finished the search; Top-4
+  went to the relay. d4 totals $28.2239 over four paid sessions (`dose_d4_*` closeouts).
+- **d1's probes** `probes_d1_20261020_093955` closed ($15.392): 7/7 units,
+  104-132 min each on the L40S.
+- **Running.**
+  - `dgv8vpzbgpuykh`: L40S, US-TX-3, created 23:30Z. `probes_d4_20261020_232941`,
+    tmux `calvol_probes_d4`, 7 units on volume `b9jwu0g1eg`. Expected $17.97,
+    hard $22.38 (authorized $22.40).
+  - `probes_d2_20261020_233510` (tmux `calvol_probes_d2`, volume B
+    `wn3avnine2`): same price. The launcher retries every 5 min while US-TX-3
+    has no L40S in stock.
+  - Owner: each run's `launch.log` until its closeout.
+- **Budget.** Programme $23.37 remained with d4's probes held at their cap; d2's
+  $22.40 fits. The extension rule passes (expected $17.97 + $5). Owner:
+  `governance.remaining_envelope`.
 - **Reporting** (maintainer 2026-10-20): every capability unit of eval-set-1,
   formal denominators first (fluid 714 items; usable over the 570 formal static
   items, episodes separately), no pooled score.
 - **Next.**
-  1. d4 resume to its closeout.
-  2. When it closes: re-check the budget rule with d4's actual cost, then
-     volume B and d2's probe session beside d1's.
-  3. When d1's probes close (~23:50Z): their closeout, then d4's probes on
-     volume A beside d2's (plans from d4's own manifest).
-  4. The formal analysis and the extension's; teardown of the volumes.
+  1. Both probe sessions to their closeouts.
+  2. The extension analysis, covering every capability.
+  3. Teardown of the three volumes with tombstones after a consumer audit.
+  4. Write the programme closeout and add the runs to `logs/index.json`.
 - **Owners.** The run closeouts, `decisions.md` 2026-10-19/20, and
   [`volume_preregistration.json`](../stages/stage-0/calibration_volume/plans/volume_preregistration.json)
   (design, d1 → d2 → d4 order, retry_policy, budget rule).

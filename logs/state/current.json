@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Stage-0 calibration-volume FORMAL STUDY RUNNING: d1, d2 COMPLETE; d4 resume dose_d4_20261020_212310 running (two earlier resume attempts ended before measurement); d1's Top-4 probes beside it. Owner: the run closeouts; decisions.md 2026-10-20.",
+ "blocker": "BLOCKED NO. Stage-0 calibration-volume FORMAL STUDY: d1, d2, d4 COMPLETE, analysed (design/formal_analysis.json). Top-4 extension: d1 7/7 closed; d4 and d2 probes running. Owner: the run closeouts; decisions.md 2026-10-20.",
  "branch": "main (squash of exec/d1-behavioural-readiness, 2026-10-17); Stage-0 work on stage0/calibration-volume-mixture",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -198,16 +198,15 @@
  ],
  "running": {
   "paid_compute": true,
-  "pods": 2,
-  "pod_id": "rzf92gbn3h40we",
+  "pods": 1,
+  "pod_id": "dgv8vpzbgpuykh",
   "pod_ids": [
-   "rzf92gbn3h40we",
-   "9l10mpu9yw4c7f"
+   "dgv8vpzbgpuykh"
   ],
-  "network_volumes": 2,
+  "network_volumes": 3,
   "launchers": {
-   "dose_d4_20261020_212310": "calvol_d4r3, search resuming",
-   "probes_d1_20261020_093955": "calvol_probes_d1, 5/7 units by 19:53Z"
+   "probes_d4_20261020_232941": "calvol_probes_d4, 7 units",
+   "probes_d2_20261020_233510": "calvol_probes_d2, waiting for L40S stock"
   },
   "_owner": "logs/budget/decisions.md 2026-10-20 (at most two sessions at once)"
  },
