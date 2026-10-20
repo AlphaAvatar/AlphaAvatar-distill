@@ -3,7 +3,7 @@
  "study_id": "formal_v1",
  "extension_id": "formal_v1_top4",
  "status": "registered before any probe result exists",
- "written_utc": "2026-10-20T07:30:00Z",
+ "written_utc": "2026-10-20T05:30:00Z",
  "decision": {
   "by": "maintainer, 2026-10-20 (task instructions to the executing agent session)",
   "maintainer_words": [

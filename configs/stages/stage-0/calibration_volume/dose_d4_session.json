@@ -41,7 +41,7 @@
  "authorizes": "nothing",
  "top4_extension": {
   "doc": "logs/stages/stage-0/calibration_volume/plans/top4_extension.json",
-  "doc_sha256": "befe716f5ffe2b9184da3c63918a6c242839d03f60aaffb046a14f2f844b8fb2",
+  "doc_sha256": "369b5549b8a2a5a16101090fb7b59dcd27ffe3be3c51dd9b57c5ef1efaa9b4eb",
   "k": 4,
   "rebuild": {
    "d1": "logs/stages/stage-0/calibration_volume/plans/top4_rebuild_d1.json"
