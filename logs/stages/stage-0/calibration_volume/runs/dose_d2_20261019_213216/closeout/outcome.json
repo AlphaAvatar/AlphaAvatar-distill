@@ -1,0 +1,15 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "dose_d2_20261019_213216",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-20T00:29:11+00:00",
+ "status": "ABANDONED_BEFORE_LAUNCH",
+ "outcome": "d2 attempt 2 (resume): no provider resource was created -- all 36 create calls (21:33Z-00:28Z, 300 s apart) were refused for capacity ('no longer any instances available'); EUR-IS-1, the network volume's datacenter, lists only A100-SXM4-80GB. A provider transient, not a defect: the same resume is retried under a fresh authorization.",
+ "provider_resource_created": false,
+ "money": {
+  "all_in_usd": 0.0,
+  "_basis": "no provider resource existed"
+ }
+}
