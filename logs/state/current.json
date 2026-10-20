@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Stage-0 calibration-volume FORMAL STUDY RUNNING: d1, d2 COMPLETE; d4 (dose_d4_20261020_054022) searching since 07:00Z (Top-4 extension: d1 rebuild and 8-candidate export done); then three L40S probe sessions. Owner: .../plans/volume_preregistration.json, .../plans/top4_extension.json; decisions.md.",
+ "blocker": "BLOCKED NO. Stage-0 calibration-volume FORMAL STUDY RUNNING: d1, d2 COMPLETE; d4 (dose_d4_20261020_054022) searching since 07:00Z; d1's Top-4 probes (probes_d1_20261020_093955) beside it (at most two sessions). Owner: .../plans/top4_extension.json; decisions.md 2026-10-20.",
  "branch": "main (squash of exec/d1-behavioural-readiness, 2026-10-17); Stage-0 work on stage0/calibration-volume-mixture",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-20T06:00:00Z",
+ "generated_utc": "2026-10-20T09:50:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Stage-0 formal volume study (maintainer-authorized 2026-10-19, $90 cap): d1 → d2 → d4 under plans/volume_preregistration.json's order and budget rule, then its formal analysis. Owner: that file; decisions.md 2026-10-19.",
+ "next": "Stage-0 formal volume study (maintainer-authorized 2026-10-19, $120 cap): d1 → d2 → d4 under plans/volume_preregistration.json's order and budget rule, then its formal analysis. Owner: that file; decisions.md 2026-10-19.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Stage-0 volume study d1 → d2 → d4 and its formal analysis; the mixture study after it.",
@@ -198,15 +198,18 @@
  ],
  "running": {
   "paid_compute": true,
-  "pods": 1,
+  "pods": 2,
   "pod_id": "ltxns3jbkkaiac",
-  "network_volumes": 1,
-  "launcher": {
-   "run_id": "dose_d4_20261020_054022",
-   "tmux": "calvol_d4",
-   "state": "S_search since 07:00Z"
+  "pod_ids": [
+   "ltxns3jbkkaiac",
+   "rzf92gbn3h40we"
+  ],
+  "network_volumes": 2,
+  "launchers": {
+   "dose_d4_20261020_054022": "calvol_d4, S_search since 07:00Z",
+   "probes_d1_20261020_093955": "calvol_probes_d1, created 09:40Z"
   },
-  "_verified": "07:12Z: journal growing, mirror passing every 120 s; d1 rebuild 3/3 byte-exact; 8 candidates verified on the relay"
+  "_owner": "logs/budget/decisions.md 2026-10-20 (at most two sessions at once)"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

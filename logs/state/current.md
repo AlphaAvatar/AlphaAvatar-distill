@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-20 07:20 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-20 09:50 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,12 +9,19 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**ONE POD IS BILLING: `ltxns3jbkkaiac` (A100-SXM4-80GB, EUR-IS-1, $1.79/h,
-created 2026-10-20 05:51Z). STAGE-0 FORMAL VOLUME STUDY: d1 AND d2 COMPLETE;
-DOSE d4 (4x) IS RUNNING, WITH THE TOP-4 EXTENSION'S A100 WORK.** Run
-`dose_d4_20261020_054022`; the launcher in tmux `calvol_d4` owns the pod and its
-watchdog (hard 1275 min = $38.03; authorized $39.50). Driver detached 05:57Z.
-Do not create another pod while it is alive.
+**TWO PODS ARE BILLING (maintainer 2026-10-20: formal_volume may run at most
+two sessions at once). STAGE-0 FORMAL VOLUME STUDY: d1 AND d2 COMPLETE; DOSE d4
+(4x) AND d1's TOP-4 PROBES ARE RUNNING.**
+- `ltxns3jbkkaiac`: A100-SXM4-80GB, EUR-IS-1, $1.79/h, created 05:51Z. Run
+  `dose_d4_20261020_054022`, tmux `calvol_d4`; watchdog hard 1275 min =
+  $38.03 (authorized $39.50).
+- `rzf92gbn3h40we`: L40S, US-TX-3, $1.09/h, created 09:40Z. Run
+  `probes_d1_20261020_093955`, tmux `calvol_probes_d1`, 7 units on volume
+  `b9jwu0g1eg`; watchdog hard 1425 min = $25.89 (authorized $26.00, issued
+  with d4 booked at its $39.50 cap).
+- **No third pod.** The next one, d2's probes on a second volume, starts after
+  d4 closes. d4's probes go on volume A after d1's close. Owner:
+  `decisions.md` 2026-10-20 (at most two sessions at once).
 - **d4 so far** (owner: the run's `launch.log` until its closeout):
   - retirement kept d2's distinct Top-4 (88 states retired, 13 GB left);
   - d1's Top-2..4 were rebuilt **byte-exact** (3/3 adopted; every step digest
@@ -35,9 +42,10 @@ Do not create another pod while it is alive.
     the 12 candidates are exported to the relay.
   - Then three L40S probe sessions on a new US-TX-3 volume.
   - The preregistered study is unchanged.
-- **Budget.** Formal $35.04 spent of $120; programme remaining $84.09. The
-  extension's L40S cost is an estimate until its first unit is measured
-  (decisions.md 2026-10-20).
+- **Budget.** Formal $35.50 booked of $120 (with volume A's $0.47
+  reservation). Remaining with d4 held at its cap: programme $44.12 before
+  the d1 probes' $26.00. The extension's L40S cost is an estimate until its
+  first unit is measured (decisions.md 2026-10-20).
 - **Stopped at $0 today.**
   - `dose_d4_20261020_045426`: non-canonical `--bundle`.
   - `dose_d4_20261020_045616`: stopped for the scope change.
@@ -54,8 +62,6 @@ Do not create another pod while it is alive.
   - Formal headlines: `fluid_reasoning_720` 0/714; the capability units at or
     near the floor; legacy (in-sample) 23/150.
   - Report: `runs/dose_d2_20261020_002929/evidence/d2/eval/report.json`.
-- **Budget** (2026-10-20 05:00Z): formal phase $35.04 spent of $90; programme
-  remaining $54.09; the d4 hard cap fits after the $4.20 volume reservation.
 - **d1** cost $12.65 over attempts 2–5 ($12.91 with attempt 1):
   - attempt 2 searched and recovered, then failed in evaluation;
   - attempt 3 created no pod (capacity);
@@ -68,10 +74,10 @@ Do not create another pod while it is alive.
   - Report: `runs/dose_d1_20261019_133708/evidence/d1/eval/report.json`.
 - **Next.**
   1. d4 (search, export, recovery, eval) and its closeout.
-  2. Create the US-TX-3 volume, then write the probe plans from d4's finalists
-     manifest (`write_probe_plans.py`). The provider account needs about $30
-     more before the probe sessions (each launch needs $30 on it).
-  3. The probe sessions, re-priced after the first unit.
+  2. Re-price from d1's first measured probe unit; return to the maintainer
+     if the remaining units' expected cost plus $5 does not fit.
+  3. When d4 closes: volume B, then d2's probe session beside d1's. When d1's
+     closes: d4's probe session on volume A (plans from d4's own manifest).
   4. The formal analysis and the extension's. The maintainer set no stop rule: a
   low 1x does not cancel 2x/4x.
 - **Owners.** The run closeouts, `decisions.md` 2026-10-19, and
