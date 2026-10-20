@@ -1,0 +1,165 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.dose_record/v1",
+ "treatment": "d2",
+ "run_id": "dose_d2_20261020_002929",
+ "search_run_id": "stage0_calvol_formal_v1_d2",
+ "volume_dir": "/runpod-volume/stage0_calvol/formal_v1/d2",
+ "started_utc": "2026-10-20T02:29:37Z",
+ "commit": "deeb17c9f46eac49151dc7b1fc5100c26ad0c663",
+ "gpu": {
+  "name": "NVIDIA A100-SXM4-80GB",
+  "memory": "81920 MiB",
+  "driver": "595.91.07"
+ },
+ "stages": {
+  "A_contract": {
+   "status": "ok",
+   "eval_set_identity": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+   "knowledge_staged": true,
+   "seconds": 0.0
+  },
+  "V_retire": {
+   "status": "ok",
+   "doses": {
+    "d1": {
+     "retired": 91,
+     "bytes": 272990935051,
+     "kept": [
+      "72b76a1ca4300f1fc3b341c28738f425"
+     ]
+    }
+   },
+   "seconds": 0.0
+  },
+  "S_search": {
+   "status": "ok",
+   "pulled_before": {
+    "utc": "2026-10-20T02:36:56Z",
+    "mode": "pull",
+    "copied": 216,
+    "skipped": 0,
+    "bytes": 237257732740,
+    "seconds": 438.6
+   },
+   "final_push": {
+    "utc": "2026-10-20T03:23:38Z",
+    "mode": "push",
+    "copied": 0,
+    "skipped": 283,
+    "bytes": 0,
+    "seconds": 0.3
+   },
+   "n_resumed": 71,
+   "seconds": 3241.0
+  },
+  "R_recovery": {
+   "status": "ok",
+   "model_dir": "/workspace/aad/artifacts/stages/stage-0/calibration_volume/formal/d2/recovery/checkpoints/step_001023/model",
+   "model_sha256": "f3a08e2392f1156a084d6a578bdf000410411670b172e68383f0f3cea23dd89b",
+   "pushed": {
+    "utc": "2026-10-20T04:14:33Z",
+    "mode": "push",
+    "copied": 8,
+    "skipped": 0,
+    "bytes": 5908319474,
+    "seconds": 17.7
+   },
+   "top1": {
+    "state_id": "9af1989dc0b8168908eeb77ee4d3fa47",
+    "path": "DEPTH(calib.s0v_rh_d2@v1)->FFN(calib.s0v_base_d2@v1)->ATTENTION(calib.s0v_base_d2@v1)->RESIDUAL_WIDTH(calib.s0v_base_d2@v1)",
+    "artifact_digest": "81cb441c19bdab9399210e0406b425290463b8cb677a1ab3fe20eceb151b2f24",
+    "single_shard_sha256": "e9eba2255dbb567b9f044c0af9b2f3139c9ef227532ff85abe66e46f158f733e",
+    "checkpoint_path": "/workspace/aad/artifacts/audit/stage0_calvol_search/d2/search/states/9af1989dc0b8168908eeb77ee4d3fa47/47f5d30f9d6361da3b8ab92b06c1eca2",
+    "num_parameters": 596049920,
+    "impl_ids": [
+     "depth.causal_kl_greedy_v1",
+     "ffn.activation_importance_v0",
+     "attention.activation_importance_v1",
+     "width.global_pca_v0"
+    ],
+    "calibration_profiles": [
+     "calib.s0v_base_d2@v1",
+     "calib.s0v_rh_d2@v1"
+    ],
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "weights_digest": "010541d8a89f009eaca42feb4954a5b17fa727e069e9d3e5bd398fa7121f0dd0"
+   },
+   "config": "artifacts/audit/stage0_calvol_dose/d2/recovery_config.json",
+   "seconds": 3054.7
+  },
+  "E_eval": {
+   "status": "ok",
+   "generated": [
+    "fluid",
+    "capability"
+   ],
+   "fluid_formal": 0,
+   "report_sha256": "c30966330e80f6e8d8e92a62de14b45a9326f3a23f2e99f4e7fa7f11fe6a5883",
+   "seconds": 1850.9
+  }
+ },
+ "status": "COMPLETE",
+ "authorization_id": "stage0.calibration_volume.dose.dose_d2_20261020_002929",
+ "search": {
+  "commit": {
+   "selection_path": "artifacts/audit/stage0_calvol_search/d2/stage1_selection.json",
+   "selected_rows": [
+    {
+     "state_id": "9af1989dc0b8168908eeb77ee4d3fa47",
+     "path": "DEPTH(calib.s0v_rh_d2@v1)->FFN(calib.s0v_base_d2@v1)->ATTENTION(calib.s0v_base_d2@v1)->RESIDUAL_WIDTH(calib.s0v_base_d2@v1)",
+     "artifact_digest": "81cb441c19bdab9399210e0406b425290463b8cb677a1ab3fe20eceb151b2f24",
+     "single_shard_sha256": "e9eba2255dbb567b9f044c0af9b2f3139c9ef227532ff85abe66e46f158f733e",
+     "checkpoint_path": "/workspace/aad/artifacts/audit/stage0_calvol_search/d2/search/states/9af1989dc0b8168908eeb77ee4d3fa47/47f5d30f9d6361da3b8ab92b06c1eca2",
+     "num_parameters": 596049920,
+     "impl_ids": [
+      "depth.causal_kl_greedy_v1",
+      "ffn.activation_importance_v0",
+      "attention.activation_importance_v1",
+      "width.global_pca_v0"
+     ],
+     "calibration_profiles": [
+      "calib.s0v_base_d2@v1",
+      "calib.s0v_rh_d2@v1"
+     ],
+     "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+     "weights_digest": "010541d8a89f009eaca42feb4954a5b17fa727e069e9d3e5bd398fa7121f0dd0"
+    }
+   ]
+  },
+  "session": {
+   "config_hash": "14ec481178ddc9d27f37343bcdb3f8a87cf663cc0b9567c9ec5e8ea8258373f5",
+   "measurement_protocol_id": "857357e82eb1bd1f367985eaa31399dc",
+   "profiles": [
+    "calib.s0v_base_d2@v1",
+    "calib.s0v_rh_d2@v1"
+   ],
+   "profile_hashes": {
+    "calib.s0v_base_d2@v1": "3334509a4c83df865843e22a67e6faa81b50909fc87394658178f31355119dad",
+    "calib.s0v_rh_d2@v1": "fc0025b995bc9e2da2a785398631f39c577e2a9109346e9c9c2089e793640846"
+   },
+   "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+   "baseline": {
+    "baseline": "stage1_init.d1_target_aware.scored_v1@v1",
+    "record_sha256": "333af13d9f2441fc658ee064f1a6ec6b15ebf5be5ee8ab31320763bbe41ce266",
+    "numerical_execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+    "execution": {
+     "micro_batch_size": 3,
+     "calibration_batch_packing": "length_sorted_v1",
+     "prediction_rows": "scored_v1"
+    },
+    "implementations": {
+     "FFN": "ffn.activation_importance_v0",
+     "DEPTH": "depth.causal_kl_greedy_v1",
+     "RESIDUAL_WIDTH": "width.global_pca_v0",
+     "ATTENTION": "attention.activation_importance_v1"
+    },
+    "position_policy": "positions.supervised_target_v1@v1",
+    "distribution_support": {
+     "support_id": "reference_topk_tail_v1",
+     "top_k": 200
+    }
+   }
+  }
+ },
+ "ended_utc": "2026-10-20T04:45:24Z"
+}

@@ -1,0 +1,733 @@
+{
+  "schema": "aadistill.stage0.calibration_volume.dose_session/v1",
+  "session_id": "stage0-calvol-dose-d2",
+  "session_spec": {
+    "session_id": "stage0-calvol-dose-d2",
+    "schema": "aadistill.stage0.calibration_volume.dose_session/v1",
+    "description": "Stage-0 calibration volume formal dose d2",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/governance/authorization.json",
+    "authorization_type": "functools.partial(<function load_for at 0x7f619747ca90>, 'dose')",
+    "plan_id": "stage0.calibration_volume.dose_d2",
+    "plan_hash": "f7f642502df6cd77214d88470c47a55d86091933d4c99b95590d5c217bafde11",
+    "status_path": "/workspace/stage0_calvol_dose.status",
+    "run_log_path": "/workspace/stage0_calvol_dose_run.log",
+    "driver_job_id": "stage0_calvol_dose_d2_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "stage0_calvol_dose",
+      "evidence_filename": "dose_record.json",
+      "archive_basename": "stage0_calvol_dose_d2",
+      "spec_success": "configs/stages/stage-0/calibration_volume/dose_artifacts.json",
+      "spec_failed": "configs/stages/stage-0/calibration_volume/dose_artifacts.json",
+      "report_names": []
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "stage0_calvol"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_KIND",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [
+        "state_eval_v1:artifacts/stages/stage-1",
+        "profiles_formal_v1:artifacts/stages/stage-0/calibration_volume",
+        "battery_v2:artifacts/stages/stage-3/eval"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 600,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [],
+      "test_paths": [],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "VLLM_READY",
+        "TEACHER_READY",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 0,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-10-20T00:30:08+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 623 min $18.57 \u00b7 soft $23.18 \u00b7 hard $23.63 (authorized $24.36)"
+    },
+    {
+      "utc": "2026-10-20T00:30:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA A100-SXM4-80GB $1.79/h, stock None"
+    },
+    {
+      "utc": "2026-10-20T00:30:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $71.2463 against the $30.0000 this session must be able to fund"
+    },
+    {
+      "utc": "2026-10-20T00:30:10+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 7 relay inputs (7 from AlphaAvatar/aadistill-artifacts), 3 local assets"
+    },
+    {
+      "utc": "2026-10-20T00:30:11+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 1: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T00:35:11+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 2: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T00:40:12+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 3: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T00:45:12+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 4: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T00:50:13+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 5: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T00:55:14+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 6: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T01:00:14+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 7: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T01:05:15+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 8: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T01:10:15+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 9: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T01:15:16+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 10: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T01:20:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 11: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T01:25:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 12: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T01:30:18+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 13: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T01:35:18+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 14: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T01:40:19+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 15: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T01:45:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 16: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T01:50:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 17: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T01:55:21+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 18: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T02:00:21+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 19: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T02:05:22+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 20: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T02:10:23+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 21: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T02:15:23+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 22: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T02:20:24+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 23: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-20T02:25:26+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 792 min = $23.63"
+    },
+    {
+      "utc": "2026-10-20T02:25:26+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created bhttzctttg3hld at $1.79/h"
+    },
+    {
+      "utc": "2026-10-20T02:26:03+00:00",
+      "elapsed_min": 0.61,
+      "msg": "TCP 22 at 157.157.221.29:16409 after 0.6 min"
+    },
+    {
+      "utc": "2026-10-20T02:26:05+00:00",
+      "elapsed_min": 0.66,
+      "msg": "draw 1: ssh reachable \u2014 $0.02"
+    },
+    {
+      "utc": "2026-10-20T02:27:08+00:00",
+      "elapsed_min": 1.7,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+    },
+    {
+      "utc": "2026-10-20T02:27:08+00:00",
+      "elapsed_min": 1.7,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-20T02:29:34+00:00",
+      "elapsed_min": 4.14,
+      "msg": "draw 1: setup complete \u2014 $0.12"
+    },
+    {
+      "utc": "2026-10-20T02:29:40+00:00",
+      "elapsed_min": 4.24,
+      "msg": "driver detached, pid 3368, confirmed by descriptor_probe \u2014 $0.13"
+    },
+    {
+      "utc": "2026-10-20T02:31:50+00:00",
+      "elapsed_min": 6.41,
+      "msg": "  2026-10-20T02:29:37Z MARKER:STAGE_START:S_search \u2014 $0.19"
+    },
+    {
+      "utc": "2026-10-20T02:38:50+00:00",
+      "elapsed_min": 13.41,
+      "msg": "  2026-10-20T02:36:56Z MARKER:DRIVER_START:d2 \u2014 $0.40"
+    },
+    {
+      "utc": "2026-10-20T03:23:22+00:00",
+      "elapsed_min": 57.94,
+      "msg": "  2026-10-20T03:21:44Z MARKER:SEARCH_DONE:d2 \u2014 $1.73"
+    },
+    {
+      "utc": "2026-10-20T03:25:43+00:00",
+      "elapsed_min": 60.28,
+      "msg": "  2026-10-20T03:23:38Z MARKER:STAGE_START:R_recovery \u2014 $1.80"
+    },
+    {
+      "utc": "2026-10-20T03:26:25+00:00",
+      "elapsed_min": 60.99,
+      "msg": "dose d2 unit search: SECURED"
+    },
+    {
+      "utc": "2026-10-20T04:16:04+00:00",
+      "elapsed_min": 110.63,
+      "msg": "  2026-10-20T04:14:33Z MARKER:STAGE_START:E_eval \u2014 $3.30"
+    },
+    {
+      "utc": "2026-10-20T04:16:20+00:00",
+      "elapsed_min": 110.9,
+      "msg": "dose d2 unit recovery: SECURED"
+    },
+    {
+      "utc": "2026-10-20T04:47:26+00:00",
+      "elapsed_min": 142.0,
+      "msg": "  2026-10-20T04:45:24Z MARKER:ALL_DONE \u2014 $4.24"
+    },
+    {
+      "utc": "2026-10-20T04:47:26+00:00",
+      "elapsed_min": 142.0,
+      "msg": "polling ended: ALL_DONE \u2014 $4.24"
+    },
+    {
+      "utc": "2026-10-20T04:50:33+00:00",
+      "elapsed_min": 145.13,
+      "msg": "  manifest rc=0\n17 file(s) across 5 class(es) -> /workspace/manifest.json\n  final_required: 17 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-10-20T04:51:52+00:00",
+      "elapsed_min": 146.44,
+      "msg": "dose d2 unit eval: SECURED"
+    },
+    {
+      "utc": "2026-10-20T04:51:55+00:00",
+      "elapsed_min": 146.49,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-10-20T04:51:55+00:00",
+      "elapsed_min": 146.49,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-10-20T04:52:06+00:00",
+      "elapsed_min": 146.67,
+      "msg": "pod deleted \u2014 146.7 min, $4.38; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.stage0.calibration_volume.authorization/v1",
+    "authorization_id": "stage0.calibration_volume.dose.dose_d2_20261020_002929",
+    "version": 1,
+    "granted_utc": "2026-10-20T00:29:29+00:00",
+    "granted_by": "maintainer (task instruction of 2026-10-18 to the executing agent session)",
+    "plan_id": "stage0.calibration_volume.dose_d2",
+    "session_plan_hash": "f7f642502df6cd77214d88470c47a55d86091933d4c99b95590d5c217bafde11",
+    "expected_usd": 18.57,
+    "hard_cap_usd": 24.36,
+    "authorized_stages": [],
+    "stage_conditions": {
+      "phase": "formal_volume",
+      "plan": "dose_d2",
+      "envelope": "{\"phase\": \"formal_volume\", \"phase_ceiling_usd\": 90.0, \"phase_spent_usd\": 30.5289, \"phase_remaining_usd\": 59.4711, \"programme_ceiling_usd\": 107.5099, \"programme_spent_usd\": 48.9145, \"programme_remaining_usd\": 58.5954, \"per_session_cap_usd\": 50.0}"
+    },
+    "scope_note": "Dose d2 attempt 3: resume of dose_d2_20261019_135821 from the network-volume journal under the preregistered retry_policy (one replacement endpoint); attempt 2 (dose_d2_20261019_213216) created no pod, EUR-IS-1 capacity",
+    "authorizes_battery": false,
+    "authorizes_search": false,
+    "authorizes_probes": false,
+    "authorizes_bench": false,
+    "authorizes_dose": true,
+    "authorized_session_commit": null,
+    "harness_source_digest": "58d28742dc56c7f8f86636c58818146370db3e2fe6ee0520227deaecdd24186c",
+    "harness_source_files": [
+      "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "scripts/shared/pod/watchdog.py",
+      "scripts/shared/pod/collect_artifacts.py",
+      "scripts/stages/stage-0/calibration_volume/governance.py",
+      "scripts/stages/stage-0/calibration_volume/launch.py",
+      "scripts/stages/stage-0/calibration_volume/battery_driver.py",
+      "scripts/stages/stage-0/calibration_volume/run_battery.py",
+      "scripts/stages/stage-0/calibration_volume/score_battery.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/common.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/induction.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/composition.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/deduction.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/analogy.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/interactive.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/registry.py",
+      "scripts/shared/evaluation/uncapped_eval.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/data/verify.py",
+      "scripts/stages/stage-0/calibration_volume/dose_driver.py",
+      "scripts/stages/stage-0/calibration_volume/search_driver.py",
+      "scripts/stages/stage-0/calibration_volume/search_session.py",
+      "scripts/stages/stage-0/calibration_volume/volume_sync.py",
+      "scripts/shared/forward_baseline.py",
+      "scripts/shared/evaluation/eval_set_scoring.py",
+      "scripts/shared/eval_sets.py",
+      "scripts/shared/training/train_stage3.py",
+      "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+      "scripts/stages/stage-1/phase_c1/packaging.py",
+      "src/aadistill/evaluation/eval_registry.py",
+      "src/aadistill/initialization/baseline.py",
+      "src/aadistill/initialization/execution.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/metrics.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/operators/depth/causal_kl_greedy.py"
+    ],
+    "per_launch_hard_usd": 24.36,
+    "provenance_commit": "2fcf10938fc1fddb1ae10f9b715c95664065d12b",
+    "enforcement": "the launcher refuses a pod unless this artifact is bound to the session plan and the harness on disk, and its hard cap covers the planned hard threshold; one artifact funds one run",
+    "authorization_sha256": "9c68ab15f7ec7c6f0c80af3e977e67e9b8fb0be83a00706991e92fc5d6a86a1b"
+  },
+  "session_plan_hash": "f7f642502df6cd77214d88470c47a55d86091933d4c99b95590d5c217bafde11",
+  "harness_source_digest": "58d28742dc56c7f8f86636c58818146370db3e2fe6ee0520227deaecdd24186c",
+  "harness_source_files": [
+    "scripts/shared/eval_sets.py",
+    "scripts/shared/evaluation/eval_set_scoring.py",
+    "scripts/shared/evaluation/uncapped_eval.py",
+    "scripts/shared/forward_baseline.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/collect_artifacts.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/shared/training/train_stage3.py",
+    "scripts/stages/stage-0/calibration_volume/battery_driver.py",
+    "scripts/stages/stage-0/calibration_volume/dose_driver.py",
+    "scripts/stages/stage-0/calibration_volume/governance.py",
+    "scripts/stages/stage-0/calibration_volume/launch.py",
+    "scripts/stages/stage-0/calibration_volume/run_battery.py",
+    "scripts/stages/stage-0/calibration_volume/score_battery.py",
+    "scripts/stages/stage-0/calibration_volume/search_driver.py",
+    "scripts/stages/stage-0/calibration_volume/search_session.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/analogy.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/common.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/composition.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/deduction.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/induction.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/interactive.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/registry.py",
+    "scripts/stages/stage-0/calibration_volume/volume_sync.py",
+    "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+    "scripts/stages/stage-1/phase_c1/packaging.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/eval_registry.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py",
+    "src/aadistill/initialization/baseline.py",
+    "src/aadistill/initialization/execution.py",
+    "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/statistics/contribution.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.79,
+    "authorized_usd": 24.36,
+    "expected_minutes": 622.6,
+    "soft_stop_minutes": 777.12,
+    "artifact_recovery_reserve_minutes": 15.0,
+    "hard_terminate_minutes": 792.12,
+    "step_time": {
+      "seconds": 1.0,
+      "source": "unused: no training in this session (arms=0)",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 20.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 10.0
+      },
+      {
+        "name": "search",
+        "minutes": 472.1
+      },
+      {
+        "name": "recovery",
+        "minutes": 61.5
+      },
+      {
+        "name": "eval_set_1",
+        "minutes": 49.0
+      },
+      {
+        "name": "pushes",
+        "minutes": 10.0
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "long_tail_generation",
+        "minutes": 30.0
+      }
+    ],
+    "notes": [
+      "below-floor step time accepted: 1.0 s/step vs floor 4.15 \u2014 no training steps; every phase is priced below"
+    ],
+    "soft_stop_reserve_minutes": 30.0,
+    "expected_usd": 18.5742,
+    "soft_stop_usd": 23.1841,
+    "artifact_recovery_reserve_usd": 0.4475,
+    "hard_terminate_usd": 23.6316
+  },
+  "quoted_price_per_hour": 1.79,
+  "stock_status": null,
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 71.2462980027,
+    "current_spend_per_hr": 0.029,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 30.0,
+    "ok": true,
+    "why": "the provider account holds $71.2463 against the $30.0000 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "precheck": {
+    "relay_needed": [
+      "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+      "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+      "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/config.json"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 7
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1419
+    },
+    "local_assets": [
+      "artifacts/stages/stage-1/state_eval_v1",
+      "artifacts/stages/stage-0/calibration_volume/profiles_formal_v1",
+      "artifacts/stages/stage-3/eval/battery_v2"
+    ],
+    "local_missing": []
+  },
+  "pod_id": "bhttzctttg3hld",
+  "actual_price_per_hour": 1.79,
+  "terminate_after_utc": "2026-10-20T13:42:17Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-artifacts/stage0_calvol/dose_d2_20261020_002929/watchdog_bhttzctttg3hld.jsonl"
+  ],
+  "watchdog_owns_pod": "bhttzctttg3hld",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "595.91.07"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_deeb17c9.bundle",
+    "SESSION_ASSETS": "state_eval_v1:artifacts/stages/stage-1,profiles_formal_v1:artifacts/stages/stage-0/calibration_volume,battery_v2:artifacts/stages/stage-3/eval",
+    "SESSION_AUTH_PATH": "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/governance/authorization.json",
+    "SESSION_COMMIT": "deeb17c9f46eac49151dc7b1fc5100c26ad0c663",
+    "SESSION_KIND": "stage0_calvol",
+    "SESSION_PLAN_HASH": "f7f642502df6cd77214d88470c47a55d86091933d4c99b95590d5c217bafde11",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054\"}]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV VLLM_READY TEACHER_READY SETUP_DONE",
+    "SESSION_STATUS": "/workspace/stage0_calvol_dose.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "600",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "stage0_calvol_dose_d2_driver",
+    "pid": 3368,
+    "workdir": "/workspace/aad",
+    "command": "PYTHONPATH=/workspace/aad/src:/workspace/aad/scripts /opt/train/bin/python /workspace/aad/scripts/stages/stage-0/calibration_volume/dose_driver.py --treatment d2 --run-id dose_d2_20261020_002929 --auth '/workspace/aad/logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/governance/authorization.json' --plan dose_d2 --status '/workspace/stage0_calvol_dose.status' --volume '/runpod-volume'",
+    "log_path": "/workspace/stage0_calvol_dose_run.log",
+    "status_path": "/workspace/stage0_calvol_dose.status",
+    "pid_path": "/workspace/jobs/stage0_calvol_dose_d2_driver.pid",
+    "descriptor_path": "/workspace/jobs/stage0_calvol_dose_d2_driver.job.json",
+    "exit_path": "/workspace/jobs/stage0_calvol_dose_d2_driver.exit",
+    "started_utc": "2026-10-20T02:29:37Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "units_secured": {
+    "search": {
+      "sha256": "b8825950eaf342b136df54c295f6537d240437df8019b0908d34d5b648a9b7c1",
+      "rc": {
+        "search_record.json": 0,
+        "structure.json": 0,
+        "stage1_selection.json": 0,
+        "search/states.jsonl": 0,
+        "search/telemetry.jsonl": 0,
+        "width_projection_4eb8475c4dbd58f6d14200559357724e.safetensors": 0,
+        "width_projection_6cf32f314838d11ffeccfe800a5f748c.safetensors": 0
+      },
+      "ok": true
+    },
+    "recovery": {
+      "sha256": "8040a665357f918643824655762d9470df47eb647706efd9bb2ade6c58536c90",
+      "rc": {
+        "recovery_products.json": 0,
+        "recovery_config.json": 0,
+        "recovery.log": 0,
+        "train_log.jsonl": 0
+      },
+      "ok": true
+    },
+    "eval": {
+      "sha256": "c30966330e80f6e8d8e92a62de14b45a9326f3a23f2e99f4e7fa7f11fe6a5883",
+      "rc": {
+        "report.json": 0,
+        "generations": 0,
+        "rows": 0,
+        "eval_fluid.log": 0,
+        "eval_capability.log": 0
+      },
+      "ok": true
+    }
+  },
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "checkpoints_fetched": [],
+  "required_products_secured": {
+    "ok": true,
+    "why": "3 finished unit(s) secured off-pod; checkpoints are on the volume"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 17,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.79,
+    "elapsed_minutes": 146.67,
+    "actual_usd": 4.3757,
+    "authorized_usd": 24.36,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-20T04:52:06+00:00"
+}
