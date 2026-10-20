@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-20 05:40 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-20 05:45 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -10,18 +10,27 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 ## Right now
 
 **NO POD EXISTS: NOTHING IS RUNNING ON THE PROVIDER AND NOTHING IS BILLING
-(provider query 2026-10-20 05:01Z: 0 pods; no launcher alive). STAGE-0 FORMAL
-VOLUME STUDY: d1 AND d2 COMPLETE; d4 PAUSED FOR A MAINTAINER DECISION.**
-- **Scope change (maintainer 2026-10-20).** Every dose's Top-4 from the full
-  search is to be recovered, and recovery may run on L40S. Open before any
-  launch: the budget (the new scope does not fit what is left of $90), whether
-  byte-identical leaves count separately (d2's Top-1 and Top-2 are the same
-  weights), and whether Top-1 is re-recovered on L40S for parity.
-- **d4 launches stopped at $0.** `dose_d4_20261020_045426` (refused: non-canonical
-  `--bundle`) and `dose_d4_20261020_045616` (stopped between create attempts:
-  its finalists_k=1 retirement would delete d2's Top-2..4 states).
-- **d1 Top-2..4 were retired** with d1's other states; the tombstone keeps their
-  checkpoint sha256, so they can be rebuilt from the journal and verified.
+(provider query 2026-10-20 05:01Z: 0 pods). STAGE-0 FORMAL VOLUME STUDY: d1 AND
+d2 COMPLETE; DOSE d4 (4x) IS ACQUIRING A POD, WITH THE TOP-4 EXTENSION'S A100
+WORK.** Run `dose_d4_20261020_054022`; the launcher in tmux `calvol_d4` retries
+the create in EUR-IS-1 every 300 s, 144 times. Expected $30.57, hard stop
+$38.03, authorized $39.50. Do not create another pod while it is alive.
+- **Top-4 extension (maintainer 2026-10-20, +$30).** Owner:
+  `plans/top4_extension.json`.
+  - Each dose's distinct Top-4 is recovered on L40S: Top-2..4 at seeds
+    20260726 and 20260727, Top-1 at 20260727. That is 21 units.
+  - In the d4 session: d1's retired Top-2..4 are rebuilt digest-pinned, and
+    the 12 candidates are exported to the relay.
+  - Then three L40S probe sessions on a new US-TX-3 volume.
+  - The preregistered study is unchanged.
+- **Budget.** Formal $35.04 spent of $120; programme remaining $84.09. The
+  extension's L40S cost is an estimate until its first unit is measured
+  (decisions.md 2026-10-20).
+- **Stopped at $0 today.**
+  - `dose_d4_20261020_045426`: non-canonical `--bundle`.
+  - `dose_d4_20261020_045616`: stopped for the scope change.
+  - `dose_d4_20261020_053929`: issued, never launched; its record's time was
+    corrected.
 - **d2** cost $17.93 over three attempts:
   - attempt 1 (`dose_d2_20261019_135821`, $13.42) lost its pod mid-search to
     the poll loop (fixed `e5a2adee`);
@@ -45,8 +54,12 @@ VOLUME STUDY: d1 AND d2 COMPLETE; d4 PAUSED FOR A MAINTAINER DECISION.**
   - Formal headlines: `fluid_reasoning_720` 1/714; the capability units at or
     near the floor; legacy (in-sample) 25/150.
   - Report: `runs/dose_d1_20261019_133708/evidence/d1/eval/report.json`.
-- **Next.** After the maintainer decision: amend the plan for Top-4, then d4,
-  then the Top-4 recoveries. Then the formal analysis. The maintainer set no stop rule: a
+- **Next.**
+  1. d4.
+  2. Write the probe plans from d4's finalists manifest
+     (`write_probe_plans.py`) and create the US-TX-3 volume.
+  3. The probe sessions, re-priced after the first unit.
+  4. The formal analysis and the extension's. The maintainer set no stop rule: a
   low 1x does not cancel 2x/4x.
 - **Owners.** The run closeouts, `decisions.md` 2026-10-19, and
   [`volume_preregistration.json`](../stages/stage-0/calibration_volume/plans/volume_preregistration.json)

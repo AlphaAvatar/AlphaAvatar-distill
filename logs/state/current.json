@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Stage-0 volume study PAUSED for a maintainer decision: d1, d2 COMPLETE; the 2026-10-20 Top-4 recovery scope (L40S allowed) needs a budget above the $90 cap and two design choices before d4 launches. Owner: .../plans/volume_preregistration.json; decisions.md.",
+ "blocker": "BLOCKED NO. Stage-0 calibration-volume FORMAL STUDY RUNNING: d1, d2 COMPLETE; d4 (dose_d4_20261020_054022) acquiring a pod with the 2026-10-20 Top-4 extension's A100 work; then three L40S probe sessions. Owner: .../plans/volume_preregistration.json, .../plans/top4_extension.json; decisions.md.",
  "branch": "main (squash of exec/d1-behavioural-readiness, 2026-10-17); Stage-0 work on stage0/calibration-volume-mixture",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-20T05:40:00Z",
+ "generated_utc": "2026-10-20T05:45:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -200,7 +200,12 @@
   "paid_compute": false,
   "pods": 0,
   "network_volumes": 1,
-  "_verified": "provider query 2026-10-20 05:01 UTC: 0 pods; no launcher alive; volume ugllmlv19t kept"
+  "launcher": {
+   "run_id": "dose_d4_20261020_054022",
+   "tmux": "calvol_d4",
+   "state": "creating (EUR-IS-1 capacity retries, 144 x 300 s)"
+  },
+  "_verified": "provider query 2026-10-20 05:01 UTC: 0 pods; d4 launcher started 05:41Z, attempt 1 refused for capacity; volume ugllmlv19t kept"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {
