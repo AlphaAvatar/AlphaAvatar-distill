@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-20 14:55 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-20 15:10 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -30,13 +30,13 @@ two sessions at once). STAGE-0 FORMAL VOLUME STUDY: d1 AND d2 COMPLETE; DOSE d4
 - **Re-price (the extension's budget rule), 14:50Z.** 19 units left at the
   measured mean ($2.16 each) plus d4 at its projected ~$28.5, d1's spend so
   far, session overheads and volume B: about $76 expected; +$5 fits the
-  $83.62 programme remainder by about $2.4. The decisive check is at d2's
+  $83.62 programme remainder by about $2.4 (before the +$6 below). The decisive check is at d2's
   probe launch, with d4's actual cost. d2's and d4's probe plans are priced
   from these minutes (recovery 61, eval 70, the larger).
-- **d4's probes cannot overlap d2's within the ceiling.** With d2's probes held
-  at their hard cap (~$21.8), d4's would be short by about $5.4. They start
-  when d2's close, about 11 h later than the overlap plan, unless the
-  maintainer adds about $6.
+- **+$6 keeps d4's probes beside d2's (maintainer 2026-10-20).** With d2's
+  probes held at their hard cap (~$21.8), d4's were short by about $5.4.
+  Programme ceiling now $143.5099, formal_volume $126, project cap
+  $643.6571. Owner: `decisions.md` 2026-10-20.
 - **d4 so far** (owner: the run's `launch.log` until its closeout):
   - retirement kept d2's distinct Top-4 (88 states retired, 13 GB left);
   - d1's Top-2..4 were rebuilt **byte-exact** (3/3 adopted; every step digest
@@ -59,10 +59,9 @@ two sessions at once). STAGE-0 FORMAL VOLUME STUDY: d1 AND d2 COMPLETE; DOSE d4
     the 12 candidates are exported to the relay.
   - Then three L40S probe sessions on a new US-TX-3 volume.
   - The preregistered study is unchanged.
-- **Budget.** Formal $35.50 booked of $120 (with volume A's $0.47
-  reservation). Remaining with d4 held at its cap: programme $44.12 before
-  the d1 probes' $26.00. The extension's L40S cost is an estimate until its
-  first unit is measured (decisions.md 2026-10-20).
+- **Budget.** Formal $35.50 closed of $126 (with volume A's $0.47
+  reservation). With d4 ($39.50) and d1's probes ($26.00) held at their caps,
+  programme $24.12 remains (owner: `governance.remaining_envelope`).
 - **Stopped at $0 today.**
   - `dose_d4_20261020_045426`: non-canonical `--bundle`.
   - `dose_d4_20261020_045616`: stopped for the scope change.
@@ -94,8 +93,8 @@ two sessions at once). STAGE-0 FORMAL VOLUME STUDY: d1 AND d2 COMPLETE; DOSE d4
   2. When d4 closes: re-check the budget rule with its actual cost (return to
      the maintainer if it no longer fits), then volume B and d2's probe
      session beside d1's, priced from the measured minutes.
-  3. When d2's probes close (or d1's, if the maintainer funds the overlap):
-     d4's probe session on volume A (plans from d4's own manifest).
+  3. When d1's probes close: d4's probe session on volume A, beside d2's
+     (plans from d4's own manifest).
   4. The formal analysis and the extension's. The maintainer set no stop rule: a
   low 1x does not cancel 2x/4x.
 - **Owners.** The run closeouts, `decisions.md` 2026-10-19, and

@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Stage-0 formal volume study (maintainer-authorized 2026-10-19, $120 cap): d1 → d2 → d4 under plans/volume_preregistration.json's order and budget rule, then its formal analysis. Owner: that file; decisions.md 2026-10-19.",
+ "next": "Stage-0 formal volume study (maintainer-authorized 2026-10-19, $126 cap): d1 → d2 → d4 under plans/volume_preregistration.json's order and budget rule, then its formal analysis. Owner: that file; decisions.md 2026-10-19.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Stage-0 volume study d1 → d2 → d4 and its formal analysis; the mixture study after it.",

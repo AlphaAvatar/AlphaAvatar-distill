@@ -12926,3 +12926,26 @@ on a paid pod.
   - The extension's re-pricing rule: re-price from the first measured unit,
     and return to the maintainer before a probe session that cannot fit.
   - The ceilings and the per-session cap.
+
+## 2026-10-20 — Top-4 probes: +$6 keeps d4's probes beside d2's
+
+- **Context.** The extension's re-price ran on d1's first two measured probe
+  units on the L40S: recovery 61 min each, eval-set-1 46 and 70 min, so 107
+  and 131 min a unit, against 134–158 min estimated. The budget rule fits at
+  expected cost by about $2.4. But a session running beside a new one is
+  booked at its hard cap. With d2's probes held at theirs (about $21.8), d4's
+  probe session could not start when d1's close: it was short by about $5.4.
+  Without more money, d4's probes would wait for d2's and the study would end
+  about 11 h later.
+- **Decision (maintainer, 2026-10-20: "并行，加6美金").** Keep the overlap and
+  add $6:
+  - programme ceiling $137.5099 → $143.5099;
+  - formal_volume $120 → $126;
+  - project cap $637.6571 → $643.6571.
+
+  Per-session cap $50 and `max_concurrent_sessions` = 2 are unchanged.
+- **Unchanged.** The re-pricing rule still applies at each probe launch.
+  d2's probe session is checked against d4's actual cost when d4 closes, and
+  the agent returns to the maintainer before a session that cannot fit.
+- **Revisit when.** A probe unit runs much longer than 131 min, or d4's
+  session costs more than its projected ~$28.5.
