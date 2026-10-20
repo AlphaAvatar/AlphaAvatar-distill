@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-20 06:00 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-20 07:20 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -14,8 +14,19 @@ created 2026-10-20 05:51Z). STAGE-0 FORMAL VOLUME STUDY: d1 AND d2 COMPLETE;
 DOSE d4 (4x) IS RUNNING, WITH THE TOP-4 EXTENSION'S A100 WORK.** Run
 `dose_d4_20261020_054022`; the launcher in tmux `calvol_d4` owns the pod and its
 watchdog (hard 1275 min = $38.03; authorized $39.50). Driver detached 05:57Z.
-Retirement kept d2's distinct Top-4 (88 states retired, 13 GB left); the d1
-Top-2..4 rebuild was running at 05:57Z. Do not create another pod while it is alive.
+Do not create another pod while it is alive.
+- **d4 so far** (owner: the run's `launch.log` until its closeout):
+  - retirement kept d2's distinct Top-4 (88 states retired, 13 GB left);
+  - d1's Top-2..4 were rebuilt **byte-exact** (3/3 adopted; every step digest
+    and the final identities matched);
+  - all 8 d1/d2 candidates are on the relay, each shard's LFS sha256 checked
+    against the finalists manifest (`9068d6f8`, secured off-pod);
+  - the d4 search started 07:00Z (about 13 h), mirrored to the volume every 120 s.
+- **Probe chain rehearsed at $0** (`98f67968`): real plans, a real
+  authorization, the launcher dry run (probes_d1: $20.89 expected, $25.89 hard)
+  and the driver across three simulated pods. It fixed three resume defects,
+  including a retrained student that would have been scored on the previous
+  student's generations.
 - **Top-4 extension (maintainer 2026-10-20, +$30).** Owner:
   `plans/top4_extension.json`.
   - Each dose's distinct Top-4 is recovered on L40S: Top-2..4 at seeds
@@ -56,9 +67,10 @@ Top-2..4 rebuild was running at 05:57Z. Do not create another pod while it is al
     near the floor; legacy (in-sample) 25/150.
   - Report: `runs/dose_d1_20261019_133708/evidence/d1/eval/report.json`.
 - **Next.**
-  1. d4.
-  2. Write the probe plans from d4's finalists manifest
-     (`write_probe_plans.py`) and create the US-TX-3 volume.
+  1. d4 (search, export, recovery, eval) and its closeout.
+  2. Create the US-TX-3 volume, then write the probe plans from d4's finalists
+     manifest (`write_probe_plans.py`). The provider account needs about $30
+     more before the probe sessions (each launch needs $30 on it).
   3. The probe sessions, re-priced after the first unit.
   4. The formal analysis and the extension's. The maintainer set no stop rule: a
   low 1x does not cancel 2x/4x.
