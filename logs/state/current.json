@@ -206,8 +206,8 @@
   ],
   "network_volumes": 2,
   "launchers": {
-   "dose_d4_20261020_054022": "calvol_d4, S_search since 07:00Z",
-   "probes_d1_20261020_093955": "calvol_probes_d1, created 09:40Z"
+   "dose_d4_20261020_054022": "calvol_d4, search 39/92 at 14:19Z",
+   "probes_d1_20261020_093955": "calvol_probes_d1, 2/7 units by 13:44Z"
   },
   "_owner": "logs/budget/decisions.md 2026-10-20 (at most two sessions at once)"
  },

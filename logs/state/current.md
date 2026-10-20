@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-20 09:50 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-20 14:55 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -20,15 +20,32 @@ two sessions at once). STAGE-0 FORMAL VOLUME STUDY: d1 AND d2 COMPLETE; DOSE d4
   `b9jwu0g1eg`; watchdog hard 1425 min = $25.89 (authorized $26.00, issued
   with d4 booked at its $39.50 cap).
 - **No third pod.** The next one, d2's probes on a second volume, starts after
-  d4 closes. d4's probes go on volume A after d1's close. Owner:
-  `decisions.md` 2026-10-20 (at most two sessions at once).
+  d4 closes. Owner: `decisions.md` 2026-10-20 (at most two sessions at once).
+- **d1 probes: 2 of 7 units done and secured off-pod** (owner: the run's
+  `probe_session.json`, fetched to its store). Measured on the L40S: recovery
+  61 min each; eval-set-1 46 and 70 min (student-dependent); 107 and 131 min a
+  unit, below the 134-158 min estimated. Fluid usable (scorer v2, 576 static
+  items): Top-1 at seed 20260727 357/576, Top-2 at 20260726 331/576; d1's
+  preregistered Top-1 unit had 346/576. Fluid correct 1/720 and 0/720.
+- **Re-price (the extension's budget rule), 14:50Z.** 19 units left at the
+  measured mean ($2.16 each) plus d4 at its projected ~$28.5, d1's spend so
+  far, session overheads and volume B: about $76 expected; +$5 fits the
+  $83.62 programme remainder by about $2.4. The decisive check is at d2's
+  probe launch, with d4's actual cost. d2's and d4's probe plans are priced
+  from these minutes (recovery 61, eval 70, the larger).
+- **d4's probes cannot overlap d2's within the ceiling.** With d2's probes held
+  at their hard cap (~$21.8), d4's would be short by about $5.4. They start
+  when d2's close, about 11 h later than the overlap plan, unless the
+  maintainer adds about $6.
 - **d4 so far** (owner: the run's `launch.log` until its closeout):
   - retirement kept d2's distinct Top-4 (88 states retired, 13 GB left);
   - d1's Top-2..4 were rebuilt **byte-exact** (3/3 adopted; every step digest
     and the final identities matched);
   - all 8 d1/d2 candidates are on the relay, each shard's LFS sha256 checked
     against the finalists manifest (`9068d6f8`, secured off-pod);
-  - the d4 search started 07:00Z (about 13 h), mirrored to the volume every 120 s.
+  - the d4 search started 07:00Z, mirrored to the volume every 120 s; 39 of 92
+    expansions by 14:19Z. From d1/d2's same expansion order, SEARCH_DONE
+    about 19:45Z (worst about 21:40Z); the hard stop is 02:55Z tomorrow.
 - **Probe chain rehearsed at $0** (`98f67968`): real plans, a real
   authorization, the launcher dry run (probes_d1: $20.89 expected, $25.89 hard)
   and the driver across three simulated pods. It fixed three resume defects,
@@ -74,10 +91,11 @@ two sessions at once). STAGE-0 FORMAL VOLUME STUDY: d1 AND d2 COMPLETE; DOSE d4
   - Report: `runs/dose_d1_20261019_133708/evidence/d1/eval/report.json`.
 - **Next.**
   1. d4 (search, export, recovery, eval) and its closeout.
-  2. Re-price from d1's first measured probe unit; return to the maintainer
-     if the remaining units' expected cost plus $5 does not fit.
-  3. When d4 closes: volume B, then d2's probe session beside d1's. When d1's
-     closes: d4's probe session on volume A (plans from d4's own manifest).
+  2. When d4 closes: re-check the budget rule with its actual cost (return to
+     the maintainer if it no longer fits), then volume B and d2's probe
+     session beside d1's, priced from the measured minutes.
+  3. When d2's probes close (or d1's, if the maintainer funds the overlap):
+     d4's probe session on volume A (plans from d4's own manifest).
   4. The formal analysis and the extension's. The maintainer set no stop rule: a
   low 1x does not cancel 2x/4x.
 - **Owners.** The run closeouts, `decisions.md` 2026-10-19, and
