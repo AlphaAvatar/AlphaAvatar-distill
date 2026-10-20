@@ -12949,3 +12949,30 @@ on a paid pod.
   the agent returns to the maintainer before a session that cannot fit.
 - **Revisit when.** A probe unit runs much longer than 131 min, or d4's
   session costs more than its projected ~$28.5.
+
+## 2026-10-20 — d4 resume: release the relayed d1/d2 finalists from the volume, and check room first
+
+- **Context.** `dose_d4_20261020_054022` finished the d4 search, then failed
+  its final push to volume `ugllmlv19t` with `Disk quota exceeded`. The 300 GB
+  volume held d4's ~92 states (~3 GB each with pruned weights), the 8 d1/d2
+  Top-4 states that V_retire had kept for the extension, and both recovered
+  students. Nobody had checked that sum against the volume's size. The launcher
+  deleted the pod; the journal and states survive up to the 18:32:23Z pass.
+- **Decision (agent, inside the phase authorization; AGENTS.md 2.5 standing
+  retirement, P8.2.1 capacity).**
+  - Resume the SAME dose from the volume journal: the preregistered
+    `retry_policy`, as for d1 and d2.
+  - First delete d1's and d2's Top-4 from the volume. The relay holds them,
+    and the probe sessions read them from there. Before deleting, re-verify
+    every file against what the hub stores. Leave a tombstone.
+  - Then require 12 GB of room, measured as the sold size less `du`.
+  - A push that fails now fails its stage, instead of being recorded as
+    durable.
+- **Alternatives.** Grow the volume. That would be bought storage, which is a
+  maintainer decision, and there is no need for it. Delete the recovered d1/d2
+  students: not needed for the room, and the volume holds their only copy.
+- **Cost.** Attempt 1 $23.6937 closed; the resume is authorized $9.00 hard
+  ($6.28 expected). d4 in total is still within the ~$28.5 that the budget
+  rule was checked against.
+- **Revisit when.** The resume's room check fails, or the search tail needs
+  more than the expansion that was in flight.

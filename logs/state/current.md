@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-20 15:10 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-20 19:00 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,97 +9,60 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**TWO PODS ARE BILLING (maintainer 2026-10-20: formal_volume may run at most
-two sessions at once). STAGE-0 FORMAL VOLUME STUDY: d1 AND d2 COMPLETE; DOSE d4
-(4x) AND d1's TOP-4 PROBES ARE RUNNING.**
-- `ltxns3jbkkaiac`: A100-SXM4-80GB, EUR-IS-1, $1.79/h, created 05:51Z. Run
-  `dose_d4_20261020_054022`, tmux `calvol_d4`; watchdog hard 1275 min =
-  $38.03 (authorized $39.50).
+**STAGE-0 FORMAL VOLUME STUDY: d1 AND d2 COMPLETE. d4's SEARCH FINISHED BUT ITS
+SESSION FAILED ON A FULL VOLUME; A RESUME IS ACQUIRING AN A100. d1's TOP-4
+PROBES ARE RUNNING.** At most two formal sessions at once (`decisions.md`
+2026-10-20).
 - `rzf92gbn3h40we`: L40S, US-TX-3, $1.09/h, created 09:40Z. Run
   `probes_d1_20261020_093955`, tmux `calvol_probes_d1`, 7 units on volume
-  `b9jwu0g1eg`; watchdog hard 1425 min = $25.89 (authorized $26.00, issued
-  with d4 booked at its $39.50 cap).
-- **No third pod.** The next one, d2's probes on a second volume, starts after
-  d4 closes. Owner: `decisions.md` 2026-10-20 (at most two sessions at once).
-- **d1 probes: 2 of 7 units done and secured off-pod** (owner: the run's
-  `probe_session.json`, fetched to its store). Measured on the L40S: recovery
-  61 min each; eval-set-1 46 and 70 min (student-dependent); 107 and 131 min a
-  unit, below the 134-158 min estimated. Fluid usable (scorer v2, 576 static
-  items): Top-1 at seed 20260727 357/576, Top-2 at 20260726 331/576; d1's
-  preregistered Top-1 unit had 346/576. Fluid correct 1/720 and 0/720.
-- **Re-price (the extension's budget rule), 14:50Z.** 19 units left at the
-  measured mean ($2.16 each) plus d4 at its projected ~$28.5, d1's spend so
-  far, session overheads and volume B: about $76 expected; +$5 fits the
-  $83.62 programme remainder by about $2.4 (before the +$6 below). The decisive check is at d2's
-  probe launch, with d4's actual cost. d2's and d4's probe plans are priced
-  from these minutes (recovery 61, eval 70, the larger).
-- **+$6 keeps d4's probes beside d2's (maintainer 2026-10-20).** With d2's
-  probes held at their hard cap (~$21.8), d4's were short by about $5.4.
-  Programme ceiling now $143.5099, formal_volume $126, project cap
-  $643.6571. Owner: `decisions.md` 2026-10-20.
-- **d4 so far** (owner: the run's `launch.log` until its closeout):
-  - retirement kept d2's distinct Top-4 (88 states retired, 13 GB left);
-  - d1's Top-2..4 were rebuilt **byte-exact** (3/3 adopted; every step digest
-    and the final identities matched);
-  - all 8 d1/d2 candidates are on the relay, each shard's LFS sha256 checked
-    against the finalists manifest (`9068d6f8`, secured off-pod);
-  - the d4 search started 07:00Z, mirrored to the volume every 120 s; 39 of 92
-    expansions by 14:19Z. From d1/d2's same expansion order, SEARCH_DONE
-    about 19:45Z (worst about 21:40Z); the hard stop is 02:55Z tomorrow.
-- **Probe chain rehearsed at $0** (`98f67968`): real plans, a real
-  authorization, the launcher dry run (probes_d1: $20.89 expected, $25.89 hard)
-  and the driver across three simulated pods. It fixed three resume defects,
-  including a retrained student that would have been scored on the previous
-  student's generations.
-- **Top-4 extension (maintainer 2026-10-20, +$30).** Owner:
-  `plans/top4_extension.json`.
-  - Each dose's distinct Top-4 is recovered on L40S: Top-2..4 at seeds
-    20260726 and 20260727, Top-1 at 20260727. That is 21 units.
-  - In the d4 session: d1's retired Top-2..4 are rebuilt digest-pinned, and
-    the 12 candidates are exported to the relay.
-  - Then three L40S probe sessions on a new US-TX-3 volume.
-  - The preregistered study is unchanged.
-- **Budget.** Formal $35.50 closed of $126 (with volume A's $0.47
-  reservation). With d4 ($39.50) and d1's probes ($26.00) held at their caps,
-  programme $24.12 remains (owner: `governance.remaining_envelope`).
-- **Stopped at $0 today.**
-  - `dose_d4_20261020_045426`: non-canonical `--bundle`.
-  - `dose_d4_20261020_045616`: stopped for the scope change.
-  - `dose_d4_20261020_053929`: issued, never launched; its record's time was
-    corrected.
-- **d2** cost $17.93 over three attempts:
-  - attempt 1 (`dose_d2_20261019_135821`, $13.42) lost its pod mid-search to
-    the poll loop (fixed `e5a2adee`);
-  - attempt 2 got no capacity ($0);
-  - attempt 3 (`dose_d2_20261020_002929`, $4.51) resumed 71 of 92 expansions
-    from the volume journal, the one replacement endpoint `retry_policy` allows.
-  - Top-1 DEPTH→FFN→ATTENTION→RESIDUAL_WIDTH, 596M parameters (same
-    architecture as d1, other profile assignment and weights).
-  - Formal headlines: `fluid_reasoning_720` 0/714; the capability units at or
-    near the floor; legacy (in-sample) 23/150.
-  - Report: `runs/dose_d2_20261020_002929/evidence/d2/eval/report.json`.
-- **d1** cost $12.65 over attempts 2–5 ($12.91 with attempt 1):
-  - attempt 2 searched and recovered, then failed in evaluation;
-  - attempt 3 created no pod (capacity);
-  - attempt 4 generated, then failed in the report's JSONL reader;
-  - attempt 5 rescored.
-  - Search: 92 expansions in 4.70 h; Top-1 DEPTH→FFN→ATTENTION→RESIDUAL_WIDTH,
-    596M parameters.
-  - Formal headlines: `fluid_reasoning_720` 1/714; the capability units at or
-    near the floor; legacy (in-sample) 25/150.
-  - Report: `runs/dose_d1_20261019_133708/evidence/d1/eval/report.json`.
+  `b9jwu0g1eg`; watchdog hard $25.89 (authorized $26.00). 4 of 7 units
+  secured off-pod by 17:57Z (107-131 min a unit on the L40S); owner: the run's
+  `launch.log` until its closeout.
+- **d4 attempt 1 failed after its search finished** (`dose_d4_20261020_054022`,
+  $23.6937, closeout). B_rebuild (d1's Top-2..4 byte-exact) and X_export_prior
+  (d1+d2 Top-4 on the relay, manifest `9068d6f8`) succeeded. The search ran
+  07:00Z-18:33Z; its final push hit `Disk quota exceeded` on the 300 GB volume
+  `ugllmlv19t` (d4's ~92 states at ~3 GB beside the 8 retained d1/d2 states and
+  both recovered students). The pod then stopped answering and the launcher
+  deleted it. Durable: the journal and states as of the 18:32:23Z mirror pass.
+- **Repair** (`527dc295`): the driver now releases an earlier dose's retained
+  Top-4 once the hub is shown to store every file (the probes read them from the
+  relay), checks the room (sold size less `du`) before any expensive work,
+  fails a stage whose push fails instead of recording it durable, and writes
+  `products.json` atomically.
+- **d4 resume** `dose_d4_20261020_185256` (plan `dose_d4_resume`, preregistered
+  `retry_policy`: journal restore), tmux `calvol_d4r`, launched 18:53Z: $6.28
+  expected, $8.88 hard (authorized $9.00). EUR-IS-1 A100 refused at first;
+  the launcher retries every 300 s. Then: release d1/d2 (~24 GB), room >= 12 GB,
+  the search tail, d4's Top-4 to the relay, recovery, eval-set-1.
+- **Budget.** Formal $59.20 closed of $126. With d1's probes ($26.00) held at
+  their cap, programme $39.93 remained before the resume's $9.00 (owner:
+  `governance.remaining_envelope`). Then d2's probes (~$21.8 hard) when the
+  resume closes; d4's when d1's probes close. d4 now totals about $23.7 + ~$6
+  against the ~$28.5 projected, so the budget rule still fits.
+- **Stopped at $0 today.** `dose_d4_20261020_045426` (non-canonical
+  `--bundle`), `dose_d4_20261020_045616` (scope change),
+  `dose_d4_20261020_053929` (issued, never launched).
+- **d2** $17.93 over three attempts (the third resumed 71 of 92 expansions from
+  the volume journal). Formal: `fluid_reasoning_720` 0/714, capability units at
+  or near the floor, legacy (in-sample) 23/150. Report:
+  `runs/dose_d2_20261020_002929/evidence/d2/eval/report.json`.
+- **d1** $12.91 over five attempts. Formal: `fluid_reasoning_720` 1/714,
+  capability units at or near the floor, legacy (in-sample) 25/150. Report:
+  `runs/dose_d1_20261019_133708/evidence/d1/eval/report.json`.
+- **Reporting** (maintainer 2026-10-20): every capability unit of eval-set-1,
+  formal denominators first (fluid 714 items; usable over the 570 formal static
+  items, episodes separately), no pooled score.
 - **Next.**
-  1. d4 (search, export, recovery, eval) and its closeout.
-  2. When d4 closes: re-check the budget rule with its actual cost (return to
-     the maintainer if it no longer fits), then volume B and d2's probe
-     session beside d1's, priced from the measured minutes.
-  3. When d1's probes close: d4's probe session on volume A, beside d2's
-     (plans from d4's own manifest).
-  4. The formal analysis and the extension's. The maintainer set no stop rule: a
-  low 1x does not cancel 2x/4x.
-- **Owners.** The run closeouts, `decisions.md` 2026-10-19, and
+  1. d4 resume to its closeout.
+  2. When it closes: re-check the budget rule with d4's actual cost, then
+     volume B and d2's probe session beside d1's.
+  3. When d1's probes close (~00:15Z): their closeout, then d4's probes on
+     volume A beside d2's (plans from d4's own manifest).
+  4. The formal analysis and the extension's; teardown of the volumes.
+- **Owners.** The run closeouts, `decisions.md` 2026-10-19/20, and
   [`volume_preregistration.json`](../stages/stage-0/calibration_volume/plans/volume_preregistration.json)
-  (design, pricing, d1 → d2 → d4 order and budget rule).
+  (design, d1 → d2 → d4 order, retry_policy, budget rule).
 
 **PERMANENT EVALUATION REGISTRY (maintainer decisions 2026-10-18/19).**
 `data/eval-set/eval-set-1` is **FROZEN** at identity 2 (`62a1a5d3`, 2026-10-19;
