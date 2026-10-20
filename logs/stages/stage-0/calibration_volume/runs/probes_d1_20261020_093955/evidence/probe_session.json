@@ -1,0 +1,263 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.probe_session/v1",
+ "run_id": "probes_d1_20261020_093955",
+ "plan": "probes_d1",
+ "volume_dir": "/runpod-volume/stage0_calvol/formal_v1/probes",
+ "started_utc": "2026-10-20T09:46:20Z",
+ "commit": "c1f27191cd35990602465e56b771a48f6963e8e1",
+ "gpu": {
+  "name": "NVIDIA L40S",
+  "memory": "46068 MiB",
+  "driver": "595.91.07"
+ },
+ "units": {
+  "s0v_top4_d1_r1_72b76a1c_s20260727": {
+   "recovery_pushed": [
+    {
+     "utc": "2026-10-20T10:47:30Z",
+     "mode": "push",
+     "copied": 5,
+     "skipped": 0,
+     "bytes": 2384285634,
+     "seconds": 6.4
+    },
+    {
+     "utc": "2026-10-20T10:47:30Z",
+     "mode": "push",
+     "copied": 3,
+     "skipped": 0,
+     "bytes": 61377,
+     "seconds": 0.0
+    }
+   ],
+   "records_pushed": {
+    "utc": "2026-10-20T11:33:46Z",
+    "mode": "push",
+    "copied": 1,
+    "skipped": 0,
+    "bytes": 32882,
+    "seconds": 0.0
+   },
+   "status": "ok",
+   "generated": [
+    "fluid",
+    "capability"
+   ],
+   "fluid_formal": 1,
+   "seconds": 6445.8
+  },
+  "s0v_top4_d1_r2_60e229ac_s20260726": {
+   "recovery_pushed": [
+    {
+     "utc": "2026-10-20T12:34:42Z",
+     "mode": "push",
+     "copied": 5,
+     "skipped": 0,
+     "bytes": 2384285650,
+     "seconds": 7.2
+    },
+    {
+     "utc": "2026-10-20T12:34:42Z",
+     "mode": "push",
+     "copied": 3,
+     "skipped": 0,
+     "bytes": 61053,
+     "seconds": 0.0
+    }
+   ],
+   "records_pushed": {
+    "utc": "2026-10-20T13:44:24Z",
+    "mode": "push",
+    "copied": 1,
+    "skipped": 0,
+    "bytes": 32900,
+    "seconds": 0.0
+   },
+   "status": "ok",
+   "generated": [
+    "fluid",
+    "capability"
+   ],
+   "fluid_formal": 0,
+   "seconds": 7838.4
+  },
+  "s0v_top4_d1_r2_60e229ac_s20260727": {
+   "recovery_pushed": [
+    {
+     "utc": "2026-10-20T14:45:17Z",
+     "mode": "push",
+     "copied": 5,
+     "skipped": 0,
+     "bytes": 2384285630,
+     "seconds": 5.6
+    },
+    {
+     "utc": "2026-10-20T14:45:17Z",
+     "mode": "push",
+     "copied": 3,
+     "skipped": 0,
+     "bytes": 61106,
+     "seconds": 0.0
+    }
+   ],
+   "records_pushed": {
+    "utc": "2026-10-20T15:43:03Z",
+    "mode": "push",
+    "copied": 1,
+    "skipped": 0,
+    "bytes": 32695,
+    "seconds": 0.0
+   },
+   "status": "ok",
+   "generated": [
+    "fluid",
+    "capability"
+   ],
+   "fluid_formal": 1,
+   "seconds": 7118.6
+  },
+  "s0v_top4_d1_r3_4df438a8_s20260726": {
+   "recovery_pushed": [
+    {
+     "utc": "2026-10-20T16:43:57Z",
+     "mode": "push",
+     "copied": 5,
+     "skipped": 0,
+     "bytes": 2384285650,
+     "seconds": 4.8
+    },
+    {
+     "utc": "2026-10-20T16:43:57Z",
+     "mode": "push",
+     "copied": 3,
+     "skipped": 0,
+     "bytes": 61199,
+     "seconds": 0.0
+    }
+   ],
+   "records_pushed": {
+    "utc": "2026-10-20T17:54:43Z",
+    "mode": "push",
+    "copied": 1,
+    "skipped": 0,
+    "bytes": 32345,
+    "seconds": 0.0
+   },
+   "status": "ok",
+   "generated": [
+    "fluid",
+    "capability"
+   ],
+   "fluid_formal": 3,
+   "seconds": 7899.7
+  },
+  "s0v_top4_d1_r3_4df438a8_s20260727": {
+   "recovery_pushed": [
+    {
+     "utc": "2026-10-20T18:55:42Z",
+     "mode": "push",
+     "copied": 5,
+     "skipped": 0,
+     "bytes": 2384285606,
+     "seconds": 6.5
+    },
+    {
+     "utc": "2026-10-20T18:55:42Z",
+     "mode": "push",
+     "copied": 3,
+     "skipped": 0,
+     "bytes": 61071,
+     "seconds": 0.0
+    }
+   ],
+   "records_pushed": {
+    "utc": "2026-10-20T19:51:06Z",
+    "mode": "push",
+    "copied": 1,
+    "skipped": 0,
+    "bytes": 32965,
+    "seconds": 0.0
+   },
+   "status": "ok",
+   "generated": [
+    "fluid",
+    "capability"
+   ],
+   "fluid_formal": 0,
+   "seconds": 6983.7
+  },
+  "s0v_top4_d1_r4_91090067_s20260726": {
+   "recovery_pushed": [
+    {
+     "utc": "2026-10-20T20:52:15Z",
+     "mode": "push",
+     "copied": 5,
+     "skipped": 0,
+     "bytes": 2384285670,
+     "seconds": 6.1
+    },
+    {
+     "utc": "2026-10-20T20:52:15Z",
+     "mode": "push",
+     "copied": 3,
+     "skipped": 0,
+     "bytes": 61068,
+     "seconds": 0.0
+    }
+   ],
+   "records_pushed": {
+    "utc": "2026-10-20T21:39:30Z",
+    "mode": "push",
+    "copied": 1,
+    "skipped": 0,
+    "bytes": 32370,
+    "seconds": 0.0
+   },
+   "status": "ok",
+   "generated": [
+    "fluid",
+    "capability"
+   ],
+   "fluid_formal": 1,
+   "seconds": 6504.0
+  },
+  "s0v_top4_d1_r4_91090067_s20260727": {
+   "recovery_pushed": [
+    {
+     "utc": "2026-10-20T22:40:27Z",
+     "mode": "push",
+     "copied": 5,
+     "skipped": 0,
+     "bytes": 2384285640,
+     "seconds": 5.9
+    },
+    {
+     "utc": "2026-10-20T22:40:27Z",
+     "mode": "push",
+     "copied": 3,
+     "skipped": 0,
+     "bytes": 61115,
+     "seconds": 0.0
+    }
+   ],
+   "records_pushed": {
+    "utc": "2026-10-20T23:23:54Z",
+    "mode": "push",
+    "copied": 1,
+    "skipped": 0,
+    "bytes": 32991,
+    "seconds": 0.0
+   },
+   "status": "ok",
+   "generated": [
+    "fluid",
+    "capability"
+   ],
+   "fluid_formal": 2,
+   "seconds": 6263.6
+  }
+ },
+ "status": "COMPLETE",
+ "authorization_id": "stage0.calibration_volume.probes.probes_d1_20261020_093955",
+ "ended_utc": "2026-10-20T23:23:54Z"
+}
