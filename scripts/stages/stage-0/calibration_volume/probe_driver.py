@@ -70,6 +70,26 @@ def push_files(out: Path, names, dst: Path, log: Path) -> dict:
     return res
 
 
+def push_student(rec_out: Path, dst: Path, log: Path) -> dict:
+    """Push the recovered student as a replacement restores it -- the model and the
+    pointer to it -- and not the trainer state, which nothing after training reads
+    (P8.4; 3.5 of a recovery's 5.6 GB)."""
+    from stages.phase_c1.autoinit_c1_driver import trained_model_dir
+    model_dir = trained_model_dir(rec_out)
+    staged = rec_out.parent / ".student.push"
+    shutil.rmtree(staged, ignore_errors=True)
+    shutil.copytree(model_dir, staged / model_dir.relative_to(rec_out), copy_function=os.link)
+    for name in ("checkpoints/latest.txt", "train_log.jsonl"):
+        if (rec_out / name).is_file():
+            (staged / name).parent.mkdir(parents=True, exist_ok=True)
+            os.link(rec_out / name, staged / name)
+    res = sync("push", staged, dst, log)
+    shutil.rmtree(staged, ignore_errors=True)
+    if "copied" not in res and "error" not in res:
+        res = {**res, "error": "volume_sync reported no result"}
+    return res
+
+
 def restore_recovery(vdir: Path, rec_out: Path, out: Path, want: str) -> Path:
     """The recovered student from the volume, verified against its record."""
     from stages.phase_c1.autoinit_c1_driver import trained_model_dir
@@ -178,7 +198,7 @@ def main(argv=None) -> int:
                                         "model_bytes": (model_dir / "model.safetensors").stat().st_size,
                                         "config_sha256": sha(cfg), "state_id": u["state_id"],
                                         "seed": int(u["seed"])}
-                    pushed = [sync("push", rec_out, vdir / "recovery", out / "sync.log"),
+                    pushed = [push_student(rec_out, vdir / "recovery", out / "sync.log"),
                               push_files(out, RECOVERY_RECORDS, vdir / "recovery_records",
                                          out / "sync.log")]
                     entry["recovery_pushed"] = pushed

@@ -64,6 +64,8 @@ def probe(tmp_path, monkeypatch):
         (rec_out / "checkpoints/t/model").mkdir(parents=True)
         (rec_out / "checkpoints/t/model/model.safetensors").write_bytes(
             f"{run_name} {len(calls)}".encode())
+        (rec_out / "checkpoints/t/model/config.json").write_text("{}\n")
+        (rec_out / "checkpoints/t/trainer_state.pt").write_bytes(b"optimizer")
         (rec_out / "checkpoints/latest.txt").write_text("t\n")
         (rec_out / "train_log.jsonl").write_text("{}\n")
         return trained_model_dir(rec_out)
@@ -123,6 +125,11 @@ def test_a_replacement_session_restores_and_brings_every_unit_home(probe):
     assert ("train", "u0") not in calls and ("train", "u1") not in calls
     assert sorted(p.name for p in (audit / "records").glob("*.done")) == ["u0.done", "u1.done"]
     _fetchable(audit)
+    # the student was restored from a volume that never held its trainer state
+    on_volume = {str(p.relative_to(probe.unit_vol("u1") / "recovery"))
+                 for p in (probe.unit_vol("u1") / "recovery").rglob("*") if p.is_file()}
+    assert on_volume == {"checkpoints/latest.txt", "checkpoints/t/model/model.safetensors",
+                         "checkpoints/t/model/config.json", "train_log.jsonl"}
 
 
 def test_a_retrained_student_never_inherits_the_previous_students_generations(probe):
