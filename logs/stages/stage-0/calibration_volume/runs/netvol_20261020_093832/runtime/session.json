@@ -1,0 +1,19 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.network_volume/v1",
+ "run_id": "netvol_20261020_093832",
+ "kind": "network_volume",
+ "provider_resource_created": true,
+ "volume_id": "b9jwu0g1eg",
+ "name": "aad-stage0-probes-a",
+ "data_center_id": "US-TX-3",
+ "size_gb": 50,
+ "created_utc": "2026-10-20T09:38:32Z",
+ "created_by": "runpodctl network-volume create --name aad-stage0-probes-a --size 50 --data-center-id US-TX-3",
+ "why": "durable store for the Top-4 extension's recovered students and unit records (plans/top4_extension.json), d1's probe session and then d4's; US-TX-3 is the secure datacenter with storage support and L40S. A RunPod network volume serves one running pod at a time, so d2's overlapping probe session gets its own volume (logs/budget/decisions.md 2026-10-20, at most two sessions at once). 50 GB: each unit keeps about 2.5 GB (the student's 2.38 GB model, its records and generations), two sessions of 7 units about 35 GB",
+ "price_basis": {
+  "usd_per_gb_month": 0.07,
+  "hours_per_month": 720,
+  "provider_api_exposes_this": false,
+  "_note": "a dated stated constant, prorated at 720 h/month (the dearer hourly rate)"
+ }
+}

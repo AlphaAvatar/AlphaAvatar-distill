@@ -12897,3 +12897,32 @@ on a paid pod.
     return to the maintainer before a probe session that cannot fit.
 - **Revisit when.** The first L40S unit has run, or a rebuilt candidate
   mismatches.
+
+## 2026-10-20 — Top-4 probes overlap: at most two sessions at once
+
+- **Context.** The three L40S probe sessions (about 19 h each) were to start
+  after the d4 A100 session closes (about 22:30Z), one after another. That
+  ends the study about 2026-10-23 09:00Z. The account was topped up by $50
+  (balance $109.67 at 09:40Z), so it can carry two sessions' hard caps at once.
+- **Decision (maintainer, 2026-10-20).** formal_volume may have up to two
+  billing sessions at once (grant `max_concurrent_sessions` = 2):
+  - d1 probes start now, beside d4;
+  - d2 probes start when d4 closes, beside d1 probes;
+  - d4 probes start when d1 probes close.
+
+  The total cost is unchanged, and the study should end about 32 h sooner.
+- **How the envelope stays safe.**
+  - A session running beside a new one is booked at its authorized hard cap,
+    which its watchdog enforces by `terminate_after_utc`.
+  - It is booked only when the issuer names it as live
+    (`governance.issue(..., concurrent_with=...)`).
+  - A named run past its terminate time refuses, and so does any other run
+    without a closeout.
+- **Volumes.** A RunPod network volume serves one running pod at a time, so
+  the overlap needs two US-TX-3 volumes:
+  - A for d1, then d4;
+  - B for d2.
+- **Unchanged.**
+  - The extension's re-pricing rule: re-price from the first measured unit,
+    and return to the maintainer before a probe session that cannot fit.
+  - The ceilings and the per-session cap.

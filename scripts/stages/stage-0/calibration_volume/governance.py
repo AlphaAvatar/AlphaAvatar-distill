@@ -25,7 +25,6 @@ import json
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
 
 from aadistill.governance.authorization import (ActionPolicy, AuthorizationError,
                                                 SpendAuthorization,
@@ -187,9 +186,11 @@ def programme_spent(repo_root: Path = REPO) -> dict:
 
     A run that created a provider resource but has no closeout cost is an
     UNKNOWN, and an unknown refuses: the envelope cannot be checked against a
-    number nobody has.
+    number nobody has. Such a run with no closeout at all is also listed as
+    `open`, the only kind `remaining_envelope` may book as running beside a
+    new session.
     """
-    total, runs, unknown = 0.0, [], []
+    total, runs, unknown, open_ = 0.0, [], [], []
     for d in sorted((repo_root / EXPERIMENT_LOGS / "runs").glob("*")):
         if not d.is_dir():
             continue
@@ -207,28 +208,64 @@ def programme_spent(repo_root: Path = REPO) -> dict:
             runs.append({"run_id": d.name, "usd": float(usd)})
         elif sess.is_file() and json.loads(sess.read_text()).get("provider_resource_created"):
             unknown.append(d.name)
-    return {"spent_usd": round(total, 4), "runs": runs, "unknown": unknown}
+            open_.append(d.name)
+    return {"spent_usd": round(total, 4), "runs": runs, "unknown": unknown, "open": open_}
 
 
-def remaining_envelope(phase: str, repo_root: Path = REPO) -> dict:
+def outstanding(run_id: str, repo_root: Path = REPO) -> dict:
+    """An open run named as running beside a new session, booked at its authorized
+    hard cap: its watchdog deletes the pod by `terminate_after_utc`, so the cap
+    bounds what it can still cost. A run past that time is not running beside
+    anything; it is unreconciled, and refuses."""
+    sess = json.loads((repo_root / run_dir(run_id) / "runtime/session.json").read_text())
+    auth = json.loads((repo_root / authorization_path(run_id)).read_text())
+    after = sess.get("terminate_after_utc")
+    if not sess.get("pod_id") or not after or (
+            datetime.fromisoformat(after.replace("Z", "+00:00")) <= datetime.now(timezone.utc)):
+        raise AuthorizationError(f"{run_id} names no live pod with a terminate time ahead "
+                                 f"(pod {sess.get('pod_id')}, terminate after {after}); "
+                                 "reconcile it before anything else is funded")
+    return {"run_id": run_id, "pod_id": sess["pod_id"], "terminate_after_utc": after,
+            "phase": auth["stage_conditions"]["phase"], "hard_cap_usd": float(auth["hard_cap_usd"])}
+
+
+def remaining_envelope(phase: str, repo_root: Path = REPO, *, concurrent_with=()) -> dict:
+    """What the next session of `phase` may be funded from. `concurrent_with` names
+    the open runs the caller knows to be live beside it; each is booked at its
+    hard cap, and together with the new session they stay within the phase's
+    `max_concurrent_sessions` (1 unless the grant says otherwise)."""
     g = grant(repo_root)
     spent = programme_spent(repo_root)
-    if spent["unknown"]:
+    stray = [r for r in concurrent_with if r not in spent["open"]]
+    if stray:
+        raise AuthorizationError(f"{stray} are not open runs of this experiment")
+    live = [outstanding(r, repo_root) for r in concurrent_with]
+    unknown = [r for r in spent["unknown"] if r not in concurrent_with]
+    if unknown:
         raise AuthorizationError(
-            f"runs {spent['unknown']} created provider resources and record no "
+            f"runs {unknown} created provider resources and record no "
             "closeout cost; reconcile them before anything else is funded")
+    limit = int(g["phases"][phase].get("max_concurrent_sessions", 1))
+    if len(live) + 1 > limit:
+        raise AuthorizationError(f"{len(live)} sessions live beside a new {phase} session "
+                                 f"exceed its max_concurrent_sessions = {limit}")
     phase_spent = sum(r["usd"] for r in spent["runs"]
                       if json.loads((repo_root / run_dir(r["run_id"]) /
                                      "closeout/outcome.json").read_text()
                                     ).get("phase") == phase)
+    held = sum(o["hard_cap_usd"] for o in live)
+    phase_held = sum(o["hard_cap_usd"] for o in live if o["phase"] == phase)
     cap = float(g["phases"][phase]["ceiling_usd"])
     prog = float(g["programme_ceiling_usd"])
-    return {"phase": phase, "phase_ceiling_usd": cap,
-            "phase_spent_usd": round(phase_spent, 4),
-            "phase_remaining_usd": round(cap - phase_spent, 4),
-            "programme_ceiling_usd": prog, "programme_spent_usd": spent["spent_usd"],
-            "programme_remaining_usd": round(prog - spent["spent_usd"], 4),
-            "per_session_cap_usd": float(g["per_session_cap_usd"])}
+    env = {"phase": phase, "phase_ceiling_usd": cap,
+           "phase_spent_usd": round(phase_spent, 4),
+           "phase_remaining_usd": round(cap - phase_spent - phase_held, 4),
+           "programme_ceiling_usd": prog, "programme_spent_usd": spent["spent_usd"],
+           "programme_remaining_usd": round(prog - spent["spent_usd"] - held, 4),
+           "per_session_cap_usd": float(g["per_session_cap_usd"])}
+    if live:
+        env["outstanding"] = live
+    return env
 
 
 def git_head(repo_root: Path = REPO) -> str:
@@ -238,7 +275,7 @@ def git_head(repo_root: Path = REPO) -> str:
 
 def issue(kind: str, run_id: str, *, phase: str, expected_usd: float,
           hard_cap_usd: float, plan: str | None = None, repo_root: Path = REPO,
-          note: str = "") -> Path:
+          note: str = "", concurrent_with=()) -> Path:
     """Write a one-use authorization for `run_id`, after checking the envelope."""
     if kind not in SESSION_KINDS:
         raise AuthorizationError(f"unknown session kind {kind!r}")
@@ -251,7 +288,7 @@ def issue(kind: str, run_id: str, *, phase: str, expected_usd: float,
             raise AuthorizationError(
                 f"phase {phase!r} opens only after {prereg.relative_to(repo_root)} "
                 "is committed")
-    env = remaining_envelope(phase, repo_root)
+    env = remaining_envelope(phase, repo_root, concurrent_with=concurrent_with)
     if hard_cap_usd > env["per_session_cap_usd"]:
         raise AuthorizationError(f"${hard_cap_usd} exceeds the per-session cap")
     if hard_cap_usd > env["phase_remaining_usd"] or hard_cap_usd > env["programme_remaining_usd"]:

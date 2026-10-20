@@ -37,7 +37,8 @@
    ],
    "ceiling_usd": 120.0,
    "scope": "the frozen first calibration-volume study as amended 2026-10-19: per dose (1x, 2x, 4x) one D1 full search, one fixed recovery at the same recipe and seed, and the whole of eval-set-1, exactly as preregistered; and, from 2026-10-20, the Top-4 extension (plans/top4_extension.json): each dose's distinct Top-4 recovered by the same recipe at the registered seeds on L40S and measured on all of eval-set-1, with d1's retired Top-2..4 rebuilt digest-pinned on the A100",
-   "requires_preregistration": "logs/stages/stage-0/calibration_volume/plans/volume_preregistration.json"
+   "requires_preregistration": "logs/stages/stage-0/calibration_volume/plans/volume_preregistration.json",
+   "max_concurrent_sessions": 2
   },
   "pilot": {
    "session_kinds": [
@@ -82,6 +83,17 @@
    "date": "2026-10-20",
    "change": "programme ceiling $107.5099 -> $137.5099 (+$30.00); formal_volume ceiling $90.00 -> $120.00; its scope adds the Top-4 extension (probes sessions); per-session cap $50 unchanged; project cap $607.6571 -> $637.6571",
    "why": "maintainer decision of 2026-10-20 (logs/budget/decisions.md 2026-10-20): every dose's Top-4 from its full search is recovered at two seeds on L40S, Top-1 at the missing seed; +$25 and then +$5",
+   "decided_by": "maintainer"
+  },
+  {
+   "date": "2026-10-20",
+   "change": "formal_volume may run up to two billing sessions at once (`max_concurrent_sessions` = 2); the ceilings and the per-session cap are unchanged",
+   "why": "the Top-4 extension's three L40S probe sessions run about 19 h each after the d4 A100 session; overlapping them (d1 probes beside d4, then d2 probes beside d1) ends the study about 32 h sooner at the same total cost. A session running beside a new one is booked at its authorized hard cap, which its watchdog enforces, and only when named as live; any other unclosed run still refuses",
+   "maintainer_words": [
+    "最多同时两个 (Recommended)",
+    "到帐了"
+   ],
+   "record": "logs/budget/decisions.md 2026-10-20 (Top-4 probes overlap: at most two sessions at once)",
    "decided_by": "maintainer"
   }
  ]
