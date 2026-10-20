@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Stage-0 calibration-volume FORMAL STUDY RUNNING: dose d1 COMPLETE; dose d2 attempt 1 lost mid-search to a launcher defect (fixed e5a2adee); attempt 2 (dose_d2_20261019_213216) resumes from the volume journal; then d4 (no stop rule). Owner: .../plans/volume_preregistration.json; decisions.md 2026-10-19.",
+ "blocker": "BLOCKED NO. Stage-0 calibration-volume FORMAL STUDY RUNNING: dose d1 COMPLETE; dose d2 attempt 1 lost mid-search to a launcher defect (fixed e5a2adee); attempt 3 (dose_d2_20261020_002929; attempt 2 got no capacity, $0) resumes from the volume journal; then d4 (no stop rule). Owner: .../plans/volume_preregistration.json; decisions.md 2026-10-19.",
  "branch": "main (squash of exec/d1-behavioural-readiness, 2026-10-17); Stage-0 work on stage0/calibration-volume-mixture",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -201,11 +201,11 @@
   "pods": 0,
   "network_volumes": 1,
   "launcher": {
-   "run_id": "dose_d2_20261019_213216",
-   "tmux": "calvol_d2b",
-   "state": "creating (EUR-IS-1 capacity retries, 36 x 300 s)"
+   "run_id": "dose_d2_20261020_002929",
+   "tmux": "calvol_d2c",
+   "state": "creating (EUR-IS-1 capacity retries, 144 x 300 s)"
   },
-  "_verified": "provider query 2026-10-19 21:33 UTC: 0 pods; launcher retrying create; volume ugllmlv19t kept"
+  "_verified": "provider query 2026-10-20 00:30 UTC: 0 pods; launcher retrying create; volume ugllmlv19t kept"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

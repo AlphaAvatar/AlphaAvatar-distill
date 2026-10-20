@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-19 21:35 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-20 00:31 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -10,10 +10,11 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 ## Right now
 
 **NO POD EXISTS: NOTHING IS RUNNING ON THE PROVIDER AND NOTHING IS BILLING
-(provider query 2026-10-19 21:33Z: 0 pods). STAGE-0 FORMAL VOLUME STUDY, DOSE
-d2 (2x) ATTEMPT 2 IS ACQUIRING A POD.** Run
-`dose_d2_20261019_213216`; the launcher in tmux `calvol_d2b` retries the create
-in EUR-IS-1 every 300 s, 36 times. Do not create another pod while it is alive.
+(provider query 2026-10-20 00:30Z: 0 pods). STAGE-0 FORMAL VOLUME STUDY, DOSE
+d2 (2x) ATTEMPT 3 IS ACQUIRING A POD.** Run
+`dose_d2_20261020_002929`; the launcher in tmux `calvol_d2c` retries the create
+in EUR-IS-1 every 300 s, 144 times. Attempt 2 (`dose_d2_20261019_213216`)
+got no capacity in 36 tries and closed at $0. Do not create another pod while it is alive.
 - **Why a second attempt.** Attempt 1 (`dose_d2_20261019_135821`, $13.42) was
   lost mid-search at 21:25Z: about 30 s of ssh failure while the pod was still
   RUNNING, and the launcher's poll loop took the unanswered probe for a dead
