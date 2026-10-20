@@ -136,6 +136,120 @@ def retire_completed_states(study_dir: Path, treatment: str, keep_k: int = 1) ->
     return doc
 
 
+def release_relayed_finalists(study_dir: Path, treatment: str, manifest: dict, *,
+                              api, repo: str) -> dict:
+    """Free the volume of an earlier dose's retained Top-k once the relay holds it:
+    every file the manifest names for a candidate is checked against what the hub
+    STORES (LFS sha256 for the shard, git blob id of the volume copy for the
+    small files), then the candidate's search state and rebuilt copy are deleted,
+    leaving a tombstone. The probe sessions read these candidates from the relay
+    (`finalists.probe_units`), so the volume copies have no consumer left
+    (AGENTS.md 2.5, P8.4); on 2026-10-20 the d4 search filled the 300 GB volume
+    beside them. Any candidate the relay does not hold refuses the whole dose
+    before a byte is deleted. Idempotent."""
+    from stages.calibration_volume.finalists import (_git_blob_sha1, _sha256, _stored,
+                                                     journal_index)
+    prev = study_dir / treatment
+    tomb = prev / "released_finalists.json"
+    if tomb.is_file() and json.loads(tomb.read_text()).get("status") == "released":
+        return json.loads(tomb.read_text())
+    unit = prev / "search_unit"
+    states = journal_index(unit / "search" / "states.jsonl")
+    released = []
+    for c in manifest["candidates"][treatment]:
+        sid = c["state_id"]
+        rows = [f for f in manifest["files"] if f["treatment"] == treatment and f["state_id"] == sid]
+        shard = [f for f in rows if f["is_shard"]]
+        if len(shard) != 1 or shard[0]["sha256"] != c["checkpoint_sha256"]:
+            raise RuntimeError(f"{treatment} {sid}: the manifest names no relay shard "
+                               f"{c['checkpoint_sha256'][:12]}")
+        state_dir = unit / "search" / "states" / sid
+        rebuilt = prev / "finalists" / sid
+        if states.get(sid, {}).get("checkpoint_path"):
+            ck = Path(states[sid]["checkpoint_path"])
+            ck_dir = state_dir / ck.relative_to(ck.parents[1]).relative_to(sid)
+        else:
+            ck_dir = state_dir
+        src = rebuilt if rebuilt.is_dir() else ck_dir
+        for f in rows:
+            got = list(api.get_paths_info(repo, [f["path"]], repo_type="model"))
+            have = _stored(got[0]) if got else None
+            if f["is_shard"]:
+                ok = bool(have) and have["sha256"] == f["sha256"]
+            elif src.is_dir():
+                local = src / f["name"]
+                ok = (bool(have) and local.is_file() and _sha256(local) == f["sha256"]
+                      and have["blob_id"] == _git_blob_sha1(local))
+            else:       # an interrupted release already deleted it: nothing left to compare
+                ok = bool(have)
+            if not ok:
+                raise RuntimeError(f"{f['path']}: the relay holds {have}, not sha256 "
+                                   f"{f['sha256'][:12]}; nothing of {treatment} was released")
+        released.append({"state_id": sid, "rank": c.get("rank"),
+                         "checkpoint_sha256": c["checkpoint_sha256"],
+                         "relay_paths": sorted(f["path"] for f in rows),
+                         "dirs": [str(d.relative_to(study_dir)) for d in (state_dir, rebuilt)
+                                  if d.is_dir()],
+                         "bytes": sum(p.stat().st_size for d in (state_dir, rebuilt)
+                                      if d.is_dir() for p in d.rglob("*") if p.is_file())})
+    doc = {"schema": "aadistill.stage0.calibration_volume.released_finalists/v1",
+           "treatment": treatment, "status": "releasing", "repo": repo,
+           "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+           "why": ("the relay holds every file of these candidates, verified against the hub "
+                   "just before deletion, and the probe sessions read them from there; the "
+                   "volume copies had no consumer left and the volume needed the room"),
+           "released": released, "released_bytes": sum(r["bytes"] for r in released)}
+    tomb.write_text(json.dumps(doc, indent=1) + "\n")
+    for r in released:
+        for d in r["dirs"]:
+            shutil.rmtree(study_dir / d, ignore_errors=True)
+    doc["status"] = "released"
+    tomb.write_text(json.dumps(doc, indent=1) + "\n")
+    return doc
+
+
+def volume_room(volume: Path, size_gb: float, dose_dir: Path) -> dict:
+    """Room left on the network volume: the size the provider sold less what `du`
+    finds on the mount (`df` there reports the shared cluster, not the volume).
+    Temporary files an interrupted `volume_sync` left under `dose_dir` are removed
+    first; they are never a real file's only copy."""
+    stale = [p for p in dose_dir.rglob("*.partial") if p.is_file()]
+    for p in stale:
+        p.unlink()
+    used = int(subprocess.run(["du", "-sb", str(volume)], capture_output=True, text=True,
+                              check=True).stdout.split()[0])
+    return {"size_bytes": int(size_gb * 1e9), "used_bytes": used,
+            "free_bytes": int(size_gb * 1e9) - used,
+            "stale_partials_removed": [str(p.relative_to(dose_dir)) for p in stale]}
+
+
+def read_products(path: Path) -> tuple[dict, str | None]:
+    """The dose's product record on the volume. One that does not parse was cut short
+    by a failed write (2026-10-20: d4's, to a full volume), so nothing it would
+    claim was made durable: it is set aside and the dose resumes unrecorded."""
+    if not path.is_file():
+        return {}, None
+    try:
+        return json.loads(path.read_text()), None
+    except json.JSONDecodeError:
+        aside = path.with_name(f"{path.name}.torn-{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}")
+        os.replace(path, aside)
+        return {}, aside.name
+
+
+def write_atomic(path: Path, text: str) -> None:
+    tmp = path.with_name(f".{path.name}.partial")
+    tmp.write_text(text)
+    os.replace(tmp, path)
+
+
+def require_pushed(res: dict, what: str) -> dict:
+    """A push whose bytes did not all reach the volume must not be recorded as durable."""
+    if "error" in res or "rc" in res:
+        raise RuntimeError(f"the push of {what} to the volume failed: {res}")
+    return res
+
+
 def train_recovery(student_dir: Path, rec_out: Path, cfg: Path, log: Path, *, env: dict,
                    run_name: str, seed: int, purpose: str) -> Path:
     """The frozen recipe (`e1_p1_kd_heavy@0.86M`) on `student_dir` by the C1 trainer.
@@ -411,6 +525,32 @@ def main(argv=None) -> int:
                 done[t] = {"retired": len(doc["retired"]), "bytes": doc["retired_bytes"],
                            "kept": doc["kept"]}
             finish(st, "V_retire", doses=done)
+        if plan.get("release_relayed_finalists"):
+            rel = plan["release_relayed_finalists"]
+            st = stage("V_release")
+            man = REPO / rel["manifest"]
+            if sha(man) != rel["manifest_sha256"]:
+                raise RuntimeError(f"{rel['manifest']} does not hash to the plan's "
+                                   f"{rel['manifest_sha256'][:12]}")
+            from huggingface_hub import HfApi
+            from shared.deployment import MAIN_RELAY
+            token = (os.environ.get("HF_TOKEN") or Path("/workspace/hf/token").read_text()).strip()
+            done = {}
+            for t in rel["treatments"]:
+                doc = release_relayed_finalists(vol.parent, t, json.loads(man.read_text()),
+                                                api=HfApi(token=token), repo=MAIN_RELAY)
+                shutil.copyfile(vol.parent / t / "released_finalists.json",
+                                out / f"released_finalists_{t}.json")
+                done[t] = {"released": [r["state_id"] for r in doc["released"]],
+                           "bytes": doc["released_bytes"]}
+            finish(st, "V_release", doses=done)
+        if plan.get("volume_room_gb"):
+            st = stage("V_room")
+            room = volume_room(Path(args.volume), plan["hardware"]["network_volume"]["size_gb"], vol)
+            if room["free_bytes"] < plan["volume_room_gb"] * 1e9:
+                raise RuntimeError(f"the volume has {room['free_bytes'] / 1e9:.1f} GB free; this "
+                                   f"session needs {plan['volume_room_gb']} GB ({room})")
+            finish(st, "V_room", **room)
 
         # -- B, X: the earlier doses' finalists, rebuilt where retired, then shipped
         if ext.get("rebuild"):
@@ -420,8 +560,10 @@ def main(argv=None) -> int:
 
         # -- S: search (resumable) ------------------------------------------
         products = vol / "products.json"
-        prod = json.loads(products.read_text()) if products.is_file() else {}
+        prod, torn = read_products(products)
         st = stage("S_search")
+        if torn:
+            st["products_set_aside"] = torn
         if prod.get("search", {}).get("complete"):
             #: P8.4: a finished search is records plus ONE consumed checkpoint
             #: (the Top-1, and only while it is untrained). The other ~90 states
@@ -430,6 +572,9 @@ def main(argv=None) -> int:
             for f in (vol / "search_unit").glob("*.json"):
                 shutil.copyfile(f, search_unit / f.name)
             pulled = {"records": sorted(f.name for f in search_unit.glob("*.json"))}
+            if sha(search_unit / "search_record.json") != prod["search"]["search_record_sha256"]:
+                raise RuntimeError("the search record on the volume is not the one the product "
+                                   "record names")
             if not prod.get("recovery", {}).get("complete"):
                 sel = json.loads((search_unit / "stage1_selection.json").read_text())
                 ck = Path(sel["selected"][0]["checkpoint_path"])
@@ -459,14 +604,16 @@ def main(argv=None) -> int:
                                     stderr=subprocess.STDOUT).returncode
             stop.write_text("stop\n")
             mirror.wait(timeout=3600)
-            final = sync("push", search_unit, vol / "search_unit", out / "sync.log")
+            final = require_pushed(sync("push", search_unit, vol / "search_unit", out / "sync.log"),
+                                   "the search unit (the volume's journal stops at the last "
+                                   "good mirror pass)")
             srec = json.loads((search_unit / "search_record.json").read_text())
             if rc != 0 or srec.get("status") != "COMPLETE":
                 raise RuntimeError(f"search_driver exited {rc} with status {srec.get('status')}; "
                                    "the journal and states are on the volume for a resume")
             prod["search"] = {"complete": True,
                               "search_record_sha256": sha(search_unit / "search_record.json")}
-            products.write_text(json.dumps(prod, indent=1) + "\n")
+            write_atomic(products, json.dumps(prod, indent=1) + "\n")
             finish(st, "S_search", pulled_before=pulled, final_push=final,
                    n_resumed=srec["stages"]["C_beam_search"].get("n_resumed"))
         #: a unit restored from the volume was secured by the session that made
@@ -505,13 +652,14 @@ def main(argv=None) -> int:
                          "Top-1 recovered by the frozen recipe at its own seed; only run "
                          "identity, pack path and student_path differ from it"))
             msha = sha(model_dir / "model.safetensors")
-            pushed = sync("push", rec_out, model_vol, out / "sync.log")
+            pushed = require_pushed(sync("push", rec_out, model_vol, out / "sync.log"),
+                                    "the recovered student")
             if (rec_out / "train_log.jsonl").is_file():
                 shutil.copyfile(rec_out / "train_log.jsonl", out / "train_log.jsonl")
             prod["recovery"] = {"complete": True, "model_sha256": msha,
                                 "model_bytes": (model_dir / "model.safetensors").stat().st_size,
                                 "config_sha256": sha(cfg), "top1_state": top1.get("state_id")}
-            products.write_text(json.dumps(prod, indent=1) + "\n")
+            write_atomic(products, json.dumps(prod, indent=1) + "\n")
             finish(st, "R_recovery", model_dir=str(model_dir), model_sha256=msha, pushed=pushed,
                    top1=top1, config=str(cfg.relative_to(REPO)))
         (out / "recovery_products.json").write_text(json.dumps(prod.get("recovery"), indent=1) + "\n")

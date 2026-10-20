@@ -1,0 +1,43 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "dose_d4_20261020_054022",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-20T18:48:11+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": "RUN_FAILED",
+ "passed": false,
+ "outcome": "Dose d4 attempt 1: FAILED after the search finished (formal measurement begun), not by the science. A_contract, V_retire (d1 91 states 273.0 GB, d2 88 states 265.8 GB, each dose's distinct Top-4 kept), B_rebuild (d1 Top-2..4, 3571 s) and X_export_prior (d1+d2 Top-4 to the relay, verified by hub sha256, manifest 9068d6f8) all OK. The search ran 07:00Z-18:33Z and its driver printed SEARCH_DONE; the final push to network volume ugllmlv19t (300 GB, EUR-IS-1) then failed with OSError 122 'Disk quota exceeded' (last good mirror pass 18:32:23Z), the driver's next volume write raised and it marked RUN_FAILED at 18:34:31Z. Root cause: no capacity check -- d4's ~92 states (~3 GB each with pruned weights) beside the 8 retained d1/d2 Top-4 states and both recovered students exceed 300 GB. The pod stopped answering ssh at about 18:37Z (provider uptime 0, cause not determined), collection failed (manifest rc=255) and the launcher deleted it at 18:41:53Z. Durable: the search journal and states on the volume as of the 18:32:23Z pass. Next: free room (the relayed d1/d2 finalists), add a room check and fail a search whose final push fails, then resume the SAME dose from the volume journal (preregistered retry_policy).",
+ "provider_resource_created": true,
+ "pod_id": "ltxns3jbkkaiac",
+ "provider_confirms_gone": true,
+ "final_pod_state": {
+  "exists": false,
+  "desired_status": "TERMINATED",
+  "billing": false
+ },
+ "money": {
+  "all_in_usd": 23.6937,
+  "gpu_usd": 22.9904,
+  "disk_usd": 0.7033,
+  "elapsed_minutes": 770.63,
+  "price_per_hour": 1.79,
+  "authorized_usd": 39.5,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.10/GB-month over the elapsed minutes, ceiled to the 4-decimal quantum"
+ },
+ "session_record_sha256": "f57ef6c128bab52f277ace4d0ee4f8eb24fae06d5ba671c1f31cea6891f3ff12",
+ "units": {
+  "d4": {
+   "dose_record.json": {
+    "sha256": "73ae40b3303c464b2fe784113f0ef0a336c3c127794da1b9e720ceef1f5f7af9",
+    "bytes": 2162
+   },
+   "finalists/finalists_manifest.json": {
+    "sha256": "9068d6f8261779be4ba4fede900fb80ad60815e74e48e5ac9ab6f040f85b587f",
+    "bytes": 31964
+   }
+  }
+ },
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/dose_d4_20261020_054022"
+}

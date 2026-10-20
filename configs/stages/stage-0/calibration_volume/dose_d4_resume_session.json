@@ -1,0 +1,55 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.session_plan/v1",
+ "session_kind": "dose",
+ "name": "dose_d4_resume",
+ "treatment": "d4",
+ "purpose": "Formal Stage-0 volume dose d4, resumed from the network volume after dose_d4_20261020_054022 failed its final push to a full volume (preregistered retry_policy: journal restore, never a second measurement): first free the volume of d1's and d2's Top-4, which the relay holds and the probe sessions read from there, and check the room; then the search's tail, d4's own Top-4 to the relay, the fixed recovery and every item of eval-set-1. B_rebuild and X_export_prior finished in the failed session and are not repeated.",
+ "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+ "teacher": {
+  "id": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+ },
+ "profile_items_dir": "artifacts/stages/stage-0/calibration_volume/profiles_formal_v1",
+ "preregistration_sha256": "7c875870863cd8deed7f6369a631cc904a18532d41000f0465147640e89be43a",
+ "setup_minutes": 20,
+ "budget_phases": {
+  "pull_and_resume": 45.0,
+  "export_own_4": 10.0,
+  "recovery": 61.5,
+  "eval_set_1": 49.0,
+  "pushes": 10.0,
+  "release": 5.0
+ },
+ "contingency_fraction": 0.2,
+ "reserve_minutes": 30,
+ "mirror_seconds": 120,
+ "hardware": {
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "container_disk_gb": 400,
+  "network_volume": {
+   "id": "ugllmlv19t",
+   "data_center": "EUR-IS-1",
+   "size_gb": 300,
+   "mount": "/runpod-volume",
+   "record": "logs/stages/stage-0/calibration_volume/runs/netvol_20261019_051206"
+  }
+ },
+ "authorizes": "nothing",
+ "top4_extension": {
+  "doc": "logs/stages/stage-0/calibration_volume/plans/top4_extension.json",
+  "doc_sha256": "369b5549b8a2a5a16101090fb7b59dcd27ffe3be3c51dd9b57c5ef1efaa9b4eb",
+  "k": 4,
+  "export_own": true,
+  "_done_in": "dose_d4_20261020_054022: B_rebuild (d1 Top-2..4) and X_export_prior (d1, d2 Top-4, manifest 9068d6f8) finished there"
+ },
+ "release_relayed_finalists": {
+  "manifest": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/evidence/d4/finalists/finalists_manifest.json",
+  "manifest_sha256": "9068d6f8261779be4ba4fede900fb80ad60815e74e48e5ac9ab6f040f85b587f",
+  "treatments": [
+   "d1",
+   "d2"
+  ]
+ },
+ "volume_room_gb": 12,
+ "_resumes": "dose_d4_20261020_054022"
+}
