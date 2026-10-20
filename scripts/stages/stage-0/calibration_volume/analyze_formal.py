@@ -238,6 +238,28 @@ def separation(doses: dict[str, Path], h2_out: dict, h1_out: dict) -> dict:
     return out
 
 
+#: what the analysis reads under one dose's dir, so the record can name its inputs
+READS = ("search/stage1_selection.json", "search/structure.json", "search/search/states.jsonl",
+         "search/width_projection_*.safetensors", "recovery/train_log.jsonl",
+         "recovery/recovery_products.json", "eval/report.json", "eval/rows/*.rows.jsonl")
+
+
+def inputs(path: Path) -> dict:
+    """The dose's run identity and the sha256 of every file the analysis read --
+    the dir itself is an assembly of secured stores and names nothing."""
+    import hashlib
+    rec = json.loads((path / "dose_record.json").read_text()) if (path / "dose_record.json").is_file() else {}
+    files = {}
+    for pattern in READS:
+        for f in sorted(path.glob(pattern)):
+            h = hashlib.sha256()
+            with f.open("rb") as fh:
+                for chunk in iter(lambda: fh.read(1 << 20), b""):
+                    h.update(chunk)
+            files[str(f.relative_to(path))] = h.hexdigest()
+    return {"run_id": rec.get("run_id"), "search_run_id": rec.get("search_run_id"), "files": files}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dose", action="append", required=True, help="d1=<dir>")
@@ -250,7 +272,7 @@ def main(argv=None) -> int:
     h2_out = h2(doses, sesoi)
     out = {"schema": "aadistill.stage0.calibration_volume.formal_analysis/v1",
            "preregistration": str(PREREG.relative_to(REPO)),
-           "doses": {d: str(p) for d, p in doses.items()},
+           "doses": {d: inputs(p) for d, p in doses.items()},
            "H1": h1_out, "H2": h2_out,
            "H3": {"read": "the 1x/2x/4x shape of H1 and H2 above; described, never tested"},
            "separation": separation(doses, h2_out, h1_out),
