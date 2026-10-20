@@ -1,0 +1,186 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.search_record/v1",
+ "treatment": "d4",
+ "run_id": "dose_d4_20261020_212310",
+ "search_run_id": "stage0_calvol_formal_v1_d4",
+ "started_utc": "2026-10-20T21:42:51Z",
+ "stages": {
+  "A_contract": {
+   "config_hash": "ff2c3dccce200908",
+   "seconds": 2.98,
+   "status": "ok"
+  },
+  "B_teacher": {
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "seconds": 20.04,
+   "status": "ok"
+  },
+  "C_beam_search": {
+   "n_states": 93,
+   "n_complete_leaves": 12,
+   "n_resumed": 90,
+   "seconds": 1344.49,
+   "status": "ok"
+  },
+  "D_commit": {
+   "k": 1,
+   "seconds": 9.65,
+   "status": "ok"
+  }
+ },
+ "status": "COMPLETE",
+ "session": {
+  "config_hash": "ff2c3dccce20090864427029103f08d7d1c55ffb8d81982168a31daa1bd284c5",
+  "measurement_protocol_id": "857357e82eb1bd1f367985eaa31399dc",
+  "profiles": [
+   "calib.s0v_base_d4@v1",
+   "calib.s0v_rh_d4@v1"
+  ],
+  "profile_hashes": {
+   "calib.s0v_base_d4@v1": "321e38fe8513d52d722c15890b3a0584081a422f41d48d2bc65fb66bf82afa6a",
+   "calib.s0v_rh_d4@v1": "5fbe3512128797a9cfc28b39252f889d07ab72fa400af20d5377fb2019fcbca2"
+  },
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "baseline": {
+   "baseline": "stage1_init.d1_target_aware.scored_v1@v1",
+   "record_sha256": "333af13d9f2441fc658ee064f1a6ec6b15ebf5be5ee8ab31320763bbe41ce266",
+   "numerical_execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "execution": {
+    "micro_batch_size": 3,
+    "calibration_batch_packing": "length_sorted_v1",
+    "prediction_rows": "scored_v1"
+   },
+   "implementations": {
+    "FFN": "ffn.activation_importance_v0",
+    "DEPTH": "depth.causal_kl_greedy_v1",
+    "RESIDUAL_WIDTH": "width.global_pca_v0",
+    "ATTENTION": "attention.activation_importance_v1"
+   },
+   "position_policy": "positions.supervised_target_v1@v1",
+   "distribution_support": {
+    "support_id": "reference_topk_tail_v1",
+    "top_k": 200
+   }
+  }
+ },
+ "execution": {
+  "operators": {
+   "micro_batch_size": 3,
+   "calibration_batch_packing": "length_sorted_v1",
+   "prediction_rows": "scored_v1",
+   "depth_prefix_reuse": true
+  },
+  "validate_on_search_device": true,
+  "prune_weights": false
+ },
+ "authorization_id": "stage0.calibration_volume.dose.dose_d4_20261020_212310",
+ "root_teacher": {
+  "verified": [
+   "model-00001-of-00003.safetensors",
+   "model-00002-of-00003.safetensors",
+   "model-00003-of-00003.safetensors"
+  ],
+  "root_teacher_id": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+  "root_teacher_sha256": "6de20cc746dd42e96f93aeb4551b8d378e415a206309435d7eaefd39cfdf45f9"
+ },
+ "commit": {
+  "selection_path": "artifacts/audit/stage0_calvol_search/d4/stage1_selection.json",
+  "selected_rows": [
+   {
+    "state_id": "1301deb71685aa1ca5c7b6cf2c491ac4",
+    "path": "ATTENTION(calib.s0v_rh_d4@v1)->DEPTH(calib.s0v_base_d4@v1)->RESIDUAL_WIDTH(calib.s0v_base_d4@v1)->FFN(calib.s0v_base_d4@v1)",
+    "artifact_digest": "457e194c4a40c2503a7d63d03269ac76ece700102bae74908b7315d367bab3f0",
+    "single_shard_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+    "checkpoint_path": "/workspace/aad/artifacts/audit/stage0_calvol_search/d4/search/states/1301deb71685aa1ca5c7b6cf2c491ac4/6aee8047e4762a7036477cb017126439",
+    "num_parameters": 596049920,
+    "impl_ids": [
+     "attention.activation_importance_v1",
+     "depth.causal_kl_greedy_v1",
+     "width.global_pca_v0",
+     "ffn.activation_importance_v0"
+    ],
+    "calibration_profiles": [
+     "calib.s0v_base_d4@v1",
+     "calib.s0v_rh_d4@v1"
+    ],
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "weights_digest": "73589c58a439bf32b4ddbf975ac245cd6b916745d5e0712ae4cf32ae158a6d0f"
+   }
+  ]
+ },
+ "width_projections": [
+  {
+   "state_id": "5949cdbee7b36bab480934ec08873311",
+   "profiles": [
+    "calib.s0v_base_d4@v1"
+   ],
+   "file": "width_projection_5949cdbee7b36bab480934ec08873311.safetensors",
+   "relative_residual": 0.0016574544133618474,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "1d29e1cbeee323af67f142ce61e3104b",
+   "profiles": [
+    "calib.s0v_rh_d4@v1"
+   ],
+   "file": "width_projection_1d29e1cbeee323af67f142ce61e3104b.safetensors",
+   "relative_residual": 0.0016574172768741846,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "5949cdbee7b36bab480934ec08873311",
+   "profiles": [
+    "calib.s0v_base_d4@v1"
+   ],
+   "file": "width_projection_5949cdbee7b36bab480934ec08873311.safetensors",
+   "relative_residual": 0.0016574544133618474,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "1d29e1cbeee323af67f142ce61e3104b",
+   "profiles": [
+    "calib.s0v_rh_d4@v1"
+   ],
+   "file": "width_projection_1d29e1cbeee323af67f142ce61e3104b.safetensors",
+   "relative_residual": 0.0016574172768741846,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "5949cdbee7b36bab480934ec08873311",
+   "profiles": [
+    "calib.s0v_base_d4@v1"
+   ],
+   "file": "width_projection_5949cdbee7b36bab480934ec08873311.safetensors",
+   "relative_residual": 0.0016574544133618474,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "1d29e1cbeee323af67f142ce61e3104b",
+   "profiles": [
+    "calib.s0v_rh_d4@v1"
+   ],
+   "file": "width_projection_1d29e1cbeee323af67f142ce61e3104b.safetensors",
+   "relative_residual": 0.0016574172768741846,
+   "shape": [
+    2560,
+    1024
+   ]
+  }
+ ],
+ "ended_utc": "2026-10-20T22:05:48Z"
+}
