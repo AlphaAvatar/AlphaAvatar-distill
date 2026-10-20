@@ -1,0 +1,17 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "netvol_20261020_233114",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-20T23:32:00+00:00",
+ "status": "VOLUME_ACTIVE",
+ "outcome": "Network volume wn3avnine2 (50 GB, US-TX-3) is ACTIVE. Its cost is booked as a RESERVATION for two days ahead (d2's probe session needs about 15 h), so every authorization issued while it exists already counts it; this record is trued up to the actual storage cost when the volume is deleted.",
+ "provider_resource_created": true,
+ "money": {
+  "all_in_usd": 0.2334,
+  "reserved_days": 2,
+  "_basis": "RESERVED, not actual: 50 GB x $0.07/GB-month x 48 h / 720 h = $0.2333, ceiled to the 4-decimal quantum. Replaced by the actual (created -> deleted hours) at deletion."
+ },
+ "authorizes": "nothing"
+}
