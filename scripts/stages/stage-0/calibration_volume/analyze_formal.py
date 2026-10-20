@@ -152,11 +152,22 @@ def h2(doses: dict[str, Path], sesoi: dict) -> dict:
 
 def top1(path: Path) -> dict:
     sel = json.loads((path / "search" / "stage1_selection.json").read_text())["selected"][0]
-    journal = {}
+    journal, traces = {}, {}
     for r in jl(path / "search" / "search" / "states.jsonl"):
         journal[r["state_id"]] = r
+        for i, st in enumerate(r.get("steps") or []):
+            if st.get("trace"):
+                traces.setdefault((r["state_id"], i), st["trace"])
     s = journal.get(sel["state_id"], {})
-    steps = s.get("steps") or []
+    #: a resumed search journals restored states again with empty step traces,
+    #: and a leaf built on one inherits them; the ancestor's first record has it
+    chain, cur = [], sel["state_id"]
+    while cur in journal and cur not in chain:
+        chain.append(cur)
+        cur = journal[cur].get("parent_id")
+    steps = [dict(st, trace=st.get("trace") or next(
+                 (traces[(c, i)] for c in chain if (c, i) in traces), {}))
+             for i, st in enumerate(s.get("steps") or [])]
     return {"state_id": sel["state_id"], "path": sel.get("path"),
             "order": [st.get("kind") for st in steps],
             "profiles": [st.get("profile_id") for st in steps],

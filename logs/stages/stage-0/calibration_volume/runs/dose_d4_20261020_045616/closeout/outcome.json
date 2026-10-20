@@ -1,0 +1,15 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "dose_d4_20261020_045616",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-20T05:07:05+00:00",
+ "status": "ABANDONED_BEFORE_LAUNCH",
+ "outcome": "Stopped by the operator at 05:01Z between create attempts (attempt 1 at 04:57:10 refused for EUR-IS-1 capacity; next due 05:02:10), on the maintainer's 2026-10-20 scope change: every dose's Top-4 from the full search is to be recovered (recovery may run on L40S). This plan's finalists_k=1 retirement would have deleted d2's Top-2..4 states before its search. Provider listed 0 pods before and after; no watchdog was started.",
+ "provider_resource_created": false,
+ "money": {
+  "all_in_usd": 0.0,
+  "_basis": "no provider resource existed"
+ }
+}

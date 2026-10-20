@@ -52,12 +52,17 @@ def per_layer(a, b) -> float:
 
 
 def load_roots(path: Path) -> dict[str, dict[str, dict]]:
-    """kind -> profile -> root decision record."""
+    """kind -> profile -> root decision record. A resumed search journals each
+    restored state again without its decision; that record never replaces one
+    that carries it."""
     out: dict[str, dict[str, dict]] = defaultdict(dict)
     for r in json.loads(path.read_text()):
         if r.get("depth") != 1:
             continue
-        out[(r.get("applied_kinds") or ["?"])[0]][(r.get("profiles") or ["?"])[0]] = r
+        slot = out[(r.get("applied_kinds") or ["?"])[0]]
+        prof = (r.get("profiles") or ["?"])[0]
+        if r.get("decision") or prof not in slot:
+            slot[prof] = r
     return out
 
 
