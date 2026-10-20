@@ -1,0 +1,212 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.top4_extension/v1",
+ "study_id": "formal_v1",
+ "extension_id": "formal_v1_top4",
+ "status": "registered before any probe result exists",
+ "written_utc": "2026-10-20T07:30:00Z",
+ "decision": {
+  "by": "maintainer, 2026-10-20 (task instructions to the executing agent session)",
+  "maintainer_words": [
+   "所有数据系列，都要按照正式full search来做，都要对比top4的恢复训练，不过恢复训练可以在L40s上完成",
+   "L40S，且只跑top2到4，每个跑两个和top1一样的种子，总共12个prob",
+   "按不同权重取前 4 (Recommended)",
+   "d4 也做，上限改加 $25 (Recommended)",
+   "Top1也要补缺失的种子，额度多增加5美元"
+  ],
+  "record": "logs/budget/decisions.md 2026-10-20 (Stage-0 volume study: Top-4 recovery extension)"
+ },
+ "relation_to_the_preregistration": {
+  "preregistration": "logs/stages/stage-0/calibration_volume/plans/volume_preregistration.json",
+  "preregistration_sha256": "7c875870863cd8deed7f6369a631cc904a18532d41000f0465147640e89be43a",
+  "unchanged": "every dose's D1 full search, its committed Top-1 (finalists_k = 1), that Top-1's fixed recovery at seed 20260726 on the A100 and its eval-set-1 measurement, and every preregistered H1/H2/H3 contrast. The extension adds units beside them; it changes none of them and its numbers never enter a preregistered contrast."
+ },
+ "candidates": {
+  "rule": "each dose's complete leaves in its own search's quality order (stage1_selection.json :: decisions, policy beam.pareto_multi_objective@v2, lineage diversity NOT applied), byte-identical leaves (same checkpoint sha256) counted once with the better-ranked state standing for both, first 4 (finalists.distinct_finalists)",
+  "why_distinct": "d2's quality positions 1 and 2 (and 4 and 5) are the same weights: DEPTH removed the same eight layers under both calibration profiles, so every descendant built on the two DEPTH states is identical; recovering one model twice at one seed would measure only GPU nondeterminism",
+  "by_dose": {
+   "d1": {
+    "selection": "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/evidence/d1/search/stage1_selection.json",
+    "selection_sha256": "f47326d58f6c2179fed81fdf6e839f58aa41c9b34b212bff5172f7c5768f7d95",
+    "finalists": [
+     {
+      "rank": 1,
+      "state_id": "72b76a1ca4300f1fc3b341c28738f425",
+      "quality_order": 1,
+      "path": "DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_rh_d1@v1)->ATTENTION(calib.s0v_rh_d1@v1)->RESIDUAL_WIDTH(calib.s0v_rh_d1@v1)",
+      "checkpoint_sha256": "49bb3c56b50d95946f7621619084fe85e6f84e9375a843a704e1ab2e53548cae",
+      "artifact_digest": "ecd34a057f83069742156ca02cd5ccd89bd5ff60a4f3c3a8ee176628f7fbf287",
+      "weights_digest": "862a6bc0deb6fe73f8ebb7139a28e64784833da2486cfc7e741a9b50081c64f1",
+      "num_parameters": 596049920,
+      "identical_leaves": []
+     },
+     {
+      "rank": 2,
+      "state_id": "60e229ac09d88cf52814894ddec0e933",
+      "quality_order": 2,
+      "path": "DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_rh_d1@v1)->ATTENTION(calib.s0v_rh_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)",
+      "checkpoint_sha256": "a092bc43630df08a84e14512555aa87b7be4913025b07aefc62aaae3c81e5a4d",
+      "artifact_digest": "5b5db096a2824f26a2aa833fe58e1aa80016a54343e8202848ebe9b052b65fcf",
+      "weights_digest": "8bfd454489e4a8d3e304df850051302fc8a3b1e2140f0463591e115d32073e44",
+      "num_parameters": 596049920,
+      "identical_leaves": []
+     },
+     {
+      "rank": 3,
+      "state_id": "4df438a839cd1ed057c2277dfcb8922f",
+      "quality_order": 3,
+      "path": "DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_rh_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)->ATTENTION(calib.s0v_base_d1@v1)",
+      "checkpoint_sha256": "3d4cb00edb8cbdbf99afffc408240d920dd75faf9e28611abdf260aa22e6b695",
+      "artifact_digest": "89ec139720bcf466b6d2afaf21ddbcc9021aaba968990444e2de07e0d15fc1dd",
+      "weights_digest": "5e80aff042f37fc84b183ecbcc0a44a0c5120ceb14ada5031f67c016959df387",
+      "num_parameters": 596049920,
+      "identical_leaves": []
+     },
+     {
+      "rank": 4,
+      "state_id": "91090067b51c9fd4c0aeb3824bc7f549",
+      "quality_order": 4,
+      "path": "ATTENTION(calib.s0v_base_d1@v1)->DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_base_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)",
+      "checkpoint_sha256": "111958717d94fd6ac6e82662fe74d9544c9254d0fc93ab4d99cc6816c0ece71f",
+      "artifact_digest": "04d8f8382919cebecf1b99754327c8c030d51b09367d46bfa38acfea5b494db0",
+      "weights_digest": "1836b546864b6b104add927de1b4394241e903ed739bb6e75244b8b1a0a2185b",
+      "num_parameters": 596049920,
+      "identical_leaves": [
+       {
+        "state_id": "b4b645c9a7e23e8535a4227d707aa575",
+        "quality_order": 5
+       }
+      ]
+     }
+    ]
+   },
+   "d2": {
+    "selection": "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/evidence/d2/search/stage1_selection.json",
+    "selection_sha256": "bb72e45c1c79b8d1baceed56d98147f6e655b30cd1ccaba450cda9a1dfd5f265",
+    "finalists": [
+     {
+      "rank": 1,
+      "state_id": "9af1989dc0b8168908eeb77ee4d3fa47",
+      "quality_order": 1,
+      "path": "DEPTH(calib.s0v_rh_d2@v1)->FFN(calib.s0v_base_d2@v1)->ATTENTION(calib.s0v_base_d2@v1)->RESIDUAL_WIDTH(calib.s0v_base_d2@v1)",
+      "checkpoint_sha256": "e9eba2255dbb567b9f044c0af9b2f3139c9ef227532ff85abe66e46f158f733e",
+      "artifact_digest": "81cb441c19bdab9399210e0406b425290463b8cb677a1ab3fe20eceb151b2f24",
+      "weights_digest": "010541d8a89f009eaca42feb4954a5b17fa727e069e9d3e5bd398fa7121f0dd0",
+      "num_parameters": 596049920,
+      "identical_leaves": [
+       {
+        "state_id": "ff80170f11c86109babb4f20c691effe",
+        "quality_order": 2
+       }
+      ]
+     },
+     {
+      "rank": 2,
+      "state_id": "e2d10ba8f532f95c174de290e19dcf01",
+      "quality_order": 3,
+      "path": "ATTENTION(calib.s0v_base_d2@v1)->DEPTH(calib.s0v_base_d2@v1)->RESIDUAL_WIDTH(calib.s0v_base_d2@v1)->FFN(calib.s0v_rh_d2@v1)",
+      "checkpoint_sha256": "34712d06301866b339b6daa9c5d43834f5fdc336ae767397adc6357f6c25176f",
+      "artifact_digest": "eed6a81b4bcf64b485e6670c17f152148b26d9e260a83ef13b6b937ee15791e6",
+      "weights_digest": "c8f882f05fbf05eff67cbec4daa1e509d328a81f5ecd1bbb13a234af7d55a1a8",
+      "num_parameters": 596049920,
+      "identical_leaves": []
+     },
+     {
+      "rank": 3,
+      "state_id": "3b2037bc90090ba13504fb18c1480e80",
+      "quality_order": 4,
+      "path": "DEPTH(calib.s0v_base_d2@v1)->FFN(calib.s0v_base_d2@v1)->ATTENTION(calib.s0v_base_d2@v1)->RESIDUAL_WIDTH(calib.s0v_rh_d2@v1)",
+      "checkpoint_sha256": "551e66850bd340851913b13d1dca5894de8a934b276e9853c563da03cefe80c7",
+      "artifact_digest": "e8b85b20b1aaf28005d61aa31bdebc3a6caee915019b7c1f153094d4fbaec9af",
+      "weights_digest": "4393a792c9b6987fab37eac7b749c28c500606f32472277648b042e97ab60eea",
+      "num_parameters": 596049920,
+      "identical_leaves": [
+       {
+        "state_id": "abf0d86cc92e5c9f8acd4f1849571fe8",
+        "quality_order": 5
+       }
+      ]
+     },
+     {
+      "rank": 4,
+      "state_id": "b6a41ee85024ac3750a39ceb97fa1b5c",
+      "quality_order": 6,
+      "path": "ATTENTION(calib.s0v_base_d2@v1)->DEPTH(calib.s0v_base_d2@v1)->FFN(calib.s0v_rh_d2@v1)->RESIDUAL_WIDTH(calib.s0v_base_d2@v1)",
+      "checkpoint_sha256": "4da365c3d8b3dc4f391a696c78750714405bc7ef488e2dccf387331a640e6b85",
+      "artifact_digest": "ad3744f273d4492f69120279aac3dffaf302258f3bde2d50f21b5fcd6b32daa6",
+      "weights_digest": "d323ce1f8368ce83a7c1917936f2859d19dc42bffc52967c15f1674a2ad2c68b",
+      "num_parameters": 596049920,
+      "identical_leaves": []
+     }
+    ]
+   }
+  },
+  "d4": "derived by the same rule from d4's own search when it completes (dose_d4 session, stage X_export)"
+ },
+ "rebuild": {
+  "d1": {
+   "plan": "logs/stages/stage-0/calibration_volume/plans/top4_rebuild_d1.json",
+   "why": "d1's Top-2..4 were retired with its other states before the extension existed (decisions.md 2026-10-19); the tombstone kept their digests and the journal their ancestry",
+   "mechanism": "digest-pinned fixed-path replay (stages.phase_d1.replay_specs + materialize_fixed_path) under the Stage-0 search's owners, every intermediate pinned to its recorded artifact digest and operator config hash; root state, operator configs and execution knobs agreed at $0 before any pod; adopted only when artifact digest, weights digest, shard sha256 and arch signature all match",
+   "hardware": "the A100-SXM4-80GB the search ran on (the success criterion is byte equality)",
+   "on_mismatch": "that candidate is not adopted and not substituted; the mismatch is diagnosed (P12.1: a wrong replay mechanism is an engineering failure, a reproduced mechanism that still disagrees is material and is reported)"
+  }
+ },
+ "units": {
+  "seeds": {
+   "top1": [
+    20260727
+   ],
+   "others": [
+    20260726,
+    20260727
+   ],
+   "_why": "20260726 is the preregistered recovery seed (the A100 Top-1 unit already holds it); 20260727 is the second seed, fixed here before any probe ran"
+  },
+  "per_dose": "Top-1 x {20260727} + Top-2..4 x {20260726, 20260727} = 7 units; 21 over d1, d2, d4",
+  "recovery": "the frozen recipe e1_p1_kd_heavy@0.86M (configs/stages/stage-3/e1/e1_r0860k_sa_pca.json) by the C1 trainer through dose_driver.train_recovery; only run identity, out_dir, pack path, student_path and seed differ (C1_PROBE_OVERRIDES, checked)",
+  "evaluation": "every item of eval-set-1 at its preregistered identity, the dose session's own dose_driver.evaluate_all (trained 8,192-token context, action protocol v2, formal scoring protocol v2)",
+  "hardware": {
+   "gpu": "NVIDIA L40S",
+   "cloud": "secure (a network volume attaches only there)",
+   "data_center": "US-TX-3 (the only datacenter with storage support and L40S stock on 2026-10-20)",
+   "durability": "a network volume in that datacenter holds every recovered student and generation as it finishes; the candidates reach it from the relay (AlphaAvatar/aadistill-artifacts, stage0_calvol/finalists/...), sha256-pinned"
+  },
+  "hardware_note": "the Top-1 seed-20260726 unit ran on an A100 and every extension unit runs on an L40S, so a contrast with the A100 unit differs in hardware as well as in seed or candidate and is reported as such, never attributed to one of them"
+ },
+ "analysis": {
+  "per_unit": "every unit and capability's formal numbers exactly as the dose report gives them (no pooled score), usable_rollout with every component, and the recovery's training record",
+  "within_dose": [
+   "rank k vs rank 1 at seed 20260727 (same L40S, same seed): task-paired differences with the preregistration's bootstrap intervals and SESOI labels",
+   "seed 20260726 vs 20260727 for ranks 2..4 (same L40S, same candidate): the seed-to-seed spread, the reference every candidate difference is read against",
+   "rank 1 on the A100 at 20260726 beside rank 1 on the L40S at 20260727: reported, not attributed (hardware and seed both differ)",
+   "search quality order beside recovered outcome, per dose: described (n = 4 candidates), never tested"
+  ],
+  "across_doses": "the 1x/2x/4x shape of the above, described",
+  "floor": "where both rates in a contrast are at the floor (0 correct), the label is reported with a floor flag; a NO-GO at the floor says nothing about whether the factor matters",
+  "not_claimed": [
+   "that search rank predicts recovered capability",
+   "cross-seed stability beyond two seeds",
+   "a hardware effect",
+   "anything the preregistered H1/H2/H3 did not register"
+  ]
+ },
+ "retry_policy": "the preregistration's: before a unit's measurement begins, ordinary failures are repaired and retried (P12.1); after it begins, the SAME unit resumes from the network volume -- a trained student is evaluated rather than retrained, finished generations rescored rather than regenerated; never a second complete measurement of a unit",
+ "budget": {
+  "maintainer": "+$30 on the Stage-0 programme (decision 2026-10-20): formal_volume $90 -> $120, programme ceiling $107.5099 -> $137.5099, project cap $607.6571 -> $637.6571; per-session cap $50 unchanged",
+  "estimate_2026_10_20": {
+   "d4_a100_session_usd": 30.2,
+   "probe_unit_l40s_usd": [
+    2.43,
+    2.87
+   ],
+   "probes_21_usd": [
+    51.0,
+    60.3
+   ],
+   "network_volume_us_tx_3_usd": 1.4,
+   "basis": "L40S securePrice $1.09/h and A100 $1.79/h (provider, 2026-10-20); recovery 62 min on an L40S measured for this recipe (D2 confirmation probes, 1,020 steps in about 60 min); eval-set-1 on an L40S NOT measured -- 1.3x to 1.8x the A100's 49 min assumed"
+  },
+  "rule": "every session's hard cap must fit the remaining envelope; after the first probe session's first unit the per-unit cost is re-priced from its measured minutes, and if the remaining units' expected cost plus $5 does not fit, no further probe session is launched until the maintainer decides"
+ },
+ "authorizes": "nothing; each session runs only through its own one-use authorization"
+}

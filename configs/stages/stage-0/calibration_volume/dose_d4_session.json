@@ -3,7 +3,7 @@
  "session_kind": "dose",
  "name": "dose_d4",
  "treatment": "d4",
- "purpose": "Formal Stage-0 volume dose d4: D1 full search, fixed recovery, every item of eval-set-1 (plans/volume_preregistration.json).",
+ "purpose": "Formal Stage-0 volume dose d4: D1 full search, fixed recovery, every item of eval-set-1 (plans/volume_preregistration.json); and the Top-4 extension's A100 work (plans/top4_extension.json): d1's retired Top-2..4 rebuilt digest-pinned, and d1's, d2's and d4's distinct Top-4 shipped to the relay for the L40S probe sessions.",
  "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
  "teacher": {
   "id": "Qwen/Qwen3-4B-Thinking-2507",
@@ -16,7 +16,9 @@
   "search": 794.3,
   "recovery": 61.5,
   "eval_set_1": 49.0,
-  "pushes": 10.0
+  "pushes": 10.0,
+  "rebuild_d1_top2to4": 60.0,
+  "export_12_candidates": 20.0
  },
  "contingency_fraction": 0.2,
  "reserve_minutes": 30,
@@ -36,5 +38,22 @@
   "d1",
   "d2"
  ],
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "top4_extension": {
+  "doc": "logs/stages/stage-0/calibration_volume/plans/top4_extension.json",
+  "doc_sha256": "befe716f5ffe2b9184da3c63918a6c242839d03f60aaffb046a14f2f844b8fb2",
+  "k": 4,
+  "rebuild": {
+   "d1": "logs/stages/stage-0/calibration_volume/plans/top4_rebuild_d1.json"
+  },
+  "rebuild_plan_sha256": {
+   "d1": "2b2614f26575f66384351cd8f897da808031755407a14ebe1487786231719f84"
+  },
+  "export_prior": [
+   "d1",
+   "d2"
+  ],
+  "export_own": true,
+  "_retain": "V_retire keeps each earlier dose's distinct Top-4 (not only its Top-1)"
+ }
 }

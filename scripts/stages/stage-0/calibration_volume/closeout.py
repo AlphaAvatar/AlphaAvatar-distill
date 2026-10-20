@@ -115,12 +115,15 @@ def main(argv=None) -> int:
                              # a formal dose unit: one directory per stage
                              "dose_record.json", "search/search_record.json",
                              "search/stage1_selection.json", "recovery/recovery_products.json",
-                             "recovery/recovery_config.json", "eval/report.json"):
+                             "recovery/recovery_config.json", "eval/report.json",
+                             # the Top-4 extension: a dose's finalists, a probe unit
+                             "finalists/finalists_manifest.json", "report.json",
+                             "recovery_products.json", "recovery_config.json"):
                     if (unit / name).is_file() and (unit / name).stat().st_size <= EVIDENCE_MAX_BYTES:
                         (ev / unit.name / name).parent.mkdir(parents=True, exist_ok=True)
                         shutil.copy2(unit / name, ev / unit.name / name)
                 units[unit.name] = files
-            for name in ("battery.json", "search_session.json", "bench.json"):
+            for name in ("battery.json", "search_session.json", "bench.json", "probe_session.json"):
                 if (store / name).is_file():
                     shutil.copy2(store / name, ev / name)
             doc["units"] = units

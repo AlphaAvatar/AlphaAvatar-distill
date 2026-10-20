@@ -79,11 +79,12 @@ def sync(mode: str, src: Path, dst: Path, log: Path) -> dict:
     return json.loads(lines[-1]) if lines else {"rc": out.returncode, "stderr": out.stderr[-500:]}
 
 
-def retire_completed_states(study_dir: Path, treatment: str) -> dict:
+def retire_completed_states(study_dir: Path, treatment: str, keep_k: int = 1) -> dict:
     """Free the volume for the next dose: delete a COMPLETE dose's search states
-    except its committed Top-1, leaving a tombstone that names every retired
-    state by id, digest and size (maintainer 2026-10-19: one dose's states fill
-    most of the 300 GB volume; AGENTS.md 2.5).
+    except its committed Top-1 and, with `keep_k` > 1, the rest of its distinct
+    Top-`keep_k` (the 2026-10-20 extension recovers them), leaving a tombstone
+    that names every retired state by id, digest and size (maintainer
+    2026-10-19: one dose's states fill most of the 300 GB volume; AGENTS.md 2.5).
 
     The states exist so a lost pod resumes instead of recomputing; a dose whose
     record says COMPLETE has no resume left and nothing else reads them. A dose
@@ -98,8 +99,12 @@ def retire_completed_states(study_dir: Path, treatment: str) -> dict:
         raise RuntimeError(f"dose {treatment} is {status or 'absent'} on the volume; only a "
                            "COMPLETE dose's states may be retired")
     unit = prev / "search_unit"
-    keep = {r["state_id"] for r in
-            json.loads((unit / "stage1_selection.json").read_text())["selected"]}
+    selection = json.loads((unit / "stage1_selection.json").read_text())
+    keep = {r["state_id"] for r in selection["selected"]}
+    if keep_k > 1:
+        from stages.calibration_volume.finalists import distinct_finalists, journal_index
+        keep |= {f["state_id"] for f in distinct_finalists(
+            selection, journal_index(unit / "search" / "states.jsonl"), keep_k)}
     digests = {}
     for line in (unit / "search" / "states.jsonl").read_text().splitlines():
         if line.strip():
@@ -129,6 +134,122 @@ def retire_completed_states(study_dir: Path, treatment: str) -> dict:
     doc["status"] = "retired"
     tomb.write_text(json.dumps(doc, indent=1) + "\n")
     return doc
+
+
+def train_recovery(student_dir: Path, rec_out: Path, cfg: Path, log: Path, *, env: dict,
+                   run_name: str, seed: int, purpose: str) -> Path:
+    """The frozen recipe (`e1_p1_kd_heavy@0.86M`) on `student_dir` by the C1 trainer.
+    Only the C1 override set -- run identity, paths, student and seed -- may differ
+    from the recipe, and that is checked rather than assumed."""
+    from stages.phase_c1.autoinit_c1_driver import (C1_PROBE_OVERRIDES, FROZEN_RECIPE,
+                                                    PACK_DIR, TRAINER, trained_model_dir)
+    frozen = json.loads(FROZEN_RECIPE.read_text())
+    derived = {**frozen, "run_name": run_name, "out_dir": str(rec_out.relative_to(REPO)),
+               "data_dir": PACK_DIR, "student_path": str(student_dir), "seed": int(seed),
+               "_purpose": purpose}
+    outside = sorted(k for k in set(frozen) | set(derived) if frozen.get(k) != derived.get(k))
+    if set(outside) - set(C1_PROBE_OVERRIDES):
+        raise RuntimeError(f"the derived recovery config differs outside "
+                           f"{sorted(C1_PROBE_OVERRIDES)}: {outside}")
+    cfg.write_text(json.dumps(derived, indent=2) + "\n")
+    shutil.rmtree(rec_out, ignore_errors=True)
+    with log.open("w") as lf:
+        rc = subprocess.run([TRAIN_PY, str(TRAINER), "--config", str(cfg)], cwd=REPO,
+                            env=env, stdout=lf, stderr=subprocess.STDOUT).returncode
+    if rc != 0:
+        raise RuntimeError(f"the trainer exited {rc}; see {log.name}")
+    return trained_model_dir(rec_out)
+
+
+def evaluate_all(model_dir: Path, out: Path, vol_gens: Path, label: str, prereg: dict,
+                 env: dict) -> tuple[dict, list]:
+    """Every item of eval-set-1 on the recovered student, then its formal report.
+    Generations already on the volume (`vol_gens`) are rescored, never regenerated;
+    each finished unit is pushed there before the next starts."""
+    from shared import eval_sets as ES
+    from stages.phase_c1.autoinit_c1_driver import TOKENIZER_SIDECAR_SHA256, TOKENIZER_SOURCE
+    from stages.phase_c1.packaging import build_evaluation_package
+    pkg = out / "package"
+    shutil.rmtree(pkg, ignore_errors=True)
+    build_evaluation_package(model_dir, tokenizer_source=TOKENIZER_SOURCE,
+                             dest=pkg, expected_sidecar_sha256=TOKENIZER_SIDECAR_SHA256)
+    gens = out / "generations"
+    gens.mkdir(exist_ok=True)
+    sync("pull", vol_gens, gens, out / "sync.log")
+    ctx = str(prereg["evaluation"]["trained_context"])
+    m = ES.manifest(SET_ID)
+    runs = []
+    fluid = gens / "fluid_reasoning_720__dev_v1.jsonl"
+    if not fluid.is_file():
+        tmp = out / "fluid_tmp.jsonl"
+        with (out / "eval_fluid.log").open("w") as lf:
+            rc = subprocess.run(
+                [VLLM_PY, "scripts/stages/stage-0/calibration_volume/run_battery.py",
+                 "--model", str(pkg), "--label", label,
+                 "--tasks", str(ES.unit_path(SET_ID, "fluid_reasoning_720", "dev_v1")),
+                 "--mode", "eval", "--out", str(tmp), "--trained-context", ctx,
+                 "--action-protocol", prereg["evaluation"]["action_protocol"]],
+                cwd=REPO, env=env, stdout=lf, stderr=subprocess.STDOUT).returncode
+        if rc != 0:
+            raise RuntimeError(f"run_battery exited {rc}; see eval_fluid.log")
+        shutil.copyfile(tmp.with_suffix(".summary.json"), gens / "fluid_reasoning_720__dev_v1.summary.json")
+        os.replace(tmp, fluid)
+        sync("push", gens, vol_gens, out / "sync.log")
+        runs.append("fluid")
+    else:   #: the eval unit's log exists either way (the launcher fetches it)
+        (out / "eval_fluid.log").write_text(f"{fluid.name}: restored from the volume, "
+                                            "rescored, not regenerated\n")
+    units = {u: ES.unit_path(SET_ID, "stage3_capability_846", u)
+             for u in m["components"]["stage3_capability_846"]["units"]}
+    legacy = legacy_prompts(out / "legacy_150.prompts.jsonl")
+    todo = {f"stage3_capability_846__{u}": p for u, p in units.items() if p is not None}
+    todo["stage3_legacy_150__items"] = legacy
+    missing = {k: p for k, p in todo.items() if not (gens / f"{k}.jsonl").is_file()}
+    if missing:
+        staged = out / "uncapped_in"
+        shutil.rmtree(staged, ignore_errors=True)
+        staged.mkdir()
+        for k, p in missing.items():
+            shutil.copyfile(p, staged / f"{k}.jsonl")
+        raw = out / "uncapped_out"
+        with (out / "eval_capability.log").open("w") as lf:
+            rc = subprocess.run(
+                [VLLM_PY, "scripts/shared/evaluation/uncapped_eval.py", "--model", str(pkg),
+                 "--label", label, "--prompts", *sorted(str(staged / f"{k}.jsonl") for k in missing),
+                 "--out-dir", str(raw), "--trained-context", ctx],
+                cwd=REPO, env=env, stdout=lf, stderr=subprocess.STDOUT).returncode
+        if rc != 0:
+            raise RuntimeError(f"uncapped_eval exited {rc}; see eval_capability.log")
+        for k in missing:
+            shutil.copyfile(raw / f"{k}.json", gens / f"{k}.summary.json")
+            os.replace(raw / f"{k}.generations.jsonl", gens / f"{k}.jsonl")
+        sync("push", gens, vol_gens, out / "sync.log")
+        runs.append("capability")
+    else:
+        (out / "eval_capability.log").write_text(
+            f"{sorted(todo)}: restored from the volume, rescored, not regenerated\n")
+    import shared.evaluation.eval_set_scoring as S
+    rep = S.report(gens, label, {}, SET_ID, rows_out=out / "rows")
+    return rep, runs
+
+
+def candidate_dirs(unit: Path, finalists_dir: Path, k: int) -> list[dict]:
+    """Each distinct Top-`k` leaf of the dose whose search unit is `unit`, with the
+    directory that holds its checkpoint: a rebuilt one under `finalists_dir`,
+    otherwise the search's own state, found under `unit` by its journaled path."""
+    from stages.calibration_volume.finalists import distinct_finalists, journal_index
+    states = journal_index(unit / "search" / "states.jsonl")
+    out = []
+    for f in distinct_finalists(json.loads((unit / "stage1_selection.json").read_text()),
+                                states, k):
+        rebuilt = finalists_dir / f["state_id"]
+        if rebuilt.is_dir():
+            d = rebuilt
+        else:
+            ck = Path(states[f["state_id"]]["checkpoint_path"])
+            d = unit / "search" / "states" / ck.relative_to(ck.parents[1])
+        out.append({**f, "dir": str(d)})
+    return out
 
 
 def legacy_prompts(dest: Path) -> Path:
@@ -221,17 +342,81 @@ def main(argv=None) -> int:
         finish(st, "A_contract", eval_set_identity=es_identity,
                knowledge_staged=knowledge is not None)
 
+        #: The Top-4 extension (maintainer 2026-10-20, plans/top4_extension.json).
+        #: Its stages never fail the preregistered dose: each records its own
+        #: outcome, which the closeout reports.
+        ext = plan.get("top4_extension") or {}
+        record["extension"] = {}
+
+        def extension(name: str, fn) -> None:
+            st = stage(name)
+            try:
+                st.update(fn())
+                finish(st, name)
+            except Exception as exc:  # noqa: BLE001
+                st.update(status="failed", error=f"{type(exc).__name__}: {exc}"[:2000],
+                          traceback=traceback.format_exc()[-4000:],
+                          seconds=round(time.time() - st.pop("t0"), 1))
+                save()
+                mark(f"STAGE_FAILED:{name}")
+            record["extension"][name] = st["status"]
+            save()
+
+        def rebuild() -> dict:
+            done = {}
+            for t, rel in ext["rebuild"].items():
+                rec = out / f"rebuild_{t}.json"
+                with (out / "rebuild.log").open("a") as lf:
+                    rc = subprocess.run(
+                        [TRAIN_PY, "scripts/stages/stage-0/calibration_volume/rebuild_driver.py",
+                         "--plan", rel, "--record", str(rec),
+                         "--work", str(REPO / "artifacts/stages/stage-0/calibration_volume/rebuild" / t),
+                         "--dest", str(vol.parent / t / "finalists")],
+                        cwd=REPO, env=env, stdout=lf, stderr=subprocess.STDOUT).returncode
+                doc = json.loads(rec.read_text()) if rec.is_file() else {}
+                done[t] = {"rc": rc, "status": doc.get("status"),
+                           "adopted": [e["state_id"] for e in doc.get("leaves", []) if e.get("adopted")]}
+                if rc != 0:
+                    raise RuntimeError(f"the rebuild of {t} exited {rc}: {done[t]}")
+            return {"rebuilt": done}
+
+        def export(treatments) -> dict:
+            from shared.deployment import MAIN_RELAY
+            from stages.calibration_volume.finalists import export_candidates
+            token = (os.environ.get("HF_TOKEN") or Path("/workspace/hf/token").read_text()).strip()
+            man = out / "finalists_manifest.json"
+            doc = json.loads(man.read_text()) if man.is_file() else {"candidates": {}, "files": []}
+            for t in treatments:
+                cands = candidate_dirs(vol.parent / t / "search_unit", vol.parent / t / "finalists",
+                                       int(ext["k"]))
+                files = export_candidates(cands, study=prereg["study_id"], treatment=t,
+                                          repo=MAIN_RELAY, token=token)
+                doc["candidates"][t] = [{k: v for k, v in c.items() if k != "dir"} for c in cands]
+                doc["files"] = [r for r in doc["files"] if r["treatment"] != t] + files
+            for rec in sorted(out.glob("rebuild_*.json")):
+                doc.setdefault("rebuild", {})[rec.stem.removeprefix("rebuild_")] = json.loads(rec.read_text())
+            man.write_text(json.dumps(doc, indent=1, default=str) + "\n")
+            done_unit("finalists", man)
+            return {"exported": {t: [c["state_id"] for c in doc["candidates"][t]] for t in treatments},
+                    "manifest_sha256": sha(man)}
+
         # -- V: room on the volume (the plan names the doses to retire) -------
         if plan.get("retire_states_of"):
             st = stage("V_retire")
             done = {}
             for t in plan["retire_states_of"]:
-                doc = retire_completed_states(vol.parent, t)
+                doc = retire_completed_states(vol.parent, t, keep_k=int(ext.get("k", 1)))
                 shutil.copyfile(vol.parent / t / "retired_states.json",
                                 out / f"retired_states_{t}.json")
                 done[t] = {"retired": len(doc["retired"]), "bytes": doc["retired_bytes"],
                            "kept": doc["kept"]}
             finish(st, "V_retire", doses=done)
+
+        # -- B, X: the earlier doses' finalists, rebuilt where retired, then shipped
+        if ext.get("rebuild"):
+            extension("B_rebuild", rebuild)
+        if ext.get("export_prior"):
+            extension("X_export_prior", lambda: export(ext["export_prior"]))
 
         # -- S: search (resumable) ------------------------------------------
         products = vol / "products.json"
@@ -291,6 +476,8 @@ def main(argv=None) -> int:
         srec = json.loads((search_unit / "search_record.json").read_text())
         record["search"] = {"commit": srec.get("commit"), "session": srec.get("session")}
         save()
+        if ext.get("export_own"):
+            extension("X_export", lambda: export([args.treatment]))
 
         # -- R: recovery (resumable) ------------------------------------------
         st = stage("R_recovery")
@@ -307,30 +494,16 @@ def main(argv=None) -> int:
                 raise RuntimeError("the recovered student on the volume does not hash to its record")
             finish(st, "R_recovery", resumed_complete=True, model_dir=str(model_dir))
         else:
-            from stages.phase_c1.autoinit_c1_driver import (C1_PROBE_OVERRIDES, FROZEN_RECIPE,
-                                                            PACK_DIR, TRAINER, trained_model_dir)
-            frozen = json.loads(FROZEN_RECIPE.read_text())
-            if frozen["seed"] != prereg["recovery"]["seed"]:
+            from stages.phase_c1.autoinit_c1_driver import FROZEN_RECIPE
+            if json.loads(FROZEN_RECIPE.read_text())["seed"] != prereg["recovery"]["seed"]:
                 raise RuntimeError("the frozen recipe's seed is not the preregistered seed")
-            derived = {**frozen, "run_name": f"s0v_formal_{args.treatment}",
-                       "out_dir": str(rec_out.relative_to(REPO)), "data_dir": PACK_DIR,
-                       "student_path": str(top1_dir),
-                       "_purpose": (f"Stage-0 volume formal dose {args.treatment}: the committed "
-                                    "Top-1 recovered by the frozen recipe at its own seed; only run "
-                                    "identity, pack path and student_path differ from it")}
-            outside = sorted(k for k in set(frozen) | set(derived)
-                             if frozen.get(k) != derived.get(k))
-            if set(outside) - set(C1_PROBE_OVERRIDES):
-                raise RuntimeError(f"the derived recovery config differs outside {sorted(C1_PROBE_OVERRIDES)}: {outside}")
             cfg = out / "recovery_config.json"
-            cfg.write_text(json.dumps(derived, indent=2) + "\n")
-            shutil.rmtree(rec_out, ignore_errors=True)
-            with (out / "recovery.log").open("w") as lf:
-                rc = subprocess.run([TRAIN_PY, str(TRAINER), "--config", str(cfg)], cwd=REPO,
-                                    env=env, stdout=lf, stderr=subprocess.STDOUT).returncode
-            if rc != 0:
-                raise RuntimeError(f"the trainer exited {rc}; see recovery.log")
-            model_dir = trained_model_dir(rec_out)
+            model_dir = train_recovery(
+                top1_dir, rec_out, cfg, out / "recovery.log", env=env,
+                run_name=f"s0v_formal_{args.treatment}", seed=prereg["recovery"]["seed"],
+                purpose=(f"Stage-0 volume formal dose {args.treatment}: the committed "
+                         "Top-1 recovered by the frozen recipe at its own seed; only run "
+                         "identity, pack path and student_path differ from it"))
             msha = sha(model_dir / "model.safetensors")
             pushed = sync("push", rec_out, model_vol, out / "sync.log")
             if (rec_out / "train_log.jsonl").is_file():
@@ -347,71 +520,9 @@ def main(argv=None) -> int:
 
         # -- E: eval-set-1, every item --------------------------------------------
         st = stage("E_eval")
-        from stages.phase_c1.autoinit_c1_driver import (TOKENIZER_SIDECAR_SHA256, TOKENIZER_SOURCE,
-                                                        trained_model_dir)
-        from stages.phase_c1.packaging import build_evaluation_package
-        pkg = out / "package"
-        shutil.rmtree(pkg, ignore_errors=True)
-        build_evaluation_package(trained_model_dir(rec_out), tokenizer_source=TOKENIZER_SOURCE,
-                                 dest=pkg, expected_sidecar_sha256=TOKENIZER_SIDECAR_SHA256)
-        gens = out / "generations"
-        gens.mkdir(exist_ok=True)
-        sync("pull", vol / "generations", gens, out / "sync.log")
-        label = f"s0v_formal_{args.treatment}"
-        ctx = str(prereg["evaluation"]["trained_context"])
-        m = ES.manifest(SET_ID)
-        runs = []
-        fluid = gens / "fluid_reasoning_720__dev_v1.jsonl"
-        if not fluid.is_file():
-            tmp = out / "fluid_tmp.jsonl"
-            with (out / "eval_fluid.log").open("w") as lf:
-                rc = subprocess.run(
-                    [VLLM_PY, "scripts/stages/stage-0/calibration_volume/run_battery.py",
-                     "--model", str(pkg), "--label", label,
-                     "--tasks", str(ES.unit_path(SET_ID, "fluid_reasoning_720", "dev_v1")),
-                     "--mode", "eval", "--out", str(tmp), "--trained-context", ctx,
-                     "--action-protocol", prereg["evaluation"]["action_protocol"]],
-                    cwd=REPO, env=env, stdout=lf, stderr=subprocess.STDOUT).returncode
-            if rc != 0:
-                raise RuntimeError(f"run_battery exited {rc}; see eval_fluid.log")
-            shutil.copyfile(tmp.with_suffix(".summary.json"), gens / "fluid_reasoning_720__dev_v1.summary.json")
-            os.replace(tmp, fluid)
-            sync("push", gens, vol / "generations", out / "sync.log")
-            runs.append("fluid")
-        else:   #: the eval unit's log exists either way (the launcher fetches it)
-            (out / "eval_fluid.log").write_text(f"{fluid.name}: restored from the volume, "
-                                                "rescored, not regenerated\n")
-        units = {u: ES.unit_path(SET_ID, "stage3_capability_846", u)
-                 for u in m["components"]["stage3_capability_846"]["units"]}
-        legacy = legacy_prompts(out / "legacy_150.prompts.jsonl")
-        todo = {f"stage3_capability_846__{u}": p for u, p in units.items() if p is not None}
-        todo["stage3_legacy_150__items"] = legacy
-        missing = {k: p for k, p in todo.items() if not (gens / f"{k}.jsonl").is_file()}
-        if missing:
-            staged = out / "uncapped_in"
-            shutil.rmtree(staged, ignore_errors=True)
-            staged.mkdir()
-            for k, p in missing.items():
-                shutil.copyfile(p, staged / f"{k}.jsonl")
-            raw = out / "uncapped_out"
-            with (out / "eval_capability.log").open("w") as lf:
-                rc = subprocess.run(
-                    [VLLM_PY, "scripts/shared/evaluation/uncapped_eval.py", "--model", str(pkg),
-                     "--label", label, "--prompts", *sorted(str(staged / f"{k}.jsonl") for k in missing),
-                     "--out-dir", str(raw), "--trained-context", ctx],
-                    cwd=REPO, env=env, stdout=lf, stderr=subprocess.STDOUT).returncode
-            if rc != 0:
-                raise RuntimeError(f"uncapped_eval exited {rc}; see eval_capability.log")
-            for k in missing:
-                shutil.copyfile(raw / f"{k}.json", gens / f"{k}.summary.json")
-                os.replace(raw / f"{k}.generations.jsonl", gens / f"{k}.jsonl")
-            sync("push", gens, vol / "generations", out / "sync.log")
-            runs.append("capability")
-        else:
-            (out / "eval_capability.log").write_text(
-                f"{sorted(todo)}: restored from the volume, rescored, not regenerated\n")
-        import shared.evaluation.eval_set_scoring as S
-        rep = S.report(gens, label, {}, SET_ID, rows_out=out / "rows")
+        from stages.phase_c1.autoinit_c1_driver import trained_model_dir
+        rep, runs = evaluate_all(trained_model_dir(rec_out), out, vol / "generations",
+                                 f"s0v_formal_{args.treatment}", prereg, env)
         (out / "report.json").write_text(json.dumps(rep, indent=1) + "\n")
         sync("push", out, vol / "dose_out", out / "sync.log")
         finish(st, "E_eval", generated=runs,

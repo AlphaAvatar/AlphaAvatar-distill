@@ -12842,3 +12842,58 @@ on a paid pod.
   - Authorization: the dose plan's own figures ($18.57 expected, $24.36
     hard). With d4 at $29.06 plus $5, the total fits the formal envelope's
     remaining $54.40 after the volume reservation.
+
+## 2026-10-20 — Stage-0 volume study: Top-4 recovery extension (L40S, two seeds), +$30
+
+- **Context.** d1 and d2 are COMPLETE. Both Top-1s score at the floor of the
+  fluid battery (1/714 and 0/714), and item-level usable-rollout status flips
+  on 45% of items between the two near-identical models. The preregistered
+  design recovers only each dose's Top-1, at one seed.
+- **Decision (maintainer, 2026-10-20).** Every dose's Top-4 from its own full
+  search is recovered and measured. Owner:
+  `logs/stages/stage-0/calibration_volume/plans/top4_extension.json`, written
+  before any probe ran.
+  - **Candidates.** The search's own quality order, byte-identical leaves
+    counted once, first 4. d2's quality positions 1 and 2 (and 4 and 5) are the
+    same weights, because DEPTH removed the same eight layers under both
+    profiles. So d2's four are quality positions 1, 3, 4 and 6; d1's are 1–4.
+  - **Seeds.** Top-2..4 at 20260726 and 20260727; Top-1 at 20260727 only
+    (its A100 unit already holds 20260726). That is 7 units per dose, 21 in
+    all.
+  - **Hardware.** L40S (secure cloud, US-TX-3, with a network volume for the
+    recovered students). Top-1's preregistered A100 unit is not rerun.
+  - **Recipe and measurement.** The dose's own `train_recovery` and
+    `evaluate_all`; only seed, student, run identity and paths differ.
+  - **Budget.** +$25, then +$5:
+    - project cap $607.6571 → $637.6571;
+    - programme ceiling $107.5099 → $137.5099;
+    - formal_volume $90 → $120.
+- **What it costs the preregistered study: nothing changes.** The search, the
+  committed Top-1 (finalists_k = 1), its A100 recovery and every H1/H2/H3
+  contrast stay as registered. The extension's numbers never enter them.
+- **d1's Top-2..4 were retired** on 2026-10-19 (decision above, "Revisit when
+  a later analysis needs a non-Top-1 state"). They are rebuilt in the d4
+  session on the A100 by the D1 replay's digest-pinned fixed path, under the
+  Stage-0 search's owners. All three $0 agreement checks pass on the
+  journal (`plans/top4_rebuild_d1.json`):
+  - root state `use_cache=False`;
+  - all 12 operator config hashes;
+  - the execution knobs.
+  A digest mismatch stops that candidate; nothing is substituted.
+- **Retirement now keeps each earlier dose's distinct Top-4** (the d4 plan's
+  `top4_extension.k`). The d4 launch of 05:01Z was stopped between create
+  attempts at $0, because its old plan would have deleted d2's Top-2..4.
+- **Durability.** Candidates leave EUR-IS-1 through the relay, sha256-pinned.
+  Measured headroom is 15.55 GiB, and the 12 candidates are about 13.3 GiB.
+  Recovered students go to a new US-TX-3 network volume, not the relay, which
+  has no room for them.
+- **Estimate (not measured).**
+  - d4 A100 session about $30.
+  - 21 L40S units about $51–60. L40S eval time is unmeasured; 1.3–1.8× the
+    A100's is assumed.
+  - New volume about $1.4.
+  - Against about $84 available, so the upper end does not fit with the $5
+    margin. The rule is to re-price from the first measured unit, and to
+    return to the maintainer before a probe session that cannot fit.
+- **Revisit when.** The first L40S unit has run, or a rebuilt candidate
+  mismatches.

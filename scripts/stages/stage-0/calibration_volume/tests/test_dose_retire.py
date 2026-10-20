@@ -54,3 +54,20 @@ def test_each_dose_retires_exactly_the_doses_before_it():
                         "volume_preregistration.json").read_text())["execution_order"]
     for i, t in enumerate(order):
         assert G.plan_doc(f"dose_{t}").get("retire_states_of", []) == order[:i], t
+
+
+def test_with_the_top4_extension_a_dose_keeps_its_distinct_top4(tmp_path):
+    """2026-10-20: the extension recovers each dose's distinct Top-4, so retirement
+    keeps them; a byte-identical leaf is represented by its better-ranked twin."""
+    states = _dose(tmp_path, "d2", "COMPLETE", states=("top", "twin", "q3", "q4", "q5", "q6"))
+    unit = tmp_path / "d2" / "search_unit"
+    shas = {"top": "c1", "twin": "c1", "q3": "c3", "q4": "c4", "q5": "c4", "q6": "c6"}
+    (unit / "search" / "states.jsonl").write_text("".join(
+        json.dumps({"state_id": s, "artifact_digest": f"d_{s}", "checkpoint_sha256": c}) + "\n"
+        for s, c in shas.items()))
+    (unit / "stage1_selection.json").write_text(json.dumps({
+        "selected": [{"state_id": "top"}],
+        "decisions": [{"state_id": s, "quality_order": i + 1} for i, s in enumerate(shas)]}))
+    doc = retire_completed_states(tmp_path, "d2", keep_k=4)
+    assert sorted(p.name for p in states.iterdir()) == ["q3", "q4", "q6", "top"]
+    assert sorted(r["state_id"] for r in doc["retired"]) == ["q5", "twin"]

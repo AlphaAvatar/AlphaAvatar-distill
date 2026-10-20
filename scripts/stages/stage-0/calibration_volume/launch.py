@@ -42,9 +42,10 @@ from stages.calibration_volume import governance as G  # noqa: E402
 
 REPO = "/workspace/aad"
 AUDIT = {"battery": "stage0_calvol_battery", "search": "stage0_calvol_search",
-         "bench": "stage0_calvol_bench", "dose": "stage0_calvol_dose"}
+         "bench": "stage0_calvol_bench", "dose": "stage0_calvol_dose",
+         "probes": "stage0_calvol_probes"}
 EVIDENCE = {"battery": "battery.json", "search": "search_session.json", "bench": "bench.json",
-            "dose": "dose_record.json"}
+            "dose": "dose_record.json", "probes": "probe_session.json"}
 #: What a finished search treatment brings home: its records, never the
 #: materialized states (5-7 GB each at the root) the search leaves on the pod.
 SEARCH_UNIT_FILES = ("search_record.json", "structure.json", "stage1_selection.json",
@@ -351,6 +352,8 @@ DOSE_UNIT_FILES = {
     "recovery": ("recovery_products.json", "recovery_config.json", "recovery.log",
                  "train_log.jsonl"),
     "eval": ("report.json", "generations", "rows", "eval_fluid.log", "eval_capability.log"),
+    #: the Top-4 extension's candidates: relay paths, sha256s and the rebuild records
+    "finalists": ("finalists_manifest.json",),
 }
 
 
@@ -471,8 +474,132 @@ def dose_spec(args) -> SessionSpec:
     )
 
 
+#: What a finished probe unit brings home -- never the recovered student, which is
+#: on the session's network volume, named in the records by sha256 (P8.4).
+PROBE_UNIT_FILES = ("report.json", "generations", "rows", "recovery_products.json",
+                    "recovery_config.json", "recovery.log", "train_log.jsonl",
+                    "eval_fluid.log", "eval_capability.log")
+
+
+def secure_probes(ctx: SessionContext) -> None:
+    """Pull each finished probe unit's records off the pod. Idempotent; never raises."""
+    try:
+        if ctx.target is None:
+            return
+        audit = f"{REPO}/artifacts/audit/{AUDIT['probes']}"
+        secured = ctx.evidence.setdefault("units_secured", {})
+        for label, digest in _remote_done(ctx, "probes").items():
+            if secured.get(label, {}).get("sha256") == digest:
+                continue
+            dest = store(ctx) / label
+            dest.mkdir(parents=True, exist_ok=True)
+            rcs = {f: _scp(ctx, f"{audit}/{label}/{f}", dest / f,
+                           recursive=f in ("generations", "rows"), limit_min=30)
+                   for f in PROBE_UNIT_FILES}
+            rep = dest / "report.json"
+            ok = (all(rc == 0 for rc in rcs.values()) and rep.is_file()
+                  and hashlib.sha256(rep.read_bytes()).hexdigest() == digest)
+            secured[label] = {"sha256": digest, "rc": rcs, "ok": ok}
+            ctx.say(f"probe unit {label}: {'SECURED' if ok else 'fetch incomplete'}")
+        _scp(ctx, f"{audit}/{EVIDENCE['probes']}", store(ctx) / EVIDENCE["probes"])
+    except Exception as exc:  # noqa: BLE001
+        ctx.evidence.setdefault("secure_errors", []).append(repr(exc)[:300])
+
+
+def probe_products_secured(ctx: SessionContext, *_a, **_k) -> tuple[bool, str]:
+    secure_probes(ctx)
+    secured = ctx.evidence.get("units_secured", {})
+    bad = [k for k, v in secured.items() if not v.get("ok")]
+    if bad:
+        return False, f"finished units not secured off-pod: {bad}"
+    return True, f"{len(secured)} finished unit(s) secured off-pod; students are on the volume"
+
+
+def probe_relay_inputs(plan: dict) -> tuple[RelayInput, ...]:
+    """Each unit's candidate checkpoint, file by file, sha256-pinned; a candidate
+    two units share (two seeds) is staged once."""
+    seen, out = set(), []
+    for u in plan["units"]:
+        for f in u["candidate_files"]:
+            if f["path"] not in seen:
+                seen.add(f["path"])
+                out.append(RelayInput(path=f["path"], repo=MAIN_RELAY,
+                                      dest=u["candidate_dir"], sha256=f["sha256"]))
+    return tuple(out)
+
+
+def probe_driver_command(ctx: Any, plan: Any) -> str:
+    py = f"PYTHONPATH={REPO}/src:{REPO}/scripts /opt/train/bin/python"
+    auth = f"'{REPO}/{G.authorization_path(ctx.args.run_id)}'"
+    return (f"{py} {REPO}/scripts/stages/stage-0/calibration_volume/probe_driver.py "
+            f"--run-id {ctx.args.run_id} --auth {auth} --plan {ctx.args.plan} "
+            f"--status '{status_path('probes')}' --volume '{ctx.args.volume_mount_path}'")
+
+
+def probe_spec(args) -> SessionSpec:
+    """Top-4 extension probes: per unit, the frozen recovery and every item of eval-set-1."""
+    from aadistill.infrastructure.session import LocalAsset
+    from shared.pod.autoinit_science_inputs import RECOVERY_LADDER
+    from stages.phase_c1.autoinit_c1_launch import C1_EVAL_TOKENIZER, C1_ROPE_INPUT
+    plan = G.plan_doc(args.plan)
+    if not getattr(args, "network_volume_id", "") or not getattr(args, "volume_mount_path", ""):
+        raise SystemExit("a probe session needs --network-volume-id and --volume-mount-path: "
+                         "its recovered students must survive the pod")
+    if args.gpu != plan["hardware"]["gpu"]:
+        raise SystemExit(f"--gpu {args.gpu!r} is not the plan's {plan['hardware']['gpu']!r}")
+    return SessionSpec(
+        session_id=f"stage0-calvol-{plan['name']}",
+        schema="aadistill.stage0.calibration_volume.probe_session/v1",
+        description=f"Stage-0 Top-4 extension: {plan['name']} ({len(plan['units'])} units)",
+        authorization_path=str(G.authorization_path(args.run_id)),
+        authorization_loader=partial(G.load_for, "probes"),
+        commands=ExecutionCommands(
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
+            **deployment_commands()),
+        plan_id=f"stage0.calibration_volume.{args.plan}",
+        plan_hash=G.plan_hash(args.plan),
+        budget=battery_budget(args),
+        setup=SetupManifest(
+            env={"SESSION_KIND": "stage0_calvol"},
+            required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
+                          "SESSION_KIND", "TEACHER_REVISION"),
+            setup_markers=("ENV_READY", "REPO_READY", "ASSETS_STAGED", "TRAIN_ENV",
+                           "VLLM_READY", "SETUP_DONE"),
+            local_assets=(LocalAsset(repo_path="artifacts/stages/stage-3/eval/battery_v2",
+                                     dest_name="battery_v2",
+                                     install_to="artifacts/stages/stage-3/eval"),),
+            relay_inputs=(*probe_relay_inputs(plan), *RECOVERY_LADDER, *C1_EVAL_TOKENIZER,
+                          *C1_ROPE_INPUT),
+            teacher_revision=plan["teacher_revision"],
+            uv_max_seconds=1500, tests_max_seconds=600),
+        driver_command=probe_driver_command,
+        driver_job_id=f"stage0_calvol_{plan['name']}_driver",
+        status_path=status_path("probes"),
+        run_log_path="/workspace/stage0_calvol_probes_run.log",
+        markers=MarkerPolicy(
+            success="ALL_DONE", failure=("RUN_FAILED",),
+            products_eligible=lambda terminal, stages: True,
+            failure_note="every finished unit is on the network volume and its records off-pod"),
+        artifacts=ArtifactPolicy(
+            audit_dirname=AUDIT["probes"], evidence_filename=EVIDENCE["probes"],
+            archive_basename=f"stage0_calvol_{plan['name']}",
+            spec_success="configs/stages/stage-0/calibration_volume/probes_artifacts.json",
+            spec_failed="configs/stages/stage-0/calibration_volume/probes_artifacts.json",
+            report_names=(),
+            on_poll=secure_probes,
+            products_secured=probe_products_secured),
+        teardown=TeardownPolicy(
+            note="delete the pod, verify from the provider that it is gone, STOP; "
+                 "the network volume is KEPT (it holds the recovered students)"),
+    )
+
+
 def spec(args) -> SessionSpec:
     kind = args.session
+    if kind == "probes":
+        return probe_spec(args)
     if kind == "dose":
         return dose_spec(args)
     if kind == "search":

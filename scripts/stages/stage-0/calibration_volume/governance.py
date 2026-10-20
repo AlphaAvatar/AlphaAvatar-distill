@@ -138,6 +138,28 @@ HARNESS["dose"] = HARNESS["battery"] + (
 )
 
 
+HARNESS["dose"] = HARNESS["dose"] + (
+    "scripts/stages/stage-0/calibration_volume/finalists.py",
+    "scripts/stages/stage-0/calibration_volume/rebuild_driver.py",
+    "scripts/stages/stage-1/phase_d1/replay_specs.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+)
+
+
+#: A Top-4 probe runs the dose's own recovery and measurement (`dose_driver`).
+HARNESS["probes"] = HARNESS["battery"] + (
+    "scripts/stages/stage-0/calibration_volume/probe_driver.py",
+    "scripts/stages/stage-0/calibration_volume/dose_driver.py",
+    "scripts/stages/stage-0/calibration_volume/volume_sync.py",
+    "scripts/shared/evaluation/eval_set_scoring.py",
+    "scripts/shared/eval_sets.py",
+    "scripts/shared/training/train_stage3.py",
+    "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+    "scripts/stages/stage-1/phase_c1/packaging.py",
+    "src/aadistill/evaluation/eval_registry.py",
+)
+
+
 def run_dir(run_id: str) -> Path:
     return EXPERIMENT_LOGS / "runs" / run_id
 
