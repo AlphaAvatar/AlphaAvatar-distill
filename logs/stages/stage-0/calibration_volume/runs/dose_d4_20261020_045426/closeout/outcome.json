@@ -1,0 +1,15 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "dose_d4_20261020_045426",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-20T04:56:08+00:00",
+ "status": "ABANDONED_BEFORE_LAUNCH",
+ "outcome": "The launcher refused at $0 before any provider call: --bundle was given as a full scratch path, not the canonical relay name aad_autoinit_b7ebcbc4.bundle (the pod fetches the bundle by that name). Operator error in the launch command, not a code defect; the guard worked. No provider resource was created. The one-use chain is closed and a fresh one is issued.",
+ "provider_resource_created": false,
+ "money": {
+  "all_in_usd": 0.0,
+  "_basis": "no provider resource existed"
+ }
+}
