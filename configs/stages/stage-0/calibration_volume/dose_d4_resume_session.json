@@ -3,7 +3,7 @@
  "session_kind": "dose",
  "name": "dose_d4_resume",
  "treatment": "d4",
- "purpose": "Formal Stage-0 volume dose d4, resumed from the network volume after dose_d4_20261020_054022 failed its final push to a full volume (preregistered retry_policy: journal restore, never a second measurement): first free the volume of d1's and d2's Top-4, which the relay holds and the probe sessions read from there, and check the room; then the search's tail, d4's own Top-4 to the relay, the fixed recovery and every item of eval-set-1. B_rebuild and X_export_prior finished in the failed session and are not repeated.",
+ "purpose": "Formal Stage-0 volume dose d4, resumed from the network volume after dose_d4_20261020_054022 failed its final push to a full volume (preregistered retry_policy: journal restore, never a second measurement): first free the volume of d1's and d2's Top-4, which the relay holds and the probe sessions read from there, retire d1's and d2's recovery optimizer states (COMPLETE doses, never trained again), and check the room; then the search's tail, d4's own Top-4 to the relay, the fixed recovery and every item of eval-set-1. B_rebuild and X_export_prior finished in the failed session and are not repeated.",
  "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
  "teacher": {
   "id": "Qwen/Qwen3-4B-Thinking-2507",
@@ -50,6 +50,11 @@
    "d2"
   ]
  },
- "volume_room_gb": 12,
+ "retire_optimizer_states": [
+  "d1",
+  "d2"
+ ],
+ "volume_room_gb": 16,
+ "_volume_room": "worst case this session writes to the volume: the largest d4 search state (7.3 GB) re-pushed, the recovery checkpoint with its optimizer state (5.9 GB) and the packaged student (2.4 GB). Measured 2026-10-20 on the volume after V_release left 10.1 GB free (dose_d4_20261020_211335).",
  "_resumes": "dose_d4_20261020_054022"
 }

@@ -12976,3 +12976,25 @@ on a paid pod.
   rule was checked against.
 - **Revisit when.** The resume's room check fails, or the search tail needs
   more than the expansion that was in flight.
+- **Revisited 2026-10-20 21:19Z — the room check failed, as designed.**
+  - Resume attempt `dose_d4_20261020_185256` ($0.2592) died in V_release. It
+    wrote its tombstone to the full volume BEFORE deleting anything. Repaired
+    in `2c1afe05`: the intent record now goes off the volume, and the tombstone
+    is written after the deletion.
+  - Attempt `dose_d4_20261020_211335` ($0.2513) released 9.54 GB, verified
+    against the relay. The finalist states were 1.19 GB each, not ~3 GB. It
+    then stopped at V_room: 10.1 GB free < 12 GB.
+  - **Decision (AGENTS.md 2.5 standing retirement).** Also retire d1's and
+    d2's recovery optimizer states, `trainer_state.pt` (3.52 GB each, 7.05 GB
+    in all). Both doses are COMPLETE and evaluated. The only reader of these
+    files is `train.py` resuming that same run, and the retry_policy never
+    retrains a complete dose. The trained students (`model/`, plus
+    `dose_out/package`) stay. The tombstone records each file's sha256 and
+    size.
+  - The room requirement rises to 16 GB, the measured worst case this session
+    writes: the largest d4 state (7.3 GB) re-pushed, the recovery checkpoint
+    (5.9 GB) and the packaged student (2.4 GB). Free after the retirement:
+    about 17.1 GB.
+  - Alternatives: grow the volume (bought storage, a maintainer decision);
+    delete the duplicate packaged students (second copies, but larger to
+    reason about than a file with no reader).

@@ -198,3 +198,31 @@ def test_room_is_the_sold_size_less_what_du_finds_after_stale_partials_go(tmp_pa
     assert room["stale_partials_removed"] == ["a/.s2.safetensors.partial"]
     assert not (dose / "a" / ".s2.safetensors.partial").exists()
     assert room["free_bytes"] == int(1e9) - room["used_bytes"] and room["used_bytes"] >= 4096
+
+
+# --- a COMPLETE dose's optimizer states (2026-10-20: the d4 resume lacked 2 GB) ----
+
+from stages.calibration_volume.dose_driver import retire_optimizer_states
+
+
+@pytest.mark.parametrize("status", ["COMPLETE", "FAILED", None])
+def test_only_a_complete_doses_optimizer_state_goes_and_its_student_stays(tmp_path, status):
+    ck = tmp_path / "d1" / "recovery" / "checkpoints" / "step_001023"
+    (ck / "model").mkdir(parents=True)
+    (ck / "model" / "model.safetensors").write_bytes(b"student")
+    (ck / "trainer_state.pt").write_bytes(b"adam" * 3)
+    if status:
+        (tmp_path / "d1" / "dose_out").mkdir()
+        (tmp_path / "d1" / "dose_out" / "dose_record.json").write_text(json.dumps({"status": status}))
+    intent = tmp_path / "intent.json"
+    if status != "COMPLETE":
+        with pytest.raises(RuntimeError, match="only a COMPLETE dose"):
+            retire_optimizer_states(tmp_path, "d1", intent=intent)
+        assert (ck / "trainer_state.pt").is_file()
+        return
+    doc = retire_optimizer_states(tmp_path, "d1", intent=intent)
+    assert not (ck / "trainer_state.pt").exists() and (ck / "model" / "model.safetensors").is_file()
+    assert doc["status"] == "retired" and doc["retired_bytes"] == 12
+    assert doc["retired"][0]["path"] == "d1/recovery/checkpoints/step_001023/trainer_state.pt"
+    assert json.loads((tmp_path / "d1" / "retired_optimizer_states.json").read_text()) == doc
+    assert retire_optimizer_states(tmp_path, "d1", intent=intent) == doc == json.loads(intent.read_text())

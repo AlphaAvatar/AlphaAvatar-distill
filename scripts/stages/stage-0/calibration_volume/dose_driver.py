@@ -213,14 +213,58 @@ def release_relayed_finalists(study_dir: Path, treatment: str, manifest: dict, *
         for d in r["dirs"]:
             shutil.rmtree(study_dir / d, ignore_errors=True)
     doc["status"] = "released"
-    for wait in (0, 5, 15, 40, 60):         # the volume's quota may lag the deletion
+    write_after_freeing(tomb, json.dumps(doc, indent=1) + "\n")
+    intent.write_text(json.dumps(doc, indent=1) + "\n")
+    return doc
+
+
+def write_after_freeing(path: Path, text: str) -> None:
+    """A tombstone written just after deleting from a full volume, whose quota may
+    lag the deletion."""
+    for wait in (0, 5, 15, 40, 60):
         time.sleep(wait)
         try:
-            write_atomic(tomb, json.dumps(doc, indent=1) + "\n")
-            break
+            return write_atomic(path, text)
         except OSError as exc:
             if exc.errno not in (122, 28) or wait == 60:    # EDQUOT, ENOSPC
                 raise
+
+
+def retire_optimizer_states(study_dir: Path, treatment: str, *, intent: Path) -> dict:
+    """Delete a COMPLETE dose's recovery optimizer states (`trainer_state.pt`, 3.5 GB
+    each) from the volume, leaving a tombstone with each file's sha256 and size.
+    Their one reader is the trainer resuming that same run; a COMPLETE dose is never
+    trained again (the preregistered retry_policy) and its evaluated student --
+    `model/` -- stays (AGENTS.md 2.5; 2026-10-20 the d4 resume needed the room).
+    The intent is written off the full volume, the tombstone after the deletion.
+    Idempotent."""
+    prev = study_dir / treatment
+    tomb = prev / "retired_optimizer_states.json"
+    try:
+        if json.loads(tomb.read_text()).get("status") == "retired":
+            shutil.copyfile(tomb, intent)
+            return json.loads(tomb.read_text())
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
+    rec = prev / "dose_out" / "dose_record.json"
+    status = json.loads(rec.read_text()).get("status") if rec.is_file() else None
+    if status != "COMPLETE":
+        raise RuntimeError(f"dose {treatment} is {status or 'absent'} on the volume; only a "
+                           "COMPLETE dose's optimizer states may be retired")
+    files = sorted((prev / "recovery" / "checkpoints").glob("*/trainer_state.pt"))
+    retired = [{"path": str(f.relative_to(study_dir)), "bytes": f.stat().st_size,
+                "sha256": sha(f)} for f in files]
+    doc = {"schema": "aadistill.stage0.calibration_volume.retired_optimizer_states/v1",
+           "treatment": treatment, "status": "retiring",
+           "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+           "why": ("the dose is COMPLETE: its recovery is never resumed, so the optimizer "
+                   "state has no reader; the trained student it produced is kept"),
+           "retired": retired, "retired_bytes": sum(r["bytes"] for r in retired)}
+    intent.write_text(json.dumps(doc, indent=1) + "\n")
+    for f in files:
+        f.unlink()
+    doc["status"] = "retired"
+    write_after_freeing(tomb, json.dumps(doc, indent=1) + "\n")
     intent.write_text(json.dumps(doc, indent=1) + "\n")
     return doc
 
@@ -560,6 +604,15 @@ def main(argv=None) -> int:
                 done[t] = {"released": [r["state_id"] for r in doc["released"]],
                            "bytes": doc["released_bytes"]}
             finish(st, "V_release", doses=done)
+        if plan.get("retire_optimizer_states"):
+            st = stage("V_optim")
+            done = {}
+            for t in plan["retire_optimizer_states"]:
+                doc = retire_optimizer_states(vol.parent, t,
+                                              intent=out / f"retired_optimizer_states_{t}.json")
+                done[t] = {"retired": [r["path"] for r in doc["retired"]],
+                           "bytes": doc["retired_bytes"]}
+            finish(st, "V_optim", doses=done)
         if plan.get("volume_room_gb"):
             st = stage("V_room")
             room = volume_room(Path(args.volume), plan["hardware"]["network_volume"]["size_gb"], vol)
