@@ -118,7 +118,8 @@ def _finalists(study: Path):
 
 def test_finalists_the_relay_holds_are_released_with_a_tombstone(tmp_path):
     manifest, _, api = _finalists(tmp_path)
-    doc = release_relayed_finalists(tmp_path, "d1", manifest, api=api, repo="r")
+    intent = tmp_path / "intent.json"
+    doc = release_relayed_finalists(tmp_path, "d1", manifest, api=api, repo="r", intent=intent)
     states = tmp_path / "d1" / "search_unit" / "search" / "states"
     assert sorted(p.name for p in states.iterdir()) == ["other"]       # not a candidate
     assert not (tmp_path / "d1" / "finalists" / "r2").exists()
@@ -126,7 +127,31 @@ def test_finalists_the_relay_holds_are_released_with_a_tombstone(tmp_path):
     assert [r["dirs"] for r in doc["released"]] == [["d1/search_unit/search/states/top"],
                                                     ["d1/finalists/r2"]]
     assert json.loads((tmp_path / "d1" / "released_finalists.json").read_text()) == doc
-    assert release_relayed_finalists(tmp_path, "d1", manifest, api=api, repo="r") == doc
+    assert json.loads(intent.read_text()) == doc
+    intent.unlink()
+    assert release_relayed_finalists(tmp_path, "d1", manifest, api=api, repo="r",
+                                     intent=intent) == doc
+    assert json.loads(intent.read_text()) == doc
+
+
+def test_on_a_full_volume_the_tombstone_follows_the_deletion(tmp_path, monkeypatch):
+    """2026-10-20: the first d4 resume died opening the tombstone on the full volume,
+    leaving it empty; nothing may be written there until the deletion frees room."""
+    manifest, _, api = _finalists(tmp_path)
+    (tmp_path / "d1" / "released_finalists.json").write_text("")     # the torn one
+    top = tmp_path / "d1" / "search_unit" / "search" / "states" / "top"
+    real = Path.write_text
+
+    def quota(self, *a, **k):
+        if tmp_path / "d1" in self.parents and top.exists():
+            raise OSError(122, "Disk quota exceeded")
+        return real(self, *a, **k)
+
+    monkeypatch.setattr(Path, "write_text", quota)
+    intent = tmp_path / "intent.json"
+    doc = release_relayed_finalists(tmp_path, "d1", manifest, api=api, repo="r", intent=intent)
+    assert doc["status"] == "released" and not top.exists()
+    assert json.loads((tmp_path / "d1" / "released_finalists.json").read_text()) == doc
 
 
 @pytest.mark.parametrize("what", ["shard", "small", "missing"])
@@ -139,7 +164,8 @@ def test_a_candidate_the_relay_does_not_hold_releases_nothing(tmp_path, what):
     else:
         del hub["relay/d1/r2/config.json"]
     with pytest.raises(RuntimeError, match="nothing of d1 was released"):
-        release_relayed_finalists(tmp_path, "d1", manifest, api=api, repo="r")
+        release_relayed_finalists(tmp_path, "d1", manifest, api=api, repo="r",
+                                  intent=tmp_path / "intent.json")
     assert (tmp_path / "d1" / "search_unit" / "search" / "states" / "top").is_dir()
     assert (tmp_path / "d1" / "finalists" / "r2").is_dir()
 

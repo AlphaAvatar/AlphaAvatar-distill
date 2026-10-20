@@ -137,7 +137,7 @@ def retire_completed_states(study_dir: Path, treatment: str, keep_k: int = 1) ->
 
 
 def release_relayed_finalists(study_dir: Path, treatment: str, manifest: dict, *,
-                              api, repo: str) -> dict:
+                              api, repo: str, intent: Path) -> dict:
     """Free the volume of an earlier dose's retained Top-k once the relay holds it:
     every file the manifest names for a candidate is checked against what the hub
     STORES (LFS sha256 for the shard, git blob id of the volume copy for the
@@ -146,13 +146,22 @@ def release_relayed_finalists(study_dir: Path, treatment: str, manifest: dict, *
     (`finalists.probe_units`), so the volume copies have no consumer left
     (AGENTS.md 2.5, P8.4); on 2026-10-20 the d4 search filled the 300 GB volume
     beside them. Any candidate the relay does not hold refuses the whole dose
-    before a byte is deleted. Idempotent."""
+    before a byte is deleted. Idempotent.
+
+    The volume this frees is full, so nothing can be written to it before the
+    deletion (the first d4 resume died opening the tombstone): the record of what
+    is about to go is written to `intent`, off the volume, and the tombstone
+    follows the deletion."""
     from stages.calibration_volume.finalists import (_git_blob_sha1, _sha256, _stored,
                                                      journal_index)
     prev = study_dir / treatment
     tomb = prev / "released_finalists.json"
-    if tomb.is_file() and json.loads(tomb.read_text()).get("status") == "released":
-        return json.loads(tomb.read_text())
+    try:
+        if json.loads(tomb.read_text()).get("status") == "released":
+            shutil.copyfile(tomb, intent)
+            return json.loads(tomb.read_text())
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass        # absent, or cut short by a write the full volume refused
     unit = prev / "search_unit"
     states = journal_index(unit / "search" / "states.jsonl")
     released = []
@@ -199,12 +208,20 @@ def release_relayed_finalists(study_dir: Path, treatment: str, manifest: dict, *
                    "just before deletion, and the probe sessions read them from there; the "
                    "volume copies had no consumer left and the volume needed the room"),
            "released": released, "released_bytes": sum(r["bytes"] for r in released)}
-    tomb.write_text(json.dumps(doc, indent=1) + "\n")
+    intent.write_text(json.dumps(doc, indent=1) + "\n")
     for r in released:
         for d in r["dirs"]:
             shutil.rmtree(study_dir / d, ignore_errors=True)
     doc["status"] = "released"
-    tomb.write_text(json.dumps(doc, indent=1) + "\n")
+    for wait in (0, 5, 15, 40, 60):         # the volume's quota may lag the deletion
+        time.sleep(wait)
+        try:
+            write_atomic(tomb, json.dumps(doc, indent=1) + "\n")
+            break
+        except OSError as exc:
+            if exc.errno not in (122, 28) or wait == 60:    # EDQUOT, ENOSPC
+                raise
+    intent.write_text(json.dumps(doc, indent=1) + "\n")
     return doc
 
 
@@ -538,9 +555,8 @@ def main(argv=None) -> int:
             done = {}
             for t in rel["treatments"]:
                 doc = release_relayed_finalists(vol.parent, t, json.loads(man.read_text()),
-                                                api=HfApi(token=token), repo=MAIN_RELAY)
-                shutil.copyfile(vol.parent / t / "released_finalists.json",
-                                out / f"released_finalists_{t}.json")
+                                                api=HfApi(token=token), repo=MAIN_RELAY,
+                                                intent=out / f"released_finalists_{t}.json")
                 done[t] = {"released": [r["state_id"] for r in doc["released"]],
                            "bytes": doc["released_bytes"]}
             finish(st, "V_release", doses=done)
