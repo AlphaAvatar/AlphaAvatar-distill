@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-20 05:45 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-20 06:00 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,12 +9,13 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**NO POD EXISTS: NOTHING IS RUNNING ON THE PROVIDER AND NOTHING IS BILLING
-(provider query 2026-10-20 05:01Z: 0 pods). STAGE-0 FORMAL VOLUME STUDY: d1 AND
-d2 COMPLETE; DOSE d4 (4x) IS ACQUIRING A POD, WITH THE TOP-4 EXTENSION'S A100
-WORK.** Run `dose_d4_20261020_054022`; the launcher in tmux `calvol_d4` retries
-the create in EUR-IS-1 every 300 s, 144 times. Expected $30.57, hard stop
-$38.03, authorized $39.50. Do not create another pod while it is alive.
+**ONE POD IS BILLING: `ltxns3jbkkaiac` (A100-SXM4-80GB, EUR-IS-1, $1.79/h,
+created 2026-10-20 05:51Z). STAGE-0 FORMAL VOLUME STUDY: d1 AND d2 COMPLETE;
+DOSE d4 (4x) IS RUNNING, WITH THE TOP-4 EXTENSION'S A100 WORK.** Run
+`dose_d4_20261020_054022`; the launcher in tmux `calvol_d4` owns the pod and its
+watchdog (hard 1275 min = $38.03; authorized $39.50). Driver detached 05:57Z.
+Retirement kept d2's distinct Top-4 (88 states retired, 13 GB left); the d1
+Top-2..4 rebuild was running at 05:57Z. Do not create another pod while it is alive.
 - **Top-4 extension (maintainer 2026-10-20, +$30).** Owner:
   `plans/top4_extension.json`.
   - Each dose's distinct Top-4 is recovered on L40S: Top-2..4 at seeds

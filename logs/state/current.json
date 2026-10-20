@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-20T05:45:00Z",
+ "generated_utc": "2026-10-20T06:00:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -197,15 +197,16 @@
   "docs/shared/STAGE0_HANDOFF.md -- the next programme's handoff"
  ],
  "running": {
-  "paid_compute": false,
-  "pods": 0,
+  "paid_compute": true,
+  "pods": 1,
+  "pod_id": "ltxns3jbkkaiac",
   "network_volumes": 1,
   "launcher": {
    "run_id": "dose_d4_20261020_054022",
    "tmux": "calvol_d4",
-   "state": "creating (EUR-IS-1 capacity retries, 144 x 300 s)"
+   "state": "driver running (B_rebuild, then search)"
   },
-  "_verified": "provider query 2026-10-20 05:01 UTC: 0 pods; d4 launcher started 05:41Z, attempt 1 refused for capacity; volume ugllmlv19t kept"
+  "_verified": "launch.log 2026-10-20 05:51Z: pod created; 05:57Z driver detached, pid 2996; volume ugllmlv19t kept"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {
