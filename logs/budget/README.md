@@ -7,6 +7,7 @@ Money and permission. Nothing here is a scientific result.
 | every cost, per session, append-only | [`ledger.md`](ledger.md) |
 | decision records | [`decisions.md`](decisions.md) |
 | grants and issued authorizations | [`approvals/`](approvals/) |
+| the provider's own billing, fetched read-only, to set beside the records | [`provider/`](provider/) — written by [`provider_billing.py`](../../scripts/maintenance/consolidation/provider_billing.py) |
 
 **The live balances are derived, not stored here.** Run
 [`derive_budget.py`](../../scripts/maintenance/consolidation/derive_budget.py): it reads the

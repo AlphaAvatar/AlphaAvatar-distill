@@ -182,10 +182,72 @@ def main() -> int:
                         "tombstone": bound(tomb) if t else None,
                         "deleted_utc": t["deleted_utc"] if t else None,
                         "members_source": t["members_source"]["kind"] if t else None,
+                        "verification": (None if not t else
+                                         "LISTED AND HASHED ON THE VOLUME before deletion "
+                                         f"({t['members_source']['audit_run']})"
+                                         if t["members_source"]["kind"] == "listing" else
+                                         "DERIVED / NOT DIRECTLY VERIFIED: no pod could attach "
+                                         "before deletion; members and model sha256 come from "
+                                         "the probe sessions' own records"),
                         "retired_bytes": sum(c["bytes"] for c in t["totals_by_class"].values())
                                          if t else None})
     audits = [{k: r[k] for k in ("run_id", "status", "usd")}
               for r in runs if r["run_id"].startswith("volaudit_")]
+
+    # --- the frozen programme verdict: four questions, never one number -----------
+    verdict = None
+    if formal and formal["analysis"] and extension and extension["analysis"]:
+        ext = load(ext_path)
+        fl = [u["eval_set_1"]["fluid_reasoning_720/dev_v1"] for u in ext["per_unit"].values()]
+        labels = [v.get("label") for res in analysis["H2"]["contrasts"].values()
+                  for v in res.values() if isinstance(v, dict) and v.get("label")]
+        static_usable = [f["static"]["usable"]["rate"] for f in fl]
+        sys.path.insert(0, str(REPO / "scripts"))
+        from shared.forward_baseline import selected
+        verdict = {
+            "summary": ("EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / "
+                        "VOLUME EFFECT ON REASONING NOT RESOLVED"),
+            "execution": (f"COMPLETE: doses {formal['complete_doses']}; "
+                          f"{ext['units_present']}/{ext['units_expected']} recovered students"),
+            "structure_selection_H1": ("DESCRIBED (descriptive by preregistration, no stability "
+                                       "claim): formal_study.analysis :: H1"),
+            "step0_initialization": ("DESCRIBED per dose, state_eval@v1 terms from each search "
+                                     "journal: formal_study.analysis :: separation"),
+            "recovery_usable_output": (
+                f"DESCRIBED: fluid static usable rollout {min(static_usable):.3f}-"
+                f"{max(static_usable):.3f} over {len(fl)} students; within a session the "
+                "recovery seed moved it more than the candidate did (top4_extension.analysis :: "
+                "within_dose; descriptive, two seeds)"),
+            "downstream_reasoning": (
+                f"FLOOR: fluid static correct at most "
+                f"{max(f['static']['correct']['count'] for f in fl)}/570 and interactive "
+                f"success at most {max(f['episodes']['success']['count'] for f in fl)}/144 over "
+                f"{len(fl)} students"),
+            "volume_effect_on_reasoning": (
+                f"UNRESOLVED: the {len(labels)} preregistered contrast labels "
+                f"({sorted(set(labels))}) are computed between rates at the floor, so they "
+                "cannot show that calibration volume does or does not move reasoning; the fixed "
+                "recovery recipe does not lift any candidate off the floor (decision 2026-10-18)"),
+            "not_claimed": [
+                "that calibration volume has no value for initialization",
+                "that no Stage-0 mixture ratio can be effective",
+                "that the D1 forward baseline is invalid",
+                "that Top-1 ranking has no scientific meaning",
+                "broad training stability from two seeds",
+                "a calibration saturation point",
+                "that higher usable rollout means higher reasoning correctness",
+            ],
+            "scope": {"stage0_volume": "CLOSED", "stage0_mixture_ratio": "DEFERRED (not run)",
+                      "d_series": "CLOSED (2026-10-17)",
+                      "forward_baseline": f"{selected(REPO).qualified_id} (unchanged)",
+                      "next": "Stage-2 teacher-native reasoning data, then Stage-3 recovery, in a "
+                              "new session under its own authorization"},
+        }
+
+    # --- what survives, and where: owner records, the relay, the tombstones -------
+    reconciliation_path = LOGS / "closeout/budget_reconciliation.json"
+    recon = load(reconciliation_path) if reconciliation_path.is_file() else None
+    handoff_path = REPO / "docs/shared/STAGE2_3_HANDOFF.md"
 
     # --- the pilot verdict, read ----------------------------------------------
     h1 = None
@@ -278,6 +340,7 @@ def main() -> int:
                 "LIVE: " + ", ".join(v["volume_id"] for v in volumes
                                      if v["status"] != "VOLUME_DELETED")),
         },
+        "programme_verdict": verdict,
         "formal_study": formal,
         "top4_extension": extension,
         "network_volumes": {"volumes": volumes, "listing_runs": audits},
@@ -289,6 +352,26 @@ def main() -> int:
                   "programme_ceiling_usd": G.grant()["programme_ceiling_usd"],
                   "project": {k: derived["project"][k] for k in
                               ("cap_usd", "cumulative_spend_usd", "remaining_usd")}},
+        "budget_reconciliation": None if not recon else {
+            "record": bound(reconciliation_path),
+            "authorized_new_spend_usd": recon["authorized_limits"]["new_spend_authorized_in_total_usd"],
+            "after_authorization": {k: recon["actual_spending_after_authorization"][k] for k in
+                                    ("booked_usd", "provider_total_usd")},
+            "overrun_against_the_cap_in_force_usd": recon["overrun"]["against_the_cap_in_force_usd"],
+            "project_provider_minus_records_usd": recon["project"]["provider_minus_records_usd"]},
+        "asset_retention": {
+            "initialization_candidates": ("12 (each dose's distinct Top-4), on the relay "
+                                          "sha256-pinned and PROTECTED: "
+                                          "logs/maintenance/inventories/checkpoint_registry.json "
+                                          ":: scientific_artifacts stage0_calvol_*_top*"),
+            "recovered_students": ("24, weights retired with the volumes; identities in each "
+                                   "run's recovery_products.json, tombstones in "
+                                   "logs/maintenance/inventories/checkpoint_tombstones.json "
+                                   ":: stage0_calvol_*"),
+            "search_journals": ("states.jsonl, structure.json and width projections per dose: "
+                                "dev-box copies only (each dose's artifacts root, the audit's "
+                                "fetched files and the out-of-tree store); no off-host copy"),
+            "handoff": handoff_path.relative_to(REPO).as_posix() if handoff_path.is_file() else None},
         "provider": provider_state(),
         "authorizes": "nothing",
     }

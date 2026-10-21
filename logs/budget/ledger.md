@@ -2968,3 +2968,48 @@ prose remains as the narrative of what was spent and why.
 autonomous sequence at A3: the FFN experiment and D1/D2/D3 are not to be
 started, and a complete valid A3 measurement is never re-run looking for
 another result.
+
+## 2026-10-21 — Stage-0 calibration-volume programme CLOSED; the books set beside the provider's own billing
+
+The programme booked **`$125.4326`** over 38 runs (2026-10-18 → 2026-10-21) and
+ended with 0 pods, 0 network volumes and `$0/h` on the account. For the first
+time the books were checked against the provider's billing history rather than
+against themselves: RunPod's day-bucketed pod and network-volume billing,
+fetched read-only and committed as
+[`provider/runpod_billing_2026-10-21.json`](provider/runpod_billing_2026-10-21.json).
+Every figure below is derived by
+[`write_budget_reconciliation.py`](../../scripts/stages/stage-0/calibration_volume/write_budget_reconciliation.py)
+into [`budget_reconciliation.json`](../stages/stage-0/calibration_volume/closeout/budget_reconciliation.json).
+
+```text
+                                       booked     provider-billed
+2026-10-18, before the $90 authority   $ 17.5099   $ 17.4777   (10 runs)
+after it (2026-10-19 04:43Z on)        $107.9227   $104.9604   (28 runs; pods $102.8604 + volumes $2.1000)
+authorized new spend                   $126.0000   = $90 + $30 (2026-10-20 05:39Z) + $6 (14:50Z)
+overrun against the cap in force       $  0.0000
+the original $90 alone, exceeded by    $ 17.9227   $ 14.9604   -- only after both raises were recorded
+```
+
+* **The "$108 missing" was not historical spend.** It is exactly the 28
+  post-authorization runs: their closeouts existed, `logs/index.json` did not
+  list them, and the project total reads runs only through the index. The
+  programme's own envelope gate reads closeouts directly and was right
+  throughout; every one of the 29 authorizations fit the ceiling in force when
+  it was issued, and the six that needed a raise were issued after it was
+  recorded. Fixed at the root: `derive_budget.project_sessions` now also finds
+  closeouts and open sessions on disk and names them.
+* **Per run, the books are at or above the provider** except four sessions a
+  fraction of a cent under (largest `+$0.0031`, probes_d2). `dose_d2_20261019_135821`
+  is booked `$3.0151` above what was billed; network volumes are billed `$0.2151`
+  above the creation-to-deletion true-up (`$2.1000` vs `$1.8849`); the `$0.0018`
+  CPU audit pod is absent from the provider's pod billing.
+* **Project level, the provider and the records disagree by `$32.5702`, and all
+  of it predates this programme.** Provider all-time `$658.1499` against the
+  records' `$625.5798`. Through 2026-09-11 (the C1 package anchor, the
+  maintainer-stated `$267.8998`) the provider billed `$305.8316`: `$37.93` the
+  records never held. After the anchor the records run `$2.37` and `$2.99` ABOVE
+  the provider. 53 billed pods (`$78.99`, July–September) are named by no
+  repository record, so whether all of that account spend belongs to this
+  project is **UNVERIFIED**. If it does, provider-verified spend exceeds the
+  `$643.6571` project cap by `$14.49`. Nothing was rebooked and no cap moved:
+  this is reported for a maintainer decision.

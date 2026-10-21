@@ -68,10 +68,12 @@ own authorization.
 
 ## 3. Stage 0: calibration volume and mixture
 
-> **Volume: run 2026-10-18, terminal.**
+> **Volume: CLOSED 2026-10-21.** The preregistered formal study and a Top-4
+> extension ran; every recovered student sits at the fluid-reasoning floor, so
+> the volume effect on reasoning is not resolved.
 > [`REPORT.md`](../../logs/stages/stage-0/calibration_volume/closeout/REPORT.md)
-> has the capability battery, the root-level H1 pilot, and why the formal
-> study (H2 and the budget) was not run.
+> round 3 has the results. **Mixture: DEFERRED**; the next round is Stage 2
+> (§4), then Stage-3 recovery ([`STAGE2_3_HANDOFF.md`](STAGE2_3_HANDOFF.md)).
 
 **Question.** How do calibration-set size and composition change which
 structure the AutoInitializer keeps, and what that structure retains on the

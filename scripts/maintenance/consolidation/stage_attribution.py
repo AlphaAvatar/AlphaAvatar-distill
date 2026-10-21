@@ -1158,16 +1158,15 @@ STAGE_1 = [
         id="calibration_volume",
         kind="experiment",
         stage_id="0",
-        status=("TERMINAL 2026-10-18, round 2 (formal study NOT RUN). "
-                "Design amended by the maintainer to 1x/2x/4x, one full "
-                "search and one recovery each; priced $86.98 expected "
-                "($77.82 with the overhead fix) against $65 formal / $74.49 "
-                "programme / $77.34 project: NOT FUNDABLE. Resolution check: "
-                "same-geometry Qwen3-0.6B (8,192 allowance) 257/720 vs every "
-                "PCA fixed-recipe student <2% (0.86M-5.50M); a D1-initialized "
-                "student is unmeasured and is the formal study's first gate. "
-                "H1 root-level pilot: FFN and WIDTH stabilize with volume, "
-                "ATTENTION no detectable effect, DEPTH unlabeled"),
+        status=("CLOSED 2026-10-21: EXECUTION COMPLETE / DOWNSTREAM REASONING "
+                "FLOOR / VOLUME EFFECT ON REASONING NOT RESOLVED. Formal study "
+                "d1/d2/d4 (one D1 full search and one fixed recovery each) and "
+                "the Top-4 extension (24 students) measured on all of "
+                "eval-set-1: fluid correct at most 3/570 static and 0/144 "
+                "episodes, so every preregistered contrast sits at the floor; "
+                "static usable 40.0-71.4%, moved more by the recovery seed than "
+                "by the candidate. Volumes retired; budget reconciled against "
+                "the provider's billing. Mixture ratio DEFERRED (never run)"),
         title="Stage-0 calibration volume dose-response (first Stage-0 study)",
         question=("With teacher, geometry, the forward-baseline method and the "
                   "recovery recipe fixed, does more independent, "
@@ -1201,6 +1200,24 @@ STAGE_1 = [
               "whether eval-set-1's fluid_reasoning_720 resolves student-scale "
               "models: teacher, same-geometry reference, five recovered students",
               field="schema", equals="aadistill.stage0.resolution_check/v1"),
+            E("logs/stages/stage-0/calibration_volume/plans/volume_preregistration.json",
+              "the formal study's preregistration: design, order, statistics, "
+              "budget rule and retry policy",
+              field="schema", equals="aadistill.stage0.calibration_volume.preregistration/v1"),
+            E("logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
+              "the preregistered analysis of d1/d2/d4: H1 structure, step-0 "
+              "state, H2 on every unit of eval-set-1, kept separate",
+              field="schema", equals="aadistill.stage0.calibration_volume.formal_analysis/v1"),
+            E("logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+              "the Top-4 extension's 24 students, correct and usable per unit, "
+              "and the paired contrasts it describes",
+              field="schema",
+              equals="aadistill.stage0.calibration_volume.extension_analysis/v1"),
+            E("logs/stages/stage-0/calibration_volume/closeout/budget_reconciliation.json",
+              "the programme's money against the authorizations in force and "
+              "the provider's own billing",
+              field="schema",
+              equals="aadistill.stage0.calibration_volume.budget_reconciliation/v1"),
             E("logs/stages/stage-0/calibration_volume/closeout/programme_closeout.json",
               "the programme's terminal record: every figure read from its "
               "owner, every verdict computed",
@@ -1212,7 +1229,11 @@ STAGE_1 = [
                    "students at floor, root-level pilot; pilot attempt 1 OOM "
                    "repaired on an 80 GB card; programme terminal; permanent "
                    "evaluation registry; resolution attempts 1-2 repaired; "
-                   "design amended to one draw per dose, still NOT RUN"],
+                   "design amended to one draw per dose, still NOT RUN",
+                   "logs/budget/decisions.md -- 2026-10-19: $90 new-spend "
+                   "authority, eval-set-1 frozen, formal study preregistered and "
+                   "run; 2026-10-20: Top-4 extension (+$30, +$6, two sessions at "
+                   "once); 2026-10-21: final closeout at $0"],
         canonical_log_destination="logs/stages/stage-0/calibration_volume",
         classification_reason=(
             "Stage 0 by subject and product: it varies the teacher-signal "

@@ -54,6 +54,7 @@ class AuditPod(StagingPod):
     def create(self) -> None:
         if not self.a.gpu_id:
             return super().create()
+        self.require_reconciled_account()
         deadline = datetime.now(timezone.utc) + timedelta(minutes=self.a.terminate_after_min)
         cmd = ["runpodctl", "pod", "create", "--gpu-id", self.a.gpu_id, "--gpu-count", "1",
                "--image", self.a.image, "--container-disk-in-gb", str(self.a.disk_gb),

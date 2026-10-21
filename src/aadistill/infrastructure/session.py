@@ -30,7 +30,7 @@ import hashlib
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, ClassVar, Mapping, Sequence
+from typing import Any, Callable, ClassVar, Iterable, Mapping, Sequence
 
 from .budget import BudgetPlan, Phase, StepTime, plan_session
 
@@ -616,6 +616,15 @@ class BudgetSpec:
     #: launcher -- a dollar figure here would be the same defect as a hardcoded
     #: experiment id in reusable core.
     account_balance_required_usd: float | Callable[[BudgetPlan], float] | None = None
+    #: The provider resources this session's own records account for and
+    #: expects to find alive when it launches: a session it deliberately runs
+    #: beside, the network volume it mounts. Ids, or a callable returning them,
+    #: derived by the launcher from its records -- never typed here. EVERY
+    #: OTHER pod or network volume on the account refuses the launch at $0
+    #: (`SessionRunner.check_account_resources`); the default, empty, is the
+    #: fail-closed answer for a session that expects nothing else to exist.
+    accounted_provider_resources: (Iterable[str]
+                                   | Callable[[], Iterable[str]]) = ()
 
     def plan(self, *, price_per_hour: float, authorized_usd: float) -> BudgetPlan:
         return plan_session(

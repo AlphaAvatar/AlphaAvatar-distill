@@ -33,6 +33,7 @@ import shutil
 import subprocess
 import urllib.error
 import urllib.request
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Protocol
 
@@ -199,12 +200,77 @@ class AccountBalance:
                       f"${required_usd:.4f} this session must be able to fund")
 
 
+@dataclass(frozen=True)
+class AccountResources:
+    """Every resource the provider ACCOUNT holds right now that can bill.
+
+    The repository's books know what its records say was created; the provider
+    knows what exists. A pod or network volume the records do not account for --
+    an orphan from a crashed launcher, a volume nobody booked, another session's
+    leftover -- bills against the account and against the project cap while
+    every allowance computed from records reads it as `$0/h`. `unaccounted`
+    names those, and an unreadable listing is `known=False`: a list that cannot
+    be read cannot be shown to be clean.
+    """
+
+    known: bool
+    pods: tuple[dict, ...] = ()
+    network_volumes: tuple[dict, ...] = ()
+    error: str | None = None
+
+    def as_dict(self) -> dict:
+        return {"known": self.known, "pods": list(self.pods),
+                "network_volumes": list(self.network_volumes),
+                "error": self.error}
+
+    def unaccounted(self, accounted: Iterable[str]) -> list[dict]:
+        """The resources whose ids are not in `accounted`."""
+        known = set(accounted)
+        return [r for r in (*self.pods, *self.network_volumes)
+                if r.get("id") not in known]
+
+
+def reconcile_account(provider: object, accounted: Iterable[str]) -> dict:
+    """Check, at $0 and before any create, that the account holds nothing but
+    `accounted`. Returns the evidence record; `record["ok"]` is the verdict.
+
+    An unreadable listing refuses: an unknown resource state is exactly the
+    condition under which nothing else may be created. A provider object that
+    cannot list its account at all (a hand-built test double) is recorded as
+    unchecked and passes; every real provider here can.
+    """
+    lister = getattr(provider, "account_resources", None)
+    if lister is None:
+        return {"checked": False, "ok": True,
+                "why": "this provider object cannot list the account"}
+    accounted = sorted(set(accounted))
+    res = lister()
+    stray = res.unaccounted(accounted) if res.known else []
+    if not res.known:
+        why = (f"the provider account's resources could not be listed "
+               f"({res.error}); a launch cannot be shown not to overlap an "
+               "unrecorded billing resource")
+    elif stray:
+        why = (f"the provider account holds {len(stray)} resource(s) the "
+               f"records do not account for: "
+               f"{[(r.get('kind'), r.get('id')) for r in stray]}; reconcile or "
+               "tear them down before anything else is created")
+    else:
+        why = (f"the provider account holds only the {len(accounted)} "
+               "resource(s) the records account for")
+    return {"checked": True, **res.as_dict(), "accounted": accounted,
+            "unaccounted": stray, "ok": bool(res.known and not stray),
+            "why": why}
+
+
 class PodProvider(Protocol):
     """The whole surface the watchdog is allowed to depend on."""
 
     def get(self, pod_id: str) -> PodState: ...
 
     def account_balance(self) -> AccountBalance: ...
+
+    def account_resources(self) -> AccountResources: ...
 
     def observe(self, query: str) -> Observation: ...
 
@@ -297,6 +363,26 @@ class RunPodProvider:
             min_balance_usd=floor,
             under_balance=None if under is None else bool(under))
 
+    def account_resources(self) -> AccountResources:
+        """Every pod (any status: a stopped pod still bills its disk) and every
+        network volume on the account. Never raises; a failed read is
+        `known=False`."""
+        obs = self.observe("query { myself { pods { id name desiredStatus "
+                           "costPerHr } networkVolumes { id name size "
+                           "dataCenterId } } }")
+        if not obs.ok:
+            return AccountResources(known=False, error=obs.error)
+        me = ((obs.data or {}).get("myself")) or {}
+        if not me or me.get("pods") is None or me.get("networkVolumes") is None:
+            return AccountResources(
+                known=False,
+                error="the control plane answered without pods and networkVolumes")
+        return AccountResources(
+            known=True,
+            pods=tuple({"kind": "pod", **p} for p in me["pods"]),
+            network_volumes=tuple({"kind": "network_volume", **v}
+                                  for v in me["networkVolumes"]))
+
     def get(self, pod_id: str) -> PodState:
         """Never raises. A watchdog that dies on a transient 502 is not a backstop."""
         query = (
@@ -388,7 +474,10 @@ class SimulatedProvider:
                  terminate_failures: int = 0, ignored_terminations: int = 0,
                  poll_errors: int = 0,
                  client_balance_usd: float | None = 1000.0,
-                 under_balance: bool = False) -> None:
+                 under_balance: bool = False,
+                 account_pods: tuple[str, ...] = (),
+                 account_volumes: tuple[str, ...] = (),
+                 resources_unreadable: bool = False) -> None:
         self.pod_id = pod_id
         self.exists = exists
         self.desired_status = desired_status
@@ -399,6 +488,11 @@ class SimulatedProvider:
         #: meaning what it meant.
         self.client_balance_usd = client_balance_usd
         self.under_balance = under_balance
+        #: What else the ACCOUNT holds. Default empty, so every existing
+        #: rehearsal still describes an account with nothing else on it.
+        self.account_pods = account_pods
+        self.account_volumes = account_volumes
+        self.resources_unreadable = resources_unreadable
         self.terminate_failures = terminate_failures
         # Terminations the provider accepts and then does not act on.
         self.ignored_terminations = ignored_terminations
@@ -431,6 +525,17 @@ class SimulatedProvider:
                               client_balance_usd=self.client_balance_usd,
                               current_spend_per_hr=0.0, min_balance_usd=0.0,
                               under_balance=self.under_balance)
+
+    def account_resources(self) -> AccountResources:
+        self.calls.append("account_resources")
+        if self.resources_unreadable:
+            return AccountResources(
+                known=False, error="SimulatedError: control plane unreachable")
+        return AccountResources(
+            known=True,
+            pods=tuple({"kind": "pod", "id": i} for i in self.account_pods),
+            network_volumes=tuple({"kind": "network_volume", "id": i}
+                                  for i in self.account_volumes))
 
     def observe(self, query: str) -> Observation:
         """Shares `poll_errors` with `get`, so one knob rehearses a control

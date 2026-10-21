@@ -42,7 +42,7 @@ from pathlib import Path
 from aadistill.governance.authorization import AuthorizationError
 from .artifact_gate import ArtifactManifest, evaluate_teardown, verify_extracted
 from .log_relay import LogRelay, RelaySpec
-from .provider import RunPodProvider, read_api_key
+from .provider import RunPodProvider, read_api_key, reconcile_account
 from .remote import JobSpec, SSHTarget, probe, start_detached
 from .session import (
     SessionContext, SessionSpec, SessionSpecError, missing_arguments,
@@ -484,6 +484,36 @@ class SessionRunner:
                       "provider half"),
         }
         self.say(("account funds OK: " if ok else "ABORT: ") + why)
+        return bool(ok)
+
+    def check_account_resources(self) -> bool:
+        """Does the provider ACCOUNT hold anything this session's records do
+        not account for?
+
+        Every allowance in this project is computed from records, so a pod or
+        network volume no record names bills at `$0/h` in every book while the
+        provider charges for it. On 2026-10-21 the project total itself was
+        found reading `$108` short because 28 closed runs were missing from the
+        run index; a resource missing from the records entirely is the same
+        failure with no closeout to find it later. So before anything is
+        created, the account's live resources must be exactly the ones the
+        session declared (`BudgetSpec.accounted_provider_resources`); anything
+        else, or a listing that cannot be read, refuses at $0.
+
+        ON BY DEFAULT, unlike the funds gate: the empty default declares that
+        nothing else should exist. The check itself is
+        `provider.reconcile_account`, shared with the pod scripts that create
+        outside this runner.
+        """
+        declared = getattr(getattr(self.spec, "budget", None),
+                           "accounted_provider_resources", ())
+        #: `getattr` as in `check_account_funds`: a hand-built runner may carry
+        #: no provider at all, and then there is nothing to list.
+        rec = reconcile_account(getattr(self, "provider", None),
+                                declared() if callable(declared) else declared)
+        self.ev["account_resources"] = rec
+        ok, why = rec["ok"], rec["why"]
+        self.say(("account resources OK: " if ok else "ABORT: ") + why)
         return bool(ok)
 
     # -- 2. precheck: everything this session reads, checked at $0 ---------
@@ -985,6 +1015,7 @@ class SessionRunner:
         #: `check_account_funds` sits with the other $0 gates and BEFORE the
         #: dry-run stop, so a dry run reports the same answer a launch would get.
         if (not self.make_plan() or not self.check_account_funds()
+                or not self.check_account_resources()
                 or not self.run_prechecks()):
             return False
 

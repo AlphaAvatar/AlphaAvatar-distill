@@ -12998,3 +12998,39 @@ on a paid pod.
   - Alternatives: grow the volume (bought storage, a maintainer decision);
     delete the duplicate packaged students (second copies, but larger to
     reason about than a file with no reader).
+
+## 2026-10-21 — Stage-0 calibration-volume programme: final closeout at $0
+
+- **Context.** Maintainer instruction (final closeout, no new paid authority):
+  verify the science and the evidence, reconcile budget, authorization and
+  provider billing, close the volumes and assets, verify eval-set-1, fix real
+  defects, hand off to Stage-2/3.
+- **Science, frozen.** EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR /
+  VOLUME EFFECT ON REASONING NOT RESOLVED, held as four separate answers in
+  `closeout/programme_closeout.json :: programme_verdict`. The 18 preregistered
+  contrast labels (all NO-GO) are computed between rates at the floor and are
+  not evidence about calibration volume. Stage-0 volume CLOSED; Stage-0 mixture
+  ratio DEFERRED, never run; D-series stays CLOSED; forward baseline stays
+  D1 + `scored_v1`.
+- **Budget, reconciled** (ledger 2026-10-21; `closeout/budget_reconciliation.json`).
+  No overrun against any cap in force. The original $90 was raised by the
+  maintainer (+$30, +$6) before any commitment needed it; new spend reached $90
+  only on 2026-10-21. The "$108 missing" was the index gap, not historical spend.
+- **Authorization exception, for the maintainer.** RunPod billed this account
+  `$32.5702` more than the project's records hold, all before 2026-10-18 and
+  `$37.93` of it before the 2026-09-11 anchor; 53 pods are named by no record.
+  Attribution is UNVERIFIED. If it is all project spend, provider-verified spend
+  exceeds the `$643.6571` project cap by `$14.49`. Not rebooked, no cap moved.
+- **Root-cause fixes.** `derive_budget.project_sessions` counts runs the index
+  misses and books an open session at its hard cap (or refuses a remainder).
+  `SessionRunner.check_account_resources` (core, on by default) and the shared
+  staging/canary pods refuse to create while the account holds any pod or
+  network volume the records do not account for, or cannot be listed.
+  `provider_billing.py` sets provider billing beside the records.
+- **Assets.** The 12 initialization candidates stay on the relay (12/12 sha256
+  verified 2026-10-21) and are PROTECTED in the checkpoint registry; the 24
+  recovered students' weights are retired with tombstones in
+  `checkpoint_tombstones.json`. Two probe volumes' contents are DERIVED / NOT
+  DIRECTLY VERIFIED. The search journals have dev-box copies only.
+- **Revisit when.** The maintainer decides the project-level provider gap, or
+  opens Stage-2/3 under its own authorization.

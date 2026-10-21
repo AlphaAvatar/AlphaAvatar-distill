@@ -55,7 +55,7 @@ What each one asked of this stage.
 
 | experiment | what it asked | logs | status |
 | --- | --- | --- | --- |
-| `calibration_volume` — Stage-0 calibration volume dose-response (first Stage-0 study) | With teacher, geometry, the forward-baseline method and the recovery recipe fixed, does more independent, capability-aligned Stage-0 calibration data stabilize the AutoInitializer's structural selection (H1), improve the recovered student's reasoning on unseen rule families (H2), and saturate (H3)? | [`calibration_volume/`](calibration_volume/) | TERMINAL 2026-10-18, round 2 (formal study NOT RUN). Design amended by the maintainer to 1x/2x/4x, one full search and one recovery each; priced $86.98 expected ($77.82 with the overhead fix) against $65 formal / $74.49 programme / $77.34 project: NOT FUNDABLE. Resolution check: same-geometry Qwen3-0.6B (8,192 allowance) 257/720 vs every PCA fixed-recipe student <2% (0.86M-5.50M); a D1-initialized student is unmeasured and is the formal study's first gate. H1 root-level pilot: FFN and WIDTH stabilize with volume, ATTENTION no detectable effect, DEPTH unlabeled |
+| `calibration_volume` — Stage-0 calibration volume dose-response (first Stage-0 study) | With teacher, geometry, the forward-baseline method and the recovery recipe fixed, does more independent, capability-aligned Stage-0 calibration data stabilize the AutoInitializer's structural selection (H1), improve the recovered student's reasoning on unseen rule families (H2), and saturate (H3)? | [`calibration_volume/`](calibration_volume/) | CLOSED 2026-10-21: EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON REASONING NOT RESOLVED. Formal study d1/d2/d4 (one D1 full search and one fixed recovery each) and the Top-4 extension (24 students) measured on all of eval-set-1: fluid correct at most 3/570 static and 0/144 episodes, so every preregistered contrast sits at the floor; static usable 40.0-71.4%, moved more by the recovery seed than by the candidate. Volumes retired; budget reconciled against the provider's billing. Mixture ratio DEFERRED (never run) |
 
 ## Runs
 
@@ -89,6 +89,7 @@ copied here.
 * logs/budget/decisions.md — 2026-08-10: the Stage 0 activation cache was lost; regenerate it and prove the initialization is unchanged
 * logs/budget/decisions.md — 2026-08-10: RESOLVED, the Stage 0 / initialization hash gate passed
 * logs/budget/decisions.md -- 2026-10-18: Stage-0 calibration-volume programme started; battery valid, students at floor, root-level pilot; pilot attempt 1 OOM repaired on an 80 GB card; programme terminal; permanent evaluation registry; resolution attempts 1-2 repaired; design amended to one draw per dose, still NOT RUN
+* logs/budget/decisions.md -- 2026-10-19: $90 new-spend authority, eval-set-1 frozen, formal study preregistered and run; 2026-10-20: Top-4 extension (+$30, +$6, two sessions at once); 2026-10-21: final closeout at $0
 
 ## Current status
 

@@ -3049,8 +3049,8 @@
    "experiment_id": "calibration_volume",
    "run_id": "volaudit_20261021_142638",
    "root": "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142638",
-   "n_files": 2,
-   "digest": "6bc7f344883097f7380b4774e99a07600d653cfd2cbc1fba9402855bc4bab413",
+   "n_files": 4,
+   "digest": "b17656230cf429746af0dd07fca5d839a351b46e88f93ec501eecf82d260f15b",
    "why": "no run manifest; its closeout states: SESSION_ENDED"
   },
   {

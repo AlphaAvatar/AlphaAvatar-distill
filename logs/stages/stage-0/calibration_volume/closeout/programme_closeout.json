@@ -1,9 +1,9 @@
 {
  "schema": "aadistill.stage0.calibration_volume.programme_closeout/v1",
- "written_utc": "2026-10-21T14:33:12+00:00",
+ "written_utc": "2026-10-21T17:07:29+00:00",
  "repository": {
   "branch": "stage0/calibration-volume-mixture",
-  "head_at_write": "bc9be68b570d158b9e7145fa912c3a5cdddfa23c",
+  "head_at_write": "96213bb8816f98f7e5748eb4d5f11665fd928035",
   "dirty_at_write": true
  },
  "data_audit": {
@@ -196,6 +196,31 @@
   "H2_resolution_evidence": "the set separates the same-geometry reference from the floor (static 0.4462, lower bound 0.3538); recovered students off the floor: none. Every student here is PCA-initialized; a D1-initialized student is unmeasured.",
   "top4_extension": "COMPLETE: 24/24 units analysed; described beside the formal study, never inside it (see top4_extension.claims for what it does not claim)",
   "network_volumes": "ALL RETIRED (AGENTS.md 2.5): ugllmlv19t, b9jwu0g1eg, wn3avnine2"
+ },
+ "programme_verdict": {
+  "summary": "EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON REASONING NOT RESOLVED",
+  "execution": "COMPLETE: doses ['d1', 'd2', 'd4']; 24/24 recovered students",
+  "structure_selection_H1": "DESCRIBED (descriptive by preregistration, no stability claim): formal_study.analysis :: H1",
+  "step0_initialization": "DESCRIBED per dose, state_eval@v1 terms from each search journal: formal_study.analysis :: separation",
+  "recovery_usable_output": "DESCRIBED: fluid static usable rollout 0.400-0.714 over 24 students; within a session the recovery seed moved it more than the candidate did (top4_extension.analysis :: within_dose; descriptive, two seeds)",
+  "downstream_reasoning": "FLOOR: fluid static correct at most 3/570 and interactive success at most 0/144 over 24 students",
+  "volume_effect_on_reasoning": "UNRESOLVED: the 18 preregistered contrast labels (['NO-GO']) are computed between rates at the floor, so they cannot show that calibration volume does or does not move reasoning; the fixed recovery recipe does not lift any candidate off the floor (decision 2026-10-18)",
+  "not_claimed": [
+   "that calibration volume has no value for initialization",
+   "that no Stage-0 mixture ratio can be effective",
+   "that the D1 forward baseline is invalid",
+   "that Top-1 ranking has no scientific meaning",
+   "broad training stability from two seeds",
+   "a calibration saturation point",
+   "that higher usable rollout means higher reasoning correctness"
+  ],
+  "scope": {
+   "stage0_volume": "CLOSED",
+   "stage0_mixture_ratio": "DEFERRED (not run)",
+   "d_series": "CLOSED (2026-10-17)",
+   "forward_baseline": "stage1_init.d1_target_aware.scored_v1@v1 (unchanged)",
+   "next": "Stage-2 teacher-native reasoning data, then Stage-3 recovery, in a new session under its own authorization"
+  }
  },
  "formal_study": {
   "preregistration": {
@@ -395,7 +420,7 @@
   ],
   "analysis": {
    "path": "logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
-   "sha256": "62607e08513b01b81de6dfc9aac90129534316ce97caf977920df34460321617"
+   "sha256": "7949efefbcc7cae5afc09d2022e547837c700340cf97ebf388997f03f743ec52"
   },
   "units": {
    "units_expected": 24,
@@ -424,6 +449,7 @@
     },
     "deleted_utc": "2026-10-21T14:30:58+00:00",
     "members_source": "listing",
+    "verification": "LISTED AND HASHED ON THE VOLUME before deletion (volaudit_20261021_142638)",
     "retired_bytes": 292446360760
    },
    {
@@ -439,6 +465,7 @@
     },
     "deleted_utc": "2026-10-21T14:30:05+00:00",
     "members_source": "derived",
+    "verification": "DERIVED / NOT DIRECTLY VERIFIED: no pod could attach before deletion; members and model sha256 come from the probe sessions' own records",
     "retired_bytes": 33380855534
    },
    {
@@ -454,6 +481,7 @@
     },
     "deleted_utc": "2026-10-21T14:29:57+00:00",
     "members_source": "derived",
+    "verification": "DERIVED / NOT DIRECTLY VERIFIED: no pod could attach before deletion; members and model sha256 come from the probe sessions' own records",
     "retired_bytes": 16690427990
    }
   ],
@@ -1176,8 +1204,27 @@
    "remaining_usd": 18.0773
   }
  },
+ "budget_reconciliation": {
+  "record": {
+   "path": "logs/stages/stage-0/calibration_volume/closeout/budget_reconciliation.json",
+   "sha256": "8c5da2d6374f84c7df8f032c890ec1a3106af110c43a220e2b863cfd90c44749"
+  },
+  "authorized_new_spend_usd": 126.0,
+  "after_authorization": {
+   "booked_usd": 107.9227,
+   "provider_total_usd": 104.9604
+  },
+  "overrun_against_the_cap_in_force_usd": 0.0,
+  "project_provider_minus_records_usd": 32.5702
+ },
+ "asset_retention": {
+  "initialization_candidates": "12 (each dose's distinct Top-4), on the relay sha256-pinned and PROTECTED: logs/maintenance/inventories/checkpoint_registry.json :: scientific_artifacts stage0_calvol_*_top*",
+  "recovered_students": "24, weights retired with the volumes; identities in each run's recovery_products.json, tombstones in logs/maintenance/inventories/checkpoint_tombstones.json :: stage0_calvol_*",
+  "search_journals": "states.jsonl, structure.json and width projections per dose: dev-box copies only (each dose's artifacts root, the audit's fetched files and the out-of-tree store); no off-host copy",
+  "handoff": "docs/shared/STAGE2_3_HANDOFF.md"
+ },
  "provider": {
-  "queried_utc": "2026-10-21T14:33:13+00:00",
+  "queried_utc": "2026-10-21T17:07:29+00:00",
   "pods": 0,
   "network_volumes": 0,
   "spend_per_hour": 0

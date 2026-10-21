@@ -2218,6 +2218,28 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "rankings are unchanged (bench: same state id, digest and "
             "evaluation).",
      }),
+    ("96213bb8816f98f7e5748eb4d5f11665fd928035",
+     "Stage-0 final closeout: provider resources reconciled before any create",
+     {
+        "src/aadistill/infrastructure/provider.py":
+            "NEW `AccountResources`, `RunPodProvider.account_resources` (every "
+            "pod of any status and every network volume, read-only; an "
+            "unreadable listing is `known=False`), `SimulatedProvider` knobs "
+            "(default: an empty account) and `reconcile_account(provider, "
+            "accounted)`. THIS IS A DECLARED SEMANTIC CHANGE: a new provider "
+            "query. NO CUDA SURFACE.",
+        "src/aadistill/infrastructure/session.py":
+            "NEW `BudgetSpec.accounted_provider_resources` (default empty): the "
+            "ids a session's records expect to find alive. THIS IS A DECLARED "
+            "SEMANTIC CHANGE of the spec. NO CUDA SURFACE.",
+        "src/aadistill/infrastructure/session_runner.py":
+            "NEW `check_account_resources`, ON BY DEFAULT in `run()` between "
+            "the funds gate and the prechecks: refuses at $0 while the account "
+            "holds a pod or network volume the session does not account for, "
+            "or cannot be listed. THIS IS A DECLARED SEMANTIC CHANGE of launch "
+            "behaviour: a session that ran beside an undeclared resource now "
+            "refuses. NO CUDA SURFACE.",
+     }),
 )
 
 

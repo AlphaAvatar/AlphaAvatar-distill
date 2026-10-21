@@ -1,0 +1,2460 @@
+{
+ "schema": "aadistill.provider_billing_snapshot/v1",
+ "fetched_utc": "2026-10-21T16:33:02+00:00",
+ "query": {
+  "endpoint": "https://rest.runpod.io/v1",
+  "window": "bucketSize=day&startTime=2026-06-01T00:00:00Z&endTime=2026-10-22T23:59:59Z"
+ },
+ "account": {
+  "known": true,
+  "client_balance_usd": 101.2318128102,
+  "current_spend_per_hr": 0.0,
+  "min_balance_usd": 0.0,
+  "under_balance": false,
+  "error": null,
+  "pods": [],
+  "network_volumes": []
+ },
+ "pods": [
+  {
+   "amount": 3.6487911858130246,
+   "timeBilledMs": 13118500,
+   "diskSpaceBilledGB": 880,
+   "podId": "zae6ba3we52vgu",
+   "time": "2026-07-22 00:00:00"
+  },
+  {
+   "amount": 2.0433273364324123,
+   "timeBilledMs": 7258564,
+   "diskSpaceBilledGB": 1000,
+   "podId": "simbeepnf8syuu",
+   "time": "2026-07-25 00:00:00"
+  },
+  {
+   "amount": 0.046085611218586564,
+   "timeBilledMs": 185605,
+   "diskSpaceBilledGB": 40,
+   "podId": "bgi8ue38hzhal8",
+   "time": "2026-07-26 00:00:00"
+  },
+  {
+   "amount": 0.26263353310059756,
+   "timeBilledMs": 924728,
+   "diskSpaceBilledGB": 160,
+   "podId": "h923aippm86s7v",
+   "time": "2026-07-26 00:00:00"
+  },
+  {
+   "amount": 0.10878423147369176,
+   "timeBilledMs": 378744,
+   "diskSpaceBilledGB": 80,
+   "podId": "hbxdtb4mbh38tx",
+   "time": "2026-07-26 00:00:00"
+  },
+  {
+   "amount": 3.90752587816678,
+   "timeBilledMs": 13918781,
+   "diskSpaceBilledGB": 7050,
+   "podId": "ippwmpc8wzed24",
+   "time": "2026-07-26 00:00:00"
+  },
+  {
+   "amount": 0.05859136034268886,
+   "timeBilledMs": 197839,
+   "diskSpaceBilledGB": 80,
+   "podId": "l1m24zl44xhqy2",
+   "time": "2026-07-26 00:00:00"
+  },
+  {
+   "amount": 0.35065247083548456,
+   "timeBilledMs": 1451209,
+   "diskSpaceBilledGB": 240,
+   "podId": "mhak4avc7kt7cz",
+   "time": "2026-07-26 00:00:00"
+  },
+  {
+   "amount": 0.10016188130248338,
+   "timeBilledMs": 347390,
+   "diskSpaceBilledGB": 80,
+   "podId": "owwdka4xzucoya",
+   "time": "2026-07-26 00:00:00"
+  },
+  {
+   "amount": 0.48837801127228886,
+   "timeBilledMs": 1732149,
+   "diskSpaceBilledGB": 240,
+   "podId": "ve2b6yz1ozedxk",
+   "time": "2026-07-26 00:00:00"
+  },
+  {
+   "amount": 1.2723405172582716,
+   "timeBilledMs": 4538309,
+   "diskSpaceBilledGB": 2250,
+   "podId": "dau6jo69vbak2w",
+   "time": "2026-07-27 00:00:00"
+  },
+  {
+   "amount": 5.824696669937111,
+   "timeBilledMs": 20745109,
+   "diskSpaceBilledGB": 10500,
+   "podId": "ruib84xvfyieqm",
+   "time": "2026-07-27 00:00:00"
+  },
+  {
+   "amount": 5.926981497206725,
+   "timeBilledMs": 21117054,
+   "diskSpaceBilledGB": 10500,
+   "podId": "absiebkmq7hjbr",
+   "time": "2026-07-28 00:00:00"
+  },
+  {
+   "amount": 4.488216397934593,
+   "timeBilledMs": 15986191,
+   "diskSpaceBilledGB": 8100,
+   "podId": "iohqynlxv5eoz4",
+   "time": "2026-07-28 00:00:00"
+  },
+  {
+   "amount": 2.6212006935384125,
+   "timeBilledMs": 9342245,
+   "diskSpaceBilledGB": 4650,
+   "podId": "g8ajahpwirhrfx",
+   "time": "2026-07-29 00:00:00"
+  },
+  {
+   "amount": 0.15407714515458792,
+   "timeBilledMs": 555230,
+   "diskSpaceBilledGB": 240,
+   "podId": "ibht1nb8o0nhyh",
+   "time": "2026-07-29 00:00:00"
+  },
+  {
+   "amount": 0.41073024075012654,
+   "timeBilledMs": 1468312,
+   "diskSpaceBilledGB": 720,
+   "podId": "lwf2th777hri8c",
+   "time": "2026-07-29 00:00:00"
+  },
+  {
+   "amount": 0.3860098053701222,
+   "timeBilledMs": 1383470,
+   "diskSpaceBilledGB": 600,
+   "podId": "oy00tooo4ckkv9",
+   "time": "2026-07-29 00:00:00"
+  },
+  {
+   "amount": 1.4624162733089179,
+   "timeBilledMs": 5204241,
+   "diskSpaceBilledGB": 2850,
+   "podId": "w86xu7t78y571h",
+   "time": "2026-07-29 00:00:00"
+  },
+  {
+   "amount": 0.43083495693281293,
+   "timeBilledMs": 1524585,
+   "diskSpaceBilledGB": 1200,
+   "podId": "wdpyamp2pp5v8t",
+   "time": "2026-07-29 00:00:00"
+  },
+  {
+   "amount": 0.8325958327623084,
+   "timeBilledMs": 2970803,
+   "diskSpaceBilledGB": 1500,
+   "podId": "2dbp44q6jpp5jk",
+   "time": "2026-07-30 00:00:00"
+  },
+  {
+   "amount": 2.29145165940281,
+   "timeBilledMs": 8162097,
+   "diskSpaceBilledGB": 4200,
+   "podId": "3cqxz56y6tc8er",
+   "time": "2026-07-30 00:00:00"
+  },
+  {
+   "amount": 1.3467715550214052,
+   "timeBilledMs": 4796341,
+   "diskSpaceBilledGB": 2550,
+   "podId": "fg3nr3ibef553d",
+   "time": "2026-07-30 00:00:00"
+  },
+  {
+   "amount": 3.4819863431621343,
+   "timeBilledMs": 12396617,
+   "diskSpaceBilledGB": 6450,
+   "podId": "glz1kuyi5viuw4",
+   "time": "2026-07-30 00:00:00"
+  },
+  {
+   "amount": 0.5590111418860033,
+   "timeBilledMs": 1998256,
+   "diskSpaceBilledGB": 320,
+   "podId": "lj4m3ogjz888m5",
+   "time": "2026-07-30 00:00:00"
+  },
+  {
+   "amount": 0.47319385141599923,
+   "timeBilledMs": 1696715,
+   "diskSpaceBilledGB": 180,
+   "podId": "n8d5kg6cw3iiuz",
+   "time": "2026-07-30 00:00:00"
+  },
+  {
+   "amount": 0.057891350239515305,
+   "timeBilledMs": 210514,
+   "diskSpaceBilledGB": 150,
+   "podId": "vuf5sxxnil7drh",
+   "time": "2026-07-30 00:00:00"
+  },
+  {
+   "amount": 18.314262642874382,
+   "timeBilledMs": 65491258,
+   "diskSpaceBilledGB": 8760,
+   "podId": "as66m7qal78e5a",
+   "time": "2026-07-31 00:00:00"
+  },
+  {
+   "amount": 0.12795544136315584,
+   "timeBilledMs": 453508,
+   "diskSpaceBilledGB": 80,
+   "podId": "iids0u7zeb5urc",
+   "time": "2026-07-31 00:00:00"
+  },
+  {
+   "amount": 15.636643410893157,
+   "timeBilledMs": 55686279,
+   "diskSpaceBilledGB": 27900,
+   "podId": "1ligfkwnaous4u",
+   "time": "2026-08-01 00:00:00"
+  },
+  {
+   "amount": 7.290777278714813,
+   "timeBilledMs": 26070840,
+   "diskSpaceBilledGB": 3480,
+   "podId": "as66m7qal78e5a",
+   "time": "2026-08-01 00:00:00"
+  },
+  {
+   "amount": 15.636368413688615,
+   "timeBilledMs": 55685279,
+   "diskSpaceBilledGB": 27900,
+   "podId": "vjavemn7m2tw5a",
+   "time": "2026-08-01 00:00:00"
+  },
+  {
+   "amount": 8.635374932317063,
+   "timeBilledMs": 30757424,
+   "diskSpaceBilledGB": 15450,
+   "podId": "1ligfkwnaous4u",
+   "time": "2026-08-02 00:00:00"
+  },
+  {
+   "amount": 8.76819226751104,
+   "timeBilledMs": 31017332,
+   "diskSpaceBilledGB": 20800,
+   "podId": "banc47gn8wn3ms",
+   "time": "2026-08-02 00:00:00"
+  },
+  {
+   "amount": 5.655215753708035,
+   "timeBilledMs": 20135128,
+   "diskSpaceBilledGB": 10200,
+   "podId": "rxie5w0kewuzg6",
+   "time": "2026-08-02 00:00:00"
+  },
+  {
+   "amount": 8.921407204237767,
+   "timeBilledMs": 31778602,
+   "diskSpaceBilledGB": 15900,
+   "podId": "vjavemn7m2tw5a",
+   "time": "2026-08-02 00:00:00"
+  },
+  {
+   "amount": 0.2562203606357798,
+   "timeBilledMs": 912771,
+   "diskSpaceBilledGB": 600,
+   "podId": "5tl5pkzxpc4zpj",
+   "time": "2026-08-03 00:00:00"
+  },
+  {
+   "amount": 0.07421824068296701,
+   "timeBilledMs": 264834,
+   "diskSpaceBilledGB": 240,
+   "podId": "76g859blv04tqc",
+   "time": "2026-08-03 00:00:00"
+  },
+  {
+   "amount": 0.16239747242070735,
+   "timeBilledMs": 577910,
+   "diskSpaceBilledGB": 450,
+   "podId": "99vwfjl77fblq6",
+   "time": "2026-08-03 00:00:00"
+  },
+  {
+   "amount": 0.3903576978482306,
+   "timeBilledMs": 1394230,
+   "diskSpaceBilledGB": 750,
+   "podId": "9rtrkkpasmj17l",
+   "time": "2026-08-03 00:00:00"
+  },
+  {
+   "amount": 0.25541161780711263,
+   "timeBilledMs": 913618,
+   "diskSpaceBilledGB": 480,
+   "podId": "a12c7ch5w9dq8n",
+   "time": "2026-08-03 00:00:00"
+  },
+  {
+   "amount": 0.048241187701933086,
+   "timeBilledMs": 170372,
+   "diskSpaceBilledGB": 240,
+   "podId": "ftsoi1per5en78",
+   "time": "2026-08-03 00:00:00"
+  },
+  {
+   "amount": 0.0655018399702385,
+   "timeBilledMs": 233138,
+   "diskSpaceBilledGB": 240,
+   "podId": "kr8gwb6jj1ec0o",
+   "time": "2026-08-03 00:00:00"
+  },
+  {
+   "amount": 10.01398931350559,
+   "timeBilledMs": 35808446,
+   "diskSpaceBilledGB": 14400,
+   "podId": "n7xjbzlmsyx9b2",
+   "time": "2026-08-03 00:00:00"
+  },
+  {
+   "amount": 0.037086501717567444,
+   "timeBilledMs": 134860,
+   "diskSpaceBilledGB": 120,
+   "podId": "q7znklj7ya7kj2",
+   "time": "2026-08-03 00:00:00"
+  },
+  {
+   "amount": 0.25723868364002556,
+   "timeBilledMs": 916474,
+   "diskSpaceBilledGB": 600,
+   "podId": "rvwv4tn4ml6d3d",
+   "time": "2026-08-03 00:00:00"
+  },
+  {
+   "amount": 0.37039846600964665,
+   "timeBilledMs": 1321651,
+   "diskSpaceBilledGB": 750,
+   "podId": "rxie5w0kewuzg6",
+   "time": "2026-08-03 00:00:00"
+  },
+  {
+   "amount": 0.3097271149745211,
+   "timeBilledMs": 1107341,
+   "diskSpaceBilledGB": 600,
+   "podId": "w82jwn06h5dp6r",
+   "time": "2026-08-03 00:00:00"
+  },
+  {
+   "amount": 1.9075925059150904,
+   "timeBilledMs": 12634905,
+   "diskSpaceBilledGB": 4200,
+   "podId": "0cn6ipb4aobca3",
+   "time": "2026-08-04 00:00:00"
+  },
+  {
+   "amount": 2.7959515801630914,
+   "timeBilledMs": 10023999,
+   "diskSpaceBilledGB": 3500,
+   "podId": "4pge0934xnly22",
+   "time": "2026-08-04 00:00:00"
+  },
+  {
+   "amount": 0.0033652056008577347,
+   "timeBilledMs": 22858,
+   "diskSpaceBilledGB": 100,
+   "podId": "gc9qeuxi4w7ew7",
+   "time": "2026-08-04 00:00:00"
+  },
+  {
+   "amount": 1.4258786085993052,
+   "timeBilledMs": 5104205,
+   "diskSpaceBilledGB": 2040,
+   "podId": "n7xjbzlmsyx9b2",
+   "time": "2026-08-04 00:00:00"
+  },
+  {
+   "amount": 0.8590913503430784,
+   "timeBilledMs": 5693828,
+   "diskSpaceBilledGB": 1900,
+   "podId": "tct4820z4t3hvn",
+   "time": "2026-08-04 00:00:00"
+  },
+  {
+   "amount": 0.06953869760036469,
+   "timeBilledMs": 252868,
+   "diskSpaceBilledGB": 100,
+   "podId": "vooci6ln90ach4",
+   "time": "2026-08-04 00:00:00"
+  },
+  {
+   "amount": 5.8938484225654975,
+   "timeBilledMs": 20996570,
+   "diskSpaceBilledGB": 10500,
+   "podId": "94slla57nnqjqa",
+   "time": "2026-08-05 00:00:00"
+  },
+  {
+   "amount": 2.917499916162342,
+   "timeBilledMs": 10465993,
+   "diskSpaceBilledGB": 3500,
+   "podId": "r3dlq1g6q51xnw",
+   "time": "2026-08-05 00:00:00"
+  },
+  {
+   "amount": 0.05997447669506073,
+   "timeBilledMs": 218089,
+   "diskSpaceBilledGB": 150,
+   "podId": "8my2o9ticj7xj9",
+   "time": "2026-08-06 00:00:00"
+  },
+  {
+   "amount": 0.9452587276464328,
+   "timeBilledMs": 3367860,
+   "diskSpaceBilledGB": 1800,
+   "podId": "kdj5vtcei1yxjn",
+   "time": "2026-08-06 00:00:00"
+  },
+  {
+   "amount": 0.0673959031701088,
+   "timeBilledMs": 245076,
+   "diskSpaceBilledGB": 150,
+   "podId": "ku7wqx33foo53l",
+   "time": "2026-08-06 00:00:00"
+  },
+  {
+   "amount": 4.90212133154273,
+   "timeBilledMs": 17453421,
+   "diskSpaceBilledGB": 9000,
+   "podId": "qzevis6g43en33",
+   "time": "2026-08-06 00:00:00"
+  },
+  {
+   "amount": 0.2562420883914456,
+   "timeBilledMs": 912850,
+   "diskSpaceBilledGB": 600,
+   "podId": "2lz4xqdok1z5s1",
+   "time": "2026-08-07 00:00:00"
+  },
+  {
+   "amount": 0.5658089014468715,
+   "timeBilledMs": 2013295,
+   "diskSpaceBilledGB": 1200,
+   "podId": "331nbu5mxwi26v",
+   "time": "2026-08-07 00:00:00"
+  },
+  {
+   "amount": 2.6867131870239973,
+   "timeBilledMs": 9567846,
+   "diskSpaceBilledGB": 4950,
+   "podId": "3wku8lc1yztfbj",
+   "time": "2026-08-07 00:00:00"
+  },
+  {
+   "amount": 0.3532302198000252,
+   "timeBilledMs": 1259221,
+   "diskSpaceBilledGB": 750,
+   "podId": "5ff0prh6fzxmvv",
+   "time": "2026-08-07 00:00:00"
+  },
+  {
+   "amount": 1.578590855235234,
+   "timeBilledMs": 5626694,
+   "diskSpaceBilledGB": 2850,
+   "podId": "8nheigrv25aeq8",
+   "time": "2026-08-07 00:00:00"
+  },
+  {
+   "amount": 0.3225492970086634,
+   "timeBilledMs": 1147654,
+   "diskSpaceBilledGB": 750,
+   "podId": "adevfxvuiwu2lw",
+   "time": "2026-08-07 00:00:00"
+  },
+  {
+   "amount": 1.4779636769089848,
+   "timeBilledMs": 5260777,
+   "diskSpaceBilledGB": 2850,
+   "podId": "dvoosn07fjs1oh",
+   "time": "2026-08-07 00:00:00"
+  },
+  {
+   "amount": 0.25563433521892875,
+   "timeBilledMs": 910640,
+   "diskSpaceBilledGB": 600,
+   "podId": "iynr8ybvpvbhgo",
+   "time": "2026-08-07 00:00:00"
+  },
+  {
+   "amount": 1.5900341572705656,
+   "timeBilledMs": 5668306,
+   "diskSpaceBilledGB": 2850,
+   "podId": "m8mmk8f2389f8s",
+   "time": "2026-08-07 00:00:00"
+  },
+  {
+   "amount": 1.604696054244414,
+   "timeBilledMs": 5721622,
+   "diskSpaceBilledGB": 2850,
+   "podId": "n1kavevctllrvi",
+   "time": "2026-08-07 00:00:00"
+  },
+  {
+   "amount": 0.11893863428849727,
+   "timeBilledMs": 426191,
+   "diskSpaceBilledGB": 300,
+   "podId": "5ccmods79ywrw2",
+   "time": "2026-08-08 00:00:00"
+  },
+  {
+   "amount": 0.09279713698197156,
+   "timeBilledMs": 331131,
+   "diskSpaceBilledGB": 300,
+   "podId": "9nrdoydt53nlzc",
+   "time": "2026-08-08 00:00:00"
+  },
+  {
+   "amount": 0.11216514487750828,
+   "timeBilledMs": 395247,
+   "diskSpaceBilledGB": 450,
+   "podId": "jusu7nm5e5xcyc",
+   "time": "2026-08-08 00:00:00"
+  },
+  {
+   "amount": 6.764207088504918,
+   "timeBilledMs": 24085753,
+   "diskSpaceBilledGB": 12150,
+   "podId": "luy1txyjro2msz",
+   "time": "2026-08-08 00:00:00"
+  },
+  {
+   "amount": 0.04421147331595421,
+   "timeBilledMs": 160769,
+   "diskSpaceBilledGB": 150,
+   "podId": "qp7xm2k01h6dg4",
+   "time": "2026-08-08 00:00:00"
+  },
+  {
+   "amount": 2.204678136156872,
+   "timeBilledMs": 7852870,
+   "diskSpaceBilledGB": 4050,
+   "podId": "xikv3u8moofu6c",
+   "time": "2026-08-08 00:00:00"
+  },
+  {
+   "amount": 0.033392215496860445,
+   "timeBilledMs": 497411,
+   "diskSpaceBilledGB": 40,
+   "podId": "3hvb5d4it6h6pb",
+   "time": "2026-08-09 00:00:00"
+  },
+  {
+   "amount": 0.04492063052020967,
+   "timeBilledMs": 666865,
+   "diskSpaceBilledGB": 60,
+   "podId": "bd83jug4g23qn0",
+   "time": "2026-08-09 00:00:00"
+  },
+  {
+   "amount": 0.957485506660305,
+   "timeBilledMs": 3412321,
+   "diskSpaceBilledGB": 1800,
+   "podId": "luy1txyjro2msz",
+   "time": "2026-08-09 00:00:00"
+  },
+  {
+   "amount": 10.703736373106949,
+   "timeBilledMs": 38120910,
+   "diskSpaceBilledGB": 19200,
+   "podId": "spa2i4615a10wu",
+   "time": "2026-08-09 00:00:00"
+  },
+  {
+   "amount": 0.5414188343565911,
+   "timeBilledMs": 1930917,
+   "diskSpaceBilledGB": 1050,
+   "podId": "138adwm46bum8v",
+   "time": "2026-08-10 00:00:00"
+  },
+  {
+   "amount": 0.2799701871117577,
+   "timeBilledMs": 999134,
+   "diskSpaceBilledGB": 600,
+   "podId": "1mm2j08s262wym",
+   "time": "2026-08-10 00:00:00"
+  },
+  {
+   "amount": 0.2534813628299162,
+   "timeBilledMs": 902811,
+   "diskSpaceBilledGB": 600,
+   "podId": "2dm0luzftizif3",
+   "time": "2026-08-10 00:00:00"
+  },
+  {
+   "amount": 0.13768597529269755,
+   "timeBilledMs": 488050,
+   "diskSpaceBilledGB": 450,
+   "podId": "6ce901ncd9efjg",
+   "time": "2026-08-10 00:00:00"
+  },
+  {
+   "amount": 1.2802085828734562,
+   "timeBilledMs": 4560607,
+   "diskSpaceBilledGB": 2400,
+   "podId": "d2nwf8995nd83j",
+   "time": "2026-08-10 00:00:00"
+  },
+  {
+   "amount": 0.07419279962778091,
+   "timeBilledMs": 269792,
+   "diskSpaceBilledGB": 150,
+   "podId": "hq685pjg56q0q4",
+   "time": "2026-08-10 00:00:00"
+  },
+  {
+   "amount": 0.1262825469020754,
+   "timeBilledMs": 446583,
+   "diskSpaceBilledGB": 450,
+   "podId": "kxrqqyuylpnrkm",
+   "time": "2026-08-10 00:00:00"
+  },
+  {
+   "amount": 0.1936206987593323,
+   "timeBilledMs": 691449,
+   "diskSpaceBilledGB": 450,
+   "podId": "mlj9pj9p5q6pta",
+   "time": "2026-08-10 00:00:00"
+  },
+  {
+   "amount": 0.28478982800152153,
+   "timeBilledMs": 1016660,
+   "diskSpaceBilledGB": 600,
+   "podId": "n3gdd9yby5fx2m",
+   "time": "2026-08-10 00:00:00"
+  },
+  {
+   "amount": 0.17954399273730814,
+   "timeBilledMs": 640261,
+   "diskSpaceBilledGB": 450,
+   "podId": "ujhpw3lnheqhmo",
+   "time": "2026-08-10 00:00:00"
+  },
+  {
+   "amount": 0.43801003391854465,
+   "timeBilledMs": 1554885,
+   "diskSpaceBilledGB": 1050,
+   "podId": "vqrrkc8w6f5786",
+   "time": "2026-08-10 00:00:00"
+  },
+  {
+   "amount": 0.1298126830952242,
+   "timeBilledMs": 465733,
+   "diskSpaceBilledGB": 300,
+   "podId": "0qkaj0xfm2qe4h",
+   "time": "2026-08-11 00:00:00"
+  },
+  {
+   "amount": 0.48894251766614616,
+   "timeBilledMs": 1740094,
+   "diskSpaceBilledGB": 1050,
+   "podId": "3deothqd14f76p",
+   "time": "2026-08-11 00:00:00"
+  },
+  {
+   "amount": 4.414059992879629,
+   "timeBilledMs": 9868312,
+   "diskSpaceBilledGB": 4950,
+   "podId": "5bd0szfrv57fw3",
+   "time": "2026-08-11 00:00:00"
+  },
+  {
+   "amount": 0.45170446077827364,
+   "timeBilledMs": 1610996,
+   "diskSpaceBilledGB": 900,
+   "podId": "5k2e72503puo1f",
+   "time": "2026-08-11 00:00:00"
+  },
+  {
+   "amount": 0.7782727226149291,
+   "timeBilledMs": 1738542,
+   "diskSpaceBilledGB": 1050,
+   "podId": "64fhzduqdwaurw",
+   "time": "2026-08-11 00:00:00"
+  },
+  {
+   "amount": 0.7624434415483847,
+   "timeBilledMs": 1706633,
+   "diskSpaceBilledGB": 900,
+   "podId": "8830ltzmwaqh08",
+   "time": "2026-08-11 00:00:00"
+  },
+  {
+   "amount": 0.4482540279859677,
+   "timeBilledMs": 1598449,
+   "diskSpaceBilledGB": 900,
+   "podId": "8ismfhukteed4j",
+   "time": "2026-08-11 00:00:00"
+  },
+  {
+   "amount": 0.4215723624220118,
+   "timeBilledMs": 942711,
+   "diskSpaceBilledGB": 600,
+   "podId": "98nmzq5a5oq4hb",
+   "time": "2026-08-11 00:00:00"
+  },
+  {
+   "amount": 0.4086443440755829,
+   "timeBilledMs": 913440,
+   "diskSpaceBilledGB": 600,
+   "podId": "btbdczhr0t0ukc",
+   "time": "2026-08-11 00:00:00"
+  },
+  {
+   "amount": 0.814624086720869,
+   "timeBilledMs": 1820847,
+   "diskSpaceBilledGB": 1050,
+   "podId": "igyljdhgg2hmzf",
+   "time": "2026-08-11 00:00:00"
+  },
+  {
+   "amount": 0.6329618019517511,
+   "timeBilledMs": 1413467,
+   "diskSpaceBilledGB": 900,
+   "podId": "rfnomrxznmzznp",
+   "time": "2026-08-11 00:00:00"
+  },
+  {
+   "amount": 0.7309556452091783,
+   "timeBilledMs": 1631409,
+   "diskSpaceBilledGB": 1050,
+   "podId": "rn7y3c2btfvv3p",
+   "time": "2026-08-11 00:00:00"
+  },
+  {
+   "amount": 3.8360203622141853,
+   "timeBilledMs": 13665074,
+   "diskSpaceBilledGB": 6900,
+   "podId": "ujgl1c8wk380ok",
+   "time": "2026-08-11 00:00:00"
+  },
+  {
+   "amount": 0.01854489929974079,
+   "timeBilledMs": 67436,
+   "diskSpaceBilledGB": 150,
+   "podId": "znqw298b50jgjd",
+   "time": "2026-08-11 00:00:00"
+  },
+  {
+   "amount": 0.29098727798555046,
+   "timeBilledMs": 1032883,
+   "diskSpaceBilledGB": 750,
+   "podId": "6ex6mpu1uha1xg",
+   "time": "2026-08-13 00:00:00"
+  },
+  {
+   "amount": 2.875361358979717,
+   "timeBilledMs": 10241213,
+   "diskSpaceBilledGB": 5250,
+   "podId": "6xrudht3i7wc62",
+   "time": "2026-08-13 00:00:00"
+  },
+  {
+   "amount": 0.022665774449706078,
+   "timeBilledMs": 82421,
+   "diskSpaceBilledGB": 150,
+   "podId": "ejewm772b02air",
+   "time": "2026-08-13 00:00:00"
+  },
+  {
+   "amount": 3.2436104881344363,
+   "timeBilledMs": 11548735,
+   "diskSpaceBilledGB": 6000,
+   "podId": "hwyay7b9df9e77",
+   "time": "2026-08-13 00:00:00"
+  },
+  {
+   "amount": 0.4254221540177241,
+   "timeBilledMs": 1515424,
+   "diskSpaceBilledGB": 900,
+   "podId": "yfr80fbbgl3q9m",
+   "time": "2026-08-13 00:00:00"
+  },
+  {
+   "amount": 0.1354835630627349,
+   "timeBilledMs": 487617,
+   "diskSpaceBilledGB": 240,
+   "podId": "2vpbiz5p2al1kj",
+   "time": "2026-08-14 00:00:00"
+  },
+  {
+   "amount": 0.4871634697774425,
+   "timeBilledMs": 1746251,
+   "diskSpaceBilledGB": 720,
+   "podId": "3uwvkx3zyria8z",
+   "time": "2026-08-14 00:00:00"
+  },
+  {
+   "amount": 0.06989248853642493,
+   "timeBilledMs": 249104,
+   "diskSpaceBilledGB": 240,
+   "podId": "bu7j1vlcjge9qj",
+   "time": "2026-08-14 00:00:00"
+  },
+  {
+   "amount": 0.15761158079840243,
+   "timeBilledMs": 563032,
+   "diskSpaceBilledGB": 360,
+   "podId": "dqw79h3twudxzt",
+   "time": "2026-08-14 00:00:00"
+  },
+  {
+   "amount": 1.3864178975345567,
+   "timeBilledMs": 4955661,
+   "diskSpaceBilledGB": 2160,
+   "podId": "hcgt3z021psyrz",
+   "time": "2026-08-14 00:00:00"
+  },
+  {
+   "amount": 0.1506048480514437,
+   "timeBilledMs": 537553,
+   "diskSpaceBilledGB": 360,
+   "podId": "setwv2mt3gx4hz",
+   "time": "2026-08-14 00:00:00"
+  },
+  {
+   "amount": 0.2943388340063393,
+   "timeBilledMs": 1050121,
+   "diskSpaceBilledGB": 600,
+   "podId": "ud7ycof0pnqu43",
+   "time": "2026-08-14 00:00:00"
+  },
+  {
+   "amount": 0.19106738653499633,
+   "timeBilledMs": 689740,
+   "diskSpaceBilledGB": 240,
+   "podId": "uzahazwqsh2r9a",
+   "time": "2026-08-14 00:00:00"
+  },
+  {
+   "amount": 0.13238472607918084,
+   "timeBilledMs": 471298,
+   "diskSpaceBilledGB": 360,
+   "podId": "z9so5ftbsokybz",
+   "time": "2026-08-14 00:00:00"
+  },
+  {
+   "amount": 0.6911785601405427,
+   "timeBilledMs": 2467922,
+   "diskSpaceBilledGB": 1200,
+   "podId": "1xwqb7os4ue9rz",
+   "time": "2026-08-15 00:00:00"
+  },
+  {
+   "amount": 0.214429191313684,
+   "timeBilledMs": 754490,
+   "diskSpaceBilledGB": 800,
+   "podId": "6mzp8m92qksalv",
+   "time": "2026-08-15 00:00:00"
+  },
+  {
+   "amount": 0.4497145233908668,
+   "timeBilledMs": 1610073,
+   "diskSpaceBilledGB": 720,
+   "podId": "dltht42ifojgwo",
+   "time": "2026-08-15 00:00:00"
+  },
+  {
+   "amount": 0.47518584062345326,
+   "timeBilledMs": 1685861,
+   "diskSpaceBilledGB": 1200,
+   "podId": "fa2sgl62t3l8q0",
+   "time": "2026-08-15 00:00:00"
+  },
+  {
+   "amount": 0.08250000327825546,
+   "timeBilledMs": 300000,
+   "diskSpaceBilledGB": 200,
+   "podId": "ky8j0kbft9mp61",
+   "time": "2026-08-15 00:00:00"
+  },
+  {
+   "amount": 0.20697215106338263,
+   "timeBilledMs": 735791,
+   "diskSpaceBilledGB": 600,
+   "podId": "vt3qm7j9vpct6c",
+   "time": "2026-08-15 00:00:00"
+  },
+  {
+   "amount": 0.40309349400922656,
+   "timeBilledMs": 1423707,
+   "diskSpaceBilledGB": 1200,
+   "podId": "s797g6xphdibms",
+   "time": "2026-08-16 00:00:00"
+  },
+  {
+   "amount": 0.25251738261431456,
+   "timeBilledMs": 901410,
+   "diskSpaceBilledGB": 600,
+   "podId": "vvsohv60cuuokx",
+   "time": "2026-08-16 00:00:00"
+  },
+  {
+   "amount": 0.3615898098796606,
+   "timeBilledMs": 1281202,
+   "diskSpaceBilledGB": 1000,
+   "podId": "wgm2tamw8nu9f5",
+   "time": "2026-08-16 00:00:00"
+  },
+  {
+   "amount": 0.06224391621071845,
+   "timeBilledMs": 221291,
+   "diskSpaceBilledGB": 240,
+   "podId": "ibj7s7fxuj9ttl",
+   "time": "2026-08-17 00:00:00"
+  },
+  {
+   "amount": 0.40186988934874535,
+   "timeBilledMs": 1427675,
+   "diskSpaceBilledGB": 1000,
+   "podId": "n2kfqhyoya4zzj",
+   "time": "2026-08-17 00:00:00"
+  },
+  {
+   "amount": 0.05747472494840622,
+   "timeBilledMs": 208999,
+   "diskSpaceBilledGB": 120,
+   "podId": "qhrir27ixfu8kt",
+   "time": "2026-08-17 00:00:00"
+  },
+  {
+   "amount": 0.18560231616720557,
+   "timeBilledMs": 666500,
+   "diskSpaceBilledGB": 400,
+   "podId": "2maapdxqg566r5",
+   "time": "2026-08-18 00:00:00"
+  },
+  {
+   "amount": 0.343533587642014,
+   "timeBilledMs": 1215543,
+   "diskSpaceBilledGB": 1000,
+   "podId": "grgiu5atibea3x",
+   "time": "2026-08-18 00:00:00"
+  },
+  {
+   "amount": 6.2927278047427535,
+   "timeBilledMs": 22259751,
+   "diskSpaceBilledGB": 14800,
+   "podId": "nex2u8no79k6pl",
+   "time": "2026-08-18 00:00:00"
+  },
+  {
+   "amount": 0.18295970209874213,
+   "timeBilledMs": 655207,
+   "diskSpaceBilledGB": 360,
+   "podId": "1dxw5aw2d112jx",
+   "time": "2026-08-19 00:00:00"
+  },
+  {
+   "amount": 0.06254792213439941,
+   "timeBilledMs": 227447,
+   "diskSpaceBilledGB": 120,
+   "podId": "detw95h0kqc7x6",
+   "time": "2026-08-19 00:00:00"
+  },
+  {
+   "amount": 5.449265675619245,
+   "timeBilledMs": 19276791,
+   "diskSpaceBilledGB": 13000,
+   "podId": "nex2u8no79k6pl",
+   "time": "2026-08-19 00:00:00"
+  },
+  {
+   "amount": 0.20757687487639487,
+   "timeBilledMs": 744724,
+   "diskSpaceBilledGB": 360,
+   "podId": "fsk7tz1rnx43xr",
+   "time": "2026-08-20 00:00:00"
+  },
+  {
+   "amount": 3.888357776682824,
+   "timeBilledMs": 13760695,
+   "diskSpaceBilledGB": 9200,
+   "podId": "o7hj2r3z2w8xat",
+   "time": "2026-08-20 00:00:00"
+  },
+  {
+   "amount": 3.2951072761788964,
+   "timeBilledMs": 11662343,
+   "diskSpaceBilledGB": 7800,
+   "podId": "y1wmjhemi50jkw",
+   "time": "2026-08-20 00:00:00"
+  },
+  {
+   "amount": 0.24063848052173853,
+   "timeBilledMs": 858214,
+   "diskSpaceBilledGB": 600,
+   "podId": "7hthdteyc25xgx",
+   "time": "2026-08-21 00:00:00"
+  },
+  {
+   "amount": 0.00775500014424324,
+   "timeBilledMs": 28200,
+   "diskSpaceBilledGB": 200,
+   "podId": "dckc72mtoe9ijw",
+   "time": "2026-08-21 00:00:00"
+  },
+  {
+   "amount": 1.3829207331873477,
+   "timeBilledMs": 4902540,
+   "diskSpaceBilledGB": 3200,
+   "podId": "9jxov5bjtiy2xu",
+   "time": "2026-08-22 00:00:00"
+  },
+  {
+   "amount": 0.41759796626865864,
+   "timeBilledMs": 1484868,
+   "diskSpaceBilledGB": 1000,
+   "podId": "k1mgu38q0y6sei",
+   "time": "2026-08-22 00:00:00"
+  },
+  {
+   "amount": 0.20285265613347292,
+   "timeBilledMs": 720811,
+   "diskSpaceBilledGB": 600,
+   "podId": "ku8vcn5mu8hp9i",
+   "time": "2026-08-22 00:00:00"
+  },
+  {
+   "amount": 10.574283817782998,
+   "timeBilledMs": 37408170,
+   "diskSpaceBilledGB": 24800,
+   "podId": "3c1g6e01kdu1ya",
+   "time": "2026-08-23 00:00:00"
+  },
+  {
+   "amount": 1.5313777020201087,
+   "timeBilledMs": 5417131,
+   "diskSpaceBilledGB": 3800,
+   "podId": "ifp8feyil1gp7v",
+   "time": "2026-08-23 00:00:00"
+  },
+  {
+   "amount": 2.640384661499411,
+   "timeBilledMs": 9340456,
+   "diskSpaceBilledGB": 6400,
+   "podId": "3c1g6e01kdu1ya",
+   "time": "2026-08-24 00:00:00"
+  },
+  {
+   "amount": 0.14572862186469138,
+   "timeBilledMs": 517296,
+   "diskSpaceBilledGB": 600,
+   "podId": "4dbqycjrivhq17",
+   "time": "2026-08-26 00:00:00"
+  },
+  {
+   "amount": 7.07911177771166,
+   "timeBilledMs": 24706871,
+   "diskSpaceBilledGB": 24600,
+   "podId": "wkausr939ts7vv",
+   "time": "2026-08-26 00:00:00"
+  },
+  {
+   "amount": 0.23344544367864728,
+   "timeBilledMs": 823640,
+   "diskSpaceBilledGB": 900,
+   "podId": "xgca8kkv4pm68n",
+   "time": "2026-08-26 00:00:00"
+  },
+  {
+   "amount": 2.8163966685533524,
+   "timeBilledMs": 9837402,
+   "diskSpaceBilledGB": 9900,
+   "podId": "wkausr939ts7vv",
+   "time": "2026-08-27 00:00:00"
+  },
+  {
+   "amount": 8.343494032509625,
+   "timeBilledMs": 29127857,
+   "diskSpaceBilledGB": 29100,
+   "podId": "zjwpsurs2dyvw8",
+   "time": "2026-08-27 00:00:00"
+  },
+  {
+   "amount": 12.47451318637468,
+   "timeBilledMs": 43531058,
+   "diskSpaceBilledGB": 43800,
+   "podId": "37aah10zvqk4lo",
+   "time": "2026-08-28 00:00:00"
+  },
+  {
+   "amount": 0.3173120486353582,
+   "timeBilledMs": 1133660,
+   "diskSpaceBilledGB": 600,
+   "podId": "ew2ykjczuex87i",
+   "time": "2026-08-29 00:00:00"
+  },
+  {
+   "amount": 0.2512454951647669,
+   "timeBilledMs": 903519,
+   "diskSpaceBilledGB": 360,
+   "podId": "nuitz0ketxukpm",
+   "time": "2026-08-29 00:00:00"
+  },
+  {
+   "amount": 1.4887926821829751,
+   "timeBilledMs": 5327933,
+   "diskSpaceBilledGB": 2160,
+   "podId": "hyvp7dw3zkb1zk",
+   "time": "2026-08-30 00:00:00"
+  },
+  {
+   "amount": 0.22740547941066325,
+   "timeBilledMs": 816828,
+   "diskSpaceBilledGB": 360,
+   "podId": "qbfqbp3y6hq8iu",
+   "time": "2026-08-30 00:00:00"
+  },
+  {
+   "amount": 1.565506827319041,
+   "timeBilledMs": 5601843,
+   "diskSpaceBilledGB": 2280,
+   "podId": "skoh6l6wmmwxce",
+   "time": "2026-08-30 00:00:00"
+  },
+  {
+   "amount": 0.07576800137758255,
+   "timeBilledMs": 275520,
+   "diskSpaceBilledGB": 200,
+   "podId": "fccr23o9jcnrh0",
+   "time": "2026-09-02 00:00:00"
+  },
+  {
+   "amount": 0.10072659468278289,
+   "timeBilledMs": 357861,
+   "diskSpaceBilledGB": 400,
+   "podId": "8ywzifnsa5zery",
+   "time": "2026-09-03 00:00:00"
+  },
+  {
+   "amount": 0.34619392873719335,
+   "timeBilledMs": 1120457,
+   "diskSpaceBilledGB": 800,
+   "podId": "pj3c870n6yx70z",
+   "time": "2026-09-03 00:00:00"
+  },
+  {
+   "amount": 0.7091082357801497,
+   "timeBilledMs": 2288492,
+   "diskSpaceBilledGB": 1600,
+   "podId": "d854jag1ybhny2",
+   "time": "2026-09-04 00:00:00"
+  },
+  {
+   "amount": 0.31877346290275455,
+   "timeBilledMs": 1029894,
+   "diskSpaceBilledGB": 800,
+   "podId": "e2ghwfuerdrvni",
+   "time": "2026-09-05 00:00:00"
+  },
+  {
+   "amount": 0.6242032060399652,
+   "timeBilledMs": 2015717,
+   "diskSpaceBilledGB": 1400,
+   "podId": "fbuggw0x9efqsz",
+   "time": "2026-09-06 00:00:00"
+  },
+  {
+   "amount": 0.42291608080267906,
+   "timeBilledMs": 1366206,
+   "diskSpaceBilledGB": 1000,
+   "podId": "gfd8buh5tr51qb",
+   "time": "2026-09-06 00:00:00"
+  },
+  {
+   "amount": 0.3566763964481652,
+   "timeBilledMs": 1155078,
+   "diskSpaceBilledGB": 800,
+   "podId": "n71opk7lv4fhzf",
+   "time": "2026-09-06 00:00:00"
+  },
+  {
+   "amount": 1.0662942701019347,
+   "timeBilledMs": 3437608,
+   "diskSpaceBilledGB": 2400,
+   "podId": "8gtnsbigpgaz76",
+   "time": "2026-09-07 00:00:00"
+  },
+  {
+   "amount": 0.006591533310711384,
+   "timeBilledMs": 98873,
+   "diskSpaceBilledGB": 20,
+   "podId": "ij54bzvcyldm9j",
+   "time": "2026-09-09 00:00:00"
+  },
+  {
+   "amount": 0.017662348109297454,
+   "timeBilledMs": 261463,
+   "diskSpaceBilledGB": 40,
+   "podId": "8tbsixglzz64ox",
+   "time": "2026-09-10 00:00:00"
+  },
+  {
+   "amount": 0.013659266754984856,
+   "timeBilledMs": 204889,
+   "diskSpaceBilledGB": 20,
+   "podId": "zoz95844krv2ze",
+   "time": "2026-09-10 00:00:00"
+  },
+  {
+   "amount": 0.11691801762208343,
+   "timeBilledMs": 378506,
+   "diskSpaceBilledGB": 400,
+   "podId": "kabazpl889i5u5",
+   "time": "2026-09-11 00:00:00"
+  },
+  {
+   "amount": 0.2820737692527473,
+   "timeBilledMs": 908684,
+   "diskSpaceBilledGB": 800,
+   "podId": "udkapuemrwqcmt",
+   "time": "2026-09-11 00:00:00"
+  },
+  {
+   "amount": 11.468157668132335,
+   "timeBilledMs": 36936117,
+   "diskSpaceBilledGB": 24800,
+   "podId": "3fjnnnftllfzya",
+   "time": "2026-09-13 00:00:00"
+  },
+  {
+   "amount": 0.4394283667206764,
+   "timeBilledMs": 1420742,
+   "diskSpaceBilledGB": 1000,
+   "podId": "9jhjbu4i67wb9k",
+   "time": "2026-09-13 00:00:00"
+  },
+  {
+   "amount": 0.40603076154366136,
+   "timeBilledMs": 1310438,
+   "diskSpaceBilledGB": 1000,
+   "podId": "h9hs9l127w4x99",
+   "time": "2026-09-13 00:00:00"
+  },
+  {
+   "amount": 10.457900252193213,
+   "timeBilledMs": 33683585,
+   "diskSpaceBilledGB": 22600,
+   "podId": "ygtjrobs456cb5",
+   "time": "2026-09-14 00:00:00"
+  },
+  {
+   "amount": 0.052014194428920746,
+   "timeBilledMs": 171790,
+   "diskSpaceBilledGB": 200,
+   "podId": "o1omuvih3yb13k",
+   "time": "2026-09-15 00:00:00"
+  },
+  {
+   "amount": 0.16659507295116782,
+   "timeBilledMs": 542577,
+   "diskSpaceBilledGB": 400,
+   "podId": "o9m4onsnaxrjp4",
+   "time": "2026-09-15 00:00:00"
+  },
+  {
+   "amount": 5.58674524910748,
+   "timeBilledMs": 17992920,
+   "diskSpaceBilledGB": 12000,
+   "podId": "vqwg6o4ftpda4b",
+   "time": "2026-09-15 00:00:00"
+  },
+  {
+   "amount": 0.588946694158949,
+   "timeBilledMs": 1929090,
+   "diskSpaceBilledGB": 480,
+   "podId": "9s9pw0c8873y5g",
+   "time": "2026-09-16 00:00:00"
+  },
+  {
+   "amount": 0.04443778470158577,
+   "timeBilledMs": 146767,
+   "diskSpaceBilledGB": 60,
+   "podId": "e2abgfw36davun",
+   "time": "2026-09-16 00:00:00"
+  },
+  {
+   "amount": 0.038043420761823654,
+   "timeBilledMs": 125648,
+   "diskSpaceBilledGB": 60,
+   "podId": "v0h4f5at4112g2",
+   "time": "2026-09-16 00:00:00"
+  },
+  {
+   "amount": 0.6413573855534196,
+   "timeBilledMs": 2072373,
+   "diskSpaceBilledGB": 1400,
+   "podId": "vqwg6o4ftpda4b",
+   "time": "2026-09-16 00:00:00"
+  },
+  {
+   "amount": 0.06295961141586304,
+   "timeBilledMs": 207940,
+   "diskSpaceBilledGB": 20,
+   "podId": "4gvvwu0sjw83h0",
+   "time": "2026-09-17 00:00:00"
+  },
+  {
+   "amount": 0.026530902832746506,
+   "timeBilledMs": 87625,
+   "diskSpaceBilledGB": 20,
+   "podId": "9olm9hi8pge3dc",
+   "time": "2026-09-17 00:00:00"
+  },
+  {
+   "amount": 0.022052676766179502,
+   "timeBilledMs": 72070,
+   "diskSpaceBilledGB": 40,
+   "podId": "fwirl8i32kn2r4",
+   "time": "2026-09-17 00:00:00"
+  },
+  {
+   "amount": 0.08697761537041515,
+   "timeBilledMs": 286501,
+   "diskSpaceBilledGB": 40,
+   "podId": "jt42hkhgnx2khg",
+   "time": "2026-09-17 00:00:00"
+  },
+  {
+   "amount": 0.1055021652719006,
+   "timeBilledMs": 347683,
+   "diskSpaceBilledGB": 40,
+   "podId": "mpdglbd21b3tt7",
+   "time": "2026-09-17 00:00:00"
+  },
+  {
+   "amount": 0.046576909720897675,
+   "timeBilledMs": 153832,
+   "diskSpaceBilledGB": 20,
+   "podId": "w70qw5g7dzls4u",
+   "time": "2026-09-17 00:00:00"
+  },
+  {
+   "amount": 0.4902761400444433,
+   "timeBilledMs": 1615438,
+   "diskSpaceBilledGB": 120,
+   "podId": "gjm8v44ykc41oq",
+   "time": "2026-09-18 00:00:00"
+  },
+  {
+   "amount": 0.13968365918844938,
+   "timeBilledMs": 446050,
+   "diskSpaceBilledGB": 800,
+   "podId": "llprq3y2moxzev",
+   "time": "2026-09-18 00:00:00"
+  },
+  {
+   "amount": 0.3495236779563129,
+   "timeBilledMs": 1151332,
+   "diskSpaceBilledGB": 100,
+   "podId": "q6fdziseu7i18s",
+   "time": "2026-09-18 00:00:00"
+  },
+  {
+   "amount": 7.369629914872348,
+   "timeBilledMs": 23162692,
+   "diskSpaceBilledGB": 31200,
+   "podId": "ulit767od813i8",
+   "time": "2026-09-18 00:00:00"
+  },
+  {
+   "amount": 0.018659891560673714,
+   "timeBilledMs": 61629,
+   "diskSpaceBilledGB": 120,
+   "podId": "04u1mava7qhf4x",
+   "time": "2026-09-19 00:00:00"
+  },
+  {
+   "amount": 1.1433894220972434,
+   "timeBilledMs": 3716699,
+   "diskSpaceBilledGB": 1680,
+   "podId": "cat1v3vafsfv2g",
+   "time": "2026-09-19 00:00:00"
+  },
+  {
+   "amount": 2.0945744055788964,
+   "timeBilledMs": 6816943,
+   "diskSpaceBilledGB": 2760,
+   "podId": "i0uku41wc6ph3e",
+   "time": "2026-09-19 00:00:00"
+  },
+  {
+   "amount": 0.04551718756556511,
+   "timeBilledMs": 150332,
+   "diskSpaceBilledGB": 120,
+   "podId": "q2bss1lxkaa2ps",
+   "time": "2026-09-19 00:00:00"
+  },
+  {
+   "amount": 2.5385531255742535,
+   "timeBilledMs": 8260359,
+   "diskSpaceBilledGB": 3360,
+   "podId": "1fv2t0y39lwhml",
+   "time": "2026-09-20 00:00:00"
+  },
+  {
+   "amount": 18.776058008312248,
+   "timeBilledMs": 61081476,
+   "diskSpaceBilledGB": 24360,
+   "podId": "0x48foz4j4xkcg",
+   "time": "2026-09-21 00:00:00"
+  },
+  {
+   "amount": 0.9239607870113105,
+   "timeBilledMs": 3005742,
+   "diskSpaceBilledGB": 1320,
+   "podId": "0x48foz4j4xkcg",
+   "time": "2026-09-22 00:00:00"
+  },
+  {
+   "amount": 0.11108436633367091,
+   "timeBilledMs": 362297,
+   "diskSpaceBilledGB": 240,
+   "podId": "4yumqr65qp5c00",
+   "time": "2026-09-23 00:00:00"
+  },
+  {
+   "amount": 2.6526289540342987,
+   "timeBilledMs": 8632536,
+   "diskSpaceBilledGB": 3480,
+   "podId": "agzedo7w6usi71",
+   "time": "2026-09-23 00:00:00"
+  },
+  {
+   "amount": 0.08693628013134003,
+   "timeBilledMs": 287129,
+   "diskSpaceBilledGB": 120,
+   "podId": "fn825nav4mykic",
+   "time": "2026-09-23 00:00:00"
+  },
+  {
+   "amount": 1.2145491518313065,
+   "timeBilledMs": 3951722,
+   "diskSpaceBilledGB": 1680,
+   "podId": "m6fi9oibrxtb0m",
+   "time": "2026-09-23 00:00:00"
+  },
+  {
+   "amount": 2.2589326072484255,
+   "timeBilledMs": 7346016,
+   "diskSpaceBilledGB": 3120,
+   "podId": "vmer6occrfdxcp",
+   "time": "2026-09-23 00:00:00"
+  },
+  {
+   "amount": 2.080946686444804,
+   "timeBilledMs": 6771934,
+   "diskSpaceBilledGB": 2760,
+   "podId": "6rwnh4rd9woxt7",
+   "time": "2026-09-24 00:00:00"
+  },
+  {
+   "amount": 0.014605697244405746,
+   "timeBilledMs": 48239,
+   "diskSpaceBilledGB": 60,
+   "podId": "6rmod2085xd313",
+   "time": "2026-09-25 00:00:00"
+  },
+  {
+   "amount": 0.04573488608002663,
+   "timeBilledMs": 151051,
+   "diskSpaceBilledGB": 120,
+   "podId": "6x4dcvm9s22cb6",
+   "time": "2026-09-25 00:00:00"
+  },
+  {
+   "amount": 0.09825022530276328,
+   "timeBilledMs": 319909,
+   "diskSpaceBilledGB": 240,
+   "podId": "c6btbh69ql85ng",
+   "time": "2026-09-25 00:00:00"
+  },
+  {
+   "amount": 0.018652020022273064,
+   "timeBilledMs": 61603,
+   "diskSpaceBilledGB": 60,
+   "podId": "o1wtd5wfat43ny",
+   "time": "2026-09-25 00:00:00"
+  },
+  {
+   "amount": 0.020832018926739693,
+   "timeBilledMs": 68803,
+   "diskSpaceBilledGB": 60,
+   "podId": "o5bv3oqqs7s80b",
+   "time": "2026-09-25 00:00:00"
+  },
+  {
+   "amount": 0.017336450517177582,
+   "timeBilledMs": 57258,
+   "diskSpaceBilledGB": 60,
+   "podId": "vx55ur6camdmgl",
+   "time": "2026-09-25 00:00:00"
+  },
+  {
+   "amount": 0.0899147018790245,
+   "timeBilledMs": 296966,
+   "diskSpaceBilledGB": 120,
+   "podId": "0a8u02ydq58xai",
+   "time": "2026-09-26 00:00:00"
+  },
+  {
+   "amount": 0.717229709844105,
+   "timeBilledMs": 2336722,
+   "diskSpaceBilledGB": 960,
+   "podId": "7ucb8jox3buc29",
+   "time": "2026-09-26 00:00:00"
+  },
+  {
+   "amount": 0.03609686344861984,
+   "timeBilledMs": 119219,
+   "diskSpaceBilledGB": 120,
+   "podId": "css25bbu7ueqla",
+   "time": "2026-09-26 00:00:00"
+  },
+  {
+   "amount": 0.16731176734901965,
+   "timeBilledMs": 543415,
+   "diskSpaceBilledGB": 360,
+   "podId": "hdwsp4btdq5t1n",
+   "time": "2026-09-26 00:00:00"
+  },
+  {
+   "amount": 0.47397039143834263,
+   "timeBilledMs": 1542471,
+   "diskSpaceBilledGB": 720,
+   "podId": "ks8pm799bytys9",
+   "time": "2026-09-26 00:00:00"
+  },
+  {
+   "amount": 2.1092558511300012,
+   "timeBilledMs": 6860845,
+   "diskSpaceBilledGB": 2880,
+   "podId": "m8t9tf8ftqlmh3",
+   "time": "2026-09-26 00:00:00"
+  },
+  {
+   "amount": 0.040764835313893855,
+   "timeBilledMs": 130049,
+   "diskSpaceBilledGB": 240,
+   "podId": "sjhg5lcu03wesf",
+   "time": "2026-09-26 00:00:00"
+  },
+  {
+   "amount": 0.03843097761273384,
+   "timeBilledMs": 126928,
+   "diskSpaceBilledGB": 120,
+   "podId": "y1rg8rsl4qy4lp",
+   "time": "2026-09-26 00:00:00"
+  },
+  {
+   "amount": 0.15096383925992996,
+   "timeBilledMs": 494009,
+   "diskSpaceBilledGB": 240,
+   "podId": "zosdyrzqvw6jwg",
+   "time": "2026-09-26 00:00:00"
+  },
+  {
+   "amount": 0.48288688680622727,
+   "timeBilledMs": 1571920,
+   "diskSpaceBilledGB": 720,
+   "podId": "25kncjfmakxxul",
+   "time": "2026-09-27 00:00:00"
+  },
+  {
+   "amount": 0.06369747966527939,
+   "timeBilledMs": 210377,
+   "diskSpaceBilledGB": 120,
+   "podId": "gbiz85xcmiq6gh",
+   "time": "2026-09-27 00:00:00"
+  },
+  {
+   "amount": 0.786675781942904,
+   "timeBilledMs": 2561498,
+   "diskSpaceBilledGB": 1080,
+   "podId": "p6doyk8jeydg1u",
+   "time": "2026-09-27 00:00:00"
+  },
+  {
+   "amount": 2.634855307172984,
+   "timeBilledMs": 8573834,
+   "diskSpaceBilledGB": 3480,
+   "podId": "xrksmenhg7dlps",
+   "time": "2026-09-27 00:00:00"
+  },
+  {
+   "amount": 4.232057907618582,
+   "timeBilledMs": 13625757,
+   "diskSpaceBilledGB": 9200,
+   "podId": "10rzsbqq4fm0oe",
+   "time": "2026-09-28 00:00:00"
+  },
+  {
+   "amount": 0.8726595505140722,
+   "timeBilledMs": 2813371,
+   "diskSpaceBilledGB": 2000,
+   "podId": "13yjoyyhabnud3",
+   "time": "2026-09-28 00:00:00"
+  },
+  {
+   "amount": 0.14477781718596816,
+   "timeBilledMs": 470520,
+   "diskSpaceBilledGB": 400,
+   "podId": "3r1vgzkoa3855r",
+   "time": "2026-09-28 00:00:00"
+  },
+  {
+   "amount": 0.2223731791600585,
+   "timeBilledMs": 719153,
+   "diskSpaceBilledGB": 600,
+   "podId": "8z0iasbo1u9xsj",
+   "time": "2026-09-28 00:00:00"
+  },
+  {
+   "amount": 0.16897582402452826,
+   "timeBilledMs": 550440,
+   "diskSpaceBilledGB": 400,
+   "podId": "9xglpzr0jafa4p",
+   "time": "2026-09-28 00:00:00"
+  },
+  {
+   "amount": 0.17704916675575078,
+   "timeBilledMs": 569459,
+   "diskSpaceBilledGB": 600,
+   "podId": "ika31gdnbcxdnf",
+   "time": "2026-09-28 00:00:00"
+  },
+  {
+   "amount": 0.13672211160883307,
+   "timeBilledMs": 443914,
+   "diskSpaceBilledGB": 400,
+   "podId": "jaz1nvhe55bau5",
+   "time": "2026-09-28 00:00:00"
+  },
+  {
+   "amount": 0.7053408361971378,
+   "timeBilledMs": 2268404,
+   "diskSpaceBilledGB": 1800,
+   "podId": "k0i94vj4652smj",
+   "time": "2026-09-28 00:00:00"
+  },
+  {
+   "amount": 0.284127886290662,
+   "timeBilledMs": 907823,
+   "diskSpaceBilledGB": 1000,
+   "podId": "m82qrw2rzfzaos",
+   "time": "2026-09-28 00:00:00"
+  },
+  {
+   "amount": 0.5844611022621393,
+   "timeBilledMs": 2484626,
+   "diskSpaceBilledGB": 1800,
+   "podId": "mnc8vbra2d5kmo",
+   "time": "2026-09-28 00:00:00"
+  },
+  {
+   "amount": 0.16558963153511286,
+   "timeBilledMs": 531611,
+   "diskSpaceBilledGB": 600,
+   "podId": "x5micecq85t2t1",
+   "time": "2026-09-28 00:00:00"
+  },
+  {
+   "amount": 0.281026151496917,
+   "timeBilledMs": 905224,
+   "diskSpaceBilledGB": 800,
+   "podId": "yqbv1hp9t5xhnx",
+   "time": "2026-09-28 00:00:00"
+  },
+  {
+   "amount": 9.502312545198947,
+   "timeBilledMs": 30603968,
+   "diskSpaceBilledGB": 20600,
+   "podId": "10rzsbqq4fm0oe",
+   "time": "2026-09-29 00:00:00"
+  },
+  {
+   "amount": 6.690346661955118,
+   "timeBilledMs": 21546099,
+   "diskSpaceBilledGB": 14400,
+   "podId": "ib1q01gn8xuecn",
+   "time": "2026-09-29 00:00:00"
+  },
+  {
+   "amount": 10.44072368182242,
+   "timeBilledMs": 33626855,
+   "diskSpaceBilledGB": 22600,
+   "podId": "ib1q01gn8xuecn",
+   "time": "2026-09-30 00:00:00"
+  },
+  {
+   "amount": 0.06875434902030975,
+   "timeBilledMs": 224785,
+   "diskSpaceBilledGB": 120,
+   "podId": "26h9foe32saz03",
+   "time": "2026-10-01 00:00:00"
+  },
+  {
+   "amount": 0.07747253135312349,
+   "timeBilledMs": 253579,
+   "diskSpaceBilledGB": 120,
+   "podId": "6t8stmean91bme",
+   "time": "2026-10-01 00:00:00"
+  },
+  {
+   "amount": 0.06946466316003352,
+   "timeBilledMs": 227131,
+   "diskSpaceBilledGB": 120,
+   "podId": "8fgex0ws3dxtf6",
+   "time": "2026-10-01 00:00:00"
+  },
+  {
+   "amount": 0.09593803819734603,
+   "timeBilledMs": 314566,
+   "diskSpaceBilledGB": 120,
+   "podId": "chxzdw7f3u6n7y",
+   "time": "2026-10-01 00:00:00"
+  },
+  {
+   "amount": 0.08821599010843784,
+   "timeBilledMs": 289062,
+   "diskSpaceBilledGB": 120,
+   "podId": "ij1q5lkvjgw424",
+   "time": "2026-10-01 00:00:00"
+  },
+  {
+   "amount": 0.04292982455808669,
+   "timeBilledMs": 139493,
+   "diskSpaceBilledGB": 120,
+   "podId": "qjxuhv9hr8pkyx",
+   "time": "2026-10-01 00:00:00"
+  },
+  {
+   "amount": 0.05865792010445148,
+   "timeBilledMs": 191439,
+   "diskSpaceBilledGB": 120,
+   "podId": "s0o39i0r8js4q8",
+   "time": "2026-10-01 00:00:00"
+  },
+  {
+   "amount": 0.05630728229880333,
+   "timeBilledMs": 185969,
+   "diskSpaceBilledGB": 60,
+   "podId": "up1584mpi4adoc",
+   "time": "2026-10-01 00:00:00"
+  },
+  {
+   "amount": 0.08452059340197593,
+   "timeBilledMs": 276857,
+   "diskSpaceBilledGB": 120,
+   "podId": "uqe7frqpwbtx4s",
+   "time": "2026-10-01 00:00:00"
+  },
+  {
+   "amount": 0.07596257713157684,
+   "timeBilledMs": 248592,
+   "diskSpaceBilledGB": 120,
+   "podId": "00dx5ssyiijam5",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.09176454890985042,
+   "timeBilledMs": 300782,
+   "diskSpaceBilledGB": 120,
+   "podId": "037tlpqnna43h7",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.03946453344542533,
+   "timeBilledMs": 128048,
+   "diskSpaceBilledGB": 120,
+   "podId": "2cc6j5xwhwes2q",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.6565891249338165,
+   "timeBilledMs": 2139117,
+   "diskSpaceBilledGB": 880,
+   "podId": "5pqrfaf2ayq4vg",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.07895220455247909,
+   "timeBilledMs": 258466,
+   "diskSpaceBilledGB": 120,
+   "podId": "6dmm3pduvx70du",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.08251469035167247,
+   "timeBilledMs": 270232,
+   "diskSpaceBilledGB": 120,
+   "podId": "8ca1q3urtxcm9e",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.05584844562690705,
+   "timeBilledMs": 182160,
+   "diskSpaceBilledGB": 120,
+   "podId": "8iif1ca895p34z",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.5207202123710886,
+   "timeBilledMs": 1708342,
+   "diskSpaceBilledGB": 360,
+   "podId": "axpjsvpzfr5rsb",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.6713480228791013,
+   "timeBilledMs": 2187862,
+   "diskSpaceBilledGB": 880,
+   "podId": "cdfxbfm10rs5i5",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.08180770289618522,
+   "timeBilledMs": 267897,
+   "diskSpaceBilledGB": 120,
+   "podId": "e0a2yb7ps0z545",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.12820930231828243,
+   "timeBilledMs": 421150,
+   "diskSpaceBilledGB": 120,
+   "podId": "ed7klmyc4ksdca",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.09199375112075359,
+   "timeBilledMs": 301539,
+   "diskSpaceBilledGB": 120,
+   "podId": "fo0weg5li3agl0",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.2776180770015344,
+   "timeBilledMs": 910023,
+   "diskSpaceBilledGB": 240,
+   "podId": "gjaffzy2pw3tbk",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.06266124558169395,
+   "timeBilledMs": 204661,
+   "diskSpaceBilledGB": 120,
+   "podId": "j9in1v58ccag7m",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.05548554286360741,
+   "timeBilledMs": 183255,
+   "diskSpaceBilledGB": 60,
+   "podId": "kr98x307m5to5s",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.0990890507819131,
+   "timeBilledMs": 324973,
+   "diskSpaceBilledGB": 120,
+   "podId": "ma8k4l2skbv2q9",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.09997558046597987,
+   "timeBilledMs": 327901,
+   "diskSpaceBilledGB": 120,
+   "podId": "nqpjywnx537p11",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.6828665944049135,
+   "timeBilledMs": 2225905,
+   "diskSpaceBilledGB": 880,
+   "podId": "nt0r5anrh062z0",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 1.9639446734217927,
+   "timeBilledMs": 6398120,
+   "diskSpaceBilledGB": 2420,
+   "podId": "qdp3jfmnelvqst",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 4.524110630503856,
+   "timeBilledMs": 14735977,
+   "diskSpaceBilledGB": 5500,
+   "podId": "sp9cv5m3sizknn",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 1.4485144518548623,
+   "timeBilledMs": 4721011,
+   "diskSpaceBilledGB": 1760,
+   "podId": "vus83qfnliptjf",
+   "time": "2026-10-02 00:00:00"
+  },
+  {
+   "amount": 0.06102715723682195,
+   "timeBilledMs": 199264,
+   "diskSpaceBilledGB": 120,
+   "podId": "3gvfeqnkbyptc4",
+   "time": "2026-10-04 00:00:00"
+  },
+  {
+   "amount": 0.46907359606120735,
+   "timeBilledMs": 1537766,
+   "diskSpaceBilledGB": 360,
+   "podId": "3xs9her5kavk14",
+   "time": "2026-10-04 00:00:00"
+  },
+  {
+   "amount": 0.0961860140087083,
+   "timeBilledMs": 315385,
+   "diskSpaceBilledGB": 120,
+   "podId": "5db8r0r06vd5k5",
+   "time": "2026-10-04 00:00:00"
+  },
+  {
+   "amount": 0.6085100759519264,
+   "timeBilledMs": 1993703,
+   "diskSpaceBilledGB": 480,
+   "podId": "6g42msvfrzemos",
+   "time": "2026-10-04 00:00:00"
+  },
+  {
+   "amount": 0.09619448997545987,
+   "timeBilledMs": 315413,
+   "diskSpaceBilledGB": 120,
+   "podId": "9rmme5u9yd68g5",
+   "time": "2026-10-04 00:00:00"
+  },
+  {
+   "amount": 1.6780926568899304,
+   "timeBilledMs": 5501040,
+   "diskSpaceBilledGB": 1140,
+   "podId": "cnzdnn3m890m1f",
+   "time": "2026-10-04 00:00:00"
+  },
+  {
+   "amount": 0.6361615572823212,
+   "timeBilledMs": 2085029,
+   "diskSpaceBilledGB": 480,
+   "podId": "d3zrira2zl98kd",
+   "time": "2026-10-04 00:00:00"
+  },
+  {
+   "amount": 0.8532755500636995,
+   "timeBilledMs": 2795222,
+   "diskSpaceBilledGB": 660,
+   "podId": "rtrdbu3wi6sfrv",
+   "time": "2026-10-04 00:00:00"
+  },
+  {
+   "amount": 0.8983019415754825,
+   "timeBilledMs": 2943933,
+   "diskSpaceBilledGB": 660,
+   "podId": "u99fhssac9f6i7",
+   "time": "2026-10-04 00:00:00"
+  },
+  {
+   "amount": 0.10814227559603751,
+   "timeBilledMs": 352580,
+   "diskSpaceBilledGB": 180,
+   "podId": "y9ilsahujayqft",
+   "time": "2026-10-04 00:00:00"
+  },
+  {
+   "amount": 0.26534831372555345,
+   "timeBilledMs": 869499,
+   "diskSpaceBilledGB": 240,
+   "podId": "8v4jc1c5mwnipb",
+   "time": "2026-10-05 00:00:00"
+  },
+  {
+   "amount": 0.8114920406369492,
+   "timeBilledMs": 2659515,
+   "diskSpaceBilledGB": 600,
+   "podId": "l11v5n0wc2pc7p",
+   "time": "2026-10-05 00:00:00"
+  },
+  {
+   "amount": 0.3033496461575851,
+   "timeBilledMs": 995008,
+   "diskSpaceBilledGB": 240,
+   "podId": "x8gh0lwxlujxcv",
+   "time": "2026-10-05 00:00:00"
+  },
+  {
+   "amount": 3.190858019515872,
+   "timeBilledMs": 10018736,
+   "diskSpaceBilledGB": 13600,
+   "podId": "gw4ofgfphr07ea",
+   "time": "2026-10-06 00:00:00"
+  },
+  {
+   "amount": 0.2574062403291464,
+   "timeBilledMs": 819568,
+   "diskSpaceBilledGB": 1200,
+   "podId": "mm8hn1191xldel",
+   "time": "2026-10-06 00:00:00"
+  },
+  {
+   "amount": 8.572443610057235,
+   "timeBilledMs": 26936511,
+   "diskSpaceBilledGB": 36000,
+   "podId": "zhk120whedjsg9",
+   "time": "2026-10-06 00:00:00"
+  },
+  {
+   "amount": 0.214743115240708,
+   "timeBilledMs": 700069,
+   "diskSpaceBilledGB": 360,
+   "podId": "02oef2ib958x6j",
+   "time": "2026-10-07 00:00:00"
+  },
+  {
+   "amount": 0.2620979103958234,
+   "timeBilledMs": 851883,
+   "diskSpaceBilledGB": 480,
+   "podId": "0tjfzjnmpf64pn",
+   "time": "2026-10-07 00:00:00"
+  },
+  {
+   "amount": 0.7220390484435484,
+   "timeBilledMs": 2352606,
+   "diskSpaceBilledGB": 960,
+   "podId": "1mgt50aapad7hv",
+   "time": "2026-10-07 00:00:00"
+  },
+  {
+   "amount": 0.17934657796286047,
+   "timeBilledMs": 583163,
+   "diskSpaceBilledGB": 360,
+   "podId": "29l0qxxx1i6906",
+   "time": "2026-10-07 00:00:00"
+  },
+  {
+   "amount": 6.683136830106378,
+   "timeBilledMs": 21002409,
+   "diskSpaceBilledGB": 28000,
+   "podId": "gw4ofgfphr07ea",
+   "time": "2026-10-07 00:00:00"
+  },
+  {
+   "amount": 0.8511518010636792,
+   "timeBilledMs": 2765272,
+   "diskSpaceBilledGB": 1320,
+   "podId": "m0p1decj1an2mc",
+   "time": "2026-10-07 00:00:00"
+  },
+  {
+   "amount": 1.0952019742690027,
+   "timeBilledMs": 3562135,
+   "diskSpaceBilledGB": 1560,
+   "podId": "mq4hnmcvkdbfgl",
+   "time": "2026-10-07 00:00:00"
+  },
+  {
+   "amount": 0.1502090545836836,
+   "timeBilledMs": 486929,
+   "diskSpaceBilledGB": 360,
+   "podId": "psl88q7qgqu44t",
+   "time": "2026-10-07 00:00:00"
+  },
+  {
+   "amount": 1.4934039991348982,
+   "timeBilledMs": 4858949,
+   "diskSpaceBilledGB": 2040,
+   "podId": "7qwzxod4y77hlo",
+   "time": "2026-10-10 00:00:00"
+  },
+  {
+   "amount": 3.5421136401128024,
+   "timeBilledMs": 11524412,
+   "diskSpaceBilledGB": 4680,
+   "podId": "7z4spas7bfpzi6",
+   "time": "2026-10-10 00:00:00"
+  },
+  {
+   "amount": 3.1237974783871323,
+   "timeBilledMs": 10161166,
+   "diskSpaceBilledGB": 4200,
+   "podId": "g35iu7j61wd7w2",
+   "time": "2026-10-10 00:00:00"
+  },
+  {
+   "amount": 0.1711518953088671,
+   "timeBilledMs": 556098,
+   "diskSpaceBilledGB": 360,
+   "podId": "sidscaxyh1c7o1",
+   "time": "2026-10-10 00:00:00"
+  },
+  {
+   "amount": 0.6862804181873798,
+   "timeBilledMs": 2229917,
+   "diskSpaceBilledGB": 1080,
+   "podId": "96emr1e7eadqc0",
+   "time": "2026-10-11 00:00:00"
+  },
+  {
+   "amount": 3.36903429555241,
+   "timeBilledMs": 10957361,
+   "diskSpaceBilledGB": 4560,
+   "podId": "b9cwmt7haborw6",
+   "time": "2026-10-11 00:00:00"
+  },
+  {
+   "amount": 10.904803727637045,
+   "timeBilledMs": 35469994,
+   "diskSpaceBilledGB": 14280,
+   "podId": "kz0r9zerjsvapk",
+   "time": "2026-10-11 00:00:00"
+  },
+  {
+   "amount": 7.210005793487653,
+   "timeBilledMs": 23455065,
+   "diskSpaceBilledGB": 9480,
+   "podId": "kz0r9zerjsvapk",
+   "time": "2026-10-12 00:00:00"
+  },
+  {
+   "amount": 10.344640949741006,
+   "timeBilledMs": 33652025,
+   "diskSpaceBilledGB": 13560,
+   "podId": "wzr7llw0shqc2k",
+   "time": "2026-10-12 00:00:00"
+  },
+  {
+   "amount": 1.5049627553671598,
+   "timeBilledMs": 4933822,
+   "diskSpaceBilledGB": 1020,
+   "podId": "2xmyzes6r0vcge",
+   "time": "2026-10-13 00:00:00"
+  },
+  {
+   "amount": 0.8048917903797701,
+   "timeBilledMs": 2637716,
+   "diskSpaceBilledGB": 600,
+   "podId": "7cr5l46wa7ptfy",
+   "time": "2026-10-13 00:00:00"
+  },
+  {
+   "amount": 0.2510430926922709,
+   "timeBilledMs": 824546,
+   "diskSpaceBilledGB": 180,
+   "podId": "20ji79950u9arw",
+   "time": "2026-10-14 00:00:00"
+  },
+  {
+   "amount": 0.24663526215590537,
+   "timeBilledMs": 809988,
+   "diskSpaceBilledGB": 180,
+   "podId": "ehienq52s3pjzp",
+   "time": "2026-10-14 00:00:00"
+  },
+  {
+   "amount": 0.6510330875171348,
+   "timeBilledMs": 2134146,
+   "diskSpaceBilledGB": 480,
+   "podId": "pln3gsuw6lvlzb",
+   "time": "2026-10-14 00:00:00"
+  },
+  {
+   "amount": 2.5315853202482685,
+   "timeBilledMs": 8237346,
+   "diskSpaceBilledGB": 3240,
+   "podId": "7stah5j2s98e69",
+   "time": "2026-10-15 00:00:00"
+  },
+  {
+   "amount": 0.01771007850766182,
+   "timeBilledMs": 58492,
+   "diskSpaceBilledGB": 120,
+   "podId": "aqohnkptg9q2vb",
+   "time": "2026-10-15 00:00:00"
+  },
+  {
+   "amount": 0.04396999627351761,
+   "timeBilledMs": 145222,
+   "diskSpaceBilledGB": 120,
+   "podId": "c6n0v702lin6wj",
+   "time": "2026-10-15 00:00:00"
+  },
+  {
+   "amount": 0.021789752994664013,
+   "timeBilledMs": 67379,
+   "diskSpaceBilledGB": 240,
+   "podId": "fo67uxvr1usw6n",
+   "time": "2026-10-15 00:00:00"
+  },
+  {
+   "amount": 0.050746509921737015,
+   "timeBilledMs": 163016,
+   "diskSpaceBilledGB": 240,
+   "podId": "hp6i00wz32gqzq",
+   "time": "2026-10-15 00:00:00"
+  },
+  {
+   "amount": 0.023688122630119324,
+   "timeBilledMs": 78236,
+   "diskSpaceBilledGB": 120,
+   "podId": "pqon2mafp0mk1l",
+   "time": "2026-10-15 00:00:00"
+  },
+  {
+   "amount": 5.533294217661023,
+   "timeBilledMs": 17388250,
+   "diskSpaceBilledGB": 23600,
+   "podId": "ricuwbh64pqlwd",
+   "time": "2026-10-15 00:00:00"
+  },
+  {
+   "amount": 9.987764708232135,
+   "timeBilledMs": 32491700,
+   "diskSpaceBilledGB": 13080,
+   "podId": "7stah5j2s98e69",
+   "time": "2026-10-16 00:00:00"
+  },
+  {
+   "amount": 4.971612090826966,
+   "timeBilledMs": 16176884,
+   "diskSpaceBilledGB": 6480,
+   "podId": "tvohx8nubg6kmi",
+   "time": "2026-10-16 00:00:00"
+  },
+  {
+   "amount": 0.04815897124353796,
+   "timeBilledMs": 154470,
+   "diskSpaceBilledGB": 240,
+   "podId": "zqbvdvlkb63vke",
+   "time": "2026-10-16 00:00:00"
+  },
+  {
+   "amount": 5.0364583756309,
+   "timeBilledMs": 16386468,
+   "diskSpaceBilledGB": 6600,
+   "podId": "6gqbeysqtywflq",
+   "time": "2026-10-17 00:00:00"
+  },
+  {
+   "amount": 0.5539970195386559,
+   "timeBilledMs": 1802192,
+   "diskSpaceBilledGB": 840,
+   "podId": "7gth4ukh0lwxgf",
+   "time": "2026-10-17 00:00:00"
+  },
+  {
+   "amount": 2.025392976240255,
+   "timeBilledMs": 4028025,
+   "diskSpaceBilledGB": 2100,
+   "podId": "5j92y6jbmrkalx",
+   "time": "2026-10-18 00:00:00"
+  },
+  {
+   "amount": 0.06682617217302322,
+   "timeBilledMs": 134399,
+   "diskSpaceBilledGB": 150,
+   "podId": "92ldrjenk7piv2",
+   "time": "2026-10-18 00:00:00"
+  },
+  {
+   "amount": 3.6256191236898303,
+   "timeBilledMs": 7207949,
+   "diskSpaceBilledGB": 3750,
+   "podId": "cn822yviydzw8l",
+   "time": "2026-10-18 00:00:00"
+  },
+  {
+   "amount": 1.2436356742400676,
+   "timeBilledMs": 3958338,
+   "diskSpaceBilledGB": 4200,
+   "podId": "nilz8lib2sk84x",
+   "time": "2026-10-18 00:00:00"
+  },
+  {
+   "amount": 1.9540242130169645,
+   "timeBilledMs": 3884490,
+   "diskSpaceBilledGB": 2100,
+   "podId": "q8lzi7xqb5wcg5",
+   "time": "2026-10-18 00:00:00"
+  },
+  {
+   "amount": 1.610695778625086,
+   "timeBilledMs": 3204472,
+   "diskSpaceBilledGB": 1650,
+   "podId": "wg8cbjbwvga8ku",
+   "time": "2026-10-18 00:00:00"
+  },
+  {
+   "amount": 6.951619129162282,
+   "timeBilledMs": 13659681,
+   "diskSpaceBilledGB": 14100,
+   "podId": "wm75q9fix8g15w",
+   "time": "2026-10-18 00:00:00"
+  },
+  {
+   "amount": 11.505776421166956,
+   "timeBilledMs": 22441785,
+   "diskSpaceBilledGB": 30400,
+   "podId": "0awhqfar3wiv3z",
+   "time": "2026-10-19 00:00:00"
+  },
+  {
+   "amount": 0.8709944772999734,
+   "timeBilledMs": 1730771,
+   "diskSpaceBilledGB": 1050,
+   "podId": "1vp9vrvdd0ydwz",
+   "time": "2026-10-19 00:00:00"
+  },
+  {
+   "amount": 10.408685483969748,
+   "timeBilledMs": 20309833,
+   "diskSpaceBilledGB": 27200,
+   "podId": "cmxnaja12ewpzc",
+   "time": "2026-10-19 00:00:00"
+  },
+  {
+   "amount": 0.26410753559321165,
+   "timeBilledMs": 521855,
+   "diskSpaceBilledGB": 800,
+   "podId": "f92f2w64asvc6h",
+   "time": "2026-10-19 00:00:00"
+  },
+  {
+   "amount": 0.250660652294755,
+   "timeBilledMs": 485500,
+   "diskSpaceBilledGB": 1200,
+   "podId": "fansceosf4q3mp",
+   "time": "2026-10-19 00:00:00"
+  },
+  {
+   "amount": 0.8696162737905979,
+   "timeBilledMs": 1693083,
+   "diskSpaceBilledGB": 2800,
+   "podId": "v1p0nifm2vb3l4",
+   "time": "2026-10-19 00:00:00"
+  },
+  {
+   "amount": 0.034441655036062,
+   "timeBilledMs": 106107,
+   "diskSpaceBilledGB": 200,
+   "podId": "3weh7q3l8p0ms1",
+   "time": "2026-10-20 00:00:00"
+  },
+  {
+   "amount": 0.2510062186047435,
+   "timeBilledMs": 495506,
+   "diskSpaceBilledGB": 800,
+   "podId": "57fzceztgwzi15",
+   "time": "2026-10-20 00:00:00"
+  },
+  {
+   "amount": 0.2432898385450244,
+   "timeBilledMs": 479987,
+   "diskSpaceBilledGB": 800,
+   "podId": "8wcyznlfbrd3uc",
+   "time": "2026-10-20 00:00:00"
+  },
+  {
+   "amount": 4.015482483431697,
+   "timeBilledMs": 7833745,
+   "diskSpaceBilledGB": 10800,
+   "podId": "9l10mpu9yw4c7f",
+   "time": "2026-10-20 00:00:00"
+  },
+  {
+   "amount": 4.500755432993174,
+   "timeBilledMs": 8791091,
+   "diskSpaceBilledGB": 11600,
+   "podId": "bhttzctttg3hld",
+   "time": "2026-10-20 00:00:00"
+  },
+  {
+   "amount": 0.5088530378416181,
+   "timeBilledMs": 1634744,
+   "diskSpaceBilledGB": 1200,
+   "podId": "dgv8vpzbgpuykh",
+   "time": "2026-10-20 00:00:00"
+  },
+  {
+   "amount": 23.5753163266927,
+   "timeBilledMs": 45980152,
+   "diskSpaceBilledGB": 61600,
+   "podId": "ltxns3jbkkaiac",
+   "time": "2026-10-20 00:00:00"
+  },
+  {
+   "amount": 15.393592822831124,
+   "timeBilledMs": 49579756,
+   "diskSpaceBilledGB": 33200,
+   "podId": "rzf92gbn3h40we",
+   "time": "2026-10-20 00:00:00"
+  },
+  {
+   "amount": 16.055896075442433,
+   "timeBilledMs": 51713663,
+   "diskSpaceBilledGB": 34600,
+   "podId": "3weh7q3l8p0ms1",
+   "time": "2026-10-21 00:00:00"
+  },
+  {
+   "amount": 14.111894568894058,
+   "timeBilledMs": 45453658,
+   "diskSpaceBilledGB": 30400,
+   "podId": "dgv8vpzbgpuykh",
+   "time": "2026-10-21 00:00:00"
+  }
+ ],
+ "networkvolumes": [
+  {
+   "amount": 0.023333333898335695,
+   "diskSpaceBilledGb": 240,
+   "startDate": "2026-09-22 00:00:00"
+  },
+  {
+   "amount": 0.08166666864417493,
+   "diskSpaceBilledGb": 840,
+   "startDate": "2026-09-23 00:00:00"
+  },
+  {
+   "amount": 0.0038888887502253056,
+   "diskSpaceBilledGb": 40,
+   "startDate": "2026-09-24 00:00:00"
+  },
+  {
+   "amount": 0.6416666693985462,
+   "diskSpaceBilledGb": 6600,
+   "startDate": "2026-10-19 00:00:00"
+  },
+  {
+   "amount": 0.7972222277894616,
+   "diskSpaceBilledGb": 8200,
+   "startDate": "2026-10-20 00:00:00"
+  },
+  {
+   "amount": 0.6611111192032695,
+   "diskSpaceBilledGb": 6800,
+   "startDate": "2026-10-21 00:00:00"
+  }
+ ]
+}

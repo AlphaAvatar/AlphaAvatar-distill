@@ -49,7 +49,7 @@ from aadistill.infrastructure.artifact_gate import (  # noqa: E402
 )
 from aadistill.infrastructure.log_relay import LogRelay, RelaySpec  # noqa: E402
 from aadistill.infrastructure.provider import (  # noqa: E402
-    RunPodProvider, read_api_key,
+    RunPodProvider, read_api_key, reconcile_account,
 )
 from aadistill.infrastructure.remote import (  # noqa: E402
     JobSpec, SSHTarget, probe, start_detached,
@@ -394,8 +394,14 @@ class Canary:
         return out
 
     # -- 5-12 --------------------------------------------------------------
+    def account_reconciled(self) -> bool:
+        """The account holds nothing else: a canary runs alone."""
+        rec = reconcile_account(self.provider, ())
+        return self.record("account_resources", rec["ok"], rec)
+
     def run(self) -> bool:
-        if not self.price_guard() or not self.create():
+        if (not self.price_guard() or not self.account_reconciled()
+                or not self.create()):
             return False
         safety = self.launch_watchdog("safety", self.safety_minutes, None)
         self.ev["watchdog_safety_journal"] = str(safety)

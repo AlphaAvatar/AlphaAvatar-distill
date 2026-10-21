@@ -4,6 +4,57 @@ Every figure below is read from
 [`programme_closeout.json`](programme_closeout.json), which derives it from the
 record that owns it. Where this page and that file disagree, the file is right.
 
+## Final closeout (2026-10-21, $0): the programme is CLOSED
+
+**Verdict: EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON
+REASONING NOT RESOLVED** (`programme_closeout.json :: programme_verdict`, which
+keeps the four answers apart):
+- **Structure (H1)** and the **step-0 state** of each Top-1 against the teacher
+  are described per dose, not tested.
+- **Recovery output:** fluid static usable rollout 40.0–71.4% over 24
+  students, moved more by the recovery seed than by the candidate (two seeds;
+  descriptive).
+- **Reasoning:** at most 3/570 static and 0/144 episodes. The 18 preregistered
+  contrasts are all labelled NO-GO, but they compare rates at the floor, so they
+  cannot show whether calibration volume moves reasoning.
+- **Not claimed:** that calibration volume has no value; that no mixture ratio
+  can work; that the D1 forward baseline is invalid; that Top-1 ranking is
+  meaningless; broad stability from two seeds; a saturation point; that a
+  higher usable rate means higher correctness.
+
+**Scope.** Stage-0 volume CLOSED; mixture ratio DEFERRED (never run); D-series
+CLOSED; forward baseline D1 + `scored_v1`, not reselected.
+
+**Money** ([`budget_reconciliation.json`](budget_reconciliation.json); ledger
+and decisions 2026-10-21):
+- After the 2026-10-19 authority: $107.9227 booked and $104.9604
+  provider-billed, against $126 authorized ($90, then +$30 and +$6 recorded on
+  2026-10-20 before any commitment needed them). No overrun against any cap in
+  force; new spend reached the original $90 on 2026-10-21 (accrual estimate).
+- The "$108 missing" from the project total was the run-index gap, not
+  historical spend. Fixed in `derive_budget.py`; launches now also refuse while
+  the provider account holds a resource the records do not account for.
+- Open for the maintainer: the provider billed this account $32.57 more than
+  the records hold, all before 2026-10-18; attribution UNVERIFIED.
+
+**Evidence and assets.**
+- 0 pods, 0 network volumes, $0/h (provider, 2026-10-21 16:33Z).
+- `ugllmlv19t`: listed and hashed on the volume before deletion (617 files;
+  518 records fetched, both local copies re-hashed equal; d1/d2
+  `retired_states.json` now also in git under
+  `runs/volaudit_20261021_142638/evidence/recovered_records/`; the 3 students'
+  sha256 equal their dose records). `b9jwu0g1eg`, `wn3avnine2`: **DERIVED / NOT
+  DIRECTLY VERIFIED** (no pod could attach before deletion).
+- 12 initialization candidates on the relay, re-verified, PROTECTED in the
+  checkpoint registry; 24 students' weights retired, tombstoned in
+  `logs/maintenance/inventories/checkpoint_tombstones.json`.
+- eval-set-1 re-verified at $0: identity 2 (`62a1a5d3`), 714 = 570 + 144 from
+  the validity mask, scorer v2, legacy_150 in-sample, TriviaQA withheld.
+
+**Next.** Stage-2 teacher-native reasoning data, then Stage-3 recovery, in a
+new session under its own authorization:
+[`docs/shared/STAGE2_3_HANDOFF.md`](../../../../../docs/shared/STAGE2_3_HANDOFF.md).
+
 ## Round 3 (2026-10-19 to 10-21): formal study, Top-4 extension, retirement
 
 **COMPLETE.** All 24 recovered students sit at the floor of fluid-reasoning

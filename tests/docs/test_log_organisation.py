@@ -1058,6 +1058,89 @@ class TestEngineeringSpendIsAttributedByPackage:
             "logs/validations/x/v1/campaign.json"]
 
 
+# --- the project total does not depend on the navigation index --------------
+
+class TestTheProjectTotalDoesNotDependOnTheIndex:
+    """On 2026-10-21 the project total missed `$107.9227`: 28 closed Stage-0
+    runs had closeouts and were absent from `logs/index.json`, the only place
+    `project_sessions` looked. The project showed `$126` left; `$18.08` was."""
+
+    RUNS = "logs/stages/stage-0/exp/runs"
+
+    def _mod(self):
+        from maintenance.consolidation import derive_budget as m
+        return m
+
+    def _tree(self, root: Path, indexed: list[str]) -> Path:
+        (root / "logs").mkdir(parents=True, exist_ok=True)
+        (root / "logs/index.json").write_text(json.dumps({"runs": [
+            {"experiment_id": "exp", "run_id": r, "root": f"{self.RUNS}/{r}"}
+            for r in indexed]}))
+        return root
+
+    def _closeout(self, root: Path, run: str, usd: float) -> None:
+        d = root / self.RUNS / run / "closeout"
+        d.mkdir(parents=True)
+        (d / "outcome.json").write_text(json.dumps(
+            {"experiment_id": "exp", "run_id": run, "money": {"all_in_usd": usd}}))
+
+    def _open(self, root: Path, run: str, hard_cap: float | None) -> None:
+        d = root / self.RUNS / run
+        (d / "runtime").mkdir(parents=True)
+        (d / "runtime/session.json").write_text(json.dumps(
+            {"run_id": run, "provider_resource_created": True}))
+        if hard_cap is not None:
+            (d / "governance").mkdir()
+            (d / "governance/authorization.json").write_text(json.dumps(
+                {"hard_cap_usd": hard_cap}))
+
+    def test_a_closeout_the_index_misses_is_counted_and_named(self, tmp_path):
+        m = self._mod()
+        root = self._tree(tmp_path, ["a"])
+        self._closeout(root, "a", 1.25)
+        self._closeout(root, "b", 2.5)
+        got = m.project_balance(root, {"cumulative_spend_at_approval_usd": 10.0},
+                                20.0)
+        assert got["cumulative_spend_usd"] == 13.75
+        assert got["remaining_usd"] == 6.25
+        assert got["sessions_not_in_the_run_index"] == ["exp/b"]
+
+    def test_an_indexed_run_found_again_on_disk_is_counted_once(self, tmp_path):
+        m = self._mod()
+        root = self._tree(tmp_path, ["a", "b"])
+        self._closeout(root, "a", 1.25)
+        self._closeout(root, "b", 2.5)
+        got = m.project_balance(root, {"cumulative_spend_at_approval_usd": 0.0},
+                                20.0)
+        assert got["cumulative_spend_usd"] == 3.75
+        assert got["sessions_not_in_the_run_index"] == []
+
+    def test_an_open_session_is_booked_at_its_hard_cap(self, tmp_path):
+        m = self._mod()
+        root = self._tree(tmp_path, [])
+        self._open(root, "live", 9.0)
+        got = m.project_balance(root, {"cumulative_spend_at_approval_usd": 0.0},
+                                20.0)
+        assert got["cumulative_spend_usd"] == 9.0
+        assert got["remaining_usd"] == 11.0
+
+    def test_an_open_session_with_no_bound_leaves_no_remainder(self, tmp_path):
+        """A resource that bills with no recorded bound has no remainder to
+        net against; a number here is the over-statement that was the defect."""
+        m = self._mod()
+        root = self._tree(tmp_path, [])
+        self._open(root, "orphan", None)
+        got = m.project_balance(root, {"cumulative_spend_at_approval_usd": 0.0},
+                                20.0)
+        assert got["remaining_usd"] is None
+        assert got["open_sessions_without_a_bound"] == ["exp/orphan"]
+
+    def test_the_live_tree_has_no_run_the_index_misses(self):
+        got = self._mod().derive(REPO)["project"]
+        assert got["sessions_not_in_the_run_index"] == []
+        assert got["open_sessions_without_a_bound"] == []
+
+
 # --- the current view cannot go stale against its own owner -----------------
 
 @needs_whole_tree

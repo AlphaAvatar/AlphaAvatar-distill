@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-21 14:40 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-21 17:30 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,11 +9,36 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**STAGE-0 CALIBRATION-VOLUME PROGRAMME COMPLETE (2026-10-21).** The formal study
-(d1, d2, d4) and the Top-4 extension are measured and analysed, and all three
-network volumes are retired. Nothing is running and nothing is billing: 0 pods, 0 volumes (provider
-query in [`programme_closeout.json`](../stages/stage-0/calibration_volume/closeout/programme_closeout.json)).
-Summary: [`closeout/REPORT.md`](../stages/stage-0/calibration_volume/closeout/REPORT.md), round 3.
+**STAGE-0 CALIBRATION-VOLUME PROGRAMME CLOSED (final $0 closeout, 2026-10-21).**
+Verdict: **EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON
+REASONING NOT RESOLVED**, held as four separate answers (structure, step-0
+state, usable output, reasoning) in
+[`programme_closeout.json`](../stages/stage-0/calibration_volume/closeout/programme_closeout.json) `:: programme_verdict`.
+Stage-0 volume CLOSED; Stage-0 mixture ratio DEFERRED (never run); D-series
+CLOSED; forward baseline D1 + `scored_v1`.
+Nothing is running and nothing is billing: 0 pods, 0 volumes, `$0/h` (provider query 2026-10-21 16:33Z,
+[`runpod_billing_2026-10-21.json`](../budget/provider/runpod_billing_2026-10-21.json) `:: account`).
+- **Budget, reconciled against the provider's billing**
+  ([`budget_reconciliation.json`](../stages/stage-0/calibration_volume/closeout/budget_reconciliation.json);
+  ledger and decisions 2026-10-21):
+  - after the $90 authority: $107.9227 booked, $104.9604 billed, of $126
+    authorized ($90 + $30 + $6); no overrun against any cap in force; the six
+    authorizations that needed a raise came after it was recorded;
+  - the "$108 missing" was the run-index gap, not historical spend; the
+    deriver now finds runs the index misses, and launches refuse while the
+    account holds a resource the records do not account for;
+  - **open for the maintainer:** RunPod billed this account $32.57 more than
+    the records hold, all before 2026-10-18 ($37.93 before the 2026-09-11
+    anchor); 53 pods are named by no record. UNVERIFIED attribution; if it is
+    all project spend, the $643.6571 cap is exceeded by $14.49.
+- **Assets.** 12 initialization candidates on the relay (12/12 sha256
+  verified), PROTECTED in `checkpoint_registry.json`; 24 recovered students'
+  weights retired, tombstoned in `checkpoint_tombstones.json`. The two probe
+  volumes' contents are DERIVED / NOT DIRECTLY VERIFIED.
+- **Next:** Stage-2 teacher-native reasoning data, then Stage-3 recovery — a
+  new session under its own authorization. Facts:
+  [`docs/shared/STAGE2_3_HANDOFF.md`](../../docs/shared/STAGE2_3_HANDOFF.md).
+
 - **Formal analysis** (preregistered):
   [`design/formal_analysis.json`](../stages/stage-0/calibration_volume/design/formal_analysis.json).
   - H2: every fluid contrast (static pooled and each axis; 2x-1x, 4x-2x, 4x-1x)
@@ -46,8 +71,6 @@ Summary: [`closeout/REPORT.md`](../stages/stage-0/calibration_volume/closeout/RE
 - **Reporting** (maintainer 2026-10-20/21): every capability unit of eval-set-1,
   correct AND usable side by side, formal denominators first (fluid 714 items; usable over the 570 formal static
   items, episodes separately), no pooled score.
-- **Next.** No session or authorization is open. The maintainer decides what
-  follows, given that every Stage-0 student is at the fluid-reasoning floor.
 - **Owners.** The run closeouts, `decisions.md` 2026-10-19/20, and
   [`volume_preregistration.json`](../stages/stage-0/calibration_volume/plans/volume_preregistration.json)
   (design, d1 → d2 → d4 order, retry_policy, budget rule).

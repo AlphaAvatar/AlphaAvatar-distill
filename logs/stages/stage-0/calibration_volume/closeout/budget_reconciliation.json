@@ -1,0 +1,1419 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.budget_reconciliation/v1",
+ "written_utc": "2026-10-21T16:43:52+00:00",
+ "sources": {
+  "provider_snapshot": {
+   "path": "logs/budget/provider/runpod_billing_2026-10-21.json",
+   "sha256": "ea369a8a98d0aaeea6bb082bf7a5a5adf4ffe7f292525645db0d1f4438e6f911"
+  },
+  "grant": "logs/budget/approvals/stage0_calibration_volume_programme_grant.json",
+  "runs": "logs/stages/stage-0/calibration_volume/runs/*",
+  "generator": "scripts/stages/stage-0/calibration_volume/write_budget_reconciliation.py"
+ },
+ "authorization_boundary_utc": "2026-10-19T04:43:24Z",
+ "historical_spend_before_authorization": {
+  "project_cumulative_at_authorization_usd": 517.6571,
+  "_project_figure": "derive_budget.py at 2026-10-19, the figure the maintainer's authorization cites; it includes the programme's 2026-10-18 runs below",
+  "programme_2026_10_18": {
+   "runs": 10,
+   "booked_usd": 17.5099,
+   "booked_pods_usd": 17.5099,
+   "booked_network_volumes_usd": 0,
+   "provider_pods_usd": 17.4777,
+   "provider_network_volumes_usd": 0.0,
+   "provider_total_usd": 17.4777,
+   "pods_not_in_provider_billing": []
+  }
+ },
+ "actual_spending_after_authorization": {
+  "runs": 28,
+  "booked_usd": 107.9227,
+  "booked_pods_usd": 106.0378,
+  "booked_network_volumes_usd": 1.8849,
+  "provider_pods_usd": 102.8604,
+  "provider_network_volumes_usd": 2.1,
+  "provider_total_usd": 104.9604,
+  "pods_not_in_provider_billing": [
+   {
+    "run_id": "volaudit_20261021_142638",
+    "pod_id": "6wjl0c32g6f0bw",
+    "booked_usd": 0.0018
+   }
+  ]
+ },
+ "authorized_limits": {
+  "original_new_spend_cap_usd": 90.0,
+  "new_spend_authorized_in_total_usd": 126.0,
+  "programme_ceiling_usd": 143.5099,
+  "formal_volume_ceiling_usd": 126.0,
+  "per_session_cap_usd": 50.0,
+  "max_concurrent_sessions": 2,
+  "amendments": [
+   {
+    "programme_ceiling_usd": 107.5099,
+    "recorded_commit": "832a034e",
+    "recorded_utc": "2026-10-19T05:13:11+00:00",
+    "added_usd": 90.0,
+    "maintainer_message": {
+     "words": "当前 RunPod 账户据维护者确认约有 $90 可用余额。这 $90 是从当前状态开始的全部新增支出硬上限",
+     "utc": "2026-10-19T04:43:24Z"
+    },
+    "new_spend_accrued_by_then_usd": 0.0005
+   },
+   {
+    "programme_ceiling_usd": 137.5099,
+    "recorded_commit": "855f0c2d",
+    "recorded_utc": "2026-10-20T05:39:04+00:00",
+    "added_usd": 30.0,
+    "maintainer_message": {
+     "words": [
+      "d4 也做，上限改加 $25 (Recommended)",
+      "Top1也要补缺失的种子，额度多增加5美元"
+     ],
+     "utc": "2026-10-20T05:17:42Z (+$25); the +$5 followed before the amendment commit, its own timestamp was lost to context compaction"
+    },
+    "new_spend_accrued_by_then_usd": 32.4273
+   },
+   {
+    "programme_ceiling_usd": 143.5099,
+    "recorded_commit": "cab64039",
+    "recorded_utc": "2026-10-20T14:50:55+00:00",
+    "added_usd": 6.0,
+    "maintainer_message": {
+     "words": "并行，加6美金",
+     "utc": "2026-10-20T14:49:14Z"
+    },
+    "new_spend_accrued_by_then_usd": 55.0865
+   }
+  ],
+  "concurrency": {
+   "max_concurrent_sessions_2_recorded_commit": "cc50afb3",
+   "recorded_utc": "2026-10-20T09:39:34+00:00",
+   "maintainer_message": {
+    "words": "最多同时两个 (Recommended)",
+    "utc": "2026-10-20T09:34:07Z"
+   },
+   "issued_beside_a_live_session": [
+    {
+     "run_id": "dose_d4_20261020_185256",
+     "granted_utc": "2026-10-20T18:52:56+00:00",
+     "after_it_was_recorded": true
+    },
+    {
+     "run_id": "dose_d4_20261020_211335",
+     "granted_utc": "2026-10-20T21:13:35+00:00",
+     "after_it_was_recorded": true
+    },
+    {
+     "run_id": "dose_d4_20261020_212310",
+     "granted_utc": "2026-10-20T21:23:10+00:00",
+     "after_it_was_recorded": true
+    },
+    {
+     "run_id": "probes_d1_20261020_093955",
+     "granted_utc": "2026-10-20T09:39:55+00:00",
+     "after_it_was_recorded": true
+    },
+    {
+     "run_id": "probes_d2_20261020_233510",
+     "granted_utc": "2026-10-20T23:35:10+00:00",
+     "after_it_was_recorded": true
+    },
+    {
+     "run_id": "probes_d4_20261020_232941",
+     "granted_utc": "2026-10-20T23:29:41+00:00",
+     "after_it_was_recorded": true
+    }
+   ]
+  }
+ },
+ "cap_in_force_at_every_issue": {
+  "authorizations": 29,
+  "all_fit_the_ceiling_in_force": true,
+  "relied_on_an_amendment_beyond_the_original_90": [
+   "dose_d4_20261020_185256",
+   "dose_d4_20261020_211335",
+   "dose_d4_20261020_212310",
+   "probes_d1_20261020_093955",
+   "probes_d2_20261020_233510",
+   "probes_d4_20261020_232941"
+  ],
+  "every_issue_came_after_the_ceiling_it_needed_was_recorded": true,
+  "largest_hard_cap_usd": 39.5
+ },
+ "new_spend_reached_the_original_90_utc": "2026-10-21T05:36+00:00",
+ "_accrual": "each post-authorization charge spread evenly from its pod's creation (a volume's creation) to its end; an estimate of WHEN money was spent, not of how much",
+ "overrun": {
+  "against_the_cap_in_force_usd": 0.0,
+  "against_the_original_90_alone_usd": {
+   "booked": 17.9227,
+   "provider": 14.9604
+  }
+ },
+ "the_missing_108": {
+  "what_it_was": "NOT historical spend: the 28 post-authorization runs above (booked $107.9227). Their closeouts existed and logs/index.json did not list them; derive_budget.project_sessions read runs only through the index, so the project total stayed at the pre-authorization figure while this programme's own gate (governance.programme_spent, which reads closeouts) was right",
+  "root_cause": "the run index is navigation rebuilt by hand (record_run_index.py); no closeout writer updates it, and the project balance depended on it",
+  "prevention": {
+   "code": [
+    "scripts/maintenance/consolidation/derive_budget.py :: _sessions_the_index_misses (closeouts and open sessions on disk; counted once; named)",
+    "src/aadistill/infrastructure/provider.py :: reconcile_account, src/aadistill/infrastructure/session_runner.py :: check_account_resources (on by default, before create)",
+    "scripts/shared/pod/stage_c2_probes_to_volume.py :: require_reconciled_account; scripts/shared/pod/canary.py :: account_reconciled",
+    "scripts/maintenance/consolidation/provider_billing.py (provider billing beside the records)"
+   ],
+   "tests": [
+    "tests/docs/test_log_organisation.py :: TestTheProjectTotalDoesNotDependOnTheIndex",
+    "tests/infrastructure/test_account_balance_gate.py :: TestTheAccountHoldsNothingTheRecordsDoNotName, TestTheRunPodListingIsParsedNotAssumed"
+   ]
+  }
+ },
+ "retroactively_discovered_historical_spend": {
+  "provider_minus_records_usd": 32.5702,
+  "status": "UNVERIFIED attribution: see project.pods_unattributed",
+  "_meaning": "money the provider billed this account that no repository record holds; none of it falls in this programme",
+  "if_all_project_spend_over_cap_usd": 14.4929
+ },
+ "remaining": {
+  "project_per_records_usd": 18.0773,
+  "programme_usd": 18.0773,
+  "_not_a_permission": "no new paid work is authorized by any remainder"
+ },
+ "resource_terminal_state": {
+  "fetched_utc": "2026-10-21T16:33:02+00:00",
+  "pods": [],
+  "network_volumes": [],
+  "current_spend_per_hr": 0.0,
+  "client_balance_usd": 101.2318128102
+ },
+ "runs": [
+  {
+   "run_id": "battery_20261018_091856",
+   "phase": "prerequisites",
+   "status": "ABANDONED_BEFORE_LAUNCH",
+   "booked_usd": 0.0,
+   "pod_id": null,
+   "volume_id": null,
+   "start_utc": null,
+   "end_utc": "2026-10-18T09:23:28+00:00",
+   "provider_resource_created": false,
+   "authorization": {
+    "granted_utc": "2026-10-18T09:18:56+00:00",
+    "hard_cap_usd": 9.0,
+    "programme_ceiling_in_force_usd": 92.0,
+    "programme_spent_at_issue_usd": 0.0,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 9.0,
+    "fits_ceiling_in_force": true
+   }
+  },
+  {
+   "run_id": "battery_20261018_092345",
+   "phase": "prerequisites",
+   "status": "SESSION_ENDED",
+   "booked_usd": 3.6303,
+   "pod_id": "cn822yviydzw8l",
+   "volume_id": null,
+   "start_utc": "2026-10-18T09:25:08+00:00",
+   "end_utc": "2026-10-18T11:25:26+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-18T09:23:45+00:00",
+    "hard_cap_usd": 9.0,
+    "programme_ceiling_in_force_usd": 92.0,
+    "programme_spent_at_issue_usd": 0.0,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 9.0,
+    "fits_ceiling_in_force": true
+   },
+   "provider_billed_usd": 3.6256,
+   "provider_minus_booked_usd": -0.0047
+  },
+  {
+   "run_id": "bench_20261019_051316",
+   "phase": "formal_engineering",
+   "status": "SESSION_ENDED",
+   "booked_usd": 0.8757,
+   "pod_id": "1vp9vrvdd0ydwz",
+   "volume_id": null,
+   "start_utc": "2026-10-19T05:14:15+00:00",
+   "end_utc": "2026-10-19T05:43:16+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-19T05:13:16+00:00",
+    "hard_cap_usd": 3.6,
+    "programme_ceiling_in_force_usd": 107.5099,
+    "programme_spent_at_issue_usd": 21.7099,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 25.3099,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-19T05:13:11+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   },
+   "provider_billed_usd": 0.871,
+   "provider_minus_booked_usd": -0.0047
+  },
+  {
+   "run_id": "dose_d1_20261019_054503",
+   "phase": "formal_volume",
+   "status": "SESSION_ENDED",
+   "booked_usd": 0.2541,
+   "pod_id": "fansceosf4q3mp",
+   "volume_id": null,
+   "start_utc": "2026-10-19T05:45:50+00:00",
+   "end_utc": "2026-10-19T05:54:06+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-19T05:45:03+00:00",
+    "hard_cap_usd": 18.55,
+    "programme_ceiling_in_force_usd": 107.5099,
+    "programme_spent_at_issue_usd": 22.5856,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 41.1356,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-19T05:13:11+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   },
+   "provider_billed_usd": 0.2507,
+   "provider_minus_booked_usd": -0.0034
+  },
+  {
+   "run_id": "dose_d1_20261019_055515",
+   "phase": "formal_volume",
+   "status": "SESSION_ENDED",
+   "booked_usd": 11.5053,
+   "pod_id": "0awhqfar3wiv3z",
+   "volume_id": null,
+   "start_utc": "2026-10-19T06:06:09+00:00",
+   "end_utc": "2026-10-19T12:20:21+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-19T05:55:15+00:00",
+    "hard_cap_usd": 18.55,
+    "programme_ceiling_in_force_usd": 107.5099,
+    "programme_spent_at_issue_usd": 22.8397,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 41.3897,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-19T05:13:11+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   },
+   "provider_billed_usd": 11.5058,
+   "provider_minus_booked_usd": 0.0005
+  },
+  {
+   "run_id": "dose_d1_20261019_122630",
+   "phase": "formal_volume",
+   "status": "ABANDONED_BEFORE_LAUNCH",
+   "booked_usd": 0.0,
+   "pod_id": null,
+   "volume_id": null,
+   "start_utc": null,
+   "end_utc": "2026-10-19T12:52:58+00:00",
+   "provider_resource_created": false,
+   "authorization": {
+    "granted_utc": "2026-10-19T12:26:30+00:00",
+    "hard_cap_usd": 18.55,
+    "programme_ceiling_in_force_usd": 107.5099,
+    "programme_spent_at_issue_usd": 34.345,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 52.895,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-19T05:13:11+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   }
+  },
+  {
+   "run_id": "dose_d1_20261019_125359",
+   "phase": "formal_volume",
+   "status": "SESSION_ENDED",
+   "booked_usd": 0.873,
+   "pod_id": "v1p0nifm2vb3l4",
+   "volume_id": null,
+   "start_utc": "2026-10-19T13:04:40+00:00",
+   "end_utc": "2026-10-19T13:33:04+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-19T12:53:59+00:00",
+    "hard_cap_usd": 18.55,
+    "programme_ceiling_in_force_usd": 107.5099,
+    "programme_spent_at_issue_usd": 34.345,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 52.895,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-19T05:13:11+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   },
+   "provider_billed_usd": 0.8696,
+   "provider_minus_booked_usd": -0.0034
+  },
+  {
+   "run_id": "dose_d1_20261019_133708",
+   "phase": "formal_volume",
+   "status": "SESSION_ENDED",
+   "booked_usd": 0.2727,
+   "pod_id": "f92f2w64asvc6h",
+   "volume_id": null,
+   "start_utc": "2026-10-19T13:47:48+00:00",
+   "end_utc": "2026-10-19T13:56:40+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-19T13:37:08+00:00",
+    "hard_cap_usd": 18.55,
+    "programme_ceiling_in_force_usd": 107.5099,
+    "programme_spent_at_issue_usd": 35.218,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 53.768,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-19T05:13:11+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   },
+   "provider_billed_usd": 0.2641,
+   "provider_minus_booked_usd": -0.0086
+  },
+  {
+   "run_id": "dose_d2_20261019_135821",
+   "phase": "formal_volume",
+   "status": "SESSION_ENDED",
+   "booked_usd": 13.4238,
+   "pod_id": "cmxnaja12ewpzc",
+   "volume_id": null,
+   "start_utc": "2026-10-19T14:09:10+00:00",
+   "end_utc": "2026-10-19T21:25:47+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-19T13:58:21+00:00",
+    "hard_cap_usd": 24.36,
+    "programme_ceiling_in_force_usd": 107.5099,
+    "programme_spent_at_issue_usd": 35.4907,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 59.8507,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-19T05:13:11+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   },
+   "provider_billed_usd": 10.4087,
+   "provider_minus_booked_usd": -3.0151
+  },
+  {
+   "run_id": "dose_d2_20261019_213216",
+   "phase": "formal_volume",
+   "status": "ABANDONED_BEFORE_LAUNCH",
+   "booked_usd": 0.0,
+   "pod_id": null,
+   "volume_id": null,
+   "start_utc": null,
+   "end_utc": "2026-10-20T00:28:36+00:00",
+   "provider_resource_created": false,
+   "authorization": {
+    "granted_utc": "2026-10-19T21:32:17+00:00",
+    "hard_cap_usd": 24.36,
+    "programme_ceiling_in_force_usd": 107.5099,
+    "programme_spent_at_issue_usd": 48.9145,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 73.2745,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-19T05:13:11+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   }
+  },
+  {
+   "run_id": "dose_d2_20261020_002929",
+   "phase": "formal_volume",
+   "status": "SESSION_ENDED",
+   "booked_usd": 4.5096,
+   "pod_id": "bhttzctttg3hld",
+   "volume_id": null,
+   "start_utc": "2026-10-20T02:25:26+00:00",
+   "end_utc": "2026-10-20T04:52:06+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-20T00:29:29+00:00",
+    "hard_cap_usd": 24.36,
+    "programme_ceiling_in_force_usd": 107.5099,
+    "programme_spent_at_issue_usd": 48.9145,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 73.2745,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-19T05:13:11+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   },
+   "provider_billed_usd": 4.5008,
+   "provider_minus_booked_usd": -0.0088
+  },
+  {
+   "run_id": "dose_d4_20261020_045426",
+   "phase": "formal_volume",
+   "status": "ABANDONED_BEFORE_LAUNCH",
+   "booked_usd": 0.0,
+   "pod_id": null,
+   "volume_id": null,
+   "start_utc": null,
+   "end_utc": "2026-10-20T04:56:08+00:00",
+   "provider_resource_created": false,
+   "authorization": {
+    "granted_utc": "2026-10-20T04:54:26+00:00",
+    "hard_cap_usd": 36.26,
+    "programme_ceiling_in_force_usd": 107.5099,
+    "programme_spent_at_issue_usd": 53.4241,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 89.6841,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-19T05:13:11+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   }
+  },
+  {
+   "run_id": "dose_d4_20261020_045616",
+   "phase": "formal_volume",
+   "status": "ABANDONED_BEFORE_LAUNCH",
+   "booked_usd": 0.0,
+   "pod_id": null,
+   "volume_id": null,
+   "start_utc": null,
+   "end_utc": "2026-10-20T05:07:05+00:00",
+   "provider_resource_created": false,
+   "authorization": {
+    "granted_utc": "2026-10-20T04:56:16+00:00",
+    "hard_cap_usd": 36.26,
+    "programme_ceiling_in_force_usd": 107.5099,
+    "programme_spent_at_issue_usd": 53.4241,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 89.6841,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-19T05:13:11+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   }
+  },
+  {
+   "run_id": "dose_d4_20261020_053929",
+   "phase": "formal_volume",
+   "status": "ABANDONED_BEFORE_LAUNCH",
+   "booked_usd": 0.0,
+   "pod_id": null,
+   "volume_id": null,
+   "start_utc": null,
+   "end_utc": "2026-10-20T05:40:16+00:00",
+   "provider_resource_created": false,
+   "authorization": {
+    "granted_utc": "2026-10-20T05:39:29+00:00",
+    "hard_cap_usd": 39.5,
+    "programme_ceiling_in_force_usd": 137.5099,
+    "programme_spent_at_issue_usd": 53.4241,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 92.9241,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-19T05:13:11+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   }
+  },
+  {
+   "run_id": "dose_d4_20261020_054022",
+   "phase": "formal_volume",
+   "status": "SESSION_ENDED",
+   "booked_usd": 23.6937,
+   "pod_id": "ltxns3jbkkaiac",
+   "volume_id": null,
+   "start_utc": "2026-10-20T05:51:15+00:00",
+   "end_utc": "2026-10-20T18:41:53+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-20T05:40:22+00:00",
+    "hard_cap_usd": 39.5,
+    "programme_ceiling_in_force_usd": 137.5099,
+    "programme_spent_at_issue_usd": 53.4241,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 92.9241,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-19T05:13:11+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   },
+   "provider_billed_usd": 23.5753,
+   "provider_minus_booked_usd": -0.1184
+  },
+  {
+   "run_id": "dose_d4_20261020_185256",
+   "phase": "formal_volume",
+   "status": "SESSION_ENDED",
+   "booked_usd": 0.2592,
+   "pod_id": "57fzceztgwzi15",
+   "volume_id": null,
+   "start_utc": "2026-10-20T21:04:12+00:00",
+   "end_utc": "2026-10-20T21:12:37+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-20T18:52:56+00:00",
+    "hard_cap_usd": 9.0,
+    "programme_ceiling_in_force_usd": 143.5099,
+    "programme_spent_at_issue_usd": 77.5845,
+    "held_beside_it_usd": 26.0,
+    "committed_at_issue_usd": 112.5845,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-20T05:39:04+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   },
+   "provider_billed_usd": 0.251,
+   "provider_minus_booked_usd": -0.0082
+  },
+  {
+   "run_id": "dose_d4_20261020_211335",
+   "phase": "formal_volume",
+   "status": "SESSION_ENDED",
+   "booked_usd": 0.2513,
+   "pod_id": "8wcyznlfbrd3uc",
+   "volume_id": null,
+   "start_utc": "2026-10-20T21:14:33+00:00",
+   "end_utc": "2026-10-20T21:22:43+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-20T21:13:35+00:00",
+    "hard_cap_usd": 9.0,
+    "programme_ceiling_in_force_usd": 143.5099,
+    "programme_spent_at_issue_usd": 77.8437,
+    "held_beside_it_usd": 26.0,
+    "committed_at_issue_usd": 112.8437,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-20T05:39:04+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   },
+   "provider_billed_usd": 0.2433,
+   "provider_minus_booked_usd": -0.008
+  },
+  {
+   "run_id": "dose_d4_20261020_212310",
+   "phase": "formal_volume",
+   "status": "SESSION_ENDED",
+   "booked_usd": 4.0197,
+   "pod_id": "9l10mpu9yw4c7f",
+   "volume_id": null,
+   "start_utc": "2026-10-20T21:23:47+00:00",
+   "end_utc": "2026-10-20T23:34:31+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-20T21:23:10+00:00",
+    "hard_cap_usd": 9.0,
+    "programme_ceiling_in_force_usd": 143.5099,
+    "programme_spent_at_issue_usd": 78.095,
+    "held_beside_it_usd": 26.0,
+    "committed_at_issue_usd": 113.095,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-20T05:39:04+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   },
+   "provider_billed_usd": 4.0155,
+   "provider_minus_booked_usd": -0.0042
+  },
+  {
+   "run_id": "netvol_20261019_051206",
+   "phase": "formal_volume",
+   "status": "VOLUME_DELETED",
+   "booked_usd": 1.6717,
+   "pod_id": null,
+   "volume_id": "ugllmlv19t",
+   "start_utc": "2026-10-19T05:12:06Z",
+   "end_utc": "2026-10-21T14:30:58+00:00",
+   "provider_resource_created": true
+  },
+  {
+   "run_id": "netvol_20261020_093832",
+   "phase": "formal_volume",
+   "status": "VOLUME_DELETED",
+   "booked_usd": 0.1403,
+   "pod_id": null,
+   "volume_id": "b9jwu0g1eg",
+   "start_utc": "2026-10-20T09:38:32Z",
+   "end_utc": "2026-10-21T14:30:05+00:00",
+   "provider_resource_created": true
+  },
+  {
+   "run_id": "netvol_20261020_233114",
+   "phase": "formal_volume",
+   "status": "VOLUME_DELETED",
+   "booked_usd": 0.0729,
+   "pod_id": null,
+   "volume_id": "wn3avnine2",
+   "start_utc": "2026-10-20T23:31:14Z",
+   "end_utc": "2026-10-21T14:29:57+00:00",
+   "provider_resource_created": true
+  },
+  {
+   "run_id": "pilot_20261018_122600",
+   "phase": "pilot",
+   "status": "ABANDONED_BEFORE_LAUNCH",
+   "booked_usd": 0.0,
+   "pod_id": null,
+   "volume_id": null,
+   "start_utc": null,
+   "end_utc": "2026-10-18T12:27:25+00:00",
+   "provider_resource_created": false,
+   "authorization": {
+    "granted_utc": "2026-10-18T12:26:00+00:00",
+    "hard_cap_usd": 8.0,
+    "programme_ceiling_in_force_usd": 92.0,
+    "programme_spent_at_issue_usd": 5.2472,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 13.2472,
+    "fits_ceiling_in_force": true
+   }
+  },
+  {
+   "run_id": "pilot_20261018_122725",
+   "phase": "pilot",
+   "status": "ABANDONED_BEFORE_LAUNCH",
+   "booked_usd": 0.0,
+   "pod_id": null,
+   "volume_id": null,
+   "start_utc": null,
+   "end_utc": "2026-10-18T12:28:08+00:00",
+   "provider_resource_created": false,
+   "authorization": {
+    "granted_utc": "2026-10-18T12:27:25+00:00",
+    "hard_cap_usd": 8.0,
+    "programme_ceiling_in_force_usd": 92.0,
+    "programme_spent_at_issue_usd": 5.2472,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 13.2472,
+    "fits_ceiling_in_force": true
+   }
+  },
+  {
+   "run_id": "pilot_20261018_122808",
+   "phase": "pilot",
+   "status": "SESSION_ENDED",
+   "booked_usd": 1.2469,
+   "pod_id": "nilz8lib2sk84x",
+   "volume_id": null,
+   "start_utc": "2026-10-18T12:28:55+00:00",
+   "end_utc": "2026-10-18T13:35:04+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-18T12:28:08+00:00",
+    "hard_cap_usd": 8.0,
+    "programme_ceiling_in_force_usd": 92.0,
+    "programme_spent_at_issue_usd": 5.2472,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 13.2472,
+    "fits_ceiling_in_force": true
+   },
+   "provider_billed_usd": 1.2436,
+   "provider_minus_booked_usd": -0.0033
+  },
+  {
+   "run_id": "pilot_20261018_134131",
+   "phase": "pilot",
+   "status": "SESSION_ENDED",
+   "booked_usd": 6.953,
+   "pod_id": "wm75q9fix8g15w",
+   "volume_id": null,
+   "start_utc": "2026-10-18T13:42:17+00:00",
+   "end_utc": "2026-10-18T17:30:07+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-18T13:41:31+00:00",
+    "hard_cap_usd": 13.0,
+    "programme_ceiling_in_force_usd": 92.0,
+    "programme_spent_at_issue_usd": 6.4941,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 19.4941,
+    "fits_ceiling_in_force": true
+   },
+   "provider_billed_usd": 6.9516,
+   "provider_minus_booked_usd": -0.0014
+  },
+  {
+   "run_id": "probes_d1_20261020_093955",
+   "phase": "formal_volume",
+   "status": "SESSION_ENDED",
+   "booked_usd": 15.392,
+   "pod_id": "rzf92gbn3h40we",
+   "volume_id": null,
+   "start_utc": "2026-10-20T09:40:55+00:00",
+   "end_utc": "2026-10-20T23:27:25+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-20T09:39:55+00:00",
+    "hard_cap_usd": 26.0,
+    "programme_ceiling_in_force_usd": 137.5099,
+    "programme_spent_at_issue_usd": 53.8908,
+    "held_beside_it_usd": 39.5,
+    "committed_at_issue_usd": 119.3908,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-20T05:39:04+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   },
+   "provider_billed_usd": 15.3936,
+   "provider_minus_booked_usd": 0.0016
+  },
+  {
+   "run_id": "probes_d2_20261020_233510",
+   "phase": "formal_volume",
+   "status": "SESSION_ENDED",
+   "booked_usd": 16.0872,
+   "pod_id": "3weh7q3l8p0ms1",
+   "volume_id": null,
+   "start_utc": "2026-10-20T23:55:50+00:00",
+   "end_utc": "2026-10-21T14:19:40+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-20T23:35:10+00:00",
+    "hard_cap_usd": 22.4,
+    "programme_ceiling_in_force_usd": 143.5099,
+    "programme_spent_at_issue_usd": 97.7401,
+    "held_beside_it_usd": 22.4,
+    "committed_at_issue_usd": 142.5401,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-20T14:50:55+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   },
+   "provider_billed_usd": 16.0903,
+   "provider_minus_booked_usd": 0.0031
+  },
+  {
+   "run_id": "probes_d4_20261020_232941",
+   "phase": "formal_volume",
+   "status": "SESSION_ENDED",
+   "booked_usd": 14.6187,
+   "pod_id": "dgv8vpzbgpuykh",
+   "volume_id": null,
+   "start_utc": "2026-10-20T23:30:21+00:00",
+   "end_utc": "2026-10-21T12:35:20+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-20T23:29:41+00:00",
+    "hard_cap_usd": 22.4,
+    "programme_ceiling_in_force_usd": 143.5099,
+    "programme_spent_at_issue_usd": 93.487,
+    "held_beside_it_usd": 9.0,
+    "committed_at_issue_usd": 124.887,
+    "fits_ceiling_in_force": true,
+    "ceiling_it_needed_recorded_utc": "2026-10-20T05:39:04+00:00",
+    "issued_after_that_ceiling_was_recorded": true
+   },
+   "provider_billed_usd": 14.6207,
+   "provider_minus_booked_usd": 0.002
+  },
+  {
+   "run_id": "resolution_20261018_201712",
+   "phase": "prerequisites",
+   "status": "SESSION_ENDED",
+   "booked_usd": 0.0729,
+   "pod_id": "92ldrjenk7piv2",
+   "volume_id": null,
+   "start_utc": "2026-10-18T20:23:32+00:00",
+   "end_utc": "2026-10-18T20:25:57+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-18T20:17:12+00:00",
+    "hard_cap_usd": 6.5,
+    "programme_ceiling_in_force_usd": 92.0,
+    "programme_spent_at_issue_usd": 13.4471,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 19.9471,
+    "fits_ceiling_in_force": true
+   },
+   "provider_billed_usd": 0.0668,
+   "provider_minus_booked_usd": -0.0061
+  },
+  {
+   "run_id": "resolution_20261018_202715",
+   "phase": "prerequisites",
+   "status": "SESSION_ENDED",
+   "booked_usd": 2.031,
+   "pod_id": "5j92y6jbmrkalx",
+   "volume_id": null,
+   "start_utc": "2026-10-18T20:28:23+00:00",
+   "end_utc": "2026-10-18T21:35:42+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-18T20:27:15+00:00",
+    "hard_cap_usd": 6.5,
+    "programme_ceiling_in_force_usd": 92.0,
+    "programme_spent_at_issue_usd": 13.52,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 20.02,
+    "fits_ceiling_in_force": true
+   },
+   "provider_billed_usd": 2.0254,
+   "provider_minus_booked_usd": -0.0056
+  },
+  {
+   "run_id": "resolution_20261018_213745",
+   "phase": "prerequisites",
+   "status": "SESSION_ENDED",
+   "booked_usd": 1.9589,
+   "pod_id": "q8lzi7xqb5wcg5",
+   "volume_id": null,
+   "start_utc": "2026-10-18T21:38:41+00:00",
+   "end_utc": "2026-10-18T22:43:36+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-18T21:37:45+00:00",
+    "hard_cap_usd": 4.64,
+    "programme_ceiling_in_force_usd": 92.0,
+    "programme_spent_at_issue_usd": 15.551,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 20.191,
+    "fits_ceiling_in_force": true
+   },
+   "provider_billed_usd": 1.954,
+   "provider_minus_booked_usd": -0.0049
+  },
+  {
+   "run_id": "teachercal_20261018_112755",
+   "phase": "prerequisites",
+   "status": "SESSION_ENDED",
+   "booked_usd": 1.6169,
+   "pod_id": "wg8cbjbwvga8ku",
+   "volume_id": null,
+   "start_utc": "2026-10-18T11:28:39+00:00",
+   "end_utc": "2026-10-18T12:22:14+00:00",
+   "provider_resource_created": true,
+   "authorization": {
+    "granted_utc": "2026-10-18T11:27:55+00:00",
+    "hard_cap_usd": 5.0,
+    "programme_ceiling_in_force_usd": 92.0,
+    "programme_spent_at_issue_usd": 3.6303,
+    "held_beside_it_usd": 0,
+    "committed_at_issue_usd": 8.6303,
+    "fits_ceiling_in_force": true
+   },
+   "provider_billed_usd": 1.6107,
+   "provider_minus_booked_usd": -0.0062
+  },
+  {
+   "run_id": "volaudit_20261021_142442",
+   "phase": "formal_volume",
+   "status": "NO_RESOURCE_CREATED",
+   "booked_usd": 0.0,
+   "pod_id": null,
+   "volume_id": null,
+   "start_utc": null,
+   "end_utc": "2026-10-21T14:24:44+00:00",
+   "provider_resource_created": false
+  },
+  {
+   "run_id": "volaudit_20261021_142534",
+   "phase": "formal_volume",
+   "status": "NO_RESOURCE_CREATED",
+   "booked_usd": 0.0,
+   "pod_id": null,
+   "volume_id": null,
+   "start_utc": null,
+   "end_utc": "2026-10-21T14:25:35+00:00",
+   "provider_resource_created": false
+  },
+  {
+   "run_id": "volaudit_20261021_142540",
+   "phase": "formal_volume",
+   "status": "NO_RESOURCE_CREATED",
+   "booked_usd": 0.0,
+   "pod_id": null,
+   "volume_id": null,
+   "start_utc": null,
+   "end_utc": "2026-10-21T14:25:40+00:00",
+   "provider_resource_created": false
+  },
+  {
+   "run_id": "volaudit_20261021_142638",
+   "phase": "formal_volume",
+   "status": "SESSION_ENDED",
+   "booked_usd": 0.0018,
+   "pod_id": "6wjl0c32g6f0bw",
+   "volume_id": null,
+   "start_utc": null,
+   "end_utc": "2026-10-21T14:28:23+00:00",
+   "provider_resource_created": true,
+   "provider_billed_usd": null,
+   "provider_minus_booked_usd": null
+  },
+  {
+   "run_id": "volaudit_20261021_142851",
+   "phase": "formal_volume",
+   "status": "NO_RESOURCE_CREATED",
+   "booked_usd": 0.0,
+   "pod_id": null,
+   "volume_id": null,
+   "start_utc": null,
+   "end_utc": "2026-10-21T14:28:54+00:00",
+   "provider_resource_created": false
+  },
+  {
+   "run_id": "volaudit_20261021_142856",
+   "phase": "formal_volume",
+   "status": "NO_RESOURCE_CREATED",
+   "booked_usd": 0.0,
+   "pod_id": null,
+   "volume_id": null,
+   "start_utc": null,
+   "end_utc": "2026-10-21T14:28:57+00:00",
+   "provider_resource_created": false
+  }
+ ],
+ "project": {
+  "snapshot": {
+   "path": "logs/budget/provider/runpod_billing_2026-10-21.json",
+   "sha256": "ea369a8a98d0aaeea6bb082bf7a5a5adf4ffe7f292525645db0d1f4438e6f911"
+  },
+  "provider_billed_usd": {
+   "pods": 655.9411,
+   "network_volumes": 2.2089,
+   "total": 658.15
+  },
+  "records_cumulative_usd": 625.5798,
+  "provider_minus_records_usd": 32.5702,
+  "pods_billed": 326,
+  "pods_created_by_a_run_record": 122,
+  "pods_only_mentioned": [
+   "02oef2ib958x6j",
+   "0a8u02ydq58xai",
+   "0cn6ipb4aobca3",
+   "0qkaj0xfm2qe4h",
+   "138adwm46bum8v",
+   "1dxw5aw2d112jx",
+   "1ligfkwnaous4u",
+   "1mgt50aapad7hv",
+   "1xwqb7os4ue9rz",
+   "20ji79950u9arw",
+   "25kncjfmakxxul",
+   "29l0qxxx1i6906",
+   "2dm0luzftizif3",
+   "2lz4xqdok1z5s1",
+   "2maapdxqg566r5",
+   "2vpbiz5p2al1kj",
+   "2xmyzes6r0vcge",
+   "37aah10zvqk4lo",
+   "3c1g6e01kdu1ya",
+   "3gvfeqnkbyptc4",
+   "3hvb5d4it6h6pb",
+   "3uwvkx3zyria8z",
+   "3wku8lc1yztfbj",
+   "3xs9her5kavk14",
+   "4dbqycjrivhq17",
+   "4pge0934xnly22",
+   "5bd0szfrv57fw3",
+   "5db8r0r06vd5k5",
+   "6ex6mpu1uha1xg",
+   "6g42msvfrzemos",
+   "6mzp8m92qksalv",
+   "6rmod2085xd313",
+   "6x4dcvm9s22cb6",
+   "6xrudht3i7wc62",
+   "7cr5l46wa7ptfy",
+   "7hthdteyc25xgx",
+   "7ucb8jox3buc29",
+   "8gtnsbigpgaz76",
+   "8ismfhukteed4j",
+   "8nheigrv25aeq8",
+   "8tbsixglzz64ox",
+   "8v4jc1c5mwnipb",
+   "8ywzifnsa5zery",
+   "94slla57nnqjqa",
+   "98nmzq5a5oq4hb",
+   "9jxov5bjtiy2xu",
+   "9nrdoydt53nlzc",
+   "9rmme5u9yd68g5",
+   "adevfxvuiwu2lw",
+   "bd83jug4g23qn0",
+   "btbdczhr0t0ukc",
+   "bu7j1vlcjge9qj",
+   "c6btbh69ql85ng",
+   "cnzdnn3m890m1f",
+   "css25bbu7ueqla",
+   "d2nwf8995nd83j",
+   "d3zrira2zl98kd",
+   "d854jag1ybhny2",
+   "dckc72mtoe9ijw",
+   "detw95h0kqc7x6",
+   "dltht42ifojgwo",
+   "dqw79h3twudxzt",
+   "dvoosn07fjs1oh",
+   "e2ghwfuerdrvni",
+   "ehienq52s3pjzp",
+   "ejewm772b02air",
+   "ew2ykjczuex87i",
+   "fa2sgl62t3l8q0",
+   "fbuggw0x9efqsz",
+   "fccr23o9jcnrh0",
+   "fsk7tz1rnx43xr",
+   "g8ajahpwirhrfx",
+   "gbiz85xcmiq6gh",
+   "gfd8buh5tr51qb",
+   "grgiu5atibea3x",
+   "hcgt3z021psyrz",
+   "hdwsp4btdq5t1n",
+   "hq685pjg56q0q4",
+   "hwyay7b9df9e77",
+   "hyvp7dw3zkb1zk",
+   "ibj7s7fxuj9ttl",
+   "ifp8feyil1gp7v",
+   "igyljdhgg2hmzf",
+   "ij54bzvcyldm9j",
+   "ippwmpc8wzed24",
+   "jusu7nm5e5xcyc",
+   "k1mgu38q0y6sei",
+   "ks8pm799bytys9",
+   "ku8vcn5mu8hp9i",
+   "kxrqqyuylpnrkm",
+   "ky8j0kbft9mp61",
+   "l11v5n0wc2pc7p",
+   "luy1txyjro2msz",
+   "m0p1decj1an2mc",
+   "m8mmk8f2389f8s",
+   "m8t9tf8ftqlmh3",
+   "mlj9pj9p5q6pta",
+   "n1kavevctllrvi",
+   "n2kfqhyoya4zzj",
+   "n3gdd9yby5fx2m",
+   "n71opk7lv4fhzf",
+   "n7xjbzlmsyx9b2",
+   "nex2u8no79k6pl",
+   "nuitz0ketxukpm",
+   "o1wtd5wfat43ny",
+   "o5bv3oqqs7s80b",
+   "o7hj2r3z2w8xat",
+   "p6doyk8jeydg1u",
+   "pj3c870n6yx70z",
+   "pln3gsuw6lvlzb",
+   "psl88q7qgqu44t",
+   "qbfqbp3y6hq8iu",
+   "qhrir27ixfu8kt",
+   "qp7xm2k01h6dg4",
+   "qzevis6g43en33",
+   "r3dlq1g6q51xnw",
+   "rfnomrxznmzznp",
+   "rn7y3c2btfvv3p",
+   "rtrdbu3wi6sfrv",
+   "ruib84xvfyieqm",
+   "s797g6xphdibms",
+   "setwv2mt3gx4hz",
+   "simbeepnf8syuu",
+   "sjhg5lcu03wesf",
+   "skoh6l6wmmwxce",
+   "spa2i4615a10wu",
+   "tct4820z4t3hvn",
+   "u99fhssac9f6i7",
+   "ud7ycof0pnqu43",
+   "ujgl1c8wk380ok",
+   "ujhpw3lnheqhmo",
+   "uzahazwqsh2r9a",
+   "vjavemn7m2tw5a",
+   "vqrrkc8w6f5786",
+   "vt3qm7j9vpct6c",
+   "vvsohv60cuuokx",
+   "vx55ur6camdmgl",
+   "wgm2tamw8nu9f5",
+   "wkausr939ts7vv",
+   "x8gh0lwxlujxcv",
+   "xgca8kkv4pm68n",
+   "xikv3u8moofu6c",
+   "y1rg8rsl4qy4lp",
+   "y1wmjhemi50jkw",
+   "y9ilsahujayqft",
+   "yfr80fbbgl3q9m",
+   "z9so5ftbsokybz",
+   "zjwpsurs2dyvw8",
+   "znqw298b50jgjd",
+   "zosdyrzqvw6jwg",
+   "zoz95844krv2ze"
+  ],
+  "pods_unattributed": [
+   {
+    "pod_id": "zae6ba3we52vgu",
+    "usd": 3.6488,
+    "first_day": "2026-07-22"
+   },
+   {
+    "pod_id": "bgi8ue38hzhal8",
+    "usd": 0.0461,
+    "first_day": "2026-07-26"
+   },
+   {
+    "pod_id": "h923aippm86s7v",
+    "usd": 0.2626,
+    "first_day": "2026-07-26"
+   },
+   {
+    "pod_id": "hbxdtb4mbh38tx",
+    "usd": 0.1088,
+    "first_day": "2026-07-26"
+   },
+   {
+    "pod_id": "l1m24zl44xhqy2",
+    "usd": 0.0586,
+    "first_day": "2026-07-26"
+   },
+   {
+    "pod_id": "mhak4avc7kt7cz",
+    "usd": 0.3507,
+    "first_day": "2026-07-26"
+   },
+   {
+    "pod_id": "owwdka4xzucoya",
+    "usd": 0.1002,
+    "first_day": "2026-07-26"
+   },
+   {
+    "pod_id": "ve2b6yz1ozedxk",
+    "usd": 0.4884,
+    "first_day": "2026-07-26"
+   },
+   {
+    "pod_id": "dau6jo69vbak2w",
+    "usd": 1.2723,
+    "first_day": "2026-07-27"
+   },
+   {
+    "pod_id": "absiebkmq7hjbr",
+    "usd": 5.927,
+    "first_day": "2026-07-28"
+   },
+   {
+    "pod_id": "iohqynlxv5eoz4",
+    "usd": 4.4882,
+    "first_day": "2026-07-28"
+   },
+   {
+    "pod_id": "ibht1nb8o0nhyh",
+    "usd": 0.1541,
+    "first_day": "2026-07-29"
+   },
+   {
+    "pod_id": "lwf2th777hri8c",
+    "usd": 0.4107,
+    "first_day": "2026-07-29"
+   },
+   {
+    "pod_id": "oy00tooo4ckkv9",
+    "usd": 0.386,
+    "first_day": "2026-07-29"
+   },
+   {
+    "pod_id": "w86xu7t78y571h",
+    "usd": 1.4624,
+    "first_day": "2026-07-29"
+   },
+   {
+    "pod_id": "wdpyamp2pp5v8t",
+    "usd": 0.4308,
+    "first_day": "2026-07-29"
+   },
+   {
+    "pod_id": "2dbp44q6jpp5jk",
+    "usd": 0.8326,
+    "first_day": "2026-07-30"
+   },
+   {
+    "pod_id": "3cqxz56y6tc8er",
+    "usd": 2.2915,
+    "first_day": "2026-07-30"
+   },
+   {
+    "pod_id": "fg3nr3ibef553d",
+    "usd": 1.3468,
+    "first_day": "2026-07-30"
+   },
+   {
+    "pod_id": "glz1kuyi5viuw4",
+    "usd": 3.482,
+    "first_day": "2026-07-30"
+   },
+   {
+    "pod_id": "lj4m3ogjz888m5",
+    "usd": 0.559,
+    "first_day": "2026-07-30"
+   },
+   {
+    "pod_id": "n8d5kg6cw3iiuz",
+    "usd": 0.4732,
+    "first_day": "2026-07-30"
+   },
+   {
+    "pod_id": "vuf5sxxnil7drh",
+    "usd": 0.0579,
+    "first_day": "2026-07-30"
+   },
+   {
+    "pod_id": "as66m7qal78e5a",
+    "usd": 25.605,
+    "first_day": "2026-07-31"
+   },
+   {
+    "pod_id": "iids0u7zeb5urc",
+    "usd": 0.128,
+    "first_day": "2026-07-31"
+   },
+   {
+    "pod_id": "banc47gn8wn3ms",
+    "usd": 8.7682,
+    "first_day": "2026-08-02"
+   },
+   {
+    "pod_id": "rxie5w0kewuzg6",
+    "usd": 6.0256,
+    "first_day": "2026-08-02"
+   },
+   {
+    "pod_id": "5tl5pkzxpc4zpj",
+    "usd": 0.2562,
+    "first_day": "2026-08-03"
+   },
+   {
+    "pod_id": "76g859blv04tqc",
+    "usd": 0.0742,
+    "first_day": "2026-08-03"
+   },
+   {
+    "pod_id": "99vwfjl77fblq6",
+    "usd": 0.1624,
+    "first_day": "2026-08-03"
+   },
+   {
+    "pod_id": "9rtrkkpasmj17l",
+    "usd": 0.3904,
+    "first_day": "2026-08-03"
+   },
+   {
+    "pod_id": "a12c7ch5w9dq8n",
+    "usd": 0.2554,
+    "first_day": "2026-08-03"
+   },
+   {
+    "pod_id": "ftsoi1per5en78",
+    "usd": 0.0482,
+    "first_day": "2026-08-03"
+   },
+   {
+    "pod_id": "kr8gwb6jj1ec0o",
+    "usd": 0.0655,
+    "first_day": "2026-08-03"
+   },
+   {
+    "pod_id": "q7znklj7ya7kj2",
+    "usd": 0.0371,
+    "first_day": "2026-08-03"
+   },
+   {
+    "pod_id": "rvwv4tn4ml6d3d",
+    "usd": 0.2572,
+    "first_day": "2026-08-03"
+   },
+   {
+    "pod_id": "w82jwn06h5dp6r",
+    "usd": 0.3097,
+    "first_day": "2026-08-03"
+   },
+   {
+    "pod_id": "gc9qeuxi4w7ew7",
+    "usd": 0.0034,
+    "first_day": "2026-08-04"
+   },
+   {
+    "pod_id": "vooci6ln90ach4",
+    "usd": 0.0695,
+    "first_day": "2026-08-04"
+   },
+   {
+    "pod_id": "8my2o9ticj7xj9",
+    "usd": 0.06,
+    "first_day": "2026-08-06"
+   },
+   {
+    "pod_id": "kdj5vtcei1yxjn",
+    "usd": 0.9453,
+    "first_day": "2026-08-06"
+   },
+   {
+    "pod_id": "ku7wqx33foo53l",
+    "usd": 0.0674,
+    "first_day": "2026-08-06"
+   },
+   {
+    "pod_id": "331nbu5mxwi26v",
+    "usd": 0.5658,
+    "first_day": "2026-08-07"
+   },
+   {
+    "pod_id": "5ff0prh6fzxmvv",
+    "usd": 0.3532,
+    "first_day": "2026-08-07"
+   },
+   {
+    "pod_id": "iynr8ybvpvbhgo",
+    "usd": 0.2556,
+    "first_day": "2026-08-07"
+   },
+   {
+    "pod_id": "5ccmods79ywrw2",
+    "usd": 0.1189,
+    "first_day": "2026-08-08"
+   },
+   {
+    "pod_id": "1mm2j08s262wym",
+    "usd": 0.28,
+    "first_day": "2026-08-10"
+   },
+   {
+    "pod_id": "6ce901ncd9efjg",
+    "usd": 0.1377,
+    "first_day": "2026-08-10"
+   },
+   {
+    "pod_id": "3deothqd14f76p",
+    "usd": 0.4889,
+    "first_day": "2026-08-11"
+   },
+   {
+    "pod_id": "5k2e72503puo1f",
+    "usd": 0.4517,
+    "first_day": "2026-08-11"
+   },
+   {
+    "pod_id": "64fhzduqdwaurw",
+    "usd": 0.7783,
+    "first_day": "2026-08-11"
+   },
+   {
+    "pod_id": "8830ltzmwaqh08",
+    "usd": 0.7624,
+    "first_day": "2026-08-11"
+   },
+   {
+    "pod_id": "xrksmenhg7dlps",
+    "usd": 2.6349,
+    "first_day": "2026-09-27"
+   }
+  ],
+  "unattributed_usd_by_first_month": {
+   "2026-07": 54.3717,
+   "2026-08": 21.9882,
+   "2026-09": 2.6349
+  },
+  "by_period": [
+   {
+    "through_utc_day": "2026-09-11",
+    "provider_cumulative_usd": 305.8316,
+    "records_cumulative_usd": 267.8998,
+    "records_are": "the C1 package anchor, cumulative_spend_at_approval_usd (maintainer-stated)",
+    "provider_minus_records_usd": 37.9318,
+    "period_provider_usd": 305.8316,
+    "period_records_usd": 267.8998
+   },
+   {
+    "through_utc_day": "2026-10-17",
+    "provider_cumulative_usd": 535.7118,
+    "records_cumulative_usd": 500.1472,
+    "records_are": "$517.6571 at the 2026-10-19 authorization less this programme's 2026-10-18 runs ($17.5099)",
+    "provider_minus_records_usd": 35.5646,
+    "period_provider_usd": 229.8802,
+    "period_records_usd": 232.2474
+   },
+   {
+    "through_utc_day": "2026-10-21",
+    "provider_cumulative_usd": 658.1499,
+    "records_cumulative_usd": 625.5798,
+    "records_are": "derive_budget.py, now",
+    "provider_minus_records_usd": 32.5701,
+    "period_provider_usd": 122.4381,
+    "period_records_usd": 125.4326
+   }
+  ]
+ }
+}
