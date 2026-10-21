@@ -32,6 +32,7 @@ from datetime import datetime, timezone
 
 from stages.reasoning_data import assets as A
 from stages.reasoning_data import isolation_check as IC
+from stages.reasoning_data import process_check as PC
 
 from aadistill.data import cleaning
 from aadistill.data.target_quality import AcceptancePolicy, Check, assess, summarize
@@ -252,7 +253,7 @@ def audit_teacher_cal() -> dict:
     recs = A.teacher_cal_records()
     tasks = A.calibration_tasks()
     from stages.calibration_volume import score_battery as SB
-    scored = {s["task_id"]: s for s in SB.score(tasks, recs)}
+    scored = {s["task_id"]: s for s in SB.score(tasks, recs, "v2")}  # the protocol H1 generates under
     out = []
     for r in recs:
         stop = next((t["stop_reason"] for t in r["turns"] if t["stop_reason"] != "eos"), "eos")
@@ -262,9 +263,15 @@ def audit_teacher_cal() -> dict:
         if r.get("interactive"):
             ok = bool(s.get("correct"))          # the replayed environment's success
             inv = int((s.get("env") or {}).get("invalid_actions", 0))
-            trace = Check("valid" if inv == 0 else "invalid", f"invalid_actions={inv}")
+            trace = Check("verified" if inv == 0 else "contradicted", f"invalid_actions={inv}")
         else:
             ok = bool(s.get("answer_correct"))   # the boxed answer alone, apart from termination
+            parts = A.split_raw(r["turns"][-1].get("raw", "")) if r["turns"] else None
+            if ok and parts:
+                task = tasks[r["task_id"]]
+                trace = PC.static_process_check(
+                    parts[0], s.get("extracted"), task["answer_type"],
+                    prompt=" ".join(m.get("content") or "" for m in task["messages"]))
         ans = Check("correct" if ok else "incorrect", "" if ok else str(s.get("reason", "")))
         rec = assess(r["task_id"], 0, stop_reason=stop, protocol_reason=proto, answer=ans,
                      trace=trace, policy=VERIFIED, end_reasons=TC_ENDS,

@@ -33,7 +33,7 @@ def test_a_clean_correct_candidate_is_accepted_with_trace_not_assessed():
     ({"proto": "think_not_closed"}, "protocol:think_not_closed"),
     ({"ans": "incorrect"}, "answer:incorrect"),
     ({"ans": "unverifiable"}, "answer:unverifiable"),
-    ({"trace": Check("invalid", "illegal_action")}, "trace:invalid:illegal_action"),
+    ({"trace": Check("contradicted", "illegal_action")}, "trace:contradicted:illegal_action"),
 ])
 def test_each_failure_is_named_and_rejects(kw, reason):
     r = rec(**kw)
@@ -44,6 +44,16 @@ def test_all_failures_are_recorded_not_only_the_first():
     r = rec(stop="length", proto="empty_answer", ans="incorrect")
     assert len(r.reasons) == 3
     assert r.length_limited and not r.naturally_terminated and not r.protocol_valid
+
+
+@pytest.mark.parametrize("state", ["verified", "partial", "not_assessed"])
+def test_a_process_state_short_of_contradiction_does_not_reject(state):
+    assert rec(trace=Check(state)).accepted_for_training
+
+
+def test_an_unknown_process_state_is_refused():
+    with pytest.raises(ValueError):
+        rec(trace=Check("valid"))
 
 
 def test_unverifiable_needs_an_explicit_switch():

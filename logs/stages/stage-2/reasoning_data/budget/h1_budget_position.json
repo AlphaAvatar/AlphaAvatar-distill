@@ -1,0 +1,263 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.budget_position/v1",
+ "written_utc": "2026-10-21T19:12:12Z",
+ "snapshot": {
+  "path": "logs/budget/provider/runpod_billing_2026-10-21T1859Z.json",
+  "sha256": "f191b70188ceca14fc802d1d0f067e0c961d22bdca3a67e42ae0cf64b18fc484"
+ },
+ "provider_queried_utc": "2026-10-21T18:59:37+00:00",
+ "categories": {
+  "confirmed_project_spend_records_usd": 625.5798,
+  "confirmed_non_project_spend_usd": 0.0,
+  "_confirmed_non_project": "none established: the sibling AlphaAvatar checkout and the out-of-tree store name none of the unattributed pods",
+  "provider_billed_all_time_usd": 658.15,
+  "provider_minus_records_usd": 32.5702,
+  "by_period": [
+   {
+    "through_utc_day": "2026-09-11",
+    "provider_cumulative_usd": 305.8316,
+    "records_cumulative_usd": 267.8998,
+    "records_are": "the C1 package anchor, cumulative_spend_at_approval_usd (maintainer-stated)",
+    "provider_minus_records_usd": 37.9318,
+    "period_provider_usd": 305.8316,
+    "period_records_usd": 267.8998
+   },
+   {
+    "through_utc_day": "2026-10-17",
+    "provider_cumulative_usd": 535.7118,
+    "records_cumulative_usd": 500.1472,
+    "records_are": "$517.6571 at the 2026-10-19 authorization less this programme's 2026-10-18 runs ($17.5099)",
+    "provider_minus_records_usd": 35.5646,
+    "period_provider_usd": 229.8802,
+    "period_records_usd": 232.2474
+   },
+   {
+    "through_utc_day": "2026-10-21",
+    "provider_cumulative_usd": 658.1499,
+    "records_cumulative_usd": 625.5798,
+    "records_are": "derive_budget.py, now",
+    "provider_minus_records_usd": 32.5701,
+    "period_provider_usd": 122.4381,
+    "period_records_usd": 125.4326
+   }
+  ],
+  "open_resource_liabilities": {
+   "pods": 0,
+   "network_volumes": 0,
+   "spend_per_hour_usd": 0.0,
+   "usd": 0.0
+  },
+  "provider_balance_usd": 101.2318128102,
+  "_provider_balance": "money on the account, not a grant and not project headroom"
+ },
+ "pods_no_run_record_created": {
+  "count": 53,
+  "usd": 78.9948,
+  "named_by_untracked_project_launch_logs": {
+   "count": 8,
+   "usd": 5.6528,
+   "pods": {
+    "1mm2j08s262wym": {
+     "usd": 0.28,
+     "first_day": "2026-08-10",
+     "files": [
+      "/home/ecs-user/aad-scratch/e8b_20260810_182318/e8b_launch.log",
+      "/home/ecs-user/aad-scratch/e8b_20260810_182318/launch.out",
+      "/home/ecs-user/aad-scratch/e8b_20260810_182318/watchdog.jsonl"
+     ]
+    },
+    "3deothqd14f76p": {
+     "usd": 0.4889,
+     "first_day": "2026-08-11",
+     "files": [
+      "/home/ecs-user/aad-scratch/e8b_s1b_20260811_084617/e8b_launch.log",
+      "/home/ecs-user/aad-scratch/e8b_s1b_20260811_084617/launch.out",
+      "/home/ecs-user/aad-scratch/e8b_s1b_20260811_084617/watchdog.jsonl"
+     ]
+    },
+    "5ccmods79ywrw2": {
+     "usd": 0.1189,
+     "first_day": "2026-08-08",
+     "files": [
+      "/home/ecs-user/aad-scratch/e6b/e6b_launch.log",
+      "/home/ecs-user/aad-scratch/e6b/orchestrator.log",
+      "/home/ecs-user/aad-scratch/e6b/watchdog.log"
+     ]
+    },
+    "5k2e72503puo1f": {
+     "usd": 0.4517,
+     "first_day": "2026-08-11",
+     "files": [
+      "/home/ecs-user/aad-scratch/e8b_s1b_20260811_084617/e8b_launch.log",
+      "/home/ecs-user/aad-scratch/e8b_s1b_20260811_084617/launch.out",
+      "/home/ecs-user/aad-scratch/e8b_s1b_20260811_084617/watchdog.jsonl"
+     ]
+    },
+    "64fhzduqdwaurw": {
+     "usd": 0.7783,
+     "first_day": "2026-08-11",
+     "files": [
+      "/home/ecs-user/aad-scratch/e8b_s2_20260811_221116/e8b_launch.log",
+      "/home/ecs-user/aad-scratch/e8b_s2_20260811_221116/launch.out",
+      "/home/ecs-user/aad-scratch/e8b_s2_20260811_221116/watchdog.jsonl"
+     ]
+    },
+    "6ce901ncd9efjg": {
+     "usd": 0.1377,
+     "first_day": "2026-08-10",
+     "files": [
+      "/home/ecs-user/aad-scratch/e8a3_20260810_163437/e8a_launch.log",
+      "/home/ecs-user/aad-scratch/e8a3_20260810_163437/launch.out",
+      "/home/ecs-user/aad-scratch/e8a3_20260810_163437/watchdog.jsonl"
+     ]
+    },
+    "8830ltzmwaqh08": {
+     "usd": 0.7624,
+     "first_day": "2026-08-11",
+     "files": [
+      "/home/ecs-user/aad-scratch/e8b_s2_20260811_221116/e8b_launch.log",
+      "/home/ecs-user/aad-scratch/e8b_s2_20260811_221116/launch.out",
+      "/home/ecs-user/aad-scratch/e8b_s2_20260811_221116/watchdog.jsonl"
+     ]
+    },
+    "xrksmenhg7dlps": {
+     "usd": 2.6349,
+     "first_day": "2026-09-27",
+     "files": [
+      "/home/ecs-user/AlphaAvatar-distill/artifacts/stages/stage-1/phase_c3/pilots/c3_packing_v2/c3pack2_20260927_v6/cost.json",
+      "/home/ecs-user/AlphaAvatar-distill/artifacts/stages/stage-1/phase_c3/pilots/c3_packing_v2/c3pack2_20260927_v6/launch.log",
+      "/home/ecs-user/AlphaAvatar-distill/artifacts/stages/stage-1/phase_c3/pilots/c3_packing_v2/c3pack2_20260927_v6/pod_id"
+     ]
+    }
+   }
+  },
+  "named_by_project_records_in_git_history": {
+   "count": 11,
+   "usd": 15.0078,
+   "pods": {
+    "2dbp44q6jpp5jk": {
+     "usd": 0.8326,
+     "first_day": "2026-07-30",
+     "commit": "ab91c56e5ce4ef342865e13f3949f45a2eb16faa",
+     "file": "logs/experiments/stage3/2026-07-30_unrestricted_pilot.md"
+    },
+    "absiebkmq7hjbr": {
+     "usd": 5.927,
+     "first_day": "2026-07-28",
+     "commit": "793afa1b814ac6a59da4a0c9a641edec59371319",
+     "file": "logs/STATE.md"
+    },
+    "fg3nr3ibef553d": {
+     "usd": 1.3468,
+     "first_day": "2026-07-30",
+     "commit": "744217b3c02030ac58135e1cd1d2d451549c3c7f",
+     "file": "logs/experiments/stage3/2026-07-30_teacher_corpus_750.md"
+    },
+    "ibht1nb8o0nhyh": {
+     "usd": 0.1541,
+     "first_day": "2026-07-29",
+     "commit": "33e335ab7cd4dec26824eba346c8a5f7fc16c2b6",
+     "file": "logs/experiments/2026-07-31_current_engine_benchmark.md"
+    },
+    "lwf2th777hri8c": {
+     "usd": 0.4107,
+     "first_day": "2026-07-29",
+     "commit": "33e335ab7cd4dec26824eba346c8a5f7fc16c2b6",
+     "file": "logs/experiments/2026-07-31_current_engine_benchmark.md"
+    },
+    "mhak4avc7kt7cz": {
+     "usd": 0.3507,
+     "first_day": "2026-07-26",
+     "commit": "9add16064f0a56b0f2e7946b8050e45ac0eecbb1",
+     "file": "logs/experiments/2026-07-26_runpod_pod_readiness_misdiagnosis.md"
+    },
+    "oy00tooo4ckkv9": {
+     "usd": 0.386,
+     "first_day": "2026-07-29",
+     "commit": "33e335ab7cd4dec26824eba346c8a5f7fc16c2b6",
+     "file": "logs/experiments/2026-07-31_current_engine_benchmark.md"
+    },
+    "vuf5sxxnil7drh": {
+     "usd": 0.0579,
+     "first_day": "2026-07-30",
+     "commit": "744217b3c02030ac58135e1cd1d2d451549c3c7f",
+     "file": "logs/experiments/stage3/2026-07-30_teacher_corpus_750.md"
+    },
+    "w86xu7t78y571h": {
+     "usd": 1.4624,
+     "first_day": "2026-07-29",
+     "commit": "0ca35a664b2e0f7ed7a7b037a868d23e217e74d9",
+     "file": "logs/experiments/2026-07-30_isolated_engine_and_cap.md"
+    },
+    "wdpyamp2pp5v8t": {
+     "usd": 0.4308,
+     "first_day": "2026-07-29",
+     "commit": "0ca35a664b2e0f7ed7a7b037a868d23e217e74d9",
+     "file": "logs/experiments/2026-07-30_isolated_engine_and_cap.md"
+    },
+    "zae6ba3we52vgu": {
+     "usd": 3.6488,
+     "first_day": "2026-07-22",
+     "commit": "c53e4739faaf909e430c2e3a8dc3ae812c8d0a00",
+     "file": "logs/STATE.md"
+    }
+   }
+  },
+  "unnamed": {
+   "count": 34,
+   "usd": 58.3342,
+   "first_day": "2026-07-26",
+   "last_day": "2026-08-07",
+   "pods": [
+    "331nbu5mxwi26v",
+    "3cqxz56y6tc8er",
+    "5ff0prh6fzxmvv",
+    "5tl5pkzxpc4zpj",
+    "76g859blv04tqc",
+    "8my2o9ticj7xj9",
+    "99vwfjl77fblq6",
+    "9rtrkkpasmj17l",
+    "a12c7ch5w9dq8n",
+    "as66m7qal78e5a",
+    "banc47gn8wn3ms",
+    "bgi8ue38hzhal8",
+    "dau6jo69vbak2w",
+    "ftsoi1per5en78",
+    "gc9qeuxi4w7ew7",
+    "glz1kuyi5viuw4",
+    "h923aippm86s7v",
+    "hbxdtb4mbh38tx",
+    "iids0u7zeb5urc",
+    "iohqynlxv5eoz4",
+    "iynr8ybvpvbhgo",
+    "kdj5vtcei1yxjn",
+    "kr8gwb6jj1ec0o",
+    "ku7wqx33foo53l",
+    "l1m24zl44xhqy2",
+    "lj4m3ogjz888m5",
+    "n8d5kg6cw3iiuz",
+    "owwdka4xzucoya",
+    "q7znklj7ya7kj2",
+    "rvwv4tn4ml6d3d",
+    "rxie5w0kewuzg6",
+    "ve2b6yz1ozedxk",
+    "vooci6ln90ach4",
+    "w82jwn06h5dp6r"
+   ],
+   "status": "OPEN"
+  },
+  "_reading": "named = this project's own records ran the pod (activity confirmed); it does not show whether those dollars sit inside the maintainer-stated 2026-09-11 anchor"
+ },
+ "bounds": {
+  "project_cap_usd": 643.6571,
+  "headroom_if_records_are_complete_usd": 18.0773,
+  "headroom_if_all_provider_billing_is_project_usd": -14.4929,
+  "conservative_headroom_usd": -14.4929
+ },
+ "for_the_maintainer": [
+  "were the 34 unnamed pods ($58.3342, billed 2026-07-22 to 2026-08-07) this project's? Nothing in the repository, its history or the dev box names them",
+  "does the 2026-09-11 anchor ($267.8998, maintainer-stated) include all account spend before that day? The provider billed $37.93 more through it",
+  "until both are answered, any H1 spend needs a cap or envelope that covers the conservative bound (the cap is exceeded by the provider total)"
+ ],
+ "authorizes": "nothing"
+}

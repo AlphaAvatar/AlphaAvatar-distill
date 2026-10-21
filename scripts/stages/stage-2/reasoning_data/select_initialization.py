@@ -102,7 +102,11 @@ def main() -> int:
     chosen = dominant[0] if len(dominant) == 1 else None
     doc = {
         "schema": "aadistill.stage2.reasoning_data.initialization_selection/v1",
-        "status": "PROPOSED -- a maintainer decision; nothing is restored, copied or trained by this record",
+        "status": ("DECIDED BY THE MAINTAINER (2026-10-21): H1 fixes Stage-0 D4 Top-1 as its research "
+                   "starting point -- not a claim that D4 reasons best, and no change to Stage-0's unresolved "
+                   "verdict. This derivation, which reached the same candidate by a rule that reads no "
+                   "recovered outcome, is kept as supporting analysis; it did not make the choice. "
+                   "Materialization: assets/d4_top1_materialization.json"),
         "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "rule": ("the candidate that Pareto-dominates all others on the searches' three minimized "
                  "step-0 objectives " + ", ".join(OBJECTIVES) + ", under the one shared state_eval suite; "
@@ -110,6 +114,7 @@ def main() -> int:
         "candidates": cands,
         "pareto_front": [f"{c['dose']}/r{c['rank']}" for c in front],
         "dominant": [f"{c['dose']}/r{c['rank']}" for c in dominant],
+        "fixed_by_maintainer": "d4/r1",
         "proposal": None if chosen is None else {
             "dose": chosen["dose"], "rank": chosen["rank"], "state_id": chosen["state_id"],
             "checkpoint_sha256": chosen["checkpoint_sha256"],

@@ -1,9 +1,9 @@
 {
  "schema": "aadistill.stage2.reasoning_data.asset_audit/v1",
- "written_utc": "2026-10-21T18:50:54Z",
+ "written_utc": "2026-10-21T19:27:56Z",
  "code_state": {
-  "git_commit": "13b03d781cffd15c3b05a90d40113373f7dd0ff8",
-  "dirty": false
+  "git_commit": "2c2e356bcd7f297890ccddc872cbff12e4033dbf",
+  "dirty": true
  },
  "inputs": {
   "corpus_v2_manifest": "59ece2a5407e4177922c523da44835c46e1422c3c4df8878a601152098e290fa",
@@ -675,7 +675,8 @@
      "incorrect": 17
     },
     "trace": {
-     "not_assessed": 75
+     "partial": 58,
+     "not_assessed": 17
     },
     "accepted_candidates": 58,
     "accepted_units": 58,
@@ -701,7 +702,8 @@
      "incorrect": 19
     },
     "trace": {
-     "not_assessed": 150
+     "partial": 127,
+     "not_assessed": 23
     },
     "accepted_candidates": 131,
     "accepted_units": 131,
@@ -726,7 +728,8 @@
      "incorrect": 8
     },
     "trace": {
-     "not_assessed": 150
+     "partial": 137,
+     "not_assessed": 13
     },
     "accepted_candidates": 142,
     "accepted_units": 142,
@@ -751,8 +754,8 @@
      "correct": 17
     },
     "trace": {
-     "valid": 68,
-     "invalid": 4
+     "verified": 68,
+     "contradicted": 4
     },
     "accepted_candidates": 16,
     "accepted_units": 16,
@@ -762,7 +765,7 @@
      "answer:incorrect": 55,
      "ending:degeneration": 1,
      "protocol:think_not_closed": 1,
-     "trace:invalid:invalid_actions=1": 4
+     "trace:contradicted:invalid_actions=1": 4
     }
    },
    "task_contained_deduction": {
@@ -777,7 +780,8 @@
      "incorrect": 1
     },
     "trace": {
-     "not_assessed": 225
+     "partial": 175,
+     "not_assessed": 50
     },
     "accepted_candidates": 224,
     "accepted_units": 224,
@@ -800,9 +804,10 @@
     "incorrect": 100
    },
    "trace": {
-    "not_assessed": 600,
-    "valid": 68,
-    "invalid": 4
+    "partial": 497,
+    "not_assessed": 103,
+    "verified": 68,
+    "contradicted": 4
    },
    "accepted_candidates": 571,
    "accepted_units": 571,
@@ -815,7 +820,7 @@
     "ending:degeneration": 17,
     "ending:length_limited": 10,
     "protocol:think_not_closed": 23,
-    "trace:invalid:invalid_actions=1": 4
+    "trace:contradicted:invalid_actions=1": 4
    }
   },
   "note": "n = 1 per task, so unit and candidate acceptance coincide; base_pool_v1 additionally dropped 53 accepted units whose render exceeded 8,192 tokens"

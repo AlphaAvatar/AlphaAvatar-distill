@@ -1,66 +1,37 @@
 {
- "schema": "aadistill.stage2.reasoning_data.authorization_proposal/v1",
- "status": "PROPOSAL for the maintainer (2026-10-21 UTC). AUTHORIZES NOTHING: no grant is issued, no budget is opened, no resource is created by this file.",
- "money_today": {
-  "project_cap_usd": 643.6571,
-  "records_cumulative_usd": 625.5798,
-  "records_remaining_usd": 18.0773,
-  "owner": "logs/stages/stage-0/calibration_volume/closeout/programme_closeout.json :: money; budget_reconciliation.json",
-  "unattributed_provider_gap_usd": 32.5702,
-  "if_the_gap_is_project_spend": "the cap is already exceeded by $14.49 and the $18.08 is not headroom",
-  "provider_balance_snapshot_usd": 101.2318128102,
-  "_balance": "budget_reconciliation.json :: resource_terminal_state.client_balance_usd (2026-10-21T16:33Z); an account balance is NOT a grant",
-  "reading": "the records' remainder cannot fund the programme below even if the gap is not project spend; nothing here assumes the gap away"
- },
- "decisions_needed_before_any_spend": [
-  "attribute the $32.57 provider-billing gap (budget_reconciliation.json :: project.pods_only_mentioned)",
-  "a new project cap or a new Stage-2/3 envelope",
-  "the durability backend (plans/durability_plan.json)",
-  "the initialization (plans/initialization_selection.json: d4 rank 1)",
-  "the corpus scheme: corpus_spec.json shares and sources (in particular: training on calibration-split families of the 10 shared generators; omitting tool and refusal data; reusing corpus_v2's verified reading targets)",
-  "the compute contract (M1 recommended, M0 the frozen alternative)",
-  "the comparison design and its sequential gate G1 (plans/comparison_design.json)"
- ],
- "engineering_still_at_0_usd_before_the_first_paid_run": [
-  "a Stage-2 adapter for run_battery.py --mode generate over train_tasks_v1 and the math sources, with the two-candidate retry and the target_quality records",
-  "gsm8k_train / math_train task builders (the datasets are in the local HF cache) with R2 decontamination",
-  "a recovery driver that reads the master pack, applies the compute contract and persists each student at completion",
-  "the launch-bound sweep and the provider/budget gates of the existing session runner"
- ],
- "phases": [
-  {
-   "phase": "P0",
-   "what": "$0 data audit, design, configs, builders, tests (this round)",
-   "usd": 0,
-   "status": "done"
+  "schema": "aadistill.stage2.reasoning_data.authorization_proposal/v2",
+  "hypothesis_id": "H1",
+  "status": "APPLICATION for the maintainer (2026-10-21 UTC). AUTHORIZES NOTHING: no grant is issued, no cap is raised, no Stage-0 authorization is reused, and no resource is created by this file.",
+  "scope": "H1 only: generate and verify arm B's corpus, validate the training changes on a small GPU run, train and evaluate the 4 formal units (2 arms x 2 seeds), store their artifacts. The nested ladder and any H3 study are separate applications.",
+  "budget_position": {
+    "owner": "logs/stages/stage-2/reasoning_data/budget/h1_budget_position.json (derived from the committed provider snapshot logs/budget/provider/runpod_billing_2026-10-21T1859Z.json and derive_budget.py)",
+    "summary": "records $625.5798 against a $643.6571 cap; provider all-time $658.15; 0 pods, 0 volumes, $0/h; provider balance $101.23 (not a grant). Headroom is +$18.08 if the records are complete and -$14.49 if all provider billing is project spend; the conservative bound is -$14.49.",
+    "unexplained": "53 billed pods ($78.99) no run record created: 8 ($5.65) are named by this project's untracked launch logs, 11 ($15.01) by its July records in git history, 34 ($58.33, billed 2026-07-26 to 2026-08-07) by nothing -- OPEN"
   },
-  {
-   "phase": "P1",
-   "what": "teacher generation for the master corpus (one A100-80GB session)",
-   "cost": "plans/cost_forecast.json :: proposal_phases.P1_generation"
-  },
-  {
-   "phase": "P2a",
-   "what": "gate G1: NEW at seed 20260726, recovery + all of eval-set-1 (one L40S unit)",
-   "cost": "plans/cost_forecast.json :: proposal_phases.P2a_gate_G1"
-  },
-  {
-   "phase": "P2b",
-   "what": "OLD x 2 seeds and NEW at seed 20260727 (three L40S units), only if G1 passes",
-   "cost": "plans/cost_forecast.json :: proposal_phases.P2b_rest_of_comparison"
-  },
-  {
-   "phase": "P3",
-   "what": "nested ladder 0.86M / 1.60M / 5.50M x 2 seeds (six L40S units), only after a GO",
-   "cost": "plans/cost_forecast.json :: proposal_phases.P3_ladder"
-  },
-  {
-   "phase": "storage",
-   "what": "50 GB network volume for about two months",
-   "cost": "plans/cost_forecast.json :: proposal_phases.storage_50gb_two_months"
-  }
- ],
- "totals": "plans/cost_forecast.json :: proposal_totals (derived; not restated here)",
- "proposed_grant_shape": "one programme envelope with per-phase hard caps, one-use authorizations per session (src/aadistill/governance/authorization.py), at most one billing resource at a time, the default-on provider-resource reconciliation and the same-failure gate before every create",
- "authorizes": "nothing"
+  "decisions_needed_before_any_spend": [
+    "attribution of the 34 unnamed pods ($58.33) and whether the 2026-09-11 anchor ($267.8998) was meant to cover all earlier account spend",
+    "an H1 envelope and the cap change it needs: H1's hard cap is plans/cost_forecast.json :: proposal_totals.h1_hard_cap_usd; under the conservative budget bound the cap must rise by at least that plus $14.49",
+    "the H1 durability backend (plans/durability_plan.json :: blocked; recommended: a 30 GB network volume)",
+    "arm B's source scheme (configs/stages/stage-2/reasoning_data/sources.json and the H1 source table in docs/stages/stage-2/reasoning_data/H1.md), including any third-party generator dependency",
+    "the compute contract M1 (truncate_padding on in both arms; per-arm blocks per step) and the draft H1 protocol (plans/comparison_design.json)"
+  ],
+  "engineering_still_at_0_usd_before_the_first_paid_run": [
+    "the Stage-2 generation adapter over train_tasks_v1 and the approved external generators, writing target_quality records with the process checks",
+    "gsm8k_train / math_train / code task builders with R2 decontamination, and the answerability task builder",
+    "the recovery driver that reads the H1 packs, applies M1, persists each student at completion and survives a failed evaluation",
+    "the launch-bound gates of the existing session runner (provider reconciliation, same-failure gate, capacity probe at true size)"
+  ],
+  "phases": [
+    {"phase": "P0", "what": "$0 audit, design, contracts, builders, tests (this round)", "usd": 0, "status": "done"},
+    {"phase": "P1", "what": "teacher generation for arm B's corpus (one A100-80GB session), verification of code on the same pod", "cost": "plans/cost_forecast.json :: proposal_phases.P1_generation"},
+    {"phase": "P1v", "what": "answer and process verification of every candidate, isolation re-check, corpus build and packing (dev box CPU)", "cost": "plans/cost_forecast.json :: proposal_phases.P1v_verification_cpu"},
+    {"phase": "P1g", "what": "small GPU validation of the H1 training changes (comparison_design.json :: gpu_questions_for_a_small_validation), one L40S session", "cost": "plans/cost_forecast.json :: proposal_phases.P1g_gpu_validation"},
+    {"phase": "P2", "what": "the 4 formal units: recovery + all of eval-set-1, L40S, compute contract M1", "cost": "plans/cost_forecast.json :: proposal_phases.P2_formal_4_units"},
+    {"phase": "closeout", "what": "failure / teardown / evidence-collection reserve, one per paid session", "cost": "plans/cost_forecast.json :: proposal_phases.closeout_reserve_4_sessions"},
+    {"phase": "storage", "what": "the H1 backend for about two months", "cost": "plans/cost_forecast.json :: proposal_phases.storage_h1_backend_two_months"},
+    {"phase": "optional", "what": "a single-seed diagnostic of arm B at 0.86M before the formal units -- not a confirmation, not a gate", "cost": "plans/cost_forecast.json :: optional"}
+  ],
+  "totals": "plans/cost_forecast.json :: proposal_totals (derived; not restated here)",
+  "proposed_grant_shape": "one H1 envelope with per-phase hard caps; a one-use authorization per session bound to its plan hash (src/aadistill/governance/authorization.py); at most one billing resource at a time; the default-on provider-resource reconciliation and the same-failure gate before every create; the capacity probe at true size before any session that produces a student",
+  "authorizes": "nothing"
 }

@@ -59,7 +59,7 @@
     "formal_funding": "priced in the frozen design (logs/stages/stage-1/phase_d1/plans/d1_design.json :: pricing); the budget terms live with the C1 grant the design cites",
     "one_use_execution_authorization": "none outstanding — a chain is built fresh per attempt and consumed by it (P12.1)",
     "open_scientific_blockers": [],
-    "maintainer_pause": "Nothing is running. The maintainer decides the Stage-2/3 proposal (docs/stages/stage-2/reasoning_data/DESIGN.md; plans/authorization_proposal.json). Open: provider billed $32.57 more than the records, all pre-2026-10-18 (ledger 2026-10-21)."
+    "maintainer_pause": "Nothing is running. The maintainer decides H1 (docs/stages/stage-2/reasoning_data/H1.md): 34 unattributed pods ($58.33), an envelope, a backend, the source scheme. D4 Top-1 is fixed."
   },
   "runs": {
     "root": "logs/stages/stage-1/phase_d1/runs",
@@ -99,7 +99,7 @@
     ]
   },
   "active_run": null,
-  "next_scientific_action": "Nothing is running. The maintainer decides the Stage-2/3 proposal (docs/stages/stage-2/reasoning_data/DESIGN.md; plans/authorization_proposal.json). Open: provider billed $32.57 more than the records, all pre-2026-10-18 (ledger 2026-10-21).",
+  "next_scientific_action": "Nothing is running. The maintainer decides H1 (docs/stages/stage-2/reasoning_data/H1.md): 34 unattributed pods ($58.33), an envelope, a backend, the source scheme. D4 Top-1 is fixed.",
   "_next_owner": "logs/state/current.json :: next",
   "authorizes": "nothing"
 }

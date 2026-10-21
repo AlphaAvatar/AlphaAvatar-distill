@@ -13103,3 +13103,73 @@ on a paid pod.
   (`plans/cost_forecast.json :: proposal_totals`).
 - **Revisit when.** The maintainer answers the proposal; nothing paid starts
   before then.
+
+## 2026-10-21 — Maintainer: H1 fixes D4 Top-1; budget and durability first; TIP as an H3 candidate
+
+- **Context.** The maintainer started H1: the Stage-2/3 comparison of corpus_v2
+  against a verified teacher-native reasoning corpus. The message approves $0
+  research preparation, engineering and validation only. No paid teacher
+  generation, GPU validation or training, evaluation pod or paid storage is
+  approved, no cap is raised, and no Stage-0 authorization is reused. A
+  supplement named the sources to audit first: Reasoning Gym, Reasoning Core,
+  PrOntoQA and the DeepMind Mathematics Dataset; then RuleTaker, COGS,
+  CodeContests and CLUTRR.
+- **Decision (maintainer).**
+  - H1 uses Stage-0 D4 Top-1 (state `1301deb7…`, checkpoint `fc28e0dd…`,
+    digest `457e194c…`) as a fixed research starting point. This is not a
+    claim that D4 reasons best, and it does not change Stage-0's unresolved
+    verdict.
+  - No new search, no comparison of the 24 old students, no all_v1 q2, and no
+    recovered student in place of the initialization.
+  - The method identity (`scored_v1`) and its frozen records are kept.
+  - Reasoning 0.70 / supporting 0.30 is the starting point for arm B; there is
+    no ratio search.
+  - The recovery objective is frozen.
+  - eval-set-1 is unchanged.
+  - TIP (arXiv:2604.14084 v4) is registered as an H3 candidate only.
+- **Done by the agent at $0** (records under
+  `logs/stages/stage-2/reasoning_data/`; summary in
+  `docs/stages/stage-2/reasoning_data/H1.md`):
+  - **D4 materialization:** relay metadata read; a dev-box copy read back,
+    with every file hash and the identity rebuilt by `verify_transferred_leaf`
+    matching; the registry rebuilt with `--hash --relay`;
+  - **budget:** a fresh read-only provider snapshot. The attribution tool's
+    self-reference defect is repaired (committed billing evidence had made
+    every pod read as "mentioned"), with a regression test. Of 53 pods no run
+    created, 8 are named by untracked launch logs and 11 by July git history;
+    34 ($58.33) stay OPEN;
+  - **durability:** the backend is not provisioned (BLOCKED); a 30 GB network
+    volume is recommended;
+  - **H1 draft protocol, accounting (U/E/C, compute contract M1) and the
+    H1-only cost forecast;**
+  - **core:** `training.accounting`, `data.code_exec`, and process states in
+    `data.target_quality`;
+  - **navigation:** "not materialized" is restated as the state at selection.
+  - **sources** (`configs/stages/stage-2/reasoning_data/external_modules.json`;
+    `docs/stages/stage-2/reasoning_data/H1.md` §8): all 8 named repos were
+    checked against primary sources, and the 4 primary ones validated
+    locally at $0 (pinned installs, 5 instances per module per difficulty;
+    305 candidate instances pass R1/R2).
+    - **Proposed candidates:** Reasoning Gym (15 modules), Reasoning Core
+      (7), PrOntoQA (process-gated) and DeepMind Mathematics (composed
+      modules).
+    - **Excluded:** ARC-derived or ARC-evaluation modules (R7),
+      gsm_symbolic (a GSM8K-test template), codeio, acre (GPL),
+      sequence/graph-path task types (R4), mechanisms already in eval-set-1,
+      and CLUTRR (non-commercial). RuleTaker and COGS are not adopted.
+    - **Verification:** library scores are never the verdict (partial
+      credit; five Reasoning Gym scorers evaluate the answer text). Each
+      module gets a project-side exact check.
+    - **Interactive coverage:** insufficient (3 families) and reported,
+      not filled.
+- **Alternatives considered.** Matching FLOPs instead of U and steps
+  (rejected: it forces unequal U or repetition); keeping the gate that
+  stopped H1 after one floor unit (removed: the maintainer forbids treating
+  one run at the floor as rejecting the route); cleaning arm A (rejected: it
+  would change the question).
+- **Risks.** Thin interactive coverage (about 18 episodes at 2.96M); 35
+  calibration families unless external generators are approved; the
+  shared-generator tier is a seen-format measurement; the conservative budget
+  bound is negative.
+- **Revisit when.** The maintainer answers the H1 application
+  (`plans/authorization_proposal.json`).

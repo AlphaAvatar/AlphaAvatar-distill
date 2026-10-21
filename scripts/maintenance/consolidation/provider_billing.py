@@ -84,15 +84,26 @@ def run_records(root: Path) -> dict[str, list[dict]]:
     return {pid: list(runs.values()) for pid, runs in out.items()}
 
 
+#: Files that list billed pods BECAUSE they are the billing evidence: the
+#: snapshots themselves and every reconciliation written from them. A pod they
+#: name is not thereby known to the repository -- committing the list of
+#: unattributed pods once made all 53 of them read as "mentioned".
+BILLING_EVIDENCE = (":(exclude)logs/budget/provider/**",
+                    ":(exclude)**/budget_reconciliation.json",
+                    ":(exclude)**/provider_attribution.json")
+
+
 def mentioned(root: Path, ids: list[str]) -> set[str]:
-    """Which ids appear anywhere in the tracked tree. A pod a record mentions
-    without having created it (a hand-written ledger line, an older layout) is
-    at least not unknown to the repository."""
+    """Which ids appear anywhere in the tracked tree outside the billing
+    evidence. A pod a record mentions without having created it (a
+    hand-written ledger line, an older layout) is at least not unknown to the
+    repository."""
     import subprocess
     if not ids:
         return set()
     got = subprocess.run(["git", "grep", "-h", "-o", "-F",
-                          *sum((["-e", i] for i in ids), [])],
+                          *sum((["-e", i] for i in ids), []), "--", ".",
+                          *BILLING_EVIDENCE],
                          cwd=root, capture_output=True, text=True).stdout.split()
     return set(got)
 

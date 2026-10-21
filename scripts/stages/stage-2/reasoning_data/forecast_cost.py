@@ -24,7 +24,8 @@ DRY = A.LOG_DIR / "audit/packing_dry_run.json"
 AUDIT = A.LOG_DIR / "audit/asset_audit.json"
 PROBES = ("probes_d1_20261020_093955", "probes_d2_20261020_233510", "probes_d4_20261020_232941")
 #: Labelled planning factors, not measurements.
-CONTINGENCY = {"generation": 1.5, "recovery": 1.25, "eval_floor_to_reasoning": 2.0, "hard_cap": 1.5}
+CONTINGENCY = {"generation": 1.5, "recovery": 1.25, "eval_floor_to_reasoning": 2.0, "hard_cap": 1.5,
+               "gpu_validation_hours": 1.25}
 
 
 def measured() -> dict:
@@ -91,6 +92,8 @@ def main() -> int:
 
     def yield_of(ref: str) -> float:
         src, key = ref.split(":")
+        if src == "assumption":
+            return float(key)
         if src == "teacher_cal":
             return tc["yield_by_axis"][key]["yield"]
         # A single-turn session's generation IS its supervised target, so the share
@@ -166,32 +169,49 @@ def main() -> int:
         ladder = phase_cost(ladder_keys, spec["seeds"], table) + overhead_usd
         phases[key] = {"comparison_usd": round(comparison, 2), "ladder_usd": round(ladder, 2)}
 
-    recommended = phases["L40S/M1_matched"]
-    # The proposal's phases, every one priced from the rows above (L40S, M1).
-    t = units["L40S/M1_matched"]
-    sess_usd = over / 3600 * price["L40S"] * disk
+    # H1's phases, every one priced from measured rates and plans/h1_accounting.json.
+    h1 = A.read_json(A.LOG_DIR / "plans/h1_accounting.json")
     cap = CONTINGENCY["hard_cap"]
-    storage_usd = round(50 * spec["durability"]["network_volume_usd_per_gb_month"] * 2, 2)
+    l40 = price["L40S"] * disk
+    sess = over / 3600 * l40
+
+    def h1_unit(arm: str) -> dict:
+        x = h1["contracts"]["M1_matched"][arm]
+        rec_h = x["executed_positions"] / pos_s["L40S"] / 3600 * CONTINGENCY["recovery"]
+        return {"recovery_hours": round(rec_h, 3), "eval_hours": round(eval_s / 3600, 3),
+                "usd": round((rec_h + eval_s / 3600) * l40, 2),
+                "executed_positions": x["executed_positions"], "optimizer_steps": x["optimizer_steps"]}
+
+    ua, ub = h1_unit("A"), h1_unit("B_estimate")
+    #: The GPU validation: four short runs (A and B, padding truncated or not, ~60 steps
+    #: each at the measured step rate), one mid-run resume, and a 50-item timing slice
+    #: of the eval -- a labelled planning figure, about 1.25 GPU hours.
+    gpu_validation_h = CONTINGENCY["gpu_validation_hours"]
+    closeout_per_session = (over / 3600 + 0.25) * l40
     rows = {
         "P1_generation": generation["expected_usd"],
-        "P2a_gate_G1": t["new_2p96M"]["usd"] + sess_usd,
-        "P2b_rest_of_comparison": 2 * t["old_2p96M"]["usd"] + t["new_2p96M"]["usd"] + sess_usd,
-        "P3_ladder": sum(t[f"new_{r / 1e6:.2f}M"]["usd"] for r in spec["rung_targets"] if r != 2_960_000)
-                     * spec["seeds"] + sess_usd,
+        "P1v_verification_cpu": 0.0,
+        "P1g_gpu_validation": gpu_validation_h * l40 + sess,
+        "P2_formal_4_units": 2 * ua["usd"] + 2 * ub["usd"] + 2 * sess,
+        "closeout_reserve_4_sessions": 4 * closeout_per_session,
     }
+    storage_gb = spec["durability"]["h1_backend_gb"]
+    storage_usd = round(storage_gb * spec["durability"]["network_volume_usd_per_gb_month"] * 2, 2)
     proposal_phases = {k: {"expected_usd": round(v, 2), "hard_cap_usd": round(v * cap, 2)}
                        for k, v in rows.items()}
-    proposal_phases["storage_50gb_two_months"] = {"expected_usd": storage_usd, "hard_cap_usd": storage_usd}
-    through_p2 = [proposal_phases[k] for k in ("P1_generation", "P2a_gate_G1", "P2b_rest_of_comparison")]
+    proposal_phases["storage_h1_backend_two_months"] = {"expected_usd": storage_usd, "hard_cap_usd": storage_usd,
+                                                        "gb": storage_gb}
+    optional = {"P2d_single_seed_diagnostic_B_0p86M": {
+        "what": "optional engineering/diagnostic step, NOT a confirmation and not a gate on H1",
+        "expected_usd": round((ub["recovery_hours"] * 860_000 / 2_960_000 + eval_s / 3600) * l40 + sess, 2)}}
     totals = {
-        "through_P2_expected_usd": round(sum(r["expected_usd"] for r in through_p2), 2),
-        "through_P2_hard_cap_usd": round(sum(r["hard_cap_usd"] for r in through_p2), 2),
-        "all_phases_expected_usd": round(sum(r["expected_usd"] for r in proposal_phases.values()), 2),
-        "all_phases_hard_cap_usd": round(sum(r["hard_cap_usd"] for r in proposal_phases.values()), 2),
+        "h1_expected_usd": round(sum(r["expected_usd"] for r in proposal_phases.values()), 2),
+        "h1_hard_cap_usd": round(sum(r["hard_cap_usd"] for r in proposal_phases.values()), 2),
+        "excludes": "the optional diagnostic and any later ladder (a separate application)",
     }
-    expected = round(generation["expected_usd"] + recommended["comparison_usd"] + recommended["ladder_usd"], 2)
+    expected = totals["h1_expected_usd"]
 
-    students = (2 + len(spec["rung_targets"]) - 1) * spec["seeds"]
+    students = 2 * spec["seeds"]  # H1: two arms x the seeds
     student_bytes = 2_384_285_634
     storage = {
         "students": students, "bytes_per_student_fp32_dir": student_bytes,
@@ -213,13 +233,11 @@ def main() -> int:
         "generation": generation,
         "units": units,
         "phases": phases,
-        "recommended_route": {"gpu": "L40S", "contract": "M1_matched", **recommended,
-                              "generation_usd": generation["expected_usd"],
-                              "expected_total_usd": expected,
-                              "hard_cap_usd": round(expected * CONTINGENCY["hard_cap"], 2)},
+        "h1_units_L40S_M1": {"A": ua, "B_estimate": ub},
+        "optional": optional,
         "proposal_phases": proposal_phases,
         "proposal_totals": totals,
-        "_proposal_phases": "the rows plans/authorization_proposal.json cites: L40S under contract M1, one session's overhead per paid phase, hard cap = expected x the labelled hard_cap factor (storage at cost)",
+        "_proposal_phases": "H1's rows, cited by plans/authorization_proposal.json: generation on one A100-80GB; GPU validation and the 4 formal units on L40S under M1 (recovery time from h1_accounting executed positions at the measured positions/s, eval at 2x the measured floor-student time); one session overhead per paid session; a closeout reserve of overhead + 15 min per session; hard cap = expected x the labelled factor (storage at cost)",
         "cpu": "every builder, audit, isolation check and pack runs on the dev box at $0 (minutes)",
         "storage": storage,
         "authorizes": "nothing",

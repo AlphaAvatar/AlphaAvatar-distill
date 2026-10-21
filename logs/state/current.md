@@ -9,48 +9,45 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**STAGE-2/3 REASONING DATA: PREPARED AT $0, NOT AUTHORIZED (2026-10-21).**
-Branch `stage2/reasoning-data`, cut from `main` `2a8bae78` (the Stage-0 squash;
-source branch kept, tip `aee9c4ff`). No teacher target was generated, no
-student trained, no provider resource created, and $0 was spent. The design is
-[`docs/stages/stage-2/reasoning_data/DESIGN.md`](../../docs/stages/stage-2/reasoning_data/DESIGN.md);
+**STAGE-2/3 H1: PREPARED AT $0, NOT AUTHORIZED (2026-10-21).**
+Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).
+No teacher target, student, GPU session or paid storage exists, and $0 was
+spent. The preparation result is
+[`docs/stages/stage-2/reasoning_data/H1.md`](../../docs/stages/stage-2/reasoning_data/H1.md);
 its records are under [`stages/stage-2/reasoning_data/`](../stages/stage-2/reasoning_data/).
-- **Audit** (`audit/asset_audit.json`):
-  - corpus_v2's selected targets are wrong for 35.8% of openmath, 11.2% of
-    gsm8k and 14.2% of multihop, and unverifiable for code and tool; only
-    6.06M of its 13.04M supervised tokens are verified correct;
-  - 28 corpus_v2 sessions are near-copies of held-out prompts (27
-    `eval_behavior_v0`, 1 `multihop`);
-  - the historical 2.96M rung is 70.3% padding and cuts 352 traces;
-  - the 519 Stage-0 fluid units are token-exactly reconstructable, but not
-    adopted.
-- **Built and tested at $0:**
-  - core: `aadistill.data.nested_ladder`, `sessions.pack_best_fit` (never
-    cuts), `aadistill.data.target_quality`, and n-gram screening in
-    `aadistill.evaluation.isolation`;
-  - the experiment layer: isolation rules R1–R8, the source catalogue with
-    licenses, and `data/stages/stage-2/reasoning_data/tasks/train_tasks_v1`
-    (2,517 verifiable tasks, every rule passed);
-  - the master-ladder builder, whose pack the trainer's own reader loads.
-- **Proposed, for the maintainer** (`plans/`):
-  - initialization: Stage-0 d4 rank 1 (`fc28e0dd…`), the unique Pareto-dominant
-    candidate on step-0 objectives, with no recovered outcome read;
-  - the 2.96M old-vs-new comparison, under compute contract M1 and gate G1;
-  - the nested 0.86M–5.50M ladder.
-- **Cost forecast** (`plans/cost_forecast.json :: proposal_totals`): $19.68
-  expected / $29.50 hard cap through the comparison; $43.81 / $62.19 for all
-  phases with storage.
-- **Durability.** The HF relay holds about 2.0 GiB (one bf16 student; probe
-  2026-10-21T17:52Z), so a backend is needed before any recovery
-  (`plans/durability_plan.json`).
+- **Initialization FIXED by the maintainer: Stage-0 D4 Top-1** (`fc28e0dd…`,
+  digest `457e194c…`). It has two verified copies: the relay, and a dev-box
+  read-back whose rebuilt identity matches (`assets/d4_top1_materialization.json`).
+  The registry shows it `retained_local`. The baseline record and
+  `selection.json` are unchanged.
+- **Budget** (`budget/h1_budget_position.json`, provider snapshot
+  2026-10-21T18:59Z):
+  - records $625.5798 against the $643.6571 cap; provider $658.15; 0 pods,
+    0 volumes, $0/h; balance $101.23 (not a grant);
+  - headroom +$18.08 if the records are complete, −$14.49 if all billing is
+    project (the conservative bound);
+  - of 53 pods no run created, 19 are now named by this project's records and
+    **34 ($58.33) stay OPEN**;
+  - the attribution tool's self-reference defect is fixed, with a regression
+    test.
+- **Durability** (`plans/durability_plan.json`). The relay holds about 2.0 GiB
+  and the dev box about 11 GiB free. **The large-artifact backend is BLOCKED:
+  not provisioned.** Recommended: a 30 GB network volume ($4.20 for two months).
+- **H1 draft** (`plans/comparison_design.json`):
+  - A = corpus_v2 as it was (isolation-only exclusion of 28 sessions);
+    B = verified teacher-native corpus, reasoning 0.70 / supporting 0.30;
+  - matched U, E and steps under contract M1, C reported;
+  - recovery frozen (CE 0.25 + KD 1.0, full-vocab forward KL);
+  - eval-set-1 with both generator tiers; statistics fixed in advance.
+- **Cost** (`plans/cost_forecast.json :: proposal_totals`): $23.33 expected,
+  $32.90 hard cap for H1.
+- **TIP** is registered as an H3 candidate only (`plans/h3_candidates.json`).
 - **Needs the maintainer:**
-  1. the $32.57 provider-gap attribution;
-  2. a new cap or envelope;
-  3. the durability backend;
-  4. the initialization, corpus scheme, compute contract and comparison design.
-
-  Owner: `plans/authorization_proposal.json`; decisions.md 2026-10-21 (round
-  opened at $0).
+  1. the 34-pod attribution and the anchor question;
+  2. an H1 envelope and cap;
+  3. the backend;
+  4. the source scheme;
+  5. M1 and the draft protocol.
 
 **STAGE-0 CALIBRATION-VOLUME PROGRAMME CLOSED (final $0 closeout, 2026-10-21).**
 Verdict: **EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON
@@ -188,10 +185,16 @@ probes all stand unchanged.
     - beam width 6 with `delayed_prune` and `pareto@v2`;
     - micro-batch 3, `length_sorted_v1`, **`scored_v1`**.
 - **Identities kept apart.** The historical reference initialization is D1-q2
-  (`afd50c9f…`, digest `3a4b4ede…`), materialized under `all_v1`. The forward
-  profile (fingerprint `e627f461…`) is **NOT MATERIALIZED**, and the resolver
-  never offers q2's digest as its expectation. B stays the archived historical
-  comparator.
+  (`afd50c9f…`, digest `3a4b4ede…`), materialized under `all_v1`. When the
+  method was selected (2026-10-17) the forward profile (fingerprint
+  `e627f461…`) had no materialization; that was the state AT SELECTION. Since
+  then the Stage-0 searches materialized 12 candidates under that exact
+  fingerprint, and H1's fixed initialization (D4 Top-1, digest `457e194c…`) is
+  one of them, bound in
+  `logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json`.
+  The frozen baseline record still lists `forward_materializations: []` and is
+  not edited. The resolver never offers q2's digest as a forward expectation.
+  B stays the archived historical comparator.
 - **Authorities.** All 11 D-series grants are CLOSED, and every D-series
   issuer refuses them. D3's unspent $6.4429 (structural) and $6.9605
   (probes) are closed, not transferred.

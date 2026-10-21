@@ -1,9 +1,19 @@
 # Stage-2 verified reasoning data → Stage-3 controlled recovery: the design
 
 **Status: $0 preparation, 2026-10-21 (UTC). PROPOSED, not preregistered, not
-funded.** It authorizes nothing: no teacher generation, no GPU recovery, no
-provider resource. Each figure names the record that owns it; where this page
-and a record disagree, the record is right.
+funded.** It authorizes nothing.
+
+> **H1 is the current round, and [`H1.md`](H1.md) is its preparation result.**
+> The maintainer fixed D4 Top-1 as the initialization, put the budget and
+> durability conditions first, set arm B to reasoning 0.70 / supporting 0.30,
+> and named the sources to audit first.
+> H1.md and the records it names supersede §6 (the comparison, now
+> `plans/comparison_design.json` v2), §8 (the initialization, now fixed), §9
+> (cost, now H1 only) and §11 (the application). The audit, quality contract
+> and isolation sections below stand as background.
+
+Each figure names the record that owns it; where this page and a record
+disagree, the record is right.
 
 | record | what it owns |
 | --- | --- |

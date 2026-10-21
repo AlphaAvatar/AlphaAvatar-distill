@@ -1,0 +1,102 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.initialization_materialization/v1",
+ "written_utc": "2026-10-21T18:58:32Z",
+ "decision": "logs/budget/decisions.md 2026-10-21 (maintainer: H1 fixes Stage-0 D4 Top-1)",
+ "method_identity": {
+  "baseline": "stage1_init.d1_target_aware.scored_v1@v1",
+  "selection": "configs/shared/baselines/selection.json (unchanged; the baseline record is frozen and is NOT edited by this record)",
+  "execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+  "prediction_rows": "scored_v1",
+  "search_evidence": [
+   "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/search_record.json",
+   "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/stage1_selection.json",
+   "/home/ecs-user/aad-artifacts/stage0_calvol/dose_d4_20261020_212310/store/d4/search/search/states.jsonl"
+  ]
+ },
+ "materialization_identity": {
+  "state_id": "1301deb71685aa1ca5c7b6cf2c491ac4",
+  "path": {
+   "artifact_digest": "457e194c4a40c2503a7d63d03269ac76ece700102bae74908b7315d367bab3f0",
+   "materialization_id": "6aee8047e4762a7036477cb017126439",
+   "numerical_execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "parent_materialization_id": "b7ec9f81f621009330c8f794dce9fa68",
+   "schema": "aadistill.autoinit.materialization_identity/v1",
+   "semantic_state_id": "1301deb71685aa1ca5c7b6cf2c491ac4"
+  },
+  "checkpoint_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+  "artifact_digest": "457e194c4a40c2503a7d63d03269ac76ece700102bae74908b7315d367bab3f0",
+  "weights_digest": "73589c58a439bf32b4ddbf975ac245cd6b916745d5e0712ae4cf32ae158a6d0f",
+  "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+  "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+  "tokenizer_sha256": null,
+  "num_parameters": 596049920,
+  "identity_owners": [
+   "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/finalists/finalists_manifest.json",
+   "/home/ecs-user/aad-artifacts/stage0_calvol/dose_d4_20261020_212310/store/d4/search/search/states.jsonl (states.jsonl artifact row)"
+  ]
+ },
+ "tokenizer_binding": {
+  "stored_with_checkpoint": false,
+  "artifact_digest_covers_tokenizer": "no (tokenizer_sha256 null in the journal, as for every Stage-0 candidate)",
+  "source": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint (the tokenizer_source of every E-series and Stage-0 recovery)",
+  "tokenizer_json_sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+  "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7"
+ },
+ "relay_metadata": {
+  "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/config.json": {
+   "size": 1419,
+   "lfs_sha256": null,
+   "blob_id": "4602edc52b4c0f50f39b25d6a1717cc4a6f53a61"
+  },
+  "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/generation_config.json": {
+   "size": 206,
+   "lfs_sha256": null,
+   "blob_id": "14bde034370c72b0f8596f89fb9d8c86a1919cdf"
+  },
+  "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors": {
+   "size": 1192135096,
+   "lfs_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+   "blob_id": "bc709ac2ffec6acfe0c65007f41633c03b317207"
+  }
+ },
+ "read_back": {
+  "dest": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4",
+  "files": [
+   {
+    "name": "config.json",
+    "bytes": 1419,
+    "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+    "manifest_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+    "matched": true
+   },
+   {
+    "name": "generation_config.json",
+    "bytes": 206,
+    "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+    "manifest_sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+    "matched": true
+   },
+   {
+    "name": "model.safetensors",
+    "bytes": 1192135096,
+    "sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+    "manifest_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+    "matched": true
+   }
+  ],
+  "identity": {
+   "artifact_digest": "457e194c4a40c2503a7d63d03269ac76ece700102bae74908b7315d367bab3f0",
+   "recorded_digest": "457e194c4a40c2503a7d63d03269ac76ece700102bae74908b7315d367bab3f0",
+   "matched": true,
+   "weights_digest": "73589c58a439bf32b4ddbf975ac245cd6b916745d5e0712ae4cf32ae158a6d0f",
+   "weights_digest_matched": true,
+   "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841"
+  }
+ },
+ "verified": true,
+ "copies": [
+  "relay (HF private) -- metadata above",
+  "dev box (this read-back) -- VERIFIED"
+ ],
+ "authorizes": "nothing"
+}

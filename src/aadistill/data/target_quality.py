@@ -13,11 +13,14 @@ questions and none implies another:
   delimiters closed, a non-empty final answer, no stray markers);
 * ``answer`` -- ``correct`` / ``incorrect`` / ``unverifiable``, from a
   task-specific verifier the caller supplies;
-* ``trace`` -- ``valid`` / ``invalid`` / ``not_assessed``. A correct final
-  answer does not establish that every step is right; where a task offers a
-  checkable intermediate (every action of an episode legal, a stated rule that
-  reproduces the examples) the caller supplies that check, and where it does
-  not the trace is ``not_assessed`` and is reported so -- never ``valid``;
+* ``trace`` -- the PROCESS, kept apart from the answer: ``verified`` (a
+  task-specific check covered the whole process, e.g. every action of an
+  episode legal on environment replay), ``partial`` (a check covered part of it,
+  or a sampled audit found no contradiction), ``contradicted`` (the process
+  conflicts with the task or with its own answer), or ``not_assessed``. A
+  correct final answer does not establish that every step is right; where a
+  task offers no checkable intermediate the trace is ``not_assessed`` and is
+  reported so -- never ``verified``;
 * ``accepted_for_training`` -- the conjunction the caller's policy requires.
 
 Length is recorded, never judged: no rule here accepts, rejects or selects a
@@ -37,7 +40,7 @@ from dataclasses import asdict, dataclass, field
 CONTRACT_ID = "aadistill.data.target_quality/v1"
 
 ANSWER_STATES = ("correct", "incorrect", "unverifiable")
-TRACE_STATES = ("valid", "invalid", "not_assessed")
+TRACE_STATES = ("verified", "partial", "contradicted", "not_assessed")
 
 
 @dataclass(frozen=True)
@@ -55,13 +58,13 @@ class AcceptancePolicy:
     ``require_answer`` -- the answer states that may be accepted; a primary
     reasoning group admits only ``correct``. ``admit_unverifiable`` is a
     separate, explicit switch so an unverifiable group can never pass by
-    omission. ``reject_trace_invalid`` drops a candidate whose trace check
-    failed even when its answer is right.
+    omission. ``reject_trace_contradicted`` drops a candidate whose process
+    check found a contradiction even when its answer is right.
     """
 
     require_answer: tuple[str, ...] = ("correct",)
     admit_unverifiable: bool = False
-    reject_trace_invalid: bool = True
+    reject_trace_contradicted: bool = True
 
     def __post_init__(self):
         bad = set(self.require_answer) - set(ANSWER_STATES)
@@ -123,8 +126,8 @@ def assess(unit_id: str, candidate_index: int, *, stop_reason: str,
         rec.reasons.append(f"protocol:{protocol_reason}")
     if answer.state not in policy.require_answer:
         rec.reasons.append(f"answer:{answer.state}" + (f":{answer.reason}" if answer.reason else ""))
-    if trace.state == "invalid" and policy.reject_trace_invalid:
-        rec.reasons.append("trace:invalid" + (f":{trace.reason}" if trace.reason else ""))
+    if trace.state == "contradicted" and policy.reject_trace_contradicted:
+        rec.reasons.append("trace:contradicted" + (f":{trace.reason}" if trace.reason else ""))
     rec.accepted_for_training = not rec.reasons
     return rec
 

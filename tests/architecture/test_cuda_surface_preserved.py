@@ -2271,6 +2271,21 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "`require_disjoint` unchanged. THIS IS A DECLARED SEMANTIC CHANGE: "
             "a new near-duplicate screen whose n and threshold are the "
             "caller's. NO CUDA SURFACE.",
+        "src/aadistill/training/accounting.py":
+            "NEW MODULE: `training_accounting` counts U (unique supervised), E "
+            "(exposure with repetition), C (FLOPs over executed positions via "
+            "`runtime.cost.forward_flops_per_token`, student fwd+bwd and "
+            "teacher fwd), steps and supervised positions per step, mirroring "
+            "the trainer's ceil step rule; `matched_steps` derives a second "
+            "pack's blocks per step. THIS IS A DECLARED SEMANTIC CHANGE by "
+            "construction; nothing in training calls it. NO CUDA SURFACE.",
+        "src/aadistill/data/code_exec.py":
+            "NEW MODULE: `run_asserts` / `run_stdio` execute a candidate "
+            "program and its tests in an isolated `python -I` subprocess with "
+            "CPU, memory, file and wall-clock limits and a PATH-only "
+            "environment (containment, explicitly not a security sandbox). "
+            "THIS IS A DECLARED SEMANTIC CHANGE by construction. NO CUDA "
+            "SURFACE.",
      }),
 )
 

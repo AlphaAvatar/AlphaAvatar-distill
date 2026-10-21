@@ -187,10 +187,13 @@ method** the §3 Stage-0 study varies calibration data under.
 - **Every D-series measurement is mixed-domain.** That includes D3's
   exploratory comparisons with q2 and B, both INCONCLUSIVE. None of them is
   fluid-reasoning evidence, and none is imported into §2's batteries.
-- **No measurement for the forward profile yet.** Its `scored_v1` profile has
-  no materialized checkpoint. The existing reference initialization, D1-q2,
-  was produced under `all_v1`. A Stage-0 study materializes its own
-  initializations and records their own identities.
+- **Forward-profile materializations.** At selection (2026-10-17) the
+  `scored_v1` profile had no materialized checkpoint, and the existing
+  reference initialization, D1-q2, was produced under `all_v1`. The Stage-0
+  searches have since materialized 12 candidates under the forward profile's
+  fingerprint `e627f461…`. H1 fixes one of them, D4 Top-1, by maintainer
+  decision (2026-10-21; `logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json`).
+  The frozen baseline record and `selection.json` are unchanged.
 - **The Stage-0 handoff.** Current calibration pools, effective scored
   positions and their limitations are in
   [`STAGE0_HANDOFF.md`](STAGE0_HANDOFF.md).

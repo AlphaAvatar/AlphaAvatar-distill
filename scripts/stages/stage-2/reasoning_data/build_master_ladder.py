@@ -111,6 +111,17 @@ def pack(ladder: dict, rendered: dict[str, RenderedSession], system_ids: dict, *
     return blocks, cuts, val_start
 
 
+def block_rows(blocks, session_counts: dict) -> list[dict]:
+    """Per-block quantities `aadistill.training.accounting` reads."""
+    rows = []
+    for b in blocks:
+        reasoning = sum(session_counts[m["session_id"]]["reasoning_tokens"] for m in b.audit["sessions"])
+        answer = sum(session_counts[m["session_id"]]["answer_tokens"] for m in b.audit["sessions"])
+        rows.append({"real_length": b.audit["unpadded_length"], "supervised": b.n_supervised,
+                     "reasoning": reasoning, "answer": answer})
+    return rows
+
+
 def block_accounting(blocks, block_len: int) -> dict:
     real = sum(b.audit["unpadded_length"] for b in blocks)
     return {"blocks": len(blocks), "real_tokens": real,
@@ -137,6 +148,7 @@ def build(sessions: list[dict], spec: dict, tokenizer) -> dict:
             row["n_blocks"] = cut
             row["packed"] = block_accounting(blocks[:cut], block_len)
     return {"ladder": ladder, "blocks": blocks, "val_start": val_start, "excluded": excluded,
+            "session_counts": {sid: split_counts(r, think_close) for sid, r in rendered.items()},
             "n_rendered": len(rendered), "n_units": len(units), "pad_id": int(pad_id),
             "system_prompt_groups": len(system_ids),
             "validation_tail": block_accounting(blocks[val_start:], block_len)}

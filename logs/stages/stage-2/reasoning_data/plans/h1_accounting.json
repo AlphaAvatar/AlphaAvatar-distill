@@ -1,0 +1,261 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1_accounting/v1",
+ "status": "A MEASURED from its real pack; B ESTIMATED until its pack exists. Authorizes nothing.",
+ "written_utc": "2026-10-21T19:27:31Z",
+ "definitions": {
+  "U": "unique supervised positions: each session's supervised target once (one accepted trace per task; turn-expanded context is not supervision)",
+  "E": "supervised exposure: U x the block passes / blocks the schedule makes (3 epochs, the wrap of the last step included)",
+  "C": "FLOPs over every executed position: student forward + backward (3x forward) and teacher forward, with causal attention over the packed block and both output heads (aadistill.runtime.cost.forward_flops_per_token)",
+  "independent_units": "tasks / episodes / source conversations; several traces of one prompt are ONE unit and only one is ever kept"
+ },
+ "models": {
+  "student": {
+   "hidden_size": 1024,
+   "num_attention_heads": 16,
+   "num_key_value_heads": 8,
+   "head_dim": 128,
+   "intermediate_size": 3072,
+   "vocab_size": 151936,
+   "num_hidden_layers": 28
+  },
+  "teacher": {
+   "hidden_size": 2560,
+   "num_attention_heads": 32,
+   "num_key_value_heads": 8,
+   "head_dim": 128,
+   "intermediate_size": 9728,
+   "vocab_size": 151936,
+   "num_hidden_layers": 36
+  },
+  "student_config": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4/config.json",
+  "teacher_config": "Qwen/Qwen3-4B-Thinking-2507 config.json (local HF cache)"
+ },
+ "arm_A": {
+  "units": 3151,
+  "sessions": 3313,
+  "blocks": 1460,
+  "packing_efficiency": 0.3548,
+  "system_prompt_groups": 1858
+ },
+ "arm_B_estimate": {
+  "blocks": 416,
+  "packing_efficiency_from": "packing_dry_run.json fluid_traces (measured)",
+  "packing_efficiency": 0.9734,
+  "reasoning_share": 0.8879,
+  "rendered_per_supervised": 1.12
+ },
+ "contracts": {
+  "M0_frozen": {
+   "A": {
+    "schema": "aadistill.training.accounting/v1",
+    "blocks": 1460,
+    "epochs": 3.0,
+    "blocks_per_step": 2,
+    "optimizer_steps": 2190,
+    "block_passes": 4380,
+    "U_supervised": 2962295,
+    "U_reasoning": 2569901,
+    "U_answer": 392394,
+    "E_supervised": 8886885,
+    "E_reasoning": 7709703,
+    "E_answer": 1177182,
+    "supervised_per_step": 4057.9,
+    "real_tokens_per_epoch": 4243598,
+    "padding_per_epoch": 7716722,
+    "executed_positions": 35880960,
+    "executed_positions_per_step": 16384.0,
+    "padding_executed": 23150166,
+    "C_student_flops": 2.2944003058040832e+17,
+    "C_teacher_flops": 3.7533145821609984e+17,
+    "C_total_flops": 6.047714887965082e+17,
+    "truncate_padding": false
+   },
+   "B_estimate": {
+    "schema": "aadistill.training.accounting/v1",
+    "blocks": 416,
+    "epochs": 3.0,
+    "blocks_per_step": 2,
+    "optimizer_steps": 624,
+    "block_passes": 1248,
+    "U_supervised": 2959840,
+    "U_reasoning": 2628288,
+    "U_answer": 331968,
+    "E_supervised": 8879520,
+    "E_reasoning": 7884864,
+    "E_answer": 995904,
+    "supervised_per_step": 14230.0,
+    "real_tokens_per_epoch": 3317184,
+    "padding_per_epoch": 90688,
+    "executed_positions": 10223616,
+    "executed_positions_per_step": 16384.0,
+    "padding_executed": 272064,
+    "C_student_flops": 6.537469364482867e+16,
+    "C_teacher_flops": 1.0694375795746406e+17,
+    "C_total_flops": 1.7231845160229274e+17,
+    "truncate_padding": false
+   },
+   "ratios_A_over_B": {
+    "U_supervised": 1.0008,
+    "E_supervised": 1.0008,
+    "optimizer_steps": 3.5096,
+    "supervised_per_step": 0.2852,
+    "executed_positions": 3.5096,
+    "C_total_flops": 3.5096
+   }
+  },
+  "M1_matched": {
+   "A": {
+    "schema": "aadistill.training.accounting/v1",
+    "blocks": 1460,
+    "epochs": 3.00137,
+    "blocks_per_step": 7,
+    "optimizer_steps": 626,
+    "block_passes": 4382,
+    "U_supervised": 2962295,
+    "U_reasoning": 2569901,
+    "U_answer": 392394,
+    "E_supervised": 8890943,
+    "E_reasoning": 7713223,
+    "E_answer": 1177720,
+    "supervised_per_step": 14202.8,
+    "real_tokens_per_epoch": 4243598,
+    "padding_per_epoch": 7716722,
+    "executed_positions": 12736607,
+    "executed_positions_per_step": 20346.0,
+    "padding_executed": 0,
+    "C_student_flops": 7.516237060124648e+16,
+    "C_teacher_flops": 1.2784658816322064e+17,
+    "C_total_flops": 2.0300895876446714e+17,
+    "truncate_padding": true
+   },
+   "B_estimate": {
+    "schema": "aadistill.training.accounting/v1",
+    "blocks": 416,
+    "epochs": 3.0,
+    "blocks_per_step": 2,
+    "optimizer_steps": 624,
+    "block_passes": 1248,
+    "U_supervised": 2959840,
+    "U_reasoning": 2628288,
+    "U_answer": 331968,
+    "E_supervised": 8879520,
+    "E_reasoning": 7884864,
+    "E_answer": 995904,
+    "supervised_per_step": 14230.0,
+    "real_tokens_per_epoch": 3317184,
+    "padding_per_epoch": 90688,
+    "executed_positions": 9951552,
+    "executed_positions_per_step": 15948.0,
+    "padding_executed": 0,
+    "C_student_flops": 6.288856058953728e+16,
+    "C_teacher_flops": 1.0345804912499098e+17,
+    "C_total_flops": 1.6634660971452826e+17,
+    "truncate_padding": true
+   },
+   "ratios_A_over_B": {
+    "U_supervised": 1.0008,
+    "E_supervised": 1.0013,
+    "optimizer_steps": 1.0032,
+    "supervised_per_step": 0.9981,
+    "executed_positions": 1.2799,
+    "C_total_flops": 1.2204
+   }
+  }
+ },
+ "primary_basis": "M1: U equal within 1% and E equal (3 epochs), optimizer steps equal within 10% with supervised positions per step matched by per-arm blocks per step; C is NOT matched and is reported -- arm A carries prompt context (passages, tool schemas) that is computed but not supervised",
+ "schedule": {
+  "rule": "the E1 builder's rule (build_experiment1_configs.py): warmup max(10, round(0.05 T)); eval every max(25, T // 8); save every max(200, T // 2); cosine to min_lr_frac 0.1",
+  "T_estimate": 624,
+  "warmup_steps": 31,
+  "eval_every": 78,
+  "save_every": 312,
+  "A_blocks_per_step": 7,
+  "B_blocks_per_step": 2,
+  "A_steps": 626,
+  "step_ratio_A_over_B": 1.0032,
+  "registered_when": "recomputed from B's real pack before preregistration; the 0.86M recipe's 1,023 steps are NOT reused"
+ },
+ "quotas_arm_B": {
+  "primary.task_contained_deduction": {
+   "share": 0.17,
+   "U_target_in_2p96M": 503200,
+   "supervised_per_unit_estimate": 3708,
+   "independent_units_estimate": 136,
+   "with_reserve_U": 528700,
+   "per_unit_source": "base_pool_v1 verified units per axis (asset_audit.json :: teacher_cal.yield_by_axis / base_pool_v1_fluid.units_by_axis)"
+  },
+  "primary.inductive_rule_discovery": {
+   "share": 0.17,
+   "U_target_in_2p96M": 503200,
+   "supervised_per_unit_estimate": 3662,
+   "independent_units_estimate": 137,
+   "with_reserve_U": 528700,
+   "per_unit_source": "base_pool_v1 verified units per axis (asset_audit.json :: teacher_cal.yield_by_axis / base_pool_v1_fluid.units_by_axis)"
+  },
+  "primary.compositional_generalization": {
+   "share": 0.17,
+   "U_target_in_2p96M": 503200,
+   "supervised_per_unit_estimate": 3574,
+   "independent_units_estimate": 141,
+   "with_reserve_U": 528700,
+   "per_unit_source": "base_pool_v1 verified units per axis (asset_audit.json :: teacher_cal.yield_by_axis / base_pool_v1_fluid.units_by_axis)"
+  },
+  "primary.abstract_analogical": {
+   "share": 0.09,
+   "U_target_in_2p96M": 266400,
+   "supervised_per_unit_estimate": 5739,
+   "independent_units_estimate": 46,
+   "with_reserve_U": 279900,
+   "per_unit_source": "base_pool_v1 verified units per axis (asset_audit.json :: teacher_cal.yield_by_axis / base_pool_v1_fluid.units_by_axis)"
+  },
+  "primary.interactive_adaptation": {
+   "share": 0.1,
+   "U_target_in_2p96M": 296000,
+   "supervised_per_unit_estimate": 16669,
+   "independent_units_estimate": 18,
+   "with_reserve_U": 311000,
+   "per_unit_source": "base_pool_v1 verified units per axis (asset_audit.json :: teacher_cal.yield_by_axis / base_pool_v1_fluid.units_by_axis)"
+  },
+  "supporting.math_reused_gsm8k": {
+   "share": 0.06,
+   "U_target_in_2p96M": 177600,
+   "supervised_per_unit_estimate": 1177,
+   "independent_units_estimate": 151,
+   "with_reserve_U": 186600,
+   "per_unit_source": "corpus_v2 gsm8k selected sessions"
+  },
+  "supporting.math_new": {
+   "share": 0.06,
+   "U_target_in_2p96M": 177600,
+   "supervised_per_unit_estimate": 3415,
+   "independent_units_estimate": 52,
+   "with_reserve_U": 186600,
+   "per_unit_source": "corpus_v2 openmath selected sessions (MATH-style proxy)"
+  },
+  "supporting.code_algorithmic": {
+   "share": 0.07,
+   "U_target_in_2p96M": 207200,
+   "supervised_per_unit_estimate": 4250,
+   "independent_units_estimate": 49,
+   "with_reserve_U": 217700,
+   "per_unit_source": "corpus_v2 code selected sessions"
+  },
+  "supporting.reading_verified": {
+   "share": 0.08,
+   "U_target_in_2p96M": 236800,
+   "supervised_per_unit_estimate": 623,
+   "independent_units_estimate": 380,
+   "with_reserve_U": 248800,
+   "per_unit_source": "corpus_v2 rag_evidence and multihop_qa selected sessions, token-weighted"
+  },
+  "supporting.answerability": {
+   "share": 0.03,
+   "U_target_in_2p96M": 88800,
+   "supervised_per_unit_estimate": 509,
+   "independent_units_estimate": 174,
+   "with_reserve_U": 93300,
+   "per_unit_source": "corpus_v2 rag_evidence selected sessions"
+  }
+ },
+ "authorizes": "nothing"
+}

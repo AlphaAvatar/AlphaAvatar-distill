@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.stage2.reasoning_data.initialization_selection/v1",
- "status": "PROPOSED -- a maintainer decision; nothing is restored, copied or trained by this record",
- "written_utc": "2026-10-21T18:06:20Z",
+ "status": "DECIDED BY THE MAINTAINER (2026-10-21): H1 fixes Stage-0 D4 Top-1 as its research starting point -- not a claim that D4 reasons best, and no change to Stage-0's unresolved verdict. This derivation, which reached the same candidate by a rule that reads no recovered outcome, is kept as supporting analysis; it did not make the choice. Materialization: assets/d4_top1_materialization.json",
+ "written_utc": "2026-10-21T19:22:03Z",
  "rule": "the candidate that Pareto-dominates all others on the searches' three minimized step-0 objectives state.teacher_kl.equal_domain_mean, state.teacher_kl.worst_domain, state.critical_token_kl, under the one shared state_eval suite; no recovered outcome is read",
  "candidates": [
   {
@@ -352,7 +352,9 @@
    "prediction_rows": "scored_v1",
    "registry_entry": "stage0_calvol_d4_top1_1301deb7",
    "relay_copy": "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors",
-   "local_copies": [],
+   "local_copies": [
+    "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4"
+   ],
    "suite": {
     "qualified_id": "state_eval@v1",
     "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
@@ -486,6 +488,7 @@
  "dominant": [
   "d4/r1"
  ],
+ "fixed_by_maintainer": "d4/r1",
  "proposal": {
   "dose": "d4",
   "rank": 1,
