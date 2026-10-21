@@ -24,7 +24,7 @@
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "blocker": "BLOCKED NO. Stage-0 programme CLOSED 2026-10-21 (final $0 closeout): EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON REASONING NOT RESOLVED. Owner: calibration_volume/closeout/programme_closeout.json.",
- "branch": "main (squash of exec/d1-behavioural-readiness, 2026-10-17); Stage-0 work on stage0/calibration-volume-mixture",
+ "branch": "main (squash of stage0/calibration-volume-mixture, 2026-10-21); next work on stage2/reasoning-data, cut fresh from main",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",

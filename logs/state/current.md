@@ -900,6 +900,42 @@ invocation with `tee` and `PIPESTATUS[0]`.
 
 ## What `main` carries
 
+**The Stage-0 calibration-volume programme, integrated 2026-10-21 (UTC) by
+SQUASH AND MERGE per AGENTS.md P12.2, on the maintainer's instruction.** One
+commit on `main` collapses everything on top of `32246d12` (the D-series
+squash): the programme's commits up to the closeout tree `fa311c67`, plus the
+pre-integration record commits after it.
+- the data audit, eval-set-1 (frozen, identity 2) and its registry;
+- the root-level pilot, the resolution check, the search-cost bench;
+- the preregistered formal study (d1/d2/d4) and the Top-4 extension (24
+  students), both analysed;
+- the volumes' retirement, the provider-verified budget reconciliation, the
+  index-gap and provider-resource fixes, and the Stage-2/3 handoff.
+
+```text
+source branch : stage0/calibration-volume-mixture   (NOT deleted -- P12.2)
+merge base    : 32246d126ee8b6920a9282a0793dfa81d2f47fae   (main before)
+branch tip    : named by the squash commit; a record on the branch cannot
+                carry its own hash
+squash commit : `git log -1 main`
+closeout tree : fa311c679cbf0454966ed50034849cb48dbf5385
+```
+
+- **What was tested.** The broad convergence ran on the closeout content of
+  `93a7f1c5`: docs, infrastructure, architecture, data and integration suites
+  1645 passed / 31 skipped / 0 failed (the pod-simulator file excluded: it
+  refuses below 20 GiB free and the dev box has 13 GiB); the calibration_volume
+  experiment suite 94 passed. After it, `76c50bb3` added the cap chain to the
+  reconciliation writer (run, output committed) and the docs suite passed again
+  (166) at `fa311c67`.
+- **The honest limit.** The tip adds only pre-integration records on top of
+  `fa311c67`: this section, `current.json` and `decisions.md`.
+- **Reachability.** Every commit hash the records cite was checked before the
+  squash: zero unreachable. The source branch is where this round's commit
+  hashes live, so it is kept permanently.
+- **Where work continues.** On `stage2/reasoning-data`, cut fresh from the
+  squash commit. Continuing on the old branch would re-apply the whole range.
+
 **The D-series and its closure, integrated 2026-10-17 (UTC) by SQUASH AND
 MERGE per AGENTS.md P12.2, on the maintainer's instruction.** One commit on
 `main` collapses everything on top of `c8f714af`: the 149 commits up to the
@@ -929,8 +965,8 @@ tested tree   : 27c279b6b10d93f75e0a3a7d5b11131cf03345d8
 - **Reachability.** Every commit hash the records cite was checked before the
   squash: zero unreachable. The source branch is where this round's commit
   hashes live, so it is kept permanently.
-- **Where work continues.** On `stage0/calibration-volume-mixture`, cut fresh from the squash commit.
-  Continuing on the old branch would re-apply the whole range.
+- **Where work continued.** On `stage0/calibration-volume-mixture`, cut fresh
+  from that squash commit (itself integrated 2026-10-21, above).
 - **Earlier integrations** (`git log main` owns the hashes):
   - `c8f714af`, 2026-10-10: the six-tree information architecture, source
     `migration/info-architecture`;

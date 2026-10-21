@@ -13034,3 +13034,18 @@ on a paid pod.
   DIRECTLY VERIFIED. The search journals have dev-box copies only.
 - **Revisit when.** The maintainer decides the project-level provider gap, or
   opens Stage-2/3 under its own authorization.
+
+## 2026-10-21 — Maintainer: squash-merge `stage0/calibration-volume-mixture` into `main`
+
+- **Context.** The Stage-0 programme is closed (entry above). The maintainer
+  asked for the branch to be squash-merged into `main` ("把分支squash merge 到
+  main"), AGENTS.md P12.2.
+- **Decision.** One squash commit on `main` over merge base `32246d12`. The
+  source branch is NOT deleted: the programme's records cite its commits. The
+  squash commit names the source branch, its tip and the merge base. Work
+  continues on `stage2/reasoning-data`, cut fresh from `main`.
+- **Checked before integrating.** Zero unreachable cited commits
+  (`converge_before_sweep.cited_commits_are_reachable`); `main` had not moved
+  since `32246d12`; the staged tree must equal the source tip's tree.
+- **Revisit when.** Never for this round; the next integration follows the
+  same rule.
