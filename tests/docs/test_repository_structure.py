@@ -168,8 +168,11 @@ def test_the_two_state_views_agree_on_money():
     be the JSON's numbers."""
     snap = load_snapshot()
     text = STATE.read_text()
+    #: Every figure at the 4-decimal quantum the renderer writes. The cap was
+    #: checked at 2 decimals, which only matched while caps were round ($595.00
+    #: is a prefix of $595.0000); $643.6571 renders as 643.6571, never 643.66.
     for key, fmt in (("cumulative_spend_usd", "{:.4f}"),
-                     ("authorized_cap_usd", "{:.2f}"),
+                     ("authorized_cap_usd", "{:.4f}"),
                      ("remaining_usd", "{:.4f}")):
         value = fmt.format(snap["budget"][key])
         assert value in text, (

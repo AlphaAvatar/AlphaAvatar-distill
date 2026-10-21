@@ -71,7 +71,6 @@ def main() -> int:
     floor = load(LOGS / "design/floor_diagnostic.json")
     pool_dir = REPO / load(CONF / "pilot_design.json")["pool"]["dir"]
     pool = load(pool_dir / "manifest.json")
-    profiles = load(CONF / "profiles.json")
     pilot_path = LOGS / "design/pilot_structure_agreement.json"
     pilot = load(pilot_path) if pilot_path.is_file() else None
     proposal_path = LOGS / "plans/formal_design_proposal.json"
@@ -133,6 +132,61 @@ def main() -> int:
     resolution_path = LOGS / "design/resolution_check.json"
     resolution = load(resolution_path) if resolution_path.is_file() else None
 
+    # --- the formal study (round 3), read ---------------------------------------
+    prereg_path = LOGS / "plans/volume_preregistration.json"
+    analysis_path = LOGS / "design/formal_analysis.json"
+    formal = None
+    if prereg_path.is_file():
+        prereg = load(prereg_path)
+        doses = {}
+        for r in runs:
+            if r["run_id"].startswith("dose_"):
+                t = r["run_id"].split("_")[1]
+                doses.setdefault(t, []).append({k: r[k] for k in ("run_id", "terminal", "usd")})
+        analysis = load(analysis_path) if analysis_path.is_file() else None
+        formal = {"preregistration": bound(prereg_path),
+                  "treatments": {t: {k: v[k] for k in ("dose", "search_config_hash",
+                                                       "profile_hashes")}
+                                 for t, v in prereg["treatments_by_id"].items()},
+                  "sessions_by_dose": doses,
+                  "complete_doses": sorted(t for t, rs in doses.items()
+                                           if any(x["terminal"] == "ALL_DONE" for x in rs)),
+                  "analysis": bound(analysis_path) if analysis else None,
+                  "contrasts": ({c: {k: v.get("label") or v.get("diff") for k, v in res.items()}
+                                 for c, res in analysis["H2"]["contrasts"].items()}
+                                if analysis else None)}
+
+    # --- the Top-4 extension (beside the formal study, never inside it), read ----
+    ext_plan_path = LOGS / "plans/top4_extension.json"
+    ext_path = LOGS / "design/extension_analysis.json"
+    extension = None
+    if ext_plan_path.is_file():
+        ext = load(ext_path) if ext_path.is_file() else None
+        extension = {"plan": bound(ext_plan_path),
+                     "sessions": [{k: r[k] for k in ("run_id", "terminal", "usd")}
+                                  for r in runs if r["run_id"].startswith("probes_")],
+                     "analysis": bound(ext_path) if ext else None,
+                     "units": ({k: ext[k] for k in ("units_expected", "units_present", "units_missing")}
+                               if ext else None),
+                     "claims": ext["claims"] if ext else None}
+
+    # --- the network volumes: reservation while live, actual once retired -------
+    volumes = []
+    for d in sorted((LOGS / "runs").glob("netvol_*")):
+        o, s = load(d / "closeout/outcome.json"), load(d / "runtime/session.json")
+        tomb = d / "closeout/tombstone.json"
+        t = load(tomb) if tomb.is_file() else None
+        volumes.append({"run_id": d.name, "volume_id": s["volume_id"], "size_gb": s["size_gb"],
+                        "data_center_id": s["data_center_id"], "status": o["status"],
+                        "usd": o["money"]["all_in_usd"],
+                        "tombstone": bound(tomb) if t else None,
+                        "deleted_utc": t["deleted_utc"] if t else None,
+                        "members_source": t["members_source"]["kind"] if t else None,
+                        "retired_bytes": sum(c["bytes"] for c in t["totals_by_class"].values())
+                                         if t else None})
+    audits = [{k: r[k] for k in ("run_id", "status", "usd")}
+              for r in runs if r["run_id"].startswith("volaudit_")]
+
     # --- the pilot verdict, read ----------------------------------------------
     h1 = None
     if pilot:
@@ -187,10 +241,18 @@ def main() -> int:
                   "covariates": pilot["covariates"] if pilot else None,
                   "agreement": bound(pilot_path) if pilot else None},
         "verdicts": {
-            "H2_downstream_reasoning": h2,
+            "H2_downstream_reasoning": (
+                ("formal study: see formal_study.contrasts (single-draw treatment comparisons on "
+                 "eval-set-1's formal rows; evaluation-sampling intervals only)")
+                if formal and formal["analysis"] else h2),
             "H1_selection_stability": ("pilot (exploratory, root-level): " + json.dumps(
                 {k: v["label"] for k, v in h1.items()}) if h1 else "pilot not complete"),
             "formal_volume_study": (
+                (f"COMPLETE: all three doses measured ({', '.join(formal['complete_doses'])}), "
+                 "preregistered and authorized 2026-10-19")
+                if formal and len(formal["complete_doses"]) == 3 else
+                (f"PARTIAL: complete doses {formal['complete_doses']} of d1/d2/d4"
+                 if formal and formal["complete_doses"] else None)) or (
                 "NOT RUN: BUDGET INSUFFICIENT for the maintainer's amended design (1x/2x/4x, one full "
                 "search and one recovery each) -- "
                 + "; ".join(f"{k}: ${v['expected_usd']} expected, money runs out at "
@@ -203,7 +265,22 @@ def main() -> int:
                 if not any(fundable.values()) else "fundable in the formal phase: needs a preregistration"),
             "H2_resolution_evidence": (resolution["verdict"]["reading"] if resolution else
                                        "reference check not run"),
+            "top4_extension": (
+                None if not extension else
+                f"COMPLETE: {extension['units']['units_present']}/"
+                f"{extension['units']['units_expected']} units analysed; described beside the "
+                "formal study, never inside it (see top4_extension.claims for what it does not claim)"
+                if extension["units"] and not extension["units"]["units_missing"] else
+                "INCOMPLETE: " + json.dumps(extension["units"] and extension["units"]["units_missing"])),
+            "network_volumes": (
+                "ALL RETIRED (AGENTS.md 2.5): " + ", ".join(v["volume_id"] for v in volumes)
+                if volumes and all(v["status"] == "VOLUME_DELETED" for v in volumes) else
+                "LIVE: " + ", ".join(v["volume_id"] for v in volumes
+                                     if v["status"] != "VOLUME_DELETED")),
         },
+        "formal_study": formal,
+        "top4_extension": extension,
+        "network_volumes": {"volumes": volumes, "listing_runs": audits},
         "formal_design_proposal": bound(proposal_path),
         "resolution_check": bound(resolution_path) if resolution else None,
         "budget_gap": budget,

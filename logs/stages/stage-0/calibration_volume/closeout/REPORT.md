@@ -4,6 +4,90 @@ Every figure below is read from
 [`programme_closeout.json`](programme_closeout.json), which derives it from the
 record that owns it. Where this page and that file disagree, the file is right.
 
+## Round 3 (2026-10-19 to 10-21): formal study, Top-4 extension, retirement
+
+**COMPLETE.** All 24 recovered students sit at the floor of fluid-reasoning
+correctness:
+- the three preregistered A100 Top-1s;
+- the 21 L40S extension units.
+
+None gets more than 3 of the 570 formal static items right, and none solves
+any of the 144 episodes. Dose (1x / 2x / 4x) moves nothing that correctness can
+see. Rollout usability ranges from 40% to 71%. That spread follows the recovery
+seed at least as much as the candidate.
+
+### Formal study
+
+- **Records.** Preregistered in
+  [`plans/volume_preregistration.json`](../plans/volume_preregistration.json);
+  analysed in [`design/formal_analysis.json`](../design/formal_analysis.json).
+- **What ran.** d1, d2 and d4 each had one full D1 search on an A100. Each
+  dose's Top-1 was recovered at seed 20260726 and generated on every item of
+  eval-set-1.
+- **H2, pooled fluid static correctness** (SESOI 0.05): every label is NO-GO.
+
+  | contrast | difference | 95% CI |
+  | --- | --- | --- |
+  | d2 − d1 | −0.0018 | [−0.0054, 0] |
+  | d4 − d2 | +0.0018 | [0, 0.0055] |
+  | d4 − d1 | 0.0 | [−0.0051, 0.0052] |
+
+  At the floor, NO-GO means the instrument sees no difference. It does not
+  mean the doses are equivalent in reasoning.
+- **Not claimed:** cross-seed or cross-draw stability, statistical saturation,
+  or a pure volume effect.
+
+### Top-4 extension
+
+- **Records.** Planned in [`plans/top4_extension.json`](../plans/top4_extension.json);
+  analysed in [`design/extension_analysis.json`](../design/extension_analysis.json).
+- **Units.** 21 on the L40S: each dose's distinct Top-4, with rank 1 at seed
+  20260727 and ranks 2–4 at 20260726 and 20260727. Together with the A100
+  Top-1s that makes 24 of 24 units and 588 paired contrasts. Every unit of
+  eval-set-1 reports correctness and usability side by side.
+- **Correctness.** At the floor everywhere. Every fluid-correctness contrast is
+  labelled NO-GO, with the floor flagged.
+- **Usability, static (570 items).** Ranges from 40.0% to 71.4%.
+  - **Seed.** Within the same L40S session, seed 20260727 beats 20260726 for
+    all 9 (dose, rank) pairs, by 3.9 to 24.9 points. 8 of the 9 CIs exclude 0.
+  - **Rank.** Rank k against rank 1 (both at seed 20260727) moves usability by
+    −11.9 to +10.5 points.
+  - **Search order.** The search's own order does not order usability. This is
+    described from 4 candidates per dose, not tested.
+- **A100 r1 s26 vs L40S r1 s27.** +1.9, −0.5 and +8.3 points. The two differ
+  in both hardware and seed, so the gap is not attributed to either.
+- **Not claimed:**
+  - that search rank predicts recovered capability;
+  - cross-seed stability beyond two seeds;
+  - a hardware effect.
+
+### Retirement and money
+
+- **Volumes.** All three network volumes were deleted on 2026-10-21 under the
+  AGENTS.md 2.5 standing retirement:
+  - `ugllmlv19t` (300 GB);
+  - `b9jwu0g1eg` and `wn3avnine2` (50 GB each).
+
+  Each has a tombstone at `runs/netvol_*/closeout/tombstone.json`.
+- **What was deleted.** Weights only. `runs/volaudit_20261021_142638` listed the
+  300 GB volume and fetched every record it held before the delete. The
+  evaluation evidence and generations remain in the runs and the artifacts
+  root, and the relay keeps the 12 Top-4 candidates, pinned by sha256.
+- **Spend.** The programme spent $125.4326 of its $143.5099 ceiling.
+
+  | phase | spend |
+  | --- | --- |
+  | prerequisites | $9.31 |
+  | pilot | $8.1999 |
+  | formal_engineering | $0.8757 |
+  | formal_volume | $107.047 |
+
+  formal_volume breaks down as:
+  - doses: d1 $12.9051, d2 $17.9334, d4 $28.2239;
+  - L40S probes: $46.0979;
+  - volumes: $1.8849, trued up to actual use;
+  - listing: $0.0018.
+
 ## Round 2 (maintainer amendment, 2026-10-18): evaluation registry and single-draw design
 
 **The formal study is still NOT RUN. The budget cannot fund even the amended

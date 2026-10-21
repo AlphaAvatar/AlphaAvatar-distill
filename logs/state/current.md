@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-21 12:40 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-21 14:40 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,39 +9,45 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**STAGE-0 FORMAL VOLUME STUDY: d1, d2 AND d4 COMPLETE AND ANALYSED. THE TOP-4
-EXTENSION IS RUNNING: d1's AND d4's 7 UNITS CLOSED, d2's RUNNING.** At most two
-formal sessions at once (`decisions.md` 2026-10-20).
-- **Formal analysis** (preregistered, $0):
+**STAGE-0 CALIBRATION-VOLUME PROGRAMME COMPLETE (2026-10-21).** The formal study
+(d1, d2, d4) and the Top-4 extension are measured and analysed, and all three
+network volumes are retired. Nothing is running and nothing is billing: 0 pods, 0 volumes (provider
+query in [`programme_closeout.json`](../stages/stage-0/calibration_volume/closeout/programme_closeout.json)).
+Summary: [`closeout/REPORT.md`](../stages/stage-0/calibration_volume/closeout/REPORT.md), round 3.
+- **Formal analysis** (preregistered):
   [`design/formal_analysis.json`](../stages/stage-0/calibration_volume/design/formal_analysis.json).
   - H2: every fluid contrast (static pooled and each axis; 2x-1x, 4x-2x, 4x-1x)
     is NO-GO, because it is at the floor: 1, 0 and 1 of 714 formal items correct.
-    Capability units are near the floor too. Usable over the 570 formal static
-    items: 60.2% (d1), 59.3% (d2), 56.1% (d4).
+    Usable over the 570 formal static items: 60.2% (d1), 59.3% (d2), 56.1% (d4).
   - H1: root selections agree far above chance (DEPTH removes the same 8 layers
     at every dose). The Top-1 order changes at 4x: ATTENTION first, where 1x and
     2x put DEPTH first.
-- **d4** `dose_d4_20261020_212310` closed ($4.0197, ALL_DONE). The journal
-  restore of the same dose (90 of 90 states restored) finished the search; Top-4
-  went to the relay. d4 totals $28.2239 over four paid sessions (`dose_d4_*` closeouts).
-- **Probes closed:** d1 `probes_d1_20261020_093955` ($15.392, 104-132 min per
-  unit) and d4 `probes_d4_20261020_232941` ($14.6187, 99-125 min per unit; pod
-  `dgv8vpzbgpuykh` deleted and confirmed gone). 7/7 units each, on the L40S.
-- **Running.** `3weh7q3l8p0ms1`: L40S, US-TX-3, created 23:55Z (fifth create
-  attempt; no stock before). `probes_d2_20261020_233510`, tmux
-  `calvol_probes_d2`, 7 units on volume B `wn3avnine2`. Expected $17.97, hard
-  $22.38 (authorized $22.40). Owner: its `launch.log` until its closeout.
-- **Budget.** Programme $23.37 remained with d4's probes held at their cap; d2's
-  $22.40 fits. The extension rule passes (expected $17.97 + $5). Owner:
-  `governance.remaining_envelope`.
+- **Top-4 extension:**
+  [`design/extension_analysis.json`](../stages/stage-0/calibration_volume/design/extension_analysis.json).
+  24/24 units (3 A100 Top-1 + 21 L40S), 588 paired contrasts, correct AND usable
+  for every unit of eval-set-1.
+  - Correctness is at the floor everywhere (at most 3/570 static, 0/144
+    episodes).
+  - Static usable ranges 40.0-71.4%. Seed 20260727 beats 20260726 in all 9
+    same-session pairs, by +3.9 to +24.9 points (8/9 CIs exclude 0). Rank k
+    against rank 1 moves it −11.9 to +10.5 points.
+  - Not claimed: that rank predicts capability, stability beyond two seeds, or
+    a hardware effect.
+  - Probe sessions: d1 $15.392, d4 $14.6187, d2 $16.0872 (pod `3weh7q3l8p0ms1`
+    deleted, confirmed gone).
+- **Volumes retired** (AGENTS.md 2.5, weights only): `ugllmlv19t`, `b9jwu0g1eg`
+  and `wn3avnine2` are deleted. Their tombstones are at
+  `runs/netvol_*/closeout/tombstone.json`, and actual cost replaced the
+  reservations. Every record on the 300 GB volume was fetched first
+  (`runs/volaudit_20261021_142638`).
+- **Money.** The programme spent $125.4326 of its $143.5099 ceiling. Its runs
+  are now in `logs/index.json`, so the project row below counts them. Owner:
+  `programme_closeout.json :: money`.
 - **Reporting** (maintainer 2026-10-20/21): every capability unit of eval-set-1,
   correct AND usable side by side, formal denominators first (fluid 714 items; usable over the 570 formal static
   items, episodes separately), no pooled score.
-- **Next.**
-  1. d2's probe session to its closeout.
-  2. The extension analysis, covering every capability.
-  3. Teardown of the three volumes with tombstones after a consumer audit.
-  4. Write the programme closeout and add the runs to `logs/index.json`.
+- **Next.** No session or authorization is open. The maintainer decides what
+  follows, given that every Stage-0 student is at the fluid-reasoning floor.
 - **Owners.** The run closeouts, `decisions.md` 2026-10-19/20, and
   [`volume_preregistration.json`](../stages/stage-0/calibration_volume/plans/volume_preregistration.json)
   (design, d1 → d2 → d4 order, retry_policy, budget rule).
@@ -4096,7 +4102,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$517.6571` spent of `$595.0000`, leaving `$77.3429` |
+| project cap | `$625.5798` spent of `$643.6571`, leaving `$18.0773` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

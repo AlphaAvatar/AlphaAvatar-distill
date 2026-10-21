@@ -1,9 +1,9 @@
 {
  "schema": "aadistill.stage0.calibration_volume.programme_closeout/v1",
- "written_utc": "2026-10-18T22:46:01+00:00",
+ "written_utc": "2026-10-21T14:33:12+00:00",
  "repository": {
   "branch": "stage0/calibration-volume-mixture",
-  "head_at_write": "8df69c633c940f36ca5a654e45fcb24426616508",
+  "head_at_write": "bc9be68b570d158b9e7145fa912c3a5cdddfa23c",
   "dirty_at_write": true
  },
  "data_audit": {
@@ -190,10 +190,305 @@
   }
  },
  "verdicts": {
-  "H2_downstream_reasoning": "NOT MEASURED: no D1-initialized recovered student exists yet; every fixed-recipe student measured so far is PCA-initialized and sits at the floor of fluid_reasoning_720",
+  "H2_downstream_reasoning": "formal study: see formal_study.contrasts (single-draw treatment comparisons on eval-set-1's formal rows; evaluation-sampling intervals only)",
   "H1_selection_stability": "pilot (exploratory, root-level): {\"ATTENTION\": \"no detectable volume effect\", \"DEPTH\": null, \"FFN\": \"stabilizes with volume\", \"RESIDUAL_WIDTH\": \"stabilizes with volume\"}",
-  "formal_volume_study": "NOT RUN: BUDGET INSUFFICIENT for the maintainer's amended design (1x/2x/4x, one full search and one recovery each) -- as_measured: $86.98 expected, money runs out at '4x: search part 2/2 (one search identity, journal on the volume)' in the formal phase ($65.0) and at '4x: search part 2/2 (one search identity, journal on the volume)' with every programme phase merged ($74.4901); with_overhead_fix: $77.82 expected, money runs out at '4x: search part 2/2 (one search identity, journal on the volume)' in the formal phase ($65.0) and at '2x+4x: recovery + eval-set-1' with every programme phase merged ($74.4901)",
-  "H2_resolution_evidence": "the set separates the same-geometry reference from the floor (static 0.4462, lower bound 0.3538); recovered students off the floor: none. Every student here is PCA-initialized; a D1-initialized student is unmeasured."
+  "formal_volume_study": "COMPLETE: all three doses measured (d1, d2, d4), preregistered and authorized 2026-10-19",
+  "H2_resolution_evidence": "the set separates the same-geometry reference from the floor (static 0.4462, lower bound 0.3538); recovered students off the floor: none. Every student here is PCA-initialized; a D1-initialized student is unmeasured.",
+  "top4_extension": "COMPLETE: 24/24 units analysed; described beside the formal study, never inside it (see top4_extension.claims for what it does not claim)",
+  "network_volumes": "ALL RETIRED (AGENTS.md 2.5): ugllmlv19t, b9jwu0g1eg, wn3avnine2"
+ },
+ "formal_study": {
+  "preregistration": {
+   "path": "logs/stages/stage-0/calibration_volume/plans/volume_preregistration.json",
+   "sha256": "7c875870863cd8deed7f6369a631cc904a18532d41000f0465147640e89be43a"
+  },
+  "treatments": {
+   "d1": {
+    "dose": 1,
+    "search_config_hash": "4c536119440ec237fa5af315e2ca187ad52c1ce1d7487fc543cd435c7355f5d7",
+    "profile_hashes": {
+     "calib.s0v_base_d1@v1": "4455351e3fda24edd5e284fb323dbb507b3bf91799312d2d5e30abd9d9b003f4",
+     "calib.s0v_rh_d1@v1": "8507de50083afc72c6831c915f991ee6fd33e43456d5ed5965498acbd92f7664"
+    }
+   },
+   "d2": {
+    "dose": 2,
+    "search_config_hash": "14ec481178ddc9d27f37343bcdb3f8a87cf663cc0b9567c9ec5e8ea8258373f5",
+    "profile_hashes": {
+     "calib.s0v_base_d2@v1": "3334509a4c83df865843e22a67e6faa81b50909fc87394658178f31355119dad",
+     "calib.s0v_rh_d2@v1": "fc0025b995bc9e2da2a785398631f39c577e2a9109346e9c9c2089e793640846"
+    }
+   },
+   "d4": {
+    "dose": 4,
+    "search_config_hash": "ff2c3dccce20090864427029103f08d7d1c55ffb8d81982168a31daa1bd284c5",
+    "profile_hashes": {
+     "calib.s0v_base_d4@v1": "321e38fe8513d52d722c15890b3a0584081a422f41d48d2bc65fb66bf82afa6a",
+     "calib.s0v_rh_d4@v1": "5fbe3512128797a9cfc28b39252f889d07ab72fa400af20d5377fb2019fcbca2"
+    }
+   }
+  },
+  "sessions_by_dose": {
+   "d1": [
+    {
+     "run_id": "dose_d1_20261019_054503",
+     "terminal": "RUN_FAILED",
+     "usd": 0.2541
+    },
+    {
+     "run_id": "dose_d1_20261019_055515",
+     "terminal": "RUN_FAILED",
+     "usd": 11.5053
+    },
+    {
+     "run_id": "dose_d1_20261019_122630",
+     "terminal": null,
+     "usd": 0.0
+    },
+    {
+     "run_id": "dose_d1_20261019_125359",
+     "terminal": "RUN_FAILED",
+     "usd": 0.873
+    },
+    {
+     "run_id": "dose_d1_20261019_133708",
+     "terminal": "ALL_DONE",
+     "usd": 0.2727
+    }
+   ],
+   "d2": [
+    {
+     "run_id": "dose_d2_20261019_135821",
+     "terminal": "DRIVER_UNKNOWN",
+     "usd": 13.4238
+    },
+    {
+     "run_id": "dose_d2_20261019_213216",
+     "terminal": null,
+     "usd": 0.0
+    },
+    {
+     "run_id": "dose_d2_20261020_002929",
+     "terminal": "ALL_DONE",
+     "usd": 4.5096
+    }
+   ],
+   "d4": [
+    {
+     "run_id": "dose_d4_20261020_045426",
+     "terminal": null,
+     "usd": 0.0
+    },
+    {
+     "run_id": "dose_d4_20261020_045616",
+     "terminal": null,
+     "usd": 0.0
+    },
+    {
+     "run_id": "dose_d4_20261020_053929",
+     "terminal": null,
+     "usd": 0.0
+    },
+    {
+     "run_id": "dose_d4_20261020_054022",
+     "terminal": "RUN_FAILED",
+     "usd": 23.6937
+    },
+    {
+     "run_id": "dose_d4_20261020_185256",
+     "terminal": "RUN_FAILED",
+     "usd": 0.2592
+    },
+    {
+     "run_id": "dose_d4_20261020_211335",
+     "terminal": "RUN_FAILED",
+     "usd": 0.2513
+    },
+    {
+     "run_id": "dose_d4_20261020_212310",
+     "terminal": "ALL_DONE",
+     "usd": 4.0197
+    }
+   ]
+  },
+  "complete_doses": [
+   "d1",
+   "d2",
+   "d4"
+  ],
+  "analysis": {
+   "path": "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
+   "sha256": "c181c66808318938b94c662dca14c38efc81319f57b8ccb9259758c44553e9b0"
+  },
+  "contrasts": {
+   "d2-d1": {
+    "fluid.static_pooled": "NO-GO",
+    "fluid.inductive_rule_discovery": "NO-GO",
+    "fluid.compositional_generalization": "NO-GO",
+    "fluid.task_contained_deduction": "NO-GO",
+    "fluid.abstract_analogical": "NO-GO",
+    "fluid.interactive_adaptation": "NO-GO",
+    "stage3_capability_846__answerability_paired": -0.0167,
+    "stage3_capability_846__gsm8k": 0.0,
+    "stage3_capability_846__knowledge": 0.0067,
+    "stage3_capability_846__math_verified": 0.0,
+    "stage3_capability_846__multihop": -0.04,
+    "stage3_capability_846__rag": 0.0,
+    "stage3_capability_846__safety_paired": 0.0,
+    "stage3_legacy_150__items": -0.0133
+   },
+   "d4-d2": {
+    "fluid.static_pooled": "NO-GO",
+    "fluid.inductive_rule_discovery": "NO-GO",
+    "fluid.compositional_generalization": "NO-GO",
+    "fluid.task_contained_deduction": "NO-GO",
+    "fluid.abstract_analogical": "NO-GO",
+    "fluid.interactive_adaptation": "NO-GO",
+    "stage3_capability_846__answerability_paired": 0.0167,
+    "stage3_capability_846__gsm8k": 0.01,
+    "stage3_capability_846__knowledge": 0.0,
+    "stage3_capability_846__math_verified": 0.0,
+    "stage3_capability_846__multihop": 0.04,
+    "stage3_capability_846__rag": -0.01,
+    "stage3_capability_846__safety_paired": 0.06,
+    "stage3_legacy_150__items": -0.0133
+   },
+   "d4-d1": {
+    "fluid.static_pooled": "NO-GO",
+    "fluid.inductive_rule_discovery": "NO-GO",
+    "fluid.compositional_generalization": "NO-GO",
+    "fluid.task_contained_deduction": "NO-GO",
+    "fluid.abstract_analogical": "NO-GO",
+    "fluid.interactive_adaptation": "NO-GO",
+    "stage3_capability_846__answerability_paired": 0.0,
+    "stage3_capability_846__gsm8k": 0.01,
+    "stage3_capability_846__knowledge": 0.0067,
+    "stage3_capability_846__math_verified": 0.0,
+    "stage3_capability_846__multihop": 0.0,
+    "stage3_capability_846__rag": -0.01,
+    "stage3_capability_846__safety_paired": 0.06,
+    "stage3_legacy_150__items": -0.0267
+   }
+  }
+ },
+ "top4_extension": {
+  "plan": {
+   "path": "logs/stages/stage-0/calibration_volume/plans/top4_extension.json",
+   "sha256": "369b5549b8a2a5a16101090fb7b59dcd27ffe3be3c51dd9b57c5ef1efaa9b4eb"
+  },
+  "sessions": [
+   {
+    "run_id": "probes_d1_20261020_093955",
+    "terminal": "ALL_DONE",
+    "usd": 15.392
+   },
+   {
+    "run_id": "probes_d2_20261020_233510",
+    "terminal": "ALL_DONE",
+    "usd": 16.0872
+   },
+   {
+    "run_id": "probes_d4_20261020_232941",
+    "terminal": "ALL_DONE",
+    "usd": 14.6187
+   }
+  ],
+  "analysis": {
+   "path": "logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+   "sha256": "62607e08513b01b81de6dfc9aac90129534316ce97caf977920df34460321617"
+  },
+  "units": {
+   "units_expected": 24,
+   "units_present": 24,
+   "units_missing": []
+  },
+  "claims": [
+   "that search rank predicts recovered capability",
+   "cross-seed stability beyond two seeds",
+   "a hardware effect",
+   "anything the preregistered H1/H2/H3 did not register"
+  ]
+ },
+ "network_volumes": {
+  "volumes": [
+   {
+    "run_id": "netvol_20261019_051206",
+    "volume_id": "ugllmlv19t",
+    "size_gb": 300,
+    "data_center_id": "EUR-IS-1",
+    "status": "VOLUME_DELETED",
+    "usd": 1.6717,
+    "tombstone": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/netvol_20261019_051206/closeout/tombstone.json",
+     "sha256": "4945adbe7b5824c9e20e720311805a4c0e08f62cf345c462261d6b89c1f27987"
+    },
+    "deleted_utc": "2026-10-21T14:30:58+00:00",
+    "members_source": "listing",
+    "retired_bytes": 292446360760
+   },
+   {
+    "run_id": "netvol_20261020_093832",
+    "volume_id": "b9jwu0g1eg",
+    "size_gb": 50,
+    "data_center_id": "US-TX-3",
+    "status": "VOLUME_DELETED",
+    "usd": 0.1403,
+    "tombstone": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/netvol_20261020_093832/closeout/tombstone.json",
+     "sha256": "f7f0745dc410a0729e6fd449380a0bc05aad0bcb3f353869e9ef676916cc8ca8"
+    },
+    "deleted_utc": "2026-10-21T14:30:05+00:00",
+    "members_source": "derived",
+    "retired_bytes": 33380855534
+   },
+   {
+    "run_id": "netvol_20261020_233114",
+    "volume_id": "wn3avnine2",
+    "size_gb": 50,
+    "data_center_id": "US-TX-3",
+    "status": "VOLUME_DELETED",
+    "usd": 0.0729,
+    "tombstone": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/netvol_20261020_233114/closeout/tombstone.json",
+     "sha256": "8b611e678942d40ee4abbeddcc479dd25aec3dc06859bfff126b26b454589139"
+    },
+    "deleted_utc": "2026-10-21T14:29:57+00:00",
+    "members_source": "derived",
+    "retired_bytes": 16690427990
+   }
+  ],
+  "listing_runs": [
+   {
+    "run_id": "volaudit_20261021_142442",
+    "status": "NO_RESOURCE_CREATED",
+    "usd": 0.0
+   },
+   {
+    "run_id": "volaudit_20261021_142534",
+    "status": "NO_RESOURCE_CREATED",
+    "usd": 0.0
+   },
+   {
+    "run_id": "volaudit_20261021_142540",
+    "status": "NO_RESOURCE_CREATED",
+    "usd": 0.0
+   },
+   {
+    "run_id": "volaudit_20261021_142638",
+    "status": "SESSION_ENDED",
+    "usd": 0.0018
+   },
+   {
+    "run_id": "volaudit_20261021_142851",
+    "status": "NO_RESOURCE_CREATED",
+    "usd": 0.0
+   },
+   {
+    "run_id": "volaudit_20261021_142856",
+    "status": "NO_RESOURCE_CREATED",
+    "usd": 0.0
+   }
+  ]
  },
  "formal_design_proposal": {
   "path": "logs/stages/stage-0/calibration_volume/plans/formal_design_proposal.json",
@@ -441,6 +736,234 @@
     }
    },
    {
+    "run_id": "bench_20261019_051316",
+    "phase": "formal_engineering",
+    "status": "SESSION_ENDED",
+    "terminal": "ALL_DONE",
+    "usd": 0.8757,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/bench_20261019_051316/closeout/outcome.json",
+     "sha256": "faa970891f1c50e9d6f69a674bf5b0e2877081e8c175574e2e89471c7921e6bb"
+    }
+   },
+   {
+    "run_id": "dose_d1_20261019_054503",
+    "phase": "formal_volume",
+    "status": "SESSION_ENDED",
+    "terminal": "RUN_FAILED",
+    "usd": 0.2541,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_054503/closeout/outcome.json",
+     "sha256": "35a75f0893613d15e4e30515d5c9620d542df56d4cc1a0133b72aba5e1b42e59"
+    }
+   },
+   {
+    "run_id": "dose_d1_20261019_055515",
+    "phase": "formal_volume",
+    "status": "SESSION_ENDED",
+    "terminal": "RUN_FAILED",
+    "usd": 11.5053,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/closeout/outcome.json",
+     "sha256": "62baaa0f375bd7f78d9a167cc80dfe0f74b03f44bf5b36162de70d28a58caa6f"
+    }
+   },
+   {
+    "run_id": "dose_d1_20261019_122630",
+    "phase": "formal_volume",
+    "status": "ABANDONED_BEFORE_LAUNCH",
+    "terminal": null,
+    "usd": 0.0,
+    "provider_confirms_gone": null,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_122630/closeout/outcome.json",
+     "sha256": "fb2ba5df218eb67b5865708bf81d1e9fb03c840a65ae907866fcaac9d4726550"
+    }
+   },
+   {
+    "run_id": "dose_d1_20261019_125359",
+    "phase": "formal_volume",
+    "status": "SESSION_ENDED",
+    "terminal": "RUN_FAILED",
+    "usd": 0.873,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_125359/closeout/outcome.json",
+     "sha256": "19583745753384ce790c1f2fd2a4ae1d279441a1cf440a8562414839f3282a53"
+    }
+   },
+   {
+    "run_id": "dose_d1_20261019_133708",
+    "phase": "formal_volume",
+    "status": "SESSION_ENDED",
+    "terminal": "ALL_DONE",
+    "usd": 0.2727,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_133708/closeout/outcome.json",
+     "sha256": "3e4583f13d638db2103d508b8d537b4322899c33492ae4d3cbb0aac30e55fdb6"
+    }
+   },
+   {
+    "run_id": "dose_d2_20261019_135821",
+    "phase": "formal_volume",
+    "status": "SESSION_ENDED",
+    "terminal": "DRIVER_UNKNOWN",
+    "usd": 13.4238,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261019_135821/closeout/outcome.json",
+     "sha256": "ff8c2020d5e579d77518883972d2f309e55900e107c1eb0faf0875fdcb0a38c3"
+    }
+   },
+   {
+    "run_id": "dose_d2_20261019_213216",
+    "phase": "formal_volume",
+    "status": "ABANDONED_BEFORE_LAUNCH",
+    "terminal": null,
+    "usd": 0.0,
+    "provider_confirms_gone": null,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261019_213216/closeout/outcome.json",
+     "sha256": "59ca474ef97e58ede704e5e51e62ca1b940c04ef9d097a23f81b6223a7099aba"
+    }
+   },
+   {
+    "run_id": "dose_d2_20261020_002929",
+    "phase": "formal_volume",
+    "status": "SESSION_ENDED",
+    "terminal": "ALL_DONE",
+    "usd": 4.5096,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/closeout/outcome.json",
+     "sha256": "c29e465117f68c338be3ffb850ebe7fa5b80d6966bf23ce60744214176ddd09c"
+    }
+   },
+   {
+    "run_id": "dose_d4_20261020_045426",
+    "phase": "formal_volume",
+    "status": "ABANDONED_BEFORE_LAUNCH",
+    "terminal": null,
+    "usd": 0.0,
+    "provider_confirms_gone": null,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_045426/closeout/outcome.json",
+     "sha256": "cb97265ef3f2f3b7b4401de374abf12cdc7d8835fa68bac41ad0b02c83b3b217"
+    }
+   },
+   {
+    "run_id": "dose_d4_20261020_045616",
+    "phase": "formal_volume",
+    "status": "ABANDONED_BEFORE_LAUNCH",
+    "terminal": null,
+    "usd": 0.0,
+    "provider_confirms_gone": null,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_045616/closeout/outcome.json",
+     "sha256": "e7f0382feacfbacf67a8daaba024ff5833a8bd953c78d22baddb808ac11d7122"
+    }
+   },
+   {
+    "run_id": "dose_d4_20261020_053929",
+    "phase": "formal_volume",
+    "status": "ABANDONED_BEFORE_LAUNCH",
+    "terminal": null,
+    "usd": 0.0,
+    "provider_confirms_gone": null,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_053929/closeout/outcome.json",
+     "sha256": "5698f92e9d4d6de9ccfae3bf40d27adaeef51e67fa16caece0c15ce171be2b77"
+    }
+   },
+   {
+    "run_id": "dose_d4_20261020_054022",
+    "phase": "formal_volume",
+    "status": "SESSION_ENDED",
+    "terminal": "RUN_FAILED",
+    "usd": 23.6937,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/closeout/outcome.json",
+     "sha256": "fe9137ee6d1767045ff519458ba3f78e13daa240e12590272e68efc8c7dc858d"
+    }
+   },
+   {
+    "run_id": "dose_d4_20261020_185256",
+    "phase": "formal_volume",
+    "status": "SESSION_ENDED",
+    "terminal": "RUN_FAILED",
+    "usd": 0.2592,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_185256/closeout/outcome.json",
+     "sha256": "a27419aa50f6eea679e89540ac326421edc46d9e16ead7466ffebccf973e20cf"
+    }
+   },
+   {
+    "run_id": "dose_d4_20261020_211335",
+    "phase": "formal_volume",
+    "status": "SESSION_ENDED",
+    "terminal": "RUN_FAILED",
+    "usd": 0.2513,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_211335/closeout/outcome.json",
+     "sha256": "426ba63ec7ba0c63cc9695910081ba2404a511dee0fee73e4476d84809d2b15b"
+    }
+   },
+   {
+    "run_id": "dose_d4_20261020_212310",
+    "phase": "formal_volume",
+    "status": "SESSION_ENDED",
+    "terminal": "ALL_DONE",
+    "usd": 4.0197,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/closeout/outcome.json",
+     "sha256": "eced54e701341a40b5607517254166c09ec7374e3f990bd6a149ed3d20fe76db"
+    }
+   },
+   {
+    "run_id": "netvol_20261019_051206",
+    "phase": "formal_volume",
+    "status": "VOLUME_DELETED",
+    "terminal": null,
+    "usd": 1.6717,
+    "provider_confirms_gone": null,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/netvol_20261019_051206/closeout/outcome.json",
+     "sha256": "9f3e36515fcf9c6bb402a8e1ac6b50f472d132f24f0c017fd1f68ae5b9a5dc40"
+    }
+   },
+   {
+    "run_id": "netvol_20261020_093832",
+    "phase": "formal_volume",
+    "status": "VOLUME_DELETED",
+    "terminal": null,
+    "usd": 0.1403,
+    "provider_confirms_gone": null,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/netvol_20261020_093832/closeout/outcome.json",
+     "sha256": "57514b636aa320d63da8293e3398efdd8c8ae8689f1b396e19c2917fb7c7a4bb"
+    }
+   },
+   {
+    "run_id": "netvol_20261020_233114",
+    "phase": "formal_volume",
+    "status": "VOLUME_DELETED",
+    "terminal": null,
+    "usd": 0.0729,
+    "provider_confirms_gone": null,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/netvol_20261020_233114/closeout/outcome.json",
+     "sha256": "bcfbe37288bade225f67702a11f2bef586cf658d4625d254db00a087efdb6840"
+    }
+   },
+   {
     "run_id": "pilot_20261018_122600",
     "phase": "pilot",
     "status": "ABANDONED_BEFORE_LAUNCH",
@@ -486,6 +1009,42 @@
     "closeout": {
      "path": "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/closeout/outcome.json",
      "sha256": "9efc1b86bc31c8abfe06819746240cd2079c546e09f5224c14d4d6a120532d69"
+    }
+   },
+   {
+    "run_id": "probes_d1_20261020_093955",
+    "phase": "formal_volume",
+    "status": "SESSION_ENDED",
+    "terminal": "ALL_DONE",
+    "usd": 15.392,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955/closeout/outcome.json",
+     "sha256": "6c8e6254a6d9b1c80ebe87e234412740edc4feb920c360869999e7523eb62d77"
+    }
+   },
+   {
+    "run_id": "probes_d2_20261020_233510",
+    "phase": "formal_volume",
+    "status": "SESSION_ENDED",
+    "terminal": "ALL_DONE",
+    "usd": 16.0872,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/closeout/outcome.json",
+     "sha256": "86752121c55ad593d6d003b06fe2de09c8f85d93c51e1f33aa1d880dff083e9b"
+    }
+   },
+   {
+    "run_id": "probes_d4_20261020_232941",
+    "phase": "formal_volume",
+    "status": "SESSION_ENDED",
+    "terminal": "ALL_DONE",
+    "usd": 14.6187,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941/closeout/outcome.json",
+     "sha256": "ebd287fc3dcaa07a9c1d968b210efa2ecc2701d03341ce8868b37119fc5ae977"
     }
    },
    {
@@ -535,18 +1094,90 @@
      "path": "logs/stages/stage-0/calibration_volume/runs/teachercal_20261018_112755/closeout/outcome.json",
      "sha256": "7489b93395a4b5f600219831f9614db35e9ec6c6dbead6569f334d17fab41994"
     }
+   },
+   {
+    "run_id": "volaudit_20261021_142442",
+    "phase": "formal_volume",
+    "status": "NO_RESOURCE_CREATED",
+    "terminal": null,
+    "usd": 0.0,
+    "provider_confirms_gone": null,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142442/closeout/outcome.json",
+     "sha256": "13568f93df8420d2e5614326230b479d36763d5fa9d4eb5858236c78a482634e"
+    }
+   },
+   {
+    "run_id": "volaudit_20261021_142534",
+    "phase": "formal_volume",
+    "status": "NO_RESOURCE_CREATED",
+    "terminal": null,
+    "usd": 0.0,
+    "provider_confirms_gone": null,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142534/closeout/outcome.json",
+     "sha256": "76aa10f51f97f0525834ad09e013043070a6a65df7a9d6dacf513ed92007a91b"
+    }
+   },
+   {
+    "run_id": "volaudit_20261021_142540",
+    "phase": "formal_volume",
+    "status": "NO_RESOURCE_CREATED",
+    "terminal": null,
+    "usd": 0.0,
+    "provider_confirms_gone": null,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142540/closeout/outcome.json",
+     "sha256": "352ef1089a61ab0098d8374cc4f01e7ad16bc8928f66609e7df8a24bfdb7517a"
+    }
+   },
+   {
+    "run_id": "volaudit_20261021_142638",
+    "phase": "formal_volume",
+    "status": "SESSION_ENDED",
+    "terminal": "AUDITED",
+    "usd": 0.0018,
+    "provider_confirms_gone": true,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142638/closeout/outcome.json",
+     "sha256": "addf2c84cb2387a03fc10f9f42e097636dd21ab904024f777742bbbb889fa144"
+    }
+   },
+   {
+    "run_id": "volaudit_20261021_142851",
+    "phase": "formal_volume",
+    "status": "NO_RESOURCE_CREATED",
+    "terminal": null,
+    "usd": 0.0,
+    "provider_confirms_gone": null,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142851/closeout/outcome.json",
+     "sha256": "5121ec751defcfa4044f015f41e94aaa6b23a6d87e5864ff968148de3469e516"
+    }
+   },
+   {
+    "run_id": "volaudit_20261021_142856",
+    "phase": "formal_volume",
+    "status": "NO_RESOURCE_CREATED",
+    "terminal": null,
+    "usd": 0.0,
+    "provider_confirms_gone": null,
+    "closeout": {
+     "path": "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142856/closeout/outcome.json",
+     "sha256": "b7ff7975ce89e46d129e47e807a68a464ab754278df20b9a1a710eae1081f295"
+    }
    }
   ],
-  "programme_spent_usd": 17.5099,
-  "programme_ceiling_usd": 92.0,
+  "programme_spent_usd": 125.4326,
+  "programme_ceiling_usd": 143.5099,
   "project": {
-   "cap_usd": 595.0,
-   "cumulative_spend_usd": 517.6571,
-   "remaining_usd": 77.3429
+   "cap_usd": 643.6571,
+   "cumulative_spend_usd": 625.5798,
+   "remaining_usd": 18.0773
   }
  },
  "provider": {
-  "queried_utc": "2026-10-18T22:46:02+00:00",
+  "queried_utc": "2026-10-21T14:33:13+00:00",
   "pods": 0,
   "network_volumes": 0,
   "spend_per_hour": 0
