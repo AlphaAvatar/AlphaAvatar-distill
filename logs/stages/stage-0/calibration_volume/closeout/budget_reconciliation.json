@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage0.calibration_volume.budget_reconciliation/v1",
- "written_utc": "2026-10-21T16:43:52+00:00",
+ "written_utc": "2026-10-21T17:18:52+00:00",
  "sources": {
   "provider_snapshot": {
    "path": "logs/budget/provider/runpod_billing_2026-10-21.json",
@@ -171,6 +171,112 @@
   "status": "UNVERIFIED attribution: see project.pods_unattributed",
   "_meaning": "money the provider billed this account that no repository record holds; none of it falls in this programme",
   "if_all_project_spend_over_cap_usd": 14.4929
+ },
+ "limits_are_different_things": {
+  "maintainer_approved_new_spend_usd": {
+   "from": "2026-10-19T04:43:24Z",
+   "increments": [
+    90.0,
+    30.0,
+    6.0
+   ],
+   "total": 126.0
+  },
+  "project_cumulative_cap_usd": {
+   "value": 643.6571,
+   "owner": "configs/stages/stage-1/phase_c1/authorization.json :: accepted_pricing",
+   "chain": [
+    {
+     "date": "2026-09-11",
+     "from_usd": 283.76,
+     "to_usd": 320.0,
+     "delta_usd": 36.24,
+     "source": "C1 execution package (accepted_pricing._cap_amendment)"
+    },
+    {
+     "date": "2026-09-17",
+     "from_usd": 320.0,
+     "to_usd": 370.0,
+     "delta_usd": 50.0,
+     "source": "Phase-C2 preparation round (_cap_amendment)"
+    },
+    {
+     "date": "2026-09-28",
+     "from_usd": 370.0,
+     "to_usd": 400.0,
+     "delta_usd": 30.0,
+     "source": "formal C3 (_cap_amendment)"
+    },
+    {
+     "date": "2026-10-02",
+     "from_usd": 400.0,
+     "to_usd": 410.0,
+     "delta_usd": 10.0,
+     "source": "A3 phase envelope (_cap_amendment)"
+    },
+    {
+     "date": "2026-10-05",
+     "from_usd": 410.0,
+     "to_usd": 465.0,
+     "delta_usd": 55.0,
+     "source": "complete D1 phase (_cap_amendment)"
+    },
+    {
+     "date": "2026-10-07",
+     "from_usd": 465.0,
+     "to_usd": 490.0,
+     "delta_usd": 25.0,
+     "source": "execution_package._amendment_2026_10_07 (D1 search stopped by an exhausted account)"
+    },
+    {
+     "date": "2026-10-10",
+     "from_usd": 490.0,
+     "to_usd": 590.0,
+     "delta_usd": 100.0,
+     "source": "logs/budget/approvals/autoinit_d1_behavioural_phase_grant.json (+$100 D1 behavioural phase; commit 786f275e on the preserved exec/d1-behavioural-readiness branch)"
+    },
+    {
+     "date": "2026-10-14",
+     "from_usd": 590.0,
+     "to_usd": 595.0,
+     "delta_usd": 5.0,
+     "source": "decisions.md 2026-10-14 (D2 v3 GO)"
+    },
+    {
+     "date": "2026-10-19",
+     "from_usd": 595.0,
+     "to_usd": 607.6571,
+     "delta_usd": 12.6571,
+     "source": "decisions.md 2026-10-19: recorded spend $517.6571 + the $90 new-spend cap; the unused $77.3429 was NOT carried"
+    },
+    {
+     "date": "2026-10-20",
+     "from_usd": 607.6571,
+     "to_usd": 637.6571,
+     "delta_usd": 30.0,
+     "source": "decisions.md 2026-10-20: Top-4 extension, +$25 then +$5"
+    },
+    {
+     "date": "2026-10-20",
+     "from_usd": 637.6571,
+     "to_usd": 643.6571,
+     "delta_usd": 6.0,
+     "source": "decisions.md 2026-10-20: two sessions at once, +$6"
+    }
+   ]
+  },
+  "programme_ceiling_usd": {
+   "value": 143.5099,
+   "is": "the $17.5099 spent before the authority plus the $126 approved since"
+  },
+  "per_session_cap_usd": 50.0,
+  "provider_account_balance_usd": {
+   "at_authority": 95.9995,
+   "now": 101.2318128102,
+   "credits_implied_since_authority": 110.1927,
+   "credits_recorded_in_the_repository": 50.0,
+   "_status": "UNVERIFIED: the balance difference implies more account credit than the $50 top-up the maintainer reported on 2026-10-20; no transaction history was fetched. A balance is not an allowance and moves no cap."
+  }
  },
  "remaining": {
   "project_per_records_usd": 18.0773,
@@ -970,17 +1076,22 @@
    "1dxw5aw2d112jx",
    "1ligfkwnaous4u",
    "1mgt50aapad7hv",
+   "1mm2j08s262wym",
    "1xwqb7os4ue9rz",
    "20ji79950u9arw",
    "25kncjfmakxxul",
    "29l0qxxx1i6906",
+   "2dbp44q6jpp5jk",
    "2dm0luzftizif3",
    "2lz4xqdok1z5s1",
    "2maapdxqg566r5",
    "2vpbiz5p2al1kj",
    "2xmyzes6r0vcge",
+   "331nbu5mxwi26v",
    "37aah10zvqk4lo",
    "3c1g6e01kdu1ya",
+   "3cqxz56y6tc8er",
+   "3deothqd14f76p",
    "3gvfeqnkbyptc4",
    "3hvb5d4it6h6pb",
    "3uwvkx3zyria8z",
@@ -989,29 +1100,45 @@
    "4dbqycjrivhq17",
    "4pge0934xnly22",
    "5bd0szfrv57fw3",
+   "5ccmods79ywrw2",
    "5db8r0r06vd5k5",
+   "5ff0prh6fzxmvv",
+   "5k2e72503puo1f",
+   "5tl5pkzxpc4zpj",
+   "64fhzduqdwaurw",
+   "6ce901ncd9efjg",
    "6ex6mpu1uha1xg",
    "6g42msvfrzemos",
    "6mzp8m92qksalv",
    "6rmod2085xd313",
    "6x4dcvm9s22cb6",
    "6xrudht3i7wc62",
+   "76g859blv04tqc",
    "7cr5l46wa7ptfy",
    "7hthdteyc25xgx",
    "7ucb8jox3buc29",
+   "8830ltzmwaqh08",
    "8gtnsbigpgaz76",
    "8ismfhukteed4j",
+   "8my2o9ticj7xj9",
    "8nheigrv25aeq8",
    "8tbsixglzz64ox",
    "8v4jc1c5mwnipb",
    "8ywzifnsa5zery",
    "94slla57nnqjqa",
    "98nmzq5a5oq4hb",
+   "99vwfjl77fblq6",
    "9jxov5bjtiy2xu",
    "9nrdoydt53nlzc",
    "9rmme5u9yd68g5",
+   "9rtrkkpasmj17l",
+   "a12c7ch5w9dq8n",
+   "absiebkmq7hjbr",
    "adevfxvuiwu2lw",
+   "as66m7qal78e5a",
+   "banc47gn8wn3ms",
    "bd83jug4g23qn0",
+   "bgi8ue38hzhal8",
    "btbdczhr0t0ukc",
    "bu7j1vlcjge9qj",
    "c6btbh69ql85ng",
@@ -1020,6 +1147,7 @@
    "d2nwf8995nd83j",
    "d3zrira2zl98kd",
    "d854jag1ybhny2",
+   "dau6jo69vbak2w",
    "dckc72mtoe9ijw",
    "detw95h0kqc7x6",
    "dltht42ifojgwo",
@@ -1032,47 +1160,68 @@
    "fa2sgl62t3l8q0",
    "fbuggw0x9efqsz",
    "fccr23o9jcnrh0",
+   "fg3nr3ibef553d",
    "fsk7tz1rnx43xr",
+   "ftsoi1per5en78",
    "g8ajahpwirhrfx",
    "gbiz85xcmiq6gh",
+   "gc9qeuxi4w7ew7",
    "gfd8buh5tr51qb",
+   "glz1kuyi5viuw4",
    "grgiu5atibea3x",
+   "h923aippm86s7v",
+   "hbxdtb4mbh38tx",
    "hcgt3z021psyrz",
    "hdwsp4btdq5t1n",
    "hq685pjg56q0q4",
    "hwyay7b9df9e77",
    "hyvp7dw3zkb1zk",
+   "ibht1nb8o0nhyh",
    "ibj7s7fxuj9ttl",
    "ifp8feyil1gp7v",
    "igyljdhgg2hmzf",
+   "iids0u7zeb5urc",
    "ij54bzvcyldm9j",
+   "iohqynlxv5eoz4",
    "ippwmpc8wzed24",
+   "iynr8ybvpvbhgo",
    "jusu7nm5e5xcyc",
    "k1mgu38q0y6sei",
+   "kdj5vtcei1yxjn",
+   "kr8gwb6jj1ec0o",
    "ks8pm799bytys9",
+   "ku7wqx33foo53l",
    "ku8vcn5mu8hp9i",
    "kxrqqyuylpnrkm",
    "ky8j0kbft9mp61",
    "l11v5n0wc2pc7p",
+   "l1m24zl44xhqy2",
+   "lj4m3ogjz888m5",
    "luy1txyjro2msz",
+   "lwf2th777hri8c",
    "m0p1decj1an2mc",
    "m8mmk8f2389f8s",
    "m8t9tf8ftqlmh3",
+   "mhak4avc7kt7cz",
    "mlj9pj9p5q6pta",
    "n1kavevctllrvi",
    "n2kfqhyoya4zzj",
    "n3gdd9yby5fx2m",
    "n71opk7lv4fhzf",
    "n7xjbzlmsyx9b2",
+   "n8d5kg6cw3iiuz",
    "nex2u8no79k6pl",
    "nuitz0ketxukpm",
    "o1wtd5wfat43ny",
    "o5bv3oqqs7s80b",
    "o7hj2r3z2w8xat",
+   "owwdka4xzucoya",
+   "oy00tooo4ckkv9",
    "p6doyk8jeydg1u",
    "pj3c870n6yx70z",
    "pln3gsuw6lvlzb",
    "psl88q7qgqu44t",
+   "q7znklj7ya7kj2",
    "qbfqbp3y6hq8iu",
    "qhrir27ixfu8kt",
    "qp7xm2k01h6dg4",
@@ -1082,6 +1231,8 @@
    "rn7y3c2btfvv3p",
    "rtrdbu3wi6sfrv",
    "ruib84xvfyieqm",
+   "rvwv4tn4ml6d3d",
+   "rxie5w0kewuzg6",
    "s797g6xphdibms",
    "setwv2mt3gx4hz",
    "simbeepnf8syuu",
@@ -1094,298 +1245,36 @@
    "ujgl1c8wk380ok",
    "ujhpw3lnheqhmo",
    "uzahazwqsh2r9a",
+   "ve2b6yz1ozedxk",
    "vjavemn7m2tw5a",
+   "vooci6ln90ach4",
    "vqrrkc8w6f5786",
    "vt3qm7j9vpct6c",
+   "vuf5sxxnil7drh",
    "vvsohv60cuuokx",
    "vx55ur6camdmgl",
+   "w82jwn06h5dp6r",
+   "w86xu7t78y571h",
+   "wdpyamp2pp5v8t",
    "wgm2tamw8nu9f5",
    "wkausr939ts7vv",
    "x8gh0lwxlujxcv",
    "xgca8kkv4pm68n",
    "xikv3u8moofu6c",
+   "xrksmenhg7dlps",
    "y1rg8rsl4qy4lp",
    "y1wmjhemi50jkw",
    "y9ilsahujayqft",
    "yfr80fbbgl3q9m",
    "z9so5ftbsokybz",
+   "zae6ba3we52vgu",
    "zjwpsurs2dyvw8",
    "znqw298b50jgjd",
    "zosdyrzqvw6jwg",
    "zoz95844krv2ze"
   ],
-  "pods_unattributed": [
-   {
-    "pod_id": "zae6ba3we52vgu",
-    "usd": 3.6488,
-    "first_day": "2026-07-22"
-   },
-   {
-    "pod_id": "bgi8ue38hzhal8",
-    "usd": 0.0461,
-    "first_day": "2026-07-26"
-   },
-   {
-    "pod_id": "h923aippm86s7v",
-    "usd": 0.2626,
-    "first_day": "2026-07-26"
-   },
-   {
-    "pod_id": "hbxdtb4mbh38tx",
-    "usd": 0.1088,
-    "first_day": "2026-07-26"
-   },
-   {
-    "pod_id": "l1m24zl44xhqy2",
-    "usd": 0.0586,
-    "first_day": "2026-07-26"
-   },
-   {
-    "pod_id": "mhak4avc7kt7cz",
-    "usd": 0.3507,
-    "first_day": "2026-07-26"
-   },
-   {
-    "pod_id": "owwdka4xzucoya",
-    "usd": 0.1002,
-    "first_day": "2026-07-26"
-   },
-   {
-    "pod_id": "ve2b6yz1ozedxk",
-    "usd": 0.4884,
-    "first_day": "2026-07-26"
-   },
-   {
-    "pod_id": "dau6jo69vbak2w",
-    "usd": 1.2723,
-    "first_day": "2026-07-27"
-   },
-   {
-    "pod_id": "absiebkmq7hjbr",
-    "usd": 5.927,
-    "first_day": "2026-07-28"
-   },
-   {
-    "pod_id": "iohqynlxv5eoz4",
-    "usd": 4.4882,
-    "first_day": "2026-07-28"
-   },
-   {
-    "pod_id": "ibht1nb8o0nhyh",
-    "usd": 0.1541,
-    "first_day": "2026-07-29"
-   },
-   {
-    "pod_id": "lwf2th777hri8c",
-    "usd": 0.4107,
-    "first_day": "2026-07-29"
-   },
-   {
-    "pod_id": "oy00tooo4ckkv9",
-    "usd": 0.386,
-    "first_day": "2026-07-29"
-   },
-   {
-    "pod_id": "w86xu7t78y571h",
-    "usd": 1.4624,
-    "first_day": "2026-07-29"
-   },
-   {
-    "pod_id": "wdpyamp2pp5v8t",
-    "usd": 0.4308,
-    "first_day": "2026-07-29"
-   },
-   {
-    "pod_id": "2dbp44q6jpp5jk",
-    "usd": 0.8326,
-    "first_day": "2026-07-30"
-   },
-   {
-    "pod_id": "3cqxz56y6tc8er",
-    "usd": 2.2915,
-    "first_day": "2026-07-30"
-   },
-   {
-    "pod_id": "fg3nr3ibef553d",
-    "usd": 1.3468,
-    "first_day": "2026-07-30"
-   },
-   {
-    "pod_id": "glz1kuyi5viuw4",
-    "usd": 3.482,
-    "first_day": "2026-07-30"
-   },
-   {
-    "pod_id": "lj4m3ogjz888m5",
-    "usd": 0.559,
-    "first_day": "2026-07-30"
-   },
-   {
-    "pod_id": "n8d5kg6cw3iiuz",
-    "usd": 0.4732,
-    "first_day": "2026-07-30"
-   },
-   {
-    "pod_id": "vuf5sxxnil7drh",
-    "usd": 0.0579,
-    "first_day": "2026-07-30"
-   },
-   {
-    "pod_id": "as66m7qal78e5a",
-    "usd": 25.605,
-    "first_day": "2026-07-31"
-   },
-   {
-    "pod_id": "iids0u7zeb5urc",
-    "usd": 0.128,
-    "first_day": "2026-07-31"
-   },
-   {
-    "pod_id": "banc47gn8wn3ms",
-    "usd": 8.7682,
-    "first_day": "2026-08-02"
-   },
-   {
-    "pod_id": "rxie5w0kewuzg6",
-    "usd": 6.0256,
-    "first_day": "2026-08-02"
-   },
-   {
-    "pod_id": "5tl5pkzxpc4zpj",
-    "usd": 0.2562,
-    "first_day": "2026-08-03"
-   },
-   {
-    "pod_id": "76g859blv04tqc",
-    "usd": 0.0742,
-    "first_day": "2026-08-03"
-   },
-   {
-    "pod_id": "99vwfjl77fblq6",
-    "usd": 0.1624,
-    "first_day": "2026-08-03"
-   },
-   {
-    "pod_id": "9rtrkkpasmj17l",
-    "usd": 0.3904,
-    "first_day": "2026-08-03"
-   },
-   {
-    "pod_id": "a12c7ch5w9dq8n",
-    "usd": 0.2554,
-    "first_day": "2026-08-03"
-   },
-   {
-    "pod_id": "ftsoi1per5en78",
-    "usd": 0.0482,
-    "first_day": "2026-08-03"
-   },
-   {
-    "pod_id": "kr8gwb6jj1ec0o",
-    "usd": 0.0655,
-    "first_day": "2026-08-03"
-   },
-   {
-    "pod_id": "q7znklj7ya7kj2",
-    "usd": 0.0371,
-    "first_day": "2026-08-03"
-   },
-   {
-    "pod_id": "rvwv4tn4ml6d3d",
-    "usd": 0.2572,
-    "first_day": "2026-08-03"
-   },
-   {
-    "pod_id": "w82jwn06h5dp6r",
-    "usd": 0.3097,
-    "first_day": "2026-08-03"
-   },
-   {
-    "pod_id": "gc9qeuxi4w7ew7",
-    "usd": 0.0034,
-    "first_day": "2026-08-04"
-   },
-   {
-    "pod_id": "vooci6ln90ach4",
-    "usd": 0.0695,
-    "first_day": "2026-08-04"
-   },
-   {
-    "pod_id": "8my2o9ticj7xj9",
-    "usd": 0.06,
-    "first_day": "2026-08-06"
-   },
-   {
-    "pod_id": "kdj5vtcei1yxjn",
-    "usd": 0.9453,
-    "first_day": "2026-08-06"
-   },
-   {
-    "pod_id": "ku7wqx33foo53l",
-    "usd": 0.0674,
-    "first_day": "2026-08-06"
-   },
-   {
-    "pod_id": "331nbu5mxwi26v",
-    "usd": 0.5658,
-    "first_day": "2026-08-07"
-   },
-   {
-    "pod_id": "5ff0prh6fzxmvv",
-    "usd": 0.3532,
-    "first_day": "2026-08-07"
-   },
-   {
-    "pod_id": "iynr8ybvpvbhgo",
-    "usd": 0.2556,
-    "first_day": "2026-08-07"
-   },
-   {
-    "pod_id": "5ccmods79ywrw2",
-    "usd": 0.1189,
-    "first_day": "2026-08-08"
-   },
-   {
-    "pod_id": "1mm2j08s262wym",
-    "usd": 0.28,
-    "first_day": "2026-08-10"
-   },
-   {
-    "pod_id": "6ce901ncd9efjg",
-    "usd": 0.1377,
-    "first_day": "2026-08-10"
-   },
-   {
-    "pod_id": "3deothqd14f76p",
-    "usd": 0.4889,
-    "first_day": "2026-08-11"
-   },
-   {
-    "pod_id": "5k2e72503puo1f",
-    "usd": 0.4517,
-    "first_day": "2026-08-11"
-   },
-   {
-    "pod_id": "64fhzduqdwaurw",
-    "usd": 0.7783,
-    "first_day": "2026-08-11"
-   },
-   {
-    "pod_id": "8830ltzmwaqh08",
-    "usd": 0.7624,
-    "first_day": "2026-08-11"
-   },
-   {
-    "pod_id": "xrksmenhg7dlps",
-    "usd": 2.6349,
-    "first_day": "2026-09-27"
-   }
-  ],
-  "unattributed_usd_by_first_month": {
-   "2026-07": 54.3717,
-   "2026-08": 21.9882,
-   "2026-09": 2.6349
-  },
+  "pods_unattributed": [],
+  "unattributed_usd_by_first_month": {},
   "by_period": [
    {
     "through_utc_day": "2026-09-11",

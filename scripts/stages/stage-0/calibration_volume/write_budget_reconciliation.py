@@ -162,6 +162,60 @@ def concurrency(issued: list[dict]) -> dict:
             "issued_beside_a_live_session": beside}
 
 
+#: The project cap's history, oldest first: (date, from, to, source). The
+#: config's `_cap_amendment` prose names every step except 465 -> 490 -> 590 ->
+#: 595, which live in the package's own amendments, the D1 behavioural phase
+#: grant and the D2 v3 decision; each step is named here with its owner.
+CAP_CHAIN = (
+    ("2026-09-11", 283.76, 320.0, "C1 execution package (accepted_pricing._cap_amendment)"),
+    ("2026-09-17", 320.0, 370.0, "Phase-C2 preparation round (_cap_amendment)"),
+    ("2026-09-28", 370.0, 400.0, "formal C3 (_cap_amendment)"),
+    ("2026-10-02", 400.0, 410.0, "A3 phase envelope (_cap_amendment)"),
+    ("2026-10-05", 410.0, 465.0, "complete D1 phase (_cap_amendment)"),
+    ("2026-10-07", 465.0, 490.0, "execution_package._amendment_2026_10_07 (D1 search stopped "
+                                 "by an exhausted account)"),
+    ("2026-10-10", 490.0, 590.0, "logs/budget/approvals/autoinit_d1_behavioural_phase_grant.json "
+                                 "(+$100 D1 behavioural phase; commit 786f275e on the preserved "
+                                 "exec/d1-behavioural-readiness branch)"),
+    ("2026-10-14", 590.0, 595.0, "decisions.md 2026-10-14 (D2 v3 GO)"),
+    ("2026-10-19", 595.0, 607.6571, "decisions.md 2026-10-19: recorded spend $517.6571 + the "
+                                    "$90 new-spend cap; the unused $77.3429 was NOT carried"),
+    ("2026-10-20", 607.6571, 637.6571, "decisions.md 2026-10-20: Top-4 extension, +$25 then +$5"),
+    ("2026-10-20", 637.6571, 643.6571, "decisions.md 2026-10-20: two sessions at once, +$6"),
+)
+
+
+def limits(snap: dict, grant: dict, pre: dict, post: dict) -> dict:
+    """Five numbers that are easy to mistake for one another, each with its owner."""
+    chain = [{"date": d, "from_usd": a, "to_usd": b, "delta_usd": round(b - a, 4),
+              "source": s} for d, a, b, s in CAP_CHAIN]
+    assert chain[-1]["to_usd"] == project_cap(), "the chain does not end at the live cap"
+    bal_at_authority = 95.9995
+    credits = round(snap["account"]["client_balance_usd"] - bal_at_authority
+                    + post["provider_total_usd"], 4)
+    return {
+        "maintainer_approved_new_spend_usd": {
+            "from": "2026-10-19T04:43:24Z", "increments": [90.0, 30.0, 6.0],
+            "total": 126.0},
+        "project_cumulative_cap_usd": {"value": chain[-1]["to_usd"],
+                                       "owner": "configs/stages/stage-1/phase_c1/"
+                                                "authorization.json :: accepted_pricing",
+                                       "chain": chain},
+        "programme_ceiling_usd": {
+            "value": float(grant["programme_ceiling_usd"]),
+            "is": "the $17.5099 spent before the authority plus the $126 approved since"},
+        "per_session_cap_usd": float(grant["per_session_cap_usd"]),
+        "provider_account_balance_usd": {
+            "at_authority": bal_at_authority, "now": snap["account"]["client_balance_usd"],
+            "credits_implied_since_authority": credits,
+            "credits_recorded_in_the_repository": 50.0,
+            "_status": ("UNVERIFIED: the balance difference implies more account credit "
+                        "than the $50 top-up the maintainer reported on 2026-10-20; no "
+                        "transaction history was fetched. A balance is not an allowance "
+                        "and moves no cap.")},
+    }
+
+
 def project_cap() -> float:
     sys.path.insert(0, str(REPO / "scripts"))
     from maintenance.consolidation.derive_budget import derive
@@ -334,6 +388,7 @@ def main(argv: list[str] | None = None) -> int:
             "_meaning": ("money the provider billed this account that no repository "
                          "record holds; none of it falls in this programme"),
         },
+        "limits_are_different_things": limits(snap, grant, pre, post),
         "remaining": {
             "project_per_records_usd": None,
             "programme_usd": round(float(grant["programme_ceiling_usd"])
