@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-20 23:45 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-21 12:40 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -10,7 +10,7 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 ## Right now
 
 **STAGE-0 FORMAL VOLUME STUDY: d1, d2 AND d4 COMPLETE AND ANALYSED. THE TOP-4
-EXTENSION IS RUNNING: d1's 7 UNITS CLOSED, d4's AND d2's RUNNING.** At most two
+EXTENSION IS RUNNING: d1's AND d4's 7 UNITS CLOSED, d2's RUNNING.** At most two
 formal sessions at once (`decisions.md` 2026-10-20).
 - **Formal analysis** (preregistered, $0):
   [`design/formal_analysis.json`](../stages/stage-0/calibration_volume/design/formal_analysis.json).
@@ -24,24 +24,21 @@ formal sessions at once (`decisions.md` 2026-10-20).
 - **d4** `dose_d4_20261020_212310` closed ($4.0197, ALL_DONE). The journal
   restore of the same dose (90 of 90 states restored) finished the search; Top-4
   went to the relay. d4 totals $28.2239 over four paid sessions (`dose_d4_*` closeouts).
-- **d1's probes** `probes_d1_20261020_093955` closed ($15.392): 7/7 units,
-  104-132 min each on the L40S.
-- **Running.**
-  - `dgv8vpzbgpuykh`: L40S, US-TX-3, created 23:30Z. `probes_d4_20261020_232941`,
-    tmux `calvol_probes_d4`, 7 units on volume `b9jwu0g1eg`. Expected $17.97,
-    hard $22.38 (authorized $22.40).
-  - `3weh7q3l8p0ms1`: L40S, US-TX-3, created 23:55Z (fifth create attempt;
-    no stock before). `probes_d2_20261020_233510`, tmux `calvol_probes_d2`,
-    7 units on volume B `wn3avnine2`; same price.
-  - Owner: each run's `launch.log` until its closeout.
+- **Probes closed:** d1 `probes_d1_20261020_093955` ($15.392, 104-132 min per
+  unit) and d4 `probes_d4_20261020_232941` ($14.6187, 99-125 min per unit; pod
+  `dgv8vpzbgpuykh` deleted and confirmed gone). 7/7 units each, on the L40S.
+- **Running.** `3weh7q3l8p0ms1`: L40S, US-TX-3, created 23:55Z (fifth create
+  attempt; no stock before). `probes_d2_20261020_233510`, tmux
+  `calvol_probes_d2`, 7 units on volume B `wn3avnine2`. Expected $17.97, hard
+  $22.38 (authorized $22.40). Owner: its `launch.log` until its closeout.
 - **Budget.** Programme $23.37 remained with d4's probes held at their cap; d2's
   $22.40 fits. The extension rule passes (expected $17.97 + $5). Owner:
   `governance.remaining_envelope`.
-- **Reporting** (maintainer 2026-10-20): every capability unit of eval-set-1,
-  formal denominators first (fluid 714 items; usable over the 570 formal static
+- **Reporting** (maintainer 2026-10-20/21): every capability unit of eval-set-1,
+  correct AND usable side by side, formal denominators first (fluid 714 items; usable over the 570 formal static
   items, episodes separately), no pooled score.
 - **Next.**
-  1. Both probe sessions to their closeouts.
+  1. d2's probe session to its closeout.
   2. The extension analysis, covering every capability.
   3. Teardown of the three volumes with tombstones after a consumer audit.
   4. Write the programme closeout and add the runs to `logs/index.json`.
