@@ -30,9 +30,9 @@ formal sessions at once (`decisions.md` 2026-10-20).
   - `dgv8vpzbgpuykh`: L40S, US-TX-3, created 23:30Z. `probes_d4_20261020_232941`,
     tmux `calvol_probes_d4`, 7 units on volume `b9jwu0g1eg`. Expected $17.97,
     hard $22.38 (authorized $22.40).
-  - `probes_d2_20261020_233510` (tmux `calvol_probes_d2`, volume B
-    `wn3avnine2`): same price. The launcher retries every 5 min while US-TX-3
-    has no L40S in stock.
+  - `3weh7q3l8p0ms1`: L40S, US-TX-3, created 23:55Z (fifth create attempt;
+    no stock before). `probes_d2_20261020_233510`, tmux `calvol_probes_d2`,
+    7 units on volume B `wn3avnine2`; same price.
   - Owner: each run's `launch.log` until its closeout.
 - **Budget.** Programme $23.37 remained with d4's probes held at their cap; d2's
   $22.40 fits. The extension rule passes (expected $17.97 + $5). Owner:
