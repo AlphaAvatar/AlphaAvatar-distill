@@ -1,0 +1,121 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.comparison_design/v1",
+ "study_id": "stage2.reasoning_data.old_vs_new_2p96M",
+ "status": "PROPOSED design (2026-10-21 UTC). NOT preregistered, NOT frozen, NOT funded. It becomes a preregistration only after the maintainer approves it, the corpus exists and its identities are filled in.",
+ "question": "Under one fixed initialization and the fixed historical recovery recipe, does 2.96M unique supervised tokens of the verified teacher-native reasoning scheme lift a 0.6B student off the fluid-reasoning floor, against 2.96M of the historical corpus_v2 scheme?",
+ "what_it_is": "a TREATMENT comparison of two complete data schemes (content, mixture, verification and isolation differ together). It is not a causal estimate of data quality alone, of verification alone or of mixture alone.",
+ "arms": {
+  "OLD": {
+   "scheme": "corpus_v2 (hygiene acceptance, uniform six-way token mixture over code, gsm8k, multihop_qa, openmath, rag_evidence, tool_calling)",
+   "sessions": "every corpus_v2 session except the 28 that fail isolation rule R2 (27 near-copies of eval_behavior_v0 prompts, 1 of multihop: audit/asset_audit.json :: isolation.corpus_v2_sessions)",
+   "cut": "2.96M unique supervised tokens by the shared builder (salt stage2.reasoning_data.old_arm/v1); measured in the dry run: 3,151 units, 3,313 sessions, 2,962,295 supervised tokens, 1,460 blocks at packing efficiency 0.355 (audit/packing_dry_run.json)",
+   "historical_note": "the historical 2.96M rung (1,944 blocks, 352 sessions cut mid-trace, 629,315 supervised tokens discarded) is NOT reused: its cuts train incomplete traces and it contains the R2-flagged sessions. The rebuilt arm shares 1,497 sessions with it (Jaccard 0.236)."
+  },
+  "NEW": {
+   "scheme": "stage2.reasoning_master@v1 (configs/stages/stage-2/reasoning_data/corpus_spec.json): verified-correct teacher-native targets, primary axes 0.68 / supporting 0.32",
+   "cut": "the master corpus's 2.96M rung D_2.96M -- the same rung the nested ladder uses, so the ladder reuses these two units"
+  }
+ },
+ "fixed": {
+  "initialization": "plans/initialization_selection.json :: proposal (d4 rank 1, checkpoint sha256 fc28e0dd...), restored from the relay and hash-checked",
+  "initialization_checkpoint_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+  "teacher": "Qwen/Qwen3-4B-Thinking-2507 @768f209d, bf16, online",
+  "tokenizer_and_template": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint (the E-series and Stage-0 tokenizer source); chat template sha256 3802169b...",
+  "geometry": "the D-series target with state_eval@v1 (596,049,920 parameters)",
+  "recipe": "e1_p1_kd_heavy (configs/stages/stage-3/recipes/recovery.json): CE 0.25 + KD 1.0, T = 1, kd_scope all; trainable attention q/k/v/o and q/k norms, MLP gate/up/down, layer norms, final norm; AdamW lr 5e-5, wd 0.01, betas (0.9, 0.95), clip 1.0; linear warm-up 5% then cosine to 0.1; fp32 weights, bf16 autocast; context 8,192",
+  "epochs": 3,
+  "seeds": [
+   20260726,
+   20260727
+  ],
+  "evaluation": "eval-set-1 identity 2 (62a1a5d3...), every item of every unit generated, scorer protocol v2 and action protocol v2, greedy, students at their trained 8,192 context (the Stage-0 evaluation path, degeneration abort recorded as right-censored)"
+ },
+ "compute_contract": {
+  "recommended": "M1_matched",
+  "M1_matched": {
+   "unique_supervised_tokens": "2.96M in both arms (within 0.5%)",
+   "epochs": "3 in both arms",
+   "optimizer_steps": "equal: T = ceil(3 x blocks_NEW / 2); each arm's blocks_per_step = round(3 x blocks_arm / T), so every step carries about the same supervised tokens; the realized T per arm is reported and must agree within 10%",
+   "padding": "truncate_padding ON in both arms: padding is never forwarded, which is mathematically identical (padding is outside every loss mask) but not bitwise identical, and changes the config hash -- a DECLARED execution deviation from the frozen config, applied to both arms",
+   "reported": [
+    "executed positions (student and teacher)",
+    "real tokens",
+    "padding tokens",
+    "FLOPs estimate (6 N_student + 2 N_teacher per executed position)",
+    "steps",
+    "blocks per step",
+    "epochs",
+    "wall seconds"
+   ],
+   "expected_asymmetry": "the OLD arm executes about 1.3x the NEW arm's positions for the same supervised tokens, because its prompts (passages, tool schemas) are context, not target; reported, not equalized",
+   "why": "under the frozen config the OLD arm would forward 4,380 block passes against about 1,250 for NEW -- 3.5x the compute and 3.5x the optimizer steps, almost all of it padding -- so a null or negative result could not be read as a data effect"
+  },
+  "M0_frozen": {
+   "description": "the frozen config byte for byte (2 blocks per step, padding forwarded)",
+   "reading": "a NEW win under M0 is conservative (NEW had less compute); a null or OLD win is uninterpretable"
+  }
+ },
+ "sequential_gate": {
+  "G1": "train and evaluate NEW at seed 20260726 first. If its formal fluid static correct is below 2% (at most 11/570), stop: the verified scheme does not leave the floor under this recipe, and the next study is the recovery OBJECTIVE, not the comparison. Otherwise run OLD at both seeds and NEW at 20260727.",
+  "why_not_bias": "the gate reads only whether NEW leaves the floor; OLD's outcome is unaffected and was already measured at the floor for every corpus_v2-trained student (24 Stage-0 units, 5 E1 PCA units)"
+ },
+ "endpoints": {
+  "primary": "fluid_reasoning_720 formal static correctness (570 items), NEW minus OLD, item-paired, pooled over the two seeds",
+  "secondary_fluid": [
+   "each static axis",
+   "episodes: success over 144",
+   "the generator tier split: the 5 evaluation-only generators (190 static + 48 episodes: unseen FORMAT) and the 10 shared generators' held-out families (380 static + 96 episodes: unseen RULE, seen format) -- reported separately, always, because NEW trains on calibration-split families of the shared generators"
+  ],
+  "supporting": [
+   "math_verified",
+   "gsm8k",
+   "multihop",
+   "rag (each over 100, item-paired)",
+   "knowledge (supplementary, when staged)"
+  ],
+  "guard_rails": [
+   "answerability_paired",
+   "safety_paired",
+   "eval_behavior_v0 (65-item core; OLD's corpus held near-copies of 27 of its prompts before R2)",
+   "usable rollout and every component (non_empty, natural_termination, no_severe_repetition, no_context_limit, protocol_valid)"
+  ],
+  "diagnostics": [
+   "teacher-forced reasoning top-1 and mean rank",
+   "teacher-native CE",
+   "training and validation CE and KD",
+   "reasoning length distribution (post hoc)"
+  ],
+  "in_sample": "stage3_legacy_150, reported apart and never beside held-out numbers",
+  "cost": "dollars, GPU hours and the compute-contract quantities per unit"
+ },
+ "statistics": {
+  "sesoi": {
+   "pooled_primary": 0.05,
+   "per_axis": 0.08,
+   "_source": "the Stage-0 preregistration (logs/stages/stage-0/calibration_volume/plans/volume_preregistration.json :: analysis.statistics), kept so the two programmes speak one scale"
+  },
+  "intervals": "rule-family cluster bootstrap, 10,000 resamples, stratified by axis (fluid); item-paired bootstrap (capability units); intervals cover evaluation sampling only",
+  "labels": {
+   "GO": "pooled interval wholly above +SESOI AND each seed's point estimate above +SESOI",
+   "NO-GO": "interval wholly inside (-SESOI, +SESOI)",
+   "REVERSED": "interval wholly below -SESOI",
+   "INCONCLUSIVE": "none of the above",
+   "FLOOR": "a flag, beside any label, when both arms are below 2% static"
+  },
+  "seeds": "two seeds per arm: reported per seed and pooled; seed variation is NOT inside the interval, so no stability claim beyond two seeds",
+  "resolution_evidence": "Qwen3-0.6B at the student geometry and the same 8,192 allowance scores 257/576 static on this set (Stage-0 REPORT round 2), so the instrument resolves 0.6B-class models on the deduction, composition and induction axes; it does not resolve analogy or interactive at that scale"
+ },
+ "decision_after": {
+  "GO": "the nested data ladder (plans/ladder_plan.json) may be proposed for funding",
+  "NO-GO or INCONCLUSIVE above the floor": "report; a mixture or objective study is designed next",
+  "FLOOR or G1 stop": "the recovery objective (KD scope, CE weight, top-k KD, sequence-level distillation) becomes the next independent study; the data scheme is not changed at the same time"
+ },
+ "not_claimed": [
+  "that verification alone, mixture alone or packing alone causes a difference",
+  "fluid-reasoning gains from lower loss, lower KL or higher usable rollout",
+  "stability beyond two seeds",
+  "unseen-format transfer from the shared-generator tier",
+  "anything about the other 11 initialization candidates"
+ ],
+ "authorizes": "nothing"
+}

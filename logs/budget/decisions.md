@@ -13049,3 +13049,57 @@ on a paid pod.
   since `32246d12`; the staged tree must equal the source tip's tree.
 - **Revisit when.** Never for this round; the next integration follows the
   same rule.
+
+## 2026-10-21 — Stage-2/3 reasoning-data round opened at $0: audit, contracts and a PROPOSED design
+
+- **Context.** The maintainer opened the next round (Stage-2 verified
+  teacher-native reasoning data → Stage-3 controlled recovery → nested data
+  scaling) and approved only $0 work: data audit, research design, configs,
+  reusable engineering and tests. No teacher generation, GPU recovery or other
+  paid resource is approved, and no Stage-0 authorization carries over. The
+  Stage-0 squash (`2a8bae78`) is already on `main`; this round works on
+  `stage2/reasoning-data`, cut from it.
+- **Decision (agent, inside the $0 scope).** Experiment `reasoning_data`
+  (Stage 2, measured through Stage-3 recovery). Everything it proposes is in
+  `docs/stages/stage-2/reasoning_data/DESIGN.md`, with every figure owned by a
+  record under `logs/stages/stage-2/reasoning_data/` or
+  `configs/stages/stage-2/reasoning_data/`:
+  - **audit:** corpus_v2's selected targets are wrong for 35.8% of openmath,
+    11.2% of gsm8k and 14.2% of multihop, and unverifiable for code and tool;
+    28 of its sessions are near-copies of held-out prompts (27
+    `eval_behavior_v0`, 1 `multihop`); its 2.96M rung is 70% padding and cuts
+    352 traces;
+  - **contracts:** the target quality contract
+    (`aadistill.data.target_quality`), isolation rules R1–R8, and the
+    per-generator-tier reporting;
+  - **mechanisms:** nested ladders (`aadistill.data.nested_ladder`),
+    best-fit packing that never cuts (`sessions.pack_best_fit`), and n-gram
+    near-duplicate screening (`aadistill.evaluation.isolation`);
+  - **a verifiable primary-axis task pool** `train_tasks_v1` (2,517 tasks)
+    that passes every isolation rule;
+  - **plans:** the initialization proposal (Stage-0 d4 rank 1, by Pareto
+    dominance on step-0 objectives, no recovered outcome read), the 2.96M
+    old-vs-new comparison with compute contract M1 and gate G1, the nested
+    ladder, the cost forecast and the durability plan.
+- **Alternatives considered.** Reuse the historical 2.96M rung byte for byte
+  (rejected: cut traces, R2-flagged sessions, 3.5x the compute of the new arm);
+  select the initialization by recovered usability (rejected: it follows the
+  seed); train on the 519 Stage-0 calibration units directly (not adopted:
+  they selected the initializations and need their own identity); a generic
+  shorter generation budget (rejected: P17/P18).
+- **Expected upside.** A comparison that can resolve: the new scheme puts
+  every primary axis in training, verifies every target, and fixes compute,
+  so a floor result would implicate the recovery objective rather than the
+  data.
+- **Risks.** Rule-family breadth (35 calibration families); the shared
+  generators make half the fluid set a seen-format measurement (reported as a
+  separate tier); the 8,192-token data-construction limit selects against the
+  longest traces; the relay holds about 2.0 GiB (one bf16 student).
+- **Needs the maintainer** (`plans/authorization_proposal.json`): the $32.57
+  provider-gap attribution, a new cap or envelope, a durability backend, and
+  the initialization, corpus scheme, compute contract and comparison design.
+  The forecast through the comparison is $19.68 expected / $29.50 hard cap,
+  and $43.81 / $62.19 for all phases with storage
+  (`plans/cost_forecast.json :: proposal_totals`).
+- **Revisit when.** The maintainer answers the proposal; nothing paid starts
+  before then.

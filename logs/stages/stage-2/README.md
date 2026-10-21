@@ -71,12 +71,11 @@ studies *of* it.
 
 ## Experiments
 
-**None.** No experiment has taken this stage as its subject,
-so there are no experiment-run logs. That is not the same as
-an empty stage: the material above is this stage's real
-output, and no run, experiment or manifest is invented to
-fill the gap. If experiment logs appear later, they get
-directories here.
+What each one asked of this stage.
+
+| experiment | what it asked | logs | status |
+| --- | --- | --- | --- |
+| `reasoning_data` — Stage-2 verified teacher-native reasoning data, measured through Stage-3 controlled recovery | Under one fixed initialization and the fixed historical recovery recipe, does verified teacher-native reasoning data lift a 0.6B student off the fluid-reasoning floor where corpus_v2 left it, and how does that scale over a nested 0.86M-5.50M ladder? | [`reasoning_data/`](reasoning_data/) | PREPARED AT $0 2026-10-21, NOT AUTHORIZED: asset audit, target quality contract, isolation rules R1-R8, a verifiable primary-axis task pool (train_tasks_v1), nested-ladder and never-cut packing mechanisms, the fixed-initialization proposal (Stage-0 d4 rank 1), the 2.96M old-vs-new comparison design (compute contract M1, gate G1), the nested ladder plan, cost forecast, durability plan and an authorization proposal. No teacher target generated, no student trained, $0 spent |
 
 ## Runs
 
@@ -91,6 +90,7 @@ canonical run list, across every stage, is
 `configs/` is the source of truth. A run's manifest records
 the config path and hash it ran under.
 
+* `configs/stages/stage-2/reasoning_data/corpus_spec.json`
 * `data/stages/stage-2/stage2_v1/stage2_offline_v1.manifest.json`
 
 ## Canonical data and artifact manifests
@@ -110,6 +110,7 @@ copied here.
 * logs/budget/decisions.md — 2026-07-21: offline data rendering, assistant-span masking, empty-think targets
 * logs/budget/decisions.md — 2026-07-26: Stage 2 mixture v1, approved 4x scale-up, carry-plus-fresh design, named val sets
 * logs/budget/decisions.md — 2026-08-01: difficulty-aware mixture replaces equal four-way balance
+* logs/budget/decisions.md -- 2026-10-21: Stage-2/3 reasoning-data round opened at $0: audit, contracts and a PROPOSED design
 
 ## Current status
 

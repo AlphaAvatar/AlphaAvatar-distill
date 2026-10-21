@@ -23,6 +23,30 @@
    "stage_id": "3",
    "data": "data/stages/stage-3",
    "logs": "logs/stages/stage-3"
+  },
+  {
+   "logical_id": "calibration_volume",
+   "kind": "experiment",
+   "stage_id": "0",
+   "scripts": "scripts/stages/stage-0/calibration_volume",
+   "logs": "logs/stages/stage-0/calibration_volume",
+   "artifacts": "artifacts/stages/stage-0/calibration_volume",
+   "configs": "configs/stages/stage-0/calibration_volume",
+   "data": "data/stages/stage-0/calibration_volume",
+   "docs": "docs/stages/stage-0/calibration_volume",
+   "live_state": null
+  },
+  {
+   "logical_id": "reasoning_data",
+   "kind": "experiment",
+   "stage_id": "2",
+   "scripts": "scripts/stages/stage-2/reasoning_data",
+   "logs": "logs/stages/stage-2/reasoning_data",
+   "artifacts": null,
+   "configs": "configs/stages/stage-2/reasoning_data",
+   "data": "data/stages/stage-2/reasoning_data",
+   "docs": "docs/stages/stage-2/reasoning_data",
+   "live_state": null
   }
  ]
 }

@@ -1,0 +1,31 @@
+{
+  "schema": "aadistill.stage2.reasoning_data.durability_plan/v1",
+  "status": "PROPOSED (2026-10-21 UTC). Its backend choice is a maintainer decision (AGENTS.md P8.2.1: provisioning or buying storage is never an autonomous repair).",
+  "measured_facts": {
+    "relay": {
+      "repo": "AlphaAvatar/aadistill-artifacts (HF, private)",
+      "headroom_bytes": 2147587286,
+      "probe": "aadistill.runtime.hub_capacity.would_accept, fresh random oids, bisected between 1,192,135,096 (accepted) and 2,384,285,634 (refused); nothing uploaded",
+      "probed_utc": "2026-10-21T17:52Z",
+      "holds": "one 1.19 GB bf16 student; refuses one 2.38 GB fp32 student directory and any batch of ten",
+      "already_holds": "the 12 PROTECTED Stage-0 initialization candidates (their only copy)"
+    },
+    "dev_box": {"free_gib": 12, "note": "df at the time of writing; the repository's artifacts/ and /home/ecs-user/aad-artifacts/ are the declared durable roots"},
+    "network_volume": {"usd_per_gb_month": 0.07, "basis": "runs/netvol_20261019_051206/closeout/outcome.json", "constraint": "one running pod at a time per volume"}
+  },
+  "what_must_survive": [
+    {"artifact": "the selected initialization (d4 rank 1, fc28e0dd...)", "bytes": 1192135096, "consumers": "every unit of the comparison and the ladder", "plan": "restore from the relay at each session start and hash-check; on approval, ALSO copy it once to the dev box (1.19 GB of 12 GB free) so it stops being a single copy"},
+    {"artifact": "generation records (all candidates, token ids)", "bytes": "about 60 MB per 4.5M generated tokens (teacher_cal: 59,193,209 bytes); about 0.2 GB for the planned 15.8M", "consumers": "the corpus build and every later audit", "plan": "pushed off the pod and hash-checked before teardown (as teacher_cal); dev box + relay"},
+    {"artifact": "the master pack (blocks.npz, audit.jsonl, ladder.json)", "bytes": "about 0.1 GB at 5.65M supervised tokens (the dry-run old-arm pack at 2.96M + tail: 1,523 blocks)", "consumers": "every recovery unit", "plan": "built on the dev box at $0, hashed into the preregistration, staged to each pod"},
+    {"artifact": "each recovered student (10 units)", "bytes": "2,384,285,634 per fp32 model directory, 22.2 GiB for 10", "consumers": "its own evaluation (state 2 of AGENTS.md P8.4 until scored); after scoring, archival only", "plan": "persist at completion, before evaluation starts, with identity, input hashes and content hash, to the backend below; per-sample generations, scored rows, reports and train logs (MBs) go to the dev box and git as in Stage 0"}
+  ],
+  "backend_options": [
+    {"option": "a 50 GB network volume kept for the programme", "cost": "$3.50 per month (about $7 for two months)", "pros": "measured path in Stage 0 (volume_sync, require_pushed)", "cons": "durable only while it is paid for; one running pod at a time; data centre fixed at creation"},
+    {"option": "an external object store (S3, R2, B2) under a maintainer account", "cost": "a few dollars per month at 25 GB", "pros": "independent of the provider and of pods", "cons": "a new credential and a new transport, not yet built or tested"},
+    {"option": "raise the HF private-storage limit", "cost": "a paid plan", "pros": "the existing relay transport", "cons": "a maintainer account decision"},
+    {"option": "persist bf16 weights only (1.19 GB each, 11.1 GiB for 10)", "cost": "halves any of the above", "pros": "what the evaluation engine loads", "cons": "loses the fp32 master; a scored student does not need it unless a later operation trains from it"}
+  ],
+  "recommendation": "a 50 GB network volume for the programme's lifetime, plus the dev-box copy of the selected initialization. The launch precondition is the same probe run at the TRUE per-object size and the TRUE total, immediately before the first recovery session; a refusal blocks the launch.",
+  "retention": "once a student is scored and its evidence is durable, its weights become retirable under the AGENTS.md 2.5 standing policy unless a declared consumer (e.g. a later on-policy stage) names it",
+  "authorizes": "nothing"
+}

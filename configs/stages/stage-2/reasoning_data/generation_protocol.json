@@ -1,0 +1,45 @@
+{
+  "schema": "aadistill.stage2.reasoning_data.generation_protocol/v1",
+  "status": "PROPOSED (2026-10-21 UTC), NOT FROZEN. The teacher-native generation protocol for stage2.reasoning_master@v1. It is frozen, with its sha256 recorded in the generation run's authorization, only after the maintainer approves the protocol and a budget.",
+  "teacher": {
+    "model": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+    "tokenizer_sha256": "3ec3c124e02b7ace235364350c04b8fc38d34b182aad914fc45430fa925c0f3f",
+    "_identity_owners": "revision and chat template: artifacts/stages/stage-3/corpus_v2/manifest.json and the teacher_cal summary (they agree); tokenizer sha: corpus_v2's manifest (teacher_cal recorded it as null -- a gap this protocol closes by recording it per run)",
+    "thinking_mode": true,
+    "think_opening": "the chat template's generation prompt opens <think>; nothing is prefilled by hand",
+    "system_message": "You are a helpful Assistant. (sessions.SYSTEM_DEFAULT; a source's own system message is kept byte-for-byte)"
+  },
+  "decoding": {
+    "temperature": 0.6, "top_p": 0.95, "top_k": 20, "min_p": 0.0,
+    "_preset": "the teacher's official recommendation, as corpus_v2 and teacher_cal used",
+    "seed_rule": "a distinct recorded seed per candidate and per turn",
+    "candidates": "up to 2 per task: the second only when the first is rejected; both recorded"
+  },
+  "allowance": {
+    "rule": "per turn: block_len - rendered prompt - 8 (aadistill.data.sessions.completion_budget), block_len = 8192",
+    "why": "a trace that does not fit the 8,192-token training block cannot be trained whole and is never cut (P17), so generating past that point buys nothing; this is a DATA-CONSTRUCTION limit, not a measurement budget (P18 governs measurement)",
+    "consequence_recorded": "length_limited candidates are kept in the record with their full token ids, never trimmed into a target; the share of tasks with no admissible trace is reported per stratum and difficulty, because the limit selects against the longest traces"
+  },
+  "engine": {
+    "runner": "scripts/stages/stage-0/calibration_volume/run_battery.py --mode generate (the asynchronous runner that produced teacher_cal), via a Stage-2 adapter for the training task set (NOT YET WRITTEN)",
+    "vllm": "0.27.1 (teacher_cal's measured engine)",
+    "dtype": "bfloat16",
+    "degeneration_check_every": 256,
+    "record_per_run": ["engine and version", "image name AND digest", "CUDA runtime and host driver", "GPU", "tokenizer sha256", "chat template sha256", "git commit and dirty state"]
+  },
+  "record_per_candidate": ["task_id", "content_sha256", "generator_id", "family_id", "axis", "difficulty", "seed (task)", "candidate_index", "seed (sampling) per turn", "prompt_token_ids", "output_token_ids", "raw", "answer", "stop_reason", "natural_termination", "length_limited", "context_limit_reached", "degeneration kind", "generated_tokens", "ttft_seconds", "seconds", "observation per turn (episodes)", "env_result (episodes)"],
+  "verification": {
+    "procedural_static": "stages.calibration_volume.score_battery (scorer protocol v2): the boxed final answer against the generator's gold; termination is judged apart from correctness",
+    "procedural_episode": "environment replay (action protocol v2): success; every action legal is the trace check",
+    "gsm8k_train": "aadistill.data.verify final_number against the human gold",
+    "math_train": "aadistill.data.verify boxed against the human gold",
+    "reading_reuse": "aadistill.data.verify span (already computed for corpus_v2's selected targets)"
+  },
+  "acceptance": "configs/stages/stage-2/reasoning_data/corpus_spec.json :: acceptance, applied by aadistill.data.target_quality",
+  "never": ["fabricate, complete or trim a reasoning trace", "accept, reject or select a target by its length", "replace a teacher target with a public one", "use a no-think or empty-think target (P17)"],
+  "isolation": "every task pool passes configs/stages/stage-2/reasoning_data/isolation_rules.json before any candidate is generated for it",
+  "durability": "the generation records (token ids included) are pushed off the pod and hash-checked before teardown, as teacher_cal's were; they are small (teacher_cal: 59 MB for 4.5M tokens)",
+  "authorizes": "nothing"
+}

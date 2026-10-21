@@ -44,6 +44,7 @@ has exactly one owner:
 | what was deleted, and how to rebuild it | [`logs/maintenance/inventories/checkpoint_tombstones.json`](./logs/maintenance/inventories/checkpoint_tombstones.json) |
 | the working contract for coding agents | [`AGENTS.md`](./AGENTS.md) |
 | the forward design for reasoning-transfer data and evaluation (Stage 0, 2, 4) | [`docs/shared/REASONING_TRANSFER_DESIGN.md`](./docs/shared/REASONING_TRANSFER_DESIGN.md) |
+| the Stage-2 verified-reasoning-data → Stage-3 recovery design (proposed; data audit, quality contract, isolation, comparison, ladder) | [`docs/stages/stage-2/reasoning_data/DESIGN.md`](./docs/stages/stage-2/reasoning_data/DESIGN.md) |
 
 **Research direction.** A **Teacher-Adaptive AutoInitializer**: search over
 initialization operators, operator order and calibration configuration, with

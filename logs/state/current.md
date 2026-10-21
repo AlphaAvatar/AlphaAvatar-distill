@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-21 17:30 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-21 18:30 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -8,6 +8,49 @@ disagree.
 Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
+
+**STAGE-2/3 REASONING DATA: PREPARED AT $0, NOT AUTHORIZED (2026-10-21).**
+Branch `stage2/reasoning-data`, cut from `main` `2a8bae78` (the Stage-0 squash;
+source branch kept, tip `aee9c4ff`). No teacher target was generated, no
+student trained, no provider resource created, and $0 was spent. The design is
+[`docs/stages/stage-2/reasoning_data/DESIGN.md`](../../docs/stages/stage-2/reasoning_data/DESIGN.md);
+its records are under [`stages/stage-2/reasoning_data/`](../stages/stage-2/reasoning_data/).
+- **Audit** (`audit/asset_audit.json`):
+  - corpus_v2's selected targets are wrong for 35.8% of openmath, 11.2% of
+    gsm8k and 14.2% of multihop, and unverifiable for code and tool; only
+    6.06M of its 13.04M supervised tokens are verified correct;
+  - 28 corpus_v2 sessions are near-copies of held-out prompts (27
+    `eval_behavior_v0`, 1 `multihop`);
+  - the historical 2.96M rung is 70.3% padding and cuts 352 traces;
+  - the 519 Stage-0 fluid units are token-exactly reconstructable, but not
+    adopted.
+- **Built and tested at $0:**
+  - core: `aadistill.data.nested_ladder`, `sessions.pack_best_fit` (never
+    cuts), `aadistill.data.target_quality`, and n-gram screening in
+    `aadistill.evaluation.isolation`;
+  - the experiment layer: isolation rules R1–R8, the source catalogue with
+    licenses, and `data/stages/stage-2/reasoning_data/tasks/train_tasks_v1`
+    (2,517 verifiable tasks, every rule passed);
+  - the master-ladder builder, whose pack the trainer's own reader loads.
+- **Proposed, for the maintainer** (`plans/`):
+  - initialization: Stage-0 d4 rank 1 (`fc28e0dd…`), the unique Pareto-dominant
+    candidate on step-0 objectives, with no recovered outcome read;
+  - the 2.96M old-vs-new comparison, under compute contract M1 and gate G1;
+  - the nested 0.86M–5.50M ladder.
+- **Cost forecast** (`plans/cost_forecast.json :: proposal_totals`): $19.68
+  expected / $29.50 hard cap through the comparison; $43.81 / $62.19 for all
+  phases with storage.
+- **Durability.** The HF relay holds about 2.0 GiB (one bf16 student; probe
+  2026-10-21T17:52Z), so a backend is needed before any recovery
+  (`plans/durability_plan.json`).
+- **Needs the maintainer:**
+  1. the $32.57 provider-gap attribution;
+  2. a new cap or envelope;
+  3. the durability backend;
+  4. the initialization, corpus scheme, compute contract and comparison design.
+
+  Owner: `plans/authorization_proposal.json`; decisions.md 2026-10-21 (round
+  opened at $0).
 
 **STAGE-0 CALIBRATION-VOLUME PROGRAMME CLOSED (final $0 closeout, 2026-10-21).**
 Verdict: **EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON

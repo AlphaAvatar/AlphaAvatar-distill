@@ -109,6 +109,11 @@ recovery recipe, and the seeds.
 
 ## 4. Stage 2: offline transfer of generalizable reasoning
 
+> **First study: designed at $0, 2026-10-21, NOT authorized.**
+> [`docs/stages/stage-2/reasoning_data/DESIGN.md`](../stages/stage-2/reasoning_data/DESIGN.md)
+> instantiates this section: a verified teacher-native master corpus, a
+> 2.96M old-vs-new treatment comparison, then a nested 0.86M–5.50M ladder.
+
 **Question.** Which offline data transfers the teacher's problem-solving
 process to unseen rule families?
 

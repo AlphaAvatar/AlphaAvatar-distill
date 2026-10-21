@@ -68,6 +68,18 @@
    "live_state": "logs/stages/stage-1/phase_d1/current.json"
   },
   {
+   "logical_id": "calibration_volume",
+   "kind": "experiment",
+   "stage_id": "0",
+   "scripts": "scripts/stages/stage-0/calibration_volume",
+   "logs": "logs/stages/stage-0/calibration_volume",
+   "artifacts": "artifacts/stages/stage-0/calibration_volume",
+   "configs": "configs/stages/stage-0/calibration_volume",
+   "data": "data/stages/stage-0/calibration_volume",
+   "docs": "docs/stages/stage-0/calibration_volume",
+   "live_state": null
+  },
+  {
    "logical_id": "phase_c2",
    "kind": "experiment",
    "stage_id": "1",

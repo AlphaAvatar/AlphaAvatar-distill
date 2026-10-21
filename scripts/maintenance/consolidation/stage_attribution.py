@@ -1615,6 +1615,73 @@ STAGE_2 = [
             "2026-07 build notes were folded into the historical index and the "
             "decision log; nothing is reconstructed to give the stage a run."),
     ),
+    dict(
+        id="reasoning_data",
+        kind="experiment",
+        stage_id="2",
+        status=("PREPARED AT $0 2026-10-21, NOT AUTHORIZED: asset audit, target "
+                "quality contract, isolation rules R1-R8, a verifiable "
+                "primary-axis task pool (train_tasks_v1), nested-ladder and "
+                "never-cut packing mechanisms, the fixed-initialization proposal "
+                "(Stage-0 d4 rank 1), the 2.96M old-vs-new comparison design "
+                "(compute contract M1, gate G1), the nested ladder plan, cost "
+                "forecast, durability plan and an authorization proposal. No "
+                "teacher target generated, no student trained, $0 spent"),
+        title="Stage-2 verified teacher-native reasoning data, measured through "
+              "Stage-3 controlled recovery",
+        question=("Under one fixed initialization and the fixed historical "
+                  "recovery recipe, does verified teacher-native reasoning data "
+                  "lift a 0.6B student off the fluid-reasoning floor where "
+                  "corpus_v2 left it, and how does that scale over a nested "
+                  "0.86M-5.50M ladder?"),
+        canonical_config="configs/stages/stage-2/reasoning_data/corpus_spec.json",
+        evidence=[
+            E("logs/stages/stage-2/reasoning_data/audit/asset_audit.json",
+              "the $0 audit of corpus_v2, the historical ladder, base_pool_v1, "
+              "teacher_cal and the E1 fluid scores under the new target "
+              "contract and the isolation rules",
+              field="schema", equals="aadistill.stage2.reasoning_data.asset_audit/v1"),
+            E("logs/stages/stage-2/reasoning_data/audit/packing_dry_run.json",
+              "the master-ladder builder run on existing material: the old "
+              "arm cut at 2.96M and the 519 fluid units, token-exact against "
+              "base_pool_v1, read back through the trainer's own reader",
+              field="schema", equals="aadistill.stage2.reasoning_data.packing_dry_run/v1"),
+            E("data/stages/stage-2/reasoning_data/tasks/train_tasks_v1.manifest.json",
+              "the verifiable primary-axis task pool: calibration-split "
+              "families, the training seed range, every isolation rule passed",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/initialization_selection.json",
+              "the fixed-initialization proposal by Pareto dominance on the "
+              "searches' step-0 objectives; no recovered outcome read",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/comparison_design.json",
+              "the PROPOSED 2.96M old-vs-new treatment comparison",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/ladder_plan.json",
+              "the PROPOSED nested data ladder",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/cost_forecast.json",
+              "GPU, CPU and storage forecast from measured rates",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/durability_plan.json",
+              "what must survive and where; the relay's measured headroom",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/authorization_proposal.json",
+              "the decisions and budget the maintainer is asked for",
+              field="authorizes", equals="nothing"),
+        ],
+        external_material=[],
+        decisions=["logs/budget/decisions.md -- 2026-10-21: Stage-2/3 "
+                   "reasoning-data round opened at $0: audit, contracts and a "
+                   "PROPOSED design"],
+        canonical_log_destination="logs/stages/stage-2/reasoning_data",
+        classification_reason=(
+            "Stage 2 by subject and product: it varies the offline training "
+            "DATA a recovered student is taught with (AGENTS.md 4.4, "
+            "reasoning-transfer priority). Stage-3 recovery and eval-set-1 are "
+            "its instruments, as Stage-3 probes were for the Stage-0 and "
+            "Stage-1 experiments."),
+    ),
 ]
 
 #: ---------------------------------------------------------------------------

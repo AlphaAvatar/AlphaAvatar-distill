@@ -2240,6 +2240,38 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "behaviour: a session that ran beside an undeclared resource now "
             "refuses. NO CUDA SURFACE.",
      }),
+    ("2a8bae7848f99076eded2a7c6bf7038f166247c4",
+     "Stage-2 reasoning data at $0: nested ladders, never-cut packing, target quality",
+     {
+        "src/aadistill/data/nested_ladder.py":
+            "NEW MODULE: `nested_order` (largest-remainder interleave of "
+            "caller-declared strata, salted family round-robin inside each), "
+            "`cut_rungs`, `composition_capacity`, `rung_accounting`, "
+            "`require_nested` and `build_ladder` (with a composition-matched "
+            "reserve that never takes a family's last unit). THIS IS A "
+            "DECLARED SEMANTIC CHANGE by construction; nothing existing calls "
+            "it, and every stratum, family, size and rung comes from the "
+            "caller. NO CUDA SURFACE.",
+        "src/aadistill/data/target_quality.py":
+            "NEW MODULE: `assess` keeps every ending, protocol, answer and "
+            "trace category of a teacher candidate apart and applies a "
+            "caller-declared `AcceptancePolicy`; `select_target` takes the "
+            "lowest accepted index (never length); `summarize`. THIS IS A "
+            "DECLARED SEMANTIC CHANGE by construction; verifiers and the "
+            "engine's stop-reason vocabulary are injected. NO CUDA SURFACE.",
+        "src/aadistill/data/sessions.py":
+            "NEW `pack_best_fit` (best-fit-decreasing per system-prompt group, "
+            "never truncating, same-source sessions never sharing a block) and "
+            "its `_finish_block`. `pack_group` and `pack_sessions` are "
+            "unchanged, so every historical pack's bytes are unchanged. THIS IS "
+            "A DECLARED SEMANTIC CHANGE: a new packing path. NO CUDA SURFACE.",
+        "src/aadistill/evaluation/isolation.py":
+            "NEW `ngrams`, `ngram_index` (optional document-frequency filter "
+            "for template n-grams) and `ngram_containment`; `key_overlaps` and "
+            "`require_disjoint` unchanged. THIS IS A DECLARED SEMANTIC CHANGE: "
+            "a new near-duplicate screen whose n and threshold are the "
+            "caller's. NO CUDA SURFACE.",
+     }),
 )
 
 
