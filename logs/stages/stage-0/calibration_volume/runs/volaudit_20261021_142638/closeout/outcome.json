@@ -1,0 +1,24 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "volaudit_20261021_142638",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-21T14:28:23+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": "AUDITED",
+ "passed": true,
+ "outcome": "Pre-retirement listing of volume ugllmlv19t (EUR-IS-1) on a CPU pod: 617 files, 292.45 GB; every file of at most 256 MiB (518 files, 434 MB) fetched into the out-of-tree store and re-hashed equal, and the recovered students hashed on the pod (524 sha256 in all). The tombstone of netvol_20261019_051206 is built from this listing.",
+ "provider_resource_created": true,
+ "pod_id": "6wjl0c32g6f0bw",
+ "provider_confirms_gone": true,
+ "money": {
+  "all_in_usd": 0.0018,
+  "gpu_usd": 0.0017,
+  "disk_usd": 8e-05,
+  "elapsed_minutes": 1.737,
+  "price_per_hour": 0.06,
+  "_basis": "the provider's quoted CPU rate over the elapsed minutes plus 20 GB container disk at $0.10/GB-month, ceiled to the 4-decimal quantum"
+ },
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/volaudit_20261021_142638"
+}
