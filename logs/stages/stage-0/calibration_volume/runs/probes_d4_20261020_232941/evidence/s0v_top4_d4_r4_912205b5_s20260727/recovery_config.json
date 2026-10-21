@@ -1,0 +1,66 @@
+{
+  "stage": "stage3_recovery",
+  "run_name": "s0v_top4_d4_r4_912205b5_s20260727",
+  "_purpose": "Stage-0 Top-4 extension: d4 rank 4 (quality 4) at seed 20260727; only run identity, pack path, student_path and seed differ from the recipe",
+  "student_path": "/workspace/aad/artifacts/stages/stage-0/calibration_volume/candidates/d4/912205b5a106bb868c43f1d24597bfcc",
+  "tokenizer_source": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+  "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+  "teacher": {
+    "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "dtype": "bfloat16"
+  },
+  "data_dir": "artifacts/shared/instruments/ladder_uniform_probe",
+  "groups": null,
+  "packing": "ladder",
+  "block_len": 8192,
+  "dtype": "float32",
+  "autocast_bf16": true,
+  "gradient_checkpointing": true,
+  "device": "auto",
+  "seed": 20260727,
+  "trainable_patterns": [
+    "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+    "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+    "input_layernorm",
+    "post_attention_layernorm",
+    "model\\.norm\\."
+  ],
+  "loss": {
+    "ce_weight": 0.25,
+    "kd_weight": 1.0,
+    "kd_temperature": 1.0,
+    "kd_scope": "all"
+  },
+  "optim": {
+    "lr": 5e-05,
+    "weight_decay": 0.01,
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "eps": 1e-08,
+    "grad_clip": 1.0
+  },
+  "schedule": {
+    "total_steps": 1023,
+    "warmup_steps": 51,
+    "min_lr_frac": 0.1
+  },
+  "batch": {
+    "blocks_per_step": 2,
+    "micro_blocks": 1
+  },
+  "checkpoint": {
+    "save_every": 511,
+    "keep_last": 1
+  },
+  "intervals": {
+    "log_every": 10,
+    "eval_every": 127,
+    "eval_blocks": 16
+  },
+  "out_dir": "artifacts/stages/stage-0/calibration_volume/probes/s0v_top4_d4_r4_912205b5_s20260727/recovery",
+  "rung": 860000,
+  "val_blocks": 16
+}
