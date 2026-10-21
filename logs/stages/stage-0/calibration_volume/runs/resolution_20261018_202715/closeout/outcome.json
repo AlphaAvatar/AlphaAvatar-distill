@@ -1,0 +1,47 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "resolution_20261018_202715",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "prerequisites",
+ "recorded_utc": "2026-10-18T21:36:30+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": "RUN_FAILED",
+ "passed": false,
+ "outcome": "Resolution-check attempt 2: NO COMPLETE MEASUREMENT. The Qwen3-0.6B reference at its 40,960-token context finished 543/720 turns in 55 min, then its long thinking tail thrashed the KV cache (finished-token count flat for 40 min); it was stopped by the operator so the two student units could run (runtime/operator_stop_qwen3_0p6b_dev.log). The driver's per-unit marker RUN_FAILED_UNIT contains the session marker RUN_FAILED, so the launcher ended the session and tore the pod down while the 5.50M student was running (an ordinary harness defect, repaired). Pod deleted after 67.3 min, provider confirms gone.",
+ "provider_resource_created": true,
+ "pod_id": "5j92y6jbmrkalx",
+ "provider_confirms_gone": true,
+ "final_pod_state": {
+  "exists": false,
+  "desired_status": "TERMINATED",
+  "billing": false
+ },
+ "money": {
+  "all_in_usd": 2.031,
+  "gpu_usd": 2.0079,
+  "disk_usd": 0.023,
+  "elapsed_minutes": 67.31,
+  "price_per_hour": 1.79,
+  "authorized_usd": 6.5,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.10/GB-month over the elapsed minutes, ceiled to the 4-decimal quantum"
+ },
+ "session_record_sha256": "6fd462905f696e3929211a94a4d8464d7217462c762ca873b135fa1c65e3e104",
+ "units": {
+  "extracted": {
+   "audit/stage0_calvol_battery/battery.json": {
+    "sha256": "dfac09a058775907131d787e71a18b695d7bef35ad59758d1346d83a31311b2a",
+    "bytes": 1013
+   },
+   "audit/stage0_calvol_battery/records/operator_stop_qwen3_0p6b_dev.log": {
+    "sha256": "6589c118f3754503b393352594d33a8839983b9efe94f87b4d3214166a10d0ea",
+    "bytes": 336
+   },
+   "audit/stage0_calvol_battery/records/qwen3_0p6b_dev.log": {
+    "sha256": "356381bb5b0e20737e6d511002641e935bb1425b4ba3f66cdbd3d1a4a84c51c7",
+    "bytes": 18020
+   }
+  }
+ },
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/resolution_20261018_202715"
+}

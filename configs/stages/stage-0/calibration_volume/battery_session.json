@@ -1,0 +1,189 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.session_plan/v1",
+ "session_kind": "battery",
+ "purpose": "Prerequisite measurement, not the formal experiment: (1) whether the capability-aligned dev battery is solvable by the teacher and off the floor for students recovered under the study's fixed recovery recipe; (2) seed-to-seed variance at fixed init (sa vs sb); (3) teacher-native calibration sessions for the Stage-0 base pool. Every number is a DEVELOPMENT number: dev_v1 is never the formal endpoint.",
+ "tasks": {
+  "dev": {
+   "path": "data/stages/stage-0/calibration_volume/tasks/dev_v1.jsonl",
+   "sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4"
+  },
+  "calibration": {
+   "path": "data/stages/stage-0/calibration_volume/tasks/calibration_v1.jsonl",
+   "sha256": "c8a267ad23164da7e55604a990b973626efecb9f368ba83faed1fb9b892435d3"
+  }
+ },
+ "teacher": {
+  "id": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+ },
+ "students": [
+  {
+   "label": "ctl_r0860k_sa",
+   "role": "permanent 0.86M-rung control, seed sa (positional PCA init, recipe e1_p1_kd_heavy@0.86M)",
+   "recovery_tokens": "0.86M",
+   "dir": "artifacts/stages/stage-0/calibration_volume/students/ctl_r0860k_sa",
+   "relay_files": [
+    {
+     "path": "permanent_controls/preflight_ctl_r0860k_sa/model/chat_template.jinja",
+     "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+     "size": 4049
+    },
+    {
+     "path": "permanent_controls/preflight_ctl_r0860k_sa/model/config.json",
+     "sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+     "size": 1418
+    },
+    {
+     "path": "permanent_controls/preflight_ctl_r0860k_sa/model/generation_config.json",
+     "sha256": "0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83",
+     "size": 205
+    },
+    {
+     "path": "permanent_controls/preflight_ctl_r0860k_sa/model/model.safetensors",
+     "sha256": "573847a730c1a4997a2fa4554ac2fe45d72633b1d8f3234c6ca72aac2ec4468f",
+     "size": 2384234968
+    },
+    {
+     "path": "permanent_controls/preflight_ctl_r0860k_sa/model/tokenizer.json",
+     "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+     "size": 11422650
+    },
+    {
+     "path": "permanent_controls/preflight_ctl_r0860k_sa/model/tokenizer_config.json",
+     "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+     "size": 694
+    }
+   ]
+  },
+  {
+   "label": "ctl_r0860k_sb",
+   "role": "permanent 0.86M-rung control, seed sb (same init and recipe as sa)",
+   "recovery_tokens": "0.86M",
+   "dir": "artifacts/stages/stage-0/calibration_volume/students/ctl_r0860k_sb",
+   "relay_files": [
+    {
+     "path": "permanent_controls/preflight_ctl_r0860k_sb/model/chat_template.jinja",
+     "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+     "size": 4049
+    },
+    {
+     "path": "permanent_controls/preflight_ctl_r0860k_sb/model/config.json",
+     "sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+     "size": 1418
+    },
+    {
+     "path": "permanent_controls/preflight_ctl_r0860k_sb/model/generation_config.json",
+     "sha256": "0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83",
+     "size": 205
+    },
+    {
+     "path": "permanent_controls/preflight_ctl_r0860k_sb/model/model.safetensors",
+     "sha256": "4c6adcf8618716902d763c00a1e64db1d9a6fdcb77472d3f8a0fd5ff157a7629",
+     "size": 2384234968
+    },
+    {
+     "path": "permanent_controls/preflight_ctl_r0860k_sb/model/tokenizer.json",
+     "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+     "size": 11422650
+    },
+    {
+     "path": "permanent_controls/preflight_ctl_r0860k_sb/model/tokenizer_config.json",
+     "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+     "size": 694
+    }
+   ]
+  },
+  {
+   "label": "e1_r2960k_sa_pca",
+   "role": "E1 KD-heavy 2.96M rung, seed sa: the higher-recovery reference",
+   "recovery_tokens": "2.96M",
+   "dir": "artifacts/stages/stage-0/calibration_volume/students/e1_r2960k_sa_pca",
+   "relay_files": [
+    {
+     "path": "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/chat_template.jinja",
+     "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+     "size": 4049
+    },
+    {
+     "path": "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/config.json",
+     "sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+     "size": 1418
+    },
+    {
+     "path": "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/generation_config.json",
+     "sha256": "0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83",
+     "size": 205
+    },
+    {
+     "path": "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/model.safetensors",
+     "sha256": "3f08482c2c8e7372fc87fd2496f50c1c618f61feaec021d73c0cc646413b80c3",
+     "size": 2384234968
+    },
+    {
+     "path": "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/tokenizer.json",
+     "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+     "size": 11422650
+    },
+    {
+     "path": "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/tokenizer_config.json",
+     "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+     "size": 694
+    }
+   ]
+  }
+ ],
+ "runs": [
+  {
+   "label": "ctl_r0860k_sa_dev",
+   "model": "student:ctl_r0860k_sa",
+   "tasks": "dev",
+   "mode": "eval",
+   "trained_context": 8192
+  },
+  {
+   "label": "ctl_r0860k_sb_dev",
+   "model": "student:ctl_r0860k_sb",
+   "tasks": "dev",
+   "mode": "eval",
+   "trained_context": 8192
+  },
+  {
+   "label": "e1_r2960k_sa_pca_dev",
+   "model": "student:e1_r2960k_sa_pca",
+   "tasks": "dev",
+   "mode": "eval",
+   "trained_context": 8192
+  },
+  {
+   "label": "teacher_dev",
+   "model": "teacher",
+   "tasks": "dev",
+   "mode": "eval",
+   "trained_context": null
+  },
+  {
+   "label": "teacher_cal",
+   "model": "teacher",
+   "tasks": "calibration",
+   "mode": "generate",
+   "session_limit": 16384,
+   "seed_base": 20261018
+  }
+ ],
+ "_order": "students first: the floor measurement is the gate the formal design depends on, and the smallest; teacher calibration generation last because it is the longest and is data construction, not measurement",
+ "context_rules": {
+  "student": "trained-context rule of shared.evaluation.uncapped_eval.resolve_context (8192, the recovery block length), as every D-series probe",
+  "teacher": "configured max_position_embeddings (262144): the teacher's own supported context, P18"
+ },
+ "sampling": {
+  "eval": "greedy, shared.evaluation.uncapped_eval.SAMPLING",
+  "generate": "teacher official preset T0.6/top_p0.95/top_k20/min_p0, one seeded request per turn"
+ },
+ "session_limit_note": "16384 tokens end to end is a DATA-CONSTRUCTION bound for calibration sessions, recorded per session as length_limited; it is never applied to a measurement",
+ "hardware": {
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "why": "the teacher's 262144-token context needs ~36 GiB of KV cache for one full-length sequence (36 layers x 8 KV heads x 128 x 2 x bf16 = 144 KiB/token), which does not fit beside the weights on a 48 GB card; an 80 GB card holds it without lowering the context (P18)"
+ },
+ "scoring": "scripts/stages/stage-0/calibration_volume/score_battery.py on the pod and again off-pod; off-pod rows are the record",
+ "authorizes": "nothing"
+}

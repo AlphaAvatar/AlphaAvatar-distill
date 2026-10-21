@@ -1074,3 +1074,28 @@ retrain.
   objective values and B has none, so nothing here is evidence about any
   candidate versus B. See
   [`attempt4/closeout/outcome.json`](../stages/stage-1/phase_c2/runs/attempt4/closeout/outcome.json).
+
+## stage0_calvol/finalists/formal_v1 — Stage-0 initialization candidates (12)
+
+- **Store:** relay `AlphaAvatar/aadistill-artifacts`, prefix
+  `stage0_calvol/finalists/formal_v1/<dose>/<state_id>/` (config,
+  generation config, one `model.safetensors` of 1,192,135,096 B each).
+- **What:** each dose's (d1, d2, d4) distinct Top-4 from its D1 full search
+  under the forward baseline (D1 + `scored_v1`), 596,049,920 parameters.
+- **Identity owners:**
+  [`dose_d4_20261020_054022 … finalists_manifest.json`](../stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022/evidence/d4/finalists/finalists_manifest.json)
+  (d1, d2) and
+  [`dose_d4_20261020_212310 … finalists_manifest.json`](../stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/finalists/finalists_manifest.json)
+  (d4): per file sha256 and size, plus `artifact_digest` and `weights_digest`.
+- **Verification:** 12/12 LFS sha256 and sizes equal to the manifests on
+  2026-10-21 (and in the relay listing of `checkpoint_registry.json`, built
+  with `--hash --relay` the same day).
+- **Retention:** PROTECTED (`reproducibility_required`): the initialization
+  assets a later stage may start from. **The relay is their only copy**; the
+  300 GB volume that also held them was retired on 2026-10-21. A second store
+  is a maintainer decision.
+- **Creation:** `scripts/stages/stage-0/calibration_volume/dose_driver.py`
+  (search, then the finalists' export); license as the teacher's
+  (Qwen3-4B-Thinking-2507, Apache-2.0). Related logs:
+  [`closeout/REPORT.md`](../stages/stage-0/calibration_volume/closeout/REPORT.md)
+  round 3.

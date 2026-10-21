@@ -42,7 +42,7 @@ from pathlib import Path
 from aadistill.governance.authorization import AuthorizationError
 from .artifact_gate import ArtifactManifest, evaluate_teardown, verify_extracted
 from .log_relay import LogRelay, RelaySpec
-from .provider import RunPodProvider, read_api_key
+from .provider import RunPodProvider, read_api_key, reconcile_account
 from .remote import JobSpec, SSHTarget, probe, start_detached
 from .session import (
     SessionContext, SessionSpec, SessionSpecError, missing_arguments,
@@ -219,6 +219,27 @@ def observed_stop_cause(state: "PodState", *,
             "project. Causes outside it include an exhausted provider account "
             "balance, a host failure and an operator action."),
     }
+
+
+#: How long a billing pod's driver may go unanswered before the session ends.
+#: `probe` reads UNKNOWN when nothing answers -- an ssh outage included -- and its
+#: contract is that on a pod still billing that is a reason to keep looking. The
+#: loop ended on the first one: dose_d2_20261019_135821 lost a running search to
+#: about 30 s of ssh failure while the provider reported the pod RUNNING. A crash
+#: still ends the session at once, because a dead driver reads EXITED:n.
+UNANSWERED_DRIVER_GRACE_S = 900.0
+
+
+def driver_terminal(live: str, unanswered_since: float | None, now: float,
+                    grace_s: float = UNANSWERED_DRIVER_GRACE_S
+                    ) -> tuple[str | None, float | None]:
+    """(terminal or None, when the current unanswered streak began)."""
+    if live == "ALIVE":
+        return None, None
+    if live != "UNKNOWN":
+        return f"DRIVER_{live}", unanswered_since
+    since = now if unanswered_since is None else unanswered_since
+    return (f"DRIVER_{live}" if now - since >= grace_s else None), since
 
 
 class SessionRunner:
@@ -463,6 +484,36 @@ class SessionRunner:
                       "provider half"),
         }
         self.say(("account funds OK: " if ok else "ABORT: ") + why)
+        return bool(ok)
+
+    def check_account_resources(self) -> bool:
+        """Does the provider ACCOUNT hold anything this session's records do
+        not account for?
+
+        Every allowance in this project is computed from records, so a pod or
+        network volume no record names bills at `$0/h` in every book while the
+        provider charges for it. On 2026-10-21 the project total itself was
+        found reading `$108` short because 28 closed runs were missing from the
+        run index; a resource missing from the records entirely is the same
+        failure with no closeout to find it later. So before anything is
+        created, the account's live resources must be exactly the ones the
+        session declared (`BudgetSpec.accounted_provider_resources`); anything
+        else, or a listing that cannot be read, refuses at $0.
+
+        ON BY DEFAULT, unlike the funds gate: the empty default declares that
+        nothing else should exist. The check itself is
+        `provider.reconcile_account`, shared with the pod scripts that create
+        outside this runner.
+        """
+        declared = getattr(getattr(self.spec, "budget", None),
+                           "accounted_provider_resources", ())
+        #: `getattr` as in `check_account_funds`: a hand-built runner may carry
+        #: no provider at all, and then there is nothing to list.
+        rec = reconcile_account(getattr(self, "provider", None),
+                                declared() if callable(declared) else declared)
+        self.ev["account_resources"] = rec
+        ok, why = rec["ok"], rec["why"]
+        self.say(("account resources OK: " if ok else "ABORT: ") + why)
         return bool(ok)
 
     # -- 2. precheck: everything this session reads, checked at $0 ---------
@@ -964,6 +1015,7 @@ class SessionRunner:
         #: `check_account_funds` sits with the other $0 gates and BEFORE the
         #: dry-run stop, so a dry run reports the same answer a launch would get.
         if (not self.make_plan() or not self.check_account_funds()
+                or not self.check_account_resources()
                 or not self.run_prechecks()):
             return False
 
@@ -1105,7 +1157,7 @@ class SessionRunner:
                   in self.spec.artifacts.extra_relay_streams(self.context())]
         relay = LogRelay(target, tuple(specs), self.scr / "relay")
 
-        last, terminal = "", ""
+        last, terminal, unanswered_since = "", "", None
         deadline = time.time() + self.a.poll_limit_min * 60
         while time.time() < deadline:
             time.sleep(self.a.poll_seconds)
@@ -1155,10 +1207,14 @@ class SessionRunner:
                     f"{self.plan.hard_terminate_minutes:.0f} min)")
                 break
             live, _ = probe(target, job)
-            if live != "ALIVE":
-                terminal = f"DRIVER_{live}"
+            stop, unanswered_since = driver_terminal(live, unanswered_since, time.time())
+            if stop:
+                terminal = stop
                 self.say(f"driver no longer running: {live}")
                 break
+            if unanswered_since is not None:
+                self.say(f"  driver unanswered for {time.time() - unanswered_since:.0f} s "
+                         "on a billing pod; still looking")
         self.ev["terminal"] = terminal or "POLL_LIMIT"
         self.say(f"polling ended: {self.ev['terminal']} — ${self.usd():.2f}")
         relay.sync_once()

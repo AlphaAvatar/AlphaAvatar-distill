@@ -1,0 +1,260 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.session_plan/v1",
+ "session_kind": "probes",
+ "name": "probes_d1",
+ "treatment": "d1",
+ "purpose": "Stage-0 Top-4 extension, dose d1: 7 units, each one candidate recovered by the frozen recipe at one seed and measured on every item of eval-set-1 (plans/top4_extension.json).",
+ "extension": "logs/stages/stage-0/calibration_volume/plans/top4_extension.json",
+ "extension_sha256": "369b5549b8a2a5a16101090fb7b59dcd27ffe3be3c51dd9b57c5ef1efaa9b4eb",
+ "study_id": "formal_v1",
+ "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+ "teacher": {
+  "id": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+ },
+ "units": [
+  {
+   "label": "s0v_top4_d1_r1_72b76a1c_s20260727",
+   "treatment": "d1",
+   "rank": 1,
+   "quality_order": 1,
+   "state_id": "72b76a1ca4300f1fc3b341c28738f425",
+   "checkpoint_sha256": "49bb3c56b50d95946f7621619084fe85e6f84e9375a843a704e1ab2e53548cae",
+   "seed": 20260727,
+   "path": "DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_rh_d1@v1)->ATTENTION(calib.s0v_rh_d1@v1)->RESIDUAL_WIDTH(calib.s0v_rh_d1@v1)",
+   "candidate_dir": "artifacts/stages/stage-0/calibration_volume/candidates/d1/72b76a1ca4300f1fc3b341c28738f425",
+   "candidate_files": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/config.json",
+     "name": "config.json",
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+     "bytes": 1419
+    },
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/generation_config.json",
+     "name": "generation_config.json",
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+     "bytes": 206
+    },
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/model.safetensors",
+     "name": "model.safetensors",
+     "sha256": "49bb3c56b50d95946f7621619084fe85e6f84e9375a843a704e1ab2e53548cae",
+     "bytes": 1192135096
+    }
+   ]
+  },
+  {
+   "label": "s0v_top4_d1_r2_60e229ac_s20260726",
+   "treatment": "d1",
+   "rank": 2,
+   "quality_order": 2,
+   "state_id": "60e229ac09d88cf52814894ddec0e933",
+   "checkpoint_sha256": "a092bc43630df08a84e14512555aa87b7be4913025b07aefc62aaae3c81e5a4d",
+   "seed": 20260726,
+   "path": "DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_rh_d1@v1)->ATTENTION(calib.s0v_rh_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)",
+   "candidate_dir": "artifacts/stages/stage-0/calibration_volume/candidates/d1/60e229ac09d88cf52814894ddec0e933",
+   "candidate_files": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/config.json",
+     "name": "config.json",
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+     "bytes": 1419
+    },
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/generation_config.json",
+     "name": "generation_config.json",
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+     "bytes": 206
+    },
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/model.safetensors",
+     "name": "model.safetensors",
+     "sha256": "a092bc43630df08a84e14512555aa87b7be4913025b07aefc62aaae3c81e5a4d",
+     "bytes": 1192135096
+    }
+   ]
+  },
+  {
+   "label": "s0v_top4_d1_r2_60e229ac_s20260727",
+   "treatment": "d1",
+   "rank": 2,
+   "quality_order": 2,
+   "state_id": "60e229ac09d88cf52814894ddec0e933",
+   "checkpoint_sha256": "a092bc43630df08a84e14512555aa87b7be4913025b07aefc62aaae3c81e5a4d",
+   "seed": 20260727,
+   "path": "DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_rh_d1@v1)->ATTENTION(calib.s0v_rh_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)",
+   "candidate_dir": "artifacts/stages/stage-0/calibration_volume/candidates/d1/60e229ac09d88cf52814894ddec0e933",
+   "candidate_files": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/config.json",
+     "name": "config.json",
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+     "bytes": 1419
+    },
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/generation_config.json",
+     "name": "generation_config.json",
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+     "bytes": 206
+    },
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/model.safetensors",
+     "name": "model.safetensors",
+     "sha256": "a092bc43630df08a84e14512555aa87b7be4913025b07aefc62aaae3c81e5a4d",
+     "bytes": 1192135096
+    }
+   ]
+  },
+  {
+   "label": "s0v_top4_d1_r3_4df438a8_s20260726",
+   "treatment": "d1",
+   "rank": 3,
+   "quality_order": 3,
+   "state_id": "4df438a839cd1ed057c2277dfcb8922f",
+   "checkpoint_sha256": "3d4cb00edb8cbdbf99afffc408240d920dd75faf9e28611abdf260aa22e6b695",
+   "seed": 20260726,
+   "path": "DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_rh_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)->ATTENTION(calib.s0v_base_d1@v1)",
+   "candidate_dir": "artifacts/stages/stage-0/calibration_volume/candidates/d1/4df438a839cd1ed057c2277dfcb8922f",
+   "candidate_files": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/config.json",
+     "name": "config.json",
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+     "bytes": 1419
+    },
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/generation_config.json",
+     "name": "generation_config.json",
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+     "bytes": 206
+    },
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
+     "name": "model.safetensors",
+     "sha256": "3d4cb00edb8cbdbf99afffc408240d920dd75faf9e28611abdf260aa22e6b695",
+     "bytes": 1192135096
+    }
+   ]
+  },
+  {
+   "label": "s0v_top4_d1_r3_4df438a8_s20260727",
+   "treatment": "d1",
+   "rank": 3,
+   "quality_order": 3,
+   "state_id": "4df438a839cd1ed057c2277dfcb8922f",
+   "checkpoint_sha256": "3d4cb00edb8cbdbf99afffc408240d920dd75faf9e28611abdf260aa22e6b695",
+   "seed": 20260727,
+   "path": "DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_rh_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)->ATTENTION(calib.s0v_base_d1@v1)",
+   "candidate_dir": "artifacts/stages/stage-0/calibration_volume/candidates/d1/4df438a839cd1ed057c2277dfcb8922f",
+   "candidate_files": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/config.json",
+     "name": "config.json",
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+     "bytes": 1419
+    },
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/generation_config.json",
+     "name": "generation_config.json",
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+     "bytes": 206
+    },
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
+     "name": "model.safetensors",
+     "sha256": "3d4cb00edb8cbdbf99afffc408240d920dd75faf9e28611abdf260aa22e6b695",
+     "bytes": 1192135096
+    }
+   ]
+  },
+  {
+   "label": "s0v_top4_d1_r4_91090067_s20260726",
+   "treatment": "d1",
+   "rank": 4,
+   "quality_order": 4,
+   "state_id": "91090067b51c9fd4c0aeb3824bc7f549",
+   "checkpoint_sha256": "111958717d94fd6ac6e82662fe74d9544c9254d0fc93ab4d99cc6816c0ece71f",
+   "seed": 20260726,
+   "path": "ATTENTION(calib.s0v_base_d1@v1)->DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_base_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)",
+   "candidate_dir": "artifacts/stages/stage-0/calibration_volume/candidates/d1/91090067b51c9fd4c0aeb3824bc7f549",
+   "candidate_files": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/config.json",
+     "name": "config.json",
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+     "bytes": 1419
+    },
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/generation_config.json",
+     "name": "generation_config.json",
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+     "bytes": 206
+    },
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/model.safetensors",
+     "name": "model.safetensors",
+     "sha256": "111958717d94fd6ac6e82662fe74d9544c9254d0fc93ab4d99cc6816c0ece71f",
+     "bytes": 1192135096
+    }
+   ]
+  },
+  {
+   "label": "s0v_top4_d1_r4_91090067_s20260727",
+   "treatment": "d1",
+   "rank": 4,
+   "quality_order": 4,
+   "state_id": "91090067b51c9fd4c0aeb3824bc7f549",
+   "checkpoint_sha256": "111958717d94fd6ac6e82662fe74d9544c9254d0fc93ab4d99cc6816c0ece71f",
+   "seed": 20260727,
+   "path": "ATTENTION(calib.s0v_base_d1@v1)->DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_base_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)",
+   "candidate_dir": "artifacts/stages/stage-0/calibration_volume/candidates/d1/91090067b51c9fd4c0aeb3824bc7f549",
+   "candidate_files": [
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/config.json",
+     "name": "config.json",
+     "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+     "bytes": 1419
+    },
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/generation_config.json",
+     "name": "generation_config.json",
+     "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+     "bytes": 206
+    },
+    {
+     "path": "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/model.safetensors",
+     "name": "model.safetensors",
+     "sha256": "111958717d94fd6ac6e82662fe74d9544c9254d0fc93ab4d99cc6816c0ece71f",
+     "bytes": 1192135096
+    }
+   ]
+  }
+ ],
+ "setup_minutes": 20,
+ "budget_phases": {
+  "recovery_x7": 455.0,
+  "eval_x7": 630.0,
+  "pushes_x7": 35.0
+ },
+ "unit_minutes": {
+  "recovery": 65.0,
+  "eval": 90.0,
+  "pushes": 5.0
+ },
+ "unit_minutes_basis": "estimate: recovery measured on an L40S for this recipe (about 60 min); eval-set-1 on an L40S not yet measured, taken at about 1.8x the A100's 49 min",
+ "contingency_fraction": 0.2,
+ "reserve_minutes": 30,
+ "hardware": {
+  "gpu": "NVIDIA L40S",
+  "container_disk_gb": 200,
+  "network_volume": {
+   "id": "b9jwu0g1eg",
+   "data_center": "US-TX-3",
+   "size_gb": 50,
+   "mount": "/runpod-volume",
+   "record": "netvol_20261020_093832"
+  }
+ },
+ "authorizes": "nothing"
+}

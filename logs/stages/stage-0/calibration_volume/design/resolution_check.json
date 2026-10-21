@@ -1,0 +1,747 @@
+{
+ "schema": "aadistill.stage0.resolution_check/v1",
+ "set": "eval-set-1/fluid_reasoning_720/dev_v1",
+ "tasks": 720,
+ "bootstrap": {
+  "resamples": 10000,
+  "unit": "rule family",
+  "seed": 20261019
+ },
+ "per_model": {
+  "teacher": {
+   "static": {
+    "n": 576,
+    "correct": 538,
+    "rate": 0.934,
+    "ci95_family_bootstrap": [
+     0.8939,
+     0.966
+    ]
+   },
+   "interactive": {
+    "n": 144,
+    "correct": 100,
+    "rate": 0.6944,
+    "ci95_family_bootstrap": [
+     0.4963,
+     0.8503
+    ]
+   },
+   "inductive_rule_discovery": {
+    "n": 144,
+    "correct": 140,
+    "rate": 0.9722,
+    "ci95_family_bootstrap": [
+     0.9353,
+     1.0
+    ]
+   },
+   "compositional_generalization": {
+    "n": 144,
+    "correct": 135,
+    "rate": 0.9375,
+    "ci95_family_bootstrap": [
+     0.8837,
+     0.9848
+    ]
+   },
+   "task_contained_deduction": {
+    "n": 192,
+    "correct": 189,
+    "rate": 0.9844,
+    "ci95_family_bootstrap": [
+     0.9688,
+     1.0
+    ]
+   },
+   "abstract_analogical": {
+    "n": 96,
+    "correct": 74,
+    "rate": 0.7708,
+    "ci95_family_bootstrap": [
+     0.6162,
+     0.9222
+    ]
+   },
+   "interactive_adaptation": {
+    "n": 144,
+    "correct": 100,
+    "rate": 0.6944,
+    "ci95_family_bootstrap": [
+     0.4924,
+     0.8526
+    ]
+   },
+   "all": {
+    "n": 720,
+    "correct": 638
+   }
+  },
+  "ctl_0.86M_sa": {
+   "static": {
+    "n": 576,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "interactive": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "inductive_rule_discovery": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "compositional_generalization": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "task_contained_deduction": {
+    "n": 192,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "abstract_analogical": {
+    "n": 96,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "interactive_adaptation": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "all": {
+    "n": 720,
+    "correct": 0
+   }
+  },
+  "ctl_0.86M_sb": {
+   "static": {
+    "n": 576,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "interactive": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "inductive_rule_discovery": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "compositional_generalization": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "task_contained_deduction": {
+    "n": 192,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "abstract_analogical": {
+    "n": 96,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "interactive_adaptation": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "all": {
+    "n": 720,
+    "correct": 0
+   }
+  },
+  "e1_1.60M_sa": {
+   "static": {
+    "n": 576,
+    "correct": 7,
+    "rate": 0.0122,
+    "ci95_family_bootstrap": [
+     0.0017,
+     0.0263
+    ]
+   },
+   "interactive": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "inductive_rule_discovery": {
+    "n": 144,
+    "correct": 1,
+    "rate": 0.0069,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0222
+    ]
+   },
+   "compositional_generalization": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "task_contained_deduction": {
+    "n": 192,
+    "correct": 6,
+    "rate": 0.0312,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0734
+    ]
+   },
+   "abstract_analogical": {
+    "n": 96,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "interactive_adaptation": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "all": {
+    "n": 720,
+    "correct": 7
+   }
+  },
+  "e1_2.96M_sa": {
+   "static": {
+    "n": 576,
+    "correct": 10,
+    "rate": 0.0174,
+    "ci95_family_bootstrap": [
+     0.0036,
+     0.0348
+    ]
+   },
+   "interactive": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "inductive_rule_discovery": {
+    "n": 144,
+    "correct": 1,
+    "rate": 0.0069,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0219
+    ]
+   },
+   "compositional_generalization": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "task_contained_deduction": {
+    "n": 192,
+    "correct": 9,
+    "rate": 0.0469,
+    "ci95_family_bootstrap": [
+     0.0101,
+     0.0977
+    ]
+   },
+   "abstract_analogical": {
+    "n": 96,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "interactive_adaptation": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "all": {
+    "n": 720,
+    "correct": 10
+   }
+  },
+  "e1_5.50M_sa": {
+   "static": {
+    "n": 576,
+    "correct": 2,
+    "rate": 0.0035,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0088
+    ]
+   },
+   "interactive": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "inductive_rule_discovery": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "compositional_generalization": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "task_contained_deduction": {
+    "n": 192,
+    "correct": 2,
+    "rate": 0.0104,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0265
+    ]
+   },
+   "abstract_analogical": {
+    "n": 96,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "interactive_adaptation": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "all": {
+    "n": 720,
+    "correct": 2
+   }
+  },
+  "qwen3_0.6B_cap8192": {
+   "static": {
+    "n": 576,
+    "correct": 257,
+    "rate": 0.4462,
+    "ci95_family_bootstrap": [
+     0.3538,
+     0.5332
+    ]
+   },
+   "interactive": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "inductive_rule_discovery": {
+    "n": 144,
+    "correct": 56,
+    "rate": 0.3889,
+    "ci95_family_bootstrap": [
+     0.2564,
+     0.5249
+    ]
+   },
+   "compositional_generalization": {
+    "n": 144,
+    "correct": 85,
+    "rate": 0.5903,
+    "ci95_family_bootstrap": [
+     0.3725,
+     0.8014
+    ]
+   },
+   "task_contained_deduction": {
+    "n": 192,
+    "correct": 114,
+    "rate": 0.5938,
+    "ci95_family_bootstrap": [
+     0.4709,
+     0.7231
+    ]
+   },
+   "abstract_analogical": {
+    "n": 96,
+    "correct": 2,
+    "rate": 0.0208,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0714
+    ]
+   },
+   "interactive_adaptation": {
+    "n": 144,
+    "correct": 0,
+    "rate": 0.0,
+    "ci95_family_bootstrap": [
+     0.0,
+     0.0
+    ]
+   },
+   "all": {
+    "n": 720,
+    "correct": 257
+   }
+  }
+ },
+ "pairs_static": {
+  "ctl_0.86M_sb - ctl_0.86M_sa": {
+   "static_n": 576,
+   "discordant": 0,
+   "discordance_rate": 0.0,
+   "delta_static": 0.0,
+   "ci95_family_bootstrap": [
+    0.0,
+    0.0
+   ]
+  },
+  "e1_1.60M_sa - ctl_0.86M_sa": {
+   "static_n": 576,
+   "discordant": 7,
+   "discordance_rate": 0.0122,
+   "delta_static": 0.0122,
+   "ci95_family_bootstrap": [
+    0.0017,
+    0.0266
+   ]
+  },
+  "e1_2.96M_sa - ctl_0.86M_sa": {
+   "static_n": 576,
+   "discordant": 10,
+   "discordance_rate": 0.0174,
+   "delta_static": 0.0174,
+   "ci95_family_bootstrap": [
+    0.0039,
+    0.035
+   ]
+  },
+  "e1_5.50M_sa - ctl_0.86M_sa": {
+   "static_n": 576,
+   "discordant": 2,
+   "discordance_rate": 0.0035,
+   "delta_static": 0.0035,
+   "ci95_family_bootstrap": [
+    0.0,
+    0.0087
+   ]
+  },
+  "qwen3_0.6B_cap8192 - ctl_0.86M_sa": {
+   "static_n": 576,
+   "discordant": 257,
+   "discordance_rate": 0.4462,
+   "delta_static": 0.4462,
+   "ci95_family_bootstrap": [
+    0.3532,
+    0.5348
+   ]
+  },
+  "teacher - ctl_0.86M_sa": {
+   "static_n": 576,
+   "discordant": 538,
+   "discordance_rate": 0.934,
+   "delta_static": 0.934,
+   "ci95_family_bootstrap": [
+    0.8943,
+    0.9671
+   ]
+  },
+  "e1_1.60M_sa - ctl_0.86M_sb": {
+   "static_n": 576,
+   "discordant": 7,
+   "discordance_rate": 0.0122,
+   "delta_static": 0.0122,
+   "ci95_family_bootstrap": [
+    0.0017,
+    0.0263
+   ]
+  },
+  "e1_2.96M_sa - ctl_0.86M_sb": {
+   "static_n": 576,
+   "discordant": 10,
+   "discordance_rate": 0.0174,
+   "delta_static": 0.0174,
+   "ci95_family_bootstrap": [
+    0.0038,
+    0.0349
+   ]
+  },
+  "e1_5.50M_sa - ctl_0.86M_sb": {
+   "static_n": 576,
+   "discordant": 2,
+   "discordance_rate": 0.0035,
+   "delta_static": 0.0035,
+   "ci95_family_bootstrap": [
+    0.0,
+    0.0087
+   ]
+  },
+  "qwen3_0.6B_cap8192 - ctl_0.86M_sb": {
+   "static_n": 576,
+   "discordant": 257,
+   "discordance_rate": 0.4462,
+   "delta_static": 0.4462,
+   "ci95_family_bootstrap": [
+    0.3527,
+    0.5354
+   ]
+  },
+  "teacher - ctl_0.86M_sb": {
+   "static_n": 576,
+   "discordant": 538,
+   "discordance_rate": 0.934,
+   "delta_static": 0.934,
+   "ci95_family_bootstrap": [
+    0.8939,
+    0.9663
+   ]
+  },
+  "e1_2.96M_sa - e1_1.60M_sa": {
+   "static_n": 576,
+   "discordant": 15,
+   "discordance_rate": 0.026,
+   "delta_static": 0.0052,
+   "ci95_family_bootstrap": [
+    -0.004,
+    0.0158
+   ]
+  },
+  "e1_5.50M_sa - e1_1.60M_sa": {
+   "static_n": 576,
+   "discordant": 7,
+   "discordance_rate": 0.0122,
+   "delta_static": -0.0087,
+   "ci95_family_bootstrap": [
+    -0.0201,
+    0.0
+   ]
+  },
+  "qwen3_0.6B_cap8192 - e1_1.60M_sa": {
+   "static_n": 576,
+   "discordant": 254,
+   "discordance_rate": 0.441,
+   "delta_static": 0.434,
+   "ci95_family_bootstrap": [
+    0.3449,
+    0.5225
+   ]
+  },
+  "teacher - e1_1.60M_sa": {
+   "static_n": 576,
+   "discordant": 531,
+   "discordance_rate": 0.9219,
+   "delta_static": 0.9219,
+   "ci95_family_bootstrap": [
+    0.8818,
+    0.9557
+   ]
+  },
+  "e1_5.50M_sa - e1_2.96M_sa": {
+   "static_n": 576,
+   "discordant": 12,
+   "discordance_rate": 0.0208,
+   "delta_static": -0.0139,
+   "ci95_family_bootstrap": [
+    -0.0314,
+    -0.0016
+   ]
+  },
+  "qwen3_0.6B_cap8192 - e1_2.96M_sa": {
+   "static_n": 576,
+   "discordant": 253,
+   "discordance_rate": 0.4392,
+   "delta_static": 0.4288,
+   "ci95_family_bootstrap": [
+    0.3377,
+    0.5185
+   ]
+  },
+  "teacher - e1_2.96M_sa": {
+   "static_n": 576,
+   "discordant": 528,
+   "discordance_rate": 0.9167,
+   "delta_static": 0.9167,
+   "ci95_family_bootstrap": [
+    0.8759,
+    0.9506
+   ]
+  },
+  "qwen3_0.6B_cap8192 - e1_5.50M_sa": {
+   "static_n": 576,
+   "discordant": 255,
+   "discordance_rate": 0.4427,
+   "delta_static": 0.4427,
+   "ci95_family_bootstrap": [
+    0.3515,
+    0.5301
+   ]
+  },
+  "teacher - e1_5.50M_sa": {
+   "static_n": 576,
+   "discordant": 536,
+   "discordance_rate": 0.9306,
+   "delta_static": 0.9306,
+   "ci95_family_bootstrap": [
+    0.8902,
+    0.9626
+   ]
+  },
+  "teacher - qwen3_0.6B_cap8192": {
+   "static_n": 576,
+   "discordant": 283,
+   "discordance_rate": 0.4913,
+   "delta_static": 0.4878,
+   "ci95_family_bootstrap": [
+    0.4089,
+    0.5689
+   ]
+  }
+ },
+ "verdict": {
+  "floor_static_rate": 0.02,
+  "reference_off_floor": true,
+  "students_off_floor": {
+   "ctl_0.86M_sa": false,
+   "ctl_0.86M_sb": false,
+   "e1_1.60M_sa": false,
+   "e1_2.96M_sa": false,
+   "e1_5.50M_sa": false
+  },
+  "student_static_rate_by_recovery_dose": [
+   [
+    "0.86M",
+    "ctl_0.86M_sa",
+    0.0
+   ],
+   [
+    "0.86M",
+    "ctl_0.86M_sb",
+    0.0
+   ],
+   [
+    "1.6M",
+    "e1_1.60M_sa",
+    0.0122
+   ],
+   [
+    "2.96M",
+    "e1_2.96M_sa",
+    0.0174
+   ],
+   [
+    "5.5M",
+    "e1_5.50M_sa",
+    0.0035
+   ]
+  ],
+  "reading": "the set separates the same-geometry reference from the floor (static 0.4462, lower bound 0.3538); recovered students off the floor: none. Every student here is PCA-initialized; a D1-initialized student is unmeasured."
+ },
+ "development_numbers_only": true
+}

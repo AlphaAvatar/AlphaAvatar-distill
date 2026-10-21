@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-17 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-21 17:30 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,10 +9,123 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods,
-0 network volumes and $0/h (2026-10-17 17:47 UTC). No D-series tmux
-session, watchdog or monitor is alive. The last pod, `6gqbeysqtywflq` (D3
-probes), was deleted at 15:35:28Z.
+**STAGE-0 CALIBRATION-VOLUME PROGRAMME CLOSED (final $0 closeout, 2026-10-21).**
+Verdict: **EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON
+REASONING NOT RESOLVED**, held as four separate answers (structure, step-0
+state, usable output, reasoning) in
+[`programme_closeout.json`](../stages/stage-0/calibration_volume/closeout/programme_closeout.json) `:: programme_verdict`.
+Stage-0 volume CLOSED; Stage-0 mixture ratio DEFERRED (never run); D-series
+CLOSED; forward baseline D1 + `scored_v1`.
+Nothing is running and nothing is billing: 0 pods, 0 volumes, `$0/h` (provider query 2026-10-21 16:33Z,
+[`runpod_billing_2026-10-21.json`](../budget/provider/runpod_billing_2026-10-21.json) `:: account`).
+- **Budget, reconciled against the provider's billing**
+  ([`budget_reconciliation.json`](../stages/stage-0/calibration_volume/closeout/budget_reconciliation.json);
+  ledger and decisions 2026-10-21):
+  - after the $90 authority: $107.9227 booked, $104.9604 billed, of $126
+    authorized ($90 + $30 + $6); no overrun against any cap in force; the six
+    authorizations that needed a raise came after it was recorded;
+  - the "$108 missing" was the run-index gap, not historical spend; the
+    deriver now finds runs the index misses, and launches refuse while the
+    account holds a resource the records do not account for;
+  - **open for the maintainer:** RunPod billed this account $32.57 more than
+    the records hold, all before 2026-10-18 ($37.93 before the 2026-09-11
+    anchor); 53 pods are named by no record. UNVERIFIED attribution; if it is
+    all project spend, the $643.6571 cap is exceeded by $14.49.
+- **Assets.** 12 initialization candidates on the relay (12/12 sha256
+  verified), PROTECTED in `checkpoint_registry.json`; 24 recovered students'
+  weights retired, tombstoned in `checkpoint_tombstones.json`. The two probe
+  volumes' contents are DERIVED / NOT DIRECTLY VERIFIED.
+- **Next:** Stage-2 teacher-native reasoning data, then Stage-3 recovery — a
+  new session under its own authorization. Facts:
+  [`docs/shared/STAGE2_3_HANDOFF.md`](../../docs/shared/STAGE2_3_HANDOFF.md).
+
+- **Formal analysis** (preregistered):
+  [`design/formal_analysis.json`](../stages/stage-0/calibration_volume/design/formal_analysis.json).
+  - H2: every fluid contrast (static pooled and each axis; 2x-1x, 4x-2x, 4x-1x)
+    is NO-GO, because it is at the floor: 1, 0 and 1 of 714 formal items correct.
+    Usable over the 570 formal static items: 60.2% (d1), 59.3% (d2), 56.1% (d4).
+  - H1: root selections agree far above chance (DEPTH removes the same 8 layers
+    at every dose). The Top-1 order changes at 4x: ATTENTION first, where 1x and
+    2x put DEPTH first.
+- **Top-4 extension:**
+  [`design/extension_analysis.json`](../stages/stage-0/calibration_volume/design/extension_analysis.json).
+  24/24 units (3 A100 Top-1 + 21 L40S), 588 paired contrasts, correct AND usable
+  for every unit of eval-set-1.
+  - Correctness is at the floor everywhere (at most 3/570 static, 0/144
+    episodes).
+  - Static usable ranges 40.0-71.4%. Seed 20260727 beats 20260726 in all 9
+    same-session pairs, by +3.9 to +24.9 points (8/9 CIs exclude 0). Rank k
+    against rank 1 moves it −11.9 to +10.5 points.
+  - Not claimed: that rank predicts capability, stability beyond two seeds, or
+    a hardware effect.
+  - Probe sessions: d1 $15.392, d4 $14.6187, d2 $16.0872 (pod `3weh7q3l8p0ms1`
+    deleted, confirmed gone).
+- **Volumes retired** (AGENTS.md 2.5, weights only): `ugllmlv19t`, `b9jwu0g1eg`
+  and `wn3avnine2` are deleted. Their tombstones are at
+  `runs/netvol_*/closeout/tombstone.json`, and actual cost replaced the
+  reservations. Every record on the 300 GB volume was fetched first
+  (`runs/volaudit_20261021_142638`).
+- **Money.** The programme spent $125.4326 of its $143.5099 ceiling. Its runs
+  are now in `logs/index.json`, so the project row below counts them. Owner:
+  `programme_closeout.json :: money`.
+- **Reporting** (maintainer 2026-10-20/21): every capability unit of eval-set-1,
+  correct AND usable side by side, formal denominators first (fluid 714 items; usable over the 570 formal static
+  items, episodes separately), no pooled score.
+- **Owners.** The run closeouts, `decisions.md` 2026-10-19/20, and
+  [`volume_preregistration.json`](../stages/stage-0/calibration_volume/plans/volume_preregistration.json)
+  (design, d1 → d2 → d4 order, retry_policy, budget rule).
+
+**PERMANENT EVALUATION REGISTRY (maintainer decisions 2026-10-18/19).**
+`data/eval-set/eval-set-1` is **FROZEN** at identity 2 (`62a1a5d3`, 2026-10-19;
+AGENTS.md P10.3).
+- **Components:**
+  - `fluid_reasoning_720` (the Stage-0 dev battery, development-exposed);
+  - `stage3_capability_846` (TriviaQA withheld from git and outside the
+    formal core; measured as supplementary from a staged local copy);
+  - `stage3_legacy_150` (in-sample regression only).
+- **Frozen contents:** validity mask v1 (6 items excluded; formal 714 = 570
+  static + 144 interactive), verified-equivalence independence groups, the
+  formal core, scorer protocol v2 and action protocol v2 with conformance
+  vectors. Historical results stay on v1.
+- **Open maintainer decisions** (`data/eval-set/registry.json`): xLAM's
+  terms, a TriviaQA redistribution basis, and the Code Owners setting on
+  `main`.
+- **Owners:** [`data/eval-set/README.md`](../../data/eval-set/README.md) and
+  `decisions.md` 2026-10-18 and 2026-10-19.
+
+**STAGE-0 CALIBRATION VOLUME, ROUND 2 (2026-10-18; superseded 2026-10-19 by
+the preregistered formal study above, after the overhead fix and the
+maintainer's amendment made it fundable).**
+- **The design.** 1x/2x/4x, one D1 full search and one fixed recovery each.
+  - Priced at $86.98 expected; $77.82 with the per-expansion overhead fix.
+  - Available: $65 in the formal phase and $77.34 in the project.
+  - The 4x search splits across sessions on a network volume.
+- **Resolution check** (on `fluid_reasoning_720`):
+  - Qwen3-0.6B (exactly the student geometry, the students' 8,192-token
+    allowance) scores 257/720.
+  - Every PCA-initialized fixed-recipe student from 0.86M to 5.50M recovery
+    tokens scores 0–10/720.
+  - So the set resolves student-scale models on deduction, composition and
+    induction (not analogy or interactive), and the recipe keeps students at
+    the floor. A D1-initialized student is unmeasured; it is the formal
+    study's first gate.
+- **Money.** The programme spent $17.51 of $92: round 2 added $4.06 for three
+  resolution attempts, two of them repaired engineering failures.
+- **H1 root-level pilot (exploratory, round 1).** FFN and RESIDUAL_WIDTH
+  stabilize with volume, ATTENTION shows no detectable effect, DEPTH is
+  unlabeled.
+- **Owners.**
+  [`REPORT.md`](../stages/stage-0/calibration_volume/closeout/REPORT.md)
+  (round 2 first),
+  [`programme_closeout.json`](../stages/stage-0/calibration_volume/closeout/programme_closeout.json)
+  and `decisions.md` 2026-10-18.
+- **Next.** Maintainer decisions:
+  - fund the amended design (about $90, or about $81 with the overhead fix,
+    which needs a project-cap increase), or authorize a 1x/2x subset (about
+    $46.67);
+  - settle eval-set-1's open decisions.
+
+  Resolved 2026-10-19: the study is preregistered and d1 is running.
 
 **THE D-SERIES IS CLOSED (maintainer final decision, 2026-10-17). D1 +
 `scored_v1` IS THE OFFICIAL FORWARD BASELINE.** It is a selection, not a
@@ -45,10 +158,7 @@ probes all stand unchanged.
 - **Owners.**
   [`programme_closeout.json`](../stages/stage-1/families/d_series/closeout/programme_closeout.json)
   and `decisions.md` 2026-10-17 (last entry).
-- **Next.** Stage-0 calibration data-volume and mixture experiments on this
-  baseline. They are **NOT authorized**; they are designed and authorized in
-  new conversations. Start at
-  [`STAGE0_HANDOFF.md`](../../docs/shared/STAGE0_HANDOFF.md).
+- **Next.** Taken up by the Stage-0 calibration-volume programme above.
 
 **THE PRIMARY TARGET IS FLUID REASONING (maintainer clarification,
 2026-10-16).** The project prioritizes fluid reasoning and adaptive
@@ -790,6 +900,42 @@ invocation with `tee` and `PIPESTATUS[0]`.
 
 ## What `main` carries
 
+**The Stage-0 calibration-volume programme, integrated 2026-10-21 (UTC) by
+SQUASH AND MERGE per AGENTS.md P12.2, on the maintainer's instruction.** One
+commit on `main` collapses everything on top of `32246d12` (the D-series
+squash): the programme's commits up to the closeout tree `fa311c67`, plus the
+pre-integration record commits after it.
+- the data audit, eval-set-1 (frozen, identity 2) and its registry;
+- the root-level pilot, the resolution check, the search-cost bench;
+- the preregistered formal study (d1/d2/d4) and the Top-4 extension (24
+  students), both analysed;
+- the volumes' retirement, the provider-verified budget reconciliation, the
+  index-gap and provider-resource fixes, and the Stage-2/3 handoff.
+
+```text
+source branch : stage0/calibration-volume-mixture   (NOT deleted -- P12.2)
+merge base    : 32246d126ee8b6920a9282a0793dfa81d2f47fae   (main before)
+branch tip    : named by the squash commit; a record on the branch cannot
+                carry its own hash
+squash commit : `git log -1 main`
+closeout tree : fa311c679cbf0454966ed50034849cb48dbf5385
+```
+
+- **What was tested.** The broad convergence ran on the closeout content of
+  `93a7f1c5`: docs, infrastructure, architecture, data and integration suites
+  1645 passed / 31 skipped / 0 failed (the pod-simulator file excluded: it
+  refuses below 20 GiB free and the dev box has 13 GiB); the calibration_volume
+  experiment suite 94 passed. After it, `76c50bb3` added the cap chain to the
+  reconciliation writer (run, output committed) and the docs suite passed again
+  (166) at `fa311c67`.
+- **The honest limit.** The tip adds only pre-integration records on top of
+  `fa311c67`: this section, `current.json` and `decisions.md`.
+- **Reachability.** Every commit hash the records cite was checked before the
+  squash: zero unreachable. The source branch is where this round's commit
+  hashes live, so it is kept permanently.
+- **Where work continues.** On `stage2/reasoning-data`, cut fresh from the
+  squash commit. Continuing on the old branch would re-apply the whole range.
+
 **The D-series and its closure, integrated 2026-10-17 (UTC) by SQUASH AND
 MERGE per AGENTS.md P12.2, on the maintainer's instruction.** One commit on
 `main` collapses everything on top of `c8f714af`: the 149 commits up to the
@@ -819,8 +965,8 @@ tested tree   : 27c279b6b10d93f75e0a3a7d5b11131cf03345d8
 - **Reachability.** Every commit hash the records cite was checked before the
   squash: zero unreachable. The source branch is where this round's commit
   hashes live, so it is kept permanently.
-- **Where work continues.** On `stage0/calibration-volume-mixture`, cut fresh from the squash commit.
-  Continuing on the old branch would re-apply the whole range.
+- **Where work continued.** On `stage0/calibration-volume-mixture`, cut fresh
+  from that squash commit (itself integrated 2026-10-21, above).
 - **Earlier integrations** (`git log main` owns the hashes):
   - `c8f714af`, 2026-10-10: the six-tree information architecture, source
     `migration/info-architecture`;
@@ -1877,7 +2023,9 @@ D1  COMPLETE / NO-GO 2026-10-12         q2 did not confirm against B
 D2  COMPLETE / NO_GO 2026-10-16         c4 did not confirm against B
 D3  COMPLETE 2026-10-17                 STRUCTURAL_CHANGE; probes INCONCLUSIVE
 D-series  CLOSED 2026-10-17             <- forward baseline: D1 + scored_v1 (a selection)
-Stage-0  NEXT PROGRAMME, NOT AUTHORIZED <- calibration volume/mixture; docs/shared/STAGE0_HANDOFF.md
+S0 volume  TERMINAL 2026-10-18 (rnd 2)  formal NOT RUN: amended design not fundable
+      root-level pilot (exploratory)    FFN/WIDTH stabilize with volume; ATTENTION no effect
+S0 mixture  NOT AUTHORIZED              later; docs/shared/STAGE0_HANDOFF.md
 C4  NOT AUTHORIZED
 ```
 
@@ -4013,7 +4161,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$500.1472` spent of `$595.0000`, leaving `$94.8528` |
+| project cap | `$625.5798` spent of `$643.6571`, leaving `$18.0773` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

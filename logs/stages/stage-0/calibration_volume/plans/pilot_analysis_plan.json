@@ -1,0 +1,29 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.pilot_analysis_plan/v1",
+ "frozen_before": "any result of runs/pilot_20261018_122808 (committed while its pod was in setup)",
+ "pilot_plan": "configs/stages/stage-0/calibration_volume/pilot_search_session.json",
+ "design": "configs/stages/stage-0/calibration_volume/pilot_design.json",
+ "status": "EXPLORATORY: a fixed-parent pilot of local selection sensitivity. It informs whether a formal volume study is worth funding; it is not the formal H1 (which is a full search per treatment) and supports no downstream-capability claim.",
+ "measurements": {
+  "decisions": "the root-level decision of every operator under every profile, read from the search's own state journal (structure.json); WIDTH bases recovered from the root child's embedding (width_projection_*.safetensors)",
+  "agreement": {
+   "FFN": "per-layer Jaccard of kept_neurons, averaged over the 36 teacher layers",
+   "ATTENTION": "per-layer Jaccard of kept_heads, averaged over layers",
+   "DEPTH": "Jaccard of the 8 removed layers, and the fraction of the 8 greedy rounds choosing the same layer",
+   "RESIDUAL_WIDTH": "subspace overlap ||Q1^T Q2||_F^2 / k of the orthonormalized projections (k = 1024)"
+  },
+  "chance_levels": "each agreement is reported beside the expectation for two independent uniform selections of the same size (WIDTH: k/n)",
+  "covariates": "realized UESP, forward tokens and number of distinct rule families per profile (from profiles.json metadata)"
+ },
+ "groupings": {
+  "between_resamples": "for each dose d in {1x, 2x, 4x}: the 3 pairs of resamples r1-r3 (DEPTH: the single r1-r2 pair at 1x and 2x)",
+  "nested_to_largest": "for each resample r: agreement of its 1x and 2x decisions with its own 4x decision (the profiles are nested within a resample, so this traces convergence along one draw)",
+  "reference_contrast": "agreement of each pilot profile's decisions with the forward baseline's historical root decisions under calib.domain_balanced@v1 and calib.reasoning_heavy@v2 (the D1 search's own state journal, scored under all_v1, whose DEPTH orders R0 showed identical to scored_v1). DESCRIPTIVE: a mixture contrast, not a volume result and not a mixture verdict."
+ },
+ "reading_rule": {
+  "per_operator": "noise(d) = max - min of the between-resample pair agreements at dose d; effect = mean(4x) - mean(1x); 'stabilizes with volume' if effect > max(noise(1x), noise(4x)) and the 2x mean lies between; 'no detectable volume effect' if |effect| <= max(noise(1x), noise(4x)); 'destabilizes' if effect < -max(noise(1x), noise(4x)). DEPTH (one pair per dose) is reported without a label.",
+  "why_noise_calibrated": "with three pairs per dose there is no defensible fixed threshold; the observed pair spread is the only noise scale the pilot measures, so an effect must exceed it to be called one",
+  "saturation": "described, not labeled: whether the 1x decisions already agree with each resample's own 4x decision as closely as two independent 4x resamples agree with each other"
+ },
+ "authorizes": "nothing"
+}

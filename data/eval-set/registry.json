@@ -1,0 +1,47 @@
+{
+ "schema": "aadistill.eval_set_registry/v1",
+ "_contract": "The project's permanent evaluation sets. A set's bytes are verified against the LAST identity in its identity_history; a protected set (candidate, frozen) gains a new identity only by appending an entry that cites a maintainer authorization. New evaluation needs are added as new sets (eval-set-2, ...), never by rewriting an old one. AUTHORIZES NOTHING.",
+ "default_formal_measurement": "eval-set-1",
+ "statuses": {
+  "draft": "under construction; not protected",
+  "candidate": "content identity pinned and protected; open review items block freezing; formal measurement may read it and must carry its identity and status",
+  "frozen": "declared frozen by the maintainer; protected",
+  "retired": "kept for history; not read by new work"
+ },
+ "eval_sets": [
+  {
+   "eval_set_id": "eval-set-1",
+   "root": "eval-set-1",
+   "manifest": "eval-set-1/manifest.json",
+   "status": "frozen",
+   "identity_history": [
+    {
+     "manifest_sha256": "0909906b67dc491c3c6e5062a64f52956d9d9035aff5fb8fca87de4c738412ac",
+     "recorded_utc": "2026-10-18T20:19:44+00:00",
+     "authorization": "logs/budget/decisions.md 2026-10-18 (Permanent evaluation registry; eval-set-1 registered as a candidate)",
+     "change": "first registration"
+    },
+    {
+     "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+     "recorded_utc": "2026-10-19T05:24:45+00:00",
+     "authorization": "logs/budget/decisions.md 2026-10-19 (Maintainer: eval-set-1 finalization and the Stage-0 volume study authorized ($90 new-spend hard cap))",
+     "change": "validity mask v1 (6 items excluded; formal 714 = 570 static + 144 interactive), verified-equivalence independence groups, formal core (TriviaQA supplementary, xLAM outside the core, Stage-2-train overlaps outside held-out correctness), scorer protocol v2 with conformance vectors and the v1/v2 rescoring record; FROZEN"
+    }
+   ],
+   "open_decisions": [
+    "Salesforce/xlam-function-calling-60k: confirm its access/redistribution terms; until then its 7 prompts stay outside the formal core (they remain in git history since 2026-07-27; removing them from history would be a separate maintainer decision)",
+    "TriviaQA: a redistribution basis would let it enter a future set's core",
+    "enable 'Require review from Code Owners' and the eval-set-integrity status check on main (repository settings; see data/eval-set/README.md)"
+   ],
+   "decisions_applied": [
+    "fluid item defects: 6 excluded by validity_v1 (no item changed)",
+    "generator defects: fixed as ordering@v2, graph_paths@v2, string_induction@v2, letter_analogy@v2 (registry.GENERATORS_V2); v1 output byte-identical",
+    "independence: exact duplicates and verified renamings count once",
+    "scorer: protocol v2 (fluid, capability answer units, legacy) with conformance; historical results stay on v1",
+    "TriviaQA: withheld from git, outside the core, measured as supplementary when staged",
+    "behaviour: duplicate pairs collapsed; 4 Stage-2-train overlaps outside held-out correctness; xLAM prompts outside the core",
+    "frozen 2026-10-19"
+   ]
+  }
+ ]
+}

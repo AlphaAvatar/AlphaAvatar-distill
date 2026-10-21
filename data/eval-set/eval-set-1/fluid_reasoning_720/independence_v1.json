@@ -1,0 +1,163 @@
+{
+ "schema": "aadistill.eval_set_independence/v1",
+ "eval_set_id": "eval-set-1",
+ "component": "fluid_reasoning_720",
+ "unit": "dev_v1",
+ "items_sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+ "rule": "two static items are ONE independent item only when their prompt AND gold are identical after replacing every person name from the generator's name pool (tasks.common.PEOPLE) with a placeholder in order of first appearance -- a bijective renaming that any reader can re-derive from the two prompts with `renaming_canon`. Nothing is merged by similarity, and no item is removed: independent statistics count each group once, beside the per-item rate.",
+ "groups": [
+  {
+   "ids": [
+    "c085ab761c987f433da9",
+    "ddd23524b099bfc3218d",
+    "a41359d6286e662235f0",
+    "edfe8e46c5875426ddfa"
+   ],
+   "canonical_sha256": "4257f56a941ec4b499733388d8e50bc727eea3dd2dc6c13d683b3263abb86024",
+   "renamings": {
+    "c085ab761c987f433da9": {
+     "Quin": "<P1>",
+     "Nia": "<P2>"
+    },
+    "ddd23524b099bfc3218d": {
+     "Ivo": "<P1>",
+     "Quin": "<P2>"
+    },
+    "a41359d6286e662235f0": {
+     "Dev": "<P1>",
+     "Lena": "<P2>"
+    },
+    "edfe8e46c5875426ddfa": {
+     "Fay": "<P1>",
+     "Jun": "<P2>"
+    }
+   }
+  },
+  {
+   "ids": [
+    "f1ae2645d27dcd123345",
+    "188d46bfe362e6a9eebe"
+   ],
+   "canonical_sha256": "9e44039456e5ea8d312837341edac31caf630df557f7a0c5e4f4a44f9f90f6b9",
+   "renamings": {
+    "f1ae2645d27dcd123345": {
+     "Fay": "<P1>",
+     "Quin": "<P2>",
+     "Eli": "<P3>"
+    },
+    "188d46bfe362e6a9eebe": {
+     "Hana": "<P1>",
+     "Kai": "<P2>",
+     "Eli": "<P3>"
+    }
+   }
+  },
+  {
+   "ids": [
+    "406266a212ca1dd1e8ff",
+    "95ff66a06dd6e49105a1",
+    "be5f0d0ea03661275c1b",
+    "dbcfe165a3d5aa8d6ec9",
+    "79a641c7081205298717",
+    "731cd3e142f89b5bb3eb"
+   ],
+   "canonical_sha256": "d8e5e30d59a38fbf107955a8a646ccd12924686817198dd6b7d43020f3f7d443",
+   "renamings": {
+    "406266a212ca1dd1e8ff": {
+     "Quin": "<P1>",
+     "Eli": "<P2>"
+    },
+    "95ff66a06dd6e49105a1": {
+     "Sami": "<P1>",
+     "Pia": "<P2>"
+    },
+    "be5f0d0ea03661275c1b": {
+     "Nia": "<P1>",
+     "Ben": "<P2>"
+    },
+    "dbcfe165a3d5aa8d6ec9": {
+     "Gus": "<P1>",
+     "Rosa": "<P2>"
+    },
+    "79a641c7081205298717": {
+     "Kai": "<P1>",
+     "Dev": "<P2>"
+    },
+    "731cd3e142f89b5bb3eb": {
+     "Pia": "<P1>",
+     "Milo": "<P2>"
+    }
+   }
+  },
+  {
+   "ids": [
+    "1d72d2226602c64c900c",
+    "588045160e969307dff4"
+   ],
+   "canonical_sha256": "e6ddf353b57026a88f3f0aa4e9775eac4319ec25e4e44a38fb5922f2a9e65218",
+   "renamings": {
+    "1d72d2226602c64c900c": {
+     "Dev": "<P1>",
+     "Ava": "<P2>",
+     "Nia": "<P3>"
+    },
+    "588045160e969307dff4": {
+     "Ivo": "<P1>",
+     "Eli": "<P2>",
+     "Ava": "<P3>"
+    }
+   }
+  },
+  {
+   "ids": [
+    "311e0e751018450ef867",
+    "213b73298ddfdf3bbe47"
+   ],
+   "canonical_sha256": "f50584d1e8a73c88ff739c8c6699ce161aacf9a847ea181ec0ad1ab14751159e",
+   "renamings": {
+    "311e0e751018450ef867": {
+     "Ava": "<P1>",
+     "Cara": "<P2>"
+    },
+    "213b73298ddfdf3bbe47": {
+     "Omar": "<P1>",
+     "Pia": "<P2>"
+    }
+   }
+  },
+  {
+   "ids": [
+    "d6ce1d5bf5785849c4d6",
+    "a2eb84a6569969d79b1c"
+   ],
+   "canonical_sha256": "f5762ed32b914afdd4fb46f92b70633bef52e7472ad91cace1e32518b8bb953b",
+   "renamings": {
+    "d6ce1d5bf5785849c4d6": {
+     "Hana": "<P1>",
+     "Kai": "<P2>"
+    },
+    "a2eb84a6569969d79b1c": {
+     "Gus": "<P1>",
+     "Sami": "<P2>"
+    }
+   }
+  }
+ ],
+ "not_counted_as_equivalent": [
+  {
+   "ids_from_audit": "letter.reverse L1 (3 items, same query 'vwxy' and answer 'yxwv')",
+   "why": "their demonstrations differ, so the inductive evidence differs: related items, not one problem; counted separately"
+  },
+  {
+   "ids_from_audit": "code_breaker openings (45 items in 9 cells share a first message)",
+   "why": "the hidden code differs; the episodes are different problems"
+  }
+ ],
+ "counts": {
+  "items": 720,
+  "groups": 6,
+  "independent": 708,
+  "formal_items": 714,
+  "formal_independent": 702
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "dose_d4_20261020_053929",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-20T05:40:16+00:00",
+ "status": "ABANDONED_BEFORE_LAUNCH",
+ "outcome": "Issued and never launched: the Top-4 extension record its plan binds (plans/top4_extension.json) carried written_utc 07:30Z for a document written at about 05:30Z; corrected, which moves the plan hash this authorization is bound to. No launcher ran; no provider resource was created. A fresh chain follows.",
+ "provider_resource_created": false,
+ "money": {
+  "all_in_usd": 0.0,
+  "_basis": "no provider resource existed"
+ }
+}

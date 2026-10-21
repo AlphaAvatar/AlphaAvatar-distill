@@ -1,0 +1,110 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.programme_grant/v1",
+ "grant_id": "stage0.calibration_volume.programme.2026-10-18",
+ "granted_utc": "2026-10-18",
+ "granted_by": "maintainer (task instruction of 2026-10-18 to the executing agent session)",
+ "decision_record": "logs/budget/decisions.md 2026-10-18 (Stage-0 calibration-volume programme started)",
+ "decision": "Formally start the Stage-0 calibration-data experiments in the order data coverage audit -> capability-aligned evaluation -> calibration VOLUME experiment (this programme) -> calibration mixture experiment (later, not funded here). The maintainer approves the data audit, the design, the necessary engineering and the first calibration-volume study; once the data and evaluation prerequisites are complete, the scientific protocol is frozen and the budget is shown sufficient for an interpretable comparison, a new Stage-0 experiment identity and its authorization records may be created and the first formal study run inside the existing cumulative cap and the per-session hard cap.",
+ "maintainer_words": [
+  "GPU 可以用于所有真正需要 GPU 的实验和验证，不要求先运行没有价值的 CPU 替代步骤。",
+  "不得把 D 系列关闭的 Grant 或未使用授权自动转给 Stage-0。",
+  "若现有预算无法完成最低有统计意义的正式对照，不应擅自缩成一个没有科学功效的实验并宣称结论；应给出实际缺口与最小可行方案。",
+  "在已经批准的范围内，普通失败由你自主修复并继续。"
+ ],
+ "funding": {
+  "source": "the project cumulative cap ($595.00), derived by scripts/maintenance/consolidation/derive_budget.py",
+  "project_remaining_at_grant_usd": 94.8528,
+  "not_transferred": "no D-series grant, authorization or unspent allowance (D3 structural $6.4429, D3 probes $6.9605) funds this programme; the C1 execution package's formal allowance does not list this experiment and is not drawn on",
+  "booked_by": "each run's closeout/outcome.json :: money.all_in_usd, discovered through logs/index.json by derive_budget.project_sessions"
+ },
+ "programme_ceiling_usd": 143.5099,
+ "_programme_ceiling": "the project remainder at grant ($94.8528) less a $2.8528 settlement reserve, so a late provider settlement cannot push the project past its cap",
+ "per_session_cap_usd": 50.0,
+ "phases": {
+  "prerequisites": {
+   "session_kinds": [
+    "battery"
+   ],
+   "ceiling_usd": 12.0,
+   "scope": "capability-aligned dev-battery calibration (teacher solvability, student floor, seed variance) and teacher-native calibration-session generation for the Stage-0 base pool; development numbers only, never the formal endpoint",
+   "requires_preregistration": null
+  },
+  "formal_volume": {
+   "session_kinds": [
+    "search",
+    "probes",
+    "dose"
+   ],
+   "ceiling_usd": 126.0,
+   "scope": "the frozen first calibration-volume study as amended 2026-10-19: per dose (1x, 2x, 4x) one D1 full search, one fixed recovery at the same recipe and seed, and the whole of eval-set-1, exactly as preregistered; and, from 2026-10-20, the Top-4 extension (plans/top4_extension.json): each dose's distinct Top-4 recovered by the same recipe at the registered seeds on L40S and measured on all of eval-set-1, with d1's retired Top-2..4 rebuilt digest-pinned on the A100",
+   "requires_preregistration": "logs/stages/stage-0/calibration_volume/plans/volume_preregistration.json",
+   "max_concurrent_sessions": 2
+  },
+  "pilot": {
+   "session_kinds": [
+    "search"
+   ],
+   "ceiling_usd": 15.0,
+   "scope": "the fixed-parent (root-level) selection-stability pilot the maintainer's brief permits ('Fixed-Path Pilot 测量性能和局部结构敏感性'): each forward-baseline operator applied to the teacher under independently resampled base-pool profiles at several doses; exploratory evidence about H1/H3, never a substitute for the formal full search",
+   "requires_preregistration": "configs/stages/stage-0/calibration_volume/pilot_search_session.json"
+  },
+  "formal_engineering": {
+   "session_kinds": [
+    "bench"
+   ],
+   "ceiling_usd": 5.0,
+   "scope": "the search-cost optimization and resume-safety validation the maintainer requires BEFORE any formal full search (2026-10-19): CUDA exactness and speed of the optimized execution path, per-expansion overhead, durable-storage throughput; no scientific measurement",
+   "requires_preregistration": null
+  }
+ },
+ "retry_policy": "ordinary engineering failures before formal measurement are repaired and retried inside the phase envelope with a fresh run id (P12.1); a deterministic paid failure is not retried unchanged; after formal measurement begins only the preregistered retry contract applies",
+ "stop_conditions": "a cumulative boundary, an unreconcilable provider resource, a change to frozen science, or a remaining envelope that cannot fund a corrected unit plus teardown",
+ "authorizes": "the phases above, each run only through its own one-use authorization issued by scripts/stages/stage-0/calibration_volume/governance.py :: issue",
+ "amendments": [
+  {
+   "date": "2026-10-18",
+   "change": "added the `pilot` phase ($10, search sessions, opened only by its committed plan) and lowered `formal_volume` from $80 to $70; the programme ceiling ($92) and the per-session cap ($30) are unchanged",
+   "why": "the prerequisite battery session showed the recovered students at the floor of the capability battery under the fixed 0.86M recovery recipe (0/720 on both seeds), so the formal downstream comparison cannot resolve any initialization difference; the root-level pilot answers the structural question (H1) that needs no recovered student, at a fraction of a formal search's cost",
+   "record": "logs/budget/decisions.md 2026-10-18 (Stage-0 evaluation floor; root-level pilot)"
+  },
+  {
+   "date": "2026-10-18",
+   "change": "moved $5 from `formal_volume` ($70 -> $65) to `pilot` ($10 -> $15); the programme ceiling ($92) and the per-session cap ($30) are unchanged",
+   "why": "the first pilot attempt (pilot_20261018_122808, $1.2469) failed by an ordinary engineering failure: CUDA OOM in DEPTH on the 44.4 GiB L40S, because the Stage-0 base pool's 8,192-token items put up to 22,141 scored rows (12.53 GiB of float32 logits) into one micro-batch of 3. The repair is the same frozen pilot on an 80 GB card, priced from that attempt's measured telemetry: $9.38 expected, $12.59 hard at $1.79/h, which the $8.75 left in the $10 pilot phase cannot fund. The formal phase cannot be opened in this programme (H2 is not resolvable under the fixed recovery recipe), so the move takes nothing a planned session needs",
+   "record": "logs/budget/decisions.md 2026-10-18 (Stage-0 pilot attempt 1 OOM; repaired on an 80 GB card)"
+  },
+  {
+   "date": "2026-10-19",
+   "change": "programme ceiling $92.00 -> $107.5099 (= $17.5099 spent + $90.00); per-session cap $30 -> $50; formal_volume ceiling -> $90.00 with the new `dose` session kind (search + recovery + eval-set-1 for one dose); new `formal_engineering` phase ($5, `bench` sessions, no preregistration) for the optimization and resume-safety validation",
+   "why": "maintainer authorization of 2026-10-19 (logs/budget/decisions.md 2026-10-19): $90 is the hard cap on ALL new spend from that authorization on, project cap $607.6571, programme ceiling $107.5099, formal phase $90, per-session $50. The programme ceiling is what binds the $90: every phase's spend counts against it, so formal_engineering and formal_volume together cannot exceed it.",
+   "decided_by": "maintainer"
+  },
+  {
+   "date": "2026-10-20",
+   "change": "programme ceiling $107.5099 -> $137.5099 (+$30.00); formal_volume ceiling $90.00 -> $120.00; its scope adds the Top-4 extension (probes sessions); per-session cap $50 unchanged; project cap $607.6571 -> $637.6571",
+   "why": "maintainer decision of 2026-10-20 (logs/budget/decisions.md 2026-10-20): every dose's Top-4 from its full search is recovered at two seeds on L40S, Top-1 at the missing seed; +$25 and then +$5",
+   "decided_by": "maintainer"
+  },
+  {
+   "date": "2026-10-20",
+   "change": "formal_volume may run up to two billing sessions at once (`max_concurrent_sessions` = 2); the ceilings and the per-session cap are unchanged",
+   "why": "the Top-4 extension's three L40S probe sessions run about 19 h each after the d4 A100 session; overlapping them (d1 probes beside d4, then d2 probes beside d1) ends the study about 32 h sooner at the same total cost. A session running beside a new one is booked at its authorized hard cap, which its watchdog enforces, and only when named as live; any other unclosed run still refuses",
+   "maintainer_words": [
+    "最多同时两个 (Recommended)",
+    "到帐了"
+   ],
+   "record": "logs/budget/decisions.md 2026-10-20 (Top-4 probes overlap: at most two sessions at once)",
+   "decided_by": "maintainer"
+  },
+  {
+   "date": "2026-10-20",
+   "change": "programme ceiling $137.5099 -> $143.5099 (+$6.00); formal_volume ceiling $120.00 -> $126.00; per-session cap $50 and max_concurrent_sessions 2 unchanged; project cap $637.6571 -> $643.6571",
+   "why": "the re-price after d1's first measured probe units (107 and 131 min a unit on the L40S) fits the extension's budget rule at expected cost, but with d2's probes held at their hard cap (about $21.8) d4's probe session could not start beside them: short by about $5.4. The maintainer chose to keep the overlap (d4 probes start when d1 probes close) and fund it",
+   "maintainer_words": [
+    "并行，加6美金"
+   ],
+   "record": "logs/budget/decisions.md 2026-10-20 (Top-4 probes: +$6 keeps d4's probes beside d2's)",
+   "decided_by": "maintainer"
+  }
+ ]
+}

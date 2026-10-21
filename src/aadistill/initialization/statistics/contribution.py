@@ -45,6 +45,7 @@ import math
 from collections.abc import Collection, Iterable, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass, field
+from typing import Any
 
 import torch
 import torch.nn.functional as F
@@ -116,6 +117,82 @@ def bypassed_blocks(model, skip: Collection[int]):
         yield model
     finally:
         _set_decoder_layers(model, layers)
+
+
+def _hidden_input(args, kwargs):
+    return args[0] if args else kwargs["hidden_states"]
+
+
+@contextmanager
+def captured_block_inputs(model, skip: Collection[int]):
+    """Bypass `skip` and record the hidden-state INPUT of every surviving block.
+
+    Run ONE forward inside this; the yielded dict then maps each surviving
+    block's ORIGINAL index to the exact tensor it received. A block computes
+    `x + f(x)` into a new tensor and never writes its input, so the recorded
+    tensors stay valid after the forward.
+
+    The bypass is done HERE, after the hooks are keyed on the full block list:
+    entered inside `bypassed_blocks` instead, the list it would enumerate is
+    the filtered one, and every index after a skipped block would name its
+    neighbour.
+    """
+    layers = _decoder_layers(model)
+    skip = {int(i) for i in skip}
+    store: dict[int, Any] = {}
+    handles = []
+    for i, block in enumerate(layers):
+        if i in skip:
+            continue
+
+        def record(module, args, kwargs, _i=i):
+            store[_i] = _hidden_input(args, kwargs)
+
+        handles.append(block.register_forward_pre_hook(record, with_kwargs=True))
+    try:
+        with bypassed_blocks(model, skip):
+            yield store
+    finally:
+        for handle in handles:
+            handle.remove()
+
+
+def has_suffix(n_layers: int, skip: Collection[int], start: int) -> bool:
+    """Whether any block after `start` survives `skip`."""
+    skip = {int(i) for i in skip}
+    return any(i not in skip for i in range(int(start) + 1, int(n_layers)))
+
+
+@contextmanager
+def resumed_after_block(model, skip: Collection[int], start: int, hidden):
+    """A forward equivalent to bypassing ``skip | {start}``, from ``start``'s input.
+
+    `hidden` is the input block `start` received in a forward of this model
+    bypassing `skip` (`captured_block_inputs`). Bypassing `start` as well leaves
+    every earlier block computing exactly what it computed there, so the first
+    surviving block after `start` would receive `hidden`. Here every block up to
+    that one is bypassed and `hidden` is injected as its input: the blocks that
+    run are the same blocks, on the same tensor, with the same masks and
+    position embeddings the model derives from its ids -- only the prefix is not
+    recomputed. Requires a surviving block after `start` (`has_suffix`).
+    """
+    layers = _decoder_layers(model)
+    skip = {int(i) for i in skip}
+    suffix = [i for i in range(int(start) + 1, len(layers)) if i not in skip]
+    if not suffix:
+        raise ValueError(f"no block after {start} survives skip {sorted(skip)}")
+
+    def inject(module, args, kwargs):
+        if args:
+            return (hidden, *args[1:]), kwargs
+        return args, {**kwargs, "hidden_states": hidden}
+
+    handle = layers[suffix[0]].register_forward_pre_hook(inject, with_kwargs=True)
+    try:
+        with bypassed_blocks(model, set(range(suffix[0])) | skip):
+            yield model
+    finally:
+        handle.remove()
 
 
 # --- distributional distortion -------------------------------------------------
@@ -659,6 +736,7 @@ def greedy_removal(
     completed_rounds: Iterable[dict] | None = None,
     on_round=None,
     on_candidate=None,
+    score_round=None,
 ) -> dict:
     """Remove `n_remove` blocks one at a time, re-scoring survivors every round.
 
@@ -685,6 +763,13 @@ def greedy_removal(
     exist because attempt 10 spent 10 h 47 m in one expansion emitting nothing:
     a round record is written only when a round completes, and a round is 29-36
     model evaluations, so between rounds the search is silent for hours.
+
+    `score_round(skipped, candidates) -> [score, ...]`, when given, scores a
+    whole round at once -- one value per candidate, in the order given, each
+    the value `score_fn(skipped | {candidate})` would return -- so a scorer can
+    share work between a round's candidates. The table, the tie-break and the
+    callbacks are unchanged; `on_candidate` then fires once the round's values
+    exist.
     """
     if not 0 <= n_remove < n_layers:
         raise ValueError(f"cannot remove {n_remove} of {n_layers} layers")
@@ -711,8 +796,15 @@ def greedy_removal(
         candidates = [i for i in range(n_layers)
                       if i not in skipped and i not in protect]
         table = []
-        for c in candidates:
-            score = float(score_fn(frozenset(skipped + [c])))
+        batch = None
+        if score_round is not None:
+            batch = [float(s) for s in score_round(frozenset(skipped), list(candidates))]
+            if len(batch) != len(candidates):
+                raise ValueError(f"score_round returned {len(batch)} values for "
+                                 f"{len(candidates)} candidates")
+        for k, c in enumerate(candidates):
+            score = (batch[k] if batch is not None
+                     else float(score_fn(frozenset(skipped + [c]))))
             if not math.isfinite(score):
                 raise ValueError(f"objective returned {score} for candidate {c}")
             evaluations += 1

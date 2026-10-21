@@ -1,0 +1,790 @@
+{
+ "schema": "aadistill.eval_set_validity/v1",
+ "eval_set_id": "eval-set-1",
+ "component": "fluid_reasoning_720",
+ "unit": "dev_v1",
+ "items_sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+ "decided_by": "maintainer",
+ "decision": "logs/budget/decisions.md 2026-10-19 (Maintainer: eval-set-1 finalization and the Stage-0 volume study authorized ($90 new-spend hard cap))",
+ "rule": "an item is EXCLUDED from formal scoring only for a defect the independent audit established and the maintainer accepted (no gold, a wrong or underdetermined gold, an answer leak, a highly plausible alternative rule); every other item is valid, and a lower-severity finding is attached to it as an annotation. Items, gold and weights are unchanged; the original 720 and every result scored on them stay bound to the original identity.",
+ "counts": {
+  "items": 720,
+  "formal": 714,
+  "excluded": 6,
+  "formal_static": 570,
+  "formal_interactive": 144,
+  "annotated_items": 71,
+  "annotations_by_class": {
+   "ambiguity.alternative_rule": 1,
+   "ambiguity.degenerate_family_not_exhibited": 1,
+   "ambiguity.minimal_evidence_letter_map": 1,
+   "ambiguity.minimal_evidence_letter_removal": 4,
+   "interactive.budget_has_zero_slack_for_optimal_play": 6,
+   "interactive.explore_each_once_then_optimal_cannot_reach_goal": 2,
+   "interactive.naive_scan_exceeds_budget": 24,
+   "interactive.protocol_prompt_clarity": 48,
+   "near_trivial.answer_equals_example_output": 5,
+   "opening_shared_with_calibration_v1": 2,
+   "reduced_evidence.duplicate_demonstration": 2
+  }
+ },
+ "excluded": [
+  {
+   "id": "82b5c880000f9eaa2c4e",
+   "class": "unanswerable",
+   "reason": "order.seating: the gold 'Nia' never appears in the prompt and the seat count is unstated (generator ordering@v1 dropped a fact)",
+   "audit": "audit/fluid_reasoning_720_quality.json :: headline.fix_or_drop_candidates"
+  },
+  {
+   "id": "83f5811a86b339da4a0c",
+   "class": "underdetermined",
+   "reason": "order.seating: the seat count is unstated; the asked seat is Omar with 2 seats and Kai only in the hidden 3-seat world",
+   "audit": "audit/fluid_reasoning_720_quality.json :: headline.fix_or_drop_candidates"
+  },
+  {
+   "id": "9fba439d2d0b78476103",
+   "class": "ambiguous_rule",
+   "reason": "str.remove_vowels: only 'o' is ever shown removed; 'remove only o' fits every example and gives another answer",
+   "audit": "audit/fluid_reasoning_720_quality.json :: headline.fix_or_drop_candidates"
+  },
+  {
+   "id": "a68fc81fffe597f45d54",
+   "class": "answer_leak",
+   "reason": "letter.double_all: the query 'ijk' is itself a worked example (ijk -> iijjkk)",
+   "audit": "audit/fluid_reasoning_720_quality.json :: headline.fix_or_drop_candidates"
+  },
+  {
+   "id": "d36815ef540363149b6c",
+   "class": "ambiguous_rule",
+   "reason": "str.remove_vowels: only 'i' is ever shown removed; 'remove only i' fits every example and gives another answer",
+   "audit": "audit/fluid_reasoning_720_quality.json :: headline.fix_or_drop_candidates"
+  },
+  {
+   "id": "f9010f2dd60a31946a20",
+   "class": "wrong_gold",
+   "reason": "graph.unreachable: the gold lists Elm, a town on no printed road; from the prompt the answer is 'Birch, Juniper'",
+   "audit": "audit/fluid_reasoning_720_quality.json :: headline.fix_or_drop_candidates"
+  }
+ ],
+ "annotations": {
+  "0e0f80578190aa4ba2bb": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "0ef5ac9cb3dda5765eb4": [
+   {
+    "class": "interactive.budget_has_zero_slack_for_optimal_play",
+    "severity": "tight",
+    "note": "code.exact_only L3 (4 digits 1-6, repeats, black-peg feedback only), budget 9 guesses. A Knuth-style greedy minimax needs 10 guesses in the worst case; a depth-bounded search found a strategy whose worst case is exactly 9 (= budget) - zero slack for an optimal player. This code needs 7 guesses under greedy minimax.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "17890aec77470affc172": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "231b02937fadd59c9e96": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "24e51e06bb02962b763d": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "28b2815dd9c25ca15a9c": [
+   {
+    "class": "interactive.budget_has_zero_slack_for_optimal_play",
+    "severity": "tight",
+    "note": "code.exact_only L3 (4 digits 1-6, repeats, black-peg feedback only), budget 9 guesses. A Knuth-style greedy minimax needs 10 guesses in the worst case; a depth-bounded search found a strategy whose worst case is exactly 9 (= budget) - zero slack for an optimal player. This code needs 6 guesses under greedy minimax.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "2e6302440345cd048696": [
+   {
+    "class": "near_trivial.answer_equals_example_output",
+    "severity": "low",
+    "note": "near-trivial (gold is verbatim an example output; count_cells output depends only on the count, so equal counts give equal outputs)",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.query_in_examples"
+   }
+  ],
+  "2fb6b081ec17696da133": [
+   {
+    "class": "ambiguity.minimal_evidence_letter_removal",
+    "severity": "medium",
+    "note": "examples only show ['e', 'o'] removed; query vowel(s) ['i'] never seen removed; 'remove ['e', 'o']' gives bciqp",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.ambiguities"
+   }
+  ],
+  "31fdee671789bd1e9d48": [
+   {
+    "class": "near_trivial.answer_equals_example_output",
+    "severity": "low",
+    "note": "near-trivial (gold is verbatim an example output; count_cells output depends only on the count, so equal counts give equal outputs)",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.query_in_examples"
+   }
+  ],
+  "321e1efc50a711d7689e": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "33e793fdd484c47d39ae": [
+   {
+    "class": "near_trivial.answer_equals_example_output",
+    "severity": "low",
+    "note": "near-trivial (gold is verbatim an example output; count_cells output depends only on the count, so equal counts give equal outputs)",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.query_in_examples"
+   }
+  ],
+  "35b62fd540369f1d8b2a": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "3f73e572bbeab2b26318": [
+   {
+    "class": "ambiguity.minimal_evidence_letter_map",
+    "severity": "low",
+    "note": "examples only show ['a', 'i', 'o'] replaced; query letters ['u'] never seen; 'replace only seen letters' gives yuus",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.ambiguities"
+   }
+  ],
+  "4052ee9aa0438ad5ca1b": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "43af0362a0cecfa22d6e": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "4a458bed68d694f3c9d4": [
+   {
+    "class": "ambiguity.degenerate_family_not_exhibited",
+    "severity": "n/a",
+    "note": "[3, 3, 3, 3, 3, 3, 3] is an arithmetic (step 0) sequence although the family is seq.affine_recurrence; the item does not exercise its named rule; the item is a constant sequence 3,3,3,3,3,3,3 labelled affine_recurrence (a=3, r=2, c=-3 fixed point)",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.ambiguities"
+   }
+  ],
+  "4b4fd08b33a18c710e88": [
+   {
+    "class": "interactive.budget_has_zero_slack_for_optimal_play",
+    "severity": "tight",
+    "note": "code.exact_only L3 (4 digits 1-6, repeats, black-peg feedback only), budget 9 guesses. A Knuth-style greedy minimax needs 10 guesses in the worst case; a depth-bounded search found a strategy whose worst case is exactly 9 (= budget) - zero slack for an optimal player. This code needs 7 guesses under greedy minimax.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "4cd6bd5ef6460886c5ad": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "4cdea0966a3e934e13ff": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "4cfec3668365227f3fa3": [
+   {
+    "class": "ambiguity.minimal_evidence_letter_removal",
+    "severity": "low",
+    "note": "examples only show ['a', 'e', 'i'] removed; query vowel(s) ['o', 'u'] never seen removed; 'remove ['a', 'e', 'i']' gives ubmbqou",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.ambiguities"
+   }
+  ],
+  "4d40d0e5ff7aa8a6a315": [
+   {
+    "class": "ambiguity.alternative_rule",
+    "severity": "low",
+    "note": "count > -1, length -> 7; count > 0, count > 1 -> 6",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.ambiguities"
+   }
+  ],
+  "50fed2a105445fe6f70c": [
+   {
+    "class": "interactive.explore_each_once_then_optimal_cannot_reach_goal",
+    "severity": "hard-but-solvable",
+    "note": "act.additive buttons {'A': ['add', 6], 'B': ['add', 7], 'C': ['add', -8]} start 14 goal 41 presses 8 oracle-optimal 4: every exploration order fails; exploring only two buttons can succeed in 4; solvable (oracle optimum 4 presses, budget 8) but only by an agent that does not spend a press on every button first; teacher failed this item",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "531dad336804668383e9": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "56f8578ee5ed9a362583": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "5b6f86e1ba7da159e8cb": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "61a337707ca533d0ebc0": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "668056d80964b7964ecc": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "6a7286609511db3cef8f": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "6c5d302320696e819cb9": [
+   {
+    "class": "ambiguity.minimal_evidence_letter_removal",
+    "severity": "medium",
+    "note": "examples only show ['a', 'o'] removed; query vowel(s) ['u'] never seen removed; 'remove ['a', 'o']' gives uvwx",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.ambiguities"
+   }
+  ],
+  "6edc878dabe37a0421d2": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "7722c63e759f807f2b41": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "78fe05bbf4b87a9735cf": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "7d28a50a0e621db5985e": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "7fd38894705cbe3ee2d2": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "83f5a37ae01459f433c5": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "8560009133daa7f7e742": [
+   {
+    "class": "near_trivial.answer_equals_example_output",
+    "severity": "low",
+    "note": "near-trivial (gold is verbatim an example output; count_cells output depends only on the count, so equal counts give equal outputs)",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.query_in_examples"
+   }
+  ],
+  "8e98e374bb9b9743f030": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "9174f48a171a52e37bbd": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "9549e0da795227516b75": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "97df690e3a8e1d0b87e4": [
+   {
+    "class": "ambiguity.minimal_evidence_letter_removal",
+    "severity": "medium",
+    "note": "examples only show ['o', 'u'] removed; query vowel(s) ['a'] never seen removed; 'remove ['o', 'u']' gives avl",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.ambiguities"
+   }
+  ],
+  "98a41cb584e1708ba007": [
+   {
+    "class": "near_trivial.answer_equals_example_output",
+    "severity": "low",
+    "note": "near-trivial (gold is verbatim an example output; count_cells output depends only on the count, so equal counts give equal outputs)",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.query_in_examples"
+   }
+  ],
+  "997c3f3342e7edee694d": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "9d71258a93451859c228": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "9e96d99d3c19f7cccf3b": [
+   {
+    "class": "reduced_evidence.duplicate_demonstration",
+    "severity": "low",
+    "note": "1 demonstration pair is repeated verbatim inside the item (less evidence than its difficulty level implies)",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.duplicates"
+   }
+  ],
+  "a0d6d5f2d85160763d08": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "a0db88347809fc4ea15f": [
+   {
+    "class": "interactive.budget_has_zero_slack_for_optimal_play",
+    "severity": "tight",
+    "note": "code.exact_only L3 (4 digits 1-6, repeats, black-peg feedback only), budget 9 guesses. A Knuth-style greedy minimax needs 10 guesses in the worst case; a depth-bounded search found a strategy whose worst case is exactly 9 (= budget) - zero slack for an optimal player. This code needs 8 guesses under greedy minimax.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "a357e74a3f67c26b5b8a": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "a9252a2569c4e4cd7691": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "a934a1dca2acc5857b31": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "ad2c2a9b0a50de653920": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "ad50ba6f5b47d8de3339": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "ae43e92420e5a16e2933": [
+   {
+    "class": "opening_shared_with_calibration_v1",
+    "severity": "informational",
+    "note": "calibration_v1 item 5b13dff438fc6becaea9 has the byte-identical opening message (different family and hidden env, so no answer leak)",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.duplicates"
+   }
+  ],
+  "b363dd8a49963f939a83": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "b49335658e05ad529091": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "b55e93d7bfa3dfeec3bb": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "b8a481f450f1b8179314": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "b9fa16588c0fda5a5bbc": [
+   {
+    "class": "opening_shared_with_calibration_v1",
+    "severity": "informational",
+    "note": "calibration_v1 item 2e2d6fcd9e7d039c3c53 has the byte-identical opening message (different family and hidden env, so no answer leak)",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.duplicates"
+   },
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "bce4d0ec60718ea92d92": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "c5b9f795779ecf18a18b": [
+   {
+    "class": "interactive.budget_has_zero_slack_for_optimal_play",
+    "severity": "tight",
+    "note": "code.exact_only L3 (4 digits 1-6, repeats, black-peg feedback only), budget 9 guesses. A Knuth-style greedy minimax needs 10 guesses in the worst case; a depth-bounded search found a strategy whose worst case is exactly 9 (= budget) - zero slack for an optimal player. This code needs 8 guesses under greedy minimax.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "c622590d4930807f51fc": [
+   {
+    "class": "interactive.explore_each_once_then_optimal_cannot_reach_goal",
+    "severity": "hard-but-solvable",
+    "note": "act.additive buttons {'A': ['add', 6], 'B': ['add', 8], 'C': ['add', -9]} start 13 goal 28 presses 8 oracle-optimal 4: every exploration order fails; exploring only two buttons can succeed in 4; solvable (oracle optimum 4 presses, budget 8) but only by an agent that does not spend a press on every button first; teacher failed this item",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "c71665378488f22c27be": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "c9cd4cd7adfd6ee05bc4": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "ca627d43a66815ce9220": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "dfd105d9014c2749d623": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "f17f341cbb5ed7b7edf1": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "f39808ccab5011edc40e": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "f5c0188b2fd20c56f641": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "f9f7a7c76dc2de523b87": [
+   {
+    "class": "interactive.budget_has_zero_slack_for_optimal_play",
+    "severity": "tight",
+    "note": "code.exact_only L3 (4 digits 1-6, repeats, black-peg feedback only), budget 9 guesses. A Knuth-style greedy minimax needs 10 guesses in the worst case; a depth-bounded search found a strategy whose worst case is exactly 9 (= budget) - zero slack for an optimal player. This code needs 6 guesses under greedy minimax.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "fa68bebfaa19ebd68dda": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ],
+  "fe53b3ac7a44dd8da48c": [
+   {
+    "class": "reduced_evidence.duplicate_demonstration",
+    "severity": "low",
+    "note": "1 demonstration pair is repeated verbatim inside the item (less evidence than its difficulty level implies)",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.duplicates"
+   }
+  ],
+  "ff07642ee3965028dcad": [
+   {
+    "class": "interactive.protocol_prompt_clarity",
+    "severity": "protocol",
+    "note": "The opening never says f follows a regular rule that extends beyond the queryable range 0..100, while the target is always 101..999. Teacher reasoning repeatedly called this a possible typo; 13/48 teacher episodes ended with ZERO queries (all failed), 11 of them answering the target value itself, i.e. an identity guess f(x)=x). All 48 episodes are identifiable within budget by an adaptive policy (max 2 queries over the env's own function library, max 3 over a broader class of the same shapes with free coefficients; budgets are 4/5/7), so items are solvable; the failure mode is protocol/prior, not gold.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   },
+   {
+    "class": "interactive.naive_scan_exceeds_budget",
+    "severity": "informational",
+    "note": "A naive sequential scan (query 0,1,2,...) needs up to 10 queries to pin mod_scale (m up to 9) and 7 for floor_div (k up to 7), above the L2/L3 budgets (5/4); only informative query choice solves them.",
+    "audit": "audit/fluid_reasoning_720_quality.json :: findings.interactive_issues"
+   }
+  ]
+ },
+ "scorer_findings": "the audit's 249 surface-form rejections are a SCORER property, not an item defect: scorer protocol v2 accepts them (see the manifest's scorer and audit/rescoring_v1_v2.json)"
+}

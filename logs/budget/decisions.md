@@ -12167,3 +12167,885 @@ on a paid pod.
   from the squash commit.
 - **What a merge is not.** It records work. It is not a release, a promotion,
   a grant or a public claim, and no scientific result moved.
+
+## 2026-10-18 — Maintainer: Stage-0 calibration-volume programme started; the $0 audit and the prerequisite battery session
+
+- **Decision (maintainer, 2026-10-18).** Formally start the Stage-0
+  calibration-data experiments in the order data coverage audit →
+  capability-aligned evaluation → calibration **volume** dose–response →
+  calibration mixture (later). The data audit, the design, the necessary
+  engineering and the first volume study are approved, inside the existing
+  project cap and the $30 per-session cap, with no D-series grant or unspent
+  allowance carried over. The forward baseline (D1 + `scored_v1`) is fixed and
+  is not re-validated; D1/D2/D3 are not reopened.
+- **Programme grant.**
+  `logs/budget/approvals/stage0_calibration_volume_programme_grant.json`:
+  - ceiling $92.00 (the $94.8528 project remainder less a $2.8528
+    settlement reserve), $30 per session;
+  - `prerequisites` ($12): battery sessions only, development numbers only;
+  - `formal_volume` ($80): search and probe sessions, opened only by a
+    committed `plans/volume_preregistration.json`.
+  - Each paid run needs its own one-use authorization
+    (`scripts/stages/stage-0/calibration_volume/governance.py :: issue`),
+    bound to the session plan hash and the harness digest. Spend is booked
+    from each run's `closeout/outcome.json :: money.all_in_usd`.
+- **The $0 audit** (`logs/stages/stage-0/calibration_volume/audit/data_audit.json`,
+  from the bytes):
+  - `corpus_v2` has **no** primary-axis content: no rule-induction,
+    compositional or interactive item, 0 rule families. Math and multihop are
+    mixed deduction + supporting knowledge.
+  - The 0.380 "openmath correctness" in the handoff counts the 42.8% of
+    candidates that hit the 8,192-token session limit as wrong; among
+    accepted trajectories it is 0.664.
+  - Correctness falls with length, e.g. GSM8K 0.911 inside the [256, 2048]
+    window vs 0.705 above it, so a longer trace is not a better signal.
+  - Calibration, state-eval, the 0.86M recovery rung and the D-series
+    batteries share no session or source prompt; one prompt text and a few
+    near-duplicates are shared, reported.
+- **Consequence: new targeted data.** A capability-aligned volume study cannot
+  be built from `corpus_v2`. Fifteen project-authored procedural generators
+  over the five P10.2 axes, with family splits by salted hash rank and five
+  evaluation-only generators, produce the dev battery (`dev_v1`, 720) and the
+  calibration prompts (`calibration_v1`, 3,072). No external data and no
+  ARC-AGI material.
+- **Prerequisite session** (`runs/battery_20261018_092345`, A100-SXM4-80GB at
+  $1.79/h, $9.00 hard): teacher solvability at its 262,144 context, the dev
+  floor of two 0.86M-rung recovered controls (seeds sa, sb) and a 2.96M
+  reference, and the teacher-native calibration sessions for the base pool.
+  - `battery_20261018_091856` was closed unlaunched at $0: a dry run found a
+    budget-spec defect whose fix moved the harness digest its authorization
+    bound.
+- **Not decided here.** The doses, the base mixture, the SESOI, the
+  recovery seeds and the decision rules. They are frozen in the
+  preregistration once the dev measurements exist.
+
+## 2026-10-18 — Stage-0: the capability battery is valid, the fixed-recipe students are at its floor; H2 is not resolvable, a root-level H1 pilot replaces the formal search for now
+
+- **Measured** (`runs/battery_20261018_092345`, $3.6303; analyses in
+  `logs/stages/stage-0/calibration_volume/design/`):
+  - **The battery is valid.** The teacher, measured at its own 262,144-token
+    context with greedy decoding, scores 638/720 on `dev_v1`.
+    - By axis: induction 0.972, composition 0.938, deduction 0.984,
+      analogy 0.771, interactive 0.694.
+    - Every difficulty stratum lies between 0.69 and 1.0.
+    - A few families are hard for the teacher too, e.g. `grid.gravity_down`
+      and `probe.floor_div`. They are task-validity items to revise before
+      any final battery.
+  - **The students are at its floor.**
+    - The two permanent 0.86M-rung controls (the recipe of every D-series
+      probe, seeds sa and sb) score **0/720 and 0/720**.
+    - Even a deliberately lenient reading credits at most 11/192 deduction
+      items, which are likely chance name matches, and about 0 elsewhere.
+    - 91–96% of their interactive turns contain no readable action.
+    - The 2.96M reference scores 10/720, 9 of them deduction.
+  - **No minimal detectable effect exists.** The seed discordance is exactly
+    0, so no comparison of initializations after this recovery can move.
+- **Consequence for H2.** EVALUATION NOT RESOLVABLE under the fixed
+  recovery recipe.
+  - The formal downstream comparison (searches, then recovery probes and
+    capability scoring) would spend its budget on outcomes that are zero by
+    construction. It is not run (maintainer brief: fix the evaluation before
+    any large recovery or full-search spend).
+  - Making H2 resolvable needs a recovery recipe that transfers task-contained
+    reasoning, e.g. verified teacher-native traces on calibration-split
+    families. That is a change to the recovery recipe, which AGENTS.md §4.5
+    reserves for the maintainer. It is reported as the minimum viable plan,
+    not executed.
+- **What still runs: H1 at the root.** Structural selection stability needs
+  no recovered student.
+  - Grant amendment: a `pilot` phase of $10, search sessions only, opened by
+    its committed plan; `formal_volume` lowered to $70; the programme ceiling
+    is unchanged.
+  - The pilot applies each forward-baseline operator to the teacher under
+    independently resampled base-pool profiles at three doses. DEPTH, the
+    token-linear expensive operator, runs on a subset through
+    `SearchConfig.impl_profiles`.
+  - It is exploratory evidence about H1/H3 and does not substitute for the
+    formal full search.
+- **Free reference.** At the root, the two historical D1 profiles (which
+  share 39 of 51 sessions) already agree: FFN Jaccard 0.907, ATTENTION 0.942,
+  DEPTH the identical removed set (D1 and D2 search journals, $0).
+- **Teacher calibration data.** The battery session's round-synchronous
+  runner was too slow for teacher generation at the teacher's measured ~4.5k
+  tokens per trace, so that unit was stopped before it produced anything
+  kept.
+  - It is regenerated on `calibration_v2`, a 672-prompt per-cell prefix of
+    v1, with the asynchronous runner (`runs/teachercal_20261018_112755`).
+
+## 2026-10-18 — Stage-0 pilot attempt 1 OOM; repaired on an 80 GB card
+
+- **What happened.** `runs/pilot_20261018_122808` (L40S, 44.4 GiB) completed
+  10 of 31 root states, then failed: CUDA OOM in DEPTH under
+  `calib.s0v_base_d1_r2@v1`, inside `sketch_forward_kl_terms`' `logsumexp`,
+  allocating 11.68 GiB on top of 25.38 GiB in use. Pod deleted, provider
+  confirms gone, $1.2469 booked by its closeout.
+- **Cause, reproduced at $0.** `base_pool_v1` admits items up to 8,192
+  tokens; D1's profiles never exceeded 2,048. Under `length_sorted_v1` at
+  micro-batch 3 that profile's longest batch holds 20,639 scored rows:
+  float32 x 151,936 vocabulary = 11.68 GiB, exactly the failed allocation.
+  The worst batch over all nine profiles is 22,141 rows (12.53 GiB).
+- **An ordinary engineering failure (P12.1), repaired by hardware, not by
+  science.** The baseline's numerics declare cuda / bf16 / fp32
+  accumulation, not a card, so an 80 GB GPU runs the same execution
+  profile; micro-batch, packing and the pool are unchanged. The pilot plan
+  is regenerated with `--gpu "NVIDIA A100-SXM4-80GB"` and priced from the
+  failed attempt's measured telemetry (DEPTH 33.5 min at 75,660 tokens,
+  1.27 min overhead per expansion): bound 284.3 min, $9.38 expected and
+  $12.59 hard at $1.79/h. Treatments, profile hashes and the DEPTH subset
+  are byte-identical.
+- **The failed attempt's states are evidence, not data.** None of its
+  decisions was inspected, and none is pooled with the replacement run,
+  which re-runs all 31 states on one card. The frozen pilot analysis plan
+  is unchanged and applies to the replacement.
+- **Money.** The grant moves $5 from `formal_volume` ($65) to `pilot` ($15);
+  the programme ceiling ($92) and the $30 per-session cap are unchanged.
+  The formal phase cannot open in this programme, because H2 is not
+  resolvable under the fixed recovery recipe.
+
+## 2026-10-18 — Stage-0 calibration-volume programme terminal; formal study NOT RUN
+
+- **Context.** The prerequisites and the root-level pilot are complete:
+  - pilot attempt 2, `runs/pilot_20261018_134131`, A100-80GB, ALL_DONE, 31/31
+    states, $6.953;
+  - programme total $13.4471 of $92.
+- **Pilot (exploratory, frozen plan).**
+  - FFN and RESIDUAL_WIDTH **stabilize with volume**: 4x−1x is +0.035 and
+    +0.057, against between-resample noise of 0.009 and 0.007.
+  - ATTENTION has **no detectable volume effect** (0.956 at 1x).
+  - DEPTH is unlabeled (one pair per dose), with identical removed sets at 2x.
+- **Formal study: NOT RUN, on two independent grounds.**
+  1. **H2: EVALUATION NOT RESOLVABLE** under the fixed recovery recipe.
+  2. **Budget insufficient.**
+     - Priced from the pilot's A100 telemetry, a full D1 search on this pool
+       is $15.40 / $21.91 / $35.19 at 1x / 2x / 4x.
+     - The smallest readable design, H1 only at 1x/2x with three resamples,
+       is $111.93, against $65 in the formal phase and $81.41 in the project.
+- **Decision.** Stop at the terminal condition and report the gap and the
+  minimum viable plan (`calibration_volume/closeout/REPORT.md` section 10).
+  - No reduced, underpowered formal study is run.
+  - The unspent formal ($65), prerequisites ($6.75) and pilot ($6.80)
+    allowances are not transferred anywhere.
+- **Alternatives considered.**
+  - Two resamples per dose: no noise estimate, so H1 is unreadable.
+  - A 4x arm: its session exceeds the $30 per-session cap.
+  - Recovery probes under the fixed recipe: they score zero by construction.
+- **Revisit when.** The maintainer chooses a recovery recipe that makes H2
+  measurable and funds the study.
+
+## 2026-10-18 — Permanent evaluation registry; eval-set-1 registered as a candidate
+
+- **Context.** Maintainer decision of 2026-10-18 (task instruction to the
+  executing agent): one permanent, cross-stage evaluation registry in
+  `data/eval-set/`, whose first set `eval-set-1` holds the Stage-0 720
+  (`fluid_reasoning_720`), the historical Stage-3 846 including the 76
+  behaviour prompts (`stage3_capability_846`), and the historical 150 as
+  in-sample regression only (`stage3_legacy_150`). The maintainer's words fix
+  the rules: no item, answer, weight, scoring semantic or data identity of a
+  registered set changes without explicit maintainer authorization; new needs
+  become eval-set-2, -3, …; no re-sampling to stand in for a frozen asset;
+  duplicates are not independent items; no external data published without a
+  license basis.
+- **Decision (what was done).**
+  - **Assets proven, not re-sampled** (`data/eval-set/eval-set-1/audit/provenance.json`):
+    - the 720 matches its manifest and rebuilds from its generators byte
+      for byte under PYTHONHASHSEED=14;
+    - the battery manifest matches the sha256 recorded in
+      `logs/state/artifact_manifests.md`, and every set matches it in hash,
+      count and ids;
+    - the 150 re-derives to the binding inclusion mask `d6e24e0b…` from the
+      pack and sessions E6 recorded;
+    - every scored run's prompt ids equal the set's;
+    - the current scorers reproduce every historical per-sample verdict
+      checked (144 teacher episodes, 620 capability rows, 300 legacy rows).
+  - **Moves and copies.**
+    - `dev_v1` and `eval_behavior_v0` moved verbatim. Live readers moved
+      with them; frozen records keep their spellings and resolve through
+      `logs/index.json :: historical_paths`.
+    - Six battery files and the battery manifest were copied
+      byte-identically from the durable artifact, which stays.
+    - The 150 are re-derived as prompts plus source gold, never the teacher
+      targets.
+  - **Withheld:** TriviaQA `knowledge` (150). Its card license is
+    `unknown`, and the University of Washington disclaims copyright of the
+    questions; the Apache-2.0 the battery manifest recorded is the code
+    repository's license. Its identity is recorded and the local copy is
+    verified.
+  - **Status `candidate`:** identity pinned and protected; NOT frozen.
+    - Mechanism: `aadistill.evaluation.eval_registry` (generic) and
+      `shared.eval_sets`.
+    - Scoring semantics are pinned by conformance vectors.
+    - Guard: `tests/data/test_eval_set_registry.py`, the
+      `eval-set-integrity` CI workflow, and `.github/CODEOWNERS`.
+- **Independent quality audit of the 720** (`audit/fluid_reasoning_720_quality.json`):
+  - every static item was re-solved from its prompt with solvers that never
+    read the generator code, and every episode was simulated;
+  - 573/576 static golds were confirmed;
+  - six items are defective: two order.seating, one graph.unreachable, the
+    letter_analogy `ijk` leak, and two str.remove_vowels ambiguities;
+  - 6 of the teacher's 82 failures come from those defects;
+  - three generator bugs are behind them;
+  - 0 exact duplicates, about 705 independent items under semantic
+    equivalence;
+  - the five headline items were spot-checked by the registrant.
+- **Isolation** (`audit/isolation.json`):
+  - nothing any model was trained, calibrated or searched on in Stage 0, the
+    D-series or the Stage-3 corpus shares a key with a held-out unit;
+  - `stage2_v1` train shares 4 prompt texts with `eval_behavior_v0`;
+  - `eval_behavior_v0` also holds 2 exact duplicate pairs, which reports
+    count once.
+- **Open decisions for the maintainer** (they block `frozen`; no item was
+  changed; the full list is in `registry.json :: open_decisions`):
+  1. the six defective items, each a new identity whichever way it is
+     decided;
+  2. the generator fixes needed before another set is drawn;
+  3. whether semantically equivalent items count once;
+  4. the scorer's normalization gaps (`\emptyset` for "none", `\mathrm{}`,
+     the Unicode minus, bolded action lines);
+  5. TriviaQA's license: keep withheld, publish after review, or replace in a
+     new set;
+  6. the behaviour set's duplicates and Stage-2 overlaps, and its seven
+     prompts from the access-gated Salesforce/xlam-function-calling-60k
+     (CC-BY-4.0), public here since 2026-07-27;
+  7. enable "Require review from Code Owners" on `main`. That is a repository
+     setting, so the agent did not change it.
+- **Alternatives considered.**
+  - Copying the 720 and the 76 instead of moving them: two owners of one fact.
+  - Freezing scorer bytes: it would block every refactor; the conformance
+    vectors pin behaviour instead.
+  - Publishing TriviaQA under the recorded Apache-2.0: that license is not the
+    question text's.
+- **Risks.**
+  - The 720 is development-exposed and cannot be presented as a blind test.
+  - `graph_paths@v1` is hash-seed dependent for 4 items, so a rebuild needs
+    PYTHONHASHSEED=14.
+- **Revisit when.** The maintainer settles the open decisions and declares
+  the set frozen, or registers eval-set-2.
+
+## 2026-10-18 — Stage-0 resolution attempt 1 failed in setup (unstaged bundle); repaired
+
+- **What happened.** `runs/resolution_20261018_201712` created an A100 pod
+  and setup failed before any measurement: the pod could not fetch
+  `transfer/aad_autoinit_990ec406.bundle` (HTTP 404), because the session
+  bundle was never staged to the relay. Pod deleted after 2.4 min, provider
+  confirms gone, $0.0729 booked by its closeout.
+- **Class.** An ordinary engineering failure (P12.1), identical to C1 attempt
+  1's. The Stage-0 launcher checked contents (plan, harness, authorization)
+  but not whether the pod could obtain the commit.
+- **Repair.**
+  - **Root cause:** `launch.bundle_on_relay` refuses at $0 a non-canonical
+    `--bundle` or a relay without the object, using
+    `stages.phase_c1.bundle`'s derived name, with a regression test.
+  - **The failure itself:** the bundle is staged with
+    `stages.phase_c1.bundle.stage_bundle` before launch.
+  - A fresh run id and authorization; the consumed one is not reused.
+  - Nothing was measured, so nothing is pooled.
+
+## 2026-10-18 — Stage-0 resolution attempt 2: reference stopped, marker defect tore the pod down; repaired
+
+- **What happened.** `runs/resolution_20261018_202715` (A100,
+  $2.031) measured nothing completely.
+  - The Qwen3-0.6B reference at its own 40,960-token context finished
+    543/720 turns in the first minutes.
+  - For the next 40 minutes its long thinking tail added no finished turn
+    while the GPU sat at 100%: 177 sequences thrashing a 651k-token KV cache.
+    At about one finished turn per two minutes it could not end before the
+    session's hard stop, so the operator stopped that unit
+    (`runtime/operator_stop_qwen3_0p6b_dev.log`).
+  - The driver then marked `RUN_FAILED_UNIT:qwen3_0p6b_dev`. The launcher
+    ends a session on any status line that contains `MARKER:RUN_FAILED`, so
+    it tore the pod down while the 5.50M student was running.
+- **Class.** Two ordinary engineering failures before any measurement
+  completed. One is a harness defect (marker vocabulary). The other is a
+  wrong runtime assumption (the reference was priced at 50 min). Nothing
+  partial is used.
+- **Repairs.**
+  - **Markers:** per-unit markers are `UNIT_OK` / `UNIT_FAILED`, and a
+    regression test proves no unit marker contains a session marker.
+  - **Reference cap:** `run_battery --diagnostic-context-cap` records an
+    explicit `context_source: diagnostic_cap` with the uncapped value and a
+    not-a-P18-measurement statement, so a capped run can never pass for a
+    P18 score.
+  - **Plan v2** (`resolution_v2_session.json`; attempts 1–2 keep
+    `resolution_session.json`) measures Qwen3-0.6B at the STUDENTS' 8,192
+    allowance as a matched-allowance diagnostic, plus the two students.
+    - It is priced with the measured setup time: $2.83 expected, $4.59 hard.
+    - Its envelope is the $4.65 left in the prerequisites phase.
+- **What stays unmeasured.** Qwen3-0.6B's own P18 score on the 720 at
+  40,960 tokens. It is a multi-hour job on an 80 GB card unless concurrency
+  is sized to the KV cache, and it is not fundable from the prerequisites
+  phase. It is a decision item.
+
+## 2026-10-18 — Stage-0 volume design amended to one draw per dose; resolution check; formal study still NOT RUN
+
+- **Context.** Maintainer amendment of 2026-10-18 (task instruction to the
+  executing agent):
+  - no independent resamples;
+  - 1x / 2x / 4x, one D1 full search and one fixed recovery each;
+  - one frozen base mixture and one nested draw;
+  - eval-set-1 as the evaluation contract;
+  - claims limited to these three treatments;
+  - verify evaluation resolution with existing checkpoints and necessary
+    reference models before any full search, without inferring D1 students'
+    scores from PCA students';
+  - split the 4x search across sessions under one search identity rather than
+    edit the baseline.
+- **Resolution check** (`design/resolution_check.json`,
+  `runs/resolution_20261018_213745`, $1.9589):
+  - Qwen3-0.6B, exactly the student geometry, under the students' 8,192
+    allowance (a labelled matched-allowance diagnostic): 257/720, static
+    0.446 [0.354, 0.533].
+    - Per axis: deduction 114/192, composition 85/144, induction 56/144,
+      analogy 2/96, interactive 0/144.
+  - Existing PCA-initialized fixed-recipe-family students:
+    - 0.86M: 0 and 0;
+    - 1.60M: 7;
+    - 2.96M: 10;
+    - 5.50M: 2.
+  - **The 720 resolves student-scale models on deduction, composition and
+    induction.** It does not resolve analogy or interactive at that scale.
+  - **The recovery recipe, not the instrument, keeps students at the
+    floor.** More recovery tokens of that recipe do not lift it.
+  - No D1-initialized recovered student exists; that remains unmeasured.
+- **Design** (`plans/formal_design_proposal.json` v2, DESIGN.md section 5a):
+  - the resolution gate measures the 1x D1 student first; below 2% static,
+    H2 is EVALUATION NOT RESOLVABLE and 2x/4x stop;
+  - the 4x search runs as two sessions on one network volume (engine journal
+    resume), with the driver/launcher support specified but not yet built;
+  - covariates recorded per dose; no variance or saturation claims.
+- **Budget.**
+  - As measured: $86.98 expected, $89.82 minimum sequential envelope.
+  - With the ~1.25 min/expansion overhead fixed: $77.82 / $80.66.
+  - Available: formal phase $65, all programme phases $74.49, project
+    $77.34.
+  - **NOT FUNDABLE.** Per P12 a hard-cap increase is the maintainer's, so
+    nothing formal was authorized.
+  - A 1x/2x-only subset (about $46.67) would fit the formal phase. It is not
+    the specified design, so it was not run.
+- **Decision.** Stop at this terminal state:
+  - the registry, the amended design, the resolution evidence and the
+    pricing are committed;
+  - the formal phase stays unopened (no preregistration).
+- **Revisit when.** The maintainer funds the amended design (about $90, or
+  about $81 after the overhead fix), authorizes the 1x/2x subset, or changes
+  the recovery recipe.
+
+## 2026-10-19 — Maintainer: eval-set-1 finalization and the Stage-0 volume study authorized ($90 new-spend hard cap)
+
+- **Context.** Maintainer authorization of 2026-10-19 (task instruction to the
+  executing agent), accepting the previous round's independent review.
+- **Budget** (re-derived from the books and the provider before anything was
+  written):
+  - project cumulative spend $517.6571 (`derive_budget.py`); Stage-0
+    programme spend $17.5099 (`governance.programme_spent`);
+  - provider balance $95.9995 at 2026-10-19T04:50Z, $0/h, 0 pods, 0 network
+    volumes;
+  - the $90 is the hard cap on ALL new spend from this authorization on
+    (GPU, storage, network volumes, failed retries, settlement); it is not
+    added to the earlier unused $77.3429;
+  - new project cap $607.6571; new Stage-0 programme ceiling $107.5099;
+    Stage-0 formal phase $90.00; Stage-0 per-session cap $50.00;
+  - funds only the current Stage-0 volume work and reopens no other
+    experiment or budget.
+- **eval-set-1, decided:**
+  - the six defective fluid items are excluded from formal scoring by a
+    versioned validity mask; formal valid set 714 = 570 static + 144
+    interactive; the original 720 and every historical result stay bound to
+    the original identity and scorer;
+  - Seating, Graph, String-induction and `graph.shortest` hash-seed defects
+    are fixed in NEW generator versions; no frozen item changes;
+  - exact duplicates count once in independent statistics; a semantic
+    near-duplicate counts once only with verifiable equivalence evidence;
+  - false rejections of semantically equivalent answers (math, text, LaTeX,
+    Unicode, action lines) are fixed under a NEW scorer protocol identity
+    with conformance tests and a reproducible old-vs-new rescoring record;
+  - `stage3_legacy_150` stays an in-sample regression unit; TriviaQA stays
+    out of public git and out of the formal core; the two behaviour duplicate
+    pairs enter the de-duplicated statistics; the four Stage-2-train overlaps
+    leave held-out correctness; the Salesforce xLAM items stay out of the
+    public frozen core until their access/redistribution terms are confirmed;
+  - other low-severity findings get a transparent validity classification,
+    with no silent change to items, gold or weights;
+  - then FREEZE eval-set-1; after the freeze any change to items, gold,
+    validity mask, scoring semantics or identity needs a new explicit
+    maintainer authorization.
+- **Design:** 1x / 2x / 4x, one D1 full search (D1 + scored_v1 forward
+  baseline) and one recovery at the same recipe and seed per dose, measured on
+  the fixed eval-set-1. No three-resample requirement. **The "1x below 2% stops
+  2x/4x" rule is rejected**: the study tests whether more calibration data
+  helps, so a low 1x cannot cancel the larger doses. Single-draw treatment
+  comparisons may be reported; cross-seed stability and statistical saturation
+  may not be claimed.
+- **Cost first:** before any formal full search, find and fix the real
+  bottleneck behind the ~1.25 min/expansion overhead without changing search
+  identity, operator numerics, state evaluation, ranking or the resume
+  contract; measure the gain; re-price; re-decide whether 4x must be split;
+  journal, materialized states, checkpoints and resume information must
+  survive a pod loss either way.
+- **Execution** is authorized once eval-set-1 is legally frozen, the protocol
+  and data identities are fixed, the forecast fits the $90 with margin, the
+  provider is checked live and the optimization and resume safety are
+  validated: run 1x, 2x, 4x. Ordinary failures are repaired autonomously; no
+  new paid session starts if forecast spend plus a safety margin does not fit
+  what is left; completing all three doses comparably comes first.
+- **Revisit when.** Any of the stop conditions above is reached.
+
+## 2026-10-19 — eval-set-1 frozen (identity 2, 62a1a5d3)
+
+- **Context.** The maintainer's 2026-10-19 decisions on the independent audit
+  (entry above).
+- **Applied, with no frozen byte changed** (`scripts/shared/data/finalize_eval_set_1.py`):
+  - **Validity mask** (`fluid_reasoning_720/validity_v1.json`): the six audited
+    defects are excluded from formal scoring. The formal set is 714 =
+    570 static + 144 interactive. 71 items carry an annotation for a
+    lower-severity finding: minimal-evidence ambiguities, near-trivial items,
+    duplicated demonstrations, tight interactive budgets, probe prompt clarity.
+  - **Independence** (`independence_v1.json`): 6 knights-and-knaves groups
+    whose prompt and gold are identical under a re-derivable renaming of person
+    names count once (708 independent of 720, 702 of the formal 714). The
+    audit's looser "same query, different demonstrations" group is related, not
+    equivalent, and is counted separately.
+  - **Formal core** (`stage3_capability_846/core_v1.json`):
+    - TriviaQA is supplementary: never in git and never in the core.
+    - The 7 xLAM prompts are outside the core until the dataset's terms are
+      confirmed.
+    - The 4 Stage-2-train overlaps are outside held-out correctness.
+    - The behaviour set's exact duplicate pairs count once.
+  - **Scorer protocol v2** for fluid static items, the answer-correctness
+    capability units and the legacy 150, and **action protocol v2** for
+    episodes, with conformance vectors for v1 and v2.
+    - `audit/rescoring_v1_v2.json` re-scores every local historical
+      generation under both. v2 lost nothing v1 accepted. The only gains are 3
+      letter-spaced answers of the Qwen3-0.6B reference (257 → 260).
+    - The teacher stays at 638.
+  - **Generator v2 versions** (`ordering@v2`, `graph_paths@v2`,
+    `string_induction@v2`, `letter_analogy@v2`, `tasks/registry.py ::
+    GENERATORS_V2`). The v1 generators still rebuild `dev_v1`,
+    `calibration_v1` and `calibration_v2` byte for byte.
+- **Registry.** Status `frozen`. Identity 2 cites the 2026-10-19 authorization.
+  The remaining open items do not block the freeze:
+  - xLAM terms;
+  - a TriviaQA basis;
+  - branch protection on `main`, which is a repository setting. The exact steps
+    and the caveat that one shared admin account cannot bind the rule against
+    itself are in `data/eval-set/README.md`.
+- **Revisit when.** Any further change to eval-set-1 needs a new explicit
+  maintainer authorization; new needs become `eval-set-2`.
+
+## 2026-10-19 — Stage-0 search cost: the real bottleneck fixed and measured; the formal study preregistered and priced inside the $90
+
+- **Bench** (`runs/bench_20261019_051316`, A100-SXM4-80GB in EUR-IS-1 with the
+  study's network volume attached, $0.8757).
+- **Per-expansion overhead: 94.3 s → 23.3 s.**
+  - 77.5 s of it was the save/reload check, which ran two 5-token forwards
+    of a teacher-sized child on the host, with 255 torch threads on a
+    container. Run on the device it takes 0.1 s plus a 6.0 s transfer.
+  - The state id, artifact digest and state evaluation are identical either
+    way.
+- **DEPTH, the cost that dominates (about 80% of every search).** Prefix reuse
+  is BIT-identical on CUDA:
+  - 3 greedy rounds with non-trailing removals: every candidate score, the
+    removal order and the child's bytes;
+  - one full 1x round on 31 items.
+  - Speed: wall clock ×1.376 per round and ×1.65 on the scoring loop alone.
+- **Network volume.** 374 MB/s push, 469 MB/s pull, and a 7.3 GB checkpoint
+  round trip is bit-identical. A mirror off the critical path therefore costs
+  the search nothing.
+- **Unchanged.** Search identity, operator numerics, state evaluation, ranking
+  and the resume contract: the knobs are execution only. One addition to resume:
+  a PRUNED record whose bytes were kept (`prune_weights=False`) is restored
+  like a MEASURED one, so a resumed search does not re-execute pruned states.
+- **Preregistration** (`plans/volume_preregistration.json`):
+  - one nested draw (seed 1308798386, profiles base/rh);
+  - search identities bound by config hash and checked on the pod;
+  - recipe `e1_p1_kd_heavy@0.86M` at seed 20260726;
+  - every item of eval-set-1 at its frozen identity;
+  - the analysis, with no stop rule.
+- **Price.**
+  - Conservative: DEPTH divided by the full-round ×1.376, not the
+    scoring-loop ×1.65.
+  - Expected / hard, per dose: d1 $14.30 / $18.55, d2 $19.15 / $24.36,
+    d4 $29.06 / $36.26.
+  - About $62.51 expected against $84.92 available (after the bench and
+    the volume's $4.20 reservation).
+  - **4x fits one session** under the $50 cap, so it is not split.
+- **Revisit when.** A dose's measured search time departs from its price by
+  more than the contingency.
+
+## 2026-10-19 — Stage-0 dose d1 attempt 1 failed before measurement (authorization kind); repaired
+
+- **What happened.** `dose_d1_20261019_054503` ($0.2541) passed setup and its
+  contract stage. Its search subprocess then loaded the session's one-use DOSE
+  authorization as a `search` artifact, and the governance policy refused it.
+  No search ran; nothing was measured.
+- **Why the $0 checks missed it.** `search_driver --check-only` returned
+  before the authorization step.
+- **Repair.**
+  - `search_driver --auth-kind` (the dose driver passes `dose`).
+  - `--check-only` now loads and plan-binds a real authorization when one is
+    named, so the next attempt's exact artifact is verified at $0 before a
+    pod exists.
+- **Retry.** A fresh run identity and a fresh one-use authorization (P12.1:
+  an engineering failure before formal measurement).
+
+## 2026-10-19 — Stage-0 volume study: each later dose retires the COMPLETE earlier doses' search states
+
+- **Context.** `prune_weights=False` keeps every materialized state on network
+  volume `ugllmlv19t` (300 GB) so a lost pod resumes instead of recomputing.
+  Measured on d1 at 46/92 expansions: 50 states, 178 GB on the pod and 175 GB on
+  the volume; d1 is projected at about 265 GB (about 290 GB at worst) with its
+  recovery. Every dose's states have the same geometry, so d2 cannot fit beside
+  d1's.
+- **Decision (maintainer, 2026-10-19).** Retire, not expand. Before its search,
+  the d2 session deletes d1's states except the committed Top-1, and d4 does
+  the same for d1 and d2. The doses to retire are declared in the d2 and d4
+  plans (`retire_states_of`), so they are bound into each session's plan hash.
+  `dose_driver.retire_completed_states` refuses a dose whose volume record is
+  not `COMPLETE`. It keeps the journal, the records, the Top-1 and the
+  recovered student. It writes a tombstone (`<dose>/retired_states.json`, also
+  copied into the session's records) that names every retired state by id,
+  artifact digest, checkpoint sha256 and size.
+- **Alternatives considered.**
+  - Expand the volume to 900 GB (about $1.40/day).
+  - Expand to 600 GB and rotate (about $0.70/day).
+  - Both keep bytes that nothing reads.
+- **Why it is safe.**
+  - A COMPLETE dose has no resume left, and nothing reads its intermediate
+    states (P8.4; AGENTS.md 2.5).
+  - d2 cannot be authorized until d1 has a closeout, so d1's records are off
+    the pod first.
+  - The states are rebuildable: the search is deterministic from its journal
+    (about 5 h on an A100, about $9).
+- **Unchanged.** The preregistration, search identity, the d1 plan (its hash
+  `53d7aec7…` is bound by the running authorization) and the resume contract
+  of a dose in progress.
+- **Revisit when.** A later analysis needs a non-Top-1 state of a completed
+  dose.
+
+## 2026-10-19 — Stage-0 dose d1 attempt 2 failed in evaluation (legacy prompt shape); the same dose resumes
+
+- **What happened.** `dose_d1_20261019_055515` ($11.5053) finished the search
+  (COMPLETE, 92 expansions, 4.70 h against 5.24 h priced, 14 DEPTH) and the
+  recovery (model `65d2c7a1…`). Both are on the network volume, and their
+  records are off the pod. It then generated all of `fluid_reasoning_720` and
+  pushed it to the volume. `uncapped_eval` generated the 8 capability units
+  and the legacy 150, then raised `KeyError: 'prompt_text'` while scoring the
+  legacy rows. `dose_driver.legacy_prompts` builds those rows itself and left
+  out the field its in-run scorer reads. Those generations were pod-local and
+  are lost, so no capability or legacy endpoint exists.
+- **Why the $0 checks missed it.** They compared flags, file names and the
+  report contract. They never ran the in-run scorer on the rows the driver
+  builds.
+- **Repair.**
+  - `legacy_prompts` carries `shared.eval_sets.prompt_text`, the one spelling
+    every component uses.
+  - Regression: `tests/test_dose_eval_inputs.py`.
+  - A $0 rehearsal ran the whole eval tail with synthetic generations: all 9
+    prompt files scored in-run, and `eval_set_scoring.report` measured every
+    unit of eval-set-1 with none missing.
+- **Retry (preregistered `retry_policy`).** The SAME dose resumes from the
+  volume under a fresh run identity and authorization:
+  - search and recovery are restored, not recomputed;
+  - fluid's finished generation is rescored, not regenerated;
+  - the capability units and the legacy 150 are generated once, since no
+    complete endpoint of theirs ever existed.
+  - This yields one complete measurement of d1, never a second one.
+
+## 2026-10-19 — Stage-0 dose d1 resume: the report's JSONL reader and the resume's unit markers repaired
+
+- **Attempt 3** (`dose_d1_20261019_122630`, $0): all six create calls were
+  refused for capacity. EUR-IS-1, the volume's datacenter, lists only the
+  A100-SXM4-80GB, and it showed none free. This was a provider transient.
+- **Attempt 4** (`dose_d1_20261019_125359`, $0.873):
+  - search and recovery were restored from the volume (recovery sha verified);
+  - fluid's generation was reused;
+  - the capability units and the legacy 150 were generated and pushed to the
+    volume.
+- **What failed.** `eval_set_scoring.report` then raised
+  `JSONDecodeError: Unterminated string`. It split JSONL with
+  `str.splitlines()`, which also breaks on U+2028, U+2029 and U+0085.
+  `json.dumps(ensure_ascii=False)` writes those raw inside a generation's text.
+  This was reproduced at $0, and no score was read.
+- **Repair.**
+  - `read_jsonl` splits on "\n" only, both in the report's readers and in
+    `score_battery`.
+  - Regression in `tests/data/test_eval_set_registry.py`; it fails with the
+    pod's exact error on the old reader.
+- **A false flag found on the way.** The resume re-marked the search and
+  recovery units it had restored, so the launcher went after files the
+  session never pulled and recorded `PRODUCTS_UNSECURED`. On a success that
+  flag blocks teardown and holds the pod to its hard stop (about 10 h).
+  - Restored units are no longer re-marked.
+  - The eval unit's two logs are written on every path, saying so when a
+    generation was restored rather than produced.
+- **Next.** Every generation of d1 is now on the volume, so the next resume
+  only rescores (preregistered `retry_policy`: finished units rescored, never
+  regenerated).
+
+## 2026-10-19 — Stage-0 dose d2: the search mirror died at start; restored by hand, fixed for d4
+
+- **What failed.** In `dose_d2_20261019_135821` the dose driver starts the
+  `volume_sync.py push --loop 120` mirror before the search creates its
+  directory. With nothing on the volume to pull, the first pass found no
+  source and exited 1 (14:14:12Z, `mirror.log`).
+  - The search kept running normally, but every state stayed on the pod's
+    local disk only: 37 of 92 expansions and 111 GB by 17:20Z.
+  - The final push after the search still runs, so a pod that survives
+    loses nothing. A lost pod would have cost the whole search so far.
+  - d1 was not affected: its first pass found the directory the earlier
+    abandoned attempt had left.
+- **Repair on the live run** (17:3xZ). This was an execution-only action:
+  nothing in the running driver or the search was touched.
+  - A separate process on the pod, `/workspace/jobs/manual_mirror_d2.py`,
+    copies with the same rule as `volume_sync.sync`: add or replace by size
+    and mtime, never delete.
+  - It writes through its own temp suffix, so it cannot collide with the
+    driver's final push.
+  - It stops when the search process (pid 3443) exits.
+  - Its log is `audit/stage0_calvol_dose/d2/manual_mirror.log`.
+- **Fix for d4.** In loop mode, `volume_sync` now logs `waiting` and keeps
+  looping while the source is absent. A single pass still reports a missing
+  source exactly as before.
+  - Regression: `scripts/stages/stage-0/calibration_volume/tests/test_volume_sync.py`.
+    It fails on the old code.
+  - d2's authorization bound the old harness digest; d4's will bind the new
+    one.
+
+## 2026-10-19 — Stage-0 dose d2 attempt 1 lost to the launcher's poll loop; the same dose resumes
+
+- **What happened.** `dose_d2_20261019_135821` cost $13.4238. It searched
+  from 14:14Z to 21:24Z; 53 of 92 expansions were done by 20:26Z. The loss
+  was not caused by the science.
+  - At 21:24:48Z ssh to the pod failed for about 30 s. The provider still
+    reported the pod RUNNING and billing.
+  - `remote.probe` returned UNKNOWN, meaning nothing answered.
+  - The poll loop in `aadistill.infrastructure.session_runner` treated any
+    non-ALIVE result as terminal. It ended as `DRIVER_UNKNOWN`, collection
+    failed (`manifest rc=255`), and the pod was deleted at 21:25:47Z.
+  - The probe's own docstring says the opposite: UNKNOWN on a billing pod is
+    a reason to keep looking.
+  - Whether the driver itself was still alive cannot be known now.
+- **What survived.** The search mirror on network volume `ugllmlv19t`
+  (restored by hand at about 17:30Z; see the entry above). Its last pass was
+  at about 21:23Z.
+- **Repair** (core, generic). `driver_terminal`:
+  - EXITED:n still ends the session at once, so a crash is caught as before.
+  - UNKNOWN on a billing pod is given `UNANSWERED_DRIVER_GRACE_S` = 900 s;
+    any answer resets the streak.
+  - The worst case on a wedged pod is 15 more minutes of billing, about $0.45
+    at $1.79/h.
+  - Regression: `tests/infrastructure/test_driver_liveness.py`.
+- **Next.** Formal measurement had begun, so under the preregistered
+  `retry_policy` the SAME dose resumes from the volume. The engine's journal
+  restore re-identifies every pulled state from its bytes, and a state whose
+  copy was cut short is rebuilt.
+  - This is one replacement endpoint, not a second measurement.
+  - Authorization: the dose plan's own figures ($18.57 expected, $24.36
+    hard). With d4 at $29.06 plus $5, the total fits the formal envelope's
+    remaining $54.40 after the volume reservation.
+
+## 2026-10-20 — Stage-0 volume study: Top-4 recovery extension (L40S, two seeds), +$30
+
+- **Context.** d1 and d2 are COMPLETE. Both Top-1s score at the floor of the
+  fluid battery (1/714 and 0/714), and item-level usable-rollout status flips
+  on 45% of items between the two near-identical models. The preregistered
+  design recovers only each dose's Top-1, at one seed.
+- **Decision (maintainer, 2026-10-20).** Every dose's Top-4 from its own full
+  search is recovered and measured. Owner:
+  `logs/stages/stage-0/calibration_volume/plans/top4_extension.json`, written
+  before any probe ran.
+  - **Candidates.** The search's own quality order, byte-identical leaves
+    counted once, first 4. d2's quality positions 1 and 2 (and 4 and 5) are the
+    same weights, because DEPTH removed the same eight layers under both
+    profiles. So d2's four are quality positions 1, 3, 4 and 6; d1's are 1–4.
+  - **Seeds.** Top-2..4 at 20260726 and 20260727; Top-1 at 20260727 only
+    (its A100 unit already holds 20260726). That is 7 units per dose, 21 in
+    all.
+  - **Hardware.** L40S (secure cloud, US-TX-3, with a network volume for the
+    recovered students). Top-1's preregistered A100 unit is not rerun.
+  - **Recipe and measurement.** The dose's own `train_recovery` and
+    `evaluate_all`; only seed, student, run identity and paths differ.
+  - **Budget.** +$25, then +$5:
+    - project cap $607.6571 → $637.6571;
+    - programme ceiling $107.5099 → $137.5099;
+    - formal_volume $90 → $120.
+- **What it costs the preregistered study: nothing changes.** The search, the
+  committed Top-1 (finalists_k = 1), its A100 recovery and every H1/H2/H3
+  contrast stay as registered. The extension's numbers never enter them.
+- **d1's Top-2..4 were retired** on 2026-10-19 (decision above, "Revisit when
+  a later analysis needs a non-Top-1 state"). They are rebuilt in the d4
+  session on the A100 by the D1 replay's digest-pinned fixed path, under the
+  Stage-0 search's owners. All three $0 agreement checks pass on the
+  journal (`plans/top4_rebuild_d1.json`):
+  - root state `use_cache=False`;
+  - all 12 operator config hashes;
+  - the execution knobs.
+  A digest mismatch stops that candidate; nothing is substituted.
+- **Retirement now keeps each earlier dose's distinct Top-4** (the d4 plan's
+  `top4_extension.k`). The d4 launch of 05:01Z was stopped between create
+  attempts at $0, because its old plan would have deleted d2's Top-2..4.
+- **Durability.** Candidates leave EUR-IS-1 through the relay, sha256-pinned.
+  Measured headroom is 15.55 GiB, and the 12 candidates are about 13.3 GiB.
+  Recovered students go to a new US-TX-3 network volume, not the relay, which
+  has no room for them.
+- **Estimate (not measured).**
+  - d4 A100 session about $30.
+  - 21 L40S units about $51–60. L40S eval time is unmeasured; 1.3–1.8× the
+    A100's is assumed.
+  - New volume about $1.4.
+  - Against about $84 available, so the upper end does not fit with the $5
+    margin. The rule is to re-price from the first measured unit, and to
+    return to the maintainer before a probe session that cannot fit.
+- **Revisit when.** The first L40S unit has run, or a rebuilt candidate
+  mismatches.
+
+## 2026-10-20 — Top-4 probes overlap: at most two sessions at once
+
+- **Context.** The three L40S probe sessions (about 19 h each) were to start
+  after the d4 A100 session closes (about 22:30Z), one after another. That
+  ends the study about 2026-10-23 09:00Z. The account was topped up by $50
+  (balance $109.67 at 09:40Z), so it can carry two sessions' hard caps at once.
+- **Decision (maintainer, 2026-10-20).** formal_volume may have up to two
+  billing sessions at once (grant `max_concurrent_sessions` = 2):
+  - d1 probes start now, beside d4;
+  - d2 probes start when d4 closes, beside d1 probes;
+  - d4 probes start when d1 probes close.
+
+  The total cost is unchanged, and the study should end about 32 h sooner.
+- **How the envelope stays safe.**
+  - A session running beside a new one is booked at its authorized hard cap,
+    which its watchdog enforces by `terminate_after_utc`.
+  - It is booked only when the issuer names it as live
+    (`governance.issue(..., concurrent_with=...)`).
+  - A named run past its terminate time refuses, and so does any other run
+    without a closeout.
+- **Volumes.** A RunPod network volume serves one running pod at a time, so
+  the overlap needs two US-TX-3 volumes:
+  - A for d1, then d4;
+  - B for d2.
+- **Unchanged.**
+  - The extension's re-pricing rule: re-price from the first measured unit,
+    and return to the maintainer before a probe session that cannot fit.
+  - The ceilings and the per-session cap.
+
+## 2026-10-20 — Top-4 probes: +$6 keeps d4's probes beside d2's
+
+- **Context.** The extension's re-price ran on d1's first two measured probe
+  units on the L40S: recovery 61 min each, eval-set-1 46 and 70 min, so 107
+  and 131 min a unit, against 134–158 min estimated. The budget rule fits at
+  expected cost by about $2.4. But a session running beside a new one is
+  booked at its hard cap. With d2's probes held at theirs (about $21.8), d4's
+  probe session could not start when d1's close: it was short by about $5.4.
+  Without more money, d4's probes would wait for d2's and the study would end
+  about 11 h later.
+- **Decision (maintainer, 2026-10-20: "并行，加6美金").** Keep the overlap and
+  add $6:
+  - programme ceiling $137.5099 → $143.5099;
+  - formal_volume $120 → $126;
+  - project cap $637.6571 → $643.6571.
+
+  Per-session cap $50 and `max_concurrent_sessions` = 2 are unchanged.
+- **Unchanged.** The re-pricing rule still applies at each probe launch.
+  d2's probe session is checked against d4's actual cost when d4 closes, and
+  the agent returns to the maintainer before a session that cannot fit.
+- **Revisit when.** A probe unit runs much longer than 131 min, or d4's
+  session costs more than its projected ~$28.5.
+
+## 2026-10-20 — d4 resume: release the relayed d1/d2 finalists from the volume, and check room first
+
+- **Context.** `dose_d4_20261020_054022` finished the d4 search, then failed
+  its final push to volume `ugllmlv19t` with `Disk quota exceeded`. The 300 GB
+  volume held d4's ~92 states (~3 GB each with pruned weights), the 8 d1/d2
+  Top-4 states that V_retire had kept for the extension, and both recovered
+  students. Nobody had checked that sum against the volume's size. The launcher
+  deleted the pod; the journal and states survive up to the 18:32:23Z pass.
+- **Decision (agent, inside the phase authorization; AGENTS.md 2.5 standing
+  retirement, P8.2.1 capacity).**
+  - Resume the SAME dose from the volume journal: the preregistered
+    `retry_policy`, as for d1 and d2.
+  - First delete d1's and d2's Top-4 from the volume. The relay holds them,
+    and the probe sessions read them from there. Before deleting, re-verify
+    every file against what the hub stores. Leave a tombstone.
+  - Then require 12 GB of room, measured as the sold size less `du`.
+  - A push that fails now fails its stage, instead of being recorded as
+    durable.
+- **Alternatives.** Grow the volume. That would be bought storage, which is a
+  maintainer decision, and there is no need for it. Delete the recovered d1/d2
+  students: not needed for the room, and the volume holds their only copy.
+- **Cost.** Attempt 1 $23.6937 closed; the resume is authorized $9.00 hard
+  ($6.28 expected). d4 in total is still within the ~$28.5 that the budget
+  rule was checked against.
+- **Revisit when.** The resume's room check fails, or the search tail needs
+  more than the expansion that was in flight.
+- **Revisited 2026-10-20 21:19Z — the room check failed, as designed.**
+  - Resume attempt `dose_d4_20261020_185256` ($0.2592) died in V_release. It
+    wrote its tombstone to the full volume BEFORE deleting anything. Repaired
+    in `2c1afe05`: the intent record now goes off the volume, and the tombstone
+    is written after the deletion.
+  - Attempt `dose_d4_20261020_211335` ($0.2513) released 9.54 GB, verified
+    against the relay. The finalist states were 1.19 GB each, not ~3 GB. It
+    then stopped at V_room: 10.1 GB free < 12 GB.
+  - **Decision (AGENTS.md 2.5 standing retirement).** Also retire d1's and
+    d2's recovery optimizer states, `trainer_state.pt` (3.52 GB each, 7.05 GB
+    in all). Both doses are COMPLETE and evaluated. The only reader of these
+    files is `train.py` resuming that same run, and the retry_policy never
+    retrains a complete dose. The trained students (`model/`, plus
+    `dose_out/package`) stay. The tombstone records each file's sha256 and
+    size.
+  - The room requirement rises to 16 GB, the measured worst case this session
+    writes: the largest d4 state (7.3 GB) re-pushed, the recovery checkpoint
+    (5.9 GB) and the packaged student (2.4 GB). Free after the retirement:
+    about 17.1 GB.
+  - Alternatives: grow the volume (bought storage, a maintainer decision);
+    delete the duplicate packaged students (second copies, but larger to
+    reason about than a file with no reader).
+
+## 2026-10-21 — Stage-0 calibration-volume programme: final closeout at $0
+
+- **Context.** Maintainer instruction (final closeout, no new paid authority):
+  verify the science and the evidence, reconcile budget, authorization and
+  provider billing, close the volumes and assets, verify eval-set-1, fix real
+  defects, hand off to Stage-2/3.
+- **Science, frozen.** EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR /
+  VOLUME EFFECT ON REASONING NOT RESOLVED, held as four separate answers in
+  `closeout/programme_closeout.json :: programme_verdict`. The 18 preregistered
+  contrast labels (all NO-GO) are computed between rates at the floor and are
+  not evidence about calibration volume. Stage-0 volume CLOSED; Stage-0 mixture
+  ratio DEFERRED, never run; D-series stays CLOSED; forward baseline stays
+  D1 + `scored_v1`.
+- **Budget, reconciled** (ledger 2026-10-21; `closeout/budget_reconciliation.json`).
+  No overrun against any cap in force. The original $90 was raised by the
+  maintainer (+$30, +$6) before any commitment needed it; new spend reached $90
+  only on 2026-10-21. The "$108 missing" was the index gap, not historical spend.
+- **Authorization exception, for the maintainer.** RunPod billed this account
+  `$32.5702` more than the project's records hold, all before 2026-10-18 and
+  `$37.93` of it before the 2026-09-11 anchor; 53 pods are named by no record.
+  Attribution is UNVERIFIED. If it is all project spend, provider-verified spend
+  exceeds the `$643.6571` project cap by `$14.49`. Not rebooked, no cap moved.
+- **Root-cause fixes.** `derive_budget.project_sessions` counts runs the index
+  misses and books an open session at its hard cap (or refuses a remainder).
+  `SessionRunner.check_account_resources` (core, on by default) and the shared
+  staging/canary pods refuse to create while the account holds any pod or
+  network volume the records do not account for, or cannot be listed.
+  `provider_billing.py` sets provider billing beside the records.
+- **Assets.** The 12 initialization candidates stay on the relay (12/12 sha256
+  verified 2026-10-21) and are PROTECTED in the checkpoint registry; the 24
+  recovered students' weights are retired with tombstones in
+  `checkpoint_tombstones.json`. Two probe volumes' contents are DERIVED / NOT
+  DIRECTLY VERIFIED. The search journals have dev-box copies only.
+- **Revisit when.** The maintainer decides the project-level provider gap, or
+  opens Stage-2/3 under its own authorization.
+
+## 2026-10-21 — Maintainer: squash-merge `stage0/calibration-volume-mixture` into `main`
+
+- **Context.** The Stage-0 programme is closed (entry above). The maintainer
+  asked for the branch to be squash-merged into `main` ("把分支squash merge 到
+  main"), AGENTS.md P12.2.
+- **Decision.** One squash commit on `main` over merge base `32246d12`. The
+  source branch is NOT deleted: the programme's records cite its commits. The
+  squash commit names the source branch, its tip and the merge base. Work
+  continues on `stage2/reasoning-data`, cut fresh from `main`.
+- **Checked before integrating.** Zero unreachable cited commits
+  (`converge_before_sweep.cited_commits_are_reachable`); `main` had not moved
+  since `32246d12`; the staged tree must equal the source tip's tree.
+- **Revisit when.** Never for this round; the next integration follows the
+  same rule.

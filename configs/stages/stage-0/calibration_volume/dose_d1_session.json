@@ -1,0 +1,36 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.session_plan/v1",
+ "session_kind": "dose",
+ "name": "dose_d1",
+ "treatment": "d1",
+ "purpose": "Formal Stage-0 volume dose d1: D1 full search, fixed recovery, every item of eval-set-1 (plans/volume_preregistration.json).",
+ "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+ "teacher": {
+  "id": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+ },
+ "profile_items_dir": "artifacts/stages/stage-0/calibration_volume/profiles_formal_v1",
+ "preregistration_sha256": "7c875870863cd8deed7f6369a631cc904a18532d41000f0465147640e89be43a",
+ "setup_minutes": 20,
+ "budget_phases": {
+  "search": 314.5,
+  "recovery": 61.5,
+  "eval_set_1": 49.0,
+  "pushes": 10.0
+ },
+ "contingency_fraction": 0.2,
+ "reserve_minutes": 30,
+ "mirror_seconds": 120,
+ "hardware": {
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "container_disk_gb": 400,
+  "network_volume": {
+   "id": "ugllmlv19t",
+   "data_center": "EUR-IS-1",
+   "size_gb": 300,
+   "mount": "/runpod-volume",
+   "record": "logs/stages/stage-0/calibration_volume/runs/netvol_20261019_051206"
+  }
+ },
+ "authorizes": "nothing"
+}

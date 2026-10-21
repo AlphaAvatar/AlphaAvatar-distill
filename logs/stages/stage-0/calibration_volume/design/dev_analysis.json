@@ -1,0 +1,2616 @@
+{
+ "schema": "aadistill.stage0.dev_analysis/v1",
+ "labels": {
+  "teacher": "teacher_dev",
+  "pair": [
+   "ctl_r0860k_sa_dev",
+   "ctl_r0860k_sb_dev"
+  ],
+  "reference": "e1_r2960k_sa_pca_dev"
+ },
+ "teacher_by_family": {
+  "code_breaker@v1/code.exact_only": {
+   "overall": {
+    "n": 18,
+    "correct": 17,
+    "rate": 0.9444
+   },
+   "L1": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 6,
+    "correct": 5,
+    "rate": 0.8333
+   }
+  },
+  "code_breaker@v1/code.pegs": {
+   "overall": {
+    "n": 15,
+    "correct": 14,
+    "rate": 0.9333
+   },
+   "L1": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 5,
+    "correct": 4,
+    "rate": 0.8
+   }
+  },
+  "code_breaker@v1/code.position_hints": {
+   "overall": {
+    "n": 15,
+    "correct": 15,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   }
+  },
+  "counterfactual_arith@v1/cf.absdiff": {
+   "overall": {
+    "n": 9,
+    "correct": 9,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   }
+  },
+  "counterfactual_arith@v1/cf.affine": {
+   "overall": {
+    "n": 9,
+    "correct": 9,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   }
+  },
+  "counterfactual_arith@v1/cf.affine_minus": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "counterfactual_arith@v1/cf.concat": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "counterfactual_arith@v1/cf.min_plus": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "counterfactual_arith@v1/cf.product_plus": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "counterfactual_arith@v1/cf.square_sum": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "defined_ops@v1/comp.chain2": {
+   "overall": {
+    "n": 12,
+    "correct": 12,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   }
+  },
+  "defined_ops@v1/comp.chain4": {
+   "overall": {
+    "n": 12,
+    "correct": 12,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   }
+  },
+  "defined_ops@v1/comp.conditional": {
+   "overall": {
+    "n": 12,
+    "correct": 12,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   }
+  },
+  "defined_ops@v1/comp.repeat": {
+   "overall": {
+    "n": 12,
+    "correct": 12,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   }
+  },
+  "entity_tracking@v1/track.add_remove": {
+   "overall": {
+    "n": 12,
+    "correct": 12,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   }
+  },
+  "entity_tracking@v1/track.all": {
+   "overall": {
+    "n": 12,
+    "correct": 12,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   }
+  },
+  "entity_tracking@v1/track.move_swap": {
+   "overall": {
+    "n": 12,
+    "correct": 12,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   }
+  },
+  "entity_tracking@v1/track.swap": {
+   "overall": {
+    "n": 12,
+    "correct": 12,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   }
+  },
+  "graph_paths@v1/graph.reach_count": {
+   "overall": {
+    "n": 18,
+    "correct": 18,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   }
+  },
+  "graph_paths@v1/graph.shortest": {
+   "overall": {
+    "n": 15,
+    "correct": 15,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   }
+  },
+  "graph_paths@v1/graph.unreachable": {
+   "overall": {
+    "n": 15,
+    "correct": 14,
+    "rate": 0.9333
+   },
+   "L1": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 5,
+    "correct": 4,
+    "rate": 0.8
+   },
+   "L3": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   }
+  },
+  "grid_transform@v1/grid.border": {
+   "overall": {
+    "n": 9,
+    "correct": 3,
+    "rate": 0.3333
+   },
+   "L1": {
+    "n": 3,
+    "correct": 1,
+    "rate": 0.3333
+   },
+   "L2": {
+    "n": 3,
+    "correct": 2,
+    "rate": 0.6667
+   },
+   "L3": {
+    "n": 3,
+    "correct": 0,
+    "rate": 0.0
+   }
+  },
+  "grid_transform@v1/grid.count_cells": {
+   "overall": {
+    "n": 9,
+    "correct": 3,
+    "rate": 0.3333
+   },
+   "L1": {
+    "n": 3,
+    "correct": 0,
+    "rate": 0.0
+   },
+   "L2": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 3,
+    "correct": 0,
+    "rate": 0.0
+   }
+  },
+  "grid_transform@v1/grid.gravity_down": {
+   "overall": {
+    "n": 6,
+    "correct": 1,
+    "rate": 0.1667
+   },
+   "L1": {
+    "n": 2,
+    "correct": 0,
+    "rate": 0.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 1,
+    "rate": 0.5
+   },
+   "L3": {
+    "n": 2,
+    "correct": 0,
+    "rate": 0.0
+   }
+  },
+  "grid_transform@v1/grid.mirror_lr": {
+   "overall": {
+    "n": 6,
+    "correct": 5,
+    "rate": 0.8333
+   },
+   "L1": {
+    "n": 2,
+    "correct": 1,
+    "rate": 0.5
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "grid_transform@v1/grid.recolor": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "grid_transform@v1/grid.shift_right": {
+   "overall": {
+    "n": 6,
+    "correct": 4,
+    "rate": 0.6667
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 1,
+    "rate": 0.5
+   },
+   "L3": {
+    "n": 2,
+    "correct": 1,
+    "rate": 0.5
+   }
+  },
+  "grid_transform@v1/grid.transpose": {
+   "overall": {
+    "n": 6,
+    "correct": 5,
+    "rate": 0.8333
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 1,
+    "rate": 0.5
+   }
+  },
+  "hidden_buttons@v1/act.additive": {
+   "overall": {
+    "n": 18,
+    "correct": 15,
+    "rate": 0.8333
+   },
+   "L1": {
+    "n": 6,
+    "correct": 5,
+    "rate": 0.8333
+   },
+   "L2": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 6,
+    "correct": 4,
+    "rate": 0.6667
+   }
+  },
+  "hidden_buttons@v1/act.modular": {
+   "overall": {
+    "n": 15,
+    "correct": 13,
+    "rate": 0.8667
+   },
+   "L1": {
+    "n": 5,
+    "correct": 4,
+    "rate": 0.8
+   },
+   "L2": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 5,
+    "correct": 4,
+    "rate": 0.8
+   }
+  },
+  "hidden_buttons@v1/act.multiply": {
+   "overall": {
+    "n": 15,
+    "correct": 9,
+    "rate": 0.6
+   },
+   "L1": {
+    "n": 5,
+    "correct": 2,
+    "rate": 0.4
+   },
+   "L2": {
+    "n": 5,
+    "correct": 2,
+    "rate": 0.4
+   },
+   "L3": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   }
+  },
+  "knights_knaves@v1/kk.identity": {
+   "overall": {
+    "n": 18,
+    "correct": 17,
+    "rate": 0.9444
+   },
+   "L1": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 6,
+    "correct": 5,
+    "rate": 0.8333
+   },
+   "L3": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   }
+  },
+  "knights_knaves@v1/kk.mixed": {
+   "overall": {
+    "n": 15,
+    "correct": 15,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   }
+  },
+  "knights_knaves@v1/kk.same_type": {
+   "overall": {
+    "n": 15,
+    "correct": 15,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   }
+  },
+  "letter_analogy@v1/letter.double_all": {
+   "overall": {
+    "n": 6,
+    "correct": 5,
+    "rate": 0.8333
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 1,
+    "rate": 0.5
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "letter_analogy@v1/letter.double_last": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "letter_analogy@v1/letter.extend_run": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "letter_analogy@v1/letter.mirror_first": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "letter_analogy@v1/letter.pred_first": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "letter_analogy@v1/letter.reverse": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "letter_analogy@v1/letter.shrink_run": {
+   "overall": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "letter_analogy@v1/letter.succ_all": {
+   "overall": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "letter_analogy@v1/letter.succ_last": {
+   "overall": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "letter_analogy@v1/letter.swap_halves": {
+   "overall": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "list_induction@v1/list.add_k": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "list_induction@v1/list.count_even": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "list_induction@v1/list.cumsum": {
+   "overall": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "list_induction@v1/list.drop_first": {
+   "overall": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "list_induction@v1/list.keep_gt": {
+   "overall": {
+    "n": 3,
+    "correct": 2,
+    "rate": 0.6667
+   },
+   "L1": {
+    "n": 1,
+    "correct": 0,
+    "rate": 0.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "list_induction@v1/list.keep_odd": {
+   "overall": {
+    "n": 3,
+    "correct": 2,
+    "rate": 0.6667
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 0,
+    "rate": 0.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "list_induction@v1/list.length": {
+   "overall": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "list_induction@v1/list.max": {
+   "overall": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "list_induction@v1/list.prepend_length": {
+   "overall": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "list_induction@v1/list.reverse": {
+   "overall": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "list_induction@v1/list.rotate_left": {
+   "overall": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "list_induction@v1/list.sort_desc": {
+   "overall": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "list_induction@v1/list.sum": {
+   "overall": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "list_induction@v1/list.take_first": {
+   "overall": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "ordering@v1/order.ages": {
+   "overall": {
+    "n": 18,
+    "correct": 18,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   }
+  },
+  "ordering@v1/order.seating": {
+   "overall": {
+    "n": 15,
+    "correct": 14,
+    "rate": 0.9333
+   },
+   "L1": {
+    "n": 5,
+    "correct": 4,
+    "rate": 0.8
+   },
+   "L2": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   }
+  },
+  "ordering@v1/order.taller": {
+   "overall": {
+    "n": 15,
+    "correct": 15,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   }
+  },
+  "probe_function@v1/probe.affine": {
+   "overall": {
+    "n": 12,
+    "correct": 9,
+    "rate": 0.75
+   },
+   "L1": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 4,
+    "correct": 2,
+    "rate": 0.5
+   },
+   "L3": {
+    "n": 4,
+    "correct": 3,
+    "rate": 0.75
+   }
+  },
+  "probe_function@v1/probe.floor_div": {
+   "overall": {
+    "n": 12,
+    "correct": 1,
+    "rate": 0.0833
+   },
+   "L1": {
+    "n": 4,
+    "correct": 1,
+    "rate": 0.25
+   },
+   "L2": {
+    "n": 4,
+    "correct": 0,
+    "rate": 0.0
+   },
+   "L3": {
+    "n": 4,
+    "correct": 0,
+    "rate": 0.0
+   }
+  },
+  "probe_function@v1/probe.mod_scale": {
+   "overall": {
+    "n": 12,
+    "correct": 3,
+    "rate": 0.25
+   },
+   "L1": {
+    "n": 4,
+    "correct": 0,
+    "rate": 0.0
+   },
+   "L2": {
+    "n": 4,
+    "correct": 1,
+    "rate": 0.25
+   },
+   "L3": {
+    "n": 4,
+    "correct": 2,
+    "rate": 0.5
+   }
+  },
+  "probe_function@v1/probe.quadratic": {
+   "overall": {
+    "n": 12,
+    "correct": 4,
+    "rate": 0.3333
+   },
+   "L1": {
+    "n": 4,
+    "correct": 2,
+    "rate": 0.5
+   },
+   "L2": {
+    "n": 4,
+    "correct": 1,
+    "rate": 0.25
+   },
+   "L3": {
+    "n": 4,
+    "correct": 1,
+    "rate": 0.25
+   }
+  },
+  "scan_language@v1/scan.rev_rev": {
+   "overall": {
+    "n": 12,
+    "correct": 10,
+    "rate": 0.8333
+   },
+   "L1": {
+    "n": 4,
+    "correct": 4,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 4,
+    "correct": 3,
+    "rate": 0.75
+   },
+   "L3": {
+    "n": 4,
+    "correct": 3,
+    "rate": 0.75
+   }
+  },
+  "scan_language@v1/scan.rev_seq": {
+   "overall": {
+    "n": 9,
+    "correct": 7,
+    "rate": 0.7778
+   },
+   "L1": {
+    "n": 3,
+    "correct": 2,
+    "rate": 0.6667
+   },
+   "L2": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 3,
+    "correct": 2,
+    "rate": 0.6667
+   }
+  },
+  "scan_language@v1/scan.seq_sur": {
+   "overall": {
+    "n": 9,
+    "correct": 6,
+    "rate": 0.6667
+   },
+   "L1": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 3,
+    "correct": 1,
+    "rate": 0.3333
+   },
+   "L3": {
+    "n": 3,
+    "correct": 2,
+    "rate": 0.6667
+   }
+  },
+  "scan_language@v1/scan.sur_rev": {
+   "overall": {
+    "n": 9,
+    "correct": 8,
+    "rate": 0.8889
+   },
+   "L1": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 3,
+    "correct": 2,
+    "rate": 0.6667
+   },
+   "L3": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   }
+  },
+  "scan_language@v1/scan.sur_seq": {
+   "overall": {
+    "n": 9,
+    "correct": 8,
+    "rate": 0.8889
+   },
+   "L1": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 3,
+    "correct": 2,
+    "rate": 0.6667
+   }
+  },
+  "sequence_induction@v1/seq.affine_recurrence": {
+   "overall": {
+    "n": 8,
+    "correct": 8,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   }
+  },
+  "sequence_induction@v1/seq.alternating_steps": {
+   "overall": {
+    "n": 9,
+    "correct": 9,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   }
+  },
+  "sequence_induction@v1/seq.arithmetic": {
+   "overall": {
+    "n": 7,
+    "correct": 7,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "sequence_induction@v1/seq.fibonacci_like": {
+   "overall": {
+    "n": 7,
+    "correct": 7,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "sequence_induction@v1/seq.geometric": {
+   "overall": {
+    "n": 5,
+    "correct": 5,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "sequence_induction@v1/seq.interleaved": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "sequence_induction@v1/seq.quadratic": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "string_induction@v1/str.caesar_back": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "string_induction@v1/str.drop_last": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "string_induction@v1/str.first_k": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "string_induction@v1/str.remove_vowels": {
+   "overall": {
+    "n": 6,
+    "correct": 4,
+    "rate": 0.6667
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 0,
+    "rate": 0.0
+   }
+  },
+  "string_induction@v1/str.reverse": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "string_induction@v1/str.rotate_left": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "string_induction@v1/str.swap_ends": {
+   "overall": {
+    "n": 6,
+    "correct": 6,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 2,
+    "correct": 2,
+    "rate": 1.0
+   }
+  },
+  "string_induction@v1/str.vowel_to_x": {
+   "overall": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  },
+  "string_induction@v1/str.wrap_first": {
+   "overall": {
+    "n": 3,
+    "correct": 3,
+    "rate": 1.0
+   },
+   "L1": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L2": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   },
+   "L3": {
+    "n": 1,
+    "correct": 1,
+    "rate": 1.0
+   }
+  }
+ },
+ "teacher_by_axis_difficulty": {
+  "inductive_rule_discovery|L1": {
+   "n": 48,
+   "correct": 47,
+   "rate": 0.9792
+  },
+  "inductive_rule_discovery|L2": {
+   "n": 48,
+   "correct": 47,
+   "rate": 0.9792
+  },
+  "inductive_rule_discovery|L3": {
+   "n": 48,
+   "correct": 46,
+   "rate": 0.9583
+  },
+  "compositional_generalization|L1": {
+   "n": 48,
+   "correct": 47,
+   "rate": 0.9792
+  },
+  "compositional_generalization|L2": {
+   "n": 48,
+   "correct": 44,
+   "rate": 0.9167
+  },
+  "compositional_generalization|L3": {
+   "n": 48,
+   "correct": 44,
+   "rate": 0.9167
+  },
+  "task_contained_deduction|L1": {
+   "n": 64,
+   "correct": 63,
+   "rate": 0.9844
+  },
+  "task_contained_deduction|L2": {
+   "n": 64,
+   "correct": 62,
+   "rate": 0.9688
+  },
+  "task_contained_deduction|L3": {
+   "n": 64,
+   "correct": 64,
+   "rate": 1.0
+  },
+  "abstract_analogical|L1": {
+   "n": 32,
+   "correct": 24,
+   "rate": 0.75
+  },
+  "abstract_analogical|L2": {
+   "n": 32,
+   "correct": 28,
+   "rate": 0.875
+  },
+  "abstract_analogical|L3": {
+   "n": 32,
+   "correct": 22,
+   "rate": 0.6875
+  },
+  "interactive_adaptation|L1": {
+   "n": 48,
+   "correct": 34,
+   "rate": 0.7083
+  },
+  "interactive_adaptation|L2": {
+   "n": 48,
+   "correct": 33,
+   "rate": 0.6875
+  },
+  "interactive_adaptation|L3": {
+   "n": 48,
+   "correct": 33,
+   "rate": 0.6875
+  }
+ },
+ "rates": {
+  "ctl_r0860k_sa_dev": {
+   "inductive_rule_discovery": {
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0,
+     "family_ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "L1": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L2": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L3": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "usable_rate": 0.2847,
+    "answer_correct_rate": 0.0
+   },
+   "compositional_generalization": {
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0,
+     "family_ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "L1": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L2": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L3": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "usable_rate": 0.2361,
+    "answer_correct_rate": 0.0
+   },
+   "task_contained_deduction": {
+    "all": {
+     "n": 192,
+     "correct": 0,
+     "rate": 0.0,
+     "family_ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "L1": {
+     "n": 64,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L2": {
+     "n": 64,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L3": {
+     "n": 64,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "usable_rate": 0.526,
+    "answer_correct_rate": 0.0
+   },
+   "abstract_analogical": {
+    "all": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0,
+     "family_ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "L1": {
+     "n": 32,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L2": {
+     "n": 32,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L3": {
+     "n": 32,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "usable_rate": 0.2083,
+    "answer_correct_rate": 0.0
+   },
+   "interactive_adaptation": {
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0,
+     "family_ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "L1": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L2": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L3": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "overall": {
+    "n": 720,
+    "correct": 0,
+    "rate": 0.0
+   }
+  },
+  "ctl_r0860k_sb_dev": {
+   "inductive_rule_discovery": {
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0,
+     "family_ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "L1": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L2": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L3": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "usable_rate": 0.2292,
+    "answer_correct_rate": 0.0
+   },
+   "compositional_generalization": {
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0,
+     "family_ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "L1": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L2": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L3": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "usable_rate": 0.1181,
+    "answer_correct_rate": 0.0
+   },
+   "task_contained_deduction": {
+    "all": {
+     "n": 192,
+     "correct": 0,
+     "rate": 0.0,
+     "family_ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "L1": {
+     "n": 64,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L2": {
+     "n": 64,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L3": {
+     "n": 64,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "usable_rate": 0.1667,
+    "answer_correct_rate": 0.0
+   },
+   "abstract_analogical": {
+    "all": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0,
+     "family_ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "L1": {
+     "n": 32,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L2": {
+     "n": 32,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L3": {
+     "n": 32,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "usable_rate": 0.0729,
+    "answer_correct_rate": 0.0
+   },
+   "interactive_adaptation": {
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0,
+     "family_ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "L1": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L2": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L3": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "overall": {
+    "n": 720,
+    "correct": 0,
+    "rate": 0.0
+   }
+  },
+  "e1_r2960k_sa_pca_dev": {
+   "inductive_rule_discovery": {
+    "all": {
+     "n": 144,
+     "correct": 1,
+     "rate": 0.0069,
+     "family_ci95": [
+      0.0,
+      0.0224
+     ]
+    },
+    "L1": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L2": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L3": {
+     "n": 48,
+     "correct": 1,
+     "rate": 0.0208
+    },
+    "usable_rate": 0.5069,
+    "answer_correct_rate": 0.0069
+   },
+   "compositional_generalization": {
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0,
+     "family_ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "L1": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L2": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L3": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "usable_rate": 0.4306,
+    "answer_correct_rate": 0.0
+   },
+   "task_contained_deduction": {
+    "all": {
+     "n": 192,
+     "correct": 9,
+     "rate": 0.0469,
+     "family_ci95": [
+      0.0101,
+      0.0994
+     ]
+    },
+    "L1": {
+     "n": 64,
+     "correct": 4,
+     "rate": 0.0625
+    },
+    "L2": {
+     "n": 64,
+     "correct": 3,
+     "rate": 0.0469
+    },
+    "L3": {
+     "n": 64,
+     "correct": 2,
+     "rate": 0.0312
+    },
+    "usable_rate": 0.5573,
+    "answer_correct_rate": 0.0469
+   },
+   "abstract_analogical": {
+    "all": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0,
+     "family_ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "L1": {
+     "n": 32,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L2": {
+     "n": 32,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L3": {
+     "n": 32,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "usable_rate": 0.4792,
+    "answer_correct_rate": 0.0
+   },
+   "interactive_adaptation": {
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0,
+     "family_ci95": [
+      0.0,
+      0.0
+     ]
+    },
+    "L1": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L2": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "L3": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "overall": {
+    "n": 720,
+    "correct": 10,
+    "rate": 0.0139
+   }
+  },
+  "teacher_dev": {
+   "inductive_rule_discovery": {
+    "all": {
+     "n": 144,
+     "correct": 140,
+     "rate": 0.9722,
+     "family_ci95": [
+      0.9328,
+      1.0
+     ]
+    },
+    "L1": {
+     "n": 48,
+     "correct": 47,
+     "rate": 0.9792
+    },
+    "L2": {
+     "n": 48,
+     "correct": 47,
+     "rate": 0.9792
+    },
+    "L3": {
+     "n": 48,
+     "correct": 46,
+     "rate": 0.9583
+    },
+    "usable_rate": 1.0,
+    "answer_correct_rate": 0.9722
+   },
+   "compositional_generalization": {
+    "all": {
+     "n": 144,
+     "correct": 135,
+     "rate": 0.9375,
+     "family_ci95": [
+      0.8846,
+      0.9845
+     ]
+    },
+    "L1": {
+     "n": 48,
+     "correct": 47,
+     "rate": 0.9792
+    },
+    "L2": {
+     "n": 48,
+     "correct": 44,
+     "rate": 0.9167
+    },
+    "L3": {
+     "n": 48,
+     "correct": 44,
+     "rate": 0.9167
+    },
+    "usable_rate": 0.9861,
+    "answer_correct_rate": 0.9375
+   },
+   "task_contained_deduction": {
+    "all": {
+     "n": 192,
+     "correct": 189,
+     "rate": 0.9844,
+     "family_ci95": [
+      0.9688,
+      1.0
+     ]
+    },
+    "L1": {
+     "n": 64,
+     "correct": 63,
+     "rate": 0.9844
+    },
+    "L2": {
+     "n": 64,
+     "correct": 62,
+     "rate": 0.9688
+    },
+    "L3": {
+     "n": 64,
+     "correct": 64,
+     "rate": 1.0
+    },
+    "usable_rate": 1.0,
+    "answer_correct_rate": 0.9844
+   },
+   "abstract_analogical": {
+    "all": {
+     "n": 96,
+     "correct": 74,
+     "rate": 0.7708,
+     "family_ci95": [
+      0.6146,
+      0.9286
+     ]
+    },
+    "L1": {
+     "n": 32,
+     "correct": 24,
+     "rate": 0.75
+    },
+    "L2": {
+     "n": 32,
+     "correct": 28,
+     "rate": 0.875
+    },
+    "L3": {
+     "n": 32,
+     "correct": 22,
+     "rate": 0.6875
+    },
+    "usable_rate": 0.9167,
+    "answer_correct_rate": 0.7708
+   },
+   "interactive_adaptation": {
+    "all": {
+     "n": 144,
+     "correct": 100,
+     "rate": 0.6944,
+     "family_ci95": [
+      0.5037,
+      0.8526
+     ]
+    },
+    "L1": {
+     "n": 48,
+     "correct": 34,
+     "rate": 0.7083
+    },
+    "L2": {
+     "n": 48,
+     "correct": 33,
+     "rate": 0.6875
+    },
+    "L3": {
+     "n": 48,
+     "correct": 33,
+     "rate": 0.6875
+    }
+   },
+   "overall": {
+    "n": 720,
+    "correct": 638,
+    "rate": 0.8861
+   }
+  }
+ },
+ "seed_noise_and_resolution": {
+  "inductive_rule_discovery": {
+   "n": 144,
+   "discordant": 0,
+   "discordance_rate": 0.0,
+   "delta_b_minus_a": 0.0,
+   "family_design_effect": 1.0
+  },
+  "compositional_generalization": {
+   "n": 144,
+   "discordant": 0,
+   "discordance_rate": 0.0,
+   "delta_b_minus_a": 0.0,
+   "family_design_effect": 1.0
+  },
+  "task_contained_deduction": {
+   "n": 192,
+   "discordant": 0,
+   "discordance_rate": 0.0,
+   "delta_b_minus_a": 0.0,
+   "family_design_effect": 1.0
+  },
+  "abstract_analogical": {
+   "n": 96,
+   "discordant": 0,
+   "discordance_rate": 0.0,
+   "delta_b_minus_a": 0.0,
+   "family_design_effect": 1.0
+  },
+  "interactive_adaptation": {
+   "n": 144,
+   "discordant": 0,
+   "discordance_rate": 0.0,
+   "delta_b_minus_a": 0.0,
+   "family_design_effect": 1.0
+  },
+  "all": {
+   "n": 720,
+   "discordant": 0,
+   "discordance_rate": 0.0,
+   "delta_b_minus_a": 0.0,
+   "family_design_effect": 1.0
+  }
+ },
+ "reference_gap": {
+  "inductive_rule_discovery": 0.0069,
+  "compositional_generalization": 0,
+  "task_contained_deduction": 0.0469,
+  "abstract_analogical": 0,
+  "interactive_adaptation": 0,
+  "all": 0.0139
+ }
+}

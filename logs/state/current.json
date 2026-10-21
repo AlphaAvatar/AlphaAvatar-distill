@@ -23,16 +23,16 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "D1 BLOCKED NO TIMES and COMPLETE. The D-series is CLOSED (maintainer decision 2026-10-17). NOTHING IS RUNNING. Owner: logs/stages/stage-1/families/d_series/closeout/programme_closeout.json.",
- "branch": "main (squash of exec/d1-behavioural-readiness, 2026-10-17); work continues on stage0/calibration-volume-mixture",
+ "blocker": "BLOCKED NO. Stage-0 programme CLOSED 2026-10-21 (final $0 closeout): EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON REASONING NOT RESOLVED. Owner: calibration_volume/closeout/programme_closeout.json.",
+ "branch": "main (squash of stage0/calibration-volume-mixture, 2026-10-21); next work on stage2/reasoning-data, cut fresh from main",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
   "_owner": "derived by scripts/maintenance/consolidation/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
-  "authorized_cap_usd": 595.0,
-  "cumulative_spend_usd": 500.1472,
+  "authorized_cap_usd": 643.6571,
+  "cumulative_spend_usd": 625.5798,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 94.8528,
+  "remaining_usd": 18.0773,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -60,7 +60,7 @@
   "protocol": "12 probes: 6 screening, 6 confirmation. All executed and scored.",
   "why_b_stands": "no valid C2 challenger displaced it"
  },
- "commit": "c8f714afb346aaea3e269230c94cef526cb6f76b",
+ "commit": "32246d126ee8b6920a9282a0793dfa81d2f47fae",
  "cuda_engineering_validation": {
   "_what": "engineering evidence only; none authorizes anything.",
   "authorizes": "nothing",
@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-17T18:00:00Z",
+ "generated_utc": "2026-10-21T14:40:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,13 +123,13 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Stage-0 calibration data-volume and mixture experiments with the forward baseline, to be designed and authorized in new conversations. NOT authorized. Handoff: docs/shared/STAGE0_HANDOFF.md.",
+ "next": "Nothing is running. Next research: Stage-2 teacher-native reasoning data, then Stage-3, in a new session under its own authorization (docs/shared/STAGE2_3_HANDOFF.md). Open: provider billed $32.57 more than the records, all pre-2026-10-18 (ledger 2026-10-21).",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "Design of the Stage-0 calibration volume/mixture programme and its capability-aligned evaluation: docs/shared/STAGE0_HANDOFF.md and docs/shared/REASONING_TRANSFER_DESIGN.md (authorize nothing).",
-  "not_next": "no paid resource without its own grant; no D-series stage, probe, rerun or rematerialization; no Stage-0 data download or generation until authorized. Owner: decisions.md 2026-10-17.",
+  "next_work": "Stage-2 teacher-native reasoning data, then Stage-3 recovery; not designed or authorized yet. Facts: docs/shared/STAGE2_3_HANDOFF.md.",
+  "not_next": "no paid resource without a new maintainer decision. Owner: decisions.md 2026-10-19/20.",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D-series CLOSED 2026-10-17 (D1 NO-GO, D2 NO_GO, D3 STRUCTURAL_CHANGE + INCONCLUSIVE probes); forward baseline D1 + scored_v1.",
-  "then": "NOTHING is queued or authorized."
+  "then": "nothing else is queued; the Stage-0 mixture ratio is DEFERRED (never run)."
  },
  "phase_b_result": {
   "authorizes": "nothing",
@@ -197,12 +197,10 @@
   "docs/shared/STAGE0_HANDOFF.md -- the next programme's handoff"
  ],
  "running": {
-  "_verified": "provider query 2026-10-17 17:47 UTC: 0 pods, 0 volumes, $0/h; no D-series tmux session, watchdog or monitor alive",
-  "network_volumes": 0,
   "paid_compute": false,
-  "pod_id": null,
   "pods": 0,
-  "run_id": null
+  "network_volumes": 0,
+  "_owner": "provider query in calibration_volume/closeout/programme_closeout.json :: provider"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {
@@ -216,8 +214,10 @@
   "D3": "COMPLETE 2026-10-17: STRUCTURAL_CHANGE (admitted); probes INCONCLUSIVE vs q2 and B (exploratory). Student-confidence D3 CANCELLED",
   "F1": "CLOSED: SKIPPED by maintainer instruction 2026-10-03; ffn.activation_importance_v0 carried forward",
   "next_scientific_stage": null,
-  "_next_is_null_because": "the D-series is CLOSED and no stage is authorized. The next programme (Stage-0 calibration volume and mixture) is designed and authorized separately.",
-  "D_series": "CLOSED 2026-10-17 by maintainer decision"
+  "_next_is_null_because": "no stage is authorized; Stage-2/3 is designed and authorized in a new session.",
+  "D_series": "CLOSED 2026-10-17 by maintainer decision",
+  "S0_volume": "CLOSED 2026-10-21: EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON REASONING NOT RESOLVED (programme_closeout.json :: programme_verdict)",
+  "S0_mixture": "NOT AUTHORIZED: DEFERRED by the maintainer 2026-10-21, never run"
  },
  "storage": {
   "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json",
@@ -231,7 +231,7 @@
  "test_suites": {
   "boundary_guard": "tests/architecture/test_core_suite_boundary.py, four rules in its docstring. Specific-experiment imports from core: 0.",
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
-  "core": "3680 passed / 32 skipped / 0 failed, 12m18s (2026-10-17, D-series closure). GREEN.",
+  "core": "3701 passed / 32 skipped / 0 failed, 12m18s (2026-10-18, eval registry + Stage-0 round 2), run with PODSIM_MIN_FREE_GIB=15: the simulator's 20 GiB disk floor exceeds the dev box's 17 GiB free.",
   "d1_launch": "1029 passed / 13 skipped / 0 failed, 2m38s: phase_d1 + docs + integration. GREEN, and the accepted out-of-tree source-screen failure is NOT in it.",
   "integration": "SQUASH AND MERGE, AGENTS.md P12.2. LATEST 2026-10-17: main squashes exec/d1-behavioural-readiness (PRESERVED; base c8f714af; tested tree 27c279b6; tip named by the squash commit). Earlier: c8f714af, 4500d775. Ranges: decisions.md.",
   "known_red": "ONE, pre-existing (bc31175f), out-of-tree, NOT core and NOT in the D1 launch suite: phase_d_series test_source_evidence::test_it_regenerates_identically. Its screen is nondeterministic across processes. Diagnosis: current.md.",

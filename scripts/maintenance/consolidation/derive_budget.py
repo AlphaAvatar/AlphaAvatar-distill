@@ -199,6 +199,7 @@ def project_sessions(root: Path) -> list[dict]:
     index = load(RUN_INDEX, root)
     out: list[dict] = []
     seen: set[tuple[str, str]] = set()
+    read: set[Path] = set()
     for entry in [*index.get("runs", []), *index.get("unrecorded", [])]:
         key = (entry.get("experiment_id"), entry.get("run_id"))
         if None in key or key in seen:
@@ -209,53 +210,135 @@ def project_sessions(root: Path) -> list[dict]:
         for cand in _outcome_paths(root, entry):
             if not cand.is_file():
                 continue
+            read.add(cand.resolve())
             doc = json.loads(cand.read_text())
-            #: THE CLOSEOUT'S OWN AUTHORITATIVE FIGURE FIRST, then the older
-            #: shapes, which remain supported because the closeouts that use
-            #: them are frozen evidence and are not being rewritten.
-            #:
-            #: `money.all_in_usd` is the behavioural closeout's shape and it is
-            #: the only one of the three that is ALL-IN: `cost.actual_usd`
-            #: carries GPU alone, because the runner reads GPU alone from the
-            #: provider. Container disk is billed separately at $0.10/GB/month
-            #: and a GPU-only figure silently understates a 120 GB session.
-            #: ORDERED BEFORE `cost.actual_usd`, which it previously was NOT.
-            #: Preferring a GPU-only figure over an all-in one, for a cap that
-            #: is denominated all-in, is the defect the 2026-10-11 maintainer
-            #: decision named: it understated D1's four behavioural subruns by
-            #: $0.1125. No closeout states both shapes, so no historical total
-            #: moves; this decides the winner for documents that state both.
-            for shape, cost in (
-                    ("budget.this_attempt",
-                     (doc.get("budget") or {}).get("this_attempt")),
-                    ("money.all_in_usd",
-                     (doc.get("money") or {}).get("all_in_usd")),
-                    ("cost.actual_usd",
-                     (doc.get("cost") or {}).get("actual_usd")),
-                    #: AFFIRMATIVELY $0, which is not the same as unknown. A
-                    #: closeout that states no provider resource was ever
-                    #: created has said what it cost: nothing was billed
-                    #: because nothing existed to bill. Without this, a
-                    #: post-anchor attempt that was retired before reaching a
-                    #: provider lands in `sessions_without_recorded_cost`
-                    #: beside the pre-anchor runs, and a reader can no longer
-                    #: tell "excluded because it predates the anchor" from
-                    #: "post-anchor and nobody knows". It is the same rule the
-                    #: launcher's `prior_attempt_actual` applies, and it is
-                    #: guarded the same way: the document must SAY `false`.
-                    #: Missing, null or true all fall through to UNKNOWN.
-                    ("no_provider_resource",
-                     0.0 if doc.get("provider_resource_created") is False
-                     else None)):
-                if cost is None:
-                    continue
-                rec["cost_usd"] = float(cost)
+            cost, shape = _closeout_cost(doc)
+            if cost is not None:
+                rec["cost_usd"] = cost
                 rec["source"] = str(cand.relative_to(root))
                 rec["shape"] = shape
                 break
-            if rec["cost_usd"] is not None:
-                break
         out.append(rec)
+    return out + _sessions_the_index_misses(root, seen, read)
+
+
+def _closeout_cost(doc: Mapping[str, Any]) -> tuple[float | None, str | None]:
+    """A closeout's cost and the shape it was read from, or `(None, None)`.
+
+    THE CLOSEOUT'S OWN AUTHORITATIVE FIGURE FIRST, then the older shapes, which
+    remain supported because the closeouts that use them are frozen evidence and
+    are not being rewritten.
+
+    `money.all_in_usd` is the behavioural closeout's shape and it is the only one
+    of the three that is ALL-IN: `cost.actual_usd` carries GPU alone, because the
+    runner reads GPU alone from the provider. Container disk is billed separately
+    at $0.10/GB/month and a GPU-only figure silently understates a 120 GB
+    session. ORDERED BEFORE `cost.actual_usd`, which it previously was NOT.
+    Preferring a GPU-only figure over an all-in one, for a cap that is
+    denominated all-in, is the defect the 2026-10-11 maintainer decision named:
+    it understated D1's four behavioural subruns by $0.1125. No closeout states
+    both shapes, so no historical total moves; this decides the winner for
+    documents that state both.
+    """
+    for shape, cost in (
+            ("budget.this_attempt", (doc.get("budget") or {}).get("this_attempt")),
+            ("money.all_in_usd", (doc.get("money") or {}).get("all_in_usd")),
+            ("cost.actual_usd", (doc.get("cost") or {}).get("actual_usd")),
+            #: AFFIRMATIVELY $0, which is not the same as unknown. A closeout
+            #: that states no provider resource was ever created has said what
+            #: it cost: nothing was billed because nothing existed to bill.
+            #: Without this, a post-anchor attempt that was retired before
+            #: reaching a provider lands in `sessions_without_recorded_cost`
+            #: beside the pre-anchor runs, and a reader can no longer tell
+            #: "excluded because it predates the anchor" from "post-anchor and
+            #: nobody knows". It is the same rule the launcher's
+            #: `prior_attempt_actual` applies, and it is guarded the same way:
+            #: the document must SAY `false`. Missing, null or true all fall
+            #: through to UNKNOWN.
+            ("no_provider_resource",
+             0.0 if doc.get("provider_resource_created") is False else None)):
+        if cost is not None:
+            return float(cost), shape
+    return None, None
+
+
+def _sessions_the_index_misses(root: Path, seen: set[tuple[str, str]],
+                               read: set[Path]) -> list[dict]:
+    """Runs that exist on disk and that `logs/index.json` does not reach.
+
+    THE INDEX IS NAVIGATION, AND THE PROJECT TOTAL WAS READING ONLY IT. The
+    index is rebuilt by hand (`record_run_index.py`); nothing that writes a
+    closeout updates it. On 2026-10-21 the 28 Stage-0 calibration-volume runs
+    after 2026-10-19 -- `$107.9227` of closed, provider-billed spend -- were
+    missing from it, so this deriver reported the project at `$517.6571` with
+    `$126` left while the runs' own closeouts summed to `$625.5798` and `$18.08`.
+    The experiment's own envelope gate read its closeouts directly and was never
+    wrong; the project figure every document quoted was.
+
+    So the tree is searched as well, and a run is counted ONCE: a closeout
+    already read through an index entry, or a run whose (experiment, run) the
+    index names, is skipped. Two cases are found:
+
+    * a closeout the index does not reach -- counted at its own figure and named
+      `indexed: False`, so the gap is visible rather than silently repaired;
+    * a run that CREATED a provider resource and has no closeout yet -- an open
+      session. It is booked at its authorized hard cap when its authorization
+      states one, which is what it can still cost, and is otherwise an unknown
+      that `project_balance` refuses to net against the cap.
+    """
+    logs = root / "logs"
+    if not logs.is_dir():
+        return []
+    out: list[dict] = []
+
+    def key_of(run_dir: Path, doc: Mapping[str, Any]) -> tuple[str, str]:
+        exp = doc.get("experiment_id") or (
+            run_dir.parent.parent.name if run_dir.parent.name == "runs"
+            else run_dir.parent.name)
+        return exp, doc.get("run_id") or run_dir.name
+
+    for path in sorted(logs.rglob("closeout/outcome.json")):
+        if path.resolve() in read:
+            continue
+        try:
+            doc = json.loads(path.read_text())
+        except (OSError, ValueError):
+            doc = {}
+        key = key_of(path.parent.parent, doc)
+        if key in seen:
+            continue
+        seen.add(key)
+        cost, shape = _closeout_cost(doc)
+        out.append({"experiment_id": key[0], "run_id": key[1], "cost_usd": cost,
+                    "source": path.relative_to(root).as_posix(), "shape": shape,
+                    "indexed": False})
+
+    for path in sorted(logs.rglob("runtime/session.json")):
+        run_dir = path.parent.parent
+        if (run_dir / "closeout/outcome.json").is_file():
+            continue
+        try:
+            doc = json.loads(path.read_text())
+        except (OSError, ValueError):
+            continue
+        if not doc.get("provider_resource_created"):
+            continue
+        key = key_of(run_dir, doc)
+        if key in seen:
+            continue
+        seen.add(key)
+        cap = None
+        auth = run_dir / "governance/authorization.json"
+        if auth.is_file():
+            try:
+                cap = json.loads(auth.read_text()).get("hard_cap_usd")
+            except (OSError, ValueError):
+                cap = None
+        out.append({"experiment_id": key[0], "run_id": key[1],
+                    "cost_usd": None if cap is None else float(cap),
+                    "source": path.relative_to(root).as_posix(),
+                    "shape": None if cap is None else "open.hard_cap_usd",
+                    "indexed": False, "open": True})
     return out
 
 
@@ -299,6 +382,14 @@ def project_balance(root: Path, pkg: dict, cap: float | None,
     unpriced = [f"{s['experiment_id']}/{s['run_id']}" for s in sessions
                 if s["cost_usd"] is None]
     since = round(sum(s["cost_usd"] for s in priced), 4)
+    #: Found on disk, not through the index: counted above, and NAMED here so a
+    #: stale index is visible instead of silently compensated for.
+    unindexed = [f"{s['experiment_id']}/{s['run_id']}" for s in sessions
+                 if s.get("indexed") is False]
+    #: An open session with no hard cap to book has no bound at all, so the
+    #: remainder is not a number anything may be planned against.
+    open_unbounded = [f"{s['experiment_id']}/{s['run_id']}" for s in sessions
+                      if s.get("open") and s["cost_usd"] is None]
     by_experiment: dict[str, float] = {}
     for s in priced:
         by_experiment[s["experiment_id"]] = round(
@@ -337,10 +428,17 @@ def project_balance(root: Path, pkg: dict, cap: float | None,
             "closeout costs from run records; the engineering campaign term is "
             "reported separately above and both are in cumulative_spend_usd"),
         "cumulative_spend_usd": cumulative,
-        "remaining_usd": round(float(cap) - cumulative, 4),
+        "remaining_usd": (None if open_unbounded
+                          else round(float(cap) - cumulative, 4)),
         "contributions_by_experiment": dict(sorted(by_experiment.items())),
         "priced_sessions": len(priced),
         "sessions_without_recorded_cost": unpriced,
+        "sessions_not_in_the_run_index": unindexed,
+        "open_sessions_without_a_bound": open_unbounded,
+        "_found_on_disk": ("runs the run index does not reach are counted from "
+                           "their own records and named above; an open session "
+                           "is booked at its authorized hard cap, and one with "
+                           "no cap leaves `remaining_usd` null"),
         "_invariant": ("every run predating the anchor records no closeout "
                        "cost, so `anchor + all recorded costs` double counts "
                        "nothing. Adding a cost to a pre-anchor closeout would "

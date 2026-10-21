@@ -1,0 +1,59 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.session_plan/v1",
+ "session_kind": "dose",
+ "name": "dose_d4",
+ "treatment": "d4",
+ "purpose": "Formal Stage-0 volume dose d4: D1 full search, fixed recovery, every item of eval-set-1 (plans/volume_preregistration.json); and the Top-4 extension's A100 work (plans/top4_extension.json): d1's retired Top-2..4 rebuilt digest-pinned, and d1's, d2's and d4's distinct Top-4 shipped to the relay for the L40S probe sessions.",
+ "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+ "teacher": {
+  "id": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+ },
+ "profile_items_dir": "artifacts/stages/stage-0/calibration_volume/profiles_formal_v1",
+ "preregistration_sha256": "7c875870863cd8deed7f6369a631cc904a18532d41000f0465147640e89be43a",
+ "setup_minutes": 20,
+ "budget_phases": {
+  "search": 794.3,
+  "recovery": 61.5,
+  "eval_set_1": 49.0,
+  "pushes": 10.0,
+  "rebuild_d1_top2to4": 60.0,
+  "export_12_candidates": 20.0
+ },
+ "contingency_fraction": 0.2,
+ "reserve_minutes": 30,
+ "mirror_seconds": 120,
+ "hardware": {
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "container_disk_gb": 400,
+  "network_volume": {
+   "id": "ugllmlv19t",
+   "data_center": "EUR-IS-1",
+   "size_gb": 300,
+   "mount": "/runpod-volume",
+   "record": "logs/stages/stage-0/calibration_volume/runs/netvol_20261019_051206"
+  }
+ },
+ "retire_states_of": [
+  "d1",
+  "d2"
+ ],
+ "authorizes": "nothing",
+ "top4_extension": {
+  "doc": "logs/stages/stage-0/calibration_volume/plans/top4_extension.json",
+  "doc_sha256": "369b5549b8a2a5a16101090fb7b59dcd27ffe3be3c51dd9b57c5ef1efaa9b4eb",
+  "k": 4,
+  "rebuild": {
+   "d1": "logs/stages/stage-0/calibration_volume/plans/top4_rebuild_d1.json"
+  },
+  "rebuild_plan_sha256": {
+   "d1": "2b2614f26575f66384351cd8f897da808031755407a14ebe1487786231719f84"
+  },
+  "export_prior": [
+   "d1",
+   "d2"
+  ],
+  "export_own": true,
+  "_retain": "V_retire keeps each earlier dose's distinct Top-4 (not only its Top-1)"
+ }
+}

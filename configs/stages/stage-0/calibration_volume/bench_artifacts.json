@@ -1,0 +1,22 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "stage0_calvol_bench",
+ "note": "The search-cost validation's one record, required on every path (the launcher's poll hook also pulls it after every stage). The bench's own checkpoints -- two teacher-sized ATTENTION children and the volume round-trip copy -- are engineering scratch with no consumer and are deliberately not collected (P8.4).",
+ "patterns_are_relative_to": "the collector's --root, <checkout>/artifacts",
+ "entries": [
+  {
+   "artifact_class": "bench_record",
+   "pattern": "audit/stage0_calvol_bench/bench.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_bytes": 8
+  },
+  {
+   "artifact_class": "bench_journals",
+   "pattern": "audit/stage0_calvol_bench/overhead_*/*.jsonl",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  }
+ ]
+}

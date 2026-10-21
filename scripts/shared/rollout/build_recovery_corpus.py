@@ -128,7 +128,7 @@ DEFAULT_EXCLUDE = (
     "data/stages/stage-2/stage2_v1/calib",
     "data/stages/stage-2/stage2/val",
     "data/stages/stage-0/warmup/holdout_v1.jsonl",
-    "data/stages/stage-3/eval_behavior_v0/prompts.jsonl",
+    "data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0/prompts.jsonl",
 )
 
 # Larger than any plausible batch count, so candidate i of batch b never reuses
@@ -381,6 +381,12 @@ def main() -> None:
     think_close_id = tokenizer.convert_tokens_to_ids(THINK_CLOSE)
 
     exclude_paths = [p.strip() for p in args.exclude_from.split(",") if p.strip()]
+    # Every held-out unit of the registered evaluation set is reserved too, read
+    # from the registry (hash-verified) so a new eval set is covered without an
+    # edit here (AGENTS.md P10.3).
+    sys.path.insert(0, str(REPO_ROOT / "scripts"))
+    from shared import eval_sets
+    exclude_paths += [p for p in eval_sets.held_out_paths() if p not in exclude_paths]
     excluded_content, excluded_prompts = load_excluded(exclude_paths)
     print(f"reserved: {len(excluded_content)} content hashes, "
           f"{len(excluded_prompts)} prompt hashes", flush=True)

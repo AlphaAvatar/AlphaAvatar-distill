@@ -1,0 +1,440 @@
+{
+ "schema": "aadistill.stage0.task_set/v1",
+ "role": "calibration",
+ "version": 2,
+ "created_utc": "2026-10-18T10:53:44+00:00",
+ "command": "scripts/stages/stage-0/calibration_volume/build_task_sets.py --role calibration --per-cell 25 --per-cell-interactive 12 --version 2 --note per-cell prefix of calibration_v1 (same seeds and families, so the same instances): the teacher's measured ~4.5k tokens per trace makes 3072 prompts more than any consumer reads",
+ "note": "per-cell prefix of calibration_v1 (same seeds and families, so the same instances): the teacher's measured ~4.5k tokens per trace makes 3072 prompts more than any consumer reads",
+ "file": "data/stages/stage-0/calibration_volume/tasks/calibration_v2.jsonl",
+ "sha256": "a888a171bbad787fbaed791692b45d136d2f487c47a12c54fc7eb1b2bbe8db25",
+ "content_ids_sha256": "ae5c132e01d530d25b11c76b61f1b413e6b4d8af9d03e074d75dcbf0adca2cd0",
+ "per_cell": 25,
+ "per_cell_interactive": 12,
+ "seed_range": [
+  2000000,
+  3000000
+ ],
+ "split_salt": "stage0.calibration_volume.family_split/v1",
+ "cal_fraction": 0.45,
+ "eval_only_generators": [
+  "code_breaker@v1",
+  "counterfactual_arith@v1",
+  "graph_paths@v1",
+  "letter_analogy@v1",
+  "sequence_induction@v1"
+ ],
+ "family_split": {
+  "list_induction@v1": {
+   "axis": "inductive_rule_discovery",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "list.append_sum",
+    "list.dedupe",
+    "list.duplicate_each",
+    "list.keep_even",
+    "list.min",
+    "list.mod_k",
+    "list.mul_k",
+    "list.pairwise_sums",
+    "list.sort_asc",
+    "list.square",
+    "list.swap_ends"
+   ],
+   "evaluation": [
+    "list.add_k",
+    "list.count_even",
+    "list.cumsum",
+    "list.drop_first",
+    "list.keep_gt",
+    "list.keep_odd",
+    "list.length",
+    "list.max",
+    "list.prepend_length",
+    "list.reverse",
+    "list.rotate_left",
+    "list.sort_desc",
+    "list.sum",
+    "list.take_first"
+   ]
+  },
+  "string_induction@v1": {
+   "axis": "inductive_rule_discovery",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "str.append_first",
+    "str.caesar",
+    "str.double_last",
+    "str.duplicate_each",
+    "str.keep_even_positions",
+    "str.mirror",
+    "str.sort_letters"
+   ],
+   "evaluation": [
+    "str.caesar_back",
+    "str.drop_last",
+    "str.first_k",
+    "str.remove_vowels",
+    "str.reverse",
+    "str.rotate_left",
+    "str.swap_ends",
+    "str.vowel_to_x",
+    "str.wrap_first"
+   ]
+  },
+  "sequence_induction@v1": {
+   "axis": "inductive_rule_discovery",
+   "interactive": false,
+   "eval_only_generator": true,
+   "calibration": [],
+   "evaluation": [
+    "seq.affine_recurrence",
+    "seq.alternating_steps",
+    "seq.arithmetic",
+    "seq.fibonacci_like",
+    "seq.geometric",
+    "seq.interleaved",
+    "seq.quadratic"
+   ]
+  },
+  "defined_ops@v1": {
+   "axis": "compositional_generalization",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "comp.chain3",
+    "comp.conditional_chain"
+   ],
+   "evaluation": [
+    "comp.chain2",
+    "comp.chain4",
+    "comp.conditional",
+    "comp.repeat"
+   ]
+  },
+  "scan_language@v1": {
+   "axis": "compositional_generalization",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "scan.rev_sur",
+    "scan.seq_rev",
+    "scan.sur_sur"
+   ],
+   "evaluation": [
+    "scan.rev_rev",
+    "scan.rev_seq",
+    "scan.seq_sur",
+    "scan.sur_rev",
+    "scan.sur_seq"
+   ]
+  },
+  "counterfactual_arith@v1": {
+   "axis": "compositional_generalization",
+   "interactive": false,
+   "eval_only_generator": true,
+   "calibration": [],
+   "evaluation": [
+    "cf.absdiff",
+    "cf.affine",
+    "cf.affine_minus",
+    "cf.concat",
+    "cf.min_plus",
+    "cf.product_plus",
+    "cf.square_sum"
+   ]
+  },
+  "ordering@v1": {
+   "axis": "task_contained_deduction",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "order.race"
+   ],
+   "evaluation": [
+    "order.ages",
+    "order.seating",
+    "order.taller"
+   ]
+  },
+  "entity_tracking@v1": {
+   "axis": "task_contained_deduction",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "track.move",
+    "track.move_remove"
+   ],
+   "evaluation": [
+    "track.add_remove",
+    "track.all",
+    "track.move_swap",
+    "track.swap"
+   ]
+  },
+  "knights_knaves@v1": {
+   "axis": "task_contained_deduction",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "kk.counting"
+   ],
+   "evaluation": [
+    "kk.identity",
+    "kk.mixed",
+    "kk.same_type"
+   ]
+  },
+  "graph_paths@v1": {
+   "axis": "task_contained_deduction",
+   "interactive": false,
+   "eval_only_generator": true,
+   "calibration": [],
+   "evaluation": [
+    "graph.reach_count",
+    "graph.shortest",
+    "graph.unreachable"
+   ]
+  },
+  "letter_analogy@v1": {
+   "axis": "abstract_analogical",
+   "interactive": false,
+   "eval_only_generator": true,
+   "calibration": [],
+   "evaluation": [
+    "letter.double_all",
+    "letter.double_last",
+    "letter.extend_run",
+    "letter.mirror_first",
+    "letter.pred_first",
+    "letter.reverse",
+    "letter.shrink_run",
+    "letter.succ_all",
+    "letter.succ_last",
+    "letter.swap_halves"
+   ]
+  },
+  "grid_transform@v1": {
+   "axis": "abstract_analogical",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "grid.fill_rows",
+    "grid.flip_h",
+    "grid.flip_v",
+    "grid.rotate_ccw",
+    "grid.rotate_cw"
+   ],
+   "evaluation": [
+    "grid.border",
+    "grid.count_cells",
+    "grid.gravity_down",
+    "grid.mirror_lr",
+    "grid.recolor",
+    "grid.shift_right",
+    "grid.transpose"
+   ]
+  },
+  "probe_function@v1": {
+   "axis": "interactive_adaptation",
+   "interactive": true,
+   "eval_only_generator": false,
+   "calibration": [
+    "probe.digit_sum",
+    "probe.threshold"
+   ],
+   "evaluation": [
+    "probe.affine",
+    "probe.floor_div",
+    "probe.mod_scale",
+    "probe.quadratic"
+   ]
+  },
+  "hidden_buttons@v1": {
+   "axis": "interactive_adaptation",
+   "interactive": true,
+   "eval_only_generator": false,
+   "calibration": [
+    "act.reverse"
+   ],
+   "evaluation": [
+    "act.additive",
+    "act.modular",
+    "act.multiply"
+   ]
+  },
+  "code_breaker@v1": {
+   "axis": "interactive_adaptation",
+   "interactive": true,
+   "eval_only_generator": true,
+   "calibration": [],
+   "evaluation": [
+    "code.exact_only",
+    "code.pegs",
+    "code.position_hints"
+   ]
+  }
+ },
+ "generator_source": {
+  "digest": "dcd602a2098160e0f4a9fbe02b0d2ca1b1de1542c5962573ef5786ec20b8219d",
+  "files": [
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/__init__.py",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/analogy.py",
+    "sha256": "b6fc482798cf074557ffe575fe65a5b7699f313e27126156e6e3df93ad0ff52e"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/common.py",
+    "sha256": "56d65f560ff5b020a6d92aac769129bb4a7c755d96c14a32cabc403e20c43b64"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/composition.py",
+    "sha256": "b246a2f0f4f052806b32678275a1a244cdacbfc1c3b3017dc41d3b6a8d8fdcd2"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/deduction.py",
+    "sha256": "0536a4280035feabd91865901c26d9e5f56d1e77fe25c6b8e50fba3f1e0ec90f"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/induction.py",
+    "sha256": "0085a394c4efc9376410e4d22a8406f4dedb4b236457997934e8f8382be366ed"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/interactive.py",
+    "sha256": "99b9f6f571eb37647bba45dda1838e99865ff6a4192107cc1c636c9a408c2e6e"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/registry.py",
+    "sha256": "64d9f0e87cbb267c3778728a29217680d05b1a9551b0377ef7d86ab0844b145f"
+   }
+  ]
+ },
+ "counts": {
+  "tasks": 672,
+  "by_axis": {
+   "inductive_rule_discovery": 150,
+   "compositional_generalization": 150,
+   "task_contained_deduction": 225,
+   "abstract_analogical": 75,
+   "interactive_adaptation": 72
+  },
+  "by_generator": {
+   "list_induction@v1": 75,
+   "string_induction@v1": 75,
+   "defined_ops@v1": 75,
+   "scan_language@v1": 75,
+   "ordering@v1": 75,
+   "entity_tracking@v1": 75,
+   "knights_knaves@v1": 75,
+   "grid_transform@v1": 75,
+   "probe_function@v1": 36,
+   "hidden_buttons@v1": 36
+  },
+  "by_difficulty": {
+   "L1": 224,
+   "L2": 224,
+   "L3": 224
+  },
+  "by_family": {
+   "list_induction@v1/list.append_sum": 9,
+   "list_induction@v1/list.dedupe": 9,
+   "list_induction@v1/list.duplicate_each": 9,
+   "list_induction@v1/list.keep_even": 6,
+   "list_induction@v1/list.min": 6,
+   "list_induction@v1/list.mod_k": 6,
+   "list_induction@v1/list.mul_k": 6,
+   "list_induction@v1/list.pairwise_sums": 6,
+   "list_induction@v1/list.sort_asc": 6,
+   "list_induction@v1/list.square": 6,
+   "list_induction@v1/list.swap_ends": 6,
+   "string_induction@v1/str.append_first": 12,
+   "string_induction@v1/str.caesar": 12,
+   "string_induction@v1/str.double_last": 12,
+   "string_induction@v1/str.duplicate_each": 12,
+   "string_induction@v1/str.keep_even_positions": 9,
+   "string_induction@v1/str.mirror": 9,
+   "string_induction@v1/str.sort_letters": 9,
+   "defined_ops@v1/comp.chain3": 39,
+   "defined_ops@v1/comp.conditional_chain": 36,
+   "scan_language@v1/scan.rev_sur": 27,
+   "scan_language@v1/scan.seq_rev": 24,
+   "scan_language@v1/scan.sur_sur": 24,
+   "ordering@v1/order.race": 75,
+   "entity_tracking@v1/track.move": 39,
+   "entity_tracking@v1/track.move_remove": 36,
+   "knights_knaves@v1/kk.counting": 75,
+   "grid_transform@v1/grid.fill_rows": 15,
+   "grid_transform@v1/grid.flip_h": 15,
+   "grid_transform@v1/grid.flip_v": 15,
+   "grid_transform@v1/grid.rotate_ccw": 15,
+   "grid_transform@v1/grid.rotate_cw": 15,
+   "probe_function@v1/probe.digit_sum": 18,
+   "probe_function@v1/probe.threshold": 18,
+   "hidden_buttons@v1/act.reverse": 36
+  },
+  "interactive": 72
+ },
+ "isolation": {
+  "checked": [
+   {
+    "a": "calibration",
+    "b": "dev",
+    "key": "family",
+    "overlap": 0
+   },
+   {
+    "a": "calibration",
+    "b": "dev",
+    "key": "content",
+    "overlap": 0
+   },
+   {
+    "a": "calibration",
+    "b": "dev",
+    "key": "prompt",
+    "overlap": 0
+   }
+  ],
+  "overlaps": {
+   "roles": {
+    "calibration": {
+     "family": 35,
+     "content": 672,
+     "prompt": 600,
+     "interactive_opening": 72
+    },
+    "dev": {
+     "family": 86,
+     "content": 720,
+     "prompt": 576,
+     "interactive_opening": 105
+    }
+   },
+   "keys": [
+    "family",
+    "content",
+    "prompt",
+    "interactive_opening"
+   ],
+   "pairs": [
+    {
+     "a": "calibration",
+     "b": "dev",
+     "overlap": {
+      "family": 0,
+      "content": 0,
+      "prompt": 0,
+      "interactive_opening": 0
+     },
+     "examples": {}
+    }
+   ]
+  }
+ },
+ "license": "project-generated procedural tasks; no external dataset, no ARC-AGI material",
+ "authorizes": "nothing"
+}

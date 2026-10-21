@@ -1,0 +1,333 @@
+{
+ "schema": "aadistill.eval_set_provenance/v1",
+ "eval_set_id": "eval-set-1",
+ "created_utc": "2026-10-18T20:19:44+00:00",
+ "code_state": {
+  "git_commit": "e5fb30ae22124c0e3803c850d7fa429888922c9e",
+  "git_commit_source": "git",
+  "dirty": true,
+  "uncommitted_state_sha256": "3c4d4a0b8b304194c21120ebb657cbb6891ced37493d938e928abcb07b422ddc",
+  "untracked_files": [
+   "configs/stages/stage-0/calibration_volume/resolution_session.json",
+   "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_201712/governance/authorization.json",
+   "scripts/stages/stage-0/calibration_volume/analyze_resolution.py"
+  ]
+ },
+ "relocations": [
+  {
+   "from": "data/stages/stage-0/calibration_volume/tasks/dev_v1.jsonl",
+   "to": "data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.jsonl",
+   "sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+   "action": "already_moved"
+  },
+  {
+   "from": "data/stages/stage-0/calibration_volume/tasks/dev_v1.manifest.json",
+   "to": "data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.manifest.json",
+   "sha256": "95531de9b347a0987c7ff973c10980dc66ff45673699422fe0f84c776f4919b5",
+   "action": "already_moved"
+  },
+  {
+   "from": "data/stages/stage-3/eval_behavior_v0/manifest.json",
+   "to": "data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0/manifest.json",
+   "sha256": "394a5ccb98b56783ac33772be2caa98609e6fae041204fd66c15b35bddb68731",
+   "action": "already_moved"
+  },
+  {
+   "from": "data/stages/stage-3/eval_behavior_v0/prompts.jsonl",
+   "to": "data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0/prompts.jsonl",
+   "sha256": "96e211883a20c9db87bde2b06e8f3a66e91e1c82f6aaffc06a04db366dc8e539",
+   "action": "already_moved"
+  },
+  {
+   "from": "artifacts/stages/stage-3/eval/battery_v2/manifest.json",
+   "to": "data/eval-set/eval-set-1/stage3_capability_846/battery_v2/manifest.json",
+   "sha256": "060bdd3170c5cfe0cdb749a7bf32e6d264d943085f0d24717f8b86d5706561df",
+   "action": "already_copied"
+  },
+  {
+   "from": "artifacts/stages/stage-3/eval/battery_v2/math_verified.jsonl",
+   "to": "data/eval-set/eval-set-1/stage3_capability_846/battery_v2/math_verified.jsonl",
+   "sha256": "bf73cb4ad8cd9299c5ab16776d1747921d754be922f12a4ee03f27537f32e1f1",
+   "action": "already_copied"
+  },
+  {
+   "from": "artifacts/stages/stage-3/eval/battery_v2/gsm8k.jsonl",
+   "to": "data/eval-set/eval-set-1/stage3_capability_846/battery_v2/gsm8k.jsonl",
+   "sha256": "1ad4ad22625a11ff5cd6dbce053f15b3cc8f4d50ea491202347e133cd5c85b3b",
+   "action": "already_copied"
+  },
+  {
+   "from": "artifacts/stages/stage-3/eval/battery_v2/multihop.jsonl",
+   "to": "data/eval-set/eval-set-1/stage3_capability_846/battery_v2/multihop.jsonl",
+   "sha256": "3bd25d896316b50e3a4b84f818a5e6bbf8eb671cb7997810251c2b4640c038e5",
+   "action": "already_copied"
+  },
+  {
+   "from": "artifacts/stages/stage-3/eval/battery_v2/rag.jsonl",
+   "to": "data/eval-set/eval-set-1/stage3_capability_846/battery_v2/rag.jsonl",
+   "sha256": "1e31c9e03bfb480443213a2cff04cf56a915305cca3ba68d9b9cc19ec4c85e6e",
+   "action": "already_copied"
+  },
+  {
+   "from": "artifacts/stages/stage-3/eval/battery_v2/answerability_paired.jsonl",
+   "to": "data/eval-set/eval-set-1/stage3_capability_846/battery_v2/answerability_paired.jsonl",
+   "sha256": "1a4369323c3bc10b2ffcb97ac41cdb2bf20b670a28a3907d80d2d94a5acce81e",
+   "action": "already_copied"
+  },
+  {
+   "from": "artifacts/stages/stage-3/eval/battery_v2/safety_paired.jsonl",
+   "to": "data/eval-set/eval-set-1/stage3_capability_846/battery_v2/safety_paired.jsonl",
+   "sha256": "ee73e208660b365e2989024739359704517b943a7dcee6a96a811db528d1a73a",
+   "action": "already_copied"
+  }
+ ],
+ "assets": {
+  "fluid_reasoning_720": {
+   "file_sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+   "matches_set_manifest": true,
+   "content_ids_sha256_matches": true,
+   "regeneration": {
+    "hash_seeds": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15
+    ],
+    "generator_source_unchanged": true,
+    "items_identical_under_every_seed_and_to_the_frozen_file": 716,
+    "items_whose_rebuild_depends_on_the_hash_seed": [
+     {
+      "task_id": "400d3a0b3c4a2bff5108",
+      "family_id": "graph.shortest",
+      "frozen_among_rebuilds": true
+     },
+     {
+      "task_id": "c79eac9dd2b783d7c0d7",
+      "family_id": "graph.shortest",
+      "frozen_among_rebuilds": true
+     },
+     {
+      "task_id": "b22bd495df69d23b027b",
+      "family_id": "graph.shortest",
+      "frozen_among_rebuilds": true
+     },
+     {
+      "task_id": "3ac89fd33647b8e9d956",
+      "family_id": "graph.shortest",
+      "frozen_among_rebuilds": true
+     }
+    ],
+    "items_not_reproduced": [],
+    "seeds_reproducing_the_file_byte_for_byte": [
+     14
+    ],
+    "cause": "graph_paths@v1 iterates a set of (town, town) edges to build adjacency, so BFS order and therefore the tied target `graph.shortest` draws depend on PYTHONHASHSEED; every instance is still self-consistent (its gold is the distance to the target it asks about)"
+   },
+   "generator_source_digest_at_build": "dcd602a2098160e0f4a9fbe02b0d2ca1b1de1542c5962573ef5786ec20b8219d",
+   "n_items": 720,
+   "evaluated_in": "logs/stages/stage-0/calibration_volume/runs/battery_20261018_092345"
+  },
+  "stage3_capability_846": {
+   "battery_manifest_sha256": "060bdd3170c5cfe0cdb749a7bf32e6d264d943085f0d24717f8b86d5706561df",
+   "battery_manifest_matches_record": true,
+   "record": "logs/state/artifact_manifests.md",
+   "battery_version": "capability-v2",
+   "frozen_flag": true,
+   "artifact_copy_identical": true,
+   "sets": {
+    "knowledge": {
+     "location": "withheld (local artifact)",
+     "sha256_matches_battery_manifest": true,
+     "n_matches": true,
+     "ids_match_manifest_sample_ids": true,
+     "ids_equal_the_ids_a_scored_run_generated": true,
+     "source": {
+      "repo": "mandarjoshi/trivia_qa",
+      "config": "rc.nocontext",
+      "split": "validation",
+      "license": "Apache-2.0"
+     }
+    },
+    "math_verified": {
+     "location": "eval-set",
+     "sha256_matches_battery_manifest": true,
+     "n_matches": true,
+     "ids_match_manifest_sample_ids": true,
+     "ids_equal_the_ids_a_scored_run_generated": true,
+     "source": {
+      "repo": "HuggingFaceH4/MATH-500",
+      "config": null,
+      "split": "test",
+      "license": "MIT"
+     }
+    },
+    "gsm8k": {
+     "location": "eval-set",
+     "sha256_matches_battery_manifest": true,
+     "n_matches": true,
+     "ids_match_manifest_sample_ids": true,
+     "ids_equal_the_ids_a_scored_run_generated": true,
+     "source": {
+      "repo": "openai/gsm8k",
+      "config": "main",
+      "split": "test",
+      "license": "MIT"
+     }
+    },
+    "multihop": {
+     "location": "eval-set",
+     "sha256_matches_battery_manifest": true,
+     "n_matches": true,
+     "ids_match_manifest_sample_ids": true,
+     "ids_equal_the_ids_a_scored_run_generated": true,
+     "source": {
+      "repo": "hotpotqa/hotpot_qa",
+      "config": "distractor",
+      "split": "validation",
+      "license": "CC-BY-SA-4.0"
+     }
+    },
+    "rag": {
+     "location": "eval-set",
+     "sha256_matches_battery_manifest": true,
+     "n_matches": true,
+     "ids_match_manifest_sample_ids": true,
+     "ids_equal_the_ids_a_scored_run_generated": true,
+     "source": {
+      "repo": "rajpurkar/squad_v2",
+      "config": null,
+      "split": "validation",
+      "license": "CC-BY-SA-4.0"
+     }
+    },
+    "answerability_paired": {
+     "location": "eval-set",
+     "sha256_matches_battery_manifest": true,
+     "n_matches": true,
+     "ids_match_manifest_sample_ids": true,
+     "ids_equal_the_ids_a_scored_run_generated": true,
+     "source": {
+      "repo": "rajpurkar/squad_v2",
+      "config": null,
+      "split": "validation",
+      "license": "CC-BY-SA-4.0"
+     }
+    },
+    "safety_paired": {
+     "location": "eval-set",
+     "sha256_matches_battery_manifest": true,
+     "n_matches": true,
+     "ids_match_manifest_sample_ids": true,
+     "ids_equal_the_ids_a_scored_run_generated": true,
+     "source": {
+      "repo": "Paul/XSTest",
+      "config": null,
+      "split": "train",
+      "license": "CC-BY-4.0"
+     }
+    }
+   },
+   "eval_behavior_v0": {
+    "prompts_sha256": "96e211883a20c9db87bde2b06e8f3a66e91e1c82f6aaffc06a04db366dc8e539",
+    "matches_its_manifest": true,
+    "n_items": 76,
+    "battery_manifest_reuses_it_with_n": 76,
+    "ids_equal_the_ids_a_scored_run_generated": true
+   },
+   "total_prompts": 846
+  },
+  "stage3_legacy_150": {
+   "inclusion_mask_reproduced": true,
+   "sessions_sha256_matches_record": true,
+   "pack_matches_record": true,
+   "record": "logs/stages/stage-3/e6/analyses/e6_registration.json",
+   "three_mode_runs_whose_ids_equal_this_set": {
+    "A1-frozen-attn-sa": true,
+    "A1-frozen-attn-sb": true,
+    "A2-lora-attn-sa": true,
+    "A2-lora-attn-sb": true,
+    "E1-1.60M-sa": true,
+    "E1-1.60M-sb": true,
+    "E1-2.96M-sa": true,
+    "E1-2.96M-sb": true,
+    "E1-5.50M-sa": true,
+    "E1-5.50M-sb": true,
+    "E4-P2-1600k-sa": true,
+    "E4-P2-1600k-sb": true,
+    "E7-B-FineWeb-sa": true,
+    "E7-B-FineWeb-sb": true,
+    "E7-C-Control-sa": true,
+    "E7-C-Control-sb": true,
+    "P0-assistant-sa": true,
+    "P0-assistant-sb": true,
+    "P0-real-sa": true,
+    "P0-real-sb": true,
+    "P1-1600k-sa": true,
+    "P1-1600k-sb": true,
+    "P2-2.96M-sa": true,
+    "P2-2.96M-sb": true,
+    "P2-ceheavy-sa": true,
+    "P2-ceheavy-sb": true
+   },
+   "in_sample": "every item is a rung-0.86M training session (the rung is a prefix of every larger rung), so every Stage-3 arm trained on all 150 prompts and their teacher targets"
+  }
+ },
+ "scorer_conformance_against_history": {
+  "fluid_reasoning_720": {
+   "interactive_episodes": 144,
+   "agree_with_historical_teacher_rows": 144,
+   "static_records_rescored": 576,
+   "static_agree_with_historical_teacher_rows": 576,
+   "historical_rows": "artifacts/stages/stage-0/calibration_volume/battery_20261018_092345/teacher_dev/score.rows.jsonl"
+  },
+  "stage3_capability_846": {
+   "knowledge": "withheld: conformance kept out of the repository with the items",
+   "math_verified": {
+    "rescored": 100,
+    "agree_with_historical_per_sample": 100
+   },
+   "gsm8k": {
+    "rescored": 100,
+    "agree_with_historical_per_sample": 100
+   },
+   "multihop": {
+    "rescored": 100,
+    "agree_with_historical_per_sample": 100
+   },
+   "rag": {
+    "rescored": 100,
+    "agree_with_historical_per_sample": 100
+   },
+   "answerability_paired": {
+    "rescored": 120,
+    "agree_with_historical_per_sample": 120
+   },
+   "safety_paired": {
+    "rescored": 100,
+    "agree_with_historical_per_sample": 100
+   }
+  },
+  "stage3_legacy_150": {
+   "E1-2.96M-sa": {
+    "rescored": 150,
+    "agree_with_historical": 150
+   },
+   "P2-2.96M-sb": {
+    "rescored": 150,
+    "agree_with_historical": 150
+   }
+  }
+ }
+}

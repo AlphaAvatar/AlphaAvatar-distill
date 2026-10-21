@@ -1,0 +1,63 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "dose_d1_20261019_054503",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-19T05:54:45+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": "RUN_FAILED",
+ "passed": false,
+ "outcome": "Dose d1 attempt 1: RUN_FAILED before any formal measurement -- the search subprocess loaded the dose authorization as a 'search' artifact and was refused (authorizes_dose not granted by policy stage0.calibration_volume.search). No search ran; the volume holds no state. Repaired: search_driver --auth-kind (dose_driver passes dose) and --check-only now verifies a real authorization at $0.",
+ "provider_resource_created": true,
+ "pod_id": "fansceosf4q3mp",
+ "provider_confirms_gone": true,
+ "final_pod_state": {
+  "exists": false,
+  "desired_status": "TERMINATED",
+  "billing": false
+ },
+ "money": {
+  "all_in_usd": 0.2541,
+  "gpu_usd": 0.2465,
+  "disk_usd": 0.0075,
+  "elapsed_minutes": 8.26,
+  "price_per_hour": 1.79,
+  "authorized_usd": 18.55,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.10/GB-month over the elapsed minutes, ceiled to the 4-decimal quantum"
+ },
+ "session_record_sha256": "4840dde8f1d65cf41f1353c9e4a0002e1fb23bed6212dce6bcae0a0e3fd34106",
+ "units": {
+  "extracted": {
+   "audit/stage0_calvol_dose/d1/dose_record.json": {
+    "sha256": "f25d9c55878c324a74121381f1a49d48a37fb6140ba42618977a6f64cdcb2caf",
+    "bytes": 1352
+   },
+   "audit/stage0_calvol_dose/d1/mirror.log": {
+    "sha256": "f73a53795626a5b3437474d9ffa94a849ce149105542d7f3f7d007596f310791",
+    "bytes": 125
+   },
+   "audit/stage0_calvol_dose/d1/search.log": {
+    "sha256": "870434a5c040753aab7fa0ae0b8e927cc2db3826e5523d401998e96c64c8a6ba",
+    "bytes": 47
+   },
+   "audit/stage0_calvol_dose/d1/sync.log": {
+    "sha256": "1376d650cc577083b8fca4da2f071f1a1c6aff644e2b22f27b7bb2c6569b433a",
+    "bytes": 336
+   },
+   "audit/stage0_calvol_dose/session/setup.log": {
+    "sha256": "ec367fd2fa9b0acf6f289a1cbc9425dcef4bed41de9768b99d9d5781ab195696",
+    "bytes": 25954
+   },
+   "audit/stage0_calvol_dose/session/stage0_calvol_dose_run.log": {
+    "sha256": "99eb3377565a829415ac261d52fc935c9abd03c67294f55fed039c67a1f1f4ad",
+    "bytes": 251
+   },
+   "audit/stage0_calvol_search/d1/search_record.json": {
+    "sha256": "37753736aba1aeda87987c0673c3235422dc723835290ef5b9f4eda7e56faf9b",
+    "bytes": 3238
+   }
+  }
+ },
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/dose_d1_20261019_054503"
+}

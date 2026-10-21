@@ -1,0 +1,19 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "netvol_20261020_233114",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-21T14:29:57+00:00",
+ "status": "VOLUME_DELETED",
+ "outcome": "Network volume wn3avnine2 (50 GB, US-TX-3) was DELETED at 2026-10-21T14:29:57+00:00 under the AGENTS.md 2.5 standing retirement; closeout/tombstone.json names what it held and where the evidence lives. Its reservation is trued up to the actual storage cost.",
+ "provider_resource_created": true,
+ "money": {
+  "all_in_usd": 0.0729,
+  "hours": 14.979,
+  "reserved_usd_replaced": 0.2334,
+  "_basis": "ACTUAL: 50 GB x $0.07/GB-month x 14.979 h / 720 h = $0.0729 (created 2026-10-20T23:31:14Z -> deleted 2026-10-21T14:29:57+00:00), ceiled to the 4-decimal quantum"
+ },
+ "authorizes": "nothing",
+ "tombstone": "closeout/tombstone.json"
+}

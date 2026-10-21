@@ -1,0 +1,55 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "bench_20261019_051316",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_engineering",
+ "recorded_utc": "2026-10-19T05:43:44+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": "ALL_DONE",
+ "passed": true,
+ "outcome": "Search-cost bench ALL_DONE on an A100-SXM4-80GB (EUR-IS-1, volume attached): DEPTH prefix reuse BIT-IDENTICAL on CUDA (3 greedy rounds on a 6-item subset incl. non-trailing removals, every candidate score, removal order and child bytes; and a full 1x round on 31 items), full-round wall clock x1.376 (scoring loop x1.65); device-side save/reload validation: same state id, digest and measurement, validation 77.5 s -> 0.1 s (+6.0 s transfer), per-expansion overhead 94.3 s -> 23.3 s; network volume 374 MB/s push, 469 MB/s pull, round trip bit-identical. Engineering only.",
+ "provider_resource_created": true,
+ "pod_id": "1vp9vrvdd0ydwz",
+ "provider_confirms_gone": true,
+ "final_pod_state": {
+  "exists": false,
+  "desired_status": "TERMINATED",
+  "billing": false
+ },
+ "money": {
+  "all_in_usd": 0.8757,
+  "gpu_usd": 0.8657,
+  "disk_usd": 0.0099,
+  "elapsed_minutes": 29.02,
+  "price_per_hour": 1.79,
+  "authorized_usd": 3.6,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.10/GB-month over the elapsed minutes, ceiled to the 4-decimal quantum"
+ },
+ "session_record_sha256": "9dcf66935d2ddcfaa0962b773b1a31a2b72b4fbb20286b9e1ad0a47abb77a220",
+ "units": {
+  "extracted": {
+   "audit/stage0_calvol_bench/bench.json": {
+    "sha256": "3aff4a2712764130a8b9ded7e3cfcecb37c88d4124ec53cbcf7765a84f967de7",
+    "bytes": 8772
+   },
+   "audit/stage0_calvol_bench/overhead_device_validation/states.jsonl": {
+    "sha256": "f1764f9854663c469db6f86242bef677a6eab0206e1985a0a55d114629dbc497",
+    "bytes": 42261
+   },
+   "audit/stage0_calvol_bench/overhead_device_validation/telemetry.jsonl": {
+    "sha256": "84dd21fe9070b19ff38d4041a792003b8a6e937cb10dd6ea45795859fd046e34",
+    "bytes": 822
+   },
+   "audit/stage0_calvol_bench/overhead_host_validation/states.jsonl": {
+    "sha256": "7bf54c1dd42e48220a93ee72f0c36c824174f53c6f665e6ffcd1b783d6235255",
+    "bytes": 42258
+   },
+   "audit/stage0_calvol_bench/overhead_host_validation/telemetry.jsonl": {
+    "sha256": "72b54f0e29ea790f815932bd0b279f908b6bdbc658ce116c14e5dfec8e01e885",
+    "bytes": 764
+   }
+  }
+ },
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/bench_20261019_051316"
+}

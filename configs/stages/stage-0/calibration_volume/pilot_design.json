@@ -1,0 +1,156 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.design/v1",
+ "name": "pilot_v1",
+ "question": "At a fixed parent (the teacher), how much does each forward-baseline operator's selection vary across independent resamples of the Stage-0 base pool, and does that variation shrink from 1x to 4x calibration volume? Exploratory H1/H3 evidence; not the formal full search.",
+ "pool": {
+  "dir": "artifacts/stages/stage-0/calibration_volume/base_pool_v1",
+  "items_sha256": "c9e18612f994795d0764ceb0d0d0f403bcf5acb7f9a746581fe45b12829c93d7",
+  "content_sha256": "f702f74ef49db55032bf8e438c37985ff539cdbe25d24355b8a7146e55b83341"
+ },
+ "reference_uesp": 45000,
+ "sample_rule": "stratified nested sampling: generator/subtype cells, seed-keyed per-cell shuffles, whole units, quota = dose x reference x domain weight split equally over the domain's cells (build_volume_profiles.py)",
+ "profiles": {
+  "base": {
+   "domain_weights": {
+    "inductive_rule_discovery": 0.18,
+    "compositional_generalization": 0.18,
+    "task_contained_deduction": 0.18,
+    "abstract_analogical": 0.18,
+    "supporting": 0.28
+   }
+  }
+ },
+ "excluded_domains": {
+  "interactive_adaptation": "13 admissible successful teacher episodes in base_pool_v1, ~16k scored positions each: too few for independent resampling and each larger than a 1x cell quota"
+ },
+ "cells": {
+  "abstract_analogical": {
+   "grid_transform@v1": [
+    "*"
+   ]
+  },
+  "compositional_generalization": {
+   "defined_ops@v1": [
+    "*"
+   ],
+   "scan_language@v1": [
+    "*"
+   ]
+  },
+  "inductive_rule_discovery": {
+   "list_induction@v1": [
+    "*"
+   ],
+   "string_induction@v1": [
+    "*"
+   ]
+  },
+  "supporting": {
+   "gsm8k": [
+    "*"
+   ],
+   "multihop_qa": [
+    "*"
+   ],
+   "openmath": [
+    "*"
+   ],
+   "rag_evidence": [
+    "*"
+   ]
+  },
+  "task_contained_deduction": {
+   "entity_tracking@v1": [
+    "*"
+   ],
+   "knights_knaves@v1": [
+    "*"
+   ],
+   "ordering@v1": [
+    "*"
+   ]
+  }
+ },
+ "treatments": {
+  "d1_r1": {
+   "dose": 1,
+   "sampling_seed": 267182578,
+   "resample": 1
+  },
+  "d1_r2": {
+   "dose": 1,
+   "sampling_seed": 620952786,
+   "resample": 2
+  },
+  "d1_r3": {
+   "dose": 1,
+   "sampling_seed": 1547666477,
+   "resample": 3
+  },
+  "d2_r1": {
+   "dose": 2,
+   "sampling_seed": 267182578,
+   "resample": 1
+  },
+  "d2_r2": {
+   "dose": 2,
+   "sampling_seed": 620952786,
+   "resample": 2
+  },
+  "d2_r3": {
+   "dose": 2,
+   "sampling_seed": 1547666477,
+   "resample": 3
+  },
+  "d4_r1": {
+   "dose": 4,
+   "sampling_seed": 267182578,
+   "resample": 1
+  },
+  "d4_r2": {
+   "dose": 4,
+   "sampling_seed": 620952786,
+   "resample": 2
+  },
+  "d4_r3": {
+   "dose": 4,
+   "sampling_seed": 1547666477,
+   "resample": 3
+  }
+ },
+ "seed_derivation": "uint32_be(sha256('stage0.calibration_volume.pilot_v1|resample|k')[:4]) mod 2**31",
+ "search_treatments": {
+  "pilot_root": [
+   "d1_r1",
+   "d1_r2",
+   "d1_r3",
+   "d2_r1",
+   "d2_r2",
+   "d2_r3",
+   "d4_r1",
+   "d4_r2",
+   "d4_r3"
+  ]
+ },
+ "depth_profiles_rule": {
+  "resamples": [
+   1,
+   2
+  ],
+  "doses": [
+   1,
+   2
+  ]
+ },
+ "leakage_exclusions": [
+  "dev_v1 and final evaluation families (generator family split)",
+  "recovery rung 0.86M sessions",
+  "state_eval@v1 sessions",
+  "d_series_behavioural_v1 prompts"
+ ],
+ "output": {
+  "items_dir": "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1",
+  "profiles_doc": "configs/stages/stage-0/calibration_volume/profiles.json"
+ },
+ "authorizes": "nothing"
+}

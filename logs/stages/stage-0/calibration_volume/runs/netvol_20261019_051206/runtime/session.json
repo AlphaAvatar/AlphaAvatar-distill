@@ -1,0 +1,16 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.network_volume/v1",
+ "run_id": "netvol_20261019_051206",
+ "kind": "network_volume",
+ "provider_resource_created": true,
+ "volume_id": "ugllmlv19t",
+ "name": "aad-stage0-calvol",
+ "data_center_id": "EUR-IS-1",
+ "size_gb": 300,
+ "created_utc": "2026-10-19T05:12:06Z",
+ "created_by": "runpodctl network-volume create --name aad-stage0-calvol --size 300 --data-center-id EUR-IS-1",
+ "why": "durable store for the formal searches' journals, every materialized state, the committed Top-1 and the recovered students (maintainer 2026-10-19: they must survive a pod loss); EUR-IS-1 is the only datacenter with storage support where A100-SXM4-80GB was available at creation (it also offers RTX PRO 6000)",
+ "price_basis": {"usd_per_gb_month": 0.07, "hours_per_month": 720,
+                 "provider_api_exposes_this": false,
+                 "_note": "a dated stated constant, prorated at 720 h/month (the dearer hourly rate)"}
+}

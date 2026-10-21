@@ -1,0 +1,86 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.search_record/v1",
+ "treatment": "pilot_root",
+ "run_id": "pilot_20261018_122808",
+ "started_utc": "2026-10-18T12:33:17Z",
+ "stages": {
+  "A_contract": {
+   "config_hash": "8126fb049ee45d9f",
+   "seconds": 1.81,
+   "status": "ok"
+  },
+  "B_teacher": {
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "seconds": 9.25,
+   "status": "ok"
+  },
+  "C_beam_search": {
+   "t0": 1792326808.4649432
+  }
+ },
+ "status": "FAILED",
+ "session": {
+  "config_hash": "8126fb049ee45d9f43c2575bb3bbd12016827ae4b61081bec13c0abedd813ee9",
+  "measurement_protocol_id": "857357e82eb1bd1f367985eaa31399dc",
+  "profiles": [
+   "calib.s0v_base_d1_r1@v1",
+   "calib.s0v_base_d1_r2@v1",
+   "calib.s0v_base_d1_r3@v1",
+   "calib.s0v_base_d2_r1@v1",
+   "calib.s0v_base_d2_r2@v1",
+   "calib.s0v_base_d2_r3@v1",
+   "calib.s0v_base_d4_r1@v1",
+   "calib.s0v_base_d4_r2@v1",
+   "calib.s0v_base_d4_r3@v1"
+  ],
+  "profile_hashes": {
+   "calib.s0v_base_d1_r1@v1": "5d2c2ccafbbe17128d4d5b8b3535572cdaff627dc30aec4e50b10b403e93404b",
+   "calib.s0v_base_d1_r2@v1": "7ee445720bde921ceb775a241a5d12abfbeb9b37af4a0f919453c9bc583b8914",
+   "calib.s0v_base_d1_r3@v1": "b643f640864efb4b0c68902df073f19eb8e5e27e789f7ac76de9dfd6b7fc29ca",
+   "calib.s0v_base_d2_r1@v1": "1a3abe693529b40cb19eccd7e52c1a6fa2f833cf31fa8d8702056c722b0aa5bd",
+   "calib.s0v_base_d2_r2@v1": "036d123340a74c0270182470d7bd46da634d65594c59816e5e44907c4451a2c2",
+   "calib.s0v_base_d2_r3@v1": "6c6fe195a200244a4b74fe48a25428f3f8bf129339f90e995785ec33c4967d7e",
+   "calib.s0v_base_d4_r1@v1": "2e8a6b66079a45bf11be764b25e8452217947cafab52cb97faae3ff2c4184409",
+   "calib.s0v_base_d4_r2@v1": "b0e6dcff4803877b02e9c8f5d684adcb8ca3ee8ad43f2dfb9bb14f3ce3bea494",
+   "calib.s0v_base_d4_r3@v1": "29d6c491ddae8315ab2999838eb9e055260d363fb1d89bd4c02889a1f88d0b7a"
+  },
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "baseline": {
+   "baseline": "stage1_init.d1_target_aware.scored_v1@v1",
+   "record_sha256": "333af13d9f2441fc658ee064f1a6ec6b15ebf5be5ee8ab31320763bbe41ce266",
+   "numerical_execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "execution": {
+    "micro_batch_size": 3,
+    "calibration_batch_packing": "length_sorted_v1",
+    "prediction_rows": "scored_v1"
+   },
+   "implementations": {
+    "FFN": "ffn.activation_importance_v0",
+    "DEPTH": "depth.causal_kl_greedy_v1",
+    "RESIDUAL_WIDTH": "width.global_pca_v0",
+    "ATTENTION": "attention.activation_importance_v1"
+   },
+   "position_policy": "positions.supervised_target_v1@v1",
+   "distribution_support": {
+    "support_id": "reference_topk_tail_v1",
+    "top_k": 200
+   }
+  }
+ },
+ "authorization_id": "stage0.calibration_volume.search.pilot_20261018_122808",
+ "root_teacher": {
+  "verified": [
+   "model-00001-of-00003.safetensors",
+   "model-00002-of-00003.safetensors",
+   "model-00003-of-00003.safetensors"
+  ],
+  "root_teacher_id": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+  "root_teacher_sha256": "6de20cc746dd42e96f93aeb4551b8d378e415a206309435d7eaefd39cfdf45f9"
+ },
+ "failure": {
+  "type": "OutOfMemoryError",
+  "message": "CUDA out of memory. Tried to allocate 11.68 GiB. GPU 0 has a total capacity of 44.39 GiB of which 10.58 GiB is free. Including non-PyTorch memory, this process has 33.81 GiB memory in use. Of the allocated memory 25.38 GiB is allocated by PyTorch, and 7.92 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)",
+  "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/stages/stage-0/calibration_volume/search_driver.py\", line 194, in main\n    result = search.run()\n             ^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/initialization/planning/search.py\", line 1369, in run\n    child = self._expand_one(parent, impl, profile)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/initialization/planning/search.py\", line 1020, in _expand_one\n    outcome = impl.execute(ctx)\n              ^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/initialization/operators/base.py\", line 439, in execute\n    outcome = self.apply(ctx)\n              ^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/torch/utils/_contextlib.py\", line 124, in decorate_context\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/initialization/operators/depth/causal_kl_greedy.py\", line 738, in apply\n    result = greedy_removal(score, ctx.parent_spec[DEPTH_FIELD], n_remove,\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/initialization/statistics/contribution.py\", line 715, in greedy_removal\n    score = float(score_fn(frozenset(skipped + [c])))\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/initialization/operators/depth/causal_kl_greedy.py\", line 478, in score\n    kl = sketch_forward_kl(idx, lp, tail, abls,\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/initialization/scoring/support.py\", line 1041, in sketch_forward_kl\n    return sketch_forward_kl_terms(support_indices, support_log_probs,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/initialization/scoring/support.py\", line 1076, in sketch_forward_kl_terms\n    log_z = torch.logsumexp(cand, dim=-1, keepdim=True)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntorch.OutOfMemoryError: CUDA out of memory. Tried to allocate 11.68 GiB. GPU 0 has a total capacity of 44.39 GiB of which 10.58 GiB is free. Including non-PyTorch memory, this process has 33.81 GiB memory in use. Of the allocated memory 25.38 GiB is allocated by PyTorch, and 7.92 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)\n"
+ },
+ "ended_utc": "2026-10-18T13:31:05Z"
+}

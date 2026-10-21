@@ -1,0 +1,351 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.battery_record/v1",
+ "started_utc": "2026-10-18T09:29:26Z",
+ "commit": "71916201f5ff44d9ade3ddd2aa79593b1ad8bac3",
+ "gpu": {
+  "name": "NVIDIA A100-SXM4-80GB",
+  "memory": "81920 MiB",
+  "driver": "580.126.16"
+ },
+ "runs": [
+  {
+   "label": "ctl_r0860k_sa_dev",
+   "mode": "eval",
+   "tasks": "dev",
+   "rc": 0,
+   "seconds": 972.5,
+   "records_sha256": "ca13e652a65394cd19b33cc21e9dfa3747515c3e561b80ac031e66fd06930c85",
+   "summary": {
+    "identity": {
+     "label": "ctl_r0860k_sa_dev",
+     "model": "/workspace/aad/artifacts/stages/stage-0/calibration_volume/students/ctl_r0860k_sa",
+     "revision": null,
+     "mode": "eval",
+     "tasks_file": "data/stages/stage-0/calibration_volume/tasks/dev_v1.jsonl",
+     "tasks_sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+     "context_resolution": {
+      "resolved_context": 8192,
+      "context_source": "trained_block_len",
+      "config_max_position_embeddings": 262144,
+      "rope_scaling_factor": null,
+      "architectural_context": 262144,
+      "trained_context": 8192,
+      "context_len_override": null,
+      "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+      "note": "effective context is the TRAINED context; this is not a 262K-context evaluation"
+     },
+     "session_limit": null,
+     "effective_limit": 8192,
+     "stop_ids": [
+      151645
+     ],
+     "sampling": {
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "top_k": -1,
+      "detokenize": false
+     },
+     "seed_base": null,
+     "system_message": "You are a helpful Assistant.",
+     "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+     "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+     "degeneration_check_every": 256,
+     "engine": {
+      "max_model_len": 8192,
+      "gpu_memory_utilization": 0.9,
+      "dtype": "bfloat16",
+      "dtype_engine": "torch.bfloat16",
+      "max_num_seqs": 256,
+      "max_num_batched_tokens": 8192,
+      "vllm_version": "0.27.1",
+      "enforce_eager": false,
+      "init_seconds": 169.3
+     },
+     "libraries": {
+      "transformers": "5.15.0",
+      "tokenizers": "0.22.2",
+      "safetensors": "0.8.0",
+      "numpy": "2.3.5",
+      "datasets": null,
+      "vllm": "0.27.1"
+     },
+     "image_digest": null,
+     "runner_sha256": "c77ae2b6e07153d5d30047165110b2920ae6d64bb0eb67b8e78f49fa53d2feaf"
+    },
+    "n_tasks": 720,
+    "rounds": 14,
+    "output_tokens": 602505,
+    "generation_seconds": 779.6,
+    "output_tokens_per_second": 772.8,
+    "ends": {
+     "answered": 416,
+     "degeneration": 232,
+     "turn_limit": 72
+    }
+   },
+   "score_rc": 0,
+   "score_stdout": "ctl_r0860k_sa_dev: 0/720 correct (0.0); by axis abstract=0.0, compositional=0.0, inductive=0.0, interactive=0.0, task=0.0\n",
+   "status": "ok"
+  },
+  {
+   "label": "ctl_r0860k_sb_dev",
+   "mode": "eval",
+   "tasks": "dev",
+   "rc": 0,
+   "seconds": 1213.4,
+   "records_sha256": "5b2dadfb303169ef6e9f05c1c2a08b18e17ecb541d852200926d88fd91049c4f",
+   "summary": {
+    "identity": {
+     "label": "ctl_r0860k_sb_dev",
+     "model": "/workspace/aad/artifacts/stages/stage-0/calibration_volume/students/ctl_r0860k_sb",
+     "revision": null,
+     "mode": "eval",
+     "tasks_file": "data/stages/stage-0/calibration_volume/tasks/dev_v1.jsonl",
+     "tasks_sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+     "context_resolution": {
+      "resolved_context": 8192,
+      "context_source": "trained_block_len",
+      "config_max_position_embeddings": 262144,
+      "rope_scaling_factor": null,
+      "architectural_context": 262144,
+      "trained_context": 8192,
+      "context_len_override": null,
+      "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+      "note": "effective context is the TRAINED context; this is not a 262K-context evaluation"
+     },
+     "session_limit": null,
+     "effective_limit": 8192,
+     "stop_ids": [
+      151645
+     ],
+     "sampling": {
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "top_k": -1,
+      "detokenize": false
+     },
+     "seed_base": null,
+     "system_message": "You are a helpful Assistant.",
+     "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+     "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+     "degeneration_check_every": 256,
+     "engine": {
+      "max_model_len": 8192,
+      "gpu_memory_utilization": 0.9,
+      "dtype": "bfloat16",
+      "dtype_engine": "torch.bfloat16",
+      "max_num_seqs": 256,
+      "max_num_batched_tokens": 8192,
+      "vllm_version": "0.27.1",
+      "enforce_eager": false,
+      "init_seconds": 68.0
+     },
+     "libraries": {
+      "transformers": "5.15.0",
+      "tokenizers": "0.22.2",
+      "safetensors": "0.8.0",
+      "numpy": "2.3.5",
+      "datasets": null,
+      "vllm": "0.27.1"
+     },
+     "image_digest": null,
+     "runner_sha256": "c77ae2b6e07153d5d30047165110b2920ae6d64bb0eb67b8e78f49fa53d2feaf"
+    },
+    "n_tasks": 720,
+    "rounds": 13,
+    "output_tokens": 600489,
+    "generation_seconds": 1129.1,
+    "output_tokens_per_second": 531.8,
+    "ends": {
+     "answered": 334,
+     "degeneration": 346,
+     "turn_limit": 40
+    }
+   },
+   "score_rc": 0,
+   "score_stdout": "ctl_r0860k_sb_dev: 0/720 correct (0.0); by axis abstract=0.0, compositional=0.0, inductive=0.0, interactive=0.0, task=0.0\n",
+   "status": "ok"
+  },
+  {
+   "label": "e1_r2960k_sa_pca_dev",
+   "mode": "eval",
+   "tasks": "dev",
+   "rc": 0,
+   "seconds": 1043.6,
+   "records_sha256": "4b54bba870e03cbbe1990a264fde43185fbc15e20a7a18f6a5518972de2eb4ae",
+   "summary": {
+    "identity": {
+     "label": "e1_r2960k_sa_pca_dev",
+     "model": "/workspace/aad/artifacts/stages/stage-0/calibration_volume/students/e1_r2960k_sa_pca",
+     "revision": null,
+     "mode": "eval",
+     "tasks_file": "data/stages/stage-0/calibration_volume/tasks/dev_v1.jsonl",
+     "tasks_sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+     "context_resolution": {
+      "resolved_context": 8192,
+      "context_source": "trained_block_len",
+      "config_max_position_embeddings": 262144,
+      "rope_scaling_factor": null,
+      "architectural_context": 262144,
+      "trained_context": 8192,
+      "context_len_override": null,
+      "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+      "note": "effective context is the TRAINED context; this is not a 262K-context evaluation"
+     },
+     "session_limit": null,
+     "effective_limit": 8192,
+     "stop_ids": [
+      151645
+     ],
+     "sampling": {
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "top_k": -1,
+      "detokenize": false
+     },
+     "seed_base": null,
+     "system_message": "You are a helpful Assistant.",
+     "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+     "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+     "degeneration_check_every": 256,
+     "engine": {
+      "max_model_len": 8192,
+      "gpu_memory_utilization": 0.9,
+      "dtype": "bfloat16",
+      "dtype_engine": "torch.bfloat16",
+      "max_num_seqs": 256,
+      "max_num_batched_tokens": 8192,
+      "vllm_version": "0.27.1",
+      "enforce_eager": false,
+      "init_seconds": 69.0
+     },
+     "libraries": {
+      "transformers": "5.15.0",
+      "tokenizers": "0.22.2",
+      "safetensors": "0.8.0",
+      "numpy": "2.3.5",
+      "datasets": null,
+      "vllm": "0.27.1"
+     },
+     "image_digest": null,
+     "runner_sha256": "c77ae2b6e07153d5d30047165110b2920ae6d64bb0eb67b8e78f49fa53d2feaf"
+    },
+    "n_tasks": 720,
+    "rounds": 12,
+    "output_tokens": 755953,
+    "generation_seconds": 958.7,
+    "output_tokens_per_second": 788.5,
+    "ends": {
+     "answered": 368,
+     "degeneration": 306,
+     "turn_limit": 46
+    }
+   },
+   "score_rc": 0,
+   "score_stdout": "e1_r2960k_sa_pca_dev: 10/720 correct (0.0139); by axis abstract=0.0, compositional=0.0, inductive=0.0069, interactive=0.0, task=0.0469\n",
+   "status": "ok"
+  },
+  {
+   "label": "teacher_dev",
+   "mode": "eval",
+   "tasks": "dev",
+   "rc": 0,
+   "seconds": 3467.1,
+   "records_sha256": "98f08abca50a4456e9021b39f709bb7cd69e7500d107f79b0fcaba47cadf2adc",
+   "summary": {
+    "identity": {
+     "label": "teacher_dev",
+     "model": "Qwen/Qwen3-4B-Thinking-2507",
+     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+     "mode": "eval",
+     "tasks_file": "data/stages/stage-0/calibration_volume/tasks/dev_v1.jsonl",
+     "tasks_sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+     "context_resolution": {
+      "resolved_context": 262144,
+      "context_source": "config:max_position_embeddings",
+      "config_max_position_embeddings": 262144,
+      "rope_scaling_factor": null,
+      "architectural_context": 262144,
+      "trained_context": null,
+      "context_len_override": null,
+      "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+      "note": null
+     },
+     "session_limit": null,
+     "effective_limit": 262144,
+     "stop_ids": [
+      151643,
+      151645
+     ],
+     "sampling": {
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "top_k": -1,
+      "detokenize": false
+     },
+     "seed_base": null,
+     "system_message": "You are a helpful Assistant.",
+     "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+     "tokenizer_sha256": null,
+     "degeneration_check_every": 256,
+     "engine": {
+      "max_model_len": 262144,
+      "gpu_memory_utilization": 0.9,
+      "dtype": "bfloat16",
+      "dtype_engine": "torch.bfloat16",
+      "max_num_seqs": 256,
+      "max_num_batched_tokens": 8192,
+      "vllm_version": "0.27.1",
+      "enforce_eager": false,
+      "init_seconds": 62.2
+     },
+     "libraries": {
+      "transformers": "5.15.0",
+      "tokenizers": "0.22.2",
+      "safetensors": "0.8.0",
+      "numpy": "2.3.5",
+      "datasets": null,
+      "vllm": "0.27.1"
+     },
+     "image_digest": null,
+     "runner_sha256": "c77ae2b6e07153d5d30047165110b2920ae6d64bb0eb67b8e78f49fa53d2feaf"
+    },
+    "n_tasks": 720,
+    "rounds": 12,
+    "output_tokens": 5395041,
+    "generation_seconds": 3390.7,
+    "output_tokens_per_second": 1591.1,
+    "ends": {
+     "answered": 566,
+     "degeneration": 12,
+     "episode_done": 142
+    }
+   },
+   "score_rc": 0,
+   "score_stdout": "teacher_dev: 638/720 correct (0.8861); by axis abstract=0.7708, compositional=0.9375, inductive=0.9722, interactive=0.6944, task=0.9844\n",
+   "status": "ok"
+  },
+  {
+   "label": "teacher_cal",
+   "mode": "generate",
+   "tasks": "calibration",
+   "rc": -15,
+   "seconds": 50.4,
+   "status": "failed",
+   "error": "RuntimeError('run_battery exited -15; see teacher_cal.log')",
+   "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/stages/stage-0/calibration_volume/battery_driver.py\", line 138, in main\n    raise RuntimeError(f\"run_battery exited {rc}; see {log.name}\")\nRuntimeError: run_battery exited -15; see teacher_cal.log\n"
+  }
+ ],
+ "stages": {
+  "A_contract": {
+   "status": "ok",
+   "plan_hash": "704d4b60fce57e3208c9b806f17b9b7796cc73b140edc1315d40ae7e490a266d",
+   "authorization_id": "stage0.calibration_volume.battery.battery_20261018_092345"
+  }
+ },
+ "finished_utc": "2026-10-18T11:21:55Z",
+ "terminal": "RUNS_FAILED",
+ "failed_runs": [
+  "teacher_cal"
+ ]
+}

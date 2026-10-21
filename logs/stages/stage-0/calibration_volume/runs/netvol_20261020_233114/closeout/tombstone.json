@@ -1,0 +1,294 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.volume_tombstone/v1",
+ "volume_id": "wn3avnine2",
+ "name": "aad-stage0-probes-b",
+ "data_center_id": "US-TX-3",
+ "size_gb": 50,
+ "created_utc": "2026-10-20T23:31:14Z",
+ "status": "DELETED",
+ "intent_utc": "2026-10-21T14:29:55+00:00",
+ "deleted_utc": "2026-10-21T14:29:57+00:00",
+ "deletion_criterion": "AGENTS.md 2.5 standing retirement of historical checkpoint weights: every unit is terminal and analysed, its evaluation evidence and identities are durable, no active or declared consumer reads the bytes, and none is an incumbent, release or retained anchor",
+ "why": "The Top-4 extension is complete and analysed (design/extension_analysis.json, 24/24 units). Each student here was recovered, generated on every item of eval-set-1 and scored; its report, rows and generations are in its run's evidence and artifacts root, its model sha256 in recovery_products.json. The only reader of these bytes is probe_driver.py, restoring an UNFINISHED unit, and every unit is finished; no plan, config or session declares another reader (consumer audit 2026-10-21: references_at_deletion is every tracked file naming the volume; each is a completed session's config or record, this volume's own record, a budget decision or the state docs). None is an incumbent, a release or a retained anchor: the extension makes no claim about a single student (design/extension_analysis.json :: claims).",
+ "references_at_deletion": [
+  "configs/stages/stage-0/calibration_volume/probes_d2_session.json",
+  "logs/stages/stage-0/calibration_volume/runs/netvol_20261020_233114/closeout/outcome.json",
+  "logs/stages/stage-0/calibration_volume/runs/netvol_20261020_233114/runtime/session.json",
+  "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/closeout/outcome.json",
+  "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/governance/authorization.json",
+  "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/runtime/session.json",
+  "logs/state/current.md"
+ ],
+ "members_source": {
+  "kind": "derived",
+  "probe_runs": [
+   "probes_d2_20261020_233510"
+  ],
+  "rule": "scripts/stages/stage-0/calibration_volume/probe_driver.py writes, per unit, exactly recovery/ (push_student), recovery_records/, products.json, generations/ (evaluate_all) and out/ (UNIT_RECORDS, then report.json); each session record shows every unit trained here, none restored or superseded",
+  "listing_attempts": {
+   "volaudit_20261021_142442": "NO_RESOURCE_CREATED",
+   "volaudit_20261021_142534": "NO_RESOURCE_CREATED",
+   "volaudit_20261021_142540": "NO_RESOURCE_CREATED",
+   "volaudit_20261021_142851": "NO_RESOURCE_CREATED"
+  }
+ },
+ "totals_by_class": {
+  "recovered student weights": {
+   "entries": 7,
+   "bytes": 16689999526
+  },
+  "record or small file": {
+   "entries": 28,
+   "bytes": 428464
+  }
+ },
+ "members": [
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r1_9af1989d_s20260727/recovery/",
+   "files": 5,
+   "bytes": 2384285635,
+   "class": "recovered student weights",
+   "contents": "checkpoints/<tag>/model/ (model.safetensors + its config files), checkpoints/latest.txt, train_log.jsonl",
+   "model_sha256": "474b35455e15e24f63fd88566b0af98b0e61012d518e488a17233f5d2ea01322",
+   "model_bytes": 2384234968,
+   "identity_record": "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r1_9af1989d_s20260727/recovery_products.json"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r1_9af1989d_s20260727/recovery_records/",
+   "files": 3,
+   "bytes": 61549,
+   "class": "record or small file",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r1_9af1989d_s20260727/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r1_9af1989d_s20260727/products.json",
+   "class": "record or small file",
+   "contents": "{\"recovery\": <recovery_products.json>}",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r1_9af1989d_s20260727/recovery_products.json (the same object)"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r1_9af1989d_s20260727/generations/",
+   "class": "record or small file",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r1_9af1989d_s20260727/generations/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r1_9af1989d_s20260727/out/",
+   "class": "record or small file",
+   "contents": "rows/, report.json, recovery_products.json, recovery_config.json, recovery.log, train_log.jsonl, eval logs",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r1_9af1989d_s20260727/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r2_e2d10ba8_s20260726/recovery/",
+   "files": 5,
+   "bytes": 2384285641,
+   "class": "recovered student weights",
+   "contents": "checkpoints/<tag>/model/ (model.safetensors + its config files), checkpoints/latest.txt, train_log.jsonl",
+   "model_sha256": "18a913b11baefcc9d16c05f6c1203d240256d7295fdf87610cf1264fb0c0430d",
+   "model_bytes": 2384234968,
+   "identity_record": "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r2_e2d10ba8_s20260726/recovery_products.json"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r2_e2d10ba8_s20260726/recovery_records/",
+   "files": 3,
+   "bytes": 61108,
+   "class": "record or small file",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r2_e2d10ba8_s20260726/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r2_e2d10ba8_s20260726/products.json",
+   "class": "record or small file",
+   "contents": "{\"recovery\": <recovery_products.json>}",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r2_e2d10ba8_s20260726/recovery_products.json (the same object)"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r2_e2d10ba8_s20260726/generations/",
+   "class": "record or small file",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r2_e2d10ba8_s20260726/generations/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r2_e2d10ba8_s20260726/out/",
+   "class": "record or small file",
+   "contents": "rows/, report.json, recovery_products.json, recovery_config.json, recovery.log, train_log.jsonl, eval logs",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r2_e2d10ba8_s20260726/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r2_e2d10ba8_s20260727/recovery/",
+   "files": 5,
+   "bytes": 2384285655,
+   "class": "recovered student weights",
+   "contents": "checkpoints/<tag>/model/ (model.safetensors + its config files), checkpoints/latest.txt, train_log.jsonl",
+   "model_sha256": "cc8f783d1a971a84de2d8a0950ea76c7c6d990056b59026772107d3cd2da5b9c",
+   "model_bytes": 2384234968,
+   "identity_record": "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r2_e2d10ba8_s20260727/recovery_products.json"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r2_e2d10ba8_s20260727/recovery_records/",
+   "files": 3,
+   "bytes": 61209,
+   "class": "record or small file",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r2_e2d10ba8_s20260727/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r2_e2d10ba8_s20260727/products.json",
+   "class": "record or small file",
+   "contents": "{\"recovery\": <recovery_products.json>}",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r2_e2d10ba8_s20260727/recovery_products.json (the same object)"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r2_e2d10ba8_s20260727/generations/",
+   "class": "record or small file",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r2_e2d10ba8_s20260727/generations/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r2_e2d10ba8_s20260727/out/",
+   "class": "record or small file",
+   "contents": "rows/, report.json, recovery_products.json, recovery_config.json, recovery.log, train_log.jsonl, eval logs",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r2_e2d10ba8_s20260727/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r3_3b2037bc_s20260726/recovery/",
+   "files": 5,
+   "bytes": 2384285652,
+   "class": "recovered student weights",
+   "contents": "checkpoints/<tag>/model/ (model.safetensors + its config files), checkpoints/latest.txt, train_log.jsonl",
+   "model_sha256": "2788773e84b603ca740f64d7f6b4eec796ec0161cbf73e0a0948b46a86f1d6e4",
+   "model_bytes": 2384234968,
+   "identity_record": "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r3_3b2037bc_s20260726/recovery_products.json"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r3_3b2037bc_s20260726/recovery_records/",
+   "files": 3,
+   "bytes": 61047,
+   "class": "record or small file",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r3_3b2037bc_s20260726/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r3_3b2037bc_s20260726/products.json",
+   "class": "record or small file",
+   "contents": "{\"recovery\": <recovery_products.json>}",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r3_3b2037bc_s20260726/recovery_products.json (the same object)"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r3_3b2037bc_s20260726/generations/",
+   "class": "record or small file",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r3_3b2037bc_s20260726/generations/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r3_3b2037bc_s20260726/out/",
+   "class": "record or small file",
+   "contents": "rows/, report.json, recovery_products.json, recovery_config.json, recovery.log, train_log.jsonl, eval logs",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r3_3b2037bc_s20260726/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r3_3b2037bc_s20260727/recovery/",
+   "files": 5,
+   "bytes": 2384285633,
+   "class": "recovered student weights",
+   "contents": "checkpoints/<tag>/model/ (model.safetensors + its config files), checkpoints/latest.txt, train_log.jsonl",
+   "model_sha256": "e1caa921781c49b243e7f72a957189d52bcb63d2cf35c0a07e517172cd0854d9",
+   "model_bytes": 2384234968,
+   "identity_record": "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r3_3b2037bc_s20260727/recovery_products.json"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r3_3b2037bc_s20260727/recovery_records/",
+   "files": 3,
+   "bytes": 61196,
+   "class": "record or small file",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r3_3b2037bc_s20260727/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r3_3b2037bc_s20260727/products.json",
+   "class": "record or small file",
+   "contents": "{\"recovery\": <recovery_products.json>}",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r3_3b2037bc_s20260727/recovery_products.json (the same object)"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r3_3b2037bc_s20260727/generations/",
+   "class": "record or small file",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r3_3b2037bc_s20260727/generations/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r3_3b2037bc_s20260727/out/",
+   "class": "record or small file",
+   "contents": "rows/, report.json, recovery_products.json, recovery_config.json, recovery.log, train_log.jsonl, eval logs",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r3_3b2037bc_s20260727/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r4_b6a41ee8_s20260726/recovery/",
+   "files": 5,
+   "bytes": 2384285656,
+   "class": "recovered student weights",
+   "contents": "checkpoints/<tag>/model/ (model.safetensors + its config files), checkpoints/latest.txt, train_log.jsonl",
+   "model_sha256": "e92a10908a5a317ccb727c17e4528fec7d67fdd5d0719e36621f3e4ba1840325",
+   "model_bytes": 2384234968,
+   "identity_record": "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r4_b6a41ee8_s20260726/recovery_products.json"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r4_b6a41ee8_s20260726/recovery_records/",
+   "files": 3,
+   "bytes": 61213,
+   "class": "record or small file",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r4_b6a41ee8_s20260726/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r4_b6a41ee8_s20260726/products.json",
+   "class": "record or small file",
+   "contents": "{\"recovery\": <recovery_products.json>}",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r4_b6a41ee8_s20260726/recovery_products.json (the same object)"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r4_b6a41ee8_s20260726/generations/",
+   "class": "record or small file",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r4_b6a41ee8_s20260726/generations/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r4_b6a41ee8_s20260726/out/",
+   "class": "record or small file",
+   "contents": "rows/, report.json, recovery_products.json, recovery_config.json, recovery.log, train_log.jsonl, eval logs",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r4_b6a41ee8_s20260726/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r4_b6a41ee8_s20260727/recovery/",
+   "files": 5,
+   "bytes": 2384285654,
+   "class": "recovered student weights",
+   "contents": "checkpoints/<tag>/model/ (model.safetensors + its config files), checkpoints/latest.txt, train_log.jsonl",
+   "model_sha256": "60e74e099474a4b5d20d29e412472171018f24b9412f7cd3a0a5b2977667c3d2",
+   "model_bytes": 2384234968,
+   "identity_record": "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence/s0v_top4_d2_r4_b6a41ee8_s20260727/recovery_products.json"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r4_b6a41ee8_s20260727/recovery_records/",
+   "files": 3,
+   "bytes": 61142,
+   "class": "record or small file",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r4_b6a41ee8_s20260727/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r4_b6a41ee8_s20260727/products.json",
+   "class": "record or small file",
+   "contents": "{\"recovery\": <recovery_products.json>}",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r4_b6a41ee8_s20260727/recovery_products.json (the same object)"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r4_b6a41ee8_s20260727/generations/",
+   "class": "record or small file",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r4_b6a41ee8_s20260727/generations/"
+  },
+  {
+   "path": "stage0_calvol/formal_v1/probes/s0v_top4_d2_r4_b6a41ee8_s20260727/out/",
+   "class": "record or small file",
+   "contents": "rows/, report.json, recovery_products.json, recovery_config.json, recovery.log, train_log.jsonl, eval logs",
+   "local_copy": "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510/s0v_top4_d2_r4_b6a41ee8_s20260727/"
+  }
+ ],
+ "reconstruction": "Not bit-for-bit: CUDA recovery training reproduces in distribution, not in bytes (logs/stages/stage-1/phase_d1/analyses/d1_probe_training_is_not_bit_reproducible.json). Re-run the unit from configs/stages/stage-0/calibration_volume/probes_<dose>_session.json with its seed, from the candidate the relay holds sha256-pinned (finalists_manifest.json): about 1 h of recovery on an L40S (~$1.1) per student, about 2 h (~$2.2) with eval-set-1.",
+ "canonical_surviving_evidence": [
+  "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510/evidence",
+  "logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+  "artifacts/stages/stage-0/calibration_volume/probes_d2_20261020_233510"
+ ],
+ "never_deleted": "logs and evidence: the records and generations the volume held have the local copies named per member",
+ "delete_command": "runpodctl network-volume delete wn3avnine2",
+ "provider_confirms_gone": true
+}

@@ -24,7 +24,8 @@ if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
 from aadistill.infrastructure.provider import (  # noqa: E402
-    AccountBalance, SimulatedProvider,
+    AccountBalance, Observation, RunPodProvider, SimulatedProvider,
+    reconcile_account,
 )
 from aadistill.infrastructure.session import BudgetSpec  # noqa: E402
 from aadistill.infrastructure.session_runner import SessionRunner  # noqa: E402
@@ -63,7 +64,8 @@ class TestWhatTheBalanceAnswers:
         assert AccountBalance(known=True, client_balance_usd=30.0).covers(30.0)[0]
 
 
-def _runner(required, *, balance=1000.0, under=False):
+def _runner(required, *, balance=1000.0, under=False, accounted=(),
+            pods=(), volumes=(), unreadable=False):
     """A runner at the gate, with a tripwire where `create` would be."""
     runner = SessionRunner.__new__(SessionRunner)
     runner.ev = {}
@@ -75,9 +77,12 @@ def _runner(required, *, balance=1000.0, under=False):
         "budget": BudgetSpec(
             arms=0, steps_per_arm=0, step_seconds=1.0, step_source="t",
             setup_minutes=1.0, transfer_minutes=1.0,
-            account_balance_required_usd=required)})()
+            account_balance_required_usd=required,
+            accounted_provider_resources=accounted)})()
     runner.provider = SimulatedProvider(
-        "pod", client_balance_usd=balance, under_balance=under)
+        "pod", client_balance_usd=balance, under_balance=under,
+        account_pods=pods, account_volumes=volumes,
+        resources_unreadable=unreadable)
     return runner
 
 
@@ -234,3 +239,85 @@ class TestTheRequirementBelongsToTheCampaign:
             "gate without one and be silently ungated")
         assert any(f.name == "account_balance_required_usd"
                    for f in dataclasses.fields(BudgetSpec))
+
+
+class TestTheAccountHoldsNothingTheRecordsDoNotName:
+    """Every allowance here is computed from records, so a resource no record
+    names bills at `$0/h` in every book. The 2026-10-21 Stage-0 audit found the
+    project total `$108` short of its own closeouts through a stale index; a
+    resource missing from the records entirely is that failure with nothing to
+    find it later. Checked at $0, before `create`, and ON by default."""
+
+    def test_an_empty_account_passes_by_default(self):
+        r = _runner(None)
+        assert SessionRunner.check_account_resources(r) is True
+        assert r.ev["account_resources"]["unaccounted"] == []
+        assert "account_resources" in r.provider.calls
+
+    def test_a_pod_nobody_recorded_refuses(self):
+        r = _runner(None, pods=("orphan1",))
+        assert SessionRunner.check_account_resources(r) is False
+        assert [x["id"] for x in r.ev["account_resources"]["unaccounted"]] == [
+            "orphan1"]
+        assert any("ABORT" in line for line in r.said)
+
+    def test_a_network_volume_nobody_recorded_refuses(self):
+        r = _runner(None, volumes=("vol1",))
+        assert SessionRunner.check_account_resources(r) is False
+
+    def test_a_declared_resource_passes_as_ids_or_a_callable(self):
+        assert SessionRunner.check_account_resources(
+            _runner(None, volumes=("vol1",), accounted=("vol1",))) is True
+        assert SessionRunner.check_account_resources(
+            _runner(None, pods=("p",), volumes=("vol1",),
+                    accounted=lambda: ["vol1", "p"])) is True
+
+    def test_declaring_one_resource_does_not_excuse_another(self):
+        r = _runner(None, pods=("beside",), volumes=("vol1",), accounted=("vol1",))
+        assert SessionRunner.check_account_resources(r) is False
+        assert [x["id"] for x in r.ev["account_resources"]["unaccounted"]] == [
+            "beside"]
+
+    def test_an_unreadable_listing_refuses(self):
+        r = _runner(None, unreadable=True)
+        assert SessionRunner.check_account_resources(r) is False
+        assert r.ev["account_resources"]["known"] is False
+
+    def test_a_double_that_cannot_list_is_recorded_unchecked(self):
+        rec = reconcile_account(object(), ())
+        assert rec == {"checked": False, "ok": True,
+                       "why": "this provider object cannot list the account"}
+
+    def test_a_stray_resource_stops_run_before_create(self):
+        r = _runner(None, pods=("orphan1",))
+        r.a = type("A", (), {"dry_run": False, "host_draws": 1})()
+        r.make_plan = lambda: True
+        r.run_prechecks = lambda: pytest.fail("prechecks reached")
+        r.create = lambda: pytest.fail("create() reached")
+        assert SessionRunner.run(r) is False
+
+
+class TestTheRunPodListingIsParsedNotAssumed:
+
+    def _provider(self, obs):
+        p = RunPodProvider.__new__(RunPodProvider)
+        p.observe = lambda query: obs
+        return p
+
+    def test_pods_of_any_status_and_volumes_are_listed(self):
+        got = self._provider(Observation(ok=True, data={"myself": {
+            "pods": [{"id": "a", "desiredStatus": "EXITED"}],
+            "networkVolumes": [{"id": "v", "size": 50}]}})).account_resources()
+        assert got.known
+        assert [r["id"] for r in got.unaccounted(())] == ["a", "v"]
+        assert got.unaccounted(("a", "v")) == []
+
+    def test_a_reply_without_the_lists_is_unknown_not_empty(self):
+        got = self._provider(Observation(ok=True, data={"myself": {}})
+                             ).account_resources()
+        assert got.known is False
+
+    def test_a_transport_failure_is_unknown(self):
+        got = self._provider(Observation(ok=False, transient=True, error="502")
+                             ).account_resources()
+        assert got.known is False and got.error == "502"

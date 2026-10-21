@@ -77,7 +77,7 @@ def staged_behavior(behavior_prompts: Path) -> Path:
     """`behavior_v0` under its own name, because the output stem becomes the
     artifact name.
 
-    The tracked file is `data/stages/stage-3/eval_behavior_v0/prompts.jsonl`, whose stem would
+    The tracked file is `data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0/prompts.jsonl`, whose stem would
     write `prompts.json` / `prompts.generations.jsonl` — an unidentifiable
     artifact for a mandatory, separately-persisted measurement. Staging a copy
     named `behavior_v0.jsonl` makes the output `behavior_v0.json` and
@@ -198,7 +198,7 @@ def main() -> int:
     ap.add_argument("--battery", type=Path,
                     default=REPO / "artifacts/stages/stage-3/eval/battery_v2")
     ap.add_argument("--behavior-prompts", type=Path,
-                    default=REPO / "data/stages/stage-3/eval_behavior_v0/prompts.jsonl")
+                    default=REPO / "data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0/prompts.jsonl")
     ap.add_argument("--holdout", type=Path,
                     default=REPO / "data/stages/stage-0/warmup/holdout_v1.jsonl")
     ap.add_argument("--out-root", type=Path, default=REPO / "artifacts/stages/stage-3/eval/e2p1")

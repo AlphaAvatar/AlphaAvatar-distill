@@ -1,0 +1,45 @@
+[20:23:29] budget: expected 130 min $3.88 · soft $5.44 · hard $5.89 (authorized $6.50)
+[20:23:29] NVIDIA A100-SXM4-80GB $1.79/h, stock Low
+[20:23:30] account funds OK: the provider account holds $100.0457 against the $30.0000 this session must be able to fund
+[20:23:31] precheck OK: 12 relay inputs (12 from AlphaAvatar/aadistill-artifacts), 0 local assets
+[20:23:32] watchdog detached — hard 198 min = $5.89
+[20:23:32] created 92ldrjenk7piv2 at $1.79/h
+[20:24:25]   starting (60s) — $0.03
+[20:25:07] TCP 22 at 154.54.102.35:16356 after 1.6 min
+[20:25:10] draw 1: ssh reachable — $0.05
+[20:25:28] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.16
+[20:25:28] draw 1: running setup
+[20:25:46] setup did not reach SETUP_DONE:
+on3.12/dist-packages/huggingface_hub/utils/_http.py", line 276, in _inner
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py", line 1047, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py", line 1117, in _hf_hub_download_to_cache_dir
+    (url_to_download, etag, commit_hash, expected_size, xet_file_data, head_call_error) = _get_metadata_or_catch_error(
+                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py", line 1762, in _get_metadata_or_catch_error
+    metadata = get_hf_file_metadata(
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/file_download.py", line 1669, in get_hf_file_metadata
+    response = _httpx2_follow_hub_redirects_with_backoff(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_http.py", line 771, in _httpx2_follow_hub_redirects_with_backoff
+    hf_raise_for_status(response)
+  File "/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_http.py", line 886, in hf_raise_for_status
+    raise _format(RemoteEntryNotFoundError, message, response, repo_type=repo_type, repo_id=repo_id) from e
+huggingface_hub.errors.RemoteEntryNotFoundError: 404 Client Error. (Request ID: Root=1-6ad52b43-5d51d1fb2a00f95a40cc95e3;bb0f1d9c-af1e-4df2-8812-b492b5f93b93)
+
+Entry Not Found for url: https://huggingface.co/AlphaAvatar/aadistill-artifacts/resolve/main/transfer/aad_autoinit_990ec406.bundle.
+SETUP_RC=1
+
+[20:25:46] ABORT after draw 1: setup_failed
+[20:25:46] deleting pod (setup setup_failed)
+[20:25:57] pod deleted — 2.4 min, $0.07; provider confirms gone: True
+
+stage0-calvol-battery INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-0/calibration_volume/runs/resolution_20261018_201712/runtime/session.json. 
+EXIT=11

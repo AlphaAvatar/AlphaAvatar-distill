@@ -87,10 +87,13 @@
    "configs/validation/c2_state_eval_certification.json": "configs/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification.json",
    "configs/validation/cuda_engineering.json": "configs/shared/validation/cuda_engineering.json",
    "configs/validation/cuda_engineering_deployment.json": "configs/shared/validation/cuda_engineering_deployment.json",
-   "data/eval_behavior_v0": "data/stages/stage-3/eval_behavior_v0",
+   "data/eval_behavior_v0": "data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0",
    "data/stage2": "data/stages/stage-2/stage2",
    "data/stage2_v1": "data/stages/stage-2/stage2_v1",
    "data/stage3_pilot": "data/stages/stage-3/stage3_pilot",
+   "data/stages/stage-0/calibration_volume/tasks/dev_v1.jsonl": "data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.jsonl",
+   "data/stages/stage-0/calibration_volume/tasks/dev_v1.manifest.json": "data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.manifest.json",
+   "data/stages/stage-3/eval_behavior_v0": "data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0",
    "data/warmup": "data/stages/stage-0/warmup",
    "docs/AUTOINIT_REFERENCE.md": "docs/stages/stage-1/AUTOINIT_REFERENCE.md",
    "docs/OPERATOR_PROMOTION_CYCLE.md": "docs/stages/stage-1/OPERATOR_PROMOTION_CYCLE.md",
@@ -743,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 94,
+  "runs_unrecorded": 132,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -760,6 +763,11 @@
     "recorded": 3,
     "unrecorded": 0,
     "total": 3
+   },
+   "calibration_volume": {
+    "recorded": 0,
+    "unrecorded": 38,
+    "total": 38
    },
    "continuation_b": {
     "recorded": 5,
@@ -2757,6 +2765,310 @@
   }
  ],
  "unrecorded": [
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "battery_20261018_091856",
+   "root": "logs/stages/stage-0/calibration_volume/runs/battery_20261018_091856",
+   "n_files": 2,
+   "digest": "f41a4ac75b19fba00d3c7e93006a56444af62d90afdd2b6d9357d13cbd1605ad",
+   "why": "no run manifest; its closeout states: ABANDONED_BEFORE_LAUNCH"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "battery_20261018_092345",
+   "root": "logs/stages/stage-0/calibration_volume/runs/battery_20261018_092345",
+   "n_files": 15,
+   "digest": "bc6a41e1b0321f09a425d500882124afddf4c2a5d683c5b67c7b48acd04eb0e4",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "bench_20261019_051316",
+   "root": "logs/stages/stage-0/calibration_volume/runs/bench_20261019_051316",
+   "n_files": 4,
+   "digest": "31b79fe27b9522d0dcf7c3494c8877cab3345fc33c8b8752e387ebf43d6714e8",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "dose_d1_20261019_054503",
+   "root": "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_054503",
+   "n_files": 3,
+   "digest": "f5ab374e7615085ebcb3c203650728cad3656dace40db57e8e18b55543cfdb27",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "dose_d1_20261019_055515",
+   "root": "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515",
+   "n_files": 8,
+   "digest": "7ba487e793056dfd98192491ee579424226483e0659a2984eb7006abb5d0b1aa",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "dose_d1_20261019_122630",
+   "root": "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_122630",
+   "n_files": 3,
+   "digest": "3d3365e97d7f8f2835c0fca6d552280b78dbdf0caebf172947e3ea57ebd26fa9",
+   "why": "no run manifest; its closeout states: ABANDONED_BEFORE_LAUNCH"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "dose_d1_20261019_125359",
+   "root": "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_125359",
+   "n_files": 7,
+   "digest": "f84208ea2c9ef996b7c610e40b10746e57e01543539faa1d0b063e4bb60c864b",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "dose_d1_20261019_133708",
+   "root": "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_133708",
+   "n_files": 5,
+   "digest": "1c307599f1582737a3bf3cd52fdda472ddc39cd5a884166f6217f3120ca82f13",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "dose_d2_20261019_135821",
+   "root": "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261019_135821",
+   "n_files": 3,
+   "digest": "b9efaf3e5ecc8ba458c7789fe0514566896ac1c8a435a470f6da0725998f2cd5",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "dose_d2_20261019_213216",
+   "root": "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261019_213216",
+   "n_files": 3,
+   "digest": "ea240ea4862b3ad4169c4c10ab5094fa2eb4937e26a83b1d8d2b9a5b20c3e194",
+   "why": "no run manifest; its closeout states: ABANDONED_BEFORE_LAUNCH"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "dose_d2_20261020_002929",
+   "root": "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929",
+   "n_files": 9,
+   "digest": "1b4a117fefd9c13fd22c66a061aa29c8c7d944f3b27b6298351f5deed2103b81",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "dose_d4_20261020_045426",
+   "root": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_045426",
+   "n_files": 2,
+   "digest": "d325145995f0317795c5deff5ddabdeb90497b2b07488104035faedb6a3ac313",
+   "why": "no run manifest; its closeout states: ABANDONED_BEFORE_LAUNCH"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "dose_d4_20261020_045616",
+   "root": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_045616",
+   "n_files": 2,
+   "digest": "b0ac6a84077e0de8869da555921daf60ac989a408484941915abf02b6aafd2dc",
+   "why": "no run manifest; its closeout states: ABANDONED_BEFORE_LAUNCH"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "dose_d4_20261020_053929",
+   "root": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_053929",
+   "n_files": 2,
+   "digest": "95192b636d2f5d467c0ca248f296280347a07c59512fd1f738fb3f5bb6ae65be",
+   "why": "no run manifest; its closeout states: ABANDONED_BEFORE_LAUNCH"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "dose_d4_20261020_054022",
+   "root": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_054022",
+   "n_files": 5,
+   "digest": "28e0fd602530c9741f3545240f879e192c437eecdaafd42c5348317cd6b8be00",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "dose_d4_20261020_185256",
+   "root": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_185256",
+   "n_files": 3,
+   "digest": "70059f57320abc4746e3ecbbf168c838b42f56cb1b9c738d12a530ddb5ed905c",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "dose_d4_20261020_211335",
+   "root": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_211335",
+   "n_files": 3,
+   "digest": "6afddbcb65f99b8767743a0ad4316188fabf9ac86c06107d3ab4669b7ca39d82",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "dose_d4_20261020_212310",
+   "root": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310",
+   "n_files": 10,
+   "digest": "cc448795da4f6ffeda2b7a7cfeb34def9acf76c81bc401bd206086624a2b3c51",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "netvol_20261019_051206",
+   "root": "logs/stages/stage-0/calibration_volume/runs/netvol_20261019_051206",
+   "n_files": 3,
+   "digest": "14cbbc1f097ecd5e5a8d3d0714c88d8b2d4560d35bfdc95911f92d20c2a928f3",
+   "why": "no run manifest; its closeout states: VOLUME_DELETED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "netvol_20261020_093832",
+   "root": "logs/stages/stage-0/calibration_volume/runs/netvol_20261020_093832",
+   "n_files": 3,
+   "digest": "5cb45da78d0ed73600dc59f4e671a1b6479128b2bfdac56a62a1c239c33f3a67",
+   "why": "no run manifest; its closeout states: VOLUME_DELETED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "netvol_20261020_233114",
+   "root": "logs/stages/stage-0/calibration_volume/runs/netvol_20261020_233114",
+   "n_files": 3,
+   "digest": "7ccbfd1d4ebff142078794da31c3b16a0784bb6a9b8e1702d56f4baac06124b3",
+   "why": "no run manifest; its closeout states: VOLUME_DELETED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "pilot_20261018_122600",
+   "root": "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_122600",
+   "n_files": 2,
+   "digest": "5c203984da3cc48adaf8fc7f8988636e275272bcfdeceb944298df992c81ea83",
+   "why": "no run manifest; its closeout states: ABANDONED_BEFORE_LAUNCH"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "pilot_20261018_122725",
+   "root": "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_122725",
+   "n_files": 2,
+   "digest": "b74b0999c022b002d845f1225c4f81372da1ce6bd81ec26eee7cc442b966c902",
+   "why": "no run manifest; its closeout states: ABANDONED_BEFORE_LAUNCH"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "pilot_20261018_122808",
+   "root": "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_122808",
+   "n_files": 8,
+   "digest": "891e02624ff0fce40b697823ebb4f61d27923ebbd3febf817ab69cf4f883ad8a",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "pilot_20261018_134131",
+   "root": "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131",
+   "n_files": 8,
+   "digest": "04cd6ff11117f15a4742cb5861b3f58141302d57d77f7b551fef2def6c8770ea",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "probes_d1_20261020_093955",
+   "root": "logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955",
+   "n_files": 25,
+   "digest": "19416af27fb3b8def87cf9cbdabecd6f2cdb80eebc81f5260f1f476ac1da4087",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "probes_d2_20261020_233510",
+   "root": "logs/stages/stage-0/calibration_volume/runs/probes_d2_20261020_233510",
+   "n_files": 25,
+   "digest": "2f03b2f49e5593207a9535ca80beb34ad423b8c10ccc6132f2797ca2e8c8c82a",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "probes_d4_20261020_232941",
+   "root": "logs/stages/stage-0/calibration_volume/runs/probes_d4_20261020_232941",
+   "n_files": 25,
+   "digest": "576af18498aaa3e93aff572e31136e298be42d22d60e68b93ee74ee5d43f6f1c",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "resolution_20261018_201712",
+   "root": "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_201712",
+   "n_files": 4,
+   "digest": "e3d9840181bb6e18faafb425d6168922e7acd4bfbd55ed4b90273d73860810ad",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "resolution_20261018_202715",
+   "root": "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_202715",
+   "n_files": 6,
+   "digest": "f08cbc0db95790188750e748f6005071d73b2bd4a9fa9d8257efdfeb52cb14ce",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "resolution_20261018_213745",
+   "root": "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_213745",
+   "n_files": 11,
+   "digest": "3b1e94b273dceacb9379b294038c6e2177dc55f00ef0da1a4675893622a36b4b",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "teachercal_20261018_112755",
+   "root": "logs/stages/stage-0/calibration_volume/runs/teachercal_20261018_112755",
+   "n_files": 7,
+   "digest": "f8a8bd263a3a9e7a654523113a912b63ceac90eb1079ea5b8cb5b9b171227d00",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "volaudit_20261021_142442",
+   "root": "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142442",
+   "n_files": 2,
+   "digest": "9a51b67705daedb41b8585424a158f93a35f015de612f27e05689bcd92866a03",
+   "why": "no run manifest; its closeout states: NO_RESOURCE_CREATED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "volaudit_20261021_142534",
+   "root": "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142534",
+   "n_files": 2,
+   "digest": "68c8c9cac132e10759b3ecd4d3aaef70b181fbba36e58f1901724b54a642e3bd",
+   "why": "no run manifest; its closeout states: NO_RESOURCE_CREATED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "volaudit_20261021_142540",
+   "root": "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142540",
+   "n_files": 2,
+   "digest": "a1e8e6554a26f9545d06359991dcdce21770e2642659858514fb737928590dfa",
+   "why": "no run manifest; its closeout states: NO_RESOURCE_CREATED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "volaudit_20261021_142638",
+   "root": "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142638",
+   "n_files": 4,
+   "digest": "b17656230cf429746af0dd07fca5d839a351b46e88f93ec501eecf82d260f15b",
+   "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "volaudit_20261021_142851",
+   "root": "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142851",
+   "n_files": 2,
+   "digest": "19b58492887e4b3d2503816ad60d362b0efd765a54883e62afa2a0e406850e92",
+   "why": "no run manifest; its closeout states: NO_RESOURCE_CREATED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "volaudit_20261021_142856",
+   "root": "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142856",
+   "n_files": 2,
+   "digest": "fa26f8248e4eff52ac7d77f54ebdbcd40bf0e4f1649a8842732438d85e2da8bd",
+   "why": "no run manifest; its closeout states: NO_RESOURCE_CREATED"
+  },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3-attempt1",

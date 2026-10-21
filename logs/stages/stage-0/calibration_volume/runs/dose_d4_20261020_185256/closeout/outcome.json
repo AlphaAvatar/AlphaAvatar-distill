@@ -1,0 +1,51 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "dose_d4_20261020_185256",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-20T21:13:01+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": "RUN_FAILED",
+ "passed": false,
+ "outcome": "Dose d4 resume attempt 1: FAILED in V_release before any measurement work, not by the science. The volume (ugllmlv19t, 300 GB) was still at quota (d1 13.2 GB + d2 13.2 GB + d4 273.6 GB = 299.995e9 bytes by du -sb), and release_relayed_finalists wrote its 'releasing' tombstone to the volume BEFORE deleting: open() raised OSError 122 'Disk quota exceeded' at 21:08:50Z, leaving an empty d1/released_finalists.json. Nothing was deleted, nothing of the search resumed. Repair: the intent record goes to the run's audit dir off the volume, the volume tombstone follows the deletion (with a short retry for quota lag), and an empty/torn tombstone reads as absent. Next: a fresh resume run of the SAME dose under the preregistered retry_policy.",
+ "provider_resource_created": true,
+ "pod_id": "57fzceztgwzi15",
+ "provider_confirms_gone": true,
+ "final_pod_state": {
+  "exists": false,
+  "desired_status": "TERMINATED",
+  "billing": false
+ },
+ "money": {
+  "all_in_usd": 0.2592,
+  "gpu_usd": 0.2515,
+  "disk_usd": 0.0077,
+  "elapsed_minutes": 8.43,
+  "price_per_hour": 1.79,
+  "authorized_usd": 9.0,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.10/GB-month over the elapsed minutes, ceiled to the 4-decimal quantum"
+ },
+ "session_record_sha256": "8e977b1f63c0310a0a899ed21854b6cbd74b2751f13e5598296b962520890c81",
+ "units": {
+  "extracted": {
+   "audit/stage0_calvol_dose/d4/dose_record.json": {
+    "sha256": "9c6b98f06d82765a368ab8c7e991433ee6b6eb7e9efc52600d6607c3e3888802",
+    "bytes": 1640
+   },
+   "audit/stage0_calvol_dose/d4/sync.log": {
+    "sha256": "34d096dde21614f281114fef4f9d74523a2af233260254d7b2a23aa49270c61a",
+    "bytes": 96
+   },
+   "audit/stage0_calvol_dose/session/setup.log": {
+    "sha256": "b4672fb09c6cf64f98631d881b0dfa8b8138f969113c18df1d608aae53a40b7b",
+    "bytes": 26575
+   },
+   "audit/stage0_calvol_dose/session/stage0_calvol_dose_run.log": {
+    "sha256": "0250a787d23a0911644d57046cb62c3214ff9f8c4c068bb30772474efdfdcb89",
+    "bytes": 127
+   }
+  }
+ },
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/dose_d4_20261020_185256"
+}

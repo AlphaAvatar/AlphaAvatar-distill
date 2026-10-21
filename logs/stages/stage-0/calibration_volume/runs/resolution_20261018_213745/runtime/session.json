@@ -1,0 +1,609 @@
+{
+  "schema": "aadistill.stage0.calibration_volume.battery_session/v1",
+  "session_id": "stage0-calvol-battery",
+  "session_spec": {
+    "session_id": "stage0-calvol-battery",
+    "schema": "aadistill.stage0.calibration_volume.battery_session/v1",
+    "description": "Stage-0 calibration volume: dev-battery calibration and teacher-native calibration-session generation",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_213745/governance/authorization.json",
+    "authorization_type": "functools.partial(<function load_for at 0x7f6499e90a90>, 'battery')",
+    "plan_id": "stage0.calibration_volume.resolution_v2",
+    "plan_hash": "db2b96d8e86c97440758ed78271f09c2e248b7dd848f9e01db07d0f1d94d19ce",
+    "status_path": "/workspace/stage0_calvol_battery.status",
+    "run_log_path": "/workspace/stage0_calvol_battery_run.log",
+    "driver_job_id": "stage0_calvol_battery_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "stage0_calvol_battery",
+      "evidence_filename": "battery.json",
+      "archive_basename": "stage0_calvol_battery",
+      "spec_success": "configs/stages/stage-0/calibration_volume/battery_artifacts.json",
+      "spec_failed": "configs/stages/stage-0/calibration_volume/battery_artifacts.json",
+      "report_names": [
+        "battery.json"
+      ]
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "stage0_calvol"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_KIND",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/chat_template.jinja",
+          "dest": "artifacts/stages/stage-0/calibration_volume/students/e1_r1600k_sa_pca",
+          "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/config.json",
+          "dest": "artifacts/stages/stage-0/calibration_volume/students/e1_r1600k_sa_pca",
+          "sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/generation_config.json",
+          "dest": "artifacts/stages/stage-0/calibration_volume/students/e1_r1600k_sa_pca",
+          "sha256": "0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/model.safetensors",
+          "dest": "artifacts/stages/stage-0/calibration_volume/students/e1_r1600k_sa_pca",
+          "sha256": "6f77676ab8fde397ef7af75fda3e62171b5c84f315c439a1abb49917e46f6697",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/tokenizer.json",
+          "dest": "artifacts/stages/stage-0/calibration_volume/students/e1_r1600k_sa_pca",
+          "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/tokenizer_config.json",
+          "dest": "artifacts/stages/stage-0/calibration_volume/students/e1_r1600k_sa_pca",
+          "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/chat_template.jinja",
+          "dest": "artifacts/stages/stage-0/calibration_volume/students/e1_r5500k_sa_pca",
+          "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/config.json",
+          "dest": "artifacts/stages/stage-0/calibration_volume/students/e1_r5500k_sa_pca",
+          "sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/generation_config.json",
+          "dest": "artifacts/stages/stage-0/calibration_volume/students/e1_r5500k_sa_pca",
+          "sha256": "0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/model.safetensors",
+          "dest": "artifacts/stages/stage-0/calibration_volume/students/e1_r5500k_sa_pca",
+          "sha256": "3069b329df3edfbd5edc0356516cd06ee7f02fe59663c19df7b30ef6acd8e397",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/tokenizer.json",
+          "dest": "artifacts/stages/stage-0/calibration_volume/students/e1_r5500k_sa_pca",
+          "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/tokenizer_config.json",
+          "dest": "artifacts/stages/stage-0/calibration_volume/students/e1_r5500k_sa_pca",
+          "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 600,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [],
+      "test_paths": [],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "VLLM_READY",
+        "TEACHER_READY",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 0,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-10-18T21:38:38+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 95 min $2.83 \u00b7 soft $4.14 \u00b7 hard $4.59 (authorized $4.64)"
+    },
+    {
+      "utc": "2026-10-18T21:38:39+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA A100-SXM4-80GB $1.79/h, stock Low"
+    },
+    {
+      "utc": "2026-10-18T21:38:39+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $97.9535 against the $30.0000 this session must be able to fund"
+    },
+    {
+      "utc": "2026-10-18T21:38:40+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 12 relay inputs (12 from AlphaAvatar/aadistill-artifacts), 0 local assets"
+    },
+    {
+      "utc": "2026-10-18T21:38:41+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 154 min = $4.59"
+    },
+    {
+      "utc": "2026-10-18T21:38:41+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created q8lzi7xqb5wcg5 at $1.79/h"
+    },
+    {
+      "utc": "2026-10-18T21:39:34+00:00",
+      "elapsed_min": 0.88,
+      "msg": "  starting (60s) \u2014 $0.03"
+    },
+    {
+      "utc": "2026-10-18T21:40:26+00:00",
+      "elapsed_min": 1.75,
+      "msg": "TCP 22 at 154.54.102.26:12726 after 1.7 min"
+    },
+    {
+      "utc": "2026-10-18T21:40:29+00:00",
+      "elapsed_min": 1.8,
+      "msg": "draw 1: ssh reachable \u2014 $0.05"
+    },
+    {
+      "utc": "2026-10-18T21:40:47+00:00",
+      "elapsed_min": 2.1,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.16"
+    },
+    {
+      "utc": "2026-10-18T21:40:47+00:00",
+      "elapsed_min": 2.1,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-18T21:43:07+00:00",
+      "elapsed_min": 4.44,
+      "msg": "draw 1: setup complete \u2014 $0.13"
+    },
+    {
+      "utc": "2026-10-18T21:43:14+00:00",
+      "elapsed_min": 4.56,
+      "msg": "driver detached, pid 2121, confirmed by descriptor_probe \u2014 $0.14"
+    },
+    {
+      "utc": "2026-10-18T21:45:27+00:00",
+      "elapsed_min": 6.77,
+      "msg": "  2026-10-18T21:43:11Z MARKER:CONTRACT_OK \u2014 $0.20"
+    },
+    {
+      "utc": "2026-10-18T21:59:46+00:00",
+      "elapsed_min": 21.08,
+      "msg": "  2026-10-18T21:58:42Z MARKER:UNIT_OK:qwen3_0p6b_cap8192_dev \u2014 $0.63"
+    },
+    {
+      "utc": "2026-10-18T22:00:14+00:00",
+      "elapsed_min": 21.55,
+      "msg": "unit qwen3_0p6b_cap8192_dev: SECURED"
+    },
+    {
+      "utc": "2026-10-18T22:24:06+00:00",
+      "elapsed_min": 45.41,
+      "msg": "  2026-10-18T22:23:20Z MARKER:UNIT_OK:e1_r5500k_sa_pca_dev \u2014 $1.35"
+    },
+    {
+      "utc": "2026-10-18T22:24:33+00:00",
+      "elapsed_min": 45.87,
+      "msg": "unit e1_r5500k_sa_pca_dev: SECURED"
+    },
+    {
+      "utc": "2026-10-18T22:41:14+00:00",
+      "elapsed_min": 62.55,
+      "msg": "  2026-10-18T22:39:30Z MARKER:ALL_DONE \u2014 $1.87"
+    },
+    {
+      "utc": "2026-10-18T22:41:14+00:00",
+      "elapsed_min": 62.55,
+      "msg": "polling ended: ALL_DONE \u2014 $1.87"
+    },
+    {
+      "utc": "2026-10-18T22:42:30+00:00",
+      "elapsed_min": 63.82,
+      "msg": "  manifest rc=0\n19 file(s) across 3 class(es) -> /workspace/manifest.json\n  final_required: 19 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-10-18T22:43:18+00:00",
+      "elapsed_min": 64.62,
+      "msg": "unit e1_r1600k_sa_pca_dev: SECURED"
+    },
+    {
+      "utc": "2026-10-18T22:43:25+00:00",
+      "elapsed_min": 64.73,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-10-18T22:43:25+00:00",
+      "elapsed_min": 64.73,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-10-18T22:43:36+00:00",
+      "elapsed_min": 64.91,
+      "msg": "pod deleted \u2014 64.9 min, $1.94; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.stage0.calibration_volume.authorization/v1",
+    "authorization_id": "stage0.calibration_volume.battery.resolution_20261018_213745",
+    "version": 1,
+    "granted_utc": "2026-10-18T21:37:45+00:00",
+    "granted_by": "maintainer (task instruction of 2026-10-18 to the executing agent session)",
+    "plan_id": "stage0.calibration_volume.resolution_v2",
+    "session_plan_hash": "db2b96d8e86c97440758ed78271f09c2e248b7dd848f9e01db07d0f1d94d19ce",
+    "expected_usd": 2.87,
+    "hard_cap_usd": 4.64,
+    "authorized_stages": [],
+    "stage_conditions": {
+      "phase": "prerequisites",
+      "plan": "resolution_v2",
+      "envelope": "{\"phase\": \"prerequisites\", \"phase_ceiling_usd\": 12.0, \"phase_spent_usd\": 7.3511, \"phase_remaining_usd\": 4.6489, \"programme_ceiling_usd\": 92.0, \"programme_spent_usd\": 15.551, \"programme_remaining_usd\": 76.449, \"per_session_cap_usd\": 30.0}"
+    },
+    "scope_note": "evaluation-resolution check, attempt 3 (plan v2): Qwen3-0.6B under the students' 8,192-token allowance as a labelled matched-allowance diagnostic, and two existing recovered students (1.60M, 5.50M), on eval-set-1 fluid_reasoning_720; no training",
+    "authorizes_battery": true,
+    "authorizes_search": false,
+    "authorizes_probes": false,
+    "authorized_session_commit": null,
+    "harness_source_digest": "fe47cd9070c697f9b8edec6be529a7f2908003b0c6db0072b620c9cdc4ad19ad",
+    "harness_source_files": [
+      "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "scripts/shared/pod/watchdog.py",
+      "scripts/shared/pod/collect_artifacts.py",
+      "scripts/stages/stage-0/calibration_volume/governance.py",
+      "scripts/stages/stage-0/calibration_volume/launch.py",
+      "scripts/stages/stage-0/calibration_volume/battery_driver.py",
+      "scripts/stages/stage-0/calibration_volume/run_battery.py",
+      "scripts/stages/stage-0/calibration_volume/score_battery.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/common.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/induction.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/composition.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/deduction.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/analogy.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/interactive.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/registry.py",
+      "scripts/shared/evaluation/uncapped_eval.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/data/verify.py"
+    ],
+    "per_launch_hard_usd": 4.64,
+    "provenance_commit": "9f63a266cc7a64d635203e57a89b6fe8a64aa0bc",
+    "enforcement": "the launcher refuses a pod unless this artifact is bound to the session plan and the harness on disk, and its hard cap covers the planned hard threshold; one artifact funds one run",
+    "authorization_sha256": "66c1bdfaff1d84d8b3e8e95b31fad6582e4d702747befbfa5bae8c022d77f49a"
+  },
+  "session_plan_hash": "db2b96d8e86c97440758ed78271f09c2e248b7dd848f9e01db07d0f1d94d19ce",
+  "harness_source_digest": "fe47cd9070c697f9b8edec6be529a7f2908003b0c6db0072b620c9cdc4ad19ad",
+  "harness_source_files": [
+    "scripts/shared/evaluation/uncapped_eval.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/collect_artifacts.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/stages/stage-0/calibration_volume/battery_driver.py",
+    "scripts/stages/stage-0/calibration_volume/governance.py",
+    "scripts/stages/stage-0/calibration_volume/launch.py",
+    "scripts/stages/stage-0/calibration_volume/run_battery.py",
+    "scripts/stages/stage-0/calibration_volume/score_battery.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/analogy.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/common.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/composition.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/deduction.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/induction.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/interactive.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/registry.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.79,
+    "authorized_usd": 4.64,
+    "expected_minutes": 95.0,
+    "soft_stop_minutes": 138.75,
+    "artifact_recovery_reserve_minutes": 15.0,
+    "hard_terminate_minutes": 153.75,
+    "step_time": {
+      "seconds": 1.0,
+      "source": "unused: no training in this session (arms=0)",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 15.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 10.0
+      },
+      {
+        "name": "reference_qwen3_0p6b_cap8192",
+        "minutes": 25.0
+      },
+      {
+        "name": "students_dev_2x",
+        "minutes": 40.0
+      },
+      {
+        "name": "scoring",
+        "minutes": 5.0
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "long_tail_generation",
+        "minutes": 20.0
+      }
+    ],
+    "notes": [
+      "below-floor step time accepted: 1.0 s/step vs floor 4.15 \u2014 no training steps; every phase is priced below"
+    ],
+    "soft_stop_reserve_minutes": 20.0,
+    "expected_usd": 2.8342,
+    "soft_stop_usd": 4.1394,
+    "artifact_recovery_reserve_usd": 0.4475,
+    "hard_terminate_usd": 4.5869
+  },
+  "quoted_price_per_hour": 1.79,
+  "stock_status": "Low",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 97.9534963638,
+    "current_spend_per_hr": 0.0,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 30.0,
+    "ok": true,
+    "why": "the provider account holds $97.9535 against the $30.0000 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "precheck": {
+    "relay_needed": [
+      "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/chat_template.jinja",
+      "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/config.json",
+      "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/generation_config.json",
+      "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/model.safetensors",
+      "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/tokenizer.json",
+      "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/tokenizer_config.json",
+      "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/chat_template.jinja",
+      "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/config.json",
+      "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/generation_config.json",
+      "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/model.safetensors",
+      "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/tokenizer.json",
+      "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/tokenizer_config.json"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 12
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1410
+    },
+    "local_assets": [],
+    "local_missing": []
+  },
+  "pod_id": "q8lzi7xqb5wcg5",
+  "actual_price_per_hour": 1.79,
+  "terminate_after_utc": "2026-10-19T00:12:25Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "artifacts/stages/stage-0/calibration_volume/resolution_20261018_213745/watchdog_q8lzi7xqb5wcg5.jsonl"
+  ],
+  "watchdog_owns_pod": "q8lzi7xqb5wcg5",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "580.126.16"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.16"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_8df69c63.bundle",
+    "SESSION_ASSETS": "",
+    "SESSION_AUTH_PATH": "logs/stages/stage-0/calibration_volume/runs/resolution_20261018_213745/governance/authorization.json",
+    "SESSION_COMMIT": "8df69c633c940f36ca5a654e45fcb24426616508",
+    "SESSION_KIND": "stage0_calvol",
+    "SESSION_PLAN_HASH": "db2b96d8e86c97440758ed78271f09c2e248b7dd848f9e01db07d0f1d94d19ce",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/students/e1_r1600k_sa_pca\",\"path\":\"e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/students/e1_r1600k_sa_pca\",\"path\":\"e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/students/e1_r1600k_sa_pca\",\"path\":\"e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/students/e1_r1600k_sa_pca\",\"path\":\"e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f77676ab8fde397ef7af75fda3e62171b5c84f315c439a1abb49917e46f6697\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/students/e1_r1600k_sa_pca\",\"path\":\"e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/students/e1_r1600k_sa_pca\",\"path\":\"e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/students/e1_r5500k_sa_pca\",\"path\":\"e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/students/e1_r5500k_sa_pca\",\"path\":\"e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/students/e1_r5500k_sa_pca\",\"path\":\"e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/students/e1_r5500k_sa_pca\",\"path\":\"e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3069b329df3edfbd5edc0356516cd06ee7f02fe59663c19df7b30ef6acd8e397\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/students/e1_r5500k_sa_pca\",\"path\":\"e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/students/e1_r5500k_sa_pca\",\"path\":\"e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"}]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV VLLM_READY TEACHER_READY SETUP_DONE",
+    "SESSION_STATUS": "/workspace/stage0_calvol_battery.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "600",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "stage0_calvol_battery_driver",
+    "pid": 2121,
+    "workdir": "/workspace/aad",
+    "command": "PYTHONPATH=/workspace/aad/src:/workspace/aad/scripts /opt/train/bin/python /workspace/aad/scripts/stages/stage-0/calibration_volume/battery_driver.py --auth '/workspace/aad/logs/stages/stage-0/calibration_volume/runs/resolution_20261018_213745/governance/authorization.json' --plan resolution_v2 --plan-hash 'db2b96d8e86c97440758ed78271f09c2e248b7dd848f9e01db07d0f1d94d19ce' --status '/workspace/stage0_calvol_battery.status'",
+    "log_path": "/workspace/stage0_calvol_battery_run.log",
+    "status_path": "/workspace/stage0_calvol_battery.status",
+    "pid_path": "/workspace/jobs/stage0_calvol_battery_driver.pid",
+    "descriptor_path": "/workspace/jobs/stage0_calvol_battery_driver.job.json",
+    "exit_path": "/workspace/jobs/stage0_calvol_battery_driver.exit",
+    "started_utc": "2026-10-18T21:43:11Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "units_secured": {
+    "qwen3_0p6b_cap8192_dev": {
+      "ok": true,
+      "sha256": "537a36a811a62d2e94b1bf017bfe74a4a8ea52df89c52102b38651b7fba9cf1b",
+      "rc": {
+        "qwen3_0p6b_cap8192_dev.jsonl": 0,
+        "qwen3_0p6b_cap8192_dev.summary.json": 0,
+        "qwen3_0p6b_cap8192_dev.log": 0,
+        "score.rows.jsonl": 0,
+        "score.summary.json": 0
+      }
+    },
+    "e1_r5500k_sa_pca_dev": {
+      "ok": true,
+      "sha256": "111be37d6b65a528972d484a7aa443773986c1de197244e241bb5ad2bf2def69",
+      "rc": {
+        "e1_r5500k_sa_pca_dev.jsonl": 0,
+        "e1_r5500k_sa_pca_dev.summary.json": 0,
+        "e1_r5500k_sa_pca_dev.log": 0,
+        "score.rows.jsonl": 0,
+        "score.summary.json": 0
+      }
+    },
+    "e1_r1600k_sa_pca_dev": {
+      "ok": true,
+      "sha256": "9f64707825c8070f23e9a8c6e0bec0452b6ae54c1763626353859af732212e7a",
+      "rc": {
+        "e1_r1600k_sa_pca_dev.jsonl": 0,
+        "e1_r1600k_sa_pca_dev.summary.json": 0,
+        "e1_r1600k_sa_pca_dev.log": 0,
+        "score.rows.jsonl": 0,
+        "score.summary.json": 0
+      }
+    }
+  },
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "fetched_reports": [
+    "battery.json"
+  ],
+  "checkpoints_fetched": [],
+  "required_products_secured": {
+    "ok": true,
+    "why": "3 finished unit(s) secured off-pod"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 19,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.79,
+    "elapsed_minutes": 64.91,
+    "actual_usd": 1.9366,
+    "authorized_usd": 4.64,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-18T22:43:36+00:00"
+}

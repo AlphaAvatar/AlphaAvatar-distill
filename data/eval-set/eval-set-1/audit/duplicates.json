@@ -1,0 +1,22 @@
+{
+ "key": "static items: shared.eval_sets.prompt_key(prompt_text(item)), case- and whitespace-insensitive prompt text; interactive episodes: content_sha256",
+ "items": 1716,
+ "duplicate_groups": 3,
+ "within_unit": [
+  [
+   "stage3_capability_846/eval_behavior_v0:glaive-003743",
+   "stage3_capability_846/eval_behavior_v0:glaive-004818"
+  ],
+  [
+   "stage3_capability_846/eval_behavior_v0:everyday-000636",
+   "stage3_capability_846/eval_behavior_v0:everyday-001567"
+  ]
+ ],
+ "across_units": [
+  [
+   "stage3_capability_846/answerability_paired:pair-0118-safe:squad-val-57299021af94a219006aa50c",
+   "stage3_capability_846/rag:squad-val-57299021af94a219006aa50c"
+  ]
+ ],
+ "redundant_items": 3
+}

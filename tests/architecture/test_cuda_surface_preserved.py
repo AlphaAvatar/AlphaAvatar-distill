@@ -2145,6 +2145,101 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "the same values. Owes GPU execution: the D3 structural session "
             "is that run.",
      }),
+    #: Declared after the fact: the D-series closure squash (32246d12)
+    #: carried this module undeclared and left this check red on `main`.
+    ("f36e322d0a468d4ac1233514c9f18ac11dda9b03",
+     "D-series closure: a selected forward baseline",
+     {
+        "src/aadistill/initialization/baseline.py":
+            "NEW MODULE: a versioned baseline record plus a sha256-bound "
+            "selection, parsed into the objects a session is built from. THIS "
+            "IS A DECLARED SEMANTIC CHANGE by construction; it changes no "
+            "existing path. It refuses an operator id, objective, support or "
+            "hash the core does not ship, and returns a recorded artifact "
+            "only for the execution fingerprint it was materialized under.",
+     }),
+    ("32246d126ee8b6920a9282a0793dfa81d2f47fae",
+     "Stage-0 calibration volume: evaluation isolation by key",
+     {
+        "src/aadistill/evaluation/isolation.py":
+            "NEW MODULE: `key_overlaps` counts the shared keys between named "
+            "item roles under caller-supplied key functions, and "
+            "`require_disjoint` raises `IsolationViolation` for a required "
+            "pair that shares any. THIS IS A DECLARED SEMANTIC CHANGE by "
+            "construction; nothing existing calls it, and every key, role and "
+            "required pair comes from the caller.",
+     }),
+    ("e5fb30ae22124c0e3803c850d7fa429888922c9e",
+     "Permanent evaluation registry",
+     {
+        "src/aadistill/evaluation/eval_registry.py":
+            "NEW MODULE: `verify` / `require_intact` compare an evaluation set's "
+            "files with the manifest the registry authorizes (sha256, size, "
+            "unlisted and withheld files, an authorization on every protected "
+            "identity) and raise `EvalSetIntegrityError`; `capability_table` "
+            "reports per capability without pooling and never scores an "
+            "unsupported, withheld or unrun unit as zero. THIS IS A DECLARED "
+            "SEMANTIC CHANGE by construction; it names no set, benchmark, stage "
+            "or path. NO CUDA SURFACE: hashing and JSON only.",
+     }),
+    ("537852364161b0d134f76095b89798f4fce930b8",
+     "Stage-0 search cost: DEPTH prefix reuse, device-side validation, pruned-state resume",
+     {
+        "src/aadistill/initialization/execution.py":
+            "NEW EXECUTION FIELD `depth_prefix_reuse` (default False): in "
+            "`as_trace` only when True, never in `as_fingerprint`, so no "
+            "materialization identity moves. THIS IS A DECLARED SEMANTIC CHANGE "
+            "of execution only; the claim that it moves no byte is the CUDA "
+            "bench's (runs/bench_20261019_051316: bit-identical tables, removal "
+            "order and child bytes).",
+        "src/aadistill/initialization/statistics/contribution.py":
+            "NEW `captured_block_inputs` (bypass + record each surviving "
+            "block's input), `resumed_after_block` (bypass up to the first "
+            "block after `start` and inject its recorded input), `has_suffix`; "
+            "`greedy_removal(score_round=...)` scores a round at once with the "
+            "same table, tie-break and callbacks. Default paths unchanged. THIS "
+            "IS A DECLARED SEMANTIC CHANGE; CUDA SURFACE: forward pre-hooks on "
+            "decoder blocks, validated bit-identical on an A100.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "`score_round` on the forward baseline's path only (scored rows, "
+            "KL-only, parent reference, no observer) when "
+            "`ExecutionConfig.depth_prefix_reuse`: the scored-rows branch's "
+            "arithmetic, line for line, per candidate and micro-batch, with "
+            "the prefix taken from one capture forward. The historical "
+            "per-candidate `score` is unchanged and remains the default. THIS "
+            "IS A DECLARED SEMANTIC CHANGE of execution; CUDA SURFACE.",
+        "src/aadistill/initialization/planning/search.py":
+            "`BeamSearch(validate_on_search_device=False)`: runtime only; when "
+            "True the produced child is moved to the search device for the "
+            "save/reload check and moved back. `_restore` also accepts a "
+            "PRUNED record whose checkpoint bytes are still on disk "
+            "(prune_weights=False), re-identified exactly like a MEASURED one. "
+            "THIS IS A DECLARED SEMANTIC CHANGE; identities, measurements and "
+            "rankings are unchanged (bench: same state id, digest and "
+            "evaluation).",
+     }),
+    ("96213bb8816f98f7e5748eb4d5f11665fd928035",
+     "Stage-0 final closeout: provider resources reconciled before any create",
+     {
+        "src/aadistill/infrastructure/provider.py":
+            "NEW `AccountResources`, `RunPodProvider.account_resources` (every "
+            "pod of any status and every network volume, read-only; an "
+            "unreadable listing is `known=False`), `SimulatedProvider` knobs "
+            "(default: an empty account) and `reconcile_account(provider, "
+            "accounted)`. THIS IS A DECLARED SEMANTIC CHANGE: a new provider "
+            "query. NO CUDA SURFACE.",
+        "src/aadistill/infrastructure/session.py":
+            "NEW `BudgetSpec.accounted_provider_resources` (default empty): the "
+            "ids a session's records expect to find alive. THIS IS A DECLARED "
+            "SEMANTIC CHANGE of the spec. NO CUDA SURFACE.",
+        "src/aadistill/infrastructure/session_runner.py":
+            "NEW `check_account_resources`, ON BY DEFAULT in `run()` between "
+            "the funds gate and the prechecks: refuses at $0 while the account "
+            "holds a pod or network volume the session does not account for, "
+            "or cannot be listed. THIS IS A DECLARED SEMANTIC CHANGE of launch "
+            "behaviour: a session that ran beside an undeclared resource now "
+            "refuses. NO CUDA SURFACE.",
+     }),
 )
 
 

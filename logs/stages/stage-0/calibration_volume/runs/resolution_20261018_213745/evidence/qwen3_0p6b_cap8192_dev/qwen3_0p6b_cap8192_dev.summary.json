@@ -1,0 +1,74 @@
+{
+ "identity": {
+  "label": "qwen3_0p6b_cap8192_dev",
+  "model": "Qwen/Qwen3-0.6B",
+  "revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+  "mode": "eval",
+  "tasks_file": "data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.jsonl",
+  "tasks_sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+  "context_resolution": {
+   "resolved_context": 8192,
+   "context_source": "diagnostic_cap",
+   "config_max_position_embeddings": 40960,
+   "rope_scaling_factor": null,
+   "architectural_context": 40960,
+   "trained_context": null,
+   "context_len_override": null,
+   "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+   "note": null,
+   "uncapped_context": 40960,
+   "uncapped_context_source": "config:max_position_embeddings",
+   "not_a_p18_measurement": "generation is capped below the model's supported context to match another model's measurement allowance; context-limit hits are right-censored and the result is a diagnostic, not this model's P18 score"
+  },
+  "session_limit": null,
+  "effective_limit": 8192,
+  "stop_ids": [
+   151643,
+   151645
+  ],
+  "sampling": {
+   "temperature": 0.0,
+   "top_p": 1.0,
+   "top_k": -1,
+   "detokenize": false
+  },
+  "seed_base": null,
+  "system_message": "You are a helpful Assistant.",
+  "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+  "tokenizer_sha256": null,
+  "degeneration_check_every": 256,
+  "engine": {
+   "max_model_len": 8192,
+   "gpu_memory_utilization": 0.9,
+   "dtype": "bfloat16",
+   "dtype_engine": "torch.bfloat16",
+   "max_num_seqs": 256,
+   "max_num_batched_tokens": 8192,
+   "vllm_version": "0.27.1",
+   "enforce_eager": false,
+   "init_seconds": 156.2
+  },
+  "libraries": {
+   "transformers": "5.15.0",
+   "tokenizers": "0.22.2",
+   "safetensors": "0.8.0",
+   "numpy": "2.3.5",
+   "datasets": null,
+   "vllm": "0.27.1"
+  },
+  "image_digest": null,
+  "runner_sha256": "d92087ba5b4909c6babe948320b4d0751456ea3ac5b588b3e6ec2fbfa779ae74"
+ },
+ "n_tasks": 720,
+ "turns": 969,
+ "output_tokens": 1659164,
+ "generation_seconds": 755.1,
+ "output_tokens_per_second": 2197.3,
+ "ends": {
+  "answered": 425,
+  "context_limit": 4,
+  "degeneration": 265,
+  "episode_done": 12,
+  "turn_limit": 14
+ }
+}

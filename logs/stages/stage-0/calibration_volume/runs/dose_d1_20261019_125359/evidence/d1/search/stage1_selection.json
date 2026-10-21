@@ -1,0 +1,350 @@
+{
+  "schema": "aadistill.autoinit.stage1_selection/v1",
+  "generated_utc": "2026-10-19T10:52:16.828096+00:00",
+  "_contract": "Written the moment a Stage-1 ranking exists, before the control measurement, the retained candidates, the summary, or any other bookkeeping. If this file exists the search COMPLETED and these five leaves were selected, whatever happened afterwards. It is not a search result and not a substitute for the summary.",
+  "search": {
+    "run_id": "stage0_calvol_formal_v1_d1",
+    "config_hash": "4c536119440ec237fa5af315e2ca187ad52c1ce1d7487fc543cd435c7355f5d7",
+    "seed": 20260815,
+    "target_spec_hash": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "workdir": "/workspace/aad/artifacts/audit/stage0_calvol_search/d1/search"
+  },
+  "journal": {
+    "path": "/workspace/aad/artifacts/audit/stage0_calvol_search/d1/search/states.jsonl",
+    "sha256": "3be04da5aea71be84aa35b80f8d64a6bfced06f202ce98abeef062e609795ba5"
+  },
+  "policy": {
+    "qualified_id": "beam.pareto_multi_objective@v2",
+    "hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4"
+  },
+  "suite": {
+    "qualified_id": "state_eval@v1",
+    "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+  },
+  "profiles": [
+    {
+      "qualified_id": "calib.s0v_base_d1@v1",
+      "profile_hash": "4455351e3fda24edd5e284fb323dbb507b3bf91799312d2d5e30abd9d9b003f4",
+      "content_sha256": "a43456e05214c4d22a62a32aa468cf6eb5184c6e4f8d07c3a55aeca5d8e9ed53"
+    },
+    {
+      "qualified_id": "calib.s0v_rh_d1@v1",
+      "profile_hash": "8507de50083afc72c6831c915f991ee6fd33e43456d5ed5965498acbd92f7664",
+      "content_sha256": "3508703a6786bd73cbb325dadc91bf402e2169630977bf4c5fa6cfc12383bec2"
+    }
+  ],
+  "selected": [
+    {
+      "state_id": "72b76a1ca4300f1fc3b341c28738f425",
+      "path": "DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_rh_d1@v1)->ATTENTION(calib.s0v_rh_d1@v1)->RESIDUAL_WIDTH(calib.s0v_rh_d1@v1)",
+      "artifact_digest": "ecd34a057f83069742156ca02cd5ccd89bd5ff60a4f3c3a8ee176628f7fbf287",
+      "single_shard_sha256": "49bb3c56b50d95946f7621619084fe85e6f84e9375a843a704e1ab2e53548cae",
+      "checkpoint_path": "/workspace/aad/artifacts/audit/stage0_calvol_search/d1/search/states/72b76a1ca4300f1fc3b341c28738f425/1a35fed31c0bff69c42b39262449adf4",
+      "num_parameters": 596049920,
+      "impl_ids": [
+        "depth.causal_kl_greedy_v1",
+        "ffn.activation_importance_v0",
+        "attention.activation_importance_v1",
+        "width.global_pca_v0"
+      ],
+      "calibration_profiles": [
+        "calib.s0v_base_d1@v1",
+        "calib.s0v_rh_d1@v1"
+      ],
+      "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+      "weights_digest": "862a6bc0deb6fe73f8ebb7139a28e64784833da2486cfc7e741a9b50081c64f1"
+    }
+  ],
+  "n_selected": 1,
+  "decisions": [
+    {
+      "state_id": "72b76a1ca4300f1fc3b341c28738f425",
+      "path": "DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_rh_d1@v1)->ATTENTION(calib.s0v_rh_d1@v1)->RESIDUAL_WIDTH(calib.s0v_rh_d1@v1)",
+      "front": 0,
+      "position_in_front": 0,
+      "quality_order": 1,
+      "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0|attention.activation_importance_v1",
+      "selected": true,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 8.031886769464768,
+        "state.teacher_kl.worst_domain": 9.3454064242026,
+        "state.critical_token_kl": 12.22867862412607
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 8.345867813258097,
+        "state.nll.teacher_reference_pooled": 0.5076820027335172,
+        "state.nll.general": 10.019275997263584,
+        "state.nll.reasoning_math": 7.382182922757307,
+        "state.nll.rag_multihop": 9.551853348502247,
+        "state.nll.code": 7.989219158407636,
+        "state.nll.tool": 8.026757091925681
+      },
+      "reason": "kept: quality order 1 of 12 (front 0), top 1 by the policy's own ordering; lineage diversity NOT applied"
+    },
+    {
+      "state_id": "60e229ac09d88cf52814894ddec0e933",
+      "path": "DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_rh_d1@v1)->ATTENTION(calib.s0v_rh_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)",
+      "front": 0,
+      "position_in_front": 1,
+      "quality_order": 2,
+      "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0|attention.activation_importance_v1",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 8.19496527947434,
+        "state.teacher_kl.worst_domain": 9.307720954459706,
+        "state.critical_token_kl": 12.56398740028865
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 8.538817101363213,
+        "state.nll.teacher_reference_pooled": 0.5076820027335172,
+        "state.nll.general": 10.101780898501634,
+        "state.nll.reasoning_math": 7.682194989134048,
+        "state.nll.rag_multihop": 9.511360888946971,
+        "state.nll.code": 8.157437866219977,
+        "state.nll.tool": 8.31421192050042
+      },
+      "reason": "not retained: quality order 2 of 12 (front 0), outside the top 1"
+    },
+    {
+      "state_id": "4df438a839cd1ed057c2277dfcb8922f",
+      "path": "DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_rh_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)->ATTENTION(calib.s0v_base_d1@v1)",
+      "front": 0,
+      "position_in_front": 2,
+      "quality_order": 3,
+      "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0|width.global_pca_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 8.50804494841031,
+        "state.teacher_kl.worst_domain": 9.097441211851287,
+        "state.critical_token_kl": 13.183806631565
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 8.969084089341818,
+        "state.nll.teacher_reference_pooled": 0.5076820027335172,
+        "state.nll.general": 9.620859606756909,
+        "state.nll.reasoning_math": 8.855498925673622,
+        "state.nll.rag_multihop": 9.234421710410171,
+        "state.nll.code": 9.308635289748134,
+        "state.nll.tool": 8.343323681887616
+      },
+      "reason": "not retained: quality order 3 of 12 (front 0), outside the top 1"
+    },
+    {
+      "state_id": "91090067b51c9fd4c0aeb3824bc7f549",
+      "path": "ATTENTION(calib.s0v_base_d1@v1)->DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_base_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)",
+      "front": 1,
+      "position_in_front": 0,
+      "quality_order": 4,
+      "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 8.289101627459791,
+        "state.teacher_kl.worst_domain": 9.309110374433441,
+        "state.critical_token_kl": 13.242471971535654
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 8.577125795653727,
+        "state.nll.teacher_reference_pooled": 0.5076820027335172,
+        "state.nll.general": 10.677089660739282,
+        "state.nll.reasoning_math": 7.5027059787302885,
+        "state.nll.rag_multihop": 9.499109536102544,
+        "state.nll.code": 8.203286336157559,
+        "state.nll.tool": 8.33767801541296
+      },
+      "reason": "not retained: quality order 4 of 12 (front 1), outside the top 1"
+    },
+    {
+      "state_id": "b4b645c9a7e23e8535a4227d707aa575",
+      "path": "ATTENTION(calib.s0v_base_d1@v1)->DEPTH(calib.s0v_rh_d1@v1)->FFN(calib.s0v_base_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)",
+      "front": 1,
+      "position_in_front": 1,
+      "quality_order": 5,
+      "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 8.289101627459791,
+        "state.teacher_kl.worst_domain": 9.309110374433441,
+        "state.critical_token_kl": 13.242471971535654
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 8.577125795653727,
+        "state.nll.teacher_reference_pooled": 0.5076820027335172,
+        "state.nll.general": 10.677089660739282,
+        "state.nll.reasoning_math": 7.5027059787302885,
+        "state.nll.rag_multihop": 9.499109536102544,
+        "state.nll.code": 8.203286336157559,
+        "state.nll.tool": 8.33767801541296
+      },
+      "reason": "not retained: quality order 5 of 12 (front 1), outside the top 1"
+    },
+    {
+      "state_id": "2bb36c036eabe2c7c10e4c93c2479397",
+      "path": "DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_rh_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)->ATTENTION(calib.s0v_rh_d1@v1)",
+      "front": 1,
+      "position_in_front": 2,
+      "quality_order": 6,
+      "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0|width.global_pca_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 8.767385252969087,
+        "state.teacher_kl.worst_domain": 9.403529508454257,
+        "state.critical_token_kl": 12.922931699786094
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 9.197598981209323,
+        "state.nll.teacher_reference_pooled": 0.5076820027335172,
+        "state.nll.general": 10.032666001179964,
+        "state.nll.reasoning_math": 8.99957164470075,
+        "state.nll.rag_multihop": 9.490009206065935,
+        "state.nll.code": 9.614182389064988,
+        "state.nll.tool": 8.487730422932977
+      },
+      "reason": "not retained: quality order 6 of 12 (front 1), outside the top 1"
+    },
+    {
+      "state_id": "bc41ee880375c9a07daf7b37aad43d68",
+      "path": "ATTENTION(calib.s0v_base_d1@v1)->DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_base_d1@v1)->RESIDUAL_WIDTH(calib.s0v_rh_d1@v1)",
+      "front": 2,
+      "position_in_front": 0,
+      "quality_order": 7,
+      "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 8.751461095967477,
+        "state.teacher_kl.worst_domain": 9.492948196795707,
+        "state.critical_token_kl": 16.514693683979274
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 9.041170647890551,
+        "state.nll.teacher_reference_pooled": 0.5076820027335172,
+        "state.nll.general": 11.373632654556763,
+        "state.nll.reasoning_math": 7.930059950711437,
+        "state.nll.rag_multihop": 9.628033305451167,
+        "state.nll.code": 8.701237837963195,
+        "state.nll.tool": 8.8392191237449
+      },
+      "reason": "not retained: quality order 7 of 12 (front 2), outside the top 1"
+    },
+    {
+      "state_id": "cd112557b37b26b26b6fc3888827de48",
+      "path": "ATTENTION(calib.s0v_base_d1@v1)->DEPTH(calib.s0v_rh_d1@v1)->FFN(calib.s0v_base_d1@v1)->RESIDUAL_WIDTH(calib.s0v_rh_d1@v1)",
+      "front": 2,
+      "position_in_front": 1,
+      "quality_order": 8,
+      "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 8.751461095967477,
+        "state.teacher_kl.worst_domain": 9.492948196795707,
+        "state.critical_token_kl": 16.514693683979274
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 9.041170647890551,
+        "state.nll.teacher_reference_pooled": 0.5076820027335172,
+        "state.nll.general": 11.373632654556763,
+        "state.nll.reasoning_math": 7.930059950711437,
+        "state.nll.rag_multihop": 9.628033305451167,
+        "state.nll.code": 8.701237837963195,
+        "state.nll.tool": 8.8392191237449
+      },
+      "reason": "not retained: quality order 8 of 12 (front 2), outside the top 1"
+    },
+    {
+      "state_id": "ba6c2ac7b69835acc705a8977b9fc082",
+      "path": "FFN(calib.s0v_base_d1@v1)->DEPTH(calib.s0v_base_d1@v1)->ATTENTION(calib.s0v_base_d1@v1)->RESIDUAL_WIDTH(calib.s0v_rh_d1@v1)",
+      "front": 3,
+      "position_in_front": 0,
+      "quality_order": 9,
+      "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1|attention.activation_importance_v1",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 11.339226387352092,
+        "state.teacher_kl.worst_domain": 13.940297199776728,
+        "state.critical_token_kl": 18.02678151147525
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 11.422321081858913,
+        "state.nll.teacher_reference_pooled": 0.5076820027335172,
+        "state.nll.general": 16.44613459466451,
+        "state.nll.reasoning_math": 9.619903177170801,
+        "state.nll.rag_multihop": 12.399847595650186,
+        "state.nll.code": 11.380456139578074,
+        "state.nll.tool": 10.190416033673309
+      },
+      "reason": "not retained: quality order 9 of 12 (front 3), outside the top 1"
+    },
+    {
+      "state_id": "0b84061182731fe1f4847c0a0a81bf66",
+      "path": "FFN(calib.s0v_base_d1@v1)->DEPTH(calib.s0v_base_d1@v1)->ATTENTION(calib.s0v_base_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)",
+      "front": 3,
+      "position_in_front": 1,
+      "quality_order": 10,
+      "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1|attention.activation_importance_v1",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 11.660148322086888,
+        "state.teacher_kl.worst_domain": 12.741831830653508,
+        "state.critical_token_kl": 18.59651436709899
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 11.81378563349014,
+        "state.nll.teacher_reference_pooled": 0.5076820027335172,
+        "state.nll.general": 14.529613924856731,
+        "state.nll.reasoning_math": 10.39704729959674,
+        "state.nll.rag_multihop": 12.789735514164136,
+        "state.nll.code": 12.934870780926746,
+        "state.nll.tool": 10.87274372656193
+      },
+      "reason": "not retained: quality order 10 of 12 (front 3), outside the top 1"
+    },
+    {
+      "state_id": "7a18d90918de20d48e908fc9460434c6",
+      "path": "RESIDUAL_WIDTH(calib.s0v_base_d1@v1)->DEPTH(calib.s0v_rh_d1@v1)->FFN(calib.s0v_base_d1@v1)->ATTENTION(calib.s0v_base_d1@v1)",
+      "front": 3,
+      "position_in_front": 2,
+      "quality_order": 11,
+      "lineage": "width.global_pca_v0|depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 14.218529904661187,
+        "state.teacher_kl.worst_domain": 15.645603990733818,
+        "state.critical_token_kl": 17.576833556911524
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 14.546865131340601,
+        "state.nll.teacher_reference_pooled": 0.5076820027335172,
+        "state.nll.general": 16.280467087845413,
+        "state.nll.reasoning_math": 12.696271907543586,
+        "state.nll.rag_multihop": 15.840055210492105,
+        "state.nll.code": 14.20123249015537,
+        "state.nll.tool": 15.174907576331078
+      },
+      "reason": "not retained: quality order 11 of 12 (front 3), outside the top 1"
+    },
+    {
+      "state_id": "97eecc77fa7f15aabaafa8ae48dce400",
+      "path": "RESIDUAL_WIDTH(calib.s0v_base_d1@v1)->DEPTH(calib.s0v_rh_d1@v1)->FFN(calib.s0v_base_d1@v1)->ATTENTION(calib.s0v_rh_d1@v1)",
+      "front": 4,
+      "position_in_front": 0,
+      "quality_order": 12,
+      "lineage": "width.global_pca_v0|depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 15.071298820444971,
+        "state.teacher_kl.worst_domain": 16.544534989412778,
+        "state.critical_token_kl": 17.812869929628334
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 15.405896659022229,
+        "state.nll.teacher_reference_pooled": 0.5076820027335172,
+        "state.nll.general": 16.822226903709414,
+        "state.nll.reasoning_math": 13.26989844941802,
+        "state.nll.rag_multihop": 16.73981524886124,
+        "state.nll.code": 14.940632506795405,
+        "state.nll.tool": 16.633608871204725
+      },
+      "reason": "not retained: quality order 12 of 12 (front 4), outside the top 1"
+    }
+  ],
+  "selection_sha256": "b57b18367c0f2fd8276285e43d6238f47e6ee373961c723a0744bc0640b87a7f"
+}

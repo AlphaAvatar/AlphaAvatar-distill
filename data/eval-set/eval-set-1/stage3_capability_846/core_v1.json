@@ -1,0 +1,66 @@
+{
+ "schema": "aadistill.eval_set_core/v1",
+ "eval_set_id": "eval-set-1",
+ "component": "stage3_capability_846",
+ "decided_by": "maintainer",
+ "decision": "logs/budget/decisions.md 2026-10-19 (Maintainer: eval-set-1 finalization and the Stage-0 volume study authorized ($90 new-spend hard cap))",
+ "units": {
+  "knowledge": {
+   "in_formal_core": false,
+   "status": "supplementary",
+   "reason": "TriviaQA has no recorded redistribution basis: it stays out of public git and the formal core never depends on it. When its verified local copy is staged it is measured and reported separately as a non-core unit."
+  },
+  "eval_behavior_v0": {
+   "in_formal_core": true,
+   "excluded_from_core": {
+    "xlam-000002": "Salesforce/xlam-function-calling-60k: access-gated; its access and redistribution terms are unconfirmed (present in the repository since 2026-07-27)",
+    "xlam-000027": "Salesforce/xlam-function-calling-60k: access-gated; its access and redistribution terms are unconfirmed (present in the repository since 2026-07-27)",
+    "xlam-000077": "Salesforce/xlam-function-calling-60k: access-gated; its access and redistribution terms are unconfirmed (present in the repository since 2026-07-27)",
+    "xlam-000427": "Salesforce/xlam-function-calling-60k: access-gated; its access and redistribution terms are unconfirmed (present in the repository since 2026-07-27)",
+    "xlam-000602": "Salesforce/xlam-function-calling-60k: access-gated; its access and redistribution terms are unconfirmed (present in the repository since 2026-07-27)",
+    "xlam-000752": "Salesforce/xlam-function-calling-60k: access-gated; its access and redistribution terms are unconfirmed (present in the repository since 2026-07-27)",
+    "xlam-001280": "Salesforce/xlam-function-calling-60k: access-gated; its access and redistribution terms are unconfirmed (present in the repository since 2026-07-27)"
+   },
+   "excluded_from_held_out": {
+    "openmath-004228": "also in the stage2_v1 TRAIN split (audit/isolation.json)",
+    "openmath-000199": "also in the stage2_v1 TRAIN split (audit/isolation.json)",
+    "everyday-001567": "also in the stage2_v1 TRAIN split (audit/isolation.json)",
+    "smoltalk-423306": "also in the stage2_v1 TRAIN split (audit/isolation.json)"
+   },
+   "duplicate_groups": [
+    [
+     "eval_behavior_v0:glaive-003743",
+     "eval_behavior_v0:glaive-004818"
+    ],
+    [
+     "eval_behavior_v0:everyday-000636",
+     "eval_behavior_v0:everyday-001567"
+    ]
+   ]
+  },
+  "math_verified": {
+   "in_formal_core": true
+  },
+  "gsm8k": {
+   "in_formal_core": true
+  },
+  "multihop": {
+   "in_formal_core": true
+  },
+  "rag": {
+   "in_formal_core": true
+  },
+  "answerability_paired": {
+   "in_formal_core": true
+  },
+  "safety_paired": {
+   "in_formal_core": true
+  }
+ },
+ "counts": {
+  "behaviour_items": 76,
+  "behaviour_core": 69,
+  "behaviour_core_held_out": 65
+ },
+ "rule": "every item is still generated and its row reported; the masks decide which rows enter the FORMAL numbers. Exact duplicates count once in independent statistics."
+}

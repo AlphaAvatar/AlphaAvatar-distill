@@ -1,0 +1,308 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.search_record/v1",
+ "treatment": "pilot_root",
+ "run_id": "pilot_20261018_134131",
+ "started_utc": "2026-10-18T13:46:46Z",
+ "stages": {
+  "A_contract": {
+   "config_hash": "4749fb92a764b250",
+   "seconds": 2.32,
+   "status": "ok"
+  },
+  "B_teacher": {
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "seconds": 12.73,
+   "status": "ok"
+  },
+  "C_beam_search": {
+   "n_states": 32,
+   "n_complete_leaves": 0,
+   "seconds": 13071.64,
+   "status": "ok"
+  },
+  "D_commit": {
+   "k": 0,
+   "note": "root-level pilot: no finalist is committed",
+   "seconds": 12.36,
+   "status": "ok"
+  }
+ },
+ "status": "COMPLETE",
+ "session": {
+  "config_hash": "4749fb92a764b250b50ff23d82efc6026cd23ae906407237893493a81db6a5c7",
+  "measurement_protocol_id": "857357e82eb1bd1f367985eaa31399dc",
+  "profiles": [
+   "calib.s0v_base_d1_r1@v1",
+   "calib.s0v_base_d1_r2@v1",
+   "calib.s0v_base_d1_r3@v1",
+   "calib.s0v_base_d2_r1@v1",
+   "calib.s0v_base_d2_r2@v1",
+   "calib.s0v_base_d2_r3@v1",
+   "calib.s0v_base_d4_r1@v1",
+   "calib.s0v_base_d4_r2@v1",
+   "calib.s0v_base_d4_r3@v1"
+  ],
+  "profile_hashes": {
+   "calib.s0v_base_d1_r1@v1": "5d2c2ccafbbe17128d4d5b8b3535572cdaff627dc30aec4e50b10b403e93404b",
+   "calib.s0v_base_d1_r2@v1": "7ee445720bde921ceb775a241a5d12abfbeb9b37af4a0f919453c9bc583b8914",
+   "calib.s0v_base_d1_r3@v1": "b643f640864efb4b0c68902df073f19eb8e5e27e789f7ac76de9dfd6b7fc29ca",
+   "calib.s0v_base_d2_r1@v1": "1a3abe693529b40cb19eccd7e52c1a6fa2f833cf31fa8d8702056c722b0aa5bd",
+   "calib.s0v_base_d2_r2@v1": "036d123340a74c0270182470d7bd46da634d65594c59816e5e44907c4451a2c2",
+   "calib.s0v_base_d2_r3@v1": "6c6fe195a200244a4b74fe48a25428f3f8bf129339f90e995785ec33c4967d7e",
+   "calib.s0v_base_d4_r1@v1": "2e8a6b66079a45bf11be764b25e8452217947cafab52cb97faae3ff2c4184409",
+   "calib.s0v_base_d4_r2@v1": "b0e6dcff4803877b02e9c8f5d684adcb8ca3ee8ad43f2dfb9bb14f3ce3bea494",
+   "calib.s0v_base_d4_r3@v1": "29d6c491ddae8315ab2999838eb9e055260d363fb1d89bd4c02889a1f88d0b7a"
+  },
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "baseline": {
+   "baseline": "stage1_init.d1_target_aware.scored_v1@v1",
+   "record_sha256": "333af13d9f2441fc658ee064f1a6ec6b15ebf5be5ee8ab31320763bbe41ce266",
+   "numerical_execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "execution": {
+    "micro_batch_size": 3,
+    "calibration_batch_packing": "length_sorted_v1",
+    "prediction_rows": "scored_v1"
+   },
+   "implementations": {
+    "FFN": "ffn.activation_importance_v0",
+    "DEPTH": "depth.causal_kl_greedy_v1",
+    "RESIDUAL_WIDTH": "width.global_pca_v0",
+    "ATTENTION": "attention.activation_importance_v1"
+   },
+   "position_policy": "positions.supervised_target_v1@v1",
+   "distribution_support": {
+    "support_id": "reference_topk_tail_v1",
+    "top_k": 200
+   }
+  }
+ },
+ "authorization_id": "stage0.calibration_volume.search.pilot_20261018_134131",
+ "root_teacher": {
+  "verified": [
+   "model-00001-of-00003.safetensors",
+   "model-00002-of-00003.safetensors",
+   "model-00003-of-00003.safetensors"
+  ],
+  "root_teacher_id": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+  "root_teacher_sha256": "6de20cc746dd42e96f93aeb4551b8d378e415a206309435d7eaefd39cfdf45f9"
+ },
+ "width_projections": [
+  {
+   "state_id": "1a2fc7418071099d1feee80c9bed1ac1",
+   "profiles": [
+    "calib.s0v_base_d1_r1@v1"
+   ],
+   "file": "width_projection_1a2fc7418071099d1feee80c9bed1ac1.safetensors",
+   "relative_residual": 0.0016572362510487437,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "9e11406f0575e2cced6ac29b6afd1f21",
+   "profiles": [
+    "calib.s0v_base_d1_r2@v1"
+   ],
+   "file": "width_projection_9e11406f0575e2cced6ac29b6afd1f21.safetensors",
+   "relative_residual": 0.0016572679160162807,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "d3dd2114157fb594b18766cd57436c3f",
+   "profiles": [
+    "calib.s0v_base_d1_r3@v1"
+   ],
+   "file": "width_projection_d3dd2114157fb594b18766cd57436c3f.safetensors",
+   "relative_residual": 0.0016561681404709816,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "12a9a771f6966205cfdade26efce84ff",
+   "profiles": [
+    "calib.s0v_base_d2_r1@v1"
+   ],
+   "file": "width_projection_12a9a771f6966205cfdade26efce84ff.safetensors",
+   "relative_residual": 0.0016575742047280073,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "be2afe21b450aae183090b3e041d57f3",
+   "profiles": [
+    "calib.s0v_base_d2_r2@v1"
+   ],
+   "file": "width_projection_be2afe21b450aae183090b3e041d57f3.safetensors",
+   "relative_residual": 0.001657376647926867,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "cdcb21d862f872b8136b1abd64b15460",
+   "profiles": [
+    "calib.s0v_base_d2_r3@v1"
+   ],
+   "file": "width_projection_cdcb21d862f872b8136b1abd64b15460.safetensors",
+   "relative_residual": 0.0016575688496232033,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "f14e6e2b88746c7e74641f39ba953010",
+   "profiles": [
+    "calib.s0v_base_d4_r1@v1"
+   ],
+   "file": "width_projection_f14e6e2b88746c7e74641f39ba953010.safetensors",
+   "relative_residual": 0.0016556010814383626,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "d6a123eb132f4978ca4b17a37fb4388c",
+   "profiles": [
+    "calib.s0v_base_d4_r2@v1"
+   ],
+   "file": "width_projection_d6a123eb132f4978ca4b17a37fb4388c.safetensors",
+   "relative_residual": 0.0016555017791688442,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "1930eabd9a325b1584c8f240394c91f4",
+   "profiles": [
+    "calib.s0v_base_d4_r3@v1"
+   ],
+   "file": "width_projection_1930eabd9a325b1584c8f240394c91f4.safetensors",
+   "relative_residual": 0.0016549581196159124,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "1a2fc7418071099d1feee80c9bed1ac1",
+   "profiles": [
+    "calib.s0v_base_d1_r1@v1"
+   ],
+   "file": "width_projection_1a2fc7418071099d1feee80c9bed1ac1.safetensors",
+   "relative_residual": 0.0016572362510487437,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "9e11406f0575e2cced6ac29b6afd1f21",
+   "profiles": [
+    "calib.s0v_base_d1_r2@v1"
+   ],
+   "file": "width_projection_9e11406f0575e2cced6ac29b6afd1f21.safetensors",
+   "relative_residual": 0.0016572679160162807,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "d3dd2114157fb594b18766cd57436c3f",
+   "profiles": [
+    "calib.s0v_base_d1_r3@v1"
+   ],
+   "file": "width_projection_d3dd2114157fb594b18766cd57436c3f.safetensors",
+   "relative_residual": 0.0016561681404709816,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "12a9a771f6966205cfdade26efce84ff",
+   "profiles": [
+    "calib.s0v_base_d2_r1@v1"
+   ],
+   "file": "width_projection_12a9a771f6966205cfdade26efce84ff.safetensors",
+   "relative_residual": 0.0016575742047280073,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "be2afe21b450aae183090b3e041d57f3",
+   "profiles": [
+    "calib.s0v_base_d2_r2@v1"
+   ],
+   "file": "width_projection_be2afe21b450aae183090b3e041d57f3.safetensors",
+   "relative_residual": 0.001657376647926867,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "cdcb21d862f872b8136b1abd64b15460",
+   "profiles": [
+    "calib.s0v_base_d2_r3@v1"
+   ],
+   "file": "width_projection_cdcb21d862f872b8136b1abd64b15460.safetensors",
+   "relative_residual": 0.0016575688496232033,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "f14e6e2b88746c7e74641f39ba953010",
+   "profiles": [
+    "calib.s0v_base_d4_r1@v1"
+   ],
+   "file": "width_projection_f14e6e2b88746c7e74641f39ba953010.safetensors",
+   "relative_residual": 0.0016556010814383626,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "d6a123eb132f4978ca4b17a37fb4388c",
+   "profiles": [
+    "calib.s0v_base_d4_r2@v1"
+   ],
+   "file": "width_projection_d6a123eb132f4978ca4b17a37fb4388c.safetensors",
+   "relative_residual": 0.0016555017791688442,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "1930eabd9a325b1584c8f240394c91f4",
+   "profiles": [
+    "calib.s0v_base_d4_r3@v1"
+   ],
+   "file": "width_projection_1930eabd9a325b1584c8f240394c91f4.safetensors",
+   "relative_residual": 0.0016549581196159124,
+   "shape": [
+    2560,
+    1024
+   ]
+  }
+ ],
+ "ended_utc": "2026-10-18T17:25:05Z"
+}

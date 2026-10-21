@@ -1,0 +1,153 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "dose_d1_20261019_055515",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-19T12:24:01+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": "RUN_FAILED",
+ "passed": false,
+ "outcome": "Dose d1 attempt 2: RUN_FAILED in E_eval, after formal measurement began. Search COMPLETE (92 expansions, 4.70 h; Top-1 72b76a1c: DEPTH(base)->FFN(rh)->ATTENTION(rh)->RESIDUAL_WIDTH(rh), 596,049,920 params) and recovery COMPLETE (model 65d2c7a1) are on the network volume, records off-pod; fluid_reasoning_720 generated in full (720 tasks) and pushed to the volume. uncapped_eval then generated the 8 capability units and the legacy 150 and raised KeyError 'prompt_text' scoring the legacy rows: dose_driver.legacy_prompts omitted the field its in-run scorer reads. Those generations were pod-local and are lost; no capability or legacy endpoint exists. Repaired (legacy_prompts carries shared.eval_sets.prompt_text; regression test). Per the preregistered retry_policy the SAME dose resumes from the volume: search and recovery restored, fluid's finished generation rescored, capability and legacy generated once.",
+ "provider_resource_created": true,
+ "pod_id": "0awhqfar3wiv3z",
+ "provider_confirms_gone": true,
+ "final_pod_state": {
+  "exists": false,
+  "desired_status": "TERMINATED",
+  "billing": false
+ },
+ "money": {
+  "all_in_usd": 11.5053,
+  "gpu_usd": 11.1637,
+  "disk_usd": 0.3415,
+  "elapsed_minutes": 374.2,
+  "price_per_hour": 1.79,
+  "authorized_usd": 18.55,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.10/GB-month over the elapsed minutes, ceiled to the 4-decimal quantum"
+ },
+ "session_record_sha256": "4f947996c448b1b3625dc2dd274921dc076ac16cabb6edc67f01b9975cb4ade4",
+ "units": {
+  "d1": {
+   "dose_record.json": {
+    "sha256": "d499d1e1842df96a8ce7b7be50926f8fe6e2cad8c3b77ea85665000218329760",
+    "bytes": 5706
+   },
+   "recovery/recovery.log": {
+    "sha256": "3010c7bf3fc89366b0a369a7b745c9c4cd912a30ad793edd9201ab1357567726",
+    "bytes": 10566
+   },
+   "recovery/recovery_config.json": {
+    "sha256": "eef12890c618211873f0e003fcb4ff9728a3fec5fdb3c80fa7d104f4fef258a7",
+    "bytes": 1870
+   },
+   "recovery/recovery_products.json": {
+    "sha256": "0db103b8e8bf5045a4cdffac7c524dfb3b0eedb4647156ffa71e85f724aee3dc",
+    "bytes": 272
+   },
+   "recovery/train_log.jsonl": {
+    "sha256": "ae3a777ac9b42e4b6144f423eeb18fb91727108aa90168fcd96a579af96c96f8",
+    "bytes": 48968
+   },
+   "search/search/states.jsonl": {
+    "sha256": "3be04da5aea71be84aa35b80f8d64a6bfced06f202ce98abeef062e609795ba5",
+    "bytes": 64381606
+   },
+   "search/search/telemetry.jsonl": {
+    "sha256": "4ef513a1b91559e8b36132838df082bb2f8b9bc5ed8305ab545b9b1f422b1ab4",
+    "bytes": 99559
+   },
+   "search/search_record.json": {
+    "sha256": "4649bdcea6433b6634eb908b954fa60c71f9b155aa0a57698143ea6d0fde28ab",
+    "bytes": 4963
+   },
+   "search/stage1_selection.json": {
+    "sha256": "f47326d58f6c2179fed81fdf6e839f58aa41c9b34b212bff5172f7c5768f7d95",
+    "bytes": 16305
+   },
+   "search/structure.json": {
+    "sha256": "00846a023fff02feb0ff98ab3ecb58cd5eb5b36f8408b777b7f3821d9d7680c6",
+    "bytes": 23123637
+   },
+   "search/width_projection_2bb3a608c281518414d06510a6d0d6e6.safetensors": {
+    "sha256": "cbf792a9b5a80880f10cd0fb62c923825152b7cbdd708e0d2ce48d1bea5a873d",
+    "bytes": 10485840
+   },
+   "search/width_projection_90dbf332eb0b4411c809c658a30f2aa6.safetensors": {
+    "sha256": "27c5e6dd56b7cbb2d7a4132e70229a1eb0e4c67bb0ae4577697c376709627d57",
+    "bytes": 10485840
+   }
+  },
+  "extracted": {
+   "audit/stage0_calvol_dose/d1/dose_record.json": {
+    "sha256": "d499d1e1842df96a8ce7b7be50926f8fe6e2cad8c3b77ea85665000218329760",
+    "bytes": 5706
+   },
+   "audit/stage0_calvol_dose/d1/eval_capability.log": {
+    "sha256": "6fae7bc93c4be93d5e5203ecf4d812f8398ceb0a296b33a40af2cc6a580e5d14",
+    "bytes": 15210
+   },
+   "audit/stage0_calvol_dose/d1/eval_fluid.log": {
+    "sha256": "5e77d09d2bf309703dfd5ddb4e401bdc5c773a46e322420848cc2a6592ea4980",
+    "bytes": 14102
+   },
+   "audit/stage0_calvol_dose/d1/fluid_tmp.summary.json": {
+    "sha256": "1827a4901d78c21e617871d9b9a243cc72fe004ca462a88737be776903c5109f",
+    "bytes": 2137
+   },
+   "audit/stage0_calvol_dose/d1/mirror.log": {
+    "sha256": "d221a6a94d0924fcd21c3d7bb3fbd89f5d7f0e32c10769087daf4471491d2f67",
+    "bytes": 14478
+   },
+   "audit/stage0_calvol_dose/d1/recovery.log": {
+    "sha256": "3010c7bf3fc89366b0a369a7b745c9c4cd912a30ad793edd9201ab1357567726",
+    "bytes": 10566
+   },
+   "audit/stage0_calvol_dose/d1/recovery_config.json": {
+    "sha256": "eef12890c618211873f0e003fcb4ff9728a3fec5fdb3c80fa7d104f4fef258a7",
+    "bytes": 1870
+   },
+   "audit/stage0_calvol_dose/d1/recovery_products.json": {
+    "sha256": "0db103b8e8bf5045a4cdffac7c524dfb3b0eedb4647156ffa71e85f724aee3dc",
+    "bytes": 272
+   },
+   "audit/stage0_calvol_dose/d1/search.log": {
+    "sha256": "75f29e6898ee064d3ef9faf407d1fe272cec866edcf56ee51dd5d37d1c936a6e",
+    "bytes": 490188
+   },
+   "audit/stage0_calvol_dose/d1/sync.log": {
+    "sha256": "20bf04b8e66fa36a5387dae048521dd6abb72bdc05f231d9987e9d5f4ba146c4",
+    "bytes": 671
+   },
+   "audit/stage0_calvol_dose/session/setup.log": {
+    "sha256": "d23d91b41e78a66a5dc8cdb8c02c5210d3b38ea3d0106f515194b4371a789a8b",
+    "bytes": 24459
+   },
+   "audit/stage0_calvol_dose/session/stage0_calvol_dose_run.log": {
+    "sha256": "2c5a6e334fa03b86a51e98a57bfaffcb9b80b2e34598edfb54acc7b498abd897",
+    "bytes": 14712
+   },
+   "audit/stage0_calvol_search/d1/search/states.jsonl": {
+    "sha256": "3be04da5aea71be84aa35b80f8d64a6bfced06f202ce98abeef062e609795ba5",
+    "bytes": 64381606
+   },
+   "audit/stage0_calvol_search/d1/search/telemetry.jsonl": {
+    "sha256": "4ef513a1b91559e8b36132838df082bb2f8b9bc5ed8305ab545b9b1f422b1ab4",
+    "bytes": 99559
+   },
+   "audit/stage0_calvol_search/d1/search_record.json": {
+    "sha256": "4649bdcea6433b6634eb908b954fa60c71f9b155aa0a57698143ea6d0fde28ab",
+    "bytes": 4963
+   },
+   "audit/stage0_calvol_search/d1/stage1_selection.json": {
+    "sha256": "f47326d58f6c2179fed81fdf6e839f58aa41c9b34b212bff5172f7c5768f7d95",
+    "bytes": 16305
+   },
+   "audit/stage0_calvol_search/d1/structure.json": {
+    "sha256": "00846a023fff02feb0ff98ab3ecb58cd5eb5b36f8408b777b7f3821d9d7680c6",
+    "bytes": 23123637
+   }
+  }
+ },
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/dose_d1_20261019_055515"
+}

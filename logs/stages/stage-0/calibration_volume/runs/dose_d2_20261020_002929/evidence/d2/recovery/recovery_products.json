@@ -1,0 +1,7 @@
+{
+ "complete": true,
+ "model_sha256": "f3a08e2392f1156a084d6a578bdf000410411670b172e68383f0f3cea23dd89b",
+ "model_bytes": 2384234968,
+ "config_sha256": "357406e8f926b43d5b72bb51fff2a76dfb9df660d1cf66d24d527b85089a1ca5",
+ "top1_state": "9af1989dc0b8168908eeb77ee4d3fa47"
+}

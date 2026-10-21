@@ -1,0 +1,567 @@
+{
+  "schema": "aadistill.stage0.calibration_volume.dose_session/v1",
+  "session_id": "stage0-calvol-dose-d2",
+  "session_spec": {
+    "session_id": "stage0-calvol-dose-d2",
+    "schema": "aadistill.stage0.calibration_volume.dose_session/v1",
+    "description": "Stage-0 calibration volume formal dose d2",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261019_135821/governance/authorization.json",
+    "authorization_type": "functools.partial(<function load_for at 0x7f7929a7ca90>, 'dose')",
+    "plan_id": "stage0.calibration_volume.dose_d2",
+    "plan_hash": "f7f642502df6cd77214d88470c47a55d86091933d4c99b95590d5c217bafde11",
+    "status_path": "/workspace/stage0_calvol_dose.status",
+    "run_log_path": "/workspace/stage0_calvol_dose_run.log",
+    "driver_job_id": "stage0_calvol_dose_d2_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "stage0_calvol_dose",
+      "evidence_filename": "dose_record.json",
+      "archive_basename": "stage0_calvol_dose_d2",
+      "spec_success": "configs/stages/stage-0/calibration_volume/dose_artifacts.json",
+      "spec_failed": "configs/stages/stage-0/calibration_volume/dose_artifacts.json",
+      "report_names": []
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "stage0_calvol"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_KIND",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [
+        "state_eval_v1:artifacts/stages/stage-1",
+        "profiles_formal_v1:artifacts/stages/stage-0/calibration_volume",
+        "battery_v2:artifacts/stages/stage-3/eval"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 600,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [],
+      "test_paths": [],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "VLLM_READY",
+        "TEACHER_READY",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 0,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-10-19T13:59:07+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 623 min $18.57 \u00b7 soft $23.18 \u00b7 hard $23.63 (authorized $24.36)"
+    },
+    {
+      "utc": "2026-10-19T13:59:07+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA A100-SXM4-80GB $1.79/h, stock Low"
+    },
+    {
+      "utc": "2026-10-19T13:59:08+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $81.9758 against the $30.0000 this session must be able to fund"
+    },
+    {
+      "utc": "2026-10-19T13:59:08+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 7 relay inputs (7 from AlphaAvatar/aadistill-artifacts), 3 local assets"
+    },
+    {
+      "utc": "2026-10-19T13:59:09+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 1: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-19T14:04:10+00:00",
+      "elapsed_min": 0.0,
+      "msg": "attempt 2: create failed \u2014 {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string        "
+    },
+    {
+      "utc": "2026-10-19T14:09:10+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 792 min = $23.63"
+    },
+    {
+      "utc": "2026-10-19T14:09:10+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created cmxnaja12ewpzc at $1.79/h"
+    },
+    {
+      "utc": "2026-10-19T14:09:22+00:00",
+      "elapsed_min": 0.19,
+      "msg": "TCP 22 at 157.157.221.29:16202 after 0.2 min"
+    },
+    {
+      "utc": "2026-10-19T14:09:25+00:00",
+      "elapsed_min": 0.25,
+      "msg": "draw 1: ssh reachable \u2014 $0.01"
+    },
+    {
+      "utc": "2026-10-19T14:10:17+00:00",
+      "elapsed_min": 1.1,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.04"
+    },
+    {
+      "utc": "2026-10-19T14:10:17+00:00",
+      "elapsed_min": 1.1,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-19T14:14:07+00:00",
+      "elapsed_min": 4.95,
+      "msg": "draw 1: setup complete \u2014 $0.15"
+    },
+    {
+      "utc": "2026-10-19T14:14:13+00:00",
+      "elapsed_min": 5.04,
+      "msg": "driver detached, pid 3427, confirmed by descriptor_probe \u2014 $0.15"
+    },
+    {
+      "utc": "2026-10-19T14:17:10+00:00",
+      "elapsed_min": 7.99,
+      "msg": "  relay errors: ['/workspace/stage0_calvol_dose_run.log', '/workspace/stage0_calvol_dose.status']"
+    },
+    {
+      "utc": "2026-10-19T14:17:14+00:00",
+      "elapsed_min": 8.06,
+      "msg": "  2026-10-19T14:14:12Z MARKER:DRIVER_START:d2 \u2014 $0.24"
+    },
+    {
+      "utc": "2026-10-19T20:26:02+00:00",
+      "elapsed_min": 376.86,
+      "msg": "  relay errors: ['/workspace/aad/artifacts/audit/stage0_calvol_dose/dose_record.json']"
+    },
+    {
+      "utc": "2026-10-19T21:24:48+00:00",
+      "elapsed_min": 435.62,
+      "msg": "  relay errors: ['/workspace/stage0_calvol_dose_run.log', '/workspace/stage0_calvol_dose.status']"
+    },
+    {
+      "utc": "2026-10-19T21:25:00+00:00",
+      "elapsed_min": 435.83,
+      "msg": "driver no longer running: UNKNOWN"
+    },
+    {
+      "utc": "2026-10-19T21:25:00+00:00",
+      "elapsed_min": 435.83,
+      "msg": "polling ended: DRIVER_UNKNOWN \u2014 $13.00"
+    },
+    {
+      "utc": "2026-10-19T21:25:16+00:00",
+      "elapsed_min": 436.1,
+      "msg": "  manifest rc=255\n"
+    },
+    {
+      "utc": "2026-10-19T21:25:36+00:00",
+      "elapsed_min": 436.42,
+      "msg": "teardown gate: allowed=True failed=training_complete"
+    },
+    {
+      "utc": "2026-10-19T21:25:36+00:00",
+      "elapsed_min": 436.42,
+      "msg": "deleting pod (gate passed after DRIVER_UNKNOWN)"
+    },
+    {
+      "utc": "2026-10-19T21:25:47+00:00",
+      "elapsed_min": 436.6,
+      "msg": "pod deleted \u2014 436.6 min, $13.03; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.stage0.calibration_volume.authorization/v1",
+    "authorization_id": "stage0.calibration_volume.dose.dose_d2_20261019_135821",
+    "version": 1,
+    "granted_utc": "2026-10-19T13:58:21+00:00",
+    "granted_by": "maintainer (task instruction of 2026-10-18 to the executing agent session)",
+    "plan_id": "stage0.calibration_volume.dose_d2",
+    "session_plan_hash": "f7f642502df6cd77214d88470c47a55d86091933d4c99b95590d5c217bafde11",
+    "expected_usd": 19.15,
+    "hard_cap_usd": 24.36,
+    "authorized_stages": [],
+    "stage_conditions": {
+      "phase": "formal_volume",
+      "plan": "dose_d2",
+      "envelope": "{\"phase\": \"formal_volume\", \"phase_ceiling_usd\": 90.0, \"phase_spent_usd\": 17.1051, \"phase_remaining_usd\": 72.8949, \"programme_ceiling_usd\": 107.5099, \"programme_spent_usd\": 35.4907, \"programme_remaining_usd\": 72.0192, \"per_session_cap_usd\": 50.0}"
+    },
+    "scope_note": "formal Stage-0 volume dose d2 (2x): retire dose d1's search states (d1 COMPLETE; its Top-1, journal and records kept, tombstone written), D1 full search, fixed recovery, every item of eval-set-1, as preregistered",
+    "authorizes_battery": false,
+    "authorizes_search": false,
+    "authorizes_probes": false,
+    "authorizes_bench": false,
+    "authorizes_dose": true,
+    "authorized_session_commit": null,
+    "harness_source_digest": "4a0d3a8f51b504a82a48d29f189f79f8db1270b95e867d1caac8eee02a6227cc",
+    "harness_source_files": [
+      "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "scripts/shared/pod/watchdog.py",
+      "scripts/shared/pod/collect_artifacts.py",
+      "scripts/stages/stage-0/calibration_volume/governance.py",
+      "scripts/stages/stage-0/calibration_volume/launch.py",
+      "scripts/stages/stage-0/calibration_volume/battery_driver.py",
+      "scripts/stages/stage-0/calibration_volume/run_battery.py",
+      "scripts/stages/stage-0/calibration_volume/score_battery.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/common.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/induction.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/composition.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/deduction.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/analogy.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/interactive.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/registry.py",
+      "scripts/shared/evaluation/uncapped_eval.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/data/verify.py",
+      "scripts/stages/stage-0/calibration_volume/dose_driver.py",
+      "scripts/stages/stage-0/calibration_volume/search_driver.py",
+      "scripts/stages/stage-0/calibration_volume/search_session.py",
+      "scripts/stages/stage-0/calibration_volume/volume_sync.py",
+      "scripts/shared/forward_baseline.py",
+      "scripts/shared/evaluation/eval_set_scoring.py",
+      "scripts/shared/eval_sets.py",
+      "scripts/shared/training/train_stage3.py",
+      "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+      "scripts/stages/stage-1/phase_c1/packaging.py",
+      "src/aadistill/evaluation/eval_registry.py",
+      "src/aadistill/initialization/baseline.py",
+      "src/aadistill/initialization/execution.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/metrics.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/operators/depth/causal_kl_greedy.py"
+    ],
+    "per_launch_hard_usd": 24.36,
+    "provenance_commit": "776d0f5b39b73274157395810236e485373185d1",
+    "enforcement": "the launcher refuses a pod unless this artifact is bound to the session plan and the harness on disk, and its hard cap covers the planned hard threshold; one artifact funds one run",
+    "authorization_sha256": "6339ea3ee91d8dd65e218019660eb3ebdb155cfecb717bd713219d1d3a4233e8"
+  },
+  "session_plan_hash": "f7f642502df6cd77214d88470c47a55d86091933d4c99b95590d5c217bafde11",
+  "harness_source_digest": "4a0d3a8f51b504a82a48d29f189f79f8db1270b95e867d1caac8eee02a6227cc",
+  "harness_source_files": [
+    "scripts/shared/eval_sets.py",
+    "scripts/shared/evaluation/eval_set_scoring.py",
+    "scripts/shared/evaluation/uncapped_eval.py",
+    "scripts/shared/forward_baseline.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/collect_artifacts.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/shared/training/train_stage3.py",
+    "scripts/stages/stage-0/calibration_volume/battery_driver.py",
+    "scripts/stages/stage-0/calibration_volume/dose_driver.py",
+    "scripts/stages/stage-0/calibration_volume/governance.py",
+    "scripts/stages/stage-0/calibration_volume/launch.py",
+    "scripts/stages/stage-0/calibration_volume/run_battery.py",
+    "scripts/stages/stage-0/calibration_volume/score_battery.py",
+    "scripts/stages/stage-0/calibration_volume/search_driver.py",
+    "scripts/stages/stage-0/calibration_volume/search_session.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/analogy.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/common.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/composition.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/deduction.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/induction.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/interactive.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/registry.py",
+    "scripts/stages/stage-0/calibration_volume/volume_sync.py",
+    "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+    "scripts/stages/stage-1/phase_c1/packaging.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/eval_registry.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py",
+    "src/aadistill/initialization/baseline.py",
+    "src/aadistill/initialization/execution.py",
+    "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/statistics/contribution.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.79,
+    "authorized_usd": 24.36,
+    "expected_minutes": 622.6,
+    "soft_stop_minutes": 777.12,
+    "artifact_recovery_reserve_minutes": 15.0,
+    "hard_terminate_minutes": 792.12,
+    "step_time": {
+      "seconds": 1.0,
+      "source": "unused: no training in this session (arms=0)",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 20.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 10.0
+      },
+      {
+        "name": "search",
+        "minutes": 472.1
+      },
+      {
+        "name": "recovery",
+        "minutes": 61.5
+      },
+      {
+        "name": "eval_set_1",
+        "minutes": 49.0
+      },
+      {
+        "name": "pushes",
+        "minutes": 10.0
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "long_tail_generation",
+        "minutes": 30.0
+      }
+    ],
+    "notes": [
+      "below-floor step time accepted: 1.0 s/step vs floor 4.15 \u2014 no training steps; every phase is priced below"
+    ],
+    "soft_stop_reserve_minutes": 30.0,
+    "expected_usd": 18.5742,
+    "soft_stop_usd": 23.1841,
+    "artifact_recovery_reserve_usd": 0.4475,
+    "hard_terminate_usd": 23.6316
+  },
+  "quoted_price_per_hour": 1.79,
+  "stock_status": "Low",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 81.975816819,
+    "current_spend_per_hr": 0.029,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 30.0,
+    "ok": true,
+    "why": "the provider account holds $81.9758 against the $30.0000 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "precheck": {
+    "relay_needed": [
+      "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+      "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+      "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/config.json"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 7
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1417
+    },
+    "local_assets": [
+      "artifacts/stages/stage-1/state_eval_v1",
+      "artifacts/stages/stage-0/calibration_volume/profiles_formal_v1",
+      "artifacts/stages/stage-3/eval/battery_v2"
+    ],
+    "local_missing": []
+  },
+  "pod_id": "cmxnaja12ewpzc",
+  "actual_price_per_hour": 1.79,
+  "terminate_after_utc": "2026-10-20T03:11:16Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-artifacts/stage0_calvol/dose_d2_20261019_135821/watchdog_cmxnaja12ewpzc.jsonl"
+  ],
+  "watchdog_owns_pod": "cmxnaja12ewpzc",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "580.159.04"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.04"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_bb890694.bundle",
+    "SESSION_ASSETS": "state_eval_v1:artifacts/stages/stage-1,profiles_formal_v1:artifacts/stages/stage-0/calibration_volume,battery_v2:artifacts/stages/stage-3/eval",
+    "SESSION_AUTH_PATH": "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261019_135821/governance/authorization.json",
+    "SESSION_COMMIT": "bb890694337c2c0af4c5f81d85349072561ea18d",
+    "SESSION_KIND": "stage0_calvol",
+    "SESSION_PLAN_HASH": "f7f642502df6cd77214d88470c47a55d86091933d4c99b95590d5c217bafde11",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054\"}]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV VLLM_READY TEACHER_READY SETUP_DONE",
+    "SESSION_STATUS": "/workspace/stage0_calvol_dose.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "600",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "stage0_calvol_dose_d2_driver",
+    "pid": 3427,
+    "workdir": "/workspace/aad",
+    "command": "PYTHONPATH=/workspace/aad/src:/workspace/aad/scripts /opt/train/bin/python /workspace/aad/scripts/stages/stage-0/calibration_volume/dose_driver.py --treatment d2 --run-id dose_d2_20261019_135821 --auth '/workspace/aad/logs/stages/stage-0/calibration_volume/runs/dose_d2_20261019_135821/governance/authorization.json' --plan dose_d2 --status '/workspace/stage0_calvol_dose.status' --volume '/runpod-volume'",
+    "log_path": "/workspace/stage0_calvol_dose_run.log",
+    "status_path": "/workspace/stage0_calvol_dose.status",
+    "pid_path": "/workspace/jobs/stage0_calvol_dose_d2_driver.pid",
+    "descriptor_path": "/workspace/jobs/stage0_calvol_dose_d2_driver.job.json",
+    "exit_path": "/workspace/jobs/stage0_calvol_dose_d2_driver.exit",
+    "started_utc": "2026-10-19T14:14:10Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "units_secured": {},
+  "terminal": "DRIVER_UNKNOWN",
+  "checkpoints_fetched": [],
+  "required_products_secured": {
+    "ok": true,
+    "why": "0 finished unit(s) secured off-pod; checkpoints are on the volume"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": true,
+    "failed_check": "training_complete",
+    "reason": "EMERGENCY budget teardown over a failed gate (training_complete): a blocking stage failed (DRIVER_UNKNOWN); the products of the stages that did not run do not exist and must not be demanded. Evidence is collected under the reduced spec and the pod is torn down.. Artifacts for the remaining checks ['training_complete', 'evaluation_complete', 'artifact_manifest_created', 'required_files_present', 'final_streams_quiescent', 'archive_created', 'archive_contents_verified', 'transfer_complete', 'local_hashes_verified', 'report_inputs_verified'] are LOST. No event stream was truncated: this session declares none, and quiescence failed because a final_required artifact is missing rather than because a producer was mid-write. The missing artifacts are listed above.",
+    "checks": {
+      "training_complete": false,
+      "evaluation_complete": false,
+      "artifact_manifest_created": false,
+      "required_files_present": false,
+      "final_streams_quiescent": false,
+      "archive_created": false,
+      "archive_contents_verified": false,
+      "transfer_complete": false,
+      "local_hashes_verified": false,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": false
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": null,
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.79,
+    "elapsed_minutes": 436.6,
+    "actual_usd": 13.0253,
+    "authorized_usd": 24.36,
+    "within_authorization": true
+  },
+  "passed": false,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-19T21:25:47+00:00"
+}

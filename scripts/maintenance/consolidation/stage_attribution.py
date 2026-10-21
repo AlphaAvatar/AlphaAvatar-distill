@@ -331,7 +331,7 @@ STAGES = [
               "/ rag_evidence, with per-arm token and packing statistics"),
             E("data/stages/stage-3/stage3_pilot/treatment",
               "the treatment arm the canonical config points at by default"),
-            E("data/stages/stage-3/eval_behavior_v0",
+            E("data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0",
               "the behaviour evaluation set the stage is judged on — "
               "autonomous rollout, not held-out loss"),
         ],
@@ -1153,6 +1153,94 @@ STAGE_1 = [
             "recovery probe. A separate experiment from D2 because it is a "
             "single-factor fixed-path ablation, not a search, and a "
             "different estimand from the cancelled student-confidence D3."),
+    ),
+    dict(
+        id="calibration_volume",
+        kind="experiment",
+        stage_id="0",
+        status=("CLOSED 2026-10-21: EXECUTION COMPLETE / DOWNSTREAM REASONING "
+                "FLOOR / VOLUME EFFECT ON REASONING NOT RESOLVED. Formal study "
+                "d1/d2/d4 (one D1 full search and one fixed recovery each) and "
+                "the Top-4 extension (24 students) measured on all of "
+                "eval-set-1: fluid correct at most 3/570 static and 0/144 "
+                "episodes, so every preregistered contrast sits at the floor; "
+                "static usable 40.0-71.4%, moved more by the recovery seed than "
+                "by the candidate. Volumes retired; budget reconciled against "
+                "the provider's billing. Mixture ratio DEFERRED (never run)"),
+        title="Stage-0 calibration volume dose-response (first Stage-0 study)",
+        question=("With teacher, geometry, the forward-baseline method and the "
+                  "recovery recipe fixed, does more independent, "
+                  "capability-aligned Stage-0 calibration data stabilize the "
+                  "AutoInitializer's structural selection (H1), improve the "
+                  "recovered student's reasoning on unseen rule families "
+                  "(H2), and saturate (H3)?"),
+        canonical_config="configs/stages/stage-0/calibration_volume/pilot_design.json",
+        evidence=[
+            E("logs/stages/stage-0/calibration_volume/audit/data_audit.json",
+              "the $0 audit of corpus_v2, the D1 profiles, state_eval@v1, the "
+              "0.86M recovery rung and the historical batteries: "
+              "independence, effective signal, length selection, quality, "
+              "contamination",
+              field="schema", equals="aadistill.stage0.calibration_data_audit/v1"),
+            E("logs/stages/stage-0/calibration_volume/design/dev_analysis.json",
+              "the dev battery's solvability (teacher), floor (two 0.86M "
+              "controls, the 2.96M reference) and resolution",
+              field="schema", equals="aadistill.stage0.dev_analysis/v1"),
+            E("logs/stages/stage-0/calibration_volume/plans/pilot_analysis_plan.json",
+              "the root-level pilot's analysis plan, frozen before its result",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-0/calibration_volume/design/pilot_structure_agreement.json",
+              "the pilot's root-level selection agreement under the frozen plan",
+              field="schema", equals="aadistill.stage0.structure_agreement/v2"),
+            E("logs/stages/stage-0/calibration_volume/plans/formal_design_proposal.json",
+              "the amended formal study (one draw per dose) priced from measured "
+              "telemetry; its resolution gate, split 4x execution and budget gap",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-0/calibration_volume/design/resolution_check.json",
+              "whether eval-set-1's fluid_reasoning_720 resolves student-scale "
+              "models: teacher, same-geometry reference, five recovered students",
+              field="schema", equals="aadistill.stage0.resolution_check/v1"),
+            E("logs/stages/stage-0/calibration_volume/plans/volume_preregistration.json",
+              "the formal study's preregistration: design, order, statistics, "
+              "budget rule and retry policy",
+              field="schema", equals="aadistill.stage0.calibration_volume.preregistration/v1"),
+            E("logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
+              "the preregistered analysis of d1/d2/d4: H1 structure, step-0 "
+              "state, H2 on every unit of eval-set-1, kept separate",
+              field="schema", equals="aadistill.stage0.calibration_volume.formal_analysis/v1"),
+            E("logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+              "the Top-4 extension's 24 students, correct and usable per unit, "
+              "and the paired contrasts it describes",
+              field="schema",
+              equals="aadistill.stage0.calibration_volume.extension_analysis/v1"),
+            E("logs/stages/stage-0/calibration_volume/closeout/budget_reconciliation.json",
+              "the programme's money against the authorizations in force and "
+              "the provider's own billing",
+              field="schema",
+              equals="aadistill.stage0.calibration_volume.budget_reconciliation/v1"),
+            E("logs/stages/stage-0/calibration_volume/closeout/programme_closeout.json",
+              "the programme's terminal record: every figure read from its "
+              "owner, every verdict computed",
+              field="authorizes", equals="nothing"),
+        ],
+        external_material=[],
+        decisions=["logs/budget/decisions.md -- 2026-10-18: Stage-0 "
+                   "calibration-volume programme started; battery valid, "
+                   "students at floor, root-level pilot; pilot attempt 1 OOM "
+                   "repaired on an 80 GB card; programme terminal; permanent "
+                   "evaluation registry; resolution attempts 1-2 repaired; "
+                   "design amended to one draw per dose, still NOT RUN",
+                   "logs/budget/decisions.md -- 2026-10-19: $90 new-spend "
+                   "authority, eval-set-1 frozen, formal study preregistered and "
+                   "run; 2026-10-20: Top-4 extension (+$30, +$6, two sessions at "
+                   "once); 2026-10-21: final closeout at $0"],
+        canonical_log_destination="logs/stages/stage-0/calibration_volume",
+        classification_reason=(
+            "Stage 0 by subject and product: it varies the teacher-signal "
+            "calibration data a Stage-1 initialization is built from (AGENTS.md "
+            "4.2, reasoning-oriented calibration). The Stage-1 search and any "
+            "Stage-3 probe are its instruments, as Stage-3 probes were for "
+            "Stage-1 experiments."),
     ),
     dict(
         id="batching_refactor_cuda",

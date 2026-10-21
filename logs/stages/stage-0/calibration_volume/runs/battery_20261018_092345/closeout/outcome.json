@@ -1,0 +1,122 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "battery_20261018_092345",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "prerequisites",
+ "recorded_utc": "2026-10-18T11:27:20+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": "RUN_FAILED",
+ "passed": false,
+ "outcome": "Prerequisite battery session. Secured and scored: two 0.86M-rung recovered controls (0/720 and 0/720 correct), the 2.96M reference (10/720) and the teacher at its 262144 context (638/720). The teacher_cal unit was stopped by the operator at 11:21Z, before generating anything kept, so its data could be regenerated with the asynchronous runner on calibration_v2 instead of risking the session's completed measurements against the hard stop; the session therefore ends RUN_FAILED by design.",
+ "provider_resource_created": true,
+ "pod_id": "cn822yviydzw8l",
+ "provider_confirms_gone": true,
+ "final_pod_state": {
+  "exists": false,
+  "desired_status": "TERMINATED",
+  "billing": false
+ },
+ "money": {
+  "all_in_usd": 3.6303,
+  "gpu_usd": 3.5891,
+  "disk_usd": 0.0412,
+  "elapsed_minutes": 120.31,
+  "price_per_hour": 1.79,
+  "authorized_usd": 9.0,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.10/GB-month over the elapsed minutes, ceiled to the 4-decimal quantum"
+ },
+ "session_record_sha256": "c689264e488440bf4fdaaab8b339dc59e6e31c59bee5a0dd3c7ed173f7f699cf",
+ "units": {
+  "ctl_r0860k_sa_dev": {
+   "ctl_r0860k_sa_dev.jsonl": {
+    "sha256": "ca13e652a65394cd19b33cc21e9dfa3747515c3e561b80ac031e66fd06930c85",
+    "bytes": 9429525
+   },
+   "ctl_r0860k_sa_dev.log": {
+    "sha256": "efe349f40aec3058ac2380c5139edaf76a423a9f83ce084ebb2b6913f936e522",
+    "bytes": 14134
+   },
+   "ctl_r0860k_sa_dev.summary.json": {
+    "sha256": "512f0f50edd19fb2f6aa604bb3b53a0883232844885272cd67174a2ed3ea7d37",
+    "bytes": 2098
+   },
+   "score.rows.jsonl": {
+    "sha256": "2d257dc114180d5e04826def15bac11cb8d18a39e0c26191cba697227a843a06",
+    "bytes": 364343
+   },
+   "score.summary.json": {
+    "sha256": "3ddd7eb3d6221fabd1e4d0afd95f28a6b76e1b3fa4f0fa4fd17aa8ce0a76b41a",
+    "bytes": 23554
+   }
+  },
+  "ctl_r0860k_sb_dev": {
+   "ctl_r0860k_sb_dev.jsonl": {
+    "sha256": "5b2dadfb303169ef6e9f05c1c2a08b18e17ecb541d852200926d88fd91049c4f",
+    "bytes": 9124813
+   },
+   "ctl_r0860k_sb_dev.log": {
+    "sha256": "5f8059373febcba075fc88bfc57da801bb6cf48290f0e59921ececce59f061df",
+    "bytes": 13866
+   },
+   "ctl_r0860k_sb_dev.summary.json": {
+    "sha256": "2a7d14c5a800bed0208a252c471e1e14d3c05bdafa15107563706aeaa7451790",
+    "bytes": 2098
+   },
+   "score.rows.jsonl": {
+    "sha256": "b4b9fc6d6323fa7c4126ca13d5bee4aa9c1ddc593f22ba48ff826d1cdeffa0e2",
+    "bytes": 365510
+   },
+   "score.summary.json": {
+    "sha256": "31288072fffc2ae5f45a7f4663d39fcbcab39ff76d27251a51ef9fa108d9a15a",
+    "bytes": 23488
+   }
+  },
+  "e1_r2960k_sa_pca_dev": {
+   "e1_r2960k_sa_pca_dev.jsonl": {
+    "sha256": "4b54bba870e03cbbe1990a264fde43185fbc15e20a7a18f6a5518972de2eb4ae",
+    "bytes": 10907266
+   },
+   "e1_r2960k_sa_pca_dev.log": {
+    "sha256": "037c2380de1d9b96edace455e85ec05f9a557c6e4b7001b1c809e119828e02ab",
+    "bytes": 13829
+   },
+   "e1_r2960k_sa_pca_dev.summary.json": {
+    "sha256": "b0c2e3c70b68746d4bc8cfef08e360abf7b3df6137b47f0f1e94bca60ec30b03",
+    "bytes": 2103
+   },
+   "score.rows.jsonl": {
+    "sha256": "0d45ebc7f157ff9238012ed4d875fc0407f45705196e673f27d16411cd71b3cb",
+    "bytes": 367485
+   },
+   "score.summary.json": {
+    "sha256": "8f64829499ddd3fdf9615cf27786b11583220c0a7f18b7faa0a70b06b48c3d89",
+    "bytes": 23686
+   }
+  },
+  "extracted": {},
+  "teacher_dev": {
+   "score.rows.jsonl": {
+    "sha256": "0ea85d191649b7ec5971cdda64506f805485a5727ac66a32283b2b902cfe6e43",
+    "bytes": 357347
+   },
+   "score.summary.json": {
+    "sha256": "c8ece95e85f3ce47d2d9932a371cc24c687fd38beb5bef413e21c6a042b4ac78",
+    "bytes": 23763
+   },
+   "teacher_dev.jsonl": {
+    "sha256": "98f08abca50a4456e9021b39f709bb7cd69e7500d107f79b0fcaba47cadf2adc",
+    "bytes": 66095435
+   },
+   "teacher_dev.log": {
+    "sha256": "312d492d24045a60ee39eaf06d6428f35ce3ff68e4a42ce6d0029465bdbac3d4",
+    "bytes": 15115
+   },
+   "teacher_dev.summary.json": {
+    "sha256": "95db15b2419f89013288c46d082fcec9c709aa1fc6d18c22ae65de6f56f61785",
+    "bytes": 1971
+   }
+  }
+ },
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/battery_20261018_092345"
+}

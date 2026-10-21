@@ -1,0 +1,528 @@
+{
+ "schema": "aadistill.eval_set_manifest/v1",
+ "eval_set_id": "eval-set-1",
+ "registered_utc": "2026-10-18",
+ "_contract": "Every content file is named with its sha256; a reader proves the bytes through aadistill.evaluation.eval_registry.require_intact before reading. Items, gold answers, weights, scoring semantics (the conformance vectors) and identity change only through a new identity in data/eval-set/registry.json citing a maintainer authorization; new evaluation needs become eval-set-2, never a rewrite of this set.",
+ "files": {
+  "conformance/fluid_reasoning_720.jsonl": {
+   "sha256": "8bbeda090fb6af6cceaba7507cedd68077e97ec96f9da3b5dfd75cada12ba27c",
+   "bytes": 1229828
+  },
+  "conformance/fluid_reasoning_720.v2.jsonl": {
+   "sha256": "ee33d2c72457e0354725e17128a3ef6a1067124a22c1d333b674fde0b24da506",
+   "bytes": 1532716
+  },
+  "conformance/stage3_capability_846.jsonl": {
+   "sha256": "7fb83ef270b9d8647bcedc1b460c9b5e2c65934eee94e35cf08e1b4ec37ba6c6",
+   "bytes": 735394
+  },
+  "conformance/stage3_capability_846.v2.jsonl": {
+   "sha256": "b8fd23dc6fcd55e5b38639995992eabd72de8acebe74b0f5ab795fb7fc01d9fd",
+   "bytes": 853780
+  },
+  "conformance/stage3_legacy_150.jsonl": {
+   "sha256": "3758992e02b1475a7883054ee16e5f421ed869159fd08ca68b525480285b07eb",
+   "bytes": 532954
+  },
+  "conformance/stage3_legacy_150.v2.jsonl": {
+   "sha256": "70025a6c79c3f280a805a5a15e7933d662bb54d9c56cceb8502d1a39b3a97ff9",
+   "bytes": 557720
+  },
+  "fluid_reasoning_720/dev_v1.jsonl": {
+   "sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+   "bytes": 605608
+  },
+  "fluid_reasoning_720/dev_v1.manifest.json": {
+   "sha256": "95531de9b347a0987c7ff973c10980dc66ff45673699422fe0f84c776f4919b5",
+   "bytes": 12531
+  },
+  "fluid_reasoning_720/independence_v1.json": {
+   "sha256": "4e5a06d48624c14a1eb20aaa5267198b2dfd801d268b7cf13a3f67b8ef17a1c5",
+   "bytes": 4053
+  },
+  "fluid_reasoning_720/validity_v1.json": {
+   "sha256": "75f4858934c9cae664e20b5886d943d19351a4efc4072c90334b4b6b418f20bf",
+   "bytes": 63064
+  },
+  "stage3_capability_846/battery_v2/answerability_paired.jsonl": {
+   "sha256": "1a4369323c3bc10b2ffcb97ac41cdb2bf20b670a28a3907d80d2d94a5acce81e",
+   "bytes": 368974
+  },
+  "stage3_capability_846/battery_v2/gsm8k.jsonl": {
+   "sha256": "1ad4ad22625a11ff5cd6dbce053f15b3cc8f4d50ea491202347e133cd5c85b3b",
+   "bytes": 63246
+  },
+  "stage3_capability_846/battery_v2/manifest.json": {
+   "sha256": "060bdd3170c5cfe0cdb749a7bf32e6d264d943085f0d24717f8b86d5706561df",
+   "bytes": 36173
+  },
+  "stage3_capability_846/battery_v2/math_verified.jsonl": {
+   "sha256": "bf73cb4ad8cd9299c5ab16776d1747921d754be922f12a4ee03f27537f32e1f1",
+   "bytes": 78411
+  },
+  "stage3_capability_846/battery_v2/multihop.jsonl": {
+   "sha256": "3bd25d896316b50e3a4b84f818a5e6bbf8eb671cb7997810251c2b4640c038e5",
+   "bytes": 1228743
+  },
+  "stage3_capability_846/battery_v2/rag.jsonl": {
+   "sha256": "1e31c9e03bfb480443213a2cff04cf56a915305cca3ba68d9b9cc19ec4c85e6e",
+   "bytes": 326734
+  },
+  "stage3_capability_846/battery_v2/safety_paired.jsonl": {
+   "sha256": "ee73e208660b365e2989024739359704517b943a7dcee6a96a811db528d1a73a",
+   "bytes": 35908
+  },
+  "stage3_capability_846/core_v1.json": {
+   "sha256": "b92769e6a564c0b2d4fcc57744706a52a2ef8fc00aea87db502c4e30dad51eb2",
+   "bytes": 3053
+  },
+  "stage3_capability_846/eval_behavior_v0/manifest.json": {
+   "sha256": "394a5ccb98b56783ac33772be2caa98609e6fae041204fd66c15b35bddb68731",
+   "bytes": 4438
+  },
+  "stage3_capability_846/eval_behavior_v0/prompts.jsonl": {
+   "sha256": "96e211883a20c9db87bde2b06e8f3a66e91e1c82f6aaffc06a04db366dc8e539",
+   "bytes": 140275
+  },
+  "stage3_legacy_150/derivation.json": {
+   "sha256": "c1841aee2fe89d310df0775c01326a57f9a0eec1b2433c11d12b78005d84ea92",
+   "bytes": 1278
+  },
+  "stage3_legacy_150/items.jsonl": {
+   "sha256": "b4e1099fe81c8fd6fa2c11cd3c712183c55d43ad92fa74916141373bac496cb5",
+   "bytes": 391578
+  }
+ },
+ "documentation": [
+  "README.md",
+  "NOTICE.md",
+  "audit/*"
+ ],
+ "withheld": {
+  "stage3_capability_846/battery_v2/knowledge.jsonl": {
+   "sha256": "2d4420ce9d3f57f10a6f14cb6125e077c35bdd1840eb82085df565760a95ce20",
+   "bytes": 127912,
+   "local_copy": "artifacts/stages/stage-3/eval/battery_v2/knowledge.jsonl",
+   "reason": "TriviaQA: the dataset card's license is 'unknown' and states the University of Washington does not own the copyright of the questions; no basis to redistribute in a public repository without maintainer/legal review"
+  }
+ },
+ "weights": "none: every unit is reported separately and no cross-unit or cross-capability aggregate is defined; a composite would need a new identity",
+ "components": {
+  "fluid_reasoning_720": {
+   "role": "development_exposed_held_out",
+   "description": "project-generated procedural reasoning tasks over five axes, drawn only from evaluation-split rule families and evaluation-only generators; static items are single-turn, interactive items are episodes stepped by a deterministic environment",
+   "units": {
+    "dev_v1": {
+     "file": "fluid_reasoning_720/dev_v1.jsonl",
+     "id_field": "task_id",
+     "n_items": 720,
+     "slice_field": "axis",
+     "sidecar_manifest": "fluid_reasoning_720/dev_v1.manifest.json"
+    }
+   },
+   "capabilities": {
+    "fluid.abstract_analogical": [
+     "fluid_reasoning_720/dev_v1[axis=abstract_analogical]"
+    ],
+    "fluid.compositional_generalization": [
+     "fluid_reasoning_720/dev_v1[axis=compositional_generalization]"
+    ],
+    "fluid.inductive_rule_discovery": [
+     "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]"
+    ],
+    "fluid.interactive_adaptation": [
+     "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]"
+    ],
+    "fluid.task_contained_deduction": [
+     "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]"
+    ]
+   },
+   "scorer": {
+    "protocol_id": "stage0.calibration_volume.score_battery@v2",
+    "formal_protocol": "v2",
+    "historical_protocol_id": "stage0.calibration_volume.score_battery@v1",
+    "adapter": "scripts/shared/evaluation/eval_set_scoring.py :: score_fluid",
+    "rule": "static: correct = usable_rollout AND canonical(last \\boxed{} of the final answer) == canonical(gold) by answer_type; interactive: correct = the environment's own success, re-derived by replaying the recorded final answers through a fresh environment; v2: the reply's boxed answer and the gold are canonicalized by tasks.common.CANON_V2 (Unicode minus, LaTeX wrappers, letter-spaced words, per-token \\mathrm{}, comma-separated grid rows, a trailing parenthetical after a name, \\emptyset / nobody / 'no knights' for an empty set), a superset of v1",
+    "conformance": {
+     "v1": "conformance/fluid_reasoning_720.jsonl",
+     "v2": "conformance/fluid_reasoning_720.v2.jsonl"
+    }
+   },
+   "generation_protocol": {
+    "runner": "scripts/stages/stage-0/calibration_volume/run_battery.py",
+    "decoding": "greedy (temperature 0)",
+    "thinking": "model-native chat template",
+    "allowance": "per sample: supported context - rendered prompt (P18)",
+    "context": "the model's actual supported context; a recovered student at its trained context, a reference model at its configured context",
+    "action_protocol": "v2 for formal measurement (tasks.interactive: markdown emphasis, code spans, $ and spaced/comma code digits read as the action); the environment and the replay use the SAME protocol, recorded per episode. Historical episodes are v1."
+   },
+   "exposure": {
+    "status": "DEVELOPMENT-EXPOSED: not a never-seen blind set",
+    "history": [
+     "2026-10-18: built as Stage-0 `dev_v1` for difficulty calibration and variance estimation; scored for the teacher and three recovered students (runs/battery_20261018_092345); items and per-item results were read by the developing agent",
+     "never used for training, calibration or search: its families are evaluation-split and calibration builds are checked disjoint by family, content and prompt"
+    ],
+    "consequence": "valid for comparing models trained without access to it; a claim of untouched-test generalization needs a fresh set from the same generators' held-out seeds (eval-set-2)"
+   },
+   "license": {
+    "source": "project-generated (no external data, no ARC-AGI material)",
+    "license": "Apache-2.0 (repository license)"
+   },
+   "stats": {
+    "axis": {
+     "abstract_analogical": 96,
+     "compositional_generalization": 144,
+     "inductive_rule_discovery": 144,
+     "interactive_adaptation": 144,
+     "task_contained_deduction": 192
+    },
+    "generator_id": {
+     "code_breaker@v1": 48,
+     "counterfactual_arith@v1": 48,
+     "defined_ops@v1": 48,
+     "entity_tracking@v1": 48,
+     "graph_paths@v1": 48,
+     "grid_transform@v1": 48,
+     "hidden_buttons@v1": 48,
+     "knights_knaves@v1": 48,
+     "letter_analogy@v1": 48,
+     "list_induction@v1": 48,
+     "ordering@v1": 48,
+     "probe_function@v1": 48,
+     "scan_language@v1": 48,
+     "sequence_induction@v1": 48,
+     "string_induction@v1": 48
+    },
+    "difficulty": {
+     "L1": 240,
+     "L2": 240,
+     "L3": 240
+    },
+    "interactive": {
+     "False": 576,
+     "True": 144
+    }
+   },
+   "independent_items": 708,
+   "quality_review": {
+    "audit": "audit/fluid_reasoning_720_quality.json",
+    "status": "DECIDED by the maintainer 2026-10-19: 6 items excluded by validity_v1, the rest valid and annotated"
+   },
+   "duplicate_groups": [],
+   "duplicate_rule": "each group is ONE independent item: a report gives every unit's registered rate over all its items and, beside it, the rate over independent items (each group counted once)",
+   "validity": {
+    "file": "fluid_reasoning_720/validity_v1.json",
+    "formal": 714,
+    "excluded": 6,
+    "formal_static": 570,
+    "formal_interactive": 144
+   },
+   "independence": {
+    "file": "fluid_reasoning_720/independence_v1.json",
+    "items": 720,
+    "groups": 6,
+    "independent": 708,
+    "formal_items": 714,
+    "formal_independent": 702
+   }
+  },
+  "stage3_capability_846": {
+   "role": "held_out",
+   "description": "the frozen Stage-3 capability battery capability-v2: seven public-benchmark sets (validation/test splits never eligible for the training corpus) plus the 76-prompt behaviour set eval_behavior_v0 (stage2_v1 val split)",
+   "units": {
+    "math_verified": {
+     "file": "stage3_capability_846/battery_v2/math_verified.jsonl",
+     "id_field": "id",
+     "n_items": 100
+    },
+    "gsm8k": {
+     "file": "stage3_capability_846/battery_v2/gsm8k.jsonl",
+     "id_field": "id",
+     "n_items": 100
+    },
+    "multihop": {
+     "file": "stage3_capability_846/battery_v2/multihop.jsonl",
+     "id_field": "id",
+     "n_items": 100
+    },
+    "rag": {
+     "file": "stage3_capability_846/battery_v2/rag.jsonl",
+     "id_field": "id",
+     "n_items": 100
+    },
+    "answerability_paired": {
+     "file": "stage3_capability_846/battery_v2/answerability_paired.jsonl",
+     "id_field": "id",
+     "n_items": 120
+    },
+    "safety_paired": {
+     "file": "stage3_capability_846/battery_v2/safety_paired.jsonl",
+     "id_field": "id",
+     "n_items": 100
+    },
+    "knowledge": {
+     "file": "stage3_capability_846/battery_v2/knowledge.jsonl",
+     "id_field": "id",
+     "n_items": 150,
+     "withheld": true
+    },
+    "eval_behavior_v0": {
+     "file": "stage3_capability_846/eval_behavior_v0/prompts.jsonl",
+     "id_field": "id",
+     "n_items": 76,
+     "slice_field": "group",
+     "sidecar_manifest": "stage3_capability_846/eval_behavior_v0/manifest.json"
+    }
+   },
+   "capabilities": {
+    "supporting.closed_book_knowledge": [
+     "stage3_capability_846/knowledge"
+    ],
+    "supporting.math_mixed": [
+     "stage3_capability_846/math_verified",
+     "stage3_capability_846/gsm8k"
+    ],
+    "grounded.multihop_evidence_reasoning": [
+     "stage3_capability_846/multihop"
+    ],
+    "grounded.rag_reading": [
+     "stage3_capability_846/rag"
+    ],
+    "uncertainty.evidence_conditioned_abstention": [
+     "stage3_capability_846/answerability_paired"
+    ],
+    "safety.refusal": [
+     "stage3_capability_846/safety_paired"
+    ],
+    "tool_use.function_calling": [
+     "stage3_capability_846/eval_behavior_v0[group=tool_calling]"
+    ],
+    "interaction.instruction_and_realtime": [
+     "stage3_capability_846/eval_behavior_v0[group=instruction]",
+     "stage3_capability_846/eval_behavior_v0[group=short_realtime]"
+    ],
+    "rollout.protocol_integrity": [
+     "stage3_capability_846/eval_behavior_v0"
+    ]
+   },
+   "scorer": {
+    "protocol_id": "capability-v2 + eval_behavior_v0 / eval-set-1 capability scorer@v2",
+    "adapter": "scripts/shared/evaluation/eval_set_scoring.py :: score_capability, score_behavior",
+    "rule": "aadistill.evaluation.capability.SCORERS per set (deterministic; alias-set EM / numeric-then-symbolic math / evidence containment), strict_answer.score_numeric for gsm8k, aadistill.evaluation.behavior.score_sample for the 76; both paired sets are headlined by PAIR accuracy, never per-row",
+    "rescoring_note": "numbers scored before the 2026-08-04 rescoring (e2diag_rescored_v2) used an earlier capability.py; compare only rescored numbers",
+    "conformance": {
+     "v1": "conformance/stage3_capability_846.jsonl",
+     "v2": "conformance/stage3_capability_846.v2.jsonl"
+    },
+    "formal_protocol": "v2",
+    "historical_protocol_id": "capability-v2 + eval_behavior_v0",
+    "v2_units": [
+     "answerability_paired",
+     "gsm8k",
+     "knowledge",
+     "math_verified",
+     "multihop",
+     "rag"
+    ],
+    "v2_rule": "the v1 scorer applied to the reply after tasks.common.normalize_v2 (Unicode minus, LaTeX wrappers and spacing, markdown emphasis); safety_paired and eval_behavior_v0 keep v1"
+   },
+   "generation_protocol": {
+    "decoding": "greedy",
+    "context": "trained context (8192) for project students; see battery_v2/manifest.json :: decoding"
+   },
+   "exposure": {
+    "status": "held out of training; heavily development-exposed as a measurement",
+    "history": [
+     "2026-08-03 frozen (capability-v2); scored for every Stage-3 Experiment-2 checkpoint, the E2 diagnostics and reference models",
+     "eval_behavior_v0 built 2026-07-27 from stage2_v1 val; scored at every Stage-3 eval point since"
+    ],
+    "known_dependence": "rag and answerability_paired share one SQuAD item (squad-val-57299021af94a219006aa50c), decisions.md 2026-08-09"
+   },
+   "license": {
+    "by_source": "see NOTICE.md",
+    "withheld": [
+     "knowledge (TriviaQA)"
+    ]
+   },
+   "stats": {
+    "by_unit": {
+     "math_verified": 100,
+     "gsm8k": 100,
+     "multihop": 100,
+     "rag": 100,
+     "answerability_paired": 120,
+     "safety_paired": 100,
+     "knowledge": 150,
+     "eval_behavior_v0": 76
+    },
+    "eval_behavior_v0": {
+     "group": {
+      "code_math": 12,
+      "instruction": 12,
+      "multihop_qa": 4,
+      "rag_evidence": 12,
+      "refusal_uncertainty": 12,
+      "short_realtime": 12,
+      "tool_calling": 12
+     },
+     "source": {
+      "everyday_conversations": 2,
+      "glaive_fc_v2": 5,
+      "gsm8k": 7,
+      "hotpot_qa": 4,
+      "oasst2": 1,
+      "openmath_instruct_2": 5,
+      "smol_smoltalk": 21,
+      "squad_v2": 24,
+      "xlam_fc_60k": 7
+     }
+    }
+   },
+   "independent_items": 843,
+   "quality_review": {
+    "status": "DECIDED by the maintainer 2026-10-19: TriviaQA outside the core (withheld, supplementary); xLAM prompts outside the core; 4 Stage-2-train overlaps outside held-out correctness"
+   },
+   "duplicate_groups": [
+    [
+     "eval_behavior_v0:glaive-003743",
+     "eval_behavior_v0:glaive-004818"
+    ],
+    [
+     "eval_behavior_v0:everyday-000636",
+     "eval_behavior_v0:everyday-001567"
+    ],
+    [
+     "answerability_paired:pair-0118-safe:squad-val-57299021af94a219006aa50c",
+     "rag:squad-val-57299021af94a219006aa50c"
+    ]
+   ],
+   "duplicate_rule": "each group is ONE independent item: a report gives every unit's registered rate over all its items and, beside it, the rate over independent items (each group counted once)",
+   "core": {
+    "file": "stage3_capability_846/core_v1.json",
+    "behaviour_items": 76,
+    "behaviour_core": 69,
+    "behaviour_core_held_out": 65
+   }
+  },
+  "stage3_legacy_150": {
+   "role": "in_sample_regression",
+   "description": "the fixed 150-prompt set (inclusion mask d6e24e0b…) every Stage-3 arm from E3 to E8 was scored on: verified-correct sessions of the 0.86M training rung, stratified over gsm8k / openmath / multihop_qa / rag_evidence",
+   "units": {
+    "items": {
+     "file": "stage3_legacy_150/items.jsonl",
+     "id_field": "id",
+     "n_items": 150,
+     "slice_field": "data_type"
+    }
+   },
+   "capabilities": {
+    "in_sample.recall_regression": [
+     "stage3_legacy_150/items"
+    ]
+   },
+   "scorer": {
+    "protocol_id": "stage3.three_mode.free@v2",
+    "adapter": "scripts/shared/evaluation/eval_set_scoring.py :: score_legacy",
+    "rule": "answer = text after </think>; numeric tasks: strict \\boxed{}/Final Answer extraction then numeric equality; free-form QA: normalized gold contained in the answer (run_three_mode_diagnostic.score); correct is reported beside usable_rollout, not conditioned on it",
+    "conformance": {
+     "v1": "conformance/stage3_legacy_150.jsonl",
+     "v2": "conformance/stage3_legacy_150.v2.jsonl"
+    },
+    "formal_protocol": "v2",
+    "historical_protocol_id": "stage3.three_mode.free@v1",
+    "v2_rule": "the v1 rule applied after tasks.common.normalize_v2"
+   },
+   "generation_protocol": {
+    "decoding": "greedy",
+    "context": 8192,
+    "rendering": "see stage3_legacy_150/derivation.json"
+   },
+   "exposure": {
+    "status": "IN-SAMPLE: TRAINING PROMPTS, never a generalization test",
+    "history": [
+     "every item and its verified teacher target is in the 0.86M rung and every larger rung; the historical ~0.19-0.21 correct on this set (e.g. 0.1867 retained reference) is in-sample recall, not reasoning on unseen problems"
+    ],
+    "consequence": "use only for regression / recall comparisons between models trained on that rung; never report beside held-out numbers as one score"
+   },
+   "license": {
+    "by_source": "see NOTICE.md (gsm8k MIT, OpenMathInstruct-2 CC-BY-4.0, HotpotQA and SQuAD v2 CC-BY-SA-4.0)"
+   },
+   "stats": {
+    "data_type": {
+     "gsm8k": 38,
+     "multihop_qa": 38,
+     "openmath": 37,
+     "rag_evidence": 37
+    },
+    "source": {
+     "gsm8k": 38,
+     "hotpot_qa": 38,
+     "openmath_instruct_2": 37,
+     "squad_v2": 37
+    }
+   },
+   "independent_items": 150,
+   "quality_review": {
+    "status": "derived and verified; in-sample by construction"
+   },
+   "duplicate_groups": [],
+   "duplicate_rule": "each group is ONE independent item: a report gives every unit's registered rate over all its items and, beside it, the rate over independent items (each group counted once)"
+  }
+ },
+ "capabilities": {
+  "fluid.abstract_analogical": [
+   "fluid_reasoning_720/dev_v1[axis=abstract_analogical]"
+  ],
+  "fluid.compositional_generalization": [
+   "fluid_reasoning_720/dev_v1[axis=compositional_generalization]"
+  ],
+  "fluid.inductive_rule_discovery": [
+   "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]"
+  ],
+  "fluid.interactive_adaptation": [
+   "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]"
+  ],
+  "fluid.task_contained_deduction": [
+   "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]"
+  ],
+  "supporting.closed_book_knowledge": [
+   "stage3_capability_846/knowledge"
+  ],
+  "supporting.math_mixed": [
+   "stage3_capability_846/math_verified",
+   "stage3_capability_846/gsm8k"
+  ],
+  "grounded.multihop_evidence_reasoning": [
+   "stage3_capability_846/multihop"
+  ],
+  "grounded.rag_reading": [
+   "stage3_capability_846/rag"
+  ],
+  "uncertainty.evidence_conditioned_abstention": [
+   "stage3_capability_846/answerability_paired"
+  ],
+  "safety.refusal": [
+   "stage3_capability_846/safety_paired"
+  ],
+  "tool_use.function_calling": [
+   "stage3_capability_846/eval_behavior_v0[group=tool_calling]"
+  ],
+  "interaction.instruction_and_realtime": [
+   "stage3_capability_846/eval_behavior_v0[group=instruction]",
+   "stage3_capability_846/eval_behavior_v0[group=short_realtime]"
+  ],
+  "rollout.protocol_integrity": [
+   "stage3_capability_846/eval_behavior_v0"
+  ],
+  "in_sample.recall_regression": [
+   "stage3_legacy_150/items"
+  ]
+ },
+ "authorizes": "nothing",
+ "frozen_utc": "2026-10-19",
+ "formal_core": {
+  "rule": "formal measurement generates EVERY item of every unit; the formal numbers are computed on the core: fluid_reasoning_720 validity_v1 (714 items), every capability unit except knowledge (TriviaQA, supplementary), eval_behavior_v0 without the xLAM prompts (and without the four Stage-2 train overlaps in held-out correctness), and stage3_legacy_150 only as in-sample regression. A non-core unit or row is reported beside, never inside, a formal number.",
+  "scoring": "each component's scorer.formal_protocol (v2)"
+ },
+ "identity_note": "identity 2 of eval-set-1: identity 1's content files are carried unchanged; the validity, independence and core files, the v2 conformance vectors and this manifest are new"
+}

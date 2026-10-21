@@ -1,0 +1,30 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.session_plan/v1",
+ "session_kind": "bench",
+ "name": "bench",
+ "purpose": "Search-cost optimization validation required by the maintainer before any formal full search (2026-10-19): CUDA bit-exactness and speed of DEPTH prefix reuse, the per-expansion overhead with save/reload validation on the device, and network-volume throughput and round-trip fidelity. Engineering only: nothing is selected, trained or evaluated.",
+ "run_label": "stage0_calvol_bench",
+ "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+ "profile": "calib.s0v_base_d1_r1@v1",
+ "profile_hash": "5d2c2ccafbbe17128d4d5b8b3535572cdaff627dc30aec4e50b10b403e93404b",
+ "profile_items_dir": "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1",
+ "_profile": "the pilot's 1x base profile (75,660 tokens, 8,192-token items): real data at the formal 1x scale, already staged and hash-pinned by the pilot",
+ "exact_subset_stride": 6,
+ "exact_remove": 3,
+ "_exactness": "every 6th item (both short and 8k-token items, padded micro-batches) and THREE greedy rounds, so later rounds score candidates after non-trailing removals; the full 1x round in stage C is compared too",
+ "setup_minutes": 20,
+ "budget_phases": {
+  "teacher_load": 4,
+  "depth_exactness_subset_3_rounds": 8,
+  "depth_speed_full_round_twice": 8,
+  "overhead_two_attention_expansions": 8,
+  "volume_round_trip": 6
+ },
+ "contingency_fraction": 0.25,
+ "reserve_minutes": 15,
+ "hardware": {
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "why": "the formal searches' card: the timings are only useful on it"
+ },
+ "authorizes": "nothing"
+}

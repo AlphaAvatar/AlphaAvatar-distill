@@ -1,0 +1,93 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "dose_d1_20261019_125359",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-19T13:36:22+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": "RUN_FAILED",
+ "passed": false,
+ "outcome": "Dose d1 attempt 4 (resume): RUN_FAILED in E_eval's report, after generation. Search and recovery restored from the volume (recovery sha verified); fluid's finished generation reused; the 8 capability units and the legacy 150 generated in full and pushed to the network volume. eval_set_scoring.report then raised JSONDecodeError ('Unterminated string', line 1 column 1003): it split JSONL with str.splitlines(), which also breaks on U+2028/U+2029/U+0085 that json.dumps(ensure_ascii=False) writes raw inside a generation's text. No report exists, so no score was read. Also recorded: PRODUCTS_UNSECURED for the restored search and recovery units, a false flag (the resume re-marked units it had not produced; they were secured by attempt 2). Repaired: JSONL is split on newline only (read_jsonl); restored units are not re-marked; the eval logs are written on every path. Every generation now exists on the volume, so the next resume only rescores.",
+ "provider_resource_created": true,
+ "pod_id": "v1p0nifm2vb3l4",
+ "provider_confirms_gone": true,
+ "final_pod_state": {
+  "exists": false,
+  "desired_status": "TERMINATED",
+  "billing": false
+ },
+ "money": {
+  "all_in_usd": 0.873,
+  "gpu_usd": 0.847,
+  "disk_usd": 0.0259,
+  "elapsed_minutes": 28.39,
+  "price_per_hour": 1.79,
+  "authorized_usd": 18.55,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.10/GB-month over the elapsed minutes, ceiled to the 4-decimal quantum"
+ },
+ "session_record_sha256": "a18f448de4e849f233dd814b2f87a15a4b79f7423f4e12d8dffac280370d89f1",
+ "units": {
+  "d1": {
+   "dose_record.json": {
+    "sha256": "7363bfa9b4b3e3e45f588f4db164d08119a76e26d00c996e39052badc063a6c6",
+    "bytes": 4999
+   },
+   "recovery/recovery_products.json": {
+    "sha256": "0db103b8e8bf5045a4cdffac7c524dfb3b0eedb4647156ffa71e85f724aee3dc",
+    "bytes": 272
+   },
+   "search/search_record.json": {
+    "sha256": "4649bdcea6433b6634eb908b954fa60c71f9b155aa0a57698143ea6d0fde28ab",
+    "bytes": 4963
+   },
+   "search/stage1_selection.json": {
+    "sha256": "f47326d58f6c2179fed81fdf6e839f58aa41c9b34b212bff5172f7c5768f7d95",
+    "bytes": 16305
+   },
+   "search/structure.json": {
+    "sha256": "00846a023fff02feb0ff98ab3ecb58cd5eb5b36f8408b777b7f3821d9d7680c6",
+    "bytes": 23123637
+   }
+  },
+  "extracted": {
+   "audit/stage0_calvol_dose/d1/dose_record.json": {
+    "sha256": "7363bfa9b4b3e3e45f588f4db164d08119a76e26d00c996e39052badc063a6c6",
+    "bytes": 4999
+   },
+   "audit/stage0_calvol_dose/d1/eval_capability.log": {
+    "sha256": "f7d11f457648e1f07031474307b21aa7a79eb45718d9202b58174ba116dc3d45",
+    "bytes": 14101
+   },
+   "audit/stage0_calvol_dose/d1/recovery_products.json": {
+    "sha256": "0db103b8e8bf5045a4cdffac7c524dfb3b0eedb4647156ffa71e85f724aee3dc",
+    "bytes": 272
+   },
+   "audit/stage0_calvol_dose/d1/sync.log": {
+    "sha256": "8986af343a83bc58fb69d0f7ba8652cefa19f578a0a9e9e5d43146739ed17279",
+    "bytes": 444
+   },
+   "audit/stage0_calvol_dose/session/setup.log": {
+    "sha256": "e8a23295687eeb74927375211a401f8fcc6b39d9211c81ffd44c2542b81d1279",
+    "bytes": 26202
+   },
+   "audit/stage0_calvol_dose/session/stage0_calvol_dose_run.log": {
+    "sha256": "df35f2ea76a3b6a3e2733d7b94408971f22dcee713df54fda1a7af5ae7bf7d2d",
+    "bytes": 234
+   },
+   "audit/stage0_calvol_search/d1/search_record.json": {
+    "sha256": "4649bdcea6433b6634eb908b954fa60c71f9b155aa0a57698143ea6d0fde28ab",
+    "bytes": 4963
+   },
+   "audit/stage0_calvol_search/d1/stage1_selection.json": {
+    "sha256": "f47326d58f6c2179fed81fdf6e839f58aa41c9b34b212bff5172f7c5768f7d95",
+    "bytes": 16305
+   },
+   "audit/stage0_calvol_search/d1/structure.json": {
+    "sha256": "00846a023fff02feb0ff98ab3ecb58cd5eb5b36f8408b777b7f3821d9d7680c6",
+    "bytes": 23123637
+   }
+  }
+ },
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/dose_d1_20261019_125359"
+}

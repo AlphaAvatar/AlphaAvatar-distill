@@ -1,0 +1,9 @@
+# Changes to the permanent evaluation sets, and to the code that verifies them,
+# need the maintainer's review (AGENTS.md P10.3). Make this binding by enabling
+# "Require review from Code Owners" on the protected branch.
+/data/eval-set/                                  @AlphaAvatar
+/src/aadistill/evaluation/eval_registry.py       @AlphaAvatar
+/scripts/shared/eval_sets.py                     @AlphaAvatar
+/scripts/shared/evaluation/eval_set_scoring.py   @AlphaAvatar
+/tests/data/test_eval_set_registry.py            @AlphaAvatar
+/.github/                                        @AlphaAvatar

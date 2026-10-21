@@ -1,0 +1,69 @@
+{
+ "identity": {
+  "label": "teacher_dev",
+  "model": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "mode": "eval",
+  "tasks_file": "data/stages/stage-0/calibration_volume/tasks/dev_v1.jsonl",
+  "tasks_sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+  "context_resolution": {
+   "resolved_context": 262144,
+   "context_source": "config:max_position_embeddings",
+   "config_max_position_embeddings": 262144,
+   "rope_scaling_factor": null,
+   "architectural_context": 262144,
+   "trained_context": null,
+   "context_len_override": null,
+   "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+   "note": null
+  },
+  "session_limit": null,
+  "effective_limit": 262144,
+  "stop_ids": [
+   151643,
+   151645
+  ],
+  "sampling": {
+   "temperature": 0.0,
+   "top_p": 1.0,
+   "top_k": -1,
+   "detokenize": false
+  },
+  "seed_base": null,
+  "system_message": "You are a helpful Assistant.",
+  "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+  "tokenizer_sha256": null,
+  "degeneration_check_every": 256,
+  "engine": {
+   "max_model_len": 262144,
+   "gpu_memory_utilization": 0.9,
+   "dtype": "bfloat16",
+   "dtype_engine": "torch.bfloat16",
+   "max_num_seqs": 256,
+   "max_num_batched_tokens": 8192,
+   "vllm_version": "0.27.1",
+   "enforce_eager": false,
+   "init_seconds": 62.2
+  },
+  "libraries": {
+   "transformers": "5.15.0",
+   "tokenizers": "0.22.2",
+   "safetensors": "0.8.0",
+   "numpy": "2.3.5",
+   "datasets": null,
+   "vllm": "0.27.1"
+  },
+  "image_digest": null,
+  "runner_sha256": "c77ae2b6e07153d5d30047165110b2920ae6d64bb0eb67b8e78f49fa53d2feaf"
+ },
+ "n_tasks": 720,
+ "rounds": 12,
+ "output_tokens": 5395041,
+ "generation_seconds": 3390.7,
+ "output_tokens_per_second": 1591.1,
+ "ends": {
+  "answered": 566,
+  "degeneration": 12,
+  "episode_done": 142
+ }
+}

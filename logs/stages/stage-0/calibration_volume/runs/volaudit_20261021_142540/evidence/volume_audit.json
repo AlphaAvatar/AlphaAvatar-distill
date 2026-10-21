@@ -1,0 +1,22 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.volume_audit/v1",
+ "run_id": "volaudit_20261021_142540",
+ "volume_id": "wn3avnine2",
+ "data_center_id": "US-TX-3",
+ "mount": "/durable",
+ "store": "/home/ecs-user/aad-artifacts/stage0_calvol/volaudit_20261021_142540",
+ "gpu_id": "NVIDIA L40S",
+ "small_max_bytes": 268435456,
+ "hash_re": "(^|/)model\\.safetensors$",
+ "started_utc": "2026-10-21T14:25:40+00:00",
+ "create_raw": "{\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string          cloud type (SECURE or COMMUNITY) (default \"SECURE\")\n      --compliance string          comma-separated compliance requirements (e.g., HIPAA,SOC_2_TYPE_2)\n      --compute-type string        compute type (GPU or CPU) (default \"GPU\")\n      --container-disk-in-gb int   container disk size in gb (default 20)\n      --country-code string        limit pod to a specific country (e.g., US, DE)\n      --data-center-ids string     comma-separated list of data center ids\n      --docker-args string         docker cmd arguments\n      --env string                 environment variables as json object\n      --global-networking          enable global networking (secure cloud only)\n      --gpu-count int              number of gpus (default 1)\n      --gpu-id string              gpu id (from 'runpodctl gpu list')\n  -h, --help                       help for create\n      --image string               docker image name (required if no template)\n      --min-cuda-version string    minimum cuda version (e.g., 12.6)\n      --name string                pod name\n      --network-volume-id string   network volume id to attach\n      --ports string               comma-separated list of ports (e.g., '8888/http,22/tcp')\n      --public-ip                  require public ip (community cloud only)\n      --registry-auth-id string    container registry auth id (from 'runpodctl registry list')\n      --ssh                        enable ssh on the pod (default true)\n      --stop-after string          auto-stop datetime (e.g., 2026-04-15T00:00:00Z)\n      --template-id string         template id (use 'runpodctl template search' to find templates)\n      --terminate-after string     auto-terminate datetime (e.g., 2026-04-15T00:00:00Z)\n      --volume-in-gb int           volume size in gb\n      --volume-mount-path string   volume mount path (default \"/workspace\")\n\nGlobal Flags:\n  -o, --output string   output format (json, yaml) (default \"json\")\n\n{\"error\":\"failed to create pod: There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\n",
+ "teardown": {
+  "pod_id": null,
+  "terminated": true,
+  "why": "FAILED",
+  "_means": "no resource was ever created"
+ },
+ "status": "FAILED",
+ "error": "RuntimeError: no pod id from the provider: {\"error\":\"There are no longer any instances available with the requested specifications. Please refresh and try again.\"}\nUsage:\n  runpodctl pod create [flags]\n\nFlags:\n      --cloud-type string          cloud type (SECURE or COMMUNITY) (default \"SECURE\")\n      --compliance string          comma-separated compliance requirements (e.g., HIPAA,SOC_2_TYPE_2)\n      --compute-type string        compute type (GPU or CPU) (default \"GPU\")\n      --container-disk-in-gb int   container disk size in gb (default 20)\n      --country-code string        limit pod to a specific country (e.g., US, DE)\n      --dat",
+ "ended_utc": "2026-10-21T14:25:40+00:00"
+}

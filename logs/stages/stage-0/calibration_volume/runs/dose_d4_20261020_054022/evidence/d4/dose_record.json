@@ -1,0 +1,89 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.dose_record/v1",
+ "treatment": "d4",
+ "run_id": "dose_d4_20261020_054022",
+ "search_run_id": "stage0_calvol_formal_v1_d4",
+ "volume_dir": "/runpod-volume/stage0_calvol/formal_v1/d4",
+ "started_utc": "2026-10-20T05:57:05Z",
+ "commit": "414099380179002ab28944e4aacbceb8e0f58ebe",
+ "gpu": {
+  "name": "NVIDIA A100-SXM4-80GB",
+  "memory": "81920 MiB",
+  "driver": "595.91.07"
+ },
+ "stages": {
+  "A_contract": {
+   "status": "ok",
+   "eval_set_identity": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+   "knowledge_staged": true,
+   "seconds": 0.0
+  },
+  "V_retire": {
+   "status": "ok",
+   "doses": {
+    "d1": {
+     "retired": 91,
+     "bytes": 272990935051,
+     "kept": [
+      "72b76a1ca4300f1fc3b341c28738f425"
+     ]
+    },
+    "d2": {
+     "retired": 88,
+     "bytes": 265807516968,
+     "kept": [
+      "3b2037bc90090ba13504fb18c1480e80",
+      "9af1989dc0b8168908eeb77ee4d3fa47",
+      "b6a41ee85024ac3750a39ceb97fa1b5c",
+      "e2d10ba8f532f95c174de290e19dcf01"
+     ]
+    }
+   },
+   "seconds": 1.9
+  },
+  "B_rebuild": {
+   "status": "ok",
+   "rebuilt": {
+    "d1": {
+     "rc": 0,
+     "status": "COMPLETE",
+     "adopted": [
+      "60e229ac09d88cf52814894ddec0e933",
+      "4df438a839cd1ed057c2277dfcb8922f",
+      "91090067b51c9fd4c0aeb3824bc7f549"
+     ]
+    }
+   },
+   "seconds": 3571.5
+  },
+  "X_export_prior": {
+   "status": "ok",
+   "exported": {
+    "d1": [
+     "72b76a1ca4300f1fc3b341c28738f425",
+     "60e229ac09d88cf52814894ddec0e933",
+     "4df438a839cd1ed057c2277dfcb8922f",
+     "91090067b51c9fd4c0aeb3824bc7f549"
+    ],
+    "d2": [
+     "9af1989dc0b8168908eeb77ee4d3fa47",
+     "e2d10ba8f532f95c174de290e19dcf01",
+     "3b2037bc90090ba13504fb18c1480e80",
+     "b6a41ee85024ac3750a39ceb97fa1b5c"
+    ]
+   },
+   "manifest_sha256": "9068d6f8261779be4ba4fede900fb80ad60815e74e48e5ac9ab6f040f85b587f",
+   "seconds": 217.5
+  },
+  "S_search": {
+   "t0": 1792479616.4834769,
+   "status": "running"
+  }
+ },
+ "status": "STARTED",
+ "authorization_id": "stage0.calibration_volume.dose.dose_d4_20261020_054022",
+ "extension": {
+  "B_rebuild": "ok",
+  "X_export_prior": "ok"
+ }
+}

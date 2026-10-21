@@ -1,5 +1,14 @@
 # Stage-0 handoff: calibration data volume and mixture, on the adopted baseline
 
+> **Taken up 2026-10-18; the volume programme CLOSED 2026-10-21.** The formal
+> study (1x/2x/4x, one D1 full search and one fixed recovery each) and a Top-4
+> extension ran: EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME
+> EFFECT ON REASONING NOT RESOLVED. The mixture ratio is DEFERRED, never run.
+> - Results and closeout:
+>   [`logs/stages/stage-0/calibration_volume/closeout/REPORT.md`](../../logs/stages/stage-0/calibration_volume/closeout/REPORT.md).
+> - The next round's facts: [`STAGE2_3_HANDOFF.md`](STAGE2_3_HANDOFF.md).
+> - The page below is the handoff as written before that work.
+
 **Status: handoff only (2026-10-17 UTC).** It authorizes nothing. No Stage-0
 experiment is designed, no dataset is built, downloaded or generated, and no
 GPU resource or grant exists for this work. Design and authorization happen in

@@ -79,7 +79,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint")
     ap.add_argument("--prompts", nargs="*", default=[
-        "data/stages/stage-3/eval_behavior_v0/prompts.jsonl",
+        "data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0/prompts.jsonl",
         "artifacts/stages/stage-3/eval/e1/gsm8k_reasoning_100.jsonl",
     ])
     args = ap.parse_args()

@@ -1,0 +1,800 @@
+{
+  "schema": "aadistill.stage0.calibration_volume.probe_session/v1",
+  "session_id": "stage0-calvol-probes_d1",
+  "session_spec": {
+    "session_id": "stage0-calvol-probes_d1",
+    "schema": "aadistill.stage0.calibration_volume.probe_session/v1",
+    "description": "Stage-0 Top-4 extension: probes_d1 (7 units)",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955/governance/authorization.json",
+    "authorization_type": "functools.partial(<function load_for at 0x7fb1fd484ca0>, 'probes')",
+    "plan_id": "stage0.calibration_volume.probes_d1",
+    "plan_hash": "62eb9a9fd2e5654528e2652704c7995450c37f87dcef17e06b1cbbc8e632e433",
+    "status_path": "/workspace/stage0_calvol_probes.status",
+    "run_log_path": "/workspace/stage0_calvol_probes_run.log",
+    "driver_job_id": "stage0_calvol_probes_d1_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "stage0_calvol_probes",
+      "evidence_filename": "probe_session.json",
+      "archive_basename": "stage0_calvol_probes_d1",
+      "spec_success": "configs/stages/stage-0/calibration_volume/probes_artifacts.json",
+      "spec_failed": "configs/stages/stage-0/calibration_volume/probes_artifacts.json",
+      "report_names": []
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "stage0_calvol"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_KIND",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/config.json",
+          "dest": "artifacts/stages/stage-0/calibration_volume/candidates/d1/72b76a1ca4300f1fc3b341c28738f425",
+          "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/generation_config.json",
+          "dest": "artifacts/stages/stage-0/calibration_volume/candidates/d1/72b76a1ca4300f1fc3b341c28738f425",
+          "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/model.safetensors",
+          "dest": "artifacts/stages/stage-0/calibration_volume/candidates/d1/72b76a1ca4300f1fc3b341c28738f425",
+          "sha256": "49bb3c56b50d95946f7621619084fe85e6f84e9375a843a704e1ab2e53548cae",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/config.json",
+          "dest": "artifacts/stages/stage-0/calibration_volume/candidates/d1/60e229ac09d88cf52814894ddec0e933",
+          "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/generation_config.json",
+          "dest": "artifacts/stages/stage-0/calibration_volume/candidates/d1/60e229ac09d88cf52814894ddec0e933",
+          "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/model.safetensors",
+          "dest": "artifacts/stages/stage-0/calibration_volume/candidates/d1/60e229ac09d88cf52814894ddec0e933",
+          "sha256": "a092bc43630df08a84e14512555aa87b7be4913025b07aefc62aaae3c81e5a4d",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/config.json",
+          "dest": "artifacts/stages/stage-0/calibration_volume/candidates/d1/4df438a839cd1ed057c2277dfcb8922f",
+          "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/generation_config.json",
+          "dest": "artifacts/stages/stage-0/calibration_volume/candidates/d1/4df438a839cd1ed057c2277dfcb8922f",
+          "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
+          "dest": "artifacts/stages/stage-0/calibration_volume/candidates/d1/4df438a839cd1ed057c2277dfcb8922f",
+          "sha256": "3d4cb00edb8cbdbf99afffc408240d920dd75faf9e28611abdf260aa22e6b695",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/config.json",
+          "dest": "artifacts/stages/stage-0/calibration_volume/candidates/d1/91090067b51c9fd4c0aeb3824bc7f549",
+          "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/generation_config.json",
+          "dest": "artifacts/stages/stage-0/calibration_volume/candidates/d1/91090067b51c9fd4c0aeb3824bc7f549",
+          "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/model.safetensors",
+          "dest": "artifacts/stages/stage-0/calibration_volume/candidates/d1/91090067b51c9fd4c0aeb3824bc7f549",
+          "sha256": "111958717d94fd6ac6e82662fe74d9544c9254d0fc93ab4d99cc6816c0ece71f",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+          "dest": "artifacts/shared/instruments/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stages/stage-3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
+          "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [
+        "battery_v2:artifacts/stages/stage-3/eval"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 600,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [],
+      "test_paths": [],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "VLLM_READY",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 0,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-10-20T09:40:52+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 1150 min $20.89 \u00b7 soft $25.62 \u00b7 hard $25.89 (authorized $26.00)"
+    },
+    {
+      "utc": "2026-10-20T09:40:52+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Medium"
+    },
+    {
+      "utc": "2026-10-20T09:40:53+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $109.5149 against the $30.0000 this session must be able to fund"
+    },
+    {
+      "utc": "2026-10-20T09:40:54+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 19 relay inputs (19 from AlphaAvatar/aadistill-artifacts), 1 local assets"
+    },
+    {
+      "utc": "2026-10-20T09:40:55+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 1425 min = $25.89"
+    },
+    {
+      "utc": "2026-10-20T09:40:55+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created rzf92gbn3h40we at $1.09/h"
+    },
+    {
+      "utc": "2026-10-20T09:41:48+00:00",
+      "elapsed_min": 0.89,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-10-20T09:42:52+00:00",
+      "elapsed_min": 1.95,
+      "msg": "  starting (120s) \u2014 $0.04"
+    },
+    {
+      "utc": "2026-10-20T09:43:02+00:00",
+      "elapsed_min": 2.13,
+      "msg": "TCP 22 at 209.170.80.132:19063 after 2.1 min"
+    },
+    {
+      "utc": "2026-10-20T09:43:05+00:00",
+      "elapsed_min": 2.18,
+      "msg": "draw 1: ssh reachable \u2014 $0.04"
+    },
+    {
+      "utc": "2026-10-20T09:43:34+00:00",
+      "elapsed_min": 2.66,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+    },
+    {
+      "utc": "2026-10-20T09:43:34+00:00",
+      "elapsed_min": 2.66,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-20T09:46:17+00:00",
+      "elapsed_min": 5.38,
+      "msg": "draw 1: setup complete \u2014 $0.10"
+    },
+    {
+      "utc": "2026-10-20T09:46:23+00:00",
+      "elapsed_min": 5.47,
+      "msg": "driver detached, pid 2612, confirmed by descriptor_probe \u2014 $0.10"
+    },
+    {
+      "utc": "2026-10-20T09:48:34+00:00",
+      "elapsed_min": 7.66,
+      "msg": "  2026-10-20T09:46:20Z MARKER:UNIT_START:s0v_top4_d1_r1_72b76a1c_s20260727 \u2014 $0.14"
+    },
+    {
+      "utc": "2026-10-20T11:34:21+00:00",
+      "elapsed_min": 113.43,
+      "msg": "  2026-10-20T11:33:46Z MARKER:UNIT_START:s0v_top4_d1_r2_60e229ac_s20260726 \u2014 $2.06"
+    },
+    {
+      "utc": "2026-10-20T11:35:46+00:00",
+      "elapsed_min": 114.85,
+      "msg": "probe unit s0v_top4_d1_r1_72b76a1c_s20260727: SECURED"
+    },
+    {
+      "utc": "2026-10-20T13:45:36+00:00",
+      "elapsed_min": 244.69,
+      "msg": "  2026-10-20T13:44:24Z MARKER:UNIT_START:s0v_top4_d1_r2_60e229ac_s20260727 \u2014 $4.45"
+    },
+    {
+      "utc": "2026-10-20T13:46:24+00:00",
+      "elapsed_min": 245.49,
+      "msg": "probe unit s0v_top4_d1_r2_60e229ac_s20260726: SECURED"
+    },
+    {
+      "utc": "2026-10-20T15:43:52+00:00",
+      "elapsed_min": 362.95,
+      "msg": "  2026-10-20T15:43:03Z MARKER:UNIT_START:s0v_top4_d1_r3_4df438a8_s20260726 \u2014 $6.59"
+    },
+    {
+      "utc": "2026-10-20T15:44:40+00:00",
+      "elapsed_min": 363.75,
+      "msg": "probe unit s0v_top4_d1_r2_60e229ac_s20260727: SECURED"
+    },
+    {
+      "utc": "2026-10-20T17:56:41+00:00",
+      "elapsed_min": 495.77,
+      "msg": "  2026-10-20T17:54:43Z MARKER:UNIT_START:s0v_top4_d1_r3_4df438a8_s20260727 \u2014 $9.01"
+    },
+    {
+      "utc": "2026-10-20T17:57:30+00:00",
+      "elapsed_min": 496.59,
+      "msg": "probe unit s0v_top4_d1_r3_4df438a8_s20260726: SECURED"
+    },
+    {
+      "utc": "2026-10-20T19:52:21+00:00",
+      "elapsed_min": 611.44,
+      "msg": "  2026-10-20T19:51:06Z MARKER:UNIT_START:s0v_top4_d1_r4_91090067_s20260726 \u2014 $11.11"
+    },
+    {
+      "utc": "2026-10-20T19:53:10+00:00",
+      "elapsed_min": 612.25,
+      "msg": "probe unit s0v_top4_d1_r3_4df438a8_s20260727: SECURED"
+    },
+    {
+      "utc": "2026-10-20T21:41:01+00:00",
+      "elapsed_min": 720.11,
+      "msg": "  2026-10-20T21:39:30Z MARKER:UNIT_START:s0v_top4_d1_r4_91090067_s20260727 \u2014 $13.08"
+    },
+    {
+      "utc": "2026-10-20T21:41:48+00:00",
+      "elapsed_min": 720.89,
+      "msg": "probe unit s0v_top4_d1_r4_91090067_s20260726: SECURED"
+    },
+    {
+      "utc": "2026-10-20T23:24:57+00:00",
+      "elapsed_min": 824.03,
+      "msg": "  2026-10-20T23:23:54Z MARKER:ALL_DONE \u2014 $14.97"
+    },
+    {
+      "utc": "2026-10-20T23:24:57+00:00",
+      "elapsed_min": 824.03,
+      "msg": "polling ended: ALL_DONE \u2014 $14.97"
+    },
+    {
+      "utc": "2026-10-20T23:26:11+00:00",
+      "elapsed_min": 825.26,
+      "msg": "  manifest rc=0\n59 file(s) across 3 class(es) -> /workspace/manifest.json\n  final_required: 59 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-10-20T23:27:11+00:00",
+      "elapsed_min": 826.27,
+      "msg": "probe unit s0v_top4_d1_r4_91090067_s20260727: SECURED"
+    },
+    {
+      "utc": "2026-10-20T23:27:14+00:00",
+      "elapsed_min": 826.32,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-10-20T23:27:14+00:00",
+      "elapsed_min": 826.32,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-10-20T23:27:25+00:00",
+      "elapsed_min": 826.5,
+      "msg": "pod deleted \u2014 826.5 min, $15.01; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.stage0.calibration_volume.authorization/v1",
+    "authorization_id": "stage0.calibration_volume.probes.probes_d1_20261020_093955",
+    "version": 1,
+    "granted_utc": "2026-10-20T09:39:55+00:00",
+    "granted_by": "maintainer (task instruction of 2026-10-18 to the executing agent session)",
+    "plan_id": "stage0.calibration_volume.probes_d1",
+    "session_plan_hash": "62eb9a9fd2e5654528e2652704c7995450c37f87dcef17e06b1cbbc8e632e433",
+    "expected_usd": 20.89,
+    "hard_cap_usd": 26.0,
+    "authorized_stages": [],
+    "stage_conditions": {
+      "phase": "formal_volume",
+      "plan": "probes_d1",
+      "envelope": "{\"phase\": \"formal_volume\", \"phase_ceiling_usd\": 120.0, \"phase_spent_usd\": 35.5052, \"phase_remaining_usd\": 44.9948, \"programme_ceiling_usd\": 137.5099, \"programme_spent_usd\": 53.8908, \"programme_remaining_usd\": 44.1191, \"per_session_cap_usd\": 50.0, \"outstanding\": [{\"run_id\": \"dose_d4_20261020_054022\", \"pod_id\": \"ltxns3jbkkaiac\", \"terminate_after_utc\": \"2026-10-21T02:55:59Z\", \"phase\": \"formal_volume\", \"hard_cap_usd\": 39.5}]}"
+    },
+    "scope_note": "Stage-0 Top-4 extension, dose d1: 7 units (Top-1 at 20260727; Top-2..4 at 20260726 and 20260727) on L40S, students on volume b9jwu0g1eg; runs beside dose_d4_20261020_054022 (maintainer 2026-10-20: at most two formal sessions at once)",
+    "authorizes_battery": false,
+    "authorizes_search": false,
+    "authorizes_probes": true,
+    "authorizes_bench": false,
+    "authorizes_dose": false,
+    "authorized_session_commit": null,
+    "harness_source_digest": "4c10a5aec11083d5e998d4387f10c9540415fabcc4139af7d5227a1d48cb33fb",
+    "harness_source_files": [
+      "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "scripts/shared/pod/watchdog.py",
+      "scripts/shared/pod/collect_artifacts.py",
+      "scripts/stages/stage-0/calibration_volume/governance.py",
+      "scripts/stages/stage-0/calibration_volume/launch.py",
+      "scripts/stages/stage-0/calibration_volume/battery_driver.py",
+      "scripts/stages/stage-0/calibration_volume/run_battery.py",
+      "scripts/stages/stage-0/calibration_volume/score_battery.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/common.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/induction.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/composition.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/deduction.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/analogy.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/interactive.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/registry.py",
+      "scripts/shared/evaluation/uncapped_eval.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/data/verify.py",
+      "scripts/stages/stage-0/calibration_volume/probe_driver.py",
+      "scripts/stages/stage-0/calibration_volume/dose_driver.py",
+      "scripts/stages/stage-0/calibration_volume/volume_sync.py",
+      "scripts/shared/evaluation/eval_set_scoring.py",
+      "scripts/shared/eval_sets.py",
+      "scripts/shared/training/train_stage3.py",
+      "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+      "scripts/stages/stage-1/phase_c1/packaging.py",
+      "src/aadistill/evaluation/eval_registry.py"
+    ],
+    "per_launch_hard_usd": 26.0,
+    "provenance_commit": "cc50afb3e1be239a723fe1895fe94b72bf8c7cc8",
+    "enforcement": "the launcher refuses a pod unless this artifact is bound to the session plan and the harness on disk, and its hard cap covers the planned hard threshold; one artifact funds one run",
+    "authorization_sha256": "df77f60dd2c5e538797f8df05d0b04a440d324ac8210362b66d55cd313311d5b"
+  },
+  "session_plan_hash": "62eb9a9fd2e5654528e2652704c7995450c37f87dcef17e06b1cbbc8e632e433",
+  "harness_source_digest": "4c10a5aec11083d5e998d4387f10c9540415fabcc4139af7d5227a1d48cb33fb",
+  "harness_source_files": [
+    "scripts/shared/eval_sets.py",
+    "scripts/shared/evaluation/eval_set_scoring.py",
+    "scripts/shared/evaluation/uncapped_eval.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/collect_artifacts.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/shared/training/train_stage3.py",
+    "scripts/stages/stage-0/calibration_volume/battery_driver.py",
+    "scripts/stages/stage-0/calibration_volume/dose_driver.py",
+    "scripts/stages/stage-0/calibration_volume/governance.py",
+    "scripts/stages/stage-0/calibration_volume/launch.py",
+    "scripts/stages/stage-0/calibration_volume/probe_driver.py",
+    "scripts/stages/stage-0/calibration_volume/run_battery.py",
+    "scripts/stages/stage-0/calibration_volume/score_battery.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/analogy.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/common.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/composition.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/deduction.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/induction.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/interactive.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/registry.py",
+    "scripts/stages/stage-0/calibration_volume/volume_sync.py",
+    "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+    "scripts/stages/stage-1/phase_c1/packaging.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/eval_registry.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 26.0,
+    "expected_minutes": 1150.0,
+    "soft_stop_minutes": 1410.0,
+    "artifact_recovery_reserve_minutes": 15.0,
+    "hard_terminate_minutes": 1425.0,
+    "step_time": {
+      "seconds": 1.0,
+      "source": "unused: no training in this session (arms=0)",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 20.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 10.0
+      },
+      {
+        "name": "recovery_x7",
+        "minutes": 455.0
+      },
+      {
+        "name": "eval_x7",
+        "minutes": 630.0
+      },
+      {
+        "name": "pushes_x7",
+        "minutes": 35.0
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "long_tail_generation",
+        "minutes": 30.0
+      }
+    ],
+    "notes": [
+      "below-floor step time accepted: 1.0 s/step vs floor 4.15 \u2014 no training steps; every phase is priced below"
+    ],
+    "soft_stop_reserve_minutes": 30.0,
+    "expected_usd": 20.8917,
+    "soft_stop_usd": 25.615,
+    "artifact_recovery_reserve_usd": 0.2725,
+    "hard_terminate_usd": 25.8875
+  },
+  "quoted_price_per_hour": 1.09,
+  "stock_status": "Medium",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 109.5149035204,
+    "current_spend_per_hr": 1.88,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 30.0,
+    "ok": true,
+    "why": "the provider account holds $109.5149 against the $30.0000 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "precheck": {
+    "relay_needed": [
+      "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/config.json",
+      "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/generation_config.json",
+      "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/model.safetensors",
+      "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/config.json",
+      "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/generation_config.json",
+      "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/model.safetensors",
+      "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/config.json",
+      "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/generation_config.json",
+      "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
+      "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/config.json",
+      "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/generation_config.json",
+      "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/model.safetensors",
+      "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+      "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+      "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/config.json"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 19
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1448
+    },
+    "local_assets": [
+      "artifacts/stages/stage-3/eval/battery_v2"
+    ],
+    "local_missing": []
+  },
+  "pod_id": "rzf92gbn3h40we",
+  "actual_price_per_hour": 1.09,
+  "terminate_after_utc": "2026-10-21T09:25:54Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-artifacts/stage0_calvol/probes_d1_20261020_093955/watchdog_rzf92gbn3h40we.jsonl"
+  ],
+  "watchdog_owns_pod": "rzf92gbn3h40we",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "595.91.07"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_c1f27191.bundle",
+    "SESSION_ASSETS": "battery_v2:artifacts/stages/stage-3/eval",
+    "SESSION_AUTH_PATH": "logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955/governance/authorization.json",
+    "SESSION_COMMIT": "c1f27191cd35990602465e56b771a48f6963e8e1",
+    "SESSION_KIND": "stage0_calvol",
+    "SESSION_PLAN_HASH": "62eb9a9fd2e5654528e2652704c7995450c37f87dcef17e06b1cbbc8e632e433",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/candidates/d1/72b76a1ca4300f1fc3b341c28738f425\",\"path\":\"stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/candidates/d1/72b76a1ca4300f1fc3b341c28738f425\",\"path\":\"stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/candidates/d1/72b76a1ca4300f1fc3b341c28738f425\",\"path\":\"stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"49bb3c56b50d95946f7621619084fe85e6f84e9375a843a704e1ab2e53548cae\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/candidates/d1/60e229ac09d88cf52814894ddec0e933\",\"path\":\"stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/candidates/d1/60e229ac09d88cf52814894ddec0e933\",\"path\":\"stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/candidates/d1/60e229ac09d88cf52814894ddec0e933\",\"path\":\"stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"a092bc43630df08a84e14512555aa87b7be4913025b07aefc62aaae3c81e5a4d\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/candidates/d1/4df438a839cd1ed057c2277dfcb8922f\",\"path\":\"stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/candidates/d1/4df438a839cd1ed057c2277dfcb8922f\",\"path\":\"stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/candidates/d1/4df438a839cd1ed057c2277dfcb8922f\",\"path\":\"stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3d4cb00edb8cbdbf99afffc408240d920dd75faf9e28611abdf260aa22e6b695\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/candidates/d1/91090067b51c9fd4c0aeb3824bc7f549\",\"path\":\"stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/candidates/d1/91090067b51c9fd4c0aeb3824bc7f549\",\"path\":\"stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/generation_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-0/calibration_volume/candidates/d1/91090067b51c9fd4c0aeb3824bc7f549\",\"path\":\"stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/model.safetensors\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"111958717d94fd6ac6e82662fe74d9544c9254d0fc93ab4d99cc6816c0ece71f\"},{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stages/stage-3/ladder_uniform\",\"dest\":\"artifacts/shared/instruments/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054\"}]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV VLLM_READY SETUP_DONE",
+    "SESSION_STATUS": "/workspace/stage0_calvol_probes.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "600",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "stage0_calvol_probes_d1_driver",
+    "pid": 2612,
+    "workdir": "/workspace/aad",
+    "command": "PYTHONPATH=/workspace/aad/src:/workspace/aad/scripts /opt/train/bin/python /workspace/aad/scripts/stages/stage-0/calibration_volume/probe_driver.py --run-id probes_d1_20261020_093955 --auth '/workspace/aad/logs/stages/stage-0/calibration_volume/runs/probes_d1_20261020_093955/governance/authorization.json' --plan probes_d1 --status '/workspace/stage0_calvol_probes.status' --volume '/runpod-volume'",
+    "log_path": "/workspace/stage0_calvol_probes_run.log",
+    "status_path": "/workspace/stage0_calvol_probes.status",
+    "pid_path": "/workspace/jobs/stage0_calvol_probes_d1_driver.pid",
+    "descriptor_path": "/workspace/jobs/stage0_calvol_probes_d1_driver.job.json",
+    "exit_path": "/workspace/jobs/stage0_calvol_probes_d1_driver.exit",
+    "started_utc": "2026-10-20T09:46:20Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "units_secured": {
+    "s0v_top4_d1_r1_72b76a1c_s20260727": {
+      "sha256": "5214dbe5dad50ae30c10664624f1547dce7fc921d94f50bd502af94e375d3df9",
+      "rc": {
+        "report.json": 0,
+        "generations": 0,
+        "rows": 0,
+        "recovery_products.json": 0,
+        "recovery_config.json": 0,
+        "recovery.log": 0,
+        "train_log.jsonl": 0,
+        "eval_fluid.log": 0,
+        "eval_capability.log": 0
+      },
+      "ok": true
+    },
+    "s0v_top4_d1_r2_60e229ac_s20260726": {
+      "sha256": "97da7f913e9f7000477e3b4688984e83a048fd6277cb39647a7bddaf52b96c15",
+      "rc": {
+        "report.json": 0,
+        "generations": 0,
+        "rows": 0,
+        "recovery_products.json": 0,
+        "recovery_config.json": 0,
+        "recovery.log": 0,
+        "train_log.jsonl": 0,
+        "eval_fluid.log": 0,
+        "eval_capability.log": 0
+      },
+      "ok": true
+    },
+    "s0v_top4_d1_r2_60e229ac_s20260727": {
+      "sha256": "86d530fa98c464a78ae6c09b75b9ad47aba9528f31578b608b8e2eeb21ae3c82",
+      "rc": {
+        "report.json": 0,
+        "generations": 0,
+        "rows": 0,
+        "recovery_products.json": 0,
+        "recovery_config.json": 0,
+        "recovery.log": 0,
+        "train_log.jsonl": 0,
+        "eval_fluid.log": 0,
+        "eval_capability.log": 0
+      },
+      "ok": true
+    },
+    "s0v_top4_d1_r3_4df438a8_s20260726": {
+      "sha256": "28f6dd41779bedc835837792c22d245551e15e04ddd6f832e924924ddfbfd69d",
+      "rc": {
+        "report.json": 0,
+        "generations": 0,
+        "rows": 0,
+        "recovery_products.json": 0,
+        "recovery_config.json": 0,
+        "recovery.log": 0,
+        "train_log.jsonl": 0,
+        "eval_fluid.log": 0,
+        "eval_capability.log": 0
+      },
+      "ok": true
+    },
+    "s0v_top4_d1_r3_4df438a8_s20260727": {
+      "sha256": "2aaedbb797871bd61f336bb634c53371e501092f5c05e80cf0694017fc552751",
+      "rc": {
+        "report.json": 0,
+        "generations": 0,
+        "rows": 0,
+        "recovery_products.json": 0,
+        "recovery_config.json": 0,
+        "recovery.log": 0,
+        "train_log.jsonl": 0,
+        "eval_fluid.log": 0,
+        "eval_capability.log": 0
+      },
+      "ok": true
+    },
+    "s0v_top4_d1_r4_91090067_s20260726": {
+      "sha256": "2680633559a9303517d55e3bbf420412c353002428264aa8cd6dafde0a8bea86",
+      "rc": {
+        "report.json": 0,
+        "generations": 0,
+        "rows": 0,
+        "recovery_products.json": 0,
+        "recovery_config.json": 0,
+        "recovery.log": 0,
+        "train_log.jsonl": 0,
+        "eval_fluid.log": 0,
+        "eval_capability.log": 0
+      },
+      "ok": true
+    },
+    "s0v_top4_d1_r4_91090067_s20260727": {
+      "sha256": "076ff499c95490da1f716dfa4f4d03de3dad2eb6572dced78fb7d21752634a0f",
+      "rc": {
+        "report.json": 0,
+        "generations": 0,
+        "rows": 0,
+        "recovery_products.json": 0,
+        "recovery_config.json": 0,
+        "recovery.log": 0,
+        "train_log.jsonl": 0,
+        "eval_fluid.log": 0,
+        "eval_capability.log": 0
+      },
+      "ok": true
+    }
+  },
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "checkpoints_fetched": [],
+  "required_products_secured": {
+    "ok": true,
+    "why": "7 finished unit(s) secured off-pod; students are on the volume"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 59,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 826.5,
+    "actual_usd": 15.0148,
+    "authorized_usd": 26.0,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-20T23:27:25+00:00"
+}

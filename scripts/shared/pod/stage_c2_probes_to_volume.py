@@ -64,7 +64,7 @@ REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
-from aadistill.infrastructure.provider import RunPodProvider  # noqa: E402
+from aadistill.infrastructure.provider import RunPodProvider, reconcile_account  # noqa: E402
 
 SCHEMA = "aadistill.autoinit.c2_probe_volume_staging/v1"
 
@@ -228,6 +228,16 @@ class StagingPod:
                 f"at the quoted ${self.price:.4f}/h; stopping")
 
     # -- lifecycle ---------------------------------------------------------
+    def require_reconciled_account(self) -> None:
+        """At $0, before the create: the account holds nothing but the volume
+        this pod attaches. Anything else is a resource no record of this run
+        accounts for, and an unreadable listing is not a clean one."""
+        rec = reconcile_account(self.provider, [self.a.volume_id])
+        self.ev["account_resources"] = rec
+        say(("account resources OK: " if rec["ok"] else "ABORT: ") + rec["why"])
+        if not rec["ok"]:
+            raise StagingError(rec["why"])
+
     def create(self) -> None:
         """ONE create call. The id is registered before anything may reject it.
 
@@ -236,6 +246,7 @@ class StagingPod:
         possible, because a session that creates a pod and then returns early on
         a price check has still been billed for it.
         """
+        self.require_reconciled_account()
         deadline = (datetime.now(timezone.utc)
                     + timedelta(minutes=self.a.terminate_after_min))
         cmd = ["runpodctl", "pod", "create",

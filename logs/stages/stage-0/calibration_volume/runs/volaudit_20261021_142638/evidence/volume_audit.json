@@ -1,0 +1,3750 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.volume_audit/v1",
+ "run_id": "volaudit_20261021_142638",
+ "volume_id": "ugllmlv19t",
+ "data_center_id": "EUR-IS-1",
+ "mount": "/durable",
+ "store": "/home/ecs-user/aad-artifacts/stage0_calvol/volaudit_20261021_142638",
+ "gpu_id": null,
+ "small_max_bytes": 268435456,
+ "hash_re": "(recovery|package)/.*model\\.safetensors$",
+ "started_utc": "2026-10-21T14:26:38+00:00",
+ "create_raw": "{\n  \"containerDiskInGb\": 20,\n  \"costPerHr\": 0.06,\n  \"createdAt\": \"2026-10-21 14:26:39.057 +0000 UTC\",\n  \"desiredStatus\": \"RUNNING\",\n  \"env\": {\n    \"PUBLIC_KEY\": \"<redacted: the operator's public ssh keys>\"\n  },\n  \"gpuCount\": 0,\n  \"id\": \"6wjl0c32g6f0bw\",\n  \"imageName\": \"runpod/base:1.0.2-ubuntu2404\",\n  \"lastStatusChange\": \"Rented by User: Wed Oct 21 2026 14:26:39 GMT+0000 (Coordinated Universal Time)\",\n  \"machine\": {\n    \"dataCenterId\": \"EUR-IS-1\",\n    \"diskThroughputMBps\": 3605,\n    \"gpuId\": \"unknown\",\n    \"location\": \"IS\",\n    \"maxDownloadSpeedMbps\": 20263,\n    \"maxUploadSpeedMbps\": 49706,\n    \"reservedCountVersion\": 1409860,\n    \"secureCloud\": true,\n    \"supportPublicIp\": true\n  },\n  \"memoryInGb\": 4,\n  \"name\": \"aad-volaudit_20261021_142638\",\n  \"ports\": [\n    \"22/tcp\"\n  ],\n  \"vcpuCount\": 2,\n  \"volumeInGb\": 0,\n  \"volumeMountPath\": \"/durable\"\n}\n",
+ "pod_id": "6wjl0c32g6f0bw",
+ "pod_started_utc": "2026-10-21T14:26:39+00:00",
+ "quoted_usd_per_hour": 0.06,
+ "files": [
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/dose_record.json",
+   "bytes": 3922,
+   "sha256": "23733be20a7f9cc9c5e7af4aca21f059aaa7bb9f77a988c636e5544ea331529b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/eval_capability.log",
+   "bytes": 385,
+   "sha256": "a0d90f9c35ca0725cb1928f51534b31cc240dd3ad84da3b61fce00d2a18978f3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/eval_fluid.log",
+   "bytes": 87,
+   "sha256": "3ae91019e93e4aff1bd0bc1876cf06d137784ab6538fb309a74fda0aa8f6b1d4",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/fluid_tmp.summary.json",
+   "bytes": 2137,
+   "sha256": "1827a4901d78c21e617871d9b9a243cc72fe004ca462a88737be776903c5109f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/fluid_reasoning_720__dev_v1.jsonl",
+   "bytes": 10088840,
+   "sha256": "b4b80d2dbe840d336651943bcb575c1f6246dafa07926752ae15927595c744b4",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/fluid_reasoning_720__dev_v1.summary.json",
+   "bytes": 2137,
+   "sha256": "1827a4901d78c21e617871d9b9a243cc72fe004ca462a88737be776903c5109f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_capability_846__answerability_paired.jsonl",
+   "bytes": 365897,
+   "sha256": "08d6007511bdfc272a2f0c66e23b1dce1c260f30a101add948e0dfa79c736bf1",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_capability_846__answerability_paired.summary.json",
+   "bytes": 5108,
+   "sha256": "2f314920092903523a6c00c0a2d1959e165ff1146f8ba776e4e51c463a45a056",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_capability_846__eval_behavior_v0.jsonl",
+   "bytes": 266510,
+   "sha256": "90aab49a6eddaf2794051043adc1f829de7f9259743981e93a8e57fc878a94a9",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_capability_846__eval_behavior_v0.summary.json",
+   "bytes": 7463,
+   "sha256": "b581b53eef5b12c4a0cbc1c4261d56bed48be1b8c60dee4ac0515d7388c0498f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_capability_846__gsm8k.jsonl",
+   "bytes": 312046,
+   "sha256": "7ed4dc6762e30d5e265e81ce97d0a4e0e21719029baaad5eb4adc0465d475b97",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_capability_846__gsm8k.summary.json",
+   "bytes": 5106,
+   "sha256": "78fd3d3dfdce89464964e31c9644c299f41f7e126bf39e97bc97f9b73a792283",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_capability_846__knowledge.jsonl",
+   "bytes": 557927,
+   "sha256": "511276df010f9412732933646836e44e31e0370c65ce40a2c6e77ac50a8d2b4c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_capability_846__knowledge.summary.json",
+   "bytes": 5118,
+   "sha256": "c6df867c2899641206cdb94ec6d9989dd259e59cd7f3e9b5c91ff63a8e8f17c3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_capability_846__math_verified.jsonl",
+   "bytes": 322974,
+   "sha256": "9a7280b747ee61b32a1373c1c7013a272678965aab3a5dfc4f60845a59969560",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_capability_846__math_verified.summary.json",
+   "bytes": 5077,
+   "sha256": "161e486b66830b7fe71cc2e2415b461f35531344f90b657627a0f343d1038b54",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_capability_846__multihop.jsonl",
+   "bytes": 321054,
+   "sha256": "bcee67d46e35fc2992e9af58462bbd3dded70180786bf6f335f0e5174db98531",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_capability_846__multihop.summary.json",
+   "bytes": 5060,
+   "sha256": "7f1ff25ba60563ce5888ea472789b6fccc1cb58680a6fc17deaef2b9639d2f3e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_capability_846__rag.jsonl",
+   "bytes": 300696,
+   "sha256": "e5a654e6b7cc00637a0235e71f13115680350ba0b8841c0e4d022bf47627497c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_capability_846__rag.summary.json",
+   "bytes": 5046,
+   "sha256": "b361649603b8d7b01ffc0ee86ad7228688ea934786150c11e67019ea425fa23f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_capability_846__safety_paired.jsonl",
+   "bytes": 434122,
+   "sha256": "fbf6d9c2ca86bd7377a127e2cf09d00d456ec9dc20630368ee12dcedb388d84b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_capability_846__safety_paired.summary.json",
+   "bytes": 5091,
+   "sha256": "1081a93e5c563e029f1613fdd24d58506ccf3028360238f34a34f33dcb3d460b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_legacy_150__items.jsonl",
+   "bytes": 488899,
+   "sha256": "a4147ad8c89dd00da1e543faf2e8d9e5aa7ffeddf16676e81bb0fa38575b4a8c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/generations/stage3_legacy_150__items.summary.json",
+   "bytes": 6209,
+   "sha256": "0436bec64acee976932654f844f806193b6ebe11878e9f0bfbe88876b9b48858",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/legacy_150.prompts.jsonl",
+   "bytes": 603051,
+   "sha256": "93cda9cfdaaf6d22a9d78e61518708dc6338c60b7a395f49cc5dc447633e5ddc",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/mirror.log",
+   "bytes": 14478,
+   "sha256": "d221a6a94d0924fcd21c3d7bb3fbd89f5d7f0e32c10769087daf4471491d2f67",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/mirror.stop",
+   "bytes": 5,
+   "sha256": "a11c3d917a2149a4b548217038bc8f2dd2130a1966e0c7af5c4225d81f25a8c3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/package/chat_template.jinja",
+   "bytes": 4049,
+   "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/package/config.json",
+   "bytes": 1418,
+   "sha256": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/package/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/package/model.safetensors",
+   "bytes": 2384234968,
+   "sha256": "65d2c7a1db618625d211404d7163a0d140408cd3f795e2637cd51bbb73aeca14",
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/package/tokenizer.json",
+   "bytes": 11422650,
+   "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/package/tokenizer_config.json",
+   "bytes": 694,
+   "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/records/eval.done",
+   "bytes": 65,
+   "sha256": "5db727b3d0a1488d8d04e8067b99e99a88441e1d3d883169a62503fbd58154a3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/records/recovery.done",
+   "bytes": 65,
+   "sha256": "07c2e0efc8935acedfb518cdf23f05d4ad4f85d5e59a2e0e935bdd0b22872bd7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/records/search.done",
+   "bytes": 65,
+   "sha256": "b1ffa8fdde291f4e7edb35a91d98eb75adce4ae68124b6a0004283c364af9de1",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/recovery.log",
+   "bytes": 10566,
+   "sha256": "3010c7bf3fc89366b0a369a7b745c9c4cd912a30ad793edd9201ab1357567726",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/recovery_config.json",
+   "bytes": 1870,
+   "sha256": "eef12890c618211873f0e003fcb4ff9728a3fec5fdb3c80fa7d104f4fef258a7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/recovery_products.json",
+   "bytes": 272,
+   "sha256": "0db103b8e8bf5045a4cdffac7c524dfb3b0eedb4647156ffa71e85f724aee3dc",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/report.json",
+   "bytes": 32908,
+   "sha256": "e3fc2c166c9cf4f133372e921e6f3cf0f6eaa290868856e2dfe3f3974cc72534",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/rows/fluid_reasoning_720__dev_v1.rows.jsonl",
+   "bytes": 73276,
+   "sha256": "a87f0dd27633f2bd85d3cda2114b78ba4bc1a0b972738ae51d31f75efd5bb620",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/rows/stage3_capability_846__answerability_paired.rows.jsonl",
+   "bytes": 14932,
+   "sha256": "f31a8d3ada0ead32e6c57cd71a10f85425ef14cb82bf5548569cfaddb42b70ba",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/rows/stage3_capability_846__eval_behavior_v0.rows.jsonl",
+   "bytes": 27358,
+   "sha256": "5c2338b623b8ff2ea91b8d4f8b471f8d669c4a6bf2900bb2453ee5e666b6f06c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/rows/stage3_capability_846__gsm8k.rows.jsonl",
+   "bytes": 9262,
+   "sha256": "51b878afbc6ce0be0f9a9bc2f9b049cb8c73324de9e391032fb3c4dd68b4a7c1",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/rows/stage3_capability_846__knowledge.rows.jsonl",
+   "bytes": 14638,
+   "sha256": "1a1438f3cc5d5a73d327a6006aaeed15949d6fb7e38a513785088d6c60f4e326",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/rows/stage3_capability_846__math_verified.rows.jsonl",
+   "bytes": 11027,
+   "sha256": "8f48e47e9c116559f0c833273455c6bc0150d94e7cf726750611fcb0cb117f90",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/rows/stage3_capability_846__multihop.rows.jsonl",
+   "bytes": 10968,
+   "sha256": "9834665295c9a5da8a5d5cf369baf7ffbc78321669c307a0f3cff48d550c0f24",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/rows/stage3_capability_846__rag.rows.jsonl",
+   "bytes": 10234,
+   "sha256": "991999086cc7183cf0e77d1f66b1bb7e9bcd8517a912b72b3dbd539aa2d68db9",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/rows/stage3_capability_846__safety_paired.rows.jsonl",
+   "bytes": 11268,
+   "sha256": "d53173db65d249c24bd5c6517eab13172023c05d82d77832c3780c42bdfc72d7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/rows/stage3_legacy_150__items.rows.jsonl",
+   "bytes": 9235,
+   "sha256": "9f40eca323e5d455d81a50fe9a7278322c1db81769f884f969bb2ea0d7cda102",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/search.log",
+   "bytes": 490188,
+   "sha256": "75f29e6898ee064d3ef9faf407d1fe272cec866edcf56ee51dd5d37d1c936a6e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/sync.log",
+   "bytes": 336,
+   "sha256": "c1a82c32bbe5e16c66fc0f6c7ddd6469207d1264630a85a189b2e3df3513521d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/train_log.jsonl",
+   "bytes": 48968,
+   "sha256": "ae3a777ac9b42e4b6144f423eeb18fb91727108aa90168fcd96a579af96c96f8",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_capability_846__answerability_paired.jsonl",
+   "bytes": 368974,
+   "sha256": "1a4369323c3bc10b2ffcb97ac41cdb2bf20b670a28a3907d80d2d94a5acce81e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_capability_846__eval_behavior_v0.jsonl",
+   "bytes": 140275,
+   "sha256": "96e211883a20c9db87bde2b06e8f3a66e91e1c82f6aaffc06a04db366dc8e539",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_capability_846__gsm8k.jsonl",
+   "bytes": 63246,
+   "sha256": "1ad4ad22625a11ff5cd6dbce053f15b3cc8f4d50ea491202347e133cd5c85b3b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_capability_846__knowledge.jsonl",
+   "bytes": 127912,
+   "sha256": "2d4420ce9d3f57f10a6f14cb6125e077c35bdd1840eb82085df565760a95ce20",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_capability_846__math_verified.jsonl",
+   "bytes": 78411,
+   "sha256": "bf73cb4ad8cd9299c5ab16776d1747921d754be922f12a4ee03f27537f32e1f1",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_capability_846__multihop.jsonl",
+   "bytes": 1228743,
+   "sha256": "3bd25d896316b50e3a4b84f818a5e6bbf8eb671cb7997810251c2b4640c038e5",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_capability_846__rag.jsonl",
+   "bytes": 326734,
+   "sha256": "1e31c9e03bfb480443213a2cff04cf56a915305cca3ba68d9b9cc19ec4c85e6e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_capability_846__safety_paired.jsonl",
+   "bytes": 35908,
+   "sha256": "ee73e208660b365e2989024739359704517b943a7dcee6a96a811db528d1a73a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
+   "bytes": 603051,
+   "sha256": "93cda9cfdaaf6d22a9d78e61518708dc6338c60b7a395f49cc5dc447633e5ddc",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_capability_846__answerability_paired.generations.jsonl",
+   "bytes": 371461,
+   "sha256": "5101686f8d38c8f9f747aa947ffb143c2dc6934cfca8db1c7538cc31711dca3c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_capability_846__answerability_paired.json",
+   "bytes": 5108,
+   "sha256": "2f314920092903523a6c00c0a2d1959e165ff1146f8ba776e4e51c463a45a056",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_capability_846__eval_behavior_v0.generations.jsonl",
+   "bytes": 245487,
+   "sha256": "45f328e717c126bbd7497351eabba037a5fa847aefb4d7ded13d78158af7d39c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_capability_846__eval_behavior_v0.json",
+   "bytes": 7463,
+   "sha256": "b581b53eef5b12c4a0cbc1c4261d56bed48be1b8c60dee4ac0515d7388c0498f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_capability_846__gsm8k.generations.jsonl",
+   "bytes": 302347,
+   "sha256": "1faf9ace2b6af6927c9244c9a26fe5155dad1fd2eb3544069eeea79c41b2c2c7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_capability_846__gsm8k.json",
+   "bytes": 5106,
+   "sha256": "78fd3d3dfdce89464964e31c9644c299f41f7e126bf39e97bc97f9b73a792283",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_capability_846__knowledge.generations.jsonl",
+   "bytes": 570100,
+   "sha256": "0496d9709428c5262710c98262f43367b6566c4e5ad92487e32edccefe12d4d6",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_capability_846__knowledge.json",
+   "bytes": 5118,
+   "sha256": "c6df867c2899641206cdb94ec6d9989dd259e59cd7f3e9b5c91ff63a8e8f17c3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_capability_846__math_verified.generations.jsonl",
+   "bytes": 308420,
+   "sha256": "fc9f644ec0b4f2c22d12401cabcc706f4d430979e054038232968eadc053aa5d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_capability_846__math_verified.json",
+   "bytes": 5077,
+   "sha256": "161e486b66830b7fe71cc2e2415b461f35531344f90b657627a0f343d1038b54",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_capability_846__multihop.generations.jsonl",
+   "bytes": 318860,
+   "sha256": "4b1faedbd69ae666e95dc269c01ed1bf193f55895a40d8c877b891ae3fed805d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_capability_846__multihop.json",
+   "bytes": 5060,
+   "sha256": "7f1ff25ba60563ce5888ea472789b6fccc1cb58680a6fc17deaef2b9639d2f3e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_capability_846__rag.generations.jsonl",
+   "bytes": 287302,
+   "sha256": "57010f6fb5f6d756436f880669007da381c23b36dd7963afe689cc39df4f02e3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_capability_846__rag.json",
+   "bytes": 5046,
+   "sha256": "b361649603b8d7b01ffc0ee86ad7228688ea934786150c11e67019ea425fa23f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_capability_846__safety_paired.generations.jsonl",
+   "bytes": 398862,
+   "sha256": "1dc656c8c49b9762ac3ffd703066b9682d9d80634b4cba2b4b91fdb76f22b6b2",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_capability_846__safety_paired.json",
+   "bytes": 5091,
+   "sha256": "1081a93e5c563e029f1613fdd24d58506ccf3028360238f34a34f33dcb3d460b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/dose_out/uncapped_out/stage3_legacy_150__items.json",
+   "bytes": 6209,
+   "sha256": "0436bec64acee976932654f844f806193b6ebe11878e9f0bfbe88876b9b48858",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/fluid_reasoning_720__dev_v1.jsonl",
+   "bytes": 10088840,
+   "sha256": "b4b80d2dbe840d336651943bcb575c1f6246dafa07926752ae15927595c744b4",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/fluid_reasoning_720__dev_v1.summary.json",
+   "bytes": 2137,
+   "sha256": "1827a4901d78c21e617871d9b9a243cc72fe004ca462a88737be776903c5109f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_capability_846__answerability_paired.jsonl",
+   "bytes": 365897,
+   "sha256": "08d6007511bdfc272a2f0c66e23b1dce1c260f30a101add948e0dfa79c736bf1",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_capability_846__answerability_paired.summary.json",
+   "bytes": 5108,
+   "sha256": "2f314920092903523a6c00c0a2d1959e165ff1146f8ba776e4e51c463a45a056",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_capability_846__eval_behavior_v0.jsonl",
+   "bytes": 266510,
+   "sha256": "90aab49a6eddaf2794051043adc1f829de7f9259743981e93a8e57fc878a94a9",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_capability_846__eval_behavior_v0.summary.json",
+   "bytes": 7463,
+   "sha256": "b581b53eef5b12c4a0cbc1c4261d56bed48be1b8c60dee4ac0515d7388c0498f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_capability_846__gsm8k.jsonl",
+   "bytes": 312046,
+   "sha256": "7ed4dc6762e30d5e265e81ce97d0a4e0e21719029baaad5eb4adc0465d475b97",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_capability_846__gsm8k.summary.json",
+   "bytes": 5106,
+   "sha256": "78fd3d3dfdce89464964e31c9644c299f41f7e126bf39e97bc97f9b73a792283",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_capability_846__knowledge.jsonl",
+   "bytes": 557927,
+   "sha256": "511276df010f9412732933646836e44e31e0370c65ce40a2c6e77ac50a8d2b4c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_capability_846__knowledge.summary.json",
+   "bytes": 5118,
+   "sha256": "c6df867c2899641206cdb94ec6d9989dd259e59cd7f3e9b5c91ff63a8e8f17c3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_capability_846__math_verified.jsonl",
+   "bytes": 322974,
+   "sha256": "9a7280b747ee61b32a1373c1c7013a272678965aab3a5dfc4f60845a59969560",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_capability_846__math_verified.summary.json",
+   "bytes": 5077,
+   "sha256": "161e486b66830b7fe71cc2e2415b461f35531344f90b657627a0f343d1038b54",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_capability_846__multihop.jsonl",
+   "bytes": 321054,
+   "sha256": "bcee67d46e35fc2992e9af58462bbd3dded70180786bf6f335f0e5174db98531",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_capability_846__multihop.summary.json",
+   "bytes": 5060,
+   "sha256": "7f1ff25ba60563ce5888ea472789b6fccc1cb58680a6fc17deaef2b9639d2f3e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_capability_846__rag.jsonl",
+   "bytes": 300696,
+   "sha256": "e5a654e6b7cc00637a0235e71f13115680350ba0b8841c0e4d022bf47627497c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_capability_846__rag.summary.json",
+   "bytes": 5046,
+   "sha256": "b361649603b8d7b01ffc0ee86ad7228688ea934786150c11e67019ea425fa23f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_capability_846__safety_paired.jsonl",
+   "bytes": 434122,
+   "sha256": "fbf6d9c2ca86bd7377a127e2cf09d00d456ec9dc20630368ee12dcedb388d84b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_capability_846__safety_paired.summary.json",
+   "bytes": 5091,
+   "sha256": "1081a93e5c563e029f1613fdd24d58506ccf3028360238f34a34f33dcb3d460b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_legacy_150__items.jsonl",
+   "bytes": 488899,
+   "sha256": "a4147ad8c89dd00da1e543faf2e8d9e5aa7ffeddf16676e81bb0fa38575b4a8c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/generations/stage3_legacy_150__items.summary.json",
+   "bytes": 6209,
+   "sha256": "0436bec64acee976932654f844f806193b6ebe11878e9f0bfbe88876b9b48858",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/products.json",
+   "bytes": 425,
+   "sha256": "b9f00a69c181a7067c186ec4192e91dac1e27cb306efb7fdc76650252e125d18",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/recovery/checkpoints/latest.txt",
+   "bytes": 12,
+   "sha256": "e48bf1d9a4d5f34111112c3255d428106c2bbb7f26a8c72ee8ac283791fabfa0",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/recovery/checkpoints/step_001023/model/config.json",
+   "bytes": 1418,
+   "sha256": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/recovery/checkpoints/step_001023/model/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/recovery/checkpoints/step_001023/model/model.safetensors",
+   "bytes": 2384234968,
+   "sha256": "65d2c7a1db618625d211404d7163a0d140408cd3f795e2637cd51bbb73aeca14",
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/recovery/run_completion.json",
+   "bytes": 1834,
+   "sha256": "a5b7b9bb00eed0681cbb204b04f7278bcbf3e28f523bbf04b57b48d19fa5a656",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/recovery/run_manifest.json",
+   "bytes": 8536,
+   "sha256": "800872f00a25cf9e81fa7945427fd271008e0c2382d028671c9aa52d540a98ca",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/recovery/train_log.jsonl",
+   "bytes": 48968,
+   "sha256": "ae3a777ac9b42e4b6144f423eeb18fb91727108aa90168fcd96a579af96c96f8",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/released_finalists.json",
+   "bytes": 2756,
+   "sha256": "86b0b5482676bc1801a9f3d331a793c385bfb1e5d0be8e174cc2abcfd44736a3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/retired_optimizer_states.json",
+   "bytes": 524,
+   "sha256": "82c0e7bb72a2f34e9759f2e7fd97b6564a896bc1e8d83b415da0b8b378836ead",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/retired_states.json",
+   "bytes": 24655,
+   "sha256": "0bec32b410510991836c57f364cb5b3676d9f8bd8b3f96436a54a6811546b52c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/search_unit/search/states.jsonl",
+   "bytes": 64381606,
+   "sha256": "3be04da5aea71be84aa35b80f8d64a6bfced06f202ce98abeef062e609795ba5",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/search_unit/search/telemetry.jsonl",
+   "bytes": 99559,
+   "sha256": "4ef513a1b91559e8b36132838df082bb2f8b9bc5ed8305ab545b9b1f422b1ab4",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/search_unit/search_record.json",
+   "bytes": 4963,
+   "sha256": "4649bdcea6433b6634eb908b954fa60c71f9b155aa0a57698143ea6d0fde28ab",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/search_unit/stage1_selection.json",
+   "bytes": 16305,
+   "sha256": "f47326d58f6c2179fed81fdf6e839f58aa41c9b34b212bff5172f7c5768f7d95",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/search_unit/structure.json",
+   "bytes": 23123637,
+   "sha256": "00846a023fff02feb0ff98ab3ecb58cd5eb5b36f8408b777b7f3821d9d7680c6",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/search_unit/width_projection_2bb3a608c281518414d06510a6d0d6e6.safetensors",
+   "bytes": 10485840,
+   "sha256": "cbf792a9b5a80880f10cd0fb62c923825152b7cbdd708e0d2ce48d1bea5a873d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d1/search_unit/width_projection_90dbf332eb0b4411c809c658a30f2aa6.safetensors",
+   "bytes": 10485840,
+   "sha256": "27c5e6dd56b7cbb2d7a4132e70229a1eb0e4c67bb0ae4577697c376709627d57",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/dose_record.json",
+   "bytes": 5678,
+   "sha256": "1d4ad74dcf85f5c83ff2c6f4effde844908b5d5c4ca5ce59e4f932b915c6adff",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/eval_capability.log",
+   "bytes": 13941,
+   "sha256": "7024d93a99933224f5085d0e8dfed096f1815c0654a74c55efdcd7f76a2be59e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/eval_fluid.log",
+   "bytes": 13932,
+   "sha256": "ab076417fb64e741c0dd210a8c686a8e7ab2b78a1a534211b71b28b230d717e4",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/fluid_tmp.summary.json",
+   "bytes": 2137,
+   "sha256": "0643d4ebd88b05f99d7a463173ad9cec92ab6d16d61848bc8653c6625de10764",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/fluid_reasoning_720__dev_v1.jsonl",
+   "bytes": 10152334,
+   "sha256": "645688a3d0323814a7ac00adc863f9c669382bc9e3d1ddc502e4649e75a25e66",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/fluid_reasoning_720__dev_v1.summary.json",
+   "bytes": 2137,
+   "sha256": "0643d4ebd88b05f99d7a463173ad9cec92ab6d16d61848bc8653c6625de10764",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_capability_846__answerability_paired.jsonl",
+   "bytes": 350587,
+   "sha256": "c2efdf6c245c7c23ce14c303c9071d5a6cd15fbc12b71650260e9c72c541a0f7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_capability_846__answerability_paired.summary.json",
+   "bytes": 5107,
+   "sha256": "0f09ad80b729b3333b4094746533d8ae1fa98e91a364bbd0e1bac5f710075cf6",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_capability_846__eval_behavior_v0.jsonl",
+   "bytes": 213292,
+   "sha256": "ddb3a3c54f9a0df1214ade236fde54cc72269ae80ce3f6b381fa5bdc12d0f46d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_capability_846__eval_behavior_v0.summary.json",
+   "bytes": 7476,
+   "sha256": "95242393c2485dc5f0d1a25af58e1ebad3f4bd6abc4b17e57fdc2413d0bc7246",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_capability_846__gsm8k.jsonl",
+   "bytes": 296264,
+   "sha256": "138efb5675053ce12e53aaea553b37044b089266494b42b18e1e4108b2ed5990",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_capability_846__gsm8k.summary.json",
+   "bytes": 5106,
+   "sha256": "bc017c48e55dfd1f2de9ce945b6b5e7ce8bffdd5dda54f7084ab3d80249addee",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_capability_846__knowledge.jsonl",
+   "bytes": 440592,
+   "sha256": "f943c3aff61a8081ac985449f16acd8badbbbb22dc56ae892bf88af1cb012f9e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_capability_846__knowledge.summary.json",
+   "bytes": 5080,
+   "sha256": "6472c52bac1d7f372783aff3641ae702c42c380a1bed0cbb709e7acf7b230aaf",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_capability_846__math_verified.jsonl",
+   "bytes": 287845,
+   "sha256": "665cda7e3b87d627ce42e1dbac84280d2c8bcb08813f5834bb92f8198301b77b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_capability_846__math_verified.summary.json",
+   "bytes": 5063,
+   "sha256": "d5c21ba39cd0ebdaec5daf73cac7104e8cd9e94cbf265f1eddbad913dfcbc65a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_capability_846__multihop.jsonl",
+   "bytes": 336118,
+   "sha256": "563a90c18311bc069e5c078abef986581abff1bd60b7a5ea77d1d77f881258d4",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_capability_846__multihop.summary.json",
+   "bytes": 5061,
+   "sha256": "a91e20309c50354b6119606051e3b98aaf5ded456a7d6478c5dff3e3976a24a2",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_capability_846__rag.jsonl",
+   "bytes": 277266,
+   "sha256": "244bacf919e349c4ae15905653a3ae0ecaf716525bda90e084ee3cadab7467dc",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_capability_846__rag.summary.json",
+   "bytes": 5043,
+   "sha256": "7a75fb87daee1ad1999397de10c12c6fd01e9e9c8a3a62047e7f1e44b846767f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_capability_846__safety_paired.jsonl",
+   "bytes": 249679,
+   "sha256": "11a72a2a684e1883473ee34782f83c16a553c5ddce7c8f2d05c29b98f1e0ce10",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_capability_846__safety_paired.summary.json",
+   "bytes": 5064,
+   "sha256": "8e9315ce16115ef16b7404e5d579532a0ffca622b7c887eb8cfd009059fda79b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_legacy_150__items.jsonl",
+   "bytes": 479213,
+   "sha256": "8f4f0a784cb5b558667855b3a4ed2e3d3cbae6a342bd9126fd1e2f6bb95ccfc8",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/generations/stage3_legacy_150__items.summary.json",
+   "bytes": 6206,
+   "sha256": "d757fa180de424aa502f5bd3d146bc31a63f835074d72dad548304769287323f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/legacy_150.prompts.jsonl",
+   "bytes": 603051,
+   "sha256": "93cda9cfdaaf6d22a9d78e61518708dc6338c60b7a395f49cc5dc447633e5ddc",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/mirror.log",
+   "bytes": 2531,
+   "sha256": "4c00d6cbfe7fccd7dcd889a0c2670d57c5c7dfcdc79c6a47b6b03dbc74713722",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/mirror.stop",
+   "bytes": 5,
+   "sha256": "a11c3d917a2149a4b548217038bc8f2dd2130a1966e0c7af5c4225d81f25a8c3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/package/chat_template.jinja",
+   "bytes": 4049,
+   "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/package/config.json",
+   "bytes": 1418,
+   "sha256": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/package/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/package/model.safetensors",
+   "bytes": 2384234968,
+   "sha256": "f3a08e2392f1156a084d6a578bdf000410411670b172e68383f0f3cea23dd89b",
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/package/tokenizer.json",
+   "bytes": 11422650,
+   "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/package/tokenizer_config.json",
+   "bytes": 694,
+   "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/records/eval.done",
+   "bytes": 65,
+   "sha256": "326ee31522a89ba960b58c8d3e82ef3867abbb7fcdc6a3fd5a80155e3491dc68",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/records/recovery.done",
+   "bytes": 65,
+   "sha256": "1f4ef5369a3403f88fbe8436e2dd0e7463669a4a902f0687e5d3fed8cbc18b67",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/records/search.done",
+   "bytes": 65,
+   "sha256": "30f4307c6c5b7a8d1735d989260d63de88eeb7e01ff47523076ef43d79f863e1",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/recovery.log",
+   "bytes": 10334,
+   "sha256": "1932d41853abbbb1c312acd96ef923a9cb71690f367469e595c7c7290e4706bc",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/recovery_config.json",
+   "bytes": 1870,
+   "sha256": "357406e8f926b43d5b72bb51fff2a76dfb9df660d1cf66d24d527b85089a1ca5",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/recovery_products.json",
+   "bytes": 272,
+   "sha256": "8040a665357f918643824655762d9470df47eb647706efd9bb2ade6c58536c90",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/report.json",
+   "bytes": 32764,
+   "sha256": "c30966330e80f6e8d8e92a62de14b45a9326f3a23f2e99f4e7fa7f11fe6a5883",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/retired_states_d1.json",
+   "bytes": 24655,
+   "sha256": "0bec32b410510991836c57f364cb5b3676d9f8bd8b3f96436a54a6811546b52c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/rows/fluid_reasoning_720__dev_v1.rows.jsonl",
+   "bytes": 73272,
+   "sha256": "57f555aaad091b7477d0ede4d0b317bca9f6b5425ce86173dd6f9bbe8e86868c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/rows/stage3_capability_846__answerability_paired.rows.jsonl",
+   "bytes": 15162,
+   "sha256": "d286d34284b5ea87a88d710b39af410813eb535fc30e89cb48f964dc1952ca9c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/rows/stage3_capability_846__eval_behavior_v0.rows.jsonl",
+   "bytes": 27293,
+   "sha256": "37da04fc6796a47df096ed6f686974fedc57651415820244d67e5f3266e4f3b5",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/rows/stage3_capability_846__gsm8k.rows.jsonl",
+   "bytes": 9322,
+   "sha256": "7131b4cb0a4aaed64b10ecd0c1858c18c4e559e8604e660507b191747df02909",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/rows/stage3_capability_846__knowledge.rows.jsonl",
+   "bytes": 14456,
+   "sha256": "e723c4e3a8f79d693ae9f51fd1f83cab2bc7bddf97b47008ea3753f757f12679",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/rows/stage3_capability_846__math_verified.rows.jsonl",
+   "bytes": 10924,
+   "sha256": "6017cc0539600ab7a23ed18125dc3b85f519422a306b29c69a20bb20f89dd244",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/rows/stage3_capability_846__multihop.rows.jsonl",
+   "bytes": 11040,
+   "sha256": "ffa5055b78467a4cb675cd0f65d501e069715f77b4da8bc4797508bed228b26f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/rows/stage3_capability_846__rag.rows.jsonl",
+   "bytes": 10439,
+   "sha256": "abb4d5e75eb4c1e5f4e0d5442cac348771b275a0d2a0fdf81e0842028dd41de6",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/rows/stage3_capability_846__safety_paired.rows.jsonl",
+   "bytes": 11300,
+   "sha256": "60fca60413dddff849c6096f2ae7fc4408f3bb258cb23063536ddba72d743283",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/rows/stage3_legacy_150__items.rows.jsonl",
+   "bytes": 9237,
+   "sha256": "a8f3942165ed0f26a8e074708f37668567657024ea9fbc4963a18127bca9493f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/search.log",
+   "bytes": 43552,
+   "sha256": "7926bf0d836ea84c270dda7f5174590a233fa4cb6966e1f17ea6f88acf9af9c4",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/sync.log",
+   "bytes": 793,
+   "sha256": "2a4235021a44d8237e9dc9bf077925c50af5b10e596dad824f20eb37bc5306d0",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/train_log.jsonl",
+   "bytes": 48977,
+   "sha256": "0561bc4ccedde02ceb9ecb59f3c9e9fea91243a74f2e3bf0da1fd6a36d950342",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_capability_846__answerability_paired.jsonl",
+   "bytes": 368974,
+   "sha256": "1a4369323c3bc10b2ffcb97ac41cdb2bf20b670a28a3907d80d2d94a5acce81e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_capability_846__eval_behavior_v0.jsonl",
+   "bytes": 140275,
+   "sha256": "96e211883a20c9db87bde2b06e8f3a66e91e1c82f6aaffc06a04db366dc8e539",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_capability_846__gsm8k.jsonl",
+   "bytes": 63246,
+   "sha256": "1ad4ad22625a11ff5cd6dbce053f15b3cc8f4d50ea491202347e133cd5c85b3b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_capability_846__knowledge.jsonl",
+   "bytes": 127912,
+   "sha256": "2d4420ce9d3f57f10a6f14cb6125e077c35bdd1840eb82085df565760a95ce20",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_capability_846__math_verified.jsonl",
+   "bytes": 78411,
+   "sha256": "bf73cb4ad8cd9299c5ab16776d1747921d754be922f12a4ee03f27537f32e1f1",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_capability_846__multihop.jsonl",
+   "bytes": 1228743,
+   "sha256": "3bd25d896316b50e3a4b84f818a5e6bbf8eb671cb7997810251c2b4640c038e5",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_capability_846__rag.jsonl",
+   "bytes": 326734,
+   "sha256": "1e31c9e03bfb480443213a2cff04cf56a915305cca3ba68d9b9cc19ec4c85e6e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_capability_846__safety_paired.jsonl",
+   "bytes": 35908,
+   "sha256": "ee73e208660b365e2989024739359704517b943a7dcee6a96a811db528d1a73a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
+   "bytes": 603051,
+   "sha256": "93cda9cfdaaf6d22a9d78e61518708dc6338c60b7a395f49cc5dc447633e5ddc",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_out/stage3_capability_846__answerability_paired.json",
+   "bytes": 5107,
+   "sha256": "0f09ad80b729b3333b4094746533d8ae1fa98e91a364bbd0e1bac5f710075cf6",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_out/stage3_capability_846__eval_behavior_v0.json",
+   "bytes": 7476,
+   "sha256": "95242393c2485dc5f0d1a25af58e1ebad3f4bd6abc4b17e57fdc2413d0bc7246",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_out/stage3_capability_846__gsm8k.json",
+   "bytes": 5106,
+   "sha256": "bc017c48e55dfd1f2de9ce945b6b5e7ce8bffdd5dda54f7084ab3d80249addee",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_out/stage3_capability_846__knowledge.json",
+   "bytes": 5080,
+   "sha256": "6472c52bac1d7f372783aff3641ae702c42c380a1bed0cbb709e7acf7b230aaf",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_out/stage3_capability_846__math_verified.json",
+   "bytes": 5063,
+   "sha256": "d5c21ba39cd0ebdaec5daf73cac7104e8cd9e94cbf265f1eddbad913dfcbc65a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_out/stage3_capability_846__multihop.json",
+   "bytes": 5061,
+   "sha256": "a91e20309c50354b6119606051e3b98aaf5ded456a7d6478c5dff3e3976a24a2",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_out/stage3_capability_846__rag.json",
+   "bytes": 5043,
+   "sha256": "7a75fb87daee1ad1999397de10c12c6fd01e9e9c8a3a62047e7f1e44b846767f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_out/stage3_capability_846__safety_paired.json",
+   "bytes": 5064,
+   "sha256": "8e9315ce16115ef16b7404e5d579532a0ffca622b7c887eb8cfd009059fda79b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/dose_out/uncapped_out/stage3_legacy_150__items.json",
+   "bytes": 6206,
+   "sha256": "d757fa180de424aa502f5bd3d146bc31a63f835074d72dad548304769287323f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/fluid_reasoning_720__dev_v1.jsonl",
+   "bytes": 10152334,
+   "sha256": "645688a3d0323814a7ac00adc863f9c669382bc9e3d1ddc502e4649e75a25e66",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/fluid_reasoning_720__dev_v1.summary.json",
+   "bytes": 2137,
+   "sha256": "0643d4ebd88b05f99d7a463173ad9cec92ab6d16d61848bc8653c6625de10764",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_capability_846__answerability_paired.jsonl",
+   "bytes": 350587,
+   "sha256": "c2efdf6c245c7c23ce14c303c9071d5a6cd15fbc12b71650260e9c72c541a0f7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_capability_846__answerability_paired.summary.json",
+   "bytes": 5107,
+   "sha256": "0f09ad80b729b3333b4094746533d8ae1fa98e91a364bbd0e1bac5f710075cf6",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_capability_846__eval_behavior_v0.jsonl",
+   "bytes": 213292,
+   "sha256": "ddb3a3c54f9a0df1214ade236fde54cc72269ae80ce3f6b381fa5bdc12d0f46d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_capability_846__eval_behavior_v0.summary.json",
+   "bytes": 7476,
+   "sha256": "95242393c2485dc5f0d1a25af58e1ebad3f4bd6abc4b17e57fdc2413d0bc7246",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_capability_846__gsm8k.jsonl",
+   "bytes": 296264,
+   "sha256": "138efb5675053ce12e53aaea553b37044b089266494b42b18e1e4108b2ed5990",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_capability_846__gsm8k.summary.json",
+   "bytes": 5106,
+   "sha256": "bc017c48e55dfd1f2de9ce945b6b5e7ce8bffdd5dda54f7084ab3d80249addee",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_capability_846__knowledge.jsonl",
+   "bytes": 440592,
+   "sha256": "f943c3aff61a8081ac985449f16acd8badbbbb22dc56ae892bf88af1cb012f9e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_capability_846__knowledge.summary.json",
+   "bytes": 5080,
+   "sha256": "6472c52bac1d7f372783aff3641ae702c42c380a1bed0cbb709e7acf7b230aaf",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_capability_846__math_verified.jsonl",
+   "bytes": 287845,
+   "sha256": "665cda7e3b87d627ce42e1dbac84280d2c8bcb08813f5834bb92f8198301b77b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_capability_846__math_verified.summary.json",
+   "bytes": 5063,
+   "sha256": "d5c21ba39cd0ebdaec5daf73cac7104e8cd9e94cbf265f1eddbad913dfcbc65a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_capability_846__multihop.jsonl",
+   "bytes": 336118,
+   "sha256": "563a90c18311bc069e5c078abef986581abff1bd60b7a5ea77d1d77f881258d4",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_capability_846__multihop.summary.json",
+   "bytes": 5061,
+   "sha256": "a91e20309c50354b6119606051e3b98aaf5ded456a7d6478c5dff3e3976a24a2",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_capability_846__rag.jsonl",
+   "bytes": 277266,
+   "sha256": "244bacf919e349c4ae15905653a3ae0ecaf716525bda90e084ee3cadab7467dc",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_capability_846__rag.summary.json",
+   "bytes": 5043,
+   "sha256": "7a75fb87daee1ad1999397de10c12c6fd01e9e9c8a3a62047e7f1e44b846767f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_capability_846__safety_paired.jsonl",
+   "bytes": 249679,
+   "sha256": "11a72a2a684e1883473ee34782f83c16a553c5ddce7c8f2d05c29b98f1e0ce10",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_capability_846__safety_paired.summary.json",
+   "bytes": 5064,
+   "sha256": "8e9315ce16115ef16b7404e5d579532a0ffca622b7c887eb8cfd009059fda79b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_legacy_150__items.jsonl",
+   "bytes": 479213,
+   "sha256": "8f4f0a784cb5b558667855b3a4ed2e3d3cbae6a342bd9126fd1e2f6bb95ccfc8",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/generations/stage3_legacy_150__items.summary.json",
+   "bytes": 6206,
+   "sha256": "d757fa180de424aa502f5bd3d146bc31a63f835074d72dad548304769287323f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/products.json",
+   "bytes": 425,
+   "sha256": "a4778eddcf8be860e0cbd58223f230b0b260a4d8ef1c2141d9dbf77b1d2140fb",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/recovery/checkpoints/latest.txt",
+   "bytes": 12,
+   "sha256": "e48bf1d9a4d5f34111112c3255d428106c2bbb7f26a8c72ee8ac283791fabfa0",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/recovery/checkpoints/step_001023/model/config.json",
+   "bytes": 1418,
+   "sha256": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/recovery/checkpoints/step_001023/model/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/recovery/checkpoints/step_001023/model/model.safetensors",
+   "bytes": 2384234968,
+   "sha256": "f3a08e2392f1156a084d6a578bdf000410411670b172e68383f0f3cea23dd89b",
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/recovery/run_completion.json",
+   "bytes": 1834,
+   "sha256": "fc179abdb645baca698b2a8f36588f8ae3dbccda2be0f9bb199a3ad8154f99d2",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/recovery/run_manifest.json",
+   "bytes": 8536,
+   "sha256": "8365449eb00cd8e92b1343a4b8938887fe64341fa68284f53baf8484552a1d5d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/recovery/train_log.jsonl",
+   "bytes": 48977,
+   "sha256": "0561bc4ccedde02ceb9ecb59f3c9e9fea91243a74f2e3bf0da1fd6a36d950342",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/released_finalists.json",
+   "bytes": 2804,
+   "sha256": "44d4411d403474011c5ab8c91ff5985582cee4eb8f7537f078ec9cc1df99bd4c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/retired_optimizer_states.json",
+   "bytes": 524,
+   "sha256": "faca796fc59b0c39f69e1632bd475eeb72235938702a7eca0f0edbcecc5605a7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/retired_states.json",
+   "bytes": 23974,
+   "sha256": "6c9b82878e2b0e88b67af262ce4c5a0ec2d96b7f76b2999b6ff653770daf2b68",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/search_unit/search/states.jsonl",
+   "bytes": 45612245,
+   "sha256": "b2eea7890313c821dcc9d51be76122578528ffd04b1643aac5989b460920ed01",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/search_unit/search/telemetry.jsonl",
+   "bytes": 103212,
+   "sha256": "a5e9930ae77bc65fb71dd83e4fe4a3c498543621715d258ce1a7dc8be94adebe",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/search_unit/search_record.json",
+   "bytes": 5506,
+   "sha256": "b8825950eaf342b136df54c295f6537d240437df8019b0908d34d5b648a9b7c1",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/search_unit/stage1_selection.json",
+   "bytes": 16344,
+   "sha256": "bb72e45c1c79b8d1baceed56d98147f6e655b30cd1ccaba450cda9a1dfd5f265",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/search_unit/structure.json",
+   "bytes": 19253620,
+   "sha256": "aa67d9887e16dac9d6a25b539711b3adf16c0f9e82a7e24aa2bd97e62d34b5eb",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/search_unit/width_projection_4eb8475c4dbd58f6d14200559357724e.safetensors",
+   "bytes": 10485840,
+   "sha256": "f71641e2b5e4848571812c7de382cc52344dda23c6ec749aa149a05fcc0e020f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d2/search_unit/width_projection_6cf32f314838d11ffeccfe800a5f748c.safetensors",
+   "bytes": 10485840,
+   "sha256": "abfea857724760b86ba84c696f4a63f1b33cf9759ecf04fbe5fa17b1829605e2",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/dose_record.json",
+   "bytes": 7002,
+   "sha256": "f993eee3875acb2e0ee7c09af47dff9f03c0554efea37638f99bbc29457d5bab",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/eval_capability.log",
+   "bytes": 16494,
+   "sha256": "4c3f0cfa254ba0df56b8807f792498d8fa775539151f02fa002e40f8e2581cfe",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/eval_fluid.log",
+   "bytes": 13942,
+   "sha256": "3656a22238252397ebbdd1705fb581b8bf0f8c14a4759ca28f9d4468f278fddf",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/finalists_manifest.json",
+   "bytes": 6384,
+   "sha256": "446501f08aadc490ff01bad6bd3c7d0ededa651e62e9e01f637f4315e03cd840",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/fluid_tmp.summary.json",
+   "bytes": 2117,
+   "sha256": "f73662ad11fa102dd1f386351ecd7405179118116408e8ce2c85a3c61e42688b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/fluid_reasoning_720__dev_v1.jsonl",
+   "bytes": 10180808,
+   "sha256": "1e96543f9961b66ca58e3a5ad84c4f191c99f163704f6c185d1f72aadfd9f329",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/fluid_reasoning_720__dev_v1.summary.json",
+   "bytes": 2117,
+   "sha256": "f73662ad11fa102dd1f386351ecd7405179118116408e8ce2c85a3c61e42688b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_capability_846__answerability_paired.jsonl",
+   "bytes": 328683,
+   "sha256": "2998958edc8becbfdd456f0d25d2911b6a912f321b8ddcfa199d9f9a78ffd9f9",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_capability_846__answerability_paired.summary.json",
+   "bytes": 5092,
+   "sha256": "5d87085b69bff4b72dcce1366d7ffaff317c221b71de753f5d21e0f38329e72e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_capability_846__eval_behavior_v0.jsonl",
+   "bytes": 207719,
+   "sha256": "84c170fbca12c606901f19bffbace405325e577deb079270fe0d431da53a53fe",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_capability_846__eval_behavior_v0.summary.json",
+   "bytes": 7448,
+   "sha256": "1e90ef13b6c07ba5c62c5e7d4a39b860fc85959ccc21eaf3c8a064a5eb2bd1d3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_capability_846__gsm8k.jsonl",
+   "bytes": 278501,
+   "sha256": "42a0e3b3690c68e9a37d5d849c92fbd1a515ee7bd9562d85367ca212687dddef",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_capability_846__gsm8k.summary.json",
+   "bytes": 5112,
+   "sha256": "b8b94bb6f467a10999f159edc0ca6b1c1818f3b3ce2e54fb234b93ebfeb3cc20",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_capability_846__knowledge.jsonl",
+   "bytes": 374612,
+   "sha256": "61cc411fb0d5e247b0762dc4953763cc0f660c3b31289e46a9184b468500b2fe",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_capability_846__knowledge.summary.json",
+   "bytes": 5077,
+   "sha256": "2a72c09a791472537929162309a45d34a7085d4fc891fe894b70da24816fa890",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_capability_846__math_verified.jsonl",
+   "bytes": 269310,
+   "sha256": "e435988b9125c697611a2464312622ca5e8cff0b3419d4408ab65dc915a67060",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_capability_846__math_verified.summary.json",
+   "bytes": 5071,
+   "sha256": "cb5045fb9d9f8287a9e870204d73fb61d6c4dec274ea978202b61a48d29b7c7f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_capability_846__multihop.jsonl",
+   "bytes": 405585,
+   "sha256": "897be24b11f2712fc303a2d3db5963c3c3861f34eeedf8bff4669a8ce715dd64",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_capability_846__multihop.summary.json",
+   "bytes": 5062,
+   "sha256": "103cd20878168939583f7fe23cd7fd5053736347bd1570e0a20d324bbfa4d217",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_capability_846__rag.jsonl",
+   "bytes": 276515,
+   "sha256": "ca2f23931d497c5dbb92ecad0a2bea57c3849bd29f1b836a8cd50d1dc8c0890a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_capability_846__rag.summary.json",
+   "bytes": 5046,
+   "sha256": "89af5ff360979b966c3a2549cc96e0b20ba1b4b188477e37048f06458625eada",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_capability_846__safety_paired.jsonl",
+   "bytes": 218272,
+   "sha256": "1c41098d2e21b3a0f60521597e12f58254933b90f7136a7408e86d3b5f49a286",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_capability_846__safety_paired.summary.json",
+   "bytes": 5059,
+   "sha256": "4f317241d47163a9b57abd65a3290a29723302640aa18596833db01b8192e0e2",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_legacy_150__items.jsonl",
+   "bytes": 456711,
+   "sha256": "7055d395455dcbf162b33b54ed93183833deab268fb63b88e02bf682b6a0b2fc",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/generations/stage3_legacy_150__items.summary.json",
+   "bytes": 6204,
+   "sha256": "27871efb050c8d6c12a1c3bf8a16b9898423c61939a735fcfc7df59d094ecacd",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/legacy_150.prompts.jsonl",
+   "bytes": 603051,
+   "sha256": "93cda9cfdaaf6d22a9d78e61518708dc6338c60b7a395f49cc5dc447633e5ddc",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/mirror.log",
+   "bytes": 1408,
+   "sha256": "8961dd8f0554760b598bc56e16c547c5d5a8a00ee04e644c0b9156aa08b44a7f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/mirror.stop",
+   "bytes": 5,
+   "sha256": "a11c3d917a2149a4b548217038bc8f2dd2130a1966e0c7af5c4225d81f25a8c3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/package/chat_template.jinja",
+   "bytes": 4049,
+   "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/package/config.json",
+   "bytes": 1418,
+   "sha256": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/package/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/package/model.safetensors",
+   "bytes": 2384234968,
+   "sha256": "8bd4cd5c34f29d102ecf1f84c6a9546fd000ce92a51d3c52605d24dae40941bc",
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/package/tokenizer.json",
+   "bytes": 11422650,
+   "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/package/tokenizer_config.json",
+   "bytes": 694,
+   "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/records/eval.done",
+   "bytes": 65,
+   "sha256": "ba933860a3eca2129ed032fe461c5230ae83e60ac1d3267e717d71ddef835fbc",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/records/finalists.done",
+   "bytes": 65,
+   "sha256": "de5f1b37dc2db2148380ab133bed72091a303eaa97860546c59e15e0988c808e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/records/recovery.done",
+   "bytes": 65,
+   "sha256": "e8af8be3fd6ae084d18e699fb0b8788a379f39c78bbbdddadcb4457dd32f3c16",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/records/search.done",
+   "bytes": 65,
+   "sha256": "e46c0b08ea9f79ef5d17056e0f3765ef60e33bee445c4c0d9fd924f753948f56",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/recovery.log",
+   "bytes": 10347,
+   "sha256": "70a7cf618f493974e7f56a7c9dd81648f9028776926167edb4649f4d4e838574",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/recovery_config.json",
+   "bytes": 1870,
+   "sha256": "9a5756df05fe4fdb0c66e730447e0db9e03aea97241b9b2ab9f63fe3657d7669",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/recovery_products.json",
+   "bytes": 272,
+   "sha256": "bd961e4e7cc3f56e52795a75e190028c5a248650dc925114f1d35b0ad761d47c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/released_finalists_d1.json",
+   "bytes": 2756,
+   "sha256": "86b0b5482676bc1801a9f3d331a793c385bfb1e5d0be8e174cc2abcfd44736a3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/released_finalists_d2.json",
+   "bytes": 2804,
+   "sha256": "44d4411d403474011c5ab8c91ff5985582cee4eb8f7537f078ec9cc1df99bd4c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/report.json",
+   "bytes": 32771,
+   "sha256": "48b1dfdbedd40ab7be5cd66ae1c91a39033bf917a2d730f2da4a343faf0fbd24",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/retired_optimizer_states_d1.json",
+   "bytes": 524,
+   "sha256": "82c0e7bb72a2f34e9759f2e7fd97b6564a896bc1e8d83b415da0b8b378836ead",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/retired_optimizer_states_d2.json",
+   "bytes": 524,
+   "sha256": "faca796fc59b0c39f69e1632bd475eeb72235938702a7eca0f0edbcecc5605a7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/rows/fluid_reasoning_720__dev_v1.rows.jsonl",
+   "bytes": 73145,
+   "sha256": "f1d6a7f89e160039f0960ab78b96dcfd3d8929e049da0bc1e995d440054ba6ac",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/rows/stage3_capability_846__answerability_paired.rows.jsonl",
+   "bytes": 15057,
+   "sha256": "3954764826b28d0ccd40cd43c57527b9c1c18075c071b299b8df3aa412d5a7cd",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/rows/stage3_capability_846__eval_behavior_v0.rows.jsonl",
+   "bytes": 27319,
+   "sha256": "8003e519b5215936b752b177136359d164dadb6b94f0fae5c1e19f7ccd8cc7b3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/rows/stage3_capability_846__gsm8k.rows.jsonl",
+   "bytes": 9210,
+   "sha256": "5c006ce57e1141c41e7823f1b1ba32cbea04088b2509e1e5f2ca9a4a2b59327c",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/rows/stage3_capability_846__knowledge.rows.jsonl",
+   "bytes": 14550,
+   "sha256": "4ccf6805b19fea5121ae45c6a4ef16b038194d4c50902de707dce548ac7ae6ee",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/rows/stage3_capability_846__math_verified.rows.jsonl",
+   "bytes": 10942,
+   "sha256": "eb44abc023fbec7dc5f390306b4dac2630f2c3b4e24362ae755f548a776c93d0",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/rows/stage3_capability_846__multihop.rows.jsonl",
+   "bytes": 11014,
+   "sha256": "655b78f7f2cdb41f738f4e40b661ebafef7cdbc01a6ee705656634086ce0e7e3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/rows/stage3_capability_846__rag.rows.jsonl",
+   "bytes": 10369,
+   "sha256": "16ec971bee34ccb9b62815cf0d443b0ed1d4b1a3c1928801001fc145d43484c0",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/rows/stage3_capability_846__safety_paired.rows.jsonl",
+   "bytes": 11092,
+   "sha256": "5502826bac21618dcd96eb170ea9c1d8c675f72a93baa3ba9c5668569af99bcf",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/rows/stage3_legacy_150__items.rows.jsonl",
+   "bytes": 9239,
+   "sha256": "8e8dce65900fc048d5ad812d0c34fb0e182236ee310b0bf48984e524bda06a28",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/search.log",
+   "bytes": 1420,
+   "sha256": "1c371ad7319f4ad785303eb5dcd63b46dbb94e9e1ac16e64eb4458f012a7802a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/sync.log",
+   "bytes": 793,
+   "sha256": "e52964ec821acab543b1f8988589b6b6826ad07159e716a90252f9b680e01da0",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/train_log.jsonl",
+   "bytes": 48994,
+   "sha256": "907b728a510b48f6d3822688ac23e64b1db1d830443efa02565f5f7d84670059",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_capability_846__answerability_paired.jsonl",
+   "bytes": 368974,
+   "sha256": "1a4369323c3bc10b2ffcb97ac41cdb2bf20b670a28a3907d80d2d94a5acce81e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_capability_846__eval_behavior_v0.jsonl",
+   "bytes": 140275,
+   "sha256": "96e211883a20c9db87bde2b06e8f3a66e91e1c82f6aaffc06a04db366dc8e539",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_capability_846__gsm8k.jsonl",
+   "bytes": 63246,
+   "sha256": "1ad4ad22625a11ff5cd6dbce053f15b3cc8f4d50ea491202347e133cd5c85b3b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_capability_846__knowledge.jsonl",
+   "bytes": 127912,
+   "sha256": "2d4420ce9d3f57f10a6f14cb6125e077c35bdd1840eb82085df565760a95ce20",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_capability_846__math_verified.jsonl",
+   "bytes": 78411,
+   "sha256": "bf73cb4ad8cd9299c5ab16776d1747921d754be922f12a4ee03f27537f32e1f1",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_capability_846__multihop.jsonl",
+   "bytes": 1228743,
+   "sha256": "3bd25d896316b50e3a4b84f818a5e6bbf8eb671cb7997810251c2b4640c038e5",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_capability_846__rag.jsonl",
+   "bytes": 326734,
+   "sha256": "1e31c9e03bfb480443213a2cff04cf56a915305cca3ba68d9b9cc19ec4c85e6e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_capability_846__safety_paired.jsonl",
+   "bytes": 35908,
+   "sha256": "ee73e208660b365e2989024739359704517b943a7dcee6a96a811db528d1a73a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_in/stage3_legacy_150__items.jsonl",
+   "bytes": 603051,
+   "sha256": "93cda9cfdaaf6d22a9d78e61518708dc6338c60b7a395f49cc5dc447633e5ddc",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_out/stage3_capability_846__answerability_paired.json",
+   "bytes": 5092,
+   "sha256": "5d87085b69bff4b72dcce1366d7ffaff317c221b71de753f5d21e0f38329e72e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_out/stage3_capability_846__eval_behavior_v0.json",
+   "bytes": 7448,
+   "sha256": "1e90ef13b6c07ba5c62c5e7d4a39b860fc85959ccc21eaf3c8a064a5eb2bd1d3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_out/stage3_capability_846__gsm8k.json",
+   "bytes": 5112,
+   "sha256": "b8b94bb6f467a10999f159edc0ca6b1c1818f3b3ce2e54fb234b93ebfeb3cc20",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_out/stage3_capability_846__knowledge.json",
+   "bytes": 5077,
+   "sha256": "2a72c09a791472537929162309a45d34a7085d4fc891fe894b70da24816fa890",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_out/stage3_capability_846__math_verified.json",
+   "bytes": 5071,
+   "sha256": "cb5045fb9d9f8287a9e870204d73fb61d6c4dec274ea978202b61a48d29b7c7f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_out/stage3_capability_846__multihop.json",
+   "bytes": 5062,
+   "sha256": "103cd20878168939583f7fe23cd7fd5053736347bd1570e0a20d324bbfa4d217",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_out/stage3_capability_846__rag.json",
+   "bytes": 5046,
+   "sha256": "89af5ff360979b966c3a2549cc96e0b20ba1b4b188477e37048f06458625eada",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_out/stage3_capability_846__safety_paired.json",
+   "bytes": 5059,
+   "sha256": "4f317241d47163a9b57abd65a3290a29723302640aa18596833db01b8192e0e2",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/dose_out/uncapped_out/stage3_legacy_150__items.json",
+   "bytes": 6204,
+   "sha256": "27871efb050c8d6c12a1c3bf8a16b9898423c61939a735fcfc7df59d094ecacd",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/fluid_reasoning_720__dev_v1.jsonl",
+   "bytes": 10180808,
+   "sha256": "1e96543f9961b66ca58e3a5ad84c4f191c99f163704f6c185d1f72aadfd9f329",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/fluid_reasoning_720__dev_v1.summary.json",
+   "bytes": 2117,
+   "sha256": "f73662ad11fa102dd1f386351ecd7405179118116408e8ce2c85a3c61e42688b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_capability_846__answerability_paired.jsonl",
+   "bytes": 328683,
+   "sha256": "2998958edc8becbfdd456f0d25d2911b6a912f321b8ddcfa199d9f9a78ffd9f9",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_capability_846__answerability_paired.summary.json",
+   "bytes": 5092,
+   "sha256": "5d87085b69bff4b72dcce1366d7ffaff317c221b71de753f5d21e0f38329e72e",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_capability_846__eval_behavior_v0.jsonl",
+   "bytes": 207719,
+   "sha256": "84c170fbca12c606901f19bffbace405325e577deb079270fe0d431da53a53fe",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_capability_846__eval_behavior_v0.summary.json",
+   "bytes": 7448,
+   "sha256": "1e90ef13b6c07ba5c62c5e7d4a39b860fc85959ccc21eaf3c8a064a5eb2bd1d3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_capability_846__gsm8k.jsonl",
+   "bytes": 278501,
+   "sha256": "42a0e3b3690c68e9a37d5d849c92fbd1a515ee7bd9562d85367ca212687dddef",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_capability_846__gsm8k.summary.json",
+   "bytes": 5112,
+   "sha256": "b8b94bb6f467a10999f159edc0ca6b1c1818f3b3ce2e54fb234b93ebfeb3cc20",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_capability_846__knowledge.jsonl",
+   "bytes": 374612,
+   "sha256": "61cc411fb0d5e247b0762dc4953763cc0f660c3b31289e46a9184b468500b2fe",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_capability_846__knowledge.summary.json",
+   "bytes": 5077,
+   "sha256": "2a72c09a791472537929162309a45d34a7085d4fc891fe894b70da24816fa890",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_capability_846__math_verified.jsonl",
+   "bytes": 269310,
+   "sha256": "e435988b9125c697611a2464312622ca5e8cff0b3419d4408ab65dc915a67060",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_capability_846__math_verified.summary.json",
+   "bytes": 5071,
+   "sha256": "cb5045fb9d9f8287a9e870204d73fb61d6c4dec274ea978202b61a48d29b7c7f",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_capability_846__multihop.jsonl",
+   "bytes": 405585,
+   "sha256": "897be24b11f2712fc303a2d3db5963c3c3861f34eeedf8bff4669a8ce715dd64",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_capability_846__multihop.summary.json",
+   "bytes": 5062,
+   "sha256": "103cd20878168939583f7fe23cd7fd5053736347bd1570e0a20d324bbfa4d217",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_capability_846__rag.jsonl",
+   "bytes": 276515,
+   "sha256": "ca2f23931d497c5dbb92ecad0a2bea57c3849bd29f1b836a8cd50d1dc8c0890a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_capability_846__rag.summary.json",
+   "bytes": 5046,
+   "sha256": "89af5ff360979b966c3a2549cc96e0b20ba1b4b188477e37048f06458625eada",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_capability_846__safety_paired.jsonl",
+   "bytes": 218272,
+   "sha256": "1c41098d2e21b3a0f60521597e12f58254933b90f7136a7408e86d3b5f49a286",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_capability_846__safety_paired.summary.json",
+   "bytes": 5059,
+   "sha256": "4f317241d47163a9b57abd65a3290a29723302640aa18596833db01b8192e0e2",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_legacy_150__items.jsonl",
+   "bytes": 456711,
+   "sha256": "7055d395455dcbf162b33b54ed93183833deab268fb63b88e02bf682b6a0b2fc",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/generations/stage3_legacy_150__items.summary.json",
+   "bytes": 6204,
+   "sha256": "27871efb050c8d6c12a1c3bf8a16b9898423c61939a735fcfc7df59d094ecacd",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/products.json",
+   "bytes": 425,
+   "sha256": "5a45329ea9519b300e2017c24a50501028d62bb4dd65ae71a1f0745d153b0715",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/products.json.torn-20261020T212836Z",
+   "bytes": 0,
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/recovery/checkpoints/latest.txt",
+   "bytes": 12,
+   "sha256": "e48bf1d9a4d5f34111112c3255d428106c2bbb7f26a8c72ee8ac283791fabfa0",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/recovery/checkpoints/step_001023/model/config.json",
+   "bytes": 1418,
+   "sha256": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/recovery/checkpoints/step_001023/model/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/recovery/checkpoints/step_001023/model/model.safetensors",
+   "bytes": 2384234968,
+   "sha256": "8bd4cd5c34f29d102ecf1f84c6a9546fd000ce92a51d3c52605d24dae40941bc",
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/recovery/checkpoints/step_001023/trainer_state.pt",
+   "bytes": 3524023523,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/recovery/run_completion.json",
+   "bytes": 1834,
+   "sha256": "6a11ad7efdeb568343aeb87abdc488da8db74ab478a1dccfb52a78686a548060",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/recovery/run_manifest.json",
+   "bytes": 8536,
+   "sha256": "7cd23bdfe1f26e93c5efe0b44aed61160582ee8b38ee9db26d0243913b5a4fa2",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/recovery/train_log.jsonl",
+   "bytes": 48994,
+   "sha256": "907b728a510b48f6d3822688ac23e64b1db1d830443efa02565f5f7d84670059",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states.jsonl",
+   "bytes": 63937054,
+   "sha256": "c162a362e01ba6b10b7f7d6baccef31798d53a3d6f096cfe0d40c73358a0d358",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/014dfb7be665698e82d89c299f421b4d/ddad3ad6919b60daba8cc288713add3d/config.json",
+   "bytes": 1419,
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/014dfb7be665698e82d89c299f421b4d/ddad3ad6919b60daba8cc288713add3d/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/014dfb7be665698e82d89c299f421b4d/ddad3ad6919b60daba8cc288713add3d/model.safetensors",
+   "bytes": 1192135096,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0244809cca0f92f03748a1c2fe552dc0/fbccb55e5d01e54deeea8361431d6224/config.json",
+   "bytes": 1595,
+   "sha256": "be93cbf95cf23ecea9d2933ae854018fc1dc70be2cb679ce46732311eac23d8d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0244809cca0f92f03748a1c2fe552dc0/fbccb55e5d01e54deeea8361431d6224/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0244809cca0f92f03748a1c2fe552dc0/fbccb55e5d01e54deeea8361431d6224/model.safetensors",
+   "bytes": 1745830368,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0363ad220c88104c0dd1e53395db4530/788d430ca3cf66d9d4bb5a416ab14c8d/config.json",
+   "bytes": 1419,
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0363ad220c88104c0dd1e53395db4530/788d430ca3cf66d9d4bb5a416ab14c8d/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0363ad220c88104c0dd1e53395db4530/788d430ca3cf66d9d4bb5a416ab14c8d/model.safetensors",
+   "bytes": 1192135096,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0782cc782936a6b90968a24114b99dc8/870cc294c4a155bf66cbb35344f83302/config.json",
+   "bytes": 1595,
+   "sha256": "57c61ce4b6b6505acf032de7b68d45c1cdc342bbeb4efe5dc1f5e84d6cae271a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0782cc782936a6b90968a24114b99dc8/870cc294c4a155bf66cbb35344f83302/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0782cc782936a6b90968a24114b99dc8/870cc294c4a155bf66cbb35344f83302/model.safetensors",
+   "bytes": 2916041360,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/07df761549b109b03c24e3a66a91640d/499a4b212e28b08cbbd99467ddfd42a3/config.json",
+   "bytes": 1419,
+   "sha256": "3bd834cc8d4ce76c4e1533e63f0446d20edc31e036391a7a3219b56b0091c95b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/07df761549b109b03c24e3a66a91640d/499a4b212e28b08cbbd99467ddfd42a3/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/07df761549b109b03c24e3a66a91640d/499a4b212e28b08cbbd99467ddfd42a3/model.safetensors",
+   "bytes": 2572061408,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0842be88210dbe40b1bab3367407611d/df7f832e9f99741631ff793ebf79dcae/config.json",
+   "bytes": 1419,
+   "sha256": "3bd834cc8d4ce76c4e1533e63f0446d20edc31e036391a7a3219b56b0091c95b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0842be88210dbe40b1bab3367407611d/df7f832e9f99741631ff793ebf79dcae/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0842be88210dbe40b1bab3367407611d/df7f832e9f99741631ff793ebf79dcae/model.safetensors",
+   "bytes": 2572061408,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0c0b4c68b76b50baf59470a9e85a9fee/1da581aa6a4004a0f516a848fcc9af11/config.json",
+   "bytes": 1419,
+   "sha256": "87b4888de3f2b9f52daa4beb5709ed015baf2850b1d41f161911114ab79acce5",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0c0b4c68b76b50baf59470a9e85a9fee/1da581aa6a4004a0f516a848fcc9af11/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0c0b4c68b76b50baf59470a9e85a9fee/1da581aa6a4004a0f516a848fcc9af11/model.safetensors",
+   "bytes": 3567466344,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0e6770d6a0aaf416ea875841b1bb654f/22569c82831b47ae82dc32e5799be79d/config.json",
+   "bytes": 1595,
+   "sha256": "57c61ce4b6b6505acf032de7b68d45c1cdc342bbeb4efe5dc1f5e84d6cae271a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0e6770d6a0aaf416ea875841b1bb654f/22569c82831b47ae82dc32e5799be79d/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/0e6770d6a0aaf416ea875841b1bb654f/22569c82831b47ae82dc32e5799be79d/model.safetensors",
+   "bytes": 2916041360,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/10234f9f9449dfafe0e975bd439fab4f/39e628e339392396cb9189cf8c8c9375/config.json",
+   "bytes": 1419,
+   "sha256": "78b1d1936113fe30f3212ea6efd685ff3cbef8ea165c5b61354b88eb83138345",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/10234f9f9449dfafe0e975bd439fab4f/39e628e339392396cb9189cf8c8c9375/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/10234f9f9449dfafe0e975bd439fab4f/39e628e339392396cb9189cf8c8c9375/model.safetensors",
+   "bytes": 2337180368,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/1301deb71685aa1ca5c7b6cf2c491ac4/6aee8047e4762a7036477cb017126439/config.json",
+   "bytes": 1419,
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/1301deb71685aa1ca5c7b6cf2c491ac4/6aee8047e4762a7036477cb017126439/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/1301deb71685aa1ca5c7b6cf2c491ac4/6aee8047e4762a7036477cb017126439/model.safetensors",
+   "bytes": 1192135096,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/167a43f4c05b0f9653eaf216717df83c/471389982ea67d86d21037058c9ed90c/config.json",
+   "bytes": 1419,
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/167a43f4c05b0f9653eaf216717df83c/471389982ea67d86d21037058c9ed90c/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/167a43f4c05b0f9653eaf216717df83c/471389982ea67d86d21037058c9ed90c/model.safetensors",
+   "bytes": 1192135096,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/17ed48b0b8829e6f3ceddffaf339c653/db60e385d1dc7c0a7f8aaeb5e0cfb163/config.json",
+   "bytes": 1419,
+   "sha256": "3bd834cc8d4ce76c4e1533e63f0446d20edc31e036391a7a3219b56b0091c95b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/17ed48b0b8829e6f3ceddffaf339c653/db60e385d1dc7c0a7f8aaeb5e0cfb163/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/17ed48b0b8829e6f3ceddffaf339c653/db60e385d1dc7c0a7f8aaeb5e0cfb163/model.safetensors",
+   "bytes": 2572061408,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/195f6a8ccc995a0f2f5451f1d0924b8b/a11be409b34a3165dd0e92833fa3c03f/config.json",
+   "bytes": 1419,
+   "sha256": "3bd834cc8d4ce76c4e1533e63f0446d20edc31e036391a7a3219b56b0091c95b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/195f6a8ccc995a0f2f5451f1d0924b8b/a11be409b34a3165dd0e92833fa3c03f/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/195f6a8ccc995a0f2f5451f1d0924b8b/a11be409b34a3165dd0e92833fa3c03f/model.safetensors",
+   "bytes": 2572061408,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/19c3be5ffd548fcb114a00aa870a5203/8b5d21e8905c0864c924291777828821/config.json",
+   "bytes": 1595,
+   "sha256": "44267daabd6a18d90557f33a2d96a2eca9aaaf606acf7c2ef010e5ba97cdfcb7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/19c3be5ffd548fcb114a00aa870a5203/8b5d21e8905c0864c924291777828821/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/19c3be5ffd548fcb114a00aa870a5203/8b5d21e8905c0864c924291777828821/model.safetensors",
+   "bytes": 3609505560,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/1d29e1cbeee323af67f142ce61e3104b/d91a6da4364cf0646babb0c082e21221/config.json",
+   "bytes": 1595,
+   "sha256": "13c826e02e79c4dd1905bb82b6d04c6fddd11ede0b22f8f0daa7c6152b2fdab3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/1d29e1cbeee323af67f142ce61e3104b/d91a6da4364cf0646babb0c082e21221/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/1d29e1cbeee323af67f142ce61e3104b/d91a6da4364cf0646babb0c082e21221/model.safetensors",
+   "bytes": 3218031264,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/1f0b27e150f0f05b8cdca85eac29b312/58437b2e297b00ccbf8ec50a35f9da1f/config.json",
+   "bytes": 1419,
+   "sha256": "cb988eec08ffc2acc6d9ab2e09700e9a544b9b7ff2a44dc8770794a21d6ffb1b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/1f0b27e150f0f05b8cdca85eac29b312/58437b2e297b00ccbf8ec50a35f9da1f/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/1f0b27e150f0f05b8cdca85eac29b312/58437b2e297b00ccbf8ec50a35f9da1f/model.safetensors",
+   "bytes": 2980263768,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/2028b5df4d96f84c4af50111d2181be4/45266f2c031aeb52471507c29b850cfa/config.json",
+   "bytes": 1595,
+   "sha256": "be93cbf95cf23ecea9d2933ae854018fc1dc70be2cb679ce46732311eac23d8d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/2028b5df4d96f84c4af50111d2181be4/45266f2c031aeb52471507c29b850cfa/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/2028b5df4d96f84c4af50111d2181be4/45266f2c031aeb52471507c29b850cfa/model.safetensors",
+   "bytes": 1745830368,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/23159c4393bd19b1b56d98064a526489/d03f211c72ea7b3b0fcc2d624e779580/config.json",
+   "bytes": 1595,
+   "sha256": "44267daabd6a18d90557f33a2d96a2eca9aaaf606acf7c2ef010e5ba97cdfcb7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/23159c4393bd19b1b56d98064a526489/d03f211c72ea7b3b0fcc2d624e779580/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/23159c4393bd19b1b56d98064a526489/d03f211c72ea7b3b0fcc2d624e779580/model.safetensors",
+   "bytes": 3609505560,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/2cc3356fca2232ca7893f3f5623e2e47/21fd2916331fdb0a92ca4071290323f8/config.json",
+   "bytes": 1419,
+   "sha256": "8b32f4145ad0256fbf88026097fd88f14aea2ed727d6e0e24f5c8db956b4764d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/2cc3356fca2232ca7893f3f5623e2e47/21fd2916331fdb0a92ca4071290323f8/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/2cc3356fca2232ca7893f3f5623e2e47/21fd2916331fdb0a92ca4071290323f8/model.safetensors",
+   "bytes": 5842876288,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/2f1cf878f6fc78e1028e026cf3ba60b7/f56e6586efd6a2a7a8a80181da318e20/config.json",
+   "bytes": 1595,
+   "sha256": "797eb91e3b41920f11ae9cf02a1498aceaf0ac16e227514f151d7a869a9454d4",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/2f1cf878f6fc78e1028e026cf3ba60b7/f56e6586efd6a2a7a8a80181da318e20/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/2f1cf878f6fc78e1028e026cf3ba60b7/f56e6586efd6a2a7a8a80181da318e20/model.safetensors",
+   "bytes": 4364480296,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/2f5f6dc553a8f78e2562a36d8f35c45a/60a82ae6a183a8149518e011887d81a6/config.json",
+   "bytes": 1595,
+   "sha256": "57c61ce4b6b6505acf032de7b68d45c1cdc342bbeb4efe5dc1f5e84d6cae271a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/2f5f6dc553a8f78e2562a36d8f35c45a/60a82ae6a183a8149518e011887d81a6/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/2f5f6dc553a8f78e2562a36d8f35c45a/60a82ae6a183a8149518e011887d81a6/model.safetensors",
+   "bytes": 2916041360,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/30f0ace871d2e1536a17046d2da3257b/ff366f975150635c30e6e56bf05f952b/config.json",
+   "bytes": 1595,
+   "sha256": "44267daabd6a18d90557f33a2d96a2eca9aaaf606acf7c2ef010e5ba97cdfcb7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/30f0ace871d2e1536a17046d2da3257b/ff366f975150635c30e6e56bf05f952b/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/30f0ace871d2e1536a17046d2da3257b/ff366f975150635c30e6e56bf05f952b/model.safetensors",
+   "bytes": 3609505560,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/3820ad00831b50efd06426c86a7d71b7/d9a8e0fd9ffc71cbef3be42597c6ab7d/config.json",
+   "bytes": 1595,
+   "sha256": "77f27023cdd2fea786528e5bd114dc7f9f4215eddd26451a49517f62cb3c3802",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/3820ad00831b50efd06426c86a7d71b7/d9a8e0fd9ffc71cbef3be42597c6ab7d/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/3820ad00831b50efd06426c86a7d71b7/d9a8e0fd9ffc71cbef3be42597c6ab7d/model.safetensors",
+   "bytes": 7290007360,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/3db028a69e22c25b307fc2e2d6cb0183/8b2f2f489e94e7e3a856e0a76345feab/config.json",
+   "bytes": 1419,
+   "sha256": "cb988eec08ffc2acc6d9ab2e09700e9a544b9b7ff2a44dc8770794a21d6ffb1b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/3db028a69e22c25b307fc2e2d6cb0183/8b2f2f489e94e7e3a856e0a76345feab/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/3db028a69e22c25b307fc2e2d6cb0183/8b2f2f489e94e7e3a856e0a76345feab/model.safetensors",
+   "bytes": 2980263768,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/42e6b198bb41fe20a2c7ed3997e3265e/d21f20b535adc3a2072b2e9cd7d87104/config.json",
+   "bytes": 1419,
+   "sha256": "78b1d1936113fe30f3212ea6efd685ff3cbef8ea165c5b61354b88eb83138345",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/42e6b198bb41fe20a2c7ed3997e3265e/d21f20b535adc3a2072b2e9cd7d87104/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/42e6b198bb41fe20a2c7ed3997e3265e/d21f20b535adc3a2072b2e9cd7d87104/model.safetensors",
+   "bytes": 2337180368,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/4584d2c01cdb677f8d05bd472233b784/7491d875a33626daae66b34788602a96/config.json",
+   "bytes": 1419,
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/4584d2c01cdb677f8d05bd472233b784/7491d875a33626daae66b34788602a96/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/4584d2c01cdb677f8d05bd472233b784/7491d875a33626daae66b34788602a96/model.safetensors",
+   "bytes": 1192135096,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/45d2091b3a66f755ea945718a6d718be/332fcb7becaa06b5e8d96b065059bf01/config.json",
+   "bytes": 1419,
+   "sha256": "87b4888de3f2b9f52daa4beb5709ed015baf2850b1d41f161911114ab79acce5",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/45d2091b3a66f755ea945718a6d718be/332fcb7becaa06b5e8d96b065059bf01/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/45d2091b3a66f755ea945718a6d718be/332fcb7becaa06b5e8d96b065059bf01/model.safetensors",
+   "bytes": 3567466344,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/490f4c356f5ac828e66717ea9745ae03/17a703a8bb3e8b4ce29b110f8c15119a/config.json",
+   "bytes": 1419,
+   "sha256": "3bd834cc8d4ce76c4e1533e63f0446d20edc31e036391a7a3219b56b0091c95b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/490f4c356f5ac828e66717ea9745ae03/17a703a8bb3e8b4ce29b110f8c15119a/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/490f4c356f5ac828e66717ea9745ae03/17a703a8bb3e8b4ce29b110f8c15119a/model.safetensors",
+   "bytes": 2572061408,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/507fcc30d6b104458defd31a24130141/c5805dfcf5cfa887dbe944a777c4edcf/config.json",
+   "bytes": 1419,
+   "sha256": "cb988eec08ffc2acc6d9ab2e09700e9a544b9b7ff2a44dc8770794a21d6ffb1b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/507fcc30d6b104458defd31a24130141/c5805dfcf5cfa887dbe944a777c4edcf/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/507fcc30d6b104458defd31a24130141/c5805dfcf5cfa887dbe944a777c4edcf/model.safetensors",
+   "bytes": 2980263768,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/511736a4816dae1937686ce3c64eb548/3dc47ce90b7577ce45ba70f2a967b09a/config.json",
+   "bytes": 1419,
+   "sha256": "cb988eec08ffc2acc6d9ab2e09700e9a544b9b7ff2a44dc8770794a21d6ffb1b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/511736a4816dae1937686ce3c64eb548/3dc47ce90b7577ce45ba70f2a967b09a/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/511736a4816dae1937686ce3c64eb548/3dc47ce90b7577ce45ba70f2a967b09a/model.safetensors",
+   "bytes": 2980263768,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/5467a0a3e603234f5aa5850ea3314db7/d397a086ad9fc6c09820a6c9a40dfb42/config.json",
+   "bytes": 1419,
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/5467a0a3e603234f5aa5850ea3314db7/d397a086ad9fc6c09820a6c9a40dfb42/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/5467a0a3e603234f5aa5850ea3314db7/d397a086ad9fc6c09820a6c9a40dfb42/model.safetensors",
+   "bytes": 1192135096,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/5758e1cca04bcb883206ca699fcbfac0/a6be86a88afbce1bc3229ccc48d36869/config.json",
+   "bytes": 1419,
+   "sha256": "8b32f4145ad0256fbf88026097fd88f14aea2ed727d6e0e24f5c8db956b4764d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/5758e1cca04bcb883206ca699fcbfac0/a6be86a88afbce1bc3229ccc48d36869/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/5758e1cca04bcb883206ca699fcbfac0/a6be86a88afbce1bc3229ccc48d36869/model.safetensors",
+   "bytes": 5842876288,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/5949cdbee7b36bab480934ec08873311/a5ff28701de3777856bd38d64257310d/config.json",
+   "bytes": 1595,
+   "sha256": "13c826e02e79c4dd1905bb82b6d04c6fddd11ede0b22f8f0daa7c6152b2fdab3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/5949cdbee7b36bab480934ec08873311/a5ff28701de3777856bd38d64257310d/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/5949cdbee7b36bab480934ec08873311/a5ff28701de3777856bd38d64257310d/model.safetensors",
+   "bytes": 3218031264,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/5acf56d7ba58b1b202fd6d574765a37f/868224d3711dc01f479820ff6caa402a/config.json",
+   "bytes": 1419,
+   "sha256": "87b4888de3f2b9f52daa4beb5709ed015baf2850b1d41f161911114ab79acce5",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/5acf56d7ba58b1b202fd6d574765a37f/868224d3711dc01f479820ff6caa402a/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/5acf56d7ba58b1b202fd6d574765a37f/868224d3711dc01f479820ff6caa402a/model.safetensors",
+   "bytes": 3567466344,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/647b6199f32df7df6488957f40dc1a38/42926e71ce46ff05545d3c3597fb053e/config.json",
+   "bytes": 1419,
+   "sha256": "728826a42faab2d06fe8da96375ad842fc6beffbd3f42f43b926bf00dae38430",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/647b6199f32df7df6488957f40dc1a38/42926e71ce46ff05545d3c3597fb053e/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/647b6199f32df7df6488957f40dc1a38/42926e71ce46ff05545d3c3597fb053e/model.safetensors",
+   "bytes": 1427016224,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/64b81e56d56c9e6822ee3d2ca0265735/503a44dc07d2e83b1318a865f5a9c742/config.json",
+   "bytes": 1419,
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/64b81e56d56c9e6822ee3d2ca0265735/503a44dc07d2e83b1318a865f5a9c742/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/64b81e56d56c9e6822ee3d2ca0265735/503a44dc07d2e83b1318a865f5a9c742/model.safetensors",
+   "bytes": 1192135096,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/658c05d241d72fc3d2a635194b4a3cad/00bc4e4c154ae16f4d16d3109a8a79d1/config.json",
+   "bytes": 1595,
+   "sha256": "797eb91e3b41920f11ae9cf02a1498aceaf0ac16e227514f151d7a869a9454d4",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/658c05d241d72fc3d2a635194b4a3cad/00bc4e4c154ae16f4d16d3109a8a79d1/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/658c05d241d72fc3d2a635194b4a3cad/00bc4e4c154ae16f4d16d3109a8a79d1/model.safetensors",
+   "bytes": 4364480296,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/65c5fa49859a22b79abd947eccc0c38a/44dc9a6057d7f70d07083bc18caa313a/config.json",
+   "bytes": 1419,
+   "sha256": "3bd834cc8d4ce76c4e1533e63f0446d20edc31e036391a7a3219b56b0091c95b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/65c5fa49859a22b79abd947eccc0c38a/44dc9a6057d7f70d07083bc18caa313a/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/65c5fa49859a22b79abd947eccc0c38a/44dc9a6057d7f70d07083bc18caa313a/model.safetensors",
+   "bytes": 2572061408,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/665f691a8a6d2479bd7394dfa5cc42b3/31251f13bbc7c014e91c0cceb635cb94/config.json",
+   "bytes": 1419,
+   "sha256": "cb988eec08ffc2acc6d9ab2e09700e9a544b9b7ff2a44dc8770794a21d6ffb1b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/665f691a8a6d2479bd7394dfa5cc42b3/31251f13bbc7c014e91c0cceb635cb94/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/665f691a8a6d2479bd7394dfa5cc42b3/31251f13bbc7c014e91c0cceb635cb94/model.safetensors",
+   "bytes": 2980263768,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/678839bcf27a14ad97b896204e73f652/b535ca1ec11220943aa7d233deb80e6c/config.json",
+   "bytes": 1595,
+   "sha256": "be93cbf95cf23ecea9d2933ae854018fc1dc70be2cb679ce46732311eac23d8d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/678839bcf27a14ad97b896204e73f652/b535ca1ec11220943aa7d233deb80e6c/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/678839bcf27a14ad97b896204e73f652/b535ca1ec11220943aa7d233deb80e6c/model.safetensors",
+   "bytes": 1745830368,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/69cfba9d146f1f57b1eeafe655bc83cc/d43e3da1977ff0a904c515cc5063e582/config.json",
+   "bytes": 1419,
+   "sha256": "8651f3349eb702d03fc72ee7ced9f182615973191a0c769a6203e2c9ff6afb2d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/69cfba9d146f1f57b1eeafe655bc83cc/d43e3da1977ff0a904c515cc5063e582/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/69cfba9d146f1f57b1eeafe655bc83cc/d43e3da1977ff0a904c515cc5063e582/model.safetensors",
+   "bytes": 6430078848,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/6fe54eb1fe1eb8b2e0977203d7beabba/a25762484828113dffc8102b88a56dfe/config.json",
+   "bytes": 1595,
+   "sha256": "44267daabd6a18d90557f33a2d96a2eca9aaaf606acf7c2ef010e5ba97cdfcb7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/6fe54eb1fe1eb8b2e0977203d7beabba/a25762484828113dffc8102b88a56dfe/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/6fe54eb1fe1eb8b2e0977203d7beabba/a25762484828113dffc8102b88a56dfe/model.safetensors",
+   "bytes": 3609505560,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/6ffe0088499f0b0f1e96240b3ec4462d/04c421819dc6231c2337943f6271e959/config.json",
+   "bytes": 1419,
+   "sha256": "cb988eec08ffc2acc6d9ab2e09700e9a544b9b7ff2a44dc8770794a21d6ffb1b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/6ffe0088499f0b0f1e96240b3ec4462d/04c421819dc6231c2337943f6271e959/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/6ffe0088499f0b0f1e96240b3ec4462d/04c421819dc6231c2337943f6271e959/model.safetensors",
+   "bytes": 2980263768,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/7142f979e942cab60c0ed36b490fd906/6697b0442962e64d795d08d792fcaef7/config.json",
+   "bytes": 1595,
+   "sha256": "57c61ce4b6b6505acf032de7b68d45c1cdc342bbeb4efe5dc1f5e84d6cae271a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/7142f979e942cab60c0ed36b490fd906/6697b0442962e64d795d08d792fcaef7/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/7142f979e942cab60c0ed36b490fd906/6697b0442962e64d795d08d792fcaef7/model.safetensors",
+   "bytes": 2916041360,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/747d7b8f2e23e2ae61cd87c9e2d64502/77c6f7bec20fcf3b3ab95bc11811364c/config.json",
+   "bytes": 1419,
+   "sha256": "cb988eec08ffc2acc6d9ab2e09700e9a544b9b7ff2a44dc8770794a21d6ffb1b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/747d7b8f2e23e2ae61cd87c9e2d64502/77c6f7bec20fcf3b3ab95bc11811364c/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/747d7b8f2e23e2ae61cd87c9e2d64502/77c6f7bec20fcf3b3ab95bc11811364c/model.safetensors",
+   "bytes": 2980263768,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/76cb3102870ee1acf3a967d71c8cb989/ee9b4e83e31584c2bbf22c9aee6620ff/config.json",
+   "bytes": 1419,
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/76cb3102870ee1acf3a967d71c8cb989/ee9b4e83e31584c2bbf22c9aee6620ff/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/76cb3102870ee1acf3a967d71c8cb989/ee9b4e83e31584c2bbf22c9aee6620ff/model.safetensors",
+   "bytes": 1192135096,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/7822b375cb33fb7f36d1686b58753aee/3bc4942cbd32409a286d04f7205ad8fe/config.json",
+   "bytes": 1419,
+   "sha256": "cb988eec08ffc2acc6d9ab2e09700e9a544b9b7ff2a44dc8770794a21d6ffb1b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/7822b375cb33fb7f36d1686b58753aee/3bc4942cbd32409a286d04f7205ad8fe/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/7822b375cb33fb7f36d1686b58753aee/3bc4942cbd32409a286d04f7205ad8fe/model.safetensors",
+   "bytes": 2980263768,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/7ceeee479e89bee5405100155e7b592b/9aa4f55d177a4a91c73beffee5fbe489/config.json",
+   "bytes": 1595,
+   "sha256": "57c61ce4b6b6505acf032de7b68d45c1cdc342bbeb4efe5dc1f5e84d6cae271a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/7ceeee479e89bee5405100155e7b592b/9aa4f55d177a4a91c73beffee5fbe489/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/7ceeee479e89bee5405100155e7b592b/9aa4f55d177a4a91c73beffee5fbe489/model.safetensors",
+   "bytes": 2916041360,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/7f066c6f0bda79e55a5113541afaff29/841ac644d49d5bd02b4847405c8f789f/config.json",
+   "bytes": 1595,
+   "sha256": "44267daabd6a18d90557f33a2d96a2eca9aaaf606acf7c2ef010e5ba97cdfcb7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/7f066c6f0bda79e55a5113541afaff29/841ac644d49d5bd02b4847405c8f789f/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/7f066c6f0bda79e55a5113541afaff29/841ac644d49d5bd02b4847405c8f789f/model.safetensors",
+   "bytes": 3609505560,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/8441f59d56497ac2d64365ab69ba8ef3/6c00ffa7d0cb4e7bc06a8ea299c32abe/config.json",
+   "bytes": 1419,
+   "sha256": "3bd834cc8d4ce76c4e1533e63f0446d20edc31e036391a7a3219b56b0091c95b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/8441f59d56497ac2d64365ab69ba8ef3/6c00ffa7d0cb4e7bc06a8ea299c32abe/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/8441f59d56497ac2d64365ab69ba8ef3/6c00ffa7d0cb4e7bc06a8ea299c32abe/model.safetensors",
+   "bytes": 2572061408,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/866043a47e4ef0cb07ea215bc3e844d0/c55b76c3323acc7a5b732a6ca4829f96/config.json",
+   "bytes": 1419,
+   "sha256": "3bd834cc8d4ce76c4e1533e63f0446d20edc31e036391a7a3219b56b0091c95b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/866043a47e4ef0cb07ea215bc3e844d0/c55b76c3323acc7a5b732a6ca4829f96/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/866043a47e4ef0cb07ea215bc3e844d0/c55b76c3323acc7a5b732a6ca4829f96/model.safetensors",
+   "bytes": 2572061408,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/891ab3fe4aba926ab325750930cefa41/addbca97d830839554367fd9e4191305/config.json",
+   "bytes": 1419,
+   "sha256": "728826a42faab2d06fe8da96375ad842fc6beffbd3f42f43b926bf00dae38430",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/891ab3fe4aba926ab325750930cefa41/addbca97d830839554367fd9e4191305/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/891ab3fe4aba926ab325750930cefa41/addbca97d830839554367fd9e4191305/model.safetensors",
+   "bytes": 1427016224,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/8a7ce4b252647aaf5751a269d08a4427/78591a30b6d9574754fd7ad787b03fbc/config.json",
+   "bytes": 1419,
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/8a7ce4b252647aaf5751a269d08a4427/78591a30b6d9574754fd7ad787b03fbc/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/8a7ce4b252647aaf5751a269d08a4427/78591a30b6d9574754fd7ad787b03fbc/model.safetensors",
+   "bytes": 1192135096,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/8fd437587824e7f31887a138f9c86328/3d7690633ced0c2e3d357809e7426057/config.json",
+   "bytes": 1595,
+   "sha256": "be93cbf95cf23ecea9d2933ae854018fc1dc70be2cb679ce46732311eac23d8d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/8fd437587824e7f31887a138f9c86328/3d7690633ced0c2e3d357809e7426057/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/8fd437587824e7f31887a138f9c86328/3d7690633ced0c2e3d357809e7426057/model.safetensors",
+   "bytes": 1745830368,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/9081a26a23b0bf8013b5a757d44e71cd/1267856edd682554934b668d87752da1/config.json",
+   "bytes": 1419,
+   "sha256": "728826a42faab2d06fe8da96375ad842fc6beffbd3f42f43b926bf00dae38430",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/9081a26a23b0bf8013b5a757d44e71cd/1267856edd682554934b668d87752da1/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/9081a26a23b0bf8013b5a757d44e71cd/1267856edd682554934b668d87752da1/model.safetensors",
+   "bytes": 1427016224,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/912205b5a106bb868c43f1d24597bfcc/9d00a3710f6fc664abe144c33b691965/config.json",
+   "bytes": 1419,
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/912205b5a106bb868c43f1d24597bfcc/9d00a3710f6fc664abe144c33b691965/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/912205b5a106bb868c43f1d24597bfcc/9d00a3710f6fc664abe144c33b691965/model.safetensors",
+   "bytes": 1192135096,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/9556c39a5186ecabbc98c39466fbd0bd/3b246f7ea417af5da5aef4e7e970ebd9/config.json",
+   "bytes": 1419,
+   "sha256": "8b32f4145ad0256fbf88026097fd88f14aea2ed727d6e0e24f5c8db956b4764d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/9556c39a5186ecabbc98c39466fbd0bd/3b246f7ea417af5da5aef4e7e970ebd9/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/9556c39a5186ecabbc98c39466fbd0bd/3b246f7ea417af5da5aef4e7e970ebd9/model.safetensors",
+   "bytes": 5842876288,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/9b413467505f6182ad7764e1f69f9a4e/07962cb668b5c89431f61c98696ce0e8/config.json",
+   "bytes": 1595,
+   "sha256": "44267daabd6a18d90557f33a2d96a2eca9aaaf606acf7c2ef010e5ba97cdfcb7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/9b413467505f6182ad7764e1f69f9a4e/07962cb668b5c89431f61c98696ce0e8/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/9b413467505f6182ad7764e1f69f9a4e/07962cb668b5c89431f61c98696ce0e8/model.safetensors",
+   "bytes": 3609505560,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a24be3154961a10be803bef68251b03a/cdeba05a26990a0d64bde5c6ced42079/config.json",
+   "bytes": 1419,
+   "sha256": "728826a42faab2d06fe8da96375ad842fc6beffbd3f42f43b926bf00dae38430",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a24be3154961a10be803bef68251b03a/cdeba05a26990a0d64bde5c6ced42079/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a24be3154961a10be803bef68251b03a/cdeba05a26990a0d64bde5c6ced42079/model.safetensors",
+   "bytes": 1427016224,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a264fd908bb1f19ed4dc0b0b158561e7/87547f8bdd93419d69e52c17343868e5/config.json",
+   "bytes": 1419,
+   "sha256": "728826a42faab2d06fe8da96375ad842fc6beffbd3f42f43b926bf00dae38430",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a264fd908bb1f19ed4dc0b0b158561e7/87547f8bdd93419d69e52c17343868e5/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a264fd908bb1f19ed4dc0b0b158561e7/87547f8bdd93419d69e52c17343868e5/model.safetensors",
+   "bytes": 1427016224,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a3643f5d99e3114fb6300f95da1cc3a8/50657cabc03a6637f2c5f380d1338773/config.json",
+   "bytes": 1419,
+   "sha256": "8b32f4145ad0256fbf88026097fd88f14aea2ed727d6e0e24f5c8db956b4764d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a3643f5d99e3114fb6300f95da1cc3a8/50657cabc03a6637f2c5f380d1338773/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a3643f5d99e3114fb6300f95da1cc3a8/50657cabc03a6637f2c5f380d1338773/model.safetensors",
+   "bytes": 5842876288,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a43133caddd937cd0cbf5ebcebd61ebd/123a3343b142f94f2f370a69ff6f859b/config.json",
+   "bytes": 1419,
+   "sha256": "728826a42faab2d06fe8da96375ad842fc6beffbd3f42f43b926bf00dae38430",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a43133caddd937cd0cbf5ebcebd61ebd/123a3343b142f94f2f370a69ff6f859b/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a43133caddd937cd0cbf5ebcebd61ebd/123a3343b142f94f2f370a69ff6f859b/model.safetensors",
+   "bytes": 1427016224,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a7966c33de780d9e46e2fdeaa20c56d1/dece1be4859bbd1d670d032c1deffc4f/config.json",
+   "bytes": 1419,
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a7966c33de780d9e46e2fdeaa20c56d1/dece1be4859bbd1d670d032c1deffc4f/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a7966c33de780d9e46e2fdeaa20c56d1/dece1be4859bbd1d670d032c1deffc4f/model.safetensors",
+   "bytes": 1192135096,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a7cacece3de565b1db9d91e747557ef7/e14d01fc68ac9c56a45f30ce98084b08/config.json",
+   "bytes": 1419,
+   "sha256": "8b32f4145ad0256fbf88026097fd88f14aea2ed727d6e0e24f5c8db956b4764d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a7cacece3de565b1db9d91e747557ef7/e14d01fc68ac9c56a45f30ce98084b08/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a7cacece3de565b1db9d91e747557ef7/e14d01fc68ac9c56a45f30ce98084b08/model.safetensors",
+   "bytes": 5842876288,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a9154a29381355045e0d3b9161e9d4d8/c309e7733a34f4783f259166510400a5/config.json",
+   "bytes": 1419,
+   "sha256": "87b4888de3f2b9f52daa4beb5709ed015baf2850b1d41f161911114ab79acce5",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a9154a29381355045e0d3b9161e9d4d8/c309e7733a34f4783f259166510400a5/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/a9154a29381355045e0d3b9161e9d4d8/c309e7733a34f4783f259166510400a5/model.safetensors",
+   "bytes": 3567466344,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/acc9db4767a674eaabb86c9c6363a766/c349fc8ba3aad5c5704cd5d1a10e1e6e/config.json",
+   "bytes": 1595,
+   "sha256": "57c61ce4b6b6505acf032de7b68d45c1cdc342bbeb4efe5dc1f5e84d6cae271a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/acc9db4767a674eaabb86c9c6363a766/c349fc8ba3aad5c5704cd5d1a10e1e6e/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/acc9db4767a674eaabb86c9c6363a766/c349fc8ba3aad5c5704cd5d1a10e1e6e/model.safetensors",
+   "bytes": 2916041360,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/ae4f6eefa41e09cdad4df5cb189ddcef/ce152d6ff349fa73f22f7cd2f0af9a77/config.json",
+   "bytes": 1595,
+   "sha256": "be93cbf95cf23ecea9d2933ae854018fc1dc70be2cb679ce46732311eac23d8d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/ae4f6eefa41e09cdad4df5cb189ddcef/ce152d6ff349fa73f22f7cd2f0af9a77/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/ae4f6eefa41e09cdad4df5cb189ddcef/ce152d6ff349fa73f22f7cd2f0af9a77/model.safetensors",
+   "bytes": 1745830368,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/b566949ab1e3686b6f6ad9991488b7f9/d06fcd278fadc4ebb97f0b152d33bd65/config.json",
+   "bytes": 1595,
+   "sha256": "57c61ce4b6b6505acf032de7b68d45c1cdc342bbeb4efe5dc1f5e84d6cae271a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/b566949ab1e3686b6f6ad9991488b7f9/d06fcd278fadc4ebb97f0b152d33bd65/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/b566949ab1e3686b6f6ad9991488b7f9/d06fcd278fadc4ebb97f0b152d33bd65/model.safetensors",
+   "bytes": 2916041360,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/b821592fdda59a6d16babfa62e2957cc/f7d05db3aa48a99f98affdbe3ee325c8/config.json",
+   "bytes": 1595,
+   "sha256": "44267daabd6a18d90557f33a2d96a2eca9aaaf606acf7c2ef010e5ba97cdfcb7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/b821592fdda59a6d16babfa62e2957cc/f7d05db3aa48a99f98affdbe3ee325c8/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/b821592fdda59a6d16babfa62e2957cc/f7d05db3aa48a99f98affdbe3ee325c8/model.safetensors",
+   "bytes": 3609505560,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/bab600b51ab2864ee6ad72951597d2cd/7e0eb0a8bb28e9d360dffa3e64b2eb89/config.json",
+   "bytes": 1419,
+   "sha256": "8b32f4145ad0256fbf88026097fd88f14aea2ed727d6e0e24f5c8db956b4764d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/bab600b51ab2864ee6ad72951597d2cd/7e0eb0a8bb28e9d360dffa3e64b2eb89/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/bab600b51ab2864ee6ad72951597d2cd/7e0eb0a8bb28e9d360dffa3e64b2eb89/model.safetensors",
+   "bytes": 5842876288,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/bc86aedafbdeaba8d25e82581556eb5e/addb7a48bca27c823cecbd4a8bf6ebaf/config.json",
+   "bytes": 1595,
+   "sha256": "57c61ce4b6b6505acf032de7b68d45c1cdc342bbeb4efe5dc1f5e84d6cae271a",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/bc86aedafbdeaba8d25e82581556eb5e/addb7a48bca27c823cecbd4a8bf6ebaf/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/bc86aedafbdeaba8d25e82581556eb5e/addb7a48bca27c823cecbd4a8bf6ebaf/model.safetensors",
+   "bytes": 2916041360,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/c06f6d966f9ccdee5cf8794bbc8e4755/fd9b13610f0803e664d91a558659ade2/config.json",
+   "bytes": 1419,
+   "sha256": "728826a42faab2d06fe8da96375ad842fc6beffbd3f42f43b926bf00dae38430",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/c06f6d966f9ccdee5cf8794bbc8e4755/fd9b13610f0803e664d91a558659ade2/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/c06f6d966f9ccdee5cf8794bbc8e4755/fd9b13610f0803e664d91a558659ade2/model.safetensors",
+   "bytes": 1427016224,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/c0d1343d43f32e258ff2e374084f4fe6/763cab316dfb853e0cb76d508a2ab1a4/config.json",
+   "bytes": 1419,
+   "sha256": "8b32f4145ad0256fbf88026097fd88f14aea2ed727d6e0e24f5c8db956b4764d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/c0d1343d43f32e258ff2e374084f4fe6/763cab316dfb853e0cb76d508a2ab1a4/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/c0d1343d43f32e258ff2e374084f4fe6/763cab316dfb853e0cb76d508a2ab1a4/model.safetensors",
+   "bytes": 5842876288,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/c470bf140373ac011f395b550002f091/6d4bd44da9c52ac38d72244c79400840/config.json",
+   "bytes": 1419,
+   "sha256": "cb988eec08ffc2acc6d9ab2e09700e9a544b9b7ff2a44dc8770794a21d6ffb1b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/c470bf140373ac011f395b550002f091/6d4bd44da9c52ac38d72244c79400840/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/c470bf140373ac011f395b550002f091/6d4bd44da9c52ac38d72244c79400840/model.safetensors",
+   "bytes": 2980263768,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/cf285a825f53434fc3bc3a58feaa31d9/43eeaeab6e37abb59c4843e8d0c78854/config.json",
+   "bytes": 1419,
+   "sha256": "78b1d1936113fe30f3212ea6efd685ff3cbef8ea165c5b61354b88eb83138345",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/cf285a825f53434fc3bc3a58feaa31d9/43eeaeab6e37abb59c4843e8d0c78854/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/cf285a825f53434fc3bc3a58feaa31d9/43eeaeab6e37abb59c4843e8d0c78854/model.safetensors",
+   "bytes": 2337180368,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/d659c8098bd0e0345c8d3bf7bc398307/2a63decbeaf70f6cfc19f1985a69d600/config.json",
+   "bytes": 1419,
+   "sha256": "8b32f4145ad0256fbf88026097fd88f14aea2ed727d6e0e24f5c8db956b4764d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/d659c8098bd0e0345c8d3bf7bc398307/2a63decbeaf70f6cfc19f1985a69d600/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/d659c8098bd0e0345c8d3bf7bc398307/2a63decbeaf70f6cfc19f1985a69d600/model.safetensors",
+   "bytes": 5842876288,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/da52c33af7b5a9ee615a79503dd7cbcf/9401ac4ea7bf86d559406e8516396c65/config.json",
+   "bytes": 1419,
+   "sha256": "cb988eec08ffc2acc6d9ab2e09700e9a544b9b7ff2a44dc8770794a21d6ffb1b",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/da52c33af7b5a9ee615a79503dd7cbcf/9401ac4ea7bf86d559406e8516396c65/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/da52c33af7b5a9ee615a79503dd7cbcf/9401ac4ea7bf86d559406e8516396c65/model.safetensors",
+   "bytes": 2980263768,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/daa80ed8a11bb39da3b7e4705e93748c/1e213cb8e4021abd96cf4a024d34d8c9/config.json",
+   "bytes": 1595,
+   "sha256": "be93cbf95cf23ecea9d2933ae854018fc1dc70be2cb679ce46732311eac23d8d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/daa80ed8a11bb39da3b7e4705e93748c/1e213cb8e4021abd96cf4a024d34d8c9/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/daa80ed8a11bb39da3b7e4705e93748c/1e213cb8e4021abd96cf4a024d34d8c9/model.safetensors",
+   "bytes": 1745830368,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/db41cc11f69c12c53e3ebc679ce69034/df4a6678e51de88ff10ec624c0ff44f5/config.json",
+   "bytes": 1419,
+   "sha256": "87b4888de3f2b9f52daa4beb5709ed015baf2850b1d41f161911114ab79acce5",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/db41cc11f69c12c53e3ebc679ce69034/df4a6678e51de88ff10ec624c0ff44f5/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/db41cc11f69c12c53e3ebc679ce69034/df4a6678e51de88ff10ec624c0ff44f5/model.safetensors",
+   "bytes": 3567466344,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/dd09fbaa79ce3b7387329145c0190489/1a0810638dc4e4a30e6124c68b55728a/config.json",
+   "bytes": 1419,
+   "sha256": "728826a42faab2d06fe8da96375ad842fc6beffbd3f42f43b926bf00dae38430",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/dd09fbaa79ce3b7387329145c0190489/1a0810638dc4e4a30e6124c68b55728a/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/dd09fbaa79ce3b7387329145c0190489/1a0810638dc4e4a30e6124c68b55728a/model.safetensors",
+   "bytes": 1427016224,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/e1170f2f3cda972ed796e00f6e593875/200e9328e44eada89d288036e593ff2d/config.json",
+   "bytes": 1419,
+   "sha256": "87b4888de3f2b9f52daa4beb5709ed015baf2850b1d41f161911114ab79acce5",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/e1170f2f3cda972ed796e00f6e593875/200e9328e44eada89d288036e593ff2d/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/e1170f2f3cda972ed796e00f6e593875/200e9328e44eada89d288036e593ff2d/model.safetensors",
+   "bytes": 3567466344,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/e58fd647dce8d63c55365829eb6d322e/f66a6c47ad234d834d7fb84cec4cbc84/config.json",
+   "bytes": 1595,
+   "sha256": "be93cbf95cf23ecea9d2933ae854018fc1dc70be2cb679ce46732311eac23d8d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/e58fd647dce8d63c55365829eb6d322e/f66a6c47ad234d834d7fb84cec4cbc84/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/e58fd647dce8d63c55365829eb6d322e/f66a6c47ad234d834d7fb84cec4cbc84/model.safetensors",
+   "bytes": 1745830368,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/e89d73d0782b3690f0041acbbcd95578/bdd5730a71b6f75db06c010ea2d57a28/config.json",
+   "bytes": 1419,
+   "sha256": "78b1d1936113fe30f3212ea6efd685ff3cbef8ea165c5b61354b88eb83138345",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/e89d73d0782b3690f0041acbbcd95578/bdd5730a71b6f75db06c010ea2d57a28/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/e89d73d0782b3690f0041acbbcd95578/bdd5730a71b6f75db06c010ea2d57a28/model.safetensors",
+   "bytes": 2337180368,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/ea6d92248705ed23159d3d140965dea3/b7ec9f81f621009330c8f794dce9fa68/config.json",
+   "bytes": 1419,
+   "sha256": "78b1d1936113fe30f3212ea6efd685ff3cbef8ea165c5b61354b88eb83138345",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/ea6d92248705ed23159d3d140965dea3/b7ec9f81f621009330c8f794dce9fa68/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/ea6d92248705ed23159d3d140965dea3/b7ec9f81f621009330c8f794dce9fa68/model.safetensors",
+   "bytes": 2337180368,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/eb7368a6dacf4081623d51007e632651/e7488f837608c08cff39b0ad03535acb/config.json",
+   "bytes": 1595,
+   "sha256": "be93cbf95cf23ecea9d2933ae854018fc1dc70be2cb679ce46732311eac23d8d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/eb7368a6dacf4081623d51007e632651/e7488f837608c08cff39b0ad03535acb/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/eb7368a6dacf4081623d51007e632651/e7488f837608c08cff39b0ad03535acb/model.safetensors",
+   "bytes": 1745830368,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/f02efd74fe97dbdbd0a72aab8ee4ea97/5697edab546827c8cec5e30875a62f73/config.json",
+   "bytes": 1595,
+   "sha256": "44267daabd6a18d90557f33a2d96a2eca9aaaf606acf7c2ef010e5ba97cdfcb7",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/f02efd74fe97dbdbd0a72aab8ee4ea97/5697edab546827c8cec5e30875a62f73/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/f02efd74fe97dbdbd0a72aab8ee4ea97/5697edab546827c8cec5e30875a62f73/model.safetensors",
+   "bytes": 3609505560,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/f588167841d040ae03dfd727c6317bd2/e6f1dfd87748caeae3ff01780b67f4e7/config.json",
+   "bytes": 1419,
+   "sha256": "78b1d1936113fe30f3212ea6efd685ff3cbef8ea165c5b61354b88eb83138345",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/f588167841d040ae03dfd727c6317bd2/e6f1dfd87748caeae3ff01780b67f4e7/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/f588167841d040ae03dfd727c6317bd2/e6f1dfd87748caeae3ff01780b67f4e7/model.safetensors",
+   "bytes": 2337180368,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/f75e1e213514b747a4d8c3f8602db853/4ee954bf52dd6caa346f16155b11409d/config.json",
+   "bytes": 1419,
+   "sha256": "8651f3349eb702d03fc72ee7ced9f182615973191a0c769a6203e2c9ff6afb2d",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/f75e1e213514b747a4d8c3f8602db853/4ee954bf52dd6caa346f16155b11409d/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/f75e1e213514b747a4d8c3f8602db853/4ee954bf52dd6caa346f16155b11409d/model.safetensors",
+   "bytes": 6430078848,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/f83dd7272113bd769bd64dce0fb01484/c96e71db809a16bb8ffa7457197e1734/config.json",
+   "bytes": 1419,
+   "sha256": "87b4888de3f2b9f52daa4beb5709ed015baf2850b1d41f161911114ab79acce5",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/f83dd7272113bd769bd64dce0fb01484/c96e71db809a16bb8ffa7457197e1734/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/f83dd7272113bd769bd64dce0fb01484/c96e71db809a16bb8ffa7457197e1734/model.safetensors",
+   "bytes": 3567466344,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/f879433e61ac19105fd273673138fbf5/8aa8b1960469990404f058d241c045ec/config.json",
+   "bytes": 1419,
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/f879433e61ac19105fd273673138fbf5/8aa8b1960469990404f058d241c045ec/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/f879433e61ac19105fd273673138fbf5/8aa8b1960469990404f058d241c045ec/model.safetensors",
+   "bytes": 1192135096,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/fb97b1347a9746931beaf7963a685254/7206ac1eeeb9e7fa569c7668b31b7ac7/config.json",
+   "bytes": 1419,
+   "sha256": "87b4888de3f2b9f52daa4beb5709ed015baf2850b1d41f161911114ab79acce5",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/fb97b1347a9746931beaf7963a685254/7206ac1eeeb9e7fa569c7668b31b7ac7/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/fb97b1347a9746931beaf7963a685254/7206ac1eeeb9e7fa569c7668b31b7ac7/model.safetensors",
+   "bytes": 3567466344,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/fcf7ff954a7f5e9a05b7b4187860eeac/33ed9befcc127b9b3f02faa37c8cd2c3/config.json",
+   "bytes": 1595,
+   "sha256": "77f27023cdd2fea786528e5bd114dc7f9f4215eddd26451a49517f62cb3c3802",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/fcf7ff954a7f5e9a05b7b4187860eeac/33ed9befcc127b9b3f02faa37c8cd2c3/generation_config.json",
+   "bytes": 206,
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/states/fcf7ff954a7f5e9a05b7b4187860eeac/33ed9befcc127b9b3f02faa37c8cd2c3/model.safetensors",
+   "bytes": 7290007360,
+   "sha256": null,
+   "fetched": false
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search/telemetry.jsonl",
+   "bytes": 99652,
+   "sha256": "597b830ca1c5522d452d006c0603d64b3624b49e335bb87e7168eb5ffae433c6",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/search_record.json",
+   "bytes": 5507,
+   "sha256": "81a0e2dda20c81f6bf1d8a2294bfc7f53c417b5fb294cdd3bb52232001922473",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/stage1_selection.json",
+   "bytes": 16348,
+   "sha256": "6b89b365b03544fef6cc820e5270407e7d8e519a61d60f5726ffe328b6b433d4",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/structure.json",
+   "bytes": 25138076,
+   "sha256": "7e26e9fb5d269badb6c07dff0e9426966cf8480148563a9eb8a44d206d002814",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/width_projection_1d29e1cbeee323af67f142ce61e3104b.safetensors",
+   "bytes": 10485840,
+   "sha256": "404eac5fcbe8b6d1e8e3e190116f09a0786abf419d659e8911123459075965d3",
+   "fetched": true
+  },
+  {
+   "path": "stage0_calvol/formal_v1/d4/search_unit/width_projection_5949cdbee7b36bab480934ec08873311.safetensors",
+   "bytes": 10485840,
+   "sha256": "46b4df2b3f6abd4f0a701635c653c1e65d67a7059ae7ea6bf4fac02e8e342531",
+   "fetched": true
+  }
+ ],
+ "totals": {
+  "files": 617,
+  "bytes": 292446360760,
+  "fetched_files": 518,
+  "fetched_bytes": 434010437,
+  "hashed_files": 524
+ },
+ "teardown": {
+  "pod_id": "6wjl0c32g6f0bw",
+  "why": "AUDITED",
+  "attempts": [
+   {
+    "method": "runpodctl remove pod",
+    "verified_transport": true,
+    "ok": true,
+    "returncode": 0,
+    "response": "pod \"6wjl0c32g6f0bw\" removed\nwarning: 'runpodctl remove pod' is deprecated, use 'runpodctl pod delete <id>' instead",
+    "error": null
+   }
+  ],
+  "verified_gone": true,
+  "last_status": "ABSENT",
+  "elapsed_minutes": 1.737,
+  "quoted_usd_per_hour": 0.06,
+  "gpu_usd": 0.0017,
+  "_verification": "termination is confirmed by polling the control plane until the pod stops billing; the terminate call's own exit status has never been treated as proof"
+ },
+ "status": "AUDITED",
+ "error": null,
+ "ended_utc": "2026-10-21T14:28:23+00:00"
+}

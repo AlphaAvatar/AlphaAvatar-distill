@@ -1,0 +1,160 @@
+{
+ "candidates": {
+  "d4": [
+   {
+    "rank": 1,
+    "state_id": "1301deb71685aa1ca5c7b6cf2c491ac4",
+    "quality_order": 1,
+    "path": "ATTENTION(calib.s0v_rh_d4@v1)->DEPTH(calib.s0v_base_d4@v1)->RESIDUAL_WIDTH(calib.s0v_base_d4@v1)->FFN(calib.s0v_base_d4@v1)",
+    "checkpoint_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+    "artifact_digest": "457e194c4a40c2503a7d63d03269ac76ece700102bae74908b7315d367bab3f0",
+    "weights_digest": "73589c58a439bf32b4ddbf975ac245cd6b916745d5e0712ae4cf32ae158a6d0f",
+    "num_parameters": 596049920,
+    "identical_leaves": []
+   },
+   {
+    "rank": 2,
+    "state_id": "167a43f4c05b0f9653eaf216717df83c",
+    "quality_order": 2,
+    "path": "ATTENTION(calib.s0v_rh_d4@v1)->DEPTH(calib.s0v_base_d4@v1)->RESIDUAL_WIDTH(calib.s0v_base_d4@v1)->FFN(calib.s0v_rh_d4@v1)",
+    "checkpoint_sha256": "a509ac31665bffbedb5374876c9b44d5ecfa6b4c642229947d82dc3b88ff383d",
+    "artifact_digest": "2b3b7f59d5bd1d689ae35ed71162b74f74383e638e816185e05733e7e569751c",
+    "weights_digest": "84f9dc5872e6a379206bcb918b4579fb5334b6eee21c88dbe7afe71ee26246ea",
+    "num_parameters": 596049920,
+    "identical_leaves": []
+   },
+   {
+    "rank": 3,
+    "state_id": "0363ad220c88104c0dd1e53395db4530",
+    "quality_order": 3,
+    "path": "ATTENTION(calib.s0v_rh_d4@v1)->DEPTH(calib.s0v_base_d4@v1)->FFN(calib.s0v_rh_d4@v1)->RESIDUAL_WIDTH(calib.s0v_base_d4@v1)",
+    "checkpoint_sha256": "5d54e3709678884a530decfb43354481da316f53604091c6d40b5f3e1bfa683a",
+    "artifact_digest": "a98e0cf2206e5ece9a92a073ff165e31fe23dee322f9b64d17bcaeb1b335122e",
+    "weights_digest": "92d33ea018835ade9b9beb2aaf012345578490b57b6c5158b2c39095f320ceb4",
+    "num_parameters": 596049920,
+    "identical_leaves": []
+   },
+   {
+    "rank": 4,
+    "state_id": "912205b5a106bb868c43f1d24597bfcc",
+    "quality_order": 4,
+    "path": "ATTENTION(calib.s0v_rh_d4@v1)->DEPTH(calib.s0v_base_d4@v1)->FFN(calib.s0v_rh_d4@v1)->RESIDUAL_WIDTH(calib.s0v_rh_d4@v1)",
+    "checkpoint_sha256": "ac7f3885a13f9acb74e2f2014dac2d4b96fcec2655841000b46fe3d6bb207cc4",
+    "artifact_digest": "c64bc63135ad2c0bd16d64e89677526c9c7397a509e1855569b4fd4b925d13d0",
+    "weights_digest": "7726d84a99f0b2b5e0d06580485982750f9efaecd5fff757bd6249d05dfd2663",
+    "num_parameters": 596049920,
+    "identical_leaves": []
+   }
+  ]
+ },
+ "files": [
+  {
+   "treatment": "d4",
+   "state_id": "1301deb71685aa1ca5c7b6cf2c491ac4",
+   "path": "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/config.json",
+   "name": "config.json",
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "bytes": 1419,
+   "is_shard": false
+  },
+  {
+   "treatment": "d4",
+   "state_id": "1301deb71685aa1ca5c7b6cf2c491ac4",
+   "path": "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/generation_config.json",
+   "name": "generation_config.json",
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "bytes": 206,
+   "is_shard": false
+  },
+  {
+   "treatment": "d4",
+   "state_id": "1301deb71685aa1ca5c7b6cf2c491ac4",
+   "path": "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors",
+   "name": "model.safetensors",
+   "sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+   "bytes": 1192135096,
+   "is_shard": true
+  },
+  {
+   "treatment": "d4",
+   "state_id": "167a43f4c05b0f9653eaf216717df83c",
+   "path": "stage0_calvol/finalists/formal_v1/d4/167a43f4c05b0f9653eaf216717df83c/config.json",
+   "name": "config.json",
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "bytes": 1419,
+   "is_shard": false
+  },
+  {
+   "treatment": "d4",
+   "state_id": "167a43f4c05b0f9653eaf216717df83c",
+   "path": "stage0_calvol/finalists/formal_v1/d4/167a43f4c05b0f9653eaf216717df83c/generation_config.json",
+   "name": "generation_config.json",
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "bytes": 206,
+   "is_shard": false
+  },
+  {
+   "treatment": "d4",
+   "state_id": "167a43f4c05b0f9653eaf216717df83c",
+   "path": "stage0_calvol/finalists/formal_v1/d4/167a43f4c05b0f9653eaf216717df83c/model.safetensors",
+   "name": "model.safetensors",
+   "sha256": "a509ac31665bffbedb5374876c9b44d5ecfa6b4c642229947d82dc3b88ff383d",
+   "bytes": 1192135096,
+   "is_shard": true
+  },
+  {
+   "treatment": "d4",
+   "state_id": "0363ad220c88104c0dd1e53395db4530",
+   "path": "stage0_calvol/finalists/formal_v1/d4/0363ad220c88104c0dd1e53395db4530/config.json",
+   "name": "config.json",
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "bytes": 1419,
+   "is_shard": false
+  },
+  {
+   "treatment": "d4",
+   "state_id": "0363ad220c88104c0dd1e53395db4530",
+   "path": "stage0_calvol/finalists/formal_v1/d4/0363ad220c88104c0dd1e53395db4530/generation_config.json",
+   "name": "generation_config.json",
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "bytes": 206,
+   "is_shard": false
+  },
+  {
+   "treatment": "d4",
+   "state_id": "0363ad220c88104c0dd1e53395db4530",
+   "path": "stage0_calvol/finalists/formal_v1/d4/0363ad220c88104c0dd1e53395db4530/model.safetensors",
+   "name": "model.safetensors",
+   "sha256": "5d54e3709678884a530decfb43354481da316f53604091c6d40b5f3e1bfa683a",
+   "bytes": 1192135096,
+   "is_shard": true
+  },
+  {
+   "treatment": "d4",
+   "state_id": "912205b5a106bb868c43f1d24597bfcc",
+   "path": "stage0_calvol/finalists/formal_v1/d4/912205b5a106bb868c43f1d24597bfcc/config.json",
+   "name": "config.json",
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "bytes": 1419,
+   "is_shard": false
+  },
+  {
+   "treatment": "d4",
+   "state_id": "912205b5a106bb868c43f1d24597bfcc",
+   "path": "stage0_calvol/finalists/formal_v1/d4/912205b5a106bb868c43f1d24597bfcc/generation_config.json",
+   "name": "generation_config.json",
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "bytes": 206,
+   "is_shard": false
+  },
+  {
+   "treatment": "d4",
+   "state_id": "912205b5a106bb868c43f1d24597bfcc",
+   "path": "stage0_calvol/finalists/formal_v1/d4/912205b5a106bb868c43f1d24597bfcc/model.safetensors",
+   "name": "model.safetensors",
+   "sha256": "ac7f3885a13f9acb74e2f2014dac2d4b96fcec2655841000b46fe3d6bb207cc4",
+   "bytes": 1192135096,
+   "is_shard": true
+  }
+ ]
+}

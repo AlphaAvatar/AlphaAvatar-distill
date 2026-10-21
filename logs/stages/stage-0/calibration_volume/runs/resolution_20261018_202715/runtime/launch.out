@@ -1,0 +1,29 @@
+bundle OK: transfer/aad_autoinit_9f63a266.bundle on the relay (34409655 bytes)
+[20:28:21] budget: expected 130 min $3.88 · soft $5.44 · hard $5.89 (authorized $6.50)
+[20:28:21] NVIDIA A100-SXM4-80GB $1.79/h, stock Low
+[20:28:21] account funds OK: the provider account holds $99.9789 against the $30.0000 this session must be able to fund
+[20:28:22] precheck OK: 12 relay inputs (12 from AlphaAvatar/aadistill-artifacts), 0 local assets
+[20:28:23] watchdog detached — hard 198 min = $5.89
+[20:28:23] created 5j92y6jbmrkalx at $1.79/h
+[20:29:17]   starting (60s) — $0.03
+[20:30:19]   starting (120s) — $0.06
+[20:30:40] TCP 22 at 64.247.196.114:19881 after 2.3 min
+[20:30:43] draw 1: ssh reachable — $0.07
+[20:30:59] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[20:30:59] draw 1: running setup
+[20:33:22] draw 1: setup complete — $0.15
+[20:33:28] driver detached, pid 2373, confirmed by descriptor_probe — $0.15
+[20:35:39]   2026-10-18T20:33:25Z MARKER:CONTRACT_OK — $0.22
+[21:34:11]   2026-10-18T21:33:34Z MARKER:RUN_FAILED_UNIT:qwen3_0p6b_dev — $1.96
+[21:34:11] every finished unit is secured off-pod before teardown
+[21:34:11] polling ended: RUN_FAILED — $1.96
+[21:35:06]   manifest rc=0
+3 file(s) across 2 class(es) -> /workspace/manifest.json
+  final_required: 3 · mutable_snapshot: 0 · final_streams_quiescent: False
+  STILL BEING WRITTEN: audit/stage0_calvol_battery/records/e1_r5500k_sa_pca_dev.log
+[21:35:31] LAUNCHER ERROR: ArtifactError: an emergency teardown over a non-quiescent event stream must name the streams it is truncating; 'the final event stream is incomplete' has to be in the record, not inferred from it later
+[21:35:31] deleting pod (launcher error)
+[21:35:42] pod deleted — 67.3 min, $2.01; provider confirms gone: True
+
+stage0-calvol-battery INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-0/calibration_volume/runs/resolution_20261018_202715/runtime/session.json. 
+EXIT=11

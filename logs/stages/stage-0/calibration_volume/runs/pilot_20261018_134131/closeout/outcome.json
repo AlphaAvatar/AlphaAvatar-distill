@@ -1,0 +1,87 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "pilot_20261018_134131",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "pilot",
+ "recorded_utc": "2026-10-18T17:30:32+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": "ALL_DONE",
+ "passed": true,
+ "outcome": "Root-level pilot, attempt 2 (replacing the L40S OOM of pilot_20261018_122808) on an A100-SXM4-80GB: ALL_DONE, 31 of 31 root states (9 ATTENTION, 4 DEPTH, 9 FFN, 9 WIDTH) and nine recovered WIDTH projections, secured off-pod and hash-checked before teardown. The collector's extracted copy was byte-identical to the secured unit and is kept only in scratch.",
+ "provider_resource_created": true,
+ "pod_id": "wm75q9fix8g15w",
+ "provider_confirms_gone": true,
+ "final_pod_state": {
+  "exists": false,
+  "desired_status": "TERMINATED",
+  "billing": false
+ },
+ "money": {
+  "all_in_usd": 6.953,
+  "gpu_usd": 6.797,
+  "disk_usd": 0.1559,
+  "elapsed_minutes": 227.83,
+  "price_per_hour": 1.79,
+  "authorized_usd": 13.0,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.10/GB-month over the elapsed minutes, ceiled to the 4-decimal quantum"
+ },
+ "session_record_sha256": "13b100bc9e51ac7c350bb4fbea6e296f4137e6834b38328b813c99469b625e39",
+ "units": {
+  "pilot_root": {
+   "search/states.jsonl": {
+    "sha256": "b402d0d5c76f3e15f1120b9271c9885e8721be0c59461fb8351bcd0e79ae78a5",
+    "bytes": 12595606
+   },
+   "search/telemetry.jsonl": {
+    "sha256": "2b8b7c233bf4921bd7c2b2870588310ec07bec96f936d416511f991e08970c76",
+    "bytes": 30295
+   },
+   "search_record.json": {
+    "sha256": "ddc877d0eb624cea84682f4f85e8394a6a05d26fc359c2e235661963686c848c",
+    "bytes": 8333
+   },
+   "structure.json": {
+    "sha256": "e9c2df5f4d4ef99d1c70daea337c0a38375c1a8f4fe759d11f52c3880638420b",
+    "bytes": 11530911
+   },
+   "width_projection_12a9a771f6966205cfdade26efce84ff.safetensors": {
+    "sha256": "877ca799ccb0ad417fcec69a8b6008fbee8847d5bdb5573bba48c8cfea8aa075",
+    "bytes": 10485840
+   },
+   "width_projection_1930eabd9a325b1584c8f240394c91f4.safetensors": {
+    "sha256": "485fd6ad5002502159057cab9d323ccace38740ab0e913afcce23ad61fc4a3a2",
+    "bytes": 10485840
+   },
+   "width_projection_1a2fc7418071099d1feee80c9bed1ac1.safetensors": {
+    "sha256": "1f33fd98166a0292b24b7098f3bc0f9c87cca02a3fc9f04664ad41b5c2329031",
+    "bytes": 10485840
+   },
+   "width_projection_9e11406f0575e2cced6ac29b6afd1f21.safetensors": {
+    "sha256": "a17c74e5b50e55599f219f9a8a80d32e08d4878a60148ea6f8a94af70e13d073",
+    "bytes": 10485840
+   },
+   "width_projection_be2afe21b450aae183090b3e041d57f3.safetensors": {
+    "sha256": "85190d387e0942c100145944975e2f05332e66e0db34849689560be6b3e2bd28",
+    "bytes": 10485840
+   },
+   "width_projection_cdcb21d862f872b8136b1abd64b15460.safetensors": {
+    "sha256": "0adb9629359346aaa2143038d8e12a7ba7081b971f92ead51610ebd28dc7f8ff",
+    "bytes": 10485840
+   },
+   "width_projection_d3dd2114157fb594b18766cd57436c3f.safetensors": {
+    "sha256": "65741661c63328646145db8a004863539c4f0e12c83d62e050eb9a296603a451",
+    "bytes": 10485840
+   },
+   "width_projection_d6a123eb132f4978ca4b17a37fb4388c.safetensors": {
+    "sha256": "a1881f5576a4aeab47ebd20849653f53e1f860441817680b0be7193fc5ece85a",
+    "bytes": 10485840
+   },
+   "width_projection_f14e6e2b88746c7e74641f39ba953010.safetensors": {
+    "sha256": "ed57f27b2bac24cfd72db63634993a69f8996317f821d7018341c9cf22bd3268",
+    "bytes": 10485840
+   }
+  }
+ },
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/pilot_20261018_134131"
+}

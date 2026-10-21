@@ -1,0 +1,456 @@
+{
+  "schema": "aadistill.stage0.calibration_volume.search_session/v1",
+  "session_id": "stage0-calvol-search",
+  "session_spec": {
+    "session_id": "stage0-calvol-search",
+    "schema": "aadistill.stage0.calibration_volume.search_session/v1",
+    "description": "Stage-0 calibration volume: Root-level selection-stability pilot (exploratory H1/H3): every forward-baseline operator applied to the teacher under n",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/governance/authorization.json",
+    "authorization_type": "functools.partial(<function load_for at 0x7fcf121b0a90>, 'search')",
+    "plan_id": "stage0.calibration_volume.pilot_search",
+    "plan_hash": "ab03253437cfe0fbefb52be6112ed00f84b44fea2580c515a46fa6b63598ff07",
+    "status_path": "/workspace/stage0_calvol_search.status",
+    "run_log_path": "/workspace/stage0_calvol_search_run.log",
+    "driver_job_id": "stage0_calvol_search_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "stage0_calvol_search",
+      "evidence_filename": "search_session.json",
+      "archive_basename": "stage0_calvol_search",
+      "spec_success": "configs/stages/stage-0/calibration_volume/search_artifacts.json",
+      "spec_failed": "configs/stages/stage-0/calibration_volume/search_artifacts.json",
+      "report_names": [
+        "search_session.json"
+      ]
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "stage0_calvol"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_KIND",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [],
+      "local_assets": [
+        "state_eval_v1:artifacts/stages/stage-1",
+        "profiles_pilot_v1:artifacts/stages/stage-0/calibration_volume"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 600,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [],
+      "test_paths": [],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "TEACHER_READY",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 0,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-10-18T13:42:15+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 314 min $9.38 \u00b7 soft $12.15 \u00b7 hard $12.59 (authorized $13.00)"
+    },
+    {
+      "utc": "2026-10-18T13:42:15+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA A100-SXM4-80GB $1.79/h, stock Medium"
+    },
+    {
+      "utc": "2026-10-18T13:42:16+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $106.9973 against the $30.0000 this session must be able to fund"
+    },
+    {
+      "utc": "2026-10-18T13:42:16+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 0 relay inputs (), 2 local assets"
+    },
+    {
+      "utc": "2026-10-18T13:42:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 422 min = $12.59"
+    },
+    {
+      "utc": "2026-10-18T13:42:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created wm75q9fix8g15w at $1.79/h"
+    },
+    {
+      "utc": "2026-10-18T13:43:09+00:00",
+      "elapsed_min": 0.88,
+      "msg": "  starting (60s) \u2014 $0.03"
+    },
+    {
+      "utc": "2026-10-18T13:44:12+00:00",
+      "elapsed_min": 1.92,
+      "msg": "  starting (120s) \u2014 $0.06"
+    },
+    {
+      "utc": "2026-10-18T13:44:33+00:00",
+      "elapsed_min": 2.27,
+      "msg": "TCP 22 at 154.54.102.31:13451 after 2.3 min"
+    },
+    {
+      "utc": "2026-10-18T13:44:36+00:00",
+      "elapsed_min": 2.32,
+      "msg": "draw 1: ssh reachable \u2014 $0.07"
+    },
+    {
+      "utc": "2026-10-18T13:45:34+00:00",
+      "elapsed_min": 3.29,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.16"
+    },
+    {
+      "utc": "2026-10-18T13:45:34+00:00",
+      "elapsed_min": 3.29,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-18T13:46:43+00:00",
+      "elapsed_min": 4.44,
+      "msg": "draw 1: setup complete \u2014 $0.13"
+    },
+    {
+      "utc": "2026-10-18T13:46:50+00:00",
+      "elapsed_min": 4.55,
+      "msg": "driver detached, pid 1222, confirmed by descriptor_probe \u2014 $0.14"
+    },
+    {
+      "utc": "2026-10-18T13:49:04+00:00",
+      "elapsed_min": 6.79,
+      "msg": "  2026-10-18T13:46:46Z MARKER:DRIVER_START:pilot_root \u2014 $0.20"
+    },
+    {
+      "utc": "2026-10-18T17:25:43+00:00",
+      "elapsed_min": 223.44,
+      "msg": "  2026-10-18T17:25:08Z MARKER:ALL_DONE \u2014 $6.67"
+    },
+    {
+      "utc": "2026-10-18T17:25:43+00:00",
+      "elapsed_min": 223.44,
+      "msg": "polling ended: ALL_DONE \u2014 $6.67"
+    },
+    {
+      "utc": "2026-10-18T17:27:39+00:00",
+      "elapsed_min": 225.37,
+      "msg": "  manifest rc=0\n15 file(s) across 5 class(es) -> /workspace/manifest.json\n  final_required: 15 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-10-18T17:29:49+00:00",
+      "elapsed_min": 227.53,
+      "msg": "unit pilot_root: SECURED"
+    },
+    {
+      "utc": "2026-10-18T17:29:56+00:00",
+      "elapsed_min": 227.65,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-10-18T17:29:56+00:00",
+      "elapsed_min": 227.65,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-10-18T17:30:07+00:00",
+      "elapsed_min": 227.83,
+      "msg": "pod deleted \u2014 227.8 min, $6.80; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.stage0.calibration_volume.authorization/v1",
+    "authorization_id": "stage0.calibration_volume.search.pilot_20261018_134131",
+    "version": 1,
+    "granted_utc": "2026-10-18T13:41:31+00:00",
+    "granted_by": "maintainer (task instruction of 2026-10-18 to the executing agent session)",
+    "plan_id": "stage0.calibration_volume.pilot_search",
+    "session_plan_hash": "ab03253437cfe0fbefb52be6112ed00f84b44fea2580c515a46fa6b63598ff07",
+    "expected_usd": 9.3766,
+    "hard_cap_usd": 13.0,
+    "authorized_stages": [],
+    "stage_conditions": {
+      "phase": "pilot",
+      "plan": "pilot_search",
+      "envelope": "{\"phase\": \"pilot\", \"phase_ceiling_usd\": 15.0, \"phase_spent_usd\": 1.2469, \"phase_remaining_usd\": 13.7531, \"programme_ceiling_usd\": 92.0, \"programme_spent_usd\": 6.4941, \"programme_remaining_usd\": 85.5059, \"per_session_cap_usd\": 30.0}"
+    },
+    "scope_note": "root-level selection-stability pilot (exploratory H1/H3), attempt 2 on an 80 GB card after the L40S OOM of pilot_20261018_122808",
+    "authorizes_battery": false,
+    "authorizes_search": true,
+    "authorizes_probes": false,
+    "authorized_session_commit": null,
+    "harness_source_digest": "d7ada1f712f18e30092779b46ce64a27dc771593831e39bfaced121e02d7d9e6",
+    "harness_source_files": [
+      "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "scripts/shared/pod/watchdog.py",
+      "scripts/shared/pod/collect_artifacts.py",
+      "scripts/stages/stage-0/calibration_volume/governance.py",
+      "scripts/stages/stage-0/calibration_volume/launch.py",
+      "scripts/stages/stage-0/calibration_volume/search_driver.py",
+      "scripts/stages/stage-0/calibration_volume/search_session.py",
+      "scripts/shared/forward_baseline.py",
+      "src/aadistill/initialization/baseline.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/metrics.py"
+    ],
+    "per_launch_hard_usd": 13.0,
+    "provenance_commit": "c591ac1daeafc4961b8e9aaa7f8d1f228ec1bc03",
+    "enforcement": "the launcher refuses a pod unless this artifact is bound to the session plan and the harness on disk, and its hard cap covers the planned hard threshold; one artifact funds one run",
+    "authorization_sha256": "029c6ed030592ff08e0482de135b24e5d119317e336cfe8df279d8aff796b1e9"
+  },
+  "session_plan_hash": "ab03253437cfe0fbefb52be6112ed00f84b44fea2580c515a46fa6b63598ff07",
+  "harness_source_digest": "d7ada1f712f18e30092779b46ce64a27dc771593831e39bfaced121e02d7d9e6",
+  "harness_source_files": [
+    "scripts/shared/forward_baseline.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/collect_artifacts.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/stages/stage-0/calibration_volume/governance.py",
+    "scripts/stages/stage-0/calibration_volume/launch.py",
+    "scripts/stages/stage-0/calibration_volume/search_driver.py",
+    "scripts/stages/stage-0/calibration_volume/search_session.py",
+    "src/aadistill/initialization/baseline.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/planning/search.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.79,
+    "authorized_usd": 13.0,
+    "expected_minutes": 314.3,
+    "soft_stop_minutes": 407.16,
+    "artifact_recovery_reserve_minutes": 15.0,
+    "hard_terminate_minutes": 422.16,
+    "step_time": {
+      "seconds": 1.0,
+      "source": "unused: no training in this session (arms=0)",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 20.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 10.0
+      },
+      {
+        "name": "search_pilot_root",
+        "minutes": 284.3
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "operator_overrun",
+        "minutes": 30.0
+      }
+    ],
+    "notes": [
+      "below-floor step time accepted: 1.0 s/step vs floor 4.15 \u2014 no training steps; every phase is priced below"
+    ],
+    "soft_stop_reserve_minutes": 30.0,
+    "expected_usd": 9.3766,
+    "soft_stop_usd": 12.1469,
+    "artifact_recovery_reserve_usd": 0.4475,
+    "hard_terminate_usd": 12.5944
+  },
+  "quoted_price_per_hour": 1.79,
+  "stock_status": "Medium",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 106.9973346836,
+    "current_spend_per_hr": 0.0,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 30.0,
+    "ok": true,
+    "why": "the provider account holds $106.9973 against the $30.0000 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "precheck": {
+    "relay_needed": [],
+    "relay_missing": [],
+    "relay_repos": {},
+    "relay_repo_files_listed": {},
+    "local_assets": [
+      "artifacts/stages/stage-1/state_eval_v1",
+      "artifacts/stages/stage-0/calibration_volume/profiles_pilot_v1"
+    ],
+    "local_missing": []
+  },
+  "pod_id": "wm75q9fix8g15w",
+  "actual_price_per_hour": 1.79,
+  "terminate_after_utc": "2026-10-18T20:44:25Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/stage0_calvol/pilot_20261018_134131/watchdog_wm75q9fix8g15w.jsonl"
+  ],
+  "watchdog_owns_pod": "wm75q9fix8g15w",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "580.126.16"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.16"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_b1f3a020.bundle",
+    "SESSION_ASSETS": "state_eval_v1:artifacts/stages/stage-1,profiles_pilot_v1:artifacts/stages/stage-0/calibration_volume",
+    "SESSION_AUTH_PATH": "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/governance/authorization.json",
+    "SESSION_COMMIT": "b1f3a02062d7b5e5fc7804c7822e8c30fe6e6ee1",
+    "SESSION_KIND": "stage0_calvol",
+    "SESSION_PLAN_HASH": "ab03253437cfe0fbefb52be6112ed00f84b44fea2580c515a46fa6b63598ff07",
+    "SESSION_RELAY_INPUTS": "[]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV TEACHER_READY SETUP_DONE",
+    "SESSION_STATUS": "/workspace/stage0_calvol_search.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "600",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "stage0_calvol_search_driver",
+    "pid": 1222,
+    "workdir": "/workspace/aad",
+    "command": "FAIL=0; PYTHONPATH=/workspace/aad/src:/workspace/aad/scripts /opt/train/bin/python /workspace/aad/scripts/stages/stage-0/calibration_volume/search_driver.py --treatment pilot_root --run-id pilot_20261018_134131 --auth '/workspace/aad/logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/governance/authorization.json' --plan pilot_search --treatments-doc configs/stages/stage-0/calibration_volume/pilot_search_session.json --status '/workspace/stage0_calvol_search.status' --max-depth 1 && mkdir -p /workspace/aad/artifacts/audit/stage0_calvol_search/records && sha256sum /workspace/aad/artifacts/audit/stage0_calvol_search/pilot_root/search_record.json | cut -d' ' -f1 > /workspace/aad/artifacts/audit/stage0_calvol_search/records/pilot_root.done || FAIL=1; printf '{\"failed\": %s}\\n' $FAIL > /workspace/aad/artifacts/audit/stage0_calvol_search/search_session.json; if [ $FAIL = 0 ]; then M=ALL_DONE; else M=RUN_FAILED; fi; echo \"$(date -u +%FT%TZ) MARKER:$M\" >> '/workspace/stage0_calvol_search.status'",
+    "log_path": "/workspace/stage0_calvol_search_run.log",
+    "status_path": "/workspace/stage0_calvol_search.status",
+    "pid_path": "/workspace/jobs/stage0_calvol_search_driver.pid",
+    "descriptor_path": "/workspace/jobs/stage0_calvol_search_driver.job.json",
+    "exit_path": "/workspace/jobs/stage0_calvol_search_driver.exit",
+    "started_utc": "2026-10-18T13:46:46Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "units_secured": {
+    "pilot_root": {
+      "ok": true,
+      "sha256": "ddc877d0eb624cea84682f4f85e8394a6a05d26fc359c2e235661963686c848c",
+      "rc": {
+        "search_record.json": 0,
+        "structure.json": 0,
+        "stage1_selection.json": 1,
+        "search/states.jsonl": 0,
+        "search/telemetry.jsonl": 0,
+        "width_projection_12a9a771f6966205cfdade26efce84ff.safetensors": 0,
+        "width_projection_1930eabd9a325b1584c8f240394c91f4.safetensors": 0,
+        "width_projection_1a2fc7418071099d1feee80c9bed1ac1.safetensors": 0,
+        "width_projection_9e11406f0575e2cced6ac29b6afd1f21.safetensors": 0,
+        "width_projection_be2afe21b450aae183090b3e041d57f3.safetensors": 0,
+        "width_projection_cdcb21d862f872b8136b1abd64b15460.safetensors": 0,
+        "width_projection_d3dd2114157fb594b18766cd57436c3f.safetensors": 0,
+        "width_projection_d6a123eb132f4978ca4b17a37fb4388c.safetensors": 0,
+        "width_projection_f14e6e2b88746c7e74641f39ba953010.safetensors": 0
+      }
+    }
+  },
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "fetched_reports": [
+    "search_session.json"
+  ],
+  "checkpoints_fetched": [],
+  "required_products_secured": {
+    "ok": true,
+    "why": "1 finished unit(s) secured off-pod"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 15,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.79,
+    "elapsed_minutes": 227.83,
+    "actual_usd": 6.797,
+    "authorized_usd": 13.0,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-18T17:30:07+00:00"
+}

@@ -1,0 +1,32 @@
+[09:24:28] budget: expected 180 min $5.37 · soft $7.31 · hard $7.76 (authorized $9.00)
+[09:24:29] NVIDIA A100-SXM4-80GB $1.79/h, stock Medium
+[09:25:05] budget: expected 180 min $5.37 · soft $7.31 · hard $7.76 (authorized $9.00)
+[09:25:05] NVIDIA A100-SXM4-80GB $1.79/h, stock Medium
+[09:25:06] account funds OK: the provider account holds $113.4773 against the $30.0000 this session must be able to fund
+[09:25:07] precheck OK: 18 relay inputs (18 from AlphaAvatar/aadistill-artifacts), 0 local assets
+[09:25:08] watchdog detached — hard 260 min = $7.76
+[09:25:08] created cn822yviydzw8l at $1.79/h
+[09:26:01]   starting (60s) — $0.03
+[09:26:43] TCP 22 at 154.54.102.46:18026 after 1.6 min
+[09:26:46] draw 1: ssh reachable — $0.05
+[09:27:04] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.16
+[09:27:04] draw 1: running setup
+[09:29:23] draw 1: setup complete — $0.13
+[09:29:29] driver detached, pid 2174, confirmed by descriptor_probe — $0.13
+[09:31:42]   2026-10-18T09:29:26Z MARKER:CONTRACT_OK — $0.20
+[09:46:01]   2026-10-18T09:45:39Z MARKER:RUN_OK:ctl_r0860k_sa_dev — $0.62
+[09:46:28] unit ctl_r0860k_sa_dev: SECURED
+[10:07:56]   2026-10-18T10:05:52Z MARKER:RUN_OK:ctl_r0860k_sb_dev — $1.28
+[10:08:22] unit ctl_r0860k_sb_dev: SECURED
+[10:25:04]   2026-10-18T10:23:16Z MARKER:RUN_OK:e1_r2960k_sa_pca_dev — $1.79
+[10:25:30] unit e1_r2960k_sa_pca_dev: SECURED
+[11:22:52]   2026-10-18T11:21:55Z MARKER:RUN_FAILED — $3.51
+[11:22:52] every finished unit is secured off-pod before teardown
+[11:22:52] polling ended: RUN_FAILED — $3.51
+[11:24:09]   manifest rc=0
+26 file(s) across 3 class(es) -> /workspace/manifest.json
+  final_required: 26 · mutable_snapshot: 0 · final_streams_quiescent: True
+[11:25:08] unit teacher_dev: SECURED
+[11:25:15] teardown gate: allowed=True failed=training_complete
+[11:25:15] deleting pod (gate passed after RUN_FAILED)
+[11:25:26] pod deleted — 120.3 min, $3.59; provider confirms gone: True

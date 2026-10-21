@@ -1,0 +1,459 @@
+{
+ "schema": "aadistill.stage0.task_set/v1",
+ "role": "dev",
+ "version": 1,
+ "created_utc": "2026-10-18T09:04:49+00:00",
+ "command": "scripts/stages/stage-0/calibration_volume/build_task_sets.py --role dev --per-cell 16 --version 1 --note development set: difficulty calibration and variance estimation; never the formal endpoint",
+ "note": "development set: difficulty calibration and variance estimation; never the formal endpoint",
+ "file": "data/stages/stage-0/calibration_volume/tasks/dev_v1.jsonl",
+ "sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+ "content_ids_sha256": "32e7a569a20fb5b172ad5d82604e5d0d7e3f5747bedc996d5738ba3519872aef",
+ "per_cell": 16,
+ "per_cell_interactive": 16,
+ "seed_range": [
+  0,
+  1000000
+ ],
+ "split_salt": "stage0.calibration_volume.family_split/v1",
+ "cal_fraction": 0.45,
+ "eval_only_generators": [
+  "code_breaker@v1",
+  "counterfactual_arith@v1",
+  "graph_paths@v1",
+  "letter_analogy@v1",
+  "sequence_induction@v1"
+ ],
+ "family_split": {
+  "list_induction@v1": {
+   "axis": "inductive_rule_discovery",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "list.append_sum",
+    "list.dedupe",
+    "list.duplicate_each",
+    "list.keep_even",
+    "list.min",
+    "list.mod_k",
+    "list.mul_k",
+    "list.pairwise_sums",
+    "list.sort_asc",
+    "list.square",
+    "list.swap_ends"
+   ],
+   "evaluation": [
+    "list.add_k",
+    "list.count_even",
+    "list.cumsum",
+    "list.drop_first",
+    "list.keep_gt",
+    "list.keep_odd",
+    "list.length",
+    "list.max",
+    "list.prepend_length",
+    "list.reverse",
+    "list.rotate_left",
+    "list.sort_desc",
+    "list.sum",
+    "list.take_first"
+   ]
+  },
+  "string_induction@v1": {
+   "axis": "inductive_rule_discovery",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "str.append_first",
+    "str.caesar",
+    "str.double_last",
+    "str.duplicate_each",
+    "str.keep_even_positions",
+    "str.mirror",
+    "str.sort_letters"
+   ],
+   "evaluation": [
+    "str.caesar_back",
+    "str.drop_last",
+    "str.first_k",
+    "str.remove_vowels",
+    "str.reverse",
+    "str.rotate_left",
+    "str.swap_ends",
+    "str.vowel_to_x",
+    "str.wrap_first"
+   ]
+  },
+  "sequence_induction@v1": {
+   "axis": "inductive_rule_discovery",
+   "interactive": false,
+   "eval_only_generator": true,
+   "calibration": [],
+   "evaluation": [
+    "seq.affine_recurrence",
+    "seq.alternating_steps",
+    "seq.arithmetic",
+    "seq.fibonacci_like",
+    "seq.geometric",
+    "seq.interleaved",
+    "seq.quadratic"
+   ]
+  },
+  "defined_ops@v1": {
+   "axis": "compositional_generalization",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "comp.chain3",
+    "comp.conditional_chain"
+   ],
+   "evaluation": [
+    "comp.chain2",
+    "comp.chain4",
+    "comp.conditional",
+    "comp.repeat"
+   ]
+  },
+  "scan_language@v1": {
+   "axis": "compositional_generalization",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "scan.rev_sur",
+    "scan.seq_rev",
+    "scan.sur_sur"
+   ],
+   "evaluation": [
+    "scan.rev_rev",
+    "scan.rev_seq",
+    "scan.seq_sur",
+    "scan.sur_rev",
+    "scan.sur_seq"
+   ]
+  },
+  "counterfactual_arith@v1": {
+   "axis": "compositional_generalization",
+   "interactive": false,
+   "eval_only_generator": true,
+   "calibration": [],
+   "evaluation": [
+    "cf.absdiff",
+    "cf.affine",
+    "cf.affine_minus",
+    "cf.concat",
+    "cf.min_plus",
+    "cf.product_plus",
+    "cf.square_sum"
+   ]
+  },
+  "ordering@v1": {
+   "axis": "task_contained_deduction",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "order.race"
+   ],
+   "evaluation": [
+    "order.ages",
+    "order.seating",
+    "order.taller"
+   ]
+  },
+  "entity_tracking@v1": {
+   "axis": "task_contained_deduction",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "track.move",
+    "track.move_remove"
+   ],
+   "evaluation": [
+    "track.add_remove",
+    "track.all",
+    "track.move_swap",
+    "track.swap"
+   ]
+  },
+  "knights_knaves@v1": {
+   "axis": "task_contained_deduction",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "kk.counting"
+   ],
+   "evaluation": [
+    "kk.identity",
+    "kk.mixed",
+    "kk.same_type"
+   ]
+  },
+  "graph_paths@v1": {
+   "axis": "task_contained_deduction",
+   "interactive": false,
+   "eval_only_generator": true,
+   "calibration": [],
+   "evaluation": [
+    "graph.reach_count",
+    "graph.shortest",
+    "graph.unreachable"
+   ]
+  },
+  "letter_analogy@v1": {
+   "axis": "abstract_analogical",
+   "interactive": false,
+   "eval_only_generator": true,
+   "calibration": [],
+   "evaluation": [
+    "letter.double_all",
+    "letter.double_last",
+    "letter.extend_run",
+    "letter.mirror_first",
+    "letter.pred_first",
+    "letter.reverse",
+    "letter.shrink_run",
+    "letter.succ_all",
+    "letter.succ_last",
+    "letter.swap_halves"
+   ]
+  },
+  "grid_transform@v1": {
+   "axis": "abstract_analogical",
+   "interactive": false,
+   "eval_only_generator": false,
+   "calibration": [
+    "grid.fill_rows",
+    "grid.flip_h",
+    "grid.flip_v",
+    "grid.rotate_ccw",
+    "grid.rotate_cw"
+   ],
+   "evaluation": [
+    "grid.border",
+    "grid.count_cells",
+    "grid.gravity_down",
+    "grid.mirror_lr",
+    "grid.recolor",
+    "grid.shift_right",
+    "grid.transpose"
+   ]
+  },
+  "probe_function@v1": {
+   "axis": "interactive_adaptation",
+   "interactive": true,
+   "eval_only_generator": false,
+   "calibration": [
+    "probe.digit_sum",
+    "probe.threshold"
+   ],
+   "evaluation": [
+    "probe.affine",
+    "probe.floor_div",
+    "probe.mod_scale",
+    "probe.quadratic"
+   ]
+  },
+  "hidden_buttons@v1": {
+   "axis": "interactive_adaptation",
+   "interactive": true,
+   "eval_only_generator": false,
+   "calibration": [
+    "act.reverse"
+   ],
+   "evaluation": [
+    "act.additive",
+    "act.modular",
+    "act.multiply"
+   ]
+  },
+  "code_breaker@v1": {
+   "axis": "interactive_adaptation",
+   "interactive": true,
+   "eval_only_generator": true,
+   "calibration": [],
+   "evaluation": [
+    "code.exact_only",
+    "code.pegs",
+    "code.position_hints"
+   ]
+  }
+ },
+ "generator_source": {
+  "digest": "dcd602a2098160e0f4a9fbe02b0d2ca1b1de1542c5962573ef5786ec20b8219d",
+  "files": [
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/__init__.py",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/analogy.py",
+    "sha256": "b6fc482798cf074557ffe575fe65a5b7699f313e27126156e6e3df93ad0ff52e"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/common.py",
+    "sha256": "56d65f560ff5b020a6d92aac769129bb4a7c755d96c14a32cabc403e20c43b64"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/composition.py",
+    "sha256": "b246a2f0f4f052806b32678275a1a244cdacbfc1c3b3017dc41d3b6a8d8fdcd2"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/deduction.py",
+    "sha256": "0536a4280035feabd91865901c26d9e5f56d1e77fe25c6b8e50fba3f1e0ec90f"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/induction.py",
+    "sha256": "0085a394c4efc9376410e4d22a8406f4dedb4b236457997934e8f8382be366ed"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/interactive.py",
+    "sha256": "99b9f6f571eb37647bba45dda1838e99865ff6a4192107cc1c636c9a408c2e6e"
+   },
+   {
+    "path": "scripts/stages/stage-0/calibration_volume/tasks/registry.py",
+    "sha256": "64d9f0e87cbb267c3778728a29217680d05b1a9551b0377ef7d86ab0844b145f"
+   }
+  ]
+ },
+ "counts": {
+  "tasks": 720,
+  "by_axis": {
+   "inductive_rule_discovery": 144,
+   "compositional_generalization": 144,
+   "task_contained_deduction": 192,
+   "abstract_analogical": 96,
+   "interactive_adaptation": 144
+  },
+  "by_generator": {
+   "list_induction@v1": 48,
+   "string_induction@v1": 48,
+   "sequence_induction@v1": 48,
+   "defined_ops@v1": 48,
+   "scan_language@v1": 48,
+   "counterfactual_arith@v1": 48,
+   "ordering@v1": 48,
+   "entity_tracking@v1": 48,
+   "knights_knaves@v1": 48,
+   "graph_paths@v1": 48,
+   "letter_analogy@v1": 48,
+   "grid_transform@v1": 48,
+   "probe_function@v1": 48,
+   "hidden_buttons@v1": 48,
+   "code_breaker@v1": 48
+  },
+  "by_difficulty": {
+   "L1": 240,
+   "L2": 240,
+   "L3": 240
+  },
+  "by_family": {
+   "list_induction@v1/list.add_k": 6,
+   "list_induction@v1/list.count_even": 6,
+   "list_induction@v1/list.cumsum": 3,
+   "list_induction@v1/list.drop_first": 3,
+   "list_induction@v1/list.keep_gt": 3,
+   "list_induction@v1/list.keep_odd": 3,
+   "list_induction@v1/list.length": 3,
+   "list_induction@v1/list.max": 3,
+   "list_induction@v1/list.prepend_length": 3,
+   "list_induction@v1/list.reverse": 3,
+   "list_induction@v1/list.rotate_left": 3,
+   "list_induction@v1/list.sort_desc": 3,
+   "list_induction@v1/list.sum": 3,
+   "list_induction@v1/list.take_first": 3,
+   "string_induction@v1/str.caesar_back": 6,
+   "string_induction@v1/str.drop_last": 6,
+   "string_induction@v1/str.first_k": 6,
+   "string_induction@v1/str.remove_vowels": 6,
+   "string_induction@v1/str.reverse": 6,
+   "string_induction@v1/str.rotate_left": 6,
+   "string_induction@v1/str.swap_ends": 6,
+   "string_induction@v1/str.vowel_to_x": 3,
+   "string_induction@v1/str.wrap_first": 3,
+   "sequence_induction@v1/seq.affine_recurrence": 8,
+   "sequence_induction@v1/seq.alternating_steps": 9,
+   "sequence_induction@v1/seq.arithmetic": 7,
+   "sequence_induction@v1/seq.fibonacci_like": 7,
+   "sequence_induction@v1/seq.geometric": 5,
+   "sequence_induction@v1/seq.interleaved": 6,
+   "sequence_induction@v1/seq.quadratic": 6,
+   "defined_ops@v1/comp.chain2": 12,
+   "defined_ops@v1/comp.chain4": 12,
+   "defined_ops@v1/comp.conditional": 12,
+   "defined_ops@v1/comp.repeat": 12,
+   "scan_language@v1/scan.rev_rev": 12,
+   "scan_language@v1/scan.rev_seq": 9,
+   "scan_language@v1/scan.seq_sur": 9,
+   "scan_language@v1/scan.sur_rev": 9,
+   "scan_language@v1/scan.sur_seq": 9,
+   "counterfactual_arith@v1/cf.absdiff": 9,
+   "counterfactual_arith@v1/cf.affine": 9,
+   "counterfactual_arith@v1/cf.affine_minus": 6,
+   "counterfactual_arith@v1/cf.concat": 6,
+   "counterfactual_arith@v1/cf.min_plus": 6,
+   "counterfactual_arith@v1/cf.product_plus": 6,
+   "counterfactual_arith@v1/cf.square_sum": 6,
+   "ordering@v1/order.ages": 18,
+   "ordering@v1/order.seating": 15,
+   "ordering@v1/order.taller": 15,
+   "entity_tracking@v1/track.add_remove": 12,
+   "entity_tracking@v1/track.all": 12,
+   "entity_tracking@v1/track.move_swap": 12,
+   "entity_tracking@v1/track.swap": 12,
+   "knights_knaves@v1/kk.identity": 18,
+   "knights_knaves@v1/kk.mixed": 15,
+   "knights_knaves@v1/kk.same_type": 15,
+   "graph_paths@v1/graph.reach_count": 18,
+   "graph_paths@v1/graph.shortest": 15,
+   "graph_paths@v1/graph.unreachable": 15,
+   "letter_analogy@v1/letter.double_all": 6,
+   "letter_analogy@v1/letter.double_last": 6,
+   "letter_analogy@v1/letter.extend_run": 6,
+   "letter_analogy@v1/letter.mirror_first": 6,
+   "letter_analogy@v1/letter.pred_first": 6,
+   "letter_analogy@v1/letter.reverse": 6,
+   "letter_analogy@v1/letter.shrink_run": 3,
+   "letter_analogy@v1/letter.succ_all": 3,
+   "letter_analogy@v1/letter.succ_last": 3,
+   "letter_analogy@v1/letter.swap_halves": 3,
+   "grid_transform@v1/grid.border": 9,
+   "grid_transform@v1/grid.count_cells": 9,
+   "grid_transform@v1/grid.gravity_down": 6,
+   "grid_transform@v1/grid.mirror_lr": 6,
+   "grid_transform@v1/grid.recolor": 6,
+   "grid_transform@v1/grid.shift_right": 6,
+   "grid_transform@v1/grid.transpose": 6,
+   "probe_function@v1/probe.affine": 12,
+   "probe_function@v1/probe.floor_div": 12,
+   "probe_function@v1/probe.mod_scale": 12,
+   "probe_function@v1/probe.quadratic": 12,
+   "hidden_buttons@v1/act.additive": 18,
+   "hidden_buttons@v1/act.modular": 15,
+   "hidden_buttons@v1/act.multiply": 15,
+   "code_breaker@v1/code.exact_only": 18,
+   "code_breaker@v1/code.pegs": 15,
+   "code_breaker@v1/code.position_hints": 15
+  },
+  "interactive": 144
+ },
+ "isolation": {
+  "checked": [],
+  "overlaps": {
+   "roles": {
+    "dev": {
+     "family": 86,
+     "content": 720,
+     "prompt": 576,
+     "interactive_opening": 105
+    }
+   },
+   "keys": [
+    "family",
+    "content",
+    "prompt",
+    "interactive_opening"
+   ],
+   "pairs": []
+  }
+ },
+ "license": "project-generated procedural tasks; no external dataset, no ARC-AGI material",
+ "authorizes": "nothing"
+}

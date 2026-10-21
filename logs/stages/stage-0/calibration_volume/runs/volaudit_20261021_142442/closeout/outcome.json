@@ -1,0 +1,15 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "volaudit_20261021_142442",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-21T14:24:44+00:00",
+ "status": "NO_RESOURCE_CREATED",
+ "outcome": "Pre-retirement listing of volume wn3avnine2 (US-TX-3): the one create call for a CPU pod was refused, no capacity ('There are no longer any instances available'). No provider resource was created and nothing was listed.",
+ "provider_resource_created": false,
+ "money": {
+  "all_in_usd": 0.0,
+  "_basis": "no provider resource existed"
+ }
+}

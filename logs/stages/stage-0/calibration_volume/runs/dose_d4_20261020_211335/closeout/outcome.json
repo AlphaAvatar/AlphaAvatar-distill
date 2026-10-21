@@ -1,0 +1,59 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "dose_d4_20261020_211335",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-20T21:22:50+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": "RUN_FAILED",
+ "passed": false,
+ "outcome": "Dose d4 resume attempt 2: FAILED at V_room before any measurement work, not by the science. V_release OK: d1's and d2's Top-4 (8 states, 9.54 GB) verified against the relay and deleted, tombstones written after the deletion (the 2c1afe05 repair worked). V_room then measured 10.1 GB free (sold 300e9 less du 289.92e9; two stale .partial files removed) against the plan's 12 GB and refused: the finalist states were 1.19 GB each, not the ~3 GB estimated. Nothing of the search, recovery or evaluation began. Repair: retire d1's and d2's recovery optimizer states (trainer_state.pt, 3.52 GB each; COMPLETE doses, never trained again; AGENTS.md 2.5) and require the measured worst case, 16 GB. Next: a fresh resume run of the SAME dose under the preregistered retry_policy.",
+ "provider_resource_created": true,
+ "pod_id": "8wcyznlfbrd3uc",
+ "provider_confirms_gone": true,
+ "final_pod_state": {
+  "exists": false,
+  "desired_status": "TERMINATED",
+  "billing": false
+ },
+ "money": {
+  "all_in_usd": 0.2513,
+  "gpu_usd": 0.2438,
+  "disk_usd": 0.0075,
+  "elapsed_minutes": 8.17,
+  "price_per_hour": 1.79,
+  "authorized_usd": 9.0,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.10/GB-month over the elapsed minutes, ceiled to the 4-decimal quantum"
+ },
+ "session_record_sha256": "180907444c87489f8bfd20106b1295aff1c63de1561f46fe0950812d9a7e1bf7",
+ "units": {
+  "extracted": {
+   "audit/stage0_calvol_dose/d4/dose_record.json": {
+    "sha256": "02005962636e74f91d0c3d1ba566b479fbee3896f2433e6ab5eddb4cb921dbf2",
+    "bytes": 2383
+   },
+   "audit/stage0_calvol_dose/d4/released_finalists_d1.json": {
+    "sha256": "86b0b5482676bc1801a9f3d331a793c385bfb1e5d0be8e174cc2abcfd44736a3",
+    "bytes": 2756
+   },
+   "audit/stage0_calvol_dose/d4/released_finalists_d2.json": {
+    "sha256": "44d4411d403474011c5ab8c91ff5985582cee4eb8f7537f078ec9cc1df99bd4c",
+    "bytes": 2804
+   },
+   "audit/stage0_calvol_dose/d4/sync.log": {
+    "sha256": "6c70755e62f41e6eae82b60b2a7231fc46ba67fd25f7997bfc75050d837f5681",
+    "bytes": 106
+   },
+   "audit/stage0_calvol_dose/session/setup.log": {
+    "sha256": "f1d8440fb0b5b79f218e92494b758da9361ffe2991d12c66a4b252c08cc201bb",
+    "bytes": 25195
+   },
+   "audit/stage0_calvol_dose/session/stage0_calvol_dose_run.log": {
+    "sha256": "140f78cd582046d0ad5219b375ec0cab24d2601c982254ce98febb584259b573",
+    "bytes": 179
+   }
+  }
+ },
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/dose_d4_20261020_211335"
+}

@@ -830,6 +830,92 @@ def scientific_artifacts(entries: list[dict]) -> dict:
             "_identity_survives_zero_copies": (
                 "derived from the family manifest, not from the bytes"),
         }
+    out.update(stage0_calibration_volume(attach))
+    return out
+
+
+STAGE0_CALVOL_RUNS = "logs/stages/stage-0/calibration_volume/runs"
+
+
+def stage0_calibration_volume(attach) -> dict[str, dict]:
+    """The Stage-0 volume study's initialization candidates and its recovered
+    students, from the records that own them.
+
+    Candidates: each dose's distinct Top-4, from the finalists manifests that
+    pinned them on the relay. They are the initialization assets a later stage
+    may start from, so they are PROTECTED here. Students: one row per distinct
+    recovered model (`recovery_products.json`); their weights were retired with
+    the study's network volumes and the tombstone inventory names them.
+    """
+    runs = REPO_ROOT / STAGE0_CALVOL_RUNS
+    if not runs.is_dir():
+        return {}
+    out: dict[str, dict] = {}
+    for man in sorted(runs.glob("*/evidence/*/finalists/finalists_manifest.json")):
+        doc = json.loads(man.read_text())
+        relay = {(f["treatment"], f["state_id"]): f["path"]
+                 for f in doc["files"] if f["name"] == "model.safetensors"}
+        for dose, cands in doc["candidates"].items():
+            for c in cands:
+                key = f"stage0_calvol_{dose}_top{c['rank']}_{c['state_id'][:8]}"
+                row = {
+                    "artifact_id": key,
+                    "role": (f"Stage-0 volume study, dose {dose}: rank {c['rank']} of "
+                             "the distinct Top-4 of its D1 full search "
+                             "(initialization candidate)"),
+                    "identity": {k: c[k] for k in (
+                        "state_id", "path", "checkpoint_sha256", "artifact_digest",
+                        "weights_digest", "num_parameters")},
+                    "identity_owner": man.relative_to(REPO_ROOT).as_posix(),
+                    "creating_run": man.parts[-5],
+                    "relay_copy": relay.get((dose, c["state_id"])),
+                    "retention": "reproducibility_required",
+                    "protected": True,
+                    "consumers": ["Stage-0 Top-4 recovery extension (complete)"],
+                    "open_consumers": [],
+                    "_kept_for": ("the initialization candidates a later stage may "
+                                  "start from; no later consumer is authorized yet"),
+                }
+                out[key] = attach(row, c["checkpoint_sha256"],
+                                  "restore the relay copy (sha256-pinned)")
+    tombs = json.loads((REPO_ROOT / TOMBSTONES_REL).read_text())["tombstones"]
+    retired = {sha: t["canonical_id"] for t in tombs
+               for sha in (t.get("member_sha256") or {}).values()}
+    seen = set()
+    for rec in sorted(runs.glob("*/evidence/**/recovery_products.json")):
+        doc = json.loads(rec.read_text())
+        sha = doc.get("model_sha256")
+        if not sha or sha in seen:
+            continue
+        seen.add(sha)
+        #: The A100 dose records name their candidate `top1_state` and keep the
+        #: seed in the recovery config beside them; the probe records state both.
+        state = doc.get("state_id") or doc["top1_state"]
+        seed = doc.get("seed")
+        if seed is None:
+            seed = json.loads((rec.parent / "recovery_config.json").read_text())["seed"]
+        doc = {**doc, "state_id": state, "seed": seed}
+        key = f"stage0_calvol_student_{state[:8]}_s{seed}"
+        out[key] = {
+            "artifact_id": key,
+            "role": (f"Stage-0 volume study: the recovered student of candidate "
+                     f"{doc['state_id']} at seed {doc['seed']}"),
+            "identity": {"model_sha256": sha, "config_sha256": doc.get("config_sha256"),
+                         "state_id": doc["state_id"], "seed": doc["seed"]},
+            "identity_owner": rec.relative_to(REPO_ROOT).as_posix(),
+            "creating_run": rec.relative_to(runs).parts[0],
+            "retention": "diagnostic",
+            "local_copies": [],
+            "copies": 0,
+            "lifecycle": ("weights_retired_tombstoned" if sha in retired
+                          else "no_local_copy"),
+            "tombstone": ({"record": TOMBSTONES_REL, "canonical_id": retired[sha]}
+                          if sha in retired else None),
+            "reconstruction": ("not bit-for-bit: re-run the frozen recovery recipe "
+                               "on the candidate at the seed"),
+            "consumers": ["design/formal_analysis.json or design/extension_analysis.json "
+                          "(complete; measured on all of eval-set-1)"],
+        }
     return out
 
 

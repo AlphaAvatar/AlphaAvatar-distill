@@ -52,7 +52,7 @@ PACK = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
 SESSIONS = REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
 VAL_STREAM = REPO / "artifacts/stages/stage-3/e7_fineweb_val"
 HOLDOUT = REPO / "data/stages/stage-0/warmup/holdout_v1.jsonl"
-PROBE_PROMPTS = REPO / "data/stages/stage-3/eval_behavior_v0/prompts.jsonl"
+PROBE_PROMPTS = REPO / "data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0/prompts.jsonl"
 
 TEACHER = "Qwen/Qwen3-4B-Thinking-2507"
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
@@ -223,7 +223,7 @@ def stage_step0_probe(args) -> None:
         try:
             run(["scripts/shared/evaluation/eval_behavior.py",
                  "--model", base / "checkpoint",
-                 "--prompts", "data/stages/stage-3/eval_behavior_v0/prompts.jsonl",
+                 "--prompts", "data/eval-set/eval-set-1/stage3_capability_846/eval_behavior_v0/prompts.jsonl",
                  "--max-new-tokens", args.probe_max_new_tokens,
                  "--dtype", "bfloat16", "--out", dest])
         except subprocess.CalledProcessError as exc:

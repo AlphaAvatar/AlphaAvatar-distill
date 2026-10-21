@@ -1,0 +1,496 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.formal_design_proposal/v2",
+ "status": "PROPOSAL -- NOT FROZEN AND NOT A PREREGISTRATION. Amended by the maintainer 2026-10-18 (single draw per dose). The formal phase opens only on plans/volume_preregistration.json; writing it needs the funding decision below.",
+ "supersedes": "formal_design_proposal v1 (three independent resamples per dose), withdrawn by the maintainer's amendment; its record is in git history",
+ "fixed": {
+  "method": "the forward baseline, resolved through shared.forward_baseline (stage1_init.d1_target_aware.scored_v1@v1) -- never edited to save cost",
+  "teacher_and_geometry": "as in configs/stages/stage-0/calibration_volume/pilot_search_session.json",
+  "recovery_recipe": "e1_p1_kd_heavy@0.86M (the D-series fixed recovery)",
+  "recovery_seed": "one, identical for all three doses",
+  "state_evaluation": "state_eval@v1",
+  "evaluation_contract": "data/eval-set/eval-set-1 at its registered identity, every unit and capability reported separately (AGENTS.md P10.3)"
+ },
+ "treatments": {
+  "doses": {
+   "1x": {
+    "target_uesp": 45000
+   },
+   "2x": {
+    "target_uesp": 90000
+   },
+   "4x": {
+    "target_uesp": 180000
+   }
+  },
+  "draws": "ONE nested draw: the 2x set contains the 1x set and the 4x set the 2x set, from one frozen base mixture (the pilot's weights: 0.18 per static primary axis, 0.28 supporting) and its frozen reasoning-heavy variant; no independent resamples",
+  "per_treatment": "one D1 full search (beam width 6, delayed_prune warm-up 1, pareto@v2) with operator order and the profile per operator FREE over the two mixtures at that dose; the committed Top-1 recovered once under the fixed recipe and seed; eval-set-1 measured once",
+  "covariates_recorded_per_dose": [
+   "realized UESP",
+   "tokens",
+   "items and units",
+   "sources and subtypes",
+   "distinct rule families",
+   "distinct generators"
+  ],
+  "covariate_rule": "rule-family diversity rises with dose in the pilot draws (10-12, 15-17, 18-22): any H1/H2 difference is reported as a volume+diversity contrast, never as a pure volume effect",
+  "hardware": "NVIDIA A100-SXM4-80GB: 8,192-token pool items OOM DEPTH on a 44 GiB card"
+ },
+ "claims": {
+  "allowed": "comparisons between these three specific treatments",
+  "not_allowed": [
+   "selection variance or stability (needs resamples; the pilot's root-level resampled measurement remains the only one)",
+   "statistical saturation (H3 is described, never tested)",
+   "a pure volume effect where composition changed with dose"
+  ]
+ },
+ "endpoints": {
+  "H1": "descriptive: the committed Top-1 of each dose -- operator order, per-step profile, and per operator FFN/ATTENTION per-layer Jaccard, DEPTH removed-set Jaccard, WIDTH subspace overlap between doses (2x vs 1x, 4x vs 2x, 4x vs 1x), each beside chance; no stability claim",
+  "H2": "eval-set-1, every unit and capability separately; primary = fluid_reasoning_720 static items pooled over the four static axes and per axis, interactive separately; supporting and guard-rail units reported beside it; stage3_legacy_150 only as in-sample regression",
+  "H3": "the 1x/2x/4x shape of H1 and H2, described"
+ },
+ "statistics": {
+  "sesoi": {
+   "pooled_primary": 0.05,
+   "per_axis": 0.08
+  },
+  "inference": "task-paired contrasts 2x-1x, 4x-2x, 4x-1x with a rule-family cluster bootstrap (10,000 resamples, stratified by axis); the interval covers EVALUATION sampling only -- training-seed and selection variance are unmeasured with one draw and one seed, and every verdict says so",
+  "decision": {
+   "GO": "a contrast's interval lies wholly above +SESOI",
+   "NO-GO": "the interval lies wholly inside (-SESOI, +SESOI)",
+   "INCONCLUSIVE": "neither",
+   "EVALUATION NOT RESOLVABLE": "the resolution gate below fails",
+   "SATURATION": "never declared; a 2x-1x GO with a 4x-2x NO-GO is reported as 'consistent with saturation for these treatments' only"
+  }
+ },
+ "resolution_gate": {
+  "before_any_search": "the reference check (configs/.../resolution_session.json): does fluid_reasoning_720 resolve models in the student's capacity range? result: logs/stages/stage-0/calibration_volume/design/resolution_check.json",
+  "after_the_1x_unit": "the 1x recovered D1-initialized student must answer at least 2% of fluid_reasoning_720's static items; below it H2 is EVALUATION NOT RESOLVABLE (measured on a D1 student, not assumed from PCA students) and the 2x/4x sessions are not launched without a new maintainer decision",
+  "why": "every fixed-recipe student measured so far is PCA-initialized and inside the floor (0/720, 0/720, 10/720); whether a D1-initialized one is has not been measured"
+ },
+ "split_execution_of_4x": {
+  "why": "its hard cap exceeds the $30 per-session cap",
+  "mechanism": [
+   "one network volume (the provider's persistent disk, ONE datacenter) holds the search workdir: the state journal and every materialized state",
+   "part 1 runs the search with the treatment's plan; the watchdog's hard stop or a planned stop ends it; nothing is collected but the journal tail and telemetry",
+   "part 2 attaches the same volume (same datacenter), runs the IDENTICAL plan, config, seed, profiles and baseline resolution; the engine restores every journaled state by content-derived id and hash-checks it from disk, and continues the first unfinished expansion",
+   "identity check: part 2's search config hash, materialization protocol and measurement protocol must equal part 1's; any declined restore (telemetry `restore_declined`) is a stop condition, not a silent re-measure",
+   "the final record carries both sessions' run ids, n_resumed, and the volume id"
+  ],
+  "engineering_not_yet_built": [
+   "search_driver: --workdir on the volume and a resume mode that asserts the identity check above (the engine already resumes)",
+   "launch: attach --network-volume-id / --volume-mount-path (SessionRunner already supports both) and a 4x two-part plan",
+   "a $0 CPU test: stop a tiny-model search mid-tree, resume, and compare the final journal with an uninterrupted run",
+   "creating the volume is a paid provider action inside the formal budget"
+  ],
+  "volume_usd_estimate": 2.8
+ },
+ "durable_artifacts": "each dose's committed Top-1 init and its recovered student (~2.4 GB each) must survive a later failure (P8.2.1): the network volume is the durable store during the study; the HF relay's private quota is full, so archival retention after the study is a maintainer decision",
+ "pricing": {
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "price_per_hour": 1.79,
+  "telemetry": {
+   "path": "artifacts/stages/stage-0/calibration_volume/pilot_20261018_134131/pilot_root/search/telemetry.jsonl",
+   "sha256": "2b8b7c233bf4921bd7c2b2870588310ec07bec96f936d416511f991e08970c76",
+   "measured_on": "NVIDIA A100-SXM4-80GB",
+   "expansions": 31,
+   "overhead_minutes": 1.253
+  },
+  "trajectory": {
+   "path": "logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/search_analysis.json",
+   "sha256": "3a54583e3a775c91ead9f7972f50c66012b692a71550869daa1f7818421c5130"
+  },
+  "recovery_minutes": {
+   "train": 61.5,
+   "source": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/closeout/outcome.json",
+   "eval_set_1": {
+    "fluid_reasoning_720": 19.0,
+    "stage3_capability_846+stage3_legacy_150": 30.0
+   }
+  },
+  "full_search_by_dose": {
+   "1x": {
+    "profile_tokens_max": 81057,
+    "per_impl": {
+     "attention.activation_importance_v1": {
+      "minutes": 16.1,
+      "scale_vs_d2": 1.913,
+      "basis": "measured at this dose (max over its resamples)"
+     },
+     "depth.causal_kl_greedy_v1": {
+      "minutes": 329.6,
+      "scale_vs_d2": 1.467,
+      "basis": "measured per-token rate"
+     },
+     "ffn.activation_importance_v0": {
+      "minutes": 12.6,
+      "scale_vs_d2": 1.247,
+      "basis": "measured at this dose (max over its resamples)"
+     },
+     "width.global_pca_v0": {
+      "minutes": 12.6,
+      "scale_vs_d2": 0.999,
+      "basis": "measured at this dose (max over its resamples)"
+     }
+    },
+    "expansions": 92,
+    "search_minutes": 486.2,
+    "search_minutes_with_overhead_fix": 383.7,
+    "composition_at_this_dose_in_the_pilot_draws": [
+     {
+      "uesp": 64049,
+      "tokens": 75660,
+      "n_items": 31,
+      "n_units": 31,
+      "n_rule_families": 10
+     },
+     {
+      "uesp": 67767,
+      "tokens": 81057,
+      "n_items": 34,
+      "n_units": 34,
+      "n_rule_families": 11
+     },
+     {
+      "uesp": 66986,
+      "tokens": 76418,
+      "n_items": 27,
+      "n_units": 27,
+      "n_rule_families": 12
+     }
+    ]
+   },
+   "2x": {
+    "profile_tokens_max": 133955,
+    "per_impl": {
+     "attention.activation_importance_v1": {
+      "minutes": 15.5,
+      "scale_vs_d2": 1.848,
+      "basis": "measured at this dose (max over its resamples)"
+     },
+     "depth.causal_kl_greedy_v1": {
+      "minutes": 544.8,
+      "scale_vs_d2": 2.425,
+      "basis": "measured per-token rate"
+     },
+     "ffn.activation_importance_v0": {
+      "minutes": 13.9,
+      "scale_vs_d2": 1.375,
+      "basis": "measured at this dose (max over its resamples)"
+     },
+     "width.global_pca_v0": {
+      "minutes": 14.9,
+      "scale_vs_d2": 1.184,
+      "basis": "measured at this dose (max over its resamples)"
+     }
+    },
+    "expansions": 92,
+    "search_minutes": 704.4,
+    "search_minutes_with_overhead_fix": 601.9,
+    "composition_at_this_dose_in_the_pilot_draws": [
+     {
+      "uesp": 111457,
+      "tokens": 133955,
+      "n_items": 56,
+      "n_units": 56,
+      "n_rule_families": 15
+     },
+     {
+      "uesp": 113887,
+      "tokens": 132671,
+      "n_items": 55,
+      "n_units": 55,
+      "n_rule_families": 15
+     },
+     {
+      "uesp": 116817,
+      "tokens": 133879,
+      "n_items": 47,
+      "n_units": 47,
+      "n_rule_families": 17
+     }
+    ]
+   },
+   "4x": {
+    "profile_tokens_max": 240945,
+    "per_impl": {
+     "attention.activation_importance_v1": {
+      "minutes": 17.7,
+      "scale_vs_d2": 2.107,
+      "basis": "measured at this dose (max over its resamples)"
+     },
+     "depth.causal_kl_greedy_v1": {
+      "minutes": 979.9,
+      "scale_vs_d2": 4.361,
+      "basis": "measured per-token rate"
+     },
+     "ffn.activation_importance_v0": {
+      "minutes": 17.2,
+      "scale_vs_d2": 1.704,
+      "basis": "measured at this dose (max over its resamples)"
+     },
+     "width.global_pca_v0": {
+      "minutes": 19.6,
+      "scale_vs_d2": 1.561,
+      "basis": "measured at this dose (max over its resamples)"
+     }
+    },
+    "expansions": 92,
+    "search_minutes": 1149.7,
+    "search_minutes_with_overhead_fix": 1047.3,
+    "composition_at_this_dose_in_the_pilot_draws": [
+     {
+      "uesp": 200139,
+      "tokens": 236895,
+      "n_items": 105,
+      "n_units": 105,
+      "n_rule_families": 20
+     },
+     {
+      "uesp": 199443,
+      "tokens": 234026,
+      "n_items": 97,
+      "n_units": 97,
+      "n_rule_families": 18
+     },
+     {
+      "uesp": 208275,
+      "tokens": 240945,
+      "n_items": 95,
+      "n_units": 95,
+      "n_rule_families": 22
+     }
+    ]
+   }
+  }
+ },
+ "design": {
+  "name": "F_single_draw",
+  "as_measured": {
+   "sessions": [
+    {
+     "session": "1x: search + recovery + eval-set-1 (gate)",
+     "work_minutes": 596.7,
+     "expected_usd": 18.7,
+     "hard_usd": 23.78
+    },
+    {
+     "session": "2x: search",
+     "work_minutes": 704.4,
+     "expected_usd": 21.91,
+     "hard_usd": 27.63
+    },
+    {
+     "session": "4x: search part 1/2 (one search identity, journal on the volume)",
+     "work_minutes": 574.9,
+     "expected_usd": 18.04,
+     "hard_usd": 23.0
+    },
+    {
+     "session": "4x: search part 2/2 (one search identity, journal on the volume)",
+     "work_minutes": 574.9,
+     "expected_usd": 18.04,
+     "hard_usd": 23.0
+    },
+    {
+     "session": "2x+4x: recovery + eval-set-1",
+     "work_minutes": 221.0,
+     "expected_usd": 7.49,
+     "hard_usd": 10.33
+    }
+   ],
+   "network_volume_usd": 2.8,
+   "expected_usd": 86.98,
+   "largest_session_hard_usd": 27.63,
+   "sum_of_hard_caps_usd": 107.74,
+   "sequenced": {
+    "formal_phase_usd": {
+     "envelope_usd": 65.0,
+     "completes": false,
+     "first_unfundable": "4x: search part 2/2 (one search identity, journal on the volume)",
+     "steps": [
+      {
+       "session": "1x: search + recovery + eval-set-1 (gate)",
+       "hard_usd": 23.78,
+       "left_before_usd": 65.0,
+       "fits": true
+      },
+      {
+       "session": "2x: search",
+       "hard_usd": 27.63,
+       "left_before_usd": 46.3,
+       "fits": true
+      },
+      {
+       "session": "4x: search part 1/2 (one search identity, journal on the volume)",
+       "hard_usd": 23.0,
+       "left_before_usd": 24.39,
+       "fits": true
+      },
+      {
+       "session": "4x: search part 2/2 (one search identity, journal on the volume)",
+       "hard_usd": 23.0,
+       "left_before_usd": 6.35,
+       "fits": false
+      }
+     ]
+    },
+    "all_programme_phases_usd": {
+     "envelope_usd": 74.4901,
+     "completes": false,
+     "first_unfundable": "4x: search part 2/2 (one search identity, journal on the volume)",
+     "steps": [
+      {
+       "session": "1x: search + recovery + eval-set-1 (gate)",
+       "hard_usd": 23.78,
+       "left_before_usd": 74.49,
+       "fits": true
+      },
+      {
+       "session": "2x: search",
+       "hard_usd": 27.63,
+       "left_before_usd": 55.79,
+       "fits": true
+      },
+      {
+       "session": "4x: search part 1/2 (one search identity, journal on the volume)",
+       "hard_usd": 23.0,
+       "left_before_usd": 33.88,
+       "fits": true
+      },
+      {
+       "session": "4x: search part 2/2 (one search identity, journal on the volume)",
+       "hard_usd": 23.0,
+       "left_before_usd": 15.84,
+       "fits": false
+      }
+     ]
+    }
+   },
+   "min_sequential_envelope_usd": 89.82,
+   "gap_to_formal_phase_expected_usd": 21.98,
+   "gap_to_programme_expected_usd": 12.49
+  },
+  "with_overhead_fix": {
+   "sessions": [
+    {
+     "session": "1x: search + recovery + eval-set-1 (gate)",
+     "work_minutes": 494.2,
+     "expected_usd": 15.64,
+     "hard_usd": 20.11
+    },
+    {
+     "session": "2x: search",
+     "work_minutes": 601.9,
+     "expected_usd": 18.85,
+     "hard_usd": 23.96
+    },
+    {
+     "session": "4x: search part 1/2 (one search identity, journal on the volume)",
+     "work_minutes": 523.6,
+     "expected_usd": 16.52,
+     "hard_usd": 21.16
+    },
+    {
+     "session": "4x: search part 2/2 (one search identity, journal on the volume)",
+     "work_minutes": 523.6,
+     "expected_usd": 16.52,
+     "hard_usd": 21.16
+    },
+    {
+     "session": "2x+4x: recovery + eval-set-1",
+     "work_minutes": 221.0,
+     "expected_usd": 7.49,
+     "hard_usd": 10.33
+    }
+   ],
+   "network_volume_usd": 2.8,
+   "expected_usd": 77.82,
+   "largest_session_hard_usd": 23.96,
+   "sum_of_hard_caps_usd": 96.72,
+   "sequenced": {
+    "formal_phase_usd": {
+     "envelope_usd": 65.0,
+     "completes": false,
+     "first_unfundable": "4x: search part 2/2 (one search identity, journal on the volume)",
+     "steps": [
+      {
+       "session": "1x: search + recovery + eval-set-1 (gate)",
+       "hard_usd": 20.11,
+       "left_before_usd": 65.0,
+       "fits": true
+      },
+      {
+       "session": "2x: search",
+       "hard_usd": 23.96,
+       "left_before_usd": 49.36,
+       "fits": true
+      },
+      {
+       "session": "4x: search part 1/2 (one search identity, journal on the volume)",
+       "hard_usd": 21.16,
+       "left_before_usd": 30.51,
+       "fits": true
+      },
+      {
+       "session": "4x: search part 2/2 (one search identity, journal on the volume)",
+       "hard_usd": 21.16,
+       "left_before_usd": 13.99,
+       "fits": false
+      }
+     ]
+    },
+    "all_programme_phases_usd": {
+     "envelope_usd": 74.4901,
+     "completes": false,
+     "first_unfundable": "2x+4x: recovery + eval-set-1",
+     "steps": [
+      {
+       "session": "1x: search + recovery + eval-set-1 (gate)",
+       "hard_usd": 20.11,
+       "left_before_usd": 74.49,
+       "fits": true
+      },
+      {
+       "session": "2x: search",
+       "hard_usd": 23.96,
+       "left_before_usd": 58.85,
+       "fits": true
+      },
+      {
+       "session": "4x: search part 1/2 (one search identity, journal on the volume)",
+       "hard_usd": 21.16,
+       "left_before_usd": 40.0,
+       "fits": true
+      },
+      {
+       "session": "4x: search part 2/2 (one search identity, journal on the volume)",
+       "hard_usd": 21.16,
+       "left_before_usd": 23.48,
+       "fits": true
+      },
+      {
+       "session": "2x+4x: recovery + eval-set-1",
+       "hard_usd": 10.33,
+       "left_before_usd": 6.96,
+       "fits": false
+      }
+     ]
+    }
+   },
+   "min_sequential_envelope_usd": 80.66,
+   "gap_to_formal_phase_expected_usd": 12.82,
+   "gap_to_programme_expected_usd": 3.33
+  }
+ },
+ "budget": {
+  "phase_remaining_usd": {
+   "prerequisites": 2.69,
+   "formal_volume": 65.0,
+   "pilot": 6.8001
+  },
+  "programme_remaining_usd": 74.4901,
+  "per_session_cap_usd": 30.0,
+  "reading": "the formal phase alone cannot fund the study in either variant; see design.<variant>.sequenced for where the money runs out when every launch must fit its hard cap"
+ },
+ "authorizes": "nothing"
+}

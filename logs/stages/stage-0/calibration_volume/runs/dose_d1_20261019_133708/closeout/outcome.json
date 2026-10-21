@@ -1,0 +1,217 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "dose_d1_20261019_133708",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "formal_volume",
+ "recorded_utc": "2026-10-19T13:57:41+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": "ALL_DONE",
+ "passed": true,
+ "outcome": "Dose d1 attempt 5 (resume): ALL_DONE -- dose d1 COMPLETE. Search (attempt 2) and recovery (attempt 2) restored from the volume, recovery sha verified; every eval-set-1 generation (fluid from attempt 2; capability and legacy from attempt 4) rescored, none regenerated; report.json over every unit, nothing missing. The legacy generations hold one U+2029, confirming attempt 4's cause. Formal headlines: fluid_reasoning_720 1/714; capability units at or near the floor; legacy (in-sample) 25/150. The eval unit secured off-pod; teardown gate clean.",
+ "provider_resource_created": true,
+ "pod_id": "f92f2w64asvc6h",
+ "provider_confirms_gone": true,
+ "final_pod_state": {
+  "exists": false,
+  "desired_status": "TERMINATED",
+  "billing": false
+ },
+ "money": {
+  "all_in_usd": 0.2727,
+  "gpu_usd": 0.2646,
+  "disk_usd": 0.0081,
+  "elapsed_minutes": 8.87,
+  "price_per_hour": 1.79,
+  "authorized_usd": 18.55,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.10/GB-month over the elapsed minutes, ceiled to the 4-decimal quantum"
+ },
+ "session_record_sha256": "f10dc4898ec5f1efd6f2fe51d5b3df7fd3a84cca0690cd710446496eef4ab2e3",
+ "units": {
+  "d1": {
+   "dose_record.json": {
+    "sha256": "23733be20a7f9cc9c5e7af4aca21f059aaa7bb9f77a988c636e5544ea331529b",
+    "bytes": 3922
+   },
+   "eval/eval_capability.log": {
+    "sha256": "a0d90f9c35ca0725cb1928f51534b31cc240dd3ad84da3b61fce00d2a18978f3",
+    "bytes": 385
+   },
+   "eval/eval_fluid.log": {
+    "sha256": "3ae91019e93e4aff1bd0bc1876cf06d137784ab6538fb309a74fda0aa8f6b1d4",
+    "bytes": 87
+   },
+   "eval/generations/fluid_reasoning_720__dev_v1.jsonl": {
+    "sha256": "b4b80d2dbe840d336651943bcb575c1f6246dafa07926752ae15927595c744b4",
+    "bytes": 10088840
+   },
+   "eval/generations/fluid_reasoning_720__dev_v1.summary.json": {
+    "sha256": "1827a4901d78c21e617871d9b9a243cc72fe004ca462a88737be776903c5109f",
+    "bytes": 2137
+   },
+   "eval/generations/stage3_capability_846__answerability_paired.jsonl": {
+    "sha256": "08d6007511bdfc272a2f0c66e23b1dce1c260f30a101add948e0dfa79c736bf1",
+    "bytes": 365897
+   },
+   "eval/generations/stage3_capability_846__answerability_paired.summary.json": {
+    "sha256": "2f314920092903523a6c00c0a2d1959e165ff1146f8ba776e4e51c463a45a056",
+    "bytes": 5108
+   },
+   "eval/generations/stage3_capability_846__eval_behavior_v0.jsonl": {
+    "sha256": "90aab49a6eddaf2794051043adc1f829de7f9259743981e93a8e57fc878a94a9",
+    "bytes": 266510
+   },
+   "eval/generations/stage3_capability_846__eval_behavior_v0.summary.json": {
+    "sha256": "b581b53eef5b12c4a0cbc1c4261d56bed48be1b8c60dee4ac0515d7388c0498f",
+    "bytes": 7463
+   },
+   "eval/generations/stage3_capability_846__gsm8k.jsonl": {
+    "sha256": "7ed4dc6762e30d5e265e81ce97d0a4e0e21719029baaad5eb4adc0465d475b97",
+    "bytes": 312046
+   },
+   "eval/generations/stage3_capability_846__gsm8k.summary.json": {
+    "sha256": "78fd3d3dfdce89464964e31c9644c299f41f7e126bf39e97bc97f9b73a792283",
+    "bytes": 5106
+   },
+   "eval/generations/stage3_capability_846__knowledge.jsonl": {
+    "sha256": "511276df010f9412732933646836e44e31e0370c65ce40a2c6e77ac50a8d2b4c",
+    "bytes": 557927
+   },
+   "eval/generations/stage3_capability_846__knowledge.summary.json": {
+    "sha256": "c6df867c2899641206cdb94ec6d9989dd259e59cd7f3e9b5c91ff63a8e8f17c3",
+    "bytes": 5118
+   },
+   "eval/generations/stage3_capability_846__math_verified.jsonl": {
+    "sha256": "9a7280b747ee61b32a1373c1c7013a272678965aab3a5dfc4f60845a59969560",
+    "bytes": 322974
+   },
+   "eval/generations/stage3_capability_846__math_verified.summary.json": {
+    "sha256": "161e486b66830b7fe71cc2e2415b461f35531344f90b657627a0f343d1038b54",
+    "bytes": 5077
+   },
+   "eval/generations/stage3_capability_846__multihop.jsonl": {
+    "sha256": "bcee67d46e35fc2992e9af58462bbd3dded70180786bf6f335f0e5174db98531",
+    "bytes": 321054
+   },
+   "eval/generations/stage3_capability_846__multihop.summary.json": {
+    "sha256": "7f1ff25ba60563ce5888ea472789b6fccc1cb58680a6fc17deaef2b9639d2f3e",
+    "bytes": 5060
+   },
+   "eval/generations/stage3_capability_846__rag.jsonl": {
+    "sha256": "e5a654e6b7cc00637a0235e71f13115680350ba0b8841c0e4d022bf47627497c",
+    "bytes": 300696
+   },
+   "eval/generations/stage3_capability_846__rag.summary.json": {
+    "sha256": "b361649603b8d7b01ffc0ee86ad7228688ea934786150c11e67019ea425fa23f",
+    "bytes": 5046
+   },
+   "eval/generations/stage3_capability_846__safety_paired.jsonl": {
+    "sha256": "fbf6d9c2ca86bd7377a127e2cf09d00d456ec9dc20630368ee12dcedb388d84b",
+    "bytes": 434122
+   },
+   "eval/generations/stage3_capability_846__safety_paired.summary.json": {
+    "sha256": "1081a93e5c563e029f1613fdd24d58506ccf3028360238f34a34f33dcb3d460b",
+    "bytes": 5091
+   },
+   "eval/generations/stage3_legacy_150__items.jsonl": {
+    "sha256": "a4147ad8c89dd00da1e543faf2e8d9e5aa7ffeddf16676e81bb0fa38575b4a8c",
+    "bytes": 488899
+   },
+   "eval/generations/stage3_legacy_150__items.summary.json": {
+    "sha256": "0436bec64acee976932654f844f806193b6ebe11878e9f0bfbe88876b9b48858",
+    "bytes": 6209
+   },
+   "eval/report.json": {
+    "sha256": "e3fc2c166c9cf4f133372e921e6f3cf0f6eaa290868856e2dfe3f3974cc72534",
+    "bytes": 32908
+   },
+   "eval/rows/fluid_reasoning_720__dev_v1.rows.jsonl": {
+    "sha256": "a87f0dd27633f2bd85d3cda2114b78ba4bc1a0b972738ae51d31f75efd5bb620",
+    "bytes": 73276
+   },
+   "eval/rows/stage3_capability_846__answerability_paired.rows.jsonl": {
+    "sha256": "f31a8d3ada0ead32e6c57cd71a10f85425ef14cb82bf5548569cfaddb42b70ba",
+    "bytes": 14932
+   },
+   "eval/rows/stage3_capability_846__eval_behavior_v0.rows.jsonl": {
+    "sha256": "5c2338b623b8ff2ea91b8d4f8b471f8d669c4a6bf2900bb2453ee5e666b6f06c",
+    "bytes": 27358
+   },
+   "eval/rows/stage3_capability_846__gsm8k.rows.jsonl": {
+    "sha256": "51b878afbc6ce0be0f9a9bc2f9b049cb8c73324de9e391032fb3c4dd68b4a7c1",
+    "bytes": 9262
+   },
+   "eval/rows/stage3_capability_846__knowledge.rows.jsonl": {
+    "sha256": "1a1438f3cc5d5a73d327a6006aaeed15949d6fb7e38a513785088d6c60f4e326",
+    "bytes": 14638
+   },
+   "eval/rows/stage3_capability_846__math_verified.rows.jsonl": {
+    "sha256": "8f48e47e9c116559f0c833273455c6bc0150d94e7cf726750611fcb0cb117f90",
+    "bytes": 11027
+   },
+   "eval/rows/stage3_capability_846__multihop.rows.jsonl": {
+    "sha256": "9834665295c9a5da8a5d5cf369baf7ffbc78321669c307a0f3cff48d550c0f24",
+    "bytes": 10968
+   },
+   "eval/rows/stage3_capability_846__rag.rows.jsonl": {
+    "sha256": "991999086cc7183cf0e77d1f66b1bb7e9bcd8517a912b72b3dbd539aa2d68db9",
+    "bytes": 10234
+   },
+   "eval/rows/stage3_capability_846__safety_paired.rows.jsonl": {
+    "sha256": "d53173db65d249c24bd5c6517eab13172023c05d82d77832c3780c42bdfc72d7",
+    "bytes": 11268
+   },
+   "eval/rows/stage3_legacy_150__items.rows.jsonl": {
+    "sha256": "9f40eca323e5d455d81a50fe9a7278322c1db81769f884f969bb2ea0d7cda102",
+    "bytes": 9235
+   }
+  },
+  "extracted": {
+   "audit/stage0_calvol_dose/d1/dose_record.json": {
+    "sha256": "23733be20a7f9cc9c5e7af4aca21f059aaa7bb9f77a988c636e5544ea331529b",
+    "bytes": 3922
+   },
+   "audit/stage0_calvol_dose/d1/eval_capability.log": {
+    "sha256": "a0d90f9c35ca0725cb1928f51534b31cc240dd3ad84da3b61fce00d2a18978f3",
+    "bytes": 385
+   },
+   "audit/stage0_calvol_dose/d1/eval_fluid.log": {
+    "sha256": "3ae91019e93e4aff1bd0bc1876cf06d137784ab6538fb309a74fda0aa8f6b1d4",
+    "bytes": 87
+   },
+   "audit/stage0_calvol_dose/d1/recovery_products.json": {
+    "sha256": "0db103b8e8bf5045a4cdffac7c524dfb3b0eedb4647156ffa71e85f724aee3dc",
+    "bytes": 272
+   },
+   "audit/stage0_calvol_dose/d1/report.json": {
+    "sha256": "e3fc2c166c9cf4f133372e921e6f3cf0f6eaa290868856e2dfe3f3974cc72534",
+    "bytes": 32908
+   },
+   "audit/stage0_calvol_dose/d1/sync.log": {
+    "sha256": "0cfd70f4b91c825023cd02eee879c7af6cf00a61e33bfcc5d28c39eb9c61e659",
+    "bytes": 443
+   },
+   "audit/stage0_calvol_dose/session/setup.log": {
+    "sha256": "06d1bf3152a0fb1202a4208c408f5658504d8a431bacd42234397db875b06921",
+    "bytes": 25281
+   },
+   "audit/stage0_calvol_dose/session/stage0_calvol_dose_run.log": {
+    "sha256": "946c1ea7c0d48404d46aaf2f7de2153b537c36aa787b0dea9dbb764408b484c4",
+    "bytes": 255
+   },
+   "audit/stage0_calvol_search/d1/search_record.json": {
+    "sha256": "4649bdcea6433b6634eb908b954fa60c71f9b155aa0a57698143ea6d0fde28ab",
+    "bytes": 4963
+   },
+   "audit/stage0_calvol_search/d1/stage1_selection.json": {
+    "sha256": "f47326d58f6c2179fed81fdf6e839f58aa41c9b34b212bff5172f7c5768f7d95",
+    "bytes": 16305
+   },
+   "audit/stage0_calvol_search/d1/structure.json": {
+    "sha256": "00846a023fff02feb0ff98ab3ecb58cd5eb5b36f8408b777b7f3821d9d7680c6",
+    "bytes": 23123637
+   }
+  }
+ },
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/dose_d1_20261019_133708"
+}

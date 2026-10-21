@@ -1,0 +1,25 @@
+[11:28:30] budget: expected 85 min $2.54 · soft $3.89 · hard $4.34 (authorized $5.00)
+[11:28:30] NVIDIA A100-SXM4-80GB $1.79/h, stock Medium
+[11:28:38] budget: expected 85 min $2.54 · soft $3.89 · hard $4.34 (authorized $5.00)
+[11:28:38] NVIDIA A100-SXM4-80GB $1.79/h, stock Medium
+[11:28:38] account funds OK: the provider account holds $109.8517 against the $30.0000 this session must be able to fund
+[11:28:38] precheck OK: 0 relay inputs (), 0 local assets
+[11:28:39] watchdog detached — hard 146 min = $4.34
+[11:28:39] created wg8cbjbwvga8ku at $1.79/h
+[11:29:32]   starting (60s) — $0.03
+[11:30:14] TCP 22 at 154.54.102.36:10930 after 1.6 min
+[11:30:17] draw 1: ssh reachable — $0.05
+[11:30:35] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.16
+[11:30:35] draw 1: running setup
+[11:32:27] draw 1: setup complete — $0.11
+[11:32:34] driver detached, pid 2044, confirmed by descriptor_probe — $0.12
+[11:34:47]   2026-10-18T11:32:30Z MARKER:CONTRACT_OK — $0.18
+[12:20:06]   2026-10-18T12:18:54Z MARKER:ALL_DONE — $1.53
+[12:20:06] polling ended: ALL_DONE — $1.53
+[12:21:02]   manifest rc=0
+5 file(s) across 2 class(es) -> /workspace/manifest.json
+  final_required: 5 · mutable_snapshot: 0 · final_streams_quiescent: True
+[12:21:56] unit teacher_cal: SECURED
+[12:22:03] teardown gate: allowed=True failed=None
+[12:22:03] deleting pod (gate passed)
+[12:22:14] pod deleted — 53.6 min, $1.60; provider confirms gone: True

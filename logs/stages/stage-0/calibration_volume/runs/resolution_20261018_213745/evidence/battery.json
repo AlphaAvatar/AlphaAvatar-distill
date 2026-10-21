@@ -1,0 +1,265 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.battery_record/v1",
+ "started_utc": "2026-10-18T21:43:11Z",
+ "commit": "8df69c633c940f36ca5a654e45fcb24426616508",
+ "gpu": {
+  "name": "NVIDIA A100-SXM4-80GB",
+  "memory": "81920 MiB",
+  "driver": "580.126.16"
+ },
+ "runs": [
+  {
+   "label": "qwen3_0p6b_cap8192_dev",
+   "mode": "eval",
+   "tasks": "dev",
+   "rc": 0,
+   "seconds": 930.3,
+   "records_sha256": "537a36a811a62d2e94b1bf017bfe74a4a8ea52df89c52102b38651b7fba9cf1b",
+   "summary": {
+    "identity": {
+     "label": "qwen3_0p6b_cap8192_dev",
+     "model": "Qwen/Qwen3-0.6B",
+     "revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+     "mode": "eval",
+     "tasks_file": "data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.jsonl",
+     "tasks_sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+     "context_resolution": {
+      "resolved_context": 8192,
+      "context_source": "diagnostic_cap",
+      "config_max_position_embeddings": 40960,
+      "rope_scaling_factor": null,
+      "architectural_context": 40960,
+      "trained_context": null,
+      "context_len_override": null,
+      "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+      "note": null,
+      "uncapped_context": 40960,
+      "uncapped_context_source": "config:max_position_embeddings",
+      "not_a_p18_measurement": "generation is capped below the model's supported context to match another model's measurement allowance; context-limit hits are right-censored and the result is a diagnostic, not this model's P18 score"
+     },
+     "session_limit": null,
+     "effective_limit": 8192,
+     "stop_ids": [
+      151643,
+      151645
+     ],
+     "sampling": {
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "top_k": -1,
+      "detokenize": false
+     },
+     "seed_base": null,
+     "system_message": "You are a helpful Assistant.",
+     "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+     "tokenizer_sha256": null,
+     "degeneration_check_every": 256,
+     "engine": {
+      "max_model_len": 8192,
+      "gpu_memory_utilization": 0.9,
+      "dtype": "bfloat16",
+      "dtype_engine": "torch.bfloat16",
+      "max_num_seqs": 256,
+      "max_num_batched_tokens": 8192,
+      "vllm_version": "0.27.1",
+      "enforce_eager": false,
+      "init_seconds": 156.2
+     },
+     "libraries": {
+      "transformers": "5.15.0",
+      "tokenizers": "0.22.2",
+      "safetensors": "0.8.0",
+      "numpy": "2.3.5",
+      "datasets": null,
+      "vllm": "0.27.1"
+     },
+     "image_digest": null,
+     "runner_sha256": "d92087ba5b4909c6babe948320b4d0751456ea3ac5b588b3e6ec2fbfa779ae74"
+    },
+    "n_tasks": 720,
+    "turns": 969,
+    "output_tokens": 1659164,
+    "generation_seconds": 755.1,
+    "output_tokens_per_second": 2197.3,
+    "ends": {
+     "answered": 425,
+     "context_limit": 4,
+     "degeneration": 265,
+     "episode_done": 12,
+     "turn_limit": 14
+    }
+   },
+   "score_rc": 0,
+   "score_stdout": "qwen3_0p6b_cap8192_dev: 257/720 correct (0.3569); by axis abstract=0.0208, compositional=0.5903, inductive=0.3889, interactive=0.0, task=0.5938\n",
+   "status": "ok"
+  },
+  {
+   "label": "e1_r5500k_sa_pca_dev",
+   "mode": "eval",
+   "tasks": "dev",
+   "rc": 0,
+   "seconds": 1478.2,
+   "records_sha256": "111be37d6b65a528972d484a7aa443773986c1de197244e241bb5ad2bf2def69",
+   "summary": {
+    "identity": {
+     "label": "e1_r5500k_sa_pca_dev",
+     "model": "/workspace/aad/artifacts/stages/stage-0/calibration_volume/students/e1_r5500k_sa_pca",
+     "revision": null,
+     "mode": "eval",
+     "tasks_file": "data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.jsonl",
+     "tasks_sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+     "context_resolution": {
+      "resolved_context": 8192,
+      "context_source": "trained_block_len",
+      "config_max_position_embeddings": 262144,
+      "rope_scaling_factor": null,
+      "architectural_context": 262144,
+      "trained_context": 8192,
+      "context_len_override": null,
+      "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+      "note": "effective context is the TRAINED context; this is not a 262K-context evaluation"
+     },
+     "session_limit": null,
+     "effective_limit": 8192,
+     "stop_ids": [
+      151645
+     ],
+     "sampling": {
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "top_k": -1,
+      "detokenize": false
+     },
+     "seed_base": null,
+     "system_message": "You are a helpful Assistant.",
+     "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+     "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+     "degeneration_check_every": 256,
+     "engine": {
+      "max_model_len": 8192,
+      "gpu_memory_utilization": 0.9,
+      "dtype": "bfloat16",
+      "dtype_engine": "torch.bfloat16",
+      "max_num_seqs": 256,
+      "max_num_batched_tokens": 8192,
+      "vllm_version": "0.27.1",
+      "enforce_eager": false,
+      "init_seconds": 68.3
+     },
+     "libraries": {
+      "transformers": "5.15.0",
+      "tokenizers": "0.22.2",
+      "safetensors": "0.8.0",
+      "numpy": "2.3.5",
+      "datasets": null,
+      "vllm": "0.27.1"
+     },
+     "image_digest": null,
+     "runner_sha256": "d92087ba5b4909c6babe948320b4d0751456ea3ac5b588b3e6ec2fbfa779ae74"
+    },
+    "n_tasks": 720,
+    "turns": 892,
+    "output_tokens": 868586,
+    "generation_seconds": 1394.7,
+    "output_tokens_per_second": 622.8,
+    "ends": {
+     "answered": 181,
+     "degeneration": 527,
+     "turn_limit": 12
+    }
+   },
+   "score_rc": 0,
+   "score_stdout": "e1_r5500k_sa_pca_dev: 2/720 correct (0.0028); by axis abstract=0.0, compositional=0.0, inductive=0.0, interactive=0.0, task=0.0104\n",
+   "status": "ok"
+  },
+  {
+   "label": "e1_r1600k_sa_pca_dev",
+   "mode": "eval",
+   "tasks": "dev",
+   "rc": 0,
+   "seconds": 969.4,
+   "records_sha256": "9f64707825c8070f23e9a8c6e0bec0452b6ae54c1763626353859af732212e7a",
+   "summary": {
+    "identity": {
+     "label": "e1_r1600k_sa_pca_dev",
+     "model": "/workspace/aad/artifacts/stages/stage-0/calibration_volume/students/e1_r1600k_sa_pca",
+     "revision": null,
+     "mode": "eval",
+     "tasks_file": "data/eval-set/eval-set-1/fluid_reasoning_720/dev_v1.jsonl",
+     "tasks_sha256": "19ec4fd9e6e9678ebe7fa58631258f19d83542c249e9201706f030a108979eb4",
+     "context_resolution": {
+      "resolved_context": 8192,
+      "context_source": "trained_block_len",
+      "config_max_position_embeddings": 262144,
+      "rope_scaling_factor": null,
+      "architectural_context": 262144,
+      "trained_context": 8192,
+      "context_len_override": null,
+      "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+      "note": "effective context is the TRAINED context; this is not a 262K-context evaluation"
+     },
+     "session_limit": null,
+     "effective_limit": 8192,
+     "stop_ids": [
+      151645
+     ],
+     "sampling": {
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "top_k": -1,
+      "detokenize": false
+     },
+     "seed_base": null,
+     "system_message": "You are a helpful Assistant.",
+     "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+     "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+     "degeneration_check_every": 256,
+     "engine": {
+      "max_model_len": 8192,
+      "gpu_memory_utilization": 0.9,
+      "dtype": "bfloat16",
+      "dtype_engine": "torch.bfloat16",
+      "max_num_seqs": 256,
+      "max_num_batched_tokens": 8192,
+      "vllm_version": "0.27.1",
+      "enforce_eager": false,
+      "init_seconds": 71.3
+     },
+     "libraries": {
+      "transformers": "5.15.0",
+      "tokenizers": "0.22.2",
+      "safetensors": "0.8.0",
+      "numpy": "2.3.5",
+      "datasets": null,
+      "vllm": "0.27.1"
+     },
+     "image_digest": null,
+     "runner_sha256": "d92087ba5b4909c6babe948320b4d0751456ea3ac5b588b3e6ec2fbfa779ae74"
+    },
+    "n_tasks": 720,
+    "turns": 1524,
+    "output_tokens": 803220,
+    "generation_seconds": 882.4,
+    "output_tokens_per_second": 910.3,
+    "ends": {
+     "answered": 321,
+     "degeneration": 333,
+     "turn_limit": 66
+    }
+   },
+   "score_rc": 0,
+   "score_stdout": "e1_r1600k_sa_pca_dev: 7/720 correct (0.0097); by axis abstract=0.0, compositional=0.0, inductive=0.0069, interactive=0.0, task=0.0312\n",
+   "status": "ok"
+  }
+ ],
+ "stages": {
+  "A_contract": {
+   "status": "ok",
+   "plan_hash": "db2b96d8e86c97440758ed78271f09c2e248b7dd848f9e01db07d0f1d94d19ce",
+   "authorization_id": "stage0.calibration_volume.battery.resolution_20261018_213745"
+  }
+ },
+ "finished_utc": "2026-10-18T22:39:30Z",
+ "terminal": "ALL_DONE",
+ "failed_runs": []
+}

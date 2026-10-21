@@ -1,0 +1,177 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "resolution_20261018_213745",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "prerequisites",
+ "recorded_utc": "2026-10-18T22:44:30+00:00",
+ "status": "SESSION_ENDED",
+ "terminal": "ALL_DONE",
+ "passed": true,
+ "outcome": "Resolution check, attempt 3 (plan v2): ALL_DONE, 3/3 units secured on an A100-80GB. Qwen3-0.6B (released, same geometry) under the students' 8,192-token allowance as a labelled matched-allowance diagnostic: 257/720. Existing recovered students: e1_r5500k_sa_pca 2/720, e1_r1600k_sa_pca (see design/resolution_check.json). Development numbers only; not the formal endpoint.",
+ "provider_resource_created": true,
+ "pod_id": "q8lzi7xqb5wcg5",
+ "provider_confirms_gone": true,
+ "final_pod_state": {
+  "exists": false,
+  "desired_status": "TERMINATED",
+  "billing": false
+ },
+ "money": {
+  "all_in_usd": 1.9589,
+  "gpu_usd": 1.9366,
+  "disk_usd": 0.0222,
+  "elapsed_minutes": 64.91,
+  "price_per_hour": 1.79,
+  "authorized_usd": 4.64,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.10/GB-month over the elapsed minutes, ceiled to the 4-decimal quantum"
+ },
+ "session_record_sha256": "e1949516d4797566210a568afe5a7c66612510bee0ca7a567b719ddec15e3a7d",
+ "units": {
+  "e1_r1600k_sa_pca_dev": {
+   "e1_r1600k_sa_pca_dev.jsonl": {
+    "sha256": "9f64707825c8070f23e9a8c6e0bec0452b6ae54c1763626353859af732212e7a",
+    "bytes": 11988087
+   },
+   "e1_r1600k_sa_pca_dev.log": {
+    "sha256": "421468bceaf9bee74be25de30255b42ba4035f932866295fb0d363506e9a44d1",
+    "bytes": 14294
+   },
+   "e1_r1600k_sa_pca_dev.summary.json": {
+    "sha256": "1b2d26603d3d0899a00672e13c62966680c848aa7ddc750170ab812b76451297",
+    "bytes": 2104
+   },
+   "score.rows.jsonl": {
+    "sha256": "9f05b281ce76755f7e16daebb953597c96c15009ee56214955a2f1db55e81d60",
+    "bytes": 367853
+   },
+   "score.summary.json": {
+    "sha256": "b95111fb7daa9a7aa5f30e9126e89b2d33da08432fe4969336597d842183ba15",
+    "bytes": 23655
+   }
+  },
+  "e1_r5500k_sa_pca_dev": {
+   "e1_r5500k_sa_pca_dev.jsonl": {
+    "sha256": "111be37d6b65a528972d484a7aa443773986c1de197244e241bb5ad2bf2def69",
+    "bytes": 11803382
+   },
+   "e1_r5500k_sa_pca_dev.log": {
+    "sha256": "eb15a5402c03b954015fbdf4fb0b6fa24f1c6cc1cc42d295462c9ad1f5890ae7",
+    "bytes": 15138
+   },
+   "e1_r5500k_sa_pca_dev.summary.json": {
+    "sha256": "2a29ec84a829c65a5bc2609ef7b67f17944ba4557023cc60d0eae6cb83997aa1",
+    "bytes": 2104
+   },
+   "score.rows.jsonl": {
+    "sha256": "25a0093d3dec3136ed430de1f0f512e173ad9b344c9a23fbc150b8eb55c43696",
+    "bytes": 369719
+   },
+   "score.summary.json": {
+    "sha256": "ad2965376961160678694fb86f9fc2da509565ab65a82c4e3efab90a5a845579",
+    "bytes": 23653
+   }
+  },
+  "extracted": {
+   "audit/stage0_calvol_battery/battery.json": {
+    "sha256": "fcf240ac41233b4e37e89675bf6356f7d0de334dc42fac84c208e4632c7ba9f6",
+    "bytes": 8989
+   },
+   "audit/stage0_calvol_battery/records/e1_r1600k_sa_pca_dev.done": {
+    "sha256": "e86e97aa6a8d9d3c73ffdb2879cd2e39c4d8a35fcae3f6216edea489ba701d60",
+    "bytes": 65
+   },
+   "audit/stage0_calvol_battery/records/e1_r1600k_sa_pca_dev.jsonl": {
+    "sha256": "9f64707825c8070f23e9a8c6e0bec0452b6ae54c1763626353859af732212e7a",
+    "bytes": 11988087
+   },
+   "audit/stage0_calvol_battery/records/e1_r1600k_sa_pca_dev.log": {
+    "sha256": "421468bceaf9bee74be25de30255b42ba4035f932866295fb0d363506e9a44d1",
+    "bytes": 14294
+   },
+   "audit/stage0_calvol_battery/records/e1_r1600k_sa_pca_dev.summary.json": {
+    "sha256": "1b2d26603d3d0899a00672e13c62966680c848aa7ddc750170ab812b76451297",
+    "bytes": 2104
+   },
+   "audit/stage0_calvol_battery/records/e1_r5500k_sa_pca_dev.done": {
+    "sha256": "0cd60e16da7f94eaf72f917ae0b6acccd5f70d033f168bd9ff863a76a41064d5",
+    "bytes": 65
+   },
+   "audit/stage0_calvol_battery/records/e1_r5500k_sa_pca_dev.jsonl": {
+    "sha256": "111be37d6b65a528972d484a7aa443773986c1de197244e241bb5ad2bf2def69",
+    "bytes": 11803382
+   },
+   "audit/stage0_calvol_battery/records/e1_r5500k_sa_pca_dev.log": {
+    "sha256": "eb15a5402c03b954015fbdf4fb0b6fa24f1c6cc1cc42d295462c9ad1f5890ae7",
+    "bytes": 15138
+   },
+   "audit/stage0_calvol_battery/records/e1_r5500k_sa_pca_dev.summary.json": {
+    "sha256": "2a29ec84a829c65a5bc2609ef7b67f17944ba4557023cc60d0eae6cb83997aa1",
+    "bytes": 2104
+   },
+   "audit/stage0_calvol_battery/records/qwen3_0p6b_cap8192_dev.done": {
+    "sha256": "2fcb7804b4a0d72d357f043a1803b3971a7bb37d8ee9910fb7676179980aa2ef",
+    "bytes": 65
+   },
+   "audit/stage0_calvol_battery/records/qwen3_0p6b_cap8192_dev.jsonl": {
+    "sha256": "537a36a811a62d2e94b1bf017bfe74a4a8ea52df89c52102b38651b7fba9cf1b",
+    "bytes": 21418782
+   },
+   "audit/stage0_calvol_battery/records/qwen3_0p6b_cap8192_dev.log": {
+    "sha256": "8a5353b0598f03a90dbb16e2f64aa7b33d8eb1106224804f26c9e19aed1c1ecd",
+    "bytes": 14207
+   },
+   "audit/stage0_calvol_battery/records/qwen3_0p6b_cap8192_dev.summary.json": {
+    "sha256": "65ecab746d4b1fe1953d91e7cbc10b18061d1d11236352a04842e7dd507be18e",
+    "bytes": 2315
+   },
+   "audit/stage0_calvol_battery/scores/e1_r1600k_sa_pca_dev.rows.jsonl": {
+    "sha256": "9f05b281ce76755f7e16daebb953597c96c15009ee56214955a2f1db55e81d60",
+    "bytes": 367853
+   },
+   "audit/stage0_calvol_battery/scores/e1_r1600k_sa_pca_dev.summary.json": {
+    "sha256": "b95111fb7daa9a7aa5f30e9126e89b2d33da08432fe4969336597d842183ba15",
+    "bytes": 23655
+   },
+   "audit/stage0_calvol_battery/scores/e1_r5500k_sa_pca_dev.rows.jsonl": {
+    "sha256": "25a0093d3dec3136ed430de1f0f512e173ad9b344c9a23fbc150b8eb55c43696",
+    "bytes": 369719
+   },
+   "audit/stage0_calvol_battery/scores/e1_r5500k_sa_pca_dev.summary.json": {
+    "sha256": "ad2965376961160678694fb86f9fc2da509565ab65a82c4e3efab90a5a845579",
+    "bytes": 23653
+   },
+   "audit/stage0_calvol_battery/scores/qwen3_0p6b_cap8192_dev.rows.jsonl": {
+    "sha256": "acbdea8398251c959ba9cabcf31332c49ce7626455ffd93068e86326538ac397",
+    "bytes": 369133
+   },
+   "audit/stage0_calvol_battery/scores/qwen3_0p6b_cap8192_dev.summary.json": {
+    "sha256": "3a6348010890f8a9d089cdef75394125bab62695e9e0cc0d36bf9099686a7c41",
+    "bytes": 24001
+   }
+  },
+  "qwen3_0p6b_cap8192_dev": {
+   "qwen3_0p6b_cap8192_dev.jsonl": {
+    "sha256": "537a36a811a62d2e94b1bf017bfe74a4a8ea52df89c52102b38651b7fba9cf1b",
+    "bytes": 21418782
+   },
+   "qwen3_0p6b_cap8192_dev.log": {
+    "sha256": "8a5353b0598f03a90dbb16e2f64aa7b33d8eb1106224804f26c9e19aed1c1ecd",
+    "bytes": 14207
+   },
+   "qwen3_0p6b_cap8192_dev.summary.json": {
+    "sha256": "65ecab746d4b1fe1953d91e7cbc10b18061d1d11236352a04842e7dd507be18e",
+    "bytes": 2315
+   },
+   "score.rows.jsonl": {
+    "sha256": "acbdea8398251c959ba9cabcf31332c49ce7626455ffd93068e86326538ac397",
+    "bytes": 369133
+   },
+   "score.summary.json": {
+    "sha256": "3a6348010890f8a9d089cdef75394125bab62695e9e0cc0d36bf9099686a7c41",
+    "bytes": 24001
+   }
+  }
+ },
+ "artifacts_root": "artifacts/stages/stage-0/calibration_volume/resolution_20261018_213745"
+}

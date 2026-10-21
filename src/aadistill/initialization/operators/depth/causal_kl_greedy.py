@@ -46,7 +46,10 @@ from aadistill.initialization.scoring.support import (
 )
 from aadistill.initialization.statistics.contribution import (
     bypassed_blocks,
+    captured_block_inputs,
     domain_balanced_score,
+    has_suffix,
+    resumed_after_block,
     forward_kl_mean,
     forward_kl_mean_batch,
     expected_evaluations,
@@ -697,6 +700,87 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                 objective_candidates[_subset_key(skip)] = record
             return primary
 
+        #: PREFIX REUSE (`ExecutionConfig.depth_prefix_reuse`), on the forward
+        #: baseline's path only: scored rows, the KL-only objective, the parent
+        #: reference, no observer. Elsewhere `score` runs unchanged.
+        n_layers = ctx.parent_spec[DEPTH_FIELD]
+        prefix_reuse = bool(ctx.execution.depth_prefix_reuse and select_rows
+                            and objective is None and parent_sketches is None
+                            and ctx.score_observer is None)
+
+        def score_round(skipped: frozenset[int], candidates: list[int]) -> list[float]:
+            """Every candidate of one round, sharing the current model's prefix.
+
+            The arithmetic per (candidate, micro-batch) is `score`'s scored-rows
+            branch line for line, and each candidate's values are appended in
+            the same micro-batch and item order, so its subtype means and its
+            domain balance are formed exactly as `score(skipped | {c})` forms
+            them. Only the forward differs: block `c`'s input is taken from one
+            capture forward of the current model instead of being recomputed.
+            """
+            per_candidate: dict[int, dict[str, list[float]]] = {c: {} for c in candidates}
+            timing["candidate_subsets"] += len(candidates)
+            item_started = time.perf_counter()
+            for group, indices in groups:
+                t0 = time.perf_counter()
+                batch_weights = (None if active is None else
+                                 active.prediction_weights_for(group, indices))
+                mask = group.prediction_mask().to(compute)
+                rows = scored_rows(mask, batch_weights)
+                idx, lp, tail = sketches.sketch_rows(group, rows, adapter)
+                ids = group.input_ids.to(compute)
+                attn = group.attention_mask.to(compute)
+                with captured_block_inputs(model, skipped) as inputs:
+                    adapter.final_hidden_states(model, ids, attn)
+                if cuda_sync:
+                    cuda_sync()
+                t1 = time.perf_counter()
+                timing["reference_seconds"] += t1 - t0
+                timing["prefix_capture_forwards"] += 1
+                for c in candidates:
+                    ta = time.perf_counter()
+                    if has_suffix(n_layers, skipped, c):
+                        with resumed_after_block(model, skipped, c, inputs[c]):
+                            abls = scored_prediction_logits(adapter, model, ids,
+                                                            attn, rows)
+                    else:
+                        with bypassed_blocks(model, skipped | {c}):
+                            abls = scored_prediction_logits(adapter, model, ids,
+                                                            attn, rows)
+                    if cuda_sync:
+                        cuda_sync()
+                    t2 = time.perf_counter()
+                    timing["ablated_seconds"] += t2 - ta
+                    timing["ablated_forwards"] += 1
+                    timing["ablated_items"] += len(group.items)
+                    kl = sketch_forward_kl(idx, lp, tail, abls,
+                                           has_tail=sketches.has_tail)
+                    values = masked_item_means(scatter_rows(kl, rows), mask,
+                                               weights=batch_weights)
+                    for item, value in zip(group.items, values.tolist()):
+                        per_candidate[c].setdefault(item["subtype"], []).append(value)
+                        timing["distortion_calls"] += 1
+                    timing["scored_rows"] += int(rows.sum())
+                    timing["forward_rows"] += int(mask.numel())
+                    timing["distortion_seconds"] += time.perf_counter() - t2
+                    del abls, kl
+                del inputs
+                if ctx.deadline is not None:
+                    ctx.deadline.check(
+                        f"depth.causal_kl_greedy_v1 round {len(skipped)} "
+                        f"(prefix reuse, {len(candidates)} candidates)")
+            timing["item_seconds"] += time.perf_counter() - item_started
+            scores = []
+            for c in candidates:
+                means = {k: sum(v) / len(v) for k, v in per_candidate[c].items()}
+                primary, _ = domain_balanced_score(means, domains)
+                scores.append(primary)
+            return scores
+
+        if prefix_reuse:
+            timing["depth_prefix_reuse"] = True
+            timing["prefix_capture_forwards"] = 0
+
         n_remove = ctx.parent_spec[DEPTH_FIELD] - ctx.target_spec[DEPTH_FIELD]
 
         # Bounded progress, and the deadline checked where the cost is.
@@ -736,7 +820,8 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                   f"margin {margin:.3e}", flush=True)
 
         result = greedy_removal(score, ctx.parent_spec[DEPTH_FIELD], n_remove,
-                                on_round=on_round, on_candidate=on_candidate)
+                                on_round=on_round, on_candidate=on_candidate,
+                                score_round=score_round if prefix_reuse else None)
         kept = result["kept"]
         child = _build_child_with_layers(ctx, kept)
 
@@ -775,6 +860,8 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                    #: trace of an all-rows run is unchanged field for field.
                    **({"prediction_rows": ctx.execution.prediction_rows}
                       if select_rows else {}),
+                   #: Execution evidence too, and only when it ran.
+                   **({"depth_prefix_reuse": True} if prefix_reuse else {}),
                    #: SCIENCE evidence: what the policy named in the hashed config
                    #: actually restricted.
                    "scoring_positions": (None if active is None
