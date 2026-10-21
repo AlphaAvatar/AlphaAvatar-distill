@@ -1,9 +1,9 @@
 {
  "schema": "aadistill.stage2.reasoning_data.asset_audit/v1",
- "written_utc": "2026-10-21T18:10:27Z",
+ "written_utc": "2026-10-21T18:50:54Z",
  "code_state": {
-  "git_commit": "2a8bae7848f99076eded2a7c6bf7038f166247c4",
-  "dirty": true
+  "git_commit": "13b03d781cffd15c3b05a90d40113373f7dd0ff8",
+  "dirty": false
  },
  "inputs": {
   "corpus_v2_manifest": "59ece2a5407e4177922c523da44835c46e1422c3c4df8878a601152098e290fa",
