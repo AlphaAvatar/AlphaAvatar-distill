@@ -33,8 +33,8 @@ spent. Owner of the evidence:
   - Requested project cap under conservative occupancy: provider snapshot + P1
     hard cap (`:: budget_occupancy`); not applied.
   - The launch identity (`c0eb4fd2…`, unchanged) and the harness
-    (`1ea5ecbd…`; `5a16440c…` superseded) are recorded there; a grant must
-    name both (`governance.issue`).
+    (`d6affe40…`; `5a16440c…` and `1ea5ecbd…` superseded) are recorded there;
+    a grant must name both (`governance.issue`).
 - **Budget** (`budget/h1_budget_position.json`): 34 pods ($58.33) and the
   anchor stay OPEN.
 - **Before a P1 launch ($0):** the session-commit bundle staged on the relay

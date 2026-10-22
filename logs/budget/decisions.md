@@ -13381,3 +13381,13 @@ on a paid pod.
     watchdog until the hard deadline, which is inside the $8.02 cap.
 - **Revisit when.** The maintainer approves or declines the P1 + P1v
   application.
+
+- **Follow-up, same day (maintainer).** `secure_shards`' `.complete` and
+  driver-record copies could each block for 20 minutes outside the 600 s
+  deadline. Every save and verify operation now shares that one deadline:
+  copies and listings get at most the time left; when it runs out, verified
+  shards are kept and the rest is recorded in `secure_deadline_skipped`. The
+  harness is now `d6affe40…`, and the launch identity is unchanged
+  (`c0eb4fd2…`). Nothing else changed: list, protocol, prediction, the
+  $5.34 / $8.02 application, and the $666.17 conservative cap request, which
+  awaits the maintainer and never rises with the snapshot.

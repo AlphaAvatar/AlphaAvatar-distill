@@ -67,10 +67,16 @@ def out_dir() -> str:
     return f"{REPO}/artifacts/audit/{AUDIT}"
 
 
-def _scp(ctx: SessionContext, remote: str, dest: Path, *, limit_min=20) -> int:
-    cmd = ["timeout", f"{limit_min}m", "scp", "-P", str(ctx.target.port), "-o", "StrictHostKeyChecking=no",
+def _scp(ctx: SessionContext, remote: str, dest: Path, *, limit_s: float = 1200) -> int:
+    """One bounded copy: `timeout` kills scp at `limit_s`, and the wait itself
+    is bounded too, so no copy outlives the time it was given."""
+    limit = max(1, int(limit_s))
+    cmd = ["timeout", f"{limit}s", "scp", "-P", str(ctx.target.port), "-o", "StrictHostKeyChecking=no",
            "-o", "UserKnownHostsFile=/dev/null", f"root@{ctx.host}:{remote}", str(dest)]
-    return subprocess.run(cmd, capture_output=True).returncode
+    try:
+        return subprocess.run(cmd, capture_output=True, timeout=limit + 30).returncode
+    except subprocess.TimeoutExpired:
+        return 124
 
 
 def store(ctx: SessionContext) -> Path:
@@ -91,13 +97,16 @@ SECURE_RETRY_SECONDS = 30.0
 #: The whole secured check, every fetch included, ends within this (inside the
 #: 15-minute artifact recovery reserve the budget prices).
 SECURE_BUDGET_SECONDS = 600.0
+#: below this many seconds left, an operation is not started (recorded as skipped)
+MIN_OPERATION_SECONDS = 2.0
+_now = time.monotonic
 
 
 class ListingUnknown(RuntimeError):
     """The pod's shard listing could not be obtained: the state is UNKNOWN."""
 
 
-def remote_markers(ctx: SessionContext) -> dict[str, str]:
+def remote_markers(ctx: SessionContext, *, timeout: float = 120) -> dict[str, str]:
     """Every sealed shard's marker on the pod: shard name -> its sha256.
 
     Returns ``{}`` only when the listing SUCCEEDED and found none (the output
@@ -107,7 +116,8 @@ def remote_markers(ctx: SessionContext) -> dict[str, str]:
     if ctx.target is None:
         raise ListingUnknown("no target to ask")
     res = ctx.target.run(f"if [ -d {out_dir()} ]; then cd {out_dir()} && for f in pass*.part*.done; do "
-                         f"[ -e \"$f\" ] && echo \"$f $(cat \"$f\")\"; done; fi; echo {LISTED}", timeout=120)
+                         f"[ -e \"$f\" ] && echo \"$f $(cat \"$f\")\"; done; fi; echo {LISTED}",
+                         timeout=max(1.0, timeout))
     if getattr(res, "timed_out", False):
         raise ListingUnknown("the listing timed out")
     if getattr(res, "returncode", 1) != 0:
@@ -131,13 +141,26 @@ def _local_ok(path: Path, digest: str) -> bool:
 
 def secure_shards(ctx: SessionContext, remote: dict[str, str] | None = None, *,
                   deadline: float | None = None) -> None:
-    """Pull each sealed shard (and each group's .complete) off the pod and
-    check the LOCAL bytes against the marker. Idempotent; never raises; an
-    unobtainable listing is recorded, not read as an empty one."""
+    """Pull each sealed shard (and each group's .complete and the driver's
+    record) off the pod and check the LOCAL bytes against the marker.
+    Idempotent; never raises; an unobtainable listing is recorded, not read as
+    an empty one. EVERY remote operation -- listings and copies alike -- is
+    bounded by the time left to `deadline` (its own `SECURE_BUDGET_SECONDS`
+    when called from the poll loop); what the deadline leaves undone is
+    recorded in ``secure_deadline_skipped`` and verified shards are kept."""
+    if deadline is None:
+        deadline = _now() + SECURE_BUDGET_SECONDS
+    skipped = ctx.evidence.setdefault("secure_deadline_skipped", [])
+
+    def left() -> float:
+        return deadline - _now()
     try:
         if remote is None:
+            if left() < MIN_OPERATION_SECONDS:
+                skipped.append("listing")
+                return
             try:
-                remote = remote_markers(ctx)
+                remote = remote_markers(ctx, timeout=min(120.0, left()))
             except ListingUnknown as exc:
                 ctx.evidence.setdefault("listing_unknown", []).append(str(exc))
                 return
@@ -148,21 +171,30 @@ def secure_shards(ctx: SessionContext, remote: dict[str, str] | None = None, *,
             if _local_ok(dest / name, digest):
                 secured[name] = {"ok": True, "sha256": digest}
                 continue
-            left = None if deadline is None else deadline - time.monotonic()
-            if left is not None and left <= 0:
+            if left() < MIN_OPERATION_SECONDS:
                 secured[name] = {"ok": False, "sha256": digest, "rc": None, "why": "check deadline passed"}
+                skipped.append(name)
                 continue
-            rc = _scp(ctx, f"{out_dir()}/{name}", dest / name,
-                      limit_min=20 if left is None else max(1, min(20, int(left // 60))))
+            rc = _scp(ctx, f"{out_dir()}/{name}", dest / name, limit_s=min(1200.0, left()))
             ok = _local_ok(dest / name, digest)
             if ok:
                 (dest / name).with_suffix(".done").write_text(digest + "\n")
             secured[name] = {"ok": ok, "sha256": digest, "rc": rc}
             ctx.say(f"shard {name}: {'SECURED' if ok else 'fetch incomplete'}")
-        res = ctx.target.run(f"cd {out_dir()} 2>/dev/null && ls *.complete 2>/dev/null || true", timeout=120)
-        for name in (getattr(res, "stdout", "") or "").split():
-            _scp(ctx, f"{out_dir()}/{name}", dest / name)
-        _scp(ctx, f"{out_dir()}/{EVIDENCE}", dest / EVIDENCE)
+        if left() < MIN_OPERATION_SECONDS:
+            skipped.append("complete-listing")
+        else:
+            res = ctx.target.run(f"cd {out_dir()} 2>/dev/null && ls *.complete 2>/dev/null || true",
+                                 timeout=min(120.0, left()))
+            for name in (getattr(res, "stdout", "") or "").split():
+                if left() < MIN_OPERATION_SECONDS:
+                    skipped.append(name)
+                    continue
+                _scp(ctx, f"{out_dir()}/{name}", dest / name, limit_s=min(1200.0, left()))
+        if left() < MIN_OPERATION_SECONDS:
+            skipped.append(EVIDENCE)
+        else:
+            _scp(ctx, f"{out_dir()}/{EVIDENCE}", dest / EVIDENCE, limit_s=min(1200.0, left()))
     except Exception as exc:  # noqa: BLE001
         ctx.evidence.setdefault("secure_errors", []).append(repr(exc)[:300])
 
@@ -174,10 +206,13 @@ def shards_secured(ctx: SessionContext, *_a, sleep=time.sleep, **_k) -> tuple[bo
     is not established -- the listing failed or a listed shard is not verified
     locally -- after `SECURE_ATTEMPTS` bounded tries, which is NOT secured."""
     why = "not checked"
-    deadline = time.monotonic() + SECURE_BUDGET_SECONDS
+    deadline = _now() + SECURE_BUDGET_SECONDS
     for attempt in range(SECURE_ATTEMPTS):
+        if deadline - _now() < MIN_OPERATION_SECONDS:
+            why = f"UNVERIFIED: the {SECURE_BUDGET_SECONDS:.0f} s check deadline passed ({why})"
+            break
         try:
-            remote = remote_markers(ctx)
+            remote = remote_markers(ctx, timeout=min(120.0, deadline - _now()))
         except ListingUnknown as exc:
             why = f"UNKNOWN: {exc}"
         else:
@@ -187,7 +222,7 @@ def shards_secured(ctx: SessionContext, *_a, sleep=time.sleep, **_k) -> tuple[bo
                 return True, ("the listing succeeded and the pod holds no sealed shard" if not remote else
                               f"{len(remote)} sealed shard(s) secured off-pod, each re-hashed in the local store")
             why = f"UNVERIFIED: {len(missing)} listed shard(s) not in the local store as marked: {missing[:5]}"
-        if attempt + 1 < SECURE_ATTEMPTS and time.monotonic() + SECURE_RETRY_SECONDS < deadline:
+        if attempt + 1 < SECURE_ATTEMPTS and _now() + SECURE_RETRY_SECONDS < deadline:
             sleep(SECURE_RETRY_SECONDS)
         else:
             break

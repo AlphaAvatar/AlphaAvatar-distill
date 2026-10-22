@@ -231,7 +231,7 @@ def fetch(monkeypatch):
     """scp from the scripted pod; `corrupt` names files that arrive damaged."""
     corrupt = set()
 
-    def scp(ctx, remote, dest, *, limit_min=20):
+    def scp(ctx, remote, dest, *, limit_s=1200):
         name = Path(remote).name
         if name in corrupt and name.endswith(".raise"):
             raise OSError("scp died")
@@ -306,3 +306,54 @@ def test_a_stale_secured_flag_never_stands_in_for_the_bytes(tmp_path, fetch):
     assert ctx.evidence["shards_secured"]["pass0_g0.part0001.jsonl"]["ok"]   # a stale flag says ok
     ok, msg = L.shards_secured(ctx, sleep=lambda s: None)
     assert not ok and "pass0_g0.part0001.jsonl" in msg
+
+
+def test_a_blocking_download_cannot_outlive_the_one_deadline(tmp_path, monkeypatch):
+    """Every copy and listing gets at most the time left; a copy that hangs to
+    its own limit uses that time up, and what is left undone is recorded --
+    the verified shard stays verified and the check returns within the deadline."""
+    clock = [0.0]
+    monkeypatch.setattr(L, "_now", lambda: clock[0])
+    files = {"pass0_g0.part0000.jsonl": b'{"task_id": "a"}\n'}
+    given = []
+
+    class SlowPod(Pod):
+        def run(self, command, *, timeout):
+            given.append(("run", timeout, clock[0]))
+            if "ls *.complete" in command:
+                return CommandResult(0, "pass0_g0.complete pass1_g0.complete\n", "")
+            return super().run(command, timeout=timeout)
+
+    def scp(ctx, remote, dest, *, limit_s=1200):
+        name = Path(remote).name
+        given.append((name, limit_s, clock[0]))
+        if name.endswith(".complete"):            # this download hangs until its own limit
+            clock[0] += limit_s
+            return 124
+        Path(dest).write_bytes(files[name])
+        return 0
+    monkeypatch.setattr(L, "_scp", scp)
+    ctx = _ctx(tmp_path, SlowPod(files))
+    ok, msg = L.shards_secured(ctx, sleep=lambda s: None)
+    assert ok and "1 sealed shard(s)" in msg                       # the verified shard is kept
+    assert all(limit <= L.SECURE_BUDGET_SECONDS - at + 1e-9 for _n, limit, at in given)
+    assert clock[0] <= L.SECURE_BUDGET_SECONDS                     # nothing ran past the deadline
+    names = [n for n, _l, _a in given]
+    assert names.count("pass0_g0.complete") == 1 and "pass1_g0.complete" not in names
+    assert {"pass1_g0.complete", L.EVIDENCE} <= set(ctx.evidence["secure_deadline_skipped"])
+
+
+def test_a_shard_download_that_hangs_leaves_the_rest_unverified_within_the_deadline(tmp_path, monkeypatch):
+    clock = [0.0]
+    monkeypatch.setattr(L, "_now", lambda: clock[0])
+    files = {"pass0_g0.part0000.jsonl": b"a\n", "pass0_g0.part0001.jsonl": b"b\n"}
+
+    def scp(ctx, remote, dest, *, limit_s=1200):
+        clock[0] += limit_s                         # every download hangs to its limit
+        return 124
+    monkeypatch.setattr(L, "_scp", scp)
+    ctx = _ctx(tmp_path, Pod(files))
+    ok, msg = L.shards_secured(ctx, sleep=lambda s: None)
+    assert not ok and msg.startswith("UNVERIFIED") and clock[0] <= L.SECURE_BUDGET_SECONDS
+    assert ctx.evidence["shards_unverified"]["why"] == msg
+    assert "pass0_g0.part0001.jsonl" in ctx.evidence["secure_deadline_skipped"]

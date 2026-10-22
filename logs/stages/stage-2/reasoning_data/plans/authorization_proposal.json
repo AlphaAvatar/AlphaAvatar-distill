@@ -82,13 +82,17 @@
   "launcher": "scripts/stages/stage-2/reasoning_data/h1_generation_launch.py (SessionSpec on aadistill.infrastructure.session_runner)",
   "governance": "scripts/stages/stage-2/reasoning_data/governance.py :: POLICY, launch_identity, HARNESS, issue (requires a maintainer grant document naming the launch identity)",
   "launch_identity_sha256": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
-  "harness_digest": "1ea5ecbd74b75f1e39e54fcc252eb184cf7ea728bf2816f10a27f9d2bd722d55",
+  "harness_digest": "d6affe40cdd8b8c1786f36ee701bdf4213d3174fc7e8ccad4a6dad25715fbbf1",
   "_binding": "the authorization binds launch_identity_sha256 (plan + protocol + inputs + pools) and harness_digest; the launcher checks both before any pod, the driver again on the pod before reading the protocol",
   "setup_branch": "scripts/shared/pod/autoinit_preflight_setup.sh :: SESSION_KIND=stage2_h1_generation (AUTHORIZATION_OK): the artifact loaded by its own type, bound to the launch identity and harness recomputed on the pod; exit 98 otherwise",
   "superseded_harness_digests": [
    {
     "digest": "5a16440caad168bc02090b1710920942ec7522713d40d656f768dff11a218167",
     "why": "0029c770's code; superseded 2026-10-22 by the issue-binds-the-approved-harness and tri-state shard-securing corrections, never an identity of the corrected code"
+   },
+   {
+    "digest": "1ea5ecbd74b75f1e39e54fcc252eb184cf7ea728bf2816f10a27f9d2bd722d55",
+    "why": "5b13ab65's code; superseded 2026-10-22 when every save and verify operation of the secured check was bound to one deadline"
    }
   ],
   "grant_document": {
