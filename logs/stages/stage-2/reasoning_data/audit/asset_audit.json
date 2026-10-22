@@ -1,9 +1,9 @@
 {
  "schema": "aadistill.stage2.reasoning_data.asset_audit/v1",
- "written_utc": "2026-10-21T20:26:46Z",
+ "written_utc": "2026-10-22T09:17:44Z",
  "code_state": {
-  "git_commit": "7598f091e6ee1b7cfb9c2917c99279203527fb16",
-  "dirty": false
+  "git_commit": "edd78189a504d674a58d42d274ea018bdb2db269",
+  "dirty": true
  },
  "inputs": {
   "corpus_v2_manifest": "59ece2a5407e4177922c523da44835c46e1422c3c4df8878a601152098e290fa",
@@ -242,7 +242,7 @@
   "selected_supervised_tokens": 13044052,
   "selected_supervised_tokens_with_a_verified_correct_answer": 6061413,
   "under_target_quality_contract": {
-   "contract": "aadistill.data.target_quality/v1",
+   "contract": "aadistill.data.target_quality/v2",
    "policy": "verified correct, naturally terminated, protocol valid (AcceptancePolicy())",
    "per_type": {
     "code": {
@@ -255,9 +255,13 @@
      "answer": {
       "unverifiable": 4800
      },
-     "trace": {
+     "answer_scope": {
+      "corpus_v2's own correctness verdict (per-type checker, recorded at generation)": 4800
+     },
+     "steps": {
       "not_assessed": 4800
      },
+     "observations": {},
      "accepted_candidates": 0,
      "accepted_units": 0,
      "candidate_accept_rate": 0.0,
@@ -279,9 +283,13 @@
       "correct": 6053,
       "incorrect": 747
      },
-     "trace": {
+     "answer_scope": {
+      "corpus_v2's own correctness verdict (per-type checker, recorded at generation)": 6800
+     },
+     "steps": {
       "not_assessed": 6800
      },
+     "observations": {},
      "accepted_candidates": 6053,
      "accepted_units": 1596,
      "candidate_accept_rate": 0.890147,
@@ -305,9 +313,13 @@
       "correct": 3698,
       "incorrect": 598
      },
-     "trace": {
+     "answer_scope": {
+      "corpus_v2's own correctness verdict (per-type checker, recorded at generation)": 4296
+     },
+     "steps": {
       "not_assessed": 4296
      },
+     "observations": {},
      "accepted_candidates": 3698,
      "accepted_units": 980,
      "candidate_accept_rate": 0.860801,
@@ -330,9 +342,13 @@
       "incorrect": 2233,
       "correct": 1367
      },
-     "trace": {
+     "answer_scope": {
+      "corpus_v2's own correctness verdict (per-type checker, recorded at generation)": 3600
+     },
+     "steps": {
       "not_assessed": 3600
      },
+     "observations": {},
      "accepted_candidates": 1367,
      "accepted_units": 413,
      "candidate_accept_rate": 0.379722,
@@ -358,9 +374,13 @@
       "correct": 16040,
       "incorrect": 360
      },
-     "trace": {
+     "answer_scope": {
+      "corpus_v2's own correctness verdict (per-type checker, recorded at generation)": 16400
+     },
+     "steps": {
       "not_assessed": 16400
      },
+     "observations": {},
      "accepted_candidates": 16040,
      "accepted_units": 4066,
      "candidate_accept_rate": 0.978049,
@@ -380,9 +400,13 @@
      "answer": {
       "unverifiable": 10400
      },
-     "trace": {
+     "answer_scope": {
+      "corpus_v2's own correctness verdict (per-type checker, recorded at generation)": 10400
+     },
+     "steps": {
       "not_assessed": 10400
      },
+     "observations": {},
      "accepted_candidates": 0,
      "accepted_units": 0,
      "candidate_accept_rate": 0.0,
@@ -674,9 +698,16 @@
      "correct": 58,
      "incorrect": 17
     },
-    "trace": {
-     "partial": 58,
-     "not_assessed": 17
+    "answer_scope": {
+     "the boxed final answer against the generator's gold": 75
+    },
+    "steps": {
+     "not_assessed": 75
+    },
+    "observations": {
+     "text_consistency": {
+      "restated": 58
+     }
     },
     "accepted_candidates": 58,
     "accepted_units": 58,
@@ -701,9 +732,17 @@
      "correct": 131,
      "incorrect": 19
     },
-    "trace": {
-     "partial": 127,
-     "not_assessed": 23
+    "answer_scope": {
+     "the boxed final answer against the generator's gold": 150
+    },
+    "steps": {
+     "not_assessed": 150
+    },
+    "observations": {
+     "text_consistency": {
+      "restated": 127,
+      "not_restated": 4
+     }
     },
     "accepted_candidates": 131,
     "accepted_units": 131,
@@ -727,9 +766,17 @@
      "correct": 142,
      "incorrect": 8
     },
-    "trace": {
-     "partial": 137,
-     "not_assessed": 13
+    "answer_scope": {
+     "the boxed final answer against the generator's gold": 150
+    },
+    "steps": {
+     "not_assessed": 150
+    },
+    "observations": {
+     "text_consistency": {
+      "restated": 137,
+      "not_restated": 5
+     }
     },
     "accepted_candidates": 142,
     "accepted_units": 142,
@@ -753,19 +800,27 @@
      "incorrect": 55,
      "correct": 17
     },
-    "trace": {
-     "verified": 68,
-     "contradicted": 4
+    "answer_scope": {
+     "the environment's goal reached on replay": 72
+    },
+    "steps": {
+     "not_assessed": 72
+    },
+    "observations": {
+     "action_legality": {
+      "all_legal": 68,
+      "illegal_action": 4
+     }
     },
     "accepted_candidates": 16,
     "accepted_units": 16,
     "candidate_accept_rate": 0.222222,
     "unit_accept_rate": 0.222222,
     "rejection_reasons": {
+     "action_legality:illegal_action:invalid_actions=1": 4,
      "answer:incorrect": 55,
      "ending:degeneration": 1,
-     "protocol:think_not_closed": 1,
-     "trace:contradicted:invalid_actions=1": 4
+     "protocol:think_not_closed": 1
     }
    },
    "task_contained_deduction": {
@@ -779,9 +834,17 @@
      "correct": 224,
      "incorrect": 1
     },
-    "trace": {
-     "partial": 175,
-     "not_assessed": 50
+    "answer_scope": {
+     "the boxed final answer against the generator's gold": 225
+    },
+    "steps": {
+     "not_assessed": 225
+    },
+    "observations": {
+     "text_consistency": {
+      "restated": 175,
+      "not_restated": 49
+     }
     },
     "accepted_candidates": 224,
     "accepted_units": 224,
@@ -803,24 +866,35 @@
     "correct": 572,
     "incorrect": 100
    },
-   "trace": {
-    "partial": 497,
-    "not_assessed": 103,
-    "verified": 68,
-    "contradicted": 4
+   "answer_scope": {
+    "the boxed final answer against the generator's gold": 600,
+    "the environment's goal reached on replay": 72
+   },
+   "steps": {
+    "not_assessed": 672
+   },
+   "observations": {
+    "action_legality": {
+     "all_legal": 68,
+     "illegal_action": 4
+    },
+    "text_consistency": {
+     "restated": 497,
+     "not_restated": 58
+    }
    },
    "accepted_candidates": 571,
    "accepted_units": 571,
    "candidate_accept_rate": 0.849702,
    "unit_accept_rate": 0.849702,
    "rejection_reasons": {
+    "action_legality:illegal_action:invalid_actions=1": 4,
     "answer:incorrect": 55,
     "answer:incorrect:unusable": 26,
     "answer:incorrect:wrong_answer": 19,
     "ending:degeneration": 17,
     "ending:length_limited": 10,
-    "protocol:think_not_closed": 23,
-    "trace:contradicted:invalid_actions=1": 4
+    "protocol:think_not_closed": 23
    }
   },
   "note": "n = 1 per task, so unit and candidate acceptance coincide; base_pool_v1 additionally dropped 53 accepted units whose render exceeded 8,192 tokens"
@@ -876,11 +950,25 @@
  },
  "isolation": {
   "corpus_v2_sessions": {
-   "schema": "aadistill.stage2.reasoning_data.isolation_report/v1",
+   "schema": "aadistill.stage2.reasoning_data.isolation_report/v2",
    "rules": "configs/stages/stage-2/reasoning_data/isolation_rules.json",
    "eval_set": "eval-set-1",
    "n_items": 11174,
    "results": {
+    "R0_provenance": {
+     "violations": {
+      "openmath_instruct_2: missing source_split": 579,
+      "unregistered source 'glaive_fc_v2'": 2561,
+      "unregistered source 'gsm8k'": 1698,
+      "unregistered source 'hotpot_qa'": 1074,
+      "unregistered source 'magicoder_oss'": 785,
+      "unregistered source 'mbpp'": 338,
+      "unregistered source 'squad_v2'": 4100,
+      "unregistered source 'xlam_fc_60k'": 39
+     },
+     "historical_pool": true,
+     "pass": false
+    },
     "R1_held_out_keys": {
      "held_out_overlap": {},
      "pass": true
@@ -1162,21 +1250,110 @@
      ],
      "violations": [],
      "n_violations": 0,
-     "historical_pool": false,
+     "historical_pool": true,
+     "pass": true
+    },
+    "R6_source_split": {
+     "violations": {},
+     "pass": true
+    },
+    "R7_arc_agi": {
+     "arc_lineage_items": {},
+     "content_refused": [],
+     "n_content_refused": 0,
+     "items_with_any_grid_match": 0,
+     "index": {
+      "path": "data/stages/stage-2/reasoning_data/isolation/arc_grid_index.json",
+      "sha256": "425b3f29afb089435982c05e900463fca6d0ebf0e37f24afbd1e214383dde91e",
+      "source": {
+       "package": "arckit 0.1.0 (PyPI)",
+       "wheel_sha256": "5a22619309d2c29b04796eadf2a58792e563d6b811ee021e5d8ca97880ebbe80",
+       "files_sha256": {
+        "arckit/data/arc1.json": "b22cbaf01a1e30f0bbf667dab30e77bf387c6a53dec84607d92a41bd276a6d47",
+        "arckit/data/kaggle2024.json": "73c89307138307a363e0c6b14d3fcf599ec63d8588f502be045d783cca2b791d"
+       }
+      }
+     },
+     "pass": true
+    },
+    "R9_mechanism_equivalence": {
+     "refused_families": [
+      "string_induction@v2/str.caesar",
+      "string_induction@v2/str.double_last",
+      "string_induction@v2/str.duplicate_each"
+     ],
+     "items": {},
+     "pairs": [
+      {
+       "domain": "string",
+       "training_family": "string_induction@v2/str.caesar",
+       "evaluation_family": "letter_analogy@v2/letter.succ_all",
+       "agreement": 1.0,
+       "verdict": "equivalent"
+      },
+      {
+       "domain": "string",
+       "training_family": "string_induction@v2/str.double_last",
+       "evaluation_family": "letter_analogy@v2/letter.double_last",
+       "agreement": 1.0,
+       "verdict": "equivalent"
+      },
+      {
+       "domain": "string",
+       "training_family": "string_induction@v2/str.duplicate_each",
+       "evaluation_family": "letter_analogy@v2/letter.double_all",
+       "agreement": 1.0,
+       "verdict": "equivalent"
+      }
+     ],
+     "overlapping_reported": [],
+     "families_without_tabulated_rules": [
+      "defined_ops@v1/comp.chain3",
+      "defined_ops@v1/comp.conditional_chain",
+      "entity_tracking@v1/track.move",
+      "entity_tracking@v1/track.move_remove",
+      "hidden_buttons@v1/act.reverse",
+      "knights_knaves@v1/kk.counting",
+      "ordering@v2/order.race",
+      "probe_function@v1/probe.digit_sum",
+      "probe_function@v1/probe.threshold",
+      "scan_language@v1/scan.rev_sur",
+      "scan_language@v1/scan.seq_rev",
+      "scan_language@v1/scan.sur_sur"
+     ],
      "pass": true
     }
    },
+   "establishes": {
+    "R0_provenance": "every item names a registered, trainable source and carries the fields its kind needs",
+    "R1_held_out_keys": "no item shares a prompt or content key with a held-out unit",
+    "R2_near_duplicate": "no item is a 13-gram near-copy of a held-out prompt",
+    "R3_rule_family": "no item comes from a rule family a fluid evaluation item uses",
+    "R4_eval_only_generators": "no item comes from an evaluation-only generator or its task type",
+    "R5_shared_generator_exposure": "shared-generator items are calibration-split families in the training seed range",
+    "R6_source_split": "every dataset item comes from a trainable split",
+    "R7_arc_agi": "no ARC-lineage source or module, and no item carrying ARC-AGI-1 grids",
+    "R9_mechanism_equivalence": "no item comes from a project family whose rule computes an evaluation family's rule"
+   },
+   "not_established": "semantic mechanism isolation beyond R9's tabulated rules: families without tabulated rules and external modules are covered by the declared review (external_modules.json :: mechanism), not by these checks",
    "violations": [
     "R2_near_duplicate"
    ],
    "pass": false
   },
   "base_pool_v1_fluid": {
-   "schema": "aadistill.stage2.reasoning_data.isolation_report/v1",
+   "schema": "aadistill.stage2.reasoning_data.isolation_report/v2",
    "rules": "configs/stages/stage-2/reasoning_data/isolation_rules.json",
    "eval_set": "eval-set-1",
    "n_items": 519,
    "results": {
+    "R0_provenance": {
+     "violations": {
+      "unregistered source None": 519
+     },
+     "historical_pool": true,
+     "pass": false
+    },
     "R1_held_out_keys": {
      "held_out_overlap": {},
      "pass": true
@@ -1469,19 +1646,106 @@
      "n_violations": 519,
      "historical_pool": true,
      "pass": false
+    },
+    "R6_source_split": {
+     "violations": {},
+     "pass": true
+    },
+    "R7_arc_agi": {
+     "arc_lineage_items": {},
+     "content_refused": [],
+     "n_content_refused": 0,
+     "items_with_any_grid_match": 3,
+     "index": {
+      "path": "data/stages/stage-2/reasoning_data/isolation/arc_grid_index.json",
+      "sha256": "425b3f29afb089435982c05e900463fca6d0ebf0e37f24afbd1e214383dde91e",
+      "source": {
+       "package": "arckit 0.1.0 (PyPI)",
+       "wheel_sha256": "5a22619309d2c29b04796eadf2a58792e563d6b811ee021e5d8ca97880ebbe80",
+       "files_sha256": {
+        "arckit/data/arc1.json": "b22cbaf01a1e30f0bbf667dab30e77bf387c6a53dec84607d92a41bd276a6d47",
+        "arckit/data/kaggle2024.json": "73c89307138307a363e0c6b14d3fcf599ec63d8588f502be045d783cca2b791d"
+       }
+      }
+     },
+     "pass": true
+    },
+    "R9_mechanism_equivalence": {
+     "refused_families": [
+      "string_induction@v2/str.caesar",
+      "string_induction@v2/str.double_last",
+      "string_induction@v2/str.duplicate_each"
+     ],
+     "items": {},
+     "pairs": [
+      {
+       "domain": "string",
+       "training_family": "string_induction@v2/str.caesar",
+       "evaluation_family": "letter_analogy@v2/letter.succ_all",
+       "agreement": 1.0,
+       "verdict": "equivalent"
+      },
+      {
+       "domain": "string",
+       "training_family": "string_induction@v2/str.double_last",
+       "evaluation_family": "letter_analogy@v2/letter.double_last",
+       "agreement": 1.0,
+       "verdict": "equivalent"
+      },
+      {
+       "domain": "string",
+       "training_family": "string_induction@v2/str.duplicate_each",
+       "evaluation_family": "letter_analogy@v2/letter.double_all",
+       "agreement": 1.0,
+       "verdict": "equivalent"
+      }
+     ],
+     "overlapping_reported": [],
+     "families_without_tabulated_rules": [
+      "defined_ops@v1/comp.chain3",
+      "defined_ops@v1/comp.conditional_chain",
+      "entity_tracking@v1/track.move",
+      "entity_tracking@v1/track.move_remove",
+      "hidden_buttons@v1/act.reverse",
+      "knights_knaves@v1/kk.counting",
+      "ordering@v2/order.race",
+      "probe_function@v1/probe.digit_sum",
+      "probe_function@v1/probe.threshold",
+      "scan_language@v1/scan.rev_sur",
+      "scan_language@v1/scan.seq_rev",
+      "scan_language@v1/scan.sur_sur"
+     ],
+     "pass": true
     }
    },
+   "establishes": {
+    "R0_provenance": "every item names a registered, trainable source and carries the fields its kind needs",
+    "R1_held_out_keys": "no item shares a prompt or content key with a held-out unit",
+    "R2_near_duplicate": "no item is a 13-gram near-copy of a held-out prompt",
+    "R3_rule_family": "no item comes from a rule family a fluid evaluation item uses",
+    "R4_eval_only_generators": "no item comes from an evaluation-only generator or its task type",
+    "R5_shared_generator_exposure": "shared-generator items are calibration-split families in the training seed range",
+    "R6_source_split": "every dataset item comes from a trainable split",
+    "R7_arc_agi": "no ARC-lineage source or module, and no item carrying ARC-AGI-1 grids",
+    "R9_mechanism_equivalence": "no item comes from a project family whose rule computes an evaluation family's rule"
+   },
+   "not_established": "semantic mechanism isolation beyond R9's tabulated rules: families without tabulated rules and external modules are covered by the declared review (external_modules.json :: mechanism), not by these checks",
    "violations": [],
    "pass": true
   },
   "stage2_training_range_sample": {
    "n_generated": 90,
    "report": {
-    "schema": "aadistill.stage2.reasoning_data.isolation_report/v1",
+    "schema": "aadistill.stage2.reasoning_data.isolation_report/v2",
     "rules": "configs/stages/stage-2/reasoning_data/isolation_rules.json",
     "eval_set": "eval-set-1",
     "n_items": 90,
     "results": {
+     "R0_provenance": {
+      "violations": {},
+      "historical_pool": false,
+      "pass": true
+     },
      "R1_held_out_keys": {
       "held_out_overlap": {},
       "pass": true
@@ -1577,8 +1841,86 @@
      "R6_source_split": {
       "violations": {},
       "pass": true
+     },
+     "R7_arc_agi": {
+      "arc_lineage_items": {},
+      "content_refused": [],
+      "n_content_refused": 0,
+      "items_with_any_grid_match": 0,
+      "index": {
+       "path": "data/stages/stage-2/reasoning_data/isolation/arc_grid_index.json",
+       "sha256": "425b3f29afb089435982c05e900463fca6d0ebf0e37f24afbd1e214383dde91e",
+       "source": {
+        "package": "arckit 0.1.0 (PyPI)",
+        "wheel_sha256": "5a22619309d2c29b04796eadf2a58792e563d6b811ee021e5d8ca97880ebbe80",
+        "files_sha256": {
+         "arckit/data/arc1.json": "b22cbaf01a1e30f0bbf667dab30e77bf387c6a53dec84607d92a41bd276a6d47",
+         "arckit/data/kaggle2024.json": "73c89307138307a363e0c6b14d3fcf599ec63d8588f502be045d783cca2b791d"
+        }
+       }
+      },
+      "pass": true
+     },
+     "R9_mechanism_equivalence": {
+      "refused_families": [
+       "string_induction@v2/str.caesar",
+       "string_induction@v2/str.double_last",
+       "string_induction@v2/str.duplicate_each"
+      ],
+      "items": {},
+      "pairs": [
+       {
+        "domain": "string",
+        "training_family": "string_induction@v2/str.caesar",
+        "evaluation_family": "letter_analogy@v2/letter.succ_all",
+        "agreement": 1.0,
+        "verdict": "equivalent"
+       },
+       {
+        "domain": "string",
+        "training_family": "string_induction@v2/str.double_last",
+        "evaluation_family": "letter_analogy@v2/letter.double_last",
+        "agreement": 1.0,
+        "verdict": "equivalent"
+       },
+       {
+        "domain": "string",
+        "training_family": "string_induction@v2/str.duplicate_each",
+        "evaluation_family": "letter_analogy@v2/letter.double_all",
+        "agreement": 1.0,
+        "verdict": "equivalent"
+       }
+      ],
+      "overlapping_reported": [],
+      "families_without_tabulated_rules": [
+       "defined_ops@v1/comp.chain3",
+       "defined_ops@v1/comp.conditional_chain",
+       "entity_tracking@v1/track.move",
+       "entity_tracking@v1/track.move_remove",
+       "hidden_buttons@v1/act.reverse",
+       "knights_knaves@v1/kk.counting",
+       "ordering@v2/order.race",
+       "probe_function@v1/probe.digit_sum",
+       "probe_function@v1/probe.threshold",
+       "scan_language@v1/scan.rev_sur",
+       "scan_language@v1/scan.seq_rev",
+       "scan_language@v1/scan.sur_sur"
+      ],
+      "pass": true
      }
     },
+    "establishes": {
+     "R0_provenance": "every item names a registered, trainable source and carries the fields its kind needs",
+     "R1_held_out_keys": "no item shares a prompt or content key with a held-out unit",
+     "R2_near_duplicate": "no item is a 13-gram near-copy of a held-out prompt",
+     "R3_rule_family": "no item comes from a rule family a fluid evaluation item uses",
+     "R4_eval_only_generators": "no item comes from an evaluation-only generator or its task type",
+     "R5_shared_generator_exposure": "shared-generator items are calibration-split families in the training seed range",
+     "R6_source_split": "every dataset item comes from a trainable split",
+     "R7_arc_agi": "no ARC-lineage source or module, and no item carrying ARC-AGI-1 grids",
+     "R9_mechanism_equivalence": "no item comes from a project family whose rule computes an evaluation family's rule"
+    },
+    "not_established": "semantic mechanism isolation beyond R9's tabulated rules: families without tabulated rules and external modules are covered by the declared review (external_modules.json :: mechanism), not by these checks",
     "violations": [],
     "pass": true
    }

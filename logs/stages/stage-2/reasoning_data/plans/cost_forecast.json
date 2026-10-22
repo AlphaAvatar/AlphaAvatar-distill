@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.stage2.reasoning_data.cost_forecast/v1",
  "status": "FORECAST from measured rates; authorizes nothing",
- "written_utc": "2026-10-21T19:27:31Z",
+ "written_utc": "2026-10-22T09:04:09Z",
  "measured": {
   "teacher_generation": {
    "tokens_per_second": 1739.1,
@@ -149,9 +149,9 @@
  "units": {
   "L40S/M0_frozen": {
    "old_2p96M": {
-    "recovery_hours": 2.713,
+    "recovery_hours": 2.711,
     "eval_hours": 1.857,
-    "usd": 5.11
+    "usd": 5.1
    },
    "new_2p96M": {
     "recovery_hours": 0.773,
@@ -203,7 +203,7 @@
   },
   "A100-80GB/M0_frozen": {
    "old_2p96M": {
-    "recovery_hours": 2.341,
+    "recovery_hours": 2.34,
     "eval_hours": 1.857,
     "usd": 7.7
    },
@@ -230,9 +230,9 @@
   },
   "A100-80GB/M1_matched": {
    "old_2p96M": {
-    "recovery_hours": 0.811,
+    "recovery_hours": 0.81,
     "eval_hours": 1.857,
-    "usd": 4.9
+    "usd": 4.89
    },
    "new_2p96M": {
     "recovery_hours": 0.634,
@@ -258,7 +258,7 @@
  },
  "phases": {
   "L40S/M0_frozen": {
-   "comparison_usd": 16.43,
+   "comparison_usd": 16.41,
    "ladder_usd": 10.07
   },
   "L40S/M1_matched": {
@@ -270,24 +270,31 @@
    "ladder_usd": 16.21
   },
   "A100-80GB/M1_matched": {
-   "comparison_usd": 19.49,
+   "comparison_usd": 19.47,
    "ladder_usd": 16.13
   }
  },
  "h1_units_L40S_M1": {
   "A": {
-   "recovery_hours": 0.96,
+   "recovery_hours": 0.958,
    "eval_hours": 1.857,
    "usd": 3.15,
-   "executed_positions": 12736607,
-   "optimizer_steps": 626
+   "executed_positions": 12712575,
+   "optimizer_steps": 625
   },
-  "B_estimate": {
-   "recovery_hours": 0.75,
+  "B": {
+   "recovery_hours": 0.751,
    "eval_hours": 1.857,
    "usd": 2.91,
-   "executed_positions": 9951552,
-   "optimizer_steps": 624
+   "executed_positions": 9961250,
+   "optimizer_steps": 625
+  },
+  "kinds": {
+   "A_positions": "measured",
+   "B_positions": "estimated",
+   "steps": "PROVISIONAL",
+   "positions_per_second": "measured on earlier L40S recovery runs (measured.*)",
+   "hours_and_usd": "forecast = planned positions / measured rate x contingency"
   }
  },
  "optional": {

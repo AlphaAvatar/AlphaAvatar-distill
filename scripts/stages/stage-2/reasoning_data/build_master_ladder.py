@@ -4,15 +4,20 @@
     PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.build_master_ladder \
         --sessions <sessions.jsonl> --spec <ladder spec .json> --out <pack dir>
 
-Input contract (one row per renderable session; the future generation step
-writes exactly this):
+Input contract (one row per session; the future generation step writes
+exactly this):
 
-    {"id": str, "unit_id": str, "stratum": str, "family": str | null,
-     "attributes": {str: str}, "messages": [...], "tools": [...] | null,
-     "data_type": str}
+    {"id": str, "unit_id": str, "unit_sessions": int, "stratum": str,
+     "family": str | null, "attributes": {str: str}, "messages": [...],
+     "tools": [...] | null, "data_type": str}
+
+`unit_sessions` is how many sessions the unit consists of (1 for a static task,
+the number of assistant turns for an episode). It is required: without it a
+unit that lost a turn upstream cannot be told from a complete one.
 
 A UNIT (a static task, a whole episode's turns, a conversation's turns) is
-indivisible: nesting, the reserve and the composition are all decided on units.
+indivisible: it is ADMITTED whole or not at all (`render_all`), and nesting,
+the reserve and the composition are all decided on units.
 The spec declares `shares` (by stratum), `rung_targets` (unique supervised
 tokens), `reserve_tokens`, `salt`, `block_len`.
 
@@ -46,22 +51,54 @@ def load_tokenizer(path: Path = A.TOKENIZER_DIR):
 
 
 def render_all(tokenizer, sessions: list[dict], *, block_len: int):
-    """Render every session; a session that does not fit is excluded, never cut."""
-    rendered, excluded, system_ids = {}, [], {}
+    """Render and admit whole UNITS. A unit is admitted only when it holds every
+    session it declares (`unit_sessions`) and every one of them renders and fits
+    a block; otherwise the whole unit is excluded, with the reason and all its
+    session ids, and none of it is packed. No session is ever cut, and no unit
+    is ever trained on in part (an episode that lost its long last turns is not
+    a shorter episode)."""
+    by_unit: dict[str, list[dict]] = defaultdict(list)
     for s in sessions:
-        try:
-            r = render_session(tokenizer, s, block_len=block_len)
-        except ValueError as e:
-            excluded.append({"id": s["id"], "unit_id": s["unit_id"], "why": str(e)[:160]})
+        if s.get("unit_sessions") is None:
+            raise ValueError(f"session {s.get('id')!r} does not declare unit_sessions")
+        by_unit[str(s["unit_id"])].append(s)
+    rendered, excluded, system_ids = {}, [], {}
+    for uid, rows in by_unit.items():
+        declared = {int(s["unit_sessions"]) for s in rows}
+        kind = why = None
+        if len(declared) != 1:
+            kind, why = "inconsistent_size", f"sessions declare sizes {sorted(declared)}"
+        elif len(rows) != next(iter(declared)):
+            kind, why = "incomplete", f"{len(rows)} of {next(iter(declared))} sessions present"
+        done: dict[str, RenderedSession] = {}
+        for s in rows if kind is None else ():
+            try:
+                done[s["id"]] = render_session(tokenizer, s, block_len=block_len)
+            except ValueError as e:
+                kind, why = "session_does_not_render_or_fit", f"{s['id']}: {str(e)[:160]}"
+                break
+        if kind is not None:
+            excluded.append({"unit_id": uid, "sessions": [s["id"] for s in rows],
+                             "kind": kind, "why": why})
             continue
-        r.source_id = str(s["unit_id"])
-        r.meta.update({"stratum": s["stratum"], "family": s.get("family"),
-                       "attributes": s.get("attributes") or {}})
-        rendered[s["id"]] = r
-        if r.system_key not in system_ids:
-            block = render_system_block(tokenizer, r.system_text, r.tools)
-            system_ids[r.system_key] = tokenizer(block, add_special_tokens=False).input_ids
+        for s in rows:
+            r = done[s["id"]]
+            r.source_id = uid
+            r.meta.update({"stratum": s["stratum"], "family": s.get("family"),
+                           "attributes": s.get("attributes") or {}})
+            rendered[s["id"]] = r
+            if r.system_key not in system_ids:
+                block = render_system_block(tokenizer, r.system_text, r.tools)
+                system_ids[r.system_key] = tokenizer(block, add_special_tokens=False).input_ids
     return rendered, excluded, system_ids
+
+
+def exclusion_summary(excluded: list[dict]) -> dict:
+    kinds: dict[str, int] = defaultdict(int)
+    for e in excluded:
+        kinds[e["kind"]] += 1
+    return {"units": len(excluded), "sessions": sum(len(e["sessions"]) for e in excluded),
+            "units_by_kind": dict(sorted(kinds.items()))}
 
 
 def split_counts(r: RenderedSession, think_close_id: int) -> dict:
@@ -122,6 +159,27 @@ def block_rows(blocks, session_counts: dict) -> list[dict]:
     return rows
 
 
+def pack_block_rows(pack_dir: Path, target: int) -> list[dict]:
+    """A written pack's rung, as the rows `aadistill.training.accounting` reads,
+    from the pack's own ladder.json and audit.jsonl (consumption indices are
+    positions in this list, as the trainer's are)."""
+    meta = json.loads((pack_dir / "ladder.json").read_text())
+    rung = next(r for r in meta["rungs"] if r["target_supervised_tokens"] == target)
+    rows = []
+    with open(pack_dir / "audit.jsonl") as f:
+        for line in f:
+            a = json.loads(line)
+            if a["block"] >= rung["n_blocks"]:
+                break
+            prev = rows[-1]["_cum"] if rows else 0
+            rows.append({"real_length": a["unpadded_length"], "supervised": a["cumulative_supervised"] - prev,
+                         "reasoning": a["supervised_reasoning"], "answer": a["supervised_answer"],
+                         "_cum": a["cumulative_supervised"]})
+    for r in rows:
+        del r["_cum"]
+    return rows
+
+
 def block_accounting(blocks, block_len: int) -> dict:
     real = sum(b.audit["unpadded_length"] for b in blocks)
     return {"blocks": len(blocks), "real_tokens": real,
@@ -164,10 +222,13 @@ def write_pack(out: Path, built: dict, spec: dict, provenance: dict) -> dict:
              ce_mask=np.asarray([b.ce_mask for b in blocks], dtype=bool),
              content_mask=np.asarray([b.content_mask for b in blocks], dtype=bool))
     cum = 0
+    counts = built.get("session_counts")
+    rows = block_rows(blocks, counts) if counts else [{} for _ in blocks]
     with open(out / "audit.jsonl", "w") as f:
-        for i, b in enumerate(blocks):
+        for i, (b, row) in enumerate(zip(blocks, rows)):
             cum += b.n_supervised
-            f.write(json.dumps({"block": i, "cumulative_supervised": cum, **b.audit}) + "\n")
+            split = {"supervised_reasoning": row["reasoning"], "supervised_answer": row["answer"]} if row else {}
+            f.write(json.dumps({"block": i, "cumulative_supervised": cum, **split, **b.audit}) + "\n")
     rungs = []
     for row in built["ladder"]["rungs"]:
         entry = {"target_supervised_tokens": row["target"], "reachable": row["reachable"],
@@ -185,7 +246,9 @@ def write_pack(out: Path, built: dict, spec: dict, provenance: dict) -> dict:
             "declared_mixture": spec["shares"], "spec": spec, "rungs": rungs,
             "validation_tail": {"first_block": built["val_start"], **built["validation_tail"]},
             "order_sha256": hashlib.sha256(json.dumps(built["ladder"]["order"]).encode()).hexdigest(),
-            "reserved_units": built["ladder"]["reserved"], "excluded_sessions": built["excluded"],
+            "reserved_units": built["ladder"]["reserved"],
+            "admission": "whole units only (render_all)",
+            "excluded_units": built["excluded"], "excluded_summary": exclusion_summary(built["excluded"]),
             "outputs": files, "provenance": provenance}
     (out / "ladder.json").write_text(json.dumps(meta, indent=1) + "\n")
     return meta

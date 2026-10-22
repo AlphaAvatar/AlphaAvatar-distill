@@ -75,7 +75,7 @@ What each one asked of this stage.
 
 | experiment | what it asked | logs | status |
 | --- | --- | --- | --- |
-| `reasoning_data` — Stage-2 verified teacher-native reasoning data, measured through Stage-3 controlled recovery | Under one fixed initialization and the fixed historical recovery recipe, does verified teacher-native reasoning data lift a 0.6B student off the fluid-reasoning floor where corpus_v2 left it, and how does that scale over a nested 0.86M-5.50M ladder? | [`reasoning_data/`](reasoning_data/) | H1 PREPARED AT $0 2026-10-21, NOT AUTHORIZED. The maintainer fixed Stage-0 D4 Top-1 as the initialization (two verified copies: relay + dev box); H1 compares 2.96M of corpus_v2 (A) with 2.96M of a verified teacher-native corpus (B) under matched U, E and steps (contract M1). Done: asset audit, target quality and process checks, isolation rules R1-R8, the train_tasks_v1 pool, the H1 accounting and draft protocol, a provider-checked budget position (34 pods / $58.33 still unattributed), the durability plan (backend BLOCKED: not provisioned), the H1 application; TIP registered as an H3 candidate only; the 8 named external sources audited (4 validated locally, module-level decisions). No teacher target generated, no student trained, $0 spent |
+| `reasoning_data` — Stage-2 verified teacher-native reasoning data, measured through Stage-3 controlled recovery | Under one fixed initialization and the fixed historical recovery recipe, does verified teacher-native reasoning data lift a 0.6B student off the fluid-reasoning floor where corpus_v2 left it, and how does that scale over a nested 0.86M-5.50M ladder? | [`reasoning_data/`](reasoning_data/) | H1 PREPARATION REVISED AT $0 2026-10-22 AFTER REVIEW, NOT COMPLETE, NOT AUTHORIZED. The maintainer fixed Stage-0 D4 Top-1 as the initialization (two verified copies: relay + dev box); H1 compares 2.96M of corpus_v2 (A) with 2.96M of a verified teacher-native corpus (B) under one matching rule (values provisional until B's pack). Done: asset audit, target quality v2, isolation rules R0-R9, the train_tasks_v2 pool, a source plan with named corpus variants, an isolated export and external task builder, a post-generation adapter validated on the Stage-0 teacher records, completion-time persistence, the H1 accounting, statistics and draft protocol, a provider-checked budget position (34 pods / $58.33 still unattributed), the durability plan (backend BLOCKED), the H1 application; TIP an H3 candidate only. Open: supporting-source builders, two exporters, five module checkers, the GPU unit driver. No teacher target generated, no student trained, $0 spent |
 
 ## Runs
 
@@ -112,6 +112,7 @@ copied here.
 * logs/budget/decisions.md — 2026-08-01: difficulty-aware mixture replaces equal four-way balance
 * logs/budget/decisions.md -- 2026-10-21: Stage-2/3 reasoning-data round opened at $0: audit, contracts and a PROPOSED design
 * logs/budget/decisions.md -- 2026-10-21: Maintainer: H1 fixes D4 Top-1; budget and durability first; TIP as an H3 candidate
+* logs/budget/decisions.md -- 2026-10-22: Independent review of H1 preparation: eight targeted corrections at $0, no paid authorization
 
 ## Current status
 

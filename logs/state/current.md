@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-21 18:30 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-22 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,12 +9,13 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**STAGE-2/3 H1: PREPARED AT $0, NOT AUTHORIZED (2026-10-21).**
+**STAGE-2/3 H1: PREPARATION REVISED AT $0 AFTER REVIEW, NOT COMPLETE, NOT AUTHORIZED (2026-10-22).**
 Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).
 No teacher target, student, GPU session or paid storage exists, and $0 was
 spent. The preparation result is
-[`docs/stages/stage-2/reasoning_data/H1.md`](../../docs/stages/stage-2/reasoning_data/H1.md);
-its records are under [`stages/stage-2/reasoning_data/`](../stages/stage-2/reasoning_data/).
+[`docs/stages/stage-2/reasoning_data/H1.md`](../../docs/stages/stage-2/reasoning_data/H1.md):
+§10 lists the review's eight corrections with their evidence, §9 what is open.
+Its records are under [`stages/stage-2/reasoning_data/`](../stages/stage-2/reasoning_data/).
 - **Initialization FIXED by the maintainer: Stage-0 D4 Top-1** (`fc28e0dd…`,
   digest `457e194c…`). It has two verified copies: the relay, and a dev-box
   read-back whose rebuilt identity matches (`assets/d4_top1_materialization.json`).
@@ -26,28 +27,36 @@ its records are under [`stages/stage-2/reasoning_data/`](../stages/stage-2/reaso
     0 volumes, $0/h; balance $101.23 (not a grant);
   - headroom +$18.08 if the records are complete, −$14.49 if all billing is
     project (the conservative bound);
-  - of 53 pods no run created, 19 are now named by this project's records and
+  - of 53 pods no run created, 19 are named by this project's records and
     **34 ($58.33) stay OPEN**;
-  - the attribution tool's self-reference defect is fixed, with a regression
-    test.
+  - the attribution tool's self-reference defect was fixed twice: a committed
+    reconciliation (the H1 position itself) no longer attributes the pods it
+    lists.
 - **Durability** (`plans/durability_plan.json`). The relay holds about 2.0 GiB
   and the dev box about 11 GiB free. **The large-artifact backend is BLOCKED:
   not provisioned.** Recommended: a 30 GB network volume ($4.20 for two months).
 - **H1 draft** (`plans/comparison_design.json`):
-  - A = corpus_v2 as it was (isolation-only exclusion of 28 sessions);
-    B = verified teacher-native corpus, reasoning 0.70 / supporting 0.30;
-  - matched U, E and steps under contract M1, C reported;
+  - A = corpus_v2 as it was (28 near-copy units excluded whole);
+    B = verified teacher-native corpus, reasoning 0.70 / supporting 0.30, cut
+    from an explicitly chosen corpus variant;
+  - the matching rule is fixed; its values (T 625, 7/2 blocks per step) are
+    provisional until B's real pack exists;
   - recovery frozen (CE 0.25 + KD 1.0, full-vocab forward KL);
-  - eval-set-1 with both generator tiers; statistics fixed in advance.
+  - eval-set-1 with both generator tiers; statistics with resolution and floor
+    rules fixed in advance.
 - **Cost** (`plans/cost_forecast.json :: proposal_totals`): $23.33 expected,
-  $32.90 hard cap for H1.
+  $32.90 hard cap for H1, recomputed once B's pack exists.
+- **Still open (engineering):** supporting-source task builders, two
+  exporters, five module checkers, the GPU unit driver
+  (`plans/source_plan.json` shortfalls; H1.md §9).
 - **TIP** is registered as an H3 candidate only (`plans/h3_candidates.json`).
 - **Needs the maintainer:**
   1. the 34-pod attribution and the anchor question;
   2. an H1 envelope and cap;
   3. the backend;
-  4. the source scheme;
-  5. M1 and the draft protocol.
+  4. the source scheme (no source is approved for H1 yet);
+  5. M1, the matching rule and the draft protocol;
+  6. whether thin interactive coverage is accepted as a scope limit.
 
 **STAGE-0 CALIBRATION-VOLUME PROGRAMME CLOSED (final $0 closeout, 2026-10-21).**
 Verdict: **EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON

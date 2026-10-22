@@ -15,8 +15,11 @@ per candidate module of `configs/.../external_modules.json`, reports:
 * how often the gold answer appears verbatim in the prompt;
 * the generator's own reproducibility across processes, and whether its own
   scorer gave partial credit (both recorded by the sampler);
-* isolation rules R1 (held-out keys) and R2 (13-gram near-duplicates) against
-  eval-set-1, run through `isolation_check.check_pool`.
+* every isolation rule, run through `isolation_check.check_pool`: R0 (the
+  module is a candidate and declares its task type and family), R1 (held-out
+  keys), R2 (13-gram near-duplicates), R4 (evaluation-only task types), R7
+  (ARC lineage and ARC-AGI-1 grids in prompt or gold). R1/R2 passing shows no
+  copy; mechanism isolation is the declared review in external_modules.json.
 
 Writes `logs/stages/stage-2/reasoning_data/audit/external_source_samples.json`
 with the sha256 of every sample file it read.
@@ -74,8 +77,12 @@ def main(argv=None) -> int:
         tokens = defaultdict(list)
         for r in rows:
             tokens[r.get("difficulty", "?")].append(len(tok(r["prompt"], add_special_tokens=False).input_ids))
+            c = cands[(source, mod)]
             pool.append({"unit_id": f"{source}:{mod}:{r.get('seed')}:{r.get('index')}",
-                         "messages": [{"role": "user", "content": r["prompt"]}]})
+                         "source": source, "module": mod, "family_id": c["family"],
+                         "task_type": c["task_type"], "seed": r.get("seed"),
+                         "messages": [{"role": "user", "content": r["prompt"]}],
+                         "gold": r.get("gold_answer")})
         def scores(r):
             c = r.get("checks") or {}
             return [v for k in ("wrong_scores", "near_miss_scores")
@@ -94,7 +101,7 @@ def main(argv=None) -> int:
     iso = IC.check_pool(pool)
     flagged = set(iso["results"]["R2_near_duplicate"]["flagged_ids"])
     doc = {
-        "schema": "aadistill.stage2.reasoning_data.external_source_samples/v1",
+        "schema": "aadistill.stage2.reasoning_data.external_source_samples/v2",
         "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "sample_files": shas,
         "sampler": "a $0 validation in an isolated scratch environment (reasoning-gym 0.1.25, reasoning-core 0.5.0, PrOntoQA 0a6412b6, mathematics_dataset 1.0.1 under sympy 1.5.1 / numpy 1.23.5); the rows carry their own version, seed and difficulty",
@@ -102,6 +109,10 @@ def main(argv=None) -> int:
         "_math_samples": "the mathematics_dataset samples are the single-step variants of the proposed composed modules (a length and isolation proxy)",
         "modules": out,
         "isolation": {"pass": iso["pass"], "violations": iso["violations"],
+                      "establishes": iso["establishes"], "not_established": iso["not_established"],
+                      "R0": iso["results"]["R0_provenance"],
+                      "R4": {k: iso["results"]["R4_eval_only_generators"][k] for k in ("task_type_hits", "pass")},
+                      "R7": {k: v for k, v in iso["results"]["R7_arc_agi"].items() if k != "index"},
                       "R1": iso["results"]["R1_held_out_keys"],
                       "R2": {k: iso["results"]["R2_near_duplicate"][k] for k in ("checked", "flagged", "flagged_by_unit")},
                       "flagged_modules": sorted({f.split(":")[0] + "/" + f.split(":")[1] for f in flagged})},

@@ -1485,7 +1485,7 @@
    "experiment_id": "reasoning_data",
    "stage_id": "2",
    "classification": "experiment",
-   "status": "H1 PREPARED AT $0 2026-10-21, NOT AUTHORIZED. The maintainer fixed Stage-0 D4 Top-1 as the initialization (two verified copies: relay + dev box); H1 compares 2.96M of corpus_v2 (A) with 2.96M of a verified teacher-native corpus (B) under matched U, E and steps (contract M1). Done: asset audit, target quality and process checks, isolation rules R1-R8, the train_tasks_v1 pool, the H1 accounting and draft protocol, a provider-checked budget position (34 pods / $58.33 still unattributed), the durability plan (backend BLOCKED: not provisioned), the H1 application; TIP registered as an H3 candidate only; the 8 named external sources audited (4 validated locally, module-level decisions). No teacher target generated, no student trained, $0 spent",
+   "status": "H1 PREPARATION REVISED AT $0 2026-10-22 AFTER REVIEW, NOT COMPLETE, NOT AUTHORIZED. The maintainer fixed Stage-0 D4 Top-1 as the initialization (two verified copies: relay + dev box); H1 compares 2.96M of corpus_v2 (A) with 2.96M of a verified teacher-native corpus (B) under one matching rule (values provisional until B's pack). Done: asset audit, target quality v2, isolation rules R0-R9, the train_tasks_v2 pool, a source plan with named corpus variants, an isolated export and external task builder, a post-generation adapter validated on the Stage-0 teacher records, completion-time persistence, the H1 accounting, statistics and draft protocol, a provider-checked budget position (34 pods / $58.33 still unattributed), the durability plan (backend BLOCKED), the H1 application; TIP an H3 candidate only. Open: supporting-source builders, two exporters, five module checkers, the GPU unit driver. No teacher target generated, no student trained, $0 spent",
    "title": "Stage-2 verified teacher-native reasoning data, measured through Stage-3 controlled recovery",
    "question": "Under one fixed initialization and the fixed historical recovery recipe, does verified teacher-native reasoning data lift a 0.6B student off the fluid-reasoning floor where corpus_v2 left it, and how does that scale over a nested 0.86M-5.50M ladder?",
    "canonical_path": "logs/stages/stage-2/reasoning_data",
@@ -1504,8 +1504,8 @@
      "equals": "aadistill.stage2.reasoning_data.packing_dry_run/v1"
     },
     {
-     "path": "data/stages/stage-2/reasoning_data/tasks/train_tasks_v1.manifest.json",
-     "says": "the verifiable primary-axis task pool: calibration-split families, the training seed range, every isolation rule passed",
+     "path": "data/stages/stage-2/reasoning_data/tasks/train_tasks_v2.manifest.json",
+     "says": "the verifiable primary-axis task pool: calibration-split families less the three R9 excludes, the training seed range, isolation rules R0-R9 passed",
      "field": "authorizes",
      "equals": "nothing"
     },
@@ -1577,7 +1577,25 @@
     },
     {
      "path": "logs/stages/stage-2/reasoning_data/audit/code_verifier_check.json",
-     "says": "the code verifier calibrated on MBPP's human reference solutions",
+     "says": "the code verifier calibrated on MBPP's human reference solutions, inside the sandbox teacher code will run in",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "logs/stages/stage-2/reasoning_data/audit/generation_adapter_validation.json",
+     "says": "the post-generation path (verify, assess, select, whole-unit sessions, pack) run on the 672 Stage-0 teacher records",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "logs/stages/stage-2/reasoning_data/audit/external_tasks_validation.json",
+     "says": "an isolated third-party export turned into tasks that pass isolation rules R0-R9, with every drop counted",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "logs/stages/stage-2/reasoning_data/plans/source_plan.json",
+     "says": "each corpus variant's per-source targets, approval state and shortfalls against the built pools",
      "field": "authorizes",
      "equals": "nothing"
     }
@@ -1585,7 +1603,8 @@
    "external_material": [],
    "decisions": [
     "logs/budget/decisions.md -- 2026-10-21: Stage-2/3 reasoning-data round opened at $0: audit, contracts and a PROPOSED design",
-    "logs/budget/decisions.md -- 2026-10-21: Maintainer: H1 fixes D4 Top-1; budget and durability first; TIP as an H3 candidate"
+    "logs/budget/decisions.md -- 2026-10-21: Maintainer: H1 fixes D4 Top-1; budget and durability first; TIP as an H3 candidate",
+    "logs/budget/decisions.md -- 2026-10-22: Independent review of H1 preparation: eight targeted corrections at $0, no paid authorization"
    ],
    "classification_reason": "Stage 2 by subject and product: it varies the offline training DATA a recovered student is taught with (AGENTS.md 4.4, reasoning-transfer priority). Stage-3 recovery and eval-set-1 are its instruments, as Stage-3 probes were for the Stage-0 and Stage-1 experiments.",
    "canonical_scripts": "scripts/stages/stage-2/reasoning_data",

@@ -29,6 +29,8 @@ from datetime import datetime, timezone
 
 from stages.reasoning_data import assets as A
 from stages.reasoning_data import isolation_check as IC
+from stages.reasoning_data import mechanism_check as MC
+from stages.reasoning_data import source_plan as SP
 
 from stages.calibration_volume.tasks import registry as R
 from stages.calibration_volume.tasks.common import DIFFICULTIES, Unsatisfiable, build_instance
@@ -44,12 +46,13 @@ def demand(oversupply: float) -> dict[str, dict]:
     tc = audit["teacher_cal"]["under_target_quality_contract"]
     pool = audit["base_pool_v1_fluid"]
     top = max(spec["rung_targets"]) + spec["reserve_tokens"]
+    shares = SP.project_demand_shares(spec)      # the largest any corpus variant asks of this source
     out = {}
     for stratum, cfg in spec["strata"].items():
         axis = cfg.get("axis")
         if not stratum.startswith("primary.") or axis is None:
             continue
-        need = top * spec["shares"][stratum]
+        need = top * shares[stratum]
         per_unit = (audit["teacher_cal"]["yield_by_axis"][axis]["verified_supervised_positions_le_8192"]
                     / pool["units_by_axis"][axis])
         accept = pool["units_by_axis"][axis] / tc[axis]["units"]
@@ -70,6 +73,11 @@ def taken_instances() -> set[str]:
     return {t["content_sha256"] for t in rows} | {t["content_sha256"] for t in IC.fluid_eval_items()}
 
 
+#: Calibration-split families whose rule computes an evaluation family's rule
+#: (isolation rule R9, `mechanism_check.review`): never drawn for training.
+MECHANISM_EXCLUDED = frozenset(MC.review()["equivalent_training_families"])
+
+
 def build(plan: dict[str, dict]) -> list[dict]:
     lo, hi = next(r for r in IC.rules()["rules"]
                   if r["id"] == "R5_shared_generator_exposure")["training_seed_range"]
@@ -85,7 +93,8 @@ def build(plan: dict[str, dict]) -> list[dict]:
         cells = [(g, d) for g in gens for d in DIFFICULTIES]
         per_cell = math.ceil(row["tasks"] / len(cells))
         for c_i, (gen, difficulty) in enumerate(cells):
-            fams = R.family_split(gen)["calibration"]
+            fams = [f for f in R.family_split(gen)["calibration"]
+                    if f"{gen.generator_id}/{f}" not in MECHANISM_EXCLUDED]
             made, i = 0, 0
             while made < per_cell:
                 seed = lo + c_i * 10_000 + i
@@ -147,6 +156,7 @@ def main(argv=None) -> int:
         "split_salt": R.SPLIT_SALT, "cal_fraction": R.CAL_FRACTION,
         "seed_rule": "training range lo + cell_index * 10,000 + i",
         "demand": plan, "n_tasks": len(tasks), "skipped_draws": skipped,
+        "mechanism_excluded_families": sorted(MECHANISM_EXCLUDED),
         "by_axis": dict(sorted(Counter(t["axis"] for t in tasks).items())),
         "by_generator": dict(sorted(Counter(t["generator_id"] for t in tasks).items())),
         "distinct_families": len({f"{t['generator_id']}/{t['family_id']}" for t in tasks}),

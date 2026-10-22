@@ -9,84 +9,661 @@
   ],
   "sources": {
     "reasoning_gym": {
-      "repo": "https://github.com/open-thought/reasoning-gym", "pin": "PyPI reasoning-gym 0.1.25 (release tag v0.1.25, 21e6d2a9a581b3e11aafe711abfd37402f8482d5; package reports __version__ 0.1.19)",
+      "repo": "https://github.com/open-thought/reasoning-gym",
+      "pin": "PyPI reasoning-gym 0.1.25 (release tag v0.1.25, 21e6d2a9a581b3e11aafe711abfd37402f8482d5; package reports __version__ 0.1.19)",
       "license": "Apache-2.0; NOTICE lists MIT/Apache third-party parts and ACRE under GPL-3.0; survo and kakurasu are adapted from SynLogic (MIT) without a NOTICE entry",
       "dependency_note": "pure Python (7 MB wheel); pulls arckit 0.1.0, which bundles ARC-AGI-1 train AND evaluation tasks with outputs -- the package must never be installed where training data is built unless arc modules are blocked, and no arckit data may enter any pool"
     },
     "reasoning_core": {
-      "repo": "https://github.com/sileod/reasoning-core", "pin": "PyPI reasoning-core 0.5.0 (release rc14, d2f0718547fffeabb4d3dc0458e76aaca06e0d37); GitHub HEAD 8676e4ea is one day old and not used",
+      "repo": "https://github.com/sileod/reasoning-core",
+      "pin": "PyPI reasoning-core 0.5.0 (release rc14, d2f0718547fffeabb4d3dc0458e76aaca06e0d37); GitHub HEAD 8676e4ea is one day old and not used",
       "license": "MIT (PyPI license fields empty; LICENSE file read)",
       "dependency_note": "pure Python base install (10 MB wheel; z3-solver, problog, duckdb among 31 deps); torch only in an unused extra; counts words instead of tokens without tiktoken, which changes its own length filter"
     },
     "prontoqa": {
-      "repo": "https://github.com/asaparov/prontoqa", "pin": "git 0a6412b6fddf46324a1cb96e066dd7b3d89b87d6 (main, 2025-09-09); not on PyPI",
+      "repo": "https://github.com/asaparov/prontoqa",
+      "pin": "git 0a6412b6fddf46324a1cb96e066dd7b3d89b87d6 (main, 2025-09-09); not on PyPI",
       "license": "Apache-2.0",
       "dependency_note": "run_experiment.py --model-name json needs numpy and scipy only; reads and writes in its working directory"
     },
     "mathematics_dataset": {
-      "repo": "https://github.com/google-deepmind/mathematics_dataset", "pin": "git 427f45075f84b8b9774950196ad63867ca20ffb3 (master; carries the current-numpy/sympy fixes; still versioned 1.0.1); PyPI 1.0.1 runs only with sympy 1.5.1 / numpy 1.23.5",
+      "repo": "https://github.com/google-deepmind/mathematics_dataset",
+      "pin": "git 427f45075f84b8b9774950196ad63867ca20ffb3 (master; carries the current-numpy/sympy fixes; still versioned 1.0.1); PyPI 1.0.1 runs only with sympy 1.5.1 / numpy 1.23.5",
       "license": "Apache-2.0",
       "dependency_note": "no answer checker ships; answers are canonical strings"
     },
-    "ruletaker": {"repo": "https://github.com/allenai/ruletaker", "pin": "git abaacec9364992eff5ec4555b837e20fee2f2ff0", "license": "Apache-2.0 code; data-zip license UNVERIFIED", "decision": "NOT ADOPTED in H1: the same multi-step rule-deduction mechanism as PrOntoQA and reasoning-core logic_derivation (counted once), and its generator returns no proof"},
-    "cogs": {"repo": "https://github.com/najoungkim/COGS", "pin": "git 165a7b669eade971fa47bf568a2e51925360fed8", "license": "MIT", "decision": "NOT ADOPTED: no generator (static data only); its gen split is a generalization benchmark and is never trainable; kept as a design reference for compositional splits"},
-    "code_contests": {"repo": "https://github.com/google-deepmind/code_contests", "pin": "git fa7a4f8139aab08362503f3344778eb86901709a (archived)", "license": "code Apache-2.0, non-code CC BY 4.0 (Codeforces material from codeforces.com; Description2Code MIT; CodeNet Apache-2.0)", "decision": "SECONDARY for supporting.code_algorithmic: train split only, R2-decontaminated, verified by aadistill.data.code_exec.run_stdio on its tests; long problem statements make long traces, so its share is small and its yield must be measured first"},
-    "clutrr": {"repo": "https://github.com/facebookresearch/clutrr", "pin": "git d045fae289d3746503677ceed7631c999202501e", "license": "CC BY-NC 4.0 (LICENSE file)", "decision": "EXCLUDED: non-commercial; design reference only"}
+    "ruletaker": {
+      "repo": "https://github.com/allenai/ruletaker",
+      "pin": "git abaacec9364992eff5ec4555b837e20fee2f2ff0",
+      "license": "Apache-2.0 code; data-zip license UNVERIFIED",
+      "decision": "NOT ADOPTED in H1: the same multi-step rule-deduction mechanism as PrOntoQA and reasoning-core logic_derivation (counted once), and its generator returns no proof"
+    },
+    "cogs": {
+      "repo": "https://github.com/najoungkim/COGS",
+      "pin": "git 165a7b669eade971fa47bf568a2e51925360fed8",
+      "license": "MIT",
+      "decision": "NOT ADOPTED: no generator (static data only); its gen split is a generalization benchmark and is never trainable; kept as a design reference for compositional splits"
+    },
+    "code_contests": {
+      "repo": "https://github.com/google-deepmind/code_contests",
+      "pin": "git fa7a4f8139aab08362503f3344778eb86901709a (archived)",
+      "license": "code Apache-2.0, non-code CC BY 4.0 (Codeforces material from codeforces.com; Description2Code MIT; CodeNet Apache-2.0)",
+      "decision": "SECONDARY for supporting.code_algorithmic: train split only, R2-decontaminated, verified by aadistill.data.code_exec.run_stdio on its tests; long problem statements make long traces, so its share is small and its yield must be measured first"
+    },
+    "clutrr": {
+      "repo": "https://github.com/facebookresearch/clutrr",
+      "pin": "git d045fae289d3746503677ceed7631c999202501e",
+      "license": "CC BY-NC 4.0 (LICENSE file)",
+      "decision": "EXCLUDED: non-commercial; design reference only"
+    }
   },
   "modules": [
-    {"source": "reasoning_gym", "module": "zebra_puzzles", "stratum": "primary.task_contained_deduction", "task_type": "constraint deduction over attributes (zebra)", "verify": "exact name match", "process": "not_assessed", "isolation": "procedural (faith-and-fate code), not ZebraLogic; no eval-set-1 generator of this type", "decision": "candidate"},
-    {"source": "reasoning_gym", "module": "self_reference", "stratum": "primary.task_contained_deduction", "task_type": "self-referential truth-count deduction", "verify": "exact integer", "process": "not_assessed", "isolation": "no eval-set-1 generator of this type", "decision": "candidate"},
-    {"source": "reasoning_gym", "module": "family_relationships", "stratum": "primary.task_contained_deduction", "task_type": "kinship composition", "verify": "exact relation word", "process": "not_assessed", "isolation": "procedural, no CLUTRR data", "decision": "candidate"},
-    {"source": "reasoning_gym", "module": "cryptarithm", "stratum": "primary.task_contained_deduction", "task_type": "letter-digit constraint solving", "verify": "project check: the mapping solves the equation (order-insensitive)", "process": "not_assessed", "isolation": "no eval-set-1 generator of this type", "decision": "candidate"},
-    {"source": "reasoning_gym", "module": "mini_sudoku", "stratum": "primary.task_contained_deduction", "task_type": "grid constraint satisfaction", "verify": "project check: grid valid and consistent with the givens (library gives 0.84 to a wrong grid)", "process": "not_assessed", "isolation": "no eval-set-1 generator of this type", "decision": "candidate"},
-    {"source": "reasoning_gym", "module": "n_queens", "stratum": "primary.task_contained_deduction", "task_type": "placement constraint satisfaction", "verify": "project check: non-attacking and contains the given queens (several valid boards; the library scorer evals the answer)", "process": "not_assessed", "isolation": "no eval-set-1 generator of this type", "decision": "candidate, needs the project checker"},
-    {"source": "reasoning_gym", "module": "string_manipulation", "stratum": "primary.compositional_generalization", "task_type": "apply a stated ordered rule list to a string", "verify": "exact string", "process": "partial when the teacher's intermediate strings match metadata.states (verification only)", "isolation": "rules are STATED, not induced; transformation primitives can overlap string_induction's -- reported", "decision": "candidate; drop items whose answer equals the input"},
-    {"source": "reasoning_gym", "module": "rotate_matrix", "stratum": "primary.compositional_generalization", "task_type": "matrix rotation by a stated angle", "verify": "exact grid", "process": "not_assessed", "isolation": "stated transformation; grid_transform's families are induced -- reported", "decision": "candidate; drop items rotated by a multiple of 360 degrees; cap size so prompts fit (top level ~20k chars)"},
-    {"source": "reasoning_gym", "module": "spiral_matrix", "stratum": "primary.compositional_generalization", "task_type": "spiral traversal", "verify": "exact sequence (project check; the library scorer evals the answer)", "process": "not_assessed", "isolation": "no eval-set-1 generator of this type", "decision": "candidate; cap size"},
-    {"source": "reasoning_gym", "module": "game_of_life", "stratum": "primary.compositional_generalization", "task_type": "apply a stated cellular-automaton rule for k steps", "verify": "exact grid (library gives 0.99 to one wrong cell)", "process": "not_assessed", "isolation": "no eval-set-1 generator of this type", "decision": "candidate; cap size"},
-    {"source": "reasoning_gym", "module": "binary_matrix", "stratum": "primary.compositional_generalization", "task_type": "distance transform", "verify": "exact grid (project check; the library scorer evals the answer)", "process": "not_assessed", "isolation": "no eval-set-1 generator of this type", "decision": "candidate; cap size"},
-    {"source": "reasoning_gym", "module": "bf", "stratum": "supporting.code_algorithmic", "task_type": "program execution (Brainf*ck)", "verify": "exact output", "process": "not_assessed", "isolation": "no eval-set-1 generator of this type", "decision": "candidate"},
-    {"source": "reasoning_gym", "module": "tower_of_hanoi", "stratum": "supporting.code_algorithmic", "task_type": "algorithmic move sequence", "verify": "project check: simulate the moves (library partial credit)", "process": "verified by simulation of every move", "isolation": "no eval-set-1 generator of this type", "decision": "candidate, needs the simulator check"},
-    {"source": "reasoning_gym", "module": "largest_island", "stratum": "supporting.code_algorithmic", "task_type": "grid connected components", "verify": "exact integer", "process": "not_assessed", "isolation": "graph traversal on a grid, but not path finding -- reviewed against graph_paths", "decision": "candidate; cap size"},
-    {"source": "reasoning_gym", "module": "polynomial_equations", "stratum": "supporting.math_new", "task_type": "polynomial roots", "verify": "project check: root set equality with tolerance (library gives 0.999 to a wrong digit)", "process": "math process check", "isolation": "Mixed (procedural algebra)", "decision": "candidate (math, Mixed)"},
-    {"source": "reasoning_gym", "module": "arc_agi", "decision": "EXCLUDED (R7): loads the ARC-AGI-1 EVALUATION set by default via arckit"},
-    {"source": "reasoning_gym", "module": "rearc", "decision": "EXCLUDED from H1 (R7): regenerates the 400 ARC-AGI-1 TRAINING tasks; any use needs its own maintainer decision"},
-    {"source": "reasoning_gym", "module": "arc_1d", "decision": "EXCLUDED from H1 (R7): procedural port of 1D-ARC; needs the same decision"},
-    {"source": "reasoning_gym", "module": "gsm_symbolic", "decision": "EXCLUDED: LLM-written generators from GSM-Symbolic templates; template 0 matches a GSM8K TEST item (eval-set-1's gsm8k source)"},
-    {"source": "reasoning_gym", "module": "codeio", "decision": "EXCLUDED: LLM-transformed snippets run by unsandboxed exec"},
-    {"source": "reasoning_gym", "module": "acre", "decision": "EXCLUDED: GPL-3.0-derived"},
-    {"source": "reasoning_gym", "module": "number_sequence", "decision": "EXCLUDED (R4): sequence induction is an evaluation-only task type"},
-    {"source": "reasoning_gym", "module": "shortest_path", "decision": "EXCLUDED (R4): graph paths is an evaluation-only task type"},
-    {"source": "reasoning_gym", "module": "path_star", "decision": "EXCLUDED (R4): graph paths"},
-    {"source": "reasoning_gym", "module": "knights_knaves", "decision": "EXCLUDED: the same mechanism as eval-set-1's knights_knaves generator (counted once; its held-out families stay unseen-rule)"},
-    {"source": "reasoning_gym", "module": "list_functions", "decision": "EXCLUDED: rule induction over list primitives semantically equivalent to list_induction's held-out families; not reproducible from its seed"},
-    {"source": "reasoning_gym", "module": "propositional_logic", "decision": "EXCLUDED: open-ended, no gold answer"},
-    {"source": "reasoning_gym", "module": "syllogism", "decision": "NOT IN H1: Yes/No answer, correct by chance half the time, no process check"},
-    {"source": "reasoning_gym", "module": "circuit_logic", "decision": "NOT IN H1: 0/1 answer (chance-correct) and ~100k-character prompts at the top level"},
-    {"source": "reasoning_gym", "module": "course_schedule", "decision": "NOT IN H1: True/False answer, chance-correct"},
-    {"source": "reasoning_gym", "module": "isomorphic_strings", "decision": "NOT IN H1: True/False answer, and the output depends on the hash seed"},
-    {"source": "reasoning_gym", "module": "string_insertion", "decision": "NOT IN H1: half the sampled items' answer equals the input"},
-    {"source": "reasoning_gym", "module": "countdown", "decision": "NOT IN H1: fails to generate at its top level (4/5); scorer parses the answer"},
-    {"source": "reasoning_gym", "module": "word_ladder", "decision": "NOT IN H1: output depends on the hash seed; word-list data not reviewed"},
-    {"source": "reasoning_gym", "module": "simple_equations", "decision": "NOT IN H1: single-step arithmetic, covered by gsm8k and mathematics_dataset"},
-    {"source": "reasoning_core", "module": "logic_derivation", "stratum": "primary.task_contained_deduction", "task_type": "forward proof from facts and rules", "verify": "exact target", "process": "partial or verified by coverage of the reference proof's derived facts (metadata.cot, verification only)", "isolation": "no eval-set-1 generator of this type", "decision": "candidate"},
-    {"source": "reasoning_core", "module": "multistep_evidence_retrieval", "stratum": "primary.task_contained_deduction", "task_type": "select the premises a proof needs", "verify": "exact premise set (order-insensitive)", "process": "coverage of metadata.cot", "isolation": "evidence over SUPPLIED premises; no eval-set-1 generator of this type", "decision": "candidate"},
-    {"source": "reasoning_core", "module": "planning", "stratum": "primary.task_contained_deduction", "task_type": "static cue-constrained plan (one prompt, one answer; NOT interactive)", "verify": "the library's own plan simulator (binary) plus an exact-plan check", "process": "verified by simulation", "isolation": "counted as deduction, never as interactive adaptation", "decision": "candidate"},
-    {"source": "reasoning_core", "module": "rule_switching", "stratum": "primary.compositional_generalization", "task_type": "track state while opcodes change meaning across modes", "verify": "exact label", "process": "not_assessed", "isolation": "generator code LLM-written (instances procedural) -- provenance flag", "decision": "candidate (provenance flag)"},
-    {"source": "reasoning_core", "module": "controlled_code_execution", "stratum": "supporting.code_algorithmic", "task_type": "predict a generated program's output", "verify": "exact output", "process": "not_assessed", "isolation": "generator code LLM-written -- provenance flag", "decision": "candidate (provenance flag)"},
-    {"source": "reasoning_core", "module": "dynamic_programming", "stratum": "supporting.code_algorithmic", "task_type": "max-sum DP and its optimal state sequence", "verify": "exact value and sequence", "process": "not_assessed", "isolation": "generator code LLM-written -- provenance flag", "decision": "candidate (provenance flag)"},
-    {"source": "reasoning_core", "module": "analogical_case_matching", "stratum": "primary.abstract_analogical", "task_type": "structural analogy over cases (pick the matching case id)", "verify": "exact id", "process": "not_assessed", "isolation": "structural, not letter-string analogy (letter_analogy is evaluation-only); the id is chosen among listed options, so chance accuracy is 1/options", "decision": "candidate"},
-    {"source": "reasoning_core", "module": "graph_pathfinding", "decision": "EXCLUDED (R4): graph paths"},
-    {"source": "reasoning_core", "module": "sequential_induction", "decision": "EXCLUDED (R4): sequence induction"},
-    {"source": "reasoning_core", "module": "reference_tracking", "decision": "EXCLUDED: the same mechanism as eval-set-1's entity_tracking generator"},
-    {"source": "reasoning_core", "module": "belief_tracking", "decision": "NOT IN H1: close to entity tracking; a later review"},
-    {"source": "reasoning_core", "module": "metamath_core_select", "decision": "EXCLUDED: downloads an unpinned set.mm at run time"},
-    {"source": "reasoning_core", "module": "metamath_entailment", "decision": "EXCLUDED: unpinned download"},
-    {"source": "reasoning_core", "module": "table_qa", "decision": "EXCLUDED: output depends on the wall-clock date"},
-    {"source": "prontoqa", "module": "fictional ontology, 3-5 hops, relevant distractors, zero-shot", "stratum": "primary.task_contained_deduction", "task_type": "multi-hop deduction over fictional rules", "verify": "True/False against the generator's label", "process": "REQUIRED: every intermediate conclusion of the reference proof appears in the teacher's reasoning (else not accepted), because a True/False answer is right by chance half the time", "isolation": "a published benchmark, not part of eval-set-1; training-only seeds; the 8 in-context examples are never used (they carry reference proofs)", "decision": "candidate, process-gated"},
-    {"source": "mathematics_dataset", "module": "composed modules (algebra__linear_1d_composed, algebra__polynomial_roots_composed, polynomials__evaluate_composed, numbers__gcd_composed, comparison__sort_composed, calculus__differentiate_composed, probability__swr_p_sequence)", "stratum": "supporting.math_new", "task_type": "multi-step school mathematics (Mixed)", "verify": "project canonical match (sympy equivalence for expressions)", "process": "math process check", "isolation": "label Mixed; train-medium/hard entropy only; never interpolate/extrapolate", "decision": "candidate (math, Mixed)"},
-    {"source": "mathematics_dataset", "module": "single-step modules (arithmetic__*, numbers__place_value, measurement__conversion, ...)", "decision": "NOT IN H1: Supporting-only drill, covered by gsm8k"},
-    {"source": "mathematics_dataset", "module": "algebra__sequence_next_term, algebra__sequence_nth_term", "decision": "EXCLUDED (R4): sequence induction"}
+    {
+      "source": "reasoning_gym",
+      "module": "zebra_puzzles",
+      "stratum": "primary.task_contained_deduction",
+      "task_type": "positional_constraint_deduction",
+      "verify": "exact name match",
+      "process": "not_assessed",
+      "isolation": "procedural (faith-and-fate code), not ZebraLogic; no eval-set-1 generator of this type",
+      "decision": "candidate",
+      "family": "reasoning_gym/zebra_puzzles",
+      "mechanism": {
+        "presentation": "deduction",
+        "what": "assign attributes to positions from explicit clues",
+        "nearest_evaluation_mechanism": "ordering@v2 held-out order.seating (positions under explicit constraints)",
+        "exposure": "shares_primitive"
+      },
+      "answer_type": "text"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "self_reference",
+      "stratum": "primary.task_contained_deduction",
+      "task_type": "self_referential_truth_assignment",
+      "verify": "exact integer",
+      "process": "not_assessed",
+      "isolation": "no eval-set-1 generator of this type",
+      "decision": "candidate",
+      "family": "reasoning_gym/self_reference",
+      "mechanism": {
+        "presentation": "deduction",
+        "what": "count consistent truth assignments of statements about each other",
+        "nearest_evaluation_mechanism": "knights_knaves@v1 held-out kk.* (truth/lie consistency)",
+        "exposure": "shares_primitive"
+      },
+      "answer_type": "number"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "family_relationships",
+      "stratum": "primary.task_contained_deduction",
+      "task_type": "relation_composition_kinship",
+      "verify": "exact relation word",
+      "process": "not_assessed",
+      "isolation": "procedural, no CLUTRR data",
+      "decision": "candidate",
+      "family": "reasoning_gym/family_relationships",
+      "mechanism": {
+        "presentation": "deduction",
+        "what": "compose kinship relations along a stated chain",
+        "nearest_evaluation_mechanism": "defined_ops@v1 held-out comp.chain* (compose stated operations)",
+        "exposure": "shares_primitive"
+      },
+      "answer_type": "text"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "cryptarithm",
+      "stratum": "primary.task_contained_deduction",
+      "task_type": "digit_assignment_search",
+      "verify": "project check: the mapping solves the equation (order-insensitive)",
+      "process": "not_assessed",
+      "isolation": "no eval-set-1 generator of this type",
+      "decision": "candidate",
+      "family": "reasoning_gym/cryptarithm",
+      "mechanism": {
+        "presentation": "search",
+        "what": "assign digits to letters so a sum holds",
+        "nearest_evaluation_mechanism": "none",
+        "exposure": "none"
+      },
+      "answer_type": "text"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "mini_sudoku",
+      "stratum": "primary.task_contained_deduction",
+      "task_type": "latin_square_constraint",
+      "verify": "project check: grid valid and consistent with the givens (library gives 0.84 to a wrong grid)",
+      "process": "not_assessed",
+      "isolation": "no eval-set-1 generator of this type",
+      "decision": "candidate",
+      "family": "reasoning_gym/mini_sudoku",
+      "mechanism": {
+        "presentation": "search",
+        "what": "complete a 4x4 sudoku",
+        "nearest_evaluation_mechanism": "none",
+        "exposure": "none"
+      },
+      "answer_type": "matrix"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "n_queens",
+      "stratum": "primary.task_contained_deduction",
+      "task_type": "placement_constraint",
+      "verify": "project check: non-attacking and contains the given queens (several valid boards; the library scorer evals the answer)",
+      "process": "not_assessed",
+      "isolation": "no eval-set-1 generator of this type",
+      "decision": "candidate, needs the project checker",
+      "family": "reasoning_gym/n_queens",
+      "mechanism": {
+        "presentation": "search",
+        "what": "place non-attacking queens",
+        "nearest_evaluation_mechanism": "none",
+        "exposure": "none"
+      },
+      "answer_type": "needs_checker"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "string_manipulation",
+      "stratum": "primary.compositional_generalization",
+      "task_type": "explicit_string_rewrite",
+      "verify": "exact string",
+      "process": "partial when the teacher's intermediate strings match metadata.states (verification only)",
+      "isolation": "rules are STATED, not induced; transformation primitives can overlap string_induction's -- reported",
+      "decision": "candidate; drop items whose answer equals the input",
+      "family": "reasoning_gym/string_manipulation",
+      "mechanism": {
+        "presentation": "explicit_rule",
+        "what": "apply ordered prefix/suffix rewrite rules until fixpoint",
+        "nearest_evaluation_mechanism": "string_induction@v2 held-out str.* (drop_last, first_k, rotate_left: primitives the rules can contain, stated rather than induced)",
+        "exposure": "shares_primitive"
+      },
+      "answer_type": "text",
+      "drop_if_gold_in_prompt": true
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "rotate_matrix",
+      "stratum": "primary.compositional_generalization",
+      "task_type": "explicit_grid_rotation",
+      "verify": "exact grid",
+      "process": "not_assessed",
+      "isolation": "stated transformation; grid_transform's families are induced -- reported",
+      "decision": "candidate; drop items rotated by a multiple of 360 degrees; cap size so prompts fit (top level ~20k chars)",
+      "family": "reasoning_gym/rotate_matrix",
+      "mechanism": {
+        "presentation": "explicit_rule",
+        "what": "rotate a digit matrix by a stated angle",
+        "nearest_evaluation_mechanism": "grid_transform@v1 rotate_cw / rotate_ccw are CALIBRATION-split families; no held-out grid family is a rotation (mechanism_check)",
+        "exposure": "none"
+      },
+      "answer_type": "matrix",
+      "drop_if_gold_in_prompt": true
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "spiral_matrix",
+      "stratum": "primary.compositional_generalization",
+      "task_type": "explicit_grid_traversal",
+      "verify": "exact sequence (project check; the library scorer evals the answer)",
+      "process": "not_assessed",
+      "isolation": "no eval-set-1 generator of this type",
+      "decision": "candidate; cap size",
+      "family": "reasoning_gym/spiral_matrix",
+      "mechanism": {
+        "presentation": "explicit_rule",
+        "what": "read a matrix in spiral order",
+        "nearest_evaluation_mechanism": "none",
+        "exposure": "none"
+      },
+      "answer_type": "matrix"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "game_of_life",
+      "stratum": "primary.compositional_generalization",
+      "task_type": "explicit_cellular_automaton",
+      "verify": "exact grid (library gives 0.99 to one wrong cell)",
+      "process": "not_assessed",
+      "isolation": "no eval-set-1 generator of this type",
+      "decision": "candidate; cap size",
+      "family": "reasoning_gym/game_of_life",
+      "mechanism": {
+        "presentation": "explicit_rule",
+        "what": "one Game-of-Life step",
+        "nearest_evaluation_mechanism": "none",
+        "exposure": "none"
+      },
+      "answer_type": "matrix"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "binary_matrix",
+      "stratum": "primary.compositional_generalization",
+      "task_type": "grid_distance_transform",
+      "verify": "exact grid (project check; the library scorer evals the answer)",
+      "process": "not_assessed",
+      "isolation": "no eval-set-1 generator of this type",
+      "decision": "candidate; cap size",
+      "family": "reasoning_gym/binary_matrix",
+      "mechanism": {
+        "presentation": "computation",
+        "what": "distance of each cell to the nearest 0",
+        "nearest_evaluation_mechanism": "none",
+        "exposure": "none"
+      },
+      "answer_type": "matrix"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "bf",
+      "stratum": "supporting.code_algorithmic",
+      "task_type": "program_interpretation",
+      "verify": "exact output",
+      "process": "not_assessed",
+      "isolation": "no eval-set-1 generator of this type",
+      "decision": "candidate",
+      "family": "reasoning_gym/bf",
+      "mechanism": {
+        "presentation": "computation",
+        "what": "run a Brainf*ck program",
+        "nearest_evaluation_mechanism": "scan_language@v1 held-out scan.* (interpret a command language)",
+        "exposure": "shares_primitive"
+      },
+      "answer_type": "text"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "tower_of_hanoi",
+      "stratum": "primary.compositional_generalization",
+      "task_type": "plan_construction_static",
+      "verify": "project check: simulate the moves (library partial credit)",
+      "process": "verified by simulation of every move",
+      "isolation": "no eval-set-1 generator of this type",
+      "decision": "candidate, needs the simulator check",
+      "family": "reasoning_gym/tower_of_hanoi",
+      "mechanism": {
+        "presentation": "search",
+        "what": "produce the move list for Tower of Hanoi",
+        "nearest_evaluation_mechanism": "none (a static plan; not interactive adaptation)",
+        "exposure": "none"
+      },
+      "answer_type": "needs_checker"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "largest_island",
+      "stratum": "primary.compositional_generalization",
+      "task_type": "grid_connected_components",
+      "verify": "exact integer",
+      "process": "not_assessed",
+      "isolation": "graph traversal on a grid, but not path finding -- reviewed against graph_paths",
+      "decision": "candidate; cap size",
+      "family": "reasoning_gym/largest_island",
+      "mechanism": {
+        "presentation": "computation",
+        "what": "size of the largest 4-connected island",
+        "nearest_evaluation_mechanism": "grid_transform@v1 held-out grid.count_cells (counts cells, no connectivity)",
+        "exposure": "none"
+      },
+      "answer_type": "number"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "polynomial_equations",
+      "stratum": "supporting.math_new",
+      "task_type": "polynomial_root_finding",
+      "verify": "project check: root set equality with tolerance (library gives 0.999 to a wrong digit)",
+      "process": "math process check",
+      "isolation": "Mixed (procedural algebra)",
+      "decision": "candidate (math, Mixed)",
+      "family": "reasoning_gym/polynomial_equations",
+      "mechanism": {
+        "presentation": "computation",
+        "what": "solve a polynomial equation",
+        "nearest_evaluation_mechanism": "none",
+        "exposure": "none"
+      },
+      "answer_type": "number_set"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "arc_agi",
+      "decision": "EXCLUDED (R7): loads the ARC-AGI-1 EVALUATION set by default via arckit"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "rearc",
+      "decision": "EXCLUDED from H1 (R7): regenerates the 400 ARC-AGI-1 TRAINING tasks; any use needs its own maintainer decision"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "arc_1d",
+      "decision": "EXCLUDED from H1 (R7): procedural port of 1D-ARC; needs the same decision"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "gsm_symbolic",
+      "decision": "EXCLUDED: LLM-written generators from GSM-Symbolic templates; template 0 matches a GSM8K TEST item (eval-set-1's gsm8k source)"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "codeio",
+      "decision": "EXCLUDED: LLM-transformed snippets run by unsandboxed exec"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "acre",
+      "decision": "EXCLUDED: GPL-3.0-derived"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "number_sequence",
+      "decision": "EXCLUDED (R4): sequence induction is an evaluation-only task type"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "shortest_path",
+      "decision": "EXCLUDED (R4): graph paths is an evaluation-only task type"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "path_star",
+      "decision": "EXCLUDED (R4): graph paths"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "knights_knaves",
+      "decision": "EXCLUDED: the same mechanism as eval-set-1's knights_knaves generator (counted once; its held-out families stay unseen-rule)"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "list_functions",
+      "decision": "EXCLUDED: rule induction over list primitives semantically equivalent to list_induction's held-out families; not reproducible from its seed"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "propositional_logic",
+      "decision": "EXCLUDED: open-ended, no gold answer"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "syllogism",
+      "decision": "NOT IN H1: Yes/No answer, correct by chance half the time, no process check"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "circuit_logic",
+      "decision": "NOT IN H1: 0/1 answer (chance-correct) and ~100k-character prompts at the top level"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "course_schedule",
+      "decision": "NOT IN H1: True/False answer, chance-correct"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "isomorphic_strings",
+      "decision": "NOT IN H1: True/False answer, and the output depends on the hash seed"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "string_insertion",
+      "decision": "NOT IN H1: half the sampled items' answer equals the input"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "countdown",
+      "decision": "NOT IN H1: fails to generate at its top level (4/5); scorer parses the answer"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "word_ladder",
+      "decision": "NOT IN H1: output depends on the hash seed; word-list data not reviewed"
+    },
+    {
+      "source": "reasoning_gym",
+      "module": "simple_equations",
+      "decision": "NOT IN H1: single-step arithmetic, covered by gsm8k and mathematics_dataset"
+    },
+    {
+      "source": "reasoning_core",
+      "module": "logic_derivation",
+      "stratum": "primary.task_contained_deduction",
+      "task_type": "formal_derivation",
+      "verify": "exact target",
+      "process": "partial or verified by coverage of the reference proof's derived facts (metadata.cot, verification only)",
+      "isolation": "no eval-set-1 generator of this type",
+      "decision": "candidate",
+      "family": "reasoning_core/logic_derivation",
+      "mechanism": {
+        "presentation": "deduction",
+        "what": "derive a stated conclusion from premises in a proof system",
+        "nearest_evaluation_mechanism": "none",
+        "exposure": "none"
+      },
+      "answer_type": "needs_checker"
+    },
+    {
+      "source": "reasoning_core",
+      "module": "multistep_evidence_retrieval",
+      "stratum": "primary.task_contained_deduction",
+      "task_type": "premise_selection",
+      "verify": "exact premise set (order-insensitive)",
+      "process": "coverage of metadata.cot",
+      "isolation": "evidence over SUPPLIED premises; no eval-set-1 generator of this type",
+      "decision": "candidate",
+      "family": "reasoning_core/multistep_evidence_retrieval",
+      "mechanism": {
+        "presentation": "deduction",
+        "what": "select the premises a conclusion needs",
+        "nearest_evaluation_mechanism": "none",
+        "exposure": "none"
+      },
+      "answer_type": "text"
+    },
+    {
+      "source": "reasoning_core",
+      "module": "planning",
+      "stratum": "primary.compositional_generalization",
+      "task_type": "plan_construction_static",
+      "verify": "the library's own plan simulator (binary) plus an exact-plan check",
+      "process": "verified by simulation",
+      "isolation": "counted as deduction, never as interactive adaptation",
+      "decision": "candidate",
+      "family": "reasoning_core/planning",
+      "mechanism": {
+        "presentation": "search",
+        "what": "STRIPS-style plan from a stated domain (static; not interactive adaptation)",
+        "nearest_evaluation_mechanism": "hidden_buttons@v1 / probe_function@v1 are INTERACTIVE discovery of unknown effects; a static plan with stated operators is a different mechanism",
+        "exposure": "none"
+      },
+      "answer_type": "needs_checker"
+    },
+    {
+      "source": "reasoning_core",
+      "module": "rule_switching",
+      "stratum": "primary.compositional_generalization",
+      "task_type": "mode_dependent_rule_application",
+      "verify": "exact label",
+      "process": "not_assessed",
+      "isolation": "generator code LLM-written (instances procedural) -- provenance flag",
+      "decision": "candidate (provenance flag)",
+      "family": "reasoning_core/rule_switching",
+      "mechanism": {
+        "presentation": "explicit_rule",
+        "what": "execute register opcodes whose meaning depends on a stated mode",
+        "nearest_evaluation_mechanism": "defined_ops@v1 held-out comp.conditional (apply stated operations conditionally)",
+        "exposure": "shares_primitive"
+      },
+      "answer_type": "text"
+    },
+    {
+      "source": "reasoning_core",
+      "module": "controlled_code_execution",
+      "stratum": "supporting.code_algorithmic",
+      "task_type": "program_tracing",
+      "verify": "exact output",
+      "process": "not_assessed",
+      "isolation": "generator code LLM-written -- provenance flag",
+      "decision": "candidate (provenance flag)",
+      "family": "reasoning_core/controlled_code_execution",
+      "mechanism": {
+        "presentation": "computation",
+        "what": "trace a short program's output",
+        "nearest_evaluation_mechanism": "none",
+        "exposure": "none"
+      },
+      "answer_type": "text"
+    },
+    {
+      "source": "reasoning_core",
+      "module": "dynamic_programming",
+      "stratum": "supporting.code_algorithmic",
+      "task_type": "dynamic_programming",
+      "verify": "exact value and sequence",
+      "process": "not_assessed",
+      "isolation": "generator code LLM-written -- provenance flag",
+      "decision": "candidate (provenance flag)",
+      "family": "reasoning_core/dynamic_programming",
+      "mechanism": {
+        "presentation": "computation",
+        "what": "solve a stated DP instance",
+        "nearest_evaluation_mechanism": "none",
+        "exposure": "none"
+      },
+      "answer_type": "text"
+    },
+    {
+      "source": "reasoning_core",
+      "module": "analogical_case_matching",
+      "stratum": "primary.abstract_analogical",
+      "task_type": "relational_structure_mapping",
+      "verify": "exact id",
+      "process": "not_assessed",
+      "isolation": "structural, not letter-string analogy (letter_analogy is evaluation-only); the id is chosen among listed options, so chance accuracy is 1/options",
+      "decision": "candidate",
+      "family": "reasoning_core/analogical_case_matching",
+      "mechanism": {
+        "presentation": "deduction",
+        "what": "find the case embeddable in a query under renaming",
+        "nearest_evaluation_mechanism": "letter_analogy@v2 (evaluation-only) is letter-string analogy, a different task type; same axis only",
+        "exposure": "none"
+      },
+      "answer_type": "text"
+    },
+    {
+      "source": "reasoning_core",
+      "module": "graph_pathfinding",
+      "decision": "EXCLUDED (R4): graph paths"
+    },
+    {
+      "source": "reasoning_core",
+      "module": "sequential_induction",
+      "decision": "EXCLUDED (R4): sequence induction"
+    },
+    {
+      "source": "reasoning_core",
+      "module": "reference_tracking",
+      "decision": "EXCLUDED: the same mechanism as eval-set-1's entity_tracking generator"
+    },
+    {
+      "source": "reasoning_core",
+      "module": "belief_tracking",
+      "decision": "NOT IN H1: close to entity tracking; a later review"
+    },
+    {
+      "source": "reasoning_core",
+      "module": "metamath_core_select",
+      "decision": "EXCLUDED: downloads an unpinned set.mm at run time"
+    },
+    {
+      "source": "reasoning_core",
+      "module": "metamath_entailment",
+      "decision": "EXCLUDED: unpinned download"
+    },
+    {
+      "source": "reasoning_core",
+      "module": "table_qa",
+      "decision": "EXCLUDED: output depends on the wall-clock date"
+    },
+    {
+      "source": "prontoqa",
+      "module": "fictional ontology, 3-5 hops, relevant distractors, zero-shot",
+      "stratum": "primary.task_contained_deduction",
+      "task_type": "ontology_multi_hop_deduction",
+      "verify": "True/False against the generator's label",
+      "process": "REQUIRED: every intermediate conclusion of the reference proof appears in the teacher's reasoning (else not accepted), because a True/False answer is right by chance half the time",
+      "isolation": "a published benchmark, not part of eval-set-1; training-only seeds; the 8 in-context examples are never used (they carry reference proofs)",
+      "decision": "candidate, process-gated",
+      "family": "prontoqa/fictional",
+      "mechanism": {
+        "presentation": "deduction",
+        "what": "chain stated class-membership rules over a fictional ontology",
+        "nearest_evaluation_mechanism": "knights_knaves / ordering held-out families are different rule systems",
+        "exposure": "none"
+      },
+      "answer_type": "bool"
+    },
+    {
+      "source": "mathematics_dataset",
+      "module": "composed modules (algebra__linear_1d_composed, algebra__polynomial_roots_composed, polynomials__evaluate_composed, numbers__gcd_composed, comparison__sort_composed, calculus__differentiate_composed, probability__swr_p_sequence)",
+      "stratum": "supporting.math_new",
+      "task_type": "composed_school_math",
+      "verify": "project canonical match (sympy equivalence for expressions)",
+      "process": "math process check",
+      "isolation": "label Mixed; train-medium/hard entropy only; never interpolate/extrapolate",
+      "decision": "candidate (math, Mixed)",
+      "family": "mathematics_dataset/composed",
+      "mechanism": {
+        "presentation": "computation",
+        "what": "evaluate composed sub-problems (define, evaluate, solve)",
+        "nearest_evaluation_mechanism": "defined_ops@v1 held-out comp.chain2 / comp.chain4 (evaluate composed stated definitions)",
+        "exposure": "shares_primitive"
+      },
+      "answer_type": "needs_checker"
+    },
+    {
+      "source": "mathematics_dataset",
+      "module": "single-step modules (arithmetic__*, numbers__place_value, measurement__conversion, ...)",
+      "decision": "NOT IN H1: Supporting-only drill, covered by gsm8k"
+    },
+    {
+      "source": "mathematics_dataset",
+      "module": "algebra__sequence_next_term, algebra__sequence_nth_term",
+      "decision": "EXCLUDED (R4): sequence induction"
+    }
   ],
-  "authorizes": "nothing"
+  "authorizes": "nothing",
+  "mechanism_review": {
+    "date_utc": "2026-10-22",
+    "method": "declared per candidate module from its documentation and the validation samples, against every eval-set-1 held-out family and evaluation-only generator; the tabulated project families are checked by execution instead (mechanism_check.py, isolation rule R9)",
+    "exposure": {
+      "none": "no evaluation mechanism found",
+      "shares_primitive": "a step or primitive an evaluation family also uses, in another format or stated rather than induced: REPORTED, and the affected evaluation tier is read with it",
+      "equivalent": "the module teaches an evaluation family's rule itself: excluded"
+    },
+    "presentation": {
+      "explicit_rule": "the rule is stated in the prompt; a held-out INDUCTIVE family with the same rule would be the main exposure risk -- none found",
+      "induction": "the rule is to be discovered",
+      "deduction": "conclusions from stated premises",
+      "search": "search over assignments or plans",
+      "computation": "execute a stated procedure"
+    },
+    "found": "no candidate module computes an evaluation family's rule; 7 share a primitive (listed per module); the explicit-rule modules state rotations, traversals and rewrites, none of which is a held-out inductive rule",
+    "limits": "a declared review, not an execution check: it can miss a mechanism a module's generator produces only at some configurations"
+  },
+  "answer_types": {
+    "text": "whitespace- and case-normalized exact match",
+    "number": "numeric equality within 1e-9",
+    "number_set": "the same multiset of numbers within 1e-6",
+    "matrix": "the same token grid (rows of tokens)",
+    "bool": "True/False",
+    "needs_checker": "no project comparator yet (multiple valid answers, a plan or a derivation to check): every candidate is UNVERIFIABLE and never accepted until the module's checker exists"
+  },
+  "_drop_if_gold_in_prompt": "only where the gold appearing verbatim in the prompt means a degenerate item (the answer IS the input: an unchanged string, an identity rotation); for choice and selection modules the gold is one of the listed options by construction"
 }

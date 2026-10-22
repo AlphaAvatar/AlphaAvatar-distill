@@ -1619,19 +1619,22 @@ STAGE_2 = [
         id="reasoning_data",
         kind="experiment",
         stage_id="2",
-        status=("H1 PREPARED AT $0 2026-10-21, NOT AUTHORIZED. The maintainer "
-                "fixed Stage-0 D4 Top-1 as the initialization (two verified "
-                "copies: relay + dev box); H1 compares 2.96M of corpus_v2 (A) "
-                "with 2.96M of a verified teacher-native corpus (B) under "
-                "matched U, E and steps (contract M1). Done: asset audit, "
-                "target quality and process checks, isolation rules R1-R8, "
-                "the train_tasks_v1 pool, the H1 accounting and draft "
-                "protocol, a provider-checked budget position (34 pods / "
-                "$58.33 still unattributed), the durability plan (backend "
-                "BLOCKED: not provisioned), the H1 application; TIP "
-                "registered as an H3 candidate only; the 8 named external "
-                "sources audited (4 validated locally, module-level decisions). "
-                "No teacher target "
+        status=("H1 PREPARATION REVISED AT $0 2026-10-22 AFTER REVIEW, NOT "
+                "COMPLETE, NOT AUTHORIZED. The maintainer fixed Stage-0 D4 "
+                "Top-1 as the initialization (two verified copies: relay + dev "
+                "box); H1 compares 2.96M of corpus_v2 (A) with 2.96M of a "
+                "verified teacher-native corpus (B) under one matching rule "
+                "(values provisional until B's pack). Done: asset audit, target "
+                "quality v2, isolation rules R0-R9, the train_tasks_v2 pool, a "
+                "source plan with named corpus variants, an isolated export and "
+                "external task builder, a post-generation adapter validated on "
+                "the Stage-0 teacher records, completion-time persistence, the "
+                "H1 accounting, statistics and draft protocol, a provider-"
+                "checked budget position (34 pods / $58.33 still unattributed), "
+                "the durability plan (backend BLOCKED), the H1 application; "
+                "TIP an H3 candidate only. Open: supporting-source builders, two "
+                "exporters, five module checkers, the GPU unit driver. No "
+                "teacher target "
                 "generated, no student trained, $0 spent"),
         title="Stage-2 verified teacher-native reasoning data, measured through "
               "Stage-3 controlled recovery",
@@ -1652,9 +1655,10 @@ STAGE_2 = [
               "arm cut at 2.96M and the 519 fluid units, token-exact against "
               "base_pool_v1, read back through the trainer's own reader",
               field="schema", equals="aadistill.stage2.reasoning_data.packing_dry_run/v1"),
-            E("data/stages/stage-2/reasoning_data/tasks/train_tasks_v1.manifest.json",
+            E("data/stages/stage-2/reasoning_data/tasks/train_tasks_v2.manifest.json",
               "the verifiable primary-axis task pool: calibration-split "
-              "families, the training seed range, every isolation rule passed",
+              "families less the three R9 excludes, the training seed range, "
+              "isolation rules R0-R9 passed",
               field="authorizes", equals="nothing"),
             E("logs/stages/stage-2/reasoning_data/plans/initialization_selection.json",
               "the fixed-initialization proposal by Pareto dominance on the "
@@ -1696,7 +1700,20 @@ STAGE_2 = [
               "isolation against eval-set-1",
               field="authorizes", equals="nothing"),
             E("logs/stages/stage-2/reasoning_data/audit/code_verifier_check.json",
-              "the code verifier calibrated on MBPP's human reference solutions",
+              "the code verifier calibrated on MBPP's human reference solutions, "
+              "inside the sandbox teacher code will run in",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/generation_adapter_validation.json",
+              "the post-generation path (verify, assess, select, whole-unit "
+              "sessions, pack) run on the 672 Stage-0 teacher records",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/external_tasks_validation.json",
+              "an isolated third-party export turned into tasks that pass "
+              "isolation rules R0-R9, with every drop counted",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/source_plan.json",
+              "each corpus variant's per-source targets, approval state and "
+              "shortfalls against the built pools",
               field="authorizes", equals="nothing"),
         ],
         external_material=[],
@@ -1705,7 +1722,10 @@ STAGE_2 = [
                    "PROPOSED design",
                    "logs/budget/decisions.md -- 2026-10-21: Maintainer: H1 "
                    "fixes D4 Top-1; budget and durability first; TIP as an H3 "
-                   "candidate"],
+                   "candidate",
+                   "logs/budget/decisions.md -- 2026-10-22: Independent review "
+                   "of H1 preparation: eight targeted corrections at $0, no "
+                   "paid authorization"],
         canonical_log_destination="logs/stages/stage-2/reasoning_data",
         classification_reason=(
             "Stage 2 by subject and product: it varies the offline training "

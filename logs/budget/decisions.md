@@ -13173,3 +13173,53 @@ on a paid pod.
   bound is negative.
 - **Revisit when.** The maintainer answers the H1 application
   (`plans/authorization_proposal.json`).
+
+## 2026-10-22 — Independent review of H1 preparation: eight targeted corrections at $0, no paid authorization
+
+- **Context.** An independent review of `stage2/reasoning-data` at `edd78189`
+  kept the asset recovery, the source audit and the H1 design (D4 Top-1, H1
+  first, the 70/30 starting point, the frozen recovery objective, eval-set-1,
+  TIP as an H3 candidate only), but did not accept "$0 preparation complete"
+  and did not approve the paid application. It asked for eight corrections
+  inside H1's scope, with no new full search, no larger matrix and no new
+  governance layer. This message authorizes no new spending.
+- **Decision.** The eight corrections were made
+  (`docs/stages/stage-2/reasoning_data/H1.md` §10):
+  1. `data.code_exec` v2: every declared test must run (nonce-checked report;
+     zero tests, early and hard exits fail); whole-output stdio with an output
+     limit; teacher code runs only in a probed bubblewrap sandbox on the dev
+     box, never on the generation pod; a pass means the declared tests passed;
+  2. billing attribution: a file citing a billing snapshot attributes nothing
+     (the H1 budget position had made its 34 OPEN pods read as mentioned);
+     53 pods / $78.99 unattributed again, 34 ($58.33) OPEN;
+  3. isolation R0 (missing provenance is a violation), R7 executed (ARC
+     lineage + ARC-AGI-1 grid fingerprints), R9 executed mechanism check (three
+     calibration families compute evaluation-only rules and are not drawn for
+     training; eval-set-1 unchanged), a declared mechanism review per external
+     module;
+  4. whole-unit admission in the packer;
+  5. `target_quality` v2: answer (with scope), text consistency, steps and
+     action legality are separate records;
+  6. an executable source plan with named corpus variants (no silent
+     fallback; no source approved yet), an isolated export and external task
+     builder, a post-generation adapter validated on the 672 Stage-0 teacher
+     records, completion-time persistence;
+  7. accounting labels every figure measured / estimated / planned / modeled;
+     the matching rule is fixed now and its values (T 625, 7/2) are
+     provisional until B's real pack; KD positions by prompt / reasoning /
+     answer;
+  8. the statistics' resolution and floor rules: a degenerate or floor
+     interval is NOT_RESOLVED, never equivalence.
+- **Alternatives considered.** Deleting the superseded `train_tasks_v1`
+  (kept: history, and nothing consumes it); downgrading interactive transfer
+  to a secondary conclusion (not done: a scope limit only the maintainer can
+  accept); lowering the 20 GiB disk gate of the pod-simulator tests to make
+  them pass (not done).
+- **Risks.** Supporting-source task builders, two exporters and five module
+  checkers are still missing (`plans/source_plan.json` shortfalls); thin
+  interactive coverage; the budget's conservative bound is negative and 34
+  pods are unattributed; the durability backend is not provisioned.
+- **Revisit when.** The maintainer answers the source scheme, the budget
+  attribution and envelope, and the backend; the next paid application covers
+  data generation and verification first, and the four formal units only
+  after B's real pack and the GPU validation.

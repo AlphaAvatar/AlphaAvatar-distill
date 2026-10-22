@@ -95,3 +95,16 @@ def test_every_candidate_external_module_lands_in_a_declared_stratum():
         if str(m.get("decision", "")).startswith("candidate"):
             assert m["stratum"] in SPEC["shares"], m["module"]
             assert m["source"] in SPEC["source_allocation"][m["stratum"]], (m["source"], m["stratum"])
+
+
+def test_the_committed_budget_position_attributes_none_of_the_pods_it_lists():
+    """Committing a reconciliation must not change attribution: every pod the
+    H1 budget position lists as no-run-record (OPEN included) is still named by
+    no tracked file other than billing evidence and reports derived from it."""
+    from maintenance.consolidation import provider_billing as PB
+    pos = A.read_json(A.LOG_DIR / "budget/h1_budget_position.json")["pods_no_run_record_created"]
+    listed = set(pos["unnamed"]["pods"])
+    for k in ("named_by_untracked_project_launch_logs", "named_by_project_records_in_git_history"):
+        listed |= set(pos[k]["pods"])
+    assert len(listed) == pos["count"] and pos["unnamed"]["status"] == "OPEN"
+    assert PB.mentioned(A.REPO, sorted(listed)) == set()

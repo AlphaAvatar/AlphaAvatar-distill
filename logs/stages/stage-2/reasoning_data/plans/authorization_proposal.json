@@ -1,7 +1,7 @@
 {
   "schema": "aadistill.stage2.reasoning_data.authorization_proposal/v2",
   "hypothesis_id": "H1",
-  "status": "APPLICATION for the maintainer (2026-10-21 UTC). AUTHORIZES NOTHING: no grant is issued, no cap is raised, no Stage-0 authorization is reused, and no resource is created by this file.",
+  "status": "APPLICATION for the maintainer (2026-10-21 UTC, revised 2026-10-22 after an independent review: the review did not approve the whole package). AUTHORIZES NOTHING: no grant is issued, no cap is raised, no Stage-0 authorization is reused, and no resource is created by this file.",
   "scope": "H1 only: generate and verify arm B's corpus, validate the training changes on a small GPU run, train and evaluate the 4 formal units (2 arms x 2 seeds), store their artifacts. The nested ladder and any H3 study are separate applications.",
   "budget_position": {
     "owner": "logs/stages/stage-2/reasoning_data/budget/h1_budget_position.json (derived from the committed provider snapshot logs/budget/provider/runpod_billing_2026-10-21T1859Z.json and derive_budget.py)",
@@ -12,26 +12,61 @@
     "attribution of the 34 unnamed pods ($58.33) and whether the 2026-09-11 anchor ($267.8998) was meant to cover all earlier account spend",
     "an H1 envelope and the cap change it needs: H1's hard cap is plans/cost_forecast.json :: proposal_totals.h1_hard_cap_usd; under the conservative budget bound the cap must rise by at least that plus $14.49",
     "the H1 durability backend (plans/durability_plan.json :: blocked; recommended: a 30 GB network volume)",
-    "arm B's source scheme (configs/stages/stage-2/reasoning_data/sources.json and the H1 source table in docs/stages/stage-2/reasoning_data/H1.md), including any third-party generator dependency",
-    "the compute contract M1 (truncate_padding on in both arms; per-arm blocks per step) and the draft H1 protocol (plans/comparison_design.json)"
+    "arm B's source scheme: which sources are approved_for_h1 (configs/stages/stage-2/reasoning_data/sources.json; none is today) and which corpus variant (corpus_spec.json :: variants), including any third-party generator dependency",
+    "the matching rule (aadistill.training.accounting.match_schedule; truncate_padding on in both arms) and the draft H1 protocol (plans/comparison_design.json); the rule's values are frozen only on B's real pack",
+    "whether thin interactive coverage (3 families, about 18 episodes) is accepted as a scope limit for H1's interactive conclusion"
   ],
   "engineering_still_at_0_usd_before_the_first_paid_run": [
-    "the Stage-2 generation adapter over train_tasks_v1 and the approved external generators, writing target_quality records with the process checks",
-    "gsm8k_train / math_train / code task builders with R2 decontamination, and the answerability task builder",
-    "the recovery driver that reads the H1 packs, applies M1, persists each student at completion and survives a failed evaluation",
+    "task builders for the supporting dataset sources (gsm8k and reading reuse selectors, MATH train, MBPP, SQuAD-unanswerable) with R2 decontamination, and exporters for PrOntoQA (with its reference conclusions) and DeepMind Mathematics: plans/source_plan.json :: shortfalls",
+    "checkers for the needs_checker modules (n_queens, tower_of_hanoi, logic_derivation, planning, mathematics_dataset), or their exclusion",
+    "the GPU unit driver: train under the matched schedule -> persist_unit checkpoint -> evaluate all of eval-set-1 -> persist_unit files (the persistence step and the post-generation adapter exist and are tested; scripts/stages/stage-2/reasoning_data/)",
     "the launch-bound gates of the existing session runner (provider reconciliation, same-failure gate, capacity probe at true size)"
   ],
   "phases": [
-    {"phase": "P0", "what": "$0 audit, design, contracts, builders, tests (this round)", "usd": 0, "status": "done"},
-    {"phase": "P1", "what": "teacher generation for arm B's corpus (one A100-80GB session), verification of code on the same pod", "cost": "plans/cost_forecast.json :: proposal_phases.P1_generation"},
-    {"phase": "P1v", "what": "answer and process verification of every candidate, isolation re-check, corpus build and packing (dev box CPU)", "cost": "plans/cost_forecast.json :: proposal_phases.P1v_verification_cpu"},
-    {"phase": "P1g", "what": "small GPU validation of the H1 training changes (comparison_design.json :: gpu_questions_for_a_small_validation), one L40S session", "cost": "plans/cost_forecast.json :: proposal_phases.P1g_gpu_validation"},
-    {"phase": "P2", "what": "the 4 formal units: recovery + all of eval-set-1, L40S, compute contract M1", "cost": "plans/cost_forecast.json :: proposal_phases.P2_formal_4_units"},
-    {"phase": "closeout", "what": "failure / teardown / evidence-collection reserve, one per paid session", "cost": "plans/cost_forecast.json :: proposal_phases.closeout_reserve_4_sessions"},
-    {"phase": "storage", "what": "the H1 backend for about two months", "cost": "plans/cost_forecast.json :: proposal_phases.storage_h1_backend_two_months"},
-    {"phase": "optional", "what": "a single-seed diagnostic of arm B at 0.86M before the formal units -- not a confirmation, not a gate", "cost": "plans/cost_forecast.json :: optional"}
+    {
+      "phase": "P0",
+      "what": "$0 audit, design, contracts, builders, tests (2026-10-21; revised 2026-10-22, still with open engineering: engineering_still_at_0_usd_before_the_first_paid_run)",
+      "usd": 0,
+      "status": "in progress"
+    },
+    {
+      "phase": "P1",
+      "what": "teacher generation for arm B's corpus (one A100-80GB session) with the Stage-0 generation driver (run_battery.py --mode generate): text only; no model-written code is executed on the generation pod",
+      "cost": "plans/cost_forecast.json :: proposal_phases.P1_generation"
+    },
+    {
+      "phase": "P1v",
+      "what": "answer, text-consistency, step and action-legality checks of every candidate (generation_adapter), code by execution in the probed sandbox, isolation re-check (R0-R9), corpus build and whole-unit packing (dev box CPU)",
+      "cost": "plans/cost_forecast.json :: proposal_phases.P1v_verification_cpu"
+    },
+    {
+      "phase": "P1g",
+      "what": "small GPU validation of the H1 training changes (comparison_design.json :: gpu_questions_for_a_small_validation), one L40S session",
+      "cost": "plans/cost_forecast.json :: proposal_phases.P1g_gpu_validation"
+    },
+    {
+      "phase": "P2",
+      "what": "the 4 formal units: recovery + all of eval-set-1, L40S, compute contract M1",
+      "cost": "plans/cost_forecast.json :: proposal_phases.P2_formal_4_units"
+    },
+    {
+      "phase": "closeout",
+      "what": "failure / teardown / evidence-collection reserve, one per paid session",
+      "cost": "plans/cost_forecast.json :: proposal_phases.closeout_reserve_4_sessions"
+    },
+    {
+      "phase": "storage",
+      "what": "the H1 backend for about two months",
+      "cost": "plans/cost_forecast.json :: proposal_phases.storage_h1_backend_two_months"
+    },
+    {
+      "phase": "optional",
+      "what": "a single-seed diagnostic of arm B at 0.86M before the formal units -- not a confirmation, not a gate",
+      "cost": "plans/cost_forecast.json :: optional"
+    }
   ],
   "totals": "plans/cost_forecast.json :: proposal_totals (derived; not restated here)",
   "proposed_grant_shape": "one H1 envelope with per-phase hard caps; a one-use authorization per session bound to its plan hash (src/aadistill/governance/authorization.py); at most one billing resource at a time; the default-on provider-resource reconciliation and the same-failure gate before every create; the capacity probe at true size before any session that produces a student",
-  "authorizes": "nothing"
+  "authorizes": "nothing",
+  "sequencing": "the next paid application covers DATA FIRST: generation (P1) and its $0 verification and corpus build (P1v), within a stated envelope. The four formal units (P2) are applied for only after B's real pack exists, the matching rule has been applied to it (plans/h1_accounting.json --pack-b), the cost forecast is recomputed from it, and the small GPU validation (P1g) has passed; the protocol is frozen at that point, not before"
 }

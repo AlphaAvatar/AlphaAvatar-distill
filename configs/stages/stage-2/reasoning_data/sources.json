@@ -39,9 +39,12 @@
         "dev/final/calibration seed ranges"
       ],
       "generator_exposure": "shared with eval-set-1 (10 of 15 generators): unseen RULES, seen FORMAT; reported separately",
-      "family_breadth": "35 calibration families across 10 generators (base_pool_v1 census)",
+      "family_breadth": "35 calibration families across 10 generators (base_pool_v1 census); 32 usable for H1 training after isolation rule R9 excludes three that compute evaluation-only rules",
       "status": "recommended",
-      "why": "the only primary-axis source with project verifiers today; the teacher solves it (dev_v1 638/720) and Stage 0 measured its trace lengths and acceptance"
+      "why": "the only primary-axis source with project verifiers today; the teacher solves it (dev_v1 638/720) and Stage 0 measured its trace lengths and acceptance",
+      "kind": "project_generator",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "stage2_generators_v1",
@@ -52,7 +55,10 @@
       "model_generated_content": "none",
       "verifier": "each generator's own checker (to be written with it)",
       "status": "planned (not implemented)",
-      "why": "35 calibration families is thin rule diversity; disjoint generators add families without exposing eval formats (R4)"
+      "why": "35 calibration families is thin rule diversity; disjoint generators add families without exposing eval formats (R4)",
+      "kind": "project_generator",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "reasoning_gym",
@@ -71,7 +77,10 @@
       ],
       "status": "candidate for selected modules (needs a dependency decision; arckit, which it pulls, bundles ARC-AGI evaluation data)",
       "why": "about 100 seeded procedural tasks with checkers: the cheapest route to many disjoint rule families",
-      "modules": "configs/stages/stage-2/reasoning_data/external_modules.json"
+      "modules": "configs/stages/stage-2/reasoning_data/external_modules.json",
+      "kind": "external_generator",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "reasoning_core",
@@ -83,7 +92,10 @@
       "verifier": "project-side exact checks per module (configs/.../external_modules.json); the library's graded scorers are not used",
       "modules": "configs/stages/stage-2/reasoning_data/external_modules.json",
       "status": "candidate (needs a dependency decision)",
-      "why": "formal derivation, evidence selection over supplied premises, structural analogy, rule switching, program execution and DP -- mechanisms eval-set-1 does not use"
+      "why": "formal derivation, evidence selection over supplied premises, structural analogy, rule switching, program execution and DP -- mechanisms eval-set-1 does not use",
+      "kind": "external_generator",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "prontoqa",
@@ -94,7 +106,10 @@
       "model_generated_content": "none (procedural)",
       "verifier": "True/False against the generator; ACCEPTANCE REQUIRES the process check (every intermediate conclusion of the reference proof in the teacher's reasoning)",
       "status": "candidate, process-gated",
-      "why": "multi-hop deduction whose reference proof lets the process, not only a chance-correct label, be checked"
+      "why": "multi-hop deduction whose reference proof lets the process, not only a chance-correct label, be checked",
+      "kind": "external_generator",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "mathematics_dataset",
@@ -105,7 +120,10 @@
       "model_generated_content": "none (procedural)",
       "verifier": "project canonical match (sympy equivalence for expressions)",
       "status": "candidate (math, Mixed)",
-      "why": "procedural multi-step school mathematics without the third-party copyright questions of competition sets; sequence modules excluded (R4)"
+      "why": "procedural multi-step school mathematics without the third-party copyright questions of competition sets; sequence modules excluded (R4)",
+      "kind": "external_generator",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "re_arc",
@@ -115,7 +133,10 @@
       "license_verified": true,
       "model_generated_content": "none",
       "scope": "generators for the 400 ARC-AGI-1 TRAINING tasks only",
-      "status": "deferred (R7: needs its own maintainer decision and a text grid interface)"
+      "status": "deferred (R7: needs its own maintainer decision and a text grid interface)",
+      "kind": "external_generator",
+      "arc_lineage": "arc_training",
+      "approved_for_h1": false
     },
     {
       "source_id": "gsm8k_train",
@@ -132,7 +153,10 @@
         "test"
       ],
       "status": "recommended",
-      "why": "verified-answer math with a human gold; corpus_v2 used it at 0.890 candidate correctness"
+      "why": "verified-answer math with a human gold; corpus_v2 used it at 0.890 candidate correctness",
+      "kind": "external_dataset",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "math_train",
@@ -149,7 +173,10 @@
         "test (MATH-500, eval-set-1's math_verified source, is a test subset)"
       ],
       "status": "recommended with R2 decontamination",
-      "why": "a human gold, unlike OpenMathInstruct-2's augmented problems"
+      "why": "a human gold, unlike OpenMathInstruct-2's augmented problems",
+      "kind": "external_dataset",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "numinamath_1p5",
@@ -158,7 +185,10 @@
       "license": "Apache-2.0",
       "license_verified": true,
       "model_generated_content": "solutions rewritten by GPT-4o; synthetic_math problems generated by GPT-4; orca_math GPT-4 synthetic",
-      "status": "candidate restricted to human-authored problem subsets, maintainer decision (model-output terms)"
+      "status": "candidate restricted to human-authored problem subsets, maintainer decision (model-output terms)",
+      "kind": "external_dataset",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "openmath_instruct_2",
@@ -168,7 +198,10 @@
       "license_verified": true,
       "model_generated_content": "problems augmented and solved by Llama-3.1-405B-Instruct; augmented-problem answers are MAJORITY VOTES, not gold",
       "status": "excluded from new corpora",
-      "why": "its answer key is not a gold, so a verified-correct gate cannot be applied to it; it also carries Llama naming obligations"
+      "why": "its answer key is not a gold, so a verified-correct gate cannot be applied to it; it also carries Llama naming obligations",
+      "kind": "external_dataset",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "mbpp_train",
@@ -186,7 +219,10 @@
       "forbidden_splits": [
         "test (task ids 11-510)"
       ],
-      "status": "recommended for H1 supporting.code_algorithmic"
+      "status": "recommended for H1 supporting.code_algorithmic",
+      "kind": "external_dataset",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "code_contests_train",
@@ -203,7 +239,10 @@
         "valid",
         "test"
       ],
-      "status": "secondary for H1 supporting.code_algorithmic (repository archived; train split only; R2-decontaminated)"
+      "status": "secondary for H1 supporting.code_algorithmic (repository archived; train split only; R2-decontaminated)",
+      "kind": "external_dataset",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "corpus_v2_gsm8k_verified",
@@ -219,7 +258,10 @@
       "forbidden_splits": [
         "test (eval-set-1 gsm8k)"
       ],
-      "status": "recommended for H1 supporting.math_reused_gsm8k (reuse: no new generation)"
+      "status": "recommended for H1 supporting.math_reused_gsm8k (reuse: no new generation)",
+      "kind": "reused_targets",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "corpus_v2_rag_verified",
@@ -235,7 +277,10 @@
       "forbidden_splits": [
         "validation (eval-set-1 rag and answerability)"
       ],
-      "status": "recommended (reuse: no new generation)"
+      "status": "recommended (reuse: no new generation)",
+      "kind": "reused_targets",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "corpus_v2_multihop_verified",
@@ -251,7 +296,10 @@
       "forbidden_splits": [
         "validation (eval-set-1 multihop)"
       ],
-      "status": "recommended (reuse: no new generation)"
+      "status": "recommended (reuse: no new generation)",
+      "kind": "reused_targets",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "squad_v2_train_unanswerable",
@@ -267,7 +315,10 @@
       "forbidden_splits": [
         "validation (eval-set-1 rag and answerability_paired)"
       ],
-      "status": "recommended for H1 supporting.answerability (new generation)"
+      "status": "recommended for H1 supporting.answerability (new generation)",
+      "kind": "external_dataset",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "tool_calling",
@@ -277,7 +328,10 @@
       "license_verified": true,
       "status": "omitted from training",
       "why": "no answer key (unverifiable), 1,861 system-prompt groups that pad most of every block, research-only terms for xLAM, and no tool-use unit in eval-set-1's formal core; the 24 Stage-0 students make tool calls where none is offered (unexpected_tool_call) after training on 38% tool sessions",
-      "risk": "tool-use behaviour may regress; eval_behavior_v0 still measures it"
+      "risk": "tool-use behaviour may regress; eval_behavior_v0 still measures it",
+      "kind": "not_trainable",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "refusal_answerability",
@@ -285,7 +339,10 @@
       "role": "evaluation_only",
       "status": "unanswerable-question support INCLUDED in H1 as supporting.answerability (squad_v2_train_unanswerable); XSTest-style safety prompts stay evaluation-only",
       "why": "the 24 Stage-0 students never abstain (answered_unanswerable 51-56 of 60); a small verified slice supports the answerability guard rail; safety_paired stays a guard rail only",
-      "risk": "the students already never abstain (answered_unanswerable 51-56 of 60)"
+      "risk": "the students already never abstain (answered_unanswerable 51-56 of 60)",
+      "kind": "not_trainable",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "excluded_noncommercial_or_unlicensed",
@@ -301,7 +358,10 @@
         "ProofWriter": "license not reachable without downloading (UNVERIFIED)",
         "FOLIO": "card MIT vs repo CC-BY-SA-4.0; gated; test unreleased"
       },
-      "status": "excluded"
+      "status": "excluded",
+      "kind": "not_trainable",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     },
     {
       "source_id": "benchmark_test_splits",
@@ -319,7 +379,10 @@
         "ALFWorld valid_unseen",
         "every eval-set-1 component"
       ],
-      "status": "never trainable"
+      "status": "never trainable",
+      "kind": "not_trainable",
+      "arc_lineage": "none",
+      "approved_for_h1": false
     }
   ],
   "historical_corpus_flags": {
@@ -329,5 +392,15 @@
   "secondary_not_adopted": {
     "ruletaker": "same mechanism as PrOntoQA / reasoning-core logic_derivation; no proofs; data-zip license UNVERIFIED",
     "cogs": "no generator; gen split never trainable; design reference"
-  }
+  },
+  "kinds": {
+    "project_generator": "items need generator_id, family_id, seed",
+    "external_generator": "items need module (a candidate module of external_modules.json), family_id, task_type, seed",
+    "external_dataset": "items need source_split",
+    "reused_targets": "items need source_split",
+    "not_trainable": "no item may come from it"
+  },
+  "_kind": "isolation_check R0 refuses an item whose source is unregistered, not trainable, or lacks the fields its kind requires: a check that cannot run on an item does not pass it",
+  "_arc_lineage": "isolation_check R7 refuses every item of a source whose arc_lineage is not 'none' (re_arc: ARC-AGI-1 training-task generators, a separate maintainer decision)",
+  "_approved_for_h1": "set to true only by a recorded maintainer decision; source_plan.py refuses a generation plan naming a source that is not approved (2026-10-22: none is approved yet -- the H1 source scheme is decision 4)"
 }

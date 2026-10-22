@@ -1,15 +1,28 @@
 {
  "schema": "aadistill.stage2.reasoning_data.code_verifier_check/v1",
- "written_utc": "2026-10-21T19:31:42Z",
+ "written_utc": "2026-10-22T08:51:09Z",
  "source": "google-research-datasets/mbpp @ 4bb6404fdc6cacfda99d4ac4205087b89d32030c (local HF cache); test split not read",
- "verifier": "aadistill.data.code_exec.run_asserts",
+ "verifier": "aadistill.data.code_exec.run_asserts (v2: every declared test must run)",
  "limits": {
   "wall_seconds": 10,
   "cpu_seconds": 5,
   "memory_mb": 512,
-  "file_mb": 16,
+  "output_bytes": 4194304,
   "open_files": 64
  },
+ "sandbox_probe": {
+  "isolated": true,
+  "protected_paths_checked": 45,
+  "network_interfaces": [
+   "lo"
+  ],
+  "environment": [
+   "LC_CTYPE",
+   "PATH",
+   "PWD"
+  ]
+ },
+ "a_pass_establishes": "the declared tests ran and passed: evidence bounded by those tests, not full semantic correctness",
  "per_split": {
   "train": {
    "tasks": 374,

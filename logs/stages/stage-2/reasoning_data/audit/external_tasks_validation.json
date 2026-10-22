@@ -1,0 +1,67 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.external_tasks/v1",
+ "created_utc": "2026-10-22T09:22:33Z",
+ "export": {
+  "sha256": "c2adc6cbac17650e0d09620aeca6f33acc3de49c4807a23ad21625976bd1cc99",
+  "rows": 176,
+  "versions": [
+   "0.1.25",
+   "0.5.0"
+  ]
+ },
+ "n_tasks": 171,
+ "drops": {
+  "n_queens: duplicate prompt": 1,
+  "rotate_matrix: the answer is the input (gold verbatim in the prompt)": 2,
+  "string_manipulation: the answer is the input (gold verbatim in the prompt)": 1,
+  "tower_of_hanoi: duplicate prompt": 1
+ },
+ "by_stratum": {
+  "primary.abstract_analogical": 8,
+  "primary.compositional_generalization": 68,
+  "primary.task_contained_deduction": 63,
+  "supporting.code_algorithmic": 24,
+  "supporting.math_new": 8
+ },
+ "by_module": {
+  "reasoning_core/analogical_case_matching": 8,
+  "reasoning_core/controlled_code_execution": 8,
+  "reasoning_core/dynamic_programming": 8,
+  "reasoning_core/logic_derivation": 8,
+  "reasoning_core/multistep_evidence_retrieval": 8,
+  "reasoning_core/planning": 8,
+  "reasoning_core/rule_switching": 8,
+  "reasoning_gym/bf": 8,
+  "reasoning_gym/binary_matrix": 8,
+  "reasoning_gym/cryptarithm": 8,
+  "reasoning_gym/family_relationships": 8,
+  "reasoning_gym/game_of_life": 8,
+  "reasoning_gym/largest_island": 8,
+  "reasoning_gym/mini_sudoku": 8,
+  "reasoning_gym/n_queens": 7,
+  "reasoning_gym/polynomial_equations": 8,
+  "reasoning_gym/rotate_matrix": 6,
+  "reasoning_gym/self_reference": 8,
+  "reasoning_gym/spiral_matrix": 8,
+  "reasoning_gym/string_manipulation": 7,
+  "reasoning_gym/tower_of_hanoi": 7,
+  "reasoning_gym/zebra_puzzles": 8
+ },
+ "answer_types": {
+  "matrix": 38,
+  "needs_checker": 30,
+  "number": 16,
+  "number_set": 8,
+  "text": 79
+ },
+ "isolation": {
+  "pass": true,
+  "violations": [],
+  "R7_items_with_any_grid_match": 8,
+  "R2_flagged": 0
+ },
+ "sha256": "f2fb1c7ee15d06b4b32218243556afb8384606a11184bffd2aeff85c7846c48d",
+ "approved_for_generation": false,
+ "authorizes": "nothing",
+ "pool_path_not_committed": "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/d1b96deb-3e24-4190-8381-f4bf41bbbdb4/scratchpad/export_env/run/tasks/external_sample_v1.jsonl"
+}

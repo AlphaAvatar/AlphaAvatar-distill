@@ -182,7 +182,7 @@ def main() -> int:
                 "usd": round((rec_h + eval_s / 3600) * l40, 2),
                 "executed_positions": x["executed_positions"], "optimizer_steps": x["optimizer_steps"]}
 
-    ua, ub = h1_unit("A"), h1_unit("B_estimate")
+    ua, ub = h1_unit("A"), h1_unit("B")
     #: The GPU validation: four short runs (A and B, padding truncated or not, ~60 steps
     #: each at the measured step rate), one mid-run resume, and a 50-item timing slice
     #: of the eval -- a labelled planning figure, about 1.25 GPU hours.
@@ -233,7 +233,11 @@ def main() -> int:
         "generation": generation,
         "units": units,
         "phases": phases,
-        "h1_units_L40S_M1": {"A": ua, "B_estimate": ub},
+        "h1_units_L40S_M1": {"A": ua, "B": ub, "kinds": {
+            "A_positions": h1["arm_A"]["kind"], "B_positions": h1["arm_B"]["kind"],
+            "steps": h1["schedule"]["status"].split(":")[0],
+            "positions_per_second": "measured on earlier L40S recovery runs (measured.*)",
+            "hours_and_usd": "forecast = planned positions / measured rate x contingency"}},
         "optional": optional,
         "proposal_phases": proposal_phases,
         "proposal_totals": totals,

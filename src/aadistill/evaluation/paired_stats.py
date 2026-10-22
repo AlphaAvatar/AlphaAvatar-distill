@@ -114,3 +114,66 @@ def joint_rate(correct: dict, terminated: dict) -> dict:
         "n": n,
         "per_sample": both,
     }
+
+
+def cluster_bootstrap(values, clusters, strata=None, *, iterations: int = 10000,
+                      seed: int, level: float = 0.95, thresholds=()) -> dict:
+    """Percentile interval for the item-weighted mean of ``values``, resampling
+    whole CLUSTERS with replacement within each stratum (each stratum keeps its
+    own cluster count), so items that share a cluster are never treated as
+    independent.
+
+    It also reports what the interval can and cannot carry. ``degenerate`` is
+    true when every resample gave one value (all values equal, e.g. all zero):
+    the interval then has no width because nothing varied, not because the
+    estimate is precise. ``informative_clusters`` counts clusters holding any
+    nonzero value. For each threshold, the share of resamples at or below and at
+    or above it (bootstrap tail shares, for one-sided tests). Deterministic in
+    ``seed``.
+    """
+    values = [float(v) for v in values]
+    clusters = list(clusters)
+    strata = list(strata) if strata is not None else ["all"] * len(values)
+    if not values or not (len(values) == len(clusters) == len(strata)):
+        raise ValueError("values, clusters and strata must be non-empty and aligned")
+    sums: dict = {}
+    home: dict = {}
+    nonzero: set = set()
+    for v, c, s in zip(values, clusters, strata):
+        if home.setdefault(c, s) != s:
+            raise ValueError(f"cluster {c!r} spans strata")
+        tot, n = sums.get(c, (0.0, 0))
+        sums[c] = (tot + v, n + 1)
+        if v != 0:
+            nonzero.add(c)
+    by_stratum: dict = {}
+    for c in sorted(sums, key=str):
+        by_stratum.setdefault(home[c], []).append(sums[c])
+    rng = random.Random(seed)
+    stats = []
+    for _ in range(iterations):
+        tot = n = 0
+        for rows in by_stratum.values():
+            k = len(rows)
+            for _ in range(k):
+                a, b = rows[rng.randrange(k)]
+                tot += a
+                n += b
+        stats.append(tot / n)
+    stats.sort()
+    alpha = 1 - level
+    lo = stats[int(alpha / 2 * iterations)]
+    hi = stats[min(iterations - 1, int((1 - alpha / 2) * iterations))]
+    return {
+        "point": round(sum(values) / len(values), 6),
+        "ci_low": round(lo, 6), "ci_high": round(hi, 6), "level": level,
+        "iterations": iterations, "seed": seed,
+        "n_items": len(values), "n_clusters": len(sums), "n_strata": len(by_stratum),
+        "informative_clusters": len(nonzero),
+        "distinct_resampled_values": len(set(stats)),
+        "degenerate": lo == hi and len(set(stats)) == 1,
+        "tail_shares": {str(t): {"at_or_below": round(sum(x <= t for x in stats) / iterations, 6),
+                                 "at_or_above": round(sum(x >= t for x in stats) / iterations, 6)}
+                        for t in thresholds},
+        "resamples": "clusters within strata, at fixed checkpoints; NOT seeds",
+    }

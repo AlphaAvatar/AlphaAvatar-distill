@@ -3,6 +3,13 @@
 **Status: $0 preparation, 2026-10-21 (UTC). PROPOSED, not preregistered, not
 funded.** It authorizes nothing.
 
+> **Revised 2026-10-22.** After an independent review, the task pool is
+> `train_tasks_v2` (32 families), the target contract is `target_quality` v2
+> (answer, text consistency, steps and action legality kept apart), isolation
+> is R0–R9, units are admitted whole, and arm A is 3,150 units / 1,459 blocks.
+> Those figures, and every other changed one, are in [`H1.md`](H1.md) §10; the
+> v1 figures below are the state of 2026-10-21.
+>
 > **H1 is the current round, and [`H1.md`](H1.md) is its preparation result.**
 > The maintainer fixed D4 Top-1 as the initialization, put the budget and
 > durability conditions first, set arm B to reasoning 0.70 / supporting 0.30,

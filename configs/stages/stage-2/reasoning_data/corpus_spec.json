@@ -76,7 +76,7 @@
         "reasoning_gym",
         "code_contests_train"
       ],
-      "verifier": "aadistill.data.code_exec (execution against the dataset's tests, on the disposable generation pod)"
+      "verifier": "aadistill.data.code_exec (execution against the dataset's tests inside the probed bubblewrap sandbox on the dev box, never on the generation pod: code_sandbox.py)"
     },
     "supporting.reading_verified": {
       "sources": [
@@ -106,25 +106,39 @@
     20260727
   ],
   "acceptance": {
-    "contract": "aadistill.data.target_quality/v1",
+    "contract": "aadistill.data.target_quality/v2",
     "primary": {
       "require_answer": [
         "correct"
       ],
       "admit_unverifiable": false,
-      "trace_check": "episodes: environment replay, every action legal -> verified, an illegal action -> contradicted; static: scripts/.../process_check.py -> partial / contradicted / not_assessed; a sampled independent review per family (h1 protocol)",
-      "reject_trace_contradicted": true
+      "reject_steps_contradicted": true,
+      "episodes": {
+        "reject_observations": {
+          "action_legality": [
+            "illegal_action"
+          ]
+        }
+      },
+      "prontoqa": {
+        "require_steps": [
+          "partial",
+          "verified"
+        ]
+      },
+      "records": "answer with its scope; text_consistency (observation: textual agreement only); steps (not_assessed unless a step checker exists); action_legality (observation, episodes) -- generation_adapter.py"
     },
     "supporting": {
       "require_answer": [
         "correct"
       ],
       "admit_unverifiable": false,
-      "reject_trace_contradicted": true,
-      "trace_check": "math: process_check; code: tests decide the answer, process not_assessed; reading and answerability: not_assessed"
+      "reject_steps_contradicted": true,
+      "records": "math: answer + text consistency; code: declared tests passed (code_exec, sandboxed), steps not_assessed; reading and answerability: answer only"
     },
     "selection": "lowest accepted candidate index; never by length",
-    "length_rule": "a session whose render exceeds block_len is EXCLUDED and counted, never cut (P17); the generation allowance is block_len - rendered prompt - 8 so a trace that cannot be trained is stopped as length_limited instead of paid for to 16k"
+    "length_rule": "a session whose render exceeds block_len is EXCLUDED and counted, never cut (P17); the generation allowance is block_len - rendered prompt - 8 so a trace that cannot be trained is stopped as length_limited instead of paid for to 16k",
+    "admission": "whole units only: an episode any of whose sessions fails or does not fit is excluded entirely (build_master_ladder.render_all)"
   },
   "generation": {
     "primary.task_contained_deduction": {
@@ -222,5 +236,49 @@
       "squad_v2_train_unanswerable": 0.03
     }
   },
-  "_source_allocation": "PROPOSED split of each stratum's share by source, as sub-strata '<stratum>/<source>' the builder interleaves exactly like strata; induction and interactive have no external source that survives isolation, so they stay on the project generators. If the maintainer does not approve a third-party generator, its allocation returns to s0_generators_v2_calsplit within the same stratum."
+  "_source_allocation": "PROPOSED split of each stratum's share by source, as sub-strata '<stratum>/<source>' the builder interleaves exactly like strata; induction and interactive have no external source that survives isolation, so they stay on the project generators. Used by the variant stage2.reasoning_master@v1 only; without approved third-party generators the corpus is the explicit variant stage2.reasoning_master@v1-project-only (variants), never this id with a quiet substitution.",
+  "variants": {
+    "stage2.reasoning_master@v1": {
+      "source_allocation": "source_allocation",
+      "what": "the proposed scheme: the top-level source_allocation, third-party generators included"
+    },
+    "stage2.reasoning_master@v1-project-only": {
+      "source_allocation": {
+        "primary.task_contained_deduction": {
+          "s0_generators_v2_calsplit": 0.17
+        },
+        "primary.inductive_rule_discovery": {
+          "s0_generators_v2_calsplit": 0.17
+        },
+        "primary.compositional_generalization": {
+          "s0_generators_v2_calsplit": 0.17
+        },
+        "primary.abstract_analogical": {
+          "s0_generators_v2_calsplit": 0.09
+        },
+        "primary.interactive_adaptation": {
+          "s0_generators_v2_calsplit": 0.1
+        },
+        "supporting.math_reused_gsm8k": {
+          "corpus_v2_gsm8k_verified": 0.06
+        },
+        "supporting.math_new": {
+          "math_train": 0.06
+        },
+        "supporting.code_algorithmic": {
+          "mbpp_train": 0.07,
+          "code_contests_train": 0.0
+        },
+        "supporting.reading_verified": {
+          "corpus_v2_rag_verified": 0.06,
+          "corpus_v2_multihop_verified": 0.02
+        },
+        "supporting.answerability": {
+          "squad_v2_train_unanswerable": 0.03
+        }
+      },
+      "what": "the same strata and shares with NO third-party generator: each primary stratum entirely from s0_generators_v2_calsplit, each supporting third-party share moved to that stratum's largest remaining source. A DIFFERENT corpus with its own id, chosen explicitly -- never a silent fallback of the first"
+    }
+  },
+  "_variants": "source_plan.py turns a variant into per-(stratum, source) targets and refuses to emit a generation plan with an unapproved source; an unapproved source never falls back silently inside the same corpus id. The _source_allocation note's earlier fallback rule is superseded by the explicit project-only variant."
 }

@@ -1,0 +1,90 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.task_set/v1",
+ "role": "stage2_training",
+ "version": 2,
+ "status": "PROPOSED pool: no teacher target exists for it, and it is not adopted as training data until the maintainer accepts the corpus spec",
+ "created_utc": "2026-10-22T09:29:30Z",
+ "command": "python -m stages.reasoning_data.build_training_tasks --version 2 --oversupply 2.0",
+ "source": "s0_generators_v2_calsplit",
+ "roster": "registry.GENERATORS_V2",
+ "split_salt": "stage0.calibration_volume.family_split/v1",
+ "cal_fraction": 0.45,
+ "seed_rule": "training range lo + cell_index * 10,000 + i",
+ "demand": {
+  "task_contained_deduction": {
+   "stratum": "primary.task_contained_deduction",
+   "supervised_tokens_needed": 528700,
+   "supervised_per_accepted_unit": 3708,
+   "accept_rate_le_8192": 0.9956,
+   "oversupply": 2.0,
+   "tasks": 287
+  },
+  "inductive_rule_discovery": {
+   "stratum": "primary.inductive_rule_discovery",
+   "supervised_tokens_needed": 528700,
+   "supervised_per_accepted_unit": 3662,
+   "accept_rate_le_8192": 0.9133,
+   "oversupply": 2.0,
+   "tasks": 317
+  },
+  "compositional_generalization": {
+   "stratum": "primary.compositional_generalization",
+   "supervised_tokens_needed": 528700,
+   "supervised_per_accepted_unit": 3574,
+   "accept_rate_le_8192": 0.68,
+   "oversupply": 2.0,
+   "tasks": 436
+  },
+  "abstract_analogical": {
+   "stratum": "primary.abstract_analogical",
+   "supervised_tokens_needed": 279900,
+   "supervised_per_accepted_unit": 5739,
+   "accept_rate_le_8192": 0.5733,
+   "oversupply": 2.0,
+   "tasks": 171
+  },
+  "interactive_adaptation": {
+   "stratum": "primary.interactive_adaptation",
+   "supervised_tokens_needed": 311000,
+   "supervised_per_accepted_unit": 16669,
+   "accept_rate_le_8192": 0.1806,
+   "oversupply": 2.0,
+   "tasks": 207
+  }
+ },
+ "n_tasks": 1425,
+ "skipped_draws": {
+  "entity_tracking@v1:IndexError": 2,
+  "knights_knaves@v1:repeats_a_stage0_or_eval_instance": 15
+ },
+ "mechanism_excluded_families": [
+  "string_induction@v2/str.caesar",
+  "string_induction@v2/str.double_last",
+  "string_induction@v2/str.duplicate_each"
+ ],
+ "by_axis": {
+  "abstract_analogical": 171,
+  "compositional_generalization": 438,
+  "inductive_rule_discovery": 318,
+  "interactive_adaptation": 210,
+  "task_contained_deduction": 288
+ },
+ "by_generator": {
+  "defined_ops@v1": 219,
+  "entity_tracking@v1": 96,
+  "grid_transform@v1": 171,
+  "hidden_buttons@v1": 105,
+  "knights_knaves@v1": 96,
+  "list_induction@v1": 159,
+  "ordering@v2": 96,
+  "probe_function@v1": 105,
+  "scan_language@v1": 219,
+  "string_induction@v2": 159
+ },
+ "distinct_families": 32,
+ "interactive": 210,
+ "sha256": "b428f1ad78245c145701ca0599ac5451b4ccecbe4e58751295e1de020321bdc5",
+ "isolation_report": "train_tasks_v2.isolation.json",
+ "license": "project-generated procedural tasks; no external dataset, no ARC-AGI material",
+ "authorizes": "nothing"
+}

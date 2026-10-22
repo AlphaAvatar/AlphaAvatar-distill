@@ -6,8 +6,8 @@
 
 Two inputs, both already on disk, neither adopted as training data here:
 
-* **old arm** -- every corpus_v2 session except the isolation-flagged ones
-  (`audit/asset_audit.json :: isolation.corpus_v2_sessions` R2), under the
+* **old arm** -- every corpus_v2 unit except those with an isolation-flagged
+  session (`audit/asset_audit.json :: isolation.corpus_v2_sessions` R2), under the
   historical uniform six-way token mixture, cut at 2.96M unique supervised
   tokens and packed by the shared builder (never cut);
 * **fluid traces** -- the 519 verified Stage-0 teacher-native units, rendered
@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -41,18 +42,33 @@ OLD_ARM_SPEC = {"block_len": 8192, "salt": "stage2.reasoning_data.old_arm/v1",
 
 
 def old_arm_sessions() -> list[dict]:
+    """corpus_v2 as it was, less every UNIT one of whose sessions isolation
+    flagged: a unit is excluded whole, never trained on in part."""
     flagged = set(A.read_json(AUDIT)["isolation"]["corpus_v2_sessions"]["results"]
                   ["R2_near_duplicate"]["flagged_ids"])
+    every = list(A.corpus_v2_sessions())
+    size = Counter(s["source_id"] for s in every)
+    gone = {s["source_id"] for s in every if s["id"] in flagged}
     out = []
-    for s in A.corpus_v2_sessions():
-        if s["id"] in flagged:
+    for s in every:
+        if s["source_id"] in gone:
             continue
-        out.append({"id": s["id"], "unit_id": s["source_id"], "stratum": s["data_type"],
+        out.append({"id": s["id"], "unit_id": s["source_id"], "unit_sessions": size[s["source_id"]],
+                    "stratum": s["data_type"],
                     "family": s["source"], "attributes": {"source": s["source"]},
                     "messages": s["messages"], "tools": s.get("tools"),
                     "data_type": s["data_type"], "candidate_index": s.get("candidate_index"),
                     "candidate_sha256": s.get("candidate_sha256")})
     return out
+
+
+def old_arm_isolation_exclusion() -> dict:
+    flagged = set(A.read_json(AUDIT)["isolation"]["corpus_v2_sessions"]["results"]
+                  ["R2_near_duplicate"]["flagged_ids"])
+    every = list(A.corpus_v2_sessions())
+    gone = {s["source_id"] for s in every if s["id"] in flagged}
+    return {"sessions_flagged": len(flagged), "units_excluded": len(gone),
+            "sessions_excluded": sum(1 for s in every if s["source_id"] in gone)}
 
 
 def fluid_sessions() -> tuple[list[dict], dict[str, int]]:
@@ -68,7 +84,8 @@ def fluid_sessions() -> tuple[list[dict], dict[str, int]]:
         history = recs[uid]["messages"]
         at = [i for i, m in enumerate(history) if m["role"] == "assistant"]
         for k, idx in enumerate(at):
-            out.append({"id": f"{uid}#t{k}", "unit_id": uid, "stratum": it["axis"],
+            out.append({"id": f"{uid}#t{k}", "unit_id": uid, "unit_sessions": len(at),
+                        "stratum": it["axis"],
                         "family": f"{it['generator_id']}/{it['family_id']}",
                         "attributes": {"generator": it["generator_id"],
                                        "difficulty": it["difficulty"]},
@@ -100,7 +117,8 @@ def summarize(built: dict, block_len: int) -> dict:
             "max_share_deviation": r["accounting"].get("max_share_deviation"),
             "distinct_families": r["accounting"]["distinct_families"],
         })
-    return {"rungs": rows, "excluded_sessions": len(built["excluded"]),
+    return {"rungs": rows, "admission": "whole units only (build_master_ladder.render_all)",
+            "excluded": B.exclusion_summary(built["excluded"]),
             "excluded_examples": built["excluded"][:5], "rendered_sessions": built["n_rendered"],
             "units": built["n_units"], "system_prompt_groups": built["system_prompt_groups"],
             "validation_tail": built["validation_tail"],
@@ -125,6 +143,7 @@ def main(argv=None) -> int:
         sess_of_unit.setdefault(s["unit_id"], []).append(s["id"])
     new_sessions = {sid for u in old["ladder"]["order"][:cut] for sid in sess_of_unit[u]}
     old_summary = summarize(old, OLD_ARM_SPEC["block_len"])
+    old_summary["isolation_exclusion"] = old_arm_isolation_exclusion()
     old_summary["historical_2p96m_rung"] = {
         "blocks": hist_rung["n_blocks"], "sessions": hist_rung["n_sessions"],
         "unique_supervised_tokens_retained": hist_rung["actual_supervised_tokens"],

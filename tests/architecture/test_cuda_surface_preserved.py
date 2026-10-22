@@ -2253,9 +2253,10 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "it, and every stratum, family, size and rung comes from the "
             "caller. NO CUDA SURFACE.",
         "src/aadistill/data/target_quality.py":
-            "NEW MODULE: `assess` keeps every ending, protocol, answer and "
-            "trace category of a teacher candidate apart and applies a "
-            "caller-declared `AcceptancePolicy`; `select_target` takes the "
+            "NEW MODULE (v2): `assess` keeps every ending, protocol, answer "
+            "(with the check's scope), step-verification and named-observation "
+            "record of a teacher candidate apart and applies a caller-declared "
+            "`AcceptancePolicy`; `select_target` takes the "
             "lowest accepted index (never length); `summarize`. THIS IS A "
             "DECLARED SEMANTIC CHANGE by construction; verifiers and the "
             "engine's stop-reason vocabulary are injected. NO CUDA SURFACE.",
@@ -2276,16 +2277,29 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "(exposure with repetition), C (FLOPs over executed positions via "
             "`runtime.cost.forward_flops_per_token`, student fwd+bwd and "
             "teacher fwd), steps and supervised positions per step, mirroring "
-            "the trainer's ceil step rule; `matched_steps` derives a second "
-            "pack's blocks per step. THIS IS A DECLARED SEMANTIC CHANGE by "
+            "the trainer's ceil step rule (or a fixed step count), and KD "
+            "positions by prompt / reasoning / answer; `consumed_exposure` sums "
+            "the blocks a run actually consumes in a given order; "
+            "`match_schedule` sets one step count and per-pack blocks per step "
+            "by a fixed rule. THIS IS A DECLARED SEMANTIC CHANGE by "
             "construction; nothing in training calls it. NO CUDA SURFACE.",
         "src/aadistill/data/code_exec.py":
-            "NEW MODULE: `run_asserts` / `run_stdio` execute a candidate "
-            "program and its tests in an isolated `python -I` subprocess with "
-            "CPU, memory, file and wall-clock limits and a PATH-only "
-            "environment (containment, explicitly not a security sandbox). "
-            "THIS IS A DECLARED SEMANTIC CHANGE by construction. NO CUDA "
-            "SURFACE.",
+            "NEW MODULE (v2): `run_asserts` passes only when every declared "
+            "test ran and passed, reported by a driver over a private pipe "
+            "under a per-run nonce (zero tests, early and hard exits fail); "
+            "`run_stdio` compares the WHOLE stdout and fails on the output "
+            "limit; both run the base interpreter with `-I` under CPU, memory, "
+            "file-size and wall-clock limits; `bwrap_sandbox` (no network, no "
+            "environment, only /usr, the interpreter prefix and the work dir) "
+            "and `probe_sandbox` (a canary reporting what it can reach). THIS "
+            "IS A DECLARED SEMANTIC CHANGE by construction. NO CUDA SURFACE.",
+        "src/aadistill/evaluation/paired_stats.py":
+            "NEW `cluster_bootstrap`: a percentile interval resampling whole "
+            "clusters within strata, reporting a degenerate distribution and "
+            "the informative clusters; `paired_bootstrap_ci`, `mcnemar_counts` "
+            "and `joint_rate` unchanged. THIS IS A DECLARED SEMANTIC CHANGE: a "
+            "new statistic whose level, strata and thresholds are the caller's. "
+            "NO CUDA SURFACE.",
      }),
 )
 

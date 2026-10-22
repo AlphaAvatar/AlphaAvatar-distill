@@ -48,6 +48,8 @@ CV2_ENDS = {"natural": ("eos",), "length": ("length", "context_limit", "over_bud
 TC_ENDS = {"natural": ("eos",), "length": ("length_limited",),
            "degeneration": ("degeneration",)}
 VERIFIED = AcceptancePolicy()
+#: an episode with an illegal action is not a target, whatever its outcome
+VERIFIED_EPISODE = AcceptancePolicy(reject_observations={"action_legality": ("illegal_action",)})
 
 
 def _stats(xs):
@@ -73,14 +75,17 @@ def _cv2_stop(c: dict) -> str:
     return "eos"
 
 
+CV2_SCOPE = "corpus_v2's own correctness verdict (per-type checker, recorded at generation)"
+
+
 def _cv2_answer(c: dict) -> Check:
     if c.get("correctness_verdict") == "unverifiable_slice":
-        return Check("unverifiable", "no answer key for this slice")
+        return Check("unverifiable", "no answer key for this slice", CV2_SCOPE)
     if c.get("correct") is True:
-        return Check("correct")
+        return Check("correct", "", CV2_SCOPE)
     if c.get("correct") is False:
-        return Check("incorrect", str(c.get("correctness_verdict") or ""))
-    return Check("unverifiable", str(c.get("correctness_verdict") or ""))
+        return Check("incorrect", str(c.get("correctness_verdict") or ""), CV2_SCOPE)
+    return Check("unverifiable", str(c.get("correctness_verdict") or ""), CV2_SCOPE)
 
 
 def audit_corpus_v2() -> dict:
@@ -91,7 +96,7 @@ def audit_corpus_v2() -> dict:
         for c in ex["candidates"]:
             proto = cleaning.check_serialization(c) if c.get("raw") is not None else "no_raw"
             rec = assess(ex["id"], int(c["index"]), stop_reason=_cv2_stop(c),
-                         protocol_reason=proto, answer=_cv2_answer(c), trace=None,
+                         protocol_reason=proto, answer=_cv2_answer(c),
                          policy=VERIFIED, end_reasons=CV2_ENDS,
                          generated_tokens=c.get("new_tokens"))
             rec.unit_id = f"{ex['data_type']}::{ex['id']}"
@@ -136,7 +141,7 @@ def audit_corpus_v2() -> dict:
         "selected_supervised_tokens": total_sup,
         "selected_supervised_tokens_with_a_verified_correct_answer": int(verified_sup),
         "under_target_quality_contract": {
-            "contract": "aadistill.data.target_quality/v1",
+            "contract": "aadistill.data.target_quality/v2",
             "policy": "verified correct, naturally terminated, protocol valid (AcceptancePolicy())",
             "per_type": contract,
             "generated_tokens": {t: {"all_candidates": gen_all[t], "accepted_candidates": gen_acc[t],
@@ -259,22 +264,26 @@ def audit_teacher_cal() -> dict:
         stop = next((t["stop_reason"] for t in r["turns"] if t["stop_reason"] != "eos"), "eos")
         proto = None if all(A.split_raw(t.get("raw", "")) for t in r["turns"]) else "think_not_closed"
         s = scored.get(r["task_id"], {})
-        trace = None
+        obs = {}
         if r.get("interactive"):
             ok = bool(s.get("correct"))          # the replayed environment's success
             inv = int((s.get("env") or {}).get("invalid_actions", 0))
-            trace = Check("verified" if inv == 0 else "contradicted", f"invalid_actions={inv}")
+            obs["action_legality"] = Check("all_legal" if inv == 0 else "illegal_action",
+                                           f"invalid_actions={inv}", "environment replay of every action")
+            scope = "the environment's goal reached on replay"
         else:
             ok = bool(s.get("answer_correct"))   # the boxed answer alone, apart from termination
+            scope = "the boxed final answer against the generator's gold"
             parts = A.split_raw(r["turns"][-1].get("raw", "")) if r["turns"] else None
             if ok and parts:
                 task = tasks[r["task_id"]]
-                trace = PC.static_process_check(
+                obs["text_consistency"] = PC.text_consistency(
                     parts[0], s.get("extracted"), task["answer_type"],
                     prompt=" ".join(m.get("content") or "" for m in task["messages"]))
-        ans = Check("correct" if ok else "incorrect", "" if ok else str(s.get("reason", "")))
+        ans = Check("correct" if ok else "incorrect", "" if ok else str(s.get("reason", "")), scope)
         rec = assess(r["task_id"], 0, stop_reason=stop, protocol_reason=proto, answer=ans,
-                     trace=trace, policy=VERIFIED, end_reasons=TC_ENDS,
+                     steps=PC.NO_STEP_CHECKER, observations=obs,
+                     policy=VERIFIED_EPISODE if r.get("interactive") else VERIFIED, end_reasons=TC_ENDS,
                      generated_tokens=sum(int(t["generated_tokens"]) for t in r["turns"]))
         rec.unit_id = f"{r['axis']}::{r['task_id']}"
         out.append(rec)
@@ -305,11 +314,14 @@ def audit_history() -> dict:
 
 
 def training_range_sample(per: int = 3) -> list[dict]:
-    """A $0 sample of the R5 lineage: v2 generators, calibration families, training seeds."""
+    """A $0 sample of the R5 lineage: v2 generators, calibration families less the
+    R9 mechanism-equivalent ones (as the task builder draws them), training seeds."""
+    from stages.reasoning_data.build_training_tasks import MECHANISM_EXCLUDED
     lo, _ = next(r for r in IC.rules()["rules"] if r["id"] == "R5_shared_generator_exposure")["training_seed_range"]
     out = []
     for gen in R.GENERATORS_V2:
-        fams = R.family_split(gen)["calibration"]
+        fams = [f for f in R.family_split(gen)["calibration"]
+                if f"{gen.generator_id}/{f}" not in MECHANISM_EXCLUDED]
         if not fams:                      # an evaluation-only generator: never sampled
             continue
         for d_i, diff in enumerate(("L1", "L2", "L3")):
@@ -319,7 +331,8 @@ def training_range_sample(per: int = 3) -> list[dict]:
                     t = build_instance(gen, fam, diff, lo + d_i * 100_000 + i)
                 except Exception:   # an unsatisfiable draw is skipped, as the builders do
                     continue
-                t["unit_id"] = t["task_id"]
+                t.update(unit_id=t["task_id"], source="s0_generators_v2_calsplit",
+                         source_split="calibration_families")
                 out.append(t)
     return out
 
@@ -333,7 +346,7 @@ def audit_isolation() -> dict:
     bp = [{**tasks[u], "unit_id": u} for u in sorted(pool_ids) if u in tasks]
     sample = training_range_sample()
     return {
-        "corpus_v2_sessions": IC.check_pool(cv2),
+        "corpus_v2_sessions": IC.check_pool(cv2, historical=True),
         "base_pool_v1_fluid": IC.check_pool(bp, historical=True),
         "stage2_training_range_sample": {"n_generated": len(sample),
                                          "report": IC.check_pool(sample, sources=sources)},

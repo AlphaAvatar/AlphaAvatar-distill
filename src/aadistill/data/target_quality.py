@@ -12,15 +12,23 @@ questions and none implies another:
 * ``protocol_valid`` -- the teacher's own output protocol parses (reasoning
   delimiters closed, a non-empty final answer, no stray markers);
 * ``answer`` -- ``correct`` / ``incorrect`` / ``unverifiable``, from a
-  task-specific verifier the caller supplies;
-* ``trace`` -- the PROCESS, kept apart from the answer: ``verified`` (a
-  task-specific check covered the whole process, e.g. every action of an
-  episode legal on environment replay), ``partial`` (a check covered part of it,
-  or a sampled audit found no contradiction), ``contradicted`` (the process
-  conflicts with the task or with its own answer), or ``not_assessed``. A
-  correct final answer does not establish that every step is right; where a
-  task offers no checkable intermediate the trace is ``not_assessed`` and is
-  reported so -- never ``verified``;
+  task-specific verifier the caller supplies, recorded with its ``scope``:
+  what the check actually covers ("final answer equals the generator's gold";
+  "the declared tests passed: not full semantic correctness"; "the
+  environment's goal was reached on replay");
+* ``steps`` -- verification of the INTERMEDIATE steps, kept apart from the
+  answer: ``verified`` (a check covered every step), ``partial`` (a check
+  covered some steps, or showed that the steps were made without showing that
+  each is valid), ``contradicted`` (a step conflicts with the task), or
+  ``not_assessed``. Only a check that reads the steps against the task sets
+  it. A correct final answer, an answer restated at the end of the reasoning,
+  or a legal action sequence does not establish that the reasoning is right;
+  where no step checker exists the state is ``not_assessed`` and is reported
+  so;
+* ``observations`` -- any other named check, in its own vocabulary, recorded
+  and counted but a verdict only where the group's policy says so: textual
+  consistency between the reasoning and the final answer, environment action
+  legality, and the like;
 * ``accepted_for_training`` -- the conjunction the caller's policy requires.
 
 Length is recorded, never judged: no rule here accepts, rejects or selects a
@@ -37,18 +45,20 @@ from collections import Counter, defaultdict
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
 
-CONTRACT_ID = "aadistill.data.target_quality/v1"
+CONTRACT_ID = "aadistill.data.target_quality/v2"
 
 ANSWER_STATES = ("correct", "incorrect", "unverifiable")
-TRACE_STATES = ("verified", "partial", "contradicted", "not_assessed")
+STEP_STATES = ("verified", "partial", "contradicted", "not_assessed")
 
 
 @dataclass(frozen=True)
 class Check:
-    """One verifier's verdict: a state from its vocabulary and a reason."""
+    """One verifier's verdict: a state from its vocabulary, a reason, and the
+    scope of what the verifier actually covered."""
 
     state: str
     reason: str = ""
+    scope: str = ""
 
 
 @dataclass(frozen=True)
@@ -58,13 +68,18 @@ class AcceptancePolicy:
     ``require_answer`` -- the answer states that may be accepted; a primary
     reasoning group admits only ``correct``. ``admit_unverifiable`` is a
     separate, explicit switch so an unverifiable group can never pass by
-    omission. ``reject_trace_contradicted`` drops a candidate whose process
-    check found a contradiction even when its answer is right.
+    omission. ``require_steps`` -- step states a group demands (empty: none),
+    e.g. a family whose acceptance is gated on its reference proof.
+    ``reject_steps_contradicted`` drops a candidate whose step check found a
+    contradiction even when its answer is right. ``reject_observations`` --
+    observation name -> the states that reject (e.g. an illegal action).
     """
 
     require_answer: tuple[str, ...] = ("correct",)
     admit_unverifiable: bool = False
-    reject_trace_contradicted: bool = True
+    require_steps: tuple[str, ...] = ()
+    reject_steps_contradicted: bool = True
+    reject_observations: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
 
     def __post_init__(self):
         bad = set(self.require_answer) - set(ANSWER_STATES)
@@ -72,6 +87,8 @@ class AcceptancePolicy:
             raise ValueError(f"unknown answer states {sorted(bad)}")
         if "unverifiable" in self.require_answer and not self.admit_unverifiable:
             raise ValueError("'unverifiable' requires admit_unverifiable=True")
+        if set(self.require_steps) - set(STEP_STATES):
+            raise ValueError(f"unknown step states {sorted(set(self.require_steps) - set(STEP_STATES))}")
 
 
 @dataclass
@@ -85,7 +102,9 @@ class CandidateRecord:
     degenerated: bool
     protocol_valid: bool
     answer: str
-    trace: str
+    answer_scope: str
+    steps: str
+    observations: dict[str, str] = field(default_factory=dict)
     generated_tokens: int | None = None
     reasons: list[str] = field(default_factory=list)
     accepted_for_training: bool = False
@@ -95,7 +114,8 @@ class CandidateRecord:
 
 
 def assess(unit_id: str, candidate_index: int, *, stop_reason: str,
-           protocol_reason: str | None, answer: Check, trace: Check | None,
+           protocol_reason: str | None, answer: Check, steps: Check | None = None,
+           observations: Mapping[str, Check] | None = None,
            policy: AcceptancePolicy, end_reasons: Mapping[str, Sequence[str]],
            generated_tokens: int | None = None) -> CandidateRecord:
     """Classify one candidate and apply the group's policy.
@@ -107,9 +127,10 @@ def assess(unit_id: str, candidate_index: int, *, stop_reason: str,
     """
     if answer.state not in ANSWER_STATES:
         raise ValueError(f"unknown answer state {answer.state!r}")
-    trace = trace or Check("not_assessed")
-    if trace.state not in TRACE_STATES:
-        raise ValueError(f"unknown trace state {trace.state!r}")
+    steps = steps or Check("not_assessed")
+    if steps.state not in STEP_STATES:
+        raise ValueError(f"unknown step state {steps.state!r}")
+    observations = dict(observations or {})
     known = {r for v in end_reasons.values() for r in v}
     if stop_reason not in known:
         raise ValueError(f"stop reason {stop_reason!r} is not mapped in end_reasons")
@@ -119,15 +140,25 @@ def assess(unit_id: str, candidate_index: int, *, stop_reason: str,
         length_limited=stop_reason in end_reasons.get("length", ()),
         degenerated=stop_reason in end_reasons.get("degeneration", ()),
         protocol_valid=protocol_reason is None,
-        answer=answer.state, trace=trace.state, generated_tokens=generated_tokens)
+        answer=answer.state, answer_scope=answer.scope, steps=steps.state,
+        observations={k: v.state for k, v in sorted(observations.items())},
+        generated_tokens=generated_tokens)
     if not rec.naturally_terminated:
         rec.reasons.append(f"ending:{stop_reason}")
     if protocol_reason is not None:
         rec.reasons.append(f"protocol:{protocol_reason}")
     if answer.state not in policy.require_answer:
         rec.reasons.append(f"answer:{answer.state}" + (f":{answer.reason}" if answer.reason else ""))
-    if trace.state == "contradicted" and policy.reject_trace_contradicted:
-        rec.reasons.append("trace:contradicted" + (f":{trace.reason}" if trace.reason else ""))
+    if steps.state == "contradicted" and policy.reject_steps_contradicted:
+        rec.reasons.append("steps:contradicted" + (f":{steps.reason}" if steps.reason else ""))
+    elif policy.require_steps and steps.state not in policy.require_steps:
+        rec.reasons.append(f"steps:{steps.state}" + (f":{steps.reason}" if steps.reason else ""))
+    for name, rejecting in sorted(policy.reject_observations.items()):
+        if name not in observations:
+            rec.reasons.append(f"{name}:missing")
+        elif observations[name].state in rejecting:
+            o = observations[name]
+            rec.reasons.append(f"{name}:{o.state}" + (f":{o.reason}" if o.reason else ""))
     rec.accepted_for_training = not rec.reasons
     return rec
 
@@ -164,7 +195,10 @@ def summarize(records: Iterable[CandidateRecord],
             "degenerated": sum(r.degenerated for r in rows),
             "protocol_valid": sum(r.protocol_valid for r in rows),
             "answer": dict(Counter(r.answer for r in rows)),
-            "trace": dict(Counter(r.trace for r in rows)),
+            "answer_scope": dict(Counter(r.answer_scope for r in rows if r.answer_scope)),
+            "steps": dict(Counter(r.steps for r in rows)),
+            "observations": {name: dict(Counter(r.observations[name] for r in rows if name in r.observations))
+                             for name in sorted({k for r in rows for k in r.observations})},
             "accepted_candidates": sum(r.accepted_for_training for r in rows),
             "accepted_units": sum(units.values()),
             "candidate_accept_rate": round(sum(r.accepted_for_training for r in rows) / n, 6) if n else None,

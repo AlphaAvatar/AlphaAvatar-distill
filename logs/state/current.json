@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO (no open scientific blocker). Paid H1 work waits on the maintainer: H1 PREPARED at $0 2026-10-21, NOT AUTHORIZED; backend not provisioned. Owner: logs/stages/stage-2/reasoning_data/plans/authorization_proposal.json.",
+ "blocker": "BLOCKED NO (no open scientific blocker). Paid H1 work waits on the maintainer: H1 preparation REVISED at $0 2026-10-22 after review, NOT complete, NOT AUTHORIZED; backend not provisioned. Owner: docs/stages/stage-2/reasoning_data/H1.md (sections 9-10).",
  "branch": "stage2/reasoning-data, cut from main 2a8bae78 (the Stage-0 squash, 2026-10-21)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-21T21:00:00Z",
+ "generated_utc": "2026-10-22T12:00:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,10 +123,10 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Nothing is running. The maintainer decides H1 (docs/stages/stage-2/reasoning_data/H1.md): 34 unattributed pods ($58.33), an envelope, a backend, the source scheme. D4 Top-1 is fixed.",
+ "next": "Nothing is running. The maintainer decides H1 (docs/stages/stage-2/reasoning_data/H1.md): 34 unattributed pods ($58.33), an envelope, a backend, the source scheme (none approved). D4 Top-1 is fixed.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "H1 (Stage-2 data vs Stage-3 recovery): $0 preparation COMPLETE 2026-10-21; awaiting maintainer decisions and a separate paid authorization (logs/stages/stage-2/reasoning_data/plans/authorization_proposal.json).",
+  "next_work": "H1 (Stage-2 data vs Stage-3 recovery): $0 preparation revised after review 2026-10-22, NOT complete (H1.md section 9); awaiting maintainer decisions and a separate paid authorization.",
   "not_next": "no paid resource without a new maintainer decision. Owner: decisions.md 2026-10-21 (Stage-2/3 round opened at $0).",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D-series CLOSED 2026-10-17 (D1 NO-GO, D2 NO_GO, D3 STRUCTURAL_CHANGE + INCONCLUSIVE probes); forward baseline D1 + scored_v1.",
   "then": "nothing else is queued; the Stage-0 mixture ratio is DEFERRED (never run)."

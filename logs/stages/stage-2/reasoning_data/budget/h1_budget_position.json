@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.reasoning_data.budget_position/v1",
- "written_utc": "2026-10-21T19:12:12Z",
+ "written_utc": "2026-10-22T08:53:01Z",
  "snapshot": {
   "path": "logs/budget/provider/runpod_billing_2026-10-21T1859Z.json",
   "sha256": "f191b70188ceca14fc802d1d0f067e0c961d22bdca3a67e42ae0cf64b18fc484"
