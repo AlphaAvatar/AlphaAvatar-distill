@@ -13391,3 +13391,39 @@ on a paid pod.
   (`c0eb4fd2…`). Nothing else changed: list, protocol, prediction, the
   $5.34 / $8.02 application, and the $666.17 conservative cap request, which
   awaits the maintainer and never rises with the snapshot.
+
+## 2026-10-22 — Maintainer: H1 P1 + P1v formally authorized; P1 executed ($3.33), P1v stopped at four short cells
+
+- **Context.** The maintainer formally approved P1 and P1v.
+  - **P1:** one A100-80GB session, the frozen list and protocol.
+  - **P1v:** at $0 on the dev box.
+  - **Money:** expected $5.34, hard cap $8.02, project cumulative cap
+    $666.17 (absolute) on the $658.15 provider basis counted once. The 34
+    pods and the anchor stay OPEN.
+  - **Frozen identities:** branch `stage2/reasoning-data` @ `8a425538`,
+    launch identity `c0eb4fd2…`, harness `d6affe40…`.
+  - **Not authorized:** P1g, P2, recovery, formal evaluation, paid volume,
+    H2/H3 or any extra paid session.
+- **Done.**
+  - **Grant and authorization:** grant `logs/budget/approvals/h1_p1_generation_grant.json`;
+    authorization issued by `governance.issue`, which checked both
+    identities.
+  - **Session commit `3f88f690`:** it adds only those records, and the
+    bundle round trip matched.
+  - **Pre-launch checks:** all passed (`runs/h1gen_20261022_190653/prelaunch_checks.json`).
+  - **Session:** 111.7 minutes, **$3.33** (provider balance −$3.37, disk
+    included); 2,164 records, each task once per pass; 26 shards secured and
+    verified as sealed. Teardown is confirmed by the provider and a 0-resource
+    reconciliation; the watchdog exited.
+  - **Copies:** dev box and relay, the relay copy read back.
+  - **P1v:**
+    - 1,057 units selected, isolation re-passed with the teacher text, all
+      units fit whole;
+    - one comparator false negative fixed (literal `\n` grid rows, +1 unit);
+    - four cells short: Reasoning Core analogy, Reasoning Gym composition,
+      Reasoning Gym deduction, Reasoning Gym bf; 213,411 supervised tokens in
+      all.
+  - **Stop:** B's pack not built, M1 not recomputed.
+- **Not done, per the authorization.** No paid top-up, no lower gate, no
+  repetition, no source substitution, no change of mix.
+- **Revisit when.** The maintainer decides on the four short cells.

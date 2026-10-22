@@ -152,3 +152,14 @@ def test_the_build_refuses_a_comparator_that_accepts_a_perturbed_gold(tmp_path, 
     monkeypatch.setitem(G.COMPARE, "text", lambda got, gold: G._text_exact(got).casefold() == G._text_exact(gold).casefold())
     with pytest.raises(SystemExit, match="does not fit"):
         ET.build([export])
+
+
+def test_a_grid_whose_rows_are_broken_by_a_literal_backslash_n_is_read_as_rows():
+    """P1v: the teacher boxed a correct mini_sudoku grid with literal ``\\n``
+    (backslash, n) between the rows; the structure is still checked."""
+    from stages.reasoning_data import generation_adapter as G
+    gold = "2 3 4 1\n4 1 2 3\n3 2 1 4\n1 4 3 2"
+    assert G.COMPARE["matrix"]("2 3 4 1\\n4 1 2 3\\n3 2 1 4\\n1 4 3 2", gold)
+    assert not G.COMPARE["matrix"]("2 3 4 1\\n4 1 2 3\\n3 2 1 4\\n1 4 2 3", gold)    # a wrong cell
+    assert not G.COMPARE["matrix"]("2 3 4 1 4 1 2 3\\n3 2 1 4 1 4 3 2", gold)       # reshaped
+    assert not G.COMPARE["matrix"]("2 3\\newline 4 1", "2 3\n4 1")                 # a LaTeX command is not a row break

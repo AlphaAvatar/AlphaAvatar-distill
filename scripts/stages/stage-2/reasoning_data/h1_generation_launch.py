@@ -33,6 +33,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import subprocess
 import sys
 import time
@@ -338,7 +339,12 @@ def spec(args) -> SessionSpec:
     )
 
 
-def closeout(run_id: str, scr: Path, *, repo_root: Path = REPO_ROOT, reconcile=None) -> dict:
+#: The container-disk basis every Stage-0 closeout priced with
+#: (`stages.calibration_volume.closeout.DISK_USD_PER_GB_MONTH`).
+DISK_USD_PER_GB_MONTH = 0.10
+
+
+def closeout(run_id: str, scr: Path, *, repo_root: Path = REPO_ROOT, reconcile=None, disk_gb: float = 150.0) -> dict:
     """The run's outcome on the dev box: every secured shard re-hashed against
     its marker, group completeness from the .complete markers, money and the
     provider's teardown confirmation from the session record, and a fresh
@@ -361,15 +367,26 @@ def closeout(run_id: str, scr: Path, *, repo_root: Path = REPO_ROOT, reconcile=N
             RunPodProvider(read_api_key(str(Path("~/.runpod/config.toml").expanduser()))), ())
     rec = reconcile()
     driver = json.loads((store_dir / EVIDENCE).read_text()) if (store_dir / EVIDENCE).is_file() else {}
+    cost = sess.get("cost") or {}
+    gpu = float(cost.get("actual_usd") or 0.0)
+    minutes = float(cost.get("elapsed_minutes") or 0.0)
+    disk = disk_gb * DISK_USD_PER_GB_MONTH * minutes / (60 * 24 * 30.4375)
+    complete_run = (bool(complete) and all(complete.values()) and not bad and driver.get("terminal") == "ALL_DONE")
     outcome = {"schema": "aadistill.stage2.reasoning_data.h1_generation_outcome/v1", "run_id": run_id,
+               "status": "COMPLETE" if complete_run else "INCOMPLETE", "terminal": driver.get("terminal"),
                "recorded_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                "driver_terminal": driver.get("terminal"), "session_passed": sess.get("passed"),
                "shards": {"secured": len(shards), "unverified": bad,
                           "records": sum(sum(1 for _ in open(s)) for s in shards if s.name not in bad)},
                "groups_complete": complete,
-               "complete": bool(complete) and all(complete.values()) and not bad
-               and driver.get("terminal") == "ALL_DONE",
-               "money": sess.get("money") or sess.get("cost"), "provider_confirms_gone": sess.get("provider_confirms_gone"),
+               "complete": complete_run,
+               "money": {"all_in_usd": math.ceil((gpu + disk) * 1e4) / 1e4, "gpu_usd": gpu, "disk_usd": round(disk, 4),
+                         "elapsed_minutes": minutes, "price_per_hour": cost.get("price_per_hour"),
+                         "authorized_usd": cost.get("authorized_usd"),
+                         "_basis": ("GPU actual from runtime/session.json :: cost plus container disk at "
+                                    f"${DISK_USD_PER_GB_MONTH}/GB-month over the elapsed minutes ({disk_gb:g} GB), "
+                                    "ceiled to the 4-decimal quantum -- the Stage-0 closeouts' basis")},
+               "cost": cost, "provider_confirms_gone": sess.get("provider_confirms_gone"),
                "provider_reconciliation_after": rec,
                "authorizes": "nothing"}
     out = repo_root / GOV.run_dir(run_id) / "closeout/outcome.json"
@@ -456,7 +473,7 @@ def main(argv: list[str] | None = None) -> int:
                           "harness": runner.harness["digest"], "launch_identity": session.plan_hash}, indent=1)[:4000])
         return 0 if ok else 12
     rc = run_session(session, args, REPO_ROOT)
-    print(json.dumps(closeout(args.run_id, Path(args.scr))["shards"]))
+    print(json.dumps(closeout(args.run_id, Path(args.scr), disk_gb=args.disk_gb)["shards"]))
     return rc
 
 

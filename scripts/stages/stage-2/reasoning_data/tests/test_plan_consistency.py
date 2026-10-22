@@ -126,9 +126,20 @@ def test_the_p1_application_names_the_generation_plan_on_disk_and_the_forecast_p
     assert gp["corpus_id"] == SPEC["chosen_variant"]["id"] and not gp["shortfalls"]
 
 
-def test_the_application_names_the_launch_identity_and_harness_on_disk():
+def test_the_application_names_the_identities_it_was_granted_or_those_on_disk():
+    """Before a grant: the application names the launch identity and harness on
+    disk. After one: it names exactly what the grant and the issued
+    authorization bind -- the identities the paid run executed -- even when the
+    code has moved on since (P1v's comparator fix)."""
     from stages.reasoning_data import governance as GOV
     from aadistill.governance.authorization import harness_source_digest
     launch = A.read_json(PLANS / "authorization_proposal.json")["launch"]
-    assert launch["launch_identity_sha256"] == GOV.launch_hash()
-    assert launch["harness_digest"] == harness_source_digest(GOV.REPO, files=GOV.HARNESS)["digest"]
+    grant_path = A.REPO / "logs/budget/approvals/h1_p1_generation_grant.json"
+    if not grant_path.exists():
+        assert launch["launch_identity_sha256"] == GOV.launch_hash()
+        assert launch["harness_digest"] == harness_source_digest(GOV.REPO, files=GOV.HARNESS)["digest"]
+        return
+    grant = A.read_json(grant_path)
+    auth = GOV.load(A.REPO / GOV.authorization_path(grant["run_id"]))
+    assert launch["launch_identity_sha256"] == grant["launch_identity_sha256"] == auth.plan_hash
+    assert launch["harness_digest"] == grant["harness_digest"] == auth.harness_source_digest

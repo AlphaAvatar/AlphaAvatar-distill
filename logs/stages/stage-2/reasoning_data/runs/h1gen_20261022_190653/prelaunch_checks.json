@@ -1,0 +1,65 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1_prelaunch_checks/v1",
+ "run_id": "h1gen_20261022_190653",
+ "checked_utc": "2026-10-22T19:05Z..19:09Z",
+ "1_provider": {
+  "snapshot": "logs/budget/provider/runpod_billing_2026-10-22T1905Z.json",
+  "all_time_usd": 658.15,
+  "vs_authorized_basis_usd": 658.15,
+  "delta_usd": 0.0,
+  "pods": 0,
+  "network_volumes": 0,
+  "spend_per_hour": 0.0,
+  "ok": true
+ },
+ "2_funds_gpu_price": {
+  "balance_usd": 101.2318,
+  "required_usd": 30.0,
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "secure_price_per_hour": 1.79,
+  "stock": "Low",
+  "plan": {
+   "expected_usd": 3.8724,
+   "soft_stop_usd": 6.4052,
+   "hard_terminate_usd": 6.8527,
+   "authorized_usd": 8.02
+  },
+  "ok": true
+ },
+ "3_identity": {
+  "accepted_commit": "8a425538d04f6ccdf137301e4e0b4e011be6d778",
+  "session_commit": "3f88f690fb51294ec02d1a7bea1f4db4ec684051",
+  "session_commit_diff_vs_accepted": [
+   "logs/budget/approvals/h1_p1_generation_grant.json",
+   "logs/budget/provider/runpod_billing_2026-10-22T1905Z.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1gen_20261022_190653/governance/authorization.json"
+  ],
+  "bundle": {
+   "relay_path": "transfer/aad_autoinit_3f88f690.bundle",
+   "sha256": "fbc18fd63d6e4c02f53c7a223710819107220715532468cd9ff879192de9a389",
+   "bytes": 37651574
+  },
+  "roundtrip": {
+   "head": "3f88f690fb51294ec02d1a7bea1f4db4ec684051",
+   "authorization_matches": true,
+   "harness_digest": "d6affe40cdd8b8c1786f36ee701bdf4213d3174fc7e8ccad4a6dad25715fbbf1",
+   "launch_identity_on_checkout": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038"
+  },
+  "ok": true
+ },
+ "4_capacity": {
+  "relay_would_accept": {
+   "2x150MB": true,
+   "1GB": true
+  },
+  "dev_box_free_bytes": 9190346752,
+  "store": "/home/ecs-user/aad-scratch/h1gen_20261022_190653/store",
+  "ok": true
+ },
+ "5_stops": {
+  "dry_run": "plan_ok true; hard deadline from cap and live price; watchdog started by the runner at create; provider reconciliation and prechecks before create",
+  "ok": true
+ },
+ "verdict": "ALL PASS: launching the approved P1",
+ "authorizes": "nothing beyond the grant"
+}

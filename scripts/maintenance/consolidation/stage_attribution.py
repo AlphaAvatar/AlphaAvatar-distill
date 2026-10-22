@@ -1619,17 +1619,15 @@ STAGE_2 = [
         id="reasoning_data",
         kind="experiment",
         stage_id="2",
-        status=("H1 DESIGN CHOSEN 2026-10-22; P1 + P1v FINAL APPLICATION READY AT $0, "
-                "NOT AUTHORIZED. Fixed: D4 Top-1, the recovery objective, eval-set-1, "
-                "70/30; arm B = stage2.reasoning_master@v1; static primary "
-                "conclusion, interactive exploratory. P1 is launchable once granted: "
-                "whole-answer comparators, finished candidates saved in hash-marked "
-                "shards before a group ends and resumed without regeneration, one "
-                "authorization binding the launch identity (plan, protocol, inputs, "
-                "pools) and the harness, checked by the launcher and again on the pod, "
-                "the launcher on the shared session runner. Open: the training backend "
-                "(BLOCKED for P1g/P2), 34 pods / $58.33 unattributed. No teacher target "
-                "generated, no student trained, $0 spent"),
+        status=("H1 P1 EXECUTED 2026-10-22 UNDER THE MAINTAINER'S GRANT ($3.33 of $8.02); "
+                "P1v STOPPED AT FOUR SHORT CELLS, B's PACK NOT BUILT. 2,164 teacher records, "
+                "every shard secured and verified (dev box + relay); 1,057 units selected, "
+                "isolation re-passed with the teacher text; Reasoning Core analogy and "
+                "Reasoning Gym composition, deduction and bf fall short of their share, the "
+                "other 17 cells are covered. No top-up, no lower gate, no repetition, no "
+                "substitution, no remix: the maintainer decides. Fixed: D4 Top-1, the recovery "
+                "objective, eval-set-1, 70/30, arm B = stage2.reasoning_master@v1. 34 pods / "
+                "$58.33 unattributed. No student trained"),
         title="Stage-2 verified teacher-native reasoning data, measured through "
               "Stage-3 controlled recovery",
         question=("Under one fixed initialization and the fixed historical "
@@ -1729,6 +1727,14 @@ STAGE_2 = [
               "the third-party pool with whole-answer comparator types, "
               "isolation rules R0-R9 passed (supersedes v1)",
               field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/runs/h1gen_20261022_190653/closeout/outcome.json",
+              "P1's outcome: shards re-hashed, both passes complete, cost, provider "
+              "teardown confirmation and the reconciliation after it",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/p1v_verification.json",
+              "P1v: verified and selected units, the isolation recheck with the "
+              "teacher text, supply per cell and the gaps",
+              field="authorizes", equals="nothing"),
             E("configs/stages/stage-2/reasoning_data/h1_units.json",
               "the four formal units, their packs' identities and the "
               "driver's launch refusals",
@@ -1752,7 +1758,10 @@ STAGE_2 = [
                    "be launchable; comparators, completion-time saving and launch "
                    "wiring at $0, final P1 + P1v application",
                    "logs/budget/decisions.md -- 2026-10-22: Maintainer: two "
-                   "launch-boundary checks before any P1 grant"],
+                   "launch-boundary checks before any P1 grant",
+                   "logs/budget/decisions.md -- 2026-10-22: Maintainer: H1 P1 + "
+                   "P1v formally authorized; P1 executed ($3.33), P1v stopped at "
+                   "four short cells"],
         canonical_log_destination="logs/stages/stage-2/reasoning_data",
         classification_reason=(
             "Stage 2 by subject and product: it varies the offline training "

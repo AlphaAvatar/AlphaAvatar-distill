@@ -167,8 +167,15 @@ def test_closeout_rehashes_every_shard_and_reconciles_the_provider(tmp_path, mon
         {"name": good.name, "sha256": hashlib.sha256(good.read_bytes()).hexdigest()}]}))
     (store / L.EVIDENCE).write_text(json.dumps({"terminal": "ALL_DONE"}))
     monkeypatch.setattr(GOV, "run_dir", lambda run_id: Path("runs") / run_id)
+    (tmp_path / "runs/r/runtime").mkdir(parents=True)
+    (tmp_path / "runs/r/runtime/session.json").write_text(json.dumps(
+        {"passed": True, "cost": {"actual_usd": 3.3331, "elapsed_minutes": 111.73, "price_per_hour": 1.79}}))
     out = L.closeout("r", scr, repo_root=tmp_path, reconcile=lambda: {"ok": True, "why": "0 pods"})
     assert out["complete"] and out["shards"] == {"secured": 1, "unverified": [], "records": 2}
+    assert out["status"] == "COMPLETE" and out["money"]["all_in_usd"] == 3.3714      # GPU + 150 GB disk
+    sys.path.insert(0, str(A.REPO / "scripts/maintenance/consolidation"))
+    from closeout_reader import closeout_cost, closeout_verdict                     # what the navigation reads
+    assert closeout_verdict(out) == "COMPLETE" and closeout_cost(out) == 3.3714
     assert out["provider_reconciliation_after"]["ok"]
     good.write_text('{"task_id": "a"}\n')                 # a shard that no longer matches its marker
     out = L.closeout("r", scr, repo_root=tmp_path, reconcile=lambda: {"ok": True, "why": "0 pods"})

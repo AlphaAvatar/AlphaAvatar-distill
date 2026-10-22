@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.stage2.reasoning_data.authorization_proposal/v4",
  "hypothesis_id": "H1",
- "status": "FINAL APPLICATION for the maintainer: P1 (teacher generation) + P1v (its $0 verification, corpus build and B's real pack) ONLY -- 2026-10-22 UTC, after the comparator, completion-persistence and launch-wiring corrections. AUTHORIZES NOTHING: no grant is issued, no cap is raised, no resource is created by this file. The whole H1 package, P1g, P2 and the network volume are NOT requested.",
+ "status": "EXECUTED: granted by the maintainer 2026-10-22 (logs/budget/approvals/h1_p1_generation_grant.json) and run as h1gen_20261022_190653 under exactly the launch identity and harness recorded in `launch` -- P1 $3.33 of $8.02; P1v stopped at four short cells (audit/p1v_verification.json). This file authorizes nothing further.",
  "scope": "generate the teacher candidates of arm B's generated cells (plans/generation_plan.json) on one A100-80GB session, bring every record home, then verify, select and pack on the dev box at $0. Nothing is trained, evaluated or stored on paid storage.",
  "generation_list": {
   "owner": "logs/stages/stage-2/reasoning_data/plans/generation_plan.json",
@@ -108,6 +108,10 @@
    ],
    "rule": "governance.issue refuses a grant missing either identity, or whose launch identity or harness digest is not the one recomputed from disk at issue; a changed digest is never adopted",
    "who_writes_it": "the agent, from the maintainer's explicit approval message, naming exactly the two values recorded here"
+  },
+  "after_the_run": {
+   "harness_on_disk": "76a3fcc796bbe878c8da011bcd53c688501f860506a56382bf7d4790d3aee42e",
+   "why_it_differs": "P1v's comparator correction (generation_adapter.parse_grid: a literal \\n between grid rows); P1 ran under the recorded harness, and any new paid session would need a new grant naming the new digest"
   }
  },
  "launch_preflight_read_only": [

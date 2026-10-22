@@ -9,41 +9,26 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**STAGE-2/3 H1: P1 + P1v FINAL APPLICATION READY AT $0; P1 LAUNCHABLE ONCE GRANTED; NOTHING AUTHORIZED (2026-10-22).**
+**STAGE-2/3 H1: P1 EXECUTED ($3.33); P1v STOPPED AT FOUR SHORT CELLS; B's PACK NOT BUILT (2026-10-22).**
 Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).
-No teacher target, student, GPU session or paid storage exists, and $0 was
-spent. Owner of the evidence:
-[`docs/stages/stage-2/reasoning_data/H1.md`](../../docs/stages/stage-2/reasoning_data/H1.md)
-§12 (this round), §11 (design choices), §9 (open). Records:
-[`stages/stage-2/reasoning_data/`](../stages/stage-2/reasoning_data/).
-- **Fixed and not reopened:** D4 Top-1, arm B = `stage2.reasoning_master@v1`,
-  70/30, M1's rule (values provisional until B's pack), static primary
-  conclusion with interactive results exploratory.
-- **This round ($0):**
-  - whole-answer comparators (`external_tasks_v2`);
-  - finished candidates saved in hash-marked shards before a group ends and
-    resumed without regeneration (`run_battery --stream-completed`,
-    `generation_driver`);
-  - one authorization binding the launch identity (plan, protocol, inputs,
-    pools) and the harness, checked by the launcher and on the pod
-    (`governance.py`);
-  - the launcher (`h1_generation_launch.py`, in `SESSION_LAUNCHERS`).
-- **The application** (`plans/authorization_proposal.json` v4): P1 + P1v only.
-  - Cost: `plans/cost_forecast.json :: p1_application`.
-  - Requested project cap under conservative occupancy: provider snapshot + P1
-    hard cap (`:: budget_occupancy`); not applied.
-  - The launch identity (`c0eb4fd2…`, unchanged) and the harness
-    (`d6affe40…`; `5a16440c…` and `1ea5ecbd…` superseded) are recorded there;
-    a grant must name both (`governance.issue`).
-- **Budget** (`budget/h1_budget_position.json`): 34 pods ($58.33) and the
-  anchor stay OPEN.
-- **Before a P1 launch ($0):** the session-commit bundle staged on the relay
-  and a fresh provider snapshot (no launch-bound sweep: no suite runs on the
-  P1 pod; `NO_CONTRACT`, with the reason).
-- **Still open:** the training backend (BLOCKED for P1g/P2) and the GPU
-  questions (P1g).
-- **Needs the maintainer:** a grant document for P1 naming the launch identity
-  and the hard cap, and the project cap value.
+Nothing is running and nothing is billing: 0 pods, 0 volumes, $0/h
+(provider snapshot `logs/budget/provider/runpod_billing_2026-10-22T2106Z.json`).
+Evidence: [`docs/stages/stage-2/reasoning_data/H1.md`](../../docs/stages/stage-2/reasoning_data/H1.md)
+§14; records under
+[`stages/stage-2/reasoning_data/runs/h1gen_20261022_190653/`](../stages/stage-2/reasoning_data/runs/h1gen_20261022_190653/)
+and `audit/p1v_verification.json`.
+- **P1:** one A100 session under the maintainer's grant, $3.33 of the $8.02
+  cap; 2,164 teacher records (both passes complete), every shard secured,
+  verified and copied (dev box + relay).
+- **P1v:** 1,057 units selected, isolation re-passed with the teacher text.
+  Four cells are short of their share (Reasoning Core analogy; Reasoning Gym
+  composition, deduction and bf); 17 cells are covered.
+- **Stopped here.** No pack, no M1 on a real pack, no top-up, no lower gate,
+  no repetition, no substitution, no remix.
+- **Budget:** about $661.52 conservative occupancy against the absolute
+  $666.17 cap; the 34 pods and the anchor stay OPEN.
+- **Needs the maintainer:** what to do about the four short cells. P1g and P2
+  are not authorized.
 
 **STAGE-0 CALIBRATION-VOLUME PROGRAMME CLOSED (final $0 closeout, 2026-10-21).**
 Verdict: **EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON
@@ -4203,7 +4188,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$625.5798` spent of `$643.6571`, leaving `$18.0773` |
+| project cap | `$628.9512` spent of `$643.6571`, leaving `$14.7059` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

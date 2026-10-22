@@ -8,11 +8,11 @@ Everything this experiment produced, in one place.
 | [`audit/`](audit/) | material |
 | [`budget/`](budget/) | material |
 | [`plans/`](plans/) | protocol, preregistration, pricing — what was registered before running |
-| runs | registered from components; see the index |
+| [`runs/`](runs/) | one directory per execution attempt |
 
 ## Runs
 
-* none recorded
+* [`h1gen_20261022_190653`](runs/h1gen_20261022_190653/)
 
 Canonical list, always the index rather than this file.
 Nothing here authorizes anything.

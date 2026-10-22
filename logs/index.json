@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 132,
+  "runs_unrecorded": 133,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -853,6 +853,11 @@
     "recorded": 0,
     "unrecorded": 2,
     "total": 2
+   },
+   "reasoning_data": {
+    "recorded": 0,
+    "unrecorded": 1,
+    "total": 1
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -3820,6 +3825,14 @@
    "n_files": 12,
    "digest": "2a18d8d5ec3c8778a49e5e7f20aafbfc2538a1b6deafd8a749113d77e897ac2c",
    "why": "no run manifest; its closeout states: COMPLETE: STRUCTURAL_CHANGE, re-derived off-pod from the step records"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1gen_20261022_190653",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1gen_20261022_190653",
+   "n_files": 4,
+   "digest": "132b245cc909059e975bc874e6b1f1dc634665dfd2438522e954b64538f400a3",
+   "why": "no run manifest; its closeout states: COMPLETE"
   }
  ],
  "authorizes": "nothing"

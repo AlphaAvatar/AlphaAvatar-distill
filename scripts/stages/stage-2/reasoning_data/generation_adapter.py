@@ -214,7 +214,7 @@ _LATEX_ENV = re.compile(r"\\begin\{[a-z]*\*?\}(?:\{[^{}]*\})?|\\end\{[a-z]*\*?\}
 
 def parse_grid(s) -> list[list[str]]:
     """Rows of cells, structure kept: ``[[a,b],[c,d]]``, or one row per line
-    (``\\\\`` too, LaTeX array wrappers dropped, ``&`` a cell separator). Text
+    (``\\\\`` or a literal ``\\n`` too, LaTeX array wrappers dropped, ``&`` a cell separator). Text
     outside the rows, an empty row, or a lone flat list for a multi-row grid
     stays what it is and is compared as such."""
     t = _LATEX_ENV.sub("", _unwrap(s)).strip()
@@ -229,7 +229,9 @@ def parse_grid(s) -> list[list[str]]:
         else:
             rows = [inner]
     else:
-        rows = [r for r in re.split(r"\n|\\\\", t) if r.strip()]
+        # a row break is a newline, LaTeX's ``\\``, or a LITERAL ``\n`` (backslash, n)
+        # written inside the box (found in P1v: a correct mini_sudoku grid refused)
+        rows = [r for r in re.split(r"\n|\\\\|\\n(?![A-Za-z])", t) if r.strip()]
     cells = [[c for c in re.split(r"[\s,&]+", r.strip()) if c] for r in rows]
     if not cells or any(not r for r in cells):
         raise Unparseable("an empty row")

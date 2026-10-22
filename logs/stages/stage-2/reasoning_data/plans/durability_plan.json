@@ -24,6 +24,15 @@
       "dev_box_free_bytes": 9974575104,
       "route": "completion shards: run_battery streams every finished episode, generation_driver seals finished candidates into hash-marked shards (every 100 records or 300 s), the launcher pulls every marked shard on each poll and hash-checks it into <scr>/store, and the run's closeout re-hashes all of them; a second copy goes to the relay from the dev box at P1v and is read back",
       "reading": "P1 needs no new storage: the network volume is the TRAINING backend (P1g/P2), not created for P1 (maintainer 2026-10-22)"
+    },
+    "p1_generation_records_h1gen_20261022_190653": {
+      "shards": 26,
+      "records": 2164,
+      "bytes": 146867615,
+      "pod_to_dev_box": "every shard pulled on the poll after it was sealed, re-hashed against its marker (launcher on_poll; closeout re-hashed all 26, 0 unverified)",
+      "dev_box": "artifacts/stages/stage-2/reasoning_data/generation/h1gen_20261022_190653/ (shards, markers, .complete, the driver record, the collector archive; gitignored) and the session store /home/ecs-user/aad-scratch/h1gen_20261022_190653/store",
+      "relay": "AlphaAvatar/aadistill-artifacts :: stage2_h1/generation/h1gen_20261022_190653/ -- 55 files uploaded 2026-10-22, every one downloaded back and sha256-compared: 0 mismatches",
+      "restore": "relay or dev box; each shard verifies against its .done marker and carries the run's launch identity"
     }
   },
   "planned_per_asset": [
