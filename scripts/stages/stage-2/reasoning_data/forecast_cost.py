@@ -118,14 +118,16 @@ def main() -> int:
     spec_tokens = gen_tokens
     plan_path = A.LOG_DIR / "plans/generation_plan.json"
     gp = A.read_json(plan_path) if plan_path.exists() else None
-    if gp is not None:      # the real list's upper bound replaces the spec-level estimate
-        gen_tokens = gp["totals"]["expected_generated_tokens_upper"]
+    if gp is not None:      # the real list's prediction replaces the spec-level estimate
+        gen_tokens = gp["totals"]["predicted_generated_tokens"]
     gen_hours = gen_tokens / m["teacher_generation"]["tokens_per_second"] / 3600
     gen_session_h = gen_hours * CONTINGENCY["generation"] + over / 3600
     generation = {"rows": gen_rows, "candidate_policy": spec["candidate_policy"],
                   "spec_estimate_generated_tokens": round(spec_tokens),
-                  "basis": ("plans/generation_plan.json :: totals.expected_generated_tokens_upper (the real task "
-                            "list, second candidates included)" if gp else "spec shares / per-stratum yield"),
+                  "basis": ("plans/generation_plan.json :: totals.predicted_generated_tokens (the real task "
+                            "list, second candidates included; a PREDICTION, not an execution limit: the "
+                            "session's hard bound is the authorized cap, enforced by the watchdog)"
+                            if gp else "spec shares / per-stratum yield"),
                   "generation_plan_sha256": A.sha256_file(plan_path) if gp else None,
                   "generated_tokens": round(gen_tokens), "gpu_hours": round(gen_hours, 2),
                   "session_hours_with_contingency": round(gen_session_h, 2),

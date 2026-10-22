@@ -3,7 +3,7 @@
  "plans": {
   "stage2.reasoning_master@v1": {
    "schema": "aadistill.stage2.reasoning_data.source_plan/v1",
-   "written_utc": "2026-10-22T16:02:08Z",
+   "written_utc": "2026-10-22T17:47:54Z",
    "corpus_id": "stage2.reasoning_master@v1",
    "admitted": true,
    "chosen": true,
@@ -303,8 +303,8 @@
      "sha256": "b428f1ad78245c145701ca0599ac5451b4ccecbe4e58751295e1de020321bdc5"
     },
     {
-     "path": "data/stages/stage-2/reasoning_data/tasks/external_tasks_v1.jsonl",
-     "sha256": "f0a3ce1f8671acfc9c5b984f3728f6cb74278268dcafd699cf94700b745c6712"
+     "path": "data/stages/stage-2/reasoning_data/tasks/external_tasks_v2.jsonl",
+     "sha256": "843dff8faf0e7d577cd0db217191d704c909bbe614ef87fd12f04e1197737127"
     },
     {
      "path": "data/stages/stage-2/reasoning_data/tasks/math_train_v1.jsonl",
@@ -329,7 +329,7 @@
   },
   "stage2.reasoning_master@v1-project-only": {
    "schema": "aadistill.stage2.reasoning_data.source_plan/v1",
-   "written_utc": "2026-10-22T16:02:08Z",
+   "written_utc": "2026-10-22T17:47:54Z",
    "corpus_id": "stage2.reasoning_master@v1-project-only",
    "admitted": true,
    "chosen": false,
@@ -499,8 +499,8 @@
      "sha256": "b428f1ad78245c145701ca0599ac5451b4ccecbe4e58751295e1de020321bdc5"
     },
     {
-     "path": "data/stages/stage-2/reasoning_data/tasks/external_tasks_v1.jsonl",
-     "sha256": "f0a3ce1f8671acfc9c5b984f3728f6cb74278268dcafd699cf94700b745c6712"
+     "path": "data/stages/stage-2/reasoning_data/tasks/external_tasks_v2.jsonl",
+     "sha256": "843dff8faf0e7d577cd0db217191d704c909bbe614ef87fd12f04e1197737127"
     },
     {
      "path": "data/stages/stage-2/reasoning_data/tasks/math_train_v1.jsonl",

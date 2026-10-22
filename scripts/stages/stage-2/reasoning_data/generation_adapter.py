@@ -69,6 +69,7 @@ import json
 import re
 from collections import Counter
 from datetime import datetime, timezone
+from fractions import Fraction
 from pathlib import Path
 
 from stages.reasoning_data import assets as A
@@ -87,34 +88,248 @@ PROCESS_GATED = AcceptancePolicy(require_steps=("partial", "verified"))
 OUT = A.LOG_DIR / "audit/generation_adapter_validation.json"
 
 
-def _text(s) -> str:
-    """Case and whitespace folded, with LaTeX ``\text{...}`` wrappers unwrapped
-    (a boxed ``\text{False}`` is the answer False)."""
-    s = re.sub(r"\\(?:text|textrm|mathrm)\{([^{}]*)\}", r"\1", str(s))
-    return " ".join(s.lower().split()).strip(" .")
+class Unparseable(ValueError):
+    """The answer is not ONE complete value of its answer type."""
 
 
-def _numbers(s) -> list[float]:
-    out = []
-    for a, b in re.findall(r"(-?\d+(?:\.\d+)?)(?:\s*/\s*(\d+(?:\.\d+)?))?", str(s)):
-        out.append(float(a) / float(b) if b else float(a))
+_WRAP = re.compile(r"\\(?:text|textrm|mathrm|textbf|texttt|mathtt|mbox)\s*\{([^{}]*)\}")
+
+
+def _unwrap(s) -> str:
+    """LaTeX text wrappers removed (a boxed ``\\text{False}`` is the answer False),
+    surrounding ``$`` and backticks dropped; nothing else is rewritten."""
+    out, prev = str(s), None
+    while prev != out:
+        prev, out = out, _WRAP.sub(r"\1", out)
+    return out.strip().strip("$`").strip()
+
+
+def _ws(s: str) -> str:
+    return " ".join(s.split())
+
+
+_DEC = r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)"
+_NUMBER = re.compile(_DEC)
+_RATIO = re.compile(rf"({_DEC})\s*/\s*({_DEC})")
+_TEXFRAC = re.compile(r"([+-]?)\\[dt]?frac\s*\{\s*([+-]?\d+)\s*\}\s*\{\s*([+-]?\d+)\s*\}")
+_LHS = re.compile(r"[A-Za-z]\s*=\s*")
+
+
+def parse_number(s) -> Fraction:
+    """ONE number literal and nothing else -- an integer, a decimal, ``a/b`` or
+    ``\\frac{a}{b}``, signed, optionally after ``x =`` -- as an exact rational.
+    ``not 7``, ``7 apples``, ``3+4`` and ``1, 2`` are Unparseable."""
+    t = _unwrap(s).replace("\u2212", "-").replace("\\left", "").replace("\\right", "").strip()
+    t = t[:-1].strip() if t.endswith(".") and not _NUMBER.fullmatch(t) else t
+    if (m := _LHS.match(t)):
+        t = t[m.end():].strip()
+    try:
+        if (m := _TEXFRAC.fullmatch(t)):
+            v = Fraction(int(m.group(2)), int(m.group(3)))
+            return -v if m.group(1) == "-" else v
+        if (m := _RATIO.fullmatch(t)):
+            return Fraction(m.group(1)) / Fraction(m.group(2))
+        if _NUMBER.fullmatch(t):
+            return Fraction(t)
+    except ZeroDivisionError as exc:
+        raise Unparseable("division by zero") from exc
+    raise Unparseable(f"not one number: {t[:40]!r}")
+
+
+def _list_body(s) -> str:
+    t = _unwrap(s).replace("\\{", "{").replace("\\}", "}").strip()
+    t = t[:-1].strip() if t.endswith(".") else t
+    if len(t) >= 2 and t[0] + t[-1] in ("()", "[]", "{}"):
+        t = t[1:-1].strip()
+    return t
+
+
+def parse_number_list(s) -> list[Fraction]:
+    """Every element of a ``,``/``;``/``and``-separated list parsed as one number;
+    an empty element or a non-number anywhere is Unparseable."""
+    t = _list_body(s)
+    parts = re.split(r"\s*(?:,|;|\band\b)\s*", t)
+    if not t or any(not p for p in parts):
+        raise Unparseable("an empty element")
+    return [parse_number(p) for p in parts]
+
+
+def _tokens(s, sep=r"[\s,]+") -> list[str]:
+    t = _list_body(s)
+    toks = [x for x in re.split(sep, t) if x]
+    if not toks:
+        raise Unparseable("empty")
+    return toks
+
+
+def parse_int_set(s) -> frozenset[int]:
+    toks = _tokens(s, r"[\s,;]+")
+    if not all(re.fullmatch(r"\d+", x) for x in toks):
+        raise Unparseable("an element that is not a non-negative integer")
+    if len(set(toks)) != len(toks):
+        raise Unparseable("a repeated element")
+    return frozenset(int(x) for x in toks)
+
+
+def parse_assignment(s) -> dict[str, str]:
+    """``A=1,B=2``: every part a letter = digit pair, no letter twice."""
+    t = re.sub(r"\s*=\s*", "=", _list_body(s))
+    parts = [x for x in re.split(r"[\s,;]+", t) if x]
+    pairs = [re.fullmatch(r"([A-Za-z])=(\d)", x) for x in parts]
+    if not parts or not all(pairs):
+        raise Unparseable("a part that is not letter=digit")
+    keys = [m.group(1) for m in pairs]
+    if len(set(keys)) != len(keys):
+        raise Unparseable("a letter assigned twice")
+    return {m.group(1): m.group(2) for m in pairs}
+
+
+_REPR_TOK = re.compile(r"""\s*(?:('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")|([+-]?(?:\d+\.\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?)"""
+                       r"""|([A-Za-z_]\w*)|([\[\](){}:,]))""")
+
+
+def parse_repr(s) -> list[tuple[str, str]]:
+    """A Python literal's tokens, whitespace between tokens ignored, nothing
+    evaluated: strings keep their content (either quote style), numbers their
+    literal text (``2`` and ``2.0`` differ, as their reprs do), names (True,
+    None) their case."""
+    t, pos, out = _unwrap(s), 0, []
+    while pos < len(t):
+        if t[pos:].strip() == "":
+            break
+        m = _REPR_TOK.match(t, pos)
+        if not m or m.end() == pos:
+            raise Unparseable(f"not a Python literal at {t[pos:pos + 12]!r}")
+        pos = m.end()
+        kind = next(k for k, g in zip("snip", m.groups()) if g is not None)
+        tok = m.group(1)[1:-1] if kind == "s" else m.group("snip".index(kind) + 1)
+        out.append((kind, tok))
+    if not out:
+        raise Unparseable("empty")
     return out
 
 
-def _tokens(s) -> list[str]:
-    return re.findall(r"[^\s,;\[\]\\]+", str(s))
+_LATEX_ENV = re.compile(r"\\begin\{[a-z]*\*?\}(?:\{[^{}]*\})?|\\end\{[a-z]*\*?\}|\\hline")
 
 
-#: answer_type -> (boxed answer, gold) -> equal. A comparator, never a score.
+def parse_grid(s) -> list[list[str]]:
+    """Rows of cells, structure kept: ``[[a,b],[c,d]]``, or one row per line
+    (``\\\\`` too, LaTeX array wrappers dropped, ``&`` a cell separator). Text
+    outside the rows, an empty row, or a lone flat list for a multi-row grid
+    stays what it is and is compared as such."""
+    t = _LATEX_ENV.sub("", _unwrap(s)).strip()
+    if t.startswith("["):
+        if not t.endswith("]"):
+            raise Unparseable("unbalanced brackets")
+        inner = t[1:-1].strip()
+        if "[" in inner or "]" in inner:
+            rows = re.findall(r"\[([^\[\]]*)\]", inner)
+            if re.sub(r"\[[^\[\]]*\]", "", inner).strip(" ,\n\t") or not rows:
+                raise Unparseable("text outside the rows")
+        else:
+            rows = [inner]
+    else:
+        rows = [r for r in re.split(r"\n|\\\\", t) if r.strip()]
+    cells = [[c for c in re.split(r"[\s,&]+", r.strip()) if c] for r in rows]
+    if not cells or any(not r for r in cells):
+        raise Unparseable("an empty row")
+    return cells
+
+
+def _text_exact(s) -> str:
+    out = _ws(_unwrap(s))
+    if not out:
+        raise Unparseable("empty")
+    return out
+
+
+def _text_ci(s) -> str:
+    return _text_exact(s).casefold().strip(" .")
+
+
+def _bool(s) -> str:
+    v = _text_ci(s)
+    if v not in ("true", "false"):
+        raise Unparseable("not True/False")
+    return v
+
+
+DECIMAL_TOL = Fraction(1, 10_000) + Fraction(1, 10 ** 12)
+
+
+def _same_decimals(got, gold) -> bool:
+    a, b = sorted(parse_number_list(got)), sorted(parse_number_list(gold))
+    return len(a) == len(b) and all(abs(x - y) <= DECIMAL_TOL for x, y in zip(a, b))
+
+
+#: answer_type -> (boxed answer, gold) -> equal. Each PARSES THE WHOLE ANSWER and
+#: raises `Unparseable` when it is not one complete value of its type; nothing
+#: is extracted from a larger text. A comparator, never a score. Which module
+#: uses which type, and why its case or order matters, is
+#: `external_modules.json :: answer_types` and each module's row.
 COMPARE = {
-    "text": lambda got, gold: _text(got) == _text(gold),
-    "number": lambda got, gold: (len(_numbers(got)) == len(_numbers(gold)) == 1
-                                 and abs(_numbers(got)[0] - _numbers(gold)[0]) < 1e-9),
-    "number_set": lambda got, gold: (len(_numbers(got)) == len(_numbers(gold)) > 0 and all(
-        abs(a - b) < 1e-6 for a, b in zip(sorted(_numbers(got)), sorted(_numbers(gold))))),
-    "matrix": lambda got, gold: _tokens(got) == _tokens(gold) and bool(_tokens(gold)),
-    "bool": lambda got, gold: _text(got) in ("true", "false") and _text(got) == _text(gold),
+    "text": lambda got, gold: _text_exact(got) == _text_exact(gold),
+    "text_ci": lambda got, gold: _text_ci(got) == _text_ci(gold),
+    "bool": lambda got, gold: _bool(got) == _bool(gold),
+    "number": lambda got, gold: parse_number(got) == parse_number(gold),
+    "decimal_set": _same_decimals,
+    "int_set": lambda got, gold: parse_int_set(got) == parse_int_set(gold),
+    "token_seq": lambda got, gold: _tokens(got) == _tokens(gold),
+    "assignment": lambda got, gold: parse_assignment(got) == parse_assignment(gold),
+    "repr": lambda got, gold: parse_repr(got) == parse_repr(gold),
+    "matrix": lambda got, gold: parse_grid(got) == parse_grid(gold),
 }
+
+
+def compares_equal(kind: str, got, gold) -> bool:
+    """`COMPARE` with an unparseable answer read as unequal (for self-checks)."""
+    try:
+        return bool(COMPARE[kind](got, gold))
+    except Unparseable:
+        return False
+
+
+def perturbations(kind: str, gold: str) -> list[str]:
+    """Structurally wrong neighbours of a gold that its comparator must refuse:
+    a dropped or added element, a reorder where order matters, a reshape, a
+    case flip where case matters, trailing words."""
+    g = str(gold)
+    out = [f"{g} or something else"]
+    if kind in ("number",):
+        out += [str(parse_number(g) + 1), f"not {g}", f"{g}, {g}"]
+    elif kind == "decimal_set":
+        v = parse_number_list(g)
+        out += [", ".join(str(float(x)) for x in v[:-1]) or "1e9", g + ", 12345.6789",
+                ", ".join(str(float(x) + Fraction(1, 1000)) for x in v)]
+    elif kind == "int_set":
+        v = sorted(parse_int_set(g))
+        out += [" ".join(map(str, v[:-1])) or "999", " ".join(map(str, v + [max(v) + 1]))]
+    elif kind == "token_seq":
+        v = _tokens(g)
+        out += [" ".join(v[:-1]) or "x", " ".join(v + v[-1:])]
+        if v != v[::-1]:
+            out.append(" ".join(v[::-1]))
+    elif kind == "assignment":
+        d = parse_assignment(g)
+        k = sorted(d)[0]
+        out += [",".join(f"{a}={(int(b) + 1) % 10 if a == k else b}" for a, b in sorted(d.items())),
+                ",".join(f"{a}={b}" for a, b in sorted(d.items())[1:]) or "Q=1"]
+    elif kind == "repr":
+        out += [g[:-1] + ", 0" + g[-1:] if g[-1:] in "])}" else g + "0", g.replace("-", "", 1) if "-" in g else "-" + g]
+    elif kind == "matrix":
+        rows = parse_grid(g)
+        flat = [c for r in rows for c in r]
+        out.append(" ".join(flat) if len(rows) > 1 else "\n".join(flat))
+        out.append("\n".join(" ".join(r) for r in rows[:-1]) or "x")
+        if len(rows) > 1 and len({len(r) for r in rows}) == 1 and len(rows) == len(rows[0]):
+            t = ["\n".join(" ".join(r[i] for r in rows) for i in range(len(rows[0])))]
+            if parse_grid(t[0]) != rows:
+                out += t
+    elif kind == "text" and g.swapcase() != g:
+        out.append(g.swapcase())
+    elif kind == "bool":
+        out.append("False" if _bool(g) == "true" else "True")
+    return out
 
 
 def external_answer(task: dict, final: str) -> Check:
@@ -131,8 +346,11 @@ def external_answer(task: dict, final: str) -> Check:
     got = boxed_answer(final or "")
     if got is None:
         return Check("incorrect", "no boxed answer", scope)
-    return Check("correct", "", scope) if COMPARE[kind](got, task["answer"]) else \
-        Check("incorrect", "wrong answer", scope)
+    try:
+        same = COMPARE[kind](got, task["answer"])
+    except Unparseable as exc:
+        return Check("incorrect", f"unparseable answer: {exc}", scope)
+    return Check("correct", "", scope) if same else Check("incorrect", "wrong answer", scope)
 
 
 def _stop(rec: dict) -> str:
@@ -143,8 +361,16 @@ def _protocol(rec: dict) -> str | None:
     return None if rec["turns"] and all(A.split_raw(t.get("raw", "")) for t in rec["turns"]) else "think_not_closed"
 
 
-def candidate(task: dict, rec: dict, index: int):
-    """One generation record -> its CandidateRecord, every check apart."""
+def _policy(task: dict) -> AcceptancePolicy:
+    if task.get("interactive"):
+        return EPISODE
+    if task.get("module") and not task.get("verifier") and task.get("reference_conclusions") is not None:
+        return PROCESS_GATED
+    return STATIC
+
+
+def _checks(task: dict, rec: dict) -> tuple[Check, Check, dict[str, Check]]:
+    """(answer, steps, observations) of one record, every check apart."""
     from stages.calibration_volume import score_battery as SB
     obs: dict[str, Check] = {}
     steps = PC.NO_STEP_CHECKER
@@ -155,7 +381,6 @@ def candidate(task: dict, rec: dict, index: int):
                                        f"invalid_actions={inv}", "environment replay of every action")
         ans = Check("correct" if s["correct"] else "incorrect", "" if s["correct"] else "goal not reached",
                     "the environment's goal reached on replay")
-        policy = EPISODE
     elif task.get("generator_id"):
         s = SB.score_static(task, rec, "v2")
         ok = bool(s.get("answer_correct"))
@@ -166,25 +391,38 @@ def candidate(task: dict, rec: dict, index: int):
             obs["text_consistency"] = PC.text_consistency(
                 parts[0], s.get("extracted"), task["answer_type"],
                 prompt=" ".join(m.get("content") or "" for m in task["messages"]))
-        policy = STATIC
     elif task.get("verifier"):
         from stages.reasoning_data.supporting_verify import VERIFIERS
         parts = A.split_raw(rec["turns"][-1].get("raw", "")) if rec["turns"] else None
         ans = (VERIFIERS[task["verifier"]](task, *parts) if parts and task["verifier"] in VERIFIERS else
                Check("unverifiable", f"no verifier {task['verifier']!r}" if parts else "think not closed", "none"))
-        policy = STATIC
     elif task.get("module"):
         parts = A.split_raw(rec["turns"][-1].get("raw", "")) if rec["turns"] else None
         ans = external_answer(task, parts[1] if parts else "")
-        policy = STATIC
         if task.get("reference_conclusions") is not None:
             steps = PC.reference_steps(parts[0] if parts else "", task["reference_conclusions"])
-            policy = PROCESS_GATED
     else:
         ans = Check("unverifiable", f"no verifier for source {task.get('source')!r}", "none")
-        policy = STATIC
+    return ans, steps, obs
+
+
+VERIFIER_ERROR_SCOPE = "the verifier raised on this record; nothing about the answer is known"
+
+
+def candidate(task: dict, rec: dict, index: int):
+    """One generation record -> its CandidateRecord, every check apart. A
+    verifier that RAISES on one record costs that candidate only: its answer is
+    ``unverifiable`` (``verifier error: ...``, counted in the rejection reasons,
+    never accepted) and the batch goes on. Anything outside the checks -- the
+    ending, the protocol, the assessment -- is not caught."""
+    try:
+        ans, steps, obs = _checks(task, rec)
+    except Exception as exc:  # noqa: BLE001 -- one verifier fault must not end the batch
+        ans = Check("unverifiable", f"verifier error: {type(exc).__name__}: {str(exc)[:160]}",
+                    VERIFIER_ERROR_SCOPE)
+        steps, obs = PC.NO_STEP_CHECKER, {}
     return assess(task["task_id"], index, stop_reason=_stop(rec), protocol_reason=_protocol(rec),
-                  answer=ans, steps=steps, observations=obs, policy=policy,
+                  answer=ans, steps=steps, observations=obs, policy=_policy(task),
                   end_reasons=ENDS, generated_tokens=sum(int(t["generated_tokens"]) for t in rec["turns"]))
 
 

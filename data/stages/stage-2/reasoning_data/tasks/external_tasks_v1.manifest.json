@@ -121,5 +121,6 @@
  },
  "sha256": "f0a3ce1f8671acfc9c5b984f3728f6cb74278268dcafd699cf94700b745c6712",
  "approved_for_generation": false,
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "superseded_by": "external_tasks_v2 (2026-10-22): same 1,163 task ids and prompts; answer types re-declared per module after the comparator review (whole-answer parsers, case kept where it matters). v1 is kept as history; nothing reads it"
 }

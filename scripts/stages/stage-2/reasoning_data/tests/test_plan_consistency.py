@@ -122,5 +122,13 @@ def test_the_p1_application_names_the_generation_plan_on_disk_and_the_forecast_p
     fc = A.read_json(PLANS / "cost_forecast.json")
     assert fc["generation"]["generation_plan_sha256"] == sha
     gp = A.read_json(PLANS / "generation_plan.json")
-    assert fc["generation"]["generated_tokens"] == gp["totals"]["expected_generated_tokens_upper"]
+    assert fc["generation"]["generated_tokens"] == gp["totals"]["predicted_generated_tokens"]
     assert gp["corpus_id"] == SPEC["chosen_variant"]["id"] and not gp["shortfalls"]
+
+
+def test_the_application_names_the_launch_identity_and_harness_on_disk():
+    from stages.reasoning_data import governance as GOV
+    from aadistill.governance.authorization import harness_source_digest
+    launch = A.read_json(PLANS / "authorization_proposal.json")["launch"]
+    assert launch["launch_identity_sha256"] == GOV.launch_hash()
+    assert launch["harness_digest"] == harness_source_digest(GOV.REPO, files=GOV.HARNESS)["digest"]

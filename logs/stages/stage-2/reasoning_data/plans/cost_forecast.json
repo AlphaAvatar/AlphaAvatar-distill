@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.stage2.reasoning_data.cost_forecast/v1",
  "status": "FORECAST from measured rates; authorizes nothing",
- "written_utc": "2026-10-22T16:02:09Z",
+ "written_utc": "2026-10-22T17:47:55Z",
  "measured": {
   "teacher_generation": {
    "tokens_per_second": 1739.1,
@@ -140,10 +140,10 @@
     "generated_tokens": 97451
    }
   },
-  "candidate_policy": "up to 2 candidates per task, the second only when the first is rejected; every candidate recorded. Yield is planned at the measured n = 1 rate per generated token, which a retry does not change.",
+  "candidate_policy": "up to 2 candidates per task, the second only when the first is rejected; ONE for MBPP (generation_protocol.json :: execution.no_second_candidate_verifiers, frozen 2026-10-22); every candidate recorded. Yield is planned at the measured n = 1 rate per generated token; the two-candidate unit yield 1-(1-p)^2 is a simplifying assumption, not a guarantee",
   "spec_estimate_generated_tokens": 6968972,
-  "basis": "plans/generation_plan.json :: totals.expected_generated_tokens_upper (the real task list, second candidates included)",
-  "generation_plan_sha256": "a75b4336f4014b54dcf430220db9c32a633aac47e9bc5f5a4afc8247997f94e2",
+  "basis": "plans/generation_plan.json :: totals.predicted_generated_tokens (the real task list, second candidates included; a PREDICTION, not an execution limit: the session's hard bound is the authorized cap, enforced by the watchdog)",
+  "generation_plan_sha256": "45606567d45907ea8656b1c40ac6bbd0492c8c5ce8c86daebce46c716e0a0b68",
   "generated_tokens": 9874990,
   "gpu_hours": 1.58,
   "session_hours_with_contingency": 2.51,

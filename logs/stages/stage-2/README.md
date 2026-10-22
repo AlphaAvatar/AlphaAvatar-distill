@@ -75,7 +75,7 @@ What each one asked of this stage.
 
 | experiment | what it asked | logs | status |
 | --- | --- | --- | --- |
-| `reasoning_data` — Stage-2 verified teacher-native reasoning data, measured through Stage-3 controlled recovery | Under one fixed initialization and the fixed historical recovery recipe, does verified teacher-native reasoning data lift a 0.6B student off the fluid-reasoning floor where corpus_v2 left it, and how does that scale over a nested 0.86M-5.50M ladder? | [`reasoning_data/`](reasoning_data/) | H1 DESIGN CHOSEN BY THE MAINTAINER 2026-10-22; P1 + P1v APPLICATION READY AT $0, NOT AUTHORIZED. Fixed: Stage-0 D4 Top-1 (two verified copies), the recovery objective, eval-set-1, the 70/30 start. Arm B = stage2.reasoning_master@v1 (reviewed external sources admitted); H1 concludes on static reasoning transfer, interactive results exploratory; M1's rule accepted, its values provisional until B's pack. Done at $0: verified-record identity into the pack, non-destructive completion-time persistence, supporting builders, PrOntoQA and DeepMind Mathematics exporters, a project checker for every candidate module, the generation plan (1,587 tasks), the generation driver, arm B's pack builder (chain validated on real teacher text, not arm B), the training unit driver (CUDA left to P1g), arm A's pack written once. Open: launcher wiring for P1, the training backend (BLOCKED for P1g/P2), 34 pods / $58.33 unattributed. No teacher target generated, no student trained, $0 spent |
+| `reasoning_data` — Stage-2 verified teacher-native reasoning data, measured through Stage-3 controlled recovery | Under one fixed initialization and the fixed historical recovery recipe, does verified teacher-native reasoning data lift a 0.6B student off the fluid-reasoning floor where corpus_v2 left it, and how does that scale over a nested 0.86M-5.50M ladder? | [`reasoning_data/`](reasoning_data/) | H1 DESIGN CHOSEN 2026-10-22; P1 + P1v FINAL APPLICATION READY AT $0, NOT AUTHORIZED. Fixed: D4 Top-1, the recovery objective, eval-set-1, 70/30; arm B = stage2.reasoning_master@v1; static primary conclusion, interactive exploratory. P1 is launchable once granted: whole-answer comparators, finished candidates saved in hash-marked shards before a group ends and resumed without regeneration, one authorization binding the launch identity (plan, protocol, inputs, pools) and the harness, checked by the launcher and again on the pod, the launcher on the shared session runner. Open: the training backend (BLOCKED for P1g/P2), 34 pods / $58.33 unattributed. No teacher target generated, no student trained, $0 spent |
 
 ## Runs
 
@@ -114,6 +114,7 @@ copied here.
 * logs/budget/decisions.md -- 2026-10-21: Maintainer: H1 fixes D4 Top-1; budget and durability first; TIP as an H3 candidate
 * logs/budget/decisions.md -- 2026-10-22: Independent review of H1 preparation: eight targeted corrections at $0, no paid authorization
 * logs/budget/decisions.md -- 2026-10-22: Maintainer: H1 design choices (arm B = stage2.reasoning_master@v1, interactive exploratory); two corrections and the P1 + P1v application at $0
+* logs/budget/decisions.md -- 2026-10-22: Maintainer: P1 must be launchable; comparators, completion-time saving and launch wiring at $0, final P1 + P1v application
 
 ## Current status
 

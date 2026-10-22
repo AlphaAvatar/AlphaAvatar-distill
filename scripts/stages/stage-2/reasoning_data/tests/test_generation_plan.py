@@ -58,3 +58,8 @@ def test_only_the_chosen_variant_gets_a_paid_list(tmp_path):
     with pytest.raises(SystemExit, match="not the chosen"):
         GP.main(["--variant", "stage2.reasoning_master@v1-project-only", "--pools", str(tmp_path / "x.jsonl"),
                  "--inputs-dir", str(tmp_path)])
+
+
+def test_the_plan_writes_its_inputs_where_governance_binds_and_the_pod_installs_them():
+    from stages.reasoning_data import governance as GOV
+    assert GP.INPUTS_DIR == A.REPO / GOV.INPUTS_DIR

@@ -30,10 +30,10 @@ is no second candidate).
 Measured on the same generators where the teacher has run (Stage-0
 teacher_cal), otherwise a named PROXY (the same axis on teacher_cal; corpus_v2's
 nearest type) or the spec's labelled assumption; a proxied cell takes a larger
-oversupply. Expected tokens assume the second candidate for every task the
-first fails, except where the verdict cannot be known on the generation pod
-(code: the sandbox runs on the dev box only), so the figure is an upper bound
-on the policy.
+oversupply. Predicted tokens assume the second candidate for every task the
+first fails, except where the protocol allows none (MBPP: the sandbox runs on
+the dev box only), so the figure is the policy's planned maximum at those rates
+on the policy -- a PREDICTION, not an execution limit.
 
 Writes the run_battery inputs (``--inputs-dir``: one file per system message,
 `run_battery`'s task contract, with each file's sha256 in the plan) and
@@ -53,10 +53,15 @@ from stages.reasoning_data import source_plan as SP
 
 OUT = A.LOG_DIR / "plans/generation_plan.json"
 OVERSUPPLY = {"measured": 1.5, "proxy": 2.0}
-#: verifiers that may not run where the teacher runs: no second candidate
-DEV_BOX_ONLY = frozenset({"code_asserts"})
-SESSION_LIMIT = 8192 - 8          # aadistill.data.sessions.completion_budget's margin
+#: The generation protocol owns the execution values (generation_driver reads
+#: the same file after the launch identity binds it): the session limit, and
+#: the verifiers that get no second candidate (their verdict needs the dev-box
+#: sandbox; MBPP, frozen 2026-10-22).
+_EXEC = A.read_json(A.CONFIG_DIR / "generation_protocol.json")["execution"]
+DEV_BOX_ONLY = frozenset(_EXEC["no_second_candidate_verifiers"])
+SESSION_LIMIT = int(_EXEC["session_limit"])
 SYSTEM_DEFAULT = "You are a helpful Assistant."
+INPUTS_DIR = A.REPO / "logs/stages/stage-2/reasoning_data/plans/generation_inputs"   # = governance.INPUTS_DIR
 
 
 def verifier_of(task: dict) -> tuple[str | None, str | None]:
@@ -207,7 +212,9 @@ def build(variant: str, pools: list[Path], reuse: list[Path] = ()) -> dict:
             bkey, kind = basis_of(*key, spec)
             rate = r[bkey]
             retry = all(verifier_of(t)[0] not in DEV_BOX_ONLY for t in ok)
-            q = 1 - (1 - rate["p"]) ** 2 if retry else rate["p"]      # units per task, both candidates
+            # units per task over both candidates: a SIMPLIFYING planning assumption (a retry of a
+            # hard task is not independent of its failure), never a guarantee of a cell's tokens
+            q = 1 - (1 - rate["p"]) ** 2 if retry else rate["p"]
             n = math.ceil(c["independent_units_estimate"] / q * OVERSUPPLY[kind])
             take = round_robin(ok, n)
             expected_units = len(take) * q
@@ -220,7 +227,7 @@ def build(variant: str, pools: list[Path], reuse: list[Path] = ()) -> dict:
                                                             "oversupply": OVERSUPPLY[kind]},
                        second_candidate="for every task the first fails" if retry else
                        "none: the verdict needs the dev-box sandbox",
-                       expected_generated_tokens_upper=round(tokens),
+                       predicted_generated_tokens=round(tokens),
                        groups=dict(sorted(Counter(group_of(t) for t in take).items())))
             chosen += take
         if row["shortfall"]:
@@ -250,7 +257,8 @@ def main(argv=None) -> int:
     ap.add_argument("--variant", default="stage2.reasoning_master@v1")
     ap.add_argument("--pools", nargs="+", required=True)
     ap.add_argument("--reuse", nargs="*", default=[])
-    ap.add_argument("--inputs-dir", required=True)
+    ap.add_argument("--inputs-dir", default=str(INPUTS_DIR),
+                    help="committed with the plan, so the session bundle carries what the pod runs")
     args = ap.parse_args(argv)
     sp = SP.plan(args.variant)
     if not (sp["admitted"] and sp["chosen"]):
@@ -268,12 +276,19 @@ def main(argv=None) -> int:
            "below_margin": [f"{c['stratum']}/{c['source']}" for c in got["cells"] if c.get("below_margin")],
            "totals": {"tasks": sum(c["generate"] for c in gen),
                       "episodes": sum(f["interactive"] for f in files),
-                      "expected_generated_tokens_upper": sum(c["expected_generated_tokens_upper"] for c in gen),
+                      "predicted_generated_tokens": sum(c["predicted_generated_tokens"] for c in gen),
+                      "_predicted": ("a PREDICTION: tasks x the named mean tokens per candidate x (2 - p) where a "
+                                     "second candidate is allowed. It is NOT an execution limit -- the session's "
+                                     "hard bound is its cost cap and watchdog"),
                       "by_rate_kind": dict(Counter(c["rate_basis"]["kind"] for c in gen))},
            "seed_rule": "pass k runs run_battery with --seed-base <plan base> + k; a turn's seed is "
                         "request_seed(base, task_id, turn), so every candidate and turn has its own recorded seed",
-           "_reading": ("an upper bound on the candidate policy at the named rates; the run's own figures replace "
-                        "them. A proxy rate is not a measurement of that source"),
+           "_reading": ("a prediction at the named rates, with q = 1-(1-p)^2 a simplifying assumption for the "
+                        "second candidate; neither guarantees any cell's supervised tokens. The run's own figures "
+                        "replace them; a proxy rate is not a measurement of that source. A short cell is "
+                        "reported -- never filled by repetition, a lower correctness gate, another source or "
+                        "another mix, and never by an automatic new paid session"),
+           "inputs_dir": str(INPUTS_DIR.relative_to(A.REPO)),
            "authorizes": "nothing"}
     OUT.write_text(json.dumps(doc, indent=1) + "\n")
     print(OUT.relative_to(A.REPO), doc["totals"], "shortfalls:", doc["shortfalls"])

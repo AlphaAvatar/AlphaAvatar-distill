@@ -139,8 +139,9 @@ def build(exports: list[Path]) -> dict:
         traces[t["task_id"]] = row.get("reference_trace") or ""
     if refused:
         raise SystemExit(f"the export holds rows the whitelist does not allow: {dict(refused)}")
-    # the comparator / checker must accept the module's own gold and reject a foreign answer
-    from stages.reasoning_data.generation_adapter import COMPARE
+    # the comparator / checker must accept the module's own gold (boxed, end to end) and reject a
+    # foreign answer; a comparator must also reject every structural perturbation of that gold
+    from stages.reasoning_data.generation_adapter import COMPARE, compares_equal, external_answer, perturbations
     missing = sorted({f"{t['source']}/{t['module']}" for t in tasks if t["answer_type"] == "checker"} - set(CK.CHECKERS))
     if missing:
         raise SystemExit(f"answer type 'checker' without a checker: {missing}")
@@ -150,8 +151,10 @@ def build(exports: list[Path]) -> dict:
             check = CK.CHECKERS[f"{t['source']}/{t['module']}"]
             return (check(t, "\\boxed{" + t["answer"] + "}").state == "correct"
                     and check(t, "\\boxed{zzz 999 qqq}").state != "correct")
-        return (COMPARE[t["answer_type"]](t["answer"], t["answer"])
-                and not COMPARE[t["answer_type"]]("zzz 999 qqq", t["answer"]))
+        kind = t["answer_type"]
+        return (external_answer(t, "\\boxed{" + t["answer"] + "}").state == "correct"
+                and not compares_equal(kind, "zzz 999 qqq", t["answer"])
+                and not any(compares_equal(kind, w, t["answer"]) for w in perturbations(kind, t["answer"])))
     wrong = Counter(f"{t['source']}/{t['module']}" for t in tasks
                     if (t["answer_type"] in COMPARE or t["answer_type"] == "checker") and not fits(t))
     if wrong:

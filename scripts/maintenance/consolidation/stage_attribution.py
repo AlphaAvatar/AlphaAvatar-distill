@@ -1619,21 +1619,16 @@ STAGE_2 = [
         id="reasoning_data",
         kind="experiment",
         stage_id="2",
-        status=("H1 DESIGN CHOSEN BY THE MAINTAINER 2026-10-22; P1 + P1v "
-                "APPLICATION READY AT $0, NOT AUTHORIZED. Fixed: Stage-0 D4 Top-1 "
-                "(two verified copies), the recovery objective, eval-set-1, the "
-                "70/30 start. Arm B = stage2.reasoning_master@v1 (reviewed external "
-                "sources admitted); H1 concludes on static reasoning transfer, "
-                "interactive results exploratory; M1's rule accepted, its values "
-                "provisional until B's pack. Done at $0: verified-record identity "
-                "into the pack, non-destructive completion-time persistence, "
-                "supporting builders, PrOntoQA and DeepMind Mathematics exporters, "
-                "a project checker for every candidate module, the generation "
-                "plan (1,587 tasks), the generation driver, arm B's pack builder "
-                "(chain validated on real teacher text, not arm B), the training "
-                "unit driver (CUDA left to P1g), arm A's pack written once. "
-                "Open: launcher wiring for P1, the training backend (BLOCKED for "
-                "P1g/P2), 34 pods / $58.33 unattributed. No teacher target "
+        status=("H1 DESIGN CHOSEN 2026-10-22; P1 + P1v FINAL APPLICATION READY AT $0, "
+                "NOT AUTHORIZED. Fixed: D4 Top-1, the recovery objective, eval-set-1, "
+                "70/30; arm B = stage2.reasoning_master@v1; static primary "
+                "conclusion, interactive exploratory. P1 is launchable once granted: "
+                "whole-answer comparators, finished candidates saved in hash-marked "
+                "shards before a group ends and resumed without regeneration, one "
+                "authorization binding the launch identity (plan, protocol, inputs, "
+                "pools) and the harness, checked by the launcher and again on the pod, "
+                "the launcher on the shared session runner. Open: the training backend "
+                "(BLOCKED for P1g/P2), 34 pods / $58.33 unattributed. No teacher target "
                 "generated, no student trained, $0 spent"),
         title="Stage-2 verified teacher-native reasoning data, measured through "
               "Stage-3 controlled recovery",
@@ -1730,6 +1725,10 @@ STAGE_2 = [
               "the corpus_v2 targets B reuses: ids and hashes only, each "
               "re-verified under B's contract",
               field="authorizes", equals="nothing"),
+            E("data/stages/stage-2/reasoning_data/tasks/external_tasks_v2.manifest.json",
+              "the third-party pool with whole-answer comparator types, "
+              "isolation rules R0-R9 passed (supersedes v1)",
+              field="authorizes", equals="nothing"),
             E("configs/stages/stage-2/reasoning_data/h1_units.json",
               "the four formal units, their packs' identities and the "
               "driver's launch refusals",
@@ -1748,7 +1747,10 @@ STAGE_2 = [
                    "logs/budget/decisions.md -- 2026-10-22: Maintainer: H1 "
                    "design choices (arm B = stage2.reasoning_master@v1, "
                    "interactive exploratory); two corrections and the P1 + P1v "
-                   "application at $0"],
+                   "application at $0",
+                   "logs/budget/decisions.md -- 2026-10-22: Maintainer: P1 must "
+                   "be launchable; comparators, completion-time saving and launch "
+                   "wiring at $0, final P1 + P1v application"],
         canonical_log_destination="logs/stages/stage-2/reasoning_data",
         classification_reason=(
             "Stage 2 by subject and product: it varies the offline training "

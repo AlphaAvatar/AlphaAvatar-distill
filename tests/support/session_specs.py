@@ -56,6 +56,10 @@ SESSION_LAUNCHERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     #: Its own rung prefix for the run id: both D3 rungs file under one
     #: experiment's run layout, and only the run id separates their paths.
     ("autoinit_d3_probes_launch", ("--run-id", "d3_probes_spec_check")),
+    #: H1's P1 teacher-generation session (Stage 2), added WITH its launcher
+    #: (2026-10-22) so the setup-env, asset and identity checks cover it before
+    #: any grant exists.
+    ("h1_generation_launch", ()),
 )
 
 

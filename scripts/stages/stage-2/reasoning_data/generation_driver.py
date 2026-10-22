@@ -1,36 +1,46 @@
 #!/usr/bin/env python3
-"""On-pod driver of H1's teacher generation (P1): the plan's inputs, two candidate passes.
+"""On-pod driver of H1's teacher generation (P1): bound inputs, two candidate passes, finished work sealed as it completes.
 
     cd /workspace/aad && PYTHONPATH=src:scripts /opt/train/bin/python \
-        -m stages.reasoning_data.generation_driver --plan <generation_plan.json> \
-        --inputs-dir <dir> --authorization <authorization.json> --status <file> --out <dir>
+        -m stages.reasoning_data.generation_driver --authorization <authorization.json> \
+        --status <file> --out <dir> [--resume-from <secured shards dir>]
 
 Generation writes TEXT: teacher programs are never executed here (the
 verifying sandbox is on the dev box, `code_sandbox.py`), so this pod's
 credentials, network and volume never meet model-written code.
 
-1. CONTRACT: the authorization is loaded under `POLICY`, must grant
-   ``teacher_generation`` and be bound to this plan file's sha256; every input
-   and pool file must hash to what the plan records. Nothing runs otherwise.
-2. PASS 0: each input group (one per system message) through the Stage-0
-   generator, `run_battery.py --mode generate` (the teacher's recommended
-   sampling, a seeded request per turn, real environment loops), at the plan's
-   session limit, seed base ``base + 0``.
-3. Every record of a pass is TAGGED with ``candidate_index`` = the pass and
-   the pass's seed base and input/raw hashes, written beside the raw output,
-   and the group's ``.done`` marker (its sha256) is written at once: that is
-   what the launcher's poll hook pulls off the pod (P8.2.1), so a finished pass
-   survives a later failure.
-4. PASS 1: the second candidate, only for tasks whose first failed, judged here
-   by the adapter's own `candidate()` (pure Python: the battery scorer, the
-   environment replay, comparators and checkers); a task whose verifier needs
-   the dev-box sandbox (`generation_plan.DEV_BOX_ONLY`) gets none.
-5. TERMINAL: one evidence record, ``MARKER:ALL_DONE`` or ``MARKER:RUN_FAILED``
-   and the exit code, in one place. A failed group is recorded and the others
-   go on; nothing already marked done is touched. Teardown is the launcher's.
-
-A rerun on the same --out skips every group whose tagged records and marker
-are present and hash-consistent: finished generation is never paid for twice.
+1. CONTRACT. The authorization is loaded under `governance.POLICY`; the launch
+   identity is recomputed HERE from the plan, protocol, inputs and pools on this
+   machine and must equal the one the authorization binds; the harness on disk
+   must digest to the authorized one; the protocol's sampling must equal the
+   generator's. Only then is anything read from the protocol, and every value
+   passed to the generator (teacher, revision, action protocol, session limit,
+   seed base, system message) comes from these bound files. Nothing runs
+   otherwise.
+2. PASSES. Pass 0 runs each input group through the Stage-0 generator,
+   `run_battery.py --mode generate` (one engine for the group: the teacher is
+   loaded once), with ``--stream-completed``: every episode's record is
+   appended the moment it ends. While the generator runs, the driver SEALS the
+   stream's complete lines into shards (``<label>.partNNNN.jsonl``, each record
+   tagged with its candidate identity) with a ``.done`` marker holding the
+   shard's sha256, every ``seal_every_records`` records or
+   ``seal_every_seconds`` (`generation_protocol.json :: execution`). The
+   launcher pulls every marked shard on each poll, so finished candidates leave
+   the pod before the group ends. A group is COMPLETE only when every task of
+   its input has exactly one sealed record (``<label>.complete``).
+3. PASS 1, the second candidate, only for tasks whose first failed, judged here
+   by the adapter's own `candidate()` (pure Python), and none for the verifiers
+   the protocol lists in ``no_second_candidate_verifiers`` (MBPP).
+4. RESUME. ``--resume-from`` brings shards secured earlier into ``--out``; a
+   stream left by a killed generator on this machine is sealed first. Each
+   sealed shard is re-verified against its marker, and each record's launch
+   identity must be this run's, before it counts. Only candidates without a
+   sealed record are generated, under the same pass seed base, so a candidate's
+   identity (task, pass, seed) never changes.
+5. TERMINAL: one evidence record, ``MARKER:ALL_DONE`` only when every group of
+   every pass is complete, else ``MARKER:RUN_FAILED`` with every sealed shard
+   kept; the exit code; the generator process never outlives the driver.
+   Teardown and provider reconciliation are the launcher's.
 """
 from __future__ import annotations
 
@@ -38,6 +48,7 @@ import argparse
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -45,105 +56,235 @@ import traceback
 from pathlib import Path
 
 from stages.reasoning_data import assets as A
-from stages.reasoning_data import generation_plan as GP
+from stages.reasoning_data import governance as GOV
 
-from aadistill.governance.authorization import ActionPolicy, AuthorizationError, SpendAuthorization
+from aadistill.governance.authorization import AuthorizationError
 
 VLLM_PY = "/opt/vllm/bin/python"
 RUNNER = "scripts/stages/stage-0/calibration_volume/run_battery.py"
-SEED_BASE = 20261022
 UNIT_OK, UNIT_FAILED = "UNIT_OK", "UNIT_FAILED"      # contain neither session marker
-POLICY = ActionPolicy(
-    policy_id="h1_teacher_generation", allowed=frozenset({"teacher_generation"}),
-    wire_schema="aadistill.stage2.reasoning_data.generation_authorization/v1",
-    plan_hash_key="generation_plan_sha256",
-    enforcement="generation_driver runs only the plan this authorization is bound to")
+
+
+class ShardError(RuntimeError):
+    """A sealed shard that cannot be trusted: stop, preserve, count nothing from it."""
 
 
 def sha(path: Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def authorize(path: Path, plan_sha: str) -> dict:
-    auth = SpendAuthorization.load(path, policy=POLICY)
-    if not auth.allows("teacher_generation"):
-        raise AuthorizationError(f"{path} does not grant teacher_generation")
-    auth.require_plan(plan_sha)
-    return {"authorization_id": auth.authorization_id, "hard_cap_usd": auth.hard_cap_usd}
+def authorize(path: Path, repo: Path) -> dict:
+    """The contract: the authorization binds this machine's launch identity and harness."""
+    auth = GOV.load(path)
+    lid = GOV.launch_hash(repo)
+    auth.require_plan(lid)
+    harness = auth.require_harness(repo)
+    return {"authorization_id": auth.authorization_id, "hard_cap_usd": auth.hard_cap_usd,
+            "launch_identity_sha256": lid, "harness_digest": harness["digest"]}
 
 
-def tag(raw: Path, out: Path, k: int, seed_base: int, input_sha: str) -> int:
-    meta = {"index": k, "seed_base": seed_base, "input_sha256": input_sha, "raw_records_sha256": sha(raw)}
-    n = 0
-    with open(out, "w") as f:
-        for rec in A.jsonl(raw):
-            f.write(json.dumps({**rec, "candidate_index": k, "generation_pass": meta}, ensure_ascii=False) + "\n")
-            n += 1
-    return n
+def contract(repo: Path, authorization: Path, authorize=authorize) -> dict:
+    bound = authorize(authorization, repo)
+    from stages.calibration_volume.run_battery import GENERATE_SAMPLING
+    proto = json.loads((repo / GOV.PROTOCOL).read_text())
+    sampling = {k: proto["decoding"][k] for k in GENERATE_SAMPLING}
+    if sampling != GENERATE_SAMPLING:
+        raise AuthorizationError(f"protocol sampling {sampling} is not the generator's {GENERATE_SAMPLING}")
+    plan = json.loads((repo / GOV.PLAN).read_text())
+    tasks = {t["task_id"]: t for p in plan["pools"] for t in A.jsonl(repo / p["path"])}
+    return {**bound, "protocol": proto, "plan": plan, "tasks": tasks}
 
 
-def second_pass(tasks: dict[str, dict], tagged: Path) -> list[str]:
-    """Task ids whose first candidate the adapter rejects, where a second
-    candidate is allowed (the verdict is computable here)."""
+def tag(rec: dict, meta: dict) -> dict:
+    return {**rec, "candidate_index": meta["index"], "generation_pass": meta}
+
+
+def sealed(out: Path, label: str, lid: str) -> dict[str, dict]:
+    """task id -> its sealed record, from every marked shard of `label`; a shard
+    whose bytes or identity do not verify refuses."""
+    got: dict[str, dict] = {}
+    for done in sorted(out.glob(f"{label}.part*.done")):
+        shard = done.with_suffix(".jsonl")
+        if not shard.is_file() or sha(shard) != done.read_text().strip():
+            raise ShardError(f"{shard.name} does not hash to its marker")
+        for rec in A.jsonl(shard):
+            if rec["generation_pass"]["launch_identity_sha256"] != lid:
+                raise ShardError(f"{shard.name}: {rec['task_id']} was generated under another launch identity")
+            if rec["task_id"] in got:
+                raise ShardError(f"{shard.name}: {rec['task_id']} sealed twice")
+            got[rec["task_id"]] = rec
+    return got
+
+
+class Sealer:
+    """Seals one stream's complete lines into marked shards of `label`."""
+
+    def __init__(self, out: Path, label: str, stream: Path, meta: dict, want: set[str], have: set[str],
+                 *, every_records: int, every_seconds: float):
+        self.out, self.label, self.stream, self.meta = out, label, stream, meta
+        self.want, self.have = want, set(have)
+        self.every_records, self.every_seconds = every_records, every_seconds
+        self.offset, self.last = 0, time.time()
+        self.anomalies: list[str] = []
+
+    def _next_part(self) -> Path:
+        n = len(list(self.out.glob(f"{self.label}.part*.done")))
+        return self.out / f"{self.label}.part{n:04d}.jsonl"
+
+    def seal(self, *, force: bool = False) -> int:
+        if not self.stream.is_file():
+            return 0
+        with open(self.stream, "rb") as f:
+            f.seek(self.offset)
+            chunk = f.read()
+        end = chunk.rfind(b"\n") + 1
+        lines = [l for l in chunk[:end].decode().splitlines() if l.strip()]
+        if not lines or (not force and len(lines) < self.every_records
+                         and time.time() - self.last < self.every_seconds):
+            return 0
+        rows = []
+        for line in lines:
+            rec = json.loads(line)
+            tid = rec.get("task_id")
+            if tid not in self.want:
+                self.anomalies.append(f"{tid}: not in this segment's input")
+            elif tid in self.have:
+                self.anomalies.append(f"{tid}: already sealed, second record discarded")
+            else:
+                self.have.add(tid)
+                rows.append(tag(rec, self.meta))
+        if rows:
+            part = self._next_part()
+            part.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
+            part.with_suffix(".done").write_text(sha(part) + "\n")
+        self.offset += end
+        self.last = time.time()
+        return len(rows)
+
+
+def run_battery(cmd: list[str], log: Path, tick, *, every: float = 30.0) -> int:
+    """The generator, with `tick` called while it runs; it never outlives this
+    call. It executes no model output, so it keeps the session's environment
+    (hub cache and access), as battery_driver's runs do."""
+    with log.open("w") as lf:
+        proc = subprocess.Popen(cmd, cwd=A.REPO, stdout=lf, stderr=subprocess.STDOUT,
+                                env={**os.environ, "PYTHONPATH": "src:scripts"})
+        try:
+            while True:
+                try:
+                    rc = proc.wait(timeout=every)
+                    break
+                except subprocess.TimeoutExpired:
+                    tick()
+        finally:
+            if proc.poll() is None:
+                proc.kill()
+                proc.wait()
+    return rc
+
+
+def second_pass(c: dict, records: dict[str, dict]) -> list[str]:
+    """Task ids whose first candidate the adapter rejects, where the protocol
+    allows a second (the verdict is computable here)."""
     from stages.reasoning_data.generation_adapter import candidate
+    none_for = set(c["protocol"]["execution"]["no_second_candidate_verifiers"])
     retry = []
-    for rec in A.jsonl(tagged):
-        task = tasks[rec["task_id"]]
-        if GP.verifier_of(task)[0] in GP.DEV_BOX_ONLY:
+    for tid, rec in sorted(records.items()):
+        task = c["tasks"][tid]
+        if task.get("verifier") in none_for:
             continue
         if not candidate(task, rec, rec["candidate_index"]).accepted_for_training:
-            retry.append(rec["task_id"])
+            retry.append(tid)
     return retry
 
 
-def run_battery(cmd: list[str], log: Path) -> int:
-    """The generator executes no model output, so it keeps the session's
-    environment (hub cache and access), as battery_driver's runs do."""
-    with log.open("w") as lf:
-        return subprocess.run(cmd, cwd=A.REPO, stdout=lf, stderr=subprocess.STDOUT,
-                              env={**os.environ, "PYTHONPATH": "src:scripts"}).returncode
+def run_group(c: dict, out: Path, inputs: Path, f: dict, k: int, ids: list[str] | None, run, mark) -> dict:
+    """One pass of one input group to completion, or as far as it gets."""
+    ex = c["protocol"]["execution"]
+    label = f"pass{k}_{Path(f['file']).stem}"
+    rows = [r for r in A.jsonl(inputs / f["file"]) if ids is None or r["task_id"] in ids]
+    want = {r["task_id"] for r in rows}
+    entry = {"label": label, "pass": k, "seed_base": ex["seed_base"] + k, "tasks": len(want), "segments": []}
+    have = sealed(out, label, c["launch_identity_sha256"])
+    if set(have) - want:
+        raise ShardError(f"{label}: sealed records for tasks outside its input: {sorted(set(have) - want)[:3]}")
+    meta = {"index": k, "seed_base": ex["seed_base"] + k, "group_input": f["file"], "group_input_sha256": f["sha256"],
+            "launch_identity_sha256": c["launch_identity_sha256"],
+            "protocol_sha256": sha(A.REPO / GOV.PROTOCOL), "runner_sha256": sha(A.REPO / RUNNER)}
+    # a stream a killed generator left on this machine: its finished lines count first
+    for old in sorted(out.glob(f"{label}.seg*.stream.jsonl")):
+        s = Sealer(out, label, old, {**meta, "segment": old.name}, want, have, every_records=1, every_seconds=0)
+        s.seal(force=True)
+        entry["segments"].append({"stream": old.name, "recovered": len(s.have) - len(have), "anomalies": s.anomalies})
+        old.rename(old.with_name(old.name + ".recovered"))     # never read, never appended to again
+        have = sealed(out, label, c["launch_identity_sha256"])
+    todo = [r for r in rows if r["task_id"] not in have]
+    if todo:
+        used = [int(p.name[len(label) + 4:].split(".")[0]) for p in out.glob(f"{label}.seg*")]
+        seg = max(used) + 1 if used else 0          # a new segment never reuses an old file
+        seg_in = out / f"{label}.seg{seg}.input.jsonl"
+        seg_in.write_text("".join(json.dumps(r, sort_keys=True, ensure_ascii=False) + "\n" for r in todo))
+        stream = out / f"{label}.seg{seg}.stream.jsonl"
+        seg_meta = {**meta, "segment": seg, "segment_input_sha256": sha(seg_in)}
+        sealer = Sealer(out, label, stream, seg_meta, {r["task_id"] for r in todo}, set(),
+                        every_records=int(ex["completion_shards"]["seal_every_records"]),
+                        every_seconds=float(ex["completion_shards"]["seal_every_seconds"]))
+        proto = c["protocol"]["teacher"]
+        cmd = [VLLM_PY, RUNNER, "--model", proto["model"], "--revision", proto["revision"],
+               "--label", f"{label}.seg{seg}", "--tasks", str(seg_in), "--mode", "generate",
+               "--session-limit", str(ex["session_limit"]), "--seed-base", str(ex["seed_base"] + k),
+               "--system", f["system"], "--action-protocol", ex["action_protocol"],
+               "--stream-completed", str(stream), "--out", str(out / f"{label}.seg{seg}.raw.jsonl")]
+        try:
+            rc = run(cmd, out / f"{label}.seg{seg}.log", sealer.seal)
+        finally:
+            sealer.seal(force=True)                     # whatever finished is sealed on every path
+        entry["segments"].append({"segment": seg, "rc": rc, "todo": len(todo), "sealed": len(sealer.have),
+                                  "anomalies": sealer.anomalies})
+        have = sealed(out, label, c["launch_identity_sha256"])
+    entry["sealed"] = len(have)
+    entry["complete"] = set(have) == want
+    if entry["complete"]:
+        shards = sorted(out.glob(f"{label}.part*.jsonl"))
+        (out / f"{label}.complete").write_text(json.dumps(
+            {"label": label, "tasks": len(want), "shards": [{"name": s.name, "sha256": sha(s)} for s in shards]},
+            indent=1) + "\n")
+    entry["records"] = have
+    return entry
 
 
-def main(argv=None, *, run=run_battery, authorize=authorize) -> int:
+def main(argv=None, *, run=run_battery, authorize=authorize, repo: Path | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--plan", required=True)
-    ap.add_argument("--inputs-dir", required=True)
     ap.add_argument("--authorization", required=True)
     ap.add_argument("--status", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--model", default=None, help="teacher dir; default: the protocol's hub id + revision")
+    ap.add_argument("--resume-from", default=None, help="shards secured by an earlier session")
     args = ap.parse_args(argv)
+    repo = Path(repo or A.REPO)
     out, status = Path(args.out), Path(args.status)
     out.mkdir(parents=True, exist_ok=True)
 
     def mark(m: str) -> None:
-        with status.open("a") as f:
-            f.write(f"{time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())} MARKER:{m}\n")
+        with status.open("a") as fh:
+            fh.write(f"{time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())} MARKER:{m}\n")
         print(f"MARKER:{m}", flush=True)
 
-    record = {"schema": "aadistill.stage2.reasoning_data.generation_session/v1",
-              "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "groups": [], "passes": {}}
+    record = {"schema": "aadistill.stage2.reasoning_data.generation_session/v2",
+              "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "groups": []}
     evidence = out / "generation_session.json"
 
     def save() -> None:
         evidence.write_text(json.dumps(record, indent=1) + "\n")
 
     try:
-        plan_path = Path(args.plan)
-        plan = json.loads(plan_path.read_text())
-        record["contract"] = {"plan_sha256": sha(plan_path), **authorize(Path(args.authorization), sha(plan_path))}
-        inputs = Path(args.inputs_dir)
-        for f in plan["inputs"]:
-            if sha(inputs / f["file"]) != f["sha256"]:
-                raise SystemExit(f"{f['file']} does not hash to the plan's {f['sha256'][:12]}")
-        tasks = {}
-        for p in plan["pools"]:
-            if sha(A.REPO / p["path"]) != p["sha256"]:
-                raise SystemExit(f"{p['path']} does not hash to the plan's {p['sha256'][:12]}")
-            tasks.update({t["task_id"]: t for t in A.jsonl(A.REPO / p["path"])})
-        proto = A.read_json(A.CONFIG_DIR / "generation_protocol.json")["teacher"]
-        record["contract"]["status"] = "ok"
+        c = contract(repo, Path(args.authorization), authorize)
+        if args.resume_from:
+            for p in sorted(Path(args.resume_from).glob("pass*.part*.*")):
+                if p.suffix in (".jsonl", ".done") and not (out / p.name).exists():
+                    shutil.copy2(p, out / p.name)
+        record["contract"] = {k: c[k] for k in ("authorization_id", "hard_cap_usd", "launch_identity_sha256",
+                                                "harness_digest")} | {"status": "ok"}
     except BaseException as exc:  # noqa: BLE001
         record["contract"] = {"status": "failed", "error": repr(exc)}
         save()
@@ -151,57 +292,38 @@ def main(argv=None, *, run=run_battery, authorize=authorize) -> int:
         return 2
     save()
     mark("CONTRACT_OK")
-    model = ["--model", args.model] if args.model else ["--model", proto["model"], "--revision", proto["revision"]]
-
-    retry: dict[str, list[str]] = {}
-    for k in (0, 1):
-        for f in plan["inputs"]:
-            label = f"pass{k}_{Path(f['file']).stem}"
-            tagged, done = out / f"{label}.jsonl", out / f"{label}.done"
-            entry = {"label": label, "pass": k, "seed_base": SEED_BASE + k}
-            t0 = time.time()
+    inputs = repo / GOV.INPUTS_DIR
+    complete = True
+    for f in c["plan"]["inputs"]:
+        ids = None
+        for k in (0, 1):
             try:
-                src = inputs / f["file"]
                 if k == 1:
-                    if label.replace("pass1_", "pass0_") not in retry:
-                        continue                       # its first pass did not finish
-                    ids = set(retry[label.replace("pass1_", "pass0_")])
-                    if not ids:
-                        continue
-                    src = out / f"{label}.input.jsonl"
-                    src.write_text("".join(json.dumps(r, sort_keys=True, ensure_ascii=False) + "\n"
-                                           for r in A.jsonl(inputs / f["file"]) if r["task_id"] in ids))
-                if done.is_file() and tagged.is_file() and done.read_text().strip() == sha(tagged):
-                    entry.update(status="ok", resumed=True, records_sha256=sha(tagged))
-                else:
-                    raw = out / f"{label}.raw.jsonl"
-                    cmd = [VLLM_PY, RUNNER, *model, "--label", label, "--tasks", str(src), "--mode", "generate",
-                           "--session-limit", str(plan["session_limit"]), "--seed-base", str(SEED_BASE + k),
-                           "--system", f["system"], "--out", str(raw)]
-                    rc = run(cmd, out / f"{label}.log")
-                    if rc != 0 or not raw.is_file():
-                        raise RuntimeError(f"run_battery exited {rc}; see {label}.log")
-                    entry["records"] = tag(raw, tagged, k, SEED_BASE + k, sha(src))
-                    entry["records_sha256"] = sha(tagged)
-                    done.write_text(entry["records_sha256"] + "\n")
-                    entry["status"] = "ok"
+                    if ids is None or not ids:
+                        break
+                g = run_group(c, out, inputs, f, k, ids, run, mark)
+                records = g.pop("records")
+                record["groups"].append(g)
+                if not g["complete"]:
+                    complete = False
+                    mark(f"{UNIT_FAILED}:{g['label']}")
+                    break                       # no second pass on an incomplete first
+                mark(f"{UNIT_OK}:{g['label']}")
                 if k == 0:
-                    retry[label] = second_pass(tasks, tagged)
-                    entry["second_candidate_tasks"] = len(retry[label])
-                entry["seconds"] = round(time.time() - t0, 1)
-                mark(f"{UNIT_OK}:{label}")
+                    ids = second_pass(c, records)
+                    g["second_candidate_tasks"] = len(ids)
             except BaseException as exc:  # noqa: BLE001
-                entry.update(status="failed", error=repr(exc), traceback=traceback.format_exc()[-3000:],
-                             seconds=round(time.time() - t0, 1))
-                mark(f"{UNIT_FAILED}:{label}")
-            record["groups"].append(entry)
+                complete = False
+                record["groups"].append({"input": f["file"], "pass": k, "status": "failed", "error": repr(exc),
+                                         "traceback": traceback.format_exc()[-3000:]})
+                mark(f"{UNIT_FAILED}:pass{k}_{Path(f['file']).stem}")
+                break
             save()
-    failed = [g["label"] for g in record["groups"] if g["status"] != "ok"]
-    record.update(finished_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), failed=failed,
-                  terminal="ALL_DONE" if not failed else "RUNS_FAILED")
+    record.update(finished_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                  terminal="ALL_DONE" if complete else "RUNS_INCOMPLETE")
     save()
-    mark("ALL_DONE" if not failed else "RUN_FAILED")
-    return 0 if not failed else 3
+    mark("ALL_DONE" if complete else "RUN_FAILED")
+    return 0 if complete else 3
 
 
 if __name__ == "__main__":

@@ -176,7 +176,7 @@
       "_proxy": "same source and template, answerable questions"
     }
   },
-  "candidate_policy": "up to 2 candidates per task, the second only when the first is rejected; every candidate recorded. Yield is planned at the measured n = 1 rate per generated token, which a retry does not change.",
+  "candidate_policy": "up to 2 candidates per task, the second only when the first is rejected; ONE for MBPP (generation_protocol.json :: execution.no_second_candidate_verifiers, frozen 2026-10-22); every candidate recorded. Yield is planned at the measured n = 1 rate per generated token; the two-candidate unit yield 1-(1-p)^2 is a simplifying assumption, not a guarantee",
   "_yield": "accepted supervised tokens per generated token, measured per stratum from Stage-0 teacher_cal (<= 8,192 rendered, verified) and corpus_v2 (verified under the contract); replaced by the generation run's own figure",
   "new_arm_rendered_per_supervised": 1.12,
   "_new_arm_rendered_per_supervised": "share-weighted rendered/supervised from the dry run (fluid traces 1.055) and the audit's selected corpus_v2 sessions (gsm8k 1.068, openmath 1.025, rag 1.396, multihop 2.371); a planning figure",

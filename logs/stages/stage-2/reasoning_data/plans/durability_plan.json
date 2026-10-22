@@ -22,7 +22,7 @@
       "what": "room on EXISTING storage for P1's generation records (text and token ids; about 0.1 GB per copy at the plan's upper bound, teacher_cal's 59 MB per 4.5M tokens)",
       "relay": "aadistill.runtime.hub_capacity.would_accept on AlphaAvatar/aadistill-artifacts, 2026-10-22T15:53Z, fresh random oids, nothing uploaded: 2 x 150 MB ACCEPTED, 1 x 1 GB ACCEPTED, 1 x 2 GB ACCEPTED",
       "dev_box_free_bytes": 9974575104,
-      "route": "teacher_cal's: each finished pass group writes <label>.done with its sha256 (generation_driver), the launcher's poll hook fetches it to the dev box and the closeout checks the sha; a second copy on the relay, downloaded back and hash-compared before teardown",
+      "route": "completion shards: run_battery streams every finished episode, generation_driver seals finished candidates into hash-marked shards (every 100 records or 300 s), the launcher pulls every marked shard on each poll and hash-checks it into <scr>/store, and the run's closeout re-hashes all of them; a second copy goes to the relay from the dev box at P1v and is read back",
       "reading": "P1 needs no new storage: the network volume is the TRAINING backend (P1g/P2), not created for P1 (maintainer 2026-10-22)"
     }
   },

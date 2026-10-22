@@ -13294,3 +13294,59 @@ on a paid pod.
 - **Revisit when.** The maintainer answers the P1 application. After P1v,
   B's real pack fixes M1's values and P2's cost, P1g is applied for next, and
   P2 only after P1g passes.
+
+## 2026-10-22 — Maintainer: P1 must be launchable; comparators, completion-time saving and launch wiring at $0, final P1 + P1v application
+
+- **Context.** The maintainer accepted the design round and closed the
+  candidate-identity and persist_unit v2 corrections. D4, arm B `@v1`, 70/30,
+  M1, the static primary conclusion and the exploratory interactive scope stay
+  as they are. `df3e73a7` could not launch P1 yet, so only what P1 needs was
+  asked for. No new spending, no GPU, pod, paid storage or teacher generation,
+  no grant, no cap change.
+- **Decision (maintainer).**
+  - Fix the comparators actually used, parsing the whole answer per type.
+  - Save finished candidates before a group ends, and resume only what is
+    missing.
+  - Wire the existing launcher, binding the plan, the protocol and the code
+    identity at the launch boundary.
+  - Label 9,874,990 tokens a prediction and q a simplifying assumption.
+  - Freeze MBPP's single candidate.
+  - Never complete B by repetition, a lower gate, another source or another
+    mix.
+  - Resubmit P1 + P1v alone, with the budget under conservative occupancy.
+    The requested project cap is $666.17 if the snapshot is still $658.15 and
+    the hard cap is still $8.02. This is a value for approval, not applied.
+- **Done by the agent at $0** (`docs/stages/stage-2/reasoning_data/H1.md` §12
+  owns the evidence):
+  - **Comparators:** whole-answer parsers; per-module answer types with
+    reasons; a verifier error costs only its candidate; the build refuses
+    every structural perturbation of each gold. `external_tasks_v2`
+    supersedes v1, with the same tasks.
+  - **Completion-time saving:** `run_battery --stream-completed`, and the
+    driver seals hash-marked shards every 100 records or 300 s, which the
+    launcher pulls on each poll. Restart and `--resume-store` re-verify the
+    shards and generate only the missing candidates. `ALL_DONE` needs every
+    task exactly once.
+  - **Binding:** `governance.py` binds launch identity + harness (closure
+    test); `issue` needs a grant naming the identity; the driver re-checks on
+    the pod before reading the protocol, and passes action protocol v2,
+    session limit, seed base and teacher from it.
+  - **Launcher:** `h1_generation_launch.py` on the shared session runner:
+    budget, watchdog, setup, prechecks, shard pulls, teardown, provider
+    confirmation and closeout. It is registered in `SESSION_LAUNCHERS`.
+  - **Application:** `authorization_proposal.json` v4. The list, the
+    prediction and the cost ($5.34 / $8.02) are unchanged.
+- **Alternatives considered.**
+  - Shards as separate generator runs: refused, since it reloads the teacher.
+  - Relaxing the core rule that a session declare a route for its inputs:
+    refused. The inputs travel as a declared local asset and are also
+    committed beside the plan.
+  - Writing a new storage or logging layer: not done.
+- **Risks.**
+  - Proxy acceptance rates (PrOntoQA, answerability) may be optimistic.
+  - The second candidate's yield assumption.
+  - The launch still needs the session-commit bundle on the relay and a
+    fresh provider snapshot. There is no launch-bound sweep: the P1 pod runs
+    no suite, and the sweep registry names it in `NO_CONTRACT` with that
+    reason.
+- **Revisit when.** The maintainer answers the P1 + P1v application.

@@ -74,7 +74,8 @@
         "nearest_evaluation_mechanism": "ordering@v2 held-out order.seating (positions under explicit constraints)",
         "exposure": "shares_primitive"
       },
-      "answer_type": "text"
+      "answer_type": "text_ci",
+      "answer_type_reason": "names are listed lower-case and capitalised in the clues; no two names differ by case alone"
     },
     {
       "source": "reasoning_gym",
@@ -92,7 +93,8 @@
         "nearest_evaluation_mechanism": "knights_knaves@v1 held-out kk.* (truth/lie consistency)",
         "exposure": "shares_primitive"
       },
-      "answer_type": "number"
+      "answer_type": "number",
+      "answer_type_reason": "a count of solutions"
     },
     {
       "source": "reasoning_gym",
@@ -110,7 +112,8 @@
         "nearest_evaluation_mechanism": "defined_ops@v1 held-out comp.chain* (compose stated operations)",
         "exposure": "shares_primitive"
       },
-      "answer_type": "text"
+      "answer_type": "text_ci",
+      "answer_type_reason": "one lower-case relationship word; capitalisation carries no meaning"
     },
     {
       "source": "reasoning_gym",
@@ -128,7 +131,8 @@
         "nearest_evaluation_mechanism": "none",
         "exposure": "none"
       },
-      "answer_type": "text"
+      "answer_type": "assignment",
+      "answer_type_reason": "a letter-to-digit mapping; the pairs' order is not part of the answer, the puzzle's letters are kept as written"
     },
     {
       "source": "reasoning_gym",
@@ -146,7 +150,8 @@
         "nearest_evaluation_mechanism": "none",
         "exposure": "none"
       },
-      "answer_type": "matrix"
+      "answer_type": "matrix",
+      "answer_type_reason": "a 4x4 grid; rows and their order are the answer"
     },
     {
       "source": "reasoning_gym",
@@ -183,7 +188,8 @@
         "exposure": "shares_primitive"
       },
       "answer_type": "text",
-      "drop_if_gold_in_prompt": true
+      "drop_if_gold_in_prompt": true,
+      "answer_type_reason": "the exact final string; case is part of a string"
     },
     {
       "source": "reasoning_gym",
@@ -202,7 +208,8 @@
         "exposure": "none"
       },
       "answer_type": "matrix",
-      "drop_if_gold_in_prompt": true
+      "drop_if_gold_in_prompt": true,
+      "answer_type_reason": "a square grid; shape and order are the answer"
     },
     {
       "source": "reasoning_gym",
@@ -220,7 +227,8 @@
         "nearest_evaluation_mechanism": "none",
         "exposure": "none"
       },
-      "answer_type": "matrix"
+      "answer_type": "token_seq",
+      "answer_type_reason": "a flat space-separated list in spiral order; line breaks inside it carry no structure, order does"
     },
     {
       "source": "reasoning_gym",
@@ -238,7 +246,8 @@
         "nearest_evaluation_mechanism": "none",
         "exposure": "none"
       },
-      "answer_type": "matrix"
+      "answer_type": "matrix",
+      "answer_type_reason": "a grid given as JSON rows; shape and order are the answer"
     },
     {
       "source": "reasoning_gym",
@@ -256,7 +265,8 @@
         "nearest_evaluation_mechanism": "none",
         "exposure": "none"
       },
-      "answer_type": "matrix"
+      "answer_type": "matrix",
+      "answer_type_reason": "a distance grid of the input's shape"
     },
     {
       "source": "reasoning_gym",
@@ -274,7 +284,8 @@
         "nearest_evaluation_mechanism": "scan_language@v1 held-out scan.* (interpret a command language)",
         "exposure": "shares_primitive"
       },
-      "answer_type": "text"
+      "answer_type": "text",
+      "answer_type_reason": "the program's exact output; case and punctuation are output bytes"
     },
     {
       "source": "reasoning_gym",
@@ -310,7 +321,8 @@
         "nearest_evaluation_mechanism": "grid_transform@v1 held-out grid.count_cells (counts cells, no connectivity)",
         "exposure": "none"
       },
-      "answer_type": "number"
+      "answer_type": "number",
+      "answer_type_reason": "an area"
     },
     {
       "source": "reasoning_gym",
@@ -328,7 +340,8 @@
         "nearest_evaluation_mechanism": "none",
         "exposure": "none"
       },
-      "answer_type": "number_set"
+      "answer_type": "decimal_set",
+      "answer_type_reason": "the real roots as decimals rounded to 4 places; the roots' order is not part of the answer"
     },
     {
       "source": "reasoning_gym",
@@ -464,7 +477,8 @@
         "nearest_evaluation_mechanism": "none",
         "exposure": "none"
       },
-      "answer_type": "text"
+      "answer_type": "int_set",
+      "answer_type_reason": "the indexes of the necessary premises: which premises, not in what order"
     },
     {
       "source": "reasoning_core",
@@ -500,7 +514,8 @@
         "nearest_evaluation_mechanism": "defined_ops@v1 held-out comp.conditional (apply stated operations conditionally)",
         "exposure": "shares_primitive"
       },
-      "answer_type": "text"
+      "answer_type": "text_ci",
+      "answer_type_reason": "one value label (A-F); labels do not differ by case alone"
     },
     {
       "source": "reasoning_core",
@@ -518,7 +533,8 @@
         "nearest_evaluation_mechanism": "none",
         "exposure": "none"
       },
-      "answer_type": "text"
+      "answer_type": "repr",
+      "answer_type_reason": "the exact Python repr of the returned value"
     },
     {
       "source": "reasoning_core",
@@ -536,7 +552,8 @@
         "nearest_evaluation_mechanism": "none",
         "exposure": "none"
       },
-      "answer_type": "text"
+      "answer_type": "token_seq",
+      "answer_type_reason": "the state-label sequence; order is the answer"
     },
     {
       "source": "reasoning_core",
@@ -554,7 +571,8 @@
         "nearest_evaluation_mechanism": "letter_analogy@v2 (evaluation-only) is letter-string analogy, a different task type; same axis only",
         "exposure": "none"
       },
-      "answer_type": "text"
+      "answer_type": "text_ci",
+      "answer_type_reason": "a case id (M0..Mk) or None; ids do not differ by case alone"
     },
     {
       "source": "reasoning_core",
@@ -613,7 +631,8 @@
         3,
         4,
         5
-      ]
+      ],
+      "answer_type_reason": "the label True/False (the process gate is separate)"
     },
     {
       "source": "mathematics_dataset",
@@ -635,7 +654,8 @@
         "nearest_evaluation_mechanism": "defined_ops@v1 held-out comp.chain2 / comp.chain4 (evaluate composed stated definitions)",
         "exposure": "shares_primitive"
       },
-      "answer_type": "number"
+      "answer_type": "number",
+      "answer_type_reason": "the solution value"
     },
     {
       "source": "mathematics_dataset",
@@ -679,7 +699,8 @@
         "nearest_evaluation_mechanism": "defined_ops@v1 held-out comp.chain2 / comp.chain4 (evaluate composed stated definitions)",
         "exposure": "shares_primitive"
       },
-      "answer_type": "number"
+      "answer_type": "number",
+      "answer_type_reason": "the value"
     },
     {
       "source": "mathematics_dataset",
@@ -701,7 +722,8 @@
         "nearest_evaluation_mechanism": "defined_ops@v1 held-out comp.chain2 / comp.chain4 (evaluate composed stated definitions)",
         "exposure": "shares_primitive"
       },
-      "answer_type": "number"
+      "answer_type": "number",
+      "answer_type_reason": "the gcd"
     },
     {
       "source": "mathematics_dataset",
@@ -800,13 +822,19 @@
     "limits": "a declared review, not an execution check: it can miss a mechanism a module's generator produces only at some configurations"
   },
   "answer_types": {
-    "text": "whitespace- and case-normalized exact match",
-    "number": "numeric equality within 1e-9",
-    "number_set": "the same multiset of numbers within 1e-6",
-    "matrix": "the same token grid (rows of tokens)",
-    "bool": "True/False",
+    "text": "CASE-SENSITIVE exact string after whitespace runs collapse and LaTeX text wrappers are removed; nothing else is normalized (a trailing period is part of the string)",
+    "text_ci": "the same, case-folded and a trailing period dropped: only for modules whose answers cannot differ by case alone (the row's answer_type_reason says why)",
+    "bool": "exactly True or False (any case, \\text{} unwrapped); 'not True' is unparseable",
+    "number": "ONE number literal and nothing else (integer, decimal, a/b, \\frac{a}{b}, signed, optionally after 'x ='), equal as an exact rational; '7 apples', 'not 7', '3+4' and two numbers are unparseable",
+    "decimal_set": "a complete ,/;/and-separated list, every element one number; the same multiset within 1e-4 (the gold is rounded to 4 decimal places); a missing or extra element, or any non-number, refuses",
+    "int_set": "a complete list of distinct non-negative integers, as a set (order not part of the answer); a repeat or a non-integer refuses",
+    "token_seq": "a complete whitespace/comma-separated token sequence, order and case kept",
+    "assignment": "letter=digit pairs, every part one pair, no letter twice; equal as a mapping (pair order not part of the answer), letter case kept",
+    "repr": "a Python literal compared token by token without evaluation: whitespace between tokens ignored, string contents, number literals (2 and 2.0 differ) and names kept",
+    "matrix": "rows of cells with the row structure kept ([[a,b],[c,d]] or one row per line, LaTeX arrays allowed): same shape, every cell equal as a string",
     "needs_checker": "no project check exists: every candidate would be UNVERIFIABLE, so a module of this type is not a candidate (deferred) and enters no paid generation list",
-    "checker": "a project checker in scripts/stages/stage-2/reasoning_data/checkers.py (CHECKERS, keyed source/module): a validity check or simulation, or value equality through a safe parser; never a library scorer, never evaluation of answer text"
+    "checker": "a project checker in scripts/stages/stage-2/reasoning_data/checkers.py (CHECKERS, keyed source/module): a validity check or simulation, or value equality through a safe parser; never a library scorer, never evaluation of answer text",
+    "_parsers": "generation_adapter.COMPARE: each parses the WHOLE boxed answer and raises Unparseable otherwise (an unparseable answer is incorrect, never partly matched); external_tasks.build refuses a pool whose comparator does not accept each kept gold end to end and refuse every structural perturbation of it (generation_adapter.perturbations)"
   },
   "_drop_if_gold_in_prompt": "only where the gold appearing verbatim in the prompt means a degenerate item (the answer IS the input: an unchanged string, an identity rotation); for choice and selection modules the gold is one of the listed options by construction",
   "_levels": "a row's levels are what the exporter generates (default 0 and 2, the library difficulty levels of reasoning_gym / reasoning_core); prontoqa: hop counts; mathematics_dataset: train entropy levels 1 (medium) and 2 (hard)"

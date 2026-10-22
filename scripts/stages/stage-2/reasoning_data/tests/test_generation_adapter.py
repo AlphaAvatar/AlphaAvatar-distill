@@ -109,4 +109,5 @@ def test_sessions_of_one_unit_naming_different_targets_are_excluded_whole(monkey
 
 def test_a_boxed_text_wrapper_is_the_answer_it_wraps():
     assert G.COMPARE["bool"]("\\text{False}", "False") and not G.COMPARE["bool"]("\\text{True}", "False")
-    assert G.COMPARE["text"]("\\text{Alice}", "alice") and not G.COMPARE["text"]("\\text{Bob}", "alice")
+    assert G.COMPARE["text_ci"]("\\text{Alice}", "alice") and not G.COMPARE["text_ci"]("\\text{Bob}", "alice")
+    assert G.COMPARE["text"]("\\text{abc}", "abc") and not G.COMPARE["text"]("\\text{ABC}", "abc")

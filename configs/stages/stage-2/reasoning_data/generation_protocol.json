@@ -18,7 +18,7 @@
     "min_p": 0.0,
     "_preset": "the teacher's official recommendation, as corpus_v2 and teacher_cal used",
     "seed_rule": "a distinct recorded seed per candidate and per turn",
-    "candidates": "up to 2 per task: the second (seed base + 1) only when the first is rejected, judged on the pod by generation_adapter.candidate (pure Python); none where the verdict needs the dev-box code sandbox; every candidate recorded, tagged with its candidate_index (the pass) and never defaulted"
+    "candidates": "up to 2 per task: the second (seed base + 1) only when the first is rejected, judged on the pod by generation_adapter.candidate (pure Python); none for the verifiers in execution.no_second_candidate_verifiers (MBPP, frozen); every candidate recorded, tagged with its candidate_index (the pass) and never defaulted. The two-candidate yield q = 1-(1-p)^2 used for planning is a SIMPLIFYING ASSUMPTION: a retry of a hard task is not independent of its first failure"
   },
   "allowance": {
     "rule": "per turn: session limit 8,184 = block_len 8,192 - 8 (aadistill.data.sessions.completion_budget's margin), minus the rendered prompt (run_battery --session-limit)",
@@ -84,5 +84,23 @@
   ],
   "isolation": "every task pool passes configs/stages/stage-2/reasoning_data/isolation_rules.json before any candidate is generated for it",
   "durability": "the generation records (token ids included) are pushed off the pod and hash-checked before teardown, as teacher_cal's were; they are small (teacher_cal: 59 MB for 4.5M tokens)",
-  "authorizes": "nothing"
+  "authorizes": "nothing",
+  "execution": {
+    "_what": "the values generation_driver passes to run_battery, read from THIS file after the launch identity (which hashes it) is checked on the pod; nothing here is a default in code",
+    "action_protocol": "v2",
+    "session_limit": 8184,
+    "seed_base": 20261022,
+    "seed_rule": "candidate pass k runs with seed base seed_base + k; a turn's seed is run_battery.request_seed(base, task_id, turn), so a resumed task regenerates under the seed its candidate identity names",
+    "sampling_must_equal": "run_battery.GENERATE_SAMPLING (checked by the driver; a mismatch refuses the run)",
+    "no_second_candidate_verifiers": [
+      "code_asserts"
+    ],
+    "_no_second_candidate": "FROZEN for H1 (maintainer 2026-10-22): MBPP tasks (verifier code_asserts) get ONE candidate, because their verdict needs the dev-box sandbox and the pod never runs teacher code; a short code cell is reported, never topped up by an automatic new paid session",
+    "completion_shards": {
+      "seal_every_records": 100,
+      "seal_every_seconds": 300,
+      "_what": "finished candidates leave the runner's per-episode stream as sealed, hash-marked shards at least this often; the launcher pulls every marked shard on each poll"
+    }
+  },
+  "completion_rule": "the run is ALL_DONE only when every task of every pass input has exactly one record; otherwise RUN_FAILED with every sealed shard kept. Within the P1 cost bound finished results are preserved; if the corpus then falls short, B is NOT completed by repeating units, lowering the correctness gate, substituting a source or changing the mix -- the shortfall is reported"
 }
