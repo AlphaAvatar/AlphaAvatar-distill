@@ -1,0 +1,19 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1_p1_grant/v1",
+ "granted_by": "maintainer (formal authorization message of 2026-10-22: H1 P1 + P1v)",
+ "granted_utc": "2026-10-22",
+ "decision": "Maintainer formally approves H1 P1 teacher-native generation (one A100-80GB paid session, the frozen stage2.reasoning_master@v1 generation list and protocol) and P1v CPU verification on the dev box; accepted preparation stage2/reasoning-data @ 8a425538d04f6ccdf137301e4e0b4e011be6d778",
+ "phase": "P1",
+ "branch": "stage2/reasoning-data",
+ "accepted_commit": "8a425538d04f6ccdf137301e4e0b4e011be6d778",
+ "launch_identity_sha256": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
+ "harness_digest": "d6affe40cdd8b8c1786f36ee701bdf4213d3174fc7e8ccad4a6dad25715fbbf1",
+ "expected_usd": 5.34,
+ "hard_cap_usd": 8.02,
+ "project_cumulative_cap_usd": 666.17,
+ "occupancy_basis": "provider all-time billing counted once, $658.15 at the recorded snapshot; the 34 historical pods and the anchor stay OPEN; the cap is absolute and never raised by a new snapshot -- a material change pauses for the maintainer",
+ "scope": "P1 teacher generation only (one A100-80GB session) and P1v at $0 on the dev box; NOT P1g, P2, student recovery, formal evaluation, paid network volume, H2/H3 or any additional paid session",
+ "on_failure": "preserve every recoverable result within the cap, provider-confirmed teardown; a new paid session needs a new maintainer approval",
+ "on_short_corpus": "report the gap; no automatic paid top-up, no lower correctness gate, no repetition, no source substitution, no mix change",
+ "run_id": "h1gen_20261022_190653"
+}
