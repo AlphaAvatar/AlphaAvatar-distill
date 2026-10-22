@@ -1750,7 +1750,9 @@ STAGE_2 = [
                    "application at $0",
                    "logs/budget/decisions.md -- 2026-10-22: Maintainer: P1 must "
                    "be launchable; comparators, completion-time saving and launch "
-                   "wiring at $0, final P1 + P1v application"],
+                   "wiring at $0, final P1 + P1v application",
+                   "logs/budget/decisions.md -- 2026-10-22: Maintainer: two "
+                   "launch-boundary checks before any P1 grant"],
         canonical_log_destination="logs/stages/stage-2/reasoning_data",
         classification_reason=(
             "Stage 2 by subject and product: it varies the offline training "

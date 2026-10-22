@@ -13350,3 +13350,34 @@ on a paid pod.
     no suite, and the sweep registry names it in `NO_CONTRACT` with that
     reason.
 - **Revisit when.** The maintainer answers the P1 + P1v application.
+
+## 2026-10-22 — Maintainer: two launch-boundary checks before any P1 grant
+
+- **Context.** The maintainer closed the scientific design, sources,
+  generation scheme and P1/P1v scope. Before a paid authorization is issued,
+  two boundary checks were to be corrected. This message authorizes no
+  spending and issues no real authorization.
+- **Decision (maintainer).**
+  - A grant must name the harness digest the maintainer approved, and issue
+    must check it beside the launch identity, never adopting a new digest.
+  - A failed shard listing must not read as "zero shards secured". Verify
+    against the obtained listing and the local bytes, with bounded retries
+    inside the reserve, and record what cannot be verified without holding
+    the budget's hard deadline.
+  - The historical pods stay OPEN.
+  - The conservative cap request ($666.17 at $658.15 + $8.02) does not rise
+    automatically with the snapshot.
+  - After an explicit approval the agent writes the machine-readable grant.
+- **Done by the agent at $0** (`docs/stages/stage-2/reasoning_data/H1.md` §13):
+  - **`governance.issue`:** requires and checks `harness_digest`.
+  - **`h1_generation_launch`:**
+    - the tri-state shard check (listing sentinel, return code and timeout;
+      local re-hash; 3 tries in 600 s, recorded);
+    - the application's harness becomes `1ea5ecbd…`, and `5a16440c…` is
+      marked superseded;
+    - the launch identity is unchanged, `c0eb4fd2…`.
+- **Risks.**
+  - In the worst case, an unverifiable shard set holds the pod under the
+    watchdog until the hard deadline, which is inside the $8.02 cap.
+- **Revisit when.** The maintainer approves or declines the P1 + P1v
+  application.

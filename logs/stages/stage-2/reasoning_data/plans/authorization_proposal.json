@@ -38,8 +38,7 @@
  ],
  "engineering_before_the_P1_launch_at_0_usd": [
   "stage the session-commit bundle on the relay (bundle_on_relay refuses otherwise)",
-  "a fresh provider snapshot and reconciliation, and a relay capacity re-probe at true size, at launch",
-  "no launch-bound sweep: the P1 pod runs no repository suite, so there is no pod test selection to certify (tests/architecture/test_sweep_registry_models_its_own_session.py :: NO_CONTRACT names it with that reason)"
+  "the read-only checks in launch_preflight_read_only, at launch"
  ],
  "phases": [
   {
@@ -83,8 +82,35 @@
   "launcher": "scripts/stages/stage-2/reasoning_data/h1_generation_launch.py (SessionSpec on aadistill.infrastructure.session_runner)",
   "governance": "scripts/stages/stage-2/reasoning_data/governance.py :: POLICY, launch_identity, HARNESS, issue (requires a maintainer grant document naming the launch identity)",
   "launch_identity_sha256": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
-  "harness_digest": "5a16440caad168bc02090b1710920942ec7522713d40d656f768dff11a218167",
+  "harness_digest": "1ea5ecbd74b75f1e39e54fcc252eb184cf7ea728bf2816f10a27f9d2bd722d55",
   "_binding": "the authorization binds launch_identity_sha256 (plan + protocol + inputs + pools) and harness_digest; the launcher checks both before any pod, the driver again on the pod before reading the protocol",
-  "setup_branch": "scripts/shared/pod/autoinit_preflight_setup.sh :: SESSION_KIND=stage2_h1_generation (AUTHORIZATION_OK): the artifact loaded by its own type, bound to the launch identity and harness recomputed on the pod; exit 98 otherwise"
- }
+  "setup_branch": "scripts/shared/pod/autoinit_preflight_setup.sh :: SESSION_KIND=stage2_h1_generation (AUTHORIZATION_OK): the artifact loaded by its own type, bound to the launch identity and harness recomputed on the pod; exit 98 otherwise",
+  "superseded_harness_digests": [
+   {
+    "digest": "5a16440caad168bc02090b1710920942ec7522713d40d656f768dff11a218167",
+    "why": "0029c770's code; superseded 2026-10-22 by the issue-binds-the-approved-harness and tri-state shard-securing corrections, never an identity of the corrected code"
+   }
+  ],
+  "grant_document": {
+   "fields": [
+    "granted_by",
+    "decision",
+    "phase (= P1)",
+    "launch_identity_sha256",
+    "harness_digest",
+    "expected_usd",
+    "hard_cap_usd",
+    "scope (optional)"
+   ],
+   "rule": "governance.issue refuses a grant missing either identity, or whose launch identity or harness digest is not the one recomputed from disk at issue; a changed digest is never adopted",
+   "who_writes_it": "the agent, from the maintainer's explicit approval message, naming exactly the two values recorded here"
+  }
+ },
+ "launch_preflight_read_only": [
+  "provider snapshot and reconciliation: 0 pods, 0 volumes, $0/h, and all-time billing; the requested project cap is that billing + P1's hard cap and does NOT rise automatically if the snapshot moved -- a changed figure goes back to the maintainer",
+  "account balance at least the budget's account_balance_required_usd (SessionRunner check_account_funds)",
+  "GPU offer at the max price (SessionRunner check_gpu_offered) and the live securePrice the hard deadline derives from",
+  "the session-commit bundle present on the relay (bundle_on_relay)",
+  "relay capacity at the records' true size (hub_capacity.would_accept, nothing uploaded) and dev-box free space for <scr>/store"
+ ]
 }

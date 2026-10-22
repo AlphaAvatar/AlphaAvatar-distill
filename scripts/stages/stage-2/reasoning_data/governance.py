@@ -16,9 +16,11 @@ One authorization artifact, loaded under `POLICY`, binds three things:
 * a hard cap the planned hard threshold must fit (`SessionRunner.make_plan`).
 
 `issue` writes an artifact ONLY from a maintainer grant document (`--grant`,
-required) that names this launch identity; there is no grant for H1 today, so
-nothing can be issued by running code. Dollar amounts live in the grant
-document, never here.
+required) that names BOTH the launch identity and the harness digest the
+maintainer approved; each is recomputed from disk and must equal the grant's,
+so neither the plan nor the code can move between approval and issue. There is
+no grant for H1 today, so nothing can be issued by running code. Dollar
+amounts live in the grant document, never here.
 """
 from __future__ import annotations
 
@@ -148,16 +150,19 @@ def authorization_path(run_id: str) -> Path:
 
 def issue(run_id: str, *, grant_path: Path, repo_root: Path = REPO, out: Path | None = None) -> Path:
     """Write the one-use authorization for `run_id` from a maintainer grant
-    document, or refuse. The grant must name the launch identity it approves
-    (``launch_identity_sha256``), who granted it, and the expected and hard-cap
-    amounts; an identity that changed since the grant is refused, and an
-    existing artifact is never re-issued."""
+    document, or refuse. The grant must name the launch identity
+    (``launch_identity_sha256``) AND the harness digest (``harness_digest``) it
+    approves, who granted it, and the expected and hard-cap amounts. Both are
+    recomputed from disk and must equal the grant's: a plan or a harness that
+    changed since the grant is refused, never adopted. An existing artifact is
+    never re-issued."""
     grant_path = Path(grant_path)
     if not grant_path.is_file():
         raise AuthorizationError(f"no grant document at {grant_path}: an H1 generation authorization is "
                                  "issued only from a maintainer grant")
     g = json.loads(grant_path.read_text())
-    for key in ("granted_by", "decision", "launch_identity_sha256", "expected_usd", "hard_cap_usd"):
+    for key in ("granted_by", "decision", "launch_identity_sha256", "harness_digest", "expected_usd",
+                "hard_cap_usd"):
         if g.get(key) in (None, ""):
             raise AuthorizationError(f"{grant_path} lacks {key!r}")
     if g.get("phase") != "P1":
@@ -167,10 +172,14 @@ def issue(run_id: str, *, grant_path: Path, repo_root: Path = REPO, out: Path | 
         raise AuthorizationError(f"the grant approves launch identity {g['launch_identity_sha256'][:12]}, which "
                                  f"this script does not derive (it derives {lid[:12]}): the plan, protocol, "
                                  "inputs or pools changed since the grant")
+    harness = harness_source_digest(repo_root, files=HARNESS)
+    if g["harness_digest"] != harness["digest"]:
+        raise AuthorizationError(f"the grant approves harness {g['harness_digest'][:12]}, but the code on disk "
+                                 f"digests to {harness['digest'][:12]}: the executable changed since the grant "
+                                 "(or the grant names another), and a new digest is never adopted at issue")
     path = Path(out) if out is not None else Path(repo_root) / authorization_path(run_id)
     if path.exists():
         raise AuthorizationError(f"{path} exists; one artifact per run, never re-issued")
-    harness = harness_source_digest(repo_root, files=HARNESS)
     head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repo_root, capture_output=True,
                           text=True).stdout.strip() or None
     auth = H1GenerationAuthorization(
@@ -180,7 +189,8 @@ def issue(run_id: str, *, grant_path: Path, repo_root: Path = REPO, out: Path | 
         plan_hash=lid, expected_usd=round(float(g["expected_usd"]), 4),
         hard_cap_usd=round(float(g["hard_cap_usd"]), 4), authorized_stages=(),
         stage_conditions={"phase": "P1", "decision": g["decision"],
-                          "grant_sha256": sha256_file(grant_path)},
+                          "grant_sha256": sha256_file(grant_path),
+                          "granted_harness_digest": g["harness_digest"]},
         scope_note=g.get("scope", "P1 teacher generation only: no training, no paid storage"),
         authorized_session_commit=None, harness_source_digest=harness["digest"], harness_source_files=HARNESS,
         per_launch_hard_usd=round(float(g["hard_cap_usd"]), 4), provenance_commit=head, action_policy=POLICY)

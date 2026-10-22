@@ -35,6 +35,7 @@ import hashlib
 import json
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path
@@ -76,32 +77,84 @@ def store(ctx: SessionContext) -> Path:
     return Path(ctx.args.scr) / "store"
 
 
+#: The listing proves itself: a sentinel the shell prints only after the loop
+#: finished, so an empty stdout from a failed or cut-off ssh is never read as
+#: "the pod holds no shards".
+LISTED = "__H1_SHARD_LISTING_COMPLETE__"
+#: Bounded retries of the secured check, well inside the budget's artifact
+#: recovery reserve (`budget().artifact_recovery_reserve_minutes`); after them
+#: an unverifiable state is RECORDED and returned as not secured -- it never
+#: holds the session open: the runner records PRODUCTS_UNSECURED and the
+#: watchdog's hard deadline still applies.
+SECURE_ATTEMPTS = 3
+SECURE_RETRY_SECONDS = 30.0
+#: The whole secured check, every fetch included, ends within this (inside the
+#: 15-minute artifact recovery reserve the budget prices).
+SECURE_BUDGET_SECONDS = 600.0
+
+
+class ListingUnknown(RuntimeError):
+    """The pod's shard listing could not be obtained: the state is UNKNOWN."""
+
+
 def remote_markers(ctx: SessionContext) -> dict[str, str]:
-    """Every sealed shard's marker on the pod: shard name -> its sha256."""
-    res = ctx.target.run(f"cd {out_dir()} 2>/dev/null && for f in pass*.part*.done; do "
-                         f"[ -e \"$f\" ] && echo \"$f $(cat $f)\"; done", timeout=120)
+    """Every sealed shard's marker on the pod: shard name -> its sha256.
+
+    Returns ``{}`` only when the listing SUCCEEDED and found none (the output
+    directory does not exist yet or holds no marker). Raises `ListingUnknown`
+    when there is no target, the command timed out or failed, the sentinel is
+    missing, or a line is not ``<name>.done <sha256>``."""
+    if ctx.target is None:
+        raise ListingUnknown("no target to ask")
+    res = ctx.target.run(f"if [ -d {out_dir()} ]; then cd {out_dir()} && for f in pass*.part*.done; do "
+                         f"[ -e \"$f\" ] && echo \"$f $(cat \"$f\")\"; done; fi; echo {LISTED}", timeout=120)
+    if getattr(res, "timed_out", False):
+        raise ListingUnknown("the listing timed out")
+    if getattr(res, "returncode", 1) != 0:
+        raise ListingUnknown(f"the listing exited {getattr(res, 'returncode', None)}")
+    lines = (getattr(res, "stdout", "") or "").splitlines()
+    if not lines or lines[-1].strip() != LISTED:
+        raise ListingUnknown("the listing did not complete (no sentinel)")
     out = {}
-    for line in (getattr(res, "stdout", "") or "").splitlines():
+    for line in lines[:-1]:
         parts = line.split()
-        if len(parts) == 2 and parts[0].endswith(".done"):
-            out[parts[0][:-5] + ".jsonl"] = parts[1]
+        if (len(parts) != 2 or not parts[0].endswith(".done") or len(parts[1]) != 64
+                or any(ch not in "0123456789abcdef" for ch in parts[1])):
+            raise ListingUnknown(f"unreadable listing line {line[:80]!r}")
+        out[parts[0][:-5] + ".jsonl"] = parts[1]
     return out
 
 
-def secure_shards(ctx: SessionContext) -> None:
+def _local_ok(path: Path, digest: str) -> bool:
+    return path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest() == digest
+
+
+def secure_shards(ctx: SessionContext, remote: dict[str, str] | None = None, *,
+                  deadline: float | None = None) -> None:
     """Pull each sealed shard (and each group's .complete) off the pod and
-    check it against its marker. Idempotent; never raises."""
+    check the LOCAL bytes against the marker. Idempotent; never raises; an
+    unobtainable listing is recorded, not read as an empty one."""
     try:
-        if ctx.target is None:
-            return
+        if remote is None:
+            try:
+                remote = remote_markers(ctx)
+            except ListingUnknown as exc:
+                ctx.evidence.setdefault("listing_unknown", []).append(str(exc))
+                return
         dest = store(ctx)
         dest.mkdir(parents=True, exist_ok=True)
         secured = ctx.evidence.setdefault("shards_secured", {})
-        for name, digest in remote_markers(ctx).items():
-            if secured.get(name, {}).get("ok"):
+        for name, digest in remote.items():
+            if _local_ok(dest / name, digest):
+                secured[name] = {"ok": True, "sha256": digest}
                 continue
-            rc = _scp(ctx, f"{out_dir()}/{name}", dest / name)
-            ok = (dest / name).is_file() and hashlib.sha256((dest / name).read_bytes()).hexdigest() == digest
+            left = None if deadline is None else deadline - time.monotonic()
+            if left is not None and left <= 0:
+                secured[name] = {"ok": False, "sha256": digest, "rc": None, "why": "check deadline passed"}
+                continue
+            rc = _scp(ctx, f"{out_dir()}/{name}", dest / name,
+                      limit_min=20 if left is None else max(1, min(20, int(left // 60))))
+            ok = _local_ok(dest / name, digest)
             if ok:
                 (dest / name).with_suffix(".done").write_text(digest + "\n")
             secured[name] = {"ok": ok, "sha256": digest, "rc": rc}
@@ -114,14 +167,33 @@ def secure_shards(ctx: SessionContext) -> None:
         ctx.evidence.setdefault("secure_errors", []).append(repr(exc)[:300])
 
 
-def shards_secured(ctx: SessionContext, *_a, **_k) -> tuple[bool, str]:
-    secure_shards(ctx)
-    secured = ctx.evidence.get("shards_secured", {})
-    remote = remote_markers(ctx) if ctx.target is not None else {}
-    missing = [n for n in remote if not secured.get(n, {}).get("ok")]
-    if missing:
-        return False, f"sealed shards not secured off-pod: {missing[:5]}"
-    return True, f"{len(secured)} sealed shard(s) secured off-pod"
+def shards_secured(ctx: SessionContext, *_a, sleep=time.sleep, **_k) -> tuple[bool, str]:
+    """Three answers, never a fourth: the listing succeeded and the pod holds
+    no shard; every listed shard is in the local store with the bytes its
+    marker names (re-hashed now, not taken from an in-memory flag); or the state
+    is not established -- the listing failed or a listed shard is not verified
+    locally -- after `SECURE_ATTEMPTS` bounded tries, which is NOT secured."""
+    why = "not checked"
+    deadline = time.monotonic() + SECURE_BUDGET_SECONDS
+    for attempt in range(SECURE_ATTEMPTS):
+        try:
+            remote = remote_markers(ctx)
+        except ListingUnknown as exc:
+            why = f"UNKNOWN: {exc}"
+        else:
+            secure_shards(ctx, remote, deadline=deadline)
+            missing = sorted(n for n, d in remote.items() if not _local_ok(store(ctx) / n, d))
+            if not missing:
+                return True, ("the listing succeeded and the pod holds no sealed shard" if not remote else
+                              f"{len(remote)} sealed shard(s) secured off-pod, each re-hashed in the local store")
+            why = f"UNVERIFIED: {len(missing)} listed shard(s) not in the local store as marked: {missing[:5]}"
+        if attempt + 1 < SECURE_ATTEMPTS and time.monotonic() + SECURE_RETRY_SECONDS < deadline:
+            sleep(SECURE_RETRY_SECONDS)
+        else:
+            break
+    ctx.evidence["shards_unverified"] = {"why": why, "attempts": SECURE_ATTEMPTS,
+                                         "note": "recorded as not secured; teardown is not held for it"}
+    return False, why
 
 
 def budget(repo_root: Path = REPO_ROOT) -> BudgetSpec:

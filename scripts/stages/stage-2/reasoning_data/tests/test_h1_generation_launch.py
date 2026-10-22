@@ -24,7 +24,9 @@ L = load_session_launcher("h1_generation_launch")
 
 def _grant(tmp_path, **over) -> Path:
     g = {"granted_by": "test", "decision": "test only", "phase": "P1", "launch_identity_sha256": GOV.launch_hash(),
+         "harness_digest": harness_source_digest(A.REPO, files=GOV.HARNESS)["digest"],
          "expected_usd": 1.0, "hard_cap_usd": 2.0, **over}
+    g = {k: v for k, v in g.items() if v is not None}
     p = tmp_path / "grant.json"
     p.write_text(json.dumps(g))
     return p
@@ -65,6 +67,29 @@ def test_the_issuer_needs_a_grant_naming_this_launch_identity(tmp_path):
     assert raw["authorizes_teacher_generation"] and not raw["authorizes_training"] and not raw["authorizes_paid_storage"]
     with pytest.raises(AuthorizationError, match="exists"):
         GOV.issue("r1", grant_path=_grant(tmp_path), out=out)
+
+
+def test_the_issuer_needs_the_approved_harness_and_never_adopts_a_new_one(tmp_path, monkeypatch):
+    out = tmp_path / "authorization.json"
+    with pytest.raises(AuthorizationError, match="lacks 'harness_digest'"):
+        GOV.issue("h1", grant_path=_grant(tmp_path, harness_digest=None), out=out)
+    with pytest.raises(AuthorizationError, match="never adopted at issue"):
+        GOV.issue("h1", grant_path=_grant(tmp_path, harness_digest="0" * 64), out=out)
+    grant = _grant(tmp_path)                        # approved against today's code ...
+    real = GOV.harness_source_digest
+
+    def edited(root, files):                         # ... and the code changes before issue
+        d = real(root, files=files)
+        return {**d, "digest": hashlib.sha256(d["digest"].encode()).hexdigest()}
+    monkeypatch.setattr(GOV, "harness_source_digest", edited)
+    with pytest.raises(AuthorizationError, match="executable changed since the grant"):
+        GOV.issue("h1", grant_path=grant, out=out)
+    assert not out.exists()
+    monkeypatch.setattr(GOV, "harness_source_digest", real)
+    path = GOV.issue("h1", grant_path=grant, out=out)  # an exact match issues, bound to that digest
+    auth = GOV.load(path)
+    assert auth.harness_source_digest == json.loads(grant.read_text())["harness_digest"]
+    assert auth.stage_conditions["granted_harness_digest"] == auth.harness_source_digest
 
 
 def test_an_artifact_claiming_more_or_edited_after_issue_is_refused(tmp_path):
@@ -174,3 +199,110 @@ def test_the_pods_setup_branch_runs_and_fails_closed(tmp_path, plan_hash, rc):
         assert "setup_probe" in res.stdout and f"launch {GOV.launch_hash()[:12]}" in res.stdout
     else:
         assert "MARK AUTHORIZATION_MISMATCH" in res.stdout
+
+
+# -- securing shards: a failed listing is UNKNOWN, never an empty success -----
+
+from aadistill.infrastructure.remote import CommandResult  # noqa: E402
+
+
+class Pod:
+    """A pod's shard directory behind a scripted ssh."""
+
+    def __init__(self, files: dict[str, bytes], result=None):
+        self.files, self.result = files, result
+
+    def run(self, command, *, timeout):
+        if self.result is not None:
+            return self.result
+        if "for f in pass*.part*.done" in command:
+            lines = [f"{n[:-6]}.done {hashlib.sha256(b).hexdigest()}" for n, b in sorted(self.files.items())]
+            return CommandResult(0, "\n".join(lines + [L.LISTED]) + "\n", "")
+        return CommandResult(0, "", "")
+
+
+def _ctx(tmp_path, pod):
+    return type("Ctx", (), {"target": pod, "host": "h", "evidence": {}, "say": staticmethod(lambda m: None),
+                            "args": type("A", (), {"scr": str(tmp_path)})()})()
+
+
+@pytest.fixture
+def fetch(monkeypatch):
+    """scp from the scripted pod; `corrupt` names files that arrive damaged."""
+    corrupt = set()
+
+    def scp(ctx, remote, dest, *, limit_min=20):
+        name = Path(remote).name
+        if name in corrupt and name.endswith(".raise"):
+            raise OSError("scp died")
+        if f"{name}.raise" in corrupt:
+            raise OSError("scp died")
+        if ctx.target is None or name not in getattr(ctx.target, "files", {}):
+            return 1
+        data = ctx.target.files[name]
+        Path(dest).write_bytes(data[:-1] if name in corrupt else data)
+        return 0
+    monkeypatch.setattr(L, "_scp", scp)
+    return corrupt
+
+
+@pytest.mark.parametrize("result,why", [
+    (CommandResult(124, "", "", timed_out=True), "timed out"),
+    (CommandResult(255, "", "ssh: connect to host"), "exited 255"),
+    (CommandResult(0, "", ""), "no sentinel"),                      # an empty stdout is not an empty pod
+    (CommandResult(0, "pass0.part0000.done not-a-digest\n" + "__H1_SHARD_LISTING_COMPLETE__\n", ""),
+     "unreadable"),
+])
+def test_a_listing_that_failed_is_unknown_never_zero_shards_secured(tmp_path, fetch, result, why):
+    sleeps = []
+    ctx = _ctx(tmp_path, Pod({}, result))
+    ok, msg = L.shards_secured(ctx, sleep=sleeps.append)
+    assert not ok and msg.startswith("UNKNOWN") and why in msg
+    assert len(sleeps) == L.SECURE_ATTEMPTS - 1                     # bounded, then recorded
+    assert ctx.evidence["shards_unverified"]["attempts"] == L.SECURE_ATTEMPTS
+
+
+def test_no_target_is_unknown(tmp_path, fetch):
+    ok, msg = L.shards_secured(_ctx(tmp_path, None), sleep=lambda s: None)
+    assert not ok and "no target" in msg
+
+
+def test_a_pod_that_really_holds_no_shard_is_secured_as_such(tmp_path, fetch):
+    ok, msg = L.shards_secured(_ctx(tmp_path, Pod({})), sleep=lambda s: None)
+    assert ok and "holds no sealed shard" in msg
+
+
+def test_listed_shards_are_secured_by_their_local_bytes_not_by_a_flag(tmp_path, fetch):
+    files = {"pass0_g0.part0000.jsonl": b'{"task_id": "a"}\n', "pass0_g0.part0001.jsonl": b'{"task_id": "b"}\n'}
+    ctx = _ctx(tmp_path, Pod(files))
+    ok, msg = L.shards_secured(ctx, sleep=lambda s: None)
+    assert ok and "2 sealed shard(s)" in msg
+    assert all((tmp_path / "store" / n).read_bytes() == b for n, b in files.items())
+    (tmp_path / "store" / "pass0_g0.part0001.jsonl").write_bytes(b"damaged")   # the flag still says ok ...
+    assert ctx.evidence["shards_secured"]["pass0_g0.part0001.jsonl"]["ok"]
+    ok, _ = L.shards_secured(ctx, sleep=lambda s: None)                  # ... the bytes are re-fetched
+    assert ok and (tmp_path / "store" / "pass0_g0.part0001.jsonl").read_bytes() == files["pass0_g0.part0001.jsonl"]
+
+
+def test_a_shard_that_arrives_damaged_is_not_secured(tmp_path, fetch):
+    files = {"pass0_g0.part0000.jsonl": b'{"task_id": "a"}\n'}
+    fetch.add("pass0_g0.part0000.jsonl")
+    ok, msg = L.shards_secured(_ctx(tmp_path, Pod(files)), sleep=lambda s: None)
+    assert not ok and msg.startswith("UNVERIFIED") and "pass0_g0.part0000.jsonl" in msg
+
+
+def test_the_poll_hook_records_an_unknown_listing_and_secures_nothing(tmp_path, fetch):
+    ctx = _ctx(tmp_path, Pod({}, CommandResult(255, "", "")))
+    L.secure_shards(ctx)
+    assert ctx.evidence["listing_unknown"] and not ctx.evidence.get("shards_secured")
+
+
+def test_a_stale_secured_flag_never_stands_in_for_the_bytes(tmp_path, fetch):
+    files = {"pass0_g0.part0000.jsonl": b'{"task_id": "a"}\n', "pass0_g0.part0001.jsonl": b'{"task_id": "b"}\n'}
+    ctx = _ctx(tmp_path, Pod(files))
+    assert L.shards_secured(ctx, sleep=lambda s: None)[0]
+    (tmp_path / "store" / "pass0_g0.part0001.jsonl").unlink()          # the local copy is lost ...
+    fetch.add("pass0_g0.part0001.jsonl.raise")                          # ... and the re-fetch dies
+    assert ctx.evidence["shards_secured"]["pass0_g0.part0001.jsonl"]["ok"]   # a stale flag says ok
+    ok, msg = L.shards_secured(ctx, sleep=lambda s: None)
+    assert not ok and "pass0_g0.part0001.jsonl" in msg

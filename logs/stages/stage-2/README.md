@@ -115,6 +115,7 @@ copied here.
 * logs/budget/decisions.md -- 2026-10-22: Independent review of H1 preparation: eight targeted corrections at $0, no paid authorization
 * logs/budget/decisions.md -- 2026-10-22: Maintainer: H1 design choices (arm B = stage2.reasoning_master@v1, interactive exploratory); two corrections and the P1 + P1v application at $0
 * logs/budget/decisions.md -- 2026-10-22: Maintainer: P1 must be launchable; comparators, completion-time saving and launch wiring at $0, final P1 + P1v application
+* logs/budget/decisions.md -- 2026-10-22: Maintainer: two launch-boundary checks before any P1 grant
 
 ## Current status
 
