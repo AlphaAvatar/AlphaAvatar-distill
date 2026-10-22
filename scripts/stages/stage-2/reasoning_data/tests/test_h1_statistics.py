@@ -1,7 +1,8 @@
 """H1's decision rule on synthetic outcomes: a floor is never read as equivalence.
 
-570 items in 60 rule families over five axes, two seeds -- the shape of the
-formal fluid static set. Each item has a latent difficulty shared by both arms
+570 items in 60 rule families over the four static axes, two seeds -- the
+shape of the formal fluid static set (interactive episodes are exploratory in
+H1 and never enter the rule). Each item has a latent difficulty shared by both arms
 and both seeds (that is what makes the comparison paired); an observation is
 correct when the difficulty plus a little noise falls below the arm's rate.
 Outcomes come from a fixed RNG per scenario.
@@ -14,7 +15,7 @@ import pytest
 
 from stages.reasoning_data import h1_statistics as H
 
-AXES = ("deduction", "induction", "composition", "analogy", "interactive")
+AXES = ("deduction", "induction", "composition", "analogy")
 SEEDS = (20260726, 20260727)
 
 
@@ -110,3 +111,10 @@ def test_unpaired_or_duplicated_rows_are_refused():
         H.decide(rs[:-1])
     with pytest.raises(ValueError, match="duplicate"):
         H.decide(rs + rs[:1])
+
+
+def test_interactive_rows_are_reported_beside_the_decision_never_inside_it():
+    rs = rows(0.2, 0.4, seed=3)
+    rs[0] = {**rs[0], "axis": "interactive_adaptation"}
+    with pytest.raises(ValueError, match="exploratory"):
+        H.decide(rs)

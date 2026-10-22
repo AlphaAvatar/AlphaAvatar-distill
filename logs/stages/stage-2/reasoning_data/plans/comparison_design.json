@@ -2,7 +2,7 @@
   "schema": "aadistill.stage2.reasoning_data.comparison_design/v2",
   "hypothesis_id": "H1",
   "study_id": "stage2.reasoning_data.h1_old_vs_new_2p96M",
-  "status": "DRAFT PROTOCOL (2026-10-21 UTC), revised after the maintainer's H1 decision. NOT preregistered, NOT frozen, NOT funded. It is frozen only after arm B's corpus exists (its pack identities and B's measured accounting replace every estimate below), the maintainer approves it, and a separate paid authorization is issued. Revised 2026-10-22 after an independent review: whole-unit admission, isolation R0/R7/R9, target_quality v2, the matching rule fixed and its values provisional, and the floor/resolution statistics (docs/stages/stage-2/reasoning_data/H1.md section 10).",
+  "status": "DRAFT PROTOCOL (2026-10-21 UTC), revised after the maintainer's H1 decision. NOT preregistered, NOT frozen, NOT funded. It is frozen only after arm B's corpus exists (its pack identities and B's measured accounting replace every estimate below), the maintainer approves it, and a separate paid authorization is issued. Revised 2026-10-22 after an independent review: whole-unit admission, isolation R0/R7/R9, target_quality v2, the matching rule fixed and its values provisional, and the floor/resolution statistics (docs/stages/stage-2/reasoning_data/H1.md section 10). Revised 2026-10-22 after the maintainer's design choices: arm B = stage2.reasoning_master@v1; M1's matching rule accepted (values provisional until B's real pack); interactive results exploratory.",
   "question": "With the same D4 initialization, the same recovery objective and a pre-defined matched training budget, does replacing the historical corpus_v2 data with a verified teacher-native reasoning corpus improve the student's actual reasoning CORRECTNESS in its own generations -- not only the completeness of its answers?",
   "what_it_is": "a TREATMENT comparison of two complete data schemes: content, quality and task distribution change together. Not attributable to correctness filtering alone; not a mixture experiment.",
   "arms": {
@@ -112,14 +112,15 @@
       "INCONCLUSIVE": "anything else",
       "FLOOR_A / FLOOR_B": "a flag beside any label when one arm alone is below 2%; a GO off the floor is still a GO"
     },
-    "multiplicity": "one primary test; the five per-axis contrasts are secondary and Holm-adjusted as a family; the generator tiers, supporting units and guard rails are reported with unadjusted intervals and labelled descriptive",
+    "multiplicity": "one primary test; the four static-axis contrasts are secondary and Holm-adjusted as a family; the generator tiers, supporting units and guard rails are reported with unadjusted intervals and labelled descriptive",
     "seeds": "reported per seed and pooled; seed variation is NOT inside the interval and no stability claim beyond two seeds is made; no seed is selected",
     "decided_before_results": "every rule above is fixed at preregistration, before any H1 result is read",
     "rule": "scripts/stages/stage-2/reasoning_data/h1_statistics.py (stage2.reasoning_data.h1_statistics/v1), validated on synthetic outcomes (tests/test_h1_statistics.py)",
     "aggregation": "per item, d = mean over the two seeds of (B correct - A correct); the statistic is the item-weighted mean of d",
     "seed_condition": "every directional label (GO, REVERSED, NO_GO) requires each seed's own point estimate on its side",
     "resolution": "an interval supports equivalence or the exclusion of a gain only with >= 10 discordant (item, seed) pairs in >= 5 clusters and a non-degenerate bootstrap; otherwise NOT_RESOLVED -- an all-zero or sparse result's [0, 0] is never read as equivalence",
-    "floor_does_not_gate": "old A need not leave the floor before H1 runs"
+    "floor_does_not_gate": "old A need not leave the floor before H1 runs",
+    "interactive_scope": "MAINTAINER DECISION 2026-10-22: H1 concludes on STATIC reasoning transfer. Interactive episode success (144 episodes) is EXPLORATORY / SECONDARY: generated and reported in full beside the decision, never inside the primary label or the Holm family (h1_statistics refuses interactive rows), because B's interactive training coverage is thin (3 calibration families, about 18 episodes at 2.96M). A scope limit of H1 only: the project's capability target is unchanged, qualified interactive training data stays in B, and every fixed interactive evaluation is kept"
   },
   "steps": {
     "optional_diagnostic_before_formal": "a single-seed, reduced-size run of B is allowed as an ENGINEERING/DIAGNOSTIC step in a later application; it is not a confirmation, does not select a seed, and does not cancel H1 if it sits at the floor",
@@ -137,7 +138,8 @@
     "fluid-reasoning gains from lower loss, lower KL or higher usable rollout",
     "stability beyond two seeds",
     "unseen-format transfer from the shared-generator tier",
-    "that D4 is the best initialization (it is the maintainer's fixed starting point)"
+    "that D4 is the best initialization (it is the maintainer's fixed starting point)",
+    "interactive adaptation transfer as a confirmatory result (exploratory in H1: maintainer 2026-10-22)"
   ],
   "authorizes": "nothing"
 }

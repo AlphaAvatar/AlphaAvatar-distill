@@ -42,10 +42,15 @@ def test_the_proposal_cites_the_forecast_and_every_total_is_a_sum():
     for row in prop["phases"][1:]:
         assert "expected_usd" not in row and "hard_cap_usd" not in row
         ref = row["cost"].split(":: ")[1]
-        if ref.startswith("proposal_phases."):
-            assert ref.split(".", 1)[1] in fc["proposal_phases"]
+        if ref.startswith(("proposal_phases.", "p1_application.")):
+            block, key = ref.split(".", 1)
+            assert key in fc[block]
         else:
             assert ref in fc
+    p1 = fc["p1_application"]
+    rows = [v for k, v in p1.items() if k not in ("totals", "_what")]
+    for k in ("expected_usd", "hard_cap_usd"):
+        assert math.isclose(p1["totals"][k], sum(r[k] for r in rows), abs_tol=0.011)
     phases = fc["proposal_phases"].values()
     assert math.isclose(fc["proposal_totals"]["h1_expected_usd"],
                         sum(p["expected_usd"] for p in phases), abs_tol=0.011)
@@ -108,3 +113,14 @@ def test_the_committed_budget_position_attributes_none_of_the_pods_it_lists():
         listed |= set(pos[k]["pods"])
     assert len(listed) == pos["count"] and pos["unnamed"]["status"] == "OPEN"
     assert PB.mentioned(A.REPO, sorted(listed)) == set()
+
+
+def test_the_p1_application_names_the_generation_plan_on_disk_and_the_forecast_prices_it():
+    prop = A.read_json(PLANS / "authorization_proposal.json")
+    sha = A.sha256_file(PLANS / "generation_plan.json")
+    assert prop["generation_list"]["generation_plan_sha256"] == sha
+    fc = A.read_json(PLANS / "cost_forecast.json")
+    assert fc["generation"]["generation_plan_sha256"] == sha
+    gp = A.read_json(PLANS / "generation_plan.json")
+    assert fc["generation"]["generated_tokens"] == gp["totals"]["expected_generated_tokens_upper"]
+    assert gp["corpus_id"] == SPEC["chosen_variant"]["id"] and not gp["shortfalls"]

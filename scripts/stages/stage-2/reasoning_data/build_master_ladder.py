@@ -13,7 +13,11 @@ exactly this):
 
 `unit_sessions` is how many sessions the unit consists of (1 for a static task,
 the number of assistant turns for an episode). It is required: without it a
-unit that lost a turn upstream cannot be told from a complete one.
+unit that lost a turn upstream cannot be told from a complete one. An optional
+`target` names the teacher output a session trains on (`generation_adapter`:
+the selected record's sha256, candidate index and per-turn output-token
+sha256); every session of a unit must name the same one, and the pack lists
+each packed unit's target in ``targets.jsonl`` (hashed in ``outputs``).
 
 A UNIT (a static task, a whole episode's turns, a conversation's turns) is
 indivisible: it is ADMITTED whole or not at all (`render_all`), and nesting,
@@ -66,8 +70,11 @@ def render_all(tokenizer, sessions: list[dict], *, block_len: int):
     for uid, rows in by_unit.items():
         declared = {int(s["unit_sessions"]) for s in rows}
         kind = why = None
+        targets = {json.dumps(s.get("target"), sort_keys=True) for s in rows}
         if len(declared) != 1:
             kind, why = "inconsistent_size", f"sessions declare sizes {sorted(declared)}"
+        elif len(targets) != 1:
+            kind, why = "inconsistent_target", f"sessions name {len(targets)} different targets"
         elif len(rows) != next(iter(declared)):
             kind, why = "incomplete", f"{len(rows)} of {next(iter(declared))} sessions present"
         done: dict[str, RenderedSession] = {}
@@ -85,7 +92,7 @@ def render_all(tokenizer, sessions: list[dict], *, block_len: int):
             r = done[s["id"]]
             r.source_id = uid
             r.meta.update({"stratum": s["stratum"], "family": s.get("family"),
-                           "attributes": s.get("attributes") or {}})
+                           "attributes": s.get("attributes") or {}, "target": s.get("target")})
             rendered[s["id"]] = r
             if r.system_key not in system_ids:
                 block = render_system_block(tokenizer, r.system_text, r.tools)
@@ -205,7 +212,9 @@ def build(sessions: list[dict], spec: dict, tokenizer) -> dict:
         if cut is not None:
             row["n_blocks"] = cut
             row["packed"] = block_accounting(blocks[:cut], block_len)
+    targets = {r.source_id: r.meta.get("target") for r in rendered.values()}
     return {"ladder": ladder, "blocks": blocks, "val_start": val_start, "excluded": excluded,
+            "targets": targets,
             "session_counts": {sid: split_counts(r, think_close) for sid, r in rendered.items()},
             "n_rendered": len(rendered), "n_units": len(units), "pad_id": int(pad_id),
             "system_prompt_groups": len(system_ids),
@@ -239,7 +248,16 @@ def write_pack(out: Path, built: dict, spec: dict, provenance: dict) -> dict:
                          real_tokens=p["real_tokens"], padding_tokens=p["padding_tokens"],
                          n_units=row["n_units"], accounting=row["accounting"])
         rungs.append(entry)
-    files = {n: A.sha256_file(out / n) for n in ("blocks.npz", "audit.jsonl")}
+    names = ["blocks.npz", "audit.jsonl"]
+    targets = built.get("targets") or {}
+    if any(targets.values()):
+        packed = set(built["ladder"]["order"][:max((r.get("n_units") or 0) for r in built["ladder"]["rungs"])])
+        packed |= set(built["ladder"]["reserved"])
+        with open(out / "targets.jsonl", "w") as f:
+            for uid in sorted(packed):
+                f.write(json.dumps({"unit_id": uid, "target": targets.get(uid)}, sort_keys=True) + "\n")
+        names.append("targets.jsonl")
+    files = {n: A.sha256_file(out / n) for n in names}
     meta = {"schema": PACK_SCHEMA, "created_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "block_len": int(spec["block_len"]), "pad_id": built["pad_id"],
             "packing": "best-fit-decreasing per rung increment, never cut (sessions.pack_best_fit)",

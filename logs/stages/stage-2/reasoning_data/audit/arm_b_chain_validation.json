@@ -1,0 +1,71 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.arm_b_chain_validation/v1",
+ "written_utc": "2026-10-22T15:46:59Z",
+ "label": "CHAIN VALIDATION at $0 -- NOT arm B (its generated cells need P1)",
+ "inputs": {
+  "stage0_teacher_records": 672,
+  "adapter_units_selected": 571,
+  "reuse_selections": [
+   {
+    "path": "data/stages/stage-2/reasoning_data/tasks/supporting_reuse_v1.selection.jsonl",
+    "sha256": "2dcac7627c479025d53de70574fb6302c6a54e777686d2457887460993b85f7c"
+   }
+  ],
+  "sessions": 6935
+ },
+ "cells_present": {
+  "primary.abstract_analogical/s0_generators_v2_calsplit": 0.0938,
+  "primary.compositional_generalization/s0_generators_v2_calsplit": 0.1406,
+  "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 0.2656,
+  "primary.interactive_adaptation/s0_generators_v2_calsplit": 0.1562,
+  "primary.task_contained_deduction/s0_generators_v2_calsplit": 0.125,
+  "supporting.math_reused_gsm8k/corpus_v2_gsm8k_verified": 0.0938,
+  "supporting.reading_verified/corpus_v2_multihop_verified": 0.0312,
+  "supporting.reading_verified/corpus_v2_rag_verified": 0.0938
+ },
+ "cells_absent_need_P1": [
+  "primary.abstract_analogical/reasoning_core",
+  "primary.compositional_generalization/reasoning_core",
+  "primary.compositional_generalization/reasoning_gym",
+  "primary.task_contained_deduction/prontoqa",
+  "primary.task_contained_deduction/reasoning_core",
+  "primary.task_contained_deduction/reasoning_gym",
+  "supporting.answerability/squad_v2_train_unanswerable",
+  "supporting.code_algorithmic/mbpp_train",
+  "supporting.code_algorithmic/reasoning_core",
+  "supporting.code_algorithmic/reasoning_gym",
+  "supporting.math_new/math_train",
+  "supporting.math_new/mathematics_dataset",
+  "supporting.math_new/reasoning_gym"
+ ],
+ "rung": {
+  "target_supervised_tokens": 912393,
+  "reachable": true,
+  "n_blocks": 129,
+  "actual_supervised_tokens": 917559,
+  "n_units": 440,
+  "n_sessions": 478
+ },
+ "excluded": {
+  "units": 53,
+  "sessions": 69,
+  "units_by_kind": {
+   "session_does_not_render_or_fit": 53
+  }
+ },
+ "trainer_reader_roundtrip": {
+  "train_blocks": 129,
+  "val_blocks": 16,
+  "train_supervised_tokens": 917559,
+  "val_disjoint_from_all_rungs": true
+ },
+ "targets_listed": 505,
+ "targets_with_identity": 505,
+ "outputs": {
+  "blocks.npz": "653ab9df78c4d5a34c404633996b18677c4c4d9447d9322df78dd787fa77f691",
+  "audit.jsonl": "50eb3b12b346e9097218db5f709c72d43a7023491b5f310f5e8d961c1e286ac4",
+  "targets.jsonl": "16b83722bf91f94c5be44b9fe3ce8b30ff0219f16fdddf9b8a4c164c67499057"
+ },
+ "reading": "every adapter session carries its record's identity into targets.jsonl; reused units carry their corpus_v2 session sha; the packer admits whole units only",
+ "authorizes": "nothing"
+}

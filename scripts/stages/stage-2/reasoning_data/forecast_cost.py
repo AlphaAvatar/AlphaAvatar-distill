@@ -115,9 +115,18 @@ def main() -> int:
                              "yield_refs": dict(zip(refs, [round(v, 4) for v in ys])),
                              "generated_tokens": round(toks)}
         gen_tokens += toks
+    spec_tokens = gen_tokens
+    plan_path = A.LOG_DIR / "plans/generation_plan.json"
+    gp = A.read_json(plan_path) if plan_path.exists() else None
+    if gp is not None:      # the real list's upper bound replaces the spec-level estimate
+        gen_tokens = gp["totals"]["expected_generated_tokens_upper"]
     gen_hours = gen_tokens / m["teacher_generation"]["tokens_per_second"] / 3600
     gen_session_h = gen_hours * CONTINGENCY["generation"] + over / 3600
     generation = {"rows": gen_rows, "candidate_policy": spec["candidate_policy"],
+                  "spec_estimate_generated_tokens": round(spec_tokens),
+                  "basis": ("plans/generation_plan.json :: totals.expected_generated_tokens_upper (the real task "
+                            "list, second candidates included)" if gp else "spec shares / per-stratum yield"),
+                  "generation_plan_sha256": A.sha256_file(plan_path) if gp else None,
                   "generated_tokens": round(gen_tokens), "gpu_hours": round(gen_hours, 2),
                   "session_hours_with_contingency": round(gen_session_h, 2),
                   "expected_usd": round(gen_session_h * price["A100-80GB"] * disk, 2)}
@@ -210,6 +219,17 @@ def main() -> int:
         "excludes": "the optional diagnostic and any later ladder (a separate application)",
     }
     expected = totals["h1_expected_usd"]
+    # The application now in front of the maintainer: P1 + P1v only, one A100 session.
+    a100 = price["A100-80GB"] * disk
+    p1_rows = {"P1_generation": generation["expected_usd"], "P1v_verification_cpu": 0.0,
+               "closeout_reserve_1_session": (over / 3600 + 0.25) * a100}
+    p1 = {k: {"expected_usd": round(v, 2), "hard_cap_usd": round(v * cap, 2)} for k, v in p1_rows.items()}
+    p1_application = {**p1, "totals": {
+        "expected_usd": round(sum(r["expected_usd"] for r in p1.values()), 2),
+        "hard_cap_usd": round(sum(r["hard_cap_usd"] for r in p1.values()), 2)},
+        "_what": ("one A100-80GB generation session (teacher_cal's measured GPU, engine and price) with a "
+                  "closeout reserve of the session overhead + 15 minutes; P1v runs on the dev box at $0. "
+                  "The whole-H1 rows (proposal_phases) are kept for reference and are NOT requested now")}
 
     students = 2 * spec["seeds"]  # H1: two arms x the seeds
     student_bytes = 2_384_285_634
@@ -241,6 +261,7 @@ def main() -> int:
         "optional": optional,
         "proposal_phases": proposal_phases,
         "proposal_totals": totals,
+        "p1_application": p1_application,
         "_proposal_phases": "H1's rows, cited by plans/authorization_proposal.json: generation on one A100-80GB; GPU validation and the 4 formal units on L40S under M1 (recovery time from h1_accounting executed positions at the measured positions/s, eval at 2x the measured floor-student time); one session overhead per paid session; a closeout reserve of overhead + 15 min per session; hard cap = expected x the labelled factor (storage at cost)",
         "cpu": "every builder, audit, isolation check and pack runs on the dev box at $0 (minutes)",
         "storage": storage,

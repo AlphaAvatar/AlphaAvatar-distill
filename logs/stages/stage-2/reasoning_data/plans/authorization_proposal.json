@@ -1,72 +1,77 @@
 {
-  "schema": "aadistill.stage2.reasoning_data.authorization_proposal/v2",
-  "hypothesis_id": "H1",
-  "status": "APPLICATION for the maintainer (2026-10-21 UTC, revised 2026-10-22 after an independent review: the review did not approve the whole package). AUTHORIZES NOTHING: no grant is issued, no cap is raised, no Stage-0 authorization is reused, and no resource is created by this file.",
-  "scope": "H1 only: generate and verify arm B's corpus, validate the training changes on a small GPU run, train and evaluate the 4 formal units (2 arms x 2 seeds), store their artifacts. The nested ladder and any H3 study are separate applications.",
-  "budget_position": {
-    "owner": "logs/stages/stage-2/reasoning_data/budget/h1_budget_position.json (derived from the committed provider snapshot logs/budget/provider/runpod_billing_2026-10-21T1859Z.json and derive_budget.py)",
-    "summary": "records $625.5798 against a $643.6571 cap; provider all-time $658.15; 0 pods, 0 volumes, $0/h; provider balance $101.23 (not a grant). Headroom is +$18.08 if the records are complete and -$14.49 if all provider billing is project spend; the conservative bound is -$14.49.",
-    "unexplained": "53 billed pods ($78.99) no run record created: 8 ($5.65) are named by this project's untracked launch logs, 11 ($15.01) by its July records in git history, 34 ($58.33, billed 2026-07-26 to 2026-08-07) by nothing -- OPEN"
+ "schema": "aadistill.stage2.reasoning_data.authorization_proposal/v3",
+ "hypothesis_id": "H1",
+ "status": "APPLICATION for the maintainer: P1 (teacher generation) + P1v (its $0 verification, corpus build and B's real pack) ONLY -- 2026-10-22 UTC, after the maintainer's design choices. AUTHORIZES NOTHING: no grant is issued, no cap is raised, no Stage-0 authorization is reused, no resource is created by this file. The whole-H1 package is NOT requested; P1g and P2 are separate later applications (sequencing).",
+ "scope": "generate the teacher candidates of arm B's generated cells (plans/generation_plan.json) on one A100-80GB session, bring every record home, then verify, select and pack on the dev box at $0. Nothing is trained, evaluated or stored on paid storage.",
+ "generation_list": {
+  "owner": "logs/stages/stage-2/reasoning_data/plans/generation_plan.json",
+  "generation_plan_sha256": "a75b4336f4014b54dcf430220db9c32a633aac47e9bc5f5a4afc8247997f94e2",
+  "what": "per (stratum, source) cell of stage2.reasoning_master@v1: the tasks drawn (round-robin over generator x difficulty / module x level, in pool order, never by a result), the cell's units, the named rate basis, expected units and the generated-token upper bound; the run_battery inputs and their sha256",
+  "only_verifiable": "every task has a usable project verifier (generation_plan.verifier_of): comparators, checkers.CHECKERS, supporting_verify.VERIFIERS, the battery scorer or environment replay",
+  "inputs_location": "artifacts/stages/stage-2/reasoning_data/generation_inputs/ (dev box, gitignored; sha256 in the plan; rebuilt byte-identically by generation_plan from the committed pools)"
+ },
+ "scale": "plans/generation_plan.json :: totals (tasks, episodes, expected_generated_tokens_upper) and cells",
+ "acceptance_basis": "plans/generation_plan.json :: cells[].rate_basis: measured on the same generators where the teacher has run (Stage-0 teacher_cal, re-counted at the 8,184 allowance), otherwise a NAMED PROXY (the same axis on teacher_cal; corpus_v2's nearest type) or the spec's labelled code assumption (0.4), with a larger margin for proxied cells. Known optimistic proxies: PrOntoQA's process gate and the answerability rate (borrowed from answerable rag questions) are not measured",
+ "resources": {
+  "gpu": "1 x A100-80GB, one session, at most one billing resource (teacher_cal's measured GPU, engine and price: plans/cost_forecast.json :: measured.teacher_generation)",
+  "engine": "vLLM 0.27.1 image as teacher_cal; run_battery --mode generate under scripts/stages/stage-2/reasoning_data/generation_driver.py",
+  "hours": "plans/cost_forecast.json :: generation (gpu_hours at the measured tokens/s; session_hours_with_contingency)",
+  "no_model_code_on_the_pod": "the pod generates text only; code candidates are executed afterwards in the probed dev-box sandbox"
+ },
+ "failure_and_teardown_reserve": {
+  "cost": "plans/cost_forecast.json :: p1_application.closeout_reserve_1_session",
+  "behaviour": "generation_driver writes each finished pass group's tagged records and its .done sha256 at once, so a later failure loses nothing finished; a rerun regenerates nothing already done; one terminal path writes the evidence and ALL_DONE / RUN_FAILED; teardown and provider reconciliation are the launcher's"
+ },
+ "persistence": {
+  "owner": "logs/stages/stage-2/reasoning_data/plans/durability_plan.json :: verified.p1_generation_records_capacity",
+  "summary": "EXISTING storage suffices: records of about 0.1 GB per copy go to the dev box (launcher fetch, sha-checked against .done) and to the relay (capacity probed 2026-10-22T15:53Z: 2 x 150 MB, 1 GB and 2 GB accepted), read back and hash-compared before teardown. No network volume is created for P1; the 30 GB volume is the preferred TRAINING backend, a separate authorization"
+ },
+ "budget_occupancy": {
+  "owner": "logs/stages/stage-2/reasoning_data/budget/h1_budget_position.json :: bounds (provider snapshot 2026-10-21T18:59Z)",
+  "conservative_rule": "occupy the PROVIDER's all-time billing (each charge counted once: no record total is added on top, so nothing is double-counted, and no unknown cost is written off): conservative headroom -$14.49 against the $643.6571 cap. Attribution of the 34 unnamed pods and the anchor's meaning stay OPEN; this rule asserts neither",
+  "what_p1_needs": "P1's hard cap (plans/cost_forecast.json :: p1_application.totals.hard_cap_usd) inside the cap. Under the conservative rule that needs a cap of at least provider all-time + P1's hard cap, i.e. a rise of $14.49 + that hard cap; if the maintainer instead states that the records are complete (the anchor covered all earlier spend), the record headroom (+$18.08) already covers it. The agent chooses neither and raises nothing",
+  "before_create": "a fresh provider reconciliation (0 pods, 0 volumes, $0/h) and the same-failure gate, as every paid session"
+ },
+ "decisions_needed_for_P1": [
+  "the P1 envelope and the cap under one of the two budget readings above (budget_occupancy)",
+  "freezing the generation protocol for this run (configs/stages/stage-2/reasoning_data/generation_protocol.json, its sha256 into the authorization)",
+  "the generation plan as the authorized plan (generation_list.generation_plan_sha256; generation_driver refuses any other)"
+ ],
+ "engineering_before_the_P1_launch_at_0_usd": [
+  "launcher wiring for the generation session in the existing session runner (session kind, pod setup, the issuer of the generation authorization under generation_driver.POLICY, the pod test selection) and its launch-bound sweep",
+  "a relay capacity re-probe at true size and a fresh provider reconciliation at launch"
+ ],
+ "phases": [
+  {
+   "phase": "P0",
+   "what": "$0 audit, design, builders, chain, driver and tests (2026-10-21/22)",
+   "usd": 0,
+   "status": "done for P1; see docs/stages/stage-2/reasoning_data/H1.md section 11"
   },
-  "decisions_needed_before_any_spend": [
-    "attribution of the 34 unnamed pods ($58.33) and whether the 2026-09-11 anchor ($267.8998) was meant to cover all earlier account spend",
-    "an H1 envelope and the cap change it needs: H1's hard cap is plans/cost_forecast.json :: proposal_totals.h1_hard_cap_usd; under the conservative budget bound the cap must rise by at least that plus $14.49",
-    "the H1 durability backend (plans/durability_plan.json :: blocked; recommended: a 30 GB network volume)",
-    "arm B's source scheme: which sources are approved_for_h1 (configs/stages/stage-2/reasoning_data/sources.json; none is today) and which corpus variant (corpus_spec.json :: variants), including any third-party generator dependency",
-    "the matching rule (aadistill.training.accounting.match_schedule; truncate_padding on in both arms) and the draft H1 protocol (plans/comparison_design.json); the rule's values are frozen only on B's real pack",
-    "whether thin interactive coverage (3 families, about 18 episodes) is accepted as a scope limit for H1's interactive conclusion"
-  ],
-  "engineering_still_at_0_usd_before_the_first_paid_run": [
-    "task builders for the supporting dataset sources (gsm8k and reading reuse selectors, MATH train, MBPP, SQuAD-unanswerable) with R2 decontamination, and exporters for PrOntoQA (with its reference conclusions) and DeepMind Mathematics: plans/source_plan.json :: shortfalls",
-    "checkers for the needs_checker modules (n_queens, tower_of_hanoi, logic_derivation, planning, mathematics_dataset), or their exclusion",
-    "the GPU unit driver: train under the matched schedule -> persist_unit checkpoint -> evaluate all of eval-set-1 -> persist_unit files (the persistence step and the post-generation adapter exist and are tested; scripts/stages/stage-2/reasoning_data/)",
-    "the launch-bound gates of the existing session runner (provider reconciliation, same-failure gate, capacity probe at true size)"
-  ],
-  "phases": [
-    {
-      "phase": "P0",
-      "what": "$0 audit, design, contracts, builders, tests (2026-10-21; revised 2026-10-22, still with open engineering: engineering_still_at_0_usd_before_the_first_paid_run)",
-      "usd": 0,
-      "status": "in progress"
-    },
-    {
-      "phase": "P1",
-      "what": "teacher generation for arm B's corpus (one A100-80GB session) with the Stage-0 generation driver (run_battery.py --mode generate): text only; no model-written code is executed on the generation pod",
-      "cost": "plans/cost_forecast.json :: proposal_phases.P1_generation"
-    },
-    {
-      "phase": "P1v",
-      "what": "answer, text-consistency, step and action-legality checks of every candidate (generation_adapter), code by execution in the probed sandbox, isolation re-check (R0-R9), corpus build and whole-unit packing (dev box CPU)",
-      "cost": "plans/cost_forecast.json :: proposal_phases.P1v_verification_cpu"
-    },
-    {
-      "phase": "P1g",
-      "what": "small GPU validation of the H1 training changes (comparison_design.json :: gpu_questions_for_a_small_validation), one L40S session",
-      "cost": "plans/cost_forecast.json :: proposal_phases.P1g_gpu_validation"
-    },
-    {
-      "phase": "P2",
-      "what": "the 4 formal units: recovery + all of eval-set-1, L40S, compute contract M1",
-      "cost": "plans/cost_forecast.json :: proposal_phases.P2_formal_4_units"
-    },
-    {
-      "phase": "closeout",
-      "what": "failure / teardown / evidence-collection reserve, one per paid session",
-      "cost": "plans/cost_forecast.json :: proposal_phases.closeout_reserve_4_sessions"
-    },
-    {
-      "phase": "storage",
-      "what": "the H1 backend for about two months",
-      "cost": "plans/cost_forecast.json :: proposal_phases.storage_h1_backend_two_months"
-    },
-    {
-      "phase": "optional",
-      "what": "a single-seed diagnostic of arm B at 0.86M before the formal units -- not a confirmation, not a gate",
-      "cost": "plans/cost_forecast.json :: optional"
-    }
-  ],
-  "totals": "plans/cost_forecast.json :: proposal_totals (derived; not restated here)",
-  "proposed_grant_shape": "one H1 envelope with per-phase hard caps; a one-use authorization per session bound to its plan hash (src/aadistill/governance/authorization.py); at most one billing resource at a time; the default-on provider-resource reconciliation and the same-failure gate before every create; the capacity probe at true size before any session that produces a student",
-  "authorizes": "nothing",
-  "sequencing": "the next paid application covers DATA FIRST: generation (P1) and its $0 verification and corpus build (P1v), within a stated envelope. The four formal units (P2) are applied for only after B's real pack exists, the matching rule has been applied to it (plans/h1_accounting.json --pack-b), the cost forecast is recomputed from it, and the small GPU validation (P1g) has passed; the protocol is frozen at that point, not before"
+  {
+   "phase": "P1",
+   "what": "teacher generation of the plan's tasks, two candidate passes (one A100-80GB session)",
+   "cost": "plans/cost_forecast.json :: p1_application.P1_generation"
+  },
+  {
+   "phase": "P1v",
+   "what": "generation_adapter on every record (sandboxed code), isolation re-check, build_arm_b -> B's real pack, h1_accounting --pack-b (M1 values), forecast_cost (P2's cost) -- dev box CPU",
+   "cost": "plans/cost_forecast.json :: p1_application.P1v_verification_cpu"
+  },
+  {
+   "phase": "closeout",
+   "what": "failure / teardown / evidence reserve for the one P1 session",
+   "cost": "plans/cost_forecast.json :: p1_application.closeout_reserve_1_session"
+  }
+ ],
+ "totals": "plans/cost_forecast.json :: p1_application.totals (derived; not restated here)",
+ "not_requested_now": {
+  "P1g": "small GPU validation of the training changes and the unit driver (plans/cost_forecast.json :: proposal_phases.P1g_gpu_validation, for reference)",
+  "P2": "the four formal units (proposal_phases.P2_formal_4_units, for reference; recomputed on B's real pack)",
+  "storage": "the 30 GB network volume for training (proposal_phases.storage_h1_backend_two_months, for reference)",
+  "whole_h1_reference": "plans/cost_forecast.json :: proposal_totals -- reference only, not an amount asked for"
+ },
+ "sequencing": "DATA FIRST (maintainer 2026-10-22): this application covers P1 + P1v only. After B's real pack exists, M1's values and P2's cost are recomputed and frozen; a separate application then asks for P1g (with the training backend if it is needed by then); only after P1g passes is the four-unit P2 applied for.",
+ "proposed_grant_shape": "one H1 envelope with per-phase hard caps; a one-use authorization per session bound to its plan hash (src/aadistill/governance/authorization.py); at most one billing resource at a time; the default-on provider-resource reconciliation and the same-failure gate before every create; the capacity probe at true size before any session that produces a student",
+ "authorizes": "nothing"
 }

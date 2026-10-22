@@ -125,11 +125,37 @@ def summarize(built: dict, block_len: int) -> dict:
             "composition_capacity": built["ladder"]["composition_capacity"]}
 
 
+def write_arm_a(out: Path) -> dict:
+    """Arm A's formal pack, written ONCE (np.savez stamps a time, so only a
+    written file has a sha256): the same build as the dry run, refused unless its
+    2.96M rung equals the measured composition the dry run recorded."""
+    if (out / "ladder.json").exists():
+        raise SystemExit(f"{out} already holds a pack; a recorded pack is never rewritten")
+    old = B.build(old_arm_sessions(), OLD_ARM_SPEC, B.load_tokenizer())
+    rec = A.read_json(OUT)["old_arm"]["rungs"][0]
+    meta = B.write_pack(out, old, OLD_ARM_SPEC, {"arm": "A", "formal_pack": True,
+                                                 "built_by": "pack_dry_run.write_arm_a"})
+    rung = next(r for r in meta["rungs"] if r["target_supervised_tokens"] == 2_960_000)
+    got = {"n_units": rung["n_units"], "n_sessions": rung["n_sessions"],
+           "actual_supervised_tokens": rung["actual_supervised_tokens"], "n_blocks": rung["n_blocks"]}
+    want = {"n_units": rec["units"], "n_sessions": rec["sessions"],
+            "actual_supervised_tokens": rec["unique_supervised_tokens"], "n_blocks": rec["blocks"]}
+    if got != want:
+        raise SystemExit(f"arm A rebuilt as {got}, not the measured {want}")
+    return {"composition": got, "blocks_sha256": A.sha256_file(out / "blocks.npz"),
+            "ladder_sha256": A.sha256_file(out / "ladder.json")}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--scratch", default=None)
+    ap.add_argument("--write-arm-a", default=None, metavar="DIR",
+                    help="write arm A's formal pack to DIR (once) and print its identity")
     args = ap.parse_args(argv)
+    if args.write_arm_a:
+        print(json.dumps(write_arm_a(Path(args.write_arm_a))))
+        return 0
     tok = B.load_tokenizer()
 
     old = B.build(old_arm_sessions(), OLD_ARM_SPEC, tok)

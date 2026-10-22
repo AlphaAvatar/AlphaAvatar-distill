@@ -1,0 +1,131 @@
+{
+  "schema": "aadistill.stage2.reasoning_data.h1_units/v1",
+  "status": "PROPOSED (2026-10-22 UTC), NOT FROZEN, NOT FUNDED. What scripts/stages/stage-2/reasoning_data/unit_driver.py runs for H1's four formal units. The driver refuses a formal launch while this file is not frozen, while the schedule it reads is provisional, or while an arm's pack identity is pending; a GPU validation (--validation) may run a provisional schedule but never writes a formal result.",
+  "frozen": false,
+  "_frozen": "set true only with the frozen protocol and its paid authorization (a maintainer decision); the driver reads it, nothing else does",
+  "units": {
+    "from": "logs/stages/stage-2/reasoning_data/plans/comparison_design.json :: arms (keys) x fixed.seeds",
+    "id": "<arm>-s<seed>",
+    "_derived": "derived by the driver, never listed here: one owner for arms and seeds"
+  },
+  "schedule": {
+    "from": "logs/stages/stage-2/reasoning_data/plans/h1_accounting.json :: schedule",
+    "keys_read": [
+      "status",
+      "steps",
+      "blocks_per_step",
+      "warmup_steps",
+      "eval_every",
+      "save_every"
+    ],
+    "provisional_when": "its status starts with PROVISIONAL (today: B's pack is estimated)",
+    "lr_rule": "warmup max(10, round(0.05 T)); eval every max(25, T // 8); save every max(200, T // 2) -- the E1 builder's rule; the driver recomputes it and refuses a schedule record that disagrees",
+    "rung": 2960000
+  },
+  "packs": {
+    "A": {
+      "status": "recorded",
+      "what": "arm A's 2.96M pack: corpus_v2 units with whole-unit isolation exclusion, cut by the shared builder (pack_dry_run.py OLD_ARM_SPEC, salt stage2.reasoning_data.old_arm/v1)",
+      "expected": {
+        "n_units": 3150,
+        "n_sessions": 3312,
+        "actual_supervised_tokens": 2960182,
+        "n_blocks": 1459
+      },
+      "expected_from": "logs/stages/stage-2/reasoning_data/audit/packing_dry_run.json :: old_arm.rungs[0] (measured)",
+      "blocks_sha256": "b561b85f9b73bcb65114871ba538609cf4ae0ea4f581e620942478a2d3a2921d",
+      "ladder_sha256": "280a531e56fd47b9f57c8c35c73140f64b7b02d89658b96187a80c79334fef55",
+      "written": {
+        "utc": "2026-10-22",
+        "by": "PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.pack_dry_run --write-arm-a artifacts/stages/stage-2/reasoning_data/packs/A",
+        "where": "artifacts/stages/stage-2/reasoning_data/packs/A on the dev box (74 MB, gitignored); the composition check against packing_dry_run.json passed at write",
+        "durable_copies": "dev box only; a pod receives it through the relay at P1g/P2 preparation, sha-checked by this record"
+      }
+    },
+    "B": {
+      "status": "pending",
+      "what": "pending: B's real pack (stage2.reasoning_master@v1, D_2.96M of B's master order) -- it exists only after P1 generation and P1v verification",
+      "expected": null,
+      "blocks_sha256": null,
+      "ladder_sha256": null
+    },
+    "layout": "<--pack-root>/<arm>/{blocks.npz, audit.jsonl, ladder.json}",
+    "check": "sha256 of blocks.npz and ladder.json equal the recorded values, and the 2.96M rung's n_units, n_sessions, actual_supervised_tokens and n_blocks equal `expected`"
+  },
+  "initialization": {
+    "record": "logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json",
+    "identity": "its materialization_identity (artifact_digest 457e194c..., weights_digest 73589c58...); the dev-box-only search journal is never read on a pod",
+    "restore": "stages.reasoning_data.restore_initialization.download from the relay, then aadistill.runtime.leaf_durability.verify_transferred_leaf against that identity; an --init-dir that already verifies is used as is"
+  },
+  "recipe": {
+    "frozen": "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json",
+    "frozen_sha256": "19e1e3f68009f16f076ca777a38055bff01caa2084073b6c54a73870b5471265",
+    "_frozen": "the recipe dose_driver.train_recovery runs (stages.phase_c1.autoinit_c1_driver.FROZEN_RECIPE): CE 0.25 + KD 1.0, T 1, kd_scope all, AdamW 5e-5, fp32 + bf16 autocast, 8,192 blocks",
+    "overrides": [
+      "run_name",
+      "_purpose",
+      "out_dir",
+      "data_dir",
+      "student_path",
+      "seed",
+      "rung",
+      "schedule.total_steps",
+      "schedule.warmup_steps",
+      "batch.blocks_per_step",
+      "checkpoint.save_every",
+      "intervals.eval_every"
+    ],
+    "_overrides": "every other key of the frozen recipe, nested keys included, is unchanged and the driver checks it; the per-unit recipe identity is the sha256 of the derived config without run_name, _purpose, out_dir, student_path and data_dir (the pack is identified by its own sha256)",
+    "trainer": "scripts/shared/training/train_stage3.py under /opt/train/bin/python (stages.phase_c1.autoinit_c1_driver.TRAINER)"
+  },
+  "evaluation": {
+    "set": "eval-set-1",
+    "every_item": true,
+    "runner": "stages.calibration_volume.dose_driver.evaluate_all (fluid via run_battery --mode eval, the capability and legacy units via uncapped_eval; scored by shared.evaluation.eval_set_scoring)",
+    "trained_context": 8192,
+    "action_protocol": "v2",
+    "progress": "<durable root>/<unit>/eval_progress: finished generation files, rescored rather than regenerated on a restart (evaluate_all's own mechanism)"
+  },
+  "durability": {
+    "order": [
+      "restore and re-verify the initialization",
+      "train",
+      "persist_unit checkpoint (the moment training ends)",
+      "persist_unit files label training (config, trainer log and manifests)",
+      "evaluate",
+      "persist_unit files label evaluation (generations, rows, formal report, logs; logical paths)",
+      "persist_unit files label report (report.json, last)"
+    ],
+    "state_from": "the durable root only: a completed report record = completed and scored (skip, bring the evidence home, never the weights); a completed checkpoint record without one = trained and durable (re-verify, resume at scoring, never retrain); none = not trained (train); a record whose inputs differ from this unit's = identity mismatch (preserve, consume nothing, stop)",
+    "local_trained_model": "a model a previous attempt on THIS machine finished training (trained.json in its attempt directory, inputs equal) is persisted rather than retrained",
+    "capacity": "--capacity-bytes (the provider's figure less what is there); df is not a network volume's quota"
+  },
+  "retry": {
+    "endpoint": "one complete endpoint per unit: a completed checkpoint is never overwritten and a scored unit is never rerun",
+    "after_formal_training_began": "an engineering failure is repaired and the SAME unit and seed retrained from the initialization as one replacement endpoint; the failed attempt is preserved in its own attempt directory and listed; partial measurements are never pooled",
+    "attempts": "<durable root>/<unit>/attempts.jsonl, append-only: run id, git commit, state at start, action, replacement_of, outcome, stage, error and its failure signature (aadistill.infrastructure.failure_signature) for the launcher's same-failure gate",
+    "on_failure": "the driver stops at the first failed unit (later units would meet the same defect); every earlier completed unit is already persisted"
+  },
+  "training_resume": {
+    "supported": false,
+    "why": "train_stage3.py has --resume, but whether a resumed run equals an uninterrupted one (data order, RNG, optimizer state) is a GPU-validation question; until that is shown a failed training attempt is retrained from the initialization"
+  },
+  "validation": {
+    "flag": "--validation [--validation-steps N]",
+    "namespace": "<durable root>/validation/<unit>: never the formal namespace, and its report says formal: false",
+    "may": "run a provisional schedule or reduced steps (the lr rule recomputed for N); it may not run a pending pack"
+  },
+  "boundary": {
+    "teardown": "the launcher's: this driver creates, stops and deletes no provider resource",
+    "observers": "the driver starts no background watcher; its children run to completion (subprocess.run), and the terminal path records an empty watch set",
+    "terminal": "--status gets ALL_DONE, FAILED or REFUSED with the per-unit outcome, in the same code path that ends the run"
+  },
+  "left_to_gpu_validation": [
+    "real CUDA execution of train_stage3 on the derived recipe at 7 and 2 blocks per step",
+    "throughput and peak memory",
+    "the trainer's --resume equivalence",
+    "persistence onto the mounted backend at its real speed and quota",
+    "evaluate_all on a recovered H1 student"
+  ],
+  "authorizes": "nothing"
+}

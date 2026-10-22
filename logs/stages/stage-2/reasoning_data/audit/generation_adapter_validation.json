@@ -1,9 +1,11 @@
 {
  "schema": "aadistill.stage2.reasoning_data.generation_adapter_validation/v1",
- "written_utc": "2026-10-22T09:18:56Z",
+ "written_utc": "2026-10-22T15:31:18Z",
  "input": {
   "records": "Stage-0 teacher_cal.jsonl (sha256-verified by assets.teacher_cal_records)",
-  "n_records": 672
+  "n_records": 672,
+  "candidate_identity": "one record per task (checked); candidate_index 0 stated explicitly",
+  "consistency": "every record passed `consistency` with the tokenizer: prompt = the task's, assistant messages = split_generation(raw), observations = next user turns, output token ids decode to raw"
  },
  "contract": {
   "abstract_analogical": {

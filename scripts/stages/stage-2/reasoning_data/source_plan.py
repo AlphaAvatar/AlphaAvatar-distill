@@ -13,11 +13,16 @@ is approved for H1. With ``--check``, it counts what the given task pools hold
 per cell and reports every shortfall: the check between the plan and the
 artifacts that are supposed to fill it.
 
-A plan is GENERATABLE only when every source it names is ``approved_for_h1``
-(`sources.json`); otherwise it is a review plan, labelled so, and
-`generation_adapter` refuses it. Dropping a source means choosing another
-variant, which carries another corpus id -- never a quiet substitution inside
-one. Writes `logs/stages/stage-2/reasoning_data/plans/source_plan.json`.
+The variant arm B is cut from is the one `corpus_spec.json :: chosen_variant`
+names (the maintainer's choice); a plan says whether it is that one
+(``chosen``). A plan is ADMITTED only when every source it names is ``approved_for_h1``
+(`sources.json`: a recorded maintainer decision); otherwise it is a review
+plan, labelled so, and `generation_adapter` refuses it. Admission is design:
+which TASKS are generated, at what scale, is `generation_plan.py`, which also
+drops every task without a usable verifier and reports each cell it then
+cannot fill. Dropping a source means choosing another variant, which carries
+another corpus id -- never a quiet substitution inside one. Writes
+`logs/stages/stage-2/reasoning_data/plans/source_plan.json`.
 """
 from __future__ import annotations
 
@@ -31,6 +36,11 @@ from stages.reasoning_data import assets as A
 
 OUT = A.LOG_DIR / "plans/source_plan.json"
 TARGET = 2_960_000
+
+
+def repo_path(path: Path) -> str:
+    rp = Path(path).resolve()
+    return str(rp.relative_to(A.REPO)) if rp.is_relative_to(A.REPO) else f"(outside the repository) {rp.name}"
 
 
 def allocation(spec: dict, variant: str) -> dict[str, dict[str, float]]:
@@ -59,9 +69,7 @@ def plan(variant: str, pools: list[Path] = ()) -> dict:
     have = Counter()
     pool_ids = []
     for p in pools:
-        rp = Path(p).resolve()
-        pool_ids.append({"path": str(rp.relative_to(A.REPO)) if rp.is_relative_to(A.REPO) else f"(outside the repository) {rp.name}",
-                         "sha256": A.sha256_file(rp)})
+        pool_ids.append({"path": repo_path(Path(p)), "sha256": A.sha256_file(Path(p))})
         for it in A.jsonl(Path(p)):
             have[(stratum_of(it, spec), it.get("source"))] += 1
     cells, unknown = [], []
@@ -86,9 +94,10 @@ def plan(variant: str, pools: list[Path] = ()) -> dict:
     unapproved = sorted({c["source"] for c in cells if c["share"] > 0 and not c["approved_for_h1"]})
     return {"schema": "aadistill.stage2.reasoning_data.source_plan/v1",
             "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "corpus_id": variant, "generatable": not unapproved,
-            "status": ("GENERATABLE: every source is approved" if not unapproved else
-                       f"REVIEW ONLY: not approved for H1: {unapproved}"),
+            "corpus_id": variant, "admitted": not unapproved,
+            "chosen": variant == (spec.get("chosen_variant") or {}).get("id"),
+            "status": ("ADMITTED: every source is approved for H1 (design; not a spending authorization)"
+                       if not unapproved else f"REVIEW ONLY: not approved for H1: {unapproved}"),
             "unapproved_sources": unapproved, "cells": cells,
             "pools_checked": pool_ids,
             "shortfalls": [f"{c['stratum']}/{c['source']}: {c['tasks_in_pools']} tasks for ~{c['independent_units_estimate']} units"

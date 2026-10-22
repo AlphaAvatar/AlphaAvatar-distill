@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.stage2.reasoning_data.durability_plan/v2",
-  "status": "H1 durability (2026-10-21 UTC). VERIFIED / PLANNED / BLOCKED are kept apart. Choosing and paying for a backend is a maintainer decision (AGENTS.md P8.2.1); nothing here creates one.",
+  "status": "H1 durability (2026-10-21 UTC). VERIFIED / PLANNED / BLOCKED are kept apart. Choosing and paying for a backend is a maintainer decision (AGENTS.md P8.2.1); nothing here creates one. Revised 2026-10-22: the maintainer prefers a 30 GB network volume for the TRAINING phases and does not want one created for P1; any paid storage still needs its own authorization.",
   "verified": {
     "initialization_two_copies": {
       "what": "Stage-0 D4 Top-1 (fc28e0dd..., artifact digest 457e194c...)",
@@ -11,30 +11,92 @@
       "restore_path": "PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.restore_initialization --dest <dir> (a pod restores from the relay and re-proves the identity before use)",
       "tokenizer": "not stored with the checkpoint (tokenizer_sha256 null in its identity); bound by file hash to artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint, which every recovery used"
     },
-    "relay_capacity": {"headroom_bytes": 2147587286, "probe_utc": "2026-10-21T17:52Z",
-                       "probe": "hub_capacity.would_accept with fresh random oids, bisected; nothing uploaded",
-                       "reading": "the relay holds one 1.19 GB bf16 student and refuses one 2.38 GB fp32 student directory"},
-    "dev_box_free_gib_after_the_copy": 11
+    "relay_capacity": {
+      "headroom_bytes": 2147587286,
+      "probe_utc": "2026-10-21T17:52Z",
+      "probe": "hub_capacity.would_accept with fresh random oids, bisected; nothing uploaded",
+      "reading": "the relay holds one 1.19 GB bf16 student and refuses one 2.38 GB fp32 student directory"
+    },
+    "dev_box_free_gib_after_the_copy": 11,
+    "p1_generation_records_capacity": {
+      "what": "room on EXISTING storage for P1's generation records (text and token ids; about 0.1 GB per copy at the plan's upper bound, teacher_cal's 59 MB per 4.5M tokens)",
+      "relay": "aadistill.runtime.hub_capacity.would_accept on AlphaAvatar/aadistill-artifacts, 2026-10-22T15:53Z, fresh random oids, nothing uploaded: 2 x 150 MB ACCEPTED, 1 x 1 GB ACCEPTED, 1 x 2 GB ACCEPTED",
+      "dev_box_free_bytes": 9974575104,
+      "route": "teacher_cal's: each finished pass group writes <label>.done with its sha256 (generation_driver), the launcher's poll hook fetches it to the dev box and the closeout checks the sha; a second copy on the relay, downloaded back and hash-compared before teardown",
+      "reading": "P1 needs no new storage: the network volume is the TRAINING backend (P1g/P2), not created for P1 (maintainer 2026-10-22)"
+    }
   },
   "planned_per_asset": [
-    {"asset": "teacher generation records (every candidate, token ids, stop reasons, verifier verdicts)", "size": "about 0.11 GB for H1's 7.9M generated tokens (teacher_cal: 59 MB for 4.5M)", "where": "pushed off the pod and hash-checked before teardown; dev box (artifacts/stages/stage-2/reasoning_data/) and the relay (fits the 2.0 GiB headroom)", "retention": "kept: they are the corpus's provenance", "restore": "relay or dev box, sha256-pinned"},
-    {"asset": "gold / verifier evidence (task sets, verdicts, process states)", "size": "a few MB", "where": "git (data/ and logs/)", "retention": "kept", "restore": "git"},
-    {"asset": "training packs (arm A and arm B: blocks.npz, audit.jsonl, ladder.json)", "size": "about 0.1 GB each", "where": "built on the dev box at $0, hashed into the preregistration, staged to each pod", "retention": "kept until H1 closes; rebuildable byte-for-byte from the sessions and the builder", "restore": "dev box, or rebuild"},
-    {"asset": "resume state of a unit in flight (fp32 weights + AdamW moments)", "size": "about 7.2 GiB", "where": "the H1 backend, written at the trainer's save points", "retention": "only while its unit runs; deleted once the unit's final checkpoint is durable", "restore": "the backend"},
-    {"asset": "completed student checkpoints (4 units)", "size": "2,384,285,634 bytes each (fp32 model directory), 8.9 GiB for 4", "where": "the H1 backend, persisted at completion BEFORE evaluation starts, with identity, input hashes and content hash", "retention": "until H1's analysis is closed; then retirable under AGENTS.md 2.5 unless a declared consumer names one", "restore": "the backend"},
-    {"asset": "evaluation raw outputs (every generation, scored rows, reports)", "size": "about 60 MB per unit", "where": "pushed off the pod and hash-checked; dev box + git (small records), relay copy of the generations", "retention": "kept", "restore": "dev box or relay"}
+    {
+      "asset": "teacher generation records (every candidate, token ids, stop reasons, verifier verdicts)",
+      "size": "about 0.11 GB for H1's 7.9M generated tokens (teacher_cal: 59 MB for 4.5M)",
+      "where": "pushed off the pod and hash-checked before teardown; dev box (artifacts/stages/stage-2/reasoning_data/) and the relay (fits the 2.0 GiB headroom)",
+      "retention": "kept: they are the corpus's provenance",
+      "restore": "relay or dev box, sha256-pinned"
+    },
+    {
+      "asset": "gold / verifier evidence (task sets, verdicts, process states)",
+      "size": "a few MB",
+      "where": "git (data/ and logs/)",
+      "retention": "kept",
+      "restore": "git"
+    },
+    {
+      "asset": "training packs (arm A and arm B: blocks.npz, audit.jsonl, ladder.json)",
+      "size": "about 0.1 GB each",
+      "where": "built on the dev box at $0 (artifacts/stages/stage-2/reasoning_data/packs/<arm>/), its sha256 recorded in h1_units.json, staged to each pod and checked there by unit_driver",
+      "retention": "kept until H1 closes; rebuildable to the same composition from the sessions and the builder, but not byte-for-byte (np.savez stamps a time), so the WRITTEN file's sha256 is the identity: arm A's is recorded in configs/stages/stage-2/reasoning_data/h1_units.json (written 2026-10-22)",
+      "restore": "dev box, or rebuild"
+    },
+    {
+      "asset": "resume state of a unit in flight (fp32 weights + AdamW moments)",
+      "size": "about 7.2 GiB",
+      "where": "the H1 backend, written at the trainer's save points",
+      "retention": "only while its unit runs; deleted once the unit's final checkpoint is durable",
+      "restore": "the backend"
+    },
+    {
+      "asset": "completed student checkpoints (4 units)",
+      "size": "2,384,285,634 bytes each (fp32 model directory), 8.9 GiB for 4",
+      "where": "the H1 backend, persisted at completion BEFORE evaluation starts, with identity, input hashes and content hash",
+      "retention": "until H1's analysis is closed; then retirable under AGENTS.md 2.5 unless a declared consumer names one",
+      "restore": "the backend"
+    },
+    {
+      "asset": "evaluation raw outputs (every generation, scored rows, reports)",
+      "size": "about 60 MB per unit",
+      "where": "pushed off the pod and hash-checked; dev box + git (small records), relay copy of the generations",
+      "retention": "kept",
+      "restore": "dev box or relay"
+    }
   ],
   "peak_backend_occupancy_gib": 18.3,
   "_peak": "4 completed students 8.9 + one resume state 7.2 + initialization 1.1 + packs 0.2 + generation records 0.1 + margin; a 30 GB backend leaves room for one failed unit's rerun",
   "blocked": {
-    "large_artifact_backend": "NOT PROVISIONED. The relay cannot hold one fp32 student, and the dev box (11 GiB free) cannot hold the four plus a resume state. H1 must not start training before a backend with >= 30 GB is confirmed AND its read-back path is exercised (write, read, hash) at its true per-object size.",
+    "large_artifact_backend": "NOT PROVISIONED. The relay cannot hold one fp32 student, and the dev box (11 GiB free) cannot hold the four plus a resume state. Not needed for P1 (generation records fit existing storage: verified.p1_generation_records_capacity). H1 must not start training before a backend with >= 30 GB is confirmed AND its read-back path is exercised (write, read, hash) at its true per-object size.",
     "options": [
-      {"option": "a 30 GB RunPod network volume kept for H1", "cost": "$2.10/month ($0.07/GB-month, the recorded basis), $4.20 for two months", "notes": "the path Stage 0 exercised (volume_sync, require_pushed); durable only while paid; one running pod at a time; data centre fixed at creation"},
-      {"option": "an external object store under a maintainer account (S3/R2/B2)", "cost": "about $1/month at 30 GB", "notes": "independent of the provider; needs a credential and a transport that is not built or tested yet"},
-      {"option": "a paid HF storage increase", "cost": "a plan change", "notes": "uses the existing relay transport; a maintainer account decision"}
+      {
+        "option": "a 30 GB RunPod network volume kept for H1",
+        "cost": "$2.10/month ($0.07/GB-month, the recorded basis), $4.20 for two months",
+        "notes": "the path Stage 0 exercised (volume_sync, require_pushed); durable only while paid; one running pod at a time; data centre fixed at creation"
+      },
+      {
+        "option": "an external object store under a maintainer account (S3/R2/B2)",
+        "cost": "about $1/month at 30 GB",
+        "notes": "independent of the provider; needs a credential and a transport that is not built or tested yet"
+      },
+      {
+        "option": "a paid HF storage increase",
+        "cost": "a plan change",
+        "notes": "uses the existing relay transport; a maintainer account decision"
+      }
     ],
     "recommendation": "the 30 GB network volume: it is the only option with an exercised transport. The launch precondition stays the capacity probe at the true per-object size and total, plus one write-read-hash round trip."
   },
-  "not_durability": ["an upload code path that exists", "a PROTECTED registry entry", "a pod disk that is still up"],
+  "not_durability": [
+    "an upload code path that exists",
+    "a PROTECTED registry entry",
+    "a pod disk that is still up"
+  ],
   "authorizes": "nothing"
 }

@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.stage2.reasoning_data.cost_forecast/v1",
  "status": "FORECAST from measured rates; authorizes nothing",
- "written_utc": "2026-10-22T09:04:09Z",
+ "written_utc": "2026-10-22T16:02:09Z",
  "measured": {
   "teacher_generation": {
    "tokens_per_second": 1739.1,
@@ -141,10 +141,13 @@
    }
   },
   "candidate_policy": "up to 2 candidates per task, the second only when the first is rejected; every candidate recorded. Yield is planned at the measured n = 1 rate per generated token, which a retry does not change.",
-  "generated_tokens": 6968972,
-  "gpu_hours": 1.11,
-  "session_hours_with_contingency": 1.82,
-  "expected_usd": 3.34
+  "spec_estimate_generated_tokens": 6968972,
+  "basis": "plans/generation_plan.json :: totals.expected_generated_tokens_upper (the real task list, second candidates included)",
+  "generation_plan_sha256": "a75b4336f4014b54dcf430220db9c32a633aac47e9bc5f5a4afc8247997f94e2",
+  "generated_tokens": 9874990,
+  "gpu_hours": 1.58,
+  "session_hours_with_contingency": 2.51,
+  "expected_usd": 4.61
  },
  "units": {
   "L40S/M0_frozen": {
@@ -305,8 +308,8 @@
  },
  "proposal_phases": {
   "P1_generation": {
-   "expected_usd": 3.34,
-   "hard_cap_usd": 5.01
+   "expected_usd": 4.61,
+   "hard_cap_usd": 6.92
   },
   "P1v_verification_cpu": {
    "expected_usd": 0.0,
@@ -331,9 +334,28 @@
   }
  },
  "proposal_totals": {
-  "h1_expected_usd": 23.33,
-  "h1_hard_cap_usd": 32.9,
+  "h1_expected_usd": 24.6,
+  "h1_hard_cap_usd": 34.81,
   "excludes": "the optional diagnostic and any later ladder (a separate application)"
+ },
+ "p1_application": {
+  "P1_generation": {
+   "expected_usd": 4.61,
+   "hard_cap_usd": 6.92
+  },
+  "P1v_verification_cpu": {
+   "expected_usd": 0.0,
+   "hard_cap_usd": 0.0
+  },
+  "closeout_reserve_1_session": {
+   "expected_usd": 0.73,
+   "hard_cap_usd": 1.1
+  },
+  "totals": {
+   "expected_usd": 5.34,
+   "hard_cap_usd": 8.02
+  },
+  "_what": "one A100-80GB generation session (teacher_cal's measured GPU, engine and price) with a closeout reserve of the session overhead + 15 minutes; P1v runs on the dev box at $0. The whole-H1 rows (proposal_phases) are kept for reference and are NOT requested now"
  },
  "_proposal_phases": "H1's rows, cited by plans/authorization_proposal.json: generation on one A100-80GB; GPU validation and the 4 formal units on L40S under M1 (recovery time from h1_accounting executed positions at the measured positions/s, eval at 2x the measured floor-student time); one session overhead per paid session; a closeout reserve of overhead + 15 min per session; hard cap = expected x the labelled factor (storage at cost)",
  "cpu": "every builder, audit, isolation check and pack runs on the dev box at $0 (minutes)",

@@ -9,54 +9,45 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**STAGE-2/3 H1: PREPARATION REVISED AT $0 AFTER REVIEW, NOT COMPLETE, NOT AUTHORIZED (2026-10-22).**
+**STAGE-2/3 H1: DESIGN CHOSEN BY THE MAINTAINER; P1 + P1v APPLICATION READY AT $0; NOTHING AUTHORIZED (2026-10-22).**
 Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).
 No teacher target, student, GPU session or paid storage exists, and $0 was
 spent. The preparation result is
 [`docs/stages/stage-2/reasoning_data/H1.md`](../../docs/stages/stage-2/reasoning_data/H1.md):
-§10 lists the review's eight corrections with their evidence, §9 what is open.
-Its records are under [`stages/stage-2/reasoning_data/`](../stages/stage-2/reasoning_data/).
-- **Initialization FIXED by the maintainer: Stage-0 D4 Top-1** (`fc28e0dd…`,
-  digest `457e194c…`). It has two verified copies: the relay, and a dev-box
-  read-back whose rebuilt identity matches (`assets/d4_top1_materialization.json`).
-  The registry shows it `retained_local`. The baseline record and
-  `selection.json` are unchanged.
-- **Budget** (`budget/h1_budget_position.json`, provider snapshot
-  2026-10-21T18:59Z):
-  - records $625.5798 against the $643.6571 cap; provider $658.15; 0 pods,
-    0 volumes, $0/h; balance $101.23 (not a grant);
-  - headroom +$18.08 if the records are complete, −$14.49 if all billing is
-    project (the conservative bound);
-  - of 53 pods no run created, 19 are named by this project's records and
-    **34 ($58.33) stay OPEN**;
-  - the attribution tool's self-reference defect was fixed twice: a committed
-    reconciliation (the H1 position itself) no longer attributes the pods it
-    lists.
-- **Durability** (`plans/durability_plan.json`). The relay holds about 2.0 GiB
-  and the dev box about 11 GiB free. **The large-artifact backend is BLOCKED:
-  not provisioned.** Recommended: a 30 GB network volume ($4.20 for two months).
-- **H1 draft** (`plans/comparison_design.json`):
-  - A = corpus_v2 as it was (28 near-copy units excluded whole);
-    B = verified teacher-native corpus, reasoning 0.70 / supporting 0.30, cut
-    from an explicitly chosen corpus variant;
-  - the matching rule is fixed; its values (T 625, 7/2 blocks per step) are
-    provisional until B's real pack exists;
-  - recovery frozen (CE 0.25 + KD 1.0, full-vocab forward KL);
-  - eval-set-1 with both generator tiers; statistics with resolution and floor
-    rules fixed in advance.
-- **Cost** (`plans/cost_forecast.json :: proposal_totals`): $23.33 expected,
-  $32.90 hard cap for H1, recomputed once B's pack exists.
-- **Still open (engineering):** supporting-source task builders, two
-  exporters, five module checkers, the GPU unit driver
-  (`plans/source_plan.json` shortfalls; H1.md §9).
-- **TIP** is registered as an H3 candidate only (`plans/h3_candidates.json`).
+§11 is this round (choices, corrections, engineering, application), §10 the
+review's corrections, §9 what is open. Records:
+[`stages/stage-2/reasoning_data/`](../stages/stage-2/reasoning_data/).
+- **Maintainer choices (2026-10-22, design only).**
+  - Fixed: D4 Top-1 (`fc28e0dd…`, digest `457e194c…`, two verified copies),
+    the recovery objective, eval-set-1, 70/30.
+  - Arm B = `stage2.reasoning_master@v1` (`corpus_spec.json ::
+    chosen_variant`; its 11 sources admitted in `sources.json`).
+  - M1's rule accepted; T 625 and 7/2 provisional until B's real pack.
+  - H1 concludes on static transfer; interactive results are exploratory
+    (`comparison_design.json :: statistics.interactive_scope`).
+- **Done at $0.**
+  - The verified record is the trained record (`generation_adapter`; target
+    identities in the pack's `targets.jsonl`).
+  - Persistence never alters completed evidence (`persist_unit` v2).
+  - Supporting pools, both exporters, a checker for every candidate module.
+  - The chain: `generation_plan` → `generation_driver` → adapter →
+    `build_arm_b`, validated end to end on real teacher text
+    (`audit/arm_b_chain_validation.json`, not arm B).
+  - `unit_driver.py` + `h1_units.json` (CUDA left to P1g); arm A's pack
+    written once.
+- **The application** (`plans/authorization_proposal.json` v3): P1 + P1v only.
+  - Plan: `plans/generation_plan.json`.
+  - Cost: `plans/cost_forecast.json :: p1_application`.
+  - Storage: existing (`plans/durability_plan.json :: verified.p1_generation_records_capacity`).
+- **Budget** (`budget/h1_budget_position.json`): 34 pods ($58.33) and the
+  anchor stay OPEN. The application gives P1's need under the conservative
+  occupancy and under the records-complete reading; the cap is unchanged.
+- **Still open:** launcher wiring for P1 ($0); the training backend (BLOCKED
+  for P1g/P2); the GPU questions (P1g).
 - **Needs the maintainer:**
-  1. the 34-pod attribution and the anchor question;
-  2. an H1 envelope and cap;
-  3. the backend;
-  4. the source scheme (no source is approved for H1 yet);
-  5. M1, the matching rule and the draft protocol;
-  6. whether thin interactive coverage is accepted as a scope limit.
+  1. the P1 envelope and cap reading;
+  2. freezing the generation protocol and plan for P1;
+  3. later: P1g, then P2.
 
 **STAGE-0 CALIBRATION-VOLUME PROGRAMME CLOSED (final $0 closeout, 2026-10-21).**
 Verdict: **EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON

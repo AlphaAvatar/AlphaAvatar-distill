@@ -4,7 +4,8 @@ The protocol (`plans/comparison_design.json :: statistics`) cites this module;
 every constant below is declared at preregistration and none is fitted to a
 result.
 
-Input: one row per (arm, seed, item) on the formal fluid static items --
+Input: one row per (arm, seed, item) on the formal fluid STATIC items (four
+axes; interactive episodes are exploratory in H1 and refused here) --
 ``{"arm": "A" | "B", "seed": int, "item_id": str, "cluster": str, "axis": str,
 "correct": bool}``. ``cluster`` is the item's rule family, with items of one
 equivalence group in one cluster. Every item must be scored for both arms at
@@ -64,6 +65,10 @@ FLOOR_RATE = 0.02
 MIN_DISCORDANT = 10
 MIN_INFORMATIVE_CLUSTERS = 5
 ALPHA_AXES = 0.05
+#: MAINTAINER 2026-10-22: H1 concludes on STATIC reasoning transfer; with 3
+#: interactive training families its interactive result is exploratory, reported
+#: beside the decision and never inside it (comparison_design.json :: statistics).
+EXPLORATORY_AXES = frozenset({"interactive_adaptation"})
 
 
 def _paired(rows: Iterable[Mapping]) -> tuple[dict, list]:
@@ -136,7 +141,12 @@ def _label(items: dict, seeds: list, sesoi: float, *, stratify: bool) -> dict:
 
 
 def decide(rows: Iterable[Mapping]) -> dict:
-    """The primary label, then the axis contrasts with Holm over axes."""
+    """The primary label, then the axis contrasts with Holm over axes. Rows of an
+    exploratory axis are refused: they are reported, not decided on."""
+    rows = list(rows)
+    bad = sorted({r["axis"] for r in rows} & EXPLORATORY_AXES)
+    if bad:
+        raise ValueError(f"{bad} is exploratory in H1 (maintainer 2026-10-22): report it beside the decision")
     items, seeds = _paired(rows)
     primary = _label(items, seeds, SESOI, stratify=True)
     axes: dict = defaultdict(dict)

@@ -1485,7 +1485,7 @@
    "experiment_id": "reasoning_data",
    "stage_id": "2",
    "classification": "experiment",
-   "status": "H1 PREPARATION REVISED AT $0 2026-10-22 AFTER REVIEW, NOT COMPLETE, NOT AUTHORIZED. The maintainer fixed Stage-0 D4 Top-1 as the initialization (two verified copies: relay + dev box); H1 compares 2.96M of corpus_v2 (A) with 2.96M of a verified teacher-native corpus (B) under one matching rule (values provisional until B's pack). Done: asset audit, target quality v2, isolation rules R0-R9, the train_tasks_v2 pool, a source plan with named corpus variants, an isolated export and external task builder, a post-generation adapter validated on the Stage-0 teacher records, completion-time persistence, the H1 accounting, statistics and draft protocol, a provider-checked budget position (34 pods / $58.33 still unattributed), the durability plan (backend BLOCKED), the H1 application; TIP an H3 candidate only. Open: supporting-source builders, two exporters, five module checkers, the GPU unit driver. No teacher target generated, no student trained, $0 spent",
+   "status": "H1 DESIGN CHOSEN BY THE MAINTAINER 2026-10-22; P1 + P1v APPLICATION READY AT $0, NOT AUTHORIZED. Fixed: Stage-0 D4 Top-1 (two verified copies), the recovery objective, eval-set-1, the 70/30 start. Arm B = stage2.reasoning_master@v1 (reviewed external sources admitted); H1 concludes on static reasoning transfer, interactive results exploratory; M1's rule accepted, its values provisional until B's pack. Done at $0: verified-record identity into the pack, non-destructive completion-time persistence, supporting builders, PrOntoQA and DeepMind Mathematics exporters, a project checker for every candidate module, the generation plan (1,587 tasks), the generation driver, arm B's pack builder (chain validated on real teacher text, not arm B), the training unit driver (CUDA left to P1g), arm A's pack written once. Open: launcher wiring for P1, the training backend (BLOCKED for P1g/P2), 34 pods / $58.33 unattributed. No teacher target generated, no student trained, $0 spent",
    "title": "Stage-2 verified teacher-native reasoning data, measured through Stage-3 controlled recovery",
    "question": "Under one fixed initialization and the fixed historical recovery recipe, does verified teacher-native reasoning data lift a 0.6B student off the fluid-reasoning floor where corpus_v2 left it, and how does that scale over a nested 0.86M-5.50M ladder?",
    "canonical_path": "logs/stages/stage-2/reasoning_data",
@@ -1598,17 +1598,48 @@
      "says": "each corpus variant's per-source targets, approval state and shortfalls against the built pools",
      "field": "authorizes",
      "equals": "nothing"
+    },
+    {
+     "path": "logs/stages/stage-2/reasoning_data/plans/generation_plan.json",
+     "says": "P1's generation list: verifiable tasks per cell, named rate bases, the token upper bound and the run inputs' hashes",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "logs/stages/stage-2/reasoning_data/audit/arm_b_chain_validation.json",
+     "says": "the generation-to-pack chain run end to end on real teacher text at $0 (not arm B)",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "data/stages/stage-2/reasoning_data/tasks/external_tasks_v1.manifest.json",
+     "says": "the demand-sized third-party pool from isolated exports, isolation rules R0-R9 passed",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "data/stages/stage-2/reasoning_data/tasks/supporting_reuse_v1.selection.manifest.json",
+     "says": "the corpus_v2 targets B reuses: ids and hashes only, each re-verified under B's contract",
+     "field": "authorizes",
+     "equals": "nothing"
+    },
+    {
+     "path": "configs/stages/stage-2/reasoning_data/h1_units.json",
+     "says": "the four formal units, their packs' identities and the driver's launch refusals",
+     "field": "authorizes",
+     "equals": "nothing"
     }
    ],
    "external_material": [],
    "decisions": [
     "logs/budget/decisions.md -- 2026-10-21: Stage-2/3 reasoning-data round opened at $0: audit, contracts and a PROPOSED design",
     "logs/budget/decisions.md -- 2026-10-21: Maintainer: H1 fixes D4 Top-1; budget and durability first; TIP as an H3 candidate",
-    "logs/budget/decisions.md -- 2026-10-22: Independent review of H1 preparation: eight targeted corrections at $0, no paid authorization"
+    "logs/budget/decisions.md -- 2026-10-22: Independent review of H1 preparation: eight targeted corrections at $0, no paid authorization",
+    "logs/budget/decisions.md -- 2026-10-22: Maintainer: H1 design choices (arm B = stage2.reasoning_master@v1, interactive exploratory); two corrections and the P1 + P1v application at $0"
    ],
    "classification_reason": "Stage 2 by subject and product: it varies the offline training DATA a recovered student is taught with (AGENTS.md 4.4, reasoning-transfer priority). Stage-3 recovery and eval-set-1 are its instruments, as Stage-3 probes were for the Stage-0 and Stage-1 experiments.",
    "canonical_scripts": "scripts/stages/stage-2/reasoning_data",
-   "canonical_artifacts": null,
+   "canonical_artifacts": "artifacts/stages/stage-2/reasoning_data",
    "canonical_configs": "configs/stages/stage-2/reasoning_data",
    "canonical_data": "data/stages/stage-2/reasoning_data",
    "canonical_docs": "docs/stages/stage-2/reasoning_data",

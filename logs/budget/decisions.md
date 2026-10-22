@@ -13223,3 +13223,74 @@ on a paid pod.
   attribution and envelope, and the backend; the next paid application covers
   data generation and verification first, and the four formal units only
   after B's real pack and the GPU validation.
+
+## 2026-10-22 — Maintainer: H1 design choices (arm B = stage2.reasoning_master@v1, interactive exploratory); two corrections and the P1 + P1v application at $0
+
+- **Context.** The maintainer accepted the review round's corrections. This
+  message continues H1 without reopening Stage 0, re-selecting D4 or widening
+  the matrix. It authorizes no new spending, creates no GPU, pod or network
+  volume, issues no paid grant and merges nothing into main.
+- **Decision (maintainer).**
+  - **Fixed:** D4 Top-1 and the forward-baseline method identity; the 70/30
+    starting point; the recovery objective; eval-set-1. TIP stays an H3
+    candidate.
+  - **Arm B** is `stage2.reasoning_master@v1` (reviewed external sources
+    included), not project-only. It uses the recorded versions and module
+    whitelist, and only modules with a usable verifier enter the paid list.
+  - **M1's matching rule** is accepted. T 625 and 7/2 stay provisional until
+    B's real pack.
+  - **Scope:** H1 concludes on static reasoning transfer; thin interactive
+    coverage is accepted as H1's scope limit, with interactive results
+    exploratory or secondary. The long-term target is unchanged, and qualified
+    interactive data and all fixed interactive evaluations stay. No
+    interactive-environment build.
+  - **Corrections:** (A) the verified record must be the trained record;
+    (B) completion-time persistence must never alter completed evidence.
+  - **Engineering:** complete the $0 engineering with clear consumers:
+    supporting builders, PrOntoQA and DeepMind Mathematics exporters,
+    checkers, the chain from source quota to pack, and the training unit
+    driver's control flow.
+  - **Budget:** the 34 pods and the anchor stay OPEN. The next application is
+    P1 + P1v only, with a conservative budget occupancy. The 30 GB network
+    volume is the preferred TRAINING backend and is not created for P1 if
+    existing storage suffices.
+- **Done by the agent at $0** (`docs/stages/stage-2/reasoning_data/H1.md` §11
+  owns the evidence):
+  - **choices recorded:** `sources.json` (11 sources admitted, each with an
+    `approval` that says design, not spending), `corpus_spec.json ::
+    chosen_variant`, `comparison_design.json :: statistics.interactive_scope`;
+    `h1_statistics` refuses interactive rows;
+  - **A:** `generation_adapter` refuses missing or repeated candidate
+    identities and inconsistent records; the selected verdict and its own
+    record travel together; target identities reach the pack's
+    `targets.jsonl`;
+  - **B:** `persist_unit` v2: `already_persisted`, refusal without change,
+    logical paths, in-flight and completed descriptors kept apart;
+  - **builders, exporters and checkers:** all candidate modules have
+    verifiers, none deferred. The pools are `external_tasks_v1` (1,163),
+    `math_train_v1`, `mbpp_train_v1`, `squad_v2_train_unanswerable_v1` and
+    the corpus_v2 reuse selection;
+  - **chain:** `generation_plan` (1,587 tasks), `generation_driver`,
+    `build_arm_b`, with a $0 chain validation on real teacher text (not arm
+    B);
+  - **unit driver:** `unit_driver.py` and `h1_units.json`; arm A's pack
+    written once;
+  - **application:** `authorization_proposal.json` v3, P1 + P1v only:
+    $5.34 expected, $8.02 hard cap (`cost_forecast.json ::
+    p1_application`). Existing storage holds P1's records.
+- **Alternatives considered.**
+  - Deferring the five needs_checker modules: not needed, since every one got
+    a sound checker.
+  - Re-selecting corpus_v2 reuse targets by B's contract: not done. The
+    reused session stays byte-for-byte corpus_v2's lowest-index target and is
+    dropped if it fails.
+  - Creating the network volume now: not done (not needed for P1).
+- **Risks.**
+  - Proxy acceptance rates for external and supporting cells. PrOntoQA's
+    process gate and answerability are probably optimistic.
+  - The second candidate is skipped for sandbox-only code.
+  - The launcher wiring for the P1 session is still to be done at $0.
+  - Under the conservative occupancy, P1 needs a $22.51 cap rise.
+- **Revisit when.** The maintainer answers the P1 application. After P1v,
+  B's real pack fixes M1's values and P2's cost, P1g is applied for next, and
+  P2 only after P1g passes.

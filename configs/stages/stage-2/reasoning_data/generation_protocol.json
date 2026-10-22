@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.stage2.reasoning_data.generation_protocol/v1",
-  "status": "PROPOSED (2026-10-21 UTC), NOT FROZEN. The teacher-native generation protocol for stage2.reasoning_master@v1. It is frozen, with its sha256 recorded in the generation run's authorization, only after the maintainer approves the protocol and a budget.",
+  "status": "PROPOSED (2026-10-21 UTC), NOT FROZEN. The teacher-native generation protocol for stage2.reasoning_master@v1. It is frozen, with its sha256 recorded in the generation run's authorization, only after the maintainer approves the protocol and a budget. Revised 2026-10-22: the runner chain (generation_plan.py -> generation_driver.py -> generation_adapter.py) is written and tested without a GPU; the source scheme is the maintainer's (stage2.reasoning_master@v1).",
   "teacher": {
     "model": "Qwen/Qwen3-4B-Thinking-2507",
     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -12,33 +12,76 @@
     "system_message": "You are a helpful Assistant. (sessions.SYSTEM_DEFAULT; a source's own system message is kept byte-for-byte)"
   },
   "decoding": {
-    "temperature": 0.6, "top_p": 0.95, "top_k": 20, "min_p": 0.0,
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0,
     "_preset": "the teacher's official recommendation, as corpus_v2 and teacher_cal used",
     "seed_rule": "a distinct recorded seed per candidate and per turn",
-    "candidates": "up to 2 per task: the second only when the first is rejected; both recorded"
+    "candidates": "up to 2 per task: the second (seed base + 1) only when the first is rejected, judged on the pod by generation_adapter.candidate (pure Python); none where the verdict needs the dev-box code sandbox; every candidate recorded, tagged with its candidate_index (the pass) and never defaulted"
   },
   "allowance": {
-    "rule": "per turn: block_len - rendered prompt - 8 (aadistill.data.sessions.completion_budget), block_len = 8192",
+    "rule": "per turn: session limit 8,184 = block_len 8,192 - 8 (aadistill.data.sessions.completion_budget's margin), minus the rendered prompt (run_battery --session-limit)",
     "why": "a trace that does not fit the 8,192-token training block cannot be trained whole and is never cut (P17), so generating past that point buys nothing; this is a DATA-CONSTRUCTION limit, not a measurement budget (P18 governs measurement)",
     "consequence_recorded": "length_limited candidates are kept in the record with their full token ids, never trimmed into a target; the share of tasks with no admissible trace is reported per stratum and difficulty, because the limit selects against the longest traces"
   },
   "engine": {
-    "runner": "scripts/stages/stage-0/calibration_volume/run_battery.py --mode generate (the asynchronous runner that produced teacher_cal), via a Stage-2 adapter for the training task set (NOT YET WRITTEN)",
+    "runner": "scripts/stages/stage-0/calibration_volume/run_battery.py --mode generate, one subprocess per input group and pass, driven by scripts/stages/stage-2/reasoning_data/generation_driver.py over the inputs generation_plan.py writes (run_battery's task contract; a task's own system message is the run's --system)",
     "vllm": "0.27.1 (teacher_cal's measured engine)",
     "dtype": "bfloat16",
     "degeneration_check_every": 256,
-    "record_per_run": ["engine and version", "image name AND digest", "CUDA runtime and host driver", "GPU", "tokenizer sha256", "chat template sha256", "git commit and dirty state"]
+    "record_per_run": [
+      "engine and version",
+      "image name AND digest",
+      "CUDA runtime and host driver",
+      "GPU",
+      "tokenizer sha256",
+      "chat template sha256",
+      "git commit and dirty state"
+    ]
   },
-  "record_per_candidate": ["task_id", "content_sha256", "generator_id", "family_id", "axis", "difficulty", "seed (task)", "candidate_index", "seed (sampling) per turn", "prompt_token_ids", "output_token_ids", "raw", "answer", "stop_reason", "natural_termination", "length_limited", "context_limit_reached", "degeneration kind", "generated_tokens", "ttft_seconds", "seconds", "observation per turn (episodes)", "env_result (episodes)"],
+  "record_per_candidate": [
+    "task_id",
+    "content_sha256",
+    "generator_id",
+    "family_id",
+    "axis",
+    "difficulty",
+    "seed (task)",
+    "candidate_index",
+    "seed (sampling) per turn",
+    "prompt_token_ids",
+    "output_token_ids",
+    "raw",
+    "answer",
+    "stop_reason",
+    "natural_termination",
+    "length_limited",
+    "context_limit_reached",
+    "degeneration kind",
+    "generated_tokens",
+    "ttft_seconds",
+    "seconds",
+    "observation per turn (episodes)",
+    "env_result (episodes)"
+  ],
   "verification": {
     "procedural_static": "stages.calibration_volume.score_battery (scorer protocol v2): the boxed final answer against the generator's gold; termination is judged apart from correctness",
-    "procedural_episode": "environment replay (action protocol v2): success; every action legal is the trace check",
-    "gsm8k_train": "aadistill.data.verify final_number against the human gold",
-    "math_train": "aadistill.data.verify boxed against the human gold",
-    "reading_reuse": "aadistill.data.verify span (already computed for corpus_v2's selected targets)"
+    "procedural_episode": "environment replay (action protocol v2): success; an illegal action rejects (observation action_legality)",
+    "external_generators": "the boxed final answer against the generator's gold with the module's declared comparator, or the module's project checker (checkers.py); prontoqa also the reference-proof step check (partial required); a module with neither is never generated",
+    "math_train": "supporting_verify.boxed_math against the human gold",
+    "mbpp_train": "supporting_verify.code_asserts in the probed sandbox on the dev box",
+    "squad_v2_train_unanswerable": "supporting_verify.abstention",
+    "reused_targets": "already verified at selection (build_supporting_tasks: final_number / span / no leading abstention); no generation",
+    "identity": "generation_adapter refuses records without a unique explicit candidate_index or whose messages are not split_generation of their raw output (and token ids decoding to it); the selected record's sha256 travels into the pack's targets.jsonl"
   },
   "acceptance": "configs/stages/stage-2/reasoning_data/corpus_spec.json :: acceptance, applied by aadistill.data.target_quality",
-  "never": ["fabricate, complete or trim a reasoning trace", "accept, reject or select a target by its length", "replace a teacher target with a public one", "use a no-think or empty-think target (P17)"],
+  "never": [
+    "fabricate, complete or trim a reasoning trace",
+    "accept, reject or select a target by its length",
+    "replace a teacher target with a public one",
+    "use a no-think or empty-think target (P17)"
+  ],
   "isolation": "every task pool passes configs/stages/stage-2/reasoning_data/isolation_rules.json before any candidate is generated for it",
   "durability": "the generation records (token ids included) are pushed off the pod and hash-checked before teardown, as teacher_cal's were; they are small (teacher_cal: 59 MB for 4.5M tokens)",
   "authorizes": "nothing"

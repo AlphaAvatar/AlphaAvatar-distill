@@ -28,9 +28,9 @@
     },
     "mathematics_dataset": {
       "repo": "https://github.com/google-deepmind/mathematics_dataset",
-      "pin": "git 427f45075f84b8b9774950196ad63867ca20ffb3 (master; carries the current-numpy/sympy fixes; still versioned 1.0.1); PyPI 1.0.1 runs only with sympy 1.5.1 / numpy 1.23.5",
+      "pin": "git 427f45075f84b8b9774950196ad63867ca20ffb3 (master; still versioned 1.0.1). It still calls ndarray.itemset, which numpy 2 removed, so it runs in its own isolated venv: numpy 1.26.4, sympy 1.14.0, absl-py 2.5.1, six 1.17.0, mpmath 1.3.0 (export run 2026-10-22). PyPI 1.0.1 runs only with sympy 1.5.1 / numpy 1.23.5",
       "license": "Apache-2.0",
-      "dependency_note": "no answer checker ships; answers are canonical strings"
+      "dependency_note": "no answer checker ships; answers are canonical strings. The composed modules' statement ORDER varies across processes even with every seed and PYTHONHASHSEED pinned (object-identity ordering in its composition code; measured 2026-10-22: 14 of 56 sample prompts reordered between two runs, no answer changed), so instances are generated once and stored and the export file's sha256 is their identity"
     },
     "ruletaker": {
       "repo": "https://github.com/allenai/ruletaker",
@@ -153,10 +153,10 @@
       "module": "n_queens",
       "stratum": "primary.task_contained_deduction",
       "task_type": "placement_constraint",
-      "verify": "project check: non-attacking and contains the given queens (several valid boards; the library scorer evals the answer)",
+      "verify": "project check (checkers.n_queens): the stated board size, every pre-placed queen kept, n queens, none attacking -- any valid completion (the library scorer evals the answer and is never used)",
       "process": "not_assessed",
       "isolation": "no eval-set-1 generator of this type",
-      "decision": "candidate, needs the project checker",
+      "decision": "candidate (project checker: checkers.n_queens)",
       "family": "reasoning_gym/n_queens",
       "mechanism": {
         "presentation": "search",
@@ -164,7 +164,7 @@
         "nearest_evaluation_mechanism": "none",
         "exposure": "none"
       },
-      "answer_type": "needs_checker"
+      "answer_type": "checker"
     },
     {
       "source": "reasoning_gym",
@@ -281,10 +281,10 @@
       "module": "tower_of_hanoi",
       "stratum": "primary.compositional_generalization",
       "task_type": "plan_construction_static",
-      "verify": "project check: simulate the moves (library partial credit)",
+      "verify": "project check (checkers.tower_of_hanoi): every move simulated, each legal, all disks end on the target peg -- any legal solution (library partial credit never used)",
       "process": "verified by simulation of every move",
       "isolation": "no eval-set-1 generator of this type",
-      "decision": "candidate, needs the simulator check",
+      "decision": "candidate (project checker: checkers.tower_of_hanoi)",
       "family": "reasoning_gym/tower_of_hanoi",
       "mechanism": {
         "presentation": "search",
@@ -292,7 +292,7 @@
         "nearest_evaluation_mechanism": "none (a static plan; not interactive adaptation)",
         "exposure": "none"
       },
-      "answer_type": "needs_checker"
+      "answer_type": "checker"
     },
     {
       "source": "reasoning_gym",
@@ -435,10 +435,10 @@
       "module": "logic_derivation",
       "stratum": "primary.task_contained_deduction",
       "task_type": "formal_derivation",
-      "verify": "exact target",
-      "process": "partial or verified by coverage of the reference proof's derived facts (metadata.cot, verification only)",
+      "verify": "project check (checkers.logic_derivation): every boxed derivation line is a step of the generator's reference derivation (same rule, same input facts, same conclusion), each input available when used, the last line derives the target -- a proof made of reference steps; a different valid route is refused",
+      "process": "the derivation IS the answer and the checker reads every line of it against the reference steps; the reasoning before it is not assessed",
       "isolation": "no eval-set-1 generator of this type",
-      "decision": "candidate",
+      "decision": "candidate (project checker: checkers.logic_derivation)",
       "family": "reasoning_core/logic_derivation",
       "mechanism": {
         "presentation": "deduction",
@@ -446,7 +446,7 @@
         "nearest_evaluation_mechanism": "none",
         "exposure": "none"
       },
-      "answer_type": "needs_checker"
+      "answer_type": "checker"
     },
     {
       "source": "reasoning_core",
@@ -471,10 +471,10 @@
       "module": "planning",
       "stratum": "primary.compositional_generalization",
       "task_type": "plan_construction_static",
-      "verify": "the library's own plan simulator (binary) plus an exact-plan check",
-      "process": "verified by simulation",
+      "verify": "project check (checkers.planning): the boxed plan simulated under the stated actions (closed world; deletes, then adds) -- every precondition holds, the goal holds at the end, the plan has the cued length; the library's simulator is not used",
+      "process": "every action of the plan simulated (the plan is the answer); the reasoning before it is not assessed",
       "isolation": "counted as deduction, never as interactive adaptation",
-      "decision": "candidate",
+      "decision": "candidate (project checker: checkers.planning)",
       "family": "reasoning_core/planning",
       "mechanism": {
         "presentation": "search",
@@ -482,7 +482,7 @@
         "nearest_evaluation_mechanism": "hidden_buttons@v1 / probe_function@v1 are INTERACTIVE discovery of unknown effects; a static plan with stated operators is a different mechanism",
         "exposure": "none"
       },
-      "answer_type": "needs_checker"
+      "answer_type": "checker"
     },
     {
       "source": "reasoning_core",
@@ -593,11 +593,11 @@
     },
     {
       "source": "prontoqa",
-      "module": "fictional ontology, 3-5 hops, relevant distractors, zero-shot",
+      "module": "fictional_ontology",
       "stratum": "primary.task_contained_deduction",
       "task_type": "ontology_multi_hop_deduction",
-      "verify": "True/False against the generator's label",
-      "process": "REQUIRED: every intermediate conclusion of the reference proof appears in the teacher's reasoning (else not accepted), because a True/False answer is right by chance half the time",
+      "verify": "True/False against the generator's label (COMPARE bool)",
+      "process": "REQUIRED: every intermediate conclusion of the reference proof (`reference_conclusions`: the chain-of-thought sentences that are not premises, less the last, which states the query's property and is the answer's own check) is stated in the teacher's reasoning and none negated (process_check.reference_steps: partial at most), because a True/False answer is right by chance half the time",
       "isolation": "a published benchmark, not part of eval-set-1; training-only seeds; the 8 in-context examples are never used (they carry reference proofs)",
       "decision": "candidate, process-gated",
       "family": "prontoqa/fictional",
@@ -607,25 +607,167 @@
         "nearest_evaluation_mechanism": "knights_knaves / ordering held-out families are different rule systems",
         "exposure": "none"
       },
-      "answer_type": "bool"
+      "answer_type": "bool",
+      "config": "fictional ontology, relevant distractors, ModusPonens, postorder; levels are hop counts (3, 4, 5); zero-shot: the CLI's 8 in-context examples are discarded",
+      "levels": [
+        3,
+        4,
+        5
+      ]
     },
     {
       "source": "mathematics_dataset",
-      "module": "composed modules (algebra__linear_1d_composed, algebra__polynomial_roots_composed, polynomials__evaluate_composed, numbers__gcd_composed, comparison__sort_composed, calculus__differentiate_composed, probability__swr_p_sequence)",
+      "module": "algebra__linear_1d_composed",
       "stratum": "supporting.math_new",
-      "task_type": "composed_school_math",
-      "verify": "project canonical match (sympy equivalence for expressions)",
-      "process": "math process check",
+      "task_type": "composed_linear_equation",
+      "verify": "COMPARE number: the integer root",
+      "process": "not_assessed (no step checker)",
       "isolation": "label Mixed; train-medium/hard entropy only; never interpolate/extrapolate",
-      "decision": "candidate (math, Mixed)",
-      "family": "mathematics_dataset/composed",
+      "decision": "candidate (math, Mixed; comparator)",
+      "family": "mathematics_dataset/algebra__linear_1d_composed",
+      "levels": [
+        1,
+        2
+      ],
       "mechanism": {
         "presentation": "computation",
         "what": "evaluate composed sub-problems (define, evaluate, solve)",
         "nearest_evaluation_mechanism": "defined_ops@v1 held-out comp.chain2 / comp.chain4 (evaluate composed stated definitions)",
         "exposure": "shares_primitive"
       },
-      "answer_type": "needs_checker"
+      "answer_type": "number"
+    },
+    {
+      "source": "mathematics_dataset",
+      "module": "algebra__polynomial_roots_composed",
+      "stratum": "supporting.math_new",
+      "task_type": "composed_polynomial_roots",
+      "verify": "project check (checkers, safe parser): the boxed roots equal the generator's as a multiset of exact rationals; items that ask for a FACTORIZATION are out of the checker's domain and dropped (no factored-form check)",
+      "process": "not_assessed (no step checker)",
+      "isolation": "label Mixed; train-medium/hard entropy only; never interpolate/extrapolate",
+      "decision": "candidate (math, Mixed; project checker)",
+      "family": "mathematics_dataset/algebra__polynomial_roots_composed",
+      "levels": [
+        1,
+        2
+      ],
+      "mechanism": {
+        "presentation": "computation",
+        "what": "evaluate composed sub-problems (define, evaluate, solve)",
+        "nearest_evaluation_mechanism": "defined_ops@v1 held-out comp.chain2 / comp.chain4 (evaluate composed stated definitions)",
+        "exposure": "shares_primitive"
+      },
+      "answer_type": "checker"
+    },
+    {
+      "source": "mathematics_dataset",
+      "module": "polynomials__evaluate_composed",
+      "stratum": "supporting.math_new",
+      "task_type": "composed_polynomial_evaluation",
+      "verify": "COMPARE number: the integer value",
+      "process": "not_assessed (no step checker)",
+      "isolation": "label Mixed; train-medium/hard entropy only; never interpolate/extrapolate",
+      "decision": "candidate (math, Mixed; comparator)",
+      "family": "mathematics_dataset/polynomials__evaluate_composed",
+      "levels": [
+        1,
+        2
+      ],
+      "mechanism": {
+        "presentation": "computation",
+        "what": "evaluate composed sub-problems (define, evaluate, solve)",
+        "nearest_evaluation_mechanism": "defined_ops@v1 held-out comp.chain2 / comp.chain4 (evaluate composed stated definitions)",
+        "exposure": "shares_primitive"
+      },
+      "answer_type": "number"
+    },
+    {
+      "source": "mathematics_dataset",
+      "module": "numbers__gcd_composed",
+      "stratum": "supporting.math_new",
+      "task_type": "composed_gcd",
+      "verify": "COMPARE number: the integer gcd",
+      "process": "not_assessed (no step checker)",
+      "isolation": "label Mixed; train-medium/hard entropy only; never interpolate/extrapolate",
+      "decision": "candidate (math, Mixed; comparator)",
+      "family": "mathematics_dataset/numbers__gcd_composed",
+      "levels": [
+        1,
+        2
+      ],
+      "mechanism": {
+        "presentation": "computation",
+        "what": "evaluate composed sub-problems (define, evaluate, solve)",
+        "nearest_evaluation_mechanism": "defined_ops@v1 held-out comp.chain2 / comp.chain4 (evaluate composed stated definitions)",
+        "exposure": "shares_primitive"
+      },
+      "answer_type": "number"
+    },
+    {
+      "source": "mathematics_dataset",
+      "module": "comparison__sort_composed",
+      "stratum": "supporting.math_new",
+      "task_type": "composed_sort",
+      "verify": "project check (checkers, safe parser): the same names and exact values in the same order",
+      "process": "not_assessed (no step checker)",
+      "isolation": "label Mixed; train-medium/hard entropy only; never interpolate/extrapolate",
+      "decision": "candidate (math, Mixed; project checker)",
+      "family": "mathematics_dataset/comparison__sort_composed",
+      "levels": [
+        1,
+        2
+      ],
+      "mechanism": {
+        "presentation": "computation",
+        "what": "evaluate composed sub-problems (define, evaluate, solve)",
+        "nearest_evaluation_mechanism": "defined_ops@v1 held-out comp.chain2 / comp.chain4 (evaluate composed stated definitions)",
+        "exposure": "shares_primitive"
+      },
+      "answer_type": "checker"
+    },
+    {
+      "source": "mathematics_dataset",
+      "module": "calculus__differentiate_composed",
+      "stratum": "supporting.math_new",
+      "task_type": "composed_differentiation",
+      "verify": "project check (checkers.parse_poly, a safe polynomial parser with no evaluation of text): the boxed derivative equals the gold as a polynomial with exact rational coefficients",
+      "process": "not_assessed (no step checker)",
+      "isolation": "label Mixed; train-medium/hard entropy only; never interpolate/extrapolate",
+      "decision": "candidate (math, Mixed; project checker)",
+      "family": "mathematics_dataset/calculus__differentiate_composed",
+      "levels": [
+        1,
+        2
+      ],
+      "mechanism": {
+        "presentation": "computation",
+        "what": "evaluate composed sub-problems (define, evaluate, solve)",
+        "nearest_evaluation_mechanism": "defined_ops@v1 held-out comp.chain2 / comp.chain4 (evaluate composed stated definitions)",
+        "exposure": "shares_primitive"
+      },
+      "answer_type": "checker"
+    },
+    {
+      "source": "mathematics_dataset",
+      "module": "probability__swr_p_sequence",
+      "stratum": "supporting.math_new",
+      "task_type": "sequence_probability",
+      "verify": "project check (checkers, safe parser): the boxed probability equals the gold rational exactly",
+      "process": "not_assessed (no step checker)",
+      "isolation": "label Mixed; train-medium/hard entropy only; never interpolate/extrapolate",
+      "decision": "candidate (math, Mixed; project checker)",
+      "family": "mathematics_dataset/probability__swr_p_sequence",
+      "levels": [
+        1,
+        2
+      ],
+      "mechanism": {
+        "presentation": "computation",
+        "what": "probability of a letter sequence drawn without replacement (a stated multiset)",
+        "nearest_evaluation_mechanism": "none",
+        "exposure": "none"
+      },
+      "answer_type": "checker"
     },
     {
       "source": "mathematics_dataset",
@@ -663,7 +805,9 @@
     "number_set": "the same multiset of numbers within 1e-6",
     "matrix": "the same token grid (rows of tokens)",
     "bool": "True/False",
-    "needs_checker": "no project comparator yet (multiple valid answers, a plan or a derivation to check): every candidate is UNVERIFIABLE and never accepted until the module's checker exists"
+    "needs_checker": "no project check exists: every candidate would be UNVERIFIABLE, so a module of this type is not a candidate (deferred) and enters no paid generation list",
+    "checker": "a project checker in scripts/stages/stage-2/reasoning_data/checkers.py (CHECKERS, keyed source/module): a validity check or simulation, or value equality through a safe parser; never a library scorer, never evaluation of answer text"
   },
-  "_drop_if_gold_in_prompt": "only where the gold appearing verbatim in the prompt means a degenerate item (the answer IS the input: an unchanged string, an identity rotation); for choice and selection modules the gold is one of the listed options by construction"
+  "_drop_if_gold_in_prompt": "only where the gold appearing verbatim in the prompt means a degenerate item (the answer IS the input: an unchanged string, an identity rotation); for choice and selection modules the gold is one of the listed options by construction",
+  "_levels": "a row's levels are what the exporter generates (default 0 and 2, the library difficulty levels of reasoning_gym / reasoning_core); prontoqa: hop counts; mathematics_dataset: train entropy levels 1 (medium) and 2 (hard)"
 }

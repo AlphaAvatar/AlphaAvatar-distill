@@ -1,0 +1,178 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.isolation_report/v2",
+ "rules": "configs/stages/stage-2/reasoning_data/isolation_rules.json",
+ "eval_set": "eval-set-1",
+ "n_items": 107,
+ "results": {
+  "R0_provenance": {
+   "violations": {},
+   "historical_pool": false,
+   "pass": true
+  },
+  "R1_held_out_keys": {
+   "held_out_overlap": {},
+   "pass": true
+  },
+  "R8_in_sample_overlap": {},
+  "R2_near_duplicate": {
+   "n": 13,
+   "threshold": 0.5,
+   "max_document_frequency": 5,
+   "checked": 107,
+   "by_unit": {
+    "fluid_reasoning_720/dev_v1": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    },
+    "stage3_capability_846/answerability_paired": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    },
+    "stage3_capability_846/eval_behavior_v0": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    },
+    "stage3_capability_846/gsm8k": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    },
+    "stage3_capability_846/knowledge": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    },
+    "stage3_capability_846/math_verified": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    },
+    "stage3_capability_846/multihop": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    },
+    "stage3_capability_846/rag": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    },
+    "stage3_capability_846/safety_paired": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    }
+   },
+   "flagged": 0,
+   "flagged_by_unit": {},
+   "flagged_ids": [],
+   "flagged_items": [],
+   "pass": true
+  },
+  "R3_rule_family": {
+   "applicable_items": 107,
+   "overlap": {
+    "generator_family": 0,
+    "family": 0
+   },
+   "examples": {},
+   "pass": true
+  },
+  "R4_eval_only_generators": {
+   "generators": {},
+   "eval_only_hits": {},
+   "task_type_hits": {},
+   "items_without_task_type": 0,
+   "pass": true
+  },
+  "R5_shared_generator_exposure": {
+   "items_from_shared_generators": 0,
+   "training_seed_range": [
+    3000000,
+    4000000
+   ],
+   "violations": [],
+   "n_violations": 0,
+   "historical_pool": false,
+   "pass": true
+  },
+  "R6_source_split": {
+   "violations": {},
+   "pass": true
+  },
+  "R7_arc_agi": {
+   "arc_lineage_items": {},
+   "content_refused": [],
+   "n_content_refused": 0,
+   "items_with_any_grid_match": 0,
+   "index": {
+    "path": "data/stages/stage-2/reasoning_data/isolation/arc_grid_index.json",
+    "sha256": "425b3f29afb089435982c05e900463fca6d0ebf0e37f24afbd1e214383dde91e",
+    "source": {
+     "package": "arckit 0.1.0 (PyPI)",
+     "wheel_sha256": "5a22619309d2c29b04796eadf2a58792e563d6b811ee021e5d8ca97880ebbe80",
+     "files_sha256": {
+      "arckit/data/arc1.json": "b22cbaf01a1e30f0bbf667dab30e77bf387c6a53dec84607d92a41bd276a6d47",
+      "arckit/data/kaggle2024.json": "73c89307138307a363e0c6b14d3fcf599ec63d8588f502be045d783cca2b791d"
+     }
+    }
+   },
+   "pass": true
+  },
+  "R9_mechanism_equivalence": {
+   "refused_families": [
+    "string_induction@v2/str.caesar",
+    "string_induction@v2/str.double_last",
+    "string_induction@v2/str.duplicate_each"
+   ],
+   "items": {},
+   "pairs": [
+    {
+     "domain": "string",
+     "training_family": "string_induction@v2/str.caesar",
+     "evaluation_family": "letter_analogy@v2/letter.succ_all",
+     "agreement": 1.0,
+     "verdict": "equivalent"
+    },
+    {
+     "domain": "string",
+     "training_family": "string_induction@v2/str.double_last",
+     "evaluation_family": "letter_analogy@v2/letter.double_last",
+     "agreement": 1.0,
+     "verdict": "equivalent"
+    },
+    {
+     "domain": "string",
+     "training_family": "string_induction@v2/str.duplicate_each",
+     "evaluation_family": "letter_analogy@v2/letter.double_all",
+     "agreement": 1.0,
+     "verdict": "equivalent"
+    }
+   ],
+   "overlapping_reported": [],
+   "families_without_tabulated_rules": [
+    "defined_ops@v1/comp.chain3",
+    "defined_ops@v1/comp.conditional_chain",
+    "entity_tracking@v1/track.move",
+    "entity_tracking@v1/track.move_remove",
+    "hidden_buttons@v1/act.reverse",
+    "knights_knaves@v1/kk.counting",
+    "ordering@v2/order.race",
+    "probe_function@v1/probe.digit_sum",
+    "probe_function@v1/probe.threshold",
+    "scan_language@v1/scan.rev_sur",
+    "scan_language@v1/scan.seq_rev",
+    "scan_language@v1/scan.sur_sur"
+   ],
+   "pass": true
+  }
+ },
+ "establishes": {
+  "R0_provenance": "every item names a registered, trainable source and carries the fields its kind needs",
+  "R1_held_out_keys": "no item shares a prompt or content key with a held-out unit",
+  "R2_near_duplicate": "no item is a 13-gram near-copy of a held-out prompt",
+  "R3_rule_family": "no item comes from a rule family a fluid evaluation item uses",
+  "R4_eval_only_generators": "no item comes from an evaluation-only generator or its task type",
+  "R5_shared_generator_exposure": "shared-generator items are calibration-split families in the training seed range",
+  "R6_source_split": "every dataset item comes from a trainable split",
+  "R7_arc_agi": "no ARC-lineage source or module, and no item carrying ARC-AGI-1 grids",
+  "R9_mechanism_equivalence": "no item comes from a project family whose rule computes an evaluation family's rule"
+ },
+ "not_established": "semantic mechanism isolation beyond R9's tabulated rules: families without tabulated rules and external modules are covered by the declared review (external_modules.json :: mechanism), not by these checks",
+ "violations": [],
+ "pass": true
+}
