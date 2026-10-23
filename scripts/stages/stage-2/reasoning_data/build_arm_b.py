@@ -60,7 +60,7 @@ def place(sessions: list[dict], shares: dict[str, float]) -> list[dict]:
 def build(sessions: list[dict], spec: dict, shares: dict[str, float], targets: list[int], tokenizer,
           *, drift: bool = False) -> dict:
     ladder_spec = {**{k: spec[k] for k in ("block_len", "reserve_tokens")}, "shares": shares,
-                   "rung_targets": targets, "salt": SALT, "allow_composition_drift": drift}
+                   "rung_targets": targets, "salt": spec.get("salt", SALT), "allow_composition_drift": drift}
     return B.build(place(sessions, shares), ladder_spec, tokenizer), ladder_spec
 
 

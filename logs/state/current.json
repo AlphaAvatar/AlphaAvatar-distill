@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO (no open scientific blocker). H1 P1 executed 2026-10-22 ($3.33); P1v stopped at four short cells, B's pack not built; the maintainer decides. Owner: docs/stages/stage-2/reasoning_data/H1.md (section 14).",
+ "blocker": "BLOCKED NO (no open scientific blocker). H1: the $0 corpus revision @v2 does not build (2026-10-23); plan 2's top-up is applied for, not authorized. Owner: docs/stages/stage-2/reasoning_data/H1.md (section 15).",
  "branch": "stage2/reasoning-data, cut from main 2a8bae78 (the Stage-0 squash, 2026-10-21)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -123,10 +123,10 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Nothing is running (0 pods, 0 volumes, $0/h). The maintainer decides on H1 arm B's four short cells (logs/stages/stage-2/reasoning_data/audit/p1v_verification.json); P1g and P2 are not authorized. 34 pods ($58.33) stay OPEN.",
+ "next": "Nothing is running (0 pods, 0 volumes, $0/h). The maintainer chooses H1 arm B's corpus (logs/stages/stage-2/reasoning_data/audit/corpus_v2_feasibility.json; plans/abstract_topup_application.json). 34 pods ($58.33) stay OPEN.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "H1: P1 done, P1v stopped at the gap (H1.md section 14); awaiting the maintainer's decision on four short cells; no further paid session authorized.",
+  "next_work": "H1: @v2 infeasible, plan 2 applied for (H1.md section 15); awaiting the maintainer; no paid session authorized.",
   "not_next": "no paid resource without a new maintainer decision. Owner: decisions.md 2026-10-21 (Stage-2/3 round opened at $0).",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D-series CLOSED 2026-10-17 (D1 NO-GO, D2 NO_GO, D3 STRUCTURAL_CHANGE + INCONCLUSIVE probes); forward baseline D1 + scored_v1.",
   "then": "nothing else is queued; the Stage-0 mixture ratio is DEFERRED (never run)."

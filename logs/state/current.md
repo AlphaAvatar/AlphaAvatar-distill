@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-22 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-23 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,26 +9,28 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**STAGE-2/3 H1: P1 EXECUTED ($3.33); P1v STOPPED AT FOUR SHORT CELLS; B's PACK NOT BUILT (2026-10-22).**
+**STAGE-2/3 H1: THE $0 CORPUS REVISION @v2 DOES NOT BUILD; PLAN 2 (A SMALL TOP-UP) AWAITS THE MAINTAINER (2026-10-23).**
 Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).
 Nothing is running and nothing is billing: 0 pods, 0 volumes, $0/h
-(provider snapshot `logs/budget/provider/runpod_billing_2026-10-22T2106Z.json`).
+(provider snapshot `logs/budget/provider/runpod_billing_2026-10-23T0503Z.json`).
 Evidence: [`docs/stages/stage-2/reasoning_data/H1.md`](../../docs/stages/stage-2/reasoning_data/H1.md)
-§14; records under
-[`stages/stage-2/reasoning_data/runs/h1gen_20261022_190653/`](../stages/stage-2/reasoning_data/runs/h1gen_20261022_190653/)
-and `audit/p1v_verification.json`.
-- **P1:** one A100 session under the maintainer's grant, $3.33 of the $8.02
-  cap; 2,164 teacher records (both passes complete), every shard secured,
-  verified and copied (dev box + relay).
-- **P1v:** 1,057 units selected, isolation re-passed with the teacher text.
-  Four cells are short of their share (Reasoning Core analogy; Reasoning Gym
-  composition, deduction and bf); 17 cells are covered.
-- **Stopped here.** No pack, no M1 on a real pack, no top-up, no lower gate,
-  no repetition, no substitution, no remix.
-- **Budget:** about $661.52 conservative occupancy against the absolute
-  $666.17 cap; the 34 pods and the anchor stay OPEN.
-- **Needs the maintainer:** what to do about the four short cells. P1g and P2
-  are not authorized.
+§14–§15; `audit/p1v_verification.json`, `audit/corpus_v2_feasibility.json`.
+- **P1 (2026-10-22):** $3.33 of the $8.02 cap; 2,164 teacher records, every
+  shard secured; P1v selected 1,057 units, and four cells fell short.
+- **@v2 (the maintainer's $0 candidate):** refused on the formal ladder:
+  - Reasoning Core analogy has ONE unit (capacity 7,737; no validation unit);
+  - project analogy (7.8%) and Reasoning Gym composition (2%) run dry just
+    below 2.96M.
+  - Independence, train/validation, R0–R9 and admission all pass.
+  - No pack; @v1 and P1v's evidence unchanged.
+- **Plan 2** (`corpus_v3_proposal.json`, analogy at @v1's 9%):
+  - 25 + 34 unused tasks in one A100 session, $1.01 expected / $2.60 hard
+    cap (`plans/abstract_topup_application.json`);
+  - NOT authorized.
+- **Budget:** $661.52 billed all-time (provider, counted once) against the
+  absolute $666.17 cap; the 34 pods and the anchor stay OPEN.
+- **Needs the maintainer:** which corpus becomes B (plan 2's top-up, another
+  revision, or none). P1g and P2 are not authorized.
 
 **STAGE-0 CALIBRATION-VOLUME PROGRAMME CLOSED (final $0 closeout, 2026-10-21).**
 Verdict: **EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON

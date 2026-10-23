@@ -55,6 +55,35 @@ def allocation(spec: dict, variant: str) -> dict[str, dict[str, float]]:
     return a
 
 
+def candidate_spec(path: Path) -> dict:
+    """A separately identified corpus candidate, as the spec it is cut under.
+
+    The candidate file names its base (`derived_from`: a corpus id and the
+    sha256 of the spec file holding it) and declares its own `shares`,
+    `source_allocation` and `salt`; everything else (size measure, block length,
+    rungs, reserve, acceptance contract) is the base's, unchanged. The base file
+    is never edited: one whose bytes differ from the recorded hash refuses. The
+    candidate is its own and only variant, and it is never the chosen one
+    (`chosen_variant` stays the base's)."""
+    c = A.read_json(Path(path))
+    base_file = A.REPO / c["derived_from"]["spec"]
+    if A.sha256_file(base_file) != c["derived_from"]["spec_sha256"]:
+        raise SystemExit(f"{c['corpus_id']}: its base {c['derived_from']['spec']} is not the bytes it was derived from")
+    base = A.read_json(base_file)
+    if base["corpus_id"] != c["derived_from"]["corpus_id"]:
+        raise SystemExit(f"{c['corpus_id']}: base is {base['corpus_id']}, not {c['derived_from']['corpus_id']}")
+    if c["corpus_id"] == base["corpus_id"] or c["corpus_id"] in base["variants"]:
+        raise SystemExit(f"{c['corpus_id']}: a candidate needs an id of its own")
+    if abs(sum(c["shares"].values()) - 1) > 1e-9:
+        raise SystemExit(f"{c['corpus_id']}: stratum shares sum to {sum(c['shares'].values())}")
+    spec = {**base, "corpus_id": c["corpus_id"], "salt": c["salt"], "shares": c["shares"],
+            "variants": {c["corpus_id"]: {"source_allocation": c["source_allocation"], "what": c["role"]}},
+            "candidate": {"path": repo_path(Path(path)), "sha256": A.sha256_file(Path(path)), "role": c["role"],
+                          "base_sha256": c["derived_from"]["spec_sha256"]}}
+    allocation(spec, c["corpus_id"])
+    return spec
+
+
 def stratum_of(item: dict, spec: dict) -> str | None:
     if item.get("stratum"):
         return item["stratum"]

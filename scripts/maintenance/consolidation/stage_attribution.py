@@ -1620,14 +1620,15 @@ STAGE_2 = [
         kind="experiment",
         stage_id="2",
         status=("H1 P1 EXECUTED 2026-10-22 UNDER THE MAINTAINER'S GRANT ($3.33 of $8.02); "
-                "P1v STOPPED AT FOUR SHORT CELLS, B's PACK NOT BUILT. 2,164 teacher records, "
-                "every shard secured and verified (dev box + relay); 1,057 units selected, "
-                "isolation re-passed with the teacher text; Reasoning Core analogy and "
-                "Reasoning Gym composition, deduction and bf fall short of their share, the "
-                "other 17 cells are covered. No top-up, no lower gate, no repetition, no "
-                "substitution, no remix: the maintainer decides. Fixed: D4 Top-1, the recovery "
-                "objective, eval-set-1, 70/30, arm B = stage2.reasoning_master@v1. 34 pods / "
-                "$58.33 unattributed. No student trained"),
+                "P1v STOPPED AT FOUR SHORT CELLS; THE MAINTAINER'S $0 CORPUS REVISION "
+                "stage2.reasoning_master@v2 DOES NOT BUILD ON THE FORMAL LADDER (2026-10-23): "
+                "Reasoning Core analogy has one unit (composition capacity 7,737, no "
+                "validation unit), and project analogy and Reasoning Gym composition run dry "
+                "just below 2.96M; independence, train/validation and R0-R9 pass. Plan 2 "
+                "(analogy at @v1's 9%) needs 25 + 34 unused tasks in one A100 session, $1.01 "
+                "expected / $2.60 hard cap: applied for, NOT authorized. B's pack not built; "
+                "@v1 unchanged. Fixed: D4 Top-1, the recovery objective, M1, eval-set-1, 70/30. "
+                "34 pods / $58.33 unattributed. No student trained"),
         title="Stage-2 verified teacher-native reasoning data, measured through "
               "Stage-3 controlled recovery",
         question=("Under one fixed initialization and the fixed historical "
@@ -1739,6 +1740,23 @@ STAGE_2 = [
               "the four formal units, their packs' identities and the "
               "driver's launch refusals",
               field="authorizes", equals="nothing"),
+            E("configs/stages/stage-2/reasoning_data/corpus_v2_candidate.json",
+              "the maintainer's $0 feasibility candidate @v2: its own id and "
+              "salt, its base named by sha256, never the chosen variant",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/corpus_v2_feasibility.json",
+              "@v2 on the formal ladder: the refusal, every cell's supply, "
+              "run-dry point and validation units, independence, isolation, "
+              "and plan 2's stand-in forecast",
+              field="authorizes", equals="nothing"),
+            E("configs/stages/stage-2/reasoning_data/corpus_v3_proposal.json",
+              "plan 2: analogy kept at @v1's 9% from the project generator, a "
+              "proposal for the maintainer",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/abstract_topup_application.json",
+              "plan 2's paid top-up application, priced from P1's measured "
+              "session; not authorized",
+              field="authorizes", equals="nothing"),
         ],
         external_material=[],
         decisions=["logs/budget/decisions.md -- 2026-10-21: Stage-2/3 "
@@ -1761,7 +1779,10 @@ STAGE_2 = [
                    "launch-boundary checks before any P1 grant",
                    "logs/budget/decisions.md -- 2026-10-22: Maintainer: H1 P1 + "
                    "P1v formally authorized; P1 executed ($3.33), P1v stopped at "
-                   "four short cells"],
+                   "four short cells",
+                   "logs/budget/decisions.md -- 2026-10-23: Maintainer: a $0 "
+                   "corpus revision before any top-up; @v2 infeasible, plan 2 "
+                   "applied for"],
         canonical_log_destination="logs/stages/stage-2/reasoning_data",
         classification_reason=(
             "Stage 2 by subject and product: it varies the offline training "

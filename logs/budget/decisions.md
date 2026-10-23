@@ -13427,3 +13427,57 @@ on a paid pod.
 - **Not done, per the authorization.** No paid top-up, no lower gate, no
   repetition, no source substitution, no change of mix.
 - **Revisit when.** The maintainer decides on the four short cells.
+
+## 2026-10-23 — Maintainer: a $0 corpus revision before any top-up; @v2 infeasible, plan 2 applied for
+
+- **Context.** The maintainer accepted the P1 closeout and P1v's stop, and
+  declined a top-up of the four short cells at the original proportions.
+  - **Instead:** first a $0 feasibility check of an explicitly named,
+    separately identified `stage2.reasoning_master@v2`, with a pre-specified
+    split. It uses only P1's accepted units and the verified reuse; 2.96M,
+    the 150k reserve and 70/30 are kept.
+  - **The check:** on the formal nested ladder and packing path, with real
+    unit lengths. The rungs, the validation tail, unit independence,
+    composition, train/validation isolation, families and R0–R9 are checked,
+    and especially Reasoning Core's single analogy unit.
+  - **If @v2 fails:** report exactly what is unsatisfied. Give plan 2:
+    analogy kept at 9% with the minimum new teacher data, the unused tasks,
+    the expected acceptance and a separate paid application. Do not force a
+    build with drift.
+  - **Unchanged:** @v1, its records and P1v's evidence; D4 Top-1, the
+    recovery objective, M1 and eval-set-1. No GPU, pod, storage, teacher
+    generation, P1g or P2.
+- **Done at $0** (`docs/stages/stage-2/reasoning_data/H1.md` §15):
+  - **@v2 recorded:** `configs/.../corpus_v2_candidate.json` has its own id
+    and salt, and its base is named by sha256; `corpus_spec.json` is
+    untouched.
+  - **Checked:** `corpus_feasibility.py` →
+    `audit/corpus_v2_feasibility.json`.
+- **Result: @v2 does not build.** The formal path refuses the first rung:
+  composition capacity 7,737. Under @v2's own salt:
+  - **Reasoning Core analogy:** its single unit runs dry at prefix 7,737 and
+    blocks every rung. It is absent from the validation tail, and one task
+    is not source coverage.
+  - **Project analogy (7.8%):** runs dry at 2,955,565, which blocks 2.96M.
+  - **Reasoning Gym composition (2%):** runs dry at 2,854,803, which also
+    blocks 2.96M.
+  - **Everything else passes:** independence, train/validation, R0–R9 and
+    the reuse isolation.
+- **Plan 2:**
+  - **Proposal:** `corpus_v3_proposal.json`, for the maintainer to confirm.
+    It keeps @v1's capability shares and the analogy cell from the project
+    generator alone.
+  - **Forecast:** on the formal ladder with stand-ins, 11 more analogy units
+    (8 at the minimum) and 3 Reasoning Gym composition units. That means 25
+    + 34 unused tasks.
+  - **Application:** `plans/abstract_topup_application.json`. One A100
+    session: $1.01 expected, $2.60 hard cap, at most $664.11 of the $666.17
+    cap (provider snapshot `runpod_billing_2026-10-23T0503Z.json`: $661.52
+    billed, 0 resources). NOT authorized.
+- **Risks.**
+  - Both routes are post hoc.
+  - Analogy rests on one generator's 5 grid families.
+  - Reasoning Gym composition yields from 3 of 14 module-levels.
+  - Removing Reasoning Core from analogy is a source change.
+- **Revisit when.** The maintainer chooses: plan 2's top-up, a different
+  revision, or none.

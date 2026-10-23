@@ -1,0 +1,252 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.topup_application/v1",
+ "written_utc": "2026-10-23T05:18:19Z",
+ "status": "APPLICATION for the maintainer's decision; NOT authorized, nothing launched",
+ "route": "plan 2: analogy kept at @v1's 0.09 with the minimum new teacher data (corpus stage2.reasoning_master@v3, configs/stages/stage-2/reasoning_data/corpus_v3_proposal.json)",
+ "what": "P1t: ONE A100-80GB session generating teacher candidates for 59 unused tasks in 2 cells under P1's frozen generation protocol (two candidates, the second only when the first is rejected; the same teacher, sampling, allowance and verifiers), then the same P1v verification and the formal ladder at $0",
+ "cells": {
+  "primary.abstract_analogical/s0_generators_v2_calsplit": {
+   "new_units": {
+    "mechanism_minimum": 8,
+    "at_the_median_size": 6,
+    "planning": 11
+   },
+   "new_supervised_tokens_planning": 50353,
+   "measured": {
+    "tasks_generated": 61,
+    "candidates": {
+     "0": 61,
+     "1": 28
+    },
+    "accepted": {
+     "0": 33,
+     "1": 8
+    },
+    "candidate_accept_rate": {
+     "0": 0.541,
+     "1": 0.2857
+    },
+    "unit_accept_rate": 0.6721,
+    "units_by_group": {
+     "grid_transform@v1/L1": "13/21",
+     "grid_transform@v1/L2": "19/20",
+     "grid_transform@v1/L3": "9/20"
+    },
+    "generated_tokens": {
+     "0": 394412,
+     "1": 185241
+    },
+    "generated_tokens_per_task": 9503
+   },
+   "tasks": {
+    "tasks": 25,
+    "by_oversupply": 25,
+    "by_binomial_p90": 20,
+    "chance_of_enough_units": 0.995
+   },
+   "unused_independent_tasks": {
+    "total": 110,
+    "pool": 171,
+    "by_family_level": {
+     "grid.fill_rows/L1": 7,
+     "grid.fill_rows/L2": 8,
+     "grid.fill_rows/L3": 8,
+     "grid.flip_h/L1": 8,
+     "grid.flip_h/L2": 8,
+     "grid.flip_h/L3": 8,
+     "grid.flip_v/L1": 7,
+     "grid.flip_v/L2": 7,
+     "grid.flip_v/L3": 7,
+     "grid.rotate_ccw/L1": 7,
+     "grid.rotate_ccw/L2": 7,
+     "grid.rotate_ccw/L3": 7,
+     "grid.rotate_cw/L1": 7,
+     "grid.rotate_cw/L2": 7,
+     "grid.rotate_cw/L3": 7
+    }
+   },
+   "enough_unused_tasks": true,
+   "families": [
+    "grid_transform@v1/grid.fill_rows",
+    "grid_transform@v1/grid.flip_h",
+    "grid_transform@v1/grid.flip_v",
+    "grid_transform@v1/grid.rotate_ccw",
+    "grid_transform@v1/grid.rotate_cw"
+   ],
+   "selection": "generation_plan.round_robin over the unused tasks' groups: P1's own rule; no group is chosen by its acceptance",
+   "selected_task_ids_sha256": "a65aacf31df3b5d0b2ca881e2d43e28b20d64e10eef68e60690a4b0c7751621c",
+   "expected_new_units": 16.8,
+   "expected_new_units_by_group_rates": {
+    "expected_units": 16.8,
+    "chance_of_at_least": {
+     "11": 0.998
+    },
+    "groups_selected": {
+     "grid_transform@v1/L1": 9,
+     "grid_transform@v1/L2": 8,
+     "grid_transform@v1/L3": 8
+    },
+    "_": "P1's per-group rates rest on 4-8 tasks per group; a group P1 never drew takes the cell's rate"
+   },
+   "predicted_generated_tokens": 237575
+  },
+  "primary.compositional_generalization/reasoning_gym": {
+   "new_units": {
+    "mechanism_minimum": 0,
+    "at_the_median_size": 0,
+    "planning": 3
+   },
+   "new_supervised_tokens_planning": 9008,
+   "measured": {
+    "tasks_generated": 99,
+    "candidates": {
+     "0": 99,
+     "1": 85
+    },
+    "accepted": {
+     "0": 14,
+     "1": 1
+    },
+    "candidate_accept_rate": {
+     "0": 0.1414,
+     "1": 0.0118
+    },
+    "unit_accept_rate": 0.1515,
+    "units_by_group": {
+     "binary_matrix/0": "0/8",
+     "binary_matrix/2": "0/8",
+     "game_of_life/0": "0/7",
+     "game_of_life/2": "0/7",
+     "largest_island/0": "7/7",
+     "largest_island/2": "0/7",
+     "rotate_matrix/0": "0/7",
+     "rotate_matrix/2": "0/7",
+     "spiral_matrix/0": "0/7",
+     "spiral_matrix/2": "0/7",
+     "string_manipulation/0": "2/7",
+     "string_manipulation/2": "0/7",
+     "tower_of_hanoi/0": "6/6",
+     "tower_of_hanoi/2": "0/7"
+    },
+    "generated_tokens": {
+     "0": 425156,
+     "1": 384573
+    },
+    "generated_tokens_per_task": 8179
+   },
+   "tasks": {
+    "tasks": 34,
+    "by_oversupply": 30,
+    "by_binomial_p90": 34,
+    "chance_of_enough_units": 0.906
+   },
+   "unused_independent_tasks": {
+    "total": 154,
+    "pool": 253,
+    "by_family_level": {
+     "reasoning_gym/binary_matrix/0": 13,
+     "reasoning_gym/binary_matrix/2": 13,
+     "reasoning_gym/game_of_life/0": 14,
+     "reasoning_gym/game_of_life/2": 14,
+     "reasoning_gym/largest_island/0": 14,
+     "reasoning_gym/largest_island/2": 14,
+     "reasoning_gym/rotate_matrix/0": 10,
+     "reasoning_gym/rotate_matrix/2": 7,
+     "reasoning_gym/spiral_matrix/0": 14,
+     "reasoning_gym/spiral_matrix/2": 14,
+     "reasoning_gym/string_manipulation/0": 7,
+     "reasoning_gym/string_manipulation/2": 14,
+     "reasoning_gym/tower_of_hanoi/2": 6
+    }
+   },
+   "enough_unused_tasks": true,
+   "families": [
+    "reasoning_gym/largest_island",
+    "reasoning_gym/string_manipulation",
+    "reasoning_gym/tower_of_hanoi"
+   ],
+   "selection": "generation_plan.round_robin over the unused tasks' groups: P1's own rule; no group is chosen by its acceptance",
+   "selected_task_ids_sha256": "863d42c219d3582e3adbfbdb50b93c04a1594efe4b0ccf5d314368810c5ce946",
+   "expected_new_units": 5.2,
+   "expected_new_units_by_group_rates": {
+    "expected_units": 3.6,
+    "chance_of_at_least": {
+     "3": 1.0
+    },
+    "groups_selected": {
+     "binary_matrix/0": 3,
+     "binary_matrix/2": 3,
+     "game_of_life/0": 3,
+     "game_of_life/2": 3,
+     "largest_island/0": 3,
+     "largest_island/2": 3,
+     "rotate_matrix/0": 3,
+     "rotate_matrix/2": 3,
+     "spiral_matrix/0": 2,
+     "spiral_matrix/2": 2,
+     "string_manipulation/0": 2,
+     "string_manipulation/2": 2,
+     "tower_of_hanoi/2": 2
+    },
+    "_": "P1's per-group rates rest on 4-8 tasks per group; a group P1 never drew takes the cell's rate"
+   },
+   "predicted_generated_tokens": 278086
+  }
+ },
+ "tasks_total": 59,
+ "predicted_generated_tokens": 515661,
+ "_prediction": "measured generated tokens per task in each cell (both candidates) x its tasks; a PREDICTION, not a limit: the hard bound is the cap, enforced by the watchdog",
+ "cost": {
+  "measured_basis": {
+   "pod_to_driver_minutes": 6.02,
+   "all_done_to_pod_deleted_minutes": 2.99,
+   "engine_start_seconds_by_pass": [
+    128.75,
+    12.48
+   ],
+   "price_per_hour": 1.79,
+   "all_in_over_gpu": 1.01149,
+   "source": "runs/h1gen_20261022_190653/runtime/session.json timeline; the generators' logs in the run's store; runs/h1gen_20261022_190653/closeout/outcome.json :: money"
+  },
+  "decode_tokens_per_second_per_sequence": 13.6,
+  "_decode": "P1's median per-sequence decode speed under its full load (decode_speed); a top-up runs far fewer sequences at once, so the bound is conservative",
+  "per_pass_bound_seconds": 602,
+  "_per_pass": "the longest possible candidate (8184 tokens) at that speed",
+  "session_minutes_expected": 33.4,
+  "expected_usd": 1.01,
+  "closeout_reserve_usd": 0.72,
+  "hard_cap_usd": 2.6,
+  "_hard_cap": "1.5 x (expected + closeout reserve of setup + teardown + 15 min), P1's rule"
+ },
+ "budget": {
+  "provider_snapshot": {
+   "path": "logs/budget/provider/runpod_billing_2026-10-23T0503Z.json",
+   "sha256": "afa8d72393e3e4d45e8ba575066ebcbeeda47fae4cbc63b64504e2bcf9b57c7b"
+  },
+  "provider_billed_total_usd": 661.5161,
+  "project_cumulative_cap_usd": 666.17,
+  "cap_source": "logs/budget/approvals/h1_p1_generation_grant.json (absolute; never raised by a snapshot)",
+  "headroom_usd": 4.65,
+  "after_hard_cap_usd": 664.11,
+  "fits_under_the_existing_cap": true,
+  "_": "occupancy as P1's grant counts it: the provider's all-time billing once; the 34 historical pods and the anchor stay OPEN"
+ },
+ "launch": "NOT built. If this route is chosen, the top-up list, its generation plan, launch identity and harness digest are built at $0 first; a grant must name both (governance.issue), and the existing launcher, shard securing, teardown and closeout apply unchanged",
+ "not_requested": [
+  "P1g",
+  "P2",
+  "student recovery",
+  "formal evaluation",
+  "a network volume",
+  "a top-up of any cell not listed",
+  "a change of D4 Top-1, the recovery objective, M1 or eval-set-1"
+ ],
+ "limitations": [
+  "post hoc: the route and its size were set after P1's yield was seen (no student or evaluation result read)",
+  "analogy would rest on the project generator alone; Reasoning Core's analogy module leaves the stratum",
+  "two generation sessions of the same teacher and protocol pooled into one corpus; every unit keeps its own record identity",
+  "the counts are forecasts from stand-ins sized as the measured units; the built ladder decides"
+ ],
+ "run_id_basis": "h1gen_20261022_190653",
+ "authorizes": "nothing"
+}

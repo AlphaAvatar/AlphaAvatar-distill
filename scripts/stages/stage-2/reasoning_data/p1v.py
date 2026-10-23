@@ -77,6 +77,20 @@ def cell_of(task: dict, spec: dict) -> str:
     return f"{task.get('stratum') or SP.stratum_of(task, spec)}/{task.get('source')}"
 
 
+def verify_run(run_id: str, store: Path) -> dict:
+    """Steps 1-2 for one run: its secured inputs, verified and selected. Every
+    later reader of P1's accepted units (this file, `corpus_feasibility`) takes
+    them from here, never from a stored selection."""
+    spec = A.read_json(A.CONFIG_DIR / "corpus_spec.json")
+    plan = A.read_json(A.REPO / GOV.PLAN)
+    auth = GOV.load(A.REPO / GOV.authorization_path(run_id))
+    recs, ins = inputs(Path(store), auth.plan_hash)
+    tasks = {t["task_id"]: t for p in plan["pools"] for t in A.jsonl(A.REPO / p["path"])}
+    tok = B.load_tokenizer()
+    got = G.adapt(tasks, recs, lambda t: SP.stratum_of(t, spec), tokenizer=tok)
+    return {"spec": spec, "plan": plan, "auth": auth, "ins": ins, "tasks": tasks, "tok": tok, "got": got}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -84,13 +98,8 @@ def main(argv=None) -> int:
     ap.add_argument("--store", required=True)
     ap.add_argument("--pack-out", required=True)
     args = ap.parse_args(argv)
-    spec = A.read_json(A.CONFIG_DIR / "corpus_spec.json")
-    plan = A.read_json(A.REPO / GOV.PLAN)
-    auth = GOV.load(A.REPO / GOV.authorization_path(args.run_id))
-    recs, ins = inputs(Path(args.store), auth.plan_hash)
-    tasks = {t["task_id"]: t for p in plan["pools"] for t in A.jsonl(A.REPO / p["path"])}
-    tok = B.load_tokenizer()
-    got = G.adapt(tasks, recs, lambda t: SP.stratum_of(t, spec), tokenizer=tok)
+    v = verify_run(args.run_id, Path(args.store))
+    spec, plan, auth, ins, tasks, tok, got = (v[k] for k in ("spec", "plan", "auth", "ins", "tasks", "tok", "got"))
 
     # per cell: what was generated, what was accepted, why the rest was not
     per: dict[str, dict] = defaultdict(lambda: {"tasks": set(), "candidates": 0, "accepted_units": set(),

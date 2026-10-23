@@ -110,8 +110,8 @@
    "who_writes_it": "the agent, from the maintainer's explicit approval message, naming exactly the two values recorded here"
   },
   "after_the_run": {
-   "harness_on_disk": "76a3fcc796bbe878c8da011bcd53c688501f860506a56382bf7d4790d3aee42e",
-   "why_it_differs": "P1v's comparator correction (generation_adapter.parse_grid: a literal \\n between grid rows); P1 ran under the recorded harness, and any new paid session would need a new grant naming the new digest"
+   "harness_on_disk": "3a965da5f234d20eadd599698ee6be4ca9f2a111f4d49a0fc98815c5dc4804e3",
+   "why_it_differs": "P1v's comparator correction (generation_adapter.parse_grid: a literal \\n between grid rows; then 76a3fcc7...), and on 2026-10-23 source_plan.candidate_spec (the separately identified corpus candidates). P1 ran under the recorded harness, and any new paid session would need a new grant naming the new digest"
   }
  },
  "launch_preflight_read_only": [

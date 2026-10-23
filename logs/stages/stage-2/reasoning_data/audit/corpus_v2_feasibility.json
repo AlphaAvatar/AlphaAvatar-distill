@@ -1,0 +1,926 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.corpus_feasibility/v1",
+ "written_utc": "2026-10-23T05:18:16Z",
+ "candidate": {
+  "path": "configs/stages/stage-2/reasoning_data/corpus_v2_candidate.json",
+  "sha256": "4e37212bf87d5a26c85d5e9e3ee39bb96eaf6e2192a3a3bf0be5072acb2396cf",
+  "role": "FEASIBILITY CANDIDATE",
+  "base_sha256": "ac7c50ae7a6b365ca45b1f8984415ee7431502fac06c4aee537f0518be457887",
+  "corpus_id": "stage2.reasoning_master@v2",
+  "salt": "stage2.reasoning_master/v2"
+ },
+ "data": {
+  "run_id": "h1gen_20261022_190653",
+  "launch_identity_sha256": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
+  "shards": 26,
+  "records": 2164,
+  "generated_units_selected": 1057,
+  "reuse_units": 6298,
+  "sessions": 7470,
+  "sessions_sha256": "a0e1d7c5ec90689b3f4ccee6ba619cb8efbb3c8f9684304c9d35a9f32c3eefe3",
+  "admission": {
+   "units": 0,
+   "sessions": 0,
+   "units_by_kind": {}
+  }
+ },
+ "formal_path": {
+  "built": false,
+  "refusal": "rung 860000: prefix size 860630 exceeds the composition capacity 7737; a declared stratum is exhausted below it",
+  "path": "build_arm_b.build -> build_master_ladder.build (render_all, ladder_units, build_ladder without drift, pack_best_fit)"
+ },
+ "contract": {
+  "composition_capacity": 7737,
+  "rung_prefix_sizes": {
+   "860000": 860630,
+   "1600000": 1606158,
+   "2960000": 2962520
+  },
+  "cells": {
+   "primary.abstract_analogical/reasoning_core": {
+    "share": 0.002,
+    "units": 1,
+    "supervised_tokens": 7737,
+    "supervised_tokens_needed_with_reserve": 6220,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "reasoning_core/analogical_case_matching"
+    ],
+    "reserve_units": 0,
+    "reserve_supervised_tokens": 0,
+    "reserve_families": 0,
+    "runs_dry_at_prefix": 7737,
+    "blocks_rungs": [
+     860000,
+     1600000,
+     2960000
+    ]
+   },
+   "primary.abstract_analogical/s0_generators_v2_calsplit": {
+    "share": 0.078,
+    "units": 41,
+    "supervised_tokens": 246989,
+    "supervised_tokens_needed_with_reserve": 242580,
+    "covered": true,
+    "families": 5,
+    "family_ids": [
+     "grid_transform@v1/grid.fill_rows",
+     "grid_transform@v1/grid.flip_h",
+     "grid_transform@v1/grid.flip_v",
+     "grid_transform@v1/grid.rotate_ccw",
+     "grid_transform@v1/grid.rotate_cw"
+    ],
+    "reserve_units": 2,
+    "reserve_supervised_tokens": 14417,
+    "reserve_families": 2,
+    "runs_dry_at_prefix": 2955565,
+    "blocks_rungs": [
+     2960000
+    ]
+   },
+   "primary.compositional_generalization/reasoning_core": {
+    "share": 0.03,
+    "units": 23,
+    "supervised_tokens": 106367,
+    "supervised_tokens_needed_with_reserve": 93300,
+    "covered": true,
+    "families": 2,
+    "family_ids": [
+     "reasoning_core/planning",
+     "reasoning_core/rule_switching"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 3658,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 3284521,
+    "blocks_rungs": []
+   },
+   "primary.compositional_generalization/reasoning_gym": {
+    "share": 0.02,
+    "units": 15,
+    "supervised_tokens": 65836,
+    "supervised_tokens_needed_with_reserve": 62200,
+    "covered": true,
+    "families": 3,
+    "family_ids": [
+     "reasoning_gym/largest_island",
+     "reasoning_gym/string_manipulation",
+     "reasoning_gym/tower_of_hanoi"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 6005,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 2854803,
+    "blocks_rungs": [
+     2960000
+    ]
+   },
+   "primary.compositional_generalization/s0_generators_v2_calsplit": {
+    "share": 0.12,
+    "units": 102,
+    "supervised_tokens": 391394,
+    "supervised_tokens_needed_with_reserve": 373200,
+    "covered": true,
+    "families": 5,
+    "family_ids": [
+     "defined_ops@v1/comp.chain3",
+     "defined_ops@v1/comp.conditional_chain",
+     "scan_language@v1/scan.rev_sur",
+     "scan_language@v1/scan.seq_rev",
+     "scan_language@v1/scan.sur_sur"
+    ],
+    "reserve_units": 4,
+    "reserve_supervised_tokens": 21478,
+    "reserve_families": 4,
+    "runs_dry_at_prefix": 3084706,
+    "blocks_rungs": []
+   },
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit": {
+    "share": 0.17,
+    "units": 190,
+    "supervised_tokens": 713594,
+    "supervised_tokens_needed_with_reserve": 528700,
+    "covered": true,
+    "families": 15,
+    "family_ids": [
+     "list_induction@v1/list.append_sum",
+     "list_induction@v1/list.dedupe",
+     "list_induction@v1/list.duplicate_each",
+     "list_induction@v1/list.keep_even",
+     "list_induction@v1/list.min",
+     "list_induction@v1/list.mod_k",
+     "list_induction@v1/list.mul_k",
+     "list_induction@v1/list.pairwise_sums",
+     "list_induction@v1/list.sort_asc",
+     "list_induction@v1/list.square",
+     "list_induction@v1/list.swap_ends",
+     "string_induction@v2/str.append_first"
+    ],
+    "reserve_units": 6,
+    "reserve_supervised_tokens": 25483,
+    "reserve_families": 6,
+    "runs_dry_at_prefix": 3896482,
+    "blocks_rungs": []
+   },
+   "primary.interactive_adaptation/s0_generators_v2_calsplit": {
+    "share": 0.1,
+    "units": 25,
+    "supervised_tokens": 445712,
+    "supervised_tokens_needed_with_reserve": 311000,
+    "covered": true,
+    "families": 3,
+    "family_ids": [
+     "hidden_buttons@v1/act.reverse",
+     "probe_function@v1/probe.digit_sum",
+     "probe_function@v1/probe.threshold"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 19594,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 3919796,
+    "blocks_rungs": []
+   },
+   "primary.task_contained_deduction/prontoqa": {
+    "share": 0.03,
+    "units": 49,
+    "supervised_tokens": 134730,
+    "supervised_tokens_needed_with_reserve": 93300,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "prontoqa/fictional"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 3162,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 3778936,
+    "blocks_rungs": []
+   },
+   "primary.task_contained_deduction/reasoning_core": {
+    "share": 0.03,
+    "units": 22,
+    "supervised_tokens": 121642,
+    "supervised_tokens_needed_with_reserve": 93300,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "reasoning_core/multistep_evidence_retrieval"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 5866,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 3465162,
+    "blocks_rungs": []
+   },
+   "primary.task_contained_deduction/reasoning_gym": {
+    "share": 0.025,
+    "units": 25,
+    "supervised_tokens": 86216,
+    "supervised_tokens_needed_with_reserve": 77750,
+    "covered": true,
+    "families": 4,
+    "family_ids": [
+     "reasoning_gym/family_relationships",
+     "reasoning_gym/mini_sudoku",
+     "reasoning_gym/n_queens",
+     "reasoning_gym/zebra_puzzles"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 3668,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 3104408,
+    "blocks_rungs": []
+   },
+   "primary.task_contained_deduction/s0_generators_v2_calsplit": {
+    "share": 0.095,
+    "units": 101,
+    "supervised_tokens": 358670,
+    "supervised_tokens_needed_with_reserve": 295450,
+    "covered": true,
+    "families": 4,
+    "family_ids": [
+     "entity_tracking@v1/track.move",
+     "entity_tracking@v1/track.move_remove",
+     "knights_knaves@v1/kk.counting",
+     "ordering@v2/order.race"
+    ],
+    "reserve_units": 4,
+    "reserve_supervised_tokens": 13924,
+    "reserve_families": 4,
+    "runs_dry_at_prefix": 3544470,
+    "blocks_rungs": []
+   },
+   "supporting.answerability/squad_v2_train_unanswerable": {
+    "share": 0.03,
+    "units": 213,
+    "supervised_tokens": 260122,
+    "supervised_tokens_needed_with_reserve": 93300,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "squad_v2_train_unanswerable"
+    ],
+    "reserve_units": 2,
+    "reserve_supervised_tokens": 2655,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 4556330,
+    "blocks_rungs": []
+   },
+   "supporting.code_algorithmic/mbpp_train": {
+    "share": 0.055,
+    "units": 107,
+    "supervised_tokens": 351988,
+    "supervised_tokens_needed_with_reserve": 171050,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "mbpp"
+    ],
+    "reserve_units": 4,
+    "reserve_supervised_tokens": 7989,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 4445531,
+    "blocks_rungs": []
+   },
+   "supporting.code_algorithmic/reasoning_core": {
+    "share": 0.015,
+    "units": 15,
+    "supervised_tokens": 66241,
+    "supervised_tokens_needed_with_reserve": 46650,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "reasoning_core/controlled_code_execution"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 3162,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 3552630,
+    "blocks_rungs": []
+   },
+   "supporting.math_new/math_train": {
+    "share": 0.03,
+    "units": 58,
+    "supervised_tokens": 122782,
+    "supervised_tokens_needed_with_reserve": 93300,
+    "covered": true,
+    "families": 7,
+    "family_ids": [
+     "algebra",
+     "counting_and_probability",
+     "geometry",
+     "intermediate_algebra",
+     "number_theory",
+     "prealgebra",
+     "precalculus"
+    ],
+    "reserve_units": 2,
+    "reserve_supervised_tokens": 2749,
+    "reserve_families": 2,
+    "runs_dry_at_prefix": 3629887,
+    "blocks_rungs": []
+   },
+   "supporting.math_new/mathematics_dataset": {
+    "share": 0.02,
+    "units": 47,
+    "supervised_tokens": 115649,
+    "supervised_tokens_needed_with_reserve": 62200,
+    "covered": true,
+    "families": 7,
+    "family_ids": [
+     "mathematics_dataset/algebra__linear_1d_composed",
+     "mathematics_dataset/algebra__polynomial_roots_composed",
+     "mathematics_dataset/calculus__differentiate_composed",
+     "mathematics_dataset/comparison__sort_composed",
+     "mathematics_dataset/numbers__gcd_composed",
+     "mathematics_dataset/polynomials__evaluate_composed",
+     "mathematics_dataset/probability__swr_p_sequence"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 2072,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 3996175,
+    "blocks_rungs": []
+   },
+   "supporting.math_new/reasoning_gym": {
+    "share": 0.01,
+    "units": 23,
+    "supervised_tokens": 95600,
+    "supervised_tokens_needed_with_reserve": 31100,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "reasoning_gym/polynomial_equations"
+    ],
+    "reserve_units": 0,
+    "reserve_supervised_tokens": 0,
+    "reserve_families": 0,
+    "runs_dry_at_prefix": 4127721,
+    "blocks_rungs": []
+   },
+   "supporting.math_reused_gsm8k/corpus_v2_gsm8k_verified": {
+    "share": 0.06,
+    "units": 1508,
+    "supervised_tokens": 1648134,
+    "supervised_tokens_needed_with_reserve": 186600,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "corpus_v2_gsm8k_verified"
+    ],
+    "reserve_units": 11,
+    "reserve_supervised_tokens": 7342,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 7714772,
+    "blocks_rungs": []
+   },
+   "supporting.reading_verified/corpus_v2_multihop_verified": {
+    "share": 0.02,
+    "units": 919,
+    "supervised_tokens": 879026,
+    "supervised_tokens_needed_with_reserve": 62200,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "corpus_v2_multihop_verified"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 824,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 6723385,
+    "blocks_rungs": []
+   },
+   "supporting.reading_verified/corpus_v2_rag_verified": {
+    "share": 0.06,
+    "units": 3871,
+    "supervised_tokens": 1806741,
+    "supervised_tokens_needed_with_reserve": 186600,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "corpus_v2_rag_verified"
+    ],
+    "reserve_units": 17,
+    "reserve_supervised_tokens": 7930,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 7873192,
+    "blocks_rungs": []
+   }
+  },
+  "validation_tail": {
+   "units": 61,
+   "supervised_tokens": 151978,
+   "cells_present": 18,
+   "cells_absent": [
+    "primary.abstract_analogical/reasoning_core",
+    "supporting.math_new/reasoning_gym"
+   ],
+   "families": 31,
+   "max_share_deviation": 0.028927
+  },
+  "_reading": "runs_dry_at_prefix: the training-order prefix size at which the cell's last unit is placed; past it the interleave cannot serve the cell, so a rung whose prefix is larger is refused (nested_ladder.composition_capacity). A one-unit cell runs dry where its unit is placed, so it either sits in a rung and caps the capacity there, or sits in none; no order or salt satisfies both."
+ },
+ "independence": {
+  "units": 7355,
+  "units_sharing_a_prompt": 0,
+  "examples": [],
+  "units_sharing_a_target": 0,
+  "units_without_target": 0,
+  "validation_prompts_also_in_training": 0
+ },
+ "isolation": {
+  "generated_units_R0_R9": {
+   "pass": true,
+   "n_items": 1057,
+   "violations": [],
+   "R2_flagged": 0
+  },
+  "reuse_selection": [
+   {
+    "path": "data/stages/stage-2/reasoning_data/tasks/supporting_reuse_v1.selection.isolation.json",
+    "pass": true
+   }
+  ]
+ },
+ "authorizes": "nothing",
+ "unsatisfied": [
+  "primary.abstract_analogical/reasoning_core: 1 unit(s), 7737 supervised; runs dry at prefix 7737, below rungs [860000, 1600000, 2960000] (composition capacity 7737); the formal path refuses without drift",
+  "primary.abstract_analogical/reasoning_core: ONE unit from one task (reasoning_core/analogical_case_matching): it cannot be both trained on and in the validation tail (reserve units: 0), and one task is not source coverage",
+  "primary.abstract_analogical/s0_generators_v2_calsplit: 41 unit(s), 246989 supervised; runs dry at prefix 2955565, below rungs [2960000] (composition capacity 7737); the formal path refuses without drift",
+  "primary.compositional_generalization/reasoning_gym: 15 unit(s), 65836 supervised; runs dry at prefix 2854803, below rungs [2960000] (composition capacity 7737); the formal path refuses without drift"
+ ],
+ "pack": {
+  "built": false,
+  "why": "rung 860000: prefix size 860630 exceeds the composition capacity 7737; a declared stratum is exhausted below it",
+  "rule": "no composition drift, no other salt, no lower gate, no repetition: the unsatisfied items are reported and nothing is packed"
+ },
+ "plan_2": {
+  "proposal": {
+   "path": "configs/stages/stage-2/reasoning_data/corpus_v3_proposal.json",
+   "sha256": "64807ec0427a7d5d0e4bea41bab1e18964d9bd44fdd5fe3e36ee7bc1e5cd0be9",
+   "role": "PLAN 2 PROPOSAL",
+   "base_sha256": "ac7c50ae7a6b365ca45b1f8984415ee7431502fac06c4aee537f0518be457887",
+   "corpus_id": "stage2.reasoning_master@v3",
+   "salt": "stage2.reasoning_master/v3"
+  },
+  "fill_cells": [
+   "primary.abstract_analogical/s0_generators_v2_calsplit",
+   "primary.compositional_generalization/reasoning_gym"
+  ],
+  "on_the_real_units_alone": {
+   "primary.abstract_analogical/s0_generators_v2_calsplit": {
+    "share": 0.09,
+    "units": 41,
+    "supervised_tokens": 246989,
+    "supervised_tokens_needed_with_reserve": 279900,
+    "covered": false,
+    "families": 5,
+    "family_ids": [
+     "grid_transform@v1/grid.fill_rows",
+     "grid_transform@v1/grid.flip_h",
+     "grid_transform@v1/grid.flip_v",
+     "grid_transform@v1/grid.rotate_ccw",
+     "grid_transform@v1/grid.rotate_cw"
+    ],
+    "reserve_units": 2,
+    "reserve_supervised_tokens": 11490,
+    "reserve_families": 2,
+    "runs_dry_at_prefix": 2595062,
+    "blocks_rungs": [
+     2960000
+    ]
+   },
+   "primary.compositional_generalization/reasoning_gym": {
+    "share": 0.02,
+    "units": 15,
+    "supervised_tokens": 65836,
+    "supervised_tokens_needed_with_reserve": 62200,
+    "covered": true,
+    "families": 3,
+    "family_ids": [
+     "reasoning_gym/largest_island",
+     "reasoning_gym/string_manipulation",
+     "reasoning_gym/tower_of_hanoi"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 4840,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 2914790,
+    "blocks_rungs": [
+     2960000
+    ]
+   }
+  },
+  "composition_capacity_without_new_units": 2595062,
+  "cells": {
+   "primary.abstract_analogical/s0_generators_v2_calsplit": {
+    "new_units": {
+     "mechanism_minimum": 8,
+     "at_the_median_size": 6,
+     "planning": 11
+    },
+    "new_supervised_tokens_planning": 50353,
+    "measured": {
+     "tasks_generated": 61,
+     "candidates": {
+      "0": 61,
+      "1": 28
+     },
+     "accepted": {
+      "0": 33,
+      "1": 8
+     },
+     "candidate_accept_rate": {
+      "0": 0.541,
+      "1": 0.2857
+     },
+     "unit_accept_rate": 0.6721,
+     "units_by_group": {
+      "grid_transform@v1/L1": "13/21",
+      "grid_transform@v1/L2": "19/20",
+      "grid_transform@v1/L3": "9/20"
+     },
+     "generated_tokens": {
+      "0": 394412,
+      "1": 185241
+     },
+     "generated_tokens_per_task": 9503
+    },
+    "tasks": {
+     "tasks": 25,
+     "by_oversupply": 25,
+     "by_binomial_p90": 20,
+     "chance_of_enough_units": 0.995
+    },
+    "unused_independent_tasks": {
+     "total": 110,
+     "pool": 171,
+     "by_family_level": {
+      "grid.fill_rows/L1": 7,
+      "grid.fill_rows/L2": 8,
+      "grid.fill_rows/L3": 8,
+      "grid.flip_h/L1": 8,
+      "grid.flip_h/L2": 8,
+      "grid.flip_h/L3": 8,
+      "grid.flip_v/L1": 7,
+      "grid.flip_v/L2": 7,
+      "grid.flip_v/L3": 7,
+      "grid.rotate_ccw/L1": 7,
+      "grid.rotate_ccw/L2": 7,
+      "grid.rotate_ccw/L3": 7,
+      "grid.rotate_cw/L1": 7,
+      "grid.rotate_cw/L2": 7,
+      "grid.rotate_cw/L3": 7
+     }
+    },
+    "enough_unused_tasks": true,
+    "families": [
+     "grid_transform@v1/grid.fill_rows",
+     "grid_transform@v1/grid.flip_h",
+     "grid_transform@v1/grid.flip_v",
+     "grid_transform@v1/grid.rotate_ccw",
+     "grid_transform@v1/grid.rotate_cw"
+    ],
+    "selection": "generation_plan.round_robin over the unused tasks' groups: P1's own rule; no group is chosen by its acceptance",
+    "selected_task_ids_sha256": "a65aacf31df3b5d0b2ca881e2d43e28b20d64e10eef68e60690a4b0c7751621c",
+    "expected_new_units": 16.8,
+    "expected_new_units_by_group_rates": {
+     "expected_units": 16.8,
+     "chance_of_at_least": {
+      "11": 0.998
+     },
+     "groups_selected": {
+      "grid_transform@v1/L1": 9,
+      "grid_transform@v1/L2": 8,
+      "grid_transform@v1/L3": 8
+     },
+     "_": "P1's per-group rates rest on 4-8 tasks per group; a group P1 never drew takes the cell's rate"
+    },
+    "predicted_generated_tokens": 237575
+   },
+   "primary.compositional_generalization/reasoning_gym": {
+    "new_units": {
+     "mechanism_minimum": 0,
+     "at_the_median_size": 0,
+     "planning": 3
+    },
+    "new_supervised_tokens_planning": 9008,
+    "measured": {
+     "tasks_generated": 99,
+     "candidates": {
+      "0": 99,
+      "1": 85
+     },
+     "accepted": {
+      "0": 14,
+      "1": 1
+     },
+     "candidate_accept_rate": {
+      "0": 0.1414,
+      "1": 0.0118
+     },
+     "unit_accept_rate": 0.1515,
+     "units_by_group": {
+      "binary_matrix/0": "0/8",
+      "binary_matrix/2": "0/8",
+      "game_of_life/0": "0/7",
+      "game_of_life/2": "0/7",
+      "largest_island/0": "7/7",
+      "largest_island/2": "0/7",
+      "rotate_matrix/0": "0/7",
+      "rotate_matrix/2": "0/7",
+      "spiral_matrix/0": "0/7",
+      "spiral_matrix/2": "0/7",
+      "string_manipulation/0": "2/7",
+      "string_manipulation/2": "0/7",
+      "tower_of_hanoi/0": "6/6",
+      "tower_of_hanoi/2": "0/7"
+     },
+     "generated_tokens": {
+      "0": 425156,
+      "1": 384573
+     },
+     "generated_tokens_per_task": 8179
+    },
+    "tasks": {
+     "tasks": 34,
+     "by_oversupply": 30,
+     "by_binomial_p90": 34,
+     "chance_of_enough_units": 0.906
+    },
+    "unused_independent_tasks": {
+     "total": 154,
+     "pool": 253,
+     "by_family_level": {
+      "reasoning_gym/binary_matrix/0": 13,
+      "reasoning_gym/binary_matrix/2": 13,
+      "reasoning_gym/game_of_life/0": 14,
+      "reasoning_gym/game_of_life/2": 14,
+      "reasoning_gym/largest_island/0": 14,
+      "reasoning_gym/largest_island/2": 14,
+      "reasoning_gym/rotate_matrix/0": 10,
+      "reasoning_gym/rotate_matrix/2": 7,
+      "reasoning_gym/spiral_matrix/0": 14,
+      "reasoning_gym/spiral_matrix/2": 14,
+      "reasoning_gym/string_manipulation/0": 7,
+      "reasoning_gym/string_manipulation/2": 14,
+      "reasoning_gym/tower_of_hanoi/2": 6
+     }
+    },
+    "enough_unused_tasks": true,
+    "families": [
+     "reasoning_gym/largest_island",
+     "reasoning_gym/string_manipulation",
+     "reasoning_gym/tower_of_hanoi"
+    ],
+    "selection": "generation_plan.round_robin over the unused tasks' groups: P1's own rule; no group is chosen by its acceptance",
+    "selected_task_ids_sha256": "863d42c219d3582e3adbfbdb50b93c04a1594efe4b0ccf5d314368810c5ce946",
+    "expected_new_units": 5.2,
+    "expected_new_units_by_group_rates": {
+     "expected_units": 3.6,
+     "chance_of_at_least": {
+      "3": 1.0
+     },
+     "groups_selected": {
+      "binary_matrix/0": 3,
+      "binary_matrix/2": 3,
+      "game_of_life/0": 3,
+      "game_of_life/2": 3,
+      "largest_island/0": 3,
+      "largest_island/2": 3,
+      "rotate_matrix/0": 3,
+      "rotate_matrix/2": 3,
+      "spiral_matrix/0": 2,
+      "spiral_matrix/2": 2,
+      "string_manipulation/0": 2,
+      "string_manipulation/2": 2,
+      "tower_of_hanoi/2": 2
+     },
+     "_": "P1's per-group rates rest on 4-8 tasks per group; a group P1 never drew takes the cell's rate"
+    },
+    "predicted_generated_tokens": 278086
+   }
+  },
+  "_counts": "mechanism_minimum: the fewest stand-ins (smallest measured sizes first) with which the formal ladder builds under the proposal's salt; at_the_median_size: the same with median-sized stand-ins; planning: the robust count the tasks are sized for (planning_units)",
+  "contract_with_the_planning_forecast": {
+   "label": "FORECAST with stand-ins: not a pack, not data",
+   "rungs": [
+    {
+     "target": 860000,
+     "n_units": 375,
+     "size": 860885,
+     "reachable": true,
+     "max_share_deviation": 0.025887,
+     "distinct_families": 61
+    },
+    {
+     "target": 1600000,
+     "n_units": 649,
+     "size": 1604428,
+     "reachable": true,
+     "max_share_deviation": 0.004855,
+     "distinct_families": 64
+    },
+    {
+     "target": 2960000,
+     "n_units": 1232,
+     "size": 2965353,
+     "reachable": true,
+     "max_share_deviation": 0.001556,
+     "distinct_families": 64
+    }
+   ],
+   "cells": {
+    "primary.abstract_analogical/s0_generators_v2_calsplit": {
+     "share": 0.09,
+     "units": 52,
+     "supervised_tokens": 297342,
+     "covered": true,
+     "runs_dry_at_prefix": 3156810,
+     "blocks_rungs": [],
+     "reserve_units": 2
+    },
+    "primary.compositional_generalization/reasoning_core": {
+     "share": 0.03,
+     "units": 23,
+     "supervised_tokens": 106367,
+     "covered": true,
+     "runs_dry_at_prefix": 3243288,
+     "blocks_rungs": [],
+     "reserve_units": 1
+    },
+    "primary.compositional_generalization/reasoning_gym": {
+     "share": 0.02,
+     "units": 18,
+     "supervised_tokens": 74844,
+     "covered": true,
+     "runs_dry_at_prefix": 3372746,
+     "blocks_rungs": [],
+     "reserve_units": 1
+    },
+    "primary.compositional_generalization/s0_generators_v2_calsplit": {
+     "share": 0.12,
+     "units": 102,
+     "supervised_tokens": 391394,
+     "covered": true,
+     "runs_dry_at_prefix": 3130589,
+     "blocks_rungs": [],
+     "reserve_units": 3
+    },
+    "primary.inductive_rule_discovery/s0_generators_v2_calsplit": {
+     "share": 0.17,
+     "units": 190,
+     "supervised_tokens": 713594,
+     "covered": true,
+     "runs_dry_at_prefix": 3926876,
+     "blocks_rungs": [],
+     "reserve_units": 7
+    },
+    "primary.interactive_adaptation/s0_generators_v2_calsplit": {
+     "share": 0.1,
+     "units": 25,
+     "supervised_tokens": 445712,
+     "covered": true,
+     "runs_dry_at_prefix": 3919648,
+     "blocks_rungs": [],
+     "reserve_units": 1
+    },
+    "primary.task_contained_deduction/prontoqa": {
+     "share": 0.03,
+     "units": 49,
+     "supervised_tokens": 134730,
+     "covered": true,
+     "runs_dry_at_prefix": 3833507,
+     "blocks_rungs": [],
+     "reserve_units": 1
+    },
+    "primary.task_contained_deduction/reasoning_core": {
+     "share": 0.03,
+     "units": 22,
+     "supervised_tokens": 121642,
+     "covered": true,
+     "runs_dry_at_prefix": 3595916,
+     "blocks_rungs": [],
+     "reserve_units": 1
+    },
+    "primary.task_contained_deduction/reasoning_gym": {
+     "share": 0.025,
+     "units": 25,
+     "supervised_tokens": 86216,
+     "covered": true,
+     "runs_dry_at_prefix": 3217586,
+     "blocks_rungs": [],
+     "reserve_units": 1
+    },
+    "primary.task_contained_deduction/s0_generators_v2_calsplit": {
+     "share": 0.085,
+     "units": 101,
+     "supervised_tokens": 358670,
+     "covered": true,
+     "runs_dry_at_prefix": 3851968,
+     "blocks_rungs": [],
+     "reserve_units": 4
+    },
+    "supporting.answerability/squad_v2_train_unanswerable": {
+     "share": 0.03,
+     "units": 213,
+     "supervised_tokens": 260122,
+     "covered": true,
+     "runs_dry_at_prefix": 4615153,
+     "blocks_rungs": [],
+     "reserve_units": 1
+    },
+    "supporting.code_algorithmic/mbpp_train": {
+     "share": 0.055,
+     "units": 107,
+     "supervised_tokens": 351988,
+     "covered": true,
+     "runs_dry_at_prefix": 4493838,
+     "blocks_rungs": [],
+     "reserve_units": 2
+    },
+    "supporting.code_algorithmic/reasoning_core": {
+     "share": 0.015,
+     "units": 15,
+     "supervised_tokens": 66241,
+     "covered": true,
+     "runs_dry_at_prefix": 3550997,
+     "blocks_rungs": [],
+     "reserve_units": 1
+    },
+    "supporting.math_new/math_train": {
+     "share": 0.03,
+     "units": 58,
+     "supervised_tokens": 122782,
+     "covered": true,
+     "runs_dry_at_prefix": 3542800,
+     "blocks_rungs": [],
+     "reserve_units": 2
+    },
+    "supporting.math_new/mathematics_dataset": {
+     "share": 0.02,
+     "units": 47,
+     "supervised_tokens": 115649,
+     "covered": true,
+     "runs_dry_at_prefix": 4049553,
+     "blocks_rungs": [],
+     "reserve_units": 2
+    },
+    "supporting.math_new/reasoning_gym": {
+     "share": 0.01,
+     "units": 23,
+     "supervised_tokens": 95600,
+     "covered": true,
+     "runs_dry_at_prefix": 4183979,
+     "blocks_rungs": [],
+     "reserve_units": 0
+    },
+    "supporting.math_reused_gsm8k/corpus_v2_gsm8k_verified": {
+     "share": 0.06,
+     "units": 1508,
+     "supervised_tokens": 1648134,
+     "covered": true,
+     "runs_dry_at_prefix": 7764969,
+     "blocks_rungs": [],
+     "reserve_units": 10
+    },
+    "supporting.reading_verified/corpus_v2_multihop_verified": {
+     "share": 0.02,
+     "units": 919,
+     "supervised_tokens": 879026,
+     "covered": true,
+     "runs_dry_at_prefix": 6784289,
+     "blocks_rungs": [],
+     "reserve_units": 2
+    },
+    "supporting.reading_verified/corpus_v2_rag_verified": {
+     "share": 0.06,
+     "units": 3871,
+     "supervised_tokens": 1806741,
+     "covered": true,
+     "runs_dry_at_prefix": 7925659,
+     "blocks_rungs": [],
+     "reserve_units": 20
+    }
+   },
+   "validation_tail": {
+    "units": 62,
+    "supervised_tokens": 151135,
+    "cells_present": 18,
+    "cells_absent": [
+     "supporting.math_new/reasoning_gym"
+    ],
+    "families": 32,
+    "max_share_deviation": 0.02636
+   }
+  },
+  "application": {
+   "path": "logs/stages/stage-2/reasoning_data/plans/abstract_topup_application.json",
+   "tasks_total": 59,
+   "expected_usd": 1.01,
+   "hard_cap_usd": 2.6,
+   "fits_under_the_existing_cap": true
+  }
+ }
+}

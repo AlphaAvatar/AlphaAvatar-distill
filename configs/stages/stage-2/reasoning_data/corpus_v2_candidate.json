@@ -1,0 +1,91 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.corpus_candidate/v1",
+ "corpus_id": "stage2.reasoning_master@v2",
+ "role": "FEASIBILITY CANDIDATE",
+ "status": "FEASIBILITY CANDIDATE named by the maintainer 2026-10-23; NOT @v1, NOT chosen, NOT adopted. Checked at $0 by scripts/stages/stage-2/reasoning_data/corpus_feasibility.py on the formal ladder and packing path; its result is logs/stages/stage-2/reasoning_data/audit/corpus_v2_feasibility.json. Adoption is the maintainer's decision.",
+ "decided_by": {
+  "by": "maintainer",
+  "date_utc": "2026-10-23",
+  "decision": "logs/budget/decisions.md 2026-10-23 (H1 P1v gap: a $0 corpus revision feasibility check before any paid top-up)"
+ },
+ "derived_from": {
+  "corpus_id": "stage2.reasoning_master@v1",
+  "spec": "configs/stages/stage-2/reasoning_data/corpus_spec.json",
+  "spec_sha256": "ac7c50ae7a6b365ca45b1f8984415ee7431502fac06c4aee537f0518be457887",
+  "_": "@v1, its generation records and P1v's evidence stay as they are; this file never edits them. Everything this file does not declare (size measure, block_len, rung_targets, reserve_tokens, the acceptance contract, admission of whole units) is @v1's, unchanged (source_plan.candidate_spec)."
+ },
+ "salt": "stage2.reasoning_master/v2",
+ "_salt": "its own ladder salt, declared before the first build and the only one run; never varied to make a build pass",
+ "shares": {
+  "primary.task_contained_deduction": 0.18,
+  "primary.inductive_rule_discovery": 0.17,
+  "primary.compositional_generalization": 0.17,
+  "primary.abstract_analogical": 0.08,
+  "primary.interactive_adaptation": 0.1,
+  "supporting.math_reused_gsm8k": 0.06,
+  "supporting.math_new": 0.06,
+  "supporting.code_algorithmic": 0.07,
+  "supporting.reading_verified": 0.08,
+  "supporting.answerability": 0.03
+ },
+ "source_allocation": {
+  "primary.task_contained_deduction": {
+   "s0_generators_v2_calsplit": 0.095,
+   "prontoqa": 0.03,
+   "reasoning_core": 0.03,
+   "reasoning_gym": 0.025
+  },
+  "primary.inductive_rule_discovery": {
+   "s0_generators_v2_calsplit": 0.17
+  },
+  "primary.compositional_generalization": {
+   "s0_generators_v2_calsplit": 0.12,
+   "reasoning_core": 0.03,
+   "reasoning_gym": 0.02
+  },
+  "primary.abstract_analogical": {
+   "s0_generators_v2_calsplit": 0.078,
+   "reasoning_core": 0.002
+  },
+  "primary.interactive_adaptation": {
+   "s0_generators_v2_calsplit": 0.1
+  },
+  "supporting.math_reused_gsm8k": {
+   "corpus_v2_gsm8k_verified": 0.06
+  },
+  "supporting.math_new": {
+   "math_train": 0.03,
+   "mathematics_dataset": 0.02,
+   "reasoning_gym": 0.01
+  },
+  "supporting.code_algorithmic": {
+   "mbpp_train": 0.055,
+   "reasoning_core": 0.015,
+   "reasoning_gym": 0.0,
+   "code_contests_train": 0.0
+  },
+  "supporting.reading_verified": {
+   "corpus_v2_rag_verified": 0.06,
+   "corpus_v2_multihop_verified": 0.02
+  },
+  "supporting.answerability": {
+   "squad_v2_train_unanswerable": 0.03
+  }
+ },
+ "_allocation": "the maintainer's pre-specified split (2026-10-23), copied exactly: 2.96M target, 150k validation reserve and reasoning 0.70 / supporting 0.30 kept; deduction 0.18 (project 0.095, PrOntoQA 0.03, Reasoning Core 0.03, Reasoning Gym 0.025), induction 0.17 and interactive 0.10 unchanged, composition 0.17 (project 0.12, Reasoning Core 0.03, Reasoning Gym 0.02), analogy 0.08 (project 0.078, Reasoning Core 0.002); supporting strata unchanged, code's Reasoning Gym (bf) share moved to MBPP. One candidate, not a mixture-ratio search, and not claimed better than @v1.",
+ "data": {
+  "rule": "ONLY units P1v accepted from P1's records and the previously verified corpus_v2 reuse selection; no new generation, no repetition, no lower gate",
+  "run_id": "h1gen_20261022_190653",
+  "launch_identity_sha256": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
+  "p1v_verification": "logs/stages/stage-2/reasoning_data/audit/p1v_verification.json",
+  "reuse": [
+   {
+    "path": "data/stages/stage-2/reasoning_data/tasks/supporting_reuse_v1.selection.jsonl",
+    "sha256": "2dcac7627c479025d53de70574fb6302c6a54e777686d2457887460993b85f7c"
+   }
+  ]
+ },
+ "post_hoc": "This allocation was set AFTER P1's acceptance was seen. It is a data-feasibility revision driven by measured yield (no student output and no evaluation result was read or used), and it is NOT the source scheme frozen before teacher generation; @v1 is that scheme. A result on a pack cut from it must say so.",
+ "fixed": "D4 Top-1, the recovery objective, M1's matching method and eval-set-1 are unchanged",
+ "authorizes": "nothing"
+}
