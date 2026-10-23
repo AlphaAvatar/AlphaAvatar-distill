@@ -52,7 +52,7 @@ The first dense-model compression experiment was kicked off with this instructio
 
 > Hi, have a look at the AlphaAvatar-distill repo and start from the teacher model https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507. Let's kick off the first dense-model compression experiment.
 
-Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, following the staged workflow in `AGENTS.md`. The working split is: agents act directly on local, reversible, CPU-scale work, and write a **costed proposal with pre-registered decision rules** for anything paid, long-running, or public-facing — the maintainer approves per session. The active proposal lives in [`logs/stages/stage-3/e2/plans/PROPOSAL.md`](./logs/stages/stage-3/e2/plans/PROPOSAL.md); current state and next actions in [`logs/state/current.md`](./logs/state/current.md).
+Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, following the staged workflow in `AGENTS.md`. The working split is: agents act directly on local, reversible, CPU-scale work, and write a **costed proposal with pre-registered decision rules** for anything paid, long-running, or public-facing — the maintainer approves per session. Current state and next actions are in [`logs/state/current.md`](./logs/state/current.md).
 
 **Example prompts.** Open the repository with your agent and ask in plain language; it reads `AGENTS.md` and the experiment records before it changes anything.
 
@@ -63,10 +63,6 @@ Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, fol
 **Explain how AlphaAvatar-distill works**
 
 > Explore the repository and explain how AlphaAvatar-distill works, from teacher model compression and student initialization to distillation, recovery, evaluation, and deployment.
-
-**Start a compression experiment**
-
-> Hi, have a look at the AlphaAvatar-distill repo and start from the teacher model https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507. Let's kick off the first dense-model compression experiment.
 
 **Distill another model**
 
@@ -152,7 +148,8 @@ Official records are stricter than ordinary experiments (AGENTS.md 3.8): exact c
 
 **No records are being kept during baseline construction** (maintainer decision, 2026-07-28). Everything run so far — including every Stage 3 run in `logs/stages/stage-3/history/EXPERIMENTS.md` — is baseline work. The **first record point** will be written once the baseline is carried through Stage 6 deployment validation with satisfactory results; it will be the first entry, not a backfill. Until then every section below is intentionally empty, and every number on this page is an attempt, not a record.
 
-This applies to the Stage 0/1 initialization result above as well: it is a strong,
+This applies to the Stage 0/1 initialization result recorded in the experiment logs
+([`logs/state/experiment_index.md`](./logs/state/experiment_index.md)) as well: it is a strong,
 reproducible finding, but it has not been through the record procedure and is not
 claimed as one.
 
