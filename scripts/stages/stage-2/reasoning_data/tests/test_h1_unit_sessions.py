@@ -80,7 +80,11 @@ def test_the_validation_spec_builds_and_formal_is_priced_only_from_a_passed_p1g(
     path.write_text(json.dumps(rep))
     plan = UD.load_plan()
     t, e = L.unit_minutes(rep, plan, "A")
-    assert t == round(plan["schedule"]["steps"] * 10.5 / 60, 1) and e == round(5.0 * 1716 / 60, 1)
+    fc = A.read_json(A.REPO / L.GL.FORECAST)
+    assert t == round(plan["schedule"]["steps"] * 10.5 / 60, 1)
+    # the slowest recorded full evaluation x the labelled reasoning factor, never the subset extrapolated
+    assert e == round(fc["measured"]["eval_seconds_per_unit_L40S"]["max"]
+                      * fc["contingency_factors_not_measurements"]["eval_floor_to_reasoning"] / 60, 1)
     f = L.spec(session_args(L, ("--phase", "P2", *VOLUME, "--measured", str(path), "--unit", "B-s20260726")))
     names = [ph.name for ph in f.budget.other_phases]
     assert names == ["B-s20260726_train", "B-s20260726_evaluate"]

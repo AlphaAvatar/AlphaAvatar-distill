@@ -1,0 +1,15 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.p1g_report/v1",
+ "run_id": "h1p1g_20261023_185836",
+ "formal": false,
+ "started_utc": "2026-10-23T19:10:50Z",
+ "checks": {},
+ "not": "a GPU validation: never a formal H1 result",
+ "error": {
+  "stage": "restore_initialization",
+  "error": "FileNotFoundError: [Errno 2] No such file or directory: '/root/.cache/huggingface/token'",
+  "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/stages/stage-2/reasoning_data/p1g_driver.py\", line 233, in main\n    init = UD.restore_init(Path(args.init_dir), plan[\"init\"])\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/stages/stage-2/reasoning_data/unit_driver.py\", line 333, in restore_init\n    token = os.environ.get(\"HF_TOKEN\") or Path.home().joinpath(\".cache/huggingface/token\").read_text().strip()\n                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/pathlib.py\", line 1029, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/pathlib.py\", line 1015, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/root/.cache/huggingface/token'\n"
+ },
+ "finished_utc": "2026-10-23T19:10:51Z",
+ "passed": false
+}

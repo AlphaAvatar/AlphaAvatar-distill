@@ -1,0 +1,41 @@
+bundle OK: transfer/aad_autoinit_f7e6a755.bundle on the relay
+[18:59:50] budget: expected 75 min $2.36 · soft $4.96 · hard $5.63 (authorized $5.75)
+[18:59:51] NVIDIA A100-SXM4-80GB $1.79/h, stock Low
+[18:59:51] account funds OK: the provider account holds $97.2269 against the $30.0000 this session must be able to fund
+[18:59:52] account resources OK: the provider account holds only the 1 resource(s) the records account for
+[18:59:52] a validation authorization for P1g
+[18:59:52] all-in $5.7317 over 180.0 min at $1.89/h, inside $5.75
+[18:59:52] units identity d7f45a8c2a3b is the authorized one
+[18:59:52] every bound file is in the session commit
+[18:59:53] precheck OK: 4 relay inputs (4 from AlphaAvatar/aadistill-artifacts), 3 local assets
+[18:59:53] attempt 1: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[19:02:54] watchdog detached — hard 179 min = $5.63
+[19:02:54] created rzi607m5rwl9e4 at $1.79/h
+[19:03:48]   starting (60s) — $0.03
+[19:04:52]   starting (120s) — $0.06
+[19:05:13] TCP 22 at 157.157.221.29:17051 after 2.3 min
+[19:05:17] draw 1: ssh reachable — $0.07
+[19:08:13] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[19:08:13] draw 1: running setup
+[19:10:47] draw 1: setup complete — $0.24
+[19:10:53] driver detached, pid 3084, confirmed by descriptor_probe_exited — $0.24
+[19:13:03]   2026-10-23T19:10:51Z MARKER:RUN_FAILED — $0.30
+[19:13:03] every finished unit is on the network volume and its evidence off-pod
+[19:13:03] polling ended: RUN_FAILED — $0.30
+[19:14:24]   manifest rc=0
+3 file(s) across 2 class(es) -> /workspace/manifest.json
+  final_required: 3 · mutable_snapshot: 0 · final_streams_quiescent: True
+[19:14:52] unit validation/p1g: evidence SECURED
+[19:14:57] teardown gate: allowed=True failed=training_complete
+[19:14:57] deleting pod (gate passed after RUN_FAILED)
+[19:15:08] pod deleted — 12.2 min, $0.36; provider confirms gone: True
+
+stage2-h1-units-validation INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-2/reasoning_data/runs/h1p1g_20261023_185836/runtime/session.json. 
+LED)
+[19:15:08] pod deleted — 12.2 min, $0.36; provider confirms gone: True
+rc=11

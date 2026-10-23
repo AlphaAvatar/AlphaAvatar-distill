@@ -144,16 +144,21 @@ def measured_basis(path: str | None, repo_root: Path = REPO_ROOT) -> dict:
     return rep
 
 
-def unit_minutes(rep: dict, plan: dict, arm: str) -> tuple[float, float]:
-    """(training, evaluation) minutes for one unit at the frozen schedule."""
+def unit_minutes(rep: dict, plan: dict, arm: str, repo_root: Path = REPO_ROOT) -> tuple[float, float]:
+    """(training, evaluation) minutes for one unit at the frozen schedule.
+
+    Training: P1g's measured steady-state step seconds at this arm's blocks per
+    step. Evaluation: the slowest full eval-set-1 evaluation recorded
+    (`cost_forecast.json :: measured.eval_seconds_per_unit_L40S.max`, students
+    at the floor) times the forecast's labelled factor for a student that
+    reasons at length -- never P1g's subset extrapolated, which the engine's
+    batching would overstate many times over."""
     s = plan["schedule"]
-    tp = rep["checks"][f"throughput_{arm}"]
-    train = s["steps"] * tp["median_step_seconds"] / 60
-    ev = rep["checks"]["evaluation_path"]
-    per_item = max(ev["fluid"]["seconds"] / max(1, ev["fluid"]["items"]),
-                   ev["capability"]["seconds"] / max(1, ev["capability"]["items"]))
-    items = 720 + 846 + 150
-    return round(train, 1), round(per_item * items / 60, 1)
+    train = s["steps"] * rep["checks"][f"throughput_{arm}"]["median_step_seconds"] / 60
+    fc = json.loads((repo_root / GL.FORECAST).read_text())
+    ev = (fc["measured"]["eval_seconds_per_unit_L40S"]["max"]
+          * fc["contingency_factors_not_measurements"]["eval_floor_to_reasoning"] / 60)
+    return round(train, 1), round(ev, 1)
 
 
 def budget(args, repo_root: Path = REPO_ROOT) -> BudgetSpec:
@@ -281,6 +286,56 @@ def spec(args) -> SessionSpec:
     )
 
 
+def closeout(run_id: str, scr: Path, *, repo_root: Path = REPO_ROOT, reconcile=None, disk_gb: float = 150.0) -> dict:
+    """The run's outcome on the dev box: the driver's terminal marker, every
+    secured evidence archive re-hashed, money (GPU from the session record plus
+    container disk; the volume is booked in its own storage record) and a
+    fresh provider reconciliation. Writes ``runs/<run_id>/closeout/outcome.json``,
+    whose ``money.all_in_usd`` the phase envelope reads."""
+    import math
+    from datetime import datetime, timezone
+    st = Path(scr) / "store"
+    evidence = {}
+    for t in sorted(st.glob("*.evidence.tgz")):
+        want = t.with_suffix(".sha256")
+        got = hashlib.sha256(t.read_bytes()).hexdigest()
+        evidence[t.name] = {"sha256": got, "verified": want.is_file() and want.read_text().strip() == got,
+                            "bytes": t.stat().st_size}
+    status = (st / "driver.status").read_text() if (st / "driver.status").is_file() else ""
+    terminal = ("ALL_DONE" if "MARKER:ALL_DONE" in status else "RUN_FAILED" if "MARKER:RUN_FAILED" in status
+                else None)
+    sess_p = repo_root / UG.run_dir(run_id) / "runtime/session.json"
+    sess = json.loads(sess_p.read_text()) if sess_p.is_file() else {}
+    if reconcile is None:
+        from aadistill.infrastructure.provider import RunPodProvider, read_api_key, reconcile_account
+        #: the volumes this phase's storage records own are the only expected resources
+        owned = tuple(h["volume"] for h in UG.spent(repo_root)["storage"])
+        reconcile = lambda: reconcile_account(  # noqa: E731
+            RunPodProvider(read_api_key(str(Path("~/.runpod/config.toml").expanduser()))), owned)
+    rec = reconcile()
+    cost = sess.get("cost") or {}
+    gpu, minutes = float(cost.get("actual_usd") or 0.0), float(cost.get("elapsed_minutes") or 0.0)
+    disk = disk_gb * GL.DISK_USD_PER_GB_MONTH * minutes / (60 * 24 * 30.4375)
+    created = bool(sess.get("provider_resource_created"))
+    out = {"schema": "aadistill.stage2.reasoning_data.h1_unit_outcome/v1", "run_id": run_id,
+           "recorded_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+           "status": "COMPLETE" if terminal == "ALL_DONE" and sess.get("passed") else "INCOMPLETE",
+           "terminal": terminal, "session_passed": sess.get("passed"), "provider_resource_created": created,
+           "evidence": evidence,
+           "money": {"all_in_usd": math.ceil((gpu + disk) * 1e4) / 1e4 if created else 0.0, "gpu_usd": gpu,
+                     "disk_usd": round(disk, 4), "elapsed_minutes": minutes,
+                     "price_per_hour": cost.get("price_per_hour"), "authorized_usd": cost.get("authorized_usd"),
+                     "_basis": ("GPU actual from runtime/session.json :: cost plus container disk at "
+                                f"${GL.DISK_USD_PER_GB_MONTH}/GB-month over the elapsed minutes ({disk_gb:g} GB); the "
+                                "network volume is booked in logs/stages/stage-2/reasoning_data/storage/")},
+           "provider_confirms_gone": sess.get("provider_confirms_gone"), "provider_reconciliation_after": rec,
+           "authorizes": "nothing"}
+    dest = repo_root / UG.run_dir(run_id) / "closeout/outcome.json"
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps(out, indent=1, default=str) + "\n")
+    return out
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--phase", required=True, choices=sorted(KIND_OF),
@@ -344,7 +399,9 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"plan_ok": ok, "plan": runner.ev.get("budget_plan"), "all_in": bound,
                           "harness": runner.harness["digest"], "units_identity": session.plan_hash}, indent=1)[:5000])
         return 0 if ok else 12
-    return run_session(session, args, REPO_ROOT)
+    rc = run_session(session, args, REPO_ROOT)
+    print(json.dumps(closeout(args.run_id, Path(args.scr), disk_gb=args.disk_gb)["money"]))
+    return rc
 
 
 if __name__ == "__main__":

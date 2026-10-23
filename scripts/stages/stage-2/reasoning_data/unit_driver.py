@@ -324,14 +324,28 @@ def _verified(model_dir: Path, ident: dict, adapter) -> bool:
     return bool(v["matched"] and v["weights_digest_matched"] and v["config_matched"] is not False)
 
 
+#: Where a token is, in order: the environment; the pod's workspace, where setup
+#: writes it (a detached driver does not inherit setup's exported HF_TOKEN --
+#: P1g h1p1g_20261023_185836 died here); the dev box's own cache.
+TOKEN_FILES = (Path("/workspace/hf/token"), Path.home() / ".cache/huggingface/token")
+
+
+def hf_token(env=os.environ, files=TOKEN_FILES) -> str:
+    if env.get("HF_TOKEN"):
+        return env["HF_TOKEN"].strip()
+    for f in files:
+        if Path(f).is_file():
+            return Path(f).read_text().strip()
+    raise FileNotFoundError(f"no HF token: HF_TOKEN is unset and none of {[str(f) for f in files]} exists")
+
+
 def restore_init(init_dir: Path, ident: dict) -> Path:
     """The fixed initialization, its identity re-proved from the bytes."""
     from stages.reasoning_data import restore_initialization as RI
     adapter = _qwen3_adapter()
     if init_dir.is_dir() and _verified(init_dir, ident, adapter):
         return init_dir
-    token = os.environ.get("HF_TOKEN") or Path.home().joinpath(".cache/huggingface/token").read_text().strip()
-    files = RI.download(init_dir, token)
+    files = RI.download(init_dir, hf_token())
     if not all(f["matched"] for f in files) or not _verified(init_dir, ident, adapter):
         raise IdentityMismatch(f"{init_dir}: the restored initialization does not re-identify")
     return init_dir

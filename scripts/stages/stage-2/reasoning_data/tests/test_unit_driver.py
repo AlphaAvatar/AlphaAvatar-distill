@@ -320,3 +320,17 @@ def test_a_save_point_for_other_inputs_is_never_resumed(real_plan, tmp_path):
     calls = Calls(tmp_path)
     assert _run(plan, tmp_path, calls) == 0 and calls.log == ["restore", "train", "evaluate"]
 
+
+def test_the_token_is_found_where_a_detached_pod_driver_can_read_it(tmp_path):
+    """Setup writes the token to the pod's workspace and exports HF_TOKEN only in
+    its own shell; the detached driver must still find it (P1g attempt 1)."""
+    ws, home = tmp_path / "ws_token", tmp_path / "home_token"
+    ws.write_text("from-workspace\n")
+    assert U.hf_token(env={}, files=(ws, home)) == "from-workspace"
+    assert U.hf_token(env={"HF_TOKEN": "from-env"}, files=(ws, home)) == "from-env"
+    home.write_text("from-home\n")
+    assert U.hf_token(env={}, files=(tmp_path / "absent", home)) == "from-home"
+    with pytest.raises(FileNotFoundError, match="no HF token"):
+        U.hf_token(env={}, files=(tmp_path / "absent",))
+    assert Path("/workspace/hf/token") in U.TOKEN_FILES
+
