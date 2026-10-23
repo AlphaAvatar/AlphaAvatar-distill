@@ -139,14 +139,6 @@ def test_markdown_table_matches_the_data():
             assert f"| {node['total_steps']} | – |" in table
 
 
-def test_readme_table_is_the_generated_one():
-    """The README table is generated output — regenerate it, don't hand-edit."""
-    readme = (REPO_ROOT / "README.md").read_text()
-    for row in pt.markdown_table(pt.load()).splitlines():
-        if row.startswith("| ") and not row.startswith("| ---"):
-            assert row in readme, f"README is out of date, missing row:\n{row}"
-
-
 def test_render_writes_an_svg(tmp_path):
     out = pt.render(pt.load(), tmp_path / "trend.svg")
     assert out.exists() and out.stat().st_size > 1000

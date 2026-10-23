@@ -1406,16 +1406,21 @@ Do not duplicate the full root `AGENTS.md` inside local files.
 
 `README.md` is agent-editable, but it must not contain fake content.
 
-The README should strictly keep the project-level structure requested by the maintainer:
+The README is a concise, English-only landing page for users -- not an
+experiment report, a technical specification or a maintenance log. It keeps
+exactly these seven top-level sections, in this order (maintainer decision
+2026-10-23):
 
-1. model performance trend and project goal;
-2. How it works;
-3. Quick start;
-4. Running the agent;
-5. Project structure;
-6. stage-wise Optim record history;
-7. References;
-8. Citation.
+1. Overview and Goals;
+2. Performance Trend;
+3. Running the Agent;
+4. Project Structure;
+5. Optim Record History (stage-wise, Stage 0-6);
+6. References;
+7. Citation.
+
+Experiment tables, procedures, commands, budgets, run-specific numbers and
+status snapshots stay in their owning logs and docs, which the README links.
 
 Empty sections are allowed. Placeholder text is allowed only when it clearly says the content is not available yet.
 
