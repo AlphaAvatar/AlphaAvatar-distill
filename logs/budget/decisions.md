@@ -13659,3 +13659,41 @@ on a paid pod.
   AGENTS.md §2.7 follows. Experiment tables, procedures, commands, budgets
   and status snapshots stay in their owning logs and docs.
 - **Done.** Commit `7e9120fe`.
+
+## 2026-10-23 — Maintainer: H1 P1g + P2 authorized ($50); protocol frozen; P1g passed; P2 started
+
+- **Context.** The maintainer authorized H1's remaining phase at `382cb6f5`:
+  P1g GPU validation, P2's four formal units, evaluation, statistics and
+  closeout.
+  - **Money:** one cumulative $50.00 envelope covering every attempt,
+    resource and storage; the absolute project cap is $712.17.
+  - **Freeze first:** the comparison design and the units, without changing
+    the treatment, proportions, objective, seeds or scoring.
+  - **Resume:** must be validated on a GPU, rather than retraining from the
+    initialization by default.
+- **Decision and execution.**
+  - **Frozen:** `plans/comparison_design.json` (B = the built @v3 pack, M1
+    measured, statistics unchanged) and `h1_units.json` (`frozen: true`).
+  - **Grant:** `logs/budget/approvals/h1_units_phase_grant.json`.
+  - **Chain:** `unit_governance.py` (typed artifacts per kind, the cumulative
+    envelope), `h1_unit_launch.py`, `p1g_driver.py`, and `unit_driver.py`
+    with durable save points and resume.
+  - **Storage:** network volume `1980hnh75i` (30 GB, EUR-IS-1), $4.20
+    reserved inside the $50.
+  - **P1g attempt 1** (`h1p1g_20261023_185836`, $0.3691): failed at the
+    initialization restore. The token lookup was repaired, with a
+    regression test.
+  - **P1g attempt 2** (`h1p1g_20261023_191644`, $0.9947): PASSED.
+    - Throughput: A 10.23 s/step, B 3.37 s/step, peak 40.0 GB.
+    - Resume: data order and LR identical after a SIGKILLed mid-run save;
+      final weights within the run-to-run floor (8.6e-4 vs 8.7e-4).
+    - The trainer is not bitwise deterministic on the GPU, which is recorded
+      as the bound on equivalence.
+    - Persistence re-identified; the evaluation path ran.
+  - **P2 session 1** (`h1p2b_…`): the two B units, hard cap $22.05.
+- **Risks.**
+  - GPU nondeterminism bounds resume equivalence.
+  - The evaluation time of a reasoning student is a forecast until the first
+    unit.
+  - The volume costs storage until it is retired.
+- **Revisit when.** P2's units complete.

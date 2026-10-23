@@ -1,0 +1,42 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1_unit_outcome/v1",
+ "run_id": "h1p2b_20261023_195303",
+ "recorded_utc": "2026-10-23T20:50:16+00:00",
+ "status": "INCOMPLETE",
+ "terminal": "RUN_FAILED",
+ "session_passed": false,
+ "provider_resource_created": true,
+ "evidence": {},
+ "money": {
+  "all_in_usd": 1.4906,
+  "gpu_usd": 1.4736,
+  "disk_usd": 0.0169,
+  "elapsed_minutes": 49.39,
+  "price_per_hour": 1.79,
+  "authorized_usd": 22.05,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB); the network volume is booked in logs/stages/stage-2/reasoning_data/storage/"
+ },
+ "provider_confirms_gone": true,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "1980hnh75i",
+    "name": "aad-h1-units",
+    "size": 30,
+    "dataCenterId": "EUR-IS-1"
+   }
+  ],
+  "error": null,
+  "accounted": [
+   "1980hnh75i"
+  ],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 1 resource(s) the records account for"
+ },
+ "authorizes": "nothing"
+}

@@ -1,0 +1,46 @@
+bundle OK: transfer/aad_autoinit_8a7012ae.bundle on the relay
+[19:54:03] budget: expected 417 min $13.12 · soft $21.10 · hard $21.77 (authorized $22.05)
+[19:54:03] NVIDIA A100-SXM4-80GB $1.79/h, stock Low
+[19:54:04] account funds OK: the provider account holds $95.8721 against the $30.0000 this session must be able to fund
+[19:54:04] account resources OK: the provider account holds only the 1 resource(s) the records account for
+[19:54:04] a formal authorization for P2
+[19:54:04] all-in $22.0476 over 692.4 min at $1.89/h, inside $22.05
+[19:54:04] units identity a6d580672a3a is the authorized one
+[19:54:04] every bound file is in the session commit
+[19:54:05] precheck OK: 4 relay inputs (4 from AlphaAvatar/aadistill-artifacts), 3 local assets
+[19:54:06] attempt 1: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[19:57:06] attempt 2: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[20:00:07] watchdog detached — hard 691 min = $21.77
+[20:00:07] created 9pzyud67qhn9wj at $1.79/h
+[20:01:02]   starting (60s) — $0.03
+[20:02:06]   starting (120s) — $0.06
+[20:02:17] TCP 22 at 157.157.221.29:12342 after 2.2 min
+[20:02:20] draw 1: ssh reachable — $0.07
+[20:05:19] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[20:05:19] draw 1: running setup
+[20:07:34] draw 1: setup complete — $0.22
+[20:07:40] driver detached, pid 3086, confirmed by descriptor_probe — $0.22
+[20:09:50]   2026-10-23T20:07:31Z MARKER:SETUP_DONE — $0.29
+[20:47:38]   2026-10-23T20:45:58Z MARKER:RUN_FAILED — $1.42
+[20:47:38] every finished unit is on the network volume and its evidence off-pod
+[20:47:38] polling ended: RUN_FAILED — $1.42
+[20:48:52]   manifest rc=0
+4 file(s) across 3 class(es) -> /workspace/manifest.json
+  final_required: 4 · mutable_snapshot: 0 · final_streams_quiescent: True
+[20:49:20] teardown gate: allowed=True failed=training_complete
+[20:49:20] deleting pod (gate passed after RUN_FAILED)
+[20:49:31] pod deleted — 49.4 min, $1.47; provider confirms gone: True
+
+stage2-h1-units-formal INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-2/reasoning_data/runs/h1p2b_20261023_195303/runtime/session.json. 
+{"all_in_usd": 1.4906, "gpu_usd": 1.4736, "disk_usd": 0.0169, "elapsed_minutes": 49.39, "price_per_hour": 1.79, "authorized_usd": 22.05, "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB); the network volume is booked in logs/stages/stage-2/reasoning_data/storage/"}
+rc=11

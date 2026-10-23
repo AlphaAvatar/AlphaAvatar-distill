@@ -87,6 +87,9 @@ class Calls:
     def evaluate(self, job):
         assert "evaluate" not in self.forbid, "re-evaluated a scored unit"
         self.log.append("evaluate")
+        # evaluation reads the PERSISTED checkpoint, and it is there (P2 session 1 read a released path)
+        assert Path(job["model_dir"]) == job["progress"].parent / "checkpoint"
+        assert (Path(job["model_dir"]) / "model.safetensors").is_file()
         # the checkpoint is durable BEFORE evaluation starts
         assert PU.completed(job["progress"].parents[1], job["unit"], "checkpoint")["persisted"] is True
         self.eval_model_dirs.append(job["model_dir"])

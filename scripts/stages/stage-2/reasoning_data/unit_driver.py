@@ -473,6 +473,9 @@ def run_unit(plan: dict, u: dict, *, root: Path, work: Path, pack_root: Path, in
             stage = "release_save_points"
             _append(root, unit, {**base, "event": "released", "save_points": release_save_points(root, unit),
                                  "utc": _now()})
+            #: the trainer's directory is gone with the save points: evaluation reads the
+            #: persisted, re-identified checkpoint (h1p2b_20261023_195303 read the old path)
+            model_dir = unit_dir / "checkpoint"
         elif state == "trained" and PU.completed(root, unit, "training") is None:
             stage = "persist_training_records"     # a previous attempt persisted the weights, not its records
             mine = local_trained(work, unit, inputs)
