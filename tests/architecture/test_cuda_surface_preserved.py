@@ -2323,6 +2323,12 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "built-in default. THIS IS A DECLARED SEMANTIC CHANGE: a caller "
             "that passes no floor is no longer refused below 4.15 s/step. "
             "NO CUDA SURFACE.",
+        "src/aadistill/infrastructure/session_runner.py":
+            "NEW `marker_terminal`; the poll loop reads the status once more when "
+            "the liveness probe finds the driver exited, so a marker written "
+            "between the status read and the probe decides the session instead of "
+            "DRIVER_EXITED. THIS IS A DECLARED SEMANTIC CHANGE of a terminal "
+            "classification. NO CUDA SURFACE.",
         "src/aadistill/infrastructure/session.py":
             "NEW `BudgetSpec.step_time_floor` and "
             "`BudgetSpec.superseded_step_seconds` (defaults None and ()), "

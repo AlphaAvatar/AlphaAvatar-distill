@@ -1,0 +1,33 @@
+bundle OK: transfer/aad_autoinit_48cc1269.bundle on the relay
+[20:51:15] budget: expected 417 min $13.12 · soft $21.10 · hard $21.77 (authorized $22.05)
+[20:51:16] NVIDIA A100-SXM4-80GB $1.79/h, stock Low
+[20:51:16] account funds OK: the provider account holds $94.4351 against the $30.0000 this session must be able to fund
+[20:51:16] account resources OK: the provider account holds only the 1 resource(s) the records account for
+[20:51:16] a formal authorization for P2
+[20:51:16] all-in $22.0476 over 692.4 min at $1.89/h, inside $22.05
+[20:51:16] units identity a6d580672a3a is the authorized one
+[20:51:16] every bound file is in the session commit
+[20:51:17] precheck OK: 4 relay inputs (4 from AlphaAvatar/aadistill-artifacts), 3 local assets
+[20:51:18] watchdog detached — hard 691 min = $21.77
+[20:51:18] created fujb0k276us2c1 at $1.79/h
+[20:52:02] TCP 22 at 157.157.221.29:12833 after 0.7 min
+[20:52:04] draw 1: ssh reachable — $0.02
+[20:55:03] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[20:55:03] draw 1: running setup
+[20:57:19] draw 1: setup complete — $0.18
+[20:57:25] driver detached, pid 3093, confirmed by descriptor_probe — $0.18
+[20:59:35]   2026-10-23T20:57:17Z MARKER:SETUP_DONE — $0.25
+[21:52:23] unit B-s20260726: evidence SECURED
+[23:23:45] unit B-s20260727: evidence SECURED
+[23:23:54] driver no longer running: EXITED:0
+[23:23:54] polling ended: DRIVER_EXITED:0 — $4.55
+[23:25:27]   manifest rc=0
+6 file(s) across 4 class(es) -> /workspace/manifest.json
+  final_required: 6 · mutable_snapshot: 0 · final_streams_quiescent: True
+[23:25:52] teardown gate: allowed=True failed=training_complete
+[23:25:52] deleting pod (gate passed after DRIVER_EXITED:0)
+[23:26:03] pod deleted — 154.7 min, $4.62; provider confirms gone: True
+
+stage2-h1-units-formal INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-2/reasoning_data/runs/h1p2b_20261023_205037/runtime/session.json. 
+{"all_in_usd": 4.6694, "gpu_usd": 4.6164, "disk_usd": 0.053, "elapsed_minutes": 154.74, "price_per_hour": 1.79, "authorized_usd": 22.05, "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB); the network volume is booked in logs/stages/stage-2/reasoning_data/storage/"}
+rc=11

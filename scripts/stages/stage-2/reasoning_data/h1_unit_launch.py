@@ -320,8 +320,13 @@ def closeout(run_id: str, scr: Path, *, repo_root: Path = REPO_ROOT, reconcile=N
     created = bool(sess.get("provider_resource_created"))
     out = {"schema": "aadistill.stage2.reasoning_data.h1_unit_outcome/v1", "run_id": run_id,
            "recorded_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-           "status": "COMPLETE" if terminal == "ALL_DONE" and sess.get("passed") else "INCOMPLETE",
-           "terminal": terminal, "session_passed": sess.get("passed"), "provider_resource_created": created,
+           #: the driver's own terminal decides, with the products secured and the pod gone; the
+           #: runner's `passed` is recorded beside it (before the marker_terminal repair it could
+           #: read DRIVER_EXITED:0 for a driver that had written ALL_DONE as it exited)
+           "status": ("COMPLETE" if terminal == "ALL_DONE" and (sess.get("required_products_secured") or {}).get("ok")
+                      and sess.get("provider_confirms_gone") else "INCOMPLETE"),
+           "terminal": terminal, "runner_terminal": sess.get("terminal"), "session_passed": sess.get("passed"),
+           "provider_resource_created": created,
            "evidence": evidence,
            "money": {"all_in_usd": math.ceil((gpu + disk) * 1e4) / 1e4 if created else 0.0, "gpu_usd": gpu,
                      "disk_usd": round(disk, 4), "elapsed_minutes": minutes,
