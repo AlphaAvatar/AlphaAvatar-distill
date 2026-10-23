@@ -1,0 +1,214 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.p1g_report/v1",
+ "run_id": "h1p1g_20261023_191644",
+ "formal": false,
+ "started_utc": "2026-10-23T19:25:26Z",
+ "checks": {
+  "initialization": {
+   "ok": true,
+   "artifact_digest": "457e194c4a40c2503a7d63d03269ac76ece700102bae74908b7315d367bab3f0"
+  },
+  "throughput_A": {
+   "steps_measured": 10,
+   "median_step_seconds": 10.23,
+   "max_step_seconds": 10.85,
+   "peak_gpu_mem_gb": 39.97,
+   "executed_positions_per_step": 57344,
+   "supervised_tokens_per_step_last": 3941,
+   "loss_first": 9.069739,
+   "loss_last": 9.834066,
+   "all_finite": true,
+   "trainer": {
+    "rc": 0,
+    "killed": false,
+    "seconds": 187.1
+   },
+   "blocks_per_step": 7,
+   "ok": true
+  },
+  "resume_B": {
+   "ok": true,
+   "kill": {
+    "after": "step_000012",
+    "killed": true,
+    "first_seconds": 95.3
+   },
+   "resumed_vs_uninterrupted": {
+    "steps": [
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24
+    ],
+    "exact_mismatch": [],
+    "max_rel_loss": 0.7575934772554076,
+    "max_rel_ce": 0.7671319279700587,
+    "max_rel_kd": 0.7551989186394297
+   },
+   "run_to_run_floor": {
+    "steps": [
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24
+    ],
+    "exact_mismatch": [],
+    "max_rel_loss": 0.7502663708960988,
+    "max_rel_ce": 0.7603614498858217,
+    "max_rel_kd": 0.7477320976505759
+   },
+   "weights_resumed_vs_uninterrupted": {
+    "same_keys": true,
+    "max_abs_diff": 0.0008644419722259045,
+    "worst_tensor": "model.layers.1.self_attn.k_proj.weight",
+    "max_abs_weight": 44.00007247924805,
+    "bitwise_identical": false,
+    "tensors": 310,
+    "_dtype": "torch.float32"
+   },
+   "weights_run_to_run_floor": {
+    "same_keys": true,
+    "max_abs_diff": 0.0008714704890735447,
+    "worst_tensor": "model.layers.0.self_attn.k_proj.weight",
+    "max_abs_weight": 44.00007247924805,
+    "bitwise_identical": false,
+    "tensors": 310,
+    "_dtype": "torch.float32"
+   },
+   "resume_state_on_volume": "/runpod-volume/h1/validation/p1g/resume_B_Y/checkpoints",
+   "rule": "data order and learning rate identical step by step; loss and final weights within twice the run-to-run difference of two uninterrupted runs (or 1e-6)"
+  },
+  "throughput_B": {
+   "steps_measured": 22,
+   "median_step_seconds": 3.37,
+   "max_step_seconds": 3.47,
+   "peak_gpu_mem_gb": 39.94,
+   "executed_positions_per_step": 16384,
+   "supervised_tokens_per_step_last": 14952,
+   "loss_first": 7.903196,
+   "loss_last": 4.459097,
+   "all_finite": true,
+   "blocks_per_step": 2,
+   "ok": true
+  },
+  "persistence": {
+   "ok": true,
+   "seconds": 18.0,
+   "status": "persisted",
+   "landed": "/runpod-volume/h1/validation/p1g-B/checkpoint",
+   "reidentified_from_landed_bytes": true
+  },
+  "evaluation_path": {
+   "fluid": {
+    "rc": 0,
+    "items": 20,
+    "generations": 20,
+    "seconds": 258.4,
+    "summary": {
+     "identity": {
+      "label": "p1g_smoke",
+      "model": "/workspace/aad/artifacts/stages/stage-2/reasoning_data/units/h1p1g_20261023_191644/p1g/eval_smoke/package",
+      "revision": null,
+      "mode": "eval",
+      "tasks_file": "/workspace/aad/artifacts/stages/stage-2/reasoning_data/units/h1p1g_20261023_191644/p1g/eval_smoke/fluid_subset.jsonl",
+      "tasks_sha256": "38c0861f31a20d984db918a3c9db5e0ead5a6a4400e3b20a814d131689dc30ff",
+      "context_resolution": {
+       "resolved_context": 8192,
+       "context_source": "trained_block_len",
+       "config_max_position_embeddings": 262144,
+       "rope_scaling_factor": null,
+       "architectural_context": 262144,
+       "trained_context": 8192,
+       "context_len_override": null,
+       "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+       "note": "effective context is the TRAINED context; this is not a 262K-context evaluation"
+      },
+      "session_limit": null,
+      "effective_limit": 8192,
+      "stop_ids": [
+       151645
+      ],
+      "sampling": {
+       "temperature": 0.0,
+       "top_p": 1.0,
+       "top_k": -1,
+       "detokenize": false
+      },
+      "seed_base": null,
+      "action_protocol": "v2",
+      "system_message": "You are a helpful Assistant.",
+      "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+      "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+      "degeneration_check_every": 256,
+      "engine": {
+       "max_model_len": 8192,
+       "gpu_memory_utilization": 0.9,
+       "dtype": "bfloat16",
+       "dtype_engine": "torch.bfloat16",
+       "max_num_seqs": 256,
+       "max_num_batched_tokens": 8192,
+       "vllm_version": "0.27.1",
+       "enforce_eager": false,
+       "init_seconds": 173.6
+      },
+      "libraries": {
+       "transformers": "5.15.0",
+       "tokenizers": "0.22.2",
+       "safetensors": "0.8.0",
+       "numpy": "2.3.5",
+       "datasets": null,
+       "vllm": "0.27.1"
+      },
+      "image_digest": null,
+      "runner_sha256": "aef276c2ca7daa8d9a99266705005f69510cdbb3fd3fc4285c724f725f2d325b"
+     },
+     "n_tasks": 20,
+     "turns": 20,
+     "output_tokens": 15360,
+     "generation_seconds": 66.1,
+     "output_tokens_per_second": 232.4,
+     "ends": {
+      "degeneration": 20
+     }
+    }
+   },
+   "capability": {
+    "unit": "math_verified",
+    "rc": 0,
+    "items": 8,
+    "generations": 8,
+    "seconds": 89.2
+   },
+   "ok": true
+  }
+ },
+ "not": "a GPU validation: never a formal H1 result",
+ "released_validation_bytes": [
+  {
+   "path": "/runpod-volume/h1/validation/p1g/resume_B_Y/checkpoints",
+   "bytes": 5908260127
+  },
+  {
+   "path": "/runpod-volume/h1/validation/p1g-B/checkpoint",
+   "bytes": 2384236592
+  }
+ ],
+ "finished_utc": "2026-10-23T19:47:03Z",
+ "passed": true
+}

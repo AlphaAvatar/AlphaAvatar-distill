@@ -216,7 +216,7 @@ def main(argv=None) -> int:
     ap.add_argument("--work", default=None)
     args = ap.parse_args(argv)
     work = Path(args.work or REPO / "artifacts/stages/stage-2/reasoning_data/units" / args.run_id / "p1g")
-    vol = Path(args.durable_root) / "validation" / "p1g"
+    vol = Path(args.durable_root) / "validation" / "p1g" / args.run_id     # per run: no attempt reads another's
     work.mkdir(parents=True, exist_ok=True)
     vol.mkdir(parents=True, exist_ok=True)
     status = Path(args.status)

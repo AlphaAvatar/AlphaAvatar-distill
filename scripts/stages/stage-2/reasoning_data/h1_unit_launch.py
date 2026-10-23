@@ -96,12 +96,13 @@ def secure_units(ctx: SessionContext) -> None:
             return
         root, aud = durable_root(ctx.args), f"{REPO}/artifacts/audit/{AUDIT}"
         secured = ctx.evidence.setdefault("units_secured", {})
-        names = list(UNITS) + (["validation/p1g", "validation/p1g-B"] if kind(ctx.args) == "validation" else [])
+        names = list(UNITS) + ([f"validation/p1g/{ctx.args.run_id}", "validation/p1g-B"]
+                               if kind(ctx.args) == "validation" else [])
         excl = " ".join(f"--exclude={e}" for e in EVIDENCE_EXCLUDES)
         for name in names:
             if secured.get(name, {}).get("ok"):
                 continue
-            ready = "p1g_report.json" if name == "validation/p1g" else "report.descriptor.json"
+            ready = "p1g_report.json" if name.startswith("validation/p1g/") else "report.descriptor.json"
             flat = name.replace("/", "__")
             res = ctx.target.run(
                 f"test -f {root}/{name}/{ready} && mkdir -p {aud} && tar czf {aud}/{flat}.evidence.tgz {excl} "

@@ -128,9 +128,11 @@
     "on_failure": "the driver stops at the first failed unit (later units would meet the same defect); every earlier completed unit is already persisted"
   },
   "training_resume": {
-    "supported": "pending P1g",
+    "supported": true,
     "mechanism": "the trainer's save points (model, AdamW state, step, RNG) are written into <durable root>/<unit>/train/a<attempt>/ with the attempt's config and inputs; an attempt that ended without completing is continued with train_stage3.py --resume latest under its own config (unit_driver.resumable); the save points are released once the final checkpoint is persisted and re-identified",
-    "validated_by": "P1g (p1g_driver.py :: resume_B): an interrupted and resumed run against two uninterrupted ones"
+    "validated_by": "P1g h1p1g_20261023_191644 (logs/stages/stage-2/reasoning_data/runs/h1p1g_20261023_191644/evidence/p1g_report.json :: checks.resume_B)",
+    "established": "on an A100-SXM4-80GB with the frozen recipe on B's pack: a run SIGKILLed after its mid-run save (written to the network volume) and continued with --resume latest kept the data order and the learning rate identical at every later step, the trainer accepted its config and consumed-block position, and its final weights differed from an uninterrupted run (max |dw| 8.6e-4) no more than a second uninterrupted run did (8.7e-4)",
+    "not_established": "bitwise or loss-level identity: the trainer is not bitwise deterministic on the GPU (two uninterrupted runs differ from step 2 at ~1e-3 and the difference grows), so equivalence is bounded by that run-to-run variation, not by zero"
   },
   "validation": {
     "flag": "--validation [--validation-steps N]",
@@ -142,12 +144,7 @@
     "observers": "the driver starts no background watcher; its children run to completion (subprocess.run), and the terminal path records an empty watch set",
     "terminal": "--status gets ALL_DONE, FAILED or REFUSED with the per-unit outcome, in the same code path that ends the run"
   },
-  "left_to_gpu_validation": [
-    "real CUDA execution of train_stage3 on the derived recipe at 7 and 2 blocks per step",
-    "throughput and peak memory",
-    "the trainer's --resume equivalence",
-    "persistence onto the mounted backend at its real speed and quota",
-    "evaluate_all on a recovered H1 student"
-  ],
-  "authorizes": "nothing"
+  "left_to_gpu_validation": [],
+  "authorizes": "nothing",
+  "_p1g": "P1g h1p1g_20261023_191644: arm A 10.23 s/step at 7 blocks per step, arm B 3.37 s/step at 2, peak 40.0 GB; persistence onto the volume re-identified; the evaluation path ran on a stratified subset"
 }
