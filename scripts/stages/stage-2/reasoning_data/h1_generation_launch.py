@@ -12,9 +12,10 @@ exists, the argument contract, the authorization loaded under
 protocol, inputs and pools: `governance.launch_hash`) and to the harness on
 disk, the budget priced inside the authorized cap (P1 from the forecast, P1t as
 its application prices it), the provider-resource reconciliation and the
-prechecks below; then the detached watchdog (the hard deadline derived from the
-cap and the live price), setup, the driver, the poll loop, collection, teardown
-and the provider's confirmation that the pod is gone. This module supplies only
+prechecks below -- the first, `all_in_within_cap`, bounds GPU, container disk
+and the watchdog's time to act together at ``--max-price``; then the detached
+watchdog (the plan's hard deadline), setup, the driver, the poll loop,
+collection, teardown and the provider's confirmation that the pod is gone. This module supplies only
 what is H1's: the plan identity, the budget rows, the driver command and where
 finished work goes.
 
@@ -68,6 +69,14 @@ TOPUP_APPLICATION = GOV.EXPERIMENT_LOGS / "plans/abstract_topup_application.json
 RESUME_INSTALL = "artifacts/stages/stage-2/reasoning_data"
 #: minutes kept after the soft stop to pull the last shards off the pod (P1's)
 ARTIFACT_RECOVERY_MINUTES = 15.0
+#: Billing outlives the hard deadline by the time the watchdog takes to act on
+#: it: at most one poll (the runner starts it with ``--poll-seconds 60``) plus
+#: one terminate-verify delay (`WatchdogPolicy.verify_delay_seconds`, 15 s).
+#: P1's delete was confirmed gone 11 s after the call.
+TERMINATION_MINUTES = 1.25
+#: The container-disk basis every Stage-0 closeout priced with
+#: (`stages.calibration_volume.closeout.DISK_USD_PER_GB_MONTH`).
+DISK_USD_PER_GB_MONTH = 0.10
 
 
 def out_dir() -> str:
@@ -261,10 +270,12 @@ def topup_budget(repo_root: Path = REPO_ROOT) -> BudgetSpec:
     """P1t, priced as its application prices it, from P1's measured session:
     pod to driver; two passes, each the slowest measured engine start plus the
     longest possible candidate at P1's decode speed; ALL_DONE to pod deleted.
-    The hard threshold is the application's rule, the project's hard-cap
-    factor (cost_forecast) times expected + setup + teardown + the recovery
-    minutes: the factor is the contingency, the closeout is the soft-stop
-    reserve, the recovery minutes x factor the artifact reserve."""
+    The application's rule, the project's hard-cap factor (cost_forecast)
+    times expected + setup + teardown + the recovery minutes, is where BILLING
+    stops: the factor is the contingency, the closeout is the soft-stop
+    reserve, and the recovery minutes x factor, less the watchdog's time to
+    act (`TERMINATION_MINUTES`), the artifact reserve -- so the hard deadline
+    falls that much earlier and `all_in_within_cap` prices the rule's minutes."""
     cost = json.loads((repo_root / TOPUP_APPLICATION).read_text())["cost"]
     m = cost["measured_basis"]
     f = json.loads((repo_root / FORECAST).read_text())["contingency_factors_not_measurements"]["hard_cap"]
@@ -278,8 +289,41 @@ def topup_budget(repo_root: Path = REPO_ROOT) -> BudgetSpec:
         other_phases=(Phase("teacher_generation_two_passes", round(passes, 2)),),
         contingency_fraction=round(f - 1.0, 4),
         soft_stop_reserves=(Phase("closeout_setup_and_teardown", round(f * (setup + teardown), 2)),),
-        artifact_recovery_reserve_minutes=round(f * ARTIFACT_RECOVERY_MINUTES, 2),
+        artifact_recovery_reserve_minutes=round(f * ARTIFACT_RECOVERY_MINUTES - TERMINATION_MINUTES, 2),
         account_balance_required_usd=30.0)
+
+
+def all_in(plan, price_per_hour: float, disk_gb: float, cap_usd: float | None = None) -> dict:
+    """The most a session can bill: GPU and container disk from the first
+    create to the hard deadline plus the watchdog's time to act on it, ceiled
+    to the closeout's 4-decimal quantum. With `cap_usd`, also the highest GPU
+    price (whole cents) at which that stays inside it."""
+    minutes = plan.hard_terminate_minutes + TERMINATION_MINUTES
+    disk_per_hour = disk_gb * DISK_USD_PER_GB_MONTH / (24 * 30.4375)
+    out = {"billable_minutes": round(minutes, 3), "price_per_hour": price_per_hour, "container_disk_gb": disk_gb,
+           "gpu_usd": round(minutes / 60 * price_per_hour, 4), "disk_usd": round(minutes / 60 * disk_per_hour, 4),
+           "all_in_usd": math.ceil(minutes / 60 * (price_per_hour + disk_per_hour) * 1e4) / 1e4}
+    if cap_usd is not None:
+        out["highest_price_inside_cap"] = math.floor((cap_usd * 60 / minutes - disk_per_hour) * 100) / 100
+    return out
+
+
+def all_in_within_cap(ctx: SessionContext) -> tuple[bool, str]:
+    """GPU, container disk and the termination time, at ``--max-price`` (the
+    live securePrice may not exceed it: `check_gpu_offered`; nor the pod's
+    returned price), inside the authorized cap, or refused at $0. The core's
+    own check prices the GPU alone."""
+    if ctx.plan is None:
+        return False, "no priced plan to bound"
+    b = all_in(ctx.plan, ctx.args.max_price, ctx.args.disk_gb, ctx.auth.hard_cap_usd)
+    ctx.evidence["all_in_bound"] = b
+    if b["all_in_usd"] > ctx.auth.hard_cap_usd:
+        return False, (f"all-in ${b['all_in_usd']:.4f} (GPU ${b['gpu_usd']:.4f} + {b['container_disk_gb']:g} GB disk "
+                       f"${b['disk_usd']:.4f} over {b['billable_minutes']} min at ${ctx.args.max_price}/h) exceeds "
+                       f"the authorized ${ctx.auth.hard_cap_usd:.2f}; it fits at ${b['highest_price_inside_cap']}/h "
+                       "or less. The cap is not raised and the run is not shrunk")
+    return True, (f"all-in ${b['all_in_usd']:.4f} over {b['billable_minutes']} min at ${ctx.args.max_price}/h, "
+                  f"inside ${ctx.auth.hard_cap_usd:.2f}")
 
 
 def driver_command(ctx: Any, plan: Any) -> str:
@@ -380,13 +424,8 @@ def spec(args) -> SessionSpec:
             spec_failed="configs/stages/stage-2/reasoning_data/h1_generation_artifacts.json",
             report_names=(EVIDENCE,), on_poll=secure_shards, products_secured=shards_secured),
         teardown=TeardownPolicy(note="delete the pod, verify from the provider that it is gone, STOP"),
-        precheck=(plan_is_the_chosen_admitted_one, bound_files_are_in_the_session_commit),
+        precheck=(all_in_within_cap, plan_is_the_chosen_admitted_one, bound_files_are_in_the_session_commit),
     )
-
-
-#: The container-disk basis every Stage-0 closeout priced with
-#: (`stages.calibration_volume.closeout.DISK_USD_PER_GB_MONTH`).
-DISK_USD_PER_GB_MONTH = 0.10
 
 
 def closeout(run_id: str, scr: Path, *, repo_root: Path = REPO_ROOT, reconcile=None, disk_gb: float = 150.0) -> dict:
@@ -516,7 +555,9 @@ def main(argv: list[str] | None = None) -> int:
         return 13
     if args.dry_run:
         ok = runner.make_plan()
-        print(json.dumps({"plan_ok": ok, "plan": runner.ev.get("budget_plan"),
+        bound = all_in(runner.plan, args.max_price, args.disk_gb, runner.auth.hard_cap_usd) if ok else None
+        ok = ok and bound["all_in_usd"] <= runner.auth.hard_cap_usd
+        print(json.dumps({"plan_ok": ok, "plan": runner.ev.get("budget_plan"), "all_in": bound,
                           "harness": runner.harness["digest"], "launch_identity": session.plan_hash}, indent=1)[:4000])
         return 0 if ok else 12
     rc = run_session(session, args, REPO_ROOT)

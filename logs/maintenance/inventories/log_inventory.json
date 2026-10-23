@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-23T10:07:14+00:00",
+  "created_utc": "2026-10-23T15:47:46+00:00",
   "command": "scripts/maintenance/consolidation/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 4159,
-    "bytes": 139434436,
+    "bytes": 139439349,
     "by_disposition": {
       "keep_canonical": 292,
       "keep_immutable": 3552,
@@ -7834,8 +7834,8 @@
     },
     {
       "path": "docs/stages/stage-2/reasoning_data/H1.md",
-      "size_bytes": 68711,
-      "sha256": "7f0fa4b065daf94b7e43e34c5d4c464c74cb02d5737cad0cf35bb14d0b0c804e",
+      "size_bytes": 70540,
+      "sha256": "e4cab5b28c44ee78730b6256ac8969eddbd4d0b2aead4660d2ddcd1b5e92d2bb",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -8963,8 +8963,8 @@
     },
     {
       "path": "logs/budget/decisions.md",
-      "size_bytes": 1190895,
-      "sha256": "34aa41d5d4859b235c6c4bcc482043c81f7b17c8b70ca6b703ed7de009283548",
+      "size_bytes": 1193084,
+      "sha256": "e1a03d80114fddee51f6d381a40cd35e54267ede1d5ae32d11c2d215c67c3351",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -69286,8 +69286,8 @@
     },
     {
       "path": "logs/stages/stage-2/reasoning_data/plans/p1t/authorization_request.json",
-      "size_bytes": 7571,
-      "sha256": "8d4386d9ade6e5c0fb34117eca688e654703cd7581c1fa982a9b791332dc2c9b",
+      "size_bytes": 8275,
+      "sha256": "86ed4fa422239764dcac8a88408a52a7ab16d72c63d5dfe76b1f3721a2d57803",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -70924,8 +70924,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 269099,
-      "sha256": "dd34e9aca5ea001efca696c535bd34bfaa8dde729d06c589397a1d69609c4dca",
+      "size_bytes": 269290,
+      "sha256": "49a255d941796d4c809cb049799fc231d1c87ebff64463e81aac5c36ab8534be",
       "category": "living_state",
       "in_paid_attempt_chain": false,
       "referenced_by": [

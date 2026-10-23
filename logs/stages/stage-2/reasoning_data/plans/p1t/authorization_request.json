@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.reasoning_data.p1t_authorization_request/v1",
- "written_utc": "2026-10-23T09:51:08Z",
+ "written_utc": "2026-10-23T15:45:21Z",
  "status": "REQUEST for the maintainer's P1t grant; NOT authorized, nothing launched",
  "phase": "P1t",
  "run_id": "h1p1t_20261023_094007",
@@ -56,7 +56,7 @@
    }
   ]
  },
- "harness_digest": "e0bb62329a8d349a242cd0a558aa5ca31a56e1e6ba52045b6d57aa996b28b67c",
+ "harness_digest": "348ed51202a07660fecfec4f390c627377452055e1d400c66735170ba9fb8818",
  "harness_files": 29,
  "not_p1s": {
   "P1_launch_identity_sha256": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
@@ -76,8 +76,8 @@
    "authorized_usd": 2.6,
    "expected_minutes": 33.37,
    "soft_stop_minutes": 63.57499999999999,
-   "artifact_recovery_reserve_minutes": 22.5,
-   "hard_terminate_minutes": 86.07499999999999,
+   "artifact_recovery_reserve_minutes": 21.25,
+   "hard_terminate_minutes": 84.82499999999999,
    "step_time": {
     "seconds": 1.0,
     "source": "unused: no training in this session (arms=0)",
@@ -117,13 +117,23 @@
    "soft_stop_reserve_minutes": 13.52,
    "expected_usd": 0.9955,
    "soft_stop_usd": 1.8967,
-   "artifact_recovery_reserve_usd": 0.6713,
-   "hard_terminate_usd": 2.5679
+   "artifact_recovery_reserve_usd": 0.634,
+   "hard_terminate_usd": 2.5306
   },
-  "launcher_hard_threshold_all_in_usd": 2.5974,
-  "fits_a_live_secure_price_up_to": 1.81,
-  "setup_may_take_up_to_minutes": 58.7,
-  "_": "h1_generation_launch.topup_budget: the application's rule, 1.5 x (expected + setup + teardown + 15 min); the watchdog's hard deadline follows the cap and the live price. P1 measured 6.02 min pod to driver; any setup up to the figure above still leaves both passes and the teardown inside the hard deadline"
+  "all_in_bound_at_p1_price": {
+   "billable_minutes": 86.075,
+   "price_per_hour": 1.79,
+   "container_disk_gb": 150,
+   "gpu_usd": 2.5679,
+   "disk_usd": 0.0295,
+   "all_in_usd": 2.5974,
+   "highest_price_inside_cap": 1.79
+  },
+  "termination_minutes": 1.25,
+  "fits_a_live_secure_price_up_to": 1.79,
+  "refused_at_0_usd_when": "all-in at --max-price exceeds $2.60 (any price above $1.79/h; all_in_within_cap), or the live securePrice or the pod's returned price exceeds --max-price (check_gpu_offered; the core's post-create abort)",
+  "setup_may_take_up_to_minutes": 57.5,
+  "_": "h1_generation_launch.topup_budget: the application's rule, 1.5 x (expected + setup + teardown + 15 min), is where billing stops; the watchdog's hard deadline is that less its time to act (1.25 min: one 60 s poll and one 15 s terminate-verify delay), taken from the artifact reserve. all_in_within_cap prices GPU and the container disk over those minutes at --max-price before any pod. P1 measured 6.02 min pod to driver; any setup up to the figure above still leaves both passes and the teardown inside the hard deadline"
  },
  "budget": {
   "provider_snapshot": {
@@ -156,7 +166,7 @@
   "scr": "/home/ecs-user/aad-scratch/h1p1t_20261023_094007",
   "route": "P1's: the driver seals finished candidates into hash-marked shards, the launcher pulls every marked shard on each poll into <scr>/store and re-hashes it, the closeout re-hashes all of them; then a copy to artifacts/stages/stage-2/reasoning_data/generation/<run>/ and to the relay (stage2_h1/generation/<run>/), read back",
   "expected_bytes": "about 6 MB of shards (P1: 141 MB for 2,164 records; P1t at most 118)",
-  "dev_box_free_bytes": 8222658560
+  "dev_box_free_bytes": 7784157184
  },
  "merge": "corpus_feasibility --candidate corpus_v3.json --store <P1 run>=<store> --store <P1t run>=<store>: each session verified under its own authorization; refused on a shared task, unit, protocol or runner; units keep their session's identity; cells at 0.0 set aside by name; the pack only when the formal ladder cuts every rung with the reserve and isolation passes",
  "grant_document": {
@@ -176,7 +186,7 @@
  "at_launch_read_only": [
   "stage the session-commit bundle on the relay (bundle_on_relay)",
   "a fresh provider snapshot: 0 pods, 0 volumes, $0/h, billing inside the cap",
-  "the live securePrice at or below the figure above (check_gpu_offered)",
+  "the live securePrice at or below the figure above, passed as --max-price (all_in_within_cap, check_gpu_offered)",
   "dev-box free space for <scr>/store"
  ],
  "on_short_corpus": "if the accepted units still do not build B on the formal ladder, the gap is reported and P1t stops there: no automatic further paid top-up, no lower gate, no repetition, no other source or mix (maintainer 2026-10-23)",

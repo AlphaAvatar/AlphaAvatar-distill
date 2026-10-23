@@ -33,7 +33,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import math
 import shutil
 from collections import Counter
 from datetime import datetime, timezone
@@ -182,6 +181,8 @@ def request(run_id: str) -> dict:
     b = L.topup_budget(A.REPO)
     bp = b.plan(price_per_hour=m["price_per_hour"], authorized_usd=hard_cap)
     hard_min = bp.as_dict()["hard_terminate_minutes"]
+    disk_gb = L.build_parser().get_default("disk_gb")
+    bound = L.all_in(bp, m["price_per_hour"], disk_gb, hard_cap)
     snap = sorted((A.REPO / "logs/budget/provider").glob("runpod_billing_*.json"))[-1]
     live = A.read_json(snap)["account"]
     billed = CF.provider_billed(snap)
@@ -207,13 +208,21 @@ def request(run_id: str) -> dict:
                  "expected_usd": app["cost"]["expected_usd"], "closeout_reserve_usd": app["cost"]["closeout_reserve_usd"],
                  "hard_cap_usd": hard_cap,
                  "launcher_budget_at_p1_price": bp.as_dict(),
-                 "launcher_hard_threshold_all_in_usd": round(bp.hard_terminate_usd * m["all_in_over_gpu"], 4),
-                 "fits_a_live_secure_price_up_to": math.floor(hard_cap / (hard_min / 60) * 100) / 100,
+                 "all_in_bound_at_p1_price": bound,
+                 "termination_minutes": L.TERMINATION_MINUTES,
+                 "fits_a_live_secure_price_up_to": bound["highest_price_inside_cap"],
+                 "refused_at_0_usd_when": (f"all-in at --max-price exceeds ${hard_cap:.2f} (any price above "
+                                           f"${bound['highest_price_inside_cap']}/h; all_in_within_cap), or the live "
+                                           "securePrice or the pod's returned price exceeds --max-price "
+                                           "(check_gpu_offered; the core's post-create abort)"),
                  "setup_may_take_up_to_minutes": round(hard_min - gen - m["all_done_to_pod_deleted_minutes"], 1),
                  "_": ("h1_generation_launch.topup_budget: the application's rule, 1.5 x (expected + setup + teardown "
-                       "+ 15 min); the watchdog's hard deadline follows the cap and the live price. P1 measured "
-                       f"{m['pod_to_driver_minutes']} min pod to driver; any setup up to the figure above still "
-                       "leaves both passes and the teardown inside the hard deadline")},
+                       "+ 15 min), is where billing stops; the watchdog's hard deadline is that less its time to act "
+                       f"({L.TERMINATION_MINUTES} min: one 60 s poll and one 15 s terminate-verify delay), taken from "
+                       "the artifact reserve. all_in_within_cap prices GPU and the container disk over those minutes "
+                       f"at --max-price before any pod. P1 measured {m['pod_to_driver_minutes']} min pod to driver; "
+                       "any setup up to the figure above still leaves both passes and the teardown inside the hard "
+                       "deadline")},
         "budget": {"provider_snapshot": {"path": SP.repo_path(snap), "sha256": A.sha256_file(snap),
                                          "fetched_utc": A.read_json(snap)["fetched_utc"]},
                    "provider_billed_total_usd": billed,
@@ -228,7 +237,7 @@ def request(run_id: str) -> dict:
                    "_": "conservative occupancy: the provider's all-time billing counted once; the cap is absolute"},
         "resources": {"gpu": "1 x NVIDIA A100-SXM4-80GB (P1's), one session, one billing resource",
                       "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 (P1's)",
-                      "container_disk_gb": 150, "network_volume": None},
+                      "container_disk_gb": disk_gb, "network_volume": None},
         "persistence": {"scr": f"/home/ecs-user/aad-scratch/{run_id}",
                         "route": ("P1's: the driver seals finished candidates into hash-marked shards, the launcher "
                                   "pulls every marked shard on each poll into <scr>/store and re-hashes it, the closeout "
@@ -245,7 +254,8 @@ def request(run_id: str) -> dict:
                            "issued_by": "governance.issue: recomputes both identities from disk and refuses a mismatch"},
         "at_launch_read_only": ["stage the session-commit bundle on the relay (bundle_on_relay)",
                                 "a fresh provider snapshot: 0 pods, 0 volumes, $0/h, billing inside the cap",
-                                "the live securePrice at or below the figure above (check_gpu_offered)",
+                                "the live securePrice at or below the figure above, passed as --max-price "
+                                "(all_in_within_cap, check_gpu_offered)",
                                 "dev-box free space for <scr>/store"],
         "on_short_corpus": plan["on_short_corpus"],
         "not_requested": ["P1g", "P2", "student recovery", "formal evaluation", "a network volume",

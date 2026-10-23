@@ -13530,3 +13530,42 @@ on a paid pod.
     digest.
 - **Revisit when.** The maintainer issues, changes or declines the P1t
   grant.
+
+## 2026-10-23 — Maintainer review of P1t: the all-in bound and complete-run admission ($0)
+
+- **Context.** The maintainer's final review at `a001d40a` accepted @v3, the
+  59 tasks, the source changes and the protocol. Two boundaries were wrong:
+  - **The bound was GPU-only.** The launcher let a live securePrice up to
+    $1.81/h through. With the 150 GB container disk, $1.81 bills $2.6261,
+    above the $2.60 hard cap.
+  - **Admission was incomplete.** `verify_sessions` required a first
+    candidate per task and every existing `.complete`. It admitted a run
+    whose due second pass never ran.
+- **Decision** (`docs/stages/stage-2/reasoning_data/H1.md` §16):
+  - **All-in bound:** `all_in_within_cap`, a $0 precheck. It prices GPU and
+    container disk at `--max-price` over the application rule's 86.075 min,
+    where billing stops.
+    - The watchdog's time to act (1.25 min) comes out of the artifact
+      reserve: the kill is at 84.8 min.
+    - At $1.79/h: $2.5974. Any price above $1.79/h refuses at $0.
+    - The cap is not raised and the run is not shrunk.
+  - **Admission:** `corpus_feasibility.completeness`. It requires:
+    - a COMPLETE closeout of this store;
+    - the driver's ALL_DONE under the authorized identities;
+    - every due task of both passes, with the driver's entries and matching
+      `.complete` records.
+    - Pass 1's due set is the run's own record. It is never recomputed:
+      P1's 577 stand, though today's adapter would send 574.
+  - **Identities:** P1t's launch identity is unchanged (`e5732fd4…`); the
+    plan and protocol did not move. The harness is now `348ed512…`, because
+    the launcher changed.
+- **Alternatives considered.**
+  - **Keep the 86.075 min kill and add the termination time on top:**
+    $2.635 at $1.79, which refuses at today's price.
+  - **Derive the deadline from the cap at the live price:** a moving kill
+    time.
+  - **Recompute pass 1 with today's adapter:** it redefines P1.
+- **Risks.** The bound has $0.0026 of slack at $1.79/h. A price rise
+  refuses P1t until the maintainer decides.
+- **Revisit when.** The maintainer issues or declines the P1t grant, or the
+  live price moves above $1.79/h.

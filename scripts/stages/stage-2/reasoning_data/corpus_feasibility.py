@@ -10,7 +10,12 @@
 1. DATA. Every generation session the corpus declares (``data.
    generation_sessions``; a corpus naming one ``data.run_id`` is P1 alone) must
    be given its secured store and be authorized: a missing one refuses, so a
-   pack is never cut from part of the corpus. Each session's accepted units come
+   pack is never cut from part of the corpus. A session is admitted only as the
+   COMPLETE run its own records say it was (`completeness`): a COMPLETE
+   closeout, the driver's ALL_DONE under the authorized launch identity and
+   harness, and every pass's due tasks sealed with a matching ``.complete`` --
+   the second pass's due set being the run's own, never recomputed by today's
+   adapter. Each session's accepted units come
    from `p1v.verify_run` against the plan ITS authorization funds (the shards
    re-hashed, every record re-verified and selected), and keep that session's
    phase, run, authorization and launch identity in their pack target. Two
@@ -511,12 +516,77 @@ def declared_sessions(cand: dict) -> list[dict]:
                                              "launch_identity_sha256": d["launch_identity_sha256"]}]
 
 
+def completeness(*, planned: dict[str, set[str]], records: list[dict], ins: dict, driver: dict | None,
+                 closeout: dict | None, identity: dict) -> list[str]:
+    """Why a store is not the complete run its own records say it was; [] when it is.
+
+    `planned` maps each input group (its file's stem) to its task ids; `ins` is
+    `p1v.inputs` on the store; `driver` the driver's record and `closeout` the
+    run's committed ``closeout/outcome.json``; `identity` the authorization's
+    id, launch identity and harness digest, which the driver's contract must
+    name. Every task is due in pass 0. Pass 1's due set is the RUN'S OWN: the
+    driver recorded how many first candidates the adapter it executed sent to a
+    second (``second_candidate_tasks``), and wrote that group's ``.complete``
+    only once every one of them was sealed. It is never recomputed: P1's
+    comparator was repaired after P1 ran, and today's adapter would not send 3
+    of the 577 P1 sent. Each due group needs the driver's complete entry, a
+    ``.complete`` matching its shards, and its records -- one per due task --
+    with the counts the driver recorded; no group is due that ran nothing, and
+    nothing ran outside a due group."""
+    problems = []
+    if closeout is None:
+        problems.append("no closeout")
+    else:
+        state = {k: closeout.get(k) for k in ("status", "complete", "terminal", "session_passed")}
+        if state != {"status": "COMPLETE", "complete": True, "terminal": "ALL_DONE", "session_passed": True}:
+            problems.append(f"the closeout is {state}")
+        sh = closeout.get("shards") or {}
+        if (sh.get("secured"), sh.get("records"), sh.get("unverified")) != (ins["shards"], ins["records"], []):
+            problems.append(f"the store is not the one the closeout closed ({ins['shards']} shards, {ins['records']} "
+                            f"records; the closeout {sh.get('secured')}, {sh.get('records')}, unverified "
+                            f"{sh.get('unverified')})")
+    if driver is None:
+        problems.append("no driver record in the store")
+        driver = {}
+    elif driver.get("terminal") != "ALL_DONE":
+        problems.append(f"the driver's terminal is {driver.get('terminal')!r}, not ALL_DONE")
+    con = driver.get("contract") or {}
+    if driver and (con.get("status") != "ok" or any(con.get(k) != v for k, v in identity.items())):
+        problems.append(f"the driver's contract {({k: con.get(k) for k in ('status', *identity)})} is not "
+                        f"the authorized {identity}")
+    ran = {g["label"]: g for g in driver.get("groups", []) if "label" in g}
+    sealed: dict[str, list[str]] = defaultdict(list)
+    for r in records:
+        sealed[f"pass{r['candidate_index']}_{Path(r['generation_pass']['group_input']).stem}"].append(r["task_id"])
+    due: dict[str, tuple[int, set[str]]] = {}
+    for stem, ids in planned.items():
+        due[f"pass0_{stem}"] = (len(ids), ids)
+        n1 = ran.get(f"pass0_{stem}", {}).get("second_candidate_tasks")
+        if not isinstance(n1, int):
+            problems.append(f"pass0_{stem}: the driver recorded no second-candidate count")
+        elif n1:
+            due[f"pass1_{stem}"] = (n1, ids)
+    for label, (n, ids) in due.items():
+        g, c, got = ran.get(label), ins["groups"].get(label), sealed.get(label, [])
+        if not (g and g.get("complete") is True and g.get("tasks") == n):
+            problems.append(f"{label}: {n} tasks due, the driver's entry is "
+                            f"{({k: g.get(k) for k in ('tasks', 'sealed', 'complete')}) if g else None}")
+        if not (c and c["complete_and_matching"] and c["tasks"] == n):
+            problems.append(f"{label}: {n} tasks due, its .complete is {c}")
+        if len(got) != n or len(set(got)) != n or not set(got) <= ids or (label.startswith("pass0_") and set(got) != ids):
+            problems.append(f"{label}: {n} tasks due, {len(set(got))} distinct sealed ({len(got)} records)")
+    extra = sorted((set(sealed) | set(ins["groups"]) | set(ran)) - set(due))
+    if extra:
+        problems.append(f"work outside the due groups: {extra}")
+    return problems
+
+
 def verify_sessions(decls: list[dict], stores: dict[str, Path]) -> list[dict]:
     """Each declared session verified under its own authorization, or refuse:
-    no store, no authorization, a store that is not the complete run (every
-    planned task with a first candidate, every group's .complete matching its
-    shards), another phase, another plan or another launch identity than
-    declared."""
+    no store, no authorization, a store that is not the complete run
+    (`completeness`), another phase, another plan or another launch identity
+    than declared."""
+    from stages.reasoning_data.h1_generation_launch import EVIDENCE
     out = []
     for d in decls:
         if d["run_id"] not in stores:
@@ -524,14 +594,22 @@ def verify_sessions(decls: list[dict], stores: dict[str, Path]) -> list[dict]:
                              "session its corpus declares, never from part of them")
         if not (A.REPO / GOV.authorization_path(d["run_id"])).is_file():
             raise SystemExit(f"{d['phase']} {d['run_id']}: no authorization; the session has not been granted or run")
-        v = p1v.verify_run(d["run_id"], stores[d["run_id"]])
-        planned = {r["task_id"] for f in v["plan"]["inputs"]
-                   for r in A.jsonl(A.REPO / GOV.inputs_dir(v["plan"]) / f["file"])}
-        first = {x["task_id"] for x in v["records"] if x["candidate_index"] == 0}
-        groups = v["ins"]["groups"]
-        if first != planned or not groups or not all(g["complete_and_matching"] for g in groups.values()):
-            raise SystemExit(f"{d['run_id']}: the store is not the complete run ({len(first & planned)} of "
-                             f"{len(planned)} planned tasks have a first candidate; groups {groups})")
+        auth = GOV.load(A.REPO / GOV.authorization_path(d["run_id"]))
+        plan = A.read_json(A.REPO / GOV.plan_of(auth))
+        store = Path(stores[d["run_id"]])
+        recs, ins = p1v.inputs(store, auth.plan_hash)
+        close = A.REPO / GOV.run_dir(d["run_id"]) / "closeout/outcome.json"
+        problems = completeness(
+            planned={Path(f["file"]).stem: {r["task_id"] for r in A.jsonl(A.REPO / GOV.inputs_dir(plan) / f["file"])}
+                     for f in plan["inputs"]},
+            records=recs, ins=ins,
+            driver=A.read_json(store / EVIDENCE) if (store / EVIDENCE).is_file() else None,
+            closeout=A.read_json(close) if close.is_file() else None,
+            identity={"authorization_id": auth.authorization_id, "launch_identity_sha256": auth.plan_hash,
+                      "harness_digest": auth.harness_source_digest})
+        if problems:
+            raise SystemExit(f"{d['run_id']}: the store is not the complete run: " + "; ".join(problems[:6]))
+        v = p1v.verify_run(d["run_id"], store)
         got = {"phase": v["auth"].stage_conditions.get("phase"), "plan": str(v["plan_path"]),
                "launch_identity_sha256": v["auth"].plan_hash}
         bad = [k for k, val in got.items() if d.get(k, val) != val]

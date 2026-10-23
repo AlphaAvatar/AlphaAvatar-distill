@@ -236,6 +236,90 @@ def test_a_deallocated_cell_is_set_aside_by_name_and_an_undeclared_one_refuses()
     assert CF.set_aside([rc], SP.candidate_spec(V2))[1] == []
 
 
+# --- a session is admitted only as the complete run its own records say ---------
+
+G0, IDENT = "generation_input_g0", {"authorization_id": "auth.r", "launch_identity_sha256": "l" * 64,
+                                    "harness_digest": "h" * 64}
+
+
+def _complete_run():
+    """Four tasks, two of whose first candidates the run's driver sent to a second."""
+    recs = [{"task_id": t, "candidate_index": k, "generation_pass": {"group_input": f"{G0}.jsonl"}}
+            for k, ts in ((0, "abcd"), (1, "bd")) for t in ts]
+    return {"planned": {G0: set("abcd")}, "records": recs,
+            "ins": {"shards": 2, "records": 6, "groups": {f"pass0_{G0}": {"tasks": 4, "complete_and_matching": True},
+                                                          f"pass1_{G0}": {"tasks": 2, "complete_and_matching": True}}},
+            "driver": {"terminal": "ALL_DONE", "contract": {"status": "ok", "hard_cap_usd": 2.6, **IDENT},
+                       "groups": [{"label": f"pass0_{G0}", "tasks": 4, "sealed": 4, "complete": True,
+                                   "second_candidate_tasks": 2},
+                                  {"label": f"pass1_{G0}", "tasks": 2, "sealed": 2, "complete": True}]},
+            "closeout": {"status": "COMPLETE", "complete": True, "terminal": "ALL_DONE", "session_passed": True,
+                         "shards": {"secured": 2, "records": 6, "unverified": []}},
+            "identity": dict(IDENT)}
+
+
+def _without_pass1(kw, *, keep_driver_entry=False):
+    """The first pass complete and the second, due, absent -- store and closeout agreeing with each other."""
+    kw["records"] = [r for r in kw["records"] if r["candidate_index"] == 0]
+    del kw["ins"]["groups"][f"pass1_{G0}"]
+    kw["ins"].update(shards=1, records=4)
+    kw["closeout"]["shards"].update(secured=1, records=4)
+    if keep_driver_entry:
+        kw["driver"]["groups"][1].update(sealed=0, complete=False)
+    else:
+        kw["driver"]["groups"].pop()
+
+
+def test_a_complete_run_is_admitted():
+    assert CF.completeness(**_complete_run()) == []
+
+
+@pytest.mark.parametrize("mutate,match", [
+    # the case the old check let through: every first candidate sealed, the due second pass never ran
+    (_without_pass1, f"pass1_{G0}: 2 tasks due, the driver's entry is None"),
+    (lambda kw: _without_pass1(kw, keep_driver_entry=True), f"pass1_{G0}: 2 tasks due, its .complete is None"),
+    (lambda kw: kw["records"].pop(), f"pass1_{G0}: 2 tasks due, 1 distinct sealed"),
+    (lambda kw: kw["driver"].update(terminal="RUNS_INCOMPLETE"), "terminal is 'RUNS_INCOMPLETE'"),
+    (lambda kw: kw.update(driver=None), "no driver record"),
+    (lambda kw: kw.update(closeout=None), "no closeout"),
+    (lambda kw: kw["closeout"].update(status="INCOMPLETE", complete=False), "the closeout is"),
+    (lambda kw: kw["ins"].update(records=7), "not the one the closeout closed"),
+    (lambda kw: kw["driver"]["contract"].update(harness_digest="x" * 64), "is not the authorized"),
+    (lambda kw: kw["driver"]["groups"][0].pop("second_candidate_tasks"), "no second-candidate count"),
+    (lambda kw: kw["driver"]["groups"][0].update(second_candidate_tasks=0), "work outside the due groups"),
+    (lambda kw: kw["planned"][G0].add("e"), f"pass0_{G0}: 5 tasks due"),
+])
+def test_a_run_that_is_not_complete_is_refused(mutate, match):
+    kw = _complete_run()
+    mutate(kw)
+    problems = CF.completeness(**kw)
+    assert any(match in p for p in problems), problems
+
+
+def test_p1_is_admitted_on_its_frozen_records_and_execution_identity():
+    """P1's second pass is the 577 its own driver, under harness d6affe40, sent:
+    the admission reads it from the run, not from today's repaired adapter."""
+    from stages.reasoning_data import governance as GOV
+    from stages.reasoning_data import p1v
+    run = "h1gen_20261022_190653"
+    store = A.REPO / "artifacts/stages/stage-2/reasoning_data/generation" / run
+    if not store.is_dir():
+        pytest.skip("P1's secured records are not on this machine")
+    auth = GOV.load(A.REPO / GOV.authorization_path(run))
+    plan = A.read_json(A.REPO / GOV.plan_of(auth))
+    recs, ins = p1v.inputs(store, auth.plan_hash)
+    driver = A.read_json(store / "generation_session.json")
+    assert CF.completeness(
+        planned={f["file"].removesuffix(".jsonl"): {r["task_id"] for r in A.jsonl(A.REPO / GOV.inputs_dir(plan) / f["file"])}
+                 for f in plan["inputs"]},
+        records=recs, ins=ins, driver=driver, closeout=A.read_json(A.REPO / GOV.run_dir(run) / "closeout/outcome.json"),
+        identity={"authorization_id": auth.authorization_id, "launch_identity_sha256": auth.plan_hash,
+                  "harness_digest": auth.harness_source_digest}) == []
+    assert driver["contract"]["harness_digest"] == auth.harness_source_digest and \
+        auth.harness_source_digest.startswith("d6affe40")                 # P1's, not today's harness
+    assert driver["groups"][0]["second_candidate_tasks"] == 577 == sum(r["candidate_index"] == 1 for r in recs)
+
+
 def test_the_corpus_declares_both_sessions_and_a_pack_needs_every_one(tmp_path):
     v3 = CF.declared_sessions(A.read_json(V3))
     assert [(d["phase"], d["run_id"]) for d in v3] == [("P1", "h1gen_20261022_190653"),
@@ -246,7 +330,7 @@ def test_the_corpus_declares_both_sessions_and_a_pack_needs_every_one(tmp_path):
         CF.verify_sessions(v3, {"h1p1t_20261023_094007": tmp_path})
     with pytest.raises(SystemExit, match="no authorization"):          # P1t is not granted: nothing to build from
         CF.verify_sessions(v3[1:], {"h1p1t_20261023_094007": tmp_path})
-    with pytest.raises(SystemExit, match="not the complete run"):     # an empty store is not P1
+    with pytest.raises(SystemExit, match="not the complete run: .*not the one the closeout closed"):  # empty
         CF.main(["--candidate", str(V3), "--store", f"h1gen_20261022_190653={tmp_path}",
                  "--store", f"h1p1t_20261023_094007={tmp_path}", "--pack-out", str(tmp_path / "never")])
     assert not (tmp_path / "never").exists()

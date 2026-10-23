@@ -24,12 +24,14 @@ Evidence: [`docs/stages/stage-2/reasoning_data/H1.md`](../../docs/stages/stage-2
   cells named. Frozen: P1t's plan binds its sha256.
 - **P1t, NOT authorized:** the application's 25 + 34 unused tasks, frozen in
   `plans/p1t/generation_plan.json` under their own launch identity; one A100
-  session, $1.01 expected / $2.60 hard cap. What a grant must name:
+  session, $1.01 expected / $2.60 hard cap, GPU + disk + termination time
+  bounded together at $0 (fits up to $1.79/h). What a grant must name:
   `plans/p1t/authorization_request.json`.
-- **The build after P1t** (`corpus_feasibility.py`): both sessions verified
-  under their own authorizations, a shared task refused, the 0.0 cells' units
-  set aside by name, the pack only on a full formal build. Short again →
-  report and stop, no automatic top-up.
+- **The build after P1t** (`corpus_feasibility.py`): both sessions admitted
+  only as complete runs (closeout, driver ALL_DONE, both passes' due tasks on
+  the run's own records) and verified under their own authorizations, a
+  shared task refused, the 0.0 cells' units set aside by name, the pack only
+  on a full formal build. Short again → report and stop, no automatic top-up.
 - **Budget:** $661.52 billed all-time (provider, counted once) against the
   absolute $666.17 cap; the 34 pods and the anchor stay OPEN.
 - **Needs the maintainer:** the P1t grant (`governance.issue` takes a grant

@@ -107,11 +107,39 @@ def test_the_launcher_binds_the_p1t_plan_and_inputs_and_prices_the_application()
     assert [a.repo_path for a in spec.setup.local_assets] == [PLAN["inputs_dir"]]
     app = A.read_json(T.APPLICATION)["cost"]
     m = app["measured_basis"]
-    plan = spec.budget.plan(price_per_hour=m["price_per_hour"], authorized_usd=app["hard_cap_usd"]).as_dict()
+    bp = spec.budget.plan(price_per_hour=m["price_per_hour"], authorized_usd=app["hard_cap_usd"])
+    plan = bp.as_dict()
     assert plan["expected_minutes"] == pytest.approx(app["session_minutes_expected"], abs=0.05)
-    all_in = plan["hard_terminate_usd"] * m["all_in_over_gpu"]
-    assert all_in == pytest.approx(app["hard_cap_usd"], abs=0.01) and plan["hard_terminate_usd"] <= app["hard_cap_usd"]
+    # billing stops where the application's rule says; the watchdog fires its time-to-act earlier
+    f = A.read_json(A.REPO / L.FORECAST)["contingency_factors_not_measurements"]["hard_cap"]
+    rule = f * (plan["expected_minutes"] + m["pod_to_driver_minutes"] + m["all_done_to_pod_deleted_minutes"]
+                + L.ARTIFACT_RECOVERY_MINUTES)
+    bound = L.all_in(bp, m["price_per_hour"], 150, app["hard_cap_usd"])
+    assert bound["billable_minutes"] == pytest.approx(rule, abs=0.01)
+    assert plan["hard_terminate_minutes"] == pytest.approx(rule - L.TERMINATION_MINUTES, abs=0.01)
+    assert bound["all_in_usd"] <= app["hard_cap_usd"] and bound["highest_price_inside_cap"] == m["price_per_hour"]
     assert L.budget("P1").setup_minutes == 25.0 and L.budget("P1").soft_stop_reserves[0].minutes == 20.0  # P1's as run
+    assert L.budget("P1").artifact_recovery_reserve_minutes == L.ARTIFACT_RECOVERY_MINUTES
+
+
+@pytest.mark.parametrize("price,disk_gb,ok", [(1.79, 150, True), (1.80, 150, False), (1.81, 150, False),
+                                              (1.79, 300, False)])
+def test_gpu_disk_and_termination_together_stay_inside_the_cap_or_refuse_at_0(price, disk_gb, ok):
+    """$1.81 fitted the GPU alone ($2.597) and not the bill ($2.626): the
+    precheck prices GPU, the container disk and the watchdog's time to act at
+    --max-price, before any pod, and never raises the cap or shrinks the run."""
+    cap = A.read_json(T.APPLICATION)["cost"]["hard_cap_usd"]
+    b = L.budget("P1t")
+    ctx = type("Ctx", (), {"plan": b.plan(price_per_hour=price, authorized_usd=cap), "evidence": {},
+                           "args": type("A", (), {"max_price": price, "disk_gb": disk_gb})(),
+                           "auth": type("Au", (), {"hard_cap_usd": cap})()})()
+    got, why = L.all_in_within_cap(ctx)
+    assert got is ok, why
+    assert (ctx.evidence["all_in_bound"]["all_in_usd"] <= cap) is ok
+    assert ok or "The cap is not raised" in why
+    assert L.all_in_within_cap(type("Ctx", (), {"plan": None})())[0] is False
+    spec = L.spec(session_args(L, ("--phase", "P1t")))
+    assert spec.precheck[0] is L.all_in_within_cap
 
 
 def test_the_request_names_what_is_on_disk_now():
@@ -125,4 +153,6 @@ def test_the_request_names_what_is_on_disk_now():
     corpus_run = [s["run_id"] for s in A.read_json(T.CORPUS)["data"]["generation_sessions"] if s["phase"] == "P1t"]
     assert [req["run_id"]] == corpus_run
     assert req["budget"]["fits_under_the_existing_cap"] and not req["budget"]["cap_raised"]
-    assert req["cost"]["launcher_hard_threshold_all_in_usd"] <= req["cost"]["hard_cap_usd"]
+    bound = req["cost"]["all_in_bound_at_p1_price"]
+    assert bound["all_in_usd"] <= req["cost"]["hard_cap_usd"] and bound["container_disk_gb"] == 150
+    assert req["cost"]["fits_a_live_secure_price_up_to"] == bound["highest_price_inside_cap"] == 1.79
