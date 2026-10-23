@@ -1,0 +1,117 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.corpus_candidate/v1",
+ "corpus_id": "stage2.reasoning_master@v3",
+ "role": "CORPUS: arm B's corpus (maintainer's choice, 2026-10-23)",
+ "status": "CHOSEN by the maintainer 2026-10-23 as H1 arm B's corpus (plan 2), and FROZEN: P1t's generation plan binds this file by its sha256 (plans/p1t/generation_plan.json :: corpus), so any edit refuses the launch and the build. Its design is the 2026-10-23 proposal unchanged (`proposal`). B's pack is built from it only when the real accepted units of P1 and P1t pass the formal ladder, every rung, the validation reserve and isolation (scripts/stages/stage-2/reasoning_data/corpus_feasibility.py); the top-up itself needs the maintainer's P1t grant.",
+ "chosen": {
+  "corpus_id": "stage2.reasoning_master@v3",
+  "for": "H1 arm B",
+  "by": "maintainer",
+  "date_utc": "2026-10-23",
+  "decision": "logs/budget/decisions.md 2026-10-23 (H1 B: the maintainer chooses plan 2, stage2.reasoning_master@v3)",
+  "_": "corpus_spec.json :: chosen_variant stays @v1, the scheme P1 was generated for; that file and its sha are @v1's identity and are not edited. B's corpus is recorded here and in h1_units.json :: packs.B"
+ },
+ "proposal": {
+  "path": "configs/stages/stage-2/reasoning_data/corpus_v3_proposal.json",
+  "sha256": "64807ec0427a7d5d0e4bea41bab1e18964d9bd44fdd5fe3e36ee7bc1e5cd0be9",
+  "commit": "1d111969",
+  "design_unchanged": [
+   "derived_from",
+   "salt",
+   "shares",
+   "source_allocation"
+  ],
+  "_": "the file the application was priced on (audit/corpus_v2_feasibility.json :: plan_2.proposal, plans/abstract_topup_application.json); renamed on adoption, its design keys byte-for-byte as proposed (a test reads the proposal back from git)"
+ },
+ "derived_from": {
+  "corpus_id": "stage2.reasoning_master@v1",
+  "spec": "configs/stages/stage-2/reasoning_data/corpus_spec.json",
+  "spec_sha256": "ac7c50ae7a6b365ca45b1f8984415ee7431502fac06c4aee537f0518be457887"
+ },
+ "salt": "stage2.reasoning_master/v3",
+ "shares": {
+  "primary.task_contained_deduction": 0.17,
+  "primary.inductive_rule_discovery": 0.17,
+  "primary.compositional_generalization": 0.17,
+  "primary.abstract_analogical": 0.09,
+  "primary.interactive_adaptation": 0.1,
+  "supporting.math_reused_gsm8k": 0.06,
+  "supporting.math_new": 0.06,
+  "supporting.code_algorithmic": 0.07,
+  "supporting.reading_verified": 0.08,
+  "supporting.answerability": 0.03
+ },
+ "source_allocation": {
+  "primary.task_contained_deduction": {
+   "s0_generators_v2_calsplit": 0.085,
+   "prontoqa": 0.03,
+   "reasoning_core": 0.03,
+   "reasoning_gym": 0.025
+  },
+  "primary.inductive_rule_discovery": {
+   "s0_generators_v2_calsplit": 0.17
+  },
+  "primary.compositional_generalization": {
+   "s0_generators_v2_calsplit": 0.12,
+   "reasoning_core": 0.03,
+   "reasoning_gym": 0.02
+  },
+  "primary.abstract_analogical": {
+   "s0_generators_v2_calsplit": 0.09,
+   "reasoning_core": 0.0
+  },
+  "primary.interactive_adaptation": {
+   "s0_generators_v2_calsplit": 0.1
+  },
+  "supporting.math_reused_gsm8k": {
+   "corpus_v2_gsm8k_verified": 0.06
+  },
+  "supporting.math_new": {
+   "math_train": 0.03,
+   "mathematics_dataset": 0.02,
+   "reasoning_gym": 0.01
+  },
+  "supporting.code_algorithmic": {
+   "mbpp_train": 0.055,
+   "reasoning_core": 0.015,
+   "reasoning_gym": 0.0,
+   "code_contests_train": 0.0
+  },
+  "supporting.reading_verified": {
+   "corpus_v2_rag_verified": 0.06,
+   "corpus_v2_multihop_verified": 0.02
+  },
+  "supporting.answerability": {
+   "squad_v2_train_unanswerable": 0.03
+  }
+ },
+ "_allocation": "@v1's capability shares (deduction 0.17, analogy 0.09, the rest unchanged; 0.70 / 0.30). Inside the strata, @v2's source moves where the data needs them (composition 0.12 / 0.03 / 0.02; code's bf share to MBPP), deduction's Reasoning Gym at @v2's 0.025 with the 0.005 to the project cell (0.085), and analogy from the project generator alone: Reasoning Core's one accepted analogy unit cannot be built or validated as a cell (audit/corpus_v2_feasibility.json), its 16 unused tasks would yield about 0.4 more units at the measured 1 in 40, and its traces exceed the 8,184 allowance (39 of 40). Removing that source from analogy is a source change inside the stratum and is the maintainer's decision.",
+ "_deallocated": "the cells this allocation declares at 0.0 are DE-ALLOCATED sources, named on purpose: primary.abstract_analogical/reasoning_core (P1 accepted ONE unit, analogical_case_matching), supporting.code_algorithmic/reasoning_gym (P1: 22 tasks, 0 accepted) and supporting.code_algorithmic/code_contests_train (never generated). A unit of P1 or P1t in a 0.0 cell is SET ASIDE by name in the build record (corpus_feasibility.set_aside: its unit id, cell, session and record sha256): it is never trained on, never in the validation tail, and its records are not deleted. A unit in a cell this file does not declare at all refuses the build.",
+ "data": {
+  "rule": "P1's accepted units, the corpus_v2 reuse selection, and P1t's accepted units (the 59 unused tasks of the two fill cells, generated under P1's frozen protocol); every generated unit keeps the session, authorization and launch identity it came from. No repetition, no lower gate, no stand-in, no drift, no other salt",
+  "generation_sessions": [
+   {
+    "phase": "P1",
+    "run_id": "h1gen_20261022_190653",
+    "launch_identity_sha256": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
+    "plan": "logs/stages/stage-2/reasoning_data/plans/generation_plan.json"
+   },
+   {
+    "phase": "P1t",
+    "run_id": "h1p1t_20261023_094007",
+    "plan": "logs/stages/stage-2/reasoning_data/plans/p1t/generation_plan.json",
+    "_": "its launch identity is that plan's (governance.launch_hash), which binds this file's sha256; it is not repeated here, which would be circular"
+   }
+  ],
+  "p1v_verification": "logs/stages/stage-2/reasoning_data/audit/p1v_verification.json",
+  "reuse": [
+   {
+    "path": "data/stages/stage-2/reasoning_data/tasks/supporting_reuse_v1.selection.jsonl",
+    "sha256": "2dcac7627c479025d53de70574fb6302c6a54e777686d2457887460993b85f7c"
+   }
+  ]
+ },
+ "post_hoc": "Set after P1's acceptance was seen, from measured data yield only (no student output and no evaluation result was read). A data-feasibility revision, NOT a mixture-ratio result and NOT shown to be a better mix; it is not the source scheme frozen before teacher generation (@v1 is). A result on a pack cut from it must say so.",
+ "fixed": "D4 Top-1, the recovery objective, M1's matching method, eval-set-1 and the 150k validation reserve are unchanged",
+ "authorizes": "nothing"
+}

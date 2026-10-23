@@ -13481,3 +13481,52 @@ on a paid pod.
   - Removing Reasoning Core from analogy is a source change.
 - **Revisit when.** The maintainer chooses: plan 2's top-up, a different
   revision, or none.
+
+## 2026-10-23 — Maintainer: B's corpus is @v3; P1t prepared at $0 for a separate grant
+
+- **Context.** The maintainer accepted the @v2 feasibility result and closed
+  @v2 as infeasible: no other salt, no composition drift.
+- **Decision.** **Arm B's corpus is `stage2.reasoning_master@v3`** (plan 2).
+  - @v1's capability shares are kept: deduction 17, induction 17,
+    composition 17, analogy 9, interactive 10, supporting 30.
+  - The source changes are accepted: Reasoning Core leaves analogy,
+    composition is re-split, and bf's code share goes to MBPP.
+  - @v1, P1's records, P1v's result and @v2's evidence keep their
+    identities.
+  - @v3 is a post-hoc feasibility revision, not a ratio-experiment result.
+  - Unchanged: D4 Top-1, the recovery objective, M1, eval-set-1 and the 150k
+    reserve.
+  - P1t (the 59 unused tasks, $2.60 hard cap, existing $666.17 cap) is
+    approved in principle; it still needs a formal grant.
+  - If B is still short after P1t: report and stop.
+  - Not authorized: any pod, GPU or generation; P1g, P2, recovery, a merge.
+- **Done at $0** (`docs/stages/stage-2/reasoning_data/H1.md` §16):
+  - **Frozen corpus:** `corpus_v3.json`, the proposal's design byte for byte,
+    with `chosen` and both generation sessions recorded.
+  - **Frozen list:** `plans/p1t/generation_plan.json`, the application's 59
+    tasks. Their id hashes match. 0 overlap with P1; R0–R9 pass; P1's pools
+    and protocol bytes.
+  - **Separate identity:** `governance.PHASE_PLANS` and a phase-aware
+    launcher, setup branch and driver.
+    - P1t launch identity `e5732fd4…`; harness `e0bb6232…`.
+    - P1's identity `c0eb4fd2…` is unchanged and its grant is not reused.
+  - **Budget:** `topup_budget`. At $1.79/h, $2.597 all-in is the hard
+    threshold; a live price above $1.81/h refuses at $0.
+  - **Provider:** snapshot `runpod_billing_2026-10-23T0942Z.json`: $661.52
+    billed, 0 resources, after the hard cap $664.12.
+  - **Merge entry:** `corpus_feasibility.py`.
+    - It needs every declared session, each verified under its own
+      authorization and complete.
+    - It refuses a shared task, unit, protocol or runner.
+    - Units keep their session identity.
+    - The 0.0 cells' units are set aside by name (one P1 unit); an
+      undeclared cell refuses.
+    - It packs only on a full formal build.
+  - **Request:** `plans/p1t/authorization_request.json`.
+- **Risks.**
+  - Reasoning Gym composition's forecast rests on three easy module-levels.
+  - Analogy rests on one generator.
+  - The code edits since P1 moved the harness, so the grant must name the new
+    digest.
+- **Revisit when.** The maintainer issues, changes or declines the P1t
+  grant.

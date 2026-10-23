@@ -44,12 +44,14 @@
     },
     "B": {
       "status": "pending",
-      "what": "pending: B's real pack (stage2.reasoning_master@v1, D_2.96M of B's master order) -- it exists only after P1 generation and P1v verification",
+      "what": "pending: B's real pack (D_2.96M of B's master order). B's corpus is stage2.reasoning_master@v3 (maintainer 2026-10-23, configs/stages/stage-2/reasoning_data/corpus_v3.json); the pack exists only after P1t generation and the formal-ladder build of P1 + P1t (corpus_feasibility.py)",
+      "corpus": {"id": "stage2.reasoning_master@v3", "file": "configs/stages/stage-2/reasoning_data/corpus_v3.json", "chosen": "maintainer 2026-10-23 (logs/budget/decisions.md)"},
       "expected": null,
       "blocks_sha256": null,
       "ladder_sha256": null,
       "p1v_2026_10_22": "NOT BUILT: P1 (h1gen_20261022_190653) ran; P1v found four cells short of their share (audit/p1v_verification.json :: gaps_supervised_tokens), so the pack does not exist and the formal units stay refused",
-      "corpus_feasibility_2026_10_23": "STILL NOT BUILT: the maintainer's $0 candidate stage2.reasoning_master@v2 does not build on the formal ladder (audit/corpus_v2_feasibility.json :: unsatisfied); plan 2 (corpus_v3_proposal.json) needs a top-up that is applied for, not authorized (plans/abstract_topup_application.json). Which corpus becomes B is the maintainer's decision"
+      "corpus_feasibility_2026_10_23": "STILL NOT BUILT: the maintainer's $0 candidate stage2.reasoning_master@v2 does not build on the formal ladder (audit/corpus_v2_feasibility.json :: unsatisfied); plan 2 (then corpus_v3_proposal.json) needs a top-up that is applied for, not authorized (plans/abstract_topup_application.json). Which corpus becomes B is the maintainer's decision",
+      "corpus_v3_2026_10_23": "the maintainer chose @v3 for B. P1t's 59-task list, launch identity and request are prepared at $0 (plans/p1t/); P1t is NOT authorized and nothing was generated, so the pack still does not exist and the formal units stay refused"
     },
     "layout": "<--pack-root>/<arm>/{blocks.npz, audit.jsonl, ladder.json}",
     "check": "sha256 of blocks.npz and ladder.json equal the recorded values, and the 2.96M rung's n_units, n_sessions, actual_supervised_tokens and n_blocks equal `expected`"

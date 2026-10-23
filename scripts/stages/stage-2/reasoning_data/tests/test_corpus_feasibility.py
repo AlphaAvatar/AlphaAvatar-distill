@@ -14,7 +14,7 @@ from stages.reasoning_data import source_plan as SP
 from aadistill.data.nested_ladder import LadderError, LadderUnit, build_ladder
 
 V2 = A.CONFIG_DIR / "corpus_v2_candidate.json"
-V3 = A.CONFIG_DIR / "corpus_v3_proposal.json"
+V3 = A.CONFIG_DIR / "corpus_v3.json"
 TARGETS = [8_600, 16_000, 29_600]
 
 
@@ -183,3 +183,70 @@ def test_attempt_never_allows_drift_and_reports_the_refusal(monkeypatch):
     monkeypatch.setattr(AB, "build", fake)
     got = CF.attempt([], {"rung_targets": [1]}, {}, None)
     assert got == {"built": False, "refusal": "rung 1: refused"} and not seen.get("drift")
+
+
+# --- two generation sessions, one corpus ---------------------------------------
+
+def _rec(tid, lid="a" * 64, proto="p" * 64):
+    return {"task_id": tid, "generation_pass": {"launch_identity_sha256": lid, "protocol_sha256": proto,
+                                                "runner_sha256": "r" * 64}}
+
+
+def _run(run_id, phase, tids, **kw):
+    sess = [{"id": f"{t}#t0", "unit_id": t, "stratum": "primary.abstract_analogical",
+             "attributes": {"source": "s0_generators_v2_calsplit"}, "messages": [],
+             "target": {"record_sha256": f"sha-{t}"}} for t in tids]
+    ident = {"phase": phase, "run_id": run_id, "authorization_id": f"auth.{run_id}",
+             "launch_identity_sha256": kw.get("lid", run_id * 4)}
+    return {"identity": ident, "records": [_rec(t, **kw) for t in tids], "ins": {"records": len(tids), "shards": 1},
+            "got": {"sessions": sess, "selected": {t: {} for t in tids}}}
+
+
+def test_two_sessions_merge_and_every_unit_keeps_the_session_that_generated_it():
+    got, prov = CF.merge([_run("p1", "P1", ["a", "b"]), _run("p1t", "P1t", ["c"])], tag=True)
+    assert {s["unit_id"]: s["target"]["generation"]["run_id"] for s in got} == {"a": "p1", "b": "p1", "c": "p1t"}
+    assert got[0]["target"]["record_sha256"] == "sha-a"            # the record identity is kept beside it
+    assert [s["phase"] for s in prov["sessions"]] == ["P1", "P1t"] and prov["tasks_in_two_sessions"] == 0
+    untagged, _ = CF.merge([_run("p1", "P1", ["a"])], tag=False)    # @v2's one-run shape is left as it was
+    assert "generation" not in untagged[0]["target"]
+
+
+@pytest.mark.parametrize("second,match", [
+    (lambda: _run("p1t", "P1t", ["b"]), "tasks generated in two sessions"),
+    (lambda: _run("p1t", "P1t", ["c"], proto="q" * 64), "protocol_sha256"),
+])
+def test_sessions_that_share_a_task_or_differ_in_protocol_do_not_merge(second, match):
+    with pytest.raises(SystemExit, match=match):
+        CF.merge([_run("p1", "P1", ["a", "b"]), second()], tag=True)
+
+
+def test_a_deallocated_cell_is_set_aside_by_name_and_an_undeclared_one_refuses():
+    spec = SP.candidate_spec(V3)
+    rc = {"id": "u#t0", "unit_id": "u", "stratum": "primary.abstract_analogical",
+          "attributes": {"source": "reasoning_core"}, "messages": [], "target": {"record_sha256": "x"}}
+    kept = {**rc, "id": "k#t0", "unit_id": "k", "attributes": {"source": "s0_generators_v2_calsplit"}}
+    keep, aside = CF.set_aside([rc, kept], spec)
+    assert keep == [kept] and aside == [{"unit_id": "u", "cell": "primary.abstract_analogical/reasoning_core",
+                                         "target": {"record_sha256": "x"}}]
+    nowhere = {**kept, "attributes": {"source": "not_declared"}}
+    assert CF.set_aside([nowhere], spec)[0] == [nowhere]          # not 0.0: left for place() to refuse
+    with pytest.raises(SystemExit, match="does not allocate"):
+        AB.place([nowhere], AB.cell_shares(spec, spec["corpus_id"]))
+    # @v2 keeps analogy's Reasoning Core cell: nothing of it is set aside there
+    assert CF.set_aside([rc], SP.candidate_spec(V2))[1] == []
+
+
+def test_the_corpus_declares_both_sessions_and_a_pack_needs_every_one(tmp_path):
+    v3 = CF.declared_sessions(A.read_json(V3))
+    assert [(d["phase"], d["run_id"]) for d in v3] == [("P1", "h1gen_20261022_190653"),
+                                                       ("P1t", "h1p1t_20261023_094007")]
+    assert CF.declared_sessions(A.read_json(V2)) == [{"phase": "P1", "run_id": "h1gen_20261022_190653",
+                                                      "launch_identity_sha256": v3[0]["launch_identity_sha256"]}]
+    with pytest.raises(SystemExit, match="no secured store given"):
+        CF.verify_sessions(v3, {"h1p1t_20261023_094007": tmp_path})
+    with pytest.raises(SystemExit, match="no authorization"):          # P1t is not granted: nothing to build from
+        CF.verify_sessions(v3[1:], {"h1p1t_20261023_094007": tmp_path})
+    with pytest.raises(SystemExit, match="not the complete run"):     # an empty store is not P1
+        CF.main(["--candidate", str(V3), "--store", f"h1gen_20261022_190653={tmp_path}",
+                 "--store", f"h1p1t_20261023_094007={tmp_path}", "--pack-out", str(tmp_path / "never")])
+    assert not (tmp_path / "never").exists()

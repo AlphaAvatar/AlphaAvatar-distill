@@ -15,12 +15,18 @@ One authorization artifact, loaded under `POLICY`, binds three things:
   launcher before any pod and by the driver on the pod;
 * a hard cap the planned hard threshold must fit (`SessionRunner.make_plan`).
 
+Each generation PHASE has its own plan and inputs (`PHASE_PLANS`): P1, the
+@v1 generation list, and P1t, the @v3 top-up of 59 unused tasks, beside it and
+never over it. The authorization's phase names the plan its session runs, so
+the launcher, the pod's setup and the driver hash the plan the grant approved,
+and a P1 artifact can never fund the P1t list or the reverse.
+
 `issue` writes an artifact ONLY from a maintainer grant document (`--grant`,
-required) that names BOTH the launch identity and the harness digest the
-maintainer approved; each is recomputed from disk and must equal the grant's,
-so neither the plan nor the code can move between approval and issue. There is
-no grant for H1 today, so nothing can be issued by running code. Dollar
-amounts live in the grant document, never here.
+required) that names its phase and BOTH the launch identity and the harness
+digest the maintainer approved; each is recomputed from disk and must equal the
+grant's, so neither the plan nor the code can move between approval and issue.
+Nothing can be issued by running code alone. Dollar amounts live in the grant
+document, never here.
 """
 from __future__ import annotations
 
@@ -37,8 +43,13 @@ from aadistill.infrastructure.manifest import sha256_file, sha256_json
 REPO = Path(__file__).resolve().parents[4]
 EXPERIMENT_LOGS = Path("logs/stages/stage-2/reasoning_data")
 PLAN = EXPERIMENT_LOGS / "plans/generation_plan.json"
+#: P1t: the @v3 top-up's own plan; its inputs sit beside it (`plans/p1t/generation_inputs`)
+TOPUP_PLAN = EXPERIMENT_LOGS / "plans/p1t/generation_plan.json"
+#: phase -> the plan its authorization funds; a phase not named here cannot be issued
+PHASE_PLANS = {"P1": PLAN, "P1t": TOPUP_PLAN}
 PROTOCOL = Path("configs/stages/stage-2/reasoning_data/generation_protocol.json")
-#: committed beside the plan, and installed at the same path on the pod as a declared local asset
+#: P1's inputs, committed beside its plan; every plan names its own (``inputs_dir``),
+#: installed at the same path on the pod as a declared local asset
 INPUTS_DIR = EXPERIMENT_LOGS / "plans/generation_inputs"
 ACTION = "teacher_generation"
 POLICY = ActionPolicy(
@@ -112,32 +123,47 @@ def load(path) -> H1GenerationAuthorization:
     return H1GenerationAuthorization.load(path)
 
 
-def launch_identity(repo_root: Path = REPO) -> dict:
+def plan_of(auth) -> Path:
+    """The plan an issued authorization funds: the one its phase names."""
+    phase = (auth.stage_conditions or {}).get("phase")
+    if phase not in PHASE_PLANS:
+        raise AuthorizationError(f"{auth.authorization_id}: phase {phase!r} names no generation plan "
+                                 f"(known: {sorted(PHASE_PLANS)})")
+    return PHASE_PLANS[phase]
+
+
+def inputs_dir(plan: dict) -> Path:
+    """Where a plan's run inputs are (the plan says; P1's plan names `INPUTS_DIR`)."""
+    return Path(plan["inputs_dir"])
+
+
+def launch_identity(repo_root: Path = REPO, plan_path: Path = PLAN) -> dict:
     """The plan, the protocol and every input and pool the plan names, each by
     the sha256 of its bytes on disk; refuses when a file differs from what the
     plan records."""
     root = Path(repo_root)
-    plan = json.loads((root / PLAN).read_text())
+    plan = json.loads((root / plan_path).read_text())
+    where = inputs_dir(plan)
     inputs = []
     for f in plan["inputs"]:
-        got = sha256_file(root / INPUTS_DIR / f["file"])
+        got = sha256_file(root / where / f["file"])
         if got != f["sha256"]:
-            raise AuthorizationError(f"{INPUTS_DIR / f['file']} hashes to {got[:12]}, not the plan's "
+            raise AuthorizationError(f"{where / f['file']} hashes to {got[:12]}, not the plan's "
                                      f"{f['sha256'][:12]}")
-        inputs.append({"file": str(INPUTS_DIR / f["file"]), "sha256": got})
+        inputs.append({"file": str(where / f["file"]), "sha256": got})
     pools = []
     for p in plan["pools"] + plan.get("reuse", []):
         got = sha256_file(root / p["path"])
         if got != p["sha256"]:
             raise AuthorizationError(f"{p['path']} hashes to {got[:12]}, not the plan's {p['sha256'][:12]}")
         pools.append({"path": p["path"], "sha256": got})
-    return {"generation_plan": {"path": str(PLAN), "sha256": sha256_file(root / PLAN)},
+    return {"generation_plan": {"path": str(plan_path), "sha256": sha256_file(root / plan_path)},
             "generation_protocol": {"path": str(PROTOCOL), "sha256": sha256_file(root / PROTOCOL)},
             "inputs": inputs, "pools": pools}
 
 
-def launch_hash(repo_root: Path = REPO) -> str:
-    return sha256_json(launch_identity(repo_root))
+def launch_hash(repo_root: Path = REPO, plan_path: Path = PLAN) -> str:
+    return sha256_json(launch_identity(repo_root, plan_path))
 
 
 def run_dir(run_id: str) -> Path:
@@ -150,12 +176,13 @@ def authorization_path(run_id: str) -> Path:
 
 def issue(run_id: str, *, grant_path: Path, repo_root: Path = REPO, out: Path | None = None) -> Path:
     """Write the one-use authorization for `run_id` from a maintainer grant
-    document, or refuse. The grant must name the launch identity
-    (``launch_identity_sha256``) AND the harness digest (``harness_digest``) it
-    approves, who granted it, and the expected and hard-cap amounts. Both are
-    recomputed from disk and must equal the grant's: a plan or a harness that
-    changed since the grant is refused, never adopted. An existing artifact is
-    never re-issued."""
+    document, or refuse. The grant must name its phase (`PHASE_PLANS`), the
+    launch identity of that phase's plan (``launch_identity_sha256``) AND the
+    harness digest (``harness_digest``) it approves, who granted it, and the
+    expected and hard-cap amounts; a grant naming a run names this one. Both
+    identities are recomputed from disk and must equal the grant's: a plan or a
+    harness that changed since the grant is refused, never adopted. An existing
+    artifact is never re-issued."""
     grant_path = Path(grant_path)
     if not grant_path.is_file():
         raise AuthorizationError(f"no grant document at {grant_path}: an H1 generation authorization is "
@@ -165,9 +192,11 @@ def issue(run_id: str, *, grant_path: Path, repo_root: Path = REPO, out: Path | 
                 "hard_cap_usd"):
         if g.get(key) in (None, ""):
             raise AuthorizationError(f"{grant_path} lacks {key!r}")
-    if g.get("phase") != "P1":
-        raise AuthorizationError(f"{grant_path} grants phase {g.get('phase')!r}, not P1")
-    lid = launch_hash(repo_root)
+    if g.get("phase") not in PHASE_PLANS:
+        raise AuthorizationError(f"{grant_path} grants phase {g.get('phase')!r}, not one of {sorted(PHASE_PLANS)}")
+    if g.get("run_id") not in (None, run_id):
+        raise AuthorizationError(f"{grant_path} grants run {g['run_id']!r}, not {run_id!r}")
+    lid = launch_hash(repo_root, PHASE_PLANS[g["phase"]])
     if g["launch_identity_sha256"] != lid:
         raise AuthorizationError(f"the grant approves launch identity {g['launch_identity_sha256'][:12]}, which "
                                  f"this script does not derive (it derives {lid[:12]}): the plan, protocol, "
@@ -188,10 +217,10 @@ def issue(run_id: str, *, grant_path: Path, repo_root: Path = REPO, out: Path | 
         granted_by=g["granted_by"], plan_id="stage2.reasoning_data.h1_generation",
         plan_hash=lid, expected_usd=round(float(g["expected_usd"]), 4),
         hard_cap_usd=round(float(g["hard_cap_usd"]), 4), authorized_stages=(),
-        stage_conditions={"phase": "P1", "decision": g["decision"],
+        stage_conditions={"phase": g["phase"], "decision": g["decision"],
                           "grant_sha256": sha256_file(grant_path),
                           "granted_harness_digest": g["harness_digest"]},
-        scope_note=g.get("scope", "P1 teacher generation only: no training, no paid storage"),
+        scope_note=g.get("scope", f"{g['phase']} teacher generation only: no training, no paid storage"),
         authorized_session_commit=None, harness_source_digest=harness["digest"], harness_source_files=HARNESS,
         per_launch_hard_usd=round(float(g["hard_cap_usd"]), 4), provenance_commit=head, action_policy=POLICY)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -203,13 +232,16 @@ def issue(run_id: str, *, grant_path: Path, repo_root: Path = REPO, out: Path | 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("identity", help="print the launch identity and the harness digest")
+    ident = sub.add_parser("identity", help="print a phase's launch identity and the harness digest")
+    ident.add_argument("--phase", choices=sorted(PHASE_PLANS), default="P1")
     i = sub.add_parser("issue", help="write a run's authorization from a maintainer grant document")
     i.add_argument("--run-id", required=True)
     i.add_argument("--grant", required=True)
     args = ap.parse_args(argv)
     if args.cmd == "identity":
-        print(json.dumps({"launch_identity_sha256": launch_hash(), "launch_identity": launch_identity(),
+        plan = PHASE_PLANS[args.phase]
+        print(json.dumps({"phase": args.phase, "launch_identity_sha256": launch_hash(REPO, plan),
+                          "launch_identity": launch_identity(REPO, plan),
                           "harness_digest": harness_source_digest(REPO, files=HARNESS)["digest"]}, indent=1))
         return 0
     print(issue(args.run_id, grant_path=Path(args.grant)))

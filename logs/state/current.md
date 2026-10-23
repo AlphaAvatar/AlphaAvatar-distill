@@ -9,28 +9,32 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**STAGE-2/3 H1: THE $0 CORPUS REVISION @v2 DOES NOT BUILD; PLAN 2 (A SMALL TOP-UP) AWAITS THE MAINTAINER (2026-10-23).**
+**STAGE-2/3 H1: THE MAINTAINER CHOSE @v3 FOR ARM B; P1t (59 TASKS) IS PREPARED AT $0 AND AWAITS ITS GRANT (2026-10-23).**
 Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).
 Nothing is running and nothing is billing: 0 pods, 0 volumes, $0/h
-(provider snapshot `logs/budget/provider/runpod_billing_2026-10-23T0503Z.json`).
+(provider snapshot `logs/budget/provider/runpod_billing_2026-10-23T0942Z.json`).
 Evidence: [`docs/stages/stage-2/reasoning_data/H1.md`](../../docs/stages/stage-2/reasoning_data/H1.md)
-§14–§15; `audit/p1v_verification.json`, `audit/corpus_v2_feasibility.json`.
+§14–§16; `audit/p1v_verification.json`, `audit/corpus_v2_feasibility.json`,
+`plans/p1t/`.
 - **P1 (2026-10-22):** $3.33 of the $8.02 cap; 2,164 teacher records, every
   shard secured; P1v selected 1,057 units, and four cells fell short.
-- **@v2 (the maintainer's $0 candidate):** refused on the formal ladder:
-  - Reasoning Core analogy has ONE unit (capacity 7,737; no validation unit);
-  - project analogy (7.8%) and Reasoning Gym composition (2%) run dry just
-    below 2.96M.
-  - Independence, train/validation, R0–R9 and admission all pass.
-  - No pack; @v1 and P1v's evidence unchanged.
-- **Plan 2** (`corpus_v3_proposal.json`, analogy at @v1's 9%):
-  - 25 + 34 unused tasks in one A100 session, $1.01 expected / $2.60 hard
-    cap (`plans/abstract_topup_application.json`);
-  - NOT authorized.
+- **@v2:** does not build on the formal ladder; closed as infeasible.
+- **@v3 (`configs/.../corpus_v3.json`), the maintainer's choice for B:**
+  @v1's capability shares, analogy from the project generator alone, the 0.0
+  cells named. Frozen: P1t's plan binds its sha256.
+- **P1t, NOT authorized:** the application's 25 + 34 unused tasks, frozen in
+  `plans/p1t/generation_plan.json` under their own launch identity; one A100
+  session, $1.01 expected / $2.60 hard cap. What a grant must name:
+  `plans/p1t/authorization_request.json`.
+- **The build after P1t** (`corpus_feasibility.py`): both sessions verified
+  under their own authorizations, a shared task refused, the 0.0 cells' units
+  set aside by name, the pack only on a full formal build. Short again →
+  report and stop, no automatic top-up.
 - **Budget:** $661.52 billed all-time (provider, counted once) against the
   absolute $666.17 cap; the 34 pods and the anchor stay OPEN.
-- **Needs the maintainer:** which corpus becomes B (plan 2's top-up, another
-  revision, or none). P1g and P2 are not authorized.
+- **Needs the maintainer:** the P1t grant (`governance.issue` takes a grant
+  naming the request's launch identity and harness digest). P1g, P2 and
+  formal recovery are not authorized.
 
 **STAGE-0 CALIBRATION-VOLUME PROGRAMME CLOSED (final $0 closeout, 2026-10-21).**
 Verdict: **EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON

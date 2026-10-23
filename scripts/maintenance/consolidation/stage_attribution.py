@@ -1620,15 +1620,17 @@ STAGE_2 = [
         kind="experiment",
         stage_id="2",
         status=("H1 P1 EXECUTED 2026-10-22 UNDER THE MAINTAINER'S GRANT ($3.33 of $8.02); "
-                "P1v STOPPED AT FOUR SHORT CELLS; THE MAINTAINER'S $0 CORPUS REVISION "
-                "stage2.reasoning_master@v2 DOES NOT BUILD ON THE FORMAL LADDER (2026-10-23): "
-                "Reasoning Core analogy has one unit (composition capacity 7,737, no "
-                "validation unit), and project analogy and Reasoning Gym composition run dry "
-                "just below 2.96M; independence, train/validation and R0-R9 pass. Plan 2 "
-                "(analogy at @v1's 9%) needs 25 + 34 unused tasks in one A100 session, $1.01 "
-                "expected / $2.60 hard cap: applied for, NOT authorized. B's pack not built; "
-                "@v1 unchanged. Fixed: D4 Top-1, the recovery objective, M1, eval-set-1, 70/30. "
-                "34 pods / $58.33 unattributed. No student trained"),
+                "P1v STOPPED AT FOUR SHORT CELLS; @v2 DOES NOT BUILD ON THE FORMAL LADDER "
+                "(closed infeasible). THE MAINTAINER CHOSE stage2.reasoning_master@v3 FOR B "
+                "(2026-10-23): @v1's capability shares, analogy from the project generator "
+                "alone. P1t PREPARED AT $0, NOT AUTHORIZED: the application's 59 unused tasks "
+                "(25 analogy + 34 Reasoning Gym composition) frozen in plans/p1t/ under their "
+                "own launch identity, $1.01 expected / $2.60 hard cap inside the absolute "
+                "$666.17 cap; the two-session merge refuses a shared task, sets the 0.0 cells' "
+                "units aside by name and packs only on a full formal build. B's pack not "
+                "built; @v1 unchanged. Fixed: D4 Top-1, the recovery objective, M1, "
+                "eval-set-1, the 150k reserve. 34 pods / $58.33 unattributed. No student "
+                "trained"),
         title="Stage-2 verified teacher-native reasoning data, measured through "
               "Stage-3 controlled recovery",
         question=("Under one fixed initialization and the fixed historical "
@@ -1749,13 +1751,22 @@ STAGE_2 = [
               "run-dry point and validation units, independence, isolation, "
               "and plan 2's stand-in forecast",
               field="authorizes", equals="nothing"),
-            E("configs/stages/stage-2/reasoning_data/corpus_v3_proposal.json",
-              "plan 2: analogy kept at @v1's 9% from the project generator, a "
-              "proposal for the maintainer",
+            E("configs/stages/stage-2/reasoning_data/corpus_v3.json",
+              "@v3, arm B's corpus (the maintainer's choice of plan 2): @v1's "
+              "capability shares, analogy from the project generator alone, the "
+              "de-allocated cells named; frozen by P1t's plan",
               field="authorizes", equals="nothing"),
             E("logs/stages/stage-2/reasoning_data/plans/abstract_topup_application.json",
               "plan 2's paid top-up application, priced from P1's measured "
               "session; not authorized",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/p1t/generation_plan.json",
+              "P1t's frozen list: the application's 59 unused tasks re-drawn by "
+              "P1's rule, P1's pools and protocol, its own launch identity",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/p1t/authorization_request.json",
+              "what a P1t grant must name: run, launch identity, harness, the "
+              "launcher's budget at P1's price, provider occupancy; not authorized",
               field="authorizes", equals="nothing"),
         ],
         external_material=[],
@@ -1782,7 +1793,9 @@ STAGE_2 = [
                    "four short cells",
                    "logs/budget/decisions.md -- 2026-10-23: Maintainer: a $0 "
                    "corpus revision before any top-up; @v2 infeasible, plan 2 "
-                   "applied for"],
+                   "applied for",
+                   "logs/budget/decisions.md -- 2026-10-23: Maintainer: B's "
+                   "corpus is @v3; P1t prepared at $0 for a separate grant"],
         canonical_log_destination="logs/stages/stage-2/reasoning_data",
         classification_reason=(
             "Stage 2 by subject and product: it varies the offline training "

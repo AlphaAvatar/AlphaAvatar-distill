@@ -75,7 +75,7 @@ What each one asked of this stage.
 
 | experiment | what it asked | logs | status |
 | --- | --- | --- | --- |
-| `reasoning_data` — Stage-2 verified teacher-native reasoning data, measured through Stage-3 controlled recovery | Under one fixed initialization and the fixed historical recovery recipe, does verified teacher-native reasoning data lift a 0.6B student off the fluid-reasoning floor where corpus_v2 left it, and how does that scale over a nested 0.86M-5.50M ladder? | [`reasoning_data/`](reasoning_data/) | H1 P1 EXECUTED 2026-10-22 UNDER THE MAINTAINER'S GRANT ($3.33 of $8.02); P1v STOPPED AT FOUR SHORT CELLS; THE MAINTAINER'S $0 CORPUS REVISION stage2.reasoning_master@v2 DOES NOT BUILD ON THE FORMAL LADDER (2026-10-23): Reasoning Core analogy has one unit (composition capacity 7,737, no validation unit), and project analogy and Reasoning Gym composition run dry just below 2.96M; independence, train/validation and R0-R9 pass. Plan 2 (analogy at @v1's 9%) needs 25 + 34 unused tasks in one A100 session, $1.01 expected / $2.60 hard cap: applied for, NOT authorized. B's pack not built; @v1 unchanged. Fixed: D4 Top-1, the recovery objective, M1, eval-set-1, 70/30. 34 pods / $58.33 unattributed. No student trained |
+| `reasoning_data` — Stage-2 verified teacher-native reasoning data, measured through Stage-3 controlled recovery | Under one fixed initialization and the fixed historical recovery recipe, does verified teacher-native reasoning data lift a 0.6B student off the fluid-reasoning floor where corpus_v2 left it, and how does that scale over a nested 0.86M-5.50M ladder? | [`reasoning_data/`](reasoning_data/) | H1 P1 EXECUTED 2026-10-22 UNDER THE MAINTAINER'S GRANT ($3.33 of $8.02); P1v STOPPED AT FOUR SHORT CELLS; @v2 DOES NOT BUILD ON THE FORMAL LADDER (closed infeasible). THE MAINTAINER CHOSE stage2.reasoning_master@v3 FOR B (2026-10-23): @v1's capability shares, analogy from the project generator alone. P1t PREPARED AT $0, NOT AUTHORIZED: the application's 59 unused tasks (25 analogy + 34 Reasoning Gym composition) frozen in plans/p1t/ under their own launch identity, $1.01 expected / $2.60 hard cap inside the absolute $666.17 cap; the two-session merge refuses a shared task, sets the 0.0 cells' units aside by name and packs only on a full formal build. B's pack not built; @v1 unchanged. Fixed: D4 Top-1, the recovery objective, M1, eval-set-1, the 150k reserve. 34 pods / $58.33 unattributed. No student trained |
 
 ## Runs
 
@@ -118,6 +118,7 @@ copied here.
 * logs/budget/decisions.md -- 2026-10-22: Maintainer: two launch-boundary checks before any P1 grant
 * logs/budget/decisions.md -- 2026-10-22: Maintainer: H1 P1 + P1v formally authorized; P1 executed ($3.33), P1v stopped at four short cells
 * logs/budget/decisions.md -- 2026-10-23: Maintainer: a $0 corpus revision before any top-up; @v2 infeasible, plan 2 applied for
+* logs/budget/decisions.md -- 2026-10-23: Maintainer: B's corpus is @v3; P1t prepared at $0 for a separate grant
 
 ## Current status
 

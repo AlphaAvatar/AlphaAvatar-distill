@@ -1,16 +1,23 @@
 #!/usr/bin/env python3
-"""A corpus candidate on the formal ladder at $0: build it, or say exactly why not.
+"""A corpus on the formal ladder at $0: build its pack, or say exactly why not.
 
     PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.corpus_feasibility \
-        --candidate configs/stages/stage-2/reasoning_data/corpus_v2_candidate.json \
-        --run-id h1gen_20261022_190653 --store <scr>/store \
-        --pack-out artifacts/stages/stage-2/reasoning_data/packs/B_v2 \
-        [--plan-2 configs/stages/stage-2/reasoning_data/corpus_v3_proposal.json]
+        --candidate configs/stages/stage-2/reasoning_data/corpus_v3.json \
+        --store h1gen_20261022_190653=<P1 scr>/store --store h1p1t_20261023_094007=<P1t scr>/store \
+        --pack-out artifacts/stages/stage-2/reasoning_data/packs/B_v3 \
+        [--plan-2 <proposal.json>]
 
-1. DATA. P1's accepted units come from `p1v.verify_run` (the shards re-hashed,
-   every record re-verified and selected); the reuse comes from its sha-checked
-   selection. Nothing else enters, and a session in a cell the candidate does
-   not allocate refuses (`build_arm_b.place`).
+1. DATA. Every generation session the corpus declares (``data.
+   generation_sessions``; a corpus naming one ``data.run_id`` is P1 alone) must
+   be given its secured store and be authorized: a missing one refuses, so a
+   pack is never cut from part of the corpus. Each session's accepted units come
+   from `p1v.verify_run` against the plan ITS authorization funds (the shards
+   re-hashed, every record re-verified and selected), and keep that session's
+   phase, run, authorization and launch identity in their pack target. Two
+   sessions merge only when no task, unit, protocol or runner differs or
+   repeats (`merge`). The reuse comes from its sha-checked selection. A unit in
+   a cell the corpus declares at 0.0 is SET ASIDE by name (`set_aside`), never
+   trained; one in a cell it does not declare refuses (`build_arm_b.place`).
 2. THE FORMAL PATH. `build_arm_b.build` -> `build_master_ladder.build`: whole
    units rendered at their real token lengths, the reserve drawn, the nested
    order, the rungs cut WITHOUT composition drift, packed best-fit. A refusal
@@ -26,10 +33,11 @@
    - each cell's families;
    - R0-R9 for the generated units, re-run with their teacher text, and the
      reuse selection's own isolation record.
-4. A BUILT CANDIDATE gets its own pack, beside @v1's and never over it,
-   hash-bound to the candidate file, P1's launch identity, the sessions and
-   the reuse. The trainer's reader must take it back. Adoption stays the
-   maintainer's.
+4. A BUILT CORPUS gets its own pack, beside @v1's and never over it,
+   hash-bound to the corpus file, every session's launch identity, the
+   sessions and the reuse -- and only when the formal path cut every rung with
+   the reserve and nothing in 3 is unsatisfied. Stand-ins never reach a pack.
+   The trainer's reader must take it back. Adoption stays the maintainer's.
 5. PLAN 2 (`--plan-2`, only when the candidate does not build).
    - The same ladder runs on the real units, plus stand-ins for the units a
      top-up would add to the cells the proposal can fill only with new data.
@@ -58,6 +66,7 @@ from stages.reasoning_data import assets as A
 from stages.reasoning_data import build_arm_b as AB
 from stages.reasoning_data import build_master_ladder as B
 from stages.reasoning_data import generation_plan as GP
+from stages.reasoning_data import governance as GOV
 from stages.reasoning_data import isolation_check as IC
 from stages.reasoning_data import p1v
 from stages.reasoning_data import source_plan as SP
@@ -494,30 +503,115 @@ def plan_2(path: Path, units: list[LadderUnit], tasks: dict, got: dict, store: P
     return doc
 
 
+def declared_sessions(cand: dict) -> list[dict]:
+    """The generation sessions a corpus file declares; a file naming one
+    ``data.run_id`` (@v2) declares P1 alone."""
+    d = cand["data"]
+    return d.get("generation_sessions") or [{"phase": "P1", "run_id": d["run_id"],
+                                             "launch_identity_sha256": d["launch_identity_sha256"]}]
+
+
+def verify_sessions(decls: list[dict], stores: dict[str, Path]) -> list[dict]:
+    """Each declared session verified under its own authorization, or refuse:
+    no store, no authorization, a store that is not the complete run (every
+    planned task with a first candidate, every group's .complete matching its
+    shards), another phase, another plan or another launch identity than
+    declared."""
+    out = []
+    for d in decls:
+        if d["run_id"] not in stores:
+            raise SystemExit(f"{d['phase']} {d['run_id']}: no secured store given; a pack is built from every "
+                             "session its corpus declares, never from part of them")
+        if not (A.REPO / GOV.authorization_path(d["run_id"])).is_file():
+            raise SystemExit(f"{d['phase']} {d['run_id']}: no authorization; the session has not been granted or run")
+        v = p1v.verify_run(d["run_id"], stores[d["run_id"]])
+        planned = {r["task_id"] for f in v["plan"]["inputs"]
+                   for r in A.jsonl(A.REPO / GOV.inputs_dir(v["plan"]) / f["file"])}
+        first = {x["task_id"] for x in v["records"] if x["candidate_index"] == 0}
+        groups = v["ins"]["groups"]
+        if first != planned or not groups or not all(g["complete_and_matching"] for g in groups.values()):
+            raise SystemExit(f"{d['run_id']}: the store is not the complete run ({len(first & planned)} of "
+                             f"{len(planned)} planned tasks have a first candidate; groups {groups})")
+        got = {"phase": v["auth"].stage_conditions.get("phase"), "plan": str(v["plan_path"]),
+               "launch_identity_sha256": v["auth"].plan_hash}
+        bad = [k for k, val in got.items() if d.get(k, val) != val]
+        if bad:
+            raise SystemExit(f"{d['run_id']}: {bad} are not what the corpus declares ({got})")
+        out.append({**v, "decl": d, "identity": {"phase": got["phase"], "run_id": d["run_id"],
+                                                  "authorization_id": v["auth"].authorization_id,
+                                                  "launch_identity_sha256": v["auth"].plan_hash}})
+    return out
+
+
+def merge(runs: list[dict], *, tag: bool) -> tuple[list[dict], dict]:
+    """The generated sessions of every run, one corpus: refused when a task was
+    generated in two sessions, a unit id repeats, or the records name another
+    protocol or runner. With `tag`, every session's pack target carries the
+    identity of the session that generated it."""
+    tasks_by_run = {r["identity"]["run_id"]: {x["task_id"] for x in r["records"]} for r in runs}
+    seen, twice = {}, []
+    for run, ids in tasks_by_run.items():
+        twice += [f"{t} ({seen[t]}, {run})" for t in ids if t in seen]
+        seen.update({t: run for t in ids})
+    pins = {k: {x["generation_pass"][k] for r in runs for x in r["records"]} for k in ("protocol_sha256", "runner_sha256")}
+    problems = ([f"tasks generated in two sessions: {twice[:5]}"] if twice else []) + \
+        [f"records under {len(v)} {k} values" for k, v in pins.items() if len(v) != 1]
+    sessions, units = [], {}
+    for r in runs:
+        for x in r["got"]["sessions"]:
+            if units.setdefault(x["unit_id"], r["identity"]["run_id"]) != r["identity"]["run_id"]:
+                problems.append(f"unit {x['unit_id']} in two sessions")
+            sessions.append({**x, "target": {**x["target"], "generation": r["identity"]}} if tag else x)
+    if problems:
+        raise SystemExit("the sessions do not merge: " + "; ".join(problems[:5]))
+    return sessions, {"sessions": [r["identity"] | {"records": r["ins"]["records"], "shards": r["ins"]["shards"],
+                                                    "units_selected": len(r["got"]["selected"])} for r in runs],
+                      "tasks_per_session": {k: len(v) for k, v in tasks_by_run.items()},
+                      "tasks_in_two_sessions": 0, "protocol_sha256": sorted(pins["protocol_sha256"]),
+                      "runner_sha256": sorted(pins["runner_sha256"])}
+
+
+def set_aside(sessions: list[dict], spec: dict) -> tuple[list[dict], list[dict]]:
+    """Split off the units of the cells the corpus declares at 0.0 (sources
+    it de-allocates), each listed by unit, cell and record identity. They are
+    not trained on and not deleted; every other session is returned as is."""
+    zero = {f"{st}/{src}" for st, cells in SP.allocation(spec, spec["corpus_id"]).items()
+            for src, share in cells.items() if share == 0}
+    keep, aside = [], {}
+    for x in sessions:
+        cell = f"{x['stratum']}/{(x.get('attributes') or {}).get('source', '')}"
+        if cell in zero:
+            aside.setdefault(x["unit_id"], {"unit_id": x["unit_id"], "cell": cell, "target": x.get("target")})
+        else:
+            keep.append(x)
+    return keep, sorted(aside.values(), key=lambda a: (a["cell"], a["unit_id"]))
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--candidate", required=True)
-    ap.add_argument("--run-id", required=True)
-    ap.add_argument("--store", required=True)
+    ap.add_argument("--store", action="append", required=True, metavar="RUN_ID=DIR",
+                    help="a declared session's secured shards; one per session the corpus declares")
     ap.add_argument("--pack-out", required=True)
     ap.add_argument("--plan-2", default=None)
     args = ap.parse_args(argv)
     spec = SP.candidate_spec(Path(args.candidate))
     cand = A.read_json(Path(args.candidate))
-    v = p1v.verify_run(args.run_id, Path(args.store))
-    got, tasks, tok = v["got"], v["tasks"], v["tok"]
+    stores = dict(kv.split("=", 1) for kv in args.store)
+    runs = verify_sessions(declared_sessions(cand), {k: Path(v) for k, v in stores.items()})
+    tok = runs[0]["tok"]
     reuse = [A.REPO / r["path"] for r in cand["data"]["reuse"]]
     for r, p in zip(cand["data"]["reuse"], reuse):
         if A.sha256_file(p) != r["sha256"]:
             raise SystemExit(f"{r['path']} is not the reuse selection the candidate names")
-    if v["auth"].plan_hash != cand["data"]["launch_identity_sha256"]:
-        raise SystemExit("the run's launch identity is not the one the candidate names")
-    sessions = got["sessions"] + AB._reused(reuse)
+    generated, provenance = merge(runs, tag="generation_sessions" in cand["data"])
+    generated, aside = set_aside(generated, spec)
+    sessions = generated + AB._reused(reuse)
     shares = AB.cell_shares(spec, spec["corpus_id"])
     present = Counter(f"{s['stratum']}/{(s.get('attributes') or {}).get('source', '')}" for s in sessions)
     unallocated = sorted(c for c in present if c not in shares)
     if unallocated:
-        raise SystemExit(f"units in cells {spec['corpus_id']} does not allocate: {unallocated}")
+        raise SystemExit(f"units in cells {spec['corpus_id']} does not declare: {unallocated}")
     sessions_sha = _sha("".join(json.dumps(s, sort_keys=True) + "\n" for s in sessions))
     placed = AB.place(sessions, shares)
     rendered, excluded, _ = B.render_all(tok, placed, block_len=int(spec["block_len"]))
@@ -525,20 +619,22 @@ def main(argv=None) -> int:
     reserve, targets = int(spec["reserve_tokens"]), list(spec["rung_targets"])
     con, lad = contract(units, shares, salt=spec["salt"], reserve=reserve, targets=targets)
     ind = independence(placed, set(lad["reserved"]))
-    gen_units = {s["unit_id"]: s for s in got["sessions"]}
-    items = [{**tasks[uid], "unit_id": uid, "messages": s["messages"]} for uid, s in sorted(gen_units.items())]
+    gen_units = {x["unit_id"]: (r["tasks"], x) for r in runs for x in r["got"]["sessions"]}
+    items = [{**tk[uid], "unit_id": uid, "messages": x["messages"]} for uid, (tk, x) in sorted(gen_units.items())]
     iso = IC.check_pool(items)
     reuse_iso = [{"path": SP.repo_path(p.with_name(p.name.replace(".jsonl", ".isolation.json"))),
                   "pass": A.read_json(p.with_name(p.name.replace(".jsonl", ".isolation.json")))["pass"]}
                  for p in reuse]
     tried = attempt(sessions, spec, shares, tok)
-    doc = {"schema": "aadistill.stage2.reasoning_data.corpus_feasibility/v1",
+    n_gen = sum(len(r["got"]["selected"]) for r in runs)
+    doc = {"schema": "aadistill.stage2.reasoning_data.corpus_feasibility/v2",
            "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
            "candidate": spec["candidate"] | {"corpus_id": spec["corpus_id"], "salt": spec["salt"]},
-           "data": {"run_id": args.run_id, "launch_identity_sha256": v["auth"].plan_hash,
-                    "shards": v["ins"]["shards"], "records": v["ins"]["records"],
-                    "generated_units_selected": len(got["selected"]),
-                    "reuse_units": len({s["unit_id"] for s in sessions}) - len(got["selected"]),
+           "data": {"generation": provenance,
+                    "generated_units_selected": n_gen,
+                    "set_aside": {"units": len(aside), "rows": aside,
+                                  "rule": "cells the corpus declares at 0.0: not trained, not validated, not deleted"},
+                    "reuse_units": len({s["unit_id"] for s in sessions}) - (n_gen - len(aside)),
                     "sessions": len(sessions), "sessions_sha256": sessions_sha,
                     "admission": B.exclusion_summary(excluded)},
            "formal_path": {"built": tried["built"], "refusal": tried.get("refusal"),
@@ -553,20 +649,25 @@ def main(argv=None) -> int:
     doc["unsatisfied"] = unsatisfied(con) + ([] if iso["pass"] else ["R0-R9 on the generated units"]) \
         + ([] if all(r["pass"] for r in reuse_iso) else ["the reuse selection's isolation record"]) \
         + ([f"{ind['units_sharing_a_prompt']} units share a prompt"] if ind["units_sharing_a_prompt"] else []) \
-        + ([f"{ind['units_sharing_a_target']} units share a target"] if ind["units_sharing_a_target"] else [])
+        + ([f"{ind['units_sharing_a_target']} units share a target"] if ind["units_sharing_a_target"] else []) \
+        + ([f"{ind['validation_prompts_also_in_training']} validation prompts are also in training"]
+           if ind["validation_prompts_also_in_training"] else [])
     out = Path(args.pack_out)
     if tried["built"] and not doc["unsatisfied"]:
         built, ladder_spec = tried["result"], tried["ladder_spec"]
         meta = B.write_pack(out, built, ladder_spec, {
             "corpus_id": spec["corpus_id"], "candidate_sha256": spec["candidate"]["sha256"],
-            "run_id": args.run_id, "launch_identity_sha256": v["auth"].plan_hash, "sessions_sha256": sessions_sha,
+            "generation_sessions": provenance["sessions"], "sessions_sha256": sessions_sha,
+            "set_aside_units": [a["unit_id"] for a in aside],
             "reuse_sha256": {r["path"]: r["sha256"] for r in cand["data"]["reuse"]}})
         from aadistill.data.ladder import ladder_blocks
         _, val, stats = ladder_blocks(out, TARGET, n_val=16)
         doc["pack"] = {"built": True, "dir": SP.repo_path(out), "outputs": meta["outputs"],
                        "ladder_sha256": A.sha256_file(out / "ladder.json"),
-                       "rungs": [{k: r.get(k) for k in ("target_supervised_tokens", "n_units", "n_blocks",
-                                                        "actual_supervised_tokens", "real_tokens", "padding_tokens")}
+                       "blocks_sha256": A.sha256_file(out / "blocks.npz"),
+                       "rungs": [{k: r.get(k) for k in ("target_supervised_tokens", "n_units", "n_sessions",
+                                                        "n_blocks", "actual_supervised_tokens", "real_tokens",
+                                                        "padding_tokens")}
                                  for r in meta["rungs"]],
                        "validation_tail": meta["validation_tail"],
                        "trainer_reader": {"val_blocks": int(val[0].shape[0]),
@@ -574,10 +675,12 @@ def main(argv=None) -> int:
     else:
         doc["pack"] = {"built": False,
                        "why": tried.get("refusal") or "; ".join(doc["unsatisfied"]),
-                       "rule": ("no composition drift, no other salt, no lower gate, no repetition: the "
-                                "unsatisfied items are reported and nothing is packed")}
+                       "rule": ("no composition drift, no other salt, no lower gate, no repetition, no automatic "
+                                "paid top-up: the unsatisfied items are reported and nothing is packed")}
         if args.plan_2:
-            doc["plan_2"] = plan_2(Path(args.plan_2), units, tasks, got, Path(args.store), args.run_id)
+            r0 = runs[0]
+            doc["plan_2"] = plan_2(Path(args.plan_2), units, r0["tasks"], r0["got"],
+                                   Path(stores[r0["identity"]["run_id"]]), r0["identity"]["run_id"])
     dest = A.LOG_DIR / f"audit/corpus_{spec['corpus_id'].split('@')[1]}_feasibility.json"
     dest.write_text(json.dumps(doc, indent=1) + "\n")
     print(dest.relative_to(A.REPO), "built" if doc["pack"]["built"] else "NOT built", doc["unsatisfied"][:3])

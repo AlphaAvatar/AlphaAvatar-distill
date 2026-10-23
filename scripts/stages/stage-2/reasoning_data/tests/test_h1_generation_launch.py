@@ -57,8 +57,12 @@ def test_the_issuer_needs_a_grant_naming_this_launch_identity(tmp_path):
         GOV.issue("r1", grant_path=tmp_path / "missing.json", out=out)
     with pytest.raises(AuthorizationError, match="does not derive"):
         GOV.issue("r1", grant_path=_grant(tmp_path, launch_identity_sha256="0" * 64), out=out)
-    with pytest.raises(AuthorizationError, match="not P1"):
+    with pytest.raises(AuthorizationError, match="not one of"):
         GOV.issue("r1", grant_path=_grant(tmp_path, phase="P2"), out=out)
+    with pytest.raises(AuthorizationError, match="grants run 'other'"):
+        GOV.issue("r1", grant_path=_grant(tmp_path, run_id="other"), out=out)
+    with pytest.raises(AuthorizationError, match="does not derive"):    # P1's identity under P1t's phase
+        GOV.issue("r1", grant_path=_grant(tmp_path, phase="P1t"), out=out)
     path = GOV.issue("r1", grant_path=_grant(tmp_path), out=out)
     auth = GOV.load(path)                              # the artifact binds identity and harness
     auth.require_plan(GOV.launch_hash())
@@ -134,14 +138,15 @@ def test_the_session_spec_validates_and_binds_the_launch_identity():
 
 
 def test_the_prechecks_refuse_a_plan_or_commit_that_is_not_the_bound_one(monkeypatch):
-    ok, why = L.plan_is_the_chosen_admitted_one(None)
-    assert ok, why
+    for phase in GOV.PHASE_PLANS:
+        ok, why = L.plan_is_the_chosen_admitted_one(type("Ctx", (), {"args": type("A", (), {"phase": phase})()})())
+        assert ok, (phase, why)
     readme = subprocess.run(["git", "show", "HEAD:README.md"], cwd=A.REPO, capture_output=True).stdout
-    ctx = type("Ctx", (), {"args": type("A", (), {"session_commit": "HEAD"})()})()
+    ctx = type("Ctx", (), {"args": type("A", (), {"session_commit": "HEAD", "phase": "P1"})()})()
     ident = {"generation_plan": {"path": "README.md", "sha256": hashlib.sha256(readme).hexdigest()},
              "generation_protocol": {"path": "README.md", "sha256": hashlib.sha256(readme).hexdigest()},
              "inputs": [], "pools": []}
-    monkeypatch.setattr(GOV, "launch_identity", lambda root=None: ident)
+    monkeypatch.setattr(GOV, "launch_identity", lambda root=None, plan_path=None: ident)
     assert L.bound_files_are_in_the_session_commit(ctx)[0]
     ident["pools"] = [{"path": "README.md", "sha256": "0" * 64}]
     ok, why = L.bound_files_are_in_the_session_commit(ctx)
@@ -149,12 +154,13 @@ def test_the_prechecks_refuse_a_plan_or_commit_that_is_not_the_bound_one(monkeyp
 
 
 def test_a_launch_without_an_authorization_is_refused_before_any_provider_call(tmp_path, capsys):
-    rc = L.main(["--run-id", "no_such_run", "--scr", str(tmp_path), "--session-commit", "0" * 40,
-                 "--bundle", "x", "--max-price", "1.0", "--dry-run"])
-    assert rc == 11 and "REFUSED at $0" in capsys.readouterr().out
+    for phase in GOV.PHASE_PLANS:
+        rc = L.main(["--phase", phase, "--run-id", "no_such_run", "--scr", str(tmp_path), "--session-commit",
+                     "0" * 40, "--bundle", "x", "--max-price", "1.0", "--dry-run"])
+        assert rc == 11 and "REFUSED at $0" in capsys.readouterr().out
     with pytest.raises(SystemExit, match="no network volume"):
-        L.main(["--run-id", "r", "--scr", str(tmp_path), "--session-commit", "0" * 40, "--bundle", "x",
-                "--max-price", "1.0", "--network-volume-id", "v"])
+        L.main(["--phase", "P1t", "--run-id", "r", "--scr", str(tmp_path), "--session-commit", "0" * 40,
+                "--bundle", "x", "--max-price", "1.0", "--network-volume-id", "v"])
 
 
 def test_closeout_rehashes_every_shard_and_reconciles_the_provider(tmp_path, monkeypatch):
@@ -189,21 +195,26 @@ def _setup_branch() -> str:
     return text[start:text.index("\nelif [", start)]
 
 
-@pytest.mark.parametrize("plan_hash,rc", [("current", 0), ("0" * 64, 98)])
-def test_the_pods_setup_branch_runs_and_fails_closed(tmp_path, plan_hash, rc):
+@pytest.mark.parametrize("phase", sorted(GOV.PHASE_PLANS))
+@pytest.mark.parametrize("plan_hash,rc", [("current", 0), ("0" * 64, 98), ("other phase", 98)])
+def test_the_pods_setup_branch_runs_and_fails_closed(tmp_path, phase, plan_hash, rc):
     """The branch the pod executes, executed: it loads the artifact by its own
-    type, recomputes the launch identity and harness from the checkout, and a
-    mismatch marks AUTHORIZATION_MISMATCH and exits 98."""
-    path = GOV.issue("setup_probe", grant_path=_grant(tmp_path), out=tmp_path / "auth.json")
+    type, recomputes the launch identity of the plan the artifact's phase names
+    and the harness from the checkout, and a mismatch -- including the other
+    phase's identity -- marks AUTHORIZATION_MISMATCH and exits 98."""
+    lid = GOV.launch_hash(A.REPO, GOV.PHASE_PLANS[phase])
+    other = next(GOV.launch_hash(A.REPO, p) for k, p in GOV.PHASE_PLANS.items() if k != phase)
+    path = GOV.issue("setup_probe", grant_path=_grant(tmp_path, phase=phase, launch_identity_sha256=lid),
+                     out=tmp_path / "auth.json")
     script = ('say() { echo "SAY $*"; }; mark() { echo "MARK $*"; }\n' + _setup_branch() + "\nexit 0\n")
     env = {"PATH": f"{Path(sys.executable).parent}:/usr/bin:/bin", "REPO": str(A.REPO),
            "SESSION_AUTH_PATH": str(path),
-           "SESSION_PLAN_HASH": GOV.launch_hash() if plan_hash == "current" else plan_hash}
+           "SESSION_PLAN_HASH": {"current": lid, "other phase": other}.get(plan_hash, plan_hash)}
     script = script.replace("/opt/train/bin/python", sys.executable)
     res = subprocess.run(["bash", "-c", script], env=env, capture_output=True, text=True, cwd=A.REPO)
     assert res.returncode == rc, res.stdout + res.stderr
     if rc == 0:
-        assert "setup_probe" in res.stdout and f"launch {GOV.launch_hash()[:12]}" in res.stdout
+        assert "setup_probe" in res.stdout and f"launch {lid[:12]}" in res.stdout
     else:
         assert "MARK AUTHORIZATION_MISMATCH" in res.stdout
 

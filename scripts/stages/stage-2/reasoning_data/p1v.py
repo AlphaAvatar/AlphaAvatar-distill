@@ -78,17 +78,23 @@ def cell_of(task: dict, spec: dict) -> str:
 
 
 def verify_run(run_id: str, store: Path) -> dict:
-    """Steps 1-2 for one run: its secured inputs, verified and selected. Every
-    later reader of P1's accepted units (this file, `corpus_feasibility`) takes
-    them from here, never from a stored selection."""
+    """Steps 1-2 for one run (P1 or P1t): its secured inputs, verified and
+    selected, against the plan its authorization's phase names -- whose launch
+    identity on disk must still be the authorized one. Every later reader of a
+    run's accepted units (this file, `corpus_feasibility`) takes them from here,
+    never from a stored selection."""
     spec = A.read_json(A.CONFIG_DIR / "corpus_spec.json")
-    plan = A.read_json(A.REPO / GOV.PLAN)
     auth = GOV.load(A.REPO / GOV.authorization_path(run_id))
+    plan_path = GOV.plan_of(auth)
+    if GOV.launch_hash(A.REPO, plan_path) != auth.plan_hash:
+        raise SystemExit(f"{run_id}: {plan_path} on disk is not the plan its authorization binds")
+    plan = A.read_json(A.REPO / plan_path)
     recs, ins = inputs(Path(store), auth.plan_hash)
     tasks = {t["task_id"]: t for p in plan["pools"] for t in A.jsonl(A.REPO / p["path"])}
     tok = B.load_tokenizer()
     got = G.adapt(tasks, recs, lambda t: SP.stratum_of(t, spec), tokenizer=tok)
-    return {"spec": spec, "plan": plan, "auth": auth, "ins": ins, "tasks": tasks, "tok": tok, "got": got}
+    return {"spec": spec, "plan": plan, "plan_path": plan_path, "auth": auth, "ins": ins, "tasks": tasks,
+            "tok": tok, "got": got, "records": recs}
 
 
 def main(argv=None) -> int:

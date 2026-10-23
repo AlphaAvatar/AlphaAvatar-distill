@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""Launch H1's P1 teacher-generation session on one provider GPU (needs an issued authorization).
+"""Launch one H1 teacher-generation session (P1, or P1t's top-up) on one provider GPU (needs an issued authorization).
 
     PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/reasoning_data/h1_generation_launch.py \
-        --run-id <run_id> --scr <scratch> --session-commit <sha> --bundle <name> \
+        --phase {P1,P1t} --run-id <run_id> --scr <scratch> --session-commit <sha> --bundle <name> \
         --max-price <live securePrice> [--resume-store <dir>] [--dry-run]
 
-Reuses `aadistill.infrastructure.session_runner`: before any pod exists, the
-argument contract, the authorization loaded under `governance.POLICY` and bound
-to this LAUNCH IDENTITY (plan, protocol, inputs and pools: `governance.
-launch_hash`) and to the harness on disk, the budget priced from the forecast
-inside the authorized cap, the provider-resource reconciliation and the
+``--phase`` names the plan (`governance.PHASE_PLANS`): P1's @v1 list or P1t's
+@v3 top-up. Reuses `aadistill.infrastructure.session_runner`: before any pod
+exists, the argument contract, the authorization loaded under
+`governance.POLICY` and bound to this LAUNCH IDENTITY (that phase's plan, the
+protocol, inputs and pools: `governance.launch_hash`) and to the harness on
+disk, the budget priced inside the authorized cap (P1 from the forecast, P1t as
+its application prices it), the provider-resource reconciliation and the
 prechecks below; then the detached watchdog (the hard deadline derived from the
 cap and the live price), setup, the driver, the poll loop, collection, teardown
 and the provider's confirmation that the pod is gone. This module supplies only
@@ -61,7 +63,11 @@ EVIDENCE = "generation_session.json"
 SESSION_KIND = "stage2_h1_generation"
 STATUS = "/workspace/stage2_h1_generation.status"
 FORECAST = GOV.EXPERIMENT_LOGS / "plans/cost_forecast.json"
+#: P1t's priced basis: P1's measured session (corpus_feasibility.topup_application)
+TOPUP_APPLICATION = GOV.EXPERIMENT_LOGS / "plans/abstract_topup_application.json"
 RESUME_INSTALL = "artifacts/stages/stage-2/reasoning_data"
+#: minutes kept after the soft stop to pull the last shards off the pod (P1's)
+ARTIFACT_RECOVERY_MINUTES = 15.0
 
 
 def out_dir() -> str:
@@ -232,10 +238,12 @@ def shards_secured(ctx: SessionContext, *_a, sleep=time.sleep, **_k) -> tuple[bo
     return False, why
 
 
-def budget(repo_root: Path = REPO_ROOT) -> BudgetSpec:
-    """Priced from the forecast's generation rows (measured throughput); the
-    minutes are bounds, and the hard deadline follows from the cap and the
-    live price (the watchdog)."""
+def budget(phase: str = "P1", repo_root: Path = REPO_ROOT) -> BudgetSpec:
+    """P1: priced from the forecast's generation rows (measured throughput);
+    the minutes are bounds, and the hard deadline follows from the cap and the
+    live price (the watchdog). P1t: `topup_budget`."""
+    if phase == "P1t":
+        return topup_budget(repo_root)
     fc = json.loads((repo_root / FORECAST).read_text())
     gen, factor = fc["generation"], fc["contingency_factors_not_measurements"]["generation"]
     return BudgetSpec(
@@ -246,7 +254,32 @@ def budget(repo_root: Path = REPO_ROOT) -> BudgetSpec:
         other_phases=(Phase("teacher_generation_two_passes", round(gen["gpu_hours"] * 60, 1)),),
         contingency_fraction=round(factor - 1.0, 4),
         soft_stop_reserves=(Phase("long_tail_generation", 20.0),),
-        artifact_recovery_reserve_minutes=15.0, account_balance_required_usd=30.0)
+        artifact_recovery_reserve_minutes=ARTIFACT_RECOVERY_MINUTES, account_balance_required_usd=30.0)
+
+
+def topup_budget(repo_root: Path = REPO_ROOT) -> BudgetSpec:
+    """P1t, priced as its application prices it, from P1's measured session:
+    pod to driver; two passes, each the slowest measured engine start plus the
+    longest possible candidate at P1's decode speed; ALL_DONE to pod deleted.
+    The hard threshold is the application's rule, the project's hard-cap
+    factor (cost_forecast) times expected + setup + teardown + the recovery
+    minutes: the factor is the contingency, the closeout is the soft-stop
+    reserve, the recovery minutes x factor the artifact reserve."""
+    cost = json.loads((repo_root / TOPUP_APPLICATION).read_text())["cost"]
+    m = cost["measured_basis"]
+    f = json.loads((repo_root / FORECAST).read_text())["contingency_factors_not_measurements"]["hard_cap"]
+    setup, teardown = m["pod_to_driver_minutes"], m["all_done_to_pod_deleted_minutes"]
+    passes = 2 * (max(m["engine_start_seconds_by_pass"]) + cost["per_pass_bound_seconds"]) / 60
+    return BudgetSpec(
+        arms=0, steps_per_arm=0, step_seconds=1.0,
+        step_source="unused: no training in this session (arms=0)",
+        below_floor_reason="no training steps; every phase is priced below",
+        setup_minutes=setup, transfer_minutes=teardown,
+        other_phases=(Phase("teacher_generation_two_passes", round(passes, 2)),),
+        contingency_fraction=round(f - 1.0, 4),
+        soft_stop_reserves=(Phase("closeout_setup_and_teardown", round(f * (setup + teardown), 2)),),
+        artifact_recovery_reserve_minutes=round(f * ARTIFACT_RECOVERY_MINUTES, 2),
+        account_balance_required_usd=30.0)
 
 
 def driver_command(ctx: Any, plan: Any) -> str:
@@ -259,10 +292,21 @@ def driver_command(ctx: Any, plan: Any) -> str:
 
 
 def plan_is_the_chosen_admitted_one(ctx: SessionContext, repo_root: Path = REPO_ROOT) -> tuple[bool, str]:
-    plan = json.loads((repo_root / GOV.PLAN).read_text())
-    if not (plan.get("admitted") and plan.get("corpus_id") == json.loads(
-            (repo_root / "configs/stages/stage-2/reasoning_data/corpus_spec.json").read_text())["chosen_variant"]["id"]):
-        return False, f"{GOV.PLAN} is not the chosen, admitted variant's plan"
+    """P1: the plan of `corpus_spec.json :: chosen_variant`. P1t: the plan of
+    the corpus the maintainer chose for arm B, built for that corpus file's
+    exact bytes. Either way admitted and without a shortfall."""
+    path = GOV.PHASE_PLANS[ctx.args.phase]
+    plan = json.loads((repo_root / path).read_text())
+    if ctx.args.phase == "P1":
+        chosen = json.loads((repo_root / "configs/stages/stage-2/reasoning_data/corpus_spec.json").read_text())[
+            "chosen_variant"]["id"]
+    else:
+        corpus = repo_root / plan["corpus"]["path"]
+        if hashlib.sha256(corpus.read_bytes()).hexdigest() != plan["corpus"]["sha256"]:
+            return False, f"{plan['corpus']['path']} is not the corpus file {path} was built for"
+        chosen = json.loads(corpus.read_text()).get("chosen", {}).get("corpus_id")
+    if not (plan.get("admitted") and plan.get("corpus_id") == chosen):
+        return False, f"{path} is not the chosen, admitted corpus's plan"
     if plan.get("shortfalls"):
         return False, f"the plan has shortfalls {plan['shortfalls']}"
     return True, f"{plan['corpus_id']}: {plan['totals']['tasks']} tasks, no shortfall"
@@ -271,7 +315,7 @@ def plan_is_the_chosen_admitted_one(ctx: SessionContext, repo_root: Path = REPO_
 def bound_files_are_in_the_session_commit(ctx: SessionContext, repo_root: Path = REPO_ROOT) -> tuple[bool, str]:
     """The pod checks out the session commit: every bound file must be in it
     with the bytes the launch identity hashed."""
-    ident = GOV.launch_identity(repo_root)
+    ident = GOV.launch_identity(repo_root, GOV.PHASE_PLANS[ctx.args.phase])
     files = [ident["generation_plan"], ident["generation_protocol"], *ident["inputs"],
              *[{"path": p["path"], "sha256": p["sha256"]} for p in ident["pools"]]]
     bad = []
@@ -287,19 +331,20 @@ def bound_files_are_in_the_session_commit(ctx: SessionContext, repo_root: Path =
 
 def spec(args) -> SessionSpec:
     proto = json.loads((REPO_ROOT / GOV.PROTOCOL).read_text())
+    plan_path = GOV.PHASE_PLANS[args.phase]
+    inputs = GOV.inputs_dir(json.loads((REPO_ROOT / plan_path).read_text()))
     #: The run inputs reach the pod by a DECLARED route (the core rule: a pod
     #: has only its bundle plus what the session names). They are also
     #: committed, for review; setup installs identical bytes over them, and the
     #: driver re-hashes them into the launch identity before reading them.
-    assets = (LocalAsset(repo_path=str(GOV.INPUTS_DIR), dest_name=GOV.INPUTS_DIR.name,
-                         install_to=str(GOV.INPUTS_DIR.parent)),)
+    assets = (LocalAsset(repo_path=str(inputs), dest_name=inputs.name, install_to=str(inputs.parent)),)
     if getattr(args, "resume_store", None):
         assets += (LocalAsset(repo_path=str(args.resume_store), dest_name="resume_store",
                               install_to=RESUME_INSTALL),)
     return SessionSpec(
         session_id="stage2-h1-generation",
         schema="aadistill.stage2.reasoning_data.h1_generation_session/v1",
-        description="H1 P1: teacher-native candidates for arm B's generated cells (text only)",
+        description=f"H1 {args.phase}: teacher-native candidates for arm B's generated cells (text only)",
         authorization_path=str(GOV.authorization_path(args.run_id)),
         authorization_loader=GOV.H1GenerationAuthorization.load,
         commands=ExecutionCommands(
@@ -308,8 +353,8 @@ def spec(args) -> SessionSpec:
             artifact_collector="scripts/shared/pod/collect_artifacts.py",
             **deployment_commands()),
         plan_id="stage2.reasoning_data.h1_generation",
-        plan_hash=GOV.launch_hash(REPO_ROOT),
-        budget=budget(),
+        plan_hash=GOV.launch_hash(REPO_ROOT, plan_path),
+        budget=budget(args.phase),
         setup=SetupManifest(
             env={"SESSION_KIND": SESSION_KIND},
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS", "SESSION_KIND", "TEACHER_REVISION"),
@@ -416,6 +461,8 @@ def bundle_on_relay(args, api=None) -> tuple[bool, str]:
 
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--phase", required=True, choices=sorted(GOV.PHASE_PLANS),
+                    help="the plan the authorization funds (governance.PHASE_PLANS)")
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--scr", required=True)
     ap.add_argument("--session-commit", required=True)
@@ -455,7 +502,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.max_price is None:
         raise SystemExit("--max-price is required: read the live securePrice first")
     if args.network_volume_id:
-        raise SystemExit("P1 attaches no network volume: its records fit existing storage")
+        raise SystemExit(f"{args.phase} attaches no network volume: its records fit existing storage")
     try:
         session = spec(args)
         runner = SessionRunner(session, args, REPO_ROOT) if args.dry_run else None

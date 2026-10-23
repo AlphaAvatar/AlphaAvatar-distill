@@ -9,9 +9,11 @@ Generation writes TEXT: teacher programs are never executed here (the
 verifying sandbox is on the dev box, `code_sandbox.py`), so this pod's
 credentials, network and volume never meet model-written code.
 
-1. CONTRACT. The authorization is loaded under `governance.POLICY`; the launch
-   identity is recomputed HERE from the plan, protocol, inputs and pools on this
-   machine and must equal the one the authorization binds; the harness on disk
+1. CONTRACT. The authorization is loaded under `governance.POLICY`; its phase
+   names the plan it funds (`governance.plan_of`: P1's list or P1t's top-up);
+   the launch identity is recomputed HERE from that plan and the protocol,
+   inputs and pools on this machine and must equal the one the authorization
+   binds; the harness on disk
    must digest to the authorized one; the protocol's sampling must equal the
    generator's. Only then is anything read from the protocol, and every value
    passed to the generator (teacher, revision, action protocol, session limit,
@@ -74,13 +76,15 @@ def sha(path: Path) -> str:
 
 
 def authorize(path: Path, repo: Path) -> dict:
-    """The contract: the authorization binds this machine's launch identity and harness."""
+    """The contract: the authorization binds this machine's launch identity, of
+    the plan its phase names, and harness."""
     auth = GOV.load(path)
-    lid = GOV.launch_hash(repo)
+    plan = GOV.plan_of(auth)
+    lid = GOV.launch_hash(repo, plan)
     auth.require_plan(lid)
     harness = auth.require_harness(repo)
     return {"authorization_id": auth.authorization_id, "hard_cap_usd": auth.hard_cap_usd,
-            "launch_identity_sha256": lid, "harness_digest": harness["digest"]}
+            "launch_identity_sha256": lid, "harness_digest": harness["digest"], "plan_path": str(plan)}
 
 
 def contract(repo: Path, authorization: Path, authorize=authorize) -> dict:
@@ -90,7 +94,7 @@ def contract(repo: Path, authorization: Path, authorize=authorize) -> dict:
     sampling = {k: proto["decoding"][k] for k in GENERATE_SAMPLING}
     if sampling != GENERATE_SAMPLING:
         raise AuthorizationError(f"protocol sampling {sampling} is not the generator's {GENERATE_SAMPLING}")
-    plan = json.loads((repo / GOV.PLAN).read_text())
+    plan = json.loads((repo / bound["plan_path"]).read_text())
     tasks = {t["task_id"]: t for p in plan["pools"] for t in A.jsonl(repo / p["path"])}
     return {**bound, "protocol": proto, "plan": plan, "tasks": tasks}
 
@@ -284,7 +288,7 @@ def main(argv=None, *, run=run_battery, authorize=authorize, repo: Path | None =
                 if p.suffix in (".jsonl", ".done") and not (out / p.name).exists():
                     shutil.copy2(p, out / p.name)
         record["contract"] = {k: c[k] for k in ("authorization_id", "hard_cap_usd", "launch_identity_sha256",
-                                                "harness_digest")} | {"status": "ok"}
+                                                "harness_digest", "plan_path")} | {"status": "ok"}
     except BaseException as exc:  # noqa: BLE001
         record["contract"] = {"status": "failed", "error": repr(exc)}
         save()
@@ -292,7 +296,7 @@ def main(argv=None, *, run=run_battery, authorize=authorize, repo: Path | None =
         return 2
     save()
     mark("CONTRACT_OK")
-    inputs = repo / GOV.INPUTS_DIR
+    inputs = repo / GOV.inputs_dir(c["plan"])
     complete = True
     for f in c["plan"]["inputs"]:
         ids = None

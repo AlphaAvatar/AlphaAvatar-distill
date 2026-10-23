@@ -36,7 +36,7 @@ def stage0():
     return tasks, recs, good[:2] + bad[:2], set(bad[:2])
 
 
-def _repo(tmp_path, stage0, *, protocol=PROTO):
+def _repo(tmp_path, stage0, *, protocol=PROTO, plan=GOV.PLAN, inputs=GOV.INPUTS_DIR):
     """A minimal repository: plan, protocol, inputs and pool where governance names them."""
     tasks, _, ids, _ = stage0
     repo = tmp_path / "repo"
@@ -44,17 +44,18 @@ def _repo(tmp_path, stage0, *, protocol=PROTO):
     pool.parent.mkdir(parents=True)
     pool.write_text("".join(json.dumps(tasks[i]) + "\n" for i in ids))
     files = GP.write_inputs([tasks[i] for i in ids], A.read_json(A.CONFIG_DIR / "corpus_spec.json"),
-                            repo / GOV.INPUTS_DIR)
-    (repo / GOV.PLAN).parent.mkdir(parents=True, exist_ok=True)
-    (repo / GOV.PLAN).write_text(json.dumps({"inputs": files, "pools": [{"path": "pool.jsonl",
-                                                                          "sha256": A.sha256_file(pool)}]}))
+                            repo / inputs)
+    (repo / plan).parent.mkdir(parents=True, exist_ok=True)
+    (repo / plan).write_text(json.dumps({"inputs": files, "inputs_dir": str(inputs),
+                                         "pools": [{"path": "pool.jsonl", "sha256": A.sha256_file(pool)}]}))
     (repo / GOV.PROTOCOL).parent.mkdir(parents=True)
     (repo / GOV.PROTOCOL).write_text(json.dumps(protocol))
     return repo
 
 
 def _ok(path, repo):
-    return {"authorization_id": "test", "hard_cap_usd": 0.0, "launch_identity_sha256": LID, "harness_digest": "h"}
+    return {"authorization_id": "test", "hard_cap_usd": 0.0, "launch_identity_sha256": LID, "harness_digest": "h",
+            "plan_path": str(GOV.PLAN)}
 
 
 class Gen:
@@ -167,6 +168,27 @@ def test_resume_from_secured_shards_and_refuse_a_tampered_one(tmp_path, stage0):
     gen2 = Gen(stage0[1])
     argv[5] = str(tmp_path / "fresh2")
     assert D.main(argv, run=gen2, authorize=_ok, repo=repo) == 3 and gen2.calls == []
+
+
+def test_a_p1t_authorization_runs_the_top_up_plan_and_its_inputs_only(tmp_path, stage0):
+    """The plan comes from the authorization's phase: a P1t artifact reads
+    plans/p1t/ and its inputs, and P1's plan path is never opened."""
+    top_inputs = GOV.TOPUP_PLAN.parent / "generation_inputs"
+    repo = _repo(tmp_path, stage0, plan=GOV.TOPUP_PLAN, inputs=top_inputs)
+    assert not (repo / GOV.PLAN).exists() and not (repo / GOV.INPUTS_DIR).exists()
+    gen = Gen(stage0[1])
+    p1t = lambda p, r: {**_ok(p, r), "plan_path": str(GOV.TOPUP_PLAN)}   # noqa: E731
+    assert D.main(_argv(tmp_path), run=gen, authorize=p1t, repo=repo) == 0
+    assert all(str(repo / top_inputs) not in c["cmd"] for c in gen.calls)    # segments are written under --out
+    rec = json.loads((tmp_path / "out/generation_session.json").read_text())
+    assert rec["contract"]["plan_path"] == str(GOV.TOPUP_PLAN) and rec["terminal"] == "ALL_DONE"
+
+
+def test_the_plan_is_the_one_the_authorizations_phase_names():
+    auth = lambda phase: type("Auth", (), {"stage_conditions": {"phase": phase}, "authorization_id": "t"})()  # noqa: E731
+    assert GOV.plan_of(auth("P1")) == GOV.PLAN and GOV.plan_of(auth("P1t")) == GOV.TOPUP_PLAN
+    with pytest.raises(D.AuthorizationError, match="names no generation plan"):
+        GOV.plan_of(auth("P2"))
 
 
 def test_a_shard_from_another_launch_identity_is_refused(tmp_path, stage0):
