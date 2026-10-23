@@ -38,13 +38,24 @@ evaluation; not trained -> trained (or, on the same machine, a model a previous
 attempt finished training is persisted instead of retrained); a record whose
 inputs are not this unit's -> preserved, nothing consumed, the unit stopped.
 
+RESUME (validated on a GPU by P1g, `p1g_driver.py`): the trainer writes its
+save points (model, AdamW state, step, RNG) into ``<durable root>/<unit>/train/
+a<attempt>/`` on the backend itself, with the attempt's config and inputs beside
+them. A unit whose training attempt ended without completing, and whose save
+point is there for THIS unit's inputs, is continued from it with
+``train_stage3.py --resume latest`` under the attempt's own config -- the same
+data order, learning rate and step count -- never retrained from the
+initialization. The save points are deleted once the final checkpoint is
+persisted and re-identified.
+
 RETRY (P12.1): one complete endpoint per unit -- a completed checkpoint is never
 overwritten and a scored unit never rerun. Once formal training began, an
-engineering failure is repaired and the same unit and seed trained again from
-the initialization as ONE replacement endpoint; the failed attempt keeps its
-own directory and its row in ``attempts.jsonl`` (with its failure signature for
-the launcher's same-failure gate); partial measurements are never pooled. The
-driver stops at the first failed unit; every earlier unit is already durable.
+engineering failure is repaired and the same unit and seed continued from its
+last save point (or, with none, trained again from the initialization) as ONE
+replacement endpoint; the failed attempt keeps its own directory and its row in
+``attempts.jsonl`` (with its failure signature for the launcher's same-failure
+gate); partial measurements are never pooled. The driver stops at the first
+failed unit; every earlier unit is already durable.
 
 TERMINAL PATH (P12.3): one ``finally`` writes the status (ALL_DONE / FAILED /
 REFUSED, per-unit outcomes), closes any registered observer -- the driver
@@ -268,6 +279,26 @@ def local_trained(work: Path, unit: str, inputs: dict) -> Path | None:
     return None
 
 
+def resumable(root: Path, unit: str, inputs: dict) -> Path | None:
+    """The latest durable training attempt of `unit` with a save point, for these inputs."""
+    for d in sorted((Path(root) / unit / "train").glob("a*"), key=lambda p: int(p.name[1:]), reverse=True):
+        meta, latest = d / "train_inputs.json", d / "checkpoints/latest.txt"
+        if meta.is_file() and latest.is_file() and (d / "recovery_config.json").is_file() \
+                and _read(meta).get("inputs") == json.loads(json.dumps(inputs)) \
+                and (d / "checkpoints" / latest.read_text().strip() / "trainer_state.pt").is_file():
+            return d
+    return None
+
+
+def release_save_points(root: Path, unit: str) -> list[dict]:
+    """The resume state, once the final checkpoint is durable: nothing reads it again."""
+    out = []
+    for d in sorted((Path(root) / unit / "train").glob("a*/checkpoints")):
+        out.append({"path": str(d), "bytes": sum(f.stat().st_size for f in d.rglob("*") if f.is_file())})
+        shutil.rmtree(d)
+    return out
+
+
 # ---- the operations a unit performs (injected in tests) ----------------------------------------------
 
 @dataclass
@@ -310,8 +341,9 @@ def train(job: dict) -> Path:
     from stages.phase_c1.autoinit_c1_driver import TRAINER, trained_model_dir
     cfg = job["attempt_dir"] / "recovery_config.json"
     cfg.write_text(json.dumps(job["recipe"], indent=2) + "\n")
-    with (job["attempt_dir"] / "recovery.log").open("w") as lf:
-        rc = subprocess.run([TRAIN_PY, str(TRAINER), "--config", str(cfg)], cwd=REPO, env=job["env"],
+    with (job["attempt_dir"] / "recovery.log").open("a") as lf:
+        rc = subprocess.run([TRAIN_PY, str(TRAINER), "--config", str(cfg)]
+                            + (["--resume", "latest"] if job.get("resume") else []), cwd=REPO, env=job["env"],
                             stdout=lf, stderr=subprocess.STDOUT).returncode
     if rc != 0:
         raise RuntimeError(f"the trainer exited {rc}; see recovery.log")
@@ -381,32 +413,52 @@ def run_unit(plan: dict, u: dict, *, root: Path, work: Path, pack_root: Path, in
     failed_training = sorted(trained_starts - {a["attempt"] for a in history
                                                if a.get("event") == "end" and a.get("outcome") == "complete"})
     local = local_trained(work, unit, inputs) if state == "untrained" else None
-    action = {"trained": "evaluate", "evaluated": "report"}.get(state, "persist_local" if local else "train")
+    saved = resumable(root, unit, inputs) if state == "untrained" and local is None else None
+    action = {"trained": "evaluate", "evaluated": "report"}.get(
+        state, "persist_local" if local else "resume" if saved else "train")
     _append(root, unit, {**base, "event": "start", "action": action, "utc": _now(),
-                         "replacement_of": failed_training[-1] if action == "train" and failed_training else None})
+                         "replacement_of": failed_training[-1] if action in ("train", "resume") and failed_training
+                         else None, "resumed_from": str(saved) if saved else None})
     stage = action
     try:
         model_dir = None
-        if action in ("train", "persist_local"):
+        if action in ("train", "resume", "persist_local"):
+            train_dir = saved
             if action == "train":
                 stage = "restore_initialization"
                 init = ops.restore_init(init_dir, plan["init"])
                 stage = "train"
+                train_dir = unit_dir / "train" / f"a{n}"
                 recipe = derive_recipe(
                     plan["recipe"], run_name=f"h1_{unit}_{run_id}_a{n}",
                     purpose=f"H1 {'GPU VALIDATION (not formal)' if validation else 'formal'} unit {unit}, attempt {n}",
-                    out_dir=str(attempt_dir / "recovery"), data_dir=str(Path(pack_root) / u["arm"]),
+                    out_dir=str(train_dir), data_dir=str(Path(pack_root) / u["arm"]),
                     student_path=str(init), seed=u["seed"], sched=sched, overrides=overrides)
+                train_dir.mkdir(parents=True, exist_ok=True)
+                (train_dir / "recovery_config.json").write_text(json.dumps(recipe, indent=2) + "\n")
+                (train_dir / "train_inputs.json").write_text(json.dumps({"inputs": inputs, "attempt": n}, indent=1) + "\n")
                 model_dir = ops.train({"unit": unit, "attempt_dir": attempt_dir, "recipe": recipe, "env": ops.env})
-                (attempt_dir / "trained.json").write_text(json.dumps(
-                    {"inputs": inputs, "model_dir": str(model_dir), "finished_utc": _now()}, indent=1) + "\n")
+            elif action == "resume":
+                stage = "resume"
+                recipe = _read(saved / "recovery_config.json")
+                model_dir = ops.train({"unit": unit, "attempt_dir": attempt_dir, "recipe": recipe, "env": ops.env,
+                                       "resume": True})
             else:
                 model_dir = local
+            if action != "persist_local":
+                (attempt_dir / "trained.json").write_text(json.dumps(
+                    {"inputs": inputs, "model_dir": str(model_dir), "finished_utc": _now()}, indent=1) + "\n")
             stage = "persist_checkpoint"
             PU.persist_checkpoint(unit, model_dir, root, adapter=ops.adapter(),
                                   arch_signature=plan["init"]["arch_signature"],
                                   num_parameters=plan["init"]["num_parameters"], inputs=inputs, capacity=capacity)
-            persist_training_records(unit, model_dir, root, work, capacity)
+            persist_training_records(unit, model_dir, root, work, capacity, train_dir=train_dir,
+                                     attempt_dir=attempt_dir)
+            if not _verified(unit_dir / "checkpoint", PU.completed(root, unit, "checkpoint"), ops.adapter()):
+                raise IdentityMismatch(f"{unit_dir / 'checkpoint'}: the persisted checkpoint does not re-identify")
+            stage = "release_save_points"
+            _append(root, unit, {**base, "event": "released", "save_points": release_save_points(root, unit),
+                                 "utc": _now()})
         elif state == "trained" and PU.completed(root, unit, "training") is None:
             stage = "persist_training_records"     # a previous attempt persisted the weights, not its records
             mine = local_trained(work, unit, inputs)
@@ -450,14 +502,23 @@ def run_unit(plan: dict, u: dict, *, root: Path, work: Path, pack_root: Path, in
     return {"unit": unit, "outcome": "complete", "action": action, "attempt": n}
 
 
-def persist_training_records(unit: str, model_dir: Path, root: Path, work: Path, capacity: int | None) -> None:
+def persist_training_records(unit: str, model_dir: Path, root: Path, work: Path, capacity: int | None, *,
+                             train_dir: Path | None = None, attempt_dir: Path | None = None) -> None:
     """The derived config, the trainer log and the trainer's own records of the
-    attempt that trained `model_dir`, under logical names."""
-    d = next((a for a in (work / unit).glob("attempt-*") if a in Path(model_dir).parents), None)
-    if d is None:
-        return
-    records = {p.name: p for p in sorted(d.glob("*")) if p.is_file() and p.name != "trained.json"}
-    records |= {f"trainer/{p.name}": p for p in sorted((d / "recovery").glob("*")) if p.is_file()}
+    attempt that trained `model_dir`, under logical names: the attempt's local
+    directory (config, the trainer's console log) and the trainer's output
+    directory on the backend (its jsonl, manifests and completion records)."""
+    if attempt_dir is None:
+        attempt_dir = next((a for a in (work / unit).glob("attempt-*") if a in Path(model_dir).parents), None)
+    if train_dir is None and attempt_dir is not None and (attempt_dir / "recovery").is_dir():
+        train_dir = attempt_dir / "recovery"
+    if train_dir is None and len(Path(model_dir).parents) > 2 \
+            and (Path(model_dir).parents[2] / "recovery_config.json").is_file():
+        train_dir = Path(model_dir).parents[2]          # <train>/checkpoints/<tag>/model
+    records = {} if attempt_dir is None else {
+        p.name: p for p in sorted(attempt_dir.glob("*")) if p.is_file() and p.name != "trained.json"}
+    if train_dir is not None:
+        records |= {f"trainer/{p.name}": p for p in sorted(Path(train_dir).glob("*")) if p.is_file()}
     if records:
         PU.persist_files(unit, records, root, label="training", capacity=capacity)
 

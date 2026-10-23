@@ -1,8 +1,8 @@
 {
   "schema": "aadistill.stage2.reasoning_data.h1_units/v1",
-  "status": "PROPOSED (2026-10-22 UTC), NOT FROZEN, NOT FUNDED. What scripts/stages/stage-2/reasoning_data/unit_driver.py runs for H1's four formal units. The driver refuses a formal launch while this file is not frozen, while the schedule it reads is provisional, or while an arm's pack identity is pending; a GPU validation (--validation) may run a provisional schedule but never writes a formal result.",
-  "frozen": false,
-  "_frozen": "set true only with the frozen protocol and its paid authorization (a maintainer decision); the driver reads it, nothing else does",
+  "status": "FROZEN (2026-10-23 UTC) under the maintainer's formal H1 P1g + P2 authorization (logs/budget/approvals/h1_units_phase_grant.json). What scripts/stages/stage-2/reasoning_data/unit_driver.py runs for H1's four formal units; the driver still refuses a formal launch with a provisional schedule or a pack that is not its recorded identity.",
+  "frozen": true,
+  "_frozen": "set true 2026-10-23 with the frozen protocol (plans/comparison_design.json) and the phase grant; the driver reads it, nothing else does",
   "units": {
     "from": "logs/stages/stage-2/reasoning_data/plans/comparison_design.json :: arms (keys) x fixed.seeds",
     "id": "<arm>-s<seed>",
@@ -128,8 +128,9 @@
     "on_failure": "the driver stops at the first failed unit (later units would meet the same defect); every earlier completed unit is already persisted"
   },
   "training_resume": {
-    "supported": false,
-    "why": "train_stage3.py has --resume, but whether a resumed run equals an uninterrupted one (data order, RNG, optimizer state) is a GPU-validation question; until that is shown a failed training attempt is retrained from the initialization"
+    "supported": "pending P1g",
+    "mechanism": "the trainer's save points (model, AdamW state, step, RNG) are written into <durable root>/<unit>/train/a<attempt>/ with the attempt's config and inputs; an attempt that ended without completing is continued with train_stage3.py --resume latest under its own config (unit_driver.resumable); the save points are released once the final checkpoint is persisted and re-identified",
+    "validated_by": "P1g (p1g_driver.py :: resume_B): an interrupted and resumed run against two uninterrupted ones"
   },
   "validation": {
     "flag": "--validation [--validation-steps N]",

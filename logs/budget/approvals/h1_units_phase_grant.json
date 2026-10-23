@@ -1,0 +1,29 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1_units_phase_grant/v1",
+ "granted_by": "maintainer (formal authorization message of 2026-10-23 UTC: H1 P1g + P2 formal phase, $50)",
+ "granted_utc": "2026-10-23",
+ "decision": "Maintainer formally approves continuing H1: P1g GPU validation, P2's four formal A/B student-recovery units, complete capability evaluation, statistical analysis and closeout, as one phase; P2 follows a passed P1g without a further approval",
+ "branch": "stage2/reasoning-data",
+ "accepted_commit": "382cb6f5d2dfd452011f1a80ff22b665765a9145",
+ "fixed": {
+  "arms": {"A": "corpus_v2's 2.96M pack (h1_units.json :: packs.A)", "B": "stage2.reasoning_master@v3's 2.96M pack (h1_units.json :: packs.B)"},
+  "initialization": "Stage-0 D4 Top-1 (assets/d4_top1_materialization.json)",
+  "m1": "614 steps; A 7 blocks per step, B 2",
+  "seeds": [20260726, 20260727],
+  "evaluation": "the frozen eval-set-1"
+ },
+ "phases": {
+  "P1g": {"kinds": ["validation"], "scope": "H1 P1g GPU validation: real packs, the frozen recipe, resume, persistence and the evaluation path; never a formal result"},
+  "P2": {"kinds": ["formal"], "scope": "H1 P2: the four frozen formal units (A and B x two seeds), their evaluation on all of eval-set-1, and their closeout"}
+ },
+ "ceiling_usd": 50.0,
+ "ceiling_scope": "CUMULATIVE over P1g and P2: every attempt, every provider resource and the network volume's full storage cost together; no session or attempt receives a fresh allocation; an estimate is not a spend target",
+ "project_cumulative_cap_usd": 712.17,
+ "occupancy_basis_usd": 662.1608,
+ "_occupancy_basis": "the recorded conservative occupancy before this phase: provider all-time $661.5161 plus P1t's $0.6447 all-in, counted once whether or not the provider has posted it; re-reconciled against a fresh provider snapshot before each launch, never double counted, and the cap is not raised by a new snapshot",
+ "storage": {"network_volume_gb_planned": 30, "rule": "its whole cost (booked at its reservation until retired or trued up) is inside the ceiling; no unbounded continuing charge"},
+ "gpu": "any GPU suited to the measured load inside the ceiling; not restricted to earlier types; GPU work goes to a GPU",
+ "on_failure": "ordinary engineering failures are repaired inside the envelope; valid completed work is reused (a trained unit is scored, an interrupted one resumed, a scored one never rerun); a seed with a complete valid result is never rerun",
+ "terminal": "SUCCESS, a scientific terminal (GO / NO_GO / INCONCLUSIVE / NOT_RESOLVED / FLOOR by the frozen rules) or a hard boundary (the envelope, the project cap, unknown billing, untrustworthy artifacts, a needed protocol change)",
+ "not_authorized": ["H2 volume ladder", "a formal mixture-ratio search", "H3", "Stage 4/5 experiments", "any change to arms, data proportions, objective, seeds or scoring"]
+}

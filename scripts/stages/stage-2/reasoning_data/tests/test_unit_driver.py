@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import copy
 import json
+from pathlib import Path
 
 import pytest
 
@@ -38,17 +39,18 @@ def _pack(tmp_path, arm="A", expected=None):
 def _plan(real_plan, tmp_path, *, frozen=True, provisional=False):
     p = copy.deepcopy(real_plan)
     p["config"]["frozen"] = frozen
-    if not provisional:
-        p["schedule"]["status"] = "FROZEN (test)"
+    p["schedule"]["status"] = "PROVISIONAL (test)" if provisional else "FROZEN (test)"
     p["packs"]["A"] = _pack(tmp_path)
     return p
 
 
 class Calls:
-    def __init__(self, tmp_path, *, fail_eval=0, fail_train=0, forbid=()):
+    def __init__(self, tmp_path, *, fail_eval=0, fail_train=0, forbid=(), crash_after_save=0):
         self.tmp, self.log, self.fail_eval, self.fail_train, self.forbid = tmp_path, [], fail_eval, fail_train, forbid
+        self.crash_after_save = crash_after_save
         self.root = tmp_path / "durable"
         self.eval_model_dirs = []
+        self.jobs = []
 
     def restore_init(self, init_dir, ident):
         self.log.append("restore")
@@ -57,17 +59,29 @@ class Calls:
 
     def train(self, job):
         assert "train" not in self.forbid, "retrained a unit that was already trained"
-        self.log.append("train")
+        self.log.append("resume" if job.get("resume") else "train")
+        self.jobs.append(job)
         assert job["recipe"]["seed"] == 20260726 and job["recipe"]["batch"]["blocks_per_step"] == 7
         if self.fail_train:
             self.fail_train -= 1
             raise RuntimeError("the trainer exited 1; see recovery.log")
         (job["attempt_dir"] / "recovery_config.json").write_text(json.dumps(job["recipe"]))
-        model = job["attempt_dir"] / "recovery/checkpoints/step_000625/model"
+        out = Path(job["recipe"]["out_dir"])          # the trainer writes where its config says
+        if self.crash_after_save:                     # the mid-run save point lands, then the pod dies
+            self.crash_after_save -= 1
+            save = out / "checkpoints/step_000307"
+            (save / "model").mkdir(parents=True)
+            (save / "trainer_state.pt").write_bytes(b"state")
+            (out / "checkpoints/latest.txt").write_text("step_000307\n")
+            raise RuntimeError("the pod was lost")
+        if job.get("resume"):
+            assert (out / "checkpoints/latest.txt").read_text().strip() == "step_000307"
+        model = out / "checkpoints/step_000614/model"
         model.mkdir(parents=True)
         (model / "model.safetensors").write_bytes(b"\x05" * 4096)
         (model / "config.json").write_text(json.dumps({"hidden_size": 8}))
-        (job["attempt_dir"] / "recovery/run_manifest.json").write_text("{}")
+        (out / "run_manifest.json").write_text("{}")
+        (out / "checkpoints/latest.txt").write_text("step_000614\n")
         return model
 
     def evaluate(self, job):
@@ -222,19 +236,23 @@ def test_the_unfrozen_config_is_refused_for_a_formal_launch(real_plan, tmp_path)
 @pytest.mark.parametrize("validation", [False, True])
 def test_a_pending_pack_is_refused_in_every_mode(real_plan, tmp_path, validation):
     plan = _plan(real_plan, tmp_path)
-    plan["packs"]["A"] = dict(real_plan["packs"]["B"])     # the committed pending record, in the run unit's slot
+    plan["packs"]["A"] = {"status": "pending", "what": "pending: a pack not built yet", "expected": None,
+                          "blocks_sha256": None, "ladder_sha256": None}
     calls = Calls(tmp_path, forbid=("train", "evaluate"))
     assert _run(plan, tmp_path, calls, *(["--validation"] if validation else [])) == 2
     assert any("pack identity pending" in r for r in _status(tmp_path)["refusals"])
 
 
-def test_the_committed_config_refuses_every_formal_unit_today(real_plan, tmp_path):
+def test_the_committed_config_admits_the_formal_units_only_with_their_real_packs(real_plan, tmp_path):
+    """Frozen with both packs recorded (2026-10-23): a formal launch is refused
+    only where the recorded packs are not, and admitted on the real ones."""
+    assert real_plan["config"]["frozen"] is True
+    assert {a: p["status"] for a, p in real_plan["packs"].items() if a in "AB"} == {"A": "recorded", "B": "recorded"}
     refusals = U.launch_refusals(real_plan, real_plan["units"], validation=False, pack_root=tmp_path)
-    assert any("not frozen" in r for r in refusals) and any("PROVISIONAL" in r for r in refusals)
-    # A's pack is recorded (written once 2026-10-22); B's exists only after P1/P1v
-    assert {r.split(":")[0] for r in refusals if "pack identity pending" in r} == {"arm B"}
-    assert real_plan["packs"]["A"]["status"] == "recorded"
-    assert any(r.startswith("arm A:") and "lacks" in r for r in refusals)      # not under this pack root
+    assert sorted(r.split(":")[0] for r in refusals) == ["arm A", "arm B"] and all("lacks" in r for r in refusals)
+    real_root = U.REPO / "artifacts/stages/stage-2/reasoning_data/packs"
+    if (real_root / "A/blocks.npz").is_file() and (real_root / "B/blocks.npz").is_file():
+        assert U.launch_refusals(real_plan, real_plan["units"], validation=False, pack_root=real_root) == []
 
 
 @pytest.mark.parametrize("break_it", ["blocks", "composition"])
@@ -251,7 +269,8 @@ def test_the_derived_recipe_differs_from_the_frozen_one_only_in_the_declared_ove
     sched = U.schedule_for(real_plan, "B")
     kw = dict(run_name="r", purpose="p", out_dir="o", data_dir="d", student_path="s", seed=1, sched=sched)
     d = U.derive_recipe(real_plan["recipe"], overrides=real_plan["config"]["recipe"]["overrides"], **kw)
-    assert d["batch"]["blocks_per_step"] == 2 and d["schedule"]["total_steps"] == 625 and d["rung"] == 2_960_000
+    assert d["batch"]["blocks_per_step"] == 2 and d["schedule"]["total_steps"] == real_plan["schedule"]["steps"]
+    assert d["rung"] == 2_960_000
     assert d["loss"] == real_plan["recipe"]["loss"] and d["optim"] == real_plan["recipe"]["optim"]
     # A's 7 blocks per step differ from the frozen 2: undeclared, that is refused
     kw["sched"] = U.schedule_for(real_plan, "A")
@@ -266,3 +285,38 @@ def test_the_schedule_record_must_agree_with_its_rule(real_plan):
     bad["schedule"]["warmup_steps"] = 30
     with pytest.raises(U.DriverRefusal, match="disagrees with its rule"):
         U.schedule_for(bad, "A")
+
+
+def test_an_interrupted_attempt_resumes_from_its_durable_save_point(real_plan, tmp_path):
+    """The pod dies after the mid-run save: the next attempt continues THAT
+    attempt's run -- its config, its output directory, --resume -- instead of
+    retraining from the initialization, and the save points go once the final
+    checkpoint is durable."""
+    plan = _plan(real_plan, tmp_path)
+    first = Calls(tmp_path, crash_after_save=1)
+    assert _run(plan, tmp_path, first) == 1 and first.log == ["restore", "train"]
+    train_dir = tmp_path / "durable" / UNIT / "train" / "a1"
+    assert (train_dir / "checkpoints/step_000307/trainer_state.pt").is_file()
+    second = Calls(tmp_path)
+    assert _run(plan, tmp_path, second) == 0
+    assert second.log == ["resume", "evaluate"]                       # no restore, no fresh training
+    job = second.jobs[0]
+    assert job["resume"] is True and job["recipe"] == json.loads((train_dir / "recovery_config.json").read_text())
+    assert job["recipe"]["out_dir"] == str(train_dir)
+    starts = [a for a in U.attempts(tmp_path / "durable", UNIT) if a["event"] == "start"]
+    assert [a["action"] for a in starts] == ["train", "resume"]
+    assert starts[1]["replacement_of"] == 1 and starts[1]["resumed_from"] == str(train_dir)
+    assert not (train_dir / "checkpoints").exists() and (train_dir / "train_inputs.json").is_file()
+    assert PU.completed(tmp_path / "durable", UNIT, "report")["persisted"] is True
+
+
+def test_a_save_point_for_other_inputs_is_never_resumed(real_plan, tmp_path):
+    plan = _plan(real_plan, tmp_path)
+    assert _run(plan, tmp_path, Calls(tmp_path, crash_after_save=1)) == 1
+    meta = tmp_path / "durable" / UNIT / "train/a1/train_inputs.json"
+    doc = json.loads(meta.read_text())
+    doc["inputs"]["seed"] = 1
+    meta.write_text(json.dumps(doc))
+    calls = Calls(tmp_path)
+    assert _run(plan, tmp_path, calls) == 0 and calls.log == ["restore", "train", "evaluate"]
+

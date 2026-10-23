@@ -328,7 +328,9 @@ def test_the_corpus_declares_both_sessions_and_a_pack_needs_every_one(tmp_path):
                                                       "launch_identity_sha256": v3[0]["launch_identity_sha256"]}]
     with pytest.raises(SystemExit, match="no secured store given"):
         CF.verify_sessions(v3, {"h1p1t_20261023_094007": tmp_path})
-    with pytest.raises(SystemExit, match="no authorization"):          # P1t is not granted: nothing to build from
+    with pytest.raises(SystemExit, match="no authorization"):          # a declared session never granted
+        CF.verify_sessions([{**v3[1], "run_id": "h1p1t_never_granted"}], {"h1p1t_never_granted": tmp_path})
+    with pytest.raises(SystemExit, match="not the complete run"):     # P1t ran: an empty store is not it
         CF.verify_sessions(v3[1:], {"h1p1t_20261023_094007": tmp_path})
     with pytest.raises(SystemExit, match="not the complete run: .*not the one the closeout closed"):  # empty
         CF.main(["--candidate", str(V3), "--store", f"h1gen_20261022_190653={tmp_path}",

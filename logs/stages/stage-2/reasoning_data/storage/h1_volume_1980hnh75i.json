@@ -1,0 +1,17 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.storage_record/v1",
+ "volume_id": "1980hnh75i",
+ "name": "aad-h1-units",
+ "provider": "RunPod network volume",
+ "data_center_id": "EUR-IS-1",
+ "size_gb": 30,
+ "created_utc": "2026-10-23T18:35:14Z",
+ "rate_usd_per_gb_month": 0.07,
+ "_rate": "the recorded basis (durability_plan.json :: blocked.options; Stage-0's volumes trued up at it)",
+ "reserved_usd": 4.2,
+ "_reserved": "30 GB x $0.07 x 2 months, booked inside the H1 P1g/P2 $50 envelope from creation (unit_governance.spent) until this record states actual_usd",
+ "consumer": "H1 P1g and P2: the durable root <mount>/h1 -- the four formal checkpoints, a unit's save points while it trains, the evaluation progress and evidence",
+ "retire_by": "2026-12-23 at the latest (the end of the reservation), or earlier once its checkpoints have no consumer (AGENTS.md 2.5); deleting it, or keeping it past the reservation, is booked here first",
+ "actual_usd": null,
+ "authorizes": "nothing"
+}

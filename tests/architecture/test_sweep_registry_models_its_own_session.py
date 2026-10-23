@@ -174,6 +174,11 @@ class TestASessionWithItsOwnStagedViewHasItsOwnEntry:
         #: and the pod runs NO repository suite (no TESTS_OK), so there is no
         #: pod test selection for a sweep to certify.
         "h1_generation_launch",
+        #: H1's unit sessions (2026-10-23), for the same reasons: a typed
+        #: artifact per kind binds the units identity and the harness, checked
+        #: by the launcher and by setup's own branch, and the pod runs no
+        #: repository suite.
+        "h1_unit_launch",
     })
 
     def test_every_session_launcher_is_either_registered_or_named(self):

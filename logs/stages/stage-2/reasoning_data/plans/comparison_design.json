@@ -2,7 +2,7 @@
   "schema": "aadistill.stage2.reasoning_data.comparison_design/v2",
   "hypothesis_id": "H1",
   "study_id": "stage2.reasoning_data.h1_old_vs_new_2p96M",
-  "status": "DRAFT PROTOCOL (2026-10-21 UTC), revised after the maintainer's H1 decision. NOT preregistered, NOT frozen, NOT funded. It is frozen only after arm B's corpus exists (its pack identities and B's measured accounting replace every estimate below), the maintainer approves it, and a separate paid authorization is issued. Revised 2026-10-22 after an independent review: whole-unit admission, isolation R0/R7/R9, target_quality v2, the matching rule fixed and its values provisional, and the floor/resolution statistics (docs/stages/stage-2/reasoning_data/H1.md section 10). Revised 2026-10-22 after the maintainer's design choices: arm B = stage2.reasoning_master@v1; M1's matching rule accepted (values provisional until B's real pack); interactive results exploratory.",
+  "status": "FROZEN (2026-10-23 UTC) under the maintainer's formal H1 P1g + P2 authorization (logs/budget/approvals/h1_units_phase_grant.json): arms, seeds, initialization, recovery objective, M1 schedule, evaluation contract and statistics as recorded here; arm B is the built stage2.reasoning_master@v3 pack. History: DRAFT 2026-10-21; revised 2026-10-22 (independent review; the maintainer's design choices, B then @v1); 2026-10-23 the maintainer chose @v3 for B and P1t built its pack. Nothing in the treatment, data proportions, objective, seeds or scoring changes at the freeze.",
   "question": "With the same D4 initialization, the same recovery objective and a pre-defined matched training budget, does replacing the historical corpus_v2 data with a verified teacher-native reasoning corpus improve the student's actual reasoning CORRECTNESS in its own generations -- not only the completeness of its answers?",
   "what_it_is": "a TREATMENT comparison of two complete data schemes: content, quality and task distribution change together. Not attributable to correctness filtering alone; not a mixture experiment.",
   "arms": {
@@ -13,14 +13,15 @@
       "not_reused": "no historical E1 result stands in for A: E1 started from a different (PCA) initialization and from a pack that cut 352 traces"
     },
     "B": {
-      "scheme": "stage2.reasoning_master@v1 (configs/stages/stage-2/reasoning_data/corpus_spec.json): verified-correct teacher-native targets, reasoning 0.70 / supporting 0.30 of unique supervised positions",
-      "cut": "D_2.96M of B's master order",
-      "quotas": "plans/h1_accounting.json :: quotas_arm_B (supervised-token target, estimated independent units per stratum)",
+      "scheme": "stage2.reasoning_master@v3 (configs/stages/stage-2/reasoning_data/corpus_v3.json; the maintainer's choice 2026-10-23): verified-correct teacher-native targets from P1 (h1gen_20261022_190653) and P1t (h1p1t_20261023_094007) with the verified reuse; @v1's capability shares, reasoning 0.70 / supporting 0.30 of unique supervised positions; analogy from the project generator alone; the 0.0 cells' unit set aside",
+      "cut": "D_2.96M of B's master order on the formal nested ladder (audit/corpus_v3_feasibility.json): measured 1,226 units, 1,301 sessions, 2,966,334 U, 402 blocks; ladder fbc0ec7b7a49..., blocks 5d06b026dcb4... (configs/stages/stage-2/reasoning_data/h1_units.json :: packs.B)",
+      "quotas": "every cell covered with the 150k reserve (audit/corpus_v3_feasibility.json :: contract.cells); no estimate remains",
       "families_and_strata": "32 calibration-split rule families over 10 generators (35 less the 3 isolation rule R9 excludes as computing evaluation-only rules); three difficulty levels in equal task counts per generator cell (data/stages/stage-2/reasoning_data/tasks/train_tasks_v2.manifest.json); external modules only if approved (corpus variant stage2.reasoning_master@v1, else @v1-project-only)",
       "interactive_coverage": "about 18 independent episodes at 2.96M (16.7k supervised tokens per accepted episode): thin, reported as such, and the interactive axis is secondary for this reason; repeated episode prefixes are context, never counted as supervision",
       "corpus_variant": "chosen explicitly from corpus_spec.json :: variants; a dropped source means the other variant and its own id, never a silent fallback (plans/source_plan.json)",
       "admission": "whole units only: an episode any of whose turns fails or does not fit is excluded entirely, with the reason (build_master_ladder.render_all)",
-      "quality": "aadistill.data.target_quality v2: answer with its scope; text consistency and action legality as observations; steps not_assessed unless a step checker exists (PrOntoQA reference proof: partial at best); an illegal action rejects an episode"
+      "quality": "aadistill.data.target_quality v2: answer with its scope; text consistency and action legality as observations; steps not_assessed unless a step checker exists (PrOntoQA reference proof: partial at best); an illegal action rejects an episode",
+      "superseded": "the @v1 description and its estimated quotas (2026-10-22) are history: @v1 did not build (audit/p1v_verification.json)"
     }
   },
   "fixed": {
@@ -57,8 +58,8 @@
     "primary_basis": "M1 (plans/h1_accounting.json :: primary_basis): one step count T for both arms by aadistill.training.accounting.match_schedule; U equal within 1% by the ladder cut; E and steps per seed computed exactly on the real packs; C NOT matched and reported",
     "why_not_more": "with A's packing efficiency at 0.355 and B's at about 0.97, U, steps and FLOPs cannot all be equal; U and steps are controlled because they are what training sees and how often it updates, C differs by about 1.22x (A higher) and is reported with its cause",
     "quota_tolerance": "a rung is a prefix of whole units, so U overshoots its target by less than one unit (< 0.6% at 2.96M); a preregistered |U_A - U_B| <= 1% of 2.96M",
-    "estimated_values": "plans/h1_accounting.json :: contracts.M1_matched (A measured, B ESTIMATED): provisional T 625, A 7 / B 2 blocks per step; NOT frozen",
-    "schedule": "plans/h1_accounting.json :: schedule -- computed by the rule on B's REAL pack (h1_accounting --pack-b), with the exact per-seed U/E/steps of both arms and a rerun cost forecast, before the protocol is frozen; the 0.86M recipe's 1,023 steps are not reused",
+    "estimated_values": "MEASURED on both real packs (plans/h1_accounting.json, 2026-10-23): T 614, A 7 / B 2 blocks per step, warm-up 31, eval every 76, save every 307; FROZEN",
+    "schedule": "plans/h1_accounting.json :: schedule (FROZEN-READY on both real packs), read by unit_driver.schedule_for",
     "counting_rules": [
       "one accepted trace per task: several teacher traces of one prompt are one unit and only one is trained",
       "turn-expanded context (an episode's earlier turns, a conversation's earlier messages) is computed, never counted in U",
