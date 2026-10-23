@@ -1,0 +1,21 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1_p1t_grant/v1",
+ "granted_by": "maintainer (formal authorization message of 2026-10-23 UTC: H1 P1t execution, then arm B's $0 verification and build)",
+ "granted_utc": "2026-10-23",
+ "decision": "Maintainer formally approves H1 P1t: one A100-80GB teacher-generation session of the frozen 59 tasks (stage2.reasoning_master@v3) under the frozen generation protocol, then the $0 dev-box verification, the @v3 merge with P1's qualified data and the formal nested-ladder build of arm B; reviewed commit stage2/reasoning-data @ 03d087c18b21f488e6bd96e61f69820c548e8c3e",
+ "phase": "P1t",
+ "branch": "stage2/reasoning-data",
+ "accepted_commit": "03d087c18b21f488e6bd96e61f69820c548e8c3e",
+ "run_id": "h1p1t_20261023_094007",
+ "launch_identity_sha256": "e5732fd4440aad13b155a2a122e56f3fec4958c702555ce30239b9f49daeb9f4",
+ "harness_digest": "348ed51202a07660fecfec4f390c627377452055e1d400c66735170ba9fb8818",
+ "expected_usd": 1.01,
+ "hard_cap_usd": 5.0,
+ "hard_cap_scope": "CUMULATIVE over the whole P1t phase: every attempt's actual billing (GPU, container disk and any other provider charge) together; an attempt never receives a fresh $5",
+ "project_cumulative_cap_usd": 666.52,
+ "occupancy_basis": "provider all-time billing counted once, $661.5161 at the recorded snapshot; the cap is absolute; the 34 historical pods and the anchor stay OPEN",
+ "supersedes": "the amount of the $2.60 application (plans/abstract_topup_application.json, plans/p1t/authorization_request.json), kept as the historical pricing basis; the frozen session plan and timings are used unchanged",
+ "scope": "P1t teacher generation only (one A100-80GB session) and arm B's $0 verification, merge and build on the dev box; NOT P1g, P2, student recovery, a network volume or any other formal paid experiment",
+ "on_failure": "ordinary engineering failures are repaired inside the cumulative $5; completed candidates are reused, never regenerated; science that completed validly is not retried for another candidate",
+ "on_short_corpus": "report the exact gap and stop; no automatic further paid top-up, no lower gate, no source or mix change"
+}
