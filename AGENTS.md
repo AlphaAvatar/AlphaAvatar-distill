@@ -1408,16 +1408,26 @@ Do not duplicate the full root `AGENTS.md` inside local files.
 
 The README is a concise, English-only landing page for users -- not an
 experiment report, a technical specification or a maintenance log. It keeps
-exactly these seven top-level sections, in this order (maintainer decision
-2026-10-23):
+exactly these seven top-level sections, in this order, with their emoji
+(maintainer decisions 2026-10-23):
 
-1. Overview and Goals;
-2. Performance Trend;
-3. Running the Agent;
-4. Project Structure;
-5. Optim Record History (stage-wise, Stage 0-6);
-6. References;
-7. Citation.
+1. `## 🧠 Overview and Goals` -- short; fluid reasoning and adaptive
+   problem-solving as the primary objective;
+2. `## 📈 Performance Trend` -- the trend figure and a short reading, no
+   experiment tables;
+3. `## 🤖 Running the agent` -- the original introduction (coding agents,
+   `AGENTS.md` as the agent contract, the first compression-experiment prompt,
+   agent-driven and reproducible work, paid actions under maintainer approval),
+   extended with short copyable example prompts rather than replaced;
+4. `## 🗂️ Project structure` -- the annotated directory tree, kept as a tree,
+   with its links;
+5. `## 🏆 Optim record history` -- organised by stage: one `###` subsection per
+   Stage 0-6 with its emoji (🧪 🧩 📚 🛠️ 🔁 🎯 🚀). Each stage gets its own
+   record table once it has an officially approved record, and says
+   `_No records yet._` until then; an experiment or attempt is never listed as
+   a record;
+6. `## 🔎 References` -- titles and links;
+7. `## 📚 Citation` -- the existing text and BibTeX, unchanged.
 
 Experiment tables, procedures, commands, budgets, run-specific numbers and
 status snapshots stay in their owning logs and docs, which the README links.

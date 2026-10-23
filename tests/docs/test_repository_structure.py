@@ -67,10 +67,14 @@ def test_the_readme_keeps_the_required_public_structure():
     """AGENTS.md §2.7 fixes the section list. Empty sections are allowed;
     missing ones are not."""
     text = README.read_text()
-    sections = ("Overview and Goals", "Performance Trend", "Running the Agent", "Project Structure",
-                "Optim Record History", "References", "Citation")
+    sections = ("🧠 Overview and Goals", "📈 Performance Trend", "🤖 Running the agent",
+                "🗂️ Project structure", "🏆 Optim record history", "🔎 References", "📚 Citation")
     found = [h.strip() for h in re.findall(r"^## (.+)$", text, re.M)]
     assert found == list(sections), found
+    # Optim record history is organised by stage, each with its own subsection.
+    records = text[text.index("## 🏆 Optim record history"):text.index("## 🔎 References")]
+    stages = re.findall(r"^### (\S+) Stage (\d)\b", records, re.M)
+    assert stages == [(e, str(i)) for i, e in enumerate("🧪 🧩 📚 🛠️ 🔁 🎯 🚀".split())], stages
 
 
 def test_the_readme_points_at_where_the_evidence_lives():

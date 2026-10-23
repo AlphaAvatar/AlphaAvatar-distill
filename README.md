@@ -1,6 +1,6 @@
 # AlphaAvatar-distill
 
-## Overview and Goals
+## 🧠 Overview and Goals
 
 AlphaAvatar-distill is an agent-guided framework for compressing large teacher
 models into smaller, efficient student models. Its purpose is reproducible,
@@ -27,7 +27,9 @@ hard-coding them. The work so far is a dense text baseline, distilling
 into a sub-1B student. Other model families, MoE and multimodal models are
 design goals and have not been validated.
 
-## Performance Trend
+---
+
+## 📈 Performance Trend
 
 [![Historical Stage-3 recovery-data scaling](./assets/e1_scaling.svg)](./assets/e1_scaling.svg)
 
@@ -40,70 +42,151 @@ Detailed results: the [experiment index](./logs/state/experiment_index.md), the
 [current state](./logs/state/current.md) and the
 [documentation](./docs/README.md).
 
-## Running the Agent
+---
 
-AlphaAvatar-distill is developed and operated through coding agents such as
-Claude Code, Codex or Cursor. Open the repository with your agent and describe
-what you want in natural language. The agent reads [`AGENTS.md`](./AGENTS.md),
-the working contract for this repository, and inspects the code and the
-experiment evidence before it changes anything. Paid, long-running or
-public-facing actions are proposed for your approval first.
+## 🤖 Running the agent
 
-**Introduce the project**
+This project is developed by autonomous coding agents (e.g. Claude Code, Codex, Cursor). [`AGENTS.md`](./AGENTS.md) is the single source of truth for agent instructions and must be read before making any change to this repository.
 
-> Read this repository and introduce AlphaAvatar-distill. Explain its goals, main capabilities, overall architecture, and current development status. Distinguish implemented functionality from planned features.
-
-**Explain how it works**
-
-> Explore the AlphaAvatar-distill codebase and explain how it works, from a teacher model checkpoint through calibration, structural initialization, distillation, student recovery, evaluation, and deployment. Keep the explanation high-level and point me to the relevant components.
-
-**Start a model compression experiment**
+The first dense-model compression experiment was kicked off with this instruction:
 
 > Hi, have a look at the AlphaAvatar-distill repo and start from the teacher model https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507. Let's kick off the first dense-model compression experiment.
 
-**Compress a custom model**
+Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, following the staged workflow in `AGENTS.md`. The working split is: agents act directly on local, reversible, CPU-scale work, and write a **costed proposal with pre-registered decision rules** for anything paid, long-running, or public-facing — the maintainer approves per session. The active proposal lives in [`logs/stages/stage-3/e2/plans/PROPOSAL.md`](./logs/stages/stage-3/e2/plans/PROPOSAL.md); current state and next actions in [`logs/state/current.md`](./logs/state/current.md).
 
-> I want to distill a teacher model into a smaller student for real-time inference. Explore the repository, help me choose an appropriate target architecture and compression ratio, and propose a reproducible training and evaluation plan.
+**Example prompts.** Open the repository with your agent and ask in plain language; it reads `AGENTS.md` and the experiment records before it changes anything.
+
+**Introduce AlphaAvatar-distill**
+
+> Read this repository and introduce AlphaAvatar-distill, including its goals, key features, architecture, and current capabilities.
+
+**Explain how AlphaAvatar-distill works**
+
+> Explore the repository and explain how AlphaAvatar-distill works, from teacher model compression and student initialization to distillation, recovery, evaluation, and deployment.
+
+**Start a compression experiment**
+
+> Hi, have a look at the AlphaAvatar-distill repo and start from the teacher model https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507. Let's kick off the first dense-model compression experiment.
+
+**Distill another model**
+
+> Help me start a new model distillation experiment using my own teacher model. Review the available architecture and compression options, then propose a reproducible workflow.
 
 **Continue an existing experiment**
 
-> Review the latest repository state and experiment evidence, identify the next steps, and continue the currently authorized workflow. Reuse valid checkpoints and previously generated data instead of repeating completed work.
+> Review the current project state and experiment records, then continue the authorized work using existing checkpoints and artifacts wherever possible.
 
-## Project Structure
+---
 
-| path | contents |
-| --- | --- |
-| `src/aadistill/` | reusable algorithm and framework code |
-| `scripts/` | experiment and workflow entry points, by stage |
-| `configs/` | model and experiment configurations |
-| `data/` | datasets and evaluation assets, including the permanent evaluation registry |
-| `tests/` | tests of the reusable core |
-| `logs/` | experiment history and evidence, by stage and experiment |
-| `artifacts/` | generated outputs and model artifacts (kept out of git) |
-| `docs/` | technical and research documentation |
-| `assets/` | figures and the data they are rendered from |
-| `AGENTS.md` | instructions for coding agents |
+## 🗂️ Project structure
 
-Details: [`docs/maintenance/REPO_LAYOUT.md`](./docs/maintenance/REPO_LAYOUT.md).
+All six trees — scripts, logs, artifacts, configs, data, docs — share one owner-first namespace: `stages/stage-<n>/<experiment>` (with `families/<family>` for experiment families), `shared/`, `maintenance/`.
+[`docs/maintenance/REPO_LAYOUT.md`](./docs/maintenance/REPO_LAYOUT.md) is the full map and the rule for where new files go.
 
-## Optim Record History
+```text
+AlphaAvatar-distill/
+├── AGENTS.md               # agent working contract (single source of truth)
+├── docs/maintenance/REPO_LAYOUT.md     # where code, configs, logs and artifacts belong
+├── pyproject.toml          # uv-managed env; CPU torch index by default
+├── src/aadistill/          # algorithm core — model-agnostic, config-driven
+│   ├── models/             #   teacher/student loading, INT8 fake-quant
+│   ├── initialization/     #   Stage 0/1 + the Teacher-Adaptive AutoInitializer:
+│   │                       #   adapters, operator registry, versioned search state,
+│   │                       #   Pareto beam search, calibration, recovery planning
+│   ├── data/               #   mixture loader, session rendering, loss masks, packing
+│   ├── training/           #   Stage-3 recovery trainer (CE+KD, freeze policy, resume)
+│   ├── rollout/            #   engine adapters, hashed rollout snapshots
+│   ├── evaluation/         #   usable_rollout, strict answer/protocol scorers,
+│   │                       #   degeneration, general-text diagnostics
+│   ├── governance/         #   authorization types, derived executable closures
+│   ├── runtime/            #   run layout mechanism, pod environment, staging contract
+│   └── infrastructure/     #   session spec/runner, provider control plane, budget,
+│                           #   watchdog, log relay, artifact gate
+├── scripts/                # executables, ONE OWNER EACH (2026-10-08 architecture)
+│   ├── stages/             #   experiment-owned code: stages/stage-<n>/<experiment>/
+│   │   └── stage-1/families/d_series/   # material owned by D1/D2/D3 together
+│   ├── shared/             #   stage-neutral: the application layer (calibration,
+│   │                       #   run_layout, recipes, …) and capabilities
+│   │                       #   data/ evaluation/ training/ rollout/ validation/ pod/
+│   └── maintenance/        #   repository tooling: architecture/ consolidation/
+│                           #   migration/ (the declarative move map lives here)
+├── configs/                # owner-first: stages/stage-<n>/<experiment>/ for
+│                           # experiment-owned specs and authorizations; stage-level
+│                           # registries at stages/stage-<n>/; shared/ and maintenance/
+│                           # (shared/baselines/ = the selected forward baseline)
+├── data/                   # owner-first: data/stages/stage-<n>/<dataset>/ — manifests
+│                           # tracked, heavy files gitignored, rebuildable
+│   └── eval-set/           #   permanent cross-stage evaluation sets: registry.json,
+│                           #   eval-set-<n>/ items tracked and hash-verified (eval-set-1 frozen)
+├── tests/                  # the CORE suite; experiment suites live with their
+│                           # experiments under scripts/stages/.../tests/
+├── logs/                   # project memory — read logs/README.md first
+│   ├── state/              #   current.json + current.md (the live snapshot),
+│   │                       #   ownership.md, artifact_manifests.md
+│   ├── stages/             #   stage → experiment → run evidence; families/ for
+│   │                       #   experiment-family records; index.json is the
+│   │                       #   ownership index (one leg per tree, all six)
+│   ├── budget/             #   ledger, decisions, consumed approvals
+│   └── maintenance/        #   inventories, registries, source-relocations
+├── artifacts/              # durable local products, by owner (gitignored except
+│                           # README.md and the generated index.json)
+├── docs/                   # durable reference, by owner — start at docs/README.md
+└── assets/                 # trend data + rendered figure
+```
 
-An official optimization record is stricter than an experiment result: it needs
-the exact commit, command, hardware, data and tokenizer identities, budget,
-metric log, final evaluation and maintainer approval ([`AGENTS.md`](./AGENTS.md)
-§3.8). Experiment results, however strong, are not records.
+The tree is abridged to the parts worth knowing about. New directories appear only when an implemented, verified milestone needs them — no empty placeholders. Model weights, activation caches and experiment artifacts are kept out of git (`.gitignore`); large checkpoints live in a private Hugging Face repo with hashes recorded in `logs/state/artifact_manifests.md`.
 
-| stage | official record |
-| --- | --- |
-| Stage 0 — initialization warm-up data collection | No official record yet |
-| Stage 1 — projection and structural initialization | No official record yet |
-| Stage 2 — offline warm-up data collection | No official record yet |
-| Stage 3 — student recovery | No official record yet |
-| Stage 4 — online data collection | No official record yet |
-| Stage 5 — on-policy distillation | No official record yet |
-| Stage 6 — deployment validation | No official record yet |
+On 2026-07-31 the 25 per-run experiment logs and 11 per-experiment proposals were consolidated into [`logs/stages/stage-3/history/EXPERIMENTS.md`](./logs/stages/stage-3/history/EXPERIMENTS.md) and [`logs/stages/stage-3/e2/plans/PROPOSAL.md`](./logs/stages/stage-3/e2/plans/PROPOSAL.md), and ~26 GB of superseded artifacts were removed. The originals remain in git history at commit `866dac2`.
 
-## References
+**Checkpoint retention is uneven and tracked.** Weights live outside git, on the
+private relay or the dev box, with hashes in
+[`logs/state/artifact_manifests.md`](./logs/state/artifact_manifests.md). One arm's weights
+(`P0-assistant`) were discarded and are unrecoverable — recorded rather than
+quietly dropped, because the loss bounds what can be re-measured.
+
+---
+
+## 🏆 Optim record history
+
+Official records are stricter than ordinary experiments (AGENTS.md 3.8): exact commit, command, hardware, data and tokenizer hashes, budget, metric log, and maintainer approval.
+
+**No records are being kept during baseline construction** (maintainer decision, 2026-07-28). Everything run so far — including every Stage 3 run in `logs/stages/stage-3/history/EXPERIMENTS.md` — is baseline work. The **first record point** will be written once the baseline is carried through Stage 6 deployment validation with satisfactory results; it will be the first entry, not a backfill. Until then every section below is intentionally empty, and every number on this page is an attempt, not a record.
+
+This applies to the Stage 0/1 initialization result above as well: it is a strong,
+reproducible finding, but it has not been through the record procedure and is not
+claimed as one.
+
+### 🧪 Stage 0 — Initialization warm-up data collection
+
+_No records yet._
+
+### 🧩 Stage 1 — Projection and structural initialization
+
+_No records yet._
+
+### 📚 Stage 2 — Offline warm-up data collection
+
+_No records yet._
+
+### 🛠️ Stage 3 — Student recovery
+
+_No records yet._
+
+### 🔁 Stage 4 — Online data collection
+
+_No records yet._
+
+### 🎯 Stage 5 — On-policy distillation
+
+_No records yet._
+
+### 🚀 Stage 6 — Deployment validation
+
+_No records yet._
+
+---
+
+## 🔎 References
 
 - Muralidharan et al., *Compact Language Models via Pruning and Knowledge Distillation* (Minitron), 2024. [arXiv:2407.14679](https://arxiv.org/abs/2407.14679)
 - Gromov et al., *The Unreasonable Ineffectiveness of the Deeper Layers*, 2024. [arXiv:2403.17887](https://arxiv.org/abs/2403.17887)
@@ -121,7 +204,9 @@ metric log, final evaluation and maintainer approval ([`AGENTS.md`](./AGENTS.md)
 - DeepSeek, *nano-vLLM*, 2025. [huggingface.co/blog](https://huggingface.co/blog/zamal/introduction-to-nano-vllm)
 - Karpathy, *nanochat*, 2025. [github.com/karpathy/nanochat](https://github.com/karpathy/nanochat)
 
-## Citation
+---
+
+## 📚 Citation
 
 If you use AlphaAvatar-distill in your research or projects, please cite it as:
 
