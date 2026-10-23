@@ -418,8 +418,8 @@ def price(*, schedule: ProbeSchedule, price_per_hour: float,
     `plan_session` RAISES when the plan does not fit `authorized_usd`; that
     refusal is how a stage that has outgrown its budget says so.
     """
-    from aadistill.infrastructure.budget import (
-        MEASURED_STEP_SECONDS, Phase, StepTime, plan_session)
+    from aadistill.infrastructure.budget import Phase, StepTime, plan_session
+    from shared.step_times import MEASURED_STEP_SECONDS
 
     cost = measured_probe_cost(repo_root)
     scale = eval_scale(schedule, repo_root)

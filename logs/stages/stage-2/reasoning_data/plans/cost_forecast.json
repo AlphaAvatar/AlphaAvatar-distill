@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.stage2.reasoning_data.cost_forecast/v1",
  "status": "FORECAST from measured rates; authorizes nothing",
- "written_utc": "2026-10-22T17:47:55Z",
+ "written_utc": "2026-10-23T17:09:49Z",
  "measured": {
   "teacher_generation": {
    "tokens_per_second": 1739.1,
@@ -279,23 +279,23 @@
  },
  "h1_units_L40S_M1": {
   "A": {
-   "recovery_hours": 0.958,
+   "recovery_hours": 0.941,
    "eval_hours": 1.857,
-   "usd": 3.15,
-   "executed_positions": 12712575,
-   "optimizer_steps": 625
+   "usd": 3.13,
+   "executed_positions": 12488833,
+   "optimizer_steps": 614
   },
   "B": {
-   "recovery_hours": 0.751,
+   "recovery_hours": 0.753,
    "eval_hours": 1.857,
-   "usd": 2.91,
-   "executed_positions": 9961250,
-   "optimizer_steps": 625
+   "usd": 2.92,
+   "executed_positions": 9984972,
+   "optimizer_steps": 614
   },
   "kinds": {
    "A_positions": "measured",
-   "B_positions": "estimated",
-   "steps": "PROVISIONAL",
+   "B_positions": "measured",
+   "steps": "FROZEN-READY",
    "positions_per_second": "measured on earlier L40S recovery runs (measured.*)",
    "hours_and_usd": "forecast = planned positions / measured rate x contingency"
   }
@@ -320,8 +320,8 @@
    "hard_cap_usd": 2.34
   },
   "P2_formal_4_units": {
-   "expected_usd": 12.45,
-   "hard_cap_usd": 18.68
+   "expected_usd": 12.43,
+   "hard_cap_usd": 18.65
   },
   "closeout_reserve_4_sessions": {
    "expected_usd": 1.78,
@@ -334,8 +334,8 @@
   }
  },
  "proposal_totals": {
-  "h1_expected_usd": 24.6,
-  "h1_hard_cap_usd": 34.81,
+  "h1_expected_usd": 24.58,
+  "h1_hard_cap_usd": 34.78,
   "excludes": "the optional diagnostic and any later ladder (a separate application)"
  },
  "p1_application": {

@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.stage2.reasoning_data.h1_accounting/v2",
- "status": "A MEASURED from its real pack; B ESTIMATED; schedule PROVISIONAL. Authorizes nothing.",
- "written_utc": "2026-10-22T09:04:08Z",
+ "status": "A MEASURED from its real pack; B MEASURED; schedule FROZEN-READY. Authorizes nothing.",
+ "written_utc": "2026-10-23T17:09:22Z",
  "kinds": {
   "measured": "counted from a real pack",
   "estimated": "B before its pack exists",
@@ -58,25 +58,11 @@
   }
  },
  "arm_B": {
-  "kind": "estimated",
-  "blocks": 416,
+  "kind": "measured",
+  "blocks": 402,
   "basis": {
-   "packing_efficiency": {
-    "value": 0.9734,
-    "kind": "measured",
-    "from": "packing_dry_run.json :: fluid_traces (the 519 Stage-0 units)"
-   },
-   "reasoning_share": {
-    "value": 0.8879,
-    "kind": "measured",
-    "from": "the same dry run"
-   },
-   "rendered_per_supervised": {
-    "value": 1.12,
-    "kind": "planning figure",
-    "from": "corpus_spec.json :: new_arm_rendered_per_supervised"
-   },
-   "uniform_blocks": "every estimated block carries the mean; the exact per-seed exposure of B exists only with its real pack"
+   "pack": "artifacts/stages/stage-2/reasoning_data/packs/B_v3",
+   "ladder_sha256": "fbc0ec7b7a49671aa051fd334d645ceef68bceeb6311b241857f1ff7713af714"
   }
  },
  "contracts": {
@@ -120,53 +106,53 @@
    },
    "B": {
     "schema": "aadistill.training.accounting/v2",
-    "blocks": 416,
+    "blocks": 402,
     "epochs": 3.0,
     "blocks_per_step": 2,
-    "optimizer_steps": 624,
-    "block_passes": 1248,
-    "U_supervised": 2959840,
-    "U_reasoning": 2628288,
-    "U_answer": 331552,
-    "E_supervised": 8879520,
-    "E_reasoning": 7884864,
-    "E_answer": 994656,
-    "supervised_per_step": 14230.0,
-    "real_tokens_per_epoch": 3315104,
-    "padding_per_epoch": 92768,
-    "executed_positions": 10223616,
+    "optimizer_steps": 603,
+    "block_passes": 1206,
+    "U_supervised": 2966334,
+    "U_reasoning": 2646905,
+    "U_answer": 319429,
+    "E_supervised": 8899002,
+    "E_reasoning": 7940715,
+    "E_answer": 958287,
+    "supervised_per_step": 14757.9,
+    "real_tokens_per_epoch": 3268696,
+    "padding_per_epoch": 24488,
+    "executed_positions": 9879552,
     "executed_positions_per_step": 16384.0,
-    "padding_executed": 278304,
-    "C_student_flops": 6.537469364482867e+16,
-    "C_teacher_flops": 1.0694375795746406e+17,
-    "C_total_flops": 1.7231845160229274e+17,
+    "padding_executed": 73464,
+    "C_student_flops": 6.317458376255078e+16,
+    "C_teacher_flops": 1.033446891800494e+17,
+    "C_total_flops": 1.665192729426002e+17,
     "truncate_padding": false,
     "kd_scope": "all",
     "KD_positions_per_pass": {
-     "prompt": 354848,
-     "reasoning": 2628288,
-     "answer": 331552,
+     "prompt": 301960,
+     "reasoning": 2646905,
+     "answer": 319429,
      "unsplit_supervised": 0
     },
     "KD_positions_exposure": {
-     "prompt": 1064544,
-     "reasoning": 7884864,
-     "answer": 994656,
+     "prompt": 905880,
+     "reasoning": 7940715,
+     "answer": 958287,
      "unsplit_supervised": 0
     }
    },
    "ratios_A_over_B": {
-    "U_supervised": 1.0001,
-    "E_supervised": 1.0003,
-    "optimizer_steps": 3.508,
-    "supervised_per_step": 0.2852,
-    "executed_positions": 3.508,
-    "C_total_flops": 3.508
+    "U_supervised": 0.9979,
+    "E_supervised": 0.9982,
+    "optimizer_steps": 3.6302,
+    "supervised_per_step": 0.275,
+    "executed_positions": 3.6302,
+    "C_total_flops": 3.6302
    },
    "kinds": {
     "U": {
      "A": "measured",
-     "B": "estimated"
+     "B": "measured"
     },
     "E": "planned (mean supervision per block)",
     "steps": "planned",
@@ -178,25 +164,25 @@
    "A": {
     "schema": "aadistill.training.accounting/v2",
     "blocks": 1459,
-    "epochs": 2.998629,
+    "epochs": 2.945853,
     "blocks_per_step": 7,
-    "optimizer_steps": 625,
-    "block_passes": 4375,
+    "optimizer_steps": 614,
+    "block_passes": 4298,
     "U_supervised": 2960182,
     "U_reasoning": 2567685,
     "U_answer": 392497,
-    "E_supervised": 8876488,
-    "E_reasoning": 7699535,
-    "E_answer": 1176953,
+    "E_supervised": 8720262,
+    "E_reasoning": 7564023,
+    "E_answer": 1156239,
     "supervised_per_step": 14202.4,
     "real_tokens_per_epoch": 4239462,
     "padding_per_epoch": 7712666,
-    "executed_positions": 12712575,
+    "executed_positions": 12488833,
     "executed_positions_per_step": 20340.1,
     "padding_executed": 0,
-    "C_student_flops": 7.500287058468846e+16,
-    "C_teacher_flops": 1.2759020392459229e+17,
-    "C_total_flops": 2.0259307450928077e+17,
+    "C_student_flops": 7.368282006239795e+16,
+    "C_teacher_flops": 1.2534461633551947e+17,
+    "C_total_flops": 1.9902743639791744e+17,
     "truncate_padding": true,
     "kd_scope": "all",
     "KD_positions_per_pass": {
@@ -206,61 +192,61 @@
      "unsplit_supervised": 0
     },
     "KD_positions_exposure": {
-     "prompt": 3831711,
-     "reasoning": 7699535,
-     "answer": 1176953,
+     "prompt": 3764273,
+     "reasoning": 7564023,
+     "answer": 1156239,
      "unsplit_supervised": 0
     }
    },
    "B": {
     "schema": "aadistill.training.accounting/v2",
-    "blocks": 416,
-    "epochs": 3.004808,
+    "blocks": 402,
+    "epochs": 3.054726,
     "blocks_per_step": 2,
-    "optimizer_steps": 625,
-    "block_passes": 1250,
-    "U_supervised": 2959840,
-    "U_reasoning": 2628288,
-    "U_answer": 331552,
-    "E_supervised": 8893750,
-    "E_reasoning": 7897500,
-    "E_answer": 996250,
-    "supervised_per_step": 14230.0,
-    "real_tokens_per_epoch": 3315104,
-    "padding_per_epoch": 92768,
-    "executed_positions": 9961250,
-    "executed_positions_per_step": 15938.0,
+    "optimizer_steps": 614,
+    "block_passes": 1228,
+    "U_supervised": 2966334,
+    "U_reasoning": 2646905,
+    "U_answer": 319429,
+    "E_supervised": 9061339,
+    "E_reasoning": 8085570,
+    "E_answer": 975768,
+    "supervised_per_step": 14757.9,
+    "real_tokens_per_epoch": 3268696,
+    "padding_per_epoch": 24488,
+    "executed_positions": 9984972,
+    "executed_positions_per_step": 16262.2,
     "padding_executed": 0,
-    "C_student_flops": 6.293271029760001e+16,
-    "C_teacher_flops": 1.0354418274304e+17,
-    "C_total_flops": 1.6647689304064e+17,
+    "C_student_flops": 6.368460962907628e+16,
+    "C_teacher_flops": 1.043067904496913e+17,
+    "C_total_flops": 1.6799140007876758e+17,
     "truncate_padding": true,
     "kd_scope": "all",
     "KD_positions_per_pass": {
-     "prompt": 354848,
-     "reasoning": 2628288,
-     "answer": 331552,
+     "prompt": 301960,
+     "reasoning": 2646905,
+     "answer": 319429,
      "unsplit_supervised": 0
     },
     "KD_positions_exposure": {
-     "prompt": 1066250,
-     "reasoning": 7897500,
-     "answer": 996250,
+     "prompt": 922405,
+     "reasoning": 8085570,
+     "answer": 975768,
      "unsplit_supervised": 0
     }
    },
    "ratios_A_over_B": {
-    "U_supervised": 1.0001,
-    "E_supervised": 0.9981,
+    "U_supervised": 0.9979,
+    "E_supervised": 0.9624,
     "optimizer_steps": 1.0,
-    "supervised_per_step": 0.9981,
-    "executed_positions": 1.2762,
-    "C_total_flops": 1.2169
+    "supervised_per_step": 0.9624,
+    "executed_positions": 1.2508,
+    "C_total_flops": 1.1847
    },
    "kinds": {
     "U": {
      "A": "measured",
-     "B": "estimated"
+     "B": "measured"
     },
     "E": "planned (mean supervision per block)",
     "steps": "planned",
@@ -275,45 +261,78 @@
    20260726,
    20260727
   ],
-  "steps": 625,
+  "steps": 614,
   "by_arm": {
    "A": {
     "20260726": {
-     "block_passes": 4375,
+     "block_passes": 4298,
      "blocks_touched": 1459,
      "U_supervised_touched": 2960182,
-     "E_supervised": 8873709,
-     "E_reasoning": 7696927,
-     "E_answer": 1176782,
-     "real_positions": 12709416,
+     "E_supervised": 8725366,
+     "E_reasoning": 7566876,
+     "E_answer": 1158490,
+     "real_positions": 12484285,
      "kd_scope": "all",
      "KD_positions_exposure": {
-      "prompt": 3831332,
-      "reasoning": 7696927,
-      "answer": 1176782,
+      "prompt": 3754621,
+      "reasoning": 7566876,
+      "answer": 1158490,
       "unsplit_supervised": 0
      }
     },
     "20260727": {
-     "block_passes": 4375,
+     "block_passes": 4298,
      "blocks_touched": 1459,
      "U_supervised_touched": 2960182,
-     "E_supervised": 8879186,
-     "E_reasoning": 7701891,
-     "E_answer": 1177295,
-     "real_positions": 12716129,
+     "E_supervised": 8750577,
+     "E_reasoning": 7589721,
+     "E_answer": 1160856,
+     "real_positions": 12537821,
      "kd_scope": "all",
      "KD_positions_exposure": {
-      "prompt": 3832568,
-      "reasoning": 7701891,
-      "answer": 1177295,
+      "prompt": 3782946,
+      "reasoning": 7589721,
+      "answer": 1160856,
       "unsplit_supervised": 0
      }
     }
    },
-   "B": null
+   "B": {
+    "20260726": {
+     "block_passes": 1228,
+     "blocks_touched": 402,
+     "U_supervised_touched": 2966334,
+     "E_supervised": 9060519,
+     "E_reasoning": 8081360,
+     "E_answer": 979159,
+     "real_positions": 9984903,
+     "kd_scope": "all",
+     "KD_positions_exposure": {
+      "prompt": 923156,
+      "reasoning": 8081360,
+      "answer": 979159,
+      "unsplit_supervised": 0
+     }
+    },
+    "20260727": {
+     "block_passes": 1228,
+     "blocks_touched": 402,
+     "U_supervised_touched": 2966334,
+     "E_supervised": 9058203,
+     "E_reasoning": 8082656,
+     "E_answer": 975547,
+     "real_positions": 9985732,
+     "kd_scope": "all",
+     "KD_positions_exposure": {
+      "prompt": 926301,
+      "reasoning": 8082656,
+      "answer": 975547,
+      "unsplit_supervised": 0
+     }
+    }
+   }
   },
-  "_B": "B has no real pack yet: no exact per-seed figure exists"
+  "_B": null
  },
  "primary_basis": "M1: one step count T for both arms (identical learning-rate schedule) from match_schedule; U equal within 1% by the ladder cut; E within the passes match_schedule reports, verified exactly per seed on the real packs; supervised positions per step follow; C is NOT matched and is reported -- arm A carries prompt context (passages, tool schemas) that is computed but not supervised",
  "schedule": {
@@ -322,31 +341,31 @@
    "rule": "aadistill.training.accounting.match_schedule/v1",
    "reference": "B",
    "reference_blocks_per_step": 2,
-   "T0": 624,
+   "T0": 603,
    "searched_steps": [
-    561,
-    687
+    542,
+    664
    ],
-   "steps": 625,
+   "steps": 614,
    "blocks_per_step": {
     "A": 7,
     "B": 2
    },
    "passes": {
-    "A": 2.998629,
-    "B": 3.004808
+    "A": 2.945853,
+    "B": 3.054726
    },
-   "max_pass_deviation": 0.001603
+   "max_pass_deviation": 0.018242
   },
-  "status": "PROVISIONAL: B's pack is estimated; the protocol freezes the values this rule returns on B's real pack",
-  "steps": 625,
+  "status": "FROZEN-READY: computed on both arms' real packs",
+  "steps": 614,
   "blocks_per_step": {
    "A": 7,
    "B": 2
   },
   "warmup_steps": 31,
-  "eval_every": 78,
-  "save_every": 312,
+  "eval_every": 76,
+  "save_every": 307,
   "lr_rule": "the E1 builder's rule (build_experiment1_configs.py): warmup max(10, round(0.05 T)); eval every max(25, T // 8); save every max(200, T // 2); cosine to min_lr_frac 0.1",
   "not_reused": "the 0.86M recipe's 1,023 steps; any earlier provisional T or blocks per step"
  },

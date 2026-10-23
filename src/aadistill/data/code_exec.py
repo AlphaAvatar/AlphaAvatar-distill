@@ -16,6 +16,18 @@ Two modes, because benchmarks state tests in two ways:
   arrives with its nonce, and every declared test ran and passed. Exit status 0
   is not evidence: a program that leaves before its tests (``sys.exit``,
   ``os._exit``) ran none of them, and fails saying so.
+
+  The program shares the driver's interpreter, so the driver binds everything
+  its verdict depends on (``exec``, ``compile``, the pipe, the report) as
+  locals of one function before any setup, program or test code runs; no
+  module global holds the report or the nonce. A program or test that rebinds
+  a builtin, replaces the builtins its namespace or the tests resolve through,
+  installs a trace or profile hook, or leaves a thread running has rewritten
+  how the tests run, and fails as ``tampered`` whatever the tests then report.
+  This contains interference through shared interpreter state -- the v2 driver
+  recorded a pass for ``assert False`` after ``builtins.exec`` was replaced.
+  It is not a defence against a program written to search the driver's own
+  frames for its nonce; the sandbox bounds what such a program can reach.
 * ``stdio`` -- each case is ``(stdin, expected_stdout)``. The WHOLE stdout is
   compared, whitespace-normalized, and the program must exit 0. An output that
   reaches ``Limits.output_bytes`` fails as ``output_limit``; it is never
@@ -52,7 +64,7 @@ import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
-CODE_EXEC_SCHEMA = "aadistill.data.code_exec/v2"
+CODE_EXEC_SCHEMA = "aadistill.data.code_exec/v3"
 ESTABLISHES = ("the declared tests ran and passed: evidence bounded by those tests, "
                "not full semantic correctness")
 
@@ -149,45 +161,93 @@ def _run(argv: list[str], workdir: str, stdin: str, lim: Limits,
 
 
 _DRIVER = r'''
-import json, os, sys
-fd = int(sys.argv[1])
-nonce = sys.stdin.readline().strip()
-with open("job.json") as f:
-    job = json.load(f)
-os.remove("job.json")
-report = {"nonce": nonce, "stage": "setup", "tests_total": len(job["tests"]),
-          "tests_run": 0, "tests_passed": 0, "failures": []}
-def send():
-    os.write(fd, json.dumps(report).encode())
-    os.close(fd)
-    os._exit(0)
-def why(e):
-    return f"{type(e).__name__}: {str(e)[:300]}"
-ns = {"__name__": "__main__", "__builtins__": __builtins__}
-try:
-    exec(compile(job["setup"], "setup.py", "exec"), ns)
-    report["stage"] = "program"
-    exec(compile(job["code"], "candidate.py", "exec"), ns)
-except SystemExit as e:
-    report["exited"] = f"SystemExit({e.code!r}) before the tests"
-    send()
-except BaseException as e:
-    report["error"] = why(e)
-    send()
-report["stage"] = "tests"
-for i, t in enumerate(job["tests"]):
-    report["tests_run"] += 1
+def _verify():
+    # The candidate shares this interpreter. Everything the verdict depends on
+    # is bound HERE, before any setup, program or test code runs, and lives in
+    # this function's locals: rebinding a builtin (exec, compile, len, ...) or
+    # a module attribute later does not reach these references, and no module
+    # global holds the report, the nonce or the pipe.
+    import _thread, builtins, json, os, sys
+    _exec, _compile, _len, _type, _str, _int = exec, compile, len, type, str, int
+    _dict, _range = dict, range
+    _write, _close, _exit, _remove, _open = os.write, os.close, os._exit, os.remove, open
+    _dumps, _loads = json.dumps, json.loads
+    _gettrace, _getprofile, _modules, _threads = sys.gettrace, sys.getprofile, sys.modules, _thread._count
+    _BaseException, _SystemExit = BaseException, SystemExit
+    _builtins = builtins
+    fd = _int(sys.argv[1])
+    nonce = sys.stdin.readline().strip()
+    with _open("job.json") as f:
+        job = _loads(f.read())
+    _remove("job.json")
+    tests = job["tests"]
+    report = {"nonce": nonce, "stage": "setup", "tests_total": _len(tests),
+              "tests_run": 0, "tests_passed": 0, "failures": []}
+    def send():
+        _write(fd, _dumps(report).encode())
+        _close(fd)
+        _exit(0)
+    def why(e):
+        return f"{_type(e).__name__}: {_str(e)[:300]}"
+    ns = {"__name__": "__main__", "__builtins__": _builtins}
     try:
-        exec(compile(t, f"test_{i}", "exec"), ns)
-        report["tests_passed"] += 1
-    except SystemExit as e:
-        report["failures"].append({"test": i, "error": f"SystemExit({e.code!r})"})
-        break
-    except BaseException as e:
-        if len(report["failures"]) < job["max_failures"]:
-            report["failures"].append({"test": i, "error": why(e)})
-report["stage"] = "done"
-send()
+        _exec(_compile(job["setup"], "setup.py", "exec"), ns)
+    except _BaseException as e:
+        report["error"] = why(e)
+        send()
+    # The shared state a test's own statements resolve through: what the
+    # dataset's setup left. A program or a test that changes it has rewritten
+    # how the tests run, and fails as tampered whatever they then report.
+    snapshot = _dict(_builtins.__dict__)
+    def tampered():
+        now = _builtins.__dict__
+        if _len(now) != _len(snapshot):
+            return "the program rebound a builtin"
+        for k, v in snapshot.items():
+            if now.get(k, now) is not v:
+                return "the program rebound a builtin"
+        if ns.get("__builtins__") is not _builtins or _modules.get("builtins") is not _builtins:
+            return "the program replaced the builtins the tests resolve through"
+        if _gettrace() is not None or _getprofile() is not None:
+            return "the program installed a trace or profile hook"
+        if _threads():
+            return "the program left a thread running"
+        return None
+    report["stage"] = "program"
+    try:
+        _exec(_compile(job["code"], "candidate.py", "exec"), ns)
+    except _SystemExit as e:
+        report["exited"] = f"SystemExit({e.code!r}) before the tests"
+        send()
+    except _BaseException as e:
+        report["error"] = why(e)
+        send()
+    t = tampered()
+    if t:
+        report["tampered"] = t
+        send()
+    report["stage"] = "tests"
+    for i in _range(_len(tests)):
+        report["tests_run"] += 1
+        try:
+            _exec(_compile(tests[i], f"test_{i}", "exec"), ns)
+            ok = True
+        except _SystemExit as e:
+            report["failures"].append({"test": i, "error": f"SystemExit({e.code!r})"})
+            break
+        except _BaseException as e:
+            ok = False
+            if _len(report["failures"]) < job["max_failures"]:
+                report["failures"].append({"test": i, "error": why(e)})
+        t = tampered()
+        if t:
+            report["tampered"] = f"{t} (during test {i})"
+            send()
+        if ok:
+            report["tests_passed"] += 1
+    report["stage"] = "done"
+    send()
+_verify()
 '''
 
 
@@ -242,6 +302,8 @@ def run_asserts(code: str, tests: Sequence[str], *, setup: str = "",
         status = run["status"]
     elif rep is None:
         status = "no_report"                    # left without the driver: os._exit, a crash, a limit
+    elif "tampered" in rep:
+        status = "tampered"
     elif "exited" in rep:
         status = "exited_early"
     elif "error" in rep:
@@ -252,7 +314,8 @@ def run_asserts(code: str, tests: Sequence[str], *, setup: str = "",
         status = "failed"
     if rep is not None:
         out.update(tests_run=rep["tests_run"], tests_passed=rep["tests_passed"],
-                   failures=rep["failures"], detail=rep.get("exited") or rep.get("error"))
+                   failures=rep["failures"],
+                   detail=rep.get("tampered") or rep.get("exited") or rep.get("error"))
     passed = status == "passed"
     return {**out, "passed": passed, "status": status,
             "establishes": ESTABLISHES if passed else None}

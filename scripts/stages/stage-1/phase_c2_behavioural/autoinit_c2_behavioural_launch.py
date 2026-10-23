@@ -2046,7 +2046,8 @@ def budget(args) -> BudgetSpec:
     explicit: under worst-case timings the session stops with a rung
     incomplete — and a partial rung decides nothing — rather than overspending.
     """
-    from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
+    from aadistill.infrastructure.budget import Phase
+    from shared.step_times import MEASURED_STEP_SECONDS
 
     #: REMAINING work, and a fresh campaign's remaining work is all of it. The
     #: same decomposition either way — a continuation budget derived beside

@@ -72,6 +72,46 @@ def test_the_program_cannot_rewrite_its_tests():
     assert not r["passed"] and r["tests_run"] == 1
 
 
+#: Each rewrites how the tests run through the interpreter state the program
+#: shares with the driver; under v2 the first four recorded `assert False` as
+#: passed (maintainer review, 2026-10-23).
+TAMPERING = {
+    "exec replaced": "import builtins\nbuiltins.exec = lambda *a, **k: None\n",
+    "compile replaced": ("import builtins\n_c = builtins.compile\n"
+                         "builtins.compile = lambda s, f, m, *a, **k: _c('pass', f, m)\n"),
+    "the namespace's builtins replaced": ("import builtins\n"
+                                          "globals()['__builtins__'] = dict(vars(builtins), AssertionError=None)\n"),
+    "a builtin the tests use replaced": "import builtins\nbuiltins.len = lambda x: 2\n",
+    "a trace hook": "import sys\nsys.settrace(lambda f, e, a: None)\n",
+    "a thread left running": ("import threading, time\n"
+                              "threading.Thread(target=time.sleep, args=(2,), daemon=True).start()\n"),
+    "exec replaced from inside a test": ("def sneaky():\n    import builtins\n"
+                                         "    builtins.exec = lambda *a, **k: None\n    return True\n"),
+}
+
+
+@pytest.mark.parametrize("name", sorted(TAMPERING))
+def test_a_program_that_rewrites_how_its_tests_run_fails_as_tampered(name):
+    tests = ["assert sneaky()", "assert False"] if "inside a test" in name else ["assert len([1]) == 2", "assert False"]
+    r = run_asserts(GOOD + TAMPERING[name], tests, limits=Limits(wall_seconds=8, cpu_seconds=3, memory_mb=512))
+    assert not r["passed"] and r["status"] == "tampered", (name, r["status"], r.get("detail"))
+    assert r["establishes"] is None
+
+
+def test_the_report_and_its_nonce_are_not_module_globals_the_program_can_rewrite():
+    forged = "import sys\nsys.modules['__main__'].report['tests_passed'] = 2\n"
+    r = run_asserts(GOOD + forged, ["assert False", "assert False"], limits=FAST)
+    assert not r["passed"] and r["status"] == "program_error" and "report" in r["detail"]
+
+
+def test_a_name_the_program_defines_for_itself_is_not_tampering():
+    """Shadowing a builtin in its own namespace is ordinary Python: the tests
+    see the program's definition, and the verdict is theirs."""
+    code = GOOD + "def max(*a):\n    return 0\n"
+    assert run_asserts(code, ["assert add(1, 1) == 2", "assert max(3, 4) == 0"], limits=FAST)["passed"]
+    assert run_asserts(GOOD, ["assert sorted([2, 1]) == [1, 2]"], setup="import math", limits=FAST)["passed"]
+
+
 def test_an_infinite_loop_is_stopped():
     r = run_asserts("while True:\n    pass\n", ["assert True"], limits=Limits(wall_seconds=3, cpu_seconds=1))
     assert not r["passed"] and r["status"] in ("no_report", "timeout")

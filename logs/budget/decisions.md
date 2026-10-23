@@ -13569,3 +13569,93 @@ on a paid pod.
   refuses P1t until the maintainer decides.
 - **Revisit when.** The maintainer issues or declines the P1t grant, or the
   live price moves above $1.79/h.
+
+## 2026-10-23 — Maintainer: H1 P1t authorized; P1t executed ($0.64), arm B's pack built, M1 measured, code verifier v3
+
+- **Context.** The maintainer formally approved P1t at reviewed commit
+  `03d087c1`.
+  - **Approved identities:** launch identity `e5732fd4…`, harness
+    `348ed512…`, the frozen 59 tasks of `stage2.reasoning_master@v3`.
+  - **Money:** a **cumulative** P1t hard cap of $5.00, superseding the
+    $2.60 application's amount; the project's absolute cap is $666.52 on the
+    recorded $661.5161 basis.
+  - **Then:** the $0 verification, the merge with P1 and the formal build of
+    arm B, and M1 and the next stage's budget inputs if B is valid.
+  - **Required before B is accepted for recovery:** close the code-verifier
+    hole and re-verify the saved MBPP teacher outputs without regenerating
+    them.
+  - **Not authorized:** P1g, P2, student recovery, a network volume.
+- **Done.**
+  - **Grant and authorization:** `logs/budget/approvals/h1_p1t_generation_grant.json`;
+    `governance.issue` recomputed both identities and they equalled the
+    approved values. The session commit `72512395` adds only those records.
+    The bundle round trip matched: checkout HEAD, the authorization bytes,
+    the harness and the launch identity.
+  - **Pre-launch checks** (`runs/h1p1t_20261023_094007/prelaunch_checks.json`):
+    0 pods, 0 volumes, $0/h, balance $97.87; A100-SXM4-80GB at $1.79/h. The
+    all-in bound at `--max-price` 2.50 was $3.616, inside $5.00.
+  - **Acquisition:** the first create found no capacity at $0 (kept in
+    `runtime/acquisition/`); the ordinary backoff created the pod 47 s later.
+  - **Session:** 21.4 minutes (setup 4.4); pass 0 sealed all 59 tasks, pass 1
+    the 41 the driver sent to a second candidate. 3 shards, 100 records, all
+    re-hashed.
+    - **Cost:** GPU $0.6373 + disk $0.0073 = $0.6447 all-in. The provider
+      balance moved −$0.6388; its all-time billing had not posted at the
+      snapshot.
+    - **Teardown:** confirmed by the provider and a 0-resource
+      reconciliation; the watchdog exited.
+  - **Copies:** dev box (`artifacts/.../generation/h1p1t_20261023_094007/`) and
+    the relay; the relay copy was read back with 0 mismatches.
+  - **Code verifier v3** (`src/aadistill/data/code_exec.py`).
+    - **The hole:** v2 recorded `assert False` as passed after a candidate
+      replaced `builtins.exec` or `compile`, rebound its namespace's
+      `__builtins__`, or rewrote the driver's module-global report.
+    - **The fix:** v3 binds every primitive its verdict depends on in one
+      function's locals before any candidate code runs. A rebound builtin, a
+      replaced builtins mapping, a trace or profile hook or a thread left
+      running fails as `tampered`.
+    - **Tests:** 7 tampering vectors and the report forge, all failing under
+      v2.
+    - **On MBPP's own data** (`audit/code_verifier_check_v3.json`): equal to
+      v2 — 473 of 474 references pass, the same mutants rejected.
+  - **Re-verification of P1's MBPP outputs**
+    (`audit/code_reverification_h1gen_20261022_190653.json`, records read,
+    never changed): 124 records, 112 executed, 107 pass under v2 and v3,
+    **0 verdicts moved**.
+  - **Arm B's pack** (`corpus_feasibility.py`, `audit/corpus_v3_feasibility.json`):
+    - **Admission:** both sessions as complete runs; P1 on its frozen
+      records.
+    - **Merge:** 1,080 generated units (P1 1,057 + P1t 23) with 6,298 reused;
+      0 tasks in two sessions; one protocol and one runner hash; one unit set
+      aside.
+    - **Ladder:** every rung cut (0.86M, 1.6M, 2.96M) with the 150,415-token
+      validation tail.
+    - **Checks:** 0 shared prompts or targets; R0–R9 pass; nothing
+      unsatisfied.
+    - **Identity:** ladder `fbc0ec7b…`, blocks `5d06b026…`, recorded in
+      `h1_units.json`; the unit driver's pack check passes for A and B.
+    - **P1t's cells:** analogy 18/25 tasks accepted, RG composition 5/34. Both
+      cells are now covered.
+  - **M1** (`plans/h1_accounting.json`): measured on both real packs; the
+    matched schedule is FROZEN-READY at 614 steps (7 and 2 blocks per step),
+    with U matched within 0.2%.
+  - **Forecast** (`plans/cost_forecast.json`): P2's four formal units on L40S
+    are expected at $12.43 (hard cap $18.65).
+  - **Core budget:** the Stage-3 step times leave `src/aadistill`. They live in
+    `scripts/shared/step_times.py`, and the floor and superseded figures are
+    caller parameters of `plan_session` and `BudgetSpec`.
+- **Not done, per the authorization.** No P1g, P2 or recovery; the units stay
+  unfrozen; nothing merged.
+- **Revisit when.** The maintainer decides P1g/P2.
+  - **Harness:** v3 moved the H1 harness digest, so a later session needs a
+    grant naming the new one.
+  - **Project cap:** the remaining headroom is about $4.36 of $666.52.
+
+## 2026-10-23 — Maintainer: the root README is a seven-section landing page
+
+- **Decision.** `README.md` is a concise, English-only entry point for users,
+  with seven sections: Overview and Goals, Performance Trend, Running the
+  Agent, Project Structure, Optim Record History, References, Citation.
+  AGENTS.md §2.7 follows. Experiment tables, procedures, commands, budgets
+  and status snapshots stay in their owning logs and docs.
+- **Done.** Commit `7e9120fe`.

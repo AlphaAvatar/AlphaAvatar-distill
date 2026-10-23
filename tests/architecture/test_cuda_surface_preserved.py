@@ -2301,6 +2301,34 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "new statistic whose level, strata and thresholds are the caller's. "
             "NO CUDA SURFACE.",
      }),
+    ("03d087c18b21f488e6bd96e61f69820c548e8c3e",
+     "H1 P1t closeout: code verifier v3 and caller-owned step-time facts",
+     {
+        "src/aadistill/data/code_exec.py":
+            "v3 (`CODE_EXEC_SCHEMA` .../v3): the assert driver binds every "
+            "primitive its verdict depends on as locals of one function before "
+            "any setup, program or test code runs, keeps no report or nonce in "
+            "module globals, and fails a run as `tampered` when the program or "
+            "a test rebinds a builtin, replaces the builtins the tests resolve "
+            "through, installs a trace or profile hook or leaves a thread "
+            "running. v2 recorded `assert False` as passed after "
+            "`builtins.exec` was replaced. THIS IS A DECLARED SEMANTIC CHANGE "
+            "of a verdict; `run_stdio`, the limits and the sandbox are "
+            "unchanged. NO CUDA SURFACE.",
+        "src/aadistill/infrastructure/budget.py":
+            "REMOVED `MEASURED_STEP_SECONDS` and `SUPERSEDED_STEP_SECONDS` (a "
+            "Stage-3 L40S measurement; now `scripts/shared/step_times.py`). "
+            "`plan_session(step_time_floor=None, superseded_step_seconds=())`: "
+            "the floor and the superseded figures are the caller's, with no "
+            "built-in default. THIS IS A DECLARED SEMANTIC CHANGE: a caller "
+            "that passes no floor is no longer refused below 4.15 s/step. "
+            "NO CUDA SURFACE.",
+        "src/aadistill/infrastructure/session.py":
+            "NEW `BudgetSpec.step_time_floor` and "
+            "`BudgetSpec.superseded_step_seconds` (defaults None and ()), "
+            "passed through to `plan_session`. THIS IS A DECLARED SEMANTIC "
+            "CHANGE of the spec. NO CUDA SURFACE.",
+     }),
 )
 
 

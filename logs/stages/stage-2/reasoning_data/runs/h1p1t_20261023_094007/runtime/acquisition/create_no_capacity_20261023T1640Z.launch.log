@@ -1,0 +1,21 @@
+bundle OK: transfer/aad_autoinit_72512395.bundle on the relay
+[16:40:27] budget: expected 33 min $1.39 · soft $2.65 · hard $3.53 (authorized $5.00)
+[16:40:27] NVIDIA A100-SXM4-80GB $1.79/h, stock None
+[16:40:27] account funds OK: the provider account holds $97.8657 against the $30.0000 this session must be able to fund
+[16:40:28] account resources OK: the provider account holds only the 0 resource(s) the records account for
+[16:40:28] all-in $3.6160 over 86.075 min at $2.5/h, inside $5.00
+[16:40:28] stage2.reasoning_master@v3: 59 tasks, no shortfall
+[16:40:28] every bound file is in the session commit
+[16:40:28] precheck OK: 0 relay inputs (), 1 local assets
+[16:40:29] attempt 1: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[16:40:29] ABORT: could not create a pod
+
+stage2-h1-generation INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-2/reasoning_data/runs/h1p1t_20261023_094007/runtime/session.json. 
+{"secured": 0, "unverified": [], "records": 0}
+40:29] ABORT: could not create a pod
+rc=11

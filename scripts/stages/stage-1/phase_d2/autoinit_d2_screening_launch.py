@@ -437,7 +437,8 @@ def budget_spec(repo_root: Path, *, authorized_minutes: float | None = None,
                 rung: Rung = SCREENING) -> BudgetSpec:
     """DECOMPOSES the priced bound (capped by the authorized minutes) so the
     plan lands exactly on it; refuses rather than thinning a reserve."""
-    from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
+    from aadistill.infrastructure.budget import Phase
+    from shared.step_times import MEASURED_STEP_SECONDS
 
     from stages.phase_d1.d1_authorization import live_money
     from stages.phase_d2.d2_screening_authorization import session_ceiling

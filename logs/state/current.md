@@ -9,34 +9,29 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**STAGE-2/3 H1: THE MAINTAINER CHOSE @v3 FOR ARM B; P1t (59 TASKS) IS PREPARED AT $0 AND AWAITS ITS GRANT (2026-10-23).**
+**STAGE-2/3 H1: P1t EXECUTED UNDER THE MAINTAINER'S GRANT; ARM B'S PACK IS BUILT ON @v3; M1 MEASURED (2026-10-23).**
 Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).
 Nothing is running and nothing is billing: 0 pods, 0 volumes, $0/h
-(provider snapshot `logs/budget/provider/runpod_billing_2026-10-23T0942Z.json`).
+(provider snapshot `logs/budget/provider/runpod_billing_2026-10-23T1703Z.json`).
 Evidence: [`docs/stages/stage-2/reasoning_data/H1.md`](../../docs/stages/stage-2/reasoning_data/H1.md)
-§14–§16; `audit/p1v_verification.json`, `audit/corpus_v2_feasibility.json`,
-`plans/p1t/`.
-- **P1 (2026-10-22):** $3.33 of the $8.02 cap; 2,164 teacher records, every
-  shard secured; P1v selected 1,057 units, and four cells fell short.
-- **@v2:** does not build on the formal ladder; closed as infeasible.
-- **@v3 (`configs/.../corpus_v3.json`), the maintainer's choice for B:**
-  @v1's capability shares, analogy from the project generator alone, the 0.0
-  cells named. Frozen: P1t's plan binds its sha256.
-- **P1t, NOT authorized:** the application's 25 + 34 unused tasks, frozen in
-  `plans/p1t/generation_plan.json` under their own launch identity; one A100
-  session, $1.01 expected / $2.60 hard cap, GPU + disk + termination time
-  bounded together at $0 (fits up to $1.79/h). What a grant must name:
-  `plans/p1t/authorization_request.json`.
-- **The build after P1t** (`corpus_feasibility.py`): both sessions admitted
-  only as complete runs (closeout, driver ALL_DONE, both passes' due tasks on
-  the run's own records) and verified under their own authorizations, a
-  shared task refused, the 0.0 cells' units set aside by name, the pack only
-  on a full formal build. Short again → report and stop, no automatic top-up.
-- **Budget:** $661.52 billed all-time (provider, counted once) against the
-  absolute $666.17 cap; the 34 pods and the anchor stay OPEN.
-- **Needs the maintainer:** the P1t grant (`governance.issue` takes a grant
-  naming the request's launch identity and harness digest). P1g, P2 and
-  formal recovery are not authorized.
+§14–§17; `audit/corpus_v3_feasibility.json`, `runs/h1p1t_20261023_094007/`,
+`plans/h1_accounting.json`, `plans/cost_forecast.json`.
+- **P1 (2026-10-22):** $3.33 of the $8.02 cap; 2,164 teacher records; 1,057 units.
+- **P1t (2026-10-23):** $0.64 all-in of the cumulative $5.00; the frozen 59
+  tasks, 100 records, 23 units; provider-confirmed teardown, copies on the
+  dev box and the relay.
+- **Code verifier v3** (`src/aadistill/data/code_exec.py`): closes the v2
+  shared-state hole; P1's 124 saved MBPP records re-verified, 0 verdicts
+  moved (`audit/code_reverification_h1gen_20261022_190653.json`).
+- **Arm B's pack (`stage2.reasoning_master@v3`):** built on the formal nested
+  ladder, every rung with the 150k reserve, nothing unsatisfied; identity in
+  `configs/.../h1_units.json :: packs.B`.
+- **M1:** both packs measured; schedule FROZEN-READY at 614 steps. P2's four
+  units forecast at $12.43 expected / $18.65 hard cap (`plans/cost_forecast.json`).
+- **Budget:** provider balance −$0.64 since the grant; the absolute project
+  cap is $666.52 (headroom ≈ $4.36 after P1t), so P2 needs a new cap decision.
+- **Needs the maintainer:** P1g / P2 (a grant naming the post-v3 harness),
+  freezing the units file, and the project cap. P1g, P2 and recovery are not authorized.
 
 **STAGE-0 CALIBRATION-VOLUME PROGRAMME CLOSED (final $0 closeout, 2026-10-21).**
 Verdict: **EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON
@@ -4196,7 +4191,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$628.9512` spent of `$643.6571`, leaving `$14.7059` |
+| project cap | `$629.5959` spent of `$643.6571`, leaving `$14.0612` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

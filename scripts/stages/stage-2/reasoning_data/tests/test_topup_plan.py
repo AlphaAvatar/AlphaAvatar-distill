@@ -148,7 +148,14 @@ def test_the_request_names_what_is_on_disk_now():
         pytest.skip("no request written yet")
     req = A.read_json(T.REQUEST)
     assert req["launch_identity_sha256"] == GOV.launch_hash(A.REPO, GOV.TOPUP_PLAN)
-    assert req["harness_digest"] == harness_source_digest(A.REPO, files=GOV.HARNESS)["digest"]
+    issued = A.REPO / GOV.authorization_path(req["run_id"])
+    if issued.is_file():
+        # Granted and issued: the request is history. The authorization binds
+        # exactly what it named; a later harness change binds a later grant.
+        auth = GOV.load(issued)
+        assert (auth.plan_hash, auth.harness_source_digest) == (req["launch_identity_sha256"], req["harness_digest"])
+    else:
+        assert req["harness_digest"] == harness_source_digest(A.REPO, files=GOV.HARNESS)["digest"]
     assert req["generation_plan"]["sha256"] == A.sha256_file(T.PLAN) and req["corpus"] == PLAN["corpus"]
     corpus_run = [s["run_id"] for s in A.read_json(T.CORPUS)["data"]["generation_sessions"] if s["phase"] == "P1t"]
     assert [req["run_id"]] == corpus_run

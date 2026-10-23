@@ -18,7 +18,7 @@
       "eval_every",
       "save_every"
     ],
-    "provisional_when": "its status starts with PROVISIONAL (today: B's pack is estimated)",
+    "provisional_when": "its status starts with PROVISIONAL (B's pack is measured since 2026-10-23; the schedule is FROZEN-READY)",
     "lr_rule": "warmup max(10, round(0.05 T)); eval every max(25, T // 8); save every max(200, T // 2) -- the E1 builder's rule; the driver recomputes it and refuses a schedule record that disagrees",
     "rung": 2960000
   },
@@ -43,15 +43,32 @@
       }
     },
     "B": {
-      "status": "pending",
-      "what": "pending: B's real pack (D_2.96M of B's master order). B's corpus is stage2.reasoning_master@v3 (maintainer 2026-10-23, configs/stages/stage-2/reasoning_data/corpus_v3.json); the pack exists only after P1t generation and the formal-ladder build of P1 + P1t (corpus_feasibility.py)",
-      "corpus": {"id": "stage2.reasoning_master@v3", "file": "configs/stages/stage-2/reasoning_data/corpus_v3.json", "chosen": "maintainer 2026-10-23 (logs/budget/decisions.md)"},
-      "expected": null,
-      "blocks_sha256": null,
-      "ladder_sha256": null,
+      "status": "recorded",
+      "what": "arm B's 2.96M pack: stage2.reasoning_master@v3 from P1 (h1gen_20261022_190653) and P1t (h1p1t_20261023_094007), each admitted as a complete run and verified under its own authorization (code verifier v3), merged, the 0.0 cells' unit set aside, cut on the formal nested ladder with the 150k reserve (corpus_feasibility.py)",
+      "corpus": {
+        "id": "stage2.reasoning_master@v3",
+        "file": "configs/stages/stage-2/reasoning_data/corpus_v3.json",
+        "chosen": "maintainer 2026-10-23 (logs/budget/decisions.md)"
+      },
+      "expected": {
+        "n_units": 1226,
+        "n_sessions": 1301,
+        "actual_supervised_tokens": 2966334,
+        "n_blocks": 402
+      },
+      "blocks_sha256": "5d06b026dcb42f43b76f8a0955f95c24884c0acaee8a57b4c16395aafe539121",
+      "ladder_sha256": "fbc0ec7b7a49671aa051fd334d645ceef68bceeb6311b241857f1ff7713af714",
       "p1v_2026_10_22": "NOT BUILT: P1 (h1gen_20261022_190653) ran; P1v found four cells short of their share (audit/p1v_verification.json :: gaps_supervised_tokens), so the pack does not exist and the formal units stay refused",
       "corpus_feasibility_2026_10_23": "STILL NOT BUILT: the maintainer's $0 candidate stage2.reasoning_master@v2 does not build on the formal ladder (audit/corpus_v2_feasibility.json :: unsatisfied); plan 2 (then corpus_v3_proposal.json) needs a top-up that is applied for, not authorized (plans/abstract_topup_application.json). Which corpus becomes B is the maintainer's decision",
-      "corpus_v3_2026_10_23": "the maintainer chose @v3 for B. P1t's 59-task list, launch identity and request are prepared at $0 (plans/p1t/); P1t is NOT authorized and nothing was generated, so the pack still does not exist and the formal units stay refused"
+      "corpus_v3_2026_10_23": "the maintainer chose @v3 for B. P1t's 59-task list, launch identity and request are prepared at $0 (plans/p1t/); P1t is NOT authorized and nothing was generated, so the pack still does not exist and the formal units stay refused",
+      "expected_from": "logs/stages/stage-2/reasoning_data/audit/corpus_v3_feasibility.json :: pack.rungs (measured)",
+      "written": {
+        "utc": "2026-10-23",
+        "by": "PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.corpus_feasibility --candidate configs/stages/stage-2/reasoning_data/corpus_v3.json --store h1gen_20261022_190653=<P1 records> --store h1p1t_20261023_094007=<P1t records> --pack-out artifacts/stages/stage-2/reasoning_data/packs/B_v3",
+        "where": "artifacts/stages/stage-2/reasoning_data/packs/B_v3 on the dev box (gitignored); staged as <pack-root>/B; every input it is cut from is durable (both runs' records on the relay, the reuse selection in git)",
+        "durable_copies": "dev box only, like A; a pod receives it through the relay at P1g/P2 preparation, sha-checked by this record"
+      },
+      "p1t_2026_10_23": "P1t ran under the maintainer's grant ($0.64 of the cumulative $5.00); the formal ladder cut every rung with the reserve and nothing in the contract is unsatisfied, so the pack exists"
     },
     "layout": "<--pack-root>/<arm>/{blocks.npz, audit.jsonl, ladder.json}",
     "check": "sha256 of blocks.npz and ladder.json equal the recorded values, and the 2.96M rung's n_units, n_sessions, actual_supervised_tokens and n_blocks equal `expected`"

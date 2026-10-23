@@ -75,11 +75,11 @@ What each one asked of this stage.
 
 | experiment | what it asked | logs | status |
 | --- | --- | --- | --- |
-| `reasoning_data` — Stage-2 verified teacher-native reasoning data, measured through Stage-3 controlled recovery | Under one fixed initialization and the fixed historical recovery recipe, does verified teacher-native reasoning data lift a 0.6B student off the fluid-reasoning floor where corpus_v2 left it, and how does that scale over a nested 0.86M-5.50M ladder? | [`reasoning_data/`](reasoning_data/) | H1 P1 EXECUTED 2026-10-22 UNDER THE MAINTAINER'S GRANT ($3.33 of $8.02); P1v STOPPED AT FOUR SHORT CELLS; @v2 DOES NOT BUILD ON THE FORMAL LADDER (closed infeasible). THE MAINTAINER CHOSE stage2.reasoning_master@v3 FOR B (2026-10-23): @v1's capability shares, analogy from the project generator alone. P1t PREPARED AT $0, NOT AUTHORIZED: the application's 59 unused tasks (25 analogy + 34 Reasoning Gym composition) frozen in plans/p1t/ under their own launch identity, $1.01 expected / $2.60 hard cap inside the absolute $666.17 cap; the two-session merge refuses a shared task, sets the 0.0 cells' units aside by name and packs only on a full formal build. B's pack not built; @v1 unchanged. Fixed: D4 Top-1, the recovery objective, M1, eval-set-1, the 150k reserve. 34 pods / $58.33 unattributed. No student trained |
+| `reasoning_data` — Stage-2 verified teacher-native reasoning data, measured through Stage-3 controlled recovery | Under one fixed initialization and the fixed historical recovery recipe, does verified teacher-native reasoning data lift a 0.6B student off the fluid-reasoning floor where corpus_v2 left it, and how does that scale over a nested 0.86M-5.50M ladder? | [`reasoning_data/`](reasoning_data/) | H1 P1 EXECUTED 2026-10-22 ($3.33 of $8.02); P1v STOPPED AT FOUR SHORT CELLS; @v2 CLOSED INFEASIBLE; THE MAINTAINER CHOSE stage2.reasoning_master@v3 FOR B. P1t EXECUTED 2026-10-23 UNDER THE MAINTAINER'S GRANT ($0.64 of the cumulative $5.00, project cap $666.52): the frozen 59 tasks, 100 records, 23 units. ARM B'S PACK BUILT on the formal nested ladder from P1 + P1t (each admitted as a complete run; code verifier v3, P1's MBPP re-verified: 0 verdicts moved): every rung with the 150k reserve, nothing unsatisfied; M1 measured on both real packs, schedule FROZEN-READY at 614 steps. Fixed: D4 Top-1, the recovery objective, M1, eval-set-1. P1g, P2 and recovery NOT authorized; no student trained. 34 pods / $58.33 unattributed |
 
 ## Runs
 
-**1** run(s) are registered for this stage's
+**2** run(s) are registered for this stage's
 experiments. An experiment's plans, analyses, results, history,
 validations and runs are all inside its own directory; the
 canonical run list, across every stage, is
@@ -119,6 +119,8 @@ copied here.
 * logs/budget/decisions.md -- 2026-10-22: Maintainer: H1 P1 + P1v formally authorized; P1 executed ($3.33), P1v stopped at four short cells
 * logs/budget/decisions.md -- 2026-10-23: Maintainer: a $0 corpus revision before any top-up; @v2 infeasible, plan 2 applied for
 * logs/budget/decisions.md -- 2026-10-23: Maintainer: B's corpus is @v3; P1t prepared at $0 for a separate grant
+* logs/budget/decisions.md -- 2026-10-23: Maintainer review of P1t: the all-in bound and complete-run admission ($0)
+* logs/budget/decisions.md -- 2026-10-23: Maintainer: H1 P1t authorized; P1t executed ($0.64), arm B's pack built, M1 measured, code verifier v3
 
 ## Current status
 

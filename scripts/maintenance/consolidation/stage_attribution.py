@@ -1619,18 +1619,16 @@ STAGE_2 = [
         id="reasoning_data",
         kind="experiment",
         stage_id="2",
-        status=("H1 P1 EXECUTED 2026-10-22 UNDER THE MAINTAINER'S GRANT ($3.33 of $8.02); "
-                "P1v STOPPED AT FOUR SHORT CELLS; @v2 DOES NOT BUILD ON THE FORMAL LADDER "
-                "(closed infeasible). THE MAINTAINER CHOSE stage2.reasoning_master@v3 FOR B "
-                "(2026-10-23): @v1's capability shares, analogy from the project generator "
-                "alone. P1t PREPARED AT $0, NOT AUTHORIZED: the application's 59 unused tasks "
-                "(25 analogy + 34 Reasoning Gym composition) frozen in plans/p1t/ under their "
-                "own launch identity, $1.01 expected / $2.60 hard cap inside the absolute "
-                "$666.17 cap; the two-session merge refuses a shared task, sets the 0.0 cells' "
-                "units aside by name and packs only on a full formal build. B's pack not "
-                "built; @v1 unchanged. Fixed: D4 Top-1, the recovery objective, M1, "
-                "eval-set-1, the 150k reserve. 34 pods / $58.33 unattributed. No student "
-                "trained"),
+        status=("H1 P1 EXECUTED 2026-10-22 ($3.33 of $8.02); P1v STOPPED AT FOUR SHORT CELLS; "
+                "@v2 CLOSED INFEASIBLE; THE MAINTAINER CHOSE stage2.reasoning_master@v3 FOR B. "
+                "P1t EXECUTED 2026-10-23 UNDER THE MAINTAINER'S GRANT ($0.64 of the cumulative "
+                "$5.00, project cap $666.52): the frozen 59 tasks, 100 records, 23 units. ARM B'S "
+                "PACK BUILT on the formal nested ladder from P1 + P1t (each admitted as a complete "
+                "run; code verifier v3, P1's MBPP re-verified: 0 verdicts moved): every rung with "
+                "the 150k reserve, nothing unsatisfied; M1 measured on both real packs, schedule "
+                "FROZEN-READY at 614 steps. Fixed: D4 Top-1, the recovery objective, M1, "
+                "eval-set-1. P1g, P2 and recovery NOT authorized; no student trained. 34 pods / "
+                "$58.33 unattributed"),
         title="Stage-2 verified teacher-native reasoning data, measured through "
               "Stage-3 controlled recovery",
         question=("Under one fixed initialization and the fixed historical "
@@ -1768,6 +1766,22 @@ STAGE_2 = [
               "what a P1t grant must name: run, launch identity, harness, the "
               "launcher's budget at P1's price, provider occupancy; not authorized",
               field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/runs/h1p1t_20261023_094007/closeout/outcome.json",
+              "P1t's outcome: shards re-hashed, both passes complete, cost, provider "
+              "teardown confirmation and the reconciliation after it",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/code_reverification_h1gen_20261022_190653.json",
+              "P1's saved MBPP programs judged by code verifier v2 and v3 in the "
+              "probed sandbox, nothing regenerated: every verdict and the ones that moved",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/code_verifier_check_v3.json",
+              "code verifier v3 on MBPP's own references and mutants",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/corpus_v3_feasibility.json",
+              "@v3 on the formal ladder from P1 + P1t: both sessions' admission and "
+              "provenance, the set-aside unit, every cell's supply, independence, "
+              "isolation, and arm B's built pack",
+              field="authorizes", equals="nothing"),
         ],
         external_material=[],
         decisions=["logs/budget/decisions.md -- 2026-10-21: Stage-2/3 "
@@ -1795,7 +1809,12 @@ STAGE_2 = [
                    "corpus revision before any top-up; @v2 infeasible, plan 2 "
                    "applied for",
                    "logs/budget/decisions.md -- 2026-10-23: Maintainer: B's "
-                   "corpus is @v3; P1t prepared at $0 for a separate grant"],
+                   "corpus is @v3; P1t prepared at $0 for a separate grant",
+                   "logs/budget/decisions.md -- 2026-10-23: Maintainer review of "
+                   "P1t: the all-in bound and complete-run admission ($0)",
+                   "logs/budget/decisions.md -- 2026-10-23: Maintainer: H1 P1t "
+                   "authorized; P1t executed ($0.64), arm B's pack built, M1 "
+                   "measured, code verifier v3"],
         canonical_log_destination="logs/stages/stage-2/reasoning_data",
         classification_reason=(
             "Stage 2 by subject and product: it varies the offline training "

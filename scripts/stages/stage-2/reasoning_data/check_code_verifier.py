@@ -12,7 +12,7 @@ None must fail them. Everything runs inside the same bubblewrap sandbox teacher
 code will be verified in (`code_sandbox.verified_sandbox`: no network, no
 home, no credentials), so the calibration measures the verifier as it will be
 used. A pass means the task's declared tests passed, nothing more.
-Writes `logs/stages/stage-2/reasoning_data/audit/code_verifier_check.json`.
+Writes `logs/stages/stage-2/reasoning_data/audit/code_verifier_check_<version>.json` (v2: `code_verifier_check.json`).
 """
 from __future__ import annotations
 
@@ -24,9 +24,10 @@ from pathlib import Path
 from stages.reasoning_data import assets as A
 from stages.reasoning_data import code_sandbox as CS
 
-from aadistill.data.code_exec import ESTABLISHES, Limits, run_asserts
+from aadistill.data.code_exec import CODE_EXEC_SCHEMA, ESTABLISHES, Limits, run_asserts
 
-OUT = A.LOG_DIR / "audit/code_verifier_check.json"
+#: One record per verifier version; the v2 check is `audit/code_verifier_check.json`.
+OUT = A.LOG_DIR / f"audit/code_verifier_check_{CODE_EXEC_SCHEMA.rsplit('/', 1)[1]}.json"
 CACHE = Path.home() / ".cache/huggingface/hub/datasets--google-research-datasets--mbpp/snapshots"
 SPLITS = ("train", "validation", "prompt")
 LIMITS = Limits(wall_seconds=10, cpu_seconds=5, memory_mb=512)
@@ -60,7 +61,7 @@ def main() -> int:
     doc = {"schema": "aadistill.stage2.reasoning_data.code_verifier_check/v1",
            "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
            "source": f"google-research-datasets/mbpp @ {Path(snap).name} (local HF cache); test split not read",
-           "verifier": "aadistill.data.code_exec.run_asserts (v2: every declared test must run)",
+           "verifier": f"aadistill.data.code_exec.run_asserts ({CODE_EXEC_SCHEMA})",
            "limits": LIMITS.__dict__, "sandbox_probe": probe, "a_pass_establishes": ESTABLISHES,
            "per_split": rows, "reference_failures": failing,
            "reading": "a task whose reference fails its own tests is unverifiable and is excluded from the code stratum; a mutant that survives shows the dataset's tests cannot see that change",

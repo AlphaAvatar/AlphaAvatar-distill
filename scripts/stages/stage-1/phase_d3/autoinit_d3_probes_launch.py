@@ -263,7 +263,8 @@ def prechecks(args) -> tuple:
 def budget_spec(repo_root: Path, *, authorized_minutes: float | None = None
                 ) -> BudgetSpec:
     """D2's confirmation decomposition, at D3's priced bound."""
-    from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
+    from aadistill.infrastructure.budget import Phase
+    from shared.step_times import MEASURED_STEP_SECONDS
 
     from stages.phase_d1.d1_authorization import live_money
     from stages.phase_d3.d3_authorization import session_ceiling

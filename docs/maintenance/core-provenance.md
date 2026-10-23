@@ -118,6 +118,12 @@ incident justifies.
     # materializes EARLY in a session — Phase A's reference-cache fallback is
 ```
 
+On 2026-10-23 the two measured figures left the core: E6b's 4.15 s/step and
+the superseded 3.625 now live in `scripts/shared/step_times.py`, and
+`plan_session` / `BudgetSpec` take the floor and the superseded figures from
+their caller, with no built-in default (AGENTS.md P3). The excerpt above is the
+module as it stood before.
+
 ### `src/aadistill/infrastructure/log_relay.py`
 
 Added 2026-09-15, with `session_runner.py` below, when `RelaySpec.whole_file`

@@ -1501,7 +1501,8 @@ def budget_spec(repo_root: Path, rung: str, *,
     a session that cannot hold its reserves needs a decision, not a thinner
     reserve.
     """
-    from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
+    from aadistill.infrastructure.budget import Phase
+    from shared.step_times import MEASURED_STEP_SECONDS
 
     cell = BA.session_cell(rung, repo_root)
     overhead = cell["session_overhead_minutes"]

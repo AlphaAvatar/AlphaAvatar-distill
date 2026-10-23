@@ -13,6 +13,7 @@ Everything this experiment produced, in one place.
 ## Runs
 
 * [`h1gen_20261022_190653`](runs/h1gen_20261022_190653/)
+* [`h1p1t_20261023_094007`](runs/h1p1t_20261023_094007/)
 
 Canonical list, always the index rather than this file.
 Nothing here authorizes anything.

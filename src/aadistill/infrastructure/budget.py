@@ -1,8 +1,8 @@
 """Four separate cost thresholds for a paid GPU session.
 
 A paid session has overrun its authorization because it was priced from an
-earlier run's comparable arms (3.625 s/step) against the 4.15 s/step it actually
-sustained — a 14% miss, and the overrun with it. The structural
+earlier run's comparable arms against a step time 14% slower that it actually
+sustained, and the overrun came with the miss. The structural
 cause was that the session had **one** number: the authorization was also the
 kill point, so by the time the deadline mattered there was no time left in which
 to bundle, transfer and verify artifacts, and no earlier point at which the
@@ -32,6 +32,7 @@ the nominal dollar cap (decision record 2026-08-09).
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field, asdict
 
 
@@ -39,25 +40,12 @@ class BudgetError(ValueError):
     """A session plan that cannot be executed within its authorization."""
 
 
-# The step time a Stage-3 ladder arm actually sustained on an L40S: 2916 steps,
-# bf16, teacher-in-memory KD, both arms, mean of the per-10-step console
-# timings. Any Stage 3 L40S estimate starts from an OBSERVED number, not an
-# extrapolated one; which run observed it is in docs/maintenance/core-provenance.md.
-#
-# 3.625 s/step — the figure derived from an earlier run's comparable arms, and
-# the one that underpriced a session — is superseded. It is recorded in
-# `SUPERSEDED_STEP_SECONDS` so that a
-# plan reaching for it is rejected by name rather than by an anonymous bound.
-MEASURED_STEP_SECONDS = 4.15
-SUPERSEDED_STEP_SECONDS = 3.625
-
-
 @dataclass(frozen=True)
 class StepTime:
     """A step-time estimate together with where it came from.
 
     The `source` is not decoration. E6b's overrun is legible only because the
-    provenance of 3.625 s/step was recorded; a bare float would have made the
+    provenance of the figure that underpriced it was recorded; a bare float would have made the
     miss untraceable. A plan refuses an estimate that does not carry one.
     """
 
@@ -178,17 +166,20 @@ def plan_session(
     contingency_fraction: float = 0.10,
     soft_stop_reserves: tuple[Phase, ...] = (),
     artifact_recovery_reserve_minutes: float = 30.0,
-    step_time_floor: float = MEASURED_STEP_SECONDS,
+    step_time_floor: float | None = None,
     below_floor_reason: str = "",
+    superseded_step_seconds: Sequence[float] = (),
 ) -> BudgetPlan:
     """Price a session and place its four thresholds.
 
-    `step_time_floor` defaults to the measured value because that is the only
-    Stage 3 L40S number this project has *observed*. A different workload may
-    legitimately be faster, but it must say so: passing a `step_time` under the
-    floor requires `below_floor_reason`, which lands in the plan's notes and
-    therefore in the session record. This is what makes "no future launch may be
-    estimated from E4's 3.6 s/step alone" enforceable rather than aspirational.
+    The step-time facts are the CALLER's: a measured floor for its workload and
+    hardware (`step_time_floor`), and figures known to have underpriced a
+    session (`superseded_step_seconds`), which the plan's notes name when the
+    estimate equals one. A `step_time` under the floor requires
+    `below_floor_reason`, which lands in the notes and therefore in the session
+    record: a workload may legitimately be faster, but it must say so. Without a
+    floor there is nothing to be below. Nothing here names a stage, a hardware
+    type or a measured value.
 
     Raises `BudgetError` when the hard terminate point exceeds the
     authorization. It never silently shrinks the experiment to fit: the caller
@@ -208,21 +199,21 @@ def plan_session(
         raise BudgetError("contingency_fraction must be non-negative")
 
     notes: list[str] = []
-    if step_time.seconds < step_time_floor:
+    if step_time_floor is not None and step_time.seconds < step_time_floor:
         if not below_floor_reason.strip():
             raise BudgetError(
                 f"step time {step_time.seconds} s/step is below the measured "
-                f"floor of {step_time_floor} s/step ({step_time.source!r}). "
-                "E6b was priced at 3.625 s/step from E4 and sustained 4.15; "
+                f"floor of {step_time_floor} s/step ({step_time.source!r}); "
                 "pass below_floor_reason to record why this workload is "
                 "genuinely faster.")
         notes.append(
             f"below-floor step time accepted: {step_time.seconds} s/step vs "
             f"floor {step_time_floor} — {below_floor_reason}")
-    if abs(step_time.seconds - SUPERSEDED_STEP_SECONDS) < 1e-9:
-        notes.append(
-            "step time equals the superseded E4-derived 3.625 s/step; this is "
-            "the figure that under-priced E6b by 14%")
+    for superseded in superseded_step_seconds:
+        if abs(step_time.seconds - superseded) < 1e-9:
+            notes.append(
+                f"step time equals the superseded {superseded} s/step the "
+                "caller names: a figure that has underpriced a session")
 
     train_minutes = arms * steps_per_arm * step_time.seconds / 60.0
     eval_minutes = arms * eval_minutes_per_arm

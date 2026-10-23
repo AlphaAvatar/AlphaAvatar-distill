@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO (no open scientific blocker). H1: the maintainer chose @v3 for arm B (2026-10-23); P1t's 59-task top-up is prepared at $0 and NOT authorized. Owner: docs/stages/stage-2/reasoning_data/H1.md (section 16).",
+ "blocker": "BLOCKED NO (no open scientific blocker). H1: P1t executed under the maintainer's grant (2026-10-23, $0.64 of the cumulative $5.00); arm B's pack is built on @v3 and M1 is measured. P1g/P2 are not authorized. Owner: docs/stages/stage-2/reasoning_data/H1.md (section 17).",
  "branch": "stage2/reasoning-data, cut from main 2a8bae78 (the Stage-0 squash, 2026-10-21)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -32,7 +32,7 @@
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 643.6571,
-  "cumulative_spend_usd": 628.9512,
+  "cumulative_spend_usd": 629.5959,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 14.7059,
+  "remaining_usd": 14.0612,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -123,10 +123,10 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Nothing is running (0 pods, 0 volumes, $0/h). The maintainer decides the P1t grant (logs/stages/stage-2/reasoning_data/plans/p1t/authorization_request.json). 34 pods ($58.33) stay OPEN.",
+ "next": "Nothing is running (0 pods, 0 volumes, $0/h). The maintainer decides P1g/P2, freezing configs/stages/stage-2/reasoning_data/h1_units.json and the project cap (P2 forecast: logs/stages/stage-2/reasoning_data/plans/cost_forecast.json). 34 pods ($58.33) stay OPEN.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "H1: B = @v3 (maintainer 2026-10-23); P1t prepared at $0, awaiting its grant (H1.md section 16); no paid session authorized.",
+  "next_work": "H1: P1t executed, B's pack built, M1 FROZEN-READY (H1.md section 17); P1g/P2 await the maintainer.",
   "not_next": "no paid resource without a new maintainer decision. Owner: decisions.md 2026-10-21 (Stage-2/3 round opened at $0).",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D-series CLOSED 2026-10-17 (D1 NO-GO, D2 NO_GO, D3 STRUCTURAL_CHANGE + INCONCLUSIVE probes); forward baseline D1 + scored_v1.",
   "then": "nothing else is queued; the Stage-0 mixture ratio is DEFERRED (never run)."
@@ -200,7 +200,7 @@
   "paid_compute": false,
   "pods": 0,
   "network_volumes": 0,
-  "_owner": "logs/budget/provider/runpod_billing_2026-10-22T2106Z.json :: account"
+  "_owner": "logs/budget/provider/runpod_billing_2026-10-23T1703Z.json :: account"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

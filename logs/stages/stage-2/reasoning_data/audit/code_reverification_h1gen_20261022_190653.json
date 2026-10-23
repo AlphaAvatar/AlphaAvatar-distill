@@ -1,0 +1,2718 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.code_reverification/v1",
+ "written_utc": "2026-10-23T17:04:48Z",
+ "run_id": "h1gen_20261022_190653",
+ "launch_identity_sha256": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
+ "store": {
+  "shards": 26,
+  "records": 2164,
+  "shards_sha256": "272d035d6d028f6a356605933c2d320358a4f96f7a78c7d9d5e0bad6f81e59d3"
+ },
+ "verifiers": {
+  "previous": {
+   "commit": "cc9da2d8",
+   "path": "src/aadistill/data/code_exec.py",
+   "source_sha256": "a6c7e4dd966b467a81eabbe35da8998cd81d9379903c358925222fd0a176d8f1",
+   "schema": "aadistill.data.code_exec/v2"
+  },
+  "current": {
+   "path": "src/aadistill/data/code_exec.py",
+   "source_sha256": "17f562478ff3d4fbd147f7143a807bc53f19192aa00dacdb0f63a834b2a6ae42",
+   "schema": "aadistill.data.code_exec/v3"
+  }
+ },
+ "script_sha256": "c58c90ecf48395c60ad39e637e81ed18affc75af5ebe89e5a7bcdbdc73f9719a",
+ "sandbox": {
+  "isolated": true,
+  "protected_paths_checked": 46,
+  "network_interfaces": [
+   "lo"
+  ],
+  "environment": [
+   "LC_CTYPE",
+   "PATH",
+   "PWD"
+  ]
+ },
+ "limits": {
+  "wall_seconds": 10,
+  "cpu_seconds": 5,
+  "memory_mb": 512,
+  "output_bytes": 4194304,
+  "open_files": 64
+ },
+ "summary": {
+  "code_asserts_records": 124,
+  "executed": 112,
+  "not_executed": 12,
+  "previous_passed": 107,
+  "current_passed": 107,
+  "verdicts_moved": 0,
+  "accepted_under_current": 107
+ },
+ "moved": [],
+ "rows": [
+  {
+   "task_id": "01296f591de31f6fdf70",
+   "candidate_index": 0,
+   "record_sha256": "0354b41855db3b9b6f5495bfbbb6f91fdc2e8462e58e21637d4828985e8fdb98",
+   "code_sha256": "bd41df35bd43fcf9204ae62d407d56115374b9c9ffc68098a4d8a6eee7369a3f",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "0426e2c187d78d6facc0",
+   "candidate_index": 0,
+   "record_sha256": "9f0cb8470ed37915b5bc697ddea0f5a711a62fa96e77af43010a49c65d145f1f",
+   "not_executed": "think not closed",
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "0733bab1058d0390e3a8",
+   "candidate_index": 0,
+   "record_sha256": "22170b12a9bcec1f64c53635b72ffb3da3ed216af4950ed57014220c7c227b37",
+   "code_sha256": "b49c89f07f584fcd6d55c10b02e0a8e3221eaa1624e1e0d0ab417cb6ed6e5bb2",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "07cc8a666eb9705766d3",
+   "candidate_index": 0,
+   "record_sha256": "ae5775da095fbd8880abbdec2d739ba8bcc4cbecbafdaf033cd786e4c9c0328a",
+   "code_sha256": "da5135eccf31f948c66bd829cdeeffc774e352102b4020d960c5ea6e9e7e54c8",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "0b340d240833c19ce836",
+   "candidate_index": 0,
+   "record_sha256": "3e4fd852ace41b1952bfa439367f27714f302c4192c332a6d290f6f6ad6f8089",
+   "code_sha256": "9c9eafbf5fc157d4fe9e1e3544e1c658d8f8b3ccea1238cd778f5d0d3c875292",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "0d8884a5a4ba9042a8ab",
+   "candidate_index": 0,
+   "record_sha256": "9557a543888e791167106bca85ec19def7d6065abd644ddd1c7eb6bb98446cd5",
+   "code_sha256": "7af75662edf62d7f8df8a2f357c0b106c0cc06556e83eb42d3ec5c7ccf61289e",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "12646dc5eae9339fd4e4",
+   "candidate_index": 0,
+   "record_sha256": "077fa5f996f1881f1c63a226ac9a9c2166b69ba84085dda4c29f0e48aab89e03",
+   "code_sha256": "389ebf38f315e08def55ababf93938d1cdb6ca883abfb6051d32e69756dc204e",
+   "previous": {
+    "passed": false,
+    "status": "failed",
+    "tests_run": 3,
+    "tests_passed": 0,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": false,
+    "status": "failed",
+    "tests_run": 3,
+    "tests_passed": 0,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "1315981ac54cf263ab65",
+   "candidate_index": 0,
+   "record_sha256": "df480a464d1bde131a81d4ba0e71278c6354a9266a0a8a0c0518c231153fc158",
+   "code_sha256": "eb51d2072d741fb409150aef56dd388e21d277fddaec1d9ea02b5866791e1138",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "188e0fc670b829e21868",
+   "candidate_index": 0,
+   "record_sha256": "2d52f2d9e16130f990375d386c372b1ba12d03ce729a925830cecbc32f1df46d",
+   "code_sha256": "c73b1e63e068af926dabd74bae6fb93c362529490a2817b91c97700d1939c268",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "18e00758e58078ed6a6a",
+   "candidate_index": 0,
+   "record_sha256": "13fc63f7ffd6350065a9b1d6225e9e75083f4c8c29da5d267b89f78c3400cb7d",
+   "code_sha256": "a8356d08d66f38a10abf360a7baabdda20243af7bbda625fc41dca64c15177b1",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "1b6d3d511d44715f80e8",
+   "candidate_index": 0,
+   "record_sha256": "894af5ab2ce728a758ac0645237e05c914b42f5d949d80809ed10ec69bcba180",
+   "code_sha256": "9ee57121283354dd143e73606ac562d2b8dfc6ceb90379d6d682e40161a4a3b6",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "1c5fec855d20c9594b05",
+   "candidate_index": 0,
+   "record_sha256": "e2b328573959220a60221f6c5a14e1f5ddab3e1f212080be251c6ec1f4ecba93",
+   "code_sha256": "0288c9cc00425f7c4bb99859698fa2b127b11a494d1290257829125586b3739f",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "247e7c67df8a650d1f96",
+   "candidate_index": 0,
+   "record_sha256": "60cfa5e2ae6fd908955cdee53977cd3422113d76de4c9ce26dee381f9c77e2f8",
+   "code_sha256": "c58c156ad0545c176c7d39155274011e9d0fada4b242db7c48c3a59c6c702b63",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "283448ee13a96639aaf9",
+   "candidate_index": 0,
+   "record_sha256": "0a91bd8c0a959958d6ca361c7039032bafdb3b33798df0f04c76f58525d5838a",
+   "not_executed": "think not closed",
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "2ad712aeb39046a7aa3f",
+   "candidate_index": 0,
+   "record_sha256": "856e2074c16593b3014b808faa4633e3bc287a40bda1b76be29976460f7bad84",
+   "not_executed": "think not closed",
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "2bed1a08f883790095d6",
+   "candidate_index": 0,
+   "record_sha256": "b715aa63dd9623e500589e77de78aae8b47613baa41985b7ff4514af3ec8d8e0",
+   "code_sha256": "eb116e69f9fa63dd01d7eb9b6a33f047c3e8dd9856249d66a36d5769e4692518",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "316875a02c24946a0362",
+   "candidate_index": 0,
+   "record_sha256": "821d8cc138f037d9ac15bfced450d31285f3b0c83b7b6b3652de56606e3b086f",
+   "code_sha256": "2ad6d4a46bce7f1509f7da2ddeb78a0d41bb6aa76c65c7b3034ec8370d100d5a",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "3852b16b94178a0e0f85",
+   "candidate_index": 0,
+   "record_sha256": "ca190c2040165a80e6eca4880c06043db48ada18d9974c432860e2922c0c3b69",
+   "code_sha256": "3cb938830e4cdc896c3ad7e6241072411cce76abfbf16ddc22530a5de6f096e0",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "3947a9154e457a1c147b",
+   "candidate_index": 0,
+   "record_sha256": "64bfa4584e4aa1b9c8cd0b36b0023e4bd39687c665fbfb8ad10a5edf9e296d57",
+   "code_sha256": "eaf275887d5493ce8bb48307ea3d705a904408838ccaa73e844cf818ff1dc623",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "39a6913bbeb32fc70449",
+   "candidate_index": 0,
+   "record_sha256": "169891134bfb2bbe77ed2516cafc3756a0019213d9dc24688be3ec47ae22020c",
+   "code_sha256": "5e24ec1ddde51a357d3d00690d294604b793820d59d4f5c5dc12c8c7dcb65626",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "3ac33bcea38717d36c49",
+   "candidate_index": 0,
+   "record_sha256": "f71126499c5e001f05be38bd9cacb5389f57cad5fe4c33c7b22df4c2d6355bc8",
+   "code_sha256": "a85f2f5d6c2258c008c39bc8779b421ad60f86e7c5ecce3b6dd5491f6ee7be31",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "3c9b384006ff70b70b99",
+   "candidate_index": 0,
+   "record_sha256": "a5036e346e3560c8efe299bd90b38580db1bcc8a3848637ad7610978c7c4381f",
+   "code_sha256": "8aaf9657798c22c216d0ee5be218e5c35eaca05f476dcc77f9cf7ca9f597c08c",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "3ccbda185f3770153e12",
+   "candidate_index": 0,
+   "record_sha256": "d62896bbd978bd91eceba6227ef7270b3774aac4273e61d89cb568af69542501",
+   "code_sha256": "46e66f22d2816b9df040df7d4326265d576431b6b82783e51c4c724ed88c5408",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "3d393064a0d24d57568f",
+   "candidate_index": 0,
+   "record_sha256": "ec314153bde99757328aa6cc93de5aaee284a5879c27e97c71f51831424d05b0",
+   "code_sha256": "2c5d15cf2e832f8ca20d1030f007c4520100c7802e3e31ca54a1ff0d0bc38f67",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "3fee07d2d348a7cfd8d3",
+   "candidate_index": 0,
+   "record_sha256": "6e83e6696a8e18654a6f80a784a2642824e4414e0c652741cb50a84db80a5600",
+   "code_sha256": "a08e57471875f5fdcec5fc05a7ad1622d55779cc80515027ee4958fa82ef6151",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "4037d665aeb07180cbc2",
+   "candidate_index": 0,
+   "record_sha256": "2a61f9540686dee0c082bd5ed9edbdaceac433c503dc99f392d143992966179e",
+   "code_sha256": "8733aaf1d95e8f59c4493d2f1414548289b5eccc8f0263f5a848034949b160e3",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "49374cc374f8e62705c1",
+   "candidate_index": 0,
+   "record_sha256": "c63de7309dc0d085268339e36839a3fb74701f677c3eab8519308bf108726968",
+   "code_sha256": "0188a5b34cf32dfcf32f7ca03e2b3d3cea18a28766443141d258011db3f8c5ab",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "4b964e0a9a9dfd458892",
+   "candidate_index": 0,
+   "record_sha256": "c3ded719b53e1f5883b38d70aa43e4f192860a0286cebb2f930becafe8727930",
+   "code_sha256": "7d32f87573bfeb0edbb2c775594e43e515ece51c7e3d1ec4f21430d66e9e017d",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "4d73b996946bf4ca923b",
+   "candidate_index": 0,
+   "record_sha256": "f74f3a9ae72d92fd18a2b26e46fc48d94f7c9cb10ed93909dce744e71798c9a0",
+   "code_sha256": "36a99ffbabb48d2a6a25a5e7955724d6b4d05a21de80f594804d0b5d7d42ad39",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "4fc73fb8c1f9b8cf4e2f",
+   "candidate_index": 0,
+   "record_sha256": "2a5e1f96869081bbad4a69701a7be6494833e410cddbce6bcffb29650310c1de",
+   "code_sha256": "2b83d52aa5a984a21481d4827f17c687f8816de653d8fdacb8c08bd67c5e7aa6",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "515d2640056800c6bc08",
+   "candidate_index": 0,
+   "record_sha256": "41b769b89aad944037b72d86a64e5b2d8a57c36cf3a5a32eb93905332e5d3596",
+   "code_sha256": "80078e87e7536fd0b529bb7995ad133b35d11a5730c8e5f16700311d6b0b1948",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "527bd2b99e8e7677f3c0",
+   "candidate_index": 0,
+   "record_sha256": "2becb19e17b9ed76e3f10f527830ef277a49527f2e3a80d5f6f684a0e7a77499",
+   "code_sha256": "d10a46922c5965bef9e42436134e22fd11eeb8376aab06503c58d73cddac45a9",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "5775f44c6c4d99ca53ea",
+   "candidate_index": 0,
+   "record_sha256": "d3e2a6c4782eb6b480fdfd0481f34a94b3a6060daa70fbcd5c95c6c36a57b899",
+   "code_sha256": "9383f79bfaebe5ae72894e6eb9e747d92f2b4d6f8179bc4d96ad8d508683078b",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "5c846bfb85d3d6b44576",
+   "candidate_index": 0,
+   "record_sha256": "23926e8de18e2cdde3355f3bc11e0dcc2f1bd63205b92c9c28c7eac291047688",
+   "not_executed": "think not closed",
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "5d9a818920343636603b",
+   "candidate_index": 0,
+   "record_sha256": "3f9fe5d2dc2cc4ebe72758d68ce9f13c983cae6174afd269a864f9ca264377a6",
+   "code_sha256": "b6cf5b9be9a21363f797deb9b13f2557fd2d06eeac43dc850da686be6852d895",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "5de2bc461880add15e9b",
+   "candidate_index": 0,
+   "record_sha256": "9fe045accfd8e44d6cdf1690564b79d4146042f0de8390a1ce6a6853f224fb12",
+   "code_sha256": "09943931f8e46fa7d3b5e18160480c323156141e9de0df96bcf69336741f9b44",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "5dec09eba900cc6a5c68",
+   "candidate_index": 0,
+   "record_sha256": "fa133a609506996c45fdb415b8bf5ccc2bd87791240793c3d2690e0285a1a234",
+   "code_sha256": "34c9ef00e9a3c5427f4796a053b27377702ffd4c10f442a56fe0f8fd007382fc",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "5f2f61c0fc8461429fb2",
+   "candidate_index": 0,
+   "record_sha256": "56cecb337bbfd000c5ca8908010cb4498445ac7b22458c2b4c8f099209bcdc59",
+   "not_executed": "think not closed",
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "62d1837dffde5db0799e",
+   "candidate_index": 0,
+   "record_sha256": "f572c38e690a32be646a7e17a25f8662203d410a38862f4864a393942057d1fd",
+   "code_sha256": "e1410c05dde8b15cc402363620d3d534094331231ae7eafbef1b21f954e878f4",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "65fab4a0cd2f4a78fe3e",
+   "candidate_index": 0,
+   "record_sha256": "a81a4acdc67b9f0561ac9461751ca93f1e294583e9d07b28de26034fddd6ccf4",
+   "not_executed": "no fenced code block in the final answer",
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "6bd99f87af635cfc4f25",
+   "candidate_index": 0,
+   "record_sha256": "0a9575cdb384bd4cd1df623f6f3c99e3b9b177197a4b0ec653fbffe533245c8c",
+   "code_sha256": "ec264ade1231dd8b65ac50e270821b9e6f915c8da46329cd5372ba929165c896",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "6cc20d999114c4abeee2",
+   "candidate_index": 0,
+   "record_sha256": "3f7f6b171f27e57635a181b4e631e1d931753dc75cc78d87478c42f834314791",
+   "code_sha256": "7e3b78cfa46e950d0b15f178f7ffa36ae7240d5e307086f0835024d2c0db30f9",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "6df2541ef2bfc23cc57a",
+   "candidate_index": 0,
+   "record_sha256": "095993094c2f2461bd2e8acb77217e61bc1da6d02378e2f143abca6e5cac33f1",
+   "code_sha256": "100244cd6dcf62c315c368ac1a184b76597719e865562ff02bc83a9d8a9ef61e",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "6fcfa35162d85d8a2216",
+   "candidate_index": 0,
+   "record_sha256": "e27b3f442e26009a4d2dea3aa728cce150f3b2e0cffe1ccc2d95935ac771e383",
+   "code_sha256": "a619d952214b855800a39e48dfb417939921041d084280b2bbc4c83e9f856fb3",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "705cc87b2a5baeebe45d",
+   "candidate_index": 0,
+   "record_sha256": "00f10943e3444cb05f7dd0e5ee76d5861314bbeabad30ac416911abec686fc3d",
+   "code_sha256": "964dd27126793943600d5430cee1a8703962a160537d28c84a83738615022c3c",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "7371a8235fe35b63f3d1",
+   "candidate_index": 0,
+   "record_sha256": "05354142bebc023336ea95fd3a8ae11a4d3a7c66fafd056ee3d9200a199204b3",
+   "code_sha256": "8e9b779a54654a7dc3bdad48b1d2310426468014bc75db038e0669bce004b498",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "749d5ed05fcdb7e65e52",
+   "candidate_index": 0,
+   "record_sha256": "17fbfd5f2d5e3cec18f2e1e5d8abb1644ff907f87812cf2bb423c8a287da1b0c",
+   "code_sha256": "d57843f58d82a624448fc519fc66a1aa1b42109411ce1842a43fc8ab8f1543c6",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "79289ae3370d50100740",
+   "candidate_index": 0,
+   "record_sha256": "4a9aeae5f974c3a4442a32d743a24b18b2149c8bf658cc9f605903df55eb291b",
+   "code_sha256": "f642325ee5a5ac432c50b4f99cbba38568034f31163c78e071676cdcef3919c2",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "7a8d465188315a5960e6",
+   "candidate_index": 0,
+   "record_sha256": "40560d0e3d1443f864c234369a56b8cb1973174d1d3233286784ea293838b959",
+   "code_sha256": "8434cb9f95c30bab98a268bd106113a15f56f8508644dadc651fb3a47cae4fe9",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "7c52cb1284a378145d91",
+   "candidate_index": 0,
+   "record_sha256": "3762355e7abeeb1739b88a527f40571e457f5a34635a2fb111d0da56072cc304",
+   "not_executed": "think not closed",
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "7d092712b0bd5b140e89",
+   "candidate_index": 0,
+   "record_sha256": "5905aef79159a59ff34e78ec537cc052f37e5458cca44f80a3fcc22adb6e770a",
+   "code_sha256": "b6e806db995349780bc34f4b99f0a2b5aad8ac987a0727908b442dbb0f92d51d",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "7d56d70eb744c8058a73",
+   "candidate_index": 0,
+   "record_sha256": "c330502c4bec472efa3f6863d5921d41447d498bcaffffdb88d953c3c298b14b",
+   "code_sha256": "77377d846697c6014630173b020c2908cf2193f4fb7f187b43c6fba8bda9ca9a",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "7d5fc36af03f6eb6c5fa",
+   "candidate_index": 0,
+   "record_sha256": "36ea427ec0714bff316315cc4d827a06fee4fb15863e1ad992e45bb3a53dd9fa",
+   "code_sha256": "445fb8fdca7fc733f449d8289565edde27cf70ae6593ff3239d3299b1122d37d",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "7daf3c879a635f867689",
+   "candidate_index": 0,
+   "record_sha256": "73bafbbc18bf02eb53a534c80d7830a2903adb19b31f1781878fb96fdf3c649d",
+   "code_sha256": "54339516f8f7616db6b6a76a29ece275f4e6a3a3c346e9471d226ce14b1e20d7",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "80550918a55d1129fcb3",
+   "candidate_index": 0,
+   "record_sha256": "cb3c4c253c66acf0be1cda37d74b6afe75879792a335217c6adbde07ce25a334",
+   "code_sha256": "ad67c6287900c9fd722e8f5b67eb349d5774ee918477aa7769c27d2e4091537b",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "80603e706d85d1779be0",
+   "candidate_index": 0,
+   "record_sha256": "4b9583e95113d2aeb8445673853763eebfa438dfe21802cdc627f54c98c3d353",
+   "code_sha256": "c5267e4dd7ca5b58f1d9c609bcff2dccc1fe448d1dfd66ff7a33d1e3d8a1c451",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "846f51fa3634e41a051d",
+   "candidate_index": 0,
+   "record_sha256": "0f08f5aff6a532e206a760cc0b34376bf2d36d70e3bd644f875b681738285bdc",
+   "code_sha256": "15e4f631790b61ccafe121fa71fe0819cfe9cb46095e72c663dbe5525e554150",
+   "previous": {
+    "passed": false,
+    "status": "failed",
+    "tests_run": 3,
+    "tests_passed": 1,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": false,
+    "status": "failed",
+    "tests_run": 3,
+    "tests_passed": 1,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "870f6cb1a8050ef221d6",
+   "candidate_index": 0,
+   "record_sha256": "d387875065f9cb308c58a211d23f1d9bf272b0d5e6beb5ce7dd42ce08056f67e",
+   "code_sha256": "c5e3d563a0cda2a80de45e2214e5040ddc6082455c45cdfcc57c78bf3da7b2ae",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "8b2f4da057506214aef7",
+   "candidate_index": 0,
+   "record_sha256": "dab096580097bf5c822533fd39c08f7c9f86f1f08f36e968941de0b9bbd43f3e",
+   "code_sha256": "3d0ea33d81f02a9691757604d6dbbeb2d0cd49ceaac208949c956d4f1fc515ac",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "8c34d1a1c79171283e65",
+   "candidate_index": 0,
+   "record_sha256": "8272d3ace4834a6679d04cd9c5ada11ee2b0696c659fec25fe5b60cfaa2dff0f",
+   "code_sha256": "54450b649b0469e55d381a4afc7d45076ae2b76ac9cd8f482f6af410edbafb4f",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "8d9f4dd4c65ad452f9df",
+   "candidate_index": 0,
+   "record_sha256": "6c59088a9dc6a51620d7f79384842e227a702296a684e74caa31c529f8b4f96a",
+   "code_sha256": "493d35d992c911b279aa9ecb7672d20f69818f7bb64efb03bd4f9b1736eb8df4",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "8dfaa7eea552415aac52",
+   "candidate_index": 0,
+   "record_sha256": "916d74e6d56fb8304996d4d5500472b95160ae98f7aa17016316ac15e9eda2e6",
+   "code_sha256": "1d39e1f64c0cdea3d887e9caa9fb06f916c73e726082a1292c086d60a1571c14",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "8e991ccbf5956abae64f",
+   "candidate_index": 0,
+   "record_sha256": "c310ba2280acd179cc3a098e12a2299aca15848bac95adfb58a5f7fe39705717",
+   "code_sha256": "43bf23eeadd0243e93c4e3746654c01e345d3fd9fb7f4b54692a941871763a3c",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "8ed72bd77518f69f569e",
+   "candidate_index": 0,
+   "record_sha256": "63cab6540064b6126c6ec1c495659b79a5bebe0e0a7b3d625a1e5f097e13e721",
+   "code_sha256": "c6b88eaa6ebd4f48248bff32df42b88e82dff9d3d96a098cfa9923965a594a92",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "90729f670e9f5d5c9f0d",
+   "candidate_index": 0,
+   "record_sha256": "ccb6e533089c53d78ce8242b31b9a741b420842947227369f1a1c42108f71848",
+   "code_sha256": "614c167a1f05bf44fda9128edf04c49a9a7cef6a914436cac2d8e260b56f8878",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "9094401fda59460bb3e2",
+   "candidate_index": 0,
+   "record_sha256": "613b732af050fb5c7babec856301f0743aa7beedcf994ab308af9496751e595b",
+   "not_executed": "think not closed",
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "92e0e2c76233de668471",
+   "candidate_index": 0,
+   "record_sha256": "724b87702aacb9990ea7a1a9a5be99b4aefc977d8c25ebd49069d72090995bf4",
+   "code_sha256": "c5eeee4f37fd378f65c5b09198cfccb6f49118267503efc830861e8a8b53cae3",
+   "previous": {
+    "passed": false,
+    "status": "failed",
+    "tests_run": 3,
+    "tests_passed": 0,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": false,
+    "status": "failed",
+    "tests_run": 3,
+    "tests_passed": 0,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "93164f057753270cdc04",
+   "candidate_index": 0,
+   "record_sha256": "8023469523bd0b9b3b0f8a66ea8397b516e099d37c7a42a0ee3a68b1fbd97162",
+   "code_sha256": "154bf4cd6c38592b0b24022c583a0867d6c388fde79a9ef51b559c0c87691a78",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "936db2b7c1b51976ae9a",
+   "candidate_index": 0,
+   "record_sha256": "4608d6a199481a8b12a615d0491c21cea855b30d39a719b828fb9b61d1725d87",
+   "code_sha256": "0cd13d60e8dccb723b97c98df5c2efaced2408c82251eb5789111edfd73d1091",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "93a255b82c5c9c424a69",
+   "candidate_index": 0,
+   "record_sha256": "897318e90f6b38a9588c7aad41edf7781678f9c75063f4f89b3f1e4ca098f3ef",
+   "code_sha256": "bd4d3d67d8bc727e344dc53049d78a888cc1cee0528296a0c5fff9fde8df4578",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "95cbe04e8fe6ac09fa98",
+   "candidate_index": 0,
+   "record_sha256": "31efe600124e361f138a89e638cb2ab0aea01455895f1f8e74bbe95698dd8943",
+   "not_executed": "think not closed",
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "96313d05f4e8449fd72f",
+   "candidate_index": 0,
+   "record_sha256": "e047add08269d839ad9c834c51387aedaa45d9af6979a7913bfd75b74aa40df9",
+   "code_sha256": "964f3a591e43fb0909b60a14a6e124b242599ba6159805a77b1782680b34a9e6",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "9a685b06c8a081c9cd7f",
+   "candidate_index": 0,
+   "record_sha256": "c3b2721e347457e624d676b9ce95892cf9420b0cd8942174b199be6241b419f5",
+   "code_sha256": "1911232636b6e3f19754456d4be1ef7d2bb3e90837d961293020ddac74667ddf",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "9a7016207dda381947d7",
+   "candidate_index": 0,
+   "record_sha256": "f63ec2782ea2eb8c9ad159c0a03a55199487290cb8572c0a192e197f90353f10",
+   "code_sha256": "2c5ac750abf8e5d43e9272c39fda564dad265fe8c3620e8767fa5bfc6d5b90a4",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "9a8c07383cac3d124b53",
+   "candidate_index": 0,
+   "record_sha256": "440a5a351d519fff3647f1f84d4078f79dee967bb804b783394ca9dd7196378c",
+   "code_sha256": "8910edb155bf573309be6cd61a8cdc822f0cd0e43eecd77bf0d1c164ce20d724",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "9b673e46642664926b14",
+   "candidate_index": 0,
+   "record_sha256": "2dd870a95519961bd0836c6b9732f90d1291cc0a1f777f97f6a214492efe54ab",
+   "code_sha256": "81922cfd588aef7acec8edf02676466b8775f6f68b6e0b9b16ad189467725088",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "9d9bdc9659ccf76a6a64",
+   "candidate_index": 0,
+   "record_sha256": "edce60a1e3c474c69c739ff77ab9f33e416850185454ab29dcccb5ad4472e194",
+   "code_sha256": "d3c8969a6045b77cd26802c14cf31127aa26cdfb508dc75e978ac6d7b219eae7",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "a589c1e76c61fd94a4b0",
+   "candidate_index": 0,
+   "record_sha256": "93c6e34c5ed6888da3ceff5772705644af08843c4e6a0bec26f00e721bdc539f",
+   "code_sha256": "45cb431182a726d348c97c5708525c483c1e0e06843c182b4c052fb26cd2952f",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "a780b4ff70af1670a497",
+   "candidate_index": 0,
+   "record_sha256": "a2c4b73e0b13e3321c90a2aef125d43f9cde707f514ed3daa442ea1a50773c3a",
+   "not_executed": "think not closed",
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "a79eefef1bf7b469bd5e",
+   "candidate_index": 0,
+   "record_sha256": "27e840596569c1612619fd7e635f87d7614128cd091cb4214a27e85aadbebbe7",
+   "code_sha256": "315649e78e56ecfe46d7c34557d1e4b297fe29839487e4f85cd63632eebbb4e0",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "abc22ab513e243b61001",
+   "candidate_index": 0,
+   "record_sha256": "65fdad984f2b3fc2c683d28a4dad4f8fd3176b7b9e520a132c635f3b48608314",
+   "code_sha256": "ac72d7b651dfb18d2013bfd6a47dd441d725313396f039ad4a121695e680c713",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "ad788e5c1c69b4c2ad1e",
+   "candidate_index": 0,
+   "record_sha256": "96b47005b3d9fc06f7f6d377a38a28137f3e9af3fd059c8c23e0b9c970e8beb2",
+   "code_sha256": "fe04a6b3f26e2b257eaa7a84dffe4244d06375f3bd27fd92afaaa89e9f081fd2",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "b0d5fa5a24d65e0ca77d",
+   "candidate_index": 0,
+   "record_sha256": "59f61f8c382306702c968f21f252b14d04ddcc74cc06afb1a4d54ff33c6ceb1f",
+   "code_sha256": "eb6160f78f73394982dbf14fd6a204197a2bcadcb894a74057794ebc57db9159",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "b1c106b85e6efb5c8fd5",
+   "candidate_index": 0,
+   "record_sha256": "4ee31fcb8e3fdada946b1ed61fa3604f59fd8d780197b52bbe627527fd58428a",
+   "code_sha256": "c2aced94c2b9da8943e47ce0b04da2cd05c541adcf3cac4c6171822a4d237076",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "b2ae6112dbbcc77972a2",
+   "candidate_index": 0,
+   "record_sha256": "81d4450b4531eecfc5c8657701ab633e764325e478340bec1f8fda7ad80ea5ca",
+   "code_sha256": "7e9352884e8277f7bf3b70256e30c3cdd9b5e850867a23278f5120d78128062d",
+   "previous": {
+    "passed": false,
+    "status": "failed",
+    "tests_run": 3,
+    "tests_passed": 0,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": false,
+    "status": "failed",
+    "tests_run": 3,
+    "tests_passed": 0,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "b3abbca74a3ce51996ca",
+   "candidate_index": 0,
+   "record_sha256": "64f23f0c9cf33dd9c85a110b980afc57be55f4cdcdd0711e7bad8fa103fabcea",
+   "code_sha256": "d2551b3f43a306d0399d746ec113ccca1c0408cb655b120d40af91c739b6d423",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "b5e0d40f0e2f1a017062",
+   "candidate_index": 0,
+   "record_sha256": "a64d65688874ea6bc2a29c75eb66e87bcfd9b209fe4adca2d7c8779d0e8a835c",
+   "code_sha256": "6bae4d7ec40cd73ec252ce953f5bf0d80971c44b39b9e0b83afc5e16c39b38be",
+   "previous": {
+    "passed": false,
+    "status": "failed",
+    "tests_run": 3,
+    "tests_passed": 0,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": false,
+    "status": "failed",
+    "tests_run": 3,
+    "tests_passed": 0,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "b96b67064d5d71022aa6",
+   "candidate_index": 0,
+   "record_sha256": "98cb95dea2694241668dd90f825a8e04039772de0f49234eb09d7a38fa8e31f3",
+   "not_executed": "think not closed",
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "b9fd94c3fe742772b3ea",
+   "candidate_index": 0,
+   "record_sha256": "2ce80b2704600caea5efc56304475d9120917d251cff2bdba1f2877c8b19cf2d",
+   "code_sha256": "cda2356acaadfdb64d01a0846526ba3f3a3fd50d634ff4fbd365a9ab10271776",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "ba02b0f6efc2c25f5851",
+   "candidate_index": 0,
+   "record_sha256": "93477bbe11097cb68c426a252e865d87b44dcc3a116af9ba8c558043757e5b33",
+   "code_sha256": "8448420f3b2080a0c1554478c3792da7e809370fb617ea556d569e0e25dba05b",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "bb50531e36a196e1691d",
+   "candidate_index": 0,
+   "record_sha256": "e7f62e4b2d21d74e89f631d9d745e4bd5ad6cd46eda7ab7ce0fcebab66a70b71",
+   "code_sha256": "5eb7547ab599e57ce18da0f04ddba02269fcc7499d4289399db230406457d157",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "bd78f233b7de16a9c4b5",
+   "candidate_index": 0,
+   "record_sha256": "b51bed3af442c10c038882387e097171b9443a4faf9410c46088e9347981afbe",
+   "code_sha256": "a6d23d92d14badba1ba6777ebb0f33a2970884ce1bf0cd4f5dd26017d9df39c3",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "bf49a69f89924334017f",
+   "candidate_index": 0,
+   "record_sha256": "32dff8885231c77cf8fe65470122fa3cae448d57ebc5a2d37a1feec31f040974",
+   "not_executed": "think not closed",
+   "accepted_under_current": false
+  },
+  {
+   "task_id": "c0b9c27c46c93e457248",
+   "candidate_index": 0,
+   "record_sha256": "50c995383c244f484df2f908ad08717d5d396a8f821e0c303e927a44d6cd36a4",
+   "code_sha256": "1a83d5a32f8795bf8ebb5f229089a070bc62219a5b6610793a0638438ec5d543",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "c1cb5de42015872ba880",
+   "candidate_index": 0,
+   "record_sha256": "64b0d7557bd564b34547bc22fee4412490c3f3ae8b3e7f020bcc232fce2f4da3",
+   "code_sha256": "e2a56bc4361063ca724720277c5e03ec2646ebf9213ec81c2e76c0226e767855",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "c22bcbe8299e08bac1b7",
+   "candidate_index": 0,
+   "record_sha256": "793a34b59704703abe21ad7f0fdb39a430a6c18d617efaab9409a742274f5c41",
+   "code_sha256": "98cfc316712cdb8ff4e1982efa87fbade8b0d606c953f13d632d2830c6e72f6d",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "c3d5768fdb93b9de98fa",
+   "candidate_index": 0,
+   "record_sha256": "1b649b6d89066678e9b2dad721b14220152e60a538ec30d730e37c0c87642de1",
+   "code_sha256": "28a27c8314a48238076ff39619b6a2483be3b5447156e828cd160b074571897c",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "c9164410c4896e269ce7",
+   "candidate_index": 0,
+   "record_sha256": "773202452a31e018edd631868415d02eed0b8f2ff5ef08039fa9944347957c60",
+   "code_sha256": "14b565bf3d87d167b4de215f919ddcd9eb418ce85ccd3c29d7e605e0054e2d09",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "ccc9263fea20ec81d098",
+   "candidate_index": 0,
+   "record_sha256": "0f1a1b97406a0567c4d0b3a311e240b5f255f7029a72d4851d63fd3c66758a0f",
+   "code_sha256": "5e69dbdc2decfe2d26d3691ce39859110b669a110318505f7fa90bfdeb898b27",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "cd00930837fbef0dd871",
+   "candidate_index": 0,
+   "record_sha256": "8670ab198a2b57974b9d0924a23fa2c22afc94c142510cd02f658561ad246dcd",
+   "code_sha256": "4264979ca382ac949614e74d502584a6416b979daff97d408e4218821635c22f",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "cd033fecba5a18d153d6",
+   "candidate_index": 0,
+   "record_sha256": "a4a2f476ba82c461830a008cab0185b7f8d1f665326a42591690380e109e0eb7",
+   "code_sha256": "9afa0e54ab49ee9231d4a3e48141beef99f2bdc1a8cca2db595017367dccade7",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "cd72bd5a8eddc30bc820",
+   "candidate_index": 0,
+   "record_sha256": "407e8e6c0f12a8a4b64c158de76bda50279141062b879abfc5f4a57a165cdec7",
+   "code_sha256": "e8d3dbd7a4b4c248ec8285adbfa616e03ed52d44572c9d430a2e99be96743249",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "cdaeae96ab0e0e3cac60",
+   "candidate_index": 0,
+   "record_sha256": "7add94fa69372768805eb84b590e73b8a692497728604af185252b05008e986c",
+   "code_sha256": "82691779da1b974469f15835e5958d511ba2a34d02f6e01fff8e5c50d3e16b64",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "cdd45f17b958d71937b9",
+   "candidate_index": 0,
+   "record_sha256": "b97f6d8cb881ce0721fb2191390e9a209664e09c31d148cc5ada6329410b0962",
+   "code_sha256": "5d2f71634825451ecdca3127a3ae68871c296a6904fbde08d9efcd5544ad89f9",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "d0f461a7c10a791e4ac0",
+   "candidate_index": 0,
+   "record_sha256": "34703243e5402e27f88f44e6a6287b6ce0cd4fd5c986e94ad8314d675fc9cc78",
+   "code_sha256": "1127353796029e65f016f8ad1e10b2d5a1f4b6f33066caa043ad4c5b1d9dfb09",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "d1ac2eb3d63334710c08",
+   "candidate_index": 0,
+   "record_sha256": "6f0b7b3472a1af8124d64f615fad36686526945562b5114d7da5dadb34e7d13c",
+   "code_sha256": "4997d8e8d57d6e4ad7a208050f833ac93a6b53de8982c14deee56a58b421ecfc",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "d2966a16e3ca977be96d",
+   "candidate_index": 0,
+   "record_sha256": "08f94179d041c46c1aed0ecfce52be631c57b559e85a773a0a4771c8a6614ee2",
+   "code_sha256": "a68d8e1c5cd885e76947830ea3a5875cd930e47ecc7a0b42b9191a8e6841b994",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "d4b0e48edcd7c2c46def",
+   "candidate_index": 0,
+   "record_sha256": "78ec138b5965ede838b60d76eec12c4da4f531ff45bf82e939e9c9acc61233a1",
+   "code_sha256": "93c925a695ae1c32532c286adf6609dc09cfa676d431f27de0f66f5eea750b16",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "d6d6870252b2315778cb",
+   "candidate_index": 0,
+   "record_sha256": "27dda8729db4c15042173132cfcf1ccb179622c9e1e00ebb8ee89e0196c4b37c",
+   "code_sha256": "7f99f012678e2f81a02d40c442705f8f14878a6abdd4a9f2db749b8ef5e62b62",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "d8839d210d22a43266be",
+   "candidate_index": 0,
+   "record_sha256": "0baf1995fc4ab99b86cad51dd7f505b07853bd902eff22e9bccb49ec6e7eb44a",
+   "code_sha256": "fd108b44e42712d74bf8db02a49623c5178cca991b52e4df60ae7d33ef520185",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "dc70d906a6d9bbf4c18a",
+   "candidate_index": 0,
+   "record_sha256": "428bb0e018ec2798b6ab1330fb1a700fda394649d483519b027505078af87046",
+   "code_sha256": "3556c8afe1de925e9523a5a632510b0ec432082293aae461d8990e8c9320e01a",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "dd467cf5e51135cecd78",
+   "candidate_index": 0,
+   "record_sha256": "5385fed1253698559b7990bdd10c610ef89d9676f546ac0575965e15b06a3022",
+   "code_sha256": "3e874db1657f6a0da3d0ac09dcf4de9cd80c97b15c61a7ffd339c7b64acd5568",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "e231a769742e730fe555",
+   "candidate_index": 0,
+   "record_sha256": "3a55a189bee955d94ea14dd40b1658c83a9b3b46f62b1fc8244ea9d18d48a870",
+   "code_sha256": "f364fbcd0cc41cd94c4530911f5dc7fc043d36ae58e4d3681ee5f4789190b52d",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "e39c187aa8549d05af85",
+   "candidate_index": 0,
+   "record_sha256": "21aa175b7d9bf9a8eee4199ce2a3c2cdcd6785110059aae6b671f7efd56876ff",
+   "code_sha256": "a325c2aaa6265f7a6e8c6487a79ab14f046554e399a1cdf10956daa08a4acd40",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "e6e28635f7b5aa3a86c7",
+   "candidate_index": 0,
+   "record_sha256": "3c7789b503f05fe3b2facaf516dea3fa6083f8af18a9bb87c11096d981d7af91",
+   "code_sha256": "a20ba4b7d9f29f8eed3982f44ea2e775c5b2d3da4515c52f5bf1498cbc1000b9",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "e89ecf1945a2e27f2479",
+   "candidate_index": 0,
+   "record_sha256": "1e76be4071cd33f2ab41451eb3c09125efe7df8cf865f12289b68b1de44c1407",
+   "code_sha256": "9b83cbb9aac52387d01faf5ccf6ca8cd9adcdd37a0fa4f6b9d1ad6618a83a06b",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "ea38aa4c44f8cbf9fb98",
+   "candidate_index": 0,
+   "record_sha256": "c34323d764d87676af447e2e7c3d7674124c048977b0952d8ff1ebed2be3e573",
+   "code_sha256": "48c3203751d0ff5b34ad64e3606208464b5ac1e9c2206a6832c4b240fecf869c",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "ebd1a95e0e51d1547848",
+   "candidate_index": 0,
+   "record_sha256": "99d56b4d92c7ec10a6f48210295cce6d2608cdd4aeeb50acff16c3d9efacc01d",
+   "code_sha256": "148458ea0d7dbac13faa00e400571c9778a6cf13fb31d85d0ee3c9ac9bc5a458",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "ee1f9dde5c2c6657f020",
+   "candidate_index": 0,
+   "record_sha256": "924e71dc0943554a3a005fde6b6e6492d994231e74e381508170186bf55106aa",
+   "code_sha256": "560f3870cd44380e561a980ab442723f5310740ae6efe7b942901279fcd03de1",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "f2063a3f773a6b49c7b6",
+   "candidate_index": 0,
+   "record_sha256": "ae25a8e77c1290a83ac9b676cefe0de60cf6f4ff324f0accd3cb533d87de30de",
+   "code_sha256": "5c80afde71bbe7f20bd16a72e776676685b06c2e24e6d17070caf647e5932657",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "f487010307278410d0e9",
+   "candidate_index": 0,
+   "record_sha256": "89141346f04695da12988a119aa3640ac0d3a3a7cf1c5daf64741225d63d4e08",
+   "code_sha256": "d871b135912e810c50b7e6f48461a3c2815b60071f6cf419f4e6c6387dd79bd4",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "f643bc278ec8cdedd034",
+   "candidate_index": 0,
+   "record_sha256": "296d42864ed42a58143c5bff39d0bb1a9e630e7926babe9948a038907f1949ed",
+   "code_sha256": "1c204fe499187ea5e56ceaa83c6e77906260dd7ddcc0519d46455b23be4c495f",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "fca968c52f099f6b877a",
+   "candidate_index": 0,
+   "record_sha256": "940d54458a2a53af4af556c411be4e632df59fada748a742c58be988c0135655",
+   "code_sha256": "a91e1c7e443a8ff267db8660eafe3360c82acf6c0d2e1f19664856cda8c18582",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  },
+  {
+   "task_id": "fd41d8aa4e07a1b6e238",
+   "candidate_index": 0,
+   "record_sha256": "70e57efb3ef0f4f2807a17acdb058b1d12fc0db9891dff92098c354afc767482",
+   "code_sha256": "d48862061babd6947493a71db266190c381864c6e695056e1111d07f8779d0da",
+   "previous": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "current": {
+    "passed": true,
+    "status": "passed",
+    "tests_run": 3,
+    "tests_passed": 3,
+    "tests_total": 3,
+    "detail": null
+   },
+   "accepted_under_current": true
+  }
+ ],
+ "reading": "the saved records are judged again, not regenerated; a moved verdict is the previous verifier's error on that record, and every later reader of the run's accepted units (p1v.verify_run, corpus_feasibility) re-runs the current verifier itself",
+ "authorizes": "nothing"
+}

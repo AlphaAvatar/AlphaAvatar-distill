@@ -33,6 +33,15 @@
       "dev_box": "artifacts/stages/stage-2/reasoning_data/generation/h1gen_20261022_190653/ (shards, markers, .complete, the driver record, the collector archive; gitignored) and the session store /home/ecs-user/aad-scratch/h1gen_20261022_190653/store",
       "relay": "AlphaAvatar/aadistill-artifacts :: stage2_h1/generation/h1gen_20261022_190653/ -- 55 files uploaded 2026-10-22, every one downloaded back and sha256-compared: 0 mismatches",
       "restore": "relay or dev box; each shard verifies against its .done marker and carries the run's launch identity"
+    },
+    "p1t_generation_records_h1p1t_20261023_094007": {
+      "shards": 3,
+      "records": 100,
+      "bytes": 6388891,
+      "pod_to_dev_box": "every shard pulled on the poll after it was sealed, re-hashed against its marker (launcher on_poll; closeout re-hashed all 3, 0 unverified)",
+      "dev_box": "artifacts/stages/stage-2/reasoning_data/generation/h1p1t_20261023_094007/ (shards, markers, .complete, the driver record, the collector archive; gitignored) and the session store /home/ecs-user/aad-scratch/h1p1t_20261023_094007/store",
+      "relay": "AlphaAvatar/aadistill-artifacts :: stage2_h1/generation/h1p1t_20261023_094007/ -- 9 files uploaded 2026-10-23, every one downloaded back and sha256-compared: 0 mismatches",
+      "restore": "relay or dev box; each shard verifies against its .done marker and carries the run's launch identity"
     }
   },
   "planned_per_asset": [

@@ -807,7 +807,8 @@ def budget_spec(repo_root: Path) -> BudgetSpec:
     right about the cause: two models of one session. There is one total, and this
     decomposes it.
     """
-    from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
+    from aadistill.infrastructure.budget import Phase
+    from shared.step_times import MEASURED_STEP_SECONDS
 
     from stages.phase_d1 import d1_authorization as A
 
