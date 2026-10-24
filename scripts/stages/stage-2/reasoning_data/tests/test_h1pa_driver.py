@@ -130,9 +130,10 @@ def test_d4_original_trains_e1s_config_unchanged(real_plan, tmp_path):
     assert _run(_plan(real_plan, tmp_path), tmp_path, calls, "D4-Original-s20260801") == 0
     r, e1 = calls.jobs[0]["recipe"], real_plan["recipes"][20260801]
     a, b = UD._flat(e1), UD._flat(r)
-    assert {k for k in set(a) | set(b) if a.get(k) != b.get(k)} <= set(D.WHERE)
+    assert {k for k in set(a) | set(b) if a.get(k) != b.get(k)} <= set(D.WHERE) | set(D.PINS)
     assert r["schedule"]["total_steps"] == 2916 and r["batch"] == {"blocks_per_step": 2, "micro_blocks": 1}
     assert r["tokenizer_source"] == D.TOKENIZER_SOURCE and r["seed"] == 20260801
+    assert r["tokenizer_sha256"] == D.PINS["tokenizer_sha256"]
     assert calls.log == ["restore", "train", "evaluate"]
     for kind in ("checkpoint", "training", "evaluation", "report"):
         assert PU.completed(tmp_path / "durable", "D4-Original-s20260801", kind)["persisted"] is True
@@ -143,7 +144,7 @@ def test_d4_augmented_changes_only_the_builder_schedule(real_plan, tmp_path):
     assert _run(_plan(real_plan, tmp_path), tmp_path, calls, "D4-Augmented-s20260726") == 0
     r, e1 = calls.jobs[0]["recipe"], real_plan["recipes"][20260726]
     a, b = UD._flat(e1), UD._flat(r)
-    assert {k for k in set(a) | set(b) if a.get(k) != b.get(k)} <= set(D.WHERE) | set(D.SCHEDULE_KEYS)
+    assert {k for k in set(a) | set(b) if a.get(k) != b.get(k)} <= set(D.WHERE) | set(D.SCHEDULE_KEYS) | set(D.PINS)
     assert (r["schedule"]["total_steps"], r["schedule"]["warmup_steps"], r["rung"]) == (3702, 185, 5923021)
     assert r["optim"] == e1["optim"] and r["loss"] == e1["loss"] and r["batch"] == e1["batch"]
 
@@ -240,3 +241,35 @@ def test_the_driver_is_formal_only(real_plan, tmp_path):
     with pytest.raises(SystemExit):
         D.run(["--run-id", "t", "--durable-root", str(tmp_path), "--validation"], ops=Calls(tmp_path).ops(),
               plan=_plan(real_plan, tmp_path))
+
+
+def test_every_derived_recipe_meets_the_trainers_tokenizer_contract(real_plan, tmp_path, monkeypatch):
+    # h1pav_20261024_191336: E1's 2.96M configs pin no tokenizer identity and the trainer refused X1;
+    # run the trainer's own contract on the fields it reads (cfg.tokenizer_source, cfg.tokenizer_sha256)
+    from aadistill.models import tokenizer_contract as TC
+    from stages.reasoning_data import h1pa_validation as V
+    src = tmp_path / "tok"
+    src.mkdir()
+    (src / "tokenizer.json").write_text("{}")
+    monkeypatch.setattr(TC, "tokenizer_hash", lambda _t: D.PINS["tokenizer_sha256"])
+    recipes = []
+    for u in (u for u in real_plan["units"] if u["execution"] == "train"):
+        sc = real_plan["study"]["arms"][u["arm"]]["schedule"]
+        sched = None if u["arm"] == "D4-Original" else {
+            "rung": 1, "total_steps": sc["optimizer_steps"], "warmup_steps": sc["warmup_steps"],
+            "eval_every": sc["eval_every"], "save_every": sc["save_every"]}
+        recipes.append(D.derive_recipe(real_plan, u, sched, run_name="-", purpose="-", out_dir="-", data_dir="-",
+                                       student_path="-"))
+    recipes += [V.validation_recipe(real_plan, arm, steps=24, save_every=12, out_dir=tmp_path, data_dir=tmp_path,
+                                    init=tmp_path, name="n") for arm in D.TRAINED]
+    assert len(recipes) == 6
+    for cfg in recipes:
+        assert cfg["tokenizer_source"] == D.TOKENIZER_SOURCE
+        TC.resolve_training_tokenizer(student_path=tmp_path / "student", tokenizer_source=src,
+                                      expected_sha256=cfg.get("tokenizer_sha256"),
+                                      loader=lambda _p: type("Tok", (), {"get_vocab": lambda self: {}})())
+    e1 = copy.deepcopy(real_plan)
+    e1["recipes"][20260726]["tokenizer_sha256"] = "0" * 64
+    with pytest.raises(D.DriverRefusal, match="pins"):
+        V.validation_recipe(e1, "D4-Augmented", steps=24, save_every=12, out_dir=tmp_path, data_dir=tmp_path,
+                            init=tmp_path, name="n")

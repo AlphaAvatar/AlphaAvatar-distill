@@ -81,7 +81,8 @@ def recipe_outside(plan: dict, cfg: dict) -> list[str]:
     e1 = plan["recipes"][int(cfg["seed"])]
     allowed = set(D.WHERE) | set(plan["study"]["gpu_validation"]["training"]["validation_only_overrides"])
     a, b = UD._flat(e1), UD._flat(cfg)
-    return sorted(k for k in set(a) | set(b) if a.get(k) != b.get(k) and k not in allowed)
+    return sorted(k for k in set(a) | set(b) if a.get(k) != b.get(k) and k not in allowed
+                  and not (k in D.PINS and b.get(k) == D.PINS[k]))
 
 
 def formal_recipes_derive(plan: dict) -> dict:

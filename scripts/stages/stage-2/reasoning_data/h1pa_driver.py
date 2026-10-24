@@ -73,6 +73,11 @@ REPORT_SCHEMA = "aadistill.stage2.reasoning_data.h1pa_unit_report/v1"
 TOKENIZER_SOURCE = "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 #: keys that name WHERE a run lives, never WHAT it trains: outside the recipe identity
 WHERE = ("run_name", "_purpose", "out_dir", "data_dir", "student_path", "tokenizer_source")
+#: identity pins the current trainer requires and E1's 2.96M configs predate (they loaded the
+#: tokenizer from their PCA student_path): never what trains, and never different from E1's.
+#: tokenizer_sha256 is E1's own recorded identity (the 2.96M runs' train_log `dataset_loaded`;
+#: e1_r0860k_sa_pca.json pins the same), which H1's pods resolved from TOKENIZER_SOURCE on 2026-10-24
+PINS = {"tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654"}
 #: what E1's builder derives from the sequence count: D4-Augmented's only recipe overrides
 SCHEDULE_KEYS = ("rung", "schedule.total_steps", "schedule.warmup_steps", "checkpoint.save_every",
                  "intervals.eval_every")
@@ -215,9 +220,12 @@ def derive_recipe(plan: dict, u: dict, sched: dict | None, *, run_name: str, pur
     included, is checked unchanged."""
     e1 = plan["recipes"][u["seed"]]
     d = copy.deepcopy(e1)
+    clash = {k: e1[k] for k, v in PINS.items() if k in e1 and e1[k] != v}
+    if clash:
+        raise DriverRefusal(f"E1's config pins {clash}, not the study's {PINS}")
     d.update(run_name=run_name, _purpose=purpose, out_dir=out_dir, data_dir=data_dir, student_path=student_path,
-             tokenizer_source=TOKENIZER_SOURCE)
-    allowed = set(WHERE)
+             tokenizer_source=TOKENIZER_SOURCE, **PINS)
+    allowed = set(WHERE) | set(PINS)
     if sched is not None:
         if sched["rung"] is not None:
             d["rung"] = sched["rung"]
