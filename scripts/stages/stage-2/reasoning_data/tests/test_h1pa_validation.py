@@ -125,3 +125,41 @@ def test_the_validation_recipe_changes_only_the_declared_keys(plan, tmp_path):
     assert V.recipe_outside(plan, cfg) == []
     assert cfg["batch"] == plan["recipes"][20260726]["batch"] and cfg["optim"] == plan["recipes"][20260726]["optim"]
     assert cfg["intervals"]["log_every"] == 1 and cfg["checkpoint"]["save_every"] == 12
+
+
+def _leftovers(pa2v_root: Path, run: str) -> None:
+    for rel in V.VALIDATION_BYTES:
+        (pa2v_root / run / rel).mkdir(parents=True)
+        (pa2v_root / run / rel / "model.safetensors").write_bytes(b"x" * 10)
+    _w(pa2v_root / run / V.REPORT, {"run_id": run})
+    _w(pa2v_root / run / "evidence" / "gpu.json", {"name": "NVIDIA L40S"})
+
+
+def test_pa2v_releases_validation_bytes_on_a_failed_path_and_an_earlier_attempts(tmp_path):
+    # h1pav_20261024_192448 failed at evaluation, before its release, and left 8.29 GB on the volume
+    durable = tmp_path / "vol" / "h1pa"
+    root = durable / "validation" / "pa2v"
+    _leftovers(root, "h1pav_earlier")
+    rc = V.main(["--run-id", "h1pav_now", "--durable-root", str(durable), "--volume-mount", str(tmp_path / "vol"),
+                 "--volume-bytes", str(30 * 10 ** 9), "--status", str(tmp_path / "status"),
+                 "--pack-root", str(tmp_path / "no_packs"), "--work", str(tmp_path / "work")])
+    assert rc == 3 and "RUN_FAILED" in (tmp_path / "status").read_text()
+    rep = json.loads((root / "h1pav_now" / V.REPORT).read_text())
+    assert rep["error"]["stage"] == "plan"
+    assert sorted(r["path"] for r in rep["released_earlier_validation_bytes"]) == \
+        sorted(str(root / "h1pav_earlier" / rel) for rel in V.VALIDATION_BYTES)
+    for rel in V.VALIDATION_BYTES:
+        assert not (root / "h1pav_earlier" / rel).exists()
+    assert (root / "h1pav_earlier" / V.REPORT).is_file() and (root / "h1pav_earlier" / "evidence/gpu.json").is_file()
+
+
+def test_the_release_runs_in_the_terminal_path_of_every_run(tmp_path, monkeypatch):
+    durable = tmp_path / "vol" / "h1pa"
+    root = durable / "validation" / "pa2v"
+    calls = []
+    real = V.release_validation_bytes
+    monkeypatch.setattr(V, "release_validation_bytes", lambda r: calls.append(Path(r)) or real(r))
+    V.main(["--run-id", "h1pav_now", "--durable-root", str(durable), "--volume-mount", str(tmp_path / "vol"),
+            "--volume-bytes", str(30 * 10 ** 9), "--status", str(tmp_path / "status"),
+            "--pack-root", str(tmp_path / "no_packs"), "--work", str(tmp_path / "work")])
+    assert calls == [root, root]

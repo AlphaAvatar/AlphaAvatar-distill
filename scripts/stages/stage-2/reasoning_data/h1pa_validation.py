@@ -58,6 +58,25 @@ FLUID_KEY, GSM8K_KEY = "fluid_reasoning_720__dev_v1", "stage3_capability_846__gs
 #: run name -> (arm, steps): the trainings PA2v measures
 RUNS = {"X1": ("D4-Augmented", 24), "X2": ("D4-Augmented", 24), "Y": ("D4-Augmented", 24),
         "O": ("D4-Original", 12)}
+#: what PA2v leaves on the volume that is never evidence (the archive excludes both) and that
+#: nothing reads: Y's trainer directory (save points, final model) and its persisted copy
+VALIDATION_BYTES = ("train_Y/checkpoints", "durable/pa2v-Y/checkpoint")
+
+
+def release_validation_bytes(pa2v_root: Path) -> list[dict]:
+    """Remove `VALIDATION_BYTES` under every PA2v run in `pa2v_root`
+    (``<durable>/validation/pa2v``): this run's at its end, on every path, and
+    an earlier attempt's at the start -- h1pav_20261024_192448 failed before
+    its release and left 8.29 GB the formal sessions' capacity plan never
+    counted. Reports and evidence stay."""
+    out = []
+    for run in sorted(p for p in Path(pa2v_root).glob("*") if p.is_dir()):
+        for rel in VALIDATION_BYTES:
+            d = run / rel
+            if d.exists():
+                out.append({"path": str(d), "bytes": sum(f.stat().st_size for f in d.rglob("*") if f.is_file())})
+                shutil.rmtree(d)
+    return out
 
 
 def validation_recipe(plan: dict, arm: str, *, steps: int, save_every: int, out_dir: Path, data_dir: Path,
@@ -284,6 +303,7 @@ def main(argv=None) -> int:
            "started_utc": UD._now(), "not": "a GPU validation: never a formal H1-PA result"}
     stage, out_dirs = "plan", {}
     try:
+        rep["released_earlier_validation_bytes"] = release_validation_bytes(run_root.parent)
         plan = D.load_plan()
         gv = plan["study"]["gpu_validation"]
         refusals = D.pack_refusals(plan, "D4-Augmented", Path(args.pack_root)) + \
@@ -346,19 +366,17 @@ def main(argv=None) -> int:
         (ev / "evaluation" / "timing.json").write_text(json.dumps(timing, indent=1))
         stage = "checks"
         rep.update(checks(ev, plan))
-        stage = "release"
-        released = []
-        for d in (out_dirs["Y"] / "checkpoints", vroot / "pa2v-Y" / "checkpoint"):
-            if d.exists():
-                released.append({"path": str(d), "bytes": sum(f.stat().st_size for f in d.rglob("*") if f.is_file())})
-                shutil.rmtree(d)
-        rep["released_validation_bytes"] = released
         stage = "done"
     except BaseException as exc:  # noqa: BLE001
         rep["error"] = {"stage": stage, "error": f"{type(exc).__name__}: {exc}"[:1500],
                         "traceback": traceback.format_exc()[-3000:]}
     finally:
         UD.close_observers()
+        try:
+            rep["released_validation_bytes"] = release_validation_bytes(run_root.parent)
+        except OSError as exc:
+            rep["released_validation_bytes"] = {"error": f"{type(exc).__name__}: {exc}"}
+            stage = "release"
         rep["finished_utc"] = UD._now()
         rep["passed"] = stage == "done" and bool(rep.get("passed"))
         (run_root / REPORT).write_text(json.dumps(rep, indent=1, default=str) + "\n")

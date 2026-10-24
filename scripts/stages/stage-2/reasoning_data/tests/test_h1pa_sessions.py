@@ -369,3 +369,31 @@ def test_the_driver_commands_take_the_providers_size():
         assert script in cmd and f"--volume-bytes {30 * 10 ** 9}" in cmd and "MARKER:" in cmd
         with pytest.raises(RuntimeError, match="no provider-reported volume size"):
             L.spec(a).driver_command(SimpleNamespace(args=a, evidence={}), None)
+
+
+def _unit_tgz(store: Path, name: str, report: dict, ckpt: dict | None) -> None:
+    store.mkdir(parents=True, exist_ok=True)
+    with tarfile.open(store / f"{name}.evidence.tgz", "w:gz") as tf:
+        for arc, doc in (("./report/report.json", report), ("./checkpoint.descriptor.json", ckpt)):
+            if doc is None:
+                continue
+            raw = json.dumps(doc).encode()
+            info = tarfile.TarInfo(arc)
+            info.size = len(raw)
+            tf.addfile(info, io.BytesIO(raw))
+
+
+def test_a_formal_closeout_records_each_units_seconds_and_kept_checkpoint(tmp_path, monkeypatch):
+    store = tmp_path / "scr" / "store"
+    _unit_tgz(store, "D4-Original-s20260726", {"execution": "train", "seconds": {"train": 11000.0, "evaluate": 5000.0}},
+              {"artifact_digest": "a" * 64, "weights_digest": "w" * 64, "destination": "/v/h1pa/x", "persisted": True})
+    _unit_tgz(store, "PCA-Original-s20260726", {"execution": "evaluate", "seconds": {"evaluate": 4800.0},
+                                                "checkpoint": {"sha256": "p" * 64}}, None)
+    _unit_tgz(store, "D4-Augmented-s20260726", {"execution": "train", "seconds": {"train": 1.0}}, {})
+    verified = {f"{u}.evidence.tgz": {"verified": True} for u in ("D4-Original-s20260726", "PCA-Original-s20260726")}
+    monkeypatch.setattr(L.HUL, "closeout", lambda *a, **k: {"evidence": verified, "money": {"all_in_usd": 1.0}})
+    (tmp_path / HG.run_dir("h1pa_f") / "closeout").mkdir(parents=True)
+    out = L.closeout("h1pa_f", tmp_path / "scr", repo_root=tmp_path, reconcile=lambda: {})
+    assert set(out["units"]) == {"D4-Original-s20260726", "PCA-Original-s20260726"}   # an unverified archive is not read
+    assert out["units"]["D4-Original-s20260726"]["checkpoint"]["weights_digest"] == "w" * 64
+    assert out["units"]["PCA-Original-s20260726"]["seconds"] == {"evaluate": 4800.0}
