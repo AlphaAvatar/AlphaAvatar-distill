@@ -346,6 +346,22 @@ def test_pa2v_stages_the_pack_of_every_arm_its_runs_train():
     assert f"{L.CHECKPOINTS}/20260726" in dests and f"{L.CHECKPOINTS}/20260801" not in dests
 
 
+def test_a_pca_checkpoint_is_staged_without_its_tokenizer_sidecars():
+    # h1pav_20261024_192448: the evaluation package refused E1's checkpoint for carrying its own
+    # tokenizer files; they are the frozen sidecars byte for byte, so only the model files are staged
+    from stages.phase_c1.autoinit_c1_driver import TOKENIZER_SIDECAR_SHA256
+    from stages.phase_c1.packaging import EVAL_TOKENIZER_SIDECARS
+    rel = L.spec(args("--phase", "PA2v")).setup.relay_inputs
+    pca = [r.path.rsplit("/", 1)[1] for r in rel if r.dest == f"{L.CHECKPOINTS}/20260726"]
+    assert "model.safetensors" in pca and "config.json" in pca
+    assert not set(pca) & set(EVAL_TOKENIZER_SIDECARS)
+    pins = L.study()["relay_inputs"]["pca_original"]
+    for seed in pins:
+        assert {n: pins[seed]["files"][n] for n in EVAL_TOKENIZER_SIDECARS} == TOKENIZER_SIDECAR_SHA256
+    with pytest.raises(RuntimeError, match="not the frozen evaluation sidecars"):
+        L.model_files_only({**pins["20260726"]["files"], "tokenizer.json": "0" * 64}, "20260726")
+
+
 def test_the_driver_commands_take_the_providers_size():
     for phase, script in (("PA2v", "h1pa_validation.py"), ("PA2", "h1pa_driver.py")):
         a = args("--phase", phase)

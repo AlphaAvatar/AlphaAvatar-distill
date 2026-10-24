@@ -123,8 +123,21 @@ def relay_inputs(units: tuple[str, ...], st: dict, relay_files: dict) -> tuple[R
     for seed in seeds:
         src = relay_files["pca_original"][seed]
         out += [RelayInput(f"{src['prefix']}/{n}", repo=MAIN_RELAY, dest=f"{CHECKPOINTS}/{seed}", sha256=sha)
-                for n, sha in sorted(src["files"].items())]
+                for n, sha in sorted(model_files_only(src["files"], seed).items())]
     return tuple(out)
+
+
+def model_files_only(files: dict, seed: str) -> dict:
+    """E1's PCA checkpoint without its tokenizer sidecars. The evaluation
+    package refuses a model directory that carries them (h1pav_20261024_192448)
+    and supplies the frozen ones itself, so the checkpoint's copies are staged
+    only after proving they are those same bytes: nothing evaluated changes."""
+    from stages.phase_c1.autoinit_c1_driver import TOKENIZER_SIDECAR_SHA256
+    from stages.phase_c1.packaging import EVAL_TOKENIZER_SIDECARS
+    differ = {n: files[n] for n in EVAL_TOKENIZER_SIDECARS if n in files and files[n] != TOKENIZER_SIDECAR_SHA256[n]}
+    if differ:
+        raise RuntimeError(f"PCA-Original seed {seed}'s tokenizer files {differ} are not the frozen evaluation sidecars")
+    return {n: sha for n, sha in files.items() if n not in EVAL_TOKENIZER_SIDECARS}
 
 
 def secure_units(ctx: SessionContext) -> None:
