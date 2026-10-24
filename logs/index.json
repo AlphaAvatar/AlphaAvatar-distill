@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 140,
+  "runs_unrecorded": 146,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -856,8 +856,8 @@
    },
    "reasoning_data": {
     "recorded": 0,
-    "unrecorded": 8,
-    "total": 8
+    "unrecorded": 14,
+    "total": 14
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -3884,10 +3884,58 @@
   },
   {
    "experiment_id": "reasoning_data",
+   "run_id": "h1pa2_20261024_203226",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1pa2_20261024_203226",
+   "n_files": 2,
+   "digest": "9e84c69aece68d0d8599801ce967d0e4b8db09d06c0a076ddf1f46d1fea5ec42",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "reasoning_data",
    "run_id": "h1pat_20261024_115517",
    "root": "logs/stages/stage-2/reasoning_data/runs/h1pat_20261024_115517",
    "n_files": 3,
    "digest": "d5eeb077d48ea60fa0f5f0024da8d2a97b43b58e0bd016ded010715ac78a6b4d",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1pav_20261024_190211",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1pav_20261024_190211",
+   "n_files": 3,
+   "digest": "236a1ab0df185e4e4030b15d4df4a759747cfa47267fd01f8a9ac87f1baa1674",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1pav_20261024_191336",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1pav_20261024_191336",
+   "n_files": 3,
+   "digest": "8fe3eb21176caa22a89285155081b1f692ae22026ada4a094ebae22d3fa2b2ae",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1pav_20261024_192448",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1pav_20261024_192448",
+   "n_files": 3,
+   "digest": "ddaed31866f42d579b85d40b954008eb49e76e574f876ca9ed588d6991ebe0e2",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1pav_20261024_194216",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1pav_20261024_194216",
+   "n_files": 4,
+   "digest": "d485bd64cb29b9b9a2e43d9eeb7aad9979f01a16a7067251a6076d465495beed",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1pav_20261024_201011",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1pav_20261024_201011",
+   "n_files": 4,
+   "digest": "e8b4d69ac05f413ad03c828ea5bea4f21e31abee544c21781c859eeedaa78bb2",
    "why": "no run manifest; its closeout states: COMPLETE"
   }
  ],

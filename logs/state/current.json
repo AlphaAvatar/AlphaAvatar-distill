@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO for $0 work. H1-PA is FROZEN and ready (whole-unit data, preregistered rule, driver and launcher built at $0); its student phase awaits a grant. Owner: docs/stages/stage-2/reasoning_data/H1PA.md (section 12).",
+ "blocker": "BLOCKED NO. H1-PA PA2 is executing under the maintainer's grant (logs/budget/approvals/h1pa_training_grant.json). Owner: docs/stages/stage-2/reasoning_data/H1PA.md (section 14).",
  "branch": "stage2/reasoning-data, cut from main 2a8bae78 (the Stage-0 squash, 2026-10-21)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -32,7 +32,7 @@
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 712.17,
-  "cumulative_spend_usd": 648.0791,
+  "cumulative_spend_usd": 649.4718,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 64.0909,
+  "remaining_usd": 62.6982,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-24T17:30:00Z",
+ "generated_utc": "2026-10-24T20:45:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Maintainer: grant H1-PA PA2v + PA2 ($50.00 cumulative, L40S; project cap $712.17 -> $731); PA2v first, its gate is enforced in code. Owner: plans/h1pa_training_application.json. 34 pods ($58.33) stay OPEN.",
+ "next": "H1-PA: close PA2-s20260726, reprice and run PA2-s20260801, then the preregistered analysis. Owner: docs/stages/stage-2/reasoning_data/H1PA.md (section 14). 34 pods ($58.33) stay OPEN.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "H1-PA (H1PA.md section 12): frozen; PA2v, then the three arms' training and evaluation, on a grant.",
@@ -197,10 +197,12 @@
   "docs/stages/stage-2/reasoning_data/H1.md -- the live round (H1)"
  ],
  "running": {
-  "paid_compute": false,
-  "pods": 0,
-  "network_volumes": 0,
-  "_owner": "logs/budget/provider/runpod_billing_2026-10-24T1726Z.json :: account"
+  "paid_compute": true,
+  "pods": 1,
+  "network_volumes": 1,
+  "run": "logs/stages/stage-2/reasoning_data/runs/h1pa2_20261024_203226 (H1-PA PA2-s20260726, L40S, hard cap $26.86)",
+  "volume": "am5m373kuq (storage/h1pa_volume_am5m373kuq.json)",
+  "pod_id": "1svnlzof00rp95"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

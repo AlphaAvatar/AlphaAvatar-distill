@@ -22,7 +22,13 @@ Everything this experiment produced, in one place.
 * [`h1p2a_20261023_232905`](runs/h1p2a_20261023_232905/)
 * [`h1p2b_20261023_195303`](runs/h1p2b_20261023_195303/)
 * [`h1p2b_20261023_205037`](runs/h1p2b_20261023_205037/)
+* [`h1pa2_20261024_203226`](runs/h1pa2_20261024_203226/)
 * [`h1pat_20261024_115517`](runs/h1pat_20261024_115517/)
+* [`h1pav_20261024_190211`](runs/h1pav_20261024_190211/)
+* [`h1pav_20261024_191336`](runs/h1pav_20261024_191336/)
+* [`h1pav_20261024_192448`](runs/h1pav_20261024_192448/)
+* [`h1pav_20261024_194216`](runs/h1pav_20261024_194216/)
+* [`h1pav_20261024_201011`](runs/h1pav_20261024_201011/)
 
 Canonical list, always the index rather than this file.
 Nothing here authorizes anything.

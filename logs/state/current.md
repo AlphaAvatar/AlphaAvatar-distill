@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-24 (UTC), 16:30Z. The human view. Every number here has an owner
+**Updated:** 2026-10-24 (UTC), 20:45Z. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,34 +9,26 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**H1-PA: FROZEN AND READY FOR A GRANT. Student training and evaluation are NOT authorized (2026-10-25).**
+**H1-PA: PA2v PASSED; PA2 SEED 20260726 RUNNING (2026-10-24 UTC).** Granted by the maintainer
+(`logs/budget/approvals/h1pa_training_grant.json`: $50.00 cumulative over PA2v + PA2, project cap $731).
 Owner: [`docs/stages/stage-2/reasoning_data/H1PA.md`](../../docs/stages/stage-2/reasoning_data/H1PA.md)
-section 12, `configs/stages/stage-2/reasoning_data/h1pa.json` and `plans/h1pa_training_application.json`.
-Nothing is running: 0 pods, 0 volumes, $0/h (snapshot `runpod_billing_2026-10-24T1726Z.json`; the provider has billed $680.6673).
-- **Arms:**
-  - PCA-Original: E1's checkpoints, re-evaluated; both are now on the relay.
-  - D4-Original: E1's pack, 2,916 steps.
-  - D4-Augmented: E1's pack unchanged plus 2.96M of pure fluid reasoning
-    admitted by whole units: 2,468 sequences, 3,702 steps, 1.27× D4-Original's
-    FLOPs.
-- **Data** (`audit/h1pa_fluid_whole_units.json`, SUCCESS): 642 units, 2,962,514
-  supervised tokens, 0 episodes split; isolation derived from real members.
-  The PA1 cut build is a superseded identity.
-- **Rule:** `plans/h1pa_preregistration.json` (A and B decided, C descriptive;
-  `nucleus_v1` only).
-- **Execution fixes (2026-10-25, H1PA.md section 13):**
-  - a 30 GB volume counted from the provider's size;
-  - PA2v's gate enforced in `h1pa_governance.issue`;
-  - formal sessions repriced from measurements;
-  - the project cap re-read from the provider at every issue and launch;
-  - the four new checkpoints kept until analysis and review.
-- **Next:** the maintainer's grant for PA2v + PA2: a $50.00 cumulative cap on
-  L40S, with the $712.17 project cap raised to $731. PA2v runs first.
+sections 12-14, `configs/stages/stage-2/reasoning_data/h1pa.json`.
+- **Running:** `runs/h1pa2_20261024_203226`, PA2-s20260726 (PCA-Original evaluate, D4-Original and
+  D4-Augmented train + evaluate), one L40S pod `1svnlzof00rp95` in EUR-IS-2 at $1.09/h, hard cap $26.86; launcher in
+  tmux `h1pa2s1`, log `artifacts/stages/stage-2/reasoning_data/h1pa/h1pa2_20261024_203226/launch.log`.
+- **Storage:** network volume `am5m373kuq` (30 GB, EUR-IS-2), `storage/h1pa_volume_am5m373kuq.json`
+  ($4.20 reserved); the four new checkpoints are kept until the analysis and the review.
+- **PA2v:** five attempts, $1.39 (H1PA.md section 14); three engineering failures fixed with
+  regressions; the gate `runs/h1pav_20261024_201011/closeout/pa2v_gate.json` passed under harness
+  `e1cf874c`, study `d8a3c15e`.
+- **Next:** session 1's closeout; reprice PA2-s20260801 from its measured evaluations (it fits
+  the envelope if a full evaluation takes at most ~140 min); then the second seed, the
+  preregistered analysis, reconciliation and cleanup.
 
 **STAGE-2/3 H1: ANNULLED FOR PROMOTION (maintainer, 2026-10-24; `plans/h1_annulment.json`). As executed: P1g PASSED, P2's FOUR FORMAL UNITS COMPLETE; THE FROZEN DECISION WAS NOT_RESOLVED (FLOOR).**
 Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).
-Nothing is running: 0 pods, $0.003/h for the kept 30 GB volume `1980hnh75i`
-(provider snapshot `logs/budget/provider/runpod_billing_2026-10-24T0507Z.json`).
+Its 30 GB volume `1980hnh75i` was retired on 2026-10-24
+(`storage/h1_volume_1980hnh75i.json`).
 Evidence: [`docs/stages/stage-2/reasoning_data/H1.md`](../../docs/stages/stage-2/reasoning_data/H1.md)
 §17–§19; `analyses/h1_result.json`, `units/`, `runs/h1p1g_*`, `runs/h1p2*`.
 - **Result:** B − A = +0.0053 (95% CI −0.0009 to +0.0136) on static fluid
@@ -57,7 +49,7 @@ state, usable output, reasoning) in
 [`programme_closeout.json`](../stages/stage-0/calibration_volume/closeout/programme_closeout.json) `:: programme_verdict`.
 Stage-0 volume CLOSED; Stage-0 mixture ratio DEFERRED (never run); D-series
 CLOSED; forward baseline D1 + `scored_v1`.
-Nothing is running and nothing is billing: 0 pods, 0 volumes, `$0/h` (provider query 2026-10-21 16:33Z,
+At Stage-0's close the account held 0 pods, 0 volumes, `$0/h` (provider query 2026-10-21 16:33Z,
 [`runpod_billing_2026-10-21.json`](../budget/provider/runpod_billing_2026-10-21.json) `:: account`).
 - **Budget, reconciled against the provider's billing**
   ([`budget_reconciliation.json`](../stages/stage-0/calibration_volume/closeout/budget_reconciliation.json);
@@ -4208,7 +4200,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$648.0791` spent of `$712.1700`, leaving `$64.0909` |
+| project cap | `$649.4718` spent of `$712.1700`, leaving `$62.6982` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 
