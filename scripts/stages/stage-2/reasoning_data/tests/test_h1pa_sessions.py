@@ -47,6 +47,13 @@ def write_grant(tmp_path, **over):
     return p
 
 
+@pytest.fixture(autouse=True)
+def own_records(tmp_path, monkeypatch):
+    """Runs and storage records under tmp_path, never the repository's real ones
+    (an open real session must not decide a synthetic test)."""
+    monkeypatch.setattr(HG, "EXPERIMENT_LOGS", tmp_path / HG.EXPERIMENT_LOGS)
+
+
 @pytest.fixture
 def grant(tmp_path, monkeypatch):
     monkeypatch.setattr(HG, "GRANT", write_grant(tmp_path))
@@ -327,6 +334,16 @@ def test_a_session_stages_only_what_its_units_read():
     assert f"{L.CHECKPOINTS}/20260801" in dests and f"{L.PACKS}/e1_2p96M" in dests
     assert f"{L.CHECKPOINTS}/20260726" not in dests and f"{L.PACKS}/e1_2p96M_plus_fluid" not in dests
     assert s.setup.env["SESSION_KIND"] == "stage2_h1pa"
+
+
+def test_pa2v_stages_the_pack_of_every_arm_its_runs_train():
+    # h1pav_20261024_190211: O trains D4-Original, gpu_validation.units names only D4-Augmented,
+    # and the pod refused at the plan for the missing e1_2p96M pack
+    from stages.reasoning_data import h1pa_validation as V
+    dests = {r.dest for r in L.spec(args("--phase", "PA2v")).setup.relay_inputs}
+    for arm, _ in V.RUNS.values():
+        assert f"{L.PACKS}/{L.study()['arms'][arm]['dataset']}" in dests, arm
+    assert f"{L.CHECKPOINTS}/20260726" in dests and f"{L.CHECKPOINTS}/20260801" not in dests
 
 
 def test_the_driver_commands_take_the_providers_size():

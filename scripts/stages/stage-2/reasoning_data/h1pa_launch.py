@@ -91,6 +91,18 @@ def units_of(args) -> tuple[str, ...]:
     return tuple(args.unit or (study()["gpu_validation"]["units"] if kind(args) == "validation" else all_units()))
 
 
+def input_units(args) -> tuple[str, ...]:
+    """The units whose inputs the pod must hold: a formal session's own; for
+    PA2v also every arm `h1pa_validation.RUNS` trains (O trains D4-Original on
+    E1's pack, which `gpu_validation.units` does not name), at the validation seed."""
+    units = units_of(args)
+    if kind(args) != "validation":
+        return units
+    from stages.reasoning_data import h1pa_validation as V
+    seed = study()["gpu_validation"]["training"]["seed"]
+    return units + tuple(sorted({f"{arm}-s{seed}" for arm, _ in V.RUNS.values()} - set(units)))
+
+
 def durable_root(args) -> str:
     return f"{args.volume_mount_path.rstrip('/')}/h1pa"
 
@@ -416,7 +428,7 @@ def spec(args) -> SessionSpec:
                            "TEACHER_READY", "AUTHORIZATION_OK", "SETUP_DONE"),
             local_assets=assets,
             relay_inputs=(*C1_EVAL_TOKENIZER, *C1_ROPE_INPUT,
-                          *relay_inputs(units_of(args), st, st["relay_inputs"])),
+                          *relay_inputs(input_units(args), st, st["relay_inputs"])),
             teacher_revision=proto["teacher"]["revision"],
             uv_max_seconds=1500, tests_max_seconds=600),
         driver_command=driver_command,

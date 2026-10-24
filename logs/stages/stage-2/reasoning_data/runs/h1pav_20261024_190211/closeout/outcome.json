@@ -1,0 +1,51 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1pa_outcome/v1",
+ "run_id": "h1pav_20261024_190211",
+ "recorded_utc": "2026-10-24T19:12:55+00:00",
+ "status": "INCOMPLETE",
+ "terminal": "RUN_FAILED",
+ "runner_terminal": "RUN_FAILED",
+ "session_passed": false,
+ "provider_resource_created": true,
+ "evidence": {
+  "pa2v.evidence.tgz": {
+   "sha256": "8f7912718a7e8ffdfccfaa2658d9ba84a9c744725f98fbf1306ecab55c9b918e",
+   "verified": true,
+   "bytes": 623
+  }
+ },
+ "money": {
+  "all_in_usd": 0.1663,
+  "gpu_usd": 0.1632,
+  "disk_usd": 0.0031,
+  "elapsed_minutes": 8.98,
+  "price_per_hour": 1.09,
+  "authorized_usd": 3.75,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB); the network volume is booked in logs/stages/stage-2/reasoning_data/storage/"
+ },
+ "provider_confirms_gone": true,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "am5m373kuq",
+    "name": "aad-h1pa",
+    "size": 30,
+    "dataCenterId": "EUR-IS-2"
+   }
+  ],
+  "error": null,
+  "accounted": [
+   "am5m373kuq"
+  ],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 1 resource(s) the records account for"
+ },
+ "authorizes": "nothing",
+ "store": "artifacts/stages/stage-2/reasoning_data/h1pa/h1pav_20261024_190211/store",
+ "units": {}
+}
