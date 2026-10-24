@@ -545,12 +545,12 @@ def generation_forecast(rows: dict, d: dict, *, price: float) -> dict:
              + sess["all_done_to_pod_deleted_minutes"])
     rate = price * sess["all_in_over_gpu"] / 60
 
-    def minutes(p0, p1, agg):
-        return fixed + cal["correction"] * (ps_seconds(p0, agg, cal["sequence_speed_cap"])
-                                            + ps_seconds(p1, agg, cal["sequence_speed_cap"])) / 60
+    def passes(p0, p1, agg):
+        return [round(cal["correction"] * ps_seconds(p, agg, cal["sequence_speed_cap"]) / 60, 2) for p in (p0, p1)]
 
-    m_exp = minutes(exp0, exp1, cal["aggregate_tokens_per_second"])
-    m_con = minutes(con0, con1, cal["aggregate_tokens_per_second_conservative"])
+    pass_exp = passes(exp0, exp1, cal["aggregate_tokens_per_second"])
+    pass_con = passes(con0, con1, cal["aggregate_tokens_per_second_conservative"])
+    m_exp, m_con = fixed + sum(pass_exp), fixed + sum(pass_con)
     reserve = (sess["pod_to_driver_minutes"] + sess["all_done_to_pod_deleted_minutes"] + 15) * rate
     hard = 1.5 * (m_exp * rate + reserve)
     return {"basis": "A100-SXM4-80GB, the hardware P1 and P1t measured (an L40S session would first need its own "
@@ -558,6 +558,11 @@ def generation_forecast(rows: dict, d: dict, *, price: float) -> dict:
             "generated_tokens": {"expected": sum(exp0) + sum(exp1), "conservative": sum(con0) + sum(con1)},
             "requests": {"expected": [len(exp0), len(exp1)], "conservative": [len(con0), len(con1)]},
             "fixed_minutes": round(fixed, 1),
+            "fixed_phases_minutes": {"pod_to_driver": sess["pod_to_driver_minutes"], "contract_check": round(contract, 2),
+                                     "engine_starts": round(sum(sess["engine_start_seconds_by_pass"]) / 60, 2),
+                                     "all_done_to_pod_deleted": sess["all_done_to_pod_deleted_minutes"],
+                                     "_source": f"runs/{p1t}/runtime/session.json timeline and its generators' logs"},
+            "pass_minutes": {"expected": pass_exp, "conservative": pass_con},
             "session_minutes": {"expected": round(m_exp, 1), "conservative": round(m_con, 1)},
             "expected_usd": round(m_exp * rate, 2), "conservative_usd": round(m_con * rate, 2),
             "hard_cap_usd": round(hard, 2), "watchdog_hard_minutes": round(hard / rate, 1),
@@ -723,7 +728,9 @@ def cmd_pregen(args) -> int:
                       "generated_tokens": c["generated_tokens"], "session_minutes": c["session_minutes"],
                       "expected_usd": c["expected_usd"], "conservative_usd": c["conservative_usd"],
                       "hard_cap_usd": c["hard_cap_usd"], "watchdog_hard_minutes": c["watchdog_hard_minutes"],
-                      "conservative_fits_the_cap": c["conservative_fits_the_cap"]}
+                      "conservative_fits_the_cap": c["conservative_fits_the_cap"],
+                      "fixed_phases_minutes": c["fixed_phases_minutes"], "pass_minutes": c["pass_minutes"],
+                      "price_per_hour": c["price_per_hour"]}
     first = next(iter(scen.values()))
     app = {"schema": "aadistill.stage2.reasoning_data.topup_application/v2",
            "written_utc": review["written_utc"],

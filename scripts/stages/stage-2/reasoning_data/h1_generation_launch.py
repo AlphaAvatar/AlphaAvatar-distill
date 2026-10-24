@@ -66,6 +66,7 @@ STATUS = "/workspace/stage2_h1_generation.status"
 FORECAST = GOV.EXPERIMENT_LOGS / "plans/cost_forecast.json"
 #: P1t's priced basis: P1's measured session (corpus_feasibility.topup_application)
 TOPUP_APPLICATION = GOV.EXPERIMENT_LOGS / "plans/abstract_topup_application.json"
+H1PA_APPLICATION = GOV.EXPERIMENT_LOGS / "plans/h1pa_topup_application.json"
 RESUME_INSTALL = "artifacts/stages/stage-2/reasoning_data"
 #: minutes kept after the soft stop to pull the last shards off the pod (P1's)
 ARTIFACT_RECOVERY_MINUTES = 15.0
@@ -253,6 +254,8 @@ def budget(phase: str = "P1", repo_root: Path = REPO_ROOT) -> BudgetSpec:
     live price (the watchdog). P1t: `topup_budget`."""
     if phase == "P1t":
         return topup_budget(repo_root)
+    if phase == "PA1":
+        return h1pa_topup_budget(repo_root)
     fc = json.loads((repo_root / FORECAST).read_text())
     gen, factor = fc["generation"], fc["contingency_factors_not_measurements"]["generation"]
     return BudgetSpec(
@@ -291,6 +294,38 @@ def topup_budget(repo_root: Path = REPO_ROOT) -> BudgetSpec:
         soft_stop_reserves=(Phase("closeout_setup_and_teardown", round(f * (setup + teardown), 2)),),
         artifact_recovery_reserve_minutes=round(f * ARTIFACT_RECOVERY_MINUTES - TERMINATION_MINUTES, 2),
         account_balance_required_usd=30.0)
+
+
+def h1pa_topup_budget(repo_root: Path = REPO_ROOT, disk_gb: float = 150.0) -> BudgetSpec:
+    """PA1, from its application's forecast of its own 115 tasks
+    (`h1pa_audit.generation_forecast`): setup and teardown as P1t measured
+    them, the two passes as forecast; the contingency takes the expected
+    session to the CONSERVATIVE one (the soft stop), and the artifact reserve is
+    every minute left before the all-in bound -- GPU and container disk at the
+    application's price over the hard deadline plus the watchdog's time to act
+    (`TERMINATION_MINUTES`) -- reaches the application's hard cap. So the
+    deadline is as long as the cap pays for at that price, and never longer."""
+    app = json.loads((repo_root / H1PA_APPLICATION).read_text())
+    row = app["scenarios"][app["requested"]]
+    f, p = row["fixed_phases_minutes"], row["pass_minutes"]
+    setup = f["pod_to_driver"] + f["contract_check"]
+    passes = f["engine_starts"] + sum(p["expected"])
+    expected = setup + passes + f["all_done_to_pod_deleted"]
+    conservative = setup + f["engine_starts"] + sum(p["conservative"]) + f["all_done_to_pod_deleted"]
+    disk_per_hour = disk_gb * DISK_USD_PER_GB_MONTH / (24 * 30.4375)
+    billable = row["hard_cap_usd"] * 60 / (row["price_per_hour"] + disk_per_hour)
+    reserve = math.floor((billable - TERMINATION_MINUTES - conservative) * 100) / 100
+    if reserve < ARTIFACT_RECOVERY_MINUTES:
+        raise ValueError(f"the cap leaves {reserve} min after the conservative session, under the "
+                         f"{ARTIFACT_RECOVERY_MINUTES} min artifact reserve: the application does not fit its cap")
+    return BudgetSpec(
+        arms=0, steps_per_arm=0, step_seconds=1.0,
+        step_source="unused: no training in this session (arms=0)",
+        below_floor_reason="no training steps; every phase is priced below",
+        setup_minutes=round(setup, 2), transfer_minutes=f["all_done_to_pod_deleted"],
+        other_phases=(Phase("teacher_generation_two_passes", round(passes, 2)),),
+        contingency_fraction=round(conservative / expected - 1.0, 4),
+        artifact_recovery_reserve_minutes=reserve, account_balance_required_usd=30.0)
 
 
 def all_in(plan, price_per_hour: float, disk_gb: float, cap_usd: float | None = None) -> dict:

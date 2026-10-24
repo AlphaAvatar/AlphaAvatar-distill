@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.reasoning_data.topup_application/v2",
- "written_utc": "2026-10-24T11:16:27Z",
+ "written_utc": "2026-10-24T11:51:57Z",
  "status": "APPLICATION for the maintainer's decision; NOT authorized, nothing launched",
  "what": "ONE A100-80GB session generating teacher candidates for unused primary fluid-reasoning tasks under P1's frozen generation protocol, then P1v verification and the no-truncation fluid pack at $0",
  "requested": "115 tasks: the gap",
@@ -34,7 +34,25 @@
    "conservative_usd": 2.44,
    "hard_cap_usd": 3.72,
    "watchdog_hard_minutes": 123.3,
-   "conservative_fits_the_cap": true
+   "conservative_fits_the_cap": true,
+   "fixed_phases_minutes": {
+    "pod_to_driver": 7.01,
+    "contract_check": 2.18,
+    "engine_starts": 2.38,
+    "all_done_to_pod_deleted": 2.4,
+    "_source": "runs/h1p1t_20261023_094007/runtime/session.json timeline and its generators' logs"
+   },
+   "pass_minutes": {
+    "expected": [
+     22.23,
+     21.59
+    ],
+    "conservative": [
+     32.31,
+     34.41
+    ]
+   },
+   "price_per_hour": 1.79
   },
   "185 tasks: the gap and a 150,000 reserve": {
    "tasks": 185,
@@ -65,7 +83,25 @@
    "conservative_usd": 2.85,
    "hard_cap_usd": 4.05,
    "watchdog_hard_minutes": 134.1,
-   "conservative_fits_the_cap": true
+   "conservative_fits_the_cap": true,
+   "fixed_phases_minutes": {
+    "pod_to_driver": 7.01,
+    "contract_check": 2.18,
+    "engine_starts": 2.38,
+    "all_done_to_pod_deleted": 2.4,
+    "_source": "runs/h1p1t_20261023_094007/runtime/session.json timeline and its generators' logs"
+   },
+   "pass_minutes": {
+    "expected": [
+     27.5,
+     23.49
+    ],
+    "conservative": [
+     39.13,
+     41.35
+    ]
+   },
+   "price_per_hour": 1.79
   }
  },
  "calibration": {

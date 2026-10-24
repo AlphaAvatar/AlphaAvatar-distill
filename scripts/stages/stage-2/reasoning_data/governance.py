@@ -16,8 +16,8 @@ One authorization artifact, loaded under `POLICY`, binds three things:
 * a hard cap the planned hard threshold must fit (`SessionRunner.make_plan`).
 
 Each generation PHASE has its own plan and inputs (`PHASE_PLANS`): P1, the
-@v1 generation list, and P1t, the @v3 top-up of 59 unused tasks, beside it and
-never over it. The authorization's phase names the plan its session runs, so
+@v1 generation list; P1t, the @v3 top-up of 59 unused tasks; and PA1, H1-PA's
+fluid top-up of 115 unused tasks; each beside the others and never over them. The authorization's phase names the plan its session runs, so
 the launcher, the pod's setup and the driver hash the plan the grant approved,
 and a P1 artifact can never fund the P1t list or the reverse.
 
@@ -46,7 +46,9 @@ PLAN = EXPERIMENT_LOGS / "plans/generation_plan.json"
 #: P1t: the @v3 top-up's own plan; its inputs sit beside it (`plans/p1t/generation_inputs`)
 TOPUP_PLAN = EXPERIMENT_LOGS / "plans/p1t/generation_plan.json"
 #: phase -> the plan its authorization funds; a phase not named here cannot be issued
-PHASE_PLANS = {"P1": PLAN, "P1t": TOPUP_PLAN}
+#: H1-PA's fluid top-up (maintainer 2026-10-24): 115 unused primary tasks, beside P1t's and never over it
+H1PA_TOPUP_PLAN = EXPERIMENT_LOGS / "plans/h1pa_topup/generation_plan.json"
+PHASE_PLANS = {"P1": PLAN, "P1t": TOPUP_PLAN, "PA1": H1PA_TOPUP_PLAN}
 PROTOCOL = Path("configs/stages/stage-2/reasoning_data/generation_protocol.json")
 #: P1's inputs, committed beside its plan; every plan names its own (``inputs_dir``),
 #: installed at the same path on the pod as a declared local asset

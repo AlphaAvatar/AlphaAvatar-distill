@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.reasoning_data.h1pa_pregen_review/v1",
- "written_utc": "2026-10-24T11:16:27Z",
+ "written_utc": "2026-10-24T11:51:57Z",
  "code": {
   "grouping": "aadistill.data.sessions.pack_sessions groups by system_group_key (the rendered system text and tool schemas) and by nothing else; pack_group fills each sequence in the given order",
   "category_and_source": "read only to ORDER sessions (mixture.interleave) and sequences (mixture.order_blocks) and to record them in the audit; neither is a packing boundary",
