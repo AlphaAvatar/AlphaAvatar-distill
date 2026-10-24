@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-24 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-24 (UTC), 16:30Z. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,20 +9,23 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**H1-PA: DATA FROZEN. The PA1 fluid top-up reached SUCCESS ($0.8455 of $3.72). Training and evaluation are NOT authorized (2026-10-24).**
+**H1-PA: FROZEN AND READY FOR A GRANT. Student training and evaluation are NOT authorized (2026-10-25).**
 Owner: [`docs/stages/stage-2/reasoning_data/H1PA.md`](../../docs/stages/stage-2/reasoning_data/H1PA.md)
-section 11, `audit/h1pa_fluid_final.json`, and `configs/stages/stage-2/reasoning_data/h1pa.json`.
-Nothing is running: 0 pods, 0 volumes, $0/h (snapshot `runpod_billing_2026-10-24T1251Z.json`).
+section 12, `configs/stages/stage-2/reasoning_data/h1pa.json` and `plans/h1pa_training_application.json`.
+Nothing is running: 0 pods, 0 volumes, $0/h (snapshot `runpod_billing_2026-10-24T1616Z.json`; the provider has billed $680.6673).
 - **Arms:**
-  - PCA-Original: E1's checkpoints, re-evaluated;
-  - D4-Original: E1's pack, 2,916 steps;
-  - D4-Augmented: E1's pack unchanged plus 2.96M of pure fluid reasoning, packed
-    whole; 2,474 sequences, 3,711 steps, 1.27× D4-Original's FLOPs.
-- **Fluid pool:** 681 verified units, 3,128,179 supervised tokens. The cut is
-  530 sequences carrying 2,965,560.
-- **Next:** a grant for training and evaluation (about $45, L40S, with the
-  $712.17 project ceiling raised). PCA-Original seed 20260801 must be uploaded
-  first.
+  - PCA-Original: E1's checkpoints, re-evaluated; both are now on the relay.
+  - D4-Original: E1's pack, 2,916 steps.
+  - D4-Augmented: E1's pack unchanged plus 2.96M of pure fluid reasoning
+    admitted by whole units: 2,468 sequences, 3,702 steps, 1.27× D4-Original's
+    FLOPs.
+- **Data** (`audit/h1pa_fluid_whole_units.json`, SUCCESS): 642 units, 2,962,514
+  supervised tokens, 0 episodes split; isolation derived from real members.
+  The PA1 cut build is a superseded identity.
+- **Rule:** `plans/h1pa_preregistration.json` (A and B decided, C descriptive;
+  `nucleus_v1` only).
+- **Next:** the maintainer's grant for PA2v + PA2: a $50.00 cumulative cap on
+  L40S, with the $712.17 project cap raised to $731.
 
 **STAGE-2/3 H1: ANNULLED FOR PROMOTION (maintainer, 2026-10-24; `plans/h1_annulment.json`). As executed: P1g PASSED, P2's FOUR FORMAL UNITS COMPLETE; THE FROZEN DECISION WAS NOT_RESOLVED (FLOOR).**
 Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).

@@ -142,26 +142,78 @@ def topup_decls(specs: list[str]) -> tuple[dict, ...]:
     return tuple(out)
 
 
+def admit_whole_units(rows: list[dict], shares: dict, *, target: int = RUNG, block_len: int = 8192) -> dict:
+    """Which units the fluid increment admits, decided per UNIT before packing
+    (maintainer, 2026-10-24: an episode's turns are all trained or none is).
+
+    The order is the packer's own: `build_token_ladder.py`'s seed-free
+    stratified interleave of these rows on the declared mixture, rendered by
+    the same `render_session` and tokenizer the packer uses. Units are taken in
+    the order of their first session, each with ALL its sessions, until the
+    admitted supervised tokens reach `target`; the stop falls on a unit
+    boundary. Nothing reads a model result, a correctness score or a length
+    preference: the rows are verified units, and the order is the mixture's."""
+    from transformers import AutoTokenizer
+    from aadistill.data.mixture import interleave
+    from aadistill.data.sessions import render_session
+    tok = AutoTokenizer.from_pretrained(str(PCA_INIT))
+    rendered = [render_session(tok, s, block_len=block_len) for s in builder_rows(rows)]
+    by_type, sup, cell = defaultdict(list), Counter(), {}
+    for r in rendered:
+        by_type[r.data_type].append(r)
+        sup[r.source_id] += r.n_supervised
+        cell[r.source_id] = r.data_type
+    seen, admitted, total = set(), [], 0
+    for r in interleave(dict(by_type), shares):
+        if r.source_id in seen:
+            continue
+        seen.add(r.source_id)
+        if total < target:
+            admitted.append(r.source_id)
+            total += sup[r.source_id]
+    excluded = [u for u in sup if u not in set(admitted)]
+    mix = Counter()
+    for u in admitted:
+        mix[cell[u]] += sup[u]
+    return {"rule": "units in the order of their first session in the packer's stratified interleave on the declared "
+                    "mixture, each with all its sessions, until the admitted supervised tokens reach the target",
+            "target": target, "admitted_units": admitted, "admitted_supervised_tokens": total,
+            "over_target": total - target, "reaches_target": total >= target,
+            "last_unit_supervised_tokens": sup[admitted[-1]] if admitted else 0,
+            "excluded_units": sorted(excluded), "excluded_supervised_tokens": sum(sup[u] for u in excluded),
+            "admitted_mixture": {k: round(v / total, 6) for k, v in sorted(mix.items())} if total else {},
+            "unit_supervised_tokens": dict(sup)}
+
+
 def cmd_sessions(args) -> int:
     stores = {k: Path(v) for k, v in (kv.split("=", 1) for kv in args.store)}
     d = derive(stores, topup_decls(args.topup))
     rows = fluid_of(d["placed"])
+    shares = natural_shares(rows, d["rendered"])
+    admission = None
+    if args.whole_units:
+        admission = admit_whole_units(rows, shares)
+        keep = set(admission["admitted_units"])
+        rows = [s for s in rows if s["unit_id"] in keep]
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     with out.open("w") as f:
         for row in builder_rows(rows):
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
-    shares = natural_shares(rows, d["rendered"])
     meta = {"source_sessions_sha256": d["sessions_sha256"], "topups": list(args.topup or []),
             "n_sessions": len(rows),
             "n_units": len({s["unit_id"] for s in rows}),
             "supervised_tokens": sum(d["rendered"][s["id"]].n_supervised for s in rows),
             "declared_mixture": shares, "builder_input_sha256": A.sha256_file(out)}
+    if admission is not None:
+        meta["admission"] = {k: v for k, v in admission.items() if k != "unit_supervised_tokens"}
     out.with_suffix(".meta.json").write_text(json.dumps(meta, indent=1) + "\n")
-    print(json.dumps({k: v for k, v in meta.items() if k != "declared_mixture"}, indent=1))
+    print(json.dumps({k: v for k, v in meta.items() if k not in ("declared_mixture", "admission")}, indent=1))
+    #: a whole-unit input is trained in full: its one rung is its own total, so the cut is every sequence
+    ladder = meta["supervised_tokens"] if admission is not None else RUNG
     print("\nE1's packer, its no-truncation switch on:\n.venv/bin/python scripts/shared/data/build_token_ladder.py "
           f"--sessions {out} --model {PCA_INIT.relative_to(A.REPO)} --block-len 8192 --no-terminal-truncation "
-          f"--ladder {RUNG} --mixture {','.join(f'{k}={v}' for k, v in shares.items())} --out <pack dir>")
+          f"--ladder {ladder} --mixture {','.join(f'{k}={v}' for k, v in shares.items())} --out <pack dir>")
     return 0
 
 
@@ -178,10 +230,20 @@ def e1_split():
 
 
 def fluid_cut(fluid_pack: Path) -> tuple[int, bool]:
-    """The fluid pack's training prefix: the first sequences that reach the
-    2.96M target (the packer's own rung), or every sequence of a pool that
-    falls short -- which makes the merged set PROVISIONAL."""
+    """The fluid pack's training sequences.
+
+    A whole-unit pack (`sessions --whole-units`: its one rung is its own total)
+    is trained in full, so no unit is ever split; it is COMPLETE when that
+    total reaches 2.96M. The superseded build (ce8bf96c) cut the pack at the
+    first sequences reaching 2.96M, the packer's rung, which split four
+    episodes; that reading is kept so the superseded identity still rebuilds.
+    A pool short of the target makes the merged set PROVISIONAL."""
     lad = A.read_json(fluid_pack / "ladder.json")
+    whole = [x for x in lad["rungs"] if x["target_supervised_tokens"] == lad["corpus_supervised_tokens"]]
+    if whole:
+        if int(whole[0]["n_blocks"]) != int(lad["n_blocks"]):
+            raise SystemExit(f"{fluid_pack}: its whole-pack rung holds {whole[0]['n_blocks']} of {lad['n_blocks']} sequences")
+        return int(lad["n_blocks"]), int(lad["corpus_supervised_tokens"]) >= RUNG
     r = next(x for x in lad["rungs"] if x["target_supervised_tokens"] == RUNG)
     return (int(r["n_blocks"]), True) if r.get("reachable") else (int(lad["n_blocks"]), False)
 
@@ -785,72 +847,340 @@ def cmd_pregen(args) -> int:
     return 0
 
 
+FINAL = A.LOG_DIR / "audit/h1pa_fluid_whole_units.json"
+
+
+def first_user(s: dict) -> str:
+    return next(m["content"] for m in s["messages"] if m["role"] == "user")
+
+
+def whole_unit_check(admission: dict, pool: list[dict], trained: set[str]) -> dict:
+    """From the pack's actual members: every admitted unit has ALL its sessions
+    trained, no excluded unit has ANY, and nothing else is trained."""
+    by_unit: dict[str, set] = defaultdict(set)
+    for s in pool:
+        by_unit[s["unit_id"]].add(s["id"])
+    adm, exc = set(admission["admitted_units"]), set(admission["excluded_units"])
+    partial = sorted(u for u, ids in by_unit.items() if ids & trained and not ids <= trained)
+    want = set().union(*(by_unit[u] for u in adm)) if adm else set()
+    episodes = {u: len(ids) for u, ids in by_unit.items() if len(ids) > 1}
+    return {"admitted_units": len(adm), "excluded_units": len(exc),
+            "admitted_and_excluded_partition_the_pool": adm | exc == set(by_unit) and not adm & exc,
+            "units_partially_trained": len(partial), "examples": partial[:5],
+            "excluded_units_with_a_trained_session": sum(bool(by_unit[u] & trained) for u in exc),
+            "trained_sessions_equal_the_admitted_units_sessions": trained == want,
+            "multi_turn_episodes": {"admitted": sum(u in adm for u in episodes), "excluded": sum(u in exc for u in episodes),
+                                    "turns_admitted": sum(n for u, n in episodes.items() if u in adm),
+                                    "turns_excluded": sum(n for u, n in episodes.items() if u in exc)},
+            "pass": not partial and trained == want and not any(by_unit[u] & trained for u in exc)}
+
+
+def train_validation_isolation(train: list[dict], val: list[dict], e1_train: list[dict], excluded: list[dict]) -> dict:
+    """The fluid training units against the sets every arm actually validates
+    on and trains beside, from their real members: E1's 16 validation sequences
+    (their corpus_v2 sessions), E1's training sequences, and the fluid units the
+    admission left out. Prompt keys, unit identities, 13-gram near-copies in
+    both directions (isolation_rules.json :: R2's protocol) and rule families."""
+    from stages.reasoning_data import corpus_feasibility as CF
+    from aadistill.evaluation import isolation as ISO
+    r2 = next(r for r in A.read_json(A.CONFIG_DIR / "isolation_rules.json")["rules"] if r["id"] == "R2_near_duplicate")
+    n, thr, mdf = r2["ngram_n"], r2["containment_threshold"], r2.get("max_document_frequency")
+    unit = lambda s: s.get("unit_id") or s.get("source_id") or s["id"]
+    keys = lambda rows: {CF.prompt_key(s) for s in rows}
+    tk, vk, ek, xk = keys(train), keys(val), keys(e1_train), keys(excluded)
+
+    def near(cands: list[dict], ref: list[dict]) -> dict:
+        rep = ISO.ngram_containment([(s["id"], first_user(s)) for s in cands],
+                                    ISO.ngram_index([first_user(s) for s in ref], n, max_document_frequency=mdf),
+                                    n, threshold=thr)
+        return {k: rep[k] for k in ("with_any_shared_ngram", "flagged")} | {
+            "flagged_ids": [r["id"] for r in rep["flagged_items"]][:10]}
+    fam = lambda rows: {s.get("family") for s in rows if s.get("family")}
+    tv, vt = near(train, val), near(val, train)
+    return {"members": {"fluid_training_sessions": len(train), "fluid_training_units": len({unit(s) for s in train}),
+                        "e1_validation_sessions": len(val), "e1_validation_units": len({unit(s) for s in val}),
+                        "e1_training_sessions": len(e1_train), "excluded_fluid_sessions": len(excluded)},
+            "prompt_overlap": {"fluid_training_x_e1_validation": len(tk & vk),
+                               "fluid_training_x_e1_training": len(tk & ek),
+                               "excluded_fluid_x_e1_validation": len(xk & vk),
+                               "fluid_training_x_excluded_fluid": len(tk & xk)},
+            "unit_overlap": {"fluid_training_x_e1_validation": len({unit(s) for s in train} & {unit(s) for s in val}),
+                             "fluid_training_x_excluded_fluid": len({unit(s) for s in train} & {unit(s) for s in excluded}),
+                             "session_ids_fluid_training_x_e1_validation": len({s["id"] for s in train} & {s["id"] for s in val})},
+            "near_duplicate": {"protocol": {"n": n, "threshold": thr, "max_document_frequency": mdf},
+                               "fluid_training_against_e1_validation": tv,
+                               "e1_validation_against_fluid_training": vt,
+                               "excluded_fluid_against_fluid_training": near(excluded, train)},
+            "rule_family": {"fluid_training_families": len(fam(train)), "e1_validation_families": len(fam(val)),
+                            "shared": sorted(fam(train) & fam(val)),
+                            "_": "corpus_v2 sessions carry no rule family; a shared family would be listed"},
+            "pass": not (tk & vk or xk & vk or {unit(s) for s in train} & {unit(s) for s in val}
+                         or tv["flagged"] or vt["flagged"] or fam(train) & fam(val))}
+
+
 def cmd_finalize(args) -> int:
-    """After the top-up: the fluid pool with the new verified units, their
-    R0-R9 with the teacher text, the 2.96M cut of the no-truncation pack, the
-    merged training set, and the terminal (SUCCESS or DATA SHORTFALL)."""
+    """The whole-unit fluid increment (maintainer, 2026-10-24): its admission
+    checked from the pack's members, every isolation derived from the real
+    training and validation members, the merged training set, and the terminal
+    (SUCCESS, DATA SHORTFALL or HARD BOUNDARY). The superseded cut-at-2.96M
+    build's record, audit/h1pa_fluid_final.json, is not rewritten."""
     from stages.reasoning_data import corpus_feasibility as CF
     from stages.reasoning_data import isolation_check as IC
     stores = {k: Path(v) for k, v in (kv.split("=", 1) for kv in args.store)}
     d = derive(stores, topup_decls(args.topup))
-    rows = fluid_of(d["placed"])
+    pool = fluid_of(d["placed"])
     meta = A.read_json(Path(args.fluid_sessions).with_suffix(".meta.json"))
+    if "admission" not in meta:
+        raise SystemExit(f"{args.fluid_sessions} is not a whole-unit builder input (sessions --whole-units)")
+    adm = meta["admission"]
     fluid, merged = Path(args.fluid_pack).resolve(), Path(args.merged).resolve()
-    tasks = d["runs"][0]["tasks"]
-    added = {x["unit_id"]: x for x in d["added"]}
-    items = [{**tasks[uid], "unit_id": uid, "messages": x["messages"]} for uid, x in sorted(added.items())]
-    iso = IC.check_pool(items)
+    n_f, complete = fluid_cut(fluid)
+    f_rows = list(A.jsonl(fluid / "audit.jsonl"))
+    trained_ids = {m["session_id"] for r in f_rows[:n_f] for m in r["sessions"]}
+    whole = whole_unit_check(adm, pool, trained_ids)
     per_run = {}
     for r in d["runs"]:
         mine = {x["unit_id"] for x in r["got"]["sessions"]}
-        rs = [s for s in rows if s["unit_id"] in mine]
+        rs = [s for s in pool if s["unit_id"] in mine]
+        tr = [s for s in rs if s["id"] in trained_ids]
         per_run[r["identity"]["run_id"]] = {
-            "phase": r["identity"]["phase"], "units": len({s["unit_id"] for s in rs}), "sessions": len(rs),
-            "supervised_tokens": sum(d["rendered"][s["id"]].n_supervised for s in rs)}
-    pool_tokens = sum(d["rendered"][s["id"]].n_supervised for s in rows)
-    n_f, complete = fluid_cut(fluid)
+            "phase": r["identity"]["phase"], "pool_units": len({s["unit_id"] for s in rs}),
+            "trained_units": len({s["unit_id"] for s in tr}), "trained_sessions": len(tr),
+            "trained_supervised_tokens": sum(d["rendered"][s["id"]].n_supervised for s in tr)}
     f_sessions = {s["id"]: s for s in A.jsonl(Path(args.fluid_sessions))}
-    f_rows = list(A.jsonl(fluid / "audit.jsonl"))
-    cut = f_rows[:n_f]
-    stats = packing_stats(cut, f_sessions, unit_of=lambda x: x["unit_id"], axis_of=lambda x: x["stratum"].split("/")[0],
+    stats = packing_stats(f_rows[:n_f], f_sessions, unit_of=lambda x: x["unit_id"],
+                          axis_of=lambda x: x["stratum"].split("/")[0],
                           source_of=lambda x: (x.get("attributes") or {}).get("source"))
-    in_cut = {f_sessions[m["session_id"]]["unit_id"] for r in cut for m in r["sessions"]}
-    later = {f_sessions[m["session_id"]]["unit_id"] for r in f_rows[n_f:] for m in r["sessions"]}
-    ind = CF.independence(rows, set())
+    # the merged set's real members: what every arm validates on, and what D4-Augmented trains on
+    m_rows = list(A.jsonl(merged / "audit.jsonl"))
+    part = lambda name: {m["session_id"] for r in m_rows if r["part"] == name for m in r["sessions"]}
+    e1s = {s["id"]: s for s in A.jsonl(E1_SESSIONS)}
+    val = [e1s[i] for i in sorted(part("e1_validation"))]
+    e1_train = [e1s[i] for i in sorted(part("e1"))]
+    train = [s for s in pool if s["id"] in part("fluid")]
+    excluded = [s for s in pool if s["unit_id"] in set(adm["excluded_units"])]
+    tv = train_validation_isolation(train, val, e1_train, excluded)
+    internal = CF.independence(train, set())
+    # eval-set-1, every admitted unit with its teacher text (R0-R9 by the frozen rules)
+    tasks = {}
+    for r in d["runs"]:
+        tasks.update(r["tasks"])
+    longest = {}
+    for s in train:
+        if len(s["messages"]) >= len(longest.get(s["unit_id"], {"messages": ()})["messages"]):
+            longest[s["unit_id"]] = s
+    items = [{**tasks[u], "unit_id": u, "messages": s["messages"]} for u, s in sorted(longest.items())]
+    iso = IC.check_pool(items)
     ident = (merged_identity(merged)
              + [check("fluid builder input", A.sha256_file(Path(args.fluid_sessions)), meta["builder_input_sha256"]),
                 check("fluid pack built from that input", A.read_json(fluid / "ladder.json")["sessions_sha256"],
                       meta["builder_input_sha256"]),
+                check("fluid part of the merged set equals the fluid pack's sequences",
+                      part("fluid") == trained_ids, True),
                 check("E1 pack unchanged", A.sha256_file(E1_PACK / "blocks.npz"),
                       A.read_json(STUDY)["datasets"]["e1_2p96M"]["blocks_sha256"])])
-    terminal = ("SUCCESS" if complete and iso["pass"] and all(c["ok"] for c in ident)
-                and not ind["units_sharing_a_prompt"] and not ind["units_sharing_a_target"] else
-                "DATA SHORTFALL" if not complete else "HARD BOUNDARY")
-    doc = {"schema": "aadistill.stage2.reasoning_data.h1pa_fluid_final/v1",
+    clean = (whole["pass"] and tv["pass"] and iso["pass"] and all(c["ok"] for c in ident)
+             and not internal["units_sharing_a_prompt"] and not internal["units_sharing_a_target"])
+    terminal = "SUCCESS" if complete and clean else "DATA SHORTFALL" if not complete else "HARD BOUNDARY"
+    lad = A.read_json(merged / "ladder.json")
+    doc = {"schema": "aadistill.stage2.reasoning_data.h1pa_fluid_final/v2",
            "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
            "terminal": terminal,
-           "pool": {"by_run": per_run, "units": len({s["unit_id"] for s in rows}), "sessions": len(rows),
-                    "supervised_tokens": pool_tokens, "target": RUNG,
-                    "shortfall_supervised_tokens": max(0, RUNG - pool_tokens)},
-           "new_units_isolation_R0_R9": {"pass": iso["pass"], "n_items": iso["n_items"],
-                                         "violations": iso["violations"][:20],
-                                         "R2_flagged": iso["results"]["R2_near_duplicate"].get("flagged")},
-           "independence": ind,
-           "fluid_increment": {**stats, "reaches_2p96M": complete,
-                               "pack": str(fluid.relative_to(A.REPO)),
+           "supersedes": {"record": "audit/h1pa_fluid_final.json", "commit": "ce8bf96c",
+                          "why": "that build cut the sequential pack at 2.96M, which split 4 multi-turn episodes "
+                                 "(their later turns untrained); its identities stay recorded as a superseded build"},
+           "admission": {k: v for k, v in adm.items() if k not in ("admitted_units", "excluded_units")}
+                        | {"admitted_unit_ids_sha256": canonical_sha(adm["admitted_units"]),
+                           "excluded_unit_ids": adm["excluded_units"]},
+           "whole_units": whole,
+           "pool": {"by_run": per_run, "units": len({s["unit_id"] for s in pool}), "sessions": len(pool),
+                    "supervised_tokens": sum(d["rendered"][s["id"]].n_supervised for s in pool)},
+           "isolation": {"train_validation": tv, "fluid_training_internal": internal,
+                         "eval_set_1_R0_R9": {"pass": iso["pass"], "n_items": iso["n_items"],
+                                              "violations": iso["violations"][:20],
+                                              "R1_held_out_overlap": iso["results"]["R1_held_out_keys"]["held_out_overlap"],
+                                              "R2_flagged": iso["results"]["R2_near_duplicate"]["flagged"],
+                                              "R2_checked": iso["results"]["R2_near_duplicate"]["checked"],
+                                              "R3_overlap": iso["results"]["R3_rule_family"]["overlap"],
+                                              "R8_in_sample_overlap": iso["results"]["R8_in_sample_overlap"],
+                                              "not_established": iso["not_established"]}},
+           "fluid_increment": {**stats, "reaches_2p96M": complete, "pack": str(fluid.relative_to(A.REPO)),
                                "outputs": {f: A.sha256_file(fluid / f) for f in ("blocks.npz", "audit.jsonl", "ladder.json")},
                                "declared_mixture": A.read_json(fluid / "ladder.json")["declared_mixture"],
-                               "units_split_by_the_cut": len(in_cut & later),
-                               "units_past_the_cut_never_trained": len(later - in_cut)},
-           "merged": {"pack": str(merged.relative_to(A.REPO)), "status": A.read_json(merged / "ladder.json")["status"],
+                               "builder_input": str(Path(args.fluid_sessions).resolve().relative_to(A.REPO)),
+                               "builder_input_sha256": meta["builder_input_sha256"]},
+           "merged": {"pack": str(merged.relative_to(A.REPO)), "status": lad["status"],
                       "outputs": {f: A.sha256_file(merged / f) for f in ("blocks.npz", "audit.jsonl", "ladder.json")},
-                      "rung": A.read_json(merged / "ladder.json")["rungs"][0]},
+                      "rung": lad["rungs"][0]},
            "identity": ident, "identity_ok": all(c["ok"] for c in ident),
            "authorizes": "nothing"}
-    out = A.LOG_DIR / "audit/h1pa_fluid_final.json"
+    out = Path(args.out) if args.out else FINAL
     out.write_text(json.dumps(doc, indent=1, default=str) + "\n")
-    print(json.dumps({k: doc[k] for k in ("terminal", "pool", "identity_ok")}, indent=1))
+    print(json.dumps({k: doc[k] for k in ("terminal", "identity_ok")} | {"whole": whole["pass"], "tv": tv["pass"],
+                                                                          "eval_set_1": iso["pass"]}, indent=1))
     return 0 if terminal == "SUCCESS" else 3
+
+
+APPLICATION = A.LOG_DIR / "plans/h1pa_training_application.json"
+#: the GPU validation, then one formal session per training seed: each yields that seed's three arms
+SESSIONS = {"PA2v": ("PA2v", ()),
+            "PA2-s20260726": ("PA2", ("PCA-Original-s20260726", "D4-Original-s20260726", "D4-Augmented-s20260726")),
+            "PA2-s20260801": ("PA2", ("PCA-Original-s20260801", "D4-Original-s20260801", "D4-Augmented-s20260801"))}
+
+
+def cmd_application(args) -> int:
+    """H1-PA's student training and evaluation, priced from the launcher's own
+    planner at the live price: each session's expected, soft and hard minutes
+    and its all-in bound (GPU + container disk + termination margin), the
+    storage, the cumulative cap the envelope arithmetic needs, the provider's
+    billing and the project cap that would have to be raised. Writes the
+    application; authorizes nothing."""
+    from aadistill.governance.authorization import harness_source_digest
+    from stages.reasoning_data import h1_generation_launch as GL
+    from stages.reasoning_data import h1pa_governance as HG
+    from stages.reasoning_data import h1pa_launch as L
+    snap = A.read_json(A.REPO / args.billing)
+    billed = round(sum(float(p["amount"]) for p in snap["pods"]) + sum(float(v["amount"]) for v in snap["networkvolumes"]), 4)
+    acct = snap["account"]
+    sessions, rows = {}, []
+    for name, (phase, units) in SESSIONS.items():
+        a = L.build_parser().parse_args(["--phase", phase, "--run-id", "application", "--scr", "/tmp/x",
+                                         "--session-commit", "0" * 40, "--bundle", "b.bundle", "--network-volume-id", "v",
+                                         "--volume-mount-path", "/runpod-volume", "--max-price", str(args.price),
+                                         *[x for u in units for x in ("--unit", u)]])
+        sp = L.spec(a)
+        pl = sp.budget.plan(price_per_hour=args.price, authorized_usd=1e6)
+        b = GL.all_in(pl, args.price, a.disk_gb)
+        floor_eval = sum(1 for ph in sp.budget.other_phases if ph.name.endswith("_evaluate"))
+        fc = A.read_json(A.REPO / GL.FORECAST)
+        saved = floor_eval * (fc["measured"]["eval_seconds_per_unit_L40S"]["max"]
+                              * (fc["contingency_factors_not_measurements"]["eval_floor_to_reasoning"] - 1) / 60)
+        sessions[name] = {"phase": phase, "units": list(L.units_of(a)),
+                          "phases_minutes": {ph.name: ph.minutes for ph in sp.budget.other_phases},
+                          "planned_minutes": {"expected": round(pl.expected_minutes, 1),
+                                              "soft_stop": round(pl.soft_stop_minutes, 1),
+                                              "hard_terminate": round(pl.hard_terminate_minutes, 1)},
+                          "expected_usd_conservative": round(pl.expected_usd * (1 + GL.DISK_USD_PER_GB_MONTH * a.disk_gb
+                                                                                 / (24 * 30.4375) / args.price), 4),
+                          "expected_minutes_at_measured_eval": round(pl.expected_minutes - saved, 1),
+                          "all_in_hard_bound": b}
+        rows.append(sessions[name])
+    disk_h = 150 * GL.DISK_USD_PER_GB_MONTH / (24 * 30.4375)
+    exp_lo = round(sum(r["expected_minutes_at_measured_eval"] for r in rows) / 60 * (args.price + disk_h), 2)
+    exp_hi = round(sum(r["expected_usd_conservative"] for r in rows), 2)
+    storage = round(args.volume_gb * 0.07 * args.storage_months, 2)
+    #: issuing the LAST session needs every earlier session's actual + its own hard bound + storage
+    need = round(rows[0]["expected_usd_conservative"] + rows[1]["expected_usd_conservative"]
+                 + rows[2]["all_in_hard_bound"]["all_in_usd"] + storage, 2)
+    #: + $1: PA2v's or the first session's planned expectation is not a bound on its actual cost
+    cap = float(math.ceil(need + 1.0))
+    st = A.read_json(STUDY)
+    doc = {"schema": "aadistill.stage2.reasoning_data.h1pa_training_application/v1",
+           "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+           "status": "APPLICATION for the maintainer's decision; NOT authorized, nothing launched, no storage created",
+           "what": "H1-PA's student phase: PA2v, one short L40S GPU validation; then PA2, the four trainings (D4-Original "
+                   "and D4-Augmented, two seeds each) and the six nucleus_v1 evaluations of eval-set-1 (those four "
+                   "checkpoints and PCA-Original's two, never retrained), in one cumulative envelope with the study's "
+                   "network volume",
+           "frozen": {"study": str(STUDY.relative_to(A.REPO)), "study_sha256": A.sha256_file(STUDY),
+                      "study_identity_sha256": HG.study_hash(), "preregistration": str(HG.PREREG),
+                      "preregistration_sha256": A.sha256_file(A.REPO / HG.PREREG),
+                      "data": "audit/h1pa_fluid_whole_units.json (terminal SUCCESS)",
+                      "harness_digest": harness_source_digest(A.REPO, files=HG.harness_files())["digest"],
+                      "_harness": "over h1pa_governance.harness_files() on the tree this application was written from; "
+                                  "issue() recomputes it on the session commit and the pod's setup re-checks it, so a "
+                                  "later code change shows up as a different digest, never a silent one"},
+           "scope": {"train": {u: (st["arms"][u.rsplit("-s", 1)[0]]["schedule"]["optimizer_steps"])
+                               for u in L.all_units() if not u.startswith("PCA")},
+                     "evaluate_only": [u for u in L.all_units() if u.startswith("PCA")],
+                     "recipe": "E1's config per seed: batch size 2, micro-batch size 1, 3 epochs, AdamW lr 5e-5, CE 0.25 + "
+                               "KD 1.0; D4-Original 2,916 optimizer steps, D4-Augmented 3,702 (E1's rule on its 2,468 "
+                               "sequences); nothing else changes",
+                     "evaluation": "eval-set-1 every item, nucleus_v1 bound explicitly and refused when absent; the "
+                                   "preregistered rule decides A and B, C is descriptive",
+                     "not_requested": ["teacher generation", "a new arm", "a ratio search", "a main merge",
+                                       "any retry of a complete valid measurement"]},
+           "hardware": {"gpu": "NVIDIA L40S 48 GB, secure cloud", "price_per_hour": args.price,
+                        "price_read": snap["fetched_utc"],
+                        "why": "measured on this exact configuration: E1 trained it on L40S at a 39.96 GB logged peak "
+                               "(sa train_log.jsonl) and 1.78 s per sequence pass (cost_forecast.json, n=21); full "
+                               "eval-set-1 evaluations ran on L40S (n=21). PA2v re-measures both under H1-PA's own "
+                               "inputs and nucleus_v1 before anything formal; no GPU type is assumed unsuitable "
+                               "without a measurement",
+                        "datacenter": "chosen at launch from a live query among those with L40S stock and network-volume "
+                                      "support (2026-10-24: EU-NL-1, EUR-IS-2, US-MO-1, US-NC-1, US-TX-3, each Low); the "
+                                      "volume is created there and locks every session to it; one GPU type for every "
+                                      "formal unit",
+                        "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 (CUDA 13: host driver >= 580); the "
+                                 "host driver of every session is recorded"},
+           "gpu_validation_PA2v": {"units": list(L.VALIDATION_UNITS), "training_steps": L.VALIDATION_STEPS,
+                                   "evaluation_items_per_unit": L.VALIDATION_ITEMS,
+                                   "measures": ["seconds per optimizer step and peak GPU memory of D4-Augmented under "
+                                                "E1's config on L40S", "nucleus_v1 generation through vLLM: the protocol's "
+                                                "identity in every summary, each item's seed, stop reasons, throughput",
+                                                "PCA-Original's checkpoint staged from the relay and re-identified"],
+                                   "gate": "PA2 starts only when PA2v completes with every check true; PA2 is priced from "
+                                           "the slower of the committed L40S step rate and PA2v's; a measured rate that "
+                                           "does not fit the envelope stops the phase and is reported",
+                                   "formal": False},
+           "sessions": sessions,
+           "money": {"expected_usd": {"at_the_measured_floor_evaluation_time": exp_lo,
+                                      "at_twice_it_for_students_that_reason": exp_hi},
+                     "storage": {"volume_gb": args.volume_gb, "usd_per_gb_month": 0.07, "months_reserved": args.storage_months,
+                                 "reserved_usd": storage,
+                                 "period": "created immediately before PA2v in the chosen datacenter; kept through PA2; at "
+                                           "closeout its actual cost replaces the reservation. The four trained "
+                                           "checkpoints live on it (the relay has 1.67 GiB headroom): after the result, "
+                                           "AGENTS.md 2.5 retires them unless the maintainer names a consumer"},
+                     "issuing_the_last_session_needs": need,
+                     "_need": "PA2v and PA2-s20260726 at their conservative expected cost + PA2-s20260801's all-in hard "
+                              "bound + the storage reservation: the envelope must still cover the last session's hard "
+                              "bound when its authorization is issued; the cap adds $1 because an expectation is not a "
+                              "bound on what PA2v or the first session actually costs",
+                     "cumulative_hard_cap_usd": cap,
+                     "cap_scope": "CUMULATIVE over PA2v and PA2: every attempt's GPU, container disk and termination "
+                                  "margin, and the study's storage; a rerun never receives a fresh allocation"},
+           "project": {"cumulative_cap_usd": 712.17, "provider_billed_usd": billed,
+                       "provider_snapshot": args.billing, "provider_state": {"pods": len(acct["pods"]),
+                                                                              "network_volumes": len(acct["network_volumes"]),
+                                                                              "spend_per_hour": acct["current_spend_per_hr"],
+                                                                              "balance_usd": round(acct["client_balance_usd"], 4)},
+                       "remaining_under_the_cap": round(712.17 - billed, 2),
+                       "cap_raise_needed": True,
+                       "cap_requested_usd": float(math.ceil(billed + cap)),
+                       "_": "provider billing counted once (pods + network volumes, all time); the PA1 pod has posted"},
+           "residual_risks": [
+               "floor: under greedy decoding E1's PCA 2.96M student answered 1.75% of the static fluid items, below the "
+               "2% floor; A or B may end NOT_RESOLVED (FLOOR), which the rule reports as no evidence either way",
+               "two seeds per arm; GPU training is not bitwise deterministic, so seed variation is reported per seed and "
+               "is outside the interval",
+               "E1's config saves one mid-run save point (save_every = T // 2) and is not changed: a pod lost late in a "
+               "training resumes from the half-way point; the replacement subrun must fit the envelope or the phase "
+               "stops and reports",
+               "L40S stock is Low in every datacenter with network volumes; a create waits at $0 rather than switching "
+               "the GPU type, which needs the maintainer",
+               "one nucleus sample per item: evaluation-sampling noise is inside the item-level bootstrap, and the "
+               "per-item seed is common to every checkpoint"],
+           "termination_protection": [
+               "one one-use authorization per session, bound to the study identity and the harness, refused at $0 when "
+               "its hard cap does not fit what the cumulative envelope has left (h1pa_governance.issue)",
+               "the all-in bound (GPU + 150 GB container disk + the 1.25 min termination margin) at the launch price "
+               "inside the session's cap, or no pod (h1_generation_launch.all_in_within_cap); the watchdog's hard "
+               "deadline follows the accepted price",
+               "account funds and provider reconciliation before every create: only the study's volume may exist",
+               "at most one billing pod at a time; one network volume",
+               "the driver persists every checkpoint, save point and evaluation to the volume as it completes; a lost "
+               "pod resumes from the last save point in a new subrun, never retraining a trained unit or re-running a "
+               "scored one",
+               "the same-failure gate: a deterministic paid failure is never retried unchanged",
+               "teardown gate, the provider's confirmation that the pod is gone, a closeout per session, and the volume "
+               "retired or kept by an explicit decision at the end"],
+           "authorizes": "nothing"}
+    APPLICATION.write_text(json.dumps(doc, indent=1, default=str) + "\n")
+    print(json.dumps({"sessions": {k: (v["planned_minutes"], v["all_in_hard_bound"]["all_in_usd"]) for k, v in sessions.items()},
+                      "money": {k: v for k, v in doc["money"].items() if k != "storage"}, "project": doc["project"]},
+                     indent=1, default=str))
+    return 0
 
 
 RUNNER = "scripts/stages/stage-0/calibration_volume/run_battery.py"
@@ -1148,6 +1478,9 @@ def main(argv=None) -> int:
     s = sub.add_parser("sessions")
     s.add_argument("--store", action="append", required=True, metavar="RUN_ID=DIR")
     s.add_argument("--topup", action="append", default=[], metavar="PHASE=RUN_ID")
+    s.add_argument("--whole-units", action="store_true",
+                   help="admit whole units in the packer's order until 2.96M (admit_whole_units); the pack is then "
+                        "trained in full")
     s.add_argument("--out", required=True)
     q = sub.add_parser("runner-equivalence")
     q.add_argument("--old-commit", required=True)
@@ -1159,6 +1492,7 @@ def main(argv=None) -> int:
     z.add_argument("--fluid-sessions", required=True)
     z.add_argument("--fluid-pack", required=True)
     z.add_argument("--merged", required=True)
+    z.add_argument("--out", default=None, help=f"default {FINAL.relative_to(A.REPO)}")
     m = sub.add_parser("merge")
     m.add_argument("--fluid-pack", required=True)
     m.add_argument("--out", required=True)
@@ -1175,6 +1509,11 @@ def main(argv=None) -> int:
     a.add_argument("--reserve", type=int, default=150_000,
                    help="an independent fluid validation reserve, priced as an option")
     a.add_argument("--volume-gb", type=int, default=50)
+    t = sub.add_parser("application")
+    t.add_argument("--price", type=float, required=True, help="the L40S secure price per hour, read live")
+    t.add_argument("--billing", required=True, help="the provider billing snapshot (logs/budget/provider/...)")
+    t.add_argument("--volume-gb", type=int, default=30)
+    t.add_argument("--storage-months", type=int, default=2)
     g = sub.add_parser("pregen")
     g.add_argument("--store", action="append", required=True, metavar="RUN_ID=DIR")
     g.add_argument("--fluid-sessions", required=True)
@@ -1183,7 +1522,8 @@ def main(argv=None) -> int:
     g.add_argument("--reserve", type=int, default=150_000)
     args = ap.parse_args(argv)
     return {"sessions": cmd_sessions, "merge": cmd_merge, "audit": cmd_audit, "pregen": cmd_pregen,
-            "finalize": cmd_finalize, "runner-equivalence": cmd_runner_equivalence}[args.cmd](args)
+            "finalize": cmd_finalize, "runner-equivalence": cmd_runner_equivalence,
+            "application": cmd_application}[args.cmd](args)
 
 
 if __name__ == "__main__":

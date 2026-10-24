@@ -59,6 +59,17 @@
    "local": "artifacts/stages/stage-2/reasoning_data/packs/{D4A_fluid_final,D4A_merged_final,D4A_fluid_final_sessions.jsonl}",
    "relay": "AlphaAvatar/aadistill-artifacts :: stage2_h1pa/packs/ -- 8 files uploaded 2026-10-24, read back, 0 mismatches",
    "identity": "configs/stages/stage-2/reasoning_data/h1pa.json :: datasets (blocks/audit/ladder sha256s); rebuildable at $0 from the three stores (h1pa_audit sessions -> build_token_ladder --no-terminal-truncation -> h1pa_audit merge)"
+  },
+  "h1pa_pca_original_20260801": {
+   "what": "H1-PA's PCA-Original seed 20260801: E1 e1_r2960k_sb_pca step 2916 (model.safetensors b658fe39...), the dev box's only copy until 2026-10-24",
+   "relay": "AlphaAvatar/aadistill-artifacts :: e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/ (six files) + e1_r2960k_sb_pca_pod_hashes.txt; downloaded again in full and re-hashed 2026-10-24: 6/6 match the dev-box copy",
+   "room": "LFS batch-endpoint bisection found 1.674 GiB of headroom; one historical Stage-3 checkpoint (stage3/s2v1_from_s1) was retired under AGENTS.md 2.5 to make room (checkpoint_tombstones.json)",
+   "consumer": "h1pa_launch stages it hash-pinned (h1pa.json :: relay_inputs.pca_original.20260801) for PCA-Original-s20260801's evaluation"
+  },
+  "h1pa_whole_unit_packs": {
+   "what": "D4A_fluid_whole (+ its builder input) and D4A_merged_whole",
+   "relay": "AlphaAvatar/aadistill-artifacts :: stage2_h1pa/packs/, 8 files read back, 0 mismatches (2026-10-24)",
+   "identity": "configs/stages/stage-2/reasoning_data/h1pa.json :: datasets"
   }
  },
  "planned_per_asset": [

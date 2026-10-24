@@ -1,13 +1,18 @@
 # H1-PA — the PCA-aligned redesign of H1
 
-**Status (2026-10-24): DATA FROZEN; training and evaluation NOT authorized.**
-The fluid increment is complete: the PA1 top-up reached terminal SUCCESS
-(section 11, `audit/h1pa_fluid_final.json`). The merged training set's identity
-is frozen in
-[`configs/stages/stage-2/reasoning_data/h1pa.json`](../../../../configs/stages/stage-2/reasoning_data/h1pa.json).
-Student training and evaluation need their own grant, with the $712.17 project
-ceiling raised to fit.
+**Status (2026-10-25): FROZEN and ready for a grant; student training and
+evaluation NOT authorized.** The data, the recipe, the evaluation protocol and
+the decision rule are fixed before any H1-PA model exists (section 12):
 
+- **Data:** the fluid increment is admitted by whole task units, so no
+  episode is split (`audit/h1pa_fluid_whole_units.json`, terminal SUCCESS).
+  The earlier cut-at-2.96M build is kept as a superseded identity.
+- **Rule:** [`plans/h1pa_preregistration.json`](../../../../logs/stages/stage-2/reasoning_data/plans/h1pa_preregistration.json).
+- **Identities:** [`configs/stages/stage-2/reasoning_data/h1pa.json`](../../../../configs/stages/stage-2/reasoning_data/h1pa.json).
+- **Application:** [`plans/h1pa_training_application.json`](../../../../logs/stages/stage-2/reasoning_data/plans/h1pa_training_application.json):
+  a $50.00 cumulative cap, with the $712.17 project cap raised to $731.
+
+Earlier records, not rewritten:
 - **Pre-generation numbers:** computed by
   [`h1pa_audit.py`](../../../../scripts/stages/stage-2/reasoning_data/h1pa_audit.py)
   and owned by
@@ -26,7 +31,7 @@ correctness on unseen problems?
 | --- | --- | --- | --- |
 | PCA-Original | E1's PCA init | E1's 2.96M pack | reuse E1's two checkpoints, re-evaluate |
 | D4-Original | D4 Top-1 | E1's 2.96M pack, the same bytes | train: 1,944 sequences, 3 epochs, 2,916 optimizer steps |
-| D4-Augmented | D4 Top-1 | E1's 2.96M pack unchanged + 2.96M pure fluid reasoning | train: 3 epochs of about 2,463 sequences, about 3,695 optimizer steps |
+| D4-Augmented | D4 Top-1 | E1's 2.96M pack unchanged + 2.96M pure fluid reasoning (whole units) | train: 3 epochs of 2,468 sequences, 3,702 optimizer steps |
 
 All arms use seeds 20260726 and 20260801. Each arm is evaluated on eval-set-1
 under `nucleus_v1`.
@@ -34,7 +39,8 @@ under `nucleus_v1`.
 - **A — initialization effect.** D4-Original − PCA-Original. Only the
   initialization differs.
 - **B — the effect of adding the increment.** D4-Augmented − D4-Original. The
-  increment brings 27% more optimizer steps and FLOPs with it. B measures that
+  increment brings 27% more optimizer steps and FLOPs with it (3,702 vs 2,916
+  steps, 1.27× FLOPs). B measures that
   combined effect, **never the data content's isolated causal effect**.
 - **C — end to end.** D4-Augmented − PCA-Original. Descriptive only.
 
@@ -318,13 +324,14 @@ evaluation at about $45. H1's remainder does not transfer.
 
 ## 10. GO/NO-GO
 
-**NO-GO for formal training now.** What GO needs, in order:
-1. A grant for the top-up session (115 tasks, $3.72 hard cap), run under P1's
-   frozen protocol, verified, and the increment packed to 2.96M at $0.
-2. This file frozen with the complete merged set's identity.
-3. A grant for training and evaluation (about $45, L40S) with the project
-   ceiling raised to fit, the study driver (built at $0), and one short GPU
-   validation session inside it.
+**Conditionally ready: GO once the grant exists; NO-GO to start anything
+paid before it.** The history of this gate:
+1. ~~A grant for the top-up session~~: done, PA1 SUCCESS (section 11).
+2. ~~This file frozen with the complete merged set's identity~~: done, with
+   the whole-unit correction (section 12).
+3. Open: a grant for PA2v + PA2 at the $50.00 cumulative cap, with the
+   project cap raised from $712.17 to $731. The driver, the launcher, the
+   governance and the decision rule are built at $0 (section 12).
 
 ## Reproduce
 
@@ -360,10 +367,13 @@ PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.h1pa_audit audi
 **Hardware: A100.**
 - L40S fits the memory and the engine, but teacher generation was never
   measured on it.
-- Decode is bandwidth-bound. Scaling the measured forecast puts L40S at about
-  $2.17 expected and $3.17 conservative, against $1.74 and $2.44 on A100.
-- So L40S is not cheaper for this job, and its unmeasured conservative case
-  would use 85% of a cap no retry may exceed.
+- The A100 choice rested on an **unverified estimate**: scaling the measured
+  A100 forecast by the two GPUs' memory-bandwidth ratio gave about $2.17
+  expected and $3.17 conservative on L40S, against $1.74 and $2.44 on A100.
+- That is not a finding that L40S is unsuitable or slower for this job: no
+  L40S generation was ever run (maintainer, 2026-10-24: no such claim without
+  a real measurement). The student phase uses L40S and measures it first
+  (section 12).
 
 **Before launch:** $679.83 billed, 0 pods, 0 volumes, $0/h. A $1.76 delta since
 the previous snapshot was H1's A session posting late.
@@ -409,9 +419,10 @@ The 2.96M cut is 530 sequences:
 - 791/791 samples packed whole and traceable; 0 sequences hold one unit twice.
 
 The cut falls inside 4 multi-turn episodes; their later turns, and 19 units past
-the cut, are never trained or validated on.
+the cut, are never trained or validated on. **Superseded (section 12):** an
+episode's turns are trained all or none, so this build is not the training set.
 
-**Merged training set** (`D4A_merged_final`).
+**Merged training set** (`D4A_merged_final`, superseded by `D4A_merged_whole`, section 12).
 - 2,474 training sequences: E1's 1,944 byte for byte, then the 530 fluid ones.
 - 5,926,067 supervised tokens, and E1's 16 validation sequences byte for byte.
 - Copied to the relay (`stage2_h1pa/packs/`, read back).
@@ -426,3 +437,189 @@ the cut, are never trained or validated on.
   dev box only, to be uploaded before training.
 - D4 Top-1 is unchanged.
 - The merged set is the only new input of D4-Augmented's future training.
+
+## 12. Final training readiness (2026-10-24/25, $0)
+
+The maintainer accepted PA1's SUCCESS and asked for five corrections before
+any paid student work. Each is done; nothing paid ran.
+
+### 12.1 The fluid increment, admitted by whole task units
+
+**What was wrong.** The PA1 build cut the sequential pack at the first
+sequences reaching 2.96M. That cut fell inside 4 multi-turn episodes: their
+early turns were trained and their later turns were not. One turn being whole
+does not make its episode whole.
+
+**The rule now** (`h1pa_audit sessions --whole-units`, `admit_whole_units`):
+- Take the packer's own session order: `build_token_ladder.py`'s seed-free
+  stratified interleave on the declared mixture, rendered by the packer's
+  `render_session` and tokenizer.
+- Walk units in the order of their first session. Admit each unit with ALL
+  its sessions until the admitted supervised tokens reach 2,960,000. The stop
+  falls on a unit boundary.
+- Pack exactly those units with E1's sequential packer (no truncation, no
+  best-fit) and train every sequence.
+- Nothing reads a model result, a correctness score or a length.
+
+**Result** (`audit/h1pa_fluid_whole_units.json`, terminal **SUCCESS**):
+
+| | value |
+| --- | ---: |
+| admitted units / sessions | 642 / 767 |
+| admitted supervised tokens | 2,962,514 (+2,514 over the target) |
+| multi-turn episodes admitted whole | 28 (153 turns) |
+| units partially trained | 0 |
+| excluded units, never trained or validated | 39 (2 episodes, 10 turns; 165,665 tokens) |
+| packed sequences | 524, 1 system-prompt group, 198 mixing axes |
+| samples per sequence / padding | 1.46 / 26.6% |
+| samples packed whole and traceable | 767/767 |
+
+- **Who was excluded.** All 39 excluded units are PA1's. Within each cell the
+  packer lists sessions in corpus order (P1, then P1t, then PA1), so the
+  top-up's units come last. P1 (593) and P1t (23) are admitted in full, PA1 at
+  26 of 65.
+- **Mixture.** The admitted set stays within 0.1 pp of the declared mixture in
+  every cell, and all five axes and ten cells remain.
+- **Merged set** `D4A_merged_whole`: E1's 1,944 training sequences byte for
+  byte, then the 524 fluid ones, then E1's 16 validation sequences byte for
+  byte. 2,468 training sequences, 5,923,021 supervised tokens.
+- **Schedule.** D4-Augmented is 3 epochs = 3,702 optimizer steps (warmup 185,
+  eval every 462, save every 1,851). Supervised-token exposure 17,769,063;
+  training FLOPs 1.152e18, 1.27× D4-Original's.
+- **Superseded, not overwritten.** The PA1 build (`D4A_fluid_final`,
+  `D4A_merged_final`) and its record `audit/h1pa_fluid_final.json` stay as they
+  were. `h1pa.json :: datasets.fluid_increment.superseded_builds` names them.
+- The new packs are on the relay (`stage2_h1pa/packs/`, 8 files read back,
+  0 mismatches).
+
+### 12.2 Train/validation isolation from the real members
+
+PA1's `finalize` called `independence(rows, set())`, so "validation prompts
+also in training" was 0 by construction. The new `finalize` derives every
+number from the merged set's own members (`part` = e1 / fluid /
+e1_validation in its `audit.jsonl`):
+
+| check | result |
+| --- | ---: |
+| prompt overlap: fluid training × E1 validation (60 sessions) | 0 |
+| prompt overlap: fluid training × E1 training (4,524 sessions) | 0 |
+| prompt overlap: excluded fluid units × E1 validation / × fluid training | 0 / 0 |
+| unit and session-id overlap: fluid training × E1 validation | 0 / 0 |
+| 13-gram near-copies (R2's protocol), both directions with E1 validation | 0 flagged, 0 sharing any 13-gram |
+| rule families: fluid training (44) × E1 validation | none shared (corpus_v2 carries no rule family) |
+| internal: units sharing a prompt or a target | 0 / 0 |
+| eval-set-1, R0–R9 over all 642 admitted units with their teacher text | PASS: R1 0, R2 0 of 614 static, R3 0 |
+
+### 12.3 The decision rule, frozen before any result
+
+[`plans/h1pa_preregistration.json`](../../../../logs/stages/stage-2/reasoning_data/plans/h1pa_preregistration.json),
+applied by [`h1pa_statistics.py`](../../../../scripts/stages/stage-2/reasoning_data/h1pa_statistics.py):
+- **Comparisons.** A = D4-Original − PCA-Original and B = D4-Augmented −
+  D4-Original are DECIDED, B being the study's question. C = D4-Augmented −
+  PCA-Original is descriptive and gets no label.
+- **The rule is H1's frozen rule, imported unchanged** (`h1_statistics`), with
+  each comparison's two arms mapped onto it:
+  - **Effect and aggregation.** The item-weighted mean of per-item seed-mean
+    differences in correctness.
+  - **Interval.** 95% percentile interval, rule-family cluster bootstrap
+    stratified by axis, 10,000 resamples.
+  - **SESOI.** 0.05 overall, 0.08 per axis; Holm over the four static axes.
+  - **Floor.** 2%.
+  - **Resolution.** At least 10 discordant item-seed pairs in at least 5
+    clusters.
+  - **Seeds.** Every directional label needs both seeds' estimates on its side.
+- **Labels.** NOT_RESOLVED, GO, REVERSED, NO_GO, INCONCLUSIVE, each with its
+  meaning in the record.
+- **Primary measure.** Formal static correctness on fluid_reasoning_720's 570
+  items. The 144 interactive episodes are exploratory: the increment's
+  interactive data still comes from H1's three calibration families.
+- **Evaluation.** eval-set-1 frozen identity `62a1a5d3…`, validity mask v1,
+  scorer v2, action protocol v2. `nucleus_v1` (`912214c6…`), with each item's
+  seed independent of the model.
+- **Never mixed.** `decide` refuses any row not generated under `nucleus_v1`,
+  E1's and H1's greedy results included.
+- **Never changed after a result.** The record binds the sha256 of the rule's
+  three files (`h1pa_statistics.py`, `h1_statistics.py`, `paired_stats.py`),
+  and `decide` refuses when any differs.
+
+### 12.4 The driver, the launcher and durability
+
+- **Driver.** [`h1pa_driver.py`](../../../../scripts/stages/stage-2/reasoning_data/h1pa_driver.py)
+  reuses `unit_driver`'s state, resume, retry and terminal path.
+  - **PCA-Original is evaluated only.** Its checkpoint is re-identified by
+    sha256 and never retrained or persisted again.
+  - **D4-Original** runs the seed's E1 config with only where-it-lives keys and
+    `tokenizer_source` replaced.
+  - **D4-Augmented** additionally takes E1's builder schedule from the merged
+    set's real sequence count, checked against the study. Loss, optimizer,
+    learning rate, batch size and micro-batch size are unchanged; tests compare
+    every nested key.
+  - **Decoding.** Every evaluation passes `nucleus_v1` explicitly. A unit
+    refuses, and never falls back to greedy, when the protocol is missing, when
+    generations on the volume were made under another protocol, or when a
+    summary lacks it.
+  - **Resume.** An interrupted training continues from its last save point
+    with `--resume latest`. A trained unit resumes at scoring, and a scored one
+    is skipped.
+- **Launcher and governance.** [`h1pa_launch.py`](../../../../scripts/stages/stage-2/reasoning_data/h1pa_launch.py),
+  [`h1pa_governance.py`](../../../../scripts/stages/stage-2/reasoning_data/h1pa_governance.py)
+  and setup's `stage2_h1pa` branch.
+  - **Authorization.** One-use artifacts of kind validation (PA2v) or formal
+    (PA2), bound to the study identity and the harness, inside one cumulative
+    envelope.
+  - **Inputs.** A pod pulls only what its units read, hash-pinned from the relay
+    (`h1pa.json :: relay_inputs`). Nothing heavy crosses the dev box's uplink.
+  - **Without a grant** the launcher refuses at $0.
+- **PCA-Original seed 20260801 is durable.**
+  - The relay had 1.674 GiB of headroom (LFS batch-endpoint bisection). Under
+    AGENTS.md 2.5 one historical Stage-3 checkpoint was retired
+    (`stage3/s2v1_from_s1`, the one retire-eligible candidate of the
+    2026-10-11 consumer audit). Its measurement evidence stays on the relay,
+    and its tombstone is in `checkpoint_tombstones.json`.
+  - The checkpoint was uploaded to
+    `e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/` and read back in
+    full: all six files match, `model.safetensors` `b658fe39…`. The dev-box copy
+    is kept.
+
+### 12.5 The application
+
+[`plans/h1pa_training_application.json`](../../../../logs/stages/stage-2/reasoning_data/plans/h1pa_training_application.json),
+priced by the launcher's own planner at the live L40S $1.09/h:
+
+| session | units | planned min (expected / hard) | all-in hard bound |
+| --- | --- | ---: | ---: |
+| PA2v (validation) | PCA-Original-s20260726, D4-Augmented-s20260726: 40 steps, 24 items per unit | 90 / 201 | $3.75 |
+| PA2-s20260726 | PCA-Original, D4-Original, D4-Augmented at seed 20260726 | 900 / 1,416 | $26.23 |
+| PA2-s20260801 | the same at seed 20260801 | 900 / 1,416 | $26.23 |
+
+- **Expected cost.** $26.16 (evaluations at the measured floor time) to $34.98
+  (twice it), plus a 30 GB volume reserved at $4.20 for two months.
+- **Cumulative hard cap: $50.00.** Issuing the last session needs PA2v and the
+  first session at their conservative cost, plus the last session's hard bound
+  and the storage, which is $48.76; $1 is added because an expectation is not a
+  bound.
+- **Project.**
+  - Provider billed $680.6673 (snapshot `runpod_billing_2026-10-24T1616Z.json`;
+    PA1's pod has posted).
+  - 0 pods, 0 volumes, $0/h.
+  - $31.50 remains under $712.17, so the cap must be raised to $731.
+- **GPU validation first.** PA2v measures on L40S, under H1-PA's own inputs:
+  - training seconds per step and peak memory;
+  - `nucleus_v1` generation, with the protocol identity in every summary,
+    per-item seeds and stop reasons;
+  - the PCA checkpoint's staging.
+
+  PA2 starts only if every check holds. It is priced from the slower of the
+  committed L40S rate and PA2v's.
+
+## Reproduce (section 12)
+
+```bash
+G=artifacts/stages/stage-2/reasoning_data/generation P=artifacts/stages/stage-2/reasoning_data/packs
+STORES="--store h1gen_20261022_190653=$G/h1gen_20261022_190653 --store h1p1t_20261023_094007=$G/h1p1t_20261023_094007 --store h1pat_20261024_115517=$G/h1pat_20261024_115517 --topup PA1=h1pat_20261024_115517"
+PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.h1pa_audit sessions --whole-units $STORES --out $P/D4A_fluid_whole_sessions.jsonl
+# then the builder command it prints (--ladder 2962514, --no-terminal-truncation) with --out $P/D4A_fluid_whole
+PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.h1pa_audit merge --fluid-pack $P/D4A_fluid_whole --out $P/D4A_merged_whole
+PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.h1pa_audit finalize $STORES --fluid-sessions $P/D4A_fluid_whole_sessions.jsonl --fluid-pack $P/D4A_fluid_whole --merged $P/D4A_merged_whole
+PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.h1pa_audit application --price <live L40S $/h> --billing logs/budget/provider/<snapshot>.json
+```

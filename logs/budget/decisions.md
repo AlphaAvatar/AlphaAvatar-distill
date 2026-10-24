@@ -13898,3 +13898,66 @@ on a paid pod.
   - Identities frozen in `h1pa.json`.
 - **Revisit when.** The maintainer grants training and evaluation (about $45,
   L40S). That grant also needs the project ceiling raised.
+
+## 2026-10-25 — Maintainer: PA1 accepted; H1-PA's final $0 readiness: whole-unit data, real isolation, a frozen rule, the driver, the application
+
+- **Context.** The maintainer's independent review accepted PA1's SUCCESS and
+  asked for five $0 corrections before any paid student work. This entry
+  records them; nothing paid ran.
+- **Decision 1, whole task units.** An episode's turns are trained all or
+  none.
+  - The fluid increment is now admitted per unit, in the packer's own
+    seed-free order, until 2,960,000 supervised tokens. Then exactly those
+    units are packed by E1's sequential packer (no truncation, no best-fit)
+    and trained in full.
+  - **Result:** 642 units (28 episodes whole), 2,962,514 tokens, 524
+    sequences, 0 units split. 39 PA1 units are excluded whole (corpus order
+    puts the top-up last) and appear in no training or validation set.
+  - **Merged set:** 2,468 sequences, 5,923,021 tokens, E1's part and
+    validation byte for byte.
+  - **D4-Augmented:** 3,702 optimizer steps.
+  - The PA1 build stays as a superseded identity (`audit/h1pa_fluid_final.json`
+    unchanged).
+  - Owner: `audit/h1pa_fluid_whole_units.json`, terminal SUCCESS.
+- **Decision 2, isolation from real members.** `finalize` no longer passes an
+  empty validation set. Every overlap is derived from the merged set's own
+  members, and every one is 0:
+  - prompt, unit and session-id overlap with E1's 60 validation sessions;
+  - prompt overlap with E1's training sessions;
+  - 13-gram near-copies in both directions;
+  - shared rule families.
+
+  R0–R9 against eval-set-1 pass over all 642 admitted units.
+- **Decision 3, the rule.** `plans/h1pa_preregistration.json`, frozen before
+  any H1-PA model exists.
+  - **Comparisons.** A (initialization) and B (augmentation, the study's
+    question) are decided; C is descriptive.
+  - **Rule.** H1's frozen rule, imported unchanged: SESOI 0.05 (0.08 per
+    axis), 95% rule-family cluster bootstrap, 2% floor, resolution minima,
+    both seeds' agreement, Holm over the static axes.
+  - **Decoding.** `nucleus_v1` only. Greedy rows refuse, and so does a rule
+    whose bytes changed.
+- **Decision 4, driver and durability.**
+  - **Code.** `h1pa_driver.py`, `h1pa_launch.py`, `h1pa_governance.py` and
+    setup's `stage2_h1pa` branch.
+  - **Recipe.** E1's configs unchanged except where a run lives and the
+    tokenizer source; D4-Augmented also takes E1's builder schedule.
+  - **Evaluation.** `nucleus_v1` is bound explicitly and refused when absent.
+    PCA-Original is evaluated only.
+  - **Resume.** A run continues from its save points, and scored units are
+    skipped.
+  - **Durability.** PCA-Original seed 20260801 is on the relay, read back in
+    full (`b658fe39…`). Room came from retiring one historical Stage-3
+    checkpoint under AGENTS.md 2.5 (`stage3/s2v1_from_s1`, tombstoned).
+- **Decision 5, the application.** `plans/h1pa_training_application.json`:
+  - **Sessions.** PA2v, a 40-step / 24-item L40S validation, then two formal
+    sessions, one per seed.
+  - **Expected cost.** $26.16–$34.98 plus $4.20 storage.
+  - **Cap.** $50.00 cumulative.
+  - **Project.** The provider has billed $680.6673, so the $712.17 cap must
+    rise to $731.
+- **Also corrected.** PA1's "L40S is not cheaper" was an unverified
+  bandwidth-ratio estimate, not a measurement. The student phase measures
+  L40S in PA2v before anything formal.
+- **Revisit when.** The maintainer grants PA2v + PA2 ($50, project cap $731) or
+  changes the plan.

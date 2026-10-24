@@ -34,10 +34,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 45,
-  "active": 43,
-  "active_retired_bytes": 438596231810,
-  "active_retired_human": "408.475 GiB",
+  "tombstones_total": 46,
+  "active": 44,
+  "active_retired_bytes": 440980466778,
+  "active_retired_human": "410.695 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -3716,6 +3716,55 @@
    "withdrawn_reason": null,
    "withdrawn_utc": null,
    "reason_physical_weights_deleted": "The Top-4 extension is complete and analysed (design/extension_analysis.json, 24/24 units). Each student here was recovered, generated on every item of eval-set-1 and scored; its report, rows and generations are in its run's evidence and artifacts root, its model sha256 in recovery_products.json. The only reader of these bytes is probe_driver.py, restoring an UNFINISHED unit, and every unit is finished; no plan, config or session declares another reader (consumer audit 2026-10-21: references_at_deletion is every tracked file naming the volume; each is a completed session's config or record, this volume's own record, a budget decision or the state docs). None is an incumbent, a release or a retained anchor: the extension makes no claim about a single student (design/extension_analysis.json :: claims)."
+  },
+  {
+   "canonical_id": "stage3_s2v1_from_s1",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "stage3/s2v1_from_s1/step_002700/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "Stage 3 start-point ablation (2026-07-27)",
+   "seed": null,
+   "scientific_role": "start-point ablation final, trained from s1_ffn_norm_v0; not the recommended branch point (s2v1_from_init was)",
+   "weights_sha256": "d2e0f66d2b070090384e86c038f1e6adac9ba79e20d0956b0dce1fc97d5b46ed",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "stage3/s2v1_from_s1/step_002700/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "d2e0f66d2b070090384e86c038f1e6adac9ba79e20d0956b0dce1fc97d5b46ed"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/state/artifact_manifests.md",
+    "logs/budget/decisions.md",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/maintenance/inventories/checkpoint_retirement_audit.json",
+    "assets/perf_trend.json (its score, not its weights)",
+    "tests/evaluation/test_perf_trend.py (the eval JSON path, not the weights)"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5: the experiment is terminal, its evaluation evidence is durable, its hashes are preserved, no active or declared consumer reads the weights, and it is not an incumbent, a release or a retained anchor. NOT a byte-identical duplicate: no copy survives anywhere.",
+   "reason_physical_weights_deleted": "The relay's private-storage headroom was 1.674 GiB (LFS batch endpoint bisection, 2026-10-24) and could not take H1-PA's PCA-Original seed 20260801 checkpoint (2.22 GiB), whose only copy is on the dev box and which the maintainer required in verifiable durable storage before H1-PA's training (H1-PA readiness, 2026-10-24). This object was the one RETIRE_ELIGIBLE candidate of the 2026-10-11 consumer audit (checkpoint_retirement_audit.json), pending confirmation that its measurement evidence is durable: confirmed 2026-10-24 -- the relay keeps the run's 15 other files under stage3/s2v1_from_s1/ (eval_behavior_v0 and its generations, the three holdout evaluations, gen_smoke, run_manifest, train_log, console log, and the pod-side hash list that names this object), and artifact_manifests.md records its holdout_v1 NLL 3.8067. A fresh grep of scripts/, src/ and configs/ found no reader of the weights.",
+   "canonical_surviving_evidence": "relay stage3/s2v1_from_s1/ (every file except the weights) and logs/state/artifact_manifests.md :: stage3/s2v1_from_init and stage3/s2v1_from_s1",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "retrain with configs/stage3_s2v1_from_s1.json (sha256 7e0612ccf3aa...) at code state f3d7547 from s1_ffn_norm_v0@660 on an L40S; GPU training is not bitwise deterministic, so a retrain is a new measurement, not this object",
+   "expected_reconstruction_cost": "one L40S session of 2,700 steps, not budgeted",
+   "frozen_results_location": "relay stage3/s2v1_from_s1/eval_*.json; logs/stages/stage-3/history/EXPERIMENTS.md section 3",
+   "deleted_utc": "2026-10-24T15:53:40Z",
+   "command": "HfApi.permanently_delete_lfs_files('AlphaAvatar/aadistill-artifacts', [the one object whose file_oid is d2e0f66d...], rewrite_history=True), after asserting one match, its filename and size, its oid in the run's hash list, and no protected prefix; the inventory went 582 -> 581 objects, 85.9044 -> 83.6839 GiB"
   }
  ],
  "schema_note": "v2 adds store, size_bytes, n_files, members, references_at_deletion, deletion_criterion, canonical_surviving_evidence and relay_hash_verified. v1 entries are unchanged and remain valid: every field they carried still means what it meant. A withdrawn entry is kept, never removed: the reason a tombstone was wrong is worth as much as the tombstone."
