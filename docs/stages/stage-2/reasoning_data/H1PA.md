@@ -11,6 +11,10 @@ the decision rule are fixed before any H1-PA model exists (section 12):
 - **Identities:** [`configs/stages/stage-2/reasoning_data/h1pa.json`](../../../../configs/stages/stage-2/reasoning_data/h1pa.json).
 - **Application:** [`plans/h1pa_training_application.json`](../../../../logs/stages/stage-2/reasoning_data/plans/h1pa_training_application.json):
   a $50.00 cumulative cap, with the $712.17 project cap raised to $731.
+- **Execution corrections** (section 13): one 30 GB volume counted from the
+  provider's size; PA2v's gate enforced in code; the formal sessions repriced
+  from measurements; the project cap re-read from the provider at every issue
+  and launch; the four new checkpoints kept until analysis and review.
 
 Earlier records, not rewritten:
 - **Pre-generation numbers:** computed by
@@ -623,3 +627,126 @@ PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.h1pa_audit merg
 PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.h1pa_audit finalize $STORES --fluid-sessions $P/D4A_fluid_whole_sessions.jsonl --fluid-pack $P/D4A_fluid_whole --merged $P/D4A_merged_whole
 PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.h1pa_audit application --price <live L40S $/h> --billing logs/budget/provider/<snapshot>.json
 ```
+
+## 13. PA2 execution corrections (2026-10-25, $0)
+
+The maintainer's budget audit of `b9c1dee9` found the training price sound:
+$26.23 is one seed session's hard cap, two trainings and three full
+evaluations, against about $16.66 expected. It asked for five execution fixes
+before anything paid. Each is done; nothing paid ran.
+
+### 13.1 Storage: one 30 GB volume, counted, not assumed
+
+- **One size.** The plan (`h1pa.json :: storage.volume_gb`), the launcher's
+  `--volume-gb` (default now 30, was 50) and the accounting use the same 30 GB.
+- **Measured from the provider.** The launcher refuses unless the provider
+  reports that volume at 30 GB in the session's datacenter
+  (`the_volume_is_the_planned_one`). The driver receives the provider's size,
+  never a command-line value.
+- **Fresh free-space count.** The driver counts free space as that size less
+  the bytes actually on the mount, recomputed before every persist and before
+  every training. A training needs room for two save points, and the driver
+  refuses to start one that does not fit. It also writes, fsyncs and reads back
+  a probe file before any unit.
+  - **Bug fixed on the way:** the earlier driver passed `persist_unit` one free
+    figure computed at the start of the session, which goes stale after the
+    first persist.
+- **Capacity plan** (sizes from records of this geometry):
+
+  | item | bytes |
+  | --- | ---: |
+  | checkpoint (fp32 `model.safetensors`) | 2.384 GB |
+  | save point (model + AdamW state) | 5.908 GB |
+  | one training's transient peak (two save points) | 11.82 GB |
+  | phase peak, during the last training | 20.22 GB of 30 |
+  | phase end (four checkpoints + six evaluations) | 11.04 GB |
+
+  PA2v measures the real save point; the gate refuses one more than 2% larger
+  than planned. 30 GB suffices, at $2.10 a month.
+
+### 13.2 PA2v is a gate in code
+
+- **The validation driver.** [`h1pa_validation.py`](../../../../scripts/stages/stage-2/reasoning_data/h1pa_validation.py)
+  replaces the formal driver's subset mode. On the formal inputs and an L40S it
+  runs:
+  - the volume probe;
+  - D4 Top-1's restore;
+  - D4-Augmented 24 steps three times (X1, X2, and Y killed with SIGKILL right
+    after its step-12 save point on the volume, then resumed);
+  - D4-Original 12 steps;
+  - Y's persist to the volume and re-identification;
+  - PCA-Original seed 20260726's re-identification;
+  - 24 fluid and 24 gsm8k items under `nucleus_v1`.
+- **The checks.** `checks()` derives every verdict from the evidence files
+  alone:
+  - an L40S, with peak memory ≤ 44 GB;
+  - the recipe differs from E1's only by the declared keys, and all four
+    formal recipes derive;
+  - resume follows P1g's rule (identical data order and learning rate; loss
+    and weights within twice the run-to-run floor);
+  - persistence and read-back, and the provider size;
+  - each summary carries `nucleus_v1`'s identity and sampling, each sample's
+    seed is the protocol's, and each records its token ids and a stop reason;
+  - the measured step time and throughput.
+- **The gate.** `h1pa_governance.pa2v_gate` reruns those checks on the dev
+  box, on the secured evidence. It also requires PA2v's validation
+  authorization under this grant, a COMPLETE closeout with the pod gone, and
+  the archive hash the closeout recorded.
+- **Enforcement.** `issue("formal")` refuses without a gate. It re-derives the
+  gate at issue time, so a hand-edited gate fails, and requires the same study
+  identity and harness, so changed code needs a new PA2v. The formal launch
+  re-checks the gate its authorization names. Tests cover each refusal.
+
+### 13.3 Budget: $50 cumulative, repriced from measurements
+
+- **What $50 covers.** It is the phase's cumulative limit, not a guarantee
+  that all three sessions can reach their hard caps. That would be **$60.42**
+  (PA2v $3.75, each seed session $26.23, storage $4.20); the cap is not raised
+  to it.
+- **Training repricing.** PA2v's measured median step time replaces the
+  committed rate, plus 10 minutes per training for loading, E1's in-run
+  validation and the save points.
+- **Evaluation repricing.** The first seed session's measured full evaluations
+  replace the conservative forecast for the second, at ×1.25.
+- **Effect.** At the slowest evaluation recorded on L40S so far, the second
+  session's hard bound falls from $26.23 to $21.27. Issuing it then needs
+  $43.79 of the $50 instead of $48.76.
+- **Hard caps.** Every session keeps a hard cap that covers its own real
+  workload. When the envelope left at issue time cannot cover the next one,
+  its authorization is refused and nothing is created.
+- **Never traded for budget:** steps, evaluation coverage, a seed, or the rule.
+
+### 13.4 Project cap and provider safety
+
+- **When.** Every authorization (`h1pa_governance.live_position`) and every
+  launch (`the_project_cap_holds_now`) reads the provider's billing and
+  account at that moment, not the application's snapshot.
+- **What is counted.**
+  - everything billed;
+  - plus each closed H1-PA session whose pod the provider has not posted yet;
+  - plus the study's unretired storage at its reservation.
+- **Refusals.** A session whose hard cap does not fit what is left under the
+  project cap is refused, and so is an account holding any pod or volume the
+  study does not own. Nothing raises a cap.
+- **Provider now** (`runpod_billing_2026-10-24T1726Z.json`): $680.6673 billed,
+  0 pods, 0 volumes, $0/h.
+
+### 13.5 Retention
+
+- **New checkpoints.** The four trained checkpoints are persisted to the
+  volume and re-identified. The closeout records each one's artifact and
+  weights digests.
+- **Kept until review.** They are kept until the preregistered analysis and
+  the maintainer's independent review are complete. No automatic AGENTS.md 2.5
+  retirement happens before then (`h1pa.json :: retention`).
+- **Then.** The closeout reports the retention need, the migration route and
+  the cost before the lifecycle decision. The volume's storage record books
+  its reservation throughout, so it never bills unmanaged.
+- **PCA-Original.** Both checkpoints stay on the relay.
+
+### Order of execution
+
+PA2v first, then PA2-s20260726, then PA2-s20260801. Each needs its own one-use
+authorization, inside the $50 envelope and the live project cap. The grant is
+the maintainer's to sign; this round created no provider resource.
+

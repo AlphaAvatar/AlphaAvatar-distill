@@ -1068,13 +1068,33 @@ def cmd_application(args) -> int:
     disk_h = 150 * GL.DISK_USD_PER_GB_MONTH / (24 * 30.4375)
     exp_lo = round(sum(r["expected_minutes_at_measured_eval"] for r in rows) / 60 * (args.price + disk_h), 2)
     exp_hi = round(sum(r["expected_usd_conservative"] for r in rows), 2)
-    storage = round(args.volume_gb * 0.07 * args.storage_months, 2)
+    st = A.read_json(STUDY)
+    vol_gb = int(st["storage"]["volume_gb"])
+    storage = round(vol_gb * float(st["storage"]["rate_usd_per_gb_month"]) * args.storage_months, 2)
+    worst = round(sum(r["all_in_hard_bound"]["all_in_usd"] for r in rows) + storage, 2)
     #: issuing the LAST session needs every earlier session's actual + its own hard bound + storage
     need = round(rows[0]["expected_usd_conservative"] + rows[1]["expected_usd_conservative"]
                  + rows[2]["all_in_hard_bound"]["all_in_usd"] + storage, 2)
-    #: + $1: PA2v's or the first session's planned expectation is not a bound on its actual cost
-    cap = float(math.ceil(need + 1.0))
-    st = A.read_json(STUDY)
+    #: the second seed session repriced once the first has measured its evaluations: here at the slowest
+    #: evaluation recorded on L40S so far (students at the floor), x the margin, as `pricing` would
+    import dataclasses
+    from aadistill.infrastructure.budget import Phase
+    fc = A.read_json(A.REPO / GL.FORECAST)
+    ev_min = round(fc["measured"]["eval_seconds_per_unit_L40S"]["max"] * st["pricing"]["evaluation_margin_after_measurement"] / 60, 1)
+    a2 = L.build_parser().parse_args(["--phase", "PA2", "--run-id", "application", "--scr", "/tmp/x", "--session-commit",
+                                      "0" * 40, "--bundle", "b.bundle", "--network-volume-id", "v", "--volume-mount-path",
+                                      "/runpod-volume", "--max-price", str(args.price),
+                                      *[x for u in SESSIONS["PA2-s20260801"][1] for x in ("--unit", u)]])
+    b2 = L.spec(a2).budget
+    b2 = dataclasses.replace(b2, other_phases=tuple(Phase(ph.name, ev_min) if ph.name.endswith("_evaluate") else ph
+                                                    for ph in b2.other_phases))
+    pl2 = b2.plan(price_per_hour=args.price, authorized_usd=1e6)
+    repriced = {"evaluation_minutes": ev_min, "planned_minutes": {"expected": round(pl2.expected_minutes, 1),
+                                                                    "hard_terminate": round(pl2.hard_terminate_minutes, 1)},
+                "all_in_hard_bound": GL.all_in(pl2, args.price, a2.disk_gb)}
+    need_repriced = round(rows[0]["expected_usd_conservative"] + rows[1]["expected_usd_conservative"]
+                          + repriced["all_in_hard_bound"]["all_in_usd"] + storage, 2)
+    cap = 50.0
     doc = {"schema": "aadistill.stage2.reasoning_data.h1pa_training_application/v1",
            "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
            "status": "APPLICATION for the maintainer's decision; NOT authorized, nothing launched, no storage created",
@@ -1113,31 +1133,49 @@ def cmd_application(args) -> int:
                                       "formal unit",
                         "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 (CUDA 13: host driver >= 580); the "
                                  "host driver of every session is recorded"},
-           "gpu_validation_PA2v": {"units": list(L.VALIDATION_UNITS), "training_steps": L.VALIDATION_STEPS,
-                                   "evaluation_items_per_unit": L.VALIDATION_ITEMS,
-                                   "measures": ["seconds per optimizer step and peak GPU memory of D4-Augmented under "
-                                                "E1's config on L40S", "nucleus_v1 generation through vLLM: the protocol's "
-                                                "identity in every summary, each item's seed, stop reasons, throughput",
-                                                "PCA-Original's checkpoint staged from the relay and re-identified"],
-                                   "gate": "PA2 starts only when PA2v completes with every check true; PA2 is priced from "
-                                           "the slower of the committed L40S step rate and PA2v's; a measured rate that "
-                                           "does not fit the envelope stops the phase and is reported",
+           "gpu_validation_PA2v": {**{k: st["gpu_validation"][k] for k in ("units", "training", "evaluation", "checks")},
+                                   "driver": "scripts/stages/stage-2/reasoning_data/h1pa_validation.py",
+                                   "gate": "ENFORCED in code: h1pa_governance.issue refuses a formal authorization without a "
+                                           "passed PA2v gate (pa2v_gate), which is RE-DERIVED at issue time from PA2v's "
+                                           "secured evidence -- its validation authorization under this grant, a COMPLETE "
+                                           "closeout with the pod gone, the evidence archive's hash, every check run again -- "
+                                           "and must name the same study identity and harness as the formal session; the "
+                                           "formal launch re-checks the gate its authorization names (the_pa2v_gate_holds)",
                                    "formal": False},
            "sessions": sessions,
            "money": {"expected_usd": {"at_the_measured_floor_evaluation_time": exp_lo,
                                       "at_twice_it_for_students_that_reason": exp_hi},
-                     "storage": {"volume_gb": args.volume_gb, "usd_per_gb_month": 0.07, "months_reserved": args.storage_months,
-                                 "reserved_usd": storage,
-                                 "period": "created immediately before PA2v in the chosen datacenter; kept through PA2; at "
-                                           "closeout its actual cost replaces the reservation. The four trained "
-                                           "checkpoints live on it (the relay has 1.67 GiB headroom): after the result, "
-                                           "AGENTS.md 2.5 retires them unless the maintainer names a consumer"},
-                     "issuing_the_last_session_needs": need,
-                     "_need": "PA2v and PA2-s20260726 at their conservative expected cost + PA2-s20260801's all-in hard "
-                              "bound + the storage reservation: the envelope must still cover the last session's hard "
-                              "bound when its authorization is issued; the cap adds $1 because an expectation is not a "
-                              "bound on what PA2v or the first session actually costs",
+                     "storage": {"volume_gb": vol_gb, "usd_per_gb_month": st["storage"]["rate_usd_per_gb_month"],
+                                 "months_reserved": args.storage_months, "reserved_usd": storage,
+                                 "capacity_plan": {"phase_peak_gb": round(st["storage"]["phase_peak_bytes"] / 1e9, 2),
+                                                   "phase_final_gb": round(st["storage"]["phase_final_bytes"] / 1e9, 2),
+                                                   "training_peak_extra_gb": round(st["storage"]["training_peak_extra_bytes"] / 1e9, 2),
+                                                   "owner": "h1pa.json :: storage"},
+                                 "verified_by": "the launcher refuses a volume whose PROVIDER-reported size is not the plan's; "
+                                                "the driver counts free space as that size less the bytes on the mount before "
+                                                "every persist and every training, after a write/read-back probe; PA2v measures "
+                                                "the real save point and its gate refuses one larger than planned",
+                                 "period": "created immediately before PA2v in the chosen datacenter; kept through PA2 and "
+                                           "until the preregistered analysis and the maintainer's independent review are "
+                                           "complete (h1pa.json :: retention); its storage record books the reservation, so "
+                                           "it never bills unmanaged; at closeout the retention need, migration route and "
+                                           "cost are reported and the lifecycle decision is taken"},
                      "cumulative_hard_cap_usd": cap,
+                     "_cap": "the maintainer's cumulative phase limit, kept at $50: it covers what the phase is expected to "
+                             "cost, NOT every session reaching its hard cap at once",
+                     "every_session_at_its_hard_cap_usd": worst,
+                     "_worst": "PA2v + both seed sessions at their all-in hard bounds + the storage reservation; not funded and "
+                               "not requested: the cap is not raised to it",
+                     "issuing_the_last_session_needs": {"before_any_measurement": need, "after_the_first_session_measures": need_repriced,
+                                                        "second_session_repriced": repriced},
+                     "_need": "PA2v and the first seed session at their conservative expected cost + the second session's "
+                              "all-in hard bound + the storage reservation. Every session's hard cap still covers its own "
+                              "real workload; when the envelope left at issue time cannot cover the next session's hard "
+                              "bound, its authorization is refused and nothing is created",
+                     "repricing": "PA2v's measured median step time prices both seed sessions' training (+10 min per training "
+                                  "for loading, E1's in-run validation and the save points); the first seed session's "
+                                  "measured full evaluations price the second's (x1.25), in place of the conservative "
+                                  "forecast. Never fewer steps, a smaller evaluation, a dropped seed or a changed rule",
                      "cap_scope": "CUMULATIVE over PA2v and PA2: every attempt's GPU, container disk and termination "
                                   "margin, and the study's storage; a rerun never receives a fresh allocation"},
            "project": {"cumulative_cap_usd": 712.17, "provider_billed_usd": billed,
@@ -1161,6 +1199,12 @@ def cmd_application(args) -> int:
                "the GPU type, which needs the maintainer",
                "one nucleus sample per item: evaluation-sampling noise is inside the item-level bootstrap, and the "
                "per-item seed is common to every checkpoint"],
+           "provider_safety": "before every authorization (h1pa_governance.live_position) and again at every launch "
+                              "(h1pa_launch.the_project_cap_holds_now) the provider's billing and account are read NOW: "
+                              "everything billed, plus each closed session the provider has not posted yet, plus the study's "
+                              "unretired storage; a session whose hard cap does not fit the project cap's remainder, or an "
+                              "account holding any pod or volume the study does not own, is refused; no cap is ever raised "
+                              "automatically",
            "termination_protection": [
                "one one-use authorization per session, bound to the study identity and the harness, refused at $0 when "
                "its hard cap does not fit what the cumulative envelope has left (h1pa_governance.issue)",
@@ -1512,7 +1556,6 @@ def main(argv=None) -> int:
     t = sub.add_parser("application")
     t.add_argument("--price", type=float, required=True, help="the L40S secure price per hour, read live")
     t.add_argument("--billing", required=True, help="the provider billing snapshot (logs/budget/provider/...)")
-    t.add_argument("--volume-gb", type=int, default=30)
     t.add_argument("--storage-months", type=int, default=2)
     g = sub.add_parser("pregen")
     g.add_argument("--store", action="append", required=True, metavar="RUN_ID=DIR")

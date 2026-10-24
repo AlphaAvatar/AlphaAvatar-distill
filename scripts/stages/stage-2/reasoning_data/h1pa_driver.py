@@ -4,8 +4,8 @@
     cd /workspace/aad && PYTHONPATH=src:scripts:scripts/stages/stage-1 /opt/train/bin/python \
         scripts/stages/stage-2/reasoning_data/h1pa_driver.py \
         --run-id <run> --durable-root <volume>/h1pa --pack-root <dir> --checkpoint-root <dir> \
-        --status <file> [--unit D4-Original-s20260726 ...] [--capacity-bytes N] \
-        [--validation [--validation-steps N] [--validation-items N]]
+        --volume-mount <volume> --volume-bytes <the provider's size> --status <file> \
+        [--unit D4-Original-s20260726 ...]
 
 Everything a unit is comes from its owner: the arms, seeds, datasets, recipes
 and checkpoint identities from ``configs/stages/stage-2/reasoning_data/h1pa.json``;
@@ -41,12 +41,14 @@ and one ``finally`` that writes the status and closes observers. An
 evaluation-only unit binds its evaluation to its inputs by persisting
 ``unit_inputs.json`` inside the evaluation file set.
 
-``--validation`` (the GPU validation) writes only under ``<durable
-root>/validation`` and is never formal: each named training unit trains
-``--validation-steps`` steps, and each named unit evaluates the first
-``--validation-items`` fluid items and the first gsm8k prompts under the same
-protocol; its report measures seconds per step, peak memory and generation
-throughput, the formal session's pricing inputs.
+CAPACITY is counted, never assumed: free space is the network volume's size as
+the PROVIDER reports it (``--volume-bytes``, passed by the launcher) less the
+bytes actually on the mount, recomputed before every persist and before every
+training, which needs room for two save points (`h1pa.json :: storage`); a
+probe file is written, fsynced and read back before any unit starts.
+
+This driver is formal only. The GPU validation (PA2v) is `h1pa_validation.py`,
+and no formal authorization is issued without its passed gate.
 """
 from __future__ import annotations
 
@@ -55,8 +57,6 @@ import copy
 import json
 import math
 import os
-import shutil
-import subprocess
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -77,10 +77,14 @@ WHERE = ("run_name", "_purpose", "out_dir", "data_dir", "student_path", "tokeniz
 SCHEDULE_KEYS = ("rung", "schedule.total_steps", "schedule.warmup_steps", "checkpoint.save_every",
                  "intervals.eval_every")
 TRAINED = ("D4-Original", "D4-Augmented")
-VALIDATION_CAPABILITY = "stage3_capability_846__gsm8k"
+PROBE_BYTES = 64 * 2 ** 20
 
 
 DriverRefusal, IdentityMismatch = UD.DriverRefusal, UD.IdentityMismatch
+
+
+class CapacityRefusal(RuntimeError):
+    """The volume lacks the room a step needs: nothing was started, nothing consumed."""
 
 
 def _now() -> str:
@@ -89,6 +93,53 @@ def _now() -> str:
 
 def canonical_sha(doc) -> str:
     return UD._json_sha(doc)
+
+
+def used_bytes(mount: Path) -> int:
+    """The bytes actually on the mount (apparent size, as ``du -sb``): a
+    network volume's df reports the host, not the volume."""
+    total = 0
+    for dirpath, _dirs, files in os.walk(mount):
+        for f in files:
+            try:
+                total += os.lstat(os.path.join(dirpath, f)).st_size
+            except OSError:
+                pass
+    return total
+
+
+def free_bytes(mount: Path | None, volume_bytes: int | None) -> int | None:
+    """The provider's size less what is on the mount; None off a volume."""
+    if mount is None or volume_bytes is None:
+        return None
+    return int(volume_bytes) - used_bytes(Path(mount))
+
+
+def probe_volume(root: Path, mount: Path, provider_bytes: int, size: int) -> dict:
+    """A probe file on the volume: written, fsynced, read back and hashed, removed."""
+    import hashlib
+    data = os.urandom(size)
+    want = hashlib.sha256(data).hexdigest()
+    Path(root).mkdir(parents=True, exist_ok=True)
+    p = Path(root) / ".capacity_probe"
+    t0 = time.time()
+    with open(p, "wb") as f:
+        f.write(data)
+        f.flush()
+        os.fsync(f.fileno())
+    t1 = time.time()
+    got = hashlib.sha256(p.read_bytes()).hexdigest()
+    t2 = time.time()
+    p.unlink()
+    return {"bytes": size, "read_back_ok": got == want, "write_seconds": round(t1 - t0, 2),
+            "read_seconds": round(t2 - t1, 2), "provider_bytes": int(provider_bytes),
+            "used_bytes_on_mount": used_bytes(Path(mount))}
+
+
+def training_need(plan: dict) -> int:
+    """Free bytes a training needs: two save points coexist for a moment
+    (keep_last 1 deletes the older one after the new one is written)."""
+    return math.ceil(int(plan["study"]["storage"]["training_peak_extra_bytes"]) * PU.MARGIN)
 
 
 # ---- the plan --------------------------------------------------------------------------------------
@@ -134,14 +185,12 @@ def pack_refusals(plan: dict, arm: str, pack_root: Path) -> list[str]:
             if UD._sha(d / n) != ds[k]]
 
 
-def schedule_for(plan: dict, arm: str, pack_root: Path, validation_steps: int | None = None) -> dict | None:
+def schedule_for(plan: dict, arm: str, pack_root: Path) -> dict | None:
     """None for D4-Original (E1's own schedule, unchanged); D4-Augmented's from
     the merged set's real training-sequence count, which must equal the
-    study's record; a validation run's from its step count."""
+    study's record."""
     e1 = plan["recipes"][int(plan["study"]["seeds"][0])]
     batch, epochs = int(e1["batch"]["blocks_per_step"]), 3
-    if validation_steps:
-        return {"rung": None, "total_steps": int(validation_steps), **UD.lr_rule(int(validation_steps))}
     if arm != "D4-Augmented":
         return None
     _, ds = dataset_of(plan, arm)
@@ -161,9 +210,9 @@ def schedule_for(plan: dict, arm: str, pack_root: Path, validation_steps: int | 
 
 def derive_recipe(plan: dict, u: dict, sched: dict | None, *, run_name: str, purpose: str, out_dir: str,
                   data_dir: str, student_path: str) -> dict:
-    """The seed's E1 config with WHERE replaced and, for D4-Augmented (or a
-    validation run), the builder-derived schedule; every other key, nested
-    keys included, is checked unchanged."""
+    """The seed's E1 config with WHERE replaced and, for D4-Augmented (or
+    PA2v's validation runs), the given schedule; every other key, nested keys
+    included, is checked unchanged."""
     e1 = plan["recipes"][u["seed"]]
     d = copy.deepcopy(e1)
     d.update(run_name=run_name, _purpose=purpose, out_dir=out_dir, data_dir=data_dir, student_path=student_path,
@@ -201,8 +250,8 @@ def evaluation_spec(plan: dict) -> dict:
             "decoding": {"path": dec["path"], "sha256": dec["sha256"]}}
 
 
-def unit_inputs(plan: dict, u: dict, sched: dict | None, recipe_sha: str | None, validation: bool) -> dict:
-    out = {"arm": u["arm"], "seed": u["seed"], "formal": not validation, "execution": u["execution"],
+def unit_inputs(plan: dict, u: dict, sched: dict | None, recipe_sha: str | None) -> dict:
+    out = {"arm": u["arm"], "seed": u["seed"], "formal": True, "execution": u["execution"],
            "evaluation": evaluation_spec(plan), "preregistration_sha256": plan["prereg_sha256"]}
     if u["execution"] == "evaluate":
         out["checkpoint_model_safetensors_sha256"] = \
@@ -214,10 +263,9 @@ def unit_inputs(plan: dict, u: dict, sched: dict | None, recipe_sha: str | None,
             "pack_blocks_sha256": ds["blocks_sha256"], "recipe_sha256": recipe_sha, "schedule": sched}
 
 
-def launch_refusals(plan: dict, units: list[dict], *, validation: bool, pack_root: Path,
-                    checkpoint_root: Path) -> list[str]:
+def launch_refusals(plan: dict, units: list[dict], *, pack_root: Path, checkpoint_root: Path) -> list[str]:
     out = []
-    if not validation and plan["study"].get("frozen") is not True:
+    if plan["study"].get("frozen") is not True:
         out.append("h1pa.json is not frozen: a formal launch needs the frozen study and its authorization")
     try:
         evaluation_spec(plan)
@@ -278,74 +326,19 @@ def evaluate(job: dict) -> tuple[dict, dict]:
     return rep, files
 
 
-def evaluate_subset(job: dict) -> tuple[dict, dict]:
-    """The GPU validation's evaluation: the first `items` fluid items through
-    run_battery and the first gsm8k prompts through uncapped_eval, both under
-    the decoding protocol; generation seconds and tokens are measured."""
-    from shared import eval_sets as ES
-    from stages.calibration_volume.dose_driver import VLLM_PY
-    from stages.phase_c1.autoinit_c1_driver import TOKENIZER_SIDECAR_SHA256
-    from stages.phase_c1.packaging import build_evaluation_package
-    ev, out, n = job["evaluation"], job["out"], int(job["items"])
-    out.mkdir(parents=True, exist_ok=True)
-    pkg = out / "package"
-    shutil.rmtree(pkg, ignore_errors=True)
-    build_evaluation_package(job["model_dir"], tokenizer_source=REPO / TOKENIZER_SOURCE, dest=pkg,
-                             expected_sidecar_sha256=TOKENIZER_SIDECAR_SHA256)
-    dec, ctx, gens = str(REPO / ev["decoding"]["path"]), str(ev["trained_context"]), out / "generations"
-    gens.mkdir(exist_ok=True)
-    t0 = time.time()
-    with (out / "eval_fluid.log").open("w") as lf:
-        rc = subprocess.run([VLLM_PY, "scripts/stages/stage-0/calibration_volume/run_battery.py", "--model", str(pkg),
-                             "--label", job["label"], "--tasks", str(ES.unit_path(ev["set"], "fluid_reasoning_720", "dev_v1")),
-                             "--mode", "eval", "--out", str(gens / "fluid_reasoning_720__dev_v1.jsonl"),
-                             "--trained-context", ctx, "--action-protocol", ev["action_protocol"], "--limit", str(n),
-                             "--decoding", dec, "--seed-namespace", "fluid_reasoning_720__dev_v1"],
-                            cwd=REPO, env=job["env"], stdout=lf, stderr=subprocess.STDOUT).returncode
-    t1 = time.time()
-    if rc != 0:
-        raise RuntimeError(f"run_battery exited {rc}; see eval_fluid.log")
-    src = ES.unit_path(ev["set"], "stage3_capability_846", "gsm8k")
-    staged = out / "uncapped_in" / f"{VALIDATION_CAPABILITY}.jsonl"
-    staged.parent.mkdir(exist_ok=True)
-    staged.write_text("".join(src.read_text().splitlines(keepends=True)[:n]))
-    with (out / "eval_capability.log").open("w") as lf:
-        rc = subprocess.run([VLLM_PY, "scripts/shared/evaluation/uncapped_eval.py", "--model", str(pkg),
-                             "--label", job["label"], "--prompts", str(staged), "--out-dir", str(gens),
-                             "--trained-context", ctx, "--decoding", dec],
-                            cwd=REPO, env=job["env"], stdout=lf, stderr=subprocess.STDOUT).returncode
-    t2 = time.time()
-    if rc != 0:
-        raise RuntimeError(f"uncapped_eval exited {rc}; see eval_capability.log")
-    if (gens / f"{VALIDATION_CAPABILITY}.json").is_file():
-        os.replace(gens / f"{VALIDATION_CAPABILITY}.json", gens / f"{VALIDATION_CAPABILITY}.summary.json")
-    fluid_sum = gens / "fluid_reasoning_720__dev_v1.summary.json"
-    bad = generation_refusals(gens, ev["decoding"]["sha256"])
-    rep = {"formal": False, "items_per_unit": n, "decoding_refusals": bad,
-           "seconds": {"fluid": round(t1 - t0, 1), "gsm8k": round(t2 - t1, 1)},
-           "fluid_summary": json.loads(fluid_sum.read_text()) if fluid_sum.is_file() else None}
-    (out / "validation_eval.json").write_text(json.dumps(rep, indent=1, default=str) + "\n")
-    if bad:
-        raise IdentityMismatch(f"validation generations not under the decoding protocol: {bad[:3]}")
-    files = {p.relative_to(out).as_posix(): p for p in sorted(gens.rglob("*")) if p.is_file()}
-    files |= {n: out / n for n in ("validation_eval.json", "eval_fluid.log", "eval_capability.log")}
-    return rep, files
-
-
 @dataclass
 class Ops:
     restore_init: Callable[[Path, dict], Path]
     stage_checkpoint: Callable[[Path, int, str], Path]
     train: Callable[[dict], Path]
     evaluate: Callable[[dict], tuple[dict, dict]]
-    evaluate_subset: Callable[[dict], tuple[dict, dict]]
     adapter: Callable[[], object]
     commit: Callable[[], str]
     env: dict = field(default_factory=dict)
 
 
 PRODUCTION = Ops(restore_init=UD.restore_init, stage_checkpoint=stage_checkpoint, train=UD.train,
-                 evaluate=evaluate, evaluate_subset=evaluate_subset, adapter=UD._qwen3_adapter,
+                 evaluate=evaluate, adapter=UD._qwen3_adapter,
                  commit=UD._git_commit, env={**os.environ, "PYTHONPATH": "src:scripts:scripts/stages/stage-1"})
 
 
@@ -369,21 +362,22 @@ def eval_unit_state(root: Path, unit: str, inputs: dict) -> tuple[str, str]:
 # ---- one unit ----------------------------------------------------------------------------------------
 
 def run_unit(plan: dict, u: dict, *, root: Path, work: Path, pack_root: Path, checkpoint_root: Path,
-             init_dir: Path, run_id: str, validation: bool, validation_steps: int | None,
-             validation_items: int, capacity: int | None, ops: Ops) -> dict:
+             init_dir: Path, run_id: str, ops: Ops, mount: Path | None = None,
+             volume_bytes: int | None = None) -> dict:
+    """One unit, formal. Free space is recomputed (`free_bytes`) before every
+    persist and before a training starts."""
     unit, train_unit = u["unit"], u["execution"] == "train"
-    sched = schedule_for(plan, u["arm"], pack_root, validation_steps) if train_unit else None
+    free = lambda: free_bytes(mount, volume_bytes)  # noqa: E731
+    sched = schedule_for(plan, u["arm"], pack_root) if train_unit else None
     recipe_sha = None
     if train_unit:
         probe = derive_recipe(plan, u, sched, run_name="-", purpose="-", out_dir="-", data_dir="-", student_path="-")
         recipe_sha = recipe_identity(probe)
-    inputs = unit_inputs(plan, u, sched, recipe_sha, validation)
-    if validation:
-        inputs["validation"] = {"steps": validation_steps, "items": validation_items}
+    inputs = unit_inputs(plan, u, sched, recipe_sha)
     state, why = UD.unit_state(root, unit, inputs) if train_unit else eval_unit_state(root, unit, inputs)
     history = UD.attempts(root, unit)
     n = 1 + max((a["attempt"] for a in history), default=0)
-    base = {"attempt": n, "run_id": run_id, "commit": ops.commit(), "state_at_start": state, "formal": not validation}
+    base = {"attempt": n, "run_id": run_id, "commit": ops.commit(), "state_at_start": state, "formal": True}
     if state == "mismatch":
         UD._append(root, unit, {**base, "event": "end", "action": "stop", "outcome": "identity_mismatch",
                                 "error": why, "utc": _now()})
@@ -406,10 +400,17 @@ def run_unit(plan: dict, u: dict, *, root: Path, work: Path, pack_root: Path, ch
     UD._append(root, unit, {**base, "event": "start", "action": action, "utc": _now(),
                             "replacement_of": failed_training[-1] if action in ("train", "resume") and failed_training
                             else None, "resumed_from": str(saved) if saved else None})
-    stage, model_dir, checkpoint = action, None, None
+    stage, model_dir, checkpoint, seconds = action, None, None, {}
     try:
         if action in ("train", "resume", "persist_local"):
             train_dir = saved
+            if action in ("train", "resume"):
+                stage = "capacity"
+                room, need = free(), training_need(plan)
+                if room is not None and room < need:
+                    raise CapacityRefusal(f"{unit}: {room} bytes free on the volume, a training needs {need} "
+                                          "(two save points); nothing was started")
+            t0 = time.time()
             if action == "train":
                 stage = "restore_initialization"
                 init = ops.restore_init(init_dir, plan["init"])
@@ -418,7 +419,7 @@ def run_unit(plan: dict, u: dict, *, root: Path, work: Path, pack_root: Path, ch
                 key, _ = dataset_of(plan, u["arm"])
                 recipe = derive_recipe(
                     plan, u, sched, run_name=f"h1pa_{unit}_{run_id}_a{n}",
-                    purpose=f"H1-PA {'GPU VALIDATION (not formal)' if validation else 'formal'} unit {unit}, attempt {n}",
+                    purpose=f"H1-PA formal unit {unit}, attempt {n}",
                     out_dir=str(train_dir), data_dir=str(Path(pack_root) / key), student_path=str(init))
                 train_dir.mkdir(parents=True, exist_ok=True)
                 (train_dir / "recovery_config.json").write_text(json.dumps(recipe, indent=2) + "\n")
@@ -431,14 +432,15 @@ def run_unit(plan: dict, u: dict, *, root: Path, work: Path, pack_root: Path, ch
                                        "resume": True})
             else:
                 model_dir = local
+            seconds["train"] = round(time.time() - t0, 1)
             if action != "persist_local":
                 (attempt_dir / "trained.json").write_text(json.dumps(
                     {"inputs": inputs, "model_dir": str(model_dir), "finished_utc": _now()}, indent=1) + "\n")
             stage = "persist_checkpoint"
             PU.persist_checkpoint(unit, model_dir, root, adapter=ops.adapter(),
                                   arch_signature=plan["init"]["arch_signature"],
-                                  num_parameters=plan["init"]["num_parameters"], inputs=inputs, capacity=capacity)
-            UD.persist_training_records(unit, model_dir, root, work, capacity, train_dir=train_dir,
+                                  num_parameters=plan["init"]["num_parameters"], inputs=inputs, capacity=free())
+            UD.persist_training_records(unit, model_dir, root, work, free(), train_dir=train_dir,
                                         attempt_dir=attempt_dir)
             if not UD._verified(unit_dir / "checkpoint", PU.completed(root, unit, "checkpoint"), ops.adapter()):
                 raise IdentityMismatch(f"{unit_dir / 'checkpoint'}: the persisted checkpoint does not re-identify")
@@ -450,7 +452,7 @@ def run_unit(plan: dict, u: dict, *, root: Path, work: Path, pack_root: Path, ch
             stage = "persist_training_records"
             mine = UD.local_trained(work, unit, inputs)
             if mine is not None:
-                UD.persist_training_records(unit, mine, root, work, capacity)
+                UD.persist_training_records(unit, mine, root, work, free())
         if action != "report":
             if train_unit:
                 if model_dir is None:
@@ -464,14 +466,16 @@ def run_unit(plan: dict, u: dict, *, root: Path, work: Path, pack_root: Path, ch
             stage = "evaluate"
             job = {"unit": unit, "model_dir": model_dir, "out": attempt_dir / "evaluation",
                    "progress": unit_dir / "eval_progress", "label": f"h1pa_{unit}_{run_id}",
-                   "evaluation": inputs["evaluation"], "env": ops.env, "items": validation_items}
-            rep, files = (ops.evaluate_subset if validation else ops.evaluate)(job)
+                   "evaluation": inputs["evaluation"], "env": ops.env}
+            t1 = time.time()
+            rep, files = ops.evaluate(job)
+            seconds["evaluate"] = round(time.time() - t1, 1)
             ui = attempt_dir / "unit_inputs.json"
             ui.write_text(json.dumps(inputs, indent=1, sort_keys=True) + "\n")
             stage = "persist_evaluation"
-            PU.persist_files(unit, {**files, "unit_inputs.json": ui}, root, label="evaluation", capacity=capacity)
+            PU.persist_files(unit, {**files, "unit_inputs.json": ui}, root, label="evaluation", capacity=free())
         else:
-            rep = UD._read(unit_dir / "evaluation" / ("validation_eval.json" if validation else "formal_report.json"))
+            rep = UD._read(unit_dir / "evaluation" / "formal_report.json")
         stage = "report"
         ev = PU.completed(root, unit, "evaluation")
         ckpt = PU.completed(root, unit, "checkpoint") if train_unit else None
@@ -480,16 +484,15 @@ def run_unit(plan: dict, u: dict, *, root: Path, work: Path, pack_root: Path, ch
                        "durable": plan["study"]["arms"][u["arm"]]["checkpoints"][str(u["seed"])].get("relay"),
                        "persisted_again": False})
         report = {"schema": REPORT_SCHEMA, "unit": unit, "arm": u["arm"], "seed": u["seed"],
-                  "execution": u["execution"], "formal": not validation, "run_id": run_id, "attempt": n,
+                  "execution": u["execution"], "formal": True, "run_id": run_id, "attempt": n,
                   "written_utc": _now(), "inputs": inputs, "study_sha256": plan["study_sha256"],
                   "initialization_record_sha256": plan["init_record_sha256"] if train_unit else None,
                   "checkpoint": checkpoint, "evaluation_files": len(ev["files"]),
                   "evaluation_descriptor_sha256": UD._sha(unit_dir / "evaluation.descriptor.json"),
                   "attempts": [a for a in UD.attempts(root, unit) if a.get("event") == "start"],
-                  ("validation_report" if validation else "formal_report"): rep,
-                  "not": None if not validation else "a GPU validation: never a formal H1-PA result"}
+                  "seconds": seconds, "formal_report": rep}
         (attempt_dir / "report.json").write_text(json.dumps(report, indent=1, default=str) + "\n")
-        PU.persist_files(unit, {"report.json": attempt_dir / "report.json"}, root, label="report", capacity=capacity)
+        PU.persist_files(unit, {"report.json": attempt_dir / "report.json"}, root, label="report", capacity=free())
     except BaseException as exc:
         import traceback
         from aadistill.infrastructure.failure_signature import signature_of
@@ -514,18 +517,17 @@ def run(argv=None, *, ops: Ops = PRODUCTION, plan: dict | None = None) -> int:
     ap.add_argument("--work", default=None)
     ap.add_argument("--status", default=None)
     ap.add_argument("--unit", action="append", default=None)
-    ap.add_argument("--capacity-bytes", type=int, default=None)
-    ap.add_argument("--validation", action="store_true")
-    ap.add_argument("--validation-steps", type=int, default=None)
-    ap.add_argument("--validation-items", type=int, default=24)
+    ap.add_argument("--volume-mount", default=None, help="the network volume's mount point")
+    ap.add_argument("--volume-bytes", type=int, default=None, help="the volume's size as the PROVIDER reports it")
     args = ap.parse_args(argv)
-    if args.validation_steps and not args.validation:
-        ap.error("--validation-steps is a GPU-validation knob; it needs --validation")
+    if (args.volume_mount is None) != (args.volume_bytes is None):
+        ap.error("--volume-mount and --volume-bytes go together: free space is the provider's size less the mount's bytes")
     work = Path(args.work or REPO / "artifacts/stages/stage-2/reasoning_data/h1pa/units" / args.run_id)
     status = Path(args.status or work / "status.json")
-    root = Path(args.durable_root) / ("validation" if args.validation else "")
+    root = Path(args.durable_root)
+    mount = Path(args.volume_mount) if args.volume_mount else None
     doc = {"schema": "aadistill.stage2.reasoning_data.h1pa_driver_status/v1", "run_id": args.run_id,
-           "formal": not args.validation, "started_utc": _now(), "units": {}, "terminal": None}
+           "formal": True, "started_utc": _now(), "units": {}, "terminal": None}
     code = 1
     try:
         plan = plan or load_plan()
@@ -534,8 +536,11 @@ def run(argv=None, *, ops: Ops = PRODUCTION, plan: dict | None = None) -> int:
         if unknown:
             raise DriverRefusal(f"unknown units {unknown}; the plan has {sorted(known)}")
         units = [known[k] for k in (args.unit or known)]
-        refusals = launch_refusals(plan, units, validation=args.validation, pack_root=Path(args.pack_root),
-                                   checkpoint_root=Path(args.checkpoint_root))
+        refusals = launch_refusals(plan, units, pack_root=Path(args.pack_root), checkpoint_root=Path(args.checkpoint_root))
+        if mount is not None:
+            doc["volume_probe"] = probe_volume(root, mount, args.volume_bytes, PROBE_BYTES)
+            if not doc["volume_probe"]["read_back_ok"]:
+                refusals.append("the volume probe did not read back what was written")
         if refusals:
             doc.update(terminal="REFUSED", refusals=refusals)
             code = 2
@@ -546,11 +551,10 @@ def run(argv=None, *, ops: Ops = PRODUCTION, plan: dict | None = None) -> int:
                 doc["units"][u["unit"]] = run_unit(
                     plan, u, root=root, work=work, pack_root=Path(args.pack_root),
                     checkpoint_root=Path(args.checkpoint_root), init_dir=Path(args.init_dir), run_id=args.run_id,
-                    validation=args.validation, validation_steps=args.validation_steps if u["execution"] == "train"
-                    and args.validation else None, validation_items=args.validation_items,
-                    capacity=args.capacity_bytes, ops=ops)
+                    ops=ops, mount=mount, volume_bytes=args.volume_bytes)
             except Exception as exc:
                 doc["units"][u["unit"]] = {"outcome": "identity_mismatch" if isinstance(exc, IdentityMismatch)
+                                           else "capacity_refused" if isinstance(exc, CapacityRefusal)
                                            else "failed", "error": f"{type(exc).__name__}: {exc}"[:800]}
                 doc["terminal"] = "FAILED"
                 return code

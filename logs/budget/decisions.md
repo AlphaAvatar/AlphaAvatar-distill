@@ -13961,3 +13961,46 @@ on a paid pod.
   L40S in PA2v before anything formal.
 - **Revisit when.** The maintainer grants PA2v + PA2 ($50, project cap $731) or
   changes the plan.
+
+## 2026-10-25 — Maintainer: PA2's budget audited; five execution corrections before anything paid ($0)
+
+- **Context.** The maintainer's independent audit of `b9c1dee9` found no
+  anomaly in the training price: $26.23 is one seed session's hard cap
+  (expected about $16.66). Five execution issues were to be fixed at $0
+  before any paid resource.
+- **Decision 1, storage.** One 30 GB volume.
+  - The plan, the launcher default and the accounting agree on 30 GB.
+  - The launcher refuses a volume the provider does not report at 30 GB in
+    the session's datacenter.
+  - The driver counts free space as the provider's size less the mount's
+    bytes before every persist and training, and refuses a training without
+    room for two save points; a write/read-back probe runs first.
+  - The stale one-shot free figure the earlier driver passed is fixed.
+  - Capacity plan: peak 20.22 GB, end 11.04 GB, owner `h1pa.json :: storage`.
+- **Decision 2, PA2v gate.** `h1pa_validation.py` checks, on L40S and the
+  formal inputs:
+  - training and memory;
+  - the recipe;
+  - SIGKILL-and-resume;
+  - persistence;
+  - the PCA identity;
+  - `nucleus_v1`, its seeds and stop reasons.
+
+  `h1pa_governance.issue("formal")` refuses without the passed gate,
+  re-derived at issue time from the secured evidence and bound to the same
+  study identity and harness. The formal launch re-checks it.
+- **Decision 3, budget.** $50 cumulative, kept.
+  - Every session at its hard cap would be $60.42; that is not funded.
+  - Formal training is repriced from PA2v's measured step time, and the
+    second seed session's evaluations from the first's measured ones.
+  - Issuing the last session then needs about $43.79 instead of $48.76.
+  - A session that does not fit is refused at $0.
+- **Decision 4, provider safety.** Every issue and every launch re-read the
+  provider's billing and account now. Unposted session costs and unretired
+  storage are added. A foreign resource or an overrun refuses, and no cap is
+  raised automatically.
+- **Decision 5, retention.** The four new checkpoints are kept on the volume
+  until the analysis and the independent review are complete; then the need,
+  migration and cost are reported before any lifecycle decision.
+- **Revisit when.** The maintainer signs the PA2v + PA2 grant ($50 cumulative,
+  project cap $731), then PA2v runs first.

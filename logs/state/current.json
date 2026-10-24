@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-24T16:30:00Z",
+ "generated_utc": "2026-10-24T17:30:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Maintainer: grant H1-PA PA2v + PA2 ($50.00 cumulative, L40S; the $712.17 project cap must rise to $731). Owner: plans/h1pa_training_application.json. 34 pods ($58.33) stay OPEN.",
+ "next": "Maintainer: grant H1-PA PA2v + PA2 ($50.00 cumulative, L40S; project cap $712.17 -> $731); PA2v first, its gate is enforced in code. Owner: plans/h1pa_training_application.json. 34 pods ($58.33) stay OPEN.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "H1-PA (H1PA.md section 12): frozen; PA2v, then the three arms' training and evaluation, on a grant.",
@@ -200,7 +200,7 @@
   "paid_compute": false,
   "pods": 0,
   "network_volumes": 0,
-  "_owner": "logs/budget/provider/runpod_billing_2026-10-24T1616Z.json :: account"
+  "_owner": "logs/budget/provider/runpod_billing_2026-10-24T1726Z.json :: account"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

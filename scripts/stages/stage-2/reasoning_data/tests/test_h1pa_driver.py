@@ -102,14 +102,14 @@ class Calls:
 
     def ops(self):
         return D.Ops(restore_init=self.restore_init, stage_checkpoint=self.stage_checkpoint, train=self.train,
-                     evaluate=self.evaluate, evaluate_subset=self.evaluate, adapter=UD._qwen3_adapter,
-                     commit=lambda: "test-commit")
+                     evaluate=self.evaluate, adapter=UD._qwen3_adapter, commit=lambda: "test-commit")
 
 
-def _run(plan, tmp_path, calls, *units):
+def _run(plan, tmp_path, calls, *units, volume=None):
+    vol = ["--volume-mount", str(tmp_path / "durable"), "--volume-bytes", str(volume)] if volume else []
     return D.run(["--run-id", "t1", "--durable-root", str(tmp_path / "durable"), "--pack-root", str(tmp_path / "packs"),
                   "--checkpoint-root", str(tmp_path / "pca"), "--init-dir", str(tmp_path / "init"),
-                  "--work", str(tmp_path / "work"), *[a for u in units for a in ("--unit", u)]],
+                  "--work", str(tmp_path / "work"), *[a for u in units for a in ("--unit", u)], *vol],
                  ops=calls.ops(), plan=plan)
 
 
@@ -211,3 +211,32 @@ def test_generations_already_on_the_volume_under_another_protocol_refuse(tmp_pat
     g.mkdir()
     (g / "fluid_reasoning_720__dev_v1.summary.json").write_text(json.dumps({"identity": {"sampling": {"temperature": 0}}}))
     assert D.generation_refusals(g, "a" * 64) and not D.generation_refusals(tmp_path / "empty", "a" * 64)
+
+
+def test_a_training_that_does_not_fit_the_volume_is_refused_before_it_starts(real_plan, tmp_path):
+    p = _plan(real_plan, tmp_path)
+    need = D.training_need(p)
+    calls = Calls(tmp_path, forbid=("train", "restore"))
+    assert _run(p, tmp_path, calls, "D4-Original-s20260726", volume=need // 2) == 1
+    st = _status(tmp_path)
+    assert st["units"]["D4-Original-s20260726"]["outcome"] == "capacity_refused"
+    assert st["volume_probe"]["read_back_ok"] is True
+
+
+def test_room_is_counted_from_the_provider_size_less_the_bytes_on_the_mount(real_plan, tmp_path):
+    m = tmp_path / "mount"
+    m.mkdir()
+    assert D.free_bytes(m, 1000) == 1000
+    (m / "x.bin").write_bytes(b"\0" * 300)
+    assert D.free_bytes(m, 1000) == 700 and D.free_bytes(None, None) is None
+    p = _plan(real_plan, tmp_path)
+    calls = Calls(tmp_path)
+    assert _run(p, tmp_path, calls, "D4-Original-s20260726", volume=10 * D.training_need(p)) == 0
+    rep = json.loads((tmp_path / "durable/D4-Original-s20260726/report/report.json").read_text())
+    assert set(rep["seconds"]) == {"train", "evaluate"}
+
+
+def test_the_driver_is_formal_only(real_plan, tmp_path):
+    with pytest.raises(SystemExit):
+        D.run(["--run-id", "t", "--durable-root", str(tmp_path), "--validation"], ops=Calls(tmp_path).ops(),
+              plan=_plan(real_plan, tmp_path))

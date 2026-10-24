@@ -339,5 +339,80 @@
     }
    }
   }
+ },
+ "storage": {
+  "volume_gb": 30,
+  "_volume_gb": "the one size the plan, the launcher (--volume-gb 30) and the capacity accounting use; the launcher refuses a volume whose size the PROVIDER reports otherwise, and the driver counts free space as the provider's size less the bytes actually on the mount, recomputed before every persist and every training",
+  "bytes": {
+   "model_safetensors": 2384234968,
+   "trainer_state_pt": 3524023523,
+   "save_point": 5908258491,
+   "evaluation_per_unit_bound": 250000000
+  },
+  "_bytes": "model: E1's fp32 checkpoints of this geometry (2,384,234,968 each); trainer_state.pt: the same geometry and trainable set's AdamW state (checkpoint_registry.json :: preflight_ctl_r0860k_s*/trainer_state.pt); a save point is both (the core trainer's save_checkpoint); evaluation: H1's units measured 15-22 MB of evidence each under greedy decoding, held twice (eval_progress + the persisted set), bounded here at about 5x that for longer nucleus generations. PA2v measures the real save point and the gate refuses one larger than planned",
+  "training_peak_extra_bytes": 11816516982,
+  "_training_peak": "keep_last 1 deletes the older save point only after the new one is written, so two coexist for a moment; the persisted copy of the final model comes after the older one is gone",
+  "phase_peak_bytes": 20219221886,
+  "_phase_peak": "during the last training: three persisted checkpoints (7.153 GB) + five evaluations (1.25 GB) + the transient (11.817 GB) = 20.219 GB of 30",
+  "phase_final_bytes": 11036939872,
+  "rate_usd_per_gb_month": 0.07,
+  "monthly_usd": 2.1
+ },
+ "gpu_validation": {
+  "phase": "PA2v",
+  "formal": false,
+  "units": [
+   "PCA-Original-s20260726",
+   "D4-Augmented-s20260726"
+  ],
+  "training": {
+   "arm": "D4-Augmented",
+   "seed": 20260726,
+   "steps": 24,
+   "save_every": 12,
+   "runs": "X1 and X2 uninterrupted, Y killed with SIGKILL right after its step-12 save point on the network volume and resumed with --resume latest; plus 12 steps of D4-Original on E1's pack",
+   "validation_only_overrides": [
+    "schedule.total_steps",
+    "schedule.warmup_steps",
+    "checkpoint.save_every",
+    "intervals.eval_every",
+    "intervals.log_every",
+    "rung"
+   ]
+  },
+  "evaluation": {
+   "checkpoint": "PCA-Original-s20260726",
+   "fluid_items": 24,
+   "gsm8k_items": 24
+  },
+  "volume_probe_bytes": 268435456,
+  "checks": {
+   "gpu": "torch reports an NVIDIA L40S",
+   "memory_gb_max": 44.0,
+   "_memory": "48 GB card, at least 4 GB headroom; E1 logged 39.96 GB for this configuration",
+   "training": "every run completes its steps; loss and gradient norm finite",
+   "config": "the run's recovery_config.json differs from the seed's E1 config only by WHERE, tokenizer_source and the validation-only overrides; D4-Original's and D4-Augmented's formal recipes derive with no key outside their declared overrides",
+   "initialization": "D4 Top-1 restored and re-identified from its bytes",
+   "pca_checkpoint": "model.safetensors' sha256 is the recorded one",
+   "resume": "P1g's rule: data order and learning rate identical at every resumed step; loss and final weights within twice the run-to-run difference of the two uninterrupted runs (or 1e-6)",
+   "persistence": "Y's final model persisted to the volume and re-identified from the landed bytes; the probe file written, fsynced and read back with its sha256",
+   "capacity": "the provider's size is the planned 30 GB; the measured save point is no larger than storage.bytes.save_point x 1.02",
+   "decoding": "every generation summary carries nucleus_v1's sha256 and its sampling; every sample's seed is the protocol's request_seed for its item and turn; every sample records output token ids and a stop_reason in {eos, degeneration, context_limit}",
+   "repricing": "the formal sessions are priced from PA2v's measured median step seconds; issuing a formal authorization needs the repriced hard cap to fit the live envelope"
+  }
+ },
+ "retention": {
+  "new_checkpoints": "the four trained D4 checkpoints are persisted to the volume, re-identified from the landed bytes, and KEPT until the preregistered analysis AND the maintainer's independent review are complete; no automatic AGENTS.md 2.5 retirement before then (maintainer, 2026-10-25)",
+  "then": "report the retention need, the migration route and the storage cost, and decide long-term storage or retirement under the lifecycle rule; the volume's storage record books its reservation until then, so it never bills unmanaged",
+  "pca_original": "both E1 checkpoints stay on the relay; never retrained"
+ },
+ "pricing": {
+  "before_pa2v": "training at the committed L40S rate (cost_forecast.json :: recovery_seconds_per_block_pass.L40S.max x batch size 2 = 3.5672 s per optimizer step); evaluation at the slowest recorded full eval-set-1 evaluation on L40S x 2 for students that reason at length (158.8 min)",
+  "formal_training": "PA2v's measured steady-state median seconds per optimizer step (the gate's measured.median_step_seconds) x the unit's optimizer steps, + training_fixed_minutes for loading, E1's in-run validation and the two save points",
+  "training_fixed_minutes": 10.0,
+  "formal_evaluation": "before any formal evaluation has run: the conservative forecast above; once a formal session of this phase has evaluated full eval-set-1 under nucleus_v1, the slowest of those measured evaluations x evaluation_margin_after_measurement",
+  "evaluation_margin_after_measurement": 1.25,
+  "hard_cap": "each session's plan x the project's hard-cap factor 1.5 (cost_forecast.json :: contingency_factors_not_measurements.hard_cap), + setup, teardown and the artifact-recovery reserve; its all-in bound (GPU + container disk + the termination margin) is the session's authorized cap",
+  "never": "fewer optimizer steps, a smaller evaluation, a dropped seed or a changed rule to fit a budget"
  }
 }

@@ -5,7 +5,7 @@
         --phase {PA2v,PA2} --run-id <run_id> --scr <scratch> --session-commit <sha> --bundle <name> \
         --max-price <live price> --network-volume-id <id> --volume-mount-path /runpod-volume \
         --data-center-ids <the volume's datacenter> [--unit D4-Original-s20260726 ...] \
-        [--step-seconds <PA2v's measured>] [--dry-run]
+        [--pa2v-gate runs/<PA2v run>/closeout/pa2v_gate.json] [--dry-run]
 
 `h1_unit_launch`'s session, with H1-PA's governance, driver and inputs:
 `aadistill.infrastructure.session_runner` runs the argument contract, the
@@ -22,6 +22,12 @@ relay, only what the session's units read -- E1's pack for D4-Original, the
 merged set for D4-Augmented, E1's checkpoint for each PCA-Original seed it
 evaluates. D4 Top-1 is restored by the driver itself (`restore_initialization`).
 Nothing heavy crosses the dev box's uplink.
+
+PA2v runs `h1pa_validation.py`; a formal PA2 session runs only on the passed
+PA2v gate its authorization names (`the_pa2v_gate_holds`, re-derived from the
+evidence at launch), with the volume the provider reports at the planned size
+(`the_volume_is_the_planned_one`) and the project cap holding against the
+provider's billing at that moment (`the_project_cap_holds_now`).
 
 The durable root is the network volume (``<mount>/h1pa``): every checkpoint,
 save point and evaluation is persisted there as it completes, so a lost pod
@@ -59,10 +65,8 @@ PACKS = "artifacts/stages/stage-2/reasoning_data/h1pa/packs"
 CHECKPOINTS = "artifacts/stages/stage-2/reasoning_data/h1pa/pca_original"
 STUDY = REPO_ROOT / HG.STUDY
 KIND_OF = {phase: kind for kind, phase in HG.KINDS.items()}
-#: the GPU validation: one training unit for a few steps, one evaluation-only unit, each on a subset
-VALIDATION_UNITS = ("PCA-Original-s20260726", "D4-Augmented-s20260726")
-VALIDATION_STEPS = 40
-VALIDATION_ITEMS = 24
+#: PA2v's bound: three 24-step runs and one 12-step run (each loading teacher and student), the
+#: persistence check and a 24-item evaluation of each kind; priced at x1.5 like every session
 VALIDATION_MINUTES = 60.0
 #: setup on an L40S image with the teacher, vLLM and the inputs (H1 P1g/P2: under 20 min); a bound
 SETUP_MINUTES = 20.0
@@ -84,7 +88,7 @@ def kind(args) -> str:
 
 
 def units_of(args) -> tuple[str, ...]:
-    return tuple(args.unit or (VALIDATION_UNITS if kind(args) == "validation" else all_units()))
+    return tuple(args.unit or (study()["gpu_validation"]["units"] if kind(args) == "validation" else all_units()))
 
 
 def durable_root(args) -> str:
@@ -118,22 +122,30 @@ def secure_units(ctx: SessionContext) -> None:
     try:
         if ctx.target is None:
             return
-        root = durable_root(ctx.args) + ("/validation" if kind(ctx.args) == "validation" else "")
         aud = f"{REPO}/artifacts/audit/{AUDIT}"
         secured = ctx.evidence.setdefault("units_secured", {})
-        excl = " ".join(f"--exclude={e}" for e in HUL.EVIDENCE_EXCLUDES)
-        for name in units_of(ctx.args):
+        if kind(ctx.args) == "validation":
+            #: PA2v's report and evidence (never its training directories or the landed copy)
+            root, names, ready = f"{durable_root(ctx.args)}/validation/pa2v", [ctx.args.run_id], "pa2v_report.json"
+            excl = "--exclude=./durable --exclude=./train_Y"
+            flat = {ctx.args.run_id: HG.PA2V_EVIDENCE.removesuffix(".evidence.tgz")}
+        else:
+            root, names, ready = durable_root(ctx.args), list(units_of(ctx.args)), "report.descriptor.json"
+            excl = " ".join(f"--exclude={e}" for e in HUL.EVIDENCE_EXCLUDES)
+            flat = {}
+        for name in names:
             if secured.get(name, {}).get("ok"):
                 continue
+            tag = flat.get(name, name)
             res = ctx.target.run(
-                f"test -f {root}/{name}/report.descriptor.json && mkdir -p {aud} && tar czf {aud}/{name}.evidence.tgz "
-                f"{excl} -C {root}/{name} . && sha256sum {aud}/{name}.evidence.tgz | cut -d' ' -f1", timeout=600)
+                f"test -f {root}/{name}/{ready} && mkdir -p {aud} && tar czf {aud}/{tag}.evidence.tgz "
+                f"{excl} -C {root}/{name} . && sha256sum {aud}/{tag}.evidence.tgz | cut -d' ' -f1", timeout=600)
             digest = (getattr(res, "stdout", "") or "").strip().splitlines()
             if getattr(res, "returncode", 1) != 0 or not digest or len(digest[-1]) != 64:
                 continue
-            dest = HUL.store(ctx) / f"{name}.evidence.tgz"
+            dest = HUL.store(ctx) / f"{tag}.evidence.tgz"
             dest.parent.mkdir(parents=True, exist_ok=True)
-            rc = HUL._scp(ctx, f"{aud}/{name}.evidence.tgz", dest)
+            rc = HUL._scp(ctx, f"{aud}/{tag}.evidence.tgz", dest)
             ok = dest.is_file() and hashlib.sha256(dest.read_bytes()).hexdigest() == digest[-1]
             if ok:
                 dest.with_suffix(".sha256").write_text(digest[-1] + "\n")
@@ -154,42 +166,67 @@ def units_secured(ctx: SessionContext, *_a, **_k) -> tuple[bool, str]:
     return True, f"{len(secured)} finished unit(s) secured off-pod; checkpoints are on the volume"
 
 
-def step_seconds(args, repo_root: Path = REPO_ROOT) -> float:
-    """Seconds per optimizer step: the committed L40S measurement
-    (`cost_forecast.json :: measured.recovery_seconds_per_block_pass.L40S.max`,
-    8,192 positions per sequence pass, teacher online, padding forwarded) times
-    E1's batch size, or PA2v's measurement (`--step-seconds`) when slower."""
+def committed_step_seconds(repo_root: Path = REPO_ROOT) -> float:
+    """The committed L40S rate: `cost_forecast.json ::
+    measured.recovery_seconds_per_block_pass.L40S.max` (8,192 positions per
+    sequence pass, teacher online, padding forwarded) times E1's batch size."""
     fc = json.loads((repo_root / GL.FORECAST).read_text())
     e1 = json.loads((repo_root / study()["recipe"]["e1_configs"]["20260726"]["path"]).read_text())
-    base = fc["measured"]["recovery_seconds_per_block_pass"]["L40S"]["max"] * int(e1["batch"]["blocks_per_step"])
-    return round(max(base, float(args.step_seconds or 0.0)), 4)
+    return round(fc["measured"]["recovery_seconds_per_block_pass"]["L40S"]["max"] * int(e1["batch"]["blocks_per_step"]), 4)
 
 
-def unit_minutes(unit: str, *, step_s: float, repo_root: Path = REPO_ROOT) -> tuple[float, float]:
-    """(training, evaluation) minutes for one unit. Training: its optimizer
-    steps at `step_s`. Evaluation: the slowest full eval-set-1 evaluation
-    recorded on L40S (students at the floor) times the forecast's labelled
-    factor for a student that reasons at length."""
-    st = study()
+def measured_evaluation_seconds(repo_root: Path = REPO_ROOT) -> float | None:
+    """The slowest full formal evaluation this phase has measured, from the
+    closeouts' per-unit records (`closeout`), or None before any."""
+    secs = []
+    for d in sorted((repo_root / HG.EXPERIMENT_LOGS / "runs").glob("*")):
+        a, o = d / "governance/authorization.json", d / "closeout/outcome.json"
+        if a.is_file() and o.is_file() and json.loads(a.read_text()).get("plan_id") == HG.PLAN_ID \
+                and (json.loads(a.read_text()).get("stage_conditions") or {}).get("kind") == "formal":
+            secs += [u["seconds"]["evaluate"] for u in (json.loads(o.read_text()).get("units") or {}).values()
+                     if (u.get("seconds") or {}).get("evaluate")]
+    return max(secs) if secs else None
+
+
+def pricing(args, repo_root: Path = REPO_ROOT) -> dict:
+    """What a session's phases are priced from (`h1pa.json :: pricing`): PA2v's
+    measured step time once its gate exists (``--pa2v-gate``), else the
+    committed rate; a measured full evaluation once a formal session has one,
+    else the conservative forecast."""
+    pr, fc = study()["pricing"], json.loads((repo_root / GL.FORECAST).read_text())
+    gate = json.loads(Path(args.pa2v_gate).read_text()) if getattr(args, "pa2v_gate", None) else None
+    step = (gate or {}).get("measured", {}).get("median_step_seconds")
+    ev_s = measured_evaluation_seconds(repo_root)
+    forecast = (fc["measured"]["eval_seconds_per_unit_L40S"]["max"]
+                * fc["contingency_factors_not_measurements"]["eval_floor_to_reasoning"] / 60)
+    return {"step_seconds": float(step) if step else committed_step_seconds(repo_root),
+            "step_source": "PA2v's measured median" if step else "the committed L40S rate (no PA2v gate given)",
+            "training_fixed_minutes": float(pr["training_fixed_minutes"]) if step else 0.0,
+            "evaluation_minutes": round(ev_s * pr["evaluation_margin_after_measurement"] / 60, 1) if ev_s
+            else round(forecast, 1),
+            "evaluation_source": "the slowest measured formal evaluation x the margin" if ev_s
+            else "the conservative forecast (no formal evaluation measured yet)"}
+
+
+def unit_minutes(unit: str, price: dict) -> tuple[float, float]:
+    """(training, evaluation) minutes for one unit under `pricing`."""
     arm = unit.rsplit("-s", 1)[0]
-    steps = 0 if arm == "PCA-Original" else int(st["arms"][arm]["schedule"]["optimizer_steps"])
-    fc = json.loads((repo_root / GL.FORECAST).read_text())
-    ev = (fc["measured"]["eval_seconds_per_unit_L40S"]["max"]
-          * fc["contingency_factors_not_measurements"]["eval_floor_to_reasoning"] / 60)
-    return round(steps * step_s / 60, 1), round(ev, 1)
+    steps = 0 if arm == "PCA-Original" else int(study()["arms"][arm]["schedule"]["optimizer_steps"])
+    train = steps * price["step_seconds"] / 60 + (price["training_fixed_minutes"] if steps else 0.0)
+    return round(train, 1), price["evaluation_minutes"]
 
 
 def budget(args, repo_root: Path = REPO_ROOT) -> BudgetSpec:
-    """PA2v: a bounded validation session. PA2: the named units. The project's
-    hard-cap factor is the contingency (P1/P1t's rule); setup and teardown sit
-    in the soft-stop reserve."""
+    """PA2v: a bounded validation session. PA2: the named units, priced by
+    `pricing`. The project's hard-cap factor is the contingency (P1/P1t's
+    rule); setup and teardown sit in the soft-stop reserve."""
     f = json.loads((repo_root / GL.FORECAST).read_text())["contingency_factors_not_measurements"]["hard_cap"]
     if kind(args) == "validation":
         phases = (Phase("pa2v_validation", VALIDATION_MINUTES),)
     else:
-        phases, step_s = [], step_seconds(args, repo_root)
+        phases, price = [], pricing(args, repo_root)
         for u in units_of(args):
-            t, e = unit_minutes(u, step_s=step_s, repo_root=repo_root)
+            t, e = unit_minutes(u, price)
             phases += ([Phase(f"{u}_train", t)] if t else []) + [Phase(f"{u}_evaluate", e)]
         phases = tuple(phases)
     return BudgetSpec(
@@ -204,20 +241,96 @@ def budget(args, repo_root: Path = REPO_ROOT) -> BudgetSpec:
         accounted_provider_resources=(args.network_volume_id,))
 
 
+def volume_bytes(ctx: Any) -> int:
+    """The network volume's size as the PROVIDER reported it to the precheck."""
+    v = ctx.evidence.get("volume") or {}
+    if not v.get("size_gb"):
+        raise RuntimeError("no provider-reported volume size: the_volume_is_the_planned_one did not run")
+    return int(v["size_gb"]) * 10 ** 9
+
+
 def driver_command(ctx: Any, plan: Any) -> str:
     a = ctx.args
     py = f"cd {REPO} && PYTHONPATH={REPO}/src:{REPO}/scripts:{REPO}/scripts/stages/stage-1 /opt/train/bin/python"
     aud = f"{REPO}/artifacts/audit/{AUDIT}"
+    vol = f"--volume-mount {a.volume_mount_path} --volume-bytes {volume_bytes(ctx)}"
+    if kind(a) == "validation":
+        cmd = (f"scripts/stages/stage-2/reasoning_data/h1pa_validation.py --run-id {a.run_id} "
+               f"--durable-root {durable_root(a)} {vol} --pack-root {REPO}/{PACKS} "
+               f"--checkpoint-root {REPO}/{CHECKPOINTS} --status {STATUS}")
+        #: the validation driver writes its own terminal marker; one that dies before it gets RUN_FAILED
+        return (f"mkdir -p {durable_root(a)} {aud} && {py} {cmd}; "
+                f"grep -qE 'MARKER:(ALL_DONE|RUN_FAILED)' {STATUS} || "
+                f"echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) MARKER:RUN_FAILED\" >> {STATUS}")
     units = " ".join(f"--unit {u}" for u in units_of(a))
-    val = (f" --validation --validation-steps {VALIDATION_STEPS} --validation-items {VALIDATION_ITEMS}"
-           if kind(a) == "validation" else "")
-    cap = f"$(( {int(a.volume_gb) * 10**9} - $(du -sb {a.volume_mount_path} | cut -f1) ))"
     return (f"mkdir -p {durable_root(a)} {aud} && {py} scripts/stages/stage-2/reasoning_data/h1pa_driver.py "
             f"--run-id {a.run_id} --durable-root {durable_root(a)} --pack-root {REPO}/{PACKS} "
-            f"--checkpoint-root {REPO}/{CHECKPOINTS} {units}{val} --capacity-bytes {cap} "
-            f"--status {aud}/driver_status.json; rc=$?; "
+            f"--checkpoint-root {REPO}/{CHECKPOINTS} {units} {vol} --status {aud}/driver_status.json; rc=$?; "
             f"if [ $rc = 0 ]; then m=ALL_DONE; else m=RUN_FAILED; fi; "
             f"echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) MARKER:$m\" >> {STATUS}")
+
+
+def _provider(args):
+    from aadistill.infrastructure.provider import RunPodProvider, read_api_key
+    return RunPodProvider(read_api_key(str(Path(args.runpod_config).expanduser())))
+
+
+def the_volume_is_the_planned_one(ctx: SessionContext, provider=None) -> tuple[bool, str]:
+    """The network volume as the PROVIDER reports it: it exists, its size is the
+    plan's (`h1pa.json :: storage.volume_gb`, also --volume-gb), and it sits in
+    the session's datacenter. Its size is what the driver counts free space
+    from; nothing is inferred from a command-line value."""
+    planned = int(study()["storage"]["volume_gb"])
+    if int(ctx.args.volume_gb) != planned:
+        return False, f"--volume-gb {ctx.args.volume_gb} is not the planned {planned}"
+    res = (provider or _provider(ctx.args)).account_resources()
+    if not res.known:
+        return False, f"the provider's resources are unknown ({res.error}); nothing is created"
+    v = next((x for x in res.network_volumes if x.get("id") == ctx.args.network_volume_id), None)
+    if v is None:
+        return False, f"the provider has no network volume {ctx.args.network_volume_id}"
+    dcs = [d for d in str(ctx.args.data_center_ids or "").split(",") if d]
+    ctx.evidence["volume"] = {"id": v["id"], "size_gb": v.get("size"), "data_center_id": v.get("dataCenterId")}
+    if int(v.get("size") or 0) != planned:
+        return False, f"the provider reports {v.get('size')} GB for {v['id']}, not the planned {planned}"
+    if not dcs or v.get("dataCenterId") not in dcs:
+        return False, f"the volume is in {v.get('dataCenterId')}; --data-center-ids {dcs} must name it"
+    return True, f"volume {v['id']}: {v['size']} GB in {v['dataCenterId']}, as planned"
+
+
+def the_project_cap_holds_now(ctx: SessionContext, snapshot: dict | None = None) -> tuple[bool, str]:
+    """The project cap against the provider's billing NOW, not the
+    application's snapshot: everything billed, closed sessions not yet posted,
+    the study's storage; this session's cap must fit what is left."""
+    from aadistill.governance.authorization import AuthorizationError
+    try:
+        live = HG.live_position(REPO_ROOT, snapshot=snapshot)
+    except AuthorizationError as exc:
+        return False, str(exc)
+    ctx.evidence["live_position"] = live
+    if ctx.auth.hard_cap_usd > live["project_remaining_usd"]:
+        return False, (f"this session's ${ctx.auth.hard_cap_usd:.2f} does not fit the ${live['project_remaining_usd']:.2f} "
+                       f"left under the ${live['project_cap_usd']:.2f} project cap as the provider bills it now")
+    return True, f"${ctx.auth.hard_cap_usd:.2f} inside the ${live['project_remaining_usd']:.2f} the provider leaves now"
+
+
+def the_pa2v_gate_holds(ctx: SessionContext, repo_root: Path = REPO_ROOT) -> tuple[bool, str]:
+    """A formal session runs only on the passed PA2v gate its authorization
+    names, re-derived now, with this session's study identity and harness."""
+    from aadistill.governance.authorization import AuthorizationError
+    if kind(ctx.args) != "formal":
+        return True, "a validation session needs no gate"
+    named = json.loads((ctx.auth.stage_conditions or {}).get("pa2v_gate") or "null")
+    if not named:
+        return False, "the formal authorization names no PA2v gate"
+    try:
+        gate = HG.verify_gate(Path(named["path"]), harness=ctx.auth.harness_source_digest,
+                              study=HG.study_hash(repo_root))
+    except AuthorizationError as exc:
+        return False, str(exc)
+    if gate["sha256"] != named["sha256"]:
+        return False, "the PA2v gate record changed after the authorization was issued"
+    return True, f"PA2v {gate['run_id']} passed; its gate is the one the authorization names"
 
 
 def the_artifact_funds_this_phase(ctx: SessionContext) -> tuple[bool, str]:
@@ -295,22 +408,37 @@ def spec(args) -> SessionSpec:
         teardown=TeardownPolicy(note="delete the pod, verify from the provider that it is gone, STOP; "
                                      "the network volume is KEPT (it holds the trained checkpoints)"),
         precheck=(the_artifact_funds_this_phase, GL.all_in_within_cap, study_identity_is_the_authorized_one,
-                  bound_files_are_in_the_session_commit),
+                  bound_files_are_in_the_session_commit, the_volume_is_the_planned_one, the_project_cap_holds_now,
+                  the_pa2v_gate_holds),
     )
 
 
 def closeout(run_id: str, scr: Path, *, repo_root: Path = REPO_ROOT, reconcile=None, disk_gb: float = 150.0) -> dict:
     """`h1_unit_launch.closeout`'s outcome, with this study's storage as the
-    expected resources: the driver's terminal marker, every secured evidence
-    archive re-hashed, money (GPU + container disk; the volume is booked in its
-    storage record) and a fresh provider reconciliation."""
+    expected resources, plus where the evidence is (``store``) and, per secured
+    unit, its report's stage seconds and its persisted checkpoint's identity
+    (the four trained checkpoints are verified here and KEPT: `h1pa.json ::
+    retention`)."""
+    import tarfile
     if reconcile is None:
         from aadistill.infrastructure.provider import RunPodProvider, read_api_key, reconcile_account
         owned = tuple(h["volume"] for h in HG.spent(repo_root)["storage"])
         reconcile = lambda: reconcile_account(  # noqa: E731
             RunPodProvider(read_api_key(str(Path("~/.runpod/config.toml").expanduser()))), owned)
     out = HUL.closeout(run_id, scr, repo_root=repo_root, reconcile=reconcile, disk_gb=disk_gb)
-    out["schema"] = "aadistill.stage2.reasoning_data.h1pa_outcome/v1"
+    store = Path(scr) / "store"
+    units = {}
+    for t in sorted(store.glob("*.evidence.tgz")):
+        name = t.name.removesuffix(".evidence.tgz")
+        if name == HG.PA2V_EVIDENCE.removesuffix(".evidence.tgz") or not out["evidence"].get(t.name, {}).get("verified"):
+            continue
+        with tarfile.open(t) as tf:
+            rep = json.loads(tf.extractfile("./report/report.json").read())
+            ck = json.loads(tf.extractfile("./checkpoint.descriptor.json").read()) if rep.get("execution") == "train" else None
+        units[name] = {"seconds": rep.get("seconds"), "execution": rep.get("execution"),
+                       "checkpoint": ({k: ck.get(k) for k in ("artifact_digest", "weights_digest", "destination", "persisted")}
+                                      if ck else rep.get("checkpoint"))}
+    out.update(schema="aadistill.stage2.reasoning_data.h1pa_outcome/v1", store=str(store), units=units)
     (repo_root / HG.run_dir(run_id) / "closeout/outcome.json").write_text(json.dumps(out, indent=1, default=str) + "\n")
     return out
 
@@ -324,14 +452,14 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--session-commit", required=True)
     ap.add_argument("--bundle", required=True)
     ap.add_argument("--unit", action="append", default=None, choices=all_units())
-    ap.add_argument("--step-seconds", type=float, default=None,
-                    help="PA2v's measured seconds per optimizer step; used when slower than the committed L40S rate")
+    ap.add_argument("--pa2v-gate", default=None,
+                    help="formal: PA2v's gate record (runs/<PA2v run>/closeout/pa2v_gate.json); prices the training")
     ap.add_argument("--out", default=None)
     ap.add_argument("--image", default="runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404")
     ap.add_argument("--gpu", default="NVIDIA L40S")
     ap.add_argument("--max-price", type=float, default=None)
     ap.add_argument("--disk-gb", type=int, default=150)
-    ap.add_argument("--volume-gb", type=int, default=50)
+    ap.add_argument("--volume-gb", type=int, default=30, help="must equal h1pa.json :: storage.volume_gb and the provider's size")
     ap.add_argument("--token-src", default=str(Path("~/.cache/huggingface/token").expanduser()))
     ap.add_argument("--runpod-config", default=str(Path("~/.runpod/config.toml").expanduser()))
     ap.add_argument("--startup-limit-min", type=float, default=15.0)

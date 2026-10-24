@@ -12,7 +12,7 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 **H1-PA: FROZEN AND READY FOR A GRANT. Student training and evaluation are NOT authorized (2026-10-25).**
 Owner: [`docs/stages/stage-2/reasoning_data/H1PA.md`](../../docs/stages/stage-2/reasoning_data/H1PA.md)
 section 12, `configs/stages/stage-2/reasoning_data/h1pa.json` and `plans/h1pa_training_application.json`.
-Nothing is running: 0 pods, 0 volumes, $0/h (snapshot `runpod_billing_2026-10-24T1616Z.json`; the provider has billed $680.6673).
+Nothing is running: 0 pods, 0 volumes, $0/h (snapshot `runpod_billing_2026-10-24T1726Z.json`; the provider has billed $680.6673).
 - **Arms:**
   - PCA-Original: E1's checkpoints, re-evaluated; both are now on the relay.
   - D4-Original: E1's pack, 2,916 steps.
@@ -24,8 +24,14 @@ Nothing is running: 0 pods, 0 volumes, $0/h (snapshot `runpod_billing_2026-10-24
   The PA1 cut build is a superseded identity.
 - **Rule:** `plans/h1pa_preregistration.json` (A and B decided, C descriptive;
   `nucleus_v1` only).
+- **Execution fixes (2026-10-25, H1PA.md section 13):**
+  - a 30 GB volume counted from the provider's size;
+  - PA2v's gate enforced in `h1pa_governance.issue`;
+  - formal sessions repriced from measurements;
+  - the project cap re-read from the provider at every issue and launch;
+  - the four new checkpoints kept until analysis and review.
 - **Next:** the maintainer's grant for PA2v + PA2: a $50.00 cumulative cap on
-  L40S, with the $712.17 project cap raised to $731.
+  L40S, with the $712.17 project cap raised to $731. PA2v runs first.
 
 **STAGE-2/3 H1: ANNULLED FOR PROMOTION (maintainer, 2026-10-24; `plans/h1_annulment.json`). As executed: P1g PASSED, P2's FOUR FORMAL UNITS COMPLETE; THE FROZEN DECISION WAS NOT_RESOLVED (FLOOR).**
 Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).

@@ -22,7 +22,15 @@ An artifact binds:
   ceiling less every earlier H1-PA session's closeout cost, every open
   session's hard cap, and the study's storage (actual once retired, its
   reservation until then). A session that created a provider resource and
-  records no closeout cost is an unknown, and refuses.
+  records no closeout cost is an unknown, and refuses;
+* a hard cap inside the PROJECT cap as the provider bills it NOW
+  (`live_position`): every issue re-reads the provider's billing and account,
+  adds each closed session the provider has not posted yet and the study's
+  unretired storage, and refuses when the cap does not cover it, or when the
+  account holds anything but the study's volume. Nothing ever raises a cap;
+* for a FORMAL session, a passed PA2v gate (`pa2v_gate`), re-derived from
+  PA2v's secured evidence at issue time and bound to the same study identity
+  and harness as the formal session.
 
 Dollar amounts live in the grant document, never here (P3).
 """
@@ -57,12 +65,15 @@ POLICIES = {k: ActionPolicy(
                  "on disk and its hard cap covers the planned hard threshold; setup re-checks both on the pod; one "
                  "artifact funds one run, inside the phase grant's cumulative envelope"),
 ) for k in KINDS}
-#: H1's unit-session scripts this session reuses (its driver helpers, launcher pieces, persistence), less
-#: P1g's driver, plus H1-PA's own
+#: H1's unit-session scripts this session reuses (its driver helpers, launcher pieces, persistence,
+#: P1g's resume mechanism), plus H1-PA's own
 SCRIPTS = tuple(s for s in UG.SCRIPTS if not s.endswith("p1g_driver.py")) + (
     "scripts/stages/stage-2/reasoning_data/h1_generation_launch.py",
     "scripts/stages/stage-2/reasoning_data/governance.py",
     "scripts/stages/stage-2/reasoning_data/h1pa_driver.py",
+    "scripts/stages/stage-2/reasoning_data/h1pa_validation.py",
+    "scripts/stages/stage-2/reasoning_data/p1g_driver.py",
+    "scripts/maintenance/consolidation/provider_billing.py",
     "scripts/stages/stage-2/reasoning_data/h1pa_governance.py",
     "scripts/stages/stage-2/reasoning_data/h1pa_launch.py",
     "scripts/shared/evaluation/decoding.py",
@@ -176,9 +187,127 @@ def remaining_envelope(repo_root: Path = REPO) -> dict:
             "runs": s["runs"], "storage": s["storage"]}
 
 
+def provider_snapshot(start: str = "2026-06-01") -> dict:
+    """The provider's billing and account, read now (read-only, $0)."""
+    from aadistill.infrastructure.provider import read_api_key
+    from maintenance.consolidation import provider_billing as PB
+    end = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    return PB.fetch(read_api_key(str(Path("~/.runpod/config.toml").expanduser())), start, end)
+
+
+def live_position(repo_root: Path = REPO, *, snapshot: dict | None = None) -> dict:
+    """The project's position as the PROVIDER bills it now: everything billed,
+    plus every closed H1-PA session whose pod the provider has not posted yet,
+    plus the study's unretired storage at its reservation. Refuses when the
+    account holds a pod or a volume this study does not own."""
+    g = grant(repo_root)
+    snap = snapshot if snapshot is not None else provider_snapshot()
+    billed = round(sum(float(r["amount"]) for r in snap["pods"]) + sum(float(r["amount"]) for r in snap["networkvolumes"]), 4)
+    posted = {r.get("podId") for r in snap["pods"]}
+    s, root = spent(repo_root), Path(repo_root)
+    unposted = []
+    for r in s["runs"]:
+        sess = root / run_dir(r["run_id"]) / "runtime/session.json"
+        pod = json.loads(sess.read_text()).get("pod_id") if sess.is_file() else None
+        if pod and pod not in posted:
+            unposted.append({"run_id": r["run_id"], "pod_id": pod, "usd": r["usd"]})
+    storage = round(sum(h["usd"] for h in s["storage"] if h["basis"] == "reserved"), 4)
+    acct = snap["account"]
+    owned = {h["volume"] for h in s["storage"]}
+    foreign = [p.get("id") for p in acct.get("pods") or []] + \
+              [v.get("id") for v in acct.get("network_volumes") or [] if v.get("id") not in owned]
+    if foreign:
+        raise AuthorizationError(f"the provider account holds {foreign}, which this study does not own: reconcile first")
+    committed = round(billed + sum(u["usd"] for u in unposted) + storage, 4)
+    cap = float(g["project_cumulative_cap_usd"])
+    return {"fetched_utc": snap["fetched_utc"], "provider_billed_usd": billed, "unposted_sessions": unposted,
+            "storage_reserved_usd": storage, "committed_usd": committed, "project_cap_usd": cap,
+            "project_remaining_usd": round(cap - committed, 4),
+            "spend_per_hour": acct.get("current_spend_per_hr"), "balance_usd": acct.get("client_balance_usd")}
+
+
+PA2V_EVIDENCE = "pa2v.evidence.tgz"
+
+
+def pa2v_gate(run_id: str, *, repo_root: Path = REPO, write: bool = True) -> dict:
+    """PA2v's verdict, re-derived on the dev box from its secured evidence:
+    the run's authorization (a validation artifact of this study and grant),
+    its closeout (COMPLETE, the pod gone), the evidence archive's hash against
+    the closeout, and every check of `h1pa_validation.checks` run again on the
+    extracted files. Writes ``runs/<run_id>/closeout/pa2v_gate.json``."""
+    import tarfile
+    import tempfile
+    from stages.reasoning_data import h1pa_driver as D
+    from stages.reasoning_data import h1pa_validation as V
+    root = Path(repo_root)
+    auth = H1PAAuthorization.load(root / authorization_path(run_id))
+    out = json.loads((root / run_dir(run_id) / "closeout/outcome.json").read_text())
+    store = Path(out["store"]) if out.get("store") else None
+    tgz = store / PA2V_EVIDENCE if store else None
+    problems = []
+    if auth.stage_conditions.get("kind") != "validation" or auth.plan_id != PLAN_ID:
+        problems.append("the run's authorization is not an H1-PA validation artifact")
+    if auth.stage_conditions.get("grant_sha256") != sha256_file(root / GRANT):
+        problems.append("the run was authorized under another grant")
+    if out.get("status") != "COMPLETE" or not out.get("provider_confirms_gone"):
+        problems.append(f"the closeout is {out.get('status')}, provider gone {out.get('provider_confirms_gone')}")
+    rec = (out.get("evidence") or {}).get(PA2V_EVIDENCE) or {}
+    if tgz is None or not tgz.is_file() or sha256_file(tgz) != rec.get("sha256") or not rec.get("verified"):
+        problems.append("the secured PA2v evidence is missing or not the archive the closeout hashed")
+        result = {"checks": {}, "measured": {}, "passed": False}
+    else:
+        with tempfile.TemporaryDirectory() as tmp:
+            with tarfile.open(tgz) as t:
+                t.extractall(tmp, filter="data")
+            pod = json.loads((Path(tmp) / V.REPORT).read_text()) if (Path(tmp) / V.REPORT).is_file() else {}
+            result = V.checks(Path(tmp) / "evidence", D.load_plan())
+            if not pod.get("passed"):
+                problems.append("the pod's own report did not pass")
+    gate = {"schema": "aadistill.stage2.reasoning_data.pa2v_gate/v1", "run_id": run_id,
+            "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "study_identity_sha256": auth.plan_hash, "harness_digest": auth.harness_source_digest,
+            "evidence_sha256": rec.get("sha256"), "problems": problems, "checks": result["checks"],
+            "measured": result["measured"], "passed": bool(result["passed"] and not problems), "authorizes": "nothing"}
+    if write:
+        p = root / run_dir(run_id) / "closeout/pa2v_gate.json"
+        p.write_text(json.dumps(gate, indent=1, default=str) + "\n")
+    return gate
+
+
+def verify_gate(path: Path | None, *, harness: str, study: str) -> dict:
+    """A formal session's precondition: the PA2v gate at `path`, RE-DERIVED now
+    from its evidence (a recorded gate is never trusted as written), passed,
+    and bound to the same study identity and harness as the formal session."""
+    if path is None or not Path(path).is_file():
+        raise AuthorizationError("no PA2v gate: a formal H1-PA session needs PA2v's passed GPU validation first")
+    recorded = json.loads(Path(path).read_text())
+    #: the gate lives at <root>/runs/<run>/closeout/pa2v_gate.json; its run's records are under that same root
+    rel = run_dir(recorded["run_id"]) / "closeout/pa2v_gate.json"
+    root = Path(path).resolve().parents[len(rel.parts) - 1]
+    if root / rel != Path(path).resolve():
+        raise AuthorizationError(f"{path} is not run {recorded['run_id']}'s gate record")
+    gate = pa2v_gate(recorded["run_id"], repo_root=root, write=False)
+    bad = [k for k in ("passed", "evidence_sha256", "study_identity_sha256", "harness_digest")
+           if gate.get(k) != recorded.get(k)]
+    if bad:
+        raise AuthorizationError(f"the recorded PA2v gate disagrees with its re-derivation on {bad}")
+    if not gate["passed"]:
+        raise AuthorizationError(f"PA2v did not pass: {gate['problems'] or [k for k, v in gate['checks'].items() if not v.get('ok')]}")
+    if gate["study_identity_sha256"] != study:
+        raise AuthorizationError(f"PA2v validated study {str(gate['study_identity_sha256'])[:12]}, not {study[:12]}")
+    if gate["harness_digest"] != harness:
+        raise AuthorizationError(f"PA2v validated harness {str(gate['harness_digest'])[:12]}, not {harness[:12]}: "
+                                 "the code changed since the validation")
+    return {"path": str(Path(path)), "sha256": sha256_file(Path(path)), "run_id": gate["run_id"],
+            "measured": gate["measured"]}
+
+
 def issue(kind: str, run_id: str, *, expected_usd: float, hard_cap_usd: float,
-          repo_root: Path = REPO, note: str = "", out: Path | None = None) -> Path:
-    """Write the one-use authorization for `run_id`, after checking the envelope."""
+          repo_root: Path = REPO, note: str = "", out: Path | None = None,
+          pa2v: Path | None = None, snapshot: dict | None = None) -> Path:
+    """Write the one-use authorization for `run_id`, after checking the
+    envelope, the project cap against the provider's billing now, and -- for a
+    formal session -- PA2v's gate (`pa2v`: the gate record), re-derived."""
     if kind not in KINDS:
         raise AuthorizationError(f"unknown kind {kind!r}")
     g = grant(repo_root)
@@ -196,18 +325,25 @@ def issue(kind: str, run_id: str, *, expected_usd: float, hard_cap_usd: float,
     env = remaining_envelope(repo_root)
     if hard_cap_usd > env["remaining_usd"] or hard_cap_usd > env["project_remaining_usd"]:
         raise AuthorizationError(f"${hard_cap_usd} does not fit the envelope {env}")
+    live = live_position(repo_root, snapshot=snapshot)
+    if hard_cap_usd > live["project_remaining_usd"]:
+        raise AuthorizationError(f"${hard_cap_usd} does not fit the project cap as the provider bills it now: {live}")
+    files = harness_files(repo_root)
+    harness = harness_source_digest(repo_root, files=files)
+    gate = None
+    if kind == "formal":
+        gate = verify_gate(pa2v, harness=harness["digest"], study=ident)
     path = Path(out) if out is not None else Path(repo_root) / authorization_path(run_id)
     if path.exists():
         raise AuthorizationError(f"{path} exists; one artifact per run, never re-issued")
-    files = harness_files(repo_root)
-    harness = harness_source_digest(repo_root, files=files)
     auth = H1PAAuthorization(
         authorization_id=f"{PLAN_ID}.{kind}.{run_id}",
         granted_utc=datetime.now(timezone.utc).isoformat(timespec="seconds"),
         granted_by=g["granted_by"], plan_id=PLAN_ID, plan_hash=ident,
         expected_usd=round(expected_usd, 4), hard_cap_usd=round(hard_cap_usd, 4), authorized_stages=(),
         stage_conditions={"kind": kind, "phase": phase, "grant_sha256": sha256_file(Path(repo_root) / GRANT),
-                          "envelope": json.dumps(env)},
+                          "envelope": json.dumps(env), "live_position": json.dumps(live),
+                          "pa2v_gate": json.dumps(gate) if gate else None},
         scope_note=note or g["phases"][phase]["scope"], authorized_session_commit=None,
         harness_source_digest=harness["digest"], harness_source_files=files,
         per_launch_hard_usd=round(hard_cap_usd, 4), provenance_commit=git_head(repo_root),
