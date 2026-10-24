@@ -9,27 +9,20 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**H1-PA, SECOND DESIGN: PCA-Original, D4-Original and D4-Augmented (E1's 2.96M plus 2.96M of pure fluid reasoning). AUDITED AT $0; NO-GO FOR FORMAL TRAINING UNTIL THE TOP-UP (2026-10-24).**
-Owner: [`docs/stages/stage-2/reasoning_data/H1PA.md`](../../docs/stages/stage-2/reasoning_data/H1PA.md),
-numbers in `logs/stages/stage-2/reasoning_data/audit/h1pa_augmented_audit.json`, identity in
-`configs/stages/stage-2/reasoning_data/h1pa.json`. Nothing is running or authorized. The account
-holds no pod and no volume.
-- **E1 kept exactly.** Identity is 30/30: E1's pack is rebuilt byte for byte,
-  and the merged set's E1 part is byte-identical.
-- **D4-Augmented** appends a fluid increment packed by E1's packer without
-  truncation:
-  - today: 492 sequences, 0 truncated;
-  - forecast: about 3,695 optimizer steps, 1.27× D4-Original's FLOPs;
-  - its gain is credited to data and compute together.
-- **The gap.** Qualified pure fluid data holds 2,807,282 of the 2,960,000
-  supervised tokens; the gap is 152,718.
-  - **Top-up:** 115 unused tasks, $1.74 expected and a $3.72 cap
-    (`plans/h1pa_topup_application.json`, priced from its own tasks).
-  - **Then:** training and evaluation, about $33–42 in all on L40S; that grant
-    also needs the $712.17 project ceiling raised.
-- **Packing review** (`audit/h1pa_pregen_review.json`): sessions are grouped by
-  system prompt only, and 191 of 492 fluid sequences mix reasoning axes.
-- **H1's volume `1980hnh75i` is retired** (AGENTS.md 2.5): $0.0449 actual.
+**H1-PA: DATA FROZEN. The PA1 fluid top-up reached SUCCESS ($0.8455 of $3.72). Training and evaluation are NOT authorized (2026-10-24).**
+Owner: [`docs/stages/stage-2/reasoning_data/H1PA.md`](../../docs/stages/stage-2/reasoning_data/H1PA.md)
+section 11, `audit/h1pa_fluid_final.json`, and `configs/stages/stage-2/reasoning_data/h1pa.json`.
+Nothing is running: 0 pods, 0 volumes, $0/h (snapshot `runpod_billing_2026-10-24T1251Z.json`).
+- **Arms:**
+  - PCA-Original: E1's checkpoints, re-evaluated;
+  - D4-Original: E1's pack, 2,916 steps;
+  - D4-Augmented: E1's pack unchanged plus 2.96M of pure fluid reasoning, packed
+    whole; 2,474 sequences, 3,711 steps, 1.27× D4-Original's FLOPs.
+- **Fluid pool:** 681 verified units, 3,128,179 supervised tokens. The cut is
+  530 sequences carrying 2,965,560.
+- **Next:** a grant for training and evaluation (about $45, L40S, with the
+  $712.17 project ceiling raised). PCA-Original seed 20260801 must be uploaded
+  first.
 
 **STAGE-2/3 H1: ANNULLED FOR PROMOTION (maintainer, 2026-10-24; `plans/h1_annulment.json`). As executed: P1g PASSED, P2's FOUR FORMAL UNITS COMPLETE; THE FROZEN DECISION WAS NOT_RESOLVED (FLOOR).**
 Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).
@@ -4206,7 +4199,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$647.2336` spent of `$712.1700`, leaving `$64.9364` |
+| project cap | `$648.0791` spent of `$712.1700`, leaving `$64.0909` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

@@ -220,6 +220,20 @@ def test_sessions_that_share_a_task_or_differ_in_protocol_do_not_merge(second, m
         CF.merge([_run("p1", "P1", ["a", "b"]), second()], tag=True)
 
 
+def test_two_runners_refuse_unless_that_exact_pair_was_shown_equivalent():
+    """H1-PA's PA1 ran under run_battery's bytes after the opt-in --decoding; only
+    the proven pair (audit/h1pa_runner_equivalence.json) folds, never another."""
+    other = _run("pa1", "PA1", ["c"])
+    for r in other["records"]:
+        r["generation_pass"]["runner_sha256"] = "n" * 64
+    with pytest.raises(SystemExit, match="runner_sha256"):
+        CF.merge([_run("p1", "P1", ["a"]), other], tag=True)
+    with pytest.raises(SystemExit, match="runner_sha256"):
+        CF.merge([_run("p1", "P1", ["a"]), other], tag=True, equivalent_runners={"x" * 64: "r" * 64})
+    got, _ = CF.merge([_run("p1", "P1", ["a"]), other], tag=True, equivalent_runners={"n" * 64: "r" * 64})
+    assert {s["unit_id"] for s in got} == {"a", "c"}
+
+
 def test_a_deallocated_cell_is_set_aside_by_name_and_an_undeclared_one_refuses():
     spec = SP.candidate_spec(V3)
     rc = {"id": "u#t0", "unit_id": "u", "stratum": "primary.abstract_analogical",

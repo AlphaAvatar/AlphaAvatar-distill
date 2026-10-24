@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 139,
+  "runs_unrecorded": 140,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -856,8 +856,8 @@
    },
    "reasoning_data": {
     "recorded": 0,
-    "unrecorded": 7,
-    "total": 7
+    "unrecorded": 8,
+    "total": 8
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -3880,6 +3880,14 @@
    "root": "logs/stages/stage-2/reasoning_data/runs/h1p2b_20261023_205037",
    "n_files": 5,
    "digest": "11a6c6cd4d241acb1617e11afce64fe7f7063c790f39129011656fb4c54e837f",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1pat_20261024_115517",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1pat_20261024_115517",
+   "n_files": 3,
+   "digest": "d5eeb077d48ea60fa0f5f0024da8d2a97b43b58e0bd016ded010715ac78a6b4d",
    "why": "no run manifest; its closeout states: COMPLETE"
   }
  ],

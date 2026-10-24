@@ -621,17 +621,25 @@ def verify_sessions(decls: list[dict], stores: dict[str, Path]) -> list[dict]:
     return out
 
 
-def merge(runs: list[dict], *, tag: bool) -> tuple[list[dict], dict]:
+def merge(runs: list[dict], *, tag: bool, equivalent_runners: dict[str, str] | None = None
+          ) -> tuple[list[dict], dict]:
     """The generated sessions of every run, one corpus: refused when a task was
     generated in two sessions, a unit id repeats, or the records name another
     protocol or runner. With `tag`, every session's pack target carries the
-    identity of the session that generated it."""
+    identity of the session that generated it.
+
+    `equivalent_runners` maps a runner sha256 to the one it was SHOWN to
+    generate identically to (a verified equivalence record, e.g. H1-PA's
+    `audit/h1pa_runner_equivalence.json`); only that exact pair is folded."""
     tasks_by_run = {r["identity"]["run_id"]: {x["task_id"] for x in r["records"]} for r in runs}
     seen, twice = {}, []
     for run, ids in tasks_by_run.items():
         twice += [f"{t} ({seen[t]}, {run})" for t in ids if t in seen]
         seen.update({t: run for t in ids})
-    pins = {k: {x["generation_pass"][k] for r in runs for x in r["records"]} for k in ("protocol_sha256", "runner_sha256")}
+    fold = equivalent_runners or {}
+    pins = {k: {fold.get(x["generation_pass"][k], x["generation_pass"][k]) if k == "runner_sha256"
+                else x["generation_pass"][k] for r in runs for x in r["records"]}
+            for k in ("protocol_sha256", "runner_sha256")}
     problems = ([f"tasks generated in two sessions: {twice[:5]}"] if twice else []) + \
         [f"records under {len(v)} {k} values" for k, v in pins.items() if len(v) != 1]
     sessions, units = [], {}

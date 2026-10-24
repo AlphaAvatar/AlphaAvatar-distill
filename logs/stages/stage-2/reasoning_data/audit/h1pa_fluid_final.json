@@ -1,0 +1,164 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1pa_fluid_final/v1",
+ "written_utc": "2026-10-24T12:51:34Z",
+ "terminal": "SUCCESS",
+ "pool": {
+  "by_run": {
+   "h1gen_20261022_190653": {
+    "phase": "P1",
+    "units": 593,
+    "sessions": 708,
+    "supervised_tokens": 2671150
+   },
+   "h1p1t_20261023_094007": {
+    "phase": "P1t",
+    "units": 23,
+    "sessions": 23,
+    "supervised_tokens": 136132
+   },
+   "h1pat_20261024_115517": {
+    "phase": "PA1",
+    "units": 65,
+    "sessions": 83,
+    "supervised_tokens": 320897
+   }
+  },
+  "units": 681,
+  "sessions": 814,
+  "supervised_tokens": 3128179,
+  "target": 2960000,
+  "shortfall_supervised_tokens": 0
+ },
+ "new_units_isolation_R0_R9": {
+  "pass": true,
+  "n_items": 65,
+  "violations": [],
+  "R2_flagged": 0
+ },
+ "independence": {
+  "units": 681,
+  "units_sharing_a_prompt": 0,
+  "examples": [],
+  "units_sharing_a_target": 0,
+  "units_without_target": 0,
+  "validation_prompts_also_in_training": 0
+ },
+ "fluid_increment": {
+  "packed_sequences": 530,
+  "system_prompt_groups": 1,
+  "sequences_with_two_or_more": {
+   "axes": 211,
+   "cells": 226,
+   "sources": 99
+  },
+  "training_samples_per_sequence": 1.49,
+  "units_per_sequence": 1.49,
+  "samples_per_sequence_distribution": {
+   "1": 301,
+   "2": 199,
+   "3": 28,
+   "4": 2
+  },
+  "axes_sharing_a_sequence": {
+   "primary.inductive_rule_discovery + primary.task_contained_deduction": 56,
+   "primary.inductive_rule_discovery + primary.interactive_adaptation": 43,
+   "primary.interactive_adaptation + primary.task_contained_deduction": 42,
+   "primary.compositional_generalization + primary.inductive_rule_discovery": 41,
+   "primary.compositional_generalization + primary.interactive_adaptation": 29,
+   "primary.compositional_generalization + primary.task_contained_deduction": 27,
+   "primary.abstract_analogical + primary.task_contained_deduction": 7,
+   "primary.abstract_analogical + primary.interactive_adaptation": 5,
+   "primary.abstract_analogical + primary.compositional_generalization": 2,
+   "primary.abstract_analogical + primary.inductive_rule_discovery": 1
+  },
+  "sequences_holding_one_unit_twice": 0,
+  "padding_ratio": 0.2726,
+  "supervised_tokens": 2965560,
+  "samples_packed_whole": "791/791",
+  "members_traceable_to_task_source_axis_unit": "791/791",
+  "reaches_2p96M": true,
+  "pack": "artifacts/stages/stage-2/reasoning_data/packs/D4A_fluid_final",
+  "outputs": {
+   "blocks.npz": "09ebee1d7d646dc6b4e97d57e0f12626018f0b530013567d9ecd2eac14ea9d31",
+   "audit.jsonl": "2185da48ab6458ae873ab5278933817ac70c6db7a783d8c3aea2052427a89356",
+   "ladder.json": "0e16046cdb966d1f15a38d8b498a79344ecb532ddfccb4294cf85c91daefe43c"
+  },
+  "declared_mixture": {
+   "primary.abstract_analogical/s0_generators_v2_calsplit": 0.122521,
+   "primary.compositional_generalization/reasoning_core": 0.039755,
+   "primary.compositional_generalization/reasoning_gym": 0.033191,
+   "primary.compositional_generalization/s0_generators_v2_calsplit": 0.141328,
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 0.246563,
+   "primary.interactive_adaptation/s0_generators_v2_calsplit": 0.168378,
+   "primary.task_contained_deduction/prontoqa": 0.046891,
+   "primary.task_contained_deduction/reasoning_core": 0.046505,
+   "primary.task_contained_deduction/reasoning_gym": 0.030126,
+   "primary.task_contained_deduction/s0_generators_v2_calsplit": 0.124743
+  },
+  "units_split_by_the_cut": 4,
+  "units_past_the_cut_never_trained": 19
+ },
+ "merged": {
+  "pack": "artifacts/stages/stage-2/reasoning_data/packs/D4A_merged_final",
+  "status": "COMPLETE: the fluid increment reaches 2.96M",
+  "outputs": {
+   "blocks.npz": "a1185c250a1316cc01ff5566c5a29d66d2edd756bf6c50086da24b36de11cbbe",
+   "audit.jsonl": "e752bd3aa090103527d590955f7d2c1ef2d0846dd4070d2cba51f311d478078c",
+   "ladder.json": "894134f9cc6081c8d1cb54c2db4fb7c0dc526a373df8e4eff4d797099fac60c4"
+  },
+  "rung": {
+   "target_supervised_tokens": 5926067,
+   "reachable": true,
+   "n_blocks": 2474,
+   "actual_supervised_tokens": 5926067,
+   "e1_supervised_tokens": 2960507,
+   "fluid_supervised_tokens": 2965560
+  }
+ },
+ "identity": [
+  {
+   "check": "merged: E1's 1,944 training sequences byte for byte",
+   "got": true,
+   "want": true,
+   "ok": true
+  },
+  {
+   "check": "merged: E1's 16 validation sequences byte for byte",
+   "got": true,
+   "want": true,
+   "ok": true
+  },
+  {
+   "check": "merged: the fluid sequences as packed",
+   "got": true,
+   "want": true,
+   "ok": true
+  },
+  {
+   "check": "merged: its E1 part names E1's pack",
+   "got": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "want": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "ok": true
+  },
+  {
+   "check": "fluid builder input",
+   "got": "816f47d23cad3284a170d29ab54c9854d8ae230f0529304bfee3b15d12e6a69c",
+   "want": "816f47d23cad3284a170d29ab54c9854d8ae230f0529304bfee3b15d12e6a69c",
+   "ok": true
+  },
+  {
+   "check": "fluid pack built from that input",
+   "got": "816f47d23cad3284a170d29ab54c9854d8ae230f0529304bfee3b15d12e6a69c",
+   "want": "816f47d23cad3284a170d29ab54c9854d8ae230f0529304bfee3b15d12e6a69c",
+   "ok": true
+  },
+  {
+   "check": "E1 pack unchanged",
+   "got": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "want": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "ok": true
+  }
+ ],
+ "identity_ok": true,
+ "authorizes": "nothing"
+}

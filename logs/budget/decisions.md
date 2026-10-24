@@ -13865,3 +13865,36 @@ on a paid pod.
 - **Revisit when.** The maintainer grants the 115-task top-up (cap $3.72,
   inside the $712.17 project cap). Training and evaluation will need the
   ceiling raised.
+
+## 2026-10-24 — H1-PA PA1 executed: the fluid top-up reached SUCCESS ($0.8455); data frozen
+
+- **Context.** The maintainer approved the 115-task top-up: task set
+  `d1ca7ece…`, $3.72 cumulative cap, project cap $712.17 unchanged, L40S
+  preferred.
+- **Integration ($0).**
+  - Phase `PA1`, plan `plans/h1pa_topup/generation_plan.json`, launch identity
+    `0c102842…`, harness `7aea3763…`.
+  - Grant `logs/budget/approvals/h1pa_topup_generation_grant.json`; one-use
+    authorization issued from it.
+  - The launcher's PA1 budget puts GPU + disk + the termination margin at
+    $3.7199 at $1.79/h (hard deadline 122.0 min).
+- **Hardware: A100.** L40S was never measured for teacher generation. Scaled by
+  bandwidth, it costs more ($2.17 expected) and would use 85% of the cap
+  conservatively.
+- **Result.**
+  - **Session** `h1pat_20261024_115517`: COMPLETE in 28.0 min, $0.8455 all-in;
+    the provider confirms the pod gone. 170 records, copies on the dev box and
+    the relay.
+  - **Pooling.** PA1's runner differs from P1's and P1t's only by the opt-in
+    `--decoding`, and pooling rests on a verified equivalence
+    (`audit/h1pa_runner_equivalence.json`; `merge` folds exactly that pair).
+  - **Pool:** 681 units (65 new), 3,128,179 supervised tokens. R0–R9 pass; no
+    shared prompt or target.
+  - **Fluid increment:** 530 sequences, 2,965,560 supervised tokens, all 791
+    samples whole.
+  - **Merged set:** 2,474 sequences, 5,926,067 supervised tokens, E1's part and
+    validation byte for byte.
+  - **D4-Augmented:** 3,711 optimizer steps.
+  - Identities frozen in `h1pa.json`.
+- **Revisit when.** The maintainer grants training and evaluation (about $45,
+  L40S). That grant also needs the project ceiling raised.

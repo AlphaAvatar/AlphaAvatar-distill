@@ -1,125 +1,137 @@
 {
-  "schema": "aadistill.stage2.reasoning_data.durability_plan/v2",
-  "status": "H1 durability (2026-10-21 UTC). VERIFIED / PLANNED / BLOCKED are kept apart. Choosing and paying for a backend is a maintainer decision (AGENTS.md P8.2.1); nothing here creates one. Revised 2026-10-22: the maintainer prefers a 30 GB network volume for the TRAINING phases and does not want one created for P1; any paid storage still needs its own authorization.",
-  "verified": {
-    "initialization_two_copies": {
-      "what": "Stage-0 D4 Top-1 (fc28e0dd..., artifact digest 457e194c...)",
-      "relay": "AlphaAvatar/aadistill-artifacts :: stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/ -- config.json, generation_config.json, model.safetensors (1,192,135,096 bytes, LFS sha256 = checkpoint sha256); relay METADATA read 2026-10-21",
-      "dev_box": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4/ -- downloaded from the relay and READ BACK: every file's sha256 and size equal the finalists manifest, and the checkpoint identity rebuilt from those bytes (aadistill.runtime.leaf_durability.verify_transferred_leaf) equals the search journal's artifact and weights digests",
-      "record": "logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json",
-      "registry": "logs/maintenance/inventories/checkpoint_registry.json :: scientific_artifacts.stage0_calvol_d4_top1_1301deb7 -- lifecycle retained_local, copies 1, all_copies_identity_verified true (rebuilt with --hash --relay)",
-      "restore_path": "PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.restore_initialization --dest <dir> (a pod restores from the relay and re-proves the identity before use)",
-      "tokenizer": "not stored with the checkpoint (tokenizer_sha256 null in its identity); bound by file hash to artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint, which every recovery used"
-    },
-    "relay_capacity": {
-      "headroom_bytes": 2147587286,
-      "probe_utc": "2026-10-21T17:52Z",
-      "probe": "hub_capacity.would_accept with fresh random oids, bisected; nothing uploaded",
-      "reading": "the relay holds one 1.19 GB bf16 student and refuses one 2.38 GB fp32 student directory"
-    },
-    "dev_box_free_gib_after_the_copy": 11,
-    "p1_generation_records_capacity": {
-      "what": "room on EXISTING storage for P1's generation records (text and token ids; about 0.1 GB per copy at the plan's upper bound, teacher_cal's 59 MB per 4.5M tokens)",
-      "relay": "aadistill.runtime.hub_capacity.would_accept on AlphaAvatar/aadistill-artifacts, 2026-10-22T15:53Z, fresh random oids, nothing uploaded: 2 x 150 MB ACCEPTED, 1 x 1 GB ACCEPTED, 1 x 2 GB ACCEPTED",
-      "dev_box_free_bytes": 9974575104,
-      "route": "completion shards: run_battery streams every finished episode, generation_driver seals finished candidates into hash-marked shards (every 100 records or 300 s), the launcher pulls every marked shard on each poll and hash-checks it into <scr>/store, and the run's closeout re-hashes all of them; a second copy goes to the relay from the dev box at P1v and is read back",
-      "reading": "P1 needs no new storage: the network volume is the TRAINING backend (P1g/P2), not created for P1 (maintainer 2026-10-22)"
-    },
-    "p1_generation_records_h1gen_20261022_190653": {
-      "shards": 26,
-      "records": 2164,
-      "bytes": 146867615,
-      "pod_to_dev_box": "every shard pulled on the poll after it was sealed, re-hashed against its marker (launcher on_poll; closeout re-hashed all 26, 0 unverified)",
-      "dev_box": "artifacts/stages/stage-2/reasoning_data/generation/h1gen_20261022_190653/ (shards, markers, .complete, the driver record, the collector archive; gitignored) and the session store /home/ecs-user/aad-scratch/h1gen_20261022_190653/store",
-      "relay": "AlphaAvatar/aadistill-artifacts :: stage2_h1/generation/h1gen_20261022_190653/ -- 55 files uploaded 2026-10-22, every one downloaded back and sha256-compared: 0 mismatches",
-      "restore": "relay or dev box; each shard verifies against its .done marker and carries the run's launch identity"
-    },
-    "p1t_generation_records_h1p1t_20261023_094007": {
-      "shards": 3,
-      "records": 100,
-      "bytes": 6388891,
-      "pod_to_dev_box": "every shard pulled on the poll after it was sealed, re-hashed against its marker (launcher on_poll; closeout re-hashed all 3, 0 unverified)",
-      "dev_box": "artifacts/stages/stage-2/reasoning_data/generation/h1p1t_20261023_094007/ (shards, markers, .complete, the driver record, the collector archive; gitignored) and the session store /home/ecs-user/aad-scratch/h1p1t_20261023_094007/store",
-      "relay": "AlphaAvatar/aadistill-artifacts :: stage2_h1/generation/h1p1t_20261023_094007/ -- 9 files uploaded 2026-10-23, every one downloaded back and sha256-compared: 0 mismatches",
-      "restore": "relay or dev box; each shard verifies against its .done marker and carries the run's launch identity"
-    },
-    "h1_formal_units_2026_10_24": {
-      "checkpoints": "the four formal students (fp32, 2,384,236,592 bytes each) persisted at the end of training and re-identified on the network volume 1980hnh75i (EUR-IS-1) under <mount>/h1/<unit>/checkpoint; save points released after each",
-      "evidence": "each unit's evidence (descriptors, report, evaluation generations and rows, training records, attempts) tarred on the pod, pulled and hash-checked (runs/<run>/closeout/outcome.json :: evidence), copied to the relay AlphaAvatar/aadistill-artifacts :: stage2_h1/units/evidence/ and read back (0 mismatches); reports, rows and descriptors also in git (logs/stages/stage-2/reasoning_data/units/)",
-      "retention": "the checkpoints stay on the volume for re-evaluation or a diagnostic until the maintainer decides; the volume's storage is booked ($4.20 reservation, retire by 2026-12-23 at the latest)"
-    }
+ "schema": "aadistill.stage2.reasoning_data.durability_plan/v2",
+ "status": "H1 durability (2026-10-21 UTC). VERIFIED / PLANNED / BLOCKED are kept apart. Choosing and paying for a backend is a maintainer decision (AGENTS.md P8.2.1); nothing here creates one. Revised 2026-10-22: the maintainer prefers a 30 GB network volume for the TRAINING phases and does not want one created for P1; any paid storage still needs its own authorization.",
+ "verified": {
+  "initialization_two_copies": {
+   "what": "Stage-0 D4 Top-1 (fc28e0dd..., artifact digest 457e194c...)",
+   "relay": "AlphaAvatar/aadistill-artifacts :: stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/ -- config.json, generation_config.json, model.safetensors (1,192,135,096 bytes, LFS sha256 = checkpoint sha256); relay METADATA read 2026-10-21",
+   "dev_box": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4/ -- downloaded from the relay and READ BACK: every file's sha256 and size equal the finalists manifest, and the checkpoint identity rebuilt from those bytes (aadistill.runtime.leaf_durability.verify_transferred_leaf) equals the search journal's artifact and weights digests",
+   "record": "logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json",
+   "registry": "logs/maintenance/inventories/checkpoint_registry.json :: scientific_artifacts.stage0_calvol_d4_top1_1301deb7 -- lifecycle retained_local, copies 1, all_copies_identity_verified true (rebuilt with --hash --relay)",
+   "restore_path": "PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.restore_initialization --dest <dir> (a pod restores from the relay and re-proves the identity before use)",
+   "tokenizer": "not stored with the checkpoint (tokenizer_sha256 null in its identity); bound by file hash to artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint, which every recovery used"
   },
-  "planned_per_asset": [
-    {
-      "asset": "teacher generation records (every candidate, token ids, stop reasons, verifier verdicts)",
-      "size": "about 0.11 GB for H1's 7.9M generated tokens (teacher_cal: 59 MB for 4.5M)",
-      "where": "pushed off the pod and hash-checked before teardown; dev box (artifacts/stages/stage-2/reasoning_data/) and the relay (fits the 2.0 GiB headroom)",
-      "retention": "kept: they are the corpus's provenance",
-      "restore": "relay or dev box, sha256-pinned"
-    },
-    {
-      "asset": "gold / verifier evidence (task sets, verdicts, process states)",
-      "size": "a few MB",
-      "where": "git (data/ and logs/)",
-      "retention": "kept",
-      "restore": "git"
-    },
-    {
-      "asset": "training packs (arm A and arm B: blocks.npz, audit.jsonl, ladder.json)",
-      "size": "about 0.1 GB each",
-      "where": "built on the dev box at $0 (artifacts/stages/stage-2/reasoning_data/packs/<arm>/), its sha256 recorded in h1_units.json, staged to each pod and checked there by unit_driver",
-      "retention": "kept until H1 closes; rebuildable to the same composition from the sessions and the builder, but not byte-for-byte (np.savez stamps a time), so the WRITTEN file's sha256 is the identity: arm A's is recorded in configs/stages/stage-2/reasoning_data/h1_units.json (written 2026-10-22)",
-      "restore": "dev box, or rebuild"
-    },
-    {
-      "asset": "resume state of a unit in flight (fp32 weights + AdamW moments)",
-      "size": "about 7.2 GiB",
-      "where": "the H1 backend, written at the trainer's save points",
-      "retention": "only while its unit runs; deleted once the unit's final checkpoint is durable",
-      "restore": "the backend"
-    },
-    {
-      "asset": "completed student checkpoints (4 units)",
-      "size": "2,384,285,634 bytes each (fp32 model directory), 8.9 GiB for 4",
-      "where": "the H1 backend, persisted at completion BEFORE evaluation starts, with identity, input hashes and content hash",
-      "retention": "until H1's analysis is closed; then retirable under AGENTS.md 2.5 unless a declared consumer names one",
-      "restore": "the backend"
-    },
-    {
-      "asset": "evaluation raw outputs (every generation, scored rows, reports)",
-      "size": "about 60 MB per unit",
-      "where": "pushed off the pod and hash-checked; dev box + git (small records), relay copy of the generations",
-      "retention": "kept",
-      "restore": "dev box or relay"
-    }
-  ],
-  "peak_backend_occupancy_gib": 18.3,
-  "_peak": "4 completed students 8.9 + one resume state 7.2 + initialization 1.1 + packs 0.2 + generation records 0.1 + margin; a 30 GB backend leaves room for one failed unit's rerun",
-  "blocked": {
-    "large_artifact_backend": "NOT PROVISIONED. The relay cannot hold one fp32 student, and the dev box (11 GiB free) cannot hold the four plus a resume state. Not needed for P1 (generation records fit existing storage: verified.p1_generation_records_capacity). H1 must not start training before a backend with >= 30 GB is confirmed AND its read-back path is exercised (write, read, hash) at its true per-object size.",
-    "options": [
-      {
-        "option": "a 30 GB RunPod network volume kept for H1",
-        "cost": "$2.10/month ($0.07/GB-month, the recorded basis), $4.20 for two months",
-        "notes": "the path Stage 0 exercised (volume_sync, require_pushed); durable only while paid; one running pod at a time; data centre fixed at creation"
-      },
-      {
-        "option": "an external object store under a maintainer account (S3/R2/B2)",
-        "cost": "about $1/month at 30 GB",
-        "notes": "independent of the provider; needs a credential and a transport that is not built or tested yet"
-      },
-      {
-        "option": "a paid HF storage increase",
-        "cost": "a plan change",
-        "notes": "uses the existing relay transport; a maintainer account decision"
-      }
-    ],
-    "recommendation": "the 30 GB network volume: it is the only option with an exercised transport. The launch precondition stays the capacity probe at the true per-object size and total, plus one write-read-hash round trip."
+  "relay_capacity": {
+   "headroom_bytes": 2147587286,
+   "probe_utc": "2026-10-21T17:52Z",
+   "probe": "hub_capacity.would_accept with fresh random oids, bisected; nothing uploaded",
+   "reading": "the relay holds one 1.19 GB bf16 student and refuses one 2.38 GB fp32 student directory"
   },
-  "not_durability": [
-    "an upload code path that exists",
-    "a PROTECTED registry entry",
-    "a pod disk that is still up"
+  "dev_box_free_gib_after_the_copy": 11,
+  "p1_generation_records_capacity": {
+   "what": "room on EXISTING storage for P1's generation records (text and token ids; about 0.1 GB per copy at the plan's upper bound, teacher_cal's 59 MB per 4.5M tokens)",
+   "relay": "aadistill.runtime.hub_capacity.would_accept on AlphaAvatar/aadistill-artifacts, 2026-10-22T15:53Z, fresh random oids, nothing uploaded: 2 x 150 MB ACCEPTED, 1 x 1 GB ACCEPTED, 1 x 2 GB ACCEPTED",
+   "dev_box_free_bytes": 9974575104,
+   "route": "completion shards: run_battery streams every finished episode, generation_driver seals finished candidates into hash-marked shards (every 100 records or 300 s), the launcher pulls every marked shard on each poll and hash-checks it into <scr>/store, and the run's closeout re-hashes all of them; a second copy goes to the relay from the dev box at P1v and is read back",
+   "reading": "P1 needs no new storage: the network volume is the TRAINING backend (P1g/P2), not created for P1 (maintainer 2026-10-22)"
+  },
+  "p1_generation_records_h1gen_20261022_190653": {
+   "shards": 26,
+   "records": 2164,
+   "bytes": 146867615,
+   "pod_to_dev_box": "every shard pulled on the poll after it was sealed, re-hashed against its marker (launcher on_poll; closeout re-hashed all 26, 0 unverified)",
+   "dev_box": "artifacts/stages/stage-2/reasoning_data/generation/h1gen_20261022_190653/ (shards, markers, .complete, the driver record, the collector archive; gitignored) and the session store /home/ecs-user/aad-scratch/h1gen_20261022_190653/store",
+   "relay": "AlphaAvatar/aadistill-artifacts :: stage2_h1/generation/h1gen_20261022_190653/ -- 55 files uploaded 2026-10-22, every one downloaded back and sha256-compared: 0 mismatches",
+   "restore": "relay or dev box; each shard verifies against its .done marker and carries the run's launch identity"
+  },
+  "p1t_generation_records_h1p1t_20261023_094007": {
+   "shards": 3,
+   "records": 100,
+   "bytes": 6388891,
+   "pod_to_dev_box": "every shard pulled on the poll after it was sealed, re-hashed against its marker (launcher on_poll; closeout re-hashed all 3, 0 unverified)",
+   "dev_box": "artifacts/stages/stage-2/reasoning_data/generation/h1p1t_20261023_094007/ (shards, markers, .complete, the driver record, the collector archive; gitignored) and the session store /home/ecs-user/aad-scratch/h1p1t_20261023_094007/store",
+   "relay": "AlphaAvatar/aadistill-artifacts :: stage2_h1/generation/h1p1t_20261023_094007/ -- 9 files uploaded 2026-10-23, every one downloaded back and sha256-compared: 0 mismatches",
+   "restore": "relay or dev box; each shard verifies against its .done marker and carries the run's launch identity"
+  },
+  "h1_formal_units_2026_10_24": {
+   "checkpoints": "the four formal students (fp32, 2,384,236,592 bytes each) persisted at the end of training and re-identified on the network volume 1980hnh75i (EUR-IS-1) under <mount>/h1/<unit>/checkpoint; save points released after each",
+   "evidence": "each unit's evidence (descriptors, report, evaluation generations and rows, training records, attempts) tarred on the pod, pulled and hash-checked (runs/<run>/closeout/outcome.json :: evidence), copied to the relay AlphaAvatar/aadistill-artifacts :: stage2_h1/units/evidence/ and read back (0 mismatches); reports, rows and descriptors also in git (logs/stages/stage-2/reasoning_data/units/)",
+   "retention": "the checkpoints stay on the volume for re-evaluation or a diagnostic until the maintainer decides; the volume's storage is booked ($4.20 reservation, retire by 2026-12-23 at the latest)"
+  },
+  "h1pa_pa1_generation_2026_10_24": {
+   "what": "H1-PA PA1 teacher-generation shards (170 records, 115 tasks) and their secured store",
+   "local": "artifacts/stages/stage-2/reasoning_data/generation/h1pat_20261024_115517/ (copied from the session store /home/ecs-user/aad-scratch/h1pat_20261024_115517/store)",
+   "relay": "AlphaAvatar/aadistill-artifacts :: stage2_h1/generation/h1pat_20261024_115517/ -- 38 files uploaded 2026-10-24, every one downloaded back and sha256-compared: 0 mismatches",
+   "restore": "relay or dev box; each shard verifies against its .done marker and carries the run's launch identity"
+  },
+  "h1pa_fluid_and_merged_packs_2026_10_24": {
+   "what": "H1-PA's final fluid increment (D4A_fluid_final), the merged training set (D4A_merged_final) and the fluid builder input",
+   "local": "artifacts/stages/stage-2/reasoning_data/packs/{D4A_fluid_final,D4A_merged_final,D4A_fluid_final_sessions.jsonl}",
+   "relay": "AlphaAvatar/aadistill-artifacts :: stage2_h1pa/packs/ -- 8 files uploaded 2026-10-24, read back, 0 mismatches",
+   "identity": "configs/stages/stage-2/reasoning_data/h1pa.json :: datasets (blocks/audit/ladder sha256s); rebuildable at $0 from the three stores (h1pa_audit sessions -> build_token_ladder --no-terminal-truncation -> h1pa_audit merge)"
+  }
+ },
+ "planned_per_asset": [
+  {
+   "asset": "teacher generation records (every candidate, token ids, stop reasons, verifier verdicts)",
+   "size": "about 0.11 GB for H1's 7.9M generated tokens (teacher_cal: 59 MB for 4.5M)",
+   "where": "pushed off the pod and hash-checked before teardown; dev box (artifacts/stages/stage-2/reasoning_data/) and the relay (fits the 2.0 GiB headroom)",
+   "retention": "kept: they are the corpus's provenance",
+   "restore": "relay or dev box, sha256-pinned"
+  },
+  {
+   "asset": "gold / verifier evidence (task sets, verdicts, process states)",
+   "size": "a few MB",
+   "where": "git (data/ and logs/)",
+   "retention": "kept",
+   "restore": "git"
+  },
+  {
+   "asset": "training packs (arm A and arm B: blocks.npz, audit.jsonl, ladder.json)",
+   "size": "about 0.1 GB each",
+   "where": "built on the dev box at $0 (artifacts/stages/stage-2/reasoning_data/packs/<arm>/), its sha256 recorded in h1_units.json, staged to each pod and checked there by unit_driver",
+   "retention": "kept until H1 closes; rebuildable to the same composition from the sessions and the builder, but not byte-for-byte (np.savez stamps a time), so the WRITTEN file's sha256 is the identity: arm A's is recorded in configs/stages/stage-2/reasoning_data/h1_units.json (written 2026-10-22)",
+   "restore": "dev box, or rebuild"
+  },
+  {
+   "asset": "resume state of a unit in flight (fp32 weights + AdamW moments)",
+   "size": "about 7.2 GiB",
+   "where": "the H1 backend, written at the trainer's save points",
+   "retention": "only while its unit runs; deleted once the unit's final checkpoint is durable",
+   "restore": "the backend"
+  },
+  {
+   "asset": "completed student checkpoints (4 units)",
+   "size": "2,384,285,634 bytes each (fp32 model directory), 8.9 GiB for 4",
+   "where": "the H1 backend, persisted at completion BEFORE evaluation starts, with identity, input hashes and content hash",
+   "retention": "until H1's analysis is closed; then retirable under AGENTS.md 2.5 unless a declared consumer names one",
+   "restore": "the backend"
+  },
+  {
+   "asset": "evaluation raw outputs (every generation, scored rows, reports)",
+   "size": "about 60 MB per unit",
+   "where": "pushed off the pod and hash-checked; dev box + git (small records), relay copy of the generations",
+   "retention": "kept",
+   "restore": "dev box or relay"
+  }
+ ],
+ "peak_backend_occupancy_gib": 18.3,
+ "_peak": "4 completed students 8.9 + one resume state 7.2 + initialization 1.1 + packs 0.2 + generation records 0.1 + margin; a 30 GB backend leaves room for one failed unit's rerun",
+ "blocked": {
+  "large_artifact_backend": "NOT PROVISIONED. The relay cannot hold one fp32 student, and the dev box (11 GiB free) cannot hold the four plus a resume state. Not needed for P1 (generation records fit existing storage: verified.p1_generation_records_capacity). H1 must not start training before a backend with >= 30 GB is confirmed AND its read-back path is exercised (write, read, hash) at its true per-object size.",
+  "options": [
+   {
+    "option": "a 30 GB RunPod network volume kept for H1",
+    "cost": "$2.10/month ($0.07/GB-month, the recorded basis), $4.20 for two months",
+    "notes": "the path Stage 0 exercised (volume_sync, require_pushed); durable only while paid; one running pod at a time; data centre fixed at creation"
+   },
+   {
+    "option": "an external object store under a maintainer account (S3/R2/B2)",
+    "cost": "about $1/month at 30 GB",
+    "notes": "independent of the provider; needs a credential and a transport that is not built or tested yet"
+   },
+   {
+    "option": "a paid HF storage increase",
+    "cost": "a plan change",
+    "notes": "uses the existing relay transport; a maintainer account decision"
+   }
   ],
-  "authorizes": "nothing"
+  "recommendation": "the 30 GB network volume: it is the only option with an exercised transport. The launch precondition stays the capacity probe at the true per-object size and total, plus one write-read-hash round trip."
+ },
+ "not_durability": [
+  "an upload code path that exists",
+  "a PROTECTED registry entry",
+  "a pod disk that is still up"
+ ],
+ "authorizes": "nothing"
 }

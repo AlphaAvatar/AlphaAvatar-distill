@@ -66,10 +66,15 @@ def builder_rows(placed: list[dict]) -> list[dict]:
     return [{**s, "data_type": s["stratum"], "source_id": s["unit_id"]} for s in placed]
 
 
-def derive(stores: dict[str, Path]) -> dict:
+def derive(stores: dict[str, Path], topups: tuple[dict, ...] = ()) -> dict:
     """The sessions the @v3 pack was built from, re-derived from the secured
     stores by the feasibility tool's own functions, their recorded hash checked,
-    rendered and admitted as @v3 admitted them; anything else refuses."""
+    rendered and admitted as @v3 admitted them; anything else refuses.
+
+    `topups` are further generation sessions ({phase, run_id,
+    launch_identity_sha256}, e.g. H1-PA's PA1) verified under their own
+    authorizations and merged in after the @v3 check: a task, unit, protocol
+    or runner that differs or repeats across the sessions refuses (`merge`)."""
     from stages.reasoning_data import build_arm_b as AB
     from stages.reasoning_data import build_master_ladder as B
     from stages.reasoning_data import corpus_feasibility as CF
@@ -79,24 +84,36 @@ def derive(stores: dict[str, Path]) -> dict:
     if A.sha256_file(cand_path) != rec["provenance"]["candidate_sha256"]:
         raise SystemExit(f"{cand_path} is not the corpus file the @v3 pack names")
     spec, cand = SP.candidate_spec(cand_path), A.read_json(cand_path)
-    runs = CF.verify_sessions(CF.declared_sessions(cand), stores)
+    runs = CF.verify_sessions(CF.declared_sessions(cand) + list(topups), stores)
+    base = runs[:len(runs) - len(topups)]
     reuse = [A.REPO / r["path"] for r in cand["data"]["reuse"]]
     for r, p in zip(cand["data"]["reuse"], reuse):
         if A.sha256_file(p) != r["sha256"]:
             raise SystemExit(f"{r['path']} is not the reuse selection the corpus names")
-    generated, _ = CF.merge(runs, tag="generation_sessions" in cand["data"])
+    generated, _ = CF.merge(base, tag="generation_sessions" in cand["data"])
     generated, aside = CF.set_aside(generated, spec)
     sessions = generated + AB._reused(reuse)
     sha = CF._sha("".join(json.dumps(s, sort_keys=True) + "\n" for s in sessions))
     if sha != rec["provenance"]["sessions_sha256"]:
         raise SystemExit(f"the re-derived sessions hash {sha}, not the {rec['provenance']['sessions_sha256']} "
                          "the @v3 pack was built from")
+    added = []
+    if topups:
+        eq = A.read_json(A.LOG_DIR / "audit/h1pa_runner_equivalence.json")
+        if not eq["pass"]:
+            raise SystemExit("the runner equivalence record does not pass; the sessions are not pooled")
+        allgen, provenance = CF.merge(runs, tag=True, equivalent_runners={eq["new"]["sha256"]: eq["old"]["sha256"]})
+        allgen, aside = CF.set_aside(allgen, spec)
+        mine = {x["unit_id"] for r in runs[len(base):] for x in r["got"]["sessions"]}
+        added = [x for x in allgen if x["unit_id"] in mine]
+        sessions = sessions + added
     placed = AB.place(sessions, AB.cell_shares(spec, spec["corpus_id"]))
     rendered, excluded, _ = B.render_all(runs[0]["tok"], placed, block_len=int(spec["block_len"]))
     if excluded:
         raise SystemExit(f"{len(excluded)} units no longer admit; the pool is not the one @v3 packed")
     return {"runs": runs, "spec": spec, "placed": placed, "aside": aside, "rendered": rendered,
-            "tok": runs[0]["tok"], "sessions_sha256": sha, "stores": stores}
+            "tok": runs[0]["tok"], "sessions_sha256": sha, "stores": stores, "added": added,
+            "v3_runs": len(base)}
 
 
 def fluid_of(placed: list[dict]) -> list[dict]:
@@ -113,9 +130,21 @@ def natural_shares(rows: list[dict], rendered: dict) -> dict:
     return {k: round(v / t, 6) for k, v in sorted(c.items())}
 
 
+def topup_decls(specs: list[str]) -> tuple[dict, ...]:
+    """``PHASE=RUN_ID`` -> the session declaration `verify_sessions` takes; the
+    launch identity is the one the run's own authorization binds."""
+    from stages.reasoning_data import governance as GOV
+    out = []
+    for item in specs or []:
+        phase, run_id = item.split("=", 1)
+        auth = GOV.load(A.REPO / GOV.authorization_path(run_id))
+        out.append({"phase": phase, "run_id": run_id, "launch_identity_sha256": auth.plan_hash})
+    return tuple(out)
+
+
 def cmd_sessions(args) -> int:
     stores = {k: Path(v) for k, v in (kv.split("=", 1) for kv in args.store)}
-    d = derive(stores)
+    d = derive(stores, topup_decls(args.topup))
     rows = fluid_of(d["placed"])
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -123,7 +152,8 @@ def cmd_sessions(args) -> int:
         for row in builder_rows(rows):
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
     shares = natural_shares(rows, d["rendered"])
-    meta = {"source_sessions_sha256": d["sessions_sha256"], "n_sessions": len(rows),
+    meta = {"source_sessions_sha256": d["sessions_sha256"], "topups": list(args.topup or []),
+            "n_sessions": len(rows),
             "n_units": len({s["unit_id"] for s in rows}),
             "supervised_tokens": sum(d["rendered"][s["id"]].n_supervised for s in rows),
             "declared_mixture": shares, "builder_input_sha256": A.sha256_file(out)}
@@ -755,6 +785,184 @@ def cmd_pregen(args) -> int:
     return 0
 
 
+def cmd_finalize(args) -> int:
+    """After the top-up: the fluid pool with the new verified units, their
+    R0-R9 with the teacher text, the 2.96M cut of the no-truncation pack, the
+    merged training set, and the terminal (SUCCESS or DATA SHORTFALL)."""
+    from stages.reasoning_data import corpus_feasibility as CF
+    from stages.reasoning_data import isolation_check as IC
+    stores = {k: Path(v) for k, v in (kv.split("=", 1) for kv in args.store)}
+    d = derive(stores, topup_decls(args.topup))
+    rows = fluid_of(d["placed"])
+    meta = A.read_json(Path(args.fluid_sessions).with_suffix(".meta.json"))
+    fluid, merged = Path(args.fluid_pack).resolve(), Path(args.merged).resolve()
+    tasks = d["runs"][0]["tasks"]
+    added = {x["unit_id"]: x for x in d["added"]}
+    items = [{**tasks[uid], "unit_id": uid, "messages": x["messages"]} for uid, x in sorted(added.items())]
+    iso = IC.check_pool(items)
+    per_run = {}
+    for r in d["runs"]:
+        mine = {x["unit_id"] for x in r["got"]["sessions"]}
+        rs = [s for s in rows if s["unit_id"] in mine]
+        per_run[r["identity"]["run_id"]] = {
+            "phase": r["identity"]["phase"], "units": len({s["unit_id"] for s in rs}), "sessions": len(rs),
+            "supervised_tokens": sum(d["rendered"][s["id"]].n_supervised for s in rs)}
+    pool_tokens = sum(d["rendered"][s["id"]].n_supervised for s in rows)
+    n_f, complete = fluid_cut(fluid)
+    f_sessions = {s["id"]: s for s in A.jsonl(Path(args.fluid_sessions))}
+    f_rows = list(A.jsonl(fluid / "audit.jsonl"))
+    cut = f_rows[:n_f]
+    stats = packing_stats(cut, f_sessions, unit_of=lambda x: x["unit_id"], axis_of=lambda x: x["stratum"].split("/")[0],
+                          source_of=lambda x: (x.get("attributes") or {}).get("source"))
+    in_cut = {f_sessions[m["session_id"]]["unit_id"] for r in cut for m in r["sessions"]}
+    later = {f_sessions[m["session_id"]]["unit_id"] for r in f_rows[n_f:] for m in r["sessions"]}
+    ind = CF.independence(rows, set())
+    ident = (merged_identity(merged)
+             + [check("fluid builder input", A.sha256_file(Path(args.fluid_sessions)), meta["builder_input_sha256"]),
+                check("fluid pack built from that input", A.read_json(fluid / "ladder.json")["sessions_sha256"],
+                      meta["builder_input_sha256"]),
+                check("E1 pack unchanged", A.sha256_file(E1_PACK / "blocks.npz"),
+                      A.read_json(STUDY)["datasets"]["e1_2p96M"]["blocks_sha256"])])
+    terminal = ("SUCCESS" if complete and iso["pass"] and all(c["ok"] for c in ident)
+                and not ind["units_sharing_a_prompt"] and not ind["units_sharing_a_target"] else
+                "DATA SHORTFALL" if not complete else "HARD BOUNDARY")
+    doc = {"schema": "aadistill.stage2.reasoning_data.h1pa_fluid_final/v1",
+           "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+           "terminal": terminal,
+           "pool": {"by_run": per_run, "units": len({s["unit_id"] for s in rows}), "sessions": len(rows),
+                    "supervised_tokens": pool_tokens, "target": RUNG,
+                    "shortfall_supervised_tokens": max(0, RUNG - pool_tokens)},
+           "new_units_isolation_R0_R9": {"pass": iso["pass"], "n_items": iso["n_items"],
+                                         "violations": iso["violations"][:20],
+                                         "R2_flagged": iso["results"]["R2_near_duplicate"].get("flagged")},
+           "independence": ind,
+           "fluid_increment": {**stats, "reaches_2p96M": complete,
+                               "pack": str(fluid.relative_to(A.REPO)),
+                               "outputs": {f: A.sha256_file(fluid / f) for f in ("blocks.npz", "audit.jsonl", "ladder.json")},
+                               "declared_mixture": A.read_json(fluid / "ladder.json")["declared_mixture"],
+                               "units_split_by_the_cut": len(in_cut & later),
+                               "units_past_the_cut_never_trained": len(later - in_cut)},
+           "merged": {"pack": str(merged.relative_to(A.REPO)), "status": A.read_json(merged / "ladder.json")["status"],
+                      "outputs": {f: A.sha256_file(merged / f) for f in ("blocks.npz", "audit.jsonl", "ladder.json")},
+                      "rung": A.read_json(merged / "ladder.json")["rungs"][0]},
+           "identity": ident, "identity_ok": all(c["ok"] for c in ident),
+           "authorizes": "nothing"}
+    out = A.LOG_DIR / "audit/h1pa_fluid_final.json"
+    out.write_text(json.dumps(doc, indent=1, default=str) + "\n")
+    print(json.dumps({k: doc[k] for k in ("terminal", "pool", "identity_ok")}, indent=1))
+    return 0 if terminal == "SUCCESS" else 3
+
+
+RUNNER = "scripts/stages/stage-0/calibration_volume/run_battery.py"
+RUNNER_EQUIVALENCE = A.LOG_DIR / "audit/h1pa_runner_equivalence.json"
+
+
+def cmd_runner_equivalence(args) -> int:
+    """PA1 ran under run_battery's bytes after the opt-in `--decoding` was
+    added (c7edf392); P1 and P1t under the bytes before it. Pooling them is
+    allowed only when the GENERATE path is shown unchanged, three ways: the
+    diff (every change gated by `--decoding` / `seed_of`, both absent in
+    generate mode); a replay of both versions' episode loop on PA1's own tasks
+    in generate mode through one scripted engine, every request compared; and
+    PA1's records (each turn's seed is the frozen rule's, the sampling the
+    frozen preset)."""
+    import importlib.util
+    import subprocess
+    import sys
+    from types import SimpleNamespace
+    from aadistill.evaluation.behavior import split_generation, template_opens_think
+    old_src = subprocess.run(["git", "show", f"{args.old_commit}:{RUNNER}"], cwd=A.REPO, capture_output=True,
+                             check=True).stdout
+    new_src = (A.REPO / RUNNER).read_bytes()
+    sha = lambda b: hashlib.sha256(b).hexdigest()
+    store = Path(args.store)
+    recs = [json.loads(l) for f in sorted(store.glob("pass*.part*.jsonl")) for l in f.read_text().splitlines() if l]
+    pinned = {r["generation_pass"]["runner_sha256"] for r in recs}
+    tmp = Path(args.scratch)
+    tmp.mkdir(parents=True, exist_ok=True)
+    (tmp / "run_battery_old.py").write_bytes(old_src)
+
+    def load(path, name):
+        spec = importlib.util.spec_from_file_location(name, path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+    old, new = load(tmp / "run_battery_old.py", "rb_old"), load(A.REPO / RUNNER, "rb_new")
+
+    class Tok:
+        def apply_chat_template(self, msgs, tokenize=False, add_generation_prompt=True):
+            return "".join(f"<|im_start|>{m['role']}\n{m['content']}<|im_end|>\n" for m in msgs) + "<|im_start|>assistant\n"
+
+        def __call__(self, text, add_special_tokens=False):
+            return SimpleNamespace(input_ids=[ord(c) % 50000 + 1 for c in text])
+
+        def decode(self, ids, skip_special_tokens=False):
+            return "".join("<|im_end|>" if i == 0 else chr(i) for i in ids)
+
+    class Engine:
+        def __init__(self):
+            self.queue, self.requests = [], []
+
+        def add_request(self, rid, prompt, params):
+            self.requests.append([rid, hashlib.sha256(json.dumps(prompt["prompt_token_ids"]).encode()).hexdigest(),
+                                  params])
+            ids = [ord(c) for c in "think</think>ANSWER: 1"] + [0]
+            self.queue.append(SimpleNamespace(request_id=rid, finished=True,
+                                              outputs=[SimpleNamespace(token_ids=ids, finish_reason="stop")]))
+
+        def has_unfinished_requests(self):
+            return bool(self.queue)
+
+        def step(self):
+            out, self.queue = self.queue, []
+            return out
+
+        def abort_request(self, rid):
+            pass
+
+    plan = A.read_json(A.REPO / "logs/stages/stage-2/reasoning_data/plans/h1pa_topup/generation_plan.json")
+    tasks = [json.loads(l) for f in plan["inputs"] for l in (A.REPO / plan["inputs_dir"] / f["file"]).read_text().splitlines() if l]
+    proto = A.read_json(A.CONFIG_DIR / "generation_protocol.json")["execution"]
+    replay = {}
+    for name, mod in (("old", old), ("new", new)):
+        logs = []
+        for k in (0, 1):
+            eng = Engine()
+            mod.run_episodes(tasks, tok=Tok(), eng=eng, make_sampling=lambda n, seed: [n, seed],
+                             limit=8184, ctx=8192, stop_ids=[0], mode="generate", seed_base=proto["seed_base"] + k,
+                             system="You are a helpful Assistant.", check_every=10 ** 9,
+                             degeneration_check=lambda ids: None, split_generation=split_generation,
+                             template_opens_think=template_opens_think, label="eq", log=lambda *a, **kw: None,
+                             action_protocol=proto["action_protocol"])
+            logs.append(eng.requests)
+        replay[name] = logs
+    same_requests = replay["old"] == replay["new"]
+    seeds_ok = all(t["seed"] == new.request_seed(proto["seed_base"] + r["candidate_index"], r["task_id"], t["turn"])
+                   for r in recs for t in r["turns"])
+    summaries = [json.loads(f.read_text()) for f in sorted(store.glob("extracted/audit/*/*.raw.summary.json"))]
+    sampling_ok = all((s.get("identity") or s)["sampling"] == new.GENERATE_SAMPLING == old.GENERATE_SAMPLING
+                      and (s.get("identity") or s).get("decoding_protocol") is None for s in summaries)
+    doc = {"schema": "aadistill.stage2.reasoning_data.h1pa_runner_equivalence/v1",
+           "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+           "runner": RUNNER,
+           "old": {"commit": args.old_commit, "sha256": sha(old_src), "ran": ["P1", "P1t"]},
+           "new": {"sha256": sha(new_src), "ran": ["PA1"], "pinned_in_PA1_records": sorted(pinned)},
+           "diff": "every change is gated by --decoding (eval mode only) or by seed_of (None in generate mode); "
+                   "the one unconditional line imports shared.evaluation.decoding",
+           "replay": {"tasks": len(tasks), "requests_per_pass": [len(x) for x in replay["new"]],
+                      "identical_requests": same_requests,
+                      "_": "both versions' run_episodes in generate mode on PA1's 115 tasks, both passes, one scripted "
+                           "engine: every request's id, prompt token hash, allowance and seed compared"},
+           "records": {"PA1_records": len(recs), "every_seed_is_the_frozen_rule": seeds_ok,
+                       "sampling_is_the_frozen_preset_and_no_decoding_protocol": sampling_ok},
+           "pass": bool(same_requests and seeds_ok and sampling_ok and pinned == {sha(new_src)}),
+           "allows": f"pooling records pinned to runner {sha(new_src)[:12]} with those pinned to {sha(old_src)[:12]}",
+           "authorizes": "nothing"}
+    RUNNER_EQUIVALENCE.write_text(json.dumps(doc, indent=1) + "\n")
+    print(json.dumps({k: doc[k] for k in ("replay", "records", "pass")}, indent=1))
+    return 0 if doc["pass"] else 3
+
+
 def _prompt(s: dict) -> str:
     return hashlib.sha256(next(m["content"] for m in s["messages"] if m["role"] == "user").encode()).hexdigest()
 
@@ -939,7 +1147,18 @@ def main(argv=None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     s = sub.add_parser("sessions")
     s.add_argument("--store", action="append", required=True, metavar="RUN_ID=DIR")
+    s.add_argument("--topup", action="append", default=[], metavar="PHASE=RUN_ID")
     s.add_argument("--out", required=True)
+    q = sub.add_parser("runner-equivalence")
+    q.add_argument("--old-commit", required=True)
+    q.add_argument("--store", required=True, help="PA1's secured store")
+    q.add_argument("--scratch", required=True)
+    z = sub.add_parser("finalize")
+    z.add_argument("--store", action="append", required=True, metavar="RUN_ID=DIR")
+    z.add_argument("--topup", action="append", required=True, metavar="PHASE=RUN_ID")
+    z.add_argument("--fluid-sessions", required=True)
+    z.add_argument("--fluid-pack", required=True)
+    z.add_argument("--merged", required=True)
     m = sub.add_parser("merge")
     m.add_argument("--fluid-pack", required=True)
     m.add_argument("--out", required=True)
@@ -963,7 +1182,8 @@ def main(argv=None) -> int:
     g.add_argument("--a100-price", type=float, required=True)
     g.add_argument("--reserve", type=int, default=150_000)
     args = ap.parse_args(argv)
-    return {"sessions": cmd_sessions, "merge": cmd_merge, "audit": cmd_audit, "pregen": cmd_pregen}[args.cmd](args)
+    return {"sessions": cmd_sessions, "merge": cmd_merge, "audit": cmd_audit, "pregen": cmd_pregen,
+            "finalize": cmd_finalize, "runner-equivalence": cmd_runner_equivalence}[args.cmd](args)
 
 
 if __name__ == "__main__":
