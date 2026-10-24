@@ -10,21 +10,27 @@
  ],
  "kept_unchanged": {
   "results": "analyses/h1_result.json, units/<unit>/ (reports, descriptors, formal reports, rows), H1.md sections 16-19: not edited, not re-read as evidence for a later study",
-  "runs": ["runs/h1gen_20261022_190653", "runs/h1p1t_20261023_094007", "runs/h1p1g_20261023_185836",
-           "runs/h1p1g_20261023_191644", "runs/h1p2b_20261023_195303", "runs/h1p2b_20261023_205037",
-           "runs/h1p2a_20261023_232905"],
-  "money": "every closeout cost stays booked; the units phase spent $21.84 of its $50 (logs/budget/approvals/h1_units_phase_grant.json :: closed)",
+  "runs": [
+   "runs/h1gen_20261022_190653",
+   "runs/h1p1t_20261023_094007",
+   "runs/h1p1g_20261023_185836",
+   "runs/h1p1g_20261023_191644",
+   "runs/h1p2b_20261023_195303",
+   "runs/h1p2b_20261023_205037",
+   "runs/h1p2a_20261023_232905"
+  ],
+  "money": "every closeout cost stays booked; the units phase spent $17.6826 of its $50 (sessions $17.6377 + the volume's actual $0.0449 after its retirement; logs/budget/approvals/h1_units_phase_grant.json :: closed)",
   "evidence": "each unit's evidence on the dev box (artifacts/stages/stage-2/reasoning_data/units/evidence) and on the relay (stage2_h1/units/evidence/), read back",
-  "checkpoints": "the four formal students on network volume 1980hnh75i (EUR-IS-1); their identities in units/<unit>/checkpoint.descriptor.json"
+  "checkpoints": "the four formal students' identities in units/<unit>/checkpoint.descriptor.json; their weights were RETIRED 2026-10-24 with network volume 1980hnh75i (AGENTS.md 2.5; tombstone in storage/h1_volume_1980hnh75i.json)"
  },
- "not_annulled": "the teacher-native data P1 and P1t generated and verified (stage2.reasoning_master@v3): H1-PA's D4-Reasoning arm reads it as it is, with no new generation",
+ "not_annulled": "the teacher-native data P1 and P1t generated and verified (stage2.reasoning_master@v3): H1-PA's D4-Augmented arm reads its primary cells as they are, with no regeneration",
  "checkpoint_consumers": {
   "audited_utc": "2026-10-24",
   "found": "none: no launcher, setup, plan or driver declares H1's four checkpoints as an input; the durability plan records where they are; H1-PA trains D4 from its initialization and evaluates PCA-Original from E1's checkpoints",
   "eligible": "AGENTS.md 2.5 retirement (terminal, evaluation evidence durable, identities preserved, no consumer, not an incumbent, release or anchor)",
-  "decision": "the maintainer's; until then the volume bills $0.003/h against H1's storage reservation (storage/h1_volume_1980hnh75i.json, retire_by 2026-12-23)"
+  "decision": "retired 2026-10-24 under AGENTS.md 2.5 once the maintainer asked for H1's storage to be reviewed by the lifecycle rule (storage/h1_volume_1980hnh75i.json :: retirement)"
  },
  "grant": "logs/budget/approvals/h1_units_phase_grant.json is CLOSED; unit_governance.issue refuses it, and its $28.16 remainder funds no later study",
- "successor": "configs/stages/stage-2/reasoning_data/h1pa.json (study stage2.reasoning_data.h1pa) under its own identity",
+ "successor": "configs/stages/stage-2/reasoning_data/h1pa.json (study stage2.reasoning_data.h1pa, v2: PCA-Original, D4-Original, D4-Augmented)",
  "authorizes": "nothing"
 }

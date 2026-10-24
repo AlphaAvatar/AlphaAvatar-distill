@@ -1,0 +1,836 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1pa_augmented_audit/v1",
+ "written_utc": "2026-10-24T10:01:12Z",
+ "study": "stage2.reasoning_data.h1pa",
+ "study_config_sha256": "d9b62aee0ee6aa2cd89608cb24854616e965fe540776e546739323063b4e7083",
+ "identity": [
+  {
+   "check": "E1 pack blocks.npz",
+   "got": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "want": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "ok": true
+  },
+  {
+   "check": "E1 pack ladder.json",
+   "got": "d4941722a099754ef5ba82d529c0fe2274a6b97af61b2fa52519ed22b84201f0",
+   "want": "d4941722a099754ef5ba82d529c0fe2274a6b97af61b2fa52519ed22b84201f0",
+   "ok": true
+  },
+  {
+   "check": "E1 pack audit.jsonl",
+   "got": "15f16b7b22b229e9c0ae510b85b4c967948828e0e7d50fac15c3e516e3e911e6",
+   "want": "15f16b7b22b229e9c0ae510b85b4c967948828e0e7d50fac15c3e516e3e911e6",
+   "ok": true
+  },
+  {
+   "check": "E1 sessions",
+   "got": "2b4edc2e2cc16cd56dae3d340345e1a17e2c4a8baa9837650a7bf5e340fa6fcd",
+   "want": "2b4edc2e2cc16cd56dae3d340345e1a17e2c4a8baa9837650a7bf5e340fa6fcd",
+   "ok": true
+  },
+  {
+   "check": "E1 pack built from those sessions",
+   "got": "2b4edc2e2cc16cd56dae3d340345e1a17e2c4a8baa9837650a7bf5e340fa6fcd",
+   "want": "2b4edc2e2cc16cd56dae3d340345e1a17e2c4a8baa9837650a7bf5e340fa6fcd",
+   "ok": true
+  },
+  {
+   "check": "E1 config seed 20260726",
+   "got": "c2e46e61b6b10ef0046acc2e1cf82c613991af113399568a5605fa819d6bd07c",
+   "want": "c2e46e61b6b10ef0046acc2e1cf82c613991af113399568a5605fa819d6bd07c",
+   "ok": true
+  },
+  {
+   "check": "E1 config seed 20260801",
+   "got": "8b385927accb73dd24233b69d0bf70bffd026d1a22e943bc39a0e7cfdc585afe",
+   "want": "8b385927accb73dd24233b69d0bf70bffd026d1a22e943bc39a0e7cfdc585afe",
+   "ok": true
+  },
+  {
+   "check": "PCA init weights",
+   "got": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+   "want": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+   "ok": true
+  },
+  {
+   "check": "PCA-Original seed 20260801 weights (dev box)",
+   "got": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
+   "want": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
+   "ok": true
+  },
+  {
+   "check": "PCA-Original seed 20260801 files against the pod-side hashes",
+   "got": {
+    "chat_template.jinja": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+    "config.json": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+    "generation_config.json": "0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83",
+    "model.safetensors": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
+    "tokenizer.json": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+    "tokenizer_config.json": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a"
+   },
+   "want": {
+    "chat_template.jinja": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+    "config.json": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
+    "generation_config.json": "0019fccc989feeebf6d72934e1f6b917b320cc61f294dca1e562bce4c9cf5f83",
+    "model.safetensors": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
+    "tokenizer.json": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+    "tokenizer_config.json": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a"
+   },
+   "ok": true
+  },
+  {
+   "check": "E1 seed 20260726 manifest: config",
+   "got": "c2e46e61b6b10ef0046acc2e1cf82c613991af113399568a5605fa819d6bd07c",
+   "want": "c2e46e61b6b10ef0046acc2e1cf82c613991af113399568a5605fa819d6bd07c",
+   "ok": true
+  },
+  {
+   "check": "E1 seed 20260726 manifest: pack",
+   "got": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "want": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "ok": true
+  },
+  {
+   "check": "PCA-Original seed 20260726 weights (pod-side hash on the relay)",
+   "got": true,
+   "want": true,
+   "ok": true
+  },
+  {
+   "check": "E1's packer rebuilds E1's pack: blocks.npz bytes",
+   "got": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "want": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "ok": true
+  },
+  {
+   "check": "E1's packer rebuilds E1's pack: audit.jsonl",
+   "got": "15f16b7b22b229e9c0ae510b85b4c967948828e0e7d50fac15c3e516e3e911e6",
+   "want": "15f16b7b22b229e9c0ae510b85b4c967948828e0e7d50fac15c3e516e3e911e6",
+   "ok": true
+  },
+  {
+   "check": "E1's packer rebuilds E1's pack: arrays",
+   "got": true,
+   "want": true,
+   "ok": true
+  },
+  {
+   "check": "D4 Top-1 weights",
+   "got": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+   "want": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+   "ok": true
+  },
+  {
+   "check": "D4 Top-1 record",
+   "got": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+   "want": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+   "ok": true
+  },
+  {
+   "check": "D4 Top-1 tensors equal the PCA student's (names and shapes)",
+   "tensors": 310,
+   "shape_map_sha256": "803a228cddc159891feec6b6d6d8edbf0c34c01301dcbc1d0e94bdd6121a736b",
+   "ok": true
+  },
+  {
+   "check": "config keys that differ",
+   "got": {
+    "max_window_layers": {
+     "pca": 28,
+     "d4": 36
+    },
+    "use_cache": {
+     "pca": true,
+     "d4": false
+    }
+   },
+   "ok": true,
+   "why_harmless": "max_window_layers is read only with use_sliding_window (false in both); use_cache is an inference cache switch"
+  },
+  {
+   "check": "seed 20260726: e1_r2960k_sa_pca",
+   "logged_steps": 291,
+   "order_or_mask_mismatches": 0,
+   "lr_mismatches": 0,
+   "ok": true
+  },
+  {
+   "check": "seed 20260801: e1_r2960k_sb_rand (same pack and seed as sb_pca)",
+   "logged_steps": 291,
+   "order_or_mask_mismatches": 0,
+   "lr_mismatches": 0,
+   "ok": true
+  },
+  {
+   "check": "validation sequences",
+   "got": [
+    2941,
+    2942,
+    2943,
+    2944,
+    2945,
+    2946,
+    2947,
+    2948,
+    2949,
+    2950,
+    2951,
+    2952,
+    2953,
+    2955,
+    2957,
+    2969
+   ],
+   "ok": true
+  },
+  {
+   "check": "fluid builder input",
+   "got": "d9eec53602b55e952474884297f7e54bc84c9b38ee28faf0bdc8c7e1e1405b4f",
+   "want": "d9eec53602b55e952474884297f7e54bc84c9b38ee28faf0bdc8c7e1e1405b4f",
+   "ok": true
+  },
+  {
+   "check": "fluid pack built from that input",
+   "got": "d9eec53602b55e952474884297f7e54bc84c9b38ee28faf0bdc8c7e1e1405b4f",
+   "want": "d9eec53602b55e952474884297f7e54bc84c9b38ee28faf0bdc8c7e1e1405b4f",
+   "ok": true
+  },
+  {
+   "check": "fluid sessions are the primary cells of the @v3 pool",
+   "got": "6458f2a868c7c30c7d831949cf226020a0f069b2af0df1ad3de227127c3fa042",
+   "want": "6458f2a868c7c30c7d831949cf226020a0f069b2af0df1ad3de227127c3fa042",
+   "ok": true
+  },
+  {
+   "check": "merged: E1's 1,944 training sequences byte for byte",
+   "got": true,
+   "want": true,
+   "ok": true
+  },
+  {
+   "check": "merged: E1's 16 validation sequences byte for byte",
+   "got": true,
+   "want": true,
+   "ok": true
+  },
+  {
+   "check": "merged: the fluid sequences as packed",
+   "got": true,
+   "want": true,
+   "ok": true
+  },
+  {
+   "check": "merged: its E1 part names E1's pack",
+   "got": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "want": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "ok": true
+  }
+ ],
+ "identity_ok": true,
+ "fluid_capacity": {
+  "cells": {
+   "primary.abstract_analogical/reasoning_core": {
+    "units": 0,
+    "supervised_tokens": 0,
+    "supervised_per_unit": {
+     "mean": null,
+     "median": null
+    },
+    "tasks_generated": 40,
+    "units_accepted": 1,
+    "unit_accept_rate": 0.025,
+    "generated_tokens_per_task": 15749,
+    "task_table": 56,
+    "unused_tasks": 16,
+    "in_this_pool": false
+   },
+   "primary.abstract_analogical/s0_generators_v2_calsplit": {
+    "units": 59,
+    "supervised_tokens": 353121,
+    "supervised_per_unit": {
+     "mean": 5985.1,
+     "median": 6138
+    },
+    "tasks_generated": 86,
+    "units_accepted": 59,
+    "unit_accept_rate": 0.686,
+    "generated_tokens_per_task": 9413,
+    "task_table": 171,
+    "unused_tasks": 85,
+    "in_this_pool": true
+   },
+   "primary.compositional_generalization/reasoning_core": {
+    "units": 23,
+    "supervised_tokens": 106367,
+    "supervised_per_unit": {
+     "mean": 4624.7,
+     "median": 4505
+    },
+    "tasks_generated": 58,
+    "units_accepted": 23,
+    "unit_accept_rate": 0.3966,
+    "generated_tokens_per_task": 11070,
+    "task_table": 112,
+    "unused_tasks": 54,
+    "in_this_pool": true
+   },
+   "primary.compositional_generalization/reasoning_gym": {
+    "units": 20,
+    "supervised_tokens": 95836,
+    "supervised_per_unit": {
+     "mean": 4791.8,
+     "median": 4632.0
+    },
+    "tasks_generated": 133,
+    "units_accepted": 20,
+    "unit_accept_rate": 0.1504,
+    "generated_tokens_per_task": 8216,
+    "task_table": 253,
+    "unused_tasks": 120,
+    "in_this_pool": true
+   },
+   "primary.compositional_generalization/s0_generators_v2_calsplit": {
+    "units": 102,
+    "supervised_tokens": 391394,
+    "supervised_per_unit": {
+     "mean": 3837.2,
+     "median": 2554.5
+    },
+    "tasks_generated": 131,
+    "units_accepted": 102,
+    "unit_accept_rate": 0.7786,
+    "generated_tokens_per_task": 6675,
+    "task_table": 438,
+    "unused_tasks": 307,
+    "in_this_pool": true
+   },
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit": {
+    "units": 190,
+    "supervised_tokens": 713594,
+    "supervised_per_unit": {
+     "mean": 3755.8,
+     "median": 3379.0
+    },
+    "tasks_generated": 218,
+    "units_accepted": 190,
+    "unit_accept_rate": 0.8716,
+    "generated_tokens_per_task": 5376,
+    "task_table": 318,
+    "unused_tasks": 100,
+    "in_this_pool": true
+   },
+   "primary.interactive_adaptation/s0_generators_v2_calsplit": {
+    "units": 25,
+    "supervised_tokens": 445712,
+    "supervised_per_unit": {
+     "mean": 17828.5,
+     "median": 16747
+    },
+    "tasks_generated": 87,
+    "units_accepted": 25,
+    "unit_accept_rate": 0.2874,
+    "generated_tokens_per_task": 30615,
+    "task_table": 210,
+    "unused_tasks": 123,
+    "in_this_pool": true
+   },
+   "primary.task_contained_deduction/prontoqa": {
+    "units": 49,
+    "supervised_tokens": 134730,
+    "supervised_per_unit": {
+     "mean": 2749.6,
+     "median": 2782
+    },
+    "tasks_generated": 51,
+    "units_accepted": 49,
+    "unit_accept_rate": 0.9608,
+    "generated_tokens_per_task": 3137,
+    "task_table": 72,
+    "unused_tasks": 21,
+    "in_this_pool": true
+   },
+   "primary.task_contained_deduction/reasoning_core": {
+    "units": 22,
+    "supervised_tokens": 121642,
+    "supervised_per_unit": {
+     "mean": 5529.2,
+     "median": 5463.0
+    },
+    "tasks_generated": 51,
+    "units_accepted": 22,
+    "unit_accept_rate": 0.4314,
+    "generated_tokens_per_task": 9260,
+    "task_table": 112,
+    "unused_tasks": 61,
+    "in_this_pool": true
+   },
+   "primary.task_contained_deduction/reasoning_gym": {
+    "units": 25,
+    "supervised_tokens": 86216,
+    "supervised_per_unit": {
+     "mean": 3448.6,
+     "median": 3162
+    },
+    "tasks_generated": 51,
+    "units_accepted": 27,
+    "unit_accept_rate": 0.5294,
+    "generated_tokens_per_task": 8991,
+    "task_table": 235,
+    "unused_tasks": 184,
+    "in_this_pool": true
+   },
+   "primary.task_contained_deduction/s0_generators_v2_calsplit": {
+    "units": 101,
+    "supervised_tokens": 358670,
+    "supervised_per_unit": {
+     "mean": 3551.2,
+     "median": 3568
+    },
+    "tasks_generated": 101,
+    "units_accepted": 101,
+    "unit_accept_rate": 1.0,
+    "generated_tokens_per_task": 3549,
+    "task_table": 288,
+    "unused_tasks": 187,
+    "in_this_pool": true
+   }
+  },
+  "supervised_tokens": 2807282,
+  "units": 616,
+  "excluded": {
+   "set_aside_by_v3": {
+    "units": [
+     {
+      "unit_id": "8a5a611b7415bbeb505a",
+      "cell": "primary.abstract_analogical/reasoning_core"
+     }
+    ],
+    "why": "the 2026-10-23 source decision: analogy rests on the project generator alone, Reasoning Core's analogy module leaves the stratum; it stays out unless the maintainer re-admits that module"
+   },
+   "supporting_cells": "never counted toward the fluid 2.96M (maintainer, 2026-10-24)",
+   "base_pool_v1": "not legal training data: R5 (its seeds are calibration-split, outside the training range) and R0 (historical provenance) in audit/asset_audit.json, and it is D4's own initialization calibration pool",
+   "rejected_candidates": "unverified or incorrect teacher outputs are never trained on"
+  }
+ },
+ "fluid_overlap_with_e1": {
+  "fluid_sessions": 731,
+  "sharing_a_user_prompt_with_corpus_v2": 0,
+  "examples": []
+ },
+ "gap_supervised_tokens": 152718,
+ "top_up": {
+  "gap_supervised_tokens": 152718,
+  "cells": {
+   "primary.abstract_analogical/s0_generators_v2_calsplit": {
+    "supervised_tokens_wanted": 19210,
+    "units_wanted": 4,
+    "tasks": {
+     "tasks": 9,
+     "by_oversupply": 9,
+     "by_binomial_p90": 8,
+     "chance_of_enough_units": 0.968
+    },
+    "unused_tasks": 85,
+    "enough_unused_tasks": true,
+    "expected_supervised_tokens": 36952,
+    "predicted_generated_tokens": 84717,
+    "selected_task_ids_sha256": "5cd15b268f118d205d41a545a2dcd7814c0c0e8bab5db449b10dc886e3e2597d"
+   },
+   "primary.compositional_generalization/reasoning_core": {
+    "supervised_tokens_wanted": 5786,
+    "units_wanted": 2,
+    "tasks": {
+     "tasks": 9,
+     "by_oversupply": 8,
+     "by_binomial_p90": 9,
+     "chance_of_enough_units": 0.927
+    },
+    "unused_tasks": 54,
+    "enough_unused_tasks": true,
+    "expected_supervised_tokens": 16507,
+    "predicted_generated_tokens": 99630,
+    "selected_task_ids_sha256": "7f768cb057fdd61df8795599d70edc25850a9def06cfcc4e66276e94710a4b46"
+   },
+   "primary.compositional_generalization/reasoning_gym": {
+    "supervised_tokens_wanted": 5214,
+    "units_wanted": 2,
+    "tasks": {
+     "tasks": 25,
+     "by_oversupply": 20,
+     "by_binomial_p90": 25,
+     "chance_of_enough_units": 0.908
+    },
+    "unused_tasks": 120,
+    "enough_unused_tasks": true,
+    "expected_supervised_tokens": 18017,
+    "predicted_generated_tokens": 205400,
+    "selected_task_ids_sha256": "5641d93b02aa94ab04a6f0459b075ab16f5687e8d463dac2bb359bfc180096c8"
+   },
+   "primary.compositional_generalization/s0_generators_v2_calsplit": {
+    "supervised_tokens_wanted": 21292,
+    "units_wanted": 6,
+    "tasks": {
+     "tasks": 12,
+     "by_oversupply": 12,
+     "by_binomial_p90": 10,
+     "chance_of_enough_units": 0.993
+    },
+    "unused_tasks": 307,
+    "enough_unused_tasks": true,
+    "expected_supervised_tokens": 35852,
+    "predicted_generated_tokens": 80100,
+    "selected_task_ids_sha256": "9e668f7e48d9c89201e6440fbb354ddfda6933a39dd15d30756f1411c741789a"
+   },
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit": {
+    "supervised_tokens_wanted": 38820,
+    "units_wanted": 11,
+    "tasks": {
+     "tasks": 19,
+     "by_oversupply": 19,
+     "by_binomial_p90": 14,
+     "chance_of_enough_units": 1.0
+    },
+    "unused_tasks": 100,
+    "enough_unused_tasks": true,
+    "expected_supervised_tokens": 62198,
+    "predicted_generated_tokens": 102144,
+    "selected_task_ids_sha256": "d45e8715b7b0d03da5a2275cfa312350b68beadefe70ceba2ef1df87466c3fcd"
+   },
+   "primary.interactive_adaptation/s0_generators_v2_calsplit": {
+    "supervised_tokens_wanted": 24247,
+    "units_wanted": 2,
+    "tasks": {
+     "tasks": 13,
+     "by_oversupply": 11,
+     "by_binomial_p90": 13,
+     "chance_of_enough_units": 0.924
+    },
+    "unused_tasks": 123,
+    "enough_unused_tasks": true,
+    "expected_supervised_tokens": 66611,
+    "predicted_generated_tokens": 397995,
+    "selected_task_ids_sha256": "7786f0b3e7b26b0efdcd030fa12455d1b0dedc14803039e3df95626f5083552b"
+   },
+   "primary.task_contained_deduction/prontoqa": {
+    "supervised_tokens_wanted": 7329,
+    "units_wanted": 3,
+    "tasks": {
+     "tasks": 5,
+     "by_oversupply": 5,
+     "by_binomial_p90": 4,
+     "chance_of_enough_units": 0.999
+    },
+    "unused_tasks": 21,
+    "enough_unused_tasks": true,
+    "expected_supervised_tokens": 13209,
+    "predicted_generated_tokens": 15685,
+    "selected_task_ids_sha256": "c888f4a85bd8f5fb9cbe70eca191ac21c4c145b303531e5320333c49d934c321"
+   },
+   "primary.task_contained_deduction/reasoning_core": {
+    "supervised_tokens_wanted": 6617,
+    "units_wanted": 2,
+    "tasks": {
+     "tasks": 8,
+     "by_oversupply": 7,
+     "by_binomial_p90": 8,
+     "chance_of_enough_units": 0.923
+    },
+    "unused_tasks": 61,
+    "enough_unused_tasks": true,
+    "expected_supervised_tokens": 19082,
+    "predicted_generated_tokens": 74080,
+    "selected_task_ids_sha256": "a5c2fda2df115c729cac06fc60ac444d06ef9849af7d8240bf3d7bb23e7f1a44"
+   },
+   "primary.task_contained_deduction/reasoning_gym": {
+    "supervised_tokens_wanted": 4690,
+    "units_wanted": 2,
+    "tasks": {
+     "tasks": 6,
+     "by_oversupply": 6,
+     "by_binomial_p90": 6,
+     "chance_of_enough_units": 0.916
+    },
+    "unused_tasks": 184,
+    "enough_unused_tasks": true,
+    "expected_supervised_tokens": 10954,
+    "predicted_generated_tokens": 53946,
+    "selected_task_ids_sha256": "6c6536ff2b6f534a612703efa842592c66d1dcdd29ca370161b6d36aebd56d45"
+   },
+   "primary.task_contained_deduction/s0_generators_v2_calsplit": {
+    "supervised_tokens_wanted": 19512,
+    "units_wanted": 6,
+    "tasks": {
+     "tasks": 9,
+     "by_oversupply": 9,
+     "by_binomial_p90": 6,
+     "chance_of_enough_units": 1.0
+    },
+    "unused_tasks": 187,
+    "enough_unused_tasks": true,
+    "expected_supervised_tokens": 31961,
+    "predicted_generated_tokens": 31941,
+    "selected_task_ids_sha256": "39eff9ea2adae27c6f3ef2a9756b657f280871e929ed21c26df5a366e0869e2e"
+   }
+  },
+  "tasks_total": 115,
+  "all_cells_have_enough_unused_tasks": true,
+  "expected_supervised_tokens": 311343,
+  "predicted_generated_tokens": 1145638,
+  "isolation_of_the_selected_tasks": {
+   "pass": true,
+   "violations": [],
+   "_": "prompt-level rules on the tasks before generation; R0-R9 run again on the accepted units with their teacher text"
+  },
+  "generation": "P1's frozen protocol (the same teacher, sampling, allowance and verifiers; two candidates, the second only when the first is rejected), then P1v verification at $0",
+  "cost": {
+   "basis": "P1's measured A100 session (the only measured generation hardware)",
+   "decode_tokens_per_second_per_sequence": 13.6,
+   "session_minutes_expected": 33.4,
+   "expected_usd": 1.01,
+   "hard_cap_usd": 2.6,
+   "price_per_hour": 1.79
+  }
+ },
+ "top_up_with_a_validation_reserve": {
+  "reserve_supervised_tokens": 150000,
+  "gap_supervised_tokens": 302718,
+  "tasks_total": 185,
+  "expected_supervised_tokens": 515618,
+  "all_cells_have_enough_unused_tasks": true,
+  "cost": {
+   "basis": "P1's measured A100 session (the only measured generation hardware)",
+   "decode_tokens_per_second_per_sequence": 13.6,
+   "session_minutes_expected": 33.4,
+   "expected_usd": 1.01,
+   "hard_cap_usd": 2.6,
+   "price_per_hour": 1.79
+  }
+ },
+ "datasets": {
+  "e1_2p96M": {
+   "packed_sequences": 1944,
+   "source_sessions": 4524,
+   "units": 4354,
+   "supervised_tokens": 2960507,
+   "non_padding_tokens": 4730748,
+   "padding_tokens": 11194500,
+   "padding_ratio": 0.7029,
+   "supervised_tokens_per_sequence": {
+    "p10": 177,
+    "p50": 296,
+    "p90": 5709,
+    "mean": 1522.9
+   },
+   "truncated_sessions": 352,
+   "supervised_discarded_by_truncation": 629315,
+   "truncation": {
+    "discarded_supervised": {
+     "reasoning": 500065,
+     "answer": 129250
+    },
+    "retained_target": {
+     "answer_lost": 307,
+     "answer_cut": 43,
+     "intact": 2
+    }
+   },
+   "token_mix": {
+    "code": 0.1665,
+    "gsm8k": 0.1671,
+    "multihop_qa": 0.1665,
+    "openmath": 0.1669,
+    "rag_evidence": 0.1667,
+    "tool_calling": 0.1664
+   },
+   "isolation": {
+    "R1_held_out_keys": {
+     "held_out_overlap": {},
+     "pass": true
+    },
+    "R2_near_duplicate_trained": {
+     "n": 9,
+     "of_flagged": 28,
+     "by_unit": {
+      "stage3_capability_846/eval_behavior_v0": 8,
+      "stage3_capability_846/multihop": 1
+     },
+     "fluid_reasoning_720": {
+      "with_any_shared_ngram": 0,
+      "flagged": 0
+     }
+    },
+    "R8_in_sample": {
+     "stage3_legacy_150/items:prompt": 150
+    }
+   }
+  },
+  "fluid_increment": {
+   "packed_sequences": 492,
+   "source_sessions": 731,
+   "units": 616,
+   "supervised_tokens": 2807282,
+   "non_padding_tokens": 2989550,
+   "padding_tokens": 1040914,
+   "padding_ratio": 0.2583,
+   "supervised_tokens_per_sequence": {
+    "p10": 3227,
+    "p50": 6024,
+    "p90": 7491,
+    "mean": 5705.9
+   },
+   "truncated_sessions": 0,
+   "supervised_discarded_by_truncation": 0,
+   "truncation": {
+    "discarded_supervised": {},
+    "retained_target": {}
+   },
+   "token_mix": {
+    "primary.abstract_analogical/s0_generators_v2_calsplit": 0.1258,
+    "primary.compositional_generalization/reasoning_core": 0.0379,
+    "primary.compositional_generalization/reasoning_gym": 0.0341,
+    "primary.compositional_generalization/s0_generators_v2_calsplit": 0.1394,
+    "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 0.2542,
+    "primary.interactive_adaptation/s0_generators_v2_calsplit": 0.1588,
+    "primary.task_contained_deduction/prontoqa": 0.048,
+    "primary.task_contained_deduction/reasoning_core": 0.0433,
+    "primary.task_contained_deduction/reasoning_gym": 0.0307,
+    "primary.task_contained_deduction/s0_generators_v2_calsplit": 0.1278
+   },
+   "axis_mix": {
+    "primary.abstract_analogical": 0.1258,
+    "primary.compositional_generalization": 0.2114,
+    "primary.inductive_rule_discovery": 0.2542,
+    "primary.interactive_adaptation": 0.1588,
+    "primary.task_contained_deduction": 0.2498
+   },
+   "declared_mixture": {
+    "primary.abstract_analogical/s0_generators_v2_calsplit": 0.125788,
+    "primary.compositional_generalization/reasoning_core": 0.03789,
+    "primary.compositional_generalization/reasoning_gym": 0.034138,
+    "primary.compositional_generalization/s0_generators_v2_calsplit": 0.139421,
+    "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 0.254194,
+    "primary.interactive_adaptation/s0_generators_v2_calsplit": 0.15877,
+    "primary.task_contained_deduction/prontoqa": 0.047993,
+    "primary.task_contained_deduction/reasoning_core": 0.043331,
+    "primary.task_contained_deduction/reasoning_gym": 0.030712,
+    "primary.task_contained_deduction/s0_generators_v2_calsplit": 0.127764
+   },
+   "mix_minus_declared_pp_max": 0.0,
+   "families": 44,
+   "reaches_2p96M": false
+  },
+  "fluid_increment_forecast_at_2p96M": {
+   "packed_sequences": 519,
+   "supervised_tokens": 2960000,
+   "non_padding_tokens": 3152183,
+   "_": "today's measured packing density scaled to 2.96M (the top-up's sessions sized as the pool's); a FORECAST, replaced by the built pack"
+  },
+  "merged": {
+   "pack": "artifacts/stages/stage-2/reasoning_data/packs/D4A_merged",
+   "status": "PROVISIONAL: the fluid pool falls short of 2.96M; not a training set"
+  }
+ },
+ "authorizes": "nothing",
+ "schedule": {
+  "recipe": {
+   "batch_size": 2,
+   "micro_batch_size": 1,
+   "gradient_accumulation_steps": 2,
+   "sequence_length": 8192,
+   "epochs": 3,
+   "padding_positions_computed": true,
+   "lr_rule": "E1's builder rule: warmup max(10, round(0.05 T)), cosine to 0.1 of peak; eval every max(25, T // 8), save every max(200, T // 2)"
+  },
+  "flops_per_position": {
+   "student_forward": {
+    "non_embedding_params": 440467456,
+    "matmul": 880934912,
+    "attention": 939524096,
+    "unembedding": 311164928,
+    "total": 2131623936
+   },
+   "teacher_forward": {
+    "non_embedding_params": 3633511936,
+    "matmul": 7267023872,
+    "attention": 2415919104,
+    "unembedding": 777912320,
+    "total": 10460855296
+   },
+   "training_total": 18987351040,
+   "_rule": "student 4 x forward (forward, backward = 2 x forward, recomputed forward for gradient checkpointing) + teacher 1 x forward"
+  },
+  "PCA-Original and D4-Original": {
+   "packed_sequences": 1944,
+   "optimizer_steps": 2916,
+   "epochs": 3.0,
+   "warmup_steps": 146,
+   "unique_supervised_tokens": 2960507,
+   "supervised_token_exposure": 8881521,
+   "non_padding_token_exposure": 14192244,
+   "positions_computed": 47775744,
+   "training_flops": 9.071e+17
+  },
+  "D4-Augmented, measured on today's fluid pool (short of 2.96M)": {
+   "packed_sequences": 2436,
+   "optimizer_steps": 3654,
+   "epochs": 3.0,
+   "warmup_steps": 183,
+   "unique_supervised_tokens": 5767789,
+   "supervised_token_exposure": 17303367,
+   "non_padding_token_exposure": 23160894,
+   "positions_computed": 59867136,
+   "training_flops": 1.137e+18
+  },
+  "D4-Augmented, forecast with the fluid increment at 2.96M": {
+   "packed_sequences": 2463,
+   "optimizer_steps": 3695,
+   "epochs": 3.0,
+   "warmup_steps": 185,
+   "unique_supervised_tokens": 5920507,
+   "supervised_token_exposure": 17763925,
+   "non_padding_token_exposure": 23651994,
+   "positions_computed": 60538880,
+   "training_flops": 1.149e+18
+  },
+  "reading": "D4-Augmented's gain, if any, combines the added data and the added optimizer steps and FLOPs it brings; it is not the data content's isolated causal effect (maintainer, 2026-10-24)"
+ },
+ "budget_L40S": {
+  "inputs": {
+   "seconds_per_optimizer_step_L40S": 3.509,
+   "training_steps": [
+    2916,
+    2916,
+    3695,
+    3695
+   ],
+   "evaluations": 6,
+   "eval_seconds_per_checkpoint": [
+    4763,
+    9526.0
+   ],
+   "session_overhead_seconds": 536,
+   "price_usd_per_hour": 1.09,
+   "gpu_validation_hours": 0.5,
+   "volume": "50 GB x $0.07/GB-month x 2 months = $7.0"
+  },
+  "training_and_evaluation": {
+   "gpu_hours": [
+    22.2,
+    30.2
+   ],
+   "usd": [
+    24.22,
+    32.87
+   ]
+  },
+  "top_up_generation": {
+   "expected_usd": 1.01,
+   "hard_cap_usd": 2.6
+  },
+  "storage_usd": 7.0,
+  "total_usd": [
+   32.23,
+   40.88
+  ]
+ }
+}

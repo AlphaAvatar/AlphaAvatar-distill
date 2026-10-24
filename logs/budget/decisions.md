@@ -13787,3 +13787,47 @@ on a paid pod.
 - **Revisit when.** The maintainer chooses the schedule and packing for
   D4-Reasoning, then issues a grant. H1's volume `1980hnh75i` has no consumer
   and awaits a retirement decision.
+
+## 2026-10-24 — Maintainer: H1-PA's third arm is D4-Augmented (E1's 2.96M + 2.96M pure fluid reasoning); audited at $0; H1's volume retired
+
+- **Context.** The 70/30 D4-Reasoning arm could not match E1's optimizer steps,
+  and E1's terminal truncation dropped its verified answers
+  (`audit/h1pa_audit.json`).
+- **Decision (maintainer).**
+  - **Arm cancelled.** D4-Reasoning is cancelled before any training.
+  - **New arm.** D4-Augmented trains D4 Top-1 on E1's 2.96M pack, unchanged,
+    plus 2.96M supervised tokens of pure fluid reasoning (the five P10.2
+    primary axes, no supporting data, no @v3 quota, no ratio search).
+  - **Packing.** The increment uses E1's sequential packer without terminal
+    truncation. E1's pack keeps its truncation. The difference is recorded.
+  - **Schedule.** E1's recipe at 3 epochs; its optimizer steps follow its
+    sequence count.
+  - **Attribution.** Its gain is credited to the added data and its added
+    compute together, never to the data content alone.
+- **Done at $0** (`audit/h1pa_augmented_audit.json`, `docs/stages/stage-2/reasoning_data/H1PA.md`).
+  - **Identity: 30/30 checks pass.** They include E1's pack rebuilt byte for
+    byte after the packer gained `--no-terminal-truncation` (off by default),
+    and a provisional merged set whose E1 part and validation are
+    byte-identical through E1's trainer reader.
+  - **Capacity.** 616 verified primary units, 2,807,282 supervised tokens. The
+    gap is 152,718.
+    - No unit shares a prompt with corpus_v2.
+    - Stage-0's `base_pool_v1` is not legal training data: it fails R5 and R0,
+      and it is D4's calibration pool.
+    - The one Reasoning Core analogy unit stays out by the 2026-10-23 source
+      decision.
+  - **Top-up.** 115 unused tasks over the ten cells in proportion to the pool,
+    sized by P1's planning rule; expected about 311k supervised tokens. The
+    selected tasks pass isolation. One session under P1's frozen protocol:
+    $1.01 expected, $2.60 cap. A 185-task option also covers a 150k validation
+    reserve at the same bound.
+  - **Fluid pack today:** 492 sequences, 25.8% padding, 0 truncated sessions.
+  - **D4-Augmented forecast:** about 2,463 sequences, 3,695 optimizer steps,
+    17.76M supervised-token exposure, 1.149e18 FLOPs (1.27× D4-Original).
+  - **Study budget (L40S):** $32.2–40.9 including the top-up and storage.
+  - **H1's volume `1980hnh75i`** was retired under AGENTS.md 2.5 (tombstone in
+    `storage/h1_volume_1980hnh75i.json`). Deleted 2026-10-24 09:57Z, with the
+    provider confirming it gone; it cost $0.0449 actual against the $4.20
+    reservation. The account holds no pod and no volume.
+- **Revisit when.** The maintainer grants the top-up session, and later the
+  training and evaluation (about $45, L40S).

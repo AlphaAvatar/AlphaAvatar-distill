@@ -1,32 +1,36 @@
 #!/usr/bin/env python3
-"""H1-PA (the PCA-aligned redesign of H1): its $0 data and identity audit.
+"""H1-PA (the PCA-aligned redesign of H1): its $0 data, capacity and identity audit.
 
-    # 1. D4-Reasoning's sessions: @v3's verified teacher data exactly as its
-    #    pack read them, written as input for E1's own packer
+    # 1. the pure fluid-reasoning pool: @v3's PRIMARY verified sessions exactly as
+    #    the @v3 pack read them, written as input for E1's own packer
     PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.h1pa_audit sessions \
         --store h1gen_20261022_190653=<P1 scr>/store --store h1p1t_20261023_094007=<P1t scr>/store \
-        --out artifacts/stages/stage-2/reasoning_data/packs/D4R_seq_sessions.jsonl
-    # 2. E1's packer, unchanged (the command `sessions` prints)
-    # 3. the audit
-    PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.h1pa_audit audit \
-        --reasoning-pack artifacts/stages/stage-2/reasoning_data/packs/D4R_seq \
-        --reasoning-sessions artifacts/stages/stage-2/reasoning_data/packs/D4R_seq_sessions.jsonl \
-        --e1-regen <dir E1's packer rebuilt E1's pack into> --relay-sa <dir holding E1 sa's relay run manifest>
+        --out artifacts/stages/stage-2/reasoning_data/packs/D4A_fluid_sessions.jsonl
+    # 2. E1's packer with its no-truncation switch (the command `sessions` prints)
+    # 3. E1's pack + the fluid pack -> D4-Augmented's training set
+    PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.h1pa_audit merge \
+        --fluid-pack artifacts/stages/stage-2/reasoning_data/packs/D4A_fluid \
+        --out artifacts/stages/stage-2/reasoning_data/packs/D4A_merged
+    # 4. the audit
+    PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.h1pa_audit audit --store ... --store ... \
+        --fluid-sessions <1's output> --fluid-pack <2's output> --merged <3's output> \
+        --relay-sa <dir with E1 sa's relay run manifest and pod hashes> --e1-regen <E1's pack rebuilt> --price <$/h>
 
-The three arms (maintainer, 2026-10-24): PCA-Original is E1's 2.96M PCA arm
-as it ran, re-evaluated and never retrained; D4-Original is D4 Top-1 trained
-on E1's own ``blocks.npz`` under E1's configuration; D4-Reasoning is D4 Top-1
-trained on ``stage2.reasoning_master@v3`` packed by E1's sequential packer
-(``scripts/shared/data/build_token_ladder.py``), never best-fit.
+The three arms (maintainer, 2026-10-24, second decision): PCA-Original is E1's
+2.96M PCA arm as it ran, re-evaluated and never retrained; D4-Original is D4
+Top-1 trained on E1's own ``blocks.npz`` under E1's configuration;
+D4-Augmented is D4 Top-1 trained on E1's ``blocks.npz`` UNCHANGED plus 2.96M
+supervised tokens of pure fluid-reasoning data (the five P10.2 primary axes),
+packed separately by E1's sequential packer without terminal truncation and
+appended. The fluid pool takes no @v3 quota: its mixture is the pool's own
+supervised-token composition, declared before packing.
 
-What the packer receives is @v3's sessions with two fields mapped, nothing
-else: ``data_type`` is the session's mixture cell (``stratum/source``, the key
-@v3 declares its shares in, as ``data_type`` is the key E1's mixture is
-declared in), and ``source_id`` is the unit (the conversation an episode's
-turns were expanded from, as corpus_v2's ``source_id`` is). The packer itself
-decides order, sequences, truncation and the validation tail.
+What the packer receives is @v3's primary sessions with two fields mapped,
+nothing else: ``data_type`` is the session's cell (``stratum/source``) and
+``source_id`` is the unit (the conversation an episode's turns were expanded
+from, as corpus_v2's ``source_id`` is).
 
-Writes ``logs/stages/stage-2/reasoning_data/audit/h1pa_audit.json``.
+Writes ``logs/stages/stage-2/reasoning_data/audit/h1pa_augmented_audit.json``.
 """
 from __future__ import annotations
 
@@ -34,6 +38,7 @@ import argparse
 import hashlib
 import json
 import math
+import statistics
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -42,15 +47,13 @@ from stages.reasoning_data import assets as A
 
 E1_PACK = A.REPO / "artifacts/shared/instruments/ladder_uniform_probe"
 E1_SESSIONS = A.REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
-E1_CONFIGS = {"20260726": A.REPO / "configs/stages/stage-3/e1/e1_r2960k_sa_pca.json",
-              "20260801": A.REPO / "configs/stages/stage-3/e1/e1_r2960k_sb_pca.json"}
 PCA_INIT = A.REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
-D4_INIT_RECORD = A.LOG_DIR / "assets/d4_top1_materialization.json"
 REASONING_PACK_RECORD = A.REPO / "artifacts/stages/stage-2/reasoning_data/packs/B/ladder.json"
-OUT = A.LOG_DIR / "audit/h1pa_audit.json"
-RUNG = 2_960_000
+STUDY = A.REPO / "configs/stages/stage-2/reasoning_data/h1pa.json"
+OUT = A.LOG_DIR / "audit/h1pa_augmented_audit.json"
+RUNG = 2_960_000          #: E1's rung, and the fluid increment's target, in supervised tokens
 EPOCHS = 3
-BATCH_SIZE = 2
+PRIMARY = "primary."
 
 
 def canonical_sha(obj) -> str:
@@ -58,15 +61,15 @@ def canonical_sha(obj) -> str:
 
 
 def builder_rows(placed: list[dict]) -> list[dict]:
-    """@v3's placed sessions as E1's packer reads them: the mixture cell as
-    `data_type`, the unit as `source_id`; every other field as it is."""
+    """Sessions as E1's packer reads them: the cell as `data_type`, the unit as
+    `source_id`; every other field as it is."""
     return [{**s, "data_type": s["stratum"], "source_id": s["unit_id"]} for s in placed]
 
 
-def reasoning_sessions(stores: dict[str, Path]) -> tuple[list[dict], dict]:
-    """The sessions @v3's pack was built from, re-derived from the secured
-    stores by the feasibility tool's own functions, and their recorded hash
-    checked: anything else refuses."""
+def derive(stores: dict[str, Path]) -> dict:
+    """The sessions the @v3 pack was built from, re-derived from the secured
+    stores by the feasibility tool's own functions, their recorded hash checked,
+    rendered and admitted as @v3 admitted them; anything else refuses."""
     from stages.reasoning_data import build_arm_b as AB
     from stages.reasoning_data import build_master_ladder as B
     from stages.reasoning_data import corpus_feasibility as CF
@@ -88,32 +91,134 @@ def reasoning_sessions(stores: dict[str, Path]) -> tuple[list[dict], dict]:
     if sha != rec["provenance"]["sessions_sha256"]:
         raise SystemExit(f"the re-derived sessions hash {sha}, not the {rec['provenance']['sessions_sha256']} "
                          "the @v3 pack was built from")
-    shares = AB.cell_shares(spec, spec["corpus_id"])
-    placed = AB.place(sessions, shares)
-    _, excluded, _ = B.render_all(runs[0]["tok"], placed, block_len=int(spec["block_len"]))
+    placed = AB.place(sessions, AB.cell_shares(spec, spec["corpus_id"]))
+    rendered, excluded, _ = B.render_all(runs[0]["tok"], placed, block_len=int(spec["block_len"]))
     if excluded:
         raise SystemExit(f"{len(excluded)} units no longer admit; the pool is not the one @v3 packed")
-    return placed, {"sessions_sha256": sha, "n_sessions": len(placed),
-                    "n_units": len({s["unit_id"] for s in placed}), "set_aside_units": len(aside),
-                    "declared_shares": shares, "corpus_id": spec["corpus_id"]}
+    return {"runs": runs, "spec": spec, "placed": placed, "aside": aside, "rendered": rendered,
+            "tok": runs[0]["tok"], "sessions_sha256": sha, "stores": stores}
+
+
+def fluid_of(placed: list[dict]) -> list[dict]:
+    return [s for s in placed if s["stratum"].startswith(PRIMARY)]
+
+
+def natural_shares(rows: list[dict], rendered: dict) -> dict:
+    """The pool's own supervised-token composition by cell: the declared
+    mixture of the fluid increment, fixed before packing and never tuned."""
+    c = Counter()
+    for s in rows:
+        c[s["stratum"]] += rendered[s["id"]].n_supervised
+    t = sum(c.values())
+    return {k: round(v / t, 6) for k, v in sorted(c.items())}
 
 
 def cmd_sessions(args) -> int:
     stores = {k: Path(v) for k, v in (kv.split("=", 1) for kv in args.store)}
-    placed, meta = reasoning_sessions(stores)
+    d = derive(stores)
+    rows = fluid_of(d["placed"])
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     with out.open("w") as f:
-        for row in builder_rows(placed):
+        for row in builder_rows(rows):
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
-    meta["builder_input_sha256"] = A.sha256_file(out)
+    shares = natural_shares(rows, d["rendered"])
+    meta = {"source_sessions_sha256": d["sessions_sha256"], "n_sessions": len(rows),
+            "n_units": len({s["unit_id"] for s in rows}),
+            "supervised_tokens": sum(d["rendered"][s["id"]].n_supervised for s in rows),
+            "declared_mixture": shares, "builder_input_sha256": A.sha256_file(out)}
     out.with_suffix(".meta.json").write_text(json.dumps(meta, indent=1) + "\n")
-    mixture = ",".join(f"{k}={v}" for k, v in meta["declared_shares"].items())
-    print(json.dumps({k: v for k, v in meta.items() if k != "declared_shares"}, indent=1))
-    print("\nE1's packer, unchanged:\n.venv/bin/python scripts/shared/data/build_token_ladder.py "
-          f"--sessions {out} --model {PCA_INIT.relative_to(A.REPO)} --block-len 8192 "
-          f"--mixture {mixture} --out <pack dir>")
+    print(json.dumps({k: v for k, v in meta.items() if k != "declared_mixture"}, indent=1))
+    print("\nE1's packer, its no-truncation switch on:\n.venv/bin/python scripts/shared/data/build_token_ladder.py "
+          f"--sessions {out} --model {PCA_INIT.relative_to(A.REPO)} --block-len 8192 --no-terminal-truncation "
+          f"--ladder {RUNG} --mixture {','.join(f'{k}={v}' for k, v in shares.items())} --out <pack dir>")
     return 0
+
+
+# -- the merged training set --------------------------------------------------
+def e1_split():
+    """E1's training prefix and validation sequences, as E1's trainer reads them."""
+    from aadistill.data.ladder import load_ladder_meta, select_val_blocks
+    from aadistill.data.sessions import rung_n_blocks
+    meta = load_ladder_meta(E1_PACK)
+    audit = list(A.jsonl(E1_PACK / "audit.jsonl"))
+    n = rung_n_blocks(meta, RUNG)
+    largest = max(int(r["n_blocks"]) for r in meta["rungs"] if r.get("reachable"))
+    return n, select_val_blocks(audit, largest, 16), audit
+
+
+def fluid_cut(fluid_pack: Path) -> tuple[int, bool]:
+    """The fluid pack's training prefix: the first sequences that reach the
+    2.96M target (the packer's own rung), or every sequence of a pool that
+    falls short -- which makes the merged set PROVISIONAL."""
+    lad = A.read_json(fluid_pack / "ladder.json")
+    r = next(x for x in lad["rungs"] if x["target_supervised_tokens"] == RUNG)
+    return (int(r["n_blocks"]), True) if r.get("reachable") else (int(lad["n_blocks"]), False)
+
+
+def cmd_merge(args) -> int:
+    """E1's training sequences unchanged, then the fluid increment, then E1's
+    16 validation sequences: E1's trainer reads the result as it reads E1's
+    pack (`ladder_blocks`), trains on E1's 1,944 sequences plus the
+    increment, and validates on E1's own validation sequences."""
+    import numpy as np
+    from aadistill.data.ladder import ladder_blocks
+    fluid = Path(args.fluid_pack).resolve()
+    n_e1, val_idx, e1_audit = e1_split()
+    n_f, complete = fluid_cut(fluid)
+    e1, fl = np.load(E1_PACK / "blocks.npz"), np.load(fluid / "blocks.npz")
+    f_audit = list(A.jsonl(fluid / "audit.jsonl"))
+    take = {"e1": list(range(n_e1)), "fluid": list(range(n_f)), "e1_validation": list(val_idx)}
+    arrays = {k: np.concatenate([e1[k][:n_e1], fl[k][:n_f], e1[k][val_idx]]) for k in ("input_ids", "ce_mask",
+                                                                                      "content_mask")}
+    rows, cum = [], 0
+    for part, src, idx in (("e1", e1_audit, take["e1"]), ("fluid", f_audit, take["fluid"]),
+                           ("e1_validation", e1_audit, take["e1_validation"])):
+        for i in idx:
+            r = {k: v for k, v in src[i].items() if k not in ("block", "cumulative_supervised")}
+            if part != "e1_validation":
+                cum += r["supervised_tokens"]
+            rows.append({"block": len(rows), "cumulative_supervised": cum, "part": part, "source_index": i, **r})
+    out = Path(args.out).resolve()
+    out.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(out / "blocks.npz", **arrays)
+    with (out / "audit.jsonl").open("w") as f:
+        for r in rows:
+            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+    e1_lad, f_lad = A.read_json(E1_PACK / "ladder.json"), A.read_json(fluid / "ladder.json")
+    train_sup = cum
+    rung = {"target_supervised_tokens": train_sup, "reachable": True, "n_blocks": n_e1 + n_f,
+            "actual_supervised_tokens": train_sup,
+            "e1_supervised_tokens": sum(e1_audit[i]["supervised_tokens"] for i in take["e1"]),
+            "fluid_supervised_tokens": sum(f_audit[i]["supervised_tokens"] for i in take["fluid"])}
+    (out / "ladder.json").write_text(json.dumps({
+        "schema": "aadistill.stage2.reasoning_data.h1pa_merged_pack/v1",
+        "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "block_len": e1_lad["block_len"], "pad_id": e1_lad["pad_id"], "n_blocks": len(rows),
+        "status": "COMPLETE: the fluid increment reaches 2.96M" if complete else
+                  "PROVISIONAL: the fluid pool falls short of 2.96M; not a training set",
+        "parts": {"e1": {"pack": str(E1_PACK.relative_to(A.REPO)), "blocks_sha256": A.sha256_file(E1_PACK / "blocks.npz"),
+                         "sequences": [0, n_e1], "packing": e1_lad["packing"]},
+                  "fluid": {"pack": str(fluid.relative_to(A.REPO)), "blocks_sha256": A.sha256_file(fluid / "blocks.npz"),
+                            "sequences": [0, n_f], "packing": f_lad["packing"]},
+                  "e1_validation": {"sequences": list(val_idx)}},
+        "packing": "two packs appended, never re-packed: E1's sequential packing with terminal truncation for "
+                   "E1's part, the same packer without truncation for the fluid part",
+        "declared_mixture": {"e1": e1_lad["declared_mixture"], "fluid": f_lad["declared_mixture"]},
+        "rungs": [rung],
+        "outputs": {"blocks": A.sha256_file(out / "blocks.npz"), "audit": A.sha256_file(out / "audit.jsonl")},
+    }, indent=1) + "\n")
+    # E1's trainer reads it: E1's sequences byte for byte, then the increment; E1's validation
+    (ids, mask, content), (vids, vmask, vcontent), stats = ladder_blocks(out, train_sup, n_val=16)
+    same = (np.array_equal(ids[:n_e1].numpy(), e1["input_ids"][:n_e1]) and
+            np.array_equal(mask[:n_e1].numpy(), e1["ce_mask"][:n_e1]) and
+            np.array_equal(content[:n_e1].numpy(), e1["content_mask"][:n_e1]) and
+            np.array_equal(vids.numpy(), e1["input_ids"][val_idx]) and
+            np.array_equal(ids[n_e1:].numpy(), fl["input_ids"][:n_f]))
+    print(json.dumps({"out": str(out), "status": "COMPLETE" if complete else "PROVISIONAL",
+                      "train_sequences": n_e1 + n_f, "train_supervised": train_sup,
+                      "e1_part_and_validation_byte_identical": same}, indent=1))
+    return 0 if same else 3
 
 
 # -- identity -----------------------------------------------------------------
@@ -176,7 +281,8 @@ def d4_identity(study: dict) -> list[dict]:
     for name, p in (("pca", pca["path"]), ("d4", d4["path"])):
         with safe_open(str(A.REPO / p / "model.safetensors"), "pt") as f:
             shapes[name] = {k: list(f.get_slice(k).get_shape()) for k in f.keys()}
-    out.append(check("D4 Top-1 tensors equal the PCA student's (names and shapes)", shapes["d4"], shapes["pca"]))
+    out.append({"check": "D4 Top-1 tensors equal the PCA student's (names and shapes)", "tensors": len(shapes["d4"]),
+                "shape_map_sha256": canonical_sha(shapes["d4"]), "ok": shapes["d4"] == shapes["pca"]})
     ca, cb = (A.read_json(A.REPO / p / "config.json") for p in (pca["path"], d4["path"]))
     differ = {k: {"pca": ca.get(k), "d4": cb.get(k)} for k in sorted(set(ca) | set(cb)) if ca.get(k) != cb.get(k)}
     out.append({"check": "config keys that differ", "got": differ, "ok": set(differ) <= {"max_window_layers", "use_cache"},
@@ -215,6 +321,149 @@ def training_order_replay(study: dict) -> list[dict]:
     return out
 
 
+def merged_identity(merged: Path) -> list[dict]:
+    """The merged set holds E1's training and validation sequences byte for
+    byte, and the fluid pack's sequences as packed."""
+    import numpy as np
+    lad = A.read_json(merged / "ladder.json")
+    n_e1, val_idx, _ = e1_split()
+    m, e1 = np.load(merged / "blocks.npz"), np.load(E1_PACK / "blocks.npz")
+    fluid = A.REPO / lad["parts"]["fluid"]["pack"]
+    fl = np.load(fluid / "blocks.npz")
+    n_f = lad["parts"]["fluid"]["sequences"][1]
+    keys = ("input_ids", "ce_mask", "content_mask")
+    return [check("merged: E1's 1,944 training sequences byte for byte",
+                  all(np.array_equal(m[k][:n_e1], e1[k][:n_e1]) for k in keys), True),
+            check("merged: E1's 16 validation sequences byte for byte",
+                  all(np.array_equal(m[k][n_e1 + n_f:], e1[k][val_idx]) for k in keys), True),
+            check("merged: the fluid sequences as packed",
+                  all(np.array_equal(m[k][n_e1:n_e1 + n_f], fl[k][:n_f]) for k in keys), True),
+            check("merged: its E1 part names E1's pack", lad["parts"]["e1"]["blocks_sha256"],
+                  A.sha256_file(E1_PACK / "blocks.npz"))]
+
+
+# -- capacity -----------------------------------------------------------------
+def capacity(d: dict) -> dict:
+    """Every primary cell's qualified supply: its verified units and supervised
+    tokens, its measured acceptance over P1 and P1t, the tasks its task table
+    still holds that neither session generated, and what was excluded and why."""
+    from stages.reasoning_data import corpus_feasibility as CF
+    from stages.reasoning_data import p1v
+    spec, runs, rendered = d["spec"], d["runs"], d["rendered"]
+    rows = fluid_of(d["placed"])
+    units = defaultdict(lambda: defaultdict(int))
+    for s in rows:
+        units[s["stratum"]][s["unit_id"]] += rendered[s["id"]].n_supervised
+    tasks = runs[0]["tasks"]
+    if any(r["tasks"].keys() != tasks.keys() for r in runs):
+        raise SystemExit("the sessions' task tables differ; the unused pool is not one set")
+    used = {c.unit_id for r in runs for c in r["got"]["candidates"]}
+    cells = {}
+    for cell in sorted({p1v.cell_of(t, spec) for t in tasks.values()} | set(units)):
+        if not cell.startswith(PRIMARY):
+            continue
+        in_cell = {tid for tid, t in tasks.items() if p1v.cell_of(t, spec) == cell}
+        gens = [CF.generation_measured(r["records"], tasks, r["got"], cell, spec) for r in runs
+                if any(c.unit_id in in_cell and c.candidate_index == 0 for c in r["got"]["candidates"])]
+        gen_tasks = sum(g["tasks_generated"] for g in gens)
+        acc = sum(sum(g["accepted"].values()) for g in gens)
+        tok = sum(sum(g["generated_tokens"].values()) for g in gens)
+        sizes = sorted(units.get(cell, {}).values())
+        pool = [t for t in tasks.values() if p1v.cell_of(t, spec) == cell]
+        unused = [t for t in pool if t["task_id"] not in used]
+        cells[cell] = {"units": len(sizes), "supervised_tokens": sum(sizes),
+                       "supervised_per_unit": {"mean": round(sum(sizes) / len(sizes), 1) if sizes else None,
+                                               "median": statistics.median(sizes) if sizes else None},
+                       "tasks_generated": gen_tasks, "units_accepted": acc,
+                       "unit_accept_rate": round(acc / gen_tasks, 4) if gen_tasks else None,
+                       "generated_tokens_per_task": round(tok / gen_tasks) if gen_tasks else None,
+                       "task_table": len(pool), "unused_tasks": len(unused),
+                       "in_this_pool": bool(sizes)}
+    aside = [{"unit_id": a["unit_id"], "cell": a["cell"]} for a in d["aside"]]
+    return {"cells": cells,
+            "supervised_tokens": sum(c["supervised_tokens"] for c in cells.values() if c["in_this_pool"]),
+            "units": sum(c["units"] for c in cells.values() if c["in_this_pool"]),
+            "excluded": {
+                "set_aside_by_v3": {"units": aside,
+                                    "why": "the 2026-10-23 source decision: analogy rests on the project generator "
+                                           "alone, Reasoning Core's analogy module leaves the stratum; it stays out "
+                                           "unless the maintainer re-admits that module"},
+                "supporting_cells": "never counted toward the fluid 2.96M (maintainer, 2026-10-24)",
+                "base_pool_v1": "not legal training data: R5 (its seeds are calibration-split, outside the training "
+                                "range) and R0 (historical provenance) in audit/asset_audit.json, and it is D4's own "
+                                "initialization calibration pool",
+                "rejected_candidates": "unverified or incorrect teacher outputs are never trained on"}}
+
+
+def e1_overlap(rows: list[dict]) -> dict:
+    """The fluid pool against every corpus_v2 session E1's pack could hold."""
+    e1 = {_prompt(s) for s in A.jsonl(E1_SESSIONS)}
+    hit = [s["id"] for s in rows if _prompt(s) in e1]
+    return {"fluid_sessions": len(rows), "sharing_a_user_prompt_with_corpus_v2": len(hit), "examples": hit[:5]}
+
+
+def topup(cap: dict, d: dict, *, gap: int, price_a100: float) -> dict:
+    """The missing supervised tokens as unused tasks to generate, sized and
+    priced from what P1 and P1t measured.
+
+    Allocation, fixed before any count is seen: the gap is split over the
+    cells in proportion to each cell's share of the existing primary pool (the
+    pool's own composition), each cell's tasks sized for its measured unit
+    acceptance and mean supervised tokens per unit with P1's planning rule
+    (`tasks_for`: 1.5x oversupply or a 90% binomial chance, whichever is
+    larger), and selected round-robin over its unused tasks' groups (P1's
+    rule; no group chosen by acceptance). Cost: P1's measured session and
+    decode speed, two passes, P1's hard-cap rule."""
+    from stages.reasoning_data import corpus_feasibility as CF
+    from stages.reasoning_data import generation_plan as GP
+    from stages.reasoning_data import isolation_check as IC
+    from stages.reasoning_data import p1v
+    spec, runs = d["spec"], d["runs"]
+    tasks = runs[0]["tasks"]
+    used = {c.unit_id for r in runs for c in r["got"]["candidates"]}
+    pool_cells = {k: v for k, v in cap["cells"].items() if v["in_this_pool"]}
+    total = sum(v["supervised_tokens"] for v in pool_cells.values())
+    rows, selected_all = {}, []
+    for cell, v in pool_cells.items():
+        want = gap * v["supervised_tokens"] / total
+        units = math.ceil(want / v["supervised_per_unit"]["mean"])
+        need = CF.tasks_for(units, v["unit_accept_rate"])
+        unused = [t for t in tasks.values() if p1v.cell_of(t, spec) == cell and t["task_id"] not in used]
+        sel = GP.round_robin(unused, need["tasks"])
+        selected_all += sel
+        rows[cell] = {"supervised_tokens_wanted": round(want), "units_wanted": units, "tasks": need,
+                      "unused_tasks": len(unused), "enough_unused_tasks": len(unused) >= need["tasks"],
+                      "expected_supervised_tokens": round(need["tasks"] * v["unit_accept_rate"]
+                                                          * v["supervised_per_unit"]["mean"]),
+                      "predicted_generated_tokens": need["tasks"] * v["generated_tokens_per_task"],
+                      "selected_task_ids_sha256": canonical_sha(sorted(t["task_id"] for t in sel))}
+    iso = IC.check_pool([{**t, "unit_id": t["task_id"], "messages": t.get("messages") or []} for t in selected_all])
+    recs = [x for r in runs if r["identity"]["phase"] == "P1" for x in r["records"]]
+    p1 = runs[0]["identity"]["run_id"]
+    sess = CF.session_measured(p1, d["stores"][p1])
+    speed = CF.decode_speed(recs)
+    limit = int(A.read_json(A.CONFIG_DIR / "generation_protocol.json")["execution"]["session_limit"])
+    per_pass = limit / speed
+    engine = max(sess["engine_start_seconds_by_pass"] or [180.0])
+    minutes = sess["pod_to_driver_minutes"] + 2 * (engine + per_pass) / 60 + sess["all_done_to_pod_deleted_minutes"]
+    rate = price_a100 * sess["all_in_over_gpu"] / 60
+    reserve = (sess["pod_to_driver_minutes"] + sess["all_done_to_pod_deleted_minutes"] + 15) * rate
+    n_tasks = sum(r["tasks"]["tasks"] for r in rows.values())
+    return {"gap_supervised_tokens": gap, "cells": rows, "tasks_total": n_tasks,
+            "all_cells_have_enough_unused_tasks": all(r["enough_unused_tasks"] for r in rows.values()),
+            "expected_supervised_tokens": sum(r["expected_supervised_tokens"] for r in rows.values()),
+            "predicted_generated_tokens": sum(r["predicted_generated_tokens"] for r in rows.values()),
+            "isolation_of_the_selected_tasks": {"pass": iso["pass"], "violations": iso["violations"][:10],
+                                                "_": "prompt-level rules on the tasks before generation; R0-R9 run "
+                                                     "again on the accepted units with their teacher text"},
+            "generation": "P1's frozen protocol (the same teacher, sampling, allowance and verifiers; two candidates, "
+                          "the second only when the first is rejected), then P1v verification at $0",
+            "cost": {"basis": "P1's measured A100 session (the only measured generation hardware)",
+                     "decode_tokens_per_second_per_sequence": speed, "session_minutes_expected": round(minutes, 1),
+                     "expected_usd": round(minutes * rate, 2), "hard_cap_usd": round(1.5 * (minutes * rate + reserve), 2),
+                     "price_per_hour": price_a100}}
+
+
 # -- data ---------------------------------------------------------------------
 def pctl(xs: list, q: float):
     xs = sorted(xs)
@@ -227,8 +476,7 @@ def truncation_detail(trunc: list[dict], sessions: dict[str, dict], tok) -> dict
     whether the retained target still holds its answer."""
     from aadistill.data.sessions import render_session
     close = tok.convert_tokens_to_ids("</think>")
-    disc = Counter()
-    kinds = Counter()
+    disc, kinds = Counter(), Counter()
     for m in trunc:
         r = render_session(tok, sessions[m["session_id"]], block_len=8192)
         kept = m["end"] - m["start"]
@@ -240,92 +488,47 @@ def truncation_detail(trunc: list[dict], sessions: dict[str, dict], tok) -> dict
                 disc["reasoning" if c is not None and i <= c else "answer" if c is not None else "unsplit"] += 1
         kinds["no_think_close" if c is None else "answer_lost" if kept <= c else
               "answer_cut" if kept <= sup[-1] else "intact"] += 1
-    return {"discarded_supervised": dict(disc), "retained_target": dict(kinds),
-            "_retained_target": "answer_lost: the cut falls inside the reasoning, so the retained target holds no "
-                                "answer; answer_cut: the cut falls inside the answer"}
+    return {"discarded_supervised": dict(disc), "retained_target": dict(kinds)}
 
 
-def pack_metrics(pack: Path, rung: int, sessions: dict[str, dict], tok, *, unit_of, declared: dict | None) -> dict:
-    from aadistill.data.ladder import load_ladder_meta, select_val_blocks
-    from aadistill.data.sessions import rung_n_blocks
-    meta = load_ladder_meta(pack)
-    audit = list(A.jsonl(pack / "audit.jsonl"))
-    n = rung_n_blocks(meta, rung)
-    train = audit[:n]
-    largest = max(int(r["n_blocks"]) for r in meta["rungs"] if r.get("reachable"))
-    val = [audit[i] for i in select_val_blocks(audit, largest, 16)]
-    members = [m for r in train for m in r["sessions"]]
+def seq_metrics(rows: list[dict], sessions: dict[str, dict], tok, *, unit_of, block_len: int = 8192) -> dict:
+    members = [m for r in rows for m in r["sessions"]]
     trunc = [m for m in members if m["truncated"]]
-    sup = sum(r["supervised_tokens"] for r in train)
-    real = sum(r["unpadded_length"] for r in train)
-    per_seq = [r["supervised_tokens"] for r in train]
-    fill = [r["unpadded_length"] / r["final_length"] for r in train]
+    n, sup = len(rows), sum(r["supervised_tokens"] for r in rows)
+    real = sum(r["unpadded_length"] for r in rows)
+    per_seq = [r["supervised_tokens"] for r in rows]
     mix = Counter()
     for m in members:
         mix[m["data_type"]] += m["supervised_retained"]
-    out = {"pack": str(pack.relative_to(A.REPO)), "packing": meta["packing"], "ordering": meta["ordering"],
-           "sequence_length": meta["block_len"], "packed_sequences": n, "source_sessions": len(members),
-           "units": len({unit_of(sessions[m["session_id"]]) for m in members}),
-           "supervised_tokens": sup, "non_padding_tokens": real, "padding_tokens": n * meta["block_len"] - real,
-           "padding_ratio": round(1 - real / (n * meta["block_len"]), 4),
-           "supervised_tokens_per_sequence": {"p10": pctl(per_seq, 0.1), "p50": pctl(per_seq, 0.5),
-                                              "p90": pctl(per_seq, 0.9), "mean": round(sup / n, 1)},
-           "sequences_under_15pct_full": sum(f < 0.15 for f in fill),
-           "truncated_sessions": len(trunc),
-           "supervised_discarded_by_truncation": sum(m["supervised_discarded"] for m in members),
-           "truncation": truncation_detail(trunc, sessions, tok),
-           "token_mix": {k: round(v / sup, 4) for k, v in sorted(mix.items())}}
-    if declared:
-        out["mix_minus_declared_pp"] = {k: round(100 * (out["token_mix"].get(k, 0) - v), 2)
-                                        for k, v in sorted(declared.items())}
-    train_units = {unit_of(sessions[m["session_id"]]) for m in members}
-    later = {unit_of(sessions[m["session_id"]]) for r in audit[n:] for m in r["sessions"]}
-    out["units_split_by_the_cut"] = len(train_units & later)
-    val_members = [m for r in val for m in r["sessions"]]
-    out["validation"] = {
-        "sequences": len(val), "supervised_tokens": sum(r["supervised_tokens"] for r in val),
-        "from_sequence": largest, "_from": "16 sequences past the largest reachable rung (ladder.select_val_blocks)",
-        "units_also_in_training": len({unit_of(sessions[m["session_id"]]) for m in val_members} & train_units),
-        "prompts_also_in_training": len({_prompt(sessions[m["session_id"]]) for m in val_members}
-                                        & {_prompt(sessions[m["session_id"]]) for m in members}),
-        "token_mix": _mix(val_members)}
-    return out
+    return {"packed_sequences": n, "source_sessions": len(members),
+            "units": len({unit_of(sessions[m["session_id"]]) for m in members}),
+            "supervised_tokens": sup, "non_padding_tokens": real, "padding_tokens": n * block_len - real,
+            "padding_ratio": round(1 - real / (n * block_len), 4),
+            "supervised_tokens_per_sequence": {"p10": pctl(per_seq, 0.1), "p50": pctl(per_seq, 0.5),
+                                               "p90": pctl(per_seq, 0.9), "mean": round(sup / n, 1)},
+            "truncated_sessions": len(trunc),
+            "supervised_discarded_by_truncation": sum(m["supervised_discarded"] for m in members),
+            "truncation": truncation_detail(trunc, sessions, tok),
+            "token_mix": {k: round(v / sup, 4) for k, v in sorted(mix.items())}}
 
 
 def _prompt(s: dict) -> str:
     return hashlib.sha256(next(m["content"] for m in s["messages"] if m["role"] == "user").encode()).hexdigest()
 
 
-def _mix(members: list[dict]) -> dict:
-    c = Counter()
-    for m in members:
-        c[m["data_type"]] += m["supervised_retained"]
-    t = sum(c.values()) or 1
-    return {k: round(v / t, 4) for k, v in sorted(c.items())}
-
-
 def by_axis(mix: dict) -> dict:
     out = Counter()
     for k, v in mix.items():
-        out[k.split("/")[0].replace("supporting.", "supporting:").split(":")[0]] += v
+        out[k.split("/")[0]] += v
     return {k: round(v, 4) for k, v in sorted(out.items())}
 
 
-def family_coverage(pack: Path, rung: int, sessions: dict[str, dict]) -> dict:
-    from aadistill.data.sessions import rung_n_blocks
-    n = rung_n_blocks(A.read_json(pack / "ladder.json"), rung)
-    seen = {sessions[m["session_id"]].get("family") for r in list(A.jsonl(pack / "audit.jsonl"))[:n]
-            for m in r["sessions"]} - {None}
-    pool = {s.get("family") for s in sessions.values()} - {None}
-    return {"families_in_pool": len(pool), "families_trained": len(seen), "missing": sorted(pool - seen)}
-
-
-def e1_isolation(pack: Path, rung: int) -> dict:
+def e1_isolation(pack: Path) -> dict:
     """E1's pack against eval-set-1, from the isolation audit H1 already ran
     over every corpus_v2 session: which flagged sessions E1 trained on."""
     from aadistill.data.sessions import rung_n_blocks
     iso = A.read_json(A.LOG_DIR / "audit/asset_audit.json")["isolation"]["corpus_v2_sessions"]["results"]
-    n = rung_n_blocks(A.read_json(pack / "ladder.json"), rung)
+    n = rung_n_blocks(A.read_json(pack / "ladder.json"), RUNG)
     trained = {m["session_id"] for r in list(A.jsonl(pack / "audit.jsonl"))[:n] for m in r["sessions"]}
     r2 = iso["R2_near_duplicate"]
     hit = [f for f in r2["flagged_items"] if f["id"] in trained]
@@ -333,54 +536,7 @@ def e1_isolation(pack: Path, rung: int) -> dict:
             "R2_near_duplicate_trained": {"n": len(hit), "of_flagged": r2["flagged"],
                                           "by_unit": dict(Counter(f["unit"] for f in hit)),
                                           "fluid_reasoning_720": r2["by_unit"]["fluid_reasoning_720/dev_v1"]},
-            "R8_in_sample": iso["R8_in_sample_overlap"],
-            "reading": ("the fluid units share no prompt key and no 13-gram near-copy with E1's training data, so "
-                        "the primary fluid conclusions are isolated; the near-copies sit in the behaviour unit and "
-                        "one multihop item, which are reported with that caveat; stage3_legacy_150 is made of E1's "
-                        "own training prompts and is in-sample regression only")}
-
-
-def no_truncation_variant(rows: list[dict], shares: dict, tok, *, block_len: int = 8192) -> dict:
-    """A MEASURED ALTERNATIVE, not a pack: E1's packer step for step (the
-    builder's render, interleave, pack, block order) with the one switch the
-    packer itself provides, `allow_terminal_truncation=False`, which closes a
-    sequence instead of cutting its last session. Reported so the maintainer
-    can weigh it; nothing trains on it."""
-    from aadistill.data.mixture import interleave, order_blocks
-    from aadistill.data.sessions import pack_sessions, render_session, render_system_block
-    rendered = [render_session(tok, s, block_len=block_len) for s in rows]
-    by_type = defaultdict(list)
-    for r in rendered:
-        by_type[r.data_type].append(r)
-    order = interleave(dict(by_type), shares)
-    sys_ids = {}
-    for r in rendered:
-        if r.system_key not in sys_ids:
-            sys_ids[r.system_key] = tok(render_system_block(tok, r.system_text, r.tools),
-                                        add_special_tokens=False).input_ids
-    blocks = order_blocks(pack_sessions(order, sys_ids, block_len=block_len, pad_id=tok.pad_token_id
-                                        if tok.pad_token_id is not None else tok.eos_token_id,
-                                        allow_terminal_truncation=False), shares)
-    run, n = 0, None
-    for i, b in enumerate(blocks):
-        run += b.n_supervised
-        if run >= RUNG:
-            n = i + 1
-            break
-    used = blocks[:n]
-    mix = Counter()
-    for b in used:
-        for m in b.audit["sessions"]:
-            mix[m["data_type"]] += m["supervised_retained"]
-    sup = sum(mix.values())
-    real = sum(b.audit["unpadded_length"] for b in used)
-    token_mix = {k: round(v / sup, 4) for k, v in sorted(mix.items())}
-    return {"packed_sequences": n, "supervised_tokens": sup, "non_padding_tokens": real,
-            "padding_ratio": round(1 - real / (n * block_len), 4), "truncated_sessions": 0,
-            "optimizer_steps_at_3_epochs": math.ceil(n * EPOCHS / BATCH_SIZE),
-            "axis_mix": by_axis(token_mix),
-            "mix_minus_declared_pp_max": max(abs(round(100 * (token_mix.get(k, 0) - v), 2)) for k, v in shares.items()),
-            "sequences_in_pool": len(blocks)}
+            "R8_in_sample": iso["R8_in_sample_overlap"]}
 
 
 # -- compute ------------------------------------------------------------------
@@ -397,135 +553,141 @@ def fwd_flops_per_position(cfg: dict, n_params: int) -> dict:
             "unembedding": 2 * d * v, "total": 2 * non_emb + 2 * layers * ctx * d_attn + 2 * d * v}
 
 
-def schedules(arms: dict, study: dict) -> dict:
-    """What each arm's training costs under E1's batch size and epochs, and the
-    schedules that would match it on another quantity instead."""
+def schedules(e1: dict, fluid_measured: dict, fluid_forecast: dict, study: dict) -> dict:
+    """D4-Original and D4-Augmented under E1's batch size and 3 epochs. The
+    trainer forwards all 8,192 positions of a sequence (E1's config leaves
+    `batch.truncate_padding` off), so FLOPs follow the sequence count."""
     cfg = A.read_json(A.REPO / study["recipe"]["e1_configs"]["20260726"]["path"])
     student = A.read_json(A.REPO / study["initializations"]["pca"]["path"] / "config.json")
     teacher = A.read_json(Path.home() / ".cache/huggingface/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots"
                           / cfg["teacher"]["revision"] / "config.json")
-    s_f = fwd_flops_per_position(student, 596_049_920)
-    t_f = fwd_flops_per_position(teacher, 4_022_468_096)
-    # student forward + backward (3x forward) + the activation-recomputation forward; teacher forward (KD)
+    s_f, t_f = fwd_flops_per_position(student, 596_049_920), fwd_flops_per_position(teacher, 4_022_468_096)
     per_pos = 4 * s_f["total"] + t_f["total"]
     bps, seq = cfg["batch"]["blocks_per_step"], cfg["block_len"]
-    padding_computed = not cfg["batch"].get("truncate_padding", False)
 
-    def plan(a: dict, steps: int) -> dict:
+    def plan(n: int, sup: int, real: int) -> dict:
+        steps = math.ceil(n * EPOCHS / bps)
         passes = steps * bps
-        positions = passes * seq if padding_computed else round(passes / a["packed_sequences"] * a["non_padding_tokens"])
-        return {"optimizer_steps": steps, "epochs": round(passes / a["packed_sequences"], 3),
-                "supervised_token_exposure": round(passes / a["packed_sequences"] * a["supervised_tokens"]),
-                "non_padding_token_exposure": round(passes / a["packed_sequences"] * a["non_padding_tokens"]),
-                "positions_computed": positions, "training_flops": float(f"{positions * per_pos:.4g}")}
+        return {"packed_sequences": n, "optimizer_steps": steps, "epochs": round(passes / n, 3),
+                "warmup_steps": max(10, round(0.05 * steps)), "unique_supervised_tokens": sup,
+                "supervised_token_exposure": round(passes / n * sup),
+                "non_padding_token_exposure": round(passes / n * real),
+                "positions_computed": passes * seq, "training_flops": float(f"{passes * seq * per_pos:.4g}")}
 
-    ref = arms["e1_2p96M"]
-    e1_steps = math.ceil(ref["packed_sequences"] * EPOCHS / bps)
-    r = arms["reasoning_v3_seq"]
-    r_steps = math.ceil(r["packed_sequences"] * EPOCHS / bps)
+    aug_m = plan(e1["packed_sequences"] + fluid_measured["packed_sequences"],
+                 e1["supervised_tokens"] + fluid_measured["supervised_tokens"],
+                 e1["non_padding_tokens"] + fluid_measured["non_padding_tokens"])
+    aug_f = plan(e1["packed_sequences"] + fluid_forecast["packed_sequences"],
+                 e1["supervised_tokens"] + fluid_forecast["supervised_tokens"],
+                 e1["non_padding_tokens"] + fluid_forecast["non_padding_tokens"])
     return {"recipe": {"batch_size": bps, "micro_batch_size": cfg["batch"]["micro_blocks"],
                        "gradient_accumulation_steps": bps // cfg["batch"]["micro_blocks"], "sequence_length": seq,
-                       "epochs": EPOCHS, "padding_positions_computed": padding_computed,
-                       "_padding": "batch.truncate_padding is absent from E1's config, so every one of a sequence's "
-                                   "8,192 positions is forwarded by student and teacher, padding included"},
+                       "epochs": EPOCHS, "padding_positions_computed": not cfg["batch"].get("truncate_padding", False),
+                       "lr_rule": "E1's builder rule: warmup max(10, round(0.05 T)), cosine to 0.1 of peak; "
+                                  "eval every max(25, T // 8), save every max(200, T // 2)"},
             "flops_per_position": {"student_forward": s_f, "teacher_forward": t_f, "training_total": per_pos,
                                    "_rule": "student 4 x forward (forward, backward = 2 x forward, recomputed "
                                             "forward for gradient checkpointing) + teacher 1 x forward"},
-            "PCA-Original and D4-Original (E1's pack)": plan(ref, e1_steps),
-            "D4-Reasoning, epoch-matched (3 epochs)": plan(r, r_steps),
-            "D4-Reasoning, step- and FLOPs-matched (2,916 steps)": plan(r, e1_steps),
-            "conflict": (f"at batch size {bps} the two packs give {e1_steps} and {r_steps} optimizer steps for 3 "
-                         "epochs. No schedule matches epochs, optimizer steps, supervised-token exposure and FLOPs "
-                         "at once: the packs hold the same supervised tokens in "
-                         f"{ref['packed_sequences']} and {r['packed_sequences']} sequences "
-                         f"({ref['supervised_tokens_per_sequence']['mean']} and "
-                         f"{r['supervised_tokens_per_sequence']['mean']} supervised tokens per sequence)")}
+            "PCA-Original and D4-Original": plan(e1["packed_sequences"], e1["supervised_tokens"],
+                                                 e1["non_padding_tokens"]),
+            "D4-Augmented, measured on today's fluid pool (short of 2.96M)": aug_m,
+            "D4-Augmented, forecast with the fluid increment at 2.96M": aug_f,
+            "reading": "D4-Augmented's gain, if any, combines the added data and the added optimizer steps and "
+                       "FLOPs it brings; it is not the data content's isolated causal effect (maintainer, 2026-10-24)"}
 
 
-def budget(sched: dict, *, price_usd_per_hour: float, volume_gb: int) -> dict:
-    """L40S cost of each schedule option, from measured rates only: E1 sa's
-    own wall time per optimizer step on L40S (its run_end, evaluations
-    included), the L40S evaluation time per checkpoint and session overhead
-    the H1 forecast measured, and the evaluation contingency it declares (a
-    student off the floor writes longer replies than the floor students
-    measured). Every arm computes all 8,192 positions of every sequence, so a
-    step costs the same in every arm."""
-    fc = A.read_json(A.LOG_DIR / "plans/cost_forecast.json")["measured"]
-    k = A.read_json(A.LOG_DIR / "plans/cost_forecast.json")["contingency_factors_not_measurements"]
+def budget(sched: dict, gen_cost: dict, *, price: float, volume_gb: int) -> dict:
+    """L40S cost from measured rates only: E1 sa's own wall time per optimizer
+    step on L40S (its run_end, evaluations included), the L40S evaluation time
+    per checkpoint and session overhead the H1 forecast measured, and the
+    evaluation contingency it declares; the top-up generation as priced above."""
+    fc = A.read_json(A.LOG_DIR / "plans/cost_forecast.json")
     run_end = [r for r in A.jsonl(A.REPO / "artifacts/stages/stage-3/rescued/_relay/e1_r2960k_sa_pca/train_log.jsonl")
                if r.get("event") == "run_end"][0]
     s_step = run_end["seconds"] / run_end["steps"]
-    ev = (fc["eval_seconds_per_unit_L40S"]["max"], fc["eval_seconds_per_unit_L40S"]["max"] * k["eval_floor_to_reasoning"])
-    over = fc["session_overhead_seconds_L40S"]["median"]
-    e1 = sched["PCA-Original and D4-Original (E1's pack)"]["optimizer_steps"]
-    ep = sched["D4-Reasoning, epoch-matched (3 epochs)"]["optimizer_steps"]
-    options = {"A: D4-Reasoning epoch-matched": {"train_steps": [e1, e1, ep, ep], "evaluations": 6},
-               "B: D4-Reasoning step- and FLOPs-matched": {"train_steps": [e1] * 4, "evaluations": 6},
-               "C: both D4-Reasoning schedules": {"train_steps": [e1] * 4 + [ep, ep], "evaluations": 8}}
+    m = fc["measured"]
+    ev = (m["eval_seconds_per_unit_L40S"]["max"],
+          m["eval_seconds_per_unit_L40S"]["max"] * fc["contingency_factors_not_measurements"]["eval_floor_to_reasoning"])
+    over = m["session_overhead_seconds_L40S"]["median"]
+    steps = ([sched["PCA-Original and D4-Original"]["optimizer_steps"]] * 2
+             + [sched["D4-Augmented, forecast with the fluid increment at 2.96M"]["optimizer_steps"]] * 2)
+    sessions = 4 + 1 + 1          # one per training run, PCA-Original's evaluation, the GPU validation
     storage = round(volume_gb * 0.07 * 2, 2)
-    out = {"inputs": {"seconds_per_optimizer_step_L40S": round(s_step, 3), "eval_seconds_per_checkpoint": list(ev),
-                      "session_overhead_seconds": over, "price_usd_per_hour": price_usd_per_hour,
-                      "volume": f"{volume_gb} GB x $0.07/GB-month x 2 months = ${storage}",
-                      "gpu_validation_hours": 0.5,
-                      "_validation": "one short L40S session before formal training: a D4-Original seed's first "
-                                     "logged steps against E1's logged counts, resume from a save point, and the "
-                                     "decoding protocol on the real engine"}}
-    for name, o in options.items():
-        sessions = len(o["train_steps"]) + 1          # one per training run, one for PCA-Original's evaluation
-        hours = [(sum(o["train_steps"]) * s_step + o["evaluations"] * e + sessions * over) / 3600 + 0.5 for e in ev]
-        out[name] = {"gpu_hours": [round(h, 1) for h in hours],
-                     "usd": [round(h * price_usd_per_hour + storage, 2) for h in hours], "sessions": sessions + 1}
-    return out
+    hours = [(sum(steps) * s_step + 6 * e + sessions * over) / 3600 + 0.5 for e in ev]
+    return {"inputs": {"seconds_per_optimizer_step_L40S": round(s_step, 3), "training_steps": steps,
+                       "evaluations": 6, "eval_seconds_per_checkpoint": list(ev), "session_overhead_seconds": over,
+                       "price_usd_per_hour": price, "gpu_validation_hours": 0.5,
+                       "volume": f"{volume_gb} GB x $0.07/GB-month x 2 months = ${storage}"},
+            "training_and_evaluation": {"gpu_hours": [round(h, 1) for h in hours],
+                                        "usd": [round(h * price, 2) for h in hours]},
+            "top_up_generation": {"expected_usd": gen_cost["expected_usd"], "hard_cap_usd": gen_cost["hard_cap_usd"]},
+            "storage_usd": storage,
+            "total_usd": [round(h * price + storage + gen_cost["expected_usd"], 2) for h in hours]}
 
 
 def cmd_audit(args) -> int:
     from transformers import AutoTokenizer
-    study = A.read_json(A.REPO / "configs/stages/stage-2/reasoning_data/h1pa.json")
+    study = A.read_json(STUDY)
     tok = AutoTokenizer.from_pretrained(str(PCA_INIT))
-    e1_sessions = {s["id"]: s for s in A.jsonl(E1_SESSIONS)}
-    r_sessions = {s["id"]: s for s in A.jsonl(Path(args.reasoning_sessions))}
-    rds = study["datasets"]["reasoning_v3_seq"]
-    pack_r = A.REPO / rds["pack"]
+    stores = {k: Path(v) for k, v in (kv.split("=", 1) for kv in args.store)}
+    d = derive(stores)
+    fluid_rows_ = fluid_of(d["placed"])
+    meta = A.read_json(Path(args.fluid_sessions).with_suffix(".meta.json"))
+    fluid_pack, merged = Path(args.fluid_pack).resolve(), Path(args.merged).resolve()
     ident = (pca_original_identity(study, Path(args.relay_sa) if args.relay_sa else None,
                                    Path(args.e1_regen) if args.e1_regen else None)
-             + d4_identity(study)
-             + [check("D4-Reasoning builder input", A.sha256_file(Path(args.reasoning_sessions)),
-                      rds["builder_input_sha256"])]
-             + [check(f"D4-Reasoning pack {f}", A.sha256_file(pack_r / f), rds[k])
-                for f, k in (("blocks.npz", "blocks_sha256"), ("ladder.json", "ladder_sha256"),
-                             ("audit.jsonl", "audit_sha256"))]
-             + [check("D4-Reasoning pack built from that input", A.read_json(pack_r / "ladder.json")["sessions_sha256"],
-                      rds["builder_input_sha256"])]
-             + training_order_replay(study))
-    declared_r = A.read_json(pack_r / "ladder.json")["declared_mixture"]
-    arms = {"e1_2p96M": pack_metrics(A.REPO / study["datasets"]["e1_2p96M"]["pack"], RUNG, e1_sessions, tok,
-                                     unit_of=lambda s: s.get("source_id") or s["id"],
-                                     declared=A.read_json(E1_PACK / "ladder.json")["declared_mixture"]),
-            "reasoning_v3_seq": pack_metrics(pack_r, RUNG, r_sessions, tok, unit_of=lambda s: s["unit_id"],
-                                             declared=declared_r)}
-    arms["reasoning_v3_seq"]["axis_mix"] = by_axis(arms["reasoning_v3_seq"]["token_mix"])
-    arms["reasoning_v3_seq"]["axis_declared"] = by_axis(declared_r)
-    arms["reasoning_v3_seq"]["families"] = family_coverage(pack_r, RUNG, r_sessions)
-    arms["reasoning_v3_seq"]["isolation"] = {
-        "pool": "R0-R9 passed on every generated unit and the reuse selection's own record "
-                "(audit/corpus_v3_feasibility.json :: isolation); packing changes no content"}
-    arms["e1_2p96M"]["isolation"] = e1_isolation(A.REPO / study["datasets"]["e1_2p96M"]["pack"], RUNG)
-    arms["reasoning_v3_seq"]["alternative_without_terminal_truncation"] = no_truncation_variant(
-        list(r_sessions.values()), declared_r, tok)
-    doc = {"schema": "aadistill.stage2.reasoning_data.h1pa_audit/v1",
+             + d4_identity(study) + training_order_replay(study)
+             + [check("fluid builder input", A.sha256_file(Path(args.fluid_sessions)), meta["builder_input_sha256"]),
+                check("fluid pack built from that input", A.read_json(fluid_pack / "ladder.json")["sessions_sha256"],
+                      meta["builder_input_sha256"]),
+                check("fluid sessions are the primary cells of the @v3 pool", meta["source_sessions_sha256"],
+                      d["sessions_sha256"])]
+             + merged_identity(merged))
+    cap = capacity(d)
+    gap = max(0, RUNG - cap["supervised_tokens"])
+    gen = topup(cap, d, gap=gap, price_a100=args.a100_price)
+    gen_reserve = topup(cap, d, gap=gap + args.reserve, price_a100=args.a100_price)
+    e1_sessions = {s["id"]: s for s in A.jsonl(E1_SESSIONS)}
+    n_e1, _, e1_audit = e1_split()
+    e1 = seq_metrics(e1_audit[:n_e1], e1_sessions, tok, unit_of=lambda s: s.get("source_id") or s["id"])
+    f_sessions = {s["id"]: s for s in A.jsonl(Path(args.fluid_sessions))}
+    f_audit = list(A.jsonl(fluid_pack / "audit.jsonl"))
+    n_f, complete = fluid_cut(fluid_pack)
+    fl = seq_metrics(f_audit[:n_f], f_sessions, tok, unit_of=lambda s: s["unit_id"])
+    fl["axis_mix"] = by_axis(fl["token_mix"])
+    fl["declared_mixture"] = A.read_json(fluid_pack / "ladder.json")["declared_mixture"]
+    fl["mix_minus_declared_pp_max"] = max(abs(round(100 * (fl["token_mix"].get(k, 0) - v), 2))
+                                          for k, v in fl["declared_mixture"].items())
+    fl["families"] = len({f_sessions[m["session_id"]].get("family") for r in f_audit[:n_f] for m in r["sessions"]}
+                         - {None})
+    fl["reaches_2p96M"] = complete
+    forecast_n = math.ceil(fl["packed_sequences"] * RUNG / fl["supervised_tokens"])
+    forecast = {"packed_sequences": forecast_n, "supervised_tokens": RUNG,
+                "non_padding_tokens": round(fl["non_padding_tokens"] * RUNG / fl["supervised_tokens"]),
+                "_": "today's measured packing density scaled to 2.96M (the top-up's sessions sized as the pool's); "
+                     "a FORECAST, replaced by the built pack"}
+    doc = {"schema": "aadistill.stage2.reasoning_data.h1pa_augmented_audit/v1",
            "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-           "study": study["study_id"], "study_config_sha256": A.sha256_file(
-               A.REPO / "configs/stages/stage-2/reasoning_data/h1pa.json"),
+           "study": study["study_id"], "study_config_sha256": A.sha256_file(STUDY),
            "identity": ident, "identity_ok": all(c["ok"] for c in ident),
-           "datasets": arms, "schedule": schedules(arms, study), "authorizes": "nothing"}
-    doc["budget_L40S"] = budget(doc["schedule"], price_usd_per_hour=args.price, volume_gb=args.volume_gb)
+           "fluid_capacity": cap, "fluid_overlap_with_e1": e1_overlap(fluid_rows_),
+           "gap_supervised_tokens": gap,
+           "top_up": gen, "top_up_with_a_validation_reserve": {"reserve_supervised_tokens": args.reserve, **{
+               k: gen_reserve[k] for k in ("gap_supervised_tokens", "tasks_total", "expected_supervised_tokens",
+                                           "all_cells_have_enough_unused_tasks", "cost")}},
+           "datasets": {"e1_2p96M": {**e1, "isolation": e1_isolation(E1_PACK)},
+                        "fluid_increment": fl, "fluid_increment_forecast_at_2p96M": forecast,
+                        "merged": {"pack": str(merged.relative_to(A.REPO)),
+                                   "status": A.read_json(merged / "ladder.json")["status"]}},
+           "authorizes": "nothing"}
+    doc["schedule"] = schedules(e1, fl, forecast, study)
+    doc["budget_L40S"] = budget(doc["schedule"], gen["cost"], price=args.price, volume_gb=args.volume_gb)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(doc, indent=1, default=str) + "\n")
-    print(OUT.relative_to(A.REPO), "identity_ok", doc["identity_ok"])
+    print(OUT.relative_to(A.REPO), "identity_ok", doc["identity_ok"], "gap", gap)
     for c in ident:
         if not c["ok"]:
             print("  FAILED:", c["check"])
-    print(json.dumps(doc["schedule"], indent=1)[:3000])
     return 0 if doc["identity_ok"] else 3
 
 
@@ -535,14 +697,24 @@ def main(argv=None) -> int:
     s = sub.add_parser("sessions")
     s.add_argument("--store", action="append", required=True, metavar="RUN_ID=DIR")
     s.add_argument("--out", required=True)
+    m = sub.add_parser("merge")
+    m.add_argument("--fluid-pack", required=True)
+    m.add_argument("--out", required=True)
     a = sub.add_parser("audit")
-    a.add_argument("--reasoning-sessions", required=True)
+    a.add_argument("--store", action="append", required=True, metavar="RUN_ID=DIR")
+    a.add_argument("--fluid-sessions", required=True)
+    a.add_argument("--fluid-pack", required=True)
+    a.add_argument("--merged", required=True)
     a.add_argument("--relay-sa", default=None, help="a directory holding E1 sa's relay run manifest and pod hashes")
     a.add_argument("--e1-regen", default=None, help="the directory E1's packer rebuilt E1's pack into")
     a.add_argument("--price", type=float, required=True, help="the L40S secure price per hour, read live")
+    a.add_argument("--a100-price", type=float, required=True,
+                   help="the A100-SXM4-80GB secure price per hour, read live (the top-up's measured hardware)")
+    a.add_argument("--reserve", type=int, default=150_000,
+                   help="an independent fluid validation reserve, priced as an option")
     a.add_argument("--volume-gb", type=int, default=50)
     args = ap.parse_args(argv)
-    return {"sessions": cmd_sessions, "audit": cmd_audit}[args.cmd](args)
+    return {"sessions": cmd_sessions, "merge": cmd_merge, "audit": cmd_audit}[args.cmd](args)
 
 
 if __name__ == "__main__":

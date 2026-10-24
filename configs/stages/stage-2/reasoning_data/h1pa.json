@@ -1,15 +1,17 @@
 {
- "schema": "aadistill.stage2.reasoning_data.h1pa_study/v1",
+ "schema": "aadistill.stage2.reasoning_data.h1pa_study/v2",
  "study_id": "stage2.reasoning_data.h1pa",
- "name": "H1-PA: the PCA-aligned redesign of H1, three arms",
- "decided_by": "maintainer, 2026-10-24 (logs/budget/decisions.md :: H1-PA)",
- "supersedes": "H1 for promotion only: logs/stages/stage-2/reasoning_data/plans/h1_annulment.json; H1's evidence is kept and is not part of this study",
- "status": "DESIGN, NOT FROZEN. D4-Reasoning's training schedule is unresolved: at E1's batch size and 3 epochs it trains 660 optimizer steps against the other arms' 2,916 (audit/h1pa_audit.json :: schedule). Choosing a schedule is the maintainer's; no formal training until it is chosen and this file is frozen",
- "questions": {
-  "Q1": "Under identical data and training conditions, is the D4 initialization better than PCA? (Comparison A: D4-Original - PCA-Original)",
-  "Q2": "With D4 fixed and the training method and compute budget controlled, does the 70/30 reasoning data help unseen-problem reasoning correctness more than the original training data? (Comparison B: D4-Reasoning - D4-Original)",
-  "C": "PCA-Original against D4-Reasoning, end to end; descriptive, changes initialization and data together, attributes to neither"
+ "name": "H1-PA: the PCA-aligned redesign of H1, three arms; the third adds 2.96M of pure fluid-reasoning data to E1's",
+ "decided_by": "maintainer, 2026-10-24, two decisions (logs/budget/decisions.md :: H1-PA, and :: H1-PA reasoning augmentation)",
+ "supersedes": "H1 for promotion only (logs/stages/stage-2/reasoning_data/plans/h1_annulment.json); and, within this study, the 70/30 D4-Reasoning arm (audited in audit/h1pa_audit.json, cancelled before any training)",
+ "status": "DESIGN, NOT FROZEN. The fluid increment holds 2,807,282 of its 2,960,000 supervised tokens (audit/h1pa_augmented_audit.json); a top-up generation of unused tasks closes the gap. No formal training until the top-up is authorized, generated, verified and packed, this file is frozen, and a grant names the training",
+ "question": "Under E1's baseline kept exactly, does adding 2.96M supervised tokens of pure fluid-reasoning data improve the D4 student's reasoning correctness on unseen problems?",
+ "comparisons": {
+  "A": "D4-Original - PCA-Original: the initialization effect; data, packing, recipe, seeds and evaluation identical",
+  "B": "D4-Augmented - D4-Original: the effect of adding the fluid increment WITH the optimizer steps and FLOPs it brings; not the data content's isolated causal effect",
+  "C": "D4-Augmented - PCA-Original: end to end, descriptive; changes initialization and data together"
  },
+ "not_studied": "no mixture-ratio search; no extra arm (no PCA-Augmented, so no 2x2 and no interaction); no step-matched or epoch-matched alternative schedule",
  "seeds": [20260726, 20260801],
  "arms": {
   "PCA-Original": {
@@ -29,9 +31,10 @@
                  "_durability": "the only copy is on the dev box (the relay refused it for quota in 2026-08); it goes to the study's durable storage before any session reads it"}
    }
   },
-  "D4-Original": {"initialization": "d4_top1", "dataset": "e1_2p96M", "recipe": "e1", "execution": "train, one run per seed"},
-  "D4-Reasoning": {"initialization": "d4_top1", "dataset": "reasoning_v3_seq", "recipe": "e1", "execution": "train, one run per seed",
-                   "schedule": "UNRESOLVED (see status)"}
+  "D4-Original": {"initialization": "d4_top1", "dataset": "e1_2p96M", "recipe": "e1",
+                  "execution": "train, one run per seed: 1,944 sequences, 3 epochs, 2,916 optimizer steps"},
+  "D4-Augmented": {"initialization": "d4_top1", "dataset": "e1_2p96M_plus_fluid", "recipe": "e1",
+                   "execution": "train, one run per seed: 3 epochs of E1's 1,944 sequences plus the fluid increment's; its optimizer steps follow its sequence count (forecast 3,695), never forced to 2,916 and never padded to it by repetition"}
  },
  "initializations": {
   "pca": {"path": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
@@ -45,27 +48,30 @@
  "datasets": {
   "e1_2p96M": {
    "pack": "artifacts/shared/instruments/ladder_uniform_probe",
-   "_pack": "E1's own pack: E1 trained from artifacts/stage3/ladder_uniform, whose blocks/ladder/audit hashes E1's run manifests record and these files carry",
+   "_pack": "E1's own pack: E1 trained from artifacts/stage3/ladder_uniform, whose blocks/ladder/audit hashes E1's run manifests record and these files carry; never re-sampled, re-packed or modified",
    "blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
    "ladder_sha256": "d4941722a099754ef5ba82d529c0fe2274a6b97af61b2fa52519ed22b84201f0",
    "audit_sha256": "15f16b7b22b229e9c0ae510b85b4c967948828e0e7d50fac15c3e516e3e911e6",
    "sessions": "artifacts/stages/stage-3/corpus_v2/sessions.jsonl",
    "sessions_sha256": "2b4edc2e2cc16cd56dae3d340345e1a17e2c4a8baa9837650a7bf5e340fa6fcd",
-   "rung": 2960000
-  },
-  "reasoning_v3_seq": {
-   "corpus_id": "stage2.reasoning_master@v3",
-   "source_sessions_sha256": "6458f2a868c7c30c7d831949cf226020a0f069b2af0df1ad3de227127c3fa042",
-   "_source": "the sessions the @v3 pack was built from, re-derived from the P1 and P1t stores (h1pa_audit sessions); no teacher generation",
-   "builder_input": "artifacts/stages/stage-2/reasoning_data/packs/D4R_seq_sessions.jsonl",
-   "builder_input_sha256": "871bceeec1dca1cab6af89da84a0bcbc442270bd271a9d83c2df5b0ba70046db",
-   "builder": "scripts/shared/data/build_token_ladder.py (E1's sequential packer, unchanged; it rebuilds E1's pack byte for byte)",
-   "pack": "artifacts/stages/stage-2/reasoning_data/packs/D4R_seq",
-   "blocks_sha256": "205e8fe6902a2153d4f323d1b6c85fcc156f13304dc7b99ec110f2c9c15386d0",
-   "ladder_sha256": "57c9dce0b3af45713be4b2716badbf0c8c6096acd761191c93cd1ad61d4402bd",
-   "audit_sha256": "a9a550a46dab37780329356700f7023e3f0aec79efe2c746fd80d77699156752",
    "rung": 2960000,
-   "never": "best-fit or best-fit-decreasing packing (maintainer, 2026-10-24)"
+   "training_sequences": 1944,
+   "validation_sequences": "16, from sequence 2941 (aadistill.data.ladder.select_val_blocks): every arm validates on these"
+  },
+  "fluid_increment": {
+   "what": "2,960,000 supervised tokens from the five P10.2 primary axes only: verified teacher-native targets from P1 and P1t (stage2.reasoning_master@v3's primary cells), plus a top-up of unused tasks; no supporting data, no @v3 quota",
+   "mixture": "the pool's own supervised-token composition by cell, declared before packing (h1pa_audit sessions); never tuned on any result",
+   "packing": "E1's sequential packer (scripts/shared/data/build_token_ladder.py) with --no-terminal-truncation, the packer's own allow_terminal_truncation=False: every verified trajectory is packed whole. This differs from E1's part, which keeps E1's terminal truncation; the difference is recorded, not hidden",
+   "today": {"builder_input": "artifacts/stages/stage-2/reasoning_data/packs/D4A_fluid_sessions.jsonl",
+             "builder_input_sha256": "d9eec53602b55e952474884297f7e54bc84c9b38ee28faf0bdc8c7e1e1405b4f",
+             "source_sessions_sha256": "6458f2a868c7c30c7d831949cf226020a0f069b2af0df1ad3de227127c3fa042",
+             "supervised_tokens": 2807282, "units": 616, "sessions": 731,
+             "gap_supervised_tokens": 152718},
+   "never": "best-fit or best-fit-decreasing packing; repeated samples; a lowered correctness standard; supporting data counted as fluid"
+  },
+  "e1_2p96M_plus_fluid": {
+   "layout": "E1's 1,944 training sequences byte for byte, then the fluid increment's sequences as packed, then E1's 16 validation sequences (h1pa_audit merge); E1's trainer reads it through aadistill.data.ladder.ladder_blocks unchanged",
+   "identity": "its own blocks/audit/ladder sha256s, recorded when the complete increment is built; today's merged pack is PROVISIONAL (the increment is short of 2.96M)"
   }
  },
  "recipe": {
@@ -77,16 +83,17 @@
                 "canonical_sha256": "8b385927accb73dd24233b69d0bf70bffd026d1a22e943bc39a0e7cfdc585afe",
                 "recorded_in": "configs/stages/stage-3/e6b/provenance.json :: e6b_p2_r2960k_sb.rung_parent_sha256 (E1 sb's run manifest was not preserved)"}
   },
-  "derive": "a D4 run's config is its seed's E1 config with student_path (the D4 directory), tokenizer_source (the PCA init directory E1 loaded its tokenizer from), data_dir (the arm's pack), run_name, out_dir and _purpose replaced; every other key, nested keys included, unchanged",
-  "facts": "batch size 2 sequences (blocks_per_step), micro-batch size 1 (micro_blocks), gradient accumulation steps 2, sequence length 8,192 (block_len), 3 epochs, 2,916 optimizer steps on E1's pack, 146 warmup steps, AdamW lr 5e-5 betas (0.9, 0.95) eps 1e-8 weight decay 0.01, gradient clipping 1.0, cosine to 0.1 of peak, CE 0.25 + KD 1.0 (T 1, KD over every non-padding position), fp32 weights with bf16 autocast, gradient checkpointing, teacher Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea in bf16, validation 16 sequences past the largest rung"
+  "derive": "a D4 run's config is its seed's E1 config with student_path (the D4 directory), tokenizer_source (the PCA init directory E1 loaded its tokenizer from), run_name, out_dir and _purpose replaced; D4-Augmented also replaces data_dir (the merged set), rung (its training supervised tokens) and the schedule E1's builder derives from the sequence count (total_steps = ceil(3 x sequences / 2), warmup max(10, round(0.05 T)), eval every max(25, T // 8), save every max(200, T // 2)); every other key, nested keys included, unchanged",
+  "facts": "batch size 2 sequences (blocks_per_step), micro-batch size 1 (micro_blocks), gradient accumulation steps 2, sequence length 8,192 (block_len), 3 epochs, AdamW lr 5e-5 betas (0.9, 0.95) eps 1e-8 weight decay 0.01, gradient clipping 1.0, cosine to 0.1 of peak, CE 0.25 + KD 1.0 (T 1, KD over every non-padding position), fp32 weights with bf16 autocast, gradient checkpointing, teacher Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea in bf16, the trainer's seeded per-epoch permutation of sequences"
  },
  "evaluation": {
   "set": "eval-set-1 (its registered identity, validity mask and scoring semantics unchanged)",
   "decoding": "configs/shared/evaluation/decoding/nucleus_v1.json",
-  "every_checkpoint": "two PCA-Original, two D4-Original and two D4-Reasoning checkpoints, each generated once under the same protocol and seed rule",
-  "never_compared_with": "any greedy result, H1's included"
+  "primary": "correctness on the formal static items of fluid_reasoning_720 (held-out rule families), each axis apart; every other unit reported beside it",
+  "every_checkpoint": "two PCA-Original, two D4-Original and two D4-Augmented checkpoints, each generated once under the same protocol and seed rule",
+  "never_compared_with": "any greedy result, E1's and H1's included"
  },
- "hardware": {"gpu": "NVIDIA L40S (48 GB)", "why": "E1 trained this exact configuration on L40S with a 39.96 GB logged peak (sa train_log.jsonl :: gpu_mem_gb)",
+ "hardware": {"gpu": "NVIDIA L40S (48 GB)", "why": "E1 trained this exact configuration on L40S with a 39.96 GB logged peak (sa train_log.jsonl :: gpu_mem_gb); D4-Augmented's sequences have the same length and micro-batch",
               "datacenters_with_l40s_and_volumes": "chosen at launch from a live query (2026-10-24: EU-NL-1, EUR-IS-2, US-MO-1, stock Low in each)"},
  "authorizes": "nothing"
 }

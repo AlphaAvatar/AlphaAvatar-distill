@@ -12,6 +12,84 @@
  "_reserved": "30 GB x $0.07 x 2 months, booked inside the H1 P1g/P2 $50 envelope from creation (unit_governance.spent) until this record states actual_usd",
  "consumer": "H1 P1g and P2: the durable root <mount>/h1 -- the four formal checkpoints, a unit's save points while it trains, the evaluation progress and evidence",
  "retire_by": "2026-12-23 at the latest (the end of the reservation), or earlier once its checkpoints have no consumer (AGENTS.md 2.5); deleting it, or keeping it past the reservation, is booked here first",
- "actual_usd": null,
- "authorizes": "nothing"
+ "actual_usd": 0.0449,
+ "authorizes": "nothing",
+ "retirement": {
+  "status": "DELETED",
+  "rule": "AGENTS.md 2.5 standing retirement of historical checkpoint weights (maintainer 2026-10-24: review H1's storage by the lifecycle rule, leave no unbounded billing)",
+  "conditions": {
+   "terminal": "H1 closed and annulled for promotion (plans/h1_annulment.json); every unit is one complete endpoint",
+   "evidence_durable": "each unit's evidence tarball on the relay (stage2_h1/units/evidence/<unit>.evidence.tgz, LFS sha256 equal to the closeouts' runs/h1p2*/closeout/outcome.json :: evidence) and extracted on the dev box (artifacts/stages/stage-2/reasoning_data/units/evidence/); reports, descriptors and rows in git (units/<unit>/)",
+   "identities_preserved": "every checkpoint's artifact and weights digest in units/<unit>/checkpoint.descriptor.json",
+   "no_consumer": "plans/h1_annulment.json :: checkpoint_consumers (2026-10-24): no launcher, setup, plan or driver reads them; H1-PA does not",
+   "not_an_anchor": "no incumbent, release or retained anchor"
+  },
+  "members": [
+   {
+    "path": "<mount>/h1/A-s20260726/checkpoint",
+    "kind": "formal student weights (fp32)",
+    "artifact_digest": "8f50904161eac8e414de355e9fe2ffebfd1f8fc1cd00f2f5e9997b805d4ef165",
+    "weights_digest": "e1af213d328ae91d9a5e733152d8988053196f1cd62777207bb87d369e4431c9",
+    "identity_record": "logs/stages/stage-2/reasoning_data/units/A-s20260726/checkpoint.descriptor.json"
+   },
+   {
+    "path": "<mount>/h1/A-s20260727/checkpoint",
+    "kind": "formal student weights (fp32)",
+    "artifact_digest": "d5d00f8619b8e1cad6cc8d749baae61494ad12c4cb97a3abeb06759993bcbd97",
+    "weights_digest": "e0a50cddec9ebdd1ae2923c41564af7da14d83dee07a5f430e6430a13cf4ac5f",
+    "identity_record": "logs/stages/stage-2/reasoning_data/units/A-s20260727/checkpoint.descriptor.json"
+   },
+   {
+    "path": "<mount>/h1/B-s20260726/checkpoint",
+    "kind": "formal student weights (fp32)",
+    "artifact_digest": "a4fc3c61738b1bf09f3e861bba2f2377b4d6777e852b0ecd17ca8eef68a17b54",
+    "weights_digest": "bd2a8acf330f42dd127bb3960aea90161d8e763a71bf0a59098e6bb381a0950e",
+    "identity_record": "logs/stages/stage-2/reasoning_data/units/B-s20260726/checkpoint.descriptor.json"
+   },
+   {
+    "path": "<mount>/h1/B-s20260727/checkpoint",
+    "kind": "formal student weights (fp32)",
+    "artifact_digest": "e026fe1d2ce8e5e7be351c3ef798af11a5735fdc19f44068e76f92fb0a336506",
+    "weights_digest": "40d0cc0a6f8d6d7e28a59af8d0c411a8a55cafc5ba17b86c9512a6f4f9283090",
+    "identity_record": "logs/stages/stage-2/reasoning_data/units/B-s20260727/checkpoint.descriptor.json"
+   }
+  ],
+  "members_basis": "DERIVED from the unit drivers' writes and the closeouts, not listed on a pod (no budget funds one): the four persisted checkpoints; the trainers' save points were released after each persistence (units/<unit>/attempts.jsonl); each unit's eval_progress holds the generations its evidence tarball already carries; P1g's validation bytes were released by p1g_driver",
+  "never_deleted": "logs and evidence: everything above stays where it is",
+  "references_in_git": [
+   "docs/stages/stage-2/reasoning_data/H1.md",
+   "docs/stages/stage-2/reasoning_data/H1PA.md",
+   "logs/budget/decisions.md",
+   "logs/budget/provider/runpod_billing_2026-10-23T1858Z.json",
+   "logs/budget/provider/runpod_billing_2026-10-24T0507Z.json",
+   "logs/maintenance/inventories/log_inventory.json",
+   "logs/stages/stage-2/reasoning_data/plans/durability_plan.json",
+   "logs/stages/stage-2/reasoning_data/plans/h1_annulment.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p1g_20261023_185836/closeout/outcome.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p1g_20261023_185836/governance/authorization.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p1g_20261023_185836/runtime/session.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p1g_20261023_191644/closeout/outcome.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p1g_20261023_191644/governance/authorization.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p1g_20261023_191644/runtime/session.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p2a_20261023_232905/closeout/outcome.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p2a_20261023_232905/governance/authorization.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p2a_20261023_232905/runtime/acquisition/refused_all_in_20261023T2329Z.session.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p2a_20261023_232905/runtime/session.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p2b_20261023_195303/closeout/outcome.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p2b_20261023_195303/governance/authorization.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p2b_20261023_195303/runtime/session.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p2b_20261023_205037/closeout/outcome.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p2b_20261023_205037/governance/authorization.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p2b_20261023_205037/runtime/session.json",
+   "logs/stages/stage-2/reasoning_data/storage/h1_volume_1980hnh75i.json",
+   "logs/state/current.json",
+   "logs/state/current.md"
+  ],
+  "written_utc": "2026-10-24T09:57:24+00:00",
+  "deleted_utc": "2026-10-24T09:57:35+00:00",
+  "delete_command": "runpodctl network-volume delete 1980hnh75i",
+  "provider_confirms_gone": true,
+  "provider_listing_after": "runpodctl network-volume list: [] (2026-10-24T09:57:35Z)"
+ },
+ "_actual": "ACTUAL: 30 GB x $0.07/GB-month x 15.373 h / 720 h = $0.0449 (created 2026-10-23T18:35:14Z -> deleted 2026-10-24T09:57:35+00:00), ceiled to the 4-decimal quantum, the Stage-0 retirements' basis; replaces the $4.2 reservation"
 }

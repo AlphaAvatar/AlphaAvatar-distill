@@ -9,25 +9,23 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**H1-PA (the PCA-aligned redesign of H1): DESIGNED AND AUDITED AT $0; NO-GO FOR FORMAL TRAINING UNTIL ONE MAINTAINER DECISION (2026-10-24).**
+**H1-PA, SECOND DESIGN: PCA-Original, D4-Original and D4-Augmented (E1's 2.96M plus 2.96M of pure fluid reasoning). AUDITED AT $0; NO-GO FOR FORMAL TRAINING UNTIL THE TOP-UP (2026-10-24).**
 Owner: [`docs/stages/stage-2/reasoning_data/H1PA.md`](../../docs/stages/stage-2/reasoning_data/H1PA.md),
-numbers in `logs/stages/stage-2/reasoning_data/audit/h1pa_audit.json`, identity in
-`configs/stages/stage-2/reasoning_data/h1pa.json`. Nothing is running or authorized.
-- **Arms:**
-  - PCA-Original: E1's two 2.96M checkpoints, re-evaluated only;
-  - D4-Original: D4 Top-1 on E1's exact pack and configuration;
-  - D4-Reasoning: D4 Top-1 on @v3 under E1's sequential packer.
-  Seeds 20260726 and 20260801. Evaluation uses `nucleus_v1`, never greedy.
-- **Comparison A is ready.** Identity is 28/28: E1's pack is rebuilt byte for
-  byte, and the training order is reproduced at every logged step.
-- **Comparison B is blocked.** D4-Reasoning packs into 440 sequences against
-  E1's 1,944, so 3 epochs means 660 against 2,916 optimizer steps. E1's
-  terminal truncation also drops 331 verified answers. The maintainer chooses
-  the schedule and packing (H1PA.md §6; recommended: truncation off plus both
-  schedules, about $34–46).
-- **Open items:**
-  - PCA-Original seed 20260801 exists only on the dev box;
-  - H1's volume `1980hnh75i` has no consumer and awaits a retirement decision.
+numbers in `logs/stages/stage-2/reasoning_data/audit/h1pa_augmented_audit.json`, identity in
+`configs/stages/stage-2/reasoning_data/h1pa.json`. Nothing is running or authorized. The account
+holds no pod and no volume.
+- **E1 kept exactly.** Identity is 30/30: E1's pack is rebuilt byte for byte,
+  and the merged set's E1 part is byte-identical.
+- **D4-Augmented** appends a fluid increment packed by E1's packer without
+  truncation:
+  - today: 492 sequences, 0 truncated;
+  - forecast: about 3,695 optimizer steps, 1.27× D4-Original's FLOPs;
+  - its gain is credited to data and compute together.
+- **The gap.** Qualified pure fluid data holds 2,807,282 of the 2,960,000
+  supervised tokens; the gap is 152,718.
+  - **Top-up:** 115 unused tasks, $1.01 expected and a $2.60 cap.
+  - **Then:** training and evaluation, about $32–41 in all on L40S.
+- **H1's volume `1980hnh75i` is retired** (AGENTS.md 2.5): $0.0449 actual.
 
 **STAGE-2/3 H1: ANNULLED FOR PROMOTION (maintainer, 2026-10-24; `plans/h1_annulment.json`). As executed: P1g PASSED, P2's FOUR FORMAL UNITS COMPLETE; THE FROZEN DECISION WAS NOT_RESOLVED (FLOOR).**
 Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).

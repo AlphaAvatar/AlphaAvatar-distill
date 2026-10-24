@@ -57,6 +57,7 @@
   "spent_usd": 21.84,
   "_spent": "sessions $17.6377 + the volume's $4.20 reservation (unit_governance.spent at closure)",
   "remainder": "$28.16 is NOT carried to H1-PA or any later study; a new study needs its own grant",
-  "enforced_by": "unit_governance.issue refuses a closed grant"
+  "enforced_by": "unit_governance.issue refuses a closed grant",
+  "storage_trued_up": "the volume was retired 2026-10-24: actual $0.0449 replaces the $4.20 reservation, so the phase's actual spend is $17.6826 (sessions $17.6377 + storage $0.0449); the remainder still funds nothing"
  }
 }
