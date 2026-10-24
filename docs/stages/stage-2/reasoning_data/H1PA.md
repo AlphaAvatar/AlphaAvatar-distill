@@ -703,9 +703,15 @@ before anything paid. Each is done; nothing paid ran.
   that all three sessions can reach their hard caps. That would be **$60.42**
   (PA2v $3.75, each seed session $26.23, storage $4.20); the cap is not raised
   to it.
-- **Training repricing.** PA2v's measured median step time replaces the
-  committed rate, plus 10 minutes per training for loading, E1's in-run
-  validation and the save points.
+- **Training repricing** (maintainer, 2026-10-25). The step time is
+  max(the committed L40S rate 3.5672 s, PA2v's measured median), plus 10
+  minutes per training for loading, E1's in-run validation and the save
+  points. A 24-step measurement can raise the price, never lower it below the
+  historical rate, so a hard deadline cannot end a valid training early. Once a
+  formal session has measured a full training of an arm, that arm is never
+  priced below it (`h1pa_launch.pricing`, `unit_minutes`). `h1pa.json ::
+  pricing` describes the measured median alone; it is part of the frozen study
+  identity and is not edited, so the code and this section own the floor.
 - **Evaluation repricing.** The first seed session's measured full evaluations
   replace the conservative forecast for the second, at ×1.25.
 - **Effect.** At the slowest evaluation recorded on L40S so far, the second
@@ -728,6 +734,13 @@ before anything paid. Each is done; nothing paid ran.
 - **Refusals.** A session whose hard cap does not fit what is left under the
   project cap is refused, and so is an account holding any pod or volume the
   study does not own. Nothing raises a cap.
+- **Fail closed** (maintainer, 2026-10-25). The position must be confirmed
+  (`h1pa_governance.snapshot_problems`): the balance and the resource listing
+  each read successfully (their own `known`; `provider_billing.fetch` used to
+  merge them so an unreadable listing read as known), the account not under
+  its minimum balance, and both billing queries returning billing rows. A
+  failed read or any unknown refuses the authorization and the launch, and so
+  does a balance below the session's hard cap.
 - **Provider now** (`runpod_billing_2026-10-24T1726Z.json`): $680.6673 billed,
   0 pods, 0 volumes, $0/h.
 
@@ -747,6 +760,8 @@ before anything paid. Each is done; nothing paid ran.
 ### Order of execution
 
 PA2v first, then PA2-s20260726, then PA2-s20260801. Each needs its own one-use
-authorization, inside the $50 envelope and the live project cap. The grant is
-the maintainer's to sign; this round created no provider resource.
+authorization, inside the $50 envelope and the live project cap. The maintainer
+signed the grant on 2026-10-25 (`logs/budget/approvals/h1pa_training_grant.json`):
+$50 cumulative, the project cap raised to $731, effective once the two fixes
+above were committed.
 

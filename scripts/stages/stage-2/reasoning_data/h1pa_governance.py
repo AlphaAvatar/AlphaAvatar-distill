@@ -192,16 +192,43 @@ def provider_snapshot(start: str = "2026-06-01") -> dict:
     from aadistill.infrastructure.provider import read_api_key
     from maintenance.consolidation import provider_billing as PB
     end = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    return PB.fetch(read_api_key(str(Path("~/.runpod/config.toml").expanduser())), start, end)
+    try:
+        return PB.fetch(read_api_key(str(Path("~/.runpod/config.toml").expanduser())), start, end)
+    except Exception as exc:  # noqa: BLE001 -- any failed read is an unknown position
+        raise AuthorizationError(f"the provider's billing could not be read ({type(exc).__name__}: {exc}); "
+                                 "an unknown position funds nothing") from exc
+
+
+def snapshot_problems(snap: dict) -> list[str]:
+    """Why `snap` cannot be shown complete: the balance and the resource listing
+    each read (their own `known`), the account not under its minimum, and both
+    billing queries returned as lists of rows with an amount. Empty when complete."""
+    acct, bad = snap.get("account") or {}, []
+    for part in ("balance", "resources"):
+        if acct.get(f"{part}_known") is not True:
+            bad.append(f"the account {part} is not known ({acct.get(f'{part}_error') or 'no state recorded'})")
+    if acct.get("under_balance") is not False:
+        bad.append(f"the account's minimum-balance state is {acct.get('under_balance')!r}")
+    if not isinstance(acct.get("pods"), list) or not isinstance(acct.get("network_volumes"), list):
+        bad.append("the account's resource lists are missing")
+    for key in ("pods", "networkvolumes"):
+        rows = snap.get(key)
+        if not isinstance(rows, list) or not all(isinstance(r, dict) and "amount" in r for r in rows):
+            bad.append(f"the {key} billing query did not return billing rows")
+    return bad
 
 
 def live_position(repo_root: Path = REPO, *, snapshot: dict | None = None) -> dict:
     """The project's position as the PROVIDER bills it now: everything billed,
     plus every closed H1-PA session whose pod the provider has not posted yet,
-    plus the study's unretired storage at its reservation. Refuses when the
-    account holds a pod or a volume this study does not own."""
+    plus the study's unretired storage at its reservation. Fails closed: refuses
+    when any provider read failed or is unknown (`snapshot_problems`), and when
+    the account holds a pod or a volume this study does not own."""
     g = grant(repo_root)
     snap = snapshot if snapshot is not None else provider_snapshot()
+    bad = snapshot_problems(snap)
+    if bad:
+        raise AuthorizationError(f"the provider position cannot be confirmed: {bad}; nothing is authorized or created")
     billed = round(sum(float(r["amount"]) for r in snap["pods"]) + sum(float(r["amount"]) for r in snap["networkvolumes"]), 4)
     posted = {r.get("podId") for r in snap["pods"]}
     s, root = spent(repo_root), Path(repo_root)
@@ -328,6 +355,8 @@ def issue(kind: str, run_id: str, *, expected_usd: float, hard_cap_usd: float,
     live = live_position(repo_root, snapshot=snapshot)
     if hard_cap_usd > live["project_remaining_usd"]:
         raise AuthorizationError(f"${hard_cap_usd} does not fit the project cap as the provider bills it now: {live}")
+    if float(live["balance_usd"]) < hard_cap_usd:
+        raise AuthorizationError(f"the provider account holds ${live['balance_usd']}, less than the ${hard_cap_usd} hard cap")
     files = harness_files(repo_root)
     harness = harness_source_digest(repo_root, files=files)
     gate = None

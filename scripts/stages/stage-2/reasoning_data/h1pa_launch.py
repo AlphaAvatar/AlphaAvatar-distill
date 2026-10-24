@@ -175,33 +175,58 @@ def committed_step_seconds(repo_root: Path = REPO_ROOT) -> float:
     return round(fc["measured"]["recovery_seconds_per_block_pass"]["L40S"]["max"] * int(e1["batch"]["blocks_per_step"]), 4)
 
 
-def measured_evaluation_seconds(repo_root: Path = REPO_ROOT) -> float | None:
-    """The slowest full formal evaluation this phase has measured, from the
-    closeouts' per-unit records (`closeout`), or None before any."""
-    secs = []
+def formal_unit_seconds(repo_root: Path = REPO_ROOT) -> list[tuple[str, dict]]:
+    """(unit, seconds) for every unit a closed formal session of this study
+    records (`closeout`: ``units.<u>.seconds``)."""
+    out = []
     for d in sorted((repo_root / HG.EXPERIMENT_LOGS / "runs").glob("*")):
         a, o = d / "governance/authorization.json", d / "closeout/outcome.json"
         if a.is_file() and o.is_file() and json.loads(a.read_text()).get("plan_id") == HG.PLAN_ID \
                 and (json.loads(a.read_text()).get("stage_conditions") or {}).get("kind") == "formal":
-            secs += [u["seconds"]["evaluate"] for u in (json.loads(o.read_text()).get("units") or {}).values()
-                     if (u.get("seconds") or {}).get("evaluate")]
+            out += [(u, r.get("seconds") or {}) for u, r in (json.loads(o.read_text()).get("units") or {}).items()]
+    return out
+
+
+def measured_evaluation_seconds(repo_root: Path = REPO_ROOT) -> float | None:
+    """The slowest full formal evaluation this phase has measured, or None before any."""
+    secs = [s["evaluate"] for _, s in formal_unit_seconds(repo_root) if s.get("evaluate")]
     return max(secs) if secs else None
 
 
+def measured_training_seconds(repo_root: Path = REPO_ROOT) -> dict[str, float]:
+    """arm -> the slowest full formal training of that arm measured so far."""
+    out: dict[str, float] = {}
+    for u, s in formal_unit_seconds(repo_root):
+        if s.get("train"):
+            arm = u.rsplit("-s", 1)[0]
+            out[arm] = max(out.get(arm, 0.0), float(s["train"]))
+    return out
+
+
 def pricing(args, repo_root: Path = REPO_ROOT) -> dict:
-    """What a session's phases are priced from (`h1pa.json :: pricing`): PA2v's
-    measured step time once its gate exists (``--pa2v-gate``), else the
-    committed rate; a measured full evaluation once a formal session has one,
-    else the conservative forecast."""
+    """What a session's phases are priced from (`h1pa.json :: pricing`).
+
+    Training: max(the committed L40S rate, PA2v's measured median) per step
+    (maintainer, 2026-10-25: a 24-step measurement never lowers the historical
+    rate, so a hard deadline cannot end a valid training early), +
+    ``training_fixed_minutes`` once the gate exists; and never less than a full
+    training of the same arm a formal session has already measured.
+    Evaluation: the slowest measured full formal evaluation x the margin once
+    one exists, else the conservative forecast."""
     pr, fc = study()["pricing"], json.loads((repo_root / GL.FORECAST).read_text())
     gate = json.loads(Path(args.pa2v_gate).read_text()) if getattr(args, "pa2v_gate", None) else None
-    step = (gate or {}).get("measured", {}).get("median_step_seconds")
+    measured = (gate or {}).get("measured", {}).get("median_step_seconds")
+    committed = committed_step_seconds(repo_root)
+    step = max(committed, float(measured)) if measured else committed
     ev_s = measured_evaluation_seconds(repo_root)
     forecast = (fc["measured"]["eval_seconds_per_unit_L40S"]["max"]
                 * fc["contingency_factors_not_measurements"]["eval_floor_to_reasoning"] / 60)
-    return {"step_seconds": float(step) if step else committed_step_seconds(repo_root),
-            "step_source": "PA2v's measured median" if step else "the committed L40S rate (no PA2v gate given)",
-            "training_fixed_minutes": float(pr["training_fixed_minutes"]) if step else 0.0,
+    return {"step_seconds": step, "committed_step_seconds": committed,
+            "pa2v_median_step_seconds": float(measured) if measured else None,
+            "step_source": ("max(the committed L40S rate, PA2v's measured median)" if measured
+                            else "the committed L40S rate (no PA2v gate given)"),
+            "training_fixed_minutes": float(pr["training_fixed_minutes"]) if measured else 0.0,
+            "training_measured_minutes": {a: round(s / 60, 1) for a, s in measured_training_seconds(repo_root).items()},
             "evaluation_minutes": round(ev_s * pr["evaluation_margin_after_measurement"] / 60, 1) if ev_s
             else round(forecast, 1),
             "evaluation_source": "the slowest measured formal evaluation x the margin" if ev_s
@@ -213,6 +238,8 @@ def unit_minutes(unit: str, price: dict) -> tuple[float, float]:
     arm = unit.rsplit("-s", 1)[0]
     steps = 0 if arm == "PCA-Original" else int(study()["arms"][arm]["schedule"]["optimizer_steps"])
     train = steps * price["step_seconds"] / 60 + (price["training_fixed_minutes"] if steps else 0.0)
+    if steps:
+        train = max(train, (price.get("training_measured_minutes") or {}).get(arm, 0.0))
     return round(train, 1), price["evaluation_minutes"]
 
 

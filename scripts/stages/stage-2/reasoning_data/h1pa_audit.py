@@ -1172,8 +1172,9 @@ def cmd_application(args) -> int:
                               "all-in hard bound + the storage reservation. Every session's hard cap still covers its own "
                               "real workload; when the envelope left at issue time cannot cover the next session's hard "
                               "bound, its authorization is refused and nothing is created",
-                     "repricing": "PA2v's measured median step time prices both seed sessions' training (+10 min per training "
-                                  "for loading, E1's in-run validation and the save points); the first seed session's "
+                     "repricing": "max(the committed L40S rate, PA2v's measured median step time) prices both seed sessions' "
+                                  "training (+10 min per training for loading, E1's in-run validation and the save "
+                                  "points), never below a full training of the same arm already measured; the first seed session's "
                                   "measured full evaluations price the second's (x1.25), in place of the conservative "
                                   "forecast. Never fewer steps, a smaller evaluation, a dropped seed or a changed rule",
                      "cap_scope": "CUMULATIVE over PA2v and PA2: every attempt's GPU, container disk and termination "

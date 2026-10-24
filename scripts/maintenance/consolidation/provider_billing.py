@@ -51,13 +51,19 @@ def fetch(api_key: str, start: str, end: str) -> dict:
     sys.path.insert(0, str(REPO_ROOT / "src"))
     from aadistill.infrastructure.provider import RunPodProvider
     prov = RunPodProvider(api_key)
+    bal, res = prov.account_balance(), prov.account_resources()
     return {
         "schema": SCHEMA,
         "fetched_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "query": {"endpoint": REST, "window": window},
-        "account": {**prov.account_balance().as_dict(),
-                    **{k: v for k, v in prov.account_resources().as_dict().items()
-                       if k != "known"}},
+        #: the balance's and the resource listing's own `known` and `error` side
+        #: by side: merging them let an unreadable listing read as known
+        "account": {**bal.as_dict(), "pods": list(res.pods),
+                    "network_volumes": list(res.network_volumes),
+                    "known": bool(bal.known and res.known),
+                    "balance_known": bal.known, "balance_error": bal.error,
+                    "resources_known": res.known, "resources_error": res.error,
+                    "error": "; ".join(e for e in (bal.error, res.error) if e) or None},
         "pods": get(f"/billing/pods?{window}"),
         "networkvolumes": get(f"/billing/networkvolumes?{window}"),
     }

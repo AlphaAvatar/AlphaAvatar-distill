@@ -28,10 +28,12 @@ from stages.reasoning_data import h1pa_launch as L
 from .test_h1pa_validation import MUTATIONS, _edit, build_evidence
 
 
-def snap(billed=680.67, pods=(), volumes=()):
+def snap(billed=680.67, pods=(), volumes=(), **acct):
     return {"fetched_utc": "2026-10-25T00:00:00+00:00", "pods": [{"amount": billed, "podId": "old"}],
             "networkvolumes": [], "account": {"pods": list(pods), "network_volumes": list(volumes),
-                                              "current_spend_per_hr": 0.0, "client_balance_usd": 78.7}}
+                                              "current_spend_per_hr": 0.0, "client_balance_usd": 78.7,
+                                              "under_balance": False, "known": True, "balance_known": True,
+                                              "resources_known": True, **acct}}
 
 
 SNAP = snap()
@@ -92,6 +94,56 @@ def test_a_closed_session_the_provider_has_not_posted_is_still_counted(tmp_path,
     posted = snap()
     posted["pods"].append({"amount": 16.4, "podId": "newpod"})
     assert HG.live_position(tmp_path, snapshot=posted)["unposted_sessions"] == []
+
+
+UNCONFIRMED = {
+    "resources unknown": lambda s: s["account"].update(resources_known=False, resources_error="HTTP 502"),
+    "balance unknown": lambda s: s["account"].update(balance_known=False, balance_error="timeout"),
+    "an old merged snapshot": lambda s: [s["account"].pop(k) for k in ("balance_known", "resources_known")],
+    "under its minimum balance": lambda s: s["account"].update(under_balance=True),
+    "an error body for billing": lambda s: s.update(pods={"error": "unauthorized"}),
+    "no resource lists": lambda s: s["account"].pop("pods"),
+}
+
+
+@pytest.mark.parametrize("case", sorted(UNCONFIRMED))
+def test_an_unconfirmed_provider_position_authorizes_nothing(tmp_path, grant, case):
+    s = snap()
+    UNCONFIRMED[case](s)
+    with pytest.raises(AuthorizationError, match="cannot be confirmed"):
+        HG.issue("validation", "t_v", expected_usd=1.0, hard_cap_usd=2.0, out=tmp_path / "a.json", snapshot=s)
+    ctx = SimpleNamespace(args=args("--phase", "PA2v"), auth=SimpleNamespace(hard_cap_usd=2.0), evidence={})
+    assert not L.the_project_cap_holds_now(ctx, snapshot=s)[0]
+
+
+def test_a_failed_provider_read_is_an_authorization_refusal(monkeypatch):
+    from maintenance.consolidation import provider_billing as PB
+    def boom(*_a, **_k):
+        raise OSError("connection reset")
+    monkeypatch.setattr(PB, "fetch", boom)
+    monkeypatch.setattr("aadistill.infrastructure.provider.read_api_key", lambda _p: "k")
+    with pytest.raises(AuthorizationError, match="could not be read"):
+        HG.provider_snapshot()
+
+
+def test_fetch_keeps_the_resource_listings_own_known_state(monkeypatch):
+    from aadistill.infrastructure import provider as P
+    from maintenance.consolidation import provider_billing as PB
+    class Prov:
+        def __init__(self, _k): pass
+        def account_balance(self): return P.AccountBalance(known=True, client_balance_usd=78.7, under_balance=False)
+        def account_resources(self): return P.AccountResources(known=False, error="HTTP 502")
+    monkeypatch.setattr(P, "RunPodProvider", Prov)
+    monkeypatch.setattr(PB.urllib.request, "urlopen", lambda *_a, **_k: io.BytesIO(b"[]"))
+    acct = PB.fetch("k", "2026-10-01", "2026-10-25")["account"]
+    assert acct["resources_known"] is False and acct["balance_known"] is True and acct["known"] is False
+    assert HG.snapshot_problems({"account": acct, "pods": [], "networkvolumes": []})
+
+
+def test_a_balance_below_the_hard_cap_refuses(tmp_path, grant):
+    with pytest.raises(AuthorizationError, match="less than"):
+        HG.issue("validation", "t_v", expected_usd=1.0, hard_cap_usd=12.0, out=tmp_path / "a.json",
+                 snapshot=snap(client_balance_usd=10.0))
 
 
 # ---- the PA2v gate ---------------------------------------------------------------------------
@@ -233,15 +285,25 @@ def test_the_launch_re_reads_the_project_cap(tmp_path, grant):
     assert not ok and "as the provider bills it now" in why
 
 
-def test_formal_training_is_priced_from_pa2vs_measured_step(tmp_path):
+@pytest.mark.parametrize("measured", [3.3, 4.1])
+def test_formal_training_is_priced_at_the_slower_of_committed_and_pa2v(tmp_path, measured):
     gate = tmp_path / "gate.json"
-    gate.write_text(json.dumps({"measured": {"median_step_seconds": 3.3}}))
+    gate.write_text(json.dumps({"measured": {"median_step_seconds": measured}}))
     a = args("--phase", "PA2", "--pa2v-gate", str(gate), "--unit", "D4-Augmented-s20260726")
     pr = L.pricing(a)
-    assert pr["step_seconds"] == 3.3 and pr["training_fixed_minutes"] == 10.0
+    step = max(measured, 1.7836 * 2)
+    assert pr["step_seconds"] == pytest.approx(step) and pr["training_fixed_minutes"] == 10.0
     t = {p.name: p.minutes for p in L.spec(a).budget.other_phases}
-    assert t["D4-Augmented-s20260726_train"] == round(3702 * 3.3 / 60 + 10.0, 1)
+    assert t["D4-Augmented-s20260726_train"] == round(3702 * step / 60 + 10.0, 1)
     assert L.pricing(args("--phase", "PA2"))["step_seconds"] == pytest.approx(1.7836 * 2)
+
+
+def test_a_measured_full_training_only_raises_its_arms_price(monkeypatch):
+    price = {"step_seconds": 3.5672, "training_fixed_minutes": 10.0, "evaluation_minutes": 99.2,
+             "training_measured_minutes": {"D4-Augmented": 400.0, "D4-Original": 60.0}}
+    assert L.unit_minutes("D4-Augmented-s20260801", price)[0] == 400.0
+    assert L.unit_minutes("D4-Original-s20260801", price)[0] == round(2916 * 3.5672 / 60 + 10.0, 1)
+    assert L.unit_minutes("PCA-Original-s20260801", price)[0] == 0
 
 
 def test_a_measured_formal_evaluation_reprices_the_next_session(tmp_path, monkeypatch):
@@ -254,6 +316,7 @@ def test_a_measured_formal_evaluation_reprices_the_next_session(tmp_path, monkey
         "PCA-Original-s20260726": {"seconds": {"evaluate": 3000.0}},
         "D4-Augmented-s20260726": {"seconds": {"train": 13000.0, "evaluate": 3600.0}}}}))
     assert L.measured_evaluation_seconds(tmp_path) == 3600.0
+    assert L.measured_training_seconds(tmp_path) == {"D4-Augmented": 13000.0}
     monkeypatch.setattr(L, "measured_evaluation_seconds", lambda repo_root=None: 3600.0)
     assert L.pricing(args("--phase", "PA2"))["evaluation_minutes"] == round(3600.0 * 1.25 / 60, 1)
 
