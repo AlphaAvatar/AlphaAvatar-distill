@@ -1,0 +1,120 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1pa_topup_authorization_request/v1",
+ "written_utc": "2026-10-24T11:55:18Z",
+ "status": "REQUEST for the maintainer's grant; NOT authorized, nothing launched",
+ "phase": "PA1",
+ "run_id": "h1pat_20261024_115517",
+ "generation_plan": {
+  "path": "logs/stages/stage-2/reasoning_data/plans/h1pa_topup/generation_plan.json",
+  "sha256": "002da1f9348658b8e0b7f2c6c61bd9d406501997d5a715d90a67b37c26a3e2de",
+  "tasks": 115,
+  "task_ids_sha256": "d1ca7ece55e55ee5997c8d27cd5b9a63a8b3799f05eec55c764c040609adb57d",
+  "cells": {
+   "primary.abstract_analogical/s0_generators_v2_calsplit": 9,
+   "primary.compositional_generalization/reasoning_core": 9,
+   "primary.compositional_generalization/reasoning_gym": 25,
+   "primary.compositional_generalization/s0_generators_v2_calsplit": 12,
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 19,
+   "primary.interactive_adaptation/s0_generators_v2_calsplit": 13,
+   "primary.task_contained_deduction/prontoqa": 5,
+   "primary.task_contained_deduction/reasoning_core": 8,
+   "primary.task_contained_deduction/reasoning_gym": 6,
+   "primary.task_contained_deduction/s0_generators_v2_calsplit": 9
+  }
+ },
+ "launch_identity_sha256": "0c1028424fe1080ff9967e29fe8ab1042a253205c04a366ab1ca87770250e2f0",
+ "harness_digest": "7aea3763b9fb8fe138ed68a1df1ff7ab5828ee26efb17ca41a9bd73d87e4fd6d",
+ "not_p1_or_p1t": "P1's and P1t's grants and authorizations are consumed and fund nothing here; this is its own run",
+ "cost": {
+  "application": {
+   "path": "logs/stages/stage-2/reasoning_data/plans/h1pa_topup_application.json",
+   "sha256": "b6d2a607b51f9e95b75511ef2c054921b3931aec8205eb22ccac6966e122c498",
+   "scenario": "115 tasks: the gap"
+  },
+  "expected_usd": 1.74,
+  "conservative_usd": 2.44,
+  "hard_cap_usd": 3.72,
+  "launcher_budget": {
+   "price_per_hour": 1.79,
+   "authorized_usd": 3.72,
+   "expected_minutes": 57.79,
+   "soft_stop_minutes": 80.692177,
+   "artifact_recovery_reserve_minutes": 41.33,
+   "hard_terminate_minutes": 122.022177,
+   "step_time": {
+    "seconds": 1.0,
+    "source": "unused: no training in this session (arms=0)",
+    "measured": true
+   },
+   "breakdown": [
+    {
+     "name": "setup",
+     "minutes": 9.19
+    },
+    {
+     "name": "train",
+     "minutes": 0.0
+    },
+    {
+     "name": "evaluate",
+     "minutes": 0.0
+    },
+    {
+     "name": "transfer",
+     "minutes": 2.4
+    },
+    {
+     "name": "teacher_generation_two_passes",
+     "minutes": 46.2
+    }
+   ],
+   "soft_stop_reserves": [],
+   "notes": [],
+   "soft_stop_reserve_minutes": 0,
+   "expected_usd": 1.7241,
+   "soft_stop_usd": 2.4073,
+   "artifact_recovery_reserve_usd": 1.233,
+   "hard_terminate_usd": 3.6403
+  },
+  "all_in_bound": {
+   "billable_minutes": 123.272,
+   "price_per_hour": 1.79,
+   "container_disk_gb": 150,
+   "gpu_usd": 3.6776,
+   "disk_usd": 0.0422,
+   "all_in_usd": 3.7199,
+   "highest_price_inside_cap": 1.79
+  },
+  "termination_minutes": 1.25,
+  "fits_a_live_secure_price_up_to": 1.79
+ },
+ "budget": {
+  "provider_snapshot": {
+   "path": "logs/budget/provider/runpod_billing_2026-10-24T1154Z.json",
+   "sha256": "38f418ec7ea41dd404833085434ec074b4f18fe245ef6046b745c5cc60604ee6",
+   "fetched_utc": "2026-10-24T11:54:35+00:00"
+  },
+  "provider_billed_total_usd": 679.8262,
+  "live": {
+   "pods": 0,
+   "network_volumes": 0,
+   "spend_per_hour": 0.0,
+   "balance_usd": 79.5702
+  },
+  "project_cumulative_cap_usd": 712.17,
+  "cap_raised": false,
+  "after_hard_cap_usd": 683.5462,
+  "fits_under_the_project_cap": true
+ },
+ "resources": {
+  "gpu": "1 x NVIDIA A100-SXM4-80GB (the measured generation hardware), one session",
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+  "container_disk_gb": 150,
+  "network_volume": null
+ },
+ "persistence": {
+  "scr": "/home/ecs-user/aad-scratch/h1pat_20261024_115517",
+  "route": "P1's: sealed shards pulled and re-hashed on every poll into <scr>/store, re-hashed at closeout; then artifacts/stages/stage-2/reasoning_data/generation/<run>/ and the relay (stage2_h1/generation/<run>/), read back"
+ },
+ "authorizes": "nothing"
+}
