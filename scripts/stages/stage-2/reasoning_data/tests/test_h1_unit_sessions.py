@@ -19,6 +19,22 @@ from support.session_specs import load_session_launcher, session_args
 
 L = load_session_launcher("h1_unit_launch")
 VOLUME = ("--network-volume-id", "v", "--volume-mount-path", "/runpod-volume")
+REAL_GRANT = UG.grant
+
+
+@pytest.fixture(autouse=True)
+def open_grant(monkeypatch):
+    """The issuance mechanism is tested against the grant as it was while H1
+    ran; the closed grant itself refuses (`test_the_closed_grant_issues_nothing`)."""
+    monkeypatch.setattr(UG, "grant", lambda repo_root=A.REPO: {
+        k: v for k, v in REAL_GRANT(repo_root).items() if k != "closed"})
+
+
+def test_the_closed_grant_issues_nothing(tmp_path, monkeypatch):
+    monkeypatch.setattr(UG, "grant", REAL_GRANT)
+    assert REAL_GRANT()["closed"]["remainder"].startswith("$28.16 is NOT carried")
+    with pytest.raises(AuthorizationError, match="grant is closed"):
+        UG.issue("formal", "t_closed", expected_usd=1.0, hard_cap_usd=2.0, out=tmp_path / "c.json")
 
 
 def test_each_kind_loads_only_under_its_own_policy(tmp_path):

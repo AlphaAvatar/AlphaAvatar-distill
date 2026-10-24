@@ -58,7 +58,7 @@ def request_seed(base: int, task_id: str, turn: int) -> int:
 def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
                  seed_base, system, check_every, degeneration_check,
                  split_generation, template_opens_think, label, log=print,
-                 action_protocol="v1", on_done=None):
+                 action_protocol="v1", on_done=None, seed_of=None):
     """Generate every task's turns through `eng`; returns (episodes, turns, tokens).
 
     ASYNCHRONOUS: one engine pass for everything. A finished turn is processed
@@ -77,6 +77,9 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
     (on every ending: answered, episode done, turn limit, a non-eos stop,
     context exhausted), so a caller can persist finished work before the whole
     batch ends.
+
+    `seed_of(task_id, turn)` gives a measurement's per-turn seed under a
+    decoding protocol; without it only `generate` mode seeds its requests.
     """
     episodes = {}
     for t in tasks:
@@ -107,7 +110,8 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
         if allowance <= 0:
             close(e, "context_exhausted")
             return
-        seed = request_seed(seed_base, tid, len(e["turns"])) if mode == "generate" else None
+        seed = (seed_of(tid, len(e["turns"])) if seed_of is not None else
+                request_seed(seed_base, tid, len(e["turns"])) if mode == "generate" else None)
         rid = f"{tid}::{len(e['turns'])}"
         eng.add_request(rid, {"prompt_token_ids": p_ids}, make_sampling(allowance, seed))
         pending[rid] = {"ep": e, "p_ids": p_ids, "allowance": allowance,
@@ -253,6 +257,11 @@ def main(argv=None) -> int:
     ap.add_argument("--stream-completed", default=None,
                     help="also append each episode's record here the moment it ends "
                          "(flushed, fsynced); the --out file is written at the end as before")
+    ap.add_argument("--decoding", default=None,
+                    help="eval mode: a decoding protocol file (configs/shared/evaluation/decoding/); "
+                         "omitted, the frozen greedy SAMPLING is used unchanged")
+    ap.add_argument("--seed-namespace", default=None,
+                    help="with --decoding: the evaluated unit's key, e.g. fluid_reasoning_720__dev_v1")
     ap.add_argument("--action-protocol", default="v1", choices=("v1", "v2"),
                     help="how the environment reads action lines (tasks/interactive.py); "
                          "recorded per episode, and the scorer replays with it")
@@ -260,6 +269,12 @@ def main(argv=None) -> int:
     if args.mode == "eval" and args.session_limit:
         raise SystemExit("--session-limit is a data-construction bound; a measurement "
                          "has none (P18)")
+    from shared.evaluation import decoding as DEC
+    protocol = DEC.load(args.decoding) if args.decoding else None
+    if protocol and (args.mode != "eval" or not args.seed_namespace
+                     or int(protocol["samples_per_item"]) != 1):
+        raise SystemExit("--decoding is a measurement protocol: eval mode, a --seed-namespace, "
+                         "one sample per item")
 
     from aadistill.evaluation import degeneration
     from aadistill.evaluation.behavior import split_generation, template_opens_think
@@ -287,7 +302,8 @@ def main(argv=None) -> int:
     ctx = ctx_info["resolved_context"]
     stop_ids = resolve_stop_ids(args.model, tok, cfg, args.revision)
     limit = min(ctx, args.session_limit) if args.session_limit else ctx
-    sampling = dict(SAMPLING) if args.mode == "eval" else dict(GENERATE_SAMPLING)
+    sampling = (dict(GENERATE_SAMPLING) if args.mode != "eval" else
+                dict(SAMPLING) if protocol is None else DEC.sampling(protocol))
     print(f"[{args.label}] mode={args.mode} context={ctx} "
           f"({ctx_info['context_source']}) limit={limit} stop={stop_ids}", flush=True)
 
@@ -324,7 +340,9 @@ def main(argv=None) -> int:
         system=args.system, check_every=args.check_every,
         degeneration_check=degeneration.check, split_generation=split_generation,
         template_opens_think=template_opens_think, label=args.label,
-        action_protocol=args.action_protocol, on_done=stream[0] if stream else None)
+        action_protocol=args.action_protocol, on_done=stream[0] if stream else None,
+        seed_of=(lambda tid, turn: DEC.request_seed(protocol, args.seed_namespace, tid, turn))
+        if protocol else None)
     if stream:
         stream[1].close()
     gen_s = round(time.time() - t_gen, 1)
@@ -335,6 +353,8 @@ def main(argv=None) -> int:
         "context_resolution": ctx_info, "session_limit": args.session_limit,
         "effective_limit": limit, "stop_ids": stop_ids, "sampling": sampling,
         "seed_base": args.seed_base if args.mode == "generate" else None,
+        **({"decoding_protocol": DEC.identity(protocol), "seed_namespace": args.seed_namespace}
+           if protocol else {}),
         "action_protocol": args.action_protocol,
         "system_message": args.system,
         "chat_template_sha256": hashlib.sha256((tok.chat_template or "").encode()).hexdigest(),

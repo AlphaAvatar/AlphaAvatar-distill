@@ -153,3 +153,34 @@ def test_each_episode_is_handed_over_once_the_moment_it_ends():
         assert rec == episode_record(tid, eps[tid], label="t", mode="eval", action_protocol="v1")
     for t in static:                       # finished first, while both episodes were still open
         assert open_at[t["task_id"]] == [m["task_id"] for m in multi]
+
+
+def test_a_measurement_seeds_every_turn_through_its_protocol():
+    """`seed_of` (a decoding protocol's per-turn seed) reaches every request and
+    every turn record; without it a measurement sends no seed, as before."""
+    tasks = [t for t in (json.loads(l) for l in Path(DEV).read_text().splitlines())
+             if t["interactive"] and len(_oracle_replies(t)) > 1][:6]
+    plans = {t["task_id"]: _oracle_replies(t) for t in tasks}
+    sent = []
+
+    def run(seed_of):
+        eng = Engine(lambda rid, p: "think</think>" + plans[rid.split("::")[0]][int(rid.split("::")[1])])
+        eps, _, _ = run_episodes(
+            tasks, tok=Tok(), eng=eng, make_sampling=lambda n, seed: sent.append(seed) or n, limit=10 ** 6,
+            ctx=10 ** 6, stop_ids=[EOS], mode="eval", seed_base=1, system="SYS",
+            check_every=10 ** 9, degeneration_check=lambda ids: None,
+            split_generation=split_generation, template_opens_think=template_opens_think,
+            label="t", log=lambda *a, **k: None, seed_of=seed_of)
+        return eps
+
+    def rule(tid, turn):
+        return 1000 * len(tid) + turn + 1
+
+    eps = run(rule)
+    turns = [(tid, t) for tid, e in eps.items() for t in e["turns"]]
+    assert len(turns) > len(tasks), "the episodes ran more than one turn"
+    assert all(t["seed"] == rule(tid, t["turn"]) for tid, t in turns)
+    assert sorted(sent) == sorted(t["seed"] for _, t in turns)
+    sent.clear()
+    plain = run(None)
+    assert set(sent) == {None} and all(t["seed"] is None for e in plain.values() for t in e["turns"])

@@ -199,6 +199,9 @@ def issue(kind: str, run_id: str, *, expected_usd: float, hard_cap_usd: float,
     if kind not in KINDS:
         raise AuthorizationError(f"unknown kind {kind!r}")
     g = grant(repo_root)
+    if g.get("closed"):
+        raise AuthorizationError(f"the H1 units grant is closed ({g['closed']['decision']}); its remainder "
+                                 "funds nothing, a later study included")
     phase = KINDS[kind]
     if phase not in g["phases"]:
         raise AuthorizationError(f"the grant funds no phase {phase!r}")

@@ -13730,3 +13730,60 @@ on a paid pod.
 - **Revisit when.** The maintainer decides whether to open the independent
   diagnostic the frozen design names for a B at the floor
   (`plans/h3_candidates.json`), and when to retire the volume.
+
+## 2026-10-24 — Maintainer: H1 annulled for promotion; H1-PA, a three-arm PCA-aligned redesign, audited at $0 (NO-GO pending one decision)
+
+- **Context.** H1 did not run the PCA baseline the maintainer required:
+  - it started arm A from D4 Top-1;
+  - it trained 614 optimizer steps where E1's 2.96M run trained 2,916;
+  - it used its own data selection and best-fit-decreasing packing;
+  - it evaluated with greedy decoding.
+- **Decisions (maintainer).**
+  - **Annulment.** H1's result may not promote anything
+    (`logs/stages/stage-2/reasoning_data/plans/h1_annulment.json`). Its
+    evidence, runs, money and checkpoints are kept. Its grant is CLOSED; the
+    $28.16 remainder funds no later study.
+  - **New study H1-PA** (`configs/stages/stage-2/reasoning_data/h1pa.json`),
+    three arms on seeds 20260726 and 20260801:
+    - PCA-Original: E1's checkpoints, re-evaluated, never retrained;
+    - D4-Original: E1's exact pack and configuration;
+    - D4-Reasoning: @v3 under E1's sequential packing.
+  - **Packing.** Best-fit and best-fit-decreasing packing are not used by a new
+    formal experiment.
+  - **Decoding.** New autoregressive evaluation uses nucleus sampling, never
+    greedy (`configs/shared/evaluation/decoding/nucleus_v1.json`).
+  - **Hardware.** L40S is preferred, chosen before the storage is.
+- **Done at $0** (`audit/h1pa_audit.json`; `docs/stages/stage-2/reasoning_data/H1PA.md`).
+  - **Identity: 28/28 checks pass.**
+    - E1's pack is rebuilt byte for byte by E1's own packer.
+    - Configs, PCA init and both checkpoints verify.
+    - Today's trainer reproduces E1's training order and LR at all 291 logged
+      steps of both seeds.
+    - D4 Top-1 has the PCA student's exact tensors.
+  - **D4-Reasoning's pool** is re-derived from the P1/P1t stores and hashes to
+    the @v3 pack's sessions (`6458f2a8…`).
+  - **D4-Reasoning under E1's packer:**
+    - 440 sequences, 2,964,159 supervised tokens;
+    - 372 sessions truncated, 331 of them losing their verified answer;
+    - compositional −3.42 pp from its declared share;
+    - a supporting-only validation set.
+  - **The nucleus protocol** is wired into both runners and `evaluate_all` as an
+    opt-in; greedy calls are unchanged.
+- **The conflict.** At batch size 2 and 3 epochs, the arms train 2,916 and 660
+  optimizer steps. No schedule matches epochs, steps, supervised exposure and
+  FLOPs at once: 1,523 against 6,737 supervised tokens per sequence, and 70.6%
+  of E1's sequences are under 15% full.
+- **Alternatives** (measured, none chosen):
+  - **Schedules:** epoch-matched, step/FLOPs-matched, or both.
+  - **Packings:** E1's packer as is, or the same packer with its own
+    `allow_terminal_truncation=False`: 568 sequences, 0 lost answers,
+    ≤0.13 pp drift.
+  - **Recommended:** truncation off plus both schedules, about $34–46 with
+    storage.
+- **Risks.**
+  - E1's PCA student answered 1.75% of the static fluid items under greedy
+    decoding, below the 2% floor, so Comparison A may again end at the floor.
+  - PCA-Original seed 20260801 exists only on the dev box.
+- **Revisit when.** The maintainer chooses the schedule and packing for
+  D4-Reasoning, then issues a grant. H1's volume `1980hnh75i` has no consumer
+  and awaits a retirement decision.

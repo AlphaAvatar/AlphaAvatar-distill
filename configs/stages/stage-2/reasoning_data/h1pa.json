@@ -1,0 +1,92 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1pa_study/v1",
+ "study_id": "stage2.reasoning_data.h1pa",
+ "name": "H1-PA: the PCA-aligned redesign of H1, three arms",
+ "decided_by": "maintainer, 2026-10-24 (logs/budget/decisions.md :: H1-PA)",
+ "supersedes": "H1 for promotion only: logs/stages/stage-2/reasoning_data/plans/h1_annulment.json; H1's evidence is kept and is not part of this study",
+ "status": "DESIGN, NOT FROZEN. D4-Reasoning's training schedule is unresolved: at E1's batch size and 3 epochs it trains 660 optimizer steps against the other arms' 2,916 (audit/h1pa_audit.json :: schedule). Choosing a schedule is the maintainer's; no formal training until it is chosen and this file is frozen",
+ "questions": {
+  "Q1": "Under identical data and training conditions, is the D4 initialization better than PCA? (Comparison A: D4-Original - PCA-Original)",
+  "Q2": "With D4 fixed and the training method and compute budget controlled, does the 70/30 reasoning data help unseen-problem reasoning correctness more than the original training data? (Comparison B: D4-Reasoning - D4-Original)",
+  "C": "PCA-Original against D4-Reasoning, end to end; descriptive, changes initialization and data together, attributes to neither"
+ },
+ "seeds": [20260726, 20260801],
+ "arms": {
+  "PCA-Original": {
+   "initialization": "pca",
+   "dataset": "e1_2p96M",
+   "recipe": "e1",
+   "execution": "reuse the trained checkpoints; re-evaluate only",
+   "checkpoints": {
+    "20260726": {"run": "e1_r2960k_sa_pca", "step": 2916,
+                 "relay": "AlphaAvatar/aadistill-artifacts :: e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/model.safetensors",
+                 "model_safetensors_sha256": "3f08482c2c8e7372fc87fd2496f50c1c618f61feaec021d73c0cc646413b80c3",
+                 "pod_hashes": "e1_scaling_20260801/e1_r2960k_sa_pca/e1_r2960k_sa_pca_artifact_hashes_20260801.txt (relay)"},
+    "20260801": {"run": "e1_r2960k_sb_pca", "step": 2916,
+                 "local": "artifacts/stages/stage-3/rescued/e1_r2960k_sb_pca",
+                 "model_safetensors_sha256": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
+                 "pod_hashes": "artifacts/stages/stage-3/rescued/e1_r2960k_sb_pca/pod_hashes.txt",
+                 "_durability": "the only copy is on the dev box (the relay refused it for quota in 2026-08); it goes to the study's durable storage before any session reads it"}
+   }
+  },
+  "D4-Original": {"initialization": "d4_top1", "dataset": "e1_2p96M", "recipe": "e1", "execution": "train, one run per seed"},
+  "D4-Reasoning": {"initialization": "d4_top1", "dataset": "reasoning_v3_seq", "recipe": "e1", "execution": "train, one run per seed",
+                   "schedule": "UNRESOLVED (see status)"}
+ },
+ "initializations": {
+  "pca": {"path": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+          "model_safetensors_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
+          "recorded_in": "logs/state/artifact_manifests.md :: stage1/qwen3_0p6b_init_v0"},
+  "d4_top1": {"record": "logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json",
+              "path": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4",
+              "model_safetensors_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+              "tokenizer": "the PCA init directory's tokenizer (the record's tokenizer_binding): the files E1 loaded"}
+ },
+ "datasets": {
+  "e1_2p96M": {
+   "pack": "artifacts/shared/instruments/ladder_uniform_probe",
+   "_pack": "E1's own pack: E1 trained from artifacts/stage3/ladder_uniform, whose blocks/ladder/audit hashes E1's run manifests record and these files carry",
+   "blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "ladder_sha256": "d4941722a099754ef5ba82d529c0fe2274a6b97af61b2fa52519ed22b84201f0",
+   "audit_sha256": "15f16b7b22b229e9c0ae510b85b4c967948828e0e7d50fac15c3e516e3e911e6",
+   "sessions": "artifacts/stages/stage-3/corpus_v2/sessions.jsonl",
+   "sessions_sha256": "2b4edc2e2cc16cd56dae3d340345e1a17e2c4a8baa9837650a7bf5e340fa6fcd",
+   "rung": 2960000
+  },
+  "reasoning_v3_seq": {
+   "corpus_id": "stage2.reasoning_master@v3",
+   "source_sessions_sha256": "6458f2a868c7c30c7d831949cf226020a0f069b2af0df1ad3de227127c3fa042",
+   "_source": "the sessions the @v3 pack was built from, re-derived from the P1 and P1t stores (h1pa_audit sessions); no teacher generation",
+   "builder_input": "artifacts/stages/stage-2/reasoning_data/packs/D4R_seq_sessions.jsonl",
+   "builder_input_sha256": "871bceeec1dca1cab6af89da84a0bcbc442270bd271a9d83c2df5b0ba70046db",
+   "builder": "scripts/shared/data/build_token_ladder.py (E1's sequential packer, unchanged; it rebuilds E1's pack byte for byte)",
+   "pack": "artifacts/stages/stage-2/reasoning_data/packs/D4R_seq",
+   "blocks_sha256": "205e8fe6902a2153d4f323d1b6c85fcc156f13304dc7b99ec110f2c9c15386d0",
+   "ladder_sha256": "57c9dce0b3af45713be4b2716badbf0c8c6096acd761191c93cd1ad61d4402bd",
+   "audit_sha256": "a9a550a46dab37780329356700f7023e3f0aec79efe2c746fd80d77699156752",
+   "rung": 2960000,
+   "never": "best-fit or best-fit-decreasing packing (maintainer, 2026-10-24)"
+  }
+ },
+ "recipe": {
+  "e1_configs": {
+   "20260726": {"path": "configs/stages/stage-3/e1/e1_r2960k_sa_pca.json",
+                "canonical_sha256": "c2e46e61b6b10ef0046acc2e1cf82c613991af113399568a5605fa819d6bd07c",
+                "recorded_in": "E1 sa's run manifest (relay)"},
+   "20260801": {"path": "configs/stages/stage-3/e1/e1_r2960k_sb_pca.json",
+                "canonical_sha256": "8b385927accb73dd24233b69d0bf70bffd026d1a22e943bc39a0e7cfdc585afe",
+                "recorded_in": "configs/stages/stage-3/e6b/provenance.json :: e6b_p2_r2960k_sb.rung_parent_sha256 (E1 sb's run manifest was not preserved)"}
+  },
+  "derive": "a D4 run's config is its seed's E1 config with student_path (the D4 directory), tokenizer_source (the PCA init directory E1 loaded its tokenizer from), data_dir (the arm's pack), run_name, out_dir and _purpose replaced; every other key, nested keys included, unchanged",
+  "facts": "batch size 2 sequences (blocks_per_step), micro-batch size 1 (micro_blocks), gradient accumulation steps 2, sequence length 8,192 (block_len), 3 epochs, 2,916 optimizer steps on E1's pack, 146 warmup steps, AdamW lr 5e-5 betas (0.9, 0.95) eps 1e-8 weight decay 0.01, gradient clipping 1.0, cosine to 0.1 of peak, CE 0.25 + KD 1.0 (T 1, KD over every non-padding position), fp32 weights with bf16 autocast, gradient checkpointing, teacher Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea in bf16, validation 16 sequences past the largest rung"
+ },
+ "evaluation": {
+  "set": "eval-set-1 (its registered identity, validity mask and scoring semantics unchanged)",
+  "decoding": "configs/shared/evaluation/decoding/nucleus_v1.json",
+  "every_checkpoint": "two PCA-Original, two D4-Original and two D4-Reasoning checkpoints, each generated once under the same protocol and seed rule",
+  "never_compared_with": "any greedy result, H1's included"
+ },
+ "hardware": {"gpu": "NVIDIA L40S (48 GB)", "why": "E1 trained this exact configuration on L40S with a 39.96 GB logged peak (sa train_log.jsonl :: gpu_mem_gb)",
+              "datacenters_with_l40s_and_volumes": "chosen at launch from a live query (2026-10-24: EU-NL-1, EUR-IS-2, US-MO-1, stock Low in each)"},
+ "authorizes": "nothing"
+}

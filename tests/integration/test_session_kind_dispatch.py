@@ -206,10 +206,20 @@ LAUNCHERS = launchers()
 BRANCHES = branches()
 
 
+#: Kinds whose ONLY launcher refuses to build on this tree, each by a refusal
+#: pinned by name and exception in `test_a_launcher_that_refuses_to_build_...`.
+#: d2_confirmation: the D-series closed 2026-10-17; its launcher pins the shared
+#: protocol's generator bytes, and `uncapped_eval.py` gained the opt-in
+#: `--decoding` protocol on 2026-10-24, so a D2 probe generated here would not
+#: pair with B's imported units -- the refusal the pin exists to make.
+KINDS_ONLY_REFUSING = {"d2_confirmation"}
+
+
 def test_the_probe_sees_the_sessions_this_repository_can_actually_launch():
     """Guards the guard: a silently empty enumeration would make everything pass."""
     kinds = {k for k, _ in LAUNCHERS.values()}
-    assert kinds >= {*DEDICATED_KINDS, DEFAULT_KIND}
+    assert kinds >= {*DEDICATED_KINDS, DEFAULT_KIND} - KINDS_ONLY_REFUSING
+    assert not kinds & KINDS_ONLY_REFUSING, "a refusing kind builds again: drop it from KINDS_ONLY_REFUSING"
     assert len(LAUNCHERS) >= 7, sorted(LAUNCHERS)
 
 
@@ -329,6 +339,9 @@ def test_a_launcher_that_refuses_to_build_is_recorded_not_swallowed():
     #: closed out with an admitted STRUCTURAL_CHANGE and a relay-verified
     #: product; it refused here, by design, until then. Each refusal is pinned
     #: to the reason it is allowed.
-    expected = {"autoinit_c2_replay_launch": "ReplaySourceError"}
+    #: The D2 confirmation launcher refuses since 2026-10-24: its frozen
+    #: generator pins predate `uncapped_eval.py --decoding` (KINDS_ONLY_REFUSING).
+    expected = {"autoinit_c2_replay_launch": "ReplaySourceError",
+                "autoinit_d2_confirmation_launch": "D2ScreeningError"}
     assert dict(UNBUILDABLE) == expected, (
         f"unexpected set of launchers that refused to build: {UNBUILDABLE}")

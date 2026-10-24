@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-23 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-24 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,7 +9,27 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**STAGE-2/3 H1: P1g PASSED, P2's FOUR FORMAL UNITS COMPLETE; THE FROZEN DECISION IS NOT_RESOLVED (FLOOR) (2026-10-24).**
+**H1-PA (the PCA-aligned redesign of H1): DESIGNED AND AUDITED AT $0; NO-GO FOR FORMAL TRAINING UNTIL ONE MAINTAINER DECISION (2026-10-24).**
+Owner: [`docs/stages/stage-2/reasoning_data/H1PA.md`](../../docs/stages/stage-2/reasoning_data/H1PA.md),
+numbers in `logs/stages/stage-2/reasoning_data/audit/h1pa_audit.json`, identity in
+`configs/stages/stage-2/reasoning_data/h1pa.json`. Nothing is running or authorized.
+- **Arms:**
+  - PCA-Original: E1's two 2.96M checkpoints, re-evaluated only;
+  - D4-Original: D4 Top-1 on E1's exact pack and configuration;
+  - D4-Reasoning: D4 Top-1 on @v3 under E1's sequential packer.
+  Seeds 20260726 and 20260801. Evaluation uses `nucleus_v1`, never greedy.
+- **Comparison A is ready.** Identity is 28/28: E1's pack is rebuilt byte for
+  byte, and the training order is reproduced at every logged step.
+- **Comparison B is blocked.** D4-Reasoning packs into 440 sequences against
+  E1's 1,944, so 3 epochs means 660 against 2,916 optimizer steps. E1's
+  terminal truncation also drops 331 verified answers. The maintainer chooses
+  the schedule and packing (H1PA.md §6; recommended: truncation off plus both
+  schedules, about $34–46).
+- **Open items:**
+  - PCA-Original seed 20260801 exists only on the dev box;
+  - H1's volume `1980hnh75i` has no consumer and awaits a retirement decision.
+
+**STAGE-2/3 H1: ANNULLED FOR PROMOTION (maintainer, 2026-10-24; `plans/h1_annulment.json`). As executed: P1g PASSED, P2's FOUR FORMAL UNITS COMPLETE; THE FROZEN DECISION WAS NOT_RESOLVED (FLOOR).**
 Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).
 Nothing is running: 0 pods, $0.003/h for the kept 30 GB volume `1980hnh75i`
 (provider snapshot `logs/budget/provider/runpod_billing_2026-10-24T0507Z.json`).
@@ -23,9 +43,8 @@ Evidence: [`docs/stages/stage-2/reasoning_data/H1.md`](../../docs/stages/stage-2
   storage of its $50; the absolute project cap is $712.17.
 - **Kept:** the four formal checkpoints on the volume; every unit's evidence
   on the dev box, the relay and (reports, rows) in git.
-- **Needs the maintainer:** whether to open the independent diagnostic the
-  frozen design names for a B at the floor (`plans/h3_candidates.json`), and
-  when to retire the volume. No further H1 work is authorized beyond the closed phase.
+- **Superseded:** by H1-PA above. The grant is closed, and its $28.16 remainder
+  funds nothing.
 
 **STAGE-0 CALIBRATION-VOLUME PROGRAMME CLOSED (final $0 closeout, 2026-10-21).**
 Verdict: **EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON

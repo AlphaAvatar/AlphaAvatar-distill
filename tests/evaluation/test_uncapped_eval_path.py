@@ -274,5 +274,7 @@ def test_sampling_semantics_are_unchanged():
     assert '"top_k": -1' in src and '"detokenize": False' in src
     assert "max_tokens=allowance" in src and "stop_token_ids=stop_ids" in src
     assert src.count("SAMPLING = {") == 1, "two copies of the sampling parameters"
-    assert src.count("**SAMPLING") == 2, (
+    assert "sampling_used = (dict(SAMPLING) if protocol is None" in src, (
+        "without a decoding protocol the frozen SAMPLING is what is used")
+    assert src.count("**sampling_used") == 2, (
         "the summary must be built from the same dict the engine call uses")
