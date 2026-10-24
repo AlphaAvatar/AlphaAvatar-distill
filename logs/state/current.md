@@ -9,29 +9,23 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**STAGE-2/3 H1: P1t EXECUTED UNDER THE MAINTAINER'S GRANT; ARM B'S PACK IS BUILT ON @v3; M1 MEASURED (2026-10-23).**
+**STAGE-2/3 H1: P1g PASSED, P2's FOUR FORMAL UNITS COMPLETE; THE FROZEN DECISION IS NOT_RESOLVED (FLOOR) (2026-10-24).**
 Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).
-Nothing is running and nothing is billing: 0 pods, 0 volumes, $0/h
-(provider snapshot `logs/budget/provider/runpod_billing_2026-10-23T1703Z.json`).
+Nothing is running: 0 pods, $0.003/h for the kept 30 GB volume `1980hnh75i`
+(provider snapshot `logs/budget/provider/runpod_billing_2026-10-24T0507Z.json`).
 Evidence: [`docs/stages/stage-2/reasoning_data/H1.md`](../../docs/stages/stage-2/reasoning_data/H1.md)
-§14–§17; `audit/corpus_v3_feasibility.json`, `runs/h1p1t_20261023_094007/`,
-`plans/h1_accounting.json`, `plans/cost_forecast.json`.
-- **P1 (2026-10-22):** $3.33 of the $8.02 cap; 2,164 teacher records; 1,057 units.
-- **P1t (2026-10-23):** $0.64 all-in of the cumulative $5.00; the frozen 59
-  tasks, 100 records, 23 units; provider-confirmed teardown, copies on the
-  dev box and the relay.
-- **Code verifier v3** (`src/aadistill/data/code_exec.py`): closes the v2
-  shared-state hole; P1's 124 saved MBPP records re-verified, 0 verdicts
-  moved (`audit/code_reverification_h1gen_20261022_190653.json`).
-- **Arm B's pack (`stage2.reasoning_master@v3`):** built on the formal nested
-  ladder, every rung with the 150k reserve, nothing unsatisfied; identity in
-  `configs/.../h1_units.json :: packs.B`.
-- **M1:** both packs measured; schedule FROZEN-READY at 614 steps. P2's four
-  units forecast at $12.43 expected / $18.65 hard cap (`plans/cost_forecast.json`).
-- **Budget:** provider balance −$0.64 since the grant; the absolute project
-  cap is $666.52 (headroom ≈ $4.36 after P1t), so P2 needs a new cap decision.
-- **Needs the maintainer:** P1g / P2 (a grant naming the post-v3 harness),
-  freezing the units file, and the project cap. P1g, P2 and recovery are not authorized.
+§17–§19; `analyses/h1_result.json`, `units/`, `runs/h1p1g_*`, `runs/h1p2*`.
+- **Result:** B − A = +0.0053 (95% CI −0.0009 to +0.0136) on static fluid
+  correctness, A 0.44% / B 0.96%: both arms at the floor → NOT_RESOLVED
+  (FLOOR); deduction INCONCLUSIVE (FLOOR_A); interactive 0/144 everywhere
+  (exploratory). No equivalence, no gain excluded.
+- **Money:** the P1g/P2 phase spent $17.64 in sessions plus $4.20 reserved
+  storage of its $50; the absolute project cap is $712.17.
+- **Kept:** the four formal checkpoints on the volume; every unit's evidence
+  on the dev box, the relay and (reports, rows) in git.
+- **Needs the maintainer:** whether to open the independent diagnostic the
+  frozen design names for a B at the floor (`plans/h3_candidates.json`), and
+  when to retire the volume. No further H1 work is authorized beyond the closed phase.
 
 **STAGE-0 CALIBRATION-VOLUME PROGRAMME CLOSED (final $0 closeout, 2026-10-21).**
 Verdict: **EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON
@@ -4191,7 +4185,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$629.5959` spent of `$643.6571`, leaving `$14.0612` |
+| project cap | `$647.2336` spent of `$712.1700`, leaving `$64.9364` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

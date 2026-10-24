@@ -13697,3 +13697,36 @@ on a paid pod.
     unit.
   - The volume costs storage until it is retired.
 - **Revisit when.** P2's units complete.
+
+## 2026-10-24 — H1 P2 executed: the frozen decision is NOT_RESOLVED (FLOOR); scientific terminal
+
+- **Context.** The four frozen formal units ran under the maintainer's
+  2026-10-23 P1g/P2 grant.
+- **Execution.** All four units completed on one A100-SXM4-80GB type, each
+  as one endpoint.
+  - **B session attempt 1** (`h1p2b_20261023_195303`, $1.4906): trained
+    B-s20260726. Its evaluation read a released path, repaired in
+    `unit_driver`.
+  - **B session** (`h1p2b_20261023_205037`, $4.6694): evaluated B-s20260726
+    without retraining; trained and evaluated B-s20260727. The runner's
+    marker race was repaired in core (`session_runner.marker_terminal`).
+  - **A session** (`h1p2a_20261023_232905`, $10.1139): A-s20260726 and
+    A-s20260727. A first $0 refusal of the all-in bound is kept under
+    `runtime/acquisition/`.
+  - **Phase total:** sessions $17.6377 plus $4.20 reserved storage, of $50.
+    The provider confirms every pod gone; only the volume remains.
+- **Result** (`analyses/h1_result.json`).
+  - **Primary:** B − A = +0.0053, 95% CI [−0.0009, +0.0136], the same at both
+    seeds; A 0.44%, B 0.96% correct on 570 static fluid items. Both arms are
+    at the floor → **NOT_RESOLVED, FLOOR**. No equivalence and no exclusion of
+    a gain.
+  - **Axes:** deduction INCONCLUSIVE (FLOOR_A: A 1.06%, B 2.65%); induction,
+    composition and analogy all at the floor.
+  - **Interactive (exploratory):** 0/144 for every unit.
+  - **Rollout:** B terminates less often (45–46% against 52–57%). This is
+    reported as behaviour, never as reasoning.
+- **Decision.** This is the scientific terminal: no extra seed, data, ladder
+  or rerun. The checkpoints stay on the volume, booked until retired.
+- **Revisit when.** The maintainer decides whether to open the independent
+  diagnostic the frozen design names for a B at the floor
+  (`plans/h3_candidates.json`), and when to retire the volume.

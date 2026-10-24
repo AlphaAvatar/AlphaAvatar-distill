@@ -1,0 +1,16 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.persisted_unit/v2",
+ "unit": "B-s20260727",
+ "kind": "report",
+ "started_utc": "2026-10-23T23:23:34Z",
+ "files": [
+  {
+   "name": "report.json",
+   "sha256": "e4cc48b9891b870d566774ed0264026a12047296d8efd30a4fcdd9e7476082ab",
+   "bytes": 35596
+  }
+ ],
+ "destination": "/runpod-volume/h1/B-s20260727/report",
+ "persisted": true,
+ "finished_utc": "2026-10-23T23:23:34Z"
+}

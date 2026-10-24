@@ -1,0 +1,11 @@
+bundle OK: transfer/aad_autoinit_b6aa0f64.bundle on the relay
+[23:29:46] budget: expected 557 min $17.55 · soft $27.74 · hard $28.41 (authorized $28.75)
+[23:29:46] NVIDIA A100-SXM4-80GB $1.79/h, stock Low
+[23:29:47] account funds OK: the provider account holds $89.7096 against the $30.0000 this session must be able to fund
+[23:29:47] account resources OK: the provider account holds only the 1 resource(s) the records account for
+[23:29:47] a formal authorization for P2
+[23:29:47] ABORT at $0: all-in $28.7536 (GPU $28.4445 + 150 GB disk $0.3090 over 903.0 min at $1.89/h) exceeds the authorized $28.75; it fits at $1.88/h or less. The cap is not raised and the run is not shrunk
+
+stage2-h1-units-formal INCOMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-2/reasoning_data/runs/h1p2a_20261023_232905/runtime/session.json. 
+{"all_in_usd": 0.0, "gpu_usd": 0.0, "disk_usd": 0.0, "elapsed_minutes": 0.0, "price_per_hour": null, "authorized_usd": null, "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB); the network volume is booked in logs/stages/stage-2/reasoning_data/storage/"}
+rc=11

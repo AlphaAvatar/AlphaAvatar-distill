@@ -42,6 +42,11 @@
       "dev_box": "artifacts/stages/stage-2/reasoning_data/generation/h1p1t_20261023_094007/ (shards, markers, .complete, the driver record, the collector archive; gitignored) and the session store /home/ecs-user/aad-scratch/h1p1t_20261023_094007/store",
       "relay": "AlphaAvatar/aadistill-artifacts :: stage2_h1/generation/h1p1t_20261023_094007/ -- 9 files uploaded 2026-10-23, every one downloaded back and sha256-compared: 0 mismatches",
       "restore": "relay or dev box; each shard verifies against its .done marker and carries the run's launch identity"
+    },
+    "h1_formal_units_2026_10_24": {
+      "checkpoints": "the four formal students (fp32, 2,384,236,592 bytes each) persisted at the end of training and re-identified on the network volume 1980hnh75i (EUR-IS-1) under <mount>/h1/<unit>/checkpoint; save points released after each",
+      "evidence": "each unit's evidence (descriptors, report, evaluation generations and rows, training records, attempts) tarred on the pod, pulled and hash-checked (runs/<run>/closeout/outcome.json :: evidence), copied to the relay AlphaAvatar/aadistill-artifacts :: stage2_h1/units/evidence/ and read back (0 mismatches); reports, rows and descriptors also in git (logs/stages/stage-2/reasoning_data/units/)",
+      "retention": "the checkpoints stay on the volume for re-evaluation or a diagnostic until the maintainer decides; the volume's storage is booked ($4.20 reservation, retire by 2026-12-23 at the latest)"
     }
   },
   "planned_per_asset": [

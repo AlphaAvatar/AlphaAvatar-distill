@@ -76,6 +76,30 @@ def rate(rows: list[dict]) -> dict:
     return {"n": n, "correct": c, "rate": round(c / n, 4) if n else None}
 
 
+ROLLOUT_FIELDS = ("terminated", "truncated_at_cap", "think_closed", "format_ok", "empty_answer", "rep_3gram")
+
+
+def capabilities(formal_report: dict) -> dict:
+    """Each capability's units as the formal report measured them: a rate or
+    headline per unit, and the rollout-integrity components -- never pooled."""
+    out = {}
+    for cap, v in (formal_report.get("capabilities") or {}).items():
+        cell = {}
+        for key, uv in (v.get("units") or {}).items():
+            if not isinstance(uv, dict):
+                continue
+            if uv.get("rate") is not None:
+                cell[key] = {"n": uv.get("n"), "correct": uv.get("correct"), "rate": uv["rate"]}
+            elif uv.get("headline_value") is not None:
+                cell[key] = {"n": uv.get("n"), uv.get("headline") or "headline": uv["headline_value"]}
+            elif (uv.get("metrics") or {}).get("overall"):
+                cell[key] = {k: uv["metrics"]["overall"].get(k) for k in ROLLOUT_FIELDS}
+            else:
+                cell[key] = {"status": uv.get("status")}
+        out[cap] = {"status": v.get("status"), "units": cell}
+    return out
+
+
 def analyse(evidence: Path) -> dict:
     plan = UD.load_plan()
     items, eval_only = fluid_meta()
@@ -101,9 +125,7 @@ def analyse(evidence: Path) -> dict:
         for cell, tiers in cells.items():
             tiers["all"] = rate([r for (a, s, ax, _t), rows in by.items() if ax == axis and f"{a}-s{s}" == cell
                                  for r in rows])
-    supporting = {name: {k: v for k, v in (u["formal_report"].get("units") or u["formal_report"]).items()
-                         if not k.startswith(FLUID[0])}
-                  for name, u in units.items()}
+    supporting = {name: capabilities(u["formal_report"]) for name, u in units.items()}
     acc = A.read_json(A.LOG_DIR / "plans/h1_accounting.json")
     return {"schema": "aadistill.stage2.reasoning_data.h1_result/v1",
             "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -116,7 +138,7 @@ def analyse(evidence: Path) -> dict:
             "primary_label": decision["primary"]["label"],
             "by_axis_and_tier": dict(axes),
             "interactive_exploratory": {a: c for a, c in axes.items() if a not in STATIC_AXES},
-            "supporting_and_guard_rails": supporting,
+            "capabilities_by_unit": supporting,
             "accounting": {"schedule": acc["schedule"], "exact_per_seed": acc["exact_per_seed"],
                            "primary_basis": acc["primary_basis"],
                            "_": "U is matched within 1%; E follows the passes match_schedule reports; C is NOT matched"},

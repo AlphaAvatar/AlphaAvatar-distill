@@ -1,0 +1,176 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.persisted_unit/v2",
+ "unit": "A-s20260727",
+ "kind": "evaluation",
+ "started_utc": "2026-10-24T05:01:51Z",
+ "files": [
+  {
+   "name": "eval_capability.log",
+   "sha256": "d1748c0137b9572a60e3c58d060d7448b058d9e1485e845d5c43f04459a695cd",
+   "bytes": 14291
+  },
+  {
+   "name": "eval_fluid.log",
+   "sha256": "782ca796c93f0196631e80bce8aad044e1358839a7b0214c94347e6ff52f5f92",
+   "bytes": 15962
+  },
+  {
+   "name": "formal_report.json",
+   "sha256": "2165b02ae4f8f9bc289ee1dfac34e3f4ea2afe792095b2d778f687e6497b09e7",
+   "bytes": 32034
+  },
+  {
+   "name": "generations/fluid_reasoning_720__dev_v1.jsonl",
+   "sha256": "3cd8d3e0dd99157d7fa81607aa577efd9022a608773ac90ec7fc5383527910e4",
+   "bytes": 11089173
+  },
+  {
+   "name": "generations/fluid_reasoning_720__dev_v1.summary.json",
+   "sha256": "5a1484816a3f7f3e639c68825737bf0890a1d9b21a5d715a5d3acd5e517a2ef0",
+   "bytes": 2199
+  },
+  {
+   "name": "generations/stage3_capability_846__answerability_paired.jsonl",
+   "sha256": "8105c238deb58585f923964a290c9ea1cb8d043870edb556203fbf806d418cbe",
+   "bytes": 389663
+  },
+  {
+   "name": "generations/stage3_capability_846__answerability_paired.summary.json",
+   "sha256": "d3b9befca3ce62eccb9fd96d0ab929203ef8984db951307c0556665eda610401",
+   "bytes": 5294
+  },
+  {
+   "name": "generations/stage3_capability_846__eval_behavior_v0.jsonl",
+   "sha256": "2500e9abd3e073fea282307a8360bf153707d02ea4c438decc724d88d8a937c3",
+   "bytes": 344521
+  },
+  {
+   "name": "generations/stage3_capability_846__eval_behavior_v0.summary.json",
+   "sha256": "b03e4796fd2224170b34a4020d2df35378c95c611503bc976934852035bf6964",
+   "bytes": 7705
+  },
+  {
+   "name": "generations/stage3_capability_846__gsm8k.jsonl",
+   "sha256": "fc1ff44a56f6cfbe8669d7ccc2c5ba5f588e76903896fc12eda366aaccc2b2b2",
+   "bytes": 394338
+  },
+  {
+   "name": "generations/stage3_capability_846__gsm8k.summary.json",
+   "sha256": "6512ac72aa198c99c21aebd6e9b7a5cfc9bdb1ffec0d293e0336a6938abfc13f",
+   "bytes": 5320
+  },
+  {
+   "name": "generations/stage3_capability_846__knowledge.jsonl",
+   "sha256": "6f34e75a075e6fc9254d409c753ddb98f1a467e0625fddc9c157ca08295d440f",
+   "bytes": 825238
+  },
+  {
+   "name": "generations/stage3_capability_846__knowledge.summary.json",
+   "sha256": "c9d050514cf83e3c64e0580065e2a757149d20843a41c729c02482745568e920",
+   "bytes": 5299
+  },
+  {
+   "name": "generations/stage3_capability_846__math_verified.jsonl",
+   "sha256": "805a057ca76912c15a30a45163b8189a122353966ce4f4671c80c3e27adb46d0",
+   "bytes": 449831
+  },
+  {
+   "name": "generations/stage3_capability_846__math_verified.summary.json",
+   "sha256": "9df947bee1e29749f40f96634efa3136398ad54efc1a844bc15eccff71bca0d3",
+   "bytes": 5288
+  },
+  {
+   "name": "generations/stage3_capability_846__multihop.jsonl",
+   "sha256": "6ee314884a857b220c1d704c8cf9bb8583597235f4549568837f1e67c3aa0742",
+   "bytes": 552659
+  },
+  {
+   "name": "generations/stage3_capability_846__multihop.summary.json",
+   "sha256": "c60463f8298ceb4aac493f4e1f642d47fe409c6904b25e925fc8bd6df5c15fc4",
+   "bytes": 5274
+  },
+  {
+   "name": "generations/stage3_capability_846__rag.jsonl",
+   "sha256": "353965ad73260772793eb6fb0055748f9bcae35e8e89a0b8a0d3643258c4dfb7",
+   "bytes": 322039
+  },
+  {
+   "name": "generations/stage3_capability_846__rag.summary.json",
+   "sha256": "13bc031a3d386f59c0b77576cd1c5c2ee63ca51ca1bbe9d582cdc04a75e42d67",
+   "bytes": 5259
+  },
+  {
+   "name": "generations/stage3_capability_846__safety_paired.jsonl",
+   "sha256": "b729b277c35d493330be83c3cee98109ed374d8d58abcc6f1740d6766af3a7d7",
+   "bytes": 632414
+  },
+  {
+   "name": "generations/stage3_capability_846__safety_paired.summary.json",
+   "sha256": "ece4d7eb7cbbf40fc2288aed4e09cdc22bc6bd61e87558224f7e5871d868c543",
+   "bytes": 5287
+  },
+  {
+   "name": "generations/stage3_legacy_150__items.jsonl",
+   "sha256": "1e1a052c9d5a92ffd5d0ae9ba44600e7629e8f4e7344b14064382aa0124eeefe",
+   "bytes": 629292
+  },
+  {
+   "name": "generations/stage3_legacy_150__items.summary.json",
+   "sha256": "1738385968d416679d3336669b926c6622b880220b390a59acdd2785eb9f7cd2",
+   "bytes": 6412
+  },
+  {
+   "name": "rows/fluid_reasoning_720__dev_v1.rows.jsonl",
+   "sha256": "e2b3791688cbdae219722a8f689f12ac4e5d6d6dc9a0c635735031c0e0e5f0f4",
+   "bytes": 73237
+  },
+  {
+   "name": "rows/stage3_capability_846__answerability_paired.rows.jsonl",
+   "sha256": "98557841cb155cfb4cca2591e2566955b742a9269bcea7c8f6574663f872abba",
+   "bytes": 15036
+  },
+  {
+   "name": "rows/stage3_capability_846__eval_behavior_v0.rows.jsonl",
+   "sha256": "3c7504821740a7c329816bf00964d20f91ab7ed0942a842193e331f574040a87",
+   "bytes": 27232
+  },
+  {
+   "name": "rows/stage3_capability_846__gsm8k.rows.jsonl",
+   "sha256": "a31afedb6ddd4e1869b6ec5038988f5247b9744e284c6dcafb1e17a100693a2d",
+   "bytes": 9370
+  },
+  {
+   "name": "rows/stage3_capability_846__knowledge.rows.jsonl",
+   "sha256": "d1d25659686d3e8006fb335dfb8e35fdfdb9e3b9e6b4e467283cd6620221391a",
+   "bytes": 14132
+  },
+  {
+   "name": "rows/stage3_capability_846__math_verified.rows.jsonl",
+   "sha256": "b668b8109078805bdfa97ebe5b6db7239e8bbed1a0fb86446180f028bed67205",
+   "bytes": 11479
+  },
+  {
+   "name": "rows/stage3_capability_846__multihop.rows.jsonl",
+   "sha256": "154e3a60adf66644c19e508de85683f694aa26d1f4cc5257f91119da223301cc",
+   "bytes": 11180
+  },
+  {
+   "name": "rows/stage3_capability_846__rag.rows.jsonl",
+   "sha256": "9b9f46adee6889a65559604d767f3ff645711b3bc04fdda93d5831c73a9dc1ac",
+   "bytes": 10198
+  },
+  {
+   "name": "rows/stage3_capability_846__safety_paired.rows.jsonl",
+   "sha256": "408f9a3d5c29cec8a5433c173263c022698ce8f6fac6a6b6b775a49841166b99",
+   "bytes": 10865
+  },
+  {
+   "name": "rows/stage3_legacy_150__items.rows.jsonl",
+   "sha256": "3a685a2a0dd5bfed94d73b319d22d0328044881f92e6a0cfeed68a5ffa62def2",
+   "bytes": 9240
+  }
+ ],
+ "destination": "/runpod-volume/h1/A-s20260727/evaluation",
+ "persisted": true,
+ "finished_utc": "2026-10-24T05:01:52Z"
+}

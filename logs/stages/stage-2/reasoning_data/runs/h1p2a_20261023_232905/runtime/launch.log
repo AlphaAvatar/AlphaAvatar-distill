@@ -1,0 +1,37 @@
+bundle OK: transfer/aad_autoinit_b6aa0f64.bundle on the relay
+[23:30:27] budget: expected 557 min $17.45 · soft $27.59 · hard $28.25 (authorized $28.75)
+[23:30:28] NVIDIA A100-SXM4-80GB $1.79/h, stock Low
+[23:30:28] account funds OK: the provider account holds $89.7096 against the $30.0000 this session must be able to fund
+[23:30:29] account resources OK: the provider account holds only the 1 resource(s) the records account for
+[23:30:29] a formal authorization for P2
+[23:30:29] all-in $28.6031 over 903.0 min at $1.88/h, inside $28.75
+[23:30:29] units identity a6d580672a3a is the authorized one
+[23:30:29] every bound file is in the session commit
+[23:30:29] precheck OK: 4 relay inputs (4 from AlphaAvatar/aadistill-artifacts), 3 local assets
+[23:30:30] watchdog detached — hard 902 min = $28.25
+[23:30:30] created pe4bzx4qy77ni7 at $1.79/h
+[23:31:24]   starting (60s) — $0.03
+[23:32:27]   starting (120s) — $0.06
+[23:33:31] TCP 22 at 157.157.221.29:17595 after 3.0 min
+[23:33:34] draw 1: ssh reachable — $0.09
+[23:36:49] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07
+[23:36:49] draw 1: running setup
+[23:38:56] draw 1: setup complete — $0.25
+[23:39:01] driver detached, pid 3263, confirmed by descriptor_probe — $0.25
+[23:41:12]   2026-10-23T23:38:53Z MARKER:SETUP_DONE — $0.32
+[23:41:26] unit B-s20260726: evidence SECURED
+[23:41:34] unit B-s20260727: evidence SECURED
+[02:24:14] unit A-s20260726: evidence SECURED
+[05:03:29]   2026-10-24T05:01:53Z MARKER:ALL_DONE — $9.93
+[05:03:29] polling ended: ALL_DONE — $9.93
+[05:05:02]   manifest rc=0
+8 file(s) across 4 class(es) -> /workspace/manifest.json
+  final_required: 8 · mutable_snapshot: 0 · final_streams_quiescent: True
+[05:05:23] unit A-s20260727: evidence SECURED
+[05:05:29] teardown gate: allowed=True failed=None
+[05:05:29] deleting pod (gate passed)
+[05:05:40] pod deleted — 335.2 min, $10.00; provider confirms gone: True
+
+stage2-h1-units-formal COMPLETE — /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-2/reasoning_data/runs/h1p2a_20261023_232905/runtime/session.json. 
+{"all_in_usd": 10.1139, "gpu_usd": 9.9991, "disk_usd": 0.1147, "elapsed_minutes": 335.16, "price_per_hour": 1.79, "authorized_usd": 28.75, "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB); the network volume is booked in logs/stages/stage-2/reasoning_data/storage/"}
+rc=0

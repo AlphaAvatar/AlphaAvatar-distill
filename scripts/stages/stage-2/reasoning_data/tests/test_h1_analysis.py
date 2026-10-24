@@ -30,8 +30,11 @@ def _evidence(tmp_path, p_correct):
         rows = [{"id": i, "correct": rng.random() < p_correct[u["arm"]], "formal": True} for i in items]
         (d / "evaluation/rows/fluid_reasoning_720__dev_v1.rows.jsonl").write_text(
             "".join(json.dumps(r) + "\n" for r in rows))
-        (d / "evaluation/formal_report.json").write_text(json.dumps({"units": {"stage3_capability_846/gsm8k": {
-            "headline": "correct", "headline_value": 0.1}}}))
+        (d / "evaluation/formal_report.json").write_text(json.dumps({"capabilities": {
+            "supporting.math_mixed": {"status": "measured", "units": {"stage3_capability_846/gsm8k": {
+                "n": 100, "headline": "correct", "headline_value": 0.1}}},
+            "rollout.protocol_integrity": {"status": "measured", "units": {"stage3_capability_846/eval_behavior_v0": {
+                "metrics": {"overall": {"terminated": 0.5, "truncated_at_cap": 0.5}}}}}}}))
     return tmp_path
 
 
@@ -43,6 +46,9 @@ def test_a_large_gain_is_a_go_and_every_axis_is_reported_apart(tmp_path):
     assert doc["decision"]["n_items"] < 720            # interactive episodes are outside the decision
     cell = doc["by_axis_and_tier"]["inductive_rule_discovery"]["B-s20260726"]
     assert set(cell) >= {"all"} and cell["all"]["n"] > 0
+    caps = doc["capabilities_by_unit"]["A-s20260726"]
+    assert caps["supporting.math_mixed"]["units"]["stage3_capability_846/gsm8k"]["correct"] == 0.1
+    assert caps["rollout.protocol_integrity"]["units"]["stage3_capability_846/eval_behavior_v0"]["terminated"] == 0.5
 
 
 def test_both_arms_at_the_floor_is_not_resolved_never_equivalence(tmp_path):
