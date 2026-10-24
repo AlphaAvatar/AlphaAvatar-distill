@@ -273,3 +273,14 @@ def test_every_derived_recipe_meets_the_trainers_tokenizer_contract(real_plan, t
     with pytest.raises(D.DriverRefusal, match="pins"):
         V.validation_recipe(e1, "D4-Augmented", steps=24, save_every=12, out_dir=tmp_path, data_dir=tmp_path,
                             init=tmp_path, name="n")
+
+
+@pytest.mark.parametrize("unit", ["PCA-Original-s20260726", "D4-Original-s20260801", "D4-Augmented-s20260726"])
+def test_the_analysis_expects_exactly_the_inputs_the_driver_binds(real_plan, tmp_path, unit):
+    # h1pa_analysis refuses a unit whose report inputs are not what it derives from the frozen study alone
+    from stages.reasoning_data import h1pa_analysis as AN
+    plan = _plan(real_plan, tmp_path)
+    assert _run(plan, tmp_path, Calls(tmp_path), unit) == 0
+    rep = json.loads((tmp_path / "durable" / unit / "report/report.json").read_text())
+    u = next(x for x in plan["units"] if x["unit"] == unit)
+    assert rep["inputs"] == json.loads(json.dumps(AN.expected_inputs(plan, u)))
