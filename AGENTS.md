@@ -1544,6 +1544,46 @@ A task is done only when:
 - README is updated if the change affects public project information;
 - the next useful action is clear.
 
+### 2.10 Use the field's standard terminology
+
+**MAINTAINER DECISION 2026-10-24.** Call every concept by the name the
+machine-learning and LLM-training community uses for it: the name found in
+the primary papers and in mainstream frameworks (PyTorch, Hugging Face
+Transformers / TRL, DeepSpeed, Megatron-LM, vLLM). This applies to reports,
+docs, logs, commit messages, code comments and replies to the maintainer, in
+every language. Do not coin a name for a concept that already has one, and do
+not describe a standard concept in invented wording.
+
+* **Prose uses the standard term; identifiers stay as they are.** Where the
+  code names something non-standardly, write the standard term. If the reader
+  needs the key, add it in a code span: "batch size (`batch.blocks_per_step`)".
+  Do not rename identifiers for this; frozen configs and records bind them by
+  hash.
+* **A standard term keeps its standard meaning.** Never use an established
+  term for something else. Never describe a metric by its field name when the
+  name misdescribes it; say what was measured. For example,
+  `truncated_at_cap` counts every non-EOS stop, most of them repetition
+  stops, so it is not "truncated at the context limit".
+* **A project-specific term is only for a project-specific concept,** one no
+  standard term covers (for example an H1 unit: one arm × seed). Define it
+  once in the document that owns it, and never present it as a field term.
+* **In Chinese, use the established Chinese term,** or the English term where
+  the field normally keeps it in English (batch size, epoch, checkpoint,
+  token, padding). Never translate an identifier literally.
+* **When unsure which term is standard, check a primary source (P13)** instead
+  of guessing.
+
+Terms this repository's code spells non-standardly:
+
+| in code | standard term | in Chinese |
+| --- | --- | --- |
+| block, `block_len` | packed sequence (training sequence); its length is the sequence length | 打包序列（训练序列）、序列长度 |
+| `blocks_per_step` | batch size: sequences per optimizer step | batch size（批大小） |
+| `micro_blocks` | micro-batch size; gradient accumulation steps = `blocks_per_step / micro_blocks` on one GPU | micro-batch、梯度累积步数 |
+| passes | epochs | epoch（轮） |
+| real / executed positions | non-padding tokens | 非 padding token |
+| pack | packed training set | 打包后的训练集 |
+
 ---
 
 ## 3. Project Development and Maintenance Log Requirements
