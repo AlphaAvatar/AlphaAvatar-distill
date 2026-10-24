@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.reasoning_data.h1pa_augmented_audit/v1",
- "written_utc": "2026-10-24T10:01:12Z",
+ "written_utc": "2026-10-24T11:18:09Z",
  "study": "stage2.reasoning_data.h1pa",
  "study_config_sha256": "d9b62aee0ee6aa2cd89608cb24854616e965fe540776e546739323063b4e7083",
  "identity": [
@@ -573,6 +573,123 @@
    }
   },
   "tasks_total": 115,
+  "selected_task_ids": [
+   "01a8cb2be858edc24d74",
+   "0544698a2e66a30c2fcf",
+   "0830bddf51d309da0b86",
+   "09867e0685e4d92091a1",
+   "0d1a0cdd9ce24608bbb0",
+   "0e5a48fa09b22ab3fd54",
+   "12f39a0819f3024a4032",
+   "13ba91bb5932406cf59d",
+   "17ad92a06325ea1f0d08",
+   "1c447d1fae7a95beb7bd",
+   "1eea59125471509f13bf",
+   "2104da9ce75aa321dd3e",
+   "21477e4c2e4fa0ea5daa",
+   "2337414d8873073464c0",
+   "26383d32a5ccc324ee8a",
+   "26b85545a5f68c3d23b2",
+   "2c007c1608f5bd85c5fb",
+   "2ca0628598d5157fb5fb",
+   "32a4a1ec80087aa4e6d9",
+   "353a9b03ccdd57681d3a",
+   "36702b34adbd2dfda775",
+   "37b89c1985cc578fc243",
+   "3ae456005a003124dfde",
+   "3b510133ba409630597e",
+   "3bd1c764c58f8a7ab8f9",
+   "3f80140227b0a70c5bd2",
+   "404725a95ce6ea7f7aa0",
+   "4172945156039a2dd55f",
+   "45cf3a55dc64ef447aaf",
+   "485242057b8508454151",
+   "4abf3b225cd386ad07c2",
+   "4ba33c4182a522f225a3",
+   "4bb476767c96fd1eb5f1",
+   "4c52a881f66b4e0872e3",
+   "4ddea5b9f72845f0f0b3",
+   "4f3b363dd0b30f0989bf",
+   "508c2a1acbb5f0e210d1",
+   "50976c395899b724dc10",
+   "5470c7fa08fd6c322045",
+   "5bb22d929f3e7294b86c",
+   "5d6246b277c7ac8a50dc",
+   "5d9c505a7c97296ee22f",
+   "5f2ba21741d79560503f",
+   "6058adbe5f102975c07d",
+   "60b18001e6d2c3d1c97f",
+   "60bc8146137ba3564cee",
+   "61820dee1de2f242860e",
+   "620147a1d327d651f78f",
+   "68b5dec9b62454378ed8",
+   "6944d8d56a1fedd249da",
+   "69abc010a0745c1b7f49",
+   "6c884b9afa8c8737b4b0",
+   "6fdd74811de34a261a54",
+   "73733e711e8c72aa9f81",
+   "7557f28de3d7a44ab6da",
+   "75d1ea9b89eaaae30534",
+   "761322a03414f89bb8b0",
+   "7a2074f23ae7e8fd5ab5",
+   "7afc949f6ceecd0d7093",
+   "7c4e6a5db5d441d89026",
+   "7d375585777f4c1df584",
+   "7d8a6d02cbcb99143419",
+   "8711049c59c6b80a60ec",
+   "8796e7add3ad8a18824a",
+   "8c81bf43bf9080fdf86a",
+   "8cae89c422db9e19004a",
+   "8f90f3c4225ee8d2fa46",
+   "94cda4535e8e110b80f1",
+   "9545b0a9bde209576335",
+   "96ae43cc16ce1f2f52ca",
+   "98eb904e6c1c7e749eae",
+   "9d4d25db1a8a6c8cc231",
+   "a04385078e79908ab824",
+   "a4e93890744f9f2d794f",
+   "a6fa9eea189570d7a72e",
+   "a71cdc9013488fc68c33",
+   "ad72af6f7242ea9569e0",
+   "ae7b946ff10045e046df",
+   "af044b8ea4d5e49a014d",
+   "b0de70f03f3233bab39d",
+   "b40f92d7a339ee8b3447",
+   "b7279fca5565095fe32e",
+   "b8280dd51032753198df",
+   "bb5c602fbf11c17d067e",
+   "bf9bb6cf5fb0a6b5e66c",
+   "c0c4b8d125e937a81cba",
+   "c2877d9f027e28d22252",
+   "c5151e5923b047e68b81",
+   "cab34172a23138a0c096",
+   "cc38c5e2211c8ee53d5e",
+   "cf2da12ad3cc5ab16f38",
+   "d1eb0d3ac9b61444f308",
+   "d22fc2ace5c0e423b3df",
+   "d261438e2ab0dd79cb81",
+   "d2e42f4e1a0c3656a493",
+   "d4718db5d154cefac2ba",
+   "d516d36b13f8edb396c1",
+   "d57b70ac93ee3cbe08d7",
+   "d6ac4b270f0d9e79850a",
+   "dcb5d77c186d75cf91c4",
+   "dcc32e21ceb10e038859",
+   "de5aad016b7db34afb8b",
+   "dfdf612343fcbc50acac",
+   "dfe14fde5377790a8269",
+   "e041a3bcce8714ad49e0",
+   "e17e7edc0971c75e1d29",
+   "e4f7905d88cea3910783",
+   "ed3f6f055b80cf175e70",
+   "edb6bc9a93c1c7bbe48c",
+   "efa4647352da1c2d27fd",
+   "f19dc619aba60ba63799",
+   "f69c274f070584d4e4ac",
+   "f74aa5fff9ced5ba8846",
+   "fc96d53325682ae60c81",
+   "fdca991337247cb4928b"
+  ],
   "all_cells_have_enough_unused_tasks": true,
   "expected_supervised_tokens": 311343,
   "predicted_generated_tokens": 1145638,
@@ -583,12 +700,76 @@
   },
   "generation": "P1's frozen protocol (the same teacher, sampling, allowance and verifiers; two candidates, the second only when the first is rejected), then P1v verification at $0",
   "cost": {
-   "basis": "P1's measured A100 session (the only measured generation hardware)",
-   "decode_tokens_per_second_per_sequence": 13.6,
-   "session_minutes_expected": 33.4,
-   "expected_usd": 1.01,
-   "hard_cap_usd": 2.6,
-   "price_per_hour": 1.79
+   "basis": "A100-SXM4-80GB, the hardware P1 and P1t measured (an L40S session would first need its own decode measurement)",
+   "price_per_hour": 1.79,
+   "calibration": {
+    "aggregate_tokens_per_second": 2049,
+    "aggregate_tokens_per_second_conservative": 1680,
+    "sequence_speed_cap": 45.9,
+    "correction": 1.321,
+    "passes": [
+     {
+      "run": "h1gen_20261022_190653",
+      "pass": 0,
+      "requests": 1587,
+      "tokens": 7274821,
+      "slowest_request_seconds": 3550,
+      "median_sequence_speed": 13.5,
+      "model_seconds": 4160
+     },
+     {
+      "run": "h1gen_20261022_190653",
+      "pass": 1,
+      "requests": 577,
+      "tokens": 4027765,
+      "slowest_request_seconds": 2398,
+      "median_sequence_speed": 14.3,
+      "model_seconds": 2659
+     },
+     {
+      "run": "h1p1t_20261023_094007",
+      "pass": 0,
+      "requests": 59,
+      "tokens": 290643,
+      "slowest_request_seconds": 243,
+      "median_sequence_speed": 35.2,
+      "model_seconds": 184
+     },
+     {
+      "run": "h1p1t_20261023_094007",
+      "pass": 1,
+      "requests": 41,
+      "tokens": 222152,
+      "slowest_request_seconds": 174,
+      "median_sequence_speed": 45.9,
+      "model_seconds": 173
+     }
+    ]
+   },
+   "generated_tokens": {
+    "expected": 1138656,
+    "conservative": 2511649
+   },
+   "requests": {
+    "expected": [
+     115,
+     57
+    ],
+    "conservative": [
+     115,
+     115
+    ]
+   },
+   "fixed_minutes": 14.0,
+   "session_minutes": {
+    "expected": 57.8,
+    "conservative": 80.7
+   },
+   "expected_usd": 1.74,
+   "conservative_usd": 2.44,
+   "hard_cap_usd": 3.72,
+   "watchdog_hard_minutes": 123.3,
+   "conservative_fits_the_cap": true
   }
  },
  "top_up_with_a_validation_reserve": {
@@ -598,12 +779,76 @@
   "expected_supervised_tokens": 515618,
   "all_cells_have_enough_unused_tasks": true,
   "cost": {
-   "basis": "P1's measured A100 session (the only measured generation hardware)",
-   "decode_tokens_per_second_per_sequence": 13.6,
-   "session_minutes_expected": 33.4,
-   "expected_usd": 1.01,
-   "hard_cap_usd": 2.6,
-   "price_per_hour": 1.79
+   "basis": "A100-SXM4-80GB, the hardware P1 and P1t measured (an L40S session would first need its own decode measurement)",
+   "price_per_hour": 1.79,
+   "calibration": {
+    "aggregate_tokens_per_second": 2049,
+    "aggregate_tokens_per_second_conservative": 1680,
+    "sequence_speed_cap": 45.9,
+    "correction": 1.321,
+    "passes": [
+     {
+      "run": "h1gen_20261022_190653",
+      "pass": 0,
+      "requests": 1587,
+      "tokens": 7274821,
+      "slowest_request_seconds": 3550,
+      "median_sequence_speed": 13.5,
+      "model_seconds": 4160
+     },
+     {
+      "run": "h1gen_20261022_190653",
+      "pass": 1,
+      "requests": 577,
+      "tokens": 4027765,
+      "slowest_request_seconds": 2398,
+      "median_sequence_speed": 14.3,
+      "model_seconds": 2659
+     },
+     {
+      "run": "h1p1t_20261023_094007",
+      "pass": 0,
+      "requests": 59,
+      "tokens": 290643,
+      "slowest_request_seconds": 243,
+      "median_sequence_speed": 35.2,
+      "model_seconds": 184
+     },
+     {
+      "run": "h1p1t_20261023_094007",
+      "pass": 1,
+      "requests": 41,
+      "tokens": 222152,
+      "slowest_request_seconds": 174,
+      "median_sequence_speed": 45.9,
+      "model_seconds": 173
+     }
+    ]
+   },
+   "generated_tokens": {
+    "expected": 1691085,
+    "conservative": 3780165
+   },
+   "requests": {
+    "expected": [
+     185,
+     82
+    ],
+    "conservative": [
+     185,
+     185
+    ]
+   },
+   "fixed_minutes": 14.0,
+   "session_minutes": {
+    "expected": 65.0,
+    "conservative": 94.5
+   },
+   "expected_usd": 1.96,
+   "conservative_usd": 2.85,
+   "hard_cap_usd": 4.05,
+   "watchdog_hard_minutes": 134.1,
+   "conservative_fits_the_cap": true
   }
  },
  "datasets": {
@@ -824,13 +1069,13 @@
    ]
   },
   "top_up_generation": {
-   "expected_usd": 1.01,
-   "hard_cap_usd": 2.6
+   "expected_usd": 1.74,
+   "hard_cap_usd": 3.72
   },
   "storage_usd": 7.0,
   "total_usd": [
-   32.23,
-   40.88
+   32.96,
+   41.61
   ]
  }
 }

@@ -1,0 +1,122 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.topup_application/v2",
+ "written_utc": "2026-10-24T11:16:27Z",
+ "status": "APPLICATION for the maintainer's decision; NOT authorized, nothing launched",
+ "what": "ONE A100-80GB session generating teacher candidates for unused primary fluid-reasoning tasks under P1's frozen generation protocol, then P1v verification and the no-truncation fluid pack at $0",
+ "requested": "115 tasks: the gap",
+ "scenarios": {
+  "115 tasks: the gap": {
+   "tasks": 115,
+   "tasks_by_cell": {
+    "primary.abstract_analogical/s0_generators_v2_calsplit": 9,
+    "primary.compositional_generalization/reasoning_core": 9,
+    "primary.compositional_generalization/reasoning_gym": 25,
+    "primary.compositional_generalization/s0_generators_v2_calsplit": 12,
+    "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 19,
+    "primary.interactive_adaptation/s0_generators_v2_calsplit": 13,
+    "primary.task_contained_deduction/prontoqa": 5,
+    "primary.task_contained_deduction/reasoning_core": 8,
+    "primary.task_contained_deduction/reasoning_gym": 6,
+    "primary.task_contained_deduction/s0_generators_v2_calsplit": 9
+   },
+   "expected_supervised_tokens": 311343,
+   "selected_task_ids_sha256": "d1ca7ece55e55ee5997c8d27cd5b9a63a8b3799f05eec55c764c040609adb57d",
+   "isolation_pass": true,
+   "generated_tokens": {
+    "expected": 1138656,
+    "conservative": 2511649
+   },
+   "session_minutes": {
+    "expected": 57.8,
+    "conservative": 80.7
+   },
+   "expected_usd": 1.74,
+   "conservative_usd": 2.44,
+   "hard_cap_usd": 3.72,
+   "watchdog_hard_minutes": 123.3,
+   "conservative_fits_the_cap": true
+  },
+  "185 tasks: the gap and a 150,000 reserve": {
+   "tasks": 185,
+   "tasks_by_cell": {
+    "primary.abstract_analogical/s0_generators_v2_calsplit": 16,
+    "primary.compositional_generalization/reasoning_core": 12,
+    "primary.compositional_generalization/reasoning_gym": 34,
+    "primary.compositional_generalization/s0_generators_v2_calsplit": 22,
+    "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 37,
+    "primary.interactive_adaptation/s0_generators_v2_calsplit": 17,
+    "primary.task_contained_deduction/prontoqa": 10,
+    "primary.task_contained_deduction/reasoning_core": 11,
+    "primary.task_contained_deduction/reasoning_gym": 9,
+    "primary.task_contained_deduction/s0_generators_v2_calsplit": 17
+   },
+   "expected_supervised_tokens": 515618,
+   "selected_task_ids_sha256": "25a3146ca4189a752ce89cb14a1a3fc86a4c7712e712383de80351f17217c303",
+   "isolation_pass": true,
+   "generated_tokens": {
+    "expected": 1691085,
+    "conservative": 3780165
+   },
+   "session_minutes": {
+    "expected": 65.0,
+    "conservative": 94.5
+   },
+   "expected_usd": 1.96,
+   "conservative_usd": 2.85,
+   "hard_cap_usd": 4.05,
+   "watchdog_hard_minutes": 134.1,
+   "conservative_fits_the_cap": true
+  }
+ },
+ "calibration": {
+  "aggregate_tokens_per_second": 2049,
+  "aggregate_tokens_per_second_conservative": 1680,
+  "sequence_speed_cap": 45.9,
+  "correction": 1.321,
+  "passes": [
+   {
+    "run": "h1gen_20261022_190653",
+    "pass": 0,
+    "requests": 1587,
+    "tokens": 7274821,
+    "slowest_request_seconds": 3550,
+    "median_sequence_speed": 13.5,
+    "model_seconds": 4160
+   },
+   {
+    "run": "h1gen_20261022_190653",
+    "pass": 1,
+    "requests": 577,
+    "tokens": 4027765,
+    "slowest_request_seconds": 2398,
+    "median_sequence_speed": 14.3,
+    "model_seconds": 2659
+   },
+   {
+    "run": "h1p1t_20261023_094007",
+    "pass": 0,
+    "requests": 59,
+    "tokens": 290643,
+    "slowest_request_seconds": 243,
+    "median_sequence_speed": 35.2,
+    "model_seconds": 184
+   },
+   {
+    "run": "h1p1t_20261023_094007",
+    "pass": 1,
+    "requests": 41,
+    "tokens": 222152,
+    "slowest_request_seconds": 174,
+    "median_sequence_speed": 45.9,
+    "model_seconds": 173
+   }
+  ]
+ },
+ "unchanged": [
+  "the teacher, sampling, allowance, seeds rule and verifiers of P1 (configs/stages/stage-2/reasoning_data/generation_protocol.json)",
+  "one unit per task, no repeated prompt or target, R0-R9 isolation on the accepted units",
+  "P1 and P1t's data: nothing regenerated"
+ ],
+ "launch": "NOT built: on a grant, the task list, its generation plan, launch identity and harness digest are built at $0 and the grant names them; the existing launcher, shard securing, teardown and closeout apply unchanged",
+ "authorizes": "nothing"
+}

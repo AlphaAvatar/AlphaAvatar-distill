@@ -105,6 +105,35 @@ built.
   truncated, 307 of them losing the answer entirely.
 - The increment packs every verified trajectory whole.
 
+**How the packer really groups** (pre-generation review, `audit/h1pa_pregen_review.json`):
+- **Code.**
+  - `pack_sessions` groups by `system_group_key` (the rendered system text plus
+    tool schemas) and nothing else.
+  - Category and source only order sessions (`interleave`) and sequences
+    (`order_blocks`), and are recorded. No category or source boundary exists.
+  - A unit's turns never share a sequence, so no turn reads another turn's
+    answer.
+- **The fluid increment:**
+  - 1 system-prompt group;
+  - 191 of 492 sequences hold two or more reasoning axes (202 two or more
+    cells, 80 two or more sources), and every pair of axes shares sequences;
+  - 1.49 samples per sequence (286 hold 1, 174 hold 2, 31 hold 3, 1 holds 4);
+  - padding 25.8%; 0 sequences hold one unit twice;
+  - 731/731 samples packed whole; 731/731 members traceable to task, source,
+    axis and unit.
+- **Why padding is higher than best-fit's.** Sequential packing closes a sequence
+  when the next whole sample does not fit. It never looks ahead or reorders for
+  fill.
+- **E1's pack** (for reference): 1,312 system-prompt groups in its 2.96M cut,
+  because tool schemas render into the system prompt. Its 465 default-prompt
+  sequences mix types in 464 of them, at 6.27 samples per sequence and 2.0%
+  padding.
+- **Joint re-packing of E1 and the increment: not done.**
+  - Only E1's default-prompt sessions could share with the fluid data.
+  - At most 127 sequences (191 optimizer steps) could be saved.
+  - It would end the property that D4-Augmented's E1 part is E1's pack, so
+    Comparison B's attribution would blur.
+
 ## 4. Capacity of qualified pure fluid-reasoning data
 
 | primary cell | verified units | supervised tokens | mean per unit | measured unit acceptance | unused tasks left |
@@ -160,14 +189,34 @@ each cell's share of the existing pool. Then, per cell:
 allowance and verifiers, with two candidates where the second runs only when
 the first is rejected. Then P1v verification and the packer at $0.
 
-**Cost** (P1's measured A100 session at $1.79/h): about 33 min, **$1.01 expected,
-$2.60 hard cap**. Running it on L40S instead would first need L40S decode speed
-measured.
+**Cost, from the session's own tasks**
+([`plans/h1pa_topup_application.json`](../../../../logs/stages/stage-2/reasoning_data/plans/h1pa_topup_application.json)).
 
-**Optional fluid validation reserve.** 185 tasks, expected about 516k, would
-cover the gap plus a 150k reserve, at the same session bound. Trajectories
-beyond the 2.96M cut are never trained. They could feed a diagnostic fluid
-validation set through the trainer's `extra_val` for both D4 arms.
+- **Model.** Each pass is processor sharing over its requests' generated tokens.
+  An interactive episode counts as one request of all its turns.
+- **Calibrated on P1's and P1t's four passes:**
+  - aggregate throughput 2,049 tok/s (1,680 conservative);
+  - single-sequence speed cap 45.9 tok/s;
+  - ×1.321 for the largest under-prediction of a measured pass.
+- **Fixed phases** (setup, contract check, two engine starts, teardown) are
+  P1t's measured ones. The hard cap follows P1's rule.
+
+| | tasks | generated tokens (expected / conservative) | session minutes | expected | conservative | hard cap |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| **gap only (requested)** | 115 | 1.14M / 2.51M | 57.8 / 80.7 | **$1.74** | $2.44 | **$3.72** |
+| gap + 150k validation reserve | 185 | 1.69M / 3.78M | 65.0 / 94.5 | $1.96 | $2.85 | $4.05 |
+
+**Why the earlier figure was too low.** The $1.01 / $2.60 estimate priced a fixed
+two-pass bound. It ignored the interactive episodes, whose turns are generated
+one after another (up to 12 turns, up to about 55k tokens), and the throughput
+shared by more requests. The 13 interactive tasks set the session's length.
+
+**Hardware.** A100, the measured generation hardware. L40S would first need its
+own decode measurement.
+
+**The 185-task reserve is not requested.** Trajectories past the 2.96M cut are
+never trained. A later fluid validation drawn from them would exclude every unit
+with a turn inside the cut.
 
 ## 6. D4-Augmented's training schedule and compute
 
@@ -239,15 +288,21 @@ holds:
 | --- | --- |
 | training (2 × 2,916 + 2 × ~3,695 steps at 3.509 s/step) | inside the next row |
 | training + 6 evaluations + overhead + a 0.5 h GPU validation, L40S | 22.2–30.2 GPU h, $24.2–32.9 |
-| top-up generation | $1.01 expected, $2.60 cap |
+| top-up generation | $1.74 expected, $3.72 cap |
 | storage (50 GB, two months) | $7.00 |
-| **total** | **$32.2–40.9** |
+| **total** | **$33.0–41.6** |
 
 Evaluation is costed at 4,763–9,526 s per checkpoint: the H1 forecast's L40S
 maximum, and ×2 for students off the floor.
 
-**Suggested grants:** the top-up session at a $2.60 hard cap, then training and
+**Suggested grants:** the top-up session at a $3.72 hard cap, then training and
 evaluation at about $45. H1's remainder does not transfer.
+
+**Project ceiling.** The absolute ceiling is $712.17, against $678.06 billed
+(snapshot `runpod_billing_2026-10-24T0507Z.json`).
+- The top-up fits.
+- Training and evaluation at about $45 would cross it, so that grant also needs
+  the ceiling raised.
 
 ## 9. Risks
 
@@ -263,11 +318,12 @@ evaluation at about $45. H1's remainder does not transfer.
 ## 10. GO/NO-GO
 
 **NO-GO for formal training now.** What GO needs, in order:
-1. A grant for the top-up session (≤ $2.60), run under P1's frozen protocol,
-   verified, and the increment packed to 2.96M at $0.
+1. A grant for the top-up session (115 tasks, $3.72 hard cap), run under P1's
+   frozen protocol, verified, and the increment packed to 2.96M at $0.
 2. This file frozen with the complete merged set's identity.
-3. A grant for training and evaluation (about $45, L40S), the study driver
-   (built at $0), and one short GPU validation session inside it.
+3. A grant for training and evaluation (about $45, L40S) with the project
+   ceiling raised to fit, the study driver (built at $0), and one short GPU
+   validation session inside it.
 
 ## Reproduce
 

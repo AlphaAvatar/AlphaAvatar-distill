@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Maintainer: grant the H1-PA top-up session (cap $2.60), then the training and evaluation (about $45, L40S). 34 pods ($58.33) stay OPEN.",
+ "next": "Maintainer: grant the H1-PA top-up session (115 tasks, cap $3.72; plans/h1pa_topup_application.json), then training and evaluation (about $45, L40S, with the $712.17 project cap raised). 34 pods ($58.33) stay OPEN.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "H1-PA (H1PA.md): the fluid top-up, then the three arms.",

@@ -13831,3 +13831,37 @@ on a paid pod.
     reservation. The account holds no pod and no volume.
 - **Revisit when.** The maintainer grants the top-up session, and later the
   training and evaluation (about $45, L40S).
+
+## 2026-10-24 — Maintainer: packing groups by system prompt only; H1-PA pre-generation review and the top-up's corrected price ($0)
+
+- **Decision (maintainer).**
+  - Sessions of different task categories share a packed sequence whenever
+    their rendered system prompt and tool definitions are the same. No
+    category, axis, dataset or generator boundary is allowed.
+  - Packing stays sequential, never best-fit, and never reorders for fill.
+  - The fluid increment keeps every verified trajectory whole.
+  - E1's pack stays byte-identical. D4-Augmented's two-part layout exists to
+    keep E1's identity, not to separate task types.
+- **Audit** (`audit/h1pa_pregen_review.json`).
+  - **Code.** `pack_sessions` groups by `system_group_key` alone. Category and
+    source only order sessions and sequences. A unit's turns never share a
+    sequence. No category boundary was found and none was written.
+  - **Fluid increment:**
+    - 1 system-prompt group;
+    - 191 of 492 sequences mix reasoning axes, and every axis pair co-occurs;
+    - 1.49 samples per sequence, 25.8% padding;
+    - 731/731 samples whole and traceable; 0 sequences hold one unit twice.
+  - **Joint re-packing with E1** would save at most 127 sequences (191 steps)
+    and would break E1's pack identity inside D4-Augmented. Not done.
+- **The top-up's price, corrected** (`plans/h1pa_topup_application.json`).
+  - **Model.** Processor sharing per pass, calibrated on P1's and P1t's four
+    passes: 2,049 tok/s aggregate (1,680 conservative), a 45.9 tok/s
+    single-sequence cap, ×1.321 correction. Fixed phases are P1t's measured
+    ones.
+  - **115 tasks:** $1.74 expected, $2.44 conservative, $3.72 cap.
+  - **185 tasks** (with a 150k reserve, not requested): $1.96, $2.85, $4.05.
+  - **Why the old figure was wrong.** The earlier $1.01 / $2.60 priced a fixed
+    two-pass bound and missed the multi-turn interactive episodes.
+- **Revisit when.** The maintainer grants the 115-task top-up (cap $3.72,
+  inside the $712.17 project cap). Training and evaluation will need the
+  ceiling raised.

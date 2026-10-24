@@ -1,0 +1,143 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1pa_pregen_review/v1",
+ "written_utc": "2026-10-24T11:16:27Z",
+ "code": {
+  "grouping": "aadistill.data.sessions.pack_sessions groups by system_group_key (the rendered system text and tool schemas) and by nothing else; pack_group fills each sequence in the given order",
+  "category_and_source": "read only to ORDER sessions (mixture.interleave) and sequences (mixture.order_blocks) and to record them in the audit; neither is a packing boundary",
+  "same_conversation": "a unit's turns never share a sequence (source_id deferral): one turn would read another's answer",
+  "no_category_boundary_found": true
+ },
+ "fluid_increment": {
+  "packed_sequences": 492,
+  "system_prompt_groups": 1,
+  "sequences_with_two_or_more": {
+   "axes": 191,
+   "cells": 202,
+   "sources": 80
+  },
+  "training_samples_per_sequence": 1.49,
+  "units_per_sequence": 1.49,
+  "samples_per_sequence_distribution": {
+   "1": 286,
+   "2": 174,
+   "3": 31,
+   "4": 1
+  },
+  "axes_sharing_a_sequence": {
+   "primary.interactive_adaptation + primary.task_contained_deduction": 44,
+   "primary.inductive_rule_discovery + primary.interactive_adaptation": 43,
+   "primary.inductive_rule_discovery + primary.task_contained_deduction": 41,
+   "primary.compositional_generalization + primary.task_contained_deduction": 37,
+   "primary.compositional_generalization + primary.inductive_rule_discovery": 33,
+   "primary.compositional_generalization + primary.interactive_adaptation": 18,
+   "primary.abstract_analogical + primary.inductive_rule_discovery": 7,
+   "primary.abstract_analogical + primary.interactive_adaptation": 4,
+   "primary.abstract_analogical + primary.task_contained_deduction": 3,
+   "primary.abstract_analogical + primary.compositional_generalization": 1
+  },
+  "sequences_holding_one_unit_twice": 0,
+  "padding_ratio": 0.2583,
+  "supervised_tokens": 2807282,
+  "samples_packed_whole": "731/731",
+  "members_traceable_to_task_source_axis_unit": "731/731"
+ },
+ "e1_pack_2p96M": {
+  "packed_sequences": 1944,
+  "system_prompt_groups": 1312,
+  "sequences_with_two_or_more": {
+   "axes": 464,
+   "cells": 464,
+   "sources": 464
+  },
+  "training_samples_per_sequence": 2.33,
+  "units_per_sequence": 2.33,
+  "samples_per_sequence_distribution": {
+   "1": 1405,
+   "2": 39,
+   "3": 47,
+   "4": 58,
+   "5": 109,
+   "6": 90,
+   "7": 76,
+   "8": 67,
+   "9": 32,
+   "10": 10,
+   "11": 6,
+   "12": 4,
+   "13": 1
+  },
+  "axes_sharing_a_sequence": {
+   "multihop_qa + rag_evidence": 320,
+   "gsm8k + rag_evidence": 291,
+   "gsm8k + multihop_qa": 261,
+   "openmath + rag_evidence": 200,
+   "code + rag_evidence": 185,
+   "gsm8k + openmath": 163,
+   "multihop_qa + openmath": 156,
+   "code + multihop_qa": 147,
+   "code + gsm8k": 142,
+   "code + openmath": 71
+  },
+  "sequences_holding_one_unit_twice": 0,
+  "padding_ratio": 0.7029,
+  "supervised_tokens": 2960507,
+  "samples_packed_whole": "4172/4524",
+  "members_traceable_to_task_source_axis_unit": "4524/4524"
+ },
+ "e1_default_prompt_sequences": {
+  "packed_sequences": 465,
+  "system_prompt_groups": 1,
+  "sequences_with_two_or_more": {
+   "axes": 464,
+   "cells": 464,
+   "sources": 464
+  },
+  "training_samples_per_sequence": 6.27,
+  "units_per_sequence": 6.27,
+  "samples_per_sequence_distribution": {
+   "2": 3,
+   "3": 22,
+   "4": 49,
+   "5": 106,
+   "6": 90,
+   "7": 75,
+   "8": 67,
+   "9": 32,
+   "10": 10,
+   "11": 6,
+   "12": 4,
+   "13": 1
+  },
+  "axes_sharing_a_sequence": {
+   "multihop_qa + rag_evidence": 320,
+   "gsm8k + rag_evidence": 291,
+   "gsm8k + multihop_qa": 261,
+   "openmath + rag_evidence": 200,
+   "code + rag_evidence": 185,
+   "gsm8k + openmath": 163,
+   "multihop_qa + openmath": 156,
+   "code + multihop_qa": 147,
+   "code + gsm8k": 142,
+   "code + openmath": 71
+  },
+  "sequences_holding_one_unit_twice": 0,
+  "padding_ratio": 0.0202,
+  "supervised_tokens": 2467920,
+  "samples_packed_whole": "2562/2914",
+  "members_traceable_to_task_source_axis_unit": "2914/2914"
+ },
+ "joint_repacking": {
+  "what": "re-packing E1's default-system-prompt sessions together with the fluid increment",
+  "the_only_shareable_group": "E1's default system prompt is the fluid data's ('You are a helpful Assistant.'): E1's tool-calling sequences carry their own tool schemas and can share with nothing",
+  "e1_default_sequences": 465,
+  "e1_default_padding_ratio": 0.0202,
+  "fluid_padding_positions": 1040914,
+  "upper_bound_sequences_saved": 127,
+  "upper_bound_optimizer_steps_saved": 191,
+  "_bound": "every fluid padding position filled by E1 tokens; E1's default sequences are already this full, so the real saving is smaller",
+  "scientific_cost": "D4-Augmented's E1 part would stop being E1's pack: E1 sessions re-placed, their truncation re-decided (or removed), so D4-Augmented no longer equals D4-Original's training data plus an increment and Comparison B loses its clean attribution; PCA-Original and D4-Original keep E1's pack either way",
+  "recommendation": "keep the two-part layout; the bound is too small to pay that cost"
+ },
+ "train_validation": "every arm validates on E1's 16 sequences; the fluid tokens past the 2.96M cut are never trained, and any later fluid validation drawn from them excludes every unit with a turn inside the cut",
+ "authorizes": "nothing"
+}

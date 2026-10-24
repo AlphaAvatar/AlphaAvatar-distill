@@ -23,8 +23,12 @@ holds no pod and no volume.
   - its gain is credited to data and compute together.
 - **The gap.** Qualified pure fluid data holds 2,807,282 of the 2,960,000
   supervised tokens; the gap is 152,718.
-  - **Top-up:** 115 unused tasks, $1.01 expected and a $2.60 cap.
-  - **Then:** training and evaluation, about $32–41 in all on L40S.
+  - **Top-up:** 115 unused tasks, $1.74 expected and a $3.72 cap
+    (`plans/h1pa_topup_application.json`, priced from its own tasks).
+  - **Then:** training and evaluation, about $33–42 in all on L40S; that grant
+    also needs the $712.17 project ceiling raised.
+- **Packing review** (`audit/h1pa_pregen_review.json`): sessions are grouped by
+  system prompt only, and 191 of 492 fluid sequences mix reasoning axes.
 - **H1's volume `1980hnh75i` is retired** (AGENTS.md 2.5): $0.0449 actual.
 
 **STAGE-2/3 H1: ANNULLED FOR PROMOTION (maintainer, 2026-10-24; `plans/h1_annulment.json`). As executed: P1g PASSED, P2's FOUR FORMAL UNITS COMPLETE; THE FROZEN DECISION WAS NOT_RESOLVED (FLOOR).**

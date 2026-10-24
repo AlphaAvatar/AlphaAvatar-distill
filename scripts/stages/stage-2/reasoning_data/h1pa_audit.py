@@ -438,18 +438,9 @@ def topup(cap: dict, d: dict, *, gap: int, price_a100: float) -> dict:
                       "predicted_generated_tokens": need["tasks"] * v["generated_tokens_per_task"],
                       "selected_task_ids_sha256": canonical_sha(sorted(t["task_id"] for t in sel))}
     iso = IC.check_pool([{**t, "unit_id": t["task_id"], "messages": t.get("messages") or []} for t in selected_all])
-    recs = [x for r in runs if r["identity"]["phase"] == "P1" for x in r["records"]]
-    p1 = runs[0]["identity"]["run_id"]
-    sess = CF.session_measured(p1, d["stores"][p1])
-    speed = CF.decode_speed(recs)
-    limit = int(A.read_json(A.CONFIG_DIR / "generation_protocol.json")["execution"]["session_limit"])
-    per_pass = limit / speed
-    engine = max(sess["engine_start_seconds_by_pass"] or [180.0])
-    minutes = sess["pod_to_driver_minutes"] + 2 * (engine + per_pass) / 60 + sess["all_done_to_pod_deleted_minutes"]
-    rate = price_a100 * sess["all_in_over_gpu"] / 60
-    reserve = (sess["pod_to_driver_minutes"] + sess["all_done_to_pod_deleted_minutes"] + 15) * rate
     n_tasks = sum(r["tasks"]["tasks"] for r in rows.values())
     return {"gap_supervised_tokens": gap, "cells": rows, "tasks_total": n_tasks,
+            "selected_task_ids": sorted(t["task_id"] for t in selected_all),
             "all_cells_have_enough_unused_tasks": all(r["enough_unused_tasks"] for r in rows.values()),
             "expected_supervised_tokens": sum(r["expected_supervised_tokens"] for r in rows.values()),
             "predicted_generated_tokens": sum(r["predicted_generated_tokens"] for r in rows.values()),
@@ -458,10 +449,119 @@ def topup(cap: dict, d: dict, *, gap: int, price_a100: float) -> dict:
                                                      "again on the accepted units with their teacher text"},
             "generation": "P1's frozen protocol (the same teacher, sampling, allowance and verifiers; two candidates, "
                           "the second only when the first is rejected), then P1v verification at $0",
-            "cost": {"basis": "P1's measured A100 session (the only measured generation hardware)",
-                     "decode_tokens_per_second_per_sequence": speed, "session_minutes_expected": round(minutes, 1),
-                     "expected_usd": round(minutes * rate, 2), "hard_cap_usd": round(1.5 * (minutes * rate + reserve), 2),
-                     "price_per_hour": price_a100}}
+            "cost": generation_forecast(rows, d, price=price_a100)}
+
+
+# -- the generation session's cost --------------------------------------------
+def ps_seconds(tokens: list[int], rate: float, cap: float) -> float:
+    """Processor sharing: while n requests are active each decodes at
+    min(cap, rate / n) tokens/s -- an engine whose aggregate throughput
+    saturates at `rate`, a single sequence at `cap`. An episode is one request
+    of its turns' total tokens (its turns are generated one after another)."""
+    rem, t, p = sorted(tokens), 0.0, 0.0
+    for i, x in enumerate(rem):
+        t += (x - p) / min(cap, rate / (len(rem) - i))
+        p = x
+    return t
+
+
+def generation_calibration(runs: list[dict]) -> dict:
+    """Every rate the session forecast uses, measured on P1's and P1t's four
+    passes: the saturated aggregate throughput (a pass's tokens over its
+    slowest request's latency, under P1's full load; the second pass as the
+    conservative value), the single-sequence speed cap (the fastest per-pass
+    median per-sequence speed), and the model's largest under-prediction of a
+    measured pass, applied as a correction."""
+    passes = []
+    for r in runs:
+        for ci in (0, 1):
+            recs = [x for x in r["records"] if x["candidate_index"] == ci]
+            toks = [sum(t["generated_tokens"] for t in x["turns"]) for x in recs]
+            speeds = [t["generated_tokens"] / (t["seconds"] - t["ttft_seconds"]) for x in recs for t in x["turns"]
+                      if t["generated_tokens"] > 1000 and t["seconds"] > t["ttft_seconds"]]
+            passes.append({"run": r["identity"]["run_id"], "pass": ci, "requests": len(recs), "tokens": sum(toks),
+                           "slowest_request_seconds": round(max(sum(t["seconds"] for t in x["turns"]) for x in recs)),
+                           "median_sequence_speed": round(statistics.median(speeds), 1), "_tokens": toks})
+    p1 = [p for p in passes if p["run"] == runs[0]["identity"]["run_id"]]
+    rate = p1[0]["tokens"] / p1[0]["slowest_request_seconds"]
+    rate_low = p1[1]["tokens"] / p1[1]["slowest_request_seconds"]
+    cap = max(p["median_sequence_speed"] for p in passes)
+    for p in passes:
+        p["model_seconds"] = round(ps_seconds(p.pop("_tokens"), rate, cap))
+    corr = max(p["slowest_request_seconds"] / p["model_seconds"] for p in passes)
+    return {"aggregate_tokens_per_second": round(rate), "aggregate_tokens_per_second_conservative": round(rate_low),
+            "sequence_speed_cap": cap, "correction": round(corr, 3), "passes": passes}
+
+
+def generation_forecast(rows: dict, d: dict, *, price: float) -> dict:
+    """The top-up session's minutes and dollars, from its own tasks.
+
+    Each pass is simulated as processor sharing over its requests' generated
+    tokens (`ps_seconds`), then multiplied by the calibration's correction:
+    * EXPECTED: each cell's tasks take its measured per-request token
+      distribution (evenly spaced quantiles of P1 and P1t's first and second
+      candidates), and the second pass holds the share its first candidates
+      measured as rejected;
+    * CONSERVATIVE: every task at its cell's 90th-percentile first-candidate
+      tokens and one at the cell's longest measured request, every task needing
+      a second candidate likewise, and the conservative aggregate throughput.
+    Session phases outside the passes (pod to driver, the contract check, both
+    engine starts, ALL_DONE to the pod deleted) are P1t's measured ones; P1's
+    hard-cap rule is 1.5 x (expected + a closeout reserve of setup + teardown +
+    15 min)."""
+    from stages.reasoning_data import corpus_feasibility as CF
+    from stages.reasoning_data import p1v
+    runs, spec = d["runs"], d["spec"]
+    cal = generation_calibration(runs)
+    tasks = runs[0]["tasks"]
+    per = defaultdict(lambda: {0: [], 1: []})
+    for r in runs:
+        for x in r["records"]:
+            per[p1v.cell_of(tasks[x["task_id"]], spec)][x["candidate_index"]].append(
+                sum(t["generated_tokens"] for t in x["turns"]))
+    acc0 = {}
+    for cell in rows:
+        in_cell = {tid for tid, t in tasks.items() if p1v.cell_of(t, spec) == cell}
+        firsts = [c for r in runs for c in r["got"]["candidates"] if c.unit_id in in_cell and c.candidate_index == 0]
+        acc0[cell] = sum(bool(c.accepted_for_training) for c in firsts) / len(firsts)
+
+    def spread(xs: list[int], k: int) -> list[int]:
+        xs = sorted(xs)
+        return [xs[min(len(xs) - 1, int((i + 0.5) / k * len(xs)))] for i in range(k)]
+
+    exp0, exp1, con0, con1 = [], [], [], []
+    for cell, row in rows.items():
+        k = row["tasks"]["tasks"]
+        first, second = per[cell][0], per[cell][1] or per[cell][0]
+        exp0 += spread(first, k)
+        exp1 += spread(second, round(k * (1 - acc0[cell])))
+        con0 += [pctl(first, 0.9)] * (k - 1) + [max(first)]
+        con1 += [pctl(second, 0.9)] * (k - 1) + [max(second)]
+    p1t = next(r for r in runs if r["identity"]["phase"] == "P1t")["identity"]["run_id"]
+    sess = CF.session_measured(p1t, d["stores"][p1t])
+    tl = A.read_json(A.LOG_DIR / f"runs/{p1t}/runtime/session.json")["timeline"]
+    contract = next(e["elapsed_min"] for e in tl if "MARKER:CONTRACT_OK" in e["msg"]) - sess["pod_to_driver_minutes"]
+    fixed = (sess["pod_to_driver_minutes"] + contract + sum(sess["engine_start_seconds_by_pass"]) / 60
+             + sess["all_done_to_pod_deleted_minutes"])
+    rate = price * sess["all_in_over_gpu"] / 60
+
+    def minutes(p0, p1, agg):
+        return fixed + cal["correction"] * (ps_seconds(p0, agg, cal["sequence_speed_cap"])
+                                            + ps_seconds(p1, agg, cal["sequence_speed_cap"])) / 60
+
+    m_exp = minutes(exp0, exp1, cal["aggregate_tokens_per_second"])
+    m_con = minutes(con0, con1, cal["aggregate_tokens_per_second_conservative"])
+    reserve = (sess["pod_to_driver_minutes"] + sess["all_done_to_pod_deleted_minutes"] + 15) * rate
+    hard = 1.5 * (m_exp * rate + reserve)
+    return {"basis": "A100-SXM4-80GB, the hardware P1 and P1t measured (an L40S session would first need its own "
+                     "decode measurement)", "price_per_hour": price, "calibration": cal,
+            "generated_tokens": {"expected": sum(exp0) + sum(exp1), "conservative": sum(con0) + sum(con1)},
+            "requests": {"expected": [len(exp0), len(exp1)], "conservative": [len(con0), len(con1)]},
+            "fixed_minutes": round(fixed, 1),
+            "session_minutes": {"expected": round(m_exp, 1), "conservative": round(m_con, 1)},
+            "expected_usd": round(m_exp * rate, 2), "conservative_usd": round(m_con * rate, 2),
+            "hard_cap_usd": round(hard, 2), "watchdog_hard_minutes": round(hard / rate, 1),
+            "conservative_fits_the_cap": m_con * rate <= hard}
 
 
 # -- data ---------------------------------------------------------------------
@@ -510,6 +610,142 @@ def seq_metrics(rows: list[dict], sessions: dict[str, dict], tok, *, unit_of, bl
             "supervised_discarded_by_truncation": sum(m["supervised_discarded"] for m in members),
             "truncation": truncation_detail(trunc, sessions, tok),
             "token_mix": {k: round(v / sup, 4) for k, v in sorted(mix.items())}}
+
+
+def packing_stats(rows: list[dict], sessions: dict[str, dict], *, unit_of, axis_of, source_of,
+                  block_len: int = 8192) -> dict:
+    """What the sequential packer actually put together: system-prompt groups,
+    sequences holding several axes, cells or sources, samples per sequence,
+    which axes share sequences, whole-answer retention, a unit never twice in
+    one sequence, and every member traceable to its task, source, axis and unit."""
+    groups, multi = Counter(), Counter()
+    pairs, per_seq, units_per = Counter(), [], []
+    whole = total = twice = traced = 0
+    for r in rows:
+        ms = r["sessions"]
+        groups[r["system_sha256"]] += 1
+        ss = [sessions[m["session_id"]] for m in ms]
+        axes = sorted({axis_of(x) for x in ss})
+        multi["axes"] += len(axes) > 1
+        multi["cells"] += len({m["data_type"] for m in ms}) > 1
+        multi["sources"] += len({source_of(x) for x in ss}) > 1
+        for i, a in enumerate(axes):
+            for b in axes[i + 1:]:
+                pairs[f"{a} + {b}"] += 1
+        per_seq.append(len(ms))
+        u = [unit_of(x) for x in ss]
+        units_per.append(len(set(u)))
+        twice += len(u) != len(set(u))
+        total += len(ms)
+        whole += sum(not m["truncated"] and not m["supervised_discarded"] for m in ms)
+        traced += sum(bool(unit_of(x) and axis_of(x) and source_of(x)) for x in ss)
+    real = sum(r["unpadded_length"] for r in rows)
+    return {"packed_sequences": len(rows), "system_prompt_groups": len(groups),
+            "sequences_with_two_or_more": {"axes": multi["axes"], "cells": multi["cells"], "sources": multi["sources"]},
+            "training_samples_per_sequence": round(sum(per_seq) / len(rows), 2),
+            "units_per_sequence": round(sum(units_per) / len(rows), 2),
+            "samples_per_sequence_distribution": dict(sorted(Counter(per_seq).items())),
+            "axes_sharing_a_sequence": dict(pairs.most_common()),
+            "sequences_holding_one_unit_twice": twice,
+            "padding_ratio": round(1 - real / (len(rows) * block_len), 4),
+            "supervised_tokens": sum(r["supervised_tokens"] for r in rows),
+            "samples_packed_whole": f"{whole}/{total}",
+            "members_traceable_to_task_source_axis_unit": f"{traced}/{total}"}
+
+
+def cmd_pregen(args) -> int:
+    """The pre-generation review (maintainer, 2026-10-24): how the packer
+    really groups, and the top-up session priced from its own tasks; writes the
+    review and the generation application."""
+    stores = {k: Path(v) for k, v in (kv.split("=", 1) for kv in args.store)}
+    d = derive(stores)
+    f_sessions = {s["id"]: s for s in A.jsonl(Path(args.fluid_sessions))}
+    fluid = Path(args.fluid_pack).resolve()
+    f_rows = list(A.jsonl(fluid / "audit.jsonl"))
+    n_e1, _, e1_audit = e1_split()
+    e1_sessions = {s["id"]: s for s in A.jsonl(E1_SESSIONS)}
+    fl = packing_stats(f_rows, f_sessions, unit_of=lambda x: x["unit_id"], axis_of=lambda x: x["stratum"].split("/")[0],
+                       source_of=lambda x: (x.get("attributes") or {}).get("source"))
+    e1 = packing_stats(e1_audit[:n_e1], e1_sessions, unit_of=lambda x: x.get("source_id") or x["id"],
+                       axis_of=lambda x: x["data_type"], source_of=lambda x: x.get("source"))
+    default_key = Counter(r["system_sha256"] for r in f_rows).most_common(1)[0][0]
+    e1_default = [r for r in e1_audit[:n_e1] if r["system_sha256"] == default_key]
+    e1_def = packing_stats(e1_default, e1_sessions, unit_of=lambda x: x.get("source_id") or x["id"],
+                           axis_of=lambda x: x["data_type"], source_of=lambda x: x.get("source"))
+    pad = sum(r["padding_length"] for r in f_rows)
+    joint = {"what": "re-packing E1's default-system-prompt sessions together with the fluid increment",
+             "the_only_shareable_group": "E1's default system prompt is the fluid data's ('You are a helpful "
+                                         "Assistant.'): E1's tool-calling sequences carry their own tool schemas "
+                                         "and can share with nothing",
+             "e1_default_sequences": e1_def["packed_sequences"], "e1_default_padding_ratio": e1_def["padding_ratio"],
+             "fluid_padding_positions": pad,
+             "upper_bound_sequences_saved": pad // 8192,
+             "upper_bound_optimizer_steps_saved": math.ceil(pad // 8192 * EPOCHS / 2),
+             "_bound": "every fluid padding position filled by E1 tokens; E1's default sequences are already this full, "
+                       "so the real saving is smaller",
+             "scientific_cost": "D4-Augmented's E1 part would stop being E1's pack: E1 sessions re-placed, their "
+                                "truncation re-decided (or removed), so D4-Augmented no longer equals D4-Original's "
+                                "training data plus an increment and Comparison B loses its clean attribution; "
+                                "PCA-Original and D4-Original keep E1's pack either way",
+             "recommendation": "keep the two-part layout; the bound is too small to pay that cost"}
+    cap = capacity(d)
+    gap = max(0, RUNG - cap["supervised_tokens"])
+    scen = {"115 tasks: the gap": topup(cap, d, gap=gap, price_a100=args.a100_price),
+            f"{0} tasks: the gap and a {args.reserve:,} reserve": topup(cap, d, gap=gap + args.reserve,
+                                                                        price_a100=args.a100_price)}
+    scen = {k.replace("0 tasks", f"{v['tasks_total']} tasks") if k.startswith("0 ") else k: v for k, v in scen.items()}
+    review = {"schema": "aadistill.stage2.reasoning_data.h1pa_pregen_review/v1",
+              "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+              "code": {"grouping": "aadistill.data.sessions.pack_sessions groups by system_group_key (the rendered "
+                                   "system text and tool schemas) and by nothing else; pack_group fills each "
+                                   "sequence in the given order",
+                       "category_and_source": "read only to ORDER sessions (mixture.interleave) and sequences "
+                                              "(mixture.order_blocks) and to record them in the audit; neither is a "
+                                              "packing boundary",
+                       "same_conversation": "a unit's turns never share a sequence (source_id deferral): one turn "
+                                            "would read another's answer",
+                       "no_category_boundary_found": True},
+              "fluid_increment": fl, "e1_pack_2p96M": e1, "e1_default_prompt_sequences": e1_def,
+              "joint_repacking": joint,
+              "train_validation": "every arm validates on E1's 16 sequences; the fluid tokens past the 2.96M cut are "
+                                  "never trained, and any later fluid validation drawn from them excludes every unit "
+                                  "with a turn inside the cut",
+              "authorizes": "nothing"}
+    out = A.LOG_DIR / "audit/h1pa_pregen_review.json"
+    out.write_text(json.dumps(review, indent=1) + "\n")
+    rows = {}
+    for name, t in scen.items():
+        c = t["cost"]
+        rows[name] = {"tasks": t["tasks_total"], "tasks_by_cell": {k: v["tasks"]["tasks"] for k, v in t["cells"].items()},
+                      "expected_supervised_tokens": t["expected_supervised_tokens"],
+                      "selected_task_ids_sha256": canonical_sha(t["selected_task_ids"]),
+                      "isolation_pass": t["isolation_of_the_selected_tasks"]["pass"],
+                      "generated_tokens": c["generated_tokens"], "session_minutes": c["session_minutes"],
+                      "expected_usd": c["expected_usd"], "conservative_usd": c["conservative_usd"],
+                      "hard_cap_usd": c["hard_cap_usd"], "watchdog_hard_minutes": c["watchdog_hard_minutes"],
+                      "conservative_fits_the_cap": c["conservative_fits_the_cap"]}
+    first = next(iter(scen.values()))
+    app = {"schema": "aadistill.stage2.reasoning_data.topup_application/v2",
+           "written_utc": review["written_utc"],
+           "status": "APPLICATION for the maintainer's decision; NOT authorized, nothing launched",
+           "what": "ONE A100-80GB session generating teacher candidates for unused primary fluid-reasoning tasks under "
+                   "P1's frozen generation protocol, then P1v verification and the no-truncation fluid pack at $0",
+           "requested": next(iter(rows)),
+           "scenarios": rows,
+           "calibration": first["cost"]["calibration"],
+           "unchanged": ["the teacher, sampling, allowance, seeds rule and verifiers of P1 "
+                         "(configs/stages/stage-2/reasoning_data/generation_protocol.json)",
+                         "one unit per task, no repeated prompt or target, R0-R9 isolation on the accepted units",
+                         "P1 and P1t's data: nothing regenerated"],
+           "launch": "NOT built: on a grant, the task list, its generation plan, launch identity and harness digest are "
+                     "built at $0 and the grant names them; the existing launcher, shard securing, teardown and "
+                     "closeout apply unchanged",
+           "authorizes": "nothing"}
+    (A.LOG_DIR / "plans/h1pa_topup_application.json").write_text(json.dumps(app, indent=1) + "\n")
+    print(json.dumps({"fluid": {k: fl[k] for k in ("system_prompt_groups", "sequences_with_two_or_more",
+                                                   "training_samples_per_sequence", "samples_packed_whole")},
+                      "scenarios": rows}, indent=1)[:4000])
+    return 0
 
 
 def _prompt(s: dict) -> str:
@@ -713,8 +949,14 @@ def main(argv=None) -> int:
     a.add_argument("--reserve", type=int, default=150_000,
                    help="an independent fluid validation reserve, priced as an option")
     a.add_argument("--volume-gb", type=int, default=50)
+    g = sub.add_parser("pregen")
+    g.add_argument("--store", action="append", required=True, metavar="RUN_ID=DIR")
+    g.add_argument("--fluid-sessions", required=True)
+    g.add_argument("--fluid-pack", required=True)
+    g.add_argument("--a100-price", type=float, required=True)
+    g.add_argument("--reserve", type=int, default=150_000)
     args = ap.parse_args(argv)
-    return {"sessions": cmd_sessions, "merge": cmd_merge, "audit": cmd_audit}[args.cmd](args)
+    return {"sessions": cmd_sessions, "merge": cmd_merge, "audit": cmd_audit, "pregen": cmd_pregen}[args.cmd](args)
 
 
 if __name__ == "__main__":
