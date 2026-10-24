@@ -765,3 +765,84 @@ signed the grant on 2026-10-25 (`logs/budget/approvals/h1pa_training_grant.json`
 $50 cumulative, the project cap raised to $731, effective once the two fixes
 above were committed.
 
+
+## 14. PA2v executed (2026-10-24 UTC): passed on the fifth attempt, $1.39
+
+Under the maintainer's PA2v/PA2 grant (`logs/budget/approvals/h1pa_training_grant.json`).
+
+**Before anything was created.**
+- **Pre-launch fixes (`534a4037`).**
+  - The provider position fails closed: the balance, the resource listing and
+    both billing queries must each be confirmed.
+  - The training step is priced at max(the committed L40S rate, PA2v's
+    measured median).
+- **Storage.**
+  - Live query 2026-10-24T19:00Z. EU-NL-1, EUR-IS-2, US-MO-1 and US-NC-1 had
+    network-volume support and L40S stock Low.
+  - Volume `am5m373kuq` (30 GB) was created in EUR-IS-2, and the provider
+    reported 30 GB there.
+  - Its record (`storage/h1pa_volume_am5m373kuq.json`) books the $4.20
+    reservation.
+
+**Attempts.** Each attempt is its own one-use authorization, session and
+closeout under `runs/<run>/`. Every pod was confirmed gone, and after each one
+the account held only the volume.
+
+| run | outcome | cost | cause → fix |
+| --- | --- | ---: | --- |
+| `h1pav_20261024_190211` | RUN_FAILED at the plan | $0.1663 | E1's pack was not staged: run O trains D4-Original, but `gpu_validation.units` names only D4-Augmented → `h1pa_launch.input_units` stages every arm `h1pa_validation.RUNS` trains (`c32010ac`) |
+| `h1pav_20261024_191336` | RUN_FAILED at training X1 | $0.1271 | the trainer requires a tokenizer identity pin, which E1's 2.96M configs predate → `h1pa_driver.PINS` adds E1's own recorded `tokenizer_sha256` (`84f1e838`) |
+| `h1pav_20261024_192448` | RUN_FAILED at evaluation packaging | $0.2988 | E1's PCA checkpoint carries its tokenizer files, which the evaluation package refuses → the checkpoint is staged without them, after proving they equal the frozen sidecars (`ef64f5c4`) |
+| `h1pav_20261024_194216` | **passed** | $0.4170 | it left attempt 3's 8.29 GB on the volume (release ran on success only) → PA2v releases its validation bytes on every path, and an earlier attempt's at its start (`f69420f2`); that moved the harness, so PA2v ran again |
+| `h1pav_20261024_201011` | **passed: the gate that funds PA2** | $0.3835 | — |
+
+Detail on the fixes:
+- **Tokenizer pin (attempt 2).**
+  - E1's 2.96M configs loaded their tokenizer from their PCA `student_path`;
+    D4 Top-1 carries none.
+  - The pinned value is `7781771a…`, E1's own recorded identity: its 2.96M
+    runs' `dataset_loaded`, the same value `e1_r0860k_sa_pca.json` pins.
+  - H1's pods resolved the same value from the same tokenizer source on
+    2026-10-23/24.
+  - A diff of E1's keys against the recipe H1 trained with shows no other key
+    missing.
+- **Tokenizer files (attempt 3).**
+  - The formal `evaluate_all` packages the same way, so PCA-Original's formal
+    units would have failed too.
+  - The package supplies byte-identical tokenizer bytes, so nothing evaluated
+    changes.
+- **Regressions.** Every fix has a regression test that fails without it.
+
+**The gate** (`runs/h1pav_20261024_201011/closeout/pa2v_gate.json`) is
+re-derived on the dev box from the secured evidence and bound to study
+`d8a3c15e…` and harness `e1cf874c…`:
+
+| check | result |
+| --- | --- |
+| GPU | NVIDIA L40S, host driver 595.91.07 |
+| memory | peak 38.98 GB (limit 44) |
+| training | X1, X2, Y, O complete and finite; every recipe differs from E1 only by the declared overrides and the pin |
+| resume | Y, killed with SIGKILL after its step-12 save point on the volume and resumed: same data order and learning rate, loss within the run-to-run floor |
+| persistence | Y persisted, read back, re-identified; save point 5,908,260,115 B (plan 5,908,258,491) |
+| PCA checkpoint | seed 20260726 re-identified (`3f08482c…`) |
+| `nucleus_v1` | 48 samples; protocol identity in both summaries; every sample seed the protocol's; token ids and a valid stop reason everywhere |
+| throughput | median step 3.59 s, max 5.19 s; 24 fluid items 196.5 s, 24 gsm8k 66.7 s |
+
+The two passing attempts ran on different pods. They generated exactly the
+same token counts (18,664 fluid, 19,208 gsm8k), so the per-item seeds
+reproduce.
+
+**Pricing for PA2.**
+- **Step time.** max(3.5672, 3.59) = 3.59 s.
+- **Per training.** D4-Original 184.5 min and D4-Augmented 231.5 min, each
+  including 10 fixed minutes.
+- **Per evaluation.** 158.8 min (the conservative forecast) until a formal
+  evaluation is measured.
+- **First seed session.** Expected 922 min ($16.76 GPU); all-in hard bound
+  $26.8583; hard cap $26.86.
+- **Whether the study fits.** After PA2v the envelope holds $44.41.
+  - The second session can be issued only if one full evaluation takes at
+    most about 140 min.
+  - The recorded L40S full evaluations took at most 79 min.
+  - That is decided on the first session's measured evaluations, before the
+    second session is issued.
