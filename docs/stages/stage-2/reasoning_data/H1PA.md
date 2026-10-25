@@ -972,23 +972,51 @@ existed, and nothing in it changed.
   - Inductive rule discovery, compositional generalization and abstract
     analogical: 0–2 correct per unit.
 
-**Beside the decision, descriptive only:**
+**All of eval-set-1, beside the decision (descriptive only).** Every unit of
+eval-set-1 was generated for all six units. Correct and usable are given side by
+side over each unit's formal items; no pooled score is made.
 
-| | PCA-O 0726 | PCA-O 0801 | D4-O 0726 | D4-O 0801 | D4-A 0726 | D4-A 0801 |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| deduction, unseen rule (/142) | 5 | 5 | 5 | 3 | 24 | 21 |
-| deduction, unseen format (/47) | 1 | 1 | 2 | 2 | 2 | 4 |
-| other static axes (/381) | 3 | 0 | 0 | 0 | 1 | 0 |
-| interactive, exploratory (/144) | 0 | 0 | 0 | 0 | 2 | 2 |
-| math_verified | 1% | 0% | 2% | 2% | 0% | 4% |
-| gsm8k | 1% | 4% | 2% | 1% | 2% | 1% |
-| multihop | 7% | 7% | 5% | 9% | 12% | 11% |
-| rag | 2% | 4% | 6% | 6% | 9% | 7% |
-| answerability (pair) | 0% | 1.7% | 1.7% | 0% | 1.7% | 1.7% |
-| safety (pair) | 0% | 2% | 0% | 2% | 0% | 4% |
-| eval_behavior: natural termination | 92% | 91% | 74% | 88% | 83% | 80% |
-| knowledge (supplementary) | 0.7% | 0% | 1.3% | 0.7% | 1.3% | 2.7% |
-| legacy_150 (in-sample only) | 30 | 29 | 24 | 33 | 33 | 35 |
+    PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.reasoning_data.h1pa_fullset \
+      --evidence artifacts/stages/stage-2/reasoning_data/h1pa/units/evidence
+
+- correct: the registered formal scores (scorer v2) in each unit's
+  `formal_report.json`.
+- usable: `aadistill.evaluation.usable_rollout` on every stored reply. For the
+  fluid items it comes from `score_battery.py --protocol v2` re-run on the
+  stored generations, which reproduces the pod's per-item correctness exactly.
+  For the stage3_capability units it is the same check applied post hoc.
+- instruction and short_realtime have no registered correctness; format_ok is
+  given in its place.
+- Fluid all-720 correctness equals the formal-714 figure in every unit: none
+  of the 6 items the validity mask excludes was answered correctly.
+
+| eval-set-1 unit (formal n) | measure | PCA-O 0726 | PCA-O 0801 | D4-O 0726 | D4-O 0801 | D4-A 0726 | D4-A 0801 |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| **fluid static (570)** | correct / usable % | 1.6 / 59.3 | 1.1 / 47.4 | 1.2 / 64.4 | 0.9 / 64.2 | 4.7 / 75.4 | 4.4 / 64.0 |
+| deduction (189) | correct / usable % | 3.2 / 70.9 | 3.2 / 56.1 | 3.7 / 64.0 | 2.6 / 74.1 | 13.8 / 80.4 | 13.2 / 64.6 |
+| ↳ deduction, unseen rule (142) | correct (count) | 5 | 5 | 5 | 3 | 24 | 21 |
+| ↳ deduction, unseen format (47) | correct (count) | 1 | 1 | 2 | 2 | 2 | 4 |
+| inductive rule discovery (142) | correct / usable % | 0.7 / 48.6 | 0.0 / 43.0 | 0.0 / 81.0 | 0.0 / 73.9 | 0.0 / 76.1 | 0.0 / 75.4 |
+| compositional generalization (144) | correct / usable % | 1.4 / 59.0 | 0.0 / 38.9 | 0.0 / 52.1 | 0.0 / 50.0 | 0.7 / 68.8 | 0.0 / 59.0 |
+| abstract analogical (95) | correct / usable % | 0.0 / 52.6 | 0.0 / 49.5 | 0.0 / 58.9 | 0.0 / 51.6 | 0.0 / 74.7 | 0.0 / 53.7 |
+| **interactive episodes (144)**, exploratory | success / all-turns-usable % | 0.0 / 0.7 | 0.0 / 2.1 | 0.0 / 6.2 | 0.0 / 4.2 | 1.4 / 11.8 | 1.4 / 10.4 |
+| math_verified (100) | correct / usable % | 1.0 / 67.0 | 0.0 / 52.0 | 2.0 / 78.0 | 2.0 / 65.0 | 0.0 / 66.0 | 4.0 / 62.0 |
+| gsm8k (100) | correct / usable % | 1.0 / 92.0 | 4.0 / 94.0 | 2.0 / 96.0 | 1.0 / 93.0 | 2.0 / 93.0 | 1.0 / 95.0 |
+| multihop (100) | correct / usable % | 7.0 / 90.0 | 7.0 / 85.0 | 5.0 / 79.0 | 9.0 / 83.0 | 12.0 / 89.0 | 11.0 / 94.0 |
+| ↳ multihop | evidence recall | 0.22 | 0.23 | 0.15 | 0.16 | 0.26 | 0.23 |
+| rag (100) | correct / usable % | 2.0 / 100.0 | 4.0 / 96.0 | 6.0 / 95.0 | 6.0 / 99.0 | 9.0 / 99.0 | 7.0 / 99.0 |
+| ↳ rag | evidence attributed | 0.31 | 0.25 | 0.36 | 0.48 | 0.45 | 0.48 |
+| answerability (60 pairs / 120 rows) | pairs correct / pairs both-usable % | 0.0 / 96.7 | 1.7 / 91.7 | 1.7 / 90.0 | 0.0 / 98.3 | 1.7 / 95.0 | 1.7 / 100.0 |
+| ↳ answerability | rows usable % · answerable_correct | 98.3 · 0.25 | 95.8 · 0.33 | 95.0 · 0.30 | 99.2 · 0.33 | 97.5 · 0.35 | 100.0 · 0.38 |
+| safety (50 pairs / 100 rows) | pairs correct / pairs both-usable % | 0.0 / 10.0 | 2.0 / 16.0 | 0.0 / 30.0 | 2.0 / 46.0 | 0.0 / 38.0 | 4.0 / 40.0 |
+| ↳ safety | rows usable % · benign_correct | 32.0 · 0.26 | 37.0 · 0.20 | 54.0 · 0.42 | 70.0 · 0.76 | 58.0 · 0.54 | 62.0 · 0.70 |
+| tool_calling (5) | exact match / usable (count) | 4 / 5 | 4 / 5 | 3 / 5 | 4 / 5 | 3 / 5 | 3 / 5 |
+| instruction (12) | format_ok / usable %, no registered correctness | 91.7 / 58.3 | 91.7 / 50.0 | 50.0 / 33.3 | 58.3 / 58.3 | 41.7 / 41.7 | 58.3 / 58.3 |
+| short_realtime (10) | format_ok / usable %, no registered correctness | 100.0 / 40.0 | 90.0 / 20.0 | 40.0 / 40.0 | 70.0 / 70.0 | 50.0 / 50.0 | 40.0 / 40.0 |
+| protocol integrity, eval_behavior (65) | natural termination / usable % | 92.3 / 76.9 | 90.8 / 69.2 | 73.8 / 70.8 | 87.7 / 86.2 | 83.1 / 80.0 | 80.0 / 80.0 |
+| knowledge, TriviaQA (150), outside the formal core | correct / usable % | 0.7 / 23.3 | 0.0 / 21.3 | 1.3 / 70.0 | 0.7 / 72.7 | 1.3 / 59.3 | 2.7 / 72.7 |
+| legacy_150 (150), in-sample only | correct / usable % | 20.0 / 88.7 | 19.3 / 87.3 | 16.0 / 93.3 | 22.0 / 88.7 | 22.0 / 89.3 | 23.3 / 92.0 |
+| stop reason, every reply of every item | eos / degeneration / context limit | 2023 / 340 / 0 | 2000 / 395 / 0 | 1607 / 485 / 0 | 1949 / 419 / 6 | 1420 / 395 / 44 | 1436 / 440 / 42 |
 
 What the table shows:
 - **Where B's deduction difference is.** It sits in the shared generators'
@@ -1000,9 +1028,14 @@ What the table shows:
   episodes in the held-out `act.modular` family. hidden_buttons is the
   generator whose `act.reverse` family supplies most of the increment's
   interactive data. Valid queries have a median of 0 in every unit.
-- **D4-Original against PCA.** It terminates naturally less often on several
-  units (eval_behavior 74% / 88% against 92% / 91%) without a correctness
-  difference. Natural termination is a guard rail, never a reasoning result.
+- **D4-Original against PCA.** Correctness differs by a few items at most on
+  every set. Usable is higher for D4-Original on most sets (fluid static 64%
+  against 47–59%, knowledge 70–73% against 21–23%, safety rows 54–70% against
+  32–37%) and lower on multihop (79–83% against 85–90%). On eval_behavior it
+  terminates naturally less often on seed 20260726 (74% against 92%).
+  Usable and natural termination are guard rails, never reasoning results.
+- **Context limit.** D4-Augmented reaches the 8,192-token context on 44 and 42
+  replies (right-censored under P18); the other arms on 0–6.
 
 **Reading.**
 - Primary label: INCONCLUSIVE (FLOOR_A). It authorizes nothing.
