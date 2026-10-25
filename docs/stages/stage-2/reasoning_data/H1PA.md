@@ -883,4 +883,147 @@ first session, under `h1pa_launch.pricing`:
   and the $35.49 the live provider position left.
 
 **PA2-s20260801** (`runs/h1pa2_20261025_055042`, pod `kqfz2osp8ps8jv`):
-running since 2026-10-25T05:51Z.
+COMPLETE, 557.7 min, $10.3232 of its $20.00 hard cap. The teardown gate
+passed, the provider confirms the pod gone, the watchdog ended on `pod_gone`,
+and the account held only the volume afterwards (`closeout/outcome.json`).
+
+| unit | execution | training | evaluation | checkpoint |
+| --- | --- | ---: | ---: | --- |
+| PCA-Original-s20260801 | evaluate (E1 run `sb`, step 2916) | — | 2653.1 s | `b658fe39…` (relay copy, not re-persisted) |
+| D4-Original-s20260801 | train + evaluate | 10216.5 s | 2718.2 s | `f1db9feb…`, on the volume |
+| D4-Augmented-s20260801 | train + evaluate | 13385.3 s | 3917.1 s | `2cbbee9e…`, on the volume |
+
+Again one attempt per unit from its untrained state, and every unit passes
+`h1pa_analysis.unit_evidence`. All six units are one complete endpoint each;
+nothing was retried, resumed or pooled.
+
+**Records.**
+- Evidence tarballs: on the relay at
+  `AlphaAvatar/aadistill-artifacts :: stage2_h1pa/units/evidence/<unit>.evidence.tgz`
+  (commit `eda7141b`). Each tarball's LFS sha256 equals its closeout's
+  `outcome.json :: evidence`.
+- Extracted evidence: on the dev box at
+  `artifacts/stages/stage-2/reasoning_data/h1pa/units/evidence/`.
+- In git (`logs/stages/stage-2/reasoning_data/units/<unit>/`): reports,
+  descriptors, attempt journals, formal reports and per-sample rows. The rows
+  carry ids, scores and reasons, never completion text. The generations stay
+  out of git, because the safety units' completions answer unsafe prompts.
+
+**Money.** All figures are against the $50.00 phase ceiling.
+
+| item | amount |
+| --- | ---: |
+| PA2v, five attempts | $1.3927 |
+| PA2-s20260726 | $10.2715 |
+| PA2-s20260801 | $10.3232 |
+| storage reserved | $4.20 |
+| **booked** | **$26.1874** |
+| **remaining** | **$23.8126** |
+
+- Project committed: $706.8547 of the $731.00 cap (`h1pa_governance.remaining_envelope`).
+- Provider check (`logs/budget/provider/runpod_billing_2026-10-25T1512Z.json`):
+  - every H1-PA pod's billed amount is within $0.005 of its record;
+  - the exception is PA2-s20260801, where 500.9 of 557.7 billed minutes had
+    posted when the snapshot was fetched, three minutes after teardown;
+  - the records are the booking.
+- The volume costs $2.10/month. About $0.10 had posted at the snapshot.
+
+## 16. Result (2026-10-25, $0)
+
+    PYTHONPATH=src:scripts:scripts/stages/stage-1 .venv/bin/python -m stages.reasoning_data.h1pa_analysis \
+      --evidence artifacts/stages/stage-2/reasoning_data/h1pa/units/evidence
+
+The analysis writes `logs/stages/stage-2/reasoning_data/analyses/h1pa_result.json`.
+Two runs agreed byte for byte apart from `written_utc`. The rule is the
+preregistered one, bound by sha256. It was applied once, after all six units
+existed, and nothing in it changed.
+
+**Decision** (formal static fluid correctness, 570 items × 2 seeds, under
+`nucleus_v1`; the delta is the second arm minus the first):
+
+| comparison | rates | delta | 95% CI | per seed | label |
+| --- | --- | ---: | --- | --- | --- |
+| **B** (primary): D4-Augmented − D4-Original | 1.05% → 4.56% | +3.51 pp | +1.89 to +5.15 | +3.51 / +3.51 | **INCONCLUSIVE**, flag FLOOR_A |
+| A: D4-Original − PCA-Original | 1.32% → 1.05% | −0.26 pp | −0.79 to +0.25 | −0.35 / −0.18 | **NOT_RESOLVED**, flag FLOOR |
+| C (descriptive): D4-Augmented − PCA-Original | 1.32% → 4.56% | +3.25 pp | +1.75 to +4.70 | +3.16 / +3.33 | no label |
+
+- **B.** The interval crosses the 5 pp SESOI and both per-seed estimates lie
+  below it: no decision either way. That means neither a meaningful gain
+  claimed nor one excluded.
+  - FLOOR_A: the comparator, D4-Original, is below the 2% floor, so NO_GO was
+    not available.
+  - Resolution: 58 discordant item-seed pairs in 13 informative clusters.
+  - B is the effect of the fluid increment together with its 786 extra
+    optimizer steps (2,916 → 3,702) and 1.27x training FLOPs (9.07e17 →
+    1.152e18). It is never the data content's isolated effect.
+- **A.** Both arms are below the 2% floor. The evaluation did not
+  discriminate the two initializations under E1's recipe (21 discordant
+  pairs, 12 clusters). This is neither equivalence nor an excluded gain.
+
+**Per axis** (SESOI 8 pp, Holm over the four static axes):
+- B, task-contained deduction: INCONCLUSIVE.
+  - Rates 3.17% → 13.49%, +10.3 pp, CI +5.3 to +15.3, seeds +10.1 / +10.6.
+  - The interval crosses the SESOI, and no Holm-adjusted gain survives.
+- A, task-contained deduction: NO_GO.
+  - Both arms 3.17%, delta 0.0 pp, CI −1.3 to +1.3, seeds +0.5 / −0.5.
+  - Both arms are above the floor on this axis, so a meaningful difference on
+    it is excluded at this scale.
+- Every other axis, in both comparisons: NOT_RESOLVED (FLOOR).
+  - Inductive rule discovery, compositional generalization and abstract
+    analogical: 0–2 correct per unit.
+
+**Beside the decision, descriptive only:**
+
+| | PCA-O 0726 | PCA-O 0801 | D4-O 0726 | D4-O 0801 | D4-A 0726 | D4-A 0801 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| deduction, unseen rule (/142) | 5 | 5 | 5 | 3 | 24 | 21 |
+| deduction, unseen format (/47) | 1 | 1 | 2 | 2 | 2 | 4 |
+| other static axes (/381) | 3 | 0 | 0 | 0 | 1 | 0 |
+| interactive, exploratory (/144) | 0 | 0 | 0 | 0 | 2 | 2 |
+| math_verified | 1% | 0% | 2% | 2% | 0% | 4% |
+| gsm8k | 1% | 4% | 2% | 1% | 2% | 1% |
+| multihop | 7% | 7% | 5% | 9% | 12% | 11% |
+| rag | 2% | 4% | 6% | 6% | 9% | 7% |
+| answerability (pair) | 0% | 1.7% | 1.7% | 0% | 1.7% | 1.7% |
+| safety (pair) | 0% | 2% | 0% | 2% | 0% | 4% |
+| eval_behavior: natural termination | 92% | 91% | 74% | 88% | 83% | 80% |
+| knowledge (supplementary) | 0.7% | 0% | 1.3% | 0.7% | 1.3% | 2.7% |
+| legacy_150 (in-sample only) | 30 | 29 | 24 | 33 | 33 | 35 |
+
+What the table shows:
+- **Where B's deduction difference is.** It sits in the shared generators'
+  held-out rule families ("unseen rule"). The evaluation-only generators
+  ("unseen format") barely move.
+- **What that means.** The augmented arm improves where its training
+  generators reach. This is not evidence of transfer to an unseen task format.
+- **Interactive episodes.** All four D4-Augmented successes are hidden_buttons
+  episodes in the held-out `act.modular` family. hidden_buttons is the
+  generator whose `act.reverse` family supplies most of the increment's
+  interactive data. Valid queries have a median of 0 in every unit.
+- **D4-Original against PCA.** It terminates naturally less often on several
+  units (eval_behavior 74% / 88% against 92% / 91%) without a correctness
+  difference. Natural termination is a guard rail, never a reasoning result.
+
+**Reading.**
+- Primary label: INCONCLUSIVE (FLOOR_A). It authorizes nothing.
+- Every absolute rate is low:
+  - the best unit solves 4.6% of the static items;
+  - three of the four static axes are near zero in every arm.
+- The preregistration allowed this terminal state. Nothing here is reread as
+  a gain, an equivalence or a reason to change the rule, the evaluation set or
+  the decoding.
+
+**Checkpoints.**
+- Retention and audit. The four new D4 checkpoints (9.54 GB, digests in
+  `storage/h1pa_volume_am5m373kuq.json :: contents_after_pa2`) stay on volume
+  `am5m373kuq` until the maintainer's independent review. The record's
+  `consumer_audit` finds no launcher, setup, plan or driver that reads them;
+  the analysis reads evidence only.
+- Proposal (`:: proposal`).
+  - After the review, retire them under AGENTS.md 2.5 with tombstones and
+    delete the volume.
+  - Alternatively, if a follow-up is authorized, it reads them in place in
+    EUR-IS-2.
+  - A migration to the relay is not recommended: there is no consumer, and
+    HF private headroom is ~2 GB.
+- The two PCA-Original checkpoints are E1's, on the relay, untouched.

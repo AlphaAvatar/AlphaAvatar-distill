@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-25 (UTC), 06:05Z. The human view. Every number here has an owner
+**Updated:** 2026-10-25 (UTC), 15:50Z. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,21 +9,31 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**H1-PA: PA2v PASSED; PA2 SEED 20260726 COMPLETE; PA2 SEED 20260801 RUNNING (2026-10-25 UTC).** Granted by the maintainer
+**H1-PA: PA2v + PA2 COMPLETE; PREREGISTERED RESULT INCONCLUSIVE (FLOOR_A) (2026-10-25 UTC).** Granted by the maintainer
 (`logs/budget/approvals/h1pa_training_grant.json`: $50.00 cumulative over PA2v + PA2, project cap $731).
 Owner: [`docs/stages/stage-2/reasoning_data/H1PA.md`](../../docs/stages/stage-2/reasoning_data/H1PA.md)
-sections 12-15, `configs/stages/stage-2/reasoning_data/h1pa.json`.
-- **Running:** `runs/h1pa2_20261025_055042`, PA2-s20260801 (PCA-Original evaluate, D4-Original and
-  D4-Augmented train + evaluate), one L40S pod `kqfz2osp8ps8jv` in EUR-IS-2 at $1.09/h, hard cap $20.00; launcher in
-  tmux `h1pa2s2`, log `artifacts/stages/stage-2/reasoning_data/h1pa/h1pa2_20261025_055042/launch.log`.
-- **Done:** `runs/h1pa2_20261024_203226` (PA2-s20260726) COMPLETE, $10.2715 of its $26.86; its three
-  units' evidence secured, both new checkpoints persisted on the volume (`closeout/outcome.json`).
-- **Storage:** network volume `am5m373kuq` (30 GB, EUR-IS-2), `storage/h1pa_volume_am5m373kuq.json`
-  ($4.20 reserved); the four new checkpoints are kept until the analysis and the review.
-- **PA2v:** five attempts, $1.39 (H1PA.md section 14); the gate
-  `runs/h1pav_20261024_201011/closeout/pa2v_gate.json` passed under harness `e1cf874c`, study `d8a3c15e`.
-- **Next:** session 2's closeout; the preregistered analysis over all six units
-  (`h1pa_analysis.py`); cost reconciliation; checkpoint consumer audit and retention proposal.
+sections 14-16, `analyses/h1pa_result.json`.
+Nothing is running and nothing is billing apart from the retained volume `am5m373kuq` ($2.10/month, booked in its
+storage record): 0 pods (provider query 2026-10-25 15:09Z, `runs/h1pa2_20261025_055042/closeout/outcome.json ::
+provider_reconciliation_after`).
+- **Result** (static fluid correctness, 570 items x 2 seeds, `nucleus_v1`):
+  - B (primary, D4-Augmented - D4-Original): +3.51 pp, CI +1.89 to +5.15 → INCONCLUSIVE, flag FLOOR_A;
+  - A (D4-Original - PCA-Original): both below the 2% floor → NOT_RESOLVED (FLOOR);
+  - C is descriptive.
+  - Interactive episodes are exploratory.
+  - Every absolute rate is low (best unit 4.6%). It authorizes nothing.
+- **Done:** six formal units, one attempt each, in `runs/h1pa2_20261024_203226` ($10.2715) and
+  `runs/h1pa2_20261025_055042` ($10.3232); both pods deleted, provider confirms gone.
+  - Evidence: relay `stage2_h1pa/units/evidence/`, dev box `artifacts/.../h1pa/units/evidence/`.
+  - Reports and rows: git `units/<unit>/`.
+- **Money:** phase $26.1874 of $50 ($21.9874 sessions + $4.20 reserved storage); project $706.8547 of $731
+  (`h1pa_governance.remaining_envelope`). Provider snapshot `runpod_billing_2026-10-25T1512Z.json`.
+- **Storage:** volume `am5m373kuq` (30 GB, EUR-IS-2, $2.10/month) holds the four D4 checkpoints (9.54 GB).
+  - They are kept until the maintainer's independent review.
+  - Consumer audit and retirement proposal: `storage/h1pa_volume_am5m373kuq.json`.
+- **PA2v:** five attempts, $1.39 (H1PA.md section 14).
+- **Next:** the maintainer's independent scientific review; then the checkpoints' lifecycle decision.
+  Nothing paid runs, and nothing is merged, without a new maintainer decision.
 
 **STAGE-2/3 H1: ANNULLED FOR PROMOTION (maintainer, 2026-10-24; `plans/h1_annulment.json`). As executed: P1g PASSED, P2's FOUR FORMAL UNITS COMPLETE; THE FROZEN DECISION WAS NOT_RESOLVED (FLOOR).**
 Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).
@@ -4200,7 +4210,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$649.4718` spent of `$712.1700`, leaving `$62.6982` |
+| project cap | `$670.0665` spent of `$712.1700`, leaving `$42.1035` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

@@ -136,7 +136,8 @@ def main(argv=None) -> int:
     doc = analyse(Path(args.evidence))
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(doc, indent=1, default=str) + "\n")
-    print(OUT.relative_to(A.REPO), {k: v.get("label") for k, v in doc["decision"]["comparisons"].items()})
+    print(OUT.relative_to(A.REPO), {k: (v.get("primary") or v).get("label")
+                                    for k, v in doc["decision"]["comparisons"].items()})
     return 0
 
 

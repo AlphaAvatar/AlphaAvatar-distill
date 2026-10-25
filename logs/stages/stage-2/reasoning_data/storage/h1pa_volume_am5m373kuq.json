@@ -19,6 +19,66 @@
  "consumer": "H1-PA PA2v and PA2: the durable root <mount>/h1pa -- the four new checkpoints, a training's save points while it runs, the evaluation progress and evidence",
  "retention": "the four new checkpoints are kept until the preregistered analysis and the maintainer's independent scientific review are complete (h1pa.json :: retention; grant :: storage); then a consumer audit and a migration or retirement proposal go to the maintainer; no AGENTS.md 2.5 automatic retirement before then",
  "retire_by": "2026-12-24 at the end of the reservation, or by the maintainer's lifecycle decision; keeping it past the reservation is booked here first",
+ "cost_to_date": {
+  "provider_observed_usd": 0.1021,
+  "_provider_observed": "logs/budget/provider/runpod_billing_2026-10-25T1512Z.json :: networkvolumes, the 2026-10-24 ($0.0525) and 2026-10-25 ($0.0496, partial day) rows; the provider's volume rows carry no volume id, and am5m373kuq is the account's only network volume since H1's 1980hnh75i was retired on 2026-10-24, so the 2026-10-24 row may still include part of that volume's last day",
+  "run_rate_usd_per_month": 2.1,
+  "_run_rate": "30 GB x $0.07/GB-month, billed on the provisioned size, not the bytes on it",
+  "booked": "reserved_usd stays the booking until the volume is retired; then actual_usd replaces it"
+ },
+ "contents_after_pa2": {
+  "members": [
+   {
+    "path": "<mount>/h1pa/D4-Original-s20260726/checkpoint",
+    "kind": "formal student weights (fp32)",
+    "bytes": 2384236592,
+    "artifact_digest": "09ea0c57c4d89e4949a2e21707ed8ac2eb6f4501ec6aa2fac653a6dcab6d8788",
+    "weights_digest": "76880fa5c5018b9ec0e3e9943abf914f3ff9cd989bfc399ccf63eb859b01785b",
+    "identity_record": "logs/stages/stage-2/reasoning_data/units/D4-Original-s20260726/checkpoint.descriptor.json"
+   },
+   {
+    "path": "<mount>/h1pa/D4-Augmented-s20260726/checkpoint",
+    "kind": "formal student weights (fp32)",
+    "bytes": 2384236592,
+    "artifact_digest": "6889b9c97c0d16f0e17e0f746857701e195b40304c27cebf10dfd6da12fc13f7",
+    "weights_digest": "411e4ff76ae7f001cbb382db5410085135af6955926a7ea29810d2c7be3b78c4",
+    "identity_record": "logs/stages/stage-2/reasoning_data/units/D4-Augmented-s20260726/checkpoint.descriptor.json"
+   },
+   {
+    "path": "<mount>/h1pa/D4-Original-s20260801/checkpoint",
+    "kind": "formal student weights (fp32)",
+    "bytes": 2384236592,
+    "artifact_digest": "f1db9febdd8d66dcb29c35649a428d3fe92661941851a6f9bdb55c94946b93d9",
+    "weights_digest": "c8259e9f8f2ff1be075a3ad95d16a0d4d98c2757538dda43d8e836d310596f6b",
+    "identity_record": "logs/stages/stage-2/reasoning_data/units/D4-Original-s20260801/checkpoint.descriptor.json"
+   },
+   {
+    "path": "<mount>/h1pa/D4-Augmented-s20260801/checkpoint",
+    "kind": "formal student weights (fp32)",
+    "bytes": 2384236592,
+    "artifact_digest": "2cbbee9ea52b27db3258fa4bb945159dc0375431edfdb0ce60c074543191702a",
+    "weights_digest": "be5f48ab4f39d91379a91785519e9594457edec33adcd69e7e665bd9b6e3a57b",
+    "identity_record": "logs/stages/stage-2/reasoning_data/units/D4-Augmented-s20260801/checkpoint.descriptor.json"
+   }
+  ],
+  "bytes": 9536946368,
+  "save_points": "none: the driver released each training's save points after its checkpoint was persisted and re-identified (units/<unit>/attempts.jsonl :: released)",
+  "other": "evaluation progress and evidence per unit (bounded by h1pa.json :: storage.bytes.evaluation_per_unit_bound); every unit's evidence is also on the relay and the dev box",
+  "_basis": "the persisted-unit descriptors and the attempt journals; the volume was not re-listed (no pod is running)"
+ },
+ "consumer_audit": {
+  "audited_utc": "2026-10-25T15:40Z",
+  "launchers_setups_plans_drivers": "none reads them: h1pa_launch stages only E1's packs and the PCA-Original checkpoints from the relay (h1pa.json :: relay_inputs); h1pa_driver writes <mount>/h1pa/<unit>/checkpoint and reads it back only to evaluate the unit it trained; no other script, config or plan names <mount>/h1pa",
+  "analysis": "h1pa_analysis reads the six units' evidence only (reports, rows, generation summaries, formal reports), never weights",
+  "declared": "the maintainer's independent scientific review (h1pa.json :: retention.new_checkpoints): KEEP until it is complete",
+  "protected_elsewhere": "the two PCA-Original checkpoints are E1's, on the relay, not on this volume; never retrained or deleted"
+ },
+ "proposal": {
+  "status": "PROPOSED, for the maintainer after the independent review; nothing is deleted or moved before then",
+  "recommended": "keep on am5m373kuq until the review closes (inside the $4.20 reservation, to 2026-12-24); then (a) if no authorized follow-up reads the weights, retire them under AGENTS.md 2.5 with tombstones carrying the digests above and delete the volume; (b) if a follow-up is authorized (for example Stage-3 recovery from D4-Augmented), that experiment mounts the volume in EUR-IS-2 and reads them in place, without a migration",
+  "not_recommended": "migrating to the HF relay now: 4 x 2.38 GB = 9.54 GB against private storage that accepted only ~2 GB on 2026-10-22 (plans/durability_plan.json), and it needs a pod in EUR-IS-2 to read the volume; no consumer requires it",
+  "cost_of_keeping": "$2.10/month; reserved through 2026-12-24"
+ },
  "actual_usd": null,
  "authorizes": "nothing"
 }

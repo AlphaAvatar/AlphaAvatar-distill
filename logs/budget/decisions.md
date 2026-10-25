@@ -14004,3 +14004,45 @@ on a paid pod.
   migration and cost are reported before any lifecycle decision.
 - **Revisit when.** The maintainer signs the PA2v + PA2 grant ($50 cumulative,
   project cap $731), then PA2v runs first.
+
+## 2026-10-25 — H1-PA PA2v + PA2 executed under the maintainer's grant; the preregistered result is INCONCLUSIVE (FLOOR_A)
+
+- **Context.** The maintainer granted PA2v + PA2: $50.00 cumulative over the
+  phase, project cap $712.17 → $731.00
+  (`logs/budget/approvals/h1pa_training_grant.json`). It became effective
+  after the two $0 fixes (live position fails closed; step time = max of the
+  committed and the PA2v-measured value).
+- **Executed.** Owner: `docs/stages/stage-2/reasoning_data/H1PA.md` §14–16.
+  - PA2v passed on its fifth attempt ($1.3927 over five subruns).
+  - PA2-s20260726 (`runs/h1pa2_20261024_203226`): COMPLETE, $10.2715.
+  - PA2-s20260801 (`runs/h1pa2_20261025_055042`): COMPLETE, $10.3232.
+  - Each was one L40S pod in EUR-IS-2 with volume `am5m373kuq`, and was
+    deleted afterwards with the provider confirming it gone.
+  - Six formal units, one attempt each; nothing retried, resumed or pooled.
+- **Result.** `analyses/h1pa_result.json`, the preregistered rule applied
+  once:
+  - B (primary, D4-Augmented − D4-Original): +3.51 pp, 95% CI +1.89 to +5.15,
+    per seed +3.51 / +3.51 → INCONCLUSIVE, flag FLOOR_A;
+  - A (D4-Original − PCA-Original): −0.26 pp, both arms below the 2% floor →
+    NOT_RESOLVED (FLOOR);
+  - C (descriptive): +3.25 pp;
+  - per axis: B deduction INCONCLUSIVE (+10.3 pp, concentrated in the shared
+    generators' held-out families), A deduction NO_GO, the other axes
+    NOT_RESOLVED (FLOOR);
+  - interactive episodes (exploratory): 0/144 except D4-Augmented 2/144 per
+    seed.
+- **Money.** The phase booked $26.1874 of $50.00: $21.9874 in sessions plus
+  $4.20 reserved storage. Project committed: $706.8547 of $731.00. The
+  provider snapshot `runpod_billing_2026-10-25T1512Z.json` agrees within
+  $0.005 per pod; PA2-s20260801's last 57 minutes had not posted yet.
+- **Checkpoints.** The four D4 checkpoints (9.54 GB) are kept on
+  `am5m373kuq` until the independent review, at $2.10/month. The consumer
+  audit found no reader beyond the review.
+  - Proposal (`storage/h1pa_volume_am5m373kuq.json :: proposal`): retire them
+    under AGENTS.md 2.5 and delete the volume after the review, unless an
+    authorized follow-up reads them in place.
+  - The two PCA-Original checkpoints stay on the relay.
+- **Not done, not authorized.** New Teacher Generation, ratio search, extra
+  arms, Stage 4/5, a merge to `main`.
+- **Revisit when.** The maintainer's independent scientific review closes;
+  then a lifecycle decision for the four checkpoints and the volume.

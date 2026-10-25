@@ -1,0 +1,61 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.persisted_unit/v2",
+ "unit": "D4-Augmented-s20260726",
+ "kind": "checkpoint",
+ "started_utc": "2026-10-25T04:46:00Z",
+ "source": "/runpod-volume/h1pa/D4-Augmented-s20260726/train/a1/checkpoints/step_003702/model",
+ "artifact_digest": "6889b9c97c0d16f0e17e0f746857701e195b40304c27cebf10dfd6da12fc13f7",
+ "weights_digest": "411e4ff76ae7f001cbb382db5410085135af6955926a7ea29810d2c7be3b78c4",
+ "config_sha256": "cb757e8976462bce6037c24d74ed20b56fca5825f4198f3e1d6d6e7aa211e453",
+ "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+ "num_parameters": 596049920,
+ "tokenizer_sha256": null,
+ "inputs": {
+  "arm": "D4-Augmented",
+  "seed": 20260726,
+  "formal": true,
+  "execution": "train",
+  "evaluation": {
+   "set": "eval-set-1",
+   "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+   "trained_context": 8192,
+   "action_protocol": "v2",
+   "decoding": {
+    "path": "configs/shared/evaluation/decoding/nucleus_v1.json",
+    "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"
+   }
+  },
+  "preregistration_sha256": "ae67279d15cddab4c14798313177d4554b8e585745cfd9b8f0afa8a42655261f",
+  "initialization_artifact_digest": "457e194c4a40c2503a7d63d03269ac76ece700102bae74908b7315d367bab3f0",
+  "initialization_weights_digest": "73589c58a439bf32b4ddbf975ac245cd6b916745d5e0712ae4cf32ae158a6d0f",
+  "pack_blocks_sha256": "8b97b202e2c1f861fe5c99e3a247ce7fdd063c354b7668ddc1ba75fedb8043f3",
+  "recipe_sha256": "6f80a6b7cbd12dc0930003d6339b675d2d524975d238ad91c99ea28f5a077b3b",
+  "schedule": {
+   "rung": 5923021,
+   "total_steps": 3702,
+   "warmup_steps": 185,
+   "eval_every": 462,
+   "save_every": 1851
+  }
+ },
+ "destination": "/runpod-volume/h1pa/D4-Augmented-s20260726/checkpoint",
+ "persisted": true,
+ "finished_utc": "2026-10-25T04:46:15Z",
+ "bytes": 2384236592,
+ "verified": {
+  "path": "/runpod-volume/h1pa/D4-Augmented-s20260726/checkpoint.partial",
+  "artifact_digest": "6889b9c97c0d16f0e17e0f746857701e195b40304c27cebf10dfd6da12fc13f7",
+  "recorded_digest": "6889b9c97c0d16f0e17e0f746857701e195b40304c27cebf10dfd6da12fc13f7",
+  "matched": true,
+  "weights_digest": "411e4ff76ae7f001cbb382db5410085135af6955926a7ea29810d2c7be3b78c4",
+  "weights_digest_matched": true,
+  "config_sha256": "cb757e8976462bce6037c24d74ed20b56fca5825f4198f3e1d6d6e7aa211e453",
+  "config_matched": true,
+  "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+  "num_parameters": 596049920,
+  "single_shard_sha256": "2e9834e7f16e371b801c8ad1a7fdf5306b2a38d83b1ed94f80016644b70dd346",
+  "shard_matched": false,
+  "tokenizer_sha256": null,
+  "total_bytes": 2384234968
+ }
+}

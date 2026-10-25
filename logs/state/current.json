@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. H1-PA PA2 is executing under the maintainer's grant (logs/budget/approvals/h1pa_training_grant.json). Owner: docs/stages/stage-2/reasoning_data/H1PA.md (section 14).",
+ "blocker": "BLOCKED NO. H1-PA is terminal (B INCONCLUSIVE, FLOOR_A); the maintainer's independent scientific review and the D4 checkpoints' lifecycle decision come next, and nothing paid runs before a new maintainer decision. Owner: docs/stages/stage-2/reasoning_data/H1PA.md (section 16).",
  "branch": "stage2/reasoning-data, cut from main 2a8bae78 (the Stage-0 squash, 2026-10-21)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -32,7 +32,7 @@
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 712.17,
-  "cumulative_spend_usd": 649.4718,
+  "cumulative_spend_usd": 670.0665,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 62.6982,
+  "remaining_usd": 42.1035,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-25T06:05:00Z",
+ "generated_utc": "2026-10-25T15:50:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,10 +123,10 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "H1-PA: close PA2-s20260801 (PA2-s20260726 COMPLETE, $10.2715), then the preregistered analysis over the six units. Owner: docs/stages/stage-2/reasoning_data/H1PA.md (sections 14-15). 34 pods ($58.33) stay OPEN.",
+ "next": "H1-PA COMPLETE: B INCONCLUSIVE (FLOOR_A), A NOT_RESOLVED (FLOOR); phase $26.1874 of $50. Next: the maintainer's independent review, then the lifecycle decision for the four D4 checkpoints (storage/h1pa_volume_am5m373kuq.json :: proposal). Owner: H1PA.md sections 14-16. 34 pods ($58.33) stay OPEN.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "H1-PA (H1PA.md section 12): frozen; PA2v, then the three arms' training and evaluation, on a grant.",
+  "next_work": "H1-PA COMPLETE (H1PA.md section 16): the maintainer's independent review, then the D4 checkpoints' lifecycle decision.",
   "not_next": "no paid resource without a new maintainer decision. Owner: decisions.md 2026-10-21 (Stage-2/3 round opened at $0).",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D-series CLOSED 2026-10-17 (D1 NO-GO, D2 NO_GO, D3 STRUCTURAL_CHANGE + INCONCLUSIVE probes); forward baseline D1 + scored_v1.",
   "then": "nothing else is queued; the Stage-0 mixture ratio is DEFERRED (never run)."
@@ -197,12 +197,11 @@
   "docs/stages/stage-2/reasoning_data/H1.md -- the live round (H1)"
  ],
  "running": {
-  "paid_compute": true,
-  "pods": 1,
+  "paid_compute": false,
+  "pods": 0,
   "network_volumes": 1,
-  "run": "logs/stages/stage-2/reasoning_data/runs/h1pa2_20261025_055042 (H1-PA PA2-s20260801, L40S, hard cap $20.00)",
-  "volume": "am5m373kuq (storage/h1pa_volume_am5m373kuq.json)",
-  "pod_id": "kqfz2osp8ps8jv"
+  "run": null,
+  "volume": "am5m373kuq (storage/h1pa_volume_am5m373kuq.json): the four H1-PA D4 checkpoints, kept until the independent review"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

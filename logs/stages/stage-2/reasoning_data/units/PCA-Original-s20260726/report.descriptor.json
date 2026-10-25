@@ -1,0 +1,16 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.persisted_unit/v2",
+ "unit": "PCA-Original-s20260726",
+ "kind": "report",
+ "started_utc": "2026-10-24T21:18:44Z",
+ "files": [
+  {
+   "name": "report.json",
+   "sha256": "a00373e14de5a7e7f368a0bbf7fc37d63f1b10098a03463c9b9ca4fcb0045844",
+   "bytes": 35836
+  }
+ ],
+ "destination": "/runpod-volume/h1pa/PCA-Original-s20260726/report",
+ "persisted": true,
+ "finished_utc": "2026-10-24T21:18:44Z"
+}

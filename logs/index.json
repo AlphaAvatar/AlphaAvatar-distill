@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 146,
+  "runs_unrecorded": 147,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -856,8 +856,8 @@
    },
    "reasoning_data": {
     "recorded": 0,
-    "unrecorded": 14,
-    "total": 14
+    "unrecorded": 15,
+    "total": 15
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -3886,9 +3886,17 @@
    "experiment_id": "reasoning_data",
    "run_id": "h1pa2_20261024_203226",
    "root": "logs/stages/stage-2/reasoning_data/runs/h1pa2_20261024_203226",
-   "n_files": 2,
-   "digest": "9e84c69aece68d0d8599801ce967d0e4b8db09d06c0a076ddf1f46d1fea5ec42",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "n_files": 3,
+   "digest": "5e755375522551947eac8357e20e1d1bc6ddce436fc9ef5f43895a7c973c3298",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1pa2_20261025_055042",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1pa2_20261025_055042",
+   "n_files": 3,
+   "digest": "57bd89bd6fbb48250c3c546d7c9a1a9f9952d97494b61d5ff9f55cc71bce3e9e",
+   "why": "no run manifest; its closeout states: COMPLETE"
   },
   {
    "experiment_id": "reasoning_data",

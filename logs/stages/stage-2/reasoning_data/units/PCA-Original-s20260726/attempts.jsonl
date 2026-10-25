@@ -1,0 +1,2 @@
+{"action": "evaluate", "attempt": 1, "commit": "b0e2bbefa5be8dbb9000441b8e11076967ec8e9d+dirty", "event": "start", "formal": true, "replacement_of": null, "resumed_from": null, "run_id": "h1pa2_20261024_203226", "state_at_start": "unevaluated", "utc": "2026-10-24T20:39:19Z"}
+{"action": "evaluate", "attempt": 1, "commit": "b0e2bbefa5be8dbb9000441b8e11076967ec8e9d+dirty", "event": "end", "formal": true, "outcome": "complete", "run_id": "h1pa2_20261024_203226", "state_at_start": "unevaluated", "utc": "2026-10-24T21:18:44Z"}
