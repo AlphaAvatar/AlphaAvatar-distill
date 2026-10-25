@@ -846,3 +846,41 @@ reproduce.
   - The recorded L40S full evaluations took at most 79 min.
   - That is decided on the first session's measured evaluations, before the
     second session is issued.
+
+## 15. PA2 executed (2026-10-24/25 UTC)
+
+Two formal sessions, one per seed, each under its own one-use authorization
+funded by the PA2v gate `h1pav_20261024_201011` and run under harness
+`e1cf874c…`, study `d8a3c15e…`. One L40S pod at a time in EUR-IS-2 at $1.09/h,
+volume `am5m373kuq`.
+
+**PA2-s20260726** (`runs/h1pa2_20261024_203226`, pod `1svnlzof00rp95`):
+COMPLETE, 554.9 min, $10.2715 of its $26.86 hard cap. The teardown gate
+passed, the provider confirms the pod gone, and the account held only the
+volume afterwards (`closeout/outcome.json`).
+
+| unit | execution | training | evaluation | checkpoint |
+| --- | --- | ---: | ---: | --- |
+| PCA-Original-s20260726 | evaluate (E1 run `sa`, step 2916) | — | 2362.2 s | `3f08482c…` (relay copy, not re-persisted) |
+| D4-Original-s20260726 | train + evaluate | 10325.6 s | 2983.6 s | `09ea0c57…`, on the volume |
+| D4-Augmented-s20260726 | train + evaluate | 13501.9 s | 3667.7 s | `6889b9c9…`, on the volume |
+
+Each unit ran one attempt from its untrained state. Each unit's evidence
+passes `h1pa_analysis.unit_evidence`: its report's inputs equal what the
+driver derives from the frozen study, and every generation summary carries
+the preregistered `nucleus_v1` identity. The pod's checkout reports
+`+dirty` only because setup switches `pyproject.toml`'s torch wheel index
+from CPU to cu128 (H1's records carry the same); HEAD was the session commit.
+
+**Repricing for PA2-s20260801.** It uses the saved measurements of the
+first session, under `h1pa_launch.pricing`:
+- evaluation: the slowest measured full evaluation (3667.7 s) x 1.25 = 76.4 min;
+- training: max(3.59 s x steps + 10 min, the arm's measured full training):
+  D4-Original max(184.5, 172.1) = 184.5 min and D4-Augmented max(231.5,
+  225.0) = 231.5 min;
+- expected 675.2 min ($12.27 GPU), hard terminate 1079.1 min, all-in hard
+  bound $19.9952: hard cap $20.00, inside the $34.14 the phase envelope held
+  and the $35.49 the live provider position left.
+
+**PA2-s20260801** (`runs/h1pa2_20261025_055042`, pod `kqfz2osp8ps8jv`):
+running since 2026-10-25T05:51Z.

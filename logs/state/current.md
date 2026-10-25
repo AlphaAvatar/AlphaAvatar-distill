@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-24 (UTC), 20:45Z. The human view. Every number here has an owner
+**Updated:** 2026-10-25 (UTC), 06:05Z. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,21 +9,21 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**H1-PA: PA2v PASSED; PA2 SEED 20260726 RUNNING (2026-10-24 UTC).** Granted by the maintainer
+**H1-PA: PA2v PASSED; PA2 SEED 20260726 COMPLETE; PA2 SEED 20260801 RUNNING (2026-10-25 UTC).** Granted by the maintainer
 (`logs/budget/approvals/h1pa_training_grant.json`: $50.00 cumulative over PA2v + PA2, project cap $731).
 Owner: [`docs/stages/stage-2/reasoning_data/H1PA.md`](../../docs/stages/stage-2/reasoning_data/H1PA.md)
-sections 12-14, `configs/stages/stage-2/reasoning_data/h1pa.json`.
-- **Running:** `runs/h1pa2_20261024_203226`, PA2-s20260726 (PCA-Original evaluate, D4-Original and
-  D4-Augmented train + evaluate), one L40S pod `1svnlzof00rp95` in EUR-IS-2 at $1.09/h, hard cap $26.86; launcher in
-  tmux `h1pa2s1`, log `artifacts/stages/stage-2/reasoning_data/h1pa/h1pa2_20261024_203226/launch.log`.
+sections 12-15, `configs/stages/stage-2/reasoning_data/h1pa.json`.
+- **Running:** `runs/h1pa2_20261025_055042`, PA2-s20260801 (PCA-Original evaluate, D4-Original and
+  D4-Augmented train + evaluate), one L40S pod `kqfz2osp8ps8jv` in EUR-IS-2 at $1.09/h, hard cap $20.00; launcher in
+  tmux `h1pa2s2`, log `artifacts/stages/stage-2/reasoning_data/h1pa/h1pa2_20261025_055042/launch.log`.
+- **Done:** `runs/h1pa2_20261024_203226` (PA2-s20260726) COMPLETE, $10.2715 of its $26.86; its three
+  units' evidence secured, both new checkpoints persisted on the volume (`closeout/outcome.json`).
 - **Storage:** network volume `am5m373kuq` (30 GB, EUR-IS-2), `storage/h1pa_volume_am5m373kuq.json`
   ($4.20 reserved); the four new checkpoints are kept until the analysis and the review.
-- **PA2v:** five attempts, $1.39 (H1PA.md section 14); three engineering failures fixed with
-  regressions; the gate `runs/h1pav_20261024_201011/closeout/pa2v_gate.json` passed under harness
-  `e1cf874c`, study `d8a3c15e`.
-- **Next:** session 1's closeout; reprice PA2-s20260801 from its measured evaluations (it fits
-  the envelope if a full evaluation takes at most ~140 min); then the second seed, the
-  preregistered analysis, reconciliation and cleanup.
+- **PA2v:** five attempts, $1.39 (H1PA.md section 14); the gate
+  `runs/h1pav_20261024_201011/closeout/pa2v_gate.json` passed under harness `e1cf874c`, study `d8a3c15e`.
+- **Next:** session 2's closeout; the preregistered analysis over all six units
+  (`h1pa_analysis.py`); cost reconciliation; checkpoint consumer audit and retention proposal.
 
 **STAGE-2/3 H1: ANNULLED FOR PROMOTION (maintainer, 2026-10-24; `plans/h1_annulment.json`). As executed: P1g PASSED, P2's FOUR FORMAL UNITS COMPLETE; THE FROZEN DECISION WAS NOT_RESOLVED (FLOOR).**
 Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).

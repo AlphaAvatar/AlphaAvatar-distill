@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-24T20:45:00Z",
+ "generated_utc": "2026-10-25T06:05:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "H1-PA: close PA2-s20260726, reprice and run PA2-s20260801, then the preregistered analysis. Owner: docs/stages/stage-2/reasoning_data/H1PA.md (section 14). 34 pods ($58.33) stay OPEN.",
+ "next": "H1-PA: close PA2-s20260801 (PA2-s20260726 COMPLETE, $10.2715), then the preregistered analysis over the six units. Owner: docs/stages/stage-2/reasoning_data/H1PA.md (sections 14-15). 34 pods ($58.33) stay OPEN.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "H1-PA (H1PA.md section 12): frozen; PA2v, then the three arms' training and evaluation, on a grant.",
@@ -200,9 +200,9 @@
   "paid_compute": true,
   "pods": 1,
   "network_volumes": 1,
-  "run": "logs/stages/stage-2/reasoning_data/runs/h1pa2_20261024_203226 (H1-PA PA2-s20260726, L40S, hard cap $26.86)",
+  "run": "logs/stages/stage-2/reasoning_data/runs/h1pa2_20261025_055042 (H1-PA PA2-s20260801, L40S, hard cap $20.00)",
   "volume": "am5m373kuq (storage/h1pa_volume_am5m373kuq.json)",
-  "pod_id": "1svnlzof00rp95"
+  "pod_id": "kqfz2osp8ps8jv"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {
