@@ -9,7 +9,7 @@ and 6 will appear the same way, and are not pre-created.
 
 | stage | what it is | its own work | experiments | runs |
 | --- | --- | --- | --- | --- |
-| [`stage-0/`](stage-0/) | Initialization warm-up data collection | 1 pipeline activity · 3 configs · 1 data manifest | 1, all with logs | 38 |
+| [`stage-0/`](stage-0/) | Initialization warm-up data collection | 1 pipeline activity · 3 configs · 1 data manifest | 1, all with logs | 42 |
 | [`stage-1/`](stage-1/) | Projection and structural initialization | 4 pipeline activities · 18 configs · 1 data manifest | 15, all with logs | 232 |
 | [`stage-2/`](stage-2/) | Offline warm-up data collection | 1 pipeline activity · 2 configs · 3 data manifests | 1, all with logs | 15 |
 | [`stage-3/`](stage-3/) | Student recovery | 3 pipeline activities · 13 configs · 1 data manifest | 15, of which 5 produced no logs of their own | 0 |
