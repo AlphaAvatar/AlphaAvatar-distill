@@ -1,11 +1,9 @@
 # Mixed calibration 2×: design recommendation and execution application
 
-**Status (2026-10-26): design v2, $0; nothing paid is authorized or issued.**
-No pod, GPU or network volume has been created for it. Execution needs the
-maintainer's grant **and** a project cap the maintainer sets; the $740 in the
-application is provisional and is re-verified against the provider's billing
-at issuance (section 9). The application covers **2× only**; 4× is outside this
-round (section 6).
+**Status (2026-10-26): GRANTED and EXECUTING.** The maintainer granted MC1 + MC2 with a cumulative $33.05 and the
+project cap $731 → $740, 2× only ([grant](../../../../logs/budget/approvals/mixed_calibration_grant.json)). Every
+paid session is issued by `mixed_governance.py` against the provider's bill read at that moment (section 12). MC1 (the
+search) is running; MC2 follows the Top-1's read-back. 4× is outside this round, and nothing starts it.
 
 This page owns the reading. The numbers are owned by the records it cites:
 - design: [`mixed_design_v2.json`](../../../../configs/stages/stage-0/calibration_volume/mixed_design_v2.json);
@@ -520,3 +518,46 @@ The builder:
 It is deterministic given the pool, corpus_v2, the H1-PA packs and eval-set-1.
 It was checked under two hash seeds, with byte-identical items. The superseded
 v1 profiles are rebuilt only from commit `6e2887ca`.
+
+## 12. Execution (2026-10-26)
+
+**Governance.** `scripts/stages/stage-0/calibration_volume/mixed_governance.py` holds:
+- one grant, one cumulative envelope, and one-use authorizations of kind `search` (MC1) or `recovery` (MC2);
+- the project position, recomputed from the provider's billing, balance and resources at every issue and every launch.
+
+The position counts:
+- everything billed;
+- unposted sessions inside a 72 h posting window;
+- every retained volume's booked reservation, less what the provider has already posted for that volume.
+
+**How posted volume rows are attributed.** The provider's volume rows carry no volume id. A day's row is netted
+against a volume only on a UTC day when it was the account's sole recorded volume, and never beyond size × the hours
+it existed that day.
+
+**Why so conservatively.** The 2026-10-23..26 rows show billed hours that the volumes' own lifetimes cannot account for:
+- H1's `1980hnh75i` existed 15.4 h and was billed 20 h;
+- one 30 GB volume can accrue at most 720 GB-h a day, but the 10-25 row is 870 GB-h;
+- the 10-24 row mixes both volumes.
+
+Those excess hours stay in the bill and offset nothing.
+
+**Cap checks.**
+- At the first funded issue: committed + the whole remaining envelope ≤ $740.
+- Afterwards: committed + that session's cap ≤ $740.
+
+A miss is a HARD BOUNDARY, and no cap is raised. At 10:28Z the committed figure was $706.9114, and with the whole
+envelope $739.96.
+
+**MC1** (`mixed_search_driver.py`): `search_driver.py` under the pinned search identity (cuda config hash
+`7ee23a7d…`) with D4's execution options, mirrored to the 150 GB volume `t6yrsvujha` (EUR-IS-1). It then commits
+k = 1, re-identifies the Top-1 and relays it.
+- **Attempt 1** (`mixs_20261026_102914`, $0.1903) died at A_contract before any measurement. Its authorization had
+  been issued after the session commit, so the pod's checkout never held it.
+  - Repaired by committing the authorization as the session commit.
+  - A new $0 precheck, `the_authorization_is_in_the_session_commit`, refuses this at launch.
+- **Attempt 2** is `mixs_20261026_103634`.
+
+**MC2** (`mixed_recovery_driver.py`): `h1pa_driver.run` with D4-Augmented copied whole and only the initialization
+replaced. Each unit's recipe must hash to D4-Augmented's recorded identity for its seed.
+
+The result is decided by `mixed_analysis.py`, which has already been rehearsed on stand-in evidence.
