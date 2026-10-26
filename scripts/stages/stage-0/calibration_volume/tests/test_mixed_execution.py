@@ -234,9 +234,18 @@ def _fake_ctx_store(tmp_path: Path, phase: str) -> tuple[Path, Path]:
     else:
         st.mkdir(parents=True)
         (st / "driver.status").write_text("x MARKER:ALL_DONE\n")
+        import tarfile
+        src = tmp_path / "unit"
+        (src / "report").mkdir(parents=True)
+        (src / "evaluation/rows").mkdir(parents=True)
+        (src / "evaluation/generations").mkdir(parents=True)
+        (src / "report/report.json").write_text("{}")
+        (src / "evaluation/rows/fluid_reasoning_720__dev_v1.rows.jsonl").write_text("{}\n")
+        (src / "evaluation/generations/x.jsonl").write_text("a reply\n")
         t = st / "Mix-Augmented-s20260726.evidence.tgz"
-        t.write_bytes(b"evidence")
-        t.with_suffix(".sha256").write_text(hashlib.sha256(b"evidence").hexdigest() + "\n")
+        with tarfile.open(t, "w:gz") as tf:
+            tf.add(src, arcname=".")
+        t.with_suffix(".sha256").write_text(hashlib.sha256(t.read_bytes()).hexdigest() + "\n")
     return root, scr
 
 
@@ -247,8 +256,16 @@ def test_success_closeouts_execute_before_any_paid_success(tmp_path, phase, disk
                       reconcile=lambda: {"ok": True, "why": "stub"})
     assert out["status"] == "COMPLETE" and out["money"]["gpu_usd"] == 5.5
     assert out["money"]["all_in_usd"] == pytest.approx(5.5 + disk * 0.10 * 200 / (60 * 24 * 30.4375), abs=1e-4)
+    landed = ML.land_evidence(phase, out["run_id"], scr, repo_root=root)
     if phase == "MC2":
         assert out["files"]["Mix-Augmented-s20260726.evidence.tgz"]["verified"] is True
+        assert landed == {"landed": ["Mix-Augmented-s20260726"]}
+        log = root / ML.UNITS_LOG / "Mix-Augmented-s20260726"
+        assert (log / "report.json").is_file() and (log / "evaluation/rows/fluid_reasoning_720__dev_v1.rows.jsonl").is_file()
+        assert not list(log.rglob("generations*")), "a generation never goes into git"
+        assert (root / ML.EVIDENCE_MIX / "Mix-Augmented-s20260726/evaluation/generations/x.jsonl").is_file()
+    else:
+        assert "mc1/mixed_search_record.json" in landed["landed"]
     assert json.loads((root / MG.run_dir(out["run_id"]) / "closeout/outcome.json").read_text())["phase"] == phase
 
 

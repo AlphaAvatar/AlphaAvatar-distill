@@ -660,6 +660,53 @@ def closeout(phase: str, run_id: str, scr: Path, *, repo_root: Path = REPO_ROOT,
     return out
 
 
+UNITS_LOG = Path("logs/stages/stage-0/calibration_volume/units")
+EVIDENCE_MIX = Path("artifacts/stages/stage-0/calibration_volume/mixed/units/evidence")
+#: small, reviewable records that go into git; journals, telemetry and generations stay in the store
+SMALL = 2_000_000
+
+
+def land_evidence(phase: str, run_id: str, scr: Path, repo_root: Path = REPO_ROOT) -> dict:
+    """MC1: the search records and the Top-1 manifest into the run's evidence/ (the journal
+    and telemetry stay in the store, hashed in the closeout). MC2: each verified unit archive
+    extracted to the artifacts root the analysis reads, and its report, descriptors, attempts,
+    formal report and per-item rows into units/<unit>/ -- never a generation, which may
+    complete an unsafe prompt."""
+    import shutil
+    import tarfile
+    st, landed = Path(scr) / "store", []
+    if phase == "MC1":
+        ev = repo_root / MG.run_dir(run_id) / "evidence"
+        for f in sorted(st.rglob("*.json")):
+            if f.stat().st_size <= SMALL:
+                (ev / f.relative_to(st)).parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(f, ev / f.relative_to(st))
+                landed.append(str(f.relative_to(st)))
+        return {"landed": landed}
+    out = json.loads((repo_root / MG.run_dir(run_id) / "closeout/outcome.json").read_text())
+    for t in sorted(st.glob("*.evidence.tgz")):
+        if not out["files"].get(t.name, {}).get("verified"):
+            continue
+        unit = t.name.removesuffix(".evidence.tgz")
+        dest = repo_root / EVIDENCE_MIX / unit
+        shutil.rmtree(dest, ignore_errors=True)
+        dest.mkdir(parents=True)
+        with tarfile.open(t) as tf:
+            tf.extractall(dest, filter="data")
+        log = repo_root / UNITS_LOG / unit
+        shutil.rmtree(log, ignore_errors=True)
+        keep = ["report/report.json", "attempts.jsonl", "checkpoint.descriptor.json", "evaluation.descriptor.json",
+                "report.descriptor.json", "training.descriptor.json", "evaluation/formal_report.json"]
+        keep += [str(p.relative_to(dest)) for p in sorted((dest / "evaluation/rows").glob("*.rows.jsonl"))]
+        for k in keep:
+            if (dest / k).is_file():
+                target = log / (Path(k).name if k == "report/report.json" else k)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(dest / k, target)
+        landed.append(unit)
+    return {"landed": landed}
+
+
 # ---- the command line -----------------------------------------------------------------------------------------
 
 def build_launch_parser(ap: argparse.ArgumentParser) -> None:
@@ -754,6 +801,7 @@ def main(argv=None) -> int:
         return launch(a)
     elif a.cmd == "closeout":
         print(json.dumps(closeout(a.phase, a.run_id, Path(a.scr), disk_gb=a.disk_gb)["money"]))
+        print(json.dumps(land_evidence(a.phase, a.run_id, Path(a.scr))))
     elif a.cmd == "read-back":
         print(read_back_top1(Path(a.store)))
     elif a.cmd == "retire-volume":
