@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Mixed Calibration 2x GRANTED 2026-10-26 ($33.05 cumulative, project cap $740, 2x only; logs/budget/approvals/mixed_calibration_grant.json). MC1 (search) RUNNING. Owner: docs/stages/stage-0/calibration_volume/MIXED.md.",
+ "blocker": "BLOCKED NO. Mixed Calibration 2x GRANTED 2026-10-26 ($33.05 cumulative, project cap $740, 2x only; logs/budget/approvals/mixed_calibration_grant.json). MC1 COMPLETE ($6.4246, Top-1 9311dcde read back); MC2 RUNNING. Owner: docs/stages/stage-0/calibration_volume/MIXED.md.",
  "branch": "stage2/reasoning-data, cut from main 2a8bae78 (the Stage-0 squash, 2026-10-21)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "MC1 to its terminal state, the Top-1 read back, the MC1 volume retired; then MC2 (two Mix-Augmented recoveries + eval-set-1) inside the grant. H1-PA review and the D4 checkpoints' retention: storage/h1pa_volume_am5m373kuq.json. 34 pods ($58.33) stay OPEN.",
+ "next": "MC2 (two Mix-Augmented recoveries + eval-set-1) to its terminal state, then mixed_analysis.py. H1-PA review and the D4 checkpoints' retention: storage/h1pa_volume_am5m373kuq.json. 34 pods ($58.33) stay OPEN.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "MC1 then MC2 of the mixed-calibration 2x study (mixed_launch.py), inside the grant",
@@ -199,9 +199,9 @@
  "running": {
   "paid_compute": true,
   "pods": 1,
-  "network_volumes": 2,
-  "pod_id": "z90fahqwqrlgb0",
-  "run": "MC1 mixs_20261026_103634 (A100-80GB EUR-IS-1, cap $15; volume t6yrsvujha)",
+  "network_volumes": 1,
+  "pod_id": "ntluvkf9fod0ec",
+  "run": "MC2 mixr_20261026_140539 (L40S EUR-IS-2 on am5m373kuq, cap $14); MC1 COMPLETE",
   "volume": "am5m373kuq: the four D4 checkpoints, D4-Augmented x2 the mixed study's formal control (storage record)"
  },
  "schema": "aadistill.current_state/v2",

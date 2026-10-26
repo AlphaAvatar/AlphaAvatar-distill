@@ -15,13 +15,13 @@ Grant: `logs/budget/approvals/mixed_calibration_grant.json` (maintainer 2026-10-
 project cap $731 -> $740, 2x only, nothing starts 4x). Governance and the corrected project position:
 `scripts/stages/stage-0/calibration_volume/mixed_governance.py` (provider read at every issue and launch).
 - **Profile** `calib.s0m_mix_2x@v2` (71,216 + 71,216 UESP, content `9a6c2782...`), unchanged.
-- **MC1 live:** run `mixs_20261026_103634`, pod `z90fahqwqrlgb0` billing (A100-SXM4-80GB, EUR-IS-1, $1.79/h, hard cap
-  $15, the watchdog's hard stop at 494 min), volume `t6yrsvujha` (150 GB, `runs/mixvol_20261026_102835`). Store:
-  `/home/ecs-user/aad-artifacts/stage0_calvol/mixs_20261026_103634/` (launcher in tmux `mixmc1`). Attempt 1
-  (`mixs_20261026_102914`, $0.1903) died at A_contract before any measurement: its authorization was not in the session
-  commit; repaired by committing it and a new $0 precheck.
-- **Then:** Top-1 relayed and read back -> MC1 volume retired -> MC2 (`mixed_launch.py launch MC2`, L40S on
-  `am5m373kuq`) -> `mixed_analysis.py`.
+- **MC1 COMPLETE** ($6.4246 in all: attempt 1 `mixs_20261026_102914` $0.1903, died at A_contract before any
+  measurement; attempt 2 `mixs_20261026_103634` $6.1817, 34 expansions; volume $0.0526, deleted). Top-1 `9311dcde...`,
+  path DEPTH->ATTENTION->FFN->RESIDUAL_WIDTH, relayed and read back (`assets/mix_top1_materialization.json`).
+- **MC2 live:** run `mixr_20261026_140539`, pod `ntluvkf9fod0ec` billing (L40S, EUR-IS-2, $1.09/h, hard cap $14, hard
+  stop 751 min) on `am5m373kuq`; launcher in tmux `mixmc2`, store
+  `/home/ecs-user/aad-artifacts/stage0_calvol/mixr_20261026_140539/`.
+- **Then:** `mixed_analysis.py` (the preregistered M decision and every capability apart).
 - **Checkpoints:** the four D4 checkpoints stay on `am5m373kuq`; D4-Augmented x2 are the formal control.
 
 **H1-PA: PA2v + PA2 COMPLETE; PREREGISTERED RESULT INCONCLUSIVE (FLOOR_A) (2026-10-25 UTC).** Granted by the maintainer
