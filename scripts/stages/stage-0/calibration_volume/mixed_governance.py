@@ -216,10 +216,10 @@ def spent(repo_root: Path = REPO) -> dict:
         sess = json.loads(sess_p.read_text()) if sess_p.is_file() else {}
         out = json.loads(out_p.read_text()) if out_p.is_file() else None
         if sess.get("kind") == "network_volume":
-            usd = (out or {}).get("money", {}).get("all_in_usd")
+            deleted = (out or {}).get("status") == "VOLUME_DELETED"
+            usd = (out or {}).get("money", {}).get("all_in_usd") if deleted else sess["reserved_usd"]
             storage.append({"run_id": d.name, "volume": sess["volume_id"], "phase": sess.get("phase"),
-                            "usd": float(usd if usd is not None else sess["reserved_usd"]),
-                            "basis": "actual" if usd is not None else "reserved"})
+                            "usd": float(usd), "basis": "actual" if deleted else "reserved"})
             continue
         auth_p = d / "governance/authorization.json"
         phase = (json.loads(auth_p.read_text()).get("stage_conditions") or {}).get("phase") if auth_p.is_file() else None
@@ -288,7 +288,8 @@ def volume_records(repo_root: Path = REPO) -> list[dict]:
         tomb = run / "closeout/tombstone.json"
         out_p = run / "closeout/outcome.json"
         deleted = json.loads(tomb.read_text()).get("deleted_utc") if tomb.is_file() else None
-        actual = (json.loads(out_p.read_text()).get("money") or {}).get("all_in_usd") if out_p.is_file() else None
+        oc = json.loads(out_p.read_text()) if out_p.is_file() else {}
+        actual = (oc.get("money") or {}).get("all_in_usd") if oc.get("status") == "VOLUME_DELETED" else None
         out.append({"volume": d["volume_id"], "size_gb": float(d["size_gb"]), "created": _utc(d["created_utc"]),
                     "deleted": _utc(deleted), "reserved_usd": float(d.get("reserved_usd") or 0.0),
                     "actual_usd": actual, "record": str(p.relative_to(root))})

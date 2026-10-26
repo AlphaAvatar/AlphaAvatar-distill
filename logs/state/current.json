@@ -32,7 +32,7 @@
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 712.17,
-  "cumulative_spend_usd": 670.0665,
+  "cumulative_spend_usd": 671.3068,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 42.1035,
+  "remaining_usd": 40.8632,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -200,7 +200,8 @@
   "paid_compute": true,
   "pods": 1,
   "network_volumes": 2,
-  "run": "MC1 mixs_20261026_102914 (pod 6cy5fhf4q1tru0, A100-80GB EUR-IS-1, cap $15; volume t6yrsvujha 150 GB, runs/mixvol_20261026_102835)",
+  "pod_id": "z90fahqwqrlgb0",
+  "run": "MC1 mixs_20261026_103634 (A100-80GB EUR-IS-1, cap $15; volume t6yrsvujha)",
   "volume": "am5m373kuq: the four D4 checkpoints, D4-Augmented x2 the mixed study's formal control (storage record)"
  },
  "schema": "aadistill.current_state/v2",

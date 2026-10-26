@@ -15,9 +15,11 @@ Grant: `logs/budget/approvals/mixed_calibration_grant.json` (maintainer 2026-10-
 project cap $731 -> $740, 2x only, nothing starts 4x). Governance and the corrected project position:
 `scripts/stages/stage-0/calibration_volume/mixed_governance.py` (provider read at every issue and launch).
 - **Profile** `calib.s0m_mix_2x@v2` (71,216 + 71,216 UESP, content `9a6c2782...`), unchanged.
-- **MC1 live:** run `mixs_20261026_102914`, pod `6cy5fhf4q1tru0` (A100-SXM4-80GB, EUR-IS-1, $1.79/h, hard cap $15, the
-  watchdog's hard stop at 494 min), volume `t6yrsvujha` (150 GB, `runs/mixvol_20261026_102835`). Store:
-  `/home/ecs-user/aad-artifacts/stage0_calvol/mixs_20261026_102914/` (launcher in tmux `mixmc1`).
+- **MC1 live:** run `mixs_20261026_103634`, pod `z90fahqwqrlgb0` billing (A100-SXM4-80GB, EUR-IS-1, $1.79/h, hard cap
+  $15, the watchdog's hard stop at 494 min), volume `t6yrsvujha` (150 GB, `runs/mixvol_20261026_102835`). Store:
+  `/home/ecs-user/aad-artifacts/stage0_calvol/mixs_20261026_103634/` (launcher in tmux `mixmc1`). Attempt 1
+  (`mixs_20261026_102914`, $0.1903) died at A_contract before any measurement: its authorization was not in the session
+  commit; repaired by committing it and a new $0 precheck.
 - **Then:** Top-1 relayed and read back -> MC1 volume retired -> MC2 (`mixed_launch.py launch MC2`, L40S on
   `am5m373kuq`) -> `mixed_analysis.py`.
 - **Checkpoints:** the four D4 checkpoints stay on `am5m373kuq`; D4-Augmented x2 are the formal control.
@@ -26,9 +28,9 @@ project cap $731 -> $740, 2x only, nothing starts 4x). Governance and the correc
 (`logs/budget/approvals/h1pa_training_grant.json`: $50.00 cumulative over PA2v + PA2, project cap $731).
 Owner: [`docs/stages/stage-2/reasoning_data/H1PA.md`](../../docs/stages/stage-2/reasoning_data/H1PA.md)
 sections 14-16, `analyses/h1pa_result.json`.
-Nothing is running and nothing is billing apart from the retained volume `am5m373kuq` ($2.10/month, booked in its
-storage record): 0 pods (provider query 2026-10-25 15:09Z, `runs/h1pa2_20261025_055042/closeout/outcome.json ::
-provider_reconciliation_after`).
+H1-PA itself runs and bills nothing apart from its retained volume `am5m373kuq` ($2.10/month, booked in its storage
+record; provider query 2026-10-25 15:09Z, `runs/h1pa2_20261025_055042/closeout/outcome.json ::
+provider_reconciliation_after`); the live pod above is the mixed-calibration study's.
 - **Result** (static fluid correctness, 570 items x 2 seeds, `nucleus_v1`):
   - B (primary, D4-Augmented - D4-Original): +3.51 pp, CI +1.89 to +5.15 → INCONCLUSIVE, flag FLOOR_A;
   - A (D4-Original - PCA-Original): both below the 2% floor → NOT_RESOLVED (FLOOR);
@@ -4223,7 +4225,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$670.0665` spent of `$712.1700`, leaving `$42.1035` |
+| project cap | `$671.3068` spent of `$712.1700`, leaving `$40.8632` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

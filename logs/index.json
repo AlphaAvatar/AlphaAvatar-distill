@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 147,
+  "runs_unrecorded": 151,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -766,8 +766,8 @@
    },
    "calibration_volume": {
     "recorded": 0,
-    "unrecorded": 38,
-    "total": 38
+    "unrecorded": 42,
+    "total": 42
    },
    "continuation_b": {
     "recorded": 5,
@@ -2913,6 +2913,38 @@
    "n_files": 10,
    "digest": "cc448795da4f6ffeda2b7a7cfeb34def9acf76c81bc401bd206086624a2b3c51",
    "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "mixs_20261026_102914",
+   "root": "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_102914",
+   "n_files": 3,
+   "digest": "cbcbb978a6692078f644ae4c019c49fb9328a0306b846a533386abca0f31c246",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "mixs_20261026_103634",
+   "root": "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_103634",
+   "n_files": 2,
+   "digest": "764b3e887cd32a4e7d9a27dd46e22cab194d736f836408a1bdb0a7c58d5f51ba",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "mixs_dry_20261026_102813",
+   "root": "logs/stages/stage-0/calibration_volume/runs/mixs_dry_20261026_102813",
+   "n_files": 3,
+   "digest": "74495595e5298257e30486fd84cba19af9148c8f4225bad207bf366743d57798",
+   "why": "no run manifest; its closeout states: ABANDONED_BEFORE_LAUNCH"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "mixvol_20261026_102835",
+   "root": "logs/stages/stage-0/calibration_volume/runs/mixvol_20261026_102835",
+   "n_files": 2,
+   "digest": "bb094c973c0815917210f88f4163cd04071c971509c6539e31b8cea63ca214ac",
+   "why": "no run manifest; its closeout states: VOLUME_RESERVED"
   },
   {
    "experiment_id": "calibration_volume",
