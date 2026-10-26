@@ -9,24 +9,18 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**MIXED CALIBRATION 2x: DESIGN v2 (EXACTLY 50/50, 2x ONLY) AND APPLICATION COMPLETE AT $0, AWAITING THE MAINTAINER'S
-FINAL AUTHORIZATION REVIEW (2026-10-26).**
-Owner: [`docs/stages/stage-0/calibration_volume/MIXED.md`](../../docs/stages/stage-0/calibration_volume/MIXED.md);
-records `configs/stages/stage-0/calibration_volume/{mixed_design_v2,profiles_mixed_v2}.json`,
-`logs/stages/stage-0/calibration_volume/design/mixed_feasibility_v2.json`, `plans/mixed_{preregistration,application}.json`
-(both version 2). The v1 design (`6e2887ca`, 50.29 : 49.71) is kept byte-unchanged as superseded.
-Nothing paid ran; no grant was issued; no pod, GPU or volume was created.
-- **Profile** `calib.s0m_mix_2x@v2`: supporting + fluid over all five axes, **exactly equal** realized scored positions
-  as the operators count them (`build_mixed_profiles.require_exact`); v1's draw and fluid half, the supporting
-  residual closed exactly by whole units. The figures are in the feasibility audit.
-- **Search:** the formal D1 full search with one profile (declared: 34 expansions instead of 92; nothing else changed).
-- **Control:** D4-Augmented's two units, reused as scored; M = Mix-Augmented - D4-Augmented preregistered under H1's
-  frozen rule (version 2 binds the v2 profile; no result starts a follow-up).
-- **4x:** out of this round's budget, authorization, implementation and every automatic flow (maintainer decision).
-- **Needs the maintainer:** the grant (envelope $33.05) and a project cap; $740 is provisional and the issuer
-  re-verifies it against the provider's billing at issuance (`plans/mixed_application.json :: money.project`).
-- **Checkpoints:** the four D4 checkpoints stay on `am5m373kuq`; D4-Augmented x2 are declared the formal control
-  (`storage/h1pa_volume_am5m373kuq.json :: declared_future_use`).
+**MIXED CALIBRATION 2x: GRANTED AND RUNNING -- MC1 (THE SEARCH) IN FLIGHT (2026-10-26).**
+Owner: [`docs/stages/stage-0/calibration_volume/MIXED.md`](../../docs/stages/stage-0/calibration_volume/MIXED.md).
+Grant: `logs/budget/approvals/mixed_calibration_grant.json` (maintainer 2026-10-26: MC1 + MC2 cumulative $33.05,
+project cap $731 -> $740, 2x only, nothing starts 4x). Governance and the corrected project position:
+`scripts/stages/stage-0/calibration_volume/mixed_governance.py` (provider read at every issue and launch).
+- **Profile** `calib.s0m_mix_2x@v2` (71,216 + 71,216 UESP, content `9a6c2782...`), unchanged.
+- **MC1 live:** run `mixs_20261026_102914`, pod `6cy5fhf4q1tru0` (A100-SXM4-80GB, EUR-IS-1, $1.79/h, hard cap $15, the
+  watchdog's hard stop at 494 min), volume `t6yrsvujha` (150 GB, `runs/mixvol_20261026_102835`). Store:
+  `/home/ecs-user/aad-artifacts/stage0_calvol/mixs_20261026_102914/` (launcher in tmux `mixmc1`).
+- **Then:** Top-1 relayed and read back -> MC1 volume retired -> MC2 (`mixed_launch.py launch MC2`, L40S on
+  `am5m373kuq`) -> `mixed_analysis.py`.
+- **Checkpoints:** the four D4 checkpoints stay on `am5m373kuq`; D4-Augmented x2 are the formal control.
 
 **H1-PA: PA2v + PA2 COMPLETE; PREREGISTERED RESULT INCONCLUSIVE (FLOOR_A) (2026-10-25 UTC).** Granted by the maintainer
 (`logs/budget/approvals/h1pa_training_grant.json`: $50.00 cumulative over PA2v + PA2, project cap $731).

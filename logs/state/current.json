@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. H1-PA terminal. Mixed Calibration 2x design v2 (exactly 50/50, 2x only) and its application are done at $0 and wait for the maintainer's final authorization review: grant + a project cap (provisional $740, re-verified at issuance). Owner: docs/stages/stage-0/calibration_volume/MIXED.md.",
+ "blocker": "BLOCKED NO. Mixed Calibration 2x GRANTED 2026-10-26 ($33.05 cumulative, project cap $740, 2x only; logs/budget/approvals/mixed_calibration_grant.json). MC1 (search) RUNNING. Owner: docs/stages/stage-0/calibration_volume/MIXED.md.",
  "branch": "stage2/reasoning-data, cut from main 2a8bae78 (the Stage-0 squash, 2026-10-21)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -123,13 +123,13 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Maintainer: decide plans/mixed_application.json v2 (2x only: search + two Mix-Augmented recoveries, envelope $33.05, cap provisional $740). H1-PA review and the D4 checkpoints' retention: storage/h1pa_volume_am5m373kuq.json. 34 pods ($58.33) stay OPEN.",
+ "next": "MC1 to its terminal state, the Top-1 read back, the MC1 volume retired; then MC2 (two Mix-Augmented recoveries + eval-set-1) inside the grant. H1-PA review and the D4 checkpoints' retention: storage/h1pa_volume_am5m373kuq.json. 34 pods ($58.33) stay OPEN.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "the mixed-calibration 2x application (MIXED.md section 9), awaiting the maintainer",
+  "next_work": "MC1 then MC2 of the mixed-calibration 2x study (mixed_launch.py), inside the grant",
   "not_next": "no paid resource without a new maintainer decision. Owner: decisions.md 2026-10-21 (Stage-2/3 round opened at $0).",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D-series CLOSED 2026-10-17 (D1 NO-GO, D2 NO_GO, D3 STRUCTURAL_CHANGE + INCONCLUSIVE probes); forward baseline D1 + scored_v1.",
-  "then": "nothing starts before the maintainer decides the mixed application; 4x is out of this round and nothing starts it automatically (MIXED.md section 6)"
+  "then": "the preregistered M decision and the full eval-set-1 report (mixed_analysis.py); NOTHING follows automatically: 4x is the maintainer's decision"
  },
  "phase_b_result": {
   "authorizes": "nothing",
@@ -197,10 +197,10 @@
   "docs/stages/stage-0/calibration_volume/MIXED.md -- the live design (mixed calibration 2x)"
  ],
  "running": {
-  "paid_compute": false,
-  "pods": 0,
-  "network_volumes": 1,
-  "run": null,
+  "paid_compute": true,
+  "pods": 1,
+  "network_volumes": 2,
+  "run": "MC1 mixs_20261026_102914 (pod 6cy5fhf4q1tru0, A100-80GB EUR-IS-1, cap $15; volume t6yrsvujha 150 GB, runs/mixvol_20261026_102835)",
   "volume": "am5m373kuq: the four D4 checkpoints, D4-Augmented x2 the mixed study's formal control (storage record)"
  },
  "schema": "aadistill.current_state/v2",

@@ -319,3 +319,50 @@ def test_read_back_rebuilds_a_real_checkpoints_identity(tmp_path, monkeypatch):
     assert got["read_back"]["verified"] is True
     assert got["materialization_identity"]["artifact_digest"] == ident["artifact_digest"]
     assert [f["name"] for f in got["relay_files"]] == [f["name"] for f in files]
+
+
+CONTROL = REPO / "artifacts/stages/stage-2/reasoning_data/h1pa/units/evidence"
+
+
+@pytest.mark.skipif(not (CONTROL / "D4-Augmented-s20260726/report/report.json").is_file(),
+                    reason="H1-PA's unit evidence is a local artifact")
+def test_the_analysis_executes_before_any_result_exists(tmp_path, monkeypatch):
+    """D4-Augmented's evidence stands in for Mix-Augmented: every reader, the bound rule
+    and the full eval-set-1 table run; identical rows must not resolve M."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "mixed_analysis", REPO / "scripts/stages/stage-0/calibration_volume/mixed_analysis.py")
+    A = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(A)
+    mix = tmp_path / "mix"
+    mix.mkdir()
+    for s in (20260726, 20260801):
+        os.symlink(CONTROL / f"D4-Augmented-s{s}", mix / f"Mix-Augmented-s{s}")
+    monkeypatch.setattr(A, "EVIDENCE_MIX", mix)
+    real_driver = A._driver
+
+    def driver():
+        M = real_driver()
+        st = json.loads(M.STUDY.read_text())
+        st["initialization"]["record"] = "logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json"
+        p = tmp_path / "study.json"
+        p.write_text(json.dumps(st))
+        load = M.load_plan
+        M.load_plan = lambda *a, **k: load(p)
+        return M
+    ctl = {s: json.loads((CONTROL / f"D4-Augmented-s{s}/report/report.json").read_text()) for s in (20260726, 20260801)}
+    monkeypatch.setattr(A, "_driver", driver)
+    monkeypatch.setattr(A, "expected_mix_inputs", lambda plan, u: ctl[u["seed"]]["inputs"])
+    real_load = A.load_unit
+
+    def load_unit(d, dec):
+        ev = real_load(d, dec)
+        if d.name.startswith("Mix"):
+            ev["report"] = {**ev["report"], "unit": d.name}
+        return ev
+    monkeypatch.setattr(A, "load_unit", load_unit)
+    doc = A.analyse()
+    assert doc["decision"]["comparisons"]["M"]["primary"]["label"] == "NOT_RESOLVED"
+    assert doc["decision"]["comparisons"]["E"]["label"] is None
+    assert set(doc["eval_set_1_correct_and_usable"]) == set(doc["units"]) and len(doc["units"]) == 6
+    assert all(doc["units"][n]["reused"] for n in doc["units"] if not n.startswith("Mix"))
