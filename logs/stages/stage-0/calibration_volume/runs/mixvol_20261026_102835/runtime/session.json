@@ -1,0 +1,22 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.network_volume/v1",
+ "run_id": "mixvol_20261026_102835",
+ "kind": "network_volume",
+ "phase": "MC1",
+ "study_id": "stage0.calibration_volume.mixed_v2",
+ "provider_resource_created": true,
+ "volume_id": "t6yrsvujha",
+ "name": "aad-mixed-mc1",
+ "data_center_id": "EUR-IS-1",
+ "size_gb": 150,
+ "created_utc": "2026-10-26T10:28:36Z",
+ "created_by": "runpodctl network-volume create --name aad-mixed-mc1 --size 150 --data-center-id EUR-IS-1",
+ "reserved_usd": 1.05,
+ "create_output": "{\n  \"dataCenterId\": \"EUR-IS-1\",\n  \"id\": \"t6yrsvujha\",\n  \"name\": \"aad-mixed-mc1\",\n  \"size\": 150\n}\n",
+ "why": "MC1's durable store: the search journal and every materialized state, mirrored while the search runs, so a lost pod resumes rather than recomputes; deleted after the Top-1 and the evidence are durable and read back",
+ "price_basis": {
+  "usd_per_gb_month": 0.07,
+  "hours_per_month": 720,
+  "provider_api_exposes_this": false
+ }
+}

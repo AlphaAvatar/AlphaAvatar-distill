@@ -1,0 +1,15 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "mixs_dry_20261026_102813",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "MC1",
+ "recorded_utc": "2026-10-26T10:29:14+00:00",
+ "status": "ABANDONED_BEFORE_LAUNCH",
+ "outcome": "MC1 $0 dry run: every pre-provider gate passed (DRY_RUN_GATES_PASSED); no pod was created by design",
+ "provider_resource_created": false,
+ "money": {
+  "all_in_usd": 0.0,
+  "_basis": "no provider resource existed"
+ }
+}
