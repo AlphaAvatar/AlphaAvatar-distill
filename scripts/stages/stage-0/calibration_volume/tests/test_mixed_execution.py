@@ -366,3 +366,26 @@ def test_the_analysis_executes_before_any_result_exists(tmp_path, monkeypatch):
     assert doc["decision"]["comparisons"]["E"]["label"] is None
     assert set(doc["eval_set_1_correct_and_usable"]) == set(doc["units"]) and len(doc["units"]) == 6
     assert all(doc["units"][n]["reused"] for n in doc["units"] if not n.startswith("Mix"))
+
+
+def test_a_launch_refuses_an_authorization_outside_the_session_commit(tmp_path):
+    """mixs_20261026_102914: the authorization was issued after the session commit and never reached the pod."""
+    import subprocess as sp
+    root = tmp_path / "repo"
+    rel = MG.authorization_path("mixs_t")
+    (root / rel).parent.mkdir(parents=True)
+    git = lambda *a: sp.run(["git", "-c", "user.email=t@t", "-c", "user.name=t", *a], cwd=root,  # noqa: E731
+                            check=True, capture_output=True, text=True).stdout.strip()
+    git("init", "-q")
+    (root / "README").write_text("x")
+    git("add", "-A")
+    git("commit", "-qm", "before the issue")
+    before = git("rev-parse", "HEAD")
+    (root / rel).write_text('{"issued": true}')
+    ctx = lambda c: SimpleNamespace(args=SimpleNamespace(run_id="mixs_t", session_commit=c))  # noqa: E731
+    assert ML.the_authorization_is_in_the_session_commit(ctx(before), repo_root=root)[0] is False
+    git("add", "-A")
+    git("commit", "-qm", "the session commit")
+    assert ML.the_authorization_is_in_the_session_commit(ctx(git("rev-parse", "HEAD")), repo_root=root)[0] is True
+    (root / rel).write_text('{"issued": "edited"}')
+    assert ML.the_authorization_is_in_the_session_commit(ctx(git("rev-parse", "HEAD")), repo_root=root)[0] is False

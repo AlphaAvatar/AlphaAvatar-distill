@@ -218,8 +218,8 @@ def mc1_spec(args) -> SessionSpec:
             report_names=(), on_poll=secure_mc1, products_secured=mc1_secured),
         teardown=TeardownPolicy(note="delete the pod, verify from the provider that it is gone, STOP; the MC1 "
                                      "volume is KEPT until the Top-1 is read back and the evidence is durable"),
-        precheck=(the_artifact_is_this_kind, _all_in_within_cap, identity_is_the_authorized_one,
-                  the_volume_is_the_mc1_volume, the_project_cap_holds_now),
+        precheck=(the_artifact_is_this_kind, the_authorization_is_in_the_session_commit, _all_in_within_cap,
+                  identity_is_the_authorized_one, the_volume_is_the_mc1_volume, the_project_cap_holds_now),
     )
 
 
@@ -383,9 +383,9 @@ def mc2_spec(args) -> SessionSpec:
             report_names=(), on_poll=secure_mc2, products_secured=mc2_secured),
         teardown=TeardownPolicy(note="delete the pod, verify from the provider that it is gone, STOP; "
                                      "am5m373kuq is KEPT (it holds the control and the new checkpoints)"),
-        precheck=(the_artifact_is_this_kind, _all_in_within_cap, identity_is_the_authorized_one,
-                  bound_files_are_in_the_session_commit, HPL.the_volume_is_the_planned_one,
-                  the_project_cap_holds_now),
+        precheck=(the_artifact_is_this_kind, the_authorization_is_in_the_session_commit, _all_in_within_cap,
+                  identity_is_the_authorized_one, bound_files_are_in_the_session_commit,
+                  HPL.the_volume_is_the_planned_one, the_project_cap_holds_now),
     )
 
 
@@ -413,6 +413,18 @@ def identity_is_the_authorized_one(ctx: SessionContext, repo_root: Path = REPO_R
     if got != ctx.auth.plan_hash:
         return False, f"the session identity on disk is {got[:12]}, not the authorized {ctx.auth.plan_hash[:12]}"
     return True, f"session identity {got[:12]} is the authorized one"
+
+
+def the_authorization_is_in_the_session_commit(ctx: SessionContext, repo_root: Path = REPO_ROOT) -> tuple[bool, str]:
+    """The pod checks out the session commit, so the authorization its driver loads must be IN
+    that commit, byte for byte (mixs_20261026_102914 died at A_contract: issued after the commit,
+    it never reached the pod)."""
+    rel = MG.authorization_path(ctx.args.run_id)
+    blob = subprocess.run(["git", "show", f"{ctx.args.session_commit}:{rel}"], cwd=repo_root, capture_output=True)
+    here = (repo_root / rel).read_bytes() if (repo_root / rel).is_file() else None
+    if blob.returncode != 0 or blob.stdout != here:
+        return False, f"{rel} is not in session commit {ctx.args.session_commit[:12]} as issued; commit it first"
+    return True, f"the authorization is in session commit {ctx.args.session_commit[:12]}"
 
 
 def the_project_cap_holds_now(ctx: SessionContext, snapshot: dict | None = None) -> tuple[bool, str]:
