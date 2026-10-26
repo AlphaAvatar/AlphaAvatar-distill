@@ -4,13 +4,15 @@
  "experiment_id": "calibration_volume",
  "stage_id": "0",
  "phase": "MC1",
- "recorded_utc": "2026-10-26T10:28:36Z",
- "status": "VOLUME_RESERVED",
- "outcome": "Network volume t6yrsvujha (150 GB, EUR-IS-1) created for MC1 and booked at its reservation until it is deleted; mixed_launch.retire_volume then trues it up to the actual storage cost.",
+ "recorded_utc": "2026-10-26T14:04:38+00:00",
+ "status": "VOLUME_DELETED",
  "provider_resource_created": true,
  "money": {
-  "all_in_usd": 1.05,
-  "_basis": "RESERVED: 150 GB x $0.07/GB-month x 3 days (logs/budget/approvals/mixed_calibration_grant.json :: phases.MC1.network_volume), replaced by the actual cost at deletion"
+  "all_in_usd": 0.0526,
+  "hours": 3.601,
+  "reserved_usd_replaced": 1.05,
+  "_basis": "ACTUAL: 150 GB x $0.07/GB-month x 3.601 h / 720 h, ceiled to the 4-decimal quantum"
  },
+ "tombstone": "closeout/tombstone.json",
  "authorizes": "nothing"
 }

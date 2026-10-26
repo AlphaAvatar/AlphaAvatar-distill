@@ -677,7 +677,7 @@ def land_evidence(phase: str, run_id: str, scr: Path, repo_root: Path = REPO_ROO
     st, landed = Path(scr) / "store", []
     if phase == "MC1":
         ev = repo_root / MG.run_dir(run_id) / "evidence"
-        for f in sorted(st.rglob("*.json")):
+        for f in sorted(p for sub in ("2x", "mc1") for p in (st / sub).rglob("*.json")):
             if f.stat().st_size <= SMALL:
                 (ev / f.relative_to(st)).parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(f, ev / f.relative_to(st))

@@ -4,6 +4,7 @@ Everything this experiment produced, in one place.
 
 | area | what it holds |
 | --- | --- |
+| [`assets/`](assets/) | material |
 | [`audit/`](audit/) | material |
 | [`closeout/`](closeout/) | material |
 | [`design/`](design/) | material |

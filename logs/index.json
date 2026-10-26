@@ -2926,9 +2926,9 @@
    "experiment_id": "calibration_volume",
    "run_id": "mixs_20261026_103634",
    "root": "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_103634",
-   "n_files": 2,
-   "digest": "764b3e887cd32a4e7d9a27dd46e22cab194d736f836408a1bdb0a7c58d5f51ba",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "n_files": 7,
+   "digest": "0b18f122d84a629399a748ad1cf7bbee4ab40b5dbc81c695b0636f24a2b19353",
+   "why": "no run manifest; its closeout states: COMPLETE"
   },
   {
    "experiment_id": "calibration_volume",
@@ -2942,9 +2942,9 @@
    "experiment_id": "calibration_volume",
    "run_id": "mixvol_20261026_102835",
    "root": "logs/stages/stage-0/calibration_volume/runs/mixvol_20261026_102835",
-   "n_files": 2,
-   "digest": "bb094c973c0815917210f88f4163cd04071c971509c6539e31b8cea63ca214ac",
-   "why": "no run manifest; its closeout states: VOLUME_RESERVED"
+   "n_files": 3,
+   "digest": "215873474e1d3db84aaaa38b219f77a6ab47839ee60c806291d3c0748758bbed",
+   "why": "no run manifest; its closeout states: VOLUME_DELETED"
   },
   {
    "experiment_id": "calibration_volume",

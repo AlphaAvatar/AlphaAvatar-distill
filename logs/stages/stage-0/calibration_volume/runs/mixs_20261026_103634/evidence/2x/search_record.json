@@ -1,0 +1,135 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.search_record/v1",
+ "treatment": "2x",
+ "run_id": "mixs_20261026_103634",
+ "search_run_id": "mixed_v2_2x_search",
+ "started_utc": "2026-10-26T10:39:44Z",
+ "stages": {
+  "A_contract": {
+   "config_hash": "7ee23a7d9e6daf29",
+   "seconds": 1.75,
+   "status": "ok"
+  },
+  "B_teacher": {
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "seconds": 10.74,
+   "status": "ok"
+  },
+  "C_beam_search": {
+   "n_states": 35,
+   "n_complete_leaves": 6,
+   "n_resumed": 0,
+   "seconds": 11713.46,
+   "status": "ok"
+  },
+  "D_commit": {
+   "k": 1,
+   "seconds": 4.59,
+   "status": "ok"
+  }
+ },
+ "status": "COMPLETE",
+ "session": {
+  "config_hash": "7ee23a7d9e6daf296c0930f21267493d893826767d73d64fe4df72d055a631f7",
+  "measurement_protocol_id": "857357e82eb1bd1f367985eaa31399dc",
+  "profiles": [
+   "calib.s0m_mix_2x@v2"
+  ],
+  "profile_hashes": {
+   "calib.s0m_mix_2x@v2": "34735ed0156b0695448d968b28ff4bc85c8388535fb84a1794adff5934d1d381"
+  },
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "baseline": {
+   "baseline": "stage1_init.d1_target_aware.scored_v1@v1",
+   "record_sha256": "333af13d9f2441fc658ee064f1a6ec6b15ebf5be5ee8ab31320763bbe41ce266",
+   "numerical_execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "execution": {
+    "micro_batch_size": 3,
+    "calibration_batch_packing": "length_sorted_v1",
+    "prediction_rows": "scored_v1"
+   },
+   "implementations": {
+    "FFN": "ffn.activation_importance_v0",
+    "DEPTH": "depth.causal_kl_greedy_v1",
+    "RESIDUAL_WIDTH": "width.global_pca_v0",
+    "ATTENTION": "attention.activation_importance_v1"
+   },
+   "position_policy": "positions.supervised_target_v1@v1",
+   "distribution_support": {
+    "support_id": "reference_topk_tail_v1",
+    "top_k": 200
+   }
+  }
+ },
+ "execution": {
+  "operators": {
+   "micro_batch_size": 3,
+   "calibration_batch_packing": "length_sorted_v1",
+   "prediction_rows": "scored_v1",
+   "depth_prefix_reuse": true
+  },
+  "validate_on_search_device": true,
+  "prune_weights": false
+ },
+ "authorization_id": "stage0.calibration_volume.mixed.search.mixs_20261026_103634",
+ "root_teacher": {
+  "verified": [
+   "model-00001-of-00003.safetensors",
+   "model-00002-of-00003.safetensors",
+   "model-00003-of-00003.safetensors"
+  ],
+  "root_teacher_id": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+  "root_teacher_sha256": "6de20cc746dd42e96f93aeb4551b8d378e415a206309435d7eaefd39cfdf45f9"
+ },
+ "commit": {
+  "selection_path": "artifacts/audit/stage0_calvol_search/2x/stage1_selection.json",
+  "selected_rows": [
+   {
+    "state_id": "9311dcde3cdaedbf54d506ccf7a98333",
+    "path": "DEPTH(calib.s0m_mix_2x@v2)->ATTENTION(calib.s0m_mix_2x@v2)->FFN(calib.s0m_mix_2x@v2)->RESIDUAL_WIDTH(calib.s0m_mix_2x@v2)",
+    "artifact_digest": "647a0ef381c8a5e0f94558fba82678ebfb8cba11f7392fe9172c9603fa631608",
+    "single_shard_sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3",
+    "checkpoint_path": "/workspace/aad/artifacts/audit/stage0_calvol_search/2x/search/states/9311dcde3cdaedbf54d506ccf7a98333/1d0d1dde93792675004a6e19f1893538",
+    "num_parameters": 596049920,
+    "impl_ids": [
+     "depth.causal_kl_greedy_v1",
+     "attention.activation_importance_v1",
+     "ffn.activation_importance_v0",
+     "width.global_pca_v0"
+    ],
+    "calibration_profiles": [
+     "calib.s0m_mix_2x@v2"
+    ],
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "weights_digest": "531a2ccd2d6387058f495f26c1e462d95b076099a05f6af4cf61d05be0c2c904"
+   }
+  ]
+ },
+ "width_projections": [
+  {
+   "state_id": "20ab76a06cd4107d84d4b350646668ff",
+   "profiles": [
+    "calib.s0m_mix_2x@v2"
+   ],
+   "file": "width_projection_20ab76a06cd4107d84d4b350646668ff.safetensors",
+   "relative_residual": 0.0016599486116319895,
+   "shape": [
+    2560,
+    1024
+   ]
+  },
+  {
+   "state_id": "20ab76a06cd4107d84d4b350646668ff",
+   "profiles": [
+    "calib.s0m_mix_2x@v2"
+   ],
+   "file": "width_projection_20ab76a06cd4107d84d4b350646668ff.safetensors",
+   "relative_residual": 0.0016599486116319895,
+   "shape": [
+    2560,
+    1024
+   ]
+  }
+ ],
+ "ended_utc": "2026-10-26T13:55:15Z"
+}
