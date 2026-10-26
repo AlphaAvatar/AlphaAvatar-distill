@@ -1,0 +1,78 @@
+{
+ "schema": "aadistill.calibration_profiles/v1",
+ "_contract": "Stage-0 mixed calibration profiles, built by build_mixed_profiles.py from the design named below; data. AUTHORIZES NOTHING.",
+ "design": "configs/stages/stage-0/calibration_volume/mixed_design_v2.json",
+ "design_sha256": "6872e0e582d416a48265c9fed16fe743458dd5dbc8761a3344d05a216c03f99d",
+ "created_utc": "2026-10-26T09:32:45+00:00",
+ "profiles": [
+  {
+   "profile_id": "calib.s0m_mix_2x",
+   "version": 2,
+   "description": "Stage-0 mixed calibration 2x: supporting + fluid (five P10.2 axes), exactly equal realized scored positions (71216 each), fluid nominal 45000 UESP, sampling seed 179444901",
+   "sources": [
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "fluid",
+     "n_items": 18,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified sample, exact balance; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "supporting",
+     "n_items": 66,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified sample, exact balance; see the design"
+    }
+   ],
+   "domain_weights": {
+    "fluid": 0.5,
+    "supporting": 0.5
+   },
+   "token_budget": 90000,
+   "sample_rule": "stratified sampling with exact balance: per cell an order that interleaves its rule families (families in a seed-keyed order, each family's units in a seed-keyed order, one unit per family per round), whole units taken from the front (at least one); a fluid cell until its quota of scored positions is met; then each supporting cell to the prefix that fits its integer share of the fluid half's REALIZED positions, and the residual closed exactly by the fewest whole units (at most 3) earliest in the cells' remaining orders interleaved (build_mixed_profiles.py)",
+   "seed": 179444901,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-0/calibration_volume/profiles_mixed_v2/calib.s0m_mix_2x.items.jsonl",
+   "rendered_manifest_sha256": null,
+   "content_sha256": "9a6c2782c2fc014c6b73077e414549989b7fedf52609446924634b33b1ead75d",
+   "items_file_sha256": "d86a4b4cecb320da5e7f24db584ad122c5e40ea9f7d19214ccfedc73356ba0d6",
+   "leakage_exclusions": [
+    "dev_v1 and final evaluation families (generator family split)",
+    "recovery rung 0.86M sessions",
+    "state_eval@v1 sessions",
+    "d_series_behavioural_v1 prompts",
+    "D4-Augmented's training and validation sessions (E1 2.96M prefix + 16 validation sequences, fluid increment)",
+    "eval-set-1 held-out units (Stage-2 isolation rules R0-R9)"
+   ],
+   "leakage_proof_path": "logs/stages/stage-0/calibration_volume/design/mixed_feasibility_v2.json",
+   "metadata": {
+    "dose": "2x",
+    "fluid_nominal_uesp": 45000,
+    "uesp": 142432,
+    "uesp_by_half": {
+     "fluid": 71216,
+     "supporting": 71216
+    },
+    "n_items": 84,
+    "n_units": 80,
+    "tokens": 170901,
+    "n_rule_families": 13
+   },
+   "is_null": false
+  }
+ ],
+ "treatments": {
+  "2x": {
+   "profiles": [
+    "calib.s0m_mix_2x@v2"
+   ],
+   "sampling_seed": 179444901
+  }
+ }
+}

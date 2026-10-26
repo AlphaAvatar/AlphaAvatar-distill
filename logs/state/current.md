@@ -9,18 +9,22 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**MIXED CALIBRATION 2x: $0 DESIGN AND EXECUTION APPLICATION COMPLETE, AWAITING THE MAINTAINER (2026-10-26).**
+**MIXED CALIBRATION 2x: DESIGN v2 (EXACTLY 50/50, 2x ONLY) AND APPLICATION COMPLETE AT $0, AWAITING THE MAINTAINER'S
+FINAL AUTHORIZATION REVIEW (2026-10-26).**
 Owner: [`docs/stages/stage-0/calibration_volume/MIXED.md`](../../docs/stages/stage-0/calibration_volume/MIXED.md);
-records `configs/stages/stage-0/calibration_volume/{mixed_design,profiles_mixed}.json`,
-`logs/stages/stage-0/calibration_volume/design/mixed_feasibility.json`, `plans/mixed_{preregistration,application}.json`.
-Nothing paid ran; no pod, GPU or volume was created.
-- **Profile** `calib.s0m_mix_2x@v1`: supporting + fluid over all five axes, 50/50 by realized scored positions,
-  from `base_pool_v1` less D4-Augmented's training/validation members and eval-set-1 R1/R2 hits; 4x is its nested
-  extension (audited, not requested).
+records `configs/stages/stage-0/calibration_volume/{mixed_design_v2,profiles_mixed_v2}.json`,
+`logs/stages/stage-0/calibration_volume/design/mixed_feasibility_v2.json`, `plans/mixed_{preregistration,application}.json`
+(both version 2). The v1 design (`6e2887ca`, 50.29 : 49.71) is kept byte-unchanged as superseded.
+Nothing paid ran; no grant was issued; no pod, GPU or volume was created.
+- **Profile** `calib.s0m_mix_2x@v2`: supporting + fluid over all five axes, **exactly equal** realized scored positions
+  as the operators count them (`build_mixed_profiles.require_exact`); v1's draw and fluid half, the supporting
+  residual closed exactly by whole units. The figures are in the feasibility audit.
 - **Search:** the formal D1 full search with one profile (declared: 34 expansions instead of 92; nothing else changed).
 - **Control:** D4-Augmented's two units, reused as scored; M = Mix-Augmented - D4-Augmented preregistered under H1's
-  frozen rule.
-- **Needs the maintainer:** the grant (envelope $33.05, expected $17.95) and the project cap raised $731 -> $740.
+  frozen rule (version 2 binds the v2 profile; no result starts a follow-up).
+- **4x:** out of this round's budget, authorization, implementation and every automatic flow (maintainer decision).
+- **Needs the maintainer:** the grant (envelope $33.05) and a project cap; $740 is provisional and the issuer
+  re-verifies it against the provider's billing at issuance (`plans/mixed_application.json :: money.project`).
 - **Checkpoints:** the four D4 checkpoints stay on `am5m373kuq`; D4-Augmented x2 are declared the formal control
   (`storage/h1pa_volume_am5m373kuq.json :: declared_future_use`).
 

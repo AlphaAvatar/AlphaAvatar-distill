@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""The mixed calibration profiles (2x and its nested 4x) and their $0 feasibility audit.
+"""The mixed calibration profile (2x, exactly 50/50) and its $0 feasibility audit.
 
     PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-0/calibration_volume/build_mixed_profiles.py \
-        --design configs/stages/stage-0/calibration_volume/mixed_design.json
+        --design configs/stages/stage-0/calibration_volume/mixed_design_v2.json
 
-From `mixed_design.json` and the verified base pool, without a GPU or a model:
+From the design and the verified base pool, without a GPU or a model (the
+superseded v1 design and its 2x/4x profiles were built by commit 6e2887ca):
 
 1. ELIGIBILITY. The pool's fluid (five P10.2 axes) and supporting units, less
    every unit that shares a session id, source id or prompt key with what
@@ -15,15 +16,20 @@ From `mixed_design.json` and the verified base pool, without a GPU or a model:
    over a static axis's generators; the interactive axis is one cell over
    both generators, episodes whole; within a cell the rule families are
    interleaved (`family_order`), so a prefix spans as many families as it has
-   units. Then supporting, four equal cells against
-   the fluid half's REALIZED scored positions, each stopped at the prefix
-   nearest its quota, so the halves are 50/50 by realized positions to within
-   half a unit per cell. One seed-keyed order per cell for both doses, so 2x
-   is a prefix of 4x in every cell.
+   units. Then supporting, balanced to the fluid half EXACTLY: the target is
+   the fluid half's realized scored positions, four integer cell quotas; each
+   cell takes the prefix of its order that fits its quota (skipping nothing),
+   and the residual is closed by the fewest whole units, at most the design's
+   `max_closing_units`, whose positions sum to it exactly, taken earliest from
+   the cells' remaining orders interleaved (`close_exact`). No unit is cut,
+   repeated or padded; if no such set exists the build writes the closest gap
+   and stops (`Infeasible`): the ratio is never relaxed.
 3. LABELS. `domain` is the half and `subtype` the axis or source group: DEPTH's
    objective is equal over domains then subtypes, so this is what makes it
    50/50 (FFN, RESIDUAL_WIDTH and ATTENTION pool over positions).
-4. COVERAGE of each profile beside historical D4's (and d1/d2's): UESP,
+   `operator_view` counts both halves through the core's own position and
+   aggregation contracts and `require_exact` refuses anything but equality.
+4. COVERAGE of the profile beside historical D4's (and d1/d2's): UESP,
    prediction positions, forward tokens, padded forward slots under the
    baseline's micro-batch 3 / length_sorted_v1, units, episodes, rule
    families, by half, axis and generator.
@@ -46,6 +52,7 @@ import statistics
 import struct
 import sys
 from collections import Counter, defaultdict
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -222,24 +229,96 @@ def family_order(cell: tuple, uids: list[str], units: dict, seed: int) -> list[s
 
 
 def _take(cell: tuple, uids: list[str], units: dict, seed: int, quota: float, *,
-          nearest: bool = False) -> tuple[list[str], int]:
-    """A prefix of the cell's seed-keyed order, at least one unit. By default it
-    stops once the quota is met; `nearest` stops at the prefix whose total is
-    closest to the quota (the first k with got_{k-1} + s_k / 2 > quota), which is
-    still monotone in the quota, so a larger dose still contains a smaller one."""
-    got, taken = 0, []
-    for uid in family_order(cell, uids, units, seed):
+          fit: bool = False) -> tuple[list[str], int, list[str]]:
+    """A prefix of the cell's seed-keyed order (at least one unit) and the rest
+    of the order. By default it stops once the quota is met; `fit` stops at the
+    first unit that would carry the total past the quota, skipping nothing, so
+    the prefix never exceeds it unless its first unit alone does."""
+    order = family_order(cell, uids, units, seed)
+    got, k = 0, 0
+    for uid in order:
         s = units[uid]["scored"]
-        if taken and (got >= quota or (nearest and got + s / 2 > quota)):
+        if k and (got >= quota or (fit and got + s > quota)):
             break
-        taken.append(uid)
+        k += 1
         got += s
-    return taken, got
+    return order[:k], got, order[k:]
+
+
+def interleave(orders: list[list[str]]) -> list[str]:
+    """Rank by rank across the orders, in the order given."""
+    return [o[r] for r in range(max(map(len, orders), default=0)) for o in orders if r < len(o)]
+
+
+def _first_exact(s: list[int], target: int, k: int, upto: int) -> tuple[int, ...] | None:
+    """Indices i_1 < ... < i_k < upto with sum(s[i]) == target: the smallest i_k,
+    then the smallest i_{k-1}, and so on; None when there are none."""
+    if target <= 0:
+        return None
+    if k == 1:
+        return next(((i,) for i in range(upto) if s[i] == target), None)
+    if k == 2:
+        first: dict[int, int] = {}
+        for m in range(upto):
+            i = first.get(target - s[m])
+            if i is not None:
+                return (i, m)
+            first.setdefault(s[m], m)
+        return None
+    for m in range(k - 1, upto):
+        rest = _first_exact(s, target - s[m], k - 1, m)
+        if rest is not None:
+            return rest + (m,)
+    return None
+
+
+def _closest(s: list[int], target: int) -> dict:
+    """The smallest |gap| one unit and two units reach: the infeasibility evidence."""
+    one = min((abs(x - target) for x in s), default=None)
+    v, two = sorted(s), None
+    i, j = 0, len(v) - 1
+    while i < j:
+        gap = v[i] + v[j] - target
+        two = abs(gap) if two is None else min(two, abs(gap))
+        if gap == 0:
+            break
+        i, j = (i + 1, j) if gap < 0 else (i, j - 1)
+    return {"one_unit": one, "two_units": two}
+
+
+class Infeasible(SystemExit):
+    """Exact balance cannot be reached under the declared rule; `evidence` says by how much."""
+
+    def __init__(self, evidence: dict):
+        super().__init__(f"exact 50/50 is infeasible under the declared rule: {json.dumps(evidence)}")
+        self.evidence = evidence
+
+
+def close_exact(residual: int, sequence: list[str], sizes: Mapping[str, int], max_units: int) -> list[str]:
+    """The fewest units of `sequence` (at most `max_units`) whose scored
+    positions sum to exactly `residual`; among those, the set whose last member
+    comes earliest in the sequence, then whose earlier members come earliest.
+    Reads nothing but the sizes; raises `Infeasible` with the closest gaps."""
+    if residual == 0:
+        return []
+    s = [sizes[u] for u in sequence]
+    for k in range(1, max_units + 1):
+        hit = _first_exact(s, residual, k, len(s))
+        if hit is not None:
+            return [sequence[i] for i in hit]
+    raise Infeasible({"residual": residual, "max_units": max_units, "candidates": len(s),
+                      "closest_gap": _closest(s, residual)})
 
 
 def sample(design: dict, units: dict[str, dict], cells: dict[tuple, list[str]], seed: int,
            fluid_nominal: float) -> tuple[list[dict], dict]:
-    """One dose's items, relabelled (domain = half, subtype = axis or source)."""
+    """One dose's items, relabelled (domain = half, subtype = axis or source).
+
+    Fluid first, each cell until its nominal quota is met. The supporting half
+    is then balanced to the fluid half EXACTLY: the target is the fluid half's
+    realized scored positions, split into integer cell quotas; each cell takes
+    the prefix of its order that fits its quota; the residual is closed by
+    `close_exact` over the cells' remaining orders, interleaved."""
     axes = design["halves"][FLUID]["axes"]
     by_axis = defaultdict(list)
     for c in cells:
@@ -250,18 +329,38 @@ def sample(design: dict, units: dict[str, dict], cells: dict[tuple, list[str]], 
     for ax in axes:
         for c in by_axis[ax]:
             quota = fluid_nominal / len(axes) / len(by_axis[ax])
-            uids, got = _take(c, cells[c], units, seed, quota)
+            uids, got, _ = _take(c, cells[c], units, seed, quota)
             census["/".join(c)] = {"quota": round(quota, 1), "scored": got, "units": len(uids),
                                    "pool_units": len(cells[c])}
             taken += uids
             fluid_got += got
-    subs = [c for c in cells if c[0] == SUPPORTING]
-    for c in subs:
-        quota = fluid_got / len(subs)
-        uids, got = _take(c, cells[c], units, seed, quota, nearest=True)
-        census["/".join(c)] = {"quota": round(quota, 1), "scored": got, "units": len(uids),
+    subs = [(SUPPORTING, s, "*") for s in design["halves"][SUPPORTING]["subtypes"]]
+    rests, prefix_got = [], 0
+    for i, c in enumerate(subs):
+        quota = fluid_got // len(subs) + (1 if i < fluid_got % len(subs) else 0)
+        uids, got, rest = _take(c, cells[c], units, seed, quota, fit=True)
+        census["/".join(c)] = {"quota": quota, "prefix_scored": got, "prefix_units": len(uids),
                                "pool_units": len(cells[c])}
         taken += uids
+        rests.append(rest)
+        prefix_got += got
+    residual = fluid_got - prefix_got
+    max_units = int(design["halves"][SUPPORTING]["balance"]["max_closing_units"])
+    closing = close_exact(residual, interleave(rests), {u: units[u]["scored"] for r in rests for u in r},
+                          max_units) if residual >= 0 else None
+    if closing is None:
+        raise Infeasible({"residual": residual, "reason": "the prefixes already exceed the target"})
+    for c, rest in zip(subs, rests):
+        mine = [u for u in closing if u in set(rest)]
+        cell = census["/".join(c)]
+        cell["closing"] = [{"unit_id": u, "scored": units[u]["scored"], "rank_after_prefix": rest.index(u)}
+                           for u in mine]
+        cell["scored"] = cell["prefix_scored"] + sum(units[u]["scored"] for u in mine)
+        cell["units"] = cell["prefix_units"] + len(mine)
+    taken += closing
+    census["_balance"] = {"target": fluid_got, "prefixes": prefix_got, "residual": residual,
+                          "closing_units": len(closing),
+                          "supporting": prefix_got + sum(units[u]["scored"] for u in closing)}
     items = []
     for uid in taken:
         u = units[uid]
@@ -328,6 +427,49 @@ def coverage(items: list[dict], *, micro_batch: int, pool_families: dict[str, se
                                          key=lambda kv: str(kv[0])))
                          for ax, its in sorted(axes.items()) if ax != SUPPORTING}
     return out
+
+
+def operator_view(items: list[dict]) -> dict:
+    """The halves as the operators read them, through the core's own contracts.
+
+    FFN, RESIDUAL_WIDTH and ATTENTION accumulate their statistics over the
+    position policy's TOKEN-axis weights (`statistics_positions`; the baseline
+    declares no confidence weighting), DEPTH scores KL over its PREDICTION-axis
+    weights and aggregates the per-subtype means with `domain_balanced_score`
+    over the domain map it builds from the items' labels (`_domain_map`). The
+    weight of a subtype is that score with the subtype at 1 and the rest at 0."""
+    from aadistill.initialization.operators.depth.causal_kl_greedy import _domain_map
+    from aadistill.initialization.scoring.batches import PREDICTION_AXIS, TOKEN_AXIS, weights_for_items
+    from aadistill.initialization.statistics.contribution import domain_balanced_score
+    from shared import forward_baseline as FB
+    policy = FB.selected().position_policy
+    out = {"position_policy": policy.qualified_id}
+    for name, axis in (("token_axis", TOKEN_AXIS), ("prediction_axis", PREDICTION_AXIS)):
+        by = Counter()
+        for it, w in zip(items, weights_for_items(items, policy, axis=axis)):
+            x = float(w.weights.sum())
+            if x != int(x):
+                raise SystemExit(f"{it['item_id']}: non-binary position weights under {policy.qualified_id}")
+            by[it["domain"]] += int(x)
+        out[name] = dict(sorted(by.items()))
+    domains = _domain_map(items)
+    subtypes = [s for v in domains.values() for s in v]
+    if len(set(subtypes)) != len(subtypes):
+        raise SystemExit(f"a subtype label is shared across halves: {domains}")
+    weight = {s: domain_balanced_score({t: float(t == s) for t in subtypes}, domains)[0] for s in subtypes}
+    out["depth_domain_map"] = domains
+    out["depth_subtype_weight"] = {s: round(w, 6) for s, w in weight.items()}
+    out["depth_half_weight"] = {d: round(sum(weight[s] for s in v), 12) for d, v in domains.items()}
+    return out
+
+
+def require_exact(view: dict) -> None:
+    """fluid == supporting on both axes the operators read, and DEPTH 1/2 each: no tolerance."""
+    for axis in ("token_axis", "prediction_axis"):
+        if view[axis].get(FLUID) != view[axis].get(SUPPORTING) or not view[axis].get(FLUID):
+            raise SystemExit(f"the halves are not equal on the {axis}: {view[axis]}")
+    if view["depth_half_weight"] != {FLUID: 0.5, SUPPORTING: 0.5}:
+        raise SystemExit(f"DEPTH does not weight the halves 1/2 each: {view['depth_half_weight']}")
 
 
 def _units(items: list[dict]) -> dict[str, list[dict]]:
@@ -505,16 +647,18 @@ PRICES = {
 # --- main -------------------------------------------------------------------
 
 def profile_entry(design: dict, pool_manifest: dict, dose: str, items: list[dict], seed: int, rel: str,
-                  body: str) -> dict:
+                  body: str, view: dict) -> dict:
     fluid_nominal = float(design["doses"][dose]["fluid_nominal_uesp"])
+    half = view["token_axis"][FLUID]
     return {
-        "profile_id": f"calib.s0m_mix_{dose}", "version": 1,
-        "description": (f"Stage-0 mixed calibration {dose}: supporting + fluid (five P10.2 axes), 50/50 by "
-                        f"realized scored positions, fluid nominal {int(fluid_nominal)} UESP, sampling seed {seed}"),
+        "profile_id": f"calib.s0m_mix_{dose}", "version": int(design["profile_version"]),
+        "description": (f"Stage-0 mixed calibration {dose}: supporting + fluid (five P10.2 axes), exactly equal "
+                        f"realized scored positions ({half} each), fluid nominal {int(fluid_nominal)} UESP, "
+                        f"sampling seed {seed}"),
         "sources": [{"dataset_id": f"aadistill/stage0_base_pool_v{pool_manifest['version']}",
                      "revision": pool_manifest["items_sha256"][:16], "domain": d,
                      "n_items": sum(1 for it in items if it["domain"] == d), "content_sha256": None,
-                     "license": "project-generated + corpus_v2", "note": "stratified nested sample; see the design"}
+                     "license": "project-generated + corpus_v2", "note": "stratified sample, exact balance; see the design"}
                     for d in (FLUID, SUPPORTING)],
         "domain_weights": {FLUID: 0.5, SUPPORTING: 0.5},
         "token_budget": int(round(2 * fluid_nominal)),
@@ -528,12 +672,27 @@ def profile_entry(design: dict, pool_manifest: dict, dose: str, items: list[dict
             "eval-set-1 held-out units (Stage-2 isolation rules R0-R9)"],
         "leakage_proof_path": design["output"]["audit"],
         "metadata": {"dose": dose, "fluid_nominal_uesp": int(fluid_nominal),
-                     "uesp": sum(len(it["tags"]["assistant"]) for it in items), "n_items": len(items),
-                     "n_units": len({it["unit_id"] for it in items}),
+                     "uesp": sum(view["token_axis"].values()), "uesp_by_half": view["token_axis"],
+                     "n_items": len(items), "n_units": len({it["unit_id"] for it in items}),
                      "tokens": sum(it["n_tokens"] for it in items),
                      "n_rule_families": len({(it.get("generator_id"), it.get("family_id"))
                                              for it in items if it.get("family_id")})},
         "is_null": False}
+
+
+def superseded_summary(design: dict) -> dict:
+    """The superseded design's 2x profile as its own audit recorded it, verified by hash."""
+    sup = design["supersedes"]
+    path = REPO / sup["feasibility"]["path"]
+    if hashlib.sha256(path.read_bytes()).hexdigest() != sup["feasibility"]["sha256"]:
+        raise SystemExit(f"{path} is not the superseded audit the design pins")
+    old = json.loads(path.read_text())
+    tot, halves = old["coverage"]["2x"]["total"], old["coverage"]["2x"]["by_half"]
+    cost = old["compute"]["search"]["2x"]
+    return {"profile": "calib.s0m_mix_2x@v1", "uesp": tot["uesp"],
+            "uesp_by_half": {h: b["uesp"] for h, b in halves.items()},
+            "forward_tokens": tot["forward_tokens"], "units": tot["units"], "items": tot["items"],
+            "search_expected_usd": cost["expected"]["gpu_usd"], "search_bound_usd": cost["bound"]["gpu_usd"]}
 
 
 def main(argv=None) -> int:
@@ -548,7 +707,7 @@ def main(argv=None) -> int:
     if pool_manifest["items_sha256"] != design["pool"]["items_sha256"]:
         raise SystemExit("the pool on disk is not the pool the design names")
     micro_batch = int(FB.selected().execution.micro_batch_size)
-    seed_text = f"stage0.calibration_volume.{design['name']}|draw|1"
+    seed_text = f"stage0.calibration_volume.{design['draw']}|draw|1"
     if f"'{seed_text}'" not in design["seed_derivation"]:
         raise SystemExit(f"the design's seed derivation does not declare {seed_text!r}")
     seed = derive_seed(seed_text)
@@ -560,43 +719,59 @@ def main(argv=None) -> int:
                 pool_families[it["generator_id"]].add(it["family_id"])
     kept, elig = eligible(design, units)
     cells = cellmap(design, kept)
-    out_root = REPO / design["output"]["items_dir"]
-    out_root.mkdir(parents=True, exist_ok=True)
-    profiles, cov, census, uids = [], {}, {}, {}
+    out = REPO / design["output"]["audit"]
+    out.parent.mkdir(parents=True, exist_ok=True)
+    head = {"schema": "aadistill.stage0.calibration_volume.mixed_feasibility/v2",
+            "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "design": {"path": args.design, "sha256": hashlib.sha256(design_path.read_bytes()).hexdigest()},
+            "sampling_seed": seed, "micro_batch_size": micro_batch}
+    profiles, cov, census, views = [], {}, {}, {}
     for dose, spec in design["doses"].items():
-        items, cen = sample(design, kept, cells, seed, float(spec["fluid_nominal_uesp"]))
+        try:
+            items, cen = sample(design, kept, cells, seed, float(spec["fluid_nominal_uesp"]))
+        except Infeasible as e:
+            out.write_text(json.dumps({**head, "status": "INFEASIBLE", "dose": dose, "evidence": e.evidence,
+                                       "reading": "no profile is written; the ratio is not relaxed",
+                                       "authorizes": "nothing"}, indent=1) + "\n")
+            print(e, file=sys.stderr)
+            return 1
+        views[dose] = operator_view(items)
+        require_exact(views[dose])
         rel = f"{design['output']['items_dir']}/calib.s0m_mix_{dose}.items.jsonl"
         body = "".join(json.dumps({k: it[k] for k in ITEM_FIELDS if k in it}, sort_keys=True) + "\n"
                        for it in items)
+        (REPO / rel).parent.mkdir(parents=True, exist_ok=True)
         (REPO / rel).write_text(body)
-        profiles.append(profile_entry(design, pool_manifest, dose, items, seed, rel, body))
+        profiles.append(profile_entry(design, pool_manifest, dose, items, seed, rel, body, views[dose]))
         cov[dose] = coverage(items, micro_batch=micro_batch, pool_families=pool_families)
         census[dose] = cen
-        uids[dose] = {it["unit_id"] for it in items}
-    if not uids["2x"] <= uids["4x"]:
-        raise SystemExit("2x is not contained in 4x: the draw is not nested")
+    version = int(design["profile_version"])
     doc = {"schema": "aadistill.calibration_profiles/v1",
            "_contract": "Stage-0 mixed calibration profiles, built by build_mixed_profiles.py from the design named below; data. AUTHORIZES NOTHING.",
-           "design": args.design, "design_sha256": hashlib.sha256(design_path.read_bytes()).hexdigest(),
+           "design": args.design, "design_sha256": head["design"]["sha256"],
            "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
            "profiles": profiles,
-           "treatments": {d: {"profiles": [f"calib.s0m_mix_{d}@v1"], "sampling_seed": seed} for d in design["doses"]}}
+           "treatments": {d: {"profiles": [f"calib.s0m_mix_{d}@v{version}"], "sampling_seed": seed}
+                          for d in design["doses"]}}
     load_profiles(doc, register=False)
     (REPO / design["output"]["profiles_doc"]).write_text(json.dumps(doc, indent=1) + "\n")
     rows = telemetry()
     model = compute_model(rows)
     hist = historical(micro_batch, pool_families)
     cost = {dose: search_cost(model, cov[dose]["total"]["forward_tokens"] / 1e6, PRICES) for dose in design["doses"]}
+    nominal = {d: {"nominal_uesp": 2 * int(s["fluid_nominal_uesp"]), "realized_uesp": cov[d]["total"]["uesp"],
+                   "ratio": round(cov[d]["total"]["uesp"] / (2 * int(s["fluid_nominal_uesp"])), 4),
+                   "of_reference": round(cov[d]["total"]["uesp"] / int(design["reference_uesp"]), 4),
+                   "fluid_cells": {c: {k: v[k] for k in ("quota", "scored", "units")}
+                                   for c, v in census[d].items() if c.startswith(FLUID)}}
+               for d, s in design["doses"].items()}
     audit = {
-        "schema": "aadistill.stage0.calibration_volume.mixed_feasibility/v1",
-        "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "design": {"path": args.design, "sha256": doc["design_sha256"]},
+        **head,
+        "status": "EXACT",
         "profiles_doc": {"path": design["output"]["profiles_doc"],
-                         "profiles": {p["profile_id"]: {"content_sha256": p["content_sha256"],
-                                                        "items_file_sha256": p["items_file_sha256"]}
-                                      for p in profiles}},
-        "sampling_seed": seed,
-        "micro_batch_size": micro_batch,
+                         "profiles": {f"{p['profile_id']}@v{p['version']}": {
+                             "content_sha256": p["content_sha256"], "items_file_sha256": p["items_file_sha256"]}
+                             for p in profiles}},
         "pool": {"units_in_design_cells": sum(1 for u in units.values()
                                               if u["domain"] == SUPPORTING or u["subtype"] in
                                               {g for gs in design["halves"][FLUID]["axes"].values() for g in gs}),
@@ -605,18 +780,17 @@ def main(argv=None) -> int:
                                       for c, v in sorted(cells.items())},
                  "rule_families_by_generator": {g: sorted(f) for g, f in sorted(pool_families.items())}},
         "eligibility": elig,
-        "nested": {"2x_in_4x": True, "units": {d: len(v) for d, v in uids.items()}},
         "cells": census,
+        "operator_view": views,
+        "nominal_vs_realized": nominal,
         "coverage": cov,
         "historical": hist,
+        "superseded": superseded_summary(design),
         "compute": {"model": model, "model_check": model_check(model, rows), "prices": PRICES,
                     "search": cost, "recovery_two_seeds": recovery_cost(PRICES)},
         "authorizes": "nothing"}
-    out = REPO / design["output"]["audit"]
-    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(audit, indent=1, default=lambda o: sorted(o) if isinstance(o, set) else str(o)) + "\n")
-    print(json.dumps({d: {"total": cov[d]["total"], "by_half": {h: {k: b[k] for k in ("uesp", "uesp_share")}
-                                                                  for h, b in cov[d]["by_half"].items()},
+    print(json.dumps({d: {"total": cov[d]["total"], "operator_view": views[d], "balance": census[d]["_balance"],
                           "search_expected_usd": cost[d]["expected"]["gpu_usd"],
                           "search_bound_usd": cost[d]["bound"]["gpu_usd"]} for d in cov}, indent=1))
     return 0

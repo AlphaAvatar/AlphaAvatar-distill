@@ -14091,3 +14091,57 @@ on a paid pod.
   - project cap $731 → $740, with $706.8547 committed.
 - **Revisit when.** The maintainer grants or amends the application. Until
   then nothing is created or billed beyond `am5m373kuq`.
+
+## 2026-10-26 — Mixed Calibration 2x: final design corrections (exact 50/50, 2x only; nothing paid)
+
+- **Context.** The maintainer reviewed `6e2887ca` and made two decisions.
+  1. The 2x profile must have `fluid_uesp == supporting_uesp` exactly, by the
+     positions the operators compute on. v1 was 71,216 / 70,401
+     (50.29 : 49.71). Labels, weights and rounding may not stand in for this.
+  2. This round covers 2x only. 4x is outside its budget, authorization,
+     implementation and every automatic flow.
+- **Decision (agent design v2, PROPOSED).** Owner:
+  `docs/stages/stage-0/calibration_volume/MIXED.md`.
+  - **Profile.** `calib.s0m_mix_2x@v2`
+    (`configs/stages/stage-0/calibration_volume/profiles_mixed_v2.json`, from
+    `mixed_design_v2.json`).
+    - v1's draw and fluid half are unchanged.
+    - Each supporting cell takes the prefix that fits its integer quota. The
+      residual (3,526) is closed exactly by the fewest whole units earliest in
+      the cells' remaining orders: 2 units, because no single unit has 3,526
+      positions.
+    - Result: 71,216 = 71,216; 142,432 UESP; 80 units; 170,901 forward tokens.
+    - The builder counts through the core's position and DEPTH-aggregation
+      contracts and refuses any inequality. When no exact set exists, it
+      records the closest gap and stops.
+  - **Superseded.** v1's design, profiles and audit are kept byte-unchanged,
+    pinned by sha256 in the v2 design.
+  - **Preregistration v2** amends v1 before any result. It binds the v2
+    profile by content hash and states that no label starts a 4x or any other
+    follow-up. The decision rule's bound bytes are unchanged.
+  - **Application v2**, 2x only:
+    - MC1 expected $6.01, bound $14.67, cap $15;
+    - MC2 unchanged, expected $10.91, bound $13.63, cap $14;
+    - expected $17.97, envelope $33.05, unchanged;
+    - the 4x entry criterion and cost are removed.
+- **Provider re-verification.** The read-only billing snapshot
+  `logs/budget/provider/runpod_billing_2026-10-26T0928Z.json` gives:
+  - billed $702.7656, with no unposted session;
+  - committed $706.8518, with `am5m373kuq`'s reservation netted of its posted
+    rows;
+  - with the envelope, $739.9018, which is $0.0982 under $740.
+  - `h1pa_governance.live_position` counts the full reservation beside those
+    rows ($706.9656, growing about $0.07/day). Under it the sum would be
+    $740.0156.
+  - The $740 cap is provisional. The issuer re-verifies it at issuance, and
+    nothing raises it automatically.
+- **Alternatives considered.**
+  - Relaxing or rounding the ratio: rejected by the maintainer.
+  - Relabelling or reweighting: not data balance.
+  - Re-drawing the profile with another seed: a new draw would also change the
+    fluid half, and it reads like seed shopping.
+  - Cutting a unit or an episode: forbidden.
+  - Per-source exact quotas: stricter than required, and more often
+    infeasible.
+- **Revisit when.** The maintainer grants or amends application v2. No grant
+  is issued and nothing is created until then.

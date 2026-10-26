@@ -1,24 +1,48 @@
 {
  "schema": "aadistill.stage0.calibration_volume.mixed_preregistration/v1",
- "study_id": "stage0.calibration_volume.mixed_v1",
- "written_utc": "2026-10-26T04:52:16Z",
+ "version": 2,
+ "study_id": "stage0.calibration_volume.mixed_v2",
+ "written_utc": "2026-10-26T09:29:40Z",
  "status": "REGISTERED before any mixed-calibration search, Top-1, recovery or evaluation exists: no Mix-Augmented model exists, so no result has been seen. mixed_statistics.decide refuses to run when the rule's bytes differ from bound_sha256. It may be amended only by a new version committed before the first Mix-Augmented result exists, never after",
- "decided_by": "maintainer brief 2026-10-26 (Mixed Calibration 2x Independent Design, section 4: the statistics are preregistered before any new Top-1 recovery result)",
+ "amends": {
+  "version": 1,
+  "sha256": "6daab43d02a6bd98e7c7b0415abec4ea5929591d6a825df524c8729db51f8da9",
+  "commit": "6e2887ca3afb1c9b57818be4a904a0f5f577d99a",
+  "when": "before any mixed-calibration search, Top-1, recovery or evaluation exists, as version 1's status permits",
+  "what": [
+   "the arm's calibration profile: calib.s0m_mix_2x@v2 (fluid == supporting exactly, 71,216 scored positions each) replaces the superseded calib.s0m_mix_2x@v1 (71,216 / 70,401)",
+   "the study is 2x only: no result of it starts a 4x search or any other follow-up (maintainer decision 2026-10-26); version 1 never contained a 4x criterion, the application did, and it is removed there",
+   "the 'inside the initialization' figures, re-read from the v2 feasibility audit"
+  ],
+  "unchanged": "the arms, the isolated variable, the recovery, the control evidence, the seeds, the comparisons, the evaluation, the primary measure, the decision rule and its bound bytes, the reachable labels and everything reported beside"
+ },
+ "decided_by": "maintainer brief 2026-10-26 (Mixed Calibration 2x Independent Design, section 4: the statistics are preregistered before any new Top-1 recovery result); amended by the maintainer's review 'Mixed Calibration 2x -- Final Design Corrections' 2026-10-26",
  "arms": {
-  "Mix-Augmented": "NEW: the Top-1 of the formal single-profile D1 full search calibrated on calib.s0m_mix_2x@v1 (configs/stages/stage-0/calibration_volume/profiles_mixed.json), trained and evaluated exactly as D4-Augmented, two seeds",
+  "Mix-Augmented": "NEW: the Top-1 of the formal single-profile D1 full search calibrated on calib.s0m_mix_2x@v2 (configs/stages/stage-0/calibration_volume/profiles_mixed_v2.json), trained and evaluated exactly as D4-Augmented, two seeds",
   "D4-Augmented": "REUSED: H1-PA's two D4-Augmented units; their checkpoints are not retrained and their evaluation is not regenerated",
   "PCA-Original": "REUSED: H1-PA's two re-evaluated E1 checkpoints; descriptive comparison only"
+ },
+ "calibration_profile": {
+  "id": "calib.s0m_mix_2x@v2",
+  "content_sha256": "9a6c2782c2fc014c6b73077e414549989b7fedf52609446924634b33b1ead75d",
+  "items_file_sha256": "d86a4b4cecb320da5e7f24db584ad122c5e40ea9f7d19214ccfedc73356ba0d6",
+  "profiles_doc": "configs/stages/stage-0/calibration_volume/profiles_mixed_v2.json",
+  "design": {
+   "path": "configs/stages/stage-0/calibration_volume/mixed_design_v2.json",
+   "sha256": "6872e0e582d416a48265c9fed16fe743458dd5dbc8761a3344d05a216c03f99d"
+  },
+  "_": "the search calibrates every operator on exactly these tokens (content_sha256 is the token-level identity); a search on any other content is not this study's arm"
  },
  "isolated_variable": "the initialization the recovery starts from: Mix-Augmented's recovery is D4-Augmented's (configs/stages/stage-2/reasoning_data/h1pa.json :: arms.D4-Augmented, datasets.e1_2p96M_plus_fluid, recipe; h1pa_driver.derive_recipe with student_path the new Top-1 and its run identity fields as the only overrides)",
  "inside_the_initialization": {
   "_": "the initialization changes these together; M is never read as any one of them",
-  "calibration_composition": "50/50 supporting and fluid by realized scored positions, against D4's base_d4 71% / rh_d4 87% static fluid",
+  "calibration_composition": "exactly equal supporting and fluid realized scored positions (71,216 each, on the token and the prediction axis), against D4's base_d4 71% / rh_d4 87% static fluid",
   "interactive": "one complete episode (hidden_buttons act.reverse, 5 turns) against none",
-  "volume": "141,617 realized UESP against base_d4 203,726 / rh_d4 215,935",
+  "volume": "142,432 realized UESP (nominal 90,000) against base_d4 203,726 / rh_d4 215,935",
   "profile_choice": "one profile for every operator, against a free per-operator choice of two",
   "depth_weighting": "DEPTH's equal-domain objective weights supporting 1/2 (half labels) against 1/5",
   "data_isolation": "no unit of D4-Augmented's training or validation sets, against 8 such supporting items in base_d4",
-  "source": "logs/stages/stage-0/calibration_volume/design/mixed_feasibility.json"
+  "source": "logs/stages/stage-0/calibration_volume/design/mixed_feasibility_v2.json"
  },
  "recovery": {
   "study": {
@@ -191,6 +215,7 @@
   "training and validation loss (diagnostics)",
   "the new Top-1's operator path and structure beside D4 Top-1's (descriptive)"
  ],
+ "follow_up": "none is preregistered: no label of M or of any axis starts a 4x search, a re-draw, a ratio search or any other run; whether to run 4x is the maintainer's decision after the formal 2x result (maintainer decision 2026-10-26)",
  "never": [
   "retraining D4-Augmented or regenerating its evaluation",
   "mixing a greedy result with a nucleus one",
@@ -198,7 +223,8 @@
   "a pooled score across units or capabilities, or usable rollout read as correctness",
   "reading step-0 KL, state-evaluation KL, loss, format or termination as reasoning",
   "selecting, dropping or re-running a seed or a unit for its result",
-  "reading M as the isolated effect of composition, volume, interactive data or profile choice"
+  "reading M as the isolated effect of composition, volume, interactive data or profile choice",
+  "starting a 4x search, or any other search or recovery, automatically from a result of this study"
  ],
  "authorizes": "nothing"
 }
