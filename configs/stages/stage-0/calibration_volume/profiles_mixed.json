@@ -1,0 +1,137 @@
+{
+ "schema": "aadistill.calibration_profiles/v1",
+ "_contract": "Stage-0 mixed calibration profiles, built by build_mixed_profiles.py from the design named below; data. AUTHORIZES NOTHING.",
+ "design": "configs/stages/stage-0/calibration_volume/mixed_design.json",
+ "design_sha256": "c25f38e09d3c1499ca4edd510bfae39a091b1b41e156ce155ba6fa1fd33aba2c",
+ "created_utc": "2026-10-26T04:54:39+00:00",
+ "profiles": [
+  {
+   "profile_id": "calib.s0m_mix_2x",
+   "version": 1,
+   "description": "Stage-0 mixed calibration 2x: supporting + fluid (five P10.2 axes), 50/50 by realized scored positions, fluid nominal 45000 UESP, sampling seed 179444901",
+   "sources": [
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "fluid",
+     "n_items": 18,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "supporting",
+     "n_items": 67,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    }
+   ],
+   "domain_weights": {
+    "fluid": 0.5,
+    "supporting": 0.5
+   },
+   "token_budget": 90000,
+   "sample_rule": "stratified nested sampling: per cell an order that interleaves its rule families (families in a seed-keyed order, each family's units in a seed-keyed order, one unit per family per round), whole units taken from the front (at least one); a fluid cell until its quota of scored positions is met, then each supporting cell to the prefix nearest its share of the fluid half's REALIZED positions; 4x takes a longer prefix of the same orders, so 2x is contained in 4x (build_mixed_profiles.py)",
+   "seed": 179444901,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-0/calibration_volume/profiles_mixed_v1/calib.s0m_mix_2x.items.jsonl",
+   "rendered_manifest_sha256": null,
+   "content_sha256": "f8abfa9380464e8ecf8e3c5e42df0e62b73333ee8c75ac6f52c2e7477dca004b",
+   "items_file_sha256": "17a4f8973c79623fd3620fbe185a8589244482d1be0b272fa13010cb4ce9660c",
+   "leakage_exclusions": [
+    "dev_v1 and final evaluation families (generator family split)",
+    "recovery rung 0.86M sessions",
+    "state_eval@v1 sessions",
+    "d_series_behavioural_v1 prompts",
+    "D4-Augmented's training and validation sessions (E1 2.96M prefix + 16 validation sequences, fluid increment)",
+    "eval-set-1 held-out units (Stage-2 isolation rules R0-R9)"
+   ],
+   "leakage_proof_path": "logs/stages/stage-0/calibration_volume/design/mixed_feasibility.json",
+   "metadata": {
+    "dose": "2x",
+    "fluid_nominal_uesp": 45000,
+    "uesp": 141617,
+    "n_items": 85,
+    "n_units": 81,
+    "tokens": 169808,
+    "n_rule_families": 13
+   },
+   "is_null": false
+  },
+  {
+   "profile_id": "calib.s0m_mix_4x",
+   "version": 1,
+   "description": "Stage-0 mixed calibration 4x: supporting + fluid (five P10.2 axes), 50/50 by realized scored positions, fluid nominal 90000 UESP, sampling seed 179444901",
+   "sources": [
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "fluid",
+     "n_items": 32,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    },
+    {
+     "dataset_id": "aadistill/stage0_base_pool_v1",
+     "revision": "c9e18612f994795d",
+     "domain": "supporting",
+     "n_items": 121,
+     "content_sha256": null,
+     "license": "project-generated + corpus_v2",
+     "note": "stratified nested sample; see the design"
+    }
+   ],
+   "domain_weights": {
+    "fluid": 0.5,
+    "supporting": 0.5
+   },
+   "token_budget": 180000,
+   "sample_rule": "stratified nested sampling: per cell an order that interleaves its rule families (families in a seed-keyed order, each family's units in a seed-keyed order, one unit per family per round), whole units taken from the front (at least one); a fluid cell until its quota of scored positions is met, then each supporting cell to the prefix nearest its share of the fluid half's REALIZED positions; 4x takes a longer prefix of the same orders, so 2x is contained in 4x (build_mixed_profiles.py)",
+   "seed": 179444901,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-0/calibration_volume/profiles_mixed_v1/calib.s0m_mix_4x.items.jsonl",
+   "rendered_manifest_sha256": null,
+   "content_sha256": "394570a88f329ee9d76ec48af20a7fbfe3fb3135cb081c067dab3a52037ebcb1",
+   "items_file_sha256": "276ac944b28606f14006e574ed00bfd15b388a624a806ef206bf00427a4e760b",
+   "leakage_exclusions": [
+    "dev_v1 and final evaluation families (generator family split)",
+    "recovery rung 0.86M sessions",
+    "state_eval@v1 sessions",
+    "d_series_behavioural_v1 prompts",
+    "D4-Augmented's training and validation sessions (E1 2.96M prefix + 16 validation sequences, fluid increment)",
+    "eval-set-1 held-out units (Stage-2 isolation rules R0-R9)"
+   ],
+   "leakage_proof_path": "logs/stages/stage-0/calibration_volume/design/mixed_feasibility.json",
+   "metadata": {
+    "dose": "4x",
+    "fluid_nominal_uesp": 90000,
+    "uesp": 268173,
+    "n_items": 153,
+    "n_units": 145,
+    "tokens": 320769,
+    "n_rule_families": 20
+   },
+   "is_null": false
+  }
+ ],
+ "treatments": {
+  "2x": {
+   "profiles": [
+    "calib.s0m_mix_2x@v1"
+   ],
+   "sampling_seed": 179444901
+  },
+  "4x": {
+   "profiles": [
+    "calib.s0m_mix_4x@v1"
+   ],
+   "sampling_seed": 179444901
+  }
+ }
+}

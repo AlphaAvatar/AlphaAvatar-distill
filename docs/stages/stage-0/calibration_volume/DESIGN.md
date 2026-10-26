@@ -5,6 +5,10 @@ The first Stage-0 calibration-data study (maintainer decision 2026-10-18,
 `logs/stages/stage-0/calibration_volume/`; this page explains the instruments
 so they can be reused without the conversation that built them.
 
+The next study, a 2x mixed (supporting + fluid) calibration searched by the
+formal D1 full search and recovered as D4-Augmented, is designed in
+[`MIXED.md`](MIXED.md) ($0; awaiting the maintainer).
+
 ## 1. The question and what is held fixed
 
 Does more independent, capability-aligned calibration data:

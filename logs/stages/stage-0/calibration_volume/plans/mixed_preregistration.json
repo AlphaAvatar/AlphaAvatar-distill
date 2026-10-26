@@ -1,0 +1,204 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.mixed_preregistration/v1",
+ "study_id": "stage0.calibration_volume.mixed_v1",
+ "written_utc": "2026-10-26T04:52:16Z",
+ "status": "REGISTERED before any mixed-calibration search, Top-1, recovery or evaluation exists: no Mix-Augmented model exists, so no result has been seen. mixed_statistics.decide refuses to run when the rule's bytes differ from bound_sha256. It may be amended only by a new version committed before the first Mix-Augmented result exists, never after",
+ "decided_by": "maintainer brief 2026-10-26 (Mixed Calibration 2x Independent Design, section 4: the statistics are preregistered before any new Top-1 recovery result)",
+ "arms": {
+  "Mix-Augmented": "NEW: the Top-1 of the formal single-profile D1 full search calibrated on calib.s0m_mix_2x@v1 (configs/stages/stage-0/calibration_volume/profiles_mixed.json), trained and evaluated exactly as D4-Augmented, two seeds",
+  "D4-Augmented": "REUSED: H1-PA's two D4-Augmented units; their checkpoints are not retrained and their evaluation is not regenerated",
+  "PCA-Original": "REUSED: H1-PA's two re-evaluated E1 checkpoints; descriptive comparison only"
+ },
+ "isolated_variable": "the initialization the recovery starts from: Mix-Augmented's recovery is D4-Augmented's (configs/stages/stage-2/reasoning_data/h1pa.json :: arms.D4-Augmented, datasets.e1_2p96M_plus_fluid, recipe; h1pa_driver.derive_recipe with student_path the new Top-1 and its run identity fields as the only overrides)",
+ "inside_the_initialization": {
+  "_": "the initialization changes these together; M is never read as any one of them",
+  "calibration_composition": "50/50 supporting and fluid by realized scored positions, against D4's base_d4 71% / rh_d4 87% static fluid",
+  "interactive": "one complete episode (hidden_buttons act.reverse, 5 turns) against none",
+  "volume": "141,617 realized UESP against base_d4 203,726 / rh_d4 215,935",
+  "profile_choice": "one profile for every operator, against a free per-operator choice of two",
+  "depth_weighting": "DEPTH's equal-domain objective weights supporting 1/2 (half labels) against 1/5",
+  "data_isolation": "no unit of D4-Augmented's training or validation sets, against 8 such supporting items in base_d4",
+  "source": "logs/stages/stage-0/calibration_volume/design/mixed_feasibility.json"
+ },
+ "recovery": {
+  "study": {
+   "path": "configs/stages/stage-2/reasoning_data/h1pa.json",
+   "sha256": "fe0ea966811b57d2a2bc94ac71bfec5660f74a63cc0f94cd9566e8efc389159d"
+  },
+  "as": "D4-Augmented: E1's 1,944 + the fluid increment's 524 sequences (5,923,021 supervised tokens), batch size 2, micro-batch 1, 3 epochs, 3,702 optimizer steps, warmup 185, CE 0.25 + KD 1.0, AdamW lr 5e-5, cosine to 0.1, the PCA init directory's tokenizer, teacher Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+  "hardware": "NVIDIA L40S, D4-Augmented's (h1pa.json :: hardware)"
+ },
+ "control_evidence": {
+  "result": {
+   "path": "logs/stages/stage-2/reasoning_data/analyses/h1pa_result.json",
+   "sha256": "eecb649e77b68e75314180009bbbbed2fcc75104dd0ed952f924d24217ed2586"
+  },
+  "units": {
+   "PCA-Original-s20260726": {
+    "run_id": "h1pa2_20261024_203226",
+    "attempt": 1,
+    "evaluation_descriptor_sha256": "4095862bb54806ace8db238d367cacffd32801e9e4a41fd6218fe5857bead22f",
+    "checkpoint": {
+     "model_safetensors_sha256": "3f08482c2c8e7372fc87fd2496f50c1c618f61feaec021d73c0cc646413b80c3",
+     "durable": "AlphaAvatar/aadistill-artifacts :: e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/model.safetensors",
+     "persisted_again": false
+    }
+   },
+   "PCA-Original-s20260801": {
+    "run_id": "h1pa2_20261025_055042",
+    "attempt": 1,
+    "evaluation_descriptor_sha256": "ca1b9150bf47598c95770238849a3740d47adf3b25f181d0b46d84fbd36d9a6d",
+    "checkpoint": {
+     "model_safetensors_sha256": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
+     "durable": "AlphaAvatar/aadistill-artifacts :: e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/model.safetensors",
+     "persisted_again": false
+    }
+   },
+   "D4-Augmented-s20260726": {
+    "run_id": "h1pa2_20261024_203226",
+    "attempt": 1,
+    "evaluation_descriptor_sha256": "a7d34fdfe910b3fd8ea57e189a96a5e1ae05011ef5e27981772164b9caf2e96e",
+    "checkpoint": {
+     "artifact_digest": "6889b9c97c0d16f0e17e0f746857701e195b40304c27cebf10dfd6da12fc13f7",
+     "weights_digest": "411e4ff76ae7f001cbb382db5410085135af6955926a7ea29810d2c7be3b78c4",
+     "destination": "/runpod-volume/h1pa/D4-Augmented-s20260726/checkpoint"
+    }
+   },
+   "D4-Augmented-s20260801": {
+    "run_id": "h1pa2_20261025_055042",
+    "attempt": 1,
+    "evaluation_descriptor_sha256": "1e5b39cf6494ac2da6796fbabfa438b6ca060f6b6028532b30454f9fb5cccb4c",
+    "checkpoint": {
+     "artifact_digest": "2cbbee9ea52b27db3258fa4bb945159dc0375431edfdb0ce60c074543191702a",
+     "weights_digest": "be5f48ab4f39d91379a91785519e9594457edec33adcd69e7e665bd9b6e3a57b",
+     "destination": "/runpod-volume/h1pa/D4-Augmented-s20260801/checkpoint"
+    }
+   }
+  },
+  "reused_as": "rows, generations and formal reports as H1-PA scored them (artifacts/stages/stage-2/reasoning_data/h1pa/units/evidence/<unit>/evaluation), never regenerated or rescored under another protocol"
+ },
+ "seeds": [
+  20260726,
+  20260801
+ ],
+ "seed_pairing": "M pairs Mix-Augmented and D4-Augmented by training-seed number; every directional label needs both seeds' own estimates on its side",
+ "comparisons": {
+  "M": {
+   "contrast": "Mix-Augmented - D4-Augmented",
+   "role": "decided"
+  },
+  "E": {
+   "contrast": "Mix-Augmented - PCA-Original",
+   "role": "descriptive"
+  }
+ },
+ "primary_comparison": "M",
+ "multiplicity": "M is the only decided comparison, at its own 95% interval; within it the four static-axis contrasts are a Holm family at alpha 0.05 (h1_statistics); every other unit is reported with its own estimate and labelled descriptive",
+ "evaluation": {
+  "identical_to": {
+   "path": "logs/stages/stage-2/reasoning_data/plans/h1pa_preregistration.json",
+   "sha256": "ae67279d15cddab4c14798313177d4554b8e585745cfd9b8f0afa8a42655261f",
+   "section": "evaluation"
+  },
+  "set": {
+   "eval_set_id": "eval-set-1",
+   "status": "frozen",
+   "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+   "validity_mask": "v1 (6 items excluded; formal 714 = 570 static + 144 interactive)",
+   "scoring_protocol": "each component's scorer.formal_protocol (v2 for eval-set-1), unchanged",
+   "action_protocol": "v2 (the protocol the interactive episodes are generated and replayed under)",
+   "every_item": "every item of every unit is generated for every checkpoint; the validity mask and core decide which rows enter the formal numbers"
+  },
+  "decoding": {
+   "protocol_id": "nucleus_v1",
+   "path": "configs/shared/evaluation/decoding/nucleus_v1.json",
+   "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4",
+   "sampling": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": -1,
+    "min_p": 0.0,
+    "repetition_penalty": 1.0,
+    "presence_penalty": 0.0,
+    "frequency_penalty": 0.0
+   },
+   "samples_per_item": 1,
+   "seed_rule": {
+    "base": 20261024,
+    "key": "<namespace>|<item id>|<turn>|<sample>",
+    "namespace": "the evaluated unit's key <component>__<unit> (e.g. fluid_reasoning_720__dev_v1, stage3_capability_846__gsm8k): uncapped_eval reads it from the prompt file's stem, which dose_driver.evaluate_all stages as <component>__<unit>.jsonl; run_battery takes it as --seed-namespace",
+    "derivation": "int.from_bytes(sha256('<base>|<key>').digest()[:8], 'big') % 2**63",
+    "independent_of": "the model, the arm and the training seed: every checkpoint draws with the same seed for the same item, turn and sample"
+   },
+   "binding": "the driver passes it to every evaluation and refuses a configuration without it, a generation already on the volume recorded under another protocol, and any generation summary that does not carry it; it never falls back to greedy decoding"
+  },
+  "context": "8,192 trained context; each sample generates until EOS or the context minus its prompt (AGENTS.md P18); degeneration stops are recorded, never re-scored as correct",
+  "same_seeds_as_control": "the seed rule is independent of model, arm and training seed, so Mix-Augmented draws the per-item seeds D4-Augmented drew"
+ },
+ "primary_measure": {
+  "what": "correctness on the FORMAL static items of fluid_reasoning_720 (dev_v1): 570 items over four axes (task-contained deduction, inductive rule discovery, compositional generalization, abstract analogical); held-out rule families",
+  "row": "one row per (arm, seed, item): correct = the formal scorer's verdict on the one nucleus sample",
+  "cluster": "the item's rule family (family_id)",
+  "interactive": "EXPLORATORY: the 144 episodes are generated, scored and reported beside the decision, never inside it; h1_statistics refuses interactive rows"
+ },
+ "decision_rule": {
+  "module": "scripts/stages/stage-0/calibration_volume/mixed_statistics.py",
+  "rule_id": "stage0.calibration_volume.mixed_statistics/v1",
+  "applies": "stage2.reasoning_data.h1_statistics/v1",
+  "bound_sha256": {
+   "scripts/stages/stage-0/calibration_volume/mixed_statistics.py": "5b6459d075c75c4c23b6bb450d752b0892865c941b70310829206324e42235c4",
+   "scripts/stages/stage-2/reasoning_data/h1_statistics.py": "c4c1191102f8b293feb9f165a7c72f1a69af3b96789c564e1747d95ea20a2836",
+   "src/aadistill/evaluation/paired_stats.py": "7d41ef3199eee78d3a9d9460c3b8f4c3bb33773d5d6b4945c57a62df934fe782"
+  },
+  "constants": {
+   "sesoi": 0.05,
+   "sesoi_axis": 0.08,
+   "level": 0.95,
+   "iterations": 10000,
+   "bootstrap_seed": 20261022,
+   "floor_rate": 0.02,
+   "min_discordant": 10,
+   "min_informative_clusters": 5,
+   "alpha_axes": 0.05
+  },
+  "effect_size": "the item-weighted mean of d_i, d_i = mean over the two seeds of (Y correct - X correct) on item i: an absolute difference in correctness rate, in percentage points",
+  "interval": "two-sided 95% percentile interval, rule-family cluster bootstrap stratified by axis, 10,000 resamples; it covers item sampling and each item's sampling outcome, never training-seed variation",
+  "seed_aggregation": "two seeds are two observations of one item (mean per item); each seed's own estimate is reported, and every directional label requires both on its side; no seed is selected or dropped",
+  "floor": "an arm whose pooled formal static correctness is below 2% is at the floor: both arms at the floor -> NOT_RESOLVED with flag FLOOR; one arm -> flag FLOOR_<arm> beside the label; NO_GO needs neither arm at the floor; a GO off the floor is still a GO",
+  "labels_in_order": [
+   "NOT_RESOLVED",
+   "GO",
+   "REVERSED",
+   "NO_GO",
+   "INCONCLUSIVE"
+  ],
+  "by_axis": "each static axis with SESOI 0.08 under the same rule (clusters unstratified); an axis gain counts only when its label is GO and it survives Holm",
+  "labels": {
+   "GO": "the interval lies wholly above +SESOI and every seed's estimate is above +SESOI: the mixed-calibration Top-1 recovers meaningfully better static fluid correctness than D4 Top-1 under D4-Augmented's recovery",
+   "NO_GO": "the interval and every seed's estimate lie inside (-SESOI, +SESOI) and neither arm is at the floor: a meaningful difference between the two initializations is excluded at this scale",
+   "REVERSED": "the interval lies wholly below -SESOI and every seed's estimate is below -SESOI: a meaningful harm",
+   "INCONCLUSIVE": "the evaluation resolved but the interval or a seed crosses a SESOI boundary: no decision either way, and no claim of an effect or of its absence",
+   "NOT_RESOLVED": "fewer than 10 discordant item-seed pairs or 5 informative clusters, a degenerate bootstrap, or both arms below 2% (flag FLOOR): the evaluation did not discriminate between the arms; no equivalence, no exclusion of a gain, no GO"
+  }
+ },
+ "reachable_labels": "with D4-Augmented at 4.56% pooled static correctness, REVERSED cannot occur on the overall contrast (a -5 pp difference needs the control above 5%); GO needs Mix-Augmented more than 5 pp above D4-Augmented with the whole interval above +5 pp (about 11% or more at H1-PA's interval widths: B's interval was +1.9 to +5.1 pp at these rates); NO_GO needs Mix-Augmented at or above 2% and the interval inside (-5, +5) pp. On deduction (D4-Augmented 13.5%, SESOI 8 pp) every label is reachable",
+ "reported_beside": [
+  "each static fluid axis per arm and seed, and the two generator tiers: unseen format (evaluation-only generators) and unseen rule (shared generators' held-out families)",
+  "the 144 interactive episodes: success and all-turns-usable (exploratory)",
+  "every eval-set-1 unit, correct AND usable side by side over its formal items (the h1pa_fullset layout): math_verified, gsm8k, multihop (+ evidence recall), rag (+ evidence attribution), knowledge (not core), answerability_paired and safety_paired (pairs and rows), tool_calling, instruction and short_realtime (format_ok in place of correctness, labelled), eval_behavior_v0, stage3_legacy_150 as in-sample regression only",
+  "protocol integrity: natural termination, degeneration stops and context-limit hits per arm and seed",
+  "step-0 teacher KL, diagnostic only: the recovery's step-0 val_kd and val_ce on E1's 16 validation sequences (train_log.jsonl, step 0) and the initialization's state_eval@v1 lineage-root KL from its search; never a reasoning result",
+  "training and validation loss (diagnostics)",
+  "the new Top-1's operator path and structure beside D4 Top-1's (descriptive)"
+ ],
+ "never": [
+  "retraining D4-Augmented or regenerating its evaluation",
+  "mixing a greedy result with a nucleus one",
+  "changing this rule, its constants, the evaluation set, the mask, the scorers or the decoding protocol after a Mix-Augmented result is seen",
+  "a pooled score across units or capabilities, or usable rollout read as correctness",
+  "reading step-0 KL, state-evaluation KL, loss, format or termination as reasoning",
+  "selecting, dropping or re-running a seed or a unit for its result",
+  "reading M as the isolated effect of composition, volume, interactive data or profile choice"
+ ],
+ "authorizes": "nothing"
+}

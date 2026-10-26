@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. H1-PA is terminal (B INCONCLUSIVE, FLOOR_A); the maintainer's independent scientific review and the D4 checkpoints' lifecycle decision come next, and nothing paid runs before a new maintainer decision. Owner: docs/stages/stage-2/reasoning_data/H1PA.md (section 16).",
+ "blocker": "BLOCKED NO. H1-PA terminal. The Mixed Calibration 2x design and execution application are done at $0 and wait for the maintainer: grant + project cap $731 -> $740. Owner: docs/stages/stage-0/calibration_volume/MIXED.md.",
  "branch": "stage2/reasoning-data, cut from main 2a8bae78 (the Stage-0 squash, 2026-10-21)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-25T15:50:00Z",
+ "generated_utc": "2026-10-26T00:00:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,13 +123,13 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "H1-PA COMPLETE: B INCONCLUSIVE (FLOOR_A), A NOT_RESOLVED (FLOOR); phase $26.1874 of $50. Next: the maintainer's independent review, then the lifecycle decision for the four D4 checkpoints (storage/h1pa_volume_am5m373kuq.json :: proposal). Owner: H1PA.md sections 14-16. 34 pods ($58.33) stay OPEN.",
+ "next": "Maintainer: decide plans/mixed_application.json (2x search + two Mix-Augmented recoveries, envelope $33.05, cap $740). H1-PA review and the D4 checkpoints' retention: storage/h1pa_volume_am5m373kuq.json. 34 pods ($58.33) stay OPEN.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "H1-PA COMPLETE (H1PA.md section 16): the maintainer's independent review, then the D4 checkpoints' lifecycle decision.",
+  "next_work": "the mixed-calibration 2x application (MIXED.md section 9), awaiting the maintainer",
   "not_next": "no paid resource without a new maintainer decision. Owner: decisions.md 2026-10-21 (Stage-2/3 round opened at $0).",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D-series CLOSED 2026-10-17 (D1 NO-GO, D2 NO_GO, D3 STRUCTURAL_CHANGE + INCONCLUSIVE probes); forward baseline D1 + scored_v1.",
-  "then": "nothing else is queued; the Stage-0 mixture ratio is DEFERRED (never run)."
+  "then": "nothing starts before the maintainer decides the mixed application; 4x only on its entry criterion (MIXED.md section 6)"
  },
  "phase_b_result": {
   "authorizes": "nothing",
@@ -194,14 +194,14 @@
  },
  "read_order": [
   "logs/README.md -- START HERE, the index",
-  "docs/stages/stage-2/reasoning_data/H1.md -- the live round (H1)"
+  "docs/stages/stage-0/calibration_volume/MIXED.md -- the live design (mixed calibration 2x)"
  ],
  "running": {
   "paid_compute": false,
   "pods": 0,
   "network_volumes": 1,
   "run": null,
-  "volume": "am5m373kuq (storage/h1pa_volume_am5m373kuq.json): the four H1-PA D4 checkpoints, kept until the independent review"
+  "volume": "am5m373kuq: the four D4 checkpoints, D4-Augmented x2 the mixed study's formal control (storage record)"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

@@ -14046,3 +14046,48 @@ on a paid pod.
   arms, Stage 4/5, a merge to `main`.
 - **Revisit when.** The maintainer's independent scientific review closes;
   then a lifecycle decision for the four checkpoints and the volume.
+
+## 2026-10-26 — Mixed Calibration 2x: $0 design and execution application (nothing paid)
+
+- **Context.** The maintainer accepted H1-PA's conclusions and asked for a $0
+  design of a new Top-1 initialization from a 2x mixed calibration: 1x
+  supporting + 1x fluid over all five P10.2 axes, 50/50 by realized positions.
+  It is to be searched by the formal D1 full search and recovered and evaluated
+  exactly as D4-Augmented. 4x was to be audited beside it. Nothing paid, no new
+  teacher data, no ratio search, no merge.
+- **Decision (agent design, PROPOSED).** Owner:
+  `docs/stages/stage-0/calibration_volume/MIXED.md`.
+  - **Profile.** `calib.s0m_mix_2x@v1` comes from `base_pool_v1`, less
+    D4-Augmented's training/validation members (1,713 supporting units) and 16
+    eval-set-1 R2 near-duplicates.
+    - Realized: 141,617 UESP, 50.3/49.7, 81 units, 1 complete episode, 13 rule
+      families.
+    - Domain labels are the halves, so DEPTH's equal-domain objective is 50/50.
+  - **4x.** `calib.s0m_mix_4x@v1`, nested, 268,173 UESP; audited, not
+    requested.
+  - **Search.** Declared change: one profile, so 34 expansions instead of 92;
+    nothing else changes. Expected $5.99, bound $14.59 on an A100-80GB.
+  - **Control.** M = Mix-Augmented − D4-Augmented, preregistered under H1's
+    frozen rule (`plans/mixed_preregistration.json`). D4-Augmented's two units
+    are reused as scored.
+  - **Checkpoints.** D4-Augmented × 2 are declared the formal control and kept
+    on `am5m373kuq` with the two D4-Original checkpoints
+    (`storage/h1pa_volume_am5m373kuq.json :: declared_future_use`); no
+    migration.
+- **Correction of the premise.** D4's calibration was static-fluid-heavy:
+  - `base_d4` was 71% and `rh_d4` 87% static fluid by positions, with no
+    interactive data;
+  - 8 of `base_d4`'s supporting items were later D4-Augmented training data.
+- **Alternatives considered.**
+  - 4x first: it is volume-matched but adds no answer the 2x result cannot
+    trigger. Its entry criterion is M GO, or deduction REVERSED.
+  - Historical axis-as-domain labels: DEPTH would weight supporting 1/6.
+  - Per-generator interactive cells: they double the interactive share.
+  - Admitting D4-Augmented's 28 trained episodes: this breaks
+    calibration/training isolation.
+- **Money asked** (`plans/mixed_application.json`):
+  - expected $17.95, envelope $33.05: MC1 cap $15.00, search volume $1.05,
+    MC2 cap $14.00, engineering reserve $3.00;
+  - project cap $731 → $740, with $706.8547 committed.
+- **Revisit when.** The maintainer grants or amends the application. Until
+  then nothing is created or billed beyond `am5m373kuq`.

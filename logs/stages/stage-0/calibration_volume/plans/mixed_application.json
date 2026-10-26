@@ -1,0 +1,136 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.mixed_application/v1",
+ "written_utc": "2026-10-26T04:56:01Z",
+ "status": "PROPOSED for the maintainer. Nothing paid is authorized: no pod, GPU or network volume is created until the maintainer grants this application and the project cap it needs",
+ "recommended": "2x: one formal single-profile D1 full search on calib.s0m_mix_2x@v1, then its Top-1 recovered and evaluated exactly as D4-Augmented on both seeds; 4x is not requested (entry_4x)",
+ "records": {
+  "design": {
+   "path": "configs/stages/stage-0/calibration_volume/mixed_design.json",
+   "sha256": "c25f38e09d3c1499ca4edd510bfae39a091b1b41e156ce155ba6fa1fd33aba2c"
+  },
+  "profiles": {
+   "path": "configs/stages/stage-0/calibration_volume/profiles_mixed.json",
+   "sha256": "904e1815f0a9313383e8e1943201fbb529ab14de5c558b3599ae680a7e8741e6"
+  },
+  "feasibility": {
+   "path": "logs/stages/stage-0/calibration_volume/design/mixed_feasibility.json",
+   "sha256": "57b03e6185107e3564121ca3d33326eefcede8d0095306975d3759713e0bfe4d"
+  },
+  "preregistration": {
+   "path": "logs/stages/stage-0/calibration_volume/plans/mixed_preregistration.json",
+   "sha256": "6daab43d02a6bd98e7c7b0415abec4ea5929591d6a825df524c8729db51f8da9"
+  },
+  "decision_rule": {
+   "path": "scripts/stages/stage-0/calibration_volume/mixed_statistics.py",
+   "sha256": "5b6459d075c75c4c23b6bb450d752b0892865c941b70310829206324e42235c4"
+  }
+ },
+ "phases": {
+  "MC1_search": {
+   "what": "the formal D1 full search (forward baseline stage1_init.d1_target_aware.scored_v1@v1) with one profile, calib.s0m_mix_2x@v1; commit k=1; materialize and identify the Top-1; secure it (relay upload + dev-box read-back by sha256) and the search evidence (journal, states.jsonl, telemetry, search_record)",
+   "hardware": "1x NVIDIA A100-SXM4-80GB (an 80 GB card is required: DEPTH on 8,192-token items at micro-batch 3 runs out of memory on a 48 GB L40S)",
+   "datacenter": "chosen at launch by a live $0 query: A100-80GB stock with network-volume support (the volume's datacenter then fixes the GPU)",
+   "network_volume": {
+    "size_gb": 150,
+    "days_reserved": 3,
+    "usd": 1.05,
+    "why": "the search's durable state: 34 states, about 96.0 GB at the historical per-level state sizes, plus the Top-1 and the journal; retired under AGENTS.md 2.5 once the Top-1 and the evidence are durable elsewhere"
+   },
+   "expected": {
+    "session_minutes": 197.6,
+    "usd": 5.99,
+    "depth_expansions": 4.33
+   },
+   "bound": {
+    "session_minutes": 481.7,
+    "depth_expansions": 16,
+    "usd": 14.59
+   },
+   "hard_cap_usd": 15,
+   "_cap": "the bound is DEPTH in every one of the 16 tree positions it can occupy; history never put it below level 3 (feasibility :: compute.model.historical_depth_fraction_by_level)"
+  },
+  "MC2_recovery_and_evaluation": {
+   "what": "two units, Mix-Augmented-s20260726 and Mix-Augmented-s20260801: D4-Augmented's recovery from the MC1 Top-1 (3,702 optimizer steps on the 5,923,021-token merged set), then every item of eval-set-1 under nucleus_v1; nothing of D4-Augmented is retrained or re-evaluated",
+   "hardware": "1x NVIDIA L40S in EUR-IS-2, D4-Augmented's GPU class, with am5m373kuq mounted",
+   "storage": "am5m373kuq (30 GB): the four D4 checkpoints (9.54 GB) stay; the two new fp32 checkpoints add 4.77 GB; peak about 24.0 GB during the second training (one final checkpoint + one live save point pair + evaluation evidence), inside the provider's 30 GB",
+   "expected": {
+    "session_minutes": 589.5,
+    "usd": 10.91,
+    "per_unit_minutes": 287.3,
+    "measured_from": "H1-PA's D4-Augmented units (train 225.0 / 223.1 min, evaluate 61.1 / 65.3 min)"
+   },
+   "bound": {
+    "session_minutes": 735.9,
+    "usd": 13.63
+   },
+   "hard_cap_usd": 14
+  }
+ },
+ "order": "MC1, then MC2 only after the Top-1 is durable and its identity recorded; at most one billing resource at a time; every pod deleted with the provider confirming it gone, observers closed in the same terminal path",
+ "money": {
+  "prices": {
+   "a100_80gb_usd_per_hour": 1.79,
+   "l40s_usd_per_hour": 1.09,
+   "volume_usd_per_gb_month": 0.07,
+   "container_disk_usd_per_gb_month": 0.1,
+   "_": "the billed rates of the last Stage-0 and H1-PA sessions; re-read live at the grant, and every cap below recomputed by the same formula if a rate is higher"
+  },
+  "expected_usd": 17.95,
+  "envelope": {
+   "MC1_hard_cap": 15,
+   "MC1_network_volume": 1.05,
+   "MC2_hard_cap": 14,
+   "engineering_reserve": 3.0,
+   "total_usd": 33.05,
+   "_reserve": "pre-science engineering subruns under AGENTS.md P12.1 (setup, staging, launcher repairs); cumulative with the sessions, never a fresh allocation"
+  },
+  "project": {
+   "committed_usd": 706.8547,
+   "cap_usd": 731.0,
+   "remaining_usd": 24.15,
+   "requested_cap_usd": 740,
+   "_": "the expected cost fits inside the remaining $24.15 but the hard caps do not, so the grant needs the cap raised to $740; nothing runs on the old cap"
+  }
+ },
+ "engineering_owed_before_the_first_paid_action": [
+  "a search-only session for the mixed treatment: search_session.treatment_profiles('2x', profiles_mixed.json) into build_session with D4's execution options (depth_prefix_reuse, validate_on_search_device, prune_weights=False), dose_driver's S_search and X_export stages without its 0.86M recovery and evaluation; the Top-1 relayed and read back",
+  "a Mix-Augmented arm for the H1-PA driver: a study record that names D4-Augmented's dataset, recipe and schedule unchanged and the new Top-1 by digest, without touching h1pa.json or any H1-PA identity",
+  "the analysis: mixed_statistics.decide on the formal static rows, and the full eval-set-1 correct-and-usable table (h1pa_fullset over the four D4-Augmented and Mix-Augmented units)",
+  "the governance chain for MC1 and MC2 through the project's issuer, and a $0 dry run of each launcher's success closeout before the first paid launch"
+ ],
+ "authorization_boundary": {
+  "if_granted": [
+   "MC1: one A100-80GB pod and one new network volume of at most 150 GB, deleted after the Top-1 and the evidence are durable",
+   "MC2: one L40S pod in EUR-IS-2 with am5m373kuq",
+   "the relay transfer of the one Top-1 checkpoint (1.2 GB, bf16)",
+   "ordinary P12.1 engineering repair inside the envelope"
+  ],
+  "never": [
+   "a 4x search, a second 2x draw or any re-draw of the profile",
+   "a mixture-ratio search",
+   "new teacher data",
+   "retraining or re-evaluating D4-Augmented, PCA-Original or D4-Original",
+   "extra arms, seeds or evaluation sets",
+   "Stage 4/5 work",
+   "a merge to main",
+   "raising any cap",
+   "a billing resource kept past its phase",
+   "deleting or migrating the four D4 checkpoints"
+  ]
+ },
+ "entry_4x": {
+  "status": "not requested",
+  "criterion": "enter 4x only on one of two preregistered results of M: (a) GO -- a dose follow-up asks whether more of the mixed calibration helps further; (b) REVERSED on the deduction axis (the one axis where D4-Augmented is off the floor) -- 2x's realized volume is 0.70x of base_d4's, so a harm at 2x confounds composition with less calibration, and 4x (1.32x base_d4) separates them. NO_GO, INCONCLUSIVE and NOT_RESOLVED do not enter 4x: an interval that crosses a SESOI is a power limit, not a volume question, and NO_GO excludes a meaningful effect of the composition at 2x",
+  "not_a_criterion": [
+   "a lower state-evaluation or step-0 KL at 4x",
+   "more rule families or a second episode by themselves",
+   "4x's being affordable"
+  ],
+  "would_cost": {
+   "MC1_4x_expected_usd": 9.88,
+   "MC1_4x_hard_cap_usd": 27,
+   "plus": "a second MC2 recovery and evaluation (expected $10.91)"
+  }
+ },
+ "authorizes": "nothing"
+}

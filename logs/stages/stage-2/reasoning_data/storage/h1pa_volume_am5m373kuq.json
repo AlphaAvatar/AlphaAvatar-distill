@@ -17,7 +17,7 @@
  "_reserved": "30 GB x $0.07 x 2 months, booked inside the H1-PA PA2v/PA2 $50 envelope from creation (h1pa_governance.spent) until this record states actual_usd",
  "datacenter_choice": "live query 2026-10-24T19:00Z: storage support and L40S stock Low in EU-NL-1, EUR-IS-2, US-MO-1, US-NC-1 (OC-AU-1 and US-TX-4 have L40S but no network volumes; US-IL-1 and US-TX-3 no L40S stock); EUR-IS-2 chosen, no measurement distinguishes the four; the volume locks every PA2v/PA2 session to EUR-IS-2 and the L40S",
  "consumer": "H1-PA PA2v and PA2: the durable root <mount>/h1pa -- the four new checkpoints, a training's save points while it runs, the evaluation progress and evidence",
- "retention": "the four new checkpoints are kept until the preregistered analysis and the maintainer's independent scientific review are complete (h1pa.json :: retention; grant :: storage); then a consumer audit and a migration or retirement proposal go to the maintainer; no AGENTS.md 2.5 automatic retirement before then",
+ "retention": "all four checkpoints are kept until BOTH the H1-PA independent review and the mixed-calibration study's analysis and review are complete (declared_future_use); then a consumer audit and a migration or retirement proposal go to the maintainer; no AGENTS.md 2.5 automatic retirement before then",
  "retire_by": "2026-12-24 at the end of the reservation, or by the maintainer's lifecycle decision; keeping it past the reservation is booked here first",
  "cost_to_date": {
   "provider_observed_usd": 0.1021,
@@ -73,10 +73,26 @@
   "declared": "the maintainer's independent scientific review (h1pa.json :: retention.new_checkpoints): KEEP until it is complete",
   "protected_elsewhere": "the two PCA-Original checkpoints are E1's, on the relay, not on this volume; never retrained or deleted"
  },
+ "declared_future_use": {
+  "declared_utc": "2026-10-26",
+  "decided_by": "maintainer brief 2026-10-26 (Mixed Calibration 2x, section 5): the two D4-Augmented checkpoints are the formal control of the next initialization study; they are not retired for want of a code consumer before that consumer completes",
+  "D4-Augmented-s20260726": "FORMAL CONTROL of the mixed-calibration study (logs/stages/stage-0/calibration_volume/plans/mixed_preregistration.json): its evaluation evidence is reused as scored and never regenerated; the weights are the retained control anchor (AGENTS.md 2.5 'explicitly retained anchor') until that study's analysis and the maintainer's review are complete",
+  "D4-Augmented-s20260801": "the same",
+  "D4-Original-s20260726": "H1-PA's comparison A/B arm: retained until H1-PA's independent review closes; no declared consumer in the mixed-calibration study",
+  "D4-Original-s20260801": "the same",
+  "what_reads_the_weights": "nothing in the mixed-calibration design: its decision reads the D4-Augmented rows and generations only (AGENTS.md P8.4: completed and scored, evidence not bytes). Retention is a scientific anchor, not an execution dependency; a later authorized consumer (re-evaluation on a future registered eval set, continued training from D4-Augmented, a diagnostic on the control's weights) mounts the volume in EUR-IS-2 and reads them in place",
+  "mixed_study_use_of_the_volume": "if MC2 is granted, its two Mix-Augmented checkpoints are written here beside the four (peak about 24.0 GB during its second training, 14.8 GB after), so treatment and control share one datacenter and GPU class (logs/stages/stage-0/calibration_volume/plans/mixed_application.json)"
+ },
  "proposal": {
-  "status": "PROPOSED, for the maintainer after the independent review; nothing is deleted or moved before then",
-  "recommended": "keep on am5m373kuq until the review closes (inside the $4.20 reservation, to 2026-12-24); then (a) if no authorized follow-up reads the weights, retire them under AGENTS.md 2.5 with tombstones carrying the digests above and delete the volume; (b) if a follow-up is authorized (for example Stage-3 recovery from D4-Augmented), that experiment mounts the volume in EUR-IS-2 and reads them in place, without a migration",
-  "not_recommended": "migrating to the HF relay now: 4 x 2.38 GB = 9.54 GB against private storage that accepted only ~2 GB on 2026-10-22 (plans/durability_plan.json), and it needs a pod in EUR-IS-2 to read the volume; no consumer requires it",
+  "status": "PROPOSED (revised 2026-10-26 for the declared future use); nothing is deleted or moved before the maintainer decides",
+  "recommended": "keep all four in place on am5m373kuq (EUR-IS-2) through both reviews: $2.10/month, already reserved to 2026-12-24 inside H1-PA's booking. If either review is still open on 2026-12-24, book one more month ($2.10) here before that date, by maintainer decision, rather than migrate. After both close: (a) no authorized consumer -> retire the weights under AGENTS.md 2.5 with tombstones carrying the digests above, then delete the volume; (b) an authorized follow-up -> it reads them in place",
+  "safe_migration_if_ever_required": [
+   "only on a maintainer decision, and only to a destination whose free capacity was read from its quota endpoint first: the HF relay's private storage accepted about 2 GB on 2026-10-22 (plans/durability_plan.json) against 9.54 GB here (14.3 GB with the Mix-Augmented pair), and the dev box has 3.8 GB free",
+   "one pod in EUR-IS-2 mounting am5m373kuq (the volume cannot be read otherwise), priced and capped like any paid session",
+   "sha256 every checkpoint against its unit descriptor before the copy, copy (runpodctl send/receive or the provider's S3-compatible endpoint), and sha256 again at the destination",
+   "write a migration record (source, destination, both hashes, sizes, time) and only then delete the volume; a tombstone for anything retired"
+  ],
+  "not_recommended": "migrating now: no consumer needs the bytes elsewhere, a migration costs a pod and a transfer, and no destination with room has been confirmed",
   "cost_of_keeping": "$2.10/month; reserved through 2026-12-24"
  },
  "actual_usd": null,
