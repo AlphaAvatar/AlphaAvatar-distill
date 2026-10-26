@@ -115,10 +115,11 @@ def main(argv=None) -> int:
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--check-only", action="store_true")
     ap.add_argument("--plan", default="search", help="the session plan name the authorization binds")
-    ap.add_argument("--auth-kind", default="search", choices=("search", "dose"),
+    ap.add_argument("--auth-kind", default="search", choices=("search", "dose", "mixed_search"),
                     help="the session kind whose authorization this search runs under: a "
                          "dose session's search is authorized by the DOSE artifact "
-                         "(dose_20261019_054503 was refused loading it as 'search')")
+                         "(dose_20261019_054503 was refused loading it as 'search'); the "
+                         "mixed-calibration study's MC1 by its own grant's search artifact")
     ap.add_argument("--treatments-doc", default=str(PREREG.relative_to(REPO)),
                     help="the document that freezes this treatment's profile hashes")
     ap.add_argument("--max-depth", type=int, default=None,
@@ -195,8 +196,16 @@ def main(argv=None) -> int:
         #: also on --check-only when a real artifact is named, so the $0 check
         #: reaches the line a paid session would otherwise die on
         if not args.check_only or Path(args.auth).is_file():
-            auth = G.load_for(args.auth_kind, args.auth)
-            auth.require_plan(G.plan_hash(args.plan))
+            if args.auth_kind == "mixed_search":
+                from stages.calibration_volume import mixed_governance as MG
+                if args.plan != MG.SEARCH_PLAN:
+                    raise RuntimeError(f"a mixed_search authorization funds the {MG.SEARCH_PLAN} plan, "
+                                       f"not {args.plan}")
+                auth = MG.load_for("search", args.auth)
+                auth.require_plan(MG.identity_hash("search"))
+            else:
+                auth = G.load_for(args.auth_kind, args.auth)
+                auth.require_plan(G.plan_hash(args.plan))
             record["authorization_id"] = auth.authorization_id
         done(st, config_hash=session.config.config_hash[:16])
         save()

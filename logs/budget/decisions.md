@@ -14145,3 +14145,68 @@ on a paid pod.
     infeasible.
 - **Revisit when.** The maintainer grants or amends application v2. No grant
   is issued and nothing is created until then.
+
+## 2026-10-26 — Mixed Calibration 2x v2: formal authorization; corrected project accounting
+
+- **Context.** The maintainer reviewed `562426f8` and accepted the design:
+  `calib.s0m_mix_2x@v2` (content `9a6c2782…`), with 71,216 + 71,216 UESP.
+  - **Granted:** MC1 + MC2 with a cumulative hard ceiling of $33.05, and the
+    project cap raised $731 → $740.
+  - **Scope:** 2x only. No result may start 4x automatically.
+  - **Owner:** `logs/budget/approvals/mixed_calibration_grant.json`.
+  - **Precondition:** before anything is paid, the accounting must be
+    corrected and the $0 launch preparation finished.
+- **Decision (agent implementation, inside the grant).**
+  - **Governance.** `mixed_governance.py` adds one grant, kinds `search`
+    (MC1) and `recovery` (MC2), one-use authorizations, and one cumulative
+    envelope. That envelope includes the MC1 volume, and an MC1 retry must
+    leave MC2's cap fundable.
+  - **Position.** `mixed_governance.position` re-reads the provider's
+    billing, balance and resources at every issue and launch. It counts:
+    - everything billed;
+    - every unposted session inside a 72 h posting window;
+    - every retained volume's booked reservation, less what the provider has
+      already posted for that volume.
+  - **Posted volume rows** carry no volume id, so they are netted only on a
+    UTC day when the volume was the account's sole recorded volume, and never
+    beyond size × the hours it existed that day.
+    - The audit of 2026-10-23..26 shows why: H1's `1980hnh75i` existed
+      15.4 h and was billed 20 h; the 10-25 row is 870 GB-h for one 30 GB
+      volume (at most 720 GB-h); the 10-24 row mixes both volumes.
+    - Those excesses stay in the bill and offset nothing.
+  - **Refusals.** It refuses an unknown read, any live pod (at most one
+    billing pod), and any volume no record owns.
+  - **Cap checks.** At the first funded issue, committed + the whole
+    remaining envelope must fit $740. Later, committed + that session's cap
+    must fit. A miss is a HARD BOUNDARY; no cap is raised.
+  - **Position at 2026-10-26T09:28Z.** Committed $706.9114: the H1-PA
+    formula's $706.9656 less the double count, plus `1980hnh75i` re-counted
+    inside its posting window. Committed + $33.05 = $739.9614.
+  - **Not counted:** `a3_attempt20`'s three September cold-host pods have
+    never appeared in the bill. They are listed, not counted.
+  - **MC1.** `mixed_search_driver.py` runs `search_driver.py` under a
+    `mixed_search` authorization, with the pinned search identity (cuda
+    config hash `7ee23a7d…`) and D4's execution options. It mirrors the
+    search to a ≤150 GB volume, then commits k = 1, re-identifies the Top-1
+    and relays it.
+    - The bound (DEPTH in all 16 positions) is the contingency: $14.97
+      all-in at $1.79/h, inside the $15 cap.
+  - **MC2.** `mixed_recovery_driver.py` runs `h1pa_driver.run` with a plan
+    whose only arm is D4-Augmented copied whole, with the initialization
+    replaced by the MC1 Top-1.
+    - Each unit's recipe must hash to D4-Augmented's recorded identity for its
+      seed, and its schedule must be D4-Augmented's.
+    - `h1pa_driver.schedule_for` now reads the derived-schedule arms from the
+      study; the default is H1-PA's `D4-Augmented`, so H1-PA is unchanged.
+    - The bound is $13.92 all-in at $1.09/h, inside the $14 cap.
+  - **Relay headroom** (LFS batch endpoint, nothing stored): 1.475 GB, enough
+    for one 1.19 GB Top-1 and two about 38 MB session bundles.
+- **Alternatives considered.**
+  - Netting all posted rows dated after a volume's creation: rejected. It
+    over-attributes rows that belong to other volumes and to the provider's
+    excess hours.
+  - Counting every never-posted historical pod: rejected. The provider's bill
+    is the charge.
+  - A time-based remainder instead of the booked reservation: rejected. The
+    record books the reservation, and an extension is booked separately first.
+- **Revisit when.** MC1 closes, and again before MC2's issue.

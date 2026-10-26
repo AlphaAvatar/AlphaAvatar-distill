@@ -193,10 +193,12 @@ def pack_refusals(plan: dict, arm: str, pack_root: Path) -> list[str]:
 def schedule_for(plan: dict, arm: str, pack_root: Path) -> dict | None:
     """None for D4-Original (E1's own schedule, unchanged); D4-Augmented's from
     the merged set's real training-sequence count, which must equal the
-    study's record."""
+    study's record. A study naming other arms that train on D4-Augmented's
+    terms (`derived_schedule_arms`: the mixed-calibration study's
+    Mix-Augmented) gets the same rule; H1-PA names none and keeps its own."""
     e1 = plan["recipes"][int(plan["study"]["seeds"][0])]
     batch, epochs = int(e1["batch"]["blocks_per_step"]), 3
-    if arm != "D4-Augmented":
+    if arm not in plan["study"].get("derived_schedule_arms", ("D4-Augmented",)):
         return None
     _, ds = dataset_of(plan, arm)
     lad = UD._read(Path(pack_root) / plan["study"]["arms"][arm]["dataset"] / "ladder.json")
@@ -209,7 +211,7 @@ def schedule_for(plan: dict, arm: str, pack_root: Path) -> dict | None:
            "save_every": sched["save_every"]}
     bad = {k: (v, want.get(k)) for k, v in got.items() if want.get(k) != v}
     if bad:
-        raise DriverRefusal(f"D4-Augmented's schedule from the merged set {bad} is not the study's record")
+        raise DriverRefusal(f"{arm}'s schedule from the merged set {bad} is not the study's record")
     return sched
 
 

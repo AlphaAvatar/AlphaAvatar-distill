@@ -1,0 +1,27 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.mixed_recovery/v1",
+ "study_id": "stage0.calibration_volume.mixed_v2",
+ "phase": "MC2",
+ "decided_by": "logs/budget/approvals/mixed_calibration_grant.json (maintainer 2026-10-26); plans/mixed_preregistration.json :: recovery",
+ "arm": "Mix-Augmented",
+ "control_arm": "D4-Augmented",
+ "base_study": {
+  "path": "configs/stages/stage-2/reasoning_data/h1pa.json",
+  "sha256": "fe0ea966811b57d2a2bc94ac71bfec5660f74a63cc0f94cd9566e8efc389159d",
+  "_": "H1-PA's frozen study record, read as it is: the arm, dataset, recipe, schedule, evaluation, storage and relay inputs of Mix-Augmented ARE D4-Augmented's (mixed_recovery_driver.load_plan copies the control arm and changes only its initialization); h1pa.json is never edited"
+ },
+ "initialization": {
+  "record": "logs/stages/stage-0/calibration_volume/assets/mix_top1_materialization.json",
+  "dir": "artifacts/stages/stage-0/calibration_volume/candidates/mixed_v2/top1",
+  "_": "the MC1 Top-1, written by mixed_launch.read_back_top1 after the relay copy is downloaded and re-identified on the dev box; the pod stages it from the relay by sha256 and the driver re-identifies it again before training"
+ },
+ "control_recipe_sha256": {
+  "20260726": "6f80a6b7cbd12dc0930003d6339b675d2d524975d238ad91c99ea28f5a077b3b",
+  "20260801": "95e4c813d5bca3e49f36af77a8d91d1e7a3c62ff13b9ae61de457c14c50772f7",
+  "_": "the recipe identity (h1pa_driver.recipe_identity: the derived config less where it runs) each D4-Augmented unit recorded in its report (artifacts/stages/stage-2/reasoning_data/h1pa/units/evidence/D4-Augmented-s<seed>/report/report.json :: inputs.recipe_sha256); a Mix-Augmented unit whose recipe hashes otherwise refuses before training"
+ },
+ "control_schedule": {"rung": 5923021, "total_steps": 3702, "warmup_steps": 185, "eval_every": 462, "save_every": 1851},
+ "durable_subdir": "mixed_v2",
+ "_durable": "the units live under <am5m373kuq mount>/mixed_v2, beside H1-PA's <mount>/h1pa, which is never written",
+ "authorizes": "nothing"
+}
