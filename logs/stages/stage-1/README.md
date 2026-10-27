@@ -86,6 +86,7 @@ What each one asked of this stage.
 | `phase_d3` — D3 — fixed-q2 DEPTH teacher-reference ablation | Given D1-q2's exact structural path, does choosing the DEPTH layers by minimizing KL against the original teacher instead of the FFN-compressed parent give a better initialization for downstream recovery? One declared change: DEPTH's KL reference (kl_reference: root_reference/v1); every operator, profile, position policy, support, aggregation, geometry and tie-break is q2's. | [`phase_d3/`](phase_d3/) | COMPLETE 2026-10-17. Structural (d3_structural_20261017_083554): STRUCTURAL_CHANGE, admitted, $0.5571. Three probes (d3_probes_20261017_110022): closeout COMPLETE, INCONCLUSIVE vs q2 and vs B (exploratory), $5.0395. Replaces the cancelled, unexecuted student-confidence D3. D-series CLOSED 2026-10-17; both D3 grants closed unspent |
 | `phase_c2` — Phase C2 — ATTENTION-aware composition/order re-search | With that ATTENTION operator now fixed, does re-optimizing the operator order and ATTENTION's calibration profile beat the frozen C1 treatment? | [`phase_c2/`](phase_c2/) | planned — space implemented and priced, NOT authorized |
 | `phase_c2_baseline_completion` — Phase C2 baseline completion — the B side of B→C | What does the frozen C1 treatment baseline B score on the same state_eval suite the five selected Search-1 candidates were measured on -- so that the B→C comparison Attempt 4 collected its ranking to ask can finally be computed? | [`phase_c2_baseline_completion/`](phase_c2_baseline_completion/) | granted — attempt5 grant committed, NOT yet authorized |
+| `projected_residual` — Full-width residual stream with per-layer trainable PCA (Research B) | Keeping the teacher's 2,560-wide residual stream, embedding and head and computing each layer's attention and FFN in a 1,024-wide space reached through a trainable per-layer PCA projection, does a student recover better fluid-reasoning correctness than D4-Augmented under its teacher, data, recipe and evaluation? | [`projected_residual/`](projected_residual/) | $0 READY 2026-10-27, NOT AUTHORIZED: the 900M full-width-residual student (902,911,488 parameters, per-layer trainable PCA projections), its initializer, exact counters and folded evaluation route implemented and host-validated; design and decision rule drafted, frozen only on the maintainer's approval; B-E engineering validation ($3.00 cap) and B1 formal ($21.00 cap) applied for. 600M reserved |
 
 ## Runs
 
@@ -109,6 +110,7 @@ the config path and hash it ran under.
 * `configs/stages/stage-1/phase_c2_replay/c2_replay_artifacts.json`
 * `configs/stages/stage-1/phase_c3/batching_refactor_cuda.json`
 * `configs/stages/stage-1/phase_d1/d1_replay_artifacts.json`
+* `configs/stages/stage-1/projected_residual/design.json`
 * `configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json`
 * `configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json`
 * `configs/stages/stage-1/source_sets.json`
@@ -129,6 +131,10 @@ copied here.
 * `artifacts/stages/stage-1/qwen3_0p6b_init_v0`
 * `artifacts/stages/stage-1/state_eval_v1`
 * `artifacts/stages/stage-1/e8_contribution_init_v1`
+
+## Decisions
+
+* logs/budget/decisions.md -- 2026-10-27: the next research programme (Research A and B) opened at $0
 
 ## Current status
 

@@ -2335,6 +2335,51 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "passed through to `plan_session`. THIS IS A DECLARED SEMANTIC "
             "CHANGE of the spec. NO CUDA SURFACE.",
      }),
+    ("d5f1c6f2a89471f99d9477b3b39e11178998b47b",
+     "Research A (hybrid teacher modes) and B (projected residual) at $0",
+     {
+        "src/aadistill/evaluation/behavior.py":
+            "NEW `THINK_STATES`, `template_think_state`, `record_think_state`; "
+            "`split_generation(think_state=...)` and `score_sample(think_state=...)` "
+            "add the `preclosed` state (a hybrid template's empty closed think "
+            "block: no delimiter allowed in the continuation, the body is the "
+            "answer); every split now also reports `think_state`. Absent the "
+            "argument every path is the historical one. THIS IS A DECLARED "
+            "SEMANTIC CHANGE of protocol parsing. NO CUDA SURFACE.",
+        "src/aadistill/evaluation/strict_answer.py":
+            "`protocol_valid(think_state=...)`; `score_numeric` reads the record's "
+            "state through `record_think_state` (identical for every record without "
+            "`think_state`). THIS IS A DECLARED SEMANTIC CHANGE. NO CUDA SURFACE.",
+        "src/aadistill/evaluation/capability.py":
+            "`_shared` reads the record's state through `record_think_state`; "
+            "identical for every record without `think_state`. THIS IS A DECLARED "
+            "SEMANTIC CHANGE. NO CUDA SURFACE.",
+        "src/aadistill/evaluation/usable_rollout.py":
+            "`components(think_state=...)` passed to the protocol check and the "
+            "answer split. THIS IS A DECLARED SEMANTIC CHANGE. NO CUDA SURFACE.",
+        "src/aadistill/training/train.py":
+            "NEW `batch.document_isolation` (default False): blocks may carry "
+            "per-document position ids, forwarded to student and teacher so "
+            "transformers builds a block-diagonal causal mask; refused unless the "
+            "flag and the blocks agree. Default path unchanged. THIS IS A DECLARED "
+            "SEMANTIC CHANGE of training; CUDA SURFACE: the attention mask on the "
+            "real models, owed to a GPU validation.",
+        "src/aadistill/data/token_documents.py":
+            "NEW MODULE: token-in/token-out teacher documents, the template's "
+            "generation suffix, `pack_isolated` (whole documents, restarting "
+            "position ids) and `isolation_report`. NO CUDA SURFACE.",
+        "src/aadistill/initialization/adapters/projected_residual.py":
+            "NEW MODULE: the `aad_projected_residual` family (full-width residual, "
+            "per-layer projection), `fold_to_qwen3`, `projection_orthogonality`, "
+            "explicit `register_auto_classes`. CUDA SURFACE: a new model, owed to "
+            "a GPU validation.",
+        "src/aadistill/initialization/transforms/projected_residual.py":
+            "NEW MODULE: `select_full_width`, `SublayerStatsCollector`, "
+            "`projection_basis`, `materialize_projected`. CUDA SURFACE: forward "
+            "hooks on the parent's blocks, owed to a GPU validation.",
+        "src/aadistill/models/cost_model.py":
+            "NEW MODULE: exact parameter counts and analytic FLOPs. NO CUDA SURFACE.",
+     }),
 )
 
 

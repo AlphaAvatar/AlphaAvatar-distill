@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-26 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-27 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -8,6 +8,24 @@ disagree.
 Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
+
+**NEXT RESEARCH PROGRAMME OPENED AT $0 (2026-10-27): RESEARCH A AND B ARE $0 READY; NOTHING PAID IS AUTHORIZED.**
+Branch `research/teacher-modes-and-projected-residual`, cut from `stage2/reasoning-data` `d5f1c6f2` (kept; nothing
+merged). Decision record: `logs/budget/decisions.md` 2026-10-27. Nothing runs; the account holds 0 pods and the
+retained volume `am5m373kuq`.
+- **Accounting audit (prerequisite): CLOSED.** Owner `logs/budget/audits/accounting_audit_2026-10-27.json` (README
+  beside it). Committed $724.345 of the $740 cap (headroom $15.655), nothing unposted; the mixed study reconciles to
+  $17.3366; every post-anchor billed pod attributed; the +$32.79 provider-records gap is +$37.53 before the
+  2026-09-11 anchor (the maintainer's call) and -$4.74 since. The account balance ($139.24) is not a grant.
+- **Research A, hybrid teacher thinking vs non-thinking:** `docs/stages/stage-2/teacher_modes/DESIGN.md`. Teacher
+  `Qwen/Qwen3-4B@1cfa9a72` pinned (`configs/stages/stage-2/teacher_modes/teacher_identity.json`); token-in/token-out
+  documents, document-isolated packing, `kd_scope="assistant"` and the `preclosed` think state implemented and
+  host-validated. Applied for: A-E $3.50, then A1-A3 + storage + reserve, $60.00 in all.
+- **Research B, 900M full-width residual + per-layer trainable PCA:** `docs/stages/stage-1/projected_residual/DESIGN.md`.
+  902,911,488 parameters (513,955,328 trainable), exact fold to stock Qwen3 for vLLM, initializer from D4 Top-1's
+  selections. Applied for: B-E $3.00, then B1 $21.00 (needs a project cap of $749 or more). 600M reserved only.
+- **Next:** the maintainer's grant decisions. Both engineering validations ($6.50) fit the current cap; the formal
+  phases do not.
 
 **MIXED CALIBRATION 2x: COMPLETE; PREREGISTERED M = NO_GO (2026-10-27).**
 Owner: [`docs/stages/stage-0/calibration_volume/MIXED.md`](../../docs/stages/stage-0/calibration_volume/MIXED.md)
@@ -4224,7 +4242,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$687.4031` spent of `$712.1700`, leaving `$24.7669` |
+| project cap | `$687.4031` spent of `$740.0000`, leaving `$52.5969` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

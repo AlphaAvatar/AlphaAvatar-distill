@@ -76,6 +76,7 @@ What each one asked of this stage.
 | experiment | what it asked | logs | status |
 | --- | --- | --- | --- |
 | `reasoning_data` — Stage-2 verified teacher-native reasoning data, measured through Stage-3 controlled recovery | Under one fixed initialization and the fixed historical recovery recipe, does verified teacher-native reasoning data lift a 0.6B student off the fluid-reasoning floor where corpus_v2 left it, and how does that scale over a nested 0.86M-5.50M ladder? | [`reasoning_data/`](reasoning_data/) | H1 CLOSED AT ITS SCIENTIFIC TERMINAL 2026-10-24: the frozen decision is NOT_RESOLVED (FLOOR) -- B - A = +0.0053 on static fluid correctness (95% CI -0.0009 to +0.0136), A 0.44% / B 0.96%, both arms at the floor; deduction INCONCLUSIVE (FLOOR_A); interactive 0/144 (exploratory). P1 ($3.33) and P1t ($0.64) generated arm B's @v3 data; P1g passed; P2's four formal units completed on an A100 ($17.64 in sessions + $4.20 reserved storage of the $50 phase grant). The four checkpoints stay on the network volume. A floor diagnostic (plans/h3_candidates.json) awaits the maintainer. 34 pods / $58.33 unattributed |
+| `teacher_modes` — Hybrid teacher: thinking against non-thinking distillation (Research A) | With one hybrid teacher, one student architecture, one common initialization and one recipe, does the teacher's native thinking or non-thinking distribution give a small student better fluid-reasoning correctness -- on the same tasks, and at the same training compute? | [`teacher_modes/`](teacher_modes/) | $0 READY 2026-10-27, NOT AUTHORIZED: the hybrid Qwen3-4B identity and both modes pinned; token-in/token-out documents, document-isolated packing, kd_scope assistant on generated tokens and the preclosed think state implemented and host-validated; the re-rendered H1-PA path audited (0 of 767 sessions trained on exactly the generated tokens); design and decision rule drafted; A-E engineering validation ($3.50 cap) and the formal phases ($60.00 total) applied for |
 
 ## Runs
 
@@ -91,6 +92,7 @@ canonical run list, across every stage, is
 the config path and hash it ran under.
 
 * `configs/stages/stage-2/reasoning_data/corpus_spec.json`
+* `configs/stages/stage-2/teacher_modes/design.json`
 * `data/stages/stage-2/stage2_v1/stage2_offline_v1.manifest.json`
 
 ## Canonical data and artifact manifests
@@ -123,6 +125,7 @@ copied here.
 * logs/budget/decisions.md -- 2026-10-23: Maintainer: H1 P1t authorized; P1t executed ($0.64), arm B's pack built, M1 measured, code verifier v3
 * logs/budget/decisions.md -- 2026-10-23: Maintainer: H1 P1g + P2 authorized ($50); protocol frozen; P1g passed; P2 started
 * logs/budget/decisions.md -- 2026-10-24: H1 P2 executed: the frozen decision is NOT_RESOLVED (FLOOR); scientific terminal
+* logs/budget/decisions.md -- 2026-10-27: the next research programme (Research A and B) opened at $0
 
 ## Current status
 

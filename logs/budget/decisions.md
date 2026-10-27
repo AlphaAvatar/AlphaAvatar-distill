@@ -14258,3 +14258,55 @@ on a paid pod.
     contrast therefore rests mostly on deduction.
 - **Revisit when.** The maintainer's independent review of this result and of
   H1-PA.
+
+## 2026-10-27 — The next research programme (Research A and B) opened at $0; mixed-calibration accounting closed
+
+- **Context.** The maintainer's brief "Next Research Programme: Teacher Reasoning
+  Modes & Trainable PCA Architecture" opens two independent research lines.
+  - It authorizes $0 engineering, design, tests and preparation only: no paid
+    teacher generation, search, recovery, GPU experiment or 600M work.
+  - It requires the mixed-calibration $0 budget attribution and the audit of
+    historical unposted sessions to close first, with an independent
+    conclusion.
+- **Accounting audit** (`logs/budget/audits/accounting_audit_2026-10-27.json`,
+  read-only, from snapshot `runpod_billing_2026-10-27T1011Z`): **CLOSED**.
+  - Committed $724.345 (provider-billed $720.1945, with nothing unposted) of the
+    $740 cap; headroom $15.655.
+  - The mixed study reconciles to its grant's $17.3366.
+  - Every billed pod since the 2026-09-11 anchor is attributed. One pod was
+    attributed by evidence: the C3 packing pilot's subrun v6, which its campaign
+    had booked under v5's pod id.
+  - The provider − records gap of +$32.79 is +$37.53 before the anchor (the
+    maintainer's call) and −$4.74 since.
+  - `derive_budget` now reads the project cap from the newest grant ($740)
+    instead of the stale package value ($712.17). No record was edited.
+  - Owed before any paid engineering: the next issuer counts
+    engineering-campaign subruns among unposted sessions.
+- **Research A** (`docs/stages/stage-2/teacher_modes/DESIGN.md`): hybrid
+  `Qwen/Qwen3-4B@1cfa9a72`, thinking against non-thinking. **$0 READY.**
+  - Implemented: the teacher identity and both modes pinned; token-in/token-out
+    documents; document-isolated packing (`batch.document_isolation`);
+    `kd_scope="assistant"` on generated tokens; the `preclosed` think state in
+    the parsers and scorers (no earlier verdict changes).
+  - Finding on H1-PA's own data: none of 767 fluid sessions trained on exactly
+    the generated tokens.
+  - Requests: A-E $3.50 (fits the cap), then A1–A3 + storage + reserve, $60.00
+    in all.
+- **Research B** (`docs/stages/stage-1/projected_residual/DESIGN.md`): a 900M
+  full-width-residual student, 902,911,488 parameters, with per-layer trainable
+  PCA projections initialized from D4 Top-1's selections. **$0 READY.**
+  - Implemented: the model type, an exact fold to stock Qwen3 for vLLM, the
+    initializer, and the exact counters.
+  - Requests: B-E $3.00 (fits the cap), then B1 $21.00. B1 needs a project cap
+    of $749 or more.
+  - 600M is reserved only.
+- **Decision.** Nothing paid is started. The maintainer decides which grants to
+  issue and in what order.
+- **Risks / limits.**
+  - Both lines will likely measure near the eval-set-1 floor on three static
+    axes. A difficulty ladder is planned (`docs/shared/REASONING_DIFFICULTY_LADDER.md`),
+    not implemented.
+  - Research A's data budget is derived from a pilot slice before the rest is
+    generated.
+- **Revisit when.** The maintainer's grant decision on A-E / B-E and the
+  formal phases.
