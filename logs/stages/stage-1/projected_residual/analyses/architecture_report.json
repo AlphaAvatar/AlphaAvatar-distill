@@ -1,0 +1,211 @@
+{
+ "schema": "aadistill.stage1.projected_residual.architecture_report/v1",
+ "conventions": "aadistill.models.cost_model docstring: 2 FLOPs per multiply-add, mean causal context (L+1)/2 at L = 8192, elementwise ops excluded, frozen tied embedding in training (E1's trainable patterns never match it)",
+ "models": {
+  "teacher_thinking_2507": {
+   "geometry": {
+    "vocab_size": 151936,
+    "hidden_size": 2560,
+    "num_hidden_layers": 36,
+    "intermediate_size": 9728,
+    "num_attention_heads": 32,
+    "num_key_value_heads": 8,
+    "head_dim": 128,
+    "tie_word_embeddings": true
+   },
+   "parameters": {
+    "embedding": 388956160,
+    "output_head_untied": 0,
+    "final_norm": 2560,
+    "per_layer": {
+     "projection": 0,
+     "attention": 26214656,
+     "ffn": 74711040,
+     "norms": 5120,
+     "total": 100930816
+    },
+    "blocks": 3633509376,
+    "total": 4022468096,
+    "non_embedding": 3633511936
+   },
+   "forward_gflops_per_token": {
+    "1": 8.0451,
+    "1024": 8.6485,
+    "4096": 10.4605,
+    "8192": 12.8764
+   },
+   "kv_cache_bytes_per_token_bf16": 147456,
+   "weights_gb_bf16": 8.045
+  },
+  "d4_top1_596m": {
+   "geometry": {
+    "vocab_size": 151936,
+    "num_hidden_layers": 28,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "head_dim": 128,
+    "tie_word_embeddings": true,
+    "hidden_size": 1024
+   },
+   "parameters": {
+    "embedding": 155582464,
+    "output_head_untied": 0,
+    "final_norm": 1024,
+    "per_layer": {
+     "projection": 0,
+     "attention": 6291712,
+     "ffn": 9437184,
+     "norms": 2048,
+     "total": 15730944
+    },
+    "blocks": 440466432,
+    "total": 596049920,
+    "non_embedding": 440467456
+   },
+   "forward_gflops_per_token": {
+    "1": 1.1922,
+    "1024": 1.4268,
+    "4096": 2.1315,
+    "8192": 3.071
+   },
+   "kv_cache_bytes_per_token_bf16": 114688,
+   "weights_gb_bf16": 1.192,
+   "training_gflops_per_position": {
+    "student": 7.9041,
+    "with_teacher_forward": 18.3649
+   },
+   "training_state_gb": 7.67
+  },
+  "pw_900m": {
+   "geometry": {
+    "vocab_size": 151936,
+    "num_hidden_layers": 28,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "head_dim": 128,
+    "tie_word_embeddings": true,
+    "hidden_size": 2560,
+    "internal_size": 1024
+   },
+   "parameters": {
+    "embedding": 388956160,
+    "output_head_untied": 0,
+    "final_norm": 2560,
+    "per_layer": {
+     "projection": 2621440,
+     "attention": 6291712,
+     "ffn": 9437184,
+     "norms": 5120,
+     "total": 18355456
+    },
+    "blocks": 513952768,
+    "total": 902911488,
+    "non_embedding": 513955328
+   },
+   "forward_gflops_per_token": {
+    "1": 2.2461,
+    "1024": 2.4808,
+    "4096": 3.1854,
+    "8192": 4.125
+   },
+   "kv_cache_bytes_per_token_bf16": 114688,
+   "weights_gb_bf16": 1.806,
+   "training_gflops_per_position": {
+    "student": 11.1864,
+    "with_teacher_forward": 21.6472
+   },
+   "training_state_gb": 9.779,
+   "meta_build_parameters": 902911488
+  },
+  "pw_900m_folded": {
+   "geometry": {
+    "vocab_size": 151936,
+    "num_hidden_layers": 28,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "head_dim": 128,
+    "tie_word_embeddings": true,
+    "hidden_size": 2560
+   },
+   "parameters": {
+    "embedding": 388956160,
+    "output_head_untied": 0,
+    "final_norm": 2560,
+    "per_layer": {
+     "projection": 0,
+     "attention": 15728896,
+     "ffn": 23592960,
+     "norms": 5120,
+     "total": 39326976
+    },
+    "blocks": 1101155328,
+    "total": 1490114048,
+    "non_embedding": 1101157888
+   },
+   "forward_gflops_per_token": {
+    "1": 2.9802,
+    "1024": 3.2148,
+    "4096": 3.9194,
+    "8192": 4.859
+   },
+   "kv_cache_bytes_per_token_bf16": 114688,
+   "weights_gb_bf16": 2.98
+  },
+  "pw_600m_reserved": {
+   "geometry": {
+    "vocab_size": 151936,
+    "num_hidden_layers": 28,
+    "intermediate_size": 1910,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "head_dim": 128,
+    "tie_word_embeddings": true,
+    "hidden_size": 2560,
+    "internal_size": 512
+   },
+   "parameters": {
+    "embedding": 388956160,
+    "output_head_untied": 0,
+    "final_norm": 2560,
+    "per_layer": {
+     "projection": 1310720,
+     "attention": 3145984,
+     "ffn": 2933760,
+     "norms": 5120,
+     "total": 7395584
+    },
+    "blocks": 207076352,
+    "total": 596035072,
+    "non_embedding": 207078912
+   },
+   "forward_gflops_per_token": {
+    "1": 1.4122,
+    "1024": 1.6468,
+    "4096": 2.3515,
+    "8192": 3.291
+   },
+   "kv_cache_bytes_per_token_bf16": 114688,
+   "weights_gb_bf16": 1.192,
+   "training_gflops_per_position": {
+    "student": 7.8506,
+    "with_teacher_forward": 18.3113
+   },
+   "training_state_gb": 4.869,
+   "meta_build_parameters": 596035072
+  }
+ },
+ "pw_900m_vs_d4": {
+  "parameters": 1.5148,
+  "trainable_parameters": 1.1668,
+  "forward_flops_ctx_1": 1.884,
+  "forward_flops_ctx_4096": 1.4944,
+  "forward_flops_ctx_8192": 1.3432,
+  "training_student": 1.4153,
+  "training_with_teacher": 1.1787,
+  "kv_cache": 1.0
+ },
+ "authorizes": "nothing"
+}

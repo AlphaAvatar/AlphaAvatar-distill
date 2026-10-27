@@ -1,0 +1,39 @@
+{
+ "schema": "aadistill.stage1.projected_residual.application/v1",
+ "study_id": "stage1.projected_residual.pw900_v1",
+ "written_utc": "2026-10-27T12:00:00Z",
+ "status": "APPLICATION, NOT A GRANT. Nothing is authorized until the maintainer grants it; a grant would be recorded in logs/budget/approvals/ and each paid session issued its own one-use authorization",
+ "design": "configs/stages/stage-1/projected_residual/design.json",
+ "preregistration": "logs/stages/stage-1/projected_residual/plans/preregistration.json",
+ "cost_forecast": "logs/stages/stage-1/projected_residual/plans/cost_forecast.json",
+ "requests": [
+  {"id": "B-E", "kind": "engineering validation", "hard_cap_usd": 3.0, "expected_usd": 1.11, "gpu": "NVIDIA L40S (one pod)",
+   "what": ["download Qwen/Qwen3-4B-Thinking-2507@768f209d; build W0 from d4_top1_selection.json; per-layer statistics over calib.s0v_base_d4@v1; the 28 bases; the 902,911,488-parameter student; its identity",
+            "the fold check in bf16 on eval-set-1 prompts against design.json :: evaluation.fold_acceptance",
+            "a 20-step trainer smoke at the recipe's exact shape (batch 2 x 8,192, micro-batch 1, bf16 autocast, gradient checkpointing, the on-the-fly teacher): step time and peak memory against the 48 GB card",
+            "save / reload / resume on CUDA bit-exact; projection orthogonality logged",
+            "the folded checkpoint under vLLM 0.27.1: load, and a handful of eval-set-1 prompts generated"],
+   "passes_when": "every item above completes, the fold check passes, and the measured step time and evaluation throughput reprice B1 inside its cap",
+   "fits_the_current_cap": "yes: committed $724.345 + $3.00 = $727.345 <= $740"},
+  {"id": "B1", "kind": "formal", "hard_cap_usd": 21.0, "expected_usd": 14.53, "conservative_usd": 18.52,
+   "gpu": "NVIDIA L40S in EUR-IS-2 with am5m373kuq (checkpoints kept there; ~22 of 30 GB after)",
+   "what": "the formal initialization, PW-Augmented on seeds 20260726 and 20260801 (D4-Augmented's recovery with the projections trainable), every item of eval-set-1 per seed under nucleus_v1 through the folded route; one billing pod at a time, at most two sessions (one per seed) if the measured time exceeds one session's comfort",
+   "only_after": "B-E passed and the preregistration frozen",
+   "fits_the_current_cap": "no: $727.35 + $21.00 = $748.35 > $740; the maintainer would have to set the project cap at $749 or more"}
+ ],
+ "total_hard_cap_usd": 24.0,
+ "project_position": {"source": "logs/budget/audits/accounting_audit_2026-10-27.json", "committed_usd": 724.345, "cap_usd": 740.0,
+                      "headroom_usd": 15.655, "note": "the account balance ($139.24) is not a grant"},
+ "owed_engineering_before_the_first_paid_action": [
+  "the study's governance: one grant, one cumulative envelope, one-use authorizations, the provider position re-read at every issue and launch, engineering-campaign subruns counted among unposted sessions (accounting audit finding 3)",
+  "the session chain: launcher, driver and their registries (session kind dispatch, pod test selection, environment record), with a $0 dry run of the success closeout",
+  "the recovery driver: D4-Augmented's recipe derivation with the trainable-pattern extension as the only further change, checked against D4-Augmented's recorded recipe identity per seed",
+  "the evaluation route: fold, fold acceptance, and the folded checkpoint's identity, wired into the H1-PA evaluation driver",
+  "the analysis: h1_statistics on P with the registered constants and the full eval-set-1 table"
+ ],
+ "never": [
+  "any 600M work", "retraining or re-evaluating D4-Augmented or PCA-Original", "new teacher data",
+  "combining the projected architecture with the hybrid teacher", "a merge to main", "raising a cap"
+ ],
+ "authorizes": "nothing"
+}
