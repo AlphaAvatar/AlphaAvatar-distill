@@ -14258,3 +14258,26 @@ on a paid pod.
     contrast therefore rests mostly on deduction.
 - **Revisit when.** The maintainer's independent review of this result and of
   H1-PA.
+
+## 2026-10-28 — Maintainer: squash-merge `stage2/reasoning-data` into `main`, then sync the research branch
+
+- **Context.** Stage 2's H1 and H1-PA and the mixed calibration 2x are
+  complete (entries above). The maintainer asked for `stage2/reasoning-data` at
+  `d5f1c6f2` to be merged into `main` before Research A and B continue, and
+  for `research/teacher-modes-and-projected-residual` NOT to be merged with it.
+- **Decision.** One squash commit on `main` over merge base `2a8bae78`
+  (AGENTS.md P12.2). The source branch is NOT deleted and its history is not
+  rewritten. The squash commit names the source branch, its tip and the merge
+  base. The research branch takes the new `main` by a merge commit, without a
+  rebase or a force push.
+- **Kept unchanged.** H1's annulment, H1-PA's INCONCLUSIVE (FLOOR_A), M =
+  NO_GO, every closed grant, every checkpoint identity. The accounting audit
+  of 2026-10-27 stays CLOSED with its open attribution questions. It is on the
+  research branch and is not part of this integration.
+- **Checked before integrating.** Zero unreachable cited commits
+  (`converge_before_sweep.cited_commits_are_reachable`); `main` had not moved
+  since `2a8bae78`; the staged tree must equal the source tip's tree.
+- **Not authorized.** A-E, B-E, any formal Research A or B phase, and any rise
+  in the $740 project cap.
+- **Revisit when.** Never for this round; the next integration follows the
+  same rule.

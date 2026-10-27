@@ -24,7 +24,7 @@
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "blocker": "BLOCKED NO. Mixed Calibration 2x COMPLETE 2026-10-27: preregistered M (Mix-Augmented - D4-Augmented, static fluid) NO_GO (-1.32 pp [-2.71, -0.17]); $17.3366 of $33.05; grant closed. Awaiting the maintainer's review. Owner: docs/stages/stage-0/calibration_volume/MIXED.md section 13.",
- "branch": "stage2/reasoning-data, cut from main 2a8bae78 (the Stage-0 squash, 2026-10-21)",
+ "branch": "main (squash of stage2/reasoning-data, 2026-10-28); next work on research/teacher-modes-and-projected-residual, merged with main",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",

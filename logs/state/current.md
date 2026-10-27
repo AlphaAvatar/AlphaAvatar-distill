@@ -963,6 +963,74 @@ invocation with `tee` and `PIPESTATUS[0]`.
 
 ## What `main` carries
 
+**Stage 2 (H1, H1-PA) and the mixed calibration 2x, integrated 2026-10-28
+(UTC) by SQUASH AND MERGE per AGENTS.md P12.2, on the maintainer's
+instruction.** One commit on `main` collapses everything on top of `2a8bae78`
+(the Stage-0 squash): the 75 commits up to the tested tree `d5f1c6f2`, plus the
+pre-integration record commit after it.
+- Stage-2/3 H1: P1g PASSED, P2's four formal units, frozen decision
+  NOT_RESOLVED (FLOOR); annulled for promotion by the maintainer
+  (`plans/h1_annulment.json`);
+- H1-PA: PA2v and PA2's six formal units, preregistered result INCONCLUSIVE
+  (FLOOR_A);
+- the mixed calibration 2x (MC1, MC2): preregistered M = NO_GO; grant closed;
+- every record, raw evidence file, checkpoint identity and closed grant of the
+  three, unchanged. The checkpoints' bytes are on volume `am5m373kuq`, not in
+  git.
+
+```text
+source branch : stage2/reasoning-data   (NOT deleted -- P12.2)
+merge base    : 2a8bae7848f99076eded2a7c6bf7038f166247c4   (main before)
+tested tree   : d5f1c6f2a89471f99d9477b3b39e11178998b47b
+branch tip    : named by the squash commit; a record on the branch cannot
+                carry its own hash
+squash commit : `git log -1 main`
+```
+
+- **What was tested**, on `d5f1c6f2`: the core full suite 3,828 passed / 27 failed / 38 skipped
+  (13 min). All 27 were in `tests/integration/test_simulator_restore.py`: 25 the
+  pod simulator refusing below 20 GiB free (the dev box has 5 GiB), 2 the
+  threshold tests reading the session's override. That file rerun with only
+  `PODSIM_MIN_FREE_GIB=3`: 36 passed. The stage-2 `reasoning_data` and stage-0
+  `calibration_volume` experiment suites: 495 passed.
+- **The honest limit.** The tip adds only pre-integration records on top of
+  `d5f1c6f2`: this section, `current.json`'s `branch`, and
+  `decisions.md`.
+- **Reachability.** Every commit hash the records cite was checked before the
+  squash: zero unreachable. The source branch is where this round's commit
+  hashes live, so it is kept permanently.
+- **Budget: four things kept apart** (maintainer, 2026-10-28). None of them
+  substitutes for another.
+  1. *The provider's bill and live resources*: the provider's own billing and
+     account listing. `main`'s newest committed snapshot is
+     `closeout/mixed_position_final.json` (2026-10-26T23:57Z). Newer snapshots
+     are on `research/teacher-modes-and-projected-residual`.
+  2. *The project's cumulative commitment* against the $740 cap: $723.30 in
+     that closeout. The provider-based accounting audit of 2026-10-27 is newer
+     and puts it at $724.345 (headroom $15.655). It lives on
+     `research/teacher-modes-and-projected-residual` (commit `811664f9`,
+     `logs/budget/audits/`), verdict CLOSED, and reaches `main` only with that
+     branch.
+  3. *Historical budget records*: run records, grants and closeouts as booked.
+     `derive_budget.py` on `main` still reads the stale $712.17 cap of the C1
+     package (the audit's finding 1, fixed on the research branch). A
+     records-based remainder is never spendable headroom.
+  4. *Unfinished attribution and governance*, NOT explained by the audit:
+     - the provider billed $37.53 more before the 2026-09-11 anchor than the
+       maintainer's stated anchor, and 55 pods ($77.33) billed before it are
+       named by no record. Whether that is project spend is unverified;
+     - network-volume rows carry no volume id; $0.34 of them lies outside
+       every recorded volume lifetime;
+     - the issuers do not scan engineering-campaign subruns for unposted
+       pods. **Before any paid authorization** the issuing chain must cover
+       campaign subruns, and the provider's live billing and resources must be
+       read again.
+- **Where work continues.** On `research/teacher-modes-and-projected-residual`
+  (Research A and B, $0), which descends from `d5f1c6f2`. It takes `main` by a
+  merge commit rather than a rebase, so its pushed commits and the identities
+  its records cite are not rewritten. `main` then becomes its ancestor, and a
+  later squash of it collapses only its own commits.
+
 **The Stage-0 calibration-volume programme, integrated 2026-10-21 (UTC) by
 SQUASH AND MERGE per AGENTS.md P12.2, on the maintainer's instruction.** One
 commit on `main` collapses everything on top of `32246d12` (the D-series
@@ -996,8 +1064,8 @@ closeout tree : fa311c679cbf0454966ed50034849cb48dbf5385
 - **Reachability.** Every commit hash the records cite was checked before the
   squash: zero unreachable. The source branch is where this round's commit
   hashes live, so it is kept permanently.
-- **Where work continues.** On `stage2/reasoning-data`, cut fresh from the
-  squash commit. Continuing on the old branch would re-apply the whole range.
+- **Where work continued.** On `stage2/reasoning-data`, cut fresh from that
+  squash commit (itself integrated 2026-10-28, above).
 
 **The D-series and its closure, integrated 2026-10-17 (UTC) by SQUASH AND
 MERGE per AGENTS.md P12.2, on the maintainer's instruction.** One commit on
