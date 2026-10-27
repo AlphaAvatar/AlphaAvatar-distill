@@ -24,7 +24,7 @@
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "blocker": "BLOCKED NO. Research A and B $0 READY 2026-10-27, nothing paid authorized; accounting audit CLOSED (committed $724.345 of $740). Owner: logs/budget/decisions.md 2026-10-27.",
- "branch": "research/teacher-modes-and-projected-residual, cut from stage2/reasoning-data d5f1c6f2 (kept)",
+ "branch": "research/teacher-modes-and-projected-residual: from stage2/reasoning-data d5f1c6f2 (kept), merged with main 72492e46 (its squash, 2026-10-28)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
