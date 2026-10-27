@@ -95,6 +95,7 @@ def run_records(root: Path) -> dict[str, list[dict]]:
 #: name is not thereby known to the repository -- committing the list of
 #: unattributed pods once made all 53 of them read as "mentioned".
 BILLING_EVIDENCE = (":(exclude)logs/budget/provider/**",
+                    ":(exclude)logs/budget/audits/**",
                     ":(exclude)**/budget_reconciliation.json",
                     ":(exclude)**/provider_attribution.json")
 

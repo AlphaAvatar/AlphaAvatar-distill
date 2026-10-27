@@ -88,6 +88,43 @@ def load(rel: str, root: Path) -> dict:
     return json.loads((root / rel).read_text())
 
 
+#: Where the maintainer's project-cap decisions are recorded since 2026-10-22:
+#: every study grant states the project cap it was issued under.
+APPROVALS = "logs/budget/approvals"
+
+
+def latest_project_cap(root: Path, package_cap: float | None) -> dict:
+    """The project cap the most recent maintainer grant states, beside the package's.
+
+    `accepted_pricing.cumulative_cap_usd` was the cap's only owner, and it was
+    caught up by hand when grants raised it (2026-10-24). The H1-PA ($731) and
+    mixed-calibration ($740) grants were never caught up, so this script went on
+    deriving the remainder against $712.17 while every issuer used $740 (the
+    2026-10-27 accounting audit). Reading the newest grant that states the cap
+    removes the hand step; nothing is edited. Grants sharing the newest date
+    must agree, or this refuses rather than choose.
+    """
+    rows = []
+    for p in sorted((root / APPROVALS).glob("*.json")):
+        d = json.loads(p.read_text())
+        if d.get("project_cumulative_cap_usd") is not None and d.get("granted_utc"):
+            rows.append((str(d["granted_utc"])[:10], float(d["project_cumulative_cap_usd"]),
+                         str(p.relative_to(root))))
+    if not rows:
+        return {"cap_usd": package_cap, "owner": f"{PACKAGE} :: accepted_pricing.cumulative_cap_usd",
+                "package_cap_usd": package_cap}
+    day = max(r[0] for r in rows)
+    newest = [r for r in rows if r[0] == day]
+    if len({r[1] for r in newest}) != 1:
+        raise SystemExit(f"grants dated {day} state different project caps: {newest}")
+    cap = newest[0][1]
+    if package_cap is not None and cap < float(package_cap):
+        raise SystemExit(f"the newest grant's project cap {cap} is below the package's "
+                         f"{package_cap}: a cap is never lowered by inference; reconcile the records")
+    return {"cap_usd": cap, "owner": newest[0][2], "granted_utc": day,
+            "package_cap_usd": package_cap}
+
+
 def formal_sessions(root: Path, funded: Sequence[str],
                     package_id: str | None = None) -> list[dict]:
     """Every formal session, with what it cost, discovered through the index.
@@ -455,7 +492,9 @@ def derive(root: Path = REPO_ROOT) -> dict:
     #: The PROJECT cap lives with the accepted pricing, not in the package: the
     #: package is one experiment's allowance and the cap bounds everything ever
     #: spent. Reading it from the wrong block is what returned "no project cap".
-    project_cap = (config.get("accepted_pricing") or {}).get("cumulative_cap_usd")
+    package_cap = (config.get("accepted_pricing") or {}).get("cumulative_cap_usd")
+    cap_source = latest_project_cap(root, package_cap)
+    project_cap = cap_source["cap_usd"]
     formal_allow = float(pkg["formal_allowance_usd"])
     eng_allow = float(pkg["gpu_engineering_allowance_usd"])
     total = float(pkg["package_total_usd"])
@@ -530,7 +569,13 @@ def derive(root: Path = REPO_ROOT) -> dict:
         #: and nothing else, so the one number every document quotes as
         #: "cumulative project spend" was maintained by hand in several places
         #: and could not include a non-C1 session at all.
-        "project": project_balance(root, pkg, project_cap, campaigns),
+        "project": {**project_balance(root, pkg, project_cap, campaigns),
+                    "cap_source": cap_source,
+                    "_remaining_is_records_based": (
+                        "cap minus the RECORDS' cumulative. The binding position is the provider's "
+                        "billing plus unposted sessions and committed storage (mixed_governance.position; "
+                        "logs/budget/audits/), which is higher: the provider has billed more than the "
+                        "records' anchor accounts for")},
         "engineering_campaigns": campaigns,
         "pending_reconciliation": [c["campaign"] for c in unattributed],
         #: `None` when anything is unreconciled: an arithmetic summary computed

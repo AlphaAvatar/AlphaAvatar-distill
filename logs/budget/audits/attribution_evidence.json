@@ -1,0 +1,19 @@
+{
+ "schema": "aadistill.budget.attribution_evidence/v1",
+ "_contract": "Evidence-based attributions of billed provider resources that no run record names by id. Each row names the record that DID book the resource, the record field that is wrong, and the numbers that tie the two; accounting_audit.py re-checks every number against the provider snapshot before accepting the row. Nothing here edits the cited record: a frozen record keeps what it says, and this file says what it should have said.",
+ "pods": [
+  {
+   "pod_id": "xrksmenhg7dlps",
+   "attributed_to": {
+    "record": "logs/stages/stage-1/phase_c3/pilots/packing-optimization/v2/campaign.json",
+    "subrun_id": "c3pack2_20260927_v6",
+    "recorded_pod_id": "gbiz85xcmiq6gh",
+    "recorded_elapsed_minutes": 143.017,
+    "recorded_cost_usd": 2.6378
+   },
+   "why": "the campaign records subrun v6 under v5's pod id. The provider bills gbiz85xcmiq6gh for 3.6 minutes only (v5's 3.633), and bills xrksmenhg7dlps, named by no record, for 142.9 minutes on the same UTC day for $2.6349 against v6's booked 143.017 minutes and $2.6378. v6 ran on xrksmenhg7dlps; its cost is already in the records, so the pod is attributed, not added.",
+   "checks": {"same_utc_day": "2026-09-27", "max_minutes_difference": 2.0, "max_usd_difference": 0.02}
+  }
+ ],
+ "authorizes": "nothing"
+}
