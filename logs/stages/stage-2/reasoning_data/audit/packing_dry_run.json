@@ -1,0 +1,187 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.packing_dry_run/v1",
+ "written_utc": "2026-10-22T09:01:13Z",
+ "tokenizer": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+ "rule": "3 epochs, 2 blocks per step, 8,192 positions forwarded per block (the frozen recipe)",
+ "old_arm": {
+  "spec": {
+   "block_len": 8192,
+   "salt": "stage2.reasoning_data.old_arm/v1",
+   "shares": {
+    "code": 0.16666666666666666,
+    "gsm8k": 0.16666666666666666,
+    "multihop_qa": 0.16666666666666666,
+    "openmath": 0.16666666666666666,
+    "rag_evidence": 0.16666666666666666,
+    "tool_calling": 0.16666666666666666
+   },
+   "rung_targets": [
+    2960000
+   ],
+   "reserve_tokens": 150000
+  },
+  "rungs": [
+   {
+    "target": 2960000,
+    "units": 3150,
+    "sessions": 3312,
+    "unique_supervised_tokens": 2960182,
+    "reasoning_tokens": 2567685,
+    "answer_tokens": 392497,
+    "rendered_tokens": 4278826,
+    "blocks": 1459,
+    "packing_efficiency": 0.3547,
+    "padding_tokens": 7712666,
+    "multi_session_blocks": 478,
+    "steps_at_3_epochs": 2189,
+    "block_passes": 4378,
+    "forward_positions": 35864576,
+    "supervised_per_forward_position": 0.2476,
+    "realized_shares": {
+     "code": 0.167398,
+     "gsm8k": 0.166999,
+     "multihop_qa": 0.166207,
+     "openmath": 0.166866,
+     "rag_evidence": 0.166215,
+     "tool_calling": 0.166313
+    },
+    "max_share_deviation": 0.000731,
+    "distinct_families": 8
+   }
+  ],
+  "admission": "whole units only (build_master_ladder.render_all)",
+  "excluded": {
+   "units": 0,
+   "sessions": 0,
+   "units_by_kind": {}
+  },
+  "excluded_examples": [],
+  "rendered_sessions": 11144,
+  "units": 10803,
+  "system_prompt_groups": 1857,
+  "validation_tail": {
+   "blocks": 63,
+   "real_tokens": 208334,
+   "padding_tokens": 307762,
+   "packing_efficiency": 0.4037,
+   "supervised_tokens": 150107,
+   "sessions": 156,
+   "multi_session_blocks": 20
+  },
+  "composition_capacity": 6280586,
+  "isolation_exclusion": {
+   "sessions_flagged": 28,
+   "units_excluded": 28,
+   "sessions_excluded": 30
+  },
+  "historical_2p96m_rung": {
+   "blocks": 1944,
+   "sessions": 4524,
+   "unique_supervised_tokens_retained": 2960507,
+   "terminal_truncations": 352,
+   "block_passes": 5832,
+   "session_overlap_with_rebuilt_old_arm": 1496,
+   "jaccard": 0.236
+  }
+ },
+ "fluid_traces": {
+  "rungs": [
+   {
+    "target": 1000000,
+    "units": 219,
+    "sessions": 267,
+    "unique_supervised_tokens": 1002381,
+    "reasoning_tokens": 904152,
+    "answer_tokens": 98229,
+    "rendered_tokens": 1066350,
+    "blocks": 134,
+    "packing_efficiency": 0.9701,
+    "padding_tokens": 32841,
+    "multi_session_blocks": 107,
+    "steps_at_3_epochs": 201,
+    "block_passes": 402,
+    "forward_positions": 3293184,
+    "supervised_per_forward_position": 0.9131,
+    "realized_shares": {
+     "abstract_analogical": 0.083286,
+     "compositional_generalization": 0.176526,
+     "inductive_rule_discovery": 0.200115,
+     "interactive_adaptation": 0.18813,
+     "task_contained_deduction": 0.351944
+    },
+    "max_share_deviation": 0.01187,
+    "distinct_families": 35
+   },
+   {
+    "target": 1800000,
+    "units": 436,
+    "sessions": 484,
+    "unique_supervised_tokens": 1801070,
+    "reasoning_tokens": 1599203,
+    "answer_tokens": 201867,
+    "rendered_tokens": 1900568,
+    "blocks": 238,
+    "packing_efficiency": 0.9734,
+    "padding_tokens": 51834,
+    "multi_session_blocks": 201,
+    "steps_at_3_epochs": 357,
+    "block_passes": 714,
+    "forward_positions": 5849088,
+    "supervised_per_forward_position": 0.9238,
+    "realized_shares": {
+     "abstract_analogical": 0.107977,
+     "compositional_generalization": 0.185229,
+     "inductive_rule_discovery": 0.226663,
+     "interactive_adaptation": 0.104703,
+     "task_contained_deduction": 0.375427
+    },
+    "max_share_deviation": 0.095297,
+    "distinct_families": 35
+   }
+  ],
+  "admission": "whole units only (build_master_ladder.render_all)",
+  "excluded": {
+   "units": 0,
+   "sessions": 0,
+   "units_by_kind": {}
+  },
+  "excluded_examples": [],
+  "rendered_sessions": 573,
+  "units": 519,
+  "system_prompt_groups": 1,
+  "validation_tail": {
+   "blocks": 23,
+   "real_tokens": 165014,
+   "padding_tokens": 23402,
+   "packing_efficiency": 0.8758,
+   "supervised_tokens": 154995,
+   "sessions": 39,
+   "multi_session_blocks": 15
+  },
+  "composition_capacity": 913169,
+  "spec": {
+   "block_len": 8192,
+   "salt": "stage2.reasoning_data.fluid_dry_run/v1",
+   "shares": {
+    "task_contained_deduction": 0.35,
+    "inductive_rule_discovery": 0.2,
+    "compositional_generalization": 0.17,
+    "abstract_analogical": 0.08,
+    "interactive_adaptation": 0.2
+   },
+   "rung_targets": [
+    1000000,
+    1800000
+   ],
+   "reserve_tokens": 150000,
+   "allow_composition_drift": true
+  },
+  "reconstruction": {
+   "items_compared": 573,
+   "token_count_mismatches": 0,
+   "examples": []
+  }
+ },
+ "not_adopted": "neither input is adopted as training data by this dry run",
+ "authorizes": "nothing"
+}

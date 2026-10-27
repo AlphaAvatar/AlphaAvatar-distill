@@ -1,0 +1,64 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1_unit_outcome/v1",
+ "run_id": "h1p2a_20261023_232905",
+ "recorded_utc": "2026-10-24T05:05:50+00:00",
+ "status": "COMPLETE",
+ "terminal": "ALL_DONE",
+ "runner_terminal": "ALL_DONE",
+ "session_passed": true,
+ "provider_resource_created": true,
+ "evidence": {
+  "A-s20260726.evidence.tgz": {
+   "sha256": "d43d4174c5739bf3cf879a723a72c27c977e64b34fb4e7989022930a87cf99f9",
+   "verified": true,
+   "bytes": 927523
+  },
+  "A-s20260727.evidence.tgz": {
+   "sha256": "1d47d0b24b4a15bd096f27be686c7191ec2ba36d53fb96127f1efd570c11acea",
+   "verified": true,
+   "bytes": 1044043
+  },
+  "B-s20260726.evidence.tgz": {
+   "sha256": "bb1d8fb353e583307915d4a96215db66d2e9676aa2124e140af3a0dce03006ef",
+   "verified": true,
+   "bytes": 1857007
+  },
+  "B-s20260727.evidence.tgz": {
+   "sha256": "50c2d51c737bcbed31fd300d8ee4a7d5aab2d56dc2ac42c879aa756b3115b2a3",
+   "verified": true,
+   "bytes": 1642745
+  }
+ },
+ "money": {
+  "all_in_usd": 10.1139,
+  "gpu_usd": 9.9991,
+  "disk_usd": 0.1147,
+  "elapsed_minutes": 335.16,
+  "price_per_hour": 1.79,
+  "authorized_usd": 28.75,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB); the network volume is booked in logs/stages/stage-2/reasoning_data/storage/"
+ },
+ "provider_confirms_gone": true,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "1980hnh75i",
+    "name": "aad-h1-units",
+    "size": 30,
+    "dataCenterId": "EUR-IS-1"
+   }
+  ],
+  "error": null,
+  "accounted": [
+   "1980hnh75i"
+  ],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 1 resource(s) the records account for"
+ },
+ "authorizes": "nothing"
+}

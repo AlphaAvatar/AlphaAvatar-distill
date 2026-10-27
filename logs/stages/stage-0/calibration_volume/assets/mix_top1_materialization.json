@@ -1,0 +1,119 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.initialization_materialization/v1",
+ "written_utc": "2026-10-26T14:04:12Z",
+ "study_id": "stage0.calibration_volume.mixed_v2",
+ "decision": "logs/budget/approvals/mixed_calibration_grant.json (MC1: the committed Top-1 of the single-profile D1 full search on calib.s0m_mix_2x@v2)",
+ "method_identity": {
+  "baseline": "stage1_init.d1_target_aware.scored_v1@v1",
+  "search_run_id": "mixed_v2_2x_search",
+  "search_config_hash": "7ee23a7d9e6daf296c0930f21267493d893826767d73d64fe4df72d055a631f7",
+  "mc1_run_id": "mixs_20261026_103634",
+  "search_evidence": {
+   "search_record_sha256": "3265dac8f825b2574a4219f88534de869338563a45bbcee48ecc141bd3e336d6",
+   "selection_sha256": "2bd8e1cd126f19655440e29639a05262f34f71466db8375961d1cdd4e51e3918",
+   "manifest_sha256": "af1a301d65a76fb48f67d2b86983e57c80e18e72bb9ff65f0fe93fe16519e005"
+  }
+ },
+ "materialization_identity": {
+  "state_id": "9311dcde3cdaedbf54d506ccf7a98333",
+  "operator_path": "DEPTH(calib.s0m_mix_2x@v2)->ATTENTION(calib.s0m_mix_2x@v2)->FFN(calib.s0m_mix_2x@v2)->RESIDUAL_WIDTH(calib.s0m_mix_2x@v2)",
+  "path": {
+   "artifact_digest": "647a0ef381c8a5e0f94558fba82678ebfb8cba11f7392fe9172c9603fa631608",
+   "materialization_id": "1d0d1dde93792675004a6e19f1893538",
+   "numerical_execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "parent_materialization_id": "52d8749e66e0cc582e3a00c18d646135",
+   "schema": "aadistill.autoinit.materialization_identity/v1",
+   "semantic_state_id": "9311dcde3cdaedbf54d506ccf7a98333"
+  },
+  "checkpoint_sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3",
+  "artifact_digest": "647a0ef381c8a5e0f94558fba82678ebfb8cba11f7392fe9172c9603fa631608",
+  "weights_digest": "531a2ccd2d6387058f495f26c1e462d95b076099a05f6af4cf61d05be0c2c904",
+  "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+  "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+  "tokenizer_sha256": null,
+  "num_parameters": 596049920
+ },
+ "tokenizer_binding": {
+  "stored_with_checkpoint": false,
+  "source": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint (the tokenizer source of D4-Augmented's recovery, h1pa_driver.TOKENIZER_SOURCE)"
+ },
+ "relay_files": [
+  {
+   "path": "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/config.json",
+   "name": "config.json",
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "bytes": 1419
+  },
+  {
+   "path": "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/generation_config.json",
+   "name": "generation_config.json",
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "bytes": 206
+  },
+  {
+   "path": "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/model.safetensors",
+   "name": "model.safetensors",
+   "sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3",
+   "bytes": 1192135096
+  }
+ ],
+ "relay_metadata": {
+  "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/config.json": {
+   "size": 1419,
+   "lfs_sha256": null,
+   "blob_id": "4602edc52b4c0f50f39b25d6a1717cc4a6f53a61"
+  },
+  "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/generation_config.json": {
+   "size": 206,
+   "lfs_sha256": null,
+   "blob_id": "14bde034370c72b0f8596f89fb9d8c86a1919cdf"
+  },
+  "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/model.safetensors": {
+   "size": 1192135096,
+   "lfs_sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3",
+   "blob_id": "d4e7ac91c115e921c58e3698f7f66ffc3a560c45"
+  }
+ },
+ "read_back": {
+  "dest": "artifacts/stages/stage-0/calibration_volume/candidates/mixed_v2/top1",
+  "files": [
+   {
+    "name": "config.json",
+    "bytes": 1419,
+    "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+    "matched": true
+   },
+   {
+    "name": "generation_config.json",
+    "bytes": 206,
+    "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+    "matched": true
+   },
+   {
+    "name": "model.safetensors",
+    "bytes": 1192135096,
+    "sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3",
+    "matched": true
+   }
+  ],
+  "identity": {
+   "path": "/home/ecs-user/AlphaAvatar-distill/artifacts/stages/stage-0/calibration_volume/candidates/mixed_v2/top1",
+   "artifact_digest": "647a0ef381c8a5e0f94558fba82678ebfb8cba11f7392fe9172c9603fa631608",
+   "recorded_digest": "647a0ef381c8a5e0f94558fba82678ebfb8cba11f7392fe9172c9603fa631608",
+   "matched": true,
+   "weights_digest": "531a2ccd2d6387058f495f26c1e462d95b076099a05f6af4cf61d05be0c2c904",
+   "weights_digest_matched": true,
+   "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+   "config_matched": true,
+   "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+   "num_parameters": 596049920,
+   "single_shard_sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3",
+   "shard_matched": true,
+   "tokenizer_sha256": null,
+   "total_bytes": 1192135096
+  },
+  "verified": true,
+  "_": "downloaded from the relay to the dev box and re-identified from the bytes that arrived (verify_transferred_leaf), separately from the relay's own metadata"
+ },
+ "authorizes": "nothing"
+}

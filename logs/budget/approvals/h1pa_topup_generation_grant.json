@@ -1,0 +1,29 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1pa_topup_grant/v1",
+ "granted_by": "maintainer (formal approval message of 2026-10-24 UTC: H1-PA 115-task teacher generation, $3.72 cumulative cap)",
+ "granted_utc": "2026-10-24",
+ "decision": "Maintainer approves H1-PA's minimal fluid top-up: 115 never-generated pure fluid-reasoning tasks (task-set sha256 d1ca7ece55e55ee5997c8d27cd5b9a63a8b3799f05eec55c764c040609adb57d) under the frozen generation protocol, then verification, R0-R9, sequential no-truncation packing of the fluid increment to 2.96M and its frozen pack identity; reviewed commit stage2/reasoning-data @ 5a8809fd3f6bf87d9862ce1d136ef7d39cbeb029",
+ "phase": "PA1",
+ "branch": "stage2/reasoning-data",
+ "accepted_commit": "5a8809fd3f6bf87d9862ce1d136ef7d39cbeb029",
+ "integration_commit": "42237877",
+ "_identities": "the launch identity and harness digest below were computed AFTER the approval, on the integration commit (the approval message asked that identity be fixed before a machine-readable authorization is issued); the task set, the protocol and the amounts are the approved ones",
+ "run_id": "h1pat_20261024_115517",
+ "task_ids_sha256": "d1ca7ece55e55ee5997c8d27cd5b9a63a8b3799f05eec55c764c040609adb57d",
+ "launch_identity_sha256": "0c1028424fe1080ff9967e29fe8ab1042a253205c04a366ab1ca87770250e2f0",
+ "harness_digest": "7aea3763b9fb8fe138ed68a1df1ff7ab5828ee26efb17ca41a9bd73d87e4fd6d",
+ "expected_usd": 1.74,
+ "hard_cap_usd": 3.72,
+ "hard_cap_scope": "CUMULATIVE over the whole PA1 phase: every attempt's GPU, container disk and termination margin together; an attempt never receives a fresh allocation",
+ "project_cumulative_cap_usd": 712.17,
+ "project_cap_raised": false,
+ "occupancy_basis": "provider all-time billing counted once, $679.8262 at logs/budget/provider/runpod_billing_2026-10-24T1154Z.json (0 pods, 0 volumes, $0/h); after the hard cap $683.5462",
+ "gpu": {
+  "chosen": "NVIDIA A100-SXM4-80GB at $1.79/h",
+  "why": "L40S fits the memory and the engine, but teacher generation was never measured on it; decode is memory-bandwidth bound (864 vs 2,039 GB/s), so the measured A100 forecast scaled by that ratio gives about $2.17 expected and $3.17 conservative on L40S against $1.74 and $2.44 measured on A100: L40S is not cheaper for this job, and its unmeasured conservative case would use 85% of a cap no retry may exceed (maintainer: L40S unless the real running conditions do not meet the requirement, never at the budget's expense)"
+ },
+ "bound": "at --max-price 1.79 the launcher's hard deadline is 122.0 min and GPU + 150 GB container disk + the 1.25 min termination margin bill at most $3.7199; any higher live price is refused at $0",
+ "scope": "PA1 teacher generation only (one A100-80GB session), then the $0 verification, R0-R9, the fluid pool's no-truncation sequential pack to 2.96M, the merged training set and its frozen identity; NOT the 185-task option, student training, evaluation, a network volume or any other paid step",
+ "on_failure": "ordinary engineering failures are repaired inside the cumulative $3.72; secured candidates are reused, a new attempt generates only what is missing",
+ "on_short_corpus": "DATA SHORTFALL: keep every valid teacher record, report the exact supervised-token gap and stop; no further task, no lower gate, no repetition, no supporting data"
+}

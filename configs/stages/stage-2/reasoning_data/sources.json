@@ -1,0 +1,487 @@
+{
+  "schema": "aadistill.stage2.reasoning_data.sources/v1",
+  "status": "PROPOSED catalogue (2026-10-21 UTC; revised for H1). Licenses are a $0 desk check of PRIMARY sources (HF dataset card + API metadata, the repository LICENSE file, PyPI, the paper); nothing was downloaded. 'verified' means the license text or metadata was read on that date; it is not a legal opinion. A source enters a corpus only through corpus_spec.json, after the maintainer accepts its row.",
+  "roles": {
+    "primary_reasoning_transfer": "data whose purpose is the P10.2 primary axes",
+    "supporting_capability": "knowledge, reading or procedure a primary task depends on, or a supporting capability eval-set-1 reports",
+    "deployment_safety_constraint": "a non-negotiable deployment or safety requirement",
+    "evaluation_only": "never trained on; measured",
+    "out_of_scope": "not trained on and not a target of this recipe"
+  },
+  "license_check": {
+    "date_utc": "2026-10-21",
+    "method": "primary sources only: https://huggingface.co/api/datasets/<id>, the card README, the GitHub LICENSE (api.github.com/repos/<repo>/license), PyPI JSON, arxiv.org",
+    "redistribution_note": "teacher traces derived from a share-alike source inherit its share-alike terms if redistributed; redistribution of any derived corpus is a separate maintainer decision"
+  },
+  "sources": [
+    {
+      "source_id": "s0_generators_v2_calsplit",
+      "lineage": "project procedural generators (scripts/stages/stage-0/calibration_volume/tasks, roster GENERATORS_V2), calibration-split families only, training seed range",
+      "role": "primary_reasoning_transfer",
+      "axes": [
+        "task_contained_deduction",
+        "inductive_rule_discovery",
+        "compositional_generalization",
+        "abstract_analogical",
+        "interactive_adaptation"
+      ],
+      "license": "Apache-2.0 (repository license; data/eval-set/eval-set-1/NOTICE.md)",
+      "license_verified": true,
+      "model_generated_content": "none (procedural)",
+      "verifier": "stages.calibration_volume.score_battery (static: boxed answer; episodes: environment replay)",
+      "trainable_splits": [
+        "calibration_families"
+      ],
+      "_trainable_splits": "calibration-split families (registry.family_split) with seeds in the R5 training range",
+      "forbidden_splits": [
+        "evaluation-split families",
+        "evaluation-only generators",
+        "dev/final/calibration seed ranges"
+      ],
+      "generator_exposure": "shared with eval-set-1 (10 of 15 generators): unseen RULES, seen FORMAT; reported separately",
+      "family_breadth": "35 calibration families across 10 generators (base_pool_v1 census); 32 usable for H1 training after isolation rule R9 excludes three that compute evaluation-only rules",
+      "status": "recommended",
+      "why": "the only primary-axis source with project verifiers today; the teacher solves it (dev_v1 638/720) and Stage 0 measured its trace lengths and acceptance",
+      "kind": "project_generator",
+      "arc_lineage": "none",
+      "approved_for_h1": true,
+      "approval": {
+        "by": "maintainer",
+        "date_utc": "2026-10-22",
+        "decision": "logs/budget/decisions.md 2026-10-22 (H1 design choices): arm B is stage2.reasoning_master@v1, the scheme with the reviewed external sources",
+        "scope": "source ADMISSION for H1 arm B at the recorded version and, for a generator, the recorded module whitelist (external_modules.json candidates); a module enters the paid generation list only with a usable project verifier (generation_plan.py)",
+        "not": "a download, paid generation or training authorization"
+      }
+    },
+    {
+      "source_id": "stage2_generators_v1",
+      "lineage": "NEW project procedural generators for training only: generator ids, family ids and task types disjoint from eval-set-1",
+      "role": "primary_reasoning_transfer",
+      "license": "Apache-2.0 (repository)",
+      "license_verified": true,
+      "model_generated_content": "none",
+      "verifier": "each generator's own checker (to be written with it)",
+      "status": "planned (not implemented)",
+      "why": "35 calibration families is thin rule diversity; disjoint generators add families without exposing eval formats (R4)",
+      "kind": "project_generator",
+      "arc_lineage": "none",
+      "approved_for_h1": false
+    },
+    {
+      "source_id": "reasoning_gym",
+      "lineage": "github.com/open-thought/reasoning-gym (PyPI reasoning-gym 0.1.25, release tag v0.1.25 21e6d2a9)",
+      "role": "primary_reasoning_transfer",
+      "license": "Apache-2.0 (LICENSE and PyPI agree); NOTICE lists MIT/Apache parts and the ACRE data under GPL-3.0",
+      "license_verified": true,
+      "model_generated_content": "codeio data LLM-transformed; gsm_symbolic generators written by prompting claude-3.5-sonnet",
+      "verifier": "project-side exact checks per module; library scores are never the verdict (partial credit; five scorers evaluate the answer text as Python)",
+      "exclusions_required": [
+        "arc_agi (loads the ARC-AGI-1 EVALUATION set by default: R7)",
+        "gsm_symbolic (templates from GSM8K-test, eval-set-1's gsm8k source)",
+        "acre (GPL-3.0 data)",
+        "codeio (LLM-transformed)",
+        "every task whose task_type is an evaluation-only type (R4): number sequences, graph paths/shortest path, letter analogies, Mastermind-like code breaking, counterfactual arithmetic"
+      ],
+      "status": "candidate for selected modules (needs a dependency decision; arckit, which it pulls, bundles ARC-AGI evaluation data)",
+      "why": "about 100 seeded procedural tasks with checkers: the cheapest route to many disjoint rule families",
+      "modules": "configs/stages/stage-2/reasoning_data/external_modules.json",
+      "kind": "external_generator",
+      "arc_lineage": "none",
+      "approved_for_h1": true,
+      "approval": {
+        "by": "maintainer",
+        "date_utc": "2026-10-22",
+        "decision": "logs/budget/decisions.md 2026-10-22 (H1 design choices): arm B is stage2.reasoning_master@v1, the scheme with the reviewed external sources",
+        "scope": "source ADMISSION for H1 arm B at the recorded version and, for a generator, the recorded module whitelist (external_modules.json candidates); a module enters the paid generation list only with a usable project verifier (generation_plan.py)",
+        "not": "a download, paid generation or training authorization"
+      }
+    },
+    {
+      "source_id": "reasoning_core",
+      "lineage": "github.com/sileod/reasoning-core (PyPI reasoning-core 0.5.0, release rc14 d2f07185)",
+      "role": "primary_reasoning_transfer",
+      "license": "MIT",
+      "license_verified": true,
+      "model_generated_content": "5 roster tasks have LLM-written GENERATOR code (instances are procedural, not model outputs)",
+      "verifier": "project-side exact checks per module (configs/.../external_modules.json); the library's graded scorers are not used",
+      "modules": "configs/stages/stage-2/reasoning_data/external_modules.json",
+      "status": "candidate (needs a dependency decision)",
+      "why": "formal derivation, evidence selection over supplied premises, structural analogy, rule switching, program execution and DP -- mechanisms eval-set-1 does not use",
+      "kind": "external_generator",
+      "arc_lineage": "none",
+      "approved_for_h1": true,
+      "approval": {
+        "by": "maintainer",
+        "date_utc": "2026-10-22",
+        "decision": "logs/budget/decisions.md 2026-10-22 (H1 design choices): arm B is stage2.reasoning_master@v1, the scheme with the reviewed external sources",
+        "scope": "source ADMISSION for H1 arm B at the recorded version and, for a generator, the recorded module whitelist (external_modules.json candidates); a module enters the paid generation list only with a usable project verifier (generation_plan.py)",
+        "not": "a download, paid generation or training authorization"
+      }
+    },
+    {
+      "source_id": "prontoqa",
+      "lineage": "github.com/asaparov/prontoqa @0a6412b6fddf46324a1cb96e066dd7b3d89b87d6 (module fictional_ontology: fictional ontology, 3-5 hops, relevant distractors, zero-shot; the repository's own CLI run_experiment.py --model-name json from a pinned checkout)",
+      "role": "primary_reasoning_transfer",
+      "license": "Apache-2.0",
+      "license_verified": true,
+      "model_generated_content": "none (procedural)",
+      "verifier": "True/False against the generator (COMPARE bool) AND the process gate: every reference_conclusions sentence (the reference chain's non-premise steps, less the last) stated in the reasoning and none negated (process_check.reference_steps, partial required)",
+      "status": "candidate, process-gated",
+      "why": "multi-hop deduction whose reference proof lets the process, not only a chance-correct label, be checked",
+      "kind": "external_generator",
+      "arc_lineage": "none",
+      "approved_for_h1": true,
+      "approval": {
+        "by": "maintainer",
+        "date_utc": "2026-10-22",
+        "decision": "logs/budget/decisions.md 2026-10-22 (H1 design choices): arm B is stage2.reasoning_master@v1, the scheme with the reviewed external sources",
+        "scope": "source ADMISSION for H1 arm B at the recorded version and, for a generator, the recorded module whitelist (external_modules.json candidates); a module enters the paid generation list only with a usable project verifier (generation_plan.py)",
+        "not": "a download, paid generation or training authorization"
+      }
+    },
+    {
+      "source_id": "mathematics_dataset",
+      "lineage": "github.com/google-deepmind/mathematics_dataset @427f45075f84b8b9774950196ad63867ca20ffb3 (seven composed modules, train-medium / train-hard entropy)",
+      "role": "supporting_capability",
+      "license": "Apache-2.0",
+      "license_verified": true,
+      "model_generated_content": "none (procedural)",
+      "verifier": "per module: numeric COMPARE, or a project checker (exact rationals, ordered sequences, polynomial equality by a parser that evaluates nothing): checkers.py",
+      "status": "candidate (math, Mixed)",
+      "why": "procedural multi-step school mathematics without the third-party copyright questions of competition sets; sequence modules excluded (R4)",
+      "kind": "external_generator",
+      "arc_lineage": "none",
+      "approved_for_h1": true,
+      "approval": {
+        "by": "maintainer",
+        "date_utc": "2026-10-22",
+        "decision": "logs/budget/decisions.md 2026-10-22 (H1 design choices): arm B is stage2.reasoning_master@v1, the scheme with the reviewed external sources",
+        "scope": "source ADMISSION for H1 arm B at the recorded version and, for a generator, the recorded module whitelist (external_modules.json candidates); a module enters the paid generation list only with a usable project verifier (generation_plan.py)",
+        "not": "a download, paid generation or training authorization"
+      },
+      "environment": "its own isolated venv (numpy 1.26.4, sympy 1.14.0, absl-py 2.5.1, six 1.17.0): the pinned commit calls ndarray.itemset, removed in numpy 2; the composed modules order sub-statements by object identity, so instances are generated ONCE and stored, the export file's sha256 being their identity"
+    },
+    {
+      "source_id": "re_arc",
+      "lineage": "github.com/michaelhodel/re-arc",
+      "role": "primary_reasoning_transfer",
+      "license": "MIT",
+      "license_verified": true,
+      "model_generated_content": "none",
+      "scope": "generators for the 400 ARC-AGI-1 TRAINING tasks only",
+      "status": "deferred (R7: needs its own maintainer decision and a text grid interface)",
+      "kind": "external_generator",
+      "arc_lineage": "arc_training",
+      "approved_for_h1": false
+    },
+    {
+      "source_id": "gsm8k_train",
+      "lineage": "openai/gsm8k main",
+      "role": "supporting_capability",
+      "license": "MIT",
+      "license_verified": true,
+      "model_generated_content": "none (human)",
+      "verifier": "aadistill.data.verify final_number",
+      "trainable_splits": [
+        "train"
+      ],
+      "forbidden_splits": [
+        "test"
+      ],
+      "status": "recommended",
+      "why": "verified-answer math with a human gold; corpus_v2 used it at 0.890 candidate correctness",
+      "kind": "external_dataset",
+      "arc_lineage": "none",
+      "approved_for_h1": false
+    },
+    {
+      "source_id": "math_train",
+      "lineage": "EleutherAI/hendrycks_math (the original HF copy is DMCA-disabled)",
+      "role": "supporting_capability",
+      "license": "MIT (mirror and GitHub agree)",
+      "license_verified": true,
+      "model_generated_content": "none (competition problems; third-party copyright not addressed by the card)",
+      "verifier": "supporting_verify.boxed_math: the last \\boxed{} of the final answer against the human gold (normalized string match; no symbolic equivalence)",
+      "trainable_splits": [
+        "train"
+      ],
+      "forbidden_splits": [
+        "test (MATH-500, eval-set-1's math_verified source, is a test subset)"
+      ],
+      "status": "recommended with R2 decontamination",
+      "why": "a human gold, unlike OpenMathInstruct-2's augmented problems",
+      "kind": "external_dataset",
+      "arc_lineage": "none",
+      "approved_for_h1": true,
+      "approval": {
+        "by": "maintainer",
+        "date_utc": "2026-10-22",
+        "decision": "logs/budget/decisions.md 2026-10-22 (H1 design choices): arm B is stage2.reasoning_master@v1, the scheme with the reviewed external sources",
+        "scope": "source ADMISSION for H1 arm B at the recorded version and, for a generator, the recorded module whitelist (external_modules.json candidates); a module enters the paid generation list only with a usable project verifier (generation_plan.py)",
+        "not": "a download, paid generation or training authorization"
+      },
+      "pin": "EleutherAI/hendrycks_math @ 21a5633873b6a120296cce3e2df9d5550074f4a3, train parquet of the 7 subjects (3.0 MB, fetched 2026-10-22 into the HF cache; sizes and sha256 in data/stages/stage-2/reasoning_data/tasks/math_train_v1.manifest.json)"
+    },
+    {
+      "source_id": "numinamath_1p5",
+      "lineage": "AI-MO/NuminaMath-1.5",
+      "role": "supporting_capability",
+      "license": "Apache-2.0",
+      "license_verified": true,
+      "model_generated_content": "solutions rewritten by GPT-4o; synthetic_math problems generated by GPT-4; orca_math GPT-4 synthetic",
+      "status": "candidate restricted to human-authored problem subsets, maintainer decision (model-output terms)",
+      "kind": "external_dataset",
+      "arc_lineage": "none",
+      "approved_for_h1": false
+    },
+    {
+      "source_id": "openmath_instruct_2",
+      "lineage": "nvidia/OpenMathInstruct-2 (corpus_v2's openmath type)",
+      "role": "supporting_capability",
+      "license": "CC-BY-4.0; content under the Llama 3.1 license terms",
+      "license_verified": true,
+      "model_generated_content": "problems augmented and solved by Llama-3.1-405B-Instruct; augmented-problem answers are MAJORITY VOTES, not gold",
+      "status": "excluded from new corpora",
+      "why": "its answer key is not a gold, so a verified-correct gate cannot be applied to it; it also carries Llama naming obligations",
+      "kind": "external_dataset",
+      "arc_lineage": "none",
+      "approved_for_h1": false
+    },
+    {
+      "source_id": "mbpp_train",
+      "lineage": "google-research-datasets/mbpp",
+      "role": "supporting_capability",
+      "license": "CC-BY-4.0",
+      "license_verified": true,
+      "model_generated_content": "none",
+      "verifier": "supporting_verify.code_asserts: aadistill.data.code_exec.run_asserts on every one of the task's asserts, inside the probed bubblewrap sandbox on the dev box (code_sandbox.py) -- never on the generation pod; a pass means the declared tests passed",
+      "trainable_splits": [
+        "train",
+        "validation",
+        "prompt"
+      ],
+      "forbidden_splits": [
+        "test (task ids 11-510)"
+      ],
+      "status": "recommended for H1 supporting.code_algorithmic",
+      "kind": "external_dataset",
+      "arc_lineage": "none",
+      "approved_for_h1": true,
+      "approval": {
+        "by": "maintainer",
+        "date_utc": "2026-10-22",
+        "decision": "logs/budget/decisions.md 2026-10-22 (H1 design choices): arm B is stage2.reasoning_master@v1, the scheme with the reviewed external sources",
+        "scope": "source ADMISSION for H1 arm B at the recorded version and, for a generator, the recorded module whitelist (external_modules.json candidates); a module enters the paid generation list only with a usable project verifier (generation_plan.py)",
+        "not": "a download, paid generation or training authorization"
+      },
+      "pin": "google-research-datasets/mbpp @ 4bb6404fdc6cacfda99d4ac4205087b89d32030c (local HF cache), full/train + validation + prompt; the test split is never read"
+    },
+    {
+      "source_id": "code_contests_train",
+      "lineage": "deepmind/code_contests",
+      "role": "supporting_capability",
+      "license": "CC-BY-4.0 (data), Apache-2.0 (code)",
+      "license_verified": true,
+      "model_generated_content": "none",
+      "verifier": "aadistill.data.code_exec.run_stdio against public/private/generated tests",
+      "trainable_splits": [
+        "train"
+      ],
+      "forbidden_splits": [
+        "valid",
+        "test"
+      ],
+      "status": "secondary for H1 supporting.code_algorithmic (repository archived; train split only; R2-decontaminated)",
+      "kind": "external_dataset",
+      "arc_lineage": "none",
+      "approved_for_h1": false
+    },
+    {
+      "source_id": "corpus_v2_gsm8k_verified",
+      "lineage": "corpus_v2 gsm8k sessions (openai/gsm8k train) whose selected target's final number matches the human gold",
+      "role": "supporting_capability",
+      "license": "MIT",
+      "license_verified": true,
+      "model_generated_content": "the teacher's own traces (Qwen3-4B-Thinking-2507 @768f209d)",
+      "verifier": "aadistill.data.verify final_number on corpus_v2's own selected target (not reselected)",
+      "trainable_splits": [
+        "train"
+      ],
+      "forbidden_splits": [
+        "test (eval-set-1 gsm8k)"
+      ],
+      "status": "recommended for H1 supporting.math_reused_gsm8k (reuse: no new generation)",
+      "kind": "reused_targets",
+      "arc_lineage": "none",
+      "approved_for_h1": true,
+      "approval": {
+        "by": "maintainer",
+        "date_utc": "2026-10-22",
+        "decision": "logs/budget/decisions.md 2026-10-22 (H1 design choices): arm B is stage2.reasoning_master@v1, the scheme with the reviewed external sources",
+        "scope": "source ADMISSION for H1 arm B at the recorded version and, for a generator, the recorded module whitelist (external_modules.json candidates); a module enters the paid generation list only with a usable project verifier (generation_plan.py)",
+        "not": "a download, paid generation or training authorization"
+      }
+    },
+    {
+      "source_id": "corpus_v2_rag_verified",
+      "lineage": "corpus_v2 rag_evidence sessions (squad_v2 train) whose selected target is span-verified",
+      "role": "supporting_capability",
+      "license": "CC-BY-SA-4.0 (share-alike)",
+      "license_verified": true,
+      "model_generated_content": "the teacher's own traces (Qwen3-4B-Thinking-2507 @768f209d)",
+      "verifier": "aadistill.data.verify span on corpus_v2's own selected target (its lowest-index hygiene-accepted candidate, not reselected); a selected answer that opens with an abstention is refused",
+      "trainable_splits": [
+        "train"
+      ],
+      "forbidden_splits": [
+        "validation (eval-set-1 rag and answerability)"
+      ],
+      "status": "recommended (reuse: no new generation)",
+      "kind": "reused_targets",
+      "arc_lineage": "none",
+      "approved_for_h1": true,
+      "approval": {
+        "by": "maintainer",
+        "date_utc": "2026-10-22",
+        "decision": "logs/budget/decisions.md 2026-10-22 (H1 design choices): arm B is stage2.reasoning_master@v1, the scheme with the reviewed external sources",
+        "scope": "source ADMISSION for H1 arm B at the recorded version and, for a generator, the recorded module whitelist (external_modules.json candidates); a module enters the paid generation list only with a usable project verifier (generation_plan.py)",
+        "not": "a download, paid generation or training authorization"
+      }
+    },
+    {
+      "source_id": "corpus_v2_multihop_verified",
+      "lineage": "corpus_v2 multihop_qa sessions (hotpot_qa train) whose selected target is span-verified",
+      "role": "supporting_capability",
+      "license": "CC-BY-SA-4.0 (share-alike)",
+      "license_verified": true,
+      "model_generated_content": "the teacher's own traces",
+      "verifier": "aadistill.data.verify span on corpus_v2's own selected target (not reselected); a selected answer that opens with an abstention is refused",
+      "trainable_splits": [
+        "train"
+      ],
+      "forbidden_splits": [
+        "validation (eval-set-1 multihop)"
+      ],
+      "status": "recommended (reuse: no new generation)",
+      "kind": "reused_targets",
+      "arc_lineage": "none",
+      "approved_for_h1": true,
+      "approval": {
+        "by": "maintainer",
+        "date_utc": "2026-10-22",
+        "decision": "logs/budget/decisions.md 2026-10-22 (H1 design choices): arm B is stage2.reasoning_master@v1, the scheme with the reviewed external sources",
+        "scope": "source ADMISSION for H1 arm B at the recorded version and, for a generator, the recorded module whitelist (external_modules.json candidates); a module enters the paid generation list only with a usable project verifier (generation_plan.py)",
+        "not": "a download, paid generation or training authorization"
+      }
+    },
+    {
+      "source_id": "squad_v2_train_unanswerable",
+      "lineage": "rajpurkar/squad_v2 TRAIN split, questions marked unanswerable, rendered with the corpus_v2 rag instruction",
+      "role": "supporting_capability",
+      "license": "CC-BY-SA-4.0 (share-alike)",
+      "license_verified": true,
+      "model_generated_content": "none (human)",
+      "verifier": "supporting_verify.abstention: the final answer OPENS with a statement that the context does not contain the answer and asserts no answer anywhere; no word-count rule",
+      "trainable_splits": [
+        "train"
+      ],
+      "forbidden_splits": [
+        "validation (eval-set-1 rag and answerability_paired)"
+      ],
+      "status": "recommended for H1 supporting.answerability (new generation)",
+      "kind": "external_dataset",
+      "arc_lineage": "none",
+      "approved_for_h1": true,
+      "approval": {
+        "by": "maintainer",
+        "date_utc": "2026-10-22",
+        "decision": "logs/budget/decisions.md 2026-10-22 (H1 design choices): arm B is stage2.reasoning_master@v1, the scheme with the reviewed external sources",
+        "scope": "source ADMISSION for H1 arm B at the recorded version and, for a generator, the recorded module whitelist (external_modules.json candidates); a module enters the paid generation list only with a usable project verifier (generation_plan.py)",
+        "not": "a download, paid generation or training authorization"
+      },
+      "pin": "rajpurkar/squad_v2 @ 3ffb306f725f7d2ce8394bc1873b24868140c412 (local HF cache), train split"
+    },
+    {
+      "source_id": "tool_calling",
+      "lineage": "corpus_v2 tool_calling (glaive-function-calling-v2, xlam-function-calling-60k)",
+      "role": "evaluation_only",
+      "license": "glaive: Apache-2.0, provenance undocumented; xLAM: CC-BY-4.0 but gated, 'for research purposes only', rows generated by DeepSeek-V2-Chat (whose license counts distilled models as derivatives) and Mixtral-8x22B",
+      "license_verified": true,
+      "status": "omitted from training",
+      "why": "no answer key (unverifiable), 1,861 system-prompt groups that pad most of every block, research-only terms for xLAM, and no tool-use unit in eval-set-1's formal core; the 24 Stage-0 students make tool calls where none is offered (unexpected_tool_call) after training on 38% tool sessions",
+      "risk": "tool-use behaviour may regress; eval_behavior_v0 still measures it",
+      "kind": "not_trainable",
+      "arc_lineage": "none",
+      "approved_for_h1": false
+    },
+    {
+      "source_id": "refusal_answerability",
+      "lineage": "squad_v2 unanswerable / XSTest",
+      "role": "evaluation_only",
+      "status": "unanswerable-question support INCLUDED in H1 as supporting.answerability (squad_v2_train_unanswerable); XSTest-style safety prompts stay evaluation-only",
+      "why": "the 24 Stage-0 students never abstain (answered_unanswerable 51-56 of 60); a small verified slice supports the answerability guard rail; safety_paired stays a guard rail only",
+      "risk": "the students already never abstain (answered_unanswerable 51-56 of 60)",
+      "kind": "not_trainable",
+      "arc_lineage": "none",
+      "approved_for_h1": false
+    },
+    {
+      "source_id": "excluded_noncommercial_or_unlicensed",
+      "role": "out_of_scope",
+      "members": {
+        "Enigmata-Data": "CC-BY-NC-4.0",
+        "K-and-K/knights-and-knaves (HF data)": "CC-BY-NC-SA-4.0",
+        "CLUTRR": "CC-BY-NC-4.0 (LICENSE file, read 2026-10-21)",
+        "LogiQA 2.0": "CC-BY-NC-SA-4.0",
+        "KodCode-V1": "CC-BY-NC-4.0, GPT-4o-generated",
+        "ZebraLogicBench": "no license; evaluation benchmark",
+        "PrimeIntellect/verifiable-coding-problems": "no license stated",
+        "ProofWriter": "license not reachable without downloading (UNVERIFIED)",
+        "FOLIO": "card MIT vs repo CC-BY-SA-4.0; gated; test unreleased"
+      },
+      "status": "excluded",
+      "kind": "not_trainable",
+      "arc_lineage": "none",
+      "approved_for_h1": false
+    },
+    {
+      "source_id": "benchmark_test_splits",
+      "role": "evaluation_only",
+      "members": [
+        "GSM8K test",
+        "MATH test / MATH-500",
+        "MBPP tasks 11-510",
+        "APPS/TACO/CodeContests test",
+        "HotpotQA validation",
+        "SQuAD v2 validation",
+        "TriviaQA validation",
+        "XSTest",
+        "ARC-AGI-1/2 evaluation",
+        "ALFWorld valid_unseen",
+        "every eval-set-1 component"
+      ],
+      "status": "never trainable",
+      "kind": "not_trainable",
+      "arc_lineage": "none",
+      "approved_for_h1": false
+    }
+  ],
+  "historical_corpus_flags": {
+    "corpus_v2": "openmath answers for augmented problems are majority votes (not gold); xLAM rows are research-only and DeepSeek-V2-generated; Magicoder-OSS-Instruct is model-generated (not re-checked here). Recorded for the old arm; the comparison trains the old arm as it was, and nothing derived from it is redistributed by this experiment."
+  },
+  "authorizes": "nothing",
+  "secondary_not_adopted": {
+    "ruletaker": "same mechanism as PrOntoQA / reasoning-core logic_derivation; no proofs; data-zip license UNVERIFIED",
+    "cogs": "no generator; gen split never trainable; design reference"
+  },
+  "kinds": {
+    "project_generator": "items need generator_id, family_id, seed",
+    "external_generator": "items need module (a candidate module of external_modules.json), family_id, task_type, seed",
+    "external_dataset": "items need source_split",
+    "reused_targets": "items need source_split",
+    "not_trainable": "no item may come from it"
+  },
+  "_kind": "isolation_check R0 refuses an item whose source is unregistered, not trainable, or lacks the fields its kind requires: a check that cannot run on an item does not pass it",
+  "_arc_lineage": "isolation_check R7 refuses every item of a source whose arc_lineage is not 'none' (re_arc: ARC-AGI-1 training-task generators, a separate maintainer decision)",
+  "_approved_for_h1": "true only by a recorded maintainer decision. 2026-10-22: the maintainer chose arm B = stage2.reasoning_master@v1, so every source that variant gives a positive share is ADMITTED (approval field); code_contests_train (share 0), gsm8k_train (reused through corpus_v2 instead), stage2_generators_v1 (not implemented), re_arc (R7) and every other row stay false. Admission is design, not spending: source_plan.py marks the plan admitted, and generation_plan.py still drops every task whose module has no project verifier"
+}

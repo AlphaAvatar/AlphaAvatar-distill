@@ -1,0 +1,530 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.corpus_feasibility/v2",
+ "written_utc": "2026-10-23T17:07:30Z",
+ "candidate": {
+  "path": "configs/stages/stage-2/reasoning_data/corpus_v3.json",
+  "sha256": "04fdcad80062d7bab7be5c7a21fc168cc09ba0168cb19873e2b600412d3bbffa",
+  "role": "CORPUS: arm B's corpus (maintainer's choice, 2026-10-23)",
+  "base_sha256": "ac7c50ae7a6b365ca45b1f8984415ee7431502fac06c4aee537f0518be457887",
+  "corpus_id": "stage2.reasoning_master@v3",
+  "salt": "stage2.reasoning_master/v3"
+ },
+ "data": {
+  "generation": {
+   "sessions": [
+    {
+     "phase": "P1",
+     "run_id": "h1gen_20261022_190653",
+     "authorization_id": "stage2.reasoning_data.h1_generation.h1gen_20261022_190653",
+     "launch_identity_sha256": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
+     "records": 2164,
+     "shards": 26,
+     "units_selected": 1057
+    },
+    {
+     "phase": "P1t",
+     "run_id": "h1p1t_20261023_094007",
+     "authorization_id": "stage2.reasoning_data.h1_generation.h1p1t_20261023_094007",
+     "launch_identity_sha256": "e5732fd4440aad13b155a2a122e56f3fec4958c702555ce30239b9f49daeb9f4",
+     "records": 100,
+     "shards": 3,
+     "units_selected": 23
+    }
+   ],
+   "tasks_per_session": {
+    "h1gen_20261022_190653": 1587,
+    "h1p1t_20261023_094007": 59
+   },
+   "tasks_in_two_sessions": 0,
+   "protocol_sha256": [
+    "be1d2eef2881d2124002c6f4aaf0d22a54f395e165f10498eea88e095d9ecdb7"
+   ],
+   "runner_sha256": [
+    "aef276c2ca7daa8d9a99266705005f69510cdbb3fd3fc4285c724f725f2d325b"
+   ]
+  },
+  "generated_units_selected": 1080,
+  "set_aside": {
+   "units": 1,
+   "rows": [
+    {
+     "unit_id": "8a5a611b7415bbeb505a",
+     "cell": "primary.abstract_analogical/reasoning_core",
+     "target": {
+      "record_sha256": "879fa2ca1a37f07d06492a9aa5202483d915a4bef27aa778df050bf52571b07c",
+      "candidate_index": 0,
+      "output_token_ids_sha256": [
+       "c61249ae534434ae388d6b67ffdf95bb3b7e2e0364194660d377a292dff35f2f"
+      ],
+      "generation": {
+       "phase": "P1",
+       "run_id": "h1gen_20261022_190653",
+       "authorization_id": "stage2.reasoning_data.h1_generation.h1gen_20261022_190653",
+       "launch_identity_sha256": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038"
+      }
+     }
+    }
+   ],
+   "rule": "cells the corpus declares at 0.0: not trained, not validated, not deleted"
+  },
+  "reuse_units": 6298,
+  "sessions": 7492,
+  "sessions_sha256": "6458f2a868c7c30c7d831949cf226020a0f069b2af0df1ad3de227127c3fa042",
+  "admission": {
+   "units": 0,
+   "sessions": 0,
+   "units_by_kind": {}
+  }
+ },
+ "formal_path": {
+  "built": true,
+  "refusal": null,
+  "path": "build_arm_b.build -> build_master_ladder.build (render_all, ladder_units, build_ladder without drift, pack_best_fit)"
+ },
+ "contract": {
+  "composition_capacity": 3131866,
+  "rung_prefix_sizes": {
+   "860000": 867545,
+   "1600000": 1600092,
+   "2960000": 2966334
+  },
+  "cells": {
+   "primary.abstract_analogical/s0_generators_v2_calsplit": {
+    "share": 0.09,
+    "units": 59,
+    "supervised_tokens": 353121,
+    "supervised_tokens_needed_with_reserve": 279900,
+    "covered": true,
+    "families": 5,
+    "family_ids": [
+     "grid_transform@v1/grid.fill_rows",
+     "grid_transform@v1/grid.flip_h",
+     "grid_transform@v1/grid.flip_v",
+     "grid_transform@v1/grid.rotate_ccw",
+     "grid_transform@v1/grid.rotate_cw"
+    ],
+    "reserve_units": 2,
+    "reserve_supervised_tokens": 12713,
+    "reserve_families": 2,
+    "runs_dry_at_prefix": 3703234,
+    "blocks_rungs": []
+   },
+   "primary.compositional_generalization/reasoning_core": {
+    "share": 0.03,
+    "units": 23,
+    "supervised_tokens": 106367,
+    "supervised_tokens_needed_with_reserve": 93300,
+    "covered": true,
+    "families": 2,
+    "family_ids": [
+     "reasoning_core/planning",
+     "reasoning_core/rule_switching"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 4959,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 3256303,
+    "blocks_rungs": []
+   },
+   "primary.compositional_generalization/reasoning_gym": {
+    "share": 0.02,
+    "units": 20,
+    "supervised_tokens": 95836,
+    "supervised_tokens_needed_with_reserve": 62200,
+    "covered": true,
+    "families": 4,
+    "family_ids": [
+     "reasoning_gym/largest_island",
+     "reasoning_gym/rotate_matrix",
+     "reasoning_gym/string_manipulation",
+     "reasoning_gym/tower_of_hanoi"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 4705,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 3908710,
+    "blocks_rungs": []
+   },
+   "primary.compositional_generalization/s0_generators_v2_calsplit": {
+    "share": 0.12,
+    "units": 102,
+    "supervised_tokens": 391394,
+    "supervised_tokens_needed_with_reserve": 373200,
+    "covered": true,
+    "families": 5,
+    "family_ids": [
+     "defined_ops@v1/comp.chain3",
+     "defined_ops@v1/comp.conditional_chain",
+     "scan_language@v1/scan.rev_sur",
+     "scan_language@v1/scan.seq_rev",
+     "scan_language@v1/scan.sur_sur"
+    ],
+    "reserve_units": 3,
+    "reserve_supervised_tokens": 15918,
+    "reserve_families": 3,
+    "runs_dry_at_prefix": 3131866,
+    "blocks_rungs": []
+   },
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit": {
+    "share": 0.17,
+    "units": 190,
+    "supervised_tokens": 713594,
+    "supervised_tokens_needed_with_reserve": 528700,
+    "covered": true,
+    "families": 15,
+    "family_ids": [
+     "list_induction@v1/list.append_sum",
+     "list_induction@v1/list.dedupe",
+     "list_induction@v1/list.duplicate_each",
+     "list_induction@v1/list.keep_even",
+     "list_induction@v1/list.min",
+     "list_induction@v1/list.mod_k",
+     "list_induction@v1/list.mul_k",
+     "list_induction@v1/list.pairwise_sums",
+     "list_induction@v1/list.sort_asc",
+     "list_induction@v1/list.square",
+     "list_induction@v1/list.swap_ends",
+     "string_induction@v2/str.append_first"
+    ],
+    "reserve_units": 7,
+    "reserve_supervised_tokens": 27161,
+    "reserve_families": 7,
+    "runs_dry_at_prefix": 3954448,
+    "blocks_rungs": []
+   },
+   "primary.interactive_adaptation/s0_generators_v2_calsplit": {
+    "share": 0.1,
+    "units": 25,
+    "supervised_tokens": 445712,
+    "supervised_tokens_needed_with_reserve": 311000,
+    "covered": true,
+    "families": 3,
+    "family_ids": [
+     "hidden_buttons@v1/act.reverse",
+     "probe_function@v1/probe.digit_sum",
+     "probe_function@v1/probe.threshold"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 17627,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 3975831,
+    "blocks_rungs": []
+   },
+   "primary.task_contained_deduction/prontoqa": {
+    "share": 0.03,
+    "units": 49,
+    "supervised_tokens": 134730,
+    "supervised_tokens_needed_with_reserve": 93300,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "prontoqa/fictional"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 4102,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 3937592,
+    "blocks_rungs": []
+   },
+   "primary.task_contained_deduction/reasoning_core": {
+    "share": 0.03,
+    "units": 22,
+    "supervised_tokens": 121642,
+    "supervised_tokens_needed_with_reserve": 93300,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "reasoning_core/multistep_evidence_retrieval"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 5059,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 3673969,
+    "blocks_rungs": []
+   },
+   "primary.task_contained_deduction/reasoning_gym": {
+    "share": 0.025,
+    "units": 25,
+    "supervised_tokens": 86216,
+    "supervised_tokens_needed_with_reserve": 77750,
+    "covered": true,
+    "families": 4,
+    "family_ids": [
+     "reasoning_gym/family_relationships",
+     "reasoning_gym/mini_sudoku",
+     "reasoning_gym/n_queens",
+     "reasoning_gym/zebra_puzzles"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 4690,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 3229917,
+    "blocks_rungs": []
+   },
+   "primary.task_contained_deduction/s0_generators_v2_calsplit": {
+    "share": 0.085,
+    "units": 101,
+    "supervised_tokens": 358670,
+    "supervised_tokens_needed_with_reserve": 264350,
+    "covered": true,
+    "families": 4,
+    "family_ids": [
+     "entity_tracking@v1/track.move",
+     "entity_tracking@v1/track.move_remove",
+     "knights_knaves@v1/kk.counting",
+     "ordering@v2/order.race"
+    ],
+    "reserve_units": 4,
+    "reserve_supervised_tokens": 13361,
+    "reserve_families": 4,
+    "runs_dry_at_prefix": 3905074,
+    "blocks_rungs": []
+   },
+   "supporting.answerability/squad_v2_train_unanswerable": {
+    "share": 0.03,
+    "units": 213,
+    "supervised_tokens": 260122,
+    "supervised_tokens_needed_with_reserve": 93300,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "squad_v2_train_unanswerable"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 2517,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 4698202,
+    "blocks_rungs": []
+   },
+   "supporting.code_algorithmic/mbpp_train": {
+    "share": 0.055,
+    "units": 107,
+    "supervised_tokens": 351988,
+    "supervised_tokens_needed_with_reserve": 171050,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "mbpp"
+    ],
+    "reserve_units": 2,
+    "reserve_supervised_tokens": 7838,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 4567756,
+    "blocks_rungs": []
+   },
+   "supporting.code_algorithmic/reasoning_core": {
+    "share": 0.015,
+    "units": 15,
+    "supervised_tokens": 66241,
+    "supervised_tokens_needed_with_reserve": 46650,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "reasoning_core/controlled_code_execution"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 3701,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 3707220,
+    "blocks_rungs": []
+   },
+   "supporting.math_new/math_train": {
+    "share": 0.03,
+    "units": 58,
+    "supervised_tokens": 122782,
+    "supervised_tokens_needed_with_reserve": 93300,
+    "covered": true,
+    "families": 7,
+    "family_ids": [
+     "algebra",
+     "counting_and_probability",
+     "geometry",
+     "intermediate_algebra",
+     "number_theory",
+     "prealgebra",
+     "precalculus"
+    ],
+    "reserve_units": 2,
+    "reserve_supervised_tokens": 8518,
+    "reserve_families": 2,
+    "runs_dry_at_prefix": 3650484,
+    "blocks_rungs": []
+   },
+   "supporting.math_new/mathematics_dataset": {
+    "share": 0.02,
+    "units": 47,
+    "supervised_tokens": 115649,
+    "supervised_tokens_needed_with_reserve": 62200,
+    "covered": true,
+    "families": 7,
+    "family_ids": [
+     "mathematics_dataset/algebra__linear_1d_composed",
+     "mathematics_dataset/algebra__polynomial_roots_composed",
+     "mathematics_dataset/calculus__differentiate_composed",
+     "mathematics_dataset/comparison__sort_composed",
+     "mathematics_dataset/numbers__gcd_composed",
+     "mathematics_dataset/polynomials__evaluate_composed",
+     "mathematics_dataset/probability__swr_p_sequence"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 927,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 4161565,
+    "blocks_rungs": []
+   },
+   "supporting.math_new/reasoning_gym": {
+    "share": 0.01,
+    "units": 23,
+    "supervised_tokens": 95600,
+    "supervised_tokens_needed_with_reserve": 31100,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "reasoning_gym/polynomial_equations"
+    ],
+    "reserve_units": 0,
+    "reserve_supervised_tokens": 0,
+    "reserve_families": 0,
+    "runs_dry_at_prefix": 4277516,
+    "blocks_rungs": []
+   },
+   "supporting.math_reused_gsm8k/corpus_v2_gsm8k_verified": {
+    "share": 0.06,
+    "units": 1508,
+    "supervised_tokens": 1648134,
+    "supervised_tokens_needed_with_reserve": 186600,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "corpus_v2_gsm8k_verified"
+    ],
+    "reserve_units": 10,
+    "reserve_supervised_tokens": 8680,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 7842460,
+    "blocks_rungs": []
+   },
+   "supporting.reading_verified/corpus_v2_multihop_verified": {
+    "share": 0.02,
+    "units": 919,
+    "supervised_tokens": 879026,
+    "supervised_tokens_needed_with_reserve": 62200,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "corpus_v2_multihop_verified"
+    ],
+    "reserve_units": 1,
+    "reserve_supervised_tokens": 823,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 6869491,
+    "blocks_rungs": []
+   },
+   "supporting.reading_verified/corpus_v2_rag_verified": {
+    "share": 0.06,
+    "units": 3871,
+    "supervised_tokens": 1806741,
+    "supervised_tokens_needed_with_reserve": 186600,
+    "covered": true,
+    "families": 1,
+    "family_ids": [
+     "corpus_v2_rag_verified"
+    ],
+    "reserve_units": 20,
+    "reserve_supervised_tokens": 7116,
+    "reserve_families": 1,
+    "runs_dry_at_prefix": 8003150,
+    "blocks_rungs": []
+   }
+  },
+  "validation_tail": {
+   "units": 60,
+   "supervised_tokens": 150415,
+   "cells_present": 18,
+   "cells_absent": [
+    "supporting.math_new/reasoning_gym"
+   ],
+   "families": 31,
+   "max_share_deviation": 0.02663
+  },
+  "_reading": "runs_dry_at_prefix: the training-order prefix size at which the cell's last unit is placed; past it the interleave cannot serve the cell, so a rung whose prefix is larger is refused (nested_ladder.composition_capacity). A one-unit cell runs dry where its unit is placed, so it either sits in a rung and caps the capacity there, or sits in none; no order or salt satisfies both."
+ },
+ "independence": {
+  "units": 7377,
+  "units_sharing_a_prompt": 0,
+  "examples": [],
+  "units_sharing_a_target": 0,
+  "units_without_target": 0,
+  "validation_prompts_also_in_training": 0
+ },
+ "isolation": {
+  "generated_units_R0_R9": {
+   "pass": true,
+   "n_items": 1080,
+   "violations": [],
+   "R2_flagged": 0
+  },
+  "reuse_selection": [
+   {
+    "path": "data/stages/stage-2/reasoning_data/tasks/supporting_reuse_v1.selection.isolation.json",
+    "pass": true
+   }
+  ]
+ },
+ "authorizes": "nothing",
+ "unsatisfied": [],
+ "pack": {
+  "built": true,
+  "dir": "artifacts/stages/stage-2/reasoning_data/packs/B_v3",
+  "outputs": {
+   "blocks.npz": "5d06b026dcb42f43b76f8a0955f95c24884c0acaee8a57b4c16395aafe539121",
+   "audit.jsonl": "1f642a7193402ac926adb03a722d3f51bd42ab3035435693b573d7f304325303",
+   "targets.jsonl": "ca77e81c45b8b95fea20f35cf0576cf183dbc5621788123f72d8b5f5fa20064b"
+  },
+  "ladder_sha256": "fbc0ec7b7a49671aa051fd334d645ceef68bceeb6311b241857f1ff7713af714",
+  "blocks_sha256": "5d06b026dcb42f43b76f8a0955f95c24884c0acaee8a57b4c16395aafe539121",
+  "rungs": [
+   {
+    "target_supervised_tokens": 860000,
+    "n_units": 374,
+    "n_sessions": 400,
+    "n_blocks": 118,
+    "actual_supervised_tokens": 867545,
+    "real_tokens": 961231,
+    "padding_tokens": 5425
+   },
+   {
+    "target_supervised_tokens": 1600000,
+    "n_units": 645,
+    "n_sessions": 685,
+    "n_blocks": 217,
+    "actual_supervised_tokens": 1600092,
+    "real_tokens": 1761970,
+    "padding_tokens": 15694
+   },
+   {
+    "target_supervised_tokens": 2960000,
+    "n_units": 1226,
+    "n_sessions": 1301,
+    "n_blocks": 402,
+    "actual_supervised_tokens": 2966334,
+    "real_tokens": 3268696,
+    "padding_tokens": 24488
+   }
+  ],
+  "validation_tail": {
+   "first_block": 402,
+   "blocks": 20,
+   "real_tokens": 161530,
+   "padding_tokens": 2310,
+   "packing_efficiency": 0.9859,
+   "supervised_tokens": 150415,
+   "sessions": 63,
+   "multi_session_blocks": 18
+  },
+  "trainer_reader": {
+   "val_blocks": 16,
+   "val_disjoint_from_all_rungs": true
+  }
+ }
+}

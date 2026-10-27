@@ -27,3 +27,27 @@ def test_required_disjointness_refuses_a_violation_and_passes_otherwise():
         require_disjoint(rep, [("b", "a", "family")])
     with pytest.raises(IsolationViolation):
         require_disjoint(rep, [("a", "c", "family")])   # an unknown pair is not a pass
+
+
+def test_ngram_containment_flags_a_reworded_copy_and_not_a_stranger():
+    from aadistill.evaluation.isolation import ngram_containment, ngram_index
+
+    held = ["Tom has 3 apples and buys 5 more; how many apples does Tom have now?"]
+    index = ngram_index(held, 5)
+    rep = ngram_containment(
+        [("copy", "TOM has 3 apples and buys 5 more;  how many apples does Tom have now?"),
+         ("reflow", "Q: Tom has 3 apples and buys 5 more; how many apples does Tom have"),
+         ("other", "A train leaves the station at noon travelling sixty miles per hour.")],
+        index, 5, threshold=0.5)
+    flagged = {r["id"] for r in rep["flagged_items"]}
+    assert flagged == {"copy", "reflow"} and rep["checked"] == 3
+    assert rep["n"] == 5 and rep["threshold"] == 0.5
+
+
+def test_a_text_shorter_than_n_collides_only_with_its_own_normal_form():
+    from aadistill.evaluation.isolation import ngram_containment, ngram_index
+
+    index = ngram_index(["Is 7 prime?"], 13)
+    rep = ngram_containment([("same", "is 7   PRIME?"), ("near", "Is 9 prime?")], index, 13,
+                            threshold=1.0)
+    assert [r["id"] for r in rep["flagged_items"]] == ["same"]

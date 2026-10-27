@@ -1,0 +1,254 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1pa_training_application/v1",
+ "written_utc": "2026-10-24T17:29:48Z",
+ "status": "APPLICATION for the maintainer's decision; NOT authorized, nothing launched, no storage created",
+ "what": "H1-PA's student phase: PA2v, one short L40S GPU validation; then PA2, the four trainings (D4-Original and D4-Augmented, two seeds each) and the six nucleus_v1 evaluations of eval-set-1 (those four checkpoints and PCA-Original's two, never retrained), in one cumulative envelope with the study's network volume",
+ "frozen": {
+  "study": "configs/stages/stage-2/reasoning_data/h1pa.json",
+  "study_sha256": "fe0ea966811b57d2a2bc94ac71bfec5660f74a63cc0f94cd9566e8efc389159d",
+  "study_identity_sha256": "d8a3c15ed32b6db386ca20934f80e1d17f6deb3bfb4b5e46711e611ed61fbb8c",
+  "preregistration": "logs/stages/stage-2/reasoning_data/plans/h1pa_preregistration.json",
+  "preregistration_sha256": "ae67279d15cddab4c14798313177d4554b8e585745cfd9b8f0afa8a42655261f",
+  "data": "audit/h1pa_fluid_whole_units.json (terminal SUCCESS)",
+  "harness_digest": "e86adfc9ae4f6bc98ca5bf22c68f24ca9a3b4d9035cc4e49c6b03b1b0b794e39",
+  "_harness": "over h1pa_governance.harness_files() on the tree this application was written from; issue() recomputes it on the session commit and the pod's setup re-checks it, so a later code change shows up as a different digest, never a silent one"
+ },
+ "scope": {
+  "train": {
+   "D4-Original-s20260726": 2916,
+   "D4-Original-s20260801": 2916,
+   "D4-Augmented-s20260726": 3702,
+   "D4-Augmented-s20260801": 3702
+  },
+  "evaluate_only": [
+   "PCA-Original-s20260726",
+   "PCA-Original-s20260801"
+  ],
+  "recipe": "E1's config per seed: batch size 2, micro-batch size 1, 3 epochs, AdamW lr 5e-5, CE 0.25 + KD 1.0; D4-Original 2,916 optimizer steps, D4-Augmented 3,702 (E1's rule on its 2,468 sequences); nothing else changes",
+  "evaluation": "eval-set-1 every item, nucleus_v1 bound explicitly and refused when absent; the preregistered rule decides A and B, C is descriptive",
+  "not_requested": [
+   "teacher generation",
+   "a new arm",
+   "a ratio search",
+   "a main merge",
+   "any retry of a complete valid measurement"
+  ]
+ },
+ "hardware": {
+  "gpu": "NVIDIA L40S 48 GB, secure cloud",
+  "price_per_hour": 1.09,
+  "price_read": "2026-10-24T17:26:57+00:00",
+  "why": "measured on this exact configuration: E1 trained it on L40S at a 39.96 GB logged peak (sa train_log.jsonl) and 1.78 s per sequence pass (cost_forecast.json, n=21); full eval-set-1 evaluations ran on L40S (n=21). PA2v re-measures both under H1-PA's own inputs and nucleus_v1 before anything formal; no GPU type is assumed unsuitable without a measurement",
+  "datacenter": "chosen at launch from a live query among those with L40S stock and network-volume support (2026-10-24: EU-NL-1, EUR-IS-2, US-MO-1, US-NC-1, US-TX-3, each Low); the volume is created there and locks every session to it; one GPU type for every formal unit",
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 (CUDA 13: host driver >= 580); the host driver of every session is recorded"
+ },
+ "gpu_validation_PA2v": {
+  "units": [
+   "PCA-Original-s20260726",
+   "D4-Augmented-s20260726"
+  ],
+  "training": {
+   "arm": "D4-Augmented",
+   "seed": 20260726,
+   "steps": 24,
+   "save_every": 12,
+   "runs": "X1 and X2 uninterrupted, Y killed with SIGKILL right after its step-12 save point on the network volume and resumed with --resume latest; plus 12 steps of D4-Original on E1's pack",
+   "validation_only_overrides": [
+    "schedule.total_steps",
+    "schedule.warmup_steps",
+    "checkpoint.save_every",
+    "intervals.eval_every",
+    "intervals.log_every",
+    "rung"
+   ]
+  },
+  "evaluation": {
+   "checkpoint": "PCA-Original-s20260726",
+   "fluid_items": 24,
+   "gsm8k_items": 24
+  },
+  "checks": {
+   "gpu": "torch reports an NVIDIA L40S",
+   "memory_gb_max": 44.0,
+   "_memory": "48 GB card, at least 4 GB headroom; E1 logged 39.96 GB for this configuration",
+   "training": "every run completes its steps; loss and gradient norm finite",
+   "config": "the run's recovery_config.json differs from the seed's E1 config only by WHERE, tokenizer_source and the validation-only overrides; D4-Original's and D4-Augmented's formal recipes derive with no key outside their declared overrides",
+   "initialization": "D4 Top-1 restored and re-identified from its bytes",
+   "pca_checkpoint": "model.safetensors' sha256 is the recorded one",
+   "resume": "P1g's rule: data order and learning rate identical at every resumed step; loss and final weights within twice the run-to-run difference of the two uninterrupted runs (or 1e-6)",
+   "persistence": "Y's final model persisted to the volume and re-identified from the landed bytes; the probe file written, fsynced and read back with its sha256",
+   "capacity": "the provider's size is the planned 30 GB; the measured save point is no larger than storage.bytes.save_point x 1.02",
+   "decoding": "every generation summary carries nucleus_v1's sha256 and its sampling; every sample's seed is the protocol's request_seed for its item and turn; every sample records output token ids and a stop_reason in {eos, degeneration, context_limit}",
+   "repricing": "the formal sessions are priced from PA2v's measured median step seconds; issuing a formal authorization needs the repriced hard cap to fit the live envelope"
+  },
+  "driver": "scripts/stages/stage-2/reasoning_data/h1pa_validation.py",
+  "gate": "ENFORCED in code: h1pa_governance.issue refuses a formal authorization without a passed PA2v gate (pa2v_gate), which is RE-DERIVED at issue time from PA2v's secured evidence -- its validation authorization under this grant, a COMPLETE closeout with the pod gone, the evidence archive's hash, every check run again -- and must name the same study identity and harness as the formal session; the formal launch re-checks the gate its authorization names (the_pa2v_gate_holds)",
+  "formal": false
+ },
+ "sessions": {
+  "PA2v": {
+   "phase": "PA2v",
+   "units": [
+    "PCA-Original-s20260726",
+    "D4-Augmented-s20260726"
+   ],
+   "phases_minutes": {
+    "pa2v_validation": 60.0
+   },
+   "planned_minutes": {
+    "expected": 90.0,
+    "soft_stop": 180.0,
+    "hard_terminate": 201.2
+   },
+   "expected_usd_conservative": 1.6658,
+   "expected_minutes_at_measured_eval": 90.0,
+   "all_in_hard_bound": {
+    "billable_minutes": 202.5,
+    "price_per_hour": 1.09,
+    "container_disk_gb": 150,
+    "gpu_usd": 3.6788,
+    "disk_usd": 0.0693,
+    "all_in_usd": 3.7481
+   }
+  },
+  "PA2-s20260726": {
+   "phase": "PA2",
+   "units": [
+    "PCA-Original-s20260726",
+    "D4-Original-s20260726",
+    "D4-Augmented-s20260726"
+   ],
+   "phases_minutes": {
+    "PCA-Original-s20260726_evaluate": 158.8,
+    "D4-Original-s20260726_train": 173.4,
+    "D4-Original-s20260726_evaluate": 158.8,
+    "D4-Augmented-s20260726_train": 220.1,
+    "D4-Augmented-s20260726_evaluate": 158.8
+   },
+   "planned_minutes": {
+    "expected": 899.9,
+    "soft_stop": 1394.9,
+    "hard_terminate": 1416.1
+   },
+   "expected_usd_conservative": 16.6562,
+   "expected_minutes_at_measured_eval": 661.8,
+   "all_in_hard_bound": {
+    "billable_minutes": 1417.35,
+    "price_per_hour": 1.09,
+    "container_disk_gb": 150,
+    "gpu_usd": 25.7485,
+    "disk_usd": 0.4851,
+    "all_in_usd": 26.2336
+   }
+  },
+  "PA2-s20260801": {
+   "phase": "PA2",
+   "units": [
+    "PCA-Original-s20260801",
+    "D4-Original-s20260801",
+    "D4-Augmented-s20260801"
+   ],
+   "phases_minutes": {
+    "PCA-Original-s20260801_evaluate": 158.8,
+    "D4-Original-s20260801_train": 173.4,
+    "D4-Original-s20260801_evaluate": 158.8,
+    "D4-Augmented-s20260801_train": 220.1,
+    "D4-Augmented-s20260801_evaluate": 158.8
+   },
+   "planned_minutes": {
+    "expected": 899.9,
+    "soft_stop": 1394.9,
+    "hard_terminate": 1416.1
+   },
+   "expected_usd_conservative": 16.6562,
+   "expected_minutes_at_measured_eval": 661.8,
+   "all_in_hard_bound": {
+    "billable_minutes": 1417.35,
+    "price_per_hour": 1.09,
+    "container_disk_gb": 150,
+    "gpu_usd": 25.7485,
+    "disk_usd": 0.4851,
+    "all_in_usd": 26.2336
+   }
+  }
+ },
+ "money": {
+  "expected_usd": {
+   "at_the_measured_floor_evaluation_time": 26.16,
+   "at_twice_it_for_students_that_reason": 34.98
+  },
+  "storage": {
+   "volume_gb": 30,
+   "usd_per_gb_month": 0.07,
+   "months_reserved": 2,
+   "reserved_usd": 4.2,
+   "capacity_plan": {
+    "phase_peak_gb": 20.22,
+    "phase_final_gb": 11.04,
+    "training_peak_extra_gb": 11.82,
+    "owner": "h1pa.json :: storage"
+   },
+   "verified_by": "the launcher refuses a volume whose PROVIDER-reported size is not the plan's; the driver counts free space as that size less the bytes on the mount before every persist and every training, after a write/read-back probe; PA2v measures the real save point and its gate refuses one larger than planned",
+   "period": "created immediately before PA2v in the chosen datacenter; kept through PA2 and until the preregistered analysis and the maintainer's independent review are complete (h1pa.json :: retention); its storage record books the reservation, so it never bills unmanaged; at closeout the retention need, migration route and cost are reported and the lifecycle decision is taken"
+  },
+  "cumulative_hard_cap_usd": 50.0,
+  "_cap": "the maintainer's cumulative phase limit, kept at $50: it covers what the phase is expected to cost, NOT every session reaching its hard cap at once",
+  "every_session_at_its_hard_cap_usd": 60.42,
+  "_worst": "PA2v + both seed sessions at their all-in hard bounds + the storage reservation; not funded and not requested: the cap is not raised to it",
+  "issuing_the_last_session_needs": {
+   "before_any_measurement": 48.76,
+   "after_the_first_session_measures": 43.79,
+   "second_session_repriced": {
+    "evaluation_minutes": 99.2,
+    "planned_minutes": {
+     "expected": 721.1,
+     "hard_terminate": 1147.9
+    },
+    "all_in_hard_bound": {
+     "billable_minutes": 1149.15,
+     "price_per_hour": 1.09,
+     "container_disk_gb": 150,
+     "gpu_usd": 20.8762,
+     "disk_usd": 0.3933,
+     "all_in_usd": 21.2696
+    }
+   }
+  },
+  "_need": "PA2v and the first seed session at their conservative expected cost + the second session's all-in hard bound + the storage reservation. Every session's hard cap still covers its own real workload; when the envelope left at issue time cannot cover the next session's hard bound, its authorization is refused and nothing is created",
+  "repricing": "PA2v's measured median step time prices both seed sessions' training (+10 min per training for loading, E1's in-run validation and the save points); the first seed session's measured full evaluations price the second's (x1.25), in place of the conservative forecast. Never fewer steps, a smaller evaluation, a dropped seed or a changed rule",
+  "cap_scope": "CUMULATIVE over PA2v and PA2: every attempt's GPU, container disk and termination margin, and the study's storage; a rerun never receives a fresh allocation"
+ },
+ "project": {
+  "cumulative_cap_usd": 712.17,
+  "provider_billed_usd": 680.6673,
+  "provider_snapshot": "logs/budget/provider/runpod_billing_2026-10-24T1726Z.json",
+  "provider_state": {
+   "pods": 0,
+   "network_volumes": 0,
+   "spend_per_hour": 0.0,
+   "balance_usd": 78.729
+  },
+  "remaining_under_the_cap": 31.5,
+  "cap_raise_needed": true,
+  "cap_requested_usd": 731.0,
+  "_": "provider billing counted once (pods + network volumes, all time); the PA1 pod has posted"
+ },
+ "residual_risks": [
+  "floor: under greedy decoding E1's PCA 2.96M student answered 1.75% of the static fluid items, below the 2% floor; A or B may end NOT_RESOLVED (FLOOR), which the rule reports as no evidence either way",
+  "two seeds per arm; GPU training is not bitwise deterministic, so seed variation is reported per seed and is outside the interval",
+  "E1's config saves one mid-run save point (save_every = T // 2) and is not changed: a pod lost late in a training resumes from the half-way point; the replacement subrun must fit the envelope or the phase stops and reports",
+  "L40S stock is Low in every datacenter with network volumes; a create waits at $0 rather than switching the GPU type, which needs the maintainer",
+  "one nucleus sample per item: evaluation-sampling noise is inside the item-level bootstrap, and the per-item seed is common to every checkpoint"
+ ],
+ "provider_safety": "before every authorization (h1pa_governance.live_position) and again at every launch (h1pa_launch.the_project_cap_holds_now) the provider's billing and account are read NOW: everything billed, plus each closed session the provider has not posted yet, plus the study's unretired storage; a session whose hard cap does not fit the project cap's remainder, or an account holding any pod or volume the study does not own, is refused; no cap is ever raised automatically",
+ "termination_protection": [
+  "one one-use authorization per session, bound to the study identity and the harness, refused at $0 when its hard cap does not fit what the cumulative envelope has left (h1pa_governance.issue)",
+  "the all-in bound (GPU + 150 GB container disk + the 1.25 min termination margin) at the launch price inside the session's cap, or no pod (h1_generation_launch.all_in_within_cap); the watchdog's hard deadline follows the accepted price",
+  "account funds and provider reconciliation before every create: only the study's volume may exist",
+  "at most one billing pod at a time; one network volume",
+  "the driver persists every checkpoint, save point and evaluation to the volume as it completes; a lost pod resumes from the last save point in a new subrun, never retraining a trained unit or re-running a scored one",
+  "the same-failure gate: a deterministic paid failure is never retried unchanged",
+  "teardown gate, the provider's confirmation that the pod is gone, a closeout per session, and the volume retired or kept by an explicit decision at the end"
+ ],
+ "authorizes": "nothing"
+}

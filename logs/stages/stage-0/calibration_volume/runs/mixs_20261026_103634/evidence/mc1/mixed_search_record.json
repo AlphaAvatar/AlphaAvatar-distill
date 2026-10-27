@@ -1,0 +1,49 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.mixed_search_record/v1",
+ "run_id": "mixs_20261026_103634",
+ "search_run_id": "mixed_v2_2x_search",
+ "volume_dir": "/runpod-volume/stage0_calvol/mixed_v2/2x",
+ "started_utc": "2026-10-26T10:39:44Z",
+ "commit": "d8f095c54b66e7ae4aa17ea785df8efafee01762",
+ "gpu": {
+  "name": "NVIDIA A100-SXM4-80GB",
+  "memory": "81920 MiB",
+  "driver": "595.91.07"
+ },
+ "stages": {
+  "A_contract": {
+   "status": "ok",
+   "harness_digest": "4b01d2f7ac843ebc14870b2fcc1cb0c67e813fcf732a09bb0b2cec30b76e5492",
+   "seconds": 0.0
+  },
+  "S_search": {
+   "status": "ok",
+   "pulled_before": {
+    "utc": "2026-10-26T10:39:44Z",
+    "mode": "pull",
+    "error": "no source /runpod-volume/stage0_calvol/mixed_v2/2x/search_unit"
+   },
+   "final_push": {
+    "utc": "2026-10-26T13:57:13Z",
+    "mode": "push",
+    "copied": 0,
+    "skipped": 108,
+    "bytes": 0,
+    "seconds": 0.1
+   },
+   "n_resumed": 0,
+   "seconds": 11848.8
+  },
+  "T_top1": {
+   "status": "ok",
+   "state_id": "9311dcde3cdaedbf54d506ccf7a98333",
+   "path": "DEPTH(calib.s0m_mix_2x@v2)->ATTENTION(calib.s0m_mix_2x@v2)->FFN(calib.s0m_mix_2x@v2)->RESIDUAL_WIDTH(calib.s0m_mix_2x@v2)",
+   "artifact_digest": "647a0ef381c8a5e0f94558fba82678ebfb8cba11f7392fe9172c9603fa631608",
+   "relay_files": 3,
+   "seconds": 39.4
+  }
+ },
+ "status": "COMPLETE",
+ "authorization_id": "stage0.calibration_volume.mixed.search.mixs_20261026_103634",
+ "ended_utc": "2026-10-26T13:57:52Z"
+}

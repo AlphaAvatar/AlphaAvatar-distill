@@ -1,0 +1,39 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1_generation_outcome/v1",
+ "run_id": "h1p1t_20261023_094007",
+ "status": "INCOMPLETE",
+ "terminal": null,
+ "recorded_utc": "2026-10-23T16:40:29+00:00",
+ "driver_terminal": null,
+ "session_passed": false,
+ "shards": {
+  "secured": 0,
+  "unverified": [],
+  "records": 0
+ },
+ "groups_complete": {},
+ "complete": false,
+ "money": {
+  "all_in_usd": 0.0,
+  "gpu_usd": 0.0,
+  "disk_usd": 0.0,
+  "elapsed_minutes": 0.0,
+  "price_per_hour": null,
+  "authorized_usd": null,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB), ceiled to the 4-decimal quantum -- the Stage-0 closeouts' basis"
+ },
+ "cost": {},
+ "provider_confirms_gone": null,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [],
+  "error": null,
+  "accounted": [],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 0 resource(s) the records account for"
+ },
+ "authorizes": "nothing"
+}

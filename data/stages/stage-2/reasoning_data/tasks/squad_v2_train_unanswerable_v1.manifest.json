@@ -1,0 +1,65 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.supporting_pool/v1",
+ "corpus_variant": "stage2.reasoning_master@v1",
+ "created_utc": "2026-10-22T15:39:27Z",
+ "version": 1,
+ "status": "PROPOSED pool: sources admitted for H1 design (maintainer, 2026-10-22); no teacher target is generated for it until a generation grant exists",
+ "kind": "generation task pool",
+ "source": "squad_v2_train_unanswerable",
+ "command": "python -m stages.reasoning_data.build_supporting_tasks --source squad_v2_train_unanswerable --version 1 --oversupply 1.5",
+ "demand": {
+  "stratum": "supporting.answerability",
+  "units_needed": 183,
+  "unit_accept_rate": 0.978049,
+  "accept_rate_basis": "corpus_v2 rag_evidence: measured n = 1 candidate accept rate under the contract (audit/asset_audit.json), a proxy for this source",
+  "oversupply": 1.5,
+  "tasks": 281
+ },
+ "n_tasks": 281,
+ "eligible_candidates": 8853,
+ "draw_order": "sha256('stage2.supporting/v1|<task_id>') ascending",
+ "provenance": {
+  "dataset": "rajpurkar/squad_v2 @ 3ffb306f725f7d2ce8394bc1873b24868140c412 train, unanswerable questions",
+  "files": [
+   {
+    "file": "squad_v2/train-00000-of-00001.parquet",
+    "sha256": "f6da32ffb482ff463ad056477740d1bb284b96a45db3a08bee6a225ca6abf291"
+   }
+  ],
+  "prompt_template": "scripts/shared/data/build_stage2_v0.py :: RAG_PROMPT (corpus_v2 rag_evidence's)",
+  "draw_rule": "one question per context paragraph",
+  "dropped": {}
+ },
+ "math500_screen": null,
+ "removed_by_isolation": {
+  "R2_flagged": 0,
+  "removed_units": []
+ },
+ "by_family": {
+  "squad_v2_train_unanswerable": 281
+ },
+ "by_difficulty": {
+  "": 281
+ },
+ "verifier": "supporting_verify.VERIFIERS['abstention']",
+ "verifier_validation": {
+  "material": "corpus_v2 teacher candidates for answerable questions (4 per prompt)",
+  "candidates": {
+   "multihop_qa:span_correct": 3698,
+   "multihop_qa:span_incorrect": 598,
+   "rag_evidence:span_correct": 16040,
+   "rag_evidence:span_incorrect": 360
+  },
+  "detected_as_abstention": {
+   "multihop_qa:span_correct": 6,
+   "multihop_qa:span_incorrect": 13,
+   "rag_evidence:span_correct": 483,
+   "rag_evidence:span_incorrect": 39
+  },
+  "reading": "detections among span-correct replies are the teacher DECLINING an answerable question while quoting context that contains the gold (corpus_v2's span check accepts them); a reading on 2026-10-22 of 25 random such detections and of every one not led by 'I cannot' / 'The context does not' found no reply that answers the question. Before the lead-sentence rule, an answer followed by 'the context does not specify ...' was detected (614 rag detections then, against 483 now)"
+ },
+ "sha256": "07f1a198569dba3e974d476c13eb7d9fb253ccd02dc55dbdaf71976d03228131",
+ "isolation_report": "squad_v2_train_unanswerable_v1.isolation.json",
+ "isolation_pass": true,
+ "authorizes": "nothing"
+}

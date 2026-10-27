@@ -1,0 +1,2855 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.mixed_feasibility/v1",
+ "written_utc": "2026-10-26T04:54:41Z",
+ "design": {
+  "path": "configs/stages/stage-0/calibration_volume/mixed_design.json",
+  "sha256": "c25f38e09d3c1499ca4edd510bfae39a091b1b41e156ce155ba6fa1fd33aba2c"
+ },
+ "profiles_doc": {
+  "path": "configs/stages/stage-0/calibration_volume/profiles_mixed.json",
+  "profiles": {
+   "calib.s0m_mix_2x": {
+    "content_sha256": "f8abfa9380464e8ecf8e3c5e42df0e62b73333ee8c75ac6f52c2e7477dca004b",
+    "items_file_sha256": "17a4f8973c79623fd3620fbe185a8589244482d1be0b272fa13010cb4ce9660c"
+   },
+   "calib.s0m_mix_4x": {
+    "content_sha256": "394570a88f329ee9d76ec48af20a7fbfe3fb3135cb081c067dab3a52037ebcb1",
+    "items_file_sha256": "276ac944b28606f14006e574ed00bfd15b388a624a806ef206bf00427a4e760b"
+   }
+  }
+ },
+ "sampling_seed": 179444901,
+ "micro_batch_size": 3,
+ "pool": {
+  "units_in_design_cells": 6539,
+  "eligible_units": 4810,
+  "eligible_by_cell": {
+   "fluid/abstract_analogical/grid_transform@v1": {
+    "units": 43,
+    "scored": 246757
+   },
+   "fluid/compositional_generalization/defined_ops@v1": {
+    "units": 73,
+    "scored": 162937
+   },
+   "fluid/compositional_generalization/scan_language@v1": {
+    "units": 29,
+    "scored": 201652
+   },
+   "fluid/inductive_rule_discovery/list_induction@v1": {
+    "units": 69,
+    "scored": 243905
+   },
+   "fluid/inductive_rule_discovery/string_induction@v1": {
+    "units": 68,
+    "scored": 257753
+   },
+   "fluid/interactive_adaptation/*": {
+    "units": 13,
+    "scored": 216701
+   },
+   "fluid/task_contained_deduction/entity_tracking@v1": {
+    "units": 75,
+    "scored": 167910
+   },
+   "fluid/task_contained_deduction/knights_knaves@v1": {
+    "units": 74,
+    "scored": 375953
+   },
+   "fluid/task_contained_deduction/ordering@v1": {
+    "units": 75,
+    "scored": 286812
+   },
+   "supporting/gsm8k/*": {
+    "units": 1000,
+    "scored": 1142245
+   },
+   "supporting/multihop_qa/*": {
+    "units": 375,
+    "scored": 427829
+   },
+   "supporting/openmath/*": {
+    "units": 188,
+    "scored": 701641
+   },
+   "supporting/rag_evidence/*": {
+    "units": 2728,
+    "scored": 1469435
+   }
+  },
+  "rule_families_by_generator": {
+   "defined_ops@v1": [
+    "comp.chain3",
+    "comp.conditional_chain"
+   ],
+   "entity_tracking@v1": [
+    "track.move",
+    "track.move_remove"
+   ],
+   "grid_transform@v1": [
+    "grid.fill_rows",
+    "grid.flip_h",
+    "grid.flip_v",
+    "grid.rotate_ccw",
+    "grid.rotate_cw"
+   ],
+   "hidden_buttons@v1": [
+    "act.reverse"
+   ],
+   "knights_knaves@v1": [
+    "kk.counting"
+   ],
+   "list_induction@v1": [
+    "list.append_sum",
+    "list.dedupe",
+    "list.duplicate_each",
+    "list.keep_even",
+    "list.min",
+    "list.mod_k",
+    "list.mul_k",
+    "list.pairwise_sums",
+    "list.sort_asc",
+    "list.square",
+    "list.swap_ends"
+   ],
+   "ordering@v1": [
+    "order.race"
+   ],
+   "probe_function@v1": [
+    "probe.digit_sum",
+    "probe.threshold"
+   ],
+   "scan_language@v1": [
+    "scan.rev_sur",
+    "scan.seq_rev",
+    "scan.sur_sur"
+   ],
+   "string_induction@v1": [
+    "str.append_first",
+    "str.caesar",
+    "str.double_last",
+    "str.duplicate_each",
+    "str.keep_even_positions",
+    "str.mirror",
+    "str.sort_letters"
+   ]
+  }
+ },
+ "eligibility": {
+  "members": {
+   "e1_training_and_validation_sessions": 4584,
+   "fluid_increment_sessions": 767
+  },
+  "excluded_d4_augmented": {
+   "supporting/gsm8k": 349,
+   "supporting/multihop_qa": 356,
+   "supporting/openmath": 115,
+   "supporting/rag_evidence": 893
+  },
+  "by_key": {
+   "session": 1711,
+   "source": 1711,
+   "prompt": 1713
+  },
+  "excluded_eval_set_r2": [
+   "squad_v2-009507",
+   "squad_v2-010803",
+   "squad_v2-010926",
+   "squad_v2-011314",
+   "squad_v2-011317",
+   "squad_v2-013655",
+   "squad_v2-013658",
+   "squad_v2-013660",
+   "squad_v2-013662",
+   "squad_v2-015161",
+   "squad_v2-016516",
+   "squad_v2-016519",
+   "squad_v2-017522",
+   "squad_v2-017525",
+   "squad_v2-017960",
+   "squad_v2-018545"
+  ],
+  "isolation": {
+   "R0_provenance": {
+    "violations": {
+     "openmath_instruct_2: missing source_split": 188,
+     "unregistered source 'gsm8k'": 1000,
+     "unregistered source 'hotpot_qa'": 375,
+     "unregistered source 'squad_v2'": 2744,
+     "unregistered source None": 519
+    },
+    "historical_pool": true,
+    "pass": false
+   },
+   "R1_held_out_keys": {
+    "held_out_overlap": {},
+    "pass": true
+   },
+   "R8_in_sample_overlap": {},
+   "R2_near_duplicate": {
+    "n": 13,
+    "threshold": 0.5,
+    "max_document_frequency": 5,
+    "checked": 4813,
+    "flagged": 16,
+    "flagged_by_unit": {
+     "stage3_capability_846/eval_behavior_v0": 16
+    },
+    "flagged_ids": [
+     "squad_v2-009507",
+     "squad_v2-010803",
+     "squad_v2-010926",
+     "squad_v2-011314",
+     "squad_v2-011317",
+     "squad_v2-013655",
+     "squad_v2-013658",
+     "squad_v2-013660",
+     "squad_v2-013662",
+     "squad_v2-015161",
+     "squad_v2-016516",
+     "squad_v2-016519",
+     "squad_v2-017522",
+     "squad_v2-017525",
+     "squad_v2-017960",
+     "squad_v2-018545"
+    ],
+    "pass": false
+   },
+   "R3_rule_family": {
+    "applicable_items": 519,
+    "overlap": {
+     "generator_family": 0,
+     "family": 0
+    },
+    "examples": {},
+    "pass": true
+   },
+   "R4_eval_only_generators": {
+    "generators": {
+     "list_induction@v1": 69,
+     "entity_tracking@v1": 75,
+     "defined_ops@v1": 73,
+     "ordering@v1": 75,
+     "knights_knaves@v1": 74,
+     "string_induction@v1": 68,
+     "scan_language@v1": 29,
+     "grid_transform@v1": 43,
+     "hidden_buttons@v1": 7,
+     "probe_function@v1": 6
+    },
+    "eval_only_hits": {},
+    "task_type_hits": {},
+    "items_without_task_type": 0,
+    "pass": true
+   },
+   "R5_shared_generator_exposure": {
+    "items_from_shared_generators": 519,
+    "training_seed_range": [
+     3000000,
+     4000000
+    ],
+    "violations": {
+     "n": 50,
+     "first": [
+      {
+       "id": "001ca9fc59ec710ec2d0",
+       "why": "seed 2200020 outside the training range"
+      },
+      {
+       "id": "02260c81cdadde652207",
+       "why": "seed 2100009 outside the training range"
+      },
+      {
+       "id": "02f2122d22b111c3618a",
+       "why": "seed 2200008 outside the training range"
+      }
+     ]
+    },
+    "n_violations": 519,
+    "historical_pool": true,
+    "pass": false,
+    "_reading": "a Stage-2 TRAINING rule (seeds in the training range 3,000,000-4,000,000); these are calibration units drawn in the calibration range 2,000,000-3,000,000 from calibration-split families, which R3 checks"
+   },
+   "R6_source_split": {
+    "violations": {},
+    "pass": true
+   },
+   "R7_arc_agi": {
+    "arc_lineage_items": {},
+    "content_refused": [],
+    "n_content_refused": 0,
+    "items_with_any_grid_match": 3,
+    "index": {
+     "path": "data/stages/stage-2/reasoning_data/isolation/arc_grid_index.json",
+     "sha256": "425b3f29afb089435982c05e900463fca6d0ebf0e37f24afbd1e214383dde91e",
+     "source": {
+      "package": "arckit 0.1.0 (PyPI)",
+      "wheel_sha256": "5a22619309d2c29b04796eadf2a58792e563d6b811ee021e5d8ca97880ebbe80",
+      "files_sha256": {
+       "arckit/data/arc1.json": "b22cbaf01a1e30f0bbf667dab30e77bf387c6a53dec84607d92a41bd276a6d47",
+       "arckit/data/kaggle2024.json": "73c89307138307a363e0c6b14d3fcf599ec63d8588f502be045d783cca2b791d"
+      }
+     }
+    },
+    "pass": true
+   },
+   "R9_mechanism_equivalence": {
+    "refused_families": [
+     "string_induction@v2/str.caesar",
+     "string_induction@v2/str.double_last",
+     "string_induction@v2/str.duplicate_each"
+    ],
+    "items": {},
+    "overlapping_reported": [],
+    "families_without_tabulated_rules": [
+     "defined_ops@v1/comp.chain3",
+     "defined_ops@v1/comp.conditional_chain",
+     "entity_tracking@v1/track.move",
+     "entity_tracking@v1/track.move_remove",
+     "hidden_buttons@v1/act.reverse",
+     "knights_knaves@v1/kk.counting",
+     "ordering@v2/order.race",
+     "probe_function@v1/probe.digit_sum",
+     "probe_function@v1/probe.threshold",
+     "scan_language@v1/scan.rev_sur",
+     "scan_language@v1/scan.seq_rev",
+     "scan_language@v1/scan.sur_sur"
+    ],
+    "pass": true
+   }
+  },
+  "isolation_report": {
+   "eval_set": "eval-set-1",
+   "n_items": 4826,
+   "establishes": {
+    "R0_provenance": "every item names a registered, trainable source and carries the fields its kind needs",
+    "R1_held_out_keys": "no item shares a prompt or content key with a held-out unit",
+    "R2_near_duplicate": "no item is a 13-gram near-copy of a held-out prompt",
+    "R3_rule_family": "no item comes from a rule family a fluid evaluation item uses",
+    "R4_eval_only_generators": "no item comes from an evaluation-only generator or its task type",
+    "R5_shared_generator_exposure": "shared-generator items are calibration-split families in the training seed range",
+    "R6_source_split": "every dataset item comes from a trainable split",
+    "R7_arc_agi": "no ARC-lineage source or module, and no item carrying ARC-AGI-1 grids",
+    "R9_mechanism_equivalence": "no item comes from a project family whose rule computes an evaluation family's rule"
+   },
+   "not_established": "semantic mechanism isolation beyond R9's tabulated rules: families without tabulated rules and external modules are covered by the declared review (external_modules.json :: mechanism), not by these checks"
+  }
+ },
+ "nested": {
+  "2x_in_4x": true,
+  "units": {
+   "2x": 81,
+   "4x": 145
+  }
+ },
+ "cells": {
+  "2x": {
+   "fluid/task_contained_deduction/entity_tracking@v1": {
+    "quota": 3000.0,
+    "scored": 3435,
+    "units": 1,
+    "pool_units": 75
+   },
+   "fluid/task_contained_deduction/ordering@v1": {
+    "quota": 3000.0,
+    "scored": 6300,
+    "units": 1,
+    "pool_units": 75
+   },
+   "fluid/task_contained_deduction/knights_knaves@v1": {
+    "quota": 3000.0,
+    "scored": 5270,
+    "units": 1,
+    "pool_units": 74
+   },
+   "fluid/inductive_rule_discovery/list_induction@v1": {
+    "quota": 4500.0,
+    "scored": 5189,
+    "units": 2,
+    "pool_units": 69
+   },
+   "fluid/inductive_rule_discovery/string_induction@v1": {
+    "quota": 4500.0,
+    "scored": 8248,
+    "units": 2,
+    "pool_units": 68
+   },
+   "fluid/compositional_generalization/defined_ops@v1": {
+    "quota": 4500.0,
+    "scored": 7882,
+    "units": 3,
+    "pool_units": 73
+   },
+   "fluid/compositional_generalization/scan_language@v1": {
+    "quota": 4500.0,
+    "scored": 7736,
+    "units": 1,
+    "pool_units": 29
+   },
+   "fluid/abstract_analogical/grid_transform@v1": {
+    "quota": 9000.0,
+    "scored": 12951,
+    "units": 2,
+    "pool_units": 43
+   },
+   "fluid/interactive_adaptation/*": {
+    "quota": 9000.0,
+    "scored": 14205,
+    "units": 1,
+    "pool_units": 13
+   },
+   "supporting/gsm8k/*": {
+    "quota": 17804.0,
+    "scored": 18092,
+    "units": 18,
+    "pool_units": 1000
+   },
+   "supporting/multihop_qa/*": {
+    "quota": 17804.0,
+    "scored": 17910,
+    "units": 10,
+    "pool_units": 375
+   },
+   "supporting/openmath/*": {
+    "quota": 17804.0,
+    "scored": 16574,
+    "units": 6,
+    "pool_units": 188
+   },
+   "supporting/rag_evidence/*": {
+    "quota": 17804.0,
+    "scored": 17825,
+    "units": 33,
+    "pool_units": 2728
+   }
+  },
+  "4x": {
+   "fluid/task_contained_deduction/entity_tracking@v1": {
+    "quota": 6000.0,
+    "scored": 8086,
+    "units": 3,
+    "pool_units": 75
+   },
+   "fluid/task_contained_deduction/ordering@v1": {
+    "quota": 6000.0,
+    "scored": 6300,
+    "units": 1,
+    "pool_units": 75
+   },
+   "fluid/task_contained_deduction/knights_knaves@v1": {
+    "quota": 6000.0,
+    "scored": 9090,
+    "units": 2,
+    "pool_units": 74
+   },
+   "fluid/inductive_rule_discovery/list_induction@v1": {
+    "quota": 9000.0,
+    "scored": 11436,
+    "units": 4,
+    "pool_units": 69
+   },
+   "fluid/inductive_rule_discovery/string_induction@v1": {
+    "quota": 9000.0,
+    "scored": 11425,
+    "units": 3,
+    "pool_units": 68
+   },
+   "fluid/compositional_generalization/defined_ops@v1": {
+    "quota": 9000.0,
+    "scored": 10821,
+    "units": 4,
+    "pool_units": 73
+   },
+   "fluid/compositional_generalization/scan_language@v1": {
+    "quota": 9000.0,
+    "scored": 15166,
+    "units": 2,
+    "pool_units": 29
+   },
+   "fluid/abstract_analogical/grid_transform@v1": {
+    "quota": 18000.0,
+    "scored": 20874,
+    "units": 3,
+    "pool_units": 43
+   },
+   "fluid/interactive_adaptation/*": {
+    "quota": 18000.0,
+    "scored": 41203,
+    "units": 2,
+    "pool_units": 13
+   },
+   "supporting/gsm8k/*": {
+    "quota": 33600.2,
+    "scored": 32166,
+    "units": 30,
+    "pool_units": 1000
+   },
+   "supporting/multihop_qa/*": {
+    "quota": 33600.2,
+    "scored": 33568,
+    "units": 21,
+    "pool_units": 375
+   },
+   "supporting/openmath/*": {
+    "quota": 33600.2,
+    "scored": 34294,
+    "units": 9,
+    "pool_units": 188
+   },
+   "supporting/rag_evidence/*": {
+    "quota": 33600.2,
+    "scored": 33744,
+    "units": 61,
+    "pool_units": 2728
+   }
+  }
+ },
+ "coverage": {
+  "2x": {
+   "total": {
+    "items": 85,
+    "units": 81,
+    "episodes": 1,
+    "uesp": 141617,
+    "prediction_positions": 169723,
+    "forward_tokens": 169808,
+    "padded_forward_slots": 178117,
+    "rule_families": 13
+   },
+   "by_half": {
+    "fluid": {
+     "items": 18,
+     "units": 14,
+     "episodes": 1,
+     "uesp": 71216,
+     "prediction_positions": 78099,
+     "forward_tokens": 78117,
+     "padded_forward_slots": 85830,
+     "rule_families": 13,
+     "uesp_share": 0.5029
+    },
+    "supporting": {
+     "items": 67,
+     "units": 67,
+     "episodes": 0,
+     "uesp": 70401,
+     "prediction_positions": 91624,
+     "forward_tokens": 91691,
+     "padded_forward_slots": 96633,
+     "rule_families": 0,
+     "uesp_share": 0.4971
+    }
+   },
+   "by_axis": {
+    "abstract_analogical": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 12951,
+     "prediction_positions": 13567,
+     "forward_tokens": 13569,
+     "padded_forward_slots": 14776,
+     "rule_families": 2,
+     "uesp_share": 0.0915,
+     "share_of_fluid": 0.1819
+    },
+    "compositional_generalization": {
+     "items": 4,
+     "units": 4,
+     "episodes": 0,
+     "uesp": 15618,
+     "prediction_positions": 16419,
+     "forward_tokens": 16423,
+     "padded_forward_slots": 19144,
+     "rule_families": 3,
+     "uesp_share": 0.1103,
+     "share_of_fluid": 0.2193
+    },
+    "inductive_rule_discovery": {
+     "items": 4,
+     "units": 4,
+     "episodes": 0,
+     "uesp": 13437,
+     "prediction_positions": 14186,
+     "forward_tokens": 14190,
+     "padded_forward_slots": 14584,
+     "rule_families": 4,
+     "uesp_share": 0.0949,
+     "share_of_fluid": 0.1887
+    },
+    "interactive_adaptation": {
+     "items": 5,
+     "units": 1,
+     "episodes": 1,
+     "uesp": 14205,
+     "prediction_positions": 18523,
+     "forward_tokens": 18528,
+     "padded_forward_slots": 23116,
+     "rule_families": 1,
+     "uesp_share": 0.1003,
+     "share_of_fluid": 0.1995
+    },
+    "supporting": {
+     "items": 67,
+     "units": 67,
+     "episodes": 0,
+     "uesp": 70401,
+     "prediction_positions": 91624,
+     "forward_tokens": 91691,
+     "padded_forward_slots": 96633,
+     "rule_families": 0,
+     "uesp_share": 0.4971
+    },
+    "task_contained_deduction": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 15005,
+     "prediction_positions": 15404,
+     "forward_tokens": 15407,
+     "padded_forward_slots": 19215,
+     "rule_families": 3,
+     "uesp_share": 0.106,
+     "share_of_fluid": 0.2107
+    }
+   },
+   "by_generator": {
+    "defined_ops@v1": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 7882,
+     "prediction_positions": 8439,
+     "forward_tokens": 8442,
+     "padded_forward_slots": 11163,
+     "rule_families": 2,
+     "uesp_share": 0.0557,
+     "pool_rule_families": 2
+    },
+    "entity_tracking@v1": {
+     "items": 1,
+     "units": 1,
+     "episodes": 0,
+     "uesp": 3435,
+     "prediction_positions": 3638,
+     "forward_tokens": 3639,
+     "padded_forward_slots": 3639,
+     "rule_families": 1,
+     "uesp_share": 0.0243,
+     "pool_rule_families": 2
+    },
+    "grid_transform@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 12951,
+     "prediction_positions": 13567,
+     "forward_tokens": 13569,
+     "padded_forward_slots": 14776,
+     "rule_families": 2,
+     "uesp_share": 0.0915,
+     "pool_rule_families": 5
+    },
+    "gsm8k": {
+     "items": 18,
+     "units": 18,
+     "episodes": 0,
+     "uesp": 18092,
+     "prediction_positions": 19485,
+     "forward_tokens": 19503,
+     "padded_forward_slots": 27765,
+     "rule_families": 0,
+     "uesp_share": 0.1278
+    },
+    "hidden_buttons@v1": {
+     "items": 5,
+     "units": 1,
+     "episodes": 1,
+     "uesp": 14205,
+     "prediction_positions": 18523,
+     "forward_tokens": 18528,
+     "padded_forward_slots": 23116,
+     "rule_families": 1,
+     "uesp_share": 0.1003,
+     "pool_rule_families": 1
+    },
+    "knights_knaves@v1": {
+     "items": 1,
+     "units": 1,
+     "episodes": 0,
+     "uesp": 5270,
+     "prediction_positions": 5362,
+     "forward_tokens": 5363,
+     "padded_forward_slots": 5363,
+     "rule_families": 1,
+     "uesp_share": 0.0372,
+     "pool_rule_families": 1
+    },
+    "list_induction@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 5189,
+     "prediction_positions": 5756,
+     "forward_tokens": 5758,
+     "padded_forward_slots": 6060,
+     "rule_families": 2,
+     "uesp_share": 0.0366,
+     "pool_rule_families": 11
+    },
+    "multihop_qa": {
+     "items": 10,
+     "units": 10,
+     "episodes": 0,
+     "uesp": 17910,
+     "prediction_positions": 30909,
+     "forward_tokens": 30919,
+     "padded_forward_slots": 35353,
+     "rule_families": 0,
+     "uesp_share": 0.1265
+    },
+    "openmath": {
+     "items": 6,
+     "units": 6,
+     "episodes": 0,
+     "uesp": 16574,
+     "prediction_positions": 16973,
+     "forward_tokens": 16979,
+     "padded_forward_slots": 22689,
+     "rule_families": 0,
+     "uesp_share": 0.117
+    },
+    "ordering@v1": {
+     "items": 1,
+     "units": 1,
+     "episodes": 0,
+     "uesp": 6300,
+     "prediction_positions": 6404,
+     "forward_tokens": 6405,
+     "padded_forward_slots": 6405,
+     "rule_families": 1,
+     "uesp_share": 0.0445,
+     "pool_rule_families": 1
+    },
+    "rag_evidence": {
+     "items": 33,
+     "units": 33,
+     "episodes": 0,
+     "uesp": 17825,
+     "prediction_positions": 24257,
+     "forward_tokens": 24290,
+     "padded_forward_slots": 26949,
+     "rule_families": 0,
+     "uesp_share": 0.1259
+    },
+    "scan_language@v1": {
+     "items": 1,
+     "units": 1,
+     "episodes": 0,
+     "uesp": 7736,
+     "prediction_positions": 7980,
+     "forward_tokens": 7981,
+     "padded_forward_slots": 7981,
+     "rule_families": 1,
+     "uesp_share": 0.0546,
+     "pool_rule_families": 3
+    },
+    "string_induction@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 8248,
+     "prediction_positions": 8430,
+     "forward_tokens": 8432,
+     "padded_forward_slots": 10988,
+     "rule_families": 2,
+     "uesp_share": 0.0582,
+     "pool_rule_families": 7
+    }
+   },
+   "episodes": [
+    {
+     "unit_id": "6fa506dc386c6d7fa458",
+     "generator": "hidden_buttons@v1",
+     "family": "act.reverse",
+     "turns": 5,
+     "uesp": 14205
+    }
+   ],
+   "difficulty": {
+    "abstract_analogical": {
+     "L2": 1,
+     "L3": 1
+    },
+    "compositional_generalization": {
+     "L1": 1,
+     "L2": 2,
+     "L3": 1
+    },
+    "inductive_rule_discovery": {
+     "L1": 1,
+     "L2": 2,
+     "L3": 1
+    },
+    "interactive_adaptation": {
+     "L1": 1
+    },
+    "task_contained_deduction": {
+     "L1": 1,
+     "L3": 2
+    }
+   }
+  },
+  "4x": {
+   "total": {
+    "items": 153,
+    "units": 145,
+    "episodes": 2,
+    "uesp": 268173,
+    "prediction_positions": 320616,
+    "forward_tokens": 320769,
+    "padded_forward_slots": 328533,
+    "rule_families": 20
+   },
+   "by_half": {
+    "fluid": {
+     "items": 32,
+     "units": 24,
+     "episodes": 2,
+     "uesp": 134401,
+     "prediction_positions": 143868,
+     "forward_tokens": 143900,
+     "padded_forward_slots": 149268,
+     "rule_families": 20,
+     "uesp_share": 0.5012
+    },
+    "supporting": {
+     "items": 121,
+     "units": 121,
+     "episodes": 0,
+     "uesp": 133772,
+     "prediction_positions": 176748,
+     "forward_tokens": 176869,
+     "padded_forward_slots": 184882,
+     "rule_families": 0,
+     "uesp_share": 0.4988
+    }
+   },
+   "by_axis": {
+    "abstract_analogical": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 20874,
+     "prediction_positions": 21729,
+     "forward_tokens": 21732,
+     "padded_forward_slots": 24489,
+     "rule_families": 3,
+     "uesp_share": 0.0778,
+     "share_of_fluid": 0.1553
+    },
+    "compositional_generalization": {
+     "items": 6,
+     "units": 6,
+     "episodes": 0,
+     "uesp": 25987,
+     "prediction_positions": 27154,
+     "forward_tokens": 27160,
+     "padded_forward_slots": 33144,
+     "rule_families": 4,
+     "uesp_share": 0.0969,
+     "share_of_fluid": 0.1934
+    },
+    "inductive_rule_discovery": {
+     "items": 7,
+     "units": 7,
+     "episodes": 0,
+     "uesp": 22861,
+     "prediction_positions": 24151,
+     "forward_tokens": 24158,
+     "padded_forward_slots": 25057,
+     "rule_families": 7,
+     "uesp_share": 0.0852,
+     "share_of_fluid": 0.1701
+    },
+    "interactive_adaptation": {
+     "items": 10,
+     "units": 2,
+     "episodes": 2,
+     "uesp": 41203,
+     "prediction_positions": 46454,
+     "forward_tokens": 46464,
+     "padded_forward_slots": 52651,
+     "rule_families": 2,
+     "uesp_share": 0.1536,
+     "share_of_fluid": 0.3066
+    },
+    "supporting": {
+     "items": 121,
+     "units": 121,
+     "episodes": 0,
+     "uesp": 133772,
+     "prediction_positions": 176748,
+     "forward_tokens": 176869,
+     "padded_forward_slots": 184882,
+     "rule_families": 0,
+     "uesp_share": 0.4988
+    },
+    "task_contained_deduction": {
+     "items": 6,
+     "units": 6,
+     "episodes": 0,
+     "uesp": 23476,
+     "prediction_positions": 24380,
+     "forward_tokens": 24386,
+     "padded_forward_slots": 30132,
+     "rule_families": 4,
+     "uesp_share": 0.0875,
+     "share_of_fluid": 0.1747
+    }
+   },
+   "by_generator": {
+    "defined_ops@v1": {
+     "items": 4,
+     "units": 4,
+     "episodes": 0,
+     "uesp": 10821,
+     "prediction_positions": 11505,
+     "forward_tokens": 11509,
+     "padded_forward_slots": 12922,
+     "rule_families": 2,
+     "uesp_share": 0.0404,
+     "pool_rule_families": 2
+    },
+    "entity_tracking@v1": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 8086,
+     "prediction_positions": 8689,
+     "forward_tokens": 8692,
+     "padded_forward_slots": 10917,
+     "rule_families": 2,
+     "uesp_share": 0.0302,
+     "pool_rule_families": 2
+    },
+    "grid_transform@v1": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 20874,
+     "prediction_positions": 21729,
+     "forward_tokens": 21732,
+     "padded_forward_slots": 24489,
+     "rule_families": 3,
+     "uesp_share": 0.0778,
+     "pool_rule_families": 5
+    },
+    "gsm8k": {
+     "items": 30,
+     "units": 30,
+     "episodes": 0,
+     "uesp": 32166,
+     "prediction_positions": 34563,
+     "forward_tokens": 34593,
+     "padded_forward_slots": 39894,
+     "rule_families": 0,
+     "uesp_share": 0.1199
+    },
+    "hidden_buttons@v1": {
+     "items": 5,
+     "units": 1,
+     "episodes": 1,
+     "uesp": 14205,
+     "prediction_positions": 18523,
+     "forward_tokens": 18528,
+     "padded_forward_slots": 23116,
+     "rule_families": 1,
+     "uesp_share": 0.053,
+     "pool_rule_families": 1
+    },
+    "knights_knaves@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 9090,
+     "prediction_positions": 9287,
+     "forward_tokens": 9289,
+     "padded_forward_slots": 10726,
+     "rule_families": 1,
+     "uesp_share": 0.0339,
+     "pool_rule_families": 1
+    },
+    "list_induction@v1": {
+     "items": 4,
+     "units": 4,
+     "episodes": 0,
+     "uesp": 11436,
+     "prediction_positions": 12452,
+     "forward_tokens": 12456,
+     "padded_forward_slots": 13112,
+     "rule_families": 4,
+     "uesp_share": 0.0426,
+     "pool_rule_families": 11
+    },
+    "multihop_qa": {
+     "items": 21,
+     "units": 21,
+     "episodes": 0,
+     "uesp": 33568,
+     "prediction_positions": 62224,
+     "forward_tokens": 62245,
+     "padded_forward_slots": 65391,
+     "rule_families": 0,
+     "uesp_share": 0.1252
+    },
+    "openmath": {
+     "items": 9,
+     "units": 9,
+     "episodes": 0,
+     "uesp": 34294,
+     "prediction_positions": 34904,
+     "forward_tokens": 34913,
+     "padded_forward_slots": 41529,
+     "rule_families": 0,
+     "uesp_share": 0.1279
+    },
+    "ordering@v1": {
+     "items": 1,
+     "units": 1,
+     "episodes": 0,
+     "uesp": 6300,
+     "prediction_positions": 6404,
+     "forward_tokens": 6405,
+     "padded_forward_slots": 6405,
+     "rule_families": 1,
+     "uesp_share": 0.0235,
+     "pool_rule_families": 1
+    },
+    "probe_function@v1": {
+     "items": 5,
+     "units": 1,
+     "episodes": 1,
+     "uesp": 26998,
+     "prediction_positions": 27931,
+     "forward_tokens": 27936,
+     "padded_forward_slots": 30338,
+     "rule_families": 1,
+     "uesp_share": 0.1007,
+     "pool_rule_families": 2
+    },
+    "rag_evidence": {
+     "items": 61,
+     "units": 61,
+     "episodes": 0,
+     "uesp": 33744,
+     "prediction_positions": 45057,
+     "forward_tokens": 45118,
+     "padded_forward_slots": 47486,
+     "rule_families": 0,
+     "uesp_share": 0.1258
+    },
+    "scan_language@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 15166,
+     "prediction_positions": 15649,
+     "forward_tokens": 15651,
+     "padded_forward_slots": 15962,
+     "rule_families": 2,
+     "uesp_share": 0.0566,
+     "pool_rule_families": 3
+    },
+    "string_induction@v1": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 11425,
+     "prediction_positions": 11699,
+     "forward_tokens": 11702,
+     "padded_forward_slots": 16482,
+     "rule_families": 3,
+     "uesp_share": 0.0426,
+     "pool_rule_families": 7
+    }
+   },
+   "episodes": [
+    {
+     "unit_id": "6fa506dc386c6d7fa458",
+     "generator": "hidden_buttons@v1",
+     "family": "act.reverse",
+     "turns": 5,
+     "uesp": 14205
+    },
+    {
+     "unit_id": "761d50ea69adbb19433e",
+     "generator": "probe_function@v1",
+     "family": "probe.threshold",
+     "turns": 5,
+     "uesp": 26998
+    }
+   ],
+   "difficulty": {
+    "abstract_analogical": {
+     "L1": 1,
+     "L2": 1,
+     "L3": 1
+    },
+    "compositional_generalization": {
+     "L1": 2,
+     "L2": 2,
+     "L3": 2
+    },
+    "inductive_rule_discovery": {
+     "L1": 3,
+     "L2": 2,
+     "L3": 2
+    },
+    "interactive_adaptation": {
+     "L1": 1,
+     "L3": 1
+    },
+    "task_contained_deduction": {
+     "L1": 1,
+     "L2": 1,
+     "L3": 4
+    }
+   }
+  }
+ },
+ "historical": {
+  "calib.s0v_base_d1": {
+   "total": {
+    "items": 30,
+    "units": 30,
+    "episodes": 0,
+    "uesp": 68756,
+    "prediction_positions": 78783,
+    "forward_tokens": 78813,
+    "padded_forward_slots": 82995,
+    "rule_families": 13
+   },
+   "by_half": {
+    "fluid": {
+     "items": 13,
+     "units": 13,
+     "episodes": 0,
+     "uesp": 50634,
+     "prediction_positions": 53116,
+     "forward_tokens": 53129,
+     "padded_forward_slots": 57333,
+     "rule_families": 13,
+     "uesp_share": 0.7364
+    },
+    "supporting": {
+     "items": 17,
+     "units": 17,
+     "episodes": 0,
+     "uesp": 18122,
+     "prediction_positions": 25667,
+     "forward_tokens": 25684,
+     "padded_forward_slots": 29372,
+     "rule_families": 0,
+     "uesp_share": 0.2636
+    }
+   },
+   "by_axis": {
+    "abstract_analogical": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 11091,
+     "prediction_positions": 11707,
+     "forward_tokens": 11709,
+     "padded_forward_slots": 13694,
+     "rule_families": 2,
+     "uesp_share": 0.1613,
+     "share_of_fluid": 0.219
+    },
+    "compositional_generalization": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 11619,
+     "prediction_positions": 12309,
+     "forward_tokens": 12312,
+     "padded_forward_slots": 22320,
+     "rule_families": 3,
+     "uesp_share": 0.169,
+     "share_of_fluid": 0.2295
+    },
+    "inductive_rule_discovery": {
+     "items": 4,
+     "units": 4,
+     "episodes": 0,
+     "uesp": 12451,
+     "prediction_positions": 13136,
+     "forward_tokens": 13140,
+     "padded_forward_slots": 15568,
+     "rule_families": 4,
+     "uesp_share": 0.1811,
+     "share_of_fluid": 0.2459
+    },
+    "supporting": {
+     "items": 17,
+     "units": 17,
+     "episodes": 0,
+     "uesp": 18122,
+     "prediction_positions": 25667,
+     "forward_tokens": 25684,
+     "padded_forward_slots": 29372,
+     "rule_families": 0,
+     "uesp_share": 0.2636
+    },
+    "task_contained_deduction": {
+     "items": 4,
+     "units": 4,
+     "episodes": 0,
+     "uesp": 15473,
+     "prediction_positions": 15964,
+     "forward_tokens": 15968,
+     "padded_forward_slots": 20066,
+     "rule_families": 4,
+     "uesp_share": 0.225,
+     "share_of_fluid": 0.3056
+    }
+   },
+   "by_generator": {
+    "defined_ops@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 4414,
+     "prediction_positions": 4870,
+     "forward_tokens": 4872,
+     "padded_forward_slots": 5438,
+     "rule_families": 2,
+     "uesp_share": 0.0642,
+     "pool_rule_families": 2
+    },
+    "entity_tracking@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 4505,
+     "prediction_positions": 4788,
+     "forward_tokens": 4790,
+     "padded_forward_slots": 5246,
+     "rule_families": 2,
+     "uesp_share": 0.0655,
+     "pool_rule_families": 2
+    },
+    "grid_transform@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 11091,
+     "prediction_positions": 11707,
+     "forward_tokens": 11709,
+     "padded_forward_slots": 13694,
+     "rule_families": 2,
+     "uesp_share": 0.1613,
+     "pool_rule_families": 5
+    },
+    "gsm8k": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 3352,
+     "prediction_positions": 3654,
+     "forward_tokens": 3657,
+     "padded_forward_slots": 5298,
+     "rule_families": 0,
+     "uesp_share": 0.0488
+    },
+    "knights_knaves@v1": {
+     "items": 1,
+     "units": 1,
+     "episodes": 0,
+     "uesp": 6611,
+     "prediction_positions": 6733,
+     "forward_tokens": 6734,
+     "padded_forward_slots": 6734,
+     "rule_families": 1,
+     "uesp_share": 0.0962,
+     "pool_rule_families": 1
+    },
+    "list_induction@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 4839,
+     "prediction_positions": 5338,
+     "forward_tokens": 5340,
+     "padded_forward_slots": 5664,
+     "rule_families": 2,
+     "uesp_share": 0.0704,
+     "pool_rule_families": 11
+    },
+    "multihop_qa": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 3923,
+     "prediction_positions": 8957,
+     "forward_tokens": 8960,
+     "padded_forward_slots": 11127,
+     "rule_families": 0,
+     "uesp_share": 0.0571
+    },
+    "openmath": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 7601,
+     "prediction_positions": 7757,
+     "forward_tokens": 7760,
+     "padded_forward_slots": 15555,
+     "rule_families": 0,
+     "uesp_share": 0.1106
+    },
+    "ordering@v1": {
+     "items": 1,
+     "units": 1,
+     "episodes": 0,
+     "uesp": 4357,
+     "prediction_positions": 4443,
+     "forward_tokens": 4444,
+     "padded_forward_slots": 4444,
+     "rule_families": 1,
+     "uesp_share": 0.0634,
+     "pool_rule_families": 1
+    },
+    "rag_evidence": {
+     "items": 8,
+     "units": 8,
+     "episodes": 0,
+     "uesp": 3246,
+     "prediction_positions": 5299,
+     "forward_tokens": 5307,
+     "padded_forward_slots": 6103,
+     "rule_families": 0,
+     "uesp_share": 0.0472
+    },
+    "scan_language@v1": {
+     "items": 1,
+     "units": 1,
+     "episodes": 0,
+     "uesp": 7205,
+     "prediction_positions": 7439,
+     "forward_tokens": 7440,
+     "padded_forward_slots": 7440,
+     "rule_families": 1,
+     "uesp_share": 0.1048,
+     "pool_rule_families": 3
+    },
+    "string_induction@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 7612,
+     "prediction_positions": 7798,
+     "forward_tokens": 7800,
+     "padded_forward_slots": 7832,
+     "rule_families": 2,
+     "uesp_share": 0.1107,
+     "pool_rule_families": 7
+    }
+   },
+   "episodes": [],
+   "difficulty": {
+    "abstract_analogical": {
+     "L2": 1,
+     "L3": 1
+    },
+    "compositional_generalization": {
+     "L1": 1,
+     "L2": 2
+    },
+    "inductive_rule_discovery": {
+     "L1": 1,
+     "L2": 2,
+     "L3": 1
+    },
+    "task_contained_deduction": {
+     "L2": 3,
+     "L3": 1
+    }
+   }
+  },
+  "calib.s0v_rh_d1": {
+   "total": {
+    "items": 22,
+    "units": 22,
+    "episodes": 0,
+    "uesp": 65459,
+    "prediction_positions": 70623,
+    "forward_tokens": 70645,
+    "padded_forward_slots": 76842,
+    "rule_families": 14
+   },
+   "by_half": {
+    "fluid": {
+     "items": 15,
+     "units": 15,
+     "episodes": 0,
+     "uesp": 57572,
+     "prediction_positions": 60433,
+     "forward_tokens": 60448,
+     "padded_forward_slots": 64335,
+     "rule_families": 14,
+     "uesp_share": 0.8795
+    },
+    "supporting": {
+     "items": 7,
+     "units": 7,
+     "episodes": 0,
+     "uesp": 7887,
+     "prediction_positions": 10190,
+     "forward_tokens": 10197,
+     "padded_forward_slots": 10948,
+     "rule_families": 0,
+     "uesp_share": 0.1205
+    }
+   },
+   "by_axis": {
+    "abstract_analogical": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 11091,
+     "prediction_positions": 11707,
+     "forward_tokens": 11709,
+     "padded_forward_slots": 13694,
+     "rule_families": 2,
+     "uesp_share": 0.1694,
+     "share_of_fluid": 0.1926
+    },
+    "compositional_generalization": {
+     "items": 4,
+     "units": 4,
+     "episodes": 0,
+     "uesp": 13982,
+     "prediction_positions": 14864,
+     "forward_tokens": 14868,
+     "padded_forward_slots": 15597,
+     "rule_families": 3,
+     "uesp_share": 0.2136,
+     "share_of_fluid": 0.2429
+    },
+    "inductive_rule_discovery": {
+     "items": 5,
+     "units": 5,
+     "episodes": 0,
+     "uesp": 17026,
+     "prediction_positions": 17898,
+     "forward_tokens": 17903,
+     "padded_forward_slots": 21178,
+     "rule_families": 5,
+     "uesp_share": 0.2601,
+     "share_of_fluid": 0.2957
+    },
+    "supporting": {
+     "items": 7,
+     "units": 7,
+     "episodes": 0,
+     "uesp": 7887,
+     "prediction_positions": 10190,
+     "forward_tokens": 10197,
+     "padded_forward_slots": 10948,
+     "rule_families": 0,
+     "uesp_share": 0.1205
+    },
+    "task_contained_deduction": {
+     "items": 4,
+     "units": 4,
+     "episodes": 0,
+     "uesp": 15473,
+     "prediction_positions": 15964,
+     "forward_tokens": 15968,
+     "padded_forward_slots": 20066,
+     "rule_families": 4,
+     "uesp_share": 0.2364,
+     "share_of_fluid": 0.2688
+    }
+   },
+   "by_generator": {
+    "defined_ops@v1": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 6777,
+     "prediction_positions": 7425,
+     "forward_tokens": 7428,
+     "padded_forward_slots": 8157,
+     "rule_families": 2,
+     "uesp_share": 0.1035,
+     "pool_rule_families": 2
+    },
+    "entity_tracking@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 4505,
+     "prediction_positions": 4788,
+     "forward_tokens": 4790,
+     "padded_forward_slots": 5246,
+     "rule_families": 2,
+     "uesp_share": 0.0688,
+     "pool_rule_families": 2
+    },
+    "grid_transform@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 11091,
+     "prediction_positions": 11707,
+     "forward_tokens": 11709,
+     "padded_forward_slots": 13694,
+     "rule_families": 2,
+     "uesp_share": 0.1694,
+     "pool_rule_families": 5
+    },
+    "gsm8k": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 1729,
+     "prediction_positions": 1889,
+     "forward_tokens": 1891,
+     "padded_forward_slots": 1942,
+     "rule_families": 0,
+     "uesp_share": 0.0264
+    },
+    "knights_knaves@v1": {
+     "items": 1,
+     "units": 1,
+     "episodes": 0,
+     "uesp": 6611,
+     "prediction_positions": 6733,
+     "forward_tokens": 6734,
+     "padded_forward_slots": 6734,
+     "rule_families": 1,
+     "uesp_share": 0.101,
+     "pool_rule_families": 1
+    },
+    "list_induction@v1": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 9414,
+     "prediction_positions": 10100,
+     "forward_tokens": 10103,
+     "padded_forward_slots": 14289,
+     "rule_families": 3,
+     "uesp_share": 0.1438,
+     "pool_rule_families": 11
+    },
+    "multihop_qa": {
+     "items": 1,
+     "units": 1,
+     "episodes": 0,
+     "uesp": 2228,
+     "prediction_positions": 3708,
+     "forward_tokens": 3709,
+     "padded_forward_slots": 3709,
+     "rule_families": 0,
+     "uesp_share": 0.034
+    },
+    "openmath": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 2472,
+     "prediction_positions": 2573,
+     "forward_tokens": 2575,
+     "padded_forward_slots": 2798,
+     "rule_families": 0,
+     "uesp_share": 0.0378
+    },
+    "ordering@v1": {
+     "items": 1,
+     "units": 1,
+     "episodes": 0,
+     "uesp": 4357,
+     "prediction_positions": 4443,
+     "forward_tokens": 4444,
+     "padded_forward_slots": 4444,
+     "rule_families": 1,
+     "uesp_share": 0.0666,
+     "pool_rule_families": 1
+    },
+    "rag_evidence": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 1458,
+     "prediction_positions": 2020,
+     "forward_tokens": 2022,
+     "padded_forward_slots": 2884,
+     "rule_families": 0,
+     "uesp_share": 0.0223
+    },
+    "scan_language@v1": {
+     "items": 1,
+     "units": 1,
+     "episodes": 0,
+     "uesp": 7205,
+     "prediction_positions": 7439,
+     "forward_tokens": 7440,
+     "padded_forward_slots": 7440,
+     "rule_families": 1,
+     "uesp_share": 0.1101,
+     "pool_rule_families": 3
+    },
+    "string_induction@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 7612,
+     "prediction_positions": 7798,
+     "forward_tokens": 7800,
+     "padded_forward_slots": 7832,
+     "rule_families": 2,
+     "uesp_share": 0.1163,
+     "pool_rule_families": 7
+    }
+   },
+   "episodes": [],
+   "difficulty": {
+    "abstract_analogical": {
+     "L2": 1,
+     "L3": 1
+    },
+    "compositional_generalization": {
+     "L1": 2,
+     "L2": 2
+    },
+    "inductive_rule_discovery": {
+     "L1": 1,
+     "L2": 2,
+     "L3": 2
+    },
+    "task_contained_deduction": {
+     "L2": 3,
+     "L3": 1
+    }
+   }
+  },
+  "calib.s0v_base_d2": {
+   "total": {
+    "items": 53,
+    "units": 53,
+    "episodes": 0,
+    "uesp": 114613,
+    "prediction_positions": 131063,
+    "forward_tokens": 131116,
+    "padded_forward_slots": 139446,
+    "rule_families": 16
+   },
+   "by_half": {
+    "fluid": {
+     "items": 22,
+     "units": 22,
+     "episodes": 0,
+     "uesp": 83554,
+     "prediction_positions": 87662,
+     "forward_tokens": 87684,
+     "padded_forward_slots": 91617,
+     "rule_families": 16,
+     "uesp_share": 0.729
+    },
+    "supporting": {
+     "items": 31,
+     "units": 31,
+     "episodes": 0,
+     "uesp": 31059,
+     "prediction_positions": 43401,
+     "forward_tokens": 43432,
+     "padded_forward_slots": 49618,
+     "rule_families": 0,
+     "uesp_share": 0.271
+    }
+   },
+   "by_axis": {
+    "abstract_analogical": {
+     "items": 4,
+     "units": 4,
+     "episodes": 0,
+     "uesp": 20137,
+     "prediction_positions": 21279,
+     "forward_tokens": 21283,
+     "padded_forward_slots": 22162,
+     "rule_families": 3,
+     "uesp_share": 0.1757,
+     "share_of_fluid": 0.241
+    },
+    "compositional_generalization": {
+     "items": 6,
+     "units": 6,
+     "episodes": 0,
+     "uesp": 20369,
+     "prediction_positions": 21690,
+     "forward_tokens": 21696,
+     "padded_forward_slots": 29988,
+     "rule_families": 4,
+     "uesp_share": 0.1777,
+     "share_of_fluid": 0.2438
+    },
+    "inductive_rule_discovery": {
+     "items": 6,
+     "units": 6,
+     "episodes": 0,
+     "uesp": 19505,
+     "prediction_positions": 20466,
+     "forward_tokens": 20472,
+     "padded_forward_slots": 22785,
+     "rule_families": 5,
+     "uesp_share": 0.1702,
+     "share_of_fluid": 0.2334
+    },
+    "supporting": {
+     "items": 31,
+     "units": 31,
+     "episodes": 0,
+     "uesp": 31059,
+     "prediction_positions": 43401,
+     "forward_tokens": 43432,
+     "padded_forward_slots": 49618,
+     "rule_families": 0,
+     "uesp_share": 0.271
+    },
+    "task_contained_deduction": {
+     "items": 6,
+     "units": 6,
+     "episodes": 0,
+     "uesp": 23543,
+     "prediction_positions": 24227,
+     "forward_tokens": 24233,
+     "padded_forward_slots": 28071,
+     "rule_families": 4,
+     "uesp_share": 0.2054,
+     "share_of_fluid": 0.2818
+    }
+   },
+   "by_generator": {
+    "defined_ops@v1": {
+     "items": 4,
+     "units": 4,
+     "episodes": 0,
+     "uesp": 8491,
+     "prediction_positions": 9335,
+     "forward_tokens": 9339,
+     "padded_forward_slots": 10387,
+     "rule_families": 2,
+     "uesp_share": 0.0741,
+     "pool_rule_families": 2
+    },
+    "entity_tracking@v1": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 6269,
+     "prediction_positions": 6663,
+     "forward_tokens": 6666,
+     "padded_forward_slots": 7869,
+     "rule_families": 2,
+     "uesp_share": 0.0547,
+     "pool_rule_families": 2
+    },
+    "grid_transform@v1": {
+     "items": 4,
+     "units": 4,
+     "episodes": 0,
+     "uesp": 20137,
+     "prediction_positions": 21279,
+     "forward_tokens": 21283,
+     "padded_forward_slots": 22162,
+     "rule_families": 3,
+     "uesp_share": 0.1757,
+     "pool_rule_families": 5
+    },
+    "gsm8k": {
+     "items": 6,
+     "units": 6,
+     "episodes": 0,
+     "uesp": 6373,
+     "prediction_positions": 6870,
+     "forward_tokens": 6876,
+     "padded_forward_slots": 8211,
+     "rule_families": 0,
+     "uesp_share": 0.0556
+    },
+    "knights_knaves@v1": {
+     "items": 1,
+     "units": 1,
+     "episodes": 0,
+     "uesp": 6611,
+     "prediction_positions": 6733,
+     "forward_tokens": 6734,
+     "padded_forward_slots": 6734,
+     "rule_families": 1,
+     "uesp_share": 0.0577,
+     "pool_rule_families": 1
+    },
+    "list_induction@v1": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 9414,
+     "prediction_positions": 10100,
+     "forward_tokens": 10103,
+     "padded_forward_slots": 14289,
+     "rule_families": 3,
+     "uesp_share": 0.0821,
+     "pool_rule_families": 11
+    },
+    "multihop_qa": {
+     "items": 5,
+     "units": 5,
+     "episodes": 0,
+     "uesp": 7982,
+     "prediction_positions": 15614,
+     "forward_tokens": 15619,
+     "padded_forward_slots": 18564,
+     "rule_families": 0,
+     "uesp_share": 0.0696
+    },
+    "openmath": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 7601,
+     "prediction_positions": 7757,
+     "forward_tokens": 7760,
+     "padded_forward_slots": 15555,
+     "rule_families": 0,
+     "uesp_share": 0.0663
+    },
+    "ordering@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 10663,
+     "prediction_positions": 10831,
+     "forward_tokens": 10833,
+     "padded_forward_slots": 12778,
+     "rule_families": 1,
+     "uesp_share": 0.093,
+     "pool_rule_families": 1
+    },
+    "rag_evidence": {
+     "items": 17,
+     "units": 17,
+     "episodes": 0,
+     "uesp": 9103,
+     "prediction_positions": 13160,
+     "forward_tokens": 13177,
+     "padded_forward_slots": 15312,
+     "rule_families": 0,
+     "uesp_share": 0.0794
+    },
+    "scan_language@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 11878,
+     "prediction_positions": 12355,
+     "forward_tokens": 12357,
+     "padded_forward_slots": 14880,
+     "rule_families": 2,
+     "uesp_share": 0.1036,
+     "pool_rule_families": 3
+    },
+    "string_induction@v1": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 10091,
+     "prediction_positions": 10366,
+     "forward_tokens": 10369,
+     "padded_forward_slots": 11748,
+     "rule_families": 2,
+     "uesp_share": 0.088,
+     "pool_rule_families": 7
+    }
+   },
+   "episodes": [],
+   "difficulty": {
+    "abstract_analogical": {
+     "L2": 3,
+     "L3": 1
+    },
+    "compositional_generalization": {
+     "L1": 4,
+     "L2": 2
+    },
+    "inductive_rule_discovery": {
+     "L1": 2,
+     "L2": 2,
+     "L3": 2
+    },
+    "task_contained_deduction": {
+     "L1": 1,
+     "L2": 4,
+     "L3": 1
+    }
+   }
+  },
+  "calib.s0v_rh_d2": {
+   "total": {
+    "items": 40,
+    "units": 40,
+    "episodes": 0,
+    "uesp": 108494,
+    "prediction_positions": 118615,
+    "forward_tokens": 118655,
+    "padded_forward_slots": 125343,
+    "rule_families": 17
+   },
+   "by_half": {
+    "fluid": {
+     "items": 25,
+     "units": 25,
+     "episodes": 0,
+     "uesp": 91543,
+     "prediction_positions": 96287,
+     "forward_tokens": 96312,
+     "padded_forward_slots": 99519,
+     "rule_families": 17,
+     "uesp_share": 0.8438
+    },
+    "supporting": {
+     "items": 15,
+     "units": 15,
+     "episodes": 0,
+     "uesp": 16951,
+     "prediction_positions": 22328,
+     "forward_tokens": 22343,
+     "padded_forward_slots": 28563,
+     "rule_families": 0,
+     "uesp_share": 0.1562
+    }
+   },
+   "by_axis": {
+    "abstract_analogical": {
+     "items": 4,
+     "units": 4,
+     "episodes": 0,
+     "uesp": 20137,
+     "prediction_positions": 21279,
+     "forward_tokens": 21283,
+     "padded_forward_slots": 22162,
+     "rule_families": 3,
+     "uesp_share": 0.1856,
+     "share_of_fluid": 0.22
+    },
+    "compositional_generalization": {
+     "items": 7,
+     "units": 7,
+     "episodes": 0,
+     "uesp": 22638,
+     "prediction_positions": 24197,
+     "forward_tokens": 24204,
+     "padded_forward_slots": 29715,
+     "rule_families": 4,
+     "uesp_share": 0.2087,
+     "share_of_fluid": 0.2473
+    },
+    "inductive_rule_discovery": {
+     "items": 7,
+     "units": 7,
+     "episodes": 0,
+     "uesp": 21738,
+     "prediction_positions": 22955,
+     "forward_tokens": 22962,
+     "padded_forward_slots": 24218,
+     "rule_families": 6,
+     "uesp_share": 0.2004,
+     "share_of_fluid": 0.2375
+    },
+    "supporting": {
+     "items": 15,
+     "units": 15,
+     "episodes": 0,
+     "uesp": 16951,
+     "prediction_positions": 22328,
+     "forward_tokens": 22343,
+     "padded_forward_slots": 28563,
+     "rule_families": 0,
+     "uesp_share": 0.1562
+    },
+    "task_contained_deduction": {
+     "items": 7,
+     "units": 7,
+     "episodes": 0,
+     "uesp": 27030,
+     "prediction_positions": 27856,
+     "forward_tokens": 27863,
+     "padded_forward_slots": 33770,
+     "rule_families": 4,
+     "uesp_share": 0.2491,
+     "share_of_fluid": 0.2953
+    }
+   },
+   "by_generator": {
+    "defined_ops@v1": {
+     "items": 5,
+     "units": 5,
+     "episodes": 0,
+     "uesp": 10760,
+     "prediction_positions": 11842,
+     "forward_tokens": 11847,
+     "padded_forward_slots": 12962,
+     "rule_families": 2,
+     "uesp_share": 0.0992,
+     "pool_rule_families": 2
+    },
+    "entity_tracking@v1": {
+     "items": 4,
+     "units": 4,
+     "episodes": 0,
+     "uesp": 9756,
+     "prediction_positions": 10292,
+     "forward_tokens": 10296,
+     "padded_forward_slots": 11499,
+     "rule_families": 2,
+     "uesp_share": 0.0899,
+     "pool_rule_families": 2
+    },
+    "grid_transform@v1": {
+     "items": 4,
+     "units": 4,
+     "episodes": 0,
+     "uesp": 20137,
+     "prediction_positions": 21279,
+     "forward_tokens": 21283,
+     "padded_forward_slots": 22162,
+     "rule_families": 3,
+     "uesp_share": 0.1856,
+     "pool_rule_families": 5
+    },
+    "gsm8k": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 3352,
+     "prediction_positions": 3654,
+     "forward_tokens": 3657,
+     "padded_forward_slots": 5298,
+     "rule_families": 0,
+     "uesp_share": 0.0309
+    },
+    "knights_knaves@v1": {
+     "items": 1,
+     "units": 1,
+     "episodes": 0,
+     "uesp": 6611,
+     "prediction_positions": 6733,
+     "forward_tokens": 6734,
+     "padded_forward_slots": 6734,
+     "rule_families": 1,
+     "uesp_share": 0.0609,
+     "pool_rule_families": 1
+    },
+    "list_induction@v1": {
+     "items": 4,
+     "units": 4,
+     "episodes": 0,
+     "uesp": 11647,
+     "prediction_positions": 12589,
+     "forward_tokens": 12593,
+     "padded_forward_slots": 13259,
+     "rule_families": 4,
+     "uesp_share": 0.1074,
+     "pool_rule_families": 11
+    },
+    "multihop_qa": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 3071,
+     "prediction_positions": 6110,
+     "forward_tokens": 6112,
+     "padded_forward_slots": 7418,
+     "rule_families": 0,
+     "uesp_share": 0.0283
+    },
+    "openmath": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 7601,
+     "prediction_positions": 7757,
+     "forward_tokens": 7760,
+     "padded_forward_slots": 15555,
+     "rule_families": 0,
+     "uesp_share": 0.0701
+    },
+    "ordering@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 10663,
+     "prediction_positions": 10831,
+     "forward_tokens": 10833,
+     "padded_forward_slots": 12778,
+     "rule_families": 1,
+     "uesp_share": 0.0983,
+     "pool_rule_families": 1
+    },
+    "rag_evidence": {
+     "items": 7,
+     "units": 7,
+     "episodes": 0,
+     "uesp": 2927,
+     "prediction_positions": 4807,
+     "forward_tokens": 4814,
+     "padded_forward_slots": 5624,
+     "rule_families": 0,
+     "uesp_share": 0.027
+    },
+    "scan_language@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 11878,
+     "prediction_positions": 12355,
+     "forward_tokens": 12357,
+     "padded_forward_slots": 14880,
+     "rule_families": 2,
+     "uesp_share": 0.1095,
+     "pool_rule_families": 3
+    },
+    "string_induction@v1": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 10091,
+     "prediction_positions": 10366,
+     "forward_tokens": 10369,
+     "padded_forward_slots": 11748,
+     "rule_families": 2,
+     "uesp_share": 0.093,
+     "pool_rule_families": 7
+    }
+   },
+   "episodes": [],
+   "difficulty": {
+    "abstract_analogical": {
+     "L2": 3,
+     "L3": 1
+    },
+    "compositional_generalization": {
+     "L1": 4,
+     "L2": 3
+    },
+    "inductive_rule_discovery": {
+     "L1": 2,
+     "L2": 3,
+     "L3": 2
+    },
+    "task_contained_deduction": {
+     "L1": 1,
+     "L2": 5,
+     "L3": 1
+    }
+   }
+  },
+  "calib.s0v_base_d4": {
+   "total": {
+    "items": 85,
+    "units": 85,
+    "episodes": 0,
+    "uesp": 203726,
+    "prediction_positions": 228152,
+    "forward_tokens": 228237,
+    "padded_forward_slots": 234740,
+    "rule_families": 21
+   },
+   "by_half": {
+    "fluid": {
+     "items": 38,
+     "units": 38,
+     "episodes": 0,
+     "uesp": 144890,
+     "prediction_positions": 152081,
+     "forward_tokens": 152119,
+     "padded_forward_slots": 159142,
+     "rule_families": 21,
+     "uesp_share": 0.7112
+    },
+    "supporting": {
+     "items": 47,
+     "units": 47,
+     "episodes": 0,
+     "uesp": 58836,
+     "prediction_positions": 76071,
+     "forward_tokens": 76118,
+     "padded_forward_slots": 80905,
+     "rule_families": 0,
+     "uesp_share": 0.2888
+    }
+   },
+   "by_axis": {
+    "abstract_analogical": {
+     "items": 6,
+     "units": 6,
+     "episodes": 0,
+     "uesp": 32903,
+     "prediction_positions": 34637,
+     "forward_tokens": 34643,
+     "padded_forward_slots": 38352,
+     "rule_families": 4,
+     "uesp_share": 0.1615,
+     "share_of_fluid": 0.2271
+    },
+    "compositional_generalization": {
+     "items": 11,
+     "units": 11,
+     "episodes": 0,
+     "uesp": 36078,
+     "prediction_positions": 38388,
+     "forward_tokens": 38399,
+     "padded_forward_slots": 43913,
+     "rule_families": 4,
+     "uesp_share": 0.1771,
+     "share_of_fluid": 0.249
+    },
+    "inductive_rule_discovery": {
+     "items": 11,
+     "units": 11,
+     "episodes": 0,
+     "uesp": 37121,
+     "prediction_positions": 39048,
+     "forward_tokens": 39059,
+     "padded_forward_slots": 41377,
+     "rule_families": 9,
+     "uesp_share": 0.1822,
+     "share_of_fluid": 0.2562
+    },
+    "supporting": {
+     "items": 47,
+     "units": 47,
+     "episodes": 0,
+     "uesp": 58836,
+     "prediction_positions": 76071,
+     "forward_tokens": 76118,
+     "padded_forward_slots": 80905,
+     "rule_families": 0,
+     "uesp_share": 0.2888
+    },
+    "task_contained_deduction": {
+     "items": 10,
+     "units": 10,
+     "episodes": 0,
+     "uesp": 38788,
+     "prediction_positions": 40008,
+     "forward_tokens": 40018,
+     "padded_forward_slots": 44660,
+     "rule_families": 4,
+     "uesp_share": 0.1904,
+     "share_of_fluid": 0.2677
+    }
+   },
+   "by_generator": {
+    "defined_ops@v1": {
+     "items": 8,
+     "units": 8,
+     "episodes": 0,
+     "uesp": 16993,
+     "prediction_positions": 18587,
+     "forward_tokens": 18595,
+     "padded_forward_slots": 19706,
+     "rule_families": 2,
+     "uesp_share": 0.0834,
+     "pool_rule_families": 2
+    },
+    "entity_tracking@v1": {
+     "items": 5,
+     "units": 5,
+     "episodes": 0,
+     "uesp": 12623,
+     "prediction_positions": 13360,
+     "forward_tokens": 13365,
+     "padded_forward_slots": 15129,
+     "rule_families": 2,
+     "uesp_share": 0.062,
+     "pool_rule_families": 2
+    },
+    "grid_transform@v1": {
+     "items": 6,
+     "units": 6,
+     "episodes": 0,
+     "uesp": 32903,
+     "prediction_positions": 34637,
+     "forward_tokens": 34643,
+     "padded_forward_slots": 38352,
+     "rule_families": 4,
+     "uesp_share": 0.1615,
+     "pool_rule_families": 5
+    },
+    "gsm8k": {
+     "items": 10,
+     "units": 10,
+     "episodes": 0,
+     "uesp": 12919,
+     "prediction_positions": 13680,
+     "forward_tokens": 13690,
+     "padded_forward_slots": 15249,
+     "rule_families": 0,
+     "uesp_share": 0.0634
+    },
+    "knights_knaves@v1": {
+     "items": 2,
+     "units": 2,
+     "episodes": 0,
+     "uesp": 12688,
+     "prediction_positions": 12919,
+     "forward_tokens": 12921,
+     "padded_forward_slots": 13468,
+     "rule_families": 1,
+     "uesp_share": 0.0623,
+     "pool_rule_families": 1
+    },
+    "list_induction@v1": {
+     "items": 6,
+     "units": 6,
+     "episodes": 0,
+     "uesp": 18280,
+     "prediction_positions": 19743,
+     "forward_tokens": 19749,
+     "padded_forward_slots": 22785,
+     "rule_families": 5,
+     "uesp_share": 0.0897,
+     "pool_rule_families": 11
+    },
+    "multihop_qa": {
+     "items": 7,
+     "units": 7,
+     "episodes": 0,
+     "uesp": 13367,
+     "prediction_positions": 24082,
+     "forward_tokens": 24089,
+     "padded_forward_slots": 29154,
+     "rule_families": 0,
+     "uesp_share": 0.0656
+    },
+    "openmath": {
+     "items": 6,
+     "units": 6,
+     "episodes": 0,
+     "uesp": 19413,
+     "prediction_positions": 19793,
+     "forward_tokens": 19799,
+     "padded_forward_slots": 25191,
+     "rule_families": 0,
+     "uesp_share": 0.0953
+    },
+    "ordering@v1": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 13477,
+     "prediction_positions": 13729,
+     "forward_tokens": 13732,
+     "padded_forward_slots": 19167,
+     "rule_families": 1,
+     "uesp_share": 0.0662,
+     "pool_rule_families": 1
+    },
+    "rag_evidence": {
+     "items": 24,
+     "units": 24,
+     "episodes": 0,
+     "uesp": 13137,
+     "prediction_positions": 18516,
+     "forward_tokens": 18540,
+     "padded_forward_slots": 22683,
+     "rule_families": 0,
+     "uesp_share": 0.0645
+    },
+    "scan_language@v1": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 19085,
+     "prediction_positions": 19801,
+     "forward_tokens": 19804,
+     "padded_forward_slots": 22341,
+     "rule_families": 2,
+     "uesp_share": 0.0937,
+     "pool_rule_families": 3
+    },
+    "string_induction@v1": {
+     "items": 5,
+     "units": 5,
+     "episodes": 0,
+     "uesp": 18841,
+     "prediction_positions": 19305,
+     "forward_tokens": 19310,
+     "padded_forward_slots": 20864,
+     "rule_families": 4,
+     "uesp_share": 0.0925,
+     "pool_rule_families": 7
+    }
+   },
+   "episodes": [],
+   "difficulty": {
+    "abstract_analogical": {
+     "L1": 1,
+     "L2": 3,
+     "L3": 2
+    },
+    "compositional_generalization": {
+     "L1": 5,
+     "L2": 4,
+     "L3": 2
+    },
+    "inductive_rule_discovery": {
+     "L1": 4,
+     "L2": 5,
+     "L3": 2
+    },
+    "task_contained_deduction": {
+     "L1": 1,
+     "L2": 7,
+     "L3": 2
+    }
+   }
+  },
+  "calib.s0v_rh_d4": {
+   "total": {
+    "items": 75,
+    "units": 75,
+    "episodes": 0,
+    "uesp": 215935,
+    "prediction_positions": 236591,
+    "forward_tokens": 236666,
+    "padded_forward_slots": 245169,
+    "rule_families": 24
+   },
+   "by_half": {
+    "fluid": {
+     "items": 47,
+     "units": 47,
+     "episodes": 0,
+     "uesp": 188503,
+     "prediction_positions": 197496,
+     "forward_tokens": 197543,
+     "padded_forward_slots": 202924,
+     "rule_families": 24,
+     "uesp_share": 0.873
+    },
+    "supporting": {
+     "items": 28,
+     "units": 28,
+     "episodes": 0,
+     "uesp": 27432,
+     "prediction_positions": 39095,
+     "forward_tokens": 39123,
+     "padded_forward_slots": 45259,
+     "rule_families": 0,
+     "uesp_share": 0.127
+    }
+   },
+   "by_axis": {
+    "abstract_analogical": {
+     "items": 8,
+     "units": 8,
+     "episodes": 0,
+     "uesp": 44118,
+     "prediction_positions": 46354,
+     "forward_tokens": 46362,
+     "padded_forward_slots": 50485,
+     "rule_families": 4,
+     "uesp_share": 0.2043,
+     "share_of_fluid": 0.234
+    },
+    "compositional_generalization": {
+     "items": 14,
+     "units": 14,
+     "episodes": 0,
+     "uesp": 47666,
+     "prediction_positions": 50643,
+     "forward_tokens": 50657,
+     "padded_forward_slots": 59296,
+     "rule_families": 5,
+     "uesp_share": 0.2207,
+     "share_of_fluid": 0.2529
+    },
+    "inductive_rule_discovery": {
+     "items": 13,
+     "units": 13,
+     "episodes": 0,
+     "uesp": 48814,
+     "prediction_positions": 51053,
+     "forward_tokens": 51066,
+     "padded_forward_slots": 55422,
+     "rule_families": 11,
+     "uesp_share": 0.2261,
+     "share_of_fluid": 0.259
+    },
+    "supporting": {
+     "items": 28,
+     "units": 28,
+     "episodes": 0,
+     "uesp": 27432,
+     "prediction_positions": 39095,
+     "forward_tokens": 39123,
+     "padded_forward_slots": 45259,
+     "rule_families": 0,
+     "uesp_share": 0.127
+    },
+    "task_contained_deduction": {
+     "items": 12,
+     "units": 12,
+     "episodes": 0,
+     "uesp": 47905,
+     "prediction_positions": 49446,
+     "forward_tokens": 49458,
+     "padded_forward_slots": 55818,
+     "rule_families": 4,
+     "uesp_share": 0.2218,
+     "share_of_fluid": 0.2541
+    }
+   },
+   "by_generator": {
+    "defined_ops@v1": {
+     "items": 10,
+     "units": 10,
+     "episodes": 0,
+     "uesp": 21029,
+     "prediction_positions": 23056,
+     "forward_tokens": 23066,
+     "padded_forward_slots": 24121,
+     "rule_families": 2,
+     "uesp_share": 0.0974,
+     "pool_rule_families": 2
+    },
+    "entity_tracking@v1": {
+     "items": 6,
+     "units": 6,
+     "episodes": 0,
+     "uesp": 16246,
+     "prediction_positions": 17180,
+     "forward_tokens": 17186,
+     "padded_forward_slots": 19332,
+     "rule_families": 2,
+     "uesp_share": 0.0752,
+     "pool_rule_families": 2
+    },
+    "grid_transform@v1": {
+     "items": 8,
+     "units": 8,
+     "episodes": 0,
+     "uesp": 44118,
+     "prediction_positions": 46354,
+     "forward_tokens": 46362,
+     "padded_forward_slots": 50485,
+     "rule_families": 4,
+     "uesp_share": 0.2043,
+     "pool_rule_families": 5
+    },
+    "gsm8k": {
+     "items": 6,
+     "units": 6,
+     "episodes": 0,
+     "uesp": 6373,
+     "prediction_positions": 6870,
+     "forward_tokens": 6876,
+     "padded_forward_slots": 8211,
+     "rule_families": 0,
+     "uesp_share": 0.0295
+    },
+    "knights_knaves@v1": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 18182,
+     "prediction_positions": 18537,
+     "forward_tokens": 18540,
+     "padded_forward_slots": 20202,
+     "rule_families": 1,
+     "uesp_share": 0.0842,
+     "pool_rule_families": 1
+    },
+    "list_induction@v1": {
+     "items": 7,
+     "units": 7,
+     "episodes": 0,
+     "uesp": 24283,
+     "prediction_positions": 25967,
+     "forward_tokens": 25974,
+     "padded_forward_slots": 29010,
+     "rule_families": 6,
+     "uesp_share": 0.1125,
+     "pool_rule_families": 11
+    },
+    "multihop_qa": {
+     "items": 5,
+     "units": 5,
+     "episodes": 0,
+     "uesp": 7982,
+     "prediction_positions": 15614,
+     "forward_tokens": 15619,
+     "padded_forward_slots": 18564,
+     "rule_families": 0,
+     "uesp_share": 0.037
+    },
+    "openmath": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 7601,
+     "prediction_positions": 7757,
+     "forward_tokens": 7760,
+     "padded_forward_slots": 15555,
+     "rule_families": 0,
+     "uesp_share": 0.0352
+    },
+    "ordering@v1": {
+     "items": 3,
+     "units": 3,
+     "episodes": 0,
+     "uesp": 13477,
+     "prediction_positions": 13729,
+     "forward_tokens": 13732,
+     "padded_forward_slots": 19167,
+     "rule_families": 1,
+     "uesp_share": 0.0624,
+     "pool_rule_families": 1
+    },
+    "rag_evidence": {
+     "items": 14,
+     "units": 14,
+     "episodes": 0,
+     "uesp": 5476,
+     "prediction_positions": 8854,
+     "forward_tokens": 8868,
+     "padded_forward_slots": 9877,
+     "rule_families": 0,
+     "uesp_share": 0.0254
+    },
+    "scan_language@v1": {
+     "items": 4,
+     "units": 4,
+     "episodes": 0,
+     "uesp": 26637,
+     "prediction_positions": 27587,
+     "forward_tokens": 27591,
+     "padded_forward_slots": 30128,
+     "rule_families": 3,
+     "uesp_share": 0.1234,
+     "pool_rule_families": 3
+    },
+    "string_induction@v1": {
+     "items": 6,
+     "units": 6,
+     "episodes": 0,
+     "uesp": 24531,
+     "prediction_positions": 25086,
+     "forward_tokens": 25092,
+     "padded_forward_slots": 29094,
+     "rule_families": 5,
+     "uesp_share": 0.1136,
+     "pool_rule_families": 7
+    }
+   },
+   "episodes": [],
+   "difficulty": {
+    "abstract_analogical": {
+     "L1": 2,
+     "L2": 4,
+     "L3": 2
+    },
+    "compositional_generalization": {
+     "L1": 7,
+     "L2": 5,
+     "L3": 2
+    },
+    "inductive_rule_discovery": {
+     "L1": 5,
+     "L2": 5,
+     "L3": 3
+    },
+    "task_contained_deduction": {
+     "L1": 1,
+     "L2": 7,
+     "L3": 4
+    }
+   }
+  }
+ },
+ "compute": {
+  "model": {
+   "depth_minutes_per_mtok": {
+    "1": 226.8,
+    "2": 176.5,
+    "3": 148.4,
+    "4": 148.4
+   },
+   "depth_rate_spread": {
+    "1": [
+     215.1,
+     235.2,
+     6
+    ],
+    "2": [
+     160.4,
+     193.4,
+     36
+    ],
+    "3": [
+     145.0,
+     151.8,
+     2
+    ]
+   },
+   "other_operators": {
+    "FFN": {
+     "a_seconds": 48.97,
+     "b_seconds_per_mtok": 80.19,
+     "n": 62,
+     "max_seconds": 105.3
+    },
+    "WIDTH": {
+     "a_seconds": 37.87,
+     "b_seconds_per_mtok": 80.37,
+     "n": 96,
+     "max_seconds": 91.3
+    },
+    "ATTENTION": {
+     "a_seconds": 47.14,
+     "b_seconds_per_mtok": 109.85,
+     "n": 74,
+     "max_seconds": 127.1
+    }
+   },
+   "overhead_seconds_per_expansion": 14.3,
+   "historical_depth_fraction_by_level": {
+    "1": 0.25,
+    "2": 0.25,
+    "3": 0.0278,
+    "4": 0.0
+   },
+   "state_gb_by_level": {
+    "1": 5.33,
+    "2": 3.38,
+    "3": 2.25,
+    "4": 1.19
+   }
+  },
+  "model_check": {
+   "d1": {
+    "predicted_minutes": 280.9,
+    "telemetry_minutes": 279.4,
+    "ratio": 1.005
+   },
+   "d2": {
+    "predicted_minutes": 451.0,
+    "telemetry_minutes": 458.6,
+    "ratio": 0.983
+   },
+   "d4": {
+    "predicted_minutes": 705.0,
+    "telemetry_minutes": 685.5,
+    "ratio": 1.028
+   }
+  },
+  "prices": {
+   "search_usd_per_hour": 1.79,
+   "_search_usd_per_hour": "A100-SXM4-80GB, the rate every Stage-0 search session was billed at (runs/dose_*/runtime/session.json :: cost.price_per_hour); re-read live at authorization",
+   "recovery_usd_per_hour": 1.09,
+   "_recovery_usd_per_hour": "L40S in EUR-IS-2, the H1-PA PA2 sessions' billed rate (runs/h1pa2_*/runtime/session.json); re-read live at authorization",
+   "disk_usd_per_gb_month": 0.1,
+   "search_container_gb": 200,
+   "recovery_container_gb": 150,
+   "search_fixed_minutes": 8.0,
+   "_search_fixed_minutes": "d4's search ran 07:00Z-18:33Z (693 min, runs/dose_d4_20261020_054022/closeout/outcome.json) over 685.5 telemetry minutes",
+   "session_fixed_minutes": 15.0,
+   "_session_fixed_minutes": "create to setup done 6-8 min (H1-PA launch logs), plus export, collection and teardown",
+   "recovery_bound_factor": 1.25,
+   "recovery_measured": "logs/stages/stage-2/reasoning_data/analyses/h1pa_result.json"
+  },
+  "search": {
+   "2x": {
+    "mtok": 0.1698,
+    "expected": {
+     "expansions": 34,
+     "depth_expansions": 4.33,
+     "depth_minutes": 136.8,
+     "other_operator_minutes": 29.6,
+     "overhead_minutes": 8.1,
+     "expansion_minutes": 174.6,
+     "session_minutes": 197.6,
+     "gpu_usd": 5.9,
+     "container_disk_usd": 0.09
+    },
+    "bound": {
+     "expansions": 34,
+     "depth_expansions": 16,
+     "depth_minutes": 430.8,
+     "other_operator_minutes": 19.7,
+     "overhead_minutes": 8.1,
+     "expansion_minutes": 458.7,
+     "session_minutes": 481.7,
+     "gpu_usd": 14.37,
+     "container_disk_usd": 0.22
+    },
+    "state_storage_gb": 96.0
+   },
+   "4x": {
+    "mtok": 0.3208,
+    "expected": {
+     "expansions": 34,
+     "depth_expansions": 4.33,
+     "depth_minutes": 258.5,
+     "other_operator_minutes": 36.4,
+     "overhead_minutes": 8.1,
+     "expansion_minutes": 303.0,
+     "session_minutes": 326.0,
+     "gpu_usd": 9.73,
+     "container_disk_usd": 0.15
+    },
+    "bound": {
+     "expansions": 34,
+     "depth_expansions": 16,
+     "depth_minutes": 813.8,
+     "other_operator_minutes": 24.7,
+     "overhead_minutes": 8.1,
+     "expansion_minutes": 846.6,
+     "session_minutes": 869.6,
+     "gpu_usd": 25.94,
+     "container_disk_usd": 0.4
+    },
+    "state_storage_gb": 96.0
+   }
+  },
+  "recovery_two_seeds": {
+   "measured_units": {
+    "D4-Augmented-s20260726": {
+     "train": 225.0,
+     "evaluate": 61.1
+    },
+    "D4-Augmented-s20260801": {
+     "train": 223.1,
+     "evaluate": 65.3
+    }
+   },
+   "per_unit_minutes": 287.3,
+   "expected": {
+    "session_minutes": 589.5,
+    "gpu_usd": 10.71,
+    "container_disk_usd": 0.2
+   },
+   "bound": {
+    "session_minutes": 735.9,
+    "gpu_usd": 13.37,
+    "container_disk_usd": 0.26
+   }
+  }
+ },
+ "authorizes": "nothing"
+}

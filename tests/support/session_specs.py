@@ -56,6 +56,15 @@ SESSION_LAUNCHERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     #: Its own rung prefix for the run id: both D3 rungs file under one
     #: experiment's run layout, and only the run id separates their paths.
     ("autoinit_d3_probes_launch", ("--run-id", "d3_probes_spec_check")),
+    #: H1's P1 teacher-generation session (Stage 2), added WITH its launcher
+    #: (2026-10-22) so the setup-env, asset and identity checks cover it before
+    #: any grant exists.
+    ("h1_generation_launch", ()),
+    #: H1's unit sessions (P1g validation and P2's formal units), added WITH
+    #: their launcher (2026-10-23); its parser requires the phase and the
+    #: volume, so `session_args` fills them (P1g sorts first and builds). Its
+    #: own run id: both H1 launchers file under one experiment's run layout.
+    ("h1_unit_launch", ("--run-id", "h1_units_spec_check")),
 )
 
 

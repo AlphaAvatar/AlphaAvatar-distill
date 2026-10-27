@@ -1,0 +1,57 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.code_verifier_check/v1",
+ "written_utc": "2026-10-23T17:05:37Z",
+ "source": "google-research-datasets/mbpp @ 4bb6404fdc6cacfda99d4ac4205087b89d32030c (local HF cache); test split not read",
+ "verifier": "aadistill.data.code_exec.run_asserts (aadistill.data.code_exec/v3)",
+ "limits": {
+  "wall_seconds": 10,
+  "cpu_seconds": 5,
+  "memory_mb": 512,
+  "output_bytes": 4194304,
+  "open_files": 64
+ },
+ "sandbox_probe": {
+  "isolated": true,
+  "protected_paths_checked": 46,
+  "network_interfaces": [
+   "lo"
+  ],
+  "environment": [
+   "LC_CTYPE",
+   "PATH",
+   "PWD"
+  ]
+ },
+ "a_pass_establishes": "the declared tests ran and passed: evidence bounded by those tests, not full semantic correctness",
+ "per_split": {
+  "train": {
+   "tasks": 374,
+   "reference_passes": 373,
+   "mutants": 374,
+   "mutants_rejected": 358,
+   "file_sha256": "09d125ca31edacb7800be8c67c45abff618faf0214ff551291817d06bdb914ae"
+  },
+  "validation": {
+   "tasks": 90,
+   "reference_passes": 90,
+   "mutants": 90,
+   "mutants_rejected": 85,
+   "file_sha256": "3f0ec060987432d99fe8fb409d31e6c67445b208a01741c5583517c80a10fe80"
+  },
+  "prompt": {
+   "tasks": 10,
+   "reference_passes": 10,
+   "mutants": 10,
+   "mutants_rejected": 10,
+   "file_sha256": "a053e4bb85ceb77430ae80592addb4ca4dc6ba087592f9e04537800ee88b7431"
+  }
+ },
+ "reference_failures": [
+  {
+   "split": "train",
+   "task_id": 927
+  }
+ ],
+ "reading": "a task whose reference fails its own tests is unverifiable and is excluded from the code stratum; a mutant that survives shows the dataset's tests cannot see that change",
+ "authorizes": "nothing"
+}

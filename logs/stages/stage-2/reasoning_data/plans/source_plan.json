@@ -1,0 +1,528 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.source_plans/v1",
+ "plans": {
+  "stage2.reasoning_master@v1": {
+   "schema": "aadistill.stage2.reasoning_data.source_plan/v1",
+   "written_utc": "2026-10-22T17:47:54Z",
+   "corpus_id": "stage2.reasoning_master@v1",
+   "admitted": true,
+   "chosen": true,
+   "status": "ADMITTED: every source is approved for H1 (design; not a spending authorization)",
+   "unapproved_sources": [],
+   "cells": [
+    {
+     "stratum": "primary.task_contained_deduction",
+     "source": "prontoqa",
+     "share": 0.03,
+     "kind": "external_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 88800,
+     "U_target_with_reserve": 93300,
+     "independent_units_estimate": 25,
+     "supervised_per_unit_estimate": 3708,
+     "tasks_in_pools": 72,
+     "shortfall": false
+    },
+    {
+     "stratum": "primary.task_contained_deduction",
+     "source": "reasoning_core",
+     "share": 0.03,
+     "kind": "external_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 88800,
+     "U_target_with_reserve": 93300,
+     "independent_units_estimate": 25,
+     "supervised_per_unit_estimate": 3708,
+     "tasks_in_pools": 112,
+     "shortfall": false
+    },
+    {
+     "stratum": "primary.task_contained_deduction",
+     "source": "reasoning_gym",
+     "share": 0.03,
+     "kind": "external_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 88800,
+     "U_target_with_reserve": 93300,
+     "independent_units_estimate": 25,
+     "supervised_per_unit_estimate": 3708,
+     "tasks_in_pools": 235,
+     "shortfall": false
+    },
+    {
+     "stratum": "primary.task_contained_deduction",
+     "source": "s0_generators_v2_calsplit",
+     "share": 0.08,
+     "kind": "project_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 236800,
+     "U_target_with_reserve": 248800,
+     "independent_units_estimate": 67,
+     "supervised_per_unit_estimate": 3708,
+     "tasks_in_pools": 288,
+     "shortfall": false
+    },
+    {
+     "stratum": "primary.inductive_rule_discovery",
+     "source": "s0_generators_v2_calsplit",
+     "share": 0.17,
+     "kind": "project_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 503200,
+     "U_target_with_reserve": 528700,
+     "independent_units_estimate": 144,
+     "supervised_per_unit_estimate": 3662,
+     "tasks_in_pools": 318,
+     "shortfall": false
+    },
+    {
+     "stratum": "primary.compositional_generalization",
+     "source": "reasoning_core",
+     "share": 0.03,
+     "kind": "external_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 88800,
+     "U_target_with_reserve": 93300,
+     "independent_units_estimate": 26,
+     "supervised_per_unit_estimate": 3574,
+     "tasks_in_pools": 112,
+     "shortfall": false
+    },
+    {
+     "stratum": "primary.compositional_generalization",
+     "source": "reasoning_gym",
+     "share": 0.05,
+     "kind": "external_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 148000,
+     "U_target_with_reserve": 155500,
+     "independent_units_estimate": 44,
+     "supervised_per_unit_estimate": 3574,
+     "tasks_in_pools": 253,
+     "shortfall": false
+    },
+    {
+     "stratum": "primary.compositional_generalization",
+     "source": "s0_generators_v2_calsplit",
+     "share": 0.09,
+     "kind": "project_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 266400,
+     "U_target_with_reserve": 279900,
+     "independent_units_estimate": 78,
+     "supervised_per_unit_estimate": 3574,
+     "tasks_in_pools": 438,
+     "shortfall": false
+    },
+    {
+     "stratum": "primary.abstract_analogical",
+     "source": "reasoning_core",
+     "share": 0.03,
+     "kind": "external_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 88800,
+     "U_target_with_reserve": 93300,
+     "independent_units_estimate": 16,
+     "supervised_per_unit_estimate": 5739,
+     "tasks_in_pools": 56,
+     "shortfall": false
+    },
+    {
+     "stratum": "primary.abstract_analogical",
+     "source": "s0_generators_v2_calsplit",
+     "share": 0.06,
+     "kind": "project_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 177600,
+     "U_target_with_reserve": 186600,
+     "independent_units_estimate": 33,
+     "supervised_per_unit_estimate": 5739,
+     "tasks_in_pools": 171,
+     "shortfall": false
+    },
+    {
+     "stratum": "primary.interactive_adaptation",
+     "source": "s0_generators_v2_calsplit",
+     "share": 0.1,
+     "kind": "project_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 296000,
+     "U_target_with_reserve": 311000,
+     "independent_units_estimate": 19,
+     "supervised_per_unit_estimate": 16669,
+     "tasks_in_pools": 210,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.math_reused_gsm8k",
+     "source": "corpus_v2_gsm8k_verified",
+     "share": 0.06,
+     "kind": "reused_targets",
+     "approved_for_h1": true,
+     "U_target_2p96M": 177600,
+     "U_target_with_reserve": 186600,
+     "independent_units_estimate": 159,
+     "supervised_per_unit_estimate": 1177,
+     "tasks_in_pools": 1508,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.math_new",
+     "source": "math_train",
+     "share": 0.03,
+     "kind": "external_dataset",
+     "approved_for_h1": true,
+     "U_target_2p96M": 88800,
+     "U_target_with_reserve": 93300,
+     "independent_units_estimate": 27,
+     "supervised_per_unit_estimate": 3415,
+     "tasks_in_pools": 107,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.math_new",
+     "source": "mathematics_dataset",
+     "share": 0.02,
+     "kind": "external_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 59200,
+     "U_target_with_reserve": 62200,
+     "independent_units_estimate": 18,
+     "supervised_per_unit_estimate": 3415,
+     "tasks_in_pools": 128,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.math_new",
+     "source": "reasoning_gym",
+     "share": 0.01,
+     "kind": "external_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 29600,
+     "U_target_with_reserve": 31100,
+     "independent_units_estimate": 9,
+     "supervised_per_unit_estimate": 3415,
+     "tasks_in_pools": 42,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.code_algorithmic",
+     "source": "code_contests_train",
+     "share": 0.0,
+     "kind": "external_dataset",
+     "approved_for_h1": false,
+     "U_target_2p96M": 0,
+     "U_target_with_reserve": 0,
+     "independent_units_estimate": 0,
+     "supervised_per_unit_estimate": 4250,
+     "tasks_in_pools": 0,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.code_algorithmic",
+     "source": "mbpp_train",
+     "share": 0.045,
+     "kind": "external_dataset",
+     "approved_for_h1": true,
+     "U_target_2p96M": 133200,
+     "U_target_with_reserve": 139950,
+     "independent_units_estimate": 33,
+     "supervised_per_unit_estimate": 4250,
+     "tasks_in_pools": 124,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.code_algorithmic",
+     "source": "reasoning_core",
+     "share": 0.015,
+     "kind": "external_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 44400,
+     "U_target_with_reserve": 46650,
+     "independent_units_estimate": 11,
+     "supervised_per_unit_estimate": 4250,
+     "tasks_in_pools": 112,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.code_algorithmic",
+     "source": "reasoning_gym",
+     "share": 0.01,
+     "kind": "external_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 29600,
+     "U_target_with_reserve": 31100,
+     "independent_units_estimate": 7,
+     "supervised_per_unit_estimate": 4250,
+     "tasks_in_pools": 41,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.reading_verified",
+     "source": "corpus_v2_multihop_verified",
+     "share": 0.02,
+     "kind": "reused_targets",
+     "approved_for_h1": true,
+     "U_target_2p96M": 59200,
+     "U_target_with_reserve": 62200,
+     "independent_units_estimate": 100,
+     "supervised_per_unit_estimate": 623,
+     "tasks_in_pools": 919,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.reading_verified",
+     "source": "corpus_v2_rag_verified",
+     "share": 0.06,
+     "kind": "reused_targets",
+     "approved_for_h1": true,
+     "U_target_2p96M": 177600,
+     "U_target_with_reserve": 186600,
+     "independent_units_estimate": 300,
+     "supervised_per_unit_estimate": 623,
+     "tasks_in_pools": 3871,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.answerability",
+     "source": "squad_v2_train_unanswerable",
+     "share": 0.03,
+     "kind": "external_dataset",
+     "approved_for_h1": true,
+     "U_target_2p96M": 88800,
+     "U_target_with_reserve": 93300,
+     "independent_units_estimate": 183,
+     "supervised_per_unit_estimate": 509,
+     "tasks_in_pools": 281,
+     "shortfall": false
+    }
+   ],
+   "pools_checked": [
+    {
+     "path": "data/stages/stage-2/reasoning_data/tasks/train_tasks_v2.jsonl",
+     "sha256": "b428f1ad78245c145701ca0599ac5451b4ccecbe4e58751295e1de020321bdc5"
+    },
+    {
+     "path": "data/stages/stage-2/reasoning_data/tasks/external_tasks_v2.jsonl",
+     "sha256": "843dff8faf0e7d577cd0db217191d704c909bbe614ef87fd12f04e1197737127"
+    },
+    {
+     "path": "data/stages/stage-2/reasoning_data/tasks/math_train_v1.jsonl",
+     "sha256": "e2ac003cbfc30c7bdb8ddc8d6c65a669bedac52a076e3879a259cb556e3bd8dd"
+    },
+    {
+     "path": "data/stages/stage-2/reasoning_data/tasks/mbpp_train_v1.jsonl",
+     "sha256": "12473c4b055accf22ca5357e966664bab57c057256ca7791c76916b3a8ca8793"
+    },
+    {
+     "path": "data/stages/stage-2/reasoning_data/tasks/squad_v2_train_unanswerable_v1.jsonl",
+     "sha256": "07f1a198569dba3e974d476c13eb7d9fb253ccd02dc55dbdaf71976d03228131"
+    },
+    {
+     "path": "data/stages/stage-2/reasoning_data/tasks/supporting_reuse_v1.selection.jsonl",
+     "sha256": "2dcac7627c479025d53de70574fb6302c6a54e777686d2457887460993b85f7c"
+    }
+   ],
+   "shortfalls": [],
+   "_units": "independent units needed before acceptance losses; a task builder draws more (its oversupply over the measured accept rate)",
+   "authorizes": "nothing"
+  },
+  "stage2.reasoning_master@v1-project-only": {
+   "schema": "aadistill.stage2.reasoning_data.source_plan/v1",
+   "written_utc": "2026-10-22T17:47:54Z",
+   "corpus_id": "stage2.reasoning_master@v1-project-only",
+   "admitted": true,
+   "chosen": false,
+   "status": "ADMITTED: every source is approved for H1 (design; not a spending authorization)",
+   "unapproved_sources": [],
+   "cells": [
+    {
+     "stratum": "primary.task_contained_deduction",
+     "source": "s0_generators_v2_calsplit",
+     "share": 0.17,
+     "kind": "project_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 503200,
+     "U_target_with_reserve": 528700,
+     "independent_units_estimate": 143,
+     "supervised_per_unit_estimate": 3708,
+     "tasks_in_pools": 288,
+     "shortfall": false
+    },
+    {
+     "stratum": "primary.inductive_rule_discovery",
+     "source": "s0_generators_v2_calsplit",
+     "share": 0.17,
+     "kind": "project_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 503200,
+     "U_target_with_reserve": 528700,
+     "independent_units_estimate": 144,
+     "supervised_per_unit_estimate": 3662,
+     "tasks_in_pools": 318,
+     "shortfall": false
+    },
+    {
+     "stratum": "primary.compositional_generalization",
+     "source": "s0_generators_v2_calsplit",
+     "share": 0.17,
+     "kind": "project_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 503200,
+     "U_target_with_reserve": 528700,
+     "independent_units_estimate": 148,
+     "supervised_per_unit_estimate": 3574,
+     "tasks_in_pools": 438,
+     "shortfall": false
+    },
+    {
+     "stratum": "primary.abstract_analogical",
+     "source": "s0_generators_v2_calsplit",
+     "share": 0.09,
+     "kind": "project_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 266400,
+     "U_target_with_reserve": 279900,
+     "independent_units_estimate": 49,
+     "supervised_per_unit_estimate": 5739,
+     "tasks_in_pools": 171,
+     "shortfall": false
+    },
+    {
+     "stratum": "primary.interactive_adaptation",
+     "source": "s0_generators_v2_calsplit",
+     "share": 0.1,
+     "kind": "project_generator",
+     "approved_for_h1": true,
+     "U_target_2p96M": 296000,
+     "U_target_with_reserve": 311000,
+     "independent_units_estimate": 19,
+     "supervised_per_unit_estimate": 16669,
+     "tasks_in_pools": 210,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.math_reused_gsm8k",
+     "source": "corpus_v2_gsm8k_verified",
+     "share": 0.06,
+     "kind": "reused_targets",
+     "approved_for_h1": true,
+     "U_target_2p96M": 177600,
+     "U_target_with_reserve": 186600,
+     "independent_units_estimate": 159,
+     "supervised_per_unit_estimate": 1177,
+     "tasks_in_pools": 1508,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.math_new",
+     "source": "math_train",
+     "share": 0.06,
+     "kind": "external_dataset",
+     "approved_for_h1": true,
+     "U_target_2p96M": 177600,
+     "U_target_with_reserve": 186600,
+     "independent_units_estimate": 55,
+     "supervised_per_unit_estimate": 3415,
+     "tasks_in_pools": 107,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.code_algorithmic",
+     "source": "code_contests_train",
+     "share": 0.0,
+     "kind": "external_dataset",
+     "approved_for_h1": false,
+     "U_target_2p96M": 0,
+     "U_target_with_reserve": 0,
+     "independent_units_estimate": 0,
+     "supervised_per_unit_estimate": 4250,
+     "tasks_in_pools": 0,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.code_algorithmic",
+     "source": "mbpp_train",
+     "share": 0.07,
+     "kind": "external_dataset",
+     "approved_for_h1": true,
+     "U_target_2p96M": 207200,
+     "U_target_with_reserve": 217700,
+     "independent_units_estimate": 51,
+     "supervised_per_unit_estimate": 4250,
+     "tasks_in_pools": 124,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.reading_verified",
+     "source": "corpus_v2_multihop_verified",
+     "share": 0.02,
+     "kind": "reused_targets",
+     "approved_for_h1": true,
+     "U_target_2p96M": 59200,
+     "U_target_with_reserve": 62200,
+     "independent_units_estimate": 100,
+     "supervised_per_unit_estimate": 623,
+     "tasks_in_pools": 919,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.reading_verified",
+     "source": "corpus_v2_rag_verified",
+     "share": 0.06,
+     "kind": "reused_targets",
+     "approved_for_h1": true,
+     "U_target_2p96M": 177600,
+     "U_target_with_reserve": 186600,
+     "independent_units_estimate": 300,
+     "supervised_per_unit_estimate": 623,
+     "tasks_in_pools": 3871,
+     "shortfall": false
+    },
+    {
+     "stratum": "supporting.answerability",
+     "source": "squad_v2_train_unanswerable",
+     "share": 0.03,
+     "kind": "external_dataset",
+     "approved_for_h1": true,
+     "U_target_2p96M": 88800,
+     "U_target_with_reserve": 93300,
+     "independent_units_estimate": 183,
+     "supervised_per_unit_estimate": 509,
+     "tasks_in_pools": 281,
+     "shortfall": false
+    }
+   ],
+   "pools_checked": [
+    {
+     "path": "data/stages/stage-2/reasoning_data/tasks/train_tasks_v2.jsonl",
+     "sha256": "b428f1ad78245c145701ca0599ac5451b4ccecbe4e58751295e1de020321bdc5"
+    },
+    {
+     "path": "data/stages/stage-2/reasoning_data/tasks/external_tasks_v2.jsonl",
+     "sha256": "843dff8faf0e7d577cd0db217191d704c909bbe614ef87fd12f04e1197737127"
+    },
+    {
+     "path": "data/stages/stage-2/reasoning_data/tasks/math_train_v1.jsonl",
+     "sha256": "e2ac003cbfc30c7bdb8ddc8d6c65a669bedac52a076e3879a259cb556e3bd8dd"
+    },
+    {
+     "path": "data/stages/stage-2/reasoning_data/tasks/mbpp_train_v1.jsonl",
+     "sha256": "12473c4b055accf22ca5357e966664bab57c057256ca7791c76916b3a8ca8793"
+    },
+    {
+     "path": "data/stages/stage-2/reasoning_data/tasks/squad_v2_train_unanswerable_v1.jsonl",
+     "sha256": "07f1a198569dba3e974d476c13eb7d9fb253ccd02dc55dbdaf71976d03228131"
+    },
+    {
+     "path": "data/stages/stage-2/reasoning_data/tasks/supporting_reuse_v1.selection.jsonl",
+     "sha256": "2dcac7627c479025d53de70574fb6302c6a54e777686d2457887460993b85f7c"
+    }
+   ],
+   "shortfalls": [],
+   "_units": "independent units needed before acceptance losses; a task builder draws more (its oversupply over the measured accept rate)",
+   "authorizes": "nothing"
+  }
+ },
+ "authorizes": "nothing"
+}

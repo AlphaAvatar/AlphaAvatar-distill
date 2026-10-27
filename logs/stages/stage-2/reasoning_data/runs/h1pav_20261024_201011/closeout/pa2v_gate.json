@@ -1,0 +1,251 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.pa2v_gate/v1",
+ "run_id": "h1pav_20261024_201011",
+ "written_utc": "2026-10-24T20:31:54Z",
+ "study_identity_sha256": "d8a3c15ed32b6db386ca20934f80e1d17f6deb3bfb4b5e46711e611ed61fbb8c",
+ "harness_digest": "e1cf874c7cc4dcd498bb49d5034c3509a348668b0915b9c684ceba799b2f785c",
+ "evidence_sha256": "8ae02540ec2817c471ec3a1321fc5f9ff5816d239c211aea5bc2cbfcddca7167",
+ "problems": [],
+ "checks": {
+  "gpu": {
+   "name": "NVIDIA L40S",
+   "ok": true
+  },
+  "training": {
+   "runs": {
+    "X1": {
+     "steps_logged": 24,
+     "complete": true,
+     "trainers_exit_ok": true,
+     "finite": true
+    },
+    "X2": {
+     "steps_logged": 24,
+     "complete": true,
+     "trainers_exit_ok": true,
+     "finite": true
+    },
+    "Y": {
+     "steps_logged": 24,
+     "complete": true,
+     "trainers_exit_ok": true,
+     "finite": true
+    },
+    "O": {
+     "steps_logged": 12,
+     "complete": true,
+     "trainers_exit_ok": true,
+     "finite": true
+    }
+   },
+   "ok": true
+  },
+  "memory": {
+   "peak_gpu_mem_gb": 38.98,
+   "limit_gb": 44.0,
+   "ok": true
+  },
+  "config": {
+   "validation_runs_outside_overrides": {
+    "X1": [],
+    "X2": [],
+    "Y": [],
+    "O": []
+   },
+   "formal_recipes": {
+    "D4-Original-s20260726": {
+     "ok": true,
+     "total_steps": 2916,
+     "batch": {
+      "blocks_per_step": 2,
+      "micro_blocks": 1
+     }
+    },
+    "D4-Original-s20260801": {
+     "ok": true,
+     "total_steps": 2916,
+     "batch": {
+      "blocks_per_step": 2,
+      "micro_blocks": 1
+     }
+    },
+    "D4-Augmented-s20260726": {
+     "ok": true,
+     "total_steps": 3702,
+     "batch": {
+      "blocks_per_step": 2,
+      "micro_blocks": 1
+     }
+    },
+    "D4-Augmented-s20260801": {
+     "ok": true,
+     "total_steps": 3702,
+     "batch": {
+      "blocks_per_step": 2,
+      "micro_blocks": 1
+     }
+    }
+   },
+   "ok": true
+  },
+  "initialization": {
+   "reidentified": true,
+   "artifact_digest": "457e194c4a40c2503a7d63d03269ac76ece700102bae74908b7315d367bab3f0",
+   "ok": true
+  },
+  "pca_checkpoint": {
+   "seed": 20260726,
+   "sha256": "3f08482c2c8e7372fc87fd2496f50c1c618f61feaec021d73c0cc646413b80c3",
+   "ok": true
+  },
+  "resume": {
+   "killed_after_save_point": true,
+   "resumed_vs_uninterrupted": {
+    "steps": [
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24
+    ],
+    "exact_mismatch": [],
+    "max_rel_loss": 0.2895407126858043,
+    "max_rel_ce": 0.26659574955931575,
+    "max_rel_kd": 0.2952856297521741
+   },
+   "run_to_run_floor": {
+    "steps": [
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24
+    ],
+    "exact_mismatch": [],
+    "max_rel_loss": 0.3234827836737987,
+    "max_rel_ce": 0.3204675063233649,
+    "max_rel_kd": 0.32533970177328425
+   },
+   "weights": {
+    "resumed": {
+     "same_keys": true,
+     "max_abs_diff": 0.0007651969790458679,
+     "worst_tensor": "model.layers.10.mlp.gate_proj.weight",
+     "max_abs_weight": 44.0,
+     "bitwise_identical": false,
+     "tensors": 310,
+     "_dtype": "torch.float32"
+    },
+    "floor": {
+     "same_keys": true,
+     "max_abs_diff": 0.0008270824328064919,
+     "worst_tensor": "model.layers.0.mlp.up_proj.weight",
+     "max_abs_weight": 44.0,
+     "bitwise_identical": false,
+     "tensors": 310,
+     "_dtype": "torch.float32"
+    }
+   },
+   "ok": true
+  },
+  "persistence": {
+   "reidentified_from_landed_bytes": true,
+   "save_point_bytes": 5908260115,
+   "used_bytes_on_mount": 8293562360,
+   "probe": {
+    "bytes": 268435456,
+    "read_back_ok": true,
+    "write_seconds": 0.51,
+    "read_seconds": 0.75,
+    "provider_bytes": 30000000000,
+    "used_bytes_on_mount": 953052
+   },
+   "ok": true
+  },
+  "capacity": {
+   "provider_bytes": 30000000000,
+   "planned_bytes": 30000000000,
+   "save_point_bytes": 5908260115,
+   "planned_save_point_bytes": 5908258491,
+   "ok": true
+  },
+  "decoding": {
+   "summaries": {
+    "fluid_reasoning_720__dev_v1": {
+     "present": true,
+     "decoding_sha256_ok": true,
+     "sampling_ok": true
+    },
+    "stage3_capability_846__gsm8k": {
+     "present": true,
+     "decoding_sha256_ok": true,
+     "sampling_ok": true
+    }
+   },
+   "samples": 48,
+   "seed_mismatch": [],
+   "bad_stop_reason": [],
+   "missing_token_ids": [],
+   "ok": true
+  },
+  "throughput": {
+   "median_step_seconds": 3.59,
+   "max_step_seconds": 5.19,
+   "peak_gpu_mem_gb": 38.98,
+   "evaluation": {
+    "rc": {
+     "fluid": 0,
+     "gsm8k": 0
+    },
+    "items_per_unit": 24,
+    "seconds": {
+     "fluid": 196.5,
+     "gsm8k": 66.7
+    },
+    "generated_tokens": {
+     "fluid": 18664,
+     "gsm8k": 19208
+    }
+   },
+   "save_point_bytes": 5908260115,
+   "ok": true
+  }
+ },
+ "measured": {
+  "median_step_seconds": 3.59,
+  "max_step_seconds": 5.19,
+  "peak_gpu_mem_gb": 38.98,
+  "evaluation": {
+   "rc": {
+    "fluid": 0,
+    "gsm8k": 0
+   },
+   "items_per_unit": 24,
+   "seconds": {
+    "fluid": 196.5,
+    "gsm8k": 66.7
+   },
+   "generated_tokens": {
+    "fluid": 18664,
+    "gsm8k": 19208
+   }
+  },
+  "save_point_bytes": 5908260115
+ },
+ "passed": true,
+ "authorizes": "nothing"
+}

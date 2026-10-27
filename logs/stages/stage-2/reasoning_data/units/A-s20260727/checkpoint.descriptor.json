@@ -1,0 +1,55 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.persisted_unit/v2",
+ "unit": "A-s20260727",
+ "kind": "checkpoint",
+ "started_utc": "2026-10-24T04:10:07Z",
+ "source": "/runpod-volume/h1/A-s20260727/train/a1/checkpoints/step_000614/model",
+ "artifact_digest": "d5d00f8619b8e1cad6cc8d749baae61494ad12c4cb97a3abeb06759993bcbd97",
+ "weights_digest": "e0a50cddec9ebdd1ae2923c41564af7da14d83dee07a5f430e6430a13cf4ac5f",
+ "config_sha256": "cb757e8976462bce6037c24d74ed20b56fca5825f4198f3e1d6d6e7aa211e453",
+ "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+ "num_parameters": 596049920,
+ "tokenizer_sha256": null,
+ "inputs": {
+  "arm": "A",
+  "seed": 20260727,
+  "formal": true,
+  "initialization_artifact_digest": "457e194c4a40c2503a7d63d03269ac76ece700102bae74908b7315d367bab3f0",
+  "initialization_weights_digest": "73589c58a439bf32b4ddbf975ac245cd6b916745d5e0712ae4cf32ae158a6d0f",
+  "pack_blocks_sha256": "b561b85f9b73bcb65114871ba538609cf4ae0ea4f581e620942478a2d3a2921d",
+  "recipe_sha256": "8904b7f3624b351937233156dc440a007ffae6820f5292bd5d2f508a99aa8365",
+  "schedule": {
+   "total_steps": 614,
+   "blocks_per_step": 7,
+   "warmup_steps": 31,
+   "eval_every": 76,
+   "save_every": 307,
+   "rung": 2960000
+  },
+  "evaluation": {
+   "set": "eval-set-1",
+   "trained_context": 8192,
+   "action_protocol": "v2"
+  }
+ },
+ "destination": "/runpod-volume/h1/A-s20260727/checkpoint",
+ "persisted": true,
+ "finished_utc": "2026-10-24T04:10:19Z",
+ "bytes": 2384236592,
+ "verified": {
+  "path": "/runpod-volume/h1/A-s20260727/checkpoint.partial",
+  "artifact_digest": "d5d00f8619b8e1cad6cc8d749baae61494ad12c4cb97a3abeb06759993bcbd97",
+  "recorded_digest": "d5d00f8619b8e1cad6cc8d749baae61494ad12c4cb97a3abeb06759993bcbd97",
+  "matched": true,
+  "weights_digest": "e0a50cddec9ebdd1ae2923c41564af7da14d83dee07a5f430e6430a13cf4ac5f",
+  "weights_digest_matched": true,
+  "config_sha256": "cb757e8976462bce6037c24d74ed20b56fca5825f4198f3e1d6d6e7aa211e453",
+  "config_matched": true,
+  "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+  "num_parameters": 596049920,
+  "single_shard_sha256": "24fbca037a3d2dc476976a497b71f2b0d56d3ad84034ec1984ce0bb9653f748d",
+  "shard_matched": false,
+  "tokenizer_sha256": null,
+  "total_bytes": 2384234968
+ }
+}

@@ -1406,16 +1406,31 @@ Do not duplicate the full root `AGENTS.md` inside local files.
 
 `README.md` is agent-editable, but it must not contain fake content.
 
-The README should strictly keep the project-level structure requested by the maintainer:
+The README is a concise, English-only landing page for users -- not an
+experiment report, a technical specification or a maintenance log. It keeps
+exactly these seven top-level sections, in this order, with their emoji
+(maintainer decisions 2026-10-23):
 
-1. model performance trend and project goal;
-2. How it works;
-3. Quick start;
-4. Running the agent;
-5. Project structure;
-6. stage-wise Optim record history;
-7. References;
-8. Citation.
+1. `## 🧠 Overview and Goals` -- short; fluid reasoning and adaptive
+   problem-solving as the primary objective;
+2. `## 📈 Performance Trend` -- the trend figure and a short reading, no
+   experiment tables;
+3. `## 🤖 Running the agent` -- the original introduction (coding agents,
+   `AGENTS.md` as the agent contract, the first compression-experiment prompt,
+   agent-driven and reproducible work, paid actions under maintainer approval),
+   extended with short copyable example prompts rather than replaced;
+4. `## 🗂️ Project structure` -- the annotated directory tree, kept as a tree,
+   with its links;
+5. `## 🏆 Optim record history` -- organised by stage: one `###` subsection per
+   Stage 0-6 with its emoji (🧪 🧩 📚 🛠️ 🔁 🎯 🚀). Each stage gets its own
+   record table once it has an officially approved record, and says
+   `_No records yet._` until then; an experiment or attempt is never listed as
+   a record;
+6. `## 🔎 References` -- titles and links;
+7. `## 📚 Citation` -- the existing text and BibTeX, unchanged.
+
+Experiment tables, procedures, commands, budgets, run-specific numbers and
+status snapshots stay in their owning logs and docs, which the README links.
 
 Empty sections are allowed. Placeholder text is allowed only when it clearly says the content is not available yet.
 
@@ -1528,6 +1543,46 @@ A task is done only when:
 - logs are updated if logs exist and the change affects project state;
 - README is updated if the change affects public project information;
 - the next useful action is clear.
+
+### 2.10 Use the field's standard terminology
+
+**MAINTAINER DECISION 2026-10-24.** Call every concept by the name the
+machine-learning and LLM-training community uses for it: the name found in
+the primary papers and in mainstream frameworks (PyTorch, Hugging Face
+Transformers / TRL, DeepSpeed, Megatron-LM, vLLM). This applies to reports,
+docs, logs, commit messages, code comments and replies to the maintainer, in
+every language. Do not coin a name for a concept that already has one, and do
+not describe a standard concept in invented wording.
+
+* **Prose uses the standard term; identifiers stay as they are.** Where the
+  code names something non-standardly, write the standard term. If the reader
+  needs the key, add it in a code span: "batch size (`batch.blocks_per_step`)".
+  Do not rename identifiers for this; frozen configs and records bind them by
+  hash.
+* **A standard term keeps its standard meaning.** Never use an established
+  term for something else. Never describe a metric by its field name when the
+  name misdescribes it; say what was measured. For example,
+  `truncated_at_cap` counts every non-EOS stop, most of them repetition
+  stops, so it is not "truncated at the context limit".
+* **A project-specific term is only for a project-specific concept,** one no
+  standard term covers (for example an H1 unit: one arm × seed). Define it
+  once in the document that owns it, and never present it as a field term.
+* **In Chinese, use the established Chinese term,** or the English term where
+  the field normally keeps it in English (batch size, epoch, checkpoint,
+  token, padding). Never translate an identifier literally.
+* **When unsure which term is standard, check a primary source (P13)** instead
+  of guessing.
+
+Terms this repository's code spells non-standardly:
+
+| in code | standard term | in Chinese |
+| --- | --- | --- |
+| block, `block_len` | packed sequence (training sequence); its length is the sequence length | 打包序列（训练序列）、序列长度 |
+| `blocks_per_step` | batch size: sequences per optimizer step | batch size（批大小） |
+| `micro_blocks` | micro-batch size; gradient accumulation steps = `blocks_per_step / micro_blocks` on one GPU | micro-batch、梯度累积步数 |
+| passes | epochs | epoch（轮） |
+| real / executed positions | non-padding tokens | 非 padding token |
+| pack | packed training set | 打包后的训练集 |
 
 ---
 

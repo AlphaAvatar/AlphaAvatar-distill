@@ -1,0 +1,103 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.mixed_design/v1",
+ "name": "mixed_v1",
+ "decided_by": "maintainer brief 2026-10-26 (Next Experiment: Mixed Calibration 2x Independent Design): the 2x profile is 1x supporting + 1x fluid, 50/50 by realized calibration positions, every P10.2 axis in the fluid half; 4x = 2x supporting + 2x fluid, a nested extension under the same draw. This file is the agent's $0 design; it authorizes nothing",
+ "question": "Under D4-Augmented's recovery and evaluation exactly, does the Top-1 of a formal D1 full search calibrated on one mixed profile (supporting + fluid over all five P10.2 axes, 50/50 by realized scored positions) recover better static fluid correctness than D4 Top-1?",
+ "pool": {
+  "dir": "artifacts/stages/stage-0/calibration_volume/base_pool_v1",
+  "items_sha256": "c9e18612f994795d0764ceb0d0d0f403bcf5acb7f9a746581fe45b12829c93d7",
+  "content_sha256": "f702f74ef49db55032bf8e438c37985ff539cdbe25d24355b8a7146e55b83341",
+  "_why": "the verified teacher-native pool historical D4's profiles were drawn from: 506 static fluid units, 13 interactive episodes and 6,020 supporting units, every item <= 8,192 rendered tokens. No new teacher data: the brief forbids generating it this round"
+ },
+ "reference_uesp": 45000,
+ "halves": {
+  "fluid": {
+   "axes": {
+    "task_contained_deduction": [
+     "entity_tracking@v1",
+     "knights_knaves@v1",
+     "ordering@v1"
+    ],
+    "inductive_rule_discovery": [
+     "list_induction@v1",
+     "string_induction@v1"
+    ],
+    "compositional_generalization": [
+     "defined_ops@v1",
+     "scan_language@v1"
+    ],
+    "abstract_analogical": [
+     "grid_transform@v1"
+    ],
+    "interactive_adaptation": [
+     "hidden_buttons@v1",
+     "probe_function@v1"
+    ]
+   },
+   "quota": "dose's fluid nominal / 5 per axis; a static axis splits it equally over its generators (one cell per generator); the interactive axis is ONE cell pooling both generators, so its quota is not doubled by the at-least-one-unit rule; within a cell the rule families are interleaved, so n units span min(n, families) families",
+   "_interactive": "an episode (unit_id) is taken or left whole, every turn item with it; base_pool_v1 has 13 episodes from 3 calibration rule families (8.3k-27.0k scored positions each), so at these doses the at-least-one-episode rule, not the quota, sets the interactive size"
+  },
+  "supporting": {
+   "subtypes": [
+    "gsm8k",
+    "multihop_qa",
+    "openmath",
+    "rag_evidence"
+   ],
+   "quota": "the fluid half's REALIZED scored positions, split equally over the four subtypes; each cell stops at the prefix of its order whose total is nearest its quota (at least one unit), so the halves are 50/50 by realized positions to within half a unit per cell",
+   "_why": "the same four supporting groups historical D4's profiles drew (knowledge-dependent: learned math procedure, multi-hop and evidence reading); code and tool_calling stay out as they did in D4's calibration, and no closed-book factual QA source exists among the verified teacher-native data"
+  }
+ },
+ "doses": {
+  "2x": {
+   "fluid_nominal_uesp": 45000,
+   "role": "the formal search's profile"
+  },
+  "4x": {
+   "fluid_nominal_uesp": 90000,
+   "role": "audited, not searched: the nested extension the 4x entry criterion would search"
+  }
+ },
+ "labels": {
+  "domain": "the half: fluid or supporting",
+  "subtype": "fluid: the item's P10.2 axis; supporting: its source group",
+  "_why": "DEPTH's objective is an unweighted mean over domain labels of an unweighted mean over subtypes of per-item KL (equal_subtype_then_equal_domain/v1). With the half as the domain, DEPTH weights supporting and fluid 1/2 each and every fluid axis 1/10; with the historical axis-as-domain labels it would weight supporting 1/6. FFN, RESIDUAL_WIDTH and ATTENTION pool their statistics over scored positions, so the realized position split is their weight"
+ },
+ "seed_derivation": "uint32_be(sha256('stage0.calibration_volume.mixed_v1|draw|1')[:4]) mod 2**31: ONE draw for both doses, declared before any profile is built; never re-drawn",
+ "sample_rule": "stratified nested sampling: per cell an order that interleaves its rule families (families in a seed-keyed order, each family's units in a seed-keyed order, one unit per family per round), whole units taken from the front (at least one); a fluid cell until its quota of scored positions is met, then each supporting cell to the prefix nearest its share of the fluid half's REALIZED positions; 4x takes a longer prefix of the same orders, so 2x is contained in 4x (build_mixed_profiles.py)",
+ "exclusions": {
+  "inherited": [
+   "dev_v1 and final evaluation families (generator family split)",
+   "recovery rung 0.86M sessions",
+   "state_eval@v1 sessions",
+   "d_series_behavioural_v1 prompts"
+  ],
+  "d4_augmented_members": {
+   "what": "every session D4-Augmented trained or validated on: E1's 2.96M training prefix and 16 validation sequences, and the fluid increment's admitted sessions; a pool unit is excluded when it shares a session id, a source id or a prompt key with any of them",
+   "e1_pack": "artifacts/shared/instruments/ladder_uniform_probe",
+   "fluid_sessions": "artifacts/stages/stage-2/reasoning_data/packs/D4A_fluid_whole_sessions.jsonl",
+   "fluid_sessions_sha256": "5d8355abaf06fa2dc8ab26dfbf360367a70d8dd07bd6a89e8acc905733e16fc1",
+   "_why": "the recovery data must not double as the new arm's calibration data. The base pool predates the 2.96M rung: 1,713 of its 6,020 supporting units share a session, source or prompt with D4-Augmented's training or validation sets, and D4 Top-1's own calibration drew 8 of them (base_d4: 8 items, 7,457 of its 203,726 scored positions; rh_d4: 3 of those 8). No fluid unit of the pool is a member"
+  },
+  "eval_set": "eval-set-1 held-out units, by the frozen Stage-2 isolation rules R0-R9 (stages.reasoning_data.isolation_check.check_pool, historical pool); a unit an R1 or R2 check flags is excluded"
+ },
+ "search": {
+  "baseline": "stage1_init.d1_target_aware.scored_v1@v1, resolved by shared.forward_baseline",
+  "profiles": [
+   "calib.s0m_mix_2x@v1"
+  ],
+  "declared_change": "the forward baseline's free variable 'calibration profile per operator' has ONE value: every operator calibrates on the mixed 2x profile. The beam tree is then 4 + 12 + 12 + 6 = 34 expansions instead of the historical two-profile 8 + 48 + 24 + 12 = 92. Operator order (all 24 orders reachable), beam.delayed_prune@v1 width 6 warmup 1, beam.pareto_multi_objective@v2, state_eval@v1, positions.supervised_target_v1@v1, reference_topk_tail_v1 K=200, micro-batch 3, length_sorted_v1 and scored_v1 are unchanged",
+  "execution": {
+   "depth_prefix_reuse": true,
+   "validate_on_search_device": true,
+   "prune_weights": false
+  },
+  "_execution": "the bit-identical execution options historical D4's search ran with (search_record.json :: execution)"
+ },
+ "output": {
+  "items_dir": "artifacts/stages/stage-0/calibration_volume/profiles_mixed_v1",
+  "profiles_doc": "configs/stages/stage-0/calibration_volume/profiles_mixed.json",
+  "audit": "logs/stages/stage-0/calibration_volume/design/mixed_feasibility.json"
+ },
+ "authorizes": "nothing"
+}

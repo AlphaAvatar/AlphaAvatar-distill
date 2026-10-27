@@ -242,6 +242,15 @@ def driver_terminal(live: str, unanswered_since: float | None, now: float,
     return (f"DRIVER_{live}" if now - since >= grace_s else None), since
 
 
+def marker_terminal(status_line: str, markers) -> str | None:
+    """The terminal a status line carries: the success marker, the first
+    failure marker it names, or None."""
+    if f"MARKER:{markers.success}" in status_line:
+        return markers.success
+    hit = [m for m in markers.failure if f"MARKER:{m}" in status_line]
+    return hit[0] if hit else None
+
+
 class SessionRunner:
     """Runs one `SessionSpec`. Not a base class; there is nothing to override."""
 
@@ -1169,13 +1178,10 @@ class SessionRunner:
             if st and st != last:
                 last = st
                 self.say(f"  {st} — ${self.usd():.2f}")
-            if f"MARKER:{self.spec.markers.success}" in st:
-                terminal = self.spec.markers.success
-                break
-            hit = [m for m in self.spec.markers.failure if f"MARKER:{m}" in st]
-            if hit:
-                terminal = hit[0]
-                self.say(self.spec.markers.failure_note)
+            terminal = marker_terminal(st, self.spec.markers) or ""
+            if terminal:
+                if terminal != self.spec.markers.success:
+                    self.say(self.spec.markers.failure_note)
                 break
             #: Secure anything that has FINISHED, now, rather than at
             #: closeout. Never allowed to disturb the run: a durability
@@ -1209,8 +1215,17 @@ class SessionRunner:
             live, _ = probe(target, job)
             stop, unanswered_since = driver_terminal(live, unanswered_since, time.time())
             if stop:
-                terminal = stop
-                self.say(f"driver no longer running: {live}")
+                #: A driver can write its marker and exit between this poll's
+                #: status read and the probe (the poll hook runs in between):
+                #: h1p2b_20261023_205037 wrote ALL_DONE 20 s before the probe
+                #: and was recorded DRIVER_EXITED:0. Read the status once more.
+                again = target.run(f"tail -1 {self.spec.status_path} 2>/dev/null",
+                                   timeout=60).stdout.strip()
+                terminal = marker_terminal(again, self.spec.markers) or stop
+                if terminal != stop:
+                    self.say(f"  {again} — ${self.usd():.2f} (written as the driver exited)")
+                else:
+                    self.say(f"driver no longer running: {live}")
                 break
             if unanswered_since is not None:
                 self.say(f"  driver unanswered for {time.time() - unanswered_since:.0f} s "

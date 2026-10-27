@@ -1,0 +1,99 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1pa_outcome/v1",
+ "run_id": "h1pa2_20261025_055042",
+ "recorded_utc": "2026-10-25T15:09:22+00:00",
+ "status": "COMPLETE",
+ "terminal": "ALL_DONE",
+ "runner_terminal": "ALL_DONE",
+ "session_passed": true,
+ "provider_resource_created": true,
+ "evidence": {
+  "D4-Augmented-s20260801.evidence.tgz": {
+   "sha256": "680a598ade1f8c5ba3ff6e1545daec172043643d016c409ba31b303524f29cab",
+   "verified": true,
+   "bytes": 6788186
+  },
+  "D4-Original-s20260801.evidence.tgz": {
+   "sha256": "08a5279c1d044617c19bba520b1f5dae76c2707d9f9fe1dcd63bd85c66174309",
+   "verified": true,
+   "bytes": 3033455
+  },
+  "PCA-Original-s20260801.evidence.tgz": {
+   "sha256": "c69315e69d48a6aeaf37f65c70a96b8fc39c45c38053ca70ce1855ab97a3fb13",
+   "verified": true,
+   "bytes": 2636825
+  }
+ },
+ "money": {
+  "all_in_usd": 10.3232,
+  "gpu_usd": 10.1323,
+  "disk_usd": 0.1909,
+  "elapsed_minutes": 557.74,
+  "price_per_hour": 1.09,
+  "authorized_usd": 20.0,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB); the network volume is booked in logs/stages/stage-2/reasoning_data/storage/"
+ },
+ "provider_confirms_gone": true,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "am5m373kuq",
+    "name": "aad-h1pa",
+    "size": 30,
+    "dataCenterId": "EUR-IS-2"
+   }
+  ],
+  "error": null,
+  "accounted": [
+   "am5m373kuq"
+  ],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 1 resource(s) the records account for"
+ },
+ "authorizes": "nothing",
+ "store": "artifacts/stages/stage-2/reasoning_data/h1pa/h1pa2_20261025_055042/store",
+ "units": {
+  "D4-Augmented-s20260801": {
+   "seconds": {
+    "train": 13385.3,
+    "evaluate": 3917.1
+   },
+   "execution": "train",
+   "checkpoint": {
+    "artifact_digest": "2cbbee9ea52b27db3258fa4bb945159dc0375431edfdb0ce60c074543191702a",
+    "weights_digest": "be5f48ab4f39d91379a91785519e9594457edec33adcd69e7e665bd9b6e3a57b",
+    "destination": "/runpod-volume/h1pa/D4-Augmented-s20260801/checkpoint",
+    "persisted": true
+   }
+  },
+  "D4-Original-s20260801": {
+   "seconds": {
+    "train": 10216.5,
+    "evaluate": 2718.2
+   },
+   "execution": "train",
+   "checkpoint": {
+    "artifact_digest": "f1db9febdd8d66dcb29c35649a428d3fe92661941851a6f9bdb55c94946b93d9",
+    "weights_digest": "c8259e9f8f2ff1be075a3ad95d16a0d4d98c2757538dda43d8e836d310596f6b",
+    "destination": "/runpod-volume/h1pa/D4-Original-s20260801/checkpoint",
+    "persisted": true
+   }
+  },
+  "PCA-Original-s20260801": {
+   "seconds": {
+    "evaluate": 2653.1
+   },
+   "execution": "evaluate",
+   "checkpoint": {
+    "model_safetensors_sha256": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
+    "durable": "AlphaAvatar/aadistill-artifacts :: e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/model.safetensors",
+    "persisted_again": false
+   }
+  }
+ }
+}

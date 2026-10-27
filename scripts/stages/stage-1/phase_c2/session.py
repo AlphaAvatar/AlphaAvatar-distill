@@ -40,7 +40,8 @@ from pathlib import Path
 from typing import Any, ClassVar
 
 from aadistill.governance.authorization import AuthorizationError
-from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
+from aadistill.infrastructure.budget import Phase
+from shared.step_times import MEASURED_STEP_SECONDS
 from aadistill.infrastructure.manifest import sha256_json
 from aadistill.infrastructure.session import BudgetSpec
 from stages.phase_a.plan import PhaseAAuthorization

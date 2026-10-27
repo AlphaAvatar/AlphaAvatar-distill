@@ -1,0 +1,181 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.persisted_unit/v2",
+ "unit": "Mix-Augmented-s20260726",
+ "kind": "evaluation",
+ "started_utc": "2026-10-26T19:01:25Z",
+ "files": [
+  {
+   "name": "eval_capability.log",
+   "sha256": "84a4cdae8faf6ff77762207795b24ff6fb7f90be23c09be15754831444dfed7f",
+   "bytes": 15142
+  },
+  {
+   "name": "eval_fluid.log",
+   "sha256": "3bfd49172ad2c1938ffd5221bcb77aa2a6a5b035cc24728bc0dee5bbc5a31ddf",
+   "bytes": 19133
+  },
+  {
+   "name": "formal_report.json",
+   "sha256": "4fa028cb9e1a8847d6ffa7c4274cb923e10a19cb36cf75d225d354d6875c6ec0",
+   "bytes": 32482
+  },
+  {
+   "name": "generations/fluid_reasoning_720__dev_v1.jsonl",
+   "sha256": "f50cad414eed2cfe7a633f2f6ff297f6df253da7b6c18dbef8030a581e15506f",
+   "bytes": 40125167
+  },
+  {
+   "name": "generations/fluid_reasoning_720__dev_v1.summary.json",
+   "sha256": "71c2bc74c42528d3661eb3f07e4d5ed53df4d80d33dd42ffee9a5af366f4e9d1",
+   "bytes": 3472
+  },
+  {
+   "name": "generations/stage3_capability_846__answerability_paired.jsonl",
+   "sha256": "5872fb17d1ca69c2a9f89ba491d195836897510d8f05833e0309c782c321c8c0",
+   "bytes": 649332
+  },
+  {
+   "name": "generations/stage3_capability_846__answerability_paired.summary.json",
+   "sha256": "741156fc0e0f44936b7f0264f2bf44b6fc10bfe1f567b8d0838a9297c417bba9",
+   "bytes": 6528
+  },
+  {
+   "name": "generations/stage3_capability_846__eval_behavior_v0.jsonl",
+   "sha256": "a0a27cb1b9e5d84dfb332d69ecf080682bc407745f986a5b7da395d27b484636",
+   "bytes": 837700
+  },
+  {
+   "name": "generations/stage3_capability_846__eval_behavior_v0.summary.json",
+   "sha256": "aa691ffeff20efd6b4d55cde335a49410cb101ecb92e760549b6683ab6751a54",
+   "bytes": 8894
+  },
+  {
+   "name": "generations/stage3_capability_846__gsm8k.jsonl",
+   "sha256": "655cc2da5b59a9ab58693485bdd83172591b72294f07aa9f9bb7d01c7165d0b6",
+   "bytes": 849058
+  },
+  {
+   "name": "generations/stage3_capability_846__gsm8k.summary.json",
+   "sha256": "86f2d4aa818beaf25064174a372c4a68ab1e1c21b5c91593fee6fd99d865876f",
+   "bytes": 6534
+  },
+  {
+   "name": "generations/stage3_capability_846__knowledge.jsonl",
+   "sha256": "12f0e174ff90bf4c4bf996c6ab4a553b509080e1d9f4325b3870542a6f81de4c",
+   "bytes": 3094538
+  },
+  {
+   "name": "generations/stage3_capability_846__knowledge.summary.json",
+   "sha256": "10324e4e3b9fb7ce53ca00009546d2e59a5f559acc0fdb36bedabe4c75d34065",
+   "bytes": 6546
+  },
+  {
+   "name": "generations/stage3_capability_846__math_verified.jsonl",
+   "sha256": "a56a151782ee7a72007d5a344f56012f3123a529a207d32adda17b2e4f86898b",
+   "bytes": 1695120
+  },
+  {
+   "name": "generations/stage3_capability_846__math_verified.summary.json",
+   "sha256": "688553b04582251a4cee60f408282fc94cf244a1c7f15d15745f5ab51c57c150",
+   "bytes": 6502
+  },
+  {
+   "name": "generations/stage3_capability_846__multihop.jsonl",
+   "sha256": "8c9c6b57c68595eed26b2070ca5200b7e3cef1693adc567f5dccf516e1d53d07",
+   "bytes": 1100045
+  },
+  {
+   "name": "generations/stage3_capability_846__multihop.summary.json",
+   "sha256": "5efaf6df3096c2a5603a85a6ded7b662dc4ddb0160caf0f53a27bc1ee989538c",
+   "bytes": 6487
+  },
+  {
+   "name": "generations/stage3_capability_846__rag.jsonl",
+   "sha256": "f7d38b8d881729ab6c45b43646b72b52df77110ba19ab4a8310319c493f271ec",
+   "bytes": 539735
+  },
+  {
+   "name": "generations/stage3_capability_846__rag.summary.json",
+   "sha256": "40a62596b28ab684f2cb58677e91af39ce303d6ec53fd262d81928f260865b79",
+   "bytes": 6443
+  },
+  {
+   "name": "generations/stage3_capability_846__safety_paired.jsonl",
+   "sha256": "c4632fc1dbcc2ef94d19015d95de3fc920f1cea25a336a93702067d6aaad5a8d",
+   "bytes": 1918282
+  },
+  {
+   "name": "generations/stage3_capability_846__safety_paired.summary.json",
+   "sha256": "ad194098eb40728a7ff1ec2f48f3b1301a7269146a90ba8a07d39e94a8e69f5d",
+   "bytes": 6522
+  },
+  {
+   "name": "generations/stage3_legacy_150__items.jsonl",
+   "sha256": "b8072064f677ea8de5cf084f71fc17bf32a7b1ec8b2055c253b8ad4ac59558bf",
+   "bytes": 1483003
+  },
+  {
+   "name": "generations/stage3_legacy_150__items.summary.json",
+   "sha256": "db2d2fd7f8bfcce73107ab2583cdb4da160395f843e0cb4cee3f050e88e26265",
+   "bytes": 7615
+  },
+  {
+   "name": "rows/fluid_reasoning_720__dev_v1.rows.jsonl",
+   "sha256": "9070b5da8871a290d772aae2c76a13574f4581a001a2aeb6dd07acde51a84252",
+   "bytes": 77653
+  },
+  {
+   "name": "rows/stage3_capability_846__answerability_paired.rows.jsonl",
+   "sha256": "33f5f2af2ecf475a2c61cc58f8da971733db80aa5e9fb96a960e10a0744de507",
+   "bytes": 14886
+  },
+  {
+   "name": "rows/stage3_capability_846__eval_behavior_v0.rows.jsonl",
+   "sha256": "d75d6139abbf1073ffafd732cce558725c340d4bb060bd77f548c47e08f81287",
+   "bytes": 27366
+  },
+  {
+   "name": "rows/stage3_capability_846__gsm8k.rows.jsonl",
+   "sha256": "3b70ea85e659bf8906f60dd01ba32727d3ce1ab13aa7f5778b0e75df893ebd7f",
+   "bytes": 9012
+  },
+  {
+   "name": "rows/stage3_capability_846__knowledge.rows.jsonl",
+   "sha256": "97effdf1f5a804b350e30dafbbe8cc065e505791c1db9580ffe3fc0b003b9f6c",
+   "bytes": 13652
+  },
+  {
+   "name": "rows/stage3_capability_846__math_verified.rows.jsonl",
+   "sha256": "94e84348400a4f023230ccb920f0f3d614ec5cb6a4e954b2631c8037c05702b4",
+   "bytes": 11152
+  },
+  {
+   "name": "rows/stage3_capability_846__multihop.rows.jsonl",
+   "sha256": "10c64d50a27470c23fbf8d904dcab7bdd42a58c34127c82e400e7fad81693ac8",
+   "bytes": 10786
+  },
+  {
+   "name": "rows/stage3_capability_846__rag.rows.jsonl",
+   "sha256": "eadad3427bb5cb3e2243599002ad419e0dd01c0160111621774e38f2254cee4a",
+   "bytes": 9984
+  },
+  {
+   "name": "rows/stage3_capability_846__safety_paired.rows.jsonl",
+   "sha256": "07dae53d8a8bdfe8e13aaa033669a585b6b5cb1bd2ebba9b4c7da79fb564403b",
+   "bytes": 10245
+  },
+  {
+   "name": "rows/stage3_legacy_150__items.rows.jsonl",
+   "sha256": "b8f758affba322eebc499542edeb7cba0f78c4b52a8d041028efb1b07566682e",
+   "bytes": 9222
+  },
+  {
+   "name": "unit_inputs.json",
+   "sha256": "07193757c4c01d8facdcdbd5a3a3be664382aba05b542cfece78ae730c83ff0a",
+   "bytes": 1042
+  }
+ ],
+ "destination": "/runpod-volume/mixed_v2/Mix-Augmented-s20260726/evaluation",
+ "persisted": true,
+ "finished_utc": "2026-10-26T19:01:26Z"
+}

@@ -1,0 +1,62 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1_prelaunch_checks/v1",
+ "run_id": "h1p1t_20261023_094007",
+ "phase": "P1t",
+ "checked_utc": "2026-10-23T16:37Z..16:40Z",
+ "1_provider": {
+  "snapshot": "logs/budget/provider/runpod_billing_2026-10-23T1637Z.json",
+  "all_time_usd": 661.5161,
+  "vs_grant_basis_usd": 661.5161,
+  "delta_usd": 0.0,
+  "pods": 0,
+  "network_volumes": 0,
+  "spend_per_hour": 0.0,
+  "ok": true
+ },
+ "2_funds_gpu_price": {
+  "balance_usd": 97.8657,
+  "required_usd": 30.0,
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "secure_price_per_hour": 1.79,
+  "stock": null,
+  "max_price_per_hour": 2.5,
+  "all_in_bound_at_max_price_usd": 3.616,
+  "authorized_cumulative_usd": 5.0,
+  "project_cap_usd": 666.52,
+  "project_after_hard_cap_usd": 666.5161,
+  "ok": true
+ },
+ "3_identity": {
+  "accepted_commit": "03d087c18b21f488e6bd96e61f69820c548e8c3e",
+  "session_commit": "725123956177ba80b40a22022d1005c8d1571734",
+  "session_commit_diff_vs_accepted": [
+   "logs/budget/approvals/h1_p1t_generation_grant.json",
+   "logs/budget/provider/runpod_billing_2026-10-23T1637Z.json",
+   "logs/stages/stage-2/reasoning_data/runs/h1p1t_20261023_094007/governance/authorization.json"
+  ],
+  "bundle": {
+   "relay_path": "transfer/aad_autoinit_72512395.bundle",
+   "sha256": "4bffab1477656c09c301551ac4f3f12bd911bede3a118a2b066e10cd59294a9a",
+   "bytes": 37554040
+  },
+  "roundtrip": {
+   "head": "725123956177ba80b40a22022d1005c8d1571734",
+   "authorization_matches": true,
+   "harness_digest": "348ed51202a07660fecfec4f390c627377452055e1d400c66735170ba9fb8818",
+   "launch_identity_on_checkout": "e5732fd4440aad13b155a2a122e56f3fec4958c702555ce30239b9f49daeb9f4"
+  },
+  "ok": true
+ },
+ "4_capacity": {
+  "dev_box_free_bytes": 7490097152,
+  "expected_bytes": "about 6 MB",
+  "store": "/home/ecs-user/aad-scratch/h1p1t_20261023_094007/store",
+  "ok": true
+ },
+ "5_stops": {
+  "dry_run": "plan_ok true at --max-price 3.00 ($4.3333 all-in, fits up to $3.46/h); watchdog kill at 84.825 min, billing bound 86.075 min; all_in_within_cap, provider reconciliation and prechecks before create",
+  "ok": true
+ },
+ "verdict": "ALL PASS: launching the approved P1t",
+ "authorizes": "nothing beyond the grant"
+}

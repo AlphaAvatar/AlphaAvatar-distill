@@ -2240,6 +2240,101 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "behaviour: a session that ran beside an undeclared resource now "
             "refuses. NO CUDA SURFACE.",
      }),
+    ("2a8bae7848f99076eded2a7c6bf7038f166247c4",
+     "Stage-2 reasoning data at $0: nested ladders, never-cut packing, target quality",
+     {
+        "src/aadistill/data/nested_ladder.py":
+            "NEW MODULE: `nested_order` (largest-remainder interleave of "
+            "caller-declared strata, salted family round-robin inside each), "
+            "`cut_rungs`, `composition_capacity`, `rung_accounting`, "
+            "`require_nested` and `build_ladder` (with a composition-matched "
+            "reserve that never takes a family's last unit). THIS IS A "
+            "DECLARED SEMANTIC CHANGE by construction; nothing existing calls "
+            "it, and every stratum, family, size and rung comes from the "
+            "caller. NO CUDA SURFACE.",
+        "src/aadistill/data/target_quality.py":
+            "NEW MODULE (v2): `assess` keeps every ending, protocol, answer "
+            "(with the check's scope), step-verification and named-observation "
+            "record of a teacher candidate apart and applies a caller-declared "
+            "`AcceptancePolicy`; `select_target` takes the "
+            "lowest accepted index (never length); `summarize`. THIS IS A "
+            "DECLARED SEMANTIC CHANGE by construction; verifiers and the "
+            "engine's stop-reason vocabulary are injected. NO CUDA SURFACE.",
+        "src/aadistill/data/sessions.py":
+            "NEW `pack_best_fit` (best-fit-decreasing per system-prompt group, "
+            "never truncating, same-source sessions never sharing a block) and "
+            "its `_finish_block`. `pack_group` and `pack_sessions` are "
+            "unchanged, so every historical pack's bytes are unchanged. THIS IS "
+            "A DECLARED SEMANTIC CHANGE: a new packing path. NO CUDA SURFACE.",
+        "src/aadistill/evaluation/isolation.py":
+            "NEW `ngrams`, `ngram_index` (optional document-frequency filter "
+            "for template n-grams) and `ngram_containment`; `key_overlaps` and "
+            "`require_disjoint` unchanged. THIS IS A DECLARED SEMANTIC CHANGE: "
+            "a new near-duplicate screen whose n and threshold are the "
+            "caller's. NO CUDA SURFACE.",
+        "src/aadistill/training/accounting.py":
+            "NEW MODULE: `training_accounting` counts U (unique supervised), E "
+            "(exposure with repetition), C (FLOPs over executed positions via "
+            "`runtime.cost.forward_flops_per_token`, student fwd+bwd and "
+            "teacher fwd), steps and supervised positions per step, mirroring "
+            "the trainer's ceil step rule (or a fixed step count), and KD "
+            "positions by prompt / reasoning / answer; `consumed_exposure` sums "
+            "the blocks a run actually consumes in a given order; "
+            "`match_schedule` sets one step count and per-pack blocks per step "
+            "by a fixed rule. THIS IS A DECLARED SEMANTIC CHANGE by "
+            "construction; nothing in training calls it. NO CUDA SURFACE.",
+        "src/aadistill/data/code_exec.py":
+            "NEW MODULE (v2): `run_asserts` passes only when every declared "
+            "test ran and passed, reported by a driver over a private pipe "
+            "under a per-run nonce (zero tests, early and hard exits fail); "
+            "`run_stdio` compares the WHOLE stdout and fails on the output "
+            "limit; both run the base interpreter with `-I` under CPU, memory, "
+            "file-size and wall-clock limits; `bwrap_sandbox` (no network, no "
+            "environment, only /usr, the interpreter prefix and the work dir) "
+            "and `probe_sandbox` (a canary reporting what it can reach). THIS "
+            "IS A DECLARED SEMANTIC CHANGE by construction. NO CUDA SURFACE.",
+        "src/aadistill/evaluation/paired_stats.py":
+            "NEW `cluster_bootstrap`: a percentile interval resampling whole "
+            "clusters within strata, reporting a degenerate distribution and "
+            "the informative clusters; `paired_bootstrap_ci`, `mcnemar_counts` "
+            "and `joint_rate` unchanged. THIS IS A DECLARED SEMANTIC CHANGE: a "
+            "new statistic whose level, strata and thresholds are the caller's. "
+            "NO CUDA SURFACE.",
+     }),
+    ("03d087c18b21f488e6bd96e61f69820c548e8c3e",
+     "H1 P1t closeout: code verifier v3 and caller-owned step-time facts",
+     {
+        "src/aadistill/data/code_exec.py":
+            "v3 (`CODE_EXEC_SCHEMA` .../v3): the assert driver binds every "
+            "primitive its verdict depends on as locals of one function before "
+            "any setup, program or test code runs, keeps no report or nonce in "
+            "module globals, and fails a run as `tampered` when the program or "
+            "a test rebinds a builtin, replaces the builtins the tests resolve "
+            "through, installs a trace or profile hook or leaves a thread "
+            "running. v2 recorded `assert False` as passed after "
+            "`builtins.exec` was replaced. THIS IS A DECLARED SEMANTIC CHANGE "
+            "of a verdict; `run_stdio`, the limits and the sandbox are "
+            "unchanged. NO CUDA SURFACE.",
+        "src/aadistill/infrastructure/budget.py":
+            "REMOVED `MEASURED_STEP_SECONDS` and `SUPERSEDED_STEP_SECONDS` (a "
+            "Stage-3 L40S measurement; now `scripts/shared/step_times.py`). "
+            "`plan_session(step_time_floor=None, superseded_step_seconds=())`: "
+            "the floor and the superseded figures are the caller's, with no "
+            "built-in default. THIS IS A DECLARED SEMANTIC CHANGE: a caller "
+            "that passes no floor is no longer refused below 4.15 s/step. "
+            "NO CUDA SURFACE.",
+        "src/aadistill/infrastructure/session_runner.py":
+            "NEW `marker_terminal`; the poll loop reads the status once more when "
+            "the liveness probe finds the driver exited, so a marker written "
+            "between the status read and the probe decides the session instead of "
+            "DRIVER_EXITED. THIS IS A DECLARED SEMANTIC CHANGE of a terminal "
+            "classification. NO CUDA SURFACE.",
+        "src/aadistill/infrastructure/session.py":
+            "NEW `BudgetSpec.step_time_floor` and "
+            "`BudgetSpec.superseded_step_seconds` (defaults None and ()), "
+            "passed through to `plan_session`. THIS IS A DECLARED SEMANTIC "
+            "CHANGE of the spec. NO CUDA SURFACE.",
+     }),
 )
 
 

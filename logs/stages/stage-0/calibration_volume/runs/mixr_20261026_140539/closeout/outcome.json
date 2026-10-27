@@ -1,0 +1,99 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.mixed_outcome/v1",
+ "run_id": "mixr_20261026_140539",
+ "phase": "MC2",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "recorded_utc": "2026-10-26T23:56:43Z",
+ "status": "COMPLETE",
+ "terminal": "ALL_DONE",
+ "runner_terminal": "ALL_DONE",
+ "session_passed": true,
+ "provider_resource_created": true,
+ "pod_id": "ntluvkf9fod0ec",
+ "provider_confirms_gone": true,
+ "store": "/home/ecs-user/aad-artifacts/stage0_calvol/mixr_20261026_140539/store",
+ "files": {
+  "Mix-Augmented-s20260726.evidence.sha256": {
+   "sha256": "3f1d69d06f720ab2c4e2258618168a04e0d77bd13450697b509d2f55f9a2a48b",
+   "bytes": 65
+  },
+  "Mix-Augmented-s20260726.evidence.tgz": {
+   "sha256": "c0a8eb9029fa1c0e9bab8fe5c6471f40cd2405cca25bcd76e890b81740706e9f",
+   "bytes": 6641891,
+   "verified": true
+  },
+  "Mix-Augmented-s20260801.evidence.sha256": {
+   "sha256": "e1d4729e8cac7c1a1fb43e8a622e253b889b662f5577f734cde6ceb7f69ba125",
+   "bytes": 65
+  },
+  "Mix-Augmented-s20260801.evidence.tgz": {
+   "sha256": "609968df20ef9b86303bf1ff9bb6ed5ce2f07d278983916b32baa5c5bd484719",
+   "bytes": 6662475,
+   "verified": true
+  },
+  "driver.status": {
+   "sha256": "5518c6b3da44fb02832f3c5cbbe4b89985d15dd2008745c27472334d95b5db11",
+   "bytes": 314
+  },
+  "driver_status.json": {
+   "sha256": "a0f28e8bbc6f19a5b469e4a3a1b0b15e387b53a6925416d887a2c93bcca75377",
+   "bytes": 830
+  },
+  "extracted/audit/stage0_calvol_mixed_recovery/Mix-Augmented-s20260726.evidence.tgz": {
+   "sha256": "c0a8eb9029fa1c0e9bab8fe5c6471f40cd2405cca25bcd76e890b81740706e9f",
+   "bytes": 6641891
+  },
+  "extracted/audit/stage0_calvol_mixed_recovery/driver_status.json": {
+   "sha256": "a0f28e8bbc6f19a5b469e4a3a1b0b15e387b53a6925416d887a2c93bcca75377",
+   "bytes": 830
+  },
+  "extracted/stages/stage-0/calibration_volume/mixed/units/mixr_20261026_140539/Mix-Augmented-s20260726/attempt-1/recovery.log": {
+   "sha256": "9a47d26c6bf06fcb0f0177d2b6415f48ddc49bed17b63b3e0740026d223b85de",
+   "bytes": 29058
+  },
+  "extracted/stages/stage-0/calibration_volume/mixed/units/mixr_20261026_140539/Mix-Augmented-s20260801/attempt-1/recovery.log": {
+   "sha256": "7b10f06ed09cace6b3190b8c32dfafd8bc532606ea537eb151c04921b8ed493b",
+   "bytes": 28831
+  },
+  "manifest.json": {
+   "sha256": "a3fb7b1a8520f45b7211b1be38926de80a244a1db6e4eb7a881147d0a5ec292c",
+   "bytes": 2266
+  },
+  "stage0_mixed_mc2": {
+   "sha256": "b27be2cafb658d2f091d7fa9135d68c815c4b49cd360676cd1569199f02ab274",
+   "bytes": 6596479
+  }
+ },
+ "money": {
+  "all_in_usd": 10.912,
+  "gpu_usd": 10.7102,
+  "disk_usd": 0.2018,
+  "elapsed_minutes": 589.55,
+  "price_per_hour": 1.09,
+  "authorized_usd": 14.0,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB); volumes are booked in their own records"
+ },
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "am5m373kuq",
+    "name": "aad-h1pa",
+    "size": 30,
+    "dataCenterId": "EUR-IS-2"
+   }
+  ],
+  "error": null,
+  "accounted": [
+   "am5m373kuq"
+  ],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 1 resource(s) the records account for"
+ },
+ "authorizes": "nothing"
+}

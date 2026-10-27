@@ -1,0 +1,40 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1pa_runner_equivalence/v1",
+ "written_utc": "2026-10-24T12:48:39Z",
+ "runner": "scripts/stages/stage-0/calibration_volume/run_battery.py",
+ "old": {
+  "commit": "0029c770",
+  "sha256": "aef276c2ca7daa8d9a99266705005f69510cdbb3fd3fc4285c724f725f2d325b",
+  "ran": [
+   "P1",
+   "P1t"
+  ]
+ },
+ "new": {
+  "sha256": "58b7c785dbac6ad9a65e65a8daf84ac8b72d4897d548c1037fb22cbcb43b05e7",
+  "ran": [
+   "PA1"
+  ],
+  "pinned_in_PA1_records": [
+   "58b7c785dbac6ad9a65e65a8daf84ac8b72d4897d548c1037fb22cbcb43b05e7"
+  ]
+ },
+ "diff": "every change is gated by --decoding (eval mode only) or by seed_of (None in generate mode); the one unconditional line imports shared.evaluation.decoding",
+ "replay": {
+  "tasks": 115,
+  "requests_per_pass": [
+   194,
+   194
+  ],
+  "identical_requests": true,
+  "_": "both versions' run_episodes in generate mode on PA1's 115 tasks, both passes, one scripted engine: every request's id, prompt token hash, allowance and seed compared"
+ },
+ "records": {
+  "PA1_records": 170,
+  "every_seed_is_the_frozen_rule": true,
+  "sampling_is_the_frozen_preset_and_no_decoding_protocol": true
+ },
+ "pass": true,
+ "allows": "pooling records pinned to runner 58b7c785dbac with those pinned to aef276c2ca7d",
+ "authorizes": "nothing"
+}

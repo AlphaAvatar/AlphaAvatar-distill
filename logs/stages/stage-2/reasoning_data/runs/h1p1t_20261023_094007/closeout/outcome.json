@@ -1,0 +1,48 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1_generation_outcome/v1",
+ "run_id": "h1p1t_20261023_094007",
+ "status": "COMPLETE",
+ "terminal": "ALL_DONE",
+ "recorded_utc": "2026-10-23T17:02:39+00:00",
+ "driver_terminal": "ALL_DONE",
+ "session_passed": true,
+ "shards": {
+  "secured": 3,
+  "unverified": [],
+  "records": 100
+ },
+ "groups_complete": {
+  "pass0_generation_input_g0": true,
+  "pass1_generation_input_g0": true
+ },
+ "complete": true,
+ "money": {
+  "all_in_usd": 0.6447,
+  "gpu_usd": 0.6373,
+  "disk_usd": 0.0073,
+  "elapsed_minutes": 21.36,
+  "price_per_hour": 1.79,
+  "authorized_usd": 5.0,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB), ceiled to the 4-decimal quantum -- the Stage-0 closeouts' basis"
+ },
+ "cost": {
+  "price_per_hour": 1.79,
+  "elapsed_minutes": 21.36,
+  "actual_usd": 0.6373,
+  "authorized_usd": 5.0,
+  "within_authorization": true
+ },
+ "provider_confirms_gone": true,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [],
+  "error": null,
+  "accounted": [],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 0 resource(s) the records account for"
+ },
+ "authorizes": "nothing"
+}

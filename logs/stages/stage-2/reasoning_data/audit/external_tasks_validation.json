@@ -1,0 +1,107 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.external_tasks/v2",
+ "created_utc": "2026-10-22T15:48:10Z",
+ "exports": [
+  {
+   "sha256": "3e9f707ba59c05a7f405bdba4ff4a5cbfba29912df0ae90e0d738a140fb7b8e5",
+   "rows": 188,
+   "sources": [
+    "prontoqa",
+    "reasoning_core",
+    "reasoning_gym"
+   ],
+   "python_hash_seed": [
+    "0"
+   ]
+  },
+  {
+   "sha256": "173d0b3a00bab0f0a04e77eba5a2bd122557763e6cea755f314a03d9c3329733",
+   "rows": 56,
+   "sources": [
+    "mathematics_dataset"
+   ],
+   "python_hash_seed": [
+    "0"
+   ]
+  }
+ ],
+ "versions": {
+  "mathematics_dataset": [
+   "1.0.1+git:427f45075f84b8b9774950196ad63867ca20ffb3"
+  ],
+  "prontoqa": [
+   "git:0a6412b6fddf46324a1cb96e066dd7b3d89b87d6"
+  ],
+  "reasoning_core": [
+   "0.5.0"
+  ],
+  "reasoning_gym": [
+   "0.1.25"
+  ]
+ },
+ "n_tasks": 232,
+ "drops": {
+  "algebra__polynomial_roots_composed: outside the project checker's domain: a factorization item: the project has no factored-form checker": 4,
+  "n_queens: duplicate prompt": 3,
+  "rotate_matrix: the answer is the input (gold verbatim in the prompt)": 1,
+  "string_manipulation: the answer is the input (gold verbatim in the prompt)": 2,
+  "tower_of_hanoi: duplicate prompt": 2
+ },
+ "by_stratum": {
+  "primary.abstract_analogical": 8,
+  "primary.compositional_generalization": 67,
+  "primary.task_contained_deduction": 73,
+  "supporting.code_algorithmic": 24,
+  "supporting.math_new": 60
+ },
+ "by_module": {
+  "mathematics_dataset/algebra__linear_1d_composed": 8,
+  "mathematics_dataset/algebra__polynomial_roots_composed": 4,
+  "mathematics_dataset/calculus__differentiate_composed": 8,
+  "mathematics_dataset/comparison__sort_composed": 8,
+  "mathematics_dataset/numbers__gcd_composed": 8,
+  "mathematics_dataset/polynomials__evaluate_composed": 8,
+  "mathematics_dataset/probability__swr_p_sequence": 8,
+  "prontoqa/fictional_ontology": 12,
+  "reasoning_core/analogical_case_matching": 8,
+  "reasoning_core/controlled_code_execution": 8,
+  "reasoning_core/dynamic_programming": 8,
+  "reasoning_core/logic_derivation": 8,
+  "reasoning_core/multistep_evidence_retrieval": 8,
+  "reasoning_core/planning": 8,
+  "reasoning_core/rule_switching": 8,
+  "reasoning_gym/bf": 8,
+  "reasoning_gym/binary_matrix": 8,
+  "reasoning_gym/cryptarithm": 8,
+  "reasoning_gym/family_relationships": 8,
+  "reasoning_gym/game_of_life": 8,
+  "reasoning_gym/largest_island": 8,
+  "reasoning_gym/mini_sudoku": 8,
+  "reasoning_gym/n_queens": 5,
+  "reasoning_gym/polynomial_equations": 8,
+  "reasoning_gym/rotate_matrix": 7,
+  "reasoning_gym/self_reference": 8,
+  "reasoning_gym/spiral_matrix": 8,
+  "reasoning_gym/string_manipulation": 6,
+  "reasoning_gym/tower_of_hanoi": 6,
+  "reasoning_gym/zebra_puzzles": 8
+ },
+ "answer_types": {
+  "bool": 12,
+  "checker": 55,
+  "matrix": 39,
+  "number": 40,
+  "number_set": 8,
+  "text": 78
+ },
+ "isolation": {
+  "pass": true,
+  "violations": [],
+  "R7_items_with_any_grid_match": 8,
+  "R2_flagged": 0
+ },
+ "sha256": "39391fc81cf08ce6fdd7daa51253c9a3569eeff8638df24b72cd55d4bb2154a7",
+ "approved_for_generation": false,
+ "authorizes": "nothing",
+ "pool_path_not_committed": "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/d1b96deb-3e24-4190-8381-f4bf41bbbdb4/scratchpad/export_env/run/tasks/external_sample_v2.jsonl"
+}

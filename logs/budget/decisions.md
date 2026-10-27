@@ -13049,3 +13049,1235 @@ on a paid pod.
   since `32246d12`; the staged tree must equal the source tip's tree.
 - **Revisit when.** Never for this round; the next integration follows the
   same rule.
+
+## 2026-10-21 — Stage-2/3 reasoning-data round opened at $0: audit, contracts and a PROPOSED design
+
+- **Context.** The maintainer opened the next round (Stage-2 verified
+  teacher-native reasoning data → Stage-3 controlled recovery → nested data
+  scaling) and approved only $0 work: data audit, research design, configs,
+  reusable engineering and tests. No teacher generation, GPU recovery or other
+  paid resource is approved, and no Stage-0 authorization carries over. The
+  Stage-0 squash (`2a8bae78`) is already on `main`; this round works on
+  `stage2/reasoning-data`, cut from it.
+- **Decision (agent, inside the $0 scope).** Experiment `reasoning_data`
+  (Stage 2, measured through Stage-3 recovery). Everything it proposes is in
+  `docs/stages/stage-2/reasoning_data/DESIGN.md`, with every figure owned by a
+  record under `logs/stages/stage-2/reasoning_data/` or
+  `configs/stages/stage-2/reasoning_data/`:
+  - **audit:** corpus_v2's selected targets are wrong for 35.8% of openmath,
+    11.2% of gsm8k and 14.2% of multihop, and unverifiable for code and tool;
+    28 of its sessions are near-copies of held-out prompts (27
+    `eval_behavior_v0`, 1 `multihop`); its 2.96M rung is 70% padding and cuts
+    352 traces;
+  - **contracts:** the target quality contract
+    (`aadistill.data.target_quality`), isolation rules R1–R8, and the
+    per-generator-tier reporting;
+  - **mechanisms:** nested ladders (`aadistill.data.nested_ladder`),
+    best-fit packing that never cuts (`sessions.pack_best_fit`), and n-gram
+    near-duplicate screening (`aadistill.evaluation.isolation`);
+  - **a verifiable primary-axis task pool** `train_tasks_v1` (2,517 tasks)
+    that passes every isolation rule;
+  - **plans:** the initialization proposal (Stage-0 d4 rank 1, by Pareto
+    dominance on step-0 objectives, no recovered outcome read), the 2.96M
+    old-vs-new comparison with compute contract M1 and gate G1, the nested
+    ladder, the cost forecast and the durability plan.
+- **Alternatives considered.** Reuse the historical 2.96M rung byte for byte
+  (rejected: cut traces, R2-flagged sessions, 3.5x the compute of the new arm);
+  select the initialization by recovered usability (rejected: it follows the
+  seed); train on the 519 Stage-0 calibration units directly (not adopted:
+  they selected the initializations and need their own identity); a generic
+  shorter generation budget (rejected: P17/P18).
+- **Expected upside.** A comparison that can resolve: the new scheme puts
+  every primary axis in training, verifies every target, and fixes compute,
+  so a floor result would implicate the recovery objective rather than the
+  data.
+- **Risks.** Rule-family breadth (35 calibration families); the shared
+  generators make half the fluid set a seen-format measurement (reported as a
+  separate tier); the 8,192-token data-construction limit selects against the
+  longest traces; the relay holds about 2.0 GiB (one bf16 student).
+- **Needs the maintainer** (`plans/authorization_proposal.json`): the $32.57
+  provider-gap attribution, a new cap or envelope, a durability backend, and
+  the initialization, corpus scheme, compute contract and comparison design.
+  The forecast through the comparison is $19.68 expected / $29.50 hard cap,
+  and $43.81 / $62.19 for all phases with storage
+  (`plans/cost_forecast.json :: proposal_totals`).
+- **Revisit when.** The maintainer answers the proposal; nothing paid starts
+  before then.
+
+## 2026-10-21 — Maintainer: H1 fixes D4 Top-1; budget and durability first; TIP as an H3 candidate
+
+- **Context.** The maintainer started H1: the Stage-2/3 comparison of corpus_v2
+  against a verified teacher-native reasoning corpus. The message approves $0
+  research preparation, engineering and validation only. No paid teacher
+  generation, GPU validation or training, evaluation pod or paid storage is
+  approved, no cap is raised, and no Stage-0 authorization is reused. A
+  supplement named the sources to audit first: Reasoning Gym, Reasoning Core,
+  PrOntoQA and the DeepMind Mathematics Dataset; then RuleTaker, COGS,
+  CodeContests and CLUTRR.
+- **Decision (maintainer).**
+  - H1 uses Stage-0 D4 Top-1 (state `1301deb7…`, checkpoint `fc28e0dd…`,
+    digest `457e194c…`) as a fixed research starting point. This is not a
+    claim that D4 reasons best, and it does not change Stage-0's unresolved
+    verdict.
+  - No new search, no comparison of the 24 old students, no all_v1 q2, and no
+    recovered student in place of the initialization.
+  - The method identity (`scored_v1`) and its frozen records are kept.
+  - Reasoning 0.70 / supporting 0.30 is the starting point for arm B; there is
+    no ratio search.
+  - The recovery objective is frozen.
+  - eval-set-1 is unchanged.
+  - TIP (arXiv:2604.14084 v4) is registered as an H3 candidate only.
+- **Done by the agent at $0** (records under
+  `logs/stages/stage-2/reasoning_data/`; summary in
+  `docs/stages/stage-2/reasoning_data/H1.md`):
+  - **D4 materialization:** relay metadata read; a dev-box copy read back,
+    with every file hash and the identity rebuilt by `verify_transferred_leaf`
+    matching; the registry rebuilt with `--hash --relay`;
+  - **budget:** a fresh read-only provider snapshot. The attribution tool's
+    self-reference defect is repaired (committed billing evidence had made
+    every pod read as "mentioned"), with a regression test. Of 53 pods no run
+    created, 8 are named by untracked launch logs and 11 by July git history;
+    34 ($58.33) stay OPEN;
+  - **durability:** the backend is not provisioned (BLOCKED); a 30 GB network
+    volume is recommended;
+  - **H1 draft protocol, accounting (U/E/C, compute contract M1) and the
+    H1-only cost forecast;**
+  - **core:** `training.accounting`, `data.code_exec`, and process states in
+    `data.target_quality`;
+  - **navigation:** "not materialized" is restated as the state at selection.
+  - **sources** (`configs/stages/stage-2/reasoning_data/external_modules.json`;
+    `docs/stages/stage-2/reasoning_data/H1.md` §8): all 8 named repos were
+    checked against primary sources, and the 4 primary ones validated
+    locally at $0 (pinned installs, 5 instances per module per difficulty;
+    305 candidate instances pass R1/R2).
+    - **Proposed candidates:** Reasoning Gym (15 modules), Reasoning Core
+      (7), PrOntoQA (process-gated) and DeepMind Mathematics (composed
+      modules).
+    - **Excluded:** ARC-derived or ARC-evaluation modules (R7),
+      gsm_symbolic (a GSM8K-test template), codeio, acre (GPL),
+      sequence/graph-path task types (R4), mechanisms already in eval-set-1,
+      and CLUTRR (non-commercial). RuleTaker and COGS are not adopted.
+    - **Verification:** library scores are never the verdict (partial
+      credit; five Reasoning Gym scorers evaluate the answer text). Each
+      module gets a project-side exact check.
+    - **Interactive coverage:** insufficient (3 families) and reported,
+      not filled.
+- **Alternatives considered.** Matching FLOPs instead of U and steps
+  (rejected: it forces unequal U or repetition); keeping the gate that
+  stopped H1 after one floor unit (removed: the maintainer forbids treating
+  one run at the floor as rejecting the route); cleaning arm A (rejected: it
+  would change the question).
+- **Risks.** Thin interactive coverage (about 18 episodes at 2.96M); 35
+  calibration families unless external generators are approved; the
+  shared-generator tier is a seen-format measurement; the conservative budget
+  bound is negative.
+- **Revisit when.** The maintainer answers the H1 application
+  (`plans/authorization_proposal.json`).
+
+## 2026-10-22 — Independent review of H1 preparation: eight targeted corrections at $0, no paid authorization
+
+- **Context.** An independent review of `stage2/reasoning-data` at `edd78189`
+  kept the asset recovery, the source audit and the H1 design (D4 Top-1, H1
+  first, the 70/30 starting point, the frozen recovery objective, eval-set-1,
+  TIP as an H3 candidate only), but did not accept "$0 preparation complete"
+  and did not approve the paid application. It asked for eight corrections
+  inside H1's scope, with no new full search, no larger matrix and no new
+  governance layer. This message authorizes no new spending.
+- **Decision.** The eight corrections were made
+  (`docs/stages/stage-2/reasoning_data/H1.md` §10):
+  1. `data.code_exec` v2: every declared test must run (nonce-checked report;
+     zero tests, early and hard exits fail); whole-output stdio with an output
+     limit; teacher code runs only in a probed bubblewrap sandbox on the dev
+     box, never on the generation pod; a pass means the declared tests passed;
+  2. billing attribution: a file citing a billing snapshot attributes nothing
+     (the H1 budget position had made its 34 OPEN pods read as mentioned);
+     53 pods / $78.99 unattributed again, 34 ($58.33) OPEN;
+  3. isolation R0 (missing provenance is a violation), R7 executed (ARC
+     lineage + ARC-AGI-1 grid fingerprints), R9 executed mechanism check (three
+     calibration families compute evaluation-only rules and are not drawn for
+     training; eval-set-1 unchanged), a declared mechanism review per external
+     module;
+  4. whole-unit admission in the packer;
+  5. `target_quality` v2: answer (with scope), text consistency, steps and
+     action legality are separate records;
+  6. an executable source plan with named corpus variants (no silent
+     fallback; no source approved yet), an isolated export and external task
+     builder, a post-generation adapter validated on the 672 Stage-0 teacher
+     records, completion-time persistence;
+  7. accounting labels every figure measured / estimated / planned / modeled;
+     the matching rule is fixed now and its values (T 625, 7/2) are
+     provisional until B's real pack; KD positions by prompt / reasoning /
+     answer;
+  8. the statistics' resolution and floor rules: a degenerate or floor
+     interval is NOT_RESOLVED, never equivalence.
+- **Alternatives considered.** Deleting the superseded `train_tasks_v1`
+  (kept: history, and nothing consumes it); downgrading interactive transfer
+  to a secondary conclusion (not done: a scope limit only the maintainer can
+  accept); lowering the 20 GiB disk gate of the pod-simulator tests to make
+  them pass (not done).
+- **Risks.** Supporting-source task builders, two exporters and five module
+  checkers are still missing (`plans/source_plan.json` shortfalls); thin
+  interactive coverage; the budget's conservative bound is negative and 34
+  pods are unattributed; the durability backend is not provisioned.
+- **Revisit when.** The maintainer answers the source scheme, the budget
+  attribution and envelope, and the backend; the next paid application covers
+  data generation and verification first, and the four formal units only
+  after B's real pack and the GPU validation.
+
+## 2026-10-22 — Maintainer: H1 design choices (arm B = stage2.reasoning_master@v1, interactive exploratory); two corrections and the P1 + P1v application at $0
+
+- **Context.** The maintainer accepted the review round's corrections. This
+  message continues H1 without reopening Stage 0, re-selecting D4 or widening
+  the matrix. It authorizes no new spending, creates no GPU, pod or network
+  volume, issues no paid grant and merges nothing into main.
+- **Decision (maintainer).**
+  - **Fixed:** D4 Top-1 and the forward-baseline method identity; the 70/30
+    starting point; the recovery objective; eval-set-1. TIP stays an H3
+    candidate.
+  - **Arm B** is `stage2.reasoning_master@v1` (reviewed external sources
+    included), not project-only. It uses the recorded versions and module
+    whitelist, and only modules with a usable verifier enter the paid list.
+  - **M1's matching rule** is accepted. T 625 and 7/2 stay provisional until
+    B's real pack.
+  - **Scope:** H1 concludes on static reasoning transfer; thin interactive
+    coverage is accepted as H1's scope limit, with interactive results
+    exploratory or secondary. The long-term target is unchanged, and qualified
+    interactive data and all fixed interactive evaluations stay. No
+    interactive-environment build.
+  - **Corrections:** (A) the verified record must be the trained record;
+    (B) completion-time persistence must never alter completed evidence.
+  - **Engineering:** complete the $0 engineering with clear consumers:
+    supporting builders, PrOntoQA and DeepMind Mathematics exporters,
+    checkers, the chain from source quota to pack, and the training unit
+    driver's control flow.
+  - **Budget:** the 34 pods and the anchor stay OPEN. The next application is
+    P1 + P1v only, with a conservative budget occupancy. The 30 GB network
+    volume is the preferred TRAINING backend and is not created for P1 if
+    existing storage suffices.
+- **Done by the agent at $0** (`docs/stages/stage-2/reasoning_data/H1.md` §11
+  owns the evidence):
+  - **choices recorded:** `sources.json` (11 sources admitted, each with an
+    `approval` that says design, not spending), `corpus_spec.json ::
+    chosen_variant`, `comparison_design.json :: statistics.interactive_scope`;
+    `h1_statistics` refuses interactive rows;
+  - **A:** `generation_adapter` refuses missing or repeated candidate
+    identities and inconsistent records; the selected verdict and its own
+    record travel together; target identities reach the pack's
+    `targets.jsonl`;
+  - **B:** `persist_unit` v2: `already_persisted`, refusal without change,
+    logical paths, in-flight and completed descriptors kept apart;
+  - **builders, exporters and checkers:** all candidate modules have
+    verifiers, none deferred. The pools are `external_tasks_v1` (1,163),
+    `math_train_v1`, `mbpp_train_v1`, `squad_v2_train_unanswerable_v1` and
+    the corpus_v2 reuse selection;
+  - **chain:** `generation_plan` (1,587 tasks), `generation_driver`,
+    `build_arm_b`, with a $0 chain validation on real teacher text (not arm
+    B);
+  - **unit driver:** `unit_driver.py` and `h1_units.json`; arm A's pack
+    written once;
+  - **application:** `authorization_proposal.json` v3, P1 + P1v only:
+    $5.34 expected, $8.02 hard cap (`cost_forecast.json ::
+    p1_application`). Existing storage holds P1's records.
+- **Alternatives considered.**
+  - Deferring the five needs_checker modules: not needed, since every one got
+    a sound checker.
+  - Re-selecting corpus_v2 reuse targets by B's contract: not done. The
+    reused session stays byte-for-byte corpus_v2's lowest-index target and is
+    dropped if it fails.
+  - Creating the network volume now: not done (not needed for P1).
+- **Risks.**
+  - Proxy acceptance rates for external and supporting cells. PrOntoQA's
+    process gate and answerability are probably optimistic.
+  - The second candidate is skipped for sandbox-only code.
+  - The launcher wiring for the P1 session is still to be done at $0.
+  - Under the conservative occupancy, P1 needs a $22.51 cap rise.
+- **Revisit when.** The maintainer answers the P1 application. After P1v,
+  B's real pack fixes M1's values and P2's cost, P1g is applied for next, and
+  P2 only after P1g passes.
+
+## 2026-10-22 — Maintainer: P1 must be launchable; comparators, completion-time saving and launch wiring at $0, final P1 + P1v application
+
+- **Context.** The maintainer accepted the design round and closed the
+  candidate-identity and persist_unit v2 corrections. D4, arm B `@v1`, 70/30,
+  M1, the static primary conclusion and the exploratory interactive scope stay
+  as they are. `df3e73a7` could not launch P1 yet, so only what P1 needs was
+  asked for. No new spending, no GPU, pod, paid storage or teacher generation,
+  no grant, no cap change.
+- **Decision (maintainer).**
+  - Fix the comparators actually used, parsing the whole answer per type.
+  - Save finished candidates before a group ends, and resume only what is
+    missing.
+  - Wire the existing launcher, binding the plan, the protocol and the code
+    identity at the launch boundary.
+  - Label 9,874,990 tokens a prediction and q a simplifying assumption.
+  - Freeze MBPP's single candidate.
+  - Never complete B by repetition, a lower gate, another source or another
+    mix.
+  - Resubmit P1 + P1v alone, with the budget under conservative occupancy.
+    The requested project cap is $666.17 if the snapshot is still $658.15 and
+    the hard cap is still $8.02. This is a value for approval, not applied.
+- **Done by the agent at $0** (`docs/stages/stage-2/reasoning_data/H1.md` §12
+  owns the evidence):
+  - **Comparators:** whole-answer parsers; per-module answer types with
+    reasons; a verifier error costs only its candidate; the build refuses
+    every structural perturbation of each gold. `external_tasks_v2`
+    supersedes v1, with the same tasks.
+  - **Completion-time saving:** `run_battery --stream-completed`, and the
+    driver seals hash-marked shards every 100 records or 300 s, which the
+    launcher pulls on each poll. Restart and `--resume-store` re-verify the
+    shards and generate only the missing candidates. `ALL_DONE` needs every
+    task exactly once.
+  - **Binding:** `governance.py` binds launch identity + harness (closure
+    test); `issue` needs a grant naming the identity; the driver re-checks on
+    the pod before reading the protocol, and passes action protocol v2,
+    session limit, seed base and teacher from it.
+  - **Launcher:** `h1_generation_launch.py` on the shared session runner:
+    budget, watchdog, setup, prechecks, shard pulls, teardown, provider
+    confirmation and closeout. It is registered in `SESSION_LAUNCHERS`.
+  - **Application:** `authorization_proposal.json` v4. The list, the
+    prediction and the cost ($5.34 / $8.02) are unchanged.
+- **Alternatives considered.**
+  - Shards as separate generator runs: refused, since it reloads the teacher.
+  - Relaxing the core rule that a session declare a route for its inputs:
+    refused. The inputs travel as a declared local asset and are also
+    committed beside the plan.
+  - Writing a new storage or logging layer: not done.
+- **Risks.**
+  - Proxy acceptance rates (PrOntoQA, answerability) may be optimistic.
+  - The second candidate's yield assumption.
+  - The launch still needs the session-commit bundle on the relay and a
+    fresh provider snapshot. There is no launch-bound sweep: the P1 pod runs
+    no suite, and the sweep registry names it in `NO_CONTRACT` with that
+    reason.
+- **Revisit when.** The maintainer answers the P1 + P1v application.
+
+## 2026-10-22 — Maintainer: two launch-boundary checks before any P1 grant
+
+- **Context.** The maintainer closed the scientific design, sources,
+  generation scheme and P1/P1v scope. Before a paid authorization is issued,
+  two boundary checks were to be corrected. This message authorizes no
+  spending and issues no real authorization.
+- **Decision (maintainer).**
+  - A grant must name the harness digest the maintainer approved, and issue
+    must check it beside the launch identity, never adopting a new digest.
+  - A failed shard listing must not read as "zero shards secured". Verify
+    against the obtained listing and the local bytes, with bounded retries
+    inside the reserve, and record what cannot be verified without holding
+    the budget's hard deadline.
+  - The historical pods stay OPEN.
+  - The conservative cap request ($666.17 at $658.15 + $8.02) does not rise
+    automatically with the snapshot.
+  - After an explicit approval the agent writes the machine-readable grant.
+- **Done by the agent at $0** (`docs/stages/stage-2/reasoning_data/H1.md` §13):
+  - **`governance.issue`:** requires and checks `harness_digest`.
+  - **`h1_generation_launch`:**
+    - the tri-state shard check (listing sentinel, return code and timeout;
+      local re-hash; 3 tries in 600 s, recorded);
+    - the application's harness becomes `1ea5ecbd…`, and `5a16440c…` is
+      marked superseded;
+    - the launch identity is unchanged, `c0eb4fd2…`.
+- **Risks.**
+  - In the worst case, an unverifiable shard set holds the pod under the
+    watchdog until the hard deadline, which is inside the $8.02 cap.
+- **Revisit when.** The maintainer approves or declines the P1 + P1v
+  application.
+
+- **Follow-up, same day (maintainer).** `secure_shards`' `.complete` and
+  driver-record copies could each block for 20 minutes outside the 600 s
+  deadline. Every save and verify operation now shares that one deadline:
+  copies and listings get at most the time left; when it runs out, verified
+  shards are kept and the rest is recorded in `secure_deadline_skipped`. The
+  harness is now `d6affe40…`, and the launch identity is unchanged
+  (`c0eb4fd2…`). Nothing else changed: list, protocol, prediction, the
+  $5.34 / $8.02 application, and the $666.17 conservative cap request, which
+  awaits the maintainer and never rises with the snapshot.
+
+## 2026-10-22 — Maintainer: H1 P1 + P1v formally authorized; P1 executed ($3.33), P1v stopped at four short cells
+
+- **Context.** The maintainer formally approved P1 and P1v.
+  - **P1:** one A100-80GB session, the frozen list and protocol.
+  - **P1v:** at $0 on the dev box.
+  - **Money:** expected $5.34, hard cap $8.02, project cumulative cap
+    $666.17 (absolute) on the $658.15 provider basis counted once. The 34
+    pods and the anchor stay OPEN.
+  - **Frozen identities:** branch `stage2/reasoning-data` @ `8a425538`,
+    launch identity `c0eb4fd2…`, harness `d6affe40…`.
+  - **Not authorized:** P1g, P2, recovery, formal evaluation, paid volume,
+    H2/H3 or any extra paid session.
+- **Done.**
+  - **Grant and authorization:** grant `logs/budget/approvals/h1_p1_generation_grant.json`;
+    authorization issued by `governance.issue`, which checked both
+    identities.
+  - **Session commit `3f88f690`:** it adds only those records, and the
+    bundle round trip matched.
+  - **Pre-launch checks:** all passed (`runs/h1gen_20261022_190653/prelaunch_checks.json`).
+  - **Session:** 111.7 minutes, **$3.33** (provider balance −$3.37, disk
+    included); 2,164 records, each task once per pass; 26 shards secured and
+    verified as sealed. Teardown is confirmed by the provider and a 0-resource
+    reconciliation; the watchdog exited.
+  - **Copies:** dev box and relay, the relay copy read back.
+  - **P1v:**
+    - 1,057 units selected, isolation re-passed with the teacher text, all
+      units fit whole;
+    - one comparator false negative fixed (literal `\n` grid rows, +1 unit);
+    - four cells short: Reasoning Core analogy, Reasoning Gym composition,
+      Reasoning Gym deduction, Reasoning Gym bf; 213,411 supervised tokens in
+      all.
+  - **Stop:** B's pack not built, M1 not recomputed.
+- **Not done, per the authorization.** No paid top-up, no lower gate, no
+  repetition, no source substitution, no change of mix.
+- **Revisit when.** The maintainer decides on the four short cells.
+
+## 2026-10-23 — Maintainer: a $0 corpus revision before any top-up; @v2 infeasible, plan 2 applied for
+
+- **Context.** The maintainer accepted the P1 closeout and P1v's stop, and
+  declined a top-up of the four short cells at the original proportions.
+  - **Instead:** first a $0 feasibility check of an explicitly named,
+    separately identified `stage2.reasoning_master@v2`, with a pre-specified
+    split. It uses only P1's accepted units and the verified reuse; 2.96M,
+    the 150k reserve and 70/30 are kept.
+  - **The check:** on the formal nested ladder and packing path, with real
+    unit lengths. The rungs, the validation tail, unit independence,
+    composition, train/validation isolation, families and R0–R9 are checked,
+    and especially Reasoning Core's single analogy unit.
+  - **If @v2 fails:** report exactly what is unsatisfied. Give plan 2:
+    analogy kept at 9% with the minimum new teacher data, the unused tasks,
+    the expected acceptance and a separate paid application. Do not force a
+    build with drift.
+  - **Unchanged:** @v1, its records and P1v's evidence; D4 Top-1, the
+    recovery objective, M1 and eval-set-1. No GPU, pod, storage, teacher
+    generation, P1g or P2.
+- **Done at $0** (`docs/stages/stage-2/reasoning_data/H1.md` §15):
+  - **@v2 recorded:** `configs/.../corpus_v2_candidate.json` has its own id
+    and salt, and its base is named by sha256; `corpus_spec.json` is
+    untouched.
+  - **Checked:** `corpus_feasibility.py` →
+    `audit/corpus_v2_feasibility.json`.
+- **Result: @v2 does not build.** The formal path refuses the first rung:
+  composition capacity 7,737. Under @v2's own salt:
+  - **Reasoning Core analogy:** its single unit runs dry at prefix 7,737 and
+    blocks every rung. It is absent from the validation tail, and one task
+    is not source coverage.
+  - **Project analogy (7.8%):** runs dry at 2,955,565, which blocks 2.96M.
+  - **Reasoning Gym composition (2%):** runs dry at 2,854,803, which also
+    blocks 2.96M.
+  - **Everything else passes:** independence, train/validation, R0–R9 and
+    the reuse isolation.
+- **Plan 2:**
+  - **Proposal:** `corpus_v3_proposal.json`, for the maintainer to confirm.
+    It keeps @v1's capability shares and the analogy cell from the project
+    generator alone.
+  - **Forecast:** on the formal ladder with stand-ins, 11 more analogy units
+    (8 at the minimum) and 3 Reasoning Gym composition units. That means 25
+    + 34 unused tasks.
+  - **Application:** `plans/abstract_topup_application.json`. One A100
+    session: $1.01 expected, $2.60 hard cap, at most $664.11 of the $666.17
+    cap (provider snapshot `runpod_billing_2026-10-23T0503Z.json`: $661.52
+    billed, 0 resources). NOT authorized.
+- **Risks.**
+  - Both routes are post hoc.
+  - Analogy rests on one generator's 5 grid families.
+  - Reasoning Gym composition yields from 3 of 14 module-levels.
+  - Removing Reasoning Core from analogy is a source change.
+- **Revisit when.** The maintainer chooses: plan 2's top-up, a different
+  revision, or none.
+
+## 2026-10-23 — Maintainer: B's corpus is @v3; P1t prepared at $0 for a separate grant
+
+- **Context.** The maintainer accepted the @v2 feasibility result and closed
+  @v2 as infeasible: no other salt, no composition drift.
+- **Decision.** **Arm B's corpus is `stage2.reasoning_master@v3`** (plan 2).
+  - @v1's capability shares are kept: deduction 17, induction 17,
+    composition 17, analogy 9, interactive 10, supporting 30.
+  - The source changes are accepted: Reasoning Core leaves analogy,
+    composition is re-split, and bf's code share goes to MBPP.
+  - @v1, P1's records, P1v's result and @v2's evidence keep their
+    identities.
+  - @v3 is a post-hoc feasibility revision, not a ratio-experiment result.
+  - Unchanged: D4 Top-1, the recovery objective, M1, eval-set-1 and the 150k
+    reserve.
+  - P1t (the 59 unused tasks, $2.60 hard cap, existing $666.17 cap) is
+    approved in principle; it still needs a formal grant.
+  - If B is still short after P1t: report and stop.
+  - Not authorized: any pod, GPU or generation; P1g, P2, recovery, a merge.
+- **Done at $0** (`docs/stages/stage-2/reasoning_data/H1.md` §16):
+  - **Frozen corpus:** `corpus_v3.json`, the proposal's design byte for byte,
+    with `chosen` and both generation sessions recorded.
+  - **Frozen list:** `plans/p1t/generation_plan.json`, the application's 59
+    tasks. Their id hashes match. 0 overlap with P1; R0–R9 pass; P1's pools
+    and protocol bytes.
+  - **Separate identity:** `governance.PHASE_PLANS` and a phase-aware
+    launcher, setup branch and driver.
+    - P1t launch identity `e5732fd4…`; harness `e0bb6232…`.
+    - P1's identity `c0eb4fd2…` is unchanged and its grant is not reused.
+  - **Budget:** `topup_budget`. At $1.79/h, $2.597 all-in is the hard
+    threshold; a live price above $1.81/h refuses at $0.
+  - **Provider:** snapshot `runpod_billing_2026-10-23T0942Z.json`: $661.52
+    billed, 0 resources, after the hard cap $664.12.
+  - **Merge entry:** `corpus_feasibility.py`.
+    - It needs every declared session, each verified under its own
+      authorization and complete.
+    - It refuses a shared task, unit, protocol or runner.
+    - Units keep their session identity.
+    - The 0.0 cells' units are set aside by name (one P1 unit); an
+      undeclared cell refuses.
+    - It packs only on a full formal build.
+  - **Request:** `plans/p1t/authorization_request.json`.
+- **Risks.**
+  - Reasoning Gym composition's forecast rests on three easy module-levels.
+  - Analogy rests on one generator.
+  - The code edits since P1 moved the harness, so the grant must name the new
+    digest.
+- **Revisit when.** The maintainer issues, changes or declines the P1t
+  grant.
+
+## 2026-10-23 — Maintainer review of P1t: the all-in bound and complete-run admission ($0)
+
+- **Context.** The maintainer's final review at `a001d40a` accepted @v3, the
+  59 tasks, the source changes and the protocol. Two boundaries were wrong:
+  - **The bound was GPU-only.** The launcher let a live securePrice up to
+    $1.81/h through. With the 150 GB container disk, $1.81 bills $2.6261,
+    above the $2.60 hard cap.
+  - **Admission was incomplete.** `verify_sessions` required a first
+    candidate per task and every existing `.complete`. It admitted a run
+    whose due second pass never ran.
+- **Decision** (`docs/stages/stage-2/reasoning_data/H1.md` §16):
+  - **All-in bound:** `all_in_within_cap`, a $0 precheck. It prices GPU and
+    container disk at `--max-price` over the application rule's 86.075 min,
+    where billing stops.
+    - The watchdog's time to act (1.25 min) comes out of the artifact
+      reserve: the kill is at 84.8 min.
+    - At $1.79/h: $2.5974. Any price above $1.79/h refuses at $0.
+    - The cap is not raised and the run is not shrunk.
+  - **Admission:** `corpus_feasibility.completeness`. It requires:
+    - a COMPLETE closeout of this store;
+    - the driver's ALL_DONE under the authorized identities;
+    - every due task of both passes, with the driver's entries and matching
+      `.complete` records.
+    - Pass 1's due set is the run's own record. It is never recomputed:
+      P1's 577 stand, though today's adapter would send 574.
+  - **Identities:** P1t's launch identity is unchanged (`e5732fd4…`); the
+    plan and protocol did not move. The harness is now `348ed512…`, because
+    the launcher changed.
+- **Alternatives considered.**
+  - **Keep the 86.075 min kill and add the termination time on top:**
+    $2.635 at $1.79, which refuses at today's price.
+  - **Derive the deadline from the cap at the live price:** a moving kill
+    time.
+  - **Recompute pass 1 with today's adapter:** it redefines P1.
+- **Risks.** The bound has $0.0026 of slack at $1.79/h. A price rise
+  refuses P1t until the maintainer decides.
+- **Revisit when.** The maintainer issues or declines the P1t grant, or the
+  live price moves above $1.79/h.
+
+## 2026-10-23 — Maintainer: H1 P1t authorized; P1t executed ($0.64), arm B's pack built, M1 measured, code verifier v3
+
+- **Context.** The maintainer formally approved P1t at reviewed commit
+  `03d087c1`.
+  - **Approved identities:** launch identity `e5732fd4…`, harness
+    `348ed512…`, the frozen 59 tasks of `stage2.reasoning_master@v3`.
+  - **Money:** a **cumulative** P1t hard cap of $5.00, superseding the
+    $2.60 application's amount; the project's absolute cap is $666.52 on the
+    recorded $661.5161 basis.
+  - **Then:** the $0 verification, the merge with P1 and the formal build of
+    arm B, and M1 and the next stage's budget inputs if B is valid.
+  - **Required before B is accepted for recovery:** close the code-verifier
+    hole and re-verify the saved MBPP teacher outputs without regenerating
+    them.
+  - **Not authorized:** P1g, P2, student recovery, a network volume.
+- **Done.**
+  - **Grant and authorization:** `logs/budget/approvals/h1_p1t_generation_grant.json`;
+    `governance.issue` recomputed both identities and they equalled the
+    approved values. The session commit `72512395` adds only those records.
+    The bundle round trip matched: checkout HEAD, the authorization bytes,
+    the harness and the launch identity.
+  - **Pre-launch checks** (`runs/h1p1t_20261023_094007/prelaunch_checks.json`):
+    0 pods, 0 volumes, $0/h, balance $97.87; A100-SXM4-80GB at $1.79/h. The
+    all-in bound at `--max-price` 2.50 was $3.616, inside $5.00.
+  - **Acquisition:** the first create found no capacity at $0 (kept in
+    `runtime/acquisition/`); the ordinary backoff created the pod 47 s later.
+  - **Session:** 21.4 minutes (setup 4.4); pass 0 sealed all 59 tasks, pass 1
+    the 41 the driver sent to a second candidate. 3 shards, 100 records, all
+    re-hashed.
+    - **Cost:** GPU $0.6373 + disk $0.0073 = $0.6447 all-in. The provider
+      balance moved −$0.6388; its all-time billing had not posted at the
+      snapshot.
+    - **Teardown:** confirmed by the provider and a 0-resource
+      reconciliation; the watchdog exited.
+  - **Copies:** dev box (`artifacts/.../generation/h1p1t_20261023_094007/`) and
+    the relay; the relay copy was read back with 0 mismatches.
+  - **Code verifier v3** (`src/aadistill/data/code_exec.py`).
+    - **The hole:** v2 recorded `assert False` as passed after a candidate
+      replaced `builtins.exec` or `compile`, rebound its namespace's
+      `__builtins__`, or rewrote the driver's module-global report.
+    - **The fix:** v3 binds every primitive its verdict depends on in one
+      function's locals before any candidate code runs. A rebound builtin, a
+      replaced builtins mapping, a trace or profile hook or a thread left
+      running fails as `tampered`.
+    - **Tests:** 7 tampering vectors and the report forge, all failing under
+      v2.
+    - **On MBPP's own data** (`audit/code_verifier_check_v3.json`): equal to
+      v2 — 473 of 474 references pass, the same mutants rejected.
+  - **Re-verification of P1's MBPP outputs**
+    (`audit/code_reverification_h1gen_20261022_190653.json`, records read,
+    never changed): 124 records, 112 executed, 107 pass under v2 and v3,
+    **0 verdicts moved**.
+  - **Arm B's pack** (`corpus_feasibility.py`, `audit/corpus_v3_feasibility.json`):
+    - **Admission:** both sessions as complete runs; P1 on its frozen
+      records.
+    - **Merge:** 1,080 generated units (P1 1,057 + P1t 23) with 6,298 reused;
+      0 tasks in two sessions; one protocol and one runner hash; one unit set
+      aside.
+    - **Ladder:** every rung cut (0.86M, 1.6M, 2.96M) with the 150,415-token
+      validation tail.
+    - **Checks:** 0 shared prompts or targets; R0–R9 pass; nothing
+      unsatisfied.
+    - **Identity:** ladder `fbc0ec7b…`, blocks `5d06b026…`, recorded in
+      `h1_units.json`; the unit driver's pack check passes for A and B.
+    - **P1t's cells:** analogy 18/25 tasks accepted, RG composition 5/34. Both
+      cells are now covered.
+  - **M1** (`plans/h1_accounting.json`): measured on both real packs; the
+    matched schedule is FROZEN-READY at 614 steps (7 and 2 blocks per step),
+    with U matched within 0.2%.
+  - **Forecast** (`plans/cost_forecast.json`): P2's four formal units on L40S
+    are expected at $12.43 (hard cap $18.65).
+  - **Core budget:** the Stage-3 step times leave `src/aadistill`. They live in
+    `scripts/shared/step_times.py`, and the floor and superseded figures are
+    caller parameters of `plan_session` and `BudgetSpec`.
+- **Not done, per the authorization.** No P1g, P2 or recovery; the units stay
+  unfrozen; nothing merged.
+- **Revisit when.** The maintainer decides P1g/P2.
+  - **Harness:** v3 moved the H1 harness digest, so a later session needs a
+    grant naming the new one.
+  - **Project cap:** the remaining headroom is about $4.36 of $666.52.
+
+## 2026-10-23 — Maintainer: the root README is a seven-section landing page
+
+- **Decision.** `README.md` is a concise, English-only entry point for users,
+  with seven sections: Overview and Goals, Performance Trend, Running the
+  Agent, Project Structure, Optim Record History, References, Citation.
+  AGENTS.md §2.7 follows. Experiment tables, procedures, commands, budgets
+  and status snapshots stay in their owning logs and docs.
+- **Done.** Commit `7e9120fe`.
+
+## 2026-10-23 — Maintainer: H1 P1g + P2 authorized ($50); protocol frozen; P1g passed; P2 started
+
+- **Context.** The maintainer authorized H1's remaining phase at `382cb6f5`:
+  P1g GPU validation, P2's four formal units, evaluation, statistics and
+  closeout.
+  - **Money:** one cumulative $50.00 envelope covering every attempt,
+    resource and storage; the absolute project cap is $712.17.
+  - **Freeze first:** the comparison design and the units, without changing
+    the treatment, proportions, objective, seeds or scoring.
+  - **Resume:** must be validated on a GPU, rather than retraining from the
+    initialization by default.
+- **Decision and execution.**
+  - **Frozen:** `plans/comparison_design.json` (B = the built @v3 pack, M1
+    measured, statistics unchanged) and `h1_units.json` (`frozen: true`).
+  - **Grant:** `logs/budget/approvals/h1_units_phase_grant.json`.
+  - **Chain:** `unit_governance.py` (typed artifacts per kind, the cumulative
+    envelope), `h1_unit_launch.py`, `p1g_driver.py`, and `unit_driver.py`
+    with durable save points and resume.
+  - **Storage:** network volume `1980hnh75i` (30 GB, EUR-IS-1), $4.20
+    reserved inside the $50.
+  - **P1g attempt 1** (`h1p1g_20261023_185836`, $0.3691): failed at the
+    initialization restore. The token lookup was repaired, with a
+    regression test.
+  - **P1g attempt 2** (`h1p1g_20261023_191644`, $0.9947): PASSED.
+    - Throughput: A 10.23 s/step, B 3.37 s/step, peak 40.0 GB.
+    - Resume: data order and LR identical after a SIGKILLed mid-run save;
+      final weights within the run-to-run floor (8.6e-4 vs 8.7e-4).
+    - The trainer is not bitwise deterministic on the GPU, which is recorded
+      as the bound on equivalence.
+    - Persistence re-identified; the evaluation path ran.
+  - **P2 session 1** (`h1p2b_…`): the two B units, hard cap $22.05.
+- **Risks.**
+  - GPU nondeterminism bounds resume equivalence.
+  - The evaluation time of a reasoning student is a forecast until the first
+    unit.
+  - The volume costs storage until it is retired.
+- **Revisit when.** P2's units complete.
+
+## 2026-10-24 — H1 P2 executed: the frozen decision is NOT_RESOLVED (FLOOR); scientific terminal
+
+- **Context.** The four frozen formal units ran under the maintainer's
+  2026-10-23 P1g/P2 grant.
+- **Execution.** All four units completed on one A100-SXM4-80GB type, each
+  as one endpoint.
+  - **B session attempt 1** (`h1p2b_20261023_195303`, $1.4906): trained
+    B-s20260726. Its evaluation read a released path, repaired in
+    `unit_driver`.
+  - **B session** (`h1p2b_20261023_205037`, $4.6694): evaluated B-s20260726
+    without retraining; trained and evaluated B-s20260727. The runner's
+    marker race was repaired in core (`session_runner.marker_terminal`).
+  - **A session** (`h1p2a_20261023_232905`, $10.1139): A-s20260726 and
+    A-s20260727. A first $0 refusal of the all-in bound is kept under
+    `runtime/acquisition/`.
+  - **Phase total:** sessions $17.6377 plus $4.20 reserved storage, of $50.
+    The provider confirms every pod gone; only the volume remains.
+- **Result** (`analyses/h1_result.json`).
+  - **Primary:** B − A = +0.0053, 95% CI [−0.0009, +0.0136], the same at both
+    seeds; A 0.44%, B 0.96% correct on 570 static fluid items. Both arms are
+    at the floor → **NOT_RESOLVED, FLOOR**. No equivalence and no exclusion of
+    a gain.
+  - **Axes:** deduction INCONCLUSIVE (FLOOR_A: A 1.06%, B 2.65%); induction,
+    composition and analogy all at the floor.
+  - **Interactive (exploratory):** 0/144 for every unit.
+  - **Rollout:** B terminates less often (45–46% against 52–57%). This is
+    reported as behaviour, never as reasoning.
+- **Decision.** This is the scientific terminal: no extra seed, data, ladder
+  or rerun. The checkpoints stay on the volume, booked until retired.
+- **Revisit when.** The maintainer decides whether to open the independent
+  diagnostic the frozen design names for a B at the floor
+  (`plans/h3_candidates.json`), and when to retire the volume.
+
+## 2026-10-24 — Maintainer: H1 annulled for promotion; H1-PA, a three-arm PCA-aligned redesign, audited at $0 (NO-GO pending one decision)
+
+- **Context.** H1 did not run the PCA baseline the maintainer required:
+  - it started arm A from D4 Top-1;
+  - it trained 614 optimizer steps where E1's 2.96M run trained 2,916;
+  - it used its own data selection and best-fit-decreasing packing;
+  - it evaluated with greedy decoding.
+- **Decisions (maintainer).**
+  - **Annulment.** H1's result may not promote anything
+    (`logs/stages/stage-2/reasoning_data/plans/h1_annulment.json`). Its
+    evidence, runs, money and checkpoints are kept. Its grant is CLOSED; the
+    $28.16 remainder funds no later study.
+  - **New study H1-PA** (`configs/stages/stage-2/reasoning_data/h1pa.json`),
+    three arms on seeds 20260726 and 20260801:
+    - PCA-Original: E1's checkpoints, re-evaluated, never retrained;
+    - D4-Original: E1's exact pack and configuration;
+    - D4-Reasoning: @v3 under E1's sequential packing.
+  - **Packing.** Best-fit and best-fit-decreasing packing are not used by a new
+    formal experiment.
+  - **Decoding.** New autoregressive evaluation uses nucleus sampling, never
+    greedy (`configs/shared/evaluation/decoding/nucleus_v1.json`).
+  - **Hardware.** L40S is preferred, chosen before the storage is.
+- **Done at $0** (`audit/h1pa_audit.json`; `docs/stages/stage-2/reasoning_data/H1PA.md`).
+  - **Identity: 28/28 checks pass.**
+    - E1's pack is rebuilt byte for byte by E1's own packer.
+    - Configs, PCA init and both checkpoints verify.
+    - Today's trainer reproduces E1's training order and LR at all 291 logged
+      steps of both seeds.
+    - D4 Top-1 has the PCA student's exact tensors.
+  - **D4-Reasoning's pool** is re-derived from the P1/P1t stores and hashes to
+    the @v3 pack's sessions (`6458f2a8…`).
+  - **D4-Reasoning under E1's packer:**
+    - 440 sequences, 2,964,159 supervised tokens;
+    - 372 sessions truncated, 331 of them losing their verified answer;
+    - compositional −3.42 pp from its declared share;
+    - a supporting-only validation set.
+  - **The nucleus protocol** is wired into both runners and `evaluate_all` as an
+    opt-in; greedy calls are unchanged.
+- **The conflict.** At batch size 2 and 3 epochs, the arms train 2,916 and 660
+  optimizer steps. No schedule matches epochs, steps, supervised exposure and
+  FLOPs at once: 1,523 against 6,737 supervised tokens per sequence, and 70.6%
+  of E1's sequences are under 15% full.
+- **Alternatives** (measured, none chosen):
+  - **Schedules:** epoch-matched, step/FLOPs-matched, or both.
+  - **Packings:** E1's packer as is, or the same packer with its own
+    `allow_terminal_truncation=False`: 568 sequences, 0 lost answers,
+    ≤0.13 pp drift.
+  - **Recommended:** truncation off plus both schedules, about $34–46 with
+    storage.
+- **Risks.**
+  - E1's PCA student answered 1.75% of the static fluid items under greedy
+    decoding, below the 2% floor, so Comparison A may again end at the floor.
+  - PCA-Original seed 20260801 exists only on the dev box.
+- **Revisit when.** The maintainer chooses the schedule and packing for
+  D4-Reasoning, then issues a grant. H1's volume `1980hnh75i` has no consumer
+  and awaits a retirement decision.
+
+## 2026-10-24 — Maintainer: H1-PA's third arm is D4-Augmented (E1's 2.96M + 2.96M pure fluid reasoning); audited at $0; H1's volume retired
+
+- **Context.** The 70/30 D4-Reasoning arm could not match E1's optimizer steps,
+  and E1's terminal truncation dropped its verified answers
+  (`audit/h1pa_audit.json`).
+- **Decision (maintainer).**
+  - **Arm cancelled.** D4-Reasoning is cancelled before any training.
+  - **New arm.** D4-Augmented trains D4 Top-1 on E1's 2.96M pack, unchanged,
+    plus 2.96M supervised tokens of pure fluid reasoning (the five P10.2
+    primary axes, no supporting data, no @v3 quota, no ratio search).
+  - **Packing.** The increment uses E1's sequential packer without terminal
+    truncation. E1's pack keeps its truncation. The difference is recorded.
+  - **Schedule.** E1's recipe at 3 epochs; its optimizer steps follow its
+    sequence count.
+  - **Attribution.** Its gain is credited to the added data and its added
+    compute together, never to the data content alone.
+- **Done at $0** (`audit/h1pa_augmented_audit.json`, `docs/stages/stage-2/reasoning_data/H1PA.md`).
+  - **Identity: 30/30 checks pass.** They include E1's pack rebuilt byte for
+    byte after the packer gained `--no-terminal-truncation` (off by default),
+    and a provisional merged set whose E1 part and validation are
+    byte-identical through E1's trainer reader.
+  - **Capacity.** 616 verified primary units, 2,807,282 supervised tokens. The
+    gap is 152,718.
+    - No unit shares a prompt with corpus_v2.
+    - Stage-0's `base_pool_v1` is not legal training data: it fails R5 and R0,
+      and it is D4's calibration pool.
+    - The one Reasoning Core analogy unit stays out by the 2026-10-23 source
+      decision.
+  - **Top-up.** 115 unused tasks over the ten cells in proportion to the pool,
+    sized by P1's planning rule; expected about 311k supervised tokens. The
+    selected tasks pass isolation. One session under P1's frozen protocol:
+    $1.01 expected, $2.60 cap. A 185-task option also covers a 150k validation
+    reserve at the same bound.
+  - **Fluid pack today:** 492 sequences, 25.8% padding, 0 truncated sessions.
+  - **D4-Augmented forecast:** about 2,463 sequences, 3,695 optimizer steps,
+    17.76M supervised-token exposure, 1.149e18 FLOPs (1.27× D4-Original).
+  - **Study budget (L40S):** $32.2–40.9 including the top-up and storage.
+  - **H1's volume `1980hnh75i`** was retired under AGENTS.md 2.5 (tombstone in
+    `storage/h1_volume_1980hnh75i.json`). Deleted 2026-10-24 09:57Z, with the
+    provider confirming it gone; it cost $0.0449 actual against the $4.20
+    reservation. The account holds no pod and no volume.
+- **Revisit when.** The maintainer grants the top-up session, and later the
+  training and evaluation (about $45, L40S).
+
+## 2026-10-24 — Maintainer: packing groups by system prompt only; H1-PA pre-generation review and the top-up's corrected price ($0)
+
+- **Decision (maintainer).**
+  - Sessions of different task categories share a packed sequence whenever
+    their rendered system prompt and tool definitions are the same. No
+    category, axis, dataset or generator boundary is allowed.
+  - Packing stays sequential, never best-fit, and never reorders for fill.
+  - The fluid increment keeps every verified trajectory whole.
+  - E1's pack stays byte-identical. D4-Augmented's two-part layout exists to
+    keep E1's identity, not to separate task types.
+- **Audit** (`audit/h1pa_pregen_review.json`).
+  - **Code.** `pack_sessions` groups by `system_group_key` alone. Category and
+    source only order sessions and sequences. A unit's turns never share a
+    sequence. No category boundary was found and none was written.
+  - **Fluid increment:**
+    - 1 system-prompt group;
+    - 191 of 492 sequences mix reasoning axes, and every axis pair co-occurs;
+    - 1.49 samples per sequence, 25.8% padding;
+    - 731/731 samples whole and traceable; 0 sequences hold one unit twice.
+  - **Joint re-packing with E1** would save at most 127 sequences (191 steps)
+    and would break E1's pack identity inside D4-Augmented. Not done.
+- **The top-up's price, corrected** (`plans/h1pa_topup_application.json`).
+  - **Model.** Processor sharing per pass, calibrated on P1's and P1t's four
+    passes: 2,049 tok/s aggregate (1,680 conservative), a 45.9 tok/s
+    single-sequence cap, ×1.321 correction. Fixed phases are P1t's measured
+    ones.
+  - **115 tasks:** $1.74 expected, $2.44 conservative, $3.72 cap.
+  - **185 tasks** (with a 150k reserve, not requested): $1.96, $2.85, $4.05.
+  - **Why the old figure was wrong.** The earlier $1.01 / $2.60 priced a fixed
+    two-pass bound and missed the multi-turn interactive episodes.
+- **Revisit when.** The maintainer grants the 115-task top-up (cap $3.72,
+  inside the $712.17 project cap). Training and evaluation will need the
+  ceiling raised.
+
+## 2026-10-24 — H1-PA PA1 executed: the fluid top-up reached SUCCESS ($0.8455); data frozen
+
+- **Context.** The maintainer approved the 115-task top-up: task set
+  `d1ca7ece…`, $3.72 cumulative cap, project cap $712.17 unchanged, L40S
+  preferred.
+- **Integration ($0).**
+  - Phase `PA1`, plan `plans/h1pa_topup/generation_plan.json`, launch identity
+    `0c102842…`, harness `7aea3763…`.
+  - Grant `logs/budget/approvals/h1pa_topup_generation_grant.json`; one-use
+    authorization issued from it.
+  - The launcher's PA1 budget puts GPU + disk + the termination margin at
+    $3.7199 at $1.79/h (hard deadline 122.0 min).
+- **Hardware: A100.** L40S was never measured for teacher generation. Scaled by
+  bandwidth, it costs more ($2.17 expected) and would use 85% of the cap
+  conservatively.
+- **Result.**
+  - **Session** `h1pat_20261024_115517`: COMPLETE in 28.0 min, $0.8455 all-in;
+    the provider confirms the pod gone. 170 records, copies on the dev box and
+    the relay.
+  - **Pooling.** PA1's runner differs from P1's and P1t's only by the opt-in
+    `--decoding`, and pooling rests on a verified equivalence
+    (`audit/h1pa_runner_equivalence.json`; `merge` folds exactly that pair).
+  - **Pool:** 681 units (65 new), 3,128,179 supervised tokens. R0–R9 pass; no
+    shared prompt or target.
+  - **Fluid increment:** 530 sequences, 2,965,560 supervised tokens, all 791
+    samples whole.
+  - **Merged set:** 2,474 sequences, 5,926,067 supervised tokens, E1's part and
+    validation byte for byte.
+  - **D4-Augmented:** 3,711 optimizer steps.
+  - Identities frozen in `h1pa.json`.
+- **Revisit when.** The maintainer grants training and evaluation (about $45,
+  L40S). That grant also needs the project ceiling raised.
+
+## 2026-10-25 — Maintainer: PA1 accepted; H1-PA's final $0 readiness: whole-unit data, real isolation, a frozen rule, the driver, the application
+
+- **Context.** The maintainer's independent review accepted PA1's SUCCESS and
+  asked for five $0 corrections before any paid student work. This entry
+  records them; nothing paid ran.
+- **Decision 1, whole task units.** An episode's turns are trained all or
+  none.
+  - The fluid increment is now admitted per unit, in the packer's own
+    seed-free order, until 2,960,000 supervised tokens. Then exactly those
+    units are packed by E1's sequential packer (no truncation, no best-fit)
+    and trained in full.
+  - **Result:** 642 units (28 episodes whole), 2,962,514 tokens, 524
+    sequences, 0 units split. 39 PA1 units are excluded whole (corpus order
+    puts the top-up last) and appear in no training or validation set.
+  - **Merged set:** 2,468 sequences, 5,923,021 tokens, E1's part and
+    validation byte for byte.
+  - **D4-Augmented:** 3,702 optimizer steps.
+  - The PA1 build stays as a superseded identity (`audit/h1pa_fluid_final.json`
+    unchanged).
+  - Owner: `audit/h1pa_fluid_whole_units.json`, terminal SUCCESS.
+- **Decision 2, isolation from real members.** `finalize` no longer passes an
+  empty validation set. Every overlap is derived from the merged set's own
+  members, and every one is 0:
+  - prompt, unit and session-id overlap with E1's 60 validation sessions;
+  - prompt overlap with E1's training sessions;
+  - 13-gram near-copies in both directions;
+  - shared rule families.
+
+  R0–R9 against eval-set-1 pass over all 642 admitted units.
+- **Decision 3, the rule.** `plans/h1pa_preregistration.json`, frozen before
+  any H1-PA model exists.
+  - **Comparisons.** A (initialization) and B (augmentation, the study's
+    question) are decided; C is descriptive.
+  - **Rule.** H1's frozen rule, imported unchanged: SESOI 0.05 (0.08 per
+    axis), 95% rule-family cluster bootstrap, 2% floor, resolution minima,
+    both seeds' agreement, Holm over the static axes.
+  - **Decoding.** `nucleus_v1` only. Greedy rows refuse, and so does a rule
+    whose bytes changed.
+- **Decision 4, driver and durability.**
+  - **Code.** `h1pa_driver.py`, `h1pa_launch.py`, `h1pa_governance.py` and
+    setup's `stage2_h1pa` branch.
+  - **Recipe.** E1's configs unchanged except where a run lives and the
+    tokenizer source; D4-Augmented also takes E1's builder schedule.
+  - **Evaluation.** `nucleus_v1` is bound explicitly and refused when absent.
+    PCA-Original is evaluated only.
+  - **Resume.** A run continues from its save points, and scored units are
+    skipped.
+  - **Durability.** PCA-Original seed 20260801 is on the relay, read back in
+    full (`b658fe39…`). Room came from retiring one historical Stage-3
+    checkpoint under AGENTS.md 2.5 (`stage3/s2v1_from_s1`, tombstoned).
+- **Decision 5, the application.** `plans/h1pa_training_application.json`:
+  - **Sessions.** PA2v, a 40-step / 24-item L40S validation, then two formal
+    sessions, one per seed.
+  - **Expected cost.** $26.16–$34.98 plus $4.20 storage.
+  - **Cap.** $50.00 cumulative.
+  - **Project.** The provider has billed $680.6673, so the $712.17 cap must
+    rise to $731.
+- **Also corrected.** PA1's "L40S is not cheaper" was an unverified
+  bandwidth-ratio estimate, not a measurement. The student phase measures
+  L40S in PA2v before anything formal.
+- **Revisit when.** The maintainer grants PA2v + PA2 ($50, project cap $731) or
+  changes the plan.
+
+## 2026-10-25 — Maintainer: PA2's budget audited; five execution corrections before anything paid ($0)
+
+- **Context.** The maintainer's independent audit of `b9c1dee9` found no
+  anomaly in the training price: $26.23 is one seed session's hard cap
+  (expected about $16.66). Five execution issues were to be fixed at $0
+  before any paid resource.
+- **Decision 1, storage.** One 30 GB volume.
+  - The plan, the launcher default and the accounting agree on 30 GB.
+  - The launcher refuses a volume the provider does not report at 30 GB in
+    the session's datacenter.
+  - The driver counts free space as the provider's size less the mount's
+    bytes before every persist and training, and refuses a training without
+    room for two save points; a write/read-back probe runs first.
+  - The stale one-shot free figure the earlier driver passed is fixed.
+  - Capacity plan: peak 20.22 GB, end 11.04 GB, owner `h1pa.json :: storage`.
+- **Decision 2, PA2v gate.** `h1pa_validation.py` checks, on L40S and the
+  formal inputs:
+  - training and memory;
+  - the recipe;
+  - SIGKILL-and-resume;
+  - persistence;
+  - the PCA identity;
+  - `nucleus_v1`, its seeds and stop reasons.
+
+  `h1pa_governance.issue("formal")` refuses without the passed gate,
+  re-derived at issue time from the secured evidence and bound to the same
+  study identity and harness. The formal launch re-checks it.
+- **Decision 3, budget.** $50 cumulative, kept.
+  - Every session at its hard cap would be $60.42; that is not funded.
+  - Formal training is repriced from PA2v's measured step time, and the
+    second seed session's evaluations from the first's measured ones.
+  - Issuing the last session then needs about $43.79 instead of $48.76.
+  - A session that does not fit is refused at $0.
+- **Decision 4, provider safety.** Every issue and every launch re-read the
+  provider's billing and account now. Unposted session costs and unretired
+  storage are added. A foreign resource or an overrun refuses, and no cap is
+  raised automatically.
+- **Decision 5, retention.** The four new checkpoints are kept on the volume
+  until the analysis and the independent review are complete; then the need,
+  migration and cost are reported before any lifecycle decision.
+- **Revisit when.** The maintainer signs the PA2v + PA2 grant ($50 cumulative,
+  project cap $731), then PA2v runs first.
+
+## 2026-10-25 — H1-PA PA2v + PA2 executed under the maintainer's grant; the preregistered result is INCONCLUSIVE (FLOOR_A)
+
+- **Context.** The maintainer granted PA2v + PA2: $50.00 cumulative over the
+  phase, project cap $712.17 → $731.00
+  (`logs/budget/approvals/h1pa_training_grant.json`). It became effective
+  after the two $0 fixes (live position fails closed; step time = max of the
+  committed and the PA2v-measured value).
+- **Executed.** Owner: `docs/stages/stage-2/reasoning_data/H1PA.md` §14–16.
+  - PA2v passed on its fifth attempt ($1.3927 over five subruns).
+  - PA2-s20260726 (`runs/h1pa2_20261024_203226`): COMPLETE, $10.2715.
+  - PA2-s20260801 (`runs/h1pa2_20261025_055042`): COMPLETE, $10.3232.
+  - Each was one L40S pod in EUR-IS-2 with volume `am5m373kuq`, and was
+    deleted afterwards with the provider confirming it gone.
+  - Six formal units, one attempt each; nothing retried, resumed or pooled.
+- **Result.** `analyses/h1pa_result.json`, the preregistered rule applied
+  once:
+  - B (primary, D4-Augmented − D4-Original): +3.51 pp, 95% CI +1.89 to +5.15,
+    per seed +3.51 / +3.51 → INCONCLUSIVE, flag FLOOR_A;
+  - A (D4-Original − PCA-Original): −0.26 pp, both arms below the 2% floor →
+    NOT_RESOLVED (FLOOR);
+  - C (descriptive): +3.25 pp;
+  - per axis: B deduction INCONCLUSIVE (+10.3 pp, concentrated in the shared
+    generators' held-out families), A deduction NO_GO, the other axes
+    NOT_RESOLVED (FLOOR);
+  - interactive episodes (exploratory): 0/144 except D4-Augmented 2/144 per
+    seed.
+- **Money.** The phase booked $26.1874 of $50.00: $21.9874 in sessions plus
+  $4.20 reserved storage. Project committed: $706.8547 of $731.00. The
+  provider snapshot `runpod_billing_2026-10-25T1512Z.json` agrees within
+  $0.005 per pod; PA2-s20260801's last 57 minutes had not posted yet.
+- **Checkpoints.** The four D4 checkpoints (9.54 GB) are kept on
+  `am5m373kuq` until the independent review, at $2.10/month. The consumer
+  audit found no reader beyond the review.
+  - Proposal (`storage/h1pa_volume_am5m373kuq.json :: proposal`): retire them
+    under AGENTS.md 2.5 and delete the volume after the review, unless an
+    authorized follow-up reads them in place.
+  - The two PCA-Original checkpoints stay on the relay.
+- **Not done, not authorized.** New Teacher Generation, ratio search, extra
+  arms, Stage 4/5, a merge to `main`.
+- **Revisit when.** The maintainer's independent scientific review closes;
+  then a lifecycle decision for the four checkpoints and the volume.
+
+## 2026-10-26 — Mixed Calibration 2x: $0 design and execution application (nothing paid)
+
+- **Context.** The maintainer accepted H1-PA's conclusions and asked for a $0
+  design of a new Top-1 initialization from a 2x mixed calibration: 1x
+  supporting + 1x fluid over all five P10.2 axes, 50/50 by realized positions.
+  It is to be searched by the formal D1 full search and recovered and evaluated
+  exactly as D4-Augmented. 4x was to be audited beside it. Nothing paid, no new
+  teacher data, no ratio search, no merge.
+- **Decision (agent design, PROPOSED).** Owner:
+  `docs/stages/stage-0/calibration_volume/MIXED.md`.
+  - **Profile.** `calib.s0m_mix_2x@v1` comes from `base_pool_v1`, less
+    D4-Augmented's training/validation members (1,713 supporting units) and 16
+    eval-set-1 R2 near-duplicates.
+    - Realized: 141,617 UESP, 50.3/49.7, 81 units, 1 complete episode, 13 rule
+      families.
+    - Domain labels are the halves, so DEPTH's equal-domain objective is 50/50.
+  - **4x.** `calib.s0m_mix_4x@v1`, nested, 268,173 UESP; audited, not
+    requested.
+  - **Search.** Declared change: one profile, so 34 expansions instead of 92;
+    nothing else changes. Expected $5.99, bound $14.59 on an A100-80GB.
+  - **Control.** M = Mix-Augmented − D4-Augmented, preregistered under H1's
+    frozen rule (`plans/mixed_preregistration.json`). D4-Augmented's two units
+    are reused as scored.
+  - **Checkpoints.** D4-Augmented × 2 are declared the formal control and kept
+    on `am5m373kuq` with the two D4-Original checkpoints
+    (`storage/h1pa_volume_am5m373kuq.json :: declared_future_use`); no
+    migration.
+- **Correction of the premise.** D4's calibration was static-fluid-heavy:
+  - `base_d4` was 71% and `rh_d4` 87% static fluid by positions, with no
+    interactive data;
+  - 8 of `base_d4`'s supporting items were later D4-Augmented training data.
+- **Alternatives considered.**
+  - 4x first: it is volume-matched but adds no answer the 2x result cannot
+    trigger. Its entry criterion is M GO, or deduction REVERSED.
+  - Historical axis-as-domain labels: DEPTH would weight supporting 1/6.
+  - Per-generator interactive cells: they double the interactive share.
+  - Admitting D4-Augmented's 28 trained episodes: this breaks
+    calibration/training isolation.
+- **Money asked** (`plans/mixed_application.json`):
+  - expected $17.95, envelope $33.05: MC1 cap $15.00, search volume $1.05,
+    MC2 cap $14.00, engineering reserve $3.00;
+  - project cap $731 → $740, with $706.8547 committed.
+- **Revisit when.** The maintainer grants or amends the application. Until
+  then nothing is created or billed beyond `am5m373kuq`.
+
+## 2026-10-26 — Mixed Calibration 2x: final design corrections (exact 50/50, 2x only; nothing paid)
+
+- **Context.** The maintainer reviewed `6e2887ca` and made two decisions.
+  1. The 2x profile must have `fluid_uesp == supporting_uesp` exactly, by the
+     positions the operators compute on. v1 was 71,216 / 70,401
+     (50.29 : 49.71). Labels, weights and rounding may not stand in for this.
+  2. This round covers 2x only. 4x is outside its budget, authorization,
+     implementation and every automatic flow.
+- **Decision (agent design v2, PROPOSED).** Owner:
+  `docs/stages/stage-0/calibration_volume/MIXED.md`.
+  - **Profile.** `calib.s0m_mix_2x@v2`
+    (`configs/stages/stage-0/calibration_volume/profiles_mixed_v2.json`, from
+    `mixed_design_v2.json`).
+    - v1's draw and fluid half are unchanged.
+    - Each supporting cell takes the prefix that fits its integer quota. The
+      residual (3,526) is closed exactly by the fewest whole units earliest in
+      the cells' remaining orders: 2 units, because no single unit has 3,526
+      positions.
+    - Result: 71,216 = 71,216; 142,432 UESP; 80 units; 170,901 forward tokens.
+    - The builder counts through the core's position and DEPTH-aggregation
+      contracts and refuses any inequality. When no exact set exists, it
+      records the closest gap and stops.
+  - **Superseded.** v1's design, profiles and audit are kept byte-unchanged,
+    pinned by sha256 in the v2 design.
+  - **Preregistration v2** amends v1 before any result. It binds the v2
+    profile by content hash and states that no label starts a 4x or any other
+    follow-up. The decision rule's bound bytes are unchanged.
+  - **Application v2**, 2x only:
+    - MC1 expected $6.01, bound $14.67, cap $15;
+    - MC2 unchanged, expected $10.91, bound $13.63, cap $14;
+    - expected $17.97, envelope $33.05, unchanged;
+    - the 4x entry criterion and cost are removed.
+- **Provider re-verification.** The read-only billing snapshot
+  `logs/budget/provider/runpod_billing_2026-10-26T0928Z.json` gives:
+  - billed $702.7656, with no unposted session;
+  - committed $706.8518, with `am5m373kuq`'s reservation netted of its posted
+    rows;
+  - with the envelope, $739.9018, which is $0.0982 under $740.
+  - `h1pa_governance.live_position` counts the full reservation beside those
+    rows ($706.9656, growing about $0.07/day). Under it the sum would be
+    $740.0156.
+  - The $740 cap is provisional. The issuer re-verifies it at issuance, and
+    nothing raises it automatically.
+- **Alternatives considered.**
+  - Relaxing or rounding the ratio: rejected by the maintainer.
+  - Relabelling or reweighting: not data balance.
+  - Re-drawing the profile with another seed: a new draw would also change the
+    fluid half, and it reads like seed shopping.
+  - Cutting a unit or an episode: forbidden.
+  - Per-source exact quotas: stricter than required, and more often
+    infeasible.
+- **Revisit when.** The maintainer grants or amends application v2. No grant
+  is issued and nothing is created until then.
+
+## 2026-10-26 — Mixed Calibration 2x v2: formal authorization; corrected project accounting
+
+- **Context.** The maintainer reviewed `562426f8` and accepted the design:
+  `calib.s0m_mix_2x@v2` (content `9a6c2782…`), with 71,216 + 71,216 UESP.
+  - **Granted:** MC1 + MC2 with a cumulative hard ceiling of $33.05, and the
+    project cap raised $731 → $740.
+  - **Scope:** 2x only. No result may start 4x automatically.
+  - **Owner:** `logs/budget/approvals/mixed_calibration_grant.json`.
+  - **Precondition:** before anything is paid, the accounting must be
+    corrected and the $0 launch preparation finished.
+- **Decision (agent implementation, inside the grant).**
+  - **Governance.** `mixed_governance.py` adds one grant, kinds `search`
+    (MC1) and `recovery` (MC2), one-use authorizations, and one cumulative
+    envelope. That envelope includes the MC1 volume, and an MC1 retry must
+    leave MC2's cap fundable.
+  - **Position.** `mixed_governance.position` re-reads the provider's
+    billing, balance and resources at every issue and launch. It counts:
+    - everything billed;
+    - every unposted session inside a 72 h posting window;
+    - every retained volume's booked reservation, less what the provider has
+      already posted for that volume.
+  - **Posted volume rows** carry no volume id, so they are netted only on a
+    UTC day when the volume was the account's sole recorded volume, and never
+    beyond size × the hours it existed that day.
+    - The audit of 2026-10-23..26 shows why: H1's `1980hnh75i` existed
+      15.4 h and was billed 20 h; the 10-25 row is 870 GB-h for one 30 GB
+      volume (at most 720 GB-h); the 10-24 row mixes both volumes.
+    - Those excesses stay in the bill and offset nothing.
+  - **Refusals.** It refuses an unknown read, any live pod (at most one
+    billing pod), and any volume no record owns.
+  - **Cap checks.** At the first funded issue, committed + the whole
+    remaining envelope must fit $740. Later, committed + that session's cap
+    must fit. A miss is a HARD BOUNDARY; no cap is raised.
+  - **Position at 2026-10-26T09:28Z.** Committed $706.9114: the H1-PA
+    formula's $706.9656 less the double count, plus `1980hnh75i` re-counted
+    inside its posting window. Committed + $33.05 = $739.9614.
+  - **Not counted:** `a3_attempt20`'s three September cold-host pods have
+    never appeared in the bill. They are listed, not counted.
+  - **MC1.** `mixed_search_driver.py` runs `search_driver.py` under a
+    `mixed_search` authorization, with the pinned search identity (cuda
+    config hash `7ee23a7d…`) and D4's execution options. It mirrors the
+    search to a ≤150 GB volume, then commits k = 1, re-identifies the Top-1
+    and relays it.
+    - The bound (DEPTH in all 16 positions) is the contingency: $14.97
+      all-in at $1.79/h, inside the $15 cap.
+  - **MC2.** `mixed_recovery_driver.py` runs `h1pa_driver.run` with a plan
+    whose only arm is D4-Augmented copied whole, with the initialization
+    replaced by the MC1 Top-1.
+    - Each unit's recipe must hash to D4-Augmented's recorded identity for its
+      seed, and its schedule must be D4-Augmented's.
+    - `h1pa_driver.schedule_for` now reads the derived-schedule arms from the
+      study; the default is H1-PA's `D4-Augmented`, so H1-PA is unchanged.
+    - The bound is $13.92 all-in at $1.09/h, inside the $14 cap.
+  - **Relay headroom** (LFS batch endpoint, nothing stored): 1.475 GB, enough
+    for one 1.19 GB Top-1 and two about 38 MB session bundles.
+- **Alternatives considered.**
+  - Netting all posted rows dated after a volume's creation: rejected. It
+    over-attributes rows that belong to other volumes and to the provider's
+    excess hours.
+  - Counting every never-posted historical pod: rejected. The provider's bill
+    is the charge.
+  - A time-based remainder instead of the booked reservation: rejected. The
+    record books the reservation, and an extension is booked separately first.
+- **Revisit when.** MC1 closes, and again before MC2's issue.
+
+## 2026-10-27 — Mixed Calibration 2x: COMPLETE; preregistered M = NO_GO
+
+- **Context.** MC1 and MC2 ran under the maintainer's grant of 2026-10-26
+  (`logs/budget/approvals/mixed_calibration_grant.json`).
+- **What ran.**
+  - **MC1 attempt 1** (`mixs_20261026_102914`, $0.1903) died at A_contract,
+    before any measurement. Its authorization was not in the session commit.
+    - Repair: commit it as the session commit, plus the precheck
+      `the_authorization_is_in_the_session_commit`.
+  - **MC1 attempt 2** (`mixs_20261026_103634`, $6.1817) ran the 34-expansion
+    D1 full search on `calib.s0m_mix_2x@v2`.
+    - Top-1 `9311dcde…`: DEPTH → ATTENTION → FFN → RESIDUAL_WIDTH.
+    - It was relayed and read back, with its identity rebuilt on the dev box.
+  - **The MC1 volume** was deleted after the read-back (actual $0.0526).
+  - **MC2** (`mixr_20261026_140539`, $10.912) trained Mix-Augmented on both
+    seeds, one complete attempt each: 3,702 steps on D4-Augmented's set, recipe
+    identity equal to D4-Augmented's per seed. Then every item of eval-set-1
+    under nucleus_v1.
+  - **Totals:** $17.3366 of $33.05. Project committed $723.30 of $740 at
+    23:57Z (provider-billed, nothing unposted).
+- **Result** (`logs/stages/stage-0/calibration_volume/analyses/mixed_result.json`):
+  - **M = Mix-Augmented − D4-Augmented on static fluid: NO_GO.**
+    - 3.25% vs 4.56%: −1.32 pp, interval [−2.71, −0.17] pp, seeds −1.40 / −1.23.
+    - A ≥ 5 pp difference is excluded at this scale.
+    - The small loss lies below the SESOI.
+  - **Deduction:** 9.3% vs 13.5% (−4.2 pp, [−8.5, −0.6]): INCONCLUSIVE.
+  - **Induction, composition, analogy:** NOT_RESOLVED at the floor.
+  - **E (vs PCA-Original), descriptive:** +1.93 pp.
+  - **Every eval-set-1 unit** is reported correct and usable side by side
+    (MIXED.md section 13).
+  - **Step-0 val_kd** (diagnostic only): 8.377 vs D4-Augmented's 6.966.
+- **Decision.**
+  - The study is terminal, and the grant is closed with $15.7134 unspent.
+  - The mixed-calibration 2x initialization is not adopted over D4 Top-1. Under
+    D4-Augmented's recovery it does not recover meaningfully better static
+    fluid correctness, and it is about 1.3 pp lower.
+  - The six checkpoints on `am5m373kuq` are kept for the independent review
+    (storage record :: `contents_after_mc2`).
+  - Nothing follows automatically. 4x is the maintainer's decision.
+- **Risks / limits.**
+  - Composition, volume (0.70× `base_d4`), interactive data, the single
+    profile, DEPTH weighting and the resulting operator order change together.
+    M isolates none of them.
+  - Three of the four static axes are at the floor in every arm. The decided
+    contrast therefore rests mostly on deduction.
+- **Revisit when.** The maintainer's independent review of this result and of
+  H1-PA.
+
+## 2026-10-28 — Maintainer: squash-merge `stage2/reasoning-data` into `main`, then sync the research branch
+
+- **Context.** Stage 2's H1 and H1-PA and the mixed calibration 2x are
+  complete (entries above). The maintainer asked for `stage2/reasoning-data` at
+  `d5f1c6f2` to be merged into `main` before Research A and B continue, and
+  for `research/teacher-modes-and-projected-residual` NOT to be merged with it.
+- **Decision.** One squash commit on `main` over merge base `2a8bae78`
+  (AGENTS.md P12.2). The source branch is NOT deleted and its history is not
+  rewritten. The squash commit names the source branch, its tip and the merge
+  base. The research branch takes the new `main` by a merge commit, without a
+  rebase or a force push.
+- **Kept unchanged.** H1's annulment, H1-PA's INCONCLUSIVE (FLOOR_A), M =
+  NO_GO, every closed grant, every checkpoint identity. The accounting audit
+  of 2026-10-27 stays CLOSED with its open attribution questions. It is on the
+  research branch and is not part of this integration.
+- **Checked before integrating.** Zero unreachable cited commits
+  (`converge_before_sweep.cited_commits_are_reachable`); `main` had not moved
+  since `2a8bae78`; the staged tree must equal the source tip's tree.
+- **Not authorized.** A-E, B-E, any formal Research A or B phase, and any rise
+  in the $740 project cap.
+- **Revisit when.** Never for this round; the next integration follows the
+  same rule.

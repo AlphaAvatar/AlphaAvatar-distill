@@ -356,3 +356,27 @@ def test_session_order_anchor_is_optional_and_default_free(pipeline):
     _, packed = pipeline
     ladder = json.loads((packed / "ladder.json").read_text())
     assert "interleave" in ladder["ordering"]
+
+
+def test_no_terminal_truncation_packs_every_session_whole(pipeline, tmp_path):
+    """`--no-terminal-truncation` (the packer's own allow_terminal_truncation=False)
+    keeps every session whole: the dress rehearsal's corpus forces truncation by
+    design, the same corpus under the switch truncates nothing and loses no
+    supervised token, and the default is still the truncating packing."""
+    corpus, packed = pipeline
+    default = [json.loads(line) for line in (packed / "audit.jsonl").open()]
+    assert any(r["terminal_truncated"] for r in default), "the rehearsal no longer forces a truncation"
+    out = tmp_path / "whole"
+    ladder = load_script("build_token_ladder", "scripts/shared/data/build_token_ladder.py")
+    sys.argv = ["build_token_ladder.py", "--sessions", str(corpus / "sessions.jsonl"),
+                "--model", f"{TEACHER}@{REVISION}", "--block-len", str(BLOCK_LEN),
+                "--ladder", "1000,3000", "--no-terminal-truncation", "--out", str(out)]
+    ladder.main()
+    rows = [json.loads(line) for line in (out / "audit.jsonl").open()]
+    members = [s for r in rows for s in r["sessions"]]
+    assert not any(r["terminal_truncated"] for r in rows)
+    assert not any(s["truncated"] or s["supervised_discarded"] for s in members)
+    assert sorted(s["session_id"] for s in members) == sorted(
+        s["session_id"] for r in default for s in r["sessions"])
+    assert "no truncation" in json.loads((out / "ladder.json").read_text())["packing"]
+    assert "terminal truncation only" in json.loads((packed / "ladder.json").read_text())["packing"]

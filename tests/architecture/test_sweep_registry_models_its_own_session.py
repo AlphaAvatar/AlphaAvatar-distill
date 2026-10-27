@@ -167,6 +167,18 @@ class TestASessionWithItsOwnStagedViewHasItsOwnEntry:
         #: session-commit gate and the bundle round trip bind the tree, and
         #: the pod's blocking gate runs the probes preflight.
         "autoinit_d3_probes_launch",
+        #: H1's P1 teacher-generation session (Stage 2, 2026-10-22), for D2's
+        #: reason and one more: its typed artifact binds the launch identity
+        #: (plan, protocol, inputs, pools) and the harness by digest, checked
+        #: by the launcher, by setup's own branch and by the driver on the pod,
+        #: and the pod runs NO repository suite (no TESTS_OK), so there is no
+        #: pod test selection for a sweep to certify.
+        "h1_generation_launch",
+        #: H1's unit sessions (2026-10-23), for the same reasons: a typed
+        #: artifact per kind binds the units identity and the harness, checked
+        #: by the launcher and by setup's own branch, and the pod runs no
+        #: repository suite.
+        "h1_unit_launch",
     })
 
     def test_every_session_launcher_is_either_registered_or_named(self):

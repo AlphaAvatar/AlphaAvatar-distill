@@ -586,6 +586,10 @@ class BudgetSpec:
     soft_stop_reserves: tuple[Phase, ...] = ()
     artifact_recovery_reserve_minutes: float = 30.0
     below_floor_reason: str = ""
+    #: The caller's measured step-time floor and superseded figures
+    #: (`budget.plan_session`); none by default -- the core names no hardware.
+    step_time_floor: float | None = None
+    superseded_step_seconds: tuple[float, ...] = ()
     #: WHAT THE PROVIDER ACCOUNT MUST HOLD before a pod is created, in dollars,
     #: or a callable taking the priced `BudgetPlan` and returning it.
     #:
@@ -633,6 +637,8 @@ class BudgetSpec:
             arms=self.arms, steps_per_arm=self.steps_per_arm,
             step_time=StepTime(self.step_seconds, self.step_source),
             below_floor_reason=self.below_floor_reason,
+            step_time_floor=self.step_time_floor,
+            superseded_step_seconds=self.superseded_step_seconds,
             setup_minutes=self.setup_minutes,
             other_phases=self.other_phases,
             eval_minutes_per_arm=self.eval_minutes_per_arm,

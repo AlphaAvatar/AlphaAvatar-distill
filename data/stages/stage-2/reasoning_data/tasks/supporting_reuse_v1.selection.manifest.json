@@ -1,0 +1,93 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.supporting_pool/v1",
+ "corpus_variant": "stage2.reasoning_master@v1",
+ "created_utc": "2026-10-22T15:40:35Z",
+ "version": 1,
+ "status": "PROPOSED pool: sources admitted for H1 design (maintainer, 2026-10-22); no teacher target is generated for it until a generation grant exists",
+ "kind": "reuse selection (no generation)",
+ "command": "python -m stages.reasoning_data.build_supporting_tasks --source reuse --version 1",
+ "by_source": {
+  "corpus_v2_gsm8k_verified": {
+   "units": 1508,
+   "supervised_tokens": 1648134
+  },
+  "corpus_v2_multihop_verified": {
+   "units": 919,
+   "supervised_tokens": 879026
+  },
+  "corpus_v2_rag_verified": {
+   "units": 3871,
+   "supervised_tokens": 1806741
+  }
+ },
+ "plan_needs": {
+  "corpus_v2_gsm8k_verified": {
+   "units_needed": 159,
+   "U_target_with_reserve": 186600
+  },
+  "corpus_v2_multihop_verified": {
+   "units_needed": 100,
+   "U_target_with_reserve": 62200
+  },
+  "corpus_v2_rag_verified": {
+   "units_needed": 300,
+   "U_target_with_reserve": 186600
+  }
+ },
+ "rejected": {
+  "corpus_v2_gsm8k_verified: answer:incorrect:answer_mismatch": 190,
+  "corpus_v2_multihop_verified: answer:incorrect:gold_span_missing": 152,
+  "corpus_v2_multihop_verified: answer:incorrect:leads with an abstention; the span matched only quoted context": 2,
+  "corpus_v2_rag_verified: answer:incorrect:gold_span_missing": 88,
+  "corpus_v2_rag_verified: answer:incorrect:leads with an abstention; the span matched only quoted context": 123
+ },
+ "removed_by_isolation": {
+  "R1_held_out_overlap": {},
+  "R2_flagged": 19,
+  "R2_flagged_by_unit": {
+   "stage3_capability_846/eval_behavior_v0": 18,
+   "stage3_capability_846/multihop": 1
+  },
+  "removed_units": [
+   "hotpot-000930",
+   "squad_v2-009015",
+   "squad_v2-009507",
+   "squad_v2-010283",
+   "squad_v2-010926",
+   "squad_v2-011314",
+   "squad_v2-011317",
+   "squad_v2-012613",
+   "squad_v2-013655",
+   "squad_v2-013658",
+   "squad_v2-013660",
+   "squad_v2-013662",
+   "squad_v2-015161",
+   "squad_v2-016516",
+   "squad_v2-016519",
+   "squad_v2-017522",
+   "squad_v2-017525",
+   "squad_v2-017960",
+   "squad_v2-018545"
+  ],
+  "first_pass_violations": [
+   "R2_near_duplicate"
+  ]
+ },
+ "verdict_scope": {
+  "corpus_v2_gsm8k_verified": "the final answer's last number against the human gold's (aadistill.data.verify final_number)",
+  "corpus_v2_multihop_verified": "the normalized gold span contained in the final answer, a yes/no gold leading it (aadistill.data.verify span)",
+  "corpus_v2_rag_verified": "the normalized gold span contained in the final answer, a yes/no gold leading it (aadistill.data.verify span)"
+ },
+ "family_key": "the source id",
+ "corpus_v2": {
+  "manifest_sessions_sha256": "2b4edc2e2cc16cd56dae3d340345e1a17e2c4a8baa9837650a7bf5e340fa6fcd",
+  "manifest_candidates_sha256": "f7f5035ef8b42fb4bacd4f28692d214ff734f4ff820c1f6e37436e328546ecc7"
+ },
+ "selection_rule": "corpus_v2's selected session (its lowest-index hygiene-accepted candidate; not reselected) whose target passes the contract again: matches its candidate, natural termination, protocol-valid, answer key passes (no length rule); a reading answer leading with an abstention is refused",
+ "reader": "build_supporting_tasks.reused_sessions(<this selection>)",
+ "teacher_text": "not in this file: artifacts/stages/stage-3/corpus_v2/sessions.jsonl (sha-verified)",
+ "sha256": "2dcac7627c479025d53de70574fb6302c6a54e777686d2457887460993b85f7c",
+ "isolation_report": "supporting_reuse_v1.selection.isolation.json",
+ "isolation_pass": true,
+ "authorizes": "nothing"
+}

@@ -1,0 +1,78 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.mixed_outcome/v1",
+ "run_id": "mixs_20261026_102914",
+ "phase": "MC1",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "recorded_utc": "2026-10-26T10:36:14Z",
+ "status": "INCOMPLETE",
+ "terminal": "RUN_FAILED",
+ "runner_terminal": "RUN_FAILED",
+ "session_passed": false,
+ "provider_resource_created": true,
+ "pod_id": "6cy5fhf4q1tru0",
+ "provider_confirms_gone": true,
+ "store": "/home/ecs-user/aad-artifacts/stage0_calvol/mixs_20261026_102914/store",
+ "files": {
+  "extracted/audit/stage0_calvol_mixed_search/mixed_search_record.json": {
+   "sha256": "7f08ff13e98f6b5e4d0c743d5875ff607c0097b3dd63f45bdc5a5af68c7c1aff",
+   "bytes": 1657
+  },
+  "extracted/audit/stage0_calvol_mixed_search/sync.log": {
+   "sha256": "986b88277e0c9e0d2e0e8ba889a0edf825044b636e401dfb70f37cc83d480dd1",
+   "bytes": 106
+  },
+  "manifest.json": {
+   "sha256": "54076f85d4afdfb44b8734a27c6617db4cde2658d11ba5e94259b720f3bfb419",
+   "bytes": 1972
+  },
+  "mc1/mixed_search_record.json": {
+   "sha256": "7f08ff13e98f6b5e4d0c743d5875ff607c0097b3dd63f45bdc5a5af68c7c1aff",
+   "bytes": 1657
+  },
+  "stage0_mixed_mc1": {
+   "sha256": "29137917796f2af0ffd9ce0dc657c81063c452b1d794452c456e3f4b77e10b2b",
+   "bytes": 852
+  }
+ },
+ "money": {
+  "all_in_usd": 0.1903,
+  "gpu_usd": 0.188,
+  "disk_usd": 0.0023,
+  "elapsed_minutes": 6.3,
+  "price_per_hour": 1.79,
+  "authorized_usd": 15.0,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (160 GB); volumes are booked in their own records"
+ },
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "am5m373kuq",
+    "name": "aad-h1pa",
+    "size": 30,
+    "dataCenterId": "EUR-IS-2"
+   },
+   {
+    "kind": "network_volume",
+    "id": "t6yrsvujha",
+    "name": "aad-mixed-mc1",
+    "size": 150,
+    "dataCenterId": "EUR-IS-1"
+   }
+  ],
+  "error": null,
+  "accounted": [
+   "am5m373kuq",
+   "t6yrsvujha"
+  ],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 2 resource(s) the records account for"
+ },
+ "authorizes": "nothing",
+ "_terminal": "the driver's terminal marker (was recorded as its record status 'FAILED'; corrected 2026-10-27 to the marker MC2's closeouts state)"
+}

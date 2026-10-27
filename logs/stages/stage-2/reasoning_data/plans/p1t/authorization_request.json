@@ -1,0 +1,203 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.p1t_authorization_request/v1",
+ "written_utc": "2026-10-23T15:45:21Z",
+ "status": "REQUEST for the maintainer's P1t grant; NOT authorized, nothing launched",
+ "phase": "P1t",
+ "run_id": "h1p1t_20261023_094007",
+ "corpus": {
+  "path": "configs/stages/stage-2/reasoning_data/corpus_v3.json",
+  "sha256": "04fdcad80062d7bab7be5c7a21fc168cc09ba0168cb19873e2b600412d3bbffa"
+ },
+ "generation_plan": {
+  "path": "logs/stages/stage-2/reasoning_data/plans/p1t/generation_plan.json",
+  "sha256": "5be5ff273bc6b062faeeda7f8c1cea90e3f9314566c28053c98191c542f2205f",
+  "tasks": 59,
+  "cells": {
+   "primary.abstract_analogical/s0_generators_v2_calsplit": 25,
+   "primary.compositional_generalization/reasoning_gym": 34
+  }
+ },
+ "launch_identity_sha256": "e5732fd4440aad13b155a2a122e56f3fec4958c702555ce30239b9f49daeb9f4",
+ "launch_identity": {
+  "generation_plan": {
+   "path": "logs/stages/stage-2/reasoning_data/plans/p1t/generation_plan.json",
+   "sha256": "5be5ff273bc6b062faeeda7f8c1cea90e3f9314566c28053c98191c542f2205f"
+  },
+  "generation_protocol": {
+   "path": "configs/stages/stage-2/reasoning_data/generation_protocol.json",
+   "sha256": "be1d2eef2881d2124002c6f4aaf0d22a54f395e165f10498eea88e095d9ecdb7"
+  },
+  "inputs": [
+   {
+    "file": "logs/stages/stage-2/reasoning_data/plans/p1t/generation_inputs/generation_input_g0.jsonl",
+    "sha256": "fd1d604d0094d761a2db501a15f2b611c7ad0e7a482b8ba6ca21c99e5bf69fe8"
+   }
+  ],
+  "pools": [
+   {
+    "path": "data/stages/stage-2/reasoning_data/tasks/train_tasks_v2.jsonl",
+    "sha256": "b428f1ad78245c145701ca0599ac5451b4ccecbe4e58751295e1de020321bdc5"
+   },
+   {
+    "path": "data/stages/stage-2/reasoning_data/tasks/external_tasks_v2.jsonl",
+    "sha256": "843dff8faf0e7d577cd0db217191d704c909bbe614ef87fd12f04e1197737127"
+   },
+   {
+    "path": "data/stages/stage-2/reasoning_data/tasks/math_train_v1.jsonl",
+    "sha256": "e2ac003cbfc30c7bdb8ddc8d6c65a669bedac52a076e3879a259cb556e3bd8dd"
+   },
+   {
+    "path": "data/stages/stage-2/reasoning_data/tasks/mbpp_train_v1.jsonl",
+    "sha256": "12473c4b055accf22ca5357e966664bab57c057256ca7791c76916b3a8ca8793"
+   },
+   {
+    "path": "data/stages/stage-2/reasoning_data/tasks/squad_v2_train_unanswerable_v1.jsonl",
+    "sha256": "07f1a198569dba3e974d476c13eb7d9fb253ccd02dc55dbdaf71976d03228131"
+   }
+  ]
+ },
+ "harness_digest": "348ed51202a07660fecfec4f390c627377452055e1d400c66735170ba9fb8818",
+ "harness_files": 29,
+ "not_p1s": {
+  "P1_launch_identity_sha256": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
+  "P1_grant_harness_digest": "d6affe40cdd8b8c1786f36ee701bdf4213d3174fc7e8ccad4a6dad25715fbbf1",
+  "_": "P1's grant and authorization are consumed and fund nothing here; P1t is its own run"
+ },
+ "cost": {
+  "application": {
+   "path": "logs/stages/stage-2/reasoning_data/plans/abstract_topup_application.json",
+   "sha256": "226a1fccb796fa10e209b3d98e4b0196fb9e1d739a0247d85bbb88e113032578"
+  },
+  "expected_usd": 1.01,
+  "closeout_reserve_usd": 0.72,
+  "hard_cap_usd": 2.6,
+  "launcher_budget_at_p1_price": {
+   "price_per_hour": 1.79,
+   "authorized_usd": 2.6,
+   "expected_minutes": 33.37,
+   "soft_stop_minutes": 63.57499999999999,
+   "artifact_recovery_reserve_minutes": 21.25,
+   "hard_terminate_minutes": 84.82499999999999,
+   "step_time": {
+    "seconds": 1.0,
+    "source": "unused: no training in this session (arms=0)",
+    "measured": true
+   },
+   "breakdown": [
+    {
+     "name": "setup",
+     "minutes": 6.02
+    },
+    {
+     "name": "train",
+     "minutes": 0.0
+    },
+    {
+     "name": "evaluate",
+     "minutes": 0.0
+    },
+    {
+     "name": "transfer",
+     "minutes": 2.99
+    },
+    {
+     "name": "teacher_generation_two_passes",
+     "minutes": 24.36
+    }
+   ],
+   "soft_stop_reserves": [
+    {
+     "name": "closeout_setup_and_teardown",
+     "minutes": 13.52
+    }
+   ],
+   "notes": [
+    "below-floor step time accepted: 1.0 s/step vs floor 4.15 \u2014 no training steps; every phase is priced below"
+   ],
+   "soft_stop_reserve_minutes": 13.52,
+   "expected_usd": 0.9955,
+   "soft_stop_usd": 1.8967,
+   "artifact_recovery_reserve_usd": 0.634,
+   "hard_terminate_usd": 2.5306
+  },
+  "all_in_bound_at_p1_price": {
+   "billable_minutes": 86.075,
+   "price_per_hour": 1.79,
+   "container_disk_gb": 150,
+   "gpu_usd": 2.5679,
+   "disk_usd": 0.0295,
+   "all_in_usd": 2.5974,
+   "highest_price_inside_cap": 1.79
+  },
+  "termination_minutes": 1.25,
+  "fits_a_live_secure_price_up_to": 1.79,
+  "refused_at_0_usd_when": "all-in at --max-price exceeds $2.60 (any price above $1.79/h; all_in_within_cap), or the live securePrice or the pod's returned price exceeds --max-price (check_gpu_offered; the core's post-create abort)",
+  "setup_may_take_up_to_minutes": 57.5,
+  "_": "h1_generation_launch.topup_budget: the application's rule, 1.5 x (expected + setup + teardown + 15 min), is where billing stops; the watchdog's hard deadline is that less its time to act (1.25 min: one 60 s poll and one 15 s terminate-verify delay), taken from the artifact reserve. all_in_within_cap prices GPU and the container disk over those minutes at --max-price before any pod. P1 measured 6.02 min pod to driver; any setup up to the figure above still leaves both passes and the teardown inside the hard deadline"
+ },
+ "budget": {
+  "provider_snapshot": {
+   "path": "logs/budget/provider/runpod_billing_2026-10-23T0942Z.json",
+   "sha256": "6f1f718402e910c03db65965b0ddfc40ad621fddd68e216de2f6f3745e1906a4",
+   "fetched_utc": "2026-10-23T09:42:20+00:00"
+  },
+  "provider_billed_total_usd": 661.5161,
+  "live": {
+   "pods": 0,
+   "network_volumes": 0,
+   "spend_per_hour": 0.0,
+   "balance_usd": 97.8657
+  },
+  "account_balance_required_usd": 30.0,
+  "project_cumulative_cap_usd": 666.17,
+  "cap_raised": false,
+  "headroom_usd": 4.6539,
+  "after_hard_cap_usd": 664.1161,
+  "fits_under_the_existing_cap": true,
+  "_": "conservative occupancy: the provider's all-time billing counted once; the cap is absolute"
+ },
+ "resources": {
+  "gpu": "1 x NVIDIA A100-SXM4-80GB (P1's), one session, one billing resource",
+  "image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404 (P1's)",
+  "container_disk_gb": 150,
+  "network_volume": null
+ },
+ "persistence": {
+  "scr": "/home/ecs-user/aad-scratch/h1p1t_20261023_094007",
+  "route": "P1's: the driver seals finished candidates into hash-marked shards, the launcher pulls every marked shard on each poll into <scr>/store and re-hashes it, the closeout re-hashes all of them; then a copy to artifacts/stages/stage-2/reasoning_data/generation/<run>/ and to the relay (stage2_h1/generation/<run>/), read back",
+  "expected_bytes": "about 6 MB of shards (P1: 141 MB for 2,164 records; P1t at most 118)",
+  "dev_box_free_bytes": 7784157184
+ },
+ "merge": "corpus_feasibility --candidate corpus_v3.json --store <P1 run>=<store> --store <P1t run>=<store>: each session verified under its own authorization; refused on a shared task, unit, protocol or runner; units keep their session's identity; cells at 0.0 set aside by name; the pack only when the formal ladder cuts every rung with the reserve and isolation passes",
+ "grant_document": {
+  "fields": [
+   "granted_by",
+   "decision",
+   "phase (= P1t)",
+   "run_id",
+   "launch_identity_sha256",
+   "harness_digest",
+   "expected_usd",
+   "hard_cap_usd",
+   "scope (optional)"
+  ],
+  "issued_by": "governance.issue: recomputes both identities from disk and refuses a mismatch"
+ },
+ "at_launch_read_only": [
+  "stage the session-commit bundle on the relay (bundle_on_relay)",
+  "a fresh provider snapshot: 0 pods, 0 volumes, $0/h, billing inside the cap",
+  "the live securePrice at or below the figure above, passed as --max-price (all_in_within_cap, check_gpu_offered)",
+  "dev-box free space for <scr>/store"
+ ],
+ "on_short_corpus": "if the accepted units still do not build B on the formal ladder, the gap is reported and P1t stops there: no automatic further paid top-up, no lower gate, no repetition, no other source or mix (maintainer 2026-10-23)",
+ "not_requested": [
+  "P1g",
+  "P2",
+  "student recovery",
+  "formal evaluation",
+  "a network volume",
+  "any further top-up",
+  "a change of D4 Top-1, the recovery objective, M1, eval-set-1 or the 150k validation reserve"
+ ],
+ "authorizes": "nothing"
+}

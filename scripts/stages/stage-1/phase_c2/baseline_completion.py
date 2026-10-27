@@ -34,7 +34,8 @@ from typing import Any
 
 from aadistill.governance.authorization import AuthorizationError
 from aadistill.governance.closure import ClosureError, derive, digest_of
-from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
+from aadistill.infrastructure.budget import Phase
+from shared.step_times import MEASURED_STEP_SECONDS
 from aadistill.infrastructure.session import BudgetSpec
 from aadistill.infrastructure.manifest import sha256_json
 

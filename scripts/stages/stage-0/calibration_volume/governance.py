@@ -192,7 +192,9 @@ def programme_spent(repo_root: Path = REPO) -> dict:
     """
     total, runs, unknown, open_ = 0.0, [], [], []
     for d in sorted((repo_root / EXPERIMENT_LOGS / "runs").glob("*")):
-        if not d.is_dir():
+        #: the mixed-calibration study's runs (`mix*`) are funded by its own grant
+        #: and booked by `mixed_governance.spent`, never by this programme
+        if not d.is_dir() or d.name.startswith("mix"):
             continue
         out = d / "closeout" / "outcome.json"
         sess = d / "runtime" / "session.json"

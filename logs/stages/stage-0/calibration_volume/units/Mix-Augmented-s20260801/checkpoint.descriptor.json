@@ -1,0 +1,61 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.persisted_unit/v2",
+ "unit": "Mix-Augmented-s20260801",
+ "kind": "checkpoint",
+ "started_utc": "2026-10-26T22:47:11Z",
+ "source": "/runpod-volume/mixed_v2/Mix-Augmented-s20260801/train/a1/checkpoints/step_003702/model",
+ "artifact_digest": "ba3a476d45efaa3901611d9f75a672f84dacf6fcc25f92340756ce9830a7e09f",
+ "weights_digest": "624a17599c90272d509b2977d30d27852747300a30f4f2933107163259387455",
+ "config_sha256": "cb757e8976462bce6037c24d74ed20b56fca5825f4198f3e1d6d6e7aa211e453",
+ "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+ "num_parameters": 596049920,
+ "tokenizer_sha256": null,
+ "inputs": {
+  "arm": "Mix-Augmented",
+  "seed": 20260801,
+  "formal": true,
+  "execution": "train",
+  "evaluation": {
+   "set": "eval-set-1",
+   "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+   "trained_context": 8192,
+   "action_protocol": "v2",
+   "decoding": {
+    "path": "configs/shared/evaluation/decoding/nucleus_v1.json",
+    "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"
+   }
+  },
+  "preregistration_sha256": "0a8d68eca6b9add907975e79dd6d0cbfb402b4b4e1f2eacc26556fbb5b26951c",
+  "initialization_artifact_digest": "647a0ef381c8a5e0f94558fba82678ebfb8cba11f7392fe9172c9603fa631608",
+  "initialization_weights_digest": "531a2ccd2d6387058f495f26c1e462d95b076099a05f6af4cf61d05be0c2c904",
+  "pack_blocks_sha256": "8b97b202e2c1f861fe5c99e3a247ce7fdd063c354b7668ddc1ba75fedb8043f3",
+  "recipe_sha256": "95e4c813d5bca3e49f36af77a8d91d1e7a3c62ff13b9ae61de457c14c50772f7",
+  "schedule": {
+   "rung": 5923021,
+   "total_steps": 3702,
+   "warmup_steps": 185,
+   "eval_every": 462,
+   "save_every": 1851
+  }
+ },
+ "destination": "/runpod-volume/mixed_v2/Mix-Augmented-s20260801/checkpoint",
+ "persisted": true,
+ "finished_utc": "2026-10-26T22:47:27Z",
+ "bytes": 2384236592,
+ "verified": {
+  "path": "/runpod-volume/mixed_v2/Mix-Augmented-s20260801/checkpoint.partial",
+  "artifact_digest": "ba3a476d45efaa3901611d9f75a672f84dacf6fcc25f92340756ce9830a7e09f",
+  "recorded_digest": "ba3a476d45efaa3901611d9f75a672f84dacf6fcc25f92340756ce9830a7e09f",
+  "matched": true,
+  "weights_digest": "624a17599c90272d509b2977d30d27852747300a30f4f2933107163259387455",
+  "weights_digest_matched": true,
+  "config_sha256": "cb757e8976462bce6037c24d74ed20b56fca5825f4198f3e1d6d6e7aa211e453",
+  "config_matched": true,
+  "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+  "num_parameters": 596049920,
+  "single_shard_sha256": "645667ec7ed7978f4f703f55cffe889879306b8c60637dd8b56cd57d3f848707",
+  "shard_matched": false,
+  "tokenizer_sha256": null,
+  "total_bytes": 2384234968
+ }
+}

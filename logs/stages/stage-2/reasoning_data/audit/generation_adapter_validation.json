@@ -1,0 +1,201 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.generation_adapter_validation/v1",
+ "written_utc": "2026-10-22T15:31:18Z",
+ "input": {
+  "records": "Stage-0 teacher_cal.jsonl (sha256-verified by assets.teacher_cal_records)",
+  "n_records": 672,
+  "candidate_identity": "one record per task (checked); candidate_index 0 stated explicitly",
+  "consistency": "every record passed `consistency` with the tokenizer: prompt = the task's, assistant messages = split_generation(raw), observations = next user turns, output token ids decode to raw"
+ },
+ "contract": {
+  "abstract_analogical": {
+   "candidates": 75,
+   "units": 75,
+   "naturally_terminated": 60,
+   "length_limited": 6,
+   "degenerated": 9,
+   "protocol_valid": 60,
+   "answer": {
+    "correct": 58,
+    "incorrect": 17
+   },
+   "answer_scope": {
+    "the boxed final answer against the generator's gold (battery protocol v2)": 75
+   },
+   "steps": {
+    "not_assessed": 75
+   },
+   "observations": {
+    "text_consistency": {
+     "restated": 60
+    }
+   },
+   "accepted_candidates": 58,
+   "accepted_units": 58,
+   "candidate_accept_rate": 0.773333,
+   "unit_accept_rate": 0.773333,
+   "rejection_reasons": {
+    "answer:incorrect:unusable": 15,
+    "answer:incorrect:wrong_answer": 2,
+    "ending:degeneration": 9,
+    "ending:length_limited": 6,
+    "protocol:think_not_closed": 15
+   }
+  },
+  "compositional_generalization": {
+   "candidates": 150,
+   "units": 150,
+   "naturally_terminated": 143,
+   "length_limited": 0,
+   "degenerated": 7,
+   "protocol_valid": 145,
+   "answer": {
+    "correct": 131,
+    "incorrect": 19
+   },
+   "answer_scope": {
+    "the boxed final answer against the generator's gold (battery protocol v2)": 150
+   },
+   "steps": {
+    "not_assessed": 150
+   },
+   "observations": {
+    "text_consistency": {
+     "restated": 139,
+     "not_restated": 4,
+     "not_assessed": 2
+    }
+   },
+   "accepted_candidates": 131,
+   "accepted_units": 131,
+   "candidate_accept_rate": 0.873333,
+   "unit_accept_rate": 0.873333,
+   "rejection_reasons": {
+    "answer:incorrect:unusable": 7,
+    "answer:incorrect:wrong_answer": 12,
+    "ending:degeneration": 7,
+    "protocol:think_not_closed": 5
+   }
+  },
+  "inductive_rule_discovery": {
+   "candidates": 150,
+   "units": 150,
+   "naturally_terminated": 146,
+   "length_limited": 4,
+   "degenerated": 0,
+   "protocol_valid": 148,
+   "answer": {
+    "correct": 142,
+    "incorrect": 8
+   },
+   "answer_scope": {
+    "the boxed final answer against the generator's gold (battery protocol v2)": 150
+   },
+   "steps": {
+    "not_assessed": 150
+   },
+   "observations": {
+    "text_consistency": {
+     "restated": 141,
+     "not_restated": 5,
+     "not_assessed": 2
+    }
+   },
+   "accepted_candidates": 142,
+   "accepted_units": 142,
+   "candidate_accept_rate": 0.946667,
+   "unit_accept_rate": 0.946667,
+   "rejection_reasons": {
+    "answer:incorrect:unusable": 4,
+    "answer:incorrect:wrong_answer": 4,
+    "ending:length_limited": 4,
+    "protocol:think_not_closed": 2
+   }
+  },
+  "interactive_adaptation": {
+   "candidates": 72,
+   "units": 72,
+   "naturally_terminated": 71,
+   "length_limited": 0,
+   "degenerated": 1,
+   "protocol_valid": 71,
+   "answer": {
+    "incorrect": 55,
+    "correct": 17
+   },
+   "answer_scope": {
+    "the environment's goal reached on replay": 72
+   },
+   "steps": {
+    "not_assessed": 72
+   },
+   "observations": {
+    "action_legality": {
+     "all_legal": 68,
+     "illegal_action": 4
+    }
+   },
+   "accepted_candidates": 16,
+   "accepted_units": 16,
+   "candidate_accept_rate": 0.222222,
+   "unit_accept_rate": 0.222222,
+   "rejection_reasons": {
+    "action_legality:illegal_action:invalid_actions=1": 4,
+    "answer:incorrect:goal not reached": 55,
+    "ending:degeneration": 1,
+    "protocol:think_not_closed": 1
+   }
+  },
+  "task_contained_deduction": {
+   "candidates": 225,
+   "units": 225,
+   "naturally_terminated": 225,
+   "length_limited": 0,
+   "degenerated": 0,
+   "protocol_valid": 225,
+   "answer": {
+    "correct": 224,
+    "incorrect": 1
+   },
+   "answer_scope": {
+    "the boxed final answer against the generator's gold (battery protocol v2)": 225
+   },
+   "steps": {
+    "not_assessed": 225
+   },
+   "observations": {
+    "text_consistency": {
+     "restated": 176,
+     "not_restated": 49
+    }
+   },
+   "accepted_candidates": 224,
+   "accepted_units": 224,
+   "candidate_accept_rate": 0.995556,
+   "unit_accept_rate": 0.995556,
+   "rejection_reasons": {
+    "answer:incorrect:wrong_answer": 1
+   }
+  }
+ },
+ "accepted_units": 571,
+ "sessions_written": 637,
+ "packer_admission": {
+  "admitted_units": 518,
+  "units": 53,
+  "sessions": 69,
+  "units_by_kind": {
+   "session_does_not_render_or_fit": 53
+  }
+ },
+ "against_base_pool_v1": {
+  "base_pool_units": 519,
+  "both": 518,
+  "admitted_not_in_base_pool": [],
+  "in_base_pool_not_admitted": [
+   "d0fe36625779cfc7d98e"
+  ]
+ },
+ "reading": "the adapter + whole-unit packer reproduce base_pool_v1's unit set when 'both' equals both counts; any difference is listed by unit",
+ "authorizes": "nothing"
+}

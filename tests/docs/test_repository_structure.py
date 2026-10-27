@@ -67,17 +67,22 @@ def test_the_readme_keeps_the_required_public_structure():
     """AGENTS.md §2.7 fixes the section list. Empty sections are allowed;
     missing ones are not."""
     text = README.read_text()
-    for heading in ("Performance Trend and Project Goal", "How it works",
-                    "Quick start", "Running the agent", "Project structure",
-                    "Optim record history", "References", "Citation"):
-        assert re.search(rf"^## .*{re.escape(heading)}", text, re.M), heading
+    sections = ("🧠 Overview and Goals", "📈 Performance Trend", "🤖 Running the agent",
+                "🗂️ Project structure", "🏆 Optim record history", "🔎 References", "📚 Citation")
+    found = [h.strip() for h in re.findall(r"^## (.+)$", text, re.M)]
+    assert found == list(sections), found
+    # Optim record history is organised by stage, each with its own subsection.
+    records = text[text.index("## 🏆 Optim record history"):text.index("## 🔎 References")]
+    stages = re.findall(r"^### (\S+) Stage (\d)\b", records, re.M)
+    assert stages == [(e, str(i)) for i, e in enumerate("🧪 🧩 📚 🛠️ 🔁 🎯 🚀".split())], stages
 
 
-def test_the_readme_points_at_the_owners_of_the_facts_it_dropped():
+def test_the_readme_points_at_where_the_evidence_lives():
+    """The landing page carries no results or live state (maintainer,
+    2026-10-23); it links the entry points of the evidence instead."""
     text = README.read_text()
-    for owner in ("logs/state/current.json", "logs/state/current.md",
-                  "logs/budget/ledger.md", "logs/state/ownership.md",
-                  "docs/maintenance/REPO_LAYOUT.md"):
+    for owner in ("logs/state/current.md", "logs/state/experiment_index.md",
+                  "docs/maintenance/REPO_LAYOUT.md", "AGENTS.md"):
         assert owner in text, f"the README does not point at {owner}"
 
 

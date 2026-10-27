@@ -1,0 +1,130 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.external_tasks/v2",
+ "created_utc": "2026-10-22T17:05:37Z",
+ "exports": [
+  {
+   "sha256": "8f94976386c124b57e1892b0e111e357115426ad3f766a83ddc226730516d211",
+   "rows": 629,
+   "sources": [
+    "reasoning_gym"
+   ],
+   "python_hash_seed": [
+    "0"
+   ]
+  },
+  {
+   "sha256": "0c203b406a86f3df69e79569e7eaeabf6e69418d952cd7638bc2b3603f2bf767",
+   "rows": 392,
+   "sources": [
+    "reasoning_core"
+   ],
+   "python_hash_seed": [
+    "0"
+   ]
+  },
+  {
+   "sha256": "5ebe9c997219dcba6284637e160e60b6b4b0428920efcfcfa62b29f20b52037d",
+   "rows": 72,
+   "sources": [
+    "prontoqa"
+   ],
+   "python_hash_seed": [
+    "0"
+   ]
+  },
+  {
+   "sha256": "bebac044d5f410bbcc50ead560ee454e29977311bd9e75a448d7f243c7e30e2c",
+   "rows": 140,
+   "sources": [
+    "mathematics_dataset"
+   ],
+   "python_hash_seed": [
+    "0"
+   ]
+  }
+ ],
+ "versions": {
+  "mathematics_dataset": [
+   "1.0.1+git:427f45075f84b8b9774950196ad63867ca20ffb3"
+  ],
+  "prontoqa": [
+   "git:0a6412b6fddf46324a1cb96e066dd7b3d89b87d6"
+  ],
+  "reasoning_core": [
+   "0.5.0"
+  ],
+  "reasoning_gym": [
+   "0.1.25"
+  ]
+ },
+ "n_tasks": 1163,
+ "drops": {
+  "algebra__polynomial_roots_composed: outside the project checker's domain: a factorization item: the project has no factored-form checker": 12,
+  "n_queens: duplicate prompt": 13,
+  "rotate_matrix: the answer is the input (gold verbatim in the prompt)": 11,
+  "self_reference: duplicate prompt": 4,
+  "string_manipulation: the answer is the input (gold verbatim in the prompt)": 7,
+  "tower_of_hanoi: duplicate prompt": 23
+ },
+ "by_stratum": {
+  "primary.abstract_analogical": 56,
+  "primary.compositional_generalization": 365,
+  "primary.task_contained_deduction": 419,
+  "supporting.code_algorithmic": 153,
+  "supporting.math_new": 170
+ },
+ "by_module": {
+  "mathematics_dataset/algebra__linear_1d_composed": 20,
+  "mathematics_dataset/algebra__polynomial_roots_composed": 8,
+  "mathematics_dataset/calculus__differentiate_composed": 20,
+  "mathematics_dataset/comparison__sort_composed": 20,
+  "mathematics_dataset/numbers__gcd_composed": 20,
+  "mathematics_dataset/polynomials__evaluate_composed": 20,
+  "mathematics_dataset/probability__swr_p_sequence": 20,
+  "prontoqa/fictional_ontology": 72,
+  "reasoning_core/analogical_case_matching": 56,
+  "reasoning_core/controlled_code_execution": 56,
+  "reasoning_core/dynamic_programming": 56,
+  "reasoning_core/logic_derivation": 56,
+  "reasoning_core/multistep_evidence_retrieval": 56,
+  "reasoning_core/planning": 56,
+  "reasoning_core/rule_switching": 56,
+  "reasoning_gym/bf": 41,
+  "reasoning_gym/binary_matrix": 42,
+  "reasoning_gym/cryptarithm": 42,
+  "reasoning_gym/family_relationships": 42,
+  "reasoning_gym/game_of_life": 42,
+  "reasoning_gym/largest_island": 42,
+  "reasoning_gym/mini_sudoku": 42,
+  "reasoning_gym/n_queens": 29,
+  "reasoning_gym/polynomial_equations": 42,
+  "reasoning_gym/rotate_matrix": 31,
+  "reasoning_gym/self_reference": 38,
+  "reasoning_gym/spiral_matrix": 42,
+  "reasoning_gym/string_manipulation": 35,
+  "reasoning_gym/tower_of_hanoi": 19,
+  "reasoning_gym/zebra_puzzles": 42
+ },
+ "answer_types": {
+  "assignment": 42,
+  "bool": 72,
+  "checker": 228,
+  "decimal_set": 42,
+  "int_set": 56,
+  "matrix": 157,
+  "number": 140,
+  "repr": 56,
+  "text": 76,
+  "text_ci": 196,
+  "token_seq": 98
+ },
+ "isolation": {
+  "pass": true,
+  "violations": [],
+  "R7_items_with_any_grid_match": 44,
+  "R2_flagged": 0
+ },
+ "sha256": "843dff8faf0e7d577cd0db217191d704c909bbe614ef87fd12f04e1197737127",
+ "approved_for_generation": false,
+ "authorizes": "nothing"
+}

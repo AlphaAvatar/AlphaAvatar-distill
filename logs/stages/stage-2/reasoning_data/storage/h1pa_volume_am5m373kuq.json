@@ -1,0 +1,124 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.storage_record/v1",
+ "volume_id": "am5m373kuq",
+ "name": "aad-h1pa",
+ "provider": "RunPod network volume",
+ "data_center_id": "EUR-IS-2",
+ "size_gb": 30,
+ "created_utc": "2026-10-24T19:01:25Z",
+ "provider_reported": {
+  "size": 30,
+  "dataCenterId": "EUR-IS-2",
+  "read": "account_resources() right after the create, known=True"
+ },
+ "rate_usd_per_gb_month": 0.07,
+ "_rate": "h1pa.json :: storage.rate_usd_per_gb_month",
+ "reserved_usd": 4.2,
+ "_reserved": "30 GB x $0.07 x 2 months, booked inside the H1-PA PA2v/PA2 $50 envelope from creation (h1pa_governance.spent) until this record states actual_usd",
+ "datacenter_choice": "live query 2026-10-24T19:00Z: storage support and L40S stock Low in EU-NL-1, EUR-IS-2, US-MO-1, US-NC-1 (OC-AU-1 and US-TX-4 have L40S but no network volumes; US-IL-1 and US-TX-3 no L40S stock); EUR-IS-2 chosen, no measurement distinguishes the four; the volume locks every PA2v/PA2 session to EUR-IS-2 and the L40S",
+ "consumer": "H1-PA PA2v and PA2: the durable root <mount>/h1pa -- the four new checkpoints, a training's save points while it runs, the evaluation progress and evidence",
+ "retention": "all four checkpoints are kept until BOTH the H1-PA independent review and the mixed-calibration study's analysis and review are complete (declared_future_use); then a consumer audit and a migration or retirement proposal go to the maintainer; no AGENTS.md 2.5 automatic retirement before then",
+ "retire_by": "2026-12-24 at the end of the reservation, or by the maintainer's lifecycle decision; keeping it past the reservation is booked here first",
+ "cost_to_date": {
+  "provider_observed_usd": 0.1021,
+  "_provider_observed": "logs/budget/provider/runpod_billing_2026-10-25T1512Z.json :: networkvolumes, the 2026-10-24 ($0.0525) and 2026-10-25 ($0.0496, partial day) rows; the provider's volume rows carry no volume id, and am5m373kuq is the account's only network volume since H1's 1980hnh75i was retired on 2026-10-24, so the 2026-10-24 row may still include part of that volume's last day",
+  "run_rate_usd_per_month": 2.1,
+  "_run_rate": "30 GB x $0.07/GB-month, billed on the provisioned size, not the bytes on it",
+  "booked": "reserved_usd stays the booking until the volume is retired; then actual_usd replaces it"
+ },
+ "contents_after_pa2": {
+  "members": [
+   {
+    "path": "<mount>/h1pa/D4-Original-s20260726/checkpoint",
+    "kind": "formal student weights (fp32)",
+    "bytes": 2384236592,
+    "artifact_digest": "09ea0c57c4d89e4949a2e21707ed8ac2eb6f4501ec6aa2fac653a6dcab6d8788",
+    "weights_digest": "76880fa5c5018b9ec0e3e9943abf914f3ff9cd989bfc399ccf63eb859b01785b",
+    "identity_record": "logs/stages/stage-2/reasoning_data/units/D4-Original-s20260726/checkpoint.descriptor.json"
+   },
+   {
+    "path": "<mount>/h1pa/D4-Augmented-s20260726/checkpoint",
+    "kind": "formal student weights (fp32)",
+    "bytes": 2384236592,
+    "artifact_digest": "6889b9c97c0d16f0e17e0f746857701e195b40304c27cebf10dfd6da12fc13f7",
+    "weights_digest": "411e4ff76ae7f001cbb382db5410085135af6955926a7ea29810d2c7be3b78c4",
+    "identity_record": "logs/stages/stage-2/reasoning_data/units/D4-Augmented-s20260726/checkpoint.descriptor.json"
+   },
+   {
+    "path": "<mount>/h1pa/D4-Original-s20260801/checkpoint",
+    "kind": "formal student weights (fp32)",
+    "bytes": 2384236592,
+    "artifact_digest": "f1db9febdd8d66dcb29c35649a428d3fe92661941851a6f9bdb55c94946b93d9",
+    "weights_digest": "c8259e9f8f2ff1be075a3ad95d16a0d4d98c2757538dda43d8e836d310596f6b",
+    "identity_record": "logs/stages/stage-2/reasoning_data/units/D4-Original-s20260801/checkpoint.descriptor.json"
+   },
+   {
+    "path": "<mount>/h1pa/D4-Augmented-s20260801/checkpoint",
+    "kind": "formal student weights (fp32)",
+    "bytes": 2384236592,
+    "artifact_digest": "2cbbee9ea52b27db3258fa4bb945159dc0375431edfdb0ce60c074543191702a",
+    "weights_digest": "be5f48ab4f39d91379a91785519e9594457edec33adcd69e7e665bd9b6e3a57b",
+    "identity_record": "logs/stages/stage-2/reasoning_data/units/D4-Augmented-s20260801/checkpoint.descriptor.json"
+   }
+  ],
+  "bytes": 9536946368,
+  "save_points": "none: the driver released each training's save points after its checkpoint was persisted and re-identified (units/<unit>/attempts.jsonl :: released)",
+  "other": "evaluation progress and evidence per unit (bounded by h1pa.json :: storage.bytes.evaluation_per_unit_bound); every unit's evidence is also on the relay and the dev box",
+  "_basis": "the persisted-unit descriptors and the attempt journals; the volume was not re-listed (no pod is running)"
+ },
+ "consumer_audit": {
+  "audited_utc": "2026-10-25T15:40Z",
+  "launchers_setups_plans_drivers": "none reads them: h1pa_launch stages only E1's packs and the PCA-Original checkpoints from the relay (h1pa.json :: relay_inputs); h1pa_driver writes <mount>/h1pa/<unit>/checkpoint and reads it back only to evaluate the unit it trained; no other script, config or plan names <mount>/h1pa",
+  "analysis": "h1pa_analysis reads the six units' evidence only (reports, rows, generation summaries, formal reports), never weights",
+  "declared": "the maintainer's independent scientific review (h1pa.json :: retention.new_checkpoints): KEEP until it is complete",
+  "protected_elsewhere": "the two PCA-Original checkpoints are E1's, on the relay, not on this volume; never retrained or deleted"
+ },
+ "declared_future_use": {
+  "declared_utc": "2026-10-26",
+  "decided_by": "maintainer brief 2026-10-26 (Mixed Calibration 2x, section 5): the two D4-Augmented checkpoints are the formal control of the next initialization study; they are not retired for want of a code consumer before that consumer completes",
+  "D4-Augmented-s20260726": "FORMAL CONTROL of the mixed-calibration study (logs/stages/stage-0/calibration_volume/plans/mixed_preregistration.json): its evaluation evidence is reused as scored and never regenerated; the weights are the retained control anchor (AGENTS.md 2.5 'explicitly retained anchor') until that study's analysis and the maintainer's review are complete",
+  "D4-Augmented-s20260801": "the same",
+  "D4-Original-s20260726": "H1-PA's comparison A/B arm: retained until H1-PA's independent review closes; no declared consumer in the mixed-calibration study",
+  "D4-Original-s20260801": "the same",
+  "what_reads_the_weights": "nothing in the mixed-calibration design: its decision reads the D4-Augmented rows and generations only (AGENTS.md P8.4: completed and scored, evidence not bytes). Retention is a scientific anchor, not an execution dependency; a later authorized consumer (re-evaluation on a future registered eval set, continued training from D4-Augmented, a diagnostic on the control's weights) mounts the volume in EUR-IS-2 and reads them in place",
+  "mixed_study_use_of_the_volume": "if MC2 is granted, its two Mix-Augmented checkpoints are written here beside the four (peak about 24.0 GB during its second training, 14.8 GB after), so treatment and control share one datacenter and GPU class (logs/stages/stage-0/calibration_volume/plans/mixed_application.json)"
+ },
+ "proposal": {
+  "status": "PROPOSED (revised 2026-10-26 for the declared future use); nothing is deleted or moved before the maintainer decides",
+  "recommended": "keep all four in place on am5m373kuq (EUR-IS-2) through both reviews: $2.10/month, already reserved to 2026-12-24 inside H1-PA's booking. If either review is still open on 2026-12-24, book one more month ($2.10) here before that date, by maintainer decision, rather than migrate. After both close: (a) no authorized consumer -> retire the weights under AGENTS.md 2.5 with tombstones carrying the digests above, then delete the volume; (b) an authorized follow-up -> it reads them in place",
+  "safe_migration_if_ever_required": [
+   "only on a maintainer decision, and only to a destination whose free capacity was read from its quota endpoint first: the HF relay's private storage accepted about 2 GB on 2026-10-22 (plans/durability_plan.json) against 9.54 GB here (14.3 GB with the Mix-Augmented pair), and the dev box has 3.8 GB free",
+   "one pod in EUR-IS-2 mounting am5m373kuq (the volume cannot be read otherwise), priced and capped like any paid session",
+   "sha256 every checkpoint against its unit descriptor before the copy, copy (runpodctl send/receive or the provider's S3-compatible endpoint), and sha256 again at the destination",
+   "write a migration record (source, destination, both hashes, sizes, time) and only then delete the volume; a tombstone for anything retired"
+  ],
+  "not_recommended": "migrating now: no consumer needs the bytes elsewhere, a migration costs a pod and a transfer, and no destination with room has been confirmed",
+  "cost_of_keeping": "$2.10/month; reserved through 2026-12-24"
+ },
+ "actual_usd": null,
+ "authorizes": "nothing",
+ "contents_after_mc2": {
+  "recorded_utc": "2026-10-27T00:00:00Z",
+  "members_added": [
+   {
+    "path": "<mount>/mixed_v2/Mix-Augmented-s20260726/checkpoint",
+    "kind": "formal student weights (fp32)",
+    "bytes": 2384236592,
+    "artifact_digest": "e94d9b0be13b6559539394d4beb4c9d37049b15853709a140566c5015aba25f5",
+    "weights_digest": "a9dde08825c3f307d0c81b517d397b816d400e626f8e4b76dd8e03b378088640",
+    "identity_record": "logs/stages/stage-0/calibration_volume/units/Mix-Augmented-s20260726/checkpoint.descriptor.json"
+   },
+   {
+    "path": "<mount>/mixed_v2/Mix-Augmented-s20260801/checkpoint",
+    "kind": "formal student weights (fp32)",
+    "bytes": 2384236592,
+    "artifact_digest": "ba3a476d45efaa3901611d9f75a672f84dacf6fcc25f92340756ce9830a7e09f",
+    "weights_digest": "624a17599c90272d509b2977d30d27852747300a30f4f2933107163259387455",
+    "identity_record": "logs/stages/stage-0/calibration_volume/units/Mix-Augmented-s20260801/checkpoint.descriptor.json"
+   }
+  ],
+  "written_by": "the mixed-calibration study's MC2 (runs/mixr_20261026_140539); the driver's volume probe before MC2 counted 9,943,482,064 bytes on the mount, so about 14.7 GB are held now, inside the provider's 30 GB",
+  "retention": "kept until the mixed-calibration study's analysis and independent review are complete (grant :: retention); then a consumer audit and a retirement or migration proposal go to the maintainer with the four H1-PA checkpoints",
+  "money": "the volume's cost stays booked here (reservation to 2026-12-24); MC2 added no storage charge of its own"
+ }
+}

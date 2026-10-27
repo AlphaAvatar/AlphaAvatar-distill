@@ -664,7 +664,8 @@ def budget(args) -> BudgetSpec:
     every leaf it does secure is verified off-pod. Under attempt 3's measured
     timings all five fit comfortably.
     """
-    from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
+    from aadistill.infrastructure.budget import Phase
+    from shared.step_times import MEASURED_STEP_SECONDS
 
     leaves = RS.build_replay_leaves(REPO_ROOT, device="cuda")
     reconstruction = sum(leaf.bounded_minutes for leaf in leaves)

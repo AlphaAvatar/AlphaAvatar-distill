@@ -10,7 +10,10 @@ generator (only the engine and the tokenizer/config loaders are stubbed) twice
 * sidecar ids equal to the ids the engine emitted, including a request the
   degeneration stop truncated, each verified against its record;
 * a run whose generator digest is not the expected one is left unhooked and
-  says so, and the tokenizer loader is restored either way.
+  says so, and the tokenizer loader is restored either way;
+* under a decoding protocol (``--decoding``) every request samples with the
+  protocol's parameters and its own seed, and each record carries that seed and
+  its output token ids; without one, the frozen greedy call is unchanged.
 
 The engine's scheduling and kernels are not exercised -- a stub cannot -- which
 is why the wrapper adds no work inside the engine loop at all.
@@ -59,7 +62,7 @@ def _no_gen_config(*a, **k):
     raise OSError("no generation config in the stub")
 transformers.GenerationConfig.from_pretrained = _no_gen_config
 
-TRUTH = {}
+TRUTH, PARAMS = {}, {}
 
 class SamplingParams:
     def __init__(self, **kw):
@@ -69,6 +72,7 @@ class Engine:
     def __init__(self):
         self.plan, self.out, self.alive, self.order = {}, {}, [], 0
     def add_request(self, rid, prompt, params):
+        PARAMS[rid] = {k: v for k, v in params.kw.items() if k != "stop_token_ids"}
         n, i = params.kw["max_tokens"], self.order
         self.order += 1
         if i % 3 == 0:
@@ -121,7 +125,7 @@ try:
 except SystemExit as e:
     rc = e.code
 Path(truth_path).write_text(json.dumps({
-    "rc": rc, "truth": TRUTH,
+    "rc": rc, "truth": TRUTH, "params": PARAMS,
     "loader_restored": transformers.AutoTokenizer.__dict__["from_pretrained"]
                        is STUB_TOK}))
 '''
@@ -263,3 +267,29 @@ def test_verify_rows_catches_a_wrong_id_list():
     out = W.verify_rows([rec], bad, [2])
     assert not out["exact"] and any("eos" in p for p in out["problems"])
     assert W.row_alignment(rec, bad["x"], [2])["aligned"] is False
+
+
+PROTOCOL = REPO / "configs/shared/evaluation/decoding/nucleus_v1.json"
+
+
+def test_a_decoding_protocol_samples_with_its_seed_and_records_tokens(runs, tmp_path):
+    from shared.evaluation import decoding as DEC
+    from shared.evaluation.uncapped_eval import SAMPLING
+    tmp, _digest, plain, _wrapped, _stale = runs
+    proto = DEC.load(PROTOCOL)
+    nucleus = _run(tmp_path, "plain", tmp_path / "nucleus", ["--decoding", str(PROTOCOL)])
+    assert nucleus["rc"] == 0
+    for rid, kw in plain["params"].items():
+        assert {k: kw[k] for k in SAMPLING} == SAMPLING and "seed" not in kw, rid
+    for stem in ("set_a", "set_b"):
+        recs = [json.loads(l) for l in (tmp_path / "nucleus" / f"{stem}.generations.jsonl").read_text().splitlines()]
+        for r in recs:
+            rid = f"arm::{stem}::{r['id']}"
+            kw = nucleus["params"][rid]
+            assert {k: kw[k] for k in DEC.sampling(proto)} == DEC.sampling(proto)
+            assert kw["seed"] == r["sampling_seed"] == DEC.request_seed(proto, stem, r["id"])
+            assert r["output_token_ids"] == nucleus["truth"][rid][:len(r["output_token_ids"])]
+            assert r["stop_reason"] in ("eos", "degeneration", "context_limit")
+        summary = json.loads((tmp_path / "nucleus" / f"{stem}.json").read_text())
+        assert summary["decoding_protocol"]["sha256"] == proto["sha256"]
+        assert summary["sampling"]["temperature"] == 0.6 and summary["sampling"]["top_k"] == -1

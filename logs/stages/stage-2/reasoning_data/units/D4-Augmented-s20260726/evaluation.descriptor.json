@@ -1,0 +1,181 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.persisted_unit/v2",
+ "unit": "D4-Augmented-s20260726",
+ "kind": "evaluation",
+ "started_utc": "2026-10-25T05:47:31Z",
+ "files": [
+  {
+   "name": "eval_capability.log",
+   "sha256": "31628a3aa87986fa8ff8e914b0d2cdb4d528c3df0ae7ac90cdcd45100472016a",
+   "bytes": 15113
+  },
+  {
+   "name": "eval_fluid.log",
+   "sha256": "4efb521577661dcb5cbd2a056ea81931d667907e5b27b835ea7f562be5b0e860",
+   "bytes": 18617
+  },
+  {
+   "name": "formal_report.json",
+   "sha256": "90399a54b2930d419d0a9b66165fbc6434b7b8d3f7677aeb30aa824f305bb08b",
+   "bytes": 32262
+  },
+  {
+   "name": "generations/fluid_reasoning_720__dev_v1.jsonl",
+   "sha256": "dd60a376e06024382cc4a592cdb86ba1322546098ec4fdcb491d8ab75b43d481",
+   "bytes": 37561329
+  },
+  {
+   "name": "generations/fluid_reasoning_720__dev_v1.summary.json",
+   "sha256": "9be765d63d770ae4fc572c883b9adcdb0773499b2ccdc22bf13a836736c69e4b",
+   "bytes": 3467
+  },
+  {
+   "name": "generations/stage3_capability_846__answerability_paired.jsonl",
+   "sha256": "69dc136ef5f974c7c61eb96708f5e782a12c8d1077a01e2154bb27b4cd4d7878",
+   "bytes": 781494
+  },
+  {
+   "name": "generations/stage3_capability_846__answerability_paired.summary.json",
+   "sha256": "2ed77806b13c7e59fb772da2d699bd868d25937cf9e45bf1e949dd6c64acc7a6",
+   "bytes": 6516
+  },
+  {
+   "name": "generations/stage3_capability_846__eval_behavior_v0.jsonl",
+   "sha256": "86432219131425e3d2f20267d33ba991842ea2ac17cc5a525ea0b4fa6716b0a4",
+   "bytes": 1078339
+  },
+  {
+   "name": "generations/stage3_capability_846__eval_behavior_v0.summary.json",
+   "sha256": "191783a3532ff6b246628673865e3bd86f0c903b95126b27cf7f9c94e2142cd7",
+   "bytes": 8872
+  },
+  {
+   "name": "generations/stage3_capability_846__gsm8k.jsonl",
+   "sha256": "021730946a0fda6dc8d0850cbc57de3ae378e5aa7f3185db7f3a8971da97c202",
+   "bytes": 942451
+  },
+  {
+   "name": "generations/stage3_capability_846__gsm8k.summary.json",
+   "sha256": "f849ce49d0eadf71d48300d6290e4b9fb1c77b2d606d8e5cd4ec4dd6f30c5d09",
+   "bytes": 6518
+  },
+  {
+   "name": "generations/stage3_capability_846__knowledge.jsonl",
+   "sha256": "8a077942481bfa6083e3d794a7071033f2d53a756a90e8e0a0fcddea0117462d",
+   "bytes": 3334999
+  },
+  {
+   "name": "generations/stage3_capability_846__knowledge.summary.json",
+   "sha256": "20051ef90db6ebebca855399cc72e0afa7824eec7b87a721d6037389ecf55cd5",
+   "bytes": 6500
+  },
+  {
+   "name": "generations/stage3_capability_846__math_verified.jsonl",
+   "sha256": "cc62b23738fcf5e52455232385f738cca2d0d0f90f48d1e178687f908b7a2ef5",
+   "bytes": 1976092
+  },
+  {
+   "name": "generations/stage3_capability_846__math_verified.summary.json",
+   "sha256": "c3d52a10f4ac88dd24a289f868206b2fbaa62b3644f96d9df202659da146207d",
+   "bytes": 6513
+  },
+  {
+   "name": "generations/stage3_capability_846__multihop.jsonl",
+   "sha256": "d8584c7904cf634f04f23d847fe62fa5b99f9f84cf4c7a5a05fe23336a70ceca",
+   "bytes": 1266574
+  },
+  {
+   "name": "generations/stage3_capability_846__multihop.summary.json",
+   "sha256": "d4aa1130875e269c2d93e7994e9026f32e1761ee3ebeb07bda4c67a1fb2e3e55",
+   "bytes": 6473
+  },
+  {
+   "name": "generations/stage3_capability_846__rag.jsonl",
+   "sha256": "fcc2ba6d989555d0ad5a437ada9c336afe012a5afb4e0a1230d9b711161fc65d",
+   "bytes": 587304
+  },
+  {
+   "name": "generations/stage3_capability_846__rag.summary.json",
+   "sha256": "b44bb9bdcba3924a079c1632e701f2b4936f0f6475d7291b49ed9b808c23f643",
+   "bytes": 6457
+  },
+  {
+   "name": "generations/stage3_capability_846__safety_paired.jsonl",
+   "sha256": "6048be6a3f4a4c387b926655d041b4568a71d18327cfec920fd9bf39dbdcaaa7",
+   "bytes": 2729570
+  },
+  {
+   "name": "generations/stage3_capability_846__safety_paired.summary.json",
+   "sha256": "14578536d823dbf802b92e6b26ceb10c1ada6b22a00d102e54a3b21cee5f27ba",
+   "bytes": 6486
+  },
+  {
+   "name": "generations/stage3_legacy_150__items.jsonl",
+   "sha256": "3dd0f3c3726d9b4b8b33eb0e4d1f1b5f0a246ce8ed8fa88aca6b1bd129de094b",
+   "bytes": 1642912
+  },
+  {
+   "name": "generations/stage3_legacy_150__items.summary.json",
+   "sha256": "58823d996429a91b2f735cf8fe8f121e23982ecf4a2149ef72a1345994863b8a",
+   "bytes": 7625
+  },
+  {
+   "name": "rows/fluid_reasoning_720__dev_v1.rows.jsonl",
+   "sha256": "3d449597d722978e6f79821f222e77351f5b99f8a90a4ee9c89ebc8b3dce1773",
+   "bytes": 77672
+  },
+  {
+   "name": "rows/stage3_capability_846__answerability_paired.rows.jsonl",
+   "sha256": "416dfe1c3dc74f731945d8a65ac9b484ef9e8cb4928ae95159bb6ab14ebc7f60",
+   "bytes": 14901
+  },
+  {
+   "name": "rows/stage3_capability_846__eval_behavior_v0.rows.jsonl",
+   "sha256": "4abe3e66fa6a41c00830b82f51069d6f9a91f9abf95d8828521a9b9c545f3d26",
+   "bytes": 27379
+  },
+  {
+   "name": "rows/stage3_capability_846__gsm8k.rows.jsonl",
+   "sha256": "48b4318fa0a9de5dba966ebf37c3dac8e1844569552d1101a4904889dbcd36ec",
+   "bytes": 9028
+  },
+  {
+   "name": "rows/stage3_capability_846__knowledge.rows.jsonl",
+   "sha256": "c1c6d3dfd085f8358ab3b537687956932c756f4e64fb6e84a233638e8a98dcfa",
+   "bytes": 13790
+  },
+  {
+   "name": "rows/stage3_capability_846__math_verified.rows.jsonl",
+   "sha256": "ac72f144aa672ddb1cf3b8cdb6bbf45b1200855d4750f0cd7f93a462956aa287",
+   "bytes": 11120
+  },
+  {
+   "name": "rows/stage3_capability_846__multihop.rows.jsonl",
+   "sha256": "f078e59f99de2933205473c75c1d642061af1d934699d36bebabe083ed91af8e",
+   "bytes": 10820
+  },
+  {
+   "name": "rows/stage3_capability_846__rag.rows.jsonl",
+   "sha256": "19d0dc0b263d914571c039d3594e8379fb818ba7365d1f3550b481f2a08c19a8",
+   "bytes": 10043
+  },
+  {
+   "name": "rows/stage3_capability_846__safety_paired.rows.jsonl",
+   "sha256": "52b627f4846df49ec480a999e35b06b95e213b00d2db9c2a7a7f73a01750940d",
+   "bytes": 10380
+  },
+  {
+   "name": "rows/stage3_legacy_150__items.rows.jsonl",
+   "sha256": "b0a9087eb9f4d6dda715358c60615b40c1142be89e894beabad91ca1faeb94e1",
+   "bytes": 9227
+  },
+  {
+   "name": "unit_inputs.json",
+   "sha256": "6154f660ba3113933fa5f4e740dda2743a5303094379813708cc25c4f97bc63c",
+   "bytes": 1041
+  }
+ ],
+ "destination": "/runpod-volume/h1pa/D4-Augmented-s20260726/evaluation",
+ "persisted": true,
+ "finished_utc": "2026-10-25T05:47:31Z"
+}

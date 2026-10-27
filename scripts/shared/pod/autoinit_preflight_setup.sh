@@ -1175,6 +1175,72 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'training {a.allows_recovery_training}, full search {a.authorizes_c2_full_search}, '
       f'later cycles {a.authorizes_later_cycles}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "stage2_h1_generation" ]; then
+  # H1's teacher-generation type (Stage 2: P1, or P1t's top-up). Its artifact
+  # binds a LAUNCH IDENTITY -- the generation plan its phase names, the
+  # generation protocol, the run inputs and the task pools, each hashed on disk
+  # -- and the harness; both are recomputed HERE from the pod's own files, so a
+  # protocol or input that differs from the granted one fails at setup, not
+  # after generation has been paid for. Without this branch SESSION_KIND would
+  # fall through to `spend` and read the artifact through the wrong type.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.reasoning_data.governance import H1GenerationAuthorization, launch_hash, plan_of
+a = H1GenerationAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+lid = launch_hash('.', plan_of(a))
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+a.require_plan(lid)
+h = a.require_harness('.')
+assert a.allows('teacher_generation') is True, 'an H1 generation session needs a generation authorization'
+assert a.allows('training') is False and a.allows('paid_storage') is False, 'generation trains nothing and buys no storage'
+print(f'  {a.authorization_id}: hard \${a.hard_cap_usd:.4f}, launch {lid[:12]}, harness {h[\"digest\"][:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "stage2_h1_units" ]; then
+  # H1's unit type (Stage 2: P1g's GPU validation or P2's formal units). Its
+  # artifact names its KIND and loads only under that kind's policy, so a
+  # validation grant cannot fund a formal unit. It binds the UNITS IDENTITY --
+  # the units config, the comparison design, the accounting record owning the
+  # schedule, the initialization record, the frozen recipe and the pack
+  # identities -- and the harness; both are recomputed HERE from the pod's own
+  # files before the driver runs.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.reasoning_data.unit_governance import H1UnitAuthorization, units_hash
+a = H1UnitAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+ident = units_hash('.')
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+a.require_plan(ident)
+h = a.require_harness('.')
+kind = a.stage_conditions['kind']
+assert a.allows(kind) is True, 'the artifact does not authorize its own kind'
+assert a.allows('training') is True and a.allows('evaluation') is True, 'a unit session trains and evaluates'
+assert a.allows('teacher_generation') is False, 'a unit session generates no teacher data'
+print(f'  {a.authorization_id}: {kind}, hard \${a.hard_cap_usd:.4f}, units {ident[:12]}, harness {h[\"digest\"][:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "stage2_h1pa" ]; then
+  # H1-PA's student type (Stage 2: PA2v's GPU validation or PA2's formal
+  # units), the sibling of stage2_h1_units under H1-PA's own grant. Its artifact
+  # names its KIND and loads only under that kind's policy. It binds the STUDY
+  # IDENTITY -- the study config, the preregistration, the decoding protocol,
+  # the initialization record, both E1 configs, and the packs' and PCA-Original
+  # checkpoints' identities -- and the harness; both are recomputed HERE.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.reasoning_data.h1pa_governance import H1PAAuthorization, study_hash
+a = H1PAAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+ident = study_hash('.')
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+a.require_plan(ident)
+h = a.require_harness('.')
+kind = a.stage_conditions['kind']
+assert a.allows(kind) is True, 'the artifact does not authorize its own kind'
+assert a.allows('training') is True and a.allows('evaluation') is True, 'an H1-PA session trains and evaluates'
+assert a.allows('teacher_generation') is False, 'an H1-PA session generates no teacher data'
+print(f'  {a.authorization_id}: {kind}, hard \${a.hard_cap_usd:.4f}, study {ident[:12]}, harness {h[\"digest\"][:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   # A THIRD type, not a relaxation of the second. The continuation's artifact
   # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend

@@ -1,0 +1,34 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.volume_tombstone/v1",
+ "volume_id": "t6yrsvujha",
+ "name": "aad-mixed-mc1",
+ "data_center_id": "EUR-IS-1",
+ "size_gb": 150,
+ "created_utc": "2026-10-26T10:28:36Z",
+ "status": "DELETED",
+ "intent_utc": "2026-10-26T14:04:36Z",
+ "deleted_utc": "2026-10-26T14:04:38+00:00",
+ "deletion_criterion": "the grant's MC1 term: deleted after the Top-1 and the search evidence are durable and read back (AGENTS.md 2.5: the states have no consumer once the Top-1 is on the relay and re-identified on the dev box)",
+ "why": "MC1 is COMPLETE (runs/mixs_20261026_103634/closeout/outcome.json): the search is terminal and committed k=1; its Top-1 is on the relay (stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/, LFS sha256 4b86c1fd...) and was downloaded and re-identified on the dev box (assets/mix_top1_materialization.json, verified); the search records, journal and telemetry are secured off-pod and hashed in the closeout. The volume's 34 materialized states have no consumer left: MC2 reads the Top-1 from the relay, and no plan, launcher or driver reads the other states (the grant's MC1 term).",
+ "canonical_surviving_evidence": [
+  "logs/stages/stage-0/calibration_volume/assets/mix_top1_materialization.json",
+  "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_103634/closeout/outcome.json",
+  "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_103634/evidence/2x",
+  "/home/ecs-user/aad-artifacts/stage0_calvol/mixs_20261026_103634/store",
+  "AlphaAvatar/aadistill-artifacts:stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333"
+ ],
+ "references_at_deletion": [
+  "docs/stages/stage-0/calibration_volume/MIXED.md",
+  "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_102914/closeout/outcome.json",
+  "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_102914/governance/authorization.json",
+  "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_102914/runtime/session.json",
+  "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_103634/governance/authorization.json",
+  "logs/stages/stage-0/calibration_volume/runs/mixs_dry_20261026_102813/runtime/session.json",
+  "logs/stages/stage-0/calibration_volume/runs/mixvol_20261026_102835/closeout/outcome.json",
+  "logs/stages/stage-0/calibration_volume/runs/mixvol_20261026_102835/runtime/session.json",
+  "logs/state/current.json",
+  "logs/state/current.md"
+ ],
+ "delete_command": "runpodctl network-volume delete t6yrsvujha",
+ "provider_confirms_gone": true
+}

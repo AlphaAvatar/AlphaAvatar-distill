@@ -1,0 +1,176 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.persisted_unit/v2",
+ "unit": "A-s20260726",
+ "kind": "evaluation",
+ "started_utc": "2026-10-24T02:23:06Z",
+ "files": [
+  {
+   "name": "eval_capability.log",
+   "sha256": "784405421c864044d3ecab1ec8028379e0dfd43ce488a42ed23b973f1c9e93d7",
+   "bytes": 14565
+  },
+  {
+   "name": "eval_fluid.log",
+   "sha256": "f3be5abda4827fcabccfd62b7699add9ce96bedae6821979628326159c9c438e",
+   "bytes": 16376
+  },
+  {
+   "name": "formal_report.json",
+   "sha256": "33258864fd7a521fa972ecd50e9d9a3d63da43342713d36b0023187e8259c172",
+   "bytes": 32126
+  },
+  {
+   "name": "generations/fluid_reasoning_720__dev_v1.jsonl",
+   "sha256": "1b64eb61a6f596da92e71ad1869a9dcaaaa7966d42f187756abfecbdf279fd22",
+   "bytes": 9983824
+  },
+  {
+   "name": "generations/fluid_reasoning_720__dev_v1.summary.json",
+   "sha256": "95195777c989707d95ca8404d4897b550def08c4a7dd2934354c574222bb6f99",
+   "bytes": 2181
+  },
+  {
+   "name": "generations/stage3_capability_846__answerability_paired.jsonl",
+   "sha256": "74e57ccad14aa9918239cd6e0cdc4d29e4997ac044d516c0a96d4a1f691a8f73",
+   "bytes": 445447
+  },
+  {
+   "name": "generations/stage3_capability_846__answerability_paired.summary.json",
+   "sha256": "c4e632fdc3f13359b4d6ef47543d11286c83c07d61d9747740ca2d4054615f36",
+   "bytes": 5320
+  },
+  {
+   "name": "generations/stage3_capability_846__eval_behavior_v0.jsonl",
+   "sha256": "b6469842d705456ce0e984f1df438cbec7d4a497a57689e81ef8f6da2708f85e",
+   "bytes": 315402
+  },
+  {
+   "name": "generations/stage3_capability_846__eval_behavior_v0.summary.json",
+   "sha256": "58265193b88ce47bf591faa7ed33941969623f64a15cbb90311279ee0cbff9dc",
+   "bytes": 7698
+  },
+  {
+   "name": "generations/stage3_capability_846__gsm8k.jsonl",
+   "sha256": "36b45e909ad517d593348c179b45448f79bd60ee9ecf527bc8d848e2d796185e",
+   "bytes": 400018
+  },
+  {
+   "name": "generations/stage3_capability_846__gsm8k.summary.json",
+   "sha256": "e913ac7aa8e53746620c3714c82bad9a0197db0adce74257aded0f3dabac971f",
+   "bytes": 5324
+  },
+  {
+   "name": "generations/stage3_capability_846__knowledge.jsonl",
+   "sha256": "1e6ab90f0c349ce97ec44a706a268127daa2125f6434b114df705bbaf6370c17",
+   "bytes": 749917
+  },
+  {
+   "name": "generations/stage3_capability_846__knowledge.summary.json",
+   "sha256": "fb4b03b01ed84988440d59ce28a2f04b804b563a461c074984af778196d2168b",
+   "bytes": 5296
+  },
+  {
+   "name": "generations/stage3_capability_846__math_verified.jsonl",
+   "sha256": "720c99c5057dbce8b4ab1b391dba5f4c0667aa87d66f0b45b32fc5b08b1d480c",
+   "bytes": 402637
+  },
+  {
+   "name": "generations/stage3_capability_846__math_verified.summary.json",
+   "sha256": "a3ebad41cf98018026710cc2aa391fb540b6886c54e3b410ff2f46b79ac3a5da",
+   "bytes": 5286
+  },
+  {
+   "name": "generations/stage3_capability_846__multihop.jsonl",
+   "sha256": "a6b4e51ba75ef452cd4c4d5f5b3a80f15c630a382d5ce3042203223fb4299852",
+   "bytes": 574387
+  },
+  {
+   "name": "generations/stage3_capability_846__multihop.summary.json",
+   "sha256": "08c43cc150a916210d4506ea22f3a3dd7a2249f6ba0491238dec2e7d5218dacc",
+   "bytes": 5278
+  },
+  {
+   "name": "generations/stage3_capability_846__rag.jsonl",
+   "sha256": "bc965604775521e77af85d3f52cc19b10ff5af1965ae4aa7f81640ce5cc920ff",
+   "bytes": 347933
+  },
+  {
+   "name": "generations/stage3_capability_846__rag.summary.json",
+   "sha256": "2a9a1fe3f34bfe4ca4350f805bb365e3ccd1c709986bd36dc8a7e738135b57cc",
+   "bytes": 5259
+  },
+  {
+   "name": "generations/stage3_capability_846__safety_paired.jsonl",
+   "sha256": "00ed55bf50b5740b3a298a8d333641d5046cab190c757ed00051dab07cb5dd85",
+   "bytes": 572721
+  },
+  {
+   "name": "generations/stage3_capability_846__safety_paired.summary.json",
+   "sha256": "9422a3c31310f70d8bbbf4dfc38d2911a8eca97988fae1f6abd77b1b9fe9fdb3",
+   "bytes": 5288
+  },
+  {
+   "name": "generations/stage3_legacy_150__items.jsonl",
+   "sha256": "c90a6b4feea5c7c5242466bbe00405e3ab8523dbfa0db71bea538e71e6c54c55",
+   "bytes": 690693
+  },
+  {
+   "name": "generations/stage3_legacy_150__items.summary.json",
+   "sha256": "935364c9331107b6b82aca11bc2e141c838d3e54e1adec466e6076911bb7a707",
+   "bytes": 6430
+  },
+  {
+   "name": "rows/fluid_reasoning_720__dev_v1.rows.jsonl",
+   "sha256": "d13b7df86b4ca814335dfa974b1edeace73b98170b51e6013ba469a5f0f2bea7",
+   "bytes": 73125
+  },
+  {
+   "name": "rows/stage3_capability_846__answerability_paired.rows.jsonl",
+   "sha256": "3a72e6a9e84a46a3964f512966cf12f78ce1adae622820a03d5f6e1d2f28b626",
+   "bytes": 14933
+  },
+  {
+   "name": "rows/stage3_capability_846__eval_behavior_v0.rows.jsonl",
+   "sha256": "5c6ad3dc854607cd9d303eb110261c98fca4238e5c9a75d9366ef63a7c0213d3",
+   "bytes": 27226
+  },
+  {
+   "name": "rows/stage3_capability_846__gsm8k.rows.jsonl",
+   "sha256": "3c833dcb1620fce0cdcdd85d2854a5e1a49f3fbcaf687edefb84f7368b2ed27a",
+   "bytes": 9384
+  },
+  {
+   "name": "rows/stage3_capability_846__knowledge.rows.jsonl",
+   "sha256": "5166d570cb2a59813abaf4e699c6d2fc6163a90450f58f80351ea2c389966cff",
+   "bytes": 14164
+  },
+  {
+   "name": "rows/stage3_capability_846__math_verified.rows.jsonl",
+   "sha256": "949ea6c032afd8a4599c6fa7598209e110b2125b2703c45bf44a8a34619e8eeb",
+   "bytes": 11559
+  },
+  {
+   "name": "rows/stage3_capability_846__multihop.rows.jsonl",
+   "sha256": "da25acd405d29932e22a9a6f14caa5b90bf0377fa533229277583dfd91ba2ae1",
+   "bytes": 11296
+  },
+  {
+   "name": "rows/stage3_capability_846__rag.rows.jsonl",
+   "sha256": "682af53e4956275749f7b816eaace6f3dbcaefbda390a5c9c115c34297a2bc08",
+   "bytes": 10196
+  },
+  {
+   "name": "rows/stage3_capability_846__safety_paired.rows.jsonl",
+   "sha256": "619a8d3ee726bb47cfb40f99ba5dd34189bdb6fdb117deac4eb3a9a7e6c88771",
+   "bytes": 10896
+  },
+  {
+   "name": "rows/stage3_legacy_150__items.rows.jsonl",
+   "sha256": "a904fec89b536cf23f3b2a1d75047945325c511162349d55fec4875e1a5ad8ee",
+   "bytes": 9241
+  }
+ ],
+ "destination": "/runpod-volume/h1/A-s20260726/evaluation",
+ "persisted": true,
+ "finished_utc": "2026-10-24T02:23:07Z"
+}

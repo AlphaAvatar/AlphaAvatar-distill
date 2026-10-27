@@ -1,0 +1,21 @@
+{
+  "schema": "aadistill.stage2.reasoning_data.ladder_plan/v1",
+  "study_id": "stage2.reasoning_data.nested_ladder",
+  "status": "PROPOSED plan (2026-10-21 UTC). Runs only after the old-vs-new comparison returns GO (plans/comparison_design.json :: decision_after). Budgets and rung training sizes are NOT frozen here.",
+  "rungs": [860000, 1600000, 2960000, 5500000],
+  "nesting": "D_0.86M ⊂ D_1.60M ⊂ D_2.96M ⊂ D_5.50M, all prefixes of ONE master order of stage2.reasoning_master@v1 (aadistill.data.nested_ladder.build_ladder); each rung's increment packed best-fit on its own so rung k is blocks[:n_k]; the in-training validation tail is reserved outside every rung",
+  "size_measure": "unique supervised assistant tokens",
+  "held_constant_across_rungs": "the stratum shares (corpus_spec.json :: shares), checked per rung as max_share_deviation; family coverage is reported per rung (round-robin ordering gives a small rung the most families its size allows)",
+  "recorded_per_rung": ["unique supervised tokens", "reasoning tokens", "answer tokens", "rendered (forward) tokens", "padding", "executed positions", "token exposure (supervised x epochs)", "FLOPs estimate", "steps", "epochs", "distinct families and generators per stratum", "difficulty composition", "max share deviation"],
+  "training": {
+    "independence": "every rung trains from the SAME initialization, independently; no rung continues another rung's checkpoint",
+    "regime": "fixed epochs (3), so training compute GROWS with the rung, as in E1; a fixed-compute ladder would be a separate protocol",
+    "recipe": "the comparison's fixed recipe and its compute contract (M1: truncate_padding on; steps follow the rung's blocks at the comparison's supervised tokens per step)",
+    "seeds": [20260726, 20260727],
+    "reuse": "the 2.96M rung's two units are the comparison's NEW arm, not retrained"
+  },
+  "comparability": "NOT comparable point-for-point with E1: E1 trained PCA initializations on corpus_v2 with a different packer (cut sessions). The curve is compared with E1 only descriptively.",
+  "analysis": "per unit and per axis, correctness and usability side by side at each rung; the dose-response is described (4 rungs x 2 seeds), with the rule-family cluster bootstrap per rung; no saturation point is claimed from four rungs",
+  "units_to_fund": "6 (3 new rungs x 2 seeds)",
+  "authorizes": "nothing"
+}

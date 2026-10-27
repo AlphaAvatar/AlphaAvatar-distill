@@ -352,6 +352,9 @@ def evaluate_all(model_dir: Path, out: Path, vol_gens: Path, label: str, prereg:
     gens.mkdir(exist_ok=True)
     sync("pull", vol_gens, gens, out / "sync.log")
     ctx = str(prereg["evaluation"]["trained_context"])
+    #: a decoding protocol the preregistration names; absent, both runners keep
+    #: their frozen greedy sampling
+    decoding = prereg["evaluation"].get("decoding")
     m = ES.manifest(SET_ID)
     runs = []
     fluid = gens / "fluid_reasoning_720__dev_v1.jsonl"
@@ -363,7 +366,9 @@ def evaluate_all(model_dir: Path, out: Path, vol_gens: Path, label: str, prereg:
                  "--model", str(pkg), "--label", label,
                  "--tasks", str(ES.unit_path(SET_ID, "fluid_reasoning_720", "dev_v1")),
                  "--mode", "eval", "--out", str(tmp), "--trained-context", ctx,
-                 "--action-protocol", prereg["evaluation"]["action_protocol"]],
+                 "--action-protocol", prereg["evaluation"]["action_protocol"]]
+                + (["--decoding", str(REPO / decoding), "--seed-namespace", "fluid_reasoning_720__dev_v1"]
+                   if decoding else []),
                 cwd=REPO, env=env, stdout=lf, stderr=subprocess.STDOUT).returncode
         if rc != 0:
             raise RuntimeError(f"run_battery exited {rc}; see eval_fluid.log")
@@ -391,7 +396,8 @@ def evaluate_all(model_dir: Path, out: Path, vol_gens: Path, label: str, prereg:
             rc = subprocess.run(
                 [VLLM_PY, "scripts/shared/evaluation/uncapped_eval.py", "--model", str(pkg),
                  "--label", label, "--prompts", *sorted(str(staged / f"{k}.jsonl") for k in missing),
-                 "--out-dir", str(raw), "--trained-context", ctx],
+                 "--out-dir", str(raw), "--trained-context", ctx]
+                + (["--decoding", str(REPO / decoding)] if decoding else []),
                 cwd=REPO, env=env, stdout=lf, stderr=subprocess.STDOUT).returncode
         if rc != 0:
             raise RuntimeError(f"uncapped_eval exited {rc}; see eval_capability.log")

@@ -1,0 +1,80 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1pa_training_grant/v1",
+ "granted_by": "maintainer (formal authorization message 'H1-PA PA2 Formal Authorization', received 2026-10-24 UTC / 2026-10-25 +08:00)",
+ "granted_utc": "2026-10-24",
+ "decision": "Maintainer approves H1-PA's formal GPU validation (PA2v) and student recovery (PA2) as one phase: PA2v, four D4 trainings, six nucleus_v1 evaluations of eval-set-1, the preregistered analysis, cost reconciliation and provider cleanup; PA2 follows a passed PA2v gate without a further approval; effective once the two pre-launch fixes are committed",
+ "branch": "stage2/reasoning-data",
+ "accepted_commit": "534a1d4b1076d28610e0897b6d1f85bde919a1b5",
+ "required_fixes": {
+  "commit": "534a4037",
+  "provider_fail_closed": "h1pa_governance.live_position refuses unless the balance, the resource listing and both billing queries are confirmed (snapshot_problems); provider_billing.fetch keeps the resource listing's own known state",
+  "step_floor": "h1pa_launch.pricing: step_seconds = max(committed L40S rate, PA2v measured median)",
+  "harness_digest_after": "95cd5c0ec47c012cb50f8bf262dee1ddac36af23879f49d0064c74d97657d4af",
+  "_harness": "supersedes the application's e86adfc9...; every authorization recomputes the harness on its own session commit and PA2v's gate must name the formal session's harness"
+ },
+ "study_identity_sha256": "d8a3c15ed32b6db386ca20934f80e1d17f6deb3bfb4b5e46711e611ed61fbb8c",
+ "application": {
+  "path": "logs/stages/stage-2/reasoning_data/plans/h1pa_training_application.json",
+  "sha256": "839f292c25519318334a0b26e0ca32cbb967f83f98948aa45639ca9cc181a420"
+ },
+ "fixed": {
+  "arms": {
+   "PCA-Original": "E1's two PCA 2.96M checkpoints, evaluate only, never retrained or deleted",
+   "D4-Original": "E1's original training set and recovery config, two seeds",
+   "D4-Augmented": "E1's training set + the 2,962,514-token fluid increment, two seeds"
+  },
+  "recipe": "E1's batch size, micro-batch size, optimizer, loss, tokenizer and training algorithm",
+  "seeds": [
+   20260726,
+   20260801
+  ],
+  "evaluation": "eval-set-1, every item, the frozen nucleus_v1 decoding protocol, generations, sampling seeds, stop reasons and per-item scores recorded",
+  "statistics": "logs/stages/stage-2/reasoning_data/plans/h1pa_preregistration.json, unchanged; FLOOR, INCONCLUSIVE and NOT_RESOLVED are valid outcomes; no completed formal measurement is rerun"
+ },
+ "phases": {
+  "PA2v": {
+   "kinds": [
+    "validation"
+   ],
+   "scope": "H1-PA PA2v GPU validation on L40S: real CUDA, the training config, checkpoints, SIGKILL/resume, persistence, nucleus_v1 and throughput; never a formal result"
+  },
+  "PA2": {
+   "kinds": [
+    "formal"
+   ],
+   "scope": "H1-PA PA2: the four frozen trainings (D4-Original and D4-Augmented x two seeds), the six nucleus_v1 evaluations, and their closeout"
+  }
+ },
+ "ceiling_usd": 50.0,
+ "ceiling_scope": "CUMULATIVE over PA2v and PA2: every attempt, engineering recovery, GPU, container disk, the network volume's storage and termination margins together; no session or attempt receives a fresh allocation",
+ "project_cumulative_cap_usd": 731.0,
+ "_project_cap": "raised by the maintainer from $712.17 to $731.00 for this phase; neither $50 nor $731 may be raised without a new maintainer decision",
+ "occupancy_basis_usd": 680.6673,
+ "_occupancy_basis": "provider all-time billing (pods + network volumes) at the grant, 0 pods, 0 volumes, $0/h (snapshot below); H1-PA sessions and storage are added from their records by remaining_envelope, and live_position re-reads the provider at every issue and launch",
+ "provider_snapshot": {
+  "path": "logs/budget/provider/runpod_billing_2026-10-24T1858Z.json",
+  "sha256": "d11c0a825fc4d34fd9048f52ab4ac6e73bd42c1ebb914d17b2e97f5f8456bf10"
+ },
+ "storage": {
+  "network_volume_gb_planned": 30,
+  "rule": "its whole cost, booked at its reservation until retired or trued up, is inside the ceiling; the four new checkpoints are kept until the formal analysis and the independent scientific review are complete, then a consumer audit and a migration or retirement proposal go to the maintainer"
+ },
+ "gpu": "NVIDIA L40S; one GPU type for every formal unit",
+ "order": [
+  "create the 30 GB volume in an L40S datacenter and check the provider-reported size",
+  "PA2v under its own one-use authorization; its gate must pass",
+  "PA2-s20260726",
+  "reprice from the saved real results, then PA2-s20260801",
+  "every evaluation, the preregistered analysis, cost reconciliation, provider cleanup"
+ ],
+ "on_failure": "ordinary engineering failures are repaired inside the envelope; a valid checkpoint is reused, an interrupted training resumes from its save point, a trained unit is not retrained, an evaluated unit is not regenerated; a deterministic failure is never retried unchanged on a paid GPU; one billing pod at a time; each session has its own authorization, closeout and cost evidence",
+ "budget_boundary": "if PA2v's measurements show the study cannot complete inside $50, stop before creating a formal PA2 pod and report the real gap; never cut evaluation items, epochs, steps, samples or a seed",
+ "terminal": "SUCCESS, a scientific terminal (GO / NO_GO / INCONCLUSIVE / NOT_RESOLVED / REVERSED by the frozen rules) or a hard boundary (budget, safety, hardware or artifact identity)",
+ "not_authorized": [
+  "teacher generation",
+  "a mixture-ratio search",
+  "an extra arm",
+  "Stage 4/5",
+  "a main merge"
+ ]
+}

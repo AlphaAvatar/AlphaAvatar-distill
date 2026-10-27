@@ -1,0 +1,55 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.persisted_unit/v2",
+ "unit": "D4-Original-s20260801",
+ "kind": "checkpoint",
+ "started_utc": "2026-10-25T09:32:30Z",
+ "source": "/runpod-volume/h1pa/D4-Original-s20260801/train/a1/checkpoints/step_002916/model",
+ "artifact_digest": "f1db9febdd8d66dcb29c35649a428d3fe92661941851a6f9bdb55c94946b93d9",
+ "weights_digest": "c8259e9f8f2ff1be075a3ad95d16a0d4d98c2757538dda43d8e836d310596f6b",
+ "config_sha256": "cb757e8976462bce6037c24d74ed20b56fca5825f4198f3e1d6d6e7aa211e453",
+ "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+ "num_parameters": 596049920,
+ "tokenizer_sha256": null,
+ "inputs": {
+  "arm": "D4-Original",
+  "seed": 20260801,
+  "formal": true,
+  "execution": "train",
+  "evaluation": {
+   "set": "eval-set-1",
+   "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+   "trained_context": 8192,
+   "action_protocol": "v2",
+   "decoding": {
+    "path": "configs/shared/evaluation/decoding/nucleus_v1.json",
+    "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"
+   }
+  },
+  "preregistration_sha256": "ae67279d15cddab4c14798313177d4554b8e585745cfd9b8f0afa8a42655261f",
+  "initialization_artifact_digest": "457e194c4a40c2503a7d63d03269ac76ece700102bae74908b7315d367bab3f0",
+  "initialization_weights_digest": "73589c58a439bf32b4ddbf975ac245cd6b916745d5e0712ae4cf32ae158a6d0f",
+  "pack_blocks_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+  "recipe_sha256": "55114b0fc2bde57e0dab235e77bcdeb1c55275f7caf067b286edf43bd5f06007",
+  "schedule": null
+ },
+ "destination": "/runpod-volume/h1pa/D4-Original-s20260801/checkpoint",
+ "persisted": true,
+ "finished_utc": "2026-10-25T09:32:45Z",
+ "bytes": 2384236592,
+ "verified": {
+  "path": "/runpod-volume/h1pa/D4-Original-s20260801/checkpoint.partial",
+  "artifact_digest": "f1db9febdd8d66dcb29c35649a428d3fe92661941851a6f9bdb55c94946b93d9",
+  "recorded_digest": "f1db9febdd8d66dcb29c35649a428d3fe92661941851a6f9bdb55c94946b93d9",
+  "matched": true,
+  "weights_digest": "c8259e9f8f2ff1be075a3ad95d16a0d4d98c2757538dda43d8e836d310596f6b",
+  "weights_digest_matched": true,
+  "config_sha256": "cb757e8976462bce6037c24d74ed20b56fca5825f4198f3e1d6d6e7aa211e453",
+  "config_matched": true,
+  "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+  "num_parameters": 596049920,
+  "single_shard_sha256": "8390fc4de7afb933634f7700e18686c9fb667739b62b330fa2d067a0c390d662",
+  "shard_matched": false,
+  "tokenizer_sha256": null,
+  "total_bytes": 2384234968
+ }
+}

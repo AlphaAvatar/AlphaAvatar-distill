@@ -7,19 +7,20 @@ the same number, so the miss arrived with no reserve behind it.
 
 import pytest
 
-from aadistill.infrastructure.budget import (
-    BudgetError, MEASURED_STEP_SECONDS, Phase, StepTime,
-    SUPERSEDED_STEP_SECONDS, plan_session,
-)
+from aadistill.infrastructure.budget import BudgetError, Phase, StepTime, plan_session
+from aadistill.infrastructure.session import BudgetSpec
 
-MEASURED = StepTime(MEASURED_STEP_SECONDS, "E6b arms, L40S, 2026-08-08")
+#: The E6b case as a caller states it: the floor it measured and the figure
+#: that underpriced it. The core holds neither (AGENTS.md P3).
+MEASURED_S, SUPERSEDED_S = 4.15, 3.625
+MEASURED = StepTime(MEASURED_S, "E6b arms, L40S, 2026-08-08")
 
 
 def a_plan(**over):
     kwargs = dict(
         price_per_hour=0.99, authorized_usd=9.50, arms=2, steps_per_arm=2916,
         step_time=MEASURED, setup_minutes=25.0, eval_minutes_per_arm=10.0,
-        transfer_minutes=20.0,
+        transfer_minutes=20.0, step_time_floor=MEASURED_S, superseded_step_seconds=(SUPERSEDED_S,),
     )
     kwargs.update(over)
     return plan_session(**kwargs)
@@ -72,7 +73,7 @@ def test_e6b_at_the_measured_step_time_does_not_fit_its_authorization():
 
 
 def test_a_step_time_below_the_measured_floor_needs_a_recorded_reason():
-    superseded = StepTime(SUPERSEDED_STEP_SECONDS, "E4 comparable arms")
+    superseded = StepTime(SUPERSEDED_S, "E4 comparable arms")
     with pytest.raises(BudgetError) as exc:
         a_plan(step_time=superseded)
     assert "below the measured floor" in str(exc.value)
@@ -82,6 +83,22 @@ def test_a_step_time_below_the_measured_floor_needs_a_recorded_reason():
                 below_floor_reason="shorter blocks, no teacher in memory",
                 authorized_usd=9.5)
     assert any("below-floor step time accepted" in n for n in ok.notes)
+    assert any(f"superseded {SUPERSEDED_S} s/step" in n for n in ok.notes)
+
+
+def test_the_core_names_no_step_time_the_caller_did_not_supply():
+    """No built-in floor or superseded figure: without them nothing refuses
+    and nothing is noted, and BudgetSpec passes the caller's through."""
+    plain = a_plan(step_time=StepTime(SUPERSEDED_S, "E4 comparable arms"),
+                   step_time_floor=None, superseded_step_seconds=())
+    assert plain.notes == ()
+    import aadistill.infrastructure.budget as budget
+    assert not [n for n in vars(budget) if n.endswith("_STEP_SECONDS")]
+    spec = dict(arms=2, steps_per_arm=2916, step_seconds=SUPERSEDED_S, step_source="E4 comparable arms",
+                setup_minutes=25.0, transfer_minutes=20.0)
+    BudgetSpec(**spec).plan(price_per_hour=0.99, authorized_usd=9.5)
+    with pytest.raises(BudgetError, match="below the measured floor"):
+        BudgetSpec(**spec, step_time_floor=MEASURED_S).plan(price_per_hour=0.99, authorized_usd=9.5)
 
 
 def test_the_floor_is_a_parameter_not_a_global_truth():

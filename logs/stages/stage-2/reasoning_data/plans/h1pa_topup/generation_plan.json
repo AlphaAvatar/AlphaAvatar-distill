@@ -1,0 +1,267 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.topup_generation_plan/v1",
+ "phase": "PA1",
+ "study": "stage2.reasoning_data.h1pa",
+ "corpus_id": "stage2.reasoning_master@v3",
+ "corpus": {
+  "path": "configs/stages/stage-2/reasoning_data/corpus_v3.json",
+  "sha256": "04fdcad80062d7bab7be5c7a21fc168cc09ba0168cb19873e2b600412d3bbffa",
+  "_": "the cell definitions the existing fluid pool and these tasks share; no @v3 quota applies"
+ },
+ "admitted": true,
+ "status": "FROZEN LIST for the maintainer's H1-PA top-up grant: the application's 115 tasks, drawn by P1's rule and matched to the approved task-set sha256; nothing is generated without a grant naming this plan's launch identity",
+ "application": {
+  "path": "logs/stages/stage-2/reasoning_data/plans/h1pa_topup_application.json",
+  "sha256": "b6d2a607b51f9e95b75511ef2c054921b3931aec8205eb22ccac6966e122c498",
+  "scenario": "115 tasks: the gap"
+ },
+ "task_ids_sha256": "d1ca7ece55e55ee5997c8d27cd5b9a63a8b3799f05eec55c764c040609adb57d",
+ "excludes": [
+  {
+   "phase": "P1",
+   "run_id": "h1gen_20261022_190653",
+   "launch_identity_sha256": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
+   "tasks": 1587
+  },
+  {
+   "phase": "P1t",
+   "run_id": "h1p1t_20261023_094007",
+   "launch_identity_sha256": "e5732fd4440aad13b155a2a122e56f3fec4958c702555ce30239b9f49daeb9f4",
+   "tasks": 59
+  }
+ ],
+ "pools": [
+  {
+   "path": "data/stages/stage-2/reasoning_data/tasks/train_tasks_v2.jsonl",
+   "sha256": "b428f1ad78245c145701ca0599ac5451b4ccecbe4e58751295e1de020321bdc5"
+  },
+  {
+   "path": "data/stages/stage-2/reasoning_data/tasks/external_tasks_v2.jsonl",
+   "sha256": "843dff8faf0e7d577cd0db217191d704c909bbe614ef87fd12f04e1197737127"
+  },
+  {
+   "path": "data/stages/stage-2/reasoning_data/tasks/math_train_v1.jsonl",
+   "sha256": "e2ac003cbfc30c7bdb8ddc8d6c65a669bedac52a076e3879a259cb556e3bd8dd"
+  },
+  {
+   "path": "data/stages/stage-2/reasoning_data/tasks/mbpp_train_v1.jsonl",
+   "sha256": "12473c4b055accf22ca5357e966664bab57c057256ca7791c76916b3a8ca8793"
+  },
+  {
+   "path": "data/stages/stage-2/reasoning_data/tasks/squad_v2_train_unanswerable_v1.jsonl",
+   "sha256": "07f1a198569dba3e974d476c13eb7d9fb253ccd02dc55dbdaf71976d03228131"
+  }
+ ],
+ "reuse": [],
+ "protocol": {
+  "path": "configs/stages/stage-2/reasoning_data/generation_protocol.json",
+  "sha256": "be1d2eef2881d2124002c6f4aaf0d22a54f395e165f10498eea88e095d9ecdb7",
+  "same_as": "P1's launch identity :: generation_protocol (byte for byte)"
+ },
+ "cells": {
+  "primary.abstract_analogical/s0_generators_v2_calsplit": {
+   "tasks": 9,
+   "selected_task_ids_sha256": "5cd15b268f118d205d41a545a2dcd7814c0c0e8bab5db449b10dc886e3e2597d",
+   "groups": {
+    "grid_transform@v1/L1": 3,
+    "grid_transform@v1/L2": 3,
+    "grid_transform@v1/L3": 3
+   },
+   "verifiers": {
+    "battery_v2": 9
+   },
+   "episodes": 0
+  },
+  "primary.compositional_generalization/reasoning_core": {
+   "tasks": 9,
+   "selected_task_ids_sha256": "7f768cb057fdd61df8795599d70edc25850a9def06cfcc4e66276e94710a4b46",
+   "groups": {
+    "planning/0": 3,
+    "planning/2": 2,
+    "rule_switching/0": 2,
+    "rule_switching/2": 2
+   },
+   "verifiers": {
+    "checker:reasoning_core/planning": 5,
+    "compare:text_ci": 4
+   },
+   "episodes": 0
+  },
+  "primary.compositional_generalization/reasoning_gym": {
+   "tasks": 25,
+   "selected_task_ids_sha256": "5641d93b02aa94ab04a6f0459b075ab16f5687e8d463dac2bb359bfc180096c8",
+   "groups": {
+    "binary_matrix/0": 2,
+    "binary_matrix/2": 2,
+    "game_of_life/0": 2,
+    "game_of_life/2": 2,
+    "largest_island/0": 2,
+    "largest_island/2": 2,
+    "rotate_matrix/0": 2,
+    "rotate_matrix/2": 2,
+    "spiral_matrix/0": 2,
+    "spiral_matrix/2": 2,
+    "string_manipulation/0": 2,
+    "string_manipulation/2": 2,
+    "tower_of_hanoi/2": 1
+   },
+   "verifiers": {
+    "checker:reasoning_gym/tower_of_hanoi": 1,
+    "compare:matrix": 12,
+    "compare:number": 4,
+    "compare:text": 4,
+    "compare:token_seq": 4
+   },
+   "episodes": 0
+  },
+  "primary.compositional_generalization/s0_generators_v2_calsplit": {
+   "tasks": 12,
+   "selected_task_ids_sha256": "9e668f7e48d9c89201e6440fbb354ddfda6933a39dd15d30756f1411c741789a",
+   "groups": {
+    "defined_ops@v1/L1": 2,
+    "defined_ops@v1/L2": 2,
+    "defined_ops@v1/L3": 2,
+    "scan_language@v1/L1": 2,
+    "scan_language@v1/L2": 2,
+    "scan_language@v1/L3": 2
+   },
+   "verifiers": {
+    "battery_v2": 12
+   },
+   "episodes": 0
+  },
+  "primary.inductive_rule_discovery/s0_generators_v2_calsplit": {
+   "tasks": 19,
+   "selected_task_ids_sha256": "d45e8715b7b0d03da5a2275cfa312350b68beadefe70ceba2ef1df87466c3fcd",
+   "groups": {
+    "list_induction@v1/L1": 4,
+    "list_induction@v1/L2": 3,
+    "list_induction@v1/L3": 3,
+    "string_induction@v2/L1": 3,
+    "string_induction@v2/L2": 3,
+    "string_induction@v2/L3": 3
+   },
+   "verifiers": {
+    "battery_v2": 19
+   },
+   "episodes": 0
+  },
+  "primary.interactive_adaptation/s0_generators_v2_calsplit": {
+   "tasks": 13,
+   "selected_task_ids_sha256": "7786f0b3e7b26b0efdcd030fa12455d1b0dedc14803039e3df95626f5083552b",
+   "groups": {
+    "hidden_buttons@v1/L1": 3,
+    "hidden_buttons@v1/L2": 2,
+    "hidden_buttons@v1/L3": 2,
+    "probe_function@v1/L1": 2,
+    "probe_function@v1/L2": 2,
+    "probe_function@v1/L3": 2
+   },
+   "verifiers": {
+    "episode_replay": 13
+   },
+   "episodes": 13
+  },
+  "primary.task_contained_deduction/prontoqa": {
+   "tasks": 5,
+   "selected_task_ids_sha256": "c888f4a85bd8f5fb9cbe70eca191ac21c4c145b303531e5320333c49d934c321",
+   "groups": {
+    "fictional_ontology/3": 2,
+    "fictional_ontology/4": 2,
+    "fictional_ontology/5": 1
+   },
+   "verifiers": {
+    "compare:bool": 5
+   },
+   "episodes": 0
+  },
+  "primary.task_contained_deduction/reasoning_core": {
+   "tasks": 8,
+   "selected_task_ids_sha256": "a5c2fda2df115c729cac06fc60ac444d06ef9849af7d8240bf3d7bb23e7f1a44",
+   "groups": {
+    "logic_derivation/0": 2,
+    "logic_derivation/2": 2,
+    "multistep_evidence_retrieval/0": 2,
+    "multistep_evidence_retrieval/2": 2
+   },
+   "verifiers": {
+    "checker:reasoning_core/logic_derivation": 4,
+    "compare:int_set": 4
+   },
+   "episodes": 0
+  },
+  "primary.task_contained_deduction/reasoning_gym": {
+   "tasks": 6,
+   "selected_task_ids_sha256": "6c6536ff2b6f534a612703efa842592c66d1dcdd29ca370161b6d36aebd56d45",
+   "groups": {
+    "cryptarithm/0": 1,
+    "cryptarithm/2": 1,
+    "family_relationships/0": 1,
+    "family_relationships/2": 1,
+    "mini_sudoku/0": 1,
+    "mini_sudoku/2": 1
+   },
+   "verifiers": {
+    "compare:assignment": 2,
+    "compare:matrix": 2,
+    "compare:text_ci": 2
+   },
+   "episodes": 0
+  },
+  "primary.task_contained_deduction/s0_generators_v2_calsplit": {
+   "tasks": 9,
+   "selected_task_ids_sha256": "39eff9ea2adae27c6f3ef2a9756b657f280871e929ed21c26df5a366e0869e2e",
+   "groups": {
+    "entity_tracking@v1/L1": 1,
+    "entity_tracking@v1/L2": 1,
+    "entity_tracking@v1/L3": 1,
+    "knights_knaves@v1/L1": 1,
+    "knights_knaves@v1/L2": 1,
+    "knights_knaves@v1/L3": 1,
+    "ordering@v2/L1": 1,
+    "ordering@v2/L2": 1,
+    "ordering@v2/L3": 1
+   },
+   "verifiers": {
+    "battery_v2": 9
+   },
+   "episodes": 0
+  }
+ },
+ "shortfalls": [],
+ "checks": {
+  "tasks_without_a_verifier": {},
+  "episodes": 13,
+  "tasks_also_in_P1_or_P1t": 0,
+  "prompts_also_in_P1_or_P1t": 0,
+  "prompts_repeated_in_the_top_up": 0,
+  "sources_not_approved_for_h1": [],
+  "isolation_R0_R9": {
+   "pass": true,
+   "n_items": 115,
+   "violations": [],
+   "R2_flagged": 0,
+   "_": "prompts only; P1v reruns R0-R9 with the teacher text"
+  }
+ },
+ "inputs": [
+  {
+   "file": "generation_input_g0.jsonl",
+   "system": "You are a helpful Assistant.",
+   "tasks": 115,
+   "sha256": "0516bea7fa955ed2888568d601c7b27bd4e18f1a4a110cae758ce41438a2a1f0",
+   "interactive": 13
+  }
+ ],
+ "inputs_dir": "logs/stages/stage-2/reasoning_data/plans/h1pa_topup/generation_inputs",
+ "session_limit": 8184,
+ "seed_rule": "pass k runs run_battery with --seed-base <plan base> + k; a turn's seed is request_seed(base, task_id, turn), so every candidate and turn has its own recorded seed",
+ "totals": {
+  "tasks": 115,
+  "episodes": 13,
+  "expected_generated_tokens": 1138656,
+  "_": "the application's forecast: a PREDICTION, not a limit; the cap is the bound"
+ },
+ "on_short_corpus": "if the accepted units leave the fluid increment short of 2.96M, the gap is reported and the phase stops: no further task, no lower gate, no repetition, no supporting data (maintainer 2026-10-24)",
+ "authorizes": "nothing"
+}

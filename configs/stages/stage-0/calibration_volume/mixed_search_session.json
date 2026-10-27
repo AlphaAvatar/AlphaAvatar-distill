@@ -1,0 +1,81 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.session_plan/v1",
+ "session_kind": "mixed_search",
+ "name": "mixed_search",
+ "study_id": "stage0.calibration_volume.mixed_v2",
+ "phase": "MC1",
+ "purpose": "MC1 of the mixed-calibration 2x study: the formal D1 forward-baseline full search on calib.s0m_mix_2x@v2 alone, its unique Top-1 committed, re-identified and relayed (plans/mixed_application.json, logs/budget/approvals/mixed_calibration_grant.json)",
+ "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+ "teacher": {
+  "id": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+ },
+ "design": {
+  "path": "configs/stages/stage-0/calibration_volume/mixed_design_v2.json",
+  "sha256": "6872e0e582d416a48265c9fed16fe743458dd5dbc8761a3344d05a216c03f99d"
+ },
+ "preregistration": {
+  "path": "logs/stages/stage-0/calibration_volume/plans/mixed_preregistration.json",
+  "sha256": "0a8d68eca6b9add907975e79dd6d0cbfb402b4b4e1f2eacc26556fbb5b26951c"
+ },
+ "profiles_doc": "configs/stages/stage-0/calibration_volume/profiles_mixed_v2.json",
+ "profile_items_dir": "artifacts/stages/stage-0/calibration_volume/profiles_mixed_v2",
+ "treatments_by_id": {
+  "2x": {
+   "profiles": [
+    "calib.s0m_mix_2x@v2"
+   ],
+   "profile_hashes": {
+    "calib.s0m_mix_2x@v2": "34735ed0156b0695448d968b28ff4bc85c8388535fb84a1794adff5934d1d381"
+   },
+   "content_sha256": {
+    "calib.s0m_mix_2x@v2": "9a6c2782c2fc014c6b73077e414549989b7fedf52609446924634b33b1ead75d"
+   },
+   "items_file_sha256": {
+    "calib.s0m_mix_2x@v2": "d86a4b4cecb320da5e7f24db584ad122c5e40ea9f7d19214ccfedc73356ba0d6"
+   },
+   "search_run_id": "mixed_v2_2x_search",
+   "_search_run_id": "the SEARCH's identity (it enters config_hash): stable across every MC1 session, so a replacement session resumes the same search from the volume's journal",
+   "search_config_hash": "7ee23a7d9e6daf296c0930f21267493d893826767d73d64fe4df72d055a631f7",
+   "_search_config_hash": "SearchConfig.config_hash on device cuda, computed at $0 by search_driver.py --check-only --device cuda (2026-10-26): the pod refuses any other search identity"
+  }
+ },
+ "search": {
+  "baseline": "stage1_init.d1_target_aware.scored_v1@v1",
+  "finalists_k": 1,
+  "_k": "the study consumes ONE initialization: the committed Top-1",
+  "execution": {
+   "depth_prefix_reuse": true,
+   "validate_on_search_device": true,
+   "prune_weights": false
+  },
+  "_execution": "D4's bit-identical execution options (search_record.json :: execution); the beam tree is the declared single-profile 34 expansions"
+ },
+ "export": {
+  "relay_prefix": "stage0_calvol/finalists/mixed_v2/2x",
+  "study": "mixed_v2",
+  "treatment": "2x",
+  "relay_headroom_bytes_2026_10_26": 1475228432,
+  "_": "the LFS batch endpoint admitted 1.475 GB and refused 1.494 GB on 2026-10-26; one 1.19 GB Top-1 fits"
+ },
+ "setup_minutes": 15.0,
+ "budget_phases": {
+  "search_bound_all_16_depth_positions": 469.5,
+  "top1_export_and_final_push": 5.0
+ },
+ "_budget": "the bound of mixed_feasibility_v2.json :: compute.search.2x.bound -- DEPTH in all 16 positions it can take plus the 8-minute search fixed cost -- IS the contingency, so none is added on top; the expected session is 198.5 min. The hard terminate is the $15 cap",
+ "contingency_fraction": 0.0,
+ "reserve_minutes": 0.0,
+ "artifact_recovery_reserve_minutes": 5.0,
+ "mirror_seconds": 120,
+ "hardware": {
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "container_disk_gb": 200,
+  "network_volume": {
+   "size_gb": 150,
+   "mount": "/runpod-volume",
+   "_": "created for MC1 only (runs/mixvol_*), deleted after the Top-1 and the evidence are durable and read back"
+  }
+ },
+ "authorizes": "nothing"
+}

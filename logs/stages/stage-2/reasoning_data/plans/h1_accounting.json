@@ -1,0 +1,455 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1_accounting/v2",
+ "status": "A MEASURED from its real pack; B MEASURED; schedule FROZEN-READY. Authorizes nothing.",
+ "written_utc": "2026-10-23T17:09:22Z",
+ "kinds": {
+  "measured": "counted from a real pack",
+  "estimated": "B before its pack exists",
+  "planned": "a schedule's consumption from mean supervision per block",
+  "exact_per_seed": "the trainer's seeded block stream, summed block by block",
+  "modeled": "FLOPs from the architecture, not a measurement",
+  "runtime": "measured rates from earlier runs: plans/cost_forecast.json"
+ },
+ "definitions": {
+  "U": "unique supervised positions: each session's supervised target once (one accepted trace per task; turn-expanded context is not supervision)",
+  "E": "supervised exposure: supervised positions processed with every repetition (epochs, the wrap of the last step)",
+  "C": "FLOPs over every executed position: student forward + backward (3x forward) and teacher forward, with causal attention over the packed block and both output heads (aadistill.runtime.cost.forward_flops_per_token)",
+  "KD_positions": "kd_scope all: every real prediction position; prompt = real positions that are not supervised (system, user, tool, passages, earlier turns)",
+  "independent_units": "tasks / episodes / source conversations; several traces of one prompt are ONE unit and only one is ever kept"
+ },
+ "models": {
+  "student": {
+   "hidden_size": 1024,
+   "num_attention_heads": 16,
+   "num_key_value_heads": 8,
+   "head_dim": 128,
+   "intermediate_size": 3072,
+   "vocab_size": 151936,
+   "num_hidden_layers": 28
+  },
+  "teacher": {
+   "hidden_size": 2560,
+   "num_attention_heads": 32,
+   "num_key_value_heads": 8,
+   "head_dim": 128,
+   "intermediate_size": 9728,
+   "vocab_size": 151936,
+   "num_hidden_layers": 36
+  },
+  "student_config": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4/config.json",
+  "teacher_config": "Qwen/Qwen3-4B-Thinking-2507 config.json (local HF cache)"
+ },
+ "arm_A": {
+  "kind": "measured",
+  "units": 3150,
+  "sessions": 3312,
+  "blocks": 1459,
+  "packing_efficiency": 0.3547,
+  "system_prompt_groups": 1857,
+  "isolation_exclusion": {
+   "sessions_flagged": 28,
+   "units_excluded": 28,
+   "sessions_excluded": 30
+  },
+  "admission_exclusion": {
+   "units": 0,
+   "sessions": 0,
+   "units_by_kind": {}
+  }
+ },
+ "arm_B": {
+  "kind": "measured",
+  "blocks": 402,
+  "basis": {
+   "pack": "artifacts/stages/stage-2/reasoning_data/packs/B_v3",
+   "ladder_sha256": "fbc0ec7b7a49671aa051fd334d645ceef68bceeb6311b241857f1ff7713af714"
+  }
+ },
+ "contracts": {
+  "M0_frozen": {
+   "A": {
+    "schema": "aadistill.training.accounting/v2",
+    "blocks": 1459,
+    "epochs": 3.000685,
+    "blocks_per_step": 2,
+    "optimizer_steps": 2189,
+    "block_passes": 4378,
+    "U_supervised": 2960182,
+    "U_reasoning": 2567685,
+    "U_answer": 392497,
+    "E_supervised": 8882575,
+    "E_reasoning": 7704815,
+    "E_answer": 1177760,
+    "supervised_per_step": 4057.8,
+    "real_tokens_per_epoch": 4239462,
+    "padding_per_epoch": 7712666,
+    "executed_positions": 35864576,
+    "executed_positions_per_step": 16384.0,
+    "padding_executed": 23143284,
+    "C_student_flops": 2.29335263443157e+17,
+    "C_teacher_flops": 3.751600739886039e+17,
+    "C_total_flops": 6.044953374317609e+17,
+    "truncate_padding": false,
+    "kd_scope": "all",
+    "KD_positions_per_pass": {
+     "prompt": 1277821,
+     "reasoning": 2567685,
+     "answer": 392497,
+     "unsplit_supervised": 0
+    },
+    "KD_positions_exposure": {
+     "prompt": 3834339,
+     "reasoning": 7704815,
+     "answer": 1177760,
+     "unsplit_supervised": 0
+    }
+   },
+   "B": {
+    "schema": "aadistill.training.accounting/v2",
+    "blocks": 402,
+    "epochs": 3.0,
+    "blocks_per_step": 2,
+    "optimizer_steps": 603,
+    "block_passes": 1206,
+    "U_supervised": 2966334,
+    "U_reasoning": 2646905,
+    "U_answer": 319429,
+    "E_supervised": 8899002,
+    "E_reasoning": 7940715,
+    "E_answer": 958287,
+    "supervised_per_step": 14757.9,
+    "real_tokens_per_epoch": 3268696,
+    "padding_per_epoch": 24488,
+    "executed_positions": 9879552,
+    "executed_positions_per_step": 16384.0,
+    "padding_executed": 73464,
+    "C_student_flops": 6.317458376255078e+16,
+    "C_teacher_flops": 1.033446891800494e+17,
+    "C_total_flops": 1.665192729426002e+17,
+    "truncate_padding": false,
+    "kd_scope": "all",
+    "KD_positions_per_pass": {
+     "prompt": 301960,
+     "reasoning": 2646905,
+     "answer": 319429,
+     "unsplit_supervised": 0
+    },
+    "KD_positions_exposure": {
+     "prompt": 905880,
+     "reasoning": 7940715,
+     "answer": 958287,
+     "unsplit_supervised": 0
+    }
+   },
+   "ratios_A_over_B": {
+    "U_supervised": 0.9979,
+    "E_supervised": 0.9982,
+    "optimizer_steps": 3.6302,
+    "supervised_per_step": 0.275,
+    "executed_positions": 3.6302,
+    "C_total_flops": 3.6302
+   },
+   "kinds": {
+    "U": {
+     "A": "measured",
+     "B": "measured"
+    },
+    "E": "planned (mean supervision per block)",
+    "steps": "planned",
+    "C": "modeled FLOPs",
+    "executed_positions": "planned"
+   }
+  },
+  "M1_matched": {
+   "A": {
+    "schema": "aadistill.training.accounting/v2",
+    "blocks": 1459,
+    "epochs": 2.945853,
+    "blocks_per_step": 7,
+    "optimizer_steps": 614,
+    "block_passes": 4298,
+    "U_supervised": 2960182,
+    "U_reasoning": 2567685,
+    "U_answer": 392497,
+    "E_supervised": 8720262,
+    "E_reasoning": 7564023,
+    "E_answer": 1156239,
+    "supervised_per_step": 14202.4,
+    "real_tokens_per_epoch": 4239462,
+    "padding_per_epoch": 7712666,
+    "executed_positions": 12488833,
+    "executed_positions_per_step": 20340.1,
+    "padding_executed": 0,
+    "C_student_flops": 7.368282006239795e+16,
+    "C_teacher_flops": 1.2534461633551947e+17,
+    "C_total_flops": 1.9902743639791744e+17,
+    "truncate_padding": true,
+    "kd_scope": "all",
+    "KD_positions_per_pass": {
+     "prompt": 1277821,
+     "reasoning": 2567685,
+     "answer": 392497,
+     "unsplit_supervised": 0
+    },
+    "KD_positions_exposure": {
+     "prompt": 3764273,
+     "reasoning": 7564023,
+     "answer": 1156239,
+     "unsplit_supervised": 0
+    }
+   },
+   "B": {
+    "schema": "aadistill.training.accounting/v2",
+    "blocks": 402,
+    "epochs": 3.054726,
+    "blocks_per_step": 2,
+    "optimizer_steps": 614,
+    "block_passes": 1228,
+    "U_supervised": 2966334,
+    "U_reasoning": 2646905,
+    "U_answer": 319429,
+    "E_supervised": 9061339,
+    "E_reasoning": 8085570,
+    "E_answer": 975768,
+    "supervised_per_step": 14757.9,
+    "real_tokens_per_epoch": 3268696,
+    "padding_per_epoch": 24488,
+    "executed_positions": 9984972,
+    "executed_positions_per_step": 16262.2,
+    "padding_executed": 0,
+    "C_student_flops": 6.368460962907628e+16,
+    "C_teacher_flops": 1.043067904496913e+17,
+    "C_total_flops": 1.6799140007876758e+17,
+    "truncate_padding": true,
+    "kd_scope": "all",
+    "KD_positions_per_pass": {
+     "prompt": 301960,
+     "reasoning": 2646905,
+     "answer": 319429,
+     "unsplit_supervised": 0
+    },
+    "KD_positions_exposure": {
+     "prompt": 922405,
+     "reasoning": 8085570,
+     "answer": 975768,
+     "unsplit_supervised": 0
+    }
+   },
+   "ratios_A_over_B": {
+    "U_supervised": 0.9979,
+    "E_supervised": 0.9624,
+    "optimizer_steps": 1.0,
+    "supervised_per_step": 0.9624,
+    "executed_positions": 1.2508,
+    "C_total_flops": 1.1847
+   },
+   "kinds": {
+    "U": {
+     "A": "measured",
+     "B": "measured"
+    },
+    "E": "planned (mean supervision per block)",
+    "steps": "planned",
+    "C": "modeled FLOPs",
+    "executed_positions": "planned"
+   }
+  }
+ },
+ "exact_per_seed": {
+  "kind": "exact_per_seed",
+  "seeds": [
+   20260726,
+   20260727
+  ],
+  "steps": 614,
+  "by_arm": {
+   "A": {
+    "20260726": {
+     "block_passes": 4298,
+     "blocks_touched": 1459,
+     "U_supervised_touched": 2960182,
+     "E_supervised": 8725366,
+     "E_reasoning": 7566876,
+     "E_answer": 1158490,
+     "real_positions": 12484285,
+     "kd_scope": "all",
+     "KD_positions_exposure": {
+      "prompt": 3754621,
+      "reasoning": 7566876,
+      "answer": 1158490,
+      "unsplit_supervised": 0
+     }
+    },
+    "20260727": {
+     "block_passes": 4298,
+     "blocks_touched": 1459,
+     "U_supervised_touched": 2960182,
+     "E_supervised": 8750577,
+     "E_reasoning": 7589721,
+     "E_answer": 1160856,
+     "real_positions": 12537821,
+     "kd_scope": "all",
+     "KD_positions_exposure": {
+      "prompt": 3782946,
+      "reasoning": 7589721,
+      "answer": 1160856,
+      "unsplit_supervised": 0
+     }
+    }
+   },
+   "B": {
+    "20260726": {
+     "block_passes": 1228,
+     "blocks_touched": 402,
+     "U_supervised_touched": 2966334,
+     "E_supervised": 9060519,
+     "E_reasoning": 8081360,
+     "E_answer": 979159,
+     "real_positions": 9984903,
+     "kd_scope": "all",
+     "KD_positions_exposure": {
+      "prompt": 923156,
+      "reasoning": 8081360,
+      "answer": 979159,
+      "unsplit_supervised": 0
+     }
+    },
+    "20260727": {
+     "block_passes": 1228,
+     "blocks_touched": 402,
+     "U_supervised_touched": 2966334,
+     "E_supervised": 9058203,
+     "E_reasoning": 8082656,
+     "E_answer": 975547,
+     "real_positions": 9985732,
+     "kd_scope": "all",
+     "KD_positions_exposure": {
+      "prompt": 926301,
+      "reasoning": 8082656,
+      "answer": 975547,
+      "unsplit_supervised": 0
+     }
+    }
+   }
+  },
+  "_B": null
+ },
+ "primary_basis": "M1: one step count T for both arms (identical learning-rate schedule) from match_schedule; U equal within 1% by the ladder cut; E within the passes match_schedule reports, verified exactly per seed on the real packs; supervised positions per step follow; C is NOT matched and is reported -- arm A carries prompt context (passages, tool schemas) that is computed but not supervised",
+ "schedule": {
+  "rule": "aadistill.training.accounting.match_schedule/v1",
+  "match": {
+   "rule": "aadistill.training.accounting.match_schedule/v1",
+   "reference": "B",
+   "reference_blocks_per_step": 2,
+   "T0": 603,
+   "searched_steps": [
+    542,
+    664
+   ],
+   "steps": 614,
+   "blocks_per_step": {
+    "A": 7,
+    "B": 2
+   },
+   "passes": {
+    "A": 2.945853,
+    "B": 3.054726
+   },
+   "max_pass_deviation": 0.018242
+  },
+  "status": "FROZEN-READY: computed on both arms' real packs",
+  "steps": 614,
+  "blocks_per_step": {
+   "A": 7,
+   "B": 2
+  },
+  "warmup_steps": 31,
+  "eval_every": 76,
+  "save_every": 307,
+  "lr_rule": "the E1 builder's rule (build_experiment1_configs.py): warmup max(10, round(0.05 T)); eval every max(25, T // 8); save every max(200, T // 2); cosine to min_lr_frac 0.1",
+  "not_reused": "the 0.86M recipe's 1,023 steps; any earlier provisional T or blocks per step"
+ },
+ "quotas_arm_B": {
+  "primary.task_contained_deduction": {
+   "share": 0.17,
+   "U_target_in_2p96M": 503200,
+   "supervised_per_unit_estimate": 3708,
+   "independent_units_estimate": 136,
+   "with_reserve_U": 528700,
+   "per_unit_source": "base_pool_v1 verified units per axis (asset_audit.json :: teacher_cal.yield_by_axis / base_pool_v1_fluid.units_by_axis)"
+  },
+  "primary.inductive_rule_discovery": {
+   "share": 0.17,
+   "U_target_in_2p96M": 503200,
+   "supervised_per_unit_estimate": 3662,
+   "independent_units_estimate": 137,
+   "with_reserve_U": 528700,
+   "per_unit_source": "base_pool_v1 verified units per axis (asset_audit.json :: teacher_cal.yield_by_axis / base_pool_v1_fluid.units_by_axis)"
+  },
+  "primary.compositional_generalization": {
+   "share": 0.17,
+   "U_target_in_2p96M": 503200,
+   "supervised_per_unit_estimate": 3574,
+   "independent_units_estimate": 141,
+   "with_reserve_U": 528700,
+   "per_unit_source": "base_pool_v1 verified units per axis (asset_audit.json :: teacher_cal.yield_by_axis / base_pool_v1_fluid.units_by_axis)"
+  },
+  "primary.abstract_analogical": {
+   "share": 0.09,
+   "U_target_in_2p96M": 266400,
+   "supervised_per_unit_estimate": 5739,
+   "independent_units_estimate": 46,
+   "with_reserve_U": 279900,
+   "per_unit_source": "base_pool_v1 verified units per axis (asset_audit.json :: teacher_cal.yield_by_axis / base_pool_v1_fluid.units_by_axis)"
+  },
+  "primary.interactive_adaptation": {
+   "share": 0.1,
+   "U_target_in_2p96M": 296000,
+   "supervised_per_unit_estimate": 16669,
+   "independent_units_estimate": 18,
+   "with_reserve_U": 311000,
+   "per_unit_source": "base_pool_v1 verified units per axis (asset_audit.json :: teacher_cal.yield_by_axis / base_pool_v1_fluid.units_by_axis)"
+  },
+  "supporting.math_reused_gsm8k": {
+   "share": 0.06,
+   "U_target_in_2p96M": 177600,
+   "supervised_per_unit_estimate": 1177,
+   "independent_units_estimate": 151,
+   "with_reserve_U": 186600,
+   "per_unit_source": "corpus_v2 gsm8k selected sessions"
+  },
+  "supporting.math_new": {
+   "share": 0.06,
+   "U_target_in_2p96M": 177600,
+   "supervised_per_unit_estimate": 3415,
+   "independent_units_estimate": 52,
+   "with_reserve_U": 186600,
+   "per_unit_source": "corpus_v2 openmath selected sessions (MATH-style proxy)"
+  },
+  "supporting.code_algorithmic": {
+   "share": 0.07,
+   "U_target_in_2p96M": 207200,
+   "supervised_per_unit_estimate": 4250,
+   "independent_units_estimate": 49,
+   "with_reserve_U": 217700,
+   "per_unit_source": "corpus_v2 code selected sessions"
+  },
+  "supporting.reading_verified": {
+   "share": 0.08,
+   "U_target_in_2p96M": 236800,
+   "supervised_per_unit_estimate": 623,
+   "independent_units_estimate": 380,
+   "with_reserve_U": 248800,
+   "per_unit_source": "corpus_v2 rag_evidence and multihop_qa selected sessions, token-weighted"
+  },
+  "supporting.answerability": {
+   "share": 0.03,
+   "U_target_in_2p96M": 88800,
+   "supervised_per_unit_estimate": 509,
+   "independent_units_estimate": 174,
+   "with_reserve_U": 93300,
+   "per_unit_source": "corpus_v2 rag_evidence selected sessions"
+  }
+ },
+ "authorizes": "nothing"
+}

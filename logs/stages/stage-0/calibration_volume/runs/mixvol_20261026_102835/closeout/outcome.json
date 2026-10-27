@@ -1,0 +1,18 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.closeout/v1",
+ "run_id": "mixvol_20261026_102835",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "phase": "MC1",
+ "recorded_utc": "2026-10-26T14:04:38+00:00",
+ "status": "VOLUME_DELETED",
+ "provider_resource_created": true,
+ "money": {
+  "all_in_usd": 0.0526,
+  "hours": 3.601,
+  "reserved_usd_replaced": 1.05,
+  "_basis": "ACTUAL: 150 GB x $0.07/GB-month x 3.601 h / 720 h, ceiled to the 4-decimal quantum"
+ },
+ "tombstone": "closeout/tombstone.json",
+ "authorizes": "nothing"
+}

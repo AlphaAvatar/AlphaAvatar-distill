@@ -1,0 +1,150 @@
+{
+  "schema": "aadistill.stage2.reasoning_data.h1_units/v1",
+  "status": "FROZEN (2026-10-23 UTC) under the maintainer's formal H1 P1g + P2 authorization (logs/budget/approvals/h1_units_phase_grant.json). What scripts/stages/stage-2/reasoning_data/unit_driver.py runs for H1's four formal units; the driver still refuses a formal launch with a provisional schedule or a pack that is not its recorded identity.",
+  "frozen": true,
+  "_frozen": "set true 2026-10-23 with the frozen protocol (plans/comparison_design.json) and the phase grant; the driver reads it, nothing else does",
+  "units": {
+    "from": "logs/stages/stage-2/reasoning_data/plans/comparison_design.json :: arms (keys) x fixed.seeds",
+    "id": "<arm>-s<seed>",
+    "_derived": "derived by the driver, never listed here: one owner for arms and seeds"
+  },
+  "schedule": {
+    "from": "logs/stages/stage-2/reasoning_data/plans/h1_accounting.json :: schedule",
+    "keys_read": [
+      "status",
+      "steps",
+      "blocks_per_step",
+      "warmup_steps",
+      "eval_every",
+      "save_every"
+    ],
+    "provisional_when": "its status starts with PROVISIONAL (B's pack is measured since 2026-10-23; the schedule is FROZEN-READY)",
+    "lr_rule": "warmup max(10, round(0.05 T)); eval every max(25, T // 8); save every max(200, T // 2) -- the E1 builder's rule; the driver recomputes it and refuses a schedule record that disagrees",
+    "rung": 2960000
+  },
+  "packs": {
+    "A": {
+      "status": "recorded",
+      "what": "arm A's 2.96M pack: corpus_v2 units with whole-unit isolation exclusion, cut by the shared builder (pack_dry_run.py OLD_ARM_SPEC, salt stage2.reasoning_data.old_arm/v1)",
+      "expected": {
+        "n_units": 3150,
+        "n_sessions": 3312,
+        "actual_supervised_tokens": 2960182,
+        "n_blocks": 1459
+      },
+      "expected_from": "logs/stages/stage-2/reasoning_data/audit/packing_dry_run.json :: old_arm.rungs[0] (measured)",
+      "blocks_sha256": "b561b85f9b73bcb65114871ba538609cf4ae0ea4f581e620942478a2d3a2921d",
+      "ladder_sha256": "280a531e56fd47b9f57c8c35c73140f64b7b02d89658b96187a80c79334fef55",
+      "written": {
+        "utc": "2026-10-22",
+        "by": "PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.pack_dry_run --write-arm-a artifacts/stages/stage-2/reasoning_data/packs/A",
+        "where": "artifacts/stages/stage-2/reasoning_data/packs/A on the dev box (74 MB, gitignored); the composition check against packing_dry_run.json passed at write",
+        "durable_copies": "dev box only; a pod receives it through the relay at P1g/P2 preparation, sha-checked by this record"
+      }
+    },
+    "B": {
+      "status": "recorded",
+      "what": "arm B's 2.96M pack: stage2.reasoning_master@v3 from P1 (h1gen_20261022_190653) and P1t (h1p1t_20261023_094007), each admitted as a complete run and verified under its own authorization (code verifier v3), merged, the 0.0 cells' unit set aside, cut on the formal nested ladder with the 150k reserve (corpus_feasibility.py)",
+      "corpus": {
+        "id": "stage2.reasoning_master@v3",
+        "file": "configs/stages/stage-2/reasoning_data/corpus_v3.json",
+        "chosen": "maintainer 2026-10-23 (logs/budget/decisions.md)"
+      },
+      "expected": {
+        "n_units": 1226,
+        "n_sessions": 1301,
+        "actual_supervised_tokens": 2966334,
+        "n_blocks": 402
+      },
+      "blocks_sha256": "5d06b026dcb42f43b76f8a0955f95c24884c0acaee8a57b4c16395aafe539121",
+      "ladder_sha256": "fbc0ec7b7a49671aa051fd334d645ceef68bceeb6311b241857f1ff7713af714",
+      "p1v_2026_10_22": "NOT BUILT: P1 (h1gen_20261022_190653) ran; P1v found four cells short of their share (audit/p1v_verification.json :: gaps_supervised_tokens), so the pack does not exist and the formal units stay refused",
+      "corpus_feasibility_2026_10_23": "STILL NOT BUILT: the maintainer's $0 candidate stage2.reasoning_master@v2 does not build on the formal ladder (audit/corpus_v2_feasibility.json :: unsatisfied); plan 2 (then corpus_v3_proposal.json) needs a top-up that is applied for, not authorized (plans/abstract_topup_application.json). Which corpus becomes B is the maintainer's decision",
+      "corpus_v3_2026_10_23": "the maintainer chose @v3 for B. P1t's 59-task list, launch identity and request are prepared at $0 (plans/p1t/); P1t is NOT authorized and nothing was generated, so the pack still does not exist and the formal units stay refused",
+      "expected_from": "logs/stages/stage-2/reasoning_data/audit/corpus_v3_feasibility.json :: pack.rungs (measured)",
+      "written": {
+        "utc": "2026-10-23",
+        "by": "PYTHONPATH=src:scripts .venv/bin/python -m stages.reasoning_data.corpus_feasibility --candidate configs/stages/stage-2/reasoning_data/corpus_v3.json --store h1gen_20261022_190653=<P1 records> --store h1p1t_20261023_094007=<P1t records> --pack-out artifacts/stages/stage-2/reasoning_data/packs/B_v3",
+        "where": "artifacts/stages/stage-2/reasoning_data/packs/B_v3 on the dev box (gitignored); staged as <pack-root>/B; every input it is cut from is durable (both runs' records on the relay, the reuse selection in git)",
+        "durable_copies": "dev box only, like A; a pod receives it through the relay at P1g/P2 preparation, sha-checked by this record"
+      },
+      "p1t_2026_10_23": "P1t ran under the maintainer's grant ($0.64 of the cumulative $5.00); the formal ladder cut every rung with the reserve and nothing in the contract is unsatisfied, so the pack exists"
+    },
+    "layout": "<--pack-root>/<arm>/{blocks.npz, audit.jsonl, ladder.json}",
+    "check": "sha256 of blocks.npz and ladder.json equal the recorded values, and the 2.96M rung's n_units, n_sessions, actual_supervised_tokens and n_blocks equal `expected`"
+  },
+  "initialization": {
+    "record": "logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json",
+    "identity": "its materialization_identity (artifact_digest 457e194c..., weights_digest 73589c58...); the dev-box-only search journal is never read on a pod",
+    "restore": "stages.reasoning_data.restore_initialization.download from the relay, then aadistill.runtime.leaf_durability.verify_transferred_leaf against that identity; an --init-dir that already verifies is used as is"
+  },
+  "recipe": {
+    "frozen": "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json",
+    "frozen_sha256": "19e1e3f68009f16f076ca777a38055bff01caa2084073b6c54a73870b5471265",
+    "_frozen": "the recipe dose_driver.train_recovery runs (stages.phase_c1.autoinit_c1_driver.FROZEN_RECIPE): CE 0.25 + KD 1.0, T 1, kd_scope all, AdamW 5e-5, fp32 + bf16 autocast, 8,192 blocks",
+    "overrides": [
+      "run_name",
+      "_purpose",
+      "out_dir",
+      "data_dir",
+      "student_path",
+      "seed",
+      "rung",
+      "schedule.total_steps",
+      "schedule.warmup_steps",
+      "batch.blocks_per_step",
+      "checkpoint.save_every",
+      "intervals.eval_every"
+    ],
+    "_overrides": "every other key of the frozen recipe, nested keys included, is unchanged and the driver checks it; the per-unit recipe identity is the sha256 of the derived config without run_name, _purpose, out_dir, student_path and data_dir (the pack is identified by its own sha256)",
+    "trainer": "scripts/shared/training/train_stage3.py under /opt/train/bin/python (stages.phase_c1.autoinit_c1_driver.TRAINER)"
+  },
+  "evaluation": {
+    "set": "eval-set-1",
+    "every_item": true,
+    "runner": "stages.calibration_volume.dose_driver.evaluate_all (fluid via run_battery --mode eval, the capability and legacy units via uncapped_eval; scored by shared.evaluation.eval_set_scoring)",
+    "trained_context": 8192,
+    "action_protocol": "v2",
+    "progress": "<durable root>/<unit>/eval_progress: finished generation files, rescored rather than regenerated on a restart (evaluate_all's own mechanism)"
+  },
+  "durability": {
+    "order": [
+      "restore and re-verify the initialization",
+      "train",
+      "persist_unit checkpoint (the moment training ends)",
+      "persist_unit files label training (config, trainer log and manifests)",
+      "evaluate",
+      "persist_unit files label evaluation (generations, rows, formal report, logs; logical paths)",
+      "persist_unit files label report (report.json, last)"
+    ],
+    "state_from": "the durable root only: a completed report record = completed and scored (skip, bring the evidence home, never the weights); a completed checkpoint record without one = trained and durable (re-verify, resume at scoring, never retrain); none = not trained (train); a record whose inputs differ from this unit's = identity mismatch (preserve, consume nothing, stop)",
+    "local_trained_model": "a model a previous attempt on THIS machine finished training (trained.json in its attempt directory, inputs equal) is persisted rather than retrained",
+    "capacity": "--capacity-bytes (the provider's figure less what is there); df is not a network volume's quota"
+  },
+  "retry": {
+    "endpoint": "one complete endpoint per unit: a completed checkpoint is never overwritten and a scored unit is never rerun",
+    "after_formal_training_began": "an engineering failure is repaired and the SAME unit and seed retrained from the initialization as one replacement endpoint; the failed attempt is preserved in its own attempt directory and listed; partial measurements are never pooled",
+    "attempts": "<durable root>/<unit>/attempts.jsonl, append-only: run id, git commit, state at start, action, replacement_of, outcome, stage, error and its failure signature (aadistill.infrastructure.failure_signature) for the launcher's same-failure gate",
+    "on_failure": "the driver stops at the first failed unit (later units would meet the same defect); every earlier completed unit is already persisted"
+  },
+  "training_resume": {
+    "supported": true,
+    "mechanism": "the trainer's save points (model, AdamW state, step, RNG) are written into <durable root>/<unit>/train/a<attempt>/ with the attempt's config and inputs; an attempt that ended without completing is continued with train_stage3.py --resume latest under its own config (unit_driver.resumable); the save points are released once the final checkpoint is persisted and re-identified",
+    "validated_by": "P1g h1p1g_20261023_191644 (logs/stages/stage-2/reasoning_data/runs/h1p1g_20261023_191644/evidence/p1g_report.json :: checks.resume_B)",
+    "established": "on an A100-SXM4-80GB with the frozen recipe on B's pack: a run SIGKILLed after its mid-run save (written to the network volume) and continued with --resume latest kept the data order and the learning rate identical at every later step, the trainer accepted its config and consumed-block position, and its final weights differed from an uninterrupted run (max |dw| 8.6e-4) no more than a second uninterrupted run did (8.7e-4)",
+    "not_established": "bitwise or loss-level identity: the trainer is not bitwise deterministic on the GPU (two uninterrupted runs differ from step 2 at ~1e-3 and the difference grows), so equivalence is bounded by that run-to-run variation, not by zero"
+  },
+  "validation": {
+    "flag": "--validation [--validation-steps N]",
+    "namespace": "<durable root>/validation/<unit>: never the formal namespace, and its report says formal: false",
+    "may": "run a provisional schedule or reduced steps (the lr rule recomputed for N); it may not run a pending pack"
+  },
+  "boundary": {
+    "teardown": "the launcher's: this driver creates, stops and deletes no provider resource",
+    "observers": "the driver starts no background watcher; its children run to completion (subprocess.run), and the terminal path records an empty watch set",
+    "terminal": "--status gets ALL_DONE, FAILED or REFUSED with the per-unit outcome, in the same code path that ends the run"
+  },
+  "left_to_gpu_validation": [],
+  "authorizes": "nothing",
+  "_p1g": "P1g h1p1g_20261023_191644: arm A 10.23 s/step at 7 blocks per step, arm B 3.37 s/step at 2, peak 40.0 GB; persistence onto the volume re-identified; the evaluation path ran on a stratified subset"
+}

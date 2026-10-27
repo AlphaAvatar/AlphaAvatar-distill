@@ -1,0 +1,865 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.p1v_verification/v1",
+ "written_utc": "2026-10-22T21:04:50Z",
+ "run_id": "h1gen_20261022_190653",
+ "authorization_id": "stage2.reasoning_data.h1_generation.h1gen_20261022_190653",
+ "launch_identity_sha256": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
+ "inputs": {
+  "shards": 26,
+  "records": 2164,
+  "groups": {
+   "pass0_generation_input_g0": {
+    "tasks": 1587,
+    "complete_and_matching": true
+   },
+   "pass1_generation_input_g0": {
+    "tasks": 577,
+    "complete_and_matching": true
+   }
+  },
+  "by_pass": {
+   "0": 1587,
+   "1": 577
+  },
+  "shard_sha256": {
+   "pass0_generation_input_g0.part0000.jsonl": "d98075a4a2fbe7ebd4a2aba0a7c48289ea8ffe6ecabf76e923fa67749b00ff39",
+   "pass0_generation_input_g0.part0001.jsonl": "de24d19f894967a6a980b44bf7e7a8a038c2ff140229a997879de5a9690e06af",
+   "pass0_generation_input_g0.part0002.jsonl": "c70e53b7ab7d4fc889f59057dd7831a6a039cf829fe8ca38a7e4624dea90397c",
+   "pass0_generation_input_g0.part0003.jsonl": "c8c249831d75fefed7d36bc5379e492f3bad1bb3d3394b834d01fac269b66ca7",
+   "pass0_generation_input_g0.part0004.jsonl": "6262fa373129b5add3d747846026cac8f186f567eb77462727ba482d03f28417",
+   "pass0_generation_input_g0.part0005.jsonl": "32cb93d35f968c76f563538e9e40f1b08fe2e2175d8b8ea49d5de9503176f394",
+   "pass0_generation_input_g0.part0006.jsonl": "8c10aafe2694d366787df80988ec2407041c6c35b1c121fd0a1870bf54062571",
+   "pass0_generation_input_g0.part0007.jsonl": "2ba29ce19acbbe8eaf785a778cc3e49d771c231b566eca7baa44dab8f00e9dc5",
+   "pass0_generation_input_g0.part0008.jsonl": "ddd180d4472bf2564d1ab8ab6539e302e1270dda5326d898bce0c305f05e11d5",
+   "pass0_generation_input_g0.part0009.jsonl": "251add69faef13ed07552574fc23fc3dca2398efef8ec5958795a07e154e4b28",
+   "pass0_generation_input_g0.part0010.jsonl": "0dcf49d753ccd39a9e44326e00c0104730bde675cbab1543bcf689f1486bd863",
+   "pass0_generation_input_g0.part0011.jsonl": "91c722176c7bc015925515b801c4b3f06fcd9b0677a2622273c6016fef23941e",
+   "pass0_generation_input_g0.part0012.jsonl": "b7c4cd6b04bc89fe52391287265035088147b43e254e41d12bc87365374c26a5",
+   "pass0_generation_input_g0.part0013.jsonl": "8271dad800f98acf782b569f73009f880910ba6a1a05231346279684e303d767",
+   "pass0_generation_input_g0.part0014.jsonl": "7b3101226c089b5587fba32d3d069ce796f6bf86b2509c766d68836af764a170",
+   "pass0_generation_input_g0.part0015.jsonl": "02c4c3ab349b46fe26af34fb0c6f7ae5fa26c1e4dc20c0b29a6f93d937ed4681",
+   "pass0_generation_input_g0.part0016.jsonl": "c5e8c080b08fe3ef4985b52f2e5fd974753a6a2b4da60be90d5761993240f4da",
+   "pass1_generation_input_g0.part0000.jsonl": "4cfa18f4489d5e4acf79bf7537e827486edf9e5693c8f1fd5d66c91b40516d91",
+   "pass1_generation_input_g0.part0001.jsonl": "146cc254c0b9602b4371555aff6ed924697050bd7093704572e046e08369bcc5",
+   "pass1_generation_input_g0.part0002.jsonl": "82d786f281aa4093fe0cb6d6c8582dd20b364bb5398f49713c490a79d72f6bb3",
+   "pass1_generation_input_g0.part0003.jsonl": "14b9383293de9ace19e979717408bc31ae0d4b8f1a7f7b4ec7e9aca2e9cadce8",
+   "pass1_generation_input_g0.part0004.jsonl": "1229171aa9ebb2a7a95adc926cb9b619c7b97d21d1ef93037cb0b684efce1ec6",
+   "pass1_generation_input_g0.part0005.jsonl": "2fbfcc7d406259c1509e40045dbfe0b72cb7755f9536e838e4342dceeada8f32",
+   "pass1_generation_input_g0.part0006.jsonl": "f5915b4f2015453ffd430a76224ec654324e59975e62f28a2ecad3e25ba38d99",
+   "pass1_generation_input_g0.part0007.jsonl": "9f9b865bbf85b2993896467e1d1d556ab3440fa2f4419a4ad35cde12d16dea5e",
+   "pass1_generation_input_g0.part0008.jsonl": "34f10b15105bc7c7a11277748058295608a797f04a638878f43fbff5b5d8556b"
+  }
+ },
+ "contract": {
+  "abstract_analogical": {
+   "candidates": 89,
+   "units": 61,
+   "naturally_terminated": 47,
+   "length_limited": 30,
+   "degenerated": 12,
+   "protocol_valid": 51,
+   "answer": {
+    "correct": 41,
+    "incorrect": 48
+   },
+   "answer_scope": {
+    "the boxed final answer against the generator's gold (battery protocol v2)": 89
+   },
+   "steps": {
+    "not_assessed": 89
+   },
+   "observations": {
+    "text_consistency": {
+     "restated": 47,
+     "not_assessed": 3,
+     "not_restated": 1
+    }
+   },
+   "accepted_candidates": 41,
+   "accepted_units": 41,
+   "candidate_accept_rate": 0.460674,
+   "unit_accept_rate": 0.672131,
+   "rejection_reasons": {
+    "answer:incorrect:unusable": 42,
+    "answer:incorrect:wrong_answer": 6,
+    "ending:degeneration": 12,
+    "ending:length_limited": 30,
+    "protocol:think_not_closed": 38
+   }
+  },
+  "compositional_generalization": {
+   "candidates": 164,
+   "units": 131,
+   "naturally_terminated": 108,
+   "length_limited": 51,
+   "degenerated": 5,
+   "protocol_valid": 117,
+   "answer": {
+    "correct": 102,
+    "incorrect": 62
+   },
+   "answer_scope": {
+    "the boxed final answer against the generator's gold (battery protocol v2)": 164
+   },
+   "steps": {
+    "not_assessed": 164
+   },
+   "observations": {
+    "text_consistency": {
+     "restated": 107,
+     "not_assessed": 9,
+     "not_restated": 1
+    }
+   },
+   "accepted_candidates": 102,
+   "accepted_units": 102,
+   "candidate_accept_rate": 0.621951,
+   "unit_accept_rate": 0.778626,
+   "rejection_reasons": {
+    "answer:incorrect:unusable": 56,
+    "answer:incorrect:wrong_answer": 6,
+    "ending:degeneration": 5,
+    "ending:length_limited": 51,
+    "protocol:think_not_closed": 47
+   }
+  },
+  "external": {
+   "candidates": 1399,
+   "units": 989,
+   "naturally_terminated": 889,
+   "length_limited": 376,
+   "degenerated": 134,
+   "protocol_valid": 917,
+   "answer": {
+    "correct": 608,
+    "incorrect": 741,
+    "unverifiable": 50
+   },
+   "answer_scope": {
+    "the final answer's last \\boxed{} against the reference solution's last \\boxed{}; normalized string match, no symbolic equivalence": 79,
+    "the boxed final answer against the generator's gold (bool comparator)": 57,
+    "every boxed derivation line is a step of the generator's reference derivation (same rule, same input facts, same conclusion), each input available when used, and the last line derives the target: a proof made of reference steps, not any valid proof": 52,
+    "the final answer's last ```python block against every declared assert, sandboxed: the declared tests ran and passed: evidence bounded by those tests, not full semantic correctness": 113,
+    "the boxed final answer against the generator's gold (text comparator)": 70,
+    "an explicit statement in the final answer that the supplied context does not contain the answer, with no answer asserted beside it; phrase patterns, no length rule": 361,
+    "the boxed final answer against the generator's gold (number comparator)": 63,
+    "none": 50,
+    "the boxed final answer against the generator's gold (text_ci comparator)": 153,
+    "the boxed final answer against the generator's gold (matrix comparator)": 100,
+    "the boxed plan simulated under the stated actions (closed world; deletes, then adds): every precondition holds when its action runs, the goal holds at the end, and the plan has the length the prompt's cue states": 44,
+    "the boxed final answer against the generator's gold (token_seq comparator)": 62,
+    "the boxed final answer against the generator's gold (decimal_set comparator)": 39,
+    "the boxed value equals the generator's gold rational exactly (safe parser)": 9,
+    "every boxed move simulated: each legal, and all disks end on the target peg (any legal solution)": 21,
+    "the boxed final answer against the generator's gold (repr comparator)": 25,
+    "the boxed board: the stated size, every pre-placed queen kept, n queens in all, none attacking another (any valid completion)": 15,
+    "the boxed final answer against the generator's gold (assignment comparator)": 20,
+    "the boxed expression equals the generator's gold as a polynomial (safe parser; no evaluation of text)": 10,
+    "the boxed final answer against the generator's gold (int_set comparator)": 29,
+    "the boxed list is the generator's ordered list: same names, same exact values, same order": 13,
+    "the boxed roots are the generator's roots as a multiset of exact rationals (safe parser)": 14
+   },
+   "steps": {
+    "not_assessed": 1347,
+    "partial": 49,
+    "contradicted": 3
+   },
+   "observations": {},
+   "accepted_candidates": 600,
+   "accepted_units": 598,
+   "candidate_accept_rate": 0.428878,
+   "unit_accept_rate": 0.604651,
+   "rejection_reasons": {
+    "answer:incorrect:1 actions, the cue states 3": 9,
+    "answer:incorrect:1 actions, the cue states 5": 5,
+    "answer:incorrect:after 1 moves the disks are not all on peg 1": 1,
+    "answer:incorrect:after 1 moves the disks are not all on peg 3": 3,
+    "answer:incorrect:after 1 moves the disks are not all on peg 4": 1,
+    "answer:incorrect:after 1 moves the disks are not all on peg 5": 1,
+    "answer:incorrect:failed: 0/3 passed": 4,
+    "answer:incorrect:failed: 1/3 passed": 1,
+    "answer:incorrect:malformed derivation: not a derivation line: @1": 1,
+    "answer:incorrect:malformed derivation: not a derivation line: @2": 1,
+    "answer:incorrect:malformed derivation: not a derivation line: @4": 2,
+    "answer:incorrect:malformed derivation: not a derivation line: Alice  is echo tagged": 1,
+    "answer:incorrect:malformed derivation: not a derivation line: Alice is an ancestor of Bruno": 1,
+    "answer:incorrect:malformed derivation: not a derivation line: Alice is an ancestor of David": 1,
+    "answer:incorrect:malformed derivation: not a derivation line: Alice is bravo tagged": 2,
+    "answer:incorrect:malformed derivation: not a derivation line: Alice is echo tagged": 1,
+    "answer:incorrect:malformed derivation: not a derivation line: Alice is foxtrot tagged": 2,
+    "answer:incorrect:malformed derivation: not a derivation line: Bruno is foxtrot tagged": 2,
+    "answer:incorrect:malformed derivation: not a derivation line: Farah  is an ancestor of  David": 2,
+    "answer:incorrect:malformed derivation: not a derivation line: Farah  is an ancestor of Alice": 1,
+    "answer:incorrect:malformed derivation: not a derivation line: Farah is not bravo tagged": 2,
+    "answer:incorrect:malformed derivation: not a derivation line: Farah is not charlie tagged": 2,
+    "answer:incorrect:malformed derivation: not a derivation line: Rule: 3,0,@1 \\Rightarrow Alice  is an ancestor of  Bruno": 1,
+    "answer:incorrect:malformed derivation: not a derivation line: Rule: 3: 0 \\rightarrow @0: Alice is an ancestor of David": 1,
+    "answer:incorrect:malformed derivation: not a derivation line: alice is an ancestor of bruno": 4,
+    "answer:incorrect:malformed derivation: not a derivation line: bruno does not stand in the helps relation to david": 1,
+    "answer:incorrect:malformed derivation: not a derivation line: clara is an ancestor of alice": 2,
+    "answer:incorrect:malformed derivation: not a derivation line: clara is an ancestor of david": 4,
+    "answer:incorrect:malformed derivation: not a derivation line: clara is an ancestor of elena": 2,
+    "answer:incorrect:malformed derivation: not a derivation line: david is active": 2,
+    "answer:incorrect:malformed derivation: not a derivation line: david is an ancestor of bruno": 2,
+    "answer:incorrect:malformed derivation: not a derivation line: david is trusted": 1,
+    "answer:incorrect:malformed derivation: not a derivation line: elena is an ancestor of clara": 4,
+    "answer:incorrect:malformed derivation: not a derivation line: elena is an ancestor of david": 1,
+    "answer:incorrect:malformed derivation: not a derivation line: farah is an ancestor of alice": 1,
+    "answer:incorrect:move 1: disk 1 is not on top of peg 3": 1,
+    "answer:incorrect:no boxed answer": 450,
+    "answer:incorrect:no boxed answer in the final answer": 9,
+    "answer:incorrect:no fenced code block in the final answer": 1,
+    "answer:incorrect:not a 4 x 4 board of Q and _": 5,
+    "answer:incorrect:not a 8 x 8 board of Q and _": 1,
+    "answer:incorrect:step 2: nbind(delta,elm) is not a listed action": 1,
+    "answer:incorrect:the answer does not lead with a statement that the context lacks the answer": 148,
+    "answer:incorrect:two queens attack each other": 1,
+    "answer:incorrect:wrong answer": 52,
+    "answer:unverifiable:think not closed": 50,
+    "ending:degeneration": 134,
+    "ending:length_limited": 376,
+    "protocol:think_not_closed": 482,
+    "steps:contradicted:negates a reference conclusion: Alex is a shumpus.": 1,
+    "steps:contradicted:negates a reference conclusion: Rex is a yumpus.": 1,
+    "steps:contradicted:negates a reference conclusion: Rex is a zumpus.": 1,
+    "steps:not_assessed:1 of 2 reference conclusions not stated": 1,
+    "steps:not_assessed:1 of 4 reference conclusions not stated": 1,
+    "steps:not_assessed:2 of 4 reference conclusions not stated": 2,
+    "steps:not_assessed:3 of 4 reference conclusions not stated": 1
+   }
+  },
+  "inductive_rule_discovery": {
+   "candidates": 256,
+   "units": 218,
+   "naturally_terminated": 208,
+   "length_limited": 46,
+   "degenerated": 2,
+   "protocol_valid": 213,
+   "answer": {
+    "correct": 190,
+    "incorrect": 66
+   },
+   "answer_scope": {
+    "the boxed final answer against the generator's gold (battery protocol v2)": 256
+   },
+   "steps": {
+    "not_assessed": 256
+   },
+   "observations": {
+    "text_consistency": {
+     "restated": 196,
+     "not_restated": 12,
+     "not_assessed": 5
+    }
+   },
+   "accepted_candidates": 190,
+   "accepted_units": 190,
+   "candidate_accept_rate": 0.742188,
+   "unit_accept_rate": 0.87156,
+   "rejection_reasons": {
+    "answer:incorrect:unusable": 48,
+    "answer:incorrect:wrong_answer": 18,
+    "ending:degeneration": 2,
+    "ending:length_limited": 46,
+    "protocol:think_not_closed": 43
+   }
+  },
+  "interactive_adaptation": {
+   "candidates": 155,
+   "units": 87,
+   "naturally_terminated": 110,
+   "length_limited": 45,
+   "degenerated": 0,
+   "protocol_valid": 122,
+   "answer": {
+    "incorrect": 130,
+    "correct": 25
+   },
+   "answer_scope": {
+    "the environment's goal reached on replay": 155
+   },
+   "steps": {
+    "not_assessed": 155
+   },
+   "observations": {
+    "action_legality": {
+     "all_legal": 153,
+     "illegal_action": 2
+    }
+   },
+   "accepted_candidates": 25,
+   "accepted_units": 25,
+   "candidate_accept_rate": 0.16129,
+   "unit_accept_rate": 0.287356,
+   "rejection_reasons": {
+    "action_legality:illegal_action:invalid_actions=1": 2,
+    "answer:incorrect:goal not reached": 130,
+    "ending:length_limited": 45,
+    "protocol:think_not_closed": 33
+   }
+  },
+  "task_contained_deduction": {
+   "candidates": 101,
+   "units": 101,
+   "naturally_terminated": 101,
+   "length_limited": 0,
+   "degenerated": 0,
+   "protocol_valid": 101,
+   "answer": {
+    "correct": 101
+   },
+   "answer_scope": {
+    "the boxed final answer against the generator's gold (battery protocol v2)": 101
+   },
+   "steps": {
+    "not_assessed": 101
+   },
+   "observations": {
+    "text_consistency": {
+     "restated": 82,
+     "not_restated": 19
+    }
+   },
+   "accepted_candidates": 101,
+   "accepted_units": 101,
+   "candidate_accept_rate": 1.0,
+   "unit_accept_rate": 1.0,
+   "rejection_reasons": {}
+  }
+ },
+ "units_selected": 1057,
+ "reused_units": 6298,
+ "admission": {
+  "units": 0,
+  "sessions": 0,
+  "units_by_kind": {}
+ },
+ "cells": {
+  "primary.abstract_analogical/reasoning_core": {
+   "share": 0.03,
+   "supervised_tokens_needed": 93300,
+   "supervised_tokens_admitted": 7737,
+   "units_admitted": 1,
+   "covered": false,
+   "tasks_generated": 40,
+   "candidates": 79,
+   "units_accepted": 1,
+   "unit_accept_rate": 0.025,
+   "rejection_reasons": {
+    "ending:length_limited": 78,
+    "answer:incorrect:no boxed answer": 78,
+    "protocol:think_not_closed": 76
+   }
+  },
+  "primary.abstract_analogical/s0_generators_v2_calsplit": {
+   "share": 0.06,
+   "supervised_tokens_needed": 186600,
+   "supervised_tokens_admitted": 246989,
+   "units_admitted": 41,
+   "covered": true,
+   "tasks_generated": 61,
+   "candidates": 89,
+   "units_accepted": 41,
+   "unit_accept_rate": 0.6721,
+   "rejection_reasons": {
+    "answer:incorrect:unusable": 42,
+    "protocol:think_not_closed": 38,
+    "ending:length_limited": 30,
+    "ending:degeneration": 12,
+    "answer:incorrect:wrong_answer": 6
+   }
+  },
+  "primary.compositional_generalization/reasoning_core": {
+   "share": 0.03,
+   "supervised_tokens_needed": 93300,
+   "supervised_tokens_admitted": 106367,
+   "units_admitted": 23,
+   "covered": true,
+   "tasks_generated": 58,
+   "candidates": 99,
+   "units_accepted": 23,
+   "unit_accept_rate": 0.3966,
+   "rejection_reasons": {
+    "ending:length_limited": 61,
+    "answer:incorrect:no boxed answer": 61,
+    "protocol:think_not_closed": 57,
+    "answer:incorrect:1 actions, the cue states 3": 9,
+    "answer:incorrect:1 actions, the cue states 5": 5,
+    "answer:incorrect:step 2: nbind(delta,elm) is not a listed action": 1
+   }
+  },
+  "primary.compositional_generalization/reasoning_gym": {
+   "share": 0.05,
+   "supervised_tokens_needed": 155500,
+   "supervised_tokens_admitted": 65836,
+   "units_admitted": 15,
+   "covered": false,
+   "tasks_generated": 99,
+   "candidates": 184,
+   "units_accepted": 15,
+   "unit_accept_rate": 0.1515,
+   "rejection_reasons": {
+    "answer:incorrect:no boxed answer": 162,
+    "protocol:think_not_closed": 158,
+    "ending:degeneration": 97,
+    "ending:length_limited": 64,
+    "answer:incorrect:after 1 moves the disks are not all on peg 3": 3,
+    "answer:incorrect:after 1 moves the disks are not all on peg 5": 1,
+    "answer:incorrect:move 1: disk 1 is not on top of peg 3": 1,
+    "answer:incorrect:after 1 moves the disks are not all on peg 4": 1
+   }
+  },
+  "primary.compositional_generalization/s0_generators_v2_calsplit": {
+   "share": 0.09,
+   "supervised_tokens_needed": 279900,
+   "supervised_tokens_admitted": 391394,
+   "units_admitted": 102,
+   "covered": true,
+   "tasks_generated": 131,
+   "candidates": 164,
+   "units_accepted": 102,
+   "unit_accept_rate": 0.7786,
+   "rejection_reasons": {
+    "answer:incorrect:unusable": 56,
+    "ending:length_limited": 51,
+    "protocol:think_not_closed": 47,
+    "answer:incorrect:wrong_answer": 6,
+    "ending:degeneration": 5
+   }
+  },
+  "primary.inductive_rule_discovery/s0_generators_v2_calsplit": {
+   "share": 0.17,
+   "supervised_tokens_needed": 528700,
+   "supervised_tokens_admitted": 713594,
+   "units_admitted": 190,
+   "covered": true,
+   "tasks_generated": 218,
+   "candidates": 256,
+   "units_accepted": 190,
+   "unit_accept_rate": 0.8716,
+   "rejection_reasons": {
+    "answer:incorrect:unusable": 48,
+    "ending:length_limited": 46,
+    "protocol:think_not_closed": 43,
+    "answer:incorrect:wrong_answer": 18,
+    "ending:degeneration": 2
+   }
+  },
+  "primary.interactive_adaptation/s0_generators_v2_calsplit": {
+   "share": 0.1,
+   "supervised_tokens_needed": 311000,
+   "supervised_tokens_admitted": 445712,
+   "units_admitted": 25,
+   "covered": true,
+   "tasks_generated": 87,
+   "candidates": 155,
+   "units_accepted": 25,
+   "unit_accept_rate": 0.2874,
+   "rejection_reasons": {
+    "answer:incorrect:goal not reached": 130,
+    "ending:length_limited": 45,
+    "protocol:think_not_closed": 33,
+    "action_legality:illegal_action:invalid_actions=1": 2
+   }
+  },
+  "primary.task_contained_deduction/prontoqa": {
+   "share": 0.03,
+   "supervised_tokens_needed": 93300,
+   "supervised_tokens_admitted": 134730,
+   "units_admitted": 49,
+   "covered": true,
+   "tasks_generated": 51,
+   "candidates": 57,
+   "units_accepted": 49,
+   "unit_accept_rate": 0.9608,
+   "rejection_reasons": {
+    "steps:not_assessed:2 of 4 reference conclusions not stated": 2,
+    "steps:not_assessed:1 of 4 reference conclusions not stated": 1,
+    "steps:not_assessed:3 of 4 reference conclusions not stated": 1,
+    "steps:contradicted:negates a reference conclusion: Rex is a yumpus.": 1,
+    "steps:not_assessed:1 of 2 reference conclusions not stated": 1,
+    "steps:contradicted:negates a reference conclusion: Rex is a zumpus.": 1,
+    "steps:contradicted:negates a reference conclusion: Alex is a shumpus.": 1
+   }
+  },
+  "primary.task_contained_deduction/reasoning_core": {
+   "share": 0.03,
+   "supervised_tokens_needed": 93300,
+   "supervised_tokens_admitted": 121642,
+   "units_admitted": 22,
+   "covered": true,
+   "tasks_generated": 51,
+   "candidates": 81,
+   "units_accepted": 22,
+   "unit_accept_rate": 0.4314,
+   "rejection_reasons": {
+    "ending:length_limited": 12,
+    "protocol:think_not_closed": 11,
+    "answer:incorrect:no boxed answer": 11,
+    "answer:incorrect:malformed derivation: not a derivation line: elena is an ancestor of clara": 4,
+    "answer:incorrect:malformed derivation: not a derivation line: alice is an ancestor of bruno": 4,
+    "answer:incorrect:malformed derivation: not a derivation line: clara is an ancestor of david": 4,
+    "answer:incorrect:malformed derivation: not a derivation line: Bruno is foxtrot tagged": 2,
+    "answer:incorrect:malformed derivation: not a derivation line: clara is an ancestor of elena": 2
+   }
+  },
+  "primary.task_contained_deduction/reasoning_gym": {
+   "share": 0.03,
+   "supervised_tokens_needed": 93300,
+   "supervised_tokens_admitted": 86216,
+   "units_admitted": 25,
+   "covered": false,
+   "tasks_generated": 51,
+   "candidates": 82,
+   "units_accepted": 25,
+   "unit_accept_rate": 0.4902,
+   "rejection_reasons": {
+    "answer:incorrect:no boxed answer": 41,
+    "protocol:think_not_closed": 40,
+    "ending:length_limited": 36,
+    "answer:incorrect:wrong answer": 7,
+    "ending:degeneration": 5,
+    "answer:incorrect:not a 4 x 4 board of Q and _": 5,
+    "answer:incorrect:not a 8 x 8 board of Q and _": 1,
+    "answer:incorrect:two queens attack each other": 1
+   }
+  },
+  "primary.task_contained_deduction/s0_generators_v2_calsplit": {
+   "share": 0.08,
+   "supervised_tokens_needed": 248800,
+   "supervised_tokens_admitted": 358670,
+   "units_admitted": 101,
+   "covered": true,
+   "tasks_generated": 101,
+   "candidates": 101,
+   "units_accepted": 101,
+   "unit_accept_rate": 1.0,
+   "rejection_reasons": {}
+  },
+  "supporting.answerability/squad_v2_train_unanswerable": {
+   "share": 0.03,
+   "supervised_tokens_needed": 93300,
+   "supervised_tokens_admitted": 260122,
+   "units_admitted": 213,
+   "covered": true,
+   "tasks_generated": 281,
+   "candidates": 361,
+   "units_accepted": 213,
+   "unit_accept_rate": 0.758,
+   "rejection_reasons": {
+    "answer:incorrect:the answer does not lead with a statement that the context lacks the answer": 148
+   }
+  },
+  "supporting.code_algorithmic/mbpp_train": {
+   "share": 0.045,
+   "supervised_tokens_needed": 139950,
+   "supervised_tokens_admitted": 351988,
+   "units_admitted": 107,
+   "covered": true,
+   "tasks_generated": 124,
+   "candidates": 124,
+   "units_accepted": 107,
+   "unit_accept_rate": 0.8629,
+   "rejection_reasons": {
+    "ending:length_limited": 12,
+    "protocol:think_not_closed": 11,
+    "answer:unverifiable:think not closed": 11,
+    "answer:incorrect:failed: 0/3 passed": 4,
+    "answer:incorrect:no fenced code block in the final answer": 1,
+    "answer:incorrect:failed: 1/3 passed": 1
+   }
+  },
+  "supporting.code_algorithmic/reasoning_core": {
+   "share": 0.015,
+   "supervised_tokens_needed": 46650,
+   "supervised_tokens_admitted": 66241,
+   "units_admitted": 15,
+   "covered": true,
+   "tasks_generated": 35,
+   "candidates": 59,
+   "units_accepted": 15,
+   "unit_accept_rate": 0.4286,
+   "rejection_reasons": {
+    "answer:incorrect:no boxed answer": 34,
+    "ending:length_limited": 33,
+    "protocol:think_not_closed": 31,
+    "answer:incorrect:wrong answer": 10,
+    "ending:degeneration": 1
+   }
+  },
+  "supporting.code_algorithmic/reasoning_gym": {
+   "share": 0.01,
+   "supervised_tokens_needed": 31100,
+   "supervised_tokens_admitted": 0,
+   "units_admitted": 0,
+   "covered": false,
+   "tasks_generated": 22,
+   "candidates": 44,
+   "units_accepted": 0,
+   "unit_accept_rate": 0.0,
+   "rejection_reasons": {
+    "answer:incorrect:no boxed answer": 41,
+    "protocol:think_not_closed": 39,
+    "ending:degeneration": 22,
+    "ending:length_limited": 19,
+    "answer:incorrect:wrong answer": 3
+   }
+  },
+  "supporting.math_new/math_train": {
+   "share": 0.03,
+   "supervised_tokens_needed": 93300,
+   "supervised_tokens_admitted": 122782,
+   "units_admitted": 58,
+   "covered": true,
+   "tasks_generated": 88,
+   "candidates": 118,
+   "units_accepted": 58,
+   "unit_accept_rate": 0.6591,
+   "rejection_reasons": {
+    "ending:length_limited": 47,
+    "protocol:think_not_closed": 39,
+    "answer:unverifiable:think not closed": 39,
+    "answer:incorrect:wrong answer": 12,
+    "answer:incorrect:no boxed answer in the final answer": 9,
+    "ending:degeneration": 1
+   }
+  },
+  "supporting.math_new/mathematics_dataset": {
+   "share": 0.02,
+   "supervised_tokens_needed": 62200,
+   "supervised_tokens_admitted": 115649,
+   "units_admitted": 47,
+   "covered": true,
+   "tasks_generated": 59,
+   "candidates": 72,
+   "units_accepted": 47,
+   "unit_accept_rate": 0.7966,
+   "rejection_reasons": {
+    "answer:incorrect:wrong answer": 19,
+    "ending:length_limited": 6,
+    "answer:incorrect:no boxed answer": 6,
+    "protocol:think_not_closed": 5
+   }
+  },
+  "supporting.math_new/reasoning_gym": {
+   "share": 0.01,
+   "supervised_tokens_needed": 31100,
+   "supervised_tokens_admitted": 95600,
+   "units_admitted": 23,
+   "covered": true,
+   "tasks_generated": 30,
+   "candidates": 39,
+   "units_accepted": 23,
+   "unit_accept_rate": 0.7667,
+   "rejection_reasons": {
+    "answer:incorrect:no boxed answer": 16,
+    "protocol:think_not_closed": 15,
+    "ending:degeneration": 8,
+    "ending:length_limited": 8
+   }
+  },
+  "supporting.math_reused_gsm8k/corpus_v2_gsm8k_verified": {
+   "share": 0.06,
+   "supervised_tokens_needed": 186600,
+   "supervised_tokens_admitted": 1648134,
+   "units_admitted": 1508,
+   "covered": true,
+   "reused": true
+  },
+  "supporting.reading_verified/corpus_v2_multihop_verified": {
+   "share": 0.02,
+   "supervised_tokens_needed": 62200,
+   "supervised_tokens_admitted": 879026,
+   "units_admitted": 919,
+   "covered": true,
+   "reused": true
+  },
+  "supporting.reading_verified/corpus_v2_rag_verified": {
+   "share": 0.06,
+   "supervised_tokens_needed": 186600,
+   "supervised_tokens_admitted": 1806741,
+   "units_admitted": 3871,
+   "covered": true,
+   "reused": true
+  }
+ },
+ "gaps_supervised_tokens": {
+  "primary.abstract_analogical/reasoning_core": 85563,
+  "primary.compositional_generalization/reasoning_gym": 89664,
+  "primary.task_contained_deduction/reasoning_gym": 7084,
+  "supporting.code_algorithmic/reasoning_gym": 31100
+ },
+ "composition_capacity_supervised_tokens": 0,
+ "isolation_recheck": {
+  "pass": true,
+  "violations": [],
+  "n_items": 1057,
+  "R2_flagged": 0,
+  "establishes": {
+   "R0_provenance": "every item names a registered, trainable source and carries the fields its kind needs",
+   "R1_held_out_keys": "no item shares a prompt or content key with a held-out unit",
+   "R2_near_duplicate": "no item is a 13-gram near-copy of a held-out prompt",
+   "R3_rule_family": "no item comes from a rule family a fluid evaluation item uses",
+   "R4_eval_only_generators": "no item comes from an evaluation-only generator or its task type",
+   "R5_shared_generator_exposure": "shared-generator items are calibration-split families in the training seed range",
+   "R6_source_split": "every dataset item comes from a trainable split",
+   "R7_arc_agi": "no ARC-lineage source or module, and no item carrying ARC-AGI-1 grids",
+   "R9_mechanism_equivalence": "no item comes from a project family whose rule computes an evaluation family's rule"
+  }
+ },
+ "authorizes": "nothing",
+ "pack": {
+  "built": false,
+  "why": "cells short of their share: {\"primary.abstract_analogical/reasoning_core\": 85563, \"primary.compositional_generalization/reasoning_gym\": 89664, \"primary.task_contained_deduction/reasoning_gym\": 7084, \"supporting.code_algorithmic/reasoning_gym\": 31100}",
+  "rule": "no paid top-up, no lower correctness gate, no repetition, no other source, no other mix: the gap is reported and P1v stops here"
+ },
+ "comparator_correction": {
+  "finding": "a correct mini_sudoku grid boxed with a LITERAL backslash-n between rows was refused by the frozen matrix comparator (3 first candidates)",
+  "fix": "generation_adapter.parse_grid reads a literal \\n (not followed by a letter) as a row break, like a newline or LaTeX \\\\; content must still equal the gold exactly (test_comparators.py)",
+  "frozen_verifier_selected_units": 1056,
+  "fixed_verifier_selected_units": 1057,
+  "effect": "+1 selected unit in primary.task_contained_deduction/reasoning_gym; no gap closed by it",
+  "frozen_cells": {
+   "primary.abstract_analogical/reasoning_core": {
+    "tasks": 40,
+    "accepted_units": 1
+   },
+   "primary.abstract_analogical/s0_generators_v2_calsplit": {
+    "tasks": 61,
+    "accepted_units": 41
+   },
+   "primary.compositional_generalization/reasoning_core": {
+    "tasks": 58,
+    "accepted_units": 23
+   },
+   "primary.compositional_generalization/reasoning_gym": {
+    "tasks": 99,
+    "accepted_units": 15
+   },
+   "primary.compositional_generalization/s0_generators_v2_calsplit": {
+    "tasks": 131,
+    "accepted_units": 102
+   },
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit": {
+    "tasks": 218,
+    "accepted_units": 190
+   },
+   "primary.interactive_adaptation/s0_generators_v2_calsplit": {
+    "tasks": 87,
+    "accepted_units": 25
+   },
+   "primary.task_contained_deduction/prontoqa": {
+    "tasks": 51,
+    "accepted_units": 49
+   },
+   "primary.task_contained_deduction/reasoning_core": {
+    "tasks": 51,
+    "accepted_units": 22
+   },
+   "primary.task_contained_deduction/reasoning_gym": {
+    "tasks": 51,
+    "accepted_units": 24
+   },
+   "primary.task_contained_deduction/s0_generators_v2_calsplit": {
+    "tasks": 101,
+    "accepted_units": 101
+   },
+   "supporting.answerability/squad_v2_train_unanswerable": {
+    "tasks": 281,
+    "accepted_units": 213
+   },
+   "supporting.code_algorithmic/mbpp_train": {
+    "tasks": 124,
+    "accepted_units": 107
+   },
+   "supporting.code_algorithmic/reasoning_core": {
+    "tasks": 35,
+    "accepted_units": 15
+   },
+   "supporting.code_algorithmic/reasoning_gym": {
+    "tasks": 22,
+    "accepted_units": 0
+   },
+   "supporting.math_new/math_train": {
+    "tasks": 88,
+    "accepted_units": 58
+   },
+   "supporting.math_new/mathematics_dataset": {
+    "tasks": 59,
+    "accepted_units": 47
+   },
+   "supporting.math_new/reasoning_gym": {
+    "tasks": 30,
+    "accepted_units": 23
+   }
+  }
+ },
+ "measured": {
+  "generated_tokens": {
+   "pass0": 7274821,
+   "pass1": 4027765,
+   "total": 11302586,
+   "predicted": 9874990,
+   "_reading": "the prediction was 13% low; the cost was below the forecast because the measured throughput was higher"
+  },
+  "generated_units_by_stratum": {
+   "primary.abstract_analogical": {
+    "units": 42,
+    "supervised_per_unit": 6065,
+    "rendered_per_supervised": 1.045
+   },
+   "primary.compositional_generalization": {
+    "units": 140,
+    "supervised_per_unit": 4026,
+    "rendered_per_supervised": 1.055
+   },
+   "primary.inductive_rule_discovery": {
+    "units": 190,
+    "supervised_per_unit": 3756,
+    "rendered_per_supervised": 1.044
+   },
+   "primary.interactive_adaptation": {
+    "units": 25,
+    "supervised_per_unit": 17828,
+    "rendered_per_supervised": 1.17
+   },
+   "primary.task_contained_deduction": {
+    "units": 197,
+    "supervised_per_unit": 3560,
+    "rendered_per_supervised": 1.042
+   },
+   "supporting.answerability": {
+    "units": 213,
+    "supervised_per_unit": 1221,
+    "rendered_per_supervised": 1.188
+   },
+   "supporting.code_algorithmic": {
+    "units": 122,
+    "supervised_per_unit": 3428,
+    "rendered_per_supervised": 1.046
+   },
+   "supporting.math_new": {
+    "units": 128,
+    "supervised_per_unit": 2610,
+    "rendered_per_supervised": 1.04
+   }
+  },
+  "generated_cells_rendered_per_supervised": 1.071,
+  "generated_cells_supervised_tokens": 3691269,
+  "_planning_figure_was": "corpus_spec new_arm_rendered_per_supervised 1.12"
+ },
+ "stop": {
+  "at": "P1v, before B's pack",
+  "why": "four cells short of their share of 2.96M + the reserve",
+  "not_done": [
+   "no pack",
+   "no M1 recompute on a real pack (B's does not exist)",
+   "no paid top-up",
+   "no lower correctness gate",
+   "no repetition",
+   "no other source",
+   "no change of mix"
+  ],
+  "decision_needed": "the maintainer's, on the four short cells"
+ }
+}

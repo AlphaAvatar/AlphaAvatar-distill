@@ -30,3 +30,16 @@ def test_an_answer_resets_the_streak():
     assert driver_terminal("ALIVE", since, 30.0) == (None, None)
     stop, since = driver_terminal("UNKNOWN", None, UNANSWERED_DRIVER_GRACE_S + 10)
     assert stop is None and since == UNANSWERED_DRIVER_GRACE_S + 10
+
+
+def test_a_marker_written_as_the_driver_exited_is_the_terminal():
+    """The status read and the liveness probe are seconds apart; a marker that
+    lands between them must still decide the session (h1p2b_20261023_205037)."""
+    from aadistill.infrastructure.session import MarkerPolicy
+    from aadistill.infrastructure.session_runner import marker_terminal
+    m = MarkerPolicy(success="ALL_DONE", failure=("RUN_FAILED",), products_eligible=lambda t, s: True)
+    assert marker_terminal("2026-10-23T23:23:34Z MARKER:ALL_DONE", m) == "ALL_DONE"
+    assert marker_terminal("x MARKER:RUN_FAILED", m) == "RUN_FAILED"
+    assert marker_terminal("x MARKER:SETUP_DONE", m) is None
+    assert marker_terminal("", m) is None
+

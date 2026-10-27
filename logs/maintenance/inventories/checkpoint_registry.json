@@ -1,7 +1,7 @@
 {
   "schema": "aadistill.checkpoint_registry/v2",
-  "created_utc": "2026-10-21T16:47:07+00:00",
-  "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --relay",
+  "created_utc": "2026-10-21T20:05:15+00:00",
+  "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --relay --out logs/maintenance/inventories/checkpoint_registry.json",
   "hashed": true,
   "scope": "every checkpoint and weight artifact in the three storage areas: local artifacts/, the relay, and anything git tracks",
   "deletion_rule": "a checkpoint may be deleted only if it is not protected, no never_delete clause applies, its scientific status is recorded elsewhere, its hash is in this registry, and a tombstone is written to logs/maintenance/inventories/checkpoint_tombstones.json",
@@ -651,11 +651,13 @@
       ],
       "open_consumers": [],
       "_kept_for": "the initialization candidates a later stage may start from; no later consumer is authorized yet",
-      "local_copies": [],
-      "copies": 0,
-      "all_copies_identity_verified": false,
+      "local_copies": [
+        "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4"
+      ],
+      "copies": 1,
+      "all_copies_identity_verified": true,
       "tombstone": null,
-      "lifecycle": "no_local_copy",
+      "lifecycle": "retained_local",
       "reconstruction": "restore the relay copy (sha256-pinned)",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not"
     },
@@ -1324,11 +1326,11 @@
     }
   },
   "local": {
-    "n_units": 87,
-    "n_weight_files": 81,
-    "total_bytes": 80725430175,
-    "total_human": "75.181 GiB",
-    "artifacts_tree_bytes": 10996710034,
+    "n_units": 88,
+    "n_weight_files": 82,
+    "total_bytes": 81917566896,
+    "total_human": "76.292 GiB",
+    "artifacts_tree_bytes": 12188847210,
     "external_store_tree_bytes": 76281447329,
     "by_store": {
       "external_store": {
@@ -1336,25 +1338,25 @@
         "bytes": 73733077771
       },
       "repo_artifacts": {
-        "units": 26,
-        "bytes": 6992352404
+        "units": 27,
+        "bytes": 8184489125
       }
     },
     "proposed_disposition": {
       "keep": 31,
       "retire": 14,
-      "review": 42
+      "review": 43
     },
     "proposed_disposition_bytes": {
       "keep": 53613593422,
       "retire": 16689914094,
-      "review": 10421922659
+      "review": 11614059380
     }
   },
   "relay": {
     "repo": "AlphaAvatar/aadistill-artifacts",
     "queried": true,
-    "queried_utc": "2026-10-21T16:41:06+00:00",
+    "queried_utc": "2026-10-21T19:59:26+00:00",
     "n_files": 1465,
     "total_bytes": 92496654451,
     "by_prefix": {
@@ -11701,13 +11703,13 @@
         "configs/stages/stage-3/e6b/provenance.json",
         "configs/stages/stage-3/e8/arms.json",
         "configs/stages/stage-3/e8/e8_contrib_r2960k_sb.json",
+        "docs/shared/STAGE2_3_HANDOFF.md",
         "docs/stages/stage-1/AUTOINIT_REFERENCE.md",
         "docs/stages/stage-1/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
-        "logs/stages/stage-3/e1/analyses/e1_test_cases.md",
-        "logs/stages/stage-3/e2/plans/PROPOSAL.md"
+        "logs/stages/stage-3/e1/analyses/e1_test_cases.md"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -12456,9 +12458,9 @@
         "configs/stages/stage-3/e8b/arms.json",
         "configs/stages/stage-3/e8b/e8b_fc_r1600k_sa.json",
         "configs/stages/stage-3/e8b/e8b_fc_r1600k_sb.json",
+        "docs/shared/STAGE2_3_HANDOFF.md",
         "docs/stages/stage-1/AUTOINIT_REFERENCE.md",
-        "docs/stages/stage-1/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
-        "logs/budget/decisions.md"
+        "docs/stages/stage-1/archive/HANDOFF_AUTOINITIALIZER_20260812.md"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -12771,6 +12773,57 @@
       "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
       "relay_mirror_verification": null,
       "canonical_location": "local only (no second copy)",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "1301deb71685aa1ca5c7b6cf2c491ac4",
+      "kind": "checkpoint",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4",
+      "weight_files": [
+        "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_bytes": 1192136721,
+      "size_human": "1.110 GiB",
+      "weights_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+      "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+      "referenced_by": [
+        "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
+        "docs/stages/stage-2/reasoning_data/H1.md",
+        "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "logs/stages/stage-0/calibration_volume/design/extension_analysis.json",
+        "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
+        "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/dose_record.json",
+        "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/finalists/finalists_manifest.json",
+        "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/recovery/recovery_config.json",
+        "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/recovery/recovery_products.json",
+        "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/search_record.json",
+        "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/stage1_selection.json"
+      ],
+      "relay_path": "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
       "reconstructable": false,
       "reconstruction_recipe": null,
       "reconstruction_cost": null,
@@ -14053,11 +14106,11 @@
         "configs/stages/stage-0/calibration_volume/resolution_session.json",
         "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
         "configs/stages/stage-1/phase_c1/c1_skip_predicate_classification.json",
+        "docs/shared/STAGE2_3_HANDOFF.md",
         "docs/stages/stage-1/AUTOINIT_REFERENCE.md",
+        "docs/stages/stage-2/reasoning_data/DESIGN.md",
         "logs/budget/decisions.md",
-        "logs/budget/ledger.md",
-        "logs/maintenance/cleanup/autoinit_relay_retention_20260822.json",
-        "logs/maintenance/cleanup/derived_cache_cleanup.json"
+        "logs/budget/ledger.md"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -14139,9 +14192,9 @@
         "docs/maintenance/REPO_LAYOUT.md",
         "docs/maintenance/core-provenance.md",
         "docs/shared/POD_SCRIPTS.md",
+        "docs/shared/STAGE2_3_HANDOFF.md",
         "docs/stages/stage-0/calibration_volume/DESIGN.md",
-        "docs/stages/stage-1/AUTOINIT_REFERENCE.md",
-        "logs/budget/README.md"
+        "docs/stages/stage-1/AUTOINIT_REFERENCE.md"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -14300,6 +14353,7 @@
       "weights_sha256": "cbf792a9b5a80880f10cd0fb62c923825152b7cbdd708e0d2ce48d1bea5a873d",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/closeout/outcome.json",
@@ -14340,6 +14394,7 @@
       "weights_sha256": "27c5e6dd56b7cbb2d7a4132e70229a1eb0e4c67bb0ae4577697c376709627d57",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/closeout/outcome.json",
@@ -14380,6 +14435,7 @@
       "weights_sha256": "f71641e2b5e4848571812c7de382cc52344dda23c6ec749aa149a05fcc0e020f",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/closeout/outcome.json",
@@ -14419,6 +14475,7 @@
       "weights_sha256": "abfea857724760b86ba84c696f4a63f1b33cf9759ecf04fbe5fa17b1829605e2",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/closeout/outcome.json",
@@ -14458,6 +14515,7 @@
       "weights_sha256": "404eac5fcbe8b6d1e8e3e190116f09a0786abf419d659e8911123459075965d3",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/closeout/outcome.json",
@@ -14497,6 +14555,7 @@
       "weights_sha256": "46b4df2b3f6abd4f0a701635c653c1e65d67a7059ae7ea6bf4fac02e8e342531",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/closeout/outcome.json",
@@ -14536,6 +14595,7 @@
       "weights_sha256": "877ca799ccb0ad417fcec69a8b6008fbee8847d5bdb5573bba48c8cfea8aa075",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/closeout/outcome.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/evidence/pilot_root/search_record.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/runtime/session.json"
@@ -14571,6 +14631,7 @@
       "weights_sha256": "485fd6ad5002502159057cab9d323ccace38740ab0e913afcce23ad61fc4a3a2",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/closeout/outcome.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/evidence/pilot_root/search_record.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/runtime/session.json"
@@ -14606,6 +14667,7 @@
       "weights_sha256": "1f33fd98166a0292b24b7098f3bc0f9c87cca02a3fc9f04664ad41b5c2329031",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/closeout/outcome.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/evidence/pilot_root/search_record.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/runtime/session.json"
@@ -14641,6 +14703,7 @@
       "weights_sha256": "a17c74e5b50e55599f219f9a8a80d32e08d4878a60148ea6f8a94af70e13d073",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/closeout/outcome.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/evidence/pilot_root/search_record.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/runtime/session.json"
@@ -14676,6 +14739,7 @@
       "weights_sha256": "85190d387e0942c100145944975e2f05332e66e0db34849689560be6b3e2bd28",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/closeout/outcome.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/evidence/pilot_root/search_record.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/runtime/session.json"
@@ -14711,6 +14775,7 @@
       "weights_sha256": "0adb9629359346aaa2143038d8e12a7ba7081b971f92ead51610ebd28dc7f8ff",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/closeout/outcome.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/evidence/pilot_root/search_record.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/runtime/session.json"
@@ -14746,6 +14811,7 @@
       "weights_sha256": "65741661c63328646145db8a004863539c4f0e12c83d62e050eb9a296603a451",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/closeout/outcome.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/evidence/pilot_root/search_record.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/runtime/session.json"
@@ -14781,6 +14847,7 @@
       "weights_sha256": "a1881f5576a4aeab47ebd20849653f53e1f860441817680b0be7193fc5ece85a",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/closeout/outcome.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/evidence/pilot_root/search_record.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/runtime/session.json"
@@ -14816,6 +14883,7 @@
       "weights_sha256": "ed57f27b2bac24cfd72db63634993a69f8996317f821d7018341c9cf22bd3268",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/closeout/outcome.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/evidence/pilot_root/search_record.json",
         "logs/stages/stage-0/calibration_volume/runs/pilot_20261018_134131/runtime/session.json"
@@ -14851,6 +14919,7 @@
       "weights_sha256": "cbf792a9b5a80880f10cd0fb62c923825152b7cbdd708e0d2ce48d1bea5a873d",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/closeout/outcome.json",
@@ -14891,6 +14960,7 @@
       "weights_sha256": "27c5e6dd56b7cbb2d7a4132e70229a1eb0e4c67bb0ae4577697c376709627d57",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/closeout/outcome.json",
@@ -14931,6 +15001,7 @@
       "weights_sha256": "f71641e2b5e4848571812c7de382cc52344dda23c6ec749aa149a05fcc0e020f",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/closeout/outcome.json",
@@ -14970,6 +15041,7 @@
       "weights_sha256": "abfea857724760b86ba84c696f4a63f1b33cf9759ecf04fbe5fa17b1829605e2",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/closeout/outcome.json",
@@ -15009,6 +15081,7 @@
       "weights_sha256": "404eac5fcbe8b6d1e8e3e190116f09a0786abf419d659e8911123459075965d3",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/closeout/outcome.json",
@@ -15048,6 +15121,7 @@
       "weights_sha256": "46b4df2b3f6abd4f0a701635c653c1e65d67a7059ae7ea6bf4fac02e8e342531",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/closeout/outcome.json",
@@ -15087,6 +15161,7 @@
       "weights_sha256": "cbf792a9b5a80880f10cd0fb62c923825152b7cbdd708e0d2ce48d1bea5a873d",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/closeout/outcome.json",
@@ -15127,6 +15202,7 @@
       "weights_sha256": "27c5e6dd56b7cbb2d7a4132e70229a1eb0e4c67bb0ae4577697c376709627d57",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/closeout/outcome.json",
@@ -15167,6 +15243,7 @@
       "weights_sha256": "f71641e2b5e4848571812c7de382cc52344dda23c6ec749aa149a05fcc0e020f",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/closeout/outcome.json",
@@ -15206,6 +15283,7 @@
       "weights_sha256": "abfea857724760b86ba84c696f4a63f1b33cf9759ecf04fbe5fa17b1829605e2",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/closeout/outcome.json",
@@ -15245,6 +15323,7 @@
       "weights_sha256": "404eac5fcbe8b6d1e8e3e190116f09a0786abf419d659e8911123459075965d3",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/closeout/outcome.json",
@@ -15284,6 +15363,7 @@
       "weights_sha256": "46b4df2b3f6abd4f0a701635c653c1e65d67a7059ae7ea6bf4fac02e8e342531",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/closeout/outcome.json",
@@ -15323,6 +15403,7 @@
       "weights_sha256": "cbf792a9b5a80880f10cd0fb62c923825152b7cbdd708e0d2ce48d1bea5a873d",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/closeout/outcome.json",
@@ -15363,6 +15444,7 @@
       "weights_sha256": "27c5e6dd56b7cbb2d7a4132e70229a1eb0e4c67bb0ae4577697c376709627d57",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/closeout/outcome.json",
@@ -15403,6 +15485,7 @@
       "weights_sha256": "f71641e2b5e4848571812c7de382cc52344dda23c6ec749aa149a05fcc0e020f",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/closeout/outcome.json",
@@ -15442,6 +15525,7 @@
       "weights_sha256": "abfea857724760b86ba84c696f4a63f1b33cf9759ecf04fbe5fa17b1829605e2",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/closeout/outcome.json",
@@ -15481,6 +15565,7 @@
       "weights_sha256": "404eac5fcbe8b6d1e8e3e190116f09a0786abf419d659e8911123459075965d3",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/closeout/outcome.json",
@@ -15520,6 +15605,7 @@
       "weights_sha256": "46b4df2b3f6abd4f0a701635c653c1e65d67a7059ae7ea6bf4fac02e8e342531",
       "config_sha256": null,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/stages/stage-0/calibration_volume/design/formal_analysis.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/closeout/outcome.json",

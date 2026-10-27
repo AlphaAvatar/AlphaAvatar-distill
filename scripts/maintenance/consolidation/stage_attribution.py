@@ -1615,6 +1615,228 @@ STAGE_2 = [
             "2026-07 build notes were folded into the historical index and the "
             "decision log; nothing is reconstructed to give the stage a run."),
     ),
+    dict(
+        id="reasoning_data",
+        kind="experiment",
+        stage_id="2",
+        status=("H1 CLOSED AT ITS SCIENTIFIC TERMINAL 2026-10-24: the frozen decision is NOT_RESOLVED "
+                "(FLOOR) -- B - A = +0.0053 on static fluid correctness (95% CI -0.0009 to +0.0136), A 0.44% / "
+                "B 0.96%, both arms at the floor; deduction INCONCLUSIVE (FLOOR_A); interactive 0/144 "
+                "(exploratory). P1 ($3.33) and P1t ($0.64) generated arm B's @v3 data; P1g passed; P2's four "
+                "formal units completed on an A100 ($17.64 in sessions + $4.20 reserved storage of the $50 "
+                "phase grant). The four checkpoints stay on the network volume. A floor diagnostic "
+                "(plans/h3_candidates.json) awaits the maintainer. 34 pods / $58.33 unattributed"),
+        title="Stage-2 verified teacher-native reasoning data, measured through "
+              "Stage-3 controlled recovery",
+        question=("Under one fixed initialization and the fixed historical "
+                  "recovery recipe, does verified teacher-native reasoning data "
+                  "lift a 0.6B student off the fluid-reasoning floor where "
+                  "corpus_v2 left it, and how does that scale over a nested "
+                  "0.86M-5.50M ladder?"),
+        canonical_config="configs/stages/stage-2/reasoning_data/corpus_spec.json",
+        evidence=[
+            E("logs/stages/stage-2/reasoning_data/audit/asset_audit.json",
+              "the $0 audit of corpus_v2, the historical ladder, base_pool_v1, "
+              "teacher_cal and the E1 fluid scores under the new target "
+              "contract and the isolation rules",
+              field="schema", equals="aadistill.stage2.reasoning_data.asset_audit/v1"),
+            E("logs/stages/stage-2/reasoning_data/audit/packing_dry_run.json",
+              "the master-ladder builder run on existing material: the old "
+              "arm cut at 2.96M and the 519 fluid units, token-exact against "
+              "base_pool_v1, read back through the trainer's own reader",
+              field="schema", equals="aadistill.stage2.reasoning_data.packing_dry_run/v1"),
+            E("data/stages/stage-2/reasoning_data/tasks/train_tasks_v2.manifest.json",
+              "the verifiable primary-axis task pool: calibration-split "
+              "families less the three R9 excludes, the training seed range, "
+              "isolation rules R0-R9 passed",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/initialization_selection.json",
+              "the fixed-initialization proposal by Pareto dominance on the "
+              "searches' step-0 objectives; no recovered outcome read",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/comparison_design.json",
+              "the PROPOSED 2.96M old-vs-new treatment comparison",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/ladder_plan.json",
+              "the PROPOSED nested data ladder",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/cost_forecast.json",
+              "GPU, CPU and storage forecast from measured rates",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/durability_plan.json",
+              "what must survive and where; the relay's measured headroom",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/authorization_proposal.json",
+              "the H1 application: decisions and phased budget the maintainer is asked for",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json",
+              "H1's fixed initialization: method and materialization identity, "
+              "relay metadata and a hash-verified dev-box read-back",
+              field="verified", equals=True),
+            E("logs/stages/stage-2/reasoning_data/budget/h1_budget_position.json",
+              "records, provider billing, resources and balance, with every "
+              "pod no run record created attributed from existing evidence",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/h1_accounting.json",
+              "U, E, C, steps and effective batch for both arms (A measured, "
+              "B estimated) under the frozen and the matched contract",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/h3_candidates.json",
+              "TIP registered as an H3 research candidate, not implemented",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/external_source_samples.json",
+              "the named external generators' $0 validation samples: teacher-"
+              "token lengths, gold leakage, scorer partial credit, and R1/R2 "
+              "isolation against eval-set-1",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/code_verifier_check.json",
+              "the code verifier calibrated on MBPP's human reference solutions, "
+              "inside the sandbox teacher code will run in",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/generation_adapter_validation.json",
+              "the post-generation path (verify, assess, select, whole-unit "
+              "sessions, pack) run on the 672 Stage-0 teacher records",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/external_tasks_validation.json",
+              "an isolated third-party export turned into tasks that pass "
+              "isolation rules R0-R9, with every drop counted",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/source_plan.json",
+              "each corpus variant's per-source targets, approval state and "
+              "shortfalls against the built pools",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/generation_plan.json",
+              "P1's generation list: verifiable tasks per cell, named rate "
+              "bases, the token upper bound and the run inputs' hashes",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/arm_b_chain_validation.json",
+              "the generation-to-pack chain run end to end on real teacher "
+              "text at $0 (not arm B)",
+              field="authorizes", equals="nothing"),
+            E("data/stages/stage-2/reasoning_data/tasks/external_tasks_v1.manifest.json",
+              "the demand-sized third-party pool from isolated exports, "
+              "isolation rules R0-R9 passed",
+              field="authorizes", equals="nothing"),
+            E("data/stages/stage-2/reasoning_data/tasks/supporting_reuse_v1.selection.manifest.json",
+              "the corpus_v2 targets B reuses: ids and hashes only, each "
+              "re-verified under B's contract",
+              field="authorizes", equals="nothing"),
+            E("data/stages/stage-2/reasoning_data/tasks/external_tasks_v2.manifest.json",
+              "the third-party pool with whole-answer comparator types, "
+              "isolation rules R0-R9 passed (supersedes v1)",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/runs/h1gen_20261022_190653/closeout/outcome.json",
+              "P1's outcome: shards re-hashed, both passes complete, cost, provider "
+              "teardown confirmation and the reconciliation after it",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/p1v_verification.json",
+              "P1v: verified and selected units, the isolation recheck with the "
+              "teacher text, supply per cell and the gaps",
+              field="authorizes", equals="nothing"),
+            E("configs/stages/stage-2/reasoning_data/h1_units.json",
+              "the four formal units, their packs' identities and the "
+              "driver's launch refusals",
+              field="authorizes", equals="nothing"),
+            E("configs/stages/stage-2/reasoning_data/corpus_v2_candidate.json",
+              "the maintainer's $0 feasibility candidate @v2: its own id and "
+              "salt, its base named by sha256, never the chosen variant",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/corpus_v2_feasibility.json",
+              "@v2 on the formal ladder: the refusal, every cell's supply, "
+              "run-dry point and validation units, independence, isolation, "
+              "and plan 2's stand-in forecast",
+              field="authorizes", equals="nothing"),
+            E("configs/stages/stage-2/reasoning_data/corpus_v3.json",
+              "@v3, arm B's corpus (the maintainer's choice of plan 2): @v1's "
+              "capability shares, analogy from the project generator alone, the "
+              "de-allocated cells named; frozen by P1t's plan",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/abstract_topup_application.json",
+              "plan 2's paid top-up application, priced from P1's measured "
+              "session; not authorized",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/p1t/generation_plan.json",
+              "P1t's frozen list: the application's 59 unused tasks re-drawn by "
+              "P1's rule, P1's pools and protocol, its own launch identity",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/plans/p1t/authorization_request.json",
+              "what a P1t grant must name: run, launch identity, harness, the "
+              "launcher's budget at P1's price, provider occupancy; not authorized",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/runs/h1p1t_20261023_094007/closeout/outcome.json",
+              "P1t's outcome: shards re-hashed, both passes complete, cost, provider "
+              "teardown confirmation and the reconciliation after it",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/code_reverification_h1gen_20261022_190653.json",
+              "P1's saved MBPP programs judged by code verifier v2 and v3 in the "
+              "probed sandbox, nothing regenerated: every verdict and the ones that moved",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/code_verifier_check_v3.json",
+              "code verifier v3 on MBPP's own references and mutants",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/analyses/h1_result.json",
+              "H1's result: the frozen decision on the four formal units, every fluid axis "
+              "and tier, every capability apart, and the accounting",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/runs/h1p1g_20261023_191644/closeout/outcome.json",
+              "P1g's outcome: the passed GPU validation's cost, evidence and teardown",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/runs/h1p2b_20261023_205037/closeout/outcome.json",
+              "P2's B session: both B units complete, evidence re-hashed, cost, teardown",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/runs/h1p2a_20261023_232905/closeout/outcome.json",
+              "P2's A session: both A units complete, evidence re-hashed, cost, teardown",
+              field="authorizes", equals="nothing"),
+            E("logs/stages/stage-2/reasoning_data/audit/corpus_v3_feasibility.json",
+              "@v3 on the formal ladder from P1 + P1t: both sessions' admission and "
+              "provenance, the set-aside unit, every cell's supply, independence, "
+              "isolation, and arm B's built pack",
+              field="authorizes", equals="nothing"),
+        ],
+        external_material=[],
+        decisions=["logs/budget/decisions.md -- 2026-10-21: Stage-2/3 "
+                   "reasoning-data round opened at $0: audit, contracts and a "
+                   "PROPOSED design",
+                   "logs/budget/decisions.md -- 2026-10-21: Maintainer: H1 "
+                   "fixes D4 Top-1; budget and durability first; TIP as an H3 "
+                   "candidate",
+                   "logs/budget/decisions.md -- 2026-10-22: Independent review "
+                   "of H1 preparation: eight targeted corrections at $0, no "
+                   "paid authorization",
+                   "logs/budget/decisions.md -- 2026-10-22: Maintainer: H1 "
+                   "design choices (arm B = stage2.reasoning_master@v1, "
+                   "interactive exploratory); two corrections and the P1 + P1v "
+                   "application at $0",
+                   "logs/budget/decisions.md -- 2026-10-22: Maintainer: P1 must "
+                   "be launchable; comparators, completion-time saving and launch "
+                   "wiring at $0, final P1 + P1v application",
+                   "logs/budget/decisions.md -- 2026-10-22: Maintainer: two "
+                   "launch-boundary checks before any P1 grant",
+                   "logs/budget/decisions.md -- 2026-10-22: Maintainer: H1 P1 + "
+                   "P1v formally authorized; P1 executed ($3.33), P1v stopped at "
+                   "four short cells",
+                   "logs/budget/decisions.md -- 2026-10-23: Maintainer: a $0 "
+                   "corpus revision before any top-up; @v2 infeasible, plan 2 "
+                   "applied for",
+                   "logs/budget/decisions.md -- 2026-10-23: Maintainer: B's "
+                   "corpus is @v3; P1t prepared at $0 for a separate grant",
+                   "logs/budget/decisions.md -- 2026-10-23: Maintainer review of "
+                   "P1t: the all-in bound and complete-run admission ($0)",
+                   "logs/budget/decisions.md -- 2026-10-23: Maintainer: H1 P1t "
+                   "authorized; P1t executed ($0.64), arm B's pack built, M1 "
+                   "measured, code verifier v3",
+                   "logs/budget/decisions.md -- 2026-10-23: Maintainer: H1 P1g "
+                   "+ P2 authorized ($50); protocol frozen; P1g passed; P2 started",
+                   "logs/budget/decisions.md -- 2026-10-24: H1 P2 executed: the "
+                   "frozen decision is NOT_RESOLVED (FLOOR); scientific terminal"],
+        canonical_log_destination="logs/stages/stage-2/reasoning_data",
+        classification_reason=(
+            "Stage 2 by subject and product: it varies the offline training "
+            "DATA a recovered student is taught with (AGENTS.md 4.4, "
+            "reasoning-transfer priority). Stage-3 recovery and eval-set-1 are "
+            "its instruments, as Stage-3 probes were for the Stage-0 and "
+            "Stage-1 experiments."),
+    ),
 ]
 
 #: ---------------------------------------------------------------------------

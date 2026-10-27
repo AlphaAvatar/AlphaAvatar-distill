@@ -1,0 +1,14 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "stage0_calvol_mixed_search",
+ "note": "MC1, one spec for success and failure. The driver's record is required on every path; the search records, journal, telemetry and the Top-1 manifest are patterns with at least zero matches (an early failure legitimately produced none) and are pulled off-pod by the launcher's poll hook as each stage finishes. The materialized states are deliberately NOT collected: they stay on the MC1 network volume until the Top-1 is read back.",
+ "patterns_are_relative_to": "the collector's --root, <checkout>/artifacts",
+ "entries": [
+  {"artifact_class": "driver_record", "pattern": "audit/stage0_calvol_mixed_search/mixed_search_record.json", "required": true, "lifecycle": "final_required", "min_bytes": 8},
+  {"artifact_class": "driver_logs", "pattern": "audit/stage0_calvol_mixed_search/*.log", "required": false, "lifecycle": "final_required", "min_matches": 0},
+  {"artifact_class": "unit_markers", "pattern": "audit/stage0_calvol_mixed_search/records/*", "required": false, "lifecycle": "final_required", "min_matches": 0},
+  {"artifact_class": "search_records", "pattern": "audit/stage0_calvol_search/2x/*.json", "required": false, "lifecycle": "final_required", "min_matches": 0},
+  {"artifact_class": "search_journals", "pattern": "audit/stage0_calvol_search/2x/search/*.jsonl", "required": false, "lifecycle": "final_required", "min_matches": 0}
+ ],
+ "authorizes": "nothing"
+}

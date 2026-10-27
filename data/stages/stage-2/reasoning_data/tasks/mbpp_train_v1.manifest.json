@@ -1,0 +1,58 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.supporting_pool/v1",
+ "corpus_variant": "stage2.reasoning_master@v1",
+ "created_utc": "2026-10-22T15:39:27Z",
+ "version": 1,
+ "status": "PROPOSED pool: sources admitted for H1 design (maintainer, 2026-10-22); no teacher target is generated for it until a generation grant exists",
+ "kind": "generation task pool",
+ "source": "mbpp_train",
+ "command": "python -m stages.reasoning_data.build_supporting_tasks --source mbpp_train --version 1 --oversupply 1.5",
+ "demand": {
+  "stratum": "supporting.code_algorithmic",
+  "units_needed": 33,
+  "unit_accept_rate": 0.4,
+  "accept_rate_basis": "corpus_spec.json :: generation.supporting.code_algorithmic planning assumption (no measured rate exists)",
+  "oversupply": 1.5,
+  "tasks": 124
+ },
+ "n_tasks": 124,
+ "eligible_candidates": 473,
+ "draw_order": "sha256('stage2.supporting/v1|<task_id>') ascending",
+ "provenance": {
+  "dataset": "google-research-datasets/mbpp @ 4bb6404fdc6cacfda99d4ac4205087b89d32030c (full; test split never read)",
+  "files": [
+   {
+    "file": "full/train-00000-of-00001.parquet",
+    "sha256": "09d125ca31edacb7800be8c67c45abff618faf0214ff551291817d06bdb914ae"
+   },
+   {
+    "file": "full/validation-00000-of-00001.parquet",
+    "sha256": "3f0ec060987432d99fe8fb409d31e6c67445b208a01741c5583517c80a10fe80"
+   },
+   {
+    "file": "full/prompt-00000-of-00001.parquet",
+    "sha256": "a053e4bb85ceb77430ae80592addb4ca4dc6ba087592f9e04537800ee88b7431"
+   }
+  ],
+  "dropped": {
+   "the reference solution fails its own asserts (code_verifier_check)": 1
+  },
+  "verification_calibration": "audit/code_verifier_check.json"
+ },
+ "math500_screen": null,
+ "removed_by_isolation": {
+  "R2_flagged": 0,
+  "removed_units": []
+ },
+ "by_family": {
+  "mbpp": 124
+ },
+ "by_difficulty": {
+  "": 124
+ },
+ "verifier": "supporting_verify.VERIFIERS['code_asserts']",
+ "sha256": "12473c4b055accf22ca5357e966664bab57c057256ca7791c76916b3a8ca8793",
+ "isolation_report": "mbpp_train_v1.isolation.json",
+ "isolation_pass": true,
+ "authorizes": "nothing"
+}

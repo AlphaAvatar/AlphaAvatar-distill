@@ -1,0 +1,560 @@
+{
+  "schema": "aadistill.stage2.reasoning_data.h1_generation_session/v1",
+  "session_id": "stage2-h1-generation",
+  "session_spec": {
+    "session_id": "stage2-h1-generation",
+    "schema": "aadistill.stage2.reasoning_data.h1_generation_session/v1",
+    "description": "H1 PA1: teacher-native candidates for arm B's generated cells (text only)",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-2/reasoning_data/runs/h1pat_20261024_115517/governance/authorization.json",
+    "authorization_type": "H1GenerationAuthorization.load",
+    "plan_id": "stage2.reasoning_data.h1_generation",
+    "plan_hash": "0c1028424fe1080ff9967e29fe8ab1042a253205c04a366ab1ca87770250e2f0",
+    "status_path": "/workspace/stage2_h1_generation.status",
+    "run_log_path": "/workspace/stage2_h1_generation_run.log",
+    "driver_job_id": "stage2_h1_generation_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "stage2_h1_generation",
+      "evidence_filename": "generation_session.json",
+      "archive_basename": "stage2_h1_generation",
+      "spec_success": "configs/stages/stage-2/reasoning_data/h1_generation_artifacts.json",
+      "spec_failed": "configs/stages/stage-2/reasoning_data/h1_generation_artifacts.json",
+      "report_names": [
+        "generation_session.json"
+      ]
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "stage2_h1_generation"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_KIND",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [],
+      "local_assets": [
+        "generation_inputs:logs/stages/stage-2/reasoning_data/plans/h1pa_topup"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 600,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [],
+      "test_paths": [],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "VLLM_READY",
+        "TEACHER_READY",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 3,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-10-24T11:57:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 58 min $1.72 \u00b7 soft $2.41 \u00b7 hard $3.64 (authorized $3.72)"
+    },
+    {
+      "utc": "2026-10-24T11:57:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA A100-SXM4-80GB $1.79/h, stock Medium"
+    },
+    {
+      "utc": "2026-10-24T11:57:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $79.5702 against the $30.0000 this session must be able to fund"
+    },
+    {
+      "utc": "2026-10-24T11:57:18+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account resources OK: the provider account holds only the 0 resource(s) the records account for"
+    },
+    {
+      "utc": "2026-10-24T11:57:18+00:00",
+      "elapsed_min": 0.0,
+      "msg": "all-in $3.7199 over 123.272 min at $1.79/h, inside $3.72"
+    },
+    {
+      "utc": "2026-10-24T11:57:18+00:00",
+      "elapsed_min": 0.0,
+      "msg": "stage2.reasoning_master@v3: 115 tasks, no shortfall"
+    },
+    {
+      "utc": "2026-10-24T11:57:18+00:00",
+      "elapsed_min": 0.0,
+      "msg": "every bound file is in the session commit"
+    },
+    {
+      "utc": "2026-10-24T11:57:18+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 0 relay inputs (), 1 local assets"
+    },
+    {
+      "utc": "2026-10-24T11:57:19+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 122 min = $3.64"
+    },
+    {
+      "utc": "2026-10-24T11:57:19+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created 670hhdfmo0bpnr at $1.79/h"
+    },
+    {
+      "utc": "2026-10-24T11:58:01+00:00",
+      "elapsed_min": 0.71,
+      "msg": "TCP 22 at 216.81.248.113:17593 after 0.7 min"
+    },
+    {
+      "utc": "2026-10-24T11:58:04+00:00",
+      "elapsed_min": 0.76,
+      "msg": "draw 1: ssh reachable \u2014 $0.02"
+    },
+    {
+      "utc": "2026-10-24T11:58:25+00:00",
+      "elapsed_min": 1.1,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+    },
+    {
+      "utc": "2026-10-24T11:58:25+00:00",
+      "elapsed_min": 1.1,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-24T12:00:31+00:00",
+      "elapsed_min": 3.21,
+      "msg": "draw 1: setup complete \u2014 $0.10"
+    },
+    {
+      "utc": "2026-10-24T12:00:37+00:00",
+      "elapsed_min": 3.31,
+      "msg": "driver detached, pid 2238, confirmed by descriptor_probe \u2014 $0.10"
+    },
+    {
+      "utc": "2026-10-24T12:02:49+00:00",
+      "elapsed_min": 5.5,
+      "msg": "  2026-10-24T12:00:34Z MARKER:CONTRACT_OK \u2014 $0.16"
+    },
+    {
+      "utc": "2026-10-24T12:07:44+00:00",
+      "elapsed_min": 10.42,
+      "msg": "shard pass0_generation_input_g0.part0000.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-24T12:12:38+00:00",
+      "elapsed_min": 15.32,
+      "msg": "shard pass0_generation_input_g0.part0001.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-24T12:14:59+00:00",
+      "elapsed_min": 17.67,
+      "msg": "  2026-10-24T12:13:19Z MARKER:UNIT_OK:pass0_generation_input_g0 \u2014 $0.53"
+    },
+    {
+      "utc": "2026-10-24T12:15:08+00:00",
+      "elapsed_min": 17.82,
+      "msg": "shard pass0_generation_input_g0.part0002.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-24T12:20:08+00:00",
+      "elapsed_min": 22.82,
+      "msg": "shard pass1_generation_input_g0.part0000.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-24T12:22:52+00:00",
+      "elapsed_min": 25.56,
+      "msg": "  2026-10-24T12:22:43Z MARKER:ALL_DONE \u2014 $0.76 (written as the driver exited)"
+    },
+    {
+      "utc": "2026-10-24T12:22:52+00:00",
+      "elapsed_min": 25.56,
+      "msg": "polling ended: ALL_DONE \u2014 $0.76"
+    },
+    {
+      "utc": "2026-10-24T12:24:27+00:00",
+      "elapsed_min": 27.13,
+      "msg": "  manifest rc=0\n23 file(s) across 4 class(es) -> /workspace/manifest.json\n  final_required: 23 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-10-24T12:24:56+00:00",
+      "elapsed_min": 27.62,
+      "msg": "shard pass1_generation_input_g0.part0001.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-24T12:25:09+00:00",
+      "elapsed_min": 27.84,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-10-24T12:25:09+00:00",
+      "elapsed_min": 27.84,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-10-24T12:25:20+00:00",
+      "elapsed_min": 28.02,
+      "msg": "pod deleted \u2014 28.0 min, $0.84; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.stage2.reasoning_data.generation_authorization/v2",
+    "authorization_id": "stage2.reasoning_data.h1_generation.h1pat_20261024_115517",
+    "version": 1,
+    "granted_utc": "2026-10-24T11:55:46+00:00",
+    "granted_by": "maintainer (formal approval message of 2026-10-24 UTC: H1-PA 115-task teacher generation, $3.72 cumulative cap)",
+    "plan_id": "stage2.reasoning_data.h1_generation",
+    "launch_identity_sha256": "0c1028424fe1080ff9967e29fe8ab1042a253205c04a366ab1ca87770250e2f0",
+    "expected_usd": 1.74,
+    "hard_cap_usd": 3.72,
+    "authorized_stages": [],
+    "stage_conditions": {
+      "phase": "PA1",
+      "decision": "Maintainer approves H1-PA's minimal fluid top-up: 115 never-generated pure fluid-reasoning tasks (task-set sha256 d1ca7ece55e55ee5997c8d27cd5b9a63a8b3799f05eec55c764c040609adb57d) under the frozen generation protocol, then verification, R0-R9, sequential no-truncation packing of the fluid increment to 2.96M and its frozen pack identity; reviewed commit stage2/reasoning-data @ 5a8809fd3f6bf87d9862ce1d136ef7d39cbeb029",
+      "grant_sha256": "672db947613985594cd48b2806286185122beb8b08ad407b00ea3cf475df3258",
+      "granted_harness_digest": "7aea3763b9fb8fe138ed68a1df1ff7ab5828ee26efb17ca41a9bd73d87e4fd6d"
+    },
+    "scope_note": "PA1 teacher generation only (one A100-80GB session), then the $0 verification, R0-R9, the fluid pool's no-truncation sequential pack to 2.96M, the merged training set and its frozen identity; NOT the 185-task option, student training, evaluation, a network volume or any other paid step",
+    "authorizes_teacher_generation": true,
+    "authorizes_training": false,
+    "authorizes_paid_storage": false,
+    "authorized_session_commit": null,
+    "harness_source_digest": "7aea3763b9fb8fe138ed68a1df1ff7ab5828ee26efb17ca41a9bd73d87e4fd6d",
+    "harness_source_files": [
+      "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "scripts/shared/pod/watchdog.py",
+      "scripts/shared/pod/collect_artifacts.py",
+      "scripts/shared/evaluation/uncapped_eval.py",
+      "scripts/shared/source_sets.py",
+      "scripts/stages/stage-0/calibration_volume/run_battery.py",
+      "scripts/stages/stage-0/calibration_volume/score_battery.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/common.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/interactive.py",
+      "scripts/stages/stage-2/reasoning_data/assets.py",
+      "scripts/stages/stage-2/reasoning_data/checkers.py",
+      "scripts/stages/stage-2/reasoning_data/generation_adapter.py",
+      "scripts/stages/stage-2/reasoning_data/generation_driver.py",
+      "scripts/stages/stage-2/reasoning_data/generation_plan.py",
+      "scripts/stages/stage-2/reasoning_data/governance.py",
+      "scripts/stages/stage-2/reasoning_data/h1_generation_launch.py",
+      "scripts/stages/stage-2/reasoning_data/process_check.py",
+      "scripts/stages/stage-2/reasoning_data/source_plan.py",
+      "scripts/stages/stage-2/reasoning_data/supporting_verify.py",
+      "src/aadistill/data/code_exec.py",
+      "src/aadistill/data/target_quality.py",
+      "src/aadistill/data/verify.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/infrastructure/env.py",
+      "src/aadistill/infrastructure/manifest.py"
+    ],
+    "per_launch_hard_usd": 3.72,
+    "provenance_commit": "42237877bcfdc925d84d702a671886bd371c13fe",
+    "enforcement": "the launcher refuses a pod unless this artifact is bound to the launch identity (plan, protocol, inputs, pools) and the harness on disk, and its hard cap covers the planned hard threshold; the driver re-checks both on the pod; one artifact funds one run",
+    "authorization_sha256": "c19712eb8c353b3902011c7516d20024d5955db06c49a6d8b6404dd7517e8e66"
+  },
+  "session_plan_hash": "0c1028424fe1080ff9967e29fe8ab1042a253205c04a366ab1ca87770250e2f0",
+  "harness_source_digest": "7aea3763b9fb8fe138ed68a1df1ff7ab5828ee26efb17ca41a9bd73d87e4fd6d",
+  "harness_source_files": [
+    "scripts/shared/evaluation/uncapped_eval.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/collect_artifacts.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/shared/source_sets.py",
+    "scripts/stages/stage-0/calibration_volume/run_battery.py",
+    "scripts/stages/stage-0/calibration_volume/score_battery.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/common.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/interactive.py",
+    "scripts/stages/stage-2/reasoning_data/assets.py",
+    "scripts/stages/stage-2/reasoning_data/checkers.py",
+    "scripts/stages/stage-2/reasoning_data/generation_adapter.py",
+    "scripts/stages/stage-2/reasoning_data/generation_driver.py",
+    "scripts/stages/stage-2/reasoning_data/generation_plan.py",
+    "scripts/stages/stage-2/reasoning_data/governance.py",
+    "scripts/stages/stage-2/reasoning_data/h1_generation_launch.py",
+    "scripts/stages/stage-2/reasoning_data/process_check.py",
+    "scripts/stages/stage-2/reasoning_data/source_plan.py",
+    "scripts/stages/stage-2/reasoning_data/supporting_verify.py",
+    "src/aadistill/data/code_exec.py",
+    "src/aadistill/data/target_quality.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/infrastructure/env.py",
+    "src/aadistill/infrastructure/manifest.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.79,
+    "authorized_usd": 3.72,
+    "expected_minutes": 57.79,
+    "soft_stop_minutes": 80.692177,
+    "artifact_recovery_reserve_minutes": 41.33,
+    "hard_terminate_minutes": 122.022177,
+    "step_time": {
+      "seconds": 1.0,
+      "source": "unused: no training in this session (arms=0)",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 9.19
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 2.4
+      },
+      {
+        "name": "teacher_generation_two_passes",
+        "minutes": 46.2
+      }
+    ],
+    "soft_stop_reserves": [],
+    "notes": [],
+    "soft_stop_reserve_minutes": 0,
+    "expected_usd": 1.7241,
+    "soft_stop_usd": 2.4073,
+    "artifact_recovery_reserve_usd": 1.233,
+    "hard_terminate_usd": 3.6403
+  },
+  "quoted_price_per_hour": 1.79,
+  "stock_status": "Medium",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 79.5701701318,
+    "current_spend_per_hr": 0.0,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 30.0,
+    "ok": true,
+    "why": "the provider account holds $79.5702 against the $30.0000 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "account_resources": {
+    "checked": true,
+    "known": true,
+    "pods": [],
+    "network_volumes": [],
+    "error": null,
+    "accounted": [],
+    "unaccounted": [],
+    "ok": true,
+    "why": "the provider account holds only the 0 resource(s) the records account for"
+  },
+  "all_in_bound": {
+    "billable_minutes": 123.272,
+    "price_per_hour": 1.79,
+    "container_disk_gb": 150,
+    "gpu_usd": 3.6776,
+    "disk_usd": 0.0422,
+    "all_in_usd": 3.7199,
+    "highest_price_inside_cap": 1.79
+  },
+  "prechecks": [
+    {
+      "check": "all_in_within_cap",
+      "ok": true,
+      "message": "all-in $3.7199 over 123.272 min at $1.79/h, inside $3.72"
+    },
+    {
+      "check": "plan_is_the_chosen_admitted_one",
+      "ok": true,
+      "message": "stage2.reasoning_master@v3: 115 tasks, no shortfall"
+    },
+    {
+      "check": "bound_files_are_in_the_session_commit",
+      "ok": true,
+      "message": "every bound file is in the session commit"
+    }
+  ],
+  "precheck": {
+    "relay_needed": [],
+    "relay_missing": [],
+    "relay_repos": {},
+    "relay_repo_files_listed": {},
+    "local_assets": [
+      "logs/stages/stage-2/reasoning_data/plans/h1pa_topup/generation_inputs"
+    ],
+    "local_missing": []
+  },
+  "pod_id": "670hhdfmo0bpnr",
+  "actual_price_per_hour": 1.79,
+  "terminate_after_utc": "2026-10-24T13:59:19Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/h1pat_20261024_115517/watchdog_670hhdfmo0bpnr.jsonl"
+  ],
+  "watchdog_owns_pod": "670hhdfmo0bpnr",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "595.91.07"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_d83bb178.bundle",
+    "SESSION_ASSETS": "generation_inputs:logs/stages/stage-2/reasoning_data/plans/h1pa_topup",
+    "SESSION_AUTH_PATH": "logs/stages/stage-2/reasoning_data/runs/h1pat_20261024_115517/governance/authorization.json",
+    "SESSION_COMMIT": "d83bb1789a86843580ab3c240ec5e560490422d3",
+    "SESSION_KIND": "stage2_h1_generation",
+    "SESSION_PLAN_HASH": "0c1028424fe1080ff9967e29fe8ab1042a253205c04a366ab1ca87770250e2f0",
+    "SESSION_RELAY_INPUTS": "[]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV VLLM_READY TEACHER_READY AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/stage2_h1_generation.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "600",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "stage2_h1_generation_driver",
+    "pid": 2238,
+    "workdir": "/workspace/aad",
+    "command": "cd /workspace/aad && PYTHONPATH=/workspace/aad/src:/workspace/aad/scripts /opt/train/bin/python -m stages.reasoning_data.generation_driver --authorization '/workspace/aad/logs/stages/stage-2/reasoning_data/runs/h1pat_20261024_115517/governance/authorization.json' --status '/workspace/stage2_h1_generation.status' --out '/workspace/aad/artifacts/audit/stage2_h1_generation'",
+    "log_path": "/workspace/stage2_h1_generation_run.log",
+    "status_path": "/workspace/stage2_h1_generation.status",
+    "pid_path": "/workspace/jobs/stage2_h1_generation_driver.pid",
+    "descriptor_path": "/workspace/jobs/stage2_h1_generation_driver.job.json",
+    "exit_path": "/workspace/jobs/stage2_h1_generation_driver.exit",
+    "started_utc": "2026-10-24T12:00:34Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "secure_deadline_skipped": [],
+  "shards_secured": {
+    "pass0_generation_input_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "387a7f066779c369f63af91ec0fffa619d9b5b1d1969682b4d26765c58b1900c"
+    },
+    "pass0_generation_input_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "8140361eab12e904a58efe41243a0d69439d38a43b81c5a44b16074e65dad9f2"
+    },
+    "pass0_generation_input_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "742f986a6a74dda17978955c1aaf3222d8642cd3e0fd766126e37ac36335f4ce"
+    },
+    "pass1_generation_input_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "97825167c0f254060ed660d94ad281c072cda05b2343ed4ca067ba7da9c4b4b6"
+    },
+    "pass1_generation_input_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "f0659c483d0b8a51bd277a10e109f58436beb7af864c1b0a2a63c75696cec50d",
+      "rc": 0
+    }
+  },
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "fetched_reports": [
+    "generation_session.json"
+  ],
+  "checkpoints_fetched": [],
+  "required_products_secured": {
+    "ok": true,
+    "why": "5 sealed shard(s) secured off-pod, each re-hashed in the local store"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 23,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.79,
+    "elapsed_minutes": 28.02,
+    "actual_usd": 0.8359,
+    "authorized_usd": 3.72,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-24T12:25:20+00:00"
+}

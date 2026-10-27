@@ -1,0 +1,146 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.mixed_outcome/v1",
+ "run_id": "mixs_20261026_103634",
+ "phase": "MC1",
+ "experiment_id": "calibration_volume",
+ "stage_id": "0",
+ "recorded_utc": "2026-10-26T14:02:28Z",
+ "status": "COMPLETE",
+ "terminal": "ALL_DONE",
+ "runner_terminal": "ALL_DONE",
+ "session_passed": true,
+ "provider_resource_created": true,
+ "pod_id": "z90fahqwqrlgb0",
+ "provider_confirms_gone": true,
+ "store": "/home/ecs-user/aad-artifacts/stage0_calvol/mixs_20261026_103634/store",
+ "files": {
+  "2x/search/states.jsonl": {
+   "sha256": "98812150f313a53fe210bf7e655759c488ca0e0c6a95cca415227ec287cde542",
+   "bytes": 24231140
+  },
+  "2x/search/telemetry.jsonl": {
+   "sha256": "9d8a55331373910bddbcb62efee39ce6502ab36702294d920ed157838839dae6",
+   "bytes": 36520
+  },
+  "2x/search_record.json": {
+   "sha256": "3265dac8f825b2574a4219f88534de869338563a45bbcee48ecc141bd3e336d6",
+   "bytes": 4270
+  },
+  "2x/stage1_selection.json": {
+   "sha256": "2bd8e1cd126f19655440e29639a05262f34f71466db8375961d1cdd4e51e3918",
+   "bytes": 9366
+  },
+  "2x/structure.json": {
+   "sha256": "296c37b5c89d8eafc7db965ce488ad374481a1a3dff57201514b56661d91084f",
+   "bytes": 7955199
+  },
+  "2x/top1_manifest.json": {
+   "sha256": "af1a301d65a76fb48f67d2b86983e57c80e18e72bb9ff65f0fe93fe16519e005",
+   "bytes": 5004
+  },
+  "2x/width_projection_20ab76a06cd4107d84d4b350646668ff.safetensors": {
+   "sha256": "28f054e101dc3ab7f42c3f8da192df8c916a95b18e5473eb357f35d8f5225bca",
+   "bytes": 10485840
+  },
+  "extracted/audit/stage0_calvol_mixed_search/mirror.log": {
+   "sha256": "ef205f832fbb33295876b8cf73c036d51914659aa3918b0056836626d2cb5294",
+   "bytes": 10114
+  },
+  "extracted/audit/stage0_calvol_mixed_search/mixed_search_record.json": {
+   "sha256": "cab3cfa8fa95d10af0ea976dc0d4d5eb8208e7fd1f636229daa91d3329e06563",
+   "bytes": 1462
+  },
+  "extracted/audit/stage0_calvol_mixed_search/records/search.done": {
+   "sha256": "89c5b8beac0abd9ca9befd8fc04e37cb02cd674aba327b488055f6b645adf81f",
+   "bytes": 65
+  },
+  "extracted/audit/stage0_calvol_mixed_search/records/top1.done": {
+   "sha256": "f39b64481195c99050a032b3f92628ef8fb80c76eb97ab6089c0b18e2bd299a8",
+   "bytes": 65
+  },
+  "extracted/audit/stage0_calvol_mixed_search/search.log": {
+   "sha256": "1568055e38d7403dc28206d88044adaa9c704ad137443d898707747b81c189bf",
+   "bytes": 177984
+  },
+  "extracted/audit/stage0_calvol_mixed_search/sync.log": {
+   "sha256": "98878174ffd0181d636d3dc39315febb32d6477960239d441a168b5da2668652",
+   "bytes": 444
+  },
+  "extracted/audit/stage0_calvol_search/2x/search/states.jsonl": {
+   "sha256": "98812150f313a53fe210bf7e655759c488ca0e0c6a95cca415227ec287cde542",
+   "bytes": 24231140
+  },
+  "extracted/audit/stage0_calvol_search/2x/search/telemetry.jsonl": {
+   "sha256": "9d8a55331373910bddbcb62efee39ce6502ab36702294d920ed157838839dae6",
+   "bytes": 36520
+  },
+  "extracted/audit/stage0_calvol_search/2x/search_record.json": {
+   "sha256": "3265dac8f825b2574a4219f88534de869338563a45bbcee48ecc141bd3e336d6",
+   "bytes": 4270
+  },
+  "extracted/audit/stage0_calvol_search/2x/stage1_selection.json": {
+   "sha256": "2bd8e1cd126f19655440e29639a05262f34f71466db8375961d1cdd4e51e3918",
+   "bytes": 9366
+  },
+  "extracted/audit/stage0_calvol_search/2x/structure.json": {
+   "sha256": "296c37b5c89d8eafc7db965ce488ad374481a1a3dff57201514b56661d91084f",
+   "bytes": 7955199
+  },
+  "extracted/audit/stage0_calvol_search/2x/top1_manifest.json": {
+   "sha256": "af1a301d65a76fb48f67d2b86983e57c80e18e72bb9ff65f0fe93fe16519e005",
+   "bytes": 5004
+  },
+  "manifest.json": {
+   "sha256": "aeeb18271673ecb90705fb459807f8f154683c8b09ef1bc568b5923249007aed",
+   "bytes": 4641
+  },
+  "mc1/mixed_search_record.json": {
+   "sha256": "cab3cfa8fa95d10af0ea976dc0d4d5eb8208e7fd1f636229daa91d3329e06563",
+   "bytes": 1462
+  },
+  "stage0_mixed_mc1": {
+   "sha256": "49937220c933c53d6c911c46d253a2adc4e87d4543b597ae487020ae7cfb482c",
+   "bytes": 9074927
+  }
+ },
+ "money": {
+  "all_in_usd": 6.1817,
+  "gpu_usd": 6.1069,
+  "disk_usd": 0.0747,
+  "elapsed_minutes": 204.7,
+  "price_per_hour": 1.79,
+  "authorized_usd": 15.0,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (160 GB); volumes are booked in their own records"
+ },
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "am5m373kuq",
+    "name": "aad-h1pa",
+    "size": 30,
+    "dataCenterId": "EUR-IS-2"
+   },
+   {
+    "kind": "network_volume",
+    "id": "t6yrsvujha",
+    "name": "aad-mixed-mc1",
+    "size": 150,
+    "dataCenterId": "EUR-IS-1"
+   }
+  ],
+  "error": null,
+  "accounted": [
+   "am5m373kuq",
+   "t6yrsvujha"
+  ],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 2 resource(s) the records account for"
+ },
+ "authorizes": "nothing",
+ "_terminal": "the driver's terminal marker (was recorded as its record status 'COMPLETE'; corrected 2026-10-27 to the marker MC2's closeouts state)"
+}

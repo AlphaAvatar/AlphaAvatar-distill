@@ -18,6 +18,13 @@
    "logs": "logs/stages/stage-1"
   },
   {
+   "logical_id": "stage-2",
+   "kind": "stage",
+   "stage_id": "2",
+   "configs": "configs/stages/stage-2",
+   "logs": "logs/stages/stage-2"
+  },
+  {
    "logical_id": "stage-3",
    "kind": "stage",
    "stage_id": "3",
@@ -181,6 +188,18 @@
    "live_state": null
   },
   {
+   "logical_id": "calibration_volume",
+   "kind": "experiment",
+   "stage_id": "0",
+   "scripts": "scripts/stages/stage-0/calibration_volume",
+   "logs": "logs/stages/stage-0/calibration_volume",
+   "artifacts": "artifacts/stages/stage-0/calibration_volume",
+   "configs": "configs/stages/stage-0/calibration_volume",
+   "data": "data/stages/stage-0/calibration_volume",
+   "docs": "docs/stages/stage-0/calibration_volume",
+   "live_state": null
+  },
+  {
    "logical_id": "c2_full_search_perf",
    "kind": "engineering",
    "stage_id": "1",
@@ -250,6 +269,18 @@
    "configs": "configs/stages/stage-1/measurement",
    "data": null,
    "docs": null,
+   "live_state": null
+  },
+  {
+   "logical_id": "reasoning_data",
+   "kind": "experiment",
+   "stage_id": "2",
+   "scripts": "scripts/stages/stage-2/reasoning_data",
+   "logs": "logs/stages/stage-2/reasoning_data",
+   "artifacts": null,
+   "configs": "configs/stages/stage-2/reasoning_data",
+   "data": "data/stages/stage-2/reasoning_data",
+   "docs": "docs/stages/stage-2/reasoning_data",
    "live_state": null
   },
   {

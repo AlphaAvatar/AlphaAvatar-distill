@@ -224,8 +224,8 @@ def budget_spec(repo_root: str | Path = REPO_ROOT):
     measured floor is passed only so the below-floor guard cannot fire on a
     figure that means nothing here.
     """
-    from aadistill.infrastructure.budget import (
-        MEASURED_STEP_SECONDS, Phase)
+    from aadistill.infrastructure.budget import Phase
+    from shared.step_times import MEASURED_STEP_SECONDS
     from aadistill.infrastructure.session import BudgetSpec
 
     FS.register_c2_operators()

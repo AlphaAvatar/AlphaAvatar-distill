@@ -262,6 +262,9 @@ def main() -> int:
                          '\'{"enable_thinking": true}\'')
     ap.add_argument("--revision", default=None,
                     help="pin the model revision (reference models)")
+    ap.add_argument("--decoding", default=None,
+                    help="a decoding protocol file (configs/shared/evaluation/decoding/); "
+                         "omitted, the frozen greedy SAMPLING above is used unchanged")
     ap.add_argument("--out", default=None)
     ap.add_argument("--gpu-sample-every", type=int, default=200,
                     help="scheduler steps between nvidia-smi samples")
@@ -295,6 +298,14 @@ def main() -> int:
           f"{ctx_info['architectural_context']}); stop ids {stop_ids}", flush=True)
 
     template_kwargs = json.loads(args.chat_template_kwargs)
+    from shared.evaluation import decoding as DEC  # noqa: E402
+    protocol = DEC.load(args.decoding) if args.decoding else None
+    if protocol and int(protocol["samples_per_item"]) != 1:
+        raise SystemExit("this runner generates one sample per item; the protocol asks for "
+                         f"{protocol['samples_per_item']}")
+    #: the ONE dict the engine call and the summary both read
+    sampling_used = (dict(SAMPLING) if protocol is None
+                     else {**DEC.sampling(protocol), "detokenize": False})
 
     # The generation protocol's own identity, recorded once and written into
     # every summary. Purely additive: nothing here changes what is generated.
@@ -366,10 +377,12 @@ def main() -> int:
             # `detokenize=False` skips vLLM's incremental detokenization, which
             # this evaluator never reads — the record is decoded once from the
             # final token ids. It changes no sampling semantics.
+            seed = (DEC.request_seed(protocol, Path(prompts_path).stem, s["id"])
+                    if protocol else None)
             params = SamplingParams(max_tokens=allowance, stop_token_ids=stop_ids,
-                                    **SAMPLING)
+                                    **sampling_used, **({"seed": seed} if protocol else {}))
             eng.add_request(rid, {"prompt_token_ids": p_ids}, params)
-            pending[rid] = {"sample": s, "p_ids": p_ids, "allowance": allowance,
+            pending[rid] = {"sample": s, "p_ids": p_ids, "allowance": allowance, "seed": seed,
                             "system_source": ("sample" if has_system
                                               else ("default" if inject
                                                     else "none")),
@@ -453,6 +466,9 @@ def main() -> int:
                 "ttft_seconds": round(st["ttft"], 3) if st["ttft"] else None,
                 "seconds": round(dt, 2), "raw": raw,
             }
+            if protocol:
+                rec["sampling_seed"] = st["seed"]
+                rec["output_token_ids"] = list(gen)
             records.append(rec)
             # `hit_cap` marks a censored generation for the scorer. Under P18 the
             # only cap is the real context, so it is set from that, never from a
@@ -496,9 +512,10 @@ def main() -> int:
             # comparable, and a reader reconstructing the generation protocol from
             # this summary must not have to infer them from the source. Purely
             # additive -- nothing about generation changes.
-            "sampling": {**SAMPLING,
+            "sampling": {**sampling_used,
                          "max_tokens_rule": MAX_TOKENS_RULE,
                          "degeneration_check_every": args.check_every},
+            **({"decoding_protocol": DEC.identity(protocol)} if protocol else {}),
             "libraries": library_versions(),
             "degeneration_stop": not args.no_degeneration_stop,
             "wave_seconds": wave_seconds,

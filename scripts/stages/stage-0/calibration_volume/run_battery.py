@@ -58,7 +58,7 @@ def request_seed(base: int, task_id: str, turn: int) -> int:
 def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
                  seed_base, system, check_every, degeneration_check,
                  split_generation, template_opens_think, label, log=print,
-                 action_protocol="v1"):
+                 action_protocol="v1", on_done=None, seed_of=None):
     """Generate every task's turns through `eng`; returns (episodes, turns, tokens).
 
     ASYNCHRONOUS: one engine pass for everything. A finished turn is processed
@@ -72,6 +72,14 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
     abort_request) and `make_sampling(max_tokens, seed)` builds its sampling
     params; both are passed in so the episode logic can be exercised without a
     GPU.
+
+    `on_done(task_id, episode)` is called once per episode, the moment it ends
+    (on every ending: answered, episode done, turn limit, a non-eos stop,
+    context exhausted), so a caller can persist finished work before the whole
+    batch ends.
+
+    `seed_of(task_id, turn)` gives a measurement's per-turn seed under a
+    decoding protocol; without it only `generate` mode seeds its requests.
     """
     episodes = {}
     for t in tasks:
@@ -88,6 +96,11 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
     t_gen = time.time()
     last_log = time.time()
 
+    def close(e, end) -> None:
+        e["done"], e["end"] = True, end
+        if on_done is not None:
+            on_done(e["task"]["task_id"], e)
+
     def submit(e) -> None:
         tid = e["task"]["task_id"]
         prompt = tok.apply_chat_template(e["history"], tokenize=False,
@@ -95,9 +108,10 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
         p_ids = tok(prompt, add_special_tokens=False).input_ids
         allowance = limit - len(p_ids)
         if allowance <= 0:
-            e["done"], e["end"] = True, "context_exhausted"
+            close(e, "context_exhausted")
             return
-        seed = request_seed(seed_base, tid, len(e["turns"])) if mode == "generate" else None
+        seed = (seed_of(tid, len(e["turns"])) if seed_of is not None else
+                request_seed(seed_base, tid, len(e["turns"])) if mode == "generate" else None)
         rid = f"{tid}::{len(e['turns'])}"
         eng.add_request(rid, {"prompt_token_ids": p_ids}, make_sampling(allowance, seed))
         pending[rid] = {"ep": e, "p_ids": p_ids, "allowance": allowance,
@@ -137,17 +151,17 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
         e["history"].append({"role": "assistant", "content": parts["answer"],
                              "reasoning_content": parts.get("think", "")})
         if reason != "eos":
-            e["done"], e["end"] = True, reason
+            close(e, reason)
             return
         if e["env"] is None:
-            e["done"], e["end"] = True, "answered"
+            close(e, "answered")
             return
         obs = e["env"].step(parts["answer"])
         turn["observation"] = obs
         if obs is None or e["env"].done:
-            e["done"], e["end"] = True, "episode_done"
+            close(e, "episode_done")
         elif len(e["turns"]) >= e["max_turns"]:
-            e["done"], e["end"] = True, "turn_limit"
+            close(e, "turn_limit")
         else:
             e["history"].append({"role": "user", "content": obs})
             submit(e)
@@ -188,6 +202,35 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
     return episodes, n_turns, out_tokens
 
 
+def episode_record(tid: str, e: dict, *, label: str, mode: str, action_protocol: str) -> dict:
+    """One finished episode as a record line (the final file and the stream
+    write the same thing)."""
+    t = e["task"]
+    return {"task_id": tid, "label": label, "mode": mode,
+            "generator_id": t["generator_id"], "family_id": t["family_id"],
+            "axis": t["axis"], "difficulty": t["difficulty"],
+            "interactive": t["interactive"], "end": e["end"],
+            "turns": e["turns"],
+            "env_result": e["env"].result() if e["env"] else None,
+            **({"action_protocol": action_protocol} if e["env"] else {}),
+            "messages": e["history"]}
+
+
+def streamer(path: Path, *, label: str, mode: str, action_protocol: str):
+    """`on_done` that appends each finished episode's record to `path` at once,
+    flushed and fsynced: a caller reading complete lines sees finished work
+    while the batch still runs."""
+    f = open(path, "a")
+
+    def write(tid: str, e: dict) -> None:
+        line = json.dumps(episode_record(tid, e, label=label, mode=mode,
+                                         action_protocol=action_protocol), ensure_ascii=False)
+        f.write(line + "\n")
+        f.flush()
+        os.fsync(f.fileno())
+    return write, f
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -211,6 +254,14 @@ def main(argv=None) -> int:
     ap.add_argument("--check-every", type=int, default=256)
     ap.add_argument("--system", default="You are a helpful Assistant.")
     ap.add_argument("--limit", type=int, default=None, help="first N tasks (smoke)")
+    ap.add_argument("--stream-completed", default=None,
+                    help="also append each episode's record here the moment it ends "
+                         "(flushed, fsynced); the --out file is written at the end as before")
+    ap.add_argument("--decoding", default=None,
+                    help="eval mode: a decoding protocol file (configs/shared/evaluation/decoding/); "
+                         "omitted, the frozen greedy SAMPLING is used unchanged")
+    ap.add_argument("--seed-namespace", default=None,
+                    help="with --decoding: the evaluated unit's key, e.g. fluid_reasoning_720__dev_v1")
     ap.add_argument("--action-protocol", default="v1", choices=("v1", "v2"),
                     help="how the environment reads action lines (tasks/interactive.py); "
                          "recorded per episode, and the scorer replays with it")
@@ -218,6 +269,12 @@ def main(argv=None) -> int:
     if args.mode == "eval" and args.session_limit:
         raise SystemExit("--session-limit is a data-construction bound; a measurement "
                          "has none (P18)")
+    from shared.evaluation import decoding as DEC
+    protocol = DEC.load(args.decoding) if args.decoding else None
+    if protocol and (args.mode != "eval" or not args.seed_namespace
+                     or int(protocol["samples_per_item"]) != 1):
+        raise SystemExit("--decoding is a measurement protocol: eval mode, a --seed-namespace, "
+                         "one sample per item")
 
     from aadistill.evaluation import degeneration
     from aadistill.evaluation.behavior import split_generation, template_opens_think
@@ -245,7 +302,8 @@ def main(argv=None) -> int:
     ctx = ctx_info["resolved_context"]
     stop_ids = resolve_stop_ids(args.model, tok, cfg, args.revision)
     limit = min(ctx, args.session_limit) if args.session_limit else ctx
-    sampling = dict(SAMPLING) if args.mode == "eval" else dict(GENERATE_SAMPLING)
+    sampling = (dict(GENERATE_SAMPLING) if args.mode != "eval" else
+                dict(SAMPLING) if protocol is None else DEC.sampling(protocol))
     print(f"[{args.label}] mode={args.mode} context={ctx} "
           f"({ctx_info['context_source']}) limit={limit} stop={stop_ids}", flush=True)
 
@@ -273,6 +331,8 @@ def main(argv=None) -> int:
                               detokenize=False, output_kind=RequestOutputKind.DELTA,
                               **params)
 
+    stream = (streamer(Path(args.stream_completed), label=args.label, mode=args.mode,
+                       action_protocol=args.action_protocol) if args.stream_completed else None)
     t_gen = time.time()
     episodes, rnd, out_tokens = run_episodes(
         tasks, tok=tok, eng=eng, make_sampling=make_sampling, limit=limit, ctx=ctx,
@@ -280,7 +340,11 @@ def main(argv=None) -> int:
         system=args.system, check_every=args.check_every,
         degeneration_check=degeneration.check, split_generation=split_generation,
         template_opens_think=template_opens_think, label=args.label,
-        action_protocol=args.action_protocol)
+        action_protocol=args.action_protocol, on_done=stream[0] if stream else None,
+        seed_of=(lambda tid, turn: DEC.request_seed(protocol, args.seed_namespace, tid, turn))
+        if protocol else None)
+    if stream:
+        stream[1].close()
     gen_s = round(time.time() - t_gen, 1)
     identity = {
         "label": args.label, "model": args.model, "revision": args.revision,
@@ -289,6 +353,8 @@ def main(argv=None) -> int:
         "context_resolution": ctx_info, "session_limit": args.session_limit,
         "effective_limit": limit, "stop_ids": stop_ids, "sampling": sampling,
         "seed_base": args.seed_base if args.mode == "generate" else None,
+        **({"decoding_protocol": DEC.identity(protocol), "seed_namespace": args.seed_namespace}
+           if protocol else {}),
         "action_protocol": args.action_protocol,
         "system_message": args.system,
         "chat_template_sha256": hashlib.sha256((tok.chat_template or "").encode()).hexdigest(),
@@ -303,15 +369,8 @@ def main(argv=None) -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     with out.open("w") as f:
         for tid, e in episodes.items():
-            t = e["task"]
-            rec = {"task_id": tid, "label": args.label, "mode": args.mode,
-                   "generator_id": t["generator_id"], "family_id": t["family_id"],
-                   "axis": t["axis"], "difficulty": t["difficulty"],
-                   "interactive": t["interactive"], "end": e["end"],
-                   "turns": e["turns"],
-                   "env_result": e["env"].result() if e["env"] else None,
-                   **({"action_protocol": args.action_protocol} if e["env"] else {}),
-                   "messages": e["history"]}
+            rec = episode_record(tid, e, label=args.label, mode=args.mode,
+                                 action_protocol=args.action_protocol)
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
     summary = {"identity": identity, "n_tasks": len(episodes), "turns": rnd,
                "output_tokens": out_tokens, "generation_seconds": gen_s,

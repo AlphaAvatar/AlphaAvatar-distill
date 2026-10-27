@@ -82,6 +82,10 @@ def main() -> None:
                          "declared mixture, so replaying it preserves the "
                          "mixture; the realized per-rung mix is reported either "
                          "way, and must be checked rather than assumed.")
+    ap.add_argument("--no-terminal-truncation", action="store_true",
+                    help="close a sequence instead of cutting its last session (the packer's own "
+                         "allow_terminal_truncation=False): every session is packed whole. Omitted, "
+                         "the packing is E1's, which cuts the last session at the sequence boundary")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -161,7 +165,8 @@ def main() -> None:
                 block_text, add_special_tokens=False).input_ids
             system_text_by_key[r.system_key] = r.system_text
     blocks = pack_sessions(order, system_ids_by_key,
-                           block_len=args.block_len, pad_id=pad_id)
+                           block_len=args.block_len, pad_id=pad_id,
+                           allow_terminal_truncation=not args.no_terminal_truncation)
     print(f"{len(blocks)} packed blocks across {len(keys)} system-prompt groups",
           flush=True)
 
@@ -261,7 +266,9 @@ def main() -> None:
         "packing_efficiency": round(
             sum(b.audit["unpadded_length"] for b in blocks)
             / max(len(blocks) * args.block_len, 1), 4),
-        "packing": "sequential within system-prompt group, terminal truncation only",
+        "packing": ("sequential within system-prompt group, no truncation (every session whole)"
+                    if args.no_terminal_truncation else
+                    "sequential within system-prompt group, terminal truncation only"),
         "rungs": ladder,
         "sessions_sha256": sha256_file(Path(args.sessions)),
         "outputs": {"blocks": sha256_file(out_dir / "blocks.npz"),

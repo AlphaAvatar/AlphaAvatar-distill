@@ -1,0 +1,541 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.initialization_selection/v1",
+ "status": "DECIDED BY THE MAINTAINER (2026-10-21): H1 fixes Stage-0 D4 Top-1 as its research starting point -- not a claim that D4 reasons best, and no change to Stage-0's unresolved verdict. This derivation, which reached the same candidate by a rule that reads no recovered outcome, is kept as supporting analysis; it did not make the choice. Materialization: assets/d4_top1_materialization.json",
+ "written_utc": "2026-10-21T19:22:03Z",
+ "rule": "the candidate that Pareto-dominates all others on the searches' three minimized step-0 objectives state.teacher_kl.equal_domain_mean, state.teacher_kl.worst_domain, state.critical_token_kl, under the one shared state_eval suite; no recovered outcome is read",
+ "candidates": [
+  {
+   "dose": "d1",
+   "rank": 1,
+   "state_id": "72b76a1ca4300f1fc3b341c28738f425",
+   "path": "DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_rh_d1@v1)->ATTENTION(calib.s0v_rh_d1@v1)->RESIDUAL_WIDTH(calib.s0v_rh_d1@v1)",
+   "checkpoint_sha256": "49bb3c56b50d95946f7621619084fe85e6f84e9375a843a704e1ab2e53548cae",
+   "artifact_digest": "ecd34a057f83069742156ca02cd5ccd89bd5ff60a4f3c3a8ee176628f7fbf287",
+   "weights_digest": "862a6bc0deb6fe73f8ebb7139a28e64784833da2486cfc7e741a9b50081c64f1",
+   "num_parameters": 596049920,
+   "objectives": {
+    "state.teacher_kl.equal_domain_mean": 8.031886769464768,
+    "state.teacher_kl.worst_domain": 9.3454064242026,
+    "state.critical_token_kl": 12.22867862412607
+   },
+   "diagnostics": {
+    "state.nll.pooled_all_domains": 8.345867813258097,
+    "state.nll.teacher_reference_pooled": 0.5076820027335172,
+    "state.nll.general": 10.019275997263584,
+    "state.nll.reasoning_math": 7.382182922757307,
+    "state.nll.rag_multihop": 9.551853348502247,
+    "state.nll.code": 7.989219158407636,
+    "state.nll.tool": 8.026757091925681
+   },
+   "selection_record": "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/evidence/d1/search/stage1_selection.json",
+   "execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "prediction_rows": "scored_v1",
+   "registry_entry": "stage0_calvol_d1_top1_72b76a1c",
+   "relay_copy": "stage0_calvol/finalists/formal_v1/d1/72b76a1ca4300f1fc3b341c28738f425/model.safetensors",
+   "local_copies": [],
+   "suite": {
+    "qualified_id": "state_eval@v1",
+    "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+   },
+   "dominated_by": [
+    "d4/r1",
+    "d4/r2"
+   ]
+  },
+  {
+   "dose": "d1",
+   "rank": 2,
+   "state_id": "60e229ac09d88cf52814894ddec0e933",
+   "path": "DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_rh_d1@v1)->ATTENTION(calib.s0v_rh_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)",
+   "checkpoint_sha256": "a092bc43630df08a84e14512555aa87b7be4913025b07aefc62aaae3c81e5a4d",
+   "artifact_digest": "5b5db096a2824f26a2aa833fe58e1aa80016a54343e8202848ebe9b052b65fcf",
+   "weights_digest": "8bfd454489e4a8d3e304df850051302fc8a3b1e2140f0463591e115d32073e44",
+   "num_parameters": 596049920,
+   "objectives": {
+    "state.teacher_kl.equal_domain_mean": 8.19496527947434,
+    "state.teacher_kl.worst_domain": 9.307720954459706,
+    "state.critical_token_kl": 12.56398740028865
+   },
+   "diagnostics": {
+    "state.nll.pooled_all_domains": 8.538817101363213,
+    "state.nll.teacher_reference_pooled": 0.5076820027335172,
+    "state.nll.general": 10.101780898501634,
+    "state.nll.reasoning_math": 7.682194989134048,
+    "state.nll.rag_multihop": 9.511360888946971,
+    "state.nll.code": 8.157437866219977,
+    "state.nll.tool": 8.31421192050042
+   },
+   "selection_record": "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/evidence/d1/search/stage1_selection.json",
+   "execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "prediction_rows": "scored_v1",
+   "registry_entry": "stage0_calvol_d1_top2_60e229ac",
+   "relay_copy": "stage0_calvol/finalists/formal_v1/d1/60e229ac09d88cf52814894ddec0e933/model.safetensors",
+   "local_copies": [],
+   "suite": {
+    "qualified_id": "state_eval@v1",
+    "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+   },
+   "dominated_by": [
+    "d4/r1",
+    "d4/r2"
+   ]
+  },
+  {
+   "dose": "d1",
+   "rank": 3,
+   "state_id": "4df438a839cd1ed057c2277dfcb8922f",
+   "path": "DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_rh_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)->ATTENTION(calib.s0v_base_d1@v1)",
+   "checkpoint_sha256": "3d4cb00edb8cbdbf99afffc408240d920dd75faf9e28611abdf260aa22e6b695",
+   "artifact_digest": "89ec139720bcf466b6d2afaf21ddbcc9021aaba968990444e2de07e0d15fc1dd",
+   "weights_digest": "5e80aff042f37fc84b183ecbcc0a44a0c5120ceb14ada5031f67c016959df387",
+   "num_parameters": 596049920,
+   "objectives": {
+    "state.teacher_kl.equal_domain_mean": 8.50804494841031,
+    "state.teacher_kl.worst_domain": 9.097441211851287,
+    "state.critical_token_kl": 13.183806631565
+   },
+   "diagnostics": {
+    "state.nll.pooled_all_domains": 8.969084089341818,
+    "state.nll.teacher_reference_pooled": 0.5076820027335172,
+    "state.nll.general": 9.620859606756909,
+    "state.nll.reasoning_math": 8.855498925673622,
+    "state.nll.rag_multihop": 9.234421710410171,
+    "state.nll.code": 9.308635289748134,
+    "state.nll.tool": 8.343323681887616
+   },
+   "selection_record": "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/evidence/d1/search/stage1_selection.json",
+   "execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "prediction_rows": "scored_v1",
+   "registry_entry": "stage0_calvol_d1_top3_4df438a8",
+   "relay_copy": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
+   "local_copies": [],
+   "suite": {
+    "qualified_id": "state_eval@v1",
+    "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+   },
+   "dominated_by": [
+    "d4/r1",
+    "d4/r2"
+   ]
+  },
+  {
+   "dose": "d1",
+   "rank": 4,
+   "state_id": "91090067b51c9fd4c0aeb3824bc7f549",
+   "path": "ATTENTION(calib.s0v_base_d1@v1)->DEPTH(calib.s0v_base_d1@v1)->FFN(calib.s0v_base_d1@v1)->RESIDUAL_WIDTH(calib.s0v_base_d1@v1)",
+   "checkpoint_sha256": "111958717d94fd6ac6e82662fe74d9544c9254d0fc93ab4d99cc6816c0ece71f",
+   "artifact_digest": "04d8f8382919cebecf1b99754327c8c030d51b09367d46bfa38acfea5b494db0",
+   "weights_digest": "1836b546864b6b104add927de1b4394241e903ed739bb6e75244b8b1a0a2185b",
+   "num_parameters": 596049920,
+   "objectives": {
+    "state.teacher_kl.equal_domain_mean": 8.289101627459791,
+    "state.teacher_kl.worst_domain": 9.309110374433441,
+    "state.critical_token_kl": 13.242471971535654
+   },
+   "diagnostics": {
+    "state.nll.pooled_all_domains": 8.577125795653727,
+    "state.nll.teacher_reference_pooled": 0.5076820027335172,
+    "state.nll.general": 10.677089660739282,
+    "state.nll.reasoning_math": 7.5027059787302885,
+    "state.nll.rag_multihop": 9.499109536102544,
+    "state.nll.code": 8.203286336157559,
+    "state.nll.tool": 8.33767801541296
+   },
+   "selection_record": "logs/stages/stage-0/calibration_volume/runs/dose_d1_20261019_055515/evidence/d1/search/stage1_selection.json",
+   "execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "prediction_rows": "scored_v1",
+   "registry_entry": "stage0_calvol_d1_top4_91090067",
+   "relay_copy": "stage0_calvol/finalists/formal_v1/d1/91090067b51c9fd4c0aeb3824bc7f549/model.safetensors",
+   "local_copies": [],
+   "suite": {
+    "qualified_id": "state_eval@v1",
+    "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+   },
+   "dominated_by": [
+    "d1/r2",
+    "d2/r1",
+    "d4/r1",
+    "d4/r2"
+   ]
+  },
+  {
+   "dose": "d2",
+   "rank": 1,
+   "state_id": "9af1989dc0b8168908eeb77ee4d3fa47",
+   "path": "DEPTH(calib.s0v_rh_d2@v1)->FFN(calib.s0v_base_d2@v1)->ATTENTION(calib.s0v_base_d2@v1)->RESIDUAL_WIDTH(calib.s0v_base_d2@v1)",
+   "checkpoint_sha256": "e9eba2255dbb567b9f044c0af9b2f3139c9ef227532ff85abe66e46f158f733e",
+   "artifact_digest": "81cb441c19bdab9399210e0406b425290463b8cb677a1ab3fe20eceb151b2f24",
+   "weights_digest": "010541d8a89f009eaca42feb4954a5b17fa727e069e9d3e5bd398fa7121f0dd0",
+   "num_parameters": 596049920,
+   "objectives": {
+    "state.teacher_kl.equal_domain_mean": 7.981634133824623,
+    "state.teacher_kl.worst_domain": 9.175026919860892,
+    "state.critical_token_kl": 12.916755484910798
+   },
+   "diagnostics": {
+    "state.nll.pooled_all_domains": 8.289744085069719,
+    "state.nll.teacher_reference_pooled": 0.5076820027335172,
+    "state.nll.general": 10.141504463754094,
+    "state.nll.reasoning_math": 7.342695266001415,
+    "state.nll.rag_multihop": 9.377243019450045,
+    "state.nll.code": 7.954719739615634,
+    "state.nll.tool": 7.903680941361713
+   },
+   "selection_record": "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/evidence/d2/search/stage1_selection.json",
+   "execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "prediction_rows": "scored_v1",
+   "registry_entry": "stage0_calvol_d2_top1_9af1989d",
+   "relay_copy": "stage0_calvol/finalists/formal_v1/d2/9af1989dc0b8168908eeb77ee4d3fa47/model.safetensors",
+   "local_copies": [],
+   "suite": {
+    "qualified_id": "state_eval@v1",
+    "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+   },
+   "dominated_by": [
+    "d4/r1",
+    "d4/r2"
+   ]
+  },
+  {
+   "dose": "d2",
+   "rank": 2,
+   "state_id": "e2d10ba8f532f95c174de290e19dcf01",
+   "path": "ATTENTION(calib.s0v_base_d2@v1)->DEPTH(calib.s0v_base_d2@v1)->RESIDUAL_WIDTH(calib.s0v_base_d2@v1)->FFN(calib.s0v_rh_d2@v1)",
+   "checkpoint_sha256": "34712d06301866b339b6daa9c5d43834f5fdc336ae767397adc6357f6c25176f",
+   "artifact_digest": "eed6a81b4bcf64b485e6670c17f152148b26d9e260a83ef13b6b937ee15791e6",
+   "weights_digest": "c8f882f05fbf05eff67cbec4daa1e509d328a81f5ecd1bbb13a234af7d55a1a8",
+   "num_parameters": 596049920,
+   "objectives": {
+    "state.teacher_kl.equal_domain_mean": 9.929662798360962,
+    "state.teacher_kl.worst_domain": 12.2029582435711,
+    "state.critical_token_kl": 12.841610848402311
+   },
+   "diagnostics": {
+    "state.nll.pooled_all_domains": 10.161025571581233,
+    "state.nll.teacher_reference_pooled": 0.5076820027335172,
+    "state.nll.general": 14.488096409849573,
+    "state.nll.reasoning_math": 8.899808505891157,
+    "state.nll.rag_multihop": 12.39353812029334,
+    "state.nll.code": 8.13702622273522,
+    "state.nll.tool": 9.067041415729173
+   },
+   "selection_record": "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/evidence/d2/search/stage1_selection.json",
+   "execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "prediction_rows": "scored_v1",
+   "registry_entry": "stage0_calvol_d2_top2_e2d10ba8",
+   "relay_copy": "stage0_calvol/finalists/formal_v1/d2/e2d10ba8f532f95c174de290e19dcf01/model.safetensors",
+   "local_copies": [],
+   "suite": {
+    "qualified_id": "state_eval@v1",
+    "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+   },
+   "dominated_by": [
+    "d1/r1",
+    "d1/r2",
+    "d4/r1",
+    "d4/r2"
+   ]
+  },
+  {
+   "dose": "d2",
+   "rank": 3,
+   "state_id": "3b2037bc90090ba13504fb18c1480e80",
+   "path": "DEPTH(calib.s0v_base_d2@v1)->FFN(calib.s0v_base_d2@v1)->ATTENTION(calib.s0v_base_d2@v1)->RESIDUAL_WIDTH(calib.s0v_rh_d2@v1)",
+   "checkpoint_sha256": "551e66850bd340851913b13d1dca5894de8a934b276e9853c563da03cefe80c7",
+   "artifact_digest": "e8b85b20b1aaf28005d61aa31bdebc3a6caee915019b7c1f153094d4fbaec9af",
+   "weights_digest": "4393a792c9b6987fab37eac7b749c28c500606f32472277648b042e97ab60eea",
+   "num_parameters": 596049920,
+   "objectives": {
+    "state.teacher_kl.equal_domain_mean": 8.863576951506701,
+    "state.teacher_kl.worst_domain": 10.26160617395381,
+    "state.critical_token_kl": 14.885588547233656
+   },
+   "diagnostics": {
+    "state.nll.pooled_all_domains": 9.228490460491473,
+    "state.nll.teacher_reference_pooled": 0.5076820027335172,
+    "state.nll.general": 10.27430340039894,
+    "state.nll.reasoning_math": 8.441845521542664,
+    "state.nll.rag_multihop": 10.460257240912238,
+    "state.nll.code": 8.815865559035569,
+    "state.nll.tool": 9.179766925097164
+   },
+   "selection_record": "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/evidence/d2/search/stage1_selection.json",
+   "execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "prediction_rows": "scored_v1",
+   "registry_entry": "stage0_calvol_d2_top3_3b2037bc",
+   "relay_copy": "stage0_calvol/finalists/formal_v1/d2/3b2037bc90090ba13504fb18c1480e80/model.safetensors",
+   "local_copies": [],
+   "suite": {
+    "qualified_id": "state_eval@v1",
+    "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+   },
+   "dominated_by": [
+    "d1/r1",
+    "d1/r2",
+    "d1/r3",
+    "d1/r4",
+    "d2/r1",
+    "d4/r1",
+    "d4/r2"
+   ]
+  },
+  {
+   "dose": "d2",
+   "rank": 4,
+   "state_id": "b6a41ee85024ac3750a39ceb97fa1b5c",
+   "path": "ATTENTION(calib.s0v_base_d2@v1)->DEPTH(calib.s0v_base_d2@v1)->FFN(calib.s0v_rh_d2@v1)->RESIDUAL_WIDTH(calib.s0v_base_d2@v1)",
+   "checkpoint_sha256": "4da365c3d8b3dc4f391a696c78750714405bc7ef488e2dccf387331a640e6b85",
+   "artifact_digest": "ad3744f273d4492f69120279aac3dffaf302258f3bde2d50f21b5fcd6b32daa6",
+   "weights_digest": "d323ce1f8368ce83a7c1917936f2859d19dc42bffc52967c15f1674a2ad2c68b",
+   "num_parameters": 596049920,
+   "objectives": {
+    "state.teacher_kl.equal_domain_mean": 9.748395117422723,
+    "state.teacher_kl.worst_domain": 10.965181478286134,
+    "state.critical_token_kl": 14.185881820470707
+   },
+   "diagnostics": {
+    "state.nll.pooled_all_domains": 9.95794376995208,
+    "state.nll.teacher_reference_pooled": 0.5076820027335172,
+    "state.nll.general": 12.980971441683462,
+    "state.nll.reasoning_math": 8.825938742069958,
+    "state.nll.rag_multihop": 11.166184624146798,
+    "state.nll.code": 9.610369209429663,
+    "state.nll.tool": 9.12599919107186
+   },
+   "selection_record": "logs/stages/stage-0/calibration_volume/runs/dose_d2_20261020_002929/evidence/d2/search/stage1_selection.json",
+   "execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "prediction_rows": "scored_v1",
+   "registry_entry": "stage0_calvol_d2_top4_b6a41ee8",
+   "relay_copy": "stage0_calvol/finalists/formal_v1/d2/b6a41ee85024ac3750a39ceb97fa1b5c/model.safetensors",
+   "local_copies": [],
+   "suite": {
+    "qualified_id": "state_eval@v1",
+    "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+   },
+   "dominated_by": [
+    "d1/r1",
+    "d1/r2",
+    "d1/r3",
+    "d1/r4",
+    "d2/r1",
+    "d4/r1",
+    "d4/r2",
+    "d4/r3",
+    "d4/r4"
+   ]
+  },
+  {
+   "dose": "d4",
+   "rank": 1,
+   "state_id": "1301deb71685aa1ca5c7b6cf2c491ac4",
+   "path": "ATTENTION(calib.s0v_rh_d4@v1)->DEPTH(calib.s0v_base_d4@v1)->RESIDUAL_WIDTH(calib.s0v_base_d4@v1)->FFN(calib.s0v_base_d4@v1)",
+   "checkpoint_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+   "artifact_digest": "457e194c4a40c2503a7d63d03269ac76ece700102bae74908b7315d367bab3f0",
+   "weights_digest": "73589c58a439bf32b4ddbf975ac245cd6b916745d5e0712ae4cf32ae158a6d0f",
+   "num_parameters": 596049920,
+   "objectives": {
+    "state.teacher_kl.equal_domain_mean": 6.762800955267164,
+    "state.teacher_kl.worst_domain": 7.383460309515872,
+    "state.critical_token_kl": 11.265094692483633
+   },
+   "diagnostics": {
+    "state.nll.code": 6.984719824112987,
+    "state.nll.general": 9.417298368976276,
+    "state.nll.pooled_all_domains": 7.114908878967543,
+    "state.nll.rag_multihop": 7.581083920938259,
+    "state.nll.reasoning_math": 5.978652542988931,
+    "state.nll.teacher_reference_pooled": 0.5076820027335172,
+    "state.nll.tool": 6.909399687480665
+   },
+   "selection_record": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/stage1_selection.json",
+   "execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "prediction_rows": "scored_v1",
+   "registry_entry": "stage0_calvol_d4_top1_1301deb7",
+   "relay_copy": "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors",
+   "local_copies": [
+    "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4"
+   ],
+   "suite": {
+    "qualified_id": "state_eval@v1",
+    "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+   },
+   "dominated_by": []
+  },
+  {
+   "dose": "d4",
+   "rank": 2,
+   "state_id": "167a43f4c05b0f9653eaf216717df83c",
+   "path": "ATTENTION(calib.s0v_rh_d4@v1)->DEPTH(calib.s0v_base_d4@v1)->RESIDUAL_WIDTH(calib.s0v_base_d4@v1)->FFN(calib.s0v_rh_d4@v1)",
+   "checkpoint_sha256": "a509ac31665bffbedb5374876c9b44d5ecfa6b4c642229947d82dc3b88ff383d",
+   "artifact_digest": "2b3b7f59d5bd1d689ae35ed71162b74f74383e638e816185e05733e7e569751c",
+   "weights_digest": "84f9dc5872e6a379206bcb918b4579fb5334b6eee21c88dbe7afe71ee26246ea",
+   "num_parameters": 596049920,
+   "objectives": {
+    "state.teacher_kl.equal_domain_mean": 6.841581827526556,
+    "state.teacher_kl.worst_domain": 7.404665853317091,
+    "state.critical_token_kl": 11.268182783216151
+   },
+   "diagnostics": {
+    "state.nll.code": 7.118529892645741,
+    "state.nll.general": 9.389788839887588,
+    "state.nll.pooled_all_domains": 7.208067588143697,
+    "state.nll.rag_multihop": 7.603234335425256,
+    "state.nll.reasoning_math": 6.1107693910637515,
+    "state.nll.teacher_reference_pooled": 0.5076820027335172,
+    "state.nll.tool": 7.041934897444178
+   },
+   "selection_record": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/stage1_selection.json",
+   "execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "prediction_rows": "scored_v1",
+   "registry_entry": "stage0_calvol_d4_top2_167a43f4",
+   "relay_copy": "stage0_calvol/finalists/formal_v1/d4/167a43f4c05b0f9653eaf216717df83c/model.safetensors",
+   "local_copies": [],
+   "suite": {
+    "qualified_id": "state_eval@v1",
+    "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+   },
+   "dominated_by": [
+    "d4/r1"
+   ]
+  },
+  {
+   "dose": "d4",
+   "rank": 3,
+   "state_id": "0363ad220c88104c0dd1e53395db4530",
+   "path": "ATTENTION(calib.s0v_rh_d4@v1)->DEPTH(calib.s0v_base_d4@v1)->FFN(calib.s0v_rh_d4@v1)->RESIDUAL_WIDTH(calib.s0v_base_d4@v1)",
+   "checkpoint_sha256": "5d54e3709678884a530decfb43354481da316f53604091c6d40b5f3e1bfa683a",
+   "artifact_digest": "a98e0cf2206e5ece9a92a073ff165e31fe23dee322f9b64d17bcaeb1b335122e",
+   "weights_digest": "92d33ea018835ade9b9beb2aaf012345578490b57b6c5158b2c39095f320ceb4",
+   "num_parameters": 596049920,
+   "objectives": {
+    "state.teacher_kl.equal_domain_mean": 8.893440785007718,
+    "state.teacher_kl.worst_domain": 10.125547516847462,
+    "state.critical_token_kl": 13.491083841846418
+   },
+   "diagnostics": {
+    "state.nll.code": 8.717096300825688,
+    "state.nll.general": 12.123130798107608,
+    "state.nll.pooled_all_domains": 9.154647276844422,
+    "state.nll.rag_multihop": 9.652135970462835,
+    "state.nll.reasoning_math": 7.806090410268231,
+    "state.nll.teacher_reference_pooled": 0.5076820027335172,
+    "state.nll.tool": 8.999133483511772
+   },
+   "selection_record": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/stage1_selection.json",
+   "execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "prediction_rows": "scored_v1",
+   "registry_entry": "stage0_calvol_d4_top3_0363ad22",
+   "relay_copy": "stage0_calvol/finalists/formal_v1/d4/0363ad220c88104c0dd1e53395db4530/model.safetensors",
+   "local_copies": [],
+   "suite": {
+    "qualified_id": "state_eval@v1",
+    "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+   },
+   "dominated_by": [
+    "d1/r1",
+    "d1/r2",
+    "d1/r3",
+    "d1/r4",
+    "d2/r1",
+    "d4/r1",
+    "d4/r2"
+   ]
+  },
+  {
+   "dose": "d4",
+   "rank": 4,
+   "state_id": "912205b5a106bb868c43f1d24597bfcc",
+   "path": "ATTENTION(calib.s0v_rh_d4@v1)->DEPTH(calib.s0v_base_d4@v1)->FFN(calib.s0v_rh_d4@v1)->RESIDUAL_WIDTH(calib.s0v_rh_d4@v1)",
+   "checkpoint_sha256": "ac7f3885a13f9acb74e2f2014dac2d4b96fcec2655841000b46fe3d6bb207cc4",
+   "artifact_digest": "c64bc63135ad2c0bd16d64e89677526c9c7397a509e1855569b4fd4b925d13d0",
+   "weights_digest": "7726d84a99f0b2b5e0d06580485982750f9efaecd5fff757bd6249d05dfd2663",
+   "num_parameters": 596049920,
+   "objectives": {
+    "state.teacher_kl.equal_domain_mean": 8.918973492385522,
+    "state.teacher_kl.worst_domain": 9.957426977298386,
+    "state.critical_token_kl": 12.871874759321535
+   },
+   "diagnostics": {
+    "state.nll.code": 9.186973817653566,
+    "state.nll.general": 11.993716147151192,
+    "state.nll.pooled_all_domains": 9.190670782366716,
+    "state.nll.rag_multihop": 9.503229656107058,
+    "state.nll.reasoning_math": 7.907955871857302,
+    "state.nll.teacher_reference_pooled": 0.5076820027335172,
+    "state.nll.tool": 8.861855889538411
+   },
+   "selection_record": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/stage1_selection.json",
+   "execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "prediction_rows": "scored_v1",
+   "registry_entry": "stage0_calvol_d4_top4_912205b5",
+   "relay_copy": "stage0_calvol/finalists/formal_v1/d4/912205b5a106bb868c43f1d24597bfcc/model.safetensors",
+   "local_copies": [],
+   "suite": {
+    "qualified_id": "state_eval@v1",
+    "hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+   },
+   "dominated_by": [
+    "d1/r1",
+    "d1/r2",
+    "d4/r1",
+    "d4/r2"
+   ]
+  }
+ ],
+ "pareto_front": [
+  "d4/r1"
+ ],
+ "dominant": [
+  "d4/r1"
+ ],
+ "fixed_by_maintainer": "d4/r1",
+ "proposal": {
+  "dose": "d4",
+  "rank": 1,
+  "state_id": "1301deb71685aa1ca5c7b6cf2c491ac4",
+  "checkpoint_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+  "artifact_digest": "457e194c4a40c2503a7d63d03269ac76ece700102bae74908b7315d367bab3f0",
+  "weights_digest": "73589c58a439bf32b4ddbf975ac245cd6b916745d5e0712ae4cf32ae158a6d0f",
+  "relay_copy": "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors",
+  "registry_entry": "stage0_calvol_d4_top1_1301deb7",
+  "step0": {
+   "state.teacher_kl.equal_domain_mean": 6.762800955267164,
+   "state.teacher_kl.worst_domain": 7.383460309515872,
+   "state.critical_token_kl": 11.265094692483633,
+   "state.nll.pooled_all_domains": 7.114908878967543,
+   "state.nll.reasoning_math": 5.978652542988931,
+   "state.nll.teacher_reference_pooled": 0.5076820027335172
+  },
+  "recovered_beside_it_not_used": [
+   {
+    "unit": "d4/r1/s20260726/A100",
+    "seed": 20260726,
+    "fluid_static_correct": "1/570",
+    "fluid_static_usable": 0.5614,
+    "episode_success": "0/144",
+    "final_val_ce": 1.332952
+   },
+   {
+    "unit": "d4/r1/s20260727/L40S",
+    "seed": 20260727,
+    "fluid_static_correct": "0/570",
+    "fluid_static_usable": 0.6439,
+    "episode_success": "0/144",
+    "final_val_ce": 1.313187
+   }
+  ]
+ },
+ "materialization_identity": {
+  "fact": "every candidate was materialized by a D1 full search whose session baseline records the forward profile's numerical execution fingerprint and prediction_rows scored_v1",
+  "fingerprints_seen": [
+   "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05"
+  ],
+  "forward_baseline_record": "configs/shared/baselines/initialization_forward_baseline_v1.json still lists forward_materializations: [] -- the open record inconsistency #1 of docs/shared/STAGE2_3_HANDOFF.md section 11; this proposal does not edit or reselect it"
+ },
+ "limits": [
+  "step-0 objectives are a structural-initialization measure (AGENTS.md 4.2); that a lower step-0 KL recovers better reasoning is NOT established -- it is what Stage 3 now tests",
+  "the three objectives are computed on state_eval@v1 (mixed-domain), not on eval-set-1",
+  "the proposal fixes ONE initialization for every arm; it makes no claim about the other 11"
+ ],
+ "authorizes": "nothing"
+}

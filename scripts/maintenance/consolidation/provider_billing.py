@@ -51,13 +51,19 @@ def fetch(api_key: str, start: str, end: str) -> dict:
     sys.path.insert(0, str(REPO_ROOT / "src"))
     from aadistill.infrastructure.provider import RunPodProvider
     prov = RunPodProvider(api_key)
+    bal, res = prov.account_balance(), prov.account_resources()
     return {
         "schema": SCHEMA,
         "fetched_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "query": {"endpoint": REST, "window": window},
-        "account": {**prov.account_balance().as_dict(),
-                    **{k: v for k, v in prov.account_resources().as_dict().items()
-                       if k != "known"}},
+        #: the balance's and the resource listing's own `known` and `error` side
+        #: by side: merging them let an unreadable listing read as known
+        "account": {**bal.as_dict(), "pods": list(res.pods),
+                    "network_volumes": list(res.network_volumes),
+                    "known": bool(bal.known and res.known),
+                    "balance_known": bal.known, "balance_error": bal.error,
+                    "resources_known": res.known, "resources_error": res.error,
+                    "error": "; ".join(e for e in (bal.error, res.error) if e) or None},
         "pods": get(f"/billing/pods?{window}"),
         "networkvolumes": get(f"/billing/networkvolumes?{window}"),
     }
@@ -84,17 +90,46 @@ def run_records(root: Path) -> dict[str, list[dict]]:
     return {pid: list(runs.values()) for pid, runs in out.items()}
 
 
-def mentioned(root: Path, ids: list[str]) -> set[str]:
-    """Which ids appear anywhere in the tracked tree. A pod a record mentions
-    without having created it (a hand-written ledger line, an older layout) is
-    at least not unknown to the repository."""
+#: Files that list billed pods BECAUSE they are the billing evidence: the
+#: snapshots themselves and every reconciliation written from them. A pod they
+#: name is not thereby known to the repository -- committing the list of
+#: unattributed pods once made all 53 of them read as "mentioned".
+BILLING_EVIDENCE = (":(exclude)logs/budget/provider/**",
+                    ":(exclude)**/budget_reconciliation.json",
+                    ":(exclude)**/provider_attribution.json")
+
+#: A file that cites a billing snapshot was written FROM the billing evidence --
+#: every reconciliation records the snapshot it read (`snapshot_identity`) --
+#: so whatever pods it lists, it attributes none of them. This is what keeps a
+#: NEW reconciliation, wherever it is committed, from changing attribution: the
+#: path list above only knows the reports that existed when it was written (the
+#: H1 budget position, committed after it, made all 53 pods read as mentioned).
+SNAPSHOT_CITATIONS = ("logs/budget/provider/", SCHEMA)
+
+
+def _git_grep(root: Path, *args: str) -> list[str]:
     import subprocess
+    out = subprocess.run(["git", "grep", *args], cwd=root, capture_output=True, text=True)
+    return [line for line in out.stdout.splitlines() if line]
+
+
+def mentioned(root: Path, ids: list[str]) -> set[str]:
+    """Which ids appear in a tracked file that is not billing evidence and does
+    not cite a billing snapshot. A pod a record mentions without having created
+    it (a hand-written ledger line, an older layout) is at least not unknown to
+    the repository; a pod only the billing evidence or a report derived from it
+    names stays unattributed."""
     if not ids:
         return set()
-    got = subprocess.run(["git", "grep", "-h", "-o", "-F",
-                          *sum((["-e", i] for i in ids), [])],
-                         cwd=root, capture_output=True, text=True).stdout.split()
-    return set(got)
+    pattern = sum((["-e", i] for i in ids), [])
+    files = _git_grep(root, "-l", "-F", *pattern, "--", ".", *BILLING_EVIDENCE)
+    if not files:
+        return set()
+    literal = [f":(literal){f}" for f in files]
+    derived = set(_git_grep(root, "-l", "-F",
+                            *sum((["-e", c] for c in SNAPSHOT_CITATIONS), []), "--", *literal))
+    keep = [f":(literal){f}" for f in files if f not in derived]
+    return set(_git_grep(root, "-h", "-o", "-F", *pattern, "--", *keep)) if keep else set()
 
 
 def billed_by_pod(snapshot: dict) -> dict[str, dict]:

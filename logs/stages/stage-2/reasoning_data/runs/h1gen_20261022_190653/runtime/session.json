@@ -1,0 +1,747 @@
+{
+  "schema": "aadistill.stage2.reasoning_data.h1_generation_session/v1",
+  "session_id": "stage2-h1-generation",
+  "session_spec": {
+    "session_id": "stage2-h1-generation",
+    "schema": "aadistill.stage2.reasoning_data.h1_generation_session/v1",
+    "description": "H1 P1: teacher-native candidates for arm B's generated cells (text only)",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-2/reasoning_data/runs/h1gen_20261022_190653/governance/authorization.json",
+    "authorization_type": "H1GenerationAuthorization.load",
+    "plan_id": "stage2.reasoning_data.h1_generation",
+    "plan_hash": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
+    "status_path": "/workspace/stage2_h1_generation.status",
+    "run_log_path": "/workspace/stage2_h1_generation_run.log",
+    "driver_job_id": "stage2_h1_generation_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "stage2_h1_generation",
+      "evidence_filename": "generation_session.json",
+      "archive_basename": "stage2_h1_generation",
+      "spec_success": "configs/stages/stage-2/reasoning_data/h1_generation_artifacts.json",
+      "spec_failed": "configs/stages/stage-2/reasoning_data/h1_generation_artifacts.json",
+      "report_names": [
+        "generation_session.json"
+      ]
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "stage2_h1_generation"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_KIND",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [],
+      "local_assets": [
+        "generation_inputs:logs/stages/stage-2/reasoning_data/plans"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 600,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [],
+      "test_paths": [],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "VLLM_READY",
+        "TEACHER_READY",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 2,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-10-22T19:09:13+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 130 min $3.87 \u00b7 soft $6.41 \u00b7 hard $6.85 (authorized $8.02)"
+    },
+    {
+      "utc": "2026-10-22T19:09:13+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA A100-SXM4-80GB $1.79/h, stock Low"
+    },
+    {
+      "utc": "2026-10-22T19:09:13+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $101.2318 against the $30.0000 this session must be able to fund"
+    },
+    {
+      "utc": "2026-10-22T19:09:14+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account resources OK: the provider account holds only the 0 resource(s) the records account for"
+    },
+    {
+      "utc": "2026-10-22T19:09:14+00:00",
+      "elapsed_min": 0.0,
+      "msg": "stage2.reasoning_master@v1: 1587 tasks, no shortfall"
+    },
+    {
+      "utc": "2026-10-22T19:09:14+00:00",
+      "elapsed_min": 0.0,
+      "msg": "every bound file is in the session commit"
+    },
+    {
+      "utc": "2026-10-22T19:09:14+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 0 relay inputs (), 1 local assets"
+    },
+    {
+      "utc": "2026-10-22T19:09:15+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 230 min = $6.85"
+    },
+    {
+      "utc": "2026-10-22T19:09:15+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created 3aot2q8zmhsmdg at $1.79/h"
+    },
+    {
+      "utc": "2026-10-22T19:10:09+00:00",
+      "elapsed_min": 0.9,
+      "msg": "  starting (60s) \u2014 $0.03"
+    },
+    {
+      "utc": "2026-10-22T19:11:13+00:00",
+      "elapsed_min": 1.96,
+      "msg": "  starting (120s) \u2014 $0.06"
+    },
+    {
+      "utc": "2026-10-22T19:11:55+00:00",
+      "elapsed_min": 2.67,
+      "msg": "TCP 22 at 157.157.221.29:12237 after 2.7 min"
+    },
+    {
+      "utc": "2026-10-22T19:11:58+00:00",
+      "elapsed_min": 2.73,
+      "msg": "draw 1: ssh reachable \u2014 $0.08"
+    },
+    {
+      "utc": "2026-10-22T19:12:25+00:00",
+      "elapsed_min": 3.16,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+    },
+    {
+      "utc": "2026-10-22T19:12:25+00:00",
+      "elapsed_min": 3.16,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-22T19:15:09+00:00",
+      "elapsed_min": 5.9,
+      "msg": "draw 1: setup complete \u2014 $0.18"
+    },
+    {
+      "utc": "2026-10-22T19:15:16+00:00",
+      "elapsed_min": 6.02,
+      "msg": "driver detached, pid 3266, confirmed by descriptor_probe \u2014 $0.18"
+    },
+    {
+      "utc": "2026-10-22T19:17:27+00:00",
+      "elapsed_min": 8.2,
+      "msg": "  2026-10-22T19:15:12Z MARKER:CONTRACT_OK \u2014 $0.24"
+    },
+    {
+      "utc": "2026-10-22T19:22:19+00:00",
+      "elapsed_min": 13.07,
+      "msg": "shard pass0_generation_input_g0.part0000.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T19:24:46+00:00",
+      "elapsed_min": 15.53,
+      "msg": "shard pass0_generation_input_g0.part0001.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T19:27:15+00:00",
+      "elapsed_min": 18.01,
+      "msg": "shard pass0_generation_input_g0.part0002.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T19:29:43+00:00",
+      "elapsed_min": 20.47,
+      "msg": "shard pass0_generation_input_g0.part0003.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T19:34:34+00:00",
+      "elapsed_min": 25.31,
+      "msg": "shard pass0_generation_input_g0.part0004.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T19:39:25+00:00",
+      "elapsed_min": 30.16,
+      "msg": "shard pass0_generation_input_g0.part0005.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T19:44:14+00:00",
+      "elapsed_min": 34.99,
+      "msg": "shard pass0_generation_input_g0.part0006.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T19:49:05+00:00",
+      "elapsed_min": 39.84,
+      "msg": "shard pass0_generation_input_g0.part0007.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T19:51:33+00:00",
+      "elapsed_min": 42.3,
+      "msg": "shard pass0_generation_input_g0.part0008.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T19:56:23+00:00",
+      "elapsed_min": 47.13,
+      "msg": "shard pass0_generation_input_g0.part0009.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T20:01:15+00:00",
+      "elapsed_min": 52.0,
+      "msg": "shard pass0_generation_input_g0.part0010.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T20:03:42+00:00",
+      "elapsed_min": 54.46,
+      "msg": "shard pass0_generation_input_g0.part0011.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T20:06:09+00:00",
+      "elapsed_min": 56.91,
+      "msg": "shard pass0_generation_input_g0.part0012.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T20:06:17+00:00",
+      "elapsed_min": 57.03,
+      "msg": "shard pass0_generation_input_g0.part0013.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T20:08:44+00:00",
+      "elapsed_min": 59.49,
+      "msg": "shard pass0_generation_input_g0.part0014.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T20:13:38+00:00",
+      "elapsed_min": 64.38,
+      "msg": "shard pass0_generation_input_g0.part0015.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T20:18:22+00:00",
+      "elapsed_min": 69.13,
+      "msg": "  2026-10-22T20:17:19Z MARKER:UNIT_OK:pass0_generation_input_g0 \u2014 $2.06"
+    },
+    {
+      "utc": "2026-10-22T20:18:31+00:00",
+      "elapsed_min": 69.26,
+      "msg": "shard pass0_generation_input_g0.part0016.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T20:23:27+00:00",
+      "elapsed_min": 74.2,
+      "msg": "shard pass1_generation_input_g0.part0000.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T20:28:24+00:00",
+      "elapsed_min": 79.15,
+      "msg": "shard pass1_generation_input_g0.part0001.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T20:33:20+00:00",
+      "elapsed_min": 84.09,
+      "msg": "shard pass1_generation_input_g0.part0002.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T20:38:18+00:00",
+      "elapsed_min": 89.05,
+      "msg": "shard pass1_generation_input_g0.part0003.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T20:40:48+00:00",
+      "elapsed_min": 91.56,
+      "msg": "shard pass1_generation_input_g0.part0004.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T20:45:44+00:00",
+      "elapsed_min": 96.49,
+      "msg": "shard pass1_generation_input_g0.part0005.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T20:50:40+00:00",
+      "elapsed_min": 101.43,
+      "msg": "shard pass1_generation_input_g0.part0006.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T20:55:36+00:00",
+      "elapsed_min": 106.36,
+      "msg": "shard pass1_generation_input_g0.part0007.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T20:57:59+00:00",
+      "elapsed_min": 108.74,
+      "msg": "  2026-10-22T20:57:58Z MARKER:ALL_DONE \u2014 $3.24"
+    },
+    {
+      "utc": "2026-10-22T20:57:59+00:00",
+      "elapsed_min": 108.74,
+      "msg": "polling ended: ALL_DONE \u2014 $3.24"
+    },
+    {
+      "utc": "2026-10-22T20:59:33+00:00",
+      "elapsed_min": 110.31,
+      "msg": "  manifest rc=0\n65 file(s) across 4 class(es) -> /workspace/manifest.json\n  final_required: 65 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-10-22T21:00:36+00:00",
+      "elapsed_min": 111.35,
+      "msg": "shard pass1_generation_input_g0.part0008.jsonl: SECURED"
+    },
+    {
+      "utc": "2026-10-22T21:00:47+00:00",
+      "elapsed_min": 111.54,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-10-22T21:00:47+00:00",
+      "elapsed_min": 111.54,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-10-22T21:00:58+00:00",
+      "elapsed_min": 111.73,
+      "msg": "pod deleted \u2014 111.7 min, $3.33; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.stage2.reasoning_data.generation_authorization/v2",
+    "authorization_id": "stage2.reasoning_data.h1_generation.h1gen_20261022_190653",
+    "version": 1,
+    "granted_utc": "2026-10-22T19:06:53+00:00",
+    "granted_by": "maintainer (formal authorization message of 2026-10-22: H1 P1 + P1v)",
+    "plan_id": "stage2.reasoning_data.h1_generation",
+    "launch_identity_sha256": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
+    "expected_usd": 5.34,
+    "hard_cap_usd": 8.02,
+    "authorized_stages": [],
+    "stage_conditions": {
+      "phase": "P1",
+      "decision": "Maintainer formally approves H1 P1 teacher-native generation (one A100-80GB paid session, the frozen stage2.reasoning_master@v1 generation list and protocol) and P1v CPU verification on the dev box; accepted preparation stage2/reasoning-data @ 8a425538d04f6ccdf137301e4e0b4e011be6d778",
+      "grant_sha256": "3d9b99e887bf21208b9cd0e9018f254680f7d1428eefb227ca432ff6aefb919f",
+      "granted_harness_digest": "d6affe40cdd8b8c1786f36ee701bdf4213d3174fc7e8ccad4a6dad25715fbbf1"
+    },
+    "scope_note": "P1 teacher generation only (one A100-80GB session) and P1v at $0 on the dev box; NOT P1g, P2, student recovery, formal evaluation, paid network volume, H2/H3 or any additional paid session",
+    "authorizes_teacher_generation": true,
+    "authorizes_training": false,
+    "authorizes_paid_storage": false,
+    "authorized_session_commit": null,
+    "harness_source_digest": "d6affe40cdd8b8c1786f36ee701bdf4213d3174fc7e8ccad4a6dad25715fbbf1",
+    "harness_source_files": [
+      "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "scripts/shared/pod/watchdog.py",
+      "scripts/shared/pod/collect_artifacts.py",
+      "scripts/shared/evaluation/uncapped_eval.py",
+      "scripts/shared/source_sets.py",
+      "scripts/stages/stage-0/calibration_volume/run_battery.py",
+      "scripts/stages/stage-0/calibration_volume/score_battery.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/common.py",
+      "scripts/stages/stage-0/calibration_volume/tasks/interactive.py",
+      "scripts/stages/stage-2/reasoning_data/assets.py",
+      "scripts/stages/stage-2/reasoning_data/checkers.py",
+      "scripts/stages/stage-2/reasoning_data/generation_adapter.py",
+      "scripts/stages/stage-2/reasoning_data/generation_driver.py",
+      "scripts/stages/stage-2/reasoning_data/generation_plan.py",
+      "scripts/stages/stage-2/reasoning_data/governance.py",
+      "scripts/stages/stage-2/reasoning_data/h1_generation_launch.py",
+      "scripts/stages/stage-2/reasoning_data/process_check.py",
+      "scripts/stages/stage-2/reasoning_data/source_plan.py",
+      "scripts/stages/stage-2/reasoning_data/supporting_verify.py",
+      "src/aadistill/data/code_exec.py",
+      "src/aadistill/data/target_quality.py",
+      "src/aadistill/data/verify.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/infrastructure/env.py",
+      "src/aadistill/infrastructure/manifest.py"
+    ],
+    "per_launch_hard_usd": 8.02,
+    "provenance_commit": "8a425538d04f6ccdf137301e4e0b4e011be6d778",
+    "enforcement": "the launcher refuses a pod unless this artifact is bound to the launch identity (plan, protocol, inputs, pools) and the harness on disk, and its hard cap covers the planned hard threshold; the driver re-checks both on the pod; one artifact funds one run",
+    "authorization_sha256": "02785260bf87831fefb8ec46ebaf471dc54cdddb7749e5975ea287fe84d5b681"
+  },
+  "session_plan_hash": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
+  "harness_source_digest": "d6affe40cdd8b8c1786f36ee701bdf4213d3174fc7e8ccad4a6dad25715fbbf1",
+  "harness_source_files": [
+    "scripts/shared/evaluation/uncapped_eval.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/collect_artifacts.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/shared/source_sets.py",
+    "scripts/stages/stage-0/calibration_volume/run_battery.py",
+    "scripts/stages/stage-0/calibration_volume/score_battery.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/common.py",
+    "scripts/stages/stage-0/calibration_volume/tasks/interactive.py",
+    "scripts/stages/stage-2/reasoning_data/assets.py",
+    "scripts/stages/stage-2/reasoning_data/checkers.py",
+    "scripts/stages/stage-2/reasoning_data/generation_adapter.py",
+    "scripts/stages/stage-2/reasoning_data/generation_driver.py",
+    "scripts/stages/stage-2/reasoning_data/generation_plan.py",
+    "scripts/stages/stage-2/reasoning_data/governance.py",
+    "scripts/stages/stage-2/reasoning_data/h1_generation_launch.py",
+    "scripts/stages/stage-2/reasoning_data/process_check.py",
+    "scripts/stages/stage-2/reasoning_data/source_plan.py",
+    "scripts/stages/stage-2/reasoning_data/supporting_verify.py",
+    "src/aadistill/data/code_exec.py",
+    "src/aadistill/data/target_quality.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/infrastructure/env.py",
+    "src/aadistill/infrastructure/manifest.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.79,
+    "authorized_usd": 8.02,
+    "expected_minutes": 129.8,
+    "soft_stop_minutes": 214.70000000000002,
+    "artifact_recovery_reserve_minutes": 15.0,
+    "hard_terminate_minutes": 229.70000000000002,
+    "step_time": {
+      "seconds": 1.0,
+      "source": "unused: no training in this session (arms=0)",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 25.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 10.0
+      },
+      {
+        "name": "teacher_generation_two_passes",
+        "minutes": 94.8
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "long_tail_generation",
+        "minutes": 20.0
+      }
+    ],
+    "notes": [
+      "below-floor step time accepted: 1.0 s/step vs floor 4.15 \u2014 no training steps; every phase is priced below"
+    ],
+    "soft_stop_reserve_minutes": 20.0,
+    "expected_usd": 3.8724,
+    "soft_stop_usd": 6.4052,
+    "artifact_recovery_reserve_usd": 0.4475,
+    "hard_terminate_usd": 6.8527
+  },
+  "quoted_price_per_hour": 1.79,
+  "stock_status": "Low",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 101.2318128102,
+    "current_spend_per_hr": 0.0,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 30.0,
+    "ok": true,
+    "why": "the provider account holds $101.2318 against the $30.0000 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "account_resources": {
+    "checked": true,
+    "known": true,
+    "pods": [],
+    "network_volumes": [],
+    "error": null,
+    "accounted": [],
+    "unaccounted": [],
+    "ok": true,
+    "why": "the provider account holds only the 0 resource(s) the records account for"
+  },
+  "prechecks": [
+    {
+      "check": "plan_is_the_chosen_admitted_one",
+      "ok": true,
+      "message": "stage2.reasoning_master@v1: 1587 tasks, no shortfall"
+    },
+    {
+      "check": "bound_files_are_in_the_session_commit",
+      "ok": true,
+      "message": "every bound file is in the session commit"
+    }
+  ],
+  "precheck": {
+    "relay_needed": [],
+    "relay_missing": [],
+    "relay_repos": {},
+    "relay_repo_files_listed": {},
+    "local_assets": [
+      "logs/stages/stage-2/reasoning_data/plans/generation_inputs"
+    ],
+    "local_missing": []
+  },
+  "pod_id": "3aot2q8zmhsmdg",
+  "actual_price_per_hour": 1.79,
+  "terminate_after_utc": "2026-10-22T22:58:56Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/h1gen_20261022_190653/watchdog_3aot2q8zmhsmdg.jsonl"
+  ],
+  "watchdog_owns_pod": "3aot2q8zmhsmdg",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "595.91.07"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_3f88f690.bundle",
+    "SESSION_ASSETS": "generation_inputs:logs/stages/stage-2/reasoning_data/plans",
+    "SESSION_AUTH_PATH": "logs/stages/stage-2/reasoning_data/runs/h1gen_20261022_190653/governance/authorization.json",
+    "SESSION_COMMIT": "3f88f690fb51294ec02d1a7bea1f4db4ec684051",
+    "SESSION_KIND": "stage2_h1_generation",
+    "SESSION_PLAN_HASH": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
+    "SESSION_RELAY_INPUTS": "[]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV VLLM_READY TEACHER_READY AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/stage2_h1_generation.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "600",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "stage2_h1_generation_driver",
+    "pid": 3266,
+    "workdir": "/workspace/aad",
+    "command": "cd /workspace/aad && PYTHONPATH=/workspace/aad/src:/workspace/aad/scripts /opt/train/bin/python -m stages.reasoning_data.generation_driver --authorization '/workspace/aad/logs/stages/stage-2/reasoning_data/runs/h1gen_20261022_190653/governance/authorization.json' --status '/workspace/stage2_h1_generation.status' --out '/workspace/aad/artifacts/audit/stage2_h1_generation'",
+    "log_path": "/workspace/stage2_h1_generation_run.log",
+    "status_path": "/workspace/stage2_h1_generation.status",
+    "pid_path": "/workspace/jobs/stage2_h1_generation_driver.pid",
+    "descriptor_path": "/workspace/jobs/stage2_h1_generation_driver.job.json",
+    "exit_path": "/workspace/jobs/stage2_h1_generation_driver.exit",
+    "started_utc": "2026-10-22T19:15:12Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "secure_deadline_skipped": [],
+  "shards_secured": {
+    "pass0_generation_input_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "d98075a4a2fbe7ebd4a2aba0a7c48289ea8ffe6ecabf76e923fa67749b00ff39"
+    },
+    "pass0_generation_input_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "de24d19f894967a6a980b44bf7e7a8a038c2ff140229a997879de5a9690e06af"
+    },
+    "pass0_generation_input_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "c70e53b7ab7d4fc889f59057dd7831a6a039cf829fe8ca38a7e4624dea90397c"
+    },
+    "pass0_generation_input_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "c8c249831d75fefed7d36bc5379e492f3bad1bb3d3394b834d01fac269b66ca7"
+    },
+    "pass0_generation_input_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "6262fa373129b5add3d747846026cac8f186f567eb77462727ba482d03f28417"
+    },
+    "pass0_generation_input_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "32cb93d35f968c76f563538e9e40f1b08fe2e2175d8b8ea49d5de9503176f394"
+    },
+    "pass0_generation_input_g0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "8c10aafe2694d366787df80988ec2407041c6c35b1c121fd0a1870bf54062571"
+    },
+    "pass0_generation_input_g0.part0007.jsonl": {
+      "ok": true,
+      "sha256": "2ba29ce19acbbe8eaf785a778cc3e49d771c231b566eca7baa44dab8f00e9dc5"
+    },
+    "pass0_generation_input_g0.part0008.jsonl": {
+      "ok": true,
+      "sha256": "ddd180d4472bf2564d1ab8ab6539e302e1270dda5326d898bce0c305f05e11d5"
+    },
+    "pass0_generation_input_g0.part0009.jsonl": {
+      "ok": true,
+      "sha256": "251add69faef13ed07552574fc23fc3dca2398efef8ec5958795a07e154e4b28"
+    },
+    "pass0_generation_input_g0.part0010.jsonl": {
+      "ok": true,
+      "sha256": "0dcf49d753ccd39a9e44326e00c0104730bde675cbab1543bcf689f1486bd863"
+    },
+    "pass0_generation_input_g0.part0011.jsonl": {
+      "ok": true,
+      "sha256": "91c722176c7bc015925515b801c4b3f06fcd9b0677a2622273c6016fef23941e"
+    },
+    "pass0_generation_input_g0.part0012.jsonl": {
+      "ok": true,
+      "sha256": "b7c4cd6b04bc89fe52391287265035088147b43e254e41d12bc87365374c26a5"
+    },
+    "pass0_generation_input_g0.part0013.jsonl": {
+      "ok": true,
+      "sha256": "8271dad800f98acf782b569f73009f880910ba6a1a05231346279684e303d767"
+    },
+    "pass0_generation_input_g0.part0014.jsonl": {
+      "ok": true,
+      "sha256": "7b3101226c089b5587fba32d3d069ce796f6bf86b2509c766d68836af764a170"
+    },
+    "pass0_generation_input_g0.part0015.jsonl": {
+      "ok": true,
+      "sha256": "02c4c3ab349b46fe26af34fb0c6f7ae5fa26c1e4dc20c0b29a6f93d937ed4681"
+    },
+    "pass0_generation_input_g0.part0016.jsonl": {
+      "ok": true,
+      "sha256": "c5e8c080b08fe3ef4985b52f2e5fd974753a6a2b4da60be90d5761993240f4da"
+    },
+    "pass1_generation_input_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "4cfa18f4489d5e4acf79bf7537e827486edf9e5693c8f1fd5d66c91b40516d91"
+    },
+    "pass1_generation_input_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "146cc254c0b9602b4371555aff6ed924697050bd7093704572e046e08369bcc5"
+    },
+    "pass1_generation_input_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "82d786f281aa4093fe0cb6d6c8582dd20b364bb5398f49713c490a79d72f6bb3"
+    },
+    "pass1_generation_input_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "14b9383293de9ace19e979717408bc31ae0d4b8f1a7f7b4ec7e9aca2e9cadce8"
+    },
+    "pass1_generation_input_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "1229171aa9ebb2a7a95adc926cb9b619c7b97d21d1ef93037cb0b684efce1ec6"
+    },
+    "pass1_generation_input_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "2fbfcc7d406259c1509e40045dbfe0b72cb7755f9536e838e4342dceeada8f32"
+    },
+    "pass1_generation_input_g0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "f5915b4f2015453ffd430a76224ec654324e59975e62f28a2ecad3e25ba38d99"
+    },
+    "pass1_generation_input_g0.part0007.jsonl": {
+      "ok": true,
+      "sha256": "9f9b865bbf85b2993896467e1d1d556ab3440fa2f4419a4ad35cde12d16dea5e"
+    },
+    "pass1_generation_input_g0.part0008.jsonl": {
+      "ok": true,
+      "sha256": "34f10b15105bc7c7a11277748058295608a797f04a638878f43fbff5b5d8556b",
+      "rc": 0
+    }
+  },
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "fetched_reports": [
+    "generation_session.json"
+  ],
+  "checkpoints_fetched": [],
+  "required_products_secured": {
+    "ok": true,
+    "why": "26 sealed shard(s) secured off-pod, each re-hashed in the local store"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 65,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.79,
+    "elapsed_minutes": 111.73,
+    "actual_usd": 3.3331,
+    "authorized_usd": 8.02,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-22T21:00:58+00:00"
+}

@@ -1,0 +1,12 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "stage0_calvol_mixed_recovery",
+ "note": "MC2, one spec for success and failure; every entry has at least zero matches (P8.2.1: preserved when they exist, never demanded). The checkpoints, save points and evaluations are on am5m373kuq as each completes; each finished unit's evidence (never weights) is also tarred, pulled by the launcher's poll hook and hash-checked before this archive exists.",
+ "patterns_are_relative_to": "the collector's --root, <checkout>/artifacts",
+ "entries": [
+  {"artifact_class": "unit_evidence", "pattern": "audit/stage0_calvol_mixed_recovery/*.evidence.tgz", "required": false, "lifecycle": "final_required", "min_matches": 0},
+  {"artifact_class": "driver_status", "pattern": "audit/stage0_calvol_mixed_recovery/driver_status.json", "required": false, "lifecycle": "final_required", "min_matches": 0},
+  {"artifact_class": "unit_attempt_logs", "pattern": "stages/stage-0/calibration_volume/mixed/units/*/*/attempt-*/*.log", "required": false, "lifecycle": "final_required", "min_matches": 0}
+ ],
+ "authorizes": "nothing"
+}

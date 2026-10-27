@@ -84,6 +84,13 @@ Two reading notes:
   pod-side manifest**, with the manifest retained alongside as `pod_hashes.txt`.
   The small evaluation JSONs uploaded successfully because they are not LFS
   objects.
+- **2026-10-24: `e1_r2960k_sb_pca` is on the relay too** (H1-PA's PCA-Original
+  seed 20260801). Its `step_002916/model/` (six files) and
+  `e1_r2960k_sb_pca_pod_hashes.txt` were uploaded, then read back in full and
+  re-hashed: every file matches, `model.safetensors` `b658fe39…`. Room came
+  from retiring `stage3/s2v1_from_s1`'s weights under AGENTS.md 2.5 (tombstone
+  in `logs/maintenance/inventories/checkpoint_tombstones.json`). So 21 of 25
+  hold weights on the relay; the dev-box copy is kept.
 - **Evaluation protocol pinned with the results:** uncapped generation within an
   effective context of **8,192** derived from the trained `block_len` (the
   derivation is recorded in every summary and every per-sample record — this is

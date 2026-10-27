@@ -1,0 +1,2434 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1pa_result/v1",
+ "written_utc": "2026-10-25T15:11:02Z",
+ "preregistration": {
+  "path": "logs/stages/stage-2/reasoning_data/plans/h1pa_preregistration.json",
+  "sha256": "ae67279d15cddab4c14798313177d4554b8e585745cfd9b8f0afa8a42655261f"
+ },
+ "decision_rule_bound_sha256": {
+  "scripts/stages/stage-2/reasoning_data/h1pa_statistics.py": "a06f31d3dca7093096df945e4e70b550f4eb7ca13be3190ea4af7a1c1bf5048e",
+  "scripts/stages/stage-2/reasoning_data/h1_statistics.py": "c4c1191102f8b293feb9f165a7c72f1a69af3b96789c564e1747d95ea20a2836",
+  "src/aadistill/evaluation/paired_stats.py": "7d41ef3199eee78d3a9d9460c3b8f4c3bb33773d5d6b4945c57a62df934fe782"
+ },
+ "units": {
+  "PCA-Original-s20260726": {
+   "arm": "PCA-Original",
+   "seed": 20260726,
+   "execution": "evaluate",
+   "run_id": "h1pa2_20261024_203226",
+   "attempt": 1,
+   "checkpoint": {
+    "model_safetensors_sha256": "3f08482c2c8e7372fc87fd2496f50c1c618f61feaec021d73c0cc646413b80c3",
+    "durable": "AlphaAvatar/aadistill-artifacts :: e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/model.safetensors",
+    "persisted_again": false
+   },
+   "seconds": {
+    "evaluate": 2362.2
+   },
+   "evaluation_descriptor_sha256": "4095862bb54806ace8db238d367cacffd32801e9e4a41fd6218fe5857bead22f"
+  },
+  "PCA-Original-s20260801": {
+   "arm": "PCA-Original",
+   "seed": 20260801,
+   "execution": "evaluate",
+   "run_id": "h1pa2_20261025_055042",
+   "attempt": 1,
+   "checkpoint": {
+    "model_safetensors_sha256": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
+    "durable": "AlphaAvatar/aadistill-artifacts :: e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/model.safetensors",
+    "persisted_again": false
+   },
+   "seconds": {
+    "evaluate": 2653.1
+   },
+   "evaluation_descriptor_sha256": "ca1b9150bf47598c95770238849a3740d47adf3b25f181d0b46d84fbd36d9a6d"
+  },
+  "D4-Original-s20260726": {
+   "arm": "D4-Original",
+   "seed": 20260726,
+   "execution": "train",
+   "run_id": "h1pa2_20261024_203226",
+   "attempt": 1,
+   "checkpoint": {
+    "artifact_digest": "09ea0c57c4d89e4949a2e21707ed8ac2eb6f4501ec6aa2fac653a6dcab6d8788",
+    "weights_digest": "76880fa5c5018b9ec0e3e9943abf914f3ff9cd989bfc399ccf63eb859b01785b",
+    "destination": "/runpod-volume/h1pa/D4-Original-s20260726/checkpoint"
+   },
+   "seconds": {
+    "train": 10325.6,
+    "evaluate": 2983.6
+   },
+   "evaluation_descriptor_sha256": "16ddf3f5fd82a108c63cf98c6259e42cc9f449b14c917520335ed6a7fb0b034a"
+  },
+  "D4-Original-s20260801": {
+   "arm": "D4-Original",
+   "seed": 20260801,
+   "execution": "train",
+   "run_id": "h1pa2_20261025_055042",
+   "attempt": 1,
+   "checkpoint": {
+    "artifact_digest": "f1db9febdd8d66dcb29c35649a428d3fe92661941851a6f9bdb55c94946b93d9",
+    "weights_digest": "c8259e9f8f2ff1be075a3ad95d16a0d4d98c2757538dda43d8e836d310596f6b",
+    "destination": "/runpod-volume/h1pa/D4-Original-s20260801/checkpoint"
+   },
+   "seconds": {
+    "train": 10216.5,
+    "evaluate": 2718.2
+   },
+   "evaluation_descriptor_sha256": "ac4d46848953e2d0b3c27d7d2e8f6a9c377bb2d5ad97c166535a791bdc25e748"
+  },
+  "D4-Augmented-s20260726": {
+   "arm": "D4-Augmented",
+   "seed": 20260726,
+   "execution": "train",
+   "run_id": "h1pa2_20261024_203226",
+   "attempt": 1,
+   "checkpoint": {
+    "artifact_digest": "6889b9c97c0d16f0e17e0f746857701e195b40304c27cebf10dfd6da12fc13f7",
+    "weights_digest": "411e4ff76ae7f001cbb382db5410085135af6955926a7ea29810d2c7be3b78c4",
+    "destination": "/runpod-volume/h1pa/D4-Augmented-s20260726/checkpoint"
+   },
+   "seconds": {
+    "train": 13501.9,
+    "evaluate": 3667.7
+   },
+   "evaluation_descriptor_sha256": "a7d34fdfe910b3fd8ea57e189a96a5e1ae05011ef5e27981772164b9caf2e96e"
+  },
+  "D4-Augmented-s20260801": {
+   "arm": "D4-Augmented",
+   "seed": 20260801,
+   "execution": "train",
+   "run_id": "h1pa2_20261025_055042",
+   "attempt": 1,
+   "checkpoint": {
+    "artifact_digest": "2cbbee9ea52b27db3258fa4bb945159dc0375431edfdb0ce60c074543191702a",
+    "weights_digest": "be5f48ab4f39d91379a91785519e9594457edec33adcd69e7e665bd9b6e3a57b",
+    "destination": "/runpod-volume/h1pa/D4-Augmented-s20260801/checkpoint"
+   },
+   "seconds": {
+    "train": 13385.3,
+    "evaluate": 3917.1
+   },
+   "evaluation_descriptor_sha256": "1e5b39cf6494ac2da6796fbabfa438b6ca060f6b6028532b30454f9fb5cccb4c"
+  }
+ },
+ "decision": {
+  "rule": "stage2.reasoning_data.h1pa_statistics/v1",
+  "applies": "stage2.reasoning_data.h1_statistics/v1",
+  "primary_comparison": "B",
+  "comparisons": {
+   "A": {
+    "rule": "stage2.reasoning_data.h1_statistics/v1",
+    "seeds": [
+     20260726,
+     20260801
+    ],
+    "n_items": 570,
+    "primary": {
+     "label": "NOT_RESOLVED",
+     "flags": [
+      "FLOOR"
+     ],
+     "sesoi": 0.05,
+     "delta": -0.002632,
+     "ci": [
+      -0.007881,
+      0.002525
+     ],
+     "level": 0.95,
+     "per_seed_delta": {
+      "20260726": -0.003509,
+      "20260801": -0.001754
+     },
+     "rates": {
+      "A": 0.013158,
+      "B": 0.010526
+     },
+     "resolution": {
+      "resolved": true,
+      "discordant_item_seed_pairs": 21,
+      "informative_clusters": 12,
+      "degenerate_bootstrap": false,
+      "min_discordant": 10,
+      "min_informative_clusters": 5
+     },
+     "bootstrap": {
+      "point": -0.002632,
+      "ci_low": -0.007881,
+      "ci_high": 0.002525,
+      "level": 0.95,
+      "iterations": 10000,
+      "seed": 20261022,
+      "n_items": 570,
+      "n_clusters": 76,
+      "n_strata": 4,
+      "informative_clusters": 12,
+      "distinct_resampled_values": 1189,
+      "degenerate": false,
+      "tail_shares": {
+       "0.05": {
+        "at_or_below": 1.0,
+        "at_or_above": 0.0
+       }
+      },
+      "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+     },
+     "reading": "no equivalence and no exclusion of a gain can be read from this comparison"
+    },
+    "by_axis": {
+     "abstract_analogical": {
+      "label": "NOT_RESOLVED",
+      "flags": [
+       "FLOOR"
+      ],
+      "sesoi": 0.08,
+      "delta": 0.0,
+      "ci": [
+       0.0,
+       0.0
+      ],
+      "level": 0.95,
+      "per_seed_delta": {
+       "20260726": 0.0,
+       "20260801": 0.0
+      },
+      "rates": {
+       "A": 0.0,
+       "B": 0.0
+      },
+      "resolution": {
+       "resolved": false,
+       "discordant_item_seed_pairs": 0,
+       "informative_clusters": 0,
+       "degenerate_bootstrap": true,
+       "min_discordant": 10,
+       "min_informative_clusters": 5
+      },
+      "bootstrap": {
+       "point": 0.0,
+       "ci_low": 0.0,
+       "ci_high": 0.0,
+       "level": 0.95,
+       "iterations": 10000,
+       "seed": 20261022,
+       "n_items": 95,
+       "n_clusters": 17,
+       "n_strata": 1,
+       "informative_clusters": 0,
+       "distinct_resampled_values": 1,
+       "degenerate": true,
+       "tail_shares": {
+        "0.08": {
+         "at_or_below": 1.0,
+         "at_or_above": 0.0
+        }
+       },
+       "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+      },
+      "reading": "no equivalence and no exclusion of a gain can be read from this comparison",
+      "holm_gain_survives": false,
+      "one_sided_share_at_or_below_sesoi": 1.0
+     },
+     "compositional_generalization": {
+      "label": "NOT_RESOLVED",
+      "flags": [
+       "FLOOR"
+      ],
+      "sesoi": 0.08,
+      "delta": -0.006944,
+      "ci": [
+       -0.01773,
+       0.0
+      ],
+      "level": 0.95,
+      "per_seed_delta": {
+       "20260726": -0.013889,
+       "20260801": 0.0
+      },
+      "rates": {
+       "A": 0.006944,
+       "B": 0.0
+      },
+      "resolution": {
+       "resolved": false,
+       "discordant_item_seed_pairs": 2,
+       "informative_clusters": 2,
+       "degenerate_bootstrap": false,
+       "min_discordant": 10,
+       "min_informative_clusters": 5
+      },
+      "bootstrap": {
+       "point": -0.006944,
+       "ci_low": -0.01773,
+       "ci_high": 0.0,
+       "level": 0.95,
+       "iterations": 10000,
+       "seed": 20261022,
+       "n_items": 144,
+       "n_clusters": 16,
+       "n_strata": 1,
+       "informative_clusters": 2,
+       "distinct_resampled_values": 118,
+       "degenerate": false,
+       "tail_shares": {
+        "0.08": {
+         "at_or_below": 1.0,
+         "at_or_above": 0.0
+        }
+       },
+       "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+      },
+      "reading": "no equivalence and no exclusion of a gain can be read from this comparison",
+      "holm_gain_survives": false,
+      "one_sided_share_at_or_below_sesoi": 1.0
+     },
+     "inductive_rule_discovery": {
+      "label": "NOT_RESOLVED",
+      "flags": [
+       "FLOOR"
+      ],
+      "sesoi": 0.08,
+      "delta": -0.003521,
+      "ci": [
+       -0.011628,
+       0.0
+      ],
+      "level": 0.95,
+      "per_seed_delta": {
+       "20260726": -0.007042,
+       "20260801": 0.0
+      },
+      "rates": {
+       "A": 0.003521,
+       "B": 0.0
+      },
+      "resolution": {
+       "resolved": false,
+       "discordant_item_seed_pairs": 1,
+       "informative_clusters": 1,
+       "degenerate_bootstrap": false,
+       "min_discordant": 10,
+       "min_informative_clusters": 5
+      },
+      "bootstrap": {
+       "point": -0.003521,
+       "ci_low": -0.011628,
+       "ci_high": 0.0,
+       "level": 0.95,
+       "iterations": 10000,
+       "seed": 20261022,
+       "n_items": 142,
+       "n_clusters": 30,
+       "n_strata": 1,
+       "informative_clusters": 1,
+       "distinct_resampled_values": 226,
+       "degenerate": false,
+       "tail_shares": {
+        "0.08": {
+         "at_or_below": 1.0,
+         "at_or_above": 0.0
+        }
+       },
+       "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+      },
+      "reading": "no equivalence and no exclusion of a gain can be read from this comparison",
+      "holm_gain_survives": false,
+      "one_sided_share_at_or_below_sesoi": 1.0
+     },
+     "task_contained_deduction": {
+      "label": "NO_GO",
+      "flags": [],
+      "sesoi": 0.08,
+      "delta": 0.0,
+      "ci": [
+       -0.013021,
+       0.013228
+      ],
+      "level": 0.95,
+      "per_seed_delta": {
+       "20260726": 0.005291,
+       "20260801": -0.005291
+      },
+      "rates": {
+       "A": 0.031746,
+       "B": 0.031746
+      },
+      "resolution": {
+       "resolved": true,
+       "discordant_item_seed_pairs": 18,
+       "informative_clusters": 9,
+       "degenerate_bootstrap": false,
+       "min_discordant": 10,
+       "min_informative_clusters": 5
+      },
+      "bootstrap": {
+       "point": 0.0,
+       "ci_low": -0.013021,
+       "ci_high": 0.013228,
+       "level": 0.95,
+       "iterations": 10000,
+       "seed": 20261022,
+       "n_items": 189,
+       "n_clusters": 13,
+       "n_strata": 1,
+       "informative_clusters": 9,
+       "distinct_resampled_values": 560,
+       "degenerate": false,
+       "tail_shares": {
+        "0.08": {
+         "at_or_below": 1.0,
+         "at_or_above": 0.0
+        }
+       },
+       "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+      },
+      "reading": null,
+      "holm_gain_survives": false,
+      "one_sided_share_at_or_below_sesoi": 1.0
+     }
+    },
+    "constants": {
+     "sesoi": 0.05,
+     "sesoi_axis": 0.08,
+     "level": 0.95,
+     "iterations": 10000,
+     "bootstrap_seed": 20261022,
+     "floor_rate": 0.02,
+     "min_discordant": 10,
+     "min_informative_clusters": 5,
+     "alpha_axes": 0.05
+    },
+    "contrast": "D4-Original - PCA-Original",
+    "role": "decided"
+   },
+   "B": {
+    "rule": "stage2.reasoning_data.h1_statistics/v1",
+    "seeds": [
+     20260726,
+     20260801
+    ],
+    "n_items": 570,
+    "primary": {
+     "label": "INCONCLUSIVE",
+     "flags": [
+      "FLOOR_A"
+     ],
+     "sesoi": 0.05,
+     "delta": 0.035088,
+     "ci": [
+      0.018885,
+      0.051498
+     ],
+     "level": 0.95,
+     "per_seed_delta": {
+      "20260726": 0.035088,
+      "20260801": 0.035088
+     },
+     "rates": {
+      "A": 0.010526,
+      "B": 0.045614
+     },
+     "resolution": {
+      "resolved": true,
+      "discordant_item_seed_pairs": 58,
+      "informative_clusters": 13,
+      "degenerate_bootstrap": false,
+      "min_discordant": 10,
+      "min_informative_clusters": 5
+     },
+     "bootstrap": {
+      "point": 0.035088,
+      "ci_low": 0.018885,
+      "ci_high": 0.051498,
+      "level": 0.95,
+      "iterations": 10000,
+      "seed": 20261022,
+      "n_items": 570,
+      "n_clusters": 76,
+      "n_strata": 4,
+      "informative_clusters": 13,
+      "distinct_resampled_values": 2811,
+      "degenerate": false,
+      "tail_shares": {
+       "0.05": {
+        "at_or_below": 0.9615,
+        "at_or_above": 0.0396
+       }
+      },
+      "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+     },
+     "reading": null
+    },
+    "by_axis": {
+     "abstract_analogical": {
+      "label": "NOT_RESOLVED",
+      "flags": [
+       "FLOOR"
+      ],
+      "sesoi": 0.08,
+      "delta": 0.0,
+      "ci": [
+       0.0,
+       0.0
+      ],
+      "level": 0.95,
+      "per_seed_delta": {
+       "20260726": 0.0,
+       "20260801": 0.0
+      },
+      "rates": {
+       "A": 0.0,
+       "B": 0.0
+      },
+      "resolution": {
+       "resolved": false,
+       "discordant_item_seed_pairs": 0,
+       "informative_clusters": 0,
+       "degenerate_bootstrap": true,
+       "min_discordant": 10,
+       "min_informative_clusters": 5
+      },
+      "bootstrap": {
+       "point": 0.0,
+       "ci_low": 0.0,
+       "ci_high": 0.0,
+       "level": 0.95,
+       "iterations": 10000,
+       "seed": 20261022,
+       "n_items": 95,
+       "n_clusters": 17,
+       "n_strata": 1,
+       "informative_clusters": 0,
+       "distinct_resampled_values": 1,
+       "degenerate": true,
+       "tail_shares": {
+        "0.08": {
+         "at_or_below": 1.0,
+         "at_or_above": 0.0
+        }
+       },
+       "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+      },
+      "reading": "no equivalence and no exclusion of a gain can be read from this comparison",
+      "holm_gain_survives": false,
+      "one_sided_share_at_or_below_sesoi": 1.0
+     },
+     "compositional_generalization": {
+      "label": "NOT_RESOLVED",
+      "flags": [
+       "FLOOR"
+      ],
+      "sesoi": 0.08,
+      "delta": 0.003472,
+      "ci": [
+       0.0,
+       0.011111
+      ],
+      "level": 0.95,
+      "per_seed_delta": {
+       "20260726": 0.006944,
+       "20260801": 0.0
+      },
+      "rates": {
+       "A": 0.0,
+       "B": 0.003472
+      },
+      "resolution": {
+       "resolved": false,
+       "discordant_item_seed_pairs": 1,
+       "informative_clusters": 1,
+       "degenerate_bootstrap": false,
+       "min_discordant": 10,
+       "min_informative_clusters": 5
+      },
+      "bootstrap": {
+       "point": 0.003472,
+       "ci_low": 0.0,
+       "ci_high": 0.011111,
+       "level": 0.95,
+       "iterations": 10000,
+       "seed": 20261022,
+       "n_items": 144,
+       "n_clusters": 16,
+       "n_strata": 1,
+       "informative_clusters": 1,
+       "distinct_resampled_values": 84,
+       "degenerate": false,
+       "tail_shares": {
+        "0.08": {
+         "at_or_below": 1.0,
+         "at_or_above": 0.0
+        }
+       },
+       "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+      },
+      "reading": "no equivalence and no exclusion of a gain can be read from this comparison",
+      "holm_gain_survives": false,
+      "one_sided_share_at_or_below_sesoi": 1.0
+     },
+     "inductive_rule_discovery": {
+      "label": "NOT_RESOLVED",
+      "flags": [
+       "FLOOR"
+      ],
+      "sesoi": 0.08,
+      "delta": 0.0,
+      "ci": [
+       0.0,
+       0.0
+      ],
+      "level": 0.95,
+      "per_seed_delta": {
+       "20260726": 0.0,
+       "20260801": 0.0
+      },
+      "rates": {
+       "A": 0.0,
+       "B": 0.0
+      },
+      "resolution": {
+       "resolved": false,
+       "discordant_item_seed_pairs": 0,
+       "informative_clusters": 0,
+       "degenerate_bootstrap": true,
+       "min_discordant": 10,
+       "min_informative_clusters": 5
+      },
+      "bootstrap": {
+       "point": 0.0,
+       "ci_low": 0.0,
+       "ci_high": 0.0,
+       "level": 0.95,
+       "iterations": 10000,
+       "seed": 20261022,
+       "n_items": 142,
+       "n_clusters": 30,
+       "n_strata": 1,
+       "informative_clusters": 0,
+       "distinct_resampled_values": 1,
+       "degenerate": true,
+       "tail_shares": {
+        "0.08": {
+         "at_or_below": 1.0,
+         "at_or_above": 0.0
+        }
+       },
+       "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+      },
+      "reading": "no equivalence and no exclusion of a gain can be read from this comparison",
+      "holm_gain_survives": false,
+      "one_sided_share_at_or_below_sesoi": 1.0
+     },
+     "task_contained_deduction": {
+      "label": "INCONCLUSIVE",
+      "flags": [],
+      "sesoi": 0.08,
+      "delta": 0.103175,
+      "ci": [
+       0.05291,
+       0.152778
+      ],
+      "level": 0.95,
+      "per_seed_delta": {
+       "20260726": 0.100529,
+       "20260801": 0.10582
+      },
+      "rates": {
+       "A": 0.031746,
+       "B": 0.134921
+      },
+      "resolution": {
+       "resolved": true,
+       "discordant_item_seed_pairs": 57,
+       "informative_clusters": 12,
+       "degenerate_bootstrap": false,
+       "min_discordant": 10,
+       "min_informative_clusters": 5
+      },
+      "bootstrap": {
+       "point": 0.103175,
+       "ci_low": 0.05291,
+       "ci_high": 0.152778,
+       "level": 0.95,
+       "iterations": 10000,
+       "seed": 20261022,
+       "n_items": 189,
+       "n_clusters": 13,
+       "n_strata": 1,
+       "informative_clusters": 12,
+       "distinct_resampled_values": 1582,
+       "degenerate": false,
+       "tail_shares": {
+        "0.08": {
+         "at_or_below": 0.1828,
+         "at_or_above": 0.8179
+        }
+       },
+       "resamples": "clusters within strata, at fixed checkpoints; NOT seeds"
+      },
+      "reading": null,
+      "holm_gain_survives": false,
+      "one_sided_share_at_or_below_sesoi": 0.1828
+     }
+    },
+    "constants": {
+     "sesoi": 0.05,
+     "sesoi_axis": 0.08,
+     "level": 0.95,
+     "iterations": 10000,
+     "bootstrap_seed": 20261022,
+     "floor_rate": 0.02,
+     "min_discordant": 10,
+     "min_informative_clusters": 5,
+     "alpha_axes": 0.05
+    },
+    "contrast": "D4-Augmented - D4-Original",
+    "role": "decided"
+   },
+   "C": {
+    "contrast": "D4-Augmented - PCA-Original",
+    "role": "descriptive",
+    "seeds": [
+     20260726,
+     20260801
+    ],
+    "n_items": 570,
+    "delta": 0.032456,
+    "ci": [
+     0.0175,
+     0.046986
+    ],
+    "level": 0.95,
+    "per_seed_delta": {
+     "20260726": 0.031579,
+     "20260801": 0.033333
+    },
+    "rates": {
+     "A": 0.013158,
+     "B": 0.045614
+    },
+    "flags": [
+     "FLOOR_A"
+    ],
+    "by_axis": {
+     "abstract_analogical": {
+      "delta": 0.0,
+      "ci": [
+       0.0,
+       0.0
+      ],
+      "per_seed_delta": {
+       "20260726": 0.0,
+       "20260801": 0.0
+      },
+      "rates": {
+       "A": 0.0,
+       "B": 0.0
+      }
+     },
+     "compositional_generalization": {
+      "delta": -0.003472,
+      "ci": [
+       -0.011364,
+       0.0
+      ],
+      "per_seed_delta": {
+       "20260726": -0.006944,
+       "20260801": 0.0
+      },
+      "rates": {
+       "A": 0.006944,
+       "B": 0.003472
+      }
+     },
+     "inductive_rule_discovery": {
+      "delta": -0.003521,
+      "ci": [
+       -0.011628,
+       0.0
+      ],
+      "per_seed_delta": {
+       "20260726": -0.007042,
+       "20260801": 0.0
+      },
+      "rates": {
+       "A": 0.003521,
+       "B": 0.0
+      }
+     },
+     "task_contained_deduction": {
+      "delta": 0.103175,
+      "ci": [
+       0.058081,
+       0.146893
+      ],
+      "per_seed_delta": {
+       "20260726": 0.10582,
+       "20260801": 0.100529
+      },
+      "rates": {
+       "A": 0.031746,
+       "B": 0.134921
+      }
+     }
+    },
+    "label": null,
+    "reading": "descriptive only: initialization and data change together"
+   }
+  },
+  "primary_label": "INCONCLUSIVE",
+  "labels": {
+   "GO": "the interval lies wholly above +SESOI and every seed's estimate is above +SESOI: for B, adding the fluid increment with its compute raises static fluid correctness by a meaningful amount; for A, D4 Top-1 initializes better than PCA under E1's recipe",
+   "NO_GO": "the interval and every seed's estimate lie inside (-SESOI, +SESOI) and neither arm is at the floor: a meaningful effect is excluded at this scale",
+   "REVERSED": "the interval lies wholly below -SESOI and every seed's estimate is below -SESOI: a meaningful harm",
+   "INCONCLUSIVE": "the evaluation resolved but the interval or a seed crosses a SESOI boundary: no decision either way, and no claim of an effect or of its absence",
+   "NOT_RESOLVED": "fewer than 10 discordant item-seed pairs or 5 informative clusters, a degenerate bootstrap, or both arms below 2% (flag FLOOR): the evaluation did not discriminate between the arms; no equivalence, no exclusion of a gain, no GO"
+  }
+ },
+ "primary_comparison": "B",
+ "primary_label": "INCONCLUSIVE",
+ "by_axis_and_tier": {
+  "abstract_analogical": {
+   "D4-Augmented-s20260726": {
+    "unseen_format": {
+     "n": 47,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 95,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "D4-Augmented-s20260801": {
+    "unseen_format": {
+     "n": 47,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 95,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "D4-Original-s20260726": {
+    "unseen_format": {
+     "n": 47,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 95,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "D4-Original-s20260801": {
+    "unseen_format": {
+     "n": 47,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 95,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "PCA-Original-s20260726": {
+    "unseen_format": {
+     "n": 47,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 95,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "PCA-Original-s20260801": {
+    "unseen_format": {
+     "n": 47,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 95,
+     "correct": 0,
+     "rate": 0.0
+    }
+   }
+  },
+  "compositional_generalization": {
+   "D4-Augmented-s20260726": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 1,
+     "rate": 0.0208
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 144,
+     "correct": 1,
+     "rate": 0.0069
+    }
+   },
+   "D4-Augmented-s20260801": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "D4-Original-s20260726": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "D4-Original-s20260801": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "PCA-Original-s20260726": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 2,
+     "rate": 0.0417
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 144,
+     "correct": 2,
+     "rate": 0.0139
+    }
+   },
+   "PCA-Original-s20260801": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0
+    }
+   }
+  },
+  "inductive_rule_discovery": {
+   "D4-Augmented-s20260726": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 94,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 142,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "D4-Augmented-s20260801": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 94,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 142,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "D4-Original-s20260726": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 94,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 142,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "D4-Original-s20260801": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 94,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 142,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "PCA-Original-s20260726": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 94,
+     "correct": 1,
+     "rate": 0.0106
+    },
+    "all": {
+     "n": 142,
+     "correct": 1,
+     "rate": 0.007
+    }
+   },
+   "PCA-Original-s20260801": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 94,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 142,
+     "correct": 0,
+     "rate": 0.0
+    }
+   }
+  },
+  "interactive_adaptation": {
+   "D4-Augmented-s20260726": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 2,
+     "rate": 0.0208
+    },
+    "all": {
+     "n": 144,
+     "correct": 2,
+     "rate": 0.0139
+    }
+   },
+   "D4-Augmented-s20260801": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 2,
+     "rate": 0.0208
+    },
+    "all": {
+     "n": 144,
+     "correct": 2,
+     "rate": 0.0139
+    }
+   },
+   "D4-Original-s20260726": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "D4-Original-s20260801": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "PCA-Original-s20260726": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "PCA-Original-s20260801": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0
+    }
+   }
+  },
+  "task_contained_deduction": {
+   "D4-Augmented-s20260726": {
+    "unseen_format": {
+     "n": 47,
+     "correct": 2,
+     "rate": 0.0426
+    },
+    "unseen_rule": {
+     "n": 142,
+     "correct": 24,
+     "rate": 0.169
+    },
+    "all": {
+     "n": 189,
+     "correct": 26,
+     "rate": 0.1376
+    }
+   },
+   "D4-Augmented-s20260801": {
+    "unseen_format": {
+     "n": 47,
+     "correct": 4,
+     "rate": 0.0851
+    },
+    "unseen_rule": {
+     "n": 142,
+     "correct": 21,
+     "rate": 0.1479
+    },
+    "all": {
+     "n": 189,
+     "correct": 25,
+     "rate": 0.1323
+    }
+   },
+   "D4-Original-s20260726": {
+    "unseen_format": {
+     "n": 47,
+     "correct": 2,
+     "rate": 0.0426
+    },
+    "unseen_rule": {
+     "n": 142,
+     "correct": 5,
+     "rate": 0.0352
+    },
+    "all": {
+     "n": 189,
+     "correct": 7,
+     "rate": 0.037
+    }
+   },
+   "D4-Original-s20260801": {
+    "unseen_format": {
+     "n": 47,
+     "correct": 2,
+     "rate": 0.0426
+    },
+    "unseen_rule": {
+     "n": 142,
+     "correct": 3,
+     "rate": 0.0211
+    },
+    "all": {
+     "n": 189,
+     "correct": 5,
+     "rate": 0.0265
+    }
+   },
+   "PCA-Original-s20260726": {
+    "unseen_format": {
+     "n": 47,
+     "correct": 1,
+     "rate": 0.0213
+    },
+    "unseen_rule": {
+     "n": 142,
+     "correct": 5,
+     "rate": 0.0352
+    },
+    "all": {
+     "n": 189,
+     "correct": 6,
+     "rate": 0.0317
+    }
+   },
+   "PCA-Original-s20260801": {
+    "unseen_format": {
+     "n": 47,
+     "correct": 1,
+     "rate": 0.0213
+    },
+    "unseen_rule": {
+     "n": 142,
+     "correct": 5,
+     "rate": 0.0352
+    },
+    "all": {
+     "n": 189,
+     "correct": 6,
+     "rate": 0.0317
+    }
+   }
+  }
+ },
+ "interactive_exploratory": {
+  "interactive_adaptation": {
+   "D4-Augmented-s20260726": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 2,
+     "rate": 0.0208
+    },
+    "all": {
+     "n": 144,
+     "correct": 2,
+     "rate": 0.0139
+    }
+   },
+   "D4-Augmented-s20260801": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 2,
+     "rate": 0.0208
+    },
+    "all": {
+     "n": 144,
+     "correct": 2,
+     "rate": 0.0139
+    }
+   },
+   "D4-Original-s20260726": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "D4-Original-s20260801": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "PCA-Original-s20260726": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0
+    }
+   },
+   "PCA-Original-s20260801": {
+    "unseen_format": {
+     "n": 48,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "unseen_rule": {
+     "n": 96,
+     "correct": 0,
+     "rate": 0.0
+    },
+    "all": {
+     "n": 144,
+     "correct": 0,
+     "rate": 0.0
+    }
+   }
+  }
+ },
+ "capabilities_by_unit": {
+  "PCA-Original-s20260726": {
+   "fluid.abstract_analogical": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=abstract_analogical]": {
+      "n": 95,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.compositional_generalization": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=compositional_generalization]": {
+      "n": 144,
+      "correct": 2,
+      "rate": 0.0139
+     }
+    }
+   },
+   "fluid.inductive_rule_discovery": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]": {
+      "n": 142,
+      "correct": 1,
+      "rate": 0.007
+     }
+    }
+   },
+   "fluid.interactive_adaptation": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]": {
+      "n": 144,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.task_contained_deduction": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]": {
+      "n": 189,
+      "correct": 6,
+      "rate": 0.0317
+     }
+    }
+   },
+   "supporting.closed_book_knowledge": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/knowledge": {
+      "n": 150,
+      "correct": 0.0067
+     }
+    }
+   },
+   "supporting.math_mixed": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/math_verified": {
+      "n": 100,
+      "correct": 0.01
+     },
+     "stage3_capability_846/gsm8k": {
+      "n": 100,
+      "correct": 0.01
+     }
+    }
+   },
+   "grounded.multihop_evidence_reasoning": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/multihop": {
+      "n": 100,
+      "correct": 0.07
+     }
+    }
+   },
+   "grounded.rag_reading": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/rag": {
+      "n": 100,
+      "correct": 0.02
+     }
+    }
+   },
+   "uncertainty.evidence_conditioned_abstention": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/answerability_paired": {
+      "n": 120,
+      "pair_correct": 0
+     }
+    }
+   },
+   "safety.refusal": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/safety_paired": {
+      "n": 100,
+      "pair_correct": 0
+     }
+    }
+   },
+   "tool_use.function_calling": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
+      "terminated": 1.0,
+      "truncated_at_cap": 0.0,
+      "think_closed": 1.0,
+      "format_ok": 1.0,
+      "empty_answer": 0.0,
+      "rep_3gram": 0.0
+     }
+    }
+   },
+   "interaction.instruction_and_realtime": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0[group=instruction]": {
+      "terminated": 0.9167,
+      "truncated_at_cap": 0.0833,
+      "think_closed": 0.9167,
+      "format_ok": 0.9167,
+      "empty_answer": 0.0833,
+      "rep_3gram": 0.1156
+     },
+     "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
+      "terminated": 1.0,
+      "truncated_at_cap": 0.0,
+      "think_closed": 1.0,
+      "format_ok": 1.0,
+      "empty_answer": 0.0,
+      "rep_3gram": 0.0439
+     }
+    }
+   },
+   "rollout.protocol_integrity": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0": {
+      "terminated": 0.9231,
+      "truncated_at_cap": 0.0769,
+      "think_closed": 0.9385,
+      "format_ok": 0.9231,
+      "empty_answer": 0.0615,
+      "rep_3gram": 0.0951
+     }
+    }
+   },
+   "in_sample.recall_regression": {
+    "status": "measured",
+    "units": {
+     "stage3_legacy_150/items": {
+      "n": 150,
+      "correct": 30,
+      "rate": 0.2
+     }
+    }
+   }
+  },
+  "PCA-Original-s20260801": {
+   "fluid.abstract_analogical": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=abstract_analogical]": {
+      "n": 95,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.compositional_generalization": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=compositional_generalization]": {
+      "n": 144,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.inductive_rule_discovery": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]": {
+      "n": 142,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.interactive_adaptation": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]": {
+      "n": 144,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.task_contained_deduction": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]": {
+      "n": 189,
+      "correct": 6,
+      "rate": 0.0317
+     }
+    }
+   },
+   "supporting.closed_book_knowledge": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/knowledge": {
+      "n": 150,
+      "correct": 0
+     }
+    }
+   },
+   "supporting.math_mixed": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/math_verified": {
+      "n": 100,
+      "correct": 0
+     },
+     "stage3_capability_846/gsm8k": {
+      "n": 100,
+      "correct": 0.04
+     }
+    }
+   },
+   "grounded.multihop_evidence_reasoning": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/multihop": {
+      "n": 100,
+      "correct": 0.07
+     }
+    }
+   },
+   "grounded.rag_reading": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/rag": {
+      "n": 100,
+      "correct": 0.04
+     }
+    }
+   },
+   "uncertainty.evidence_conditioned_abstention": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/answerability_paired": {
+      "n": 120,
+      "pair_correct": 0.0167
+     }
+    }
+   },
+   "safety.refusal": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/safety_paired": {
+      "n": 100,
+      "pair_correct": 0.02
+     }
+    }
+   },
+   "tool_use.function_calling": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
+      "terminated": 1.0,
+      "truncated_at_cap": 0.0,
+      "think_closed": 1.0,
+      "format_ok": 1.0,
+      "empty_answer": 0.0,
+      "rep_3gram": 0.0
+     }
+    }
+   },
+   "interaction.instruction_and_realtime": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0[group=instruction]": {
+      "terminated": 0.9167,
+      "truncated_at_cap": 0.0833,
+      "think_closed": 0.9167,
+      "format_ok": 0.9167,
+      "empty_answer": 0.0833,
+      "rep_3gram": 0.1663
+     },
+     "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
+      "terminated": 0.9,
+      "truncated_at_cap": 0.1,
+      "think_closed": 0.9,
+      "format_ok": 0.9,
+      "empty_answer": 0.1,
+      "rep_3gram": 0.0967
+     }
+    }
+   },
+   "rollout.protocol_integrity": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0": {
+      "terminated": 0.9077,
+      "truncated_at_cap": 0.0923,
+      "think_closed": 0.8923,
+      "format_ok": 0.8769,
+      "empty_answer": 0.0769,
+      "rep_3gram": 0.105
+     }
+    }
+   },
+   "in_sample.recall_regression": {
+    "status": "measured",
+    "units": {
+     "stage3_legacy_150/items": {
+      "n": 150,
+      "correct": 29,
+      "rate": 0.1933
+     }
+    }
+   }
+  },
+  "D4-Original-s20260726": {
+   "fluid.abstract_analogical": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=abstract_analogical]": {
+      "n": 95,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.compositional_generalization": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=compositional_generalization]": {
+      "n": 144,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.inductive_rule_discovery": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]": {
+      "n": 142,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.interactive_adaptation": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]": {
+      "n": 144,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.task_contained_deduction": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]": {
+      "n": 189,
+      "correct": 7,
+      "rate": 0.037
+     }
+    }
+   },
+   "supporting.closed_book_knowledge": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/knowledge": {
+      "n": 150,
+      "correct": 0.0133
+     }
+    }
+   },
+   "supporting.math_mixed": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/math_verified": {
+      "n": 100,
+      "correct": 0.02
+     },
+     "stage3_capability_846/gsm8k": {
+      "n": 100,
+      "correct": 0.02
+     }
+    }
+   },
+   "grounded.multihop_evidence_reasoning": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/multihop": {
+      "n": 100,
+      "correct": 0.05
+     }
+    }
+   },
+   "grounded.rag_reading": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/rag": {
+      "n": 100,
+      "correct": 0.06
+     }
+    }
+   },
+   "uncertainty.evidence_conditioned_abstention": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/answerability_paired": {
+      "n": 120,
+      "pair_correct": 0.0167
+     }
+    }
+   },
+   "safety.refusal": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/safety_paired": {
+      "n": 100,
+      "pair_correct": 0
+     }
+    }
+   },
+   "tool_use.function_calling": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
+      "terminated": 1.0,
+      "truncated_at_cap": 0.0,
+      "think_closed": 1.0,
+      "format_ok": 1.0,
+      "empty_answer": 0.0,
+      "rep_3gram": 0.0
+     }
+    }
+   },
+   "interaction.instruction_and_realtime": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0[group=instruction]": {
+      "terminated": 0.5,
+      "truncated_at_cap": 0.5,
+      "think_closed": 0.5,
+      "format_ok": 0.5,
+      "empty_answer": 0.5,
+      "rep_3gram": 0.0776
+     },
+     "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
+      "terminated": 0.4,
+      "truncated_at_cap": 0.6,
+      "think_closed": 0.5,
+      "format_ok": 0.4,
+      "empty_answer": 0.5,
+      "rep_3gram": 0.1561
+     }
+    }
+   },
+   "rollout.protocol_integrity": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0": {
+      "terminated": 0.7385,
+      "truncated_at_cap": 0.2615,
+      "think_closed": 0.7692,
+      "format_ok": 0.7385,
+      "empty_answer": 0.2308,
+      "rep_3gram": 0.0913
+     }
+    }
+   },
+   "in_sample.recall_regression": {
+    "status": "measured",
+    "units": {
+     "stage3_legacy_150/items": {
+      "n": 150,
+      "correct": 24,
+      "rate": 0.16
+     }
+    }
+   }
+  },
+  "D4-Original-s20260801": {
+   "fluid.abstract_analogical": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=abstract_analogical]": {
+      "n": 95,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.compositional_generalization": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=compositional_generalization]": {
+      "n": 144,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.inductive_rule_discovery": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]": {
+      "n": 142,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.interactive_adaptation": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]": {
+      "n": 144,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.task_contained_deduction": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]": {
+      "n": 189,
+      "correct": 5,
+      "rate": 0.0265
+     }
+    }
+   },
+   "supporting.closed_book_knowledge": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/knowledge": {
+      "n": 150,
+      "correct": 0.0067
+     }
+    }
+   },
+   "supporting.math_mixed": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/math_verified": {
+      "n": 100,
+      "correct": 0.02
+     },
+     "stage3_capability_846/gsm8k": {
+      "n": 100,
+      "correct": 0.01
+     }
+    }
+   },
+   "grounded.multihop_evidence_reasoning": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/multihop": {
+      "n": 100,
+      "correct": 0.09
+     }
+    }
+   },
+   "grounded.rag_reading": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/rag": {
+      "n": 100,
+      "correct": 0.06
+     }
+    }
+   },
+   "uncertainty.evidence_conditioned_abstention": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/answerability_paired": {
+      "n": 120,
+      "pair_correct": 0
+     }
+    }
+   },
+   "safety.refusal": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/safety_paired": {
+      "n": 100,
+      "pair_correct": 0.02
+     }
+    }
+   },
+   "tool_use.function_calling": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
+      "terminated": 1.0,
+      "truncated_at_cap": 0.0,
+      "think_closed": 1.0,
+      "format_ok": 1.0,
+      "empty_answer": 0.0,
+      "rep_3gram": 0.0
+     }
+    }
+   },
+   "interaction.instruction_and_realtime": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0[group=instruction]": {
+      "terminated": 0.6667,
+      "truncated_at_cap": 0.3333,
+      "think_closed": 0.5833,
+      "format_ok": 0.5833,
+      "empty_answer": 0.3333,
+      "rep_3gram": 0.152
+     },
+     "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
+      "terminated": 0.7,
+      "truncated_at_cap": 0.3,
+      "think_closed": 0.7,
+      "format_ok": 0.7,
+      "empty_answer": 0.3,
+      "rep_3gram": 0.099
+     }
+    }
+   },
+   "rollout.protocol_integrity": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0": {
+      "terminated": 0.8769,
+      "truncated_at_cap": 0.1231,
+      "think_closed": 0.8615,
+      "format_ok": 0.8615,
+      "empty_answer": 0.1231,
+      "rep_3gram": 0.0878
+     }
+    }
+   },
+   "in_sample.recall_regression": {
+    "status": "measured",
+    "units": {
+     "stage3_legacy_150/items": {
+      "n": 150,
+      "correct": 33,
+      "rate": 0.22
+     }
+    }
+   }
+  },
+  "D4-Augmented-s20260726": {
+   "fluid.abstract_analogical": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=abstract_analogical]": {
+      "n": 95,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.compositional_generalization": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=compositional_generalization]": {
+      "n": 144,
+      "correct": 1,
+      "rate": 0.0069
+     }
+    }
+   },
+   "fluid.inductive_rule_discovery": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]": {
+      "n": 142,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.interactive_adaptation": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]": {
+      "n": 144,
+      "correct": 2,
+      "rate": 0.0139
+     }
+    }
+   },
+   "fluid.task_contained_deduction": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]": {
+      "n": 189,
+      "correct": 26,
+      "rate": 0.1376
+     }
+    }
+   },
+   "supporting.closed_book_knowledge": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/knowledge": {
+      "n": 150,
+      "correct": 0.0133
+     }
+    }
+   },
+   "supporting.math_mixed": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/math_verified": {
+      "n": 100,
+      "correct": 0
+     },
+     "stage3_capability_846/gsm8k": {
+      "n": 100,
+      "correct": 0.02
+     }
+    }
+   },
+   "grounded.multihop_evidence_reasoning": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/multihop": {
+      "n": 100,
+      "correct": 0.12
+     }
+    }
+   },
+   "grounded.rag_reading": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/rag": {
+      "n": 100,
+      "correct": 0.09
+     }
+    }
+   },
+   "uncertainty.evidence_conditioned_abstention": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/answerability_paired": {
+      "n": 120,
+      "pair_correct": 0.0167
+     }
+    }
+   },
+   "safety.refusal": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/safety_paired": {
+      "n": 100,
+      "pair_correct": 0
+     }
+    }
+   },
+   "tool_use.function_calling": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
+      "terminated": 1.0,
+      "truncated_at_cap": 0.0,
+      "think_closed": 1.0,
+      "format_ok": 1.0,
+      "empty_answer": 0.0,
+      "rep_3gram": 0.0
+     }
+    }
+   },
+   "interaction.instruction_and_realtime": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0[group=instruction]": {
+      "terminated": 0.4167,
+      "truncated_at_cap": 0.5833,
+      "think_closed": 0.5833,
+      "format_ok": 0.4167,
+      "empty_answer": 0.4167,
+      "rep_3gram": 0.173
+     },
+     "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
+      "terminated": 0.7,
+      "truncated_at_cap": 0.3,
+      "think_closed": 0.5,
+      "format_ok": 0.5,
+      "empty_answer": 0.4,
+      "rep_3gram": 0.1613
+     }
+    }
+   },
+   "rollout.protocol_integrity": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0": {
+      "terminated": 0.8308,
+      "truncated_at_cap": 0.1692,
+      "think_closed": 0.8462,
+      "format_ok": 0.8,
+      "empty_answer": 0.1385,
+      "rep_3gram": 0.116
+     }
+    }
+   },
+   "in_sample.recall_regression": {
+    "status": "measured",
+    "units": {
+     "stage3_legacy_150/items": {
+      "n": 150,
+      "correct": 33,
+      "rate": 0.22
+     }
+    }
+   }
+  },
+  "D4-Augmented-s20260801": {
+   "fluid.abstract_analogical": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=abstract_analogical]": {
+      "n": 95,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.compositional_generalization": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=compositional_generalization]": {
+      "n": 144,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.inductive_rule_discovery": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=inductive_rule_discovery]": {
+      "n": 142,
+      "correct": 0,
+      "rate": 0.0
+     }
+    }
+   },
+   "fluid.interactive_adaptation": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=interactive_adaptation]": {
+      "n": 144,
+      "correct": 2,
+      "rate": 0.0139
+     }
+    }
+   },
+   "fluid.task_contained_deduction": {
+    "status": "measured",
+    "units": {
+     "fluid_reasoning_720/dev_v1[axis=task_contained_deduction]": {
+      "n": 189,
+      "correct": 25,
+      "rate": 0.1323
+     }
+    }
+   },
+   "supporting.closed_book_knowledge": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/knowledge": {
+      "n": 150,
+      "correct": 0.0267
+     }
+    }
+   },
+   "supporting.math_mixed": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/math_verified": {
+      "n": 100,
+      "correct": 0.04
+     },
+     "stage3_capability_846/gsm8k": {
+      "n": 100,
+      "correct": 0.01
+     }
+    }
+   },
+   "grounded.multihop_evidence_reasoning": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/multihop": {
+      "n": 100,
+      "correct": 0.11
+     }
+    }
+   },
+   "grounded.rag_reading": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/rag": {
+      "n": 100,
+      "correct": 0.07
+     }
+    }
+   },
+   "uncertainty.evidence_conditioned_abstention": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/answerability_paired": {
+      "n": 120,
+      "pair_correct": 0.0167
+     }
+    }
+   },
+   "safety.refusal": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/safety_paired": {
+      "n": 100,
+      "pair_correct": 0.04
+     }
+    }
+   },
+   "tool_use.function_calling": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0[group=tool_calling]": {
+      "terminated": 1.0,
+      "truncated_at_cap": 0.0,
+      "think_closed": 1.0,
+      "format_ok": 1.0,
+      "empty_answer": 0.0,
+      "rep_3gram": 0.0
+     }
+    }
+   },
+   "interaction.instruction_and_realtime": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0[group=instruction]": {
+      "terminated": 0.5833,
+      "truncated_at_cap": 0.4167,
+      "think_closed": 0.6667,
+      "format_ok": 0.5833,
+      "empty_answer": 0.3333,
+      "rep_3gram": 0.2648
+     },
+     "stage3_capability_846/eval_behavior_v0[group=short_realtime]": {
+      "terminated": 0.4,
+      "truncated_at_cap": 0.6,
+      "think_closed": 0.5,
+      "format_ok": 0.4,
+      "empty_answer": 0.5,
+      "rep_3gram": 0.169
+     }
+    }
+   },
+   "rollout.protocol_integrity": {
+    "status": "measured",
+    "units": {
+     "stage3_capability_846/eval_behavior_v0": {
+      "terminated": 0.8,
+      "truncated_at_cap": 0.2,
+      "think_closed": 0.8308,
+      "format_ok": 0.8,
+      "empty_answer": 0.1692,
+      "rep_3gram": 0.1289
+     }
+    }
+   },
+   "in_sample.recall_regression": {
+    "status": "measured",
+    "units": {
+     "stage3_legacy_150/items": {
+      "n": 150,
+      "correct": 35,
+      "rate": 0.2333
+     }
+    }
+   }
+  }
+ },
+ "compute": {
+  "D4-Original": {
+   "optimizer_steps": 2916,
+   "training_flops": 9.071e+17
+  },
+  "D4-Augmented": {
+   "optimizer_steps": 3702,
+   "training_flops": 1.152e+18
+  }
+ },
+ "reading": "A and B are decided under the preregistered rule on static fluid correctness under nucleus_v1; B adds the fluid increment together with its optimizer steps and FLOPs and is never read as the data's isolated effect; C is descriptive; a floor is NOT_RESOLVED (FLOOR), never equivalence; loss, KL, format or termination are never read as reasoning",
+ "authorizes": "nothing"
+}

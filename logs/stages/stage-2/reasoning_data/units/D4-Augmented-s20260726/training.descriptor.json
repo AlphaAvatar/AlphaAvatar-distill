@@ -1,0 +1,46 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.persisted_unit/v2",
+ "unit": "D4-Augmented-s20260726",
+ "kind": "training",
+ "started_utc": "2026-10-25T04:46:15Z",
+ "files": [
+  {
+   "name": "recovery.log",
+   "sha256": "d9f701988234a376dd0a55f50713e51cc679a21af2e2e3867a06d6c95abf29b4",
+   "bytes": 29006
+  },
+  {
+   "name": "recovery_config.json",
+   "sha256": "04c4c32b26c6e75583df566938665d88dddcb4abbcc1b46fa5322877c7a3d5fd",
+   "bytes": 1808
+  },
+  {
+   "name": "trainer/recovery_config.json",
+   "sha256": "04c4c32b26c6e75583df566938665d88dddcb4abbcc1b46fa5322877c7a3d5fd",
+   "bytes": 1808
+  },
+  {
+   "name": "trainer/run_completion.json",
+   "sha256": "987c1cc1b8449705a3fe0f213aad2155717b95e393fb914158d4bb23be55366a",
+   "bytes": 1809
+  },
+  {
+   "name": "trainer/run_manifest.json",
+   "sha256": "9aae1b4f41b5fa9997f1cdbaad28ca43dba2d93fc45c617f276d62edcc6e7015",
+   "bytes": 10029
+  },
+  {
+   "name": "trainer/train_inputs.json",
+   "sha256": "1cbe7e3cead82127d91cf845d85a1e0e40dadb3b42cc33e77419112685c54cbc",
+   "bytes": 1098
+  },
+  {
+   "name": "trainer/train_log.jsonl",
+   "sha256": "f9b3d88dfc12f4b8e3def734d9715d12cd3b3e387095dd10d9165d0b56e46132",
+   "bytes": 164402
+  }
+ ],
+ "destination": "/runpod-volume/h1pa/D4-Augmented-s20260726/training",
+ "persisted": true,
+ "finished_utc": "2026-10-25T04:46:15Z"
+}

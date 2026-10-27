@@ -1,0 +1,23 @@
+{
+ "schema": "aadistill.decoding_protocol/v1",
+ "protocol_id": "nucleus_v1",
+ "decided_by": "maintainer, 2026-10-24: new autoregressive evaluation uses nucleus sampling, never greedy decoding (logs/budget/decisions.md :: H1-PA)",
+ "sampling": {"temperature": 0.6, "top_p": 0.95, "top_k": -1, "min_p": 0.0,
+              "repetition_penalty": 1.0, "presence_penalty": 0.0, "frequency_penalty": 0.0},
+ "_sampling": "pure nucleus (top-p) sampling: top_k -1 and min_p 0 disable vLLM's other truncation filters and no penalty is applied. Temperature 0.6 and top-p 0.95 are the values the teacher's model card recommends for thinking mode (Qwen/Qwen3-4B-Thinking-2507: Temperature=0.6, TopP=0.95, TopK=20, MinP=0, the preset run_battery's GENERATE_SAMPLING records); its TopK=20 is not used, because the protocol is pure top-p",
+ "samples_per_item": 1,
+ "seed_rule": {
+  "base": 20261024,
+  "key": "<namespace>|<item id>|<turn>|<sample>",
+  "namespace": "the evaluated unit's key <component>__<unit> (e.g. fluid_reasoning_720__dev_v1, stage3_capability_846__gsm8k): uncapped_eval reads it from the prompt file's stem, which dose_driver.evaluate_all stages as <component>__<unit>.jsonl; run_battery takes it as --seed-namespace",
+  "derivation": "int.from_bytes(sha256('<base>|<key>').digest()[:8], 'big') % 2**63",
+  "independent_of": "the model, the arm and the training seed: every checkpoint draws with the same seed for the same item, turn and sample"
+ },
+ "unchanged": {
+  "context": "AGENTS.md P18: each sample may generate until EOS or the trained context (8,192) minus its prompt",
+  "stops": "EOS (<|im_end|>) and the semantic degeneration stop (checked every 256 generated tokens); each sample records stop_reason eos, degeneration or context_limit",
+  "eval_set": "eval-set-1's items, validity mask and scoring protocols are not touched"
+ },
+ "records": "per sample: sampling_seed, output_token_ids, stop_reason; per run: this file's path and sha256 and the sampling passed to the engine",
+ "never_compared_with": "a greedy generation"
+}

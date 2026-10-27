@@ -1,0 +1,43 @@
+{
+  "schema": "aadistill.stage2.reasoning_data.h3_candidates/v1",
+  "status": "REGISTERED as a research direction only (maintainer, 2026-10-21). Nothing here is implemented, wired into the H1 trainer, scheduled or funded.",
+  "h3": "the diagnostic proposed if H1's verified corpus passes its quality audit and the student still sits fully at the floor after reasonable coverage and optimization diagnostics (comparison_design.json :: steps.if_B_at_floor); an H-number is a research question, not a pipeline stage, and does not move work out of the repository's Stage-3/4/5 ownership",
+  "candidates": [
+    {
+      "id": "tip",
+      "reference": {
+        "title": "TIP: Token Importance in On-Policy Distillation",
+        "authors": "Yuanda Xu, Hejian Sang, Zhengze Zhou, Ran He, Zhipeng Wang, Alborz Geramifard",
+        "arxiv": "2604.14084",
+        "version_checked": "v4 (21 May 2026; v1 15 Apr, v2 19 Apr, v3 20 May 2026)",
+        "url": "https://arxiv.org/abs/2604.14084v4",
+        "notes_page": "https://aipapernotes.alphaavatar.io/llm/training/RL/OPD/2026/TIP (provided by the maintainer; not read for this record)",
+        "read_for_this_record": "the arXiv abstract page only (2026-10-21 UTC); the full text has not been read",
+        "status": "queued"
+      },
+      "what_the_abstract_states": [
+        "a two-axis taxonomy of token positions by student entropy and teacher-student divergence, for on-policy distillation where the student trains on its own rollouts under token-level teacher supervision",
+        "selected regions: high student entropy, and low student entropy with high teacher-student divergence (overconfident wrong predictions)",
+        "reported: keeping 50% of tokens by entropy-based sampling matches or exceeds all-token training while cutting peak memory by up to 47%; under 10% of tokens from the low-entropy/high-divergence region nearly matches full-token baselines",
+        "the abstract does not state the KL direction or the prefix construction"
+      ],
+      "maintainer_notes": [
+        "the original method uses student-generated prefixes and KL(student || teacher) -- to be confirmed from the full text before any design is frozen",
+        "a selection that keeps only high-entropy positions misses low-entropy/high-divergence positions; the combination is the point",
+        "teacher-student divergence is not an independent gold: it says where the student disagrees, not that the teacher is right"
+      ],
+      "hypothesis": "concentrating distillation on positions selected by student entropy combined with teacher-student divergence transfers more reasoning per supervised position than all-token distillation, at matched trajectories and matched KL",
+      "applicability": [
+        "the faithful method is ON-POLICY: it needs student rollouts, a rollout service and the Stage-4/5 ownership, cost and authorization that come with them",
+        "an offline, teacher-forced, forward-KL variant would be a TIP-INSPIRED ADAPTATION and is never called a reproduction"
+      ],
+      "future_comparison_design": {
+        "controls": "trajectory distribution, KL direction and token-selection rule varied ONE at a time",
+        "baseline": "an all-token arm with the SAME trajectory protocol and the SAME KL (direction and temperature), so the selection rule is the only difference",
+        "endpoint": "eval-set-1 formal fluid correctness and the per-axis and supporting reports, as in H1; memory and throughput reported separately",
+        "not_now": ["no implementation", "no retention-ratio sweep", "the paper's reported gains are not this project's"]
+      }
+    }
+  ],
+  "authorizes": "nothing"
+}

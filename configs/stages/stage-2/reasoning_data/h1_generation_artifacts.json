@@ -1,0 +1,37 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "stage2_h1_generation",
+ "note": "One spec for success and failure. The driver's record is required on every path; shards, markers, segment inputs, streams, raw records and logs are patterns with at least zero matches, because an early failure legitimately produced none (P8.2.1: preserved when they exist, never demanded). Every sealed shard is also pulled off-pod by the launcher's poll hook and hash-checked before this archive exists.",
+ "patterns_are_relative_to": "the collector's --root, <checkout>/artifacts",
+ "entries": [
+  {
+   "artifact_class": "generation_session_record",
+   "pattern": "audit/stage2_h1_generation/generation_session.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_bytes": 64
+  },
+  {
+   "artifact_class": "generation_shards",
+   "pattern": "audit/stage2_h1_generation/pass*.part*",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "generation_group_markers",
+   "pattern": "audit/stage2_h1_generation/*.complete",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "generation_segments",
+   "pattern": "audit/stage2_h1_generation/pass*.seg*",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  }
+ ],
+ "authorizes": "nothing"
+}

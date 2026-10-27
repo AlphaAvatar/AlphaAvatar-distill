@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-21 17:30 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-26 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,6 +9,63 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
+**MIXED CALIBRATION 2x: COMPLETE; PREREGISTERED M = NO_GO (2026-10-27).**
+Owner: [`docs/stages/stage-0/calibration_volume/MIXED.md`](../../docs/stages/stage-0/calibration_volume/MIXED.md)
+section 13; `logs/stages/stage-0/calibration_volume/analyses/mixed_result.json`. Grant (closed):
+`logs/budget/approvals/mixed_calibration_grant.json`. Nothing is running and nothing is billing apart from the
+retained volume `am5m373kuq` (provider 2026-10-26T23:57Z: 0 pods; `closeout/mixed_position_final.json`).
+- **M = Mix-Augmented - D4-Augmented** (static fluid correctness, 570 items x 2 seeds, nucleus_v1): 3.25% vs 4.56%,
+  -1.32 pp [-2.71, -0.17] -> NO_GO (a >= 5 pp difference is excluded; the small loss is below the SESOI). Deduction
+  9.3% vs 13.5% INCONCLUSIVE; the other three axes NOT_RESOLVED at the floor. E (vs PCA-Original) +1.93 pp, descriptive.
+- **Runs:** MC1 `mixs_20261026_103634` (Top-1 `9311dcde`, DEPTH->ATTENTION->FFN->RESIDUAL_WIDTH; attempt 1
+  `mixs_20261026_102914` died pre-science), its volume deleted; MC2 `mixr_20261026_140539`, both units one attempt.
+- **Money:** $17.3366 of $33.05 (MC1 $6.4246, MC2 $10.912); project committed $723.30 of $740.
+- **Checkpoints:** `am5m373kuq` holds the four D4 and the two Mix-Augmented checkpoints, kept for the review.
+- **Next:** the maintainer's review; 4x or anything else is the maintainer's decision.
+
+**H1-PA: PA2v + PA2 COMPLETE; PREREGISTERED RESULT INCONCLUSIVE (FLOOR_A) (2026-10-25 UTC).** Granted by the maintainer
+(`logs/budget/approvals/h1pa_training_grant.json`: $50.00 cumulative over PA2v + PA2, project cap $731).
+Owner: [`docs/stages/stage-2/reasoning_data/H1PA.md`](../../docs/stages/stage-2/reasoning_data/H1PA.md)
+sections 14-16, `analyses/h1pa_result.json`.
+H1-PA itself runs and bills nothing apart from its retained volume `am5m373kuq` ($2.10/month, booked in its storage
+record; provider query 2026-10-25 15:09Z, `runs/h1pa2_20261025_055042/closeout/outcome.json ::
+provider_reconciliation_after`).
+- **Result** (static fluid correctness, 570 items x 2 seeds, `nucleus_v1`):
+  - B (primary, D4-Augmented - D4-Original): +3.51 pp, CI +1.89 to +5.15 → INCONCLUSIVE, flag FLOOR_A;
+  - A (D4-Original - PCA-Original): both below the 2% floor → NOT_RESOLVED (FLOOR);
+  - C is descriptive.
+  - Interactive episodes are exploratory.
+  - Every absolute rate is low (best unit 4.6%). It authorizes nothing.
+- **Done:** six formal units, one attempt each, in `runs/h1pa2_20261024_203226` ($10.2715) and
+  `runs/h1pa2_20261025_055042` ($10.3232); both pods deleted, provider confirms gone.
+  - Evidence: relay `stage2_h1pa/units/evidence/`, dev box `artifacts/.../h1pa/units/evidence/`.
+  - Reports and rows: git `units/<unit>/`.
+- **Money:** phase $26.1874 of $50 ($21.9874 sessions + $4.20 reserved storage); project $706.8547 of $731
+  (`h1pa_governance.remaining_envelope`). Provider snapshot `runpod_billing_2026-10-25T1512Z.json`.
+- **Storage:** volume `am5m373kuq` (30 GB, EUR-IS-2, $2.10/month) holds the four D4 checkpoints (9.54 GB).
+  - They are kept until the maintainer's independent review.
+  - Consumer audit and retirement proposal: `storage/h1pa_volume_am5m373kuq.json`.
+- **PA2v:** five attempts, $1.39 (H1PA.md section 14).
+- **Next:** the maintainer's independent scientific review; the checkpoints are retained through it and through the
+  mixed-calibration study (above). Nothing paid runs, and nothing is merged, without a new maintainer decision.
+
+**STAGE-2/3 H1: ANNULLED FOR PROMOTION (maintainer, 2026-10-24; `plans/h1_annulment.json`). As executed: P1g PASSED, P2's FOUR FORMAL UNITS COMPLETE; THE FROZEN DECISION WAS NOT_RESOLVED (FLOOR).**
+Branch `stage2/reasoning-data` (cut from `main` `2a8bae78`; nothing merged).
+Its 30 GB volume `1980hnh75i` was retired on 2026-10-24
+(`storage/h1_volume_1980hnh75i.json`).
+Evidence: [`docs/stages/stage-2/reasoning_data/H1.md`](../../docs/stages/stage-2/reasoning_data/H1.md)
+§17–§19; `analyses/h1_result.json`, `units/`, `runs/h1p1g_*`, `runs/h1p2*`.
+- **Result:** B − A = +0.0053 (95% CI −0.0009 to +0.0136) on static fluid
+  correctness, A 0.44% / B 0.96%: both arms at the floor → NOT_RESOLVED
+  (FLOOR); deduction INCONCLUSIVE (FLOOR_A); interactive 0/144 everywhere
+  (exploratory). No equivalence, no gain excluded.
+- **Money:** the P1g/P2 phase spent $17.64 in sessions plus $4.20 reserved
+  storage of its $50; the absolute project cap is $712.17.
+- **Kept:** the four formal checkpoints on the volume; every unit's evidence
+  on the dev box, the relay and (reports, rows) in git.
+- **Superseded:** by H1-PA above. The grant is closed, and its $28.16 remainder
+  funds nothing.
+
 **STAGE-0 CALIBRATION-VOLUME PROGRAMME CLOSED (final $0 closeout, 2026-10-21).**
 Verdict: **EXECUTION COMPLETE / DOWNSTREAM REASONING FLOOR / VOLUME EFFECT ON
 REASONING NOT RESOLVED**, held as four separate answers (structure, step-0
@@ -16,7 +73,7 @@ state, usable output, reasoning) in
 [`programme_closeout.json`](../stages/stage-0/calibration_volume/closeout/programme_closeout.json) `:: programme_verdict`.
 Stage-0 volume CLOSED; Stage-0 mixture ratio DEFERRED (never run); D-series
 CLOSED; forward baseline D1 + `scored_v1`.
-Nothing is running and nothing is billing: 0 pods, 0 volumes, `$0/h` (provider query 2026-10-21 16:33Z,
+At Stage-0's close the account held 0 pods, 0 volumes, `$0/h` (provider query 2026-10-21 16:33Z,
 [`runpod_billing_2026-10-21.json`](../budget/provider/runpod_billing_2026-10-21.json) `:: account`).
 - **Budget, reconciled against the provider's billing**
   ([`budget_reconciliation.json`](../stages/stage-0/calibration_volume/closeout/budget_reconciliation.json);
@@ -145,10 +202,16 @@ probes all stand unchanged.
     - beam width 6 with `delayed_prune` and `pareto@v2`;
     - micro-batch 3, `length_sorted_v1`, **`scored_v1`**.
 - **Identities kept apart.** The historical reference initialization is D1-q2
-  (`afd50c9f…`, digest `3a4b4ede…`), materialized under `all_v1`. The forward
-  profile (fingerprint `e627f461…`) is **NOT MATERIALIZED**, and the resolver
-  never offers q2's digest as its expectation. B stays the archived historical
-  comparator.
+  (`afd50c9f…`, digest `3a4b4ede…`), materialized under `all_v1`. When the
+  method was selected (2026-10-17) the forward profile (fingerprint
+  `e627f461…`) had no materialization; that was the state AT SELECTION. Since
+  then the Stage-0 searches materialized 12 candidates under that exact
+  fingerprint, and H1's fixed initialization (D4 Top-1, digest `457e194c…`) is
+  one of them, bound in
+  `logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json`.
+  The frozen baseline record still lists `forward_materializations: []` and is
+  not edited. The resolver never offers q2's digest as a forward expectation.
+  B stays the archived historical comparator.
 - **Authorities.** All 11 D-series grants are CLOSED, and every D-series
   issuer refuses them. D3's unspent $6.4429 (structural) and $6.9605
   (probes) are closed, not transferred.
@@ -900,6 +963,74 @@ invocation with `tee` and `PIPESTATUS[0]`.
 
 ## What `main` carries
 
+**Stage 2 (H1, H1-PA) and the mixed calibration 2x, integrated 2026-10-28
+(UTC) by SQUASH AND MERGE per AGENTS.md P12.2, on the maintainer's
+instruction.** One commit on `main` collapses everything on top of `2a8bae78`
+(the Stage-0 squash): the 75 commits up to the tested tree `d5f1c6f2`, plus the
+pre-integration record commit after it.
+- Stage-2/3 H1: P1g PASSED, P2's four formal units, frozen decision
+  NOT_RESOLVED (FLOOR); annulled for promotion by the maintainer
+  (`plans/h1_annulment.json`);
+- H1-PA: PA2v and PA2's six formal units, preregistered result INCONCLUSIVE
+  (FLOOR_A);
+- the mixed calibration 2x (MC1, MC2): preregistered M = NO_GO; grant closed;
+- every record, raw evidence file, checkpoint identity and closed grant of the
+  three, unchanged. The checkpoints' bytes are on volume `am5m373kuq`, not in
+  git.
+
+```text
+source branch : stage2/reasoning-data   (NOT deleted -- P12.2)
+merge base    : 2a8bae7848f99076eded2a7c6bf7038f166247c4   (main before)
+tested tree   : d5f1c6f2a89471f99d9477b3b39e11178998b47b
+branch tip    : named by the squash commit; a record on the branch cannot
+                carry its own hash
+squash commit : `git log -1 main`
+```
+
+- **What was tested**, on `d5f1c6f2`: the core full suite 3,828 passed / 27 failed / 38 skipped
+  (13 min). All 27 were in `tests/integration/test_simulator_restore.py`: 25 the
+  pod simulator refusing below 20 GiB free (the dev box has 5 GiB), 2 the
+  threshold tests reading the session's override. That file rerun with only
+  `PODSIM_MIN_FREE_GIB=3`: 36 passed. The stage-2 `reasoning_data` and stage-0
+  `calibration_volume` experiment suites: 495 passed.
+- **The honest limit.** The tip adds only pre-integration records on top of
+  `d5f1c6f2`: this section, `current.json`'s `branch`, and
+  `decisions.md`.
+- **Reachability.** Every commit hash the records cite was checked before the
+  squash: zero unreachable. The source branch is where this round's commit
+  hashes live, so it is kept permanently.
+- **Budget: four things kept apart** (maintainer, 2026-10-28). None of them
+  substitutes for another.
+  1. *The provider's bill and live resources*: the provider's own billing and
+     account listing. `main`'s newest committed snapshot is
+     `closeout/mixed_position_final.json` (2026-10-26T23:57Z). Newer snapshots
+     are on `research/teacher-modes-and-projected-residual`.
+  2. *The project's cumulative commitment* against the $740 cap: $723.30 in
+     that closeout. The provider-based accounting audit of 2026-10-27 is newer
+     and puts it at $724.345 (headroom $15.655). It lives on
+     `research/teacher-modes-and-projected-residual` (commit `811664f9`,
+     `logs/budget/audits/`), verdict CLOSED, and reaches `main` only with that
+     branch.
+  3. *Historical budget records*: run records, grants and closeouts as booked.
+     `derive_budget.py` on `main` still reads the stale $712.17 cap of the C1
+     package (the audit's finding 1, fixed on the research branch). A
+     records-based remainder is never spendable headroom.
+  4. *Unfinished attribution and governance*, NOT explained by the audit:
+     - the provider billed $37.53 more before the 2026-09-11 anchor than the
+       maintainer's stated anchor, and 55 pods ($77.33) billed before it are
+       named by no record. Whether that is project spend is unverified;
+     - network-volume rows carry no volume id; $0.34 of them lies outside
+       every recorded volume lifetime;
+     - the issuers do not scan engineering-campaign subruns for unposted
+       pods. **Before any paid authorization** the issuing chain must cover
+       campaign subruns, and the provider's live billing and resources must be
+       read again.
+- **Where work continues.** On `research/teacher-modes-and-projected-residual`
+  (Research A and B, $0), which descends from `d5f1c6f2`. It takes `main` by a
+  merge commit rather than a rebase, so its pushed commits and the identities
+  its records cite are not rewritten. `main` then becomes its ancestor, and a
+  later squash of it collapses only its own commits.
+
 **The Stage-0 calibration-volume programme, integrated 2026-10-21 (UTC) by
 SQUASH AND MERGE per AGENTS.md P12.2, on the maintainer's instruction.** One
 commit on `main` collapses everything on top of `32246d12` (the D-series
@@ -933,8 +1064,8 @@ closeout tree : fa311c679cbf0454966ed50034849cb48dbf5385
 - **Reachability.** Every commit hash the records cite was checked before the
   squash: zero unreachable. The source branch is where this round's commit
   hashes live, so it is kept permanently.
-- **Where work continues.** On `stage2/reasoning-data`, cut fresh from the
-  squash commit. Continuing on the old branch would re-apply the whole range.
+- **Where work continued.** On `stage2/reasoning-data`, cut fresh from that
+  squash commit (itself integrated 2026-10-28, above).
 
 **The D-series and its closure, integrated 2026-10-17 (UTC) by SQUASH AND
 MERGE per AGENTS.md P12.2, on the maintainer's instruction.** One commit on
@@ -4161,7 +4292,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$625.5798` spent of `$643.6571`, leaving `$18.0773` |
+| project cap | `$687.4031` spent of `$712.1700`, leaving `$24.7669` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

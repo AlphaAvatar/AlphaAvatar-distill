@@ -1,0 +1,375 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.cost_forecast/v1",
+ "status": "FORECAST from measured rates; authorizes nothing",
+ "written_utc": "2026-10-23T17:09:49Z",
+ "measured": {
+  "teacher_generation": {
+   "tokens_per_second": 1739.1,
+   "output_tokens": 4528160,
+   "seconds": 2603.7,
+   "gpu": "A100-80GB",
+   "engine": "vLLM 0.27.1",
+   "session_all_in_usd": 1.6169,
+   "session_minutes": 53.58,
+   "price_per_hour": 1.79,
+   "source": "runs/teachercal_20261018_112755 (summary + closeout)"
+  },
+  "recovery_seconds_per_block_pass": {
+   "A100": {
+    "min": 1.4758,
+    "max": 1.5391,
+    "n": 3
+   },
+   "L40S": {
+    "min": 1.7751,
+    "max": 1.7836,
+    "n": 21
+   }
+  },
+  "recovery_basis": "extension_analysis.json :: per_unit.*.recovery (seconds / (steps x 2 blocks)); 8,192 positions per pass, teacher online, padding forwarded",
+  "positions_per_second_full_blocks": {
+   "A100": 5449.8,
+   "L40S": 4607.1
+  },
+  "eval_seconds_per_unit_L40S": {
+   "median": 3343,
+   "max": 4763,
+   "n": 21,
+   "note": "students at the floor: short, often degenerate replies"
+  },
+  "session_overhead_seconds_L40S": {
+   "median": 536,
+   "n": 3
+  },
+  "price_per_hour": {
+   "L40S": [
+    1.09
+   ],
+   "A100-80GB": 1.79
+  },
+  "disk_share_of_gpu_cost": 0.0251
+ },
+ "contingency_factors_not_measurements": {
+  "generation": 1.5,
+  "recovery": 1.25,
+  "eval_floor_to_reasoning": 2.0,
+  "hard_cap": 1.5,
+  "gpu_validation_hours": 1.25
+ },
+ "plan_sizes": {
+  "rung_targets": [
+   860000,
+   1600000,
+   2960000
+  ],
+  "reserve_tokens": 150000,
+  "seeds": 2
+ },
+ "generation": {
+  "rows": {
+   "primary.task_contained_deduction": {
+    "supervised_tokens_needed": 528700,
+    "yield": 0.9963,
+    "yield_refs": {
+     "teacher_cal:task_contained_deduction": 0.9963
+    },
+    "generated_tokens": 530663
+   },
+   "primary.inductive_rule_discovery": {
+    "supervised_tokens_needed": 528700,
+    "yield": 0.7823,
+    "yield_refs": {
+     "teacher_cal:inductive_rule_discovery": 0.7823
+    },
+    "generated_tokens": 675828
+   },
+   "primary.compositional_generalization": {
+    "supervised_tokens_needed": 528700,
+    "yield": 0.4635,
+    "yield_refs": {
+     "teacher_cal:compositional_generalization": 0.4635
+    },
+    "generated_tokens": 1140669
+   },
+   "primary.abstract_analogical": {
+    "supervised_tokens_needed": 279900,
+    "yield": 0.4384,
+    "yield_refs": {
+     "teacher_cal:abstract_analogical": 0.4384
+    },
+    "generated_tokens": 638458
+   },
+   "primary.interactive_adaptation": {
+    "supervised_tokens_needed": 311000,
+    "yield": 0.1272,
+    "yield_refs": {
+     "teacher_cal:interactive_adaptation": 0.1272
+    },
+    "generated_tokens": 2444969
+   },
+   "supporting.math_reused_gsm8k": {
+    "reused": true,
+    "generated_tokens": 0
+   },
+   "supporting.math_new": {
+    "supervised_tokens_needed": 186600,
+    "yield": 0.2081,
+    "yield_refs": {
+     "corpus_v2:openmath": 0.2081
+    },
+    "generated_tokens": 896684
+   },
+   "supporting.code_algorithmic": {
+    "supervised_tokens_needed": 217700,
+    "yield": 0.4,
+    "yield_refs": {
+     "assumption:0.4": 0.4
+    },
+    "generated_tokens": 544250
+   },
+   "supporting.reading_verified": {
+    "reused": true,
+    "generated_tokens": 0
+   },
+   "supporting.answerability": {
+    "supervised_tokens_needed": 93300,
+    "yield": 0.9574,
+    "yield_refs": {
+     "corpus_v2:rag_evidence": 0.9574
+    },
+    "generated_tokens": 97451
+   }
+  },
+  "candidate_policy": "up to 2 candidates per task, the second only when the first is rejected; ONE for MBPP (generation_protocol.json :: execution.no_second_candidate_verifiers, frozen 2026-10-22); every candidate recorded. Yield is planned at the measured n = 1 rate per generated token; the two-candidate unit yield 1-(1-p)^2 is a simplifying assumption, not a guarantee",
+  "spec_estimate_generated_tokens": 6968972,
+  "basis": "plans/generation_plan.json :: totals.predicted_generated_tokens (the real task list, second candidates included; a PREDICTION, not an execution limit: the session's hard bound is the authorized cap, enforced by the watchdog)",
+  "generation_plan_sha256": "45606567d45907ea8656b1c40ac6bbd0492c8c5ce8c86daebce46c716e0a0b68",
+  "generated_tokens": 9874990,
+  "gpu_hours": 1.58,
+  "session_hours_with_contingency": 2.51,
+  "expected_usd": 4.61
+ },
+ "units": {
+  "L40S/M0_frozen": {
+   "old_2p96M": {
+    "recovery_hours": 2.711,
+    "eval_hours": 1.857,
+    "usd": 5.1
+   },
+   "new_2p96M": {
+    "recovery_hours": 0.773,
+    "eval_hours": 1.857,
+    "usd": 2.94
+   },
+   "new_0.86M": {
+    "recovery_hours": 0.225,
+    "eval_hours": 1.857,
+    "usd": 2.33
+   },
+   "new_1.60M": {
+    "recovery_hours": 0.419,
+    "eval_hours": 1.857,
+    "usd": 2.54
+   },
+   "new_2.96M": {
+    "recovery_hours": 0.773,
+    "eval_hours": 1.857,
+    "usd": 2.94
+   }
+  },
+  "L40S/M1_matched": {
+   "old_2p96M": {
+    "recovery_hours": 0.959,
+    "eval_hours": 1.857,
+    "usd": 3.15
+   },
+   "new_2p96M": {
+    "recovery_hours": 0.75,
+    "eval_hours": 1.857,
+    "usd": 2.91
+   },
+   "new_0.86M": {
+    "recovery_hours": 0.218,
+    "eval_hours": 1.857,
+    "usd": 2.32
+   },
+   "new_1.60M": {
+    "recovery_hours": 0.406,
+    "eval_hours": 1.857,
+    "usd": 2.53
+   },
+   "new_2.96M": {
+    "recovery_hours": 0.75,
+    "eval_hours": 1.857,
+    "usd": 2.91
+   }
+  },
+  "A100-80GB/M0_frozen": {
+   "old_2p96M": {
+    "recovery_hours": 2.34,
+    "eval_hours": 1.857,
+    "usd": 7.7
+   },
+   "new_2p96M": {
+    "recovery_hours": 0.667,
+    "eval_hours": 1.857,
+    "usd": 4.63
+   },
+   "new_0.86M": {
+    "recovery_hours": 0.195,
+    "eval_hours": 1.857,
+    "usd": 3.76
+   },
+   "new_1.60M": {
+    "recovery_hours": 0.361,
+    "eval_hours": 1.857,
+    "usd": 4.07
+   },
+   "new_2.96M": {
+    "recovery_hours": 0.667,
+    "eval_hours": 1.857,
+    "usd": 4.63
+   }
+  },
+  "A100-80GB/M1_matched": {
+   "old_2p96M": {
+    "recovery_hours": 0.81,
+    "eval_hours": 1.857,
+    "usd": 4.89
+   },
+   "new_2p96M": {
+    "recovery_hours": 0.634,
+    "eval_hours": 1.857,
+    "usd": 4.57
+   },
+   "new_0.86M": {
+    "recovery_hours": 0.184,
+    "eval_hours": 1.857,
+    "usd": 3.75
+   },
+   "new_1.60M": {
+    "recovery_hours": 0.343,
+    "eval_hours": 1.857,
+    "usd": 4.04
+   },
+   "new_2.96M": {
+    "recovery_hours": 0.634,
+    "eval_hours": 1.857,
+    "usd": 4.57
+   }
+  }
+ },
+ "phases": {
+  "L40S/M0_frozen": {
+   "comparison_usd": 16.41,
+   "ladder_usd": 10.07
+  },
+  "L40S/M1_matched": {
+   "comparison_usd": 12.45,
+   "ladder_usd": 10.03
+  },
+  "A100-80GB/M0_frozen": {
+   "comparison_usd": 25.21,
+   "ladder_usd": 16.21
+  },
+  "A100-80GB/M1_matched": {
+   "comparison_usd": 19.47,
+   "ladder_usd": 16.13
+  }
+ },
+ "h1_units_L40S_M1": {
+  "A": {
+   "recovery_hours": 0.941,
+   "eval_hours": 1.857,
+   "usd": 3.13,
+   "executed_positions": 12488833,
+   "optimizer_steps": 614
+  },
+  "B": {
+   "recovery_hours": 0.753,
+   "eval_hours": 1.857,
+   "usd": 2.92,
+   "executed_positions": 9984972,
+   "optimizer_steps": 614
+  },
+  "kinds": {
+   "A_positions": "measured",
+   "B_positions": "measured",
+   "steps": "FROZEN-READY",
+   "positions_per_second": "measured on earlier L40S recovery runs (measured.*)",
+   "hours_and_usd": "forecast = planned positions / measured rate x contingency"
+  }
+ },
+ "optional": {
+  "P2d_single_seed_diagnostic_B_0p86M": {
+   "what": "optional engineering/diagnostic step, NOT a confirmation and not a gate on H1",
+   "expected_usd": 2.49
+  }
+ },
+ "proposal_phases": {
+  "P1_generation": {
+   "expected_usd": 4.61,
+   "hard_cap_usd": 6.92
+  },
+  "P1v_verification_cpu": {
+   "expected_usd": 0.0,
+   "hard_cap_usd": 0.0
+  },
+  "P1g_gpu_validation": {
+   "expected_usd": 1.56,
+   "hard_cap_usd": 2.34
+  },
+  "P2_formal_4_units": {
+   "expected_usd": 12.43,
+   "hard_cap_usd": 18.65
+  },
+  "closeout_reserve_4_sessions": {
+   "expected_usd": 1.78,
+   "hard_cap_usd": 2.67
+  },
+  "storage_h1_backend_two_months": {
+   "expected_usd": 4.2,
+   "hard_cap_usd": 4.2,
+   "gb": 30
+  }
+ },
+ "proposal_totals": {
+  "h1_expected_usd": 24.58,
+  "h1_hard_cap_usd": 34.78,
+  "excludes": "the optional diagnostic and any later ladder (a separate application)"
+ },
+ "p1_application": {
+  "P1_generation": {
+   "expected_usd": 4.61,
+   "hard_cap_usd": 6.92
+  },
+  "P1v_verification_cpu": {
+   "expected_usd": 0.0,
+   "hard_cap_usd": 0.0
+  },
+  "closeout_reserve_1_session": {
+   "expected_usd": 0.73,
+   "hard_cap_usd": 1.1
+  },
+  "totals": {
+   "expected_usd": 5.34,
+   "hard_cap_usd": 8.02
+  },
+  "_what": "one A100-80GB generation session (teacher_cal's measured GPU, engine and price) with a closeout reserve of the session overhead + 15 minutes; P1v runs on the dev box at $0. The whole-H1 rows (proposal_phases) are kept for reference and are NOT requested now"
+ },
+ "_proposal_phases": "H1's rows, cited by plans/authorization_proposal.json: generation on one A100-80GB; GPU validation and the 4 formal units on L40S under M1 (recovery time from h1_accounting executed positions at the measured positions/s, eval at 2x the measured floor-student time); one session overhead per paid session; a closeout reserve of overhead + 15 min per session; hard cap = expected x the labelled factor (storage at cost)",
+ "cpu": "every builder, audit, isolation check and pack runs on the dev box at $0 (minutes)",
+ "storage": {
+  "students": 4,
+  "bytes_per_student_fp32_dir": 2384285634,
+  "total_gib": 8.88,
+  "init_bytes": 1192135096,
+  "relay_headroom_bytes": 2147587286,
+  "relay_probe_utc": "2026-10-21T17:52Z",
+  "relay_can_hold": "one bf16 student; refuses one 2.38 GB fp32 student directory",
+  "dev_box_free_gib": 12,
+  "network_volume_usd_per_gb_month": 0.07,
+  "network_volume_50gb_two_months_usd": 7.0
+ },
+ "authorizes": "nothing"
+}

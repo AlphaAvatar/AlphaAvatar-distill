@@ -1,0 +1,136 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1pa_preregistration/v1",
+ "study_id": "stage2.reasoning_data.h1pa",
+ "written_utc": "2026-10-24T16:09:44Z",
+ "status": "FROZEN before any H1-PA training or evaluation: no H1-PA model exists, so no result has been seen. Committed in git; h1pa_statistics.decide refuses to run when the rule's bytes differ from bound_sha256",
+ "decided_by": "maintainer, 2026-10-24 (H1-PA final training readiness: freeze the formal decision rules before formal training or evaluation)",
+ "arms": {
+  "PCA-Original": "E1's two 2.96M PCA checkpoints, re-evaluated only",
+  "D4-Original": "D4 Top-1 trained under E1's recipe on E1's pack, two seeds",
+  "D4-Augmented": "D4 Top-1 trained under E1's recipe on E1's pack + the whole-unit fluid increment, two seeds"
+ },
+ "seeds": [
+  20260726,
+  20260801
+ ],
+ "seed_pairing": "a comparison pairs its arms by training-seed number (PCA-Original's E1 seeds are the same numbers); every directional label needs both seeds' own estimates on its side",
+ "comparisons": {
+  "A": {
+   "contrast": "D4-Original - PCA-Original",
+   "role": "decided"
+  },
+  "B": {
+   "contrast": "D4-Augmented - D4-Original",
+   "role": "decided"
+  },
+  "C": {
+   "contrast": "D4-Augmented - PCA-Original",
+   "role": "descriptive"
+  }
+ },
+ "primary_comparison": "B",
+ "comparison_meaning": {
+  "A": "the initialization effect: data, packing, recipe, seeds and evaluation identical",
+  "B": "the effect of adding the fluid increment WITH the 786 extra optimizer steps and 1.27x FLOPs it brings; never the data content's isolated causal effect",
+  "C": "end to end; descriptive only (estimate, interval, per-seed estimates, rates); no label is assigned or cited"
+ },
+ "multiplicity": "A and B are separate questions, each decided at its own 95% interval and never combined into one claim; within a decided comparison the four static-axis contrasts are a Holm family at alpha 0.05 (h1_statistics); every other unit is reported with its own estimate and labelled descriptive",
+ "evaluation": {
+  "set": {
+   "eval_set_id": "eval-set-1",
+   "status": "frozen",
+   "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+   "validity_mask": "v1 (6 items excluded; formal 714 = 570 static + 144 interactive)",
+   "scoring_protocol": "each component's scorer.formal_protocol (v2 for eval-set-1), unchanged",
+   "action_protocol": "v2 (the protocol the interactive episodes are generated and replayed under)",
+   "every_item": "every item of every unit is generated for every checkpoint; the validity mask and core decide which rows enter the formal numbers"
+  },
+  "decoding": {
+   "protocol_id": "nucleus_v1",
+   "path": "configs/shared/evaluation/decoding/nucleus_v1.json",
+   "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4",
+   "sampling": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": -1,
+    "min_p": 0.0,
+    "repetition_penalty": 1.0,
+    "presence_penalty": 0.0,
+    "frequency_penalty": 0.0
+   },
+   "samples_per_item": 1,
+   "seed_rule": {
+    "base": 20261024,
+    "key": "<namespace>|<item id>|<turn>|<sample>",
+    "namespace": "the evaluated unit's key <component>__<unit> (e.g. fluid_reasoning_720__dev_v1, stage3_capability_846__gsm8k): uncapped_eval reads it from the prompt file's stem, which dose_driver.evaluate_all stages as <component>__<unit>.jsonl; run_battery takes it as --seed-namespace",
+    "derivation": "int.from_bytes(sha256('<base>|<key>').digest()[:8], 'big') % 2**63",
+    "independent_of": "the model, the arm and the training seed: every checkpoint draws with the same seed for the same item, turn and sample"
+   },
+   "binding": "the driver passes it to every evaluation and refuses a configuration without it, a generation already on the volume recorded under another protocol, and any generation summary that does not carry it; it never falls back to greedy decoding"
+  },
+  "context": "8,192 trained context; each sample generates until EOS or the context minus its prompt (AGENTS.md P18); degeneration stops are recorded, never re-scored as correct",
+  "every_checkpoint": "two PCA-Original, two D4-Original and two D4-Augmented checkpoints, each generated once under this protocol"
+ },
+ "primary_measure": {
+  "what": "correctness on the FORMAL static items of fluid_reasoning_720 (dev_v1): 570 items over four axes (task-contained deduction, inductive rule discovery, compositional generalization, abstract analogical); held-out rule families",
+  "row": "one row per (arm, seed, item): correct = the formal scorer's verdict on the one nucleus sample",
+  "cluster": "the item's rule family (family_id)",
+  "interactive": "EXPLORATORY: the 144 interactive episodes are generated, scored and reported per arm and seed beside the decision, never inside it or its Holm family; h1_statistics refuses interactive rows. Why: the increment's interactive data comes from the same 3 calibration families as H1's (hidden_buttons act.reverse 17 episodes, probe_function threshold 8, digit_sum 3: 28 episodes, 153 turns), the scope rule the maintainer set for H1 on 2026-10-22"
+ },
+ "decision_rule": {
+  "module": "scripts/stages/stage-2/reasoning_data/h1pa_statistics.py",
+  "rule_id": "stage2.reasoning_data.h1pa_statistics/v1",
+  "applies": "stage2.reasoning_data.h1_statistics/v1",
+  "bound_sha256": {
+   "scripts/stages/stage-2/reasoning_data/h1pa_statistics.py": "a06f31d3dca7093096df945e4e70b550f4eb7ca13be3190ea4af7a1c1bf5048e",
+   "scripts/stages/stage-2/reasoning_data/h1_statistics.py": "c4c1191102f8b293feb9f165a7c72f1a69af3b96789c564e1747d95ea20a2836",
+   "src/aadistill/evaluation/paired_stats.py": "7d41ef3199eee78d3a9d9460c3b8f4c3bb33773d5d6b4945c57a62df934fe782"
+  },
+  "constants": {
+   "sesoi": 0.05,
+   "sesoi_axis": 0.08,
+   "level": 0.95,
+   "iterations": 10000,
+   "bootstrap_seed": 20261022,
+   "floor_rate": 0.02,
+   "min_discordant": 10,
+   "min_informative_clusters": 5,
+   "alpha_axes": 0.05
+  },
+  "effect_size": "the item-weighted mean of d_i, d_i = mean over the two seeds of (Y correct - X correct) on item i: an absolute difference in correctness rate, in percentage points",
+  "interval": "two-sided 95% percentile interval, rule-family cluster bootstrap stratified by axis, 10,000 resamples; it covers item sampling and each item's sampling outcome, never training-seed variation",
+  "seed_aggregation": "two seeds are two observations of one item (mean per item); each seed's own estimate is reported, and every directional label requires both on its side; no seed is selected or dropped",
+  "floor": "an arm whose pooled formal static correctness is below 2% is at the floor: both arms at the floor -> NOT_RESOLVED with flag FLOOR; one arm -> flag FLOOR_<arm> beside the label; NO_GO needs neither arm at the floor; a GO off the floor is still a GO",
+  "labels_in_order": [
+   "NOT_RESOLVED",
+   "GO",
+   "REVERSED",
+   "NO_GO",
+   "INCONCLUSIVE"
+  ],
+  "labels": {
+   "GO": "the interval lies wholly above +SESOI and every seed's estimate is above +SESOI: for B, adding the fluid increment with its compute raises static fluid correctness by a meaningful amount; for A, D4 Top-1 initializes better than PCA under E1's recipe",
+   "NO_GO": "the interval and every seed's estimate lie inside (-SESOI, +SESOI) and neither arm is at the floor: a meaningful effect is excluded at this scale",
+   "REVERSED": "the interval lies wholly below -SESOI and every seed's estimate is below -SESOI: a meaningful harm",
+   "INCONCLUSIVE": "the evaluation resolved but the interval or a seed crosses a SESOI boundary: no decision either way, and no claim of an effect or of its absence",
+   "NOT_RESOLVED": "fewer than 10 discordant item-seed pairs or 5 informative clusters, a degenerate bootstrap, or both arms below 2% (flag FLOOR): the evaluation did not discriminate between the arms; no equivalence, no exclusion of a gain, no GO"
+  },
+  "by_axis": "each static axis with SESOI 0.08 under the same rule (clusters unstratified); an axis gain counts only when its label is GO and it survives Holm"
+ },
+ "reported_beside": [
+  "each fluid axis per arm and seed, and the two generator tiers (evaluation-only generators: unseen format; shared generators' held-out families: unseen rule)",
+  "the 144 interactive episodes (exploratory)",
+  "every supporting and guard-rail unit of eval-set-1 on its own (math_verified, gsm8k, multihop, rag, answerability_paired, safety_paired, eval_behavior_v0 core, stage3_legacy_150 as in-sample regression only)",
+  "usable rollout and each component, natural termination, degeneration stops and context-limit hits",
+  "training loss and validation loss on E1's 16 sequences (diagnostics, never a reasoning result)"
+ ],
+ "never": [
+  "mixing a greedy result (E1's, H1's or any other) with a nucleus one",
+  "changing this rule, its constants, the evaluation set, the mask, the scorers or the decoding protocol after a result is seen",
+  "a pooled score across units or capabilities",
+  "selecting, dropping or adding a seed; re-running a complete valid evaluation for another draw",
+  "reading usable rollout, loss, KL or natural termination as reasoning"
+ ],
+ "validated": "scripts/stages/stage-2/reasoning_data/tests/test_h1pa_statistics.py: every label reachable on synthetic rows, greedy rows refused, a changed rule refused, interactive rows refused",
+ "authorizes": "nothing"
+}

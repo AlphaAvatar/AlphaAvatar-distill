@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 132,
+  "runs_unrecorded": 152,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -766,8 +766,8 @@
    },
    "calibration_volume": {
     "recorded": 0,
-    "unrecorded": 38,
-    "total": 38
+    "unrecorded": 43,
+    "total": 43
    },
    "continuation_b": {
     "recorded": 5,
@@ -853,6 +853,11 @@
     "recorded": 0,
     "unrecorded": 2,
     "total": 2
+   },
+   "reasoning_data": {
+    "recorded": 0,
+    "unrecorded": 15,
+    "total": 15
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -2911,6 +2916,46 @@
   },
   {
    "experiment_id": "calibration_volume",
+   "run_id": "mixr_20261026_140539",
+   "root": "logs/stages/stage-0/calibration_volume/runs/mixr_20261026_140539",
+   "n_files": 3,
+   "digest": "1eea691ca430ef3d342a0bffa90af5172ab6060030d1841b0483a98484268730",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "mixs_20261026_102914",
+   "root": "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_102914",
+   "n_files": 3,
+   "digest": "cbcbb978a6692078f644ae4c019c49fb9328a0306b846a533386abca0f31c246",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "mixs_20261026_103634",
+   "root": "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_103634",
+   "n_files": 7,
+   "digest": "0b18f122d84a629399a748ad1cf7bbee4ab40b5dbc81c695b0636f24a2b19353",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "mixs_dry_20261026_102813",
+   "root": "logs/stages/stage-0/calibration_volume/runs/mixs_dry_20261026_102813",
+   "n_files": 3,
+   "digest": "74495595e5298257e30486fd84cba19af9148c8f4225bad207bf366743d57798",
+   "why": "no run manifest; its closeout states: ABANDONED_BEFORE_LAUNCH"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "mixvol_20261026_102835",
+   "root": "logs/stages/stage-0/calibration_volume/runs/mixvol_20261026_102835",
+   "n_files": 3,
+   "digest": "215873474e1d3db84aaaa38b219f77a6ab47839ee60c806291d3c0748758bbed",
+   "why": "no run manifest; its closeout states: VOLUME_DELETED"
+  },
+  {
+   "experiment_id": "calibration_volume",
    "run_id": "netvol_20261019_051206",
    "root": "logs/stages/stage-0/calibration_volume/runs/netvol_20261019_051206",
    "n_files": 3,
@@ -3820,6 +3865,126 @@
    "n_files": 12,
    "digest": "2a18d8d5ec3c8778a49e5e7f20aafbfc2538a1b6deafd8a749113d77e897ac2c",
    "why": "no run manifest; its closeout states: COMPLETE: STRUCTURAL_CHANGE, re-derived off-pod from the step records"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1gen_20261022_190653",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1gen_20261022_190653",
+   "n_files": 4,
+   "digest": "132b245cc909059e975bc874e6b1f1dc634665dfd2438522e954b64538f400a3",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1p1g_20261023_185836",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1p1g_20261023_185836",
+   "n_files": 5,
+   "digest": "83befcd36f116c879845d2fd08498311718fa4d0eb467c3c332935e83fd12db1",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1p1g_20261023_191644",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1p1g_20261023_191644",
+   "n_files": 8,
+   "digest": "c7cf66a1dd7377880ab6b5d097b04718173006d72247aaa6ecd3e4e69ade7c97",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1p1t_20261023_094007",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1p1t_20261023_094007",
+   "n_files": 7,
+   "digest": "4fa881cf9fef1c5e0da6dfd285bad7afea0723e06f6e648185a36f7b2be7636e",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1p2a_20261023_232905",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1p2a_20261023_232905",
+   "n_files": 7,
+   "digest": "d28f16f2991ec24f9c2c4257593ce276e2c4af09eb04ed02518821025389c1cc",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1p2b_20261023_195303",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1p2b_20261023_195303",
+   "n_files": 5,
+   "digest": "4edd014a5bc0e8e7de1156331918a2559cc5dfdb854e062cffc022d8cb925c15",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1p2b_20261023_205037",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1p2b_20261023_205037",
+   "n_files": 5,
+   "digest": "11a6c6cd4d241acb1617e11afce64fe7f7063c790f39129011656fb4c54e837f",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1pa2_20261024_203226",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1pa2_20261024_203226",
+   "n_files": 3,
+   "digest": "5e755375522551947eac8357e20e1d1bc6ddce436fc9ef5f43895a7c973c3298",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1pa2_20261025_055042",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1pa2_20261025_055042",
+   "n_files": 3,
+   "digest": "57bd89bd6fbb48250c3c546d7c9a1a9f9952d97494b61d5ff9f55cc71bce3e9e",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1pat_20261024_115517",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1pat_20261024_115517",
+   "n_files": 3,
+   "digest": "d5eeb077d48ea60fa0f5f0024da8d2a97b43b58e0bd016ded010715ac78a6b4d",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1pav_20261024_190211",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1pav_20261024_190211",
+   "n_files": 3,
+   "digest": "236a1ab0df185e4e4030b15d4df4a759747cfa47267fd01f8a9ac87f1baa1674",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1pav_20261024_191336",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1pav_20261024_191336",
+   "n_files": 3,
+   "digest": "8fe3eb21176caa22a89285155081b1f692ae22026ada4a094ebae22d3fa2b2ae",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1pav_20261024_192448",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1pav_20261024_192448",
+   "n_files": 3,
+   "digest": "ddaed31866f42d579b85d40b954008eb49e76e574f876ca9ed588d6991ebe0e2",
+   "why": "no run manifest; its closeout states: INCOMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1pav_20261024_194216",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1pav_20261024_194216",
+   "n_files": 4,
+   "digest": "d485bd64cb29b9b9a2e43d9eeb7aad9979f01a16a7067251a6076d465495beed",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "reasoning_data",
+   "run_id": "h1pav_20261024_201011",
+   "root": "logs/stages/stage-2/reasoning_data/runs/h1pav_20261024_201011",
+   "n_files": 4,
+   "digest": "e8b4d69ac05f413ad03c828ea5bea4f21e31abee544c21781c859eeedaa78bb2",
+   "why": "no run manifest; its closeout states: COMPLETE"
   }
  ],
  "authorizes": "nothing"

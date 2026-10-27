@@ -1,0 +1,314 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1pa_fluid_final/v2",
+ "written_utc": "2026-10-24T16:32:49Z",
+ "terminal": "SUCCESS",
+ "supersedes": {
+  "record": "audit/h1pa_fluid_final.json",
+  "commit": "ce8bf96c",
+  "why": "that build cut the sequential pack at 2.96M, which split 4 multi-turn episodes (their later turns untrained); its identities stay recorded as a superseded build"
+ },
+ "admission": {
+  "rule": "units in the order of their first session in the packer's stratified interleave on the declared mixture, each with all its sessions, until the admitted supervised tokens reach the target",
+  "target": 2960000,
+  "admitted_supervised_tokens": 2962514,
+  "over_target": 2514,
+  "reaches_target": true,
+  "last_unit_supervised_tokens": 3448,
+  "excluded_supervised_tokens": 165665,
+  "admitted_mixture": {
+   "primary.abstract_analogical/s0_generators_v2_calsplit": 0.123489,
+   "primary.compositional_generalization/reasoning_core": 0.040353,
+   "primary.compositional_generalization/reasoning_gym": 0.034051,
+   "primary.compositional_generalization/s0_generators_v2_calsplit": 0.14053,
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 0.246288,
+   "primary.interactive_adaptation/s0_generators_v2_calsplit": 0.167869,
+   "primary.task_contained_deduction/prontoqa": 0.046317,
+   "primary.task_contained_deduction/reasoning_core": 0.047027,
+   "primary.task_contained_deduction/reasoning_gym": 0.029949,
+   "primary.task_contained_deduction/s0_generators_v2_calsplit": 0.124127
+  },
+  "admitted_unit_ids_sha256": "7586929f7fb1ba28d0bf9beeeede970dd2aac7457125bce90574c84dd408deb9",
+  "excluded_unit_ids": [
+   "3f80140227b0a70c5bd2",
+   "404725a95ce6ea7f7aa0",
+   "4f3b363dd0b30f0989bf",
+   "5470c7fa08fd6c322045",
+   "6944d8d56a1fedd249da",
+   "6c884b9afa8c8737b4b0",
+   "7a2074f23ae7e8fd5ab5",
+   "7afc949f6ceecd0d7093",
+   "7d375585777f4c1df584",
+   "7d8a6d02cbcb99143419",
+   "8711049c59c6b80a60ec",
+   "8c81bf43bf9080fdf86a",
+   "8f90f3c4225ee8d2fa46",
+   "9545b0a9bde209576335",
+   "96ae43cc16ce1f2f52ca",
+   "98eb904e6c1c7e749eae",
+   "a71cdc9013488fc68c33",
+   "ad72af6f7242ea9569e0",
+   "af044b8ea4d5e49a014d",
+   "b0de70f03f3233bab39d",
+   "b40f92d7a339ee8b3447",
+   "bb5c602fbf11c17d067e",
+   "bf9bb6cf5fb0a6b5e66c",
+   "c0c4b8d125e937a81cba",
+   "c2877d9f027e28d22252",
+   "cab34172a23138a0c096",
+   "cf2da12ad3cc5ab16f38",
+   "d261438e2ab0dd79cb81",
+   "d2e42f4e1a0c3656a493",
+   "d4718db5d154cefac2ba",
+   "d6ac4b270f0d9e79850a",
+   "dcc32e21ceb10e038859",
+   "dfdf612343fcbc50acac",
+   "dfe14fde5377790a8269",
+   "e041a3bcce8714ad49e0",
+   "ed3f6f055b80cf175e70",
+   "efa4647352da1c2d27fd",
+   "f69c274f070584d4e4ac",
+   "fdca991337247cb4928b"
+  ]
+ },
+ "whole_units": {
+  "admitted_units": 642,
+  "excluded_units": 39,
+  "admitted_and_excluded_partition_the_pool": true,
+  "units_partially_trained": 0,
+  "examples": [],
+  "excluded_units_with_a_trained_session": 0,
+  "trained_sessions_equal_the_admitted_units_sessions": true,
+  "multi_turn_episodes": {
+   "admitted": 28,
+   "excluded": 2,
+   "turns_admitted": 153,
+   "turns_excluded": 10
+  },
+  "pass": true
+ },
+ "pool": {
+  "by_run": {
+   "h1gen_20261022_190653": {
+    "phase": "P1",
+    "pool_units": 593,
+    "trained_units": 593,
+    "trained_sessions": 708,
+    "trained_supervised_tokens": 2671150
+   },
+   "h1p1t_20261023_094007": {
+    "phase": "P1t",
+    "pool_units": 23,
+    "trained_units": 23,
+    "trained_sessions": 23,
+    "trained_supervised_tokens": 136132
+   },
+   "h1pat_20261024_115517": {
+    "phase": "PA1",
+    "pool_units": 65,
+    "trained_units": 26,
+    "trained_sessions": 36,
+    "trained_supervised_tokens": 155232
+   }
+  },
+  "units": 681,
+  "sessions": 814,
+  "supervised_tokens": 3128179
+ },
+ "isolation": {
+  "train_validation": {
+   "members": {
+    "fluid_training_sessions": 767,
+    "fluid_training_units": 642,
+    "e1_validation_sessions": 60,
+    "e1_validation_units": 60,
+    "e1_training_sessions": 4524,
+    "excluded_fluid_sessions": 47
+   },
+   "prompt_overlap": {
+    "fluid_training_x_e1_validation": 0,
+    "fluid_training_x_e1_training": 0,
+    "excluded_fluid_x_e1_validation": 0,
+    "fluid_training_x_excluded_fluid": 0
+   },
+   "unit_overlap": {
+    "fluid_training_x_e1_validation": 0,
+    "fluid_training_x_excluded_fluid": 0,
+    "session_ids_fluid_training_x_e1_validation": 0
+   },
+   "near_duplicate": {
+    "protocol": {
+     "n": 13,
+     "threshold": 0.5,
+     "max_document_frequency": 5
+    },
+    "fluid_training_against_e1_validation": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "e1_validation_against_fluid_training": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "excluded_fluid_against_fluid_training": {
+     "with_any_shared_ngram": 26,
+     "flagged": 0,
+     "flagged_ids": []
+    }
+   },
+   "rule_family": {
+    "fluid_training_families": 44,
+    "e1_validation_families": 0,
+    "shared": [],
+    "_": "corpus_v2 sessions carry no rule family; a shared family would be listed"
+   },
+   "pass": true
+  },
+  "fluid_training_internal": {
+   "units": 642,
+   "units_sharing_a_prompt": 0,
+   "examples": [],
+   "units_sharing_a_target": 0,
+   "units_without_target": 0,
+   "validation_prompts_also_in_training": 0
+  },
+  "eval_set_1_R0_R9": {
+   "pass": true,
+   "n_items": 642,
+   "violations": [],
+   "R1_held_out_overlap": {},
+   "R2_flagged": 0,
+   "R2_checked": 614,
+   "R3_overlap": {
+    "generator_family": 0,
+    "family": 0
+   },
+   "R8_in_sample_overlap": {},
+   "not_established": "semantic mechanism isolation beyond R9's tabulated rules: families without tabulated rules and external modules are covered by the declared review (external_modules.json :: mechanism), not by these checks"
+  }
+ },
+ "fluid_increment": {
+  "packed_sequences": 524,
+  "system_prompt_groups": 1,
+  "sequences_with_two_or_more": {
+   "axes": 198,
+   "cells": 212,
+   "sources": 91
+  },
+  "training_samples_per_sequence": 1.46,
+  "units_per_sequence": 1.46,
+  "samples_per_sequence_distribution": {
+   "1": 309,
+   "2": 189,
+   "3": 24,
+   "4": 2
+  },
+  "axes_sharing_a_sequence": {
+   "primary.inductive_rule_discovery + primary.task_contained_deduction": 51,
+   "primary.inductive_rule_discovery + primary.interactive_adaptation": 41,
+   "primary.interactive_adaptation + primary.task_contained_deduction": 39,
+   "primary.compositional_generalization + primary.inductive_rule_discovery": 38,
+   "primary.compositional_generalization + primary.interactive_adaptation": 28,
+   "primary.compositional_generalization + primary.task_contained_deduction": 25,
+   "primary.abstract_analogical + primary.task_contained_deduction": 7,
+   "primary.abstract_analogical + primary.interactive_adaptation": 5,
+   "primary.abstract_analogical + primary.compositional_generalization": 2
+  },
+  "sequences_holding_one_unit_twice": 0,
+  "padding_ratio": 0.2658,
+  "supervised_tokens": 2962514,
+  "samples_packed_whole": "767/767",
+  "members_traceable_to_task_source_axis_unit": "767/767",
+  "reaches_2p96M": true,
+  "pack": "artifacts/stages/stage-2/reasoning_data/packs/D4A_fluid_whole",
+  "outputs": {
+   "blocks.npz": "dd0749a60c0e80464f2d7654ccb95fe63942f07888f683df33081a2b2aca3f1f",
+   "audit.jsonl": "dbcff43c445303073d49b8c223d9afd87f424157711b133522700abdf12f601f",
+   "ladder.json": "4810de88b535550500186422ba9ff4b53934b6ba7d61075bebc2f631e6180e49"
+  },
+  "declared_mixture": {
+   "primary.abstract_analogical/s0_generators_v2_calsplit": 0.122521,
+   "primary.compositional_generalization/reasoning_core": 0.039755,
+   "primary.compositional_generalization/reasoning_gym": 0.033191,
+   "primary.compositional_generalization/s0_generators_v2_calsplit": 0.141328,
+   "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 0.246563,
+   "primary.interactive_adaptation/s0_generators_v2_calsplit": 0.168378,
+   "primary.task_contained_deduction/prontoqa": 0.046891,
+   "primary.task_contained_deduction/reasoning_core": 0.046505,
+   "primary.task_contained_deduction/reasoning_gym": 0.030126,
+   "primary.task_contained_deduction/s0_generators_v2_calsplit": 0.124743
+  },
+  "builder_input": "artifacts/stages/stage-2/reasoning_data/packs/D4A_fluid_whole_sessions.jsonl",
+  "builder_input_sha256": "5d8355abaf06fa2dc8ab26dfbf360367a70d8dd07bd6a89e8acc905733e16fc1"
+ },
+ "merged": {
+  "pack": "artifacts/stages/stage-2/reasoning_data/packs/D4A_merged_whole",
+  "status": "COMPLETE: the fluid increment reaches 2.96M",
+  "outputs": {
+   "blocks.npz": "8b97b202e2c1f861fe5c99e3a247ce7fdd063c354b7668ddc1ba75fedb8043f3",
+   "audit.jsonl": "0fab85184e83b5b5ebf0454cb656d3752e80f48eeabc75a092a2a9906949080b",
+   "ladder.json": "dabd1405236fe4823d944d8215f6c2a5e8abf765115436578c6446c035e4e8f7"
+  },
+  "rung": {
+   "target_supervised_tokens": 5923021,
+   "reachable": true,
+   "n_blocks": 2468,
+   "actual_supervised_tokens": 5923021,
+   "e1_supervised_tokens": 2960507,
+   "fluid_supervised_tokens": 2962514
+  }
+ },
+ "identity": [
+  {
+   "check": "merged: E1's 1,944 training sequences byte for byte",
+   "got": true,
+   "want": true,
+   "ok": true
+  },
+  {
+   "check": "merged: E1's 16 validation sequences byte for byte",
+   "got": true,
+   "want": true,
+   "ok": true
+  },
+  {
+   "check": "merged: the fluid sequences as packed",
+   "got": true,
+   "want": true,
+   "ok": true
+  },
+  {
+   "check": "merged: its E1 part names E1's pack",
+   "got": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "want": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "ok": true
+  },
+  {
+   "check": "fluid builder input",
+   "got": "5d8355abaf06fa2dc8ab26dfbf360367a70d8dd07bd6a89e8acc905733e16fc1",
+   "want": "5d8355abaf06fa2dc8ab26dfbf360367a70d8dd07bd6a89e8acc905733e16fc1",
+   "ok": true
+  },
+  {
+   "check": "fluid pack built from that input",
+   "got": "5d8355abaf06fa2dc8ab26dfbf360367a70d8dd07bd6a89e8acc905733e16fc1",
+   "want": "5d8355abaf06fa2dc8ab26dfbf360367a70d8dd07bd6a89e8acc905733e16fc1",
+   "ok": true
+  },
+  {
+   "check": "fluid part of the merged set equals the fluid pack's sequences",
+   "got": true,
+   "want": true,
+   "ok": true
+  },
+  {
+   "check": "E1 pack unchanged",
+   "got": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "want": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+   "ok": true
+  }
+ ],
+ "identity_ok": true,
+ "authorizes": "nothing"
+}

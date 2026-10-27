@@ -1,0 +1,17 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1_driver_status/v1",
+ "run_id": "h1p2b_20261023_195303",
+ "formal": true,
+ "started_utc": "2026-10-23T20:07:37Z",
+ "units": {
+  "B-s20260726": {
+   "outcome": "failed",
+   "error": "C1PackagingError: /runpod-volume/h1/B-s20260726/train/a1/checkpoints/step_000614/model is not a directory"
+  }
+ },
+ "terminal": "FAILED",
+ "finished_utc": "2026-10-23T20:45:58Z",
+ "exit_code": 1,
+ "observers_open": 0,
+ "teardown": "the launcher's: this driver creates and deletes no provider resource"
+}

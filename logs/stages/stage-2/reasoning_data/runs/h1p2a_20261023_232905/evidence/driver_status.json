@@ -1,0 +1,25 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.h1_driver_status/v1",
+ "run_id": "h1p2a_20261023_232905",
+ "formal": true,
+ "started_utc": "2026-10-23T23:38:58Z",
+ "units": {
+  "A-s20260726": {
+   "unit": "A-s20260726",
+   "outcome": "complete",
+   "action": "train",
+   "attempt": 1
+  },
+  "A-s20260727": {
+   "unit": "A-s20260727",
+   "outcome": "complete",
+   "action": "train",
+   "attempt": 1
+  }
+ },
+ "terminal": "ALL_DONE",
+ "finished_utc": "2026-10-24T05:01:53Z",
+ "exit_code": 0,
+ "observers_open": 0,
+ "teardown": "the launcher's: this driver creates and deletes no provider resource"
+}

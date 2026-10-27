@@ -1,0 +1,107 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.isolation_report/v1",
+ "rules": "configs/stages/stage-2/reasoning_data/isolation_rules.json",
+ "eval_set": "eval-set-1",
+ "n_items": 2517,
+ "results": {
+  "R1_held_out_keys": {
+   "held_out_overlap": {},
+   "pass": true
+  },
+  "R8_in_sample_overlap": {},
+  "R2_near_duplicate": {
+   "n": 13,
+   "threshold": 0.5,
+   "max_document_frequency": 5,
+   "checked": 2061,
+   "by_unit": {
+    "fluid_reasoning_720/dev_v1": {
+     "with_any_shared_ngram": 1062,
+     "flagged": 0
+    },
+    "stage3_capability_846/answerability_paired": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    },
+    "stage3_capability_846/eval_behavior_v0": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    },
+    "stage3_capability_846/gsm8k": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    },
+    "stage3_capability_846/knowledge": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    },
+    "stage3_capability_846/math_verified": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    },
+    "stage3_capability_846/multihop": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    },
+    "stage3_capability_846/rag": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    },
+    "stage3_capability_846/safety_paired": {
+     "with_any_shared_ngram": 0,
+     "flagged": 0
+    }
+   },
+   "flagged": 0,
+   "flagged_by_unit": {},
+   "flagged_ids": [],
+   "flagged_items": [],
+   "pass": true
+  },
+  "R3_rule_family": {
+   "applicable_items": 2517,
+   "overlap": {
+    "generator_family": 0,
+    "family": 0
+   },
+   "examples": {},
+   "pass": true
+  },
+  "R4_eval_only_generators": {
+   "generators": {
+    "grid_transform@v1": 276,
+    "defined_ops@v1": 372,
+    "scan_language@v1": 372,
+    "list_induction@v1": 273,
+    "string_induction@v2": 273,
+    "hidden_buttons@v1": 228,
+    "probe_function@v1": 228,
+    "entity_tracking@v1": 165,
+    "knights_knaves@v1": 165,
+    "ordering@v2": 165
+   },
+   "eval_only_hits": {},
+   "task_type_hits": {},
+   "items_without_task_type": 0,
+   "pass": true
+  },
+  "R5_shared_generator_exposure": {
+   "items_from_shared_generators": 2517,
+   "training_seed_range": [
+    3000000,
+    4000000
+   ],
+   "violations": [],
+   "n_violations": 0,
+   "historical_pool": false,
+   "pass": true
+  },
+  "R6_source_split": {
+   "violations": {},
+   "pass": true
+  }
+ },
+ "violations": [],
+ "pass": true,
+ "stage0_task_sets_content_overlap": 0
+}

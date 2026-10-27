@@ -1,0 +1,176 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.mixed_application/v1",
+ "version": 2,
+ "written_utc": "2026-10-26T09:30:14Z",
+ "status": "PROPOSED for the maintainer's final authorization review. NOTHING PAID IS AUTHORIZED OR ISSUED: no grant, pod, GPU or network volume exists for this study until the maintainer grants this application and sets the project cap, and the issuer re-verifies the position at issuance",
+ "supersedes": {
+  "version": 1,
+  "sha256": "57ac217b8551222fb043952d430d12e81a4c88ceb18e5f685792595bde105c6b",
+  "commit": "6e2887ca3afb1c9b57818be4a904a0f5f577d99a",
+  "why": "maintainer review 2026-10-26: the 2x profile must be exactly 50/50 (v1's was 50.29 : 49.71), and this round's application covers 2x only (v1 carried a 4x entry criterion and a 4x cost)"
+ },
+ "scope": "2x ONLY: MC1, MC2, their storage, engineering recovery and teardown. 4x is outside this application's budget, authorization, implementation and every automatic flow",
+ "recommended": "2x: one formal single-profile D1 full search on calib.s0m_mix_2x@v2 (exactly 71,216 fluid = 71,216 supporting scored positions), then its Top-1 recovered and evaluated exactly as D4-Augmented on both seeds",
+ "records": {
+  "design": {
+   "path": "configs/stages/stage-0/calibration_volume/mixed_design_v2.json",
+   "sha256": "6872e0e582d416a48265c9fed16fe743458dd5dbc8761a3344d05a216c03f99d"
+  },
+  "profiles": {
+   "path": "configs/stages/stage-0/calibration_volume/profiles_mixed_v2.json",
+   "sha256": "615e03c99ceb0ec77401f9e5ba177de2edcfbb02139960d4b8c7955b707a142d"
+  },
+  "feasibility": {
+   "path": "logs/stages/stage-0/calibration_volume/design/mixed_feasibility_v2.json",
+   "sha256": "8abaeb39d5ceac8da9a5254c7d048be9baef782f99a2b6f45b2c5f7f58b7162e"
+  },
+  "preregistration": {
+   "path": "logs/stages/stage-0/calibration_volume/plans/mixed_preregistration.json",
+   "sha256": "0a8d68eca6b9add907975e79dd6d0cbfb402b4b4e1f2eacc26556fbb5b26951c"
+  },
+  "decision_rule": {
+   "path": "scripts/stages/stage-0/calibration_volume/mixed_statistics.py",
+   "sha256": "5b6459d075c75c4c23b6bb450d752b0892865c941b70310829206324e42235c4"
+  },
+  "provider_snapshot": {
+   "path": "logs/budget/provider/runpod_billing_2026-10-26T0928Z.json",
+   "sha256": "ad6f8418ec7285fa8a231026e2742e76d0a84b37b220f9a131d5c0f1ed2154c1"
+  }
+ },
+ "calibration_profile": {
+  "id": "calib.s0m_mix_2x@v2",
+  "content_sha256": "9a6c2782c2fc014c6b73077e414549989b7fedf52609446924634b33b1ead75d",
+  "uesp": {
+   "fluid": 71216,
+   "supporting": 71216,
+   "total": 142432,
+   "nominal": 90000
+  },
+  "forward_tokens": 170901,
+  "superseded_v1": {
+   "uesp": {
+    "fluid": 71216,
+    "supporting": 70401,
+    "total": 141617
+   },
+   "forward_tokens": 169808
+  }
+ },
+ "phases": {
+  "MC1_search": {
+   "what": "the formal D1 full search (forward baseline stage1_init.d1_target_aware.scored_v1@v1) with one profile, calib.s0m_mix_2x@v2; commit k=1; materialize and identify the Top-1; secure it (relay upload + dev-box read-back by sha256) and the search evidence (journal, states.jsonl, telemetry, search_record)",
+   "hardware": "1x NVIDIA A100-SXM4-80GB (an 80 GB card is required: DEPTH on 8,192-token items at micro-batch 3 runs out of memory on a 48 GB L40S)",
+   "datacenter": "chosen at launch by a live $0 query: A100-80GB stock with network-volume support (the volume's datacenter then fixes the GPU)",
+   "network_volume": {
+    "size_gb": 150,
+    "days_reserved": 3,
+    "usd": 1.05,
+    "why": "the search's durable state: 34 states, about 96.0 GB at the historical per-level state sizes, plus the Top-1 and the journal; retired under AGENTS.md 2.5 once the Top-1 and the evidence are durable elsewhere"
+   },
+   "expected": {
+    "session_minutes": 198.5,
+    "usd": 6.01,
+    "depth_expansions": 4.33
+   },
+   "bound": {
+    "session_minutes": 484.5,
+    "depth_expansions": 16,
+    "usd": 14.67
+   },
+   "hard_cap_usd": 15,
+   "_cap": "the bound is DEPTH in every one of the 16 tree positions it can occupy; history never put it below level 3 (feasibility :: compute.model.historical_depth_fraction_by_level)",
+   "_recomputed": "from calib.s0m_mix_2x@v2's 170,901 forward tokens (v1: 169,808; +0.64%) by the same telemetry model; GPU plus container disk; v1 was $5.99 expected / $14.59 bound"
+  },
+  "MC2_recovery_and_evaluation": {
+   "what": "two units, Mix-Augmented-s20260726 and Mix-Augmented-s20260801: D4-Augmented's recovery from the MC1 Top-1 (3,702 optimizer steps on the 5,923,021-token merged set), then every item of eval-set-1 under nucleus_v1; nothing of D4-Augmented is retrained or re-evaluated",
+   "hardware": "1x NVIDIA L40S in EUR-IS-2, D4-Augmented's GPU class, with am5m373kuq mounted",
+   "storage": "am5m373kuq (30 GB): the four D4 checkpoints (9.54 GB) stay; the two new fp32 checkpoints add 4.77 GB; peak about 24.0 GB during the second training (one final checkpoint + one live save point pair + evaluation evidence), inside the provider's 30 GB",
+   "expected": {
+    "session_minutes": 589.5,
+    "usd": 10.91,
+    "per_unit_minutes": 287.3,
+    "measured_from": "H1-PA's D4-Augmented units (train 225.0 / 223.1 min, evaluate 61.1 / 65.3 min)"
+   },
+   "bound": {
+    "session_minutes": 735.9,
+    "usd": 13.63
+   },
+   "hard_cap_usd": 14,
+   "_recomputed": "unchanged by the profile correction: the recovery and evaluation are D4-Augmented's fixed 3,702 steps and every item of eval-set-1, independent of the calibration the initialization was searched on"
+  }
+ },
+ "order": "MC1, then MC2 only after the Top-1 is durable and its identity recorded; at most one billing resource at a time; every pod deleted with the provider confirming it gone, observers closed in the same terminal path",
+ "money": {
+  "prices": {
+   "a100_80gb_usd_per_hour": 1.79,
+   "l40s_usd_per_hour": 1.09,
+   "volume_usd_per_gb_month": 0.07,
+   "container_disk_usd_per_gb_month": 0.1,
+   "_": "the billed rates of the last Stage-0 and H1-PA sessions; re-read live at the grant, and every cap below recomputed by the same formula if a rate is higher"
+  },
+  "expected_usd": 17.97,
+  "envelope": {
+   "MC1_hard_cap": 15,
+   "MC1_network_volume": 1.05,
+   "MC2_hard_cap": 14,
+   "engineering_reserve": 3.0,
+   "total_usd": 33.05,
+   "_reserve": "pre-science engineering subruns under AGENTS.md P12.1 (setup, staging, launcher repairs); cumulative with the sessions, never a fresh allocation",
+   "_fits": "unchanged at $33.05: the corrected MC1 bound $14.67 fits its $15 cap and MC2's $13.63 its $14; no 4x cost is in it"
+  },
+  "project": {
+   "provider_position": {
+    "snapshot": "logs/budget/provider/runpod_billing_2026-10-26T0928Z.json",
+    "fetched_utc": "2026-10-26T09:28:51+00:00",
+    "provider_billed_usd": 702.7656,
+    "unposted_sessions_usd": 0.0,
+    "account_resources": "network volume am5m373kuq only; no pod"
+   },
+   "storage": {
+    "am5m373kuq_reserved_usd": 4.2,
+    "posted_rows_netted_usd": 0.1138,
+    "_": "the reservation (30 GB x $0.07 x 2 months from creation) counted net of the volume rows the provider has already posted that can only be this volume's (2026-10-25 and 2026-10-26, the account's only volume); the 2026-10-24 row is not netted because it may include the retired 1980hnh75i"
+   },
+   "committed_usd": 706.8518,
+   "committed_usd_h1pa_formula": 706.9656,
+   "_h1pa_formula": "h1pa_governance.live_position counts the full reservation beside the volume's posted rows, so it grows about $0.07/day with no new spend; under it committed + envelope = $740.0156, $0.0156 over $740",
+   "cap_usd": 731.0,
+   "remaining_usd": 24.1482,
+   "committed_plus_envelope_usd": 739.9018,
+   "requested_cap_usd": 740,
+   "headroom_usd": 0.0982,
+   "status": "PROVISIONAL: $740 is the current application value, not an issued cap. At issuance the issuer re-reads the provider's billing, recomputes committed by the rule above and the corrected 2x costs, and issues nothing if committed + envelope exceeds the cap the maintainer sets; the agent never raises a cap or trims the envelope to make it fit"
+  }
+ },
+ "engineering_owed_before_the_first_paid_action": [
+  "a search-only session for the mixed treatment: search_session.treatment_profiles('2x', profiles_mixed_v2.json) into build_session with D4's execution options (depth_prefix_reuse, validate_on_search_device, prune_weights=False), dose_driver's S_search and X_export stages without its 0.86M recovery and evaluation; the Top-1 relayed and read back",
+  "a Mix-Augmented arm for the H1-PA driver: a study record that names D4-Augmented's dataset, recipe and schedule unchanged and the new Top-1 by digest, without touching h1pa.json or any H1-PA identity",
+  "the analysis: mixed_statistics.decide on the formal static rows, and the full eval-set-1 correct-and-usable table (h1pa_fullset over the four D4-Augmented and Mix-Augmented units)",
+  "the governance chain for MC1 and MC2 through the project's issuer -- re-reading the provider's billing at issuance, counting a storage reservation net of its posted rows, and refusing if committed + envelope exceeds the maintainer's cap -- and a $0 dry run of each launcher's success closeout before the first paid launch"
+ ],
+ "authorization_boundary": {
+  "if_granted": [
+   "MC1: one A100-80GB pod and one new network volume of at most 150 GB, deleted after the Top-1 and the evidence are durable",
+   "MC2: one L40S pod in EUR-IS-2 with am5m373kuq",
+   "the relay transfer of the one Top-1 checkpoint (1.2 GB, bf16)",
+   "ordinary P12.1 engineering repair inside the envelope"
+  ],
+  "never": [
+   "a 4x search, a 4x profile, a 4x cost or resource, or any search started automatically from a result of this study",
+   "a second 2x draw or any re-draw or re-balancing of calib.s0m_mix_2x@v2",
+   "a mixture-ratio search",
+   "new teacher data",
+   "retraining or re-evaluating D4-Augmented, PCA-Original or D4-Original",
+   "extra arms, seeds or evaluation sets",
+   "Stage 4/5 work",
+   "a merge to main",
+   "raising any cap",
+   "a billing resource kept past its phase",
+   "deleting or migrating the four D4 checkpoints"
+  ]
+ },
+ "out_of_scope": {
+  "4x": "maintainer decision 2026-10-26: no budget, authorization, implementation or automatic flow in this round. It remains a future option in the research documents (MIXED.md section 6); whether to run it is the maintainer's decision after the formal 2x result"
+ },
+ "authorizes": "nothing"
+}

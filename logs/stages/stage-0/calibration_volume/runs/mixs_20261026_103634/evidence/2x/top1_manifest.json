@@ -1,0 +1,106 @@
+{
+ "schema": "aadistill.stage0.calibration_volume.mixed_top1_manifest/v1",
+ "study_id": "stage0.calibration_volume.mixed_v2",
+ "run_id": "mixs_20261026_103634",
+ "search_run_id": "mixed_v2_2x_search",
+ "search_config_hash": "7ee23a7d9e6daf296c0930f21267493d893826767d73d64fe4df72d055a631f7",
+ "search_record_sha256": "3265dac8f825b2574a4219f88534de869338563a45bbcee48ecc141bd3e336d6",
+ "selection_sha256": "2bd8e1cd126f19655440e29639a05262f34f71466db8375961d1cdd4e51e3918",
+ "selected": {
+  "state_id": "9311dcde3cdaedbf54d506ccf7a98333",
+  "path": "DEPTH(calib.s0m_mix_2x@v2)->ATTENTION(calib.s0m_mix_2x@v2)->FFN(calib.s0m_mix_2x@v2)->RESIDUAL_WIDTH(calib.s0m_mix_2x@v2)",
+  "artifact_digest": "647a0ef381c8a5e0f94558fba82678ebfb8cba11f7392fe9172c9603fa631608",
+  "single_shard_sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3",
+  "checkpoint_path": "/workspace/aad/artifacts/audit/stage0_calvol_search/2x/search/states/9311dcde3cdaedbf54d506ccf7a98333/1d0d1dde93792675004a6e19f1893538",
+  "num_parameters": 596049920,
+  "impl_ids": [
+   "depth.causal_kl_greedy_v1",
+   "attention.activation_importance_v1",
+   "ffn.activation_importance_v0",
+   "width.global_pca_v0"
+  ],
+  "calibration_profiles": [
+   "calib.s0m_mix_2x@v2"
+  ],
+  "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+  "weights_digest": "531a2ccd2d6387058f495f26c1e462d95b076099a05f6af4cf61d05be0c2c904"
+ },
+ "identity": {
+  "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+  "artifact_digest": "647a0ef381c8a5e0f94558fba82678ebfb8cba11f7392fe9172c9603fa631608",
+  "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+  "extra": {},
+  "index_sha256": null,
+  "n_shards": 1,
+  "num_parameters": 596049920,
+  "path": "/workspace/aad/artifacts/audit/stage0_calvol_search/2x/search/states/9311dcde3cdaedbf54d506ccf7a98333/1d0d1dde93792675004a6e19f1893538",
+  "schema": "aadistill.autoinit.checkpoint_identity/v1",
+  "shards": [
+   {
+    "filename": "model.safetensors",
+    "sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3",
+    "size_bytes": 1192135096
+   }
+  ],
+  "single_shard_sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3",
+  "tokenizer_sha256": null,
+  "total_bytes": 1192135096,
+  "weights_digest": "531a2ccd2d6387058f495f26c1e462d95b076099a05f6af4cf61d05be0c2c904",
+  "materialization": {
+   "artifact_digest": "647a0ef381c8a5e0f94558fba82678ebfb8cba11f7392fe9172c9603fa631608",
+   "materialization_id": "1d0d1dde93792675004a6e19f1893538",
+   "numerical_execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "parent_materialization_id": "52d8749e66e0cc582e3a00c18d646135",
+   "schema": "aadistill.autoinit.materialization_identity/v1",
+   "semantic_state_id": "9311dcde3cdaedbf54d506ccf7a98333"
+  },
+  "checkpoint_sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3"
+ },
+ "verified_on_pod": {
+  "path": "/workspace/aad/artifacts/audit/stage0_calvol_search/2x/search/states/9311dcde3cdaedbf54d506ccf7a98333/1d0d1dde93792675004a6e19f1893538",
+  "artifact_digest": "647a0ef381c8a5e0f94558fba82678ebfb8cba11f7392fe9172c9603fa631608",
+  "recorded_digest": "647a0ef381c8a5e0f94558fba82678ebfb8cba11f7392fe9172c9603fa631608",
+  "matched": true,
+  "weights_digest": "531a2ccd2d6387058f495f26c1e462d95b076099a05f6af4cf61d05be0c2c904",
+  "weights_digest_matched": true,
+  "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+  "config_matched": true,
+  "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+  "num_parameters": 596049920,
+  "single_shard_sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3",
+  "shard_matched": true,
+  "tokenizer_sha256": null,
+  "total_bytes": 1192135096
+ },
+ "relay_repo": "AlphaAvatar/aadistill-artifacts",
+ "files": [
+  {
+   "treatment": "2x",
+   "state_id": "9311dcde3cdaedbf54d506ccf7a98333",
+   "path": "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/config.json",
+   "name": "config.json",
+   "sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "bytes": 1419,
+   "is_shard": false
+  },
+  {
+   "treatment": "2x",
+   "state_id": "9311dcde3cdaedbf54d506ccf7a98333",
+   "path": "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/generation_config.json",
+   "name": "generation_config.json",
+   "sha256": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+   "bytes": 206,
+   "is_shard": false
+  },
+  {
+   "treatment": "2x",
+   "state_id": "9311dcde3cdaedbf54d506ccf7a98333",
+   "path": "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/model.safetensors",
+   "name": "model.safetensors",
+   "sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3",
+   "bytes": 1192135096,
+   "is_shard": true
+  }
+ ],
+ "written_utc": "2026-10-26T13:57:52Z"
+}

@@ -1,0 +1,16 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.persisted_unit/v2",
+ "unit": "D4-Augmented-s20260801",
+ "kind": "report",
+ "started_utc": "2026-10-25T15:06:59Z",
+ "files": [
+  {
+   "name": "report.json",
+   "sha256": "c289da1858e22cbeb6840544efad0bf7f4b8db65ea04287c36a82ee877630abf",
+   "bytes": 35929
+  }
+ ],
+ "destination": "/runpod-volume/h1pa/D4-Augmented-s20260801/report",
+ "persisted": true,
+ "finished_utc": "2026-10-25T15:06:59Z"
+}

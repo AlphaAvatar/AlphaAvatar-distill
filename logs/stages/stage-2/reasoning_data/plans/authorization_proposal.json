@@ -1,0 +1,124 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.authorization_proposal/v4",
+ "hypothesis_id": "H1",
+ "status": "EXECUTED: granted by the maintainer 2026-10-22 (logs/budget/approvals/h1_p1_generation_grant.json) and run as h1gen_20261022_190653 under exactly the launch identity and harness recorded in `launch` -- P1 $3.33 of $8.02; P1v stopped at four short cells (audit/p1v_verification.json). This file authorizes nothing further.",
+ "scope": "generate the teacher candidates of arm B's generated cells (plans/generation_plan.json) on one A100-80GB session, bring every record home, then verify, select and pack on the dev box at $0. Nothing is trained, evaluated or stored on paid storage.",
+ "generation_list": {
+  "owner": "logs/stages/stage-2/reasoning_data/plans/generation_plan.json",
+  "generation_plan_sha256": "45606567d45907ea8656b1c40ac6bbd0492c8c5ce8c86daebce46c716e0a0b68",
+  "what": "per (stratum, source) cell of stage2.reasoning_master@v1: the tasks drawn (round-robin over generator x difficulty / module x level, in pool order, never by a result), the cell's units, the named rate basis, expected units and the generated-token upper bound; the run_battery inputs and their sha256",
+  "only_verifiable": "every task has a usable project verifier (generation_plan.verifier_of): comparators, checkers.CHECKERS, supporting_verify.VERIFIERS, the battery scorer or environment replay",
+  "inputs_location": "artifacts/stages/stage-2/reasoning_data/generation_inputs/ (dev box, gitignored; sha256 in the plan; rebuilt byte-identically by generation_plan from the committed pools)"
+ },
+ "scale": "plans/generation_plan.json :: totals (tasks, episodes, predicted_generated_tokens) and cells. predicted_generated_tokens is a PREDICTION from mean tokens per candidate and planned acceptance, NOT an execution limit: the session's hard bound is the authorized cap, enforced by the watchdog",
+ "acceptance_basis": "plans/generation_plan.json :: cells[].rate_basis: measured on the same generators where the teacher has run (Stage-0 teacher_cal, re-counted at the 8,184 allowance), otherwise a NAMED PROXY (the same axis on teacher_cal; corpus_v2's nearest type) or the spec's labelled code assumption (0.4), with a larger margin for proxied cells. Known optimistic proxies: PrOntoQA's process gate and the answerability rate (borrowed from answerable rag questions) are not measured The two-candidate yield q = 1-(1-p)^2 is a simplifying planning assumption (a retry of a hard task is not independent of its failure) and guarantees no cell's supervised tokens.",
+ "resources": {
+  "gpu": "1 x A100-80GB, one session, at most one billing resource (teacher_cal's measured GPU, engine and price: plans/cost_forecast.json :: measured.teacher_generation)",
+  "engine": "vLLM 0.27.1 image as teacher_cal; run_battery --mode generate under scripts/stages/stage-2/reasoning_data/generation_driver.py",
+  "hours": "plans/cost_forecast.json :: generation (gpu_hours at the measured tokens/s; session_hours_with_contingency)",
+  "no_model_code_on_the_pod": "the pod generates text only; code candidates are executed afterwards in the probed dev-box sandbox"
+ },
+ "failure_and_teardown_reserve": {
+  "cost": "plans/cost_forecast.json :: p1_application.closeout_reserve_1_session",
+  "behaviour": "generation_driver: run_battery streams every finished episode (--stream-completed); the driver seals finished candidates into hash-marked shards every 100 records or 300 s, and the launcher pulls every marked shard on each poll and hash-checks it into <scr>/store, so finished work leaves the pod before its group ends. A restart (or a replacement session given --resume-store) re-verifies the sealed shards and generates only the candidates without a record, under the same seed. RUN_FAILED keeps every shard; ALL_DONE needs every group complete. Teardown, the provider's confirmation and a fresh reconciliation are the launcher's (h1_generation_launch.closeout)"
+ },
+ "persistence": {
+  "owner": "logs/stages/stage-2/reasoning_data/plans/durability_plan.json :: verified.p1_generation_records_capacity",
+  "summary": "EXISTING storage: sealed shards are pulled to the dev box on every poll and hash-checked (launcher on_poll), the run's closeout re-hashes all of them; the records are about 0.1 GB per copy. A second copy on the relay is made from the dev box at P1v (capacity probed 2026-10-22T15:53Z: 2 x 150 MB, 1 GB, 2 GB accepted) and read back. No network volume for P1; the 30 GB volume is the preferred TRAINING backend, a separate authorization"
+ },
+ "budget_occupancy": {
+  "owner": "logs/stages/stage-2/reasoning_data/budget/h1_budget_position.json :: bounds (provider snapshot 2026-10-21T18:59Z)",
+  "rule": "CONSERVATIVE OCCUPANCY: the provider's all-time billing counted ONCE (no record total added on top, so nothing is double-counted; no unknown cost written off). The 34 unnamed pods ($58.33) and the anchor's meaning stay OPEN; this rule asserts neither",
+  "requested_project_cap": "provider all-time billing at the pre-launch snapshot + P1's hard cap (plans/cost_forecast.json p1_application.totals.hard_cap_usd). With the 2026-10-21 snapshot ($658.15) and today's hard cap ($8.02) that is $666.17, against today's cap $643.6571: a value the maintainer may approve, NOT applied by this file. If the pre-launch snapshot differs, the requested cap moves by exactly that difference",
+  "before_create": "a fresh provider snapshot and reconciliation (0 pods, 0 volumes, $0/h) and the same-failure gate, as every paid session"
+ },
+ "decisions_needed_for_P1": [
+  "approve the P1 envelope: the hard cap (cost_forecast :: p1_application.totals) and the project cap value under budget_occupancy",
+  "freeze the generation protocol and plan by this launch identity (launch.launch_identity_sha256) and the harness (launch.harness_digest): a grant document naming them is what governance.issue requires"
+ ],
+ "engineering_before_the_P1_launch_at_0_usd": [
+  "stage the session-commit bundle on the relay (bundle_on_relay refuses otherwise)",
+  "the read-only checks in launch_preflight_read_only, at launch"
+ ],
+ "phases": [
+  {
+   "phase": "P0",
+   "what": "$0 audit, design, builders, chain, driver and tests (2026-10-21/22)",
+   "usd": 0,
+   "status": "done for P1; docs/stages/stage-2/reasoning_data/H1.md sections 11-12"
+  },
+  {
+   "phase": "P1",
+   "what": "teacher generation of the plan's tasks, two candidate passes (one A100-80GB session)",
+   "cost": "plans/cost_forecast.json :: p1_application.P1_generation"
+  },
+  {
+   "phase": "P1v",
+   "what": "generation_adapter on every record (sandboxed code), isolation re-check, build_arm_b -> B's real pack, h1_accounting --pack-b (M1 values), forecast_cost (P2's cost) -- dev box CPU",
+   "cost": "plans/cost_forecast.json :: p1_application.P1v_verification_cpu"
+  },
+  {
+   "phase": "closeout",
+   "what": "failure / teardown / evidence reserve for the one P1 session",
+   "cost": "plans/cost_forecast.json :: p1_application.closeout_reserve_1_session"
+  }
+ ],
+ "totals": "plans/cost_forecast.json :: p1_application.totals (derived; not restated here)",
+ "not_requested_now": {
+  "P1g": "small GPU validation of the training changes and the unit driver (plans/cost_forecast.json :: proposal_phases.P1g_gpu_validation, for reference)",
+  "P2": "the four formal units (proposal_phases.P2_formal_4_units, for reference; recomputed on B's real pack)",
+  "storage": "the 30 GB network volume for training (proposal_phases.storage_h1_backend_two_months, for reference)",
+  "whole_h1_reference": "plans/cost_forecast.json :: proposal_totals -- reference only, not an amount asked for"
+ },
+ "sequencing": "DATA FIRST (maintainer 2026-10-22): this application covers P1 + P1v only. After B's real pack exists, M1's values and P2's cost are recomputed and frozen; a separate application then asks for P1g (with the training backend if it is needed by then); only after P1g passes is the four-unit P2 applied for.",
+ "proposed_grant_shape": "one H1 envelope with per-phase hard caps; a one-use authorization per session bound to its plan hash (src/aadistill/governance/authorization.py); at most one billing resource at a time; the default-on provider-resource reconciliation and the same-failure gate before every create; the capacity probe at true size before any session that produces a student",
+ "authorizes": "nothing",
+ "frozen_in_the_protocol": {
+  "mbpp_single_candidate": "configs/stages/stage-2/reasoning_data/generation_protocol.json :: execution.no_second_candidate_verifiers (code_asserts): MBPP gets ONE candidate; a short code cell is reported, never topped up by an automatic new paid session",
+  "execution_values": "generation_protocol.json :: execution (action protocol v2, session limit 8,184, seed base, completion shards); the driver reads them only after the launch identity binds the file",
+  "completion_rule": "generation_protocol.json :: completion_rule: ALL_DONE only when every task of every pass has exactly one record; finished results are preserved within the cost bound; a short corpus is never completed by repetition, a lower correctness gate, another source or another mix"
+ },
+ "launch": {
+  "launcher": "scripts/stages/stage-2/reasoning_data/h1_generation_launch.py (SessionSpec on aadistill.infrastructure.session_runner)",
+  "governance": "scripts/stages/stage-2/reasoning_data/governance.py :: POLICY, launch_identity, HARNESS, issue (requires a maintainer grant document naming the launch identity)",
+  "launch_identity_sha256": "c0eb4fd2f7dee31b2b93c9f5f3ccbe467eb8cba54d214921484abd3653ed2038",
+  "harness_digest": "d6affe40cdd8b8c1786f36ee701bdf4213d3174fc7e8ccad4a6dad25715fbbf1",
+  "_binding": "the authorization binds launch_identity_sha256 (plan + protocol + inputs + pools) and harness_digest; the launcher checks both before any pod, the driver again on the pod before reading the protocol",
+  "setup_branch": "scripts/shared/pod/autoinit_preflight_setup.sh :: SESSION_KIND=stage2_h1_generation (AUTHORIZATION_OK): the artifact loaded by its own type, bound to the launch identity and harness recomputed on the pod; exit 98 otherwise",
+  "superseded_harness_digests": [
+   {
+    "digest": "5a16440caad168bc02090b1710920942ec7522713d40d656f768dff11a218167",
+    "why": "0029c770's code; superseded 2026-10-22 by the issue-binds-the-approved-harness and tri-state shard-securing corrections, never an identity of the corrected code"
+   },
+   {
+    "digest": "1ea5ecbd74b75f1e39e54fcc252eb184cf7ea728bf2816f10a27f9d2bd722d55",
+    "why": "5b13ab65's code; superseded 2026-10-22 when every save and verify operation of the secured check was bound to one deadline"
+   }
+  ],
+  "grant_document": {
+   "fields": [
+    "granted_by",
+    "decision",
+    "phase (= P1)",
+    "launch_identity_sha256",
+    "harness_digest",
+    "expected_usd",
+    "hard_cap_usd",
+    "scope (optional)"
+   ],
+   "rule": "governance.issue refuses a grant missing either identity, or whose launch identity or harness digest is not the one recomputed from disk at issue; a changed digest is never adopted",
+   "who_writes_it": "the agent, from the maintainer's explicit approval message, naming exactly the two values recorded here"
+  },
+  "after_the_run": {
+   "harness_on_disk": "3a965da5f234d20eadd599698ee6be4ca9f2a111f4d49a0fc98815c5dc4804e3",
+   "why_it_differs": "P1v's comparator correction (generation_adapter.parse_grid: a literal \\n between grid rows; then 76a3fcc7...), and on 2026-10-23 source_plan.candidate_spec (the separately identified corpus candidates). P1 ran under the recorded harness, and any new paid session would need a new grant naming the new digest"
+  }
+ },
+ "launch_preflight_read_only": [
+  "provider snapshot and reconciliation: 0 pods, 0 volumes, $0/h, and all-time billing; the requested project cap is that billing + P1's hard cap and does NOT rise automatically if the snapshot moved -- a changed figure goes back to the maintainer",
+  "account balance at least the budget's account_balance_required_usd (SessionRunner check_account_funds)",
+  "GPU offer at the max price (SessionRunner check_gpu_offered) and the live securePrice the hard deadline derives from",
+  "the session-commit bundle present on the relay (bundle_on_relay)",
+  "relay capacity at the records' true size (hub_capacity.would_accept, nothing uploaded) and dev-box free space for <scr>/store"
+ ]
+}

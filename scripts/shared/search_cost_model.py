@@ -474,8 +474,8 @@ def price(space: SearchSpace, cost: CostModel, *, price_per_hour: float,
     refusal is the point: it is how a search that has outgrown its budget says
     so, instead of being quietly shrunk to fit.
     """
-    from aadistill.infrastructure.budget import (
-        MEASURED_STEP_SECONDS, Phase, StepTime, plan_session)
+    from aadistill.infrastructure.budget import Phase, StepTime, plan_session
+    from shared.step_times import MEASURED_STEP_SECONDS
 
     expected = trajectory(space, cost, prefer_costly=True,
                           beam_width=beam_width, warmup_levels=warmup_levels,

@@ -32,6 +32,12 @@ prefix-nested blocks by construction, and because the terminal session may be
 cut at the boundary, packing efficiency stays at ~100% anyway. Nothing is traded
 away for the nesting property.
 
+(That last sentence holds only while cutting is allowed. Where a trace may not
+be cut -- a teacher-native reasoning corpus -- sequential fill pads most of
+every block, and ``pack_best_fit`` packs each nested increment best-fit
+instead, which keeps the nesting at the increment boundaries; see
+``nested_ladder``.)
+
 Padding needs no attention mask, and passing one would be actively harmful
 --------------------------------------------------------------------------
 Attention is causal and padding is right-aligned, so no real token can attend to
@@ -495,6 +501,121 @@ def rung_n_blocks(ladder: dict, target_supervised_tokens: int) -> int:
     raise KeyError(
         f"no rung at {target_supervised_tokens}; have "
         f"{[r['target_supervised_tokens'] for r in ladder['rungs']]}")
+
+
+def _finish_block(ids: list[int], ce: list[bool], members: list[dict], system_ids: list[int],
+                  *, block_len: int, pad_id: int, deferred: int) -> PackedBlock:
+    """Pad one never-truncated block and attach the audit `pack_group` writes."""
+    unpadded = len(ids)
+    pad_n = block_len - unpadded
+    ids = ids + [pad_id] * pad_n
+    ce = ce + [False] * pad_n
+    content = [True] * unpadded + [False] * pad_n
+    spans, start = [], None
+    for position, flag in enumerate(ce):
+        if flag and start is None:
+            start = position
+        elif not flag and start is not None:
+            spans.append([start, position])
+            start = None
+    if start is not None:
+        spans.append([start, len(ce)])
+    return PackedBlock(input_ids=ids, ce_mask=ce, content_mask=content, audit={
+        "system_sha256": hashlib.sha256(json.dumps(system_ids).encode()).hexdigest(),
+        "n_system_tokens": len(system_ids),
+        "sessions": members,
+        "session_ids": [m["session_id"] for m in members],
+        "supervision_spans": spans,
+        "unpadded_length": unpadded,
+        "padding_length": pad_n,
+        "final_length": len(ids),
+        "deferred_same_source": deferred,
+        "terminal_truncated": False,
+        "terminal_truncation": None,
+        "supervised_tokens": int(sum(ce)),
+    })
+
+
+def pack_best_fit(
+    sessions: list[RenderedSession],
+    system_ids_by_key: dict[str, list[int]],
+    *,
+    block_len: int,
+    pad_id: int,
+) -> list[PackedBlock]:
+    """Best-fit-decreasing packing that never cuts a session.
+
+    For a corpus whose sessions are long teacher traces, sequential fill wastes
+    most of every block once cutting is forbidden (P17: a trace is trained
+    whole or not at all), so this places each session -- longest first, ties by
+    id -- into the open block of its system-prompt group with the least room
+    that still fits it and holds no session from the same source conversation,
+    opening a new block otherwise.
+
+    Nesting is the CALLER's job: pack each ladder rung's increment on its own
+    and concatenate (``nested_ladder``), so rung k stays ``blocks[:n_k]``. The
+    output is a pure function of the session set (not its order), with blocks
+    emitted per group in sorted key order and, inside a group, in opening
+    order. Every rule ``pack_group`` enforces holds here except that nothing is
+    ever truncated; a session that cannot fit an empty block is an error.
+    """
+    by_key: dict[str, list[RenderedSession]] = {}
+    for session in sessions:
+        by_key.setdefault(session.system_key, []).append(session)
+    out: list[PackedBlock] = []
+    for key in sorted(by_key):
+        if key not in system_ids_by_key:
+            raise KeyError(f"no rendered system block for group {key}")
+        system_ids = system_ids_by_key[key]
+        capacity = block_len - len(system_ids)
+        group = sorted(by_key[key], key=lambda s: (-s.n_body_tokens, s.session_id))
+        rooms: list[int] = []
+        contents: list[list[RenderedSession]] = []
+        sources: list[set[str]] = []
+        deferred: list[int] = []
+        for session in group:
+            if session.n_body_tokens > capacity:
+                raise RuntimeError(
+                    f"session {session.session_id!r} is {session.n_body_tokens} body "
+                    f"tokens and cannot fit a {block_len}-token block with "
+                    f"{len(system_ids)} system tokens; reject it before packing")
+            best = None
+            for i, room in enumerate(rooms):
+                if room < session.n_body_tokens:
+                    continue
+                if session.source_id is not None and session.source_id in sources[i]:
+                    deferred[i] += 1
+                    continue
+                if best is None or room < rooms[best]:
+                    best = i
+            if best is None:
+                rooms.append(capacity)
+                contents.append([])
+                sources.append(set())
+                deferred.append(0)
+                best = len(rooms) - 1
+            rooms[best] -= session.n_body_tokens
+            contents[best].append(session)
+            if session.source_id is not None:
+                sources[best].add(session.source_id)
+        for members_in, n_deferred in zip(contents, deferred):
+            ids, ce, members = list(system_ids), [False] * len(system_ids), []
+            for s in members_in:
+                start = len(ids)
+                ids.extend(s.body_ids)
+                ce.extend(s.body_mask)
+                members.append({
+                    "session_id": s.session_id, "data_type": s.data_type,
+                    "candidate_index": s.candidate_index,
+                    "candidate_sha256": s.candidate_sha256,
+                    "start": start, "end": len(ids),
+                    "original_rendered_tokens": s.n_rendered_tokens,
+                    "original_body_tokens": s.n_body_tokens, "truncated": False,
+                    "supervised_retained": s.n_supervised, "supervised_discarded": 0,
+                })
+            out.append(_finish_block(ids, ce, members, system_ids, block_len=block_len,
+                                     pad_id=pad_id, deferred=n_deferred))
+    return out
 
 
 def pack_sessions(

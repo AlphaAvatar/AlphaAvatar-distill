@@ -1,0 +1,720 @@
+{"correct": false, "extracted": "[7, 1, 2, 3, 8]", "formal": true, "id": "424bd847a714f66694d7", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "f0c95a6ee27666183cba", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "04f3387e9b0fc9353e99", "reason": "unusable"}
+{"correct": false, "extracted": "[8, 8, 2, 0, 7]", "formal": true, "id": "bccd2fe6afbe3134500d", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[2, 2, 5, 2, 2, 4]", "formal": true, "id": "819b539f11f3019b82be", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[2, 1]", "formal": true, "id": "0da6f8dd824c653f709a", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "0c9cf6f6b1318622bdda", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "94f3ac56667fd59c0b8a", "reason": "unusable"}
+{"correct": false, "extracted": "[10, 13, 22, 33, 42]", "formal": true, "id": "4d78d76a21727fd0ec22", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "2c0496bd3a2e459d5f23", "reason": "unusable"}
+{"correct": false, "extracted": "[1, 2, 4]", "formal": true, "id": "1fcc7715aa4c9b719ec2", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[6, 1, 9, 9]", "formal": true, "id": "dde7751072ea49e9c189", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "06d17e6a645cb8cddad9", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[4, 4, 3, 7]", "formal": true, "id": "14cb58c77383537c240f", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[3, 12, 9, 15]", "formal": true, "id": "aeed386f63b208f6c615", "reason": "wrong_answer"}
+{"correct": false, "extracted": "9", "formal": true, "id": "dedede03bd1a9d3f5662", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[5, 7, 6, 0, 17, 5]", "formal": true, "id": "5b5320ef44c1fe5b95e1", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "84a1c92f4aa46dd53c7b", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[17, 12, 11, 6, 1]", "formal": true, "id": "8385cd46e4d4b590b5ba", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[3, 11, 17, 13, 20]", "formal": true, "id": "31092774f55145e16a8d", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[20, 0, 5, 0, 16, 4, 7]", "formal": true, "id": "9abbc2185de68d70fbc6", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[3, 3, 18, 19]", "formal": true, "id": "67c9d1913ead8d37c41b", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "a1b795cd5017c804773a", "reason": "wrong_answer"}
+{"correct": false, "extracted": "60", "formal": true, "id": "2929447b4092c7626993", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[9, 10, 10, 10, 10]", "formal": true, "id": "59047be04f650b850e56", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[2, 17, 5, 5, 2]", "formal": true, "id": "989910e178aafc70c4a3", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[5, 11, 19, 6, 0, 5, 2, 5]", "formal": true, "id": "2cf2c27dae7a74e0f879", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[8, 1, 0, 8, 11, 0, 16, 8]", "formal": true, "id": "046298877ca86ee52eff", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "36b8c47417563740ce56", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[0, 7, 11, 12]", "formal": true, "id": "a8ad87f001fc08a2905c", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[17, 9, 16, 19, 15, 19]", "formal": true, "id": "c6f5f34368e67adee8c5", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "92123d16d54768b79fd5", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "6a1f0c502e5603853e6a", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "aa204641fe094a8a5d87", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "dc1d23e2a48a2d211389", "reason": "unusable"}
+{"correct": false, "extracted": "[32, 7, 10, 35, 44]", "formal": true, "id": "c007b04c0d7fa3cecf4f", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "1fb446bc0eb262167f8c", "reason": "unusable"}
+{"correct": false, "extracted": "[45, 45, 32, 40, 47, 15, 12]", "formal": true, "id": "15d36974e6e1ea297f8c", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "4d40d0e5ff7aa8a6a315", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "6c25be10e3ef87996cc4", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[40]", "formal": true, "id": "f2a0a714e2e9889943eb", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[20, 1, 3, 20, 13]", "formal": true, "id": "3fbb5071bf0e6a994e81", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[45, 21, 35, 21, 40, 25, 50]", "formal": true, "id": "6f8593b1d6a072db1330", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[23, 23, 23, 23, 23, 23]", "formal": true, "id": "81082396ca7031a0e520", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "8fe40b81bb8baf6948b8", "reason": "unusable"}
+{"correct": false, "extracted": "[11, 4, 47, 43, 14, 24, 12]", "formal": true, "id": "94d4bd18f848dd559b28", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[40, 19, 42, 6, 45, 12, 37]", "formal": true, "id": "9f15e3dc04001bb1ebef", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "a87ee9c304091f3e98a6", "reason": "wrong_answer"}
+{"correct": false, "extracted": "zitbz", "formal": true, "id": "7e13e921a77134e0defe", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "d5c1291d406f71b2ae23", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "fb5466bfc25660f8203f", "reason": "unusable"}
+{"correct": false, "extracted": "avlz", "formal": true, "id": "97df690e3a8e1d0b87e4", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "34df18f3589b66ed2cff", "reason": "unusable"}
+{"correct": false, "extracted": "dhqvwqvw", "formal": true, "id": "8e15ec4c7dc1a299bc71", "reason": "wrong_answer"}
+{"correct": false, "extracted": "ajx (1), txao (2), mzzd (3), bpuhk (4)", "formal": true, "id": "3ce5266cfcb0897ccf3b", "reason": "wrong_answer"}
+{"correct": false, "extracted": "bix", "formal": true, "id": "ea28f68367384860f91f", "reason": "wrong_answer"}
+{"correct": false, "extracted": "utjtu", "formal": true, "id": "414670505f9a4b13461b", "reason": "wrong_answer"}
+{"correct": false, "extracted": "mfse", "formal": true, "id": "4c567a25384ee1c62c7d", "reason": "wrong_answer"}
+{"correct": false, "extracted": "sxx", "formal": true, "id": "24a67ad271cf06ea1fa3", "reason": "wrong_answer"}
+{"correct": false, "extracted": "zcxgs", "formal": true, "id": "c67de1a338964bc76103", "reason": "wrong_answer"}
+{"correct": false, "extracted": "uvwoxx", "formal": true, "id": "6c5d302320696e819cb9", "reason": "wrong_answer"}
+{"correct": false, "extracted": "raas", "formal": true, "id": "fe3e4482d89795fe9519", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "1fb676f98cc4a34bfac0", "reason": "unusable"}
+{"correct": false, "extracted": "ftm", "formal": true, "id": "2e6fb71da00fd4496382", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "52eb92c0e109998fd2b0", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "a61f3ddf80f84b71da51", "reason": "unusable"}
+{"correct": false, "extracted": "wir", "formal": true, "id": "d6d5e3162a31ade97c3c", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "2fb6b081ec17696da133", "reason": "unusable"}
+{"correct": false, "extracted": "jgiqzzlj", "formal": true, "id": "51cdfbb047b9f48d7984", "reason": "wrong_answer"}
+{"correct": false, "extracted": "hhwgtd", "formal": true, "id": "967655f9425f0af3c4ca", "reason": "wrong_answer"}
+{"correct": false, "extracted": "kjyn", "formal": true, "id": "d395583ab5463016aba4", "reason": "wrong_answer"}
+{"correct": false, "extracted": "yuyus", "formal": true, "id": "3f73e572bbeab2b26318", "reason": "wrong_answer"}
+{"correct": false, "extracted": "heik", "formal": true, "id": "a4e04735e5fe64128316", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "ae195ae4276ea2aeabb5", "reason": "unusable"}
+{"correct": false, "extracted": "ctoe", "formal": true, "id": "348cc4ab80da123e1ed0", "reason": "wrong_answer"}
+{"correct": false, "extracted": "zwavqgvz", "formal": true, "id": "0582e6c1f7735e1db319", "reason": "wrong_answer"}
+{"correct": false, "extracted": "ubqoo", "formal": true, "id": "4cfec3668365227f3fa3", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "3deab7894084d3eb7b46", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "63016f28a3fb99c2533a", "reason": "unusable"}
+{"correct": false, "extracted": "qrozpfq", "formal": true, "id": "eb1bef44ad91aadef096", "reason": "wrong_answer"}
+{"correct": false, "extracted": "mbkzax", "formal": true, "id": "c8e7c42167924a74e631", "reason": "wrong_answer"}
+{"correct": false, "extracted": "tyxlrczuuyxrlcznz", "formal": true, "id": "b60d896f067f3530e6da", "reason": "wrong_answer"}
+{"correct": false, "extracted": "ffjuwkwo", "formal": true, "id": "8753d78122fc7a7ddd8b", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": false, "id": "9fba439d2d0b78476103", "reason": "unusable"}
+{"correct": false, "extracted": "pdpkxhm", "formal": true, "id": "8e116a41b54a6156744b", "reason": "wrong_answer"}
+{"correct": false, "extracted": "roa", "formal": true, "id": "55207caebe8b2847dd60", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "10752ddd0d32d47dbff6", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "a2b84a0ed955677b582c", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "785234a48ba4168db5cb", "reason": "unusable"}
+{"correct": false, "extracted": "koqwrjk", "formal": true, "id": "eb8074df0dc67481b3d9", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "498907f74bf7669afcc0", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "1f34466fe0b5bc289eda", "reason": "unusable"}
+{"correct": false, "extracted": "orbrlp", "formal": false, "id": "d36815ef540363149b6c", "reason": "wrong_answer"}
+{"correct": false, "extracted": "hiuwidnos + h", "formal": true, "id": "9bca6bc4cd0585b2348d", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "675443363b6fe2c1bc66", "reason": "unusable"}
+{"correct": false, "extracted": "tfxgvp", "formal": true, "id": "75db14b87d8d2c18ece5", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "4a458bed68d694f3c9d4", "reason": "unusable"}
+{"correct": false, "extracted": "6", "formal": true, "id": "0965ffb6d4039ef18eda", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "7921a4a60557e14d01fe", "reason": "wrong_answer"}
+{"correct": false, "extracted": "4268142236", "formal": true, "id": "23b520a949337db833ff", "reason": "wrong_answer"}
+{"correct": false, "extracted": "3", "formal": true, "id": "9d346c5a3d27abb01563", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "eddaea9b9d47439e0418", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "9f360c5a80966b2b0701", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "9735679f44e1806bfaa8", "reason": "unusable"}
+{"correct": false, "extracted": "100", "formal": true, "id": "36a3b4f422887c426bd5", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "8f297fe1b405fcae87ef", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "ef4353c3d5d65cbca769", "reason": "unusable"}
+{"correct": false, "extracted": "5", "formal": true, "id": "d44f093bd1691936c5dc", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "e60ded3ca4f7527aaf22", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "e4c08d4295063cc27396", "reason": "wrong_answer"}
+{"correct": false, "extracted": "0", "formal": true, "id": "3171abfe4889ef266dae", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "54e6346a3da16ad55ff8", "reason": "wrong_answer"}
+{"correct": false, "extracted": "24", "formal": true, "id": "aab7024f7cd9963c37a5", "reason": "wrong_answer"}
+{"correct": false, "extracted": "14", "formal": true, "id": "801cd71eb61d5683eac4", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "414de6db615aef541c3d", "reason": "unusable"}
+{"correct": false, "extracted": "40", "formal": true, "id": "286c8119251200340008", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "4c51d8cb05371317b5a5", "reason": "unusable"}
+{"correct": false, "extracted": "19", "formal": true, "id": "ebe49b490b9a6ca986e0", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "52d7923c21211feaa649", "reason": "wrong_answer"}
+{"correct": false, "extracted": "78", "formal": true, "id": "2862cab11262f0bc5652", "reason": "wrong_answer"}
+{"correct": false, "extracted": "22", "formal": true, "id": "20f7d6580a8dc1d0c08c", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "02ed46dd4af9d7ebe48e", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "f91aeacc0bf1dae6c08f", "reason": "unusable"}
+{"correct": false, "extracted": "4", "formal": true, "id": "66472fb3e664f0d77751", "reason": "wrong_answer"}
+{"correct": false, "extracted": "7", "formal": true, "id": "dda8f953984afb44a440", "reason": "wrong_answer"}
+{"correct": false, "extracted": "67", "formal": true, "id": "9da9100f81d6409b2241", "reason": "wrong_answer"}
+{"correct": false, "extracted": "136", "formal": true, "id": "0602f5bb8d045b42e025", "reason": "wrong_answer"}
+{"correct": false, "extracted": "18", "formal": true, "id": "5cb0eb470c62ed5a7e43", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "a9f0e13a76060014abfe", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "93a51bdd323f6353561d", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "4a0d79d518b3f7a0327f", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "6b5b41b8504ff2039656", "reason": "wrong_answer"}
+{"correct": false, "extracted": "8", "formal": true, "id": "e3c2302d1477b5c6d5ee", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "a13067bdd50ba1110cef", "reason": "unusable"}
+{"correct": false, "extracted": "5", "formal": true, "id": "2604fea706560f31a296", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "cc7ea3d16fb703f13876", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "38fe7fa6efee84ecc1b9", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "9d66298d94c693c5de97", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "90b6cbc3e447775ad154", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "5331505c2f95ea37d108", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "1b0c04a940768bc47bfd", "reason": "unusable"}
+{"correct": false, "extracted": "9", "formal": true, "id": "1180963d304bdc3ad0b7", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "b341cbb6ebbd799f3cc4", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "ad32552dd19361aba246", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[3, 0, 0, 0]", "formal": true, "id": "e7a33cb050605fe24cef", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[4, 0, 2, 9, 4, 0, 2, 9, 4, 0, 2, 9]", "formal": true, "id": "fb666f83a08c865e2ff4", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[77, 78, 7, 5]", "formal": true, "id": "27f9753a870b86ddd6b0", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[10, 2, 9]", "formal": true, "id": "f31d63c5c2f410127e90", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[8, 0, 6, 10]", "formal": true, "id": "dc9aaa46da943f1e2745", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[2, 12, 8]", "formal": true, "id": "a9aad5808172db05184c", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[9, 8, 4, 9]", "formal": true, "id": "a74d5976f0c6ce5acce9", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[3, 1, 3, 6, 13, 13]", "formal": true, "id": "d5e8762c6bfc012b1680", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[3, 4, 8, 6, 11]", "formal": true, "id": "c6c8bfc834fd5fe8558c", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[10, 1, 0, 1]", "formal": true, "id": "f87de6816ea6cfb8d17f", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[7, 9, 9]", "formal": true, "id": "c00af33efa1c754d6deb", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[4, 3, 7, 7, 1, 4, 3, 7, 7, 1, 4, 3, 7, 7, 1, 2]", "formal": true, "id": "d3bb2a7b706805a707e2", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "28e206fb6be69a733ca0", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[0, 4, 4, 7, 7]", "formal": true, "id": "bf6144adc930c905b580", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[1, 4, 1, 9]", "formal": true, "id": "63a6fb6b6c44b67852ad", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[8, 0]", "formal": true, "id": "417cc350041c1458dff4", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[10, 10, 10, 10]", "formal": true, "id": "347d427063b5d36e81dd", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[3, 9, 3, 2, 2, 3]", "formal": true, "id": "58c099be4370593a973c", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[2, 10, 4, 19, 19, 19]", "formal": true, "id": "d39ed075b32ad2a4566b", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[20, 5, 20, 11, 20, 20]", "formal": true, "id": "a6b4e02f3b01c802b644", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[10, 6, 5, 9]", "formal": true, "id": "0ee37e23e4c32fa29a63", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[14, 16, 11, 16, 1, 1]", "formal": true, "id": "40f65ba99edcd551c826", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[15, 14, 5]", "formal": true, "id": "b80d45b38398332a35ca", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[22, 30, 22, 30]", "formal": true, "id": "a77e20ce2089664737ea", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[6, 14, 15]", "formal": true, "id": "63f8f578a6382ad25dc0", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "913046bf1f3a8713db20", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[3, 19, 8, 2]", "formal": true, "id": "9dbd4d5d1b33512314c3", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[40, 40]", "formal": true, "id": "244ec91c0abf7ab3cf9b", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[28, 66, 81]", "formal": true, "id": "2a45301b23c4eb748b77", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[13, 3, 3, 11, 20, 1]", "formal": true, "id": "57e2da31dc7757354b45", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[6, 13, 19]", "formal": true, "id": "b104520b3c87c2a67fa2", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[16, 8, 1, 11, 7, 17]", "formal": true, "id": "2369efa127eef1e7b06e", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[9, 30, 30, 8, 29]", "formal": true, "id": "12c881c2fc4d89ce4633", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[16, 22, 34, 24, 34, 5, 5]", "formal": true, "id": "75fae89beda176743376", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[17, 1, 12, 19, 24, 27]", "formal": true, "id": "606302ca96a6c2ed2258", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[24, 8, 19, 17, 12, 20, 20]", "formal": true, "id": "65072e774fa682f62bdf", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[8, 8, 8, 8, 17, 16, 23, 24]", "formal": true, "id": "718f4f28537305afb7e3", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "e3000f6ec97d61d2260f", "reason": "unusable"}
+{"correct": false, "extracted": "[2, 25, 23, 18, 13, 10, 10]", "formal": true, "id": "7e659dd9853000c83c8b", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[27, 18, 16, 270]", "formal": true, "id": "bdab0256ad5185f5cc38", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[7, 19, 2, 1]", "formal": true, "id": "8cf6c32513da72fdac78", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[32, 29, 28, 22, 1, 98, 92, 32]", "formal": true, "id": "a08144846880d43bcb81", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[21, 30]", "formal": true, "id": "fbe6598d2ec27ca11629", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[27, 3, 5, 19, 4]", "formal": true, "id": "f782c4429f8e396347ec", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[1, 6, 1, 8, 9, 6]", "formal": true, "id": "4bc2b2d3f87272478613", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[6, 10, 7, 16]", "formal": true, "id": "7383f0c31f25732f044d", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[29, 29, 29, 21, 29, 29, 29]", "formal": true, "id": "f3d4c08e3fb846eba37f", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "72f35d55fee8d977bb1f", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "6f4ed958032b0b4b5e02", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "3d509e1afe29d7ad02ee", "reason": "unusable"}
+{"correct": false, "extracted": "TURN TURN LOOK LOOK LOOK", "formal": true, "id": "2bfb2bca4913c57ce8ff", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "da4c86561b6359395537", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "b947c53d4c91f204fb29", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "513290ce76ce9e433e38", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "00c4217401414f386f7f", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "2e8ace01f489ec808028", "reason": "unusable"}
+{"correct": false, "extracted": "WALK WALK", "formal": true, "id": "c4d567db8cc1f483a471", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "5e7dfdf4347cba35f5e1", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "36a1a27d3bb3c01e6297", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "1b1dc4b8f29db0cc7825", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "d229cf688445f2e67575", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "7deb70ae1eedc1bb2779", "reason": "unusable"}
+{"correct": false, "extracted": "JUMP JUMP JUMP RUN RUN", "formal": true, "id": "80eb633ee99eba19c54b", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "671d946fd28048911faa", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "127ff1a469b395f514ef", "reason": "unusable"}
+{"correct": false, "extracted": "LOOK RUN RUN LOOK LOOK LOOK", "formal": true, "id": "29cd383833266b215ca4", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "7a2e3ce79d65e21708ec", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "378e4c7067c55e8b403f", "reason": "unusable"}
+{"correct": false, "extracted": "SWIM JUMP", "formal": true, "id": "54eda884ee61907813be", "reason": "wrong_answer"}
+{"correct": false, "extracted": "LOOK RUN LOOK RUN", "formal": true, "id": "61850b97b8f96f34ee8f", "reason": "wrong_answer"}
+{"correct": false, "extracted": "JUMP TURN", "formal": true, "id": "fe2afecf1b803d63f7fc", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "5eb5f630deee02e29ce0", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "3c019849476fc8f01bdd", "reason": "unusable"}
+{"correct": false, "extracted": "JUMP JUMP", "formal": true, "id": "c0246eaea9d84ba76518", "reason": "wrong_answer"}
+{"correct": false, "extracted": "LOOK WALK LOOK", "formal": true, "id": "9bc25f8900e9fb63c845", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "16e37b335968b0339e86", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "7bc3632319fd041e9cc5", "reason": "unusable"}
+{"correct": false, "extracted": "SWIM JUMP SWIM", "formal": true, "id": "9f5d7032d5d8cdfc961b", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "6839e5f7307b3c5a5c78", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "263786efa079c29b41f6", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "c285aeaa29e4c1dd49c1", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "4316c5ff345116dee000", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "d4a8637ce4bbf9bfdb13", "reason": "unusable"}
+{"correct": false, "extracted": "RUN RUN RUN JUMP JUMP", "formal": true, "id": "1df8328b925317c456e4", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "695a0f97b6a2ac279499", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "44de2d39c9c550346ead", "reason": "unusable"}
+{"correct": false, "extracted": "JUMP RUN JUMP RUN TURN", "formal": true, "id": "b0d3984ba71267c81a5b", "reason": "wrong_answer"}
+{"correct": false, "extracted": "A B A", "formal": true, "id": "c649d976afe166467c23", "reason": "wrong_answer"}
+{"correct": false, "extracted": "JUMP RUN RUN", "formal": true, "id": "8410f80bcfebd5c79f6a", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "5ee85f63cad92a6999c3", "reason": "unusable"}
+{"correct": false, "extracted": "JUMP WALK SWIM RUN", "formal": true, "id": "435a2dcb4fe6740825ed", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "9ebfcb1d30a7535ce3f6", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "4064c19d54d71a263bc7", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "b2d6748e42127afb7734", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "12b261685effafbd7408", "reason": "unusable"}
+{"correct": false, "extracted": "JUMP JUMP", "formal": true, "id": "0100a638fb44996edce1", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "b0ab148e4653b4d6a322", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "c0d9c38b930a9b4e5423", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "916a5d211b3f96194bbf", "reason": "unusable"}
+{"correct": false, "extracted": "1", "formal": true, "id": "39ae9cece52ef655aea4", "reason": "wrong_answer"}
+{"correct": false, "extracted": "4", "formal": true, "id": "a8d4758c90ea34ffd398", "reason": "wrong_answer"}
+{"correct": false, "extracted": "9", "formal": true, "id": "de72b2cfc460654eb13f", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "a342bc4b79ed9302a9d0", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "423ea4e54145dd2ff2a2", "reason": "wrong_answer"}
+{"correct": false, "extracted": "4", "formal": true, "id": "22e093b96c49af1ab707", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "b4b6d34aeab7cc7e3934", "reason": "wrong_answer"}
+{"correct": false, "extracted": "2", "formal": true, "id": "1c1c185372c1c263acbe", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "091f6d551464ee39e057", "reason": "unusable"}
+{"correct": false, "extracted": "4", "formal": true, "id": "b47e926bd90bf5d428ef", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "d657d2b1b833b1f5803f", "reason": "unusable"}
+{"correct": false, "extracted": "24", "formal": true, "id": "e3ef2af11c49cf8fc91a", "reason": "wrong_answer"}
+{"correct": false, "extracted": "7", "formal": true, "id": "4f02fd1067d9588cb521", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "34ae5f4376e86ea84361", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "146306467526e50ed8fd", "reason": "unusable"}
+{"correct": false, "extracted": "19", "formal": true, "id": "f37fa78e8fb1d3fbec91", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "a19a704471657ce9e5cd", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "68c16708eede0400194f", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "cb3820320205d2ee8ee8", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "7c46bf14de919d6de077", "reason": "wrong_answer"}
+{"correct": false, "extracted": "40", "formal": true, "id": "dfe6778fdebf1247fa47", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "952304b74a0fe2a28d45", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "8594045afc44e6074ae9", "reason": "wrong_answer"}
+{"correct": false, "extracted": "7", "formal": true, "id": "62701ad5e8ed3a40a1dc", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "0198008e1b319f4786e9", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "e1088f96a38d6d6c6399", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "f5c207c0cd75785c165d", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "61462f4c9bacc26a9513", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "7ffa261820e36838d6d5", "reason": "wrong_answer"}
+{"correct": false, "extracted": "1", "formal": true, "id": "c992a5010b0738029858", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "2ee022752a6af99d4439", "reason": "unusable"}
+{"correct": false, "extracted": "10", "formal": true, "id": "76b49e2d64775bfe78a4", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "c9d9f13338125d5b8fb3", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "6ae770108d830c8d63ab", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "3f62cfccdda4f20ea906", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "36152173330948504a6f", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "028e6d7ff04ed84b7901", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "4474f16c257f8f56299e", "reason": "unusable"}
+{"correct": false, "extracted": "2", "formal": true, "id": "7c7cbe7dfa63c33d25a8", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "867e41041d8c2095572a", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "0ecf73edb3b985a73deb", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "d46ee33792b9803f0a51", "reason": "unusable"}
+{"correct": false, "extracted": "4", "formal": true, "id": "dc1cb6ddff0a5b212998", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "eabc06c5811225c97e52", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "6617ad22b49bfee52846", "reason": "wrong_answer"}
+{"correct": false, "extracted": "5", "formal": true, "id": "e5c87fa5a00a2ee777fd", "reason": "wrong_answer"}
+{"correct": true, "extracted": "eli", "formal": true, "id": "2213002e96a11152073f", "reason": "ok"}
+{"correct": true, "extracted": "jun", "formal": true, "id": "c8e256691e129888fde4", "reason": "ok"}
+{"correct": false, "extracted": "35", "formal": true, "id": "297788eb860f1e6a6b7b", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": false, "id": "83f5811a86b339da4a0c", "reason": "unusable"}
+{"correct": false, "extracted": "omar", "formal": true, "id": "611e1c7eb04402134aac", "reason": "wrong_answer"}
+{"correct": false, "extracted": "37", "formal": true, "id": "c41d44acbc40b43f94f8", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "e03508e5dc129df2fa78", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "109c39e8293af3cca3c2", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "21fa83663e85cf651a20", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": false, "id": "82b5c880000f9eaa2c4e", "reason": "wrong_answer"}
+{"correct": false, "extracted": "ben", "formal": true, "id": "92605f5a9c93f033437b", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "6e65dedd99b3da30374d", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "3081b3d1b3ffb42b88f8", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "6d4b00eea36c80492fdf", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "fa19ec60184c14f533af", "reason": "no_boxed"}
+{"correct": false, "extracted": "10", "formal": true, "id": "6ab3f0cca382efc28fa0", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "f8085137f4569b691db1", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "349e9a8e6b0edd90a3aa", "reason": "wrong_answer"}
+{"correct": false, "extracted": "18", "formal": true, "id": "5fd254ddbc57652ea0cc", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "0a59c2b8cbcd8ef4d0e1", "reason": "unusable"}
+{"correct": true, "extracted": "eli", "formal": true, "id": "85e674df1472afa863c1", "reason": "ok"}
+{"correct": false, "extracted": "9", "formal": true, "id": "0e5a2e830367856de3da", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "29e198040ab9c702aee2", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "bdf79a4b48dfed6d7bc0", "reason": "unusable"}
+{"correct": false, "extracted": "7", "formal": true, "id": "9750dead33448e31cc59", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "6e27e4a66079f6ecbf74", "reason": "unusable"}
+{"correct": false, "extracted": "milo", "formal": true, "id": "003d1670021954700cf4", "reason": "wrong_answer"}
+{"correct": false, "extracted": "2", "formal": true, "id": "ac5c841e092e78b706c4", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "6534110b02630c52df4f", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "4085e1a333271d4fc872", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "ddcd702ba34574883f86", "reason": "unusable"}
+{"correct": false, "extracted": "10", "formal": true, "id": "0e01f0ae25bfa9b60f9a", "reason": "wrong_answer"}
+{"correct": false, "extracted": "rosa", "formal": true, "id": "c117b8619eccbe7ebfb7", "reason": "wrong_answer"}
+{"correct": false, "extracted": "rosa", "formal": true, "id": "e0f99ed23dc448dc0975", "reason": "wrong_answer"}
+{"correct": false, "extracted": "4", "formal": true, "id": "0cfe8888f2b44ed49c38", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "8c2fa24354085056f534", "reason": "wrong_answer"}
+{"correct": false, "extracted": "milo", "formal": true, "id": "b9e1f5f3503a2761bc8c", "reason": "wrong_answer"}
+{"correct": false, "extracted": "9", "formal": true, "id": "4a5bcafe18dfba51f9e8", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "7896bb167e2d336e07b0", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "8c6d39234893278335cc", "reason": "unusable"}
+{"correct": false, "extracted": "9", "formal": true, "id": "c5dd38cf9145134b5965", "reason": "wrong_answer"}
+{"correct": false, "extracted": "ava", "formal": true, "id": "ed8ff1cf81d25be83020", "reason": "wrong_answer"}
+{"correct": true, "extracted": "pia", "formal": true, "id": "85687fc79cbf1cd0c467", "reason": "ok"}
+{"correct": false, "extracted": "4", "formal": true, "id": "78c576dacea545af6318", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "cf6f19787b8b27db31a9", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "6fa12ee84fd58915b669", "reason": "unusable"}
+{"correct": false, "extracted": "34", "formal": true, "id": "ce30ad4f4029962ba3b8", "reason": "wrong_answer"}
+{"correct": true, "extracted": "3", "formal": true, "id": "ba23be00670a71af2666", "reason": "ok"}
+{"correct": false, "extracted": null, "formal": true, "id": "cb2307319e5e200e64f0", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "b02b093d907cd77e5777", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "927ac2a37d528dc56d42", "reason": "unusable"}
+{"correct": true, "extracted": "2", "formal": true, "id": "65875bc8299067f82417", "reason": "ok"}
+{"correct": false, "extracted": "[\"shell\"]", "formal": true, "id": "f31a02d9a2553bc49d2c", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "235297f163be9b1bca39", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "cee0d7f391bf4fcabbce", "reason": "unusable"}
+{"correct": true, "extracted": "1", "formal": true, "id": "9daf3ee57aa52236935e", "reason": "ok"}
+{"correct": false, "extracted": "2", "formal": true, "id": "bbafe202c138ff65aac7", "reason": "wrong_answer"}
+{"correct": false, "extracted": "1", "formal": true, "id": "43c98387567fbd6fcef2", "reason": "wrong_answer"}
+{"correct": false, "extracted": "4", "formal": true, "id": "dd31739c775443343924", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "b8704f651ca6d6da6c03", "reason": "unusable"}
+{"correct": false, "extracted": "[\"cup\"]", "formal": true, "id": "979443fc80d48a0c9f10", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "7f7221a06ca5ade0d703", "reason": "wrong_answer"}
+{"correct": false, "extracted": "1", "formal": true, "id": "fcd01f6a4323f275046f", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[]", "formal": true, "id": "9438ecc09e506c0ace24", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "4c8afc183a6e96495767", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[]", "formal": true, "id": "ed17496bd725f9e600c2", "reason": "wrong_answer"}
+{"correct": true, "extracted": "4", "formal": true, "id": "a098e84a77a8b44b5ff3", "reason": "ok"}
+{"correct": false, "extracted": "[\"ring\"]", "formal": true, "id": "b91171642567ff3b87cc", "reason": "wrong_answer"}
+{"correct": true, "extracted": "[]", "formal": true, "id": "84fbbe6a962e5cf86f29", "reason": "ok"}
+{"correct": false, "extracted": "1", "formal": true, "id": "8b57e1881243d61e5f68", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "f19820627f6131eefa5b", "reason": "unusable"}
+{"correct": true, "extracted": "[]", "formal": true, "id": "23020e2a9339963ac90d", "reason": "ok"}
+{"correct": false, "extracted": null, "formal": true, "id": "4f31ec6752ea7b9d4f7b", "reason": "wrong_answer"}
+{"correct": false, "extracted": "1", "formal": true, "id": "a2bf908fbe59ad3cfb43", "reason": "wrong_answer"}
+{"correct": false, "extracted": "1", "formal": true, "id": "539d36d94f3465dae38f", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[\"rope\"]", "formal": true, "id": "568e569a640c3fbfccdc", "reason": "wrong_answer"}
+{"correct": true, "extracted": "2", "formal": true, "id": "29389b4d13d830ac503a", "reason": "ok"}
+{"correct": false, "extracted": "4", "formal": true, "id": "ca39018603aef1cd0e7c", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[]", "formal": true, "id": "2dc211eeeb7740eb7fc6", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "3a755b587e72f7280a9d", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "360d636737ca3dfba3fd", "reason": "unusable"}
+{"correct": false, "extracted": "[\"key\"]", "formal": true, "id": "91fb2323a5a83d056144", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "72cf9e1fa3a497da380b", "reason": "unusable"}
+{"correct": false, "extracted": "[]", "formal": true, "id": "93e872cf747926b1e8c3", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[]", "formal": true, "id": "b6a2721a65962d25271f", "reason": "wrong_answer"}
+{"correct": false, "extracted": "1", "formal": true, "id": "9961f46f41fe2e0da4af", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[\"ring\", \"shell\"]", "formal": true, "id": "4f341579415b870b7db6", "reason": "wrong_answer"}
+{"correct": false, "extracted": "1", "formal": true, "id": "406f999127dc010dc1b3", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "be32d32f8d1e79e9ff29", "reason": "wrong_answer"}
+{"correct": false, "extracted": "2", "formal": true, "id": "53415bfe759af9e8e09f", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[\"card\", \"stone\"]", "formal": true, "id": "995ec65829ec791d40da", "reason": "wrong_answer"}
+{"correct": true, "extracted": "[]", "formal": true, "id": "9b5176c0d26c364c5c2e", "reason": "ok"}
+{"correct": false, "extracted": null, "formal": true, "id": "284e8196414e1809c73f", "reason": "unusable"}
+{"correct": false, "extracted": "[\"stone\"]", "formal": true, "id": "2315eba1b9cfaec96de2", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[\"card\", \"coin\", \"shell\"]", "formal": true, "id": "b64e46117395035df2ea", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[\"eli\", \"quin\"]", "formal": true, "id": "406266a212ca1dd1e8ff", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[\"cara\"]", "formal": true, "id": "311e0e751018450ef867", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "c085ab761c987f433da9", "reason": "unusable"}
+{"correct": false, "extracted": "[\"is\", \"knave\", \"knight\", \"pia\", \"sami\"]", "formal": true, "id": "95ff66a06dd6e49105a1", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "ecccf54194871e4f91e8", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "0e6141de095b83e7322d", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "be5f0d0ea03661275c1b", "reason": "unusable"}
+{"correct": false, "extracted": "[\"hana\", \"kai\"]", "formal": true, "id": "d6ce1d5bf5785849c4d6", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[\"ivo\", \"quin\"]", "formal": true, "id": "ddd23524b099bfc3218d", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "dbcfe165a3d5aa8d6ec9", "reason": "unusable"}
+{"correct": true, "extracted": "[]", "formal": true, "id": "a2eb84a6569969d79b1c", "reason": "ok"}
+{"correct": false, "extracted": "[\"dev\", \"lena\"]", "formal": true, "id": "a41359d6286e662235f0", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[\"dev\", \"kai\"]", "formal": true, "id": "79a641c7081205298717", "reason": "wrong_answer"}
+{"correct": true, "extracted": "[\"omar\", \"pia\"]", "formal": true, "id": "213b73298ddfdf3bbe47", "reason": "ok"}
+{"correct": false, "extracted": null, "formal": true, "id": "edfe8e46c5875426ddfa", "reason": "unusable"}
+{"correct": true, "extracted": "[\"milo\"]", "formal": true, "id": "731cd3e142f89b5bb3eb", "reason": "ok"}
+{"correct": true, "extracted": "[\"lena\"]", "formal": true, "id": "b793ca6d5780ccd46d3f", "reason": "ok"}
+{"correct": true, "extracted": "[]", "formal": true, "id": "cb59b1088a43afecae0d", "reason": "ok"}
+{"correct": false, "extracted": null, "formal": true, "id": "06efcdef4e3c0cb1e05e", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "1d72d2226602c64c900c", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "71280c6f13a5b846d7c8", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "5ff0d8aca8ed50b88d4b", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "a33b37c69294eb1b0f6a", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "ee4326e63cae4971a601", "reason": "unusable"}
+{"correct": false, "extracted": "[\"quin\"]", "formal": true, "id": "f1ae2645d27dcd123345", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[]", "formal": true, "id": "588045160e969307dff4", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "1a66a2dbc35ad3463461", "reason": "unusable"}
+{"correct": false, "extracted": "[\"i\", \"milo\"]", "formal": true, "id": "e1602194feb1e873b41b", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "11a3e55532132571bcf5", "reason": "unusable"}
+{"correct": false, "extracted": "[\"milo\", \"omar\", \"sami\"]", "formal": true, "id": "377dd0e746203d81c2e7", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "188d46bfe362e6a9eebe", "reason": "unusable"}
+{"correct": false, "extracted": "[\"sami\"]", "formal": true, "id": "39049dc6a4e630c53740", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[\"ava\", \"ivo\", \"nia\"]", "formal": true, "id": "e830322f39c87cdb1d79", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[\"gus\"]", "formal": true, "id": "6a8302bc50b3f3359974", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[\"cara\", \"dev\", \"eli\"]", "formal": true, "id": "2b6cf23e4e7fd0e746fe", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[\"cara\"]", "formal": true, "id": "f53ef322ea5d452f379d", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "740663c47a6e48acd07d", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "fbacf3fe41a18c99e192", "reason": "unusable"}
+{"correct": false, "extracted": "[\"cara\", \"dev\", \"hana\"]", "formal": true, "id": "08493ab4d57ce63348cb", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "864f3e5a670042a3819a", "reason": "unusable"}
+{"correct": false, "extracted": "[\"quin\", \"rosa\"]", "formal": true, "id": "b23a8856ca6856fbca11", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "89b2f0b4dbfab361efef", "reason": "unusable"}
+{"correct": false, "extracted": "[\"dev\", \"lena\", \"omar\"]", "formal": true, "id": "fe3d39cc37c24ce081d2", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[\"ava\", \"kai\"]", "formal": true, "id": "773101fb14a1414b1f19", "reason": "wrong_answer"}
+{"correct": false, "extracted": "[\"fay\", \"pia\", \"tao\"]", "formal": true, "id": "135feb6a68b591430605", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "468caa16fa82ca26602f", "reason": "unusable"}
+{"correct": false, "extracted": "[]", "formal": true, "id": "23b44fa0425730b27477", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "de5b780bfb7e697d335c", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "e59bc82bce9f9ab76037", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "2da0c0e5a19cbc0f8590", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "a5f5e3d7fe098ab0e845", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "edf48e790d8e1158cb60", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "cf0653a5c9f590248e2b", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "4f9929fcba94b0bf2c22", "reason": "unusable"}
+{"correct": false, "extracted": "4", "formal": true, "id": "ad92d9fe89c97a39d7e2", "reason": "wrong_answer"}
+{"correct": false, "extracted": "0", "formal": true, "id": "94a5968e9c9561017d12", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "13ad07302a99a25521af", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "ca20a26d484307c4cbb8", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "a64234935845d54d2cfc", "reason": "unusable"}
+{"correct": false, "extracted": "[]", "formal": true, "id": "fe8949b9a56ece3a7f0f", "reason": "wrong_answer"}
+{"correct": false, "extracted": "8", "formal": true, "id": "c43eb95e754ff4e83f14", "reason": "wrong_answer"}
+{"correct": true, "extracted": "2", "formal": true, "id": "34ab7133fe7366816603", "reason": "ok"}
+{"correct": false, "extracted": "[]", "formal": true, "id": "cb1c841218d1bae0595a", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "26c19ef2936050368415", "reason": "unusable"}
+{"correct": false, "extracted": "3", "formal": true, "id": "bf70d4b2c260aede1592", "reason": "wrong_answer"}
+{"correct": false, "extracted": "2", "formal": true, "id": "a2ccf11bde1018169df9", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": false, "id": "f9010f2dd60a31946a20", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "d2420e9e36f4d84bde29", "reason": "unusable"}
+{"correct": false, "extracted": "6", "formal": true, "id": "400d3a0b3c4a2bff5108", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "2b1cd1ed06181d33f6c5", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "8955e767c0fd5756be94", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "3a82fc69a2798ebe02b2", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "3761410f0ad80a757a74", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "f15128ca7822ce0a0cbe", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "cc78953cd48bfe560f46", "reason": "unusable"}
+{"correct": false, "extracted": "[\"d\", \"elm\"]", "formal": true, "id": "7019e74acb5836c3f294", "reason": "wrong_answer"}
+{"correct": false, "extracted": "1", "formal": true, "id": "3cefdaabed5eb00a82dd", "reason": "wrong_answer"}
+{"correct": false, "extracted": "6", "formal": true, "id": "f6192a65a3f2909aaa65", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "222c505637f6ee06bd03", "reason": "unusable"}
+{"correct": false, "extracted": "4", "formal": true, "id": "22fc4f47da67b4ef6792", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "eca50d96d864ad8ba2f5", "reason": "unusable"}
+{"correct": false, "extracted": "3", "formal": true, "id": "c79eac9dd2b783d7c0d7", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "dfc0b05e5bd02b77854b", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "f349e7a47b1599ab09b8", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "b22bd495df69d23b027b", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "5cb36de43df28069afd9", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "5670213599c05a87010d", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "3ac89fd33647b8e9d956", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "e35c869c0cdcfb3bc0e6", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "5f4cd1949a5f83250746", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "5867e07796d67a8d128d", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "755b194db62cd6c55bf3", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "0bab3362f3a33fde3e0f", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "e031b1de00fb11cbb81a", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "9fcd832ad339b4aabefd", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "05f0d2b1d0d57100745a", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": false, "id": "a68fc81fffe597f45d54", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "d5710dd264c0d210fb31", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "3ab1f456f09d8c5c0bc7", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "156149ebc06b5ac92330", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "42a5cc4e0bdf0651e340", "reason": "unusable"}
+{"correct": false, "extracted": "w", "formal": true, "id": "1bc532accb57be88dc97", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "fdc28ce9b62f33a221c9", "reason": "unusable"}
+{"correct": false, "extracted": "0", "formal": true, "id": "be85b1d0094c3fa295b2", "reason": "wrong_answer"}
+{"correct": false, "extracted": "1", "formal": true, "id": "ed03825a36da6ac60230", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "1f89f38f05c3d8ebe1f1", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "4372406446a848858587", "reason": "unusable"}
+{"correct": false, "extracted": "the third and fourth numbers are different", "formal": true, "id": "890cba1071c155266392", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "9e96d99d3c19f7cccf3b", "reason": "unusable"}
+{"correct": false, "extracted": "vvwxyv", "formal": true, "id": "e5e25f38e30591afa542", "reason": "wrong_answer"}
+{"correct": false, "extracted": "uwx", "formal": true, "id": "f352089a502992ef3185", "reason": "wrong_answer"}
+{"correct": false, "extracted": "yxwv", "formal": true, "id": "fdeb5a83bdb7f0620704", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "150801b83cde39a0707c", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "fe53b3ac7a44dd8da48c", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "f703ff8f66c00317d408", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "2cdb5676afd70564ae2e", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "270d9c3c01e6153d5780", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "77be177f8e6526684812", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "9da08891c835d1bae4ef", "reason": "unusable"}
+{"correct": false, "extracted": "4", "formal": true, "id": "e00097dd2cc10f3861e1", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "afcabba80db2a86f1e7c", "reason": "unusable"}
+{"correct": false, "extracted": "feldcd +1", "formal": true, "id": "765fa1cc65ae89968335", "reason": "wrong_answer"}
+{"correct": false, "extracted": "rrstrrr", "formal": true, "id": "b210d4b1986776392558", "reason": "wrong_answer"}
+{"correct": false, "extracted": "kmlnkk", "formal": true, "id": "59d75999036db9d4bcd7", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "a1ef6575bd1869448420", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "866c63825409c67e862e", "reason": "unusable"}
+{"correct": false, "extracted": "s1", "formal": true, "id": "085ce11e33471772b803", "reason": "wrong_answer"}
+{"correct": false, "extracted": "0", "formal": true, "id": "c93f4168b3f7f2f25418", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "49271cd8830cffef1517", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "aca645296dfcdfa5033d", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "62e422cf744851e46739", "reason": "unusable"}
+{"correct": false, "extracted": "6", "formal": true, "id": "eb6143e719ed16192010", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "dee5323f99ebf2e7f883", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "03e4c57f342de2ac20b8", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "08a80adf2fc1f4b5f07f", "reason": "unusable"}
+{"correct": false, "extracted": "6", "formal": true, "id": "2069ea4f3f28cd3160e5", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "2a8bb608611915a69b55", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "de82a0043f7d75e93e90", "reason": "unusable"}
+{"correct": false, "extracted": "ttuuvvww", "formal": true, "id": "baf925477426bc2ddb46", "reason": "wrong_answer"}
+{"correct": false, "extracted": "2", "formal": true, "id": "5a65bb97e4a1f03c8389", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "50954fd486ba2633584a", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "de6f3c16c4e340f4760c", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "8e9e12496c0dc73bd521", "reason": "unusable"}
+{"correct": false, "extracted": "4", "formal": true, "id": "69117bcb3c8dbe465091", "reason": "wrong_answer"}
+{"correct": false, "extracted": "000/000/000", "formal": true, "id": "cc26d49764ac9c5d7cc4", "reason": "wrong_answer"}
+{"correct": false, "extracted": "010/000/000", "formal": true, "id": "8560009133daa7f7e742", "reason": "wrong_answer"}
+{"correct": false, "extracted": "000/001/200", "formal": true, "id": "95f699b462a896eef9c4", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "ec1b2bdc17dddb259cef", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "31045550a2083a27eff7", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "287356494f2b34fc5445", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "d8082f3368a3e10f0d3a", "reason": "unusable"}
+{"correct": false, "extracted": "000/300/000", "formal": true, "id": "6db166108af40d20447c", "reason": "wrong_answer"}
+{"correct": false, "extracted": "070/010/000", "formal": true, "id": "31fdee671789bd1e9d48", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "c5214898de92782bb64a", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "7035eb586f24292cb857", "reason": "unusable"}
+{"correct": false, "extracted": "000/101/000", "formal": true, "id": "9fe9ff9c25c2066a355d", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "3576d4a0edf21d50ebc0", "reason": "unusable"}
+{"correct": false, "extracted": "200/000/400", "formal": true, "id": "25df5900d5b273e9ef41", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "1db08dc9ddc5b9c0b3db", "reason": "unusable"}
+{"correct": false, "extracted": "000/101/011", "formal": true, "id": "33e793fdd484c47d39ae", "reason": "wrong_answer"}
+{"correct": false, "extracted": "3663/0343/6664/0600", "formal": true, "id": "6a2bade2ec69084debb7", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "2c845e04d32c4043202f", "reason": "unusable"}
+{"correct": false, "extracted": "1061/1000/0501/0160", "formal": true, "id": "2fe7e076d15fc2945728", "reason": "wrong_answer"}
+{"correct": false, "extracted": "0030/0000/0000/1103", "formal": true, "id": "235f351ad52494604a1b", "reason": "wrong_answer"}
+{"correct": false, "extracted": "0770/0007/0007/0070", "formal": true, "id": "b0173cb3e8e6a9d17b2c", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "e9cc04470395a524c960", "reason": "unusable"}
+{"correct": false, "extracted": "0031/6103/0006/0011", "formal": true, "id": "7b1ba34c4c4c7f55dd4a", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "b45c8c9152ceb839719e", "reason": "unusable"}
+{"correct": false, "extracted": "0000/0301/0100/0116", "formal": true, "id": "98a41cb584e1708ba007", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "d3898e215be7afb4ddfb", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "de964b73a9abe6fd2540", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "f85a5a86760ad98d2043", "reason": "unusable"}
+{"correct": false, "extracted": "0040/3003/7737/3403", "formal": true, "id": "e8476cdf0fa1b0d8f71d", "reason": "wrong_answer"}
+{"correct": false, "extracted": "0002/0755/7000/2020", "formal": true, "id": "1eee9f6215f60a8ab816", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "d498c61e56978ff9ced1", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "2e6302440345cd048696", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "2f748cd85e7aad8fc7c1", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "0a2731fbb455066c7578", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "d08260d651d79ecba33a", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "925f6f7413178d7aaa9b", "reason": "unusable"}
+{"correct": false, "extracted": "40004/06776/46700/00110/00006", "formal": true, "id": "acec9053eef2f3d13598", "reason": "wrong_answer"}
+{"correct": false, "extracted": "60607/00006/70270/20006/60000", "formal": true, "id": "0d460dd0f838640686e2", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "91db8fb33d6940a26dfb", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "fa2a0a8b434f19ee723b", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "78ca1e2ff542333bc01b", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "85a38ece0d91d2bdb420", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "d3ef6f6fa48ba5da97ae", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "6de01596461e6af448f8", "reason": "unusable"}
+{"correct": false, "extracted": null, "formal": true, "id": "3dc91b759917320d47ee", "reason": "unusable"}
+{"correct": false, "extracted": "02407/00004/20220/20202/44770", "formal": true, "id": "28cd5833a95f777b9b7b", "reason": "wrong_answer"}
+{"correct": false, "extracted": "00000/20002/00002/02606/02000", "formal": true, "id": "3776737cb9402acee854", "reason": "wrong_answer"}
+{"correct": false, "extracted": null, "formal": true, "id": "7756dc97d6db0595c1b5", "reason": "unusable"}
+{"correct": false, "formal": true, "id": "a357e74a3f67c26b5b8a", "success": false}
+{"correct": false, "formal": true, "id": "ad50ba6f5b47d8de3339", "success": false}
+{"correct": false, "formal": true, "id": "5b6f86e1ba7da159e8cb", "success": false}
+{"correct": false, "formal": true, "id": "9174f48a171a52e37bbd", "success": false}
+{"correct": false, "formal": true, "id": "ad2c2a9b0a50de653920", "success": false}
+{"correct": false, "formal": true, "id": "531dad336804668383e9", "success": false}
+{"correct": false, "formal": true, "id": "dfd105d9014c2749d623", "success": false}
+{"correct": false, "formal": true, "id": "43af0362a0cecfa22d6e", "success": false}
+{"correct": false, "formal": true, "id": "9d71258a93451859c228", "success": false}
+{"correct": false, "formal": true, "id": "7fd38894705cbe3ee2d2", "success": false}
+{"correct": false, "formal": true, "id": "b363dd8a49963f939a83", "success": false}
+{"correct": false, "formal": true, "id": "f17f341cbb5ed7b7edf1", "success": false}
+{"correct": false, "formal": true, "id": "24e51e06bb02962b763d", "success": false}
+{"correct": false, "formal": true, "id": "ff07642ee3965028dcad", "success": false}
+{"correct": true, "formal": true, "id": "56f8578ee5ed9a362583", "success": true}
+{"correct": false, "formal": true, "id": "0e0f80578190aa4ba2bb", "success": false}
+{"correct": false, "formal": true, "id": "fa68bebfaa19ebd68dda", "success": false}
+{"correct": false, "formal": true, "id": "6edc878dabe37a0421d2", "success": false}
+{"correct": false, "formal": true, "id": "61a337707ca533d0ebc0", "success": false}
+{"correct": false, "formal": true, "id": "78fe05bbf4b87a9735cf", "success": false}
+{"correct": false, "formal": true, "id": "a0d6d5f2d85160763d08", "success": false}
+{"correct": false, "formal": true, "id": "b55e93d7bfa3dfeec3bb", "success": false}
+{"correct": false, "formal": true, "id": "bce4d0ec60718ea92d92", "success": false}
+{"correct": false, "formal": true, "id": "83f5a37ae01459f433c5", "success": false}
+{"correct": false, "formal": true, "id": "a934a1dca2acc5857b31", "success": false}
+{"correct": false, "formal": true, "id": "c71665378488f22c27be", "success": false}
+{"correct": false, "formal": true, "id": "f5c0188b2fd20c56f641", "success": false}
+{"correct": false, "formal": true, "id": "17890aec77470affc172", "success": false}
+{"correct": false, "formal": true, "id": "4052ee9aa0438ad5ca1b", "success": false}
+{"correct": false, "formal": true, "id": "7d28a50a0e621db5985e", "success": false}
+{"correct": false, "formal": true, "id": "321e1efc50a711d7689e", "success": false}
+{"correct": false, "formal": true, "id": "668056d80964b7964ecc", "success": false}
+{"correct": false, "formal": true, "id": "ca627d43a66815ce9220", "success": false}
+{"correct": false, "formal": true, "id": "35b62fd540369f1d8b2a", "success": false}
+{"correct": false, "formal": true, "id": "6a7286609511db3cef8f", "success": false}
+{"correct": false, "formal": true, "id": "4cd6bd5ef6460886c5ad", "success": false}
+{"correct": false, "formal": true, "id": "c9cd4cd7adfd6ee05bc4", "success": false}
+{"correct": false, "formal": true, "id": "8e98e374bb9b9743f030", "success": false}
+{"correct": false, "formal": true, "id": "231b02937fadd59c9e96", "success": false}
+{"correct": false, "formal": true, "id": "a9252a2569c4e4cd7691", "success": false}
+{"correct": false, "formal": true, "id": "9549e0da795227516b75", "success": false}
+{"correct": false, "formal": true, "id": "b9fa16588c0fda5a5bbc", "success": false}
+{"correct": false, "formal": true, "id": "4cdea0966a3e934e13ff", "success": false}
+{"correct": false, "formal": true, "id": "7722c63e759f807f2b41", "success": false}
+{"correct": false, "formal": true, "id": "997c3f3342e7edee694d", "success": false}
+{"correct": false, "formal": true, "id": "f39808ccab5011edc40e", "success": false}
+{"correct": false, "formal": true, "id": "b49335658e05ad529091", "success": false}
+{"correct": false, "formal": true, "id": "b8a481f450f1b8179314", "success": false}
+{"correct": false, "formal": true, "id": "74a50d9005622e9ceb33", "success": false}
+{"correct": true, "formal": true, "id": "1f4e01054d78aeaafa38", "success": true}
+{"correct": false, "formal": true, "id": "7817ee3a54df92fc38ae", "success": false}
+{"correct": false, "formal": true, "id": "ae43e92420e5a16e2933", "success": false}
+{"correct": false, "formal": true, "id": "87844114ad3724fd1b9d", "success": false}
+{"correct": false, "formal": true, "id": "cd89966fa3cdf6f49237", "success": false}
+{"correct": false, "formal": true, "id": "a298c41216ce6531e712", "success": false}
+{"correct": false, "formal": true, "id": "50908d74f701fd3cf11c", "success": false}
+{"correct": false, "formal": true, "id": "0662f9bdffad4598a7d3", "success": false}
+{"correct": false, "formal": true, "id": "3d4a4bfb40abb4949ecb", "success": false}
+{"correct": false, "formal": true, "id": "a7d661039144be6ceed4", "success": false}
+{"correct": false, "formal": true, "id": "c7c45285402f27ddf8f4", "success": false}
+{"correct": false, "formal": true, "id": "6bd2886266dd38e0a1c3", "success": false}
+{"correct": false, "formal": true, "id": "dac687166f99fafa7344", "success": false}
+{"correct": false, "formal": true, "id": "f5c97ae4e1a22403a1b2", "success": false}
+{"correct": false, "formal": true, "id": "7b1c85296ea577dad0d4", "success": false}
+{"correct": false, "formal": true, "id": "b69c319d37580dd5f441", "success": false}
+{"correct": false, "formal": true, "id": "3663b2128fe00b9aadb1", "success": false}
+{"correct": false, "formal": true, "id": "0de857a9dcd43da032b2", "success": false}
+{"correct": false, "formal": true, "id": "e362fce136693d936b14", "success": false}
+{"correct": false, "formal": true, "id": "97078b1675935b5d6092", "success": false}
+{"correct": false, "formal": true, "id": "c16f8c51ce1c1f5c3ca6", "success": false}
+{"correct": false, "formal": true, "id": "2fcf9b3be50422a3f4f7", "success": false}
+{"correct": false, "formal": true, "id": "7b6cfedee0948e3b4992", "success": false}
+{"correct": false, "formal": true, "id": "500e377639f99eca3844", "success": false}
+{"correct": false, "formal": true, "id": "b035f7684412fa547b12", "success": false}
+{"correct": false, "formal": true, "id": "55e89c095d64b4b3bdf3", "success": false}
+{"correct": false, "formal": true, "id": "b995a2c9b9a1bf716ccd", "success": false}
+{"correct": false, "formal": true, "id": "5b7f34077476b6dac4cc", "success": false}
+{"correct": false, "formal": true, "id": "454b7fea148bdbe0778a", "success": false}
+{"correct": false, "formal": true, "id": "fa1c9e31b261f8f00801", "success": false}
+{"correct": false, "formal": true, "id": "e528350f4442a7cd8638", "success": false}
+{"correct": false, "formal": true, "id": "b782ddbf842e873e8b6f", "success": false}
+{"correct": false, "formal": true, "id": "2e33143ec563ba1d4eca", "success": false}
+{"correct": false, "formal": true, "id": "22a6e8dbff89c59cc69b", "success": false}
+{"correct": false, "formal": true, "id": "42ded97c22b32a33459e", "success": false}
+{"correct": true, "formal": true, "id": "5ac02d7dd3865a3d22fb", "success": true}
+{"correct": false, "formal": true, "id": "23c3fda06a3cf4e2bad0", "success": false}
+{"correct": false, "formal": true, "id": "c622590d4930807f51fc", "success": false}
+{"correct": false, "formal": true, "id": "bf44b78b6853bba80dfe", "success": false}
+{"correct": false, "formal": true, "id": "7562a45b3ead0dd7edf8", "success": false}
+{"correct": false, "formal": true, "id": "1abb50bc1950491172e2", "success": false}
+{"correct": false, "formal": true, "id": "4954bbf24b9fd539390b", "success": false}
+{"correct": false, "formal": true, "id": "c7dcb3f0baa86a2133b1", "success": false}
+{"correct": false, "formal": true, "id": "50fed2a105445fe6f70c", "success": false}
+{"correct": true, "formal": true, "id": "d3cac7d76a57440a6500", "success": true}
+{"correct": false, "formal": true, "id": "eea63ae22043f11be1a8", "success": false}
+{"correct": false, "formal": true, "id": "888e89fb91a89cf4f295", "success": false}
+{"correct": false, "formal": true, "id": "de49e81d78c992a41ec5", "success": false}
+{"correct": false, "formal": true, "id": "a2e55a29ba1140125fed", "success": false}
+{"correct": false, "formal": true, "id": "5c22a6be2913ecb3c010", "success": false}
+{"correct": false, "formal": true, "id": "b842e4c00655696ceeee", "success": false}
+{"correct": false, "formal": true, "id": "8caea3e077c40eaeb36f", "success": false}
+{"correct": false, "formal": true, "id": "50c49c4d630994ca07fd", "success": false}
+{"correct": false, "formal": true, "id": "daac27081b365f103285", "success": false}
+{"correct": false, "formal": true, "id": "be118e40cc1e617a008c", "success": false}
+{"correct": false, "formal": true, "id": "67ae80763f5faada617c", "success": false}
+{"correct": false, "formal": true, "id": "70c4501595e3f2f8d472", "success": false}
+{"correct": false, "formal": true, "id": "cc1993afd41b11fa2ae0", "success": false}
+{"correct": false, "formal": true, "id": "7c63ca7411f407a0e4d5", "success": false}
+{"correct": false, "formal": true, "id": "17cc88aafbc2d9c14a8f", "success": false}
+{"correct": false, "formal": true, "id": "9de7f60c5b7ae71cd7fa", "success": false}
+{"correct": false, "formal": true, "id": "dd02e72868d6b355cab4", "success": false}
+{"correct": false, "formal": true, "id": "c091f5bb6d6941377b7c", "success": false}
+{"correct": false, "formal": true, "id": "efa6a8e6b5e25d95f948", "success": false}
+{"correct": false, "formal": true, "id": "0c22916f34be1100bf2d", "success": false}
+{"correct": false, "formal": true, "id": "615e951f6d0021b2f723", "success": false}
+{"correct": false, "formal": true, "id": "2e38b04bf7fb3eddf44b", "success": false}
+{"correct": false, "formal": true, "id": "3da3b92800120d356151", "success": false}
+{"correct": false, "formal": true, "id": "9b1cc0fea45ab0eb769e", "success": false}
+{"correct": false, "formal": true, "id": "5c17065779e7910fb3d3", "success": false}
+{"correct": false, "formal": true, "id": "2fffd7b177ee17344701", "success": false}
+{"correct": false, "formal": true, "id": "674d54c7e159737bfcbc", "success": false}
+{"correct": false, "formal": true, "id": "fae646011874208c0102", "success": false}
+{"correct": false, "formal": true, "id": "b4a5addded35036f70fa", "success": false}
+{"correct": false, "formal": true, "id": "f639518d79349a1fa71c", "success": false}
+{"correct": false, "formal": true, "id": "3eba7c3ae736ad0222cf", "success": false}
+{"correct": false, "formal": true, "id": "25949cc3a5cedefddb7b", "success": false}
+{"correct": false, "formal": true, "id": "557e04d62b1b1e8771be", "success": false}
+{"correct": false, "formal": true, "id": "662cbe2e7422f1111efb", "success": false}
+{"correct": false, "formal": true, "id": "28b2815dd9c25ca15a9c", "success": false}
+{"correct": false, "formal": true, "id": "4587e4823a7cc0fdc28a", "success": false}
+{"correct": false, "formal": true, "id": "d6fbed346c4ed63fe1aa", "success": false}
+{"correct": false, "formal": true, "id": "f9f7a7c76dc2de523b87", "success": false}
+{"correct": false, "formal": true, "id": "ed253705fd95f090955f", "success": false}
+{"correct": false, "formal": true, "id": "61413b8e70c4c7b2924f", "success": false}
+{"correct": false, "formal": true, "id": "a0db88347809fc4ea15f", "success": false}
+{"correct": false, "formal": true, "id": "2e9540060ab701fc13ae", "success": false}
+{"correct": false, "formal": true, "id": "d33fe420491dbf6e99da", "success": false}
+{"correct": false, "formal": true, "id": "4b4fd08b33a18c710e88", "success": false}
+{"correct": false, "formal": true, "id": "e6ff9695715a249703a8", "success": false}
+{"correct": false, "formal": true, "id": "a5d205e12ef6659a75b6", "success": false}
+{"correct": false, "formal": true, "id": "0ef5ac9cb3dda5765eb4", "success": false}
+{"correct": false, "formal": true, "id": "89fd7c498daf4ff03bfd", "success": false}
+{"correct": false, "formal": true, "id": "a2256a452a26672d450b", "success": false}
+{"correct": false, "formal": true, "id": "c5b9f795779ecf18a18b", "success": false}
