@@ -33,6 +33,7 @@ for _p in ("src", "scripts"):
 
 from aadistill.data.verify import boxed_answer  # noqa: E402
 from aadistill.evaluation import usable_rollout  # noqa: E402
+from aadistill.evaluation.behavior import record_think_state  # noqa: E402
 from stages.calibration_volume.tasks.common import CANON_BY_PROTOCOL, gold_key_for  # noqa: E402
 from stages.calibration_volume.tasks.interactive import make_env  # noqa: E402
 
@@ -50,7 +51,7 @@ SCORER_ID = SCORER_IDS["v1"]
 def turn_components(turn: dict) -> dict:
     rec = {k: turn[k] for k in ("raw", "natural_termination", "degeneration_triggered",
                                 "context_limit_reached")}
-    comp = usable_rollout.components(rec, think_preopened=turn["think_preopened"])
+    comp = usable_rollout.components(rec, think_state=record_think_state(turn))
     comp["usable"] = all(comp.values())
     return comp
 

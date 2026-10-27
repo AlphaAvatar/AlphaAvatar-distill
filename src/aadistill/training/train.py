@@ -150,6 +150,8 @@ def validate_train_config(cfg: dict) -> None:
             raise ValueError(f"batch.{key} must be >= 1")
     if "truncate_padding" in batch and not isinstance(batch["truncate_padding"], bool):
         raise ValueError("batch.truncate_padding must be a bool")
+    if "document_isolation" in batch and not isinstance(batch["document_isolation"], bool):
+        raise ValueError("batch.document_isolation must be a bool")
     ck = need(cfg, "checkpoint", dict)
     for key in ("save_every", "keep_last"):
         need(ck, key, int, "checkpoint.")
@@ -357,12 +359,18 @@ def nonpad_extent(content_mask: torch.Tensor) -> int:
 
 
 def _unpack_blocks(blocks):
-    """Accept (ids, loss_mask) or (ids, loss_mask, content_mask)."""
+    """Accept (ids, loss_mask), (ids, loss_mask, content_mask) or
+    (ids, loss_mask, content_mask, position_ids); returns all four."""
     if len(blocks) == 2:
-        return blocks[0], blocks[1], None
+        return blocks[0], blocks[1], None, None
     if len(blocks) == 3:
-        return blocks
-    raise ValueError("block tuples must be (ids, mask) or (ids, mask, content)")
+        return (*blocks, None)
+    if len(blocks) == 4:
+        if blocks[2] is None:
+            raise ValueError("position ids need a content mask: isolated documents are padded")
+        return tuple(blocks)
+    raise ValueError("block tuples must be (ids, mask), (ids, mask, content) or "
+                     "(ids, mask, content, position_ids)")
 
 
 def masked_ce(logits: torch.Tensor, input_ids: torch.Tensor, loss_mask: torch.Tensor):
@@ -556,6 +564,7 @@ def gradient_share(trainer, n_steps: int = 4) -> dict:
         ids, mask = trainer.train_ids[idxs], trainer.train_mask[idxs]
         content = (None if trainer.train_content is None
                    else trainer.train_content[idxs])
+        pos = None if trainer.train_pos is None else trainer.train_pos[idxs]
         ce_total = int(mask[:, 1:].sum()) if loss_cfg["ce_weight"] > 0 else 0
         kd_total = (
             int(prediction_mask(mask, loss_cfg["kd_scope"], content,
@@ -565,7 +574,8 @@ def gradient_share(trainer, n_steps: int = 4) -> dict:
         trainer.opt.zero_grad(set_to_none=True)
         ce_sum, _, kd_sum, _ = trainer._micro_losses(
             ids.to(trainer.device), mask.to(trainer.device),
-            None if content is None else content.to(trainer.device))
+            None if content is None else content.to(trainer.device),
+            None if pos is None else pos.to(trainer.device))
         loss = torch.zeros((), device=trainer.device)
         if ce_total:
             loss = loss + loss_cfg["ce_weight"] * ce_sum / ce_total
@@ -679,6 +689,13 @@ class Trainer:
         # config also changes that config's hash, so the manifest records which
         # path a run took instead of leaving it to the code version.
         self.truncate_padding = bool(cfg["batch"].get("truncate_padding", False))
+        # Document isolation: blocks carry per-document position ids that restart
+        # at 0, and both models are run with them and no 2-D attention mask, which
+        # makes transformers build a block-diagonal causal mask -- each packed
+        # document attends only to itself, as it did when the teacher generated
+        # it. Off by default (every logged run attends across its whole block),
+        # and declared in the config so its hash records which path a run took.
+        self.document_isolation = bool(cfg["batch"].get("document_isolation", False))
         # Token accounting, kept as three distinct quantities so a saving is
         # never confused with a change in how much supervision the run saw.
         self._exec_logical = 0         # cumulative: blocks x logical block length
@@ -728,30 +745,42 @@ class Trainer:
             weight_decay=opt_cfg["weight_decay"],
         )
 
-        # Block tuples are (ids, loss_mask) or (ids, loss_mask, content_mask);
-        # the content mask is present only under padded (best-fit) packing.
-        self.train_ids, self.train_mask, self.train_content = _unpack_blocks(
+        # Block tuples are (ids, loss_mask), (ids, loss_mask, content_mask) or,
+        # for isolated documents, (ids, loss_mask, content_mask, position_ids);
+        # the content mask is present only under padded packing.
+        self.train_ids, self.train_mask, self.train_content, self.train_pos = _unpack_blocks(
             train_blocks
         )
+        if (self.train_pos is not None) != self.document_isolation:
+            raise ValueError(
+                "batch.document_isolation must be true exactly when the blocks carry "
+                "position ids: isolated blocks trained without them would attend across "
+                "documents, and a config without the flag would not record the treatment")
         if self.train_ids.shape[0] == 0:
             raise ValueError("no training blocks")
         if val_blocks is not None:
-            val_ids, val_mask, val_content = _unpack_blocks(val_blocks)
+            val_ids, val_mask, val_content, val_pos = _unpack_blocks(val_blocks)
+            if (val_pos is not None) != self.document_isolation:
+                raise ValueError("validation blocks must match batch.document_isolation")
             # Fixed shuffle so a truncated eval (eval_blocks < all) still
             # samples across groups instead of the first groups alphabetically.
             perm = epoch_permutation(val_ids.shape[0], cfg["seed"] + 777, 0)
             self.val_ids, self.val_mask = val_ids[perm], val_mask[perm]
             self.val_content = None if val_content is None else val_content[perm]
+            self.val_pos = None if val_pos is None else val_pos[perm]
         else:
-            self.val_ids = self.val_mask = self.val_content = None
+            self.val_ids = self.val_mask = self.val_content = self.val_pos = None
         # Named secondary val sets (e.g. the frozen val_v0 alongside a v1
         # mixture's own val split); evaluated and logged next to the primary.
         self.extra_vals: dict[str, tuple] = {}
         for name, blocks in (extra_val_blocks or {}).items():
-            ids, mask, content = _unpack_blocks(blocks)
+            ids, mask, content, pos = _unpack_blocks(blocks)
+            if (pos is not None) != self.document_isolation:
+                raise ValueError(f"extra validation set {name} must match batch.document_isolation")
             perm = epoch_permutation(ids.shape[0], cfg["seed"] + 777, 0)
             self.extra_vals[name] = (
-                ids[perm], mask[perm], None if content is None else content[perm]
+                ids[perm], mask[perm], None if content is None else content[perm],
+                None if pos is None else pos[perm],
             )
         if self.extra_vals and self.val_ids is None:
             raise ValueError("extra_val_blocks given but no primary val_blocks")
@@ -791,7 +820,8 @@ class Trainer:
         return nullcontext()
 
     def _micro_losses(
-        self, ids: torch.Tensor, mask: torch.Tensor, content: torch.Tensor | None = None
+        self, ids: torch.Tensor, mask: torch.Tensor, content: torch.Tensor | None = None,
+        positions: torch.Tensor | None = None,
     ):
         """Forward one microbatch; returns (ce_sum, ce_n, kd_sum, kd_n).
 
@@ -816,6 +846,9 @@ class Trainer:
                 ids = ids[:, :extent]
                 mask = mask[:, :extent]
                 content = content[:, :extent]
+                if positions is not None:
+                    positions = positions[:, :extent]
+        fwd = {} if positions is None else {"position_ids": positions}
         # Accounted in both paths so the two are directly comparable.
         executed = int(ids.shape[0] * ids.shape[1])
         self._exec_logical += n_blocks * logical_len
@@ -824,12 +857,12 @@ class Trainer:
         self._step_positions += executed
         self._step_nonpad += nonpad
         with self._autocast():
-            logits = self.student(ids).logits
+            logits = self.student(ids, **fwd).logits
         ce_sum, ce_n = masked_ce(logits, ids, mask)
         kd_sum, kd_n = torch.zeros((), device=ids.device), 0
         if self.teacher is not None and loss_cfg["kd_weight"] > 0:
             with torch.no_grad(), self._autocast():
-                t_logits = self.teacher(ids).logits
+                t_logits = self.teacher(ids, **fwd).logits
             kd_sum, kd_n = kd_forward_kl(
                 logits,
                 t_logits,
@@ -946,6 +979,7 @@ class Trainer:
         )
         ids, mask = self.train_ids[idxs], self.train_mask[idxs]
         content = None if self.train_content is None else self.train_content[idxs]
+        pos = None if self.train_pos is None else self.train_pos[idxs]
         # Normalizers are known from the masks alone, so microbatch losses can
         # be scaled exactly before backward (sum over micro = true step mean).
         ce_total = int(mask[:, 1:].sum()) if loss_cfg["ce_weight"] > 0 else 0
@@ -973,7 +1007,8 @@ class Trainer:
             mcontent = (
                 None if content is None else content[i : i + micro].to(self.device)
             )
-            ce_sum, _, kd_sum, _ = self._micro_losses(mids, mmask, mcontent)
+            mpos = None if pos is None else pos[i : i + micro].to(self.device)
+            ce_sum, _, kd_sum, _ = self._micro_losses(mids, mmask, mcontent, mpos)
             loss = torch.zeros((), device=self.device)
             if ce_total > 0:
                 loss = loss + loss_cfg["ce_weight"] * ce_sum / ce_total
@@ -1036,11 +1071,12 @@ class Trainer:
             "executed_nonpad_tokens": self._step_nonpad,
             "supervised_tokens": ce_total,
             "truncate_padding": self.truncate_padding,
+            "document_isolation": self.document_isolation,
         }
 
     @torch.no_grad()
     def _eval_blocks(
-        self, val_ids, val_mask, max_blocks: int | None, val_content=None
+        self, val_ids, val_mask, max_blocks: int | None, val_content=None, val_pos=None
     ) -> dict:
         """CE (assistant targets) and KD metrics over a fixed block order."""
         n = val_ids.shape[0]
@@ -1058,7 +1094,8 @@ class Trainer:
                 None if val_content is None
                 else val_content[i : i + micro].to(self.device)
             )
-            ce_sum, cn, kd_sum, kn = self._micro_losses(ids, mask, content)
+            pos = None if val_pos is None else val_pos[i : i + micro].to(self.device)
+            ce_sum, cn, kd_sum, kn = self._micro_losses(ids, mask, content, pos)
             ce_s += float(ce_sum)
             ce_n += cn
             kd_s += float(kd_sum)
@@ -1078,7 +1115,7 @@ class Trainer:
         if self.val_ids is None:
             raise ValueError("trainer has no validation blocks")
         return self._eval_blocks(
-            self.val_ids, self.val_mask, max_blocks, self.val_content
+            self.val_ids, self.val_mask, max_blocks, self.val_content, self.val_pos
         )
 
     def _eval_and_log(self, eval_blocks, suffix: str = "") -> dict:
@@ -1086,8 +1123,8 @@ class Trainer:
         ev = self.evaluate(eval_blocks)
         self.logger.log("eval_result", step=self.step, val_set="val", **ev)
         print(f"eval step {self.step}{suffix}: {ev}", flush=True)
-        for name, (ids, mask, content) in self.extra_vals.items():
-            ex = self._eval_blocks(ids, mask, eval_blocks, content)
+        for name, (ids, mask, content, pos) in self.extra_vals.items():
+            ex = self._eval_blocks(ids, mask, eval_blocks, content, pos)
             self.logger.log("eval_result", step=self.step, val_set=name, **ex)
             print(f"eval step {self.step}{suffix} [{name}]: {ex}", flush=True)
         return ev

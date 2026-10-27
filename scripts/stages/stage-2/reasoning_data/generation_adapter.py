@@ -78,7 +78,7 @@ from stages.reasoning_data import source_plan as SP
 
 from aadistill.data.target_quality import AcceptancePolicy, Check, assess, select_target, summarize
 from aadistill.data.verify import boxed_answer
-from aadistill.evaluation.behavior import split_generation
+from aadistill.evaluation.behavior import record_think_state, split_generation
 
 ENDS = {"natural": ("eos",), "length": ("length_limited", "length", "context_limit"),
         "degeneration": ("degeneration",)}
@@ -474,7 +474,7 @@ def consistency(task: dict, rec: dict, tokenizer=None) -> list[str]:
         return bad
     for k, t in enumerate(turns):
         a = rest[2 * k]
-        parts = split_generation(t.get("raw", ""), think_preopened=bool(t.get("think_preopened", True)))
+        parts = split_generation(t.get("raw", ""), think_state=record_think_state(t))
         if a.get("content") != parts["answer"] or t.get("answer") != parts["answer"]:
             bad.append(f"turn {k}: assistant content is not the raw output's answer")
         if a.get("reasoning_content", "") != parts.get("think", ""):

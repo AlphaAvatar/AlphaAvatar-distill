@@ -1,0 +1,113 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.cost_forecast/v1",
+ "measured": {
+  "generated_tokens_2507": 12920708,
+  "generation_session_minutes": 161.11,
+  "tokens_per_session_minute": 80198,
+  "seconds_per_step": 3.6314,
+  "evaluate_seconds_student": 3792.4,
+  "isolated_packing_fill": 0.9389,
+  "a100_usd_per_hour": 1.8108,
+  "l40s_usd_per_hour": 1.1108
+ },
+ "sources": [
+  "logs/stages/stage-2/reasoning_data/runs/h1gen_20261022_190653/closeout/outcome.json",
+  "logs/stages/stage-2/reasoning_data/runs/h1p1t_20261023_094007/closeout/outcome.json",
+  "logs/stages/stage-2/reasoning_data/runs/h1pat_20261024_115517/closeout/outcome.json",
+  "logs/stages/stage-0/calibration_volume/analyses/mixed_result.json",
+  "logs/stages/stage-2/teacher_modes/audit/token_identity_audit.json"
+ ],
+ "scenarios": {
+  "expected": {
+   "assumptions": {
+    "ht_tokens_vs_2507": 1.0,
+    "hn_tokens_vs_2507": 0.25,
+    "admitted_both": 0.7,
+    "x_tokens_m": 3.0,
+    "teacher_eval_vs_student": 3.5,
+    "hn_eval_vs_ht": 0.5,
+    "calibration_tokens_m": 0.5
+   },
+   "generation_tokens_m": 19.65,
+   "sequences": {
+    "H-T-S": 1235,
+    "H-N-S": 309,
+    "H-N-C": 1235
+   },
+   "optimizer_steps": {
+    "H-T-S": 1853,
+    "H-N-S": 464,
+    "H-N-C": 1853
+   },
+   "A1_generation": {
+    "hours": 4.58,
+    "usd": 8.3
+   },
+   "A2_initialization": {
+    "hours": 1.0,
+    "usd": 1.81
+   },
+   "A3_recovery_and_evaluation": {
+    "hours": 18.91,
+    "train_hours": 8.41,
+    "student_eval_hours": 4.21,
+    "teacher_eval_hours": 5.53,
+    "usd": 21.0
+   }
+  },
+  "conservative": {
+   "assumptions": {
+    "ht_tokens_vs_2507": 1.15,
+    "hn_tokens_vs_2507": 0.5,
+    "admitted_both": 0.8,
+    "x_tokens_m": 6.0,
+    "teacher_eval_vs_student": 5.0,
+    "hn_eval_vs_ht": 0.7,
+    "calibration_tokens_m": 0.8
+   },
+   "generation_tokens_m": 28.12,
+   "sequences": {
+    "H-T-S": 1623,
+    "H-N-S": 706,
+    "H-N-C": 1623
+   },
+   "optimizer_steps": {
+    "H-T-S": 2435,
+    "H-N-S": 1059,
+    "H-N-C": 2435
+   },
+   "A1_generation": {
+    "hours": 6.34,
+    "usd": 11.49
+   },
+   "A2_initialization": {
+    "hours": 1.5,
+    "usd": 2.72
+   },
+   "A3_recovery_and_evaluation": {
+    "hours": 26.72,
+    "train_hours": 11.96,
+    "student_eval_hours": 5.06,
+    "teacher_eval_hours": 8.95,
+    "usd": 29.68
+   }
+  }
+ },
+ "A_E_engineering_validation": {
+  "hours_expected": 1.0,
+  "hours_conservative": 1.75,
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "what": "the hybrid teacher under vLLM 0.27.1 in both modes on a few T0 tasks (prompt identity, think states, stop ids), the real-teacher teacher-forced isolation check in bf16 and fp32, a 20-step isolated-pack trainer smoke with kd_scope assistant and the on-the-fly hybrid teacher (step time, peak memory)"
+ },
+ "storage": "a new 50 GB network volume beside the A3 pod for six checkpoints (~2.4 GB each); am5m373kuq (14.7 of 30 GB, kept for the H1-PA/mixed review) cannot hold them; reserved at 50 GB x $0.07 x 1 month",
+ "hard_caps_usd": {
+  "A_E_engineering_validation": 3.5,
+  "A1_generation": 13.5,
+  "A2_initialization": 3.5,
+  "A3_recovery_and_evaluation": 33.0,
+  "storage": 3.5,
+  "engineering_reserve": 3.0
+ },
+ "total_hard_cap_usd": 60.0,
+ "authorizes": "nothing"
+}

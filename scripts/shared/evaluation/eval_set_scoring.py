@@ -82,6 +82,9 @@ def _full_turn(t: dict) -> dict:
             "degeneration_triggered": t.get("degeneration_triggered", False),
             "context_limit_reached": t.get("context_limit_reached", False),
             "think_preopened": t.get("think_preopened", True),
+            # carried only when the record states it, so an earlier record's
+            # turn is exactly what it always was
+            **({"think_state": t["think_state"]} if t.get("think_state") else {}),
             "generated_tokens": t.get("generated_tokens", 0),
             "stop_reason": t.get("stop_reason")}
 
@@ -134,7 +137,8 @@ def score_capability(set_name: str, sample: dict, record: dict, protocol: str = 
 def score_behavior(sample: dict, record: dict) -> dict:
     from aadistill.evaluation.behavior import score_sample
     v = score_sample(sample, record.get("raw", ""),
-                     hit_cap=record.get("stop_reason") not in (None, "eos"))
+                     hit_cap=record.get("stop_reason") not in (None, "eos"),
+                     think_state=record.get("think_state"))
     return _plain({k: val for k, val in v.items() if not isinstance(val, (dict, list))})
 
 
@@ -144,7 +148,10 @@ def score_legacy(item: dict, record: dict, protocol: str = "v1") -> dict:
     from stages.d0.run_three_mode_diagnostic import score
     if protocol == "v2":
         record = normalized_record(record)
-    answer = split_generation(record["raw"], think_preopened=True)["answer"]
+    # A record that states its think state (a hybrid template's) is split under
+    # it; every earlier record keeps the pre-opened rule it was scored under.
+    answer = split_generation(record["raw"], think_preopened=True,
+                              think_state=record.get("think_state"))["answer"]
     return _plain({"correct": score(item, answer)})
 
 

@@ -1,0 +1,93 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.preregistration/v1",
+ "version": 1,
+ "study_id": "stage2.teacher_modes.hybrid_v1",
+ "written_utc": "2026-10-27T12:00:00Z",
+ "status": "DRAFTED before any hybrid-teacher generation exists; REGISTERED (frozen, its sha256 bound into the grant) only on the maintainer's approval, and never amended after the first datum of A1 exists. The data budget's NUMBERS are derived by the rules below from A1's pilot slice; the rules are fixed now",
+ "design": {"path": "configs/stages/stage-2/teacher_modes/design.json"},
+ "arms": {
+  "H-T-S": "the common initialization trained on the H-T documents of I (tasks admitted in both modes)",
+  "H-N-S": "the same initialization trained on the H-N documents of I",
+  "H-N-C": "the same initialization trained on the H-N documents of I and X, X sized so its isolated pack has H-T-S's sequence count"
+ },
+ "isolated_variables": {
+  "S": "the teacher's mode on the same tasks: same task ids, same initialization, recipe, epochs, seeds and evaluation; the training compute differs (H-T documents are longer) and is reported beside, never equalized",
+  "C": "the teacher's mode at the same training compute: the same number of packed 8,192-token sequences, optimizer steps and epochs (equal FLOPs up to padding, which is reported); H-N-C sees more tasks"
+ },
+ "inside_the_variable": {
+  "_": "these come with the mode, are reported, and are never read as the mode's isolated effect",
+  "sampling_preset": "H-T 0.6 / 0.95 / 20 against H-N 0.7 / 0.8 / 20 (the model card's)",
+  "trajectory_length": "reasoning tokens exist only in H-T",
+  "admission": "each mode's own correctness decides which of its trajectories are trainable; S restricts both to I",
+  "evaluation_mode": "each student is measured in its own mode"
+ },
+ "seeds": [20260726, 20260801],
+ "seed_pairing": "arms are paired by training-seed number; every directional label needs both seeds' own estimates on its side",
+ "comparisons": {
+  "S": {"contrast": "H-T-S - H-N-S", "role": "decided"},
+  "C": {"contrast": "H-T-S - H-N-C", "role": "decided",
+        "fallback": {"when": "X is infeasible under design.json :: tasks.X.if_infeasible, decided at $0 before any training",
+                     "contrast": "H-T-C - H-N-S, H-T-C = a seeded prefix of I's H-T documents (whole units) packed to H-N-S's sequence count",
+                     "note": "the fallback is compute-matched at the smaller scale, where the floor is likelier"}},
+  "teacher_gap": {"contrast": "teacher(mode) - student, per arm", "role": "descriptive"}
+ },
+ "multiplicity": "two decided comparisons, S and C, each at a 97.5% interval (Bonferroni over the two); within each the four static-axis contrasts are a Holm family at alpha 0.05",
+ "evaluation": {
+  "set": {"eval_set_id": "eval-set-1", "status": "frozen", "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+          "validity_mask": "v1 (formal 714 = 570 static + 144 interactive)", "scoring_protocol": "v2, unchanged",
+          "action_protocol": "v2"},
+  "decoding": {"protocol_id": "nucleus_v1", "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"},
+  "modes": "students in their own training mode; the teacher in both",
+  "think_state": "every generation records the think_state its prompt produced; the preclosed state is scored with no think delimiter allowed in the continuation, and no earlier record or verdict changes",
+  "every_item": "every item of every unit is generated for every checkpoint and for the teacher in both modes"
+ },
+ "primary_measure": "correctness on the 570 formal static items of fluid_reasoning_720 (dev_v1), one nucleus_v1 sample per item and seed, clustered by rule family; the interactive episodes exploratory",
+ "decision_rule": {
+  "module": "scripts/stages/stage-2/reasoning_data/h1_statistics.py",
+  "rule_id": "stage2.reasoning_data.h1_statistics/v1",
+  "bound_sha256": {
+   "scripts/stages/stage-2/reasoning_data/h1_statistics.py": "c4c1191102f8b293feb9f165a7c72f1a69af3b96789c564e1747d95ea20a2836",
+   "src/aadistill/evaluation/paired_stats.py": "7d41ef3199eee78d3a9d9460c3b8f4c3bb33773d5d6b4945c57a62df934fe782"
+  },
+  "constants": {"sesoi": 0.05, "sesoi_axis": 0.08, "level": 0.975, "iterations": 10000, "bootstrap_seed": 20261028,
+                "floor_rate": 0.02, "min_discordant": 10, "min_informative_clusters": 5, "alpha_axes": 0.05},
+  "labels": {
+   "GO_THINKING": "the interval lies wholly above +5 pp and both seeds' estimates are above +5 pp",
+   "GO_NON_THINKING": "the interval lies wholly below -5 pp and both seeds' estimates are below -5 pp",
+   "NO_GO": "the interval and both seeds' estimates lie inside (-5, +5) pp and neither arm is below 2%: a meaningful difference between the modes is excluded at this scale",
+   "INCONCLUSIVE": "anything else off the floor",
+   "NOT_RESOLVED": "both arms below 2% (FLOOR); one arm below 2% flagged FLOOR_<arm>"
+  },
+  "reading": "S and C are read separately and never merged: a mode that wins S and not C wins by compute, one that wins C and not S wins by data efficiency"
+ },
+ "data_budget_rules": {
+  "_": "applied to A1's pilot slice before the rest of A1 is generated; recorded, then fixed",
+  "I": "tasks whose every turn is admitted in both modes",
+  "steps": "each arm: total_steps = ceil(3 x sequences / 2) (H1-PA's rule), sequences from pack_isolated at 8,192",
+  "X_size": "the smallest whole-unit prefix of the seeded X order whose H-N documents, packed with I's, reach H-T-S's sequence count",
+  "repricing": "the remaining A1 and A3 costs are recomputed from the slice's measured tokens per task, acceptance and length-limit share by forecast_cost.py; if the repriced total exceeds the phase cap, A stops at a HARD BOUNDARY with the data generated so far kept"
+ },
+ "teacher_correctness": "per mode on every T0 task's first candidate (the teacher's correctness), and the two-candidate yield, per cell and axis; and on eval-set-1 per mode under nucleus_v1",
+ "sensitivity": {
+  "registered_not_run": "H-N generated under H-T's preset (0.6 / 0.95 / 20) on I, trained as H-N-S: isolates the sampling preset from the mode. Run only on a later maintainer decision"
+ },
+ "reported_beside": [
+  "each static axis per arm and seed, unseen rule and unseen format tiers; the 144 interactive episodes (exploratory)",
+  "every eval-set-1 unit, correct AND usable side by side over its formal items, for every student and for the teacher in both modes",
+  "the teacher-student gap per unit and axis",
+  "protocol integrity: natural termination, degeneration stops, context-limit hits; think_state violations",
+  "reasoning and answer tokens per unit (generation lengths), and supervised tokens, context tokens, sequences and training FLOPs per arm",
+  "teacher correctness, admission rate, length-limit share and tokens per task, per mode and cell",
+  "training: loss curves and validation CE/KD (diagnostics only)"
+ ],
+ "never": [
+  "a re-rendered target, a hand-built mode prefix, a soft switch, or a mode-forcing system message",
+  "removing a thinking span from a thinking-mode trace to make a non-thinking target, or any answer-only cut of a Thinking-2507 trace",
+  "changing this rule, its constants, the evaluation set, the mask, the scorers or nucleus_v1 after a datum is seen",
+  "a pooled score across units, or usable rollout, KL, loss or length read as reasoning",
+  "selecting, dropping or re-running a seed for its result",
+  "combining the hybrid non-thinking teacher with the projected-residual architecture in this round (brief section 4)",
+  "starting any follow-up automatically from a result of this study"
+ ],
+ "authorizes": "nothing"
+}

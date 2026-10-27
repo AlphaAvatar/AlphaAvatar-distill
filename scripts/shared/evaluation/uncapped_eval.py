@@ -283,7 +283,7 @@ def main() -> int:
     from vllm import LLM, SamplingParams
 
     from aadistill.evaluation.behavior import (  # noqa: E402
-        aggregate, behavior_score, score_sample, template_opens_think,
+        aggregate, behavior_score, score_sample, template_opens_think, template_think_state,
     )
 
     rev = {"revision": args.revision} if args.revision else {}
@@ -369,6 +369,7 @@ def main() -> int:
             # PROMPT, and the scorer needs it to judge the continuation. Record
             # it per sample rather than leaving a later reader to guess.
             preopened = template_opens_think(prompt)
+            think_state = template_think_state(prompt)
             allowance = ctx - len(p_ids)
             if allowance <= 0:
                 raise SystemExit(
@@ -386,7 +387,7 @@ def main() -> int:
                             "system_source": ("sample" if has_system
                                               else ("default" if inject
                                                     else "none")),
-                            "think_preopened": preopened,
+                            "think_preopened": preopened, "think_state": think_state,
                             "gen": [], "n_gen": 0, "last_check": 0, "degen": None,
                             "finish": None, "t0": time.time(), "ttft": None}
         t_wave = time.time()
@@ -451,7 +452,7 @@ def main() -> int:
                 "id": s_["id"], "label": args.label, "group": s_.get("group"),
                 "source": s_.get("source"), "prompt_tokens": len(st["p_ids"]),
                 "system_source": st["system_source"],
-                "think_preopened": st["think_preopened"],
+                "think_preopened": st["think_preopened"], "think_state": st["think_state"],
                 "context_len": ctx, "context_resolution": ctx_info,
                 "generation_allowance": st["allowance"],
                 "generated_tokens": len(gen), "stop_reason": reason,

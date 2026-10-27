@@ -58,7 +58,7 @@ def request_seed(base: int, task_id: str, turn: int) -> int:
 def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
                  seed_base, system, check_every, degeneration_check,
                  split_generation, template_opens_think, label, log=print,
-                 action_protocol="v1", on_done=None, seed_of=None):
+                 action_protocol="v1", on_done=None, seed_of=None, template_kwargs=None):
     """Generate every task's turns through `eng`; returns (episodes, turns, tokens).
 
     ASYNCHRONOUS: one engine pass for everything. A finished turn is processed
@@ -80,7 +80,14 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
 
     `seed_of(task_id, turn)` gives a measurement's per-turn seed under a
     decoding protocol; without it only `generate` mode seeds its requests.
+
+    `template_kwargs` go to every `apply_chat_template` call (a hybrid
+    template's `enable_thinking`). Each turn records the `think_state` its
+    rendered prompt left the continuation in, and is split under it.
     """
+    from aadistill.evaluation.behavior import template_think_state
+
+    template_kwargs = dict(template_kwargs or {})
     episodes = {}
     for t in tasks:
         env = (make_env(t["env"], action_protocol=action_protocol)
@@ -104,7 +111,7 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
     def submit(e) -> None:
         tid = e["task"]["task_id"]
         prompt = tok.apply_chat_template(e["history"], tokenize=False,
-                                         add_generation_prompt=True)
+                                         add_generation_prompt=True, **template_kwargs)
         p_ids = tok(prompt, add_special_tokens=False).input_ids
         allowance = limit - len(p_ids)
         if allowance <= 0:
@@ -115,7 +122,8 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
         rid = f"{tid}::{len(e['turns'])}"
         eng.add_request(rid, {"prompt_token_ids": p_ids}, make_sampling(allowance, seed))
         pending[rid] = {"ep": e, "p_ids": p_ids, "allowance": allowance,
-                        "preopened": template_opens_think(prompt), "gen": [],
+                        "preopened": template_opens_think(prompt),
+                        "think_state": template_think_state(prompt), "gen": [],
                         "last": 0, "degen": None, "finish": None, "t0": time.time(),
                         "ttft": None, "seed": seed}
 
@@ -130,7 +138,7 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
         reason = ("eos" if eos else "degeneration" if st["degen"] else
                   ("context_limit" if limit == ctx else "length_limited")
                   if hit else st["finish"] or "unknown")
-        parts = split_generation(raw, think_preopened=st["preopened"])
+        parts = split_generation(raw, think_preopened=st["preopened"], think_state=st["think_state"])
         turn = {
             "turn": len(e["turns"]), "prompt_tokens": len(st["p_ids"]),
             "generation_allowance": st["allowance"], "generated_tokens": len(gen),
@@ -140,7 +148,8 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
             "right_censored": reason in ("context_limit", "degeneration"),
             "degeneration_triggered": st["degen"] is not None,
             "degeneration_kind": (st["degen"] or {}).get("kind"),
-            "think_preopened": st["preopened"], "seed": st["seed"],
+            "think_preopened": st["preopened"], "think_state": st["think_state"],
+            "seed": st["seed"],
             "ttft_seconds": round(st["ttft"], 3) if st["ttft"] else None,
             "seconds": round(time.time() - st["t0"], 2),
             "raw": raw, "answer": parts["answer"],
@@ -265,7 +274,17 @@ def main(argv=None) -> int:
     ap.add_argument("--action-protocol", default="v1", choices=("v1", "v2"),
                     help="how the environment reads action lines (tasks/interactive.py); "
                          "recorded per episode, and the scorer replays with it")
+    ap.add_argument("--chat-template-kwargs", default="{}",
+                    help='JSON passed to every apply_chat_template call, e.g. '
+                         '\'{"enable_thinking": false}\' for a hybrid template; recorded')
+    ap.add_argument("--generate-sampling", default=None,
+                    help="generate mode: JSON replacing the default teacher sampling "
+                         "(GENERATE_SAMPLING), e.g. a mode's own official preset; recorded")
     args = ap.parse_args(argv)
+    template_kwargs = json.loads(args.chat_template_kwargs)
+    if args.generate_sampling and args.mode != "generate":
+        raise SystemExit("--generate-sampling is a data-generation setting; a measurement "
+                         "uses --decoding")
     if args.mode == "eval" and args.session_limit:
         raise SystemExit("--session-limit is a data-construction bound; a measurement "
                          "has none (P18)")
@@ -302,7 +321,8 @@ def main(argv=None) -> int:
     ctx = ctx_info["resolved_context"]
     stop_ids = resolve_stop_ids(args.model, tok, cfg, args.revision)
     limit = min(ctx, args.session_limit) if args.session_limit else ctx
-    sampling = (dict(GENERATE_SAMPLING) if args.mode != "eval" else
+    sampling = ((json.loads(args.generate_sampling) if args.generate_sampling
+                 else dict(GENERATE_SAMPLING)) if args.mode != "eval" else
                 dict(SAMPLING) if protocol is None else DEC.sampling(protocol))
     print(f"[{args.label}] mode={args.mode} context={ctx} "
           f"({ctx_info['context_source']}) limit={limit} stop={stop_ids}", flush=True)
@@ -342,7 +362,7 @@ def main(argv=None) -> int:
         template_opens_think=template_opens_think, label=args.label,
         action_protocol=args.action_protocol, on_done=stream[0] if stream else None,
         seed_of=(lambda tid, turn: DEC.request_seed(protocol, args.seed_namespace, tid, turn))
-        if protocol else None)
+        if protocol else None, template_kwargs=template_kwargs)
     if stream:
         stream[1].close()
     gen_s = round(time.time() - t_gen, 1)
@@ -358,6 +378,7 @@ def main(argv=None) -> int:
         "action_protocol": args.action_protocol,
         "system_message": args.system,
         "chat_template_sha256": hashlib.sha256((tok.chat_template or "").encode()).hexdigest(),
+        "chat_template_kwargs": template_kwargs,
         "tokenizer_sha256": tokenizer_files_sha256(args.model),
         "degeneration_check_every": args.check_every,
         "engine": {**engine, "init_seconds": init_s},
