@@ -630,8 +630,10 @@ def closeout(phase: str, run_id: str, scr: Path, *, repo_root: Path = REPO_ROOT,
              for p in sorted(st.rglob("*")) if p.is_file()} if st.is_dir() else {}
     if phase == "MC1":
         rec_p = st / "mc1" / "mixed_search_record.json"
-        terminal = json.loads(rec_p.read_text()).get("status") if rec_p.is_file() else None
-        complete = terminal == "COMPLETE" and (sess.get("required_products_secured") or {}).get("ok")
+        #: the driver's terminal MARKER, as for MC2: it writes ALL_DONE exactly when its record is COMPLETE
+        done = json.loads(rec_p.read_text()).get("status") if rec_p.is_file() else None
+        terminal = {"COMPLETE": "ALL_DONE", "FAILED": "RUN_FAILED"}.get(done)
+        complete = terminal == "ALL_DONE" and (sess.get("required_products_secured") or {}).get("ok")
     else:
         status = (st / "driver.status").read_text() if (st / "driver.status").is_file() else ""
         terminal = "ALL_DONE" if "MARKER:ALL_DONE" in status else "RUN_FAILED" if "MARKER:RUN_FAILED" in status else None

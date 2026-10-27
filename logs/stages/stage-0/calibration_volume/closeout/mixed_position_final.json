@@ -1,0 +1,81 @@
+{
+ "fetched_utc": "2026-10-26T23:57:44+00:00",
+ "provider_billed_usd": 719.0734,
+ "provider_billed_pods_usd": 716.5583,
+ "provider_billed_volumes_usd": 2.5151,
+ "unposted_sessions": [],
+ "never_posted_sessions_not_counted": [
+  {
+   "run": "logs/stages/stage-1/phase_a3/runs/a3_attempt20",
+   "pod_id": "2iaipmt4cd45qs",
+   "usd": 0.8316,
+   "ended_utc": "2026-10-03T06:48:41.012449+00:00"
+  }
+ ],
+ "storage": [
+  {
+   "volume": "am5m373kuq",
+   "record": "logs/stages/stage-2/reasoning_data/storage/h1pa_volume_am5m373kuq.json",
+   "basis": "reserved",
+   "obligation_usd": 4.2,
+   "netted_posted_usd": 0.07,
+   "future_usd": 4.13,
+   "netting": [
+    {
+     "day": "2026-10-24",
+     "row_gb_h": 540.0,
+     "own_max_gb_h": 150.0,
+     "netted_gb_h": 0.0,
+     "netted_usd": 0.0,
+     "shared_with": [
+      "1980hnh75i"
+     ]
+    },
+    {
+     "day": "2026-10-25",
+     "row_gb_h": 870.0,
+     "own_max_gb_h": 720.0,
+     "netted_gb_h": 720.0,
+     "netted_usd": 0.07,
+     "shared_with": []
+    },
+    {
+     "day": "2026-10-26",
+     "row_gb_h": 1530.0,
+     "own_max_gb_h": 720.0,
+     "netted_gb_h": 0.0,
+     "netted_usd": 0.0,
+     "shared_with": [
+      "t6yrsvujha"
+     ]
+    }
+   ]
+  },
+  {
+   "volume": "1980hnh75i",
+   "record": "logs/stages/stage-2/reasoning_data/storage/h1_volume_1980hnh75i.json",
+   "basis": "deleted inside the posting window",
+   "obligation_usd": 0.0449,
+   "netted_posted_usd": 0.0,
+   "future_usd": 0.0449
+  },
+  {
+   "volume": "t6yrsvujha",
+   "record": "logs/stages/stage-0/calibration_volume/runs/mixvol_20261026_102835/runtime/session.json",
+   "basis": "deleted inside the posting window",
+   "obligation_usd": 0.0526,
+   "netted_posted_usd": 0.0,
+   "future_usd": 0.0526
+  }
+ ],
+ "committed_usd": 723.3009,
+ "project_cap_usd": 740.0,
+ "project_remaining_usd": 16.6991,
+ "account_pods": [],
+ "account_volumes": [
+  "am5m373kuq"
+ ],
+ "spend_per_hour": 0.003,
+ "balance_usd": 39.2718467875,
+ "rule": "mixed_governance.position"
+}

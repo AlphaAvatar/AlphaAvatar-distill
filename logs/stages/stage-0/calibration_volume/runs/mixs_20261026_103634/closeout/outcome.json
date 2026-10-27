@@ -6,7 +6,7 @@
  "stage_id": "0",
  "recorded_utc": "2026-10-26T14:02:28Z",
  "status": "COMPLETE",
- "terminal": "COMPLETE",
+ "terminal": "ALL_DONE",
  "runner_terminal": "ALL_DONE",
  "session_passed": true,
  "provider_resource_created": true,
@@ -141,5 +141,6 @@
   "ok": true,
   "why": "the provider account holds only the 2 resource(s) the records account for"
  },
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "_terminal": "the driver's terminal marker (was recorded as its record status 'COMPLETE'; corrected 2026-10-27 to the marker MC2's closeouts state)"
 }

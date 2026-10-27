@@ -9,20 +9,19 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**MIXED CALIBRATION 2x: GRANTED AND RUNNING -- MC1 (THE SEARCH) IN FLIGHT (2026-10-26).**
-Owner: [`docs/stages/stage-0/calibration_volume/MIXED.md`](../../docs/stages/stage-0/calibration_volume/MIXED.md).
-Grant: `logs/budget/approvals/mixed_calibration_grant.json` (maintainer 2026-10-26: MC1 + MC2 cumulative $33.05,
-project cap $731 -> $740, 2x only, nothing starts 4x). Governance and the corrected project position:
-`scripts/stages/stage-0/calibration_volume/mixed_governance.py` (provider read at every issue and launch).
-- **Profile** `calib.s0m_mix_2x@v2` (71,216 + 71,216 UESP, content `9a6c2782...`), unchanged.
-- **MC1 COMPLETE** ($6.4246 in all: attempt 1 `mixs_20261026_102914` $0.1903, died at A_contract before any
-  measurement; attempt 2 `mixs_20261026_103634` $6.1817, 34 expansions; volume $0.0526, deleted). Top-1 `9311dcde...`,
-  path DEPTH->ATTENTION->FFN->RESIDUAL_WIDTH, relayed and read back (`assets/mix_top1_materialization.json`).
-- **MC2 live:** run `mixr_20261026_140539`, pod `ntluvkf9fod0ec` billing (L40S, EUR-IS-2, $1.09/h, hard cap $14, hard
-  stop 751 min) on `am5m373kuq`; launcher in tmux `mixmc2`, store
-  `/home/ecs-user/aad-artifacts/stage0_calvol/mixr_20261026_140539/`.
-- **Then:** `mixed_analysis.py` (the preregistered M decision and every capability apart).
-- **Checkpoints:** the four D4 checkpoints stay on `am5m373kuq`; D4-Augmented x2 are the formal control.
+**MIXED CALIBRATION 2x: COMPLETE; PREREGISTERED M = NO_GO (2026-10-27).**
+Owner: [`docs/stages/stage-0/calibration_volume/MIXED.md`](../../docs/stages/stage-0/calibration_volume/MIXED.md)
+section 13; `logs/stages/stage-0/calibration_volume/analyses/mixed_result.json`. Grant (closed):
+`logs/budget/approvals/mixed_calibration_grant.json`. Nothing is running and nothing is billing apart from the
+retained volume `am5m373kuq` (provider 2026-10-26T23:57Z: 0 pods; `closeout/mixed_position_final.json`).
+- **M = Mix-Augmented - D4-Augmented** (static fluid correctness, 570 items x 2 seeds, nucleus_v1): 3.25% vs 4.56%,
+  -1.32 pp [-2.71, -0.17] -> NO_GO (a >= 5 pp difference is excluded; the small loss is below the SESOI). Deduction
+  9.3% vs 13.5% INCONCLUSIVE; the other three axes NOT_RESOLVED at the floor. E (vs PCA-Original) +1.93 pp, descriptive.
+- **Runs:** MC1 `mixs_20261026_103634` (Top-1 `9311dcde`, DEPTH->ATTENTION->FFN->RESIDUAL_WIDTH; attempt 1
+  `mixs_20261026_102914` died pre-science), its volume deleted; MC2 `mixr_20261026_140539`, both units one attempt.
+- **Money:** $17.3366 of $33.05 (MC1 $6.4246, MC2 $10.912); project committed $723.30 of $740.
+- **Checkpoints:** `am5m373kuq` holds the four D4 and the two Mix-Augmented checkpoints, kept for the review.
+- **Next:** the maintainer's review; 4x or anything else is the maintainer's decision.
 
 **H1-PA: PA2v + PA2 COMPLETE; PREREGISTERED RESULT INCONCLUSIVE (FLOOR_A) (2026-10-25 UTC).** Granted by the maintainer
 (`logs/budget/approvals/h1pa_training_grant.json`: $50.00 cumulative over PA2v + PA2, project cap $731).
@@ -30,7 +29,7 @@ Owner: [`docs/stages/stage-2/reasoning_data/H1PA.md`](../../docs/stages/stage-2/
 sections 14-16, `analyses/h1pa_result.json`.
 H1-PA itself runs and bills nothing apart from its retained volume `am5m373kuq` ($2.10/month, booked in its storage
 record; provider query 2026-10-25 15:09Z, `runs/h1pa2_20261025_055042/closeout/outcome.json ::
-provider_reconciliation_after`); the live pod above is the mixed-calibration study's.
+provider_reconciliation_after`).
 - **Result** (static fluid correctness, 570 items x 2 seeds, `nucleus_v1`):
   - B (primary, D4-Augmented - D4-Original): +3.51 pp, CI +1.89 to +5.15 → INCONCLUSIVE, flag FLOOR_A;
   - A (D4-Original - PCA-Original): both below the 2% floor → NOT_RESOLVED (FLOOR);
@@ -4225,7 +4224,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$676.4911` spent of `$712.1700`, leaving `$35.6789` |
+| project cap | `$687.4031` spent of `$712.1700`, leaving `$24.7669` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 

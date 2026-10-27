@@ -6,7 +6,7 @@
  "stage_id": "0",
  "recorded_utc": "2026-10-26T10:36:14Z",
  "status": "INCOMPLETE",
- "terminal": "FAILED",
+ "terminal": "RUN_FAILED",
  "runner_terminal": "RUN_FAILED",
  "session_passed": false,
  "provider_resource_created": true,
@@ -73,5 +73,6 @@
   "ok": true,
   "why": "the provider account holds only the 2 resource(s) the records account for"
  },
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "_terminal": "the driver's terminal marker (was recorded as its record status 'FAILED'; corrected 2026-10-27 to the marker MC2's closeouts state)"
 }

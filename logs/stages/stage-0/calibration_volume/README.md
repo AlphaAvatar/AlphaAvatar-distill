@@ -4,11 +4,13 @@ Everything this experiment produced, in one place.
 
 | area | what it holds |
 | --- | --- |
+| [`analyses/`](analyses/) | working analyses and audits |
 | [`assets/`](assets/) | material |
 | [`audit/`](audit/) | material |
 | [`closeout/`](closeout/) | material |
 | [`design/`](design/) | material |
 | [`plans/`](plans/) | protocol, preregistration, pricing — what was registered before running |
+| [`units/`](units/) | material |
 | [`runs/`](runs/) | one directory per execution attempt |
 
 ## Runs
@@ -31,6 +33,7 @@ Everything this experiment produced, in one place.
 * [`dose_d4_20261020_185256`](runs/dose_d4_20261020_185256/)
 * [`dose_d4_20261020_211335`](runs/dose_d4_20261020_211335/)
 * [`dose_d4_20261020_212310`](runs/dose_d4_20261020_212310/)
+* [`mixr_20261026_140539`](runs/mixr_20261026_140539/)
 * [`mixs_20261026_102914`](runs/mixs_20261026_102914/)
 * [`mixs_20261026_103634`](runs/mixs_20261026_103634/)
 * [`mixs_dry_20261026_102813`](runs/mixs_dry_20261026_102813/)

@@ -1,0 +1,16 @@
+{
+ "schema": "aadistill.stage2.reasoning_data.persisted_unit/v2",
+ "unit": "Mix-Augmented-s20260726",
+ "kind": "report",
+ "started_utc": "2026-10-26T19:01:26Z",
+ "files": [
+  {
+   "name": "report.json",
+   "sha256": "264e863808938169d895d6f481ebe29a069e718c326f8b182b6aae30bc00717d",
+   "bytes": 36086
+  }
+ ],
+ "destination": "/runpod-volume/mixed_v2/Mix-Augmented-s20260726/report",
+ "persisted": true,
+ "finished_utc": "2026-10-26T19:01:26Z"
+}

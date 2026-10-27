@@ -8,15 +8,28 @@
  "accepted": {
   "profile": "calib.s0m_mix_2x@v2",
   "content_sha256": "9a6c2782c2fc014c6b73077e414549989b7fedf52609446924634b33b1ead75d",
-  "uesp": {"fluid": 71216, "supporting": 71216, "total": 142432},
+  "uesp": {
+   "fluid": 71216,
+   "supporting": 71216,
+   "total": 142432
+  },
   "units_and_episodes": "whole units and episodes, the frozen draw (seed 179444901)",
   "search": "the D1 forward-baseline full search: beam 6, scored_v1, target-position KL, Top-200 + tail KL, all four operators, the frozen ranking",
   "recovery_and_evaluation": "exactly D4-Augmented's: the same merged training set and recipe, seeds 20260726 and 20260801, 3,702 optimizer steps, every item of eval-set-1 under nucleus_v1"
  },
  "records": {
-  "design": {"path": "configs/stages/stage-0/calibration_volume/mixed_design_v2.json", "sha256": "6872e0e582d416a48265c9fed16fe743458dd5dbc8761a3344d05a216c03f99d"},
-  "preregistration": {"path": "logs/stages/stage-0/calibration_volume/plans/mixed_preregistration.json", "sha256": "0a8d68eca6b9add907975e79dd6d0cbfb402b4b4e1f2eacc26556fbb5b26951c"},
-  "application": {"path": "logs/stages/stage-0/calibration_volume/plans/mixed_application.json", "sha256": "3b572a5fa29948d577ed94e26f4a13dda561926c91fbd99f923635c51729f32d"}
+  "design": {
+   "path": "configs/stages/stage-0/calibration_volume/mixed_design_v2.json",
+   "sha256": "6872e0e582d416a48265c9fed16fe743458dd5dbc8761a3344d05a216c03f99d"
+  },
+  "preregistration": {
+   "path": "logs/stages/stage-0/calibration_volume/plans/mixed_preregistration.json",
+   "sha256": "0a8d68eca6b9add907975e79dd6d0cbfb402b4b4e1f2eacc26556fbb5b26951c"
+  },
+  "application": {
+   "path": "logs/stages/stage-0/calibration_volume/plans/mixed_application.json",
+   "sha256": "3b572a5fa29948d577ed94e26f4a13dda561926c91fbd99f923635c51729f32d"
+  }
  },
  "maintainer_words": "批准 MC1 + MC2 新增累计硬上限 $33.05。批准项目累计 Cap 从 $731 提高至 $740。本轮只授权 2x。4x 完全不在本轮范围。任何结果都不得自动启动 4x，是否继续由我另行决定。不得擅自提高两个预算上限。",
  "ceiling_usd": 33.05,
@@ -25,7 +38,11 @@
   "MC1": {
    "kind": "search",
    "session_hard_cap_usd": 15.0,
-   "network_volume": {"max_gb": 150, "reserved_usd": 1.05, "_": "150 GB x $0.07/GB-month x 3 days"},
+   "network_volume": {
+    "max_gb": 150,
+    "reserved_usd": 1.05,
+    "_": "150 GB x $0.07/GB-month x 3 days"
+   },
    "gpu": "NVIDIA A100-SXM4-80GB",
    "scope": "the formal D1 full search on calib.s0m_mix_2x@v2, its unique Top-1 committed, identified, relayed and read back; the temporary volume deleted after the Top-1 and the search evidence are durable and verified, with the provider confirming it gone"
   },
@@ -54,5 +71,17 @@
   "changing the frozen science to save money"
  ],
  "retention": "the four H1-PA D4 checkpoints stay on am5m373kuq; the two Mix-Augmented checkpoints stay there until the study's analysis and independent review are complete",
- "authorizes": "MC1 and MC2 only, each paid session through its own one-use authorization issued by scripts/stages/stage-0/calibration_volume/mixed_governance.py :: issue"
+ "authorizes": "MC1 and MC2 only, each paid session through its own one-use authorization issued by scripts/stages/stage-0/calibration_volume/mixed_governance.py :: issue",
+ "closed": {
+  "utc": "2026-10-27T00:00:00Z",
+  "decision": "the study reached its complete scientific terminal state: MC1 and MC2 COMPLETE, the preregistered M decided (analyses/mixed_result.json); no further session may be issued under this grant (AGENTS.md P12.1: stop after a complete valid scientific verdict)",
+  "spent_usd": 17.3366,
+  "by": {
+   "MC1_sessions": 6.372,
+   "MC1_volume": 0.0526,
+   "MC2_sessions": 10.912
+  },
+  "unspent_usd": 15.7134,
+  "final_position": "logs/stages/stage-0/calibration_volume/closeout/mixed_position_final.json"
+ }
 }

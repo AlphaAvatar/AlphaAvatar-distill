@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 151,
+  "runs_unrecorded": 152,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -766,8 +766,8 @@
    },
    "calibration_volume": {
     "recorded": 0,
-    "unrecorded": 42,
-    "total": 42
+    "unrecorded": 43,
+    "total": 43
    },
    "continuation_b": {
     "recorded": 5,
@@ -2913,6 +2913,14 @@
    "n_files": 10,
    "digest": "cc448795da4f6ffeda2b7a7cfeb34def9acf76c81bc401bd206086624a2b3c51",
    "why": "no run manifest; its closeout states: SESSION_ENDED"
+  },
+  {
+   "experiment_id": "calibration_volume",
+   "run_id": "mixr_20261026_140539",
+   "root": "logs/stages/stage-0/calibration_volume/runs/mixr_20261026_140539",
+   "n_files": 3,
+   "digest": "1eea691ca430ef3d342a0bffa90af5172ab6060030d1841b0483a98484268730",
+   "why": "no run manifest; its closeout states: COMPLETE"
   },
   {
    "experiment_id": "calibration_volume",

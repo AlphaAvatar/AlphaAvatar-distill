@@ -14210,3 +14210,51 @@ on a paid pod.
   - A time-based remainder instead of the booked reservation: rejected. The
     record books the reservation, and an extension is booked separately first.
 - **Revisit when.** MC1 closes, and again before MC2's issue.
+
+## 2026-10-27 — Mixed Calibration 2x: COMPLETE; preregistered M = NO_GO
+
+- **Context.** MC1 and MC2 ran under the maintainer's grant of 2026-10-26
+  (`logs/budget/approvals/mixed_calibration_grant.json`).
+- **What ran.**
+  - **MC1 attempt 1** (`mixs_20261026_102914`, $0.1903) died at A_contract,
+    before any measurement. Its authorization was not in the session commit.
+    - Repair: commit it as the session commit, plus the precheck
+      `the_authorization_is_in_the_session_commit`.
+  - **MC1 attempt 2** (`mixs_20261026_103634`, $6.1817) ran the 34-expansion
+    D1 full search on `calib.s0m_mix_2x@v2`.
+    - Top-1 `9311dcde…`: DEPTH → ATTENTION → FFN → RESIDUAL_WIDTH.
+    - It was relayed and read back, with its identity rebuilt on the dev box.
+  - **The MC1 volume** was deleted after the read-back (actual $0.0526).
+  - **MC2** (`mixr_20261026_140539`, $10.912) trained Mix-Augmented on both
+    seeds, one complete attempt each: 3,702 steps on D4-Augmented's set, recipe
+    identity equal to D4-Augmented's per seed. Then every item of eval-set-1
+    under nucleus_v1.
+  - **Totals:** $17.3366 of $33.05. Project committed $723.30 of $740 at
+    23:57Z (provider-billed, nothing unposted).
+- **Result** (`logs/stages/stage-0/calibration_volume/analyses/mixed_result.json`):
+  - **M = Mix-Augmented − D4-Augmented on static fluid: NO_GO.**
+    - 3.25% vs 4.56%: −1.32 pp, interval [−2.71, −0.17] pp, seeds −1.40 / −1.23.
+    - A ≥ 5 pp difference is excluded at this scale.
+    - The small loss lies below the SESOI.
+  - **Deduction:** 9.3% vs 13.5% (−4.2 pp, [−8.5, −0.6]): INCONCLUSIVE.
+  - **Induction, composition, analogy:** NOT_RESOLVED at the floor.
+  - **E (vs PCA-Original), descriptive:** +1.93 pp.
+  - **Every eval-set-1 unit** is reported correct and usable side by side
+    (MIXED.md section 13).
+  - **Step-0 val_kd** (diagnostic only): 8.377 vs D4-Augmented's 6.966.
+- **Decision.**
+  - The study is terminal, and the grant is closed with $15.7134 unspent.
+  - The mixed-calibration 2x initialization is not adopted over D4 Top-1. Under
+    D4-Augmented's recovery it does not recover meaningfully better static
+    fluid correctness, and it is about 1.3 pp lower.
+  - The six checkpoints on `am5m373kuq` are kept for the independent review
+    (storage record :: `contents_after_mc2`).
+  - Nothing follows automatically. 4x is the maintainer's decision.
+- **Risks / limits.**
+  - Composition, volume (0.70× `base_d4`), interactive data, the single
+    profile, DEPTH weighting and the resulting operator order change together.
+    M isolates none of them.
+  - Three of the four static axes are at the floor in every arm. The decided
+    contrast therefore rests mostly on deduction.
+- **Revisit when.** The maintainer's independent review of this result and of
+  H1-PA.

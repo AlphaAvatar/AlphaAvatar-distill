@@ -96,5 +96,29 @@
   "cost_of_keeping": "$2.10/month; reserved through 2026-12-24"
  },
  "actual_usd": null,
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "contents_after_mc2": {
+  "recorded_utc": "2026-10-27T00:00:00Z",
+  "members_added": [
+   {
+    "path": "<mount>/mixed_v2/Mix-Augmented-s20260726/checkpoint",
+    "kind": "formal student weights (fp32)",
+    "bytes": 2384236592,
+    "artifact_digest": "e94d9b0be13b6559539394d4beb4c9d37049b15853709a140566c5015aba25f5",
+    "weights_digest": "a9dde08825c3f307d0c81b517d397b816d400e626f8e4b76dd8e03b378088640",
+    "identity_record": "logs/stages/stage-0/calibration_volume/units/Mix-Augmented-s20260726/checkpoint.descriptor.json"
+   },
+   {
+    "path": "<mount>/mixed_v2/Mix-Augmented-s20260801/checkpoint",
+    "kind": "formal student weights (fp32)",
+    "bytes": 2384236592,
+    "artifact_digest": "ba3a476d45efaa3901611d9f75a672f84dacf6fcc25f92340756ce9830a7e09f",
+    "weights_digest": "624a17599c90272d509b2977d30d27852747300a30f4f2933107163259387455",
+    "identity_record": "logs/stages/stage-0/calibration_volume/units/Mix-Augmented-s20260801/checkpoint.descriptor.json"
+   }
+  ],
+  "written_by": "the mixed-calibration study's MC2 (runs/mixr_20261026_140539); the driver's volume probe before MC2 counted 9,943,482,064 bytes on the mount, so about 14.7 GB are held now, inside the provider's 30 GB",
+  "retention": "kept until the mixed-calibration study's analysis and independent review are complete (grant :: retention); then a consumer audit and a retirement or migration proposal go to the maintainer with the four H1-PA checkpoints",
+  "money": "the volume's cost stays booked here (reservation to 2026-12-24); MC2 added no storage charge of its own"
+ }
 }

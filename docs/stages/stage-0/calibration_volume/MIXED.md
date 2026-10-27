@@ -1,9 +1,11 @@
 # Mixed calibration 2×: design recommendation and execution application
 
-**Status (2026-10-26): GRANTED and EXECUTING.** The maintainer granted MC1 + MC2 with a cumulative $33.05 and the
-project cap $731 → $740, 2× only ([grant](../../../../logs/budget/approvals/mixed_calibration_grant.json)). Every
-paid session is issued by `mixed_governance.py` against the provider's bill read at that moment (section 12). MC1 (the
-search) is running; MC2 follows the Top-1's read-back. 4× is outside this round, and nothing starts it.
+**Status (2026-10-27): COMPLETE.**
+- **Scope:** MC1 and MC2 ran under the maintainer's grant, 2× only, and the grant is now closed.
+- **Decision:** the preregistered M is **NO_GO** (section 13).
+- **Cost:** $17.3366 of the $33.05 ceiling. With it the project's committed spend is $723.30 of the $740 cap.
+- **Nothing is running.** The account holds only `am5m373kuq`.
+- **4×** is the maintainer's decision; nothing starts it.
 
 This page owns the reading. The numbers are owned by the records it cites:
 - design: [`mixed_design_v2.json`](../../../../configs/stages/stage-0/calibration_volume/mixed_design_v2.json);
@@ -561,3 +563,136 @@ k = 1, re-identifies the Top-1 and relays it.
 replaced. Each unit's recipe must hash to D4-Augmented's recorded identity for its seed.
 
 The result is decided by `mixed_analysis.py`, which has already been rehearsed on stand-in evidence.
+
+## 13. Result (2026-10-27)
+
+Owner: [`analyses/mixed_result.json`](../../../../logs/stages/stage-0/calibration_volume/analyses/mixed_result.json)
+(`mixed_analysis.py`).
+- **Units.** Two new Mix-Augmented units (MC2 `mixr_20261026_140539`, each one complete attempt) beside H1-PA's reused
+  D4-Augmented and PCA-Original units.
+- **Identity.** Every unit's identity was checked first. The new reports' inputs equal what the frozen plan derives, and
+  every reused unit's evaluation descriptor is the one the preregistration names.
+- **Decoding.** Every generation is under nucleus_v1. Nothing was regenerated or rescored.
+
+**The initialization.**
+- **MC1 Top-1** `9311dcde…`, path DEPTH → ATTENTION → FFN → RESIDUAL_WIDTH, all on `calib.s0m_mix_2x@v2`. D4 Top-1's
+  path was ATTENTION → DEPTH → RESIDUAL_WIDTH → FFN.
+- **Recovered checkpoints** on `am5m373kuq`: `e94d9b0b…` (s20260726) and `ba3a476d…` (s20260801).
+
+**The decided comparison M = Mix-Augmented − D4-Augmented** (formal static fluid items, 570 × 2 seeds, rule-family
+cluster bootstrap):
+
+| | Mix-Augmented | D4-Augmented | M | 95% interval | per seed | label |
+| --- | ---: | ---: | ---: | --- | --- | --- |
+| static fluid, pooled | 3.25% | 4.56% | −1.32 pp | [−2.71, −0.17] pp | −1.40 / −1.23 pp | **NO_GO** |
+| task-contained deduction | 9.26% | 13.49% | −4.23 pp | [−8.46, −0.60] pp | −4.76 / −3.70 pp | INCONCLUSIVE |
+| inductive rule discovery | 0.35% | 0.00% | +0.35 pp | [0.00, 1.06] pp | +0.70 / 0.00 pp | NOT_RESOLVED |
+| compositional generalization | 0.35% | 0.35% | 0.00 pp | [0, 0] | 0 / 0 | NOT_RESOLVED |
+| abstract analogical | 0.00% | 0.00% | 0.00 pp | [0, 0] | 0 / 0 | NOT_RESOLVED |
+
+**How to read M.**
+- **NO_GO.** The interval and both seeds lie inside ±5 pp, and neither arm is below the 2% floor. A meaningful (≥ 5 pp)
+  difference between the two initializations is excluded at this scale.
+- **The small loss is real but below the SESOI.** The interval is entirely below zero: Mix-Augmented is about 1.3 pp
+  lower, a small loss within the preregistered SESOI.
+- **Deduction.** Deduction is the one axis with signal: 9.3% vs 13.5%. Its interval crosses the −8 pp axis SESOI, so it
+  is INCONCLUSIVE and not a decided harm.
+- **The other three axes** are at the floor in both arms.
+
+**What M does not isolate.** The two arms differ only in the initialization the recovery starts from. Inside it, these
+change together, so M is not the isolated effect of any one of them:
+- calibration composition (50/50 against D4's 71–87% static fluid);
+- volume (0.70× `base_d4`);
+- one interactive episode;
+- one profile for every operator;
+- DEPTH half labels;
+- the resulting operator order.
+
+**E = Mix-Augmented − PCA-Original** is descriptive only: +1.93 pp, [+0.70, +3.19] pp.
+
+**Unseen rule vs unseen format** (correct / items, s20260726 · s20260801):
+
+| axis | tier | Mix-Augmented | D4-Augmented | PCA-Original |
+| --- | --- | --- | --- | --- |
+| deduction | unseen rule | 15/142 · 17/142 | 24/142 · 21/142 | 5/142 · 5/142 |
+| deduction | unseen format | 2/47 · 1/47 | 2/47 · 4/47 | 1/47 · 1/47 |
+| induction | unseen rule / format | 0/94 · 0/94 / 1/48 · 0/48 | 0 / 0 | 1/94 · 0/94 / 0 |
+| composition | unseen rule / format | 0/96 · 0/96 / 1/48 · 0/48 | 0 / 1/48 · 0/48 | 0 / 2/48 · 0/48 |
+| analogy | both | 0 | 0 | 0 |
+| interactive (exploratory) | unseen rule / format | 2/96 · 4/96 / 0 | 2/96 · 2/96 / 0 | 0 / 0 |
+
+**Every eval-set-1 unit, CORRECT · USABLE** over the formal items, each unit apart and no pooled score:
+- instruction and short_realtime have no registered correctness, so `format_ok` is shown in its place;
+- knowledge is outside the formal core;
+- legacy_150 is in-sample;
+- the paired units show pairs correct · pairs both usable;
+- interactive episodes show success · all turns usable;
+- protocol integrity shows terminated · usable.
+
+| unit | Mix s20260726 | Mix s20260801 | D4-A s20260726 | D4-A s20260801 | PCA-O s20260726 | PCA-O s20260801 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| fluid static | 19/570 · 416/570 | 18/570 · 345/570 | 27/570 · 430/570 | 25/570 · 365/570 | 9/570 · 338/570 | 6/570 · 270/570 |
+| task_contained_deduction | 17/189 · 147/189 | 18/189 · 116/189 | 26/189 · 152/189 | 25/189 · 122/189 | 6/189 · 134/189 | 6/189 · 106/189 |
+| inductive_rule_discovery | 1/142 · 118/142 | 0/142 · 104/142 | 0/142 · 108/142 | 0/142 · 107/142 | 1/142 · 69/142 | 0/142 · 61/142 |
+| compositional_generalization | 1/144 · 83/144 | 0/144 · 87/144 | 1/144 · 99/144 | 0/144 · 85/144 | 2/144 · 85/144 | 0/144 · 56/144 |
+| abstract_analogical | 0/95 · 68/95 | 0/95 · 38/95 | 0/95 · 71/95 | 0/95 · 51/95 | 0/95 · 50/95 | 0/95 · 47/95 |
+| interactive episodes | 2/144 · 5/144 | 4/144 · 11/144 | 2/144 · 17/144 | 2/144 · 15/144 | 0/144 · 1/144 | 0/144 · 3/144 |
+| math_verified | 1/100 · 65/100 | 0/100 · 55/100 | 0/100 · 66/100 | 4/100 · 62/100 | 1/100 · 67/100 | 0/100 · 52/100 |
+| gsm8k | 2/100 · 95/100 | 4/100 · 92/100 | 2/100 · 93/100 | 1/100 · 95/100 | 1/100 · 92/100 | 4/100 · 94/100 |
+| multihop | 11/100 · 95/100 | 9/100 · 86/100 | 12/100 · 89/100 | 11/100 · 94/100 | 7/100 · 90/100 | 7/100 · 85/100 |
+| rag | 3/100 · 100/100 | 5/100 · 99/100 | 9/100 · 99/100 | 7/100 · 99/100 | 2/100 · 100/100 | 4/100 · 96/100 |
+| knowledge | 3/150 · 102/150 | 3/150 · 104/150 | 2/150 · 89/150 | 4/150 · 109/150 | 1/150 · 35/150 | 0/150 · 32/150 |
+| answerability_paired | 2/60 · 57/60 | 1/60 · 58/60 | 1/60 · 57/60 | 1/60 · 60/60 | 0/60 · 58/60 | 1/60 · 55/60 |
+| safety_paired | 0/50 · 26/50 | 1/50 · 19/50 | 0/50 · 19/50 | 2/50 · 20/50 | 0/50 · 5/50 | 1/50 · 8/50 |
+| tool_calling | 3/5 · 5/5 | 3/5 · 5/5 | 3/5 · 5/5 | 3/5 · 5/5 | 4/5 · 5/5 | 4/5 · 5/5 |
+| instruction | fmt 5/12 · 5/12 | fmt 6/12 · 5/12 | fmt 5/12 · 5/12 | fmt 7/12 · 7/12 | fmt 11/12 · 7/12 | fmt 11/12 · 6/12 |
+| short_realtime | fmt 6/10 · 3/10 | fmt 8/10 · 7/10 | fmt 5/10 · 5/10 | fmt 4/10 · 4/10 | fmt 10/10 · 4/10 | fmt 9/10 · 2/10 |
+| protocol integrity | 51/65 · 48/65 | 55/65 · 53/65 | 54/65 · 52/65 | 52/65 · 52/65 | 60/65 · 50/65 | 59/65 · 45/65 |
+| legacy_150 (in-sample) | 38/150 · 137/150 | 32/150 · 135/150 | 33/150 · 134/150 | 35/150 · 138/150 | 30/150 · 133/150 | 29/150 · 131/150 |
+
+**Protocol integrity.**
+- **Fluid generations** (answered / context limit / degeneration stop / episode done / turn limit):
+
+  | unit | answered | context limit | degeneration stop | episode done | turn limit |
+  | --- | ---: | ---: | ---: | ---: | ---: |
+  | Mix s20260726 | 421 | 45 | 246 | 4 | 4 |
+  | Mix s20260801 | 348 | 54 | 305 | 12 | 1 |
+  | D4-A s20260726 | 436 | 43 | 223 | 17 | 1 |
+  | D4-A s20260801 | 368 | 41 | 295 | 14 | 2 |
+
+- **Capability and legacy replies (996 per unit), natural termination:** Mix 865 / 851, D4-A 823 / 850, PCA-O 910 / 890.
+  Context-limit hits are 0–1 per unit.
+- **Context-limit hits are right-censored, never scored as failures.**
+
+**Step-0 teacher KL (diagnostic only, never a reasoning result).** On E1's 16 validation sequences (supporting, code and
+tool data):
+- Mix-Augmented `val_kd` 8.377 / `val_ce` 8.580;
+- D4-Augmented 6.966 / 7.205.
+
+The mixed initialization starts further from the teacher on E1-type data. After the same 3,702 steps, its static fluid
+correctness is lower by about 1.3 pp.
+
+**Cost.**
+
+| item | run | USD |
+| --- | --- | ---: |
+| MC1 attempt 1 (A_contract refusal, pre-science) | `mixs_20261026_102914` | 0.1903 |
+| MC1 attempt 2 (204.7 min A100-80GB) | `mixs_20261026_103634` | 6.1817 |
+| MC1 volume (3.6 h, deleted after the read-back) | `mixvol_20261026_102835` | 0.0526 |
+| MC2 (589.6 min L40S) | `mixr_20261026_140539` | 10.912 |
+| **total** | | **17.3366** of 33.05 |
+
+**Provider position** at 2026-10-26T23:57Z: billed $719.07; committed $723.30 against the $740 cap, with no unposted
+session; balance $39.27
+([`closeout/mixed_position_final.json`](../../../../logs/stages/stage-0/calibration_volume/closeout/mixed_position_final.json)).
+
+**Storage.** `am5m373kuq` holds the four H1-PA checkpoints and the two Mix-Augmented checkpoints, about 14.7 GB of 30.
+All six are kept until the study's analysis and independent review are complete (storage record ::
+`contents_after_mc2`).
+
+**What this does not license.**
+- No claim that mixed calibration helps or harms fluid reasoning in general.
+- No claim about 2× against 4×.
+- No reading of usable rollout, step-0 KL or loss as reasoning.
+
+Whether to run 4× or anything else is the maintainer's decision.
