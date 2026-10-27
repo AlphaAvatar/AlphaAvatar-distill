@@ -4,7 +4,9 @@
  "study_id": "stage2.teacher_modes.hybrid_v1",
  "written_utc": "2026-10-27T12:00:00Z",
  "status": "DRAFTED before any hybrid-teacher generation exists; REGISTERED (frozen, its sha256 bound into the grant) only on the maintainer's approval, and never amended after the first datum of A1 exists. The data budget's NUMBERS are derived by the rules below from A1's pilot slice; the rules are fixed now",
- "design": {"path": "configs/stages/stage-2/teacher_modes/design.json"},
+ "design": {
+  "path": "configs/stages/stage-2/teacher_modes/design.json"
+ },
  "arms": {
   "H-T-S": "the common initialization trained on the H-T documents of I (tasks admitted in both modes)",
   "H-N-S": "the same initialization trained on the H-N documents of I",
@@ -21,22 +23,44 @@
   "admission": "each mode's own correctness decides which of its trajectories are trainable; S restricts both to I",
   "evaluation_mode": "each student is measured in its own mode"
  },
- "seeds": [20260726, 20260801],
+ "seeds": [
+  20260726,
+  20260801
+ ],
  "seed_pairing": "arms are paired by training-seed number; every directional label needs both seeds' own estimates on its side",
  "comparisons": {
-  "S": {"contrast": "H-T-S - H-N-S", "role": "decided"},
-  "C": {"contrast": "H-T-S - H-N-C", "role": "decided",
-        "fallback": {"when": "X is infeasible under design.json :: tasks.X.if_infeasible, decided at $0 before any training",
-                     "contrast": "H-T-C - H-N-S, H-T-C = a seeded prefix of I's H-T documents (whole units) packed to H-N-S's sequence count",
-                     "note": "the fallback is compute-matched at the smaller scale, where the floor is likelier"}},
-  "teacher_gap": {"contrast": "teacher(mode) - student, per arm", "role": "descriptive"}
+  "S": {
+   "contrast": "H-T-S - H-N-S",
+   "role": "decided"
+  },
+  "C": {
+   "contrast": "H-T-S - H-N-C",
+   "role": "decided",
+   "fallback": {
+    "when": "X is infeasible under design.json :: tasks.X.if_infeasible, decided at $0 before any training",
+    "contrast": "H-T-C - H-N-S, H-T-C = a seeded prefix of I's H-T documents (whole units) packed to H-N-S's sequence count",
+    "note": "the fallback is compute-matched at the smaller scale, where the floor is likelier"
+   }
+  },
+  "teacher_gap": {
+   "contrast": "teacher(mode) - student, per arm",
+   "role": "descriptive"
+  }
  },
  "multiplicity": "two decided comparisons, S and C, each at a 97.5% interval (Bonferroni over the two); within each the four static-axis contrasts are a Holm family at alpha 0.05",
  "evaluation": {
-  "set": {"eval_set_id": "eval-set-1", "status": "frozen", "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
-          "validity_mask": "v1 (formal 714 = 570 static + 144 interactive)", "scoring_protocol": "v2, unchanged",
-          "action_protocol": "v2"},
-  "decoding": {"protocol_id": "nucleus_v1", "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"},
+  "set": {
+   "eval_set_id": "eval-set-1",
+   "status": "frozen",
+   "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+   "validity_mask": "v1 (formal 714 = 570 static + 144 interactive)",
+   "scoring_protocol": "v2, unchanged",
+   "action_protocol": "v2"
+  },
+  "decoding": {
+   "protocol_id": "nucleus_v1",
+   "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"
+  },
   "modes": "students in their own training mode; the teacher in both",
   "think_state": "every generation records the think_state its prompt produced; the preclosed state is scored with no think delimiter allowed in the continuation, and no earlier record or verdict changes",
   "every_item": "every item of every unit is generated for every checkpoint and for the teacher in both modes"
@@ -49,8 +73,17 @@
    "scripts/stages/stage-2/reasoning_data/h1_statistics.py": "c4c1191102f8b293feb9f165a7c72f1a69af3b96789c564e1747d95ea20a2836",
    "src/aadistill/evaluation/paired_stats.py": "7d41ef3199eee78d3a9d9460c3b8f4c3bb33773d5d6b4945c57a62df934fe782"
   },
-  "constants": {"sesoi": 0.05, "sesoi_axis": 0.08, "level": 0.975, "iterations": 10000, "bootstrap_seed": 20261028,
-                "floor_rate": 0.02, "min_discordant": 10, "min_informative_clusters": 5, "alpha_axes": 0.05},
+  "constants": {
+   "sesoi": 0.05,
+   "sesoi_axis": 0.08,
+   "level": 0.975,
+   "iterations": 10000,
+   "bootstrap_seed": 20261028,
+   "floor_rate": 0.02,
+   "min_discordant": 10,
+   "min_informative_clusters": 5,
+   "alpha_axes": 0.05
+  },
   "labels": {
    "GO_THINKING": "the interval lies wholly above +5 pp and both seeds' estimates are above +5 pp",
    "GO_NON_THINKING": "the interval lies wholly below -5 pp and both seeds' estimates are below -5 pp",
@@ -78,7 +111,8 @@
   "protocol integrity: natural termination, degeneration stops, context-limit hits; think_state violations",
   "reasoning and answer tokens per unit (generation lengths), and supervised tokens, context tokens, sequences and training FLOPs per arm",
   "teacher correctness, admission rate, length-limit share and tokens per task, per mode and cell",
-  "training: loss curves and validation CE/KD (diagnostics only)"
+  "training: loss curves and validation CE/KD (diagnostics only)",
+  "per arm: the pack's composition statistics and context_exposure (zero foreign context under isolation, reported to show it)"
  ],
  "never": [
   "a re-rendered target, a hand-built mode prefix, a soft switch, or a mode-forcing system message",
@@ -87,7 +121,12 @@
   "a pooled score across units, or usable rollout, KL, loss or length read as reasoning",
   "selecting, dropping or re-running a seed for its result",
   "combining the hybrid non-thinking teacher with the projected-residual architecture in this round (brief section 4)",
-  "starting any follow-up automatically from a result of this study"
+  "starting any follow-up automatically from a result of this study",
+  "comparing a teacher mode and a context strategy in one contrast, or switching an arm's context strategy after a datum is seen"
  ],
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "held_constant": {
+  "context_strategy": "document_isolated for every arm (design.json :: context_strategy): one packer, sequence length, placement rule and seeded order, and the trainer's batch.context_strategy, in every run's config hash. Chosen so the context distribution does not move with the mode; cross-context training stays a supported strategy and is not compared here",
+  "evaluation_identity": "configs/stages/stage-2/teacher_modes/evaluation_identity.json: each mode's template, think state, instrument and scorer sources by sha256; frozen with this preregistration"
+ }
 }

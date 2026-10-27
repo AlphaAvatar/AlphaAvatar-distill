@@ -214,8 +214,10 @@ def audit(root: Path, snapshot_path: Path) -> dict:
     grant = json.loads((root / "logs/budget/approvals/mixed_calibration_grant.json").read_text())
     booked_total = round(sum(float(m["booked_usd"]) for m in mixed), 4)
 
-    # 6. caps and the binding position
-    pos = MG.position(root, snapshot=snap)
+    # 6. caps and the binding position: the issuers' rule with engineering-campaign
+    #    subruns counted (shared.project_position, the fix for finding 3)
+    from shared import project_position as PP
+    pos = PP.position(root, snapshot=snap)
     findings = []
     if project["cap_source"]["package_cap_usd"] != project["cap_source"]["cap_usd"]:
         findings.append({"id": "stale_package_cap", "severity": "accounting",
@@ -231,13 +233,18 @@ def audit(root: Path, snapshot_path: Path) -> dict:
                                  "under v5's pod id", "rows": evidence,
                          "fix": "attributed by logs/budget/audits/attribution_evidence.json; its cost was "
                                 "already in the records, so nothing is added"})
+    camp = pos["campaign_subruns"]
     findings.append({"id": "campaign_subruns_not_scanned_for_unposted_pods", "severity": "governance",
                      "what": "mixed_governance.position (and h1pa_governance.live_position) look for unposted "
                              "pods only in runs/*/runtime/session.json; an engineering campaign's subruns "
                              "(validations/, pilots/) are invisible to it, so an engineering pod still inside "
                              "the 72 h posting window would be missing from 'committed'",
-                     "fix": "the next study's issuer must count campaign subruns too (owed engineering; "
-                            "today none is inside the window, so today's position is complete)"})
+                     "fix": ("FIXED 2026-10-27: shared.project_position counts them (an unposted subrun inside "
+                             "the window at its booked cost, refused without a confirmed teardown); this "
+                             f"position uses it: {camp['campaigns_scanned']} campaigns, "
+                             f"{camp['subruns_with_a_pod']} subruns with a pod, {len(camp['unposted'])} unposted "
+                             "inside the window. Every new issuer reads this rule; the closed studies' issuers "
+                             "are left as they ran")})
     findings.append({"id": "volume_rows_exceed_lifetimes", "severity": "attribution",
                      "what": f"the provider's volume rows bill {round(excess_usd, 4)} USD of GB-h beyond what "
                              "every recorded volume's lifetime can accrue (including three September rows no "
@@ -281,6 +288,7 @@ def audit(root: Path, snapshot_path: Path) -> dict:
                                          "project_cap_usd", "project_remaining_usd", "balance_usd",
                                          "account_pods", "account_volumes")}
                     | {"storage": [{k: v for k, v in s.items() if k != "netting"} for s in pos["storage"]],
+                       "campaign_subruns_unposted": pos["campaign_subruns"]["unposted"],
                        "rule": pos["rule"]},
         "findings": findings,
         "not_changed": ["no historical conclusion, authorization, grant or run record was edited",

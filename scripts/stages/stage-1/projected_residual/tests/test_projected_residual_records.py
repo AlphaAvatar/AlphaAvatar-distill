@@ -77,6 +77,27 @@ def test_the_materialization_driver_runs_end_to_end_on_the_host(tmp_path):
     assert json.loads((tmp_path / "model" / "config.json").read_text())["model_type"] == "aad_projected_residual"
 
 
+def test_the_engineering_validation_driver_runs_every_check_on_the_host(tmp_path):
+    """B-E's driver end to end on a random small teacher: the code path a paid
+    session runs, short of CUDA and vLLM, which only the GPU can answer."""
+    from stages.projected_residual import engineering_validation as EV
+
+    rec = EV.run(tmp_path, device="cpu", tiny=True, steps=4)
+    c = rec["checks"]
+    assert rec["passed"] and c["vllm"]["status"] == "NOT_RUN"
+    assert {k: v["status"] for k, v in c.items() if k != "vllm"} == dict.fromkeys(
+        ("initialization", "fold", "trainer_smoke", "resume", "checkpoint_identity"), "PASS")
+    smoke = c["trainer_smoke"]
+    assert smoke["projections_with_a_gradient"] == smoke["projections"] > 0 and smoke["embedding_unchanged"]
+    assert smoke["orthogonality_rel_fro_max"]["after"] > smoke["orthogonality_rel_fro_max"]["before"]
+    assert c["resume"]["max_abs_param_diff"] == 0.0
+    # the declared basis is measured against the outputs' subspaces too
+    layer = rec["per_layer"][0]
+    assert {"attn_out_energy_under_declared_basis", "ffn_out_energy_under_declared_basis",
+            "residual_in_energy_under_declared_basis"} <= set(layer)
+    assert json.loads((tmp_path / "engineering_validation.json").read_text())["passed"]
+
+
 def test_export_reproduces_the_committed_selection_when_the_journal_is_present():
     from stages.projected_residual import export_selection
 

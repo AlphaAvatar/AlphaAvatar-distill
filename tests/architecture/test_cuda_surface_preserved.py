@@ -2358,16 +2358,18 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "`components(think_state=...)` passed to the protocol check and the "
             "answer split. THIS IS A DECLARED SEMANTIC CHANGE. NO CUDA SURFACE.",
         "src/aadistill/training/train.py":
-            "NEW `batch.document_isolation` (default False): blocks may carry "
-            "per-document position ids, forwarded to student and teacher so "
+            "NEW `batch.context_strategy`: `cross_context` (the default, every "
+            "logged run's path, unchanged) or `document_isolated`, whose blocks "
+            "carry per-document position ids forwarded to student and teacher so "
             "transformers builds a block-diagonal causal mask; refused unless the "
-            "flag and the blocks agree. Default path unchanged. THIS IS A DECLARED "
-            "SEMANTIC CHANGE of training; CUDA SURFACE: the attention mask on the "
-            "real models, owed to a GPU validation.",
+            "strategy and the blocks agree; recorded in every step's metrics. THIS "
+            "IS A DECLARED SEMANTIC CHANGE of training; CUDA SURFACE: the attention "
+            "mask on the real models, owed to a GPU validation.",
         "src/aadistill/data/token_documents.py":
             "NEW MODULE: token-in/token-out teacher documents, the template's "
-            "generation suffix, `pack_isolated` (whole documents, restarting "
-            "position ids) and `isolation_report`. NO CUDA SURFACE.",
+            "generation suffix and message terminator, both context strategies "
+            "(`pack_isolated`, `pack_cross_context`, `pack_documents`), "
+            "`context_exposure` and `isolation_report`. NO CUDA SURFACE.",
         "src/aadistill/initialization/adapters/projected_residual.py":
             "NEW MODULE: the `aad_projected_residual` family (full-width residual, "
             "per-layer projection), `fold_to_qwen3`, `projection_orthogonality`, "

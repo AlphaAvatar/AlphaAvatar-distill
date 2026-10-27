@@ -14311,7 +14311,7 @@ on a paid pod.
 - **Revisit when.** The maintainer's grant decision on A-E / B-E and the
   formal phases.
 
-## 2026-10-28 — Maintainer: squash-merge `stage2/reasoning-data` into `main`, then sync the research branch
+## 2026-10-27 — Maintainer: squash-merge `stage2/reasoning-data` into `main`, then sync the research branch
 
 - **Context.** Stage 2's H1 and H1-PA and the mixed calibration 2x are
   complete (entries above). The maintainer asked for `stage2/reasoning-data` at
@@ -14333,3 +14333,50 @@ on a paid pod.
   in the $740 project cap.
 - **Revisit when.** Never for this round; the next integration follows the
   same rule.
+
+## 2026-10-27 — Maintainer: cross-context training is a supported strategy; `preclosed` scoring accepted; $0 preparation for A-E and B-E
+
+- **Context.** After the Stage-2 integration (entry above, accepted by the
+  maintainer), the maintainer corrected this branch's 2026-10-27 reading of the
+  historical packing and set the $0 preparation before any A-E / B-E grant.
+- **Decision.**
+  - **Cross-context training is deliberate, not a defect.** Several documents
+    in one causal context, teacher and student on the same composed sequence,
+    is a supported training distribution. Document isolation is a second,
+    opt-in strategy for exact teacher-native conditioning. The trainer's
+    `batch.context_strategy` (`cross_context` default, `document_isolated`)
+    replaces the boolean added on this branch, and both packers record their
+    composition. Calling the earlier packing "leakage" was wrong.
+  - **Research A declares `document_isolated` for every arm**, because under
+    cross-context the number of preceding foreign documents would follow the
+    mode (1.87 against 6.61 documents per sequence, 29% against 84% of
+    supervised tokens behind foreign context; `token_identity_audit.json ::
+    context_strategy_estimate`). The strategy itself is not compared in round 1.
+  - **Token identity is a separate serialization question.** Classified on
+    H1-PA's 767 sessions: the template's prefilled `<think>\n` (1,534 positions,
+    0.052%) and 578 re-tokenizations of identical text (1,102 positions, 0.037%);
+    no whitespace or content change. Nothing is inferred about H1-PA's validity
+    or its correctness.
+  - **`preclosed` is accepted** as the hybrid non-thinking mode's scoring
+    extension, for records that state `think_state` only. Each mode now has an
+    evaluation identity (`configs/stages/stage-2/teacher_modes/evaluation_identity.json`).
+    Every registered conformance vector rewritten into the thinking and
+    non-thinking forms scores as it did historically. This is a $0 design; it
+    authorizes no paid evaluation.
+  - **Budget.** `scripts/shared/project_position.py` counts engineering-campaign
+    subruns (audit finding 3, fixed). The re-read position
+    (`logs/budget/audits/accounting_audit_2026-10-27T1913Z.json`) is $724.3509
+    of $740; A-E + B-E ($6.50 in caps) fit the project cap and the balance.
+  - **Disk.** 11.95 GiB of tool caches with no consumer were deleted
+    (`logs/maintenance/storage/devbox_cleanup_20261027.json`); 16 GiB free. The
+    rest needs the maintainer.
+- **Kept unchanged.** H1, H1-PA and the mixed calibration's records and
+  verdicts; eval-set-1, its scorers and conformance vectors; nucleus_v1; the
+  $740 cap; the pre-anchor attribution questions (still open).
+- **Dates.** Records are dated in UTC. The integration's pre-integration
+  record, its squash commit message and the entry above first said
+  "2026-10-28", which is the dev box's +08:00 date. They are corrected to
+  2026-10-27 here. `main` 72492e46 keeps the original text until the next
+  integration.
+- **Not authorized.** A-E, B-E, any formal phase, any rise in the cap.
+- **Revisit when.** The maintainer decides the A-E / B-E grants.

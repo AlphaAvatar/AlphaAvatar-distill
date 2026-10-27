@@ -1,0 +1,136 @@
+{
+ "schema": "aadistill.maintenance.devbox_cleanup/v1",
+ "written_utc": "2026-10-27T19:09:43+00:00",
+ "why": "the dev box had 5 GiB free; the pod simulator needs 20 GiB (maintainer 2026-10-27: a safe, auditable cleanup that deletes only what provably has no consumer, stopping where there is doubt)",
+ "evidence": [
+  "no process's exe, cwd, open fd, mmap or command line touches any path below (a /proc scan of every process, run twice, 2026-10-27)",
+  "none is referenced by a tracked file of this repository; none is under ~/aad-artifacts, the repo, a model cache or another project's tree",
+  "each is a tool cache or a version the tool itself retired, and is fetched again on demand"
+ ],
+ "free_bytes_before": 4534800384,
+ "deleted": [
+  {
+   "path": "~/.npm/_cacache",
+   "what": "npm's download cache (no package.json in this repo, no npm process running)",
+   "how": "npm cache clean --force",
+   "bytes": 9056366067,
+   "done": true
+  },
+  {
+   "path": "~/.vscode-server/data/CachedExtensionVSIXs",
+   "what": "VS Code's cache of downloaded extension packages",
+   "how": "rm -rf",
+   "bytes": 1326755239,
+   "done": true
+  },
+  {
+   "path": "~/.vscode-server/extensions/anthropic.claude-code-2.1.292-linux-x64",
+   "what": "an extension version VS Code itself marked obsolete in extensions/.obsolete (a newer version is installed)",
+   "how": "rm -rf",
+   "bytes": 263156054,
+   "done": true
+  },
+  {
+   "path": "~/.vscode-server/extensions/vue.volar-3.3.12",
+   "what": "an extension version VS Code itself marked obsolete in extensions/.obsolete (a newer version is installed)",
+   "how": "rm -rf",
+   "bytes": 4307726,
+   "done": true
+  },
+  {
+   "path": "~/.vscode-server/extensions/ms-python.python-2026.8.0-linux-x64",
+   "what": "an extension version VS Code itself marked obsolete in extensions/.obsolete (a newer version is installed)",
+   "how": "rm -rf",
+   "bytes": 62991687,
+   "done": true
+  },
+  {
+   "path": "~/.vscode-server/extensions/ms-python.vscode-python-envs-1.38.0-linux-x64",
+   "what": "an extension version VS Code itself marked obsolete in extensions/.obsolete (a newer version is installed)",
+   "how": "rm -rf",
+   "bytes": 41164090,
+   "done": true
+  },
+  {
+   "path": "~/.vscode-server/extensions/anthropic.claude-code-2.1.296-linux-x64",
+   "what": "an extension version VS Code itself marked obsolete in extensions/.obsolete (a newer version is installed)",
+   "how": "rm -rf",
+   "bytes": 268779886,
+   "done": true
+  },
+  {
+   "path": "~/.vscode-server/extensions/anthropic.claude-code-2.1.300-linux-x64",
+   "what": "an extension version VS Code itself marked obsolete in extensions/.obsolete (a newer version is installed)",
+   "how": "rm -rf",
+   "bytes": 278897588,
+   "done": true
+  },
+  {
+   "path": "~/.vscode-server/extensions/eamodio.gitlens-19.3.0",
+   "what": "an extension version VS Code itself marked obsolete in extensions/.obsolete (a newer version is installed)",
+   "how": "rm -rf",
+   "bytes": 18980291,
+   "done": true
+  },
+  {
+   "path": "~/.vscode-server/extensions/anthropic.claude-code-2.1.301-linux-x64",
+   "what": "an extension version VS Code itself marked obsolete in extensions/.obsolete (a newer version is installed)",
+   "how": "rm -rf",
+   "bytes": 280493310,
+   "done": true
+  },
+  {
+   "path": "~/.vscode-server/extensions/anthropic.claude-code-2.1.306-linux-x64",
+   "what": "an extension version VS Code itself marked obsolete in extensions/.obsolete (a newer version is installed)",
+   "how": "rm -rf",
+   "bytes": 303094391,
+   "done": true
+  },
+  {
+   "path": "~/.vscode-server/extensions/anthropic.claude-code-2.1.308-linux-x64",
+   "what": "an extension version VS Code itself marked obsolete in extensions/.obsolete (a newer version is installed)",
+   "how": "rm -rf",
+   "bytes": 304831073,
+   "done": true
+  },
+  {
+   "path": "~/.vscode-server/extensions/anthropic.claude-code-2.1.309-linux-x64",
+   "what": "an extension version VS Code itself marked obsolete in extensions/.obsolete (a newer version is installed)",
+   "how": "rm -rf",
+   "bytes": 306098713,
+   "done": true
+  },
+  {
+   "path": "~/.vscode-server/extensions/anthropic.claude-code-2.1.310-linux-x64",
+   "what": "an extension version VS Code itself marked obsolete in extensions/.obsolete (a newer version is installed)",
+   "how": "rm -rf",
+   "bytes": 304274016,
+   "done": true
+  }
+ ],
+ "not_deleted": [
+  {
+   "path": "~/.vscode-server/cli/servers/Stable-* (6 idle builds, 3.76 GiB)",
+   "why": "a tmux shell's PATH still points at one of them, and VS Code's lru.json lists five as its reconnect cache: a consumer exists"
+  },
+  {
+   "path": "~/.cache/uv (11 GiB), ~/.local/share/pnpm/store (5.1 GiB)",
+   "why": "mostly hardlinked into another project's live environment, whose service runs uv sync on every restart; a prune frees at most ~2 GiB and could make that service download on restart"
+  },
+  {
+   "path": "/var/log/alphaavatar/demo-agent{,.err}.log (34 GiB)",
+   "why": "another project's live service holds both open; only truncation would free space, and that is its owner's decision"
+  },
+  {
+   "path": "~/aad-artifacts: 14 checkpoints the registry marks disposition 'retire' (15.5 GiB), relay_retired duplicates (2.9 GiB)",
+   "why": "retirement under AGENTS.md 2.5 needs a consumer audit and a tombstone per checkpoint, and the D1 products have no relay copy; relay_retired is already reported for a maintainer decision (storage_closeout_20260831.json)"
+  },
+  {
+   "path": "~/aad-scratch/c2b-p4-root/attempt12 (2.2 GiB), /tmp/claude-1000/.../e3b6a9c9 (0.6 GiB)",
+   "why": "the last local copy of a C2 probe, and an earlier session's staging whose evidence was not confirmed collected"
+  }
+ ],
+ "authorizes": "nothing",
+ "free_bytes_after": 17367969792,
+ "reclaimed_bytes": 12833169408
+}

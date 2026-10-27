@@ -120,8 +120,8 @@ def test_document_isolation_through_position_ids():
     out = m(packed, position_ids=pos, use_cache=False).logits
     assert torch.allclose(out[:, :7], m(a, use_cache=False).logits, atol=1e-10)
     assert torch.allclose(out[:, 7:], m(b, use_cache=False).logits, atol=1e-10)
-    leaked = m(packed, use_cache=False).logits
-    assert not torch.allclose(leaked[:, 7:], out[:, 7:], atol=1e-6)
+    composed = m(packed, use_cache=False).logits      # cross_context: b conditioned on a
+    assert not torch.allclose(composed[:, 7:], out[:, 7:], atol=1e-6)
 
 
 def test_frozen_tied_embedding_and_trainable_projections(tmp_path):

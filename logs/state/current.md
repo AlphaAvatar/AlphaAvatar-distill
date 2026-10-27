@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-28 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-27 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,34 +9,47 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**NEXT RESEARCH PROGRAMME OPENED AT $0 (2026-10-27): RESEARCH A AND B ARE $0 READY; NOTHING PAID IS AUTHORIZED.**
-Branch `research/teacher-modes-and-projected-residual`, cut from `stage2/reasoning-data` `d5f1c6f2` (kept). On
-2026-10-28 `stage2/reasoning-data` was squash-merged into `main` (`72492e46`, "What `main` carries" below) and this
-branch took that `main` by a merge commit: no rebase, no force push, its four research commits unchanged. This
-branch is NOT merged. Decision records: `logs/budget/decisions.md` 2026-10-27 and 2026-10-28. Nothing runs; the
-account holds 0 pods and the retained volume `am5m373kuq`.
-- **Accounting audit (prerequisite): CLOSED**, its open questions kept open. Owner
-  `logs/budget/audits/accounting_audit_2026-10-27.json` (README beside it). Four views, never substituted for one
-  another:
-  - *provider bill and live resources* (snapshot `logs/budget/provider/runpod_billing_2026-10-27T1011Z.json`):
-    billed $720.19; 0 pods; `am5m373kuq` only. The balance ($139.24) is not a grant;
-  - *project commitment*: $724.345 of the $740 cap, headroom $15.655, nothing unposted; the mixed study reconciles
-    to $17.3366;
+**RESEARCH A AND B: $0 PREPARATION FOR A-E / B-E COMPLETE (2026-10-27 UTC); NOTHING PAID IS AUTHORIZED.**
+Branch `research/teacher-modes-and-projected-residual`, cut from `stage2/reasoning-data` `d5f1c6f2` (kept). That
+branch was squash-merged into `main` (`72492e46`, "What `main` carries" below), and this branch took that `main`
+by a merge commit: no rebase, no force push, its research commits unchanged. This branch is NOT merged. Decision
+records: `logs/budget/decisions.md`, the three 2026-10-27 entries at its end. Nothing runs; the account holds
+0 pods and the retained volume `am5m373kuq`.
+- **Budget, four views kept apart** (owner `logs/budget/audits/accounting_audit_2026-10-27T1913Z.json`, verdict
+  CLOSED, README beside it):
+  - *provider bill and live resources*: billed $720.2266; 0 pods; `am5m373kuq` only. The balance ($139.21) is
+    not a grant;
+  - *project commitment*: $724.3509 of the $740 cap, headroom $15.6491, nothing unposted, engineering-campaign
+    subruns now counted (`scripts/shared/project_position.py`, audit finding 3 FIXED);
   - *historical budget records*: as booked. `current.json`'s records-based remainder is not headroom;
-  - *unfinished attribution and governance*, NOT explained: +$37.53 billed before the 2026-09-11 anchor beyond the
-    maintainer's stated anchor, 55 pre-anchor pods ($77.33) named by no record, $0.34 of volume rows outside every
-    recorded lifetime, and issuers that do not scan engineering-campaign subruns.
-  - **Before any paid authorization:** the issuing chain must count campaign subruns, and the provider's live billing
-    and resources are read again.
-- **Research A, hybrid teacher thinking vs non-thinking:** `docs/stages/stage-2/teacher_modes/DESIGN.md`. Teacher
-  `Qwen/Qwen3-4B@1cfa9a72` pinned (`configs/stages/stage-2/teacher_modes/teacher_identity.json`); token-in/token-out
-  documents, document-isolated packing, `kd_scope="assistant"` and the `preclosed` think state implemented and
-  host-validated. Applied for: A-E $3.50, then A1-A3 + storage + reserve, $60.00 in all.
+  - *unfinished attribution*, NOT explained: +$37.53 billed before the 2026-09-11 anchor beyond the maintainer's
+    stated anchor, 55 pre-anchor pods ($77.33) named by no record, $0.35 of volume rows outside every recorded
+    lifetime.
+  - **Before any paid authorization:** the study's issuer (grant, envelope, one-use authorization) is built on
+    `project_position` and re-reads the provider at issue and launch. A-E + B-E ($6.50 in caps) fit both the
+    project cap and the balance today (`project_position.py --request`).
+- **Research A, hybrid teacher thinking vs non-thinking:** `docs/stages/stage-2/teacher_modes/DESIGN.md`.
+  - Teacher `Qwen/Qwen3-4B@1cfa9a72`; token-in/token-out documents; `kd_scope="assistant"`.
+  - **Both context strategies supported** (`batch.context_strategy`: `cross_context`, the default and H1/H1-PA's,
+    a deliberate design; `document_isolated`). The study declares `document_isolated` for every arm so the
+    context distribution does not move with the mode; the strategy itself is not compared in round 1.
+  - Token identity classified: prefill `<think>\n` 0.052% of supervised positions, re-tokenization of identical
+    text 0.037%; no inference about H1-PA.
+  - `preclosed` scoring accepted by the maintainer; per-mode evaluation identity
+    (`configs/stages/stage-2/teacher_modes/evaluation_identity.json`); every conformance vector scores alike in
+    all three think states.
+  - Applied for: A-E $3.50, then A1-A3 + storage + reserve, $60.00 in all.
 - **Research B, 900M full-width residual + per-layer trainable PCA:** `docs/stages/stage-1/projected_residual/DESIGN.md`.
-  902,911,488 parameters (513,955,328 trainable), exact fold to stock Qwen3 for vLLM, initializer from D4 Top-1's
-  selections. Applied for: B-E $3.00, then B1 $21.00 (needs a project cap of $749 or more). 600M reserved only.
-- **Next:** the maintainer's grant decisions. Both engineering validations ($6.50) fit the current cap; the formal
-  phases do not.
+  - 902,911,488 parameters (513,955,328 trainable), architecture unchanged.
+  - B-E driver `engineering_validation.py`: initialization with input- and output-subspace energy, bf16 fold,
+    trainer smoke (step time, memory, orthogonality drift), CUDA resume, checkpoint identity, vLLM; on the host
+    every check passes but vLLM (NOT_RUN).
+  - Applied for: B-E $3.00, then B1 $21.00 (needs a project cap of $749 or more). 600M reserved only.
+- **Disk:** 16 GiB free after deleting 11.95 GiB of consumer-free tool caches
+  (`logs/maintenance/storage/devbox_cleanup_20261027.json`); the pod simulator still needs 20 GiB, and the rest
+  needs the maintainer's decision.
+- **Next:** the maintainer's grant decisions for A-E and B-E. Still owed at $0 before the first paid action:
+  each study's issuer and launch chain, and A-E's driver.
 
 **MIXED CALIBRATION 2x: COMPLETE; PREREGISTERED M = NO_GO (2026-10-27).**
 Owner: [`docs/stages/stage-0/calibration_volume/MIXED.md`](../../docs/stages/stage-0/calibration_volume/MIXED.md)
@@ -992,7 +1005,7 @@ invocation with `tee` and `PIPESTATUS[0]`.
 
 ## What `main` carries
 
-**Stage 2 (H1, H1-PA) and the mixed calibration 2x, integrated 2026-10-28
+**Stage 2 (H1, H1-PA) and the mixed calibration 2x, integrated 2026-10-27
 (UTC) by SQUASH AND MERGE per AGENTS.md P12.2, on the maintainer's
 instruction.** One commit on `main` collapses everything on top of `2a8bae78`
 (the Stage-0 squash): the 75 commits up to the tested tree `d5f1c6f2`, plus the
@@ -1028,7 +1041,7 @@ squash commit : `git log -1 main`
 - **Reachability.** Every commit hash the records cite was checked before the
   squash: zero unreachable. The source branch is where this round's commit
   hashes live, so it is kept permanently.
-- **Budget: four things kept apart** (maintainer, 2026-10-28). None of them
+- **Budget: four things kept apart** (maintainer, 2026-10-27). None of them
   substitutes for another.
   1. *The provider's bill and live resources*: the provider's own billing and
      account listing. `main`'s newest committed snapshot is
@@ -1094,7 +1107,7 @@ closeout tree : fa311c679cbf0454966ed50034849cb48dbf5385
   squash: zero unreachable. The source branch is where this round's commit
   hashes live, so it is kept permanently.
 - **Where work continued.** On `stage2/reasoning-data`, cut fresh from that
-  squash commit (itself integrated 2026-10-28, above).
+  squash commit (itself integrated 2026-10-27, above).
 
 **The D-series and its closure, integrated 2026-10-17 (UTC) by SQUASH AND
 MERGE per AGENTS.md P12.2, on the maintainer's instruction.** One commit on

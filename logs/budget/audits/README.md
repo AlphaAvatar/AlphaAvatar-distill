@@ -8,6 +8,7 @@ by one. Each audit is regenerated from a committed provider snapshot by
 | audit | snapshot | verdict |
 | --- | --- | --- |
 | [`accounting_audit_2026-10-27.json`](accounting_audit_2026-10-27.json) | [`runpod_billing_2026-10-27T1011Z.json`](../provider/runpod_billing_2026-10-27T1011Z.json) | CLOSED, with four findings |
+| [`accounting_audit_2026-10-27T1913Z.json`](accounting_audit_2026-10-27T1913Z.json) | [`runpod_billing_2026-10-27T1913Z.json`](../provider/runpod_billing_2026-10-27T1913Z.json) | CLOSED; finding 3 fixed; the position counts campaign subruns |
 
 ## 2026-10-27: closing the mixed-calibration accounting
 
@@ -88,3 +89,35 @@ The account balance ($139.24) is not a grant.
 - No historical conclusion, authorization, grant or run record.
 - No cap.
 - The pre-anchor difference is reported, not booked.
+
+## 2026-10-27T19:13Z: finding 3 fixed, the position re-read
+
+The maintainer accepted the integration and asked that, before any further paid
+authorization, the issuing chain count engineering-campaign subruns and the
+provider's live billing and resources be read again.
+
+**Fix.** [`scripts/shared/project_position.py`](../../../scripts/shared/project_position.py)
+is the issuers' rule (`mixed_governance.position`) plus every
+`aadistill.engineering_campaign/v1` subrun:
+- unbilled and inside the 72 h posting window: counted at its booked cost;
+- unbilled and inside the window without `teardown_confirmed`: refused;
+- unbilled and past the window: listed as never charged, not counted.
+
+Every new issuer reads it; the closed studies' issuers stay as they ran. This
+audit's position uses it: 18 campaigns, 55 subruns with a pod, none unposted.
+
+**Four views, kept apart.** None stands in for another.
+
+| view | value at 19:13Z | owner |
+| --- | ---: | --- |
+| provider bill | $720.2266 (0 pods, `am5m373kuq` only, $0.003/h) | the snapshot |
+| project commitment | $724.3509 of $740, headroom $15.6491 | this audit's `position` |
+| historical budget records | $687.40 booked | `derive_budget.py` |
+| unfinished attribution | +$37.53 before the 2026-09-11 anchor; 55 pre-anchor pods ($77.33) named by no record; $0.35 of volume rows outside every recorded lifetime | `gap`, `billed_pods`, `network_volumes` |
+
+- The account balance ($139.21) is not a grant.
+- **The pre-anchor difference and the unnamed pods are NOT explained.** They
+  are reported, not attributed; their attribution is the maintainer's.
+- The commitment rose $0.006 since 10:11Z: the retained volume's storage,
+  inside its reservation.
+

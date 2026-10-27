@@ -7,41 +7,83 @@
  "preregistration": "logs/stages/stage-2/teacher_modes/plans/preregistration.json",
  "cost_forecast": "logs/stages/stage-2/teacher_modes/plans/cost_forecast.json",
  "requests": [
-  {"id": "A-E", "kind": "engineering validation", "hard_cap_usd": 3.5, "expected_usd": 1.81, "gpu": "NVIDIA A100-SXM4-80GB (one pod)",
-   "what": ["Qwen/Qwen3-4B@1cfa9a72 under vLLM 0.27.1 in both modes on a few T0 tasks: every prompt ends in its mode's generation prompt, every turn records its think_state, H-N generations hold no think delimiter, stop ids as recorded",
-            "the real-teacher teacher-forced check: isolated packed logits against each document alone, fp32 and bf16, both modes",
-            "a 20-step trainer smoke on an isolated pack with kd_scope assistant and the on-the-fly hybrid teacher, on the E1 PCA student as a stand-in: step time and peak memory at 8,192",
-            "the eval-set-1 scorers on the smoke's H-N records (think_state preclosed)"],
+  {
+   "id": "A-E",
+   "kind": "engineering validation",
+   "hard_cap_usd": 3.5,
+   "expected_usd": 1.81,
+   "gpu": "NVIDIA A100-SXM4-80GB (one pod)",
+   "what": [
+    "Qwen/Qwen3-4B@1cfa9a72 under vLLM 0.27.1 in both modes on a few T0 tasks: every prompt ends in its mode's generation prompt, every turn records its think_state, H-N generations hold no think delimiter, stop ids as recorded",
+    "the real-teacher teacher-forced check: isolated packed logits against each document alone, fp32 and bf16, both modes",
+    "a 20-step trainer smoke on an isolated pack with kd_scope assistant and the on-the-fly hybrid teacher, on the E1 PCA student as a stand-in: step time and peak memory at 8,192",
+    "the eval-set-1 scorers on the smoke's H-N records (think_state preclosed)"
+   ],
    "passes_when": "every item completes and the teacher-forced check is within the bf16 tolerance it measures for the unpacked reference",
-   "fits_the_current_cap": "yes, with B-E: $724.345 + $3.00 + $3.50 = $730.845 <= $740"},
-  {"id": "A1", "kind": "formal data generation", "hard_cap_usd": 13.5, "expected_usd": 8.30, "conservative_usd": 11.49,
+   "fits_the_current_cap": "yes, with B-E: $724.345 + $3.00 + $3.50 = $730.845 <= $740"
+  },
+  {
+   "id": "A1",
+   "kind": "formal data generation",
+   "hard_cap_usd": 13.5,
+   "expected_usd": 8.3,
+   "conservative_usd": 11.49,
    "gpu": "NVIDIA A100-SXM4-80GB (the measured generation hardware)",
-   "what": "T0 (1,761 tasks) in both modes, the calibration prompts in both modes, then X in H-N; the first 10% slice first, repricing the rest (preregistration :: data_budget_rules)"},
-  {"id": "A2", "kind": "formal initialization", "hard_cap_usd": 3.5, "expected_usd": 1.81,
-   "gpu": "NVIDIA A100-SXM4-80GB", "what": "the common hybrid-derived initialization on the fixed path with the mode-balanced calibration; one materialization"},
-  {"id": "A3", "kind": "formal recovery and evaluation", "hard_cap_usd": 33.0, "expected_usd": 21.0, "conservative_usd": 29.68,
+   "what": "T0 (1,761 tasks) in both modes, the calibration prompts in both modes, then X in H-N; the first 10% slice first, repricing the rest (preregistration :: data_budget_rules)"
+  },
+  {
+   "id": "A2",
+   "kind": "formal initialization",
+   "hard_cap_usd": 3.5,
+   "expected_usd": 1.81,
+   "gpu": "NVIDIA A100-SXM4-80GB",
+   "what": "the common hybrid-derived initialization on the fixed path with the mode-balanced calibration; one materialization"
+  },
+  {
+   "id": "A3",
+   "kind": "formal recovery and evaluation",
+   "hard_cap_usd": 33.0,
+   "expected_usd": 21.0,
+   "conservative_usd": 29.68,
    "gpu": "NVIDIA L40S, sessions sequential, one billing pod at a time",
-   "what": "H-T-S, H-N-S and H-N-C on two seeds, every item of eval-set-1 per student in its mode, and the teacher on eval-set-1 in both modes"},
-  {"id": "storage", "hard_cap_usd": 3.5, "what": "one new 50 GB volume for A3's six checkpoints, deleted after the review"},
-  {"id": "engineering reserve", "hard_cap_usd": 3.0, "what": "pre-science subruns inside the envelope (P12.1)"}
+   "what": "H-T-S, H-N-S and H-N-C on two seeds, every item of eval-set-1 per student in its mode, and the teacher on eval-set-1 in both modes"
+  },
+  {
+   "id": "storage",
+   "hard_cap_usd": 3.5,
+   "what": "one new 50 GB volume for A3's six checkpoints, deleted after the review"
+  },
+  {
+   "id": "engineering reserve",
+   "hard_cap_usd": 3.0,
+   "what": "pre-science subruns inside the envelope (P12.1)"
+  }
  ],
  "total_hard_cap_usd": 60.0,
- "project_position": {"source": "logs/budget/audits/accounting_audit_2026-10-27.json", "committed_usd": 724.345, "cap_usd": 740.0,
-                      "headroom_usd": 15.655,
-                      "formal_needs": "A1-A3 + storage + reserve = $56.50 beyond A-E: the maintainer would have to set the project cap at about $790 for A alone, $810 for A and B"},
+ "project_position": {
+  "source": "logs/budget/audits/accounting_audit_2026-10-27.json",
+  "committed_usd": 724.345,
+  "cap_usd": 740.0,
+  "headroom_usd": 15.655,
+  "formal_needs": "A1-A3 + storage + reserve = $56.50 beyond A-E: the maintainer would have to set the project cap at about $790 for A alone, $810 for A and B"
+ },
  "owed_engineering_before_the_first_paid_action": [
-  "the study's governance: one grant, one cumulative envelope, one-use authorizations, the provider's live billing and resources re-read at every issue and launch, engineering-campaign subruns counted among unposted sessions (accounting audit finding 3)",
+  "the study's issuer: one grant, one cumulative envelope, one-use authorizations, built on scripts/shared/project_position.py, which reads the provider live at every issue and launch and counts engineering-campaign subruns among unposted sessions (accounting audit finding 3, FIXED 2026-10-27; logs/budget/audits/accounting_audit_2026-10-27T1913Z.json)",
   "the generation chain per mode: generation_plan inputs for T0, the calibration prompts and X (X built and isolation-checked at $0), the driver passing --chat-template-kwargs and --generate-sampling and recording both",
   "admission: generation_adapter's verification reading think_state, documents built by document_from_turn with prompt_mode_problems, episodes whole, I and X derived by the registered rules",
   "the mode-balanced calibration profile builder and the fixed-path materialization on the hybrid teacher (forward-baseline operators, no search)",
-  "the recovery driver: H1-PA's recipe with kd_scope assistant and batch.document_isolation, the isolated pack as the training set, the hybrid teacher on-the-fly",
+  "the recovery driver: H1-PA's recipe with kd_scope assistant and batch.context_strategy document_isolated, the pack_documents pack (its composition and context_exposure recorded) as the training set, the hybrid teacher on-the-fly",
   "evaluation: the driver passing each student's mode to run_battery and uncapped_eval, the teacher in both modes",
   "the analysis: h1_statistics on S and C at 97.5% and the full table with the teacher-student gap"
  ],
  "never": [
-  "new data generation, search or recovery before its phase is granted", "a soft switch or a hand-built mode prefix",
-  "an answer-only cut of a thinking trace", "combining the non-thinking teacher with the projected architecture",
-  "changing eval-set-1, its scorers or nucleus_v1", "a merge to main", "raising a cap"
+  "new data generation, search or recovery before its phase is granted",
+  "a soft switch or a hand-built mode prefix",
+  "an answer-only cut of a thinking trace",
+  "combining the non-thinking teacher with the projected architecture",
+  "changing eval-set-1, its scorers or nucleus_v1",
+  "a merge to main",
+  "raising a cap"
  ],
  "authorizes": "nothing"
 }

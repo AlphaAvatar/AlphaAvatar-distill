@@ -51,6 +51,7 @@ import torch
 import torch.nn.functional as F
 
 from ..data.dataset import best_fit_blocks, encode_sample, load_split, pack_blocks
+from ..data.token_documents import CONTEXT_STRATEGIES
 from ..infrastructure.manifest import sha256_json
 from .lora import (
     LoRAConfig,
@@ -150,8 +151,8 @@ def validate_train_config(cfg: dict) -> None:
             raise ValueError(f"batch.{key} must be >= 1")
     if "truncate_padding" in batch and not isinstance(batch["truncate_padding"], bool):
         raise ValueError("batch.truncate_padding must be a bool")
-    if "document_isolation" in batch and not isinstance(batch["document_isolation"], bool):
-        raise ValueError("batch.document_isolation must be a bool")
+    if batch.get("context_strategy", "cross_context") not in CONTEXT_STRATEGIES:
+        raise ValueError(f"batch.context_strategy must be one of {CONTEXT_STRATEGIES}")
     ck = need(cfg, "checkpoint", dict)
     for key in ("save_every", "keep_last"):
         need(ck, key, int, "checkpoint.")
@@ -689,13 +690,18 @@ class Trainer:
         # config also changes that config's hash, so the manifest records which
         # path a run took instead of leaving it to the code version.
         self.truncate_padding = bool(cfg["batch"].get("truncate_padding", False))
-        # Document isolation: blocks carry per-document position ids that restart
-        # at 0, and both models are run with them and no 2-D attention mask, which
-        # makes transformers build a block-diagonal causal mask -- each packed
-        # document attends only to itself, as it did when the teacher generated
-        # it. Off by default (every logged run attends across its whole block),
-        # and declared in the config so its hash records which path a run took.
-        self.document_isolation = bool(cfg["batch"].get("document_isolation", False))
+        # Context strategy, a training-distribution choice; both are supported.
+        # "cross_context" (the default, and every logged run's): one causal
+        # context per packed sequence, positions continuous, so a later document
+        # is conditioned on the earlier ones; teacher and student run on the same
+        # composed sequence, so KD compares them on one context. "document_isolated":
+        # blocks carry per-document position ids restarting at 0, and both models
+        # run with them and no 2-D mask, which makes transformers build a
+        # block-diagonal causal mask -- each document is conditioned only on
+        # itself, the context its teacher generation had. Declared in the config
+        # so its hash records which distribution a run trained on.
+        self.context_strategy = cfg["batch"].get("context_strategy", "cross_context")
+        self.document_isolation = self.context_strategy == "document_isolated"
         # Token accounting, kept as three distinct quantities so a saving is
         # never confused with a change in how much supervision the run saw.
         self._exec_logical = 0         # cumulative: blocks x logical block length
@@ -753,15 +759,16 @@ class Trainer:
         )
         if (self.train_pos is not None) != self.document_isolation:
             raise ValueError(
-                "batch.document_isolation must be true exactly when the blocks carry "
-                "position ids: isolated blocks trained without them would attend across "
-                "documents, and a config without the flag would not record the treatment")
+                "batch.context_strategy must be 'document_isolated' exactly when the blocks "
+                "carry position ids: isolated blocks run without them would be conditioned on "
+                "their neighbours, and a config that did not say so would not record the "
+                "distribution it trained on")
         if self.train_ids.shape[0] == 0:
             raise ValueError("no training blocks")
         if val_blocks is not None:
             val_ids, val_mask, val_content, val_pos = _unpack_blocks(val_blocks)
             if (val_pos is not None) != self.document_isolation:
-                raise ValueError("validation blocks must match batch.document_isolation")
+                raise ValueError("validation blocks must match batch.context_strategy")
             # Fixed shuffle so a truncated eval (eval_blocks < all) still
             # samples across groups instead of the first groups alphabetically.
             perm = epoch_permutation(val_ids.shape[0], cfg["seed"] + 777, 0)
@@ -776,7 +783,7 @@ class Trainer:
         for name, blocks in (extra_val_blocks or {}).items():
             ids, mask, content, pos = _unpack_blocks(blocks)
             if (pos is not None) != self.document_isolation:
-                raise ValueError(f"extra validation set {name} must match batch.document_isolation")
+                raise ValueError(f"extra validation set {name} must match batch.context_strategy")
             perm = epoch_permutation(ids.shape[0], cfg["seed"] + 777, 0)
             self.extra_vals[name] = (
                 ids[perm], mask[perm], None if content is None else content[perm],
@@ -1071,7 +1078,7 @@ class Trainer:
             "executed_nonpad_tokens": self._step_nonpad,
             "supervised_tokens": ce_total,
             "truncate_padding": self.truncate_padding,
-            "document_isolation": self.document_isolation,
+            "context_strategy": self.context_strategy,
         }
 
     @torch.no_grad()

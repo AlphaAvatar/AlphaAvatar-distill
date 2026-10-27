@@ -50,12 +50,102 @@
   "supervised_tokens_as_trained": 2962514,
   "generated_tokens": 2961175
  },
+ "target_differences": {
+  "supervised_positions_as_trained": 2962514,
+  "by_kind": {
+   "retokenization": {
+    "sessions": 132,
+    "spans": 578,
+    "trained_tokens": 1102,
+    "generated_tokens": 1297,
+    "by_location": {
+     "answer": {
+      "spans": 82,
+      "trained_tokens": 162,
+      "generated_tokens": 184
+     },
+     "reasoning": {
+      "spans": 495,
+      "trained_tokens": 937,
+      "generated_tokens": 1110
+     },
+     "think_boundary": {
+      "spans": 1,
+      "trained_tokens": 3,
+      "generated_tokens": 3
+     }
+    },
+    "share_of_supervised_positions": 0.00037198
+   },
+   "template_prefill": {
+    "sessions": 767,
+    "spans": 767,
+    "trained_tokens": 1534,
+    "generated_tokens": 0,
+    "by_location": {
+     "before_generation": {
+      "spans": 767,
+      "trained_tokens": 1534,
+      "generated_tokens": 0
+     }
+    },
+    "share_of_supervised_positions": 0.0005178
+   }
+  },
+  "examples": {
+   "template_prefill": [],
+   "retokenization": [
+    {
+     "session": "0057ccf8deea94e180e4#t0",
+     "where": "reasoning",
+     "trained": "'ildd'",
+     "generated": "'ildd'"
+    },
+    {
+     "session": "0057ccf8deea94e180e4#t0",
+     "where": "reasoning",
+     "trained": "'ildd'",
+     "generated": "'ildd'"
+    },
+    {
+     "session": "00b0c50f1ece8b32745c#t0",
+     "where": "reasoning",
+     "trained": "' gorpus'",
+     "generated": "' gorpus'"
+    },
+    {
+     "session": "00b0c50f1ece8b32745c#t0",
+     "where": "reasoning",
+     "trained": "' gorpus'",
+     "generated": "' gorpus'"
+    }
+   ]
+  },
+  "supervised_positions_after_a_generation_divergence": 330674,
+  "share_after_a_generation_divergence": 0.111619,
+  "loss_weights_h1pa": {
+   "ce_weight": 0.25,
+   "kd_weight": 1.0,
+   "kd_temperature": 1.0,
+   "kd_scope": "all",
+   "_source": "configs/stages/stage-2/reasoning_data/h1pa.json :: recipe.facts (E1's loss block)"
+  },
+  "reading": {
+   "template_prefill": "the `<think>\\n` the Thinking-2507 template prefills in the generation prompt, supervised by CE because the re-rendered assistant turn contains it. It is a template control token the deployment template supplies as context, so the student never needs to generate it; supervising it is unnecessary rather than wrong. Whether it conflicts with the teacher depends on the teacher's own probability of `<think>` after `<|im_start|>assistant\\n`, which needs the teacher's weights (not measured here)",
+   "retokenization": "the same text in different token ids: the conditioning text is unchanged",
+   "whitespace": "the template's newline normalization around the reasoning and the answer: the text differs only in whitespace, and every later position is conditioned on the normalized text",
+   "content": "a change of non-whitespace text",
+   "conditioning": "H1-PA ran the teacher on the fly on the same re-rendered sequence, so KD compared teacher and student on one context everywhere; the difference is that after a divergence that context is the re-rendered text, not the teacher's own generation. KD was applied at every non-padding position, so the prefill changes only what CE supervised",
+   "not_concluded": "these counts do not show that H1-PA's training was invalid or that this caused its low correctness; no such inference is made"
+  }
+ },
  "as_generated_documents": {
   "documents": 767,
   "prompt_ends_in_the_template_generation_prompt": 767,
   "generation_suffix_text": "<|im_start|>assistant\n<think>\n",
   "end_on_a_stop_id": 767,
   "isolated_pack": {
+   "strategy": "document_isolated",
    "sequences": 410,
    "sequence_length": 8192,
    "documents": 767,
@@ -80,8 +170,44 @@
    "model": "random 2-layer Qwen3, float64, the real 151,669-token vocabulary",
    "tolerance": 1e-09,
    "pass": true
+  },
+  "context_strategy_estimate": {
+   "as_generated": {
+    "system_groups": 1,
+    "largest_group": {
+     "strategy": "cross_context",
+     "supervised_tokens": 2961175,
+     "documents_per_sequence_mean": 1.8707,
+     "documents_per_sequence_max": 4,
+     "share_of_supervised_tokens_with_foreign_context": 0.292331,
+     "foreign_context_tokens_per_supervised_token": {
+      "mean": 1292.8,
+      "p50": 0,
+      "p90": 4988,
+      "max": 7803
+     }
+    }
+   },
+   "length_proxy_x0.25": {
+    "system_groups": 1,
+    "largest_group": {
+     "strategy": "cross_context",
+     "supervised_tokens": 740304,
+     "documents_per_sequence_mean": 6.6121,
+     "documents_per_sequence_max": 10,
+     "share_of_supervised_tokens_with_foreign_context": 0.835646,
+     "foreign_context_tokens_per_supervised_token": {
+      "mean": 3317.81,
+      "p50": 3281,
+      "p90": 6572,
+      "max": 8053
+     }
+    }
+   },
+   "separator": "\n",
+   "packing": "pack_cross_context, shared system block once per sequence, best fit, order seed 20261027"
   }
  },
- "reading": "the as-trained path supervises the template's re-rendering of each turn; the as-generated path supervises exactly the teacher's sampled tokens on exactly its context. This audit measures their difference on the data H1-PA trained on; it changes no H1-PA identity or result.",
+ "reading": "the as-trained path supervises the template's re-rendering of each turn; the as-generated path supervises exactly the teacher's sampled tokens on exactly its context. This audit measures their difference on the data H1-PA trained on and classifies it (target_differences); it changes no H1-PA identity or result and does not infer that H1-PA's training was invalid. Cross-context packing, which H1-PA also used, is a separate, supported training strategy, not part of this difference.",
  "authorizes": "nothing"
 }

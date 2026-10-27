@@ -1,7 +1,7 @@
 # Research B — full-width residual stream with per-layer trainable PCA (900M)
 
-**Status (2026-10-27): $0 READY for an engineering-validation grant; nothing
-authorized.**
+**Status (2026-10-27, revised the same day): $0 READY for an engineering-validation
+grant; nothing authorized.**
 
 - The architecture, its initializer, the exact counters and the evaluation
   route are implemented and validated on the host.
@@ -164,9 +164,26 @@ parameter-matched to 596,049,920 within 14,848.
 From [`cost_forecast.json`](../../../../logs/stages/stage-1/projected_residual/plans/cost_forecast.json),
 scaled from D4-Augmented's measured sessions:
 
-**B-E** (engineering validation): $1.11 expected, $3.00 cap. It covers the real
-initialization, the bf16 fold check, a 20-step trainer smoke at the recipe's
-shape, CUDA resume and vLLM loading. It fits the current $740 cap.
+**B-E** (engineering validation): $1.11 expected, $3.00 cap, on one L40S. It
+fits the current $740 cap. One driver,
+[`engineering_validation.py`](../../../../scripts/stages/stage-1/projected_residual/engineering_validation.py),
+runs every check and writes one record; it trains no student that is kept and
+evaluates nothing on eval-set-1.
+
+| check | measures | passes when |
+| --- | --- | --- |
+| initialization | the real materialization; the declared basis's captured energy per layer on the input roles, and on `residual_in` and the sub-layers' outputs (`attn_out`, `ffn_out`) | it completes; counted parameters equal the cost model's |
+| fold | factored against folded stock Qwen3, fp32 and bf16 | bf16 difference ≤ 2 × the model's own bf16-vs-fp32 |
+| trainer_smoke | 20 steps at the recipe's shape (8,192, batch 2, micro-batch 1, bf16 autocast, gradient checkpointing, the teacher on the fly): step time, peak memory, orthogonality drift | finite losses, a gradient on every `P_l`, the tied embedding unchanged |
+| resume | uninterrupted against half + checkpoint + reload + half, on CUDA | identical parameters |
+| checkpoint_identity | save → reload → save; the folded model reloaded as stock Qwen3 | identical shard bytes; identical logits |
+| vllm | the folded checkpoint in vLLM 0.27.1 | loads and generates |
+
+- **Every check runs** even after one fails, so one session reports all of them.
+- **On the host** (`--tiny`, a random small teacher) the driver passes every
+  check except vLLM, which is NOT_RUN; that dry run is a test.
+- **What B-E does not settle:** whether trainable projections help reasoning.
+  That is B1's preregistered comparison.
 
 **B1** (formal): $14.53 expected (13.1 L40S hours), $18.52 conservative,
 $21.00 cap.
@@ -181,6 +198,7 @@ PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-1/projected_residua
 PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-1/projected_residual/architecture_report.py \
     --write logs/stages/stage-1/projected_residual/analyses/architecture_report.json
 PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-1/projected_residual/materialize.py --tiny --out /tmp/pw
+PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-1/projected_residual/engineering_validation.py --tiny --out /tmp/pw-be
 PYTHONPATH=src:scripts:tests .venv/bin/python -m pytest -q tests/models/test_projected_residual.py \
     tests/initialization/test_projected_residual_init.py scripts/stages/stage-1/projected_residual/tests
 ```

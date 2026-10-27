@@ -1,0 +1,140 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.evaluation_identity/v1",
+ "_contract": "A generation of this study is scored under one identity per mode, and every\npart of it is bound by hash:\n\n* the mode: the teacher revision, chat template, template kwargs, the\n  generation prompt they produce and the think state it leaves;\n* the instrument: eval-set-1's current identity and each component's formal\n  scoring protocol and conformance vectors, and the decoding protocol;\n* the scorer: the parser's think-state branch and the source files that score.\n\n``preclosed`` is the hybrid non-thinking mode's state: an empty closed think\nblock in the prompt, no delimiter allowed in the continuation, the body the\nanswer. It applies only to a record that states ``think_state``; a record\nwithout the field keeps the rule it was scored under, and no historical\nresult, item, gold answer or protocol changes (the maintainer's 2026-10-27\napproval of this $0 scoring design; it authorizes no paid evaluation).",
+ "teacher_identity": {
+  "path": "configs/stages/stage-2/teacher_modes/teacher_identity.json",
+  "sha256": "624027db1f8608f9637a72ef77e82e30c2a8b1b4c1ebd513422f89bbdeba7b7f"
+ },
+ "modes": {
+  "H-T": {
+   "mode": "H-T",
+   "teacher": {
+    "model": "Qwen/Qwen3-4B",
+    "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+   },
+   "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+   "template_kwargs": {
+    "enable_thinking": true
+   },
+   "generation_suffix_ids": [
+    151644,
+    77091,
+    198
+   ],
+   "think_state": "self_opening",
+   "eval_set": {
+    "eval_set_id": "eval-set-1",
+    "status": "frozen",
+    "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+    "components": {
+     "fluid_reasoning_720": {
+      "formal_protocol": "v2",
+      "conformance_sha256": {
+       "v1": "8bbeda090fb6af6cceaba7507cedd68077e97ec96f9da3b5dfd75cada12ba27c",
+       "v2": "ee33d2c72457e0354725e17128a3ef6a1067124a22c1d333b674fde0b24da506"
+      }
+     },
+     "stage3_capability_846": {
+      "formal_protocol": "v2",
+      "conformance_sha256": {
+       "v1": "7fb83ef270b9d8647bcedc1b460c9b5e2c65934eee94e35cf08e1b4ec37ba6c6",
+       "v2": "b8fd23dc6fcd55e5b38639995992eabd72de8acebe74b0f5ab795fb7fc01d9fd"
+      }
+     },
+     "stage3_legacy_150": {
+      "formal_protocol": "v2",
+      "conformance_sha256": {
+       "v1": "3758992e02b1475a7883054ee16e5f421ed869159fd08ca68b525480285b07eb",
+       "v2": "70025a6c79c3f280a805a5a15e7933d662bb54d9c56cceb8502d1a39b3a97ff9"
+      }
+     }
+    }
+   },
+   "decoding": {
+    "protocol_id": "nucleus_v1",
+    "path": "configs/shared/evaluation/decoding/nucleus_v1.json",
+    "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"
+   },
+   "scorer": {
+    "sources_sha256": {
+     "src/aadistill/evaluation/behavior.py": "3f65a4930e4e57637c8c2598fb1c566079ddee5d0635a7143c84c963020becb1",
+     "src/aadistill/evaluation/strict_answer.py": "cc7461eb213371d312ffe15a938215f9f0a891be5aa9285af61d6b4c09ac7c7b",
+     "src/aadistill/evaluation/capability.py": "a3976190a45dd55e37deb1dddf7d0c00930e6dbe249eacfd956afbd75f524f7a",
+     "src/aadistill/evaluation/usable_rollout.py": "39e097ada9d99cc41603528edf690e3b4fef9794d6c55e5ce389858a946f38f7",
+     "scripts/shared/evaluation/eval_set_scoring.py": "a80ed0fdad31b4d4498f2fb11d88ec7e2324ad4dbe590d1ca800d40037c3be12",
+     "scripts/stages/stage-0/calibration_volume/score_battery.py": "3423e731671ffacd8859889409bfe5aff7709fda77cf459d1f841bd240954421"
+    },
+    "rule": "aadistill.evaluation.behavior.record_think_state: a record's stated think_state, else the historical think_preopened rule"
+   },
+   "identity_sha256": "6f5ef37680d70b1ff2aca115c68d8facb9a3bd6e9ef669985c85c8bbf9fdd00f"
+  },
+  "H-N": {
+   "mode": "H-N",
+   "teacher": {
+    "model": "Qwen/Qwen3-4B",
+    "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+   },
+   "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+   "template_kwargs": {
+    "enable_thinking": false
+   },
+   "generation_suffix_ids": [
+    151644,
+    77091,
+    198,
+    151667,
+    271,
+    151668,
+    271
+   ],
+   "think_state": "preclosed",
+   "eval_set": {
+    "eval_set_id": "eval-set-1",
+    "status": "frozen",
+    "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+    "components": {
+     "fluid_reasoning_720": {
+      "formal_protocol": "v2",
+      "conformance_sha256": {
+       "v1": "8bbeda090fb6af6cceaba7507cedd68077e97ec96f9da3b5dfd75cada12ba27c",
+       "v2": "ee33d2c72457e0354725e17128a3ef6a1067124a22c1d333b674fde0b24da506"
+      }
+     },
+     "stage3_capability_846": {
+      "formal_protocol": "v2",
+      "conformance_sha256": {
+       "v1": "7fb83ef270b9d8647bcedc1b460c9b5e2c65934eee94e35cf08e1b4ec37ba6c6",
+       "v2": "b8fd23dc6fcd55e5b38639995992eabd72de8acebe74b0f5ab795fb7fc01d9fd"
+      }
+     },
+     "stage3_legacy_150": {
+      "formal_protocol": "v2",
+      "conformance_sha256": {
+       "v1": "3758992e02b1475a7883054ee16e5f421ed869159fd08ca68b525480285b07eb",
+       "v2": "70025a6c79c3f280a805a5a15e7933d662bb54d9c56cceb8502d1a39b3a97ff9"
+      }
+     }
+    }
+   },
+   "decoding": {
+    "protocol_id": "nucleus_v1",
+    "path": "configs/shared/evaluation/decoding/nucleus_v1.json",
+    "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"
+   },
+   "scorer": {
+    "sources_sha256": {
+     "src/aadistill/evaluation/behavior.py": "3f65a4930e4e57637c8c2598fb1c566079ddee5d0635a7143c84c963020becb1",
+     "src/aadistill/evaluation/strict_answer.py": "cc7461eb213371d312ffe15a938215f9f0a891be5aa9285af61d6b4c09ac7c7b",
+     "src/aadistill/evaluation/capability.py": "a3976190a45dd55e37deb1dddf7d0c00930e6dbe249eacfd956afbd75f524f7a",
+     "src/aadistill/evaluation/usable_rollout.py": "39e097ada9d99cc41603528edf690e3b4fef9794d6c55e5ce389858a946f38f7",
+     "scripts/shared/evaluation/eval_set_scoring.py": "a80ed0fdad31b4d4498f2fb11d88ec7e2324ad4dbe590d1ca800d40037c3be12",
+     "scripts/stages/stage-0/calibration_volume/score_battery.py": "3423e731671ffacd8859889409bfe5aff7709fda77cf459d1f841bd240954421"
+    },
+    "rule": "aadistill.evaluation.behavior.record_think_state: a record's stated think_state, else the historical think_preopened rule"
+   },
+   "identity_sha256": "5c31ae9686ba5e590a687263b0c7f658143d9412bda23cd8943f71cf712abfed"
+  }
+ },
+ "students": "a student is scored under the identity of the mode it was trained in; the teacher under both",
+ "authorizes": "nothing"
+}

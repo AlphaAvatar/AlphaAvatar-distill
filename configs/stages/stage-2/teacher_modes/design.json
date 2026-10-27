@@ -1,12 +1,13 @@
 {
  "schema": "aadistill.stage2.teacher_modes.design/v1",
  "study_id": "stage2.teacher_modes.hybrid_v1",
- "status": "PROPOSED 2026-10-27, NOT FROZEN. The mode protocol, the token-in/token-out data path and the isolation are implemented and validated at $0; the study is frozen with its preregistration only on the maintainer's approval, before any hybrid-teacher datum exists. Nothing here is authorized to run.",
+ "status": "PROPOSED 2026-10-27, revised 2026-10-27 (both context strategies supported; the declared one and why; the token-identity classification; each mode's evaluation identity), NOT FROZEN. The mode protocol, the token-in/token-out data path and both context strategies are implemented and validated at $0; the study is frozen with its preregistration only on the maintainer's approval, before any hybrid-teacher datum exists. Nothing here is authorized to run.",
  "decided_by": "maintainer brief 2026-10-27 'Next Research Programme: Teacher Reasoning Modes & Trainable PCA Architecture', Research A",
  "question": "With one hybrid teacher, one student architecture, one common initialization and one recovery recipe, does distilling the teacher's native THINKING distribution or its native NON-THINKING distribution give a small student better fluid-reasoning correctness on unseen problems -- (S) on the same tasks, and (C) at the same training compute?",
  "teacher": {
   "identity": "configs/stages/stage-2/teacher_modes/teacher_identity.json",
-  "model": "Qwen/Qwen3-4B", "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
   "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
   "vocabulary_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
   "tokenizer_files_sha256": "0d96ecc916745b3a6eb234433e6ddeeab051736a6336ef0db95b3022c425c3eb",
@@ -14,51 +15,101 @@
   "historical": "Qwen/Qwen3-4B-Thinking-2507@768f209d is every earlier round's teacher and NOT an arm here: the same vocabulary, a different template (3802169b...), RoPE base 5,000,000 against 1,000,000, a 262,144 against 40,960-position config"
  },
  "modes": {
-  "H-T": {"template_kwargs": {"enable_thinking": true}, "think_state": "self_opening",
-          "generation_prompt": "<|im_start|>assistant\\n (ids 151644, 77091, 198)",
-          "targets": "every generated token: <think>, the reasoning, </think>, the answer and <|im_end|>"},
-  "H-N": {"template_kwargs": {"enable_thinking": false}, "think_state": "preclosed",
-          "generation_prompt": "<|im_start|>assistant\\n<think>\\n\\n</think>\\n\\n (ids 151644, 77091, 198, 151667, 271, 151668, 271)",
-          "targets": "every generated token: the answer and <|im_end|>; the template's empty think block is context"},
+  "H-T": {
+   "template_kwargs": {
+    "enable_thinking": true
+   },
+   "think_state": "self_opening",
+   "generation_prompt": "<|im_start|>assistant\\n (ids 151644, 77091, 198)",
+   "targets": "every generated token: <think>, the reasoning, </think>, the answer and <|im_end|>"
+  },
+  "H-N": {
+   "template_kwargs": {
+    "enable_thinking": false
+   },
+   "think_state": "preclosed",
+   "generation_prompt": "<|im_start|>assistant\\n<think>\\n\\n</think>\\n\\n (ids 151644, 77091, 198, 151667, 271, 151668, 271)",
+   "targets": "every generated token: the answer and <|im_end|>; the template's empty think block is context"
+  },
   "switch": "the official hard switch only (tokenizer.apply_chat_template(..., enable_thinking=...)); no /think or /no_think, no hand-built prefix, no mode-forcing system text",
   "system_message": "You are a helpful Assistant. -- the same for both modes and for every task that does not carry its own"
  },
  "token_protocol": {
   "rule": "a training document is the engine's own prompt_token_ids followed by its own output_token_ids (aadistill.data.token_documents); nothing is re-rendered",
-  "why": "re-rendering a finished turn is not token-identical to prompt + generation: on the 767 H1-PA fluid sessions none of the as-trained targets equals the generated tokens (635 add the template's prefilled <think>\\n to the CE mask, 132 differ inside the generation) -- logs/stages/stage-2/teacher_modes/audit/token_identity_audit.json; the hybrid template additionally strips newlines around a reasoning span and before an answer (tests/data/test_token_documents.py)",
+  "why": "a teacher-native target is what the teacher generated, token for token; re-rendering a finished turn is not that. On the 767 H1-PA fluid sessions (token_identity_audit.json :: target_differences) the CE targets as trained differ from the generated tokens in two ways only: every session supervises the Thinking-2507 template's prefilled <think>\\n (2 positions, 1,534 in all, 0.052% of supervised positions; a template control token the deployment template supplies, unnecessary rather than wrong), and 132 sessions carry 578 re-tokenizations of the SAME text (1,102 positions, 0.037%); no whitespace or content difference. 11.2% of supervised positions follow a re-tokenization, conditioned on the same text in canonical ids. H1-PA ran the teacher on the same sequence, so KD compared the models on one context throughout. None of this is read as H1-PA's training being invalid or as a cause of its correctness. Taking prompt_token_ids + output_token_ids removes the question for this study; the hybrid template also strips newlines around a reasoning span and before an answer when it re-renders (tests/data/test_token_documents.py)",
   "mode_check": "every document's prompt must end in its mode's generation prompt (prompt_mode_problems); a document under the other mode's prompt is refused",
   "termination": "only generations ending on a stop id (<|im_end|> 151645 or <|endoftext|> 151643) become documents; the stop token is a target",
   "multi_turn": "each turn of an episode is its own document with its own recorded prompt (the template drops earlier turns' reasoning in both modes, so turn k's context is what the teacher saw at turn k); an episode is admitted whole or not at all",
   "length": "a document longer than the 8,192-token sequence is refused, never cut (P17); the per-turn generation allowance is 8,184 minus the prompt (data construction, as P1)"
  },
- "packing": {
-  "rule": "pack_isolated: whole documents, best fit in a seeded order, 8,192-token sequences, position ids restarting at every document and at the pad run; trainer batch.document_isolation = true, so student and teacher attend within each document only",
-  "verified": "on CPU: packed hidden states equal each document's own exactly on two real 8,192-token sequences of H1-PA documents (token_identity_audit.json :: isolation_check), and the trainer's CE and KD over an isolated sequence equal the per-document sums (tests/data/test_token_documents.py); on the real teacher in bf16: owed to the engineering validation A-E",
-  "why": "the existing sequential packer concatenates sessions after one shared system block with no isolation, so a later session attends to earlier ones the teacher never saw: a context shift inside KD. Isolation removes it; on the H1-PA documents it also cuts sequences 524 -> 410 (padding 26.6% -> 6.1%)"
+ "context_strategy": {
+  "declared": "document_isolated",
+  "same_for_every_arm": "one definition for H-T-S, H-N-S and H-N-C: the strategy, the packer, the 8,192-token sequence length, best fit, the seeded order and the trainer's batch.context_strategy; it enters every run's config hash",
+  "supported": {
+   "cross_context": "the trainer's default and every earlier run's distribution (H1, H1-PA: sessions after one shared system block in one causal context). A deliberate training strategy for using, ignoring or integrating context already present, not an error: teacher and student run on the same composed sequence, so KD compares them on one context. For token-native documents: pack_cross_context (the shared system block once, bodies joined by the template's message terminator, continuous positions), recording each sequence's composition and every document's preceding foreign context. A composition of independent documents is not a real conversation and is never reported as one",
+   "document_isolated": "pack_isolated: whole documents, best fit in a seeded order, position ids restarting at every document and at the pad run; trainer batch.context_strategy document_isolated, so each document is conditioned only on itself -- the context the teacher generated it in"
+  },
+  "why_isolated_for_this_study": "to keep the context distribution from moving with the mode, not because cross-context training is wrong. Packed cross-context at 8,192, documents' lengths decide how many neighbours precede each target: on H1-PA's as-generated documents 1.87 documents per sequence and 29% of supervised tokens behind foreign context (mean 1,293 foreign tokens); on a length-only proxy for non-thinking documents (generation x 0.25, the forecast's ratio) 6.61 per sequence and 84% (mean 3,318) -- token_identity_audit.json :: context_strategy_estimate. Under cross-context S and C would compare the modes AND two different context distributions. Isolated, every target is conditioned on exactly its own generation context in both modes, which is also the exact teacher-native distribution the mode comparison asks about",
+  "not_compared_here": "the strategy itself. A study of cross-context against isolated training (its effect on generalization and multi-question robustness) is its own experiment within one mode, never mixed with the mode comparison in round 1",
+  "recorded_per_run": "the pack's strategy, composition (documents per sequence in order), stats and context_exposure, and the trainer's context_strategy in every step's metrics",
+  "verified": "on CPU: packed hidden states equal each document's own exactly on two real 8,192-token sequences of H1-PA documents (token_identity_audit.json :: isolation_check); the trainer's CE and KD over an isolated sequence equal the per-document sums; under cross_context the first document of a sequence equals its own run and later ones are conditioned on their neighbours, and KD is zero for one model on one context (tests/data/test_token_documents.py); on the real teacher in bf16: owed to the engineering validation A-E",
+  "packing_density": "isolated, the H1-PA documents fill 410 sequences at 6.1% padding (the earlier sequential pack: 524 at 26.6%)"
  },
  "supervision": {
-  "kd": "forward KL(teacher || student) at T = 1, kd_scope 'assistant': exactly the generated-token positions (prediction_mask = the documents' target mask); never system, user, header or prefill positions, never padding, never a cross-document position",
+  "kd": "forward KL(teacher || student) at T = 1, kd_scope 'assistant': exactly the generated-token positions (prediction_mask = the documents' target mask); never system, user, header, prefill or separator positions, never padding, and under isolation never a position predicting across a document boundary",
   "ce": "CE on the same positions, weight 0.25; KD weight 1.0 (H1-PA's weights)",
-  "teacher_context": "the teacher runs on the same isolated packed sequence, so its distribution at every target is conditioned on exactly the tokens the student sees, which are the tokens the teacher generated from"
+  "teacher_context": "the teacher runs on the same packed sequence as the student under either strategy, so its distribution at every target is conditioned on exactly the tokens the student sees; under the declared isolated strategy those are the tokens the teacher generated from"
  },
  "tasks": {
-  "T0": {"_": "the frozen H1 task lists, both modes on the same task ids",
+  "T0": {
+   "_": "the frozen H1 task lists, both modes on the same task ids",
    "lists": [
-    {"phase": "P1", "path": "logs/stages/stage-2/reasoning_data/plans/generation_inputs/generation_input_g0.jsonl", "tasks": 1587, "sha256": "424934ac16103aa2e304db87ae1a8deca4fc0f6202215750a105a746ef023445"},
-    {"phase": "P1t", "path": "logs/stages/stage-2/reasoning_data/plans/p1t/generation_inputs/generation_input_g0.jsonl", "tasks": 59, "sha256": "fd1d604d0094d761a2db501a15f2b611c7ad0e7a482b8ba6ca21c99e5bf69fe8"},
-    {"phase": "PA1", "path": "logs/stages/stage-2/reasoning_data/plans/h1pa_topup/generation_inputs/generation_input_g0.jsonl", "tasks": 115, "sha256": "0516bea7fa955ed2888568d601c7b27bd4e18f1a4a110cae758ce41438a2a1f0"}],
+    {
+     "phase": "P1",
+     "path": "logs/stages/stage-2/reasoning_data/plans/generation_inputs/generation_input_g0.jsonl",
+     "tasks": 1587,
+     "sha256": "424934ac16103aa2e304db87ae1a8deca4fc0f6202215750a105a746ef023445"
+    },
+    {
+     "phase": "P1t",
+     "path": "logs/stages/stage-2/reasoning_data/plans/p1t/generation_inputs/generation_input_g0.jsonl",
+     "tasks": 59,
+     "sha256": "fd1d604d0094d761a2db501a15f2b611c7ad0e7a482b8ba6ca21c99e5bf69fe8"
+    },
+    {
+     "phase": "PA1",
+     "path": "logs/stages/stage-2/reasoning_data/plans/h1pa_topup/generation_inputs/generation_input_g0.jsonl",
+     "tasks": 115,
+     "sha256": "0516bea7fa955ed2888568d601c7b27bd4e18f1a4a110cae758ce41438a2a1f0"
+    }
+   ],
    "tasks": 1761,
    "covers": "the five P10.2 primary axes (task-contained deduction, inductive rule discovery, compositional generalization, abstract analogical, interactive adaptation) and the verifiable supporting cells (math, code, answerability)",
-   "isolation": "R0-R9 passed for these lists (H1); eval-set-1 held out by shared.eval_sets.require_disjoint"},
-  "X": {"_": "the compute-matching extension, H-N only",
+   "isolation": "R0-R9 passed for these lists (H1); eval-set-1 held out by shared.eval_sets.require_disjoint"
+  },
+  "X": {
+   "_": "the compute-matching extension, H-N only",
    "rule": "unused tasks of T0's own pools, drawn round-robin over each cell's unused task groups in T0's cell proportions (P1's rule), then -- only if still short -- new tasks from the project's own generators on the next training seed block, built and isolation-checked (R0-R9) at $0 BEFORE generation; added whole, in a seeded order, until H-N-C's isolated pack reaches H-T-S's sequence count",
-   "if_infeasible": "if any cell cannot reach its share without moving the cell mixture by more than 2 points, C uses its fallback (preregistration :: comparisons.C.fallback); the decision is recorded at $0 before any training"}
+   "if_infeasible": "if any cell cannot reach its share without moving the cell mixture by more than 2 points, C uses its fallback (preregistration :: comparisons.C.fallback); the decision is recorded at $0 before any training"
+  }
  },
  "generation": {
   "runner": "scripts/stages/stage-0/calibration_volume/run_battery.py --mode generate --chat-template-kwargs <mode> --generate-sampling <mode's official preset>, driven per input group and pass like P1",
-  "sampling": {"H-T": {"temperature": 0.6, "top_p": 0.95, "top_k": 20, "min_p": 0.0},
-               "H-N": {"temperature": 0.7, "top_p": 0.8, "top_k": 20, "min_p": 0.0},
-               "source": "teacher_identity.json :: modes.*.official_sampling (the model card)"},
+  "sampling": {
+   "H-T": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0
+   },
+   "H-N": {
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "min_p": 0.0
+   },
+   "source": "teacher_identity.json :: modes.*.official_sampling (the model card)"
+  },
   "sampling_confound": "the two modes are generated under their own official presets, which differ: the comparison is of the two native distributions as their authors define them. The KD target is always the teacher's full temperature-1 distribution at the visited context, so sampling decides which trajectories are visited, never the target at a given context. The sampling effect alone is a registered sensitivity arm (preregistration :: sensitivity), not run in round 1",
   "seeds": "a distinct recorded seed per task, candidate and turn, the SAME seed for the same (task, candidate, turn) in both modes",
   "candidates": "up to 2 per task, the second only when the first is rejected (P1's rule), every candidate recorded",
@@ -75,21 +126,32 @@
   "declared_prior": "the fixed operator path came from a Thinking-2507 search; it is a structural prior, not a mode prior"
  },
  "arms": {
-  "H-T-S": "H-T documents of I", "H-N-S": "H-N documents of I", "H-N-C": "H-N documents of I and X, sized to H-T-S's sequence count",
-  "seeds": [20260726, 20260801]
+  "H-T-S": "H-T documents of I",
+  "H-N-S": "H-N documents of I",
+  "H-N-C": "H-N documents of I and X, sized to H-T-S's sequence count",
+  "seeds": [
+   20260726,
+   20260801
+  ]
  },
  "recovery": {
   "as": "H1-PA's recipe (configs/stages/stage-2/reasoning_data/h1pa.json :: recipe): batch size 2, micro-batch 1, sequence length 8,192, 3 epochs, total_steps = ceil(3 x sequences / 2), warmup max(10, round(0.05 T)), AdamW lr 5e-5 betas (0.9, 0.95) eps 1e-8 weight decay 0.01, clipping 1.0, cosine to 0.1, CE 0.25 + KD 1.0 at T 1, fp32 weights with bf16 autocast, gradient checkpointing, E1's trainable patterns (the tied embedding frozen)",
-  "declared_changes_from_h1pa": {"kd_scope": "assistant (H1-PA: all)", "batch.document_isolation": "true (H1-PA: no isolation)", "teacher": "the hybrid, on-the-fly", "student_path": "the common hybrid initialization"},
+  "declared_changes_from_h1pa": {
+   "kd_scope": "assistant (H1-PA: all)",
+   "batch.context_strategy": "document_isolated (H1-PA: cross_context; see context_strategy)",
+   "teacher": "the hybrid, on-the-fly",
+   "student_path": "the common hybrid initialization"
+  },
   "identical_across_arms": "everything except the training documents and, through them, the step count"
  },
  "evaluation": {
   "set": "eval-set-1, every item of every unit, the validity mask and formal protocol v2, unchanged",
   "decoding": "nucleus_v1 (912214c6...) for every student and for the teacher in both modes: the measuring instrument is identical across arms",
   "mode": "each student is measured in its own training mode (H-T students with enable_thinking=True, H-N with False) through --chat-template-kwargs; the teacher in both",
-  "scoring": "the frozen scorers on records that state their think_state: preclosed generations (H-N) are split with no think delimiter allowed in the continuation (aadistill.evaluation.behavior); every earlier record keeps its rule and its verdicts; the conformance vectors are unchanged",
+  "scoring": "the frozen scorers on records that state their think_state: preclosed generations (H-N) are split with no think delimiter allowed in the continuation (aadistill.evaluation.behavior); a record without the field keeps its historical rule and verdict; every registered conformance vector rewritten into the self_opening and preclosed forms scores exactly as it did historically (scripts/stages/stage-2/teacher_modes/tests/test_mode_scoring_conformance.py). Approved by the maintainer 2026-10-27 as the $0 design of the new modes' scoring; it authorizes no paid evaluation",
   "context": "8,192 trained context for students (P18, as H1-PA); the teacher at its resolved supported context (resolve_context: max_position_embeddings 40,960; the model card states 32,768 native) minus the prompt",
-  "teacher_student_gap": "teacher correctness per mode beside each arm's, per unit and axis"
+  "teacher_student_gap": "teacher correctness per mode beside each arm's, per unit and axis",
+  "identity": "configs/stages/stage-2/teacher_modes/evaluation_identity.json: per mode, the teacher revision, chat template, template kwargs, generation prompt and think state, eval-set-1's identity with each component's formal protocol and conformance vectors, nucleus_v1, and the scorer sources, each by sha256; a student is scored under its training mode's identity"
  },
  "authorizes": "nothing"
 }

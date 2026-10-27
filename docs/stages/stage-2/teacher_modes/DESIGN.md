@@ -3,8 +3,9 @@
 **Status (2026-10-27): $0 READY for an engineering-validation grant; nothing
 authorized.**
 
-- The mode protocol, the token-in/token-out data path, document-isolated
-  packing and mode-aware scoring are implemented and validated on the host.
+- The mode protocol, the token-in/token-out data path, both context strategies
+  (cross-context and document-isolated) and mode-aware scoring are implemented
+  and validated on the host.
 - The scientific design and its decision rule are drafted. They freeze only on
   the maintainer's approval, before any hybrid-teacher datum exists.
 
@@ -13,7 +14,8 @@ authorized.**
 | [`configs/stages/stage-2/teacher_modes/teacher_identity.json`](../../../../configs/stages/stage-2/teacher_modes/teacher_identity.json) | the teacher's revision, file and weight hashes, chat template, vocabulary, both modes' generation prompts and official sampling |
 | [`configs/stages/stage-2/teacher_modes/design.json`](../../../../configs/stages/stage-2/teacher_modes/design.json) | modes, token protocol, packing, supervision, tasks, generation, admission, initialization, arms, recovery, evaluation |
 | [`logs/stages/stage-2/teacher_modes/plans/preregistration.json`](../../../../logs/stages/stage-2/teacher_modes/plans/preregistration.json) | comparisons S and C, the decision rule, the data-budget rules |
-| [`logs/stages/stage-2/teacher_modes/audit/token_identity_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/token_identity_audit.json) | the re-rendered path against the generated tokens on H1-PA's data; isolated packing on real documents |
+| [`configs/stages/stage-2/teacher_modes/evaluation_identity.json`](../../../../configs/stages/stage-2/teacher_modes/evaluation_identity.json) | each mode's evaluation identity: template, think state, instrument, scorer sources |
+| [`logs/stages/stage-2/teacher_modes/audit/token_identity_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/token_identity_audit.json) | the re-rendered path against the generated tokens on H1-PA's data, classified; both packings on real documents |
 | [`logs/stages/stage-2/teacher_modes/plans/cost_forecast.json`](../../../../logs/stages/stage-2/teacher_modes/plans/cost_forecast.json), [`application.json`](../../../../logs/stages/stage-2/teacher_modes/plans/application.json) | phases, caps, the project-cap consequence |
 
 ## 1. Question
@@ -61,16 +63,6 @@ historical teacher and is not an arm.
 
 ## 3. Token protocol: prompt plus generation, never re-rendered
 
-**Rendering a finished turn again does not reproduce what the teacher saw and
-emitted.**
-- The hybrid template strips newlines around the reasoning and before an
-  answer, and appends a `\n` after `<|im_end|>` (`tests/data/test_token_documents.py`).
-- **On H1-PA's own fluid data** (767 sessions, `token_identity_audit.json`),
-  the CE targets as trained never equal the generated tokens:
-  - 635 sessions supervise the template's prefilled `<think>\n`;
-  - 132 differ inside the generation.
-- This changes no H1-PA result; it is why this study does not use that path.
-
 **A document is the engine's `prompt_token_ids` + `output_token_ids`**
 (`aadistill.data.token_documents`):
 - its prompt must end in its mode's generation prompt;
@@ -81,32 +73,86 @@ emitted.**
   exactly the context the teacher had;
 - episodes are admitted whole.
 
-## 4. Packing without cross-document attention
+**Why not re-render.** Rendering a finished turn again is not token-identical
+to what the teacher emitted. On H1-PA's own fluid data (767 sessions,
+`token_identity_audit.json :: target_differences`) the CE targets as trained
+differ from the generated tokens in exactly two ways:
 
-**The existing sequential packer** puts sessions after one shared system block
-in one causal window. A later session attends to earlier ones, which the
-teacher never saw, so KD compared the models on a context outside the teacher's
-generation.
+| difference | sessions | supervised positions | share | what it is |
+| --- | ---: | ---: | ---: | --- |
+| the template's prefilled `<think>\n` | 767 | 1,534 | 0.052% | a template control token the deployment template supplies as context: unnecessary to supervise, not wrong |
+| re-tokenization inside the generation | 132 | 1,102 (578 spans) | 0.037% | the **same text** in other token ids; no whitespace and no content difference |
 
-**`pack_isolated` fixes this:**
-- whole documents, best fit, in a seeded order;
-- position ids restart at each document and at the pad run;
-- the trainer's `batch.document_isolation` (default off, so every logged run is
-  unchanged) runs student and teacher with those ids and no 2-D mask;
-- transformers then builds a block-diagonal causal mask. It does so only with
-  `use_cache=False` and no 2-D mask, which is the trainer's configuration and
-  is tested.
+- 11.2% of supervised positions follow a re-tokenization: conditioned on the
+  same text in canonical ids rather than the sampled ids.
+- H1-PA ran the teacher on the same sequence, so KD compared the two models on
+  one context everywhere, with KD on every non-padding position (CE 0.25 +
+  KD 1.0). The prefill changes only what CE supervised.
+- Whether the prefill positions conflict with the teacher depends on the
+  teacher's own probability of `<think>` there. That needs the teacher's
+  weights and was not measured.
+- **These counts do not show that H1-PA's training was invalid, or that they
+  caused its low correctness, and nothing here infers it.** They are a
+  serialization question, separate from packing; this study removes it by
+  taking tokens as generated.
+
+## 4. Context strategy: two supported, one declared
+
+**Both strategies are supported training distributions**
+(`batch.context_strategy`, `token_documents.pack_documents`):
+
+| | `cross_context` | `document_isolated` |
+| --- | --- | --- |
+| context | several documents in one causal context per sequence | each document conditioned only on itself |
+| positions | continuous | restarting at every document and at the pad run |
+| packer | `pack_cross_context`: the shared system block once, bodies joined by the template's message terminator | `pack_isolated` |
+| KD | teacher and student on the same composed sequence | teacher and student on the same isolated sequence |
+| status | the trainer's default; H1 and H1-PA trained this way | opt-in |
+
+- **Cross-context is a deliberate design, not an error.** The project wants a
+  model that uses, ignores or integrates context already present. Because the
+  teacher runs on the same composed sequence, the KL has no conditioning
+  mismatch: it is a different training distribution from the teacher's
+  generation context, chosen on purpose.
+- A composition of independent documents is still not a real conversation. Its
+  composition is recorded (`PackedDocuments.composition()`,
+  `context_exposure`) and it is never reported as conversational ability.
+- Placement is the same seeded best fit for both, so the two differ in the
+  conditioning context and not in which documents meet.
+- transformers builds the isolated (block-diagonal) mask from position ids only
+  with `use_cache=False` and no 2-D mask, which is the trainer's configuration
+  and is tested.
+
+**Declared for this study: `document_isolated`, the same for every arm.** The
+reason is to keep the context distribution from moving with the mode:
+
+| packed cross-context at 8,192 | documents per sequence | supervised tokens behind foreign context | mean foreign tokens |
+| --- | ---: | ---: | ---: |
+| H1-PA's as-generated (thinking) documents | 1.87 | 29% | 1,293 |
+| length-only proxy, generation × 0.25 | 6.61 | 84% | 3,318 |
+
+- Under cross-context, S and C would compare the modes **and** two different
+  context distributions. Isolated, every target is conditioned on exactly its
+  own generation context in both modes, which is the teacher-native
+  distribution the mode question is about.
+- The proxy uses only lengths, with placeholder ids: no trace content is cut
+  or used.
+- **Not compared in this round:** the strategy itself. Cross-context against
+  isolated training is its own experiment, within one mode, later.
 
 **Verified on CPU:**
-- packed hidden states equal each document's own on two real 8,192-token
-  sequences of H1-PA documents (difference 0.0);
-- the trainer's CE and KD over an isolated sequence equal the per-document sums;
-- without position ids the same sequence leaks.
+- isolated packed hidden states equal each document's own on two real
+  8,192-token sequences of H1-PA documents (difference 0.0);
+- the trainer's CE and KD over an isolated sequence equal the per-document
+  sums; under cross-context the first document of a sequence equals its own
+  run, later ones are conditioned on their neighbours, and KD is zero for one
+  model on one context;
+- the hybrid template's message terminator joins two documents exactly as it
+  writes consecutive turns.
 
-The real-teacher check in bf16 is the engineering validation's.
-
-**Isolation also packs tighter.** On the same 767 documents: 410 sequences at
-6.1% padding, against 524 at 26.6%.
+The real-teacher check in bf16 is the engineering validation's. Isolation also
+packs tighter: 410 sequences at 6.1% padding against the earlier pack's 524 at
+26.6%.
 
 ## 5. Supervision
 
@@ -115,11 +161,13 @@ The real-teacher check in bf16 is the engineering validation's.
 - CE on exactly the same positions. The weights are H1-PA's: CE 0.25 + KD 1.0.
 
 **The supervised positions are the generated tokens:** the documents' target
-mask. System, user, header and prefill positions are never supervised, and
-neither are padding or a position that predicts across a document boundary.
+mask. System, user, header, prefill and separator positions are never
+supervised, and neither are padding or, isolated, a position that predicts
+across a document boundary.
 
-**Teacher context:** the teacher runs on the same isolated sequence, so its
-distribution at every target is conditioned on what the student sees.
+**Teacher context:** the teacher runs on the same packed sequence as the
+student, so its distribution at every target is conditioned on what the student
+sees.
 
 ## 6. Data and the two comparisons
 
@@ -173,8 +221,15 @@ structural prior, not a mode prior.
 - nucleus_v1 for every student and for the teacher;
 - each student is measured in its own mode, and the teacher in both;
 - generations record their `think_state`; `preclosed` ones are scored with no
-  think delimiter allowed;
-- no earlier record or verdict changes, and the conformance vectors stay green.
+  think delimiter allowed (approved by the maintainer 2026-10-27 as the $0
+  scoring design; no paid evaluation is authorized by it);
+- each mode has an evaluation identity
+  ([`evaluation_identity.json`](../../../../configs/stages/stage-2/teacher_modes/evaluation_identity.json)):
+  template, think state, eval-set-1 identity, formal protocols, conformance
+  vectors, nucleus_v1 and scorer sources, by sha256;
+- every registered conformance vector rewritten into the thinking and
+  non-thinking forms scores exactly as it did historically, and a record that
+  does not state `think_state` keeps its historical rule.
 
 **Decision:**
 - the H1/mixed rule (`h1_statistics`): SESOI 5 pp, 8 pp per axis, 2% floor,
@@ -219,6 +274,8 @@ PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/tea
     --write configs/stages/stage-2/teacher_modes/teacher_identity.json
 PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/token_identity_audit.py \
     --write logs/stages/stage-2/teacher_modes/audit/token_identity_audit.json
+PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/evaluation_identity.py \
+    --write configs/stages/stage-2/teacher_modes/evaluation_identity.json
 PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/forecast_cost.py \
     --write logs/stages/stage-2/teacher_modes/plans/cost_forecast.json
 PYTHONPATH=src:scripts:tests .venv/bin/python -m pytest -q tests/data/test_token_documents.py \

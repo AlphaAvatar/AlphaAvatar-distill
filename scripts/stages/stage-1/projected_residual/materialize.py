@@ -14,7 +14,10 @@ exercises every line below except the hub download. Steps, each recorded:
    layer's float64 second moments of the declared statistic's roles over every
    real token;
 3. ``P_l`` = the top-``internal_size`` eigenbasis per layer; per-role captured
-   energy recorded;
+   energy recorded, for the declared statistic's roles and for every
+   ``diagnostic_statistics`` role (the other statistics' inputs, and the
+   sub-layers' outputs under ``read_write``) under the declared basis: how well
+   that basis fits each layer's input AND output subspaces;
 4. the projected student (``W0``'s weights with ``P_l`` folded in), saved with
    ``save_pretrained``, its weights hashed;
 5. the fold check: the student against its folded stock-Qwen3 form on a fixed
@@ -61,7 +64,8 @@ def tiny_inputs():
     return teacher, sel, items, {"internal_size": 16, "statistic": "sublayer_inputs"}
 
 
-def run(design: dict, out: Path, *, device: str, tiny: bool) -> dict:
+def run(design: dict, out: Path, *, device: str, tiny: bool,
+        diagnostic_statistics: tuple[str, ...] = ()) -> dict:
     import torch
     from transformers import AutoModelForCausalLM
 
@@ -100,8 +104,10 @@ def run(design: dict, out: Path, *, device: str, tiny: bool) -> dict:
         torch.cuda.empty_cache()
     w0 = w0.to(device)
     roles = STATISTICS[arch["statistic"]]
+    extra = tuple(r for s in diagnostic_statistics for r in STATISTICS[s] if r not in roles)
+    extra = tuple(dict.fromkeys(extra))
     t1 = time.time()
-    col = SublayerStatsCollector(adapter, w0, roles)
+    col = SublayerStatsCollector(adapter, w0, roles + extra)
     positions = 0
     for it in items:
         ids = torch.tensor([it["ids"]], device=device)
@@ -114,6 +120,9 @@ def run(design: dict, out: Path, *, device: str, tiny: bool) -> dict:
     bases, diags = [], []
     for i in range(len(adapter.blocks(w0))):
         p, dg = projection_basis({r: st[r][i] for r in roles}, int(arch["internal_size"]))
+        for r in extra:                       # the declared basis against the other roles' moments
+            m = st[r][i][0].double().to(p.device)
+            dg[f"{r}_energy_under_declared_basis"] = float(torch.trace(p.T @ m @ p) / torch.trace(m))
         bases.append(p)
         diags.append({"layer": i, **dg})
     timings["bases_s"] = round(time.time() - t2, 1)
@@ -142,7 +151,8 @@ def run(design: dict, out: Path, *, device: str, tiny: bool) -> dict:
         "tiny_smoke": tiny,
         "teacher": None if tiny else design["teacher"],
         "selection_content_sha256": None if tiny else design["selection"]["content_sha256"],
-        "statistic": arch["statistic"], "roles": list(roles), "calibration_positions": positions,
+        "statistic": arch["statistic"], "roles": list(roles), "diagnostic_roles": list(extra),
+        "calibration_positions": positions,
         "geometry": geom, "num_parameters": counted,
         "num_parameters_cost_model": parameter_counts(geom)["total"],
         "weights": [{"file": p.name, "sha256": file_sha256(p)} for p in shards],
