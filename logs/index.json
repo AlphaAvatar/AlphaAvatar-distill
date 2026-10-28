@@ -746,7 +746,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 152,
+  "runs_unrecorded": 155,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -854,6 +854,11 @@
     "unrecorded": 2,
     "total": 2
    },
+   "projected_residual": {
+    "recorded": 0,
+    "unrecorded": 1,
+    "total": 1
+   },
    "reasoning_data": {
     "recorded": 0,
     "unrecorded": 15,
@@ -863,6 +868,11 @@
     "recorded": 8,
     "unrecorded": 0,
     "total": 8
+   },
+   "teacher_modes": {
+    "recorded": 0,
+    "unrecorded": 2,
+    "total": 2
    }
   },
   "_by_experiment_scope": "counts BOTH layouts, split by what each entry is. `recorded` is a run that wrote its own manifest; `unrecorded` is a directory holding evidence without one. They are reported separately because a missing manifest is a real difference in what the entry can be trusted to say about itself, not a presentation detail."
@@ -2927,7 +2937,7 @@
    "run_id": "mixs_20261026_102914",
    "root": "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_102914",
    "n_files": 3,
-   "digest": "cbcbb978a6692078f644ae4c019c49fb9328a0306b846a533386abca0f31c246",
+   "digest": "53d2dc47b168d3da370cf5575cd9c6085264fa4e99b074f1f9e1ad3fa6649631",
    "why": "no run manifest; its closeout states: INCOMPLETE"
   },
   {
@@ -2935,7 +2945,7 @@
    "run_id": "mixs_20261026_103634",
    "root": "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_103634",
    "n_files": 7,
-   "digest": "0b18f122d84a629399a748ad1cf7bbee4ab40b5dbc81c695b0636f24a2b19353",
+   "digest": "c9f32a11fcfa8a0835d318102c3e241ddeae88b85a30d02777358a7166f372b2",
    "why": "no run manifest; its closeout states: COMPLETE"
   },
   {
@@ -3867,6 +3877,14 @@
    "why": "no run manifest; its closeout states: COMPLETE: STRUCTURAL_CHANGE, re-derived off-pod from the step records"
   },
   {
+   "experiment_id": "projected_residual",
+   "run_id": "be_20261028_095332",
+   "root": "logs/stages/stage-1/projected_residual/runs/be_20261028_095332",
+   "n_files": 10,
+   "digest": "8d3c0d9e4538f376e0950edadb42eeba603d79f8b69b116b965eb934f3e56947",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
    "experiment_id": "reasoning_data",
    "run_id": "h1gen_20261022_190653",
    "root": "logs/stages/stage-2/reasoning_data/runs/h1gen_20261022_190653",
@@ -3984,6 +4002,22 @@
    "root": "logs/stages/stage-2/reasoning_data/runs/h1pav_20261024_201011",
    "n_files": 4,
    "digest": "e8b4d69ac05f413ad03c828ea5bea4f21e31abee544c21781c859eeedaa78bb2",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "ae_20261028_091943",
+   "root": "logs/stages/stage-2/teacher_modes/runs/ae_20261028_091943",
+   "n_files": 7,
+   "digest": "7d9a89cf71c008a34810688b1b3e5f52b545735d4374884d8c5adb260c716177",
+   "why": "no run manifest; its closeout states: COMPLETE"
+  },
+  {
+   "experiment_id": "teacher_modes",
+   "run_id": "ae_20261028_093428",
+   "root": "logs/stages/stage-2/teacher_modes/runs/ae_20261028_093428",
+   "n_files": 9,
+   "digest": "58a2d2dd88ff31e37e44ca2fd81acb2ae46f17067e5e3b869efd447aae8523ca",
    "why": "no run manifest; its closeout states: COMPLETE"
   }
  ],

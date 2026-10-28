@@ -68,6 +68,7 @@ labelled instead of removed.
 | `stage_c2_probes_to_volume.py` | engineering transport: stages probe checkpoints onto a network volume; its own docstring files it as infrastructure, not science |
 | `watchdog.py` | the independent provider-side kill switch |
 | `collect_artifacts.py` | artifact manifest, gate and collection |
+| `teacher_cache.py` | the offline teacher lookup on a pod: the cached snapshot directory for the files setup's TEACHER_READY step fetched (`local_snapshot`), whose patterns a test keeps equal to the setup script's. huggingface_hub 1.x refuses a whole-repository offline lookup on that partial snapshot (A-E attempt 1, $0.2275) |
 | `cpu_test_env_args.py` | emits the C1 CPU-test environment as `env(1)` arguments, from the one declaration in `aadistill.autoinit.cpu_test_env`. The pod's gate and the dev-box simulator both consume it, so the diagnostic and the paid pod run pytest under the same hardware- and cache-neutral scope |
 | `summarize_pytest_outcomes.py` | the CPU gate's complete outcome — every FAILED, ERROR and SKIPPED nodeid with reasons, a skip-set digest, and the exact set difference against the launch-bound sweep. `--strict` refuses a pod whose suite passed but whose skip set is not the one the sweep certified |
 | `simulate_pod_env.sh` | runs the pod's exact test command locally with pod-absent artifacts hidden |

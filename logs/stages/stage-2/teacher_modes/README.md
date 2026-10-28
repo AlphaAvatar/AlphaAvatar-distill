@@ -11,7 +11,8 @@ Everything this experiment produced, in one place.
 
 ## Runs
 
-* none recorded
+* [`ae_20261028_091943`](runs/ae_20261028_091943/)
+* [`ae_20261028_093428`](runs/ae_20261028_093428/)
 
 Canonical list, always the index rather than this file.
 Nothing here authorizes anything.
