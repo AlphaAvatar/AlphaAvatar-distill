@@ -1,0 +1,36 @@
+{
+ "schema": "aadistill.study_engineering_grant/v1",
+ "status": "granted",
+ "study": "A-E",
+ "proposed_utc": "2026-10-28",
+ "maintainer_position": "2026-10-28: agreed in principle to proceed with A-E and B-E, paid authorization NOT issued; A-E's $3.50 hard cap kept as the proposed scope (Research A/B Engineering Readiness Review)",
+ "granted_by": "maintainer",
+ "decision": "2026-10-28 UTC, A-E / B-E Engineering Validation Formal Authorization (reviewed HEAD 0b5043de): \u73b0\u5728\u6b63\u5f0f\u6279\u51c6 A-E \u548c B-E \u4e24\u9879\u4ed8\u8d39\u5de5\u7a0b\u9a8c\u8bc1\u3002A-E\uff1a\u65b0\u589e\u7d2f\u8ba1\u786c\u4e0a\u9650 $3.50\uff1b\u672c\u8f6e\u65b0\u589e\u652f\u51fa\u5408\u8ba1\u4e0d\u5f97\u8d85\u8fc7 $6.50\uff1b\u9879\u76ee\u7d2f\u8ba1\u786c\u4e0a\u9650\u4ecd\u7136\u662f $740\uff0c\u4e0d\u5f97\u63d0\u9ad8\uff1b\u4e24\u9879\u9884\u7b97\u72ec\u7acb\u8ba1\u7b97\uff0c\u4e0d\u80fd\u81ea\u52a8\u4e92\u76f8\u8f6c\u79fb\uff1b\u6bcf\u9879\u7684\u5168\u90e8\u5c1d\u8bd5\u3001\u5931\u8d25\u91cd\u8bd5\u53ca\u76f8\u5173\u8d39\u7528\u5fc5\u987b\u8ba1\u5165\u672c\u9879\u7d2f\u8ba1 Envelope\u3002\u6388\u6743\u4ee5\u5df2\u5ba1\u67e5\u7684 engineering_grant_proposal.json\u3001\u51bb\u7ed3\u7684\u7814\u7a76\u8eab\u4efd\u3001\u9a8c\u8bc1\u914d\u7f6e\u4e0e\u5b9e\u73b0\u4e3a\u51c6\uff0c\u4e0d\u5f97\u64c5\u81ea\u6269\u5927\u9a8c\u8bc1\u8303\u56f4\u3002A-E \u53ea\u5141\u8bb8\u57fa\u4e8e\u5b98\u65b9 Hybrid Qwen/Qwen3-4B@1cfa9a72 \u7684\u5de5\u7a0b\u9a8c\u8bc1\uff1b\u9a8c\u8bc1\u751f\u6210\u4e0d\u5f97\u8fdb\u5165\u6b63\u5f0f\u8bad\u7ec3\u8bed\u6599\uff0c\u4e5f\u4e0d\u5f97\u4f5c\u4e3a\u6b63\u5f0f\u63a8\u7406\u80fd\u529b\u5b9e\u9a8c\u7ed3\u679c\u3002PASS \u4e0d\u6784\u6210\u6b63\u5f0f\u79d1\u5b66 GO\u3002",
+ "ceiling_usd": 3.5,
+ "per_session_hard_cap_usd": 3.5,
+ "project_cumulative_cap_usd": 740.0,
+ "gpu": "NVIDIA A100-SXM4-80GB",
+ "max_price_usd_per_hour": 1.87,
+ "_max_price": "the highest secure price at which the planned session (25 min setup + 5 transfer + 40 validation, x1.25, + reserves = 110 min hard deadline) stays inside $3.50 all in (shared.study_engineering.all_in); quoted $1.79/h, stock Medium, 2026-10-28T05:40Z. A higher quote is refused at $0",
+ "scope": "Research A's engineering validation on one pod: the hybrid teacher Qwen/Qwen3-4B@1cfa9a72 in both official modes under vLLM 0.27.1 (prompt token identity, think states, stop ids), the real teacher's teacher-forced packed-vs-alone check in fp32 and bf16 under document_isolated, the assistant-target KL mask, a 20-step isolated-pack trainer smoke with the on-the-fly hybrid teacher on the E1 PCA stand-in student, and the eval-set-1 scorers on the H-N (preclosed) and H-T records; scripts/stages/stage-2/teacher_modes/engineering_validation.py",
+ "retries": "ordinary pre-science engineering failures are repaired and rerun as new runs with new one-use artifacts inside this one cumulative envelope (P12.1); a deterministic failure is not retried unchanged",
+ "application": {
+  "path": "logs/stages/stage-2/teacher_modes/plans/application.json",
+  "sha256": "cdd12be40ecd7235738047980ebd6702fb04754415379142a909140a1dc02196"
+ },
+ "never": [
+  "a GPU, a pod or a network volume before the maintainer's explicit approval writes the grant",
+  "formal training, teacher-data generation, recovery or evaluation; nothing it produces is a result or enters a GO decision",
+  "another grant's unspent remainder, or the account balance, as funds",
+  "raising the $740 project cap",
+  "a merge to main"
+ ],
+ "authorizes": "A-E's engineering validation only (scope), inside ceiling_usd cumulatively and the project cap; one-use artifacts from `issue`; nothing formal",
+ "granted_utc": "2026-10-28",
+ "proposal": {
+  "path": "logs/stages/stage-2/teacher_modes/plans/engineering_grant_proposal.json",
+  "sha256": "41eccaf708e311f3fb53174df64af3f5bc45970a46c7deeba72b85c00f95ad47"
+ },
+ "study_identity_sha256": "d5eb76a143919fb94382a300bab0f51fb77cae21d816a578cdc3df95c4bfd85e",
+ "granted_at_commit": "0b5043de61341d4656e1e879aefebbd40b100581"
+}

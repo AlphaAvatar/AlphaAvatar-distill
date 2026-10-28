@@ -718,7 +718,12 @@ def write_grant(study: Study, *, decision: str, granted_by: str, root: Path = RE
     app = doc.get("application")
     if isinstance(app, str) and (root / app).is_file():
         doc["application"] = {"path": app, "sha256": sha256_file(root / app)}
+    #: the proposal's own "funds nothing" notes describe the proposal, not the grant
+    for k in ("authorizes", "_application", "to_grant"):
+        doc.pop(k, None)
     doc.update(status="granted", granted_by=granted_by, decision=decision,
+               authorizes=(f"{study.key}'s engineering validation only (scope), inside ceiling_usd cumulatively and the "
+                           "project cap; one-use artifacts from `issue`; nothing formal"),
                granted_utc=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
                proposal={"path": str(study.proposal), "sha256": sha256_file(prop)},
                study_identity_sha256=identity_hash(study, root), granted_at_commit=git_head(root))
