@@ -2,8 +2,8 @@
  "schema": "aadistill.stage1.projected_residual.independent_gated_design/v1",
  "study_id": "stage1.projected_residual.independent_gated_v1",
  "name": "Full-width residual + four independent projections + identity-initialized learnable SiLU residual gate (1.123B), against D4-Augmented under the same new training protocol",
- "status": "DESIGNED 2026-10-29 at $0 on the maintainer's decision; NOT FROZEN. Frozen with its preregistration only when the maintainer authorizes the paid phase. Authorizes nothing.",
- "decided_by": "maintainer brief 2026-10-29 'Revised Research A/B Programme & Engineering Principles', sections 1-4",
+ "status": "DESIGNED 2026-10-28 at $0 on the maintainer's decision; NOT FROZEN. Frozen with its preregistration only when the maintainer authorizes the paid phase. Authorizes nothing.",
+ "decided_by": "maintainer brief 2026-10-28 'Revised Research A/B Programme & Engineering Principles', sections 1-4",
  "supersedes": {
   "study": "stage1.projected_residual.pw900_v1 (configs/stages/stage-1/projected_residual/design.json, sha256 bound in the B-E grant)",
   "how": "for new work only: the 902,911,488-parameter transpose-shared design, its B-E FAIL (be_20261028_095332) and every record of it stay as they are, a historical research record; this design is a new scientific identity, never run under that authorization"
@@ -90,7 +90,7 @@
   "not_a_search": "one materialization; no candidate is ranked or selected"
  },
  "objective": {
-  "baseline": "the project's training baseline, maintainer decision 2026-10-29: target-position + teacher reference Top-K + tail forward KL",
+  "baseline": "the project's training baseline, maintainer decision 2026-10-28: target-position + teacher reference Top-K + tail forward KL",
   "kd": "loss.kd_support = the forward baseline's distribution support, resolved from configs/shared/baselines/selection.json (shared.forward_baseline.selected().distribution_support: reference_topk_tail_v1, top_k 200), never retyped; loss.kd_scope 'assistant'; T 1",
   "positions": "KL and CE at exactly the same target positions: the pack's assistant-target mask with every chat-template prefill removed (loss.exclude_template_prefill: generation prompt <|im_start|>assistant\\n = [151644, 77091, 198], prefill <think>\\n = [151667, 198]); never system, user, header, prefill or padding positions; the whole sequence is still forwarded as context",
   "prefill_on_d4a_data": "on D4-Augmented's 2,468 training sequences all 5,291 assistant runs follow the generation prompt and begin with the prefill: 10,582 positions stop being targets (5,923,021 -> 5,912,439 supervised targets); validation 81,195 -> 81,075. Derived from the recorded token ids, no regeneration, the sequences byte-identical",

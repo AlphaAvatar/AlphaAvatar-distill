@@ -18,7 +18,7 @@ import math
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[3]
-OUT = REPO / "logs/budget/applications/research_ab_2026-10-29/forecast.json"
+OUT = REPO / "logs/budget/applications/research_ab_2026-10-28/forecast.json"
 
 MEASURED = {
     "l40s_usd_per_hour": (1.11, "logs/stages/stage-2/teacher_modes/plans/cost_forecast.json :: measured.l40s_usd_per_hour"),
@@ -97,7 +97,7 @@ def research_a(s: dict, key: str) -> dict:
 
 
 def forecast() -> dict:
-    out = {"schema": "aadistill.budget.research_ab_forecast/v1", "written_utc": "2026-10-29T12:00:00Z",
+    out = {"schema": "aadistill.budget.research_ab_forecast/v1", "written_utc": "2026-10-28T18:30:00Z",
            "measured": {k: {"value": round(v, 4), "source": src} for k, (v, src) in MEASURED.items()},
            "design_facts": {"d4a_sequences": D4A_SEQUENCES, "d4a_steps": D4A_STEPS,
                             "projected_training_flops_ratio": round(TRAIN_FLOPS_RATIO_PROJECTED, 4),

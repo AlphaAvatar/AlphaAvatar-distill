@@ -1,9 +1,9 @@
 # Research B — full-width residual stream with trainable projections
 
-## Current study (2026-10-29): four independent projections + learnable SiLU gate, 1.123B
+## Current study (2026-10-28): four independent projections + learnable SiLU gate, 1.123B
 
 **Status: designed and implemented at $0; nothing authorized.** Maintainer
-decision 2026-10-29. The 900M transpose-shared design below, its B-E FAIL
+decision 2026-10-28. The 900M transpose-shared design below, its B-E FAIL
 (`be_20261028_095332`) and every record of it are a historical research record.
 
 - **Model.** Residual 2,560; attention and FFN at 1,024; 28 layers; FFN 3,072;
@@ -38,7 +38,7 @@ decision 2026-10-29. The 900M transpose-shared design below, its B-E FAIL
 | [`plans/independent_gated_preregistration.json`](../../../../logs/stages/stage-1/projected_residual/plans/independent_gated_preregistration.json) | comparisons P and R, the decision rule |
 | [`independent_gated_validation.json`](../../../../configs/stages/stage-1/projected_residual/independent_gated_validation.json), [`independent_gated_validation.py`](../../../../scripts/stages/stage-1/projected_residual/independent_gated_validation.py), [`igv_launch.py`](../../../../scripts/stages/stage-1/projected_residual/igv_launch.py) | the engineering validation, its thresholds, its launcher |
 | [`recovery_driver.py`](../../../../scripts/stages/stage-1/projected_residual/recovery_driver.py) | both arms' formal units on H1-PA's unit driver |
-| [`logs/budget/applications/research_ab_2026-10-29/`](../../../../logs/budget/applications/research_ab_2026-10-29/) | the phase application and its forecast |
+| [`logs/budget/applications/research_ab_2026-10-28/`](../../../../logs/budget/applications/research_ab_2026-10-28/) | the phase application and its forecast |
 
 ---
 

@@ -1,8 +1,8 @@
 # Research A — hybrid teacher: thinking against non-thinking distillation
 
-## Current study (2026-10-29): D4-Augmented's training scale, no pilot
+## Current study (2026-10-28): D4-Augmented's training scale, no pilot
 
-**Status: designed at $0; nothing authorized.** Maintainer decision 2026-10-29.
+**Status: designed at $0; nothing authorized.** Maintainer decision 2026-10-28.
 The design below (`hybrid_v1`, T0 scale with a 10% promotion pilot) is
 superseded for new work; A-E's PASS and its records stay as they are.
 
@@ -31,7 +31,7 @@ superseded for new work; A-E's PASS and its records stay as they are.
 | --- | --- |
 | [`d4_scale_design.json`](../../../../configs/stages/stage-2/teacher_modes/d4_scale_design.json) | scale, tasks, stopping rule, long-reasoning rule, arms, objective, execution |
 | [`plans/d4_scale_preregistration.json`](../../../../logs/stages/stage-2/teacher_modes/plans/d4_scale_preregistration.json) | S and C, the decision rule, the data-size rules |
-| [`logs/budget/applications/research_ab_2026-10-29/`](../../../../logs/budget/applications/research_ab_2026-10-29/) | the phase application and its forecast |
+| [`logs/budget/applications/research_ab_2026-10-28/`](../../../../logs/budget/applications/research_ab_2026-10-28/) | the phase application and its forecast |
 
 ---
 

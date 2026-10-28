@@ -1,9 +1,9 @@
 {
  "schema": "aadistill.budget.phase_application/v1",
- "written_utc": "2026-10-29T12:00:00Z",
+ "written_utc": "2026-10-28T18:30:00Z",
  "status": "APPLICATION, NOT A GRANT. Nothing is authorized until the maintainer grants it; each paid session then gets its own one-use authorization inside the granted envelopes",
- "decided_by": "maintainer brief 2026-10-29 'Revised Research A/B Programme & Engineering Principles' (section 11: one phase-level application with the full cumulative budget, the hardware range and the protocols)",
- "forecast": "logs/budget/applications/research_ab_2026-10-29/forecast.json (scripts/maintenance/consolidation/research_ab_forecast.py; every rate a measurement its record owns)",
+ "decided_by": "maintainer brief 2026-10-28 'Revised Research A/B Programme & Engineering Principles' (section 11: one phase-level application with the full cumulative budget, the hardware range and the protocols)",
+ "forecast": "logs/budget/applications/research_ab_2026-10-28/forecast.json (scripts/maintenance/consolidation/research_ab_forecast.py; every rate a measurement its record owns)",
  "project_position": {
   "committed_usd": 725.4993,
   "cap_usd": 740.0,
@@ -132,7 +132,7 @@
   "Research A: E and X built and isolation-checked (R0-R9) and frozen; the wave generation driver and its admission with the length-censoring record; the recovery driver (H1-PA's machinery with document_isolated packs and the new KD); the launchers; the analysis (h1_statistics on S and C)",
   "each before its first paid session, inside the granted phase (AGENTS.md P12.1: no intermediate approvals between driver, launcher, GPU execution and evaluation)"
  ],
- "historical_checkpoint_retirement": "13 retirement-eligible historical weights retired 2026-10-29 under AGENTS.md 2.5 (14.43 GiB on the dev box, 4 relay objects 4.44 GiB; tombstones in logs/maintenance/inventories/checkpoint_tombstones.json); D3's product kept (a launcher still declares it). The four H1-PA D4 and two Mix-Augmented checkpoints on am5m373kuq (about 14.3 GB) are proposed for retirement at the first session that mounts the volume, after a consumer re-audit",
+ "historical_checkpoint_retirement": "13 retirement-eligible historical weights retired 2026-10-28 under AGENTS.md 2.5 (14.43 GiB on the dev box, 4 relay objects 4.44 GiB; tombstones in logs/maintenance/inventories/checkpoint_tombstones.json); D3's product kept (a launcher still declares it). The four H1-PA D4 and two Mix-Augmented checkpoints on am5m373kuq (about 14.3 GB) are proposed for retirement at the first session that mounts the volume, after a consumer re-audit",
  "not_requested": [
   "600M work",
   "any search",

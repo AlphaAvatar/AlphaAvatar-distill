@@ -14580,7 +14580,7 @@ on a paid pod.
   decision.
 - Revisit when the maintainer decides on Research A's A1–A3 and on B-E's findings.
 
-## 2026-10-29 — Maintainer: revised Research A/B programme and engineering principles; $0 implementation done; phase application submitted (PENDING)
+## 2026-10-28 — Maintainer: revised Research A/B programme and engineering principles; $0 implementation done; phase application submitted (PENDING)
 
 - Context: the maintainer's brief "Revised Research A/B Programme & Engineering Principles"
   (reviewed HEAD `4c588844`) replaced the pending Research A/B follow-ups. It authorizes the
@@ -14612,7 +14612,7 @@ on a paid pod.
   - Research A: `d4_scale_design.json` and its preregistration;
   - retirement: 13 historical checkpoint weights (14.43 GiB dev box, 4 relay objects 4.44 GiB),
     tombstoned; D3's product kept (a launcher still declares it).
-- **Application (PENDING):** `logs/budget/applications/research_ab_2026-10-29/application.json`,
+- **Application (PENDING):** `logs/budget/applications/research_ab_2026-10-28/application.json`,
   phase hard cap $177.21 (expected $102.41), project cap requested **$903** (committed
   $725.4993). The formal launchers and Research A's data/recovery chain are owed $0 engineering
   inside the phase.

@@ -2,8 +2,8 @@
  "schema": "aadistill.stage2.teacher_modes.d4_scale_design/v1",
  "study_id": "stage2.teacher_modes.d4_scale_v1",
  "name": "One hybrid teacher, its native thinking and non-thinking distributions, distilled at D4-Augmented's training scale under the target-position Top-200 + tail KD protocol",
- "status": "DESIGNED 2026-10-29 at $0 on the maintainer's decision; NOT FROZEN. Frozen with its preregistration when the maintainer authorizes the paid phase. Authorizes nothing.",
- "decided_by": "maintainer brief 2026-10-29 'Revised Research A/B Programme & Engineering Principles', sections 3 and 5",
+ "status": "DESIGNED 2026-10-28 at $0 on the maintainer's decision; NOT FROZEN. Frozen with its preregistration when the maintainer authorizes the paid phase. Authorizes nothing.",
+ "decided_by": "maintainer brief 2026-10-28 'Revised Research A/B Programme & Engineering Principles', sections 3 and 5",
  "supersedes": {
   "study": "stage2.teacher_modes.hybrid_v1 (configs/stages/stage-2/teacher_modes/design.json, sha256 bound in the A-E grant)",
   "what_changes": "the scale (D4-Augmented's order of magnitude instead of T0's 1,761 tasks), the KD objective (the project's new training baseline), and no promotion pilot (the 10% A1 slice is cancelled); the mode protocol, token protocol, isolation, admission, initialization and evaluation are carried over unchanged",

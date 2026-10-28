@@ -2,7 +2,7 @@
  "schema": "aadistill.stage2.teacher_modes.d4_scale_preregistration/v1",
  "version": 1,
  "study_id": "stage2.teacher_modes.d4_scale_v1",
- "written_utc": "2026-10-29T12:00:00Z",
+ "written_utc": "2026-10-28T18:30:00Z",
  "status": "DRAFTED at $0 before any datum of this study exists; REGISTERED (frozen, its sha256 bound into the phase grant) only on the maintainer's authorization, and never amended after the first generation wave of this study exists. No pilot gates the study: the data size follows the registered stopping rule",
  "design": {
   "path": "configs/stages/stage-2/teacher_modes/d4_scale_design.json"

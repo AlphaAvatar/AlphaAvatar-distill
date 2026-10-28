@@ -4,7 +4,7 @@
     PYTHONPATH=src:scripts python scripts/maintenance/consolidation/retire_eligible_checkpoints.py --execute
 
 The STANDING authorization (AGENTS.md 2.5, restated by the maintainer
-2026-10-29): a completed historical checkpoint's weights are retired when its
+2026-10-28): a completed historical checkpoint's weights are retired when its
 experiment is terminal, its measurement evidence is durable, its hashes are
 preserved, no active or declared consumer reads the bytes, and it is not an
 incumbent, a release or a retained anchor. The registry
@@ -112,11 +112,11 @@ def tombstone(r: dict, utc: str, relay_verified: bool | None) -> dict:
         "size_bytes": r.get("size_bytes"), "size_human": r.get("size_human"), "n_files": len(members),
         "members": members, "references_at_deletion": list(r.get("referenced_by") or []),
         "deletion_criterion": CRITERION,
-        "deletion_criterion_meaning": ("AGENTS.md 2.5 (standing; restated by the maintainer 2026-10-29): the experiment "
+        "deletion_criterion_meaning": ("AGENTS.md 2.5 (standing; restated by the maintainer 2026-10-28): the experiment "
                                        "is terminal, its evaluation evidence is durable, its hashes are preserved, no "
                                        "active or declared consumer reads the weights, and it is not an incumbent, a "
                                        "release or a retained anchor"),
-        "reason_physical_weights_deleted": (r.get("retention_reason") or "") + " | re-derived 2026-10-29 by "
+        "reason_physical_weights_deleted": (r.get("retention_reason") or "") + " | re-derived 2026-10-28 by "
                                            "retire_eligible_checkpoints.py: local bytes re-hashed, no code/config "
                                            "reader, no session launcher declares it",
         "canonical_surviving_evidence": "the experiment's run records under logs/stages/ (closeouts, evidence, "

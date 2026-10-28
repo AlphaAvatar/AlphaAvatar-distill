@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-29 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-28 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,9 +9,9 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**REVISED RESEARCH A/B PROGRAMME (maintainer, 2026-10-29): $0 DESIGN AND IMPLEMENTATION DONE; THE PHASE APPLICATION IS PENDING. No paid resource, no cap increase. Committed $725.4993 of $740; 0 pods; volume `am5m373kuq` only. STOPPED at the maintainer's decision on the application.**
-Decision record: `logs/budget/decisions.md` 2026-10-29. Application:
-`logs/budget/applications/research_ab_2026-10-29/application.json` (phase hard cap $177.21, expected
+**REVISED RESEARCH A/B PROGRAMME (maintainer, 2026-10-28): $0 DESIGN AND IMPLEMENTATION DONE; THE PHASE APPLICATION IS PENDING. No paid resource, no cap increase. Committed $725.4993 of $740; 0 pods; volume `am5m373kuq` only. STOPPED at the maintainer's decision on the application.**
+Decision record: `logs/budget/decisions.md` 2026-10-28. Application:
+`logs/budget/applications/research_ab_2026-10-28/application.json` (phase hard cap $177.21, expected
 $102.41, project cap requested $903). Branch `research/teacher-modes-and-projected-residual`; `main` stays
 at `72492e46`.
 - **Training baseline (core):** `loss.kd_support` = KD at the assistant target positions with the
@@ -27,7 +27,7 @@ at `72492e46`.
 - **Research A, D4 scale** (`docs/stages/stage-2/teacher_modes/DESIGN.md`): `d4_scale_design.json` and
   its preregistration (S and C, two seeds, no pilot, censored long reasoning never admitted). Owed in-phase:
   E and X built and isolation-checked, the wave generation, admission and recovery drivers, launchers.
-- **Retirement (AGENTS.md 2.5):** 13 historical weights retired 2026-10-29 (14.43 GiB dev box, 4 relay
+- **Retirement (AGENTS.md 2.5):** 13 historical weights retired 2026-10-28 (14.43 GiB dev box, 4 relay
   objects 4.44 GiB), tombstoned; D3's product kept. Dev box 30 GB free; relay 83.9 GiB.
 - **Next:** the maintainer's decision on the application. Nothing starts automatically.
 

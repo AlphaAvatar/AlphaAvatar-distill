@@ -2,7 +2,7 @@
  "schema": "aadistill.stage1.projected_residual.independent_gated_preregistration/v1",
  "version": 1,
  "study_id": "stage1.projected_residual.independent_gated_v1",
- "written_utc": "2026-10-29T12:00:00Z",
+ "written_utc": "2026-10-28T18:30:00Z",
  "status": "DRAFTED at $0 before any model of this study exists; REGISTERED (frozen, its sha256 bound into the phase grant) only on the maintainer's authorization, and never amended after the first trained result of this study exists",
  "design": {
   "path": "configs/stages/stage-1/projected_residual/independent_gated_design.json"

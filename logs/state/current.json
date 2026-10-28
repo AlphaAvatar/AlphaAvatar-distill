@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Revised Research A/B programme: $0 design and implementation done 2026-10-29; the phase application (hard cap $177.21, project cap requested $903) awaits the maintainer; 0 pods; committed $725.4993 of $740. Owner: logs/budget/decisions.md 2026-10-29.",
+ "blocker": "BLOCKED NO. Revised Research A/B programme: $0 design and implementation done 2026-10-28; the phase application (hard cap $177.21, project cap requested $903) awaits the maintainer; 0 pods; committed $725.4993 of $740. Owner: logs/budget/decisions.md 2026-10-28.",
  "branch": "research/teacher-modes-and-projected-residual: from stage2/reasoning-data d5f1c6f2 (kept), merged with main 72492e46 (its squash, 2026-10-27)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-29T12:00:00Z",
+ "generated_utc": "2026-10-28T18:30:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Maintainer: the phase application (logs/budget/applications/research_ab_2026-10-29/). Nothing starts automatically.",
+ "next": "Maintainer: the phase application (logs/budget/applications/research_ab_2026-10-28/). Nothing starts automatically.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "the maintainer's decision on the phase application; then the independent-gated engineering validation (igv_launch.py) and the in-phase launchers",

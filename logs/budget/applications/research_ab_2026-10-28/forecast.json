@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.budget.research_ab_forecast/v1",
- "written_utc": "2026-10-29T12:00:00Z",
+ "written_utc": "2026-10-28T18:30:00Z",
  "measured": {
   "l40s_usd_per_hour": {
    "value": 1.11,
