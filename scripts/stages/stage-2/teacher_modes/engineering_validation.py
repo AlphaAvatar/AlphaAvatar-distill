@@ -308,9 +308,9 @@ def teacher_source(cfg: dict, args) -> str:
     so the revision is fixed by the path itself), or the host run's tiny teacher."""
     if args.tiny:
         return str(Path(args.work) / "tiny_teacher")
-    from huggingface_hub import snapshot_download
+    from shared.pod.teacher_cache import local_snapshot
     t = cfg["teacher"]
-    return snapshot_download(t["model"], revision=t["revision"], local_files_only=True)
+    return local_snapshot(t["model"], t["revision"])
 
 
 def engine_request(cfg: dict, args, size: dict, requests: list[dict]) -> dict:

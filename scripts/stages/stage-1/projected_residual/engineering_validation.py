@@ -86,6 +86,7 @@ for _p in ("src", "scripts"):
         sys.path.insert(0, str(REPO / _p))
 
 from shared.validation import vllm_check as VC  # noqa: E402  (standard library only)
+from shared.pod.teacher_cache import local_snapshot  # noqa: E402  (huggingface_hub imported on call)
 
 CONFIG = "configs/stages/stage-1/projected_residual/engineering_validation.json"
 SCHEMA = "aadistill.stage1.projected_residual.engineering_validation/v2"
@@ -401,7 +402,8 @@ def torch_phase(out: Path, work: Path, cfg: dict, *, device: str, tiny: bool, st
             tm, trev = design["teacher"]["model"], design["teacher"]["revision"]
             stops = resolve_stop_ids(tm, AutoTokenizer.from_pretrained(tm, revision=trev),
                                      AutoConfig.from_pretrained(tm, revision=trev), trev)
-            tokenizer = {"tokenizer": tm, "tokenizer_revision": trev}
+            #: the cached snapshot's directory, not the repository id: the engine runs offline
+            tokenizer = {"tokenizer": local_snapshot(tm, trev), "tokenizer_revision": None}
         v = cfg["vllm"]
         request = {"model": str(f), **tokenizer, "dtype": cfg["numeric_identity"]["dtype"],
                    "max_model_len": int(ctx["resolved_context"]), "gpu_memory_utilization": v["gpu_memory_utilization"],

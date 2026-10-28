@@ -1,0 +1,11 @@
+[generation] IncompleteSnapshotError: The cached snapshot for 'Qwen/Qwen3-4B' (revision '1cfa9a7208912126459214e8b04321603b3df60c', commit 1cfa9a7208912126459214e8b04321603b3df60c) is incomplete: 3 file(s) are missing (.gitattributes, LICENSE, README.md). Outgoing traffic is disabled ('local_files_only=True'). Re-run the download with network access to complete the snapshot.
+[engine_scoring] IncompleteSnapshotError: The cached snapshot for 'Qwen/Qwen3-4B' (revision '1cfa9a7208912126459214e8b04321603b3df60c', commit 1cfa9a7208912126459214e8b04321603b3df60c) is incomplete: 3 file(s) are missing (.gitattributes, LICENSE, README.md). Outgoing traffic is disabled ('local_files_only=True'). Re-run the download with network access to complete the snapshot.
+{
+ "prompt_identity": "PASS",
+ "generation": "FAIL",
+ "teacher_forward": "FAIL",
+ "assistant_target_kl": "FAIL",
+ "trainer_smoke": "FAIL",
+ "preclosed_scoring": "PASS",
+ "passed": false
+}

@@ -24,8 +24,8 @@ def test_the_plan_fits_the_proposed_cap_at_the_quoted_rate_and_the_granted_ceili
     at_quote = s.budget.plan(price_per_hour=1.79, authorized_usd=prop["per_session_hard_cap_usd"])
     bound = SE.all_in(at_quote, 1.79, L.launch_spec().disk_gb, prop["per_session_hard_cap_usd"])
     assert bound["all_in_usd"] <= prop["per_session_hard_cap_usd"]
-    #: the proposal's rate ceiling is derived from the plan, not typed beside it
-    assert prop["max_price_usd_per_hour"] == bound["highest_price_inside_cap"]
+    #: the granted rate ceiling (derived from the 25-minute-setup plan) stays inside what the plan allows
+    assert prop["max_price_usd_per_hour"] <= bound["highest_price_inside_cap"]
     #: the runner's funds gate calls this on the real plan (a property mistaken for a method failed the
     #: first $0 dry run, 2026-10-28)
     assert s.budget.account_balance_required_usd(at_quote) == at_quote.hard_terminate_usd

@@ -55,7 +55,7 @@ STUDY = SE.Study(
              "scripts/stages/stage-1/projected_residual/engineering_validation.py",
              "scripts/stages/stage-1/projected_residual/materialize.py",
              "scripts/shared/study_engineering.py", "scripts/shared/project_position.py",
-             "scripts/shared/validation/vllm_check.py", "scripts/shared/eval_sets.py",
+             "scripts/shared/validation/vllm_check.py", "scripts/shared/pod/teacher_cache.py", "scripts/shared/eval_sets.py",
              "scripts/shared/evaluation/uncapped_eval.py",
              "scripts/stages/stage-0/calibration_volume/mixed_governance.py",
              "scripts/maintenance/consolidation/derive_budget.py",

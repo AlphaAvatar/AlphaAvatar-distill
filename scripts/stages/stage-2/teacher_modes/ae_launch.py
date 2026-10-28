@@ -58,7 +58,7 @@ STUDY = SE.Study(
              "scripts/stages/stage-2/teacher_modes/engineering_validation.py",
              "scripts/stages/stage-2/teacher_modes/evaluation_identity.py",
              "scripts/shared/study_engineering.py", "scripts/shared/project_position.py",
-             "scripts/shared/validation/vllm_check.py", "scripts/shared/eval_sets.py",
+             "scripts/shared/validation/vllm_check.py", "scripts/shared/pod/teacher_cache.py", "scripts/shared/eval_sets.py",
              "scripts/shared/evaluation/eval_set_scoring.py",
              "scripts/stages/stage-0/calibration_volume/score_battery.py",
              "scripts/stages/stage-0/calibration_volume/run_battery.py",
@@ -99,9 +99,11 @@ def launch_spec() -> SE.Launch:
     return SE.Launch(
         session_kind="stage2_teacher_modes", authorization=AEAuthorization, teacher_model=teacher["model"], teacher_revision=teacher["revision"],
         driver="scripts/stages/stage-2/teacher_modes/engineering_validation.py",
-        #: the driver's bound inside the $3.50 cap at the granted rate (plan: 25 setup + 5 transfer + 40,
-        #: x1.25, + reserves = 110 min hard; cost_forecast.json :: A_E_engineering_validation)
-        validation_minutes=40.0, setup_minutes=25.0, disk_gb=120,
+        #: the driver's bound inside the cap at the granted rate (plan: 20 setup + 5 transfer + 40, x1.25,
+        #: + reserves = 103.75 min hard). Setup was 25 min (cost_forecast.json :: A_E_engineering_validation)
+        #: until attempt 1 (ae_20261028_091943) measured create -> SETUP_DONE in 3.7 min and left $3.2725
+        #: of the envelope, inside which the 110-minute plan no longer fits at the $1.79 quote
+        validation_minutes=40.0, setup_minutes=20.0, disk_gb=120,
         driver_args=lambda args: f"--student {SE.POD_REPO}/{STAND_IN}",
         relay_inputs=relay_inputs(), verdict=verdict,
         artifact_spec="configs/stages/stage-2/teacher_modes/engineering_artifacts.json")
