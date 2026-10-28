@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-27 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-28 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,47 +9,65 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A AND B: $0 PREPARATION FOR A-E / B-E COMPLETE (2026-10-27 UTC); NOTHING PAID IS AUTHORIZED.**
-Branch `research/teacher-modes-and-projected-residual`, cut from `stage2/reasoning-data` `d5f1c6f2` (kept). That
-branch was squash-merged into `main` (`72492e46`, "What `main` carries" below), and this branch took that `main`
-by a merge commit: no rebase, no force push, its research commits unchanged. This branch is NOT merged. Decision
-records: `logs/budget/decisions.md`, the three 2026-10-27 entries at its end. Nothing runs; the account holds
-0 pods and the retained volume `am5m373kuq`.
-- **Budget, four views kept apart** (owner `logs/budget/audits/accounting_audit_2026-10-27T1913Z.json`, verdict
-  CLOSED, README beside it):
-  - *provider bill and live resources*: billed $720.2266; 0 pods; `am5m373kuq` only. The balance ($139.21) is
-    not a grant;
-  - *project commitment*: $724.3509 of the $740 cap, headroom $15.6491, nothing unposted, engineering-campaign
-    subruns now counted (`scripts/shared/project_position.py`, audit finding 3 FIXED);
-  - *historical budget records*: as booked. `current.json`'s records-based remainder is not headroom;
+**RESEARCH A AND B: A-E / B-E ENGINEERING VALIDATIONS READY TO ISSUE AT $0 (2026-10-28 UTC); NOTHING PAID IS AUTHORIZED.**
+The maintainer agreed in principle to A-E ($3.50) and B-E ($3.00) and issued no grant
+(`logs/budget/decisions.md` 2026-10-28). Branch `research/teacher-modes-and-projected-residual`; `main` stays at
+`72492e46`, and this branch is NOT merged. Nothing runs. The account holds 0 pods and the retained volume
+`am5m373kuq`.
+- **The issuance chain** (`shared.study_engineering`; instances `ae_launch.py`, `be_launch.py`):
+  - grant from the maintainer's decision only; until then each study's proposal
+    (`plans/engineering_grant_proposal.json`), which funds a dry run and nothing else;
+  - per-study cumulative envelope; one-use authorization bound to the study identity and the harness;
+  - the live project position at issue and at launch (fail closed); the balance a necessary condition, never
+    headroom;
+  - the shared session runner (watchdog, hard deadline from the accepted price, pinned train and vLLM
+    environments, the evidence relayed and hash-checked, teardown confirmed by the provider), and a closeout that
+    re-derives the driver's verdict.
+- **$0 dry runs:** `logs/stages/stage-2/teacher_modes/validations/a-e/dry_runs/` and
+  `logs/stages/stage-1/projected_residual/validations/b-e/dry_runs/` hold, per study, the dry-run artifact and
+  the runner's own record of every pre-provider gate.
+  - The final runs (`20261028T0625Z`, commit `6b1fb231`) end `DRY_RUN_GATES_PASSED` for both studies.
+  - The only refusal is the expected one: no relay bundle until the granted commit exists.
+  - Nothing was created. The first run found a $0 defect, fixed in `19fcab54`.
+- **Budget, four views kept apart** (owner `logs/budget/provider/runpod_billing_2026-10-28T0537Z.json` through
+  `scripts/shared/project_position.py`; the 2026-10-27 audit stays CLOSED):
+  - *provider bill and live resources*: billed $720.2558; 0 pods; `am5m373kuq` only. The balance ($139.18) is
+    not a grant.
+  - *project commitment*: $724.3538 of the $740 cap, headroom $15.6462. A-E + B-E caps would take it to $730.8538.
+    Every one of the 55 campaign subruns has a confirmed teardown (25 by their own records, 30 by
+    `logs/budget/reconciliations/campaign_teardowns_2026-10-28.json`); an unconfirmed one now refuses whatever its
+    age.
+  - *historical budget records*: as booked. `current.json`'s records-based remainder is not headroom.
   - *unfinished attribution*, NOT explained: +$37.53 billed before the 2026-09-11 anchor beyond the maintainer's
-    stated anchor, 55 pre-anchor pods ($77.33) named by no record, $0.35 of volume rows outside every recorded
-    lifetime.
-  - **Before any paid authorization:** the study's issuer (grant, envelope, one-use authorization) is built on
-    `project_position` and re-reads the provider at issue and launch. A-E + B-E ($6.50 in caps) fit both the
-    project cap and the balance today (`project_position.py --request`).
+    stated anchor; 55 pre-anchor pods ($77.33) named by no record; $0.35 of volume rows outside every recorded
+    lifetime; pod `gbiz85xcmiq6gh` named by two subruns and billed once.
 - **Research A, hybrid teacher thinking vs non-thinking:** `docs/stages/stage-2/teacher_modes/DESIGN.md`.
   - Teacher `Qwen/Qwen3-4B@1cfa9a72`; token-in/token-out documents; `kd_scope="assistant"`.
   - **Both context strategies supported** (`batch.context_strategy`: `cross_context`, the default and H1/H1-PA's,
     a deliberate design; `document_isolated`). The study declares `document_isolated` for every arm so the
-    context distribution does not move with the mode; the strategy itself is not compared in round 1.
-  - Token identity classified: prefill `<think>\n` 0.052% of supervised positions, re-tokenization of identical
-    text 0.037%; no inference about H1-PA.
-  - `preclosed` scoring accepted by the maintainer; per-mode evaluation identity
-    (`configs/stages/stage-2/teacher_modes/evaluation_identity.json`); every conformance vector scores alike in
-    all three think states.
+    context distribution does not move with the mode. The strategy itself is not compared in round 1.
+  - A-E driver `engineering_validation.py`: prompt token identity in both modes, vLLM generation in both modes,
+    the real teacher teacher-forced (packed vs alone, fp32/bf16), the assistant-target KL mask, a 20-step
+    isolated-pack smoke on the E1 PCA stand-in, `preclosed` scoring. One A100-SXM4-80GB, at most $1.87/h.
   - Applied for: A-E $3.50, then A1-A3 + storage + reserve, $60.00 in all.
 - **Research B, 900M full-width residual + per-layer trainable PCA:** `docs/stages/stage-1/projected_residual/DESIGN.md`.
   - 902,911,488 parameters (513,955,328 trainable), architecture unchanged.
-  - B-E driver `engineering_validation.py`: initialization with input- and output-subspace energy, bf16 fold,
-    trainer smoke (step time, memory, orthogonality drift), CUDA resume, checkpoint identity, vLLM; on the host
-    every check passes but vLLM (NOT_RUN).
+  - B-E driver `engineering_validation.py`:
+    - the CPU float32 structural fold check, plus a CUDA fp32/bf16 fold check on 7 fixed eval-set-1 prompts
+      against `fold_acceptance`;
+    - smoke, resume and checkpoint identity, on the requested device;
+    - vLLM in its own process on a clear GPU, on the same prompts, against the HF reference.
+    - One L40S, at most $1.14/h.
   - Applied for: B-E $3.00, then B1 $21.00 (needs a project cap of $749 or more). 600M reserved only.
-- **Disk:** 16 GiB free after deleting 11.95 GiB of consumer-free tool caches
-  (`logs/maintenance/storage/devbox_cleanup_20261027.json`); the pod simulator still needs 20 GiB, and the rest
-  needs the maintainer's decision.
-- **Next:** the maintainer's grant decisions for A-E and B-E. Still owed at $0 before the first paid action:
-  each study's issuer and launch chain, and A-E's driver.
+- **Disk:** 16 GiB free (`logs/maintenance/storage/devbox_cleanup_20261028.json`). The suite has its own simulator
+  floor (`AAD_TEST_PODSIM_MIN_FREE_GIB`); a real sweep's floor cannot be lowered. The 14 retire-listed checkpoints,
+  D1's weights without a relay copy and other projects' assets are kept for the maintainer.
+- **Next:** the maintainer's decision on the two grants. On approval:
+  1. `<launcher> grant --decision ...`;
+  2. `issue`;
+  3. commit;
+  4. `stages.phase_c1.bundle.stage_bundle` for that commit;
+  5. `launch`.
 
 **MIXED CALIBRATION 2x: COMPLETE; PREREGISTERED M = NO_GO (2026-10-27).**
 Owner: [`docs/stages/stage-0/calibration_volume/MIXED.md`](../../docs/stages/stage-0/calibration_volume/MIXED.md)

@@ -14380,3 +14380,110 @@ on a paid pod.
   integration.
 - **Not authorized.** A-E, B-E, any formal phase, any rise in the cap.
 - **Revisit when.** The maintainer decides the A-E / B-E grants.
+
+## 2026-10-28 — Research A/B engineering readiness: the A-E / B-E chains built at $0, the teardown boundary, the suite's own disk floor
+
+- **Context.** The maintainer reviewed `f0f99f35` ("Research A/B Engineering
+  Readiness Review"). They accepted the $0 direction and agreed in principle to
+  A-E ($3.50) and B-E ($3.00), but issued no paid authorization. They asked for
+  every remaining $0 issuance, launch, driver and validation step now, three
+  corrections to the B-E driver, a stricter campaign-subrun boundary and a test
+  floor separate from the launch floor.
+- **Decision.**
+  - **One mechanism for a study's engineering validation**: `shared.study_engineering`.
+    Research A's instance is `scripts/stages/stage-2/teacher_modes/ae_launch.py`;
+    Research B's is `scripts/stages/stage-1/projected_residual/be_launch.py`.
+    - *Grant.* Written only from the maintainer's decision
+      (`logs/budget/approvals/<study>_engineering_grant.json`, by `grant
+      --decision`). Until then each study holds a proposal (`plans/engineering_grant_proposal.json`,
+      status `proposed`). A proposal funds only a dry run, whose artifact is
+      marked, lands outside the run directory, and is refused by the
+      launcher's gates and by setup.
+    - *Envelope.* Cumulative per study: the grant's ceiling less every
+      session's closeout cost. A session with a resource and no cost refuses.
+      No other grant's remainder and no account balance funds it.
+    - *Authorization.* One use per run id, bound to the study identity (design,
+      check config, preregistration, bound records) and the harness digest.
+    - *Live position.* `project_position` re-reads the provider at issue and
+      at launch and fails closed. The hard cap must fit the per-session cap,
+      the envelope and the project remainder. The balance must cover the hard
+      cap as a necessary condition; it is never headroom.
+    - *Session.* The shared session runner, as for H1-PA: watchdog; hard
+      deadline from the accepted price; setup with the pinned train and vLLM
+      environments; the evidence relayed and hash-checked on every poll;
+      teardown confirmed by the provider; a closeout that re-derives the
+      driver's verdict from the secured evidence.
+  - **Why the session runner rather than the stock-image engineering
+    launcher.** A-E and B-E must validate the stack the formal phases will run
+    on: the offline-pinned train environment, the vLLM 0.27.1 wheelhouse and
+    the relay inputs. A stock image would validate a different torch and
+    transformers.
+  - **Setup.** The teacher is now a session input (`TEACHER_MODEL`, defaulting
+    to Thinking-2507, so every earlier session is unchanged). One
+    authorization branch serves both study kinds.
+  - **B-E driver**, per the review:
+    - The CPU float32 fold check stays as the structural check.
+    - A separate CUDA check compares factored and folded models in fp32 and
+      bf16 on the L40S, on 7 fixed eval-set-1 prompts, against
+      `fold_acceptance`. Probe, threshold, reference error and numeric
+      identity are fixed in the check config, which is bound into the study
+      identity.
+    - The PyTorch checks run in a child process that exits. vLLM starts only
+      after `nvidia-smi` shows the GPU clear (`shared.validation.vllm_check.run_isolated`).
+    - vLLM runs the same fixed prompts, and its teacher-forced log-probabilities
+      are compared with the HF reference. This is an engineering check, not a
+      measurement.
+    - The A-E review found a second defect: `Trainer(...)` was called without
+      `device=`, so it would have run on CPU. Fixed, and both drivers' verdicts
+      now refuse a smoke that ran on another device.
+  - **A-E driver**: prompt token identity in both official modes; generation
+    under vLLM in both modes; the real teacher teacher-forced, packed against
+    each document alone, in fp32 and bf16; the assistant-target KL mask; a
+    20-step isolated-pack trainer smoke on the E1 PCA stand-in; the H-N/H-T
+    records through the eval-set-1 scorers. No cross-context arm is added and
+    the main design is unchanged.
+  - **Teardown boundary.** A campaign subrun whose teardown is unconfirmed
+    refuses issuance whatever its age or billing; a missing bill is not
+    evidence that a pod is gone. The 30 historical subruns that predate the
+    field are confirmed by `logs/budget/reconciliations/campaign_teardowns_2026-10-28.json`.
+    That record is written from the 2026-10-28 snapshot's resource listing
+    and re-checked against it at every read. Pod `gbiz85xcmiq6gh` is named by
+    two subruns and billed once; the attribution stays open.
+  - **Disk.** The suite's simulator runs have their own floor
+    (`tests/support/podsim.py`, `AAD_TEST_PODSIM_MIN_FREE_GIB`). A real
+    sweep's floor (`record_pod_environment.min_free_gib`) can be raised by
+    its override and never lowered. Nothing checkpoint-like was deleted
+    (`logs/maintenance/storage/devbox_cleanup_20261028.json`).
+- **Position** (`logs/budget/provider/runpod_billing_2026-10-28T0537Z.json`
+  through `project_position`):
+  - billed $720.2558;
+  - committed $724.3538 of $740 (headroom $15.6462);
+  - A-E + B-E caps take committed to $730.8538;
+  - balance $139.18, not a grant; 0 pods; only `am5m373kuq`.
+- **Proposed, not granted:**
+  - A-E: $3.50 on one A100-SXM4-80GB at no more than $1.87/h (quoted $1.79);
+  - B-E: $3.00 on one L40S at no more than $1.14/h (quoted $1.09).
+  - Each rate ceiling is the highest price at which the planned session's
+    all-in bound fits its cap.
+- **$0 dry runs** (`logs/stages/stage-2/teacher_modes/validations/a-e/dry_runs/`,
+  `logs/stages/stage-1/projected_residual/validations/b-e/dry_runs/`).
+  - The issuer reads the proposal and writes a marked artifact outside the run
+    directory. The launcher then runs the shared runner's own pre-provider
+    gates against the provider read live: the plan, the quote, funds,
+    resources, every precheck and the relay listing.
+  - The first run (`20261028T0622Z`) found a defect at $0: the funds gate
+    called a property. Fixed in `19fcab54`.
+  - `20261028T0624Z` and the final `20261028T0625Z` (`6b1fb231`) end
+    `DRY_RUN_GATES_PASSED` for both studies:
+    - A-E: all-in $3.3495 ≤ $3.50 over 111.25 min at $1.79/h, balance needed $3.28;
+    - B-E: all-in $2.8583 ≤ $3.00 over 155 min at $1.09/h, balance needed $2.79;
+    - account resources: only `am5m373kuq`.
+  - The one refusal is the expected one: the session commit's bundle is not on
+    the relay. It is staged for the granted commit at launch.
+  - `refusals.txt` records a real issue refused without a grant, and a real
+    launch refused without its artifact, both at $0.
+- **Not authorized.** Any pod, GPU or volume; A-E and B-E themselves; any
+  formal phase; any rise in the $740 cap; a merge.
+- **Revisit when.** The maintainer decides the two grants. Then: `grant
+  --decision`, `issue`, commit, `stages.phase_c1.bundle.stage_bundle` for that
+  commit, `launch`.

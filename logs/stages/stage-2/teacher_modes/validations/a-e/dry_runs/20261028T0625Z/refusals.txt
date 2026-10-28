@@ -1,0 +1,7 @@
+$ ae issue (no --dry-run)
+REFUSED at $0: no grant at logs/budget/approvals/teacher_modes_engineering_grant.json: A-E is not authorized (a proposal exists)
+RC=11
+$ ae launch (no --dry-run, no artifact)
+REFUSED at $0: no authorization at /home/ecs-user/AlphaAvatar-distill/logs/stages/stage-2/teacher_modes/runs/aeneg_probe/governance/authorization.json: nothing was issued for this run
+No provider resource was created.
+RC=11
