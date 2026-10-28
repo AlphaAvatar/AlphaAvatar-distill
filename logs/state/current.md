@@ -9,7 +9,8 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A AND B: A-E / B-E ENGINEERING VALIDATIONS READY TO ISSUE AT $0 (2026-10-28 UTC); NOTHING PAID IS AUTHORIZED.**
+**RESEARCH A AND B: A-E ($3.50) AND B-E ($3.00) PAID ENGINEERING VALIDATIONS AUTHORIZED (maintainer, 2026-10-28 UTC). A-E: PASS (attempt 2 `ae_20261028_093428`; $0.7089 of $3.50 across two attempts). B-E: in progress.**
+Decision record: `logs/budget/decisions.md` 2026-10-28 "A-E ($3.50) and B-E ($3.00) ... authorized". Neither PASS is a scientific GO; A1–A3, B1 and 600M stay unauthorized. The text below is the $0 readiness state the authorization was granted on.
 The maintainer agreed in principle to A-E ($3.50) and B-E ($3.00) and issued no grant
 (`logs/budget/decisions.md` 2026-10-28). Branch `research/teacher-modes-and-projected-residual`; `main` stays at
 `72492e46`, and this branch is NOT merged. Nothing runs. The account holds 0 pods and the retained volume

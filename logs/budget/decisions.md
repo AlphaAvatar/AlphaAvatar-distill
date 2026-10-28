@@ -14487,3 +14487,53 @@ on a paid pod.
 - **Revisit when.** The maintainer decides the two grants. Then: `grant
   --decision`, `issue`, commit, `stages.phase_c1.bundle.stage_bundle` for that
   commit, `launch`.
+
+## 2026-10-28 — Maintainer: A-E ($3.50) and B-E ($3.00) paid engineering validations authorized; A-E executed: PASS
+
+- Context: the maintainer's "A-E / B-E Engineering Validation Formal Authorization" (reviewed HEAD
+  `0b5043de`), which:
+  - approves the two paid engineering validations: A-E with a new cumulative hard cap of $3.50,
+    B-E with $3.00, at most $6.50 of new spending in all;
+  - keeps the project cap at $740, never raised;
+  - keeps the two envelopes independent: every attempt and retry counts against its own study, and
+    a failure resets nothing;
+  - binds the scope to the reviewed proposals, the frozen study identities, the check configs and
+    the implementation;
+  - makes neither PASS a scientific GO;
+  - authorizes none of A1–A3, B1, 600M, teacher-data generation, formal recovery or evaluation, or
+    a merge to main.
+- Decision (A-E, executed first as the maintainer suggested):
+  - **Grant.** `logs/budget/approvals/teacher_modes_engineering_grant.json`, written from that
+    decision by `ae_launch.py grant`. It binds study identity `d5eb76a1…` at `0b5043de`. The grant
+    writer no longer copies the proposal's own "authorizes: nothing" note into a grant.
+  - **Attempt 1** (`ae_20261028_091943`, pod `oodcj3rhp5mkgp`, A100-SXM4-80GB at $1.79/h):
+    `RUN_FAILED` 20 s into the driver; $0.2275 all in. Diagnosis:
+    `runs/ae_20261028_091943/closeout/diagnosis.md`.
+    - Cause: the driver's offline `snapshot_download(local_files_only=True)` of the whole teacher
+      repository raised `IncompleteSnapshotError`. Setup fetches only weights, configs, the
+      tokenizer and the chat template, and huggingface_hub 1.x refuses that partial snapshot.
+    - This was a harness assumption, not a finding. No check that needs the teacher ran.
+    - Repair: `shared.pod.teacher_cache.local_snapshot` asks for exactly the files setup fetched,
+      and a test keeps the two pattern lists equal. B-E's vLLM tokenizer now uses the same local
+      directory.
+  - **Re-price.** The envelope left $3.2725, and at $1.79 the 110-minute plan bounds at $3.3496.
+    - Setup was re-priced 25 → 20 min; attempt 1 measured 3.7 min from create to `SETUP_DONE`.
+    - The plan is now a 103.75-minute hard deadline: $3.1613 all in at $1.79 and $3.2663 at $1.85,
+      the highest rate inside $3.2725.
+    - The validation phase, its checks and the granted $1.87/h ceiling are unchanged.
+  - **Attempt 2** (`ae_20261028_093428`, pod `57q3hvyv6sstse`, $1.79/h, hard cap $3.2725):
+    **PASS**. All six checks passed: prompt identity, generation, teacher forward, assistant-target
+    KL, trainer smoke, `preclosed` scoring.
+    - The verdict was re-derived off-pod from the secured archive (sha256 `de28e9e9…`), and it
+      agrees with the pod's.
+    - Cost: 15.99 min, $0.4814.
+    - The pod was deleted and the provider confirms it is gone; the account holds only
+      `am5m373kuq`.
+  - **A-E envelope:** spent $0.7089 of $3.50, so $2.7911 remains, which no other study may use.
+- Alternatives considered:
+  - a retry at the unchanged 110-minute plan: it does not fit the remainder at any rate at or above
+    the $1.79 quote;
+  - shrinking the validation: forbidden.
+- Risks: the 20-minute setup allowance is short for a genuinely cold host. A slow setup would end the
+  session INCOMPLETE at the hard deadline; it would not overspend.
+- Revisit when B-E closes; a single entry then reports both.
