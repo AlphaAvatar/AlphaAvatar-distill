@@ -1,0 +1,26 @@
+REFUSED at $0: the relay holds no transfer/aad_autoinit_2c032fa0.bundle; stage it first
+[06:22:37] budget: expected 105 min $1.91 · soft $2.61 · hard $2.79 (authorized $3.00)
+[06:22:37] NVIDIA L40S $1.09/h, stock Low
+Traceback (most recent call last):
+  File "/home/ecs-user/AlphaAvatar-distill/scripts/stages/stage-1/projected_residual/be_launch.py", line 112, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/home/ecs-user/AlphaAvatar-distill/scripts/stages/stage-1/projected_residual/be_launch.py", line 108, in main
+    return SE.cli(STUDY, launch_spec, argv, gpu=GPU, description=__doc__.split("\n")[0])
+           ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ecs-user/AlphaAvatar-distill/scripts/shared/study_engineering.py", line 735, in cli
+    return launch_main(study, launch_spec(), rest, description=description, gpu=gpu)
+  File "/home/ecs-user/AlphaAvatar-distill/scripts/shared/study_engineering.py", line 684, in launch_main
+    runner.run()
+    ~~~~~~~~~~^^
+  File "/home/ecs-user/AlphaAvatar-distill/src/aadistill/infrastructure/session_runner.py", line 1026, in run
+    if (not self.make_plan() or not self.check_account_funds()
+                                    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/ecs-user/AlphaAvatar-distill/src/aadistill/infrastructure/session_runner.py", line 485, in check_account_funds
+    need = float(required(self.plan) if callable(required) else required)
+                 ~~~~~~~~^^^^^^^^^^^
+  File "/home/ecs-user/AlphaAvatar-distill/scripts/shared/study_engineering.py", line 525, in <lambda>
+    account_balance_required_usd=lambda plan: plan.hard_terminate_usd(),
+                                              ~~~~~~~~~~~~~~~~~~~~~~~^^
+TypeError: 'float' object is not callable
+LAUNCH_RC=1
