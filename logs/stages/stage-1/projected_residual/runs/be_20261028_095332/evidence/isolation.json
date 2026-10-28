@@ -1,0 +1,9 @@
+{
+ "parent_imported_torch_at_start": false,
+ "torch_child": {
+  "pid": 2946,
+  "returncode": 0,
+  "seconds": 714.5
+ },
+ "parent_imported_torch": false
+}

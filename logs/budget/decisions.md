@@ -14537,3 +14537,45 @@ on a paid pod.
 - Risks: the 20-minute setup allowance is short for a genuinely cold host. A slow setup would end the
   session INCOMPLETE at the hard deadline; it would not overspend.
 - Revisit when B-E closes; a single entry then reports both.
+
+## 2026-10-28 — B-E executed: FAIL (training OOM on the L40S; vLLM consistency); both authorized validations closed
+
+- Context: the maintainer's 2026-10-28 authorization of B-E ($3.00, L40S, at most $1.14/h). It
+  orders that an OOM, a numerical mismatch or an unsupported device be recorded as a real FAIL,
+  and that architecture, GPU and thresholds never change to reach a PASS.
+- Decision:
+  - **Grant.** `logs/budget/approvals/projected_residual_engineering_grant.json`, written from that
+    decision. It binds study identity `4d5920df…` at `8de3aefb`.
+  - **Attempt 1** (`be_20261028_095332`, pod `42dgaejv0tke69`, $1.09/h): a complete measurement,
+    verdict **FAIL**. The verdict was re-derived off-pod from the secured archive (sha256
+    `b0c80dab…`) and agrees with the pod's. 23.68 min, $0.4366. The pod was deleted and the provider
+    confirms it is gone.
+  - **PASS:**
+    - initialization: 902,911,488 parameters, real per-layer projections from 228,237 calibration
+      positions;
+    - CPU float32 structural fold: relative 3.2e-5;
+    - CUDA fold: bf16 max \|Δlogit\| 12.03 ≤ 2 × 11.22, fp32 0.0061;
+    - checkpoint identity;
+    - GPU isolation.
+  - **FAIL:**
+    - trainer smoke: CUDA OOM in the KD loss at the frozen E1 recipe (sequence length 8192,
+      on-the-fly teacher): 44.31 of 44.39 GiB. Resume could not be measured without it.
+    - vLLM: median \|Δ log-prob\| 0.234 nat > 0.1. The other criterion passed: top-1 agreement
+      0.986 ≥ 0.98 on 295 confident positions.
+  - Diagnosis: `runs/be_20261028_095332/closeout/diagnosis.md`. The mechanism reproduced the
+    conditions it claims to (P12.1), so these are results. **Not retried**: an unchanged rerun is
+    deterministic, and every change that might pass is excluded.
+  - **B-E envelope:** $0.4366 of $3.00 spent, $2.5634 unused, not transferable.
+- **Both validations, the maintainer's $6.50:**
+  - spent $1.1455: A-E $0.7089 (PASS), B-E $0.4366 (FAIL);
+  - unused $5.3545: A-E $2.7911, B-E $2.5634;
+  - project committed $725.4993 of $740 (the provider's view at the closeouts).
+- Neither result is a scientific GO, and nothing next starts automatically. A1–A3, B1 and 600M
+  need new maintainer decisions.
+- Alternatives considered:
+  - a B-E retry at a shorter sequence, on an A100, or with a relaxed vLLM threshold: each is
+    excluded by the authorization;
+  - a retry unchanged: it is deterministic.
+- Risks: B1 as applied for (an L40S, the same recipe) inherits the OOM. That is the maintainer's
+  decision.
+- Revisit when the maintainer decides on Research A's A1–A3 and on B-E's findings.

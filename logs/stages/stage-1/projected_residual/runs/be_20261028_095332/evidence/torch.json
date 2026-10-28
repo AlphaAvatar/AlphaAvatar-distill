@@ -1,0 +1,226 @@
+{
+ "tiny": false,
+ "device": "cuda:0",
+ "device_name": "NVIDIA L40S",
+ "capability": [
+  8,
+  9
+ ],
+ "torch": "2.11.0+cu128",
+ "transformers": "5.13.1",
+ "cuda_runtime": "12.8",
+ "numeric_identity_applied": {
+  "matmul_allow_tf32": false,
+  "cudnn_allow_tf32": false,
+  "deterministic_algorithms": true,
+  "deterministic_warn_only": true,
+  "cublas_workspace_config": ":4096:8",
+  "attn_implementation": "sdpa"
+ },
+ "measurements": {
+  "initialization": {
+   "num_parameters": 902911488,
+   "num_parameters_cost_model": 902911488,
+   "seconds": 626.2,
+   "calibration_positions": 228237,
+   "energy_captured_min": {
+    "pooled_energy_captured": 0.931222,
+    "attn_in_energy_captured": 0.94939,
+    "ffn_in_energy_captured": 0.912544,
+    "residual_in_energy_under_declared_basis": 0.675976,
+    "attn_out_energy_under_declared_basis": 0.430989,
+    "ffn_out_energy_under_declared_basis": 0.480699
+   },
+   "structural_fold_check": {
+    "device": "cpu",
+    "dtype": "float32",
+    "probe_tokens": 256,
+    "max_abs_logit_diff": 0.000652700662612915,
+    "max_abs_logit": 20.281524658203125,
+    "relative": 3.218203136167684e-05,
+    "_": "whether the fold is the same function; device numerics are fold_numerics'"
+   },
+   "weights": [
+    {
+     "file": "model.safetensors",
+     "sha256": "ee4caf42f364673bbbbaf203367c373ad15fa457f2796e8ad2da75fe113406a4"
+    }
+   ],
+   "config_sha256": "3dcd2c70117f5c112b211ac2a3f95c08503be6c3933751bb0058ccf491606f8d",
+   "timings": {
+    "load_s": 5.4,
+    "statistics_s": 421.2,
+    "bases_s": 133.7
+   }
+  },
+  "probe": {
+   "rows": [
+    {
+     "id": "fluid_reasoning_720/dev_v1/424bd847a714f66694d7",
+     "tokens": 221,
+     "token_ids_sha256": "b8825c7b1330e64f1393ff5058b2285964c0b2e6c2ad8a47b82110426395737b",
+     "expected_sha256": "b8825c7b1330e64f1393ff5058b2285964c0b2e6c2ad8a47b82110426395737b"
+    },
+    {
+     "id": "fluid_reasoning_720/dev_v1/e7a33cb050605fe24cef",
+     "tokens": 188,
+     "token_ids_sha256": "87ce7bd8f0fc68e79f3d40698026dce49662cc94b45e8404dd2c693f7fac08bb",
+     "expected_sha256": "87ce7bd8f0fc68e79f3d40698026dce49662cc94b45e8404dd2c693f7fac08bb"
+    },
+    {
+     "id": "fluid_reasoning_720/dev_v1/e5c87fa5a00a2ee777fd",
+     "tokens": 70,
+     "token_ids_sha256": "2332d31a0dabe7913dc8d37444494bebfcd2fe03516e044d6d2624dc1080ef52",
+     "expected_sha256": "2332d31a0dabe7913dc8d37444494bebfcd2fe03516e044d6d2624dc1080ef52"
+    },
+    {
+     "id": "fluid_reasoning_720/dev_v1/a68fc81fffe597f45d54",
+     "tokens": 66,
+     "token_ids_sha256": "16c0e7c7e4dfec0efe0aab039de8a83d12a17af4cb16a23d1cd6e97612284abe",
+     "expected_sha256": "16c0e7c7e4dfec0efe0aab039de8a83d12a17af4cb16a23d1cd6e97612284abe"
+    },
+    {
+     "id": "stage3_capability_846/gsm8k/gsm8k-test-00917",
+     "tokens": 55,
+     "token_ids_sha256": "41491c60397ec6c10bccfc5d8113ff3970b8ae37f0ac65c9520b96741aebbd4a",
+     "expected_sha256": "41491c60397ec6c10bccfc5d8113ff3970b8ae37f0ac65c9520b96741aebbd4a"
+    },
+    {
+     "id": "stage3_capability_846/gsm8k/gsm8k-test-01007",
+     "tokens": 74,
+     "token_ids_sha256": "ea4a0695a1a940303e13f24922a2834561abfded8d1f6e6b338c60416867b7ba",
+     "expected_sha256": "ea4a0695a1a940303e13f24922a2834561abfded8d1f6e6b338c60416867b7ba"
+    },
+    {
+     "id": "stage3_capability_846/math_verified/math500-test/algebra/2102.json",
+     "tokens": 94,
+     "token_ids_sha256": "23dae360a1a398f8c2f520554088c3872736b614ca42ade20cea915f2d2c3294",
+     "expected_sha256": "23dae360a1a398f8c2f520554088c3872736b614ca42ade20cea915f2d2c3294"
+    }
+   ],
+   "positions": 768
+  },
+  "fold_cuda": {
+   "prompts": [
+    {
+     "tokens": 221,
+     "fold_fp32_max_abs": 0.0011374950408935547,
+     "fold_bf16_max_abs": 6.1640625,
+     "fold_bf16_mean_abs": 0.45861196517944336,
+     "bf16_vs_fp32_max_abs": 5.940280914306641,
+     "argmax_agree_bf16": 0.7782805562019348,
+     "argmax_agree_folded_bf16_vs_factored_fp32": 0.8914027214050293
+    },
+    {
+     "tokens": 188,
+     "fold_fp32_max_abs": 0.006077289581298828,
+     "fold_bf16_max_abs": 10.75,
+     "fold_bf16_mean_abs": 0.548940122127533,
+     "bf16_vs_fp32_max_abs": 8.062437057495117,
+     "argmax_agree_bf16": 0.6117021441459656,
+     "argmax_agree_folded_bf16_vs_factored_fp32": 0.7553191781044006
+    },
+    {
+     "tokens": 70,
+     "fold_fp32_max_abs": 0.0006194114685058594,
+     "fold_bf16_max_abs": 6.734375,
+     "fold_bf16_mean_abs": 0.4128822982311249,
+     "bf16_vs_fp32_max_abs": 4.6822943687438965,
+     "argmax_agree_bf16": 0.6714285612106323,
+     "argmax_agree_folded_bf16_vs_factored_fp32": 0.6142857074737549
+    },
+    {
+     "tokens": 66,
+     "fold_fp32_max_abs": 0.000762939453125,
+     "fold_bf16_max_abs": 9.578125,
+     "fold_bf16_mean_abs": 0.6490150690078735,
+     "bf16_vs_fp32_max_abs": 3.85247802734375,
+     "argmax_agree_bf16": 0.5303030014038086,
+     "argmax_agree_folded_bf16_vs_factored_fp32": 0.5454545617103577
+    },
+    {
+     "tokens": 55,
+     "fold_fp32_max_abs": 0.0017049312591552734,
+     "fold_bf16_max_abs": 12.03125,
+     "fold_bf16_mean_abs": 0.7463057637214661,
+     "bf16_vs_fp32_max_abs": 11.220019340515137,
+     "argmax_agree_bf16": 0.5636363625526428,
+     "argmax_agree_folded_bf16_vs_factored_fp32": 0.581818163394928
+    },
+    {
+     "tokens": 74,
+     "fold_fp32_max_abs": 0.000850677490234375,
+     "fold_bf16_max_abs": 6.78125,
+     "fold_bf16_mean_abs": 0.5280101299285889,
+     "bf16_vs_fp32_max_abs": 3.0545129776000977,
+     "argmax_agree_bf16": 0.6216216087341309,
+     "argmax_agree_folded_bf16_vs_factored_fp32": 0.6351351141929626
+    },
+    {
+     "tokens": 94,
+     "fold_fp32_max_abs": 0.001316070556640625,
+     "fold_bf16_max_abs": 6.734375,
+     "fold_bf16_mean_abs": 0.48275652527809143,
+     "bf16_vs_fp32_max_abs": 4.417165756225586,
+     "argmax_agree_bf16": 0.6170212626457214,
+     "argmax_agree_folded_bf16_vs_factored_fp32": 0.7340425252914429
+    }
+   ],
+   "positions": 768,
+   "max_abs_logit_diff_fp32": 0.006077289581298828,
+   "max_abs_logit_diff_bf16": 12.03125,
+   "bf16_vs_fp32_same_model": 11.220019340515137,
+   "diagnostics": {
+    "mean_abs_logit_diff_bf16": 0.5231633107954016,
+    "argmax_agreement_bf16": 0.6562500013969839
+   },
+   "factor": 2.0,
+   "criterion_met": true,
+   "device_name": "NVIDIA L40S",
+   "attn_implementation": {
+    "factored": "sdpa",
+    "folded": "sdpa"
+   },
+   "dtypes": {
+    "factored": "torch.bfloat16",
+    "folded": "torch.bfloat16"
+   }
+  },
+  "checkpoint_identity": {
+   "resave_shards_identical": true,
+   "shards": {
+    "model.safetensors": "ee4caf42f364673bbbbaf203367c373ad15fa457f2796e8ad2da75fe113406a4"
+   },
+   "folded_class": "Qwen3ForCausalLM",
+   "folded_reload_max_abs_diff": 0.0,
+   "folded_shards": {
+    "model.safetensors": "e65a58614ff780b4761ef3c678fd123d251c0ec89f1fbf6dac1e161cf9d2d1f7"
+   },
+   "folded_config_sha256": "6428ec0e4b4d41a3cc50b3695e6a443977f1c5d2ad104a81252a235fb6f7db4d"
+  },
+  "reference": {
+   "context": {
+    "resolved_context": 8192,
+    "context_source": "trained_block_len",
+    "config_max_position_embeddings": 262144,
+    "rope_scaling_factor": null,
+    "architectural_context": 262144,
+    "trained_context": 8192,
+    "context_len_override": null,
+    "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+    "note": "effective context is the TRAINED context; this is not a 262K-context evaluation"
+   },
+   "stop_token_ids": [
+    151643,
+    151645
+   ],
+   "dtype": "bfloat16",
+   "attn_implementation": "sdpa",
+   "prompts": 7
+  }
+ },
+ "errors": {
+  "trainer_smoke": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/stages/stage-1/projected_residual/engineering_validation.py\", line 217, in attempt\n    meas[name] = fn()\n                 ^^^^\n  File \"/workspace/aad/scripts/stages/stage-1/projected_residual/engineering_validation.py\", line 306, in trainer_smoke\n    tr, times, losses = train(work / \"smoke\", steps)\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/stages/stage-1/projected_residual/engineering_validation.py\", line 293, in train\n    m = tr.step_once()\n        ^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/training/train.py\", line 1018, in step_once\n    ce_sum, _, kd_sum, _ = self._micro_losses(mids, mmask, mcontent, mpos)\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/training/train.py\", line 873, in _micro_losses\n    kd_sum, kd_n = kd_forward_kl(\n                   ^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/training/train.py\", line 413, in kd_forward_kl\n    kl = (t.exp() * (t - s)).sum()\n          ~~~~~~~~^~~~~~~~~\ntorch.OutOfMemoryError: CUDA out of memory. Tried to allocate 298.00 MiB. GPU 0 has a total capacity of 44.39 GiB of which 77.31 MiB is free. Including non-PyTorch memory, this process has 44.31 GiB memory in use. Of the allocated memory 42.56 GiB is allocated by PyTorch, and 1.20 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)\n",
+  "resume": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/stages/stage-1/projected_residual/engineering_validation.py\", line 217, in attempt\n    meas[name] = fn()\n                 ^^^^\n  File \"/workspace/aad/scripts/stages/stage-1/projected_residual/engineering_validation.py\", line 333, in resume\n    raise RuntimeError(\"no uninterrupted run to compare with: the trainer smoke failed\")\nRuntimeError: no uninterrupted run to compare with: the trainer smoke failed\n"
+ }
+}

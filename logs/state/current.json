@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. A-E/B-E ready to issue at $0 2026-10-28 (dry runs DRY_RUN_GATES_PASSED); nothing paid authorized; committed $724.3538 of $740. Owner: logs/budget/decisions.md 2026-10-28.",
+ "blocker": "BLOCKED NO. A-E PASS ($0.7089 of $3.50), B-E FAIL ($0.4366 of $3.00: L40S OOM, vLLM 0.234 nat); both closed 2026-10-28, 0 pods; committed $725.4993 of $740. Owner: logs/budget/decisions.md 2026-10-28.",
  "branch": "research/teacher-modes-and-projected-residual: from stage2/reasoning-data d5f1c6f2 (kept), merged with main 72492e46 (its squash, 2026-10-27)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -32,7 +32,7 @@
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 740.0,
-  "cumulative_spend_usd": 687.4031,
+  "cumulative_spend_usd": 688.5486,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 52.5969,
+  "remaining_usd": 51.4514,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-28T06:30:00Z",
+ "generated_utc": "2026-10-28T10:30:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,10 +123,10 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Maintainer: grant A-E ($3.50) / B-E ($3.00)? On approval: <launcher> grant, issue, commit, stage_bundle, launch (shared.study_engineering).",
+ "next": "Maintainer: Research A's A1-A3? B-E's findings (OOM on the L40S, vLLM consistency) for B1? Nothing starts automatically.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "A-E/B-E on the maintainer's grant (proposals in each study's plans/); $0 readiness in their DESIGN.md",
+  "next_work": "the maintainer's decision on A1-A3 and on B-E's FAIL; runs in each study's runs/, diagnoses in their closeout/diagnosis.md",
   "not_next": "no paid resource without a new maintainer decision. Owner: decisions.md 2026-10-21 (Stage-2/3 round opened at $0).",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D-series CLOSED 2026-10-17 (D1 NO-GO, D2 NO_GO, D3 STRUCTURAL_CHANGE + INCONCLUSIVE probes); forward baseline D1 + scored_v1.",
   "then": "nothing follows automatically: every grant is the maintainer's"
@@ -153,7 +153,7 @@
    "blocker": "none; see the top-level blocker.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line."
   },
   "c2": {

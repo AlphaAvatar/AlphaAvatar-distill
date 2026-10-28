@@ -9,7 +9,7 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A AND B: A-E ($3.50) AND B-E ($3.00) PAID ENGINEERING VALIDATIONS AUTHORIZED (maintainer, 2026-10-28 UTC). A-E: PASS (attempt 2 `ae_20261028_093428`; $0.7089 of $3.50 across two attempts). B-E: in progress.**
+**RESEARCH A AND B: A-E ($3.50) AND B-E ($3.00) PAID ENGINEERING VALIDATIONS AUTHORIZED (maintainer, 2026-10-28 UTC). A-E: PASS (attempt 2 `ae_20261028_093428`; $0.7089 of $3.50 across two attempts). B-E: FAIL (`be_20261028_095332`, $0.4366 of $3.00): trainer smoke OOM on the L40S at the frozen E1 recipe, so resume unmeasured; vLLM median |Δ log-prob| 0.234 > 0.1 nat. Initialization, both fold checks, checkpoint identity and GPU isolation PASS. Both closed; no pod; committed $725.4993 of $740. STOPPED at the maintainer's next decision.**
 Decision record: `logs/budget/decisions.md` 2026-10-28 "A-E ($3.50) and B-E ($3.00) ... authorized". Neither PASS is a scientific GO; A1–A3, B1 and 600M stay unauthorized. The text below is the $0 readiness state the authorization was granted on.
 The maintainer agreed in principle to A-E ($3.50) and B-E ($3.00) and issued no grant
 (`logs/budget/decisions.md` 2026-10-28). Branch `research/teacher-modes-and-projected-residual`; `main` stays at
@@ -4353,7 +4353,7 @@ these by hand; run the deriver.**
 | formal sessions | `$98.8304` of `$256.6523` |
 | GPU engineering | `$3.1804` of `$25.0741` |
 | package | `$102.0108` of `$281.7264` |
-| project cap | `$687.4031` spent of `$740.0000`, leaving `$52.5969` |
+| project cap | `$688.5486` spent of `$740.0000`, leaving `$51.4514` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 3.** 4 ceilings cost `$120.0000` and the formal allowance has `$98.8304`. Dividing the PACKAGE balance instead gives 3, which is the error: the engineering allowance cannot pay for a formal probe.
 
