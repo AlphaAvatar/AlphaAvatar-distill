@@ -1,0 +1,226 @@
+{
+ "schema": "aadistill.campaign_teardown_reconciliation/v1",
+ "written_utc": "2026-10-28T05:38:20+00:00",
+ "snapshot": {
+  "path": "logs/budget/provider/runpod_billing_2026-10-28T0537Z.json",
+  "sha256": "95a93f0a0458c9f4ddcf01b1e88517d2806b66dfaeee0981ce3a126d8afb4f78",
+  "fetched_utc": "2026-10-28T05:37:32+00:00"
+ },
+ "rule": "each pod below is a campaign subrun whose record states no teardown_confirmed; the provider resource listing in the cited snapshot was read and does not contain it, which is the same provider query a launcher's teardown confirmation polls. Re-checked at every read by shared.project_position.reconciled_teardowns",
+ "teardowns": [
+  {
+   "campaign": "logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/campaign.json",
+   "subrun_id": "r0_s1",
+   "pod_id": "2xmyzes6r0vcge",
+   "booked_usd": 1.5074,
+   "provider_billed_usd": 1.505
+  },
+  {
+   "campaign": "logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/campaign.json",
+   "subrun_id": "refcal_s1",
+   "pod_id": "7cr5l46wa7ptfy",
+   "booked_usd": 0.8069,
+   "provider_billed_usd": 0.8049
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_c3/pilots/batching-adoption/v1/campaign.json",
+   "subrun_id": "c3pilot_20260927_a1",
+   "pod_id": "7ucb8jox3buc29",
+   "booked_usd": 0.7209,
+   "provider_billed_usd": 0.7172
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_c3/pilots/batching-adoption/v1/campaign.json",
+   "subrun_id": "c3pilot_20260927_a3",
+   "pod_id": "css25bbu7ueqla",
+   "booked_usd": 0.0391,
+   "provider_billed_usd": 0.0361
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_c3/pilots/batching-adoption/v1/campaign.json",
+   "subrun_id": "c3pilot_20260927_a4",
+   "pod_id": "ks8pm799bytys9",
+   "booked_usd": 0.4765,
+   "provider_billed_usd": 0.474
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_c3/pilots/batching-adoption/v1/campaign.json",
+   "subrun_id": "c3pilot_20260927_a5",
+   "pod_id": "m8t9tf8ftqlmh3",
+   "booked_usd": 2.1113,
+   "provider_billed_usd": 2.1093
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_c3/pilots/packing-optimization/v1/campaign.json",
+   "subrun_id": "c3pack_20260927_b2",
+   "pod_id": "p6doyk8jeydg1u",
+   "booked_usd": 0.7897,
+   "provider_billed_usd": 0.7867
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_c3/pilots/packing-optimization/v1/campaign.json",
+   "subrun_id": "c3pack_20260927_b3",
+   "pod_id": "25kncjfmakxxul",
+   "booked_usd": 0.4863,
+   "provider_billed_usd": 0.4829
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_c3/pilots/packing-optimization/v2/campaign.json",
+   "subrun_id": "c3pack2_20260927_v5",
+   "pod_id": "gbiz85xcmiq6gh",
+   "booked_usd": 0.067,
+   "provider_billed_usd": 0.0637
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_c3/pilots/packing-optimization/v2/campaign.json",
+   "subrun_id": "c3pack2_20260927_v6",
+   "pod_id": "gbiz85xcmiq6gh",
+   "booked_usd": 2.6378,
+   "provider_billed_usd": 0.0637
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json",
+   "subrun_id": "r1",
+   "pod_id": "psl88q7qgqu44t",
+   "booked_usd": 0.155,
+   "provider_billed_usd": 0.1502
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json",
+   "subrun_id": "r2",
+   "pod_id": "02oef2ib958x6j",
+   "booked_usd": 0.2116,
+   "provider_billed_usd": 0.2147
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json",
+   "subrun_id": "r3",
+   "pod_id": "29l0qxxx1i6906",
+   "booked_usd": 0.1844,
+   "provider_billed_usd": 0.1793
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json",
+   "subrun_id": "r4",
+   "pod_id": "0tjfzjnmpf64pn",
+   "booked_usd": 0.2634,
+   "provider_billed_usd": 0.2621
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json",
+   "subrun_id": "r5",
+   "pod_id": "1mgt50aapad7hv",
+   "booked_usd": 0.7156,
+   "provider_billed_usd": 0.722
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json",
+   "subrun_id": "r6",
+   "pod_id": "m0p1decj1an2mc",
+   "booked_usd": 0.84,
+   "provider_billed_usd": 0.8512
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json",
+   "subrun_id": "r7",
+   "pod_id": "mq4hnmcvkdbfgl",
+   "booked_usd": 1.079,
+   "provider_billed_usd": 1.0952
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/campaign.json",
+   "subrun_id": "d1_qual_20261004_131735_s1",
+   "pod_id": "y9ilsahujayqft",
+   "booked_usd": 0.1098,
+   "provider_billed_usd": 0.1081
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/campaign.json",
+   "subrun_id": "d1_qual_20261004_132544_s2",
+   "pod_id": "u99fhssac9f6i7",
+   "booked_usd": 0.9006,
+   "provider_billed_usd": 0.8983
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/campaign.json",
+   "subrun_id": "d1_qual_20261004_142346_s3",
+   "pod_id": "cnzdnn3m890m1f",
+   "booked_usd": 1.6808,
+   "provider_billed_usd": 1.6781
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/campaign.json",
+   "subrun_id": "d1_qual_20261004_160221_s4",
+   "pod_id": "3gvfeqnkbyptc4",
+   "booked_usd": 0.0632,
+   "provider_billed_usd": 0.061
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/campaign.json",
+   "subrun_id": "d1_qual_20261004_160758_s5",
+   "pod_id": "3xs9her5kavk14",
+   "booked_usd": 0.4714,
+   "provider_billed_usd": 0.4691
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/campaign.json",
+   "subrun_id": "a1",
+   "pod_id": "d3zrira2zl98kd",
+   "booked_usd": 0.6382,
+   "provider_billed_usd": 0.6362
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/campaign.json",
+   "subrun_id": "a2",
+   "pod_id": "rtrdbu3wi6sfrv",
+   "booked_usd": 0.8552,
+   "provider_billed_usd": 0.8533
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/campaign.json",
+   "subrun_id": "a3",
+   "pod_id": "5db8r0r06vd5k5",
+   "booked_usd": 0.0985,
+   "provider_billed_usd": 0.0962
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/campaign.json",
+   "subrun_id": "a4",
+   "pod_id": "6g42msvfrzemos",
+   "booked_usd": 0.6105,
+   "provider_billed_usd": 0.6085
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/campaign.json",
+   "subrun_id": "a5",
+   "pod_id": "9rmme5u9yd68g5",
+   "booked_usd": 0.0985,
+   "provider_billed_usd": 0.0962
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/campaign.json",
+   "subrun_id": "a6",
+   "pod_id": "x8gh0lwxlujxcv",
+   "booked_usd": 0.3057,
+   "provider_billed_usd": 0.3033
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/campaign.json",
+   "subrun_id": "a7",
+   "pod_id": "8v4jc1c5mwnipb",
+   "booked_usd": 0.2675,
+   "provider_billed_usd": 0.2653
+  },
+  {
+   "campaign": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/campaign.json",
+   "subrun_id": "a8",
+   "pod_id": "l11v5n0wc2pc7p",
+   "booked_usd": 0.8137,
+   "provider_billed_usd": 0.8115
+  }
+ ],
+ "attribution_notes": [
+  "pod gbiz85xcmiq6gh is named by more than one subrun; the provider bills it once ($0.0637), so at most one of those records is its true cost. The position counts the provider's bill, so committed spend is not understated; the attribution stays unresolved"
+ ],
+ "authorizes": "nothing"
+}

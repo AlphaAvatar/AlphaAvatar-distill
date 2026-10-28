@@ -1,10 +1,12 @@
 """The project position counts engineering-campaign subruns (accounting audit 2026-10-27, finding 3).
 
 A campaign subrun the provider has not billed, inside the posting window, is a
-liability at its booked cost; without a confirmed teardown it refuses the
-position outright; past the window it was never charged. The position on the
-repository's own records and committed snapshot is the issuers' rule plus the
-campaign subruns, against the newest grant's cap.
+liability at its booked cost; past the window it was never charged. Whatever
+its age or posting, a subrun whose teardown is not confirmed -- by its record or
+by a reconciliation that still holds against the snapshot it cites -- refuses
+the position (maintainer, 2026-10-28). The position on the repository's own
+records and committed snapshot is the issuers' rule plus the campaign subruns,
+against the newest grant's cap.
 """
 
 from __future__ import annotations
@@ -53,6 +55,45 @@ def test_an_unposted_subrun_without_a_confirmed_teardown_refuses(tmp_path):
     assert PP.campaign_subruns(tmp_path, posted=set(), now=NOW, expect_pods=("live?",))["unposted"] == []
 
 
+@pytest.mark.parametrize("posted, hours_ago", [(False, 200), (True, 2), (True, 200)])
+def test_an_unconfirmed_teardown_refuses_whatever_the_bill_and_the_age(tmp_path, posted, hours_ago):
+    """Past the posting window or billed, a pod whose teardown nothing confirms may still exist."""
+    _campaign(tmp_path, [_sub("p", hours_ago, confirmed=None)])
+    with pytest.raises(AuthorizationError, match="teardown is not confirmed"):
+        PP.campaign_subruns(tmp_path, posted={"p"} if posted else set(), now=NOW)
+
+
+def _snapshot(root: Path, pods=(), billed=(("p", 0.5),), known=True) -> Path:
+    d = root / "logs/budget/provider"
+    d.mkdir(parents=True, exist_ok=True)
+    f = d / "snap.json"
+    f.write_text(json.dumps({"fetched_utc": NOW.isoformat(), "account": {
+        "resources_known": known, "pods": [{"id": x} for x in pods], "network_volumes": []},
+        "pods": [{"podId": i, "amount": a} for i, a in billed], "networkvolumes": []}))
+    return f
+
+
+def test_a_reconciliation_confirms_a_teardown_and_is_rechecked_at_every_read(tmp_path):
+    _campaign(tmp_path, [_sub("p", 200, confirmed=None), _sub("q", 1, usd=0.25)])
+    snap = _snapshot(tmp_path)
+    doc = PP.write_reconciliation(tmp_path, snap, tmp_path / PP.RECONCILIATIONS / "r.json")
+    assert [r["pod_id"] for r in doc["teardowns"]] == ["p"] and doc["teardowns"][0]["provider_billed_usd"] == 0.5
+    out = PP.campaign_subruns(tmp_path, posted={"p"}, now=NOW)
+    assert out["teardown_confirmed_by"] == {"subrun record": 1, "reconciliation": 1}
+    # the cited snapshot changed after the reconciliation was written: it confirms nothing
+    snap.write_text(snap.read_text().replace('"pods": []', '"pods": [{"id": "p"}]', 1))
+    with pytest.raises(AuthorizationError, match="no longer the cited bytes"):
+        PP.campaign_subruns(tmp_path, posted={"p"}, now=NOW)
+
+
+def test_a_reconciliation_refuses_a_pod_still_listed_or_an_unread_listing(tmp_path):
+    _campaign(tmp_path, [_sub("p", 200, confirmed=None)])
+    with pytest.raises(AuthorizationError, match="still in the provider's inventory"):
+        PP.write_reconciliation(tmp_path, _snapshot(tmp_path, pods=("p",)), tmp_path / "r.json")
+    with pytest.raises(AuthorizationError, match="resource listing was not read"):
+        PP.write_reconciliation(tmp_path, _snapshot(tmp_path, known=False), tmp_path / "r.json")
+
+
 def test_an_unposted_subrun_without_a_cost_refuses(tmp_path):
     _campaign(tmp_path, [_sub("p", 1, usd=None)])
     with pytest.raises(AuthorizationError, match="records no cost"):
@@ -81,6 +122,7 @@ def test_the_position_on_the_repository_is_the_issuers_rule_plus_campaign_subrun
     pos = PP.position(REPO, snapshot=snap)
     camp = pos["campaign_subruns"]
     assert camp["campaigns_scanned"] >= 18 and camp["subruns_with_a_pod"] >= 55
+    assert sum(camp["teardown_confirmed_by"].values()) == camp["subruns_with_a_pod"]
     assert pos["committed_usd"] == round(base["committed_usd"] + sum(u["usd"] for u in camp["unposted"]), 4)
     assert pos["project_cap_usd"] == 740.0            # the newest grant's, not a constant here
     r = PP.readiness(pos, {"A-E": 3.5, "B-E": 3.0})
@@ -97,6 +139,7 @@ def test_position_adds_what_the_campaign_scan_counts(monkeypatch):
     before = PP.position(REPO, snapshot=snap)
     row = {"campaign": "c", "subrun_id": "s", "pod_id": "p", "usd": 1.2345}
     monkeypatch.setattr(PP, "campaign_subruns", lambda *a, **k: {"campaigns_scanned": 1, "subruns_with_a_pod": 1,
+                                                                   "teardown_confirmed_by": {"subrun record": 1},
                                                                    "unposted": [row], "never_posted_not_counted": []})
     after = PP.position(REPO, snapshot=snap)
     assert after["committed_usd"] == round(before["committed_usd"] + 1.2345, 4)

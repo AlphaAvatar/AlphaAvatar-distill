@@ -8,7 +8,12 @@ belongs to the stage that owns the question it answers.
 the calibration and dataset registries, the recipes, the recovery policy, the
 preflight harness, the deployment relay, the cost model, the run-layout
 convention (`shared.run_layout`, which also owns `resolve_historical` — the
-old-path → current-path lookup over `logs/index.json :: historical_paths.map`).
+old-path → current-path lookup over `logs/index.json :: historical_paths.map`),
+the project's committed spend as the provider bills it
+(`shared.project_position`), and a research study's engineering validation —
+grant, cumulative envelope, one-use authorization, launch gates, session and
+closeout (`shared.study_engineering`; Research A's `ae_launch.py` and Research
+B's `be_launch.py` declare the instances).
 
 **Subpackages** are the CLI capabilities:
 

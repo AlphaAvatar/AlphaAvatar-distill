@@ -65,6 +65,8 @@ SESSION_LAUNCHERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     #: volume, so `session_args` fills them (P1g sorts first and builds). Its
     #: own run id: both H1 launchers file under one experiment's run layout.
     ("h1_unit_launch", ("--run-id", "h1_units_spec_check")),
+    ("ae_launch", ("--run-id", "ae_spec_check")),
+    ("be_launch", ("--run-id", "be_spec_check")),
 )
 
 

@@ -267,6 +267,41 @@ The application lists the full set. In short:
 - the recovery and evaluation drivers;
 - the analysis.
 
+## 11. A-E: the engineering validation
+
+A-E checks, on one A100-SXM4-80GB, what a host cannot: the real hybrid teacher
+in both official modes, the engine, real memory and real step time. It is not
+a scientific run. No document it builds is training data, no correctness is
+reported, and nothing it measures changes this design. A-E uses
+`document_isolated` only and adds no cross-context comparison.
+
+- **Driver:** [`engineering_validation.py`](../../../../scripts/stages/stage-2/teacher_modes/engineering_validation.py).
+- **Check config:** [`engineering_validation.json`](../../../../configs/stages/stage-2/teacher_modes/engineering_validation.json).
+  It fixes every task id, threshold and numeric setting before the run, and
+  the issuer binds it into the study identity.
+
+| check | what runs | passes when |
+|---|---|---|
+| prompt identity | four T0 tasks (one per axis) and four eval-set-1 items, rendered with the official hard switch only | the chat template is teacher_identity.json's, every prompt ends in its mode's generation prompt and leaves its mode's think state, the teacher's files and weight shards match the identity |
+| generation | the teacher under vLLM 0.27.1 in both modes: token ids in, each mode's official sampling preset, the same seed per task in both modes. T0 allowance: A1's data-construction limit (8,184 minus the prompt). Eval items: the full remaining context (P18) | the engine echoed every prompt's ids, every turn ended on a stop id or is recorded at its limit, no non-thinking output holds a think delimiter, each mode yields documents |
+| teacher forward | the documents in an isolated pack at 8,192, against each document alone, at every target position, in fp32 (TF32 off) and bf16, both modes; and the engine's teacher-forced log-probabilities of the same ids | bf16 packed-vs-alone ≤ 2× the documents' own bf16-vs-fp32 difference; fp32 packed-vs-alone ≤ 0.1× it; the engine's mean log-probability difference from the HF fp32 forward ≤ 4× the HF bf16 one |
+| assistant-target KL | the trainer's `kd_scope` `assistant` mask on the pack | the KD positions are exactly the generated tokens (no system, user, header, prefill, padding or cross-document position); positions restart at every document; KL(teacher ‖ teacher) = 0; the stand-in student's KD is finite and counts the target tokens |
+| trainer smoke | 20 steps of H1-PA's recipe with this design's declared changes (`kd_scope` `assistant`, `batch.context_strategy` `document_isolated`, the hybrid teacher on the fly) on H1-PA's PCA-Original seed-20260726 checkpoint as a stand-in student | finite losses; every step isolated, with KD positions equal to CE targets; the config differs from E1's only in the declared keys; the student's bytes are the declared ones. Step time and peak memory are recorded |
+| non-thinking scoring | the eval-item turns through eval-set-1's frozen scorers under their recorded think state | every record is read in its mode's state; no well-formed record is a protocol violation; a delimiter in a non-thinking reply is one; without `think_state` the same reply keeps the historical rule; evaluation_identity.json regenerates unchanged |
+
+**Process isolation.** The parent process never initializes CUDA. The PyTorch
+work runs in child processes that exit before the next GPU user starts. vLLM
+runs through `shared.validation.vllm_check.run_isolated`, which reads the GPU
+first and refuses while any compute process holds it. The engine runs before
+the PyTorch phases, so the GPU is read and recorded again before each phase.
+
+**Verdict.** `verdict(out, config)` re-derives every status from the evidence
+files and the config alone. The pod writes it as `report.json`; the dev box
+re-runs it on the secured copy.
+
+The driver also runs end to end on a host (`--tiny`): random small models at
+the real vocabulary, and the engine NOT_RUN, or a stand-in engine in the tests.
+
 ## Reproduce ($0)
 
 ```bash
@@ -278,6 +313,8 @@ PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/eva
     --write configs/stages/stage-2/teacher_modes/evaluation_identity.json
 PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/forecast_cost.py \
     --write logs/stages/stage-2/teacher_modes/plans/cost_forecast.json
+PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/engineering_validation.py \
+    --run-id host --out /tmp/ae/out --work /tmp/ae/work --status /tmp/ae/status --tiny
 PYTHONPATH=src:scripts:tests .venv/bin/python -m pytest -q tests/data/test_token_documents.py \
     scripts/stages/stage-2/teacher_modes/tests
 ```

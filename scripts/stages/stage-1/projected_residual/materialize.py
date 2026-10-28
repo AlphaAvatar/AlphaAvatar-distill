@@ -20,8 +20,16 @@ exercises every line below except the hub download. Steps, each recorded:
    that basis fits each layer's input AND output subspaces;
 4. the projected student (``W0``'s weights with ``P_l`` folded in), saved with
    ``save_pretrained``, its weights hashed;
-5. the fold check: the student against its folded stock-Qwen3 form on a fixed
-   probe, float32 and bfloat16, so the evaluation route is measured before use.
+5. the STRUCTURAL fold check, on the CPU in float32: the student against its
+   folded stock-Qwen3 form on the first calibration item's first 256 tokens.
+   It asks whether the fold computes the same function (a transposed or
+   misplaced projection moves logits by their own magnitude; a correct fold by
+   float32 rounding), not how the evaluation device rounds it.
+
+Device numerics are a separate measurement: `fold_numerics` runs both forms ON
+the evaluation device, float32 and bfloat16, over a fixed probe, and returns
+what design.json :: evaluation.fold_acceptance compares. A CPU bfloat16 figure
+is never a stand-in for it (the B-E driver runs it on the L40S).
 
 Nothing here trains, evaluates or selects; the selection is an input.
 """
@@ -130,7 +138,7 @@ def run(design: dict, out: Path, *, device: str, tiny: bool,
     out.mkdir(parents=True, exist_ok=True)
     student.save_pretrained(out / "model")
     shards = sorted((out / "model").glob("*.safetensors"))
-    # the fold check, on the first item's first 256 tokens
+    # the structural fold check: CPU, float32, the first item's first 256 tokens
     probe = torch.tensor([items[0]["ids"][:256]], device="cpu")
     student_cpu = student.to("cpu")
     folded = fold_to_qwen3(student_cpu, dtype=torch.float32)
@@ -138,10 +146,8 @@ def run(design: dict, out: Path, *, device: str, tiny: bool,
         a = student_cpu(probe, use_cache=False).logits
         b = folded(probe, use_cache=False).logits
         fold_fp32 = float((a - b).abs().max())
-        a16 = student_cpu.to(torch.bfloat16)(probe, use_cache=False).logits.float()
-        b16 = folded.to(torch.bfloat16)(probe, use_cache=False).logits.float()
-        fold_bf16 = float((a16 - b16).abs().max())
-        bf16_vs_fp32 = float((a16 - a).abs().max())
+        logit_scale = float(a.abs().max())
+    del folded
     geom = {k: getattr(student.config, k) for k in ("vocab_size", "hidden_size", "internal_size",
                                                     "intermediate_size", "num_hidden_layers", "num_attention_heads",
                                                     "num_key_value_heads", "head_dim", "tie_word_embeddings")}
@@ -158,12 +164,69 @@ def run(design: dict, out: Path, *, device: str, tiny: bool,
         "weights": [{"file": p.name, "sha256": file_sha256(p)} for p in shards],
         "config_sha256": file_sha256(out / "model" / "config.json"),
         "per_layer": diags,
-        "fold_check": {"probe_tokens": int(probe.shape[1]), "max_abs_logit_diff_fp32": fold_fp32,
-                       "max_abs_logit_diff_bf16": fold_bf16, "bf16_vs_fp32_same_model": bf16_vs_fp32},
+        "structural_fold_check": {"device": "cpu", "dtype": "float32", "probe_tokens": int(probe.shape[1]),
+                                  "max_abs_logit_diff": fold_fp32, "max_abs_logit": logit_scale,
+                                  "relative": fold_fp32 / logit_scale if logit_scale else None,
+                                  "_": "whether the fold is the same function; device numerics are fold_numerics'"},
         "timings": timings, "device": device,
     }
     (out / "materialization.json").write_text(json.dumps(record, indent=1) + "\n")
     return record
+
+
+def fold_numerics(student, folded, probes: list[list[int]], *, device: str, factor: float) -> dict:
+    """The factored student against its fold, BOTH on `device`, float32 then bfloat16.
+
+    `probes` are token-id prompts, run one at a time (no padding). Per prompt and
+    over all positions: the fold's float32 difference, its bfloat16 difference,
+    the factored model's own bfloat16-vs-float32 difference (the reference error
+    design.json :: evaluation.fold_acceptance scales), and, as diagnostics only,
+    the mean bfloat16 difference and argmax agreement. `criterion_met` is the
+    acceptance: max |folded_bf16 - factored_bf16| <= factor x max |factored_bf16 -
+    factored_fp32|. Both models are cast to bfloat16 IN PLACE at the end; the
+    caller passes copies it can lose. The device is whatever the models are on;
+    the caller records which card that was.
+    """
+    import torch
+
+    with torch.no_grad():
+        return _fold_numerics(student, folded, probes, device=device, factor=factor)
+
+
+def _fold_numerics(student, folded, probes, *, device, factor):
+    import torch
+
+    student, folded = student.to(device).eval(), folded.to(device).eval()
+    ref = []
+    for ids in probes:
+        x = torch.tensor([ids], device=device)
+        a = student(x, use_cache=False).logits.float()
+        b = folded(x, use_cache=False).logits.float()
+        ref.append((a.cpu(), float((a - b).abs().max())))
+        del a, b
+    student.to(torch.bfloat16)
+    folded.to(torch.bfloat16)
+    rows = []
+    for ids, (a, fp32_diff) in zip(probes, ref):
+        x = torch.tensor([ids], device=device)
+        a16 = student(x, use_cache=False).logits.float().cpu()
+        b16 = folded(x, use_cache=False).logits.float().cpu()
+        d = (a16 - b16).abs()
+        rows.append({"tokens": len(ids), "fold_fp32_max_abs": fp32_diff, "fold_bf16_max_abs": float(d.max()),
+                     "fold_bf16_mean_abs": float(d.mean()), "bf16_vs_fp32_max_abs": float((a16 - a).abs().max()),
+                     "argmax_agree_bf16": float((a16.argmax(-1) == b16.argmax(-1)).float().mean()),
+                     "argmax_agree_folded_bf16_vs_factored_fp32": float((b16.argmax(-1) == a.argmax(-1))
+                                                                         .float().mean())})
+    n = sum(r["tokens"] for r in rows)
+    out = {"prompts": rows, "positions": n,
+           "max_abs_logit_diff_fp32": max(r["fold_fp32_max_abs"] for r in rows),
+           "max_abs_logit_diff_bf16": max(r["fold_bf16_max_abs"] for r in rows),
+           "bf16_vs_fp32_same_model": max(r["bf16_vs_fp32_max_abs"] for r in rows),
+           "diagnostics": {"mean_abs_logit_diff_bf16": sum(r["fold_bf16_mean_abs"] * r["tokens"] for r in rows) / n,
+                           "argmax_agreement_bf16": sum(r["argmax_agree_bf16"] * r["tokens"] for r in rows) / n},
+           "factor": factor}
+    out["criterion_met"] = out["max_abs_logit_diff_bf16"] <= factor * out["bf16_vs_fp32_same_model"]
+    return out
 
 
 def main(argv=None) -> int:
@@ -175,7 +238,7 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     design = json.loads((REPO / a.design).read_text()) if not a.tiny else {}
     rec = run(design, Path(a.out), device=a.device, tiny=a.tiny)
-    print(json.dumps({k: rec[k] for k in ("num_parameters", "num_parameters_cost_model", "fold_check",
+    print(json.dumps({k: rec[k] for k in ("num_parameters", "num_parameters_cost_model", "structural_fold_check",
                                           "timings")}, indent=1))
     return 0
 

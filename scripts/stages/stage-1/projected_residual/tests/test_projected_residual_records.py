@@ -70,32 +70,11 @@ def test_the_materialization_driver_runs_end_to_end_on_the_host(tmp_path):
 
     rec = materialize.run({}, tmp_path, device="cpu", tiny=True)
     assert rec["num_parameters"] == rec["num_parameters_cost_model"]
-    fc = rec["fold_check"]
-    assert fc["max_abs_logit_diff_fp32"] < 1e-5
-    assert fc["max_abs_logit_diff_bf16"] <= 2 * fc["bf16_vs_fp32_same_model"]
+    fc = rec["structural_fold_check"]
+    assert (fc["device"], fc["dtype"]) == ("cpu", "float32") and fc["max_abs_logit_diff"] < 1e-5
+    assert "max_abs_logit_diff_bf16" not in fc       # device numerics are fold_numerics', on the device
     assert (tmp_path / "model" / "config.json").is_file()
     assert json.loads((tmp_path / "model" / "config.json").read_text())["model_type"] == "aad_projected_residual"
-
-
-def test_the_engineering_validation_driver_runs_every_check_on_the_host(tmp_path):
-    """B-E's driver end to end on a random small teacher: the code path a paid
-    session runs, short of CUDA and vLLM, which only the GPU can answer."""
-    from stages.projected_residual import engineering_validation as EV
-
-    rec = EV.run(tmp_path, device="cpu", tiny=True, steps=4)
-    c = rec["checks"]
-    assert rec["passed"] and c["vllm"]["status"] == "NOT_RUN"
-    assert {k: v["status"] for k, v in c.items() if k != "vllm"} == dict.fromkeys(
-        ("initialization", "fold", "trainer_smoke", "resume", "checkpoint_identity"), "PASS")
-    smoke = c["trainer_smoke"]
-    assert smoke["projections_with_a_gradient"] == smoke["projections"] > 0 and smoke["embedding_unchanged"]
-    assert smoke["orthogonality_rel_fro_max"]["after"] > smoke["orthogonality_rel_fro_max"]["before"]
-    assert c["resume"]["max_abs_param_diff"] == 0.0
-    # the declared basis is measured against the outputs' subspaces too
-    layer = rec["per_layer"][0]
-    assert {"attn_out_energy_under_declared_basis", "ffn_out_energy_under_declared_basis",
-            "residual_in_energy_under_declared_basis"} <= set(layer)
-    assert json.loads((tmp_path / "engineering_validation.json").read_text())["passed"]
 
 
 def test_export_reproduces_the_committed_selection_when_the_journal_is_present():

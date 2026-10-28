@@ -416,15 +416,20 @@ def min_free_gib() -> int:
     standing disk policy and must not be inherited by an operation with a
     different footprint: a larger student, a longer battery or a sweep that
     retains more per test needs its own number, measured the same way. Override
-    with `AAD_PODSIM_MIN_FREE_GIB` when the workload is known to differ, which
-    is the supported way to say so rather than editing this function.
+    with `AAD_PODSIM_MIN_FREE_GIB` when the workload is known to need MORE,
+    which is the supported way to say so rather than editing this function.
+
+    An override RAISES the floor and never lowers it (maintainer, 2026-10-28):
+    a dev box short of space does not make a real sweep's footprint smaller, and
+    a lowered floor is how a sweep fills the disk. The test suite's own
+    simulator runs have their own floor (`tests/support/podsim.py`,
+    `AAD_TEST_PODSIM_MIN_FREE_GIB`) and never read this one.
     """
-    override = os.environ.get("AAD_PODSIM_MIN_FREE_GIB")
-    if override:
-        return int(override)
     measured_tmp_gib = 4      # observed peak of one full-suite tmp_path tree
     headroom_gib = 16         # what a wrong estimate must not be able to eat
-    return measured_tmp_gib * 2 + headroom_gib
+    derived = measured_tmp_gib * 2 + headroom_gib
+    override = os.environ.get("AAD_PODSIM_MIN_FREE_GIB")
+    return max(derived, int(override)) if override else derived
 
 
 def check_invocation_matches(contract, setup_env, pytest_cmd, child_env):

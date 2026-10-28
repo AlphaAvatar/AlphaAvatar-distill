@@ -15,15 +15,18 @@
    "gpu": "NVIDIA L40S (one pod)",
    "what": [
     "download Qwen/Qwen3-4B-Thinking-2507@768f209d; build W0 from d4_top1_selection.json; per-layer statistics over calib.s0v_base_d4@v1; the 28 bases; the 902,911,488-parameter student; its identity",
-    "the fold check in bf16 on eval-set-1 prompts against design.json :: evaluation.fold_acceptance",
+    "the CPU float32 structural fold check (relative max |diff| <= 1e-3), kept as the structural check only",
+    "the CUDA fold numerics on the L40S: factored and folded both on the device, fp32 and bf16, on 7 fixed eval-set-1 prompts (four fluid_reasoning_720 dev items, two gsm8k, one math500; ids and token-id sha256 fixed in the check config); max |folded bf16 - factored bf16| <= 2 x the factored model's own bf16-vs-fp32 difference (design.json :: evaluation.fold_acceptance); TF32 off, sdpa, a different card FAILS",
     "a 20-step trainer smoke at the recipe's exact shape (batch 2 x 8,192, micro-batch 1, bf16 autocast, gradient checkpointing, the on-the-fly teacher): step time and peak memory against the 48 GB card",
-    "save / reload / resume on CUDA bit-exact; projection orthogonality logged",
-    "the folded checkpoint under vLLM 0.27.1: load, and a handful of eval-set-1 prompts generated"
+    "save / reload / resume on CUDA bit-exact; projection orthogonality logged; checkpoint identity",
+    "the folded checkpoint under vLLM 0.27.1 in its own process, started only on a GPU no earlier check holds (nvidia-smi: no compute process, <= 1 GiB in use): load, the 7 prompts greedy for 128 tokens (an engineering load and consistency check, not a measurement), the engine's teacher-forced log-probs against the HF folded bf16 reference on the same card (median |delta| <= 0.1 nat, >= 98% top-1 agreement where the reference leads by >= 1 nat)"
    ],
    "passes_when": "every item above completes, the fold check passes, and the measured step time and evaluation throughput reprice B1 inside its cap",
    "fits_the_current_cap": "yes: committed $724.345 + $3.00 = $727.345 <= $740",
-   "driver": "scripts/stages/stage-1/projected_residual/engineering_validation.py (checks and criteria in its docstring and in DESIGN.md section 8)",
-   "host_dry_run": "every check PASS except vllm NOT_RUN (scripts/stages/stage-1/projected_residual/tests/test_projected_residual_records.py)"
+   "driver": "scripts/stages/stage-1/projected_residual/engineering_validation.py; check config configs/stages/stage-1/projected_residual/engineering_validation.json (every threshold, the probe and the numeric identity fixed in advance); verdict re-derived from the evidence at closeout",
+   "host_dry_run": "the driver end to end on the host through the real parent/child orchestration (scripts/stages/stage-1/projected_residual/tests/test_be_driver.py); the issuer and the launcher's $0 gates against the provider read live (logs/stages/stage-1/projected_residual/validations/b-e/dry_runs/)",
+   "launcher": "scripts/stages/stage-1/projected_residual/be_launch.py on shared.study_engineering: the grant and its envelope, the one-use authorization, the live project position at issue and at launch, the shared session runner (watchdog, hard deadline from the accepted price, setup with the pinned train and vLLM environments, the evidence relay on every poll, teardown and the provider's confirmation), closeout",
+   "grant_proposal": "logs/stages/stage-1/projected_residual/plans/engineering_grant_proposal.json (status proposed; the maintainer's 2026-10-28 agreement in principle, no paid authorization)"
   },
   {
    "id": "B1",
@@ -39,17 +42,17 @@
  ],
  "total_hard_cap_usd": 24.0,
  "project_position": {
-  "source": "logs/budget/audits/accounting_audit_2026-10-27.json",
-  "committed_usd": 724.345,
+  "source": "logs/budget/provider/runpod_billing_2026-10-28T0537Z.json through shared.project_position (campaign teardowns confirmed by logs/budget/reconciliations/campaign_teardowns_2026-10-28.json)",
+  "committed_usd": 724.3538,
   "cap_usd": 740.0,
-  "headroom_usd": 15.655,
-  "note": "the account balance ($139.24) is not a grant"
+  "headroom_usd": 15.6462,
+  "note": "the account balance ($139.18) is not a grant"
  },
  "owed_engineering_before_the_first_paid_action": [
-  "the study's issuer: one grant, one cumulative envelope, one-use authorizations, built on scripts/shared/project_position.py, which reads the provider live at every issue and launch and counts engineering-campaign subruns among unposted sessions (accounting audit finding 3, FIXED 2026-10-27; logs/budget/audits/accounting_audit_2026-10-27T1913Z.json)",
-  "the session chain: launcher, driver and their registries (session kind dispatch, pod test selection, environment record), with a $0 dry run of the success closeout",
+  "B-E: DONE at $0 2026-10-28 -- the issuer (shared.study_engineering via be_launch.py), the session chain and its registries (the setup branch stage1_projected_residual, the launcher-contract registry), the driver's corrections; what remains is the maintainer's grant, then the bundle of the session commit on the relay",
+  "B1's own issuer and its formal session chain (after B-E passed and the preregistration frozen)",
   "the recovery driver: D4-Augmented's recipe derivation with the trainable-pattern extension as the only further change, checked against D4-Augmented's recorded recipe identity per seed",
-  "the evaluation route: fold, fold acceptance, and the folded checkpoint's identity, wired into the H1-PA evaluation driver",
+  "the evaluation route: fold, fold acceptance (materialize.fold_numerics, the same code B-E runs), and the folded checkpoint's identity, wired into the H1-PA evaluation driver",
   "the analysis: h1_statistics on P with the registered constants and the full eval-set-1 table"
  ],
  "never": [

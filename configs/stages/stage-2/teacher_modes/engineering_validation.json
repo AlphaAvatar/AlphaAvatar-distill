@@ -1,0 +1,93 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.engineering_validation_config/v1",
+ "study": "A-E",
+ "_contract": "What A-E (Research A's engineering validation) runs and every criterion it is judged by, fixed before any GPU run and bound into the study identity by the issuer. Read by scripts/stages/stage-2/teacher_modes/engineering_validation.py, whose `verdict` re-derives each status from the run's evidence files and the values here. Nothing here is a scientific result or a capability measurement; no document A-E builds is training data, no correctness is reported. AUTHORIZES NOTHING.",
+ "design": "configs/stages/stage-2/teacher_modes/design.json",
+ "teacher_identity": "configs/stages/stage-2/teacher_modes/teacher_identity.json",
+ "evaluation_identity": "configs/stages/stage-2/teacher_modes/evaluation_identity.json",
+ "teacher": {
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "_": "design.json :: teacher; its small files and weight shards are checked against teacher_identity.json on the pod"
+ },
+ "modes": {
+  "H-T": {"identity_mode": "thinking", "think_state": "self_opening"},
+  "H-N": {"identity_mode": "non_thinking", "think_state": "preclosed"}
+ },
+ "t0": {
+  "list": "logs/stages/stage-2/reasoning_data/plans/generation_inputs/generation_input_g0.jsonl",
+  "list_sha256": "424934ac16103aa2e304db87ae1a8deca4fc0f6202215750a105a746ef023445",
+  "task_ids": ["37b3c6f1bd3da5ff03fc", "76af5e23ee0a7e4961f8", "bc2c5eea29dd0e735f5b", "e9975d122ae49378b8c9"],
+  "_task_ids": "the shortest single-turn task of four T0 families, one per axis: prontoqa/fictional (task-contained deduction), list.dedupe (inductive rule discovery), comp.chain3 (compositional generalization), prealgebra (supporting math); design.json :: tasks.T0's P1 list, the same task ids in both modes",
+  "system_message_rule": "aadistill.data.sessions.split_system: a task's own system message kept, else SYSTEM_DEFAULT ('You are a helpful Assistant.')"
+ },
+ "eval_items": [
+  {"component": "stage3_capability_846", "unit": "gsm8k", "id": "gsm8k-test-00595"},
+  {"component": "stage3_capability_846", "unit": "gsm8k", "id": "gsm8k-test-00679"},
+  {"component": "fluid_reasoning_720", "unit": "dev_v1", "id": "1b0c04a940768bc47bfd"},
+  {"component": "fluid_reasoning_720", "unit": "dev_v1", "id": "92605f5a9c93f033437b"}
+ ],
+ "_eval_items": "four eval-set-1 items (the two shortest gsm8k prompts; the shortest static dev_v1 items of the inductive and deductive axes), generated in both modes ONLY to put real hybrid records through the frozen scorers under their declared think state. Never a capability measurement: correctness is neither stored nor reported, and these generations never become documents (eval-set-1 is held out from every training set)",
+ "generation": {
+  "engine": {"dtype": "bfloat16", "max_model_len": 40960, "gpu_memory_utilization": 0.85, "seed": 0, "enforce_eager": false},
+  "_max_model_len": "the teacher's resolved supported context: max_position_embeddings 40,960 (design.json :: evaluation.context)",
+  "t0_session_limit": 8184,
+  "_t0_session_limit": "a T0 turn's allowance is 8,184 - its prompt, A1's data-construction limit (configs/stages/stage-2/reasoning_data/generation_protocol.json :: allowance: the 8,192 training sequence less the 8-token margin); a turn that reaches it is recorded length_limited, never cut, and does not become a document (P17)",
+  "eval_allowance": "the full remaining context, max_model_len - prompt (P18); a turn that reaches it is recorded context_limit_reached",
+  "seed_base": 20261028,
+  "seed_rule": "run_battery.request_seed(seed_base, task_id, turn): the SAME seed for the same (task, turn) in both modes (design.json :: generation.seeds); one candidate",
+  "sampling": "design.json :: generation.sampling[mode], each mode's official preset, plus seed, max_tokens and stop_token_ids",
+  "stop_ids": [151645, 151643],
+  "think_ids": [151667, 151668],
+  "synthetic_turn_ids": {
+   "reasoning": [25139, 287, 911, 279, 5912, 13],
+   "answer": [785, 4226, 374, 1124, 79075, 90, 16, 17, 7810],
+   "_": "the teacher tokenizer's ids of 'Reasoning about the rule.' and 'The answer is \\boxed{12}.': the turns that stand in when the engine did not run (a host run, or a failed engine), so every later check still runs; recorded synthetic, and the generation check is then NOT_RUN (host) or FAIL (pod)"
+  }
+ },
+ "teacher_forward": {
+  "sequence_length": 8192,
+  "order_seed": 20261028,
+  "pad_id": 151643,
+  "attn_implementation": "sdpa",
+  "fp32": {"allow_tf32": false, "float32_matmul_precision": "highest"},
+  "bf16_k": 2.0,
+  "_bf16_k": "per mode, packed-vs-alone max |logit difference| at the target positions in bf16 must not exceed bf16_k x the bf16-vs-fp32 max difference of the documents run ALONE (the unpacked reference). Packed and alone bf16 runs each carry bf16 rounding of about that size, so their difference is bounded by roughly twice it; a conditioning error (a neighbour document visible, a position not restarted) moves logits by O(1) or more",
+  "fp32_fraction_of_bf16_reference": 0.1,
+  "_fp32": "per mode, packed-vs-alone max |logit difference| in fp32 (TF32 off) must not exceed 0.1 x the same bf16 reference. In exact arithmetic the two are equal; in fp32 only the reduction order differs (2^-23 relative per operation against bf16's 2^-8), so a real fp32 difference sits orders of magnitude below the bf16 one, and a factor of 10 still separates it from any conditioning error",
+  "engine_mean_k": 4.0,
+  "_engine": "per mode, the engine's teacher-forced log-probability of every target token (prompt_logprobs over the document's own ids) against the HF fp32 forward of the document alone: mean |difference| must not exceed engine_mean_k x the mean |bf16 - fp32| of the HF forward on the same tokens. Two bf16 implementations of one function differ by rounding of comparable size; a different function (a wrong RoPE base, head layout or tied head) differs by about a nat or more. The maximum and p99 are reported beside it, not gated"
+ },
+ "assistant_target_kl": {
+  "kd_scope": "assistant",
+  "_": "the trainer's prediction_mask(target_mask, 'assistant', content) must equal the documents' generated-token layout exactly; KL(teacher || teacher) on it must be 0; the stand-in student's KD on it must be finite and count exactly the target tokens"
+ },
+ "trainer_smoke": {
+  "steps": 20,
+  "warmup_steps_excluded": 2,
+  "e1_config": "configs/stages/stage-3/e1/e1_r2960k_sa_pca.json",
+  "_e1_config": "H1-PA's recipe for seed 20260726 (configs/stages/stage-2/reasoning_data/h1pa.json :: recipe.e1_configs)",
+  "declared_changes": ["batch.context_strategy", "checkpoint.save_every", "device", "intervals.eval_blocks", "intervals.eval_every", "intervals.log_every", "loss.kd_scope", "out_dir", "run_name", "_purpose", "schedule.total_steps", "schedule.warmup_steps", "student_path", "teacher.model_id", "teacher.revision"],
+  "_declared_changes": "design.json :: recovery.declared_changes_from_h1pa (kd_scope assistant, batch.context_strategy document_isolated, the hybrid teacher on the fly, the stand-in student's path) plus where and how long a smoke runs; every other key of the E1 config, nested keys included, unchanged",
+  "documents": "the A-E T0 documents of both modes in one isolated pack at 8,192 (generated by the teacher in this run; synthetic only when the engine did not run, recorded). A timing and memory smoke: the formal arms train one mode each",
+  "student": {
+   "stand_in": "H1-PA PCA-Original seed 20260726, E1's PCA checkpoint (configs/stages/stage-2/reasoning_data/h1pa.json :: relay_inputs.pca_original.20260726): a stand-in for step time and memory only, never trained on as a result",
+   "model_safetensors_sha256": "3f08482c2c8e7372fc87fd2496f50c1c618f61feaec021d73c0cc646413b80c3"
+  }
+ },
+ "preclosed_scoring": {
+  "_": "each eval record is built the way run_battery records a turn (raw decoded with special tokens, think_state from the rendered prompt) and scored by shared.evaluation.eval_set_scoring.ADAPTERS under its component's formal protocol. PASS: every record reads its declared think state; no structurally well-formed record (ended on a stop id; H-N: no think delimiter; H-T: one <think> first and one </think> after it) is a protocol violation; any H-N continuation holding a delimiter is one; the same H-N reply without think_state keeps the historical rule (think_delimiters_invalid); a </think> inserted into an H-N reply is refused; at least one well-formed record per mode; evaluation_identity.json regenerates to the committed document"
+ },
+ "timeouts_s": {"engine": 2400, "teacher": 2400, "train": 2400},
+ "tiny": {
+  "sequence_length": 512,
+  "steps": 3,
+  "warmup_steps_excluded": 1,
+  "max_model_len": 4096,
+  "t0_session_limit": 4088,
+  "extra_declared_changes": ["block_len"],
+  "model": {"vocab_size": 151936, "hidden_size": 16, "num_hidden_layers": 2, "intermediate_size": 32, "num_attention_heads": 2, "num_key_value_heads": 1, "head_dim": 8, "max_position_embeddings": 4096, "rope_theta": 1000000},
+  "_": "the host path: random small teacher and student at the real vocabulary, so every token id is the real one; the real tokenizer when it is cached, else a stand-in of the template's structure; the engine NOT_RUN unless a stand-in engine script is given (tests only)"
+ },
+ "authorizes": "nothing"
+}

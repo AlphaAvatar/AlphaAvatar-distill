@@ -179,6 +179,13 @@ class TestASessionWithItsOwnStagedViewHasItsOwnEntry:
         #: by the launcher and by setup's own branch, and the pod runs no
         #: repository suite.
         "h1_unit_launch",
+        #: Research A's and B's engineering validations (2026-10-28,
+        #: `shared.study_engineering`), for the same reasons: each study's typed
+        #: artifact binds its study identity and the harness, checked by the
+        #: launcher, by setup's own branch and against the session commit, and
+        #: the pod runs no repository suite (no TESTS_OK).
+        "ae_launch",
+        "be_launch",
     })
 
     def test_every_session_launcher_is_either_registered_or_named(self):

@@ -1,0 +1,29 @@
+{
+ "schema": "aadistill.study_engineering_grant/v1",
+ "status": "proposed",
+ "study": "B-E",
+ "proposed_utc": "2026-10-28",
+ "maintainer_position": "2026-10-28: agreed in principle to proceed with A-E and B-E, paid authorization NOT issued; B-E's $3.00 hard cap kept as the proposed scope (Research A/B Engineering Readiness Review)",
+ "granted_by": "nobody: a proposal, not a grant",
+ "decision": "PENDING the maintainer's explicit approval",
+ "ceiling_usd": 3.0,
+ "per_session_hard_cap_usd": 3.0,
+ "project_cumulative_cap_usd": 740.0,
+ "gpu": "NVIDIA L40S",
+ "max_price_usd_per_hour": 1.14,
+ "_max_price": "the highest secure price at which the planned session (25 min setup + 5 transfer + 75 validation, x1.25, + reserves) stays inside $3.00 all in (shared.study_engineering.all_in); quoted $1.09/h, stock Low, 2026-10-28T05:40Z. A higher quote is refused at $0",
+ "scope": "Research B's engineering validation of the 900M projected-residual student on one pod: design.json's materialization on Qwen3-4B-Thinking-2507@768f209d, the CUDA fp32/bf16 fold check on fixed eval-set-1 prompts, a 20-step trainer smoke at the recipe's shape, bit-exact resume and checkpoint identity on CUDA, and the folded checkpoint under vLLM 0.27.1 on fixed prompts against the HF reference, in a process that starts only on a GPU the earlier checks no longer hold; scripts/stages/stage-1/projected_residual/engineering_validation.py",
+ "retries": "ordinary pre-science engineering failures are repaired and rerun as new runs with new one-use artifacts inside this one cumulative envelope (P12.1); a deterministic failure is not retried unchanged",
+ "application": "logs/stages/stage-1/projected_residual/plans/application.json",
+ "never": [
+  "a GPU, a pod or a network volume before the maintainer's explicit approval writes the grant",
+  "formal training, teacher-data generation, recovery or evaluation; nothing it produces is a result or enters a GO decision",
+  "another grant's unspent remainder, or the account balance, as funds",
+  "raising the $740 project cap",
+  "a merge to main",
+  "any 600M work"
+ ],
+ "to_grant": "on the maintainer's explicit approval only: `be_launch.py grant --decision '<the approval, quoted>' --granted-by maintainer` writes logs/budget/approvals/projected_residual_engineering_grant.json from this proposal with the study identity at that commit",
+ "authorizes": "nothing",
+ "_application": "bound by sha256 when the grant is written (shared.study_engineering.write_grant)"
+}

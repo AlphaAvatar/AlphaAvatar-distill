@@ -168,22 +168,33 @@ scaled from D4-Augmented's measured sessions:
 fits the current $740 cap. One driver,
 [`engineering_validation.py`](../../../../scripts/stages/stage-1/projected_residual/engineering_validation.py),
 runs every check and writes one record; it trains no student that is kept and
-evaluates nothing on eval-set-1.
+scores nothing. Every threshold, the probe and the numeric identity are fixed
+in advance in
+[`engineering_validation.json`](../../../../configs/stages/stage-1/projected_residual/engineering_validation.json),
+and `verdict` re-derives every status from the evidence and that file alone.
 
 | check | measures | passes when |
 | --- | --- | --- |
-| initialization | the real materialization; the declared basis's captured energy per layer on the input roles, and on `residual_in` and the sub-layers' outputs (`attn_out`, `ffn_out`) | it completes; counted parameters equal the cost model's |
-| fold | factored against folded stock Qwen3, fp32 and bf16 | bf16 difference ≤ 2 × the model's own bf16-vs-fp32 |
+| initialization | the real materialization; the declared basis's captured energy per layer on the input roles, and on `residual_in` and the sub-layers' outputs (`attn_out`, `ffn_out`) | counted parameters equal the cost model's |
+| structural_fold | factored against folded stock Qwen3 on the CPU in float32 (is the fold the same function) | max \|diff\| / max \|logit\| ≤ 1e-3 |
+| fold_cuda | both forms ON the L40S, float32 and bfloat16, over 7 fixed eval-set-1 prompts (4 fluid static items, one per axis; 2 gsm8k; 1 math), rendered as the evaluation renders them and hash-checked; TF32 off, sdpa | max \|folded_bf16 − factored_bf16\| ≤ 2 × the factored model's own bf16-vs-fp32, on the L40S; mean \|diff\| and argmax agreement reported beside it |
 | trainer_smoke | 20 steps at the recipe's shape (8,192, batch 2, micro-batch 1, bf16 autocast, gradient checkpointing, the teacher on the fly): step time, peak memory, orthogonality drift | finite losses, a gradient on every `P_l`, the tied embedding unchanged |
-| resume | uninterrupted against half + checkpoint + reload + half, on CUDA | identical parameters |
+| resume | uninterrupted against half + checkpoint + reload + half, on CUDA | bit-identical; otherwise no further apart than two uninterrupted runs are (the kernel nondeterminism logged, P5) |
 | checkpoint_identity | save → reload → save; the folded model reloaded as stock Qwen3 | identical shard bytes; identical logits |
-| vllm | the folded checkpoint in vLLM 0.27.1 | loads and generates |
+| gpu_isolation | the PyTorch checks' process exited before vLLM started; nvidia-smi read before the engine | no compute process and ≤ 1 GiB in use; the parent never imported torch |
+| vllm | the saved folded checkpoint in vLLM 0.27.1 at the evaluation's resolved context (8,192), greedy, 128 tokens per prompt (an engineering load check, not a P18 measurement); its teacher-forced log-probabilities against HF bf16 on the same ids and card | loads; echoed prompt ids; finite log-probabilities; finish reasons; median \|Δ realized log-prob\| ≤ 0.1 nat and ≥ 98% top-1 agreement where the reference leads by ≥ 1 nat |
 
+- **One process boundary.** The driver's parent never imports torch. The
+  teacher, the students and the trainer live in a child process that exits
+  before vLLM starts in its own interpreter, so the engine sizes its KV cache
+  on an empty card.
 - **Every check runs** even after one fails, so one session reports all of them.
-- **On the host** (`--tiny`, a random small teacher) the driver passes every
-  check except vLLM, which is NOT_RUN; that dry run is a test.
-- **What B-E does not settle:** whether trainable projections help reasoning.
-  That is B1's preregistered comparison.
+- **On the host** (`--tiny`, a random small teacher) the same orchestration runs
+  on the CPU. `fold_cuda` keeps its numbers as a rehearsal and is NOT_RUN;
+  `gpu_isolation` and `vllm` are NOT_RUN. That dry run is a test
+  (`tests/test_be_driver.py`).
+- **No result and no GO.** B-E does not settle whether trainable projections
+  help reasoning; that is B1's preregistered comparison.
 
 **B1** (formal): $14.53 expected (13.1 L40S hours), $18.52 conservative,
 $21.00 cap.

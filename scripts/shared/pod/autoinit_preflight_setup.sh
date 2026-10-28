@@ -484,11 +484,17 @@ mark VLLM_READY
 fi
 
 if step_declared TEACHER_READY; then
-say "downloading the teacher at the pinned revision"
-python3 -c "
+# WHICH teacher is the session's (`SetupManifest.env` TEACHER_MODEL); unset means
+# Thinking-2507, every earlier session's teacher, so their setup is unchanged.
+# Research A's hybrid teacher (Qwen/Qwen3-4B) is a different repository at its
+# own revision, and downloading Thinking-2507 at that revision would fail -- or,
+# worse, succeed for a revision the two happened to share.
+TEACHER_MODEL="${TEACHER_MODEL:-Qwen/Qwen3-4B-Thinking-2507}"
+say "downloading the teacher $TEACHER_MODEL at the pinned revision"
+TEACHER_MODEL="$TEACHER_MODEL" python3 -c "
 import os
 from huggingface_hub import snapshot_download
-snapshot_download('Qwen/Qwen3-4B-Thinking-2507', revision=os.environ['TEACHER_REVISION'],
+snapshot_download(os.environ['TEACHER_MODEL'], revision=os.environ['TEACHER_REVISION'],
                   token=os.environ['HF_TOKEN'],
                   allow_patterns=['*.json','*.safetensors','*.jinja','*.txt'])
 "
@@ -1240,6 +1246,38 @@ assert a.allows(kind) is True, 'the artifact does not authorize its own kind'
 assert a.allows('training') is True and a.allows('evaluation') is True, 'an H1-PA session trains and evaluates'
 assert a.allows('teacher_generation') is False, 'an H1-PA session generates no teacher data'
 print(f'  {a.authorization_id}: {kind}, hard \${a.hard_cap_usd:.4f}, study {ident[:12]}, harness {h[\"digest\"][:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "stage2_teacher_modes" ]; then
+  # Research A (A-E)'s ENGINEERING VALIDATION (`shared.study_engineering`, `stages.teacher_modes.ae_launch`). Its own
+  # TYPE, which can say yes to an engineering validation and to nothing else -- no
+  # formal unit, no teacher-data generation -- and never to a dry-run artifact.
+  # The STUDY IDENTITY (design, check config, preregistration, bound records) and
+  # the harness are recomputed HERE from the pod's own files. Without this branch
+  # SESSION_KIND would fall through to `spend` and read the artifact as the wrong type.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from shared import study_engineering as SE
+from stages.teacher_modes.ae_launch import AEAuthorization
+a = AEAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+got = SE.require_on_pod(a, AEAuthorization.STUDY, os.environ['SESSION_PLAN_HASH'])
+print(f'  {a.authorization_id}: {a.STUDY.key}, hard \${a.hard_cap_usd:.4f}, study {got[\"identity\"][:12]}, harness {got[\"harness\"][:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "stage1_projected_residual" ]; then
+  # Research B (B-E)'s ENGINEERING VALIDATION (`shared.study_engineering`, `stages.projected_residual.be_launch`). Its own
+  # TYPE, which can say yes to an engineering validation and to nothing else -- no
+  # formal unit, no teacher-data generation -- and never to a dry-run artifact.
+  # The STUDY IDENTITY (design, check config, preregistration, bound records) and
+  # the harness are recomputed HERE from the pod's own files. Without this branch
+  # SESSION_KIND would fall through to `spend` and read the artifact as the wrong type.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from shared import study_engineering as SE
+from stages.projected_residual.be_launch import BEAuthorization
+a = BEAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+got = SE.require_on_pod(a, BEAuthorization.STUDY, os.environ['SESSION_PLAN_HASH'])
+print(f'  {a.authorization_id}: {a.STUDY.key}, hard \${a.hard_cap_usd:.4f}, study {got[\"identity\"][:12]}, harness {got[\"harness\"][:12]}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   # A THIRD type, not a relaxation of the second. The continuation's artifact
