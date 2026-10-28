@@ -233,3 +233,24 @@ def test_the_pod_check_refuses_a_dry_run_and_another_plan(tmp_path, live):
         SE.require_on_pod(a, st, SE.identity_hash(st, tmp_path), root=tmp_path)
     with pytest.raises(AuthorizationError, match="bound to plan"):
         SE.require_on_pod(a, st, "0" * 64, root=tmp_path)
+
+
+def test_a_real_launch_without_its_own_artifact_refuses_at_zero(tmp_path, monkeypatch, capsys):
+    """No grant, so no artifact in the run directory: the launcher refuses with the reason before the
+    runner, and a dry-run artifact is never accepted by a real launch."""
+    from stages.reasoning_data import h1_generation_launch as GL
+    st = _study(tmp_path)
+    launch = SE.Launch(session_kind="x", authorization=SE.EngineeringAuthorization, teacher_model="m",
+                       teacher_revision="r", driver="scripts/x/driver.py", validation_minutes=10.0)
+    monkeypatch.setattr(GL, "bundle_on_relay", lambda args: (True, "on the relay"))
+    monkeypatch.setattr(SE, "session_spec", lambda study, launch, args, root=None: SimpleNamespace(
+        authorization_path=str(study.authorization_path(args.run_id)), plan_hash="0" * 64,
+        authorization_loader=lambda p: SE.load_authorization(study, p)))
+    import aadistill.infrastructure.session_runner as SR
+    monkeypatch.setattr(SR, "run_session", lambda *a, **k: pytest.fail("the runner was reached"))
+    argv = ["--run-id", "r1", "--scr", str(tmp_path / "scr"), "--session-commit", "0" * 40,
+            "--bundle", "b", "--max-price", "1.09"]
+    assert SE.launch_main(st, launch, argv, root=tmp_path, gpu="NVIDIA L40S") == 11
+    assert "REFUSED at $0: no authorization" in capsys.readouterr().out
+    with pytest.raises(SystemExit, match="dry-run artifact"):
+        SE.launch_main(st, launch, argv + ["--authorization", "x.json"], root=tmp_path, gpu="NVIDIA L40S")

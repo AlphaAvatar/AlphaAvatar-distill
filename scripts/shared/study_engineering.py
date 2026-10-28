@@ -670,6 +670,11 @@ def launch_main(study: Study, launch: Launch, argv=None, *, root: Path = REPO_RO
         session = session_spec(study, launch, args, root)
         if args.dry_run:
             session = replace(session, authorization_path=str(Path(args.authorization).resolve()))
+        #: the artifact, its plan and its harness, read here so a missing or stale one refuses with its
+        #: reason before anything else (the runner reads them again when it is built)
+        auth = session.authorization_loader(Path(root) / session.authorization_path)
+        auth.require_plan(session.plan_hash)
+        auth.require_harness(root)
         runner = SessionRunner(session, args, root) if args.dry_run else None
     except AuthorizationError as exc:
         print(f"REFUSED at $0: {exc}\nNo provider resource was created.")
