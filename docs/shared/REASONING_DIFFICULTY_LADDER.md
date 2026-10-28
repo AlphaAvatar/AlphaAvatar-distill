@@ -15,7 +15,7 @@ can say where along a difficulty axis a student stops succeeding.
 
 ## What it would be
 
-**Levels:** for each of the five P10.2 primary axes, five levels L0–L4. Each
+**Levels:** for each of five reasoning axes -- AGENTS.md P10.2's four primary axes and abstract/analogical reasoning, a sub-category reported on its own -- five levels L0–L4. Each
 level is set by a declared generator parameter:
 
 | axis | the parameter |

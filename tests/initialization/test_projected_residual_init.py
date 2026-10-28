@@ -16,9 +16,11 @@ from transformers import Qwen3Config, Qwen3ForCausalLM
 
 from aadistill.initialization.adapters import build_registry
 from aadistill.initialization.transforms.projected_residual import (
+    INDEPENDENT_BASES,
     STATISTICS,
     SelectionError,
     SublayerStatsCollector,
+    independent_bases,
     materialize_projected,
     projection_basis,
     select_full_width,
@@ -168,3 +170,69 @@ def test_projection_basis_refuses_degenerate_input():
         projection_basis({"attn_in": (torch.zeros(4, 4, dtype=torch.float64), 3)}, 2)
     with pytest.raises(ValueError):
         projection_basis({"attn_in": (torch.eye(4, dtype=torch.float64), 3)}, 5)
+
+
+# --- independent projections: one basis per site -------------------------------------------
+
+GATED = "learnable_silu_residual"
+
+
+@pytest.mark.parametrize("activation", [None, GATED])
+def test_identity_independent_bases_reproduce_w0_exactly(activation):
+    w0 = select_full_width(ADAPTER, teacher(2), SEL, w0_spec())
+    eye = torch.eye(32, dtype=torch.float64)
+    student = materialize_projected(ADAPTER, w0, [{k: eye for k in INDEPENDENT_BASES}] * 3,
+                                    dtype=torch.float64, projection_activation=activation)
+    assert student.config.projection_sharing == "independent"
+    assert student.config.projection_activation == activation
+    ids = torch.randint(0, 61, (2, 10))
+    assert torch.allclose(student(ids, use_cache=False).logits, w0(ids, use_cache=False).logits, atol=1e-12)
+
+
+def test_independent_bases_lose_nothing_when_inputs_and_outputs_lie_in_a_subspace():
+    from aadistill.evaluation.function_error import function_error
+
+    r = 12
+    w0 = _subspace_w0(r)
+    col = SublayerStatsCollector(ADAPTER, w0, sorted(set(INDEPENDENT_BASES.values())))
+    for seed in range(3):
+        g = torch.Generator().manual_seed(seed)
+        col.process(w0, torch.randint(0, 61, (2, 16), generator=g))
+    col.close()
+    st = col.state()
+    bases = []
+    for i in range(3):
+        b, diags = independent_bases({role: st[role][i] for role in INDEPENDENT_BASES.values()}, r)
+        assert set(b) == set(INDEPENDENT_BASES)
+        for site, role in INDEPENDENT_BASES.items():
+            assert diags[site][f"{role}_energy_captured"] > 1 - 1e-10
+        bases.append(b)
+    student = materialize_projected(ADAPTER, w0, bases, dtype=torch.float64, projection_activation=GATED)
+    ids = torch.randint(0, 61, (2, 11))
+    assert torch.allclose(student(ids, use_cache=False).logits, w0(ids, use_cache=False).logits, atol=1e-9)
+    rows = torch.ones(2, 10, dtype=torch.bool)
+    err = function_error(w0, student, [(ids, rows)])
+    assert err["positions"] == 20 and err["kl"]["max"] < 1e-9 and err["top1_agreement"] == 1.0
+
+
+def test_a_truncated_independent_init_is_measured_as_an_approximation():
+    from aadistill.evaluation.function_error import function_error
+
+    w0 = select_full_width(ADAPTER, teacher(4), SEL, w0_spec())
+    col = SublayerStatsCollector(ADAPTER, w0, sorted(set(INDEPENDENT_BASES.values())))
+    col.process(w0, torch.randint(0, 61, (4, 16)))
+    col.close()
+    st = col.state()
+    bases = [independent_bases({k: st[k][i] for k in INDEPENDENT_BASES.values()}, 8)[0] for i in range(3)]
+    student = materialize_projected(ADAPTER, w0, bases, dtype=torch.float64, projection_activation=GATED)
+    ids = torch.randint(0, 61, (2, 9))
+    rows = torch.rand(2, 8) > 0.3
+    err = function_error(w0, student, [(ids, rows)], chunk=3)
+    # the definition, computed directly over the full vocabulary
+    lr = torch.log_softmax(w0(ids, use_cache=False).logits[:, :-1][rows].float(), -1)
+    lc = torch.log_softmax(student(ids, use_cache=False).logits[:, :-1][rows].float(), -1)
+    kl = (lr.exp() * (lr - lc)).sum(-1)
+    assert err["positions"] == int(rows.sum())
+    assert err["kl"]["mean"] == pytest.approx(float(kl.mean()), rel=1e-5) and err["kl"]["mean"] > 1e-6
+    with pytest.raises(ValueError, match="same form"):
+        materialize_projected(ADAPTER, w0, [bases[0], torch.eye(32, dtype=torch.float64)[:, :8], bases[2]])

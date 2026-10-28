@@ -1,0 +1,217 @@
+{
+ "schema": "aadistill.budget.research_ab_forecast/v1",
+ "written_utc": "2026-10-29T12:00:00Z",
+ "measured": {
+  "l40s_usd_per_hour": {
+   "value": 1.11,
+   "source": "logs/stages/stage-2/teacher_modes/plans/cost_forecast.json :: measured.l40s_usd_per_hour"
+  },
+  "a100_usd_per_hour": {
+   "value": 1.81,
+   "source": "logs/stages/stage-2/teacher_modes/plans/cost_forecast.json :: measured.a100_usd_per_hour"
+  },
+  "d4a_seconds_per_step_l40s": {
+   "value": 3.6157,
+   "source": "logs/stages/stage-2/reasoning_data/runs/h1pa2_20261025_055042/closeout/outcome.json :: units.D4-Augmented-s20260801.seconds.train / 3,702 steps"
+  },
+  "d4a_eval_seconds_l40s": {
+   "value": 3917.1,
+   "source": "the same outcome :: units.D4-Augmented-s20260801.seconds.evaluate (all of eval-set-1)"
+  },
+  "isolated_seconds_per_step_a100": {
+   "value": 5.19,
+   "source": "logs/stages/stage-2/teacher_modes/runs/ae_20261028_093428/evidence/trainer_smoke.json (E1 student, document_isolated, on-the-fly teacher)"
+  },
+  "generation_tokens_per_session_minute_a100": {
+   "value": 80198,
+   "source": "logs/stages/stage-2/teacher_modes/plans/cost_forecast.json :: measured.tokens_per_session_minute"
+  },
+  "t0_generation_tokens_m": {
+   "value": 19.15,
+   "source": "the same forecast :: scenarios.expected.generation_tokens_m less calibration"
+  },
+  "t0_generation_tokens_m_conservative": {
+   "value": 27.32,
+   "source": "the same :: scenarios.conservative, less calibration"
+  },
+  "t0_ht_s_sequences": {
+   "value": 1235,
+   "source": "the same :: scenarios.expected.sequences.H-T-S"
+  },
+  "t0_ht_s_sequences_conservative": {
+   "value": 1623,
+   "source": "the same :: scenarios.conservative.sequences.H-T-S"
+  },
+  "t0_hn_s_sequences": {
+   "value": 309,
+   "source": "the same :: scenarios.expected.sequences.H-N-S"
+  },
+  "t0_hn_s_sequences_conservative": {
+   "value": 706,
+   "source": "the same :: scenarios.conservative.sequences.H-N-S"
+  }
+ },
+ "design_facts": {
+  "d4a_sequences": 2468,
+  "d4a_steps": 3702,
+  "projected_training_flops_ratio": 1.1787,
+  "projected_inference_flops_ratio": 1.4946
+ },
+ "scenarios": {
+  "expected": {
+   "multipliers": {
+    "step": 1.0,
+    "eval": 1.0,
+    "projected_eval": 1.4946034725480997,
+    "gpu_train_a": "l40s",
+    "teacher_eval_vs_student": 3.5,
+    "hn_eval_vs_ht": 0.5
+   },
+   "research_b": {
+    "engineering_validation": {
+     "usd": 3.0,
+     "_": "its proposal's hard cap (plans/independent_gated_engineering_proposal.json)"
+    },
+    "initialization": {
+     "hours": 0.92,
+     "gpu": "L40S",
+     "usd": 1.02
+    },
+    "control_D4-Augmented-topk200": {
+     "hours": 10.45,
+     "gpu": "L40S",
+     "usd": 11.59,
+     "seconds_per_step": 3.616
+    },
+    "projected_1123M": {
+     "hours": 12.85,
+     "gpu": "L40S",
+     "usd": 14.26,
+     "seconds_per_step": 4.262
+    }
+   },
+   "research_a": {
+    "generation": {
+     "tokens_m": 38.77,
+     "scale_vs_t0": 1.998,
+     "hours": 9.06,
+     "gpu": "A100 80GB",
+     "usd": 16.39
+    },
+    "initialization": {
+     "hours": 1.0,
+     "gpu": "A100 80GB",
+     "usd": 1.81
+    },
+    "recovery": {
+     "optimizer_steps": {
+      "H-T-S": 3702,
+      "H-N-S": 927,
+      "H-N-C": 3702
+     },
+     "seconds_per_step": 5.19,
+     "hours": 25.77,
+     "gpu": "L40S",
+     "usd": 28.61
+    },
+    "evaluation": {
+     "hours": 10.56,
+     "gpu": "L40S",
+     "usd": 11.73,
+     "what": "six students in their own modes and the teacher in both modes, every item of eval-set-1"
+    }
+   },
+   "research_b_usd": 29.87,
+   "research_a_usd": 58.54
+  },
+  "conservative": {
+   "multipliers": {
+    "step": 1.25,
+    "eval": 1.25,
+    "projected_eval": 2.0,
+    "gpu_train_a": "a100",
+    "teacher_eval_vs_student": 5.0,
+    "hn_eval_vs_ht": 0.7
+   },
+   "research_b": {
+    "engineering_validation": {
+     "usd": 3.0,
+     "_": "its proposal's hard cap (plans/independent_gated_engineering_proposal.json)"
+    },
+    "initialization": {
+     "hours": 1.33,
+     "gpu": "L40S",
+     "usd": 1.48
+    },
+    "control_D4-Augmented-topk200": {
+     "hours": 12.85,
+     "gpu": "L40S",
+     "usd": 14.26,
+     "seconds_per_step": 4.52
+    },
+    "projected_1123M": {
+     "hours": 16.14,
+     "gpu": "L40S",
+     "usd": 17.92,
+     "seconds_per_step": 5.327
+    }
+   },
+   "research_a": {
+    "generation": {
+     "tokens_m": 42.34,
+     "scale_vs_t0": 1.521,
+     "hours": 9.8,
+     "gpu": "A100 80GB",
+     "usd": 17.74
+    },
+    "initialization": {
+     "hours": 1.5,
+     "gpu": "A100 80GB",
+     "usd": 2.71
+    },
+    "recovery": {
+     "optimizer_steps": {
+      "H-T-S": 3702,
+      "H-N-S": 1611,
+      "H-N-C": 3702
+     },
+     "seconds_per_step": 6.488,
+     "hours": 34.24,
+     "gpu": "A100",
+     "usd": 61.98
+    },
+    "evaluation": {
+     "hours": 18.59,
+     "gpu": "L40S",
+     "usd": 20.63,
+     "what": "six students in their own modes and the teacher in both modes, every item of eval-set-1"
+    }
+   },
+   "research_b_usd": 36.66,
+   "research_a_usd": 103.06
+  }
+ },
+ "hard_caps_usd": {
+  "research_b": {
+   "engineering_validation": 3.0,
+   "initialization": 1.53,
+   "control_D4-Augmented-topk200": 17.38,
+   "projected_1123M": 21.39
+  },
+  "research_a": {
+   "generation": 24.59,
+   "initialization": 2.71,
+   "recovery": 61.98,
+   "evaluation": 20.63
+  },
+  "storage": 14.0,
+  "engineering_reserve": 10.0,
+  "_storage": "one 100 GB network volume for the phase's save points, checkpoints and corpora (or am5m373kuq resized to 100 GB), at $0.07/GB-month for two months",
+  "_reserve": "pre-science engineering subruns across the whole phase (P12.1), cumulative",
+  "research_b_total": 43.3,
+  "research_a_total": 109.91,
+  "phase_total": 177.21
+ },
+ "expected_usd": 102.41,
+ "authorizes": "nothing"
+}

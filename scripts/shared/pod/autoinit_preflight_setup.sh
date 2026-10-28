@@ -1279,6 +1279,20 @@ a = BEAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 got = SE.require_on_pod(a, BEAuthorization.STUDY, os.environ['SESSION_PLAN_HASH'])
 print(f'  {a.authorization_id}: {a.STUDY.key}, hard \${a.hard_cap_usd:.4f}, study {got[\"identity\"][:12]}, harness {got[\"harness\"][:12]}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "stage1_independent_gated" ]; then
+  # Research B's independent-gated study: its ENGINEERING VALIDATION (`shared.study_engineering`,
+  # `stages.projected_residual.igv_launch`). Its own TYPE, which can say yes to an engineering
+  # validation and to nothing else, and never to a dry-run artifact. The STUDY IDENTITY and the
+  # harness are recomputed HERE from the pod's own files.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from shared import study_engineering as SE
+from stages.projected_residual.igv_launch import IGEAuthorization
+a = IGEAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+got = SE.require_on_pod(a, IGEAuthorization.STUDY, os.environ['SESSION_PLAN_HASH'])
+print(f'  {a.authorization_id}: {a.STUDY.key}, hard \${a.hard_cap_usd:.4f}, study {got[\"identity\"][:12]}, harness {got[\"harness\"][:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   # A THIRD type, not a relaxation of the second. The continuation's artifact
   # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend

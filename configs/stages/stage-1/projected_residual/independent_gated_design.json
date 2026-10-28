@@ -1,0 +1,212 @@
+{
+ "schema": "aadistill.stage1.projected_residual.independent_gated_design/v1",
+ "study_id": "stage1.projected_residual.independent_gated_v1",
+ "name": "Full-width residual + four independent projections + identity-initialized learnable SiLU residual gate (1.123B), against D4-Augmented under the same new training protocol",
+ "status": "DESIGNED 2026-10-29 at $0 on the maintainer's decision; NOT FROZEN. Frozen with its preregistration only when the maintainer authorizes the paid phase. Authorizes nothing.",
+ "decided_by": "maintainer brief 2026-10-29 'Revised Research A/B Programme & Engineering Principles', sections 1-4",
+ "supersedes": {
+  "study": "stage1.projected_residual.pw900_v1 (configs/stages/stage-1/projected_residual/design.json, sha256 bound in the B-E grant)",
+  "how": "for new work only: the 902,911,488-parameter transpose-shared design, its B-E FAIL (be_20261028_095332) and every record of it stay as they are, a historical research record; this design is a new scientific identity, never run under that authorization"
+ },
+ "question": "Keeping the teacher's full 2,560-wide residual stream, embedding and tied output head, and computing each layer's attention and FFN at 1,024 through four independent trainable projections with identity-initialized learnable SiLU gates, does the student recover better fluid-reasoning correctness than D4-Augmented when BOTH are trained under the same target-position Top-200 + tail KD protocol?",
+ "teacher": {
+  "model": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "dtype": "bfloat16",
+  "_": "D4-Augmented's teacher, unchanged; Research A's hybrid teacher is not used here"
+ },
+ "base_study": {
+  "path": "configs/stages/stage-2/reasoning_data/h1pa.json",
+  "sha256": "fe0ea966811b57d2a2bc94ac71bfec5660f74a63cc0f94cd9566e8efc389159d",
+  "control_arm": "D4-Augmented",
+  "_": "H1-PA's frozen study record: its D4-Augmented arm's dataset, recipe, schedule, seeds and evaluation are what both arms reuse"
+ },
+ "architecture": {
+  "model_type": "aad_projected_residual",
+  "implementation": "src/aadistill/initialization/adapters/projected_residual.py (Hugging Face reference); src/aadistill/initialization/adapters/projected_residual_vllm.py (vLLM)",
+  "projection_sharing": "independent",
+  "projection_activation": "learnable_silu_residual",
+  "hidden_size": 2560,
+  "internal_size": 1024,
+  "intermediate_size": 3072,
+  "num_hidden_layers": 28,
+  "num_attention_heads": 16,
+  "num_key_value_heads": 8,
+  "head_dim": 128,
+  "tie_word_embeddings": true,
+  "inherited_from_teacher_config": [
+   "vocab_size 151936",
+   "rope_theta 5,000,000",
+   "max_position_embeddings 262,144",
+   "rms_norm_eps 1e-6",
+   "hidden_act silu",
+   "attention_bias false"
+  ],
+  "per_layer": {
+   "projections": "attn_down [1024, 2560], attn_up [2560, 1024], ffn_down [1024, 2560], ffn_up [2560, 1024]: four nn.Linear, bias-free, none shared, no transpose tie, no orthogonality constraint or regularizer",
+   "gates": "attn_in_gate after attn_down, attn_out_gate before attn_up, ffn_in_gate after ffn_down, ffn_out_gate before ffn_up: phi(z) = z + alpha * silu(z), alpha a static trainable vector [1024] per gate, zero at initialization, no schedule, no sigmoid/tanh bound, no separate hyperparameter",
+   "computation": "a = phi_ai(attn_down(input_layernorm(x))); h = x + attn_up(phi_ao(attn(a))); f = phi_fi(ffn_down(post_attention_layernorm(h))); y = h + ffn_up(phi_fo(ffn(f))); Qwen3's attention (q/k norms, RoPE, GQA) and SwiGLU FFN unchanged at width 1,024",
+   "at_initialization": "alpha = 0: phi is the identity and its input Jacobian the identity matrix; d phi / d alpha = silu(z) is non-zero, so every gate receives a gradient at the first step (tests/models/test_projected_residual.py)",
+   "name": "identity-initialized learnable SiLU residual gate; not ReZero or LayerScale, which scale a residual branch"
+  },
+  "num_parameters": 1123227136,
+  "projection_and_block_parameters_without_gates": 1123112448,
+  "gate_parameters": 114688,
+  "trainable_parameters": 734270976,
+  "frozen_parameters": {
+   "tied embedding / output head": 388956160
+  },
+  "counted_by": "the real model construction on the meta device equals aadistill.models.cost_model.parameter_counts (tests/models/test_projected_residual.py :: test_independent_gated_counts_and_full_size_geometry)",
+  "not_the_name": "not PW-900: that is the historical 902.9M transpose-shared design"
+ },
+ "selection": {
+  "path": "configs/stages/stage-1/projected_residual/d4_top1_selection.json",
+  "file_sha256": "34e00f8756cae38f7a3b2969518dbcff9131d372cd61d554057498a2ff4689a1",
+  "content_sha256": "0c44e2e8da0c63c94c7d34a1cd5712905b2f1946de5f200643734bc1f57548b2",
+  "what": "D4 Top-1's kept teacher layers (28 of 36), query heads (16 of 32 per layer, two per KV group, all 8 KV heads) and FFN neurons (3,072 of 9,728 per layer), unchanged from the historical design"
+ },
+ "calibration": {
+  "profile_id": "calib.s0v_base_d4@v1",
+  "items_path": "artifacts/stages/stage-0/calibration_volume/profiles_formal_v1/calib.s0v_base_d4.items.jsonl",
+  "items_file_sha256": "2e8b99565a147e8253ca1768383fb9d4d728ceb105e283ad3653f043485e7e05",
+  "items": 85,
+  "positions": "every real token of every item, unweighted"
+ },
+ "initialization": {
+  "driver": "scripts/stages/stage-1/projected_residual/materialize.py (the independent path)",
+  "steps": [
+   "W0 = select_full_width(teacher, selection): the teacher with the kept layers, heads and neurons, width 2,560 (a stock Qwen3 of 1,490,114,048 parameters)",
+   "SublayerStatsCollector over the 85 calibration items through W0, float64: per layer the second moments of attn_in and ffn_in (the two norms' outputs, what the down maps read) and attn_out and ffn_out (the o_proj and down_proj outputs, what the up maps write)",
+   "per layer, four bases (transforms.projected_residual.INDEPENDENT_BASES): attn_down from attn_in, attn_up from attn_out, ffn_down from ffn_in, ffn_up from ffn_out, each the top-1,024 eigenbasis of its own uncentered second moment",
+   "the student = materialize_projected(W0, bases): down weights P^T, readers W P, writers Q^T W, up weights Q; norms, q/k norms, embedding, head and RoPE are W0's; every alpha 0",
+   "the initialization error, recorded, never assumed away: aadistill.evaluation.function_error of the student against W0 (what the projections lose) and against the teacher (selection and projections together), float32 on the device, over every real position of the calibration items (in sample) and of the fixed probe prompts (out of sample): mean / p50 / p90 / max forward KL, top-1 agreement, mean and max centred logit difference, both CEs; and per layer and site the captured energy of the activation each basis maps",
+   "save_pretrained; the sha256 of every weight file; the record logs/stages/stage-1/projected_residual/assets/independent_gated_init.json (written only by the formal initialization)"
+  ],
+  "exactness_anchors": [
+   "with internal_size = hidden_size and identity bases the student computes W0 exactly, gated or not",
+   "when every sub-layer input and output lies in an r-dimensional subspace the collector's four bases reproduce W0 exactly at rank r"
+  ],
+  "not_equivalent": "the student computes x + Q Q^T f(P P^T x_hat) where W0 computes x + f(x_hat): an approximation of W0 and of the teacher, never described as either",
+  "not_a_search": "one materialization; no candidate is ranked or selected"
+ },
+ "objective": {
+  "baseline": "the project's training baseline, maintainer decision 2026-10-29: target-position + teacher reference Top-K + tail forward KL",
+  "kd": "loss.kd_support = the forward baseline's distribution support, resolved from configs/shared/baselines/selection.json (shared.forward_baseline.selected().distribution_support: reference_topk_tail_v1, top_k 200), never retyped; loss.kd_scope 'assistant'; T 1",
+  "positions": "KL and CE at exactly the same target positions: the pack's assistant-target mask with every chat-template prefill removed (loss.exclude_template_prefill: generation prompt <|im_start|>assistant\\n = [151644, 77091, 198], prefill <think>\\n = [151667, 198]); never system, user, header, prefill or padding positions; the whole sequence is still forwarded as context",
+  "prefill_on_d4a_data": "on D4-Augmented's 2,468 training sequences all 5,291 assistant runs follow the generation prompt and begin with the prefill: 10,582 positions stop being targets (5,923,021 -> 5,912,439 supervised targets); validation 81,195 -> 81,075. Derived from the recorded token ids, no regeneration, the sequences byte-identical",
+  "implementation": "src/aadistill/training/topk_kd.py through Trainer (loss.kd_support): the teacher's Top-200 indices, log probabilities and complement-logsumexp tail at the target rows; the student's full-vocabulary normalizer, its support log probabilities and its complement-logsumexp tail, differentiable, in 512-row blocks under activation checkpointing; rows selected from the final hidden states before either output head",
+  "not_full_vocabulary": "a coarsening of the vocabulary partition and so a lower bound on the full-vocabulary KL; every report calls it the Top-200 + tail KL",
+  "cost_note": "K bounds the teacher state per position (O(K)); every target position still pays each model's full-vocabulary log-normalizer"
+ },
+ "arms": {
+  "D4-Augmented-topk200": {
+   "role": "the matched control (maintainer brief section 4)",
+   "initialization": "D4 Top-1, the existing legal initialization (logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json, sha256 06f8c42a..., artifact digest 457e194c...), restored from the relay and re-identified from its bytes; not re-searched, not re-materialized",
+   "recipe": "H1-PA's D4-Augmented recipe for the seed (E1's config under h1pa_driver.derive_recipe with D4-Augmented's schedule) plus recipe_overrides; nothing else changes",
+   "trained_once": "one complete run per seed; its final checkpoint persisted and kept as this study's control"
+  },
+  "Projected-1123M-topk200": {
+   "role": "the architecture under test",
+   "initialization": "this design's initialization, from logs/stages/stage-1/projected_residual/assets/independent_gated_init.json once the formal initialization has written it (until then the driver refuses this arm)",
+   "recipe": "the same derived recipe as the control for the same seed, plus arm_overrides"
+  }
+ },
+ "initializations": {
+  "D4-Augmented-topk200": {
+   "record": "logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json",
+   "sha256": "06f8c42a689d227b622c2eb46190a99f0de12232a40a851fcadd1ec4ce732696",
+   "restore": "from the relay by unit_driver.restore_init (restore_initialization), re-identified from its bytes"
+  },
+  "Projected-1123M-topk200": {
+   "record": "logs/stages/stage-1/projected_residual/assets/independent_gated_init.json",
+   "sha256": null,
+   "restore": "staged by setup from the relay by sha256 and re-identified from its bytes (recovery_driver.restore_staged)",
+   "_": "written by the formal initialization; sha256 bound when that record exists"
+  }
+ },
+ "recipe_overrides": {
+  "loss.kd_scope": "assistant",
+  "loss.kd_support": "resolved: the forward baseline's distribution support",
+  "loss.exclude_template_prefill": {
+   "generation_prompt": [
+    151644,
+    77091,
+    198
+   ],
+   "prefill": [
+    151667,
+    198
+   ]
+  },
+  "checkpoint.bind_identity": true
+ },
+ "arm_overrides": {
+  "Projected-1123M-topk200": {
+   "trainable_patterns_added": [
+    "\\.(attn|ffn)_(down|up)\\.weight$",
+    "_gate\\.alpha$"
+   ],
+   "monitor": {
+    "every": 50,
+    "groups": {
+     "gates": "_gate\\.alpha$",
+     "projections": "\\.(attn|ffn)_(down|up)\\.weight$"
+    }
+   }
+  }
+ },
+ "seeds": [
+  20260726,
+  20260801
+ ],
+ "data": {
+  "dataset": "H1-PA :: e1_2p96M_plus_fluid (packs/D4A_merged_whole, blocks.npz sha256 8b97b202..., 2,468 training sequences of 8,192, E1's 16 validation sequences), reused byte for byte: no new teacher data, no re-sampling",
+  "context_strategy": "cross_context, as packed (D4-Augmented's)",
+  "declared_property_kept": "132 of the fluid part's sessions carry 578 re-tokenizations of the teacher's text (0.037% of supervised positions; logs/stages/stage-2/teacher_modes/audit/token_identity_audit.json): both arms train on the same bytes, so it is not a difference between them, and it is not changed here"
+ },
+ "schedule": "D4-Augmented's: 3 epochs, batch size 2 sequences, micro-batch size 1 (gradient accumulation 2 on one GPU), 3,702 optimizer steps, warmup 185, cosine to 0.1, save point every 1,851 steps (keep_last 1), validation every 462 steps on E1's 16 sequences",
+ "execution": {
+  "driver": "scripts/stages/stage-1/projected_residual/recovery_driver.py: H1-PA's unit driver (h1pa_driver.run) with this study's plan, one arm per invocation; its state, resume, persistence and evaluation are H1-PA's",
+  "topology": "one GPU per training unit (data parallelism is not used: batch size 2 at micro-batch 1 is two forward/backward passes per step on one card; model state fits one card at both sizes). Seeds are independent units; they may run concurrently on separate GPUs of one pod, which changes no unit's arithmetic",
+  "hardware": "chosen from the engineering validation's measured peak memory and step time: an NVIDIA L40S (48 GB) when the measured peak leaves at least 4 GB free and its step time prices the phase inside its cap, otherwise an NVIDIA A100 80GB; the card is recorded in every unit and enters its execution identity",
+  "memory_estimate_before_measurement": "1.123B: fp32 weights 4.49 GB + gradients and AdamW moments of the 734M trainable 8.81 GB + the bf16 teacher 8.04 GB + checkpointed fp32 residual activations at 8,192 about 2.3 GB + one recomputed block and one 512-row head block, about 27 GB; D4-Augmented about 21 GB. The B-E OOM (44.31 GB on the L40S) came from full-vocabulary logits at every position, which head-row selection removes",
+  "persistence": "every save point and the final checkpoint on the network volume as they are written (save points carry optimizer state, step, RNG states, the consumed-sequence position and the bound data and initialization identities: a later attempt resumes rather than retrains); each unit's evaluation persisted when it completes; evidence relayed off the pod on every poll"
+ },
+ "evaluation": {
+  "identical_to": {
+   "path": "logs/stages/stage-2/reasoning_data/plans/h1pa_preregistration.json",
+   "sha256": "ae67279d15cddab4c14798313177d4554b8e585745cfd9b8f0afa8a42655261f",
+   "section": "evaluation"
+  },
+  "set": "eval-set-1, every item of every unit, under its registered identity, validity mask and formal scoring protocol",
+  "decoding": {
+   "protocol_id": "nucleus_v1",
+   "path": "configs/shared/evaluation/decoding/nucleus_v1.json",
+   "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"
+  },
+  "engine": "vLLM 0.27.1 for BOTH arms: D4-Augmented-topk200 as a stock Qwen3, the projected student through the out-of-tree model (vLLM general plugin aadistill_projected_residual, scripts/shared/rollout/vllm_plugin), never folded and never with its gates removed",
+  "engine_admission": "before the projected student is evaluated, the engineering validation measures, on the evaluation card, the vLLM model's teacher-forced log probabilities against the HF reference implementation in bf16 on the fixed probe prompts of independent_gated_validation.json :: probe (token ids recomputed and hash-checked), beside the HF reference's own bf16-vs-fp32 difference on the same prompts; the admission is that the engine-vs-HF-bf16 difference is no larger than 2x that bf16-vs-fp32 baseline (median and p99 over positions) and that greedy decoding agrees where the reference leads by >= 1 nat in >= 98% of positions. The historical folded-model 0.1 nat criterion is not used for this architecture; the same check, with the same probe and criteria, runs on each trained checkpoint before its evaluation (recovery_driver.admitted_evaluate)",
+  "historical_reference": "H1-PA's two D4-Augmented units (old protocol: full-vocabulary KD at every position) are reported beside, labelled as a different training protocol, never as a matched arm"
+ },
+ "comparisons": {
+  "P": {
+   "contrast": "Projected-1123M-topk200 - D4-Augmented-topk200",
+   "role": "decided",
+   "statistics": "plans/independent_gated_preregistration.json"
+  },
+  "R": {
+   "contrast": "D4-Augmented-topk200 - D4-Augmented (H1-PA, old protocol)",
+   "role": "descriptive: what the training protocol changed, on the same initialization, data and seeds"
+  }
+ },
+ "not_matched": {
+  "_": "the two arms are neither parameter- nor FLOPs-matched; P is the architecture's effect at this size and compute, never a same-size architectural advantage",
+  "parameters": "1,123,227,136 vs 596,049,920 (1.885x); trainable 734,270,976 vs 440,467,456 (1.667x)",
+  "training_flops_per_supervised_position": "student forward + backward + recompute 11.19 vs 7.90 GFLOPs (1.416x); with the teacher's forward 21.65 vs 18.36 (1.179x), at mean context 4,096 (aadistill.models.cost_model; the gates' elementwise SiLU excluded)",
+  "inference_flops_per_token": "3.19 vs 2.13 GFLOPs at context 4,096 (1.49x); 2.25 vs 1.19 at context 1 (1.88x), of which the full-width output head is 0.78",
+  "kv_cache": "identical: 114,688 bytes per token in bf16 (28 layers x 8 KV heads x 128 x K and V)",
+  "weights_bf16": "2.25 GB vs 1.19 GB",
+  "measured_separately": "step time, peak training memory, inference throughput, weight bytes and KV cache are measured on the evaluation card, each reported apart"
+ },
+ "authorizes": "nothing"
+}

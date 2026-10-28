@@ -186,6 +186,8 @@ class TestASessionWithItsOwnStagedViewHasItsOwnEntry:
         #: the pod runs no repository suite (no TESTS_OK).
         "ae_launch",
         "be_launch",
+        #: The independent-gated study's engineering validation (2026-10-29), for the same reasons.
+        "igv_launch",
     })
 
     def test_every_session_launcher_is_either_registered_or_named(self):

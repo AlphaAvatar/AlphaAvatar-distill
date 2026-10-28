@@ -1,0 +1,4 @@
+Metadata-Version: 2.1
+Name: aadistill-vllm-plugin
+Version: 1.0
+Summary: vLLM general plugin: registers AlphaAvatar-distill's custom model families (aadistill.initialization.adapters.projected_residual_vllm)

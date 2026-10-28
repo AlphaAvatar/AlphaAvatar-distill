@@ -26,6 +26,17 @@ exercises every line below except the hub download. Steps, each recorded:
    misplaced projection moves logits by their own magnitude; a correct fold by
    float32 rounding), not how the evaluation device rounds it.
 
+A design with ``architecture.projection_sharing = "independent"`` (four
+projections per layer, optionally gated) takes, in step 3, one basis per site
+from the activation that site maps (``INDEPENDENT_BASES``: the down maps from
+the normalized sub-layer inputs, the up maps from the sub-layer outputs), and in
+step 5 replaces the fold check -- a gated model does not fold -- with the
+INITIALIZATION ERROR: ``aadistill.evaluation.function_error`` of the student
+against ``W0`` (what the projections lose) and against the teacher (what the
+selection and the projections lose together), in float32 on the materializing
+device, over every real position of the calibration items (in-sample) and of
+the probe prompts (``--probe``; out of sample).
+
 Device numerics are a separate measurement: `fold_numerics` runs both forms ON
 the evaluation device, float32 and bfloat16, over a fixed probe, and returns
 what design.json :: evaluation.fold_acceptance compares. A CPU bfloat16 figure
@@ -73,13 +84,14 @@ def tiny_inputs():
 
 
 def run(design: dict, out: Path, *, device: str, tiny: bool,
-        diagnostic_statistics: tuple[str, ...] = ()) -> dict:
+        diagnostic_statistics: tuple[str, ...] = (), probes: list[list[int]] | None = None) -> dict:
     import torch
     from transformers import AutoModelForCausalLM
 
     from aadistill.initialization.adapters import build_registry
     from aadistill.initialization.transforms.projected_residual import (
-        STATISTICS, SublayerStatsCollector, materialize_projected, projection_basis, select_full_width)
+        INDEPENDENT_BASES, STATISTICS, SublayerStatsCollector, independent_bases, materialize_projected,
+        projection_basis, select_full_width)
     from aadistill.models.cost_model import parameter_counts
     from aadistill.initialization.adapters.projected_residual import fold_to_qwen3
 
@@ -88,6 +100,7 @@ def run(design: dict, out: Path, *, device: str, tiny: bool,
     timings = {}
     if tiny:
         teacher, selection, items, arch = tiny_inputs()
+        arch = {**arch, **(design.get("architecture") or {})}
         teacher = teacher.to(device)
     else:
         arch = design["architecture"]
@@ -107,6 +120,10 @@ def run(design: dict, out: Path, *, device: str, tiny: bool,
                                            num_attention_heads=len(selection["kept_heads"][0]),
                                            intermediate_size=len(selection["kept_neurons"][0]))
     w0 = select_full_width(adapter, teacher, selection, spec, dtype=torch.float32)
+    if arch.get("projection_sharing") == "independent":
+        return _run_independent(design, out, arch=arch, teacher=teacher, w0=w0.to(device), items=items,
+                                probes=probes or [], device=device, tiny=tiny, timings=timings,
+                                adapter=adapter)
     del teacher
     if device.startswith("cuda"):
         torch.cuda.empty_cache()
@@ -174,6 +191,85 @@ def run(design: dict, out: Path, *, device: str, tiny: bool,
     return record
 
 
+def _run_independent(design, out, *, arch, teacher, w0, items, probes, device, tiny, timings, adapter):
+    """Steps 2-5 for four independent projections per layer (see the module docstring)."""
+    import torch
+
+    from aadistill.evaluation.function_error import function_error
+    from aadistill.initialization.transforms.projected_residual import (
+        INDEPENDENT_BASES, SublayerStatsCollector, independent_bases, materialize_projected)
+    from aadistill.models.cost_model import parameter_counts
+
+    roles = tuple(dict.fromkeys(INDEPENDENT_BASES.values()))
+    t1 = time.time()
+    col = SublayerStatsCollector(adapter, w0, roles)
+    positions = 0
+    for it in items:
+        ids = torch.tensor([it["ids"]], device=device)
+        col.process(w0, ids)
+        positions += ids.shape[1]
+    col.close()
+    st = col.state()
+    timings["statistics_s"] = round(time.time() - t1, 1)
+    t2 = time.time()
+    bases, diags = [], []
+    for i in range(len(adapter.blocks(w0))):
+        b, dg = independent_bases({r: st[r][i] for r in roles}, int(arch["internal_size"]))
+        bases.append(b)
+        diags.append({"layer": i, **{f"{site}_{INDEPENDENT_BASES[site]}_energy_captured":
+                                     dg[site][f"{INDEPENDENT_BASES[site]}_energy_captured"] for site in b},
+                      **{f"{site}_orthonormality_error": dg[site]["orthonormality_error"] for site in b}})
+    timings["bases_s"] = round(time.time() - t2, 1)
+    student = materialize_projected(adapter, w0, bases, dtype=torch.float32,
+                                    projection_activation=arch.get("projection_activation"))
+    student = student.to(device)
+    t3 = time.time()
+
+    def batches(seqs):
+        for ids in seqs:
+            x = torch.tensor([ids], device=device)
+            yield x, torch.ones(1, x.shape[1] - 1, dtype=torch.bool, device=device)
+
+    calib = [it["ids"] for it in items]
+    error = {"in_sample_calibration": {
+                 "vs_full_width_parent": function_error(w0, student, batches(calib)),
+                 "vs_teacher": function_error(teacher.to(device), student, batches(calib))}}
+    if probes:
+        error["probe"] = {"vs_full_width_parent": function_error(w0, student, batches(probes)),
+                          "vs_teacher": function_error(teacher, student, batches(probes)),
+                          "prompts": len(probes)}
+    timings["initialization_error_s"] = round(time.time() - t3, 1)
+    del teacher
+    out.mkdir(parents=True, exist_ok=True)
+    student.save_pretrained(out / "model")
+    shards = sorted((out / "model").glob("*.safetensors"))
+    keys = ("vocab_size", "hidden_size", "internal_size", "intermediate_size", "num_hidden_layers",
+            "num_attention_heads", "num_key_value_heads", "head_dim", "tie_word_embeddings",
+            "projection_sharing", "projection_activation")
+    geom = {k: getattr(student.config, k) for k in keys}
+    counted = sum(p.numel() for p in student.parameters())
+    record = {
+        "schema": "aadistill.stage1.projected_residual.materialization/v2",
+        "tiny_smoke": tiny,
+        "teacher": None if tiny else design["teacher"],
+        "selection_content_sha256": None if tiny else design["selection"]["content_sha256"],
+        "bases": {site: role for site, role in INDEPENDENT_BASES.items()},
+        "calibration_positions": positions,
+        "geometry": geom, "num_parameters": counted,
+        "num_parameters_cost_model": parameter_counts(geom)["total"],
+        "weights": [{"file": p.name, "sha256": file_sha256(p)} for p in shards],
+        "config_sha256": file_sha256(out / "model" / "config.json"),
+        "per_layer": diags,
+        "initialization_error": error,
+        "_initialization_error": ("float32 on the materializing device, every real position; the student is an "
+                                  "approximation of W0 (projections) and of the teacher (selection + projections), "
+                                  "never claimed equal to either"),
+        "timings": timings, "device": device,
+    }
+    (out / "materialization.json").write_text(json.dumps(record, indent=1) + "\n")
+    return record
+
+
 def fold_numerics(student, folded, probes: list[list[int]], *, device: str, factor: float) -> dict:
     """The factored student against its fold, BOTH on `device`, float32 then bfloat16.
 
@@ -235,11 +331,19 @@ def main(argv=None) -> int:
     ap.add_argument("--out", required=True)
     ap.add_argument("--device", default="cpu")
     ap.add_argument("--tiny", action="store_true", help="host smoke test on a random small teacher")
+    ap.add_argument("--tiny-independent", action="store_true",
+                    help="the host smoke test with four independent, gated projections per layer")
+    ap.add_argument("--probe", default=None,
+                    help="a JSON list of token-id prompts: the out-of-sample initialization-error probe")
     a = ap.parse_args(argv)
-    design = json.loads((REPO / a.design).read_text()) if not a.tiny else {}
-    rec = run(design, Path(a.out), device=a.device, tiny=a.tiny)
+    tiny = a.tiny or a.tiny_independent
+    design = json.loads((REPO / a.design).read_text()) if not tiny else (
+        {"architecture": {"projection_sharing": "independent",
+                          "projection_activation": "learnable_silu_residual"}} if a.tiny_independent else {})
+    probes = json.loads(Path(a.probe).read_text()) if a.probe else None
+    rec = run(design, Path(a.out), device=a.device, tiny=tiny, probes=probes)
     print(json.dumps({k: rec[k] for k in ("num_parameters", "num_parameters_cost_model", "structural_fold_check",
-                                          "timings")}, indent=1))
+                                          "initialization_error", "timings") if k in rec}, indent=1))
     return 0
 
 

@@ -6,17 +6,26 @@ Fails loudly if the requested model or revision is unavailable (AGENTS.md 2.3).
 from __future__ import annotations
 
 import hashlib
+from pathlib import Path
 
 import torch
-from pathlib import Path
 
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
 DTYPES = {"float32": torch.float32, "bfloat16": torch.bfloat16, "float16": torch.float16}
 
 
-def resolve_revision(model_id: str, revision: str | None) -> str:
-    """Pin a branch/tag revision to its exact commit hash."""
+def resolve_revision(model_id: str, revision: str | None) -> str | None:
+    """Pin a branch/tag revision to its exact commit hash.
+
+    A full 40-hex commit hash is already exact and is returned as given, with no
+    hub call (an offline pod can load a pinned teacher from its cache); a local
+    directory has no hub revision and resolves to ``None``.
+    """
+    if revision is not None and len(revision) == 40 and all(c in "0123456789abcdef" for c in revision):
+        return revision
+    if revision is None and Path(model_id).is_dir():
+        return None
     from huggingface_hub import HfApi
 
     info = HfApi().model_info(model_id, revision=revision)

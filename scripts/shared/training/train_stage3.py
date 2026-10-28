@@ -86,6 +86,33 @@ from aadistill.training.train import (
 )
 
 
+def bound_identity(cfg: dict, paths: dict, resume_ckpt: Path | None = None) -> dict:
+    """The contents a checkpoint's resume is bound to: the data and the initialization.
+
+    Data: the pack's files for a ladder run, else the mixture manifests. The
+    initialization: every ``*.safetensors`` file of ``student_path``. Each is a
+    sha256 over the sorted (name, file sha256) pairs, so it does not depend on
+    the directory a session mounted them in.
+    """
+    pack = paths["data_dir"]
+    names = (("blocks.npz", "ladder.json", "audit.jsonl") if cfg.get("packing") == "ladder"
+             else tuple(sorted(p.name for p in Path(pack).glob("*.manifest.json"))))
+    data = {n: sha256_file(pack / n) for n in names if (pack / n).is_file()}
+    init_dir = paths["student_path"]
+    init = {p.name: sha256_file(p) for p in sorted(Path(init_dir).glob("*.safetensors"))}
+    if not data:
+        raise FileNotFoundError(f"checkpoint.bind_identity: no data to bind under {pack}")
+    if not init and resume_ckpt is not None and (resume_ckpt / "resume_identity.json").is_file():
+        # A resume on a resource where the initialization is not staged: it is not read
+        # (the weights come from the save point), so its identity is the save point's,
+        # recorded as not re-verified here. The data is always re-hashed.
+        saved = json.loads((resume_ckpt / "resume_identity.json").read_text())
+        return {"data": sha256_json(data), "initialization": saved["initialization"]}
+    if not init:
+        raise FileNotFoundError(f"checkpoint.bind_identity: no initialization to bind under {init_dir}")
+    return {"data": sha256_json(data), "initialization": sha256_json(init)}
+
+
 def resolve_device(pref: str) -> str:
     if pref == "auto":
         return "cuda" if torch.cuda.is_available() else "cpu"
@@ -143,6 +170,10 @@ def main() -> None:
 
     logger = JsonlLogger(paths["train_log"])
     from transformers import AutoModelForCausalLM
+
+    from aadistill.initialization.adapters.families import register_custom_model_families
+
+    register_custom_model_families()
 
     # The tokenizer is a SEPARATE dependency from the student weights, declared
     # rather than inferred. A searched leaf is a model artifact and carries no
@@ -277,6 +308,12 @@ def main() -> None:
         print(f"  {budget['kd_positions']:,} extra KD positions over "
               f"{budget['active_steps']} steps ({budget['exposures']} exposures)")
 
+    # `checkpoint.bind_identity`: a checkpoint's optimizer state resumes only onto
+    # the bytes it trained on. The config names the data and the initialization
+    # by path; these are their contents, recomputed at every start, so a resume
+    # after either changed under its path is refused (Trainer.restore).
+    resume_identity = (bound_identity(cfg, paths, resume_ckpt) if cfg["checkpoint"].get("bind_identity")
+                       else None)
     trainer = Trainer(
         cfg,
         student,
@@ -289,6 +326,7 @@ def main() -> None:
         extra_val_blocks=extra_val_blocks,
         think_ids=think_ids,
         extra_stream_blocks=extra_stream_blocks,
+        resume_identity=resume_identity,
     )
     if resume_ckpt is not None:
         trainer.restore(resume_ckpt)

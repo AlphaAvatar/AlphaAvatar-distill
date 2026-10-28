@@ -1,0 +1,156 @@
+{
+ "schema": "aadistill.stage1.projected_residual.independent_gated_validation_config/v1",
+ "validation": "independent-gated engineering validation",
+ "study_id": "stage1.projected_residual.independent_gated_v1",
+ "_contract": "Everything the validation's verdict depends on, fixed before the session: the probe, the numeric identity, the smoke and resume shapes, every threshold. scripts/stages/stage-1/projected_residual/independent_gated_validation.py :: verdict re-derives every check from the evidence and this file alone. Engineering only: nothing measured here is a result, a selection or a GO, and nothing it trains is kept as a student.",
+ "design": "configs/stages/stage-1/projected_residual/independent_gated_design.json",
+ "driver": "scripts/stages/stage-1/projected_residual/independent_gated_validation.py",
+ "probe": {
+  "_": "real eval-set-1 prompts from safe reasoning components only (no safety, answerability or knowledge item), rendered as the evaluation route renders them: run_battery's system message, the item's messages, the Thinking-2507 template with its generation prompt (which opens <think>), tokenized without special tokens. The token ids are recomputed on the pod and must hash to these values; the evidence records ids and hashes, never prompt text",
+  "eval_set_id": "eval-set-1",
+  "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+  "system_message": "You are a helpful Assistant.",
+  "tokenizer": {
+   "model": "Qwen/Qwen3-4B-Thinking-2507",
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "tokenizer_files_sha256": "432738f604172d754f429813517fb6045a2b13be31d78faba60f6f8a9b0e14d0"
+  },
+  "token_ids_hash": "sha256 of json.dumps(ids, separators=(',', ':'))",
+  "items": [
+   {
+    "component": "fluid_reasoning_720",
+    "unit": "dev_v1",
+    "item_id": "424bd847a714f66694d7",
+    "axis": "inductive_rule_discovery",
+    "tokens": 221,
+    "token_ids_sha256": "b8825c7b1330e64f1393ff5058b2285964c0b2e6c2ad8a47b82110426395737b"
+   },
+   {
+    "component": "fluid_reasoning_720",
+    "unit": "dev_v1",
+    "item_id": "e7a33cb050605fe24cef",
+    "axis": "compositional_generalization",
+    "tokens": 188,
+    "token_ids_sha256": "87ce7bd8f0fc68e79f3d40698026dce49662cc94b45e8404dd2c693f7fac08bb"
+   },
+   {
+    "component": "fluid_reasoning_720",
+    "unit": "dev_v1",
+    "item_id": "e5c87fa5a00a2ee777fd",
+    "axis": "task_contained_deduction",
+    "tokens": 70,
+    "token_ids_sha256": "2332d31a0dabe7913dc8d37444494bebfcd2fe03516e044d6d2624dc1080ef52"
+   },
+   {
+    "component": "fluid_reasoning_720",
+    "unit": "dev_v1",
+    "item_id": "a68fc81fffe597f45d54",
+    "axis": "abstract_analogical",
+    "tokens": 66,
+    "token_ids_sha256": "16c0e7c7e4dfec0efe0aab039de8a83d12a17af4cb16a23d1cd6e97612284abe"
+   },
+   {
+    "component": "stage3_capability_846",
+    "unit": "gsm8k",
+    "item_id": "gsm8k-test-00917",
+    "axis": null,
+    "tokens": 55,
+    "token_ids_sha256": "41491c60397ec6c10bccfc5d8113ff3970b8ae37f0ac65c9520b96741aebbd4a"
+   },
+   {
+    "component": "stage3_capability_846",
+    "unit": "gsm8k",
+    "item_id": "gsm8k-test-01007",
+    "axis": null,
+    "tokens": 74,
+    "token_ids_sha256": "ea4a0695a1a940303e13f24922a2834561abfded8d1f6e6b338c60416867b7ba"
+   },
+   {
+    "component": "stage3_capability_846",
+    "unit": "math_verified",
+    "item_id": "math500-test/algebra/2102.json",
+    "axis": null,
+    "tokens": 94,
+    "token_ids_sha256": "23dae360a1a398f8c2f520554088c3872736b614ca42ade20cea915f2d2c3294"
+   }
+  ],
+  "tiny_lengths": [
+   17,
+   33,
+   41
+  ],
+  "_tiny": "the host path's tiny teacher has a 97-token vocabulary, so its probe is seeded random ids of these lengths; it rehearses the code, never the numbers"
+ },
+ "numeric_identity": {
+  "device_class": null,
+  "_device_class": "recorded, never required: this study's card follows the measured peak memory and step time (independent_gated_design.json :: execution.hardware), and the validation measures whichever card the session runs on",
+  "dtype": "bfloat16",
+  "reference_dtype": "float32",
+  "attn_implementation": "sdpa",
+  "tf32": false,
+  "_tf32": "torch.backends.cuda.matmul.allow_tf32 and torch.backends.cudnn.allow_tf32 set False before any CUDA work, so float32 is float32",
+  "deterministic_algorithms": "warn_only",
+  "cublas_workspace_config": ":4096:8",
+  "_deterministic": "torch.use_deterministic_algorithms(True, warn_only=True) with CUBLAS_WORKSPACE_CONFIG set before CUDA initializes; kernels with no deterministic implementation warn rather than abort, and the resume check measures what remains"
+ },
+ "smoke": {
+  "recipe": "recovery_driver.load_plan(arm) :: the derived recipe of each arm for seed 20260726 (D4-Augmented's E1 config, its schedule, the new KD protocol, the arm's overrides) under validation-only overrides",
+  "validation_only_overrides": [
+   "schedule.total_steps",
+   "schedule.warmup_steps",
+   "checkpoint.save_every",
+   "checkpoint.keep_last",
+   "intervals.eval_every",
+   "intervals.log_every",
+   "monitor.every",
+   "student_path",
+   "out_dir",
+   "run_name"
+  ],
+  "seed": 20260726,
+  "steps": 20,
+  "steady_state_from_step": 4,
+  "data": "the real training pack (packs/D4A_merged_whole, staged by setup), so the target-row fraction, the prefill exclusion and the step's memory are the formal run's",
+  "tiny_steps": 4
+ },
+ "resume": {
+  "steps": 8,
+  "save_at": 4,
+  "how": "X: 8 steps uninterrupted; Y: 8 steps with a save point at 4, killed (SIGKILL) as soon as that save point is logged, then --resume latest to 8; X2: a second uninterrupted run, only when X and Y are not bit-identical"
+ },
+ "memory": {
+  "headroom_gib_min": 4.0,
+  "measure": "torch.cuda.max_memory_reserved over the run (the allocator's pool, what an OOM exhausts) against the card's total"
+ },
+ "expected": {
+  "num_parameters": 1123227136,
+  "trainable_parameters": {
+   "Projected-1123M-topk200": 734270976,
+   "D4-Augmented-topk200": 440467456
+  }
+ },
+ "native_generation": {
+  "new_tokens": 32,
+  "equality_dtype": "float32",
+  "diagnostic_dtype": "bfloat16"
+ },
+ "engine_admission": {
+  "factor": 2.0,
+  "confident_margin_nats": 1.0,
+  "confident_top1_agreement_min": 0.98,
+  "confident_positions_min": 50,
+  "max_model_len": 8192
+ },
+ "throughput": {
+  "prompts": 16,
+  "new_tokens": 256,
+  "_": "greedy, both arms' smoke checkpoints, the same prompts (the probe, repeated): a measurement for pricing evaluation, never a criterion"
+ },
+ "authorizes": "nothing",
+ "control_init_files": {
+  "config.json": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+  "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+  "model.safetensors": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+  "_provenance": "sha256 of the dev box's copy that logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json :: copies records as read back and VERIFIED; model.safetensors equals that record's lfs_sha256 and checkpoint_sha256"
+ }
+}

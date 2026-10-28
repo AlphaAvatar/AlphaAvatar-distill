@@ -67,6 +67,9 @@ SESSION_LAUNCHERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("h1_unit_launch", ("--run-id", "h1_units_spec_check")),
     ("ae_launch", ("--run-id", "ae_spec_check")),
     ("be_launch", ("--run-id", "be_spec_check")),
+    #: Research B's independent-gated study's engineering validation, added WITH
+    #: its launcher (2026-10-29) so every structural check covers it before any grant.
+    ("igv_launch", ("--run-id", "igv_spec_check")),
 )
 
 

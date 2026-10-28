@@ -24,6 +24,20 @@ attention and FFN read and write. This module builds it in three explicit steps:
    readers ``W P_l``, writers ``P_l^T W``. Norms, q/k norms, embedding, output
    head and RoPE are ``W0``'s, untouched.
 
+**Independent projections** (``projection_sharing = "independent"``) take one
+basis per site instead of one per layer, each from the activation that site
+maps (``INDEPENDENT_BASES``): a down map from its sub-layer's normalized INPUT,
+an up map from its sub-layer's OUTPUT. With down basis ``P`` and up basis ``Q``
+(both ``[d, r]``, orthonormal columns) the sub-layer's readers become ``W P``,
+its writer ``Q^T W``, its down map ``P^T`` and its up map ``Q``; a learnable
+gate starts at ``alpha = 0``, the identity. The student then computes
+``x + Q Q^T f(P P^T x_hat)`` where ``W0`` computes ``x + f(x_hat)``: the input
+keeps the part of ``x_hat`` in ``P``'s span and the output the part of ``f`` in
+``Q``'s span. It equals ``W0`` only when both lie in those spans (and exactly at
+``r = d``); it is an approximation, and ``basis_energy`` plus an end-to-end
+comparison against ``W0`` (``aadistill.evaluation.function_error``) are how a
+materialization measures it.
+
 Module access goes through the architecture adapter's roles (``q``, ``gate``,
 ``attn_out``, the two norms ...), so nothing here names a teacher, a width or a
 selection; those arrive as arguments (AGENTS.md P3).
@@ -42,17 +56,22 @@ STATISTICS = {
     "residual_input": ("residual_in",),
     "read_write": ("attn_in", "ffn_in", "attn_out", "ffn_out"),
 }
+#: Independent projections: each site's basis from the activation it maps.
+INDEPENDENT_BASES = {"attn_down": "attn_in", "attn_up": "attn_out",
+                     "ffn_down": "ffn_in", "ffn_up": "ffn_out"}
 ROLES = ("residual_in", "attn_in", "ffn_in", "attn_out", "ffn_out")
 READERS = ("q", "k", "v", "gate", "up")
 WRITERS = ("attn_out", "ffn_out")
 
 __all__ = [
     "STATISTICS",
+    "INDEPENDENT_BASES",
     "SelectionError",
     "selection_problems",
     "select_full_width",
     "SublayerStatsCollector",
     "projection_basis",
+    "independent_bases",
     "materialize_projected",
 ]
 
@@ -287,13 +306,33 @@ def projection_basis(moments: Mapping[str, tuple[torch.Tensor, int]], rank: int)
     return basis, diag
 
 
-@torch.no_grad()
-def materialize_projected(adapter: Any, w0: Any, bases: Sequence[torch.Tensor], *,
-                          dtype: Any = None) -> Any:
-    """The projected student: ``W0``'s weights with each layer's ``P_l`` folded in.
+def independent_bases(layer_moments: Mapping[str, tuple[torch.Tensor, int]], rank: int
+                      ) -> tuple[dict[str, torch.Tensor], dict]:
+    """One layer's four bases (``INDEPENDENT_BASES``), each from its own role's moment.
 
-    Readers ``W[out, d] @ P_l -> [out, r]``; writers ``P_l^T @ W[d, in] -> [r, in]``.
-    With ``r == d`` and ``P_l = I`` the result computes exactly ``W0``.
+    Returns ``({site: [d, rank]}, {site: diagnostics})``; a site's
+    ``<role>_energy_captured`` is the share of that activation's second moment
+    its basis keeps -- one minus the mean-square relative error of reconstructing
+    the activation from its projection.
+    """
+    bases, diags = {}, {}
+    for site, role in INDEPENDENT_BASES.items():
+        if role not in layer_moments:
+            raise ValueError(f"site {site} needs the {role} moments")
+        bases[site], diags[site] = projection_basis({role: layer_moments[role]}, rank)
+    return bases, diags
+
+
+@torch.no_grad()
+def materialize_projected(adapter: Any, w0: Any, bases: Sequence[Any], *,
+                          dtype: Any = None, projection_activation: str | None = None) -> Any:
+    """The projected student: ``W0``'s weights with each layer's bases folded in.
+
+    ``bases`` holds one entry per layer: a ``[d, r]`` tensor for the
+    transpose-shared form (readers ``W P``, writers ``P^T W``), or a dict
+    ``{site: [d, r]}`` over ``INDEPENDENT_BASES`` for independent projections
+    (see the module docstring). With ``r == d`` and identity bases the result
+    computes exactly ``W0``.
     """
     from aadistill.initialization.adapters.projected_residual import (
         ProjectedResidualConfig,
@@ -303,28 +342,49 @@ def materialize_projected(adapter: Any, w0: Any, bases: Sequence[torch.Tensor], 
     blocks = adapter.blocks(w0)
     if len(bases) != len(blocks):
         raise ValueError(f"{len(bases)} bases for {len(blocks)} layers")
+    independent = isinstance(bases[0], Mapping)
+    if any(isinstance(b, Mapping) != independent for b in bases):
+        raise ValueError("every layer's bases must have the same form")
     d = int(adapter.spec_of(w0)["hidden_size"])
-    ranks = {int(b.shape[1]) for b in bases}
-    if len(ranks) != 1 or any(b.shape[0] != d for b in bases):
+    mats = [m for b in bases for m in (b.values() if independent else (b,))]
+    ranks = {int(m.shape[1]) for m in mats}
+    if len(ranks) != 1 or any(m.shape[0] != d for m in mats):
         raise ValueError("every basis must be [hidden_size, r] with one common r")
+    if independent and any(set(b) != set(INDEPENDENT_BASES) for b in bases):
+        raise ValueError(f"independent bases need exactly the sites {sorted(INDEPENDENT_BASES)}")
     raw = w0.config.to_dict()
     for key in ("model_type", "architectures", "transformers_version"):
         raw.pop(key, None)
-    cfg = ProjectedResidualConfig(internal_size=ranks.pop(), **raw)
+    cfg = ProjectedResidualConfig(
+        internal_size=ranks.pop(),
+        projection_sharing="independent" if independent else "transpose_shared",
+        projection_activation=projection_activation, **raw)
     cfg.architectures = ["ProjectedResidualForCausalLM"]
     dtype = dtype or next(w0.parameters()).dtype
     student = ProjectedResidualForCausalLM(cfg).to(dtype)
     adapter.embedding(student).weight.copy_(adapter.embedding(w0).weight)
     adapter.final_norm(student).weight.copy_(adapter.final_norm(w0).weight)
-    for p, s, c in zip(bases, blocks, adapter.blocks(student)):
-        p = p.double().to(adapter.attn_norm(s).weight.device)
-        c.projection.copy_(p)
+    for b, s, c in zip(bases, blocks, adapter.blocks(student)):
+        dev = adapter.attn_norm(s).weight.device
+        if independent:
+            b = {k: v.double().to(dev) for k, v in b.items()}
+            reader = {"attn": b["attn_down"], "ffn": b["ffn_down"]}
+            writer = {"attn": b["attn_up"], "ffn": b["ffn_up"]}
+            for sub in ("attn", "ffn"):
+                getattr(c, f"{sub}_down").weight.copy_(reader[sub].T)
+                getattr(c, f"{sub}_up").weight.copy_(writer[sub])
+        else:
+            p = b.double().to(dev)
+            c.projection.copy_(p)
+            reader = writer = {"attn": p, "ffn": p}
         s_in, c_in = adapter.stream_in_projections(s), adapter.stream_in_projections(c)
         s_out, c_out = adapter.stream_out_projections(s), adapter.stream_out_projections(c)
         for role in READERS:
-            c_in[role][0].weight.copy_(s_in[role][0].weight.double() @ p)
+            sub = "attn" if role in ("q", "k", "v") else "ffn"
+            c_in[role][0].weight.copy_(s_in[role][0].weight.double() @ reader[sub])
         for role in WRITERS:
-            c_out[role].weight.copy_(p.T @ s_out[role].weight.double())
+            sub = "attn" if role == "attn_out" else "ffn"
+            c_out[role].weight.copy_(writer[sub].T @ s_out[role].weight.double())
         adapter.attn_norm(c).weight.copy_(adapter.attn_norm(s).weight)
         adapter.ffn_norm(c).weight.copy_(adapter.ffn_norm(s).weight)
         for role, norm in adapter.attention_subnorms(s).items():

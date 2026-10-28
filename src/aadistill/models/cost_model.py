@@ -2,8 +2,13 @@
 
 Covers the standard block and the projected-residual block
 (`aadistill.initialization.adapters.projected_residual`): a geometry that names an
-``internal_size`` has a projection per layer (even at ``internal_size ==
-hidden_size``); one without it is the standard block.
+``internal_size`` has projections in every layer (even at ``internal_size ==
+hidden_size``); one without it is the standard block. ``projection_sharing``
+(default ``transpose_shared``: one matrix per layer) or ``independent`` (four)
+and ``projection_activation`` (a learnable gate adds ``internal_size``
+parameters at each of its four positions) follow the model's config fields.
+The FLOPs do not depend on the sharing: a token passes through four
+``hidden x internal`` products per layer either way.
 Every number is arithmetic over the geometry; nothing here is a measurement,
 and nothing names a particular model (AGENTS.md P3).
 
@@ -14,8 +19,8 @@ Conventions, stated once:
 * attention scores and the value mix cost ``2 * 2 * n_q * head_dim * c`` per
   token at context ``c`` (``QK^T`` and ``AV``); a causal sequence of length
   ``L`` has mean context ``(L + 1) / 2``;
-* norms, RoPE, softmax and the SwiGLU product are elementwise and excluded
-  (well under 1% at these sizes);
+* norms, RoPE, softmax, the SwiGLU product and a projection gate's SiLU are
+  elementwise and excluded (well under 1% at these sizes);
 * the embedding lookup is a gather and costs nothing; the tied output head is a
   full ``hidden x vocab`` matmul;
 * training FLOPs: a linear layer's backward is ``2x`` its forward when its weight
@@ -49,6 +54,12 @@ def _geometry(geom: Mapping[str, Any]) -> dict:
     g["internal_size"] = int(geom["internal_size"]) if g["projected"] else int(geom["hidden_size"])
     if g["projected"] and g["internal_size"] > g["hidden_size"]:
         raise ValueError("internal_size cannot exceed hidden_size")
+    g["sharing"] = geom.get("projection_sharing") or "transpose_shared"
+    if g["sharing"] not in ("transpose_shared", "independent"):
+        raise ValueError(f"unknown projection_sharing {g['sharing']!r}")
+    g["gated"] = geom.get("projection_activation") is not None
+    if (g["gated"] or "projection_sharing" in geom) and not g["projected"]:
+        raise ValueError("projection fields need an internal_size")
     return g
 
 
@@ -57,19 +68,21 @@ def parameter_counts(geom: Mapping[str, Any]) -> dict:
     g = _geometry(geom)
     d, r, hd = g["hidden_size"], g["internal_size"], g["head_dim"]
     q, kv = g["num_attention_heads"] * hd, g["num_key_value_heads"] * hd
-    projection = d * r if g["projected"] else 0
+    projection = (d * r * (4 if g["sharing"] == "independent" else 1)) if g["projected"] else 0
+    gates = 4 * r if g["gated"] else 0
     attention = r * q + 2 * r * kv + q * r + 2 * hd
     ffn = 3 * r * g["intermediate_size"]
     norms = 2 * d
-    per_layer = projection + attention + ffn + norms
+    per_layer = projection + gates + attention + ffn + norms
     embedding = g["vocab_size"] * d
     head = 0 if g["tie_word_embeddings"] else g["vocab_size"] * d
     blocks = per_layer * g["num_hidden_layers"]
     total = embedding + head + blocks + d
     return {
         "embedding": embedding, "output_head_untied": head, "final_norm": d,
-        "per_layer": {"projection": projection, "attention": attention, "ffn": ffn,
-                      "norms": norms, "total": per_layer},
+        #: `gates` only when the geometry has them, so every earlier geometry's counts serialize as before
+        "per_layer": {"projection": projection, **({"gates": gates} if g["gated"] else {}), "attention": attention,
+                      "ffn": ffn, "norms": norms, "total": per_layer},
         "blocks": blocks, "total": total,
         "non_embedding": total - embedding - head,
     }

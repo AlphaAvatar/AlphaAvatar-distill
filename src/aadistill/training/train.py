@@ -53,6 +53,7 @@ import torch.nn.functional as F
 from ..data.dataset import best_fit_blocks, encode_sample, load_split, pack_blocks
 from ..data.token_documents import CONTEXT_STRATEGIES
 from ..infrastructure.manifest import sha256_json
+from . import topk_kd
 from .lora import (
     LoRAConfig,
     apply_lora,
@@ -104,8 +105,11 @@ def validate_train_config(cfg: dict) -> None:
     need(cfg, "groups", (list, type(None)))
     teacher = need(cfg, "teacher", (dict, type(None)))
     if teacher is not None:
-        for key in ("model_id", "revision", "dtype"):
+        for key in ("model_id", "dtype"):
             need(teacher, key, str, "teacher.")
+        # A hub teacher is always pinned; only a local directory has no revision.
+        if not (teacher.get("revision") is None and "revision" in teacher and Path(teacher["model_id"]).is_dir()):
+            need(teacher, "revision", str, "teacher.")
     patterns = need(cfg, "trainable_patterns", (list, str))
     if isinstance(patterns, str) and patterns != "all":
         raise ValueError("trainable_patterns must be 'all' or a list of regexes")
@@ -122,6 +126,29 @@ def validate_train_config(cfg: dict) -> None:
     if "kd_chunk" in loss:
         if not isinstance(loss["kd_chunk"], int) or loss["kd_chunk"] < 1:
             raise ValueError("loss.kd_chunk must be a positive int")
+    # Optional. Absent means the historical full-vocabulary KD over full logits,
+    # byte-identical for every config written before this key existed. Present,
+    # it names the KD support (topk_kd.TRAINING_SUPPORTS) and switches both models
+    # to head-row selection: only the loss's prediction positions reach the
+    # output head. It is part of the config, so of the hash.
+    # Optional. `loss.exclude_template_prefill`: {generation_prompt, prefill} token
+    # ids; every target the chat template prefilled stops being a target for CE
+    # AND KD (aadistill.data.target_policy). Absent: the pack's mask as built.
+    if "exclude_template_prefill" in loss:
+        ex = loss["exclude_template_prefill"]
+        if not isinstance(ex, dict) or set(ex) != {"generation_prompt", "prefill"} or not all(
+                isinstance(v, list) and v and all(isinstance(t, int) for t in v) for v in ex.values()):
+            raise ValueError("loss.exclude_template_prefill must be {generation_prompt: [ids], prefill: [ids]}")
+        if cfg.get("extra_val") is not None:
+            raise ValueError("loss.exclude_template_prefill is not applied to extra_val sets")
+    if "kd_support" in loss:
+        topk_kd.training_support(loss["kd_support"])
+        if not loss["kd_weight"] > 0:
+            raise ValueError("loss.kd_support names a KD support but kd_weight is 0")
+        if cfg.get("extra_stream") is not None:
+            raise ValueError("loss.kd_support is not implemented for the extra stream")
+        if cfg.get("lora") is not None:
+            raise ValueError("loss.kd_support is not implemented together with lora")
     optim = need(cfg, "optim", dict)
     for key in ("lr", "weight_decay", "eps", "grad_clip"):
         need(optim, key, (int, float), "optim.")
@@ -156,6 +183,8 @@ def validate_train_config(cfg: dict) -> None:
     ck = need(cfg, "checkpoint", dict)
     for key in ("save_every", "keep_last"):
         need(ck, key, int, "checkpoint.")
+    if "bind_identity" in ck and not isinstance(ck["bind_identity"], bool):
+        raise ValueError("checkpoint.bind_identity must be a bool")
     iv = need(cfg, "intervals", dict)
     for key in ("log_every", "eval_every", "eval_blocks"):
         need(iv, key, int, "intervals.")
@@ -169,6 +198,16 @@ def validate_train_config(cfg: dict) -> None:
             raise ValueError("extra_val name 'val' collides with the primary val")
     if cfg.get("extra_stream") is not None:
         validate_extra_stream_config(cfg["extra_stream"])
+    # Optional. `monitor`: {"every": N, "groups": {name: regex}} logs a
+    # `param_stats` event every N optimizer steps -- each group's parameter
+    # count, mean, mean |x|, max |x| and its gradient norm before clipping.
+    # Observation only: it reads tensors and changes nothing.
+    mon = cfg.get("monitor")
+    if mon is not None:
+        if (not isinstance(mon, dict) or not isinstance(mon.get("every"), int) or mon["every"] < 1
+                or not isinstance(mon.get("groups"), dict) or not mon["groups"]
+                or not all(isinstance(k, str) and isinstance(v, str) for k, v in mon["groups"].items())):
+            raise ValueError("monitor must be {every: positive int, groups: {name: regex}}")
 
 
 EXTRA_STREAM_KINDS = ("general_text_kd", "in_domain_kd_control")
@@ -660,9 +699,18 @@ class Trainer:
         extra_val_blocks: dict | None = None,
         think_ids: tuple[int, int] | None = None,
         extra_stream_blocks: tuple | None = None,
+        resume_identity: dict | None = None,
     ):
         validate_train_config(cfg)
         loss_cfg = cfg["loss"]
+        # What a checkpoint must have been written against besides the config:
+        # the caller's identities of the bytes the config only names (the data,
+        # the initialization, the trainer code). Saved with every checkpoint and
+        # compared exactly on restore, so optimizer state is never resumed onto a
+        # different dataset or starting point that kept its path.
+        self.resume_identity = dict(resume_identity or {})
+        self.kd_support = (topk_kd.training_support(loss_cfg["kd_support"])
+                           if "kd_support" in loss_cfg else None)
         if loss_cfg["kd_weight"] > 0 and teacher is None:
             raise ValueError("loss.kd_weight > 0 requires a teacher model")
         # Fail here rather than at the first backward: a run that silently fell
@@ -725,6 +773,11 @@ class Trainer:
             self.teacher.config.use_cache = False
             for p in self.teacher.parameters():
                 p.requires_grad_(False)
+        if self.kd_support is not None:
+            self.student_head = topk_kd.output_head(self.student)
+            self.teacher_head = topk_kd.output_head(self.teacher)
+        # Per-step sums of the head-row KD diagnostics (see _row_micro_losses).
+        self._step_kd_diag = {"rows": 0, "teacher_tail_mass": 0.0, "target_in_support": 0}
 
         # LoRA is applied *before* the freeze sweep and the optimizer is built,
         # so the adapter is part of the trainable set from step 0 and never
@@ -765,12 +818,28 @@ class Trainer:
                 "distribution it trained on")
         if self.train_ids.shape[0] == 0:
             raise ValueError("no training blocks")
+        self.target_policy = None
+        if "exclude_template_prefill" in loss_cfg:
+            from ..data.target_policy import drop_template_prefill
+
+            ex = loss_cfg["exclude_template_prefill"]
+            self.train_mask, stats = drop_template_prefill(self.train_ids, self.train_mask, **ex)
+            if stats["unmatched_runs_after_generation_prompt"]:
+                raise ValueError(f"{stats['unmatched_runs_after_generation_prompt']} supervised runs follow the "
+                                 "generation prompt without the declared prefill: the template is not the one "
+                                 "the policy describes")
+            self.target_policy = {"train": stats}
         if val_blocks is not None:
             val_ids, val_mask, val_content, val_pos = _unpack_blocks(val_blocks)
             if (val_pos is not None) != self.document_isolation:
                 raise ValueError("validation blocks must match batch.context_strategy")
             # Fixed shuffle so a truncated eval (eval_blocks < all) still
             # samples across groups instead of the first groups alphabetically.
+            if self.target_policy is not None:
+                from ..data.target_policy import drop_template_prefill
+
+                val_mask, self.target_policy["val"] = drop_template_prefill(
+                    val_ids, val_mask, **loss_cfg["exclude_template_prefill"])
             perm = epoch_permutation(val_ids.shape[0], cfg["seed"] + 777, 0)
             self.val_ids, self.val_mask = val_ids[perm], val_mask[perm]
             self.val_content = None if val_content is None else val_content[perm]
@@ -863,6 +932,8 @@ class Trainer:
         self._exec_nonpad += nonpad
         self._step_positions += executed
         self._step_nonpad += nonpad
+        if self.kd_support is not None:
+            return self._row_micro_losses(ids, mask, content, fwd)
         with self._autocast():
             logits = self.student(ids, **fwd).logits
         ce_sum, ce_n = masked_ce(logits, ids, mask)
@@ -879,6 +950,70 @@ class Trainer:
                 chunk=loss_cfg.get("kd_chunk", KD_CHUNK_DEFAULT),
             )
         return ce_sum, ce_n, kd_sum, kd_n
+
+    def _row_micro_losses(self, ids, mask, content, fwd):
+        """`_micro_losses` under `loss.kd_support`: only the loss's rows reach either head.
+
+        Both backbones run the whole sequence; the CE rows (the loss mask) and the
+        KD rows (`prediction_mask` under `kd_scope`) are selected from the final
+        hidden states, their union is projected through each model's own output
+        head in blocks, and the teacher keeps only its Top-K sketch. The CE and KD
+        sums, and the counts the caller normalizes by, are those of the full-logit
+        path for the same rows; KD is the reference-Top-K + tail KL, not the
+        full-vocabulary one (`topk_kd`).
+        """
+        loss_cfg = self.cfg["loss"]
+        ce_pos = (mask[:, 1:].bool() if loss_cfg["ce_weight"] > 0
+                  else torch.zeros_like(mask[:, 1:], dtype=torch.bool))
+        kd_pos = prediction_mask(mask, loss_cfg["kd_scope"], content,
+                                 input_ids=ids, think_ids=self.think_ids).bool()
+        rows = ce_pos | kd_pos
+        if not bool(rows.any()):
+            zero = torch.zeros((), device=ids.device)
+            return zero, 0, zero, 0
+        targets = ids[:, 1:][rows]
+        chunk = loss_cfg.get("kd_chunk", KD_CHUNK_DEFAULT)
+        temperature = float(loss_cfg["kd_temperature"])
+        with torch.no_grad(), self._autocast():
+            t_hidden = topk_kd.head_rows(self.teacher, ids, rows, **fwd)
+            sketch = topk_kd.teacher_sketch(self.teacher_head, t_hidden,
+                                            top_k=int(self.kd_support.top_k),
+                                            temperature=temperature, chunk=chunk)
+        del t_hidden
+        kd_rows = kd_pos[rows]
+        with self._autocast():
+            s_hidden = topk_kd.head_rows(self.student, ids, rows, **fwd)
+            ce_sum, kd_sum = topk_kd.topk_tail_losses(
+                self.student_head, s_hidden, sketch, targets, ce_pos[rows], kd_rows,
+                temperature=temperature, chunk=chunk)
+        with torch.no_grad():
+            n_kd = int(kd_rows.sum())
+            if n_kd:
+                d = self._step_kd_diag
+                d["rows"] += n_kd
+                d["teacher_tail_mass"] += float(sketch.tail_log_prob[kd_rows].exp().sum())
+                d["target_in_support"] += int(
+                    (sketch.support_indices[kd_rows] == targets[kd_rows, None]).any(-1).sum())
+        return ce_sum, int(ce_pos.sum()), kd_sum, int(kd_pos.sum())
+
+    def _monitor_due(self, step: int) -> bool:
+        mon = self.cfg.get("monitor")
+        return mon is not None and step % int(mon["every"]) == 0
+
+    @torch.no_grad()
+    def _param_stats(self) -> dict:
+        """Per monitored group: parameters, mean, mean |x|, max |x|, gradient norm before clipping."""
+        out = {}
+        for name, pattern in self.cfg["monitor"]["groups"].items():
+            ps = [p for n, p in self.student.named_parameters() if re.search(pattern, n)]
+            if not ps:
+                raise ValueError(f"monitor group {name!r} ({pattern}) matches no parameter")
+            flat = torch.cat([p.detach().double().flatten() for p in ps])
+            grads = [p.grad.detach().double().pow(2).sum() for p in ps if p.grad is not None]
+            out[name] = {"parameters": int(flat.numel()), "mean": float(flat.mean()),
+                         "mean_abs": float(flat.abs().mean()), "max_abs": float(flat.abs().max()),
+                         "grad_norm": float(torch.stack(grads).sum().sqrt()) if grads else None}
+        return out
 
     def _extra_micro_kd(self, ids: torch.Tensor):
         """Forward one extra-stream microbatch; returns (kd_sum, kd_n).
@@ -1007,6 +1142,7 @@ class Trainer:
         self.student.train()
         self.opt.zero_grad(set_to_none=True)
         self._step_positions = self._step_nonpad = 0
+        self._step_kd_diag = {"rows": 0, "teacher_tail_mass": 0.0, "target_in_support": 0}
         ce_acc = kd_acc = 0.0
         for i in range(0, bps, micro):
             mids = ids[i : i + micro].to(self.device)
@@ -1032,11 +1168,14 @@ class Trainer:
         # this branch runs.
         extra_metrics = (self._extra_pass() if self.extra_active(self.step)
                          else {})
+        monitored = self._param_stats() if self._monitor_due(self.step + 1) else None
         grad_norm = torch.nn.utils.clip_grad_norm_(
             self.params, cfg["optim"]["grad_clip"]
         )
         self.opt.step()
         self.step += 1
+        if monitored is not None:
+            self.logger.log("param_stats", step=self.step, groups=monitored)
 
         ce_mean = ce_acc / ce_total if ce_total else None
         kd_mean = kd_acc / kd_total if kd_total else None
@@ -1056,6 +1195,12 @@ class Trainer:
                 float(self.extra_cfg["lambda_extra"]) * extra_metrics["extra_kd"], 6)
             extra_metrics["lambda_extra"] = float(self.extra_cfg["lambda_extra"])
         extra_metrics.pop("extra_block_indices", None)
+        diag = self._step_kd_diag
+        if self.kd_support is not None and diag["rows"]:
+            # Evidence beside the loss, never folded into it: how much teacher
+            # mass the tail bucket carries and how often the target is in S.
+            extra_metrics["kd_teacher_tail_mass"] = round(diag["teacher_tail_mass"] / diag["rows"], 6)
+            extra_metrics["kd_target_in_support"] = round(diag["target_in_support"] / diag["rows"], 6)
         return {
             "step": self.step,
             "loss": round(total, 6),
@@ -1187,6 +1332,11 @@ class Trainer:
             "kd_chunk": int(loss_cfg.get("kd_chunk", KD_CHUNK_DEFAULT)),
             "kd_chunk_source": ("config" if "kd_chunk" in loss_cfg
                                 else "trainer default KD_CHUNK_DEFAULT"),
+            **({"kd_objective": topk_kd.objective_identity(
+                    self.kd_support, loss_cfg["kd_scope"], loss_cfg["kd_temperature"])}
+               if self.kd_support is not None else {}),
+            **({"resume_identity": self.resume_identity} if self.resume_identity else {}),
+            **({"target_policy": self.target_policy} if self.target_policy else {}),
             # batch semantics as executed
             "blocks_per_step": int(batch["blocks_per_step"]),
             "micro_blocks": int(batch["micro_blocks"]),
@@ -1244,12 +1394,19 @@ class Trainer:
                 "consumed_blocks": self.consumed_blocks(),
                 "optimizer": self.opt.state_dict(),
                 "torch_rng_state": torch.get_rng_state(),
+                **({"cuda_rng_states": torch.cuda.get_rng_state_all()}
+                   if str(self.device).startswith("cuda") and torch.cuda.is_available() else {}),
+                **({"resume_identity": self.resume_identity} if self.resume_identity else {}),
                 "config_sha256": self.config_sha,
                 "trainable_names": self.freeze_report["trainable_names"],
                 "lora_config": self.lora_cfg.to_dict() if self.lora_cfg else None,
             },
             ckpt_dir / "trainer_state.pt",
         )
+        if self.resume_identity:
+            # Readable without loading the optimizer state: a resume on another
+            # resource compares against it before anything heavy loads.
+            (ckpt_dir / "resume_identity.json").write_text(json.dumps(self.resume_identity, indent=1) + "\n")
         (self.out_dir / "checkpoints" / "latest.txt").write_text(tag + "\n")
         keep = self.cfg["checkpoint"]["keep_last"]
         if keep > 0:
@@ -1280,6 +1437,11 @@ class Trainer:
             )
         if list(state["trainable_names"]) != self.freeze_report["trainable_names"]:
             raise ValueError("checkpoint freeze set differs from current config")
+        if dict(state.get("resume_identity") or {}) != self.resume_identity:
+            raise ValueError(
+                "checkpoint was written against different data, initialization or code "
+                f"identities ({state.get('resume_identity')} != {self.resume_identity}); "
+                "refusing to resume its optimizer state")
         saved_lora = state.get("lora_config")
         current_lora = self.lora_cfg.to_dict() if self.lora_cfg else None
         if saved_lora != current_lora:
@@ -1300,6 +1462,8 @@ class Trainer:
                 f"consumed-block position {self.consumed_blocks()} does not match "
                 f"the checkpoint's {expected}; batch config changed")
         torch.set_rng_state(state["torch_rng_state"])
+        if state.get("cuda_rng_states") is not None and torch.cuda.is_available():
+            torch.cuda.set_rng_state_all(state["cuda_rng_states"])
         self.logger.log("resume_loaded", step=self.step, checkpoint=str(ckpt_dir),
                         consumed_blocks=self.consumed_blocks())
 
@@ -1331,6 +1495,7 @@ class Trainer:
                               "lora_trainable_params", "total_params")
                 },
                 lora_config=self.lora_cfg.to_dict() if self.lora_cfg else None,
+                target_policy=self.target_policy,
                 extra_stream=(
                     {**self.extra_cfg,
                      "stream_blocks": int(self.extra_ids.shape[0]),
@@ -1348,6 +1513,8 @@ class Trainer:
             m["tokens_seen"] = self.step * bps * block_len
             if torch.cuda.is_available() and str(self.device).startswith("cuda"):
                 m["gpu_mem_gb"] = round(torch.cuda.max_memory_allocated() / 2**30, 2)
+                # the allocator's pool: what an out-of-memory error actually exhausts
+                m["gpu_mem_reserved_gb"] = round(torch.cuda.max_memory_reserved() / 2**30, 2)
             if iv["log_every"] and self.step % iv["log_every"] == 0:
                 self.logger.log("train_step", **m)
                 parts = [f"step {self.step}/{total}", f"loss {m['loss']:.4f}"]

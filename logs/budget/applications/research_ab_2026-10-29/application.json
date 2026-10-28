@@ -1,0 +1,143 @@
+{
+ "schema": "aadistill.budget.phase_application/v1",
+ "written_utc": "2026-10-29T12:00:00Z",
+ "status": "APPLICATION, NOT A GRANT. Nothing is authorized until the maintainer grants it; each paid session then gets its own one-use authorization inside the granted envelopes",
+ "decided_by": "maintainer brief 2026-10-29 'Revised Research A/B Programme & Engineering Principles' (section 11: one phase-level application with the full cumulative budget, the hardware range and the protocols)",
+ "forecast": "logs/budget/applications/research_ab_2026-10-29/forecast.json (scripts/maintenance/consolidation/research_ab_forecast.py; every rate a measurement its record owns)",
+ "project_position": {
+  "committed_usd": 725.4993,
+  "cap_usd": 740.0,
+  "headroom_usd": 14.5007,
+  "source": "logs/budget/decisions.md 2026-10-28 (both closeouts) through shared.project_position; provider 10:20Z: 0 pods, volume am5m373kuq only"
+ },
+ "requested_project_cap_usd": 903.0,
+ "_requested_cap": "committed $725.4993 + the phase's hard caps $177.21 = $902.71, rounded up",
+ "phase_hard_cap_usd": 177.21,
+ "expected_usd": 102.41,
+ "envelopes": [
+  {
+   "id": "research-b-engineering",
+   "study": "stage1.projected_residual.independent_gated_v1",
+   "kind": "engineering validation",
+   "hard_cap_usd": 3.0,
+   "gpu": "L40S (one pod, at most $1.36/h)",
+   "what": "independent_gated_validation.py: the real 1.123B initialization and its error, CUDA numerics, native generation, both arms' 20-step smokes under the new KD (peak memory, step time), CUDA resume, checkpoint identity, the vLLM model's engine admission, both arms' decode throughput",
+   "chain": "READY at $0: driver + host rehearsal through the formal entry point, launcher igv_launch.py on shared.study_engineering, setup branch stage1_independent_gated, proposal plans/independent_gated_engineering_proposal.json"
+  },
+  {
+   "id": "research-b-initialization",
+   "kind": "formal initialization",
+   "hard_cap_usd": 1.53,
+   "expected_usd": 1.02,
+   "gpu": "L40S or A100 80GB",
+   "what": "materialize.py's independent path on Thinking-2507: the four bases per layer, the student, its initialization error; persisted with its identity (assets/independent_gated_init.json)",
+   "only_after": "the engineering validation passed"
+  },
+  {
+   "id": "research-b-control",
+   "kind": "formal recovery + evaluation",
+   "hard_cap_usd": 17.38,
+   "expected_usd": 11.59,
+   "gpu": "L40S (A100 80GB if the validation's memory says so)",
+   "what": "D4-Augmented-topk200 on seeds 20260726 and 20260801: D4 Top-1 trained ONCE per seed under the new protocol, every item of eval-set-1 under nucleus_v1; recovery_driver.py --arm D4-Augmented-topk200",
+   "reuses": "D4 Top-1 (relay, sha256 fc28e0dd...), D4-Augmented's pack, recipe, schedule, seeds and evaluation; no search, no re-initialization, no new teacher data"
+  },
+  {
+   "id": "research-b-projected",
+   "kind": "formal recovery + evaluation",
+   "hard_cap_usd": 21.39,
+   "expected_usd": 14.26,
+   "gpu": "L40S (A100 80GB if the validation's memory says so)",
+   "what": "Projected-1123M-topk200 on both seeds, the same protocol, evaluated through the out-of-tree vLLM model after its admission on each checkpoint"
+  },
+  {
+   "id": "research-a-generation",
+   "study": "stage2.teacher_modes.d4_scale_v1",
+   "kind": "formal data generation",
+   "hard_cap_usd": 24.59,
+   "expected_usd": 16.39,
+   "gpu": "A100 80GB",
+   "what": "T0 + E in both modes, X in H-N, the calibration prompts in both modes, in waves until H-T-S reaches 2,468 sequences; ~38.77M generated tokens expected (42.34M conservative)"
+  },
+  {
+   "id": "research-a-initialization",
+   "kind": "formal initialization",
+   "hard_cap_usd": 2.71,
+   "expected_usd": 1.81,
+   "gpu": "A100 80GB",
+   "what": "the common hybrid-derived initialization on D4 Top-1's fixed operator path, mode-balanced calibration; one materialization"
+  },
+  {
+   "id": "research-a-recovery",
+   "kind": "formal recovery",
+   "hard_cap_usd": 61.98,
+   "expected_usd": 28.61,
+   "gpu": "L40S, or A100 80GB",
+   "what": "H-T-S, H-N-S and H-N-C on two seeds ({'H-T-S': 3702, 'H-N-S': 927, 'H-N-C': 3702} optimizer steps expected), document_isolated, the new KD protocol"
+  },
+  {
+   "id": "research-a-evaluation",
+   "kind": "formal evaluation",
+   "hard_cap_usd": 20.63,
+   "expected_usd": 11.73,
+   "gpu": "L40S",
+   "what": "six students in their own modes and the teacher in both modes, every item of eval-set-1 under nucleus_v1"
+  },
+  {
+   "id": "storage",
+   "kind": "network volume",
+   "hard_cap_usd": 14.0,
+   "what": "one 100 GB network volume (or am5m373kuq resized to 100 GB) for save points, checkpoints and corpora, two months; NEEDS the maintainer's explicit approval as a new or resized volume"
+  },
+  {
+   "id": "engineering-reserve",
+   "kind": "pre-science subruns",
+   "hard_cap_usd": 10.0,
+   "what": "ordinary pre-science engineering failures across the phase (P12.1), cumulative; never science after measurement has begun"
+  }
+ ],
+ "hardware_range": {
+  "allowed": [
+   "NVIDIA L40S (48 GB)",
+   "NVIDIA A100 80GB"
+  ],
+  "rule": "a unit runs on the L40S when its measured peak reserved memory leaves 4 GB free and its step time prices it inside its envelope; otherwise on an A100 80GB; one GPU per training unit (no DDP/FSDP/TP: batch size 2 at micro-batch 1 is two passes on one card and both models fit one card); independent units may share a multi-GPU pod one GPU each; the card enters each unit's identity",
+  "never": "changing the sequence length, the batch size, the recipe or the architecture to fit a cheaper card"
+ },
+ "reusable_assets": [
+  "D4 Top-1 (the control's initialization) on the relay, hash-pinned",
+  "D4-Augmented's training pack (packs/D4A_merged_whole) on the relay, hash-pinned, byte for byte",
+  "Thinking-2507 and the hybrid Qwen3-4B from the hub at pinned revisions",
+  "T0's 1,761 frozen tasks and verifiers; calib.s0v_base_d4@v1",
+  "eval-set-1 and nucleus_v1, unchanged",
+  "H1-PA's two D4-Augmented units' evaluation evidence (old protocol, descriptive only; their weights are not read)",
+  "A-E's PASS (hybrid modes, token identity, isolation, preclosed scoring) as engineering evidence for Research A's chain"
+ ],
+ "checkpoint_persistence": {
+  "rule": "AGENTS.md P8.2.1 and the maintainer's section 6: every expensive unit persisted when it completes",
+  "training": "save points every 1,851 steps (keep_last 1) and the final checkpoint on the network volume as written: weights, AdamW state, step, CPU and CUDA RNG states, consumed-sequence position, config hash and the bound data and initialization identities (checkpoint.bind_identity); a later attempt resumes from the last valid save point",
+  "initializations_and_corpora": "persisted with their sha256 at completion (volume and relay) and reused, never regenerated",
+  "evaluation": "each unit's generations, rows and report persisted when complete; a scored unit is never re-evaluated",
+  "retention": "every new checkpoint kept through the analysis and the maintainer's review; then retired under AGENTS.md 2.5 when no consumer remains"
+ },
+ "stop_conditions": [
+  "a phase or envelope cap would be exceeded by the next session's plan (each re-priced from measured step time)",
+  "a resource whose billing or ownership is unknown",
+  "a deterministic failure the evidence cannot explain (never retried unchanged)",
+  "a change to frozen science would be needed (protocol, data, arms, seeds, scoring, thresholds)",
+  "every unit of every arm complete and analyzed: the report, then the maintainer's decision"
+ ],
+ "owed_in_phase_engineering_at_zero_cost": [
+  "Research B: the formal session launchers for the initialization and the recovery units (on h1pa_launch / mixed_launch's machinery, their authorization kind and setup branch), and the evaluation route's engine admission wiring per checkpoint (recovery_driver.admitted_evaluate exists)",
+  "Research A: E and X built and isolation-checked (R0-R9) and frozen; the wave generation driver and its admission with the length-censoring record; the recovery driver (H1-PA's machinery with document_isolated packs and the new KD); the launchers; the analysis (h1_statistics on S and C)",
+  "each before its first paid session, inside the granted phase (AGENTS.md P12.1: no intermediate approvals between driver, launcher, GPU execution and evaluation)"
+ ],
+ "historical_checkpoint_retirement": "13 retirement-eligible historical weights retired 2026-10-29 under AGENTS.md 2.5 (14.43 GiB on the dev box, 4 relay objects 4.44 GiB; tombstones in logs/maintenance/inventories/checkpoint_tombstones.json); D3's product kept (a launcher still declares it). The four H1-PA D4 and two Mix-Augmented checkpoints on am5m373kuq (about 14.3 GB) are proposed for retirement at the first session that mounts the volume, after a consumer re-audit",
+ "not_requested": [
+  "600M work",
+  "any search",
+  "new D4 initialization",
+  "a merge to main"
+ ],
+ "authorizes": "nothing"
+}

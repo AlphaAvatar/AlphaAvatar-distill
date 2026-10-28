@@ -219,7 +219,13 @@ def derive_recipe(plan: dict, u: dict, sched: dict | None, *, run_name: str, pur
                   data_dir: str, student_path: str) -> dict:
     """The seed's E1 config with WHERE replaced and, for D4-Augmented (or
     PA2v's validation runs), the given schedule; every other key, nested keys
-    included, is checked unchanged."""
+    included, is checked unchanged.
+
+    A study may declare a protocol change of its own: ``plan["recipe_overrides"]``
+    maps dotted config keys to their new values (for every arm), and
+    ``plan["arm_overrides"][arm]`` the same for one arm. They are applied last and
+    are the only further keys allowed to differ; H1-PA declares none, so its
+    recipes are unchanged."""
     e1 = plan["recipes"][u["seed"]]
     d = copy.deepcopy(e1)
     clash = {k: e1[k] for k, v in PINS.items() if k in e1 and e1[k] != v}
@@ -235,8 +241,16 @@ def derive_recipe(plan: dict, u: dict, sched: dict | None, *, run_name: str, pur
         d["checkpoint"]["save_every"] = sched["save_every"]
         d["intervals"]["eval_every"] = sched["eval_every"]
         allowed |= set(SCHEDULE_KEYS)
+    overrides = {**(plan.get("recipe_overrides") or {}), **((plan.get("arm_overrides") or {}).get(u["arm"]) or {})}
+    for key, value in overrides.items():
+        *parents, leaf = key.split(".")
+        target = d
+        for part in parents:
+            target = target.setdefault(part, {})
+        target[leaf] = copy.deepcopy(value)
     a, b = UD._flat(e1), UD._flat(d)
-    outside = sorted(k for k in set(a) | set(b) if a.get(k) != b.get(k) and k not in allowed)
+    declared = lambda k: k in allowed or any(k == o or k.startswith(o + ".") for o in overrides)  # noqa: E731
+    outside = sorted(k for k in set(a) | set(b) if a.get(k) != b.get(k) and not declared(k))
     if outside:
         raise DriverRefusal(f"the derived recipe differs from E1's outside the declared overrides: {outside}")
     return d

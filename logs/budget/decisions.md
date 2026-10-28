@@ -14579,3 +14579,46 @@ on a paid pod.
 - Risks: B1 as applied for (an L40S, the same recipe) inherits the OOM. That is the maintainer's
   decision.
 - Revisit when the maintainer decides on Research A's A1–A3 and on B-E's findings.
+
+## 2026-10-29 — Maintainer: revised Research A/B programme and engineering principles; $0 implementation done; phase application submitted (PENDING)
+
+- Context: the maintainer's brief "Revised Research A/B Programme & Engineering Principles"
+  (reviewed HEAD `4c588844`) replaced the pending Research A/B follow-ups. It authorizes the
+  new design and its engineering implementation, **no paid resource and no cap increase**.
+  A-E PASS, B-E FAIL and every record of them stay as they are.
+- Decision (the maintainer's):
+  - **Research B** adopts the full-width residual with four independent trainable projections
+    per layer and identity-initialized learnable SiLU gates (1,123,227,136 parameters,
+    734,270,976 trainable), PCA for initialization only, no folding, native HF and vLLM
+    inference; the GPU is chosen by measured need (L40S, else A100 80GB, else multi-GPU).
+  - **Training baseline** for new distillation: KD at the assistant target positions with the
+    teacher's Top-200 + one complement-logsumexp tail bucket, CE on the same positions, rows
+    selected before the output head; not the full-vocabulary KL.
+  - **D4-Augmented is retrained once per seed** under that protocol from D4 Top-1 as Research
+    B's matched control; H1-PA's D4-Augmented is reported beside as the old protocol.
+  - **Research A** runs directly at D4-Augmented's training scale (S and C, two seeds), no 10%
+    pilot; long thinking trajectories are never cut into training data.
+  - Expensive completed work is persisted and resumed rather than redone; consumer-less
+    historical weights retire under AGENTS.md 2.5.
+- Done at $0 (branch `research/teacher-modes-and-projected-residual`):
+  - core: `aadistill.training.topk_kd` and `Trainer` (`loss.kd_support`,
+    `loss.exclude_template_prefill`, `checkpoint.bind_identity`, `monitor`, CUDA RNG in save
+    points); the four-projection gated model, its cost counts, its four-basis initialization;
+    `aadistill.evaluation.function_error`; the vLLM out-of-tree model and its general plugin;
+    an offline-safe teacher revision pin;
+  - Research B: `independent_gated_design.json`, its preregistration, `recovery_driver.py` on
+    H1-PA's unit driver (both arms), the engineering validation driver with a host rehearsal
+    through the formal entry point, its launcher `igv_launch.py` and setup branch;
+  - Research A: `d4_scale_design.json` and its preregistration;
+  - retirement: 13 historical checkpoint weights (14.43 GiB dev box, 4 relay objects 4.44 GiB),
+    tombstoned; D3's product kept (a launcher still declares it).
+- **Application (PENDING):** `logs/budget/applications/research_ab_2026-10-29/application.json`,
+  phase hard cap $177.21 (expected $102.41), project cap requested **$903** (committed
+  $725.4993). The formal launchers and Research A's data/recovery chain are owed $0 engineering
+  inside the phase.
+- Alternatives considered: a fixed 0.1 nat vLLM criterion for the new model (rejected by the
+  maintainer); a multi-GPU training topology (not needed: both models fit one card at batch 2).
+- Risks: document-isolated training measured 5.19 s/step on an A100 (A-E), above the
+  cross-context 3.62 s/step, which dominates Research A's conservative cost; length censoring at
+  8,192 may bias S.
+- Revisit when the maintainer decides on the application.

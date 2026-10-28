@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.checkpoint_registry/v2",
-  "created_utc": "2026-10-21T20:05:15+00:00",
+  "created_utc": "2026-10-28T17:44:04+00:00",
   "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --relay --out logs/maintenance/inventories/checkpoint_registry.json",
   "hashed": true,
   "scope": "every checkpoint and weight artifact in the three storage areas: local artifacts/, the relay, and anything git tracks",
@@ -76,17 +76,19 @@
         "phase_d1 screening and confirmation: COMPLETE (D-series closed 2026-10-17)"
       ],
       "open_consumers": [],
-      "local_copies": [
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/e5e3edb0477b25147de952153da8fc21",
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/e5e3edb0477b25147de952153da8fc21"
-      ],
-      "copies": 2,
-      "all_copies_identity_verified": true,
-      "tombstone": null,
-      "lifecycle": "retained_local",
+      "local_copies": [],
+      "copies": 0,
+      "all_copies_identity_verified": false,
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "phase_d1_e5e3edb0477b25147de952153da8fc21",
+        "deleted_utc": "2026-10-28T17:32:23+00:00",
+        "reason": "the completed D1 search's retained products: finalists q1 and q3 of the frozen quality-order top-4, plus the search's own lineage-retained leaves; identities bound by logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Not the forward baseline's reference (that is q2). Retirement-eligible under AGENTS.md 2.5 | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "byte-exact replay from the committed search record; both unretained finalists were reproduced EXACTLY by the finalist-rematerialization campaign (logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json)",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not",
-      "materialization": "local bytes retained; replay is the fallback"
+      "materialization": "byte-exact replay from the committed search record; both unretained finalists were reproduced EXACTLY by the finalist-rematerialization campaign (logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json)"
     },
     "d1_finalist_q2": {
       "artifact_id": "d1_finalist_q2",
@@ -152,17 +154,19 @@
         "phase_d1 screening and confirmation: COMPLETE (D-series closed 2026-10-17)"
       ],
       "open_consumers": [],
-      "local_copies": [
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/56388d47b6a71e1b49e44929e48d4061",
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/56388d47b6a71e1b49e44929e48d4061"
-      ],
-      "copies": 2,
-      "all_copies_identity_verified": true,
-      "tombstone": null,
-      "lifecycle": "retained_local",
+      "local_copies": [],
+      "copies": 0,
+      "all_copies_identity_verified": false,
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "phase_d1_56388d47b6a71e1b49e44929e48d4061",
+        "deleted_utc": "2026-10-28T17:32:23+00:00",
+        "reason": "the completed D1 search's retained products: finalists q1 and q3 of the frozen quality-order top-4, plus the search's own lineage-retained leaves; identities bound by logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Not the forward baseline's reference (that is q2). Retirement-eligible under AGENTS.md 2.5 | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "byte-exact replay from the committed search record; both unretained finalists were reproduced EXACTLY by the finalist-rematerialization campaign (logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json)",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not",
-      "materialization": "local bytes retained; replay is the fallback"
+      "materialization": "byte-exact replay from the committed search record; both unretained finalists were reproduced EXACTLY by the finalist-rematerialization campaign (logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json)"
     },
     "d1_finalist_q4": {
       "artifact_id": "d1_finalist_q4",
@@ -183,16 +187,19 @@
         "phase_d1 screening and confirmation: COMPLETE (D-series closed 2026-10-17)"
       ],
       "open_consumers": [],
-      "local_copies": [
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_replay_002/products/3fcaf42eaa91b3ed02eab6c2f3213bfc"
-      ],
-      "copies": 1,
-      "all_copies_identity_verified": true,
-      "tombstone": null,
-      "lifecycle": "retained_local",
+      "local_copies": [],
+      "copies": 0,
+      "all_copies_identity_verified": false,
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "phase_d1_3fcaf42eaa91b3ed02eab6c2f3213bfc",
+        "deleted_utc": "2026-10-28T17:32:23+00:00",
+        "reason": "finalist q4 of the frozen quality-order top-4, which the search did not retain; reproduced EXACTLY by the finalist-rematerialization campaign. Identities are bound by logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Retirement-eligible under AGENTS.md 2.5 | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "byte-exact replay from the committed search record; both unretained finalists were reproduced EXACTLY by the finalist-rematerialization campaign (logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json)",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not",
-      "materialization": "local bytes retained; replay is the fallback"
+      "materialization": "byte-exact replay from the committed search record; both unretained finalists were reproduced EXACTLY by the finalist-rematerialization campaign (logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json)"
     },
     "d2_candidate_c1": {
       "artifact_id": "d2_candidate_c1",
@@ -215,16 +222,19 @@
         "phase_d2 shared confirmation: not this candidate"
       ],
       "open_consumers": [],
-      "local_copies": [
-        "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd"
-      ],
-      "copies": 1,
-      "all_copies_identity_verified": true,
-      "tombstone": null,
-      "lifecycle": "retained_local",
+      "local_copies": [],
+      "copies": 0,
+      "all_copies_identity_verified": false,
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "phase_d2_59013099b902f213649b8aa4c676dedd",
+        "deleted_utc": "2026-10-28T17:32:23+00:00",
+        "reason": "the four initializations the D2 formal search committed (stage1_selection.json of d2_search_20261015_051722); every D2 behavioural probe trains FROM one of them. A second copy is on the relay under stage1/phase_d2/d2_search_20261015_051722/, round-trip verified (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json). D2 screening and c4's shared confirmation (NO_GO) are complete. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Retirement-eligible under AGENTS.md 2.5 | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (round-trip verified); a replay of the search path is the fallback",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not",
-      "materialization": "local bytes retained; the relay copy is the second source"
+      "materialization": "restore the relay copy (round-trip verified); a replay of the search path is the fallback"
     },
     "d2_candidate_c2": {
       "artifact_id": "d2_candidate_c2",
@@ -247,16 +257,19 @@
         "phase_d2 shared confirmation: not this candidate"
       ],
       "open_consumers": [],
-      "local_copies": [
-        "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a"
-      ],
-      "copies": 1,
-      "all_copies_identity_verified": true,
-      "tombstone": null,
-      "lifecycle": "retained_local",
+      "local_copies": [],
+      "copies": 0,
+      "all_copies_identity_verified": false,
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "phase_d2_c2cb27efcf68b4f18bf7284aea84877a",
+        "deleted_utc": "2026-10-28T17:32:23+00:00",
+        "reason": "the four initializations the D2 formal search committed (stage1_selection.json of d2_search_20261015_051722); every D2 behavioural probe trains FROM one of them. A second copy is on the relay under stage1/phase_d2/d2_search_20261015_051722/, round-trip verified (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json). D2 screening and c4's shared confirmation (NO_GO) are complete. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Retirement-eligible under AGENTS.md 2.5 | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (round-trip verified); a replay of the search path is the fallback",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not",
-      "materialization": "local bytes retained; the relay copy is the second source"
+      "materialization": "restore the relay copy (round-trip verified); a replay of the search path is the fallback"
     },
     "d2_candidate_c3": {
       "artifact_id": "d2_candidate_c3",
@@ -279,16 +292,19 @@
         "phase_d2 shared confirmation: not this candidate"
       ],
       "open_consumers": [],
-      "local_copies": [
-        "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae"
-      ],
-      "copies": 1,
-      "all_copies_identity_verified": true,
-      "tombstone": null,
-      "lifecycle": "retained_local",
+      "local_copies": [],
+      "copies": 0,
+      "all_copies_identity_verified": false,
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "phase_d2_30fe791a85d70ac713e75893fea107ae",
+        "deleted_utc": "2026-10-28T17:32:23+00:00",
+        "reason": "the four initializations the D2 formal search committed (stage1_selection.json of d2_search_20261015_051722); every D2 behavioural probe trains FROM one of them. A second copy is on the relay under stage1/phase_d2/d2_search_20261015_051722/, round-trip verified (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json). D2 screening and c4's shared confirmation (NO_GO) are complete. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Retirement-eligible under AGENTS.md 2.5 | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (round-trip verified); a replay of the search path is the fallback",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not",
-      "materialization": "local bytes retained; the relay copy is the second source"
+      "materialization": "restore the relay copy (round-trip verified); a replay of the search path is the fallback"
     },
     "d2_candidate_c4": {
       "artifact_id": "d2_candidate_c4",
@@ -311,16 +327,19 @@
         "phase_d2 shared confirmation: COMPLETE, NO_GO (d2_confirmation_20261016_105802)"
       ],
       "open_consumers": [],
-      "local_copies": [
-        "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03"
-      ],
-      "copies": 1,
-      "all_copies_identity_verified": true,
-      "tombstone": null,
-      "lifecycle": "retained_local",
+      "local_copies": [],
+      "copies": 0,
+      "all_copies_identity_verified": false,
+      "tombstone": {
+        "record": "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "canonical_id": "phase_d2_3a4173e4eff45b0d73fd82bd0b263f03",
+        "deleted_utc": "2026-10-28T17:32:23+00:00",
+        "reason": "the four initializations the D2 formal search committed (stage1_selection.json of d2_search_20261015_051722); every D2 behavioural probe trains FROM one of them. A second copy is on the relay under stage1/phase_d2/d2_search_20261015_051722/, round-trip verified (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json). D2 screening and c4's shared confirmation (NO_GO) are complete. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Retirement-eligible under AGENTS.md 2.5 | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it"
+      },
+      "lifecycle": "weights_retired_tombstoned",
       "reconstruction": "restore the relay copy (round-trip verified); a replay of the search path is the fallback",
       "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not",
-      "materialization": "local bytes retained; the relay copy is the second source"
+      "materialization": "restore the relay copy (round-trip verified); a replay of the search path is the fallback"
     },
     "d3_initial_checkpoint": {
       "artifact_id": "d3_initial_checkpoint",
@@ -1326,75 +1345,83 @@
     }
   },
   "local": {
-    "n_units": 88,
-    "n_weight_files": 82,
-    "total_bytes": 81917566896,
-    "total_human": "76.292 GiB",
-    "artifacts_tree_bytes": 12188847210,
-    "external_store_tree_bytes": 76281447329,
+    "n_units": 78,
+    "n_weight_files": 71,
+    "total_bytes": 67690159160,
+    "total_human": "63.041 GiB",
+    "artifacts_tree_bytes": 14349660704,
+    "external_store_tree_bytes": 60894799337,
     "by_store": {
       "external_store": {
-        "units": 61,
-        "bytes": 73733077771
+        "units": 50,
+        "bytes": 58313533314
       },
       "repo_artifacts": {
-        "units": 27,
-        "bytes": 8184489125
+        "units": 28,
+        "bytes": 9376625846
       }
     },
     "proposed_disposition": {
       "keep": 31,
-      "retire": 14,
-      "review": 43
+      "retire": 2,
+      "review": 45
     },
     "proposed_disposition_bytes": {
       "keep": 53613593422,
-      "retire": 16689914094,
-      "review": 11614059380
+      "retire": 1259883797,
+      "review": 12816681941
     }
   },
   "relay": {
     "repo": "AlphaAvatar/aadistill-artifacts",
     "queried": true,
-    "queried_utc": "2026-10-21T19:59:26+00:00",
-    "n_files": 1465,
-    "total_bytes": 92496654451,
+    "queried_utc": "2026-10-28T17:39:08+00:00",
+    "n_files": 1619,
+    "total_bytes": 90053347376,
     "by_prefix": {
       "stage3": {
-        "files": 180,
-        "bytes": 28752090392
+        "files": 179,
+        "bytes": 26367855424
       },
       "stage0_calvol": {
-        "files": 36,
-        "bytes": 14305640652
-      },
-      "transfer": {
-        "files": 621,
-        "bytes": 13066231679
+        "files": 39,
+        "bytes": 15497777373
       },
       "e1_scaling_20260801": {
-        "files": 305,
-        "bytes": 12140681449
+        "files": 312,
+        "bytes": 14536345939
+      },
+      "transfer": {
+        "files": 642,
+        "bytes": 13872939862
       },
       "a3_preserved_probes": {
         "files": 12,
         "bytes": 9536946368
       },
-      "stage1": {
-        "files": 31,
-        "bytes": 8414216806
-      },
       "permanent_controls": {
         "files": 18,
         "bytes": 4791374395
+      },
+      "stage1": {
+        "files": 27,
+        "bytes": 3645676422
       },
       "stage3_recovery_corpus_v2": {
         "files": 9,
         "bytes": 1015033375
       },
+      "stage2_h1": {
+        "files": 106,
+        "bytes": 225184504
+      },
       "stage0_calibration_volume": {
         "files": 5,
         "bytes": 154750248
+      },
+      "stage2_h1pa": {
+        "files": 22,
+        "bytes": 89772449
       },
       "stage3_teacher_corpus_20260730": {
         "files": 4,
@@ -1450,7 +1477,7 @@
       },
       ".gitattributes": {
         "files": 1,
-        "bytes": 54799
+        "bytes": 56729
       },
       "c1_preserved_probes": {
         "files": 18,
@@ -1461,7 +1488,7 @@
     "files": [
       {
         "path": ".gitattributes",
-        "size_bytes": 54799,
+        "size_bytes": 56729,
         "sha256": null
       },
       {
@@ -3005,6 +3032,41 @@
         "sha256": null
       },
       {
+        "path": "e1_scaling_20260801/e1_r2960k_sb_pca/e1_r2960k_sb_pca_pod_hashes.txt",
+        "size_bytes": 506,
+        "sha256": null
+      },
+      {
+        "path": "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/chat_template.jinja",
+        "size_bytes": 4049,
+        "sha256": null
+      },
+      {
+        "path": "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/config.json",
+        "size_bytes": 1418,
+        "sha256": null
+      },
+      {
+        "path": "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/generation_config.json",
+        "size_bytes": 205,
+        "sha256": null
+      },
+      {
+        "path": "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/model.safetensors",
+        "size_bytes": 2384234968,
+        "sha256": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5"
+      },
+      {
+        "path": "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/tokenizer.json",
+        "size_bytes": 11422650,
+        "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506"
+      },
+      {
+        "path": "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/tokenizer_config.json",
+        "size_bytes": 694,
+        "sha256": null
+      },
+      {
         "path": "e1_scaling_20260801/e1_r5500k_sa_pca/console.log",
         "size_bytes": 33871,
         "sha256": null
@@ -3860,6 +3922,21 @@
         "sha256": "ac7f3885a13f9acb74e2f2014dac2d4b96fcec2655841000b46fe3d6bb207cc4"
       },
       {
+        "path": "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/config.json",
+        "size_bytes": 1419,
+        "sha256": null
+      },
+      {
+        "path": "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/generation_config.json",
+        "size_bytes": 206,
+        "sha256": null
+      },
+      {
+        "path": "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/model.safetensors",
+        "size_bytes": 1192135096,
+        "sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3"
+      },
+      {
         "path": "stage1/phase_d2/d2_confirmation_20261016_105802/d2_confirmation_artifacts.tar.gz",
         "size_bytes": 4338735,
         "sha256": "7e7a82e567369ab7b06b7472a35260957cf116369d854f91d9c81289c367122b"
@@ -3885,11 +3962,6 @@
         "sha256": null
       },
       {
-        "path": "stage1/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "52c511c67badbecb5a75bff585bf4db66ce198dc6f30f398965a06a1fcb19d52"
-      },
-      {
         "path": "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/config.json",
         "size_bytes": 1419,
         "sha256": null
@@ -3898,11 +3970,6 @@
         "path": "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/generation_config.json",
         "size_bytes": 206,
         "sha256": null
-      },
-      {
-        "path": "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "5d6c0a5a2c04bfc4cf75fd301e06b93affc557ab142229585f0a10c8029d0fbe"
       },
       {
         "path": "stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/config.json",
@@ -3915,11 +3982,6 @@
         "sha256": null
       },
       {
-        "path": "stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "7b52fb15a7b397d8e00e5cd39e2f667a83bd4d5d9aa2b857d11fe5dfc3cac138"
-      },
-      {
         "path": "stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/config.json",
         "size_bytes": 1419,
         "sha256": null
@@ -3928,11 +3990,6 @@
         "path": "stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/generation_config.json",
         "size_bytes": 206,
         "sha256": null
-      },
-      {
-        "path": "stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/model.safetensors",
-        "size_bytes": 1192135096,
-        "sha256": "9a0f41e98a38ca69a86a45197f97c5fdb06ecb37db2f3480c77730dbd567d728"
       },
       {
         "path": "stage1/phase_d3/d3_probes_20261017_110022/d3_probes_artifacts.tar.gz",
@@ -4013,6 +4070,646 @@
         "path": "stage1/qwen3_0p6b_init_v0/random_baseline/tokenizer_config.json",
         "size_bytes": 694,
         "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/generation_session.json",
+        "size_bytes": 1102,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.complete",
+        "size_bytes": 2522,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0000.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0000.jsonl",
+        "size_bytes": 1468259,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0001.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0001.jsonl",
+        "size_bytes": 5596998,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0002.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0002.jsonl",
+        "size_bytes": 7683000,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0003.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0003.jsonl",
+        "size_bytes": 4671767,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0004.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0004.jsonl",
+        "size_bytes": 6749154,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0005.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0005.jsonl",
+        "size_bytes": 6869287,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0006.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0006.jsonl",
+        "size_bytes": 5142730,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0007.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0007.jsonl",
+        "size_bytes": 6279233,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0008.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0008.jsonl",
+        "size_bytes": 7568078,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0009.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0009.jsonl",
+        "size_bytes": 3342924,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0010.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0010.jsonl",
+        "size_bytes": 5081220,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0011.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0011.jsonl",
+        "size_bytes": 5542923,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0012.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0012.jsonl",
+        "size_bytes": 3129770,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0013.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0013.jsonl",
+        "size_bytes": 2914440,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0014.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0014.jsonl",
+        "size_bytes": 5961731,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0015.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0015.jsonl",
+        "size_bytes": 10374461,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0016.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass0_generation_input_g0.part0016.jsonl",
+        "size_bytes": 6921548,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.complete",
+        "size_bytes": 1369,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0000.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0000.jsonl",
+        "size_bytes": 2233789,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0001.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0001.jsonl",
+        "size_bytes": 8422478,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0002.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0002.jsonl",
+        "size_bytes": 4444543,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0003.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0003.jsonl",
+        "size_bytes": 5189017,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0004.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0004.jsonl",
+        "size_bytes": 6294381,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0005.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0005.jsonl",
+        "size_bytes": 3177878,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0006.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0006.jsonl",
+        "size_bytes": 9168645,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0007.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0007.jsonl",
+        "size_bytes": 6224255,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0008.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1gen_20261022_190653/pass1_generation_input_g0.part0008.jsonl",
+        "size_bytes": 6408423,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1p1t_20261023_094007/generation_session.json",
+        "size_bytes": 1172,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1p1t_20261023_094007/pass0_generation_input_g0.complete",
+        "size_bytes": 360,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1p1t_20261023_094007/pass0_generation_input_g0.part0000.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1p1t_20261023_094007/pass0_generation_input_g0.part0000.jsonl",
+        "size_bytes": 843604,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1p1t_20261023_094007/pass0_generation_input_g0.part0001.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1p1t_20261023_094007/pass0_generation_input_g0.part0001.jsonl",
+        "size_bytes": 2751053,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1p1t_20261023_094007/pass1_generation_input_g0.complete",
+        "size_bytes": 216,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1p1t_20261023_094007/pass1_generation_input_g0.part0000.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1p1t_20261023_094007/pass1_generation_input_g0.part0000.jsonl",
+        "size_bytes": 2792291,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/generation_session.json",
+        "size_bytes": 1184,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass0_generation_input_g0.complete",
+        "size_bytes": 505,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass0_generation_input_g0.part0000.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass0_generation_input_g0.part0000.jsonl",
+        "size_bytes": 1314745,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass0_generation_input_g0.part0001.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass0_generation_input_g0.part0001.jsonl",
+        "size_bytes": 6232504,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass0_generation_input_g0.part0002.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass0_generation_input_g0.part0002.jsonl",
+        "size_bytes": 1649596,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass0_generation_input_g0.seg0.input.jsonl",
+        "size_bytes": 143907,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass0_generation_input_g0.seg0.log",
+        "size_bytes": 15580,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass0_generation_input_g0.seg0.raw.jsonl",
+        "size_bytes": 9129685,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass0_generation_input_g0.seg0.raw.summary.json",
+        "size_bytes": 2072,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass0_generation_input_g0.seg0.stream.jsonl",
+        "size_bytes": 9129685,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass1_generation_input_g0.complete",
+        "size_bytes": 360,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass1_generation_input_g0.part0000.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass1_generation_input_g0.part0000.jsonl",
+        "size_bytes": 3758620,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass1_generation_input_g0.part0001.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass1_generation_input_g0.part0001.jsonl",
+        "size_bytes": 1487061,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass1_generation_input_g0.seg0.input.jsonl",
+        "size_bytes": 101034,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass1_generation_input_g0.seg0.log",
+        "size_bytes": 15020,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass1_generation_input_g0.seg0.raw.jsonl",
+        "size_bytes": 5213561,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass1_generation_input_g0.seg0.raw.summary.json",
+        "size_bytes": 2067,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass1_generation_input_g0.seg0.stream.jsonl",
+        "size_bytes": 5213561,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/generation_session.json",
+        "size_bytes": 1184,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/manifest.json",
+        "size_bytes": 7926,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/pass0_generation_input_g0.complete",
+        "size_bytes": 505,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/pass0_generation_input_g0.part0000.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/pass0_generation_input_g0.part0000.jsonl",
+        "size_bytes": 1314745,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/pass0_generation_input_g0.part0001.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/pass0_generation_input_g0.part0001.jsonl",
+        "size_bytes": 6232504,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/pass0_generation_input_g0.part0002.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/pass0_generation_input_g0.part0002.jsonl",
+        "size_bytes": 1649596,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/pass1_generation_input_g0.complete",
+        "size_bytes": 360,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/pass1_generation_input_g0.part0000.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/pass1_generation_input_g0.part0000.jsonl",
+        "size_bytes": 3758620,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/pass1_generation_input_g0.part0001.done",
+        "size_bytes": 65,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/pass1_generation_input_g0.part0001.jsonl",
+        "size_bytes": 1487061,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1/generation/h1pat_20261024_115517/stage2_h1_generation",
+        "size_bytes": 8592782,
+        "sha256": "7b64d2f33b886c106d3605579a48dedbb35436723fb26827136e733ace20c95c"
+      },
+      {
+        "path": "stage2_h1/units/evidence/A-s20260726.evidence.tgz",
+        "size_bytes": 927523,
+        "sha256": "d43d4174c5739bf3cf879a723a72c27c977e64b34fb4e7989022930a87cf99f9"
+      },
+      {
+        "path": "stage2_h1/units/evidence/A-s20260727.evidence.tgz",
+        "size_bytes": 1044043,
+        "sha256": "1d47d0b24b4a15bd096f27be686c7191ec2ba36d53fb96127f1efd570c11acea"
+      },
+      {
+        "path": "stage2_h1/units/evidence/B-s20260726.evidence.tgz",
+        "size_bytes": 1857007,
+        "sha256": "bb1d8fb353e583307915d4a96215db66d2e9676aa2124e140af3a0dce03006ef"
+      },
+      {
+        "path": "stage2_h1/units/evidence/B-s20260727.evidence.tgz",
+        "size_bytes": 1642745,
+        "sha256": "50c2d51c737bcbed31fd300d8ee4a7d5aab2d56dc2ac42c879aa756b3115b2a3"
+      },
+      {
+        "path": "stage2_h1pa/packs/D4A_fluid_final/audit.jsonl",
+        "size_bytes": 520762,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1pa/packs/D4A_fluid_final/blocks.npz",
+        "size_bytes": 2866563,
+        "sha256": "09ebee1d7d646dc6b4e97d57e0f12626018f0b530013567d9ecd2eac14ea9d31"
+      },
+      {
+        "path": "stage2_h1pa/packs/D4A_fluid_final/ladder.json",
+        "size_bytes": 6380,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1pa/packs/D4A_fluid_final_sessions.jsonl",
+        "size_bytes": 17983482,
+        "sha256": "816f47d23cad3284a170d29ab54c9854d8ae230f0529304bfee3b15d12e6a69c"
+      },
+      {
+        "path": "stage2_h1pa/packs/D4A_fluid_final_sessions.meta.json",
+        "size_bytes": 1014,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1pa/packs/D4A_fluid_whole/audit.jsonl",
+        "size_bytes": 492212,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1pa/packs/D4A_fluid_whole/blocks.npz",
+        "size_bytes": 2715164,
+        "sha256": "dd0749a60c0e80464f2d7654ccb95fe63942f07888f683df33081a2b2aca3f1f"
+      },
+      {
+        "path": "stage2_h1pa/packs/D4A_fluid_whole/ladder.json",
+        "size_bytes": 6115,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1pa/packs/D4A_fluid_whole_sessions.jsonl",
+        "size_bytes": 16990088,
+        "sha256": "5d8355abaf06fa2dc8ab26dfbf360367a70d8dd07bd6a89e8acc905733e16fc1"
+      },
+      {
+        "path": "stage2_h1pa/packs/D4A_fluid_whole_sessions.meta.json",
+        "size_bytes": 20581,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1pa/packs/D4A_merged_final/audit.jsonl",
+        "size_bytes": 3163036,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1pa/packs/D4A_merged_final/blocks.npz",
+        "size_bytes": 8344933,
+        "sha256": "a1185c250a1316cc01ff5566c5a29d66d2edd756bf6c50086da24b36de11cbbe"
+      },
+      {
+        "path": "stage2_h1pa/packs/D4A_merged_final/ladder.json",
+        "size_bytes": 2510,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1pa/packs/D4A_merged_whole/audit.jsonl",
+        "size_bytes": 3151442,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1pa/packs/D4A_merged_whole/blocks.npz",
+        "size_bytes": 8331713,
+        "sha256": "8b97b202e2c1f861fe5c99e3a247ce7fdd063c354b7668ddc1ba75fedb8043f3"
+      },
+      {
+        "path": "stage2_h1pa/packs/D4A_merged_whole/ladder.json",
+        "size_bytes": 2510,
+        "sha256": null
+      },
+      {
+        "path": "stage2_h1pa/units/evidence/D4-Augmented-s20260726.evidence.tgz",
+        "size_bytes": 6673851,
+        "sha256": "2b670810ae03bb5c51340796862bee6d6caea773e6355d44a9265031e8801a81"
+      },
+      {
+        "path": "stage2_h1pa/units/evidence/D4-Augmented-s20260801.evidence.tgz",
+        "size_bytes": 6788186,
+        "sha256": "680a598ade1f8c5ba3ff6e1545daec172043643d016c409ba31b303524f29cab"
+      },
+      {
+        "path": "stage2_h1pa/units/evidence/D4-Original-s20260726.evidence.tgz",
+        "size_bytes": 3203836,
+        "sha256": "f0997bf4efdc3f2692fe576eca41bf8986f7fdc005c753067b55c1eaa2e19e81"
+      },
+      {
+        "path": "stage2_h1pa/units/evidence/D4-Original-s20260801.evidence.tgz",
+        "size_bytes": 3033455,
+        "sha256": "08a5279c1d044617c19bba520b1f5dae76c2707d9f9fe1dcd63bd85c66174309"
+      },
+      {
+        "path": "stage2_h1pa/units/evidence/PCA-Original-s20260726.evidence.tgz",
+        "size_bytes": 2837791,
+        "sha256": "c01cd5153cea28180b592ffc056148595aeab55a0f9ea6aee12f0355449517c5"
+      },
+      {
+        "path": "stage2_h1pa/units/evidence/PCA-Original-s20260801.evidence.tgz",
+        "size_bytes": 2636825,
+        "sha256": "c69315e69d48a6aeaf37f65c70a96b8fc39c45c38053ca70ce1855ab97a3fb13"
       },
       {
         "path": "stage3/kdconf_ctrl_a/console.log",
@@ -4895,11 +5592,6 @@
         "sha256": null
       },
       {
-        "path": "stage3/s2v1_from_s1/step_002700/model/model.safetensors",
-        "size_bytes": 2384234968,
-        "sha256": "d2e0f66d2b070090384e86c038f1e6adac9ba79e20d0956b0dce1fc97d5b46ed"
-      },
-      {
         "path": "stage3/s2v1_from_s1/step_002700/model/tokenizer.json",
         "size_bytes": 11422650,
         "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506"
@@ -5083,6 +5775,11 @@
         "path": "transfer/aad_autoinit_0f6f68a0.bundle",
         "size_bytes": 17755594,
         "sha256": "10fa7e4d2288136f11105b0f478065075a0c16a3d6afa961b14452b3e006416f"
+      },
+      {
+        "path": "transfer/aad_autoinit_0facf513.bundle",
+        "size_bytes": 38461491,
+        "sha256": "e3c63a4e87f699c0fe2115c9ced9808892deebf6c2a159cff3e2e31b21d3b560"
       },
       {
         "path": "transfer/aad_autoinit_1013f46f.bundle",
@@ -5275,9 +5972,19 @@
         "sha256": "208bf66ebe4324a6d4d05b670cfc145c12cc022086b74e9c9ec5d4eac6d1292f"
       },
       {
+        "path": "transfer/aad_autoinit_3023bccf.bundle",
+        "size_bytes": 38443828,
+        "sha256": "9abf61acd34cf8eabb577fcedb71e9abbbd371f437e3f05e41d906a821e910f4"
+      },
+      {
         "path": "transfer/aad_autoinit_30f5fa79.bundle",
         "size_bytes": 18340737,
         "sha256": "e07ab6e1cdfe181862a999928690d3eaca6a0693c45e836acdbc26f49c1df862"
+      },
+      {
+        "path": "transfer/aad_autoinit_31f7643c.bundle",
+        "size_bytes": 38801029,
+        "sha256": "19ceea380ef1f7754ebef3b7d59bc5c1f777b24358cf847a8dc8882452fcf6ae"
       },
       {
         "path": "transfer/aad_autoinit_323aa4ae.bundle",
@@ -5355,6 +6062,11 @@
         "sha256": "f31736b3bd14b6b42a293cbbb170ea4167549b7c89afeb34b16b705b985f1235"
       },
       {
+        "path": "transfer/aad_autoinit_3f88f690.bundle",
+        "size_bytes": 37651574,
+        "sha256": "fbc18fd63d6e4c02f53c7a223710819107220715532468cd9ff879192de9a389"
+      },
+      {
         "path": "transfer/aad_autoinit_40c3d53a.bundle",
         "size_bytes": 3997902,
         "sha256": "a18f22a5220591e0867ed363c8f48d400d729c47c1a43fc36e45c212bfc3a5b4"
@@ -5393,6 +6105,11 @@
         "path": "transfer/aad_autoinit_47fbfe8c.bundle",
         "size_bytes": 7780618,
         "sha256": "b5e781dba27cd567b38b3b2595cf90a9d8d9cfef72c4590cca9c00ca7a48d88a"
+      },
+      {
+        "path": "transfer/aad_autoinit_48cc1269.bundle",
+        "size_bytes": 38188045,
+        "sha256": "2823dc9ea2091b6ea1ff57a2f36e83cb473058fa2466f075636f13d16e280373"
       },
       {
         "path": "transfer/aad_autoinit_4a25699a.bundle",
@@ -5468,6 +6185,11 @@
         "path": "transfer/aad_autoinit_588dd1fc.bundle",
         "size_bytes": 22903522,
         "sha256": "6424f7127ca9e6929954add0313e6c780967c4f6c390719b141a362a34dc1c98"
+      },
+      {
+        "path": "transfer/aad_autoinit_5947afbb.bundle",
+        "size_bytes": 38297218,
+        "sha256": "bef112da6faf5a6858b0dedda3a3b5418d3ec345a2f610f80af68369299f9c99"
       },
       {
         "path": "transfer/aad_autoinit_5b0396c7.bundle",
@@ -5575,6 +6297,11 @@
         "sha256": "7c68380358ceaac9d75fa999b7b570c51b3bcd5583dc0078faa3482627af9632"
       },
       {
+        "path": "transfer/aad_autoinit_72512395.bundle",
+        "size_bytes": 37554040,
+        "sha256": "4bffab1477656c09c301551ac4f3f12bd911bede3a118a2b066e10cd59294a9a"
+      },
+      {
         "path": "transfer/aad_autoinit_7289f0e1.bundle",
         "size_bytes": 22842306,
         "sha256": "e48c8411d712bc6e574bf79507de8e8b4c56cc73a277f3a6e879cc1aa03481aa"
@@ -5680,6 +6407,11 @@
         "sha256": "a6bd6b5ff3852e3cfe357613c7d5eccfd7a91955812318bd428ce551dc5db545"
       },
       {
+        "path": "transfer/aad_autoinit_84fbcdd1.bundle",
+        "size_bytes": 39270816,
+        "sha256": "8e2a682da462bfcfc8cb8fcdf76da4f5fdb91a9dc0518c0e753c9a60c8d16cc7"
+      },
+      {
         "path": "transfer/aad_autoinit_8518458c.bundle",
         "size_bytes": 18568714,
         "sha256": "4fa11ecd431db09e2d128d05986aa5a1eb1213c392a6f5fff5744be86e16c73f"
@@ -5698,6 +6430,11 @@
         "path": "transfer/aad_autoinit_88349d70.bundle",
         "size_bytes": 5131329,
         "sha256": "ca879159ce149bb21bd1f18050c1be92c3397eef85d4e24f4ecc1bd25c89830c"
+      },
+      {
+        "path": "transfer/aad_autoinit_8a7012ae.bundle",
+        "size_bytes": 38079960,
+        "sha256": "14f36a2f5a8ef718224727b42a33cdf80c36f63ce70f3cc5085e0055724dd6e2"
       },
       {
         "path": "transfer/aad_autoinit_8b4ee3fd.bundle",
@@ -5750,6 +6487,11 @@
         "sha256": "18f315570f680a626f57f62b6bcb559c21380dcdc9b57e55390e7d348d580f81"
       },
       {
+        "path": "transfer/aad_autoinit_8e8f1441.bundle",
+        "size_bytes": 38313981,
+        "sha256": "112e207fe8c030d1cd7cbd41f3c809f94a1aeb915c3d23d9e8dbb2fc4d561779"
+      },
+      {
         "path": "transfer/aad_autoinit_917b57fd.bundle",
         "size_bytes": 18429719,
         "sha256": "fa591eba2b396f61162399a06e1f395261d77d61544071017343cc95462e19c9"
@@ -5783,6 +6525,11 @@
         "path": "transfer/aad_autoinit_96611c89.bundle",
         "size_bytes": 12966063,
         "sha256": "98ec9ff05e31d51b291761756cbcca38a162ffbe1a40ec4154a3f5f7fdd2193d"
+      },
+      {
+        "path": "transfer/aad_autoinit_96889a6e.bundle",
+        "size_bytes": 38330551,
+        "sha256": "e661179b659125f0e4725db05955dc5a31e9137be65081eb4c3533547418fa82"
       },
       {
         "path": "transfer/aad_autoinit_98bc7bb7.bundle",
@@ -5833,6 +6580,11 @@
         "path": "transfer/aad_autoinit_a070b86a.bundle",
         "size_bytes": 22831355,
         "sha256": "6eae55cf0bdf44dc9ac5cc4fdd099d2916dca1d862797ac6ba640acb68299067"
+      },
+      {
+        "path": "transfer/aad_autoinit_a0cc3c5f.bundle",
+        "size_bytes": 39160913,
+        "sha256": "8a0006a57c052d7a9671b443a7e12eda4131659dfcffb98d58b8f857a15a4251"
       },
       {
         "path": "transfer/aad_autoinit_a227fe8f.bundle",
@@ -5905,9 +6657,19 @@
         "sha256": "1e83cba127de2826e29117c650120d5479e5462741e654905931e3177635776d"
       },
       {
+        "path": "transfer/aad_autoinit_b094fd28.bundle",
+        "size_bytes": 38601557,
+        "sha256": "b8a102b28bd86ef585dfeb013fa77f3fe591bfbaa5d87630fc25777ef7573a3f"
+      },
+      {
         "path": "transfer/aad_autoinit_b09bb98e.bundle",
         "size_bytes": 19491260,
         "sha256": "e9ec9c97b5ebc283442455d4e0fe6f3f7b8ae2f08a6ae03c654508ce00c912dd"
+      },
+      {
+        "path": "transfer/aad_autoinit_b0e2bbef.bundle",
+        "size_bytes": 38479401,
+        "sha256": "303097f2a736915ad87c444f17f7612671123f6d8e417681e6b14f4c86d0bbcb"
       },
       {
         "path": "transfer/aad_autoinit_b189fade.bundle",
@@ -5938,6 +6700,11 @@
         "path": "transfer/aad_autoinit_b3659623.bundle",
         "size_bytes": 34832490,
         "sha256": "66643ce24e82d08aca99223e33e566a2c3d30e1d70b9a64f35a580879b6432b3"
+      },
+      {
+        "path": "transfer/aad_autoinit_b6aa0f64.bundle",
+        "size_bytes": 37970414,
+        "sha256": "52dda325a86dec2813bd75c58521e4923ba9ae5ec9cb4f05aec842dcc173b83f"
       },
       {
         "path": "transfer/aad_autoinit_b7ebcbc4.bundle",
@@ -6105,6 +6872,11 @@
         "sha256": "c5ddd0faad29ddb38755c005c59a48c14d00828eee5b0cae431d1c6d8b156848"
       },
       {
+        "path": "transfer/aad_autoinit_d83bb178.bundle",
+        "size_bytes": 38371306,
+        "sha256": "350355499926d5555f40836d79937da0f02f9b1ba65ad40ae2571975afdad977"
+      },
+      {
         "path": "transfer/aad_autoinit_d85f24b3.bundle",
         "size_bytes": 34830285,
         "sha256": "2bcbf19029bca784f4dd021e50c670d131f3c4f77d88effd418055b930db5f86"
@@ -6118,6 +6890,11 @@
         "path": "transfer/aad_autoinit_d8e90df8.bundle",
         "size_bytes": 23301524,
         "sha256": "29e452469ffd65899485d7d20dda4d15994ed40f8ffa02ae6f5e0931118ad6cd"
+      },
+      {
+        "path": "transfer/aad_autoinit_d8f095c5.bundle",
+        "size_bytes": 38649421,
+        "sha256": "cbc80c60172487f65fb890e0dbb51dca721d8954ac98f02a636840e8ea7312eb"
       },
       {
         "path": "transfer/aad_autoinit_d91bef1c.bundle",
@@ -6140,6 +6917,11 @@
         "sha256": "d07ab6b59d3f9e7f800a48e2c08000a71df71f8fddc7c955a7a9b16107b24595"
       },
       {
+        "path": "transfer/aad_autoinit_db480621.bundle",
+        "size_bytes": 38320295,
+        "sha256": "87563486418e1406da4e85f53579eca9d203177b39686992f757cbb90f30df7a"
+      },
+      {
         "path": "transfer/aad_autoinit_db8bf1f7.bundle",
         "size_bytes": 4020654,
         "sha256": "f69d4120031000007713c35a23e7e81c1af2cd6c9689cc54c04048b78c9b03de"
@@ -6158,6 +6940,11 @@
         "path": "transfer/aad_autoinit_deac14cb.bundle",
         "size_bytes": 34541976,
         "sha256": "f827cad15b061e2bed8cb987bc3c28d6bcc76df7db403a5295a0aefb7eeb3c08"
+      },
+      {
+        "path": "transfer/aad_autoinit_ded8b7a8.bundle",
+        "size_bytes": 39216802,
+        "sha256": "f2d9d9189156aadc10eeaf9ccfa4b2556d68191689abff2dd82e596fe603c935"
       },
       {
         "path": "transfer/aad_autoinit_deeb17c9.bundle",
@@ -6245,6 +7032,11 @@
         "sha256": "d6ad96961908acf832d4ae56ca97b87c6b23b9da4e6d8d5633d85e551e8d5f5d"
       },
       {
+        "path": "transfer/aad_autoinit_f27ee093.bundle",
+        "size_bytes": 38488948,
+        "sha256": "8517fa1913327e593140caa8dad4ccc58adabb4fe6de5ce7164cbf907fd50eb7"
+      },
+      {
         "path": "transfer/aad_autoinit_f3597146.bundle",
         "size_bytes": 18572061,
         "sha256": "c9942c609c6a7b0d3c662a1a0d3a44ffcc8ab610571f246406c3653e88282a42"
@@ -6268,6 +7060,11 @@
         "path": "transfer/aad_autoinit_f54254a2.bundle",
         "size_bytes": 7406322,
         "sha256": "cd6696b0be00af3fc17131c4fb2bd560d984b388568a86d9e55e3819457bbba1"
+      },
+      {
+        "path": "transfer/aad_autoinit_f7e6a755.bundle",
+        "size_bytes": 38056593,
+        "sha256": "f7ce89c87fe061f6f40b362e066533c8915fbe3f22dbd01a3d504d146cba0cdc"
       },
       {
         "path": "transfer/aad_autoinit_f95f3a6e.bundle",
@@ -8946,6 +9743,46 @@
       "note": null
     },
     {
+      "sha256": "680a598ade1f8c5ba3ff6e1545daec172043643d016c409ba31b303524f29cab",
+      "size_bytes": 6788186,
+      "members": [
+        "artifacts/stages/stage-2/reasoning_data/h1pa/h1pa2_20261025_055042/store/D4-Augmented-s20260801.evidence.tgz",
+        "artifacts/stages/stage-2/reasoning_data/h1pa/units/evidence/D4-Augmented-s20260801.evidence.tgz"
+      ],
+      "reclaimable_bytes": 6788186,
+      "note": null
+    },
+    {
+      "sha256": "2b670810ae03bb5c51340796862bee6d6caea773e6355d44a9265031e8801a81",
+      "size_bytes": 6673851,
+      "members": [
+        "artifacts/stages/stage-2/reasoning_data/h1pa/h1pa2_20261024_203226/store/D4-Augmented-s20260726.evidence.tgz",
+        "artifacts/stages/stage-2/reasoning_data/h1pa/units/evidence/D4-Augmented-s20260726.evidence.tgz"
+      ],
+      "reclaimable_bytes": 6673851,
+      "note": null
+    },
+    {
+      "sha256": "8140361eab12e904a58efe41243a0d69439d38a43b81c5a44b16074e65dad9f2",
+      "size_bytes": 6232504,
+      "members": [
+        "artifacts/stages/stage-2/reasoning_data/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass0_generation_input_g0.part0001.jsonl",
+        "artifacts/stages/stage-2/reasoning_data/generation/h1pat_20261024_115517/pass0_generation_input_g0.part0001.jsonl"
+      ],
+      "reclaimable_bytes": 6232504,
+      "note": null
+    },
+    {
+      "sha256": "97825167c0f254060ed660d94ad281c072cda05b2343ed4ca067ba7da9c4b4b6",
+      "size_bytes": 3758620,
+      "members": [
+        "artifacts/stages/stage-2/reasoning_data/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass1_generation_input_g0.part0000.jsonl",
+        "artifacts/stages/stage-2/reasoning_data/generation/h1pat_20261024_115517/pass1_generation_input_g0.part0000.jsonl"
+      ],
+      "reclaimable_bytes": 3758620,
+      "note": null
+    },
+    {
       "sha256": "3bd25d896316b50e3a4b84f818a5e6bbf8eb671cb7997810251c2b4640c038e5",
       "size_bytes": 1228743,
       "members": [
@@ -8968,6 +9805,26 @@
       "note": null
     },
     {
+      "sha256": "f0997bf4efdc3f2692fe576eca41bf8986f7fdc005c753067b55c1eaa2e19e81",
+      "size_bytes": 3203836,
+      "members": [
+        "artifacts/stages/stage-2/reasoning_data/h1pa/h1pa2_20261024_203226/store/D4-Original-s20260726.evidence.tgz",
+        "artifacts/stages/stage-2/reasoning_data/h1pa/units/evidence/D4-Original-s20260726.evidence.tgz"
+      ],
+      "reclaimable_bytes": 3203836,
+      "note": null
+    },
+    {
+      "sha256": "08a5279c1d044617c19bba520b1f5dae76c2707d9f9fe1dcd63bd85c66174309",
+      "size_bytes": 3033455,
+      "members": [
+        "artifacts/stages/stage-2/reasoning_data/h1pa/h1pa2_20261025_055042/store/D4-Original-s20260801.evidence.tgz",
+        "artifacts/stages/stage-2/reasoning_data/h1pa/units/evidence/D4-Original-s20260801.evidence.tgz"
+      ],
+      "reclaimable_bytes": 3033455,
+      "note": null
+    },
+    {
       "sha256": "93cda9cfdaaf6d22a9d78e61518708dc6338c60b7a395f49cc5dc447633e5ddc",
       "size_bytes": 603051,
       "members": [
@@ -8982,6 +9839,26 @@
       "note": null
     },
     {
+      "sha256": "c01cd5153cea28180b592ffc056148595aeab55a0f9ea6aee12f0355449517c5",
+      "size_bytes": 2837791,
+      "members": [
+        "artifacts/stages/stage-2/reasoning_data/h1pa/h1pa2_20261024_203226/store/PCA-Original-s20260726.evidence.tgz",
+        "artifacts/stages/stage-2/reasoning_data/h1pa/units/evidence/PCA-Original-s20260726.evidence.tgz"
+      ],
+      "reclaimable_bytes": 2837791,
+      "note": null
+    },
+    {
+      "sha256": "c69315e69d48a6aeaf37f65c70a96b8fc39c45c38053ca70ce1855ab97a3fb13",
+      "size_bytes": 2636825,
+      "members": [
+        "artifacts/stages/stage-2/reasoning_data/h1pa/h1pa2_20261025_055042/store/PCA-Original-s20260801.evidence.tgz",
+        "artifacts/stages/stage-2/reasoning_data/h1pa/units/evidence/PCA-Original-s20260801.evidence.tgz"
+      ],
+      "reclaimable_bytes": 2636825,
+      "note": null
+    },
+    {
       "sha256": "b9efa822aa96a334b2eb13aa23c1d435bceaaa800fea30503aca964ad04c43ff",
       "size_bytes": 2442391,
       "members": [
@@ -8989,6 +9866,36 @@
         "artifacts/audit/three_mode/P1-1600k-sa/free.generations.jsonl"
       ],
       "reclaimable_bytes": 2442391,
+      "note": null
+    },
+    {
+      "sha256": "742f986a6a74dda17978955c1aaf3222d8642cd3e0fd766126e37ac36335f4ce",
+      "size_bytes": 1649596,
+      "members": [
+        "artifacts/stages/stage-2/reasoning_data/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass0_generation_input_g0.part0002.jsonl",
+        "artifacts/stages/stage-2/reasoning_data/generation/h1pat_20261024_115517/pass0_generation_input_g0.part0002.jsonl"
+      ],
+      "reclaimable_bytes": 1649596,
+      "note": null
+    },
+    {
+      "sha256": "f0659c483d0b8a51bd277a10e109f58436beb7af864c1b0a2a63c75696cec50d",
+      "size_bytes": 1487061,
+      "members": [
+        "artifacts/stages/stage-2/reasoning_data/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass1_generation_input_g0.part0001.jsonl",
+        "artifacts/stages/stage-2/reasoning_data/generation/h1pat_20261024_115517/pass1_generation_input_g0.part0001.jsonl"
+      ],
+      "reclaimable_bytes": 1487061,
+      "note": null
+    },
+    {
+      "sha256": "387a7f066779c369f63af91ec0fffa619d9b5b1d1969682b4d26765c58b1900c",
+      "size_bytes": 1314745,
+      "members": [
+        "artifacts/stages/stage-2/reasoning_data/generation/h1pat_20261024_115517/extracted/audit/stage2_h1_generation/pass0_generation_input_g0.part0000.jsonl",
+        "artifacts/stages/stage-2/reasoning_data/generation/h1pat_20261024_115517/pass0_generation_input_g0.part0000.jsonl"
+      ],
+      "reclaimable_bytes": 1314745,
       "note": null
     },
     {
@@ -11603,6 +12510,7 @@
       "weights_sha256": "f7c8816fc234cb8f441885eae897df951a61c3ec476de2fc6b0940e974ac265d",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-2/reasoning_data/h1pa.json",
         "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
@@ -11613,8 +12521,7 @@
         "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142638/evidence/volume_audit.json",
         "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json",
         "logs/stages/stage-3/e2/plans/PROPOSAL.md",
-        "logs/stages/stage-3/history/EXPERIMENTS.md",
-        "logs/state/artifact_manifests.md"
+        "logs/stages/stage-3/history/EXPERIMENTS.md"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -11647,6 +12554,7 @@
       "weights_sha256": "d333a47a8fa15414e5259711a75d890e66b9174c7f9fc1eca377c7ad4dfb165b",
       "config_sha256": null,
       "referenced_by": [
+        "configs/stages/stage-2/reasoning_data/h1pa.json",
         "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
@@ -11657,8 +12565,7 @@
         "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142638/evidence/volume_audit.json",
         "logs/stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json",
         "logs/stages/stage-3/e2/plans/PROPOSAL.md",
-        "logs/stages/stage-3/history/EXPERIMENTS.md",
-        "logs/state/artifact_manifests.md"
+        "logs/stages/stage-3/history/EXPERIMENTS.md"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -11698,6 +12605,7 @@
       "weights_sha256": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
       "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
       "referenced_by": [
+        "configs/stages/stage-2/reasoning_data/h1pa.json",
         "configs/stages/stage-3/e1/e1_r2960k_sb_pca.json",
         "configs/stages/stage-3/e6b/e6b_p2_r2960k_sb.json",
         "configs/stages/stage-3/e6b/provenance.json",
@@ -11706,16 +12614,15 @@
         "docs/shared/STAGE2_3_HANDOFF.md",
         "docs/stages/stage-1/AUTOINIT_REFERENCE.md",
         "docs/stages/stage-1/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
+        "docs/stages/stage-2/reasoning_data/H1PA.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/inventories/log_inventory.json",
-        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
-        "logs/stages/stage-3/e1/analyses/e1_test_cases.md"
+        "logs/maintenance/inventories/log_inventory.json"
       ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.1151307191/model.safetensors",
+      "relay_path": "e1_scaling_20260801/e1_r2960k_sb_pca/step_002916/model/model.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
       "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
+      "canonical_location": "relay + local",
       "reconstructable": true,
       "reconstruction_recipe": "a paid recovery run of configs/stages/stage-3/e1/e1_r2960k_sb_pca.json",
       "reconstruction_cost": "paid GPU (a full 2.96M-token recovery)",
@@ -11750,6 +12657,7 @@
       "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
       "referenced_by": [
         "README.md",
+        "configs/shared/evaluation/decoding/nucleus_v1.json",
         "configs/shared/validation/cuda_engineering.json",
         "configs/stages/stage-0/calibration_volume/audit_inputs.json",
         "configs/stages/stage-0/calibration_volume/battery_session.json",
@@ -11759,8 +12667,7 @@
         "configs/stages/stage-0/calibration_volume/resolution_session.json",
         "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
         "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json",
-        "configs/stages/stage-0/qwen3_4b_thinking_v1.json"
+        "configs/stages/stage-0/qwen3_4b_thinking.json"
       ],
       "relay_path": "permanent_controls/preflight_ctl_r0860k_sa/model/model.safetensors",
       "relay_verified": true,
@@ -11801,6 +12708,7 @@
       "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
       "referenced_by": [
         "README.md",
+        "configs/shared/evaluation/decoding/nucleus_v1.json",
         "configs/shared/validation/cuda_engineering.json",
         "configs/stages/stage-0/calibration_volume/audit_inputs.json",
         "configs/stages/stage-0/calibration_volume/battery_session.json",
@@ -11810,8 +12718,7 @@
         "configs/stages/stage-0/calibration_volume/resolution_session.json",
         "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
         "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json",
-        "configs/stages/stage-0/qwen3_4b_thinking_v1.json"
+        "configs/stages/stage-0/qwen3_4b_thinking.json"
       ],
       "relay_path": "permanent_controls/preflight_ctl_r0860k_sb/model/model.safetensors",
       "relay_verified": true,
@@ -11852,6 +12759,7 @@
       "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
       "referenced_by": [
         "README.md",
+        "configs/shared/evaluation/decoding/nucleus_v1.json",
         "configs/shared/validation/cuda_engineering.json",
         "configs/stages/stage-0/calibration_volume/audit_inputs.json",
         "configs/stages/stage-0/calibration_volume/battery_session.json",
@@ -11861,8 +12769,7 @@
         "configs/stages/stage-0/calibration_volume/resolution_session.json",
         "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
         "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json",
-        "configs/stages/stage-0/qwen3_4b_thinking_v1.json"
+        "configs/stages/stage-0/qwen3_4b_thinking.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -11903,6 +12810,7 @@
       "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
       "referenced_by": [
         "README.md",
+        "configs/shared/evaluation/decoding/nucleus_v1.json",
         "configs/shared/validation/cuda_engineering.json",
         "configs/stages/stage-0/calibration_volume/audit_inputs.json",
         "configs/stages/stage-0/calibration_volume/battery_session.json",
@@ -11912,8 +12820,7 @@
         "configs/stages/stage-0/calibration_volume/resolution_session.json",
         "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
         "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json",
-        "configs/stages/stage-0/qwen3_4b_thinking_v1.json"
+        "configs/stages/stage-0/qwen3_4b_thinking.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -11954,6 +12861,7 @@
       "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
       "referenced_by": [
         "README.md",
+        "configs/shared/evaluation/decoding/nucleus_v1.json",
         "configs/shared/validation/cuda_engineering.json",
         "configs/stages/stage-0/calibration_volume/audit_inputs.json",
         "configs/stages/stage-0/calibration_volume/battery_session.json",
@@ -11963,8 +12871,7 @@
         "configs/stages/stage-0/calibration_volume/resolution_session.json",
         "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
         "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json",
-        "configs/stages/stage-0/qwen3_4b_thinking_v1.json"
+        "configs/stages/stage-0/qwen3_4b_thinking.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -12005,6 +12912,7 @@
       "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
       "referenced_by": [
         "README.md",
+        "configs/shared/evaluation/decoding/nucleus_v1.json",
         "configs/shared/validation/cuda_engineering.json",
         "configs/stages/stage-0/calibration_volume/audit_inputs.json",
         "configs/stages/stage-0/calibration_volume/battery_session.json",
@@ -12014,8 +12922,7 @@
         "configs/stages/stage-0/calibration_volume/resolution_session.json",
         "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
         "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json",
-        "configs/stages/stage-0/qwen3_4b_thinking_v1.json"
+        "configs/stages/stage-0/qwen3_4b_thinking.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -12056,6 +12963,7 @@
       "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
       "referenced_by": [
         "README.md",
+        "configs/shared/evaluation/decoding/nucleus_v1.json",
         "configs/shared/validation/cuda_engineering.json",
         "configs/stages/stage-0/calibration_volume/audit_inputs.json",
         "configs/stages/stage-0/calibration_volume/battery_session.json",
@@ -12065,8 +12973,7 @@
         "configs/stages/stage-0/calibration_volume/resolution_session.json",
         "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
         "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json",
-        "configs/stages/stage-0/qwen3_4b_thinking_v1.json"
+        "configs/stages/stage-0/qwen3_4b_thinking.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -12107,6 +13014,7 @@
       "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
       "referenced_by": [
         "README.md",
+        "configs/shared/evaluation/decoding/nucleus_v1.json",
         "configs/shared/validation/cuda_engineering.json",
         "configs/stages/stage-0/calibration_volume/audit_inputs.json",
         "configs/stages/stage-0/calibration_volume/battery_session.json",
@@ -12116,8 +13024,7 @@
         "configs/stages/stage-0/calibration_volume/resolution_session.json",
         "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
         "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json",
-        "configs/stages/stage-0/qwen3_4b_thinking_v1.json"
+        "configs/stages/stage-0/qwen3_4b_thinking.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -12158,6 +13065,7 @@
       "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
       "referenced_by": [
         "README.md",
+        "configs/shared/evaluation/decoding/nucleus_v1.json",
         "configs/shared/validation/cuda_engineering.json",
         "configs/stages/stage-0/calibration_volume/audit_inputs.json",
         "configs/stages/stage-0/calibration_volume/battery_session.json",
@@ -12167,8 +13075,7 @@
         "configs/stages/stage-0/calibration_volume/resolution_session.json",
         "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
         "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json",
-        "configs/stages/stage-0/qwen3_4b_thinking_v1.json"
+        "configs/stages/stage-0/qwen3_4b_thinking.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -12209,6 +13116,7 @@
       "config_sha256": "62d14acfb86e397e9449e0d39d5aba6c5a84facac372a86b85e9ac6915be9522",
       "referenced_by": [
         "README.md",
+        "configs/shared/evaluation/decoding/nucleus_v1.json",
         "configs/shared/validation/cuda_engineering.json",
         "configs/stages/stage-0/calibration_volume/audit_inputs.json",
         "configs/stages/stage-0/calibration_volume/battery_session.json",
@@ -12218,8 +13126,7 @@
         "configs/stages/stage-0/calibration_volume/resolution_session.json",
         "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
         "configs/stages/stage-0/calibration_volume/teacher_cal_session.json",
-        "configs/stages/stage-0/qwen3_4b_thinking.json",
-        "configs/stages/stage-0/qwen3_4b_thinking_v1.json"
+        "configs/stages/stage-0/qwen3_4b_thinking.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -12500,11 +13407,11 @@
       "weights_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
       "config_sha256": "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
       "referenced_by": [
-        "README.md",
         "configs/stages/stage-1/operator_ledger.json",
         "configs/stages/stage-1/phase_c1/c1_skip_predicate_classification.json",
         "configs/stages/stage-1/phase_c3/batching_refactor_cuda.json",
         "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json",
+        "configs/stages/stage-2/reasoning_data/h1pa.json",
         "configs/stages/stage-3/e1/e1_ctl_r0250k_sa_pca_stepmatched.json",
         "configs/stages/stage-3/e1/e1_r0250k_sa_pca.json",
         "configs/stages/stage-3/e1/e1_r0250k_sa_rand.json",
@@ -12807,6 +13714,8 @@
       "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
       "referenced_by": [
         "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
+        "configs/stages/stage-1/projected_residual/d4_top1_selection.json",
+        "configs/stages/stage-2/reasoning_data/h1pa.json",
         "docs/stages/stage-2/reasoning_data/H1.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/checkpoint_tombstones.json",
@@ -12815,11 +13724,60 @@
         "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/dose_record.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/finalists/finalists_manifest.json",
         "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/recovery/recovery_config.json",
-        "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/recovery/recovery_products.json",
-        "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/search_record.json",
-        "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/stage1_selection.json"
+        "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/recovery/recovery_products.json"
       ],
       "relay_path": "stage0_calvol/finalists/formal_v1/d4/1301deb71685aa1ca5c7b6cf2c491ac4/model.safetensors",
+      "relay_verified": true,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "relay + local",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "top1",
+      "kind": "checkpoint",
+      "store": "repo_artifacts",
+      "path_local": "artifacts/stages/stage-0/calibration_volume/candidates/mixed_v2/top1",
+      "weight_files": [
+        "artifacts/stages/stage-0/calibration_volume/candidates/mixed_v2/top1/model.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {
+        "num_hidden_layers": 28,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "num_attention_heads": 16,
+        "num_key_value_heads": 8,
+        "vocab_size": 151936
+      },
+      "size_bytes": 1192136721,
+      "size_human": "1.110 GiB",
+      "weights_sha256": "4b86c1fd34a7b9d2ac8c764884c3f1b3091cfa7c7296fd3360579a0361521da3",
+      "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+      "referenced_by": [
+        "configs/stages/stage-0/calibration_volume/mixed_recovery.json",
+        "configs/stages/stage-0/calibration_volume/mixed_search_session.json",
+        "configs/stages/stage-1/projected_residual/d4_top1_selection.json",
+        "configs/stages/stage-1/projected_residual/design.json",
+        "configs/stages/stage-1/projected_residual/engineering_validation.json",
+        "configs/stages/stage-1/projected_residual/independent_gated_design.json",
+        "configs/stages/stage-1/projected_residual/independent_gated_validation.json",
+        "configs/stages/stage-2/reasoning_data/h1_units.json",
+        "configs/stages/stage-2/reasoning_data/h1pa.json",
+        "configs/stages/stage-2/teacher_modes/design.json",
+        "docs/shared/REASONING_TRANSFER_DESIGN.md",
+        "docs/stages/stage-1/projected_residual/DESIGN.md"
+      ],
+      "relay_path": "stage0_calvol/finalists/mixed_v2/2x/9311dcde3cdaedbf54d506ccf7a98333/model.safetensors",
       "relay_verified": true,
       "relay_same_size_unverified": null,
       "relay_mirror_verification": null,
@@ -13189,73 +14147,6 @@
       "disposition": "keep"
     },
     {
-      "canonical_name": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/phase_d1/d1_replay_002/products/3fcaf42eaa91b3ed02eab6c2f3213bfc",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_replay_002/products/3fcaf42eaa91b3ed02eab6c2f3213bfc/model.safetensors"
-      ],
-      "experiment": "phase_d1",
-      "role": "D1 behavioural finalist (rematerialized)",
-      "retention": "diagnostic",
-      "status": "closed",
-      "retention_reason": "finalist q4 of the frozen quality-order top-4, which the search did not retain; reproduced EXACTLY by the finalist-rematerialization campaign. Identities are bound by logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Retirement-eligible under AGENTS.md 2.5",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 1192136721,
-      "size_human": "1.110 GiB",
-      "weights_sha256": "973d40e93f784eed6e811c599c7585dc6bb03b8e5dd99f904fac8acceb36f005",
-      "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
-      "referenced_by": [
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-        "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
-        "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_083610/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q4_s516448251.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q4_s614923639.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_screening_ranking_offpod.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "byte-exact replay from the committed search record",
-      "reconstruction_cost": "paid GPU (~$0.5-1 per finalist)",
-      "never_delete_clause": null,
-      "protected": false,
-      "disposition": "retire",
-      "scientific_identity": {
-        "artifact_id": "d1_finalist_q4",
-        "finalist": 4,
-        "state_id": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
-        "operator_path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
-        "artifact_digest": "253ebdee1f82265bbba700885387e1a411134ea12dc5850454c17fee15e34a4f",
-        "weights_digest": "4f055824408c50eeadddb700ebce56f61d14185b4d123954801ec1911486c892",
-        "single_shard_sha256": "973d40e93f784eed6e811c599c7585dc6bb03b8e5dd99f904fac8acceb36f005",
-        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
-        "identity_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-        "creating_run": "d1_replay_002 (rematerialized, exact)",
-        "consumers": [
-          "phase_d1 screening (paused; logs/stages/stage-1/phase_d1/current.json)"
-        ]
-      },
-      "identity_verified": true
-    },
-    {
       "canonical_name": "afd50c9ff0e3d20542bb5473ea745b55",
       "kind": "checkpoint",
       "store": "external_store",
@@ -13321,662 +14212,6 @@
         ]
       },
       "identity_verified": true
-    },
-    {
-      "canonical_name": "56388d47b6a71e1b49e44929e48d4061",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/56388d47b6a71e1b49e44929e48d4061",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/56388d47b6a71e1b49e44929e48d4061/model.safetensors"
-      ],
-      "experiment": "phase_d1",
-      "role": "out-of-band duplicate of the D1 search products",
-      "retention": "duplicate",
-      "status": "active",
-      "retention_reason": "a second transport copy of the same product set; the canonical copy is products/ one level up, hash-verified. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 1192136721,
-      "size_human": "1.110 GiB",
-      "weights_sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099",
-      "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
-      "referenced_by": [
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-        "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
-        "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_083610/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q3_s516448251.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q3_s614923639.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_screening_ranking_offpod.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "byte-identical to products/",
-      "reconstruction_cost": "$0 (copy)",
-      "never_delete_clause": null,
-      "protected": false,
-      "disposition": "retire",
-      "scientific_identity": {
-        "artifact_id": "d1_finalist_q3",
-        "finalist": 3,
-        "state_id": "56388d47b6a71e1b49e44929e48d4061",
-        "operator_path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
-        "artifact_digest": "9e04b4095713599c319a723c7f342005e484e38e5db4a5a7f08620fdd4cdb18a",
-        "weights_digest": "8ab8e46ecbe955e314699b4ceab379ff6a7f2e7440b5aa840f14588e913b7876",
-        "single_shard_sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099",
-        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
-        "identity_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-        "creating_run": "d1_search_20261006_210210",
-        "consumers": [
-          "phase_d1 screening (paused; logs/stages/stage-1/phase_d1/current.json)"
-        ]
-      },
-      "identity_verified": true
-    },
-    {
-      "canonical_name": "a2b2f04ae642ac69d278c20feb42d52f",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/a2b2f04ae642ac69d278c20feb42d52f",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/a2b2f04ae642ac69d278c20feb42d52f/model.safetensors"
-      ],
-      "experiment": "phase_d1",
-      "role": "out-of-band duplicate of the D1 search products",
-      "retention": "duplicate",
-      "status": "active",
-      "retention_reason": "a second transport copy of the same product set; the canonical copy is products/ one level up, hash-verified. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 1192136721,
-      "size_human": "1.110 GiB",
-      "weights_sha256": "e331bef5b9dab0ba8d5795bdc9a8e33a7107b5871bcadce20667694e412b61a8",
-      "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
-      "referenced_by": [
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/complete_leaf_ranking.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/d1_search.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/stage1_selection.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/runtime/session.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "byte-identical to products/",
-      "reconstruction_cost": "$0 (copy)",
-      "never_delete_clause": null,
-      "protected": false,
-      "disposition": "retire"
-    },
-    {
-      "canonical_name": "e5e3edb0477b25147de952153da8fc21",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/e5e3edb0477b25147de952153da8fc21",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/e5e3edb0477b25147de952153da8fc21/model.safetensors"
-      ],
-      "experiment": "phase_d1",
-      "role": "out-of-band duplicate of the D1 search products",
-      "retention": "duplicate",
-      "status": "active",
-      "retention_reason": "a second transport copy of the same product set; the canonical copy is products/ one level up, hash-verified. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 1192136721,
-      "size_human": "1.110 GiB",
-      "weights_sha256": "46fec7ddd33f27d01040165ef0df05fd956ff83035b7e049248b0165408ca00d",
-      "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
-      "referenced_by": [
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-        "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
-        "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_083610/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q1_s516448251.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q1_s614923639.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_screening_ranking_offpod.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "byte-identical to products/",
-      "reconstruction_cost": "$0 (copy)",
-      "never_delete_clause": null,
-      "protected": false,
-      "disposition": "retire",
-      "scientific_identity": {
-        "artifact_id": "d1_finalist_q1",
-        "finalist": 1,
-        "state_id": "e5e3edb0477b25147de952153da8fc21",
-        "operator_path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.reasoning_heavy@v2)",
-        "artifact_digest": "a7736a705b3ee76d8e008964163e0157f6dd50cdbce60cbd12423719e6745ff6",
-        "weights_digest": "fcc98b1c2bfd6ede83fb708ba2cd164fb41936e0a2674a8386448bbf3ab2466d",
-        "single_shard_sha256": "46fec7ddd33f27d01040165ef0df05fd956ff83035b7e049248b0165408ca00d",
-        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
-        "identity_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-        "creating_run": "d1_search_20261006_210210",
-        "consumers": [
-          "phase_d1 screening (paused; logs/stages/stage-1/phase_d1/current.json)"
-        ]
-      },
-      "identity_verified": true
-    },
-    {
-      "canonical_name": "ea4fe4d356b8c8f40f048256df6b8999",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/ea4fe4d356b8c8f40f048256df6b8999",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/ea4fe4d356b8c8f40f048256df6b8999/model.safetensors"
-      ],
-      "experiment": "phase_d1",
-      "role": "out-of-band duplicate of the D1 search products",
-      "retention": "duplicate",
-      "status": "active",
-      "retention_reason": "a second transport copy of the same product set; the canonical copy is products/ one level up, hash-verified. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 1192136721,
-      "size_human": "1.110 GiB",
-      "weights_sha256": "e009674b1d5dddeafc2febeb8241f2dc63cc926e05f35d4b7fb4cdfa2a25149b",
-      "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
-      "referenced_by": [
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/complete_leaf_ranking.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/d1_search.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/stage1_selection.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/runtime/session.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "byte-identical to products/",
-      "reconstruction_cost": "$0 (copy)",
-      "never_delete_clause": null,
-      "protected": false,
-      "disposition": "retire"
-    },
-    {
-      "canonical_name": "56388d47b6a71e1b49e44929e48d4061",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/56388d47b6a71e1b49e44929e48d4061",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/56388d47b6a71e1b49e44929e48d4061/model.safetensors"
-      ],
-      "experiment": "phase_d1",
-      "role": "D1 behavioural finalist or retained search leaf",
-      "retention": "diagnostic",
-      "status": "closed",
-      "retention_reason": "the completed D1 search's retained products: finalists q1 and q3 of the frozen quality-order top-4, plus the search's own lineage-retained leaves; identities bound by logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Not the forward baseline's reference (that is q2). Retirement-eligible under AGENTS.md 2.5",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 1192136721,
-      "size_human": "1.110 GiB",
-      "weights_sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099",
-      "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
-      "referenced_by": [
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-        "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
-        "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_083610/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q3_s516448251.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q3_s614923639.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_screening_ranking_offpod.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "byte-exact replay from the committed search record (proved twice by the finalist-rematerialization campaign)",
-      "reconstruction_cost": "paid GPU (~$0.5-1 per finalist)",
-      "never_delete_clause": null,
-      "protected": false,
-      "disposition": "retire",
-      "scientific_identity": {
-        "artifact_id": "d1_finalist_q3",
-        "finalist": 3,
-        "state_id": "56388d47b6a71e1b49e44929e48d4061",
-        "operator_path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
-        "artifact_digest": "9e04b4095713599c319a723c7f342005e484e38e5db4a5a7f08620fdd4cdb18a",
-        "weights_digest": "8ab8e46ecbe955e314699b4ceab379ff6a7f2e7440b5aa840f14588e913b7876",
-        "single_shard_sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099",
-        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
-        "identity_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-        "creating_run": "d1_search_20261006_210210",
-        "consumers": [
-          "phase_d1 screening (paused; logs/stages/stage-1/phase_d1/current.json)"
-        ]
-      },
-      "identity_verified": true
-    },
-    {
-      "canonical_name": "a2b2f04ae642ac69d278c20feb42d52f",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/a2b2f04ae642ac69d278c20feb42d52f",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/a2b2f04ae642ac69d278c20feb42d52f/model.safetensors"
-      ],
-      "experiment": "phase_d1",
-      "role": "D1 behavioural finalist or retained search leaf",
-      "retention": "diagnostic",
-      "status": "closed",
-      "retention_reason": "the completed D1 search's retained products: finalists q1 and q3 of the frozen quality-order top-4, plus the search's own lineage-retained leaves; identities bound by logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Not the forward baseline's reference (that is q2). Retirement-eligible under AGENTS.md 2.5",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 1192136721,
-      "size_human": "1.110 GiB",
-      "weights_sha256": "e331bef5b9dab0ba8d5795bdc9a8e33a7107b5871bcadce20667694e412b61a8",
-      "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
-      "referenced_by": [
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/complete_leaf_ranking.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/d1_search.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/stage1_selection.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/runtime/session.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "byte-exact replay from the committed search record (proved twice by the finalist-rematerialization campaign)",
-      "reconstruction_cost": "paid GPU (~$0.5-1 per finalist)",
-      "never_delete_clause": null,
-      "protected": false,
-      "disposition": "retire"
-    },
-    {
-      "canonical_name": "e5e3edb0477b25147de952153da8fc21",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/e5e3edb0477b25147de952153da8fc21",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/e5e3edb0477b25147de952153da8fc21/model.safetensors"
-      ],
-      "experiment": "phase_d1",
-      "role": "D1 behavioural finalist or retained search leaf",
-      "retention": "diagnostic",
-      "status": "closed",
-      "retention_reason": "the completed D1 search's retained products: finalists q1 and q3 of the frozen quality-order top-4, plus the search's own lineage-retained leaves; identities bound by logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Not the forward baseline's reference (that is q2). Retirement-eligible under AGENTS.md 2.5",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 1192136721,
-      "size_human": "1.110 GiB",
-      "weights_sha256": "46fec7ddd33f27d01040165ef0df05fd956ff83035b7e049248b0165408ca00d",
-      "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
-      "referenced_by": [
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-        "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
-        "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_083610/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q1_s516448251.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q1_s614923639.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_screening_ranking_offpod.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "byte-exact replay from the committed search record (proved twice by the finalist-rematerialization campaign)",
-      "reconstruction_cost": "paid GPU (~$0.5-1 per finalist)",
-      "never_delete_clause": null,
-      "protected": false,
-      "disposition": "retire",
-      "scientific_identity": {
-        "artifact_id": "d1_finalist_q1",
-        "finalist": 1,
-        "state_id": "e5e3edb0477b25147de952153da8fc21",
-        "operator_path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.reasoning_heavy@v2)",
-        "artifact_digest": "a7736a705b3ee76d8e008964163e0157f6dd50cdbce60cbd12423719e6745ff6",
-        "weights_digest": "fcc98b1c2bfd6ede83fb708ba2cd164fb41936e0a2674a8386448bbf3ab2466d",
-        "single_shard_sha256": "46fec7ddd33f27d01040165ef0df05fd956ff83035b7e049248b0165408ca00d",
-        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
-        "identity_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-        "creating_run": "d1_search_20261006_210210",
-        "consumers": [
-          "phase_d1 screening (paused; logs/stages/stage-1/phase_d1/current.json)"
-        ]
-      },
-      "identity_verified": true
-    },
-    {
-      "canonical_name": "ea4fe4d356b8c8f40f048256df6b8999",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/ea4fe4d356b8c8f40f048256df6b8999",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/ea4fe4d356b8c8f40f048256df6b8999/model.safetensors"
-      ],
-      "experiment": "phase_d1",
-      "role": "D1 behavioural finalist or retained search leaf",
-      "retention": "diagnostic",
-      "status": "closed",
-      "retention_reason": "the completed D1 search's retained products: finalists q1 and q3 of the frozen quality-order top-4, plus the search's own lineage-retained leaves; identities bound by logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Not the forward baseline's reference (that is q2). Retirement-eligible under AGENTS.md 2.5",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 1192136721,
-      "size_human": "1.110 GiB",
-      "weights_sha256": "e009674b1d5dddeafc2febeb8241f2dc63cc926e05f35d4b7fb4cdfa2a25149b",
-      "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
-      "referenced_by": [
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/complete_leaf_ranking.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/d1_search.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/stage1_selection.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/runtime/session.json"
-      ],
-      "relay_path": null,
-      "relay_verified": false,
-      "relay_same_size_unverified": "stage0_calvol/finalists/formal_v1/d1/4df438a839cd1ed057c2277dfcb8922f/model.safetensors",
-      "relay_mirror_verification": null,
-      "canonical_location": "local only (no second copy)",
-      "reconstructable": true,
-      "reconstruction_recipe": "byte-exact replay from the committed search record (proved twice by the finalist-rematerialization campaign)",
-      "reconstruction_cost": "paid GPU (~$0.5-1 per finalist)",
-      "never_delete_clause": null,
-      "protected": false,
-      "disposition": "retire"
-    },
-    {
-      "canonical_name": "30fe791a85d70ac713e75893fea107ae",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/model.safetensors"
-      ],
-      "experiment": "phase_d2",
-      "role": "D2 v3 committed Top-4 initialization",
-      "retention": "diagnostic",
-      "status": "closed",
-      "retention_reason": "the four initializations the D2 formal search committed (stage1_selection.json of d2_search_20261015_051722); every D2 behavioural probe trains FROM one of them. A second copy is on the relay under stage1/phase_d2/d2_search_20261015_051722/, round-trip verified (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json). D2 screening and c4's shared confirmation (NO_GO) are complete. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Retirement-eligible under AGENTS.md 2.5",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 1192136721,
-      "size_human": "1.110 GiB",
-      "weights_sha256": "52c511c67badbecb5a75bff585bf4db66ce198dc6f30f398965a06a1fcb19d52",
-      "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
-      "referenced_by": [
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/stages/stage-1/phase_d2/analyses/d2_screening_inputs.json",
-        "logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183412/runtime/session.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183734/runtime/session.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_193502/runtime/session.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c3_s516448251.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c3_s614923639.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening_ranking.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/training/d2_screening_c3_s516448251/run_manifest.json"
-      ],
-      "relay_path": "stage1/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/model.safetensors",
-      "relay_verified": true,
-      "relay_same_size_unverified": null,
-      "relay_mirror_verification": null,
-      "canonical_location": "relay + local",
-      "reconstructable": true,
-      "reconstruction_recipe": "the relay copy (byte-exact, verified); otherwise a replay of the search path under the D2 v3 objective",
-      "reconstruction_cost": "$0 from the relay",
-      "never_delete_clause": null,
-      "protected": false,
-      "disposition": "retire"
-    },
-    {
-      "canonical_name": "3a4173e4eff45b0d73fd82bd0b263f03",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/model.safetensors"
-      ],
-      "experiment": "phase_d2",
-      "role": "D2 v3 committed Top-4 initialization",
-      "retention": "diagnostic",
-      "status": "closed",
-      "retention_reason": "the four initializations the D2 formal search committed (stage1_selection.json of d2_search_20261015_051722); every D2 behavioural probe trains FROM one of them. A second copy is on the relay under stage1/phase_d2/d2_search_20261015_051722/, round-trip verified (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json). D2 screening and c4's shared confirmation (NO_GO) are complete. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Retirement-eligible under AGENTS.md 2.5",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 1192136721,
-      "size_human": "1.110 GiB",
-      "weights_sha256": "5d6c0a5a2c04bfc4cf75fd301e06b93affc557ab142229585f0a10c8029d0fbe",
-      "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
-      "referenced_by": [
-        "logs/budget/approvals/autoinit_d2_confirmation_grant.json",
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/stages/stage-1/phase_d2/analyses/d2_candidate_relay_restore.json",
-        "logs/stages/stage-1/phase_d2/analyses/d2_screening_inputs.json",
-        "logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/configs/d2_confirmation_c4_s1004399678.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/configs/d2_confirmation_c4_s396880939.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/configs/d2_confirmation_c4_s766527341.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/d2_confirmation.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/d2_confirmation_verdict.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/training/d2_confirmation_c4_s1004399678/run_manifest.json"
-      ],
-      "relay_path": "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/model.safetensors",
-      "relay_verified": true,
-      "relay_same_size_unverified": null,
-      "relay_mirror_verification": null,
-      "canonical_location": "relay + local",
-      "reconstructable": true,
-      "reconstruction_recipe": "the relay copy (byte-exact, verified); otherwise a replay of the search path under the D2 v3 objective",
-      "reconstruction_cost": "$0 from the relay",
-      "never_delete_clause": null,
-      "protected": false,
-      "disposition": "retire"
-    },
-    {
-      "canonical_name": "59013099b902f213649b8aa4c676dedd",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/model.safetensors"
-      ],
-      "experiment": "phase_d2",
-      "role": "D2 v3 committed Top-4 initialization",
-      "retention": "diagnostic",
-      "status": "closed",
-      "retention_reason": "the four initializations the D2 formal search committed (stage1_selection.json of d2_search_20261015_051722); every D2 behavioural probe trains FROM one of them. A second copy is on the relay under stage1/phase_d2/d2_search_20261015_051722/, round-trip verified (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json). D2 screening and c4's shared confirmation (NO_GO) are complete. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Retirement-eligible under AGENTS.md 2.5",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 1192136721,
-      "size_human": "1.110 GiB",
-      "weights_sha256": "7b52fb15a7b397d8e00e5cd39e2f667a83bd4d5d9aa2b857d11fe5dfc3cac138",
-      "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
-      "referenced_by": [
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/stages/stage-1/phase_d2/analyses/d2_screening_inputs.json",
-        "logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183412/runtime/session.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183734/runtime/session.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_193502/runtime/session.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c1_s516448251.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c1_s614923639.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening_ranking.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/training/d2_screening_c1_s516448251/run_manifest.json"
-      ],
-      "relay_path": "stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/model.safetensors",
-      "relay_verified": true,
-      "relay_same_size_unverified": null,
-      "relay_mirror_verification": null,
-      "canonical_location": "relay + local",
-      "reconstructable": true,
-      "reconstruction_recipe": "the relay copy (byte-exact, verified); otherwise a replay of the search path under the D2 v3 objective",
-      "reconstruction_cost": "$0 from the relay",
-      "never_delete_clause": null,
-      "protected": false,
-      "disposition": "retire"
-    },
-    {
-      "canonical_name": "c2cb27efcf68b4f18bf7284aea84877a",
-      "kind": "checkpoint",
-      "store": "external_store",
-      "path_local": "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a",
-      "weight_files": [
-        "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/model.safetensors"
-      ],
-      "experiment": "phase_d2",
-      "role": "D2 v3 committed Top-4 initialization",
-      "retention": "diagnostic",
-      "status": "closed",
-      "retention_reason": "the four initializations the D2 formal search committed (stage1_selection.json of d2_search_20261015_051722); every D2 behavioural probe trains FROM one of them. A second copy is on the relay under stage1/phase_d2/d2_search_20261015_051722/, round-trip verified (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json). D2 screening and c4's shared confirmation (NO_GO) are complete. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Retirement-eligible under AGENTS.md 2.5",
-      "architecture": {
-        "num_hidden_layers": 28,
-        "hidden_size": 1024,
-        "intermediate_size": 3072,
-        "num_attention_heads": 16,
-        "num_key_value_heads": 8,
-        "vocab_size": 151936
-      },
-      "size_bytes": 1192136721,
-      "size_human": "1.110 GiB",
-      "weights_sha256": "9a0f41e98a38ca69a86a45197f97c5fdb06ecb37db2f3480c77730dbd567d728",
-      "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
-      "referenced_by": [
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/stages/stage-1/phase_d2/analyses/d2_screening_inputs.json",
-        "logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183412/runtime/session.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183734/runtime/session.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_193502/runtime/session.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c2_s516448251.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c2_s614923639.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening_ranking.json",
-        "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/training/d2_screening_c2_s516448251/run_manifest.json"
-      ],
-      "relay_path": "stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/model.safetensors",
-      "relay_verified": true,
-      "relay_same_size_unverified": null,
-      "relay_mirror_verification": null,
-      "canonical_location": "relay + local",
-      "reconstructable": true,
-      "reconstruction_recipe": "the relay copy (byte-exact, verified); otherwise a replay of the search path under the D2 v3 objective",
-      "reconstruction_cost": "$0 from the relay",
-      "never_delete_clause": null,
-      "protected": false,
-      "disposition": "retire"
     },
     {
       "canonical_name": "4f3e3eb734f405db23c0b14773f8720c70b166e88106f58827b126c71f0c22de",
@@ -14106,11 +14341,11 @@
         "configs/stages/stage-0/calibration_volume/resolution_session.json",
         "configs/stages/stage-0/calibration_volume/resolution_v2_session.json",
         "configs/stages/stage-1/phase_c1/c1_skip_predicate_classification.json",
+        "configs/stages/stage-1/projected_residual/independent_gated_validation.json",
+        "configs/stages/stage-2/reasoning_data/h1pa.json",
         "docs/shared/STAGE2_3_HANDOFF.md",
         "docs/stages/stage-1/AUTOINIT_REFERENCE.md",
-        "docs/stages/stage-2/reasoning_data/DESIGN.md",
-        "logs/budget/decisions.md",
-        "logs/budget/ledger.md"
+        "docs/stages/stage-2/reasoning_data/DESIGN.md"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -14148,11 +14383,11 @@
         "configs/stages/stage-0/calibration_volume/bench_session.json",
         "configs/stages/stage-0/calibration_volume/dose_d4_resume_session.json",
         "configs/stages/stage-0/calibration_volume/formal_design.json",
+        "configs/stages/stage-0/calibration_volume/mixed_design.json",
+        "configs/stages/stage-0/calibration_volume/mixed_design_v2.json",
+        "configs/stages/stage-0/calibration_volume/mixed_search_session.json",
         "configs/stages/stage-0/calibration_volume/pilot_design.json",
-        "configs/stages/stage-0/calibration_volume/pilot_search_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d1_session.json",
-        "configs/stages/stage-0/calibration_volume/probes_d4_session.json",
-        "configs/stages/stage-0/calibration_volume/profiles.json"
+        "configs/stages/stage-0/calibration_volume/pilot_search_session.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -14183,18 +14418,18 @@
       "weights_sha256": null,
       "config_sha256": null,
       "referenced_by": [
-        "README.md",
         "configs/shared/infrastructure/artifact_store.json",
         "configs/stages/stage-0/calibration_volume/dose_d4_resume_session.json",
         "configs/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification.json",
         "configs/stages/stage-1/phase_c1/authorization.json",
         "configs/stages/stage-1/phase_c1/c1_skip_predicate_classification.json",
-        "docs/maintenance/REPO_LAYOUT.md",
-        "docs/maintenance/core-provenance.md",
-        "docs/shared/POD_SCRIPTS.md",
-        "docs/shared/STAGE2_3_HANDOFF.md",
-        "docs/stages/stage-0/calibration_volume/DESIGN.md",
-        "docs/stages/stage-1/AUTOINIT_REFERENCE.md"
+        "configs/stages/stage-1/projected_residual/d4_top1_selection.json",
+        "configs/stages/stage-1/projected_residual/independent_gated_design.json",
+        "configs/stages/stage-2/reasoning_data/external_modules.json",
+        "configs/stages/stage-2/reasoning_data/h1_units.json",
+        "configs/stages/stage-2/reasoning_data/h1pa.json",
+        "configs/stages/stage-2/reasoning_data/sources.json",
+        "configs/stages/stage-2/teacher_modes/engineering_validation.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -14228,6 +14463,7 @@
         "configs/shared/baselines/initialization_forward_baseline_v1.json",
         "logs/index.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/families/d_series/analyses/d1_shared_evidence_audit.json",
         "logs/stages/stage-1/families/d_series/closeout/programme_closeout.json",
@@ -14235,8 +14471,7 @@
         "logs/stages/stage-1/phase_d1/README.md",
         "logs/stages/stage-1/phase_d1/current.json",
         "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/closeout/outcome.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_behavioural.json",
-        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_screening_ranking_offpod.json"
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_behavioural.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -14249,6 +14484,43 @@
       "never_delete_clause": "the only copy of the generations the shared protocol pairs D2/D3 candidates with; the trained checkpoints are retired, so nothing can regenerate them",
       "protected": true,
       "disposition": "keep"
+    },
+    {
+      "canonical_name": "oob_products",
+      "kind": "artifact_tree",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products",
+      "weight_files": [],
+      "experiment": "phase_d1",
+      "role": "out-of-band duplicate of the D1 search products",
+      "retention": "duplicate",
+      "status": "active",
+      "retention_reason": "a second transport copy of the same product set; the canonical copy is products/ one level up, hash-verified. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records",
+      "architecture": {},
+      "size_bytes": 67747076,
+      "size_human": "0.063 GiB",
+      "weights_sha256": null,
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/inventories/checkpoint_tombstones.json",
+        "logs/stages/stage-1/phase_d3/plans/d3_control_q2.json",
+        "logs/stages/stage-1/phase_d3/plans/d3_parent_reference_admission_v1.json",
+        "scripts/maintenance/consolidation/build_checkpoint_registry.py",
+        "scripts/maintenance/migration/tests/test_info_architecture_v2.py",
+        "scripts/stages/stage-1/phase_d1/replay_specs.py"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": true,
+      "reconstruction_recipe": "byte-identical to products/",
+      "reconstruction_cost": "$0 (copy)",
+      "never_delete_clause": null,
+      "protected": false,
+      "disposition": "retire"
     },
     {
       "canonical_name": "d1_behavioural_20261012_064341",
@@ -14311,16 +14583,16 @@
       "referenced_by": [
         "configs/stages/stage-0/calibration_volume/audit_inputs.json",
         "configs/stages/stage-0/calibration_volume/formal_design.json",
+        "configs/stages/stage-0/calibration_volume/mixed_design.json",
+        "configs/stages/stage-0/calibration_volume/mixed_design_v2.json",
         "configs/stages/stage-0/calibration_volume/pilot_design.json",
         "configs/stages/stage-0/calibration_volume/profiles.json",
         "configs/stages/stage-0/calibration_volume/profiles_formal.json",
+        "configs/stages/stage-0/calibration_volume/profiles_mixed.json",
+        "configs/stages/stage-0/calibration_volume/profiles_mixed_v2.json",
         "logs/budget/decisions.md",
         "logs/index.json",
-        "logs/maintenance/inventories/checkpoint_registry.json",
-        "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
-        "logs/stages/index.json",
-        "logs/stages/stage-0/calibration_volume/audit/data_audit.json",
-        "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json"
+        "logs/maintenance/inventories/checkpoint_registry.json"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -15371,6 +15643,42 @@
         "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/runtime/session.json",
         "logs/stages/stage-0/calibration_volume/runs/netvol_20261019_051206/closeout/tombstone.json",
         "logs/stages/stage-0/calibration_volume/runs/volaudit_20261021_142638/evidence/volume_audit.json"
+      ],
+      "relay_path": null,
+      "relay_verified": false,
+      "relay_same_size_unverified": null,
+      "relay_mirror_verification": null,
+      "canonical_location": "local only (no second copy)",
+      "reconstructable": false,
+      "reconstruction_recipe": null,
+      "reconstruction_cost": null,
+      "never_delete_clause": "unclassified",
+      "protected": true,
+      "disposition": "review"
+    },
+    {
+      "canonical_name": "width_projection_20ab76a06cd4107d84d4b350646668ff.safetensors",
+      "kind": "tensor_file",
+      "store": "external_store",
+      "path_local": "/home/ecs-user/aad-artifacts/stage0_calvol/mixs_20261026_103634/store/2x/width_projection_20ab76a06cd4107d84d4b350646668ff.safetensors",
+      "weight_files": [
+        "/home/ecs-user/aad-artifacts/stage0_calvol/mixs_20261026_103634/store/2x/width_projection_20ab76a06cd4107d84d4b350646668ff.safetensors"
+      ],
+      "experiment": "unknown",
+      "role": "unclassified",
+      "retention": "diagnostic",
+      "status": "unreviewed",
+      "retention_reason": "not matched by the classification table \u2014 review before any deletion",
+      "architecture": {},
+      "size_bytes": 10485840,
+      "size_human": "0.010 GiB",
+      "weights_sha256": "28f054e101dc3ab7f42c3f8da192df8c916a95b18e5473eb357f35d8f5225bca",
+      "config_sha256": null,
+      "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_103634/closeout/outcome.json",
+        "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_103634/evidence/2x/search_record.json",
+        "logs/stages/stage-0/calibration_volume/runs/mixs_20261026_103634/runtime/session.json"
       ],
       "relay_path": null,
       "relay_verified": false,

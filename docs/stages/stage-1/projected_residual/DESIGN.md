@@ -1,4 +1,48 @@
-# Research B — full-width residual stream with per-layer trainable PCA (900M)
+# Research B — full-width residual stream with trainable projections
+
+## Current study (2026-10-29): four independent projections + learnable SiLU gate, 1.123B
+
+**Status: designed and implemented at $0; nothing authorized.** Maintainer
+decision 2026-10-29. The 900M transpose-shared design below, its B-E FAIL
+(`be_20261028_095332`) and every record of it are a historical research record.
+
+- **Model.** Residual 2,560; attention and FFN at 1,024; 28 layers; FFN 3,072;
+  16 query / 8 KV heads of 128; frozen tied embedding and head. Each layer has
+  four independent trainable projections (`attn_down`, `attn_up`, `ffn_down`,
+  `ffn_up`; down `[1024, 2560]`, up `[2560, 1024]`) and four gates
+  `phi(z) = z + alpha * silu(z)`, `alpha` per channel, zero at initialization
+  (the identity, with a gradient on `alpha` from the first step). 1,123,227,136
+  parameters (734,270,976 trainable), counted from the real model construction.
+- **Initialization.** Each projection's basis is the top-1,024 eigenbasis of the
+  activation it maps (down maps: the normalized sub-layer inputs; up maps: the
+  sub-layer outputs). The student approximates its full-width parent and the
+  teacher; the error is measured and recorded (`aadistill.evaluation.function_error`),
+  never assumed away.
+- **Training.** The project's new baseline: KD at the assistant target
+  positions only, the teacher's Top-200 + one tail bucket
+  (`loss.kd_support`, resolved from the forward baseline), CE on the same
+  positions, chat-template prefill removed from the targets
+  (`loss.exclude_template_prefill`). D4-Augmented's data, recipe, schedule and
+  seeds otherwise.
+- **Control.** D4-Augmented retrained once per seed from D4 Top-1 under the same
+  protocol. H1-PA's D4-Augmented (old protocol) is reported beside, as a
+  different protocol.
+- **Inference.** The Hugging Face model is the reference; vLLM runs the
+  out-of-tree model through its general plugin (no folding, gates kept), after an
+  engine admission against the HF reference judged by the bf16-vs-fp32 noise
+  measured in the same session.
+
+| record | owns |
+| --- | --- |
+| [`independent_gated_design.json`](../../../../configs/stages/stage-1/projected_residual/independent_gated_design.json) | architecture, initialization, objective, arms, overrides, execution, evaluation, what is not matched |
+| [`plans/independent_gated_preregistration.json`](../../../../logs/stages/stage-1/projected_residual/plans/independent_gated_preregistration.json) | comparisons P and R, the decision rule |
+| [`independent_gated_validation.json`](../../../../configs/stages/stage-1/projected_residual/independent_gated_validation.json), [`independent_gated_validation.py`](../../../../scripts/stages/stage-1/projected_residual/independent_gated_validation.py), [`igv_launch.py`](../../../../scripts/stages/stage-1/projected_residual/igv_launch.py) | the engineering validation, its thresholds, its launcher |
+| [`recovery_driver.py`](../../../../scripts/stages/stage-1/projected_residual/recovery_driver.py) | both arms' formal units on H1-PA's unit driver |
+| [`logs/budget/applications/research_ab_2026-10-29/`](../../../../logs/budget/applications/research_ab_2026-10-29/) | the phase application and its forecast |
+
+---
+
+## Historical: the 900M transpose-shared design (2026-10-27/28)
 
 **Status (2026-10-27, revised the same day): $0 READY for an engineering-validation
 grant; nothing authorized.**

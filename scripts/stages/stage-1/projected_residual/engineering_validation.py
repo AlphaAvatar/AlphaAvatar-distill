@@ -304,7 +304,8 @@ def torch_phase(out: Path, work: Path, cfg: dict, *, device: str, tiny: bool, st
         if cuda:
             torch.cuda.reset_peak_memory_stats(device)
         tr, times, losses = train(work / "smoke", steps)
-        grads = [float(p.grad.norm()) if p.grad is not None else 0.0 for p in projections(tr.student)]
+        grads = [float(p.grad.norm()) if p.grad is not None else 0.0
+                 for sites in projections(tr.student) for p in sites.values()]
         orth1 = projection_orthogonality(tr.student)
         full.update({n: p.detach().cpu().clone() for n, p in tr.student.named_parameters()})
         warm = times[2:] or times

@@ -2382,6 +2382,58 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
         "src/aadistill/models/cost_model.py":
             "NEW MODULE: exact parameter counts and analytic FLOPs. NO CUDA SURFACE.",
      }),
+    ("4c5888442331611b99158ed0c6fc1f7d2a1e2c6a",
+     "Revised Research A/B programme: the Top-K + tail KD training baseline and the gated projected model",
+     {
+        "src/aadistill/training/topk_kd.py":
+            "NEW MODULE: reference-Top-K + complement-logsumexp tail forward KL as a "
+            "differentiable training objective at head rows selected before the output "
+            "head (`head_rows`, `teacher_sketch`, `topk_tail_losses` under activation "
+            "checkpointing). CUDA SURFACE: bf16 autocast head blocks and checkpointed "
+            "recompute on the real models, owed to a GPU validation.",
+        "src/aadistill/training/train.py":
+            "NEW optional `loss.kd_support` (switches CE and KD to head-row selection and "
+            "the Top-K + tail KL), `loss.exclude_template_prefill`, "
+            "`checkpoint.bind_identity` (resume refused on other data or initialization "
+            "identities; `resume_identity.json` beside each save point), `monitor` "
+            "(parameter statistics), CUDA RNG states in save points, reserved-memory "
+            "logging, a local-directory teacher without a revision. Absent keys keep every "
+            "historical config's path. THIS IS A DECLARED SEMANTIC CHANGE of training; "
+            "CUDA SURFACE: the new loss path's memory and numerics, owed to a GPU validation.",
+        "src/aadistill/data/target_policy.py":
+            "NEW MODULE: `drop_template_prefill`, template-prefilled targets removed from a "
+            "loss mask by token ids. NO CUDA SURFACE.",
+        "src/aadistill/evaluation/function_error.py":
+            "NEW MODULE: `function_error`, two causal LMs' next-token distributions compared "
+            "at chosen rows (KL, top-1 agreement, centred logit differences, CE). CUDA "
+            "SURFACE: runs on the materializing device, owed to a GPU validation.",
+        "src/aadistill/initialization/adapters/projected_residual.py":
+            "`projection_sharing` gains `independent` (four Linear projections per layer) "
+            "and `projection_activation` `learnable_silu_residual` (phi(z) = z + alpha * "
+            "silu(z), alpha zero-initialized); `projections` returns per-site maps, "
+            "`gate_statistics`, `fold_to_qwen3` folds independent linear models and refuses "
+            "gated ones. The transpose-shared default is unchanged. THIS IS A DECLARED "
+            "SEMANTIC CHANGE of the family; CUDA SURFACE: a new model, owed to a GPU validation.",
+        "src/aadistill/initialization/transforms/projected_residual.py":
+            "NEW `INDEPENDENT_BASES`, `independent_bases`; `materialize_projected` takes "
+            "per-site bases and a projection activation (the shared form unchanged). CUDA "
+            "SURFACE: the materialization on the real teacher, owed to a GPU validation.",
+        "src/aadistill/initialization/adapters/families.py":
+            "NEW MODULE: `CUSTOM_MODEL_FAMILIES` and `register_custom_model_families` "
+            "(explicit, idempotent Auto-class registration). NO CUDA SURFACE.",
+        "src/aadistill/models/cost_model.py":
+            "`projection_sharing` and `projection_activation` in the geometry: four "
+            "projections and the gates' parameters counted; `per_layer.gates` only for a "
+            "gated geometry, so earlier geometries serialize as before. NO CUDA SURFACE.",
+        "src/aadistill/models/teacher.py":
+            "`resolve_revision` returns a full 40-hex commit without a hub call and None "
+            "for a local directory. THIS IS A DECLARED SEMANTIC CHANGE of loading (an "
+            "offline pod can load a pinned teacher). NO CUDA SURFACE.",
+        "src/aadistill/initialization/adapters/projected_residual_vllm.py":
+            "NEW MODULE: the projected-residual family as a vLLM out-of-tree model and its "
+            "general-plugin `register`; imported only in the vLLM environment. CUDA "
+            "SURFACE: the whole engine path, owed to a GPU validation.",
+     }),
 )
 
 

@@ -1,0 +1,127 @@
+{
+ "schema": "aadistill.stage1.projected_residual.independent_gated_preregistration/v1",
+ "version": 1,
+ "study_id": "stage1.projected_residual.independent_gated_v1",
+ "written_utc": "2026-10-29T12:00:00Z",
+ "status": "DRAFTED at $0 before any model of this study exists; REGISTERED (frozen, its sha256 bound into the phase grant) only on the maintainer's authorization, and never amended after the first trained result of this study exists",
+ "design": {
+  "path": "configs/stages/stage-1/projected_residual/independent_gated_design.json"
+ },
+ "arms": {
+  "Projected-1123M-topk200": "NEW: the 1.123B student (four independent projections + identity-initialized learnable SiLU gates; design :: architecture, initialization), trained with D4-Augmented's data and recipe under the new KD protocol (design :: objective, recipe_overrides, arm_overrides), two seeds",
+  "D4-Augmented-topk200": "NEW, the matched control: D4 Top-1 trained with D4-Augmented's data and recipe under the SAME new KD protocol, two seeds, trained once",
+  "D4-Augmented (H1-PA, old protocol)": "REUSED, descriptive only: H1-PA's two D4-Augmented units, trained with full-vocabulary KD at every position; never retrained, never a matched arm"
+ },
+ "isolated_variable": "the student architecture and its initialization; teacher, data, KD protocol, recipe, seeds, evaluation set, decoding protocol and inference engine version are the same in both decided arms",
+ "inside_the_variable": {
+  "_": "these change together and P is never read as any one of them",
+  "parameters": "1,123,227,136 vs 596,049,920; trainable 734,270,976 vs 440,467,456",
+  "compute": "1.18x the training FLOPs per supervised position with the teacher's forward (1.42x student-only); 1.49x the inference FLOPs at context 4,096",
+  "residual_width": "2,560 vs 1,024",
+  "width_mechanism": "112 trainable per-site bases (4 per layer) with 112 learnable SiLU gates vs one fixed global basis",
+  "output_head": "the teacher's 2,560-wide tied head, frozen, vs D4's projected 1,024-wide tied head, frozen",
+  "inference_implementation": "the projected student runs vLLM's out-of-tree model, D4 a stock Qwen3 in the same vLLM version"
+ },
+ "seeds": [
+  20260726,
+  20260801
+ ],
+ "seed_pairing": "P pairs the two arms by training-seed number; every directional label needs both seeds' own estimates on its side",
+ "comparisons": {
+  "P": {
+   "contrast": "Projected-1123M-topk200 - D4-Augmented-topk200",
+   "role": "decided"
+  },
+  "R": {
+   "contrast": "D4-Augmented-topk200 - D4-Augmented (H1-PA, old protocol)",
+   "role": "descriptive: the training protocol's change on one initialization, data and seed pair"
+  }
+ },
+ "primary_comparison": "P",
+ "multiplicity": "P is the only decided comparison, at its own 95% interval; within it the four static-axis contrasts (eval-set-1's registered static axes, above) are a Holm family at alpha 0.05 (h1_statistics)",
+ "evaluation": {
+  "set": {
+   "eval_set_id": "eval-set-1",
+   "status": "frozen",
+   "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+   "validity_mask": "v1 (6 items excluded; formal 714 = 570 static + 144 interactive)",
+   "scoring_protocol": "each component's scorer.formal_protocol (v2 for eval-set-1), unchanged",
+   "action_protocol": "v2 (the protocol the interactive episodes are generated and replayed under)",
+   "every_item": "every item of every unit is generated for every checkpoint; the validity mask and core decide which rows enter the formal numbers"
+  },
+  "decoding": {
+   "protocol_id": "nucleus_v1",
+   "path": "configs/shared/evaluation/decoding/nucleus_v1.json",
+   "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4",
+   "sampling": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": -1,
+    "min_p": 0.0,
+    "repetition_penalty": 1.0,
+    "presence_penalty": 0.0,
+    "frequency_penalty": 0.0
+   },
+   "samples_per_item": 1,
+   "seed_rule": {
+    "base": 20261024,
+    "key": "<namespace>|<item id>|<turn>|<sample>",
+    "namespace": "the evaluated unit's key <component>__<unit> (e.g. fluid_reasoning_720__dev_v1, stage3_capability_846__gsm8k): uncapped_eval reads it from the prompt file's stem, which dose_driver.evaluate_all stages as <component>__<unit>.jsonl; run_battery takes it as --seed-namespace",
+    "derivation": "int.from_bytes(sha256('<base>|<key>').digest()[:8], 'big') % 2**63",
+    "independent_of": "the model, the arm and the training seed: every checkpoint draws with the same seed for the same item, turn and sample"
+   },
+   "binding": "the driver passes it to every evaluation and refuses a configuration without it, a generation already on the volume recorded under another protocol, and any generation summary that does not carry it; it never falls back to greedy decoding"
+  },
+  "context": "8,192 trained context; each sample generates until EOS or the context minus its prompt (AGENTS.md P18); degeneration stops are recorded, never re-scored as correct",
+  "every_checkpoint": "two D4-Augmented-topk200 and two Projected-1123M-topk200 checkpoints, each generated once under this protocol; the projected checkpoints through the out-of-tree vLLM model after its engine admission (independent_gated_design.json :: evaluation.engine_admission)"
+ },
+ "primary_measure": "correctness on the 570 formal static items of fluid_reasoning_720 (dev_v1), one nucleus_v1 sample per item and seed, clustered by rule family. Its four static axes are eval-set-1's registered ones: three of AGENTS.md P10.2's four primary axes (task-contained deduction, inductive rule discovery, compositional generalization) and abstract/analogical reasoning, a registered sub-category reported as its own diagnostic axis; the fourth primary axis, interactive adaptation and planning, is the 144 interactive episodes, exploratory",
+ "decision_rule": {
+  "module": "scripts/stages/stage-2/reasoning_data/h1_statistics.py",
+  "rule_id": "stage2.reasoning_data.h1_statistics/v1",
+  "bound_sha256": {
+   "scripts/stages/stage-2/reasoning_data/h1_statistics.py": "c4c1191102f8b293feb9f165a7c72f1a69af3b96789c564e1747d95ea20a2836",
+   "src/aadistill/evaluation/paired_stats.py": "7d41ef3199eee78d3a9d9460c3b8f4c3bb33773d5d6b4945c57a62df934fe782"
+  },
+  "constants": {
+   "sesoi": 0.05,
+   "sesoi_axis": 0.08,
+   "level": 0.95,
+   "iterations": 10000,
+   "bootstrap_seed": 20261029,
+   "floor_rate": 0.02,
+   "min_discordant": 10,
+   "min_informative_clusters": 5,
+   "alpha_axes": 0.05
+  },
+  "labels": {
+   "GO": "the interval lies wholly above +5 pp and both seeds' estimates are above +5 pp",
+   "NO_GO": "the interval and both seeds' estimates lie inside (-5, +5) pp and neither arm is below 2%",
+   "REVERSED": "the interval lies wholly below -5 pp and both seeds' estimates are below -5 pp",
+   "INCONCLUSIVE": "anything else off the floor",
+   "NOT_RESOLVED": "both arms below 2% (flag FLOOR); one arm below 2% is flagged FLOOR_<arm> beside the label"
+  },
+  "same_rule_as": "the H1-PA, mixed-calibration and historical projected-residual decisions (constants identical except the new bootstrap seed)"
+ },
+ "reported_beside": [
+  "each static axis per arm and seed, unseen-rule and unseen-format tiers",
+  "the 144 interactive episodes (exploratory)",
+  "every eval-set-1 unit, correct AND usable side by side over its formal items",
+  "protocol integrity: natural termination, degeneration stops, context-limit hits",
+  "generation lengths (reasoning and answer tokens) per unit",
+  "training: loss curves, validation CE and Top-200 + tail KD at every validation step, the KD diagnostics (teacher tail mass, target-in-support share)",
+  "the initialization error of the projected student against W0 and against the teacher, per layer and site and end to end",
+  "the gates: alpha mean, mean |alpha|, |alpha| quantiles and gradient norms during training, and per layer and gate at the end; projection orthogonality and singular values at step 0 and at the end",
+  "parameters, training FLOPs, inference FLOPs, KV cache, measured step time, peak training memory, inference throughput and weight bytes, each apart",
+  "R: the new protocol's D4-Augmented beside H1-PA's, descriptive"
+ ],
+ "never": [
+  "changing this rule, its constants, the evaluation set, the mask, the scorers, the decoding protocol or the KD protocol after a result of this study is seen",
+  "a pooled score across units, or usable rollout, KL, loss or PCA energy read as reasoning",
+  "selecting, dropping or re-running a seed for its result; a complete valid unit is never rerun",
+  "claiming a same-size advantage: neither parameters nor FLOPs are matched",
+  "describing the Top-200 + tail KL as the full-vocabulary KL",
+  "comparing with Research A's hybrid-teacher students as if they were a controlled pair (a different teacher lineage)"
+ ],
+ "authorizes": "nothing"
+}

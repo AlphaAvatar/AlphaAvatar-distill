@@ -1,5 +1,42 @@
 # Research A — hybrid teacher: thinking against non-thinking distillation
 
+## Current study (2026-10-29): D4-Augmented's training scale, no pilot
+
+**Status: designed at $0; nothing authorized.** Maintainer decision 2026-10-29.
+The design below (`hybrid_v1`, T0 scale with a 10% promotion pilot) is
+superseded for new work; A-E's PASS and its records stay as they are.
+
+- **Scale.** H-T-S reaches D4-Augmented's 2,468 packed 8,192-token sequences
+  (3,702 optimizer steps at batch size 2, 3 epochs), two seeds. Supervised
+  tokens follow from the teacher's own documents. Tasks: T0's 1,761 plus an
+  extension E from T0's unused pools and the project's generators, built and
+  isolation-checked before generation, generated in waves until the target is
+  reached. No pilot gate.
+- **Arms.** S: H-T-S and H-N-S on the same task ids. C: H-N-C with further
+  independent H-N tasks (X) packed to H-T-S's sequence count.
+- **Long reasoning.** A turn that reaches its 8,184-minus-prompt allowance is
+  right-censored and never admitted or cut; censoring is recorded per cell and
+  mode, and a primary cell above 20% is flagged on S.
+- **Kept from hybrid_v1:** the official hard switch, token-native documents,
+  document isolation, the common hybrid-derived initialization, eval-set-1 under
+  nucleus_v1 in each student's own mode, the scoring identity.
+- **Objective.** The project's new KD baseline (Top-200 + tail at the target
+  positions). A different teacher lineage from Research B: never a controlled
+  pair with it.
+- **Axes.** AGENTS.md P10.2 has four primary axes; eval-set-1's static axes are
+  three of them plus abstract/analogical reasoning, a sub-category reported on
+  its own.
+
+| record | owns |
+| --- | --- |
+| [`d4_scale_design.json`](../../../../configs/stages/stage-2/teacher_modes/d4_scale_design.json) | scale, tasks, stopping rule, long-reasoning rule, arms, objective, execution |
+| [`plans/d4_scale_preregistration.json`](../../../../logs/stages/stage-2/teacher_modes/plans/d4_scale_preregistration.json) | S and C, the decision rule, the data-size rules |
+| [`logs/budget/applications/research_ab_2026-10-29/`](../../../../logs/budget/applications/research_ab_2026-10-29/) | the phase application and its forecast |
+
+---
+
+## Historical: hybrid_v1 (2026-10-27)
+
 **Status (2026-10-27): $0 READY for an engineering-validation grant; nothing
 authorized.**
 
@@ -173,7 +210,7 @@ sees.
 
 **T0** is the frozen H1 task lists:
 - P1 + P1t + PA1, 1,761 tasks, isolation R0–R9;
-- the five primary axes plus verifiable supporting cells;
+- AGENTS.md P10.2's four primary axes (task-contained deduction, inductive rule discovery, compositional generalization, interactive adaptation and planning), abstract/analogical reasoning as a reported sub-category, plus verifiable supporting cells;
 - both modes on the same task ids.
 
 **Sets derived from T0:**

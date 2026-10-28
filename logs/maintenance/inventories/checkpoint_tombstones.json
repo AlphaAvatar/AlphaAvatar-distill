@@ -34,10 +34,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 46,
-  "active": 44,
-  "active_retired_bytes": 440980466778,
-  "active_retired_human": "410.695 GiB",
+  "tombstones_total": 59,
+  "active": 57,
+  "active_retired_bytes": 456478244151,
+  "active_retired_human": "425.128 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -3765,6 +3765,753 @@
    "frozen_results_location": "relay stage3/s2v1_from_s1/eval_*.json; logs/stages/stage-3/history/EXPERIMENTS.md section 3",
    "deleted_utc": "2026-10-24T15:53:40Z",
    "command": "HfApi.permanently_delete_lfs_files('AlphaAvatar/aadistill-artifacts', [the one object whose file_oid is d2e0f66d...], rewrite_history=True), after asserting one match, its filename and size, its oid in the run's hash list, and no protected prefix; the inventory went 582 -> 581 objects, 85.9044 -> 83.6839 GiB"
+  },
+  {
+   "canonical_id": "phase_d1_3fcaf42eaa91b3ed02eab6c2f3213bfc",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_d1/d1_replay_002/products/3fcaf42eaa91b3ed02eab6c2f3213bfc"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "phase_d1",
+   "seed": null,
+   "scientific_role": "D1 behavioural finalist (rematerialized)",
+   "weights_sha256": "973d40e93f784eed6e811c599c7585dc6bb03b8e5dd99f904fac8acceb36f005",
+   "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 1192136721,
+   "size_human": "1.110 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_d1/d1_replay_002/products/3fcaf42eaa91b3ed02eab6c2f3213bfc/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "973d40e93f784eed6e811c599c7585dc6bb03b8e5dd99f904fac8acceb36f005"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+    "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
+    "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_083610/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q4_s516448251.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q4_s614923639.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_screening_ranking_offpod.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 (standing; restated by the maintainer 2026-10-29): the experiment is terminal, its evaluation evidence is durable, its hashes are preserved, no active or declared consumer reads the weights, and it is not an incumbent, a release or a retained anchor",
+   "reason_physical_weights_deleted": "finalist q4 of the frozen quality-order top-4, which the search did not retain; reproduced EXACTLY by the finalist-rematerialization campaign. Identities are bound by logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Retirement-eligible under AGENTS.md 2.5 | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it",
+   "canonical_surviving_evidence": "the experiment's run records under logs/stages/ (closeouts, evidence, identities) and this tombstone",
+   "relay_hash_verified": null,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "byte-exact replay from the committed search record",
+   "expected_reconstruction_cost": "paid GPU (~$0.5-1 per finalist)",
+   "frozen_results_location": "logs/stages/stage-1/phase_d1",
+   "deleted_utc": "2026-10-28T17:32:23+00:00",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null
+  },
+  {
+   "canonical_id": "phase_d1_56388d47b6a71e1b49e44929e48d4061_duplicate",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/56388d47b6a71e1b49e44929e48d4061"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "phase_d1",
+   "seed": null,
+   "scientific_role": "out-of-band duplicate of the D1 search products",
+   "weights_sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099",
+   "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 1192136721,
+   "size_human": "1.110 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/56388d47b6a71e1b49e44929e48d4061/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+    "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
+    "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_083610/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q3_s516448251.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q3_s614923639.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_screening_ranking_offpod.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 (standing; restated by the maintainer 2026-10-29): the experiment is terminal, its evaluation evidence is durable, its hashes are preserved, no active or declared consumer reads the weights, and it is not an incumbent, a release or a retained anchor",
+   "reason_physical_weights_deleted": "a second transport copy of the same product set; the canonical copy is products/ one level up, hash-verified. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it",
+   "canonical_surviving_evidence": "the experiment's run records under logs/stages/ (closeouts, evidence, identities) and this tombstone",
+   "relay_hash_verified": null,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "byte-identical to products/",
+   "expected_reconstruction_cost": "$0 (copy)",
+   "frozen_results_location": "logs/stages/stage-1/phase_d1",
+   "deleted_utc": "2026-10-28T17:32:23+00:00",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null
+  },
+  {
+   "canonical_id": "phase_d1_a2b2f04ae642ac69d278c20feb42d52f_duplicate",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/a2b2f04ae642ac69d278c20feb42d52f"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "phase_d1",
+   "seed": null,
+   "scientific_role": "out-of-band duplicate of the D1 search products",
+   "weights_sha256": "e331bef5b9dab0ba8d5795bdc9a8e33a7107b5871bcadce20667694e412b61a8",
+   "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 1192136721,
+   "size_human": "1.110 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/a2b2f04ae642ac69d278c20feb42d52f/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "e331bef5b9dab0ba8d5795bdc9a8e33a7107b5871bcadce20667694e412b61a8"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/complete_leaf_ranking.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/d1_search.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/stage1_selection.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/runtime/session.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 (standing; restated by the maintainer 2026-10-29): the experiment is terminal, its evaluation evidence is durable, its hashes are preserved, no active or declared consumer reads the weights, and it is not an incumbent, a release or a retained anchor",
+   "reason_physical_weights_deleted": "a second transport copy of the same product set; the canonical copy is products/ one level up, hash-verified. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it",
+   "canonical_surviving_evidence": "the experiment's run records under logs/stages/ (closeouts, evidence, identities) and this tombstone",
+   "relay_hash_verified": null,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "byte-identical to products/",
+   "expected_reconstruction_cost": "$0 (copy)",
+   "frozen_results_location": "logs/stages/stage-1/phase_d1",
+   "deleted_utc": "2026-10-28T17:32:23+00:00",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null
+  },
+  {
+   "canonical_id": "phase_d1_e5e3edb0477b25147de952153da8fc21_duplicate",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/e5e3edb0477b25147de952153da8fc21"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "phase_d1",
+   "seed": null,
+   "scientific_role": "out-of-band duplicate of the D1 search products",
+   "weights_sha256": "46fec7ddd33f27d01040165ef0df05fd956ff83035b7e049248b0165408ca00d",
+   "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 1192136721,
+   "size_human": "1.110 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/e5e3edb0477b25147de952153da8fc21/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "46fec7ddd33f27d01040165ef0df05fd956ff83035b7e049248b0165408ca00d"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+    "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
+    "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_083610/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q1_s516448251.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q1_s614923639.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_screening_ranking_offpod.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 (standing; restated by the maintainer 2026-10-29): the experiment is terminal, its evaluation evidence is durable, its hashes are preserved, no active or declared consumer reads the weights, and it is not an incumbent, a release or a retained anchor",
+   "reason_physical_weights_deleted": "a second transport copy of the same product set; the canonical copy is products/ one level up, hash-verified. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it",
+   "canonical_surviving_evidence": "the experiment's run records under logs/stages/ (closeouts, evidence, identities) and this tombstone",
+   "relay_hash_verified": null,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "byte-identical to products/",
+   "expected_reconstruction_cost": "$0 (copy)",
+   "frozen_results_location": "logs/stages/stage-1/phase_d1",
+   "deleted_utc": "2026-10-28T17:32:23+00:00",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null
+  },
+  {
+   "canonical_id": "phase_d1_ea4fe4d356b8c8f40f048256df6b8999_duplicate",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/ea4fe4d356b8c8f40f048256df6b8999"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "phase_d1",
+   "seed": null,
+   "scientific_role": "out-of-band duplicate of the D1 search products",
+   "weights_sha256": "e009674b1d5dddeafc2febeb8241f2dc63cc926e05f35d4b7fb4cdfa2a25149b",
+   "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 1192136721,
+   "size_human": "1.110 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/ea4fe4d356b8c8f40f048256df6b8999/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "e009674b1d5dddeafc2febeb8241f2dc63cc926e05f35d4b7fb4cdfa2a25149b"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/complete_leaf_ranking.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/d1_search.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/stage1_selection.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/runtime/session.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 (standing; restated by the maintainer 2026-10-29): the experiment is terminal, its evaluation evidence is durable, its hashes are preserved, no active or declared consumer reads the weights, and it is not an incumbent, a release or a retained anchor",
+   "reason_physical_weights_deleted": "a second transport copy of the same product set; the canonical copy is products/ one level up, hash-verified. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it",
+   "canonical_surviving_evidence": "the experiment's run records under logs/stages/ (closeouts, evidence, identities) and this tombstone",
+   "relay_hash_verified": null,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "byte-identical to products/",
+   "expected_reconstruction_cost": "$0 (copy)",
+   "frozen_results_location": "logs/stages/stage-1/phase_d1",
+   "deleted_utc": "2026-10-28T17:32:23+00:00",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null
+  },
+  {
+   "canonical_id": "phase_d1_56388d47b6a71e1b49e44929e48d4061",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/56388d47b6a71e1b49e44929e48d4061"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "phase_d1",
+   "seed": null,
+   "scientific_role": "D1 behavioural finalist or retained search leaf",
+   "weights_sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099",
+   "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 1192136721,
+   "size_human": "1.110 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/56388d47b6a71e1b49e44929e48d4061/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+    "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
+    "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_083610/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q3_s516448251.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q3_s614923639.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_screening_ranking_offpod.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 (standing; restated by the maintainer 2026-10-29): the experiment is terminal, its evaluation evidence is durable, its hashes are preserved, no active or declared consumer reads the weights, and it is not an incumbent, a release or a retained anchor",
+   "reason_physical_weights_deleted": "the completed D1 search's retained products: finalists q1 and q3 of the frozen quality-order top-4, plus the search's own lineage-retained leaves; identities bound by logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Not the forward baseline's reference (that is q2). Retirement-eligible under AGENTS.md 2.5 | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it",
+   "canonical_surviving_evidence": "the experiment's run records under logs/stages/ (closeouts, evidence, identities) and this tombstone",
+   "relay_hash_verified": null,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "byte-exact replay from the committed search record (proved twice by the finalist-rematerialization campaign)",
+   "expected_reconstruction_cost": "paid GPU (~$0.5-1 per finalist)",
+   "frozen_results_location": "logs/stages/stage-1/phase_d1",
+   "deleted_utc": "2026-10-28T17:32:23+00:00",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null
+  },
+  {
+   "canonical_id": "phase_d1_a2b2f04ae642ac69d278c20feb42d52f",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/a2b2f04ae642ac69d278c20feb42d52f"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "phase_d1",
+   "seed": null,
+   "scientific_role": "D1 behavioural finalist or retained search leaf",
+   "weights_sha256": "e331bef5b9dab0ba8d5795bdc9a8e33a7107b5871bcadce20667694e412b61a8",
+   "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 1192136721,
+   "size_human": "1.110 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/a2b2f04ae642ac69d278c20feb42d52f/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "e331bef5b9dab0ba8d5795bdc9a8e33a7107b5871bcadce20667694e412b61a8"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/complete_leaf_ranking.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/d1_search.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/stage1_selection.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/runtime/session.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 (standing; restated by the maintainer 2026-10-29): the experiment is terminal, its evaluation evidence is durable, its hashes are preserved, no active or declared consumer reads the weights, and it is not an incumbent, a release or a retained anchor",
+   "reason_physical_weights_deleted": "the completed D1 search's retained products: finalists q1 and q3 of the frozen quality-order top-4, plus the search's own lineage-retained leaves; identities bound by logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Not the forward baseline's reference (that is q2). Retirement-eligible under AGENTS.md 2.5 | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it",
+   "canonical_surviving_evidence": "the experiment's run records under logs/stages/ (closeouts, evidence, identities) and this tombstone",
+   "relay_hash_verified": null,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "byte-exact replay from the committed search record (proved twice by the finalist-rematerialization campaign)",
+   "expected_reconstruction_cost": "paid GPU (~$0.5-1 per finalist)",
+   "frozen_results_location": "logs/stages/stage-1/phase_d1",
+   "deleted_utc": "2026-10-28T17:32:23+00:00",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null
+  },
+  {
+   "canonical_id": "phase_d1_e5e3edb0477b25147de952153da8fc21",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/e5e3edb0477b25147de952153da8fc21"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "phase_d1",
+   "seed": null,
+   "scientific_role": "D1 behavioural finalist or retained search leaf",
+   "weights_sha256": "46fec7ddd33f27d01040165ef0df05fd956ff83035b7e049248b0165408ca00d",
+   "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 1192136721,
+   "size_human": "1.110 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/e5e3edb0477b25147de952153da8fc21/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "46fec7ddd33f27d01040165ef0df05fd956ff83035b7e049248b0165408ca00d"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+    "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
+    "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_083610/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q1_s516448251.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/configs/d1_screening_q1_s614923639.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_behavioural.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/evidence/d1_screening_ranking_offpod.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 (standing; restated by the maintainer 2026-10-29): the experiment is terminal, its evaluation evidence is durable, its hashes are preserved, no active or declared consumer reads the weights, and it is not an incumbent, a release or a retained anchor",
+   "reason_physical_weights_deleted": "the completed D1 search's retained products: finalists q1 and q3 of the frozen quality-order top-4, plus the search's own lineage-retained leaves; identities bound by logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Not the forward baseline's reference (that is q2). Retirement-eligible under AGENTS.md 2.5 | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it",
+   "canonical_surviving_evidence": "the experiment's run records under logs/stages/ (closeouts, evidence, identities) and this tombstone",
+   "relay_hash_verified": null,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "byte-exact replay from the committed search record (proved twice by the finalist-rematerialization campaign)",
+   "expected_reconstruction_cost": "paid GPU (~$0.5-1 per finalist)",
+   "frozen_results_location": "logs/stages/stage-1/phase_d1",
+   "deleted_utc": "2026-10-28T17:32:23+00:00",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null
+  },
+  {
+   "canonical_id": "phase_d1_ea4fe4d356b8c8f40f048256df6b8999",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/ea4fe4d356b8c8f40f048256df6b8999"
+   ],
+   "store": "external_store",
+   "relay_path": null,
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "phase_d1",
+   "seed": null,
+   "scientific_role": "D1 behavioural finalist or retained search leaf",
+   "weights_sha256": "e009674b1d5dddeafc2febeb8241f2dc63cc926e05f35d4b7fb4cdfa2a25149b",
+   "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 1192136721,
+   "size_human": "1.110 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/ea4fe4d356b8c8f40f048256df6b8999/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "e009674b1d5dddeafc2febeb8241f2dc63cc926e05f35d4b7fb4cdfa2a25149b"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/complete_leaf_ranking.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/d1_search.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/stage1_selection.json",
+    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/runtime/session.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 (standing; restated by the maintainer 2026-10-29): the experiment is terminal, its evaluation evidence is durable, its hashes are preserved, no active or declared consumer reads the weights, and it is not an incumbent, a release or a retained anchor",
+   "reason_physical_weights_deleted": "the completed D1 search's retained products: finalists q1 and q3 of the frozen quality-order top-4, plus the search's own lineage-retained leaves; identities bound by logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Not the forward baseline's reference (that is q2). Retirement-eligible under AGENTS.md 2.5 | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it",
+   "canonical_surviving_evidence": "the experiment's run records under logs/stages/ (closeouts, evidence, identities) and this tombstone",
+   "relay_hash_verified": null,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "byte-exact replay from the committed search record (proved twice by the finalist-rematerialization campaign)",
+   "expected_reconstruction_cost": "paid GPU (~$0.5-1 per finalist)",
+   "frozen_results_location": "logs/stages/stage-1/phase_d1",
+   "deleted_utc": "2026-10-28T17:32:23+00:00",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null
+  },
+  {
+   "canonical_id": "phase_d2_30fe791a85d70ac713e75893fea107ae",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae"
+   ],
+   "store": "external_store",
+   "relay_path": "stage1/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "phase_d2",
+   "seed": null,
+   "scientific_role": "D2 v3 committed Top-4 initialization",
+   "weights_sha256": "52c511c67badbecb5a75bff585bf4db66ce198dc6f30f398965a06a1fcb19d52",
+   "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 1192136721,
+   "size_human": "1.110 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/30fe791a85d70ac713e75893fea107ae/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "52c511c67badbecb5a75bff585bf4db66ce198dc6f30f398965a06a1fcb19d52"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_d2/analyses/d2_screening_inputs.json",
+    "logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183412/runtime/session.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183734/runtime/session.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_193502/runtime/session.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c3_s516448251.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c3_s614923639.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening_ranking.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/training/d2_screening_c3_s516448251/run_manifest.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 (standing; restated by the maintainer 2026-10-29): the experiment is terminal, its evaluation evidence is durable, its hashes are preserved, no active or declared consumer reads the weights, and it is not an incumbent, a release or a retained anchor",
+   "reason_physical_weights_deleted": "the four initializations the D2 formal search committed (stage1_selection.json of d2_search_20261015_051722); every D2 behavioural probe trains FROM one of them. A second copy is on the relay under stage1/phase_d2/d2_search_20261015_051722/, round-trip verified (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json). D2 screening and c4's shared confirmation (NO_GO) are complete. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Retirement-eligible under AGENTS.md 2.5 | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it",
+   "canonical_surviving_evidence": "the experiment's run records under logs/stages/ (closeouts, evidence, identities) and this tombstone",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "the relay copy (byte-exact, verified); otherwise a replay of the search path under the D2 v3 objective",
+   "expected_reconstruction_cost": "$0 from the relay",
+   "frozen_results_location": "logs/stages/stage-1/phase_d2",
+   "deleted_utc": "2026-10-28T17:32:23+00:00",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null
+  },
+  {
+   "canonical_id": "phase_d2_3a4173e4eff45b0d73fd82bd0b263f03",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03"
+   ],
+   "store": "external_store",
+   "relay_path": "stage1/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "phase_d2",
+   "seed": null,
+   "scientific_role": "D2 v3 committed Top-4 initialization",
+   "weights_sha256": "5d6c0a5a2c04bfc4cf75fd301e06b93affc557ab142229585f0a10c8029d0fbe",
+   "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 1192136721,
+   "size_human": "1.110 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/3a4173e4eff45b0d73fd82bd0b263f03/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "5d6c0a5a2c04bfc4cf75fd301e06b93affc557ab142229585f0a10c8029d0fbe"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/budget/approvals/autoinit_d2_confirmation_grant.json",
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_d2/analyses/d2_candidate_relay_restore.json",
+    "logs/stages/stage-1/phase_d2/analyses/d2_screening_inputs.json",
+    "logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/configs/d2_confirmation_c4_s1004399678.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/configs/d2_confirmation_c4_s396880939.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/configs/d2_confirmation_c4_s766527341.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/d2_confirmation.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/d2_confirmation_verdict.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_confirmation_20261016_105802/evidence/training/d2_confirmation_c4_s1004399678/run_manifest.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 (standing; restated by the maintainer 2026-10-29): the experiment is terminal, its evaluation evidence is durable, its hashes are preserved, no active or declared consumer reads the weights, and it is not an incumbent, a release or a retained anchor",
+   "reason_physical_weights_deleted": "the four initializations the D2 formal search committed (stage1_selection.json of d2_search_20261015_051722); every D2 behavioural probe trains FROM one of them. A second copy is on the relay under stage1/phase_d2/d2_search_20261015_051722/, round-trip verified (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json). D2 screening and c4's shared confirmation (NO_GO) are complete. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Retirement-eligible under AGENTS.md 2.5 | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it",
+   "canonical_surviving_evidence": "the experiment's run records under logs/stages/ (closeouts, evidence, identities) and this tombstone",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "the relay copy (byte-exact, verified); otherwise a replay of the search path under the D2 v3 objective",
+   "expected_reconstruction_cost": "$0 from the relay",
+   "frozen_results_location": "logs/stages/stage-1/phase_d2",
+   "deleted_utc": "2026-10-28T17:32:23+00:00",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null
+  },
+  {
+   "canonical_id": "phase_d2_59013099b902f213649b8aa4c676dedd",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd"
+   ],
+   "store": "external_store",
+   "relay_path": "stage1/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "phase_d2",
+   "seed": null,
+   "scientific_role": "D2 v3 committed Top-4 initialization",
+   "weights_sha256": "7b52fb15a7b397d8e00e5cd39e2f667a83bd4d5d9aa2b857d11fe5dfc3cac138",
+   "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 1192136721,
+   "size_human": "1.110 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/59013099b902f213649b8aa4c676dedd/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "7b52fb15a7b397d8e00e5cd39e2f667a83bd4d5d9aa2b857d11fe5dfc3cac138"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_d2/analyses/d2_screening_inputs.json",
+    "logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183412/runtime/session.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183734/runtime/session.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_193502/runtime/session.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c1_s516448251.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c1_s614923639.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening_ranking.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/training/d2_screening_c1_s516448251/run_manifest.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 (standing; restated by the maintainer 2026-10-29): the experiment is terminal, its evaluation evidence is durable, its hashes are preserved, no active or declared consumer reads the weights, and it is not an incumbent, a release or a retained anchor",
+   "reason_physical_weights_deleted": "the four initializations the D2 formal search committed (stage1_selection.json of d2_search_20261015_051722); every D2 behavioural probe trains FROM one of them. A second copy is on the relay under stage1/phase_d2/d2_search_20261015_051722/, round-trip verified (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json). D2 screening and c4's shared confirmation (NO_GO) are complete. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Retirement-eligible under AGENTS.md 2.5 | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it",
+   "canonical_surviving_evidence": "the experiment's run records under logs/stages/ (closeouts, evidence, identities) and this tombstone",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "the relay copy (byte-exact, verified); otherwise a replay of the search path under the D2 v3 objective",
+   "expected_reconstruction_cost": "$0 from the relay",
+   "frozen_results_location": "logs/stages/stage-1/phase_d2",
+   "deleted_utc": "2026-10-28T17:32:23+00:00",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null
+  },
+  {
+   "canonical_id": "phase_d2_c2cb27efcf68b4f18bf7284aea84877a",
+   "historical_paths": [
+    "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a"
+   ],
+   "store": "external_store",
+   "relay_path": "stage1/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "phase_d2",
+   "seed": null,
+   "scientific_role": "D2 v3 committed Top-4 initialization",
+   "weights_sha256": "9a0f41e98a38ca69a86a45197f97c5fdb06ecb37db2f3480c77730dbd567d728",
+   "config_sha256": "e94e4d3a9cab307a55f97991776ec22f0b2b6e2ec91c93a6ceba5639f3bf7a49",
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 1192136721,
+   "size_human": "1.110 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "/home/ecs-user/aad-artifacts/phase_d2/d2_search_20261015_051722/products/c2cb27efcf68b4f18bf7284aea84877a/model.safetensors",
+     "size_bytes": 1192135096,
+     "sha256": "9a0f41e98a38ca69a86a45197f97c5fdb06ecb37db2f3480c77730dbd567d728"
+    }
+   ],
+   "references_at_deletion": [
+    "logs/maintenance/inventories/checkpoint_registry.json",
+    "logs/stages/stage-1/phase_d2/analyses/d2_screening_inputs.json",
+    "logs/stages/stage-1/phase_d2/plans/d2_screening_grant_proposal.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183412/runtime/session.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_183734/runtime/session.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_193502/runtime/session.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c2_s516448251.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/configs/d2_screening_c2_s614923639.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/d2_screening_ranking.json",
+    "logs/stages/stage-1/phase_d2/runs/d2_screening_20261015_203346/evidence/training/d2_screening_c2_s516448251/run_manifest.json"
+   ],
+   "deletion_criterion": "agents_2_5_standing_retirement",
+   "deletion_criterion_meaning": "AGENTS.md 2.5 (standing; restated by the maintainer 2026-10-29): the experiment is terminal, its evaluation evidence is durable, its hashes are preserved, no active or declared consumer reads the weights, and it is not an incumbent, a release or a retained anchor",
+   "reason_physical_weights_deleted": "the four initializations the D2 formal search committed (stage1_selection.json of d2_search_20261015_051722); every D2 behavioural probe trains FROM one of them. A second copy is on the relay under stage1/phase_d2/d2_search_20261015_051722/, round-trip verified (logs/stages/stage-1/phase_d2/runs/d2_search_20261015_051722/evidence/product_durability.json). D2 screening and c4's shared confirmation (NO_GO) are complete. The D-series is CLOSED (maintainer decision 2026-10-17, logs/stages/stage-1/families/d_series/closeout/programme_closeout.json): every consumer is terminal and the measurement evidence is durable in the run records. Retirement-eligible under AGENTS.md 2.5 | re-derived 2026-10-29 by retire_eligible_checkpoints.py: local bytes re-hashed, no code/config reader, no session launcher declares it",
+   "canonical_surviving_evidence": "the experiment's run records under logs/stages/ (closeouts, evidence, identities) and this tombstone",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "the relay copy (byte-exact, verified); otherwise a replay of the search path under the D2 v3 objective",
+   "expected_reconstruction_cost": "$0 from the relay",
+   "frozen_results_location": "logs/stages/stage-1/phase_d2",
+   "deleted_utc": "2026-10-28T17:32:23+00:00",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null
   }
  ],
  "schema_note": "v2 adds store, size_bytes, n_files, members, references_at_deletion, deletion_criterion, canonical_surviving_evidence and relay_hash_verified. v1 entries are unchanged and remain valid: every field they carried still means what it meant. A withdrawn entry is kept, never removed: the reason a tombstone was wrong is worth as much as the tombstone."
