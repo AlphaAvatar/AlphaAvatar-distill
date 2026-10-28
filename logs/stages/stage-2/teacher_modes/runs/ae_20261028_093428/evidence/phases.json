@@ -1,0 +1,36 @@
+{
+ "teacher": {
+  "started_utc": "2026-10-28T09:45:54+00:00",
+  "gpu_before": {
+   "read_utc": "2026-10-28T09:45:54+00:00",
+   "known": true,
+   "name": "NVIDIA A100-SXM4-80GB",
+   "driver": "595.91.07",
+   "used_mib": 0,
+   "total_mib": 81920,
+   "compute_processes": []
+  },
+  "returncode": 0,
+  "seconds": 45.8,
+  "stdout_tail": "",
+  "stderr_tail": "\nLoading weights:   0%|          | 0/398 [00:00<?, ?it/s]\nLoading weights:  12%|\u2588\u258f        | 49/398 [00:00<00:00, 489.95it/s]\nLoading weights:  25%|\u2588\u2588\u258d       | 98/398 [00:00<00:00, 378.02it/s]\nLoading weights:  35%|\u2588\u2588\u2588\u258d      | 139/398 [00:00<00:00, 387.82it/s]\nLoading weights:  46%|\u2588\u2588\u2588\u2588\u258b     | 185/398 [00:00<00:00, 413.50it/s]\nLoading weights:  57%|\u2588\u2588\u2588\u2588\u2588\u258b    | 228/398 [00:00<00:00, 413.78it/s]\nLoading weights:  68%|\u2588\u2588\u2588\u2588\u2588\u2588\u258a   | 270/398 [00:00<00:00, 415.06it/s]\nLoading weights:  78%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a  | 312/398 [00:00<00:00, 412.66it/s]\nLoading weights:  89%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589 | 354/398 [00:00<00:00, 413.22it/s]\nLoading weights:  99%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589| 396/398 [00:00<00:00, 414.32it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 398/398 [00:00<00:00, 413.70it/s]\n\nLoading weights:   0%|          | 0/310 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 310/310 [00:00<00:00, 7606.16it/s]\n",
+  "problems": []
+ },
+ "train": {
+  "started_utc": "2026-10-28T09:46:39+00:00",
+  "gpu_before": {
+   "read_utc": "2026-10-28T09:46:39+00:00",
+   "known": true,
+   "name": "NVIDIA A100-SXM4-80GB",
+   "driver": "595.91.07",
+   "used_mib": 0,
+   "total_mib": 81920,
+   "compute_processes": []
+  },
+  "returncode": 0,
+  "seconds": 111.2,
+  "stdout_tail": "",
+  "stderr_tail": "\nLoading weights:   0%|          | 0/398 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 398/398 [00:00<00:00, 4635.01it/s]\n\nLoading weights:   0%|          | 0/310 [00:00<?, ?it/s]\nLoading weights: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 310/310 [00:00<00:00, 5361.35it/s]\n",
+  "problems": []
+ }
+}

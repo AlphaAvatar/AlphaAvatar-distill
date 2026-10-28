@@ -1,0 +1,155 @@
+bundle OK: transfer/aad_autoinit_ded8b7a8.bundle on the relay
+[09:35:32] budget: expected 65 min $2.00 · soft $2.89 · hard $3.20 (authorized $3.27)
+[09:35:33] NVIDIA A100-SXM4-80GB $1.79/h, stock Low
+[09:35:33] account funds OK: the provider account holds $138.9510 against the $3.1990 this session must be able to fund
+[09:35:34] account resources OK: the provider account holds only the 1 resource(s) the records account for
+[09:35:34] a A-E engineering-validation artifact, unused
+[09:35:34] NVIDIA A100-SXM4-80GB at no more than $1.85/h, as granted
+[09:35:34] all-in $3.2663 over 105.0 min, inside $3.27
+[09:35:34] study identity d5eb76a14391 is the authorized one
+[09:35:34] every bound file is in the session commit
+[09:35:36] $3.27 inside the envelope ($3.2725) and the $15.4187 the project cap leaves now
+[09:35:37] precheck OK: 3 relay inputs (3 from AlphaAvatar/aadistill-artifacts), 0 local assets
+[09:35:37] DRY RUN: every pre-provider gate passed; stopping before provider creation. Nothing was created and nothing bills.
+{
+ "terminal": "DRY_RUN_GATES_PASSED",
+ "provider_resource_created": false,
+ "bundle_on_relay": {
+  "ok": true,
+  "why": "transfer/aad_autoinit_ded8b7a8.bundle on the relay"
+ },
+ "budget_plan": {
+  "price_per_hour": 1.85,
+  "authorized_usd": 3.2725,
+  "expected_minutes": 65.0,
+  "soft_stop_minutes": 93.75,
+  "artifact_recovery_reserve_minutes": 10.0,
+  "hard_terminate_minutes": 103.75,
+  "step_time": {
+   "seconds": 1.0,
+   "source": "unused: the validation is one phase (arms=0)",
+   "measured": true
+  },
+  "breakdown": [
+   {
+    "name": "setup",
+    "minutes": 20.0
+   },
+   {
+    "name": "train",
+    "minutes": 0.0
+   },
+   {
+    "name": "evaluate",
+    "minutes": 0.0
+   },
+   {
+    "name": "transfer",
+    "minutes": 5.0
+   },
+   {
+    "name": "A-E_validation",
+    "minutes": 40.0
+   }
+  ],
+  "soft_stop_reserves": [
+   {
+    "name": "closeout_and_teardown",
+    "minutes": 12.5
+   }
+  ],
+  "notes": [],
+  "soft_stop_reserve_minutes": 12.5,
+  "expected_usd": 2.0042,
+  "soft_stop_usd": 2.8906,
+  "artifact_recovery_reserve_usd": 0.3083,
+  "hard_terminate_usd": 3.199
+ },
+ "quoted_price_per_hour": 1.79,
+ "stock": "Low",
+ "account_balance": {
+  "known": true,
+  "client_balance_usd": 138.9510466475,
+  "current_spend_per_hr": 0.003,
+  "min_balance_usd": 0.0,
+  "under_balance": false,
+  "error": null,
+  "required_usd": 3.199,
+  "ok": true,
+  "why": "the provider account holds $138.9510 against the $3.1990 this session must be able to fund",
+  "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+ },
+ "account_resources": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "am5m373kuq",
+    "name": "aad-h1pa",
+    "size": 30,
+    "dataCenterId": "EUR-IS-2"
+   }
+  ],
+  "error": null,
+  "accounted": [
+   "am5m373kuq"
+  ],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 1 resource(s) the records account for"
+ },
+ "prechecks": [
+  {
+   "check": "the_artifact_is_this_studys_and_unused",
+   "ok": true,
+   "message": "a A-E engineering-validation artifact, unused"
+  },
+  {
+   "check": "the_gpu_and_price_are_the_grants",
+   "ok": true,
+   "message": "NVIDIA A100-SXM4-80GB at no more than $1.85/h, as granted"
+  },
+  {
+   "check": "all_in_within_cap",
+   "ok": true,
+   "message": "all-in $3.2663 over 105.0 min, inside $3.27"
+  },
+  {
+   "check": "the_study_identity_is_the_authorized_one",
+   "ok": true,
+   "message": "study identity d5eb76a14391 is the authorized one"
+  },
+  {
+   "check": "bound_files_are_in_the_session_commit",
+   "ok": true,
+   "message": "every bound file is in the session commit"
+  },
+  {
+   "check": "the_project_cap_holds_now",
+   "ok": true,
+   "message": "$3.27 inside the envelope ($3.2725) and the $15.4187 the project cap leaves now"
+  }
+ ],
+ "precheck": {
+  "relay_needed": [
+   "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/config.json",
+   "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/generation_config.json",
+   "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model/model.safetensors"
+  ],
+  "relay_missing": [],
+  "relay_repos": {
+   "AlphaAvatar/aadistill-artifacts": 3
+  },
+  "relay_repo_files_listed": {
+   "AlphaAvatar/aadistill-artifacts": 1622
+  },
+  "local_assets": [],
+  "local_missing": []
+ },
+ "harness": "bd33a53120a33b780659b17cb81d6927d5064b350eaa6e079f4d33f7eb577d68",
+ "study_identity": "d5eb76a143919fb94382a300bab0f51fb77cae21d816a578cdc3df95c4bfd85e",
+ "record": "logs/stages/stage-2/teacher_modes/validations/a-e/dry_runs/prelaunch_ae_20261028_093428/session.dry_run.json"
+}
+rc=0

@@ -1,0 +1,115 @@
+{
+ "device": "NVIDIA A100-SXM4-80GB",
+ "torch": "2.11.0+cu128",
+ "attn_implementation": "sdpa",
+ "tf32": {
+  "matmul": false,
+  "cudnn": false
+ },
+ "float32_matmul_precision": "highest",
+ "modes": {
+  "H-T": {
+   "documents": 4,
+   "pack_sha256": "15422dc6ba004dcbc97b6496db36bb273b108d3b3c60b48ed0a7ebed9aac9c70",
+   "sequences": [
+    {
+     "index": 0,
+     "members": [
+      {
+       "doc_id": "H-T:t0:76af5e23ee0a7e4961f8",
+       "targets": 7563,
+       "d_fp32": 0.0038576126098632812,
+       "d_bf16": 13.78125,
+       "ref_bf16_alone": 15.526291847229004,
+       "ref_bf16_packed": 15.213794708251953
+      }
+     ],
+     "kl_self": 0.0,
+     "kl_self_positions": 7563,
+     "student_kd": 6968.79248046875,
+     "student_kd_positions": 7563
+    },
+    {
+     "index": 1,
+     "members": [
+      {
+       "doc_id": "H-T:t0:e9975d122ae49378b8c9",
+       "targets": 1495,
+       "d_fp32": 0.0014055073261260986,
+       "d_bf16": 6.6640625,
+       "ref_bf16_alone": 5.72039794921875,
+       "ref_bf16_packed": 4.906837463378906
+      },
+      {
+       "doc_id": "H-T:t0:bc2c5eea29dd0e735f5b",
+       "targets": 1531,
+       "d_fp32": 0.02440398931503296,
+       "d_bf16": 9.515625,
+       "ref_bf16_alone": 14.755268096923828,
+       "ref_bf16_packed": 15.192763328552246
+      },
+      {
+       "doc_id": "H-T:t0:37b3c6f1bd3da5ff03fc",
+       "targets": 1376,
+       "d_fp32": 0.0005142688751220703,
+       "d_bf16": 1.375,
+       "ref_bf16_alone": 3.200805187225342,
+       "ref_bf16_packed": 3.2010178565979004
+      }
+     ],
+     "kl_self": 0.0,
+     "kl_self_positions": 4402,
+     "student_kd": 6045.166015625,
+     "student_kd_positions": 4402
+    }
+   ]
+  },
+  "H-N": {
+   "documents": 4,
+   "pack_sha256": "1e3d24d07c1300e6b058ea278c535f8a1763d8eacd37fa064fa175a3bdaa34e3",
+   "sequences": [
+    {
+     "index": 0,
+     "members": [
+      {
+       "doc_id": "H-N:t0:76af5e23ee0a7e4961f8",
+       "targets": 3567,
+       "d_fp32": 0.0039157867431640625,
+       "d_bf16": 11.53125,
+       "ref_bf16_alone": 13.471625328063965,
+       "ref_bf16_packed": 12.369718551635742
+      },
+      {
+       "doc_id": "H-N:t0:e9975d122ae49378b8c9",
+       "targets": 128,
+       "d_fp32": 0.000171661376953125,
+       "d_bf16": 1.0625,
+       "ref_bf16_alone": 1.107785940170288,
+       "ref_bf16_packed": 0.5248394012451172
+      },
+      {
+       "doc_id": "H-N:t0:bc2c5eea29dd0e735f5b",
+       "targets": 325,
+       "d_fp32": 0.0008805990219116211,
+       "d_bf16": 10.25,
+       "ref_bf16_alone": 12.868362426757812,
+       "ref_bf16_packed": 9.399640083312988
+      },
+      {
+       "doc_id": "H-N:t0:37b3c6f1bd3da5ff03fc",
+       "targets": 584,
+       "d_fp32": 0.000537872314453125,
+       "d_bf16": 3.40625,
+       "ref_bf16_alone": 2.8923940658569336,
+       "ref_bf16_packed": 2.579315185546875
+      }
+     ],
+     "kl_self": 0.0,
+     "kl_self_positions": 4604,
+     "student_kd": 3484.178955078125,
+     "student_kd_positions": 4604
+    }
+   ]
+  }
+ }
+}
