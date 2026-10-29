@@ -1,22 +1,22 @@
 {
  "schema": "aadistill.budget.phase_dry_run/v1",
- "run_utc": "2026-10-29T10:05:00Z",
- "what": "phase.py issue --dry-run for each session kind against the L40S proposal (no artifact is written on a refusal; nothing is created)",
+ "run_utc": "2026-10-29T15:26:44Z",
+ "what": "phase.py issue --dry-run for each session kind against the L40S proposal (no artifact is written on a refusal; nothing is created); rerun after the gate corrections (the check config's gates changed the phase identity)",
  "supersedes": "dry_run_issue_2026-10-28.json (the A100-default application's dry run, kept as it ran)",
  "check": {
   "command": "phase.py issue --kind check --run-id dry_check --expected-usd 1 --hard-cap-usd 4.56 --dry-run --out <scratch>/check.json",
   "result": "REFUSED at $0: A-D4 at $4.56 is not fundable: ['the project cap is $740.0, the grant was written under $868.0: a new maintainer decision, not an inference']",
-  "reading": "the one expected refusal: the identity (now with the check's config and diagnostic tasks), the proposal, the envelope, the per-session cap, the live provider position and the balance all hold, and $4.56 fits the $14.5088 the current cap leaves; what refuses is the project cap the grant would be written under"
+  "reading": "the one expected refusal: the identity (with the check's config, its gates and the diagnostic tasks), the proposal, the envelope, the per-session cap, the live provider position and the balance all hold, and $4.56 fits the $14.5088 the current cap leaves; what refuses is the project cap the grant would be written under"
  },
  "teacher": {
   "command": "phase.py issue --kind teacher --run-id dry_teacher --expected-usd 1 --hard-cap-usd 63.76 --dry-run --out <scratch>/teacher.json",
-  "result": "REFUSED at $0: a teacher session is priced from logs/stages/stage-2/teacher_modes/assets/l40s_check.json, which does not exist yet: the L40S check (kind check) and its dev-box record come first",
-  "reading": "expected: the teacher artifact binds the committed check record"
+  "result": "REFUSED at $0: the L40S check record does not admit a teacher session: logs/stages/stage-2/teacher_modes/assets/l40s_check.json does not exist: the L40S check (kind check) and its dev-box record come first",
+  "reading": "expected: the teacher artifact is issued only once the committed check record admits its operations (l40s_check.gate, fail-closed)"
  },
  "recovery": {
   "command": "phase.py issue --kind recovery --run-id dry_recovery --expected-usd 1 --hard-cap-usd 58.97 --dry-run --out <scratch>/recovery.json",
   "result": "REFUSED at $0: a recovery session reads logs/stages/stage-2/teacher_modes/data/admission.json and logs/stages/stage-2/teacher_modes/assets/common_initialization.json; ['admission_sha256', 'initialization_record_sha256'] do not exist yet: the teacher session and the dev box's admission come first",
-  "reading": "expected: a recovery artifact binds the records the teacher session and the dev box's admission produce"
+  "reading": "expected: a recovery artifact binds the records the teacher session and the dev box's admission produce, and then needs the check record to admit the training step"
  },
  "authorizes": "nothing"
 }

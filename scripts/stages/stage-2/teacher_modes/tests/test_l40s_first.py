@@ -7,6 +7,7 @@ import json
 import math
 import random
 import sys
+import tarfile
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -37,16 +38,6 @@ def test_every_kind_runs_on_the_l40s_and_the_proposal_lists_no_other_card():
     assert PH.STUDY.claims_of("check") == {"engineering_validation"}
     assert PH.STUDY.claims_of("teacher") == PH.STUDY.claims_of("recovery") == PH.STUDY.claims
     assert {PH.CHECK_CONFIG, PH.DIAGNOSTIC} <= set(PH.STUDY.identity_files)
-
-
-def test_the_teacher_kind_is_priced_from_and_binds_the_committed_check_record(tmp_path):
-    with pytest.raises(PH.SE.AuthorizationError, match="L40S check"):
-        PH.kind_conditions("teacher", tmp_path)
-    rec = tmp_path / PH.CHECK_RECORD
-    rec.parent.mkdir(parents=True)
-    rec.write_text('{"verdict": {}}\n')
-    assert PH.kind_conditions("teacher", tmp_path) == {
-        "l40s_check_record_sha256": hashlib.sha256(rec.read_bytes()).hexdigest()}
 
 
 def test_an_out_of_memory_initialization_is_rerun_once_at_the_declared_fallback(tmp_path, monkeypatch):
@@ -88,8 +79,8 @@ def test_an_out_of_memory_error_is_seen_through_an_operators_wrapper():
     assert not IN.is_out_of_memory(ValueError("shape mismatch"))
 
 
-def _evidence(out: Path, *, init=("oom", "ok"), reserved=30.0) -> None:
-    L._write(out, "device", {"generation": {"used_mib_peak": 41000, "total_mib": 46068, "samples": 9},
+def _evidence(out: Path, *, init=("oom", "ok"), reserved=30.0, gen_used=41000) -> None:
+    L._write(out, "device", {"generation": {"used_mib_peak": gen_used, "total_mib": 46068, "samples": 9},
                              "evaluation_engine": {"used_mib_peak": 41100, "total_mib": 46068, "samples": 4}})
     L._write(out, "generation", {"tasks": 64, "modes": {m: {"complete": True, "tokens_per_second": 900.0, "engine": {}}
                                                         for m in L.MODES}})
@@ -124,6 +115,88 @@ def test_the_check_verdict_derives_each_margin_and_names_only_memory_bound_opera
     _evidence(both, init=("oom", "oom"))
     v = L.verdict(both, cfg)
     assert v["failed"] == ["initialization"] and v["a100_evidence"] == ["initialization"] and not v["complete"]
+
+
+RUN = "check_r1"
+
+
+def _chain(tmp: Path, monkeypatch, *, pod_report=None, **evidence) -> tuple[Path, Path]:
+    """A closed check on a repository holding this phase's identity files: the pod's evidence and report, the
+    shared closeout's verified archive and outcome, the committed check authorization; returns (repo, scr)."""
+    root, ev, scr = tmp / "repo", tmp / "evidence", tmp / "scr"
+    for rel in PH.STUDY.identity_files:
+        (root / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root / rel).symlink_to(REPO / rel)
+    _evidence(ev, **evidence)
+    cfg = L.load_config()
+    L._write(ev, "run", {"config_sha256": L._sha(REPO / L.CONFIG), "contract": {
+        "status": "ok", "identity": PH.SE.identity_hash(PH.STUDY, root), "harness": "h", "authorization_id": "auth-1"}})
+    L._write(ev, "report", pod_report if pod_report is not None else L._plain(L.verdict(ev, cfg)))
+    (scr / "store").mkdir(parents=True)
+    tgz = scr / "store" / PH.SE.EVIDENCE_ARCHIVE
+    with tarfile.open(tgz, "w:gz") as t:
+        t.add(ev, arcname=".")
+    run = root / PH.STUDY.run_dir(RUN)
+    L._write(run / "closeout", "outcome", {"kind": "check", "evidence": {"sha256": L._sha(tgz), "verified": True},
+                                           "verdict_rederived": {"agrees_with_the_pod": pod_report is None}})
+    auth = root / PH.STUDY.authorization_path(RUN)
+    auth.parent.mkdir(parents=True)
+    auth.write_text(json.dumps({"stage_conditions": {"kind": "check"}, "authorization_id": "auth-1"}))
+    #: the artifact loader's own checks are the shared tests'; here, what the gate reads from it
+    monkeypatch.setattr(PH.PhaseAuthorization, "load", lambda path: SimpleNamespace(**json.loads(Path(path).read_text())))
+    return root, scr
+
+
+TEACHER, RECOVERY = (L.load_config()["gates"][k] for k in ("teacher", "recovery"))
+
+
+def test_the_check_record_admits_a_formal_session_only_fail_closed(tmp_path, monkeypatch):
+    root, scr = _chain(tmp_path / "ok", monkeypatch)
+    with pytest.raises(PH.SE.AuthorizationError, match="L40S check"):
+        PH.kind_conditions("teacher", root)                                    # no record
+    (root / PH.CHECK_RECORD).parent.mkdir(parents=True)
+    (root / PH.CHECK_RECORD).write_text('{"verdict": {}}\n')
+    with pytest.raises(PH.SE.AuthorizationError, match="not a check record"):
+        PH.kind_conditions("teacher", root)                                    # an empty verdict
+    rec = L.record(RUN, scr, root)
+    assert rec["agrees_with_the_pod"] and rec["evidence"].endswith(f"runs/{RUN}/check_evidence")
+    assert PH.kind_conditions("teacher", root) == {"l40s_check_record_sha256": L._sha(root / PH.CHECK_RECORD)}
+    assert L.gate(RECOVERY, root) == []
+    # identities: the phase's, the run's
+    for key, value, why in (("identity", "0" * 64, "another phase identity"),
+                            ("authorization_id", "auth-2", "not the check the record names")):
+        bad = {**rec, key: value}
+        (root / PH.CHECK_RECORD).write_text(json.dumps(bad))
+        assert any(why in b for b in L.gate(TEACHER, root))
+    (root / PH.CHECK_RECORD).write_text(json.dumps(rec))
+    # the committed evidence is the recorded one, and re-derives the recorded verdict
+    t = root / rec["evidence"] / "train_H-T.json"
+    t.write_text(t.read_text().replace('"reserved_gib": 30.0', '"reserved_gib": 29.0'))
+    assert any("committed evidence" in b for b in L.gate(RECOVERY, root))
+    # a failed initialization refuses the teacher session (and is the one operation an A100 may be asked for)
+    root, scr = _chain(tmp_path / "oom", monkeypatch, init=("oom", "oom"))
+    rec = L.record(RUN, scr, root)
+    assert rec["verdict"]["a100_evidence"] == ["initialization"]
+    with pytest.raises(PH.SE.AuthorizationError, match="initialization: FAILED"):
+        PH.kind_conditions("teacher", root)
+    assert L.gate(RECOVERY, root) == []
+    # the pod's report and the dev box's re-derivation disagree
+    root, scr = _chain(tmp_path / "pod", monkeypatch, pod_report={"passed": True, "checks": {}})
+    assert not L.record(RUN, scr, root)["agrees_with_the_pod"]
+    assert any("disagree" in b for b in L.gate(TEACHER, root)) and any("closeout" in b for b in L.gate(TEACHER, root))
+
+
+def test_a_margin_below_the_wanted_one_refuses_until_a_recorded_decision_and_never_names_an_a100(tmp_path, monkeypatch):
+    root, scr = _chain(tmp_path, monkeypatch, gen_used=43000, reserved=41.0)
+    rec = L.record(RUN, scr, root)
+    v = rec["verdict"]
+    assert v["complete"] and v["below_margin"] == ["generation", "train_H-N", "train_H-T"] and not v["a100_evidence"]
+    assert [b.split(":")[0] for b in L.gate(TEACHER, root)] == ["generation"]
+    assert [b.split(":")[0] for b in L.gate(RECOVERY, root)] == ["train_H-T", "train_H-N"]
+    with pytest.raises(SystemExit, match="not an operation below"):
+        L.record(RUN, scr, root, accept_margin={"initialization": "accepted"})
+    L.record(RUN, scr, root, accept_margin={"generation": "maintainer: accept 2.99 GiB for generation"})
+    assert L.gate(TEACHER, root) == [] and len(L.gate(RECOVERY, root)) == 2
 
 
 class FakeEngine:
@@ -227,6 +300,33 @@ def test_the_forecast_application_and_proposal_state_one_budget():
         "check": hc["check"], "teacher": hc["teacher_session"], "recovery": hc["recovery"], "storage": hc["storage"],
         "engineering_reserve": hc["engineering_reserve"]}
     assert "a100" in app["not_requested"] and set(app["hardware_range"]["cards"]) == {"NVIDIA L40S"}
+    # the live price and the ceiling told apart: the proposal's ceiling, the launcher's planning, one set of bounds
+    b = f["bounds"]
+    assert PF.PRICE_CEILING == prop["gpus"]["NVIDIA L40S"] == b["ceiling_usd_per_gpu_hour"] > b["live_usd_per_gpu_hour"]
+    assert PF.CONTINGENCY == PH.launch_spec("teacher").contingency_fraction
+    assert app["price"]["phase"]["as_run"] == {k: b["phase"][k] for k in ("expected", "conservative")}
+    assert b["phase"]["conservative"]["at_ceiling"] <= hc["phase_total"]
+    assert not b["teacher"]["fits_the_cap_as_run"]["conservative"]["at_ceiling"]          # stated, handled, not raised
+    assert all(v < b["teacher"]["longest_session_work_hours"]["at_ceiling"]
+               for v in b["teacher"]["bounded_sessions"]["through_w00"].values())
+    two = app["envelopes"][[e["id"] for e in app["envelopes"]].index("recovery")]
+    assert "ESTIMATE" in two["two_gpus_estimate"]["_"] and "wall_two_gpus_expected" not in two["hours"]
+
+
+def test_longest_session_is_the_shared_planners_refusal_point():
+    from aadistill.infrastructure.budget import BudgetError, Phase, StepTime, plan_session
+    from stages.teacher_modes import phase_forecast as PF
+    h = PF.longest_session_hours(63.76, 1.19)
+
+    def plan(hours):
+        return plan_session(price_per_hour=1.19, authorized_usd=63.76, arms=0, steps_per_arm=0,
+                            step_time=StepTime(1.0, "unused"), setup_minutes=20.0, transfer_minutes=5.0,
+                            other_phases=(Phase("work", hours * 60),), contingency_fraction=0.25,
+                            soft_stop_reserves=(Phase("closeout_and_teardown", 12.5),),
+                            artifact_recovery_reserve_minutes=10.0)
+    assert plan(h).hard_terminate_usd <= 63.76
+    with pytest.raises(BudgetError):
+        plan(h + 0.02)
 
 
 def test_a_phase_that_raised_or_crashed_is_failed_not_unrun(tmp_path):

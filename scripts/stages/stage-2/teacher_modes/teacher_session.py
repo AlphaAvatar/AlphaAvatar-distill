@@ -4,6 +4,8 @@
     cd /workspace/aad && HF_HUB_OFFLINE=1 PYTHONPATH=src:scripts:scripts/stages/stage-1 /opt/train/bin/python \\
         scripts/stages/stage-2/teacher_modes/teacher_session.py --authorization <authorization.json> \\
         --durable-root <volume>/teacher_modes --status <file> [--phases calibration,initialization,waves,x,teacher_eval]
+    # a BOUNDED session: no generation stage after the named one (the next session resumes from the volume)
+    ... --phases calibration,initialization,waves@w00
 
 Every value the runner receives is read from ``generation_protocol.json``
 after the authorization's study identity and harness are re-checked here
@@ -13,7 +15,13 @@ resumes from there (AGENTS.md P8.4): a sealed shard is never regenerated, an
 initialization that re-identifies is never re-materialized, an evaluated unit
 is rescored, never regenerated.
 
-PHASES, in order; each skips what its durable records say is complete:
+PHASES, in order; each skips what its durable records say is complete, and
+each starts only when what it depends on is complete ON THE VOLUME, whichever
+session produced it (``needs``): the initialization reads the whole
+calibration, and the generation and the teacher's evaluation -- the session's
+bulk spend -- start only once the common initialization is persisted. A failed
+or missing prerequisite stops that phase and every later one, with everything
+finished kept:
 
 1. ``calibration`` -- the hybrid on the 160 calibration prompts
    (`hybrid_calibration.py`), each mode, one candidate.
@@ -28,9 +36,22 @@ PHASES, in order; each skips what its durable records say is complete:
    E stops at the first wave whose LOWER H-T-S count reaches the target with
    the margin. The exact rule is the dev box's (`admission.py`).
 4. ``x`` -- X's waves, H-N only, until H-N-C's LOWER count reaches the
-   highest UPPER H-T-S count with the margin, or X is exhausted.
+   highest UPPER H-T-S count with the margin, or X is exhausted. That target
+   is E's: a session that generated no waves first reads T0/V and E's stages
+   back from their identity-verified sealed shards (``run_stage(replay=True)``,
+   which never generates) and applies the same stopping rule to them, so one
+   session or several generate the same tasks and stop at the same wave; if
+   E's waves are not all sealed, X does not start.
 5. ``teacher_eval`` -- eval-set-1 in each mode at the teacher's supported
    context (`h1pa_driver.evaluate`, the snapshot as is, the mode's kwargs).
+
+``waves@<stage>`` or ``x@<stage>`` BOUNDS a session: it generates no stage of
+that phase after the named one and runs no later phase, then ends
+``ALL_DONE`` (what it was asked is done). The application's first teacher
+session ends after W00 so the remaining generation is re-priced from W00's
+measured rate (each stage's record carries its wall seconds and generated
+tokens) before more is spent; the stopping rule is unaffected, since every
+later session rebuilds it from the volume.
 
 Generation writes TEXT and runs no teacher program (MBPP's sandbox is the dev
 box's). The status file gets ``MARKER:ALL_DONE`` only when every requested
@@ -114,8 +135,9 @@ def stages(c: dict) -> list[dict]:
     return out
 
 
-def write_inputs(c: dict, out: Path, stage: str, ids: list[str]) -> list[dict]:
-    """The stage's run_battery inputs (one file per system message), written once, deterministic."""
+def write_inputs(c: dict, out: Path, stage: str, ids: list[str], *, write: bool = True) -> list[dict] | None:
+    """The stage's run_battery inputs (one file per system message), written once, deterministic; with
+    ``write=False`` only read back (None: this volume never wrote them, so the stage was never generated)."""
     spec = A.read_json(A.CONFIG_DIR / "corpus_spec.json")
     by_system = defaultdict(list)
     for tid in ids:
@@ -135,7 +157,10 @@ def write_inputs(c: dict, out: Path, stage: str, ids: list[str]) -> list[dict]:
         body = "".join(json.dumps(r, sort_keys=True, ensure_ascii=False) + "\n" for r in rows)
         if path.is_file() and path.read_text() != body:
             raise GD.ShardError(f"{path.name} on the volume is not this stage's input")
-        path.write_text(body)
+        if not write and not path.is_file():
+            return None
+        if write:
+            path.write_text(body)
         files.append({"file": path.name, "system": system, "tasks": len(rows), "sha256": _sha(path)})
     return files
 
@@ -146,11 +171,23 @@ def mode_args(c: dict, mode: str) -> tuple[str, ...]:
             "--generate-sampling", json.dumps(m["sampling"], sort_keys=True))
 
 
-def run_stage(c: dict, out: Path, stage: dict, run, mark, *, candidates: int) -> dict:
-    """Every mode's passes of one stage; returns per mode the records by task and pass, and completeness."""
-    files = write_inputs(c, out, stage["stage"], stage["ids"])
-    got = {"stage": stage["stage"], "groups": [], "complete": True, "records": {}}
-    for mode in stage["modes"]:
+def sealed_group(c: dict, out: Path, f: dict, ids: list[str] | None, label: str) -> dict:
+    """`GD.run_group`'s result from the group's identity-verified sealed shards alone; it never generates."""
+    want = {r["task_id"] for r in A.jsonl(out / "inputs" / f["file"]) if ids is None or r["task_id"] in ids}
+    have = GD.sealed(out, label, c["launch_identity_sha256"])
+    if set(have) - want:
+        raise GD.ShardError(f"{label}: sealed records for tasks outside its input: {sorted(set(have) - want)[:3]}")
+    return {"label": label, "tasks": len(want), "sealed": len(have), "complete": set(have) == want,
+            "replayed": True, "records": have}
+
+
+def run_stage(c: dict, out: Path, stage: dict, run, mark, *, candidates: int, replay: bool = False) -> dict:
+    """Every mode's passes of one stage; returns per mode the records by task and pass, and completeness. With
+    ``replay`` the same passes are read back from the sealed shards and nothing is generated: complete only
+    when every pass of every mode is sealed."""
+    files = write_inputs(c, out, stage["stage"], stage["ids"], write=not replay)
+    got = {"stage": stage["stage"], "groups": [], "complete": files is not None, "records": {}}
+    for mode in (stage["modes"] if files is not None else ()):
         recs: dict[str, list[dict]] = defaultdict(list)
         for f in files:
             ids = None
@@ -158,17 +195,20 @@ def run_stage(c: dict, out: Path, stage: dict, run, mark, *, candidates: int) ->
                 if k and not ids:
                     break
                 label = f"{stage['stage']}_{mode}_pass{k}_{Path(f['file']).stem}"
-                g = GD.run_group(c, out, out / "inputs", f, k, ids, run, mark, label=label,
-                                 extra_args=mode_args(c, mode))
+                g = (sealed_group(c, out, f, ids, label) if replay else
+                     GD.run_group(c, out, out / "inputs", f, k, ids, run, mark, label=label,
+                                  extra_args=mode_args(c, mode)))
                 g_recs = g.pop("records")
                 for tid, r in g_recs.items():
                     recs[tid].append(r)
                 got["groups"].append(g)
                 if not g["complete"]:
                     got["complete"] = False
-                    mark(f"{GD.UNIT_FAILED}:{label}")
+                    if not replay:
+                        mark(f"{GD.UNIT_FAILED}:{label}")
                     break
-                mark(f"{GD.UNIT_OK}:{label}")
+                if not replay:
+                    mark(f"{GD.UNIT_OK}:{label}")
                 if k == 0 and candidates > 1:
                     ids = GD.second_pass(c, g_recs)        #: the pod's judgement of each first candidate
         got["records"][mode] = {tid: sorted(rs, key=lambda r: r["candidate_index"]) for tid, rs in recs.items()}
@@ -237,6 +277,50 @@ def bound(c: dict, verdicts: dict, stages_done: list[dict]) -> dict:
         out["H-N-C_lower"] = count(base + x_ids, "H-N", False)
         out["x_reached"] = out["H-N-C_lower"] >= out["x_target"]
     return out
+
+
+def generate(c: dict, out: Path, phase: str, run, mark, *, candidates: int, verdicts: dict, done: list[dict],
+             rows: dict, save, replay: bool = False, through: str | None = None) -> str:
+    """One generation phase's stages in order until its bound stops it (waves: E reached; x: X's target
+    reached) or its slice is exhausted; `verdicts` and `done` carry every earlier stage's judgement, whichever
+    session generated it. With ``replay`` each stage is read back from its sealed shards and the first that is
+    not sealed ends the phase incomplete; with ``through`` the session generates nothing after that stage.
+    Returns ``complete``, ``bounded`` or ``incomplete``; `rows` is the phase's record."""
+    slices, reached = {"waves": (("T0+V", "E"), "e_reached"), "x": (("X",), "x_reached")}[phase]
+    rows.setdefault("stages", [])
+    if replay:
+        rows["replayed_from_sealed_shards"] = True
+    for s in stages(c):
+        if s["slice"] not in slices:
+            continue
+        b = bound(c, verdicts, done) if done else {}
+        if b.get(reached):
+            rows["stopped"] = {"after": done[-1]["stage"], "bound": b}
+            return "complete"
+        t0 = time.time()
+        got = run_stage(c, out, s, run, mark, candidates=candidates, replay=replay)
+        rows["stages"].append({
+            "stage": s["stage"], "complete": got["complete"], "groups": got["groups"],
+            "generated_here": any("rc" in seg for g in got["groups"] for seg in g.get("segments", [])),
+            "seconds": round(time.time() - t0, 1),
+            "generated_tokens": sum(int(t.get("generated_tokens") or 0) for recs in got["records"].values()
+                                    for rs in recs.values() for r in rs for t in r.get("turns", []))})
+        if not got["complete"]:
+            rows["stopped"] = {"at": s["stage"], "reason": "not sealed on the volume" if replay else "incomplete"}
+            save()
+            return "incomplete"
+        for mode, recs in got["records"].items():
+            for tid in s["ids"]:
+                verdicts[(tid, mode)] = verdict(c, tid, mode, recs.get(tid, []))
+        done.append(s)
+        rows["bound"] = bound(c, verdicts, done)
+        save()
+        if s["stage"] == through:
+            rows["stopped"] = {"after": s["stage"], "reason": f"a bounded session: --phases {phase}@{through}"}
+            return "bounded"
+    rows["stopped"] = {"after": done[-1]["stage"] if done else None,
+                       "reason": f"{phase}: every stage of the slice generated"}
+    return "complete"
 
 
 # ---- initialization and teacher evaluation ----------------------------------------------------------------
@@ -318,9 +402,10 @@ def main(argv=None, *, run=GD.run_battery, authorize=authorize, repo: Path | Non
     root, status = Path(args.durable_root), Path(args.status)
     out = root / "generation"
     out.mkdir(parents=True, exist_ok=True)
-    phases = [p for p in args.phases.split(",") if p]
-    if set(phases) - set(PHASES):
-        raise SystemExit(f"unknown phases {sorted(set(phases) - set(PHASES))}")
+    through = dict(p.split("@", 1) for p in args.phases.split(",") if "@" in p)
+    phases = [p.split("@", 1)[0] for p in args.phases.split(",") if p]
+    if set(phases) - set(PHASES) or set(through) - {"waves", "x"}:
+        raise SystemExit(f"unknown phases or bounds in {args.phases!r}")
 
     def mark(m: str) -> None:
         with status.open("a") as fh:
@@ -337,6 +422,9 @@ def main(argv=None, *, run=GD.run_battery, authorize=authorize, repo: Path | Non
         c = contract(repo, Path(args.authorization), authorize)
         record["contract"] = {k: c[k] for k in ("authorization_id", "launch_identity_sha256", "harness_digest")
                               if k in c} | {"status": "ok"}
+        names = {s["stage"] for s in stages(c)}
+        if any(not v.startswith("w" if k == "waves" else "x") or v not in names for k, v in through.items()):
+            raise SystemExit(f"{through}: not a stage of that phase")
     except BaseException as exc:  # noqa: BLE001
         record["contract"] = {"status": "failed", "error": repr(exc)}
         save()
@@ -346,58 +434,48 @@ def main(argv=None, *, run=GD.run_battery, authorize=authorize, repo: Path | Non
     mark("CONTRACT_OK")
     complete = True
     n_cand = int(c["protocol"]["execution"]["candidates"])
+    cal = {"stage": "cal", "slice": "calibration", "modes": MODES, "ids": [t["task_id"] for t in c["calibration"]]}
+    persisted = root / "initialization" / "initialization.json"
     verdicts: dict = {}
-    done_stages: list[dict] = []
+    done: list[dict] = []
 
-    def judge(got: dict, s: dict) -> None:
-        for mode, recs in got["records"].items():
-            for tid in s["ids"]:
-                verdicts[(tid, mode)] = verdict(c, tid, mode, recs.get(tid, []))
+    def needs(phase: str) -> str | None:
+        """Why `phase` may not start (None: it may), from the volume, not from this process."""
+        if phase == "initialization" and not run_stage(c, out, cal, run, mark, candidates=1, replay=True)["complete"]:
+            return "the calibration is not complete on the volume, and the initialization reads all of it"
+        if phase in ("waves", "x", "teacher_eval") and not persisted.is_file():
+            return "the common initialization is not persisted: the generation and the evaluation wait for it"
+        if phase == "x" and not done and generate(
+                c, out, "waves", run, mark, candidates=n_cand, verdicts=verdicts, done=done,
+                rows=record["phases"].setdefault("waves", {}), save=save, replay=True) != "complete":
+            return "E's waves are not all sealed on the volume, so X's target is unknown"
+        return None
 
     try:
-        if "calibration" in phases:
-            s = {"stage": "cal", "slice": "calibration", "modes": MODES, "ids": [t["task_id"] for t in c["calibration"]]}
-            got = run_stage(c, out, s, run, mark, candidates=1)
-            record["phases"]["calibration"] = {"complete": got["complete"], "groups": got["groups"]}
-            complete &= got["complete"]
-            save()
-        if "initialization" in phases:
-            record["phases"]["initialization"] = initialize(c, root, record["phases"].get("calibration"), status)
-            complete &= record["phases"]["initialization"]["status"] != "failed"
-            save()
-        all_stages = stages(c)
-        for phase, slices in (("waves", ("T0+V", "E")), ("x", ("X",))):
-            if phase not in phases:
-                continue
-            rows = record["phases"].setdefault(phase, {"stages": []})
-            for s in all_stages:
-                if s["slice"] not in slices:
-                    continue
-                b = bound(c, verdicts, done_stages) if done_stages else {}
-                if phase == "waves" and b.get("e_reached"):
-                    rows["stopped"] = {"after": done_stages[-1]["stage"], "bound": b}
-                    break
-                if phase == "x" and b.get("x_reached"):
-                    rows["stopped"] = {"after": done_stages[-1]["stage"], "bound": b}
-                    break
-                got = run_stage(c, out, s, run, mark, candidates=n_cand)
-                judge(got, s)
-                done_stages.append(s)
-                rows["stages"].append({"stage": s["stage"], "complete": got["complete"], "groups": got["groups"]})
-                rows["bound"] = bound(c, verdicts, done_stages)
-                save()
-                if not got["complete"]:
-                    complete = False
+        for phase in (p for p in PHASES if p in phases):
+            why = needs(phase)
+            if why:
+                record["phases"][phase] = {"status": "blocked", "reason": why}
+                complete = False
+            elif phase == "calibration":
+                got = run_stage(c, out, cal, run, mark, candidates=1)
+                record["phases"]["calibration"] = {"complete": got["complete"], "groups": got["groups"]}
+                complete = got["complete"]
+            elif phase == "initialization":
+                record["phases"]["initialization"] = initialize(c, root, record["phases"].get("calibration"), status)
+                complete = record["phases"]["initialization"]["status"] != "failed"
+            elif phase in ("waves", "x"):
+                got = generate(c, out, phase, run, mark, candidates=n_cand, verdicts=verdicts, done=done,
+                               rows=record["phases"].setdefault(phase, {}), save=save, through=through.get(phase))
+                complete = got != "incomplete"
+                if got == "bounded":
+                    save()
                     break
             else:
-                rows["stopped"] = {"after": done_stages[-1]["stage"] if done_stages else None,
-                                   "reason": f"{phase}: every stage of the slice generated"}
+                record["phases"]["teacher_eval"] = {m: teacher_eval(c, root, m) for m in MODES}
             save()
             if not complete:
                 break
-        if "teacher_eval" in phases and complete:
-            record["phases"]["teacher_eval"] = {m: teacher_eval(c, root, m) for m in MODES}
-            save()
     except BaseException as exc:  # noqa: BLE001
         complete = False
         record["error"] = {"error": repr(exc), "traceback": traceback.format_exc()[-4000:]}

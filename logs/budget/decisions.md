@@ -14715,3 +14715,51 @@ on a paid pod.
   session is the one part dearer on the L40S than on the A100; the formal training step's reserved
   peak and the initialization's micro-batch-1 fit are measured only by the check; L40S stock is Low.
 - Revisit when the maintainer decides on the application, and again after the check's record.
+
+## 2026-10-29 (UTC) — Maintainer review of `d4b08344`: the check gates each formal kind fail-closed; X's stop across sessions; the price bounds
+
+- Context: the maintainer accepted the L40S-first revision (every operation on the L40S, the
+  initialization's micro-batch 3 → 1 fallback, expanding `am5m373kuq` before recovery) and asked for
+  three execution fixes before the grant (brief "Research A Final Authorization Gate Corrections").
+  The science is unchanged; $0; nothing created; no merge.
+- Decision / done:
+  - **The check gates each formal kind, fail-closed** (`l40s_check.gate`, from `phase.kind_conditions`
+    at issue and on the pod). Before, the teacher kind only needed the record to exist (a test let
+    `{"verdict": {}}` through). Now the record must name the phase identity and the check config
+    as they are, the run's committed check authorization and its shared closeout (archive verified,
+    verdict agreeing with the pod), and committed evidence (`runs/<run>/check_evidence`, written by
+    `l40s_check.py record --run-id --scr`) that hashes to the record and re-derives exactly its
+    verdict and the pod's report. Each operation the kind runs (`l40s_check.json :: gates`: teacher —
+    generation, evaluation_engine, initialization; recovery — both training steps) must be MEASURED
+    with 4 GiB free. A smaller margin refuses until a protocol-neutral memory optimization and a new
+    check, or an explicit maintainer decision for that operation (`--accept-margin`); it never names
+    an A100. Recovery now needs the gate too.
+  - **X's stopping rule across sessions** (`teacher_session.py`): `verdicts`/`done_stages` were
+    process-local, so `--phases x` after `--phases waves` had no target and would have generated all
+    14,000 X tasks. A session that generated no waves now reads T0/V and E back from their
+    identity-verified sealed shards (`run_stage(replay=True)`, never generating) and applies the same
+    rule; unsealed waves block X. Regression: one session and three bounded sessions generate the same
+    calls and seal the same groups (the test fails with the replay disabled).
+  - **Dependencies:** a phase starts only when what it needs is complete on the volume — no
+    initialization on a partial calibration, no generation or teacher evaluation before the
+    initialization is persisted; a failure stops everything after it.
+  - **Price:** every cost is at the live $1.09; $1.19 is the proposal's ceiling. The teacher's $63.76
+    cap is exactly the conservative 57.42 h at $1.09; at $1.19 it buys 52.67 h, and the conservative
+    case as run (two bounded sessions) is $64.41 at $1.09 and $70.21 at $1.19. One session's artifact
+    admits at most 46.07 h of work at $1.09 (42.14 h at $1.19; the shared planner's own bound). Not
+    raised: the teacher work runs bounded — first calibration, the initialization and W00
+    (`--phases ...,waves@w00`), then the rest re-priced from W00's measured rate, issued only inside
+    the teacher envelope's remainder, else stop and ask. The phase's conservative case as run is
+    $139.52 at $1.19, inside the $142.19 hard cap only by eating the engineering reserve, which is the
+    maintainer's reallocation. Two GPUs per recovery pod are an ESTIMATE from a unit schedule
+    (17.99 h wall-clock against 35.39 h; $39.59 against $39.31), not exactly half at the same cost.
+  - The application keeps hard cap $142.19 and the requested project cap $868 (`application.json ::
+    price`, `forecast.json :: bounds`); dry runs re-run (the gates changed the phase identity): check
+    refused only on the project cap, teacher on the gate, recovery on its missing records.
+- Alternatives considered: raising the teacher cap to its conservative-at-ceiling cost (declined by
+  the maintainer: bounded sessions and re-pricing come first); merging several check runs'
+  per-operation results into one gate (more machinery; a second check is an engineering subrun).
+- Risks: the engine's nvidia-smi free margin is set by `gpu_memory_utilization` 0.90 (about 4.5 GiB),
+  close to the 4 GiB wanted; the conservative check (the initialization's fallback at its slowest)
+  does not fit one $4.56 session, so the initialization, last in order, may need a second check.
+- Revisit when the maintainer decides on the application, after the check's record, and after W00.

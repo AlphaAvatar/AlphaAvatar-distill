@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.budget.research_a_forecast/v2",
- "written_utc": "2026-10-29T10:00:00Z",
+ "written_utc": "2026-10-29T15:40:00Z",
  "card": "NVIDIA L40S (every kind; d4_scale_design.json :: execution.hardware)",
  "measured": {
   "l40s_usd_per_hour": {
@@ -164,7 +164,18 @@
     },
     "hours_total": 35.15,
     "gpu": "1 x NVIDIA L40S",
-    "usd": 39.04
+    "usd": 39.04,
+    "bounded_sessions": {
+     "through_w00": {
+      "hours": 11.87,
+      "usd": 13.18
+     },
+     "after_w00": {
+      "hours": 23.86,
+      "usd": 26.5
+     },
+     "_": "the same work in two sessions: one more setup and closeout than hours_total"
+    }
    },
    "recovery": {
     "optimizer_steps": {
@@ -178,9 +189,15 @@
      "evaluate": 4.9
     },
     "hours_total": 35.39,
-    "wall_hours_two_gpus": 17.99,
-    "gpu": "NVIDIA L40S, 1 or 2 on one pod (one unit per GPU; the GPU-hours, and so the cost, are the same)",
-    "usd": 39.31
+    "gpu": "NVIDIA L40S, 1 or 2 on one pod (one unit per GPU)",
+    "usd": 39.31,
+    "two_gpus": {
+     "wall_hours": 17.99,
+     "gpu_hours": 35.98,
+     "idle_gpu_hours": 0.0,
+     "usd": 39.59,
+     "_": "an ESTIMATE, not half the wall-clock at the same cost: both GPUs bill through setup, the closeout and the shorter GPU's idle tail; the units' real lengths decide it"
+    }
    }
   },
   "conservative": {
@@ -230,7 +247,18 @@
     },
     "hours_total": 57.42,
     "gpu": "1 x NVIDIA L40S",
-    "usd": 63.76
+    "usd": 63.76,
+    "bounded_sessions": {
+     "through_w00": {
+      "hours": 18.13,
+      "usd": 20.13
+     },
+     "after_w00": {
+      "hours": 39.87,
+      "usd": 44.28
+     },
+     "_": "the same work in two sessions: one more setup and closeout than hours_total"
+    }
    },
    "recovery": {
     "optimizer_steps": {
@@ -244,9 +272,15 @@
      "evaluate": 6.53
     },
     "hours_total": 48.53,
-    "wall_hours_two_gpus": 24.56,
-    "gpu": "NVIDIA L40S, 1 or 2 on one pod (one unit per GPU; the GPU-hours, and so the cost, are the same)",
-    "usd": 53.89
+    "gpu": "NVIDIA L40S, 1 or 2 on one pod (one unit per GPU)",
+    "usd": 53.89,
+    "two_gpus": {
+     "wall_hours": 24.56,
+     "gpu_hours": 49.11,
+     "idle_gpu_hours": 0.0,
+     "usd": 54.04,
+     "_": "an ESTIMATE, not half the wall-clock at the same cost: both GPUs bill through setup, the closeout and the shorter GPU's idle tail; the units' real lengths decide it"
+    }
    }
   }
  },
@@ -364,5 +398,164 @@
  },
  "expected_usd": 84.73,
  "conservative_usd": 127.11,
+ "bounds": {
+  "live_usd_per_gpu_hour": 1.09,
+  "ceiling_usd_per_gpu_hour": 1.19,
+  "_": "costs elsewhere in this forecast are at the live price; the hard caps are dollars and do not grow with the price: at the ceiling they buy fewer hours",
+  "check": {
+   "hard_cap_usd": 4.56,
+   "gpu_hours_the_cap_buys": {
+    "at_live": 4.11,
+    "at_ceiling": 3.77
+   },
+   "hours": {
+    "expected": 2.6,
+    "conservative": 4.1
+   },
+   "work_hours": {
+    "expected": 2.02,
+    "conservative": 3.52
+   },
+   "longest_session_work_hours": {
+    "at_live": 2.63,
+    "at_ceiling": 2.34
+   },
+   "usd_as_run": {
+    "expected": {
+     "at_live": 2.89,
+     "at_ceiling": 3.15
+    },
+    "conservative": {
+     "at_live": 4.55,
+     "at_ceiling": 4.96
+    }
+   },
+   "fits_the_cap_as_run": {
+    "expected": {
+     "at_live": true,
+     "at_ceiling": true
+    },
+    "conservative": {
+     "at_live": true,
+     "at_ceiling": false
+    }
+   }
+  },
+  "teacher": {
+   "hard_cap_usd": 63.76,
+   "gpu_hours_the_cap_buys": {
+    "at_live": 57.41,
+    "at_ceiling": 52.67
+   },
+   "hours": {
+    "expected": 35.15,
+    "conservative": 57.42
+   },
+   "work_hours": {
+    "expected": 34.57,
+    "conservative": 56.84
+   },
+   "longest_session_work_hours": {
+    "at_live": 46.07,
+    "at_ceiling": 42.14
+   },
+   "usd_as_run": {
+    "expected": {
+     "at_live": 39.68,
+     "at_ceiling": 43.25
+    },
+    "conservative": {
+     "at_live": 64.41,
+     "at_ceiling": 70.21
+    }
+   },
+   "fits_the_cap_as_run": {
+    "expected": {
+     "at_live": true,
+     "at_ceiling": true
+    },
+    "conservative": {
+     "at_live": false,
+     "at_ceiling": false
+    }
+   },
+   "bounded_sessions": {
+    "through_w00": {
+     "expected": 11.87,
+     "conservative": 18.13
+    },
+    "after_w00": {
+     "expected": 23.86,
+     "conservative": 39.87
+    }
+   }
+  },
+  "recovery": {
+   "hard_cap_usd": 58.97,
+   "gpu_hours_the_cap_buys": {
+    "at_live": 53.1,
+    "at_ceiling": 48.71
+   },
+   "hours": {
+    "expected": 35.39,
+    "conservative": 48.53
+   },
+   "work_hours": {
+    "expected": 34.81,
+    "conservative": 47.95
+   },
+   "longest_session_work_hours": {
+    "at_live": 42.56,
+    "at_ceiling": 38.92
+   },
+   "usd_as_run": {
+    "expected": {
+     "at_live": 39.3,
+     "at_ceiling": 42.84
+    },
+    "conservative": {
+     "at_live": 54.54,
+     "at_ceiling": 59.45
+    }
+   },
+   "fits_the_cap_as_run": {
+    "expected": {
+     "at_live": true,
+     "at_ceiling": true
+    },
+    "conservative": {
+     "at_live": true,
+     "at_ceiling": false
+    }
+   },
+   "two_gpus": {
+    "wall_hours": {
+     "expected": 17.99,
+     "conservative": 24.56
+    },
+    "usd_at_live": {
+     "expected": 39.59,
+     "conservative": 54.04
+    },
+    "longest_session_wall_hours": {
+     "at_live": 20.92,
+     "at_ceiling": 19.1
+    },
+    "_": "estimates (recovery :: two_gpus)"
+   }
+  },
+  "phase": {
+   "expected": {
+    "at_live": 85.37,
+    "at_ceiling": 92.74
+   },
+   "conservative": {
+    "at_live": 128.4,
+    "at_ceiling": 139.52
+   },
+   "hard_cap_usd": 142.19,
+   "_": "the three sessions' kinds as run, plus storage; the conservative at the ceiling leaves of the hard cap only what the engineering reserve does not use"
+  }
+ },
  "authorizes": "nothing"
 }

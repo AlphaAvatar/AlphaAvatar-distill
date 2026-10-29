@@ -30,17 +30,19 @@ separate funding application.
   training step, D4 Top-1's path on the hybrid), measured on the card. Its
   evidence directory is the shared relay's, so it is secured, re-hashed and its
   verdict re-derived like a validation's; the dev box's `l40s_check.py record`
-  writes ``CHECK_RECORD``, committed.
+  commits its verdict inputs under the run and writes ``CHECK_RECORD``.
 * ``teacher`` (one L40S): `teacher_session.py` -- the calibration
   trajectories, the common initialization, T0/V and E's waves in both modes,
   X in H-N, the teacher's own evaluation in both modes. Sealed shards and
   finished evidence are pulled on every poll; everything is on the volume.
-  Its artifact binds the committed check record by sha256: it is priced from
-  that measurement, and refuses to be issued before it exists.
+  It is priced from the check's measurement, and its artifact is issued only
+  once the committed check record admits generation, the 40,960 engine and
+  the initialization (`l40s_check.gate`, fail-closed), binding it by sha256.
 * ``recovery`` (one or two L40S on ONE pod): `recovery_units.py` -- the six
-  units. Its artifact also binds the committed admission and initialization
-  records by sha256 (``conditions``), which exist only after the teacher
-  session and the dev box's admission.
+  units. Its artifact needs the check record to admit the training step, and
+  binds it with the committed admission and initialization records
+  (``conditions``), which exist only after the teacher session and the dev
+  box's admission.
 
 Between them, at $0 on the dev box: `admission.py` on the secured shards
 (the exact stopping rule, X, every pack's sha256), committed with the
@@ -138,23 +140,25 @@ def _sha(rel: str, root: Path = REPO_ROOT) -> str | None:
 
 
 def kind_conditions(kind: str, root: Path = REPO_ROOT) -> dict:
-    """What a kind's artifact binds beyond the phase identity: the teacher session the committed L40S check
-    record it is priced from; recovery the committed admission and initialization records. Each refuses to be
-    issued before its records exist."""
-    if kind == "teacher":
-        got = {"l40s_check_record_sha256": _sha(CHECK_RECORD, root)}
-        if got["l40s_check_record_sha256"] is None:
-            raise SE.AuthorizationError(f"a teacher session is priced from {CHECK_RECORD}, which does not exist yet: "
-                                        "the L40S check (kind check) and its dev-box record come first")
-        return got
-    if kind != "recovery":
+    """What a formal kind's artifact binds beyond the phase identity, refusing it until each holds: the
+    committed L40S check record, once it ADMITS the operations that kind runs (`l40s_check.gate`, fail-closed:
+    identities, evidence, verdict, per-operation status and memory margin; the config's ``gates``), and for
+    recovery the committed admission and initialization records too. Issue checks them, and so does the
+    driver on the pod (`require_on_pod`)."""
+    if kind == "check":
         return {}
-    got = {"admission_sha256": _sha(ADMISSION, root), "initialization_record_sha256": _sha(INIT_RECORD, root)}
-    missing = [k for k, v in got.items() if v is None]
-    if missing:
-        raise SE.AuthorizationError(f"a recovery session reads {ADMISSION} and {INIT_RECORD}; {missing} do not exist "
-                                    "yet: the teacher session and the dev box's admission come first")
-    return got
+    got = {}
+    if kind == "recovery":
+        got = {"admission_sha256": _sha(ADMISSION, root), "initialization_record_sha256": _sha(INIT_RECORD, root)}
+        missing = [k for k, v in got.items() if v is None]
+        if missing:
+            raise SE.AuthorizationError(f"a recovery session reads {ADMISSION} and {INIT_RECORD}; {missing} do not "
+                                        "exist yet: the teacher session and the dev box's admission come first")
+    from stages.teacher_modes import l40s_check as LC
+    bad = LC.gate(LC.load_config(Path(root) / CHECK_CONFIG)["gates"][kind], root)
+    if bad:
+        raise SE.AuthorizationError(f"the L40S check record does not admit a {kind} session: " + "; ".join(bad))
+    return {**got, "l40s_check_record_sha256": _sha(CHECK_RECORD, root)}
 
 
 def require_on_pod(path: Path, kind: str, root: Path = REPO_ROOT) -> dict:

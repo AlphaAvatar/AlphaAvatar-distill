@@ -1,8 +1,8 @@
 {
  "schema": "aadistill.budget.phase_application/v2",
- "written_utc": "2026-10-29T10:00:00Z",
+ "written_utc": "2026-10-29T15:45:00Z",
  "status": "APPLICATION, NOT A GRANT. Nothing is authorized until the maintainer grants it; each paid session then gets its own one-use authorization inside the granted envelope",
- "decided_by": "maintainer brief 2026-10-29 'Research A L40S-First Hardware and Budget Correction' (the L40S by default for every operation; an A100 only for an operation measured not to fit after memory management; one phase grant; storage and budget re-derived from the provider)",
+ "decided_by": "maintainer brief 2026-10-29 'Research A L40S-First Hardware and Budget Correction' (the L40S by default for every operation; an A100 only for an operation measured not to fit after memory management; one phase grant; storage and budget re-derived from the provider); corrected by the maintainer's review of d4b08344 ('Research A Final Authorization Gate Corrections': the check record gates each formal kind fail-closed, X's stopping rule is rebuilt from the sealed shards across sessions, a failed calibration or initialization stops what depends on it, and the live price is told apart from the ceiling; the budget is not enlarged)",
  "supersedes": "this file's version at commit 99655ad7 (the A100-default application: $161.97 phase hard cap, $888 project cap): NOT APPROVED by the maintainer on 2026-10-29 because its hardware choice broke the L40S-first rule; kept in git history",
  "forecast": "logs/budget/applications/research_a_2026-10-29/forecast.json (scripts/stages/stage-2/teacher_modes/phase_forecast.py: every rate a measurement its record owns, or a declared assumption with its basis and a conservative value)",
  "project_position": {
@@ -39,11 +39,11 @@
     "conservative": 4.1
    },
    "what": "on diagnostic inputs only (build_tasks.py diagnostic: 64 tasks disjoint from T0, the order, the pools, eval-set-1's held-out prompts and the calibration prompts; the Stage-0 d4 profiles; the A-E stand-in student): the teacher session's generation path in both modes, the evaluation engine at 40,960, the formal training step per mode (Top-200 + tail KD at the target positions, kd_scope assistant, document isolation, 8,192, micro-batch 1), D4 Top-1's fixed path on the hybrid at micro-batch 3 then, only on out-of-memory, 1. Records peak allocated and reserved memory, the free margin (>= 4 GiB wanted), seconds per step, tokens per second; reads no eval-set-1 item",
-   "then": "the dev box's l40s_check.py record writes logs/stages/stage-2/teacher_modes/assets/l40s_check.json, committed; the teacher session is re-priced from it, and its artifact binds it"
+   "then": "the shared closeout verifies the evidence archive and re-derives the verdict; the dev box's l40s_check.py record --run-id <run> --scr <scratch> commits the verdict inputs under the run and writes logs/stages/stage-2/teacher_modes/assets/l40s_check.json; the teacher work is re-priced from it, and each formal kind is issued only once `gate` admits its operations"
   },
   {
    "id": "teacher",
-   "kind": "the teacher session (phase.py --kind teacher; it may be split by --phases, each part resuming from the volume)",
+   "kind": "the teacher work, in bounded sessions (phase.py --kind teacher): first calibration, the initialization and W00 (--phases calibration,initialization,waves@w00), then the rest, re-priced from W00; each resumes from the volume",
    "hard_cap_usd": 63.76,
    "expected_usd": 39.04,
    "conservative_usd": 63.76,
@@ -64,7 +64,8 @@
     "conservative": 64.91
    },
    "what": "calibration (160 prompts x 2 modes) -> the common initialization (D4 Top-1's path on the hybrid; micro-batch 1 only after an out-of-memory exit) -> W00 (T0 + V) and E's waves in both modes until the pod's lower bound reaches 2,468 H-T-S sequences -> X in H-N -> the teacher's eval-set-1 in both modes at 40,960",
-   "only_after": "the committed L40S check record (its artifact binds it by sha256)"
+   "only_after": "the committed L40S check record ADMITS generation, the 40,960 engine and the initialization (l40s_check.gate, fail-closed); its artifact binds the record by sha256",
+   "price": "priced at $1.09; at $1.19 see price.teacher"
   },
   {
    "id": "recovery",
@@ -72,11 +73,10 @@
    "hard_cap_usd": 58.97,
    "expected_usd": 39.31,
    "conservative_usd": 53.89,
-   "gpu": "NVIDIA L40S, 1 or 2 on one pod (one unit per GPU; the GPU-hours and the cost are the same, the wall-clock halves)",
+   "gpu": "NVIDIA L40S, 1 or 2 on one pod (one unit per GPU)",
    "hours": {
     "expected": 35.39,
-    "conservative": 48.53,
-    "wall_two_gpus_expected": 17.99
+    "conservative": 48.53
    },
    "optimizer_steps_expected": {
     "H-T-S": 3913,
@@ -88,7 +88,22 @@
     "conservative": 8.109
    },
    "what": "six units (H-T-S, H-N-S, H-N-C or the registered fallback H-T-C, two seeds), each trained, persisted and evaluated on all of eval-set-1 in its own mode",
-   "only_after": "the dev box's admission record and the committed initialization record (its artifact binds both by sha256), and am5m373kuq expanded"
+   "only_after": "the committed L40S check record ADMITS the training step in both modes (l40s_check.gate), the dev box's admission record and the committed initialization record (its artifact binds all three by sha256), and am5m373kuq expanded",
+   "two_gpus_estimate": {
+    "wall_hours": {
+     "expected": 17.99,
+     "conservative": 24.56
+    },
+    "usd_at_live": {
+     "expected": 39.59,
+     "conservative": 54.04
+    },
+    "one_session_holds_at_most_wall_hours": {
+     "at_live": 20.92,
+     "at_ceiling": 19.1
+    },
+    "_": "ESTIMATES from a schedule of the six units onto two GPUs, longest first: not exactly half the wall-clock, and not exactly the same cost -- the pod bills both GPUs through setup, the closeout and whichever GPU finishes first; the units' measured lengths decide both"
+   }
   },
   {
    "id": "storage",
@@ -133,7 +148,9 @@
   "student_evaluation": {
    "status": "MEASURED on the L40S: H1-PA's and the mixed study's units evaluated all of eval-set-1 there (3,748-3,999 s each)"
   },
-  "two_gpu_pod": "per-GPU memory is the one-GPU memory (one unit per GPU); L40S x 2 stock read Medium on 2026-10-29, EUR-IS-2 Low: unexercised"
+  "two_gpu_pod": "per-GPU memory is the one-GPU memory (one unit per GPU); L40S x 2 stock read Medium on 2026-10-29, EUR-IS-2 Low: unexercised",
+  "gate": "FAIL-CLOSED (l40s_check.gate, from phase.kind_conditions at issue and again on the pod): the committed record must name the phase identity and the check config as they are now, the run's committed check authorization and its shared closeout (evidence archive verified, verdict re-derived and agreeing with the pod), and committed evidence that hashes to the record and re-derives exactly the record's verdict and the pod's report; then every operation the kind runs (l40s_check.json :: gates: teacher -- generation, evaluation_engine, initialization; recovery -- train_H-T, train_H-N) must be MEASURED with at least 4 GiB free. Unmeasured, failed, a wrong identity or incomplete evidence refuses that kind. A smaller margin refuses until a protocol-neutral memory optimization and a new check, or an explicit maintainer decision for that operation recorded with the record (--accept-margin); it never selects another card, and only an operation that ran out of memory after every declared option is A100 evidence",
+  "engine_margin_note": "the engine allocates gpu_memory_utilization 0.90 of the card up front, so its free margin by nvidia-smi is set by that setting (about 4.5 GiB of the 44.99 GiB nvidia-smi reports) rather than by the workload, close to the 4 GiB wanted: a reading below it refuses the teacher kind like any other, and lowering the utilization is a protocol-neutral engine setting a new check would measure"
  },
  "storage": {
   "need_gb": {
@@ -222,9 +239,10 @@
  ],
  "issuance": [
   "maintainer: grant (phase.py grant --decision ... --granted-by maintainer) and the new project cap",
-  "check: phase.py issue --kind check -> commit and push -> bundle -> launch --kind check --network-volume-id am5m373kuq --data-center-ids EUR-IS-2 --volume-gb 30",
-  "dev box ($0): l40s_check.py record on the secured evidence; commit the record; re-price the teacher session from it",
-  "teacher session: phase.py issue --kind teacher -> launch --kind teacher (same volume)",
+  "check: phase.py issue --kind check -> commit and push -> bundle -> launch --kind check --minutes <its planned work; the $4.56 cap admits 2.63 h at $1.09, 2.34 h at $1.19> --network-volume-id am5m373kuq --data-center-ids EUR-IS-2 --volume-gb 30",
+  "dev box ($0): closeout, then l40s_check.py record --run-id <run> --scr <scratch>; commit the record and its check_evidence; it prints which kinds `gate` admits; re-price the teacher work from the measured rates",
+  "teacher session 1: phase.py issue --kind teacher (refused unless the gate admits it) -> launch --kind teacher --phases calibration,initialization,waves@w00 (same volume); a failed calibration or initialization stops everything after it",
+  "dev box ($0): re-price E's remaining waves, X and the teacher's evaluation from W00's measured rate at the live price; issue the next teacher session(s) (--phases waves,x,teacher_eval, or split) only inside the teacher envelope's remainder, else stop and report",
   "dev box ($0): admission.py on the secured shards; commit admission.json and the initialization record",
   "maintainer action before recovery: expand am5m373kuq (55 GB for one GPU, 65 GB for two); then recovery session(s): phase.py issue --kind recovery -> launch --kind recovery --volume-gb <the new size> (more sessions if one does not finish: the units resume)",
   "dev box ($0): analysis.py on the secured evidence; the result to the maintainer"
@@ -232,6 +250,8 @@
  "stop_conditions": [
   "the phase's cumulative hard cap or the project cap would be exceeded by the next session's bound",
   "the account balance cannot fund the next session's hard cap",
+  "the committed check record does not admit a kind (l40s_check.gate): that kind is not issued; an unmeasured or failed operation is diagnosed as an engineering failure, a margin below 4 GiB answered by a protocol-neutral memory optimization and a new check or the maintainer's explicit decision -- never by another card on its own",
+  "after the check or after W00, the remaining teacher work re-priced from the measurement at the live price does not fit the teacher envelope's remainder: stop with everything durable, report the measured figure, the maintainer decides",
   "an operation does not fit the L40S after the declared memory management: reported with its evidence, and that operation waits for the maintainer's decision on another card -- nothing is shortened, dropped or lowered to fit",
   "a provider resource whose ownership or billing cannot be reconciled",
   "continuing would change the frozen design, preregistration, eval set, scorers, decoding or admission rules",
@@ -239,10 +259,12 @@
   "E is exhausted before 2,468 sequences (the reached count is the scale, reported) or C falls to its registered fallback: both are registered outcomes, not stops"
  ],
  "risks": [
-  "generation throughput on the L40S is the largest unknown: at the assumed 0.40 x the A100's the teacher session is about 35 h, at 0.30 about 57 h; on the L40S it is the one part that costs MORE than on the A100 (the A100 plan's expected $33.17), which this application accepts under the L40S-first rule",
-  "the initialization is likely to need its micro-batch 1 fallback (above); if micro-batch 1 also runs out of memory, the initialization alone waits for a decision",
-  "the formal training step's reserved peak is unmeasured until the check",
+  "generation throughput on the L40S is the largest unknown: at the assumed 0.40 x the A100's the teacher work is about 35 h, at 0.30 about 57 h; on the L40S it is the one part that costs MORE than on the A100 (the A100 plan's expected $33.17), which this application accepts under the L40S-first rule",
+  "price: the teacher's conservative case as run costs $64.41 at $1.09 and $70.21 at $1.19 against its $63.76 cap; the phase's conservative as run is $139.52 at $1.19 of the $142.19 hard cap. Bounded sessions and the re-pricing after the check and after W00 decide before that money is spent",
+  "the initialization is likely to need its micro-batch 1 fallback (above); if micro-batch 1 also runs out of memory, the initialization alone waits for a decision, and with it the generation (it starts only once the initialization is persisted)",
+  "the formal training step's reserved peak is unmeasured until the check; the engine's free margin sits close to the 4 GiB wanted by its own allocation setting (memory.engine_margin_note)",
   "L40S stock is Low in every datacenter with network volumes; a create waits at $0 rather than switching card",
+  "two GPUs per recovery pod are unexercised, and their wall-clock and cost are estimates (envelopes.recovery.two_gpus_estimate)",
   "the balance ($137.97) covers the expected ($84.73) and the conservative ($127.11) phase but is $4.22 short of the hard cap: a top-up before recovery only if the reserve is drawn"
  ],
  "not_requested": {
@@ -251,9 +273,73 @@
   "joint_cap": "the $903 joint cap and the $888 A100-default cap"
  },
  "decisions_requested": [
-  "approve this L40S phase and the $868 project cap",
+  "approve this L40S phase and the $868 project cap (unchanged by this correction)",
   "the storage route: expand am5m373kuq in place before recovery (recommended; 55 GB for one GPU, 65 GB for two) or a new volume in an L40S datacenter",
-  "one or two L40S per recovery pod (the same cost; two halve the wall-clock and need the 65 GB size)"
+  "one or two L40S per recovery pod, decided before recovery: two are ESTIMATED at 17.99 h wall-clock against 35.39 h on one (expected), for about the same cost ($39.59 against $39.31), and need the 65 GB size"
  ],
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "price": {
+  "live_usd_per_gpu_hour": 1.09,
+  "ceiling_usd_per_gpu_hour": 1.19,
+  "_": "every cost elsewhere in this application is at the live securePrice $1.09 (read 2026-10-29T09:24Z); $1.19 is the highest price the proposal admits. The hard caps are dollars priced at $1.09: at $1.19 they buy 8% fewer GPU-hours, and none is raised for it. A session's artifact also bounds its length: the launcher refuses a session whose planned length (x 1.25 and its reserves) does not fit the cap at the quoted price (forecast.json :: bounds, from the shared planner itself). 'As run' counts each bounded session's own setup and closeout",
+  "teacher": {
+   "hard_cap_usd": 63.76,
+   "gpu_hours_it_buys": {
+    "at_live": 57.41,
+    "at_ceiling": 52.67
+   },
+   "conservative": "57.42 h in one session: $63.76 at $1.09 -- the hard cap is exactly this; as run in two bounded sessions $64.41 at $1.09 and $70.21 at $1.19: the cap does NOT cover the conservative case as run, at either price",
+   "expected": "35.15 h: as run $39.68 at $1.09, $43.25 at $1.19 -- well inside the cap",
+   "one_session_holds_at_most": "46.07 h of work at $1.09, 42.14 h at $1.19: the conservative 56.84 h never fit one session",
+   "handled_by": "bounded sessions, not a larger cap: (1) the check's measured generation rate re-prices the teacher work before any teacher artifact is issued; (2) the first teacher session runs calibration, the initialization and W00 only (--phases calibration,initialization,waves@w00: 11.87 h expected, 18.13 h conservative, one session at either price); (3) the dev box re-prices the rest -- E's waves still needed, X, the teacher's evaluation -- from W00's measured seconds and generated tokens (teacher_session.json :: phases.waves.stages[0]) at the live price; (4) the next session is issued only if that fits the teacher envelope's remainder, split again by --phases if one session's bound is too short. If it does not fit, the teacher work stops there with every sealed shard and the initialization kept on the volume, and the measured figure goes to the maintainer: no automatic increase, and the engineering reserve is not spent on scientific work"
+  },
+  "check": {
+   "hard_cap_usd": 4.56,
+   "work_hours": {
+    "expected": 2.02,
+    "conservative": 3.52
+   },
+   "one_session_holds_at_most": {
+    "at_live": 2.63,
+    "at_ceiling": 2.34
+   },
+   "_": "the expected check fits one session at either price; the conservative one (the initialization's fallback at its slowest) does not: the initialization runs last, so a check cut at its bound loses only that measurement, the record shows it unmeasured, the teacher kind is refused, and a second check is an engineering subrun from the reserve"
+  },
+  "recovery": {
+   "hard_cap_usd": 58.97,
+   "gpu_hours_it_buys": {
+    "at_live": 53.1,
+    "at_ceiling": 48.71
+   },
+   "usd_as_run": {
+    "expected": {
+     "at_live": 39.3,
+     "at_ceiling": 42.84
+    },
+    "conservative": {
+     "at_live": 54.54,
+     "at_ceiling": 59.45
+    }
+   },
+   "one_gpu_session_holds_at_most": {
+    "at_live": 42.56,
+    "at_ceiling": 38.92
+   },
+   "_": "the conservative 47.95 h of work does not fit one session: the units are independent and durable, so a second session (--unit) takes the rest. Then it fits the cap at $1.09 ($54.54) and is $0.48 over at $1.19"
+  },
+  "phase": {
+   "as_run": {
+    "expected": {
+     "at_live": 85.37,
+     "at_ceiling": 92.74
+    },
+    "conservative": {
+     "at_live": 128.4,
+     "at_ceiling": 139.52
+    }
+   },
+   "hard_cap_usd": 142.19,
+   "_": "the conservative case at $1.19 ($139.52) still fits the $142.19 phase hard cap, leaving $2.67: the teacher and recovery overruns would come out of what is the engineering reserve, which is the maintainer's reallocation, not the agent's"
+  }
+ }
 }

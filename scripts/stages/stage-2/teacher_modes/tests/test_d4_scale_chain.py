@@ -111,11 +111,19 @@ class FakeTeacher:
         return 0
 
 
-def _session(root: Path, durable: Path, fake, monkeypatch, phases="calibration,waves,x"):
+def _initialized(c, root, cal, status, inits=None):
+    """initialization.py's durable product, stood in (its own tests are test_l40s_first's)."""
+    (root / "initialization").mkdir(parents=True, exist_ok=True)
+    (root / "initialization" / "initialization.json").write_text("{}")
+    return {"status": "persisted"}
+
+
+def _session(root: Path, durable: Path, fake, monkeypatch, phases="calibration,initialization,waves,x",
+             initialize=_initialized):
     monkeypatch.setattr(GA, "candidate", _verdict)
     authorize = lambda path, repo: {"authorization_id": "a", "identity": IDENT, "harness_digest": "h"}  # noqa: E731
     return GEN.main(["--authorization", "a.json", "--durable-root", str(durable), "--status", str(durable / "status"),
-                     "--phases", phases], run=fake, authorize=authorize, repo=root)
+                     "--phases", phases], run=fake, authorize=authorize, repo=root, initialize=initialize)
 
 
 def test_the_teacher_session_runs_its_waves_bounds_the_rule_and_resumes_without_regenerating(tmp_path, monkeypatch):
@@ -180,6 +188,60 @@ def test_the_teacher_session_runs_its_waves_bounds_the_rule_and_resumes_without_
     assert ADM.build_packs(ADM.selection(wide), durable / "generation", IDENT, tmp_path / "packs_c", repo=root)["H-N-C"]
     cen = ADM.censoring(got)
     assert cen["rows"] and all(0 <= r["first_length_limited_share"] <= 1 for r in cen["rows"])
+
+
+def test_split_sessions_generate_the_one_sessions_tasks_and_x_stops_on_the_waves_sealed_before(tmp_path, monkeypatch):
+    root = _tiny_repo(tmp_path)
+    one, a = tmp_path / "one", FakeTeacher()
+    assert _session(root, one, a, monkeypatch) == 0
+    r1 = json.loads((one / "teacher_session.json").read_text())
+    assert "reason" not in r1["phases"]["x"]["stopped"]         # X reached its target before X ran out
+    # the same work in three sessions -- bounded after W00, the rest of the waves, then X alone: X's target is
+    # rebuilt from the sealed shards, never from an earlier process
+    two, w, b, c = tmp_path / "two", FakeTeacher(), FakeTeacher(), FakeTeacher()
+    assert _session(root, two, w, monkeypatch, phases="calibration,initialization,waves@w00") == 0
+    r0 = json.loads((two / "teacher_session.json").read_text())["phases"]["waves"]
+    assert r0["stopped"]["after"] == "w00" and "bounded" in r0["stopped"]["reason"] and "x" not in json.loads(
+        (two / "teacher_session.json").read_text())["phases"]
+    assert r0["stages"][0]["generated_here"] and r0["stages"][0]["generated_tokens"] > 0
+    assert {f.split("_")[0] for f, _, _ in w.calls} == {"cal", "w00"}
+    assert _session(root, two, b, monkeypatch, phases="waves") == 0
+    assert _session(root, two, c, monkeypatch, phases="x") == 0
+    r2 = json.loads((two / "teacher_session.json").read_text())
+    assert c.calls and all(f.startswith("x") for f, _, _ in c.calls)
+    assert sorted(w.calls + b.calls + c.calls) == sorted(a.calls)
+    assert sorted(p.name for p in (two / "generation").glob("*.complete")) == sorted(
+        p.name for p in (one / "generation").glob("*.complete"))
+    assert r2["phases"]["waves"]["replayed_from_sealed_shards"] and r2["phases"]["x"]["stopped"] == r1["phases"]["x"]["stopped"]
+    # X does not start on waves that are not all sealed, nor anything after an initialization that is not persisted
+    part = tmp_path / "part"
+    assert _session(root, part, FakeTeacher(), monkeypatch, phases="x") == 3
+    assert "initialization is not persisted" in json.loads((part / "teacher_session.json").read_text())["phases"]["x"]["reason"]
+    _initialized(None, part, None, None)
+    x = FakeTeacher()
+    assert _session(root, part, x, monkeypatch, phases="x") == 3 and x.calls == []
+    assert "not all sealed" in json.loads((part / "teacher_session.json").read_text())["phases"]["x"]["reason"]
+
+
+def test_a_failed_calibration_or_initialization_stops_every_phase_that_depends_on_it(tmp_path, monkeypatch):
+    root = _tiny_repo(tmp_path)
+
+    class NoCalibration(FakeTeacher):
+        def __call__(self, cmd, log, tick):
+            if Path(cmd[cmd.index("--tasks") + 1]).name.startswith("cal_"):
+                self.calls.append(("cal", "", ""))
+                return 1
+            return super().__call__(cmd, log, tick)
+    inits, fake = [], NoCalibration()
+    track = lambda *a: inits.append(a) or _initialized(*a)  # noqa: E731
+    assert _session(root, tmp_path / "a", fake, monkeypatch, initialize=track) == 3
+    assert inits == [] and {f for f, _, _ in fake.calls} == {"cal"}
+    assert _session(root, tmp_path / "a", FakeTeacher(), monkeypatch, phases="initialization", initialize=track) == 3
+    assert inits == [] and "calibration is not complete" in json.loads(
+        (tmp_path / "a" / "teacher_session.json").read_text())["phases"]["initialization"]["reason"]
+    failed, gen = lambda *a: {"status": "failed", "returncode": 1}, FakeTeacher()  # noqa: E731
+    assert _session(root, tmp_path / "b", gen, monkeypatch, initialize=failed) == 3
+    assert {f.split("_")[0] for f, _, _ in gen.calls} == {"cal"}            # no wave, no X after it
 
 
 def test_a_hybrid_preclosed_turn_is_split_by_its_state_and_h1s_turns_are_unchanged():

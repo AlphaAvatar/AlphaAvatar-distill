@@ -67,14 +67,22 @@ phase): the *check* on one L40S, first (`l40s_check.py`: the formal code paths
 on diagnostic inputs -- generation, the evaluation engine at 40,960, the formal
 training step, D4 Top-1's path on the hybrid -- with peak allocated and
 reserved memory, step time and throughput; never formal, it reads no
-eval-set-1 item); the *teacher* session on one L40S (calibration,
+eval-set-1 item); the *teacher* work on one L40S (calibration,
 initialization, W00 = T0 + V, E's waves, X, the teacher's own evaluation in
-both modes), priced from the committed check record its artifact binds; the
-dev box's admission ($0); the *recovery* session(s), one or two L40S on one
-pod, six units through H1-PA's unit driver; the dev box's analysis ($0).
-Everything finished is on the phase's network volume (`am5m373kuq`, expanded
-in place before recovery) as it completes and is pulled on every poll; a later
-attempt resumes from the volume.
+both modes) in bounded sessions -- the first through W00
+(`--phases calibration,initialization,waves@w00`), the rest re-priced from
+W00's measured rate; the *recovery* session(s), one or two L40S on one pod,
+six units through H1-PA's unit driver; the dev box's admission and analysis
+($0) between them. Each formal kind is issued only once the committed check
+record admits the operations it runs (`l40s_check.gate`, fail-closed:
+identities, evidence, the verdict re-derived and agreeing with the pod, each
+operation measured with 4 GiB free). Everything finished is on the phase's
+network volume (`am5m373kuq`, expanded in place before recovery) as it
+completes and is pulled on every poll; a later session resumes from the volume
+and rebuilds every stopping decision from the sealed shards, so one session
+or several generate the same tasks. A phase starts only when what it depends
+on is complete on the volume: no initialization on a partial calibration, no
+generation or evaluation before the initialization is persisted.
 
 | record | owns |
 | --- | --- |

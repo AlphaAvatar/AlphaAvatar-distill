@@ -6,9 +6,10 @@
         scripts/stages/stage-2/teacher_modes/l40s_check.py run --authorization <authorization.json> \\
         --out artifacts/audit/stage2_teacher_modes_phase/<run> --work /workspace/a_check --status <file> \\
         --student artifacts/stages/stage-2/reasoning_data/h1pa/pca_original/20260726
-    # the dev box, on the secured copy: the verdict re-derived, and the record the teacher kind binds
+    # the dev box, after the shared closeout: the verified archive's verdict inputs committed under the run,
+    # the verdict re-derived, and the record the teacher and recovery kinds bind (`gate`)
     PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/l40s_check.py record \\
-        --evidence <secured evidence dir> --run-id <run>
+        --run-id <run> --scr <scratch> [--accept-margin <operation>="<the maintainer's decision>"]
 
 Never formal (its artifact claims engineering_validation only). It answers, on
 the card the phase runs on, what no CPU and no A100 record can: whether each
@@ -50,6 +51,16 @@ FINDING about that operation -- reported with the memory management already
 tried -- not a reason to shorten a sequence, drop data or lower a context; only
 an operation that does not fit after every such option is evidence for an A100,
 for that operation alone (d4_scale_design.json :: execution.hardware).
+
+``gate(operations)`` is what a formal session's issue (and its driver on the
+pod) asks of the committed record, FAIL-CLOSED: the phase identity and the
+check config as they are now, the run's committed check authorization and
+shared closeout, the committed evidence hashing to the record and re-deriving
+exactly its verdict and the pod's report, and every operation that session
+runs (the config's ``gates``) MEASURED with the wanted margin. A smaller
+margin admits only with an explicit maintainer decision for that operation,
+recorded with the record (``--accept-margin``); otherwise it is answered by a
+protocol-neutral memory optimization and a new check, never by another card.
 """
 from __future__ import annotations
 
@@ -62,6 +73,8 @@ import re
 import shutil
 import subprocess
 import sys
+import tarfile
+import tempfile
 import threading
 import time
 import traceback
@@ -76,6 +89,8 @@ CONFIG = "configs/stages/stage-2/teacher_modes/l40s_check.json"
 PROTOCOL = "configs/stages/stage-2/teacher_modes/generation_protocol.json"
 H1PA = "configs/stages/stage-2/reasoning_data/h1pa.json"
 RECORD = "logs/stages/stage-2/teacher_modes/assets/l40s_check.json"
+#: under the check run's directory: the verdict's inputs (the evidence's top-level JSON files), committed
+EVIDENCE_COPY = "check_evidence"
 SCHEMA = "aadistill.stage2.teacher_modes.l40s_check/v1"
 MODES = ("H-T", "H-N")
 KV_TOKENS = re.compile(r"GPU KV cache size:\s*([\d,]+)\s*tokens")
@@ -98,6 +113,15 @@ def _write(out: Path, name: str, doc) -> None:
 def _read(out: Path, name: str):
     p = Path(out) / f"{name}.json"
     return json.loads(p.read_text()) if p.is_file() else None
+
+
+def _sha(p: Path) -> str | None:
+    return hashlib.sha256(Path(p).read_bytes()).hexdigest() if Path(p).is_file() else None
+
+
+def _plain(doc):
+    """`doc` as its JSON file reads back (what a comparison with a written verdict compares)."""
+    return json.loads(json.dumps(doc, default=str))
 
 
 def diagnostic_tasks(cfg: dict) -> list[dict]:
@@ -539,23 +563,101 @@ def verdict(out: str | Path, cfg: dict) -> dict:
             "reads_no_eval_set": True, "formal": False, "authorizes": "nothing"}
 
 
-def record(evidence: Path, run_id: str, repo: Path = REPO) -> dict:
-    """The dev box's record of a secured check: the verdict re-derived, the measured rates, the evidence's hash."""
-    cfg = load_config()
-    v = verdict(evidence, cfg)
-    pod = json.loads((Path(evidence) / "report.json").read_text())
-    files = sorted(p for p in Path(evidence).rglob("*.json") if p.is_file())
-    rec = {"schema": f"{SCHEMA}_record", "run_id": run_id, "written_utc": utc(), "verdict": v,
-           "agrees_with_the_pod": v == pod,
-           "evidence_sha256": hashlib.sha256(b"".join(hashlib.sha256(p.read_bytes()).digest() for p in files)).hexdigest(),
-           "evidence_files": len(files), "config_sha256": hashlib.sha256((repo / CONFIG).read_bytes()).hexdigest(),
+def record(run_id: str, scr: Path, repo: Path = REPO, *, accept_margin: dict | None = None) -> dict:
+    """The dev box's record of a closed check: the evidence archive the shared closeout verified, its verdict
+    inputs committed under the run (``EVIDENCE_COPY``), the verdict re-derived from that copy beside the pod's,
+    and the run's identities -- what `gate` re-checks. ``accept_margin`` (operation -> the maintainer's quoted
+    decision) is the only way a measured margin below the wanted one admits a session; it names an operation
+    that IS below it."""
+    from stages.teacher_modes import phase as PH
+    repo = Path(repo)
+    run = repo / PH.STUDY.run_dir(run_id)
+    outcome = _read(run / "closeout", "outcome") or {}
+    tgz, ev = Path(scr) / "store" / PH.SE.EVIDENCE_ARCHIVE, outcome.get("evidence") or {}
+    if outcome.get("kind") != "check" or not ev.get("verified") or _sha(tgz) != ev.get("sha256"):
+        raise SystemExit(f"{run_id}: no closed check whose verified evidence archive is {tgz}")
+    copy = run / EVIDENCE_COPY
+    shutil.rmtree(copy, ignore_errors=True)
+    copy.mkdir(parents=True)
+    with tempfile.TemporaryDirectory() as tmp:
+        with tarfile.open(tgz) as t:
+            t.extractall(tmp, filter="data")
+        for q in sorted(Path(tmp).glob("*.json")):
+            shutil.copyfile(q, copy / q.name)
+    run_doc = _read(copy, "run") or {}
+    v = _plain(verdict(copy, load_config(repo / CONFIG)))
+    accepted = {}
+    for op, decision in (accept_margin or {}).items():
+        if op not in v["below_margin"] or not str(decision).strip():
+            raise SystemExit(f"--accept-margin {op}: not an operation below the wanted margin, or no decision quoted")
+        accepted[op] = {"decided_by": "maintainer", "decision": str(decision).strip()}
+    rec = {"schema": f"{SCHEMA}_record", "run_id": run_id, "written_utc": utc(),
+           "identity": (run_doc.get("contract") or {}).get("identity"),
+           "authorization_id": (run_doc.get("contract") or {}).get("authorization_id"),
+           "harness": (run_doc.get("contract") or {}).get("harness"), "config_sha256": run_doc.get("config_sha256"),
+           "evidence_archive_sha256": ev["sha256"], "evidence": str(copy.relative_to(repo)),
+           "evidence_files": {q.name: _sha(q) for q in sorted(copy.glob("*.json"))},
+           "verdict": v, "agrees_with_the_pod": v == _read(copy, "report"), "margin_accepted": accepted,
            "use": ("what the teacher session and the recovery units are priced from (phase_forecast.py), and what "
-                   "the teacher kind's artifact binds (phase.kind_conditions)"),
+                   "their artifacts bind once `gate` admits their operations (phase.kind_conditions)"),
            "authorizes": "nothing"}
     dest = repo / RECORD
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(rec, indent=1, default=str) + "\n")
     return rec
+
+
+def gate(operations, repo: Path = REPO) -> list[str]:
+    """Why the committed record does NOT admit a session that runs `operations` (empty: it does). Fail-closed:
+    anything unmeasured, failed, unverifiable or not this phase's refuses."""
+    from stages.teacher_modes import phase as PH
+    repo = Path(repo)
+    if not (repo / RECORD).is_file():
+        return [f"{RECORD} does not exist: the L40S check (kind check) and its dev-box record come first"]
+    rec = json.loads((repo / RECORD).read_text())
+    if rec.get("schema") != f"{SCHEMA}_record":
+        return [f"{RECORD} is not a check record"]
+    bad = []
+    if rec.get("config_sha256") != _sha(repo / CONFIG):
+        bad.append("the check config is not the one the check ran under")
+    if rec.get("identity") != PH.SE.identity_hash(PH.STUDY, repo):
+        bad.append("the check ran under another phase identity than the files hold now")
+    try:
+        run = repo / PH.STUDY.run_dir(str(rec.get("run_id") or ""))
+        auth = PH.PhaseAuthorization.load(repo / PH.STUDY.authorization_path(rec["run_id"]))
+    except Exception as exc:  # noqa: BLE001 -- every reason is a refusal
+        return bad + [f"run {rec.get('run_id')!r} has no committed check authorization ({exc})"]
+    if (auth.stage_conditions or {}).get("kind") != "check" or auth.authorization_id != rec.get("authorization_id"):
+        bad.append(f"run {rec['run_id']}'s committed authorization is not the check the record names")
+    out = _read(run / "closeout", "outcome") or {}
+    ev = out.get("evidence") or {}
+    if (out.get("kind") != "check" or ev.get("verified") is not True or ev.get("sha256") != rec.get("evidence_archive_sha256")
+            or (out.get("verdict_rederived") or {}).get("agrees_with_the_pod") is not True):
+        bad.append(f"run {rec['run_id']}'s shared closeout did not verify this evidence archive and its verdict")
+    copy = run / EVIDENCE_COPY
+    if not rec.get("evidence_files") or {q.name: _sha(q) for q in sorted(copy.glob("*.json"))} != rec["evidence_files"]:
+        return bad + ["the committed evidence is not the evidence the record hashed"]
+    run_doc = _read(copy, "run") or {}
+    if ((run_doc.get("contract") or {}).get("identity"), (run_doc.get("contract") or {}).get("authorization_id"),
+            run_doc.get("config_sha256")) != (rec.get("identity"), rec.get("authorization_id"), rec.get("config_sha256")):
+        bad.append("the evidence's own contract names other identities than the record")
+    v = _plain(verdict(copy, load_config(repo / CONFIG)))
+    if v != rec.get("verdict"):
+        bad.append("the record's verdict is not the one its evidence derives")
+    if v != _read(copy, "report"):
+        bad.append("the pod's verdict and the dev box's re-derivation disagree")
+    for op in operations:
+        o = v["operations"].get(op) or {}
+        mem = o.get("memory") or {}
+        acc = (rec.get("margin_accepted") or {}).get(op) or {}
+        if o.get("status") != "MEASURED":
+            bad.append(f"{op}: {o.get('status') or 'not in the evidence'}")
+        elif mem.get("fits_with_margin") is not True and not (acc.get("decided_by") == "maintainer"
+                                                              and str(acc.get("decision") or "").strip()):
+            bad.append(f"{op}: free memory {mem.get('free_gib')} GiB, not the {v['free_memory_wanted_gib']} GiB wanted, "
+                       "and no recorded maintainer decision for it (a memory optimization and a new check, or "
+                       "--accept-margin)")
+    return bad
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -575,8 +677,10 @@ def build_parser() -> argparse.ArgumentParser:
     c.add_argument("--mode", default=None)
     c.add_argument("--micro-batch-size", type=int, default=None)
     rec = sub.add_parser("record")
-    rec.add_argument("--evidence", required=True)
     rec.add_argument("--run-id", required=True)
+    rec.add_argument("--scr", required=True, help="the check launch's scratch (its store holds the evidence archive)")
+    rec.add_argument("--accept-margin", action="append", default=[], metavar='OPERATION="DECISION"',
+                     help="the maintainer's quoted decision accepting one operation's measured margin below the wanted")
     return ap
 
 
@@ -595,9 +699,12 @@ def main(argv=None) -> int:
                                                     "traceback": traceback.format_exc()[-3000:]})
             return IN.OOM_EXIT if oom else 1
     if a.cmd == "record":
-        rec = record(Path(a.evidence), a.run_id)
-        print(json.dumps({k: rec["verdict"][k] for k in ("complete", "fit_with_margin", "below_margin", "failed",
-                                                         "a100_evidence")}, indent=1))
+        rec = record(a.run_id, Path(a.scr), accept_margin=dict(x.split("=", 1) for x in a.accept_margin))
+        from stages.teacher_modes import phase as PH
+        print(json.dumps({**{k: rec["verdict"][k] for k in ("complete", "fit_with_margin", "below_margin", "failed",
+                                                            "a100_evidence")},
+                          "admits": {k: gate(ops) or "yes" for k, ops in load_config()["gates"].items()},
+                          "_": f"{PH.CHECK_RECORD} written; commit it with {rec['evidence']}"}, indent=1))
         return 0
     a.identity = ""
     report = run(a)

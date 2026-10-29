@@ -14,6 +14,17 @@ cost x 1.5 and its conservative cost. A budget is never converted from another
 card by the price ratio: hours are derived per operation from the measured
 rate and the declared card factor, then priced at the L40S rate.
 
+PRICE. Every cost is at the live L40S price (``MEASURED``); ``PRICE_CEILING``
+is the highest price the proposal admits, at which ``bounds`` re-prices each
+envelope: the GPU-hours its hard cap buys at each price, and the longest work a
+single session's artifact at that cap admits (the shared planner's own bound,
+`aadistill.infrastructure.budget.plan_session`). A hard cap is dollars, never
+hours: work that does not fit one session runs as bounded sessions (the teacher
+session first through W00, then re-priced from W00's measured rate). Two GPUs
+on one recovery pod are an ESTIMATE from a schedule of the six units, not half
+the wall-clock at the same cost: the pod bills both GPUs through setup, the
+closeout and the shorter GPU's idle tail.
+
 STORAGE compares the two ways to hold the phase's bytes, at one and at two
 GPUs per recovery pod: expanding ``am5m373kuq`` (its historical checkpoints
 stay where they are) and a new volume in an L40S datacenter. The existing
@@ -84,6 +95,8 @@ SCENARIOS = {
 }
 SETUP_H, CLOSE_H, UNIT_FIXED_H, LOAD_H = 20 / 60, 0.25, 10 / 60, 5 / 60
 HARD_CAP_FACTOR = 1.5
+#: the proposal's highest admitted L40S price per GPU-hour, and phase.launch_spec's planning contingency
+PRICE_CEILING, CONTINGENCY = 1.19, 0.25
 DISK_USD_PER_HOUR = 150 * 0.10 / (24 * 30.4375)        #: 150 GB container disk at $0.10/GB-month
 STORAGE_MONTHS, STORAGE_MARGIN, ROUND_GB = 2, 1.10, 5
 ENGINEERING_RESERVE = 10.0
@@ -97,8 +110,30 @@ def a(k: str, scenario: str) -> float:
     return ASSUMED[k][scenario]
 
 
-def usd(hours: float) -> float:
-    return round(hours * (m("l40s_usd_per_hour") + DISK_USD_PER_HOUR), 2)
+def usd(hours: float, price: float | None = None) -> float:
+    return round(hours * ((price or m("l40s_usd_per_hour")) + DISK_USD_PER_HOUR), 2)
+
+
+def longest_session_hours(cap: float, pod_price: float) -> float:
+    """The longest work (``launch --minutes``) one artifact at `cap` admits at `pod_price`: the shared planner's
+    refusal point for study_engineering.session_spec's plan (setup, 5 min transfer, the work, x (1 +
+    contingency), the closeout reserve, 10 min artifact recovery), by bisection."""
+    from aadistill.infrastructure.budget import BudgetError, Phase, StepTime, plan_session
+
+    def fits(minutes: float) -> bool:
+        try:
+            plan_session(price_per_hour=pod_price, authorized_usd=cap, arms=0, steps_per_arm=0,
+                         step_time=StepTime(1.0, "unused: one phase"), setup_minutes=SETUP_H * 60, transfer_minutes=5.0,
+                         other_phases=(Phase("work", minutes),), contingency_fraction=CONTINGENCY,
+                         soft_stop_reserves=(Phase("closeout_and_teardown", round((1 + CONTINGENCY) * 10.0, 2)),),
+                         artifact_recovery_reserve_minutes=10.0)
+            return True
+        except BudgetError:
+            return False
+    lo, hi = 0.0, cap / pod_price * 60
+    for _ in range(40):
+        lo, hi = ((lo + hi) / 2, hi) if fits((lo + hi) / 2) else (lo, (lo + hi) / 2)
+    return math.floor(lo / 60 * 100) / 100
 
 
 def per_task_tokens() -> float:
@@ -142,10 +177,16 @@ def teacher_session(key: str, s: dict) -> dict:
     hours = {"setup": SETUP_H, "generation": gen_hours(sum(tokens.values()), key), "initialization": init_hours(key, s),
              "teacher_evaluation": teval_h, "closeout": CLOSE_H}
     h = sum(hours.values())
+    #: the bounded plan: calibration, the initialization and W00 first; the rest re-priced from W00's measured rate
+    first = SETUP_H + gen_hours(tokens["calibration"] + tokens["t0"] + tokens["v"], key) + hours["initialization"] + CLOSE_H
+    rest = SETUP_H + gen_hours(tokens["e"] + tokens["x"], key) + teval_h + CLOSE_H
     return {"tokens_m": {k: round(v / 1e6, 2) for k, v in tokens.items()}, "tokens_total_m": round(sum(tokens.values()) / 1e6, 2),
             "e_tasks_needed": e_needed, "e_tasks_generated": e_generated, "t0_ht_s_sequences": round(s_t0),
             "hours": {k: round(v, 2) for k, v in hours.items()}, "hours_total": round(h, 2), "gpu": "1 x NVIDIA L40S",
-            "usd": usd(h), "_tokens": sum(tokens.values())}
+            "usd": usd(h), "_tokens": sum(tokens.values()),
+            "bounded_sessions": {"through_w00": {"hours": round(first, 2), "usd": usd(first)},
+                                 "after_w00": {"hours": round(rest, 2), "usd": usd(rest)},
+                                 "_": "the same work in two sessions: one more setup and closeout than hours_total"}}
 
 
 def recovery(key: str, s: dict, teacher: dict) -> dict:
@@ -154,13 +195,23 @@ def recovery(key: str, s: dict, teacher: dict) -> dict:
     steps = {"H-T-S": math.ceil(3 * hts / 2), "H-N-S": math.ceil(3 * hns / 2), "H-N-C": math.ceil(3 * hts / 2)}
     step_s = m("isolated_seconds_per_step_a100") * a("l40s_step_vs_a100", key) * s["step"]
     train_h = DESIGN["seeds"] * sum(n * step_s / 3600 + UNIT_FIXED_H for n in steps.values())
-    eval_h = DESIGN["units"] * m("student_eval_seconds_l40s") / 3600 * s["student_eval"]
+    eval_unit_h = m("student_eval_seconds_l40s") / 3600 * s["student_eval"]
+    eval_h = DESIGN["units"] * eval_unit_h
     h = SETUP_H + train_h + eval_h + CLOSE_H
+    #: two GPUs: the six units scheduled longest first onto the less loaded GPU; the pod bills both GPUs throughout
+    load = [0.0, 0.0]
+    for u in sorted((n * step_s / 3600 + UNIT_FIXED_H + eval_unit_h for n in steps.values()
+                     for _ in range(DESIGN["seeds"])), reverse=True):
+        load[load.index(min(load))] += u
+    wall2 = SETUP_H + max(load) + CLOSE_H
     return {"optimizer_steps": steps, "seconds_per_step": round(step_s, 3),
             "hours": {"train": round(train_h, 2), "evaluate": round(eval_h, 2)}, "hours_total": round(h, 2),
-            "wall_hours_two_gpus": round(SETUP_H + (train_h + eval_h) / 2 + CLOSE_H, 2),
-            "gpu": "NVIDIA L40S, 1 or 2 on one pod (one unit per GPU; the GPU-hours, and so the cost, are the same)",
-            "usd": usd(h)}
+            "gpu": "NVIDIA L40S, 1 or 2 on one pod (one unit per GPU)", "usd": usd(h),
+            "two_gpus": {"wall_hours": round(wall2, 2), "gpu_hours": round(2 * wall2, 2),
+                         "idle_gpu_hours": round(max(load) - min(load), 2),
+                         "usd": round(2 * wall2 * m("l40s_usd_per_hour") + wall2 * DISK_USD_PER_HOUR, 2),
+                         "_": ("an ESTIMATE, not half the wall-clock at the same cost: both GPUs bill through setup, "
+                               "the closeout and the shorter GPU's idle tail; the units' real lengths decide it")}}
 
 
 def storage(teacher_tokens: float) -> dict:
@@ -196,7 +247,7 @@ def storage(teacher_tokens: float) -> dict:
 
 
 def forecast() -> dict:
-    out = {"schema": "aadistill.budget.research_a_forecast/v2", "written_utc": "2026-10-29T10:00:00Z",
+    out = {"schema": "aadistill.budget.research_a_forecast/v2", "written_utc": "2026-10-29T15:40:00Z",
            "card": "NVIDIA L40S (every kind; d4_scale_design.json :: execution.hardware)",
            "measured": {k: {"value": v, "source": src} for k, (v, src) in MEASURED.items()}, "assumed": ASSUMED,
            "design": DESIGN, "scenarios": {}}
@@ -221,7 +272,52 @@ def forecast() -> dict:
                                                   "engineering_reserve")), 2)
     out["expected_usd"] = round(sum(e[k]["usd"] for k in ("check", "teacher_session", "recovery")) + st_e["phase_usd"], 2)
     out["conservative_usd"] = round(sum(c[k]["usd"] for k in ("check", "teacher_session", "recovery")) + st_c["phase_usd"], 2)
+    out["bounds"] = bounds(hc, out["scenarios"], {"expected": st_e["phase_usd"], "conservative": st_c["phase_usd"]})
     out["authorizes"] = "nothing"
+    return out
+
+
+def bounds(hc: dict, scen: dict, storage_usd: dict) -> dict:
+    """Each envelope at the live price and at the ceiling: what its hard cap buys, the longest single session its
+    artifact admits, and what each scenario costs AS RUN -- the teacher in its two bounded sessions, recovery (one
+    GPU) in as many sessions as that bound needs, each extra session with its own setup and closeout."""
+    live, ceil = m("l40s_usd_per_hour"), PRICE_CEILING
+    prices = (("at_live", live), ("at_ceiling", ceil))
+
+    def as_run(key: str, sc: dict, cap: float, price: float) -> float:
+        if key == "teacher_session":
+            h = sum(sc[key]["bounded_sessions"][k]["hours"] for k in ("through_w00", "after_w00"))
+        else:
+            h = sc[key]["hours_total"]
+            if key == "recovery":
+                h += (SETUP_H + CLOSE_H) * (math.ceil((h - SETUP_H - CLOSE_H) / longest_session_hours(cap, price)) - 1)
+        return usd(h, price)
+    out = {"live_usd_per_gpu_hour": live, "ceiling_usd_per_gpu_hour": ceil,
+           "_": ("costs elsewhere in this forecast are at the live price; the hard caps are dollars and do not grow "
+                 "with the price: at the ceiling they buy fewer hours")}
+    for env, key in (("check", "check"), ("teacher", "teacher_session"), ("recovery", "recovery")):
+        cap = hc[key]
+        row = {"hard_cap_usd": cap,
+               "gpu_hours_the_cap_buys": {at: round(cap / (pr + DISK_USD_PER_HOUR), 2) for at, pr in prices},
+               "hours": {k: scen[k][key]["hours_total"] for k in SCENARIOS},
+               "work_hours": {k: round(scen[k][key]["hours_total"] - SETUP_H - CLOSE_H, 2) for k in SCENARIOS},
+               "longest_session_work_hours": {at: longest_session_hours(cap, pr) for at, pr in prices},
+               "usd_as_run": {k: {at: as_run(key, scen[k], cap, pr) for at, pr in prices} for k in SCENARIOS}}
+        row["fits_the_cap_as_run"] = {k: {at: v <= cap for at, v in row["usd_as_run"][k].items()} for k in SCENARIOS}
+        if key == "teacher_session":
+            row["bounded_sessions"] = {k: {s: scen[s][key]["bounded_sessions"][k]["hours"] for s in SCENARIOS}
+                                       for k in ("through_w00", "after_w00")}
+        if key == "recovery":
+            row["two_gpus"] = {"wall_hours": {k: scen[k][key]["two_gpus"]["wall_hours"] for k in SCENARIOS},
+                               "usd_at_live": {k: scen[k][key]["two_gpus"]["usd"] for k in SCENARIOS},
+                               "longest_session_wall_hours": {at: longest_session_hours(cap, 2 * pr) for at, pr in prices},
+                               "_": "estimates (recovery :: two_gpus)"}
+        out[env] = row
+    out["phase"] = {k: {at: round(sum(out[e]["usd_as_run"][k][at] for e in ("check", "teacher", "recovery"))
+                                  + storage_usd[k], 2) for at, _ in prices} for k in SCENARIOS}
+    out["phase"].update(hard_cap_usd=hc["phase_total"],
+                        _=("the three sessions' kinds as run, plus storage; the conservative at the ceiling leaves of "
+                           "the hard cap only what the engineering reserve does not use"))
     return out
 
 
