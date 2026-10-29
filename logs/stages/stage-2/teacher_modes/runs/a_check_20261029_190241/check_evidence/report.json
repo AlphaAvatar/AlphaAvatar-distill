@@ -1,0 +1,184 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.l40s_check/v1",
+ "card": "NVIDIA L40S",
+ "free_memory_wanted_gib": 4.0,
+ "operations": {
+  "generation": {
+   "status": "MEASURED",
+   "memory": {
+    "total_gib": 44.99,
+    "peak_gib": 40.23,
+    "free_gib": 4.76,
+    "fits_with_margin": true
+   },
+   "management": "the engine's own allocation (gpu_memory_utilization 0.87, teacher_session's)",
+   "tokens_per_second": {
+    "H-T": 437.3,
+    "H-N": 258.5
+   },
+   "engine": {
+    "H-T": {
+     "kv_cache_tokens": 218234,
+     "max_concurrency": 26.67,
+     "at_tokens_per_request": 8184
+    },
+    "H-N": {
+     "kv_cache_tokens": 219753,
+     "max_concurrency": 26.85,
+     "at_tokens_per_request": 8184
+    }
+   }
+  },
+  "evaluation_engine": {
+   "status": "MEASURED",
+   "context": 40960,
+   "memory": {
+    "total_gib": 44.99,
+    "peak_gib": 40.72,
+    "free_gib": 4.27,
+    "fits_with_margin": true
+   },
+   "engine": {
+    "kv_cache_tokens": 228144,
+    "max_concurrency": 5.57,
+    "at_tokens_per_request": 40960
+   },
+   "management": "the engine's KV capacity at the full context; a lower context is never an option (P18)"
+  },
+  "train_H-T": {
+   "status": "MEASURED",
+   "memory": {
+    "total_gib": 44.39,
+    "peak_gib": 18.81,
+    "free_gib": 25.58,
+    "fits_with_margin": true
+   },
+   "allocated_gib": 17.53,
+   "seconds_per_step": 6.214,
+   "nonpad_tokens_per_second": 2307.6,
+   "documents": 57,
+   "management": "micro-batch 1 and activation checkpointing already (the recipe's); Top-K rows chunked by 512"
+  },
+  "train_H-N": {
+   "status": "MEASURED",
+   "memory": {
+    "total_gib": 44.39,
+    "peak_gib": 18.47,
+    "free_gib": 25.92,
+    "fits_with_margin": true
+   },
+   "allocated_gib": 17.51,
+   "seconds_per_step": 5.6648,
+   "nonpad_tokens_per_second": 2652.5,
+   "documents": 108,
+   "management": "micro-batch 1 and activation checkpointing already (the recipe's); Top-K rows chunked by 512"
+  },
+  "initialization": {
+   "status": "MEASURED",
+   "attempts": [
+    {
+     "micro_batch_size": 1,
+     "out_of_memory": false,
+     "completed": true,
+     "seconds": 2626.3,
+     "steps": [
+      {
+       "impl_id": "attention.activation_importance_v1",
+       "seconds": 78.2,
+       "allocated_gib": 9.88,
+       "reserved_gib": 9.99,
+       "total_gib": 44.39
+      },
+      {
+       "impl_id": "depth.causal_kl_greedy_v1",
+       "seconds": 2371.3,
+       "allocated_gib": 26.62,
+       "reserved_gib": 26.88,
+       "total_gib": 44.39
+      },
+      {
+       "impl_id": "width.global_pca_v0",
+       "seconds": 108.6,
+       "allocated_gib": 19.73,
+       "reserved_gib": 26.88,
+       "total_gib": 44.39
+      },
+      {
+       "impl_id": "ffn.activation_importance_v0",
+       "seconds": 32.9,
+       "allocated_gib": 15.12,
+       "reserved_gib": 26.88,
+       "total_gib": 44.39
+      }
+     ],
+     "memory": {
+      "total_gib": 44.39,
+      "peak_gib": 26.88,
+      "free_gib": 17.51,
+      "fits_with_margin": true
+     }
+    },
+    {
+     "micro_batch_size": 3,
+     "out_of_memory": true,
+     "completed": false,
+     "seconds": 443.5,
+     "steps": [
+      {
+       "impl_id": "attention.activation_importance_v1",
+       "seconds": 85.1,
+       "allocated_gib": 14.36,
+       "reserved_gib": 14.89,
+       "total_gib": 44.39
+      }
+     ],
+     "memory": {
+      "total_gib": 44.39,
+      "peak_gib": 14.89,
+      "free_gib": 29.5,
+      "fits_with_margin": true
+     }
+    }
+   ],
+   "exits": {
+    "3": 75,
+    "1": 0
+   },
+   "management": "the design's micro-batch fallback (initialization.execution) and the allocator's expandable_segments:True (initialization.ALLOCATOR)",
+   "memory": {
+    "total_gib": 44.39,
+    "peak_gib": 26.88,
+    "free_gib": 17.51,
+    "fits_with_margin": true
+   }
+  }
+ },
+ "complete": true,
+ "fit_with_margin": true,
+ "passed": true,
+ "checks": {
+  "generation": {
+   "status": "MEASURED"
+  },
+  "evaluation_engine": {
+   "status": "MEASURED"
+  },
+  "train_H-T": {
+   "status": "MEASURED"
+  },
+  "train_H-N": {
+   "status": "MEASURED"
+  },
+  "initialization": {
+   "status": "MEASURED"
+  }
+ },
+ "_passed": "every operation measured (the shared closeout's re-derivation reads passed and checks); whether each fits with the wanted margin is fit_with_margin and below_margin",
+ "below_margin": [],
+ "failed": [],
+ "a100_evidence": [],
+ "_a100_evidence": "an operation that failed out of memory after every declared memory management option; anything else that failed is an engineering failure to diagnose, not a reason for another card",
+ "reads_no_eval_set": true,
+ "formal": false,
+ "authorizes": "nothing"
+}

@@ -14811,3 +14811,14 @@ on a paid pod.
   application's memory section): the initialization's process runs with `PYTORCH_CUDA_ALLOC_CONF=
   expandable_segments:True` (`initialization.ALLOCATOR`, set by both parents, recorded in its record).
   A third check measures it.
+- **Check attempt 3, `a_check_20261029_190241`: PASS, $1.3815 all-in (74.6 min; pod `20irs4efpf9nh1` gone,
+  the provider confirms).** The gate admits both formal kinds (`assets/l40s_check.json`, committed with
+  `runs/a_check_20261029_190241/check_evidence`): generation 4.76 GiB free (Thinking 437 tok/s, Non-Thinking
+  259 tok/s, engine start included), the 40,960 engine 4.27 GiB, training 25.6 / 25.9 GiB (6.21 / 5.66 s per
+  step), the initialization at micro-batch 1 after micro-batch 3's out-of-memory exit 17.51 GiB free (peak
+  reserved 26.88 GiB = allocated 26.62 with expandable segments; 2,626 s). No exception, no A100. The three
+  checks cost $3.7670 together, inside the $4.56 check envelope: nothing was drawn from the reserve.
+- **Teacher re-priced from it** (`phase_forecast.py --from-check`): the first session (calibration, the
+  initialization, W00) 15.42 h expected ($17.13), 16.90 h conservative ($18.77); after W00 34.89 / 46.05 h
+  ($38.74 / $51.14) -- the conservative total would exceed the $63.76 teacher envelope, which W00's own
+  measured rate decides before anything after W00 is issued.
