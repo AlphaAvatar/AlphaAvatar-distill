@@ -1,0 +1,67 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.l40s_check_config/v1",
+ "study": "A-D4, session kind check",
+ "_contract": "What Research A's L40S engineering check runs and what it reports, fixed before any GPU run and bound into the phase identity. Read by scripts/stages/stage-2/teacher_modes/l40s_check.py, whose `verdict` re-derives every status from the run's evidence and the values here. The check runs the phase's own formal code paths on DIAGNOSTIC inputs; nothing it builds is training data, a calibration profile, an initialization, an evaluation or a result, and it reads no eval-set-1 item. AUTHORIZES NOTHING.",
+ "decided_by": "maintainer brief 2026-10-29 'Research A L40S-First Hardware and Budget Correction', section 3",
+ "card": "NVIDIA L40S",
+ "free_memory_wanted_gib": 4.0,
+ "_free_memory": "each operation's margin: the card's total less its peak RESERVED memory (PyTorch) or the device's peak used memory (the engine, nvidia-smi), at least 4 GiB wanted. A smaller margin or an out-of-memory error is reported with the operation and its memory management; it never shortens a sequence, drops data, changes batch semantics or lowers a context",
+ "diagnostic_tasks": {
+  "path": "data/stages/stage-2/teacher_modes/tasks/diagnostic_v1.jsonl",
+  "sha256": "679d54d14a8c1e598d8305ce170c6da9f14f11f7e8a9b6dd71cd3f36d0a4798c",
+  "_": "build_tasks.py diagnostic: 64 tasks disjoint from T0, the order, the pools, eval-set-1's held-out prompts and the calibration prompts"
+ },
+ "generation": {
+  "tasks": 64,
+  "modes": [
+   "H-T",
+   "H-N"
+  ],
+  "candidates": 1,
+  "_": "teacher_session.run_stage on the diagnostic tasks: the teacher session's runner (run_battery --mode generate), engine settings, data-construction limit 8,184 - prompt, and each mode's template kwargs and official sampling (generation_protocol.json). Measured per mode: generated tokens, wall seconds, tokens per second, the engine's KV cache capacity (its log) and the device's peak used memory"
+ },
+ "evaluation_engine": {
+  "tasks": 16,
+  "mode": "H-N",
+  "seed_namespace": "l40s_check_engine",
+  "decoding": "configs/shared/evaluation/decoding/nucleus_v1.json",
+  "_": "run_battery --mode eval with --trained-context at the teacher's supported 40,960 (generation_protocol.json teacher_evaluation.context), nucleus_v1, the full remaining context per item (P18): the engine the teacher's evaluation builds. H-N keeps the diagnostic short; the engine's memory at 40,960 does not depend on the mode. Measured: it starts, its KV capacity and maximum concurrency at 40,960 (its log), peak used memory"
+ },
+ "train": {
+  "e1_seed": "20260726",
+  "steps": 20,
+  "warmup_steps_excluded": 2,
+  "sequence_length": 8192,
+  "pad_id": 151643,
+  "order_seed": 20261029,
+  "student": "the A-E stand-in (H1-PA PCA-Original seed 20260726, E1's PCA checkpoint, ae_launch.STAND_IN): the student geometry (596M); a stand-in for memory and step time only, never trained on as a result",
+  "_": "the formal recipe: the seed's E1 config with recovery_units.recipe_overrides (Top-200 + tail KD at the target positions resolved from the forward baseline, kd_scope assistant, document isolation, the hybrid teacher on the fly) and only where/how-long keys changed, micro-batch 1, on each mode's diagnostic documents packed document_isolated at 8,192 (every turn that forms a token document; correctness is never read). Measured per mode: peak allocated and reserved memory, seconds per optimizer step after warmup, non-padding tokens per second"
+ },
+ "initialization": {
+  "profiles": {
+   "calib.s0v_rh_d4@v1": "calib.s0v_rh_d4@v1",
+   "calib.s0v_base_d4@v1": "calib.s0v_base_d4@v1"
+  },
+  "profiles_document": "configs/stages/stage-0/calibration_volume/profiles_formal.json",
+  "items": {
+   "artifacts/stages/stage-0/calibration_volume/profiles_formal_v1/calib.s0v_rh_d4.items.jsonl": "3e8d10189f7c8b433ca051f086a9b825a79b7fc4182583f10a591ca9b2428267",
+   "artifacts/stages/stage-0/calibration_volume/profiles_formal_v1/calib.s0v_base_d4.items.jsonl": "2e8b99565a147e8253ca1768383fb9d4d728ceb105e283ad3653f043485e7e05"
+  },
+  "_": "D4 Top-1's fixed path (initialization.PATH, seed, target geometry) on the hybrid root, materialized by initialization.materialize with the Stage-0 profiles THEMSELVES (Thinking-2507's items on the same prompts: the same length regime, up to 7,787 tokens) instead of the hybrid's, at the forward baseline's execution, then -- only on a CUDA out-of-memory error -- at the design's fallback micro-batch (d4_scale_design.json :: initialization.execution.on_out_of_memory). Measured per step: seconds, peak allocated and reserved memory. Its product is a diagnostic, deleted with the pod: never an initialization of this study"
+ },
+ "order": [
+  "generation",
+  "evaluation_engine",
+  "train",
+  "initialization"
+ ],
+ "_order": "the longest and riskiest last, so an initialization failure costs no other measurement",
+ "sampler_seconds": 2.0,
+ "timeouts_s": {
+  "generation": 5400,
+  "evaluation_engine": 2400,
+  "train": 1800,
+  "initialization": 9000
+ },
+ "authorizes": "nothing"
+}

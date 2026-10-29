@@ -3,37 +3,44 @@
  "status": "proposed",
  "study": "A-D4",
  "proposed_utc": "2026-10-29",
- "maintainer_position": "2026-10-29 brief 'Research A First, Research B Teacher Selection Deferred': Research A's standalone phase application is requested; the $903 joint cap and the A+B application are not approved; Research B is not requested. This proposal funds nothing until granted",
+ "maintainer_position": "2026-10-29 brief 'Research A L40S-First Hardware and Budget Correction': the A100-default application ($161.97, $888 cap) is not approved; every operation defaults to the L40S, an A100 only for an operation measured not to fit after memory management; one phase grant. This proposal funds nothing until granted",
  "granted_by": "nobody: a proposal, not a grant",
  "decision": "PENDING the maintainer's explicit approval",
- "ceiling_usd": 161.97,
- "per_session_hard_cap_usd": 89.61,
+ "ceiling_usd": 142.19,
+ "per_session_hard_cap_usd": 63.76,
  "session_hard_caps_usd": {
-  "teacher": 49.76,
-  "recovery": 89.61
+  "check": 4.56,
+  "teacher": 63.76,
+  "recovery": 58.97
  },
- "project_cumulative_cap_usd": 888.0,
+ "project_cumulative_cap_usd": 868.0,
  "gpus": {
-  "NVIDIA A100-SXM4-80GB": 1.89,
   "NVIDIA L40S": 1.19
  },
- "_gpus": "the cards the phase may use, each with its highest secure price per GPU-hour (A-E's A100 quote $1.79, H1-PA's L40S $1.09, each with headroom); a session refuses at $0 when its planned all-in bound does not fit its hard cap at the quoted price",
+ "_gpus": "the one card the phase may use, with its highest secure price per GPU-hour (live $1.09 on 2026-10-29, with headroom); a session refuses at $0 when its planned all-in bound does not fit its hard cap at the quoted price, and --gpu anything else is refused",
  "gpu_count_max": 2,
  "_gpu_count": "at most 2 GPUs on the ONE pod a session creates (recovery runs one unit per GPU); never two pods at once (P12.1)",
  "network_volume": {
-  "size_gb": 60,
-  "datacenter": "one of the datacenters that stock the A100 SXM 80GB (2026-10-28 20:30Z: EUR-IS-1, EU-RO-1, US-KS-2, US-MD-1, US-WA-1, US-CA-2); created once, with the maintainer's approval of this phase, and kept until the maintainer releases it",
-  "why_new": "am5m373kuq sits in EUR-IS-2, which stocks no A100 SXM; the teacher session and the recovery units need one volume in one A100 datacenter",
-  "peak_gb": 42.9
+  "id": "am5m373kuq",
+  "datacenter": "EUR-IS-2",
+  "size_gb_now": 30,
+  "expand_to_gb": {
+   "one_gpu": 55,
+   "two_gpus": 65
+  },
+  "when": "before the recovery session; the check and the teacher session fit its current 30 GB (peak 4.8 GB in its 15.3 GB free)",
+  "why": "the cheaper route during the phase, no migration, the historical checkpoints untouched (application.json :: storage)"
  },
- "scope": "Research A's D4-scale study (configs/stages/stage-2/teacher_modes/d4_scale_design.json, preregistration frozen at the grant): the teacher session (calibration, the common initialization, T0/V and E's waves in both modes, X in H-N, the teacher's evaluation in both modes) and the recovery session(s) of the six units (H-T-S, H-N-S, H-N-C or the registered fallback, two seeds each), through scripts/stages/stage-2/teacher_modes/phase.py; the dev box's $0 admission and analysis between and after them",
+ "scope": "Research A's D4-scale study (configs/stages/stage-2/teacher_modes/d4_scale_design.json, preregistration frozen at the grant): the L40S engineering check (diagnostic inputs, never formal), the teacher session (calibration, the common initialization, T0/V and E's waves in both modes, X in H-N, the teacher's evaluation in both modes) and the recovery session(s) of the six units (H-T-S, H-N-S, H-N-C or the registered fallback, two seeds each), through scripts/stages/stage-2/teacher_modes/phase.py; the dev box's $0 record, admission and analysis between and after them",
  "retries": "ordinary pre-science engineering failures are repaired and rerun as new runs with new one-use artifacts inside this one cumulative envelope (P12.1); an engineering failure after formal measurement began reruns the SAME frozen unit to one replacement endpoint, never an optional second measurement; a deterministic failure is never retried unchanged",
  "application": "logs/budget/applications/research_a_2026-10-29/application.json",
  "never": [
-  "a GPU, a pod or a network volume before the maintainer's explicit approval writes the grant",
+  "a GPU, a pod, a network volume or a volume expansion before the maintainer's explicit approval writes the grant",
+  "an A100 or any card other than the L40S",
   "a Research B session, initialization, matched control or recovery; Research B's teacher is the maintainer's decision after this study",
   "another grant's unspent remainder, or the account balance, as funds",
   "a scientific pilot, a promotion gate or a change to the frozen design, preregistration, eval set, scorers or nucleus_v1",
+  "a shorter sequence, dropped data, a changed batch semantics or a lower evaluation context to fit a card",
   "raising the project cap beyond the granted one",
   "a merge to main"
  ],

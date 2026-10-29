@@ -19,7 +19,8 @@ PHASES, in order; each skips what its durable records say is complete:
    (`hybrid_calibration.py`), each mode, one candidate.
 2. ``initialization`` -- `initialization.py` in a child process (the GPU is
    clear of the engine): the mode-balanced hybrid profiles, the fixed path,
-   the checkpoint persisted with its identity.
+   the checkpoint persisted with its identity; a CUDA out-of-memory exit is
+   rerun once at the design's fallback micro-batch (1, the reference path).
 3. ``waves`` -- W00 (T0 and V), then E's waves, both modes; per wave and mode
    pass 0, then pass 1 for each task whose first candidate the pod rejects
    (H1's `generation_driver.second_pass`; none for MBPP). After each wave the
@@ -240,19 +241,41 @@ def bound(c: dict, verdicts: dict, stages_done: list[dict]) -> dict:
 
 # ---- initialization and teacher evaluation ----------------------------------------------------------------
 
+def initialization_sizes(root: Path) -> list[int]:
+    """The forward baseline's micro-batch, then the design's out-of-memory fallback, without any size an earlier
+    attempt already ran out of memory at (``oom_mb<k>.json`` on the volume): never repeated unchanged."""
+    from stages.teacher_modes import initialization as IN
+    design = json.loads((REPO / "configs/stages/stage-2/teacher_modes/d4_scale_design.json").read_text())
+    sizes = [IN.execution().micro_batch_size, int(design["initialization"]["execution"]["on_out_of_memory"])]
+    return [k for k in dict.fromkeys(sizes) if not (root / "initialization" / f"oom_mb{k}.json").is_file()]
+
+
 def initialize(c: dict, root: Path, cal: dict, status) -> dict:
-    """`initialization.py` in its own process, on the calibration records; skipped when durable."""
+    """`initialization.py` in its own process, on the calibration records; skipped when durable. A CUDA
+    out-of-memory exit is answered once with the design's fallback micro-batch (initialization.py MEMORY)."""
+    from stages.teacher_modes import initialization as IN
     rec = root / "initialization" / "initialization.json"
     if rec.is_file():
         return {"status": "already_persisted", "record": str(rec)}
     shards = root / "generation"
-    cmd = [sys.executable, str(REPO / "scripts/stages/stage-2/teacher_modes/initialization.py"),
-           "--records", str(shards), "--out", str(root / "initialization"), "--work", "/workspace/a_init_work",
-           "--device", "cuda:0", "--identity", c["launch_identity_sha256"]]
-    with (root / "initialization.log").open("a") as lf:
-        rc = subprocess.run(cmd, cwd=REPO, stdout=lf, stderr=subprocess.STDOUT,
-                            env={**os.environ, "PYTHONPATH": "src:scripts:scripts/stages/stage-1"}).returncode
-    return {"status": "persisted" if rc == 0 and rec.is_file() else "failed", "returncode": rc}
+    base = IN.execution().micro_batch_size
+    attempts, rc = [], None
+    for k in initialization_sizes(root):
+        cmd = [sys.executable, str(REPO / "scripts/stages/stage-2/teacher_modes/initialization.py"),
+               "--records", str(shards), "--out", str(root / "initialization"), "--work", "/workspace/a_init_work",
+               "--device", "cuda:0", "--identity", c["launch_identity_sha256"],
+               *(() if k == base else ("--micro-batch-size", str(k)))]
+        with (root / "initialization.log").open("a") as lf:
+            rc = subprocess.run(cmd, cwd=REPO, stdout=lf, stderr=subprocess.STDOUT,
+                                env={**os.environ, "PYTHONPATH": "src:scripts:scripts/stages/stage-1"}).returncode
+        attempts.append({"micro_batch_size": k, "returncode": rc,
+                         "out_of_memory": rc == IN.OOM_EXIT})
+        if rc != IN.OOM_EXIT:
+            break
+    if rc is None:
+        return {"status": "failed", "attempts": attempts,
+                "reason": "every declared micro-batch already ran out of memory (oom_mb*.json on the volume)"}
+    return {"status": "persisted" if rc == 0 and rec.is_file() else "failed", "returncode": rc, "attempts": attempts}
 
 
 def teacher_eval(c: dict, root: Path, mode: str) -> dict:

@@ -9,25 +9,29 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A FIRST (maintainer, 2026-10-28 UTC): RESEARCH A'S CHAIN IS COMPLETE AT $0 AND ITS STANDALONE PHASE APPLICATION IS PENDING; RESEARCH B'S TEACHER IS PENDING A's RESULT. No paid resource, no cap increase. Committed $725.4883 of $740 (provider, 20:27Z); 0 pods; volume `am5m373kuq` only. STOPPED at the maintainer's decision on the application.**
-Decision record: `logs/budget/decisions.md` 2026-10-28 "Research A first". Application:
-`logs/budget/applications/research_a_2026-10-29/application.json` (phase hard cap $161.97, expected $105.51,
-project cap requested $888; a new 60 GB volume in an A100 datacenter). The joint A+B application and its $903
-cap are not approved (kept, marked superseded). Branch `research/teacher-modes-and-projected-residual`; `main`
+**RESEARCH A L40S-FIRST (maintainer, 2026-10-29 UTC): THE A100-DEFAULT APPLICATION IS NOT APPROVED; THE L40S PHASE APPLICATION IS PENDING. Every Research A operation runs on the L40S; an A100 only for an operation measured not to fit after memory management, for that operation alone. No paid resource, no cap increase, no volume change. Committed $725.4912 of $740 (provider, 09:24Z); 0 pods; volume `am5m373kuq` only. STOPPED at the maintainer's decision on the application.**
+Decision record: `logs/budget/decisions.md` 2026-10-29 "Research A L40S-first". Application:
+`logs/budget/applications/research_a_2026-10-29/application.json` (phase hard cap $142.19 = check $4.56 + teacher
+session $63.76 + recovery $58.97 + storage $4.90 + reserve $10.00; expected $84.73, conservative $127.11; project
+cap requested $868; `am5m373kuq` expanded in place before recovery to 55 GB, or 65 GB for two GPUs). The earlier
+version ($161.97, $888, A100) stays in git history. Branch `research/teacher-modes-and-projected-residual`; `main`
 stays at `72492e46`.
 - **Research A** (`docs/stages/stage-2/teacher_modes/DESIGN.md`): the task order frozen at $0
-  (`data/stages/stage-2/teacher_modes/tasks/order_v1.*`: V 240, E 3,522, X 14,000, R0-R9 pass); `phase.py`
-  issues and launches the *teacher* session (`teacher_session.py`: calibration, the common initialization on
-  D4 Top-1's path, waves, X, the teacher's evaluation) and the *recovery* session(s) (`recovery_units.py`);
-  `admission.py` and `analysis.py` run on the dev box. Tested on a tiny repository with a fake teacher; nothing
-  of it has run on a GPU.
+  (`data/stages/stage-2/teacher_modes/tasks/order_v1.*`); `phase.py` issues and launches three kinds on the L40S:
+  the *check* first (`l40s_check.py`: the formal code paths on diagnostic inputs -- 64 tasks of
+  `diagnostic_v1.jsonl`, the Stage-0 d4 profiles, the A-E stand-in -- with peak allocated/reserved memory, step
+  time and throughput; never formal), the *teacher* session (priced from and bound to the check's committed
+  record), the *recovery* session(s); `admission.py` and `analysis.py` run on the dev box. The initialization
+  declares one memory fallback (micro-batch 3, then 1 after a CUDA out-of-memory exit). Nothing of it has run on
+  a GPU; the formal training step's memory, the L40S generation throughput and the initialization's fit are
+  UNKNOWN until the check.
 - **Research B** (`docs/stages/stage-1/projected_residual/DESIGN.md`): the teacher is `pending`; every formal
-  use refuses (`recovery_driver.formal_teacher`); the seed check fixed; the engine admission reads engineering
-  texts, not eval-set-1. Nothing of B is requested.
+  use refuses (`recovery_driver.formal_teacher`). Nothing of B is requested.
 - **Training baseline (core):** `loss.kd_support` (Top-200 + tail KD at the target positions,
-  `src/aadistill/training/topk_kd.py`); `checkpoint.bind_identity`; isolated packs on disk
-  (`token_documents.write_pack`, `ladder_blocks` with position ids); one pod may hold 2 GPUs (`--gpu-count`).
-- **Next:** the maintainer's decision on Research A's application. Nothing starts automatically.
+  `src/aadistill/training/topk_kd.py`); `checkpoint.bind_identity`; isolated packs on disk; one pod may hold 2
+  GPUs (`--gpu-count`).
+- **Next:** the maintainer's decision on the L40S application; then the check, its record, the re-priced
+  teacher session. Nothing starts automatically.
 
 **RESEARCH A AND B: A-E ($3.50) AND B-E ($3.00) PAID ENGINEERING VALIDATIONS AUTHORIZED (maintainer, 2026-10-28 UTC). A-E: PASS (attempt 2 `ae_20261028_093428`; $0.7089 of $3.50 across two attempts). B-E: FAIL (`be_20261028_095332`, $0.4366 of $3.00): trainer smoke OOM on the L40S at the frozen E1 recipe, so resume unmeasured; vLLM median |Δ log-prob| 0.234 > 0.1 nat. Initialization, both fold checks, checkpoint identity and GPU isolation PASS. Both closed; no pod; committed $725.4993 of $740. STOPPED at the maintainer's next decision.**
 Decision record: `logs/budget/decisions.md` 2026-10-28 "A-E ($3.50) and B-E ($3.00) ... authorized". Neither PASS is a scientific GO; A1–A3, B1 and 600M stay unauthorized. The text below is the $0 readiness state the authorization was granted on.

@@ -231,8 +231,8 @@ def test_a_recovery_artifact_cannot_be_issued_before_the_admission_and_initializ
         pytest.skip("the records exist: the phase is past this point")
     with pytest.raises(PH.SE.AuthorizationError, match="teacher session"):
         PH.kind_conditions("recovery")
-    assert PH.kind_conditions("teacher") == {}
-    assert PH.STUDY.formal and set(PH.STUDY.kinds) == {"teacher", "recovery"}
+    assert PH.kind_conditions("check") == {}
+    assert PH.STUDY.formal and set(PH.STUDY.kinds) == {"check", "teacher", "recovery"}
     assert set(PH.STUDY.identity_files) >= {PH.DESIGN, PH.PREREG, PH.PROTOCOL, PH.ORDER}
 
 

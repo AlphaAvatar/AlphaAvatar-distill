@@ -300,3 +300,39 @@ def test_a_formal_phase_names_its_kinds_and_its_artifacts_claim_exactly_the_phas
     assert not gpu(ctx)[0]
     teacher = dataclasses.replace(launch, kind="teacher")
     assert not SE.prechecks(ph, teacher, tmp_path)[0](ctx)[0]           # a recovery artifact funds no teacher session
+
+
+def test_a_phase_kind_may_claim_less_and_each_artifact_claims_exactly_its_kinds(tmp_path, live, monkeypatch):
+    """A formal phase's engineering check claims engineering_validation only, under the phase's one grant; a check
+    artifact is never a formal one, and neither passes as the other's kind on the pod."""
+    st = _study(tmp_path)
+    import dataclasses
+    ph = dataclasses.replace(st, key="X-P", plan_id="stage9.x.phase", claims=frozenset({"formal", "training"}),
+                             kinds=("check", "teacher"), kind_claims=(("check", frozenset({"engineering_validation"})),),
+                             wire_schema="aadistill.stage9.x.phase_authorization/v1")
+    _proposal(tmp_path, ph, gpus={"NVIDIA L40S": 1.19}, gpu_count_max=2, ceiling_usd=10.0,
+              per_session_hard_cap_usd=10.0, gpu=None, max_price_usd_per_hour=None)
+    live["project_remaining_usd"] = 20.0
+    assert ph.formal and ph.claims_of("check") == {"engineering_validation"} and ph.claims_of("teacher") == ph.claims
+    chk = SE.issue(ph, "r1", expected_usd=1.0, hard_cap_usd=3.0, root=tmp_path, dry_run=True, out=tmp_path / "s/c.json",
+                   kind="check")
+    tea = SE.issue(ph, "r2", expected_usd=1.0, hard_cap_usd=3.0, root=tmp_path, dry_run=True, out=tmp_path / "s/t.json",
+                   kind="teacher")
+    c, t = (SE.load_authorization(ph, p, allow_dry_run=True) for p in (chk, tea))
+    assert SE.claimed(c) == {"engineering_validation"} and not c.allows("formal")
+    assert SE.claimed(t) == {"formal", "training"}
+    # a check artifact relabelled as a teacher one is refused: its claims are not the teacher kind's
+    raw = json.loads(chk.read_text())
+    raw["stage_conditions"]["kind"] = "teacher"
+    raw.pop("authorization_sha256")
+    from aadistill.infrastructure.manifest import sha256_json
+    raw["authorization_sha256"] = sha256_json(raw)
+    forged = tmp_path / "s/forged.json"
+    forged.write_text(json.dumps(raw))
+    with pytest.raises(AuthorizationError, match="claims"):
+        SE.load_authorization(ph, forged, allow_dry_run=True)
+    for a, kind, other in ((c, "check", "teacher"), (t, "teacher", "check")):
+        monkeypatch.setitem(a.stage_conditions, "dry_run", "false")
+        assert SE.require_on_pod(a, ph, a.plan_hash, str(tmp_path), kind=kind)["kind"] == kind
+        with pytest.raises(AuthorizationError, match="claims|not"):
+            SE.require_on_pod(a, ph, a.plan_hash, str(tmp_path), kind=other)

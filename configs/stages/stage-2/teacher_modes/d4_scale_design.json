@@ -2,8 +2,8 @@
  "schema": "aadistill.stage2.teacher_modes.d4_scale_design/v1",
  "study_id": "stage2.teacher_modes.d4_scale_v1",
  "name": "One hybrid teacher, its native thinking and non-thinking distributions, distilled at D4-Augmented's training scale under the target-position Top-200 + tail KD protocol",
- "status": "DESIGNED 2026-10-28 at $0 on the maintainer's decision; revised 2026-10-29 on the maintainer's brief 'Research A First, Research B Teacher Selection Deferred' (Research A runs first and alone; its tasks built and frozen; its execution chain complete). NOT FROZEN: frozen with its preregistration when the maintainer grants the phase. Authorizes nothing.",
- "decided_by": "maintainer brief 2026-10-28 'Revised Research A/B Programme & Engineering Principles', sections 3 and 5; maintainer brief 2026-10-29 sections 3 and 4",
+ "status": "DESIGNED 2026-10-28 at $0 on the maintainer's decision; revised 2026-10-29 on the maintainer's brief 'Research A First, Research B Teacher Selection Deferred' (Research A runs first and alone; its tasks built and frozen; its execution chain complete); hardware and execution revised 2026-10-29 on the maintainer's brief 'Research A L40S-First Hardware and Budget Correction' (L40S by default; nothing scientific changed). NOT FROZEN: frozen with its preregistration when the maintainer grants the phase. Authorizes nothing.",
+ "decided_by": "maintainer brief 2026-10-28 'Revised Research A/B Programme & Engineering Principles', sections 3 and 5; maintainer brief 2026-10-29 sections 3 and 4; maintainer brief 2026-10-29 'Research A L40S-First Hardware and Budget Correction', sections 1-6 (hardware, execution, storage and budget only)",
  "supersedes": {
   "study": "stage2.teacher_modes.hybrid_v1 (configs/stages/stage-2/teacher_modes/design.json, sha256 bound in the A-E grant)",
   "what_changes": "the scale (D4-Augmented's order of magnitude instead of T0's 1,761 tasks), the KD objective (the project's new training baseline), and no promotion pilot (the 10% A1 slice is cancelled); the mode protocol, token protocol, isolation, admission, initialization and evaluation are carried over unchanged",
@@ -82,7 +82,12 @@
   "method": "D4 Top-1's operator path, step for step (its search record: attention.activation_importance_v1 on rh_d4's prompts, depth.causal_kl_greedy_v1, width.global_pca_v0, ffn.activation_importance_v0 on base_d4's; seed 20260815; the Stage-0 search's execution and target geometry), materialized ONCE on Qwen/Qwen3-4B@1cfa9a72 by materialize_fixed_path with the hybrid's own mode-balanced items as two hybrid profiles (initialization.py): operator-internal measurement only, no search, no pinned digest",
   "geometry": "the 596M student geometry (28 layers, 1,024 wide, 16/8 heads, FFN 3,072, tied embedding), inheriting the hybrid's config",
   "persistence": "persisted on the volume the moment it exists (persist_unit) with initialization.json last; its identity is committed (logs/stages/stage-2/teacher_modes/assets/common_initialization.json) and every recovery unit re-identifies it from its bytes; never re-materialized after it exists",
-  "mode_balance": "equal scored positions from each mode, by whole items: every item of the mode with fewer, then the other mode's items in a seeded order until its positions reach that total; subtype = source subtype x mode, so DEPTH's subtype-then-domain average weighs the modes equally (calibration.items_from_records)"
+  "mode_balance": "equal scored positions from each mode, by whole items: every item of the mode with fewer, then the other mode's items in a seeded order until its positions reach that total; subtype = source subtype x mode, so DEPTH's subtype-then-domain average weighs the modes equally (calibration.items_from_records)",
+  "execution": {
+   "micro_batch_size": "the forward baseline's execution (configs/shared/baselines/selection.json: micro-batch 3, length-sorted packing, scored rows only), DEPTH prefix reuse on, as the Stage-0 search ran it",
+   "on_out_of_memory": 1,
+   "_on_out_of_memory": "memory management, not a protocol change: on a CUDA out-of-memory error the path is rerun ONCE at micro-batch 1, execution.py's one-item-per-forward reference path -- the same operators, profiles, seed, geometry and estimand, a different grouping of the same forwards (an execution knob, recorded in initialization.json :: execution; never chosen by a result). Why it is declared: DEPTH widens a micro-batch's scored rows to float32 at once, about 12.4-13.0 GiB at micro-batch 3 on 8k-token items (the Stage-0 d4 profiles' largest length-sorted batch: 21,882 / 22,910 rows x 151,936), the regime that ran an L40S out of memory (pilot_20261018_122808); about 4.4 GiB at micro-batch 1. A size that already ran out of memory is never repeated (oom_mb<k>.json on the volume)"
+  }
  },
  "arms": {
   "H-T-S": "H-T documents of I",
@@ -113,12 +118,13 @@
  },
  "execution": {
   "topology": "one GPU per training unit; units of different arms or seeds may run concurrently on separate GPUs of one pod, which changes no unit's arithmetic",
-  "hardware": "A100 80GB for the teacher session (the measured generation hardware) and, by default, for recovery; an L40S pod is used for recovery only when the first formal unit's measured peak memory leaves 4 GB free on it; the card, its count and the pod enter every unit's execution identity",
+  "hardware": "NVIDIA L40S 48 GB for every session and operation of the phase: the engineering check, the calibration generation, the initialization, the waves, X, the teacher's evaluation at 40,960, every recovery unit and every student evaluation. An A100 is used for an operation only when that operation is MEASURED not to fit an L40S after memory management that changes no protocol (execution micro-batch, engine concurrency, activation checkpointing, allocator settings) -- and then for that operation alone, under a separate funding application with the evidence; an unmeasured operation is not evidence of need. Never a shorter sequence, dropped data, a changed batch semantics, a lower evaluation context or another protocol to fit a card. The card, its count and the pod enter every unit's execution identity; every formal unit of one comparison trains on one card type",
   "persistence": "save points (optimizer state, step, RNG states, the consumed-sequence position, the bound data and initialization identities) on the network volume as written; a later attempt resumes from the last valid save point, never retrains a completed unit, never re-evaluates a scored one",
   "sessions": {
-   "teacher": "one A100 80GB: calibration -> initialization -> W00..W09 -> X -> the teacher's evaluation in both modes (phase.py kind teacher)",
+   "check": "one L40S, before anything formal: the bounded engineering check (l40s_check.py, phase.py kind check) on diagnostic inputs only -- the teacher session's generation path, the evaluation engine at 40,960, D4 Top-1's fixed path on the hybrid with the Stage-0 profiles, the formal training step; peak allocated/reserved memory, step time, throughput and the free margin (>= 4 GiB wanted). Its committed record is what the teacher session is priced from, and the teacher kind's artifact binds it",
+   "teacher": "one L40S: calibration -> initialization -> W00..W09 -> X -> the teacher's evaluation in both modes (phase.py kind teacher; it may run as several sessions by --phases, each resuming from the volume)",
    "dev_box": "admission.py on the secured shards ($0): the exact rules, the packs' sha256, committed with the initialization record",
-   "recovery": "one pod, one or more GPUs (A100 80GB or L40S), the six units (phase.py kind recovery)",
+   "recovery": "one pod, one or two L40S, the six units, one unit per GPU (phase.py kind recovery)",
    "analysis": "analysis.py on the secured evidence ($0)"
   }
  },

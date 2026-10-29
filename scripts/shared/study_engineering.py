@@ -3,7 +3,8 @@
 One mechanism for every study's engineering validation (Research A's A-E,
 Research B's B-E) and for a study's formal PHASE (Research A's D4-scale study:
 one grant, several session kinds -- a `Study` with formal ``claims`` and its
-``kinds``). The instance -- which grant, which files bind the study,
+``kinds``; a kind may claim less, ``kind_claims``, as the phase's engineering
+check claims engineering_validation only). The instance -- which grant, which files bind the study,
 which scripts run, where its runs live, which driver and inputs the pod gets --
 is a `Study` and a `Launch` its own module declares. Dollar amounts live in the
 grant document, never here (P3).
@@ -81,14 +82,21 @@ class Study:
     claims: frozenset = frozenset({"engineering_validation"})
     #: the session kinds an artifact may name (its ``stage_conditions.kind``)
     kinds: tuple[str, ...] = ("engineering_validation",)
+    #: (kind, claims) for a kind that claims other than ``claims``: a formal phase's engineering check
+    #: claims engineering_validation only, under the phase's one grant
+    kind_claims: tuple[tuple[str, frozenset], ...] = ()
 
     @property
     def formal(self) -> bool:
         return "formal" in self.claims
 
-    def policy(self) -> ActionPolicy:
+    def claims_of(self, kind: str | None = None) -> frozenset:
+        """Exactly what an artifact of `kind` claims (the study's claims unless the kind declares its own)."""
+        return frozenset(dict(self.kind_claims).get(kind or self.kinds[0], self.claims))
+
+    def policy(self, kind: str | None = None) -> ActionPolicy:
         return ActionPolicy(
-            policy_id=self.plan_id, allowed=frozenset(self.claims), wire_claims=CLAIMS,
+            policy_id=self.plan_id, allowed=self.claims_of(kind), wire_claims=CLAIMS,
             wire_schema=self.wire_schema, plan_hash_key="study_identity_sha256",
             enforcement=("the launcher refuses a pod unless this artifact is bound to the study identity and the "
                          "harness on disk, is not a dry run, has not been used, and its hard cap covers the planned "
@@ -130,12 +138,13 @@ def require_on_pod(auth: SpendAuthorization, study: Study, session_plan_hash: st
     auth.require_plan(session_plan_hash)
     auth.require_plan(ident)
     h = auth.require_harness(root)
-    if claimed(auth) != frozenset(study.claims):
-        raise AuthorizationError(f"the artifact claims {sorted(claimed(auth))}, not {study.key}'s {sorted(study.claims)}")
+    want = kind or study.kinds[0]
+    if claimed(auth) != study.claims_of(want):
+        raise AuthorizationError(f"the artifact claims {sorted(claimed(auth))}, not {study.key}'s "
+                                 f"{sorted(study.claims_of(want))} for a {want!r} session")
     sc = auth.stage_conditions or {}
     if sc.get("dry_run") != "false":
         raise AuthorizationError("a dry-run artifact funds nothing")
-    want = kind or study.kinds[0]
     if sc.get("kind") != want:
         raise AuthorizationError(f"the artifact funds a {sc.get('kind')!r} session, not {want!r}")
     return {"identity": ident, "harness": h["digest"], "kind": want, "authorization_id": auth.authorization_id}
@@ -147,13 +156,17 @@ def load_authorization(study: Study, path, *, allow_dry_run: bool = False, cls=S
     path = Path(path)
     if not path.is_file():
         raise AuthorizationError(f"no authorization at {path}: nothing was issued for this run")
-    #: the base loader's checks (its own sha256, the policy's claims), building an instance of `cls`
-    auth = SpendAuthorization.load.__func__(cls, path, policy=study.policy())
+    #: the kind it names picks the policy; the base loader's checks (its own sha256, no claim beyond that
+    #: policy) then run before anything else is read, building an instance of `cls`
+    kind = ((json.loads(path.read_text()).get("stage_conditions") or {}).get("kind"))
+    if kind not in study.kinds:
+        raise AuthorizationError(f"{path} names kind {kind!r}, not a kind of {study.key} ({list(study.kinds)})")
+    auth = SpendAuthorization.load.__func__(cls, path, policy=study.policy(kind))
     if auth.plan_id != study.plan_id:
         raise AuthorizationError(f"{path} is for {auth.plan_id}, not {study.plan_id}")
-    if claimed(auth) != frozenset(study.claims) or (auth.stage_conditions or {}).get("kind") not in study.kinds:
-        raise AuthorizationError(f"{path} is not an authorization of {study.key} ({sorted(study.claims)}, "
-                                 f"a kind of {list(study.kinds)})")
+    if claimed(auth) != study.claims_of(kind):
+        raise AuthorizationError(f"{path} is not an authorization of {study.key} (a {kind!r} artifact claims "
+                                 f"{sorted(study.claims_of(kind))}, this one {sorted(claimed(auth))})")
     if (auth.stage_conditions or {}).get("dry_run") == "true" and not allow_dry_run:
         raise AuthorizationError(f"{path} is a DRY-RUN artifact; it funds nothing and creates nothing")
     return auth
@@ -335,7 +348,7 @@ def issue(study: Study, run_id: str, *, expected_usd: float, hard_cap_usd: float
                           "envelope": json.dumps(env), "live_position": json.dumps(pos, default=str)},
         scope_note=note or g.get("scope", ""), authorized_session_commit=None,
         harness_source_digest=harness["digest"], harness_source_files=files,
-        per_launch_hard_usd=round(hard_cap_usd, 4), provenance_commit=git_head(root), action_policy=study.policy())
+        per_launch_hard_usd=round(hard_cap_usd, 4), provenance_commit=git_head(root), action_policy=study.policy(kind))
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(auth.as_dict(), indent=1) + "\n")
     load_authorization(study, path, allow_dry_run=dry_run).require_plan(ident)
@@ -665,7 +678,7 @@ def closeout(study: Study, launch: Launch, run_id: str, scr: Path, *, root: Path
                      "_basis": (f"GPU actual from runtime/session.json :: cost plus container disk at "
                                 f"${DISK_USD_PER_GB_MONTH}/GB-month over the elapsed minutes ({disk_gb:g} GB)")},
            "provider_confirms_gone": sess.get("provider_confirms_gone"), "provider_reconciliation_after": rec,
-           "kind": launch.kind, "scientific_use": study.formal, "authorizes": "nothing"}
+           "kind": launch.kind, "scientific_use": "formal" in study.claims_of(launch.kind), "authorizes": "nothing"}
     dest = root / study.run_dir(run_id) / "closeout/outcome.json"
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(out, indent=1, default=str) + "\n")

@@ -1,80 +1,210 @@
 {
- "schema": "aadistill.budget.phase_application/v1",
- "written_utc": "2026-10-28T20:40:00Z",
+ "schema": "aadistill.budget.phase_application/v2",
+ "written_utc": "2026-10-29T10:00:00Z",
  "status": "APPLICATION, NOT A GRANT. Nothing is authorized until the maintainer grants it; each paid session then gets its own one-use authorization inside the granted envelope",
- "decided_by": "maintainer brief 2026-10-29 'Research A First, Research B Teacher Selection Deferred' (section 3: a phase application covering Research A only, priced afresh from the provider, storage and prices)",
- "supersedes": "logs/budget/applications/research_ab_2026-10-28/application.json (the joint A+B application and its $903 cap): NOT APPROVED by the maintainer, kept as a historical record",
- "forecast": "logs/budget/applications/research_a_2026-10-29/forecast.json (scripts/stages/stage-2/teacher_modes/phase_forecast.py; every rate a measurement its record owns)",
+ "decided_by": "maintainer brief 2026-10-29 'Research A L40S-First Hardware and Budget Correction' (the L40S by default for every operation; an A100 only for an operation measured not to fit after memory management; one phase grant; storage and budget re-derived from the provider)",
+ "supersedes": "this file's version at commit 99655ad7 (the A100-default application: $161.97 phase hard cap, $888 project cap): NOT APPROVED by the maintainer on 2026-10-29 because its hardware choice broke the L40S-first rule; kept in git history",
+ "forecast": "logs/budget/applications/research_a_2026-10-29/forecast.json (scripts/stages/stage-2/teacher_modes/phase_forecast.py: every rate a measurement its record owns, or a declared assumption with its basis and a conservative value)",
  "project_position": {
-  "fetched_utc": "2026-10-28T20:27:43Z",
-  "provider_billed_usd": 721.4369,
-  "committed_usd": 725.4883,
+  "fetched_utc": "2026-10-29T09:24:42Z",
+  "provider_billed_usd": 721.4748,
+  "committed_usd": 725.4912,
   "cap_usd": 740.0,
-  "remaining_usd": 14.5117,
-  "balance_usd": 138.01,
+  "remaining_usd": 14.5088,
+  "balance_usd": 137.9711,
   "account_pods": 0,
   "account_volumes": [
    "am5m373kuq (30 GB, EUR-IS-2)"
   ],
+  "includes": "am5m373kuq's 30 GB through 2026-12-24 ($4.20 reserved in its storage record; $0.24 posted, $3.96 still to post)",
   "source": "shared.study_engineering.live_position (the provider read now, fail closed)"
  },
- "requested_project_cap_usd": 888.0,
- "_requested_cap": "committed $725.4883 + this phase's hard cap $161.97 = $887.46, rounded up; Research B's $43.30 is not requested",
- "phase_hard_cap_usd": 161.97,
- "expected_usd": 105.51,
+ "requested_project_cap_usd": 868.0,
+ "_requested_cap": "committed $725.4912 + this phase's hard cap $142.19 = $867.68, rounded up; Research B is not requested",
+ "phase_hard_cap_usd": 142.19,
+ "expected_usd": 84.73,
+ "conservative_usd": 127.11,
+ "_consistency": "expected <= conservative <= hard cap, and the project cap = committed + the hard cap: the same forecast file owns all three; nothing is converted from another card by the price ratio",
+ "card": "NVIDIA L40S 48 GB for every session and operation (d4_scale_design.json :: execution.hardware); no A100 is requested",
  "envelopes": [
   {
+   "id": "check",
+   "kind": "the L40S engineering check (phase.py --kind check; never formal; its artifact claims engineering_validation only)",
+   "hard_cap_usd": 4.56,
+   "expected_usd": 2.88,
+   "conservative_usd": 4.56,
+   "gpu": "1 x NVIDIA L40S on am5m373kuq (EUR-IS-2)",
+   "hours": {
+    "expected": 2.6,
+    "conservative": 4.1
+   },
+   "what": "on diagnostic inputs only (build_tasks.py diagnostic: 64 tasks disjoint from T0, the order, the pools, eval-set-1's held-out prompts and the calibration prompts; the Stage-0 d4 profiles; the A-E stand-in student): the teacher session's generation path in both modes, the evaluation engine at 40,960, the formal training step per mode (Top-200 + tail KD at the target positions, kd_scope assistant, document isolation, 8,192, micro-batch 1), D4 Top-1's fixed path on the hybrid at micro-batch 3 then, only on out-of-memory, 1. Records peak allocated and reserved memory, the free margin (>= 4 GiB wanted), seconds per step, tokens per second; reads no eval-set-1 item",
+   "then": "the dev box's l40s_check.py record writes logs/stages/stage-2/teacher_modes/assets/l40s_check.json, committed; the teacher session is re-priced from it, and its artifact binds it"
+  },
+  {
    "id": "teacher",
-   "kind": "teacher session (phase.py --kind teacher)",
-   "hard_cap_usd": 49.76,
-   "expected_usd": 33.17,
-   "conservative_usd": 44.94,
-   "gpu": "1 x A100 SXM 80GB on the phase volume",
-   "hours_expected": 18.32,
-   "what": "calibration (160 prompts x 2 modes) -> the common initialization (D4 Top-1's path on the hybrid) -> W00 (T0 + V) and E's waves in both modes until the pod's lower bound reaches 2,468 H-T-S sequences -> X in H-N -> the teacher's eval-set-1 in both modes at 40,960",
+   "kind": "the teacher session (phase.py --kind teacher; it may be split by --phases, each part resuming from the volume)",
+   "hard_cap_usd": 63.76,
+   "expected_usd": 39.04,
+   "conservative_usd": 63.76,
+   "gpu": "1 x NVIDIA L40S on am5m373kuq",
+   "hours": {
+    "expected": 35.15,
+    "conservative": 57.42
+   },
+   "hours_by_part_expected": {
+    "setup": 0.33,
+    "generation": 27.56,
+    "initialization": 1.3,
+    "teacher_evaluation": 5.71,
+    "closeout": 0.25
+   },
    "generated_tokens_m": {
     "expected": 53.05,
     "conservative": 64.91
-   }
+   },
+   "what": "calibration (160 prompts x 2 modes) -> the common initialization (D4 Top-1's path on the hybrid; micro-batch 1 only after an out-of-memory exit) -> W00 (T0 + V) and E's waves in both modes until the pod's lower bound reaches 2,468 H-T-S sequences -> X in H-N -> the teacher's eval-set-1 in both modes at 40,960",
+   "only_after": "the committed L40S check record (its artifact binds it by sha256)"
   },
   {
    "id": "recovery",
    "kind": "recovery session(s) (phase.py --kind recovery)",
-   "hard_cap_usd": 89.61,
-   "expected_usd": 59.74,
-   "conservative_usd": 73.23,
-   "gpu": "A100 SXM 80GB, 1 or 2 on one pod (an L40S pod only when the first unit's measured peak leaves 4 GB free)",
+   "hard_cap_usd": 58.97,
+   "expected_usd": 39.31,
+   "conservative_usd": 53.89,
+   "gpu": "NVIDIA L40S, 1 or 2 on one pod (one unit per GPU; the GPU-hours and the cost are the same, the wall-clock halves)",
+   "hours": {
+    "expected": 35.39,
+    "conservative": 48.53,
+    "wall_two_gpus_expected": 17.99
+   },
    "optimizer_steps_expected": {
     "H-T-S": 3913,
     "H-N-S": 1370,
     "H-N-C": 3913
    },
    "seconds_per_step": {
-    "expected": 5.19,
-    "conservative": 6.488
+    "expected": 5.66,
+    "conservative": 8.109
    },
    "what": "six units (H-T-S, H-N-S, H-N-C or the registered fallback H-T-C, two seeds), each trained, persisted and evaluated on all of eval-set-1 in its own mode",
-   "only_after": "the dev box's admission record and the committed initialization record (its artifact binds both by sha256)"
+   "only_after": "the dev box's admission record and the committed initialization record (its artifact binds both by sha256), and am5m373kuq expanded"
   },
   {
    "id": "storage",
-   "hard_cap_usd": 12.6,
-   "what": "one new 60 GB network volume in an A100 datacenter, 2 months at $0.07/GB-month; plus am5m373kuq (30 GB, EUR-IS-2, H1-PA's and the mixed study's checkpoints) keeps billing $2.10/month while it exists: two months"
+   "hard_cap_usd": 4.9,
+   "expected_usd": 3.5,
+   "what": "expanding am5m373kuq to 65 GB (+35 GB, two GPUs, conservative) for 2 months; expected +25 GB (one GPU), $3.5; the expansion happens before the recovery session, not now (the check and the teacher session fit the current 30 GB)"
   },
   {
    "id": "engineering_reserve",
    "hard_cap_usd": 10.0,
-   "what": "pre-science engineering subruns across the phase (P12.1), cumulative"
+   "what": "pre-science engineering subruns across the phase (P12.1), cumulative; no A100 in it"
   }
  ],
+ "memory": {
+  "card": "NVIDIA L40S: 44.39 GiB as PyTorch reports it (pilot_20261018_122808's error message); 4 GiB free wanted, so a peak RESERVED of at most about 40.4 GiB",
+  "formal_training_step": {
+   "status": "UNKNOWN: not measured on any card under the formal recipe",
+   "measured_neighbours": [
+    "E1's recipe on L40S (full-vocabulary KD at every position, cross-context, micro-batch 1, 8,192): 39.96 GiB peak allocated (h1pa.json :: hardware)",
+    "H1-PA PA2v, the same recipe on L40S: 38.98 GiB peak allocated (runs/h1pav_20261024_201011/closeout/pa2v_gate.json)",
+    "A-E on A100 (document isolation, full-vocabulary KD, the hybrid on the fly): 38.5 GiB peak allocated (runs/ae_20261028_093428/evidence/trainer_smoke.json); NOT the formal Top-200 + tail KD, so not registered as its measurement"
+   ],
+   "reserved": "none of the three logged its peak reserved memory: UNKNOWN",
+   "analytic": "the formal path differs from those three only where the vocabulary enters: every [8,192 x 151,936] tensor of the full-vocabulary path -- the student's and the teacher's logits (2.32 GiB each in bf16), CE's gathered rows widened to fp32 and the log-softmax it keeps (about 4.6 GiB each), KD's gathered student and teacher rows (2.32 GiB each) -- is replaced by 512-row blocks (0.29 GiB in fp32, a few at a time) at the target positions only; weights, AdamW state, the teacher and checkpointed activations are unchanged. So the formal peak is expected BELOW 38.5-40 GiB, by an amount the check measures; document isolation's masked attention ran inside A-E's 38.5 GiB",
+   "if_it_does_not_fit": "the recipe already runs micro-batch 1 with activation checkpointing; the Top-K blocks can be made smaller (kd_chunk, an execution knob); the allocator's expandable segments; never a shorter sequence, fewer documents or another batch size"
+  },
+  "teacher_generation_and_calibration": {
+   "status": "UNKNOWN on the L40S (the hybrid has run only on the A100)",
+   "analytic": "the runner sizes the engine to the 8,192 limit at gpu_memory_utilization 0.90: about 40 GiB, of which the 4B weights take 8.05 GB and the KV cache about 30 GiB (147,456 B per token: about 218,000 tokens, some 26 full-length sequences at once); past start-up the engine preempts rather than running out of memory. Throughput is the open quantity (ASSUMED 0.40 x the A100's, conservative 0.30)"
+  },
+  "teacher_evaluation_40960": {
+   "status": "UNKNOWN on the L40S",
+   "analytic": "the same engine at max_model_len 40,960: one full-length sequence needs 5.6 GiB of KV cache, so the pool holds about five at once and many more of the usual lengths; the engine refuses to start only if one does not fit, which it does. The context is never lowered (P18)"
+  },
+  "initialization": {
+   "status": "UNKNOWN for the hybrid; an out-of-memory error at micro-batch 3 is LIKELY on the evidence",
+   "measured_neighbour": "pilot_20261018_122808, the same DEPTH operator on 8k-token items at micro-batch 3 on an L40S: 'Tried to allocate 11.68 GiB ... total capacity of 44.39 GiB of which 10.58 GiB is free ... 25.38 GiB is allocated by PyTorch, and 7.92 GiB is reserved by PyTorch but unallocated'",
+   "analytic": "DEPTH widens the micro-batch's scored rows to fp32 for its log-sum-exp: on the Stage-0 d4 profiles' largest length-sorted batch that is 12.05-12.97 GiB at micro-batch 3 (21,295-22,910 rows), 8.2-8.6 at 2, 4.2-4.4 at 1 (build: packing.pack on the frozen items, $0); with the reduction's own temporary of the same size, micro-batch 3 needs roughly 49 GiB, micro-batch 1 roughly 34",
+   "memory_management": "declared before any run (d4_scale_design.json :: initialization.execution): the forward baseline's micro-batch 3, then -- on a CUDA out-of-memory exit only -- micro-batch 1, execution.py's one-item-per-forward reference path (the same operators, profiles, seed, geometry and estimand); a size that already ran out of memory is never repeated",
+   "a100": "only if micro-batch 1 also runs out of memory on the L40S, for the initialization alone (teacher_session --phases initialization), under a separate application with the check's evidence"
+  },
+  "student_evaluation": {
+   "status": "MEASURED on the L40S: H1-PA's and the mixed study's units evaluated all of eval-set-1 there (3,748-3,999 s each)"
+  },
+  "two_gpu_pod": "per-GPU memory is the one-GPU memory (one unit per GPU); L40S x 2 stock read Medium on 2026-10-29, EUR-IS-2 Low: unexercised"
+ },
+ "storage": {
+  "need_gb": {
+   "expected": {
+    "teacher_session": 4.6,
+    "recovery_1_gpu": 31.3,
+    "recovery_2_gpus": 40.7
+   },
+   "conservative": {
+    "teacher_session": 4.8,
+    "recovery_1_gpu": 31.6,
+    "recovery_2_gpus": 41.0
+   }
+  },
+  "held_gb": {
+   "generation": 1.34,
+   "initialization": 2.38,
+   "teacher_evaluation": 1.0,
+   "check_evidence": 0.1
+  },
+  "basis": "generation: the forecast's tokens x 12.99 B per generated token (H1's sealed shards) x 1.59 (directory over shards); every checkpoint 2.38 GB; a training's transient two save points (keep_last 1: the new one is written before the old one goes) 11.82 GB; evaluation evidence 2 x 0.25 GB per unit; the check's evidence 0.1 GB. Packs, the init path's working states and the teacher snapshot are on the 150 GB container disk",
+  "am5m373kuq": {
+   "size_gb": 30,
+   "used_gb": 14.71,
+   "free_gb": 15.29,
+   "holds": "H1-PA's four D4 checkpoints and the mixed study's two Mix-Augmented checkpoints (14.7 GB), kept for their reviews; nothing is deleted or moved",
+   "teacher_session_fits_now": true
+  },
+  "options": {
+   "expand_am5m373kuq": {
+    "one_gpu": {
+     "to_gb": 55,
+     "added_gb": 25,
+     "phase_usd": 3.5,
+     "monthly_usd_after": 3.85
+    },
+    "two_gpus": {
+     "to_gb": 65,
+     "added_gb": 35,
+     "phase_usd": 4.9,
+     "monthly_usd_after": 4.55
+    },
+    "for": "no migration, no new datacenter lock, the historical checkpoints stay in place, the L40S has run there (H1-PA, MC2); the cheaper of the two during the phase",
+    "against": "a volume only grows: the added GB bill as long as am5m373kuq exists, so Research A's retention and the historical reviews share one lifecycle"
+   },
+   "new_volume": {
+    "one_gpu": {
+     "size_gb": 35,
+     "phase_usd": 4.9,
+     "monthly_usd_after": 2.45
+    },
+    "two_gpus": {
+     "size_gb": 50,
+     "phase_usd": 7.0,
+     "monthly_usd_after": 3.5
+    },
+    "for": "released on its own when Research A's bytes are retired",
+    "against": "more expensive during the phase, and am5m373kuq keeps billing beside it; L40S datacenters with network volumes (EU-NL-1, EUR-IS-2, US-MO-1, US-TX-3) all read Low stock on 2026-10-29"
+   }
+  },
+  "recommended": "expand am5m373kuq in place, before the recovery session: to 55 GB for one GPU per pod, 65 GB for two (the hard cap books 65)",
+  "overlap_corrected": "the previous application booked am5m373kuq's existing 30 GB again ($4.20 for two months) although the committed position already holds that reservation to 2026-12-24: removed. Only the added GB are this phase's",
+  "after_2026_12_24": "if am5m373kuq is kept past its reservation, its base 30 GB is booked by its own storage record (a maintainer lifecycle decision), not by this phase"
+ },
  "hardware_range": {
   "cards": {
-   "NVIDIA A100-SXM4-80GB": "<= $1.89 per GPU-hour",
-   "NVIDIA L40S": "<= $1.19 per GPU-hour (recovery only)"
+   "NVIDIA L40S": "<= $1.19 per GPU-hour (live securePrice $1.09 on 2026-10-29)"
   },
   "gpus_per_pod": "<= 2 (one pod at a time)",
-  "topology": "one GPU per training unit; no DP, FSDP or TP (batch size 2 at micro-batch 1 is two forward/backward passes on one card; the 596M student and the 4B bf16 teacher fit one A100); units of different arms or seeds on separate GPUs of one pod change no unit's arithmetic",
-  "network_volume": "NEW, 60 GB, in an A100 datacenter (am5m373kuq's EUR-IS-2 stocks no A100 SXM): created once on this approval; peak need with two concurrent units ~43 GB"
+  "topology": "one GPU per training unit; no DP, FSDP or TP; units of different arms or seeds on separate GPUs of one pod change no unit's arithmetic",
+  "a100": "none requested. An A100 enters only for an operation the L40S check (or a formal session) MEASURED not to fit after memory management that changes no protocol, for that operation alone, under a separate application with the evidence"
  },
  "reusable_assets": [
   "T0 (1,761 frozen H1 tasks) and the frozen order (V 240, E 3,522, X 14,000; data/stages/stage-2/teacher_modes/tasks/order_v1.*)",
@@ -85,34 +215,45 @@
  ],
  "checkpoint_persistence": [
   "every sealed generation shard on the volume as written, pulled to the dev box on every poll; a later attempt never regenerates one",
-  "the common initialization persisted with its identity the moment it exists; never re-materialized",
+  "the common initialization persisted with its identity the moment it exists; never re-materialized; an out-of-memory attempt is recorded and never repeated",
   "save points (optimizer, step, RNG states, data position, bound data and initialization identities) on the volume; an interrupted unit resumes from the last one, on any resource",
   "each trained checkpoint persisted before evaluation; a scored unit is skipped; finished generations are rescored, never regenerated",
   "the packs rebuilt on the recovery pod from the volume's shards must hash to the admission record (nothing crosses the dev box's uplink)"
  ],
  "issuance": [
-  "maintainer: grant (phase.py grant --decision ... --granted-by maintainer) and the new project cap; create the 60 GB volume in an A100 datacenter",
-  "teacher session: phase.py issue --kind teacher -> commit and push -> bundle -> launch --kind teacher",
+  "maintainer: grant (phase.py grant --decision ... --granted-by maintainer) and the new project cap",
+  "check: phase.py issue --kind check -> commit and push -> bundle -> launch --kind check --network-volume-id am5m373kuq --data-center-ids EUR-IS-2 --volume-gb 30",
+  "dev box ($0): l40s_check.py record on the secured evidence; commit the record; re-price the teacher session from it",
+  "teacher session: phase.py issue --kind teacher -> launch --kind teacher (same volume)",
   "dev box ($0): admission.py on the secured shards; commit admission.json and the initialization record",
-  "recovery session(s): phase.py issue --kind recovery -> launch --kind recovery (more sessions if one does not finish: the units resume)",
+  "maintainer action before recovery: expand am5m373kuq (55 GB for one GPU, 65 GB for two); then recovery session(s): phase.py issue --kind recovery -> launch --kind recovery --volume-gb <the new size> (more sessions if one does not finish: the units resume)",
   "dev box ($0): analysis.py on the secured evidence; the result to the maintainer"
  ],
  "stop_conditions": [
   "the phase's cumulative hard cap or the project cap would be exceeded by the next session's bound",
-  "the account balance cannot fund the next session's hard cap (it is $138.01 now: the phase's $161.97 needs a top-up before its later sessions)",
+  "the account balance cannot fund the next session's hard cap",
+  "an operation does not fit the L40S after the declared memory management: reported with its evidence, and that operation waits for the maintainer's decision on another card -- nothing is shortened, dropped or lowered to fit",
   "a provider resource whose ownership or billing cannot be reconciled",
   "continuing would change the frozen design, preregistration, eval set, scorers, decoding or admission rules",
   "a formal unit's complete valid endpoint exists (never re-measured), or the whole result is complete",
   "E is exhausted before 2,468 sequences (the reached count is the scale, reported) or C falls to its registered fallback: both are registered outcomes, not stops"
  ],
+ "risks": [
+  "generation throughput on the L40S is the largest unknown: at the assumed 0.40 x the A100's the teacher session is about 35 h, at 0.30 about 57 h; on the L40S it is the one part that costs MORE than on the A100 (the A100 plan's expected $33.17), which this application accepts under the L40S-first rule",
+  "the initialization is likely to need its micro-batch 1 fallback (above); if micro-batch 1 also runs out of memory, the initialization alone waits for a decision",
+  "the formal training step's reserved peak is unmeasured until the check",
+  "L40S stock is Low in every datacenter with network volumes; a create waits at $0 rather than switching card",
+  "the balance ($137.97) covers the expected ($84.73) and the conservative ($127.11) phase but is $4.22 short of the hard cap: a top-up before recovery only if the reserve is drawn"
+ ],
  "not_requested": {
-  "research_b": "Research B's $43.30 (its engineering validation $3.00, PCA initialization $1.53, the matched D4-A control $17.38, the 1.123B recovery $21.39) and every B session: its teacher is pending this study's result and the maintainer's decision; B is re-priced then, for the chosen teacher's architecture, hardware and data",
-  "joint_cap": "the $903 joint cap"
+  "research_b": "Research B's sessions and budget: its teacher is pending this study's result and the maintainer's decision",
+  "a100": "no A100 session or hour",
+  "joint_cap": "the $903 joint cap and the $888 A100-default cap"
  },
  "decisions_requested": [
-  "approve this phase and the $888 project cap",
-  "create one new 60 GB network volume in an A100 SXM datacenter (or name the datacenter)",
-  "top up the provider balance before the recovery session (balance $138.01 < the phase's $161.97)"
+  "approve this L40S phase and the $868 project cap",
+  "the storage route: expand am5m373kuq in place before recovery (recommended; 55 GB for one GPU, 65 GB for two) or a new volume in an L40S datacenter",
+  "one or two L40S per recovery pod (the same cost; two halve the wall-clock and need the 65 GB size)"
  ],
  "authorizes": "nothing"
 }

@@ -1,0 +1,42 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.diagnostic_tasks/v1",
+ "name": "diagnostic_v1",
+ "created_utc": "2026-10-29T09:32:41Z",
+ "command": "python -m stages.teacher_modes.build_tasks diagnostic",
+ "use": "the L40S engineering check's inputs (configs/stages/stage-2/teacher_modes/l40s_check.json): their generations measure memory and throughput only. NEVER training, calibration or evaluation data; admission.py, build_tasks' order and the teacher session never read this file",
+ "n_tasks": 64,
+ "cells": {
+  "primary.abstract_analogical/s0_generators_v2_calsplit": 95,
+  "primary.compositional_generalization/s0_generators_v2_calsplit": 143,
+  "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 237,
+  "primary.interactive_adaptation/s0_generators_v2_calsplit": 100,
+  "primary.task_contained_deduction/s0_generators_v2_calsplit": 110,
+  "supporting.answerability/squad_v2_train_unanswerable": 281,
+  "supporting.math_new/math_train": 88
+ },
+ "by_cell": {
+  "primary.abstract_analogical/s0_generators_v2_calsplit": 6,
+  "primary.compositional_generalization/s0_generators_v2_calsplit": 9,
+  "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 14,
+  "primary.interactive_adaptation/s0_generators_v2_calsplit": 6,
+  "primary.task_contained_deduction/s0_generators_v2_calsplit": 7,
+  "supporting.answerability/squad_v2_train_unanswerable": 17,
+  "supporting.math_new/math_train": 5
+ },
+ "not_covered": "the external generators' cells (their construction needs an isolated export) and MBPP's (exhausted by the order): their share goes to their stratum's other cells, and the code stratum has none here",
+ "events": [],
+ "project_group_shortfalls": {},
+ "removed_before_isolation": 6,
+ "seed_rules": {
+  "project": "R5 lo + 900,000 + group index x 1,000 + i (the order's block is lo + 500,000 + group index x 10,000 + i)",
+  "datasets": "build_supporting_tasks._order (its SALT), past every pooled and ordered task"
+ },
+ "disjoint_from": "T0, order_v1 and every pool, by task id and content; eval-set-1's held-out prompts and the calibration prompts by prompt key (isolate)",
+ "isolation": {
+  "pass": true,
+  "violations": []
+ },
+ "sha256": "679d54d14a8c1e598d8305ce170c6da9f14f11f7e8a9b6dd71cd3f36d0a4798c",
+ "license": "project-generated tasks; MATH (MIT) and SQuAD v2 (CC-BY-SA-4.0) train splits only",
+ "authorizes": "nothing"
+}

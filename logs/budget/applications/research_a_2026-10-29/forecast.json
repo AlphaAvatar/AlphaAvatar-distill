@@ -1,14 +1,11 @@
 {
- "schema": "aadistill.budget.research_a_forecast/v1",
- "written_utc": "2026-10-29T00:00:00Z",
+ "schema": "aadistill.budget.research_a_forecast/v2",
+ "written_utc": "2026-10-29T10:00:00Z",
+ "card": "NVIDIA L40S (every kind; d4_scale_design.json :: execution.hardware)",
  "measured": {
-  "a100_usd_per_hour": {
-   "value": 1.79,
-   "source": "logs/stages/stage-2/teacher_modes/runs/ae_20261028_093428/runtime/session.json :: cost.price_per_hour (A-E, A100 SXM 80GB)"
-  },
   "l40s_usd_per_hour": {
    "value": 1.09,
-   "source": "logs/stages/stage-2/reasoning_data/runs/h1pa2_20261025_055042 (H1-PA, L40S)"
+   "source": "the provider's live securePrice for NVIDIA L40S (1 and 2 GPUs), read 2026-10-29T09:24Z; H1-PA's billed rate (runs/h1pa2_20261025_055042)"
   },
   "t0_generated_tokens_2507": {
    "value": 12920708,
@@ -16,7 +13,7 @@
   },
   "tokens_per_session_minute_a100": {
    "value": 80198,
-   "source": "the same :: measured.tokens_per_session_minute (H1's three generation sessions, A100)"
+   "source": "the same :: measured.tokens_per_session_minute (H1's three generation sessions, A100 SXM 80GB)"
   },
   "t0_ht_s_sequences_at_reference": {
    "value": 1235,
@@ -24,15 +21,27 @@
   },
   "isolated_seconds_per_step_a100": {
    "value": 5.19,
-   "source": "logs/stages/stage-2/teacher_modes/runs/ae_20261028_093428/evidence/trainer_smoke.json (document_isolated, on-the-fly teacher, A100)"
+   "source": "logs/stages/stage-2/teacher_modes/runs/ae_20261028_093428/evidence/trainer_smoke.json (document_isolated, full-vocabulary KD, the hybrid on the fly, A100)"
+  },
+  "e1_seconds_per_step_l40s": {
+   "value": 3.6314,
+   "source": "logs/stages/stage-2/teacher_modes/plans/cost_forecast.json :: measured.seconds_per_step (H1-PA's E1 recipe, cross-context, L40S)"
+  },
+  "e1_seconds_per_step_a100": {
+   "value": 3.33,
+   "source": "logs/stages/stage-2/reasoning_data/runs/h1p1g_20261023_191644/evidence/resume_B_X1.train_log.jsonl (the same E1 recipe, median after 3 steps, A100)"
   },
   "student_eval_seconds_l40s": {
    "value": 3917.1,
-   "source": "logs/stages/stage-2/reasoning_data/runs/h1pa2_20261025_055042/closeout/outcome.json :: D4-Augmented-s20260801 evaluate (all of eval-set-1, nucleus_v1)"
+   "source": "logs/stages/stage-2/reasoning_data/runs/h1pa2_20261025_055042/closeout/outcome.json :: D4-Augmented-s20260801 evaluate (all of eval-set-1, nucleus_v1, L40S)"
+  },
+  "teacher_over_student_eval_one_card": {
+   "value": 3.54,
+   "source": "logs/stages/stage-0/calibration_volume/runs/battery_20261018_092345/evidence: teacher_dev 3,390.7 s against e1_r2960k_sa_pca_dev 958.7 s on the same A100 (the fluid dev battery)"
   },
   "operator_seconds_d4_path_a100": {
    "value": 2446.4,
-   "source": "the dose_d4 search telemetry: D4 Top-1's ATTENTION 98.9 + DEPTH 2,258.9 + WIDTH 43.9 + FFN 44.7 s (A100)"
+   "source": "the dose_d4 search telemetry: D4 Top-1's ATTENTION 98.9 + DEPTH 2,258.9 + WIDTH 43.9 + FFN 44.7 s (A100, micro-batch 3)"
   },
   "save_point_bytes": {
    "value": 5908258491,
@@ -41,6 +50,52 @@
   "checkpoint_bytes": {
    "value": 2384234968,
    "source": "the same :: storage.bytes.model_safetensors"
+  },
+  "evaluation_bytes_per_copy_bound": {
+   "value": 250000000,
+   "source": "the same :: storage.bytes.evaluation_per_unit_bound (held twice: progress and the persisted set)"
+  },
+  "shard_bytes_per_generated_token": {
+   "value": 12.99,
+   "source": "artifacts/stages/stage-2/reasoning_data/generation (H1's sealed shards): 182,132,932 B for 14,026,035 generated tokens"
+  },
+  "generation_dir_over_shards": {
+   "value": 1.59,
+   "source": "artifacts/stages/stage-2/reasoning_data/generation/h1gen_20261022_190653: 233,202,261 B directory over 146,860,932 B of shards"
+  },
+  "am5m373kuq_used_bytes": {
+   "value": 14711955248,
+   "source": "logs/stages/stage-2/reasoning_data/storage/h1pa_volume_am5m373kuq.json :: contents_after_mc2 (9,943,482,064 B probed before MC2 + the two Mix-Augmented checkpoints)"
+  },
+  "am5m373kuq_size_gb": {
+   "value": 30,
+   "source": "the provider, read 2026-10-29T09:24Z (EUR-IS-2)"
+  },
+  "volume_usd_per_gb_month": {
+   "value": 0.07,
+   "source": "h1pa.json :: storage.rate_usd_per_gb_month"
+  }
+ },
+ "assumed": {
+  "l40s_generation_vs_a100": {
+   "expected": 0.4,
+   "conservative": 0.3,
+   "basis": "NOT MEASURED. Decoding long reasoning traces at high concurrency reads each sequence's KV cache every step, so it is memory-bandwidth bound: the L40S's 864 GB/s is 0.42 of the A100 SXM4's 2,039 GB/s, and at gpu_memory_utilization 0.90 the L40S holds about half the A100's KV cache (about 30 GiB after the 8 GB of weights, against about 63), which bounds concurrency; prefill is compute-bound, where the two cards are comparable. Replaced by the L40S check's measured tokens per second on the teacher session's own runner"
+  },
+  "l40s_step_vs_a100": {
+   "expected": 1.0905,
+   "conservative": 1.25,
+   "basis": "the one measured same-recipe pair (E1's recipe, cross-context): 3.6314 s on the L40S against 3.33 s on the A100; conservative 1.25 because document isolation runs a masked attention kernel the pair did not exercise. Replaced by the check's measured formal step"
+  },
+  "l40s_operators_vs_a100": {
+   "expected": 1.0905,
+   "conservative": 1.5,
+   "basis": "the same training-step ratio; no L40S timing of the D4 path on these items exists"
+  },
+  "micro_batch_1_vs_3": {
+   "expected": 1.3,
+   "conservative": 2.0,
+   "basis": "the initialization's out-of-memory fallback (d4_scale_design.json :: initialization.execution): three times the forwards of a third the rows each, on items that already fill the card"
   }
  },
  "design": {
@@ -53,7 +108,13 @@
   "seeds": 2,
   "epochs": 3,
   "batch": 2,
-  "x_tasks": 14000
+  "x_tasks": 14000,
+  "units": 6,
+  "check": {
+   "generation_tasks": 64,
+   "engine_tasks": 16,
+   "train_steps_per_mode": 20
+  }
  },
  "scenarios": {
   "expected": {
@@ -65,8 +126,22 @@
     "student_eval": 0.75,
     "teacher_eval_ht": 3.5,
     "teacher_eval_hn": 1.75,
-    "init_minutes": 60,
-    "hn_admitted": 0.75
+    "hn_admitted": 0.75,
+    "init_oom_attempt_h": 0.25
+   },
+   "check": {
+    "hours": {
+     "setup": 0.33,
+     "generation": 0.39,
+     "evaluation_engine": 0.1,
+     "train": 0.23,
+     "initialization": 1.3,
+     "closeout": 0.25
+    },
+    "hours_total": 2.6,
+    "gpu": "1 x NVIDIA L40S",
+    "generated_tokens_m": 0.62,
+    "usd": 2.88
    },
    "teacher_session": {
     "tokens_m": {
@@ -82,14 +157,14 @@
     "t0_ht_s_sequences": 1235,
     "hours": {
      "setup": 0.33,
-     "generation": 11.02,
-     "initialization": 1.0,
+     "generation": 27.56,
+     "initialization": 1.3,
      "teacher_evaluation": 5.71,
      "closeout": 0.25
     },
-    "hours_total": 18.32,
-    "gpu": "1 x A100 SXM 80GB",
-    "usd": 33.17
+    "hours_total": 35.15,
+    "gpu": "1 x NVIDIA L40S",
+    "usd": 39.04
    },
    "recovery": {
     "optimizer_steps": {
@@ -97,15 +172,15 @@
      "H-N-S": 1370,
      "H-N-C": 3913
     },
-    "seconds_per_step": 5.19,
+    "seconds_per_step": 5.66,
     "hours": {
-     "train": 27.52,
+     "train": 29.91,
      "evaluate": 4.9
     },
-    "hours_total": 32.99,
-    "gpu": "A100 SXM 80GB (1 or 2 on one pod)",
-    "usd": 59.74,
-    "volume_peak_gb_two_gpus": 42.9
+    "hours_total": 35.39,
+    "wall_hours_two_gpus": 17.99,
+    "gpu": "NVIDIA L40S, 1 or 2 on one pod (one unit per GPU; the GPU-hours, and so the cost, are the same)",
+    "usd": 39.31
    }
   },
   "conservative": {
@@ -117,8 +192,22 @@
     "student_eval": 1.0,
     "teacher_eval_ht": 5.0,
     "teacher_eval_hn": 3.5,
-    "init_minutes": 90,
-    "hn_admitted": 0.65
+    "hn_admitted": 0.65,
+    "init_oom_attempt_h": 0.5
+   },
+   "check": {
+    "hours": {
+     "setup": 0.33,
+     "generation": 0.54,
+     "evaluation_engine": 0.1,
+     "train": 0.26,
+     "initialization": 2.62,
+     "closeout": 0.25
+    },
+    "hours_total": 4.1,
+    "gpu": "1 x NVIDIA L40S",
+    "generated_tokens_m": 0.69,
+    "usd": 4.56
    },
    "teacher_session": {
     "tokens_m": {
@@ -134,14 +223,14 @@
     "t0_ht_s_sequences": 1116,
     "hours": {
      "setup": 0.33,
-     "generation": 13.49,
-     "initialization": 1.5,
+     "generation": 44.96,
+     "initialization": 2.62,
      "teacher_evaluation": 9.25,
      "closeout": 0.25
     },
-    "hours_total": 24.82,
-    "gpu": "1 x A100 SXM 80GB",
-    "usd": 44.94
+    "hours_total": 57.42,
+    "gpu": "1 x NVIDIA L40S",
+    "usd": 63.76
    },
    "recovery": {
     "optimizer_steps": {
@@ -149,29 +238,131 @@
      "H-N-S": 1185,
      "H-N-C": 3893
     },
-    "seconds_per_step": 6.488,
+    "seconds_per_step": 8.109,
     "hours": {
-     "train": 33.33,
+     "train": 41.42,
      "evaluate": 6.53
     },
-    "hours_total": 40.44,
-    "gpu": "A100 SXM 80GB (1 or 2 on one pod)",
-    "usd": 73.23,
-    "volume_peak_gb_two_gpus": 42.9
+    "hours_total": 48.53,
+    "wall_hours_two_gpus": 24.56,
+    "gpu": "NVIDIA L40S, 1 or 2 on one pod (one unit per GPU; the GPU-hours, and so the cost, are the same)",
+    "usd": 53.89
    }
   }
  },
- "hard_caps_usd": {
-  "teacher_session": 49.76,
-  "recovery": 89.61,
-  "storage": 8.4,
-  "engineering_reserve": 10.0,
-  "_storage": "one new 60 GB network volume in an A100 datacenter, 2 months at $0.07/GB-month",
-  "_reserve": "pre-science engineering subruns across the phase (P12.1), cumulative",
-  "phase_total": 161.97,
-  "storage_existing_volume": 4.2,
-  "_storage_existing_volume": "am5m373kuq (30 GB, EUR-IS-2, H1-PA's and the mixed study's checkpoints) keeps billing $2.10/month while it exists: two months"
+ "storage": {
+  "expected": {
+   "held_gb": {
+    "generation": 1.1,
+    "initialization": 2.38,
+    "teacher_evaluation": 1.0,
+    "check_evidence": 0.1
+   },
+   "peak_gb": {
+    "teacher_session": 4.6,
+    "recovery_1_gpu": 31.3,
+    "recovery_2_gpus": 40.7
+   },
+   "am5m373kuq": {
+    "size_gb": 30,
+    "used_gb": 14.71,
+    "free_gb": 15.29,
+    "teacher_session_fits_now": true
+   },
+   "options": {
+    "recovery_1_gpu": {
+     "expand_am5m373kuq": {
+      "to_gb": 55,
+      "added_gb": 25,
+      "phase_usd": 3.5,
+      "monthly_usd_after": 3.85
+     },
+     "new_volume": {
+      "size_gb": 35,
+      "phase_usd": 4.9,
+      "monthly_usd_after": 2.45
+     }
+    },
+    "recovery_2_gpus": {
+     "expand_am5m373kuq": {
+      "to_gb": 65,
+      "added_gb": 35,
+      "phase_usd": 4.9,
+      "monthly_usd_after": 4.55
+     },
+     "new_volume": {
+      "size_gb": 45,
+      "phase_usd": 6.3,
+      "monthly_usd_after": 3.15
+     }
+    }
+   },
+   "months": 2,
+   "margin": 1.1,
+   "_": "phase_usd is only what this phase adds: am5m373kuq's 30 GB through 2026-12-24 is already in the committed position (its storage record's $4.20 reservation, $3.96 of it not yet posted) and is not counted again. A volume only grows: an expansion's added GB bill as long as am5m373kuq exists; a new volume can be released on its own"
+  },
+  "conservative": {
+   "held_gb": {
+    "generation": 1.34,
+    "initialization": 2.38,
+    "teacher_evaluation": 1.0,
+    "check_evidence": 0.1
+   },
+   "peak_gb": {
+    "teacher_session": 4.8,
+    "recovery_1_gpu": 31.6,
+    "recovery_2_gpus": 41.0
+   },
+   "am5m373kuq": {
+    "size_gb": 30,
+    "used_gb": 14.71,
+    "free_gb": 15.29,
+    "teacher_session_fits_now": true
+   },
+   "options": {
+    "recovery_1_gpu": {
+     "expand_am5m373kuq": {
+      "to_gb": 55,
+      "added_gb": 25,
+      "phase_usd": 3.5,
+      "monthly_usd_after": 3.85
+     },
+     "new_volume": {
+      "size_gb": 35,
+      "phase_usd": 4.9,
+      "monthly_usd_after": 2.45
+     }
+    },
+    "recovery_2_gpus": {
+     "expand_am5m373kuq": {
+      "to_gb": 65,
+      "added_gb": 35,
+      "phase_usd": 4.9,
+      "monthly_usd_after": 4.55
+     },
+     "new_volume": {
+      "size_gb": 50,
+      "phase_usd": 7.0,
+      "monthly_usd_after": 3.5
+     }
+    }
+   },
+   "months": 2,
+   "margin": 1.1,
+   "_": "phase_usd is only what this phase adds: am5m373kuq's 30 GB through 2026-12-24 is already in the committed position (its storage record's $4.20 reservation, $3.96 of it not yet posted) and is not counted again. A volume only grows: an expansion's added GB bill as long as am5m373kuq exists; a new volume can be released on its own"
+  }
  },
- "expected_usd": 101.31,
+ "hard_caps_usd": {
+  "check": 4.56,
+  "teacher_session": 63.76,
+  "recovery": 58.97,
+  "storage": 4.9,
+  "engineering_reserve": 10.0,
+  "_storage": "expanding am5m373kuq to 65 GB (+35 GB, two GPUs, conservative) for 2 months; expected +25 GB (one GPU), $3.5",
+  "_reserve": "pre-science engineering subruns across the phase (P12.1), cumulative; no A100 in it",
+  "phase_total": 142.19
+ },
+ "expected_usd": 84.73,
+ "conservative_usd": 127.11,
  "authorizes": "nothing"
 }

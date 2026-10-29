@@ -14664,3 +14664,54 @@ on a paid pod.
   0.55-0.70); at 2 points the C mixture rule may fall to its registered fallback; the
   initialization and the generation drivers have run only on fakes and a tiny repository.
 - Revisit when the maintainer decides on the application.
+
+## 2026-10-29 (UTC) — Maintainer: Research A L40S-first; the A100-default application not approved; the L40S application
+
+- Context: the maintainer reviewed `99655ad7` (brief "Research A L40S-First Hardware and Budget
+  Correction", 2026-10-29). The science is accepted; the $161.97 application and the $888 cap are
+  **not approved** because they made the A100 the default, against the standing L40S-first rule.
+- Decision (maintainer): every Research A operation defaults to the L40S 48 GB (generation,
+  calibration, the D4 initialization, the teacher's evaluation at 40,960, every recovery unit,
+  every student evaluation). An A100 needs a MEASURED out-of-memory after memory management that
+  changes no protocol, and then covers that operation alone under its own application; "unmeasured",
+  "faster" or "already priced" are not reasons. One phase grant; storage re-compared (expanding
+  `am5m373kuq` against a new L40S-datacenter volume) at one and two GPUs; the double-booked storage
+  checked; nothing scientific changes; Research B stays pending.
+- Done at $0:
+  - Hardware: `phase.py` runs every kind on `NVIDIA L40S` (the proposal lists no other card);
+    `d4_scale_design.json :: execution.hardware/sessions` state the rule.
+  - A bounded L40S engineering check as the phase's third kind (`check`, its artifact claims
+    engineering_validation only: `Study.kind_claims` in `shared.study_engineering`):
+    `l40s_check.py` runs the formal code paths on DIAGNOSTIC inputs -- the teacher session's
+    generation runner on 64 tasks built for it (`build_tasks.py diagnostic`, disjoint from T0, the
+    order, the pools, eval-set-1's held-out prompts and the calibration prompts), the evaluation
+    engine at 40,960, the formal training step per mode (Top-200 + tail at the target positions,
+    kd_scope assistant, document isolation, 8,192, micro-batch 1), D4 Top-1's path on the hybrid
+    with the Stage-0 profiles -- recording peak allocated and reserved memory, the free margin
+    (4 GiB wanted), step time and throughput. The teacher kind's artifact binds its committed
+    record and is priced from it.
+  - Memory: the formal training step is UNKNOWN (E1 39.96 GiB and PA2v 38.98 GiB on the L40S and
+    A-E's 38.5 GiB on the A100 all ran full-vocabulary KD; the Top-K path removes every
+    [8,192 x 151,936] tensor, so it is expected lower). The initialization is likely to run out of
+    memory at micro-batch 3 (DEPTH widens 12.05-12.97 GiB of scored rows on the d4 items; the
+    same operator OOMed an L40S at 11.68 GiB, pilot_20261018_122808): the design now declares its
+    one fallback, micro-batch 1 (the reference path) after a CUDA out-of-memory exit, never repeated.
+  - Storage: `am5m373kuq`'s 30 GB to 2026-12-24 ($4.20) is already in the committed position; the
+    A100 application booked it again -- removed. The check and the teacher session fit its current
+    30 GB (15.3 GB free); recovery needs 55 GB (one GPU) or 65 GB (two): expanding in place costs
+    $3.50 / $4.90 for two months against $4.90 / $7.00 for a new volume, with no migration.
+- **Application (PENDING):** `logs/budget/applications/research_a_2026-10-29/application.json`:
+  phase hard cap **$142.19** (check $4.56, teacher session $63.76, recovery $58.97, storage
+  $4.90, engineering reserve $10.00), expected $84.73, conservative $127.11; project cap
+  requested **$868** (committed $725.4912 at 09:24Z). No A100. The balance ($137.97) covers the
+  conservative phase and is $4.22 short of its hard cap.
+- Dry runs ($0): check refused only on the project cap ($740 against the proposal's $868); teacher
+  refused for the missing check record; recovery for the missing admission and initialization
+  records (`dry_run_issue_2026-10-29.json`).
+- Alternatives considered: the A100 for the teacher session alone (faster and, at the assumed
+  L40S throughput, cheaper -- not a memory need, so not allowed); a new volume (dearer during the
+  phase; releasable on its own).
+- Risks: L40S generation throughput is assumed (0.40 x the A100's, conservative 0.30): the teacher
+  session is the one part dearer on the L40S than on the A100; the formal training step's reserved
+  peak and the initialization's micro-batch-1 fit are measured only by the check; L40S stock is Low.
+- Revisit when the maintainer decides on the application, and again after the check's record.

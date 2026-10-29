@@ -1295,7 +1295,7 @@ print(f'  {a.authorization_id}: {a.STUDY.key}, hard \${a.hard_cap_usd:.4f}, stud
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "stage2_teacher_modes_phase" ]; then
   # Research A's D4-scale PHASE (`stages.teacher_modes.phase`): its own TYPE, FORMAL, which says yes
-  # to exactly one of the phase's session kinds (PHASE_KIND: teacher | recovery) and never to a
+  # to exactly one of the phase's session kinds (PHASE_KIND: check | teacher | recovery) and never to a
   # dry-run artifact. The phase identity, the harness, the kind and the kind's bound records are
   # recomputed HERE from the pod's own files; each driver checks them again before it reads anything.
   cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \

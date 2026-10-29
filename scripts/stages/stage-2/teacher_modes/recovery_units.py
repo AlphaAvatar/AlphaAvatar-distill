@@ -66,6 +66,15 @@ def resolved_kd_support() -> dict:
     return selected(REPO).distribution_support.as_dict()
 
 
+def recipe_overrides(proto: dict) -> dict:
+    """The design's declared changes to every arm's E1 recipe (d4_scale_design.json :: recovery); the L40S
+    check trains the same ones."""
+    t = proto["teacher"]
+    return {"loss.kd_support": resolved_kd_support(), "loss.kd_scope": "assistant",
+            "batch.context_strategy": "document_isolated", "checkpoint.bind_identity": True,
+            "teacher": {"model_id": t["model"], "revision": t["revision"], "dtype": "bfloat16"}}
+
+
 def load_plan(*, admission: Path = ADMISSION, init_record: Path = INIT_RECORD, frozen: bool = False) -> dict:
     """`h1pa_driver`'s plan shape for this study, from its owners; ``frozen`` is set by the caller only
     after the phase authorization was checked (`phase.require_on_pod`)."""
@@ -96,15 +105,12 @@ def load_plan(*, admission: Path = ADMISSION, init_record: Path = INIT_RECORD, f
                      "schedule": {"packed_sequences": int(a["sequences"]), "optimizer_steps": sched["total_steps"],
                                   "warmup_steps": sched["warmup_steps"], "eval_every": sched["eval_every"],
                                   "save_every": sched["save_every"]}}
-    t = proto["teacher"]
     study = {"study_id": design["study_id"], "seeds": seed_lists[0], "arms": arms, "datasets": datasets,
              "derived_schedule_arms": sorted(arms), "frozen": bool(frozen),
              "storage": {"training_peak_extra_bytes": h1pa["storage"]["training_peak_extra_bytes"]},
              "evaluation": {"trained_context": 8192, "action_protocol": proto["execution"]["action_protocol"],
                             "decoding": prereg["evaluation"]["decoding"]["path"]}}
-    overrides = {"loss.kd_support": resolved_kd_support(), "loss.kd_scope": "assistant",
-                 "batch.context_strategy": "document_isolated", "checkpoint.bind_identity": True,
-                 "teacher": {"model_id": t["model"], "revision": t["revision"], "dtype": "bfloat16"}}
+    overrides = recipe_overrides(proto)
     arm_over = {arm: {"val_blocks": int(adm["arms"][arm]["pack"]["n_val_blocks"]),
                       "intervals.eval_blocks": int(adm["arms"][arm]["pack"]["n_val_blocks"])} for arm in arms}
     units = [{"unit": f"{arm}-s{seed}", "arm": arm, "seed": int(seed), "execution": "train"}

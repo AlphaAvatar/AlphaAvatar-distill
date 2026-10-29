@@ -8,6 +8,8 @@
     #        --whitelist <scratch>/whitelist_n<N>.json --n <N> --seed-base 2026102900 --out <export.jsonl>
     # 3. the order, its isolation report and its manifest (refuses unless every rule passes)
     PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.build_tasks build --exports <export.jsonl> ...
+    # the L40S check's DIAGNOSTIC tasks (never training, calibration or evaluation data)
+    PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.build_tasks diagnostic
 
 THE CELLS are T0's (stratum, source) pairs, P1's cells, and each cell's share is
 its share of T0's 1,761 tasks (d4_scale_design.json :: tasks). A cell's supply,
@@ -41,6 +43,16 @@ ARC-grid rule flag are removed first and counted), shares no content key with T0
 sets or a fluid evaluation item, and no prompt key with the calibration
 profiles' prompts. Nothing is chosen by looking at a teacher
 generation: none exists.
+
+DIAGNOSTIC TASKS (``diagnostic``) are the L40S engineering check's inputs:
+``DIAG_TASKS`` tasks in T0's proportions over the cells whose source can
+construct new instances without an external export -- the project generators,
+on their own seed block (``lo + DIAG_BLOCK + group index x 1,000 + i``, beyond
+every seed the order used), and MATH and SQuAD v2 continued past every pooled
+and ordered task -- through the same isolation (R0-R9, the held-out prompts,
+the calibration prompts) and disjoint from T0, the order and the pools by task
+id and content. Their generations measure memory and throughput only and are
+never training, calibration or evaluation data.
 """
 from __future__ import annotations
 
@@ -82,6 +94,10 @@ SEED_BASE, SUPPLEMENT_SEED_BASE = 2026102900, 2026102901
 PROJECT_BLOCK = 500_000
 #: new instances requested beyond a cell's need: drops (duplicates, size caps, isolation) are refilled from it
 MARGIN = 1.3
+#: the L40S check's diagnostic tasks: their own name, count and project seed block (beyond the order's
+#: lo + 500,000 + 30 groups x 10,000)
+DIAG_NAME, DIAG_TASKS, DIAG_BLOCK, DIAG_SPAN = "diagnostic_v1", 64, 900_000, 1_000
+DIAG_SCHEMA = "aadistill.stage2.teacher_modes.diagnostic_tasks/v1"
 PROJECT, EXTERNAL = "s0_generators_v2_calsplit", ("reasoning_gym", "reasoning_core", "prontoqa", "mathematics_dataset")
 DATASETS = {"math_train": BS.math_candidates, "mbpp_train": BS.mbpp_candidates,
             "squad_v2_train_unanswerable": BS.squad_candidates}
@@ -181,19 +197,21 @@ def whitelists(t0: list[dict], need: dict) -> dict[int, list[dict]]:
 
 # ---- new instances, each from its own source's construction ------------------------------------------
 
-def project_extension(t0: list[dict], need: dict, taken: set[str]) -> tuple[list[dict], dict]:
+def project_extension(t0: list[dict], need: dict, taken: set[str], *, block: int = PROJECT_BLOCK,
+                      span: int = 10_000) -> tuple[list[dict], dict]:
     """New project-generator instances, per T0 group (generator x difficulty), on the fresh seed block.
 
-    Group j of the sorted project groups draws seeds ``lo + PROJECT_BLOCK + j x 10,000 + i``. A group
-    whose small instance space yields no further distinct instance inside its block stops there (the
-    round-robin's other groups of the cell continue); the shortfall is returned and recorded."""
+    Group j of the sorted project groups draws seeds ``lo + block + j x span + i`` (the order's:
+    ``lo + PROJECT_BLOCK + j x 10,000 + i``). A group whose small instance space yields no further distinct
+    instance inside its block stops there (the round-robin's other groups of the cell continue); the
+    shortfall is returned and recorded."""
     from stages.calibration_volume.tasks import registry as R
     from stages.calibration_volume.tasks.common import Unsatisfiable, build_instance
     lo, hi = next(r for r in IC.rules()["rules"] if r["id"] == "R5_shared_generator_exposure")["training_seed_range"]
     gens = {g.generator_id: g for g in R.GENERATORS_V2}
     cells = [(c, row) for c, row in sorted(need.items()) if c[1] == PROJECT and row["new_needed"]]
     all_groups = sorted({g for c, _ in cells for g in groups_of(t0, c)})
-    if lo + PROJECT_BLOCK + len(all_groups) * 10_000 > hi:
+    if lo + block + len(all_groups) * span > hi:
         raise SystemExit("the project groups do not fit the fresh block inside R5's training range")
     out, seen, short = [], set(taken), {}
     for c, row in cells:
@@ -205,10 +223,10 @@ def project_extension(t0: list[dict], need: dict, taken: set[str]) -> tuple[list
             fams = [f for f in R.family_split(gen)["calibration"] if f"{gid}/{f}" not in BT.MECHANISM_EXCLUDED]
             j = all_groups.index(g)
             made = 0
-            for i in range(10_000):
+            for i in range(span):
                 if made >= per:
                     break
-                seed = lo + PROJECT_BLOCK + j * 10_000 + i
+                seed = lo + block + j * span + i
                 try:
                     t = build_instance(gen, gen.family(fams[i % len(fams)]), difficulty, seed)
                 except (Unsatisfiable, IndexError, ValueError):
@@ -306,20 +324,7 @@ def build(exports: list[Path]) -> dict:
     ext = ET.build(exports) if exports else {"tasks": [], "drops": {}}
     ext_tasks = [t for t in ext["tasks"] if t["task_id"] not in by and t["content_sha256"] not in taken]
     new += ext_tasks
-    # isolation: R1/R2-flagged and calibration-key items out first, then every rule must pass
-    cal_keys = calibration_keys()
-    from shared import eval_sets as ES
-    first = IC.check_pool(new)
-    flagged = set(first["results"]["R2_near_duplicate"]["flagged_ids"])
-    held = {ES.prompt_key(ES.prompt_text(r)) for rows in ES.component_items(roles=ES.HELD_OUT_ROLES).values()
-            for r in rows if ES.prompt_text(r).strip()}
-    flagged |= {t["unit_id"] for t in new if ES.prompt_key(ES.prompt_text(t)) in held}
-    flagged |= {t["unit_id"] for t in new if ES.prompt_key(ES.prompt_text(t)) in cal_keys}
-    #: R7's content rule per item (the report lists only the first 50): an instance carrying ARC-AGI-1 grids
-    flagged |= {t["unit_id"] for t in new
-                if IC.arc_matches([ES.prompt_text(t), str(t.get("gold") or t.get("answer") or "")])["refuse"]}
-    new = [t for t in new if t["unit_id"] not in flagged]
-    report = IC.check_pool(new, refuse=True)
+    new, flagged, report, first = isolate(new)
     sp = spec()
     for t in new:
         supply.setdefault(cell_of(t, sp), [])
@@ -332,6 +337,90 @@ def build(exports: list[Path]) -> dict:
             "project_group_shortfalls": project_short,
             "removed": sorted(flagged), "external_drops": ext["drops"], "new": len(new),
             "first_pass_violations": first["violations"]}
+
+
+def isolate(new: list[dict]) -> tuple[list[dict], set, dict, dict]:
+    """R1/R2-flagged, held-out-prompt, calibration-key and ARC-grid items out first, then every rule must pass."""
+    cal_keys = calibration_keys()
+    from shared import eval_sets as ES
+    first = IC.check_pool(new)
+    flagged = set(first["results"]["R2_near_duplicate"]["flagged_ids"])
+    held = {ES.prompt_key(ES.prompt_text(r)) for rows in ES.component_items(roles=ES.HELD_OUT_ROLES).values()
+            for r in rows if ES.prompt_text(r).strip()}
+    flagged |= {t["unit_id"] for t in new if ES.prompt_key(ES.prompt_text(t)) in held}
+    flagged |= {t["unit_id"] for t in new if ES.prompt_key(ES.prompt_text(t)) in cal_keys}
+    #: R7's content rule per item (the report lists only the first 50): an instance carrying ARC-AGI-1 grids
+    flagged |= {t["unit_id"] for t in new
+                if IC.arc_matches([ES.prompt_text(t), str(t.get("gold") or t.get("answer") or "")])["refuse"]}
+    new = [t for t in new if t["unit_id"] not in flagged]
+    return new, flagged, IC.check_pool(new, refuse=True), first
+
+
+def diagnostic(n: int = DIAG_TASKS) -> dict:
+    """The L40S check's tasks (module docstring): T0's proportions over the self-constructing cells."""
+    by = pools()
+    t0c, t0 = t0_cells(by)
+    order = list(A.jsonl(OUT_DIR / f"{NAME}.jsonl"))
+    known = {**by, **{t["task_id"]: t for t in order}}
+    cells = Counter({c: k for c, k in t0c.items() if c[1] == PROJECT or c[1] in ("math_train",
+                                                                                   "squad_v2_train_unanswerable")})
+    total = sum(cells.values())
+    need = {c: {"new_needed": math.ceil(k / total * n)} for c, k in sorted(cells.items())}
+    taken = BT.taken_instances() | {t["content_sha256"] for t in known.values()}
+    new, short = project_extension(t0, need, taken, block=DIAG_BLOCK, span=DIAG_SPAN)
+    taken |= {t["content_sha256"] for t in new}
+    new += dataset_extension(need, known, taken)
+    new, flagged, report, _ = isolate(new)
+    sp = spec()
+    fresh: dict[tuple, list[dict]] = defaultdict(list)
+    for t in new:
+        fresh[cell_of(t, sp)].append(t)
+    queues = {c: GP.round_robin(fresh.get(c, []), len(fresh.get(c, []))) for c in cells}
+    rows, events = interleave(cells, queues, n)
+    clash = [t["task_id"] for t in rows if t["task_id"] in known or t["content_sha256"] in
+             {k["content_sha256"] for k in known.values()}]
+    if clash or len(rows) != n:
+        raise SystemExit(f"diagnostic tasks: {len(rows)} of {n}, {len(clash)} shared with T0, the order or the pools")
+    return {"rows": rows, "events": events, "cells": cells, "isolation": report, "removed": sorted(flagged),
+            "project_group_shortfalls": short}
+
+
+def write_diagnostic(got: dict) -> dict:
+    out = OUT_DIR / f"{DIAG_NAME}.jsonl"
+    if out.exists():
+        raise SystemExit(f"{out.relative_to(REPO)} exists: diagnostic tasks are never rebuilt -- bump DIAG_NAME")
+    rows = []
+    for i, t in enumerate(got["rows"]):
+        c = t.pop("_cell")
+        t.pop("_pool", None)
+        rows.append({**t, "stratum": c[0], "position": i, "slice": "diagnostic"})
+    out.write_text("".join(json.dumps(r, sort_keys=True, ensure_ascii=False) + "\n" for r in rows))
+    manifest = {
+        "schema": DIAG_SCHEMA, "name": DIAG_NAME,
+        "created_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "command": "python -m stages.teacher_modes.build_tasks diagnostic",
+        "use": ("the L40S engineering check's inputs (configs/stages/stage-2/teacher_modes/l40s_check.json): their "
+                "generations measure memory and throughput only. NEVER training, calibration or evaluation data; "
+                "admission.py, build_tasks' order and the teacher session never read this file"),
+        "n_tasks": len(rows), "cells": {f"{c[0]}/{c[1]}": k for c, k in sorted(got["cells"].items())},
+        "by_cell": dict(sorted(Counter(f"{r['stratum']}/{r['source']}" for r in rows).items())),
+        "not_covered": ("the external generators' cells (their construction needs an isolated export) and MBPP's "
+                        "(exhausted by the order): their share goes to their stratum's other cells, and the code "
+                        "stratum has none here"),
+        "events": got["events"], "project_group_shortfalls": got["project_group_shortfalls"],
+        "removed_before_isolation": len(got["removed"]),
+        "seed_rules": {"project": f"R5 lo + {DIAG_BLOCK:,} + group index x {DIAG_SPAN:,} + i (the order's block is "
+                                  f"lo + {PROJECT_BLOCK:,} + group index x 10,000 + i)",
+                       "datasets": "build_supporting_tasks._order (its SALT), past every pooled and ordered task"},
+        "disjoint_from": "T0, order_v1 and every pool, by task id and content; eval-set-1's held-out prompts and the "
+                         "calibration prompts by prompt key (isolate)",
+        "isolation": {"pass": got["isolation"].get("pass"), "violations": got["isolation"].get("violations")},
+        "sha256": A.sha256_file(out),
+        "license": "project-generated tasks; MATH (MIT) and SQuAD v2 (CC-BY-SA-4.0) train splits only",
+        "authorizes": "nothing",
+    }
+    (OUT_DIR / f"{DIAG_NAME}.manifest.json").write_text(json.dumps(manifest, indent=1, default=str) + "\n")
+    return manifest
 
 
 def slice_of(i: int) -> tuple[str, int | None]:
@@ -413,7 +502,12 @@ def main(argv=None) -> int:
     p.add_argument("--out-dir", required=True)
     b = sub.add_parser("build")
     b.add_argument("--exports", nargs="*", default=[])
+    sub.add_parser("diagnostic")
     a = ap.parse_args(argv)
+    if a.cmd == "diagnostic":
+        m = write_diagnostic(diagnostic())
+        print(json.dumps({k: m[k] for k in ("n_tasks", "by_cell", "sha256")}, indent=1))
+        return 0
     if a.cmd == "plan":
         by = pools()
         t0c, t0 = t0_cells(by)

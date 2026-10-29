@@ -1,30 +1,46 @@
 #!/usr/bin/env python3
-"""Research A's D4-scale phase: one grant, two session kinds, every session issued and launched here ($0 until granted).
+"""Research A's D4-scale phase: one grant, three session kinds, every session issued and launched here ($0 until granted).
 
     # the maintainer's grant from the phase proposal (only on the maintainer's explicit approval)
     PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/phase.py grant \\
         --decision "<the maintainer's words>" --granted-by maintainer
-    # a one-use authorization for one session (--dry-run reads the proposal and writes outside the run dir)
-    PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/phase.py issue --kind teacher \\
+    # a one-use authorization for one session, --kind check | teacher | recovery (--dry-run reads the
+    # proposal and writes outside the run dir)
+    PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/phase.py issue --kind check \\
         --run-id <run> --expected-usd <x> --hard-cap-usd <cap> [--dry-run --out <scratch>/auth.json]
     # the session (every $0 gate for real first; --dry-run --authorization <scratch>/auth.json stops before a create)
-    PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/phase.py launch --kind teacher \\
+    PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/phase.py launch --kind check \\
         --run-id <run> --scr <scratch> --session-commit <sha> --bundle <name> --max-price <live pod price> \\
         --network-volume-id <id> --volume-mount-path /runpod-volume --data-center-ids <its datacenter> --volume-gb <size>
 
-`shared.study_engineering` with this phase's instance, a FORMAL study: its
-artifacts claim formal, teacher generation, training and evaluation, each
+`shared.study_engineering` with this phase's instance, a FORMAL study: the
+teacher and recovery artifacts claim formal, teacher generation, training and
+evaluation, the check's engineering validation only (``kind_claims``); each
 names one session kind, and setup's ``stage2_teacher_modes_phase`` branch and
 each driver re-check identity, harness and kind on the pod (`require_on_pod`).
 
-* ``teacher`` (A100 80GB): `teacher_session.py` -- the calibration
+HARDWARE (d4_scale_design.json :: execution.hardware): every kind runs on the
+NVIDIA L40S (``GPU``), the only card the proposal lists. An A100 is never a
+default: only an operation measured not to fit an L40S after memory management
+that changes no protocol is evidence for one, for that operation alone, under a
+separate funding application.
+
+* ``check`` (one L40S, first): `l40s_check.py` -- the phase's formal paths
+  on diagnostic inputs (generation, the evaluation engine at 40,960, the formal
+  training step, D4 Top-1's path on the hybrid), measured on the card. Its
+  evidence directory is the shared relay's, so it is secured, re-hashed and its
+  verdict re-derived like a validation's; the dev box's `l40s_check.py record`
+  writes ``CHECK_RECORD``, committed.
+* ``teacher`` (one L40S): `teacher_session.py` -- the calibration
   trajectories, the common initialization, T0/V and E's waves in both modes,
   X in H-N, the teacher's own evaluation in both modes. Sealed shards and
   finished evidence are pulled on every poll; everything is on the volume.
-* ``recovery`` (A100 80GB or L40S, one or more GPUs on ONE pod):
-  `recovery_units.py` -- the six units. Its artifact also binds the committed
-  admission and initialization records by sha256 (``conditions``), which
-  exist only after the teacher session and the dev box's admission.
+  Its artifact binds the committed check record by sha256: it is priced from
+  that measurement, and refuses to be issued before it exists.
+* ``recovery`` (one or two L40S on ONE pod): `recovery_units.py` -- the six
+  units. Its artifact also binds the committed admission and initialization
+  records by sha256 (``conditions``), which exist only after the teacher
+  session and the dev box's admission.
 
 Between them, at $0 on the dev box: `admission.py` on the secured shards
 (the exact stopping rule, X, every pack's sha256), committed with the
@@ -52,7 +68,11 @@ H1PA = "configs/stages/stage-2/reasoning_data/h1pa.json"
 ORDER = "data/stages/stage-2/teacher_modes/tasks/order_v1.jsonl"
 ADMISSION = "logs/stages/stage-2/teacher_modes/data/admission.json"
 INIT_RECORD = "logs/stages/stage-2/teacher_modes/assets/common_initialization.json"
-TEACHER_GPU = "NVIDIA A100-SXM4-80GB"
+CHECK_CONFIG = "configs/stages/stage-2/teacher_modes/l40s_check.json"
+CHECK_RECORD = "logs/stages/stage-2/teacher_modes/assets/l40s_check.json"
+DIAGNOSTIC = "data/stages/stage-2/teacher_modes/tasks/diagnostic_v1.jsonl"
+#: the phase's card, every kind (d4_scale_design.json :: execution.hardware)
+GPU = "NVIDIA L40S"
 SESSION_KIND = "stage2_teacher_modes_phase"
 DURABLE = "teacher_modes"
 
@@ -75,9 +95,11 @@ STUDY = SE.Study(
                     "data/stages/stage-2/teacher_modes/tasks/order_v1.manifest.json",
                     "logs/stages/stage-2/teacher_modes/plans/calibration_inputs/calibration_input_g0.jsonl",
                     "configs/shared/evaluation/decoding/nucleus_v1.json", "configs/shared/baselines/selection.json",
+                    CHECK_CONFIG, DIAGNOSTIC, "configs/stages/stage-0/calibration_volume/profiles_formal.json",
                     H1PA, *_e1_configs(), *_t0_lists()),
     scripts=tuple(f"scripts/stages/stage-2/teacher_modes/{n}.py" for n in
-                  ("phase", "teacher_session", "initialization", "hybrid_calibration", "admission", "recovery_units", "mode_statistics", "analysis")) + (
+                  ("phase", "teacher_session", "initialization", "hybrid_calibration", "admission", "recovery_units",
+                   "mode_statistics", "analysis", "l40s_check")) + (
         "scripts/shared/study_engineering.py", "scripts/shared/project_position.py", "scripts/shared/eval_sets.py",
         "scripts/shared/forward_baseline.py", "scripts/shared/pod/teacher_cache.py",
         "scripts/shared/evaluation/eval_set_scoring.py", "scripts/shared/evaluation/uncapped_eval.py",
@@ -101,7 +123,8 @@ STUDY = SE.Study(
         "scripts/shared/pod/autoinit_preflight_setup.sh", "scripts/shared/pod/collect_artifacts.py"),
     wire_schema="aadistill.stage2.teacher_modes.phase_authorization/v1",
     claims=frozenset({"formal", "teacher_generation", "training", "evaluation"}),
-    kinds=("teacher", "recovery"))
+    kinds=("check", "teacher", "recovery"),
+    kind_claims=(("check", frozenset({"engineering_validation"})),))
 
 
 class PhaseAuthorization(SE.EngineeringAuthorization):
@@ -115,8 +138,15 @@ def _sha(rel: str, root: Path = REPO_ROOT) -> str | None:
 
 
 def kind_conditions(kind: str, root: Path = REPO_ROOT) -> dict:
-    """What a kind's artifact binds beyond the phase identity: recovery reads the committed admission and
-    initialization records, and refuses to be issued before both exist."""
+    """What a kind's artifact binds beyond the phase identity: the teacher session the committed L40S check
+    record it is priced from; recovery the committed admission and initialization records. Each refuses to be
+    issued before its records exist."""
+    if kind == "teacher":
+        got = {"l40s_check_record_sha256": _sha(CHECK_RECORD, root)}
+        if got["l40s_check_record_sha256"] is None:
+            raise SE.AuthorizationError(f"a teacher session is priced from {CHECK_RECORD}, which does not exist yet: "
+                                        "the L40S check (kind check) and its dev-box record come first")
+        return got
     if kind != "recovery":
         return {}
     got = {"admission_sha256": _sha(ADMISSION, root), "initialization_record_sha256": _sha(INIT_RECORD, root)}
@@ -179,7 +209,8 @@ def _tar(ctx, src: str, name: str, excludes: tuple[str, ...] = ()) -> tuple[bool
 
 def secure(kind: str):
     """on_poll: every sealed shard by its marker (teacher), every finished unit's evidence and the
-    small records (both kinds), into ``<scr>/store``. Idempotent; never raises."""
+    small records (both kinds), into ``<scr>/store``. Idempotent; never raises. (The check is secured
+    by the shared evidence relay: its report and evidence directory.)"""
     def on_poll(ctx) -> None:
         try:
             if ctx.target is None:
@@ -291,6 +322,27 @@ def teacher_command(ctx, plan) -> str:
             f"--authorization {auth} --durable-root {durable(a)} --status {status}{phases}" + _tail(status))
 
 
+def check_evidence_dir(run_id: str) -> str:
+    """The check's evidence directory: the shared relay's (`SE.evidence_dir`), so the shared securing and
+    closeout verify it and re-derive its verdict."""
+    return f"{SE.POD_REPO}/artifacts/audit/{SESSION_KIND}/{run_id}"
+
+
+def check_verdict(evidence: Path) -> dict:
+    from stages.teacher_modes import l40s_check as LC
+    return LC.verdict(Path(evidence), LC.load_config())
+
+
+def check_command(ctx, plan) -> str:
+    a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
+    from stages.teacher_modes import ae_launch as AE
+    auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
+    out = check_evidence_dir(a.run_id)
+    return (f"mkdir -p {out} && {_py()} scripts/stages/stage-2/teacher_modes/l40s_check.py run "
+            f"--authorization {auth} --out {out} --work /workspace/a_check --status {status} "
+            f"--student {SE.POD_REPO}/{AE.STAND_IN}" + _tail(status))
+
+
 def recovery_command(ctx, plan) -> str:
     a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
     from stages.reasoning_data import h1pa_launch as HPL
@@ -308,14 +360,26 @@ def launch_spec(kind: str, minutes: float = 0.0) -> SE.Launch:
     t = json.loads((REPO_ROOT / PROTOCOL).read_text())["teacher"]
     battery = LocalAsset(repo_path="artifacts/stages/stage-3/eval/battery_v2", dest_name="battery_v2",
                          install_to="artifacts/stages/stage-3/eval")
+    stage0_items = LocalAsset(repo_path="artifacts/stages/stage-0/calibration_volume/profiles_formal_v1",
+                              dest_name="profiles_formal_v1", install_to="artifacts/stages/stage-0/calibration_volume")
     common = dict(session_kind=SESSION_KIND, authorization=PhaseAuthorization, teacher_model=t["model"],
-                  teacher_revision=t["revision"], kind=kind, local_assets=(battery,), disk_gb=150,
+                  teacher_revision=t["revision"], kind=kind,
+                  local_assets=(stage0_items,) if kind == "check" else (battery,), disk_gb=150,
                   contingency_fraction=0.25, setup_env={"PHASE_KIND": kind},
                   extra_prechecks=(the_volume_is_the_planned_one, the_kind_records_are_the_bound_ones),
                   on_poll=secure(kind), products_secured=secured(kind),
                   artifact_spec="configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
                   teardown_note=("delete the pod, verify from the provider that it is gone, STOP; the network volume "
                                  "is KEPT: it holds every shard, the initialization, save points and checkpoints"))
+    if kind == "check":
+        from stages.teacher_modes import ae_launch as AE
+        common.update(on_poll=None, products_secured=None, verdict=check_verdict,
+                      teardown_note=("delete the pod, verify from the provider that it is gone, STOP; the check keeps "
+                                     "nothing: its evidence is relayed, its diagnostic weights are scratch"))
+        return SE.Launch(**common, driver="scripts/stages/stage-2/teacher_modes/l40s_check.py",
+                         validation_minutes=minutes, setup_minutes=20.0, command=check_command,
+                         relay_inputs=AE.relay_inputs(),
+                         description="Research A: the L40S engineering check (diagnostic inputs, never formal)")
     if kind == "teacher":
         return SE.Launch(**common, driver="scripts/stages/stage-2/teacher_modes/teacher_session.py",
                          validation_minutes=minutes, setup_minutes=20.0, command=teacher_command,
@@ -360,15 +424,15 @@ def main(argv=None) -> int:
             return 0
         if argv[0] == "launch":
             return SE.launch_main(STUDY, launch_spec(kind, minutes), rest[1:], description=__doc__.split("\n")[0],
-                                  gpu=TEACHER_GPU)
-        return SE.cli(STUDY, lambda: launch_spec(kind, minutes), rest, gpu=TEACHER_GPU,
+                                  gpu=GPU)
+        return SE.cli(STUDY, lambda: launch_spec(kind, minutes), rest, gpu=GPU,
                       description=__doc__.split("\n")[0])
-    return SE.cli(STUDY, lambda: launch_spec("teacher"), argv, gpu=TEACHER_GPU, description=__doc__.split("\n")[0])
+    return SE.cli(STUDY, lambda: launch_spec("teacher"), argv, gpu=GPU, description=__doc__.split("\n")[0])
 
 
 def build_parser():
     """The launch parser, for the shared launcher-contract tests."""
-    return SE.build_parser(__doc__.split("\n")[0], gpu=TEACHER_GPU)
+    return SE.build_parser(__doc__.split("\n")[0], gpu=GPU)
 
 
 def spec(args):

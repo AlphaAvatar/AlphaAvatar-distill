@@ -1,6 +1,6 @@
 # Research A — hybrid teacher: thinking against non-thinking distillation
 
-## Current study (2026-10-28): D4-Augmented's training scale, no pilot
+## Current study (2026-10-28, hardware revised 2026-10-29): D4-Augmented's training scale, no pilot
 
 **Status: the whole chain is implemented at $0 and its task order is frozen;
 nothing is authorized.** The maintainer's decisions of 2026-10-28 (the revised
@@ -51,13 +51,30 @@ stay as they are.
   (exploratory); abstract/analogical reasoning is a registered sub-category,
   reported on its own.
 
+**Hardware (maintainer, 2026-10-29: L40S first).** Every session and
+operation runs on the NVIDIA L40S 48 GB. An A100 enters only for an operation
+*measured* not to fit an L40S after memory management that changes no
+protocol, for that operation alone, under its own funding application; an
+unmeasured operation is not evidence of need, and nothing is shortened,
+dropped or lowered to fit a card. The initialization declares its one memory
+fallback in advance: the forward baseline's micro-batch 3, and only after a
+CUDA out-of-memory exit micro-batch 1, the one-item-per-forward reference path
+(DEPTH widens about 12.4-13.0 GiB of scored rows to fp32 at micro-batch 3 on
+8k-token items, the regime that ran an L40S out of memory before).
+
 **Sessions** (`phase.py`, one grant, `shared.study_engineering` as a formal
-phase): the *teacher* session on one A100 80GB (calibration, initialization,
-W00 = T0 + V, E's waves, X, the teacher's own evaluation in both modes); the
-dev box's admission ($0); the *recovery* session(s), one or two GPUs on one
+phase): the *check* on one L40S, first (`l40s_check.py`: the formal code paths
+on diagnostic inputs -- generation, the evaluation engine at 40,960, the formal
+training step, D4 Top-1's path on the hybrid -- with peak allocated and
+reserved memory, step time and throughput; never formal, it reads no
+eval-set-1 item); the *teacher* session on one L40S (calibration,
+initialization, W00 = T0 + V, E's waves, X, the teacher's own evaluation in
+both modes), priced from the committed check record its artifact binds; the
+dev box's admission ($0); the *recovery* session(s), one or two L40S on one
 pod, six units through H1-PA's unit driver; the dev box's analysis ($0).
-Everything finished is on the phase's network volume as it completes and is
-pulled on every poll; a later attempt resumes from the volume.
+Everything finished is on the phase's network volume (`am5m373kuq`, expanded
+in place before recovery) as it completes and is pulled on every poll; a later
+attempt resumes from the volume.
 
 | record | owns |
 | --- | --- |
@@ -65,7 +82,8 @@ pulled on every poll; a later attempt resumes from the volume.
 | [`generation_protocol.json`](../../../../configs/stages/stage-2/teacher_modes/generation_protocol.json) | every value the teacher session passes to the runner; the bound inputs |
 | [`plans/d4_scale_preregistration.json`](../../../../logs/stages/stage-2/teacher_modes/plans/d4_scale_preregistration.json) | S and C, the bound decision rule (`mode_statistics.py`), the data-size rules |
 | [`data/.../tasks/order_v1.manifest.json`](../../../../data/stages/stage-2/teacher_modes/tasks/order_v1.manifest.json) | the frozen order: cells, slices, substitutions, exports, isolation |
-| [`logs/budget/applications/research_a_2026-10-29/`](../../../../logs/budget/applications/research_a_2026-10-29/) | the phase application, its proposal and its forecast |
+| [`l40s_check.json`](../../../../configs/stages/stage-2/teacher_modes/l40s_check.json), [`data/.../tasks/diagnostic_v1.manifest.json`](../../../../data/stages/stage-2/teacher_modes/tasks/diagnostic_v1.manifest.json) | the L40S check's phases and margins; its diagnostic tasks (never training, calibration or evaluation data) |
+| [`logs/budget/applications/research_a_2026-10-29/`](../../../../logs/budget/applications/research_a_2026-10-29/) | the L40S phase application (memory assessment, storage comparison), its proposal and its forecast |
 
 ---
 
