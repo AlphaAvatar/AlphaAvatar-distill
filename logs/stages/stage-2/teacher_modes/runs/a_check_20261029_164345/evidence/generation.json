@@ -1,0 +1,38 @@
+{
+ "tasks": 64,
+ "modes": {
+  "H-T": {
+   "complete": true,
+   "turns": 67,
+   "generated_tokens": 186066,
+   "wall_seconds": 425.8,
+   "tokens_per_second": 436.9,
+   "stop_reasons": {
+    "degeneration": 1,
+    "eos": 57,
+    "length_limited": 9
+   },
+   "engine": {
+    "kv_cache_tokens": 227921,
+    "max_concurrency": 27.85,
+    "at_tokens_per_request": 8184
+   }
+  },
+  "H-N": {
+   "complete": true,
+   "turns": 109,
+   "generated_tokens": 40371,
+   "wall_seconds": 153.2,
+   "tokens_per_second": 263.4,
+   "stop_reasons": {
+    "degeneration": 1,
+    "eos": 108
+   },
+   "engine": {
+    "kv_cache_tokens": 229439,
+    "max_concurrency": 28.04,
+    "at_tokens_per_request": 8184
+   }
+  }
+ }
+}

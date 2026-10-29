@@ -122,6 +122,16 @@ def profiles_doc(built: dict, items_dir: Path) -> dict:
     return {"schema": PROFILE_DOCUMENT_SCHEMA, "profiles": profiles}
 
 
+def register_operators() -> None:
+    """The frozen operators and the forward baseline's, registered (idempotent). A spec validates every step's
+    implementation when it is built, so this comes before `fixed_path_spec`, in the process that builds it:
+    nothing registers on import (aadistill.initialization.operators.register)."""
+    from shared import forward_baseline as FB
+    from stages.phase_d1 import d1_session as D1S
+    D1S._register_frozen_operators()
+    FB.register_operators(FB.selected(REPO))
+
+
 def fixed_path_spec(device: str, profile_of=None):
     """D4 Top-1's four steps on the hybrid profiles, the Stage-0 target geometry, the hybrid root.
     ``profile_of`` maps each step's Stage-0 profile to the profile it runs on (default: its hybrid one;
@@ -130,6 +140,7 @@ def fixed_path_spec(device: str, profile_of=None):
     from aadistill.initialization.planning.fixed_path import FixedPathSpec, FixedPathStep
     from shared import forward_baseline as FB
     from stages.phase_a3 import a3_session as A3S
+    register_operators()
     teacher = json.loads(PROTOCOL.read_text())["teacher"]
     terms = FB.session_terms(FB.selected(REPO))
     target = A3S.path_spec(workdir_device=device).target_spec
@@ -170,11 +181,8 @@ def materialize(spec, ex, work: Path, device: str, steps: list) -> list:
     """`materialize_fixed_path` on the registered profiles, each step's identity, seconds and memory into `steps`."""
     from aadistill.initialization.planning.fixed_path import materialize_fixed_path
     from aadistill.initialization.specs.arch import get_adapter
-    from shared import forward_baseline as FB
-    from stages.phase_d1 import d1_session as D1S
     from stages.phase_d1 import replay_specs as R
-    D1S._register_frozen_operators()
-    FB.register_operators(FB.selected(REPO))
+    register_operators()
     device_peaks(device)
     return materialize_fixed_path(
         spec, adapter=get_adapter(spec.family), workdir=work / "path", repo_root=REPO, execution=ex,

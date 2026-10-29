@@ -486,6 +486,7 @@ def _smi(device: dict, phase: str) -> tuple[float | None, float | None]:
 
 def verdict(out: str | Path, cfg: dict) -> dict:
     """Every status from the evidence files and the config alone (the dev box re-runs it on the secured copy)."""
+    from stages.teacher_modes import teacher_session as TS
     out, want = Path(out), float(cfg["free_memory_wanted_gib"])
     device = _read(out, "device") or {}
     ops: dict[str, dict] = {}
@@ -501,7 +502,7 @@ def verdict(out: str | Path, cfg: dict) -> dict:
         total, peak = _smi(device, "generation")
         ops["generation"] = {"status": "MEASURED" if all(m["complete"] for m in gen["modes"].values()) else "FAILED",
                              "memory": _margin(total, peak, want), "management": "the engine's own allocation "
-                             "(gpu_memory_utilization 0.90 of the card, the runner's setting)",
+                             f"(gpu_memory_utilization {TS.GENERATION_GPU_MEMORY_UTILIZATION}, teacher_session's)",
                              "tokens_per_second": {m: v["tokens_per_second"] for m, v in gen["modes"].items()},
                              "engine": {m: v["engine"] for m, v in gen["modes"].items()}}
     else:

@@ -1,0 +1,62 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.phase_authorization_outcome/v1",
+ "run_id": "a_check_20261029_164345",
+ "study": "A-D4",
+ "recorded_utc": "2026-10-29T17:19:41+00:00",
+ "status": "COMPLETE",
+ "validation_passed": false,
+ "terminal": "RUN_FAILED",
+ "runner_terminal": "RUN_FAILED",
+ "provider_resource_created": true,
+ "evidence": {
+  "path": "/home/ecs-user/AlphaAvatar-distill/.scratch/research_a/a_check_20261029_164345/store/evidence.tgz",
+  "sha256": "1f51b9db739201827cb48327d7f3f93c355ae92da45481a34b3af1fad336c304",
+  "bytes": 1708926,
+  "verified": true
+ },
+ "verdict_rederived": {
+  "passed": false,
+  "checks": {
+   "generation": "MEASURED",
+   "evaluation_engine": "MEASURED",
+   "train_H-T": "MEASURED",
+   "train_H-N": "MEASURED",
+   "initialization": "FAILED"
+  },
+  "agrees_with_the_pod": true
+ },
+ "money": {
+  "all_in_usd": 0.6347,
+  "gpu_usd": 0.6229,
+  "disk_usd": 0.0117,
+  "elapsed_minutes": 34.29,
+  "price_per_hour": 1.09,
+  "authorized_usd": 5.91,
+  "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB)"
+ },
+ "provider_confirms_gone": true,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "network_volumes": [
+   {
+    "kind": "network_volume",
+    "id": "am5m373kuq",
+    "name": "aad-h1pa",
+    "size": 30,
+    "dataCenterId": "EUR-IS-2"
+   }
+  ],
+  "error": null,
+  "accounted": [
+   "am5m373kuq"
+  ],
+  "unaccounted": [],
+  "ok": true,
+  "why": "the provider account holds only the 1 resource(s) the records account for"
+ },
+ "kind": "check",
+ "scientific_use": false,
+ "authorizes": "nothing"
+}

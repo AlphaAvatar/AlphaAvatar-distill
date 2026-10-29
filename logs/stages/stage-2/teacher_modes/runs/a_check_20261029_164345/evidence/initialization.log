@@ -1,0 +1,23 @@
+Traceback (most recent call last):
+  File "/workspace/aad/scripts/stages/stage-2/teacher_modes/l40s_check.py", line 704, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/aad/scripts/stages/stage-2/teacher_modes/l40s_check.py", line 680, in main
+    return phase_init(a)
+           ^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/stages/stage-2/teacher_modes/l40s_check.py", line 375, in phase_init
+    spec = IN.fixed_path_spec("cuda:0", profile_of=ic["profiles"])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/stages/stage-2/teacher_modes/initialization.py", line 135, in fixed_path_spec
+    target = A3S.path_spec(workdir_device=device).target_spec
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/stages/stage-1/phase_a3/a3_session.py", line 190, in path_spec
+    return FixedPathSpec(
+           ^^^^^^^^^^^^^^
+  File "<string>", line 16, in __init__
+  File "/workspace/aad/src/aadistill/initialization/planning/fixed_path.py", line 276, in __post_init__
+    impl = get_implementation(s.impl_id)  # raises on an unregistered id
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/src/aadistill/initialization/operators/base.py", line 503, in get_implementation
+    raise KeyError(
+KeyError: "no operator implementation 'attention.activation_importance_v1'; registered: ['attention.weight_proxy_v0', 'composite.stage1_sandwich_v0', 'depth.causal_kl_greedy_v1', 'depth.positional_v0', 'ffn.activation_importance_v0', 'width.global_pca_v0']"

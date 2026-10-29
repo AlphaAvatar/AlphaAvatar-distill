@@ -14782,3 +14782,20 @@ on a paid pod.
   record's `margin_accepted` is ignored, and an exception, if the maintainer ever approves one, is a
   new mechanism citing that decision. The check config's text changed with it, so the grant binds the
   updated phase identity.
+- **Check attempt 1, `a_check_20261029_164345`: engineering failure, $0.6347 all-in (34.3 min, pod
+  `939had81aqfs8c` deleted, the provider confirms it gone).** Measured on the L40S: generation (Thinking
+  437 tok/s, Non-Thinking 263 tok/s on the 64 diagnostic tasks, engine start included), the evaluation
+  engine at 40,960 (KV cache 228,144 tokens, 5.57 full-length sequences; 4.27 GiB free), the formal
+  training step (peak reserved 19.03 / 18.47 GiB, 25 GiB free; 6.22 / 5.66 s per step). Two defects:
+  - the initialization never started: `KeyError: no operator implementation
+    'attention.activation_importance_v1'` -- `initialization.fixed_path_spec` built the spec before
+    anything registered the operators (registration ran only inside `materialize`; nothing registers on
+    import). The formal initialization built its spec the same way, so the teacher session would have
+    failed there too. Fix: `initialization.register_operators()` before the spec; a fresh-interpreter
+    regression test (it fails without the fix).
+  - generation left 3.63 GiB free (below 4): the engine's KV cache over-ran its 0.90 request by about
+    0.6 GiB. Fix, an engine setting only (decoding, limits and seeds unchanged): the generation engine runs
+    at `gpu_memory_utilization` 0.87 (`teacher_session.GENERATION_GPU_MEMORY_UTILIZATION`), about 5 GiB
+    free at about 27 full-length sequences. The teacher's evaluation engine stays at 0.90 (4.27 GiB free).
+  Neither is a protocol change or a reason for another card; a new check measures both. Its evidence is
+  kept under the run.

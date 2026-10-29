@@ -1,0 +1,18 @@
+{
+ "context": 40960,
+ "mode": "H-N",
+ "tasks": 16,
+ "returncodes": [
+  0
+ ],
+ "started": true,
+ "episodes": 16,
+ "generated_tokens": 7272,
+ "context_limit_reached": 0,
+ "wall_seconds": 756.3,
+ "engine": {
+  "kv_cache_tokens": 228144,
+  "max_concurrency": 5.57,
+  "at_tokens_per_request": 40960
+ }
+}

@@ -1,0 +1,11 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.l40s_check/v1",
+ "started_utc": "2026-10-29T16:52:03Z",
+ "config_sha256": "1cd6b9537b8f9442195b2fdbd4d0721c626c0595864a15c859c377421929107b",
+ "contract": {
+  "status": "ok",
+  "identity": "848f65087269a8328a0cd682d5f8e089e5af93bb3e3e0b843b4868ef9c7a03d1",
+  "harness": "84d6b012e31c4fd9a51df492636280ee2f4fae8ba6d8a9dc69ba7f6373e88611",
+  "authorization_id": "stage2.teacher_modes.d4_scale.a_check_20261029_164345"
+ }
+}

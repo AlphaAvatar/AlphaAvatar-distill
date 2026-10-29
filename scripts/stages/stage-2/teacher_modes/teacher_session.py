@@ -86,6 +86,11 @@ PHASES = ("calibration", "initialization", "waves", "x", "teacher_eval")
 POOLS = ("train_tasks_v2", "train_tasks_v1", "external_tasks_v2", "math_train_v1", "mbpp_train_v1",
          "squad_v2_train_unanswerable_v1")
 SCHEMA = "aadistill.stage2.teacher_modes.teacher_session/v1"
+#: the generation engine's gpu_memory_utilization (run_battery --gpu-mem-util), not the runner's 0.90: at 0.90
+#: the L40S check (a_check_20261029_164345) measured 3.63 GiB free on the card -- the engine's KV cache over-runs
+#: its request by about 0.6 GiB -- below the 4 GiB wanted; each 0.01 is about 0.44 GiB of KV cache, so 0.87 leaves
+#: about 5 GiB at about 27 full-length sequences at once. An engine setting: decoding, limits and seeds unchanged
+GENERATION_GPU_MEMORY_UTILIZATION = 0.87
 
 
 def _sha(p: Path) -> str:
@@ -168,7 +173,8 @@ def write_inputs(c: dict, out: Path, stage: str, ids: list[str], *, write: bool 
 def mode_args(c: dict, mode: str) -> tuple[str, ...]:
     m = c["protocol"]["modes"][mode]
     return ("--chat-template-kwargs", json.dumps(m["template_kwargs"], sort_keys=True),
-            "--generate-sampling", json.dumps(m["sampling"], sort_keys=True))
+            "--generate-sampling", json.dumps(m["sampling"], sort_keys=True),
+            "--gpu-mem-util", str(GENERATION_GPU_MEMORY_UTILIZATION))
 
 
 def sealed_group(c: dict, out: Path, f: dict, ids: list[str] | None, label: str) -> dict:

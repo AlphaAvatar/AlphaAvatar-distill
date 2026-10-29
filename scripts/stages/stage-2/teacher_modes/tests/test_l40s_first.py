@@ -252,6 +252,9 @@ def test_the_check_runs_the_teacher_sessions_runner_and_the_40960_engine_on_diag
     cmd = next(c for c in engine.calls if "--mode" in c and c[c.index("--mode") + 1] == "eval")
     assert eng["started"] and eng["context"] == 40960 and cmd[cmd.index("--trained-context") + 1] == "40960"
     assert "--session-limit" not in cmd and eng["engine"]["max_concurrency"] == 5.32
+    # the generation engine runs at the setting the check measured 3.63 GiB free above (a_check_20261029_164345)
+    gen = [c for c in engine.calls if c[c.index("--mode") + 1] == "generate"]
+    assert gen and all(c[c.index("--gpu-mem-util") + 1] == "0.87" for c in gen)
     assert report["operations"]["train_H-T"]["status"] == "NOT_RUN" and not report["complete"]
     assert "MARKER:RUN_FAILED" in Path(args.status).read_text()
 
@@ -349,3 +352,31 @@ def test_the_check_launch_uses_the_shared_relay_and_its_own_driver():
     args = SimpleNamespace(run_id="r7", volume_mount_path="/runpod-volume")
     cmd = PH.check_command(SimpleNamespace(args=args), None)
     assert f"--out {PH.check_evidence_dir('r7')}" in cmd and "--student /workspace/aad/" in cmd
+
+
+def test_the_initialization_path_builds_in_a_fresh_process():
+    """A spec validates its operators when it is built and nothing registers on import: a_check_20261029_164345
+    failed `KeyError: no operator implementation 'attention.activation_importance_v1'` in the check's child (and
+    the formal initialization built its spec the same way). Everything before the root model loads, in a new
+    interpreter, as the check's child and the formal initialization run it."""
+    import subprocess
+    code = """
+import json, sys
+from stages.teacher_modes import initialization as IN, l40s_check as L
+from aadistill.initialization.calibration.profiles import load_profiles
+from aadistill.initialization.specs.arch import get_adapter
+ic = L.load_config()["initialization"]
+doc = json.loads((L.REPO / ic["profiles_document"]).read_text())
+keep = set(ic["profiles"].values())
+load_profiles({**doc, "profiles": [p for p in doc["profiles"] if f"{p['profile_id']}@v{p['version']}" in keep]})
+check = IN.fixed_path_spec("cpu", profile_of=ic["profiles"])
+formal = IN.fixed_path_spec("cpu")
+get_adapter(check.family)
+print(json.dumps([[s.impl_id for s in check.steps], IN.execution(1).micro_batch_size]))
+"""
+    env = {"PATH": "/usr/bin:/bin", "PYTHONPATH": ":".join(str(REPO / p) for p in ("src", "scripts", "scripts/stages/stage-1",
+                                                                                 "scripts/stages/stage-2"))}
+    r = subprocess.run([sys.executable, "-c", code], cwd=REPO, env=env, capture_output=True, text=True, timeout=600)
+    assert r.returncode == 0, r.stderr[-3000:]
+    impls, mb = json.loads(r.stdout.strip().splitlines()[-1])
+    assert impls[0] == "attention.activation_importance_v1" and mb == 1
