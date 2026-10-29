@@ -9,32 +9,22 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A L40S PHASE APPLICATION PENDING, FINAL GATE CORRECTIONS DONE (maintainer review of `d4b08344`, 2026-10-29 UTC). The L40S-first revision is accepted; three execution fixes landed at $0: the check record gates each formal kind fail-closed, X's stopping rule is rebuilt from the sealed shards across sessions, and the budget tells the live $1.09 from the $1.19 ceiling. No paid resource, no cap increase, no volume change. Committed $725.4912 of $740 (provider, 09:24Z); 0 pods; volume `am5m373kuq` only. STOPPED at the maintainer's decision on the application.**
-Decision records: `logs/budget/decisions.md` 2026-10-29 "Research A L40S-first" and "Maintainer review of `d4b08344`".
-Application: `logs/budget/applications/research_a_2026-10-29/application.json` (phase hard cap $142.19 = check $4.56 +
-teacher $63.76 + recovery $58.97 + storage $4.90 + reserve $10.00; expected $84.73, conservative $127.11 at $1.09;
-its `price` section and `forecast.json :: bounds` give each envelope at $1.09 and $1.19 as run; project cap requested
-$868; `am5m373kuq` expanded in place before recovery to 55 GB, or 65 GB for two GPUs). Branch
+**RESEARCH A PHASE GRANTED AND EXECUTING (maintainer, 2026-10-29 UTC): $142.19 phase, $868 project cap, the L40S only. The L40S check PASSED on attempt 3; teacher session 1 (calibration, the initialization, W00) is RUNNING on `am5m373kuq`. Research B: teacher pending, nothing authorized.**
+Decision record: `logs/budget/decisions.md` 2026-10-29 "Research A's L40S phase APPROVED" (with the check attempts and
+the re-pricing). Grant: `logs/budget/approvals/teacher_modes_d4_scale_phase_grant.json`. Branch
 `research/teacher-modes-and-projected-residual`; `main` stays at `72492e46`.
-- **Research A** (`docs/stages/stage-2/teacher_modes/DESIGN.md`): the task order frozen at $0; `phase.py` issues and
-  launches three kinds on the L40S: the *check* first (`l40s_check.py`, diagnostic inputs, never formal), the
-  *teacher* work in bounded sessions (first `--phases calibration,initialization,waves@w00`, the rest re-priced from
-  W00's measured rate), the *recovery* session(s). Teacher and recovery are issued only once the committed check
-  record admits their operations (`l40s_check.gate`: identities, committed evidence, the verdict re-derived and
-  agreeing with the pod, each operation measured with 4 GiB free). A later session rebuilds every stopping
-  decision from the sealed shards; a phase starts only when what it needs is complete on the volume. Nothing of
-  it has run on a GPU; the formal training step's memory, the L40S generation throughput and the initialization's
-  fit are UNKNOWN until the check.
-- **Price risk:** the teacher's conservative case as run is $64.41 at $1.09 and $70.21 at $1.19 against its $63.76
-  cap; handled by the bounded sessions and the re-pricing after the check and after W00 (stop and ask if the rest
-  does not fit), not by a larger cap.
-- **Research B** (`docs/stages/stage-1/projected_residual/DESIGN.md`): the teacher is `pending`; every formal
-  use refuses (`recovery_driver.formal_teacher`). Nothing of B is requested.
-- **Training baseline (core):** `loss.kd_support` (Top-200 + tail KD at the target positions,
-  `src/aadistill/training/topk_kd.py`); `checkpoint.bind_identity`; isolated packs on disk; one pod may hold 2
-  GPUs (`--gpu-count`).
-- **Next:** the maintainer's decision on the L40S application; then the check, its record (`l40s_check.py record
-  --run-id --scr`), the re-priced first teacher session. Nothing starts automatically.
+- **Check** (`l40s_check.py`, three engineering sessions, $3.7670 in all, inside the $4.56 check envelope):
+  attempt 1 found the initialization's spec built before its operators were registered and generation at 3.63 GiB
+  free; attempt 2 found the initialization's caching-allocator fragmentation (0.64 GiB free by reserved memory);
+  attempt 3 (`a_check_20261029_190241`) PASSED with generation at `gpu_memory_utilization` 0.87 and the
+  initialization's process on expandable segments. The committed record (`assets/l40s_check.json`) admits the
+  teacher and recovery kinds (`l40s_check.gate`); no margin exception exists.
+- **Teacher session 1** `a_teacher_20261029_201915` (`--phases calibration,initialization,waves@w00`, planned for the
+  conservative 16.32 h at $1.09, hard cap $23.80; tmux `a_teacher1`, scratch
+  `.scratch/research_a/a_teacher_20261029_201915`). After W00 the dev box re-prices E, X and the teacher's
+  evaluation from W00's measured rate (`phase_forecast.py`) and issues the rest only inside the teacher envelope.
+- **Next:** W00's re-pricing; the remaining teacher sessions; admission; `am5m373kuq` expanded (65 GB for two GPUs,
+  else 55); recovery; analysis. A shortfall stops what has not started and is reported.
 
 **RESEARCH A AND B: A-E ($3.50) AND B-E ($3.00) PAID ENGINEERING VALIDATIONS AUTHORIZED (maintainer, 2026-10-28 UTC). A-E: PASS (attempt 2 `ae_20261028_093428`; $0.7089 of $3.50 across two attempts). B-E: FAIL (`be_20261028_095332`, $0.4366 of $3.00): trainer smoke OOM on the L40S at the frozen E1 recipe, so resume unmeasured; vLLM median |Δ log-prob| 0.234 > 0.1 nat. Initialization, both fold checks, checkpoint identity and GPU isolation PASS. Both closed; no pod; committed $725.4993 of $740. STOPPED at the maintainer's next decision.**
 Decision record: `logs/budget/decisions.md` 2026-10-28 "A-E ($3.50) and B-E ($3.00) ... authorized". Neither PASS is a scientific GO; A1–A3, B1 and 600M stay unauthorized. The text below is the $0 readiness state the authorization was granted on.
