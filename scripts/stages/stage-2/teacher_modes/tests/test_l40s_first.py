@@ -186,17 +186,19 @@ def test_the_check_record_admits_a_formal_session_only_fail_closed(tmp_path, mon
     assert any("disagree" in b for b in L.gate(TEACHER, root)) and any("closeout" in b for b in L.gate(TEACHER, root))
 
 
-def test_a_margin_below_the_wanted_one_refuses_until_a_recorded_decision_and_never_names_an_a100(tmp_path, monkeypatch):
+def test_a_margin_below_the_wanted_one_always_refuses_and_never_names_an_a100(tmp_path, monkeypatch):
     root, scr = _chain(tmp_path, monkeypatch, gen_used=43000, reserved=41.0)
     rec = L.record(RUN, scr, root)
     v = rec["verdict"]
     assert v["complete"] and v["below_margin"] == ["generation", "train_H-N", "train_H-T"] and not v["a100_evidence"]
     assert [b.split(":")[0] for b in L.gate(TEACHER, root)] == ["generation"]
     assert [b.split(":")[0] for b in L.gate(RECOVERY, root)] == ["train_H-T", "train_H-N"]
-    with pytest.raises(SystemExit, match="not an operation below"):
-        L.record(RUN, scr, root, accept_margin={"initialization": "accepted"})
-    L.record(RUN, scr, root, accept_margin={"generation": "maintainer: accept 2.99 GiB for generation"})
-    assert L.gate(TEACHER, root) == [] and len(L.gate(RECOVERY, root)) == 2
+    # no exception can be declared from the dev box: neither the record command nor a hand-edited record admits it
+    assert "--accept-margin" not in L.build_parser().format_help() + L.build_parser()._subparsers._group_actions[0]  \
+        .choices["record"].format_help()
+    forged = {**rec, "margin_accepted": {"generation": {"decided_by": "maintainer", "decision": "accept"}}}
+    (root / PH.CHECK_RECORD).write_text(json.dumps(forged))
+    assert [b.split(":")[0] for b in L.gate(TEACHER, root)] == ["generation"]
 
 
 class FakeEngine:

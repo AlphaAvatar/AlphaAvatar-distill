@@ -67,7 +67,7 @@
    "train_H-N"
   ]
  },
- "_gates": "the operations each formal session runs, which the committed record must show MEASURED with free_memory_wanted_gib before that session's artifact is issued (l40s_check.gate, phase.kind_conditions): the teacher session generates, evaluates the teacher at 40,960 and materializes the initialization; recovery trains. Unmeasured, failed, unverifiable or below the margin refuses; a smaller margin admits only with an explicit maintainer decision for that operation; nothing here selects another card",
+ "_gates": "the operations each formal session runs, which the committed record must show MEASURED with free_memory_wanted_gib before that session's artifact is issued (l40s_check.gate, phase.kind_conditions): the teacher session generates, evaluates the teacher at 40,960 and materializes the initialization; recovery trains. Unmeasured, failed, unverifiable or below the margin refuses; no margin exception is approved (maintainer, 2026-10-30) and none can be declared from the dev box; nothing here selects another card",
  "sampler_seconds": 2.0,
  "timeouts_s": {
   "generation": 5400,

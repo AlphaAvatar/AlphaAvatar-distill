@@ -14763,3 +14763,22 @@ on a paid pod.
   close to the 4 GiB wanted; the conservative check (the initialization's fallback at its slowest)
   does not fit one $4.56 session, so the initialization, last in order, may need a second check.
 - Revisit when the maintainer decides on the application, after the check's record, and after W00.
+
+## 2026-10-30 (UTC) — Maintainer: Research A's L40S phase APPROVED ($142.19 phase, $868 project); no margin exception
+
+- Context: the maintainer reviewed `09dfae86` (brief "Research A Phase Approval and Execution").
+- Decision (maintainer): the L40S phase application is approved — phase cumulative hard cap $142.19,
+  project cumulative hard cap $868, the NVIDIA L40S the only approved card; A100 not authorized;
+  Research B's teacher stays pending and nothing of B is authorized. One phase grant, executed along
+  the implemented chain (check → teacher → admission → recovery → analysis) with autonomous repair of
+  ordinary engineering failures inside it; no change to the frozen design, admission, decoding,
+  evaluation or statistics. Recovery prefers 2 x L40S (one unit per GPU) when live stock, card, memory
+  margin and budget allow, else 1; `am5m373kuq` is expanded in place before recovery to 55 GB (one GPU)
+  or 65 GB (two), not earlier, and no historical checkpoint is deleted. Each session is issued at the
+  live price; the $10 engineering reserve is not moved into formal generation or recovery; a shortfall
+  stops what has not started, keeps everything valid and is reported, never funded automatically.
+- Fixed before the grant: `l40s_check.py record --accept-margin` let any non-empty string declare a
+  maintainer decision. Removed: a margin below 4 GiB always refuses (`l40s_check.gate`), a hand-edited
+  record's `margin_accepted` is ignored, and an exception, if the maintainer ever approves one, is a
+  new mechanism citing that decision. The check config's text changed with it, so the grant binds the
+  updated phase identity.

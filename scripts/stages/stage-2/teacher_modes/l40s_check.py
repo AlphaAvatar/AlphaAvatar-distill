@@ -9,7 +9,7 @@
     # the dev box, after the shared closeout: the verified archive's verdict inputs committed under the run,
     # the verdict re-derived, and the record the teacher and recovery kinds bind (`gate`)
     PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-2/teacher_modes/l40s_check.py record \\
-        --run-id <run> --scr <scratch> [--accept-margin <operation>="<the maintainer's decision>"]
+        --run-id <run> --scr <scratch>
 
 Never formal (its artifact claims engineering_validation only). It answers, on
 the card the phase runs on, what no CPU and no A100 record can: whether each
@@ -58,9 +58,10 @@ check config as they are now, the run's committed check authorization and
 shared closeout, the committed evidence hashing to the record and re-deriving
 exactly its verdict and the pod's report, and every operation that session
 runs (the config's ``gates``) MEASURED with the wanted margin. A smaller
-margin admits only with an explicit maintainer decision for that operation,
-recorded with the record (``--accept-margin``); otherwise it is answered by a
-protocol-neutral memory optimization and a new check, never by another card.
+margin always refuses (maintainer, 2026-10-30: no exception is approved, and
+none can be declared from here); it is answered by a protocol-neutral memory
+optimization and a new check, never by another card. An exception, if the
+maintainer ever approves one, is a new mechanism citing that decision.
 """
 from __future__ import annotations
 
@@ -563,12 +564,10 @@ def verdict(out: str | Path, cfg: dict) -> dict:
             "reads_no_eval_set": True, "formal": False, "authorizes": "nothing"}
 
 
-def record(run_id: str, scr: Path, repo: Path = REPO, *, accept_margin: dict | None = None) -> dict:
+def record(run_id: str, scr: Path, repo: Path = REPO) -> dict:
     """The dev box's record of a closed check: the evidence archive the shared closeout verified, its verdict
     inputs committed under the run (``EVIDENCE_COPY``), the verdict re-derived from that copy beside the pod's,
-    and the run's identities -- what `gate` re-checks. ``accept_margin`` (operation -> the maintainer's quoted
-    decision) is the only way a measured margin below the wanted one admits a session; it names an operation
-    that IS below it."""
+    and the run's identities -- what `gate` re-checks."""
     from stages.teacher_modes import phase as PH
     repo = Path(repo)
     run = repo / PH.STUDY.run_dir(run_id)
@@ -586,18 +585,13 @@ def record(run_id: str, scr: Path, repo: Path = REPO, *, accept_margin: dict | N
             shutil.copyfile(q, copy / q.name)
     run_doc = _read(copy, "run") or {}
     v = _plain(verdict(copy, load_config(repo / CONFIG)))
-    accepted = {}
-    for op, decision in (accept_margin or {}).items():
-        if op not in v["below_margin"] or not str(decision).strip():
-            raise SystemExit(f"--accept-margin {op}: not an operation below the wanted margin, or no decision quoted")
-        accepted[op] = {"decided_by": "maintainer", "decision": str(decision).strip()}
     rec = {"schema": f"{SCHEMA}_record", "run_id": run_id, "written_utc": utc(),
            "identity": (run_doc.get("contract") or {}).get("identity"),
            "authorization_id": (run_doc.get("contract") or {}).get("authorization_id"),
            "harness": (run_doc.get("contract") or {}).get("harness"), "config_sha256": run_doc.get("config_sha256"),
            "evidence_archive_sha256": ev["sha256"], "evidence": str(copy.relative_to(repo)),
            "evidence_files": {q.name: _sha(q) for q in sorted(copy.glob("*.json"))},
-           "verdict": v, "agrees_with_the_pod": v == _read(copy, "report"), "margin_accepted": accepted,
+           "verdict": v, "agrees_with_the_pod": v == _read(copy, "report"),
            "use": ("what the teacher session and the recovery units are priced from (phase_forecast.py), and what "
                    "their artifacts bind once `gate` admits their operations (phase.kind_conditions)"),
            "authorizes": "nothing"}
@@ -649,14 +643,11 @@ def gate(operations, repo: Path = REPO) -> list[str]:
     for op in operations:
         o = v["operations"].get(op) or {}
         mem = o.get("memory") or {}
-        acc = (rec.get("margin_accepted") or {}).get(op) or {}
         if o.get("status") != "MEASURED":
             bad.append(f"{op}: {o.get('status') or 'not in the evidence'}")
-        elif mem.get("fits_with_margin") is not True and not (acc.get("decided_by") == "maintainer"
-                                                              and str(acc.get("decision") or "").strip()):
-            bad.append(f"{op}: free memory {mem.get('free_gib')} GiB, not the {v['free_memory_wanted_gib']} GiB wanted, "
-                       "and no recorded maintainer decision for it (a memory optimization and a new check, or "
-                       "--accept-margin)")
+        elif mem.get("fits_with_margin") is not True:
+            bad.append(f"{op}: free memory {mem.get('free_gib')} GiB, not the {v['free_memory_wanted_gib']} GiB wanted "
+                       "(a protocol-neutral memory optimization and a new check; no exception is approved)")
     return bad
 
 
@@ -679,8 +670,6 @@ def build_parser() -> argparse.ArgumentParser:
     rec = sub.add_parser("record")
     rec.add_argument("--run-id", required=True)
     rec.add_argument("--scr", required=True, help="the check launch's scratch (its store holds the evidence archive)")
-    rec.add_argument("--accept-margin", action="append", default=[], metavar='OPERATION="DECISION"',
-                     help="the maintainer's quoted decision accepting one operation's measured margin below the wanted")
     return ap
 
 
@@ -699,7 +688,7 @@ def main(argv=None) -> int:
                                                     "traceback": traceback.format_exc()[-3000:]})
             return IN.OOM_EXIT if oom else 1
     if a.cmd == "record":
-        rec = record(a.run_id, Path(a.scr), accept_margin=dict(x.split("=", 1) for x in a.accept_margin))
+        rec = record(a.run_id, Path(a.scr))
         from stages.teacher_modes import phase as PH
         print(json.dumps({**{k: rec["verdict"][k] for k in ("complete", "fit_with_margin", "below_margin", "failed",
                                                             "a100_evidence")},
