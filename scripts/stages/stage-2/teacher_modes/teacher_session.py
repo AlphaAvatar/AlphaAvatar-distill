@@ -356,8 +356,7 @@ def initialize(c: dict, root: Path, cal: dict, status) -> dict:
                "--device", "cuda:0", "--identity", c["launch_identity_sha256"],
                *(() if k == base else ("--micro-batch-size", str(k)))]
         with (root / "initialization.log").open("a") as lf:
-            rc = subprocess.run(cmd, cwd=REPO, stdout=lf, stderr=subprocess.STDOUT,
-                                env={**os.environ, "PYTHONPATH": "src:scripts:scripts/stages/stage-1"}).returncode
+            rc = subprocess.run(cmd, cwd=REPO, stdout=lf, stderr=subprocess.STDOUT, env=IN.child_env()).returncode
         attempts.append({"micro_batch_size": k, "returncode": rc,
                          "out_of_memory": rc == IN.OOM_EXIT})
         if rc != IN.OOM_EXIT:

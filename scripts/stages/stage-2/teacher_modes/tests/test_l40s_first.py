@@ -48,6 +48,7 @@ def test_an_out_of_memory_initialization_is_rerun_once_at_the_declared_fallback(
 
     def fake(cmd, **kw):
         calls.append(cmd)
+        assert kw["env"]["PYTORCH_CUDA_ALLOC_CONF"] == IN.ALLOCATOR == "expandable_segments:True"
         if "--micro-batch-size" in cmd:
             (tmp_path / "initialization" / "initialization.json").write_text("{}")
             return SimpleNamespace(returncode=0)
@@ -380,3 +381,29 @@ print(json.dumps([[s.impl_id for s in check.steps], IN.execution(1).micro_batch_
     assert r.returncode == 0, r.stderr[-3000:]
     impls, mb = json.loads(r.stdout.strip().splitlines()[-1])
     assert impls[0] == "attention.activation_importance_v1" and mb == 1
+
+
+def test_the_teacher_work_is_repriced_from_the_checks_measured_rates():
+    from stages.teacher_modes import phase_forecast as PF
+    rec = lambda ht, hn, init: {"run_id": "r", "verdict": {"operations": {  # noqa: E731
+        "generation": {"tokens_per_second": {"H-T": ht, "H-N": hn}},
+        "initialization": {"attempts": [{"seconds": init}]}}}}
+    slow, fast = PF.from_check(rec(400.0, 250.0, 3600)), PF.from_check(rec(800.0, 500.0, 3600))
+    for k in ("expected", "conservative"):
+        gen = lambda r: r[k]["through_w00"]["work_hours"] - r["initialization_hours"]  # noqa: E731
+        assert abs(gen(slow) - 2 * gen(fast)) < 0.02                  # generation hours follow the measured rate
+        assert slow[k]["through_w00"]["usd"] > fast[k]["through_w00"]["usd"]
+    assert slow["initialization_hours"] == round(1.0 + PF.LOAD_H, 2)
+
+
+def test_the_checks_initialization_child_runs_with_the_teacher_sessions_allocator(tmp_path, monkeypatch):
+    seen = {}
+
+    def fake(cmd, **kw):
+        seen[cmd[cmd.index("--phase") + 1]] = kw["env"].get("PYTORCH_CUDA_ALLOC_CONF")
+        return SimpleNamespace(returncode=0)
+    monkeypatch.setattr(L.subprocess, "run", fake)
+    args = SimpleNamespace(config=L.CONFIG, out=str(tmp_path), work=str(tmp_path), student="s", identity="i")
+    for phase in ("init", "train"):
+        assert L._child(args, phase, [], tmp_path / "log", 10) == 0
+    assert seen["init"] == IN.ALLOCATOR

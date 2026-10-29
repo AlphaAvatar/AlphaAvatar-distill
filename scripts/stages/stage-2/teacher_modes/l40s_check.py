@@ -377,7 +377,8 @@ def phase_init(args) -> int:
     work = Path(args.work) / f"init_mb{ex.micro_batch_size}"
     steps: list = []
     t0 = time.time()
-    rec = {"execution": ex.as_trace(), "path": [s.label for s in spec.steps]}
+    rec = {"execution": ex.as_trace(), "allocator": os.environ.get("PYTORCH_CUDA_ALLOC_CONF"),
+           "path": [s.label for s in spec.steps]}
     try:
         res = IN.materialize(spec, ex, work, "cuda:0", steps)
         rec.update(out_of_memory=False, steps=steps, seconds=round(time.time() - t0, 1),
@@ -397,12 +398,15 @@ def phase_init(args) -> int:
 # ---- the parent ---------------------------------------------------------------------------------------------
 
 def _child(args, phase: str, extra: list[str], log: Path, timeout: float) -> int:
+    from stages.teacher_modes import initialization as IN
     cmd = [sys.executable, str(Path(__file__).resolve()), "child", "--phase", phase, "--config", args.config,
            "--out", args.out, "--work", args.work, "--student", args.student, "--identity", args.identity, *extra]
+    #: the initialization's child as the teacher session starts it (its allocator setting); training as the recipe's
+    env = IN.child_env() if phase == "init" else {**os.environ, "PYTHONPATH": "src:scripts:scripts/stages/stage-1"}
     with log.open("a") as lf:
         try:
             return subprocess.run(cmd, cwd=REPO, stdout=lf, stderr=subprocess.STDOUT, timeout=timeout,
-                                  env={**os.environ, "PYTHONPATH": "src:scripts:scripts/stages/stage-1"}).returncode
+                                  env=env).returncode
         except subprocess.TimeoutExpired:
             return 124
 
@@ -486,6 +490,7 @@ def _smi(device: dict, phase: str) -> tuple[float | None, float | None]:
 
 def verdict(out: str | Path, cfg: dict) -> dict:
     """Every status from the evidence files and the config alone (the dev box re-runs it on the secured copy)."""
+    from stages.teacher_modes import initialization as IN
     from stages.teacher_modes import teacher_session as TS
     out, want = Path(out), float(cfg["free_memory_wanted_gib"])
     device = _read(out, "device") or {}
@@ -544,7 +549,8 @@ def verdict(out: str | Path, cfg: dict) -> dict:
     ops["initialization"] = {**({"status": "MEASURED"} if done else {"status": "FAILED"} if tried else
                                 absent("initialization", "initialization_exits")),
                              "attempts": tried, "exits": _read(out, "initialization_exits"),
-                             "management": "the design's micro-batch fallback (initialization.execution)"}
+                             "management": ("the design's micro-batch fallback (initialization.execution) and the "
+                                            f"allocator's {IN.ALLOCATOR} (initialization.ALLOCATOR)")}
     if done:
         ops["initialization"]["memory"] = done[-1]["memory"]
     complete = all(o["status"] == "MEASURED" for o in ops.values())

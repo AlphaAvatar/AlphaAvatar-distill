@@ -277,6 +277,30 @@ def forecast() -> dict:
     return out
 
 
+def from_check(rec: dict) -> dict:
+    """The teacher work re-priced from the committed check record (``l40s_check.py record``): each mode's
+    measured generation rate (the engine's start included, so on the slow side for long runs) and the
+    initialization's measured attempts replace the assumed card factors; the tokens, the teacher's evaluation
+    and the session overheads stay as each scenario forecasts them. What the first teacher artifact is
+    priced from; W00's own measurement re-prices the rest."""
+    ops = rec["verdict"]["operations"]
+    rate = ops["generation"]["tokens_per_second"]
+    init_h = sum(float(t.get("seconds") or 0) for t in ops["initialization"]["attempts"]) / 3600 + LOAD_H
+    out = {"check_run": rec["run_id"], "tokens_per_second": rate, "initialization_hours": round(init_h, 2)}
+    for key, s in SCENARIOS.items():
+        t = teacher_session(key, s)
+        tok = {k: v * 1e6 for k, v in t["tokens_m"].items()}
+        ht = s["ht_tokens"] / (s["ht_tokens"] + s["hn_tokens"])
+        both = lambda n: (n * ht / rate["H-T"] + n * (1 - ht) / rate["H-N"]) / 3600  # noqa: E731
+        first = SETUP_H + both(tok["calibration"] + tok["t0"] + tok["v"]) + init_h + CLOSE_H
+        rest = SETUP_H + both(tok["e"]) + tok["x"] / rate["H-N"] / 3600 + t["hours"]["teacher_evaluation"] + CLOSE_H
+        out[key] = {"through_w00": {"hours": round(first, 2), "work_hours": round(first - SETUP_H - CLOSE_H, 2),
+                                    "usd": usd(first)},
+                    "after_w00": {"hours": round(rest, 2), "work_hours": round(rest - SETUP_H - CLOSE_H, 2),
+                                  "usd": usd(rest)}}
+    return out
+
+
 def bounds(hc: dict, scen: dict, storage_usd: dict) -> dict:
     """Each envelope at the live price and at the ceiling: what its hard cap buys, the longest single session its
     artifact admits, and what each scenario costs AS RUN -- the teacher in its two bounded sessions, recovery (one
@@ -324,7 +348,11 @@ def bounds(hc: dict, scen: dict, storage_usd: dict) -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--write", action="store_true")
+    ap.add_argument("--from-check", default=None, help="the committed check record: the teacher work re-priced")
     args = ap.parse_args(argv)
+    if args.from_check:
+        print(json.dumps(from_check(json.loads(Path(args.from_check).read_text())), indent=1))
+        return 0
     doc = forecast()
     if args.write:
         OUT.parent.mkdir(parents=True, exist_ok=True)

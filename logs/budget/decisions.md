@@ -14799,3 +14799,15 @@ on a paid pod.
     free at about 27 full-length sequences. The teacher's evaluation engine stays at 0.90 (4.27 GiB free).
   Neither is a protocol change or a reason for another card; a new check measures both. Its evidence is
   kept under the run.
+- **Check attempt 2, `a_check_20261029_172423`: complete, $1.7508 all-in (94.6 min; pod `betvewsu0anx8c`
+  gone, the provider confirms).** Every operation MEASURED; the closeout's re-derived verdict agrees with
+  the pod. Generation at 0.87: 4.97 GiB free (Thinking 339 tok/s, Non-Thinking 264 tok/s, engine start
+  included; KV cache 218,234 tokens, 26.7 full-length sequences). The 40,960 engine: 4.27 GiB free. Training:
+  25.1 / 25.9 GiB free, 6.29 / 5.73 s per step. Initialization: micro-batch 3 ran out of memory in DEPTH
+  (exit 75, as forecast), micro-batch 1 completed in 2,614.7 s (DEPTH 2,365.7 s) -- but with 0.64 GiB free by
+  peak RESERVED memory (43.75 GiB) against 26.68 GiB peak ALLOCATED: the caching allocator fragments at one
+  item per forward over growing lengths. The gate admits recovery's training step and refuses the teacher
+  kind on that margin, as fail-closed requires. Memory optimization, protocol-neutral (named in the
+  application's memory section): the initialization's process runs with `PYTORCH_CUDA_ALLOC_CONF=
+  expandable_segments:True` (`initialization.ALLOCATOR`, set by both parents, recorded in its record).
+  A third check measures it.

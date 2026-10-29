@@ -1,0 +1,213 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.l40s_check/v1_record",
+ "run_id": "a_check_20261029_172423",
+ "written_utc": "2026-10-29T19:00:21Z",
+ "identity": "848f65087269a8328a0cd682d5f8e089e5af93bb3e3e0b843b4868ef9c7a03d1",
+ "authorization_id": "stage2.teacher_modes.d4_scale.a_check_20261029_172423",
+ "harness": "5f3a84771aeea5204318b4509338daaf0db95362b8baf6d7e226d5f78cdd2708",
+ "config_sha256": "1cd6b9537b8f9442195b2fdbd4d0721c626c0595864a15c859c377421929107b",
+ "evidence_archive_sha256": "72e5aaaafab661dba95dbdf5ed6c3ff8af3b410cdba27d1093a758eb430b6f87",
+ "evidence": "logs/stages/stage-2/teacher_modes/runs/a_check_20261029_172423/check_evidence",
+ "evidence_files": {
+  "device.json": "989b72ef54505d780371746153819a25d5024b12138163d379d76b68a237342b",
+  "evaluation_engine.json": "47299fa2bb6e9146e1802158e116ccbcdf1123e6f11e2ec37c08a65bfbc37697",
+  "generation.json": "572e06de294f84baaddb03fc21886a17c2a51ee5be6bff275d3457c78dfc3530",
+  "initialization_exits.json": "4020ab84c7d02ef123efa2e8a3829b1bbe4d8a3d590f58c5d52522a49bc9fa65",
+  "initialization_mb1.json": "44bb48857e9735f8b9fbc276932f3bd152957e7fa363b84cda9698513b3513fd",
+  "initialization_mb3.json": "e8176d55d13b964b0e82558d1ac41e43880365b4ebb1fdda05de15da4dc8bc46",
+  "report.json": "e06565046c3f991962c6ddd047459503b7e65b41c68a088d9b0d3e88dee14a0c",
+  "run.json": "ca17e40fce06fa687ad13c5025d4516d859144155df10baf6995d37fad764879",
+  "train_H-N.json": "a49ea55ffdcaee91422262f7d17a5543b6c042f92649f0675bdedf3288eb236a",
+  "train_H-T.json": "92604a7dab2ed73281df0ae160be59d34a02bcf0c2cc3d2dfb6483c5417fbb64",
+  "train_exits.json": "9be8d57dfe2612947e3977bcf5b0f3e42d1603aded520954c596935ca59ce461"
+ },
+ "verdict": {
+  "schema": "aadistill.stage2.teacher_modes.l40s_check/v1",
+  "card": "NVIDIA L40S",
+  "free_memory_wanted_gib": 4.0,
+  "operations": {
+   "generation": {
+    "status": "MEASURED",
+    "memory": {
+     "total_gib": 44.99,
+     "peak_gib": 40.02,
+     "free_gib": 4.97,
+     "fits_with_margin": true
+    },
+    "management": "the engine's own allocation (gpu_memory_utilization 0.87, teacher_session's)",
+    "tokens_per_second": {
+     "H-T": 339.1,
+     "H-N": 263.8
+    },
+    "engine": {
+     "H-T": {
+      "kv_cache_tokens": 218234,
+      "max_concurrency": 26.67,
+      "at_tokens_per_request": 8184
+     },
+     "H-N": {
+      "kv_cache_tokens": 219753,
+      "max_concurrency": 26.85,
+      "at_tokens_per_request": 8184
+     }
+    }
+   },
+   "evaluation_engine": {
+    "status": "MEASURED",
+    "context": 40960,
+    "memory": {
+     "total_gib": 44.99,
+     "peak_gib": 40.72,
+     "free_gib": 4.27,
+     "fits_with_margin": true
+    },
+    "engine": {
+     "kv_cache_tokens": 228144,
+     "max_concurrency": 5.57,
+     "at_tokens_per_request": 40960
+    },
+    "management": "the engine's KV capacity at the full context; a lower context is never an option (P18)"
+   },
+   "train_H-T": {
+    "status": "MEASURED",
+    "memory": {
+     "total_gib": 44.39,
+     "peak_gib": 19.25,
+     "free_gib": 25.14,
+     "fits_with_margin": true
+    },
+    "allocated_gib": 17.53,
+    "seconds_per_step": 6.2946,
+    "nonpad_tokens_per_second": 2460.3,
+    "documents": 66,
+    "management": "micro-batch 1 and activation checkpointing already (the recipe's); Top-K rows chunked by 512"
+   },
+   "train_H-N": {
+    "status": "MEASURED",
+    "memory": {
+     "total_gib": 44.39,
+     "peak_gib": 18.49,
+     "free_gib": 25.9,
+     "fits_with_margin": true
+    },
+    "allocated_gib": 17.51,
+    "seconds_per_step": 5.7317,
+    "nonpad_tokens_per_second": 2609.0,
+    "documents": 97,
+    "management": "micro-batch 1 and activation checkpointing already (the recipe's); Top-K rows chunked by 512"
+   },
+   "initialization": {
+    "status": "MEASURED",
+    "attempts": [
+     {
+      "micro_batch_size": 1,
+      "out_of_memory": false,
+      "completed": true,
+      "seconds": 2614.7,
+      "steps": [
+       {
+        "impl_id": "attention.activation_importance_v1",
+        "seconds": 76.0,
+        "allocated_gib": 9.93,
+        "reserved_gib": 42.89,
+        "total_gib": 44.39
+       },
+       {
+        "impl_id": "depth.causal_kl_greedy_v1",
+        "seconds": 2365.7,
+        "allocated_gib": 26.68,
+        "reserved_gib": 43.75,
+        "total_gib": 44.39
+       },
+       {
+        "impl_id": "width.global_pca_v0",
+        "seconds": 106.4,
+        "allocated_gib": 19.79,
+        "reserved_gib": 28.07,
+        "total_gib": 44.39
+       },
+       {
+        "impl_id": "ffn.activation_importance_v0",
+        "seconds": 32.8,
+        "allocated_gib": 15.18,
+        "reserved_gib": 28.07,
+        "total_gib": 44.39
+       }
+      ],
+      "memory": {
+       "total_gib": 44.39,
+       "peak_gib": 43.75,
+       "free_gib": 0.64,
+       "fits_with_margin": false
+      }
+     },
+     {
+      "micro_batch_size": 3,
+      "out_of_memory": true,
+      "completed": false,
+      "seconds": 402.6,
+      "steps": [
+       {
+        "impl_id": "attention.activation_importance_v1",
+        "seconds": 84.3,
+        "allocated_gib": 14.42,
+        "reserved_gib": 40.32,
+        "total_gib": 44.39
+       }
+      ],
+      "memory": {
+       "total_gib": 44.39,
+       "peak_gib": 40.32,
+       "free_gib": 4.07,
+       "fits_with_margin": true
+      }
+     }
+    ],
+    "exits": {
+     "3": 75,
+     "1": 0
+    },
+    "management": "the design's micro-batch fallback (initialization.execution)",
+    "memory": {
+     "total_gib": 44.39,
+     "peak_gib": 43.75,
+     "free_gib": 0.64,
+     "fits_with_margin": false
+    }
+   }
+  },
+  "complete": true,
+  "fit_with_margin": false,
+  "passed": true,
+  "checks": {
+   "generation": {
+    "status": "MEASURED"
+   },
+   "evaluation_engine": {
+    "status": "MEASURED"
+   },
+   "train_H-T": {
+    "status": "MEASURED"
+   },
+   "train_H-N": {
+    "status": "MEASURED"
+   },
+   "initialization": {
+    "status": "MEASURED"
+   }
+  },
+  "_passed": "every operation measured (the shared closeout's re-derivation reads passed and checks); whether each fits with the wanted margin is fit_with_margin and below_margin",
+  "below_margin": [
+   "initialization"
+  ],
+  "failed": [],
+  "a100_evidence": [],
+  "_a100_evidence": "an operation that failed out of memory after every declared memory management option; anything else that failed is an engineering failure to diagnose, not a reason for another card",
+  "reads_no_eval_set": true,
+  "formal": false,
+  "authorizes": "nothing"
+ },
+ "agrees_with_the_pod": true,
+ "use": "what the teacher session and the recovery units are priced from (phase_forecast.py), and what their artifacts bind once `gate` admits their operations (phase.kind_conditions)",
+ "authorizes": "nothing"
+}

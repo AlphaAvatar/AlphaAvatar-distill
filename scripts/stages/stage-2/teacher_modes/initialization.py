@@ -42,6 +42,7 @@ import copy
 import dataclasses
 import hashlib
 import json
+import os
 import shutil
 import sys
 import time
@@ -69,6 +70,19 @@ UNIT = "common_initialization"
 SCHEMA = "aadistill.stage2.teacher_modes.initialization/v1"
 #: the exit status of a CUDA out-of-memory error, which the caller answers with the declared fallback
 OOM_EXIT = 75
+#: the CUDA caching allocator's setting for the initialization's process (PYTORCH_CUDA_ALLOC_CONF, set by its
+#: parent before CUDA starts): at micro-batch 1 the L40S check (a_check_20261029_172423) measured DEPTH at 26.68 GiB
+#: peak ALLOCATED but 43.75 GiB peak RESERVED -- one item per forward at growing lengths leaves cached blocks too
+#: small to reuse -- so 0.64 GiB free by reserved memory, below the 4 GiB wanted. Expandable segments let a
+#: segment grow instead; memory layout only, the same operators and arithmetic
+ALLOCATOR = "expandable_segments:True"
+
+
+def child_env(extra: dict | None = None) -> dict:
+    """The initialization process's environment: the parent's, the repository paths and ``ALLOCATOR``."""
+    return {**os.environ, "PYTHONPATH": "src:scripts:scripts/stages/stage-1", "PYTORCH_CUDA_ALLOC_CONF": ALLOCATOR,
+            **(extra or {})}
+
 
 
 def is_out_of_memory(exc: BaseException | None) -> bool:
@@ -221,7 +235,7 @@ def run(args) -> dict:
     except Exception as exc:
         if is_out_of_memory(exc):
             (out / f"oom_mb{ex.micro_batch_size}.json").write_text(json.dumps(
-                {"execution": ex.as_trace(), "steps_done": steps, "seconds": round(time.time() - t0, 1),
+                {"execution": ex.as_trace(), "allocator": os.environ.get("PYTORCH_CUDA_ALLOC_CONF"), "steps_done": steps, "seconds": round(time.time() - t0, 1),
                  "error": str(exc)[:2000]}, indent=1, default=str) + "\n")
         raise
     final = results[-1]
@@ -245,7 +259,7 @@ def run(args) -> dict:
                           "status": persisted["status"]},
            "calibration": {h: {k: v for k, v in b.items() if k != "items"} for h, b in built.items()},
            "steps": steps, "seconds": round(time.time() - t0, 1), "device": args.device,
-           "execution": ex.as_trace(),
+           "execution": ex.as_trace(), "allocator": os.environ.get("PYTORCH_CUDA_ALLOC_CONF"),
            "out_of_memory_attempts": sorted(p.name for p in out.glob("oom_mb*.json")),
            "scientific_use": "the study's common initialization for every arm (d4_scale_design.json :: initialization)",
            "never": "a teacher-forced or downstream result; an approximation of the hybrid, never described as it"}
