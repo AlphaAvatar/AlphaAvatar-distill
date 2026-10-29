@@ -58,7 +58,7 @@ check config as they are now, the run's committed check authorization and
 shared closeout, the committed evidence hashing to the record and re-deriving
 exactly its verdict and the pod's report, and every operation that session
 runs (the config's ``gates``) MEASURED with the wanted margin. A smaller
-margin always refuses (maintainer, 2026-10-30: no exception is approved, and
+margin always refuses (maintainer, 2026-10-29: no exception is approved, and
 none can be declared from here); it is answered by a protocol-neutral memory
 optimization and a new check, never by another card. An exception, if the
 maintainer ever approves one, is a new mechanism citing that decision.
