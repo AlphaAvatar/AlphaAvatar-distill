@@ -2,6 +2,18 @@
 
 ## Current study (2026-10-28): four independent projections + learnable SiLU gate, 1.123B
 
+**2026-10-28 (maintainer, "Research A first"): the teacher is PENDING.** Which
+teacher Research B uses -- Thinking-2507, the hybrid in thinking or in
+non-thinking mode, or no formal B for now -- is the maintainer's decision after
+Research A's complete result, with the corpus, the PCA calibration, the
+initialization and the matched control's data of that lineage. The design keeps
+its architecture and protocol; `recovery_driver.load_plan` and `formal_teacher`
+refuse every formal use while the teacher is pending, and teacher-independent
+engineering runs on a declared stand-in (`engineering_teacher`). The engine
+admission's probe is six engineering texts isolated from eval-set-1. Nothing of
+B is requested now.
+
+
 **Status: designed and implemented at $0; nothing authorized.** Maintainer
 decision 2026-10-28. The 900M transpose-shared design below, its B-E FAIL
 (`be_20261028_095332`) and every record of it are a historical research record.

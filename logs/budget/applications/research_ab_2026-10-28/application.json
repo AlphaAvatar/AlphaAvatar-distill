@@ -139,5 +139,10 @@
   "new D4 initialization",
   "a merge to main"
  ],
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "superseded": {
+  "utc": "2026-10-28",
+  "by": "logs/budget/applications/research_a_2026-10-29/application.json",
+  "why": "maintainer brief 2026-10-28 UTC 'Research A First, Research B Teacher Selection Deferred': this joint application and its $903 cap are NOT approved; Research A is applied for alone, Research B is re-priced after its teacher is decided"
+ }
 }

@@ -70,6 +70,10 @@ SESSION_LAUNCHERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     #: Research B's independent-gated study's engineering validation, added WITH
     #: its launcher (2026-10-28) so every structural check covers it before any grant.
     ("igv_launch", ("--run-id", "igv_spec_check")),
+    #: Research A's D4-scale phase (both kinds share one launcher, `phase.py`), added WITH it
+    #: (2026-10-28) so every structural check covers it before any grant.
+    ("phase", ("--run-id", "phase_spec_check", "--network-volume-id", "v", "--volume-mount-path", "/runpod-volume",
+               "--volume-gb", "60")),
 )
 
 

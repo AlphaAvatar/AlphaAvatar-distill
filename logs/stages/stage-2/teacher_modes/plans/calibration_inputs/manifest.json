@@ -1,0 +1,24 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.calibration_inputs/v1",
+ "profiles": {
+  "calib.s0v_rh_d4@v1": "artifacts/stages/stage-0/calibration_volume/profiles_formal_v1/calib.s0v_rh_d4.items.jsonl",
+  "calib.s0v_base_d4@v1": "artifacts/stages/stage-0/calibration_volume/profiles_formal_v1/calib.s0v_base_d4.items.jsonl"
+ },
+ "profiles_sha256": {
+  "calib.s0v_rh_d4@v1": "3e8d10189f7c8b433ca051f086a9b825a79b7fc4182583f10a591ca9b2428267",
+  "calib.s0v_base_d4@v1": "2e8b99565a147e8253ca1768383fb9d4d728ceb105e283ad3653f043485e7e05"
+ },
+ "source_tokenizer": {
+  "model": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+ },
+ "files": [
+  {
+   "file": "calibration_input_g0.jsonl",
+   "system": "You are a helpful Assistant.",
+   "tasks": 160,
+   "sha256": "86c1431b70219d3fc7db08cfe02181fda63b4179d00e37fb3a363e42edf4d9ef"
+  }
+ ],
+ "authorizes": "nothing"
+}

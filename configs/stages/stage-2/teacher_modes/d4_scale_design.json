@@ -2,8 +2,8 @@
  "schema": "aadistill.stage2.teacher_modes.d4_scale_design/v1",
  "study_id": "stage2.teacher_modes.d4_scale_v1",
  "name": "One hybrid teacher, its native thinking and non-thinking distributions, distilled at D4-Augmented's training scale under the target-position Top-200 + tail KD protocol",
- "status": "DESIGNED 2026-10-28 at $0 on the maintainer's decision; NOT FROZEN. Frozen with its preregistration when the maintainer authorizes the paid phase. Authorizes nothing.",
- "decided_by": "maintainer brief 2026-10-28 'Revised Research A/B Programme & Engineering Principles', sections 3 and 5",
+ "status": "DESIGNED 2026-10-28 at $0 on the maintainer's decision; revised 2026-10-29 on the maintainer's brief 'Research A First, Research B Teacher Selection Deferred' (Research A runs first and alone; its tasks built and frozen; its execution chain complete). NOT FROZEN: frozen with its preregistration when the maintainer grants the phase. Authorizes nothing.",
+ "decided_by": "maintainer brief 2026-10-28 'Revised Research A/B Programme & Engineering Principles', sections 3 and 5; maintainer brief 2026-10-29 sections 3 and 4",
  "supersedes": {
   "study": "stage2.teacher_modes.hybrid_v1 (configs/stages/stage-2/teacher_modes/design.json, sha256 bound in the A-E grant)",
   "what_changes": "the scale (D4-Augmented's order of magnitude instead of T0's 1,761 tasks), the KD objective (the project's new training baseline), and no promotion pilot (the 10% A1 slice is cancelled); the mode protocol, token protocol, isolation, admission, initialization and evaluation are carried over unchanged",
@@ -12,16 +12,27 @@
  "question": "With one hybrid teacher, one student architecture, one common initialization and one recovery recipe, does distilling the teacher's native THINKING distribution or its native NON-THINKING distribution give a small student better fluid-reasoning correctness on unseen problems -- (S) on the same tasks, and (C) at comparable training compute -- at D4-Augmented's training scale?",
  "teacher": {
   "identity": "configs/stages/stage-2/teacher_modes/teacher_identity.json",
-  "model": "Qwen/Qwen3-4B", "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
   "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
   "dtype": "bfloat16",
   "lineage_note": "a different post-training lineage from Thinking-2507 (D4-Augmented's and Research B's teacher): no Research A student is ever set beside a Research B student as a controlled pair, even under the same KD objective"
  },
  "modes": {
-  "H-T": {"template_kwargs": {"enable_thinking": true}, "think_state": "self_opening",
-          "targets": "every generated token: <think>, the reasoning, </think>, the answer and the stop token"},
-  "H-N": {"template_kwargs": {"enable_thinking": false}, "think_state": "preclosed",
-          "targets": "every generated token: the answer and the stop token; the template's empty think block is context"},
+  "H-T": {
+   "template_kwargs": {
+    "enable_thinking": true
+   },
+   "think_state": "self_opening",
+   "targets": "every generated token: <think>, the reasoning, </think>, the answer and the stop token"
+  },
+  "H-N": {
+   "template_kwargs": {
+    "enable_thinking": false
+   },
+   "think_state": "preclosed",
+   "targets": "every generated token: the answer and the stop token; the template's empty think block is context"
+  },
   "switch": "the official hard switch only (apply_chat_template(..., enable_thinking=...)); no /think or /no_think, no hand-built prefix, no mode-inducing system text; the system message 'You are a helpful Assistant.' for both modes and every task that carries none",
   "verified": "A-E PASS (ae_20261028_093428): prompt token identity, both modes' generation, think states and stop tokens on the real teacher under vLLM 0.27.1"
  },
@@ -36,42 +47,51 @@
   "T0": "the frozen H1 task lists (hybrid_v1 :: tasks.T0: P1 1,587 + P1t 59 + PA1 115 = 1,761 tasks, sha256-pinned), both modes",
   "E": {
    "_": "the D4-scale extension, both modes on every task",
-   "source": "unused tasks of T0's own pools (data/stages/stage-2/reasoning_data/tasks/*_v2 and the supporting pools), drawn round-robin over each cell's unused task groups in T0's cell proportions (P1's rule), then -- when a cell's pool is exhausted -- new tasks from the project's own generators on the next training seed block",
-   "measured_supply_2026_10_29": "unused in T0's pools: primary cells about 2,000 tasks after removing the v1/v2 duplicate listings (task-contained deduction, inductive rule discovery, compositional generalization, interactive adaptation and abstract/analogical), supporting cells 6,000+ (reading 4,790, gsm8k 1,508, math 181, code 192); generators have no fixed bound",
-   "built_before_generation": "built, isolation-checked (R0-R9: content, transformation-family, generator and source-lineage isolation from eval-set-1 and its held-out rule families; shared.eval_sets.require_disjoint) and frozen with its sha256 at $0, before any of its tasks is generated",
-   "order": "one seeded order over E, generated in waves of 400 tasks"
+   "source": "the order data/stages/stage-2/teacher_modes/tasks/order_v1.jsonl (build_tasks.py), T0's (stratum, source) cells in T0's proportions by largest remainder: each cell's unused pool tasks first, round-robin over its groups (P1's rule), then new tasks from the SAME source's own construction (the project generators on a fresh seed block inside R5's training range; the third-party generators through H1's isolated export at new seed bases; MATH, MBPP and SQuAD v2 continued in their pool builder's hash order). A cell whose supply ends hands its later share to its stratum's other cells (MBPP, 474 tasks in all, runs out at order position 4,948, inside X); no stratum's share moves",
+   "built_before_generation": "FROZEN 2026-10-29 at $0 before any of its tasks is generated: 17,762 tasks (V 240, E 3,522 = 2 x T0, X 14,000), sha256 d71ac56b99f3..., R0-R9 pass with 17 flagged items removed first (R1/R2/R7 and the calibration prompts' keys); per-slice stratum shares within 0.24 points of T0's in V, equal in E, within 0.01 in X (order_v1.manifest.json)",
+   "order": "the frozen order's E slice in waves of 400 (W01..W09)"
   },
-  "stopping_rule": "after each wave (T0 is the first), the admitted H-T documents of I are packed document_isolated at 8,192; generation stops at the end of the first wave at which H-T-S reaches 2,468 sequences, or when E is exhausted (the reached count is then the scale, reported). A data-size rule on teacher data fixed before any datum exists, never a scientific decision",
+  "stopping_rule": "after each wave (W00 = T0 and V first) the admitted H-T documents of I are packed document_isolated at 8,192; the stopping wave is the first whose pack reaches 2,468 sequences, or the last of E (the reached count is then the scale, reported). Exact on the dev box with every verifier (admission.py); the pod, which cannot run MBPP's sandbox, bounds the rule from below and keeps generating until its LOWER count reaches the target (generation_protocol.json :: stopping), so it never stops early; waves after the stopping wave are generated and never trained on. A data-size rule fixed before any datum exists, never a scientific decision",
   "X": {
    "_": "the compute-matching extension, H-N only",
-   "rule": "further tasks after E in the same seeded construction (pools first, then generators), in T0's cell proportions, generated in H-N only and added whole until H-N-C's isolated pack reaches H-T-S's sequence count",
+   "rule": "X's H-N-admitted tasks, taken in X's order per stratum and interleaved by largest remainder against I's stratum shares, added whole until H-N-C's isolated pack reaches H-T-S's sequence count; then the smallest such prefix",
    "independence": "every X task is a distinct task (a distinct pool item or a distinct generator seed); no task, prompt or content key repeats across T0, E, X or eval-set-1",
-   "if_infeasible": "if a cell cannot reach its share without moving the cell mixture by more than 2 points, C uses the registered fallback (preregistration :: comparisons.C.fallback), decided at $0 before any training"
+   "if_infeasible": "C is FEASIBLE when that count is reached and every stratum's share of H-N-C's tasks is within 2 points of its share of I (admission.py); otherwise the registered fallback (preregistration :: comparisons.C.fallback), decided at $0 on the dev box before any training"
+  },
+  "V": {
+   "_": "the validation reserve: the order's first 240 tasks, generated with T0 in W00 in both modes, never trained on",
+   "use": "each mode's admitted V documents packed document_isolated, at most 16 sequences: every arm's validation CE/KD in its own mode (diagnostics only, never a decision)"
   }
  },
  "generation": {
-  "runner": "run_battery.py --mode generate under each mode's template kwargs and official sampling (H-T 0.6/0.95/20/0, H-N 0.7/0.8/20/0), driven per wave; the same recorded seed for the same (task, candidate, turn) in both modes; up to 2 candidates per task, the second only when the first is not admitted",
+  "runner": "teacher_session.py (teacher_modes) on H1's generation driver (run_group, sealed shards, second_pass) and run_battery.py --mode generate under each mode's template kwargs and official sampling (H-T 0.6/0.95/20/0, H-N 0.7/0.8/20/0), every value read from generation_protocol.json; the same recorded seed for the same (task, candidate, turn) in both modes; up to 2 candidates per task, the second only when the pod's pure-Python verdict rejects the first (none for MBPP)",
   "allowance": "per turn, 8,184 - the prompt's tokens: a document never exceeds the 8,192-token training sequence, so nothing is ever cut",
   "long_reasoning": {
    "_": "the maintainer's concern (brief section 5): thinking trajectories longer than the training sequence",
-   "rule": "a turn that reaches its allowance without a stop token is recorded context_limit_reached -- right-censored -- and is NEVER admitted, never truncated into a document and never scored as wrong",
+   "rule": "a turn that reaches its allowance (8,184 - the prompt) without a stop token is recorded length_limited: TRAINING-LENGTH-LIMITED and right-censored at the training sequence, never a context-limit hit (the teacher's supported context is 40,960) -- never admitted, never truncated into a document, never scored as wrong",
    "recorded": "per cell, mode and wave: the share of first candidates censored, their prompt lengths, and how many tasks were admitted only through a second candidate; the teacher's eval-set-1 generations at its full supported context (40,960) show the uncensored length distribution beside it",
-   "flag": "LENGTH_CENSORED on any primary cell whose H-T first-candidate censored share exceeds 20%: that cell's S contrast is reported with the flag, beside the composition shift of I against each mode's own admitted set (cells, difficulty tiers), and the maintainer decides how the cell is read; nothing is re-run or re-cut",
+   "flag": "LENGTH_CENSORED, a DESCRIPTIVE warning threshold (maintainer brief 2026-10-29 section 4): any primary cell whose H-T first-candidate length-limited share exceeds 20% carries it; that cell's length-limited share, correctness, natural-termination rate and trainable-sample count are reported in full beside the composition shift of I. It never drops a capability category, changes admission, pauses anything or triggers a re-run",
    "declared_bias": "admission at 8,192 favours tasks whose thinking fits the sequence; the comparison is between the two modes' admissible teacher-native distributions at this sequence length, and is reported as that"
   },
-  "calibration": "the hybrid's own H-T and H-N trajectories on calib.s0v_base_d4@v1's 85 prompts, for the common initialization (unchanged from hybrid_v1)",
-  "persistence": "each wave's raw generations, documents and admission records are written to the network volume and the relay as the wave completes (sha256 recorded); a later attempt resumes at the first incomplete wave and never regenerates a completed one"
+  "calibration": "the hybrid's own H-T and H-N trajectories on the prompts of D4 Top-1's two calibration profiles (calib.s0v_rh_d4@v1, 75, for ATTENTION; calib.s0v_base_d4@v1, 85, for DEPTH, RESIDUAL_WIDTH and FFN), each prompt recovered from its own token ids (hybrid_calibration.py; logs/stages/stage-2/teacher_modes/plans/calibration_inputs), one candidate per mode",
+  "persistence": "the teacher session writes everything under <volume>/teacher_modes as it completes -- each wave's sealed shards (sha256 markers), the initialization, the teacher's evaluation -- and the launcher pulls every sealed shard and finished evidence on each poll; a later attempt re-reads the volume and never regenerates a sealed shard, re-materializes the initialization or re-evaluates a persisted unit"
  },
  "admission": "verified correct by the frozen verifiers (P1v), naturally terminated, every turn within 8,192, the prompt in its mode's generation prompt; units whole; identical rules in both modes. I = tasks admitted in both modes",
  "initialization": {
   "rule": "ONE common initialization for every arm, compressed from the hybrid teacher itself (unchanged from hybrid_v1)",
-  "method": "the D1 + scored_v1 forward-baseline operators on Qwen/Qwen3-4B@1cfa9a72 along D4 Top-1's operator path (ATTENTION -> DEPTH -> RESIDUAL_WIDTH -> FFN) as a fixed path: one materialization, no search, operator-internal measurement only; mode-balanced calibration",
+  "method": "D4 Top-1's operator path, step for step (its search record: attention.activation_importance_v1 on rh_d4's prompts, depth.causal_kl_greedy_v1, width.global_pca_v0, ffn.activation_importance_v0 on base_d4's; seed 20260815; the Stage-0 search's execution and target geometry), materialized ONCE on Qwen/Qwen3-4B@1cfa9a72 by materialize_fixed_path with the hybrid's own mode-balanced items as two hybrid profiles (initialization.py): operator-internal measurement only, no search, no pinned digest",
   "geometry": "the 596M student geometry (28 layers, 1,024 wide, 16/8 heads, FFN 3,072, tied embedding), inheriting the hybrid's config",
-  "persistence": "the materialized checkpoint persisted with its identity at completion and reused by all six units; never re-materialized after it exists"
+  "persistence": "persisted on the volume the moment it exists (persist_unit) with initialization.json last; its identity is committed (logs/stages/stage-2/teacher_modes/assets/common_initialization.json) and every recovery unit re-identifies it from its bytes; never re-materialized after it exists",
+  "mode_balance": "equal scored positions from each mode, by whole items: every item of the mode with fewer, then the other mode's items in a seeded order until its positions reach that total; subtype = source subtype x mode, so DEPTH's subtype-then-domain average weighs the modes equally (calibration.items_from_records)"
  },
  "arms": {
-  "H-T-S": "H-T documents of I", "H-N-S": "H-N documents of I", "H-N-C": "H-N documents of I and X, sized to H-T-S's sequence count",
-  "seeds": [20260726, 20260801]
+  "H-T-S": "H-T documents of I",
+  "H-N-S": "H-N documents of I",
+  "H-N-C": "H-N documents of I and X, sized to H-T-S's sequence count",
+  "seeds": [
+   20260726,
+   20260801
+  ]
  },
  "objective": {
   "kd": "the project's training baseline: loss.kd_support resolved from the forward baseline (reference_topk_tail_v1, top_k 200, shared.forward_baseline), loss.kd_scope 'assistant' (= the documents' generated tokens), T 1; the Top-200 + tail KL, never called the full-vocabulary KL",
@@ -80,21 +100,37 @@
  },
  "recovery": {
   "as": "H1-PA's recipe (h1pa.json :: recipe, E1's configs): batch size 2 packed sequences, micro-batch size 1 (2 gradient accumulation steps on one GPU), sequence length 8,192, 3 epochs, total_steps = ceil(3 x sequences / 2), warmup max(10, round(0.05 T)), AdamW lr 5e-5 betas (0.9, 0.95) eps 1e-8 weight decay 0.01, clipping 1.0, cosine to 0.1, fp32 weights with bf16 autocast, gradient checkpointing, E1's trainable patterns (the tied embedding frozen)",
-  "declared_changes_from_h1pa": {"loss": "the training baseline above (H1-PA: full-vocabulary KD at every position)", "batch.context_strategy": "document_isolated", "teacher": "the hybrid, on the fly", "student_path": "the common hybrid initialization", "checkpoint.bind_identity": true},
-  "identical_across_arms": "everything except the training documents and, through them, the step count"
+  "declared_changes_from_h1pa": {
+   "loss": "the training baseline above (H1-PA: full-vocabulary KD at every position)",
+   "batch.context_strategy": "document_isolated",
+   "teacher": "the hybrid, on the fly",
+   "student_path": "the common hybrid initialization",
+   "checkpoint.bind_identity": true,
+   "val_blocks": "each arm's own-mode validation tail (at most 16 sequences)"
+  },
+  "identical_across_arms": "everything except the training documents and, through them, the step count",
+  "driver": "recovery_units.py (teacher_modes): the packs rebuilt on the pod from the volume's shards and the committed admission record, every file's sha256 equal to the record's; then h1pa_driver.run per GPU (state, resume, persistence, evaluation are H1-PA's); each student evaluated in its own mode with the hybrid's tokenizer and template"
  },
  "execution": {
   "topology": "one GPU per training unit; units of different arms or seeds may run concurrently on separate GPUs of one pod, which changes no unit's arithmetic",
-  "hardware": "generation and the initialization on an A100 80GB (the measured generation hardware); recovery on an L40S when the measured peak memory leaves 4 GB free, otherwise an A100 80GB; the card enters every unit's execution identity",
-  "persistence": "save points (optimizer state, step, RNG states, the consumed-sequence position, the bound data and initialization identities) on the network volume as written; a later attempt resumes from the last valid save point, never retrains a completed unit, never re-evaluates a scored one"
+  "hardware": "A100 80GB for the teacher session (the measured generation hardware) and, by default, for recovery; an L40S pod is used for recovery only when the first formal unit's measured peak memory leaves 4 GB free on it; the card, its count and the pod enter every unit's execution identity",
+  "persistence": "save points (optimizer state, step, RNG states, the consumed-sequence position, the bound data and initialization identities) on the network volume as written; a later attempt resumes from the last valid save point, never retrains a completed unit, never re-evaluates a scored one",
+  "sessions": {
+   "teacher": "one A100 80GB: calibration -> initialization -> W00..W09 -> X -> the teacher's evaluation in both modes (phase.py kind teacher)",
+   "dev_box": "admission.py on the secured shards ($0): the exact rules, the packs' sha256, committed with the initialization record",
+   "recovery": "one pod, one or more GPUs (A100 80GB or L40S), the six units (phase.py kind recovery)",
+   "analysis": "analysis.py on the secured evidence ($0)"
+  }
  },
  "evaluation": {
   "set": "eval-set-1, every item of every unit, under its registered identity, validity mask and formal protocol v2",
   "decoding": "nucleus_v1 (912214c6...) for every student and for the teacher in both modes",
   "mode": "each student in its own training mode; the teacher in both, at its full supported context (P18)",
   "scoring": "the frozen scorers on records that state their think_state (approved 2026-10-27; tests/test_mode_scoring_conformance.py)",
-  "axes": "eval-set-1's registered static axes of fluid_reasoning_720: three of AGENTS.md P10.2's four primary axes (task-contained deduction, inductive rule discovery, compositional generalization) and abstract/analogical reasoning, a registered sub-category reported as its own diagnostic axis; the fourth primary axis, interactive adaptation and planning, is the 144 interactive episodes (exploratory); every other unit reported beside, never pooled into one score"
+  "axes": "AGENTS.md P10.2's four primary axes, each reported apart: task-contained deduction, inductive rule discovery and compositional generalization (eval-set-1's static items, decided) and interactive adaptation and planning (the 144 interactive episodes, exploratory); abstract/analogical reasoning, a registered sub-category, is reported as its own axis and enters the static Holm family as eval-set-1 registers it; every other unit reported beside, never pooled; NLL, KL and usable rollout are never read as reasoning",
+  "teacher": "the teacher in both modes on every item, at the remaining capacity of its 40,960-token supported context (P18), in the teacher session"
  },
  "isolation": "task, rule-family, transformation-family, generator and source-lineage isolation between T0, E, X, the calibration prompts and eval-set-1 (R0-R9; shared.eval_sets.require_disjoint and held_out_paths); never an official ARC-AGI evaluation task or a derivative",
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "research_b": "Research B's teacher is the maintainer's decision after this study's complete result; nothing here selects it, and no Research B experiment starts automatically from it (brief 2026-10-29)"
 }

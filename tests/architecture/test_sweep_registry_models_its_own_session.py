@@ -188,6 +188,8 @@ class TestASessionWithItsOwnStagedViewHasItsOwnEntry:
         "be_launch",
         #: The independent-gated study's engineering validation (2026-10-28), for the same reasons.
         "igv_launch",
+        #: Research A's D4-scale phase (2026-10-28), for the same reasons.
+        "phase",
     })
 
     def test_every_session_launcher_is_either_registered_or_named(self):

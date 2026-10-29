@@ -1,0 +1,118 @@
+{
+ "schema": "aadistill.budget.phase_application/v1",
+ "written_utc": "2026-10-28T20:40:00Z",
+ "status": "APPLICATION, NOT A GRANT. Nothing is authorized until the maintainer grants it; each paid session then gets its own one-use authorization inside the granted envelope",
+ "decided_by": "maintainer brief 2026-10-29 'Research A First, Research B Teacher Selection Deferred' (section 3: a phase application covering Research A only, priced afresh from the provider, storage and prices)",
+ "supersedes": "logs/budget/applications/research_ab_2026-10-28/application.json (the joint A+B application and its $903 cap): NOT APPROVED by the maintainer, kept as a historical record",
+ "forecast": "logs/budget/applications/research_a_2026-10-29/forecast.json (scripts/stages/stage-2/teacher_modes/phase_forecast.py; every rate a measurement its record owns)",
+ "project_position": {
+  "fetched_utc": "2026-10-28T20:27:43Z",
+  "provider_billed_usd": 721.4369,
+  "committed_usd": 725.4883,
+  "cap_usd": 740.0,
+  "remaining_usd": 14.5117,
+  "balance_usd": 138.01,
+  "account_pods": 0,
+  "account_volumes": [
+   "am5m373kuq (30 GB, EUR-IS-2)"
+  ],
+  "source": "shared.study_engineering.live_position (the provider read now, fail closed)"
+ },
+ "requested_project_cap_usd": 888.0,
+ "_requested_cap": "committed $725.4883 + this phase's hard cap $161.97 = $887.46, rounded up; Research B's $43.30 is not requested",
+ "phase_hard_cap_usd": 161.97,
+ "expected_usd": 105.51,
+ "envelopes": [
+  {
+   "id": "teacher",
+   "kind": "teacher session (phase.py --kind teacher)",
+   "hard_cap_usd": 49.76,
+   "expected_usd": 33.17,
+   "conservative_usd": 44.94,
+   "gpu": "1 x A100 SXM 80GB on the phase volume",
+   "hours_expected": 18.32,
+   "what": "calibration (160 prompts x 2 modes) -> the common initialization (D4 Top-1's path on the hybrid) -> W00 (T0 + V) and E's waves in both modes until the pod's lower bound reaches 2,468 H-T-S sequences -> X in H-N -> the teacher's eval-set-1 in both modes at 40,960",
+   "generated_tokens_m": {
+    "expected": 53.05,
+    "conservative": 64.91
+   }
+  },
+  {
+   "id": "recovery",
+   "kind": "recovery session(s) (phase.py --kind recovery)",
+   "hard_cap_usd": 89.61,
+   "expected_usd": 59.74,
+   "conservative_usd": 73.23,
+   "gpu": "A100 SXM 80GB, 1 or 2 on one pod (an L40S pod only when the first unit's measured peak leaves 4 GB free)",
+   "optimizer_steps_expected": {
+    "H-T-S": 3913,
+    "H-N-S": 1370,
+    "H-N-C": 3913
+   },
+   "seconds_per_step": {
+    "expected": 5.19,
+    "conservative": 6.488
+   },
+   "what": "six units (H-T-S, H-N-S, H-N-C or the registered fallback H-T-C, two seeds), each trained, persisted and evaluated on all of eval-set-1 in its own mode",
+   "only_after": "the dev box's admission record and the committed initialization record (its artifact binds both by sha256)"
+  },
+  {
+   "id": "storage",
+   "hard_cap_usd": 12.6,
+   "what": "one new 60 GB network volume in an A100 datacenter, 2 months at $0.07/GB-month; plus am5m373kuq (30 GB, EUR-IS-2, H1-PA's and the mixed study's checkpoints) keeps billing $2.10/month while it exists: two months"
+  },
+  {
+   "id": "engineering_reserve",
+   "hard_cap_usd": 10.0,
+   "what": "pre-science engineering subruns across the phase (P12.1), cumulative"
+  }
+ ],
+ "hardware_range": {
+  "cards": {
+   "NVIDIA A100-SXM4-80GB": "<= $1.89 per GPU-hour",
+   "NVIDIA L40S": "<= $1.19 per GPU-hour (recovery only)"
+  },
+  "gpus_per_pod": "<= 2 (one pod at a time)",
+  "topology": "one GPU per training unit; no DP, FSDP or TP (batch size 2 at micro-batch 1 is two forward/backward passes on one card; the 596M student and the 4B bf16 teacher fit one A100); units of different arms or seeds on separate GPUs of one pod change no unit's arithmetic",
+  "network_volume": "NEW, 60 GB, in an A100 datacenter (am5m373kuq's EUR-IS-2 stocks no A100 SXM): created once on this approval; peak need with two concurrent units ~43 GB"
+ },
+ "reusable_assets": [
+  "T0 (1,761 frozen H1 tasks) and the frozen order (V 240, E 3,522, X 14,000; data/stages/stage-2/teacher_modes/tasks/order_v1.*)",
+  "A-E's validated mode protocol, token-native documents, document isolation, the preclosed scoring and the hybrid teacher's identity",
+  "H1's generation driver (sealing, resume, second pass), H1's verifiers and isolation rules, H1-PA's unit driver (state, resume, persistence, evaluation)",
+  "the project's Top-200 + tail KD training baseline (loss.kd_support), eval-set-1 under nucleus_v1",
+  "nothing of Research B, and no Thinking-2507 corpus or initialization (a different lineage)"
+ ],
+ "checkpoint_persistence": [
+  "every sealed generation shard on the volume as written, pulled to the dev box on every poll; a later attempt never regenerates one",
+  "the common initialization persisted with its identity the moment it exists; never re-materialized",
+  "save points (optimizer, step, RNG states, data position, bound data and initialization identities) on the volume; an interrupted unit resumes from the last one, on any resource",
+  "each trained checkpoint persisted before evaluation; a scored unit is skipped; finished generations are rescored, never regenerated",
+  "the packs rebuilt on the recovery pod from the volume's shards must hash to the admission record (nothing crosses the dev box's uplink)"
+ ],
+ "issuance": [
+  "maintainer: grant (phase.py grant --decision ... --granted-by maintainer) and the new project cap; create the 60 GB volume in an A100 datacenter",
+  "teacher session: phase.py issue --kind teacher -> commit and push -> bundle -> launch --kind teacher",
+  "dev box ($0): admission.py on the secured shards; commit admission.json and the initialization record",
+  "recovery session(s): phase.py issue --kind recovery -> launch --kind recovery (more sessions if one does not finish: the units resume)",
+  "dev box ($0): analysis.py on the secured evidence; the result to the maintainer"
+ ],
+ "stop_conditions": [
+  "the phase's cumulative hard cap or the project cap would be exceeded by the next session's bound",
+  "the account balance cannot fund the next session's hard cap (it is $138.01 now: the phase's $161.97 needs a top-up before its later sessions)",
+  "a provider resource whose ownership or billing cannot be reconciled",
+  "continuing would change the frozen design, preregistration, eval set, scorers, decoding or admission rules",
+  "a formal unit's complete valid endpoint exists (never re-measured), or the whole result is complete",
+  "E is exhausted before 2,468 sequences (the reached count is the scale, reported) or C falls to its registered fallback: both are registered outcomes, not stops"
+ ],
+ "not_requested": {
+  "research_b": "Research B's $43.30 (its engineering validation $3.00, PCA initialization $1.53, the matched D4-A control $17.38, the 1.123B recovery $21.39) and every B session: its teacher is pending this study's result and the maintainer's decision; B is re-priced then, for the chosen teacher's architecture, hardware and data",
+  "joint_cap": "the $903 joint cap"
+ },
+ "decisions_requested": [
+  "approve this phase and the $888 project cap",
+  "create one new 60 GB network volume in an A100 SXM datacenter (or name the datacenter)",
+  "top up the provider balance before the recovery session (balance $138.01 < the phase's $161.97)"
+ ],
+ "authorizes": "nothing"
+}

@@ -54,13 +54,69 @@ def test_each_arm_differs_from_d4_augmented_only_by_the_declared_protocol(arm):
     assert got["schedule"]["total_steps"] == 3702 == ref["schedule"]["total_steps"]
 
 
-def test_the_projected_arm_refuses_until_its_initialization_is_bound():
+def _variant(tmp_path, *, teacher=None, design_seeds=None, prereg_seeds=None):
+    d, pr = json.loads(json.dumps(DESIGN)), json.loads(RD.PREREG.read_text())
+    if teacher is not None:
+        d["teacher"] = teacher
+    if design_seeds is not None:
+        d["seeds"] = design_seeds
+    if prereg_seeds is not None:
+        pr["seeds"] = prereg_seeds
+    (tmp_path / "design.json").write_text(json.dumps(d))
+    (tmp_path / "prereg.json").write_text(json.dumps(pr))
+    return tmp_path / "design.json", tmp_path / "prereg.json"
+
+
+DECIDED = {"status": "decided", "model": "Qwen/Qwen3-4B-Thinking-2507",
+           "revision": "768f209d9ea81521153ed38c47d515654e938aea", "dtype": "bfloat16"}
+
+
+def test_no_formal_unit_while_the_teacher_is_pending():
+    assert DESIGN["teacher"]["status"] == "pending" and "model" not in DESIGN["teacher"]
+    for arm in DESIGN["arms"]:
+        with pytest.raises(RD.TeacherPending, match="pending"):
+            RD.load_plan(arm)
+    with pytest.raises(RD.TeacherPending):
+        RD.formal_teacher(DESIGN)
+    #: teacher-independent engineering runs on the declared stand-in, and builds no unit
+    assert RD.engineering_teacher(DESIGN) is DESIGN["engineering_teacher"]
+    assert RD.load_plan("D4-Augmented-topk200", require_initialization=False)["units"] == []
+
+
+def test_a_decided_teacher_builds_the_control_and_the_projected_arm_still_needs_its_init(tmp_path):
+    design, prereg = _variant(tmp_path, teacher=DECIDED)
     with pytest.raises(HD.DriverRefusal, match="initialization record"):
-        RD.load_plan("Projected-1123M-topk200")
-    plan = RD.load_plan("D4-Augmented-topk200")
+        RD.load_plan("Projected-1123M-topk200", design, prereg)
+    plan = RD.load_plan("D4-Augmented-topk200", design, prereg)
     assert [u["unit"] for u in plan["units"]] == ["D4-Augmented-topk200-s20260726", "D4-Augmented-topk200-s20260801"]
     with pytest.raises(HD.DriverRefusal, match="not an arm"):
-        RD.load_plan("D4-Augmented")
+        RD.load_plan("D4-Augmented", design, prereg)
+
+
+@pytest.mark.parametrize("design_seeds,prereg_seeds", [
+    (None, [20260726, 20260802]),          # design == base, the preregistration differs
+    ([20260726, 20260802], None),          # base == preregistration, the design differs
+    ([20260801, 20260726], [20260801, 20260726])])   # design == preregistration, the base differs
+def test_the_three_seed_lists_must_be_identical(tmp_path, design_seeds, prereg_seeds):
+    design, prereg = _variant(tmp_path, teacher=DECIDED, design_seeds=design_seeds, prereg_seeds=prereg_seeds)
+    with pytest.raises(HD.DriverRefusal, match="seeds differ"):
+        RD.load_plan("D4-Augmented-topk200", design, prereg)
+
+
+def test_the_engine_probe_is_engineering_text_isolated_from_the_evaluation_set():
+    from shared import eval_sets as ES
+    probe = json.loads(RD.ADMISSION_CONFIG.read_text())["probe"]
+    assert "items" not in probe and "eval_set_id" not in probe and len(probe["texts"]) >= 4
+    ES.require_disjoint([{"id": t["id"], "prompt_text": t["text"]} for t in probe["texts"]])
+    from huggingface_hub.constants import HF_HUB_CACHE
+    t = probe["tokenizer"]
+    #: the tokenizer files only (a host's snapshot may lack the weights `local_snapshot` also asks for)
+    tok = Path(HF_HUB_CACHE) / f"models--{t['model'].replace('/', '--')}" / "snapshots" / t["revision"]
+    if not (tok / "tokenizer.json").is_file():
+        pytest.skip("the probe tokenizer is not cached on this host")
+    rows, ids = EA.probe_ids(probe, tok)
+    assert all(r["token_ids_sha256"] == r["expected_sha256"] for r in rows)
+    assert sum(map(len, ids)) == sum(t["tokens"] for t in probe["texts"])
 
 
 def test_the_projected_evaluation_runs_only_after_the_engine_is_admitted(tmp_path):

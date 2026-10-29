@@ -1,7 +1,9 @@
-"""A research study's engineering validation: grant, cumulative envelope, one-use authorization, live position, session and closeout.
+"""A research study's sessions: grant, cumulative envelope, one-use authorization, live position, session and closeout.
 
 One mechanism for every study's engineering validation (Research A's A-E,
-Research B's B-E). The instance -- which grant, which files bind the study,
+Research B's B-E) and for a study's formal PHASE (Research A's D4-scale study:
+one grant, several session kinds -- a `Study` with formal ``claims`` and its
+``kinds``). The instance -- which grant, which files bind the study,
 which scripts run, where its runs live, which driver and inputs the pod gets --
 is a `Study` and a `Launch` its own module declares. Dollar amounts live in the
 grant document, never here (P3).
@@ -66,8 +68,8 @@ CLAIMS = {"authorizes_engineering_validation": "engineering_validation", "author
 
 @dataclass(frozen=True)
 class Study:
-    """What binds one study's engineering validation."""
-    key: str                                  #: "A-E", "B-E"
+    """What binds one study's sessions: an engineering validation, or a formal phase's kinds."""
+    key: str                                  #: "A-E", "B-E", "A-D4"
     plan_id: str
     logs: Path                                #: the experiment's log area (runs live under it)
     grant: Path                               #: logs/budget/approvals/<...>.json, the maintainer's
@@ -75,10 +77,18 @@ class Study:
     identity_files: tuple[str, ...]           #: the bound files: design, preregistration, check config...
     scripts: tuple[str, ...]                  #: every script the session runs, beyond src/aadistill
     wire_schema: str
+    #: what every artifact of this study claims, exactly (`CLAIMS`'s actions); an engineering validation by default
+    claims: frozenset = frozenset({"engineering_validation"})
+    #: the session kinds an artifact may name (its ``stage_conditions.kind``)
+    kinds: tuple[str, ...] = ("engineering_validation",)
+
+    @property
+    def formal(self) -> bool:
+        return "formal" in self.claims
 
     def policy(self) -> ActionPolicy:
         return ActionPolicy(
-            policy_id=self.plan_id, allowed=frozenset({"engineering_validation"}), wire_claims=CLAIMS,
+            policy_id=self.plan_id, allowed=frozenset(self.claims), wire_claims=CLAIMS,
             wire_schema=self.wire_schema, plan_hash_key="study_identity_sha256",
             enforcement=("the launcher refuses a pod unless this artifact is bound to the study identity and the "
                          "harness on disk, is not a dry run, has not been used, and its hard cap covers the planned "
@@ -94,8 +104,13 @@ class Study:
         return self.run_dir(run_id) / "governance/authorization.json"
 
 
+def claimed(auth) -> frozenset:
+    """The `CLAIMS` actions an artifact grants."""
+    return frozenset(a for a in CLAIMS.values() if auth.allows(a))
+
+
 class EngineeringAuthorization(SpendAuthorization):
-    """A study's engineering-validation artifact type. Each study declares its own subclass naming
+    """A study's session artifact type (engineering or a formal phase). Each study declares its own subclass naming
     ``STUDY``, so setup's branch for that study's session kind loads exactly that type
     (`tests/integration/test_session_kind_dispatch.py`)."""
     STUDY = None
@@ -107,19 +122,23 @@ class EngineeringAuthorization(SpendAuthorization):
         return load_authorization(cls.STUDY, path, allow_dry_run=allow_dry_run, cls=cls)
 
 
-def require_on_pod(auth: SpendAuthorization, study: Study, session_plan_hash: str, root: str = ".") -> dict:
-    """Setup's check on the pod, from the pod's own files: the plan and study identity, the harness,
-    an engineering validation and nothing formal, never a dry run."""
+def require_on_pod(auth: SpendAuthorization, study: Study, session_plan_hash: str, root: str = ".",
+                   kind: str | None = None) -> dict:
+    """Setup's (and a formal driver's) check on the pod, from the pod's own files: the plan and study
+    identity, the harness, exactly the study's claims, the session's kind, never a dry run."""
     ident = identity_hash(study, root)
     auth.require_plan(session_plan_hash)
     auth.require_plan(ident)
     h = auth.require_harness(root)
-    if not auth.allows("engineering_validation") or any(
-            auth.allows(x) for x in ("formal", "training", "evaluation", "teacher_generation", "paid_storage")):
-        raise AuthorizationError("not an engineering-validation artifact, or one that claims something formal")
-    if (auth.stage_conditions or {}).get("dry_run") != "false":
+    if claimed(auth) != frozenset(study.claims):
+        raise AuthorizationError(f"the artifact claims {sorted(claimed(auth))}, not {study.key}'s {sorted(study.claims)}")
+    sc = auth.stage_conditions or {}
+    if sc.get("dry_run") != "false":
         raise AuthorizationError("a dry-run artifact funds nothing")
-    return {"identity": ident, "harness": h["digest"]}
+    want = kind or study.kinds[0]
+    if sc.get("kind") != want:
+        raise AuthorizationError(f"the artifact funds a {sc.get('kind')!r} session, not {want!r}")
+    return {"identity": ident, "harness": h["digest"], "kind": want, "authorization_id": auth.authorization_id}
 
 
 def load_authorization(study: Study, path, *, allow_dry_run: bool = False, cls=SpendAuthorization):
@@ -132,8 +151,9 @@ def load_authorization(study: Study, path, *, allow_dry_run: bool = False, cls=S
     auth = SpendAuthorization.load.__func__(cls, path, policy=study.policy())
     if auth.plan_id != study.plan_id:
         raise AuthorizationError(f"{path} is for {auth.plan_id}, not {study.plan_id}")
-    if not auth.allows("engineering_validation") or any(auth.allows(a) for a in ("formal", "teacher_generation")):
-        raise AuthorizationError(f"{path} is not an engineering-validation authorization of {study.key}")
+    if claimed(auth) != frozenset(study.claims) or (auth.stage_conditions or {}).get("kind") not in study.kinds:
+        raise AuthorizationError(f"{path} is not an authorization of {study.key} ({sorted(study.claims)}, "
+                                 f"a kind of {list(study.kinds)})")
     if (auth.stage_conditions or {}).get("dry_run") == "true" and not allow_dry_run:
         raise AuthorizationError(f"{path} is a DRY-RUN artifact; it funds nothing and creates nothing")
     return auth
@@ -164,6 +184,10 @@ def git_head(root: Path = REPO_ROOT) -> str | None:
 
 GRANT_FIELDS = ("study", "ceiling_usd", "per_session_hard_cap_usd", "project_cumulative_cap_usd", "gpu",
                 "max_price_usd_per_hour", "granted_by", "decision")
+#: a formal phase's hardware boundary: the cards it may use, each with its highest price per GPU, and the
+#: most GPUs one pod may hold (one pod at a time, P12.1)
+PHASE_GRANT_FIELDS = ("study", "ceiling_usd", "per_session_hard_cap_usd", "project_cumulative_cap_usd", "gpus",
+                      "gpu_count_max", "granted_by", "decision")
 
 
 def grant(study: Study, root: Path = REPO_ROOT, *, dry_run: bool = False) -> dict:
@@ -185,7 +209,7 @@ def grant(study: Study, root: Path = REPO_ROOT, *, dry_run: bool = False) -> dic
     else:
         raise AuthorizationError(f"no grant at {study.grant}: {study.key} is not authorized "
                                  f"(a proposal{' exists' if (root / study.proposal).is_file() else ' is missing'})")
-    missing = [k for k in GRANT_FIELDS if g.get(k) in (None, "")]
+    missing = [k for k in (PHASE_GRANT_FIELDS if study.formal else GRANT_FIELDS) if g.get(k) in (None, "")]
     if missing or g["study"] != study.key:
         raise AuthorizationError(f"{g['_source']} is not a grant of {study.key} (missing {missing})")
     return g
@@ -265,10 +289,16 @@ def funding_problems(hard_cap_usd: float, g: dict, env: dict, pos: dict) -> list
 
 
 def issue(study: Study, run_id: str, *, expected_usd: float, hard_cap_usd: float, root: Path = REPO_ROOT,
-          snapshot: dict | None = None, dry_run: bool = False, out: Path | None = None, note: str = "") -> Path:
+          snapshot: dict | None = None, dry_run: bool = False, out: Path | None = None, note: str = "",
+          kind: str | None = None, conditions: dict | None = None) -> Path:
     """Write the one-use authorization for `run_id` after every funding check (module docstring).
-    A dry run reads the proposal, writes to `out` only (never the run directory) and marks the artifact."""
+    A dry run reads the proposal, writes to `out` only (never the run directory) and marks the artifact.
+    ``kind`` names the session kind (a formal study's; an engineering study has one); ``conditions``
+    are the kind's own bound facts (the inputs it reads, by sha256), written beside the funding ones."""
     root = Path(root)
+    kind = kind or study.kinds[0]
+    if kind not in study.kinds:
+        raise AuthorizationError(f"{kind!r} is not a session kind of {study.key} ({list(study.kinds)})")
     g = grant(study, root, dry_run=dry_run)
     ident = identity_hash(study, root)
     if g.get("study_identity_sha256") not in (None, ident):
@@ -296,9 +326,12 @@ def issue(study: Study, run_id: str, *, expected_usd: float, hard_cap_usd: float
         authorization_id=f"{study.plan_id}.{run_id}", granted_utc=datetime.now(timezone.utc).isoformat(timespec="seconds"),
         granted_by=g["granted_by"], plan_id=study.plan_id, plan_hash=ident,
         expected_usd=round(expected_usd, 4), hard_cap_usd=round(hard_cap_usd, 4), authorized_stages=(),
-        stage_conditions={"kind": "engineering_validation", "study": study.key, "dry_run": "true" if dry_run else "false",
+        stage_conditions={**{k: str(v) for k, v in (conditions or {}).items()},
+                          "kind": kind, "study": study.key, "dry_run": "true" if dry_run else "false",
                           "grant": g["_source"], "grant_sha256": sha256_file(root / g["_source"]),
-                          "gpu": g["gpu"], "max_price_usd_per_hour": str(g["max_price_usd_per_hour"]),
+                          **({"gpus": json.dumps(g["gpus"], sort_keys=True), "gpu_count_max": str(g["gpu_count_max"])}
+                             if study.formal else
+                             {"gpu": g["gpu"], "max_price_usd_per_hour": str(g["max_price_usd_per_hour"])}),
                           "envelope": json.dumps(env), "live_position": json.dumps(pos, default=str)},
         scope_note=note or g.get("scope", ""), authorized_session_commit=None,
         harness_source_digest=harness["digest"], harness_source_files=files,
@@ -313,7 +346,7 @@ def issue(study: Study, run_id: str, *, expected_usd: float, hard_cap_usd: float
 
 @dataclass(frozen=True)
 class Launch:
-    """What one study's engineering session runs, and on what."""
+    """What one study's session runs, and on what."""
     session_kind: str                         #: setup's authorization branch (autoinit_preflight_setup.sh)
     authorization: type                       #: the study's EngineeringAuthorization subclass, which that branch loads
     teacher_model: str
@@ -328,9 +361,22 @@ class Launch:
     contingency_fraction: float = 0.25
     verdict: Callable[[Path], dict] | None = None   #: re-derives the driver's report from its evidence
     artifact_spec: str = ""                   #: what the collector archives at teardown (configs/...)
+    #: the artifact's ``stage_conditions.kind`` this launch runs (a formal study's session kind)
+    kind: str = "engineering_validation"
+    description: str = ""
+    #: a formal session's own driver command line (ctx, plan) -> shell; default: the validation driver's
+    command: Callable[[Any, Any], str] | None = None
+    #: further $0 gates before the create (the volume's identity, the kind's bound inputs, ...)
+    extra_prechecks: tuple = ()
+    #: on_poll / products_secured: a formal session secures its finished products as they complete
+    on_poll: Callable | None = None
+    products_secured: Callable | None = None
+    setup_env: dict = field(default_factory=dict)
+    teardown_note: str = ("delete the pod, verify from the provider that it is gone, STOP; nothing is kept "
+                          "on the provider: the validation's weights are scratch")
 
     def audit(self) -> str:
-        return f"{self.session_kind}_engineering"
+        return f"{self.session_kind}_engineering" if self.kind == "engineering_validation" else self.session_kind
 
     def status(self) -> str:
         return f"/workspace/{self.session_kind}.status"
@@ -412,6 +458,8 @@ def prechecks(study: Study, launch: Launch, root: Path = REPO_ROOT) -> tuple:
         sc = ctx.auth.stage_conditions or {}
         if ctx.auth.plan_id != study.plan_id or sc.get("study") != study.key:
             return False, f"the artifact funds {sc.get('study')} / {ctx.auth.plan_id}, not {study.key}"
+        if sc.get("kind") != launch.kind:
+            return False, f"the artifact funds a {sc.get('kind')!r} session, not this launch's {launch.kind!r}"
         if sc.get("dry_run") != "false" and not getattr(ctx.args, "dry_run", False):
             return False, "a dry-run artifact funds nothing and creates nothing"
         #: ONE USE: any earlier launch of this run -- one that created a pod, or one refused at $0 -- left a
@@ -420,10 +468,20 @@ def prechecks(study: Study, launch: Launch, root: Path = REPO_ROOT) -> tuple:
         if not getattr(ctx.args, "dry_run", False) and (
                 (rd / "closeout/outcome.json").is_file() or (rd / "runtime/session.json").is_file()):
             return False, f"run {ctx.args.run_id} has already used its artifact; a retry is a new run and a new artifact"
-        return True, f"a {study.key} engineering-validation artifact, unused"
+        return True, f"a {study.key} {launch.kind} artifact, unused"
 
     def the_gpu_and_price_are_the_grants(ctx) -> tuple[bool, str]:
         sc = ctx.auth.stage_conditions or {}
+        if study.formal:
+            allowed, n = json.loads(sc.get("gpus") or "{}"), int(getattr(ctx.args, "gpu_count", 1) or 1)
+            if ctx.args.gpu not in allowed:
+                return False, f"--gpu {ctx.args.gpu!r} is not one of the granted {sorted(allowed)}"
+            if n > int(sc.get("gpu_count_max") or 1):
+                return False, f"--gpu-count {n} exceeds the granted {sc.get('gpu_count_max')} GPUs per pod"
+            if float(ctx.args.max_price) > float(allowed[ctx.args.gpu]) * n + 1e-9:
+                return False, (f"--max-price ${ctx.args.max_price}/h exceeds the granted ${allowed[ctx.args.gpu]}/h per "
+                               f"GPU x {n}")
+            return True, f"{n} x {ctx.args.gpu} at no more than ${ctx.args.max_price}/h for the pod, as granted"
         if ctx.args.gpu != sc.get("gpu"):
             return False, f"--gpu {ctx.args.gpu!r} is not the granted {sc.get('gpu')!r}"
         if float(ctx.args.max_price) > float(sc.get("max_price_usd_per_hour") or 0) + 1e-9:
@@ -470,7 +528,8 @@ def prechecks(study: Study, launch: Launch, root: Path = REPO_ROOT) -> tuple:
                 f"${pos['project_remaining_usd']} the project cap leaves now" if not bad else "; ".join(bad))
 
     return (the_artifact_is_this_studys_and_unused, the_gpu_and_price_are_the_grants, all_in_within_cap,
-            the_study_identity_is_the_authorized_one, bound_files_are_in_the_session_commit, the_project_cap_holds_now)
+            the_study_identity_is_the_authorized_one, bound_files_are_in_the_session_commit, the_project_cap_holds_now,
+            *launch.extra_prechecks)
 
 
 def owned_volumes(root: Path = REPO_ROOT) -> tuple[str, ...]:
@@ -490,7 +549,7 @@ def session_spec(study: Study, launch: Launch, args, root: Path = REPO_ROOT):
     status, ev = launch.status(), evidence_dir(launch, args.run_id)
     work = f"/workspace/{launch.session_kind}_work"
 
-    def driver_command(ctx, plan) -> str:
+    def default_command(ctx, plan) -> str:
         py = (f"cd {POD_REPO} && HF_HUB_OFFLINE=1 PYTHONPATH={POD_REPO}/src:{POD_REPO}/scripts:"
               f"{POD_REPO}/scripts/stages/stage-1 /opt/train/bin/python")
         cmd = (f"{launch.driver} --run-id {ctx.args.run_id} --out {ev} --work {work} --status {status} "
@@ -500,11 +559,13 @@ def session_spec(study: Study, launch: Launch, args, root: Path = REPO_ROOT):
                 f"grep -qE 'MARKER:(ALL_DONE|RUN_FAILED)' {status} || "
                 f"echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) MARKER:RUN_FAILED\" >> {status}")
 
+    driver_command = launch.command or default_command
     f = 1.0 + launch.contingency_fraction
     return SessionSpec(
-        session_id=f"{launch.session_kind}-engineering",
+        session_id=f"{launch.session_kind}-engineering" if launch.kind == "engineering_validation" else
+        f"{launch.session_kind}-{launch.kind}",
         schema=f"{study.wire_schema.rsplit('/', 1)[0]}_session/v1",
-        description=f"{study.key}: the engineering validation (never formal)",
+        description=launch.description or f"{study.key}: the engineering validation (never formal)",
         authorization_path=str(study.authorization_path(args.run_id)),
         #: the bound classmethod itself for a launch (its class is what setup's branch must load); a dry run
         #: alone may read a dry-run artifact
@@ -518,14 +579,15 @@ def session_spec(study: Study, launch: Launch, args, root: Path = REPO_ROOT):
             arms=0, steps_per_arm=0, step_seconds=1.0, step_source="unused: the validation is one phase (arms=0)",
             below_floor_reason="no arm-level steps; the validation is priced as one phase",
             setup_minutes=launch.setup_minutes, transfer_minutes=5.0,
-            other_phases=(Phase(f"{study.key}_validation", launch.validation_minutes),),
+            other_phases=(Phase(f"{study.key}_validation" if launch.kind == "engineering_validation"
+                                else f"{study.key}_{launch.kind}", launch.validation_minutes),),
             contingency_fraction=launch.contingency_fraction,
             soft_stop_reserves=(Phase("closeout_and_teardown", round(f * 10.0, 2)),),
             artifact_recovery_reserve_minutes=10.0,
             account_balance_required_usd=lambda plan: plan.hard_terminate_usd,
             accounted_provider_resources=lambda: owned_volumes(root)),
         setup=SetupManifest(
-            env={"SESSION_KIND": launch.session_kind, "TEACHER_MODEL": launch.teacher_model},
+            env={"SESSION_KIND": launch.session_kind, "TEACHER_MODEL": launch.teacher_model, **launch.setup_env},
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS", "SESSION_KIND", "TEACHER_REVISION",
                           "TEACHER_MODEL"),
             #: no TESTS_OK: no repository suite on the paid pod (P8.2.1); no ROPE_OK: it checks C1-lineage
@@ -537,14 +599,15 @@ def session_spec(study: Study, launch: Launch, args, root: Path = REPO_ROOT):
         driver_command=driver_command, driver_job_id=f"{launch.session_kind}_driver", status_path=status,
         run_log_path=f"/workspace/{launch.session_kind}_run.log",
         markers=MarkerPolicy(success="ALL_DONE", failure=("RUN_FAILED",), products_eligible=lambda t, s: True,
-                             failure_note="the validation keeps no weights; its evidence is pulled on every poll"),
+                             failure_note=("the validation keeps no weights; its evidence is pulled on every poll"
+                                           if not study.formal else "finished work is on the network volume as it "
+                                           "completes and its evidence is pulled on every poll")),
         artifacts=ArtifactPolicy(audit_dirname=launch.audit(), evidence_filename=REPORT,
-                                 archive_basename=f"{launch.session_kind}_engineering",
+                                 archive_basename=launch.audit(),
                                  spec_success=launch.artifact_spec, spec_failed=launch.artifact_spec,
-                                 report_names=(), on_poll=secure_evidence(launch),
-                                 products_secured=evidence_secured(launch)),
-        teardown=TeardownPolicy(note="delete the pod, verify from the provider that it is gone, STOP; nothing is kept "
-                                     "on the provider: the validation's weights are scratch"),
+                                 report_names=(), on_poll=launch.on_poll or secure_evidence(launch),
+                                 products_secured=launch.products_secured or evidence_secured(launch)),
+        teardown=TeardownPolicy(note=launch.teardown_note),
         precheck=prechecks(study, launch, root),
     )
 
@@ -602,7 +665,7 @@ def closeout(study: Study, launch: Launch, run_id: str, scr: Path, *, root: Path
                      "_basis": (f"GPU actual from runtime/session.json :: cost plus container disk at "
                                 f"${DISK_USD_PER_GB_MONTH}/GB-month over the elapsed minutes ({disk_gb:g} GB)")},
            "provider_confirms_gone": sess.get("provider_confirms_gone"), "provider_reconciliation_after": rec,
-           "scientific_use": False, "authorizes": "nothing"}
+           "kind": launch.kind, "scientific_use": study.formal, "authorizes": "nothing"}
     dest = root / study.run_dir(run_id) / "closeout/outcome.json"
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(out, indent=1, default=str) + "\n")
@@ -635,6 +698,13 @@ def build_parser(description: str, *, gpu: str):
     ap.add_argument("--poll-seconds", type=float, default=60.0)
     ap.add_argument("--poll-limit-min", type=float, default=600.0)
     ap.add_argument("--settle-seconds", type=float, default=20.0)
+    ap.add_argument("--gpu-count", type=int, default=1, help="GPUs on the one pod; --max-price is the POD's price")
+    ap.add_argument("--phases", default=None, help="a formal driver's phase selection (its own --phases)")
+    ap.add_argument("--unit", action="append", default=None, help="a formal driver's unit selection")
+    ap.add_argument("--network-volume-id", default="")
+    ap.add_argument("--volume-mount-path", default="")
+    ap.add_argument("--data-center-ids", default="")
+    ap.add_argument("--volume-gb", type=int, default=None, help="the network volume's planned size (a formal phase)")
     ap.add_argument("--dry-run", action="store_true",
                     help="every $0 step (authorization, prechecks, the live provider read, the plan); no create")
     ap.add_argument("--authorization", default=None,
@@ -723,7 +793,10 @@ def write_grant(study: Study, *, decision: str, granted_by: str, root: Path = RE
         doc.pop(k, None)
     doc.update(status="granted", granted_by=granted_by, decision=decision,
                authorizes=(f"{study.key}'s engineering validation only (scope), inside ceiling_usd cumulatively and the "
-                           "project cap; one-use artifacts from `issue`; nothing formal"),
+                           "project cap; one-use artifacts from `issue`; nothing formal" if not study.formal else
+                           f"{study.key}'s phase only (scope): its session kinds {list(study.kinds)}, inside ceiling_usd "
+                           "cumulatively, per_session_hard_cap_usd per session and the project cap; one-use artifacts "
+                           "from `issue`; no other study and no follow-up"),
                granted_utc=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
                proposal={"path": str(study.proposal), "sha256": sha256_file(prop)},
                study_identity_sha256=identity_hash(study, root), granted_at_commit=git_head(root))

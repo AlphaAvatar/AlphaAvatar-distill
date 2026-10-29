@@ -3,7 +3,7 @@
  "version": 1,
  "study_id": "stage2.teacher_modes.d4_scale_v1",
  "written_utc": "2026-10-28T18:30:00Z",
- "status": "DRAFTED at $0 before any datum of this study exists; REGISTERED (frozen, its sha256 bound into the phase grant) only on the maintainer's authorization, and never amended after the first generation wave of this study exists. No pilot gates the study: the data size follows the registered stopping rule",
+ "status": "DRAFTED at $0 before any datum of this study exists (revised 2026-10-29 with the frozen task order, the X rule, the length-limit terminology and the bound decision rule); REGISTERED (frozen, its sha256 bound into the phase grant) only on the maintainer's authorization, and never amended after the first generation wave of this study exists. No pilot gates the study: the data size follows the registered stopping rule",
  "design": {
   "path": "configs/stages/stage-2/teacher_modes/d4_scale_design.json"
  },
@@ -40,14 +40,15 @@
     "when": "X is infeasible under design.json :: tasks.X.if_infeasible, decided at $0 before any training",
     "contrast": "H-T-C - H-N-S, H-T-C = a seeded prefix of I's H-T documents (whole units) packed to H-N-S's sequence count",
     "note": "the fallback is compute-matched at the smaller scale, where the floor is likelier"
-   }
+   },
+   "feasibility": "FEASIBLE when H-N-C's pack reaches H-T-S's sequence count and every stratum's share of H-N-C's tasks is within 2 points of its share of I (admission.py); decided at $0 before any training"
   },
   "teacher_gap": {
    "contrast": "teacher(mode) - student, per arm",
    "role": "descriptive"
   }
  },
- "multiplicity": "two decided comparisons, S and C, each at a 97.5% interval (Bonferroni over the two); within each the four static-axis contrasts (eval-set-1's registered static axes, above) are a Holm family at alpha 0.05",
+ "multiplicity": "two decided comparisons, S and C, each at a 97.5% interval (Bonferroni over the two); within each, eval-set-1's registered static axes (the three static primary axes and the abstract/analogical sub-category) are a Holm family at alpha 0.05",
  "evaluation": {
   "set": {
    "eval_set_id": "eval-set-1",
@@ -59,17 +60,20 @@
   },
   "decoding": {
    "protocol_id": "nucleus_v1",
-   "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4"
+   "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4",
+   "path": "configs/shared/evaluation/decoding/nucleus_v1.json"
   },
   "modes": "students in their own training mode; the teacher in both",
   "think_state": "every generation records the think_state its prompt produced; the preclosed state is scored with no think delimiter allowed in the continuation, and no earlier record or verdict changes",
   "every_item": "every item of every unit is generated for every checkpoint and for the teacher in both modes"
  },
- "primary_measure": "correctness on the 570 formal static items of fluid_reasoning_720 (dev_v1), one nucleus_v1 sample per item and seed, clustered by rule family. Its four static axes are eval-set-1's registered ones: three of AGENTS.md P10.2's four primary axes (task-contained deduction, inductive rule discovery, compositional generalization) and abstract/analogical reasoning, a registered sub-category reported as its own diagnostic axis; the fourth primary axis, interactive adaptation and planning, is the 144 interactive episodes, exploratory",
+ "primary_measure": "correctness on the 570 formal static items of fluid_reasoning_720 (dev_v1), one nucleus_v1 sample per item and seed, clustered by rule family. AGENTS.md P10.2's four primary axes are each reported apart: task-contained deduction, inductive rule discovery and compositional generalization (static, decided) and interactive adaptation and planning (the 144 interactive episodes, exploratory); abstract/analogical reasoning is a registered sub-category, reported as its own axis",
  "decision_rule": {
-  "module": "scripts/stages/stage-2/reasoning_data/h1_statistics.py",
-  "rule_id": "stage2.reasoning_data.h1_statistics/v1",
+  "module": "scripts/stages/stage-2/teacher_modes/mode_statistics.py",
+  "rule_id": "stage2.teacher_modes.statistics/v1",
+  "applies": "H1's rule shape (h1_statistics.py: pairing, SESOI, floor, resolution), at this study's level and seed",
   "bound_sha256": {
+   "scripts/stages/stage-2/teacher_modes/mode_statistics.py": "5220e8d581ba20942a8d134b11eb1f3d3c7c3f7df4dbc0c9a457d700f37a42bb",
    "scripts/stages/stage-2/reasoning_data/h1_statistics.py": "c4c1191102f8b293feb9f165a7c72f1a69af3b96789c564e1747d95ea20a2836",
    "src/aadistill/evaluation/paired_stats.py": "7d41ef3199eee78d3a9d9460c3b8f4c3bb33773d5d6b4945c57a62df934fe782"
   },
@@ -96,11 +100,12 @@
  "data_budget_rules": {
   "_": "fixed now, applied as the data is generated; no pilot slice and no promotion gate",
   "I": "tasks whose every turn is admitted in both modes",
-  "scale": "generation in waves (T0, then E's seeded order in waves of 400); after each wave I's H-T documents are packed document_isolated at 8,192; generation stops at the end of the first wave at which H-T-S reaches 2,468 sequences (D4-Augmented's count), or when E is exhausted",
+  "scale": "generation in waves (W00 = T0 and V, then the frozen order's E slice in waves of 400); after each wave I's H-T documents are packed document_isolated at 8,192; the stopping wave is the first whose pack reaches 2,468 sequences (D4-Augmented's count), or E's last; exact on the dev box (admission.py); waves after it are never trained on",
   "steps": "each arm: total_steps = ceil(3 x sequences / 2) (H1-PA's rule), sequences from pack_isolated at 8,192",
-  "X_size": "the smallest whole-unit prefix of the seeded X order whose H-N documents, packed with I's, reach H-T-S's sequence count",
-  "length_censoring": "a generation that reaches its 8,184-minus-prompt allowance is right-censored and never admitted; any primary cell whose H-T first-candidate censored share exceeds 20% is flagged LENGTH_CENSORED on S and reported with the composition shift of I; nothing is cut, re-sampled or re-run",
-  "budget_boundary": "every session is priced from the measured tokens per task and step time of the sessions before it; if the remaining work does not fit the phase's remaining cap, the phase stops at a HARD BOUNDARY with every completed wave, initialization and unit kept"
+  "X_size": "X's H-N-admitted tasks in X's order, per stratum by largest remainder against I's stratum shares, the smallest whole-task prefix whose H-N documents, packed with I's, reach H-T-S's sequence count",
+  "length_censoring": "a generation that reaches its 8,184-minus-prompt allowance is training-length-limited (right-censored at the training sequence; never called a context-limit hit: the teacher supports 40,960) and never admitted; any primary cell whose H-T first-candidate length-limited share exceeds 20% carries the DESCRIPTIVE warning LENGTH_CENSORED, its limited share, correctness, natural-termination rate and trainable-sample count reported in full; nothing is cut, re-sampled, re-run or dropped because of it",
+  "budget_boundary": "every session is priced from the measured tokens per task and step time of the sessions before it; if the remaining work does not fit the phase's remaining cap, the phase stops at a HARD BOUNDARY with every completed wave, initialization and unit kept",
+  "validation": "each mode's admitted V documents (the order's first 240 tasks), at most 16 isolated sequences, every arm in its own mode: diagnostics only"
  },
  "teacher_correctness": "per mode on every T0 task's first candidate (the teacher's correctness), and the two-candidate yield, per cell and axis; and on eval-set-1 per mode under nucleus_v1",
  "sensitivity": {
@@ -141,5 +146,6 @@
  "objective": {
   "kd": "reference_topk_tail_v1 at top_k 200 resolved from the forward baseline, kd_scope assistant, T 1; CE 0.25 + KD 1.0 on the same target positions",
   "never": "described as the full-vocabulary KL"
- }
+ },
+ "research_b": "no Research B experiment starts from this study's result; its teacher is the maintainer's decision (brief 2026-10-29)"
 }

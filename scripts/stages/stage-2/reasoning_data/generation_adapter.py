@@ -355,12 +355,25 @@ def external_answer(task: dict, final: str) -> Check:
     return Check("correct", "", scope) if same else Check("incorrect", "wrong answer", scope)
 
 
+def split_turn(turn: dict) -> tuple[str, str] | None:
+    """(reasoning, answer) of one turn under the think state its prompt left it in, or None when
+    the protocol is broken. A turn with no ``think_state`` (H1's records) or a pre-opened one is
+    `assets.split_raw` exactly, as every H1 verdict was reached; a hybrid template's
+    ``self_opening`` and ``preclosed`` turns (Research A) are `behavior.split_generation`'s
+    strict reading of that state."""
+    state = turn.get("think_state")
+    if state in (None, "preopened"):
+        return A.split_raw(turn.get("raw", ""))
+    parts = split_generation(turn.get("raw", ""), think_state=record_think_state(turn))
+    return (parts["think"].strip("\n"), parts["answer"].strip("\n")) if parts["think_closed"] else None
+
+
 def _stop(rec: dict) -> str:
     return next((t["stop_reason"] for t in rec["turns"] if t["stop_reason"] != "eos"), "eos")
 
 
 def _protocol(rec: dict) -> str | None:
-    return None if rec["turns"] and all(A.split_raw(t.get("raw", "")) for t in rec["turns"]) else "think_not_closed"
+    return None if rec["turns"] and all(split_turn(t) for t in rec["turns"]) else "think_not_closed"
 
 
 def _policy(task: dict) -> AcceptancePolicy:
@@ -388,18 +401,18 @@ def _checks(task: dict, rec: dict) -> tuple[Check, Check, dict[str, Check]]:
         ok = bool(s.get("answer_correct"))
         ans = Check("correct" if ok else "incorrect", "" if ok else str(s.get("reason", "")),
                     "the boxed final answer against the generator's gold (battery protocol v2)")
-        parts = A.split_raw(rec["turns"][-1].get("raw", "")) if rec["turns"] else None
+        parts = split_turn(rec["turns"][-1]) if rec["turns"] else None
         if parts:
             obs["text_consistency"] = PC.text_consistency(
                 parts[0], s.get("extracted"), task["answer_type"],
                 prompt=" ".join(m.get("content") or "" for m in task["messages"]))
     elif task.get("verifier"):
         from stages.reasoning_data.supporting_verify import VERIFIERS
-        parts = A.split_raw(rec["turns"][-1].get("raw", "")) if rec["turns"] else None
+        parts = split_turn(rec["turns"][-1]) if rec["turns"] else None
         ans = (VERIFIERS[task["verifier"]](task, *parts) if parts and task["verifier"] in VERIFIERS else
                Check("unverifiable", f"no verifier {task['verifier']!r}" if parts else "think not closed", "none"))
     elif task.get("module"):
-        parts = A.split_raw(rec["turns"][-1].get("raw", "")) if rec["turns"] else None
+        parts = split_turn(rec["turns"][-1]) if rec["turns"] else None
         ans = external_answer(task, parts[1] if parts else "")
         if task.get("reference_conclusions") is not None:
             steps = PC.reference_steps(parts[0] if parts else "", task["reference_conclusions"])

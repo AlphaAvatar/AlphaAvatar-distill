@@ -165,7 +165,8 @@ def test_launch_gates_refuse_a_dry_run_artifact_a_used_run_and_another_card(tmp_
     granted = SE.load_authorization(st, SE.issue(st, "r9", expected_usd=1.0, hard_cap_usd=3.0, root=tmp_path,
                                                  dry_run=True, out=tmp_path / "s/b.json"), allow_dry_run=True)
     real = _ctx(st, granted)
-    real.auth = type("A", (), {"plan_id": st.plan_id, "stage_conditions": {"study": st.key, "dry_run": "false"}})()
+    real.auth = type("A", (), {"plan_id": st.plan_id, "stage_conditions": {"study": st.key, "dry_run": "false",
+                                                                          "kind": "engineering_validation"}})()
     assert unused(real)[0]
     _run(tmp_path, st, "r9", created=False)                      # an earlier launch refused at $0: consumed
     ok, why = unused(real)
@@ -211,7 +212,8 @@ def test_each_study_has_its_own_type_and_setup_branch():
     text = (SE.REPO_ROOT / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     for kind, mod, cls in (("stage2_teacher_modes", "stages.teacher_modes.ae_launch", "AEAuthorization"),
                            ("stage1_projected_residual", "stages.projected_residual.be_launch", "BEAuthorization"),
-                           ("stage1_independent_gated", "stages.projected_residual.igv_launch", "IGEAuthorization")):
+                           ("stage1_independent_gated", "stages.projected_residual.igv_launch", "IGEAuthorization"),
+                           ("stage2_teacher_modes_phase", "stages.teacher_modes.phase", "PhaseAuthorization")):
         body = text[text.index(f'elif [ "$SESSION_KIND" = "{kind}" ]; then'):]
         body = body[:body.index("elif [", 10)]
         for needle in (f"from {mod} import {cls}", f"{cls}.load(", "SE.require_on_pod(", "AUTHORIZATION_MISMATCH"):
@@ -255,3 +257,46 @@ def test_a_real_launch_without_its_own_artifact_refuses_at_zero(tmp_path, monkey
     assert "REFUSED at $0: no authorization" in capsys.readouterr().out
     with pytest.raises(SystemExit, match="dry-run artifact"):
         SE.launch_main(st, launch, argv + ["--authorization", "x.json"], root=tmp_path, gpu="NVIDIA L40S")
+
+
+def test_a_formal_phase_names_its_kinds_and_its_artifacts_claim_exactly_the_phase(tmp_path, live, monkeypatch):
+    st = _study(tmp_path)
+    import dataclasses
+    ph = dataclasses.replace(st, key="X-P", plan_id="stage9.x.phase", claims=frozenset({"formal", "training", "evaluation"}),
+                             kinds=("teacher", "recovery"), wire_schema="aadistill.stage9.x.phase_authorization/v1")
+    _proposal(tmp_path, ph, gpus={"NVIDIA A100-SXM4-80GB": 1.89}, gpu_count_max=2, ceiling_usd=10.0,
+              per_session_hard_cap_usd=10.0, gpu=None, max_price_usd_per_hour=None)
+    live["project_remaining_usd"] = 20.0
+    with pytest.raises(AuthorizationError, match="not a session kind"):
+        SE.issue(ph, "r1", expected_usd=1.0, hard_cap_usd=3.0, root=tmp_path, dry_run=True, out=tmp_path / "s/a.json",
+                 kind="engineering_validation")
+    p = SE.issue(ph, "r1", expected_usd=1.0, hard_cap_usd=3.0, root=tmp_path, dry_run=True, out=tmp_path / "s/a.json",
+                 kind="recovery", conditions={"admission_sha256": "a" * 64})
+    a = SE.load_authorization(ph, p, allow_dry_run=True)
+    assert SE.claimed(a) == ph.claims and a.stage_conditions["kind"] == "recovery"
+    assert a.stage_conditions["admission_sha256"] == "a" * 64 and json.loads(a.stage_conditions["gpus"])
+    # an engineering study cannot load the phase's artifact, nor the phase an engineering one
+    with pytest.raises(AuthorizationError):
+        SE.load_authorization(st, p, allow_dry_run=True)
+    # on the pod: identity, harness, claims and the kind, never a dry run
+    with pytest.raises(AuthorizationError, match="dry-run"):
+        SE.require_on_pod(a, ph, a.plan_hash, str(tmp_path), kind="recovery")
+    monkeypatch.setitem(a.stage_conditions, "dry_run", "false")
+    with pytest.raises(AuthorizationError, match="not 'teacher'"):
+        SE.require_on_pod(a, ph, a.plan_hash, str(tmp_path), kind="teacher")
+    assert SE.require_on_pod(a, ph, a.plan_hash, str(tmp_path), kind="recovery")["kind"] == "recovery"
+    # the hardware boundary: a granted card, at most its price per GPU x the count, at most gpu_count_max GPUs
+    launch = SE.Launch(session_kind="x", authorization=SE.EngineeringAuthorization, teacher_model="m",
+                       teacher_revision="r", driver="scripts/x/driver.py", validation_minutes=10.0, kind="recovery")
+    unused, gpu = SE.prechecks(ph, launch, tmp_path)[:2]
+    ctx = SimpleNamespace(auth=a, args=SimpleNamespace(run_id="r1", dry_run=True, gpu="NVIDIA A100-SXM4-80GB",
+                                                       max_price=3.7, gpu_count=2, disk_gb=150), evidence={}, plan=None)
+    assert gpu(ctx)[0] and unused(ctx)[0]
+    ctx.args.gpu_count = 3
+    assert not gpu(ctx)[0]
+    ctx.args.gpu_count, ctx.args.max_price = 2, 3.9
+    assert not gpu(ctx)[0]
+    ctx.args.gpu, ctx.args.max_price = "NVIDIA L40S", 1.0
+    assert not gpu(ctx)[0]
+    teacher = dataclasses.replace(launch, kind="teacher")
+    assert not SE.prechecks(ph, teacher, tmp_path)[0](ctx)[0]           # a recovery artifact funds no teacher session

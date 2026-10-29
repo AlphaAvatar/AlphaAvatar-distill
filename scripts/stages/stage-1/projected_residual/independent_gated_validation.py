@@ -257,7 +257,7 @@ def torch_phase(out: Path, work: Path, cfg: dict, *, device: str, tiny: bool, pa
     from aadistill.models.cost_model import kv_cache_bytes_per_token
     from shared.validation import engine_admission as EA
     from stages.projected_residual import materialize as M
-    from stages.projected_residual.engineering_validation import apply_numeric_identity, render_probe, tiny_probe
+    from stages.projected_residual.engineering_validation import apply_numeric_identity, tiny_probe
 
     register_custom_model_families()
     doc = {"schema": SCHEMA + "#torch", "device": device, "tiny": tiny, "started_utc": _now(), "checks": {}}
@@ -289,8 +289,11 @@ def torch_phase(out: Path, work: Path, cfg: dict, *, device: str, tiny: bool, pa
         pack_root, control_init = assets["pack_root"], assets["control_init"]
         teacher = {"model_id": str(assets["teacher"]), "revision": None, "dtype": "float32"}
     else:
-        doc["probe"], probes = render_probe(cfg)
-        mat_design, teacher = design, None
+        from shared.pod.teacher_cache import local_snapshot
+        tk = cfg["probe"]["tokenizer"]
+        doc["probe"], probes = EA.probe_ids(cfg["probe"], local_snapshot(tk["model"], tk["revision"]))
+        #: the teacher-independent stand-in (design :: engineering_teacher): the study's teacher is pending
+        mat_design, teacher = {**design, "teacher": _rd().engineering_teacher(design)}, None
     doc["control_init"] = str(control_init) if control_init else None
     save()
     init_dir = work / "init"
@@ -429,8 +432,8 @@ def vllm_phase(out: Path, cfg: dict, vllm_python: str, t: dict) -> dict:
     ctl = (t["checks"].get("smoke_control") or {}).get("final_model") or t.get("control_init")
     ref = _load(out / "hf_reference.json")
     from shared.pod.teacher_cache import local_snapshot
-    teacher = json.loads((REPO / cfg["design"]).read_text())["teacher"]
-    tok = local_snapshot(teacher["model"], teacher["revision"])
+    tk = cfg["probe"]["tokenizer"]
+    tok = local_snapshot(tk["model"], tk["revision"])
     if proj and ref:
         r = VC.run_isolated(vllm_python, EA.vllm_request(proj, probes, ea["max_model_len"], tokenizer=tok),
                             out / "vllm_admission")
@@ -519,7 +522,11 @@ def verdict(out_dir, cfg: dict) -> dict:
         res["gpu_isolation"] = st(iso.get("parent_imported_torch") is False and iso.get("child_returncode") == 0
                                   and not clear, str(clear or iso))
         a = v.get("admission") or {}
-        res["vllm_admission"] = st(a.get("status") == "PASS", str(a.get("problems") or "no admission"))
+        #: the probe is the config's engineering text, recomputed on the pod (never an evaluation item)
+        unhashed = [r.get("id") for r in t.get("probe") or [] if r.get("token_ids_sha256") != r.get("expected_sha256")]
+        res["vllm_admission"] = st(a.get("status") == "PASS" and bool(t.get("probe")) and not unhashed,
+                                   str(a.get("problems") or (f"probe ids not the configured ones: {unhashed}"
+                                                             if unhashed else "no admission")))
         tps = [v.get(f"throughput_{x}") or {} for x in ("projected", "control")]
         res["inference_throughput"] = st(all(x.get("generated_tokens") for x in tps), str(tps))
     ok = all(res[x]["status"] in ("PASS",) or (tiny and res[x]["status"] == "NOT_RUN" and x in GPU_ONLY)
@@ -528,6 +535,8 @@ def verdict(out_dir, cfg: dict) -> dict:
             "measured": {"device": t.get("device_name"), "device_total_gib": total,
                          "projected": _measured(c.get("smoke_projected")), "control": _measured(c.get("smoke_control")),
                          "initialization_error": (c.get("initialization") or {}).get("initialization_error"),
+                         "_initialization": ("materialized from the design's engineering_teacher: an engineering "
+                                             "measurement of the code path, never the study's PCA initialization"),
                          "numerics_cuda": {k: n.get(k) for k in n if k.endswith("fp32")},
                          "vllm": {x: v.get(x) for x in ("admission", "throughput_projected", "throughput_control")}},
             "scientific_use": False}

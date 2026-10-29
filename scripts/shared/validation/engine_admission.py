@@ -26,6 +26,12 @@ bfloat16-sensitive from an engine that computes something else.
   least ``confident_top1_agreement_min`` of them (with at least
   ``confident_positions_min`` such positions).
 
+The probe is the engineering diagnostic text of the caller's config
+(``probe_ids``): written for engine numerics, isolated from every held-out
+evaluation unit, tokenized as plain text, so that debugging an implementation
+never re-reads a formal evaluation set and the probe depends on no teacher's
+chat template.
+
 Nothing here scores, selects or decides anything scientific.
 """
 from __future__ import annotations
@@ -36,6 +42,30 @@ from pathlib import Path
 
 SCHEMA = "aadistill.engine_admission/v1"
 CRITERIA_KEYS = ("factor", "confident_margin_nats", "confident_top1_agreement_min", "confident_positions_min")
+
+
+def ids_sha(ids: list[int]) -> str:
+    import hashlib
+    import json
+    return hashlib.sha256(json.dumps(list(ids), separators=(",", ":")).encode()).hexdigest()
+
+
+def probe_ids(probe: dict, tokenizer_dir: str | Path) -> tuple[list[dict], list[list[int]]]:
+    """The config's diagnostic texts as token ids (plain text, no chat template, no added special tokens).
+
+    Returns the evidence rows (id, length, the ids' sha256 and the configured one;
+    never the text) and the ids. A row whose hash is not the configured one is the
+    caller's to refuse."""
+    from transformers import AutoTokenizer
+
+    tok = AutoTokenizer.from_pretrained(str(tokenizer_dir))
+    rows, ids_all = [], []
+    for t in probe["texts"]:
+        ids = tok(t["text"], add_special_tokens=False).input_ids
+        rows.append({"id": t["id"], "tokens": len(ids), "token_ids_sha256": ids_sha(ids),
+                     "expected_sha256": t["token_ids_sha256"]})
+        ids_all.append(list(ids))
+    return rows, ids_all
 
 
 def hf_reference(model_dir: str | Path, probes: list[list[int]], *, device: str) -> dict:

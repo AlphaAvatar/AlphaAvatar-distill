@@ -2,36 +2,70 @@
 
 ## Current study (2026-10-28): D4-Augmented's training scale, no pilot
 
-**Status: designed at $0; nothing authorized.** Maintainer decision 2026-10-28.
-The design below (`hybrid_v1`, T0 scale with a 10% promotion pilot) is
-superseded for new work; A-E's PASS and its records stay as they are.
+**Status: the whole chain is implemented at $0 and its task order is frozen;
+nothing is authorized.** The maintainer's decisions of 2026-10-28 (the revised
+programme, then "Research A first"): Research A runs first and alone; Research
+B's teacher waits for its result. The design below (`hybrid_v1`, T0 scale with
+a 10% promotion pilot) is superseded for new work; A-E's PASS and its records
+stay as they are.
 
 - **Scale.** H-T-S reaches D4-Augmented's 2,468 packed 8,192-token sequences
   (3,702 optimizer steps at batch size 2, 3 epochs), two seeds. Supervised
-  tokens follow from the teacher's own documents. Tasks: T0's 1,761 plus an
-  extension E from T0's unused pools and the project's generators, built and
-  isolation-checked before generation, generated in waves until the target is
-  reached. No pilot gate.
-- **Arms.** S: H-T-S and H-N-S on the same task ids. C: H-N-C with further
-  independent H-N tasks (X) packed to H-T-S's sequence count.
+  tokens follow from the teacher's own documents. No pilot gate.
+- **Tasks, frozen at $0** (`build_tasks.py`, `data/stages/stage-2/teacher_modes/tasks/order_v1.*`):
+  T0's 1,761 tasks, then one order of 17,762 new tasks in T0's (stratum, source)
+  proportions -- each cell's unused pool tasks first, then the same source's
+  own construction (the project generators on a fresh seed block, the
+  third-party generators through H1's isolated export at new seed bases,
+  MATH/MBPP/SQuAD v2 continued in their builders' hash order). V (240) is the
+  validation reserve, E (3,522 = 2 x T0) the extension in waves of 400, X
+  (14,000) the H-N-only compute-matching extension. R0-R9 pass; every slice's
+  stratum shares are T0's within 0.24 points.
+- **Stopping.** After each wave the admitted H-T documents of I (tasks
+  admitted in both modes) are packed; the first wave reaching 2,468 sequences
+  is the stopping wave. Exact on the dev box (`admission.py`, every verifier
+  including MBPP's sandbox); the pod only bounds it from below and keeps
+  generating until the bound is reached, so it never stops early.
+- **Arms.** S: H-T-S and H-N-S on the same task ids. C: H-N-C with X's
+  H-N-admitted tasks, taken per stratum against I's shares, the smallest prefix
+  reaching H-T-S's count; C is feasible when every stratum stays within 2 points
+  of I's share, else the registered fallback H-T-C against H-N-S.
 - **Long reasoning.** A turn that reaches its 8,184-minus-prompt allowance is
-  right-censored and never admitted or cut; censoring is recorded per cell and
-  mode, and a primary cell above 20% is flagged on S.
+  *training-length-limited* (right-censored at the training sequence; the
+  teacher's supported context is 40,960, so it is never a context-limit hit),
+  never admitted or cut. Per cell, mode and wave the limited share, correctness,
+  natural termination and trainable samples are reported; a primary cell above
+  20% carries the descriptive warning `LENGTH_CENSORED` and nothing else.
+- **Initialization.** D4 Top-1's operator path step for step on the hybrid,
+  materialized once with the hybrid's own mode-balanced trajectories on the
+  path's two calibration profiles (`hybrid_calibration.py`, `initialization.py`).
 - **Kept from hybrid_v1:** the official hard switch, token-native documents,
-  document isolation, the common hybrid-derived initialization, eval-set-1 under
-  nucleus_v1 in each student's own mode, the scoring identity.
-- **Objective.** The project's new KD baseline (Top-200 + tail at the target
+  document isolation, eval-set-1 under nucleus_v1 in each student's own mode,
+  the scoring identity.
+- **Objective.** The project's KD baseline (Top-200 + tail at the target
   positions). A different teacher lineage from Research B: never a controlled
   pair with it.
-- **Axes.** AGENTS.md P10.2 has four primary axes; eval-set-1's static axes are
-  three of them plus abstract/analogical reasoning, a sub-category reported on
-  its own.
+- **Axes.** AGENTS.md P10.2's four primary axes, each reported apart:
+  task-contained deduction, inductive rule discovery, compositional
+  generalization (static, decided) and interactive adaptation and planning
+  (exploratory); abstract/analogical reasoning is a registered sub-category,
+  reported on its own.
+
+**Sessions** (`phase.py`, one grant, `shared.study_engineering` as a formal
+phase): the *teacher* session on one A100 80GB (calibration, initialization,
+W00 = T0 + V, E's waves, X, the teacher's own evaluation in both modes); the
+dev box's admission ($0); the *recovery* session(s), one or two GPUs on one
+pod, six units through H1-PA's unit driver; the dev box's analysis ($0).
+Everything finished is on the phase's network volume as it completes and is
+pulled on every poll; a later attempt resumes from the volume.
 
 | record | owns |
 | --- | --- |
 | [`d4_scale_design.json`](../../../../configs/stages/stage-2/teacher_modes/d4_scale_design.json) | scale, tasks, stopping rule, long-reasoning rule, arms, objective, execution |
-| [`plans/d4_scale_preregistration.json`](../../../../logs/stages/stage-2/teacher_modes/plans/d4_scale_preregistration.json) | S and C, the decision rule, the data-size rules |
-| [`logs/budget/applications/research_ab_2026-10-28/`](../../../../logs/budget/applications/research_ab_2026-10-28/) | the phase application and its forecast |
+| [`generation_protocol.json`](../../../../configs/stages/stage-2/teacher_modes/generation_protocol.json) | every value the teacher session passes to the runner; the bound inputs |
+| [`plans/d4_scale_preregistration.json`](../../../../logs/stages/stage-2/teacher_modes/plans/d4_scale_preregistration.json) | S and C, the bound decision rule (`mode_statistics.py`), the data-size rules |
+| [`data/.../tasks/order_v1.manifest.json`](../../../../data/stages/stage-2/teacher_modes/tasks/order_v1.manifest.json) | the frozen order: cells, slices, substitutions, exports, isolation |
+| [`logs/budget/applications/research_a_2026-10-29/`](../../../../logs/budget/applications/research_a_2026-10-29/) | the phase application, its proposal and its forecast |
 
 ---
 

@@ -25,6 +25,12 @@ before its evaluation:
 * the projected student's evaluation runs through vLLM's out-of-tree model,
   whose general plugin this process puts on every child's PYTHONPATH, and only
   after `engine_admission` passes on that checkpoint.
+
+The TEACHER is the maintainer's decision after Research A (design :: teacher):
+while it is pending, `load_plan` builds no formal unit and `formal_teacher`
+refuses, so no formal initialization, recovery or matched control runs on a
+provisional teacher. Teacher-independent engineering reads `engineering_teacher`
+and the recipe side only (``require_initialization=False``).
 """
 from __future__ import annotations
 
@@ -51,6 +57,25 @@ PROJECTED = "Projected-1123M-topk200"
 ADMISSION_CONFIG = REPO / "configs/stages/stage-1/projected_residual/independent_gated_validation.json"
 
 
+class TeacherPending(HD.DriverRefusal):
+    """Research B's teacher is not decided: nothing formal may run (design :: teacher)."""
+
+
+def formal_teacher(design: dict) -> dict:
+    """The decided teacher (model, revision, dtype, template kwargs); refuses while it is pending."""
+    t = design["teacher"]
+    if t.get("status") != "decided" or not t.get("model") or not t.get("revision"):
+        raise TeacherPending(f"{design['study_id']}: the teacher is {t.get('status')!r}, decided by the maintainer "
+                             "after Research A; no formal initialization, recovery or matched control runs before it")
+    return t
+
+
+def engineering_teacher(design: dict) -> dict:
+    """The teacher a teacher-independent engineering check runs: the decided one, else the declared stand-in."""
+    t = design["teacher"]
+    return t if t.get("status") == "decided" else design["engineering_teacher"]
+
+
 def resolved_kd_support() -> dict:
     from shared.forward_baseline import selected
     return selected(REPO).distribution_support.as_dict()
@@ -63,8 +88,11 @@ def load_plan(arm: str, design_path: Path = DESIGN, prereg_path: Path = PREREG, 
     ``require_initialization=False`` builds the recipe side only (what
     `h1pa_driver.derive_recipe` reads), for the engineering validation, whose
     student is its own materialization: the plan then carries no ``init`` and no
-    unit can run from it."""
+    unit can run from it. A formal plan (``require_initialization=True``) also
+    needs the decided teacher (`formal_teacher`)."""
     design, prereg = UD._read(design_path), UD._read(prereg_path)
+    if require_initialization:
+        formal_teacher(design)
     if arm not in design["arms"]:
         raise HD.DriverRefusal(f"{arm!r} is not an arm of {design['study_id']}; arms: {sorted(design['arms'])}")
     base_path = REPO / design["base_study"]["path"]
@@ -72,8 +100,9 @@ def load_plan(arm: str, design_path: Path = DESIGN, prereg_path: Path = PREREG, 
         raise HD.DriverRefusal(f"{design['base_study']['path']} is not the H1-PA record the design names")
     base = UD._read(base_path)
     ctl = design["base_study"]["control_arm"]
-    if [int(s) for s in design["seeds"]] != [int(s) for s in base["seeds"]] != [int(s) for s in prereg["seeds"]]:
-        raise HD.DriverRefusal("the design's, the base study's and the preregistration's seeds differ")
+    seed_lists = [[int(s) for s in doc["seeds"]] for doc in (design, base, prereg)]
+    if any(x != seed_lists[0] for x in seed_lists[1:]):
+        raise HD.DriverRefusal(f"the design's, the base study's and the preregistration's seeds differ: {seed_lists}")
     init = design["initializations"][arm]
     rec = REPO / init["record"]
     bound = rec.is_file() and bool(init.get("sha256")) and UD._sha(rec) == init["sha256"]
@@ -105,6 +134,7 @@ def load_plan(arm: str, design_path: Path = DESIGN, prereg_path: Path = PREREG, 
             arm_over[k] = v
     units = [{"unit": f"{arm}-s{seed}", "arm": arm, "seed": int(seed), "execution": "train"}
              for seed in design["seeds"]]
+    bound = bound and require_initialization        #: the recipe side builds no unit, bound or not
     return {"study": study, "study_sha256": UD._sha(design_path), "prereg": prereg,
             "prereg_sha256": UD._sha(prereg_path), "recipes": recipes,
             "init": UD._read(rec)["materialization_identity"] if bound else None,
@@ -158,14 +188,14 @@ def engine_admission(model_dir: Path, work: Path) -> dict:
     """HF reference in a child that exits, then vLLM on the clear GPU (`engine_admission`, `vllm_check`)."""
     import subprocess
 
+    from shared.pod.teacher_cache import local_snapshot
     from shared.validation import engine_admission as EA
     from shared.validation import vllm_check as VC
 
-    from stages.projected_residual.engineering_validation import render_probe
-
     work.mkdir(parents=True, exist_ok=True)
     cfg = UD._read(ADMISSION_CONFIG)
-    rows, ids = render_probe(cfg)
+    tok = local_snapshot(cfg["probe"]["tokenizer"]["model"], cfg["probe"]["tokenizer"]["revision"])
+    rows, ids = EA.probe_ids(cfg["probe"], tok)
     bad = [r["id"] for r in rows if r["token_ids_sha256"] != r["expected_sha256"]]
     if bad:
         return {"status": "FAIL", "problems": [f"the probe's token ids are not the configured ones: {bad}"]}
@@ -177,12 +207,8 @@ def engine_admission(model_dir: Path, work: Path) -> dict:
     (work / "probes.json").write_text(json.dumps([p["ids"] for p in probes]))
     subprocess.run([sys.executable, "-c", code], cwd=REPO, check=True)
     ref = json.loads(ref_path.read_text())
-    from shared.pod.teacher_cache import local_snapshot
-    teacher = UD._read(DESIGN)["teacher"]
     res = VC.run_isolated(os.environ.get("AAD_VLLM_PYTHON", "/opt/vllm/bin/python"),
-                          EA.vllm_request(model_dir, [p["ids"] for p in probes], 8192,
-                                          tokenizer=local_snapshot(teacher["model"], teacher["revision"])),
-                          work / "vllm")
+                          EA.vllm_request(model_dir, [p["ids"] for p in probes], 8192, tokenizer=tok), work / "vllm")
     crit = {k: cfg["engine_admission"][k] for k in EA.CRITERIA_KEYS}
     return {**EA.compare(ref, res.get("result"), crit), "gpu_before": res.get("gpu_before"),
             "engine_status": res.get("status"), "probe": rows}

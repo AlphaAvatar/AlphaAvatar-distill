@@ -39,6 +39,7 @@ import json
 import random
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import torch
 
@@ -52,8 +53,10 @@ __all__ = [
     "message_terminator",
     "PackedDocuments",
     "pack_isolated",
+    "isolated_sequence_count",
     "pack_cross_context",
     "pack_documents",
+    "write_pack",
     "context_exposure",
     "isolation_report",
 ]
@@ -235,6 +238,17 @@ def _order(docs: Sequence[TokenDocument], order_seed: int | None) -> list[int]:
     return order
 
 
+def isolated_sequence_count(lengths: Mapping[str, int], seq_len: int, *, order_seed: int | None = None) -> int:
+    """The number of sequences `pack_isolated` makes of documents with these lengths, given in
+    `pack_isolated`'s input order (a mapping keeps it), without building any tensor."""
+    order = list(range(len(lengths)))
+    if order_seed is not None:
+        random.Random(order_seed).shuffle(order)
+    sizes = list(lengths.values())
+    bins, _ = _best_fit(sizes, sizes, seq_len, order)
+    return len(bins)
+
+
 def pack_isolated(docs: Sequence[TokenDocument], seq_len: int, pad_id: int, *,
                   order_seed: int | None = None) -> PackedDocuments:
     """Whole documents, best fit, into ``seq_len`` sequences with restarting positions.
@@ -340,6 +354,47 @@ def pack_documents(docs: Sequence[TokenDocument], seq_len: int, pad_id: int, *, 
         return pack_cross_context(docs, seq_len, pad_id, shared_prefix=shared_prefix,
                                   separator_ids=separator_ids, order_seed=order_seed)
     raise ValueError(f"unknown context strategy {strategy!r}; one of {CONTEXT_STRATEGIES}")
+
+
+def write_pack(train: PackedDocuments, val: PackedDocuments, out_dir, *, data_type: Mapping[str, str],
+               extra: Mapping | None = None) -> dict:
+    """``blocks.npz``, ``ladder.json`` and ``audit.jsonl`` in the trainer's ladder contract.
+
+    One rung covering ``train``'s sequences; ``val``'s sequences follow them as
+    the tail the loader validates on (`aadistill.data.ladder.ladder_blocks`).
+    Isolated packs also store ``position_ids``. ``data_type`` maps every doc id
+    to the category its validation mixture and audit count it under. Returns
+    the ladder record, with the sha256 of each written file.
+    """
+    import numpy as np
+
+    from aadistill.infrastructure.manifest import sha256_file
+
+    out = Path(out_dir)
+    if train.strategy != val.strategy or train.input_ids.shape[1] != val.input_ids.shape[1]:
+        raise DocumentError("train and validation sequences must share one strategy and sequence length")
+    out.mkdir(parents=True, exist_ok=True)
+    cat = lambda name: torch.cat([getattr(train, name), getattr(val, name)]).numpy()  # noqa: E731
+    arrays = {"input_ids": cat("input_ids").astype(np.int32), "ce_mask": cat("target_mask"),
+              "content_mask": cat("content_mask")}
+    if train.strategy == "document_isolated":
+        arrays["position_ids"] = cat("position_ids").astype(np.int32)
+    np.savez(out / "blocks.npz", **arrays)
+    with (out / "audit.jsonl").open("w") as f:
+        for b, members in enumerate(train.members + val.members):
+            f.write(json.dumps({"block": b, "split": "train" if b < len(train.members) else "val",
+                                "sessions": [{"session_id": m["doc_id"], "data_type": data_type[m["doc_id"]],
+                                              "supervised_retained": m["supervised"], "start": m["start"],
+                                              "length": m["length"], "foreign_context": m["foreign_context"]}
+                                             for m in members]}) + "\n")
+    st = train.stats()
+    ladder = {"packing": f"token_documents.{train.strategy}", "block_len": int(train.input_ids.shape[1]),
+              "n_blocks": st["sequences"], "n_val_blocks": len(val.members),
+              "rungs": [{"target_supervised_tokens": st["supervised_tokens"], "n_blocks": st["sequences"],
+                         "reachable": True, "actual_supervised_tokens": st["supervised_tokens"]}],
+              "train": st, "val": val.stats(), **dict(extra or {})}
+    (out / "ladder.json").write_text(json.dumps(ladder, indent=1) + "\n")
+    return {**ladder, "files_sha256": {n: sha256_file(out / n) for n in ("blocks.npz", "ladder.json", "audit.jsonl")}}
 
 
 def context_exposure(packed: PackedDocuments) -> dict:

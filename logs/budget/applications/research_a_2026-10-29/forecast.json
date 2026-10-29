@@ -1,0 +1,177 @@
+{
+ "schema": "aadistill.budget.research_a_forecast/v1",
+ "written_utc": "2026-10-29T00:00:00Z",
+ "measured": {
+  "a100_usd_per_hour": {
+   "value": 1.79,
+   "source": "logs/stages/stage-2/teacher_modes/runs/ae_20261028_093428/runtime/session.json :: cost.price_per_hour (A-E, A100 SXM 80GB)"
+  },
+  "l40s_usd_per_hour": {
+   "value": 1.09,
+   "source": "logs/stages/stage-2/reasoning_data/runs/h1pa2_20261025_055042 (H1-PA, L40S)"
+  },
+  "t0_generated_tokens_2507": {
+   "value": 12920708,
+   "source": "logs/stages/stage-2/teacher_modes/plans/cost_forecast.json :: measured.generated_tokens_2507 (H1's P1 + P1t + PA1 records, both candidates)"
+  },
+  "tokens_per_session_minute_a100": {
+   "value": 80198,
+   "source": "the same :: measured.tokens_per_session_minute (H1's three generation sessions, A100)"
+  },
+  "t0_ht_s_sequences_at_reference": {
+   "value": 1235,
+   "source": "the same :: scenarios.expected.sequences.H-T-S (T0, admitted_both 0.70, H-T tokens 1.0x)"
+  },
+  "isolated_seconds_per_step_a100": {
+   "value": 5.19,
+   "source": "logs/stages/stage-2/teacher_modes/runs/ae_20261028_093428/evidence/trainer_smoke.json (document_isolated, on-the-fly teacher, A100)"
+  },
+  "student_eval_seconds_l40s": {
+   "value": 3917.1,
+   "source": "logs/stages/stage-2/reasoning_data/runs/h1pa2_20261025_055042/closeout/outcome.json :: D4-Augmented-s20260801 evaluate (all of eval-set-1, nucleus_v1)"
+  },
+  "operator_seconds_d4_path_a100": {
+   "value": 2446.4,
+   "source": "the dose_d4 search telemetry: D4 Top-1's ATTENTION 98.9 + DEPTH 2,258.9 + WIDTH 43.9 + FFN 44.7 s (A100)"
+  },
+  "save_point_bytes": {
+   "value": 5908258491,
+   "source": "configs/stages/stage-2/reasoning_data/h1pa.json :: storage.bytes.save_point (this geometry)"
+  },
+  "checkpoint_bytes": {
+   "value": 2384234968,
+   "source": "the same :: storage.bytes.model_safetensors"
+  }
+ },
+ "design": {
+  "t0_tasks": 1761,
+  "v_tasks": 240,
+  "wave": 400,
+  "e_waves": 9,
+  "target_sequences": 2468,
+  "calibration_prompts": 160,
+  "seeds": 2,
+  "epochs": 3,
+  "batch": 2,
+  "x_tasks": 14000
+ },
+ "scenarios": {
+  "expected": {
+   "multipliers": {
+    "ht_tokens": 1.0,
+    "hn_tokens": 0.25,
+    "admitted_both": 0.7,
+    "step": 1.0,
+    "student_eval": 0.75,
+    "teacher_eval_ht": 3.5,
+    "teacher_eval_hn": 1.75,
+    "init_minutes": 60,
+    "hn_admitted": 0.75
+   },
+   "teacher_session": {
+    "tokens_m": {
+     "calibration": 0.88,
+     "t0": 16.15,
+     "v": 2.2,
+     "e": 22.01,
+     "x": 11.8
+    },
+    "tokens_total_m": 53.05,
+    "e_tasks_needed": 1759,
+    "e_tasks_generated": 2400,
+    "t0_ht_s_sequences": 1235,
+    "hours": {
+     "setup": 0.33,
+     "generation": 11.02,
+     "initialization": 1.0,
+     "teacher_evaluation": 5.71,
+     "closeout": 0.25
+    },
+    "hours_total": 18.32,
+    "gpu": "1 x A100 SXM 80GB",
+    "usd": 33.17
+   },
+   "recovery": {
+    "optimizer_steps": {
+     "H-T-S": 3913,
+     "H-N-S": 1370,
+     "H-N-C": 3913
+    },
+    "seconds_per_step": 5.19,
+    "hours": {
+     "train": 27.52,
+     "evaluate": 4.9
+    },
+    "hours_total": 32.99,
+    "gpu": "A100 SXM 80GB (1 or 2 on one pod)",
+    "usd": 59.74,
+    "volume_peak_gb_two_gpus": 42.9
+   }
+  },
+  "conservative": {
+   "multipliers": {
+    "ht_tokens": 1.15,
+    "hn_tokens": 0.25,
+    "admitted_both": 0.55,
+    "step": 1.25,
+    "student_eval": 1.0,
+    "teacher_eval_ht": 5.0,
+    "teacher_eval_hn": 3.5,
+    "init_minutes": 90,
+    "hn_admitted": 0.65
+   },
+   "teacher_session": {
+    "tokens_m": {
+     "calibration": 0.99,
+     "t0": 18.09,
+     "v": 2.47,
+     "e": 28.76,
+     "x": 14.6
+    },
+    "tokens_total_m": 64.91,
+    "e_tasks_needed": 2134,
+    "e_tasks_generated": 2800,
+    "t0_ht_s_sequences": 1116,
+    "hours": {
+     "setup": 0.33,
+     "generation": 13.49,
+     "initialization": 1.5,
+     "teacher_evaluation": 9.25,
+     "closeout": 0.25
+    },
+    "hours_total": 24.82,
+    "gpu": "1 x A100 SXM 80GB",
+    "usd": 44.94
+   },
+   "recovery": {
+    "optimizer_steps": {
+     "H-T-S": 3893,
+     "H-N-S": 1185,
+     "H-N-C": 3893
+    },
+    "seconds_per_step": 6.488,
+    "hours": {
+     "train": 33.33,
+     "evaluate": 6.53
+    },
+    "hours_total": 40.44,
+    "gpu": "A100 SXM 80GB (1 or 2 on one pod)",
+    "usd": 73.23,
+    "volume_peak_gb_two_gpus": 42.9
+   }
+  }
+ },
+ "hard_caps_usd": {
+  "teacher_session": 49.76,
+  "recovery": 89.61,
+  "storage": 8.4,
+  "engineering_reserve": 10.0,
+  "_storage": "one new 60 GB network volume in an A100 datacenter, 2 months at $0.07/GB-month",
+  "_reserve": "pre-science engineering subruns across the phase (P12.1), cumulative",
+  "phase_total": 161.97,
+  "storage_existing_volume": 4.2,
+  "_storage_existing_volume": "am5m373kuq (30 GB, EUR-IS-2, H1-PA's and the mixed study's checkpoints) keeps billing $2.10/month while it exists: two months"
+ },
+ "expected_usd": 101.31,
+ "authorizes": "nothing"
+}

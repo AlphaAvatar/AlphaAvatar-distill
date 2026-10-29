@@ -6,72 +6,49 @@
  "design": "configs/stages/stage-1/projected_residual/independent_gated_design.json",
  "driver": "scripts/stages/stage-1/projected_residual/independent_gated_validation.py",
  "probe": {
-  "_": "real eval-set-1 prompts from safe reasoning components only (no safety, answerability or knowledge item), rendered as the evaluation route renders them: run_battery's system message, the item's messages, the Thinking-2507 template with its generation prompt (which opens <think>), tokenized without special tokens. The token ids are recomputed on the pod and must hash to these values; the evidence records ids and hashes, never prompt text",
-  "eval_set_id": "eval-set-1",
-  "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
-  "system_message": "You are a helpful Assistant.",
+  "_": "engineering diagnostic texts written for engine numerics (prose, arithmetic, code, a JSON record, a numbered procedure, one ChatML exchange), never an evaluation item: maintainer brief 2026-10-29 section 5 keeps the formal evaluation set out of implementation debugging. Tokenized as plain text without added special tokens (shared.validation.engine_admission.probe_ids), so no teacher's chat template enters; Qwen3-4B@1cfa9a72 and Qwen3-4B-Thinking-2507@768f209d give the same ids. The ids are recomputed on the pod and must hash to these values; the evidence records ids and hashes, never the text",
+  "isolation": "shares no key with any held-out unit of eval-set-1 (shared.eval_sets.require_disjoint; scripts/stages/stage-1/projected_residual/tests/test_independent_gated.py)",
   "tokenizer": {
    "model": "Qwen/Qwen3-4B-Thinking-2507",
-   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
-   "tokenizer_files_sha256": "432738f604172d754f429813517fb6045a2b13be31d78faba60f6f8a9b0e14d0"
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea"
   },
   "token_ids_hash": "sha256 of json.dumps(ids, separators=(',', ':'))",
-  "items": [
+  "texts": [
    {
-    "component": "fluid_reasoning_720",
-    "unit": "dev_v1",
-    "item_id": "424bd847a714f66694d7",
-    "axis": "inductive_rule_discovery",
-    "tokens": 221,
-    "token_ids_sha256": "b8825c7b1330e64f1393ff5058b2285964c0b2e6c2ad8a47b82110426395737b"
+    "id": "prose",
+    "text": "The river ran slowly through the valley, and the old mill at its bend had not turned in years. Every spring the villagers talked about repairing the wheel, and every autumn the conversation moved on to the harvest, the roof of the school and the price of feed. Nobody minded very much. The mill had become a place to sit in the evening, to watch the swallows skim the water and to argue, without heat, about whether the weather would hold.",
+    "tokens": 92,
+    "token_ids_sha256": "92713f97e00c8d77713cf3154c78942aaeffb58fa9791161ba3acbd38ba5ca96"
    },
    {
-    "component": "fluid_reasoning_720",
-    "unit": "dev_v1",
-    "item_id": "e7a33cb050605fe24cef",
-    "axis": "compositional_generalization",
-    "tokens": 188,
-    "token_ids_sha256": "87ce7bd8f0fc68e79f3d40698026dce49662cc94b45e8404dd2c693f7fac08bb"
+    "id": "arithmetic",
+    "text": "To add two fractions with different denominators, first rewrite them over a common denominator. For example, to compute 1/4 + 1/6, note that the least common multiple of 4 and 6 is 12. Then 1/4 = 3/12 and 1/6 = 2/12, so the sum is 5/12. The same idea works for subtraction: 5/8 - 1/3 = 15/24 - 8/24 = 7/24. Multiplying fractions is simpler, because the numerators and denominators are multiplied separately: 2/3 x 9/10 = 18/30 = 3/5.",
+    "tokens": 158,
+    "token_ids_sha256": "1b696fdc0e5d8547b0324ab2c2abfb646fba8f8bcde0c7e4f66b6040fdd9eaf8"
    },
    {
-    "component": "fluid_reasoning_720",
-    "unit": "dev_v1",
-    "item_id": "e5c87fa5a00a2ee777fd",
-    "axis": "task_contained_deduction",
-    "tokens": 70,
-    "token_ids_sha256": "2332d31a0dabe7913dc8d37444494bebfcd2fe03516e044d6d2624dc1080ef52"
+    "id": "code",
+    "text": "def running_mean(values):\n    \"\"\"Return the mean of each prefix of values.\"\"\"\n    means = []\n    total = 0.0\n    for count, value in enumerate(values, start=1):\n        total += value\n        means.append(total / count)\n    return means\n\n\nif __name__ == \"__main__\":\n    print(running_mean([2.0, 4.0, 6.0, 8.0]))\n",
+    "tokens": 90,
+    "token_ids_sha256": "b47cb8561a0fbaa143e9e2dd2cb9f2098b85e4e0b4f636a90d5587ee61ee486f"
    },
    {
-    "component": "fluid_reasoning_720",
-    "unit": "dev_v1",
-    "item_id": "a68fc81fffe597f45d54",
-    "axis": "abstract_analogical",
-    "tokens": 66,
-    "token_ids_sha256": "16c0e7c7e4dfec0efe0aab039de8a83d12a17af4cb16a23d1cd6e97612284abe"
+    "id": "structured",
+    "text": "{\n  \"name\": \"weather-station-07\",\n  \"location\": {\"latitude\": 46.21, \"longitude\": 6.14, \"elevation_m\": 375},\n  \"sensors\": [\n    {\"kind\": \"temperature\", \"unit\": \"celsius\", \"interval_s\": 60},\n    {\"kind\": \"humidity\", \"unit\": \"percent\", \"interval_s\": 60},\n    {\"kind\": \"pressure\", \"unit\": \"hectopascal\", \"interval_s\": 300}\n  ],\n  \"active\": true\n}",
+    "tokens": 129,
+    "token_ids_sha256": "25e2bcf8f0a27230bc66b17d8b615a911359ed59e8f735274b464ee7c974e202"
    },
    {
-    "component": "stage3_capability_846",
-    "unit": "gsm8k",
-    "item_id": "gsm8k-test-00917",
-    "axis": null,
-    "tokens": 55,
-    "token_ids_sha256": "41491c60397ec6c10bccfc5d8113ff3970b8ae37f0ac65c9520b96741aebbd4a"
+    "id": "procedure",
+    "text": "How to repot a houseplant:\n1. Water the plant a day before, so the root ball holds together.\n2. Choose a new pot about two centimetres wider than the old one, with a drainage hole.\n3. Put a layer of fresh potting mix in the bottom of the new pot.\n4. Turn the old pot on its side and ease the plant out, supporting the base of the stems.\n5. Loosen any circling roots gently with your fingers.\n6. Set the plant in the new pot at the same depth as before and fill around it with mix.\n7. Water thoroughly and keep the plant out of direct sun for a few days.",
+    "tokens": 138,
+    "token_ids_sha256": "1feed9a6e1f2c9197f639d1b0553fa627cf277365183ba6dfe5366e61bce2697"
    },
    {
-    "component": "stage3_capability_846",
-    "unit": "gsm8k",
-    "item_id": "gsm8k-test-01007",
-    "axis": null,
-    "tokens": 74,
-    "token_ids_sha256": "ea4a0695a1a940303e13f24922a2834561abfded8d1f6e6b338c60416867b7ba"
-   },
-   {
-    "component": "stage3_capability_846",
-    "unit": "math_verified",
-    "item_id": "math500-test/algebra/2102.json",
-    "axis": null,
-    "tokens": 94,
-    "token_ids_sha256": "23dae360a1a398f8c2f520554088c3872736b614ca42ade20cea915f2d2c3294"
+    "id": "dialogue",
+    "text": "<|im_start|>user\nCan you suggest a name for a small bakery that sells bread and cakes?<|im_end|>\n<|im_start|>assistant\nHere are a few ideas: \"The Daily Crumb\", \"Flour and Ember\", \"Rise and Shine Bakery\" and \"The Corner Loaf\". A name that mentions your street or town can also help local customers remember you.<|im_end|>\n",
+    "tokens": 73,
+    "token_ids_sha256": "1a8af4a6aae91604f4a0d493ae8f99b2bf37e16e381af7f1bbdc712c4305e130"
    }
   ],
   "tiny_lengths": [
@@ -79,7 +56,8 @@
    33,
    41
   ],
-  "_tiny": "the host path's tiny teacher has a 97-token vocabulary, so its probe is seeded random ids of these lengths; it rehearses the code, never the numbers"
+  "_tiny": "the host path's tiny teacher has a 97-token vocabulary, so its probe is seeded random ids of these lengths; it rehearses the code, never the numbers",
+  "superseded": "the eval-set-1 probe of 2026-10-28 (7 items of fluid_reasoning_720 and stage3_capability_846): never run, replaced before any session; B-E's frozen evidence keeps its own probe"
  },
  "numeric_identity": {
   "device_class": null,

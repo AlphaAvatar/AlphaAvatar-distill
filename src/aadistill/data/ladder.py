@@ -107,7 +107,10 @@ def ladder_blocks(packed_dir: str | Path, rung: int, n_val: int = 16):
 
     `train` and `val` are each `(input_ids, loss_mask, content_mask)` in the
     layout `Trainer` expects. Train is the rung prefix; val is a fixed slice of
-    the pack tail, disjoint from every rung by construction.
+    the pack tail, disjoint from every rung by construction. A pack that stores
+    its own ``position_ids`` (document-isolated sequences,
+    `token_documents.write_pack`) gives four-tuples with them last, the layout
+    ``batch.context_strategy: document_isolated`` requires.
     """
     packed_dir = Path(packed_dir)
     meta = load_ladder_meta(packed_dir)
@@ -130,6 +133,9 @@ def ladder_blocks(packed_dir: str | Path, rung: int, n_val: int = 16):
 
     train = (input_ids[:n_blocks], loss_mask[:n_blocks], content_mask[:n_blocks])
     val = (input_ids[val_tensor], loss_mask[val_tensor], content_mask[val_tensor])
+    if "position_ids" in arrays.files:
+        positions = torch.from_numpy(arrays["position_ids"].astype(np.int64))
+        train, val = (*train, positions[:n_blocks]), (*val, positions[val_tensor])
 
     train_tokens: Counter = Counter()
     for row in audit[:n_blocks]:

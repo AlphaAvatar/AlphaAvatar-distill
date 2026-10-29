@@ -115,7 +115,9 @@ def verdict(evidence: Path) -> dict:
 
 
 def launch_spec() -> SE.Launch:
-    teacher = json.loads((REPO_ROOT / DESIGN).read_text())["teacher"]
+    from stages.projected_residual.recovery_driver import engineering_teacher
+    #: teacher-independent engineering: the study's own teacher is pending Research A (design :: teacher)
+    teacher = engineering_teacher(json.loads((REPO_ROOT / DESIGN).read_text()))
     return SE.Launch(
         session_kind="stage1_independent_gated", authorization=IGEAuthorization, teacher_model=teacher["model"],
         teacher_revision=teacher["revision"],

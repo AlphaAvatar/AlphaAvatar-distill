@@ -3,7 +3,7 @@
  "version": 1,
  "study_id": "stage1.projected_residual.independent_gated_v1",
  "written_utc": "2026-10-28T18:30:00Z",
- "status": "DRAFTED at $0 before any model of this study exists; REGISTERED (frozen, its sha256 bound into the phase grant) only on the maintainer's authorization, and never amended after the first trained result of this study exists",
+ "status": "DRAFTED at $0 before any model of this study exists; REGISTERED (frozen, its sha256 bound into the phase grant) only on the maintainer's authorization, and never amended after the first trained result of this study exists; 2026-10-28: the TEACHER IS PENDING Research A (design :: teacher), so nothing here is registered or run until the maintainer decides it and the teacher-dependent sections are rebuilt for that lineage",
  "design": {
   "path": "configs/stages/stage-1/projected_residual/independent_gated_design.json"
  },

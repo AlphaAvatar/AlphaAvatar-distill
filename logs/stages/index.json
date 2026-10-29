@@ -1858,9 +1858,9 @@
    ],
    "classification_reason": "Stage 2 by subject and product: which native teacher distribution the offline training data is generated from (AGENTS.md 4.4). The initialization, Stage-3 recovery and eval-set-1 are its instruments.",
    "canonical_scripts": "scripts/stages/stage-2/teacher_modes",
-   "canonical_artifacts": null,
+   "canonical_artifacts": "artifacts/stages/stage-2/teacher_modes",
    "canonical_configs": "configs/stages/stage-2/teacher_modes",
-   "canonical_data": null,
+   "canonical_data": "data/stages/stage-2/teacher_modes",
    "canonical_docs": "docs/stages/stage-2/teacher_modes",
    "live_state": null
   },

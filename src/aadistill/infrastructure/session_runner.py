@@ -407,6 +407,13 @@ class SessionRunner:
                  f"(authorized ${self.auth.hard_cap_usd:.2f})")
         return self.check_gpu_offered()
 
+    def gpu_count(self) -> int:
+        """GPUs on the one pod (``--gpu-count``, default 1). Several are still ONE provider resource."""
+        n = int(getattr(self.a, "gpu_count", 1) or 1)
+        if n < 1:
+            raise SessionSpecError(f"--gpu-count {n}: a pod has at least one GPU")
+        return n
+
     def check_gpu_offered(self) -> bool:
         """Is the GPU offered at or below the priced rate?
 
@@ -421,10 +428,11 @@ class SessionRunner:
         that must not happen is proceeding to `create()` on an unpriced GPU.
         """
         obs = None
+        n = self.gpu_count()
         for attempt in range(1, self.a.create_attempts + 1):
             obs = self.provider.observe(
                 'query { gpuTypes(input:{id:"%s"}) { id securePrice '
-                'lowestPrice(input:{gpuCount:1}) { stockStatus } } }' % self.a.gpu)
+                'lowestPrice(input:{gpuCount:%d}) { stockStatus } } }' % (self.a.gpu, n))
             if obs.ok:
                 break
             self.ev.setdefault("control_plane_retries", []).append(
@@ -445,8 +453,11 @@ class SessionRunner:
         if not rows:
             self.say(f"ABORT: {self.a.gpu} not offered")
             return False
-        self.price = rows[0].get("securePrice")
+        #: the POD's price: --max-price and every cost bound are per pod, all its GPUs together
+        per_gpu = rows[0].get("securePrice")
+        self.price = None if per_gpu is None else per_gpu * n
         self.ev["quoted_price_per_hour"] = self.price
+        self.ev["gpu_count"] = n
         self.ev["stock_status"] = (rows[0].get("lowestPrice") or {}).get("stockStatus")
         self.say(f"{self.a.gpu} ${self.price}/h, stock {self.ev['stock_status']}")
         if self.price is None or self.price > self.a.max_price:
@@ -648,7 +659,7 @@ class SessionRunner:
         for attempt in range(1, self.a.create_attempts + 1):
             raw = subprocess.run(
                 [self.cli, "pod", "create", "--image", self.a.image,
-                 "--gpu-id", self.a.gpu, "--gpu-count", "1",
+                 "--gpu-id", self.a.gpu, "--gpu-count", str(self.gpu_count()),
                  "--container-disk-in-gb", str(self.a.disk_gb),
                  *self.attached_volume(),
                  *self.placement(),

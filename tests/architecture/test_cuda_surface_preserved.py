@@ -2434,6 +2434,23 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "general-plugin `register`; imported only in the vLLM environment. CUDA "
             "SURFACE: the whole engine path, owed to a GPU validation.",
      }),
+    ("e70c1d92b3f35822c524cab23183ba6879b8085a",
+     "Research A first: its chain at $0 (isolated packs on disk, a multi-GPU pod)",
+     {
+        "src/aadistill/data/ladder.py":
+            "`ladder_blocks` returns four-tuples with the pack's own `position_ids` when "
+            "`blocks.npz` stores them (document-isolated packs); packs without them load "
+            "as before. NO CUDA SURFACE.",
+        "src/aadistill/data/token_documents.py":
+            "NEW `isolated_sequence_count` (pack_isolated's sequence count without "
+            "tensors, the same placement) and `write_pack` (the ladder contract with "
+            "position ids and a validation tail). NO CUDA SURFACE.",
+        "src/aadistill/infrastructure/session_runner.py":
+            "`--gpu-count` (default 1): the pod is created with that many GPUs and priced "
+            "per pod (the per-GPU quote x the count) against --max-price; one GPU keeps "
+            "every earlier session's command and price. THIS IS A DECLARED SEMANTIC "
+            "CHANGE of provisioning; NO CUDA SURFACE.",
+     }),
 )
 
 

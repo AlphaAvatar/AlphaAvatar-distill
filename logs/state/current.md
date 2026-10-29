@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-28 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-28 (UTC), late. The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,27 +9,25 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**REVISED RESEARCH A/B PROGRAMME (maintainer, 2026-10-28): $0 DESIGN AND IMPLEMENTATION DONE; THE PHASE APPLICATION IS PENDING. No paid resource, no cap increase. Committed $725.4993 of $740; 0 pods; volume `am5m373kuq` only. STOPPED at the maintainer's decision on the application.**
-Decision record: `logs/budget/decisions.md` 2026-10-28. Application:
-`logs/budget/applications/research_ab_2026-10-28/application.json` (phase hard cap $177.21, expected
-$102.41, project cap requested $903). Branch `research/teacher-modes-and-projected-residual`; `main` stays
-at `72492e46`.
-- **Training baseline (core):** `loss.kd_support` = KD at the assistant target positions with the
-  teacher's Top-200 + one tail bucket (`src/aadistill/training/topk_kd.py`), rows chosen before the output
-  head, CE on the same positions; `loss.exclude_template_prefill`, `checkpoint.bind_identity`, `monitor`.
-  Absent keys keep every historical config byte-identical.
-- **Research B, 1.123B** (`docs/stages/stage-1/projected_residual/DESIGN.md`): four independent
-  projections + identity-initialized learnable SiLU gates (1,123,227,136 parameters, 734,270,976 trainable);
-  four-basis PCA initialization with a measured error; native HF and an out-of-tree vLLM model (general
-  plugin). Matched control: D4-Augmented retrained once per seed under the new protocol. Ready: design,
-  preregistration, `recovery_driver.py` (both arms), the engineering validation + launcher `igv_launch.py`.
-  Owed in-phase: the formal launchers.
-- **Research A, D4 scale** (`docs/stages/stage-2/teacher_modes/DESIGN.md`): `d4_scale_design.json` and
-  its preregistration (S and C, two seeds, no pilot, censored long reasoning never admitted). Owed in-phase:
-  E and X built and isolation-checked, the wave generation, admission and recovery drivers, launchers.
-- **Retirement (AGENTS.md 2.5):** 13 historical weights retired 2026-10-28 (14.43 GiB dev box, 4 relay
-  objects 4.44 GiB), tombstoned; D3's product kept. Dev box 30 GB free; relay 83.9 GiB.
-- **Next:** the maintainer's decision on the application. Nothing starts automatically.
+**RESEARCH A FIRST (maintainer, 2026-10-28 UTC): RESEARCH A'S CHAIN IS COMPLETE AT $0 AND ITS STANDALONE PHASE APPLICATION IS PENDING; RESEARCH B'S TEACHER IS PENDING A's RESULT. No paid resource, no cap increase. Committed $725.4883 of $740 (provider, 20:27Z); 0 pods; volume `am5m373kuq` only. STOPPED at the maintainer's decision on the application.**
+Decision record: `logs/budget/decisions.md` 2026-10-28 "Research A first". Application:
+`logs/budget/applications/research_a_2026-10-29/application.json` (phase hard cap $161.97, expected $105.51,
+project cap requested $888; a new 60 GB volume in an A100 datacenter). The joint A+B application and its $903
+cap are not approved (kept, marked superseded). Branch `research/teacher-modes-and-projected-residual`; `main`
+stays at `72492e46`.
+- **Research A** (`docs/stages/stage-2/teacher_modes/DESIGN.md`): the task order frozen at $0
+  (`data/stages/stage-2/teacher_modes/tasks/order_v1.*`: V 240, E 3,522, X 14,000, R0-R9 pass); `phase.py`
+  issues and launches the *teacher* session (`teacher_session.py`: calibration, the common initialization on
+  D4 Top-1's path, waves, X, the teacher's evaluation) and the *recovery* session(s) (`recovery_units.py`);
+  `admission.py` and `analysis.py` run on the dev box. Tested on a tiny repository with a fake teacher; nothing
+  of it has run on a GPU.
+- **Research B** (`docs/stages/stage-1/projected_residual/DESIGN.md`): the teacher is `pending`; every formal
+  use refuses (`recovery_driver.formal_teacher`); the seed check fixed; the engine admission reads engineering
+  texts, not eval-set-1. Nothing of B is requested.
+- **Training baseline (core):** `loss.kd_support` (Top-200 + tail KD at the target positions,
+  `src/aadistill/training/topk_kd.py`); `checkpoint.bind_identity`; isolated packs on disk
+  (`token_documents.write_pack`, `ladder_blocks` with position ids); one pod may hold 2 GPUs (`--gpu-count`).
+- **Next:** the maintainer's decision on Research A's application. Nothing starts automatically.
 
 **RESEARCH A AND B: A-E ($3.50) AND B-E ($3.00) PAID ENGINEERING VALIDATIONS AUTHORIZED (maintainer, 2026-10-28 UTC). A-E: PASS (attempt 2 `ae_20261028_093428`; $0.7089 of $3.50 across two attempts). B-E: FAIL (`be_20261028_095332`, $0.4366 of $3.00): trainer smoke OOM on the L40S at the frozen E1 recipe, so resume unmeasured; vLLM median |Δ log-prob| 0.234 > 0.1 nat. Initialization, both fold checks, checkpoint identity and GPU isolation PASS. Both closed; no pod; committed $725.4993 of $740. STOPPED at the maintainer's next decision.**
 Decision record: `logs/budget/decisions.md` 2026-10-28 "A-E ($3.50) and B-E ($3.00) ... authorized". Neither PASS is a scientific GO; A1–A3, B1 and 600M stay unauthorized. The text below is the $0 readiness state the authorization was granted on.

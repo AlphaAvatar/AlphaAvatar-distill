@@ -24,5 +24,10 @@
  ],
  "to_grant": "on the maintainer's explicit approval only: `igv_launch.py grant --decision '<the approval, quoted>' --granted-by maintainer` writes logs/budget/approvals/independent_gated_engineering_grant.json from this proposal with the study identity at that commit",
  "authorizes": "nothing",
- "_application": "bound by sha256 when the grant is written (shared.study_engineering.write_grant)"
+ "_application": "bound by sha256 when the grant is written (shared.study_engineering.write_grant)",
+ "deferred": {
+  "utc": "2026-10-28",
+  "why": "maintainer brief 'Research A First, Research B Teacher Selection Deferred': Research B's $43.30, this validation's $3.00 included, is not requested now; the proposal stays, unissued, until B is re-priced",
+  "probe": "its engine admission now reads the engineering texts of independent_gated_validation.json :: probe, not eval-set-1"
+ }
 }

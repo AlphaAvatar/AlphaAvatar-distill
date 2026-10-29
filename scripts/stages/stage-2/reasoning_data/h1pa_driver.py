@@ -338,7 +338,9 @@ def evaluate(job: dict) -> tuple[dict, dict]:
         raise IdentityMismatch(f"generations on the volume under another decoding protocol: {bad[:3]}; preserved")
     prereg = {"evaluation": {"trained_context": ev["trained_context"], "action_protocol": ev["action_protocol"],
                              "decoding": ev["decoding"]["path"]}}
-    rep, _ = evaluate_all(job["model_dir"], out, progress, job["label"], prereg, job["env"])
+    #: a study that evaluates under another tokenizer or a mode's template switch names them on the job
+    extra = {k: job[k] for k in ("package", "template_kwargs") if job.get(k) is not None}
+    rep, _ = evaluate_all(job["model_dir"], out, progress, job["label"], prereg, job["env"], **extra)
     bad = generation_refusals(out / "generations", ev["decoding"]["sha256"])
     if bad:
         raise IdentityMismatch(f"generations not under the preregistered decoding protocol: {bad[:3]}")

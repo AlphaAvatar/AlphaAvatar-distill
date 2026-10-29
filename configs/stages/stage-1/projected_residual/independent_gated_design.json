@@ -2,18 +2,50 @@
  "schema": "aadistill.stage1.projected_residual.independent_gated_design/v1",
  "study_id": "stage1.projected_residual.independent_gated_v1",
  "name": "Full-width residual + four independent projections + identity-initialized learnable SiLU residual gate (1.123B), against D4-Augmented under the same new training protocol",
- "status": "DESIGNED 2026-10-28 at $0 on the maintainer's decision; NOT FROZEN. Frozen with its preregistration only when the maintainer authorizes the paid phase. Authorizes nothing.",
- "decided_by": "maintainer brief 2026-10-28 'Revised Research A/B Programme & Engineering Principles', sections 1-4",
+ "status": "DESIGNED 2026-10-28 at $0 on the maintainer's decision; revised 2026-10-29: the TEACHER IS PENDING Research A's complete result (brief 2026-10-29 'Research A First, Research B Teacher Selection Deferred'). NOT FROZEN. The architecture, the training protocol and the engineering paths stand; no formal initialization, recovery or matched control is issuable until the maintainer decides the teacher. Authorizes nothing.",
+ "decided_by": "maintainer brief 2026-10-28 'Revised Research A/B Programme & Engineering Principles', sections 1-4; teacher deferred by the maintainer brief 2026-10-29, sections 1, 2 and 6",
  "supersedes": {
   "study": "stage1.projected_residual.pw900_v1 (configs/stages/stage-1/projected_residual/design.json, sha256 bound in the B-E grant)",
   "how": "for new work only: the 902,911,488-parameter transpose-shared design, its B-E FAIL (be_20261028_095332) and every record of it stay as they are, a historical research record; this design is a new scientific identity, never run under that authorization"
  },
- "question": "Keeping the teacher's full 2,560-wide residual stream, embedding and tied output head, and computing each layer's attention and FFN at 1,024 through four independent trainable projections with identity-initialized learnable SiLU gates, does the student recover better fluid-reasoning correctness than D4-Augmented when BOTH are trained under the same target-position Top-200 + tail KD protocol?",
+ "question": "Keeping the teacher's full 2,560-wide residual stream, embedding and tied output head, and computing each layer's attention and FFN at 1,024 through four independent trainable projections with identity-initialized learnable SiLU gates, does the student recover better fluid-reasoning correctness than the D4-Augmented geometry when BOTH are initialized from, and trained on data of, the SAME teacher lineage under the same target-position Top-200 + tail KD protocol? Which teacher is the maintainer's decision after Research A",
  "teacher": {
+  "status": "pending",
+  "decision": "the maintainer's, after Research A's complete scientific result, weighing teacher correctness, student correctness, the reasoning axes separately, training cost, output length and the statistical uncertainty; never chosen automatically, by a shorter output or by any single metric",
+  "candidates": [
+   "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+   "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c, enable_thinking=True (Research A's H-T)",
+   "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c, enable_thinking=False (Research A's H-N)",
+   "no formal Research B experiment for now"
+  ],
+  "pending_with_it": [
+   "the teacher checkpoint",
+   "the teacher's thinking mode",
+   "the teacher-native training corpus",
+   "the teacher-dependent PCA calibration",
+   "the teacher-specific initialization",
+   "the matched control's initialization source and training data (one teacher lineage for both arms)"
+  ],
+  "enforced_by": "recovery_driver.load_plan refuses every formal unit and recovery_driver.formal_teacher refuses every formal use while status is 'pending' (scripts/stages/stage-1/projected_residual/tests/test_independent_gated.py)",
+  "when_decided": "status 'decided' with the chosen model, revision and template kwargs, and every teacher-dependent section below rebuilt for that lineage: Thinking-2507 reuses D4 Top-1 and D4-Augmented's corpus (no new search, no new data); a hybrid mode builds the matched control from Research A's legal data and initialization assets first"
+ },
+ "engineering_teacher": {
   "model": "Qwen/Qwen3-4B-Thinking-2507",
   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
   "dtype": "bfloat16",
-  "_": "D4-Augmented's teacher, unchanged; Research A's hybrid teacher is not used here"
+  "use": "teacher-INDEPENDENT engineering checks only: the architecture's memory, step time, numerics, save/load/resume and its vLLM model behave the same under any Qwen3-4B-shaped teacher (36 x 2,560, the same vocabulary). Nothing it produces is this study's initialization, calibration, PCA basis, data or result, and no record of it is registered as one"
+ },
+ "teacher_dependent": {
+  "sections": [
+   "base_study",
+   "selection",
+   "calibration",
+   "initializations",
+   "data",
+   "recipe_overrides.loss.exclude_template_prefill",
+   "arms.D4-Augmented-topk200.initialization"
+  ],
+  "status": "the Thinking-2507 candidate's values: kept for the teacher-independent engineering checks and as the reusable assets if the maintainer chooses Thinking-2507; rebuilt for the chosen lineage otherwise. None of them is this study's until the teacher is decided"
  },
  "base_study": {
   "path": "configs/stages/stage-2/reasoning_data/h1pa.json",

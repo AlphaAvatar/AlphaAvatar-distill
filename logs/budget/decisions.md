@@ -14622,3 +14622,45 @@ on a paid pod.
   cross-context 3.62 s/step, which dominates Research A's conservative cost; length censoring at
   8,192 may bias S.
 - Revisit when the maintainer decides on the application.
+
+## 2026-10-28 (UTC) — Maintainer: Research A first; Research B's teacher deferred; A's standalone application
+
+- Context: the maintainer reviewed `e70c1d92` (brief "Research A First, Research B Teacher Selection
+  Deferred", received 2026-10-28 UTC). The $0 implementation is accepted; the joint A+B application
+  and the $903 cap are **not approved**.
+- Decision (maintainer):
+  - **Research A runs first, alone**, at D4-Augmented's scale with S and C, document isolation, the
+    Top-200 + tail KD, token-native data and the frozen eval set; no pilot; generation in persisted
+    waves is an execution strategy, not a gate.
+  - **Research B's teacher is pending** Research A's complete result and the maintainer's choice
+    (Thinking-2507, hybrid thinking, hybrid non-thinking, or no formal B for now): checkpoint, mode,
+    corpus, PCA calibration, initialization and the matched control's data all wait. B's
+    architecture and teacher-independent engineering stay. B's $43.30 is not requested.
+  - The 20% length threshold is a DESCRIPTIVE warning; a generation reaching 8,184 minus the
+    prompt is training-length-limited (right-censored), never a context-limit hit (the teacher
+    supports 40,960).
+  - Fix B's seed-identity check; move B's engine admission off eval-set-1 onto engineering text.
+- Done at $0 (branch `research/teacher-modes-and-projected-residual`):
+  - Research B: the design's teacher `pending` with a declared engineering stand-in;
+    `recovery_driver.load_plan` and `formal_teacher` refuse every formal use while pending; the
+    three seed lists must be identical (the chained `!=` accepted two of three differing); the
+    engine-admission probe is six engineering texts isolated from eval-set-1 (`probe_ids`).
+  - Research A: the task order frozen at $0 (17,762 tasks: V 240, E 3,522, X 14,000;
+    `data/stages/stage-2/teacher_modes/tasks/order_v1.*`, R0-R9 pass); the teacher session's
+    driver (calibration, the common initialization on D4 Top-1's path, waves, X, the teacher's
+    evaluation), the dev box's admission (exact stopping rule, X, packs), the recovery driver
+    (packs rebuilt on the pod and hash-checked, H1-PA's unit driver per GPU, each mode evaluated in
+    its own template), the bound decision rule, the analysis, and the phase's issuer and launcher
+    (`phase.py` on `shared.study_engineering`, now able to carry a formal phase's kinds).
+- **Application (PENDING):** `logs/budget/applications/research_a_2026-10-29/application.json`:
+  phase hard cap **$161.97** (teacher session $49.76, recovery $89.61, storage $12.60, engineering
+  reserve $10.00), expected $105.51; project cap requested **$888** (committed $725.4883 at
+  20:27Z). A new 60 GB volume in an A100 datacenter is needed (EUR-IS-2 has no A100 SXM). The
+  provider balance ($138.01) covers the teacher session; it needs a top-up before recovery.
+- Alternatives considered: recovery on L40S (cheaper, but its memory under the new loss is
+  unmeasured and the volume must sit where the A100s are); a separate teacher-evaluation session
+  (costs another setup).
+- Risks: E's size and the X generation follow the teacher's own yields (the forecast's admission
+  0.55-0.70); at 2 points the C mixture rule may fall to its registered fallback; the
+  initialization and the generation drivers have run only on fakes and a tiny repository.
+- Revisit when the maintainer decides on the application.
