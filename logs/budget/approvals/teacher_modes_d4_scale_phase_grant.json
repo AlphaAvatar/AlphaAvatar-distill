@@ -1,0 +1,58 @@
+{
+ "schema": "aadistill.study_phase_grant/v1",
+ "status": "granted",
+ "study": "A-D4",
+ "proposed_utc": "2026-10-29",
+ "maintainer_position": "2026-10-29 brief 'Research A L40S-First Hardware and Budget Correction': the A100-default application ($161.97, $888 cap) is not approved; every operation defaults to the L40S, an A100 only for an operation measured not to fit after memory management; one phase grant. This proposal funds nothing until granted",
+ "granted_by": "maintainer",
+ "decision": "Maintainer \u51b3\u5b9a\uff1a\u6279\u51c6 Research A \u7684 L40S \u9636\u6bb5\u7533\u8bf7\u3002Research A \u9636\u6bb5\u7d2f\u8ba1\u786c\u4e0a\u9650 $142.19\uff1b\u9879\u76ee\u7d2f\u8ba1\u786c\u4e0a\u9650 $868\uff1b\u9ed8\u8ba4\u4e14\u552f\u4e00\u5df2\u6279\u51c6 GPU\uff1aNVIDIA L40S\uff1bResearch B \u4ecd\u4e3a Teacher Pending\uff0c\u672a\u6388\u6743\uff1bA100 \u672a\u6388\u6743\u3002\u91c7\u7528\u5355\u4e00 Research A \u9636\u6bb5 Grant\uff0c\u6309 Check \u2192 Teacher \u2192 Admission \u2192 Recovery \u2192 Analysis \u6267\u884c\uff1bRecovery \u4f18\u5148 2\u00d7L40S\uff08\u4e0d\u6ee1\u8db3\u5219 1\u00d7L40S\uff09\uff1bRecovery \u524d\u539f\u5730\u6269\u5bb9 am5m373kuq \u81f3 55 GB\uff081 GPU\uff09\u6216 65 GB\uff082 GPU\uff09\u3002(brief 'Research A Phase Approval and Execution', 2026-10-29 UTC, reviewing 09dfae86)",
+ "ceiling_usd": 142.19,
+ "per_session_hard_cap_usd": 63.76,
+ "session_hard_caps_usd": {
+  "check": 4.56,
+  "teacher": 63.76,
+  "recovery": 58.97
+ },
+ "project_cumulative_cap_usd": 868.0,
+ "gpus": {
+  "NVIDIA L40S": 1.19
+ },
+ "_gpus": "the one card the phase may use, with its highest secure price per GPU-hour (live $1.09 on 2026-10-29, with headroom); a session refuses at $0 when its planned all-in bound does not fit its hard cap at the quoted price, and --gpu anything else is refused",
+ "gpu_count_max": 2,
+ "_gpu_count": "at most 2 GPUs on the ONE pod a session creates (recovery runs one unit per GPU); never two pods at once (P12.1)",
+ "network_volume": {
+  "id": "am5m373kuq",
+  "datacenter": "EUR-IS-2",
+  "size_gb_now": 30,
+  "expand_to_gb": {
+   "one_gpu": 55,
+   "two_gpus": 65
+  },
+  "when": "before the recovery session; the check and the teacher session fit its current 30 GB (peak 4.8 GB in its 15.3 GB free)",
+  "why": "the cheaper route during the phase, no migration, the historical checkpoints untouched (application.json :: storage)"
+ },
+ "scope": "Research A's D4-scale study (configs/stages/stage-2/teacher_modes/d4_scale_design.json, preregistration frozen at the grant): the L40S engineering check (diagnostic inputs, never formal), the teacher session (calibration, the common initialization, T0/V and E's waves in both modes, X in H-N, the teacher's evaluation in both modes) and the recovery session(s) of the six units (H-T-S, H-N-S, H-N-C or the registered fallback, two seeds each), through scripts/stages/stage-2/teacher_modes/phase.py; the dev box's $0 record, admission and analysis between and after them",
+ "retries": "ordinary pre-science engineering failures are repaired and rerun as new runs with new one-use artifacts inside this one cumulative envelope (P12.1); an engineering failure after formal measurement began reruns the SAME frozen unit to one replacement endpoint, never an optional second measurement; a deterministic failure is never retried unchanged",
+ "application": {
+  "path": "logs/budget/applications/research_a_2026-10-29/application.json",
+  "sha256": "e0a67a4f846d22c8d9b7d457eaa37670e059642c3e8b9c13e9d16faffbe0eb52"
+ },
+ "never": [
+  "a GPU, a pod, a network volume or a volume expansion before the maintainer's explicit approval writes the grant",
+  "an A100 or any card other than the L40S",
+  "a Research B session, initialization, matched control or recovery; Research B's teacher is the maintainer's decision after this study",
+  "another grant's unspent remainder, or the account balance, as funds",
+  "a scientific pilot, a promotion gate or a change to the frozen design, preregistration, eval set, scorers or nucleus_v1",
+  "a shorter sequence, dropped data, a changed batch semantics or a lower evaluation context to fit a card",
+  "raising the project cap beyond the granted one",
+  "a merge to main"
+ ],
+ "authorizes": "A-D4's phase only (scope): its session kinds ['check', 'teacher', 'recovery'], inside ceiling_usd cumulatively, per_session_hard_cap_usd per session and the project cap; one-use artifacts from `issue`; no other study and no follow-up",
+ "granted_utc": "2026-10-29",
+ "proposal": {
+  "path": "logs/budget/applications/research_a_2026-10-29/proposal.json",
+  "sha256": "15ba61b1b221719bbe19c9eafc3812b473598585515fc5d8e759799f6f22973d"
+ },
+ "study_identity_sha256": "848f65087269a8328a0cd682d5f8e089e5af93bb3e3e0b843b4868ef9c7a03d1",
+ "granted_at_commit": "3729719c0b46a276827ee83089b1f33b81102073"
+}
