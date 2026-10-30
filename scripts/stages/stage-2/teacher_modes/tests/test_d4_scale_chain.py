@@ -175,6 +175,14 @@ def test_the_teacher_session_runs_its_waves_bounds_the_rule_and_resumes_without_
     a = ADM.build_packs(sel, durable / "generation", IDENT, tmp_path / "packs_a", repo=root)
     b = ADM.build_packs(json.loads(json.dumps(sel)), durable / "generation", IDENT, tmp_path / "packs_b", repo=root)
     assert {k: v["files_sha256"] for k, v in a.items()} == {k: v["files_sha256"] for k, v in b.items()}
+    # the validation tail is the first VAL_SEQUENCES sequences of the mode's V pack as packed, never a re-pack
+    val_blocks = lambda d: [[x["session_id"] for x in json.loads(l)["sessions"]]  # noqa: E731
+                            for l in (d / "audit.jsonl").read_text().splitlines() if json.loads(l)["split"] == "val"]
+    monkeypatch.setattr(ADM, "VAL_SEQUENCES", 1)
+    ADM.build_packs(sel, durable / "generation", IDENT, tmp_path / "packs_v1", repo=root)
+    full, one = val_blocks(tmp_path / "packs_a" / "H-T-S"), val_blocks(tmp_path / "packs_v1" / "H-T-S")
+    assert len(full) > 1 and one == full[:1]
+    monkeypatch.setattr(ADM, "VAL_SEQUENCES", 16)
     from aadistill.data.ladder import ladder_blocks
     lad = a["H-T-S"]
     train, val, _ = ladder_blocks(tmp_path / "packs_a" / "H-T-S", lad["rungs"][0]["target_supervised_tokens"],

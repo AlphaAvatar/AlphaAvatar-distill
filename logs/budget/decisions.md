@@ -14856,3 +14856,9 @@ on a paid pod.
   $58.43 after session 1, so the rest is ONE bounded session (`--phases waves,x,teacher_eval`) planned for the
   conservative work. Recovery shrinks with the scale (about 905 / 242 / 905 optimizer steps per seed for H-T-S /
   H-N-S / H-N-C instead of 3,702 for each).
+- **Admission rehearsed on W00 at $0 (scratch, not the record):** `admission.py` end to end on real records and
+  `recovery_units.load_plan` on its output: the six units, two GPUs partitioned by seed. One defect: each mode's
+  validation tail re-packed the documents of the V pack's first 16 sequences in a new shuffle, which can need one
+  more -- H-T's came to 17 against the design's "at most 16 sequences" (diagnostics only, never a decision). Fixed:
+  the tail is the first 16 sequences as packed (H-T 16, H-N 9 on W00); regression in the chain test (fails with
+  the re-pack). Teacher session 2 does not build packs; the recovery session's harness carries the fix.

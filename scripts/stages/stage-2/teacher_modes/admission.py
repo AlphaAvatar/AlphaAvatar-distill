@@ -325,7 +325,7 @@ def selection(got: dict) -> dict:
 def build_packs(sel: dict, store: Path, identity: str, out: Path, repo: Path = REPO) -> dict:
     """Every arm's pack and its mode's validation tail, from the sealed records and `sel` alone (the
     dev box writes them; the recovery pod rebuilds them from the volume's copy of the same shards)."""
-    from aadistill.data.token_documents import document_from_turn, pack_isolated, write_pack
+    from aadistill.data.token_documents import PackedDocuments, document_from_turn, pack_isolated, write_pack
     proto = protocol(repo)
     tasks, *_ = tasks_and_stages(proto, repo)
     spec = A.read_json(A.CONFIG_DIR / "corpus_spec.json")
@@ -342,9 +342,12 @@ def build_packs(sel: dict, store: Path, identity: str, out: Path, repo: Path = R
             docs[d.doc_id], dtype[d.doc_id] = d, stratum
     val = {}
     for m, ids in sel["val"].items():
-        whole = pack_isolated([docs[k] for k in sorted(ids)], seq, pad, order_seed=seed)
-        keep = sorted(x["doc_id"] for ms in whole.members[:VAL_SEQUENCES] for x in ms)
-        val[m] = pack_isolated([docs[k] for k in keep], seq, pad, order_seed=seed)
+        # the first VAL_SEQUENCES sequences of the mode's V pack, as packed: re-packing their documents in a
+        # new shuffle can need one sequence more than the design's "at most 16"
+        w = pack_isolated([docs[k] for k in sorted(ids)], seq, pad, order_seed=seed)
+        n = min(VAL_SEQUENCES, w.input_ids.shape[0])
+        val[m] = PackedDocuments(w.input_ids[:n], w.target_mask[:n], w.content_mask[:n], w.position_ids[:n],
+                                 w.members[:n], [], w.strategy)
     res = {}
     for name, a in sel["arms"].items():
         tr = pack_isolated([docs[k] for k in sorted(a["doc_ids"])], seq, pad, order_seed=seed)
