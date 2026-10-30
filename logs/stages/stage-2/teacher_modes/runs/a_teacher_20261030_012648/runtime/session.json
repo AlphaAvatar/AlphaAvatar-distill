@@ -1,0 +1,3091 @@
+{
+  "schema": "aadistill.stage2.teacher_modes.phase_authorization_session/v1",
+  "session_id": "stage2_teacher_modes_phase-teacher",
+  "session_spec": {
+    "session_id": "stage2_teacher_modes_phase-teacher",
+    "schema": "aadistill.stage2.teacher_modes.phase_authorization_session/v1",
+    "description": "Research A: the teacher session (calibration, initialization, waves, X, the teacher's evaluation)",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-2/teacher_modes/runs/a_teacher_20261030_012648/governance/authorization.json",
+    "authorization_type": "EngineeringAuthorization.load",
+    "plan_id": "stage2.teacher_modes.d4_scale",
+    "plan_hash": "848f65087269a8328a0cd682d5f8e089e5af93bb3e3e0b843b4868ef9c7a03d1",
+    "status_path": "/workspace/stage2_teacher_modes_phase.status",
+    "run_log_path": "/workspace/stage2_teacher_modes_phase_run.log",
+    "driver_job_id": "stage2_teacher_modes_phase_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "stage2_teacher_modes_phase",
+      "evidence_filename": "report.json",
+      "archive_basename": "stage2_teacher_modes_phase",
+      "spec_success": "configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
+      "spec_failed": "configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
+      "report_names": []
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "stage2_teacher_modes_phase",
+        "TEACHER_MODEL": "Qwen/Qwen3-4B",
+        "PHASE_KIND": "teacher"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_KIND",
+        "TEACHER_REVISION",
+        "TEACHER_MODEL"
+      ],
+      "relay_inputs": [],
+      "local_assets": [
+        "battery_v2:artifacts/stages/stage-3/eval"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 600,
+      "teacher_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "test_ignores": [],
+      "test_paths": [],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "VLLM_READY",
+        "TEACHER_READY",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 8,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-10-30T01:28:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 1617 min $29.38 \u00b7 soft $36.95 \u00b7 hard $37.13 (authorized $38.30)"
+    },
+    {
+      "utc": "2026-10-30T01:28:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Low"
+    },
+    {
+      "utc": "2026-10-30T01:28:03+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $128.8683 against the $37.1281 this session must be able to fund"
+    },
+    {
+      "utc": "2026-10-30T01:28:04+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account resources OK: the provider account holds only the 1 resource(s) the records account for"
+    },
+    {
+      "utc": "2026-10-30T01:28:04+00:00",
+      "elapsed_min": 0.0,
+      "msg": "a A-D4 teacher artifact, unused"
+    },
+    {
+      "utc": "2026-10-30T01:28:04+00:00",
+      "elapsed_min": 0.0,
+      "msg": "1 x NVIDIA L40S at no more than $1.09/h for the pod, as granted"
+    },
+    {
+      "utc": "2026-10-30T01:28:04+00:00",
+      "elapsed_min": 0.0,
+      "msg": "all-in $37.7108 over 2045.0 min, inside $38.30"
+    },
+    {
+      "utc": "2026-10-30T01:28:04+00:00",
+      "elapsed_min": 0.0,
+      "msg": "study identity 848f65087269 is the authorized one"
+    },
+    {
+      "utc": "2026-10-30T01:28:04+00:00",
+      "elapsed_min": 0.0,
+      "msg": "every bound file is in the session commit"
+    },
+    {
+      "utc": "2026-10-30T01:28:07+00:00",
+      "elapsed_min": 0.0,
+      "msg": "$38.30 inside the envelope ($133.0888) and the $134.2513 the project cap leaves now"
+    },
+    {
+      "utc": "2026-10-30T01:28:07+00:00",
+      "elapsed_min": 0.0,
+      "msg": "volume am5m373kuq: 30 GB in EUR-IS-2"
+    },
+    {
+      "utc": "2026-10-30T01:28:07+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the kind's bound records are the committed ones"
+    },
+    {
+      "utc": "2026-10-30T01:28:07+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 0 relay inputs (), 1 local assets"
+    },
+    {
+      "utc": "2026-10-30T01:28:08+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 2044 min = $37.13"
+    },
+    {
+      "utc": "2026-10-30T01:28:08+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created c8sfjpoy6mi31o at $1.09/h"
+    },
+    {
+      "utc": "2026-10-30T01:29:02+00:00",
+      "elapsed_min": 0.91,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-10-30T01:30:08+00:00",
+      "elapsed_min": 1.99,
+      "msg": "  starting (120s) \u2014 $0.04"
+    },
+    {
+      "utc": "2026-10-30T01:30:29+00:00",
+      "elapsed_min": 2.35,
+      "msg": "TCP 22 at 81.27.69.178:27648 after 2.3 min"
+    },
+    {
+      "utc": "2026-10-30T01:30:32+00:00",
+      "elapsed_min": 2.39,
+      "msg": "draw 1: ssh reachable \u2014 $0.04"
+    },
+    {
+      "utc": "2026-10-30T01:30:55+00:00",
+      "elapsed_min": 2.79,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+    },
+    {
+      "utc": "2026-10-30T01:30:55+00:00",
+      "elapsed_min": 2.79,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-30T01:33:13+00:00",
+      "elapsed_min": 5.09,
+      "msg": "draw 1: setup complete \u2014 $0.09"
+    },
+    {
+      "utc": "2026-10-30T01:33:20+00:00",
+      "elapsed_min": 5.21,
+      "msg": "driver detached, pid 2767, confirmed by descriptor_probe \u2014 $0.09"
+    },
+    {
+      "utc": "2026-10-30T01:34:33+00:00",
+      "elapsed_min": 6.42,
+      "msg": "  2026-10-30T01:33:28Z MARKER:UNIT_OK:w00_H-N_pass1_w00_g0 \u2014 $0.12"
+    },
+    {
+      "utc": "2026-10-30T02:09:02+00:00",
+      "elapsed_min": 40.91,
+      "msg": "  2026-10-30T02:07:07Z MARKER:UNIT_OK:w01_H-T_pass0_w01_g0 \u2014 $0.74"
+    },
+    {
+      "utc": "2026-10-30T02:26:30+00:00",
+      "elapsed_min": 58.37,
+      "msg": "  2026-10-30T02:25:44Z MARKER:UNIT_OK:w01_H-T_pass1_w01_g0 \u2014 $1.06"
+    },
+    {
+      "utc": "2026-10-30T02:31:08+00:00",
+      "elapsed_min": 63.01,
+      "msg": "  2026-10-30T02:30:58Z MARKER:UNIT_OK:w01_H-N_pass0_w01_g0 \u2014 $1.14"
+    },
+    {
+      "utc": "2026-10-30T02:38:12+00:00",
+      "elapsed_min": 70.07,
+      "msg": "  2026-10-30T02:36:03Z MARKER:UNIT_OK:w01_H-N_pass1_w01_g0 \u2014 $1.27"
+    },
+    {
+      "utc": "2026-10-30T03:06:25+00:00",
+      "elapsed_min": 98.28,
+      "msg": "  2026-10-30T03:04:34Z MARKER:UNIT_OK:w02_H-T_pass0_w02_g0 \u2014 $1.79"
+    },
+    {
+      "utc": "2026-10-30T03:27:56+00:00",
+      "elapsed_min": 119.8,
+      "msg": "  2026-10-30T03:26:21Z MARKER:UNIT_OK:w02_H-T_pass1_w02_g0 \u2014 $2.18"
+    },
+    {
+      "utc": "2026-10-30T03:33:08+00:00",
+      "elapsed_min": 125.01,
+      "msg": "  2026-10-30T03:31:53Z MARKER:UNIT_OK:w02_H-N_pass0_w02_g0 \u2014 $2.27"
+    },
+    {
+      "utc": "2026-10-30T03:38:05+00:00",
+      "elapsed_min": 129.95,
+      "msg": "  2026-10-30T03:36:48Z MARKER:UNIT_OK:w02_H-N_pass1_w02_g0 \u2014 $2.36"
+    },
+    {
+      "utc": "2026-10-30T04:06:21+00:00",
+      "elapsed_min": 158.22,
+      "msg": "  2026-10-30T04:06:06Z MARKER:UNIT_OK:w03_H-T_pass0_w03_g0 \u2014 $2.87"
+    },
+    {
+      "utc": "2026-10-30T04:27:06+00:00",
+      "elapsed_min": 178.96,
+      "msg": "  2026-10-30T04:26:56Z MARKER:UNIT_OK:w03_H-T_pass1_w03_g0 \u2014 $3.25"
+    },
+    {
+      "utc": "2026-10-30T04:32:52+00:00",
+      "elapsed_min": 184.73,
+      "msg": "  2026-10-30T04:31:23Z MARKER:UNIT_OK:w03_H-N_pass0_w03_g0 \u2014 $3.36"
+    },
+    {
+      "utc": "2026-10-30T04:38:25+00:00",
+      "elapsed_min": 190.28,
+      "msg": "  2026-10-30T04:36:49Z MARKER:UNIT_OK:w03_H-N_pass1_w03_g0 \u2014 $3.46"
+    },
+    {
+      "utc": "2026-10-30T05:00:57+00:00",
+      "elapsed_min": 212.81,
+      "msg": "  2026-10-30T05:00:11Z MARKER:UNIT_OK:w04_H-T_pass0_w04_g0 \u2014 $3.87"
+    },
+    {
+      "utc": "2026-10-30T05:21:06+00:00",
+      "elapsed_min": 232.97,
+      "msg": "  2026-10-30T05:20:05Z MARKER:UNIT_OK:w04_H-T_pass1_w04_g0 \u2014 $4.23"
+    },
+    {
+      "utc": "2026-10-30T05:27:10+00:00",
+      "elapsed_min": 239.04,
+      "msg": "  2026-10-30T05:25:48Z MARKER:UNIT_OK:w04_H-N_pass0_w04_g0 \u2014 $4.34"
+    },
+    {
+      "utc": "2026-10-30T05:33:09+00:00",
+      "elapsed_min": 245.03,
+      "msg": "  2026-10-30T05:30:52Z MARKER:UNIT_OK:w04_H-N_pass1_w04_g0 \u2014 $4.45"
+    },
+    {
+      "utc": "2026-10-30T06:00:35+00:00",
+      "elapsed_min": 272.45,
+      "msg": "  2026-10-30T05:58:03Z MARKER:UNIT_OK:w05_H-T_pass0_w05_g0 \u2014 $4.95"
+    },
+    {
+      "utc": "2026-10-30T06:19:21+00:00",
+      "elapsed_min": 291.21,
+      "msg": "  2026-10-30T06:18:50Z MARKER:UNIT_OK:w05_H-T_pass1_w05_g0 \u2014 $5.29"
+    },
+    {
+      "utc": "2026-10-30T06:25:54+00:00",
+      "elapsed_min": 297.77,
+      "msg": "  2026-10-30T06:24:15Z MARKER:UNIT_OK:w05_H-N_pass0_w05_g0 \u2014 $5.41"
+    },
+    {
+      "utc": "2026-10-30T06:32:19+00:00",
+      "elapsed_min": 304.19,
+      "msg": "  2026-10-30T06:29:25Z MARKER:UNIT_OK:w05_H-N_pass1_w05_g0 \u2014 $5.53"
+    },
+    {
+      "utc": "2026-10-30T06:58:41+00:00",
+      "elapsed_min": 330.55,
+      "msg": "  2026-10-30T06:57:06Z MARKER:UNIT_OK:w06_H-T_pass0_w06_g0 \u2014 $6.00"
+    },
+    {
+      "utc": "2026-10-30T07:21:44+00:00",
+      "elapsed_min": 353.6,
+      "msg": "  2026-10-30T07:19:13Z MARKER:UNIT_OK:w06_H-T_pass1_w06_g0 \u2014 $6.42"
+    },
+    {
+      "utc": "2026-10-30T07:25:26+00:00",
+      "elapsed_min": 357.3,
+      "msg": "  2026-10-30T07:24:02Z MARKER:UNIT_OK:w06_H-N_pass0_w06_g0 \u2014 $6.49"
+    },
+    {
+      "utc": "2026-10-30T07:28:52+00:00",
+      "elapsed_min": 360.74,
+      "msg": "  2026-10-30T07:28:48Z MARKER:UNIT_OK:w06_H-N_pass1_w06_g0 \u2014 $6.55"
+    },
+    {
+      "utc": "2026-10-30T08:01:06+00:00",
+      "elapsed_min": 392.97,
+      "msg": "  2026-10-30T07:57:25Z MARKER:UNIT_OK:w07_H-T_pass0_w07_g0 \u2014 $7.14"
+    },
+    {
+      "utc": "2026-10-30T08:19:00+00:00",
+      "elapsed_min": 410.87,
+      "msg": "  2026-10-30T08:18:50Z MARKER:UNIT_OK:w07_H-T_pass1_w07_g0 \u2014 $7.46"
+    },
+    {
+      "utc": "2026-10-30T08:26:35+00:00",
+      "elapsed_min": 418.45,
+      "msg": "  2026-10-30T08:24:28Z MARKER:UNIT_OK:w07_H-N_pass0_w07_g0 \u2014 $7.60"
+    },
+    {
+      "utc": "2026-10-30T08:30:18+00:00",
+      "elapsed_min": 422.17,
+      "msg": "  2026-10-30T08:29:36Z MARKER:UNIT_OK:w07_H-N_pass1_w07_g0 \u2014 $7.67"
+    },
+    {
+      "utc": "2026-10-30T09:00:34+00:00",
+      "elapsed_min": 452.44,
+      "msg": "  2026-10-30T08:57:44Z MARKER:UNIT_OK:w08_H-T_pass0_w08_g0 \u2014 $8.22"
+    },
+    {
+      "utc": "2026-10-30T09:19:39+00:00",
+      "elapsed_min": 471.51,
+      "msg": "  2026-10-30T09:16:57Z MARKER:UNIT_OK:w08_H-T_pass1_w08_g0 \u2014 $8.57"
+    },
+    {
+      "utc": "2026-10-30T09:23:45+00:00",
+      "elapsed_min": 475.62,
+      "msg": "  2026-10-30T09:22:27Z MARKER:UNIT_OK:w08_H-N_pass0_w08_g0 \u2014 $8.64"
+    },
+    {
+      "utc": "2026-10-30T09:27:40+00:00",
+      "elapsed_min": 479.53,
+      "msg": "  2026-10-30T09:27:27Z MARKER:UNIT_OK:w08_H-N_pass1_w08_g0 \u2014 $8.71"
+    },
+    {
+      "utc": "2026-10-30T09:51:36+00:00",
+      "elapsed_min": 503.46,
+      "msg": "  2026-10-30T09:50:21Z MARKER:UNIT_OK:w09_H-T_pass0_w09_g0 \u2014 $9.15"
+    },
+    {
+      "utc": "2026-10-30T10:07:59+00:00",
+      "elapsed_min": 519.86,
+      "msg": "  2026-10-30T10:07:21Z MARKER:UNIT_OK:w09_H-T_pass1_w09_g0 \u2014 $9.44"
+    },
+    {
+      "utc": "2026-10-30T10:12:13+00:00",
+      "elapsed_min": 524.08,
+      "msg": "  2026-10-30T10:11:54Z MARKER:UNIT_OK:w09_H-N_pass0_w09_g0 \u2014 $9.52"
+    },
+    {
+      "utc": "2026-10-30T10:16:43+00:00",
+      "elapsed_min": 528.59,
+      "msg": "  2026-10-30T10:16:27Z MARKER:UNIT_OK:w09_H-N_pass1_w09_g0 \u2014 $9.60"
+    },
+    {
+      "utc": "2026-10-30T10:25:33+00:00",
+      "elapsed_min": 537.42,
+      "msg": "  2026-10-30T10:22:03Z MARKER:UNIT_OK:x01_H-N_pass0_x01_g0 \u2014 $9.76"
+    },
+    {
+      "utc": "2026-10-30T10:30:01+00:00",
+      "elapsed_min": 541.88,
+      "msg": "  2026-10-30T10:26:57Z MARKER:UNIT_OK:x01_H-N_pass1_x01_g0 \u2014 $9.84"
+    },
+    {
+      "utc": "2026-10-30T10:34:48+00:00",
+      "elapsed_min": 546.67,
+      "msg": "  2026-10-30T10:32:56Z MARKER:UNIT_OK:x02_H-N_pass0_x02_g0 \u2014 $9.93"
+    },
+    {
+      "utc": "2026-10-30T10:39:16+00:00",
+      "elapsed_min": 551.14,
+      "msg": "  2026-10-30T10:37:54Z MARKER:UNIT_OK:x02_H-N_pass1_x02_g0 \u2014 $10.01"
+    },
+    {
+      "utc": "2026-10-30T10:43:53+00:00",
+      "elapsed_min": 555.75,
+      "msg": "  2026-10-30T10:43:03Z MARKER:UNIT_OK:x03_H-N_pass0_x03_g0 \u2014 $10.10"
+    },
+    {
+      "utc": "2026-10-30T10:48:37+00:00",
+      "elapsed_min": 560.48,
+      "msg": "  2026-10-30T10:47:40Z MARKER:UNIT_OK:x03_H-N_pass1_x03_g0 \u2014 $10.18"
+    },
+    {
+      "utc": "2026-10-30T10:58:13+00:00",
+      "elapsed_min": 570.09,
+      "msg": "  2026-10-30T10:53:26Z MARKER:UNIT_OK:x04_H-N_pass0_x04_g0 \u2014 $10.36"
+    },
+    {
+      "utc": "2026-10-30T11:02:56+00:00",
+      "elapsed_min": 574.8,
+      "msg": "  2026-10-30T10:58:57Z MARKER:UNIT_OK:x04_H-N_pass1_x04_g0 \u2014 $10.44"
+    },
+    {
+      "utc": "2026-10-30T11:07:58+00:00",
+      "elapsed_min": 579.83,
+      "msg": "  2026-10-30T11:05:20Z MARKER:UNIT_OK:x05_H-N_pass0_x05_g0 \u2014 $10.53"
+    },
+    {
+      "utc": "2026-10-30T11:13:06+00:00",
+      "elapsed_min": 584.96,
+      "msg": "  2026-10-30T11:10:38Z MARKER:UNIT_OK:x05_H-N_pass1_x05_g0 \u2014 $10.63"
+    },
+    {
+      "utc": "2026-10-30T11:18:06+00:00",
+      "elapsed_min": 589.96,
+      "msg": "  2026-10-30T11:16:54Z MARKER:UNIT_OK:x06_H-N_pass0_x06_g0 \u2014 $10.72"
+    },
+    {
+      "utc": "2026-10-30T11:23:14+00:00",
+      "elapsed_min": 595.1,
+      "msg": "  2026-10-30T11:22:10Z MARKER:UNIT_OK:x06_H-N_pass1_x06_g0 \u2014 $10.81"
+    },
+    {
+      "utc": "2026-10-30T11:28:26+00:00",
+      "elapsed_min": 600.31,
+      "msg": "  2026-10-30T11:27:29Z MARKER:UNIT_OK:x07_H-N_pass0_x07_g0 \u2014 $10.91"
+    },
+    {
+      "utc": "2026-10-30T11:33:50+00:00",
+      "elapsed_min": 605.71,
+      "msg": "  2026-10-30T11:32:08Z MARKER:UNIT_OK:x07_H-N_pass1_x07_g0 \u2014 $11.00"
+    },
+    {
+      "utc": "2026-10-30T11:39:13+00:00",
+      "elapsed_min": 611.08,
+      "msg": "  2026-10-30T11:37:53Z MARKER:UNIT_OK:x08_H-N_pass0_x08_g0 \u2014 $11.10"
+    },
+    {
+      "utc": "2026-10-30T11:44:33+00:00",
+      "elapsed_min": 616.41,
+      "msg": "  2026-10-30T11:43:20Z MARKER:UNIT_OK:x08_H-N_pass1_x08_g0 \u2014 $11.20"
+    },
+    {
+      "utc": "2026-10-30T11:50:09+00:00",
+      "elapsed_min": 622.01,
+      "msg": "  2026-10-30T11:48:47Z MARKER:UNIT_OK:x09_H-N_pass0_x09_g0 \u2014 $11.30"
+    },
+    {
+      "utc": "2026-10-30T11:55:31+00:00",
+      "elapsed_min": 627.38,
+      "msg": "  2026-10-30T11:54:20Z MARKER:UNIT_OK:x09_H-N_pass1_x09_g0 \u2014 $11.40"
+    },
+    {
+      "utc": "2026-10-30T12:00:54+00:00",
+      "elapsed_min": 632.77,
+      "msg": "  2026-10-30T12:00:13Z MARKER:UNIT_OK:x10_H-N_pass0_x10_g0 \u2014 $11.50"
+    },
+    {
+      "utc": "2026-10-30T12:06:35+00:00",
+      "elapsed_min": 638.46,
+      "msg": "  2026-10-30T12:05:26Z MARKER:UNIT_OK:x10_H-N_pass1_x10_g0 \u2014 $11.60"
+    },
+    {
+      "utc": "2026-10-30T12:12:30+00:00",
+      "elapsed_min": 644.37,
+      "msg": "  2026-10-30T12:11:34Z MARKER:UNIT_OK:x11_H-N_pass0_x11_g0 \u2014 $11.71"
+    },
+    {
+      "utc": "2026-10-30T12:18:24+00:00",
+      "elapsed_min": 650.27,
+      "msg": "  2026-10-30T12:17:06Z MARKER:UNIT_OK:x11_H-N_pass1_x11_g0 \u2014 $11.81"
+    },
+    {
+      "utc": "2026-10-30T12:24:19+00:00",
+      "elapsed_min": 656.19,
+      "msg": "  2026-10-30T12:23:02Z MARKER:UNIT_OK:x12_H-N_pass0_x12_g0 \u2014 $11.92"
+    },
+    {
+      "utc": "2026-10-30T12:30:20+00:00",
+      "elapsed_min": 662.19,
+      "msg": "  2026-10-30T12:28:13Z MARKER:UNIT_OK:x12_H-N_pass1_x12_g0 \u2014 $12.03"
+    },
+    {
+      "utc": "2026-10-30T12:36:37+00:00",
+      "elapsed_min": 668.49,
+      "msg": "  2026-10-30T12:33:14Z MARKER:UNIT_OK:x13_H-N_pass0_x13_g0 \u2014 $12.14"
+    },
+    {
+      "utc": "2026-10-30T12:42:46+00:00",
+      "elapsed_min": 674.64,
+      "msg": "  2026-10-30T12:38:35Z MARKER:UNIT_OK:x13_H-N_pass1_x13_g0 \u2014 $12.26"
+    },
+    {
+      "utc": "2026-10-30T12:49:10+00:00",
+      "elapsed_min": 681.03,
+      "msg": "  2026-10-30T12:48:58Z MARKER:UNIT_OK:x14_H-N_pass1_x14_g0 \u2014 $12.37"
+    },
+    {
+      "utc": "2026-10-30T12:55:31+00:00",
+      "elapsed_min": 687.39,
+      "msg": "  2026-10-30T12:54:18Z MARKER:UNIT_OK:x15_H-N_pass0_x15_g0 \u2014 $12.49"
+    },
+    {
+      "utc": "2026-10-30T13:01:55+00:00",
+      "elapsed_min": 693.79,
+      "msg": "  2026-10-30T12:59:11Z MARKER:UNIT_OK:x15_H-N_pass1_x15_g0 \u2014 $12.60"
+    },
+    {
+      "utc": "2026-10-30T13:08:33+00:00",
+      "elapsed_min": 700.41,
+      "msg": "  2026-10-30T13:05:27Z MARKER:UNIT_OK:x16_H-N_pass0_x16_g0 \u2014 $12.72"
+    },
+    {
+      "utc": "2026-10-30T13:14:58+00:00",
+      "elapsed_min": 706.83,
+      "msg": "  2026-10-30T13:11:16Z MARKER:UNIT_OK:x16_H-N_pass1_x16_g0 \u2014 $12.84"
+    },
+    {
+      "utc": "2026-10-30T13:21:37+00:00",
+      "elapsed_min": 713.48,
+      "msg": "  2026-10-30T13:17:28Z MARKER:UNIT_OK:x17_H-N_pass0_x17_g0 \u2014 $12.96"
+    },
+    {
+      "utc": "2026-10-30T13:28:25+00:00",
+      "elapsed_min": 720.28,
+      "msg": "  2026-10-30T13:22:46Z MARKER:UNIT_OK:x17_H-N_pass1_x17_g0 \u2014 $13.09"
+    },
+    {
+      "utc": "2026-10-30T13:35:25+00:00",
+      "elapsed_min": 727.28,
+      "msg": "  2026-10-30T13:34:30Z MARKER:UNIT_OK:x18_H-N_pass1_x18_g0 \u2014 $13.21"
+    },
+    {
+      "utc": "2026-10-30T13:42:42+00:00",
+      "elapsed_min": 734.56,
+      "msg": "  2026-10-30T13:39:55Z MARKER:UNIT_OK:x19_H-N_pass0_x19_g0 \u2014 $13.34"
+    },
+    {
+      "utc": "2026-10-30T13:50:06+00:00",
+      "elapsed_min": 741.98,
+      "msg": "  2026-10-30T13:45:24Z MARKER:UNIT_OK:x19_H-N_pass1_x19_g0 \u2014 $13.48"
+    },
+    {
+      "utc": "2026-10-30T13:57:03+00:00",
+      "elapsed_min": 748.91,
+      "msg": "  2026-10-30T13:56:16Z MARKER:UNIT_OK:x20_H-N_pass1_x20_g0 \u2014 $13.61"
+    },
+    {
+      "utc": "2026-10-30T14:04:03+00:00",
+      "elapsed_min": 755.93,
+      "msg": "  2026-10-30T14:02:00Z MARKER:UNIT_OK:x21_H-N_pass0_x21_g0 \u2014 $13.73"
+    },
+    {
+      "utc": "2026-10-30T14:11:26+00:00",
+      "elapsed_min": 763.31,
+      "msg": "  2026-10-30T14:07:21Z MARKER:UNIT_OK:x21_H-N_pass1_x21_g0 \u2014 $13.87"
+    },
+    {
+      "utc": "2026-10-30T14:18:51+00:00",
+      "elapsed_min": 770.72,
+      "msg": "  2026-10-30T14:17:47Z MARKER:UNIT_OK:x22_H-N_pass1_x22_g0 \u2014 $14.00"
+    },
+    {
+      "utc": "2026-10-30T14:26:26+00:00",
+      "elapsed_min": 778.31,
+      "msg": "  2026-10-30T14:23:14Z MARKER:UNIT_OK:x23_H-N_pass0_x23_g0 \u2014 $14.14"
+    },
+    {
+      "utc": "2026-10-30T14:34:14+00:00",
+      "elapsed_min": 786.1,
+      "msg": "  2026-10-30T14:33:19Z MARKER:UNIT_OK:x24_H-N_pass0_x24_g0 \u2014 $14.28"
+    },
+    {
+      "utc": "2026-10-30T14:42:12+00:00",
+      "elapsed_min": 794.07,
+      "msg": "  2026-10-30T14:38:50Z MARKER:UNIT_OK:x24_H-N_pass1_x24_g0 \u2014 $14.43"
+    },
+    {
+      "utc": "2026-10-30T14:50:15+00:00",
+      "elapsed_min": 802.11,
+      "msg": "  2026-10-30T14:49:22Z MARKER:UNIT_OK:x25_H-N_pass1_x25_g0 \u2014 $14.57"
+    },
+    {
+      "utc": "2026-10-30T14:58:13+00:00",
+      "elapsed_min": 810.08,
+      "msg": "  2026-10-30T14:55:31Z MARKER:UNIT_OK:x26_H-N_pass0_x26_g0 \u2014 $14.72"
+    },
+    {
+      "utc": "2026-10-30T15:06:20+00:00",
+      "elapsed_min": 818.2,
+      "msg": "  2026-10-30T15:01:02Z MARKER:UNIT_OK:x26_H-N_pass1_x26_g0 \u2014 $14.86"
+    },
+    {
+      "utc": "2026-10-30T15:14:42+00:00",
+      "elapsed_min": 826.57,
+      "msg": "  2026-10-30T15:12:08Z MARKER:UNIT_OK:x27_H-N_pass1_x27_g0 \u2014 $15.02"
+    },
+    {
+      "utc": "2026-10-30T15:23:21+00:00",
+      "elapsed_min": 835.21,
+      "msg": "  2026-10-30T15:18:14Z MARKER:UNIT_OK:x28_H-N_pass0_x28_g0 \u2014 $15.17"
+    },
+    {
+      "utc": "2026-10-30T15:31:36+00:00",
+      "elapsed_min": 843.47,
+      "msg": "  2026-10-30T15:29:10Z MARKER:UNIT_OK:x29_H-N_pass0_x29_g0 \u2014 $15.32"
+    },
+    {
+      "utc": "2026-10-30T15:40:34+00:00",
+      "elapsed_min": 852.43,
+      "msg": "  2026-10-30T15:39:28Z MARKER:UNIT_OK:x30_H-N_pass0_x30_g0 \u2014 $15.49"
+    },
+    {
+      "utc": "2026-10-30T15:49:49+00:00",
+      "elapsed_min": 861.69,
+      "msg": "  2026-10-30T15:45:12Z MARKER:UNIT_OK:x30_H-N_pass1_x30_g0 \u2014 $15.65"
+    },
+    {
+      "utc": "2026-10-30T15:58:54+00:00",
+      "elapsed_min": 870.77,
+      "msg": "  2026-10-30T15:56:49Z MARKER:UNIT_OK:x31_H-N_pass1_x31_g0 \u2014 $15.82"
+    },
+    {
+      "utc": "2026-10-30T16:07:57+00:00",
+      "elapsed_min": 879.81,
+      "msg": "  2026-10-30T16:03:29Z MARKER:UNIT_OK:x32_H-N_pass0_x32_g0 \u2014 $15.98"
+    },
+    {
+      "utc": "2026-10-30T16:16:24+00:00",
+      "elapsed_min": 888.27,
+      "msg": "  2026-10-30T16:09:20Z MARKER:UNIT_OK:x32_H-N_pass1_x32_g0 \u2014 $16.14"
+    },
+    {
+      "utc": "2026-10-30T20:55:31+00:00",
+      "elapsed_min": 1167.39,
+      "msg": "  2026-10-30T20:49:50Z MARKER:ALL_DONE \u2014 $21.21 (written as the driver exited)"
+    },
+    {
+      "utc": "2026-10-30T20:55:31+00:00",
+      "elapsed_min": 1167.39,
+      "msg": "polling ended: ALL_DONE \u2014 $21.21"
+    },
+    {
+      "utc": "2026-10-30T20:55:48+00:00",
+      "elapsed_min": 1167.67,
+      "msg": "  manifest rc=0\n0 file(s) across 0 class(es) -> /workspace/manifest.json\n  final_required: 0 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-10-30T21:02:45+00:00",
+      "elapsed_min": 1174.61,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-10-30T21:02:45+00:00",
+      "elapsed_min": 1174.61,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-10-30T21:02:56+00:00",
+      "elapsed_min": 1174.8,
+      "msg": "pod deleted \u2014 1174.8 min, $21.34; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.stage2.teacher_modes.phase_authorization/v1",
+    "authorization_id": "stage2.teacher_modes.d4_scale.a_teacher_20261030_012648",
+    "version": 1,
+    "granted_utc": "2026-10-30T01:26:51+00:00",
+    "granted_by": "maintainer",
+    "plan_id": "stage2.teacher_modes.d4_scale",
+    "study_identity_sha256": "848f65087269a8328a0cd682d5f8e089e5af93bb3e3e0b843b4868ef9c7a03d1",
+    "expected_usd": 21.31,
+    "hard_cap_usd": 38.3,
+    "authorized_stages": [],
+    "stage_conditions": {
+      "l40s_check_record_sha256": "a98174e35acef9a9eefc1e75a5a748238761a8a0bbc5312b7cfd1a4d1c10b784",
+      "kind": "teacher",
+      "study": "A-D4",
+      "dry_run": "false",
+      "grant": "logs/budget/approvals/teacher_modes_d4_scale_phase_grant.json",
+      "grant_sha256": "94ccdc445f1670d0c8ad9bca3543daaba2e43754a51b73437079e749b8b6e158",
+      "gpus": "{\"NVIDIA L40S\": 1.19}",
+      "gpu_count_max": "2",
+      "envelope": "{\"ceiling_usd\": 142.19, \"spent_usd\": 9.1012, \"remaining_usd\": 133.0888, \"runs\": [{\"run_id\": \"a_check_20261029_164345\", \"usd\": 0.6347}, {\"run_id\": \"a_check_20261029_172423\", \"usd\": 1.7508}, {\"run_id\": \"a_check_20261029_190241\", \"usd\": 1.3815}, {\"run_id\": \"a_teacher_20261029_201915\", \"usd\": 5.3342}]}",
+      "live_position": "{\"fetched_utc\": \"2026-10-30T01:26:49+00:00\", \"provider_billed_usd\": 729.8345, \"committed_usd\": 733.7487, \"project_cap_usd\": 868.0, \"project_remaining_usd\": 134.2513, \"account_pods\": [], \"account_volumes\": [\"am5m373kuq\"], \"balance_usd\": 128.8682809348, \"spend_per_hour\": 0.003, \"rule\": \"shared.project_position: mixed_governance.position + engineering-campaign subruns\", \"unposted_sessions\": 0, \"campaign_unposted\": 0, \"campaign_teardown_confirmed_by\": {\"subrun record\": 25, \"reconciliation\": 30}}"
+    },
+    "scope_note": "teacher session 2: --phases waves,x,teacher_eval (E's W01-W09, X, the teacher's eval-set-1 in both modes), re-priced from W00 (phase_forecast.py --from-w00): 18.61 h expected, 26.53 h conservative at $1.09",
+    "authorizes_engineering_validation": false,
+    "authorizes_formal": true,
+    "authorizes_training": true,
+    "authorizes_evaluation": true,
+    "authorizes_teacher_generation": true,
+    "authorizes_paid_storage": false,
+    "authorized_session_commit": null,
+    "harness_source_digest": "816daf9f1021f9313283a34a3e839788340b875058b694296433ef83e1ea1f3c",
+    "harness_source_files": [
+      "src/aadistill/__init__.py",
+      "src/aadistill/data/__init__.py",
+      "src/aadistill/data/cleaning.py",
+      "src/aadistill/data/code_exec.py",
+      "src/aadistill/data/dataset.py",
+      "src/aadistill/data/diversity.py",
+      "src/aadistill/data/e5_pack.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/data/ladder.py",
+      "src/aadistill/data/mixture.py",
+      "src/aadistill/data/nested_ladder.py",
+      "src/aadistill/data/paired_corpus.py",
+      "src/aadistill/data/prefix_split.py",
+      "src/aadistill/data/recovery.py",
+      "src/aadistill/data/sessions.py",
+      "src/aadistill/data/target_policy.py",
+      "src/aadistill/data/target_quality.py",
+      "src/aadistill/data/token_documents.py",
+      "src/aadistill/data/tools.py",
+      "src/aadistill/data/verify.py",
+      "src/aadistill/evaluation/__init__.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/capability.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/eval_registry.py",
+      "src/aadistill/evaluation/function_error.py",
+      "src/aadistill/evaluation/general_text.py",
+      "src/aadistill/evaluation/init_nll.py",
+      "src/aadistill/evaluation/isolation.py",
+      "src/aadistill/evaluation/oracle_reasoning.py",
+      "src/aadistill/evaluation/paired_stats.py",
+      "src/aadistill/evaluation/protocol_field.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/governance/__init__.py",
+      "src/aadistill/governance/artifact_manifest.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/governance/closure.py",
+      "src/aadistill/governance/grant.py",
+      "src/aadistill/governance/post_freeze.py",
+      "src/aadistill/infrastructure/__init__.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/bundle_transport.py",
+      "src/aadistill/infrastructure/env.py",
+      "src/aadistill/infrastructure/failure_signature.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/source_identity.py",
+      "src/aadistill/infrastructure/transfer.py",
+      "src/aadistill/infrastructure/watchdog.py",
+      "src/aadistill/initialization/__init__.py",
+      "src/aadistill/initialization/adapters/__init__.py",
+      "src/aadistill/initialization/adapters/families.py",
+      "src/aadistill/initialization/adapters/projected_residual.py",
+      "src/aadistill/initialization/adapters/projected_residual_vllm.py",
+      "src/aadistill/initialization/adapters/qwen3.py",
+      "src/aadistill/initialization/baseline.py",
+      "src/aadistill/initialization/calibration/__init__.py",
+      "src/aadistill/initialization/calibration/batching.py",
+      "src/aadistill/initialization/calibration/datasets.py",
+      "src/aadistill/initialization/calibration/items.py",
+      "src/aadistill/initialization/calibration/packing.py",
+      "src/aadistill/initialization/calibration/profiles.py",
+      "src/aadistill/initialization/device.py",
+      "src/aadistill/initialization/execution.py",
+      "src/aadistill/initialization/operators/__init__.py",
+      "src/aadistill/initialization/operators/_common.py",
+      "src/aadistill/initialization/operators/attention/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/_common.py",
+      "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+      "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+      "src/aadistill/initialization/operators/attention/gqa/causal_kl.py",
+      "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+      "src/aadistill/initialization/operators/base.py",
+      "src/aadistill/initialization/operators/composite/__init__.py",
+      "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+      "src/aadistill/initialization/operators/depth/__init__.py",
+      "src/aadistill/initialization/operators/depth/_common.py",
+      "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+      "src/aadistill/initialization/operators/depth/positional.py",
+      "src/aadistill/initialization/operators/ffn/__init__.py",
+      "src/aadistill/initialization/operators/ffn/dense/__init__.py",
+      "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+      "src/aadistill/initialization/operators/register.py",
+      "src/aadistill/initialization/operators/width/__init__.py",
+      "src/aadistill/initialization/operators/width/residual/__init__.py",
+      "src/aadistill/initialization/operators/width/residual/global_pca.py",
+      "src/aadistill/initialization/planning/__init__.py",
+      "src/aadistill/initialization/planning/fixed_path.py",
+      "src/aadistill/initialization/planning/generation.py",
+      "src/aadistill/initialization/planning/generation_compat.py",
+      "src/aadistill/initialization/planning/isolation.py",
+      "src/aadistill/initialization/planning/metrics.py",
+      "src/aadistill/initialization/planning/operator_config.py",
+      "src/aadistill/initialization/planning/ranking.py",
+      "src/aadistill/initialization/planning/recovery.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/stage1_import.py",
+      "src/aadistill/initialization/planning/stage1_selection.py",
+      "src/aadistill/initialization/scoring/__init__.py",
+      "src/aadistill/initialization/scoring/batches.py",
+      "src/aadistill/initialization/scoring/content.py",
+      "src/aadistill/initialization/scoring/kl_reference.py",
+      "src/aadistill/initialization/scoring/objective.py",
+      "src/aadistill/initialization/scoring/output_head.py",
+      "src/aadistill/initialization/scoring/positions.py",
+      "src/aadistill/initialization/scoring/protocol_identity.py",
+      "src/aadistill/initialization/scoring/reference_store.py",
+      "src/aadistill/initialization/scoring/rows.py",
+      "src/aadistill/initialization/scoring/support.py",
+      "src/aadistill/initialization/specs/__init__.py",
+      "src/aadistill/initialization/specs/arch.py",
+      "src/aadistill/initialization/specs/artifact.py",
+      "src/aadistill/initialization/specs/identity_collapse.py",
+      "src/aadistill/initialization/specs/materialization.py",
+      "src/aadistill/initialization/specs/metrics.py",
+      "src/aadistill/initialization/specs/state.py",
+      "src/aadistill/initialization/statistics/__init__.py",
+      "src/aadistill/initialization/statistics/collect.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/statistics/reweight.py",
+      "src/aadistill/initialization/statistics/spec.py",
+      "src/aadistill/initialization/transforms/__init__.py",
+      "src/aadistill/initialization/transforms/nll_gate.py",
+      "src/aadistill/initialization/transforms/project.py",
+      "src/aadistill/initialization/transforms/projected_residual.py",
+      "src/aadistill/initialization/transforms/sandwich.py",
+      "src/aadistill/models/__init__.py",
+      "src/aadistill/models/cost_model.py",
+      "src/aadistill/models/quant.py",
+      "src/aadistill/models/student.py",
+      "src/aadistill/models/teacher.py",
+      "src/aadistill/models/tokenizer_contract.py",
+      "src/aadistill/rollout/__init__.py",
+      "src/aadistill/rollout/engines.py",
+      "src/aadistill/rollout/generate.py",
+      "src/aadistill/rollout/snapshots.py",
+      "src/aadistill/runtime/__init__.py",
+      "src/aadistill/runtime/cost.py",
+      "src/aadistill/runtime/cpu_test_env.py",
+      "src/aadistill/runtime/device_handoff.py",
+      "src/aadistill/runtime/durable_store.py",
+      "src/aadistill/runtime/hub_capacity.py",
+      "src/aadistill/runtime/leaf_durability.py",
+      "src/aadistill/runtime/pod_environment.py",
+      "src/aadistill/runtime/run_layout.py",
+      "src/aadistill/runtime/setup_steps.py",
+      "src/aadistill/runtime/staging_contract.py",
+      "src/aadistill/runtime/telemetry.py",
+      "src/aadistill/training/__init__.py",
+      "src/aadistill/training/accounting.py",
+      "src/aadistill/training/lora.py",
+      "src/aadistill/training/topk_kd.py",
+      "src/aadistill/training/train.py",
+      "scripts/stages/stage-2/teacher_modes/phase.py",
+      "scripts/stages/stage-2/teacher_modes/teacher_session.py",
+      "scripts/stages/stage-2/teacher_modes/initialization.py",
+      "scripts/stages/stage-2/teacher_modes/hybrid_calibration.py",
+      "scripts/stages/stage-2/teacher_modes/admission.py",
+      "scripts/stages/stage-2/teacher_modes/recovery_units.py",
+      "scripts/stages/stage-2/teacher_modes/mode_statistics.py",
+      "scripts/stages/stage-2/teacher_modes/analysis.py",
+      "scripts/stages/stage-2/teacher_modes/l40s_check.py",
+      "scripts/shared/study_engineering.py",
+      "scripts/shared/project_position.py",
+      "scripts/shared/eval_sets.py",
+      "scripts/shared/forward_baseline.py",
+      "scripts/shared/pod/teacher_cache.py",
+      "scripts/shared/evaluation/eval_set_scoring.py",
+      "scripts/shared/evaluation/uncapped_eval.py",
+      "scripts/shared/training/train_stage3.py",
+      "scripts/stages/stage-0/calibration_volume/run_battery.py",
+      "scripts/stages/stage-0/calibration_volume/score_battery.py",
+      "scripts/stages/stage-0/calibration_volume/dose_driver.py",
+      "scripts/stages/stage-0/calibration_volume/mixed_governance.py",
+      "scripts/stages/stage-1/phase_c1/packaging.py",
+      "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+      "scripts/stages/stage-1/phase_d1/d1_session.py",
+      "scripts/stages/stage-1/phase_d1/replay_specs.py",
+      "scripts/stages/stage-1/phase_a3/a3_session.py",
+      "scripts/stages/stage-1/projected_residual/recovery_driver.py",
+      "scripts/stages/stage-2/reasoning_data/generation_driver.py",
+      "scripts/stages/stage-2/reasoning_data/generation_adapter.py",
+      "scripts/stages/stage-2/reasoning_data/generation_plan.py",
+      "scripts/stages/stage-2/reasoning_data/h1pa_driver.py",
+      "scripts/stages/stage-2/reasoning_data/unit_driver.py",
+      "scripts/stages/stage-2/reasoning_data/persist_unit.py",
+      "scripts/stages/stage-2/reasoning_data/h1_generation_launch.py",
+      "scripts/maintenance/consolidation/derive_budget.py",
+      "scripts/maintenance/consolidation/provider_billing.py",
+      "scripts/shared/deployment.py",
+      "scripts/shared/pod/watchdog.py",
+      "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "scripts/shared/pod/collect_artifacts.py"
+    ],
+    "per_launch_hard_usd": 38.3,
+    "provenance_commit": "6d0d0a7ef799994c4bbee22f522bfa9b9a30cf34",
+    "enforcement": "the launcher refuses a pod unless this artifact is bound to the study identity and the harness on disk, is not a dry run, has not been used, and its hard cap covers the planned all-in bound and fits the project cap as the provider bills it at launch; setup re-checks the binding on the pod; one artifact funds one run inside the grant's envelope",
+    "authorization_sha256": "d67fcb0c48260a24b6c88b36dae0244563658df12f32a4eb55872ee8fd5843fe"
+  },
+  "session_plan_hash": "848f65087269a8328a0cd682d5f8e089e5af93bb3e3e0b843b4868ef9c7a03d1",
+  "harness_source_digest": "816daf9f1021f9313283a34a3e839788340b875058b694296433ef83e1ea1f3c",
+  "harness_source_files": [
+    "scripts/maintenance/consolidation/derive_budget.py",
+    "scripts/maintenance/consolidation/provider_billing.py",
+    "scripts/shared/deployment.py",
+    "scripts/shared/eval_sets.py",
+    "scripts/shared/evaluation/eval_set_scoring.py",
+    "scripts/shared/evaluation/uncapped_eval.py",
+    "scripts/shared/forward_baseline.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/collect_artifacts.py",
+    "scripts/shared/pod/teacher_cache.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/shared/project_position.py",
+    "scripts/shared/study_engineering.py",
+    "scripts/shared/training/train_stage3.py",
+    "scripts/stages/stage-0/calibration_volume/dose_driver.py",
+    "scripts/stages/stage-0/calibration_volume/mixed_governance.py",
+    "scripts/stages/stage-0/calibration_volume/run_battery.py",
+    "scripts/stages/stage-0/calibration_volume/score_battery.py",
+    "scripts/stages/stage-1/phase_a3/a3_session.py",
+    "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+    "scripts/stages/stage-1/phase_c1/packaging.py",
+    "scripts/stages/stage-1/phase_d1/d1_session.py",
+    "scripts/stages/stage-1/phase_d1/replay_specs.py",
+    "scripts/stages/stage-1/projected_residual/recovery_driver.py",
+    "scripts/stages/stage-2/reasoning_data/generation_adapter.py",
+    "scripts/stages/stage-2/reasoning_data/generation_driver.py",
+    "scripts/stages/stage-2/reasoning_data/generation_plan.py",
+    "scripts/stages/stage-2/reasoning_data/h1_generation_launch.py",
+    "scripts/stages/stage-2/reasoning_data/h1pa_driver.py",
+    "scripts/stages/stage-2/reasoning_data/persist_unit.py",
+    "scripts/stages/stage-2/reasoning_data/unit_driver.py",
+    "scripts/stages/stage-2/teacher_modes/admission.py",
+    "scripts/stages/stage-2/teacher_modes/analysis.py",
+    "scripts/stages/stage-2/teacher_modes/hybrid_calibration.py",
+    "scripts/stages/stage-2/teacher_modes/initialization.py",
+    "scripts/stages/stage-2/teacher_modes/l40s_check.py",
+    "scripts/stages/stage-2/teacher_modes/mode_statistics.py",
+    "scripts/stages/stage-2/teacher_modes/phase.py",
+    "scripts/stages/stage-2/teacher_modes/recovery_units.py",
+    "scripts/stages/stage-2/teacher_modes/teacher_session.py",
+    "src/aadistill/__init__.py",
+    "src/aadistill/data/__init__.py",
+    "src/aadistill/data/cleaning.py",
+    "src/aadistill/data/code_exec.py",
+    "src/aadistill/data/dataset.py",
+    "src/aadistill/data/diversity.py",
+    "src/aadistill/data/e5_pack.py",
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/data/ladder.py",
+    "src/aadistill/data/mixture.py",
+    "src/aadistill/data/nested_ladder.py",
+    "src/aadistill/data/paired_corpus.py",
+    "src/aadistill/data/prefix_split.py",
+    "src/aadistill/data/recovery.py",
+    "src/aadistill/data/sessions.py",
+    "src/aadistill/data/target_policy.py",
+    "src/aadistill/data/target_quality.py",
+    "src/aadistill/data/token_documents.py",
+    "src/aadistill/data/tools.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/__init__.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/capability.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/eval_registry.py",
+    "src/aadistill/evaluation/function_error.py",
+    "src/aadistill/evaluation/general_text.py",
+    "src/aadistill/evaluation/init_nll.py",
+    "src/aadistill/evaluation/isolation.py",
+    "src/aadistill/evaluation/oracle_reasoning.py",
+    "src/aadistill/evaluation/paired_stats.py",
+    "src/aadistill/evaluation/protocol_field.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py",
+    "src/aadistill/governance/__init__.py",
+    "src/aadistill/governance/artifact_manifest.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/governance/closure.py",
+    "src/aadistill/governance/grant.py",
+    "src/aadistill/governance/post_freeze.py",
+    "src/aadistill/infrastructure/__init__.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/bundle_transport.py",
+    "src/aadistill/infrastructure/env.py",
+    "src/aadistill/infrastructure/failure_signature.py",
+    "src/aadistill/infrastructure/log_relay.py",
+    "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/source_identity.py",
+    "src/aadistill/infrastructure/transfer.py",
+    "src/aadistill/infrastructure/watchdog.py",
+    "src/aadistill/initialization/__init__.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/families.py",
+    "src/aadistill/initialization/adapters/projected_residual.py",
+    "src/aadistill/initialization/adapters/projected_residual_vllm.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/baseline.py",
+    "src/aadistill/initialization/calibration/__init__.py",
+    "src/aadistill/initialization/calibration/batching.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/items.py",
+    "src/aadistill/initialization/calibration/packing.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/execution.py",
+    "src/aadistill/initialization/operators/__init__.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+    "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+    "src/aadistill/initialization/operators/attention/gqa/causal_kl.py",
+    "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite/__init__.py",
+    "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+    "src/aadistill/initialization/operators/depth/__init__.py",
+    "src/aadistill/initialization/operators/depth/_common.py",
+    "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+    "src/aadistill/initialization/operators/depth/positional.py",
+    "src/aadistill/initialization/operators/ffn/__init__.py",
+    "src/aadistill/initialization/operators/ffn/dense/__init__.py",
+    "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+    "src/aadistill/initialization/operators/register.py",
+    "src/aadistill/initialization/operators/width/__init__.py",
+    "src/aadistill/initialization/operators/width/residual/__init__.py",
+    "src/aadistill/initialization/operators/width/residual/global_pca.py",
+    "src/aadistill/initialization/planning/__init__.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/planning/generation.py",
+    "src/aadistill/initialization/planning/generation_compat.py",
+    "src/aadistill/initialization/planning/isolation.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/planning/operator_config.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/recovery.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_import.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/scoring/__init__.py",
+    "src/aadistill/initialization/scoring/batches.py",
+    "src/aadistill/initialization/scoring/content.py",
+    "src/aadistill/initialization/scoring/kl_reference.py",
+    "src/aadistill/initialization/scoring/objective.py",
+    "src/aadistill/initialization/scoring/output_head.py",
+    "src/aadistill/initialization/scoring/positions.py",
+    "src/aadistill/initialization/scoring/protocol_identity.py",
+    "src/aadistill/initialization/scoring/reference_store.py",
+    "src/aadistill/initialization/scoring/rows.py",
+    "src/aadistill/initialization/scoring/support.py",
+    "src/aadistill/initialization/specs/__init__.py",
+    "src/aadistill/initialization/specs/arch.py",
+    "src/aadistill/initialization/specs/artifact.py",
+    "src/aadistill/initialization/specs/identity_collapse.py",
+    "src/aadistill/initialization/specs/materialization.py",
+    "src/aadistill/initialization/specs/metrics.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/statistics/__init__.py",
+    "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/statistics/reweight.py",
+    "src/aadistill/initialization/statistics/spec.py",
+    "src/aadistill/initialization/transforms/__init__.py",
+    "src/aadistill/initialization/transforms/nll_gate.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/projected_residual.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
+    "src/aadistill/models/__init__.py",
+    "src/aadistill/models/cost_model.py",
+    "src/aadistill/models/quant.py",
+    "src/aadistill/models/student.py",
+    "src/aadistill/models/teacher.py",
+    "src/aadistill/models/tokenizer_contract.py",
+    "src/aadistill/rollout/__init__.py",
+    "src/aadistill/rollout/engines.py",
+    "src/aadistill/rollout/generate.py",
+    "src/aadistill/rollout/snapshots.py",
+    "src/aadistill/runtime/__init__.py",
+    "src/aadistill/runtime/cost.py",
+    "src/aadistill/runtime/cpu_test_env.py",
+    "src/aadistill/runtime/device_handoff.py",
+    "src/aadistill/runtime/durable_store.py",
+    "src/aadistill/runtime/hub_capacity.py",
+    "src/aadistill/runtime/leaf_durability.py",
+    "src/aadistill/runtime/pod_environment.py",
+    "src/aadistill/runtime/run_layout.py",
+    "src/aadistill/runtime/setup_steps.py",
+    "src/aadistill/runtime/staging_contract.py",
+    "src/aadistill/runtime/telemetry.py",
+    "src/aadistill/training/__init__.py",
+    "src/aadistill/training/accounting.py",
+    "src/aadistill/training/lora.py",
+    "src/aadistill/training/topk_kd.py",
+    "src/aadistill/training/train.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 38.3,
+    "expected_minutes": 1617.0,
+    "soft_stop_minutes": 2033.75,
+    "artifact_recovery_reserve_minutes": 10.0,
+    "hard_terminate_minutes": 2043.75,
+    "step_time": {
+      "seconds": 1.0,
+      "source": "unused: the validation is one phase (arms=0)",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 20.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 5.0
+      },
+      {
+        "name": "A-D4_teacher",
+        "minutes": 1592.0
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "closeout_and_teardown",
+        "minutes": 12.5
+      }
+    ],
+    "notes": [],
+    "soft_stop_reserve_minutes": 12.5,
+    "expected_usd": 29.3755,
+    "soft_stop_usd": 36.9465,
+    "artifact_recovery_reserve_usd": 0.1817,
+    "hard_terminate_usd": 37.1281
+  },
+  "quoted_price_per_hour": 1.09,
+  "gpu_count": 1,
+  "stock_status": "Low",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 128.8682809348,
+    "current_spend_per_hr": 0.003,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 37.1281,
+    "ok": true,
+    "why": "the provider account holds $128.8683 against the $37.1281 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "account_resources": {
+    "checked": true,
+    "known": true,
+    "pods": [],
+    "network_volumes": [
+      {
+        "kind": "network_volume",
+        "id": "am5m373kuq",
+        "name": "aad-h1pa",
+        "size": 30,
+        "dataCenterId": "EUR-IS-2"
+      }
+    ],
+    "error": null,
+    "accounted": [
+      "am5m373kuq"
+    ],
+    "unaccounted": [],
+    "ok": true,
+    "why": "the provider account holds only the 1 resource(s) the records account for"
+  },
+  "prechecks": [
+    {
+      "check": "the_artifact_is_this_studys_and_unused",
+      "ok": true,
+      "message": "a A-D4 teacher artifact, unused"
+    },
+    {
+      "check": "the_gpu_and_price_are_the_grants",
+      "ok": true,
+      "message": "1 x NVIDIA L40S at no more than $1.09/h for the pod, as granted"
+    },
+    {
+      "check": "all_in_within_cap",
+      "ok": true,
+      "message": "all-in $37.7108 over 2045.0 min, inside $38.30"
+    },
+    {
+      "check": "the_study_identity_is_the_authorized_one",
+      "ok": true,
+      "message": "study identity 848f65087269 is the authorized one"
+    },
+    {
+      "check": "bound_files_are_in_the_session_commit",
+      "ok": true,
+      "message": "every bound file is in the session commit"
+    },
+    {
+      "check": "the_project_cap_holds_now",
+      "ok": true,
+      "message": "$38.30 inside the envelope ($133.0888) and the $134.2513 the project cap leaves now"
+    },
+    {
+      "check": "the_volume_is_the_planned_one",
+      "ok": true,
+      "message": "volume am5m373kuq: 30 GB in EUR-IS-2"
+    },
+    {
+      "check": "the_kind_records_are_the_bound_ones",
+      "ok": true,
+      "message": "the kind's bound records are the committed ones"
+    }
+  ],
+  "all_in_bound": {
+    "billable_minutes": 2045.0,
+    "price_per_hour": 1.09,
+    "container_disk_gb": 120,
+    "gpu_usd": 37.1508,
+    "disk_usd": 0.5599,
+    "all_in_usd": 37.7108,
+    "highest_price_inside_cap": 1.1
+  },
+  "live_position": {
+    "fetched_utc": "2026-10-30T01:28:05+00:00",
+    "provider_billed_usd": 729.8345,
+    "committed_usd": 733.7487,
+    "project_cap_usd": 868.0,
+    "project_remaining_usd": 134.2513,
+    "account_pods": [],
+    "account_volumes": [
+      "am5m373kuq"
+    ],
+    "balance_usd": 128.8682809348,
+    "spend_per_hour": 0.003,
+    "rule": "shared.project_position: mixed_governance.position + engineering-campaign subruns",
+    "unposted_sessions": 0,
+    "campaign_unposted": 0,
+    "campaign_teardown_confirmed_by": {
+      "subrun record": 25,
+      "reconciliation": 30
+    }
+  },
+  "envelope": {
+    "ceiling_usd": 142.19,
+    "spent_usd": 9.1012,
+    "remaining_usd": 133.0888,
+    "runs": [
+      {
+        "run_id": "a_check_20261029_164345",
+        "usd": 0.6347
+      },
+      {
+        "run_id": "a_check_20261029_172423",
+        "usd": 1.7508
+      },
+      {
+        "run_id": "a_check_20261029_190241",
+        "usd": 1.3815
+      },
+      {
+        "run_id": "a_teacher_20261029_201915",
+        "usd": 5.3342
+      },
+      {
+        "run_id": "a_teacher_20261030_012648",
+        "usd": 0.0
+      }
+    ]
+  },
+  "volume": {
+    "id": "am5m373kuq",
+    "size_gb": 30,
+    "data_center_id": "EUR-IS-2"
+  },
+  "precheck": {
+    "relay_needed": [],
+    "relay_missing": [],
+    "relay_repos": {},
+    "relay_repo_files_listed": {},
+    "local_assets": [
+      "artifacts/stages/stage-3/eval/battery_v2"
+    ],
+    "local_missing": []
+  },
+  "pod_id": "c8sfjpoy6mi31o",
+  "actual_price_per_hour": 1.09,
+  "terminate_after_utc": "2026-10-31T11:31:52Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/AlphaAvatar-distill/.scratch/research_a/a_teacher_20261030_012648/watchdog_c8sfjpoy6mi31o.jsonl"
+  ],
+  "watchdog_owns_pod": "c8sfjpoy6mi31o",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "595.91.07"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_f93d83a7.bundle",
+    "PHASE_KIND": "teacher",
+    "SESSION_ASSETS": "battery_v2:artifacts/stages/stage-3/eval",
+    "SESSION_AUTH_PATH": "logs/stages/stage-2/teacher_modes/runs/a_teacher_20261030_012648/governance/authorization.json",
+    "SESSION_COMMIT": "f93d83a764d4dbecd8783db9ef8e40ecbe2a05bd",
+    "SESSION_KIND": "stage2_teacher_modes_phase",
+    "SESSION_PLAN_HASH": "848f65087269a8328a0cd682d5f8e089e5af93bb3e3e0b843b4868ef9c7a03d1",
+    "SESSION_RELAY_INPUTS": "[]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV VLLM_READY TEACHER_READY AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/stage2_teacher_modes_phase.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "",
+    "TEACHER_MODEL": "Qwen/Qwen3-4B",
+    "TEACHER_REVISION": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "TESTS_MAX_S": "600",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "stage2_teacher_modes_phase_driver",
+    "pid": 2767,
+    "workdir": "/workspace/aad",
+    "command": "mkdir -p /runpod-volume/teacher_modes && cd /workspace/aad && HF_HUB_OFFLINE=1 PYTHONPATH=/workspace/aad/src:/workspace/aad/scripts:/workspace/aad/scripts/stages/stage-1 /opt/train/bin/python scripts/stages/stage-2/teacher_modes/teacher_session.py --authorization /workspace/aad/logs/stages/stage-2/teacher_modes/runs/a_teacher_20261030_012648/governance/authorization.json --durable-root /runpod-volume/teacher_modes --status /workspace/stage2_teacher_modes_phase.status --phases waves,x,teacher_eval; grep -qE 'MARKER:(ALL_DONE|RUN_FAILED)' /workspace/stage2_teacher_modes_phase.status || echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) MARKER:RUN_FAILED\" >> /workspace/stage2_teacher_modes_phase.status",
+    "log_path": "/workspace/stage2_teacher_modes_phase_run.log",
+    "status_path": "/workspace/stage2_teacher_modes_phase.status",
+    "pid_path": "/workspace/jobs/stage2_teacher_modes_phase_driver.pid",
+    "descriptor_path": "/workspace/jobs/stage2_teacher_modes_phase_driver.job.json",
+    "exit_path": "/workspace/jobs/stage2_teacher_modes_phase_driver.exit",
+    "started_utc": "2026-10-30T01:33:16Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "secured": {
+    "cal_H-N_pass0_cal_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "cd400f4d1a99a1b9d50f85b481dd24f9ff047e77f0c6ee4ee5fc052b9ea09dbc"
+    },
+    "cal_H-N_pass0_cal_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "f9223fd7dd33566cbd8f39d284c46a895e694a2810cb7a843ba3782212334d38"
+    },
+    "cal_H-T_pass0_cal_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "205c55e0d45a724414856e25140bda2ab4cd17177b9be55381d7c4d534363709"
+    },
+    "cal_H-T_pass0_cal_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "293501a8d49e7b4844f04fefc67599f765e37b22200f3cf2cb15e299587ac4c9"
+    },
+    "w00_H-N_pass0_w00_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "0d9f238b64d5a588d49402fe18d3539549b1502fff60b21d0c14584f80473a00"
+    },
+    "w00_H-N_pass0_w00_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "93865b146722e84b4dcf89064816e9ff5a7ca762a958efd926f3b91c462dd27c"
+    },
+    "w00_H-N_pass0_w00_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "ce6be57b3822c7c6d31a3b920b86d70fb43c20fa89eeea25c89e4725aa0dedef"
+    },
+    "w00_H-N_pass0_w00_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "2f1574e4b4f8354fc896e629a28fbe1a544534ee16c80b625bb606c6f53d3eca"
+    },
+    "w00_H-N_pass0_w00_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "e294496e2f660030eeb3ef46b95f43607458211aaab1847e845604e92fcc2640"
+    },
+    "w00_H-N_pass0_w00_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "2b15bfaeac72a7cbbd29d7693d855502be248b900122e575a5b010b958fb4e36"
+    },
+    "w00_H-N_pass0_w00_g0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "12c8cc87f481c09a0a03cacc49a76b7175f919a992819d5fb201807b93f324c4"
+    },
+    "w00_H-N_pass0_w00_g0.part0007.jsonl": {
+      "ok": true,
+      "sha256": "961d5768bd28b1642fe2f09d1bd857974279447603b4aab47e9bf4a92ca83416"
+    },
+    "w00_H-N_pass0_w00_g0.part0008.jsonl": {
+      "ok": true,
+      "sha256": "7dec8dcd3c096539e3b09840412e65fda7f5843bd2bc96e3280adaf05edc64d5"
+    },
+    "w00_H-N_pass0_w00_g0.part0009.jsonl": {
+      "ok": true,
+      "sha256": "6fdb4acd2e629a2b7202a190800d1443915e200d61a4877649659f584e9fa9a7"
+    },
+    "w00_H-N_pass0_w00_g0.part0010.jsonl": {
+      "ok": true,
+      "sha256": "028008dd4b5f185d7c478bdaf2b8c40d8e07560d28adb8d33bae018bcf623334"
+    },
+    "w00_H-N_pass0_w00_g0.part0011.jsonl": {
+      "ok": true,
+      "sha256": "d997d2642673bd190f9dc43ac3af635771cc34a1620cff365c46b0fab6703022"
+    },
+    "w00_H-N_pass0_w00_g0.part0012.jsonl": {
+      "ok": true,
+      "sha256": "ab4b48b0683d2acfe166824d52ceb601012e694b48483ab60a55dcba94168c19"
+    },
+    "w00_H-N_pass0_w00_g0.part0013.jsonl": {
+      "ok": true,
+      "sha256": "ee04a529babb9ccd7ef0863f7ab9b4bb63d28040e41bfee1aa98ea45c8eb7169"
+    },
+    "w00_H-N_pass1_w00_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "128d8e1dd5d888ee8038c4aa9cba51e8007b095af2b2e648244e7fc28986a70b"
+    },
+    "w00_H-N_pass1_w00_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "dbe2be0f6eeb60b7707cf8f167bfc2058c02653bb42a1825cd24c7b895b188f2"
+    },
+    "w00_H-N_pass1_w00_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "7be905e8e816beaed9cfc6009792085caa2166f3feaacf9da8f596f74ee0d376"
+    },
+    "w00_H-N_pass1_w00_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "c1ab8b20c6e31e16984ddbcc32dd04f615959da7052b347d506fc060c63ca01f"
+    },
+    "w00_H-N_pass1_w00_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "d3346261b407000dd31b4d871937c2ec13104025f79309b0cca6f142e2a78a82"
+    },
+    "w00_H-N_pass1_w00_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "958196764c2bbcdd753c11ef28908178a15cccf4ef7fe5cc771d90bcf97ae34f"
+    },
+    "w00_H-N_pass1_w00_g0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "a24f6bb8b34fb213abf9fd0f854e79e1a9fdec523a4b6a05a3f8fb7d8f5960e0"
+    },
+    "w00_H-N_pass1_w00_g0.part0007.jsonl": {
+      "ok": true,
+      "sha256": "76fc4734133fc6231b6d4b07e64d95bff194f631042e779596888addf4dc0f48"
+    },
+    "w00_H-N_pass1_w00_g0.part0008.jsonl": {
+      "ok": true,
+      "sha256": "cf0dc1cf320cf0c04e581c44b9693b280785778d0d08070858329ef2f567a6ba"
+    },
+    "w00_H-N_pass1_w00_g0.part0009.jsonl": {
+      "ok": true,
+      "sha256": "dba735aecebb708ec9b14643a19482f1aa2b96881081de7cfd97a319b3c77321"
+    },
+    "w00_H-T_pass0_w00_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "16d845e07e4765c38812f40db71fb49018ba797d7c82f4d453eb093d17479624"
+    },
+    "w00_H-T_pass0_w00_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "a2ff8a1a230a83dfeddb128fa40b0fccbbd3eaca9cd54ee1fd4096026881c47e"
+    },
+    "w00_H-T_pass0_w00_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "0e16fdf6ef530ee1a08a22fb12a2c6317babc5a46d6af6f2f7648f9a523a9384"
+    },
+    "w00_H-T_pass0_w00_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "1d19f54abf54a115f13e4c5ad7d44ddafdf25e66e92124923424cf2b0420efb5"
+    },
+    "w00_H-T_pass0_w00_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "e9fe4d57a0d1680204d3f384421983cd8634ee151bf76702e43392bc6be132a4"
+    },
+    "w00_H-T_pass0_w00_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "7ab92b1f2ef4a599ea4f8143fc1b75f23363f0e7550b5322c816d2878729eb5f"
+    },
+    "w00_H-T_pass0_w00_g0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "a11dea6b33538299e817de03f492581ce1380f79445c4dd508e778adf5634e7c"
+    },
+    "w00_H-T_pass0_w00_g0.part0007.jsonl": {
+      "ok": true,
+      "sha256": "164e49dee65c6ab07414f1ec29411445e1d76608be0ee2a93e22d86e340325e4"
+    },
+    "w00_H-T_pass0_w00_g0.part0008.jsonl": {
+      "ok": true,
+      "sha256": "bf7dca84ef27727923c980b786684582ee6ff9c7eb768f82a6b69be9d46255f6"
+    },
+    "w00_H-T_pass0_w00_g0.part0009.jsonl": {
+      "ok": true,
+      "sha256": "dcefecc1874a4cd2f76269e0081437e36cb5ff70c174ca50d5448172112beab4"
+    },
+    "w00_H-T_pass0_w00_g0.part0010.jsonl": {
+      "ok": true,
+      "sha256": "c7d8c4451be1188efd10b7c4954214c97377b9cdfea3cb50c6372c067ff201a2"
+    },
+    "w00_H-T_pass0_w00_g0.part0011.jsonl": {
+      "ok": true,
+      "sha256": "bc51f600f1a5d2689c119b892a91fa48b48e166e94e352bbb66c956a19685a49"
+    },
+    "w00_H-T_pass0_w00_g0.part0012.jsonl": {
+      "ok": true,
+      "sha256": "f2a65567646ec4eda6fcb8080335b04f7358555e7f1ab1bd058fd411f2a60a0e"
+    },
+    "w00_H-T_pass0_w00_g0.part0013.jsonl": {
+      "ok": true,
+      "sha256": "d8f9ae286e60c50ac79b00da7b1cfdc189c05351dca4051bb0959adcf7ae00dc"
+    },
+    "w00_H-T_pass0_w00_g0.part0014.jsonl": {
+      "ok": true,
+      "sha256": "e1f60b6e8e9a76005c417185f86832f5d51a0945fd8c10514abb5b075d467c19"
+    },
+    "w00_H-T_pass0_w00_g0.part0015.jsonl": {
+      "ok": true,
+      "sha256": "999a310a51e0b7f4d9fa77361cd69874ccea6d06b00011a7bfc3c92e0d339129"
+    },
+    "w00_H-T_pass0_w00_g0.part0016.jsonl": {
+      "ok": true,
+      "sha256": "fb0f1d5b2b760b4f10b8f30f4d9a70e860a1764ef480f0f5862b85d5e39b1513"
+    },
+    "w00_H-T_pass0_w00_g0.part0017.jsonl": {
+      "ok": true,
+      "sha256": "6d913df1a16256e096191b35e541de089c6b3a4fb3b31064d551854ccdecdbd2"
+    },
+    "w00_H-T_pass0_w00_g0.part0018.jsonl": {
+      "ok": true,
+      "sha256": "54d468eda8b00e0b423f7f9bd1736074ed290d68c5a68c40dbe48e65871e22b9"
+    },
+    "w00_H-T_pass0_w00_g0.part0019.jsonl": {
+      "ok": true,
+      "sha256": "79e16bc205f1d767d7e605eb51cc133a5b7fc2f0278360fad53792a1ca56c1e3"
+    },
+    "w00_H-T_pass0_w00_g0.part0020.jsonl": {
+      "ok": true,
+      "sha256": "33ca8d04eaf65ac37059660374c1c43252e19348d757f2927ee367fce2c0cccf"
+    },
+    "w00_H-T_pass0_w00_g0.part0021.jsonl": {
+      "ok": true,
+      "sha256": "aa7b3a131ffb226642bc63179ee414feb6cbdae65c1eb9f8a3dbd594214fb61a"
+    },
+    "w00_H-T_pass0_w00_g0.part0022.jsonl": {
+      "ok": true,
+      "sha256": "b93080f3fef67fb842b8c62c216f23d025b4ba89fe7d956b5c68b415aa9f714a"
+    },
+    "w00_H-T_pass0_w00_g0.part0023.jsonl": {
+      "ok": true,
+      "sha256": "c6c17755fc4c5c5ec992cfe1fbd02eff2d37b4fa4e616b93bc5b865617199520"
+    },
+    "w00_H-T_pass0_w00_g0.part0024.jsonl": {
+      "ok": true,
+      "sha256": "b5edc2e9ddf489b843ffc3a0015eb4a141f34eb3d5bc0e8dde96afeccf767148"
+    },
+    "w00_H-T_pass0_w00_g0.part0025.jsonl": {
+      "ok": true,
+      "sha256": "7761f823ed831fa1308c340e9e12a0b8e741c39863bcf6c714c0dd1fa756d226"
+    },
+    "w00_H-T_pass0_w00_g0.part0026.jsonl": {
+      "ok": true,
+      "sha256": "4ef2717fb29ac91ee210b58b5fa400036afdcfc6ff617944b7a603316cb5b268"
+    },
+    "w00_H-T_pass1_w00_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "23200cb373b514828c77aa24e6928ca7580d21a272780717b86a0dd28596ef85"
+    },
+    "w00_H-T_pass1_w00_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "16f77e50b78155b7339119ff2c3c5d122036288a0a00bbbda0d7b8353b5c9aae"
+    },
+    "w00_H-T_pass1_w00_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "82b5c6510770fa34a41bab103ecf1cdd19d03ec4303651592f043f951d036860"
+    },
+    "w00_H-T_pass1_w00_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "f5c3c68172c9a65991de19e696ceacff7b7bb4522344ebc272d39e57db66b351"
+    },
+    "w00_H-T_pass1_w00_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "fb25e6e3e2a30a99b7093fbd6364b26667da2704d767849a22ab6dcce0cc58fe"
+    },
+    "w00_H-T_pass1_w00_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "1f28af2a05fde9d7f0fba284b7baac6710d8665a71a200f037a5c87396072a2c"
+    },
+    "w00_H-T_pass1_w00_g0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "6f2e13fc30c296f3a9e3550ca4865a90b684abbbbb5f73bf0da8420f9f20666a"
+    },
+    "w00_H-T_pass1_w00_g0.part0007.jsonl": {
+      "ok": true,
+      "sha256": "426a6a6501c16cd100bab1adab2085608d75234fb7529464d61e5dace0c383ac"
+    },
+    "w00_H-T_pass1_w00_g0.part0008.jsonl": {
+      "ok": true,
+      "sha256": "8fe063078a298f02d4059f7ba879c1f10b85fc34975b226f64cc70ede83403ec"
+    },
+    "w00_H-T_pass1_w00_g0.part0009.jsonl": {
+      "ok": true,
+      "sha256": "ab1a4dc60895fb97cde1f0cf957f4407ea2be011a61a94e5cc5c195807bd3884"
+    },
+    "w00_H-T_pass1_w00_g0.part0010.jsonl": {
+      "ok": true,
+      "sha256": "4d4b4df331d9b5d58f4e66a1bb8432a22f6ad695fe51bfe47cf41c4084217050"
+    },
+    "w00_H-T_pass1_w00_g0.part0011.jsonl": {
+      "ok": true,
+      "sha256": "6c89866679af2f79a8c033f773cb909028dbb99ec26d418412aebf63d878051c"
+    },
+    "w00_H-T_pass1_w00_g0.part0012.jsonl": {
+      "ok": true,
+      "sha256": "8a328fb592150c1ce2d40b75ece000807bf84feac5d154eceaa31811b58e7b81"
+    },
+    "w00_H-T_pass1_w00_g0.part0013.jsonl": {
+      "ok": true,
+      "sha256": "6c95016761106e9dbce251cf0847f6570ef0f0a8e1fe3a7798dcb85aadbc2715"
+    },
+    "w00_H-T_pass1_w00_g0.part0014.jsonl": {
+      "ok": true,
+      "sha256": "17af00031c0f32d61d1275e767f0f80d60ccfe14fd773c286f83eed79207c63c"
+    },
+    "w00_H-T_pass1_w00_g0.part0015.jsonl": {
+      "ok": true,
+      "sha256": "5237d129f8163214efb5cfe25641d89bf4f85689182f9d6ad891c10de3354f8e"
+    },
+    "w00_H-T_pass1_w00_g0.part0016.jsonl": {
+      "ok": true,
+      "sha256": "0fe8d47d3486a2fe5e4c3eaff6a4c03e5f0c1ea9f201001509d881bf4d889f16"
+    },
+    "w00_H-T_pass1_w00_g0.part0017.jsonl": {
+      "ok": true,
+      "sha256": "334506f713a36b32af76241a99e6cdde8fbf0c4ea4397a3f13ee4fafcf632488"
+    },
+    "w00_H-T_pass1_w00_g0.part0018.jsonl": {
+      "ok": true,
+      "sha256": "d209c37a14a385b22e6e4c3db67c74f7a7e01469cbbe429a72f32f9218c96764"
+    },
+    "w01_H-T_pass0_w01_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "35152a0f259e30e9dce16e0104033b679e0030d2051b0a11da3df481bb0aad86"
+    },
+    "w01_H-T_pass0_w01_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "eb3e1eb0397b789e2dfb0b6c05a62d311832dc692c2a762e62934d87357dbce8"
+    },
+    "w01_H-T_pass0_w01_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "bd6e1c0e18133f8d69ed2f124ee4845815a63c7eced7e45845a7399426e92c3f"
+    },
+    "w01_H-T_pass0_w01_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "ebe50fdb33ddea9a006d35cc6f39cdbf49940e4d690b90dd72ef0669abafa449"
+    },
+    "w01_H-T_pass0_w01_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "bed08306812c10817ed4f678e4d47d9a94b4caa68d7147d7a537eb995e03076f"
+    },
+    "w01_H-T_pass0_w01_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "cc237e7de8a842121373402f4120dcf33fb945f5c0415dd18f84a75f285ca578"
+    },
+    "w01_H-T_pass0_w01_g0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "3f3ac65bc21bfa85c65a605765de59e0173822d804c4a7c4ebda6cb28fbde4bc"
+    },
+    "w01_H-T_pass1_w01_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "9994a31895d2e2e95b0bdf86fcbe837db02abfd1d140d524b5cff34f097ff506"
+    },
+    "w01_H-T_pass1_w01_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "6a31497ea2fb2f041895a1d0d26f40aa8d696f77f62d0cc6b0f98115c5b8e6aa"
+    },
+    "w01_H-T_pass1_w01_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "1250ac4fab2cbdf8c13fda4bad6885e78cdc0e8c30ae7e82aa66d25983276bc9"
+    },
+    "w01_H-T_pass1_w01_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "3759385efd62b75e7fab6de82f6867811c7c508840632bd573ccd903d4e9ce85"
+    },
+    "w01_H-N_pass0_w01_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "fab3a8359e9bc38972c4aa8d473c5538dde81d8d8b8ab21e532018f53b5be830"
+    },
+    "w01_H-N_pass0_w01_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "c26d839a8ffbc89b64a91f27e112fccfd098747956673906503517c1c378a25c"
+    },
+    "w01_H-N_pass0_w01_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "336458507b6ac480720981910ec48e6b42033567bb109140f8bebc532a6f7c58"
+    },
+    "w01_H-N_pass0_w01_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "4a184377bb015a6f8999b2b5e5df9f040aea6b8132092f5661687a610473e675"
+    },
+    "w01_H-N_pass1_w01_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "021367cd3e8f1e6fe68d8d72b24c3a4b74a9e6fb6460fa7934f2c6cb2f92b7ea"
+    },
+    "w01_H-N_pass1_w01_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "2100922302e7b68726f5708e3676022a51a983fdcb423e74333e9c6355cc8cf7"
+    },
+    "w02_H-T_pass0_w02_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "cba2f715e06c5275fccb24f264054142391fcab9a0cef585e9301b39a5996068"
+    },
+    "w02_H-T_pass0_w02_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "45dfc2b69e6b6224d35884827573d09be3d4dd6d1571e58d6acce6b8688ebb85"
+    },
+    "w02_H-T_pass0_w02_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "e958122d6117f067e7b608163971590c2f0b83312b9f98753a4fc409b3eebd2f"
+    },
+    "w02_H-T_pass0_w02_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "219a1b427bfbe560d833b0262b4b38f18a83812d22fb039361a9e4b5c8c37972"
+    },
+    "w02_H-T_pass0_w02_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "bf1b6da66016ab44813f43eb10bb1cc7dd45175aaa3a073d1fa7f99ea8823523"
+    },
+    "w02_H-T_pass0_w02_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "5a5a2f4930b198845ea9977d41f27a2b98444a99d4812ad8ac38ac49a9f18348"
+    },
+    "w02_H-T_pass1_w02_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "9d557fede0071c741a3332ffcf6c17211e744802508c72994c1d1b623e589a2b"
+    },
+    "w02_H-T_pass1_w02_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "6b9a8576e6032739fd57e0f4d37645686ee6d64571e8f2515fc820d2f4fc7ce7"
+    },
+    "w02_H-T_pass1_w02_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "8fab8b93556d95cfe7f94b340d15801ab012faef200bf1f509864cbc521f505e"
+    },
+    "w02_H-T_pass1_w02_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "803b4502b25d168279bcd246a8f4e335ddb3f358aa7fbfdb3686f442768dcaf7"
+    },
+    "w02_H-N_pass0_w02_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "89ba14b06cafecd46b1a20f61c0e8994dca27f990bf4156582fe9df122c0e5a9"
+    },
+    "w02_H-N_pass0_w02_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "c8315811d6c1f2c73b4f1b0a0a7feb131008a9c06989dba33c8ad3044dd77839"
+    },
+    "w02_H-T_pass1_w02_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "a3f9410874b253c472a6a248763917380684683c50482756ca132d42571711ea"
+    },
+    "w02_H-N_pass0_w02_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "4f33ea29ce146c73294c933b4db0851fe86de72782bdff5e867989a6d1c470c1"
+    },
+    "w02_H-N_pass0_w02_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "98fb6c8b729450b02749bfcac3d65dbc0985a6b5806fb69c3600b9480a19939c"
+    },
+    "w02_H-N_pass1_w02_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "2dfc145bcc64ac1b2309fd28b91cbd676978f1c13ea949818cb754641211e7ab"
+    },
+    "w02_H-N_pass1_w02_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "d354827084055eb00ba0cebfad1004f180eb9b19a66187fdda9823825c300bd8"
+    },
+    "w03_H-T_pass0_w03_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "a495049ba31de3dd33c43cf91815fab4f15cac2dff1873bc0c6228f324ea8d1c"
+    },
+    "w03_H-T_pass0_w03_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "ba740a4d2388a8785e045a9f3a758dc8f559508662d4c036bda1482601587d79"
+    },
+    "w03_H-T_pass0_w03_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "6b10932999ebf37d067dd3cc1cf3b28a2f3a4284a1fd5070d014da71aff4aadc"
+    },
+    "w03_H-T_pass0_w03_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "3c905c9148060a5dc29f2dfc579da1ce2f49c917038681cd519c07f29dc49e7b"
+    },
+    "w03_H-T_pass0_w03_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "dfe6e43dad97d618af3442a0e546b97a7664bada46ea1487644563c0efa3df26"
+    },
+    "w03_H-T_pass0_w03_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "4d612bcb110404c6163a23e56dd2458346347f5fa6e4c03ecd00537050646419"
+    },
+    "w03_H-T_pass0_w03_g0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "78d6b2556b3d38659698fac21bc22cb07c242eda29f267fc37f25c8047ca45be"
+    },
+    "w03_H-T_pass1_w03_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "8c5ae9b623ed08650551e0c888a3d33d51ff7507c0da8d13d97a385b043f0a66"
+    },
+    "w03_H-T_pass1_w03_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "d65e2f0a1125f929ec65ec715fc0ccc2a0dd582ed92605b0ff962482e518f6de"
+    },
+    "w03_H-T_pass1_w03_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "127b81aea8e93ddce6363fdcf46208f80f239da6c352941e6554c5c0d9b1e904"
+    },
+    "w03_H-T_pass1_w03_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "f0f45cf76005f36fc82f5dbcf3a3f63607a6e3b8295e9fc509d0642320b99a3b"
+    },
+    "w03_H-T_pass1_w03_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "cd7e5cb28c9fc4fb77b3f67df16565f52294564133ec0095473295673e38f9b7"
+    },
+    "w03_H-N_pass0_w03_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "b035138525aaa3e05b4a15e16369eda8bb53688f0a6ebbbe2734d7dfe513b861"
+    },
+    "w03_H-N_pass0_w03_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "77d110e34800779b0a08da6f2c6b8bca726afa3e2147534b7f9d731f3171cd34"
+    },
+    "w03_H-N_pass0_w03_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "dfc73ef5ef52fde95d0b0d9a228ade441c532ba8b3b3b1be7ed7e2cd028ed9bb"
+    },
+    "w03_H-N_pass0_w03_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "5dacf3fa1a8d443b84592235c44a6a86f7ba99047b88575545ea7f01e9800ce0"
+    },
+    "w03_H-N_pass1_w03_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "625b4a8d9a8bfeeb06d3b0e930780d1db4d2570215b58a7c92f389ee58327441"
+    },
+    "w03_H-N_pass1_w03_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "a28857320ef15b98e84651ea361a5a438c99629cba9d06d56fe222469d7817e3"
+    },
+    "w04_H-T_pass0_w04_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "946d20fd42c4dd715809ef195cbe29c94225dd6f7f3bffda313eeaa85d13bf20"
+    },
+    "w04_H-T_pass0_w04_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "647d9acf16352a3ac00d6e52bb9513ab838f03d701c8079d5920958a77ece7cc"
+    },
+    "w04_H-T_pass0_w04_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "e0772745095bbe6a484e36658f2c84c1d44bc0b07ffecc8be208a5200ae23df1"
+    },
+    "w04_H-T_pass0_w04_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "b48656327413bd98e56be1eddb7b1c9c88fa9a33a5d929276258da95547cc37f"
+    },
+    "w04_H-T_pass0_w04_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "e17386db1d7ceff68bceac8f6d19f9bab0b295d88d656fcd82b044ea7d13790a"
+    },
+    "w04_H-T_pass1_w04_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "fa21187f5b1a94b081bcc4d9af02247eda974df30b5a57c3f00b242271806b0f"
+    },
+    "w04_H-T_pass1_w04_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "d1e6070a9e06581b34496464e0ad9268183d83e439e50d301cafade809f4bc49"
+    },
+    "w04_H-T_pass1_w04_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "adbbca9ee99c26986e9626ecd0c23737c410fee654fa3e6058fde865a859bc64"
+    },
+    "w04_H-N_pass0_w04_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "f056744fd9e9212c61c2a6bc290ddd65942bc2e22a73848c1473a13c4d089996"
+    },
+    "w04_H-T_pass1_w04_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "493cb70f185dc427f85564936805ca37a8a3c164a6baad8fd01145621d16a301"
+    },
+    "w04_H-N_pass0_w04_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "b4085f5ecd5487044f1584abbaf16cd897790cacf93262f74a660d3c10ae0155"
+    },
+    "w04_H-N_pass0_w04_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "897306216ef2208925eefc5263ddaa600d9118655de7f4dc0a61ee9895e9ad33"
+    },
+    "w04_H-N_pass0_w04_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "fdeda201d03e1ad2c862eff07f39410788a8e4d8b5ea2455973ac058c2b97087"
+    },
+    "w04_H-N_pass1_w04_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "1d47223c4037f9b32d16d0adcba668532af150a703db1447aac057659f2503d9"
+    },
+    "w04_H-N_pass1_w04_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "d9d77ca005a3bc7d504369f51272fe822ba98339e8e391f1a2c64f15508080af"
+    },
+    "w05_H-T_pass0_w05_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "7bb52ace2258080db680abf295add02b623836aac9eda928d65f83c40ddf9f74"
+    },
+    "w05_H-T_pass0_w05_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "4652258a045898253edca02b5243928bf256b7c680a140bd4f4bd5b90836ae75"
+    },
+    "w05_H-T_pass0_w05_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "7a8dfdbef12b9cc18ac2f9ead9711a1819202b6c39d631a353d730faa5678438"
+    },
+    "w05_H-T_pass0_w05_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "a208acd15999b7125aa8cd00d2c562762055acd8df99e7bb721cb8040f8e04ea"
+    },
+    "w05_H-T_pass0_w05_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "1fcd0a5865750ff201b8b82df310c7ba29a20a1d2ebad111758fe8d268178290"
+    },
+    "w05_H-T_pass0_w05_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "386710674f1c96bc61d3bd16068e7f3b848ea3cc4926e541ce926d951ab7d792"
+    },
+    "w05_H-T_pass1_w05_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "0c4d1ec11a23bfb0cd593feb912d14ef4e6b83123d00414e7f4fec7d2536d3ac"
+    },
+    "w05_H-T_pass1_w05_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "f5be48173a2d7d8e779615eb958ffa89507530c29da3c536be01d39266892b2f"
+    },
+    "w05_H-T_pass1_w05_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "6a624e85e0de2f179a64d9f3ab27c6b12045d670531318c0e5e5337d38849b10"
+    },
+    "w05_H-T_pass1_w05_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "ed4cb9e0446547c70ff056067bcb37039284ad1c0bdfd097a2ad8f3fff768e50"
+    },
+    "w05_H-T_pass1_w05_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "a8dd82cf4a627be3886c03de06b1b184ec8d8c95492ddf1269131aefc5c4a74d"
+    },
+    "w05_H-N_pass0_w05_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "36f1104ed1c39a6f4dac892fca20b3a682012748960bfcc9ed3857fad3194c37"
+    },
+    "w05_H-N_pass0_w05_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "5a5c8312e7a255ed6f5cdb08eda56ad4fe35df037908d6b38e5bcf00eab658fd"
+    },
+    "w05_H-N_pass0_w05_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "d99500befeb92f08c456fcf858340ab287ceaaa567145e20e7a456b850ef8df9"
+    },
+    "w05_H-N_pass0_w05_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "de4264e6551f8997c1abaaf540950af7cfc9779f48e9117811370e2adfe75cd8"
+    },
+    "w05_H-N_pass1_w05_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "495b6071ac40731e5b6610c86051e83e00fb63db20acd313cfa9f63f70736643"
+    },
+    "w05_H-N_pass1_w05_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "537d1e6a7872b82bec41d99627fd64b1a1113ed3f8c2b25ccb7bc10119a2abba"
+    },
+    "w06_H-T_pass0_w06_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "e93b83bd7e2c73034f97181e5ceae948a49aea9844d1fb31b9debb95cc214fd6"
+    },
+    "w06_H-T_pass0_w06_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "e5dfb8779ab3c2920c410d525fcb5997932cf0327c1f3a94116ad23a3fecdc37"
+    },
+    "w06_H-T_pass0_w06_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "1764b455a57bfcd16934957c2fae93c2cb9d38e5269f20030529b4b4f3367c8f"
+    },
+    "w06_H-T_pass0_w06_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "7d070a83ae9b74522630651a4344c541e017a776a84b530f0684a52d633e3e4b"
+    },
+    "w06_H-T_pass0_w06_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "5fe41f8f6adc894a63f96e61754a5fe63fc337b6997673ef6367917b12a0586e"
+    },
+    "w06_H-T_pass0_w06_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "9ebbf22589cfca12dee0e6c1afb5a1f24d9dadc133544e4906c915054900507a"
+    },
+    "w06_H-T_pass1_w06_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "1bfa1e298180cb05ae6ecb3205ec9591f762283a9cc8fc9a7a4935078722a7fd"
+    },
+    "w06_H-T_pass1_w06_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "95cc972404bbcfef12bb1cfa9a20e8e4fb44a6e8f05a784535e2c4552ee2f10c"
+    },
+    "w06_H-T_pass1_w06_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "7fb1623b547d440755cc1c3e8b21ce05982cc39b9db3dd0cd475c477fe6fc75d"
+    },
+    "w06_H-T_pass1_w06_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "0c99493580e7e1e2fb04a5747e413c3d2eecdea4451035ea74ec8b312cb1abcc"
+    },
+    "w06_H-N_pass0_w06_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "0080153b301334c3b8ca3f6304cb425e570f6251d99cd7ab128528148d6f5a21"
+    },
+    "w06_H-N_pass0_w06_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "274fd1054b26e8023ea7bfb71169e47f2f589357fdd1af6c1075fb66d180e478"
+    },
+    "w06_H-N_pass0_w06_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "b7b131d79a3a25647815af0d41d29a796e435352646e4d3c6d85e13ecc5e7235"
+    },
+    "w06_H-T_pass1_w06_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "c9a0e8a83ea61c7ea10a0ad29e5d5b8ccd4e59ec9e372f024c6ccf286ce835b2"
+    },
+    "w06_H-N_pass0_w06_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "9b2452b88f9a77e9195ad1f584908fa7b7a34fab14eed1796e67155f1a563b40"
+    },
+    "w06_H-N_pass1_w06_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "32b8febf89b8fa0e8fb3c6289b9091ff62b4d4f838113682178632cdae9add20"
+    },
+    "w06_H-N_pass1_w06_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "82c29c6ccc4be5a78b35f19b028bf1d618fa4305a47c352d4f2d45c167e88707"
+    },
+    "w07_H-T_pass0_w07_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "420837a813459ed080e551bb134d1788f2e56fb4552ab297f364165c100c8e84"
+    },
+    "w07_H-T_pass0_w07_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "b5fbaac1fc0b74ddb2c66794f82c1bf8b3eb1e48a74b6d106aa74aa957ff6425"
+    },
+    "w07_H-T_pass0_w07_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "03d923ac3b4e3ef01ceb9220e14e828de0e6e2088ec59a2b4e6a7febf04b6306"
+    },
+    "w07_H-T_pass0_w07_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "25456b13ae8b6cbd69ef9cfa5a3615984edaf5069dce994a4c24fe56895dd78d"
+    },
+    "w07_H-T_pass0_w07_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "98c7aa35cd111ca262c96054badfc428f1a27031695034effb3c9183ff69fc49"
+    },
+    "w07_H-T_pass0_w07_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "73f46c83c545439b5d47befb34f3c3949386c041a390255557bcaeca9ef17b31"
+    },
+    "w07_H-T_pass0_w07_g0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "0ffabcc24d93e0c2ff30eeee35be179944a24936084b5c018ea0f351ca5ee25d"
+    },
+    "w07_H-T_pass1_w07_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "6ccb60ba5e582a43f4c385ae7056f7dd3819b7c1ed899bc1f3e8202ddf29354c"
+    },
+    "w07_H-T_pass1_w07_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "46987c74df789dc66c9f12695a8273556f9101bebfc550f44707ba1016284acf"
+    },
+    "w07_H-T_pass1_w07_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "fcfd24f0f8ecee592f19af698ef36f53bce563bb2db7874d916caff4d7523f2b"
+    },
+    "w07_H-T_pass1_w07_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "c44c0f659b075735d681c3060e75463affaddfeb93acd9cb6bfaf63b33c6e893"
+    },
+    "w07_H-T_pass1_w07_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "666b24de19cc5f413fdce5374d6fe1ab003982c0dd55ab0c020a3acd4ac18d00"
+    },
+    "w07_H-N_pass0_w07_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "c350af62a00979830b69cf726893d7c2655c91aa1c2b43cd202f7b0c682b21e7"
+    },
+    "w07_H-N_pass0_w07_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "8f89b0c443ab6bae5e5fed58e5d8fcb4abe06e5271e22348c8bd8398ee3e3ed6"
+    },
+    "w07_H-N_pass0_w07_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "a1e4c29282ac3bed2e732496a861b0dd112275889d370375b38e23d4344c48d4"
+    },
+    "w07_H-N_pass0_w07_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "3445e769c2307b232b35cad40e4510b067ce5d4d7844e9a6356e666b27b0938b"
+    },
+    "w07_H-N_pass1_w07_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "fdc3af2f41298f2b486db9f50046b2c9f7ee46f6e4a3b7ef69fc352ffd4a6842"
+    },
+    "w07_H-N_pass1_w07_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "b5242ec4deea37f8668e5444be8f134b128f5ea3156d3486a1f4b57588b123ce"
+    },
+    "w08_H-T_pass0_w08_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "75bb230e7f0a4adebdea80a9307176c64fc530a04e1667352e652012bf40095f"
+    },
+    "w08_H-T_pass0_w08_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "2f63b2cf4a8ec6ad34409a6d66fafe3cb65dcd1b7725a33071555dc8c89d75ed"
+    },
+    "w08_H-T_pass0_w08_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "758620f3e157c3bdde3b2b4b08842325634d9d2da953c4b91b3c9fbf07f67ecc"
+    },
+    "w08_H-T_pass0_w08_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "6dde2e964f58178d5c93d0cc3664b57864c869d85aa073b1eee04b00e8fb995f"
+    },
+    "w08_H-T_pass0_w08_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "8de90e4fc49c74b8fb74a5286a88f2cf5ce69fd20dfd556d13c21711f66b9476"
+    },
+    "w08_H-T_pass0_w08_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "f496b52f9bf2bde58a936e3feb42455ff7da5cd2035c5cb945c1f4de594400da"
+    },
+    "w08_H-T_pass0_w08_g0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "b0139a5f48963b983094e31f9d82a3be80421a44064065107ddce9ca265a0b59"
+    },
+    "w08_H-T_pass1_w08_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "94e5b99daf31d83ec2389a14ad9c2aba5869823ba0b7e558448023e03ea51b7c"
+    },
+    "w08_H-T_pass1_w08_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "b7b5d799de2d2c4e9c6348cc5f1e1f287691dd72e2f17a0d2e74cb7ac25e52f2"
+    },
+    "w08_H-T_pass1_w08_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "28b887837c470b0a7009c962f2bee6ec96b8d26227f8fff84cd9ab23071b9b63"
+    },
+    "w08_H-N_pass0_w08_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "e665cfa6b09650dbe22ad5d19252e76be02299e9efcafcef9abc7ad4a1a8a3a6"
+    },
+    "w08_H-N_pass0_w08_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "85576ff5570e31cf2bb7b0a7fea761782b4f317147c5b91364f2f01ad861912d"
+    },
+    "w08_H-N_pass0_w08_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "4c8036a45c8ea1e64b9013be4eeb563b5454dd43cc705163a45d20972169fef8"
+    },
+    "w08_H-T_pass1_w08_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "039acda9a796bcde36eecba18d5d8e0dd5448d013eda13b123b2a98ee9e54240"
+    },
+    "w08_H-N_pass0_w08_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "ead6e126358f42b97a18e426802c7fbc0b5b2bcc4bcffad76f80424780fcd95f"
+    },
+    "w08_H-N_pass1_w08_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "aa6996c8913789ce260e561d685917982336877437520c595a56db735696809f"
+    },
+    "w08_H-N_pass1_w08_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "01bf7ed6cf3189c14e4accddd597b8ecbb334ffdc5455514d21472773b7b6c9d"
+    },
+    "w09_H-T_pass0_w09_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "e1e5da5677d25ff2d4da2eca12d7b0faba7622e899cb172d7dd849e0b6aedf85"
+    },
+    "w09_H-T_pass0_w09_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "229613919dc6fa48742fc11de7796c3dea6fa6da571a0845c96cb67b79c6da29"
+    },
+    "w09_H-T_pass0_w09_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "ddf4964f42261f80e15db4ead1d0b36b49f69a7f772859bc0dd253eb11ab0396"
+    },
+    "w09_H-T_pass0_w09_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "5581fcad43ceb2505542a3cee358606cb2c5b85c8213a51df3b98bb8bbc75202"
+    },
+    "w09_H-T_pass0_w09_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "a54326a7df1a881b285081b787b60a0e2e9f12689f245afd8d17a00588511e78"
+    },
+    "w09_H-T_pass1_w09_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "f6a700082f1186d4751ff5e5f94de69358c923fefc626b907e675e8483c442aa"
+    },
+    "w09_H-T_pass1_w09_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "5895abf306d7a1506dfbbdd9bae62aad2440d514e44441803d93e47a55ad3fa9"
+    },
+    "w09_H-T_pass1_w09_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "82d3aa4b4873ad7ac3287f8bce4ac905f821a6cb5822a34f5bc92b9bc1f9c211"
+    },
+    "w09_H-T_pass1_w09_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "0da37d041a6995e304d4a9ae93dfa5aacc093653821252642fd1c3d041a2c581"
+    },
+    "w09_H-N_pass0_w09_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "7acf0c644e8d73a47ded969e5fae897796f21c82652efced9e92c2876dc0c330"
+    },
+    "w09_H-N_pass0_w09_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "ad3c0c2a71b70b0c2c04b1561f23b5ae8b4ed1364c12d6770403f2fcde8ffdf0"
+    },
+    "w09_H-N_pass0_w09_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "ced0333c68aa512bc40b5f12f95091f50d92ce493382829e91c37a1e89104b91"
+    },
+    "w09_H-N_pass1_w09_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "0896f0f76d6f74f1a73c01cc8060e95515c908902e94017bfc341a4d327810ff"
+    },
+    "w09_H-N_pass1_w09_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "13259972f82632fa591024e8fdc9fdef071f90fc43bb934c5ddc94079f6c4c47"
+    },
+    "x01_H-N_pass0_x01_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "b80d7e08db39d6cfe9dd93caa1503c9500e5f8b08c6c55fce3a62d925976e5b1"
+    },
+    "x01_H-N_pass0_x01_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "6ec4891007193064c30afb78d8a46e329cf514302f96251819ead02721ed02c9"
+    },
+    "x01_H-N_pass0_x01_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "db87c3f25681cc6e01a0a054d46fbd8fd6f2f9e9055c53892188f758e0fca14f"
+    },
+    "x01_H-N_pass0_x01_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "ccda83bebb3f1372b8e64ae64f290d53ab5b6fd4cc2febf8983b7f4af91c7afd"
+    },
+    "x01_H-N_pass1_x01_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "3a6bd1e4085e1692392d834fe26ff2cde71cefd190564c8c498fbecdcd9e6bda"
+    },
+    "x01_H-N_pass1_x01_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "2e677bdcbaa7680e4c3523b16fc10e74f103fc939a4cb941c975260da8e24007"
+    },
+    "x02_H-N_pass0_x02_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "5ef4a55cf19fb2fdc83e059cdae9ad4112b9da7e09eab0b6e1b1caa12f1942b3"
+    },
+    "x02_H-N_pass0_x02_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "618a83937e27880f6ac8f58813e2d5dd828f46000eb1aa4598df19014e73ac2e"
+    },
+    "x02_H-N_pass0_x02_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "8c1fe68e418185d6614f19b7258e391f16e779d1db1fd4a0d7b8dc3e355b8ad6"
+    },
+    "x02_H-N_pass0_x02_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "359b9fe17028a56a627a9b8c72155c5589784fb24f1decdc16e1d8c618974cb8"
+    },
+    "x02_H-N_pass1_x02_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "f01b34e0e5714a729e8588d65394dae6c7a3a5710e6c612e73ae3664c5417501"
+    },
+    "x02_H-N_pass1_x02_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "ebc0f4f78c6a19dfd3aa68c7d0e55d503e3d26f215028f7ea08ad90711ecb736"
+    },
+    "x03_H-N_pass0_x03_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "657b8ce0025b0dd0bd595ecb9fe19774422ddffcb63b327868b1eff1e5d3ce71"
+    },
+    "x03_H-N_pass0_x03_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "b15088d761ee2a3747837018265203eca7579536c76c7378e795411d20fb0859"
+    },
+    "x03_H-N_pass0_x03_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "8809ab7d4a7ea174cc911013f9c9aaa6e828ae572ebf8897725a75445b3ad232"
+    },
+    "x03_H-N_pass0_x03_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "1a935156c236d852acf846e5e9aa73ea20f8fa9b543a10cd102b5347052c04eb"
+    },
+    "x03_H-N_pass1_x03_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "21f7d79d20f81384236f0fc4fb9562390ee6a245a691835596e3cd774ab8b081"
+    },
+    "x03_H-N_pass1_x03_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "6d177ee47b33b7b8828171a200f1335306eb2b32bf53abadaddd939d454d1957"
+    },
+    "x04_H-N_pass0_x04_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "b64707f0b84e6bc3cc5d4f5d2306f4a5cbb6154bd6bb30cf0ed53cd55c853c25"
+    },
+    "x04_H-N_pass0_x04_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "6684f98b5b8be55cb55af0bf391a83148ca4f293bc19ad637dd301fa9f99ef06"
+    },
+    "x04_H-N_pass0_x04_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "642919d1ff4c013a049018d32e0138d9b4de03fc4b033c44c24c3859bad65010"
+    },
+    "x04_H-N_pass0_x04_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "a5cf9a7cb3fa2657afe5882c9e90ad0377cf3978769d7a2db0f3a2b2defcbd8a"
+    },
+    "x04_H-N_pass1_x04_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "981266ab648c01fb0d356bc2a420fbff93b439f547f8eadd6a22bae0a291ee8c"
+    },
+    "x04_H-N_pass1_x04_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "b4a030266e3f9fc7f624ef40a140d4ca80cd7ae9681a9760855014187aa903f6"
+    },
+    "x05_H-N_pass0_x05_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "e76824020f09f565b985155588e96adb09aa4e7f63c00def5c3a4cf4b682db12"
+    },
+    "x05_H-N_pass0_x05_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "35d90319f9d43bf80cc7222682363d1d08167d517dc1e42cd4edf9c5ec131e36"
+    },
+    "x05_H-N_pass0_x05_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "cd58c7a94e883b3e1674575a2c8956301c52231d23da55d0cd43fcabd16c0f82"
+    },
+    "x05_H-N_pass0_x05_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "84109b0ea894c13b215275c23baca2eb8735c10a54b097021a427a7091629adc"
+    },
+    "x05_H-N_pass1_x05_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "da73bbca671d204dd17d18f385a1deeae47b5f29484c852f2c021ef308cd9274"
+    },
+    "x05_H-N_pass1_x05_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "ec7e7db2909fcfd56e4efdcb542467cead245dcb63cea60c52379bd3b85e1fb4"
+    },
+    "x06_H-N_pass0_x06_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "f66d8c4d8bf0131e48ffb3ebbfdc0b8ff4e4cecbd8dbd56bb7e37150174ba2fc"
+    },
+    "x06_H-N_pass0_x06_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "5e3ed5c4cf1b224605e3f27c1ecbc686c5a9fdf16d57e3b3e2b2e6bafb62ffbc"
+    },
+    "x06_H-N_pass0_x06_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "aeba2e46a5c9fa2c10655a396db955c631025c3648862a2e31337d757bb408e4"
+    },
+    "x06_H-N_pass0_x06_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "ec2ba11e332591d1595c58f00f91bcf0a020c75b8bf7fd1d1587d23f88c2084a"
+    },
+    "x06_H-N_pass1_x06_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "d4731882a92a284dea427196bc92b98193cf8c0e8c01ef58ef9372a62f81bb19"
+    },
+    "x06_H-N_pass1_x06_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "c771ef307b893532b6fa60a142fa94bed7fc73d710036db05d6358aa2435b1d6"
+    },
+    "x07_H-N_pass0_x07_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "8f4c61e22c1b3c3de3e66ec45a975608bb6417e18dad5f8486f95c31d31322dd"
+    },
+    "x07_H-N_pass0_x07_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "a59ba031cd4af21aa05a8c5c237f2e2d41d55cb3eebbb716a01dab572d3b8cd1"
+    },
+    "x07_H-N_pass0_x07_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "67bc50166c2b99c54fff7ef791d4ae9b50f3107f86f93507997d1e14e7cd0cd7"
+    },
+    "x07_H-N_pass0_x07_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "495aa6d8a4fe2c542f51e5a0e13facff5439590dfedb64930a3d7a89a066321e"
+    },
+    "x07_H-N_pass1_x07_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "1f21cc24e620e43b1c9327261b52bec18ccda17bb04ece1e989608b92daa5ec1"
+    },
+    "x07_H-N_pass1_x07_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "2f0542359f44ca6e028079cee8f32a1460670d9493c5d82f95cda361ff50594a"
+    },
+    "x08_H-N_pass0_x08_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "c900d0cdeb7cc6abbe3491eb9cbb1e9fdb8520bf3e5b47338d95f6c077f38e01"
+    },
+    "x08_H-N_pass0_x08_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "eb853ce480348781cf518d69f6a360d8b0d7a7d09fb9b26c50a9a13871c744e1"
+    },
+    "x08_H-N_pass0_x08_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "cec8e5e9046c42244278001e12d36fa4c327afb8a46ae56722c02ae086b9dc58"
+    },
+    "x08_H-N_pass0_x08_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "2974b840feb6de0caa485693cb5e1ac126ad103f1c72ced2180827be99380ef4"
+    },
+    "x08_H-N_pass1_x08_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "a58ede08804604ccfda866c81f6491fe0da76076f1fa0428525742080e8849c2"
+    },
+    "x08_H-N_pass1_x08_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "0c00d49a75bebfde65666da2041b1b0daaad31108b03e154fa719efcf9b88493"
+    },
+    "x09_H-N_pass0_x09_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "f2212063a3a2f21cd34131f61e5abb75e66a501ff8460efc16a11a779f57be13"
+    },
+    "x09_H-N_pass0_x09_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "2e1c7a74d9dab0ba11f23d572220c2f24a442ffb2e94eda4be90953065466ef8"
+    },
+    "x09_H-N_pass0_x09_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "d7cb7db88595dceb3cbd6158d292ea10f35ffb411417ab8f1dde40aaa58a5b74"
+    },
+    "x09_H-N_pass0_x09_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "14cbac5c2ce5952f0f4f92dd68d4a0cef1b9146971f4fb44802ba3455aec7570"
+    },
+    "x09_H-N_pass1_x09_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "019776e050ea1a9a1e3f53fab731834ed225ad3aca09588e8f9fe31f84cadb18"
+    },
+    "x09_H-N_pass1_x09_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "2c8c5862e8a9dd8773a83da1b1a8feb4a6708d03b5263eb89240fcebb14316e1"
+    },
+    "x10_H-N_pass0_x10_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "b539098624b06cd83d7e0dbc2c6e4cb31d764af95e5b9953ba6e8b940da138d3"
+    },
+    "x10_H-N_pass0_x10_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "ae60b5f3184d8fce07c2dfbca37fe9ec986e8bec5826d029bab6bf0d17d905e3"
+    },
+    "x10_H-N_pass0_x10_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "84b2b9544ee4ed4661a5cabeb8655ce7c6aa93e9100e4857384ae01e913b072d"
+    },
+    "x10_H-N_pass1_x10_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "645bbd68ec477f8bec016375ceff042dc1d3c923a9a588cc0974f8a597113977"
+    },
+    "x10_H-N_pass1_x10_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "60672c15eaa76bd9593d6f55f66a0e184cb58ee8a2a5960a7d5f4b36ed84f063"
+    },
+    "x11_H-N_pass0_x11_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "7d01f8ca6961a461d8b08c1e339b28d9b4780872659ac311449838613e7c22af"
+    },
+    "x11_H-N_pass0_x11_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "bcb938cb82422e07ccdc8666d45945b12f4816ed50f01dc98c73379111818656"
+    },
+    "x11_H-N_pass0_x11_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "9a9c58661e06d388b8f4118004f6eb3e56699400fc5ca9750ab38ebc755f9570"
+    },
+    "x11_H-N_pass0_x11_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "e325f2954c8759221c19944644f0e712cb8938cdbb522c3dd9019275fb378ac4"
+    },
+    "x11_H-N_pass1_x11_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "487a90366724e2c0ba08a8624e60118ae7848c0e8ff63543ca3c2eb9b97fd5c9"
+    },
+    "x11_H-N_pass1_x11_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "face6e9ec4467f9fbd2a0065809edd8485d2e2456eb6819f581f095051922ccf"
+    },
+    "x12_H-N_pass0_x12_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "5dbc688ec8b6c88a42541f6ae51426cb23403d3dbb17f1cb777b83008b1fbaff"
+    },
+    "x12_H-N_pass0_x12_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "3409ab532b0ff66a5a34de313dac123c27451201690f0f473ec1d36ff5a8c547"
+    },
+    "x12_H-N_pass0_x12_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "26e158e9abe52c25c1ef6089f04c5e4e06034984c45dafb98c7c3e140ce092f0"
+    },
+    "x12_H-N_pass0_x12_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "5efc597ace9a489ed6b89d1b7052bc73c944dcee398adb83c0f76b013ec1cfe3"
+    },
+    "x12_H-N_pass1_x12_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "f8fa07c22132c47b81fa343afe144832cc8ed4b3221f567e46e2ffff377e54df"
+    },
+    "x12_H-N_pass1_x12_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "13433e1b2e2d288af7d187dfe2fd3b34abfe426d03d7068e71fbaa17c7499a72"
+    },
+    "x13_H-N_pass0_x13_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "1beac0bf9c57fdda0af3abf3cebdca4589240fe40aa1c12935e9b4dea4bcb4b6"
+    },
+    "x13_H-N_pass0_x13_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "ab37ad1deedd35192763f917e34c9d8f82d3f030521bdb0e6ae13328844e2afc"
+    },
+    "x13_H-N_pass0_x13_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "5502862169cef0dfd8f2e981947fbe1a214922fc4400c855570662823b582664"
+    },
+    "x13_H-N_pass0_x13_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "04c9707bac685d6b4b7ac5b20a596c379692eb3e4342ceca7286edc7cc72aaae"
+    },
+    "x13_H-N_pass1_x13_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "76497be2523b7353bd01596c180b38a7fcb0528c0420df1cc963eed7530f90b6"
+    },
+    "x13_H-N_pass1_x13_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "cbfbedf47f7179060a516543df301a7c2f2e0d350dcdae16763a9e760be5609e"
+    },
+    "x14_H-N_pass0_x14_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "9cdc9e218e380a039202b1a95497614d55b9e57538f8d8412ad1106ef0a259c2"
+    },
+    "x14_H-N_pass0_x14_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "7ce9e6e408e7bec2a8c50e1ac5e30191646cfc9c6007d3cfa4c37b69182cc8e3"
+    },
+    "x14_H-N_pass0_x14_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "472014bd101816b1bb6a8bb8b0cd710d3b2b7f818790280d56a05555ccc7fc63"
+    },
+    "x14_H-N_pass0_x14_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "8f805ede79e596bd45fb2a04e4ab66d65c35065b2b918d974946a2fe0d830bba"
+    },
+    "x14_H-N_pass1_x14_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "47053482bb1c6a705d906c0b3dd8b562fd070d8ef59740ce9e2476ea6589c60e"
+    },
+    "x14_H-N_pass1_x14_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "9fa73b93707492bafb18496c8ecb683b3adccf52b0cc1a935a5e1df64c0a5bfc"
+    },
+    "x15_H-N_pass0_x15_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "01d74b26d884b1e7c1c2741fb0911c17abf9244e2e43126e294663755a7d29a4"
+    },
+    "x15_H-N_pass0_x15_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "9d0775bd596bb4d4d169350e16c9d589463ab0ef0d272307ede0f71833dd2139"
+    },
+    "x15_H-N_pass0_x15_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "7761e0fa98d20963f26bb221bc6b09bd658a4937e6bbd599bbb4f8b41d788f34"
+    },
+    "x15_H-N_pass1_x15_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "5a88869cf3fa3c61121f9cfac89dc813a6575a171af600006bc25039e7ac967d"
+    },
+    "x15_H-N_pass1_x15_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "221d4146a9e82ef93d9248985477d30dd50a7359dea53ceedda5906ff223ba90"
+    },
+    "x16_H-N_pass0_x16_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "36b3123762d23de688c7edd3f0d28c78a379edd6f26a54faac40b8f2046eb78e"
+    },
+    "x16_H-N_pass0_x16_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "5755e1879b9880cbc3d1dbc616ad55501b3f5d1596ad854654cb9443561ed8d9"
+    },
+    "x16_H-N_pass0_x16_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "e956045a1c0aee3fb8b5971d64f09730af764aeda8bd6f64b3e13bff6ed1ed11"
+    },
+    "x16_H-N_pass0_x16_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "901cb58e63f5bbc11184065488cd0a1ac5dde7e461d67546710b80c86e254f52"
+    },
+    "x16_H-N_pass1_x16_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "7a5a38f0fc22045290fc4193362c9ec93d615c177dc3ebe3c3cf9847f85fad44"
+    },
+    "x16_H-N_pass1_x16_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "d43a5eaca41af6bc98da8484e72db5d622cd9ae85d1b4ab704085aeb80e57d15"
+    },
+    "x17_H-N_pass0_x17_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "7115f67787fd08d3c9e3b773faf4c53a7518620b6b7508d16c187dd03d1089ed"
+    },
+    "x17_H-N_pass0_x17_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "8d0f3be0c42d7e65130d2f0b37c5cff7afd74b7e451b575059ad23ce5c89789b"
+    },
+    "x17_H-N_pass0_x17_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "597610890a8fcf517d6e20bd25dc21de1ccc6654c7b26a1468d70cdeb2f380ac"
+    },
+    "x17_H-N_pass0_x17_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "5bc03c090b0555be1a09628ddf320a4006f766873228a6e87cefd297dc3c1175"
+    },
+    "x17_H-N_pass1_x17_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "52d19acd22e334f64687faabf4f33d3e3cfebed1c0ea170a94d853c894e1c70e"
+    },
+    "x17_H-N_pass1_x17_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "3d6d28ef38f3d8503359827b652d4b4fe1f8a5687b5e25734d7bfc1b8e6eb2ec"
+    },
+    "x18_H-N_pass0_x18_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "a3461df5999a6511c99920a1220c63e3094f254c2ee0c718391c3bdcbaef5903"
+    },
+    "x18_H-N_pass0_x18_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "0ef0896302ac46fae220afbbacdefc27ff58ffbff25acfcd17952ec69d2afea0"
+    },
+    "x18_H-N_pass0_x18_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "646d97b764579913ceaec7d3f91fdd1b280e788ba965bbb7a33bc7dd44476f80"
+    },
+    "x18_H-N_pass0_x18_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "56db04a4319d6704dae7a67eafbd7d9f825cb2d933a7d920a0cb4ad3212eddd2"
+    },
+    "x18_H-N_pass1_x18_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "ddd913a7d8e94cfed77f5c88784013da3cd0bb26bd8f7c03485cb5dfb94ed16b"
+    },
+    "x18_H-N_pass1_x18_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "2cd587e0b9a1af6f51ab089e28d5fc3e28634a60dc17b1d8424d94dd05dec815"
+    },
+    "x19_H-N_pass0_x19_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "9805185d28af8efdeb52dd956c896b6305277a44bdcced01cf934a37990d636d"
+    },
+    "x19_H-N_pass0_x19_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "e987e8fafbed96e1e91078cf8ed74aefcaab092bcc388f256b66fdd07df4ca14"
+    },
+    "x19_H-N_pass0_x19_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "1cb172ced63abc41150542992d7bd2f26e62795313bea5b1e8edcf6d152676e1"
+    },
+    "x19_H-N_pass0_x19_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "5fb64e80b8bb00e0b35e914a533dcfbf3490d6188ab9c7c44a7bf73a33609727"
+    },
+    "x19_H-N_pass1_x19_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "6f3f22ff4a33d009938256b8fe5b865a5f61e2b31cad77c2e138c68550b7c917"
+    },
+    "x19_H-N_pass1_x19_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "75712abc3cf9c23ba111c0bfa85d4e6528f6de54398a16804e9ed939d049fc8a"
+    },
+    "x20_H-N_pass0_x20_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "6bdf28a845e7f6f27c8647928dc7670123047d8806f8e4de260fb1a02c86c443"
+    },
+    "x20_H-N_pass0_x20_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "ee65b39066929cf750e65f4951454652e0e580b5a4cba0670080ecbddac46778"
+    },
+    "x20_H-N_pass0_x20_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "d8db4a3399bcdc08effe1f2a7cc5ee2278fce0521a980e88aaa0b766ac6ea6ae"
+    },
+    "x20_H-N_pass1_x20_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "ef5bc2629f8f48907d374831746a5005b10ec8cf71bdb8c8f7bfa14e767cf62a"
+    },
+    "x20_H-N_pass1_x20_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "13354c8e614156213296bcfc005b4d71c5e28d47b3e5e00dc6106677249c5192"
+    },
+    "x21_H-N_pass0_x21_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "c62700c2689fd0314c9e07601c22bb32b39ce2766b4c1742a93f6ca9e8df83a4"
+    },
+    "x21_H-N_pass0_x21_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "61c3ec6318f785a42494f068567b0c00ccc6a61866c86fc922b53d0ef1a47e8a"
+    },
+    "x21_H-N_pass0_x21_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "f5da44ae6e3130982bb385f29b15641c8055bf5d9f716aef78e67ed2215799b6"
+    },
+    "x21_H-N_pass0_x21_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "74bdee38e153e7c5c77bf425a30b1c54760474c3ae4349b5b1d13d43b2003fbf"
+    },
+    "x21_H-N_pass1_x21_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "b79c9894988e5d6eed81bc7712f6bb67ef645dcc31f189268b524d4e049b8ff8"
+    },
+    "x21_H-N_pass1_x21_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "c78e82eb53455192fd9ce465835e580b5de7942b43d1d97a21edc1dbf65bfffd"
+    },
+    "x22_H-N_pass0_x22_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "9a13eceabf1d6d05cc3677f9534c7261451a6a1717647bc4e15c375e25ef9c53"
+    },
+    "x22_H-N_pass0_x22_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "05e9080a9f99cacec5d668dd065238a8bc507c2fba72a3201ee708498f3a7642"
+    },
+    "x22_H-N_pass0_x22_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "8a24d0fb013f4b4e6510cc447da3b67831efac13ae8050c58ececb1e76e3aa4a"
+    },
+    "x22_H-N_pass0_x22_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "2d1a427391bd89813922150d20079376d956dfc59e788bb403d69726950456e7"
+    },
+    "x22_H-N_pass1_x22_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "324bbd30ae7b6a94a366c81ec869a0285c78a8916b772f2f86a76c10f23b2b0e"
+    },
+    "x22_H-N_pass1_x22_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "a982e4a6c77e8b006405a57d8fd6523a65ec9a7b2c16a9f1ebb3930d1b11f8cd"
+    },
+    "x23_H-N_pass0_x23_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "426921e8528b5cb3fc42d28f30392e3867c85487f5d8a80c830dffd0f3bf0dbc"
+    },
+    "x23_H-N_pass0_x23_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "4f5e1701d8aac732260428ffdbfc068f2f58becde77fc122801d780fe4784da8"
+    },
+    "x23_H-N_pass0_x23_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "cc85e11db1761e9a296af1dd84ef9a747c0a0633726b70c3e9ed0e2c3bceaa03"
+    },
+    "x23_H-N_pass1_x23_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "38217292a0c8944552a2fcbd030474f6bd7658f767df84feff62318b4e55ea01"
+    },
+    "x23_H-N_pass1_x23_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "09430db4c6d62d799d43fdab049d2986fe5a18c38ad1a63ea7598131c29a9108"
+    },
+    "x24_H-N_pass0_x24_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "ef456db1a306f2c1323b9a0f58fd074b1b9bcf3ad7dda8cd01aba5092119daef"
+    },
+    "x24_H-N_pass0_x24_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "f821a97690045951aaa6242c6f9ca09e4ce5bfc72a6d3090ac9e9068eb59d571"
+    },
+    "x24_H-N_pass0_x24_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "1b159e36a8439c55d20b1091ac806f2d560d621661b483911e3f41a712c75bb0"
+    },
+    "x24_H-N_pass0_x24_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "25187395c286ac1730dc06264a1b271c3d1e2c321113cf9345c80f73cc9538a3"
+    },
+    "x24_H-N_pass1_x24_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "1eec13d435730d0e378fbeeadfc37532b6476744fd69cbabb4a3464140a66564"
+    },
+    "x24_H-N_pass1_x24_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "f00a50a051dd0be219308ba7a01b91297d444f8814e7e76f933ee4ef8ead48bb"
+    },
+    "x25_H-N_pass0_x25_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "fc89da610dcdd03e85935baa60d20fa5120ff79b6f103c617c7f4f0c96da05bd"
+    },
+    "x25_H-N_pass0_x25_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "dc375ff1bbe2e5b0ad5881049d1883d706f7c6e6a42f92cf2f52128a3891beeb"
+    },
+    "x25_H-N_pass0_x25_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "b615a4e06853b3dba4fbfe4936468c4da897c28f0939a4f39681cf5483b463e7"
+    },
+    "x25_H-N_pass0_x25_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "f5c4734629f699cbbd40ee0cb66aa30354caf129dda612209ddacc919ecf18ee"
+    },
+    "x25_H-N_pass1_x25_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "e9064a0523d260916e396c71b442d54f0fcfff188313257c891f2895823d7ab1"
+    },
+    "x25_H-N_pass1_x25_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "92795d35e08d4d911108b9ac8778fadd2b93744d8706642b3c8efc1da7516fd8"
+    },
+    "x26_H-N_pass0_x26_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "03fece4365d1d89391a794fb3650daf6956a3b92d7d980cfa8b7b26bdd7057fb"
+    },
+    "x26_H-N_pass0_x26_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "4750324a63c01060a3075f2a6e42a4d76a6783e3a7803c9d9e465700842d8eae"
+    },
+    "x26_H-N_pass0_x26_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "84f5aeabae54f7fcb47d3d80f3f064f9f7b4eb7eaa3d76d3c897f33d885bbfd5"
+    },
+    "x26_H-N_pass0_x26_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "54ca8a79cdf8a7075ee2b6f33de4898a64046612ae93dffb9fdc9d56152d7d26"
+    },
+    "x26_H-N_pass1_x26_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "2c75f878d5d267919dde6abe72d20f591305e7e27da3b7dd2cbc77395f0a7997"
+    },
+    "x26_H-N_pass1_x26_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "e140356f1abf012f98768fdea2de29f6ee2289045e7c27e285489a907ff4fbf6"
+    },
+    "x27_H-N_pass0_x27_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "f05f614395808080fa4819d691cbbb1f8142ca85329f9c69d741301209225835"
+    },
+    "x27_H-N_pass0_x27_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "e3fe485102a5dbe7e2fccbec5fcc07a9b2fd8431e841c7babb935aea401e599b"
+    },
+    "x27_H-N_pass0_x27_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "57f290c0418de884584ec620bb51019766367ba378e353d85cc4da19c9c7538e"
+    },
+    "x27_H-N_pass0_x27_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "5a7f9c4821d414b43b75bb5d836f21ffc0a260dcbf06cd9c1d548c8f18b5af69"
+    },
+    "x27_H-N_pass1_x27_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "e3fa99135e45f1f665bbe5e7f3ee594960f4e5b6a262b86290e141c46ab08ed1"
+    },
+    "x27_H-N_pass1_x27_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "8a910d2a167ea98799b0d99b763e4f20a15497b2568b2dca01166e2118d4646a"
+    },
+    "x28_H-N_pass0_x28_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "9723b2cb0a6560cc89adde4d4b596b9fbaf058d91d6f9ab2c50cccae638d9f36"
+    },
+    "x28_H-N_pass0_x28_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "f30cec6afe42aed657777d47a6ec9b7293a8b5163ec43e5748896531e5211dc3"
+    },
+    "x28_H-N_pass0_x28_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "35218f747f7159ddd534a6d7b4fc0d565c446d0fe611eea5b0fbb885f1127378"
+    },
+    "x28_H-N_pass0_x28_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "4d9e5e53491f118f664a3f6757f7d6ba7f817f5c1cb15ca8a2149615a3f490a2"
+    },
+    "x28_H-N_pass1_x28_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "af6d2a81332a8f8f0729b155958d658f56e7b2afea9c3724e50ccf3d98c64678"
+    },
+    "x28_H-N_pass1_x28_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "9671b13997d41519a1ceec7f77140eabe9d67db8ca3c3759b6a2637a575033b6"
+    },
+    "x29_H-N_pass0_x29_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "a7498697e5c93f204e27cb36f56e274d6c16950bc028cd07a5cb2eb652b0cf85"
+    },
+    "x29_H-N_pass0_x29_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "d6d5f0536321f4da2e1353cde266f6e8ee84869cb6f982dee6fad03a943719c6"
+    },
+    "x29_H-N_pass0_x29_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "dda168925028c5a6ffdd6c2cb7bfd51e6bec36821d9dbf60bbe560b5c22adfaf"
+    },
+    "x29_H-N_pass0_x29_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "22f8ff132cda60f1319f86b673aa6b0834c486da4b2d3aef4330b4cdcc24cfba"
+    },
+    "x29_H-N_pass1_x29_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "771fd7a00eec07fd6b4f0dd5bbfeabb7c6ead60c5995f1ce8cf98591a1a7f286"
+    },
+    "x29_H-N_pass1_x29_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "1bf960aa73a1196bdb42671319a527a2dd4878711e04c7dad8dd6ff01031bb94"
+    },
+    "x30_H-N_pass0_x30_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "f6d87e12c7b425bcc619c16288f3121da87ff0ec2d8d39bffddd019b878bfd7e"
+    },
+    "x30_H-N_pass0_x30_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "15069b38cb781b1fdd897553da1d19d62ab808fd9de0e41b9a59b5a48cd62212"
+    },
+    "x30_H-N_pass0_x30_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "15e3f47069f9a7e5d23724c1d8328b31540a3f46ab6e1a1ea5e35a7877d40ebf"
+    },
+    "x30_H-N_pass0_x30_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "c70a6068d4e07264df072e3381d21646bb1afe071e166bca00f91d6efb35595d"
+    },
+    "x30_H-N_pass1_x30_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "dce946c51bc4c643d424d6e694ec0ff184a56695a1940f2702325fefcbab1dd8"
+    },
+    "x30_H-N_pass1_x30_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "b645fda27e6b6c5e851cadf1e70fcf4bd5efa0f30da660c12607c0ae48151a7f"
+    },
+    "x31_H-N_pass0_x31_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "099748dfdd2461aeec38c6c9824af771f95e674648d856aac6b5dfe36e84ec24"
+    },
+    "x31_H-N_pass0_x31_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "8e7d54135d6a26d308d0f70e0f45810576afa639f5fdb01121b075e5678e3471"
+    },
+    "x31_H-N_pass0_x31_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "30fa2a8ce72f7e7faf260cb5d425b08b330080ad89a98ff269f1a5f55d26cefe"
+    },
+    "x31_H-N_pass0_x31_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "ac1274b2a264e27ade20797268936d1b0a0e49f78e512b8f0a0b53e1f18856fe"
+    },
+    "x31_H-N_pass1_x31_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "774c8640db097abacafb026645b152f23feec8ea4bbe62f3c50ff690a04a4977"
+    },
+    "x31_H-N_pass1_x31_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "94ab80cdb59508c8564b90c2efcec54ce9e0995f73204783182230998019eea3"
+    },
+    "x32_H-N_pass0_x32_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "d9f2ffb374d89d48445288e1208d93b6e8741cd4d041f4ec15691d7a1210ccef"
+    },
+    "x32_H-N_pass0_x32_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "c486e934ea41c93bd3e2ee8c82620110422aa968ac402db8d75eabb13bac313b"
+    },
+    "x32_H-N_pass0_x32_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "02207924c8db17ae0a8e3aef3a233d7acb70916b6c682c460e2a99a787076348"
+    },
+    "x32_H-N_pass1_x32_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "eccd876d4aa8a0968e1fb635bd8bae9dd41f56efe636079257f19a78eb043ba4"
+    },
+    "x32_H-N_pass1_x32_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "bcac091f58572dccb6fffc3a248b66dcf6ed28b914f101ad6ce6135872f1892d"
+    },
+    "teacher_eval__teacher_H-T": {
+      "ok": true,
+      "sha256": "7e323314916b9cf267995ba8fbd21213d7d54c2c4f767a1b46582476b9a4df62"
+    },
+    "teacher_eval__teacher_H-N": {
+      "ok": true,
+      "sha256": "6f6c93ef959907155db41b659ae10cfd8b0c1e205522795b1f185f441546f637"
+    }
+  },
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "checkpoints_fetched": [],
+  "required_products_secured": {
+    "ok": true,
+    "why": "413 finished item(s) secured off-pod; everything is on the network volume"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 0,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 1174.8,
+    "actual_usd": 21.3422,
+    "authorized_usd": 38.3,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-30T21:02:56+00:00"
+}
