@@ -4,19 +4,19 @@
  "name": "aad-h1pa",
  "provider": "RunPod network volume",
  "data_center_id": "EUR-IS-2",
- "size_gb": 30,
+ "size_gb": 55,
  "created_utc": "2026-10-24T19:01:25Z",
  "provider_reported": {
-  "size": 30,
+  "size": 55,
   "dataCenterId": "EUR-IS-2",
-  "read": "account_resources() right after the create, known=True"
+  "read": "runpodctl network-volume get am5m373kuq right after the expansion, 2026-10-30T21:18Z"
  },
  "rate_usd_per_gb_month": 0.07,
  "_rate": "h1pa.json :: storage.rate_usd_per_gb_month",
- "reserved_usd": 4.2,
- "_reserved": "30 GB x $0.07 x 2 months, booked inside the H1-PA PA2v/PA2 $50 envelope from creation (h1pa_governance.spent) until this record states actual_usd",
+ "reserved_usd": 7.7,
+ "_reserved": "30 GB x $0.07 x 2 months ($4.20), booked inside the H1-PA PA2v/PA2 $50 envelope from creation (h1pa_governance.spent), plus the 2026-10-30 expansion's 25 GB x $0.07 x 2 months ($3.50), booked inside Research A's phase envelope (its application's storage line, $4.90), until this record states actual_usd",
  "datacenter_choice": "live query 2026-10-24T19:00Z: storage support and L40S stock Low in EU-NL-1, EUR-IS-2, US-MO-1, US-NC-1 (OC-AU-1 and US-TX-4 have L40S but no network volumes; US-IL-1 and US-TX-3 no L40S stock); EUR-IS-2 chosen, no measurement distinguishes the four; the volume locks every PA2v/PA2 session to EUR-IS-2 and the L40S",
- "consumer": "H1-PA PA2v and PA2: the durable root <mount>/h1pa -- the four new checkpoints, a training's save points while it runs, the evaluation progress and evidence",
+ "consumer": "H1-PA PA2v and PA2: the durable root <mount>/h1pa -- the four new checkpoints, a training's save points while it runs, the evaluation progress and evidence; since 2026-10-29 also Research A (A-D4): <mount>/teacher_modes -- the teacher sessions' sealed shards, the common initialization, the teacher's evaluation, the recovery units",
  "retention": "all four checkpoints are kept until BOTH the H1-PA independent review and the mixed-calibration study's analysis and review are complete (declared_future_use); then a consumer audit and a migration or retirement proposal go to the maintainer; no AGENTS.md 2.5 automatic retirement before then",
  "retire_by": "2026-12-24 at the end of the reservation, or by the maintainer's lifecycle decision; keeping it past the reservation is booked here first",
  "cost_to_date": {
@@ -120,5 +120,18 @@
   "written_by": "the mixed-calibration study's MC2 (runs/mixr_20261026_140539); the driver's volume probe before MC2 counted 9,943,482,064 bytes on the mount, so about 14.7 GB are held now, inside the provider's 30 GB",
   "retention": "kept until the mixed-calibration study's analysis and independent review are complete (grant :: retention); then a consumer audit and a retirement or migration proposal go to the maintainer with the four H1-PA checkpoints",
   "money": "the volume's cost stays booked here (reservation to 2026-12-24); MC2 added no storage charge of its own"
- }
+ },
+ "expansions": [
+  {
+   "utc": "2026-10-30T21:18:14Z",
+   "from_gb": 30,
+   "to_gb": 55,
+   "command": "runpodctl network-volume update am5m373kuq --size 55",
+   "authorized_by": "the maintainer's Research A phase approval (2026-10-29): expand am5m373kuq in place before recovery, 55 GB for one GPU, 65 for two; no historical checkpoint deleted",
+   "why_55": "recovery on ONE L40S: the live 2-GPU L40S query returned no stock (secure cloud, any datacenter and EUR-IS-2) at 2026-10-30T21:15Z; one GPU in EUR-IS-2 Low",
+   "added_reserved_usd": 3.5,
+   "booked_in": "Research A phase envelope (logs/budget/applications/research_a_2026-10-29/forecast.json :: hard_caps_usd.storage)",
+   "consumer": "Research A recovery: the six units' save points, checkpoints and evaluations under <mount>/teacher_modes, beside the teacher session's shards and the common initialization"
+  }
+ ]
 }

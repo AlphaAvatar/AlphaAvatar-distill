@@ -14885,3 +14885,14 @@ on a paid pod.
   beyond the 2 points; so H-T-C, a seeded whole-task prefix of I's H-T documents at H-N-S's count (154 sequences,
   231 steps), against H-N-S. LENGTH_CENSORED (descriptive) in five primary cells. Before the fix: I 2,057, H-T-S
   614, H-N-S 161 (kept in scratch for the audit, never used).
+- **Recovery on ONE L40S; am5m373kuq expanded to 55 GB (2026-10-30T21:18Z, as approved).** The live query for 2 x L40S
+  (secure cloud, any datacenter and EUR-IS-2) returned no stock at 21:15Z; one L40S in EUR-IS-2 "Low" at $1.09/h.
+  So one GPU and 55 GB (no historical checkpoint deleted). The expansion's 25 GB x $0.07 x 2 months ($3.50) is booked
+  in the volume's storage record (`reserved_usd` 7.70, `expansions`), inside the phase application's storage line
+  ($4.90); the phase envelope's run list does not carry storage, so the phase's cumulative is its runs plus $3.50.
+- **Recovery priced from measurement** (`a_recovery_20261030_211948`): the six units' optimizer steps from the admission record (887 /
+  231 / 231 per seed), the check's measured L40S step (6.214 s H-T, 5.6648 s H-N), 10 min fixed per unit, and the
+  student evaluation's 3,917.1 s per unit (all of eval-set-1, L40S, the forecast's measured row) at the forecast's
+  scenario factors: expected (step 1.0, evaluation 0.75) 10.48 h of work, conservative (1.25, 1.0) 13.26 h = 796 min.
+  The planner at 796 min: all-in $19.36 over 1,050 min; issued expected $12.10, hard cap $20.00 (recovery envelope
+  $58.97; phase spent $30.85 + $3.50 storage).
