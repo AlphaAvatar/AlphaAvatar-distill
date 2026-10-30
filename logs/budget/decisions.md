@@ -14896,3 +14896,17 @@ on a paid pod.
   scenario factors: expected (step 1.0, evaluation 0.75) 10.48 h of work, conservative (1.25, 1.0) 13.26 h = 796 min.
   The planner at 796 min: all-in $19.36 over 1,050 min; issued expected $12.10, hard cap $20.00 (recovery envelope
   $58.97; phase spent $30.85 + $3.50 storage).
+- **Teacher evaluation, both modes (eval-set-1, scorer v2, nucleus_v1, 40,960; secured archives re-hashed).** Static
+  fluid formal core (714 items): thinking 573 (80.3%), non-thinking 442 (61.9%). Per axis, thinking / non-thinking:
+  task-contained deduction 189/189 and 161/189, inductive rule discovery 130/142 and 90/142, compositional
+  generalization 129/144 and 103/144, abstract/analogical 63/95 and 39/95, interactive adaptation 62/144 and
+  49/144. No turn reached the context limit in either mode; the right-censored turns are degeneration-check stops
+  (thinking 27 of 1,272 fluid turns, non-thinking 19 of 1,592). Static generated tokens: thinking median 1,998,
+  p90 8,082, max 17,407, 57 of 576 over 8,192 (15 of them correct); non-thinking median 422, p90 1,019, max 3,584.
+- **A scorer limitation for the maintainer (eval-set-1 is frozen; nothing changed).** The strict answer rule
+  (`aadistill.evaluation.strict_answer`) reads `\boxed{}` or a line starting with "Final Answer:"/"Answer:" after
+  markup characters only; the non-thinking teacher writes "### ✅ Final Answer:" (63 of its 100 GSM8K outputs), so
+  55 of 100 score `no_final_answer` and GSM8K reads 38% (thinking 88%). A post-hoc diagnostic that admits any
+  non-word prefix finds 38 of those 55 equal to gold -- beside the formal number, never in it. The S/C decision
+  (static fluid, boxed answers: non-thinking 7 `unusable` of 714) is unaffected; the supporting math units and any
+  non-thinking student that imitates this heading are. Changing the rule is a new scorer identity: the maintainer's.
