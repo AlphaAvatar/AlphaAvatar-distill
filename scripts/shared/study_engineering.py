@@ -667,10 +667,15 @@ def closeout(study: Study, launch: Launch, run_id: str, scr: Path, *, root: Path
     disk = disk_gb * DISK_USD_PER_GB_MONTH * minutes / (60 * 24 * 30.4375)
     created = bool(sess.get("provider_resource_created"))
     passed = bool(terminal == "ALL_DONE" and rederived and rederived["passed"] and rederived["agrees_with_the_pod"])
+    # a kind that secures its products on every poll (no evidence archive, no verdict) is complete when
+    # the launcher recorded them secured off-pod and the driver finished
+    products = sess.get("required_products_secured") if launch.verdict is None and launch.products_secured else None
+    secured = bool(products and products.get("ok") is True and terminal == "ALL_DONE")
     out = {"schema": f"{study.wire_schema.rsplit('/', 1)[0]}_outcome/v1", "run_id": run_id, "study": study.key,
            "recorded_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-           "status": "COMPLETE" if evidence and evidence["verified"] and sess.get("provider_confirms_gone") else "INCOMPLETE",
-           "validation_passed": passed, "terminal": terminal, "runner_terminal": sess.get("terminal"),
+           "status": ("COMPLETE" if ((evidence and evidence["verified"]) or secured) and sess.get("provider_confirms_gone")
+                      else "INCOMPLETE"),
+           "validation_passed": passed, "products_secured": products, "terminal": terminal, "runner_terminal": sess.get("terminal"),
            "provider_resource_created": created, "evidence": evidence, "verdict_rederived": rederived,
            "money": {"all_in_usd": math.ceil((gpu + disk) * 1e4) / 1e4 if created else 0.0, "gpu_usd": gpu,
                      "disk_usd": round(disk, 4), "elapsed_minutes": minutes, "price_per_hour": cost.get("price_per_hour"),

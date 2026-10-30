@@ -301,6 +301,67 @@ def from_check(rec: dict) -> dict:
     return out
 
 
+#: per generation group: the engine's start and the group's tail (a W00 group's seconds include one)
+GROUP_FIXED_S = 90.0
+#: E's and X's frozen sizes (order_v1.manifest.json): their whole slices bound the work from above
+E_TASKS, X_TASKS, CONSERVATIVE_RATE = 3522, 14000, 1.25
+
+
+def w00_counts(records: Path, identity: str) -> dict:
+    """W00's exact admission on the dev box (admission.decide, every verifier): I, each S arm's sequences, and
+    the sequences of every T0 task's admitted H-N documents (what an X task brings to H-N-C)."""
+    from stages.teacher_modes import admission as AD
+    got = AD.decide(Path(records), identity)
+    v, t0, proto = got["verdicts"], got["t0"], got["proto"]
+    hn_all = [t for t in t0 if v.get((t, "H-N"), {}).get("admitted")]
+    return {"t0_tasks": len(t0), "I": len(got["I"]), "H-T-S": got["arms"]["H-T-S"]["sequences"],
+            "H-N-S": got["arms"]["H-N-S"]["sequences"], "H-N_admitted_tasks": len(hn_all),
+            "H-N_admitted_sequences": AD.count(AD.docs_of(hn_all, "H-N", v), proto)}
+
+
+def from_w00(session: dict, status: str, counts: dict) -> dict:
+    """The teacher work after W00, re-priced from W00 itself: each mode's seconds per task from the driver's
+    markers (every group's start and tail counted once per group, ``GROUP_FIXED_S``), E's 3,522 tasks in both
+    modes and X's H-N tasks. X's expected size is what W00's exact admission projects (E's tasks admitted like
+    T0's: H-T-S and H-N-S grow by (T0 + E) / T0; each X task brings what a T0 task's admitted H-N documents
+    bring); its conservative size is the whole slice. The teacher's evaluation keeps the forecast's hours."""
+    from datetime import datetime
+    st = next(x for x in session["phases"]["waves"]["stages"] if x["stage"] == "w00")
+    when = {ln.split("MARKER:UNIT_OK:")[1].strip(): datetime.fromisoformat(ln.split()[0].replace("Z", "+00:00"))
+            for ln in status.splitlines() if "MARKER:UNIT_OK:w00_" in ln}
+    groups = st["groups"]
+    t = when[groups[-1]["label"]].timestamp() - st["seconds"]
+    secs = {"H-T": 0.0, "H-N": 0.0}
+    n = {"H-T": 0, "H-N": 0}
+    for g in groups:
+        mode = g["label"].split("_")[1]
+        secs[mode] += when[g["label"]].timestamp() - t
+        t = when[g["label"]].timestamp()
+        n[mode] += 1
+    tasks = groups[0]["tasks"]
+    rate = {k: (secs[k] - n[k] * GROUP_FIXED_S) / tasks for k in secs}
+    grow = (counts["t0_tasks"] + E_TASKS) / counts["t0_tasks"]
+    hts, hns = counts["H-T-S"] * grow, counts["H-N-S"] * grow
+    x_exp = min(X_TASKS, math.ceil((hts - hns) / (counts["H-N_admitted_sequences"] / counts["t0_tasks"])))
+    out = {"w00": {"tasks": tasks, "seconds": st["seconds"], "generated_tokens": st["generated_tokens"],
+                   "seconds_by_mode": {k: round(v, 1) for k, v in secs.items()},
+                   "seconds_per_task": {k: round(v, 3) for k, v in rate.items()}, "admission": counts},
+           "projected": {"H-T-S_after_E": round(hts), "H-N-S_after_E": round(hns), "x_tasks": x_exp,
+                         "_": ("E's whole slice cannot reach 2,468: E is exhausted and the reached count is the scale "
+                               "(d4_scale_design.json :: tasks.stopping_rule)") if hts < 2468 else ""}}
+    for key, s in SCENARIOS.items():
+        f = 1.0 if key == "expected" else CONSERVATIVE_RATE
+        x = x_exp if key == "expected" else X_TASKS
+        e_h = (E_TASKS * (rate["H-T"] + rate["H-N"]) * f + 4 * math.ceil(E_TASKS / DESIGN["wave"]) * GROUP_FIXED_S) / 3600
+        x_h = (x * rate["H-N"] * f + 2 * math.ceil(x / DESIGN["wave"]) * GROUP_FIXED_S) / 3600
+        te_h = teacher_session(key, s)["hours"]["teacher_evaluation"]
+        work = e_h + x_h + te_h
+        out[key] = {"work_hours": {"e": round(e_h, 2), "x": round(x_h, 2), "teacher_evaluation": round(te_h, 2),
+                                   "total": round(work, 2)},
+                    "session_hours": round(SETUP_H + work + CLOSE_H, 2), "usd": usd(SETUP_H + work + CLOSE_H)}
+    return out
+
+
 def bounds(hc: dict, scen: dict, storage_usd: dict) -> dict:
     """Each envelope at the live price and at the ceiling: what its hard cap buys, the longest single session its
     artifact admits, and what each scenario costs AS RUN -- the teacher in its two bounded sessions, recovery (one
@@ -349,7 +410,16 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--write", action="store_true")
     ap.add_argument("--from-check", default=None, help="the committed check record: the teacher work re-priced")
+    ap.add_argument("--from-w00", default=None, help="the teacher session's record: the work after W00 re-priced")
+    ap.add_argument("--status", default=None, help="with --from-w00: the driver's marker file")
+    ap.add_argument("--records", default=None, help="with --from-w00: the sealed shards (admission.decide)")
+    ap.add_argument("--identity", default=None, help="with --from-w00: the study identity the shards carry")
     args = ap.parse_args(argv)
+    if args.from_w00:
+        counts = w00_counts(Path(args.records), args.identity)
+        print(json.dumps(from_w00(json.loads(Path(args.from_w00).read_text()), Path(args.status).read_text(), counts),
+                         indent=1))
+        return 0
     if args.from_check:
         print(json.dumps(from_check(json.loads(Path(args.from_check).read_text())), indent=1))
         return 0

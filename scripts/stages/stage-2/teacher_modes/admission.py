@@ -137,7 +137,7 @@ def admit(task: dict, mode: str, recs: list[dict], proto: dict) -> dict:
         first = rec["turns"][0] if rec["turns"] else {}
         seen.append({"candidate": rec["candidate_index"], "accepted": bool(c.accepted_for_training and docs
                                                                             and not why[len(c.reasons):]),
-                     "correct": c.answer.state == "correct" if hasattr(c, "answer") else None,
+                     "correct": c.answer == "correct",
                      "length_limited": any(t.get("stop_reason") == "length_limited" for t in rec["turns"]),
                      "prompt_tokens": first.get("prompt_tokens"), "reasons": why,
                      "generated_tokens": sum(int(t["generated_tokens"]) for t in rec["turns"])})

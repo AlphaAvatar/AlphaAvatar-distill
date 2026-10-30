@@ -208,6 +208,26 @@ def test_closeout_rehashes_the_evidence_and_rederives_the_verdict(tmp_path, tamp
     assert SE.envelope(st, {"ceiling_usd": 3.0}, tmp_path)["spent_usd"] == out["money"]["all_in_usd"]
 
 
+@pytest.mark.parametrize("secured", [True, False])
+def test_a_kind_that_secures_its_products_closes_on_them(tmp_path, secured):
+    """A formal kind keeps no evidence archive: its products are secured on every poll, and the launcher's
+    record of that (with the driver's ALL_DONE) is what makes its closeout COMPLETE."""
+    st = _study(tmp_path)
+    launch = SE.Launch(session_kind="x", authorization=SE.EngineeringAuthorization, teacher_model="m",
+                       teacher_revision="r", driver="scripts/x/driver.py", validation_minutes=10.0,
+                       products_secured=lambda ctx, *a, **k: (True, ""))
+    _run(tmp_path, st, "r1")
+    (tmp_path / st.run_dir("r1") / "runtime/session.json").write_text(json.dumps(
+        {"provider_resource_created": True, "provider_confirms_gone": True,
+         "required_products_secured": {"ok": secured, "why": "74 finished item(s) secured off-pod"},
+         "cost": {"actual_usd": 5.2, "elapsed_minutes": 288.0, "price_per_hour": 1.09}}))
+    (tmp_path / "scr/store").mkdir(parents=True)
+    (tmp_path / "scr/store/driver.status").write_text("2026-10-30T01:06:39Z MARKER:ALL_DONE\n")
+    out = SE.closeout(st, launch, "r1", tmp_path / "scr", root=tmp_path, reconcile=lambda: {"ok": True})
+    assert out["status"] == ("COMPLETE" if secured else "INCOMPLETE") and out["evidence"] is None
+    assert out["products_secured"]["ok"] is secured and not out["validation_passed"]
+
+
 def test_each_study_has_its_own_type_and_setup_branch():
     text = (SE.REPO_ROOT / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     for kind, mod, cls in (("stage2_teacher_modes", "stages.teacher_modes.ae_launch", "AEAuthorization"),

@@ -14822,3 +14822,37 @@ on a paid pod.
   initialization, W00) 15.42 h expected ($17.13), 16.90 h conservative ($18.77); after W00 34.89 / 46.05 h
   ($38.74 / $51.14) -- the conservative total would exceed the $63.76 teacher envelope, which W00's own
   measured rate decides before anything after W00 is issued.
+- **Teacher session 1, `a_teacher_20261029_201915`: COMPLETE, $5.3342 all-in (288.2 min at $1.09; pod
+  `8s9bie3edgr9y9` deleted, the provider confirms it gone; 74 of 74 finished items secured off-pod).**
+  Calibration (160 prompts x 2 modes), the common initialization (persisted on `am5m373kuq`, micro-batch 3, the
+  forward baseline's, no out-of-memory; 596,049,920 parameters; record copied to
+  `assets/common_initialization.json`, which recovery binds) and W00 (T0 1,761 + V 240 tasks, both modes, two
+  candidates; 15,287.5 s, 13,747,648 generated tokens) are sealed. Evidence: `runs/a_teacher_20261029_201915/
+  {runtime,closeout,evidence}`.
+  - The shared closeout first wrote `status: INCOMPLETE`: it knew only an evidence archive, and the formal kinds
+    keep none (their products are secured on every poll). Fixed (`study_engineering.closeout`): a kind without a
+    verdict is COMPLETE when the launcher recorded its products secured and the driver finished; regression in
+    `scripts/shared/tests/test_study_engineering.py` (fails without the fix). Re-run at $0: COMPLETE.
+  - The dev box's admission had never run on real records and raised at once: `admission.admit` read
+    `c.answer.state`, but `CandidateRecord.answer` is the state string. The chain test's stand-in verifier
+    returned exactly the wrong shape, so it passed. Fixed in `admission.py`; the stand-in is now the real
+    `CandidateRecord` and the test checks each candidate's correctness against the censoring rows (it fails
+    without the fix). The pod's own bound (`teacher_session.verdict`) never read that field.
+- **W00 by the exact rule (dev box, every verifier, MBPP included):** I = 676 tasks (the pod bounded it at
+  597-701), H-T-S 201 sequences (pod 183-212), H-N-S 54. Per T0 task: H-T admitted 988 / 1,761, H-N 791; H-T
+  first candidates length-limited 321 (18%). LENGTH_CENSORED (descriptive, > 20% of a primary cell's H-T first
+  candidates): five cells in abstract/analogical, compositional, interactive and deduction strata. H-N candidates
+  with a correct answer and not admitted fail P1v's step check ("reference conclusions not stated": 112 H-N, 24
+  H-T) -- the frozen verifier, identical in both modes, not a harness defect.
+- **The scale (preregistered rule, no decision taken):** at W00's rate E's whole slice (3,522 tasks) brings
+  H-T-S to about 603 sequences, a quarter of the 2,468 target, so E runs all of W01-W09 and the reached count is
+  the scale (`d4_scale_design.json :: tasks.stopping_rule`: "or the last of E (the reached count is then the
+  scale, reported)"). X needs about 10,639 of its 14,000 tasks for H-N-C to reach H-T-S's count; C's feasibility
+  and fallback stay the dev box's exact decision after X.
+- **The rest re-priced from W00** (`phase_forecast.py --from-w00`, inputs committed under the run): H-T 6.33 s
+  and H-N 1.13 s per task (each group's start and tail, 90 s, counted per group); after W00 18.61 h of work
+  expected ($21.31: E 8.20 h, X 4.70 h, the teacher's evaluation 5.71 h, the forecast's) and 26.53 h
+  conservative ($30.11: E and X x 1.25, X's whole slice, the evaluation 9.25 h). The teacher envelope holds
+  $58.43 after session 1, so the rest is ONE bounded session (`--phases waves,x,teacher_eval`) planned for the
+  conservative work. Recovery shrinks with the scale (about 905 / 242 / 905 optimizer steps per seed for H-T-S /
+  H-N-S / H-N-C instead of 3,702 for each).

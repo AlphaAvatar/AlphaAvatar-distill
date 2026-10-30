@@ -11,7 +11,6 @@ import random
 import shutil
 import sys
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 
@@ -76,10 +75,14 @@ def _tiny_repo(tmp: Path) -> Path:
 
 def _verdict(task, rec, index):
     """A seeded stand-in for H1's verifiers: ~70% of candidates accepted, per (task, mode, candidate)."""
+    from aadistill.data.target_quality import CandidateRecord
     st = rec["turns"][0].get("think_state")
     ok = int(hashlib.sha256(f"{task['task_id']}|{st}|{index}".encode()).hexdigest(), 16) % 10 < 7
-    return SimpleNamespace(accepted_for_training=ok, reasons=[] if ok else ["wrong answer"],
-                           answer=SimpleNamespace(state="correct" if ok else "incorrect"))
+    limited = any(t.get("stop_reason") == "length_limited" for t in rec["turns"])
+    return CandidateRecord(unit_id=task["task_id"], candidate_index=index, naturally_terminated=not limited,
+                           length_limited=limited, degenerated=False, protocol_valid=True,
+                           answer="correct" if ok else "incorrect", answer_scope="seeded", steps="not_assessed",
+                           reasons=[] if ok else ["answer:incorrect:wrong answer"], accepted_for_training=ok)
 
 
 class FakeTeacher:
@@ -188,6 +191,9 @@ def test_the_teacher_session_runs_its_waves_bounds_the_rule_and_resumes_without_
     assert ADM.build_packs(ADM.selection(wide), durable / "generation", IDENT, tmp_path / "packs_c", repo=root)["H-N-C"]
     cen = ADM.censoring(got)
     assert cen["rows"] and all(0 <= r["first_length_limited_share"] <= 1 for r in cen["rows"])
+    # each candidate's correctness is the verifier's answer state (CandidateRecord.answer is that string)
+    firsts = [v["candidates"][0] for v in got["verdicts"].values() if v["candidates"]]
+    assert sum(r["first_correct"] for r in cen["rows"]) == sum(c["correct"] for c in firsts) > 0
 
 
 def test_split_sessions_generate_the_one_sessions_tasks_and_x_stops_on_the_waves_sealed_before(tmp_path, monkeypatch):
