@@ -14862,3 +14862,26 @@ on a paid pod.
   more -- H-T's came to 17 against the design's "at most 16 sequences" (diagnostics only, never a decision). Fixed:
   the tail is the first 16 sequences as packed (H-T 16, H-N 9 on W00); regression in the chain test (fails with
   the re-pack). Teacher session 2 does not build packs; the recovery session's harness carries the fix.
+- **Teacher session 2 (`a_teacher_20261030_012648`, $21.7443 all-in of its $38.30): COMPLETE.** 1,174.8 min on
+  1 x L40S at $1.09/h; pod deleted, provider confirms gone, only `am5m373kuq` remains; 106 sealed groups.
+  E: W01-W09 all generated (8.7 h), not reached. X: 32 groups (12,800 tasks), stopped by its bound. The teacher's
+  evaluation on eval-set-1 under nucleus_v1 at 40,960 in both modes, persisted and secured (archives hashed).
+  W00 replayed from session 1's sealed shards; calibration and W00 in the store identical to session 1's.
+- **Admission's isolation recheck did not enforce R9 (fixed before any training, $0).** The first dev-box
+  admission reported `isolation_recheck.pass: false` (R9 mechanism equivalence) and admitted the items anyway:
+  the recheck removed only R1/R2-flagged records, while its documented rule is that an admitted record "passes
+  the isolation recheck (`check_pool`)" and the design's isolation is R0-R9. Cause: `order_v1`'s isolation report
+  covered its 21,336 new tasks only; the pooled supply it reused (`s0_generators_v2_calsplit`, calibration
+  families) carried 117 E tasks of R9's three refused families (`string_induction@v2/str.caesar`,
+  `str.double_last`, `str.duplicate_each`, rule-equivalent to eval-set-1's `letter_analogy@v2` families), so the
+  order manifest's "R0-R9 pass" holds for its new tasks, not for all 17,762. The frozen order is not rebuilt (its
+  hash binds the study identity). Fix (`admission.isolation_recheck`): R9's refused families are removed with
+  R1/R2's flags, then `check_pool(refuse=True)` must pass on the rest; regression in the chain test (fails without
+  the removal). 193 admitted records removed; the recheck now passes on the remaining 10,774.
+- **The admission record (`logs/stages/stage-2/teacher_modes/data/admission.json`):** E exhausted, the reached
+  count is the scale: I = 1,969 tasks; H-T-S 591 sequences (887 optimizer steps per seed), H-N-S 154 (231).
+  C: FALLBACK by the registered rule -- X reached H-T-S's count, but `supporting.code_algorithmic`'s share is
+  5.11 points under I's (the order's code supply was exhausted, its substitutions recorded in the manifest),
+  beyond the 2 points; so H-T-C, a seeded whole-task prefix of I's H-T documents at H-N-S's count (154 sequences,
+  231 steps), against H-N-S. LENGTH_CENSORED (descriptive) in five primary cells. Before the fix: I 2,057, H-T-S
+  614, H-N-S 161 (kept in scratch for the audit, never used).

@@ -43,6 +43,20 @@ def test_the_order_is_frozen_isolated_and_holds_t0s_proportions():
     assert len({r["content_sha256"] for r in rows}) == len(rows)
 
 
+def test_the_admission_recheck_removes_r9s_refused_families_and_then_passes_every_rule():
+    # order_v1's isolation covered its new tasks only; its pooled supply carried E tasks of R9's refused families
+    rows = [json.loads(l) for l in ORDER.read_text().splitlines()]
+    bad = next(r for r in rows if (r.get("generator_id"), r.get("family_id")) == ("string_induction@v2", "str.caesar"))
+    ok = next(r for r in rows if (r.get("generator_id"), r.get("family_id")) == ("string_induction@v2", "str.append_first"))
+    adm = {(r["task_id"], m): {"admitted": True, "record": {"messages": r["messages"] + [
+        {"role": "assistant", "content": f"<think>\nx\n</think>\n\n\\boxed{{{r['answer']}}}"}]}}
+        for r in (bad, ok) for m in ADM.MODES}
+    flagged, iso = ADM.isolation_recheck(adm, {r["task_id"]: r for r in (bad, ok)})
+    assert flagged == {(bad["task_id"], m) for m in ADM.MODES}
+    assert iso["before_removal"]["violations"] == ["R9_mechanism_equivalence"]
+    assert iso["pass"] is True and iso["n_items_after_removal"] == len(ADM.MODES)
+
+
 # ---- a tiny phase: real tasks, a fake teacher ----------------------------------------------------------------------
 
 def _tiny_repo(tmp: Path) -> Path:

@@ -148,8 +148,11 @@ def admit(task: dict, mode: str, recs: list[dict], proto: dict) -> dict:
 
 
 def isolation_recheck(admitted: dict, tasks: dict) -> tuple[set[tuple[str, str]], dict]:
-    """(task, mode) pairs whose admitted record R1 or R2 flags against eval-set-1, P1v's recheck: the
-    task with the record's own messages (an episode's observations are the teacher-dependent text)."""
+    """(task, mode) pairs whose admitted record fails P1v's recheck against eval-set-1 -- R1's held-out keys,
+    R2's near-copies, R9's mechanism-equivalent families -- after which the rest must pass every rule (it
+    raises otherwise): the task with the record's own messages (an episode's observations are the
+    teacher-dependent text). R9 is here because order_v1's isolation report covered only its new tasks; the
+    pooled supply it reused carried E tasks of R9's refused families."""
     from shared import eval_sets as ES
     from stages.reasoning_data import isolation_check as IC
     items = [{**tasks[tid], "task_id": f"{tid}|{mode}", "unit_id": f"{tid}|{mode}", "messages": v["record"]["messages"]}
@@ -162,8 +165,15 @@ def isolation_recheck(admitted: dict, tasks: dict) -> tuple[set[tuple[str, str]]
         held = {ES.prompt_key(ES.prompt_text(r)) for rows in ES.component_items(roles=ES.HELD_OUT_ROLES).values()
                 for r in rows if ES.prompt_text(r).strip()}
         flagged |= {i["unit_id"] for i in items if not i.get("interactive") and ES.prompt_key(ES.prompt_text(i)) in held}
-    return {tuple(f.rsplit("|", 1)) for f in flagged}, {"n_items": rep["n_items"], "pass": rep["pass"],
-                                                        "violations": rep["violations"][:20]}
+    r9 = rep["results"]["R9_mechanism_equivalence"]
+    refused = set(r9["refused_families"])
+    flagged |= {i["unit_id"] for i in items if f"{i.get('generator_id')}/{i.get('family_id')}" in refused}
+    rest = [i for i in items if i["unit_id"] not in flagged]
+    final = IC.check_pool(rest, refuse=True) if rest else {"n_items": 0, "pass": True, "violations": []}
+    return {tuple(f.rsplit("|", 1)) for f in flagged}, {
+        "n_items": rep["n_items"], "pass": final["pass"], "violations": final["violations"][:20],
+        "before_removal": {"pass": rep["pass"], "violations": rep["violations"][:20], "R9_items": r9["items"]},
+        "n_items_after_removal": final["n_items"]}
 
 
 def count(docs: dict[str, int], proto: dict) -> int:
