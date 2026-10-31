@@ -1,0 +1,2555 @@
+{
+  "schema": "aadistill.stage2.teacher_modes.tm_authorization_session/v1",
+  "session_id": "stage2_teacher_modes_tm-supplement",
+  "session_spec": {
+    "session_id": "stage2_teacher_modes_tm-supplement",
+    "schema": "aadistill.stage2.teacher_modes.tm_authorization_session/v1",
+    "description": "Research A v2: the supplementary teacher generation (order_v2, both modes, token quotas)",
+    "deployment": {
+      "artifact_collector": "scripts/shared/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/shared/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "37616bcfa390f46d38bcbb320cec690f8b3333b062c3ea26c5d3e7248008edae",
+    "authorization_path": "logs/stages/stage-2/teacher_modes/runs/a_supplement_20261031_144618/governance/authorization.json",
+    "authorization_type": "EngineeringAuthorization.load",
+    "plan_id": "stage2.teacher_modes.token_matched",
+    "plan_hash": "0d39ad935bc3d32b255345afac8995defeb8ef38c59c27e851cd9f4f1baea259",
+    "status_path": "/workspace/stage2_teacher_modes_tm.status",
+    "run_log_path": "/workspace/stage2_teacher_modes_tm_run.log",
+    "driver_job_id": "stage2_teacher_modes_tm_driver",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "stage2_teacher_modes_tm",
+      "evidence_filename": "report.json",
+      "archive_basename": "stage2_teacher_modes_tm",
+      "spec_success": "configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
+      "spec_failed": "configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
+      "report_names": []
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "stage2_teacher_modes_tm",
+        "TEACHER_MODEL": "Qwen/Qwen3-4B",
+        "PHASE_KIND": "supplement"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_KIND",
+        "TEACHER_REVISION",
+        "TEACHER_MODEL"
+      ],
+      "relay_inputs": [],
+      "local_assets": [
+        "battery_v2:artifacts/stages/stage-3/eval",
+        "order_v2.jsonl.gz:artifacts/stages/stage-2/teacher_modes/tasks"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 600,
+      "teacher_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "test_ignores": [],
+      "test_paths": [],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "VLLM_READY",
+        "TEACHER_READY",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 8,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-10-31T14:49:15+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 625 min $11.35 \u00b7 soft $14.42 \u00b7 hard $14.60 (authorized $17.00)"
+    },
+    {
+      "utc": "2026-10-31T14:49:16+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Medium"
+    },
+    {
+      "utc": "2026-10-31T14:49:16+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $89.3778 against the $14.6015 this session must be able to fund"
+    },
+    {
+      "utc": "2026-10-31T14:49:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account resources OK: the provider account holds only the 1 resource(s) the records account for"
+    },
+    {
+      "utc": "2026-10-31T14:49:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "a A-TM supplement artifact, unused"
+    },
+    {
+      "utc": "2026-10-31T14:49:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "1 x NVIDIA L40S at no more than $1.09/h for the pod, as granted"
+    },
+    {
+      "utc": "2026-10-31T14:49:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "all-in $14.8446 over 805.0 min, inside $17.00"
+    },
+    {
+      "utc": "2026-10-31T14:49:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "study identity 0d39ad935bc3 is the authorized one"
+    },
+    {
+      "utc": "2026-10-31T14:49:17+00:00",
+      "elapsed_min": 0.0,
+      "msg": "every bound file is in the session commit"
+    },
+    {
+      "utc": "2026-10-31T14:49:19+00:00",
+      "elapsed_min": 0.0,
+      "msg": "$17.00 inside the envelope ($90.101) and the $91.5709 the project cap leaves now"
+    },
+    {
+      "utc": "2026-10-31T14:49:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "volume am5m373kuq: 55 GB in EUR-IS-2"
+    },
+    {
+      "utc": "2026-10-31T14:49:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the kind's bound records are the committed ones"
+    },
+    {
+      "utc": "2026-10-31T14:49:20+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 0 relay inputs (), 2 local assets"
+    },
+    {
+      "utc": "2026-10-31T14:49:21+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 804 min = $14.60"
+    },
+    {
+      "utc": "2026-10-31T14:49:21+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created 5z9cnen69078ys at $1.09/h"
+    },
+    {
+      "utc": "2026-10-31T14:50:15+00:00",
+      "elapsed_min": 0.9,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-10-31T14:51:19+00:00",
+      "elapsed_min": 1.97,
+      "msg": "  starting (120s) \u2014 $0.04"
+    },
+    {
+      "utc": "2026-10-31T14:51:51+00:00",
+      "elapsed_min": 2.5,
+      "msg": "TCP 22 at 81.27.69.178:28746 after 2.5 min"
+    },
+    {
+      "utc": "2026-10-31T14:51:54+00:00",
+      "elapsed_min": 2.55,
+      "msg": "draw 1: ssh reachable \u2014 $0.05"
+    },
+    {
+      "utc": "2026-10-31T14:53:48+00:00",
+      "elapsed_min": 4.45,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+    },
+    {
+      "utc": "2026-10-31T14:53:48+00:00",
+      "elapsed_min": 4.45,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-31T14:56:00+00:00",
+      "elapsed_min": 6.65,
+      "msg": "draw 1: setup complete \u2014 $0.12"
+    },
+    {
+      "utc": "2026-10-31T14:56:07+00:00",
+      "elapsed_min": 6.78,
+      "msg": "driver detached, pid 2598, confirmed by descriptor_probe \u2014 $0.12"
+    },
+    {
+      "utc": "2026-10-31T14:57:23+00:00",
+      "elapsed_min": 8.03,
+      "msg": "  2026-10-31T14:56:30Z MARKER:ROUND_OK:s01t \u2014 $0.15"
+    },
+    {
+      "utc": "2026-10-31T19:44:33+00:00",
+      "elapsed_min": 295.2,
+      "msg": "  2026-10-31T19:43:48Z MARKER:UNIT_OK:s01n_H-N_pass0_s01n_g0 \u2014 $5.36"
+    },
+    {
+      "utc": "2026-10-31T23:44:15+00:00",
+      "elapsed_min": 534.9,
+      "msg": "  2026-10-31T23:43:26Z MARKER:ROUND_OK:s01n \u2014 $9.72"
+    },
+    {
+      "utc": "2026-10-31T23:50:42+00:00",
+      "elapsed_min": 541.36,
+      "msg": "  2026-10-31T23:49:56Z MARKER:UNIT_OK:s02n_H-N_pass0_s02n_g0 \u2014 $9.83"
+    },
+    {
+      "utc": "2026-10-31T23:51:51+00:00",
+      "elapsed_min": 542.51,
+      "msg": "  2026-10-31T23:51:28Z MARKER:ALL_DONE \u2014 $9.86 (written as the driver exited)"
+    },
+    {
+      "utc": "2026-10-31T23:51:51+00:00",
+      "elapsed_min": 542.51,
+      "msg": "polling ended: ALL_DONE \u2014 $9.86"
+    },
+    {
+      "utc": "2026-10-31T23:52:06+00:00",
+      "elapsed_min": 542.76,
+      "msg": "  manifest rc=0\n0 file(s) across 0 class(es) -> /workspace/manifest.json\n  final_required: 0 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-10-31T23:53:51+00:00",
+      "elapsed_min": 544.5,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-10-31T23:53:51+00:00",
+      "elapsed_min": 544.5,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-10-31T23:54:02+00:00",
+      "elapsed_min": 544.69,
+      "msg": "pod deleted \u2014 544.7 min, $9.90; provider confirms gone: True"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.stage2.teacher_modes.tm_authorization/v1",
+    "authorization_id": "stage2.teacher_modes.token_matched.a_supplement_20261031_144618",
+    "version": 1,
+    "granted_utc": "2026-10-31T14:46:29+00:00",
+    "granted_by": "maintainer",
+    "plan_id": "stage2.teacher_modes.token_matched",
+    "study_identity_sha256": "0d39ad935bc3d32b255345afac8995defeb8ef38c59c27e851cd9f4f1baea259",
+    "expected_usd": 11.5,
+    "hard_cap_usd": 17.0,
+    "authorized_stages": [],
+    "stage_conditions": {
+      "l40s_check_record_sha256": "a98174e35acef9a9eefc1e75a5a748238761a8a0bbc5312b7cfd1a4d1c10b784",
+      "kind": "supplement",
+      "study": "A-TM",
+      "dry_run": "false",
+      "grant": "logs/budget/approvals/teacher_modes_token_matched_grant.json",
+      "grant_sha256": "ba7e68d4d0506edc71f4f33bc6924c1b2fc4dddd71da8a7ca5b08f10cfc7b27b",
+      "gpus": "{\"NVIDIA L40S\": 1.19}",
+      "gpu_count_max": "1",
+      "envelope": "{\"ceiling_usd\": 95.8883, \"spent_usd\": 5.7873, \"remaining_usd\": 90.101, \"runs\": [{\"run_id\": \"a_supplement_20261031_091618\", \"usd\": 0.0}, {\"run_id\": \"a_supplement_20261031_092108\", \"usd\": 5.7873}]}",
+      "live_position": "{\"fetched_utc\": \"2026-10-31T14:46:28+00:00\", \"provider_billed_usd\": 769.2249, \"committed_usd\": 776.4291, \"project_cap_usd\": 868.0, \"project_remaining_usd\": 91.5709, \"account_pods\": [], \"account_volumes\": [\"am5m373kuq\"], \"balance_usd\": 89.3778493461, \"spend_per_hour\": 0.005, \"rule\": \"shared.project_position: mixed_governance.position + engineering-campaign subruns\", \"unposted_sessions\": 0, \"campaign_unposted\": 0, \"campaign_teardown_confirmed_by\": {\"subrun record\": 25, \"reconciliation\": 30}}"
+    },
+    "scope_note": "Research A v2 supplement, replacement session after a_supplement_20261031_092108 RUN_FAILED (JSON Lines reader fix 7d31676f): resumes from the sealed shards, the non-thinking rounds remain; cumulative supplement cap stays at the original $23.00",
+    "authorizes_engineering_validation": false,
+    "authorizes_formal": true,
+    "authorizes_training": false,
+    "authorizes_evaluation": false,
+    "authorizes_teacher_generation": true,
+    "authorizes_paid_storage": false,
+    "authorized_session_commit": null,
+    "harness_source_digest": "57d7d0bbad15779da9394179849a5a858014e8c8cc68946085899700cbed0253",
+    "harness_source_files": [
+      "src/aadistill/__init__.py",
+      "src/aadistill/data/__init__.py",
+      "src/aadistill/data/cleaning.py",
+      "src/aadistill/data/code_exec.py",
+      "src/aadistill/data/dataset.py",
+      "src/aadistill/data/diversity.py",
+      "src/aadistill/data/e5_pack.py",
+      "src/aadistill/data/extra_stream.py",
+      "src/aadistill/data/ladder.py",
+      "src/aadistill/data/mixture.py",
+      "src/aadistill/data/nested_ladder.py",
+      "src/aadistill/data/paired_corpus.py",
+      "src/aadistill/data/prefix_split.py",
+      "src/aadistill/data/recovery.py",
+      "src/aadistill/data/sessions.py",
+      "src/aadistill/data/target_policy.py",
+      "src/aadistill/data/target_quality.py",
+      "src/aadistill/data/token_documents.py",
+      "src/aadistill/data/tools.py",
+      "src/aadistill/data/verify.py",
+      "src/aadistill/evaluation/__init__.py",
+      "src/aadistill/evaluation/behavior.py",
+      "src/aadistill/evaluation/capability.py",
+      "src/aadistill/evaluation/degeneration.py",
+      "src/aadistill/evaluation/eval_registry.py",
+      "src/aadistill/evaluation/function_error.py",
+      "src/aadistill/evaluation/general_text.py",
+      "src/aadistill/evaluation/init_nll.py",
+      "src/aadistill/evaluation/isolation.py",
+      "src/aadistill/evaluation/oracle_reasoning.py",
+      "src/aadistill/evaluation/paired_stats.py",
+      "src/aadistill/evaluation/protocol_field.py",
+      "src/aadistill/evaluation/strict_answer.py",
+      "src/aadistill/evaluation/usable_rollout.py",
+      "src/aadistill/governance/__init__.py",
+      "src/aadistill/governance/artifact_manifest.py",
+      "src/aadistill/governance/authorization.py",
+      "src/aadistill/governance/closure.py",
+      "src/aadistill/governance/grant.py",
+      "src/aadistill/governance/post_freeze.py",
+      "src/aadistill/infrastructure/__init__.py",
+      "src/aadistill/infrastructure/artifact_gate.py",
+      "src/aadistill/infrastructure/budget.py",
+      "src/aadistill/infrastructure/bundle_transport.py",
+      "src/aadistill/infrastructure/env.py",
+      "src/aadistill/infrastructure/failure_signature.py",
+      "src/aadistill/infrastructure/log_relay.py",
+      "src/aadistill/infrastructure/manifest.py",
+      "src/aadistill/infrastructure/provider.py",
+      "src/aadistill/infrastructure/remote.py",
+      "src/aadistill/infrastructure/session.py",
+      "src/aadistill/infrastructure/session_prechecks.py",
+      "src/aadistill/infrastructure/session_runner.py",
+      "src/aadistill/infrastructure/source_identity.py",
+      "src/aadistill/infrastructure/transfer.py",
+      "src/aadistill/infrastructure/watchdog.py",
+      "src/aadistill/initialization/__init__.py",
+      "src/aadistill/initialization/adapters/__init__.py",
+      "src/aadistill/initialization/adapters/families.py",
+      "src/aadistill/initialization/adapters/projected_residual.py",
+      "src/aadistill/initialization/adapters/projected_residual_vllm.py",
+      "src/aadistill/initialization/adapters/qwen3.py",
+      "src/aadistill/initialization/baseline.py",
+      "src/aadistill/initialization/calibration/__init__.py",
+      "src/aadistill/initialization/calibration/batching.py",
+      "src/aadistill/initialization/calibration/datasets.py",
+      "src/aadistill/initialization/calibration/items.py",
+      "src/aadistill/initialization/calibration/packing.py",
+      "src/aadistill/initialization/calibration/profiles.py",
+      "src/aadistill/initialization/device.py",
+      "src/aadistill/initialization/execution.py",
+      "src/aadistill/initialization/operators/__init__.py",
+      "src/aadistill/initialization/operators/_common.py",
+      "src/aadistill/initialization/operators/attention/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+      "src/aadistill/initialization/operators/attention/gqa/_common.py",
+      "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+      "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+      "src/aadistill/initialization/operators/attention/gqa/causal_kl.py",
+      "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+      "src/aadistill/initialization/operators/base.py",
+      "src/aadistill/initialization/operators/composite/__init__.py",
+      "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+      "src/aadistill/initialization/operators/depth/__init__.py",
+      "src/aadistill/initialization/operators/depth/_common.py",
+      "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+      "src/aadistill/initialization/operators/depth/positional.py",
+      "src/aadistill/initialization/operators/ffn/__init__.py",
+      "src/aadistill/initialization/operators/ffn/dense/__init__.py",
+      "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+      "src/aadistill/initialization/operators/register.py",
+      "src/aadistill/initialization/operators/width/__init__.py",
+      "src/aadistill/initialization/operators/width/residual/__init__.py",
+      "src/aadistill/initialization/operators/width/residual/global_pca.py",
+      "src/aadistill/initialization/planning/__init__.py",
+      "src/aadistill/initialization/planning/fixed_path.py",
+      "src/aadistill/initialization/planning/generation.py",
+      "src/aadistill/initialization/planning/generation_compat.py",
+      "src/aadistill/initialization/planning/isolation.py",
+      "src/aadistill/initialization/planning/metrics.py",
+      "src/aadistill/initialization/planning/operator_config.py",
+      "src/aadistill/initialization/planning/ranking.py",
+      "src/aadistill/initialization/planning/recovery.py",
+      "src/aadistill/initialization/planning/search.py",
+      "src/aadistill/initialization/planning/stage1_import.py",
+      "src/aadistill/initialization/planning/stage1_selection.py",
+      "src/aadistill/initialization/scoring/__init__.py",
+      "src/aadistill/initialization/scoring/batches.py",
+      "src/aadistill/initialization/scoring/content.py",
+      "src/aadistill/initialization/scoring/kl_reference.py",
+      "src/aadistill/initialization/scoring/objective.py",
+      "src/aadistill/initialization/scoring/output_head.py",
+      "src/aadistill/initialization/scoring/positions.py",
+      "src/aadistill/initialization/scoring/protocol_identity.py",
+      "src/aadistill/initialization/scoring/reference_store.py",
+      "src/aadistill/initialization/scoring/rows.py",
+      "src/aadistill/initialization/scoring/support.py",
+      "src/aadistill/initialization/specs/__init__.py",
+      "src/aadistill/initialization/specs/arch.py",
+      "src/aadistill/initialization/specs/artifact.py",
+      "src/aadistill/initialization/specs/identity_collapse.py",
+      "src/aadistill/initialization/specs/materialization.py",
+      "src/aadistill/initialization/specs/metrics.py",
+      "src/aadistill/initialization/specs/state.py",
+      "src/aadistill/initialization/statistics/__init__.py",
+      "src/aadistill/initialization/statistics/collect.py",
+      "src/aadistill/initialization/statistics/contribution.py",
+      "src/aadistill/initialization/statistics/reweight.py",
+      "src/aadistill/initialization/statistics/spec.py",
+      "src/aadistill/initialization/transforms/__init__.py",
+      "src/aadistill/initialization/transforms/nll_gate.py",
+      "src/aadistill/initialization/transforms/project.py",
+      "src/aadistill/initialization/transforms/projected_residual.py",
+      "src/aadistill/initialization/transforms/sandwich.py",
+      "src/aadistill/models/__init__.py",
+      "src/aadistill/models/cost_model.py",
+      "src/aadistill/models/quant.py",
+      "src/aadistill/models/student.py",
+      "src/aadistill/models/teacher.py",
+      "src/aadistill/models/tokenizer_contract.py",
+      "src/aadistill/rollout/__init__.py",
+      "src/aadistill/rollout/engines.py",
+      "src/aadistill/rollout/generate.py",
+      "src/aadistill/rollout/snapshots.py",
+      "src/aadistill/runtime/__init__.py",
+      "src/aadistill/runtime/cost.py",
+      "src/aadistill/runtime/cpu_test_env.py",
+      "src/aadistill/runtime/device_handoff.py",
+      "src/aadistill/runtime/durable_store.py",
+      "src/aadistill/runtime/hub_capacity.py",
+      "src/aadistill/runtime/leaf_durability.py",
+      "src/aadistill/runtime/pod_environment.py",
+      "src/aadistill/runtime/run_layout.py",
+      "src/aadistill/runtime/setup_steps.py",
+      "src/aadistill/runtime/staging_contract.py",
+      "src/aadistill/runtime/telemetry.py",
+      "src/aadistill/training/__init__.py",
+      "src/aadistill/training/accounting.py",
+      "src/aadistill/training/lineage.py",
+      "src/aadistill/training/lora.py",
+      "src/aadistill/training/topk_kd.py",
+      "src/aadistill/training/train.py",
+      "scripts/stages/stage-2/teacher_modes/token_matched_phase.py",
+      "scripts/stages/stage-2/teacher_modes/phase.py",
+      "scripts/stages/stage-2/teacher_modes/supplement_session.py",
+      "scripts/stages/stage-2/teacher_modes/teacher_session.py",
+      "scripts/stages/stage-2/teacher_modes/admission.py",
+      "scripts/stages/stage-2/teacher_modes/supply_audit.py",
+      "scripts/stages/stage-2/teacher_modes/build_supplement_tasks.py",
+      "scripts/stages/stage-2/teacher_modes/build_tasks.py",
+      "scripts/stages/stage-2/teacher_modes/build_calibration_supplement.py",
+      "scripts/stages/stage-2/teacher_modes/hybrid_calibration.py",
+      "scripts/shared/study_engineering.py",
+      "scripts/shared/project_position.py",
+      "scripts/shared/eval_sets.py",
+      "scripts/shared/pod/teacher_cache.py",
+      "scripts/stages/stage-0/calibration_volume/run_battery.py",
+      "scripts/stages/stage-0/calibration_volume/score_battery.py",
+      "scripts/stages/stage-0/calibration_volume/mixed_governance.py",
+      "scripts/stages/stage-2/reasoning_data/generation_driver.py",
+      "scripts/stages/stage-2/reasoning_data/generation_adapter.py",
+      "scripts/stages/stage-2/reasoning_data/generation_plan.py",
+      "scripts/stages/stage-2/reasoning_data/supporting_verify.py",
+      "scripts/maintenance/consolidation/derive_budget.py",
+      "scripts/maintenance/consolidation/provider_billing.py",
+      "scripts/shared/deployment.py",
+      "scripts/shared/pod/watchdog.py",
+      "scripts/shared/pod/autoinit_preflight_setup.sh",
+      "scripts/shared/pod/collect_artifacts.py"
+    ],
+    "per_launch_hard_usd": 17.0,
+    "provenance_commit": "7d31676f91069a4fc83a5d3cfa7f97fadc6265ab",
+    "enforcement": "the launcher refuses a pod unless this artifact is bound to the study identity and the harness on disk, is not a dry run, has not been used, and its hard cap covers the planned all-in bound and fits the project cap as the provider bills it at launch; setup re-checks the binding on the pod; one artifact funds one run inside the grant's envelope",
+    "authorization_sha256": "f8deb5599813ac9a4b0139e65dd506eb6ebf37e17b3499db4f1413e557ef57b9"
+  },
+  "session_plan_hash": "0d39ad935bc3d32b255345afac8995defeb8ef38c59c27e851cd9f4f1baea259",
+  "harness_source_digest": "57d7d0bbad15779da9394179849a5a858014e8c8cc68946085899700cbed0253",
+  "harness_source_files": [
+    "scripts/maintenance/consolidation/derive_budget.py",
+    "scripts/maintenance/consolidation/provider_billing.py",
+    "scripts/shared/deployment.py",
+    "scripts/shared/eval_sets.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/collect_artifacts.py",
+    "scripts/shared/pod/teacher_cache.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/shared/project_position.py",
+    "scripts/shared/study_engineering.py",
+    "scripts/stages/stage-0/calibration_volume/mixed_governance.py",
+    "scripts/stages/stage-0/calibration_volume/run_battery.py",
+    "scripts/stages/stage-0/calibration_volume/score_battery.py",
+    "scripts/stages/stage-2/reasoning_data/generation_adapter.py",
+    "scripts/stages/stage-2/reasoning_data/generation_driver.py",
+    "scripts/stages/stage-2/reasoning_data/generation_plan.py",
+    "scripts/stages/stage-2/reasoning_data/supporting_verify.py",
+    "scripts/stages/stage-2/teacher_modes/admission.py",
+    "scripts/stages/stage-2/teacher_modes/build_calibration_supplement.py",
+    "scripts/stages/stage-2/teacher_modes/build_supplement_tasks.py",
+    "scripts/stages/stage-2/teacher_modes/build_tasks.py",
+    "scripts/stages/stage-2/teacher_modes/hybrid_calibration.py",
+    "scripts/stages/stage-2/teacher_modes/phase.py",
+    "scripts/stages/stage-2/teacher_modes/supplement_session.py",
+    "scripts/stages/stage-2/teacher_modes/supply_audit.py",
+    "scripts/stages/stage-2/teacher_modes/teacher_session.py",
+    "scripts/stages/stage-2/teacher_modes/token_matched_phase.py",
+    "src/aadistill/__init__.py",
+    "src/aadistill/data/__init__.py",
+    "src/aadistill/data/cleaning.py",
+    "src/aadistill/data/code_exec.py",
+    "src/aadistill/data/dataset.py",
+    "src/aadistill/data/diversity.py",
+    "src/aadistill/data/e5_pack.py",
+    "src/aadistill/data/extra_stream.py",
+    "src/aadistill/data/ladder.py",
+    "src/aadistill/data/mixture.py",
+    "src/aadistill/data/nested_ladder.py",
+    "src/aadistill/data/paired_corpus.py",
+    "src/aadistill/data/prefix_split.py",
+    "src/aadistill/data/recovery.py",
+    "src/aadistill/data/sessions.py",
+    "src/aadistill/data/target_policy.py",
+    "src/aadistill/data/target_quality.py",
+    "src/aadistill/data/token_documents.py",
+    "src/aadistill/data/tools.py",
+    "src/aadistill/data/verify.py",
+    "src/aadistill/evaluation/__init__.py",
+    "src/aadistill/evaluation/behavior.py",
+    "src/aadistill/evaluation/capability.py",
+    "src/aadistill/evaluation/degeneration.py",
+    "src/aadistill/evaluation/eval_registry.py",
+    "src/aadistill/evaluation/function_error.py",
+    "src/aadistill/evaluation/general_text.py",
+    "src/aadistill/evaluation/init_nll.py",
+    "src/aadistill/evaluation/isolation.py",
+    "src/aadistill/evaluation/oracle_reasoning.py",
+    "src/aadistill/evaluation/paired_stats.py",
+    "src/aadistill/evaluation/protocol_field.py",
+    "src/aadistill/evaluation/strict_answer.py",
+    "src/aadistill/evaluation/usable_rollout.py",
+    "src/aadistill/governance/__init__.py",
+    "src/aadistill/governance/artifact_manifest.py",
+    "src/aadistill/governance/authorization.py",
+    "src/aadistill/governance/closure.py",
+    "src/aadistill/governance/grant.py",
+    "src/aadistill/governance/post_freeze.py",
+    "src/aadistill/infrastructure/__init__.py",
+    "src/aadistill/infrastructure/artifact_gate.py",
+    "src/aadistill/infrastructure/budget.py",
+    "src/aadistill/infrastructure/bundle_transport.py",
+    "src/aadistill/infrastructure/env.py",
+    "src/aadistill/infrastructure/failure_signature.py",
+    "src/aadistill/infrastructure/log_relay.py",
+    "src/aadistill/infrastructure/manifest.py",
+    "src/aadistill/infrastructure/provider.py",
+    "src/aadistill/infrastructure/remote.py",
+    "src/aadistill/infrastructure/session.py",
+    "src/aadistill/infrastructure/session_prechecks.py",
+    "src/aadistill/infrastructure/session_runner.py",
+    "src/aadistill/infrastructure/source_identity.py",
+    "src/aadistill/infrastructure/transfer.py",
+    "src/aadistill/infrastructure/watchdog.py",
+    "src/aadistill/initialization/__init__.py",
+    "src/aadistill/initialization/adapters/__init__.py",
+    "src/aadistill/initialization/adapters/families.py",
+    "src/aadistill/initialization/adapters/projected_residual.py",
+    "src/aadistill/initialization/adapters/projected_residual_vllm.py",
+    "src/aadistill/initialization/adapters/qwen3.py",
+    "src/aadistill/initialization/baseline.py",
+    "src/aadistill/initialization/calibration/__init__.py",
+    "src/aadistill/initialization/calibration/batching.py",
+    "src/aadistill/initialization/calibration/datasets.py",
+    "src/aadistill/initialization/calibration/items.py",
+    "src/aadistill/initialization/calibration/packing.py",
+    "src/aadistill/initialization/calibration/profiles.py",
+    "src/aadistill/initialization/device.py",
+    "src/aadistill/initialization/execution.py",
+    "src/aadistill/initialization/operators/__init__.py",
+    "src/aadistill/initialization/operators/_common.py",
+    "src/aadistill/initialization/operators/attention/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+    "src/aadistill/initialization/operators/attention/gqa/_common.py",
+    "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+    "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+    "src/aadistill/initialization/operators/attention/gqa/causal_kl.py",
+    "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+    "src/aadistill/initialization/operators/base.py",
+    "src/aadistill/initialization/operators/composite/__init__.py",
+    "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+    "src/aadistill/initialization/operators/depth/__init__.py",
+    "src/aadistill/initialization/operators/depth/_common.py",
+    "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+    "src/aadistill/initialization/operators/depth/positional.py",
+    "src/aadistill/initialization/operators/ffn/__init__.py",
+    "src/aadistill/initialization/operators/ffn/dense/__init__.py",
+    "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+    "src/aadistill/initialization/operators/register.py",
+    "src/aadistill/initialization/operators/width/__init__.py",
+    "src/aadistill/initialization/operators/width/residual/__init__.py",
+    "src/aadistill/initialization/operators/width/residual/global_pca.py",
+    "src/aadistill/initialization/planning/__init__.py",
+    "src/aadistill/initialization/planning/fixed_path.py",
+    "src/aadistill/initialization/planning/generation.py",
+    "src/aadistill/initialization/planning/generation_compat.py",
+    "src/aadistill/initialization/planning/isolation.py",
+    "src/aadistill/initialization/planning/metrics.py",
+    "src/aadistill/initialization/planning/operator_config.py",
+    "src/aadistill/initialization/planning/ranking.py",
+    "src/aadistill/initialization/planning/recovery.py",
+    "src/aadistill/initialization/planning/search.py",
+    "src/aadistill/initialization/planning/stage1_import.py",
+    "src/aadistill/initialization/planning/stage1_selection.py",
+    "src/aadistill/initialization/scoring/__init__.py",
+    "src/aadistill/initialization/scoring/batches.py",
+    "src/aadistill/initialization/scoring/content.py",
+    "src/aadistill/initialization/scoring/kl_reference.py",
+    "src/aadistill/initialization/scoring/objective.py",
+    "src/aadistill/initialization/scoring/output_head.py",
+    "src/aadistill/initialization/scoring/positions.py",
+    "src/aadistill/initialization/scoring/protocol_identity.py",
+    "src/aadistill/initialization/scoring/reference_store.py",
+    "src/aadistill/initialization/scoring/rows.py",
+    "src/aadistill/initialization/scoring/support.py",
+    "src/aadistill/initialization/specs/__init__.py",
+    "src/aadistill/initialization/specs/arch.py",
+    "src/aadistill/initialization/specs/artifact.py",
+    "src/aadistill/initialization/specs/identity_collapse.py",
+    "src/aadistill/initialization/specs/materialization.py",
+    "src/aadistill/initialization/specs/metrics.py",
+    "src/aadistill/initialization/specs/state.py",
+    "src/aadistill/initialization/statistics/__init__.py",
+    "src/aadistill/initialization/statistics/collect.py",
+    "src/aadistill/initialization/statistics/contribution.py",
+    "src/aadistill/initialization/statistics/reweight.py",
+    "src/aadistill/initialization/statistics/spec.py",
+    "src/aadistill/initialization/transforms/__init__.py",
+    "src/aadistill/initialization/transforms/nll_gate.py",
+    "src/aadistill/initialization/transforms/project.py",
+    "src/aadistill/initialization/transforms/projected_residual.py",
+    "src/aadistill/initialization/transforms/sandwich.py",
+    "src/aadistill/models/__init__.py",
+    "src/aadistill/models/cost_model.py",
+    "src/aadistill/models/quant.py",
+    "src/aadistill/models/student.py",
+    "src/aadistill/models/teacher.py",
+    "src/aadistill/models/tokenizer_contract.py",
+    "src/aadistill/rollout/__init__.py",
+    "src/aadistill/rollout/engines.py",
+    "src/aadistill/rollout/generate.py",
+    "src/aadistill/rollout/snapshots.py",
+    "src/aadistill/runtime/__init__.py",
+    "src/aadistill/runtime/cost.py",
+    "src/aadistill/runtime/cpu_test_env.py",
+    "src/aadistill/runtime/device_handoff.py",
+    "src/aadistill/runtime/durable_store.py",
+    "src/aadistill/runtime/hub_capacity.py",
+    "src/aadistill/runtime/leaf_durability.py",
+    "src/aadistill/runtime/pod_environment.py",
+    "src/aadistill/runtime/run_layout.py",
+    "src/aadistill/runtime/setup_steps.py",
+    "src/aadistill/runtime/staging_contract.py",
+    "src/aadistill/runtime/telemetry.py",
+    "src/aadistill/training/__init__.py",
+    "src/aadistill/training/accounting.py",
+    "src/aadistill/training/lineage.py",
+    "src/aadistill/training/lora.py",
+    "src/aadistill/training/topk_kd.py",
+    "src/aadistill/training/train.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 17.0,
+    "expected_minutes": 625.0,
+    "soft_stop_minutes": 793.75,
+    "artifact_recovery_reserve_minutes": 10.0,
+    "hard_terminate_minutes": 803.75,
+    "step_time": {
+      "seconds": 1.0,
+      "source": "unused: the validation is one phase (arms=0)",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 20.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 5.0
+      },
+      {
+        "name": "A-TM_supplement",
+        "minutes": 600.0
+      }
+    ],
+    "soft_stop_reserves": [
+      {
+        "name": "closeout_and_teardown",
+        "minutes": 12.5
+      }
+    ],
+    "notes": [],
+    "soft_stop_reserve_minutes": 12.5,
+    "expected_usd": 11.3542,
+    "soft_stop_usd": 14.4198,
+    "artifact_recovery_reserve_usd": 0.1817,
+    "hard_terminate_usd": 14.6015
+  },
+  "quoted_price_per_hour": 1.09,
+  "gpu_count": 1,
+  "stock_status": "Medium",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 89.3778493461,
+    "current_spend_per_hr": 0.005,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 14.6015,
+    "ok": true,
+    "why": "the provider account holds $89.3778 against the $14.6015 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "account_resources": {
+    "checked": true,
+    "known": true,
+    "pods": [],
+    "network_volumes": [
+      {
+        "kind": "network_volume",
+        "id": "am5m373kuq",
+        "name": "aad-h1pa",
+        "size": 55,
+        "dataCenterId": "EUR-IS-2"
+      }
+    ],
+    "error": null,
+    "accounted": [
+      "am5m373kuq"
+    ],
+    "unaccounted": [],
+    "ok": true,
+    "why": "the provider account holds only the 1 resource(s) the records account for"
+  },
+  "prechecks": [
+    {
+      "check": "the_artifact_is_this_studys_and_unused",
+      "ok": true,
+      "message": "a A-TM supplement artifact, unused"
+    },
+    {
+      "check": "the_gpu_and_price_are_the_grants",
+      "ok": true,
+      "message": "1 x NVIDIA L40S at no more than $1.09/h for the pod, as granted"
+    },
+    {
+      "check": "all_in_within_cap",
+      "ok": true,
+      "message": "all-in $14.8446 over 805.0 min, inside $17.00"
+    },
+    {
+      "check": "the_study_identity_is_the_authorized_one",
+      "ok": true,
+      "message": "study identity 0d39ad935bc3 is the authorized one"
+    },
+    {
+      "check": "bound_files_are_in_the_session_commit",
+      "ok": true,
+      "message": "every bound file is in the session commit"
+    },
+    {
+      "check": "the_project_cap_holds_now",
+      "ok": true,
+      "message": "$17.00 inside the envelope ($90.101) and the $91.5709 the project cap leaves now"
+    },
+    {
+      "check": "the_volume_is_the_planned_one",
+      "ok": true,
+      "message": "volume am5m373kuq: 55 GB in EUR-IS-2"
+    },
+    {
+      "check": "the_kind_records_are_the_bound_ones",
+      "ok": true,
+      "message": "the kind's bound records are the committed ones"
+    }
+  ],
+  "all_in_bound": {
+    "billable_minutes": 805.0,
+    "price_per_hour": 1.09,
+    "container_disk_gb": 120,
+    "gpu_usd": 14.6242,
+    "disk_usd": 0.2204,
+    "all_in_usd": 14.8446,
+    "highest_price_inside_cap": 1.25
+  },
+  "live_position": {
+    "fetched_utc": "2026-10-31T14:49:18+00:00",
+    "provider_billed_usd": 769.2249,
+    "committed_usd": 776.4291,
+    "project_cap_usd": 868.0,
+    "project_remaining_usd": 91.5709,
+    "account_pods": [],
+    "account_volumes": [
+      "am5m373kuq"
+    ],
+    "balance_usd": 89.3778493461,
+    "spend_per_hour": 0.005,
+    "rule": "shared.project_position: mixed_governance.position + engineering-campaign subruns",
+    "unposted_sessions": 0,
+    "campaign_unposted": 0,
+    "campaign_teardown_confirmed_by": {
+      "subrun record": 25,
+      "reconciliation": 30
+    }
+  },
+  "envelope": {
+    "ceiling_usd": 95.8883,
+    "spent_usd": 5.7873,
+    "remaining_usd": 90.101,
+    "runs": [
+      {
+        "run_id": "a_supplement_20261031_091618",
+        "usd": 0.0
+      },
+      {
+        "run_id": "a_supplement_20261031_092108",
+        "usd": 5.7873
+      },
+      {
+        "run_id": "a_supplement_20261031_144618",
+        "usd": 0.0
+      }
+    ]
+  },
+  "volume": {
+    "id": "am5m373kuq",
+    "size_gb": 55,
+    "data_center_id": "EUR-IS-2"
+  },
+  "precheck": {
+    "relay_needed": [],
+    "relay_missing": [],
+    "relay_repos": {},
+    "relay_repo_files_listed": {},
+    "local_assets": [
+      "artifacts/stages/stage-3/eval/battery_v2",
+      "artifacts/stages/stage-2/teacher_modes/tasks/order_v2.jsonl.gz"
+    ],
+    "local_missing": []
+  },
+  "pod_id": "5z9cnen69078ys",
+  "actual_price_per_hour": 1.09,
+  "terminate_after_utc": "2026-11-01T04:13:05Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/AlphaAvatar-distill/.scratch/research_a/a_supplement_20261031_144618/watchdog_5z9cnen69078ys.jsonl"
+  ],
+  "watchdog_owns_pod": "5z9cnen69078ys",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "595.91.07"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_f0bcdcb3.bundle",
+    "PHASE_KIND": "supplement",
+    "SESSION_ASSETS": "battery_v2:artifacts/stages/stage-3/eval,order_v2.jsonl.gz:artifacts/stages/stage-2/teacher_modes/tasks",
+    "SESSION_AUTH_PATH": "logs/stages/stage-2/teacher_modes/runs/a_supplement_20261031_144618/governance/authorization.json",
+    "SESSION_COMMIT": "f0bcdcb394779615d7c877b28f84ff7f0bf918e0",
+    "SESSION_KIND": "stage2_teacher_modes_tm",
+    "SESSION_PLAN_HASH": "0d39ad935bc3d32b255345afac8995defeb8ef38c59c27e851cd9f4f1baea259",
+    "SESSION_RELAY_INPUTS": "[]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV VLLM_READY TEACHER_READY AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/stage2_teacher_modes_tm.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "",
+    "TEACHER_MODEL": "Qwen/Qwen3-4B",
+    "TEACHER_REVISION": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "TESTS_MAX_S": "600",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "stage2_teacher_modes_tm_driver",
+    "pid": 2598,
+    "workdir": "/workspace/aad",
+    "command": "mkdir -p /runpod-volume/teacher_modes && cd /workspace/aad && HF_HUB_OFFLINE=1 PYTHONPATH=/workspace/aad/src:/workspace/aad/scripts:/workspace/aad/scripts/stages/stage-1 /opt/train/bin/python scripts/stages/stage-2/teacher_modes/supplement_session.py --authorization /workspace/aad/logs/stages/stage-2/teacher_modes/runs/a_supplement_20261031_144618/governance/authorization.json --durable-root /runpod-volume/teacher_modes --status /workspace/stage2_teacher_modes_tm.status; grep -qE 'MARKER:(ALL_DONE|RUN_FAILED)' /workspace/stage2_teacher_modes_tm.status || echo \"$(date -u +%Y-%m-%dT%H:%M:%SZ) MARKER:RUN_FAILED\" >> /workspace/stage2_teacher_modes_tm.status",
+    "log_path": "/workspace/stage2_teacher_modes_tm_run.log",
+    "status_path": "/workspace/stage2_teacher_modes_tm.status",
+    "pid_path": "/workspace/jobs/stage2_teacher_modes_tm_driver.pid",
+    "descriptor_path": "/workspace/jobs/stage2_teacher_modes_tm_driver.job.json",
+    "exit_path": "/workspace/jobs/stage2_teacher_modes_tm_driver.exit",
+    "started_utc": "2026-10-31T14:56:03Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "secured": {
+    "s00n_H-N_pass0_s00n_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "6b595b79acea6105d5f42a2ea2c4d1de06bcf172868e627e290eace2ed59a567"
+    },
+    "s00n_H-N_pass0_s00n_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "e259fba05493b576f22fca8aef0fa0faae553909116daf49a2ec5980cb27f6d0"
+    },
+    "s00n_H-N_pass0_s00n_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "edc1e255686e4e4c267daf038dfa049f64a16eb5b9e7366a548c74ace97cd04c"
+    },
+    "s00t_H-T_pass0_s00t_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "33577a9703fee71d8b1b78ccdf1e8f80c76781785698b152876d93d86a31bfda"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "d0d079849f60d3798af7506f3827f2fc46cacc9166dd528943e959806166298d"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "06d9f7357dfe4c627c609e4dd7db85d49d3f518ac65744de55e087132d2f5d43"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "3bff4c4d7739cfec31a44947cac6153ba05935b7f8aa4c9a03b5938662fc5947"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "a15bc1a484148cc383f5bbae47c2694141473bd777d7ec659a158f12fa22e3c9"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "5702dbedcf29c699e3ca39f0da36fb9f579fb9a8db5eac6c12692f3f6f5921ff"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "b73c92cbed55807a87d632f2e75db5ea83acabfe4cbb5b0b10e83dfbd93d9ad2"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "333d83b8f675c53fc85c3ea34e97ffc792b872511890338ba8dd79f2ff5efe2f"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0007.jsonl": {
+      "ok": true,
+      "sha256": "522b79b27d6082433d157c79aed15c5a96b9a51ffb30f7f8439e617547a9100c"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0008.jsonl": {
+      "ok": true,
+      "sha256": "19a96189a80eb0735c9b48ed04de37421c6ebe37ccbfae608dc1dd2e6e1933ee"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0009.jsonl": {
+      "ok": true,
+      "sha256": "cc9ce95f202cb5a9ff262c232a31f72d75ba58537e5835d55fa62d8deb2b0d1b"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0010.jsonl": {
+      "ok": true,
+      "sha256": "43307c324da25f5ad957791040620a306832abc249389571272a41af97a5156f"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0011.jsonl": {
+      "ok": true,
+      "sha256": "503689ed1997ba5a08296ff76109db9790ba5c0ed5ce563a1565bf4acd392bae"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0012.jsonl": {
+      "ok": true,
+      "sha256": "6ec12206c2d3e7a623c5e310bb6df63fd400a5fccc858b12a64183d8d175f45e"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0013.jsonl": {
+      "ok": true,
+      "sha256": "0f1cb003bcbb474cf480c404f349eb96633dd9588ee7a785d35b9a6bd3259171"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0014.jsonl": {
+      "ok": true,
+      "sha256": "113252e0c7e84b1090db56ba9fdf3cec6ecd7f7950ea8a28929ed59b97ae9152"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0015.jsonl": {
+      "ok": true,
+      "sha256": "3304901ef893b78c29b9bf2bbd8dc83bee58c5aadd6e749dfa8be75f9ae30ecf"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0016.jsonl": {
+      "ok": true,
+      "sha256": "5cfd0bc0ac5ffd62377bb8871fb9b670da2cc21101a994d4928400ba3965fd94"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0017.jsonl": {
+      "ok": true,
+      "sha256": "01d068a0cfb7e56e09535a437260f143de47550ec5bc7f4a879d57c5e0913177"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0018.jsonl": {
+      "ok": true,
+      "sha256": "6bc29e0ad4c36c727dbfc06a0944e0d65896147d905a4fd89fe3e980859d1036"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0019.jsonl": {
+      "ok": true,
+      "sha256": "62b38b0d97f234ec0fae9e4323ef7a3c425a84a30a7010a04e7ca53bdc067213"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0020.jsonl": {
+      "ok": true,
+      "sha256": "9e91580d7a976841c75828ff7814b503df4f4c8b154422955156ae596cc99e3c"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0021.jsonl": {
+      "ok": true,
+      "sha256": "6faa7c55a9ab1f131ce399436d8e70efb0d3294d8dd218bc723ca28eeb2a049a"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0022.jsonl": {
+      "ok": true,
+      "sha256": "18290ad34265d27cf181b439b7ecb1b7c3c6f5627ab80ce44df5f89af316127e"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0023.jsonl": {
+      "ok": true,
+      "sha256": "bbc2e337abf0b861127ba01dc2d2f1048135492f4724048715c7a8425c0d9b8c"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0024.jsonl": {
+      "ok": true,
+      "sha256": "51abbf49a11d05e6bd8c1c0b4eee04ffeb9f52cefcb4104b966ab57bf83bc973"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0025.jsonl": {
+      "ok": true,
+      "sha256": "8f138a524be4d1ac2f6a11158f5ed95c213c5104287f90a59caa306cfaf37acc"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0026.jsonl": {
+      "ok": true,
+      "sha256": "1097bb1edfc8ec319ec33c17685f2a88b562d066f577437352ee7076300d1573"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0027.jsonl": {
+      "ok": true,
+      "sha256": "f8835351fa628bef5c16a625423549ab61b59a21b7b530135842368882fe554e"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0028.jsonl": {
+      "ok": true,
+      "sha256": "7140420d509408acc5b499edd791b5110e45c923a75f0e0450f7354942df81f3"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0029.jsonl": {
+      "ok": true,
+      "sha256": "fdbf00c807cf28804d35104239fb6cbe59968cdb7087d193c78fcd4b4a87ce64"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0030.jsonl": {
+      "ok": true,
+      "sha256": "0403575013a337c6667d459ebcd4e656271947b5f7869c7c6a90305488972c96"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0031.jsonl": {
+      "ok": true,
+      "sha256": "3dccbf7c63508572e7e0ef4edeb0a7c40ffa77b856f95ebd95220a1089da8b74"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0032.jsonl": {
+      "ok": true,
+      "sha256": "b8a47c1b1f0415082d81ec940d6c8827cab6b2c1314291092ad7ccd8e191d834"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0033.jsonl": {
+      "ok": true,
+      "sha256": "6de45baec95d9d36842b97e2a43b7fec34c99a1a2e2b1ca716b22ea605ad02ef"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0034.jsonl": {
+      "ok": true,
+      "sha256": "15fe884c1be875ba9d76bb1f568b162c09f318a3f7c33d278058de4e6b2aed7a"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0035.jsonl": {
+      "ok": true,
+      "sha256": "67a46f57d1b5d07e826a103101e773d0940eec3e609f70bd4818e11eabeeaf3b"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0036.jsonl": {
+      "ok": true,
+      "sha256": "35f540fa8f82f87a303f1794040f2e0aa9dec5b35efdd5a7c9393caf2d61d159"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0037.jsonl": {
+      "ok": true,
+      "sha256": "b3e308e6577ba3d16e47bd8e99759aaf1ec7ab237ad1cc411c042fc37170e337"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0038.jsonl": {
+      "ok": true,
+      "sha256": "f1b530bf98a976dab3c0fb0ab06ecb2ddf6e6b53938b7fb8a597f5cecc18d4b5"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0039.jsonl": {
+      "ok": true,
+      "sha256": "52a7e82b653c01104ad5010de640646785239d49c7ddbdfe7014b011a27176c7"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0040.jsonl": {
+      "ok": true,
+      "sha256": "289de7fc4e1826afc968c6b612f4274c4c477b23c1c2ecd78eca71bebe9ab3c6"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0041.jsonl": {
+      "ok": true,
+      "sha256": "96cb759d91967f01b8285516b32336f9a3790c0a91ebde42d7ba29469c6a71d6"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0042.jsonl": {
+      "ok": true,
+      "sha256": "06cccee09305b956597ce7410fbca6fbef95ccfd72637aac6996f8d0ae3afc53"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0043.jsonl": {
+      "ok": true,
+      "sha256": "a73a0584721fea24b3cf125e4a376a848ff018ef705634cad3255033e84cb216"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0044.jsonl": {
+      "ok": true,
+      "sha256": "ff10a31a3d2b8b7799b83141e393c67d8551d4338c5aae9ed2079100a0fb6a7d"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0045.jsonl": {
+      "ok": true,
+      "sha256": "845b790169031e240a48c23d41ed44e02d05fc01b1397f9c30b008224d231041"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0046.jsonl": {
+      "ok": true,
+      "sha256": "31f043c205301717fda64c3cd79108df92799a2d582a3d55d5f91760358ce374"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0047.jsonl": {
+      "ok": true,
+      "sha256": "cfe5665845e350b83bea5c536a615a487f96287610826ec2674ebe32b34770df"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0048.jsonl": {
+      "ok": true,
+      "sha256": "49e5e3ca2f1ffb50bed3b625c353ebf90affa4bd8cbefeb65d2922266e269bdc"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0049.jsonl": {
+      "ok": true,
+      "sha256": "6f8f364a60e0a8b02a3ff2f11fa362233c21cd7f114221cf4885b63372ef00c4"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0050.jsonl": {
+      "ok": true,
+      "sha256": "60ca7149383718fc83cafb6de475fae46d8a1d1df2a7486821402cebef51ea66"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0051.jsonl": {
+      "ok": true,
+      "sha256": "00e09d13ec176c5e5b7d71a16c62701c965e0ea14d802349c8eac20486be2407"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0052.jsonl": {
+      "ok": true,
+      "sha256": "507e465f0c632307b3cfd04533304d38dbd42bfd600c4204950896aed756fa98"
+    },
+    "s01t_H-T_pass0_s01t_g0.part0053.jsonl": {
+      "ok": true,
+      "sha256": "9014d2f4e8e946ecb8f09619d02fa41c09689abb7ab2753b3b518da3282c8be8"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "b39c4f07ea17351a5eec4573cb71620f382b6bd7e8ea708ab1e46d070ca3032d"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "42e6f3f07de3d2f8b5046092fb33bc35e533da13beabe160d9b4a3a281ecac81"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "f35aa97efe718f6c5d18bd25af5628debb84f5bfb8c2d95ce563acf574075367"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "44fee10f6dc9c2a8ac83242233fec1bdc2b9f9ce5846024b44e4ad01a8aa3e26"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "22beeaa1ba546651221169a788d3144e1fa694d150345ac8d18673d6306a4049"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "0b21e73beafc2279749f9f9c1903ea3970ad3bb1c631a03c74c9fefab29c4bd3"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "e6db2ecc5465650d6670b1a9d081389952fb519014e4999f895bc0900d030dd5"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0007.jsonl": {
+      "ok": true,
+      "sha256": "e64ab0c20493d1ab8c5d7ce021e763a0e52ac24efc9e86990c1343bf0682311f"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0008.jsonl": {
+      "ok": true,
+      "sha256": "b2fa1f6568c64f28effbb591441b4a8e0ece7d6bec08004345918d8fce388d9b"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0009.jsonl": {
+      "ok": true,
+      "sha256": "8e70208bf8e5aec391d1452a18413b5f1a61769551a083830e3c720fa86377e6"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0010.jsonl": {
+      "ok": true,
+      "sha256": "4434104cebbfce780fc0cdd20e6f6a12637a8207e8b8f89faeb139207e91d316"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0011.jsonl": {
+      "ok": true,
+      "sha256": "607a9cf8739c08dca3681555d49cba41f7a224aa116f9398b15b311aa4d36129"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0012.jsonl": {
+      "ok": true,
+      "sha256": "47f278f48eb780ba82a4a1327852badf7dcd3596688b93b64e45218b1056ab8a"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0013.jsonl": {
+      "ok": true,
+      "sha256": "17303d9790680aae5f2e9c0045671797f6840b043c21506b422bd280851545c8"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0014.jsonl": {
+      "ok": true,
+      "sha256": "fbb7b3297a1683162cf837e8ff7ee4cfc76a9e59da081a276032af0314b61fa8"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0015.jsonl": {
+      "ok": true,
+      "sha256": "d771291b726651b4f0e841d896acdd60c32d30d40aa8eb0faf4a2d8139544fc3"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0016.jsonl": {
+      "ok": true,
+      "sha256": "d8312687f7a9dad49cab996674a0724851220f1fb4e63a87e867d557b4cfec93"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0017.jsonl": {
+      "ok": true,
+      "sha256": "ee6d7c73a2dd2c6b082b0219c2087fc143538ecb6050c9d0db2c9ac5b2377eb8"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0018.jsonl": {
+      "ok": true,
+      "sha256": "353b017f9a1fbeb18d067623785615510c58e7baa89fc3497e54719e5a82c40c"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0019.jsonl": {
+      "ok": true,
+      "sha256": "981dfb6a3224299c3542641a980c38dd351103413cde6771fbc049c10283acac"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0020.jsonl": {
+      "ok": true,
+      "sha256": "af2582939d33a9c1ccbe5fb87cb18ec81f69bc3be1361ee27b613908aa754111"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0021.jsonl": {
+      "ok": true,
+      "sha256": "bb7ddeeab110d948867f4aaf6efa4f8ae7603d439bbf79c6b1bd0a7d103a011a"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0022.jsonl": {
+      "ok": true,
+      "sha256": "38c58cf463dce06faa8cfa1bd664312d462b95da9d73ce1f336834fff5e31b0c"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0023.jsonl": {
+      "ok": true,
+      "sha256": "7783bf8e779560e06b41d1562b0360c5f00a0a28ad6045a21a176e67f3ed9f27"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0024.jsonl": {
+      "ok": true,
+      "sha256": "55ed2aaff4ce7c1850117dab831f9bcb9a48a8fd8beef9720ba90c1c9ce42a2c"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0025.jsonl": {
+      "ok": true,
+      "sha256": "60c12faf2f5589ce9ba2b9dcaa7153c457083a2fafce4e6873c7f299d6eb44c8"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0026.jsonl": {
+      "ok": true,
+      "sha256": "aa0047766a77c7138bc4e1f964cc839120bb4f3a9c1061f3f59b87b3378e2b92"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0027.jsonl": {
+      "ok": true,
+      "sha256": "7719ada0df8980b6bd10d518c9093c2ec3c2cea28827db3e51253d9413f962f1"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0028.jsonl": {
+      "ok": true,
+      "sha256": "a005912f934d5e18f4cfcdfbc3c5a84db9320472525baf9f1aa29425efda7c2a"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0029.jsonl": {
+      "ok": true,
+      "sha256": "e7b462d548b1e876f498ee941bc7f3eec0a69fa1bfc247ced4ef8695f288b185"
+    },
+    "s01t_H-T_pass1_s01t_g0.part0030.jsonl": {
+      "ok": true,
+      "sha256": "56c55edac017ae5b19c176d628c2bce9c9cf8d1ab5d4c871eaeb4058f6edd701"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "f136f2b2a72141f3de84b01e423f8b83a9071a4ac8b9932005f8218e5e5b94be"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "01ce1ffb7b96c98addb071ad55bf49840b0d1ff60eabf2c99dfafb682c4f9f16"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "7e9aef545b16145fc4cc6496bcb85eefab5becf7e7f3770f955fbf59d3f1e634"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "428b52ad0e5bd205b968ea058a790b10abdc8c3c37b384b55cf9eb20a8d23d3a"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "9dd8c868c9772898bde6306e3642444b7c24a9fa8aa60a7cdd01181ee068935e"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "ddbdf4344afe4f5484927bf8fb03af32f0c9725ea7a83fb40819f7e3dc90d0e6"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "1adef2adb50d3e57ec36201fe2a92e2ad076a20ecc4317980d134dfdb3e41a02"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0007.jsonl": {
+      "ok": true,
+      "sha256": "b7c5decdce669eba4473e70db949913d44fff5e8a66c38300a6f2944a666de14"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0008.jsonl": {
+      "ok": true,
+      "sha256": "5390e3857a1ebbbf988e303ca7fd08010640129e9b81aee49508cae80df2e636"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0009.jsonl": {
+      "ok": true,
+      "sha256": "4ff3f8db04c134bba99ee6f48859d2c2f199bb625bfa3df482e7845a8c7cb099"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0010.jsonl": {
+      "ok": true,
+      "sha256": "23bbb3aeaf8097ea4ac0788306c1659a90976b817e215e3165a7e9173de98953"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0011.jsonl": {
+      "ok": true,
+      "sha256": "b0ddafd7c12495314d7c377b137605533f201be3ddacb2b34acc428ac6f62957"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0012.jsonl": {
+      "ok": true,
+      "sha256": "8694719e01e743fe0dad4127daad28d3d9831bf0f30fa748484d99f18f50f9e9"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0013.jsonl": {
+      "ok": true,
+      "sha256": "de209c8cf746a8f48b48945b13b5453dab6ebbba32788c6533a8987f9db3137d"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0014.jsonl": {
+      "ok": true,
+      "sha256": "224f6ec890637644ce6523b483768ee712b751d6231767e821b7bd6d0a7eae87"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0015.jsonl": {
+      "ok": true,
+      "sha256": "fe510a5509bde36164164cfeff293c1425f65766a4a774bf474d96c0c569280c"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0016.jsonl": {
+      "ok": true,
+      "sha256": "ee9445041897607c0dcb5b1a462ab8c097c378b62b5cebf6a8fd42b5d25920a6"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0017.jsonl": {
+      "ok": true,
+      "sha256": "d680df64fe07985853b165ba8b02aa13828571671b68b1c38310fcb135384245"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0018.jsonl": {
+      "ok": true,
+      "sha256": "0bf92f733ec9f0825d54a5b95c7997621d0b5fb3759d710360f3c602ca883bd7"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0019.jsonl": {
+      "ok": true,
+      "sha256": "acbe1c9cd12e84219ce7c887389f9e32bd7d7b1900dbaee395cff8a6ec001aad"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0020.jsonl": {
+      "ok": true,
+      "sha256": "95699d5857dec75280d4d963c945aa2cdbdac656bdc883904b1707a51c2d9717"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0021.jsonl": {
+      "ok": true,
+      "sha256": "f56cfcbee9ee4518aa2f56715907987aba1d6b4a6e65636c75b19e224b16653c"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0022.jsonl": {
+      "ok": true,
+      "sha256": "20df0b08628bb89f30e51f1357a8675cbca08cb5822aea2656b394d4d3821c99"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0023.jsonl": {
+      "ok": true,
+      "sha256": "6b384f9d7bdc1ce49e81da5bfb6dd6c7c87d1b1b767a3734ef9dc17429772ae0"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0024.jsonl": {
+      "ok": true,
+      "sha256": "1045be822c229c1830076a8785c285e3158d05370c3e7c86bbc9591d3f4b129c"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0025.jsonl": {
+      "ok": true,
+      "sha256": "6089b11347177dc54685719d32fbd4af90c36c030a66271b9f230fab65c341b7"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0026.jsonl": {
+      "ok": true,
+      "sha256": "0683d3ec3a958775baafa3f2c61b9e2bcac57fdce66b962125fb605578adab39"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0027.jsonl": {
+      "ok": true,
+      "sha256": "a0d2e974938ceb20587a5562e2d74c380d1ad23228978b5af45cac8784c3b460"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0028.jsonl": {
+      "ok": true,
+      "sha256": "f3b9995f81614a3ac1b7e1977f31051213001f9353da8d81def010e05f524a2c"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0029.jsonl": {
+      "ok": true,
+      "sha256": "571bb708988705491a19647365decf870cc2e7db2df49f62fe02a44cf7275f27"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0030.jsonl": {
+      "ok": true,
+      "sha256": "9a07f97af6a8ddafaf81d029e48447dcc8d71af4a16383c4f335b7d84d533c7e"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0031.jsonl": {
+      "ok": true,
+      "sha256": "a3df51df948f7a17d58c76b35b85f788b6ad39d457ddda21d8035528e3d9af84"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0032.jsonl": {
+      "ok": true,
+      "sha256": "e990b73072a0f1330fbdb7cd961c857bb005fc04544d339ca1d3d698c28a4fba"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0033.jsonl": {
+      "ok": true,
+      "sha256": "dc88996ed7e25aea7a341355710b3fbd0a5ecb441fbb8755ded112d96a13204e"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0034.jsonl": {
+      "ok": true,
+      "sha256": "417884a75434f0c30da2eb3af4835caf09c10288ce9fa67b347c295b5014b661"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0035.jsonl": {
+      "ok": true,
+      "sha256": "3046485a832a64cb8e78c12e9c72d31068a2a92480c9af30e04f27c271bcea2c"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0036.jsonl": {
+      "ok": true,
+      "sha256": "5ebe60ac942ea3e774560b0b419fbb89648fc34a09db68b265def32670a8f2b6"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0037.jsonl": {
+      "ok": true,
+      "sha256": "b91001d82a5a0c4a882264443af880c1a59cb29f234c00ba843d55b1ac58f315"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0038.jsonl": {
+      "ok": true,
+      "sha256": "be6a229c56be8b166d0b48a3a31c7c9f0deb94e5f197a9b1ce2c34fb68fb1df7"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0039.jsonl": {
+      "ok": true,
+      "sha256": "740682af1d16e490becc0f2fc9ba31811a2225ea0b77308b6578d5514e14e159"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0040.jsonl": {
+      "ok": true,
+      "sha256": "75c85699b60cce1e0bddb66a906ebbc3c77f795fad313ad98828926e604330af"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0041.jsonl": {
+      "ok": true,
+      "sha256": "4fcca241aa3e25bffc4acf137b9fc7021d3c889d3e543b33a3ab7b344759297c"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0042.jsonl": {
+      "ok": true,
+      "sha256": "38f996a9af08895bbf0af40be73da4ea62d22f0ad91d63c1e07c08aa29465de8"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0043.jsonl": {
+      "ok": true,
+      "sha256": "62a5b7f90e563e5b58f167866ddd7dd81c0e6c0a18d5d49c3e3b4197c992ff41"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0044.jsonl": {
+      "ok": true,
+      "sha256": "548ee7a44449a957236d431ab1280014af2087f6780a7ddc4f1823eeedb1da86"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0045.jsonl": {
+      "ok": true,
+      "sha256": "74c672e7bef20f7d2de5416e821166c45c484dedabf824bd8cdacfba641398dd"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0046.jsonl": {
+      "ok": true,
+      "sha256": "3a8903ec578f927fa777af965d95a2c8dca77e7412ac1bf4f991050f6f3f9413"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0047.jsonl": {
+      "ok": true,
+      "sha256": "02908c506ec7081bce785369e42f56d4a5383a7f9ce015e290e364387bf99ceb"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0048.jsonl": {
+      "ok": true,
+      "sha256": "948dbc26d2d6b1bebfa3270bcef597f50bea0e8beea69f2cb1b3efac1362f65b"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0049.jsonl": {
+      "ok": true,
+      "sha256": "18c46e2bc3e85f58a1f459a9cf950309ac51c91cd16772e7f93ca1d8ca16f71e"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0050.jsonl": {
+      "ok": true,
+      "sha256": "1a3683fa265ac31b1c9becbd452848d94e05b3e82234d8e50bb63fe5abb79605"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0051.jsonl": {
+      "ok": true,
+      "sha256": "d4823966852e6f6310343e3cd843ca4a970e3fcc2f158450193c4ca0a8134bf5"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0052.jsonl": {
+      "ok": true,
+      "sha256": "af4e625f44a4033fa2f6af3e6a778d518eee6bc8a32e4bdbff7ee5d0994eb8e9"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0053.jsonl": {
+      "ok": true,
+      "sha256": "41ed6599125589fe55aa592e0deaf7130d822a84067fa23299a93c889122b577"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0054.jsonl": {
+      "ok": true,
+      "sha256": "5a63959434cc6d980934b08e0c88190fc8d3da4342e1be1bd5a4a00856a02406"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0055.jsonl": {
+      "ok": true,
+      "sha256": "b06b6ea5de13a67517ace02d9a670e44adfd5375f144ca13c861391da9c5674d"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0056.jsonl": {
+      "ok": true,
+      "sha256": "f55226696bc245863109002f2c73bcb05bcfd68dff1c5abed8a309c7d06cee3c"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0057.jsonl": {
+      "ok": true,
+      "sha256": "1feb890d80d0d2d617f421c75a42d65190f37a0b2f10a08d5fcfb79abcaf6249"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0058.jsonl": {
+      "ok": true,
+      "sha256": "974a0036da6f87697c257c489177298f42c1a69d1bdfe584f95d26845ab33344"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0059.jsonl": {
+      "ok": true,
+      "sha256": "1b5a08b7e5fce0d1e279facb17cec27e5518cc4c92d7d0e44b99011ef9574245"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0060.jsonl": {
+      "ok": true,
+      "sha256": "777d0c6286bd203d6acba94637742dd02af59e0b97083926262d8e0c19dcebc2"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0061.jsonl": {
+      "ok": true,
+      "sha256": "85d078cf74e49be4935886824c63ec4c937867a8e8918023159e85a1e0ae2475"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0062.jsonl": {
+      "ok": true,
+      "sha256": "350c72ec2ea129338cb09104fcccd9fb8eebbf3d7c4892df87b5f80185f26978"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0063.jsonl": {
+      "ok": true,
+      "sha256": "976c370d493ac3d8cefde50eb2248515a38bc9cc74f18c105df84a22bd5966c0"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0064.jsonl": {
+      "ok": true,
+      "sha256": "c6556be8b7a82565fb6f2323c3f8f4872ffc755244e82411707650810b3b45c2"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0065.jsonl": {
+      "ok": true,
+      "sha256": "2518a01b7c61ab394399821513493fe3dd121aa31adec30ed0772ebf58b39f43"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0066.jsonl": {
+      "ok": true,
+      "sha256": "243d904447629517a55b0b6a3f330391d4beeaa647c2ce54de60617175908663"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0067.jsonl": {
+      "ok": true,
+      "sha256": "45b94bb44db97c12299d8ad46b283c99609c8d2848246a6d54c86b24a80452e2"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0068.jsonl": {
+      "ok": true,
+      "sha256": "f7ef5e6d4035431506fa71d90296a7f726151e65e506a4e872f6c63f2a0ad4ba"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0069.jsonl": {
+      "ok": true,
+      "sha256": "5f099412d9f0f72325c57839f43cabae5197174578d69e923ceee50896a143c1"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0070.jsonl": {
+      "ok": true,
+      "sha256": "804ff5764a12d1ef54cf8a9726d238ea60f33841b156fbc3e967c363685f7803"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0071.jsonl": {
+      "ok": true,
+      "sha256": "3c6f96acbae48e415c49710804f75032e91b8791709bae963f15cb2d099ca1d3"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0072.jsonl": {
+      "ok": true,
+      "sha256": "452d0facca7fa9f3d5430e84e178c72d0858c4164f15357b9267eb1f676194a6"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0073.jsonl": {
+      "ok": true,
+      "sha256": "32d383ebf49814035703d7350eeab98601b536f7802e1eb114af01a7587af590"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0074.jsonl": {
+      "ok": true,
+      "sha256": "cb4d08e269b2e35dfc709454d7fb3e6627abdd6fe1752c12cb5116ce49df18f3"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0075.jsonl": {
+      "ok": true,
+      "sha256": "a37ae675e0bf29bf39fa376edb668c70a70c67f4d4d52ae309cdaa53acac15fe"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0076.jsonl": {
+      "ok": true,
+      "sha256": "d7a7b2c3a4e1c92b2d7567e71271cf8aeca4a1ce754dc165659e5fd51b76d398"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0077.jsonl": {
+      "ok": true,
+      "sha256": "4ad47e24ed5fd0b8032db1898b1037bd8e689c4a6bfcf6f2cc75c4909407a501"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0078.jsonl": {
+      "ok": true,
+      "sha256": "7101c9901983e033f3513e478d3b6e1cafb58d13728731f8e2ede7e924201395"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0079.jsonl": {
+      "ok": true,
+      "sha256": "f7cae34943e1658436392176975e19a3ce803022c85d7627690f4330a87da947"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0080.jsonl": {
+      "ok": true,
+      "sha256": "cd83dd5b23a8b415d33e025fb5be0791dccb7bf19ebc63ca0d186987824b49c4"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0081.jsonl": {
+      "ok": true,
+      "sha256": "438f61b7a208f032072674bcab66add9fb513bd86f3e4462673609eaf9343fc4"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0082.jsonl": {
+      "ok": true,
+      "sha256": "259602b6be83bf2f972d97e085d63024f634ed0b2aaefaf8b85d6e3eae2ce9f3"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0083.jsonl": {
+      "ok": true,
+      "sha256": "c4c424d389db9902dfa8d486125ea4f47f822a4da6d522be3779cf0b2f1c3836"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0084.jsonl": {
+      "ok": true,
+      "sha256": "9512397468da73bf986ad5dbab7a6b9e64a771003067414873468f003b0669b7"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0085.jsonl": {
+      "ok": true,
+      "sha256": "40e487c62b5ddfac16355c434a22d10c93e29df39c3bdb254f3736bbef675039"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0086.jsonl": {
+      "ok": true,
+      "sha256": "8b28d51c308766711c769762469eba1a2904efd6b4abae0b429f0df446dd1ad4"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0087.jsonl": {
+      "ok": true,
+      "sha256": "4a5ffa6345399b15a9f4a99729405b3b0ea6fa9bbc457e1de91eabb1519417c3"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0088.jsonl": {
+      "ok": true,
+      "sha256": "1cd53ef002465862f09d17c2781bb77da6f3cb9abad58177f5e98366ebb49ed8"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0089.jsonl": {
+      "ok": true,
+      "sha256": "4dbeeeb32d0f72420e87fa2e754c000397a75ecd969ee9442cb50230692c5958"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0090.jsonl": {
+      "ok": true,
+      "sha256": "b752c244ca5be2d52eb074a3af68d42f0775f3644138b2383ad59090e6617dbf"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0091.jsonl": {
+      "ok": true,
+      "sha256": "72997e675c28c1d93f42962f8f53ddef731c81497cbfdc780e4c5886798a6a5d"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0092.jsonl": {
+      "ok": true,
+      "sha256": "b35c372c14c189d77ea927770406d84a4af22d93a3fedd45770acfa837a3fab8"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0093.jsonl": {
+      "ok": true,
+      "sha256": "fcb8a132f483b9341c344e425d3055e10b807634cdebaa2258ffe23d44d86293"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0094.jsonl": {
+      "ok": true,
+      "sha256": "c57e36634a74a15946adb00a26279f2a7487ecb3f2547dec25fe26f02886d00d"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0095.jsonl": {
+      "ok": true,
+      "sha256": "6b50a4c0f66ebe320241dbd3a9f9e4f49cfe40422919af0ee9d1207b71fd8d3d"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0096.jsonl": {
+      "ok": true,
+      "sha256": "948e14a272d5ba98b6ce06d21a43cceeb2a49986fc160683f3428aa8d7764499"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0097.jsonl": {
+      "ok": true,
+      "sha256": "3055ec4f7959b86f19d5045822de3a654ebf118f7a9d61763aaab84f4467479e"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0098.jsonl": {
+      "ok": true,
+      "sha256": "fbfdf94122cab535913a14b1a9bac2c13f3c816081a8c098f2e79c7c68843c10"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0099.jsonl": {
+      "ok": true,
+      "sha256": "3451f77c47e273d0386d251b7a424e4b804fa0a3efec288ac3aa15f2d54a62f7"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0100.jsonl": {
+      "ok": true,
+      "sha256": "0402c0103527b9980a83ad3b5cabb375031e2d786f209f432e623c76288ae0ab"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0101.jsonl": {
+      "ok": true,
+      "sha256": "9a2b47915950c939150c1d1284095fe17c97f404df07f95d08d078ec33125e29"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0102.jsonl": {
+      "ok": true,
+      "sha256": "bacdb60eecfa394ae3e36af0cac94d263879e2a16fc86c557332e7a2c911a24e"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0103.jsonl": {
+      "ok": true,
+      "sha256": "71dbd2641a770a5fd42201bf9f9509554a429abf9c88e9d53294350305cd1119"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0104.jsonl": {
+      "ok": true,
+      "sha256": "63a6cd1d7c7c66a660730aa5b01041087c57a9d32d8248c27d18c4d280643a9c"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0105.jsonl": {
+      "ok": true,
+      "sha256": "32e9e7a123c0735f3d288362f1f3c66e3ccab29aee77c2f31155017a7e902f3e"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0106.jsonl": {
+      "ok": true,
+      "sha256": "96e70d2dd49f501e46fda900c375af60513d90c55e513b832412d35b64f1eeda"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0107.jsonl": {
+      "ok": true,
+      "sha256": "466ed78f90a332cdc2b5aaf47f3ae575893481bf53745db54fcf9eec7309d9a3"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0108.jsonl": {
+      "ok": true,
+      "sha256": "8c276100bd2462f66a86bc03447ec3f71a5efd72ad4ac693d769bf3707cec1e2"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0109.jsonl": {
+      "ok": true,
+      "sha256": "5334bf92c6814d42a1fa9e2f014cc15c635ffd6764f2a65637e21bdba8e1b9a1"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0110.jsonl": {
+      "ok": true,
+      "sha256": "2b654cd701aaa3f7b676fbdbe63a3e7ff10dd076eb760d676640bffb193ef207"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0111.jsonl": {
+      "ok": true,
+      "sha256": "d83bf3c16a6ddf6b4915448e7c10b8f4f2d460f0a940d704b7980b16872f986b"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0112.jsonl": {
+      "ok": true,
+      "sha256": "d72c1df377d2b669be160134b9432404a041de723d7931cdba49f4b405acc849"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0113.jsonl": {
+      "ok": true,
+      "sha256": "ff3a7aa2fc03205b3e9d3be82d6ab7631013de1c481c8a0548737149ae74a4cf"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0114.jsonl": {
+      "ok": true,
+      "sha256": "edf22189a0ac519460f71df6fea9614b55f15e1edaafec3cc1c826ef82428dc9"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0115.jsonl": {
+      "ok": true,
+      "sha256": "5a7376c53ac43e55f6f3268922a61e0ae7d165a3af13cf4900860158bf65d42a"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0116.jsonl": {
+      "ok": true,
+      "sha256": "5f7c7cbd99919a3449d979cffc01c2c551e4eb1d8f7dc86b8489d9c4311d21a5"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0117.jsonl": {
+      "ok": true,
+      "sha256": "8fe874bf9e3ca59d1ac7c07208dd96c63d707366d0478aadd12119c4d14a0d5c"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0118.jsonl": {
+      "ok": true,
+      "sha256": "1f8b9c50bbdecc1c44c561658d055f2eb4e9828b334036ba1618b8b7a118bd32"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0119.jsonl": {
+      "ok": true,
+      "sha256": "4f4a7af3cb7b3a9c383bcd61856729820e80b92c8c7bce0245609beacc3c6163"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0120.jsonl": {
+      "ok": true,
+      "sha256": "37ae882deb307f3e5e724019291fdbde56e2ed72055b98d70860d3b72c4ae17a"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0121.jsonl": {
+      "ok": true,
+      "sha256": "8809ae3915f03d1cec1d02a1cb896a284e8dd9e576eadae8dc64e77ce159cd70"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0122.jsonl": {
+      "ok": true,
+      "sha256": "eaa9d3c1f186275bdadfaf357e81b425c7f5dec9d2aa6866c09ab6af605d7405"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0123.jsonl": {
+      "ok": true,
+      "sha256": "3fab03696f7a439c92d0abcc7ea30b4d61089e62f207c92da437012eddfdd90b"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0124.jsonl": {
+      "ok": true,
+      "sha256": "34272d5f34616a8d74655b2e35df4cb3bb3dc77a5f5b68ad2de8c4f3efe05566"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0125.jsonl": {
+      "ok": true,
+      "sha256": "058580e4d8873ac667620ebd6c3c9ed5b7eeaecff0030d45d36c0dfa12a71152"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0126.jsonl": {
+      "ok": true,
+      "sha256": "fb18010e2df54374ca541c1e0eaaab371f54a53b9ed0a2e08a9572b8ff53be46"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0127.jsonl": {
+      "ok": true,
+      "sha256": "950ed1b8764409311fb9ee808f62aeb2f0446892efd38a687da7c6e6e84f7844"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0128.jsonl": {
+      "ok": true,
+      "sha256": "2cb471b851e55be4337c59010aa5ea0835673f9adda2fbc64f8d930b7af93ec1"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0129.jsonl": {
+      "ok": true,
+      "sha256": "58a7a25006234a1e5ee6d517c43d54f0d885fcf3128575cad880c0a13646064a"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0130.jsonl": {
+      "ok": true,
+      "sha256": "1ef59df7618dbb771ef045b6c47a23c8f326b3831dcdd0b8ebe0db382bb0e8d5"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0131.jsonl": {
+      "ok": true,
+      "sha256": "f9f445334a9d77213cce3004ae08b6681c9f17a0c1092408a8b7f6cc5fff1b34"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0132.jsonl": {
+      "ok": true,
+      "sha256": "9f2b092749f51f537de98c93262426793e225e1922ce56ea438b701e6f5e190a"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0133.jsonl": {
+      "ok": true,
+      "sha256": "a9b207a664fe070ad02aac382779b725dd308a9248ed43b21a802ff62a92c03e"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0134.jsonl": {
+      "ok": true,
+      "sha256": "95e4ecaa561d81e82ce288e171d7eff73065e1b454d72a78c194317cb723420f"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0135.jsonl": {
+      "ok": true,
+      "sha256": "e80a40f31500900c882179d83874b29d479a5c607b8d3d30672d31dc1d8efe58"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0136.jsonl": {
+      "ok": true,
+      "sha256": "0d33f47a2a81cc61fc254d4b8713d9d6a4a6f9dffedd249d1c60bbe9f6447590"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0137.jsonl": {
+      "ok": true,
+      "sha256": "597012b10fb3c3bc815ffe48c775618ca6505321fa7f0abad5689f6269f6bdd5"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0138.jsonl": {
+      "ok": true,
+      "sha256": "6fb912a369f9a374171dfc7788eeaafe1b456ce0d643046c4ff9dbfb4bc601db"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0139.jsonl": {
+      "ok": true,
+      "sha256": "46a236a761134f9237e7f9066af220bac0d94ad9e945c0bfda277b86ad655d9e"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0140.jsonl": {
+      "ok": true,
+      "sha256": "081df606174b56f1e924506121a00a542208fa5ab1936a0b66945e9d721e0933"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0141.jsonl": {
+      "ok": true,
+      "sha256": "9df1168c9f33e5038d63bc59f6ff723ca41d2eb9e98d366df56674ed22dbe130"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0142.jsonl": {
+      "ok": true,
+      "sha256": "3c3b55f62138eb16444070fb46d0f113b52584c1148d529a5ecf19f9cc55336e"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0143.jsonl": {
+      "ok": true,
+      "sha256": "b78d2a1b52599e3afda6b81b20e9ef34353aea935403d23b4660b69735ee9464"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0144.jsonl": {
+      "ok": true,
+      "sha256": "55e7d41ccb746a0df0bbfbea300df43f791a97e310ff7edc0918a796356208f5"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0145.jsonl": {
+      "ok": true,
+      "sha256": "d3b9b14a432e7f672ca8571e6a16e2c04c9e430bf8e997b4972d3a5257ebda0d"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0146.jsonl": {
+      "ok": true,
+      "sha256": "6a80b0d1ec4e30742304079a639fffe389fca41d5ae3aea3f1a8a8fef5695240"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0147.jsonl": {
+      "ok": true,
+      "sha256": "feb06935dc52334095ec34543d164fbd627e78108512f95051f27ec99207421f"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0148.jsonl": {
+      "ok": true,
+      "sha256": "3a33b54f3091c70d037489e61211d02c72f2d34412cc855eb4d8ca9a0a624de2"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0149.jsonl": {
+      "ok": true,
+      "sha256": "c9f7732e9fdc3d21a8fbbdc49f117e0cb468559d7745d9fa06b698aff887cdca"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0150.jsonl": {
+      "ok": true,
+      "sha256": "dff867bcce562ec534e49e4e9b94d7888f0a65579e7964cc5e181eec6ec66c76"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0151.jsonl": {
+      "ok": true,
+      "sha256": "d0bbcba5959a1a0be621f3f1234325940e11b0833ba68f3e8d7702b5ad4ba1ac"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0152.jsonl": {
+      "ok": true,
+      "sha256": "a645150c0f7a80c3f87b5701397f3d32c4b7ecfa6dba0634aa656eba4a2272f8"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0153.jsonl": {
+      "ok": true,
+      "sha256": "6647166d66f5ebc786182452956868c4bdfb5c9155a3c40e93eaa4716878ff2b"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0154.jsonl": {
+      "ok": true,
+      "sha256": "3fef891cec20b1490c0cbb75c05672e25b1452ce3466f298cc847415634acca5"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0155.jsonl": {
+      "ok": true,
+      "sha256": "9ae4b63306c927b1d460c4c7abe600dd5c2ad1ecad01fd5f8fe86de61f262611"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0156.jsonl": {
+      "ok": true,
+      "sha256": "1ada37b1fd201be97603f895bdbf7978a0e837e422db848cfa0993c4f3877dd3"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0157.jsonl": {
+      "ok": true,
+      "sha256": "a16fffa5c10e32b2329e075dd4b2bc7cb314674f9c5250f8a395cc7adb602a44"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0158.jsonl": {
+      "ok": true,
+      "sha256": "c3925bb3c7f8f3a19c26462024babe112d1e814f2e5e889212034caf2177c88c"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0159.jsonl": {
+      "ok": true,
+      "sha256": "e81c2bd718038bbe4bf173bb948278d20d5d141d2da4448aa7c257eae125ae70"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0160.jsonl": {
+      "ok": true,
+      "sha256": "cc3d0694ce251e7e8598a8d542d55aafb03e5e066acf0d19db36e2e46d241459"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0161.jsonl": {
+      "ok": true,
+      "sha256": "c94ef423f7fbad14020869b7d3c16f5f48efedcda089cd1a974437042a0306a6"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0162.jsonl": {
+      "ok": true,
+      "sha256": "1331065b9d0ea6d65ed01fbabc66e2b39f8114c7c87fd4c5224e4d1a31de2573"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0163.jsonl": {
+      "ok": true,
+      "sha256": "9eb21e35f8ddea4385ac4a3b837d8f392b88147cf0d4f26f18d2073e3a109cc0"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0164.jsonl": {
+      "ok": true,
+      "sha256": "019997fabe8072c4d0058287d9e9e4d12f65197fe4c6281ef50d010b5a72a633"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0165.jsonl": {
+      "ok": true,
+      "sha256": "fd8761ebf110272de51df9e0ee8c4dbbadf0b04162651bb6fedb11bd3b21c0bf"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0166.jsonl": {
+      "ok": true,
+      "sha256": "f6c02260470b95322ea09513e0ad946544202454effcb984a130b7dc1814eeaa"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0167.jsonl": {
+      "ok": true,
+      "sha256": "80a6a7ab5a0e70e07adb781521925614a70c8e5896bfe4468800a691d590a56f"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0168.jsonl": {
+      "ok": true,
+      "sha256": "822c2397065b6d4bfd76df22a2d866a1395af3656488db8ef72a20bdca1883ca"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0169.jsonl": {
+      "ok": true,
+      "sha256": "b6ed9d4b120ff696148f5055ba2a40f785341c079e9a11cc2839e7bdfda9d3f3"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0170.jsonl": {
+      "ok": true,
+      "sha256": "fc6e33bc0914db83eb9f1a8c0e9590a7662c3ef5bcdeb9fe61c47f3e4c8414ac"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0171.jsonl": {
+      "ok": true,
+      "sha256": "eddee5c43a1160a2d8b91439c3fca923cf1bb8f09c0590b21fc81c3fb7b7accb"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0172.jsonl": {
+      "ok": true,
+      "sha256": "5cc5210e9b6e97a81a59cc44fccc686636f589bb1f1a074ae5a9862e40539608"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0173.jsonl": {
+      "ok": true,
+      "sha256": "5e0e90c1d56eb049827b197c7bd6d94491c2597d38a0d14a2a156d83b59799ec"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0174.jsonl": {
+      "ok": true,
+      "sha256": "a1d32cbac15e4af78f2eaea432036388813fcd7a5ee435b8b4935c8b5ec80e38"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0175.jsonl": {
+      "ok": true,
+      "sha256": "c1aed70e2408d53b063372742277e6eb8359a9376ebb27b9c3040513903fd3f7"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0176.jsonl": {
+      "ok": true,
+      "sha256": "8cc6bf1adc66bbcc007ce3550ea9c5f361df2b581ec40ff66ad324b90521a842"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0177.jsonl": {
+      "ok": true,
+      "sha256": "b566159207f09e6f9c8fa20b51e770739a21602876d591ecf4706b9e6ea412eb"
+    },
+    "s01n_H-N_pass0_s01n_g0.part0178.jsonl": {
+      "ok": true,
+      "sha256": "e5faed5ade8da284d94e8d3eadea8354ec8dcb2cd095f9254c592f758f1b2777"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "171c7c54d62b5a28cfc7d15a6ce3430b81b574f999da65804de38e08208a8a26"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "d5364f7c8766988697dff7624397196cd8273c682338d4f1bbe5609054077209"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "0d2ea7c52f1db46efc10c4a9f6f3367563c03506537c2362e13ba01655f5e83a"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "39827499fd6915bd423fbe9f35cf3b225b07ea4628500275a7d23e1cbf652716"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "7c11c00fb1a998a2946fb6365797e0805b995a8170c5e854dd6f63b9f239a500"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "b21c148d3f6298fa22e59399939565e5d34dfc381eca730f0a4df5188b67ae17"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "2678b8511e778c3e9b57712f6cb4e2239af4652f48209af15d68a794573efe59"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0007.jsonl": {
+      "ok": true,
+      "sha256": "997d8355043063c0124da7ba22ea756b027e98b939e4ea726326df7f0def8238"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0008.jsonl": {
+      "ok": true,
+      "sha256": "945efa3733aba3151d999700eb728ea3cf84e27e7b0bac57b8d0a69a71c4c383"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0009.jsonl": {
+      "ok": true,
+      "sha256": "4b1fb663b417f1e5277828fa6f09143a85c36f029c4d5be58dd2c97c83a47431"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0010.jsonl": {
+      "ok": true,
+      "sha256": "2463bfee40848fcae3fc5afa01f1dbe166c6c4642201a06ce59a5293e23a731e"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0011.jsonl": {
+      "ok": true,
+      "sha256": "265de3736c581c0469e3b8e96327777a9eb7fdf1517d018fc9c3f1f47b3a9e74"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0012.jsonl": {
+      "ok": true,
+      "sha256": "5534ff0c66d1882f4b30d6018fd7c8f9ad655e4439ff7ff344b7643639a51704"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0013.jsonl": {
+      "ok": true,
+      "sha256": "265a9317a59781897d5ff11e0a57b9c747ada1c36b6f015f68463e32a0700c4b"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0014.jsonl": {
+      "ok": true,
+      "sha256": "ec737fd8f0e825ae0e8d9ad5775e068457e4561102ec2ca3ae30d18927528893"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0015.jsonl": {
+      "ok": true,
+      "sha256": "e3aa6ed31cd58259a0562a172d8bcdd6c2ba92bd334e61b6d13287288c4d2a67"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0016.jsonl": {
+      "ok": true,
+      "sha256": "abf81471e5a6f2884820a13fd93e7af7ddb7e0e5d079bdb81268923416edd76d"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0017.jsonl": {
+      "ok": true,
+      "sha256": "92a4b7a9b08645f293849b5c90df986768c19d40c366802f265026a85e7abdf9"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0018.jsonl": {
+      "ok": true,
+      "sha256": "ad31a6b2bd97f5e15f0c193fb811ac57eb285cb2d01e165cf2d76e2a1c05d6a0"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0019.jsonl": {
+      "ok": true,
+      "sha256": "eb74d3c34502834d41505ac64c6d1dfc699094408b87c81fe1ccc08886ee8073"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0020.jsonl": {
+      "ok": true,
+      "sha256": "6be82d135490873b4e78756e36955842aca0d1625f3460b5bace52c58100a3b1"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0021.jsonl": {
+      "ok": true,
+      "sha256": "deeefffb467c379540ef67f055310343c8a6db1a7792868a447cd8e6e9be11ac"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0022.jsonl": {
+      "ok": true,
+      "sha256": "d5d3caa19480ab3f2abf9b5f0042369ee4cc83caeecab4d4e5d655de3b0858cc"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0023.jsonl": {
+      "ok": true,
+      "sha256": "831259be96c12842980cc42b695cecd3b24512d8de5c7980959b049a89661d6c"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0024.jsonl": {
+      "ok": true,
+      "sha256": "55475bf114eed1d1de3d7c32626f8f4a85913fd297306fb118a8c23339be4d51"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0025.jsonl": {
+      "ok": true,
+      "sha256": "e1276b329d2d1def837fb68605c2a169b350d6556c09e64fdd0f433c0aec64ab"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0026.jsonl": {
+      "ok": true,
+      "sha256": "f8f2311ab0ebee0d919e540208e6564004d3e931a6b7c1cc24e2aa53d3867550"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0027.jsonl": {
+      "ok": true,
+      "sha256": "6c369192e9fe09fa353ac2d8f880ec757ff9ddb658280652c74ec537113afc4f"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0028.jsonl": {
+      "ok": true,
+      "sha256": "2650d2ef9d4f1b720636121855bb57cdbf824e8e4730ab0e3a9dccb38b6a518b"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0029.jsonl": {
+      "ok": true,
+      "sha256": "d683d0c372aa6c365d3229ab5bb0bdbfe374d6a5b5c910917272b421403cfe52"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0030.jsonl": {
+      "ok": true,
+      "sha256": "98002680dff128c65e5e62ca0eb7e5e55cfb6748744914fa67b76f5d5e154417"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0031.jsonl": {
+      "ok": true,
+      "sha256": "9da6a4d12f5035d50ddf6e96cd41107aa31d2b825605cbe19a8bcd4d201ea63c"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0032.jsonl": {
+      "ok": true,
+      "sha256": "3813451ce376785cd5c39adc74188d5f2bb59f9668caf7e04a2caaa2762ae014"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0033.jsonl": {
+      "ok": true,
+      "sha256": "be6924e7f86942eb23c1bd455746c32401bf9a1f3057674291bb03170e33cc5e"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0034.jsonl": {
+      "ok": true,
+      "sha256": "1920e6e6fbf951a08eabf179635efd6395168f61f93bdc7a8d41ec06b1fd07ac"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0035.jsonl": {
+      "ok": true,
+      "sha256": "c6ff5ddaa4f7084dc0a425680bbd0c35f4dd76a6e9038e6d837d84a874cf8ea5"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0036.jsonl": {
+      "ok": true,
+      "sha256": "b2b4335abf8895100f02a2351e939941ae14658d0a4493a738505d2552b38986"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0037.jsonl": {
+      "ok": true,
+      "sha256": "b44a3454ff5fed49cf8381c7252d9e8b069bc2c8ad7a4210d385b39a95986ada"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0038.jsonl": {
+      "ok": true,
+      "sha256": "1002869e3903a08cdce6f9055addeb39234ae900e55afd9fb3c24e876e386bd9"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0039.jsonl": {
+      "ok": true,
+      "sha256": "293e8c3bdc99a6ce6026293e9ffc16489b1b174abef31534556513b4017d1ccd"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0040.jsonl": {
+      "ok": true,
+      "sha256": "913c7c75a0e347277a7de87f116435330e3e8a02fef1d1dce601532adefdb9aa"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0041.jsonl": {
+      "ok": true,
+      "sha256": "e43791b40d950575cfb7023e106634ea9dc12700acfe844842c4d14256840633"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0042.jsonl": {
+      "ok": true,
+      "sha256": "1f5a671166b0bd3893607979d0ddceb6175c09d4b88b353b7bfa6b59699735c0"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0043.jsonl": {
+      "ok": true,
+      "sha256": "fd6f76af8ac51e22c86d15de41ce3ba93cc2390e5ef1b41a7567d0568397e9ff"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0044.jsonl": {
+      "ok": true,
+      "sha256": "9bd78c0935bfa5dd0216adb627e14bf385dd69f5399a3206aaa7cd0e436b21dc"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0045.jsonl": {
+      "ok": true,
+      "sha256": "c6a56edbdff0ae0354158f966fecd3ac06fe270f6d0e753bd28c03479f308dcd"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0046.jsonl": {
+      "ok": true,
+      "sha256": "a5b2204c6e3ebfd6d603c5ca97ccedd3333a9689371bbd2948cf7f24db9a0747"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0047.jsonl": {
+      "ok": true,
+      "sha256": "6e75ebdc8d52054bf2ce423f15b84632483685c47ee8a88d52a404b20df81d4d"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0048.jsonl": {
+      "ok": true,
+      "sha256": "babd378dac4411845019c4ba0c6bbd171082fafc2d95289e87eea275cd9e1417"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0049.jsonl": {
+      "ok": true,
+      "sha256": "56cd8959fa1d10e6e522ffc8bbe2b604d3d07e7e880bd783217db7e6daa2a51e"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0050.jsonl": {
+      "ok": true,
+      "sha256": "fb0732b2d7106959844bef5415ed2d5e50e515051c16482337fb89e6d373d107"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0051.jsonl": {
+      "ok": true,
+      "sha256": "73b06e54e72b536ccad9c3d0987fcc38df826cbc09fa9d5f39627380306c12fc"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0052.jsonl": {
+      "ok": true,
+      "sha256": "3127e2790eb9d1f39c9734fa565d055e8e8fc8e22d41b4fc013ac76752d417d2"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0053.jsonl": {
+      "ok": true,
+      "sha256": "a759ecb6c6cfb52ce6771690a0c4e07241abb8cb834874670eb79569b2f3140a"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0054.jsonl": {
+      "ok": true,
+      "sha256": "cef26d6074f6c420d29451632991b41912a6007fabacc8d4f1ef452acfafadd4"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0055.jsonl": {
+      "ok": true,
+      "sha256": "b5d9dc5ffa92f6eebe13f08f6c93af0c5ce79f14c17530332b5cde27dc81b809"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0056.jsonl": {
+      "ok": true,
+      "sha256": "0b3451315471422df60ed3c8b43104417d3e990f1fc989d87754d4cb7b1d4b7f"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0057.jsonl": {
+      "ok": true,
+      "sha256": "fcfff40b5479c92d1179b9e3cae90f517f739aac496d0de6917f1d7992d7fc02"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0058.jsonl": {
+      "ok": true,
+      "sha256": "8677ddcad150620557c257983438a2ebbd4386e7dfb84802a6d73776ac68a3fc"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0059.jsonl": {
+      "ok": true,
+      "sha256": "f12ee522b1163fcec73385017d05749cd31504d28cf09b9f475954b6d64c1d30"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0060.jsonl": {
+      "ok": true,
+      "sha256": "1a45b190e6701078e2dd74d8064b9922008cfa50a1705e9b1a9247865b80ac6e"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0061.jsonl": {
+      "ok": true,
+      "sha256": "c5cc895bc65b6d2bee7bc7af8b62adfc8dccacc99b264ce7c13cd87537792fc6"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0062.jsonl": {
+      "ok": true,
+      "sha256": "b7effe2bb06141a71bda289d06af07e889bd134d26476ba2e3c02b02100db1a8"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0063.jsonl": {
+      "ok": true,
+      "sha256": "3c118a7db3a44affc57e722dad0d3ff7ed4ebd51b83f7fb793dbea6022e127fe"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0064.jsonl": {
+      "ok": true,
+      "sha256": "91c951e36154cfc20cf38a9d6dae65545f87ea8d4c6bde85db693b89477f957c"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0065.jsonl": {
+      "ok": true,
+      "sha256": "06d82906c78a8045940cc9cdddb3a69fbf93fc71a5123bb11c4d0c9d6e603373"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0066.jsonl": {
+      "ok": true,
+      "sha256": "6b63b4d5355699497cd194b4e23205173d8e1121e36e35e407265398e967e94c"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0067.jsonl": {
+      "ok": true,
+      "sha256": "f8d21b7bd56b798270f06129368dbe801a6f7f0d42674abe4c9d56cfa40d059d"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0068.jsonl": {
+      "ok": true,
+      "sha256": "7904623cb4127e765dbddc1ce06ce94bac3ab543e0ac42f7d8d0c16ce8957988"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0069.jsonl": {
+      "ok": true,
+      "sha256": "27cb2eea12e089e382500d7fb1ad2e34a920ede26ae1842f1b6ccfe67c77aedd"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0070.jsonl": {
+      "ok": true,
+      "sha256": "ef912ac6f7b057338d5c2f8b071f86834fbebd5d9bbc173d62a358d5c16c0ab2"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0071.jsonl": {
+      "ok": true,
+      "sha256": "faae159721ac41619bd3e3771ec10676f5ab8f20578ace3056d85971432eb8ca"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0072.jsonl": {
+      "ok": true,
+      "sha256": "a51be5670d2247235b685647e7a1e738b7e1d9d8f904781015b0b01667ffe577"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0073.jsonl": {
+      "ok": true,
+      "sha256": "daebf0c70737cc1c438de4ee8accaf0955181b8c0798877f8adb9718ceb645cf"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0074.jsonl": {
+      "ok": true,
+      "sha256": "332e14635fd1942800a6e0025a8ee6c75633e975d10917de22a1841cc197d223"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0075.jsonl": {
+      "ok": true,
+      "sha256": "2bb83a462d5f117d801763e407bf9195ebb87b6dc41941ab098a1c382866ca49"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0076.jsonl": {
+      "ok": true,
+      "sha256": "5b1b063d914541f210695064eb9ec975229f3dab8ff64223585e826921e45bcf"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0077.jsonl": {
+      "ok": true,
+      "sha256": "26adb2dd895739ce2daf024242e8a9899bc00ecf62dd13bdf3805b12fe79b481"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0078.jsonl": {
+      "ok": true,
+      "sha256": "ab32a0679f92b2deef0f0f44a7c0efa32bc853b16e1dc4e83c79e4cd5cdf0584"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0079.jsonl": {
+      "ok": true,
+      "sha256": "379983d7e71ba9650b422b08f0244840206233bc41945bc0a9cf2076913c115b"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0080.jsonl": {
+      "ok": true,
+      "sha256": "12b1677e3759edda09afc352f194b54bc297e349231e2b9b75179cabd9b173bd"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0081.jsonl": {
+      "ok": true,
+      "sha256": "c2d7e8ee806233e73954e34cc6b1faf0775aef34d39fbb4a0e9fd16b7aed1cb7"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0082.jsonl": {
+      "ok": true,
+      "sha256": "9d767616647908ff172d09e8203d02561df8ffff746ffb8933b6cc53462c9cde"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0083.jsonl": {
+      "ok": true,
+      "sha256": "9d6d8d497ae4316f145409da312e87fb477cef4cb3f27afb751f073926aac1ed"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0084.jsonl": {
+      "ok": true,
+      "sha256": "d5a0c4e4ecaf0e4337475afb0b264ec1f4865ca25e6f8b3bc704930cbce3e819"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0085.jsonl": {
+      "ok": true,
+      "sha256": "7eaa34503c838a8d6b5d0f4470db2a25af377ef3a35671c0a36ccf11dd1ffbc0"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0086.jsonl": {
+      "ok": true,
+      "sha256": "3c09663033947cf871e44889f78cd5eb441f89f6c0a97cb06164e2bd581416ed"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0087.jsonl": {
+      "ok": true,
+      "sha256": "a0650bba07a584b5c829809cffe98e3bd5c45fefbbc0a7ab5d666dbb483d9213"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0088.jsonl": {
+      "ok": true,
+      "sha256": "f1709260b83a38b72d6967fee1fe8e0a4ca4455d1cf79d9c640dcbc93219e127"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0089.jsonl": {
+      "ok": true,
+      "sha256": "42c741447f1daddb672771e2f2763a9bf962528c72c3f8aeacb06bc32d4be51f"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0090.jsonl": {
+      "ok": true,
+      "sha256": "c0aceae07daefe0574a085a090f1175b650b8ecb46e545aef5033716e3198640"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0091.jsonl": {
+      "ok": true,
+      "sha256": "535e8e6ff6fd2f5784d3cb21adbfc3adc7d39bb6b5c4d004d4bd7b8d65711865"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0092.jsonl": {
+      "ok": true,
+      "sha256": "cc7fa166e1c55d099f0789ecd394e9ba9772720dd80990886de47578e23c6752"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0093.jsonl": {
+      "ok": true,
+      "sha256": "ec83507cbfe26e621812a646ae92f58f5eac870441b1ffb1a3e8839eccd98cd7"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0094.jsonl": {
+      "ok": true,
+      "sha256": "7ea800e01f5bf6fa77ac0e74eba80a476aed9878b73756d00cf00c6a45bf8572"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0095.jsonl": {
+      "ok": true,
+      "sha256": "eb6b364fe9e01d5e4c45dc40cef2f08c4bf791bfadebcfc7b048b741d181d1c2"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0096.jsonl": {
+      "ok": true,
+      "sha256": "e01c2a1d1fd63e63edfef5a151c7dbb737db0c31f2b6f6f06f4db32471a0e1cf"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0097.jsonl": {
+      "ok": true,
+      "sha256": "1e359a05951e499bc9fd8b6a7d2d838321f86e82b31b7fbf06c5336cd4972bcb"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0098.jsonl": {
+      "ok": true,
+      "sha256": "d00b73ca3b57696a8f684687e45994390a36aa7ee95c3670f0a01841693a0bf7"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0099.jsonl": {
+      "ok": true,
+      "sha256": "0859b582f328936faedd792e714bb46adcb22d6bbaedd057bc6f5d3be13f5ec3"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0100.jsonl": {
+      "ok": true,
+      "sha256": "e6c1d361ecb5943e19f6a004b32f0262d695957d9cdcb57cfef7784bf3d95334"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0101.jsonl": {
+      "ok": true,
+      "sha256": "97b517652e2440e26ad8e29c8ff3f3d255c84c185b4aa5acb82a6811fa7eefff"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0102.jsonl": {
+      "ok": true,
+      "sha256": "0f682a39798a8a129a5fd030dc3c31a1f28140f54d3733510a2c17b78d42db39"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0103.jsonl": {
+      "ok": true,
+      "sha256": "2203cffb712faf094ca478f9c8a50b2c92c85d76290176970940fccb210ea494"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0104.jsonl": {
+      "ok": true,
+      "sha256": "47f8deb665610c2d590d30430b50b969c4c18cada6dd55967ae172f69a3eb4f9"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0105.jsonl": {
+      "ok": true,
+      "sha256": "c4f98bd39d5173993adcbf9af6bf7672efb86c6fd9803acad972c5a3cf9b6970"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0106.jsonl": {
+      "ok": true,
+      "sha256": "4034e7179685940471c9c718dc7c8049bf524b67968c66aaf91d7e18c7bf7fdb"
+    },
+    "s01n_H-N_pass1_s01n_g0.part0107.jsonl": {
+      "ok": true,
+      "sha256": "3406d097f7cfa0e22df6e235918db170f9eda21c2a1fccdb4cc389acebec7053"
+    },
+    "s02n_H-N_pass0_s02n_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "7555ae3f4df74e381cade8274a5c826d3dcf9bee0cc68c9b3494835da1ef8d78"
+    },
+    "s02n_H-N_pass0_s02n_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "7654f2ac8925fc9479c99baecd1afbfc5d891b038054708c6b40360272f52291"
+    },
+    "s02n_H-N_pass0_s02n_g0.part0002.jsonl": {
+      "ok": true,
+      "sha256": "5301f116ac26d22e322b82b0318fcb1e83a02502063c7b5a08c0c8098b31a000"
+    },
+    "s02n_H-N_pass0_s02n_g0.part0003.jsonl": {
+      "ok": true,
+      "sha256": "7b15536727ee3bc78c73a57de564800c0dc513874cd5d2c63c44ea40820b7d4f"
+    },
+    "s02n_H-N_pass0_s02n_g0.part0004.jsonl": {
+      "ok": true,
+      "sha256": "3af35175af0b75eae59f79c5e65fb29fe6514a8e8fc33e46057b86453be95356"
+    },
+    "s02n_H-N_pass0_s02n_g0.part0005.jsonl": {
+      "ok": true,
+      "sha256": "6a7f58085edc3cbae788e0220d37e4ffee61852e5a9be1ee1e83c3b7669af50f"
+    },
+    "s02n_H-N_pass0_s02n_g0.part0006.jsonl": {
+      "ok": true,
+      "sha256": "d00bad549726e0277c7700c61c1f9cd23c9fa22dc42ecf2e78b8d5d6c7bae5c1"
+    },
+    "s02n_H-N_pass0_s02n_g0.part0007.jsonl": {
+      "ok": true,
+      "sha256": "0f3fef1fe6ac462c60d276302f9d0832a5c609f9d3895171c34e576588dda034"
+    },
+    "s02n_H-N_pass0_s02n_g0.part0008.jsonl": {
+      "ok": true,
+      "sha256": "fb14aa4d90196beb56439321829c205f2a0e6530e164eee2efa1ff22f39c5e20"
+    },
+    "s02n_H-N_pass0_s02n_g0.part0009.jsonl": {
+      "ok": true,
+      "sha256": "7cf46e7160d82ae0096b9c13ff1da713ff00b28ba307d759fea99c15d70f10f1"
+    },
+    "s02n_H-N_pass0_s02n_g0.part0010.jsonl": {
+      "ok": true,
+      "sha256": "2040a46e95e558f61fa1942b353d7d7a180478299229fb7491ad7c7c16e17c67"
+    },
+    "s02n_H-N_pass0_s02n_g0.part0011.jsonl": {
+      "ok": true,
+      "sha256": "a6313f0949cb505d1ba1ef9afa024318da88f17cc63cbf2ab9d2213e55de0bff"
+    },
+    "s02n_H-N_pass1_s02n_g0.part0000.jsonl": {
+      "ok": true,
+      "sha256": "4077077875f244743973943f0953ceee1bd00141e08d53660b9b94483c28f5dd"
+    },
+    "s02n_H-N_pass1_s02n_g0.part0001.jsonl": {
+      "ok": true,
+      "sha256": "6549ac11491be575aee7b0460d1f2fb25d91acc858637f68821fffaa8af8a543"
+    }
+  },
+  "v1_small": {
+    "units/H-T-C-s20260801/checkpoint.descriptor.json": true,
+    "units/H-T-C-s20260801/training.descriptor.json": true,
+    "units/H-T-C-s20260801/attempts.jsonl": true,
+    "units/H-T-C-s20260801/train/a1/train_log.jsonl": true,
+    "units/H-T-C-s20260801/train/a1/run_manifest.json": true,
+    "units/H-T-C-s20260801/train/a1/train_inputs.json": true,
+    "units/H-T-C-s20260801/train/a1/checkpoints/latest.txt": false,
+    "recovery_a_recovery_20261030_211948.json": true
+  },
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "checkpoints_fetched": [],
+  "runner_logs": {
+    "s00n_H-N_pass0_s00n_g0.seg0.log": true,
+    "s00t_H-T_pass0_s00t_g0.seg0.log": true,
+    "s01n_H-N_pass0_s01n_g0.seg0.log": true,
+    "s01n_H-N_pass0_s01n_g0.seg1.log": true,
+    "s01n_H-N_pass1_s01n_g0.seg0.log": true,
+    "s01t_H-T_pass0_s01t_g0.seg0.log": true,
+    "s01t_H-T_pass1_s01t_g0.seg0.log": true,
+    "s02n_H-N_pass0_s02n_g0.seg0.log": true,
+    "s02n_H-N_pass1_s02n_g0.seg0.log": true
+  },
+  "required_products_secured": {
+    "ok": true,
+    "why": "390 sealed shard(s) secured off-pod; everything is on the network volume"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 0,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 544.69,
+    "actual_usd": 9.8951,
+    "authorized_usd": 17.0,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-31T23:54:02+00:00"
+}
