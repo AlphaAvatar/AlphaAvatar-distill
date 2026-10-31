@@ -1,0 +1,10 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.phase_authorization_outcome/v1",
+ "run_id": "a_supplement_20261031_091618",
+ "study": "A-TM",
+ "status": "NOT_LAUNCHED",
+ "provider_resource_created": false,
+ "money": {"all_in_usd": 0.0},
+ "why": "superseded before launch: the maintainer's 2026-10-31 'Teacher-Student Lineage Invariant and Final 3x2 Training Matrix' cancelled the same-tasks arms the study's preregistration v1 registered, so the preregistration was amended (v2) before any supplementary record existed, which changes the study identity this artifact binds; a new artifact was issued under the amended identity",
+ "authorizes": "nothing"
+}

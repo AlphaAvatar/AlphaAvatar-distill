@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Research A v2's admission: sealed v1 and supplement records -> each mode's token-matched selection, the same-tasks
-set, every pack. $0, dev box.
+"""Research A v2's admission: sealed v1 and supplement records -> each mode's token-matched selection (A1: thinking,
+A2: non-thinking), both packs. $0, dev box.
 
     PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.token_admission \\
         --v1-records <v1 scr>/store/generation --v1-identity <v1 study identity> \\
@@ -20,8 +20,7 @@ The registered rules (token_matched_design.json :: scale, categories, selection,
    family shares in that cell; a family that runs dry hands its share to the cell's others. The category stops
    at the first task that reaches its target. A cell that runs dry first is a SHORTFALL: reported, the
    selection refused, nothing substituted.
-4. SAME TASKS: the tasks both selections hold, each mode with its own documents.
-5. PACKS: each arm's documents `pack_isolated` at 8,192 (doc ids sorted, the protocol's order seed), with its
+4. PACKS: each arm's documents `pack_isolated` at 8,192 (doc ids sorted, the protocol's order seed), with its
    mode's validation tail (V and V2 documents, at most 16 sequences), `write_pack`.
 
 Nothing reads a student result, an eval-set-1 item, or a length or score beyond the frozen verdict.
@@ -158,12 +157,12 @@ def decide(got: dict, design: dict | None = None) -> dict:
             cq = {"/".join(c): v for c, v in q.items() if BST.category_of(c) == cat}
             sel[m][cat] = select({c: sup[m][c] for c in cq}, cq, targets, float(total))
     ids = {m: [t for cat in sel[m].values() for t, *_ in cat["tasks"]] for m in MODES}
-    same = sorted(set(ids["H-T"]) & set(ids["H-N"]))
     val = {m: sorted({dd.doc_id for t in got["val_ids"] for dd in (got["verdicts"].get((t, m)) or {}).get("docs", [])})
            for m in MODES}
-    arms = {"H-T-TM": ("H-T", ids["H-T"]), "H-N-TM": ("H-N", ids["H-N"]), "H-T-ST": ("H-T", same), "H-N-ST": ("H-N", same)}
+    #: the maintainer's final matrix (2026-10-31): A1 and A2 are the hybrid arms; same-tasks arms are cancelled
+    arms = {"A1": ("H-T", ids["H-T"]), "A2": ("H-N", ids["H-N"])}
     return {"quotas": {"/".join(c): v for c, v in q.items()}, "targets": targets, "selection": sel, "arms": arms,
-            "same_tasks": same, "val": val, "supply": sup}
+            "val": val, "supply": sup}
 
 
 def accounting(got: dict, dec: dict, packs: dict | None) -> dict:
@@ -271,12 +270,12 @@ def main(argv=None) -> int:
     cells = set(dec["quotas"])
     fam_tvd = {}
     for c in sorted(cells):
-        fa = {k: v for k, v in acc["H-T-TM"]["by_family"].items() if k.startswith(c + "/")}
-        fb = {k: v for k, v in acc["H-N-TM"]["by_family"].items() if k.startswith(c + "/")}
+        fa = {k: v for k, v in acc["A1"]["by_family"].items() if k.startswith(c + "/")}
+        fb = {k: v for k, v in acc["A2"]["by_family"].items() if k.startswith(c + "/")}
         fam_tvd[c] = tvd(fa, fb)
     targets = BST.design()["scale"]
     checks = {}
-    for m, arm in (("H-T", "H-T-TM"), ("H-N", "H-N-TM")):
+    for m, arm in (("H-T", "A1"), ("H-N", "A2")):
         tot = acc[arm]["supervised_tokens"]
         checks[arm] = {"total": tot, "over_target_fraction": round(tot / targets["per_mode_total"] - 1, 6),
                        "category_deviation_points": {k: round(100 * (acc[arm]["by_category"].get(k, 0) / tot - v / targets["per_mode_total"]), 4)
@@ -295,7 +294,6 @@ def main(argv=None) -> int:
                                       if a.records and Path(a.records).is_dir() else []}},
            "quotas": dec["quotas"], "family_targets": dec["targets"], "shortfall": short, "tolerance_checks": checks,
            "family_tvd_between_modes": fam_tvd, "arms": acc,
-           "same_tasks": {"tasks": len(dec["same_tasks"])},
            "validation": {m: {"documents": len(v)} for m, v in dec["val"].items()},
            "selection": {m: {cat: [t for t, *_ in s["tasks"]] for cat, s in dec["selection"][m].items()} for m in MODES},
            "isolation_recheck": {**got["isolation"], "flagged": got["flagged"]},

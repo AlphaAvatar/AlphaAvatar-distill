@@ -1,9 +1,9 @@
 {
  "schema": "aadistill.stage2.teacher_modes.token_matched_preregistration/v1",
- "version": 1,
+ "version": 2,
  "study_id": "stage2.teacher_modes.token_matched",
- "written_utc": "2026-10-31T08:39:47Z",
- "status": "REGISTERED before any supplementary generation, before order_v2's records exist and before any student of this study exists; no Research A v1 student score was read by the agent before it. The decision rule is bound now; the training recipe and the initialization are PROPOSALS (docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md) that freeze only on the maintainer's approval, without changing anything registered here",
+ "written_utc": "2026-10-31T09:20:38Z",
+ "status": "REGISTERED (v2) before any supplementary generation, before order_v2's records exist and before any student of this study exists; no Research A v1 student score was read by the agent before it. The decision rule is bound now; the training recipe and the initialization are PROPOSALS (docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md) that freeze only on the maintainer's approval, without changing anything registered here",
  "design": {
   "path": "configs/stages/stage-2/teacher_modes/token_matched_design.json"
  },
@@ -11,35 +11,51 @@
   "for_new_work": "logs/stages/stage-2/teacher_modes/plans/d4_scale_preregistration.json (v1, sha256 060a156e74ebcefc9115f0945192a2f1266a9e8e0e4fa2e2788c2573bfc39ecf): frozen, not overwritten; its comparisons S and C and its students stay Research A v1's"
  },
  "arms": {
-  "H-T-TM": "H-T documents of the H-T token-matched selection: 5,923,021 unique supervised tokens (2,960,507 base-corpus counterpart + 2,962,514 fluid), whole tasks, at the design's cell shares",
-  "H-N-TM": "H-N documents of the H-N token-matched selection, the same targets and cell shares",
-  "H-T-ST": "H-T documents of the tasks both token-matched selections hold",
-  "H-N-ST": "H-N documents of the same tasks"
+  "A1": {
+   "initialization": "the hybrid D4 full-search Top-1 (to be searched)",
+   "kd_teacher": "Qwen/Qwen3-4B@1cfa9a72, thinking",
+   "data": "the H-T token-matched selection, about 5.923M unique supervised tokens"
+  },
+  "A2": {
+   "initialization": "the same hybrid Top-1",
+   "kd_teacher": "Qwen/Qwen3-4B@1cfa9a72, non-thinking",
+   "data": "the H-N token-matched selection, about 5.923M"
+  },
+  "C1": {
+   "initialization": "the Thinking-2507 D4 Top-1 (single-shard fc28e0dd...)",
+   "kd_teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d",
+   "data": "D4-Augmented's own pack (5,923,021), hash-verified, no hybrid data"
+  }
  },
  "seeds": [
   20260726,
   20260801
  ],
  "seed_pairing": "arms are paired by training-seed number; every directional label needs both seeds' own estimates on its side",
- "initialization": "one checkpoint for every arm and seed: the Top-1 of a NEW D4 full search on the hybrid teacher (proposed, not yet run); its artifact digest is bound into every unit before training",
+ "initialization": "A1 and A2: one checkpoint, the Top-1 of a NEW hybrid D4 full search (proposed); C1: the Thinking-2507 D4 Top-1 (single-shard sha256 fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8). Each bound by digest into every unit before training",
  "comparisons": {
-  "primary": {
-   "contrast": "H-T-TM - H-N-TM",
+  "A1_vs_A2": {
+   "contrast": "A1 - A2",
    "role": "decided",
-   "reading": "at equal unique supervised tokens and equal category and cell composition; NOT at equal compute (steps, non-padding tokens, FLOPs and task counts differ and are reported)"
+   "reading": "the primary comparison: the same hybrid teacher, the same initialization, matched unique supervised tokens and category/cell composition; NOT matched compute"
   },
-  "secondary": {
-   "contrast": "H-T-ST - H-N-ST",
-   "role": "decided, independent",
-   "reading": "on the same tasks with each mode's natural length (supervised tokens differ and are reported)"
+  "C1_vs_D4_Augmented": {
+   "contrast": "C1 - historical D4-Augmented (h1pa.json's two units)",
+   "role": "estimated, reported with every protocol difference",
+   "reading": "the same teacher, initialization and data: the target-position Top-200+tail KD objective against the historical one, every other protocol difference disclosed"
   },
-  "never": "the two are never pooled into one effect estimate; step-matched and FLOPs-matched comparisons are not registered and are not implied by either",
+  "A1_vs_C1": {
+   "contrast": "A1 - C1",
+   "role": "descriptive, end to end",
+   "reading": "end to end, the hybrid route against the Thinking-2507 route; not a single-variable causal contrast"
+  },
+  "never": "the three contrasts are never pooled; none is read as a single-variable effect beyond what its own reading states",
   "teacher_gap": {
    "contrast": "teacher(mode) - student, per arm",
    "role": "descriptive"
   }
  },
- "multiplicity": "Bonferroni over the two decided comparisons: each interval at 97.5%",
+ "multiplicity": "PROPOSED for the maintainer's approval with the training plan: the decision rule's interval for A1 - A2 at 97.5% as in v1, the other two contrasts estimated at the same level and labelled by the same rule without a GO decision",
  "evaluation": {
   "set": {
    "eval_set_id": "eval-set-1",
@@ -93,7 +109,8 @@
   "selection": "token_matched_design.json :: selection (reuse first, the frozen v1 verdict and isolation recheck, largest-remainder interleave over cells, families toward the two modes' mean family shares)",
   "steps": "each arm: ceil(epochs x sequences / batch size) as the approved training plan fixes it; the arms' differing step counts are reported, never equalized here",
   "length_censoring": "a generation that reaches its 8,184-minus-prompt allowance is training-length-limited (right-censored at the training sequence; never called a context-limit hit: the teacher supports 40,960) and never admitted; any primary cell whose H-T first-candidate length-limited share exceeds 20% carries the DESCRIPTIVE warning LENGTH_CENSORED, its limited share, correctness, natural-termination rate and trainable-sample count reported in full; nothing is cut, re-sampled, re-run or dropped because of it",
-  "validation": "each mode's admitted V and V2 documents, at most 16 isolated sequences: diagnostics only"
+  "validation": "each mode's admitted V and V2 documents, at most 16 isolated sequences: diagnostics only; C1 keeps D4-Augmented's own 16 E1 validation sequences",
+  "c1": "D4-Augmented's merged pack (D4A_merged_whole: 2,468 sequences, 5,923,021 supervised tokens) as hash-verified, its packing and context strategy kept and disclosed"
  },
  "teacher_correctness": "per mode on every T0 task's first candidate (the teacher's correctness), and the two-candidate yield, per cell and axis; and on eval-set-1 per mode under nucleus_v1",
  "reported_beside": [
@@ -115,5 +132,26 @@
   "comparing a Research A student with a Research B student as a controlled pair (different teacher lineages)",
   "admitting a truncated reasoning trajectory, or lowering a correctness standard to reach a scale"
  ],
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "supersedes_v1_of_this_file": {
+  "sha256": "72331f5847a21dd539aafa49bc1bc970cd248a6d831b9283c16ea022ae8eb323",
+  "written_utc": "2026-10-31T08:39:47Z",
+  "why": "amended the same day, before any supplementary record or any result existed, for Maintainer 2026-10-31 'Teacher–Student Lineage Invariant and Final 3×2 Training Matrix': the same-tasks arms are cancelled and the matrix is A1/A2/C1"
+ },
+ "lineage": {
+  "invariant": "Root Teacher -> Calibration -> Full Search -> Student Initialization -> Teacher-native training data -> Online KD teacher -> recovery checkpoint: one teacher lineage (model id, revision, weight hashes, tokenizer, vocabulary, chat template, RoPE/model config) end to end",
+  "hybrid": {
+   "model": "Qwen/Qwen3-4B",
+   "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+   "identity": "configs/stages/stage-2/teacher_modes/teacher_identity.json",
+   "modes": "thinking and non-thinking are two official modes of ONE set of weights: A1 and A2 share the one Top-1 of a mode-balanced hybrid full search"
+  },
+  "thinking_2507": {
+   "model": "Qwen/Qwen3-4B-Thinking-2507",
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "initialization_single_shard_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8"
+  },
+  "never": "a student initialized from one lineage distilled by, or trained on data of, the other; a warning in place of a refusal",
+  "gates": "configuration validation, launch admission and the trainer at runtime (proposed with the training plan; nothing trains in this round)"
+ }
 }

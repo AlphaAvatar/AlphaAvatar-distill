@@ -2,11 +2,12 @@
  "schema": "aadistill.stage2.teacher_modes.token_matched_design/v1",
  "study_id": "stage2.teacher_modes.token_matched",
  "name": "Research A v2: thinking against non-thinking at matched supervised tokens and composition",
- "status": "REGISTERED 2026-10-31 at $0, before any supplementary generation and before any student result was read; DATA ONLY: this design authorizes supplementary teacher generation and the data admission, never a calibration generation, a search, an initialization, a training run or an evaluation (the D4 full search and the training are proposals that wait for the maintainer's review)",
+ "status": "REGISTERED 2026-10-31 at $0, before any supplementary generation and before any student result was read; DATA ONLY: this design authorizes supplementary teacher generation and the data admission, never a search, an initialization, a training run or an evaluation (the D4 full search and the training are proposals that wait for the maintainer's review)",
  "decided_by": {
   "maintainer": "2026-10-31 'Research A Immediate STOP and Token-Matched Data Completion': stop the recovery; the training scale is supervised tokens, not packed sequences; per mode 5,923,021 = 2,960,507 (the category corresponding to D4-Augmented's base corpus) + 2,962,514 (fluid reasoning); matched totals, category ratio and comparable source distribution; reuse every legal sealed record first; stop after the data and wait for review",
   "maintainer_choice": "2026-10-31 (question in session): the base-corpus category corresponds to E1's corpus_v2 type by type -- competition math (MATH train, replacing openmath), GSM8K train, SQuAD v2 answerable reading, HotpotQA multi-hop reading, code -- one fifth each; tool calling has no legal training source and is dropped; answerability is not counted",
-  "maintainer_2": "2026-10-31 'Research A STOP, Token-Matched data completion and D4 Full Search plan review' (supersedes the first 2026-10-31 brief): the same token targets; match totals, categories and source/family distributions as closely as possible; the new study's initialization is a NEW D4 full search on the hybrid teacher's frozen weights with D4's search specification and freshly computed hybrid calibration references -- proposed now, not executed; every arm and both seeds start from its one Top-1"
+  "maintainer_2": "2026-10-31 'Research A STOP, Token-Matched data completion and D4 Full Search plan review' (supersedes the first 2026-10-31 brief): the same token targets; match totals, categories and source/family distributions as closely as possible; the new study's initialization is a NEW D4 full search on the hybrid teacher's frozen weights with D4's search specification and freshly computed hybrid calibration references -- proposed now, not executed; every arm and both seeds start from its one Top-1",
+  "maintainer_3": "Maintainer 2026-10-31 'Teacher–Student Lineage Invariant and Final 3×2 Training Matrix': a student starts from ITS OWN teacher's weights through the approved initialization and is distilled by the same teacher lineage; the final matrix is three arms x two seeds (20260726, 20260801): A1 = the new hybrid D4 full-search Top-1, KD and data from the hybrid in thinking mode; A2 = the same Top-1, the hybrid in non-thinking mode; C1 = the historical Thinking-2507 D4 Top-1 (single-shard sha256 fc28e0dd...), KD from Thinking-2507, D4-Augmented's own data; B1/B2, D1/D2, same-tasks and every other arm are cancelled; lineage gates fail closed"
  },
  "supersedes": {
   "for_new_work": "configs/stages/stage-2/teacher_modes/d4_scale_design.json (study 848f6508..., the 2,468-sequence target); it stays frozen as Research A v1 and its records, preregistration and student results keep their identity",
@@ -139,32 +140,56 @@
  "validation": "per mode, the admitted documents of V and V2 (32 tasks of each new dataset cell), document-isolated at 8,192, at most 16 sequences: diagnostic only",
  "packing": "aadistill.data.token_documents.pack_isolated (document_isolated) at 8,192, documents sorted by doc id, order seed 20261029 (generation_protocol.json :: stopping)",
  "comparisons": {
-  "primary": {
-   "name": "token-matched, composition-matched",
-   "arms": {
-    "H-T-TM": "H-T documents of the H-T selection",
-    "H-N-TM": "H-N documents of the H-N selection"
+  "matrix": {
+   "A1": {
+    "initialization": "the hybrid D4 full-search Top-1 (to be searched)",
+    "kd_teacher": "Qwen/Qwen3-4B@1cfa9a72, thinking",
+    "data": "the H-T token-matched selection, about 5.923M unique supervised tokens"
    },
-   "matched": "unique supervised tokens per category and cell",
-   "differs_and_is_reported": "task counts and task identities (the modes' lengths differ about 5x), documents, packed sequences, non-padding context tokens, optimizer steps, training FLOPs and teacher-forward FLOPs, padding share; the causal reading is limited to 'at equal supervised tokens and composition', never 'at equal compute'"
-  },
-  "secondary": {
-   "name": "same tasks",
-   "arms": {
-    "H-T-ST": "H-T documents of the tasks both selections hold",
-    "H-N-ST": "H-N documents of the same tasks"
+   "A2": {
+    "initialization": "the same hybrid Top-1",
+    "kd_teacher": "Qwen/Qwen3-4B@1cfa9a72, non-thinking",
+    "data": "the H-N token-matched selection, about 5.923M"
    },
-   "differs_and_is_reported": "supervised tokens (each mode's natural length) and everything that follows from them",
-   "never": "pooled with the primary into one effect estimate"
+   "C1": {
+    "initialization": "the Thinking-2507 D4 Top-1 (single-shard fc28e0dd...)",
+    "kd_teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d",
+    "data": "D4-Augmented's own pack (5,923,021), hash-verified, no hybrid data"
+   }
   },
-  "not_the_same": "token-matched, step-matched and FLOPs-matched are different comparisons; only token-matched (primary) and same-tasks (secondary) are registered here, the others are reported as accounting"
+  "seeds": [
+   20260726,
+   20260801
+  ],
+  "runs": 6,
+  "A1_vs_A2": "the primary comparison: the same hybrid teacher, the same initialization, matched unique supervised tokens and category/cell composition; NOT matched compute",
+  "C1_vs_D4_Augmented": "the same teacher, initialization and data: the target-position Top-200+tail KD objective against the historical one, every other protocol difference disclosed",
+  "A1_vs_C1": "end to end, the hybrid route against the Thinking-2507 route; not a single-variable causal contrast",
+  "cancelled": "the same-tasks arms and every other control (maintainer 2026-10-31)",
+  "not_the_same": "token-matched, step-matched and FLOPs-matched are different comparisons; only the matrix above is registered"
  },
  "compute_accounting": "per arm: unique supervised tokens, documents, tasks, packed sequences, non-padding tokens, padding share, optimizer steps, supervised-token exposure, student and teacher FLOPs (logs/stages/stage-2/teacher_modes/data/token_matched_admission.json)",
  "next": "the maintainer's review of the data audit, the initialization plan and the training plan (docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md); nothing is initialized, trained or evaluated before it",
  "authorizes": "nothing",
  "initialization": {
-  "decision": "maintainer 2026-10-31: a new D4 full search on the hybrid teacher (Qwen/Qwen3-4B@1cfa9a72), not D4 Top-1 and not Research A v1's fixed-path common initialization",
-  "status": "PROPOSED, not executed: docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md section B and configs/stages/stage-2/teacher_modes/full_search_proposal.json; nothing in this round calibrates, searches or materializes",
-  "shared_by": "both primary arms, both secondary arms and both seeds start from the one Top-1 checkpoint, bound by its artifact digest"
+  "decision": "Maintainer 2026-10-31 'Teacher–Student Lineage Invariant and Final 3×2 Training Matrix': A1/A2 from ONE new D4 full search on the hybrid's weights (D1 target-aware, scored_v1, reference_topk_tail_v1 K=200, beam 6, warmup 1, pareto v2, operator order and Base/Reasoning-Heavy profile searched), calibrated on both modes balanced on scored positions; C1 from the historical Thinking-2507 D4 Top-1",
+  "status": "PROPOSED, not executed (docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md); this round prepares the calibration data only",
+  "shared_by": "A1 and A2, both seeds, bound by the Top-1's artifact digest"
+ },
+ "lineage": {
+  "invariant": "Root Teacher -> Calibration -> Full Search -> Student Initialization -> Teacher-native training data -> Online KD teacher -> recovery checkpoint: one teacher lineage (model id, revision, weight hashes, tokenizer, vocabulary, chat template, RoPE/model config) end to end",
+  "hybrid": {
+   "model": "Qwen/Qwen3-4B",
+   "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+   "identity": "configs/stages/stage-2/teacher_modes/teacher_identity.json",
+   "modes": "thinking and non-thinking are two official modes of ONE set of weights: A1 and A2 share the one Top-1 of a mode-balanced hybrid full search"
+  },
+  "thinking_2507": {
+   "model": "Qwen/Qwen3-4B-Thinking-2507",
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "initialization_single_shard_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8"
+  },
+  "never": "a student initialized from one lineage distilled by, or trained on data of, the other; a warning in place of a refusal",
+  "gates": "configuration validation, launch admission and the trainer at runtime (proposed with the training plan; nothing trains in this round)"
  }
 }
