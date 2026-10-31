@@ -55,6 +55,13 @@ def request_seed(base: int, task_id: str, turn: int) -> int:
     return int.from_bytes(h[:4], "big") % (2 ** 31)
 
 
+def read_tasks(path) -> list[dict]:
+    """The --tasks JSON Lines, split on "\n" only: str.splitlines() also breaks at U+0085, U+2028 and
+    U+2029, which an ensure_ascii=False input carries raw (a GSM8K problem holding U+2028 failed s01n of
+    a_supplement_20261031_092108 before the engine loaded)."""
+    return [json.loads(l) for l in Path(path).read_text(encoding="utf-8").split("\n") if l.strip()]
+
+
 def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
                  seed_base, system, check_every, degeneration_check,
                  split_generation, template_opens_think, label, log=print,
@@ -327,7 +334,7 @@ def main(argv=None) -> int:
     print(f"[{args.label}] mode={args.mode} context={ctx} "
           f"({ctx_info['context_source']}) limit={limit} stop={stop_ids}", flush=True)
 
-    tasks = [json.loads(l) for l in Path(args.tasks).read_text().splitlines() if l.strip()]
+    tasks = read_tasks(args.tasks)
     if args.limit:
         tasks = tasks[:args.limit]
 

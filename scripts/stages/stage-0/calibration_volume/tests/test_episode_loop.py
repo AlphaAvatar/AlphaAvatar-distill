@@ -184,3 +184,12 @@ def test_a_measurement_seeds_every_turn_through_its_protocol():
     sent.clear()
     plain = run(None)
     assert set(sent) == {None} and all(t["seed"] is None for e in plain.values() for t in e["turns"])
+
+
+def test_a_raw_unicode_line_separator_inside_a_task_does_not_split_it(tmp_path):
+    """An ensure_ascii=False input carries U+2028 / U+0085 / U+2029 raw inside a string; they are not line ends."""
+    from stages.calibration_volume.run_battery import read_tasks
+    rows = [{"task_id": "a", "messages": [{"role": "user", "content": "x y\x85z "}]}, {"task_id": "b"}]
+    p = tmp_path / "tasks.jsonl"
+    p.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+    assert read_tasks(p) == rows

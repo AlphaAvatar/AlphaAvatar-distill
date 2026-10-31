@@ -142,7 +142,8 @@ class Sealer:
             f.seek(self.offset)
             chunk = f.read()
         end = chunk.rfind(b"\n") + 1
-        lines = [l for l in chunk[:end].decode().splitlines() if l.strip()]
+        #: "\n" only: the stream is ensure_ascii=False, and splitlines() would tear a record at a raw U+2028
+        lines = [l for l in chunk[:end].decode().split("\n") if l.strip()]
         if not lines or (not force and len(lines) < self.every_records
                          and time.time() - self.last < self.every_seconds):
             return 0

@@ -133,3 +133,20 @@ def test_the_supplement_session_generates_calibration_then_rounds_to_the_need_an
     n = len(fake.calls)
     assert SS.main(args, run=fake, authorize=auth, repo=root) == 0
     assert len(fake.calls) == n                                               # every sealed record is read back
+
+
+def test_closeout_pulls_this_studys_runner_logs_only(monkeypatch, tmp_path):
+    """A unit that dies before sealing leaves its traceback in its runner log alone: closeout pulls every own one."""
+    from types import SimpleNamespace
+
+    from stages.teacher_modes import token_matched_phase as TM
+    listing = "s01n_H-N_pass0_s01n_g0.seg0.log\ns01t_H-T_pass1_s01t_g0.seg0.log\npass0_generation_input_g0.seg0.log\n"
+    ctx = SimpleNamespace(target=SimpleNamespace(run=lambda cmd, timeout: SimpleNamespace(
+        returncode=0, stdout=listing + TM.P1.LISTED + "\n")), args=None, evidence={})
+    pulled = []
+    monkeypatch.setattr(TM.P1, "durable", lambda args: "/v/d")
+    monkeypatch.setattr(TM.SE, "store", lambda c: tmp_path)
+    monkeypatch.setattr(TM.P1, "_pull", lambda c, remote, dest, digest: pulled.append(remote) or True)
+    TM.runner_logs(ctx)
+    assert pulled == ["/v/d/generation/s01n_H-N_pass0_s01n_g0.seg0.log", "/v/d/generation/s01t_H-T_pass1_s01t_g0.seg0.log"]
+    assert set(ctx.evidence["runner_logs"]) == {p.rsplit("/", 1)[1] for p in pulled}

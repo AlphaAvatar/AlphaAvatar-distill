@@ -147,8 +147,23 @@ def secure(ctx) -> None:
         ctx.evidence.setdefault("secure_errors", []).append(repr(exc)[:300])
 
 
+def runner_logs(ctx) -> None:
+    """At closeout, this study's runner logs (small text): a unit that fails before it seals anything leaves its
+    traceback only there (s01n of a_supplement_20261031_092108). Never raises."""
+    try:
+        if ctx.target is None:
+            return
+        root, st = P1.durable(ctx.args), SE.store(ctx)
+        lines = P1._listing(ctx, f"cd {root}/generation 2>/dev/null && ls *.log 2>/dev/null || true") or []
+        ctx.evidence["runner_logs"] = {n: P1._pull(ctx, f"{root}/generation/{n}", st / "generation" / n, None)
+                                       for n in (l.strip() for l in lines) if OWN_SHARD.match(n)}
+    except Exception as exc:  # noqa: BLE001
+        ctx.evidence.setdefault("secure_errors", []).append(repr(exc)[:300])
+
+
 def products_secured(ctx, *_a, **_k) -> tuple[bool, str]:
     secure(ctx)
+    runner_logs(ctx)
     got = ctx.evidence.get("secured", {})
     bad = sorted(k for k, v in got.items() if not v.get("ok"))
     if bad or ctx.evidence.get("listing_unknown"):
