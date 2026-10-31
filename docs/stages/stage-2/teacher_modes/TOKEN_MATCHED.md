@@ -106,7 +106,7 @@ modes, and the item sub-type is `<type>|<mode>`:
   loader is not edited.
 
 **Isolation** (`full_search_isolation.json`).
-- State evaluation against calibration and against all training of both lineages: no shared prompt key, task id or
+- State evaluation against calibration and against all training of both lineages: no shared prompt key, example id (`task_id`) or
   content. 4 and 208 13-gram near-copies were removed.
 - Calibration against A1/A2's training: 0.
 - Calibration against C1's training: 232 shared corpus_v2 prompts, all held out of the profiles.
@@ -150,7 +150,7 @@ modes, and the item sub-type is `<type>|<mode>`:
 
 | | A1 | A2 | C1 |
 | --- | --- | --- | --- |
-| packing / context strategy | token documents, document-isolated | token documents, document-isolated | D4-Augmented's ladder: cross-context within system-prompt groups (kept, disclosed) |
+| packing / context strategy | token-native turns, each turn attends only to itself (`document_isolated`) | the same | D4-Augmented's ladder: cross-context within system-prompt groups (kept, disclosed) |
 | packed sequences, optimizer steps | from the admission | from the admission | 2,468 sequences, 3,702 steps (warmup 185, eval every 462, save every 1,851) |
 | supervised tokens / exposure | about 5.923M / 3 × | about 5.923M / 3 × | 5,923,021 / 17,769,063 |
 | non-padding tokens | from the admission | from the admission | 7,882,298 (61.0% padding) |
@@ -175,7 +175,7 @@ template and the weights tell them apart.
 
 **C1's differences, disclosed.** C1 against A1/A2, and C1 against the historical D4-Augmented:
 - **C1 against A1/A2.** These are separate routes: a different teacher and initialization, and cross-context ladder
-  packing against document isolation. C1's E1 part carries 352 traces cut at 8,192 (trained without `<|im_end|>`),
+  packing against per-turn isolation. C1's E1 part carries 352 traces cut at 8,192 (trained without `<|im_end|>`),
   hygiene-only targets (openmath 35.8% wrong; code and tool calling unverifiable) and 492,587 tool-calling tokens.
   The fluid part supervised the template's prefilled `<think>` and 1,102 re-tokenized positions.
 - **C1 against the historical D4-Augmented.** C1 adds KD on the target positions only with Top-200 + tail, where
