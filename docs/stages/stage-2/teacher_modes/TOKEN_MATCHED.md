@@ -29,87 +29,102 @@ _Filled from the admission record once the supplement session's records are secu
 
 ## B. The hybrid D4 full search (proposed, not run)
 
+Owners:
+- [`full_search_proposal.json`](../../../../configs/stages/stage-2/teacher_modes/full_search_proposal.json);
+- [`full_search_types.json`](../../../../configs/stages/stage-2/teacher_modes/full_search_types.json);
+- [`audit/full_search_isolation.json`](../../../../logs/stages/stage-2/teacher_modes/audit/full_search_isolation.json);
+- [`hybrid_d4_profiles.json`](../../../../configs/stages/stage-2/teacher_modes/hybrid_d4_profiles.json).
+
 **Root teacher.**
 - `Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c`.
-- Weight shards' LFS sha256 `328a91d3…`, `6cd087b3…`, `e4bf4369…` (`teacher_identity.json`).
+- Weight shards `328a91d3…`, `6cd087b3…`, `e4bf4369…`.
 - Chat template `a55ee1b1…`, RoPE base 1,000,000, 40,960 positions.
-- Its thinking and non-thinking modes are two official modes of one set of weights, so A1 and A2 share one
-  initialization.
+- H-T means `enable_thinking=True` and H-N means `enable_thinking=False`, each with its official sampling.
 
-**Method: D4's own, resolved from the selected forward baseline, never copied.**
+**Method: D4's, resolved from the selected forward baseline.**
+- Baseline: `stage1_init.d1_target_aware.scored_v1@v1`.
+- Operators: ATTENTION `activation_importance_v1`, DEPTH `causal_kl_greedy_v1`, RESIDUAL_WIDTH `global_pca_v0`, FFN
+  `activation_importance_v0`. Operator order and each operator's profile are searched.
+- Beam: `beam.delayed_prune@v1`, width 6, warmup 1.
+- Ranking: `pareto_multi_objective@v2`.
+- Positions, support and rows: `positions.supervised_target_v1@v1`, `reference_topk_tail_v1` with K = 200, `scored_v1`.
+- Execution: `length_sorted_v1`, DEPTH prefix reuse.
+- Geometry: 596M (28 / 1024 / 16 Q / 8 KV / 3072, tied embeddings).
+- Seed 20260815; Top-1 is the first of 12 leaves in the Pareto order; one search.
 
-| term | value |
-| --- | --- |
-| baseline | `stage1_init.d1_target_aware.scored_v1@v1` |
-| operators | ATTENTION `activation_importance_v1`, DEPTH `causal_kl_greedy_v1`, RESIDUAL_WIDTH `global_pca_v0`, FFN `activation_importance_v0` |
-| free variables | operator order and each operator's calibration profile (hybrid Base or hybrid Reasoning-Heavy) |
-| beam | `beam.delayed_prune@v1`, width 6, warmup 1 |
-| ranking | `beam.pareto_multi_objective@v2`: equal-domain mean KL, worst-domain KL, critical-token KL, ε 1e-4 |
-| positions / support / rows | `positions.supervised_target_v1@v1` / `reference_topk_tail_v1` (K = 200 + tail) / `scored_v1` |
-| packing / DEPTH prefix reuse | `length_sorted_v1` / on, re-validated on the search card |
-| KL references | DEPTH against the parent state; state evaluation and ranking against the root, the hybrid, recomputed per state |
-| geometry | 596,049,920 parameters: 28 layers, hidden 1024, 16 Q / 8 KV heads, head dim 128, FFN 3072, tied embeddings |
-| seed, commit | 20260815; Top-1 = the first of the 12 complete leaves in the Pareto quality order |
+**One type table for both data sets** (`full_search_types.json`). There are 13 types over five domains, each in both
+modes, and the item sub-type is `<type>|<mode>`:
 
-The tree is D4's: 8 + 48 + 24 + 12 = 92 expansions.
+| domain (ability axis) | types | A1/A2 training cells they stand for |
+| --- | --- | --- |
+| abstract_analogical | grid_transform@v1 | abstract_analogical / project generators |
+| compositional_generalization | defined_ops@v1, scan_language@v1 | compositional / project generators |
+| inductive_rule_discovery | list_induction@v1, string_induction@v1 | inductive / project generators |
+| task_contained_deduction | entity_tracking@v1, knights_knaves@v1, ordering@v1 | deduction / project generators |
+| supporting (E1's base-corpus counterpart) | openmath, gsm8k, rag_evidence, multihop_qa, code | competition math, GSM8K, SQuAD, HotpotQA, code |
 
-**Calibration: both modes, balanced on scored positions, v1's trajectories first.**
-- Two profiles keep D4's design: `calib.hybrid_d4_base@v1` (0.18 per static primary axis, 0.28 supporting) and
-  `calib.hybrid_d4_rh@v1` (0.22, 0.12).
-- Each has D4's 4× volume, 180,000 scored positions, over D4's 12 cells (one per subtype) and in D4's cell order
-  over `base_pool_v1` (seed 1308798386).
-- **Each mode fills half of every cell's quota with its own naturally terminated trajectories.** The subtype carries
-  the mode (`<subtype>|<mode>`), so the subtype-then-domain reduction weighs the modes equally inside every domain.
-  The result is ONE initialization, not one per mode.
-- Coverage audit: v1's sealed hybrid calibration is D4's 4× prefix. It covers the thinking mode, one cell 829
-  positions short. The non-thinking mode has about 27,500 of 90,000 positions per profile, because its answers are
-  short.
-- 801 further units of D4's own pool were therefore generated (round 0 of the supplement session, one candidate, v1's
-  rule), continuing D4's cell order: all 801 in the non-thinking mode, 12 of them also in the thinking mode. Every
-  cell stayed inside its pool.
-- The profiles are written from the sealed records on the dev box (`build_calibration_supplement.py profiles`).
-- Isolation: the calibration prompts share no key with any training order, T0, the pools or eval-set-1's held-out
-  prompts (R1, R2), and come from no family R9 refuses.
+- **Interactive adaptation is excluded from both sets.** A token-level KL on a fixed transcript is not closed-loop
+  interaction, and D4's profiles carry no interactive domain (their weights are kept). Interactive adaptation stays
+  in A1/A2's training and is measured closed-loop on eval-set-1. Including it as a sixth domain in both sets is the
+  maintainer's alternative.
+- **Training sources not typed here**, each listed with its reason in the table: the reasoning_core and
+  reasoning_gym fluid cells, and MBPP (exhausted by training).
+- Scored positions are the positions that predict the hybrid's own generated tokens, `<|im_end|>` included; no
+  prompt, template or preclosed think block is scored.
+- Critical tokens follow each mode's native output: H-T has `think_close`, `final_answer`, `eos`; H-N has
+  `final_answer`, `eos`, never a `</think>` it did not generate.
 
-**State evaluation.** D4's method (`state_eval@v1`) with hybrid references. One choice for the maintainer:
-- (a) The suite's items as they are, which are Thinking-2507 trajectories.
-- (b, recommended) The same 80 prompts with the hybrid's own trajectories in both modes, balanced on prediction
-  positions. This is 160 short generations at the start of the search session.
+**Calibration** (`calib.hybrid_d4_base@v1`, `calib.hybrid_d4_rh@v1`).
+- D4's weights: 0.18 / 0.28 and 0.22 / 0.12.
+- D4's volume of 180,000 scored positions per profile, over the 13 types.
+- Rule: per cell, D4's order, each mode filling half the cell's quota with its own naturally terminated
+  trajectories.
+- Reused: v1's sealed hybrid calibration (D4's 4× prefix) and the supplement's 801 units.
+- Held out, the order continuing past them:
+  - 33 pool units of R9-refused families (`string_induction@v1` `str.caesar`, `str.double_last`, `str.duplicate_each`;
+    D4's own profiles held 4 of them each);
+  - 5,034 pool units whose prompt is a training prompt of A1/A2 or of C1.
+- Coverage now (scored positions): base H-T 92,648 / H-N 83,999, rh H-T 95,415 / H-N 85,084.
+- Short cells: string_induction, code (not yet generated) and rag_evidence (H-N). The top-up is the code cell's 9
+  prompts plus about 13 refill units.
 
-The suite loader binds Thinking-2507's suite today, so it needs a hybrid binding in either case.
+**State evaluation `state_eval_hybrid@v1` (new; `state_eval@v1` is unchanged and unused).**
+- 1,722 prompts, all new.
+- Fluid prompts are new instances of the same @v1 generators: calibration-split families, seeds 2,500,000–2,570,030
+  in the calibration range.
+- Dataset prompts are train rows past everything order_v2 holds, rendered as corpus_v2 rendered them.
+- openmath comes from base_pool_v1's unused units; code from reasoning_core at seed base 2026320000.
+- Quota: frozen at 12,000 scored positions per (type, mode), 312,000 in all.
+- Scoring: D4's three objectives under equal sub-type (mode included) then equal domain, so the modes are 50:50
+  and no profile gains from raw tokens. Critical-token KL is 0.5 × the H-T classes' mean + 0.5 × the H-N classes'
+  mean, which needs a small evaluator extension before the search. Per-mode KLs are recorded beside the ranking
+  values.
+- The manifest binds the root teacher (weights, revision), the tokenizer, the template, both modes, the type
+  table, every item's prompt and output ids with their masks, the critical classes, the isolation proof, the content
+  sha256, the suite hash and the measurement protocol id.
+- Loader: `hybrid_state_eval.load` refuses any other binding and then uses the shared loader; phase_d1's frozen
+  loader is not edited.
+
+**Isolation** (`full_search_isolation.json`).
+- State evaluation against calibration and against all training of both lineages: no shared prompt key, task id or
+  content. 4 and 208 13-gram near-copies were removed.
+- Calibration against A1/A2's training: 0.
+- Calibration against C1's training: 232 shared corpus_v2 prompts, all held out of the profiles.
+- State evaluation against eval-set-1: R1, R2, R3, R4, R7 and R9 by family name pass.
+- Rule families and generators are shared between calibration and state evaluation by design; instances, seeds and
+  rows are not.
 
 **Execution.**
-- **Card and micro-batch.** One L40S at micro-batch 1 for the whole search, declared before the run. Micro-batch 3
-  ran out of memory in DEPTH on an L40S with this root on D4's items (`a_check_20261029_190241`, 10.99 GiB asked of
-  44.39 GiB); micro-batch 1 completed with a 26.88 GiB peak. Micro-batch is a numerical-execution field: semantic
-  state ids are unchanged, while materialization ids and the execution fingerprint differ.
-- **Alternative.** The historical profile, an A100 at micro-batch 3, would need a separate approval.
-- **Persistence and resume.** The journal and every state are on a network volume after each expansion. A resumed
-  search replays the journal and restores only states whose bytes re-identify.
-- **Storage (a decision for the maintainer).** D4 kept 274 GB of states. That needs a volume of about 300 GB in the
-  card's datacenter, or `prune_weights` true (pruned states' bytes deleted, the journal kept).
-- **Estimate.** From D4's measured 11.1 h of operator time on an A100 at micro-batch 3 (DEPTH 9.7 h) and the L40S
-  check's DEPTH ratio of 1.05: about 13.5 h expected, 18 h conservative, $15.2–20.1 at $1.09/h, plus storage.
+- One L40S at micro-batch 1 for the whole search. Micro-batch 3 measured out of memory in DEPTH on an L40S with this
+  root. An A100 at micro-batch 3 needs a separate approval.
+- Journal and states go to a network volume after every expansion, and a resume restores only re-identified bytes.
+- Storage needs about 300 GB, or `prune_weights` (a maintainer decision).
 
-**Product and sharing.**
-- The Top-1's checkpoint identity (artifact digest, weights digest, single-shard sha256, config sha256, 596,049,920
-  parameters) and its materialization identity, with the root teacher recorded.
-- A1's and A2's four units bind its single-shard sha256 in their lineage blocks.
-- The full journal, every candidate's order and profiles, every expansion's KL and state-evaluation metrics, the
-  Pareto decisions, memory and time telemetry, and a structural comparison with D4 Top-1 (ATTENTION(rh) →
-  DEPTH(base) → RESIDUAL_WIDTH(base) → FFN(base)) that changes nothing.
-
-**Differences from D4's search:**
-- the root teacher;
-- the calibration trajectories, which are the hybrid's own, half from each mode;
-- the state-evaluation references;
-- the L40S at micro-batch 1;
-- everything else is unchanged.
-
-**Differences from Research A v1's fixed path:**
-- v1 ran D4 Top-1's path without searching;
-- v1's profiles held about 55,000 positions balanced by whole items, against D4's 180,000 here with per-cell mode
-  balance.
+**Budget** (D4's measurements, DEPTH token-linear).
+- The hybrid profiles hold 449,155 and 319,611 tokens, 1.97× and 1.35× D4's, because non-thinking supporting items
+  pair long prompts with short answers.
+- Expected 20.5 h on the L40S ($22.35) and conservative 25.6 h ($27.9), plus about $5 of storage.
+- The inputs session (calibration top-up and the state evaluation's generation) is about $1.0–1.5.
 
 ## C. The 3 × 2 training matrix (proposed, not run)
 

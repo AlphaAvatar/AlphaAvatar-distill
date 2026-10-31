@@ -1,0 +1,810 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.full_search_isolation/v1",
+ "written_utc": "2026-10-31T10:04:04Z",
+ "types": {
+  "path": "configs/stages/stage-2/teacher_modes/full_search_types.json",
+  "sha256": "641b8b3f5eb45a02edd493506050734a53661a7efd82282e119f41127767ff61"
+ },
+ "state_evaluation": {
+  "path": "data/stages/stage-2/teacher_modes/tasks/state_eval_hybrid_v1.tasks.jsonl",
+  "sha256": "56b85c17ff2fffd19d09ebcb84356202328fe176dd117f8879c28b30c4257a3f",
+  "units": 1722,
+  "queue_by_type": {
+   "code": 22,
+   "defined_ops@v1": 53,
+   "entity_tracking@v1": 53,
+   "grid_transform@v1": 21,
+   "gsm8k": 73,
+   "knights_knaves@v1": 21,
+   "list_induction@v1": 23,
+   "multihop_qa": 683,
+   "openmath": 43,
+   "ordering@v1": 70,
+   "rag_evidence": 590,
+   "scan_language@v1": 39,
+   "string_induction@v1": 31
+  },
+  "positions_per_type_and_mode": 12000,
+  "planned_units": {
+   "grid_transform@v1": 21,
+   "defined_ops@v1": 53,
+   "scan_language@v1": 39,
+   "list_induction@v1": 23,
+   "string_induction@v1": 31,
+   "entity_tracking@v1": 55,
+   "knights_knaves@v1": 22,
+   "ordering@v1": 70,
+   "openmath": 43,
+   "gsm8k": 73,
+   "rag_evidence": 590,
+   "multihop_qa": 683,
+   "code": 22
+  },
+  "fluid_shortfalls": {},
+  "lineage": {
+   "by_subtype": {
+    "code": 22,
+    "defined_ops@v1": 53,
+    "entity_tracking@v1": 53,
+    "grid_transform@v1": 21,
+    "gsm8k": 73,
+    "knights_knaves@v1": 21,
+    "list_induction@v1": 23,
+    "multihop_qa": 683,
+    "openmath": 43,
+    "ordering@v1": 70,
+    "rag_evidence": 590,
+    "scan_language@v1": 39,
+    "string_induction@v1": 31
+   },
+   "generators": [
+    "controlled_code_execution",
+    "corpus_v2_openmath",
+    "defined_ops@v1",
+    "entity_tracking@v1",
+    "grid_transform@v1",
+    "gsm8k_train",
+    "hotpot_qa_train",
+    "knights_knaves@v1",
+    "list_induction@v1",
+    "ordering@v1",
+    "scan_language@v1",
+    "squad_v2_train_answerable",
+    "string_induction@v1"
+   ],
+   "families": 33,
+   "seed_range": [
+    2500000,
+    2694520000
+   ],
+   "sources": {
+    "reasoning_core": 22,
+    "stage0_generators_calibration_families": 311,
+    "gsm8k_train": 73,
+    "hotpot_qa_train": 683,
+    "corpus_v2_openmath": 43,
+    "squad_v2_train_answerable": 590
+   }
+  }
+ },
+ "calibration_code": {
+  "path": "data/stages/stage-2/teacher_modes/tasks/calibration_code_v1.jsonl",
+  "sha256": "7260847aebd3f631aee6caeea5b2cf35efb844369ccd8f4b8494a9f472392657",
+  "units": 9,
+  "lineage": {
+   "by_subtype": {
+    "code": 9
+   },
+   "generators": [
+    "controlled_code_execution"
+   ],
+   "families": 1,
+   "seed_range": [
+    2694310000,
+    2694510000
+   ],
+   "sources": {
+    "reasoning_core": 9
+   }
+  }
+ },
+ "calibration_sets": {
+  "hybrid_calibration_v1": {
+   "units": 160,
+   "lineage": {
+    "by_subtype": {
+     "list_induction@v1": 13,
+     "string_induction@v1": 11,
+     "defined_ops@v1": 18,
+     "scan_language@v1": 7,
+     "entity_tracking@v1": 11,
+     "ordering@v1": 6,
+     "knights_knaves@v1": 5,
+     "grid_transform@v1": 14,
+     "gsm8k": 16,
+     "multihop_qa": 12,
+     "openmath": 9,
+     "rag_evidence": 38
+    },
+    "generators": [
+     "corpus_v2",
+     "defined_ops@v1",
+     "entity_tracking@v1",
+     "grid_transform@v1",
+     "knights_knaves@v1",
+     "list_induction@v1",
+     "ordering@v1",
+     "scan_language@v1",
+     "string_induction@v1"
+    ],
+    "families": 25,
+    "seed_range": null,
+    "sources": {
+     "null": 160
+    }
+   }
+  },
+  "calibration_v2": {
+   "units": 801,
+   "lineage": {
+    "by_subtype": {
+     "list_induction@v1": 11,
+     "ordering@v1": 33,
+     "scan_language@v1": 25,
+     "defined_ops@v1": 31,
+     "entity_tracking@v1": 22,
+     "string_induction@v1": 18,
+     "grid_transform@v1": 23,
+     "knights_knaves@v1": 8,
+     "gsm8k": 26,
+     "multihop_qa": 327,
+     "openmath": 15,
+     "rag_evidence": 262
+    },
+    "generators": [
+     "corpus_v2",
+     "defined_ops@v1",
+     "entity_tracking@v1",
+     "grid_transform@v1",
+     "knights_knaves@v1",
+     "list_induction@v1",
+     "ordering@v1",
+     "scan_language@v1",
+     "string_induction@v1"
+    ],
+    "families": 29,
+    "seed_range": null,
+    "sources": {
+     "stage0_teacher_native": 171,
+     "corpus_v2": 630
+    }
+   }
+  }
+ },
+ "removed": {
+  "R2_vs_eval_set_1": 2,
+  "R9_refused_family": 0,
+  "near_copy_of_calibration": 4,
+  "near_copy_of_training": 208
+ },
+ "pairs": {
+  "state_eval_vs_calibration": {
+   "exact": {
+    "prompt_keys": 0,
+    "task_ids": 0,
+    "content": 0
+   },
+   "ngram_by_type": {
+    "code": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 22,
+     "with_any_shared_ngram": 20,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "defined_ops": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 53,
+     "with_any_shared_ngram": 16,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "entity_tracking": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 55,
+     "with_any_shared_ngram": 51,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "grid_transform": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 21,
+     "with_any_shared_ngram": 21,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "gsm8k": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 99,
+     "with_any_shared_ngram": 0,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "knights_knaves": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 22,
+     "with_any_shared_ngram": 20,
+     "flagged": 1,
+     "flagged_ids": [
+      "476ffbe446ce21ad1e77"
+     ]
+    },
+    "list_induction": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 23,
+     "with_any_shared_ngram": 7,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "multihop_qa": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 923,
+     "with_any_shared_ngram": 165,
+     "flagged": 3,
+     "flagged_ids": [
+      "d2513b03fceb2f7518fe",
+      "79c9ed536b83a7e23e02",
+      "ee210655bab82d94f1fc"
+     ]
+    },
+    "openmath": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 43,
+     "with_any_shared_ngram": 0,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "ordering": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 70,
+     "with_any_shared_ngram": 38,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "rag_evidence": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 797,
+     "with_any_shared_ngram": 169,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "scan_language": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 39,
+     "with_any_shared_ngram": 12,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "string_induction": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 31,
+     "with_any_shared_ngram": 0,
+     "flagged": 0,
+     "flagged_ids": []
+    }
+   }
+  },
+  "state_eval_vs_training": {
+   "exact": {
+    "a1a2_pools_t0": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    },
+    "a1a2_order_v1": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    },
+    "a1a2_order_v2": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    },
+    "diagnostic_v1": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    },
+    "c1_d4_augmented": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    }
+   },
+   "ngram_by_type": {
+    "code": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 22,
+     "with_any_shared_ngram": 22,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "defined_ops": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 53,
+     "with_any_shared_ngram": 48,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "entity_tracking": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 55,
+     "with_any_shared_ngram": 55,
+     "flagged": 2,
+     "flagged_ids": [
+      "3f9f18b928f3c0d6181f",
+      "4057dfd41f8a01e3d5af"
+     ]
+    },
+    "grid_transform": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 21,
+     "with_any_shared_ngram": 21,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "gsm8k": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 99,
+     "with_any_shared_ngram": 0,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "knights_knaves": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 22,
+     "with_any_shared_ngram": 19,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "list_induction": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 23,
+     "with_any_shared_ngram": 11,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "multihop_qa": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 923,
+     "with_any_shared_ngram": 860,
+     "flagged": 205,
+     "flagged_ids": [
+      "199284d65cb068144fcd",
+      "a6a4d10d11fa29b96af7",
+      "637f0f20659111f5b978",
+      "59056ff6cb731021afca",
+      "cc128aa22979cb2b8a63",
+      "20d2062bed95beee6ee3",
+      "df50ecbc7498cdb13681",
+      "7a7a3365b1b6b18f6eef",
+      "bf52e31b0d2b37422d18",
+      "295b3f5bc438776f467d",
+      "a41ac32c123a015e305e",
+      "3b7d914bb13b2818d3f5",
+      "de1e8a126c478e055277",
+      "e61a2f14dcc20fc05595",
+      "a64e2ad8a48bb070b9a9",
+      "72da7955ad0676570220",
+      "dde7a5353d1b2588dc4c",
+      "11b42ed90fc65b5d143b",
+      "e4ce91825f7f3249b1ea",
+      "3da7b7a74bc89bf97e03",
+      "2ba958957b94c6187ad9",
+      "549012611297b3cb430a",
+      "3ba21b50f0640ae36f40",
+      "4f45344e682abfad15e0",
+      "95f8689246bf5011fe28",
+      "8eae653af45d3a3c995c",
+      "7864667bb959c846934d",
+      "a70743d7b17aa3714b0f",
+      "fadffe6d80d80d2a5031",
+      "016bbb53dc04ae4e76b0",
+      "0dd0c04b455c3d151e6d",
+      "12cd4403fb79266840c1",
+      "e35af08946304bca82fc",
+      "697c5d1ce3038f4a55c8",
+      "122df5d5149979ed77bd",
+      "30196dd11c64e966afcb",
+      "e7caee63ecd17599b6e1",
+      "77d253cb856f77daa33b",
+      "a37ceef7f30eef3f16d3",
+      "d2513b03fceb2f7518fe",
+      "0ff5461cc50fff56de26",
+      "af934d45b86c885e4812",
+      "85a6638b4d556ab5cdfa",
+      "64520c33ef8a3ad89dfd",
+      "e8af6f2d6f356429970c",
+      "0a4163d4df1aeda884e1",
+      "b40fc9d1227c23a28497",
+      "95346f9b60b00fe18922",
+      "a52581f964ff3be00622",
+      "659a25bed0f60747480c",
+      "288ba154037decd7155a",
+      "1ab31637d3aefcab8bd5",
+      "ee1136ba512e81fd68b5",
+      "6ba1f815bd5fd8d5967b",
+      "4d65623bafba253fcef6",
+      "fe1f81d3f2e8bedd3993",
+      "ea8edb4c92c461c81f78",
+      "1578647b2ec952b686a7",
+      "4debcfd602814b166700",
+      "844db07a979d6c21cc47",
+      "022a31482bda35ed1acb",
+      "c4b005fe4a2ae9fbf5d2",
+      "a1d0395b773d713c2da5",
+      "36e218a5624cd7c67e44",
+      "f2678ca0dfd799466776",
+      "71043424498739830ff8",
+      "fc989a8adfd38d98cbc2",
+      "e70c5da6da8ccad5f31d",
+      "e4671a8feee8a010271b",
+      "f4af3c6ec3576f5d72be",
+      "db5aba39d5d47fe919f1",
+      "8440b171196454d929c5",
+      "4e84b8c4b9a915ca512f",
+      "576fec75e29162dc01ff",
+      "e26ed75398f111b64e77",
+      "2f930a9354ed92ccef6d",
+      "6f4ba9c6a8e60adf2fc3",
+      "86978fa0613df0cbecda",
+      "f0e77c76b0ba4db9d1ae",
+      "c59e4afcf02bf6d27fa2",
+      "7800255efa9a35a7944e",
+      "80ef042d13fbfb389d05",
+      "481dc2de01051a6be67d",
+      "7be376cb84c43aa83456",
+      "84d47508d43ca6e7d4be",
+      "28cc90f85eb0b08c5bac",
+      "16c933a0f1b14de8c6f9",
+      "d35813c93c48f08f32af",
+      "95981f29e5b6c806feaa",
+      "3927e2f90341231dee30",
+      "83181a3b0f61450f8e23",
+      "224c03c5f01a7b72aa55",
+      "c52386cfd1b476c4fdb6",
+      "156ce0ded8eab31b330e",
+      "4523ddb09278117aaf91",
+      "2ed9ab050b8cda97c451",
+      "8ba813ab0f0afc8e8b46",
+      "b114394dac424c667efc",
+      "5cce039634c93f5d6e95",
+      "2d30eb767fd7bbcc8333",
+      "648e5d99162cc9d95020",
+      "ee6d6df5f44a5d9ceff4",
+      "5755111660be0c998fb6",
+      "8ef753f04a56463e249a",
+      "8589f4dd847f333bbe7e",
+      "96fbdf5286beefb9d0c7",
+      "29344c9758808ca08b5f",
+      "1140349769673052072b",
+      "edcccdb5214efd1aad1b",
+      "403532a923fa5fa58986",
+      "d12d2e9c63082404cf57",
+      "955085650a906718607e",
+      "7c5345cf4c00189fde8f",
+      "9fc0ead41e140d8a3175",
+      "bd67d9c24a037ac0b349",
+      "0e232356286500dbb52d",
+      "93430cb68b9982c5f642",
+      "03ff35b562f08ff3d0ce",
+      "379d8fa9592709e380f7",
+      "0fae234ca469934d19e1",
+      "dcdf3307b2d0a6d58a18",
+      "98f894a3513e7f9e5149",
+      "ca128ccfe5accd1657f4",
+      "6150ff2274428c55ce8f",
+      "f7f4edbafc1e8369a181",
+      "f963749afab2e67bf02d",
+      "9f8121729e6facbfe788",
+      "3a59377a6f62f7118fee",
+      "9f947f700691e6eb53df",
+      "6442a3226554537b5ad3",
+      "b81da86893bc1d59376e",
+      "4bd24ac968045ee4c424",
+      "36a46d933fc27db792be",
+      "902b4e92f6c781900643",
+      "deb9d5c0be352f53e75d",
+      "c515cadd2ae7573633d0",
+      "3999a06af976e1777b27",
+      "6b85b81be1c52bdf635d",
+      "474f0dd9332f2df9e399",
+      "05b85f492ec34ae67f15",
+      "83fe6d37e83304a65cf3",
+      "c4e449584cfc270fae82",
+      "e1863b745327b81afbff",
+      "2fd92e479faec8f9a046",
+      "ee210655bab82d94f1fc",
+      "f3816192b326db99c61d",
+      "677def3f9c1ee1c9cb7e",
+      "c34bdc68be726ac19bf2",
+      "66721719102578631203",
+      "ab717c6ec0b0d207750f",
+      "311787b571e2a1740dcf",
+      "67d4d7bf82dd8de25d7a",
+      "07a3f804fbe13aefade2",
+      "05444e1dd3befd5911a1",
+      "1b2d4cfb1106c501cf55",
+      "55b9e669688f03044c39",
+      "565dbecc92fec686f31c",
+      "3dc9826ce1cf3e368faa",
+      "a6a3c3802a589a15a719",
+      "c668f3c43779109bd033",
+      "427422595dafd8b761f7",
+      "2539f88f9246f542e21a",
+      "e381e87544069e20ae2c",
+      "ac73886870f1d2b1429d",
+      "9c297e2e323271a995ba",
+      "eb93e2d5d51d98c5c15b",
+      "120edad5c8fa0d249b77",
+      "fb963011d8c554814b2c",
+      "936f875a55e2cbc30328",
+      "04982a4f7ceed53ace2f",
+      "d7a1b4ec822d51667d94",
+      "491e35041a1632e85379",
+      "ef0dad84cf2b5f350a9c",
+      "fc2e2a9325568797b5cf",
+      "66f93a1c4b5a56bc4656",
+      "f9c339007127b076e1ed",
+      "990460eb6fee3f1391e0",
+      "e06c37918e7e0fe12afa",
+      "a36f27234da5fb4a5b2a",
+      "69a378d4160e770c9877",
+      "78233f957a84194e35b9",
+      "89bec21017cbeb7e7eca",
+      "242a627f716b1751db54",
+      "5255a6ac713887a7cc93",
+      "326427636e81144865e2",
+      "69bc7c9e8d8b3944e4fc",
+      "455f03f2340fbea746a4",
+      "d0c2b36e34c9fd96b088",
+      "8ad84fa1a2ed3a5dc4a7",
+      "4eb30612e352adf76328",
+      "41102e75cdb5a4e4fdd7",
+      "1fe94daee2961835ef01",
+      "657b261edb4c7f82f00b",
+      "1507391bf7a13e35f719",
+      "9ccbb651740423f989ab",
+      "e8b5d2db5a7aa3e0d27b",
+      "5a9d3ec952af10d82c4e",
+      "ac9ca90ca28c99eec71d",
+      "a3b365401e5d18bcc2a6",
+      "fe22c21e64a4fe6b5406",
+      "be52857f0bbfbf740a24",
+      "dad28f07f04d29c87266",
+      "009193ba1a0268b16ab2",
+      "54b228d81693b3fe0e32",
+      "2083f7cc1bb8e5fa51f2"
+     ]
+    },
+    "openmath": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 43,
+     "with_any_shared_ngram": 0,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "ordering": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 70,
+     "with_any_shared_ngram": 59,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "rag_evidence": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 797,
+     "with_any_shared_ngram": 112,
+     "flagged": 1,
+     "flagged_ids": [
+      "bd275e845401b676489c"
+     ]
+    },
+    "scan_language": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 39,
+     "with_any_shared_ngram": 39,
+     "flagged": 0,
+     "flagged_ids": []
+    },
+    "string_induction": {
+     "n": 13,
+     "threshold": 0.5,
+     "checked": 31,
+     "with_any_shared_ngram": 0,
+     "flagged": 0,
+     "flagged_ids": []
+    }
+   }
+  },
+  "calibration_vs_training": {
+   "exact": {
+    "hybrid_calibration_v1|a1a2_pools_t0": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    },
+    "hybrid_calibration_v1|a1a2_order_v1": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    },
+    "hybrid_calibration_v1|a1a2_order_v2": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    },
+    "hybrid_calibration_v1|diagnostic_v1": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    },
+    "hybrid_calibration_v1|c1_d4_augmented": {
+     "prompt_keys": 8,
+     "task_ids": 0,
+     "content": 0
+    },
+    "calibration_v2|a1a2_pools_t0": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    },
+    "calibration_v2|a1a2_order_v1": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    },
+    "calibration_v2|a1a2_order_v2": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    },
+    "calibration_v2|diagnostic_v1": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    },
+    "calibration_v2|c1_d4_augmented": {
+     "prompt_keys": 224,
+     "task_ids": 0,
+     "content": 0
+    },
+    "calibration_code|a1a2_pools_t0": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    },
+    "calibration_code|a1a2_order_v1": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    },
+    "calibration_code|a1a2_order_v2": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    },
+    "calibration_code|diagnostic_v1": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    },
+    "calibration_code|c1_d4_augmented": {
+     "prompt_keys": 0,
+     "task_ids": 0,
+     "content": 0
+    }
+   }
+  },
+  "state_eval_vs_eval_set_1": {
+   "R1_held_out_keys": {
+    "pass": true,
+    "overlap": {}
+   },
+   "R2_near_duplicate": {
+    "pass": true
+   },
+   "R3_rule_family": {
+    "pass": true
+   },
+   "R4_eval_only_generators": {
+    "pass": true
+   },
+   "R7_arc_agi": {
+    "pass": true
+   },
+   "R9_mechanism_equivalence_by_family_name": {
+    "pass": true,
+    "items": {}
+   }
+  },
+  "calibration_vs_eval_set_1": {
+   "calibration_code": {
+    "R1_held_out_keys": {
+     "pass": true,
+     "overlap": {}
+    },
+    "R2_near_duplicate": {
+     "pass": true
+    },
+    "R3_rule_family": {
+     "pass": true
+    },
+    "R4_eval_only_generators": {
+     "pass": true
+    },
+    "R7_arc_agi": {
+     "pass": true
+    },
+    "R9_mechanism_equivalence_by_family_name": {
+     "pass": true,
+     "items": {}
+    }
+   },
+   "hybrid_calibration_v1_and_calibration_v2": {
+    "R1_held_out_keys": {
+     "pass": true,
+     "overlap": {}
+    },
+    "R2_near_duplicate": {
+     "pass": true
+    },
+    "R3_rule_family": {
+     "pass": true
+    },
+    "R4_eval_only_generators": {
+     "pass": true
+    },
+    "R7_arc_agi": {
+     "pass": true
+    },
+    "R9_mechanism_equivalence_by_family_name": {
+     "pass": false,
+     "items": {
+      "string_induction@v1/str.double_last": 7,
+      "string_induction@v1/str.caesar": 5,
+      "string_induction@v1/str.duplicate_each": 6
+     }
+    }
+   }
+  }
+ },
+ "_": "calibration and state evaluation share types, generators and rule families BY DESIGN (one type table); they share no task id, content, prompt key or 13-gram near-copy. R5 and R6 are training rules: these sets sit in the calibration seed range [2,000,000, 3,000,000), disjoint from training's [3,000,000, 4,000,000)",
+ "authorizes": "nothing"
+}

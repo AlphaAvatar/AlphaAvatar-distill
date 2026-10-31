@@ -1,0 +1,194 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.full_search_types/v1",
+ "status": "PROPOSED 2026-10-31 for the maintainer's review (brief 'Full Search Calibration / State Evaluation Distribution Alignment'); one type definition that the hybrid calibration profiles AND the hybrid state evaluation both read",
+ "root_teacher": {
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "identity": "configs/stages/stage-2/teacher_modes/teacher_identity.json"
+ },
+ "modes": {
+  "H-T": {
+   "template_kwargs": {
+    "enable_thinking": true
+   },
+   "sampling": "the model card's thinking preset (generation_protocol.json :: modes.H-T)"
+  },
+  "H-N": {
+   "template_kwargs": {
+    "enable_thinking": false
+   },
+   "sampling": "the model card's non-thinking preset (generation_protocol.json :: modes.H-N)"
+  }
+ },
+ "type_key": "(domain, subtype, mode); the item's subtype field is '<subtype>|<mode>' in both data sets, so every reduction that averages sub-types equally weighs the two modes 50:50 inside every domain",
+ "types": [
+  {
+   "domain": "abstract_analogical",
+   "ability_axis": "abstract_analogical",
+   "subtype": "grid_transform@v1",
+   "source_type": "project generator grid_transform@v1, calibration-split families, calibration seed range",
+   "training_cells": [
+    "primary.abstract_analogical/s0_generators_v2_calsplit"
+   ]
+  },
+  {
+   "domain": "compositional_generalization",
+   "ability_axis": "compositional_generalization",
+   "subtype": "defined_ops@v1",
+   "source_type": "project generator defined_ops@v1",
+   "training_cells": [
+    "primary.compositional_generalization/s0_generators_v2_calsplit"
+   ]
+  },
+  {
+   "domain": "compositional_generalization",
+   "ability_axis": "compositional_generalization",
+   "subtype": "scan_language@v1",
+   "source_type": "project generator scan_language@v1",
+   "training_cells": [
+    "primary.compositional_generalization/s0_generators_v2_calsplit"
+   ]
+  },
+  {
+   "domain": "inductive_rule_discovery",
+   "ability_axis": "inductive_rule_discovery",
+   "subtype": "list_induction@v1",
+   "source_type": "project generator list_induction@v1",
+   "training_cells": [
+    "primary.inductive_rule_discovery/s0_generators_v2_calsplit"
+   ]
+  },
+  {
+   "domain": "inductive_rule_discovery",
+   "ability_axis": "inductive_rule_discovery",
+   "subtype": "string_induction@v1",
+   "source_type": "project generator string_induction@v1",
+   "training_cells": [
+    "primary.inductive_rule_discovery/s0_generators_v2_calsplit"
+   ]
+  },
+  {
+   "domain": "task_contained_deduction",
+   "ability_axis": "task_contained_deduction",
+   "subtype": "entity_tracking@v1",
+   "source_type": "project generator entity_tracking@v1",
+   "training_cells": [
+    "primary.task_contained_deduction/s0_generators_v2_calsplit"
+   ]
+  },
+  {
+   "domain": "task_contained_deduction",
+   "ability_axis": "task_contained_deduction",
+   "subtype": "knights_knaves@v1",
+   "source_type": "project generator knights_knaves@v1",
+   "training_cells": [
+    "primary.task_contained_deduction/s0_generators_v2_calsplit"
+   ]
+  },
+  {
+   "domain": "task_contained_deduction",
+   "ability_axis": "task_contained_deduction",
+   "subtype": "ordering@v1",
+   "source_type": "project generator ordering@v1",
+   "training_cells": [
+    "primary.task_contained_deduction/s0_generators_v2_calsplit"
+   ]
+  },
+  {
+   "domain": "supporting",
+   "ability_axis": "supporting (P10.2), the counterpart of E1's base-corpus type",
+   "subtype": "openmath",
+   "source_type": "competition math: OpenMathInstruct-2 augmented MATH-style problems (corpus_v2 rendering)",
+   "training_cells": [
+    "competition_math: supporting.math_new/math_train (MATH train; the SAME type, another source)"
+   ]
+  },
+  {
+   "domain": "supporting",
+   "ability_axis": "supporting (P10.2), the counterpart of E1's base-corpus type",
+   "subtype": "gsm8k",
+   "source_type": "GSM8K train, raw question (corpus_v2 rendering)",
+   "training_cells": [
+    "gsm8k: supporting.math_gsm8k/gsm8k_train"
+   ]
+  },
+  {
+   "domain": "supporting",
+   "ability_axis": "supporting (P10.2), the counterpart of E1's base-corpus type",
+   "subtype": "rag_evidence",
+   "source_type": "SQuAD v2 train answerable, RAG_PROMPT (corpus_v2 rendering)",
+   "training_cells": [
+    "rag_reading: supporting.reading_verified/squad_v2_train_answerable"
+   ]
+  },
+  {
+   "domain": "supporting",
+   "ability_axis": "supporting (P10.2), the counterpart of E1's base-corpus type",
+   "subtype": "multihop_qa",
+   "source_type": "HotpotQA distractor train, HOTPOT_PROMPT (corpus_v2 rendering)",
+   "training_cells": [
+    "multihop_reading: supporting.reading_verified/hotpot_qa_train"
+   ]
+  },
+  {
+   "domain": "supporting",
+   "ability_axis": "supporting (P10.2), the counterpart of E1's base-corpus type",
+   "subtype": "code",
+   "source_type": "reasoning_core code modules (controlled_code_execution, dynamic_programming), new exports",
+   "training_cells": [
+    "code: supporting.code_algorithmic/reasoning_core (+ MBPP, exhausted)"
+   ]
+  }
+ ],
+ "scored_positions": "positions.supervised_target_v1@v1 on the hybrid's own trajectory: the positions that predict the generated tokens (prompt ids + output ids; a position i predicts token i+1), the generated <|im_end|> included; nothing of the prompt, the template or the preclosed '<think>\\n\\n</think>\\n\\n' of the non-thinking prompt is scored",
+ "critical_tokens": {
+  "H-T": [
+   "think_close (the position predicting the generated </think>)",
+   "final_answer (the positions predicting the final answer's tokens)",
+   "eos (the position predicting the generated <|im_end|>)"
+  ],
+  "H-N": [
+   "final_answer",
+   "eos"
+  ],
+  "never": "a </think> the non-thinking mode never generated: its preclosed think block is prompt, not output, and is not a critical position",
+  "aggregation": "PROPOSED frozen rule: per mode, the unweighted mean over that mode's critical classes; state.critical_token_kl = 0.5 x H-T + 0.5 x H-N (the current evaluator averages all declared classes unweighted, which would give H-T 3/5: a small generic extension, critical classes grouped by mode, is owed before the search)"
+ },
+ "domains_and_weights": {
+  "calibration": {
+   "base": {
+    "inductive_rule_discovery": 0.18,
+    "compositional_generalization": 0.18,
+    "task_contained_deduction": 0.18,
+    "abstract_analogical": 0.18,
+    "supporting": 0.28
+   },
+   "rh": {
+    "inductive_rule_discovery": 0.22,
+    "compositional_generalization": 0.22,
+    "task_contained_deduction": 0.22,
+    "abstract_analogical": 0.22,
+    "supporting": 0.12
+   },
+   "_": "D4's weights, kept; both profiles cover all 13 types; a domain's share is split equally over its sub-types and halved per mode"
+  },
+  "state_evaluation": "its own frozen quota, independent of either profile: 12,000 scored positions per (subtype, mode), 13 x 2 x 12,000 = 312,000; ranking reduces equal sub-type (mode included) then equal domain, so a profile's raw token count confers no ranking advantage"
+ },
+ "interactive_adaptation": {
+  "treatment": "EXCLUDED from both data sets, consistently",
+  "why": [
+   "token-level KL on a fixed episode transcript measures the student's agreement with the teacher on observations the teacher's own actions produced; it is not closed-loop interaction and must not be read as interactive ability",
+   "D4's profiles carry no interactive domain and their weights are kept (formal_design.json :: excluded_domains: too few admissible episodes, each larger than a cell quota)",
+   "interactive adaptation stays in A1/A2's training data (16.8% of fluid) and is measured closed-loop on eval-set-1's interactive units after training"
+  ],
+  "alternative_for_the_maintainer": "include per-turn transcript items of the hybrid's own episodes as a sixth domain in both sets, with weights the maintainer sets: a change to D4's profile design, and still teacher-forced fidelity only"
+ },
+ "training_cells_not_typed_here": {
+  "primary.compositional_generalization/reasoning_core, /reasoning_gym": "third-party generators: D4's calibration pool holds none; the axis is typed by its project generators",
+  "primary.task_contained_deduction/reasoning_core, /reasoning_gym": "the same",
+  "supporting.code_algorithmic/mbpp_train": "MBPP is exhausted by training (every eligible task is a training task); the code type uses reasoning_core's code modules, the code cell's main training source",
+  "_": "the maintainer may extend the types with these sources; each would need its own share inside its domain and new items in BOTH sets"
+ },
+ "old_suite": "state_eval@v1 (Thinking-2507 trajectories; tool / rag_multihop / reasoning_math / general / code, no fluid axis) is unchanged and is not used by the hybrid search",
+ "authorizes": "nothing"
+}

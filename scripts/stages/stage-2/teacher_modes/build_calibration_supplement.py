@@ -60,17 +60,30 @@ def design() -> dict:
     return json.loads(DESIGN.read_text())
 
 
-def cell_quotas(d: dict) -> dict[str, dict[tuple, float]]:
-    """profile -> cell -> its D4 quota of scored positions (both modes together)."""
+TYPES = REPO / "configs/stages/stage-2/teacher_modes/full_search_types.json"
+CODE_TASKS = REPO / "data/stages/stage-2/teacher_modes/tasks/calibration_code_v1.jsonl"
+
+
+def cell_quotas(d: dict, types: list[dict] | None = None) -> dict[str, dict[tuple, float]]:
+    """profile -> cell -> its D4 quota of scored positions (both modes together). With the full-search type table,
+    a domain's share is split over the table's sub-types for it (supporting: D4's four and code)."""
+    subs_of = defaultdict(list)
+    for t in types or []:
+        subs_of[t["domain"]].append(t["subtype"])
     out = {}
     for name, prof in d["profiles"].items():
         q = {}
         for domain, w in prof["domain_weights"].items():
-            subs = d["cells"][domain]
+            subs = subs_of.get(domain) or list(d["cells"][domain])
             for sub in subs:
                 q[(domain, sub, "*")] = DOSE * float(d["reference_uesp"]) * w / len(subs)
         out[name] = q
     return out
+
+
+def r9_refused(generator_id, family_id) -> bool:
+    from stages.teacher_modes.build_state_eval_hybrid import r9_refused as by_name
+    return by_name(generator_id, family_id)
 
 
 def pool_order(d: dict) -> tuple[dict, dict[tuple, list[str]]]:
@@ -218,13 +231,53 @@ def item_of(rec: dict, unit: dict, mode: str, stop_ids: set[int]) -> dict | None
             "turn": 0}
 
 
+def held_out_of_profiles(units: dict) -> dict[str, str]:
+    """unit id -> why it may not enter a hybrid profile: R9 by family name, or its prompt is a training prompt of
+    either lineage (A1/A2's sets or C1's D4-Augmented sessions)."""
+    from huggingface_hub.constants import HF_HUB_CACHE
+    from transformers import AutoTokenizer
+
+    from shared import eval_sets as ES
+    from stages.teacher_modes.build_state_eval_hybrid import training_sets
+    train = {ES.prompt_key(ES.prompt_text(t)) for rows in training_sets().values() for t in rows}
+    m, rev = CAL.SOURCE_TOKENIZER
+    tok = AutoTokenizer.from_pretrained(Path(HF_HUB_CACHE) / f"models--{m.replace('/', '--')}" / "snapshots" / rev)
+    out = {}
+    for uid, u in units.items():
+        it = u["items"][0]
+        if r9_refused(it.get("generator_id"), it.get("family_id")):
+            out[uid] = "R9 (family name)"
+        elif "ids" in it:
+            msgs = CAL.prompt_messages(it, tok)
+            if ES.prompt_key(ES.prompt_text({"messages": msgs})) in train:
+                out[uid] = "a training prompt"
+    return out
+
+
 def profiles(v1_store: Path, v1_identity: str, store: Path | None, identity: str | None) -> dict:
-    """Both hybrid D4 profiles: per cell and mode, D4's order, half the cell quota of the mode's own positions."""
+    """Both hybrid D4 profiles: per cell and mode, D4's order, half the cell quota of the mode's own positions; units
+    held out (`held_out_of_profiles`) are passed over and the order continues. A (profile, mode, cell) still short
+    lists the next units of its order a calibration top-up would generate (``refill``)."""
     from aadistill.initialization.calibration.profiles import mixture_content_sha256
     d = design()
-    quotas = cell_quotas(d)
+    types = json.loads(TYPES.read_text())["types"]
+    quotas = cell_quotas(d, types)
     units, order = pool_order(d)
+    if CODE_TASKS.is_file():                #: the code cell: its own prompt list, in file order (no D4 pool unit)
+        code = list(A.jsonl(CODE_TASKS))
+        order[("supporting", "code", "*")] = [t["task_id"] for t in code]
+        for t in code:
+            units[t["task_id"]] = {"unit_id": t["task_id"], "items": [{"item_id": t["task_id"], "domain": "supporting",
+                                   "subtype": "code", "generator_id": t.get("module"), "family_id": t.get("family_id")}]}
     recs = hybrid_records(v1_store, v1_identity, store, identity)
+    held = held_out_of_profiles(units)
+    per_unit = defaultdict(list)
+    for (uid, mode), rec in recs.items():
+        t = rec["turns"][0]
+        if t.get("stop_reason") == "eos" and uid in units:
+            u = units[uid]["items"][0]
+            per_unit[(mode, u["subtype"])].append(int(t["generated_tokens"]))
+    refill = defaultdict(set)
     proto = json.loads((REPO / "configs/stages/stage-2/teacher_modes/generation_protocol.json").read_text())
     stop = {int(x) for x in proto["teacher"]["stop_ids"]}
     PROFILE_DIR.mkdir(parents=True, exist_ok=True)
@@ -234,11 +287,19 @@ def profiles(v1_store: Path, v1_identity: str, store: Path | None, identity: str
         for cell, quota in sorted(q.items()):
             for mode in MODES:
                 got, taken, skipped = 0, 0, 0
-                for uid in order[cell]:
-                    if got >= quota / 2 and taken:
+                refused, est, new = 0, 0.0, []
+                ppu = per_unit[(mode, cell[1])]
+                mean = sum(ppu) / len(ppu) if ppu else 0.0
+                for uid in order.get(cell, []):
+                    if got + est >= quota / 2 and (taken or new):
                         break
+                    if uid in held:
+                        refused += 1        #: R9 by family name, or a training prompt of either lineage
+                        continue
                     rec = recs.get((uid, mode))
                     if rec is None:
+                        new.append(uid)     #: not generated in this mode: a top-up's next unit
+                        est += mean * MARGIN if mean else quota
                         continue
                     it = item_of(rec, units[uid], mode, stop)
                     if it is None:
@@ -248,7 +309,10 @@ def profiles(v1_store: Path, v1_identity: str, store: Path | None, identity: str
                     got += len(it["tags"]["assistant"])
                     taken += 1
                 census[f"{'/'.join(cell[:2])}|{mode}"] = {"quota": round(quota / 2, 1), "scored": got, "items": taken,
-                                                          "not_naturally_terminated": skipped, "short": got < quota / 2}
+                                                          "not_naturally_terminated": skipped, "held_out_units": refused,
+                                                          "short": got < quota / 2, "refill_units": len(new)}
+                for uid in new:
+                    refill[uid].add(mode)
         pid = HYBRID_IDS[prof]
         path = PROFILE_DIR / f"{pid}.items.jsonl"
         body = "".join(json.dumps(it, sort_keys=True) + "\n" for it in items)
@@ -264,11 +328,19 @@ def profiles(v1_store: Path, v1_identity: str, store: Path | None, identity: str
                                  "tokens": sum(i["n_tokens"] for i in items),
                                  "short_cells": sorted(k for k, v in census.items() if v["short"])}})
         report[pid] = census
+    short = sorted(f"{p['profile_id']}:{c}" for p in doc for c in p["metadata"]["short_cells"])
     rec = {"schema": "aadistill.calibration_profiles/v1",
+           "status": ("COMPLETE: every cell holds half its D4 quota in each mode" if not short else
+                      f"INCOMPLETE: {len(short)} (profile, cell, mode) short until the top-up's units are generated"),
            "_contract": ("Research A v2's hybrid D4-scale calibration profiles (build_calibration_supplement.py profiles); data "
                          "for the PROPOSED full search -- nothing searches with them before the maintainer's approval"),
            "teacher": {"model": proto["teacher"]["model"], "revision": proto["teacher"]["revision"]},
-           "profiles": doc, "census": report, "authorizes": "nothing"}
+           "profiles": doc, "census": report,
+           "held_out": dict(Counter(held.values())),
+           "refill": {"units": len(refill), "by_cell_and_modes": dict(Counter(
+               f"{units[u]['items'][0]['domain']}/{units[u]['items'][0]['subtype']}|{'+'.join(sorted(m))}" for u, m in refill.items())),
+               "unit_ids": {u: sorted(m) for u, m in sorted(refill.items())}},
+           "authorizes": "nothing"}
     PROFILE_DOC.write_text(json.dumps(rec, indent=1) + "\n")
     return rec
 

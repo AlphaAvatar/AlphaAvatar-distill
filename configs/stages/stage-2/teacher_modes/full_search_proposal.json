@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.teacher_modes.full_search_proposal/v1",
- "status": "PROPOSED 2026-10-31 for the maintainer's review; NOT authorized, NOT run. Nothing here searches, materializes or computes a reference",
+ "status": "PROPOSED 2026-10-31 for the maintainer's review, revised the same day for the brief 'Full Search Calibration / State Evaluation Distribution Alignment'; NOT authorized, NOT run",
  "decided_by": "maintainer 2026-10-31 (three briefs): a NEW D4 full search on the hybrid teacher's frozen weights, D4's search specification, the hybrid's own calibration (both modes, balanced on scored positions, reusing v1's sealed trajectories first), references and activations computed from the hybrid; one Top-1 shared by A1 and A2 and both seeds; never D4 Top-1, its rankings, references or weights, never v1's fixed-path initialization",
  "root_teacher": {
   "model": "Qwen/Qwen3-4B",
@@ -55,18 +55,42 @@
  },
  "calibration": {
   "profiles": {
-   "calib.hybrid_d4_base@v1": "D4's base cells and weights (0.18 per static primary axis, 0.28 supporting), 4 x 45,000 = 180,000 scored positions, half from each mode in every cell",
-   "calib.hybrid_d4_rh@v1": "D4's reasoning-heavy weights (0.22 per axis, 0.12 supporting), the same volume and per-cell mode balance"
+   "calib.hybrid_d4_base@v1": "D4's base weights (0.18 per static axis, 0.28 supporting), 180,000 scored positions, half per mode in every one of the 13 cells",
+   "calib.hybrid_d4_rh@v1": "D4's reasoning-heavy weights (0.22, 0.12), the same volume and cells"
   },
-  "rule": "per profile, mode and cell: D4's cell order over base_pool_v1 (seed 1308798386), the mode's own naturally terminated scored positions, until half the cell's D4 quota; items are the hybrid's own trajectories as generated (ids = prompt + output ids, tags.assistant = the generated positions, subtype = '<source subtype>|<mode>' so the subtype-then-domain reduction weighs the modes equally inside every domain)",
-  "supply": "v1's sealed calibration trajectories (D4's 4x prefix, both modes) first; the audit (logs/stages/stage-2/teacher_modes/audit/calibration_coverage.json) found H-N about 62,500 positions short per profile and H-T 829 short in one cell, so 801 further D4-pool units (data/stages/stage-2/teacher_modes/tasks/calibration_v2.jsonl: all 801 in non-thinking mode, 12 of them also in thinking mode) are generated in the supplement session's round 0, one candidate, the v1 calibration rule",
-  "isolation": "disjoint from every training order (order_v1, order_v2, T0, the pools) and eval-set-1's held-out prompts (R1, R2) and refused families (R9)",
-  "built_by": "build_calibration_supplement.py (the profiles are written on the dev box from the sealed records after the supplement; their items files and hashes go into the search config)"
+  "rule": "per profile, mode and cell: D4's cell order over base_pool_v1 (seed 1308798386) -- the code cell's own prompt list (calibration_code_v1.jsonl) -- the mode's own naturally terminated scored positions, until half the cell's quota (a domain's share split equally over its types, so supporting's 0.28 / 0.12 now over five); a unit refused by R9 (by family name) or whose prompt is a training prompt of either lineage is passed over and the order continues",
+  "reuse": "v1's sealed hybrid calibration (D4's 4x prefix) and the supplement's round 0 (801 D4-pool units) first",
+  "coverage_now": "configs/stages/stage-2/teacher_modes/hybrid_d4_profiles.json (built from the sealed records): base H-T 92,648 / H-N 83,999, rh H-T 95,415 / H-N 85,084 scored positions; short: string_induction (both modes: R9 removed 33 units of the pool's refused families), code (not generated), rag_evidence H-N",
+  "top_up": "the code cell's 9 prompts (calibration_code_v1.jsonl, reasoning_core code modules at seed base 2026310000) in both modes, and the refill units the profile build lists (string_induction 3 H-T + 8 H-N, rag_evidence 2 H-N), one candidate each, v1's rule",
+  "held_out": "33 pool units of R9-refused families (string_induction@v1 str.caesar, str.double_last, str.duplicate_each: D4's own profiles held 4 of them each) and 5,034 pool units whose prompt is a training prompt of A1/A2 (order_v2) or C1 (D4-Augmented's E1 sessions)",
+  "built_by": "build_calibration_supplement.py profiles"
  },
  "state_evaluation": {
-  "method": "state_eval@v1's method (80 items, 74,022 prediction positions, domains tool / rag_multihop / reasoning_math / general / code, critical tags think_close, eos, final_answer, tool_close; equal_subtype_then_equal_domain/v1)",
-  "references": "recomputed from the hybrid for every state; nothing of Thinking-2507's",
-  "decision_for_the_maintainer": "(a) state_eval@v1's items as they are (Thinking-2507 trajectories) with hybrid-recomputed references -- no new data, but the hybrid is measured on another model's text and the non-thinking mode is absent; or (b, recommended) the same 80 prompts with the hybrid's own trajectories in both modes, balanced on prediction positions, the same domains and critical-tag rules -- 160 short generations (well under $0.50) at the start of the search session. The loader binds Thinking-2507's suite today (phase_d1 d1_session.load_state_eval_suite, TEACHER_BINDING) and needs a hybrid binding either way"
+  "identity": "state_eval_hybrid@v1, a NEW suite; state_eval@v1 and its records are unchanged and unused by this search",
+  "prompts": {
+   "path": "data/stages/stage-2/teacher_modes/tasks/state_eval_hybrid_v1.tasks.jsonl",
+   "units": 1722,
+   "by_type": "code 22, defined_ops 53, entity_tracking 53, grid_transform 21, gsm8k 73, knights_knaves 21, list_induction 23, multihop_qa 683, openmath 43, ordering 70, rag_evidence 590, scan_language 39, string_induction 31",
+   "sources": "fluid: new instances of the same @v1 generators, calibration-split families, seeds 2,500,000-2,570,030 (calibration range; Stage-0's calibration used 2,000,000-2,200,024); gsm8k / rag / multihop: dataset train rows past every row order_v2 holds, corpus_v2's rendering, one question per SQuAD paragraph; openmath: base_pool_v1 units no calibration or training set holds; code: reasoning_core code modules at seed base 2026320000"
+  },
+  "quota": "12,000 scored positions per (type, mode), frozen before generation: 13 x 2 x 12,000 = 312,000; each mode takes its type's queue in order until its positions reach the quota (whole units)",
+  "scoring": {
+   "objectives": "D4's: state.teacher_kl.equal_domain_mean, state.teacher_kl.worst_domain, state.critical_token_kl",
+   "reduction": "equal_subtype_then_equal_domain/v1 over sub-types '<type>|<mode>': inside every domain each type and each mode weigh equally, so the modes are 50:50 and a profile's raw tokens confer nothing",
+   "critical_tokens": "per mode: H-T think_close, final_answer, eos; H-N final_answer, eos (no </think>: the non-thinking prompt's preclosed think block is prompt, not output); critical_token_kl = 0.5 x mean over H-T's classes + 0.5 x mean over H-N's -- the current evaluator averages every declared class unweighted (H-T would weigh 3/5): a generic extension, critical classes grouped by mode, is owed before the search, with its test",
+   "per_mode_kl": "each mode's equal-domain mean, worst domain and critical-token KL recorded beside the ranking values in every state's evaluation (journal), never ranked on alone",
+   "same_suite": "every candidate of the search is scored on this one frozen suite, items and weights fixed"
+  },
+  "manifest": [
+   "suite_id state_eval_hybrid, version 1; root teacher model, revision and weight-shard sha256; tokenizer files' sha256 and vocabulary sha256; chat template sha256; each mode's template kwargs and sampling",
+   "the type table's sha256 and the domain -> sub-type map ('<type>|<mode>'), critical classes per mode, general_domain none",
+   "per item: item_id, task id, type, mode, domain, prompt token ids and output token ids (ids = prompt + output), n_prediction_positions, tags (assistant = the generated positions; think_close, final_answer, eos as present in that mode), source lineage (generator, family, seed or dataset row)",
+   "counts per (type, mode): items and scored positions",
+   "the isolation proof's sha256 (logs/stages/stage-2/teacher_modes/audit/full_search_isolation.json)",
+   "content_sha256 (the item ids' token content, mixture_content_sha256's rule), the structural suite_hash (StateEvalSuite), and the measurement_protocol_id the evaluator derives (suite structure and content, scoring policy, reduction, execution fingerprint)"
+  ],
+  "loader": "a hybrid binding beside the shared loader (scripts/shared/evaluation/load_state_eval.load): it refuses a suite whose manifest does not name this root teacher, tokenizer, template and type table, then loads it; phase_d1's frozen Thinking-2507 binding (d1_session.load_state_eval_suite) is not edited",
+  "generation": "the hybrid's own trajectories, one candidate per prompt and mode (the official template, sampling and seeds of generation_protocol.json at a new seed base), only naturally terminated ones are items; H-T on its queue prefix (about 188 prompts), H-N on its (up to 1,722)"
  },
  "mode_combination": "ONE initialization: every operator's calibration and every state's KL read one profile whose cells hold equal scored positions of the two modes, and the state objectives average over subtypes '<subtype>|<mode>' before domains: the two modes are weighted equally inside every domain by construction, never searched separately",
  "execution": {
@@ -79,13 +103,27 @@
   "storage": "D4 stored 274 GB of states (largest 7.3 GB, the teacher-sized ones early in the tree); am5m373kuq holds 55 GB: the search needs its own volume of about 300 GB in the card's datacenter, or prune_weights true (pruned states' bytes deleted, the journal kept) -- a maintainer decision"
  },
  "estimate": {
-  "basis": "D4's measured search: 92 expansions, 11.08 h of operator time on an A100 at micro-batch 3, DEPTH 9.72 h of it; the L40S check's DEPTH at micro-batch 1 took 1.05 x the A100's micro-batch-3 DEPTH on the same items, the other operators about 1.09 x",
-  "hours_expected": 13.5,
-  "hours_conservative": 18.0,
-  "usd_expected": 15.22,
-  "usd_conservative": 20.12,
-  "plus": "a 300 GB volume for about a week (about $5) unless prune_weights; the Top-1's materialization and verification are inside the search",
-  "not_yet_measured": "the hybrid profiles' token counts (H-N items are shorter: more items for the same scored positions) and the L40S's state-evaluation time"
+  "basis": "D4's measured search (A100, micro-batch 3): DEPTH 9.72 h over 14 expansions (base 4.64 h, rh 5.08 h), the other operators 1.36 h, state evaluation 7.5 s per state at 74,022 positions; DEPTH is token-linear (MIXED.md's model); the L40S at micro-batch 1 ran D4's DEPTH path at 1.05 x the A100's micro-batch-3 time",
+  "profile_tokens": {
+   "calib.hybrid_d4_base@v1": 449155,
+   "calib.hybrid_d4_rh@v1": 319611,
+   "vs_d4": "1.97 x and 1.35 x D4's 228,237 and 236,666 tokens: the non-thinking supporting items carry long prompts (HotpotQA about 1,400 prompt tokens for about 25 scored positions)"
+  },
+  "hours": {
+   "depth": 16.8,
+   "other_operators": 2.2,
+   "state_evaluation": 0.9,
+   "overhead": 0.6,
+   "expected": 20.5,
+   "conservative": 25.6
+  },
+  "usd": {
+   "search_expected": 22.35,
+   "search_conservative": 27.9,
+   "storage": "about $5 for a 300 GB volume for a week (D4 kept 274 GB of states), or prune_weights true",
+   "inputs_session": "the calibration top-up and the state evaluation's generation: about 1.0 M generated tokens, about 45 min with setup, about $1.0-1.5"
+  },
+  "note": "profile token counts are from the records generated so far; the top-up adds a few thousand tokens"
  },
  "product": {
   "top1": "the Top-1's checkpoint identity (aadistill.autoinit.checkpoint_identity/v1: artifact_digest, weights_digest, single_shard_sha256, config_sha256, arch_signature, 596,049,920 parameters) and its materialization identity (semantic_state_id, materialization_id, numerical_execution_fingerprint, parent)",
@@ -105,5 +143,20 @@
    "v1's profiles were about 55,000 scored positions each (a quarter of D4's volume), balanced by whole items; these are D4's 180,000 with per-cell mode balance"
   ]
  },
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "types": {
+  "path": "configs/stages/stage-2/teacher_modes/full_search_types.json",
+  "summary": "13 types over five domains -- the four static fluid axes (grid_transform; defined_ops, scan_language; list_induction, string_induction; entity_tracking, knights_knaves, ordering) and supporting (openmath, gsm8k, rag_evidence, multihop_qa, code) -- each in both modes; calibration and state evaluation read the same table and every type is covered in both; interactive adaptation is excluded from both, with its reasons"
+ },
+ "state_evaluation_old_choice": "(a) and (b) of the first proposal are REJECTED by the maintainer (2026-10-31): neither covered the fluid axes",
+ "isolation": {
+  "proof": "logs/stages/stage-2/teacher_modes/audit/full_search_isolation.json",
+  "summary": [
+   "state evaluation vs calibration: 0 shared prompt keys, task ids or contents; 4 13-gram near-copies removed before freezing",
+   "state evaluation vs training (T0, pools, order_v1, order_v2, the diagnostic tasks, C1's D4-Augmented sessions): 0 exact; 208 13-gram near-copies removed (HotpotQA and SQuAD paragraphs shared across questions)",
+   "calibration vs A1/A2's training: 0; calibration vs C1's training: 232 shared prompts (D4's pool and E1 both drew corpus_v2) -- held out of the hybrid profiles",
+   "state evaluation vs eval-set-1: R1, R2 (2 removed), R3, R4, R7 and R9 by family name pass; calibration vs eval-set-1: R1-R4, R7 pass, R9 by family name fails for 18 units -- held out of the profiles",
+   "rule families, generators and source lineage are SHARED between calibration and state evaluation by design (one type table); seeds, instances and dataset rows are disjoint; both sit in the calibration seed range, disjoint from training's"
+  ]
+ }
 }

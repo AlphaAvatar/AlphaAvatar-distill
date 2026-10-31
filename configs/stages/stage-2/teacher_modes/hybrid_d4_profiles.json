@@ -1,0 +1,614 @@
+{
+ "schema": "aadistill.calibration_profiles/v1",
+ "status": "INCOMPLETE: 10 (profile, cell, mode) short until the top-up's units are generated",
+ "_contract": "Research A v2's hybrid D4-scale calibration profiles (build_calibration_supplement.py profiles); data for the PROPOSED full search -- nothing searches with them before the maintainer's approval",
+ "teacher": {
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+ },
+ "profiles": [
+  {
+   "profile_id": "calib.hybrid_d4_base",
+   "version": 1,
+   "description": "the hybrid's D4 base profile: D4's cells, order and quotas, half of every cell from each mode",
+   "domain_weights": {
+    "inductive_rule_discovery": 0.18,
+    "compositional_generalization": 0.18,
+    "task_contained_deduction": 0.18,
+    "abstract_analogical": 0.18,
+    "supporting": 0.28
+   },
+   "token_budget": 180000,
+   "seed": 1308798386,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-2/teacher_modes/calibration_v2/calib.hybrid_d4_base.items.jsonl",
+   "items_file_sha256": "246ee9a858031cf6267eb092fa60d3ec38793ce1d86acd2976ea7f4de4336b5f",
+   "content_sha256": "4a38094d9027114953ab52c4038d04a05b01031f4d3d8463d8caca620cd23b6c",
+   "metadata": {
+    "uesp": 176647,
+    "scored_positions_by_mode": {
+     "H-T": 92648,
+     "H-N": 83999
+    },
+    "n_items": 543,
+    "tokens": 449155,
+    "short_cells": [
+     "inductive_rule_discovery/string_induction@v1|H-N",
+     "inductive_rule_discovery/string_induction@v1|H-T",
+     "supporting/code|H-N",
+     "supporting/code|H-T",
+     "supporting/rag_evidence|H-N"
+    ]
+   }
+  },
+  {
+   "profile_id": "calib.hybrid_d4_rh",
+   "version": 1,
+   "description": "the hybrid's D4 rh profile: D4's cells, order and quotas, half of every cell from each mode",
+   "domain_weights": {
+    "inductive_rule_discovery": 0.22,
+    "compositional_generalization": 0.22,
+    "task_contained_deduction": 0.22,
+    "abstract_analogical": 0.22,
+    "supporting": 0.12
+   },
+   "token_budget": 180000,
+   "seed": 1308798386,
+   "role": "operator_calibration",
+   "materialized": true,
+   "items_path": "artifacts/stages/stage-2/teacher_modes/calibration_v2/calib.hybrid_d4_rh.items.jsonl",
+   "items_file_sha256": "3f6a3a0629d24613131e9324368b67060bd69313b2f8541530f409891bb1b6cd",
+   "content_sha256": "a6682519759738a9cf48416bbdff87531ebe4c6c7bbf3abd3b159230d23364f9",
+   "metadata": {
+    "uesp": 180499,
+    "scored_positions_by_mode": {
+     "H-T": 95415,
+     "H-N": 85084
+    },
+    "n_items": 361,
+    "tokens": 319611,
+    "short_cells": [
+     "inductive_rule_discovery/string_induction@v1|H-N",
+     "inductive_rule_discovery/string_induction@v1|H-T",
+     "supporting/code|H-N",
+     "supporting/code|H-T",
+     "supporting/rag_evidence|H-N"
+    ]
+   }
+  }
+ ],
+ "census": {
+  "calib.hybrid_d4_base": {
+   "abstract_analogical/grid_transform@v1|H-T": {
+    "quota": 16200.0,
+    "scored": 17211,
+    "items": 6,
+    "not_naturally_terminated": 1,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "abstract_analogical/grid_transform@v1|H-N": {
+    "quota": 16200.0,
+    "scored": 16322,
+    "items": 20,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "compositional_generalization/defined_ops@v1|H-T": {
+    "quota": 8100.0,
+    "scored": 8273,
+    "items": 7,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "compositional_generalization/defined_ops@v1|H-N": {
+    "quota": 8100.0,
+    "scored": 8144,
+    "items": 24,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "compositional_generalization/scan_language@v1|H-T": {
+    "quota": 8100.0,
+    "scored": 10930,
+    "items": 3,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "compositional_generalization/scan_language@v1|H-N": {
+    "quota": 8100.0,
+    "scored": 8409,
+    "items": 19,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "inductive_rule_discovery/list_induction@v1|H-T": {
+    "quota": 8100.0,
+    "scored": 9249,
+    "items": 5,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "inductive_rule_discovery/list_induction@v1|H-N": {
+    "quota": 8100.0,
+    "scored": 8306,
+    "items": 10,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "inductive_rule_discovery/string_induction@v1|H-T": {
+    "quota": 8100.0,
+    "scored": 4294,
+    "items": 2,
+    "not_naturally_terminated": 1,
+    "held_out_units": 7,
+    "short": true,
+    "refill_units": 2
+   },
+   "inductive_rule_discovery/string_induction@v1|H-N": {
+    "quota": 8100.0,
+    "scored": 4578,
+    "items": 8,
+    "not_naturally_terminated": 2,
+    "held_out_units": 20,
+    "short": true,
+    "refill_units": 5
+   },
+   "supporting/code|H-T": {
+    "quota": 5040.0,
+    "scored": 0,
+    "items": 0,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": true,
+    "refill_units": 1
+   },
+   "supporting/code|H-N": {
+    "quota": 5040.0,
+    "scored": 0,
+    "items": 0,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": true,
+    "refill_units": 1
+   },
+   "supporting/gsm8k|H-T": {
+    "quota": 5040.0,
+    "scored": 8182,
+    "items": 6,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/gsm8k|H-N": {
+    "quota": 5040.0,
+    "scored": 5150,
+    "items": 22,
+    "not_naturally_terminated": 0,
+    "held_out_units": 5,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/multihop_qa|H-T": {
+    "quota": 5040.0,
+    "scored": 5117,
+    "items": 8,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/multihop_qa|H-N": {
+    "quota": 5040.0,
+    "scored": 5077,
+    "items": 129,
+    "not_naturally_terminated": 0,
+    "held_out_units": 117,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/openmath|H-T": {
+    "quota": 5040.0,
+    "scored": 5306,
+    "items": 4,
+    "not_naturally_terminated": 0,
+    "held_out_units": 1,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/openmath|H-N": {
+    "quota": 5040.0,
+    "scored": 5967,
+    "items": 11,
+    "not_naturally_terminated": 0,
+    "held_out_units": 6,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/rag_evidence|H-T": {
+    "quota": 5040.0,
+    "scored": 5633,
+    "items": 15,
+    "not_naturally_terminated": 0,
+    "held_out_units": 5,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/rag_evidence|H-N": {
+    "quota": 5040.0,
+    "scored": 4984,
+    "items": 187,
+    "not_naturally_terminated": 0,
+    "held_out_units": 47,
+    "short": true,
+    "refill_units": 2
+   },
+   "task_contained_deduction/entity_tracking@v1|H-T": {
+    "quota": 5400.0,
+    "scored": 6214,
+    "items": 5,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/entity_tracking@v1|H-N": {
+    "quota": 5400.0,
+    "scored": 5473,
+    "items": 19,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/knights_knaves@v1|H-T": {
+    "quota": 5400.0,
+    "scored": 6257,
+    "items": 2,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/knights_knaves@v1|H-N": {
+    "quota": 5400.0,
+    "scored": 6130,
+    "items": 6,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/ordering@v1|H-T": {
+    "quota": 5400.0,
+    "scored": 5982,
+    "items": 4,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/ordering@v1|H-N": {
+    "quota": 5400.0,
+    "scored": 5459,
+    "items": 21,
+    "not_naturally_terminated": 1,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   }
+  },
+  "calib.hybrid_d4_rh": {
+   "abstract_analogical/grid_transform@v1|H-T": {
+    "quota": 19800.0,
+    "scored": 21405,
+    "items": 7,
+    "not_naturally_terminated": 1,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "abstract_analogical/grid_transform@v1|H-N": {
+    "quota": 19800.0,
+    "scored": 20646,
+    "items": 25,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "compositional_generalization/defined_ops@v1|H-T": {
+    "quota": 9900.0,
+    "scored": 10512,
+    "items": 9,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "compositional_generalization/defined_ops@v1|H-N": {
+    "quota": 9900.0,
+    "scored": 10052,
+    "items": 30,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "compositional_generalization/scan_language@v1|H-T": {
+    "quota": 9900.0,
+    "scored": 10930,
+    "items": 3,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "compositional_generalization/scan_language@v1|H-N": {
+    "quota": 9900.0,
+    "scored": 10469,
+    "items": 22,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "inductive_rule_discovery/list_induction@v1|H-T": {
+    "quota": 9900.0,
+    "scored": 10851,
+    "items": 6,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "inductive_rule_discovery/list_induction@v1|H-N": {
+    "quota": 9900.0,
+    "scored": 10221,
+    "items": 12,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "inductive_rule_discovery/string_induction@v1|H-T": {
+    "quota": 9900.0,
+    "scored": 4294,
+    "items": 2,
+    "not_naturally_terminated": 1,
+    "held_out_units": 10,
+    "short": true,
+    "refill_units": 3
+   },
+   "inductive_rule_discovery/string_induction@v1|H-N": {
+    "quota": 9900.0,
+    "scored": 4578,
+    "items": 8,
+    "not_naturally_terminated": 2,
+    "held_out_units": 21,
+    "short": true,
+    "refill_units": 8
+   },
+   "supporting/code|H-T": {
+    "quota": 2160.0,
+    "scored": 0,
+    "items": 0,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": true,
+    "refill_units": 1
+   },
+   "supporting/code|H-N": {
+    "quota": 2160.0,
+    "scored": 0,
+    "items": 0,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": true,
+    "refill_units": 1
+   },
+   "supporting/gsm8k|H-T": {
+    "quota": 2160.0,
+    "scored": 2385,
+    "items": 2,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/gsm8k|H-N": {
+    "quota": 2160.0,
+    "scored": 2175,
+    "items": 9,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/multihop_qa|H-T": {
+    "quota": 2160.0,
+    "scored": 4056,
+    "items": 5,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/multihop_qa|H-N": {
+    "quota": 2160.0,
+    "scored": 2163,
+    "items": 53,
+    "not_naturally_terminated": 0,
+    "held_out_units": 38,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/openmath|H-T": {
+    "quota": 2160.0,
+    "scored": 2560,
+    "items": 2,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/openmath|H-N": {
+    "quota": 2160.0,
+    "scored": 2194,
+    "items": 6,
+    "not_naturally_terminated": 0,
+    "held_out_units": 2,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/rag_evidence|H-T": {
+    "quota": 2160.0,
+    "scored": 2384,
+    "items": 12,
+    "not_naturally_terminated": 0,
+    "held_out_units": 3,
+    "short": false,
+    "refill_units": 0
+   },
+   "supporting/rag_evidence|H-N": {
+    "quota": 2160.0,
+    "scored": 2136,
+    "items": 79,
+    "not_naturally_terminated": 0,
+    "held_out_units": 24,
+    "short": true,
+    "refill_units": 1
+   },
+   "task_contained_deduction/entity_tracking@v1|H-T": {
+    "quota": 6600.0,
+    "scored": 7505,
+    "items": 6,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/entity_tracking@v1|H-N": {
+    "quota": 6600.0,
+    "scored": 6798,
+    "items": 23,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/knights_knaves@v1|H-T": {
+    "quota": 6600.0,
+    "scored": 10724,
+    "items": 3,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/knights_knaves@v1|H-N": {
+    "quota": 6600.0,
+    "scored": 6905,
+    "items": 7,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/ordering@v1|H-T": {
+    "quota": 6600.0,
+    "scored": 7809,
+    "items": 5,
+    "not_naturally_terminated": 0,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   },
+   "task_contained_deduction/ordering@v1|H-N": {
+    "quota": 6600.0,
+    "scored": 6747,
+    "items": 25,
+    "not_naturally_terminated": 1,
+    "held_out_units": 0,
+    "short": false,
+    "refill_units": 0
+   }
+  }
+ },
+ "held_out": {
+  "R9 (family name)": 33,
+  "a training prompt": 5034
+ },
+ "refill": {
+  "units": 14,
+  "by_cell_and_modes": {
+   "inductive_rule_discovery/string_induction@v1|H-T": 3,
+   "inductive_rule_discovery/string_induction@v1|H-N": 8,
+   "supporting/code|H-N+H-T": 1,
+   "supporting/rag_evidence|H-N": 2
+  },
+  "unit_ids": {
+   "09cb938af3b3bc2c3f94": [
+    "H-T"
+   ],
+   "13505c6f56d2ed912db8": [
+    "H-T"
+   ],
+   "249f90ed0a6657629356": [
+    "H-N",
+    "H-T"
+   ],
+   "2ba9101caf4f20230778": [
+    "H-N"
+   ],
+   "56b68ae392e88bfedf92": [
+    "H-N"
+   ],
+   "595a6ed8c4ec149be566": [
+    "H-N"
+   ],
+   "615532328aa54b5ba873": [
+    "H-N"
+   ],
+   "c085f69a5ee59543c2c2": [
+    "H-N"
+   ],
+   "c2bc29d40663e02f302e": [
+    "H-N"
+   ],
+   "db38afeee44ab8906645": [
+    "H-N"
+   ],
+   "db93c4cb84d681506be8": [
+    "H-T"
+   ],
+   "eacade49691a5ac02d06": [
+    "H-N"
+   ],
+   "squad_v2-010803": [
+    "H-N"
+   ],
+   "squad_v2-013660": [
+    "H-N"
+   ]
+  }
+ },
+ "authorizes": "nothing"
+}
