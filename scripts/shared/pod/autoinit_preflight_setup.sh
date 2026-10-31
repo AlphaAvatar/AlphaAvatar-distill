@@ -1310,6 +1310,22 @@ bad = {k: v for k, v in kind_conditions(got['kind']).items() if a.stage_conditio
 assert not bad, f'the artifact binds other records than this pod holds: {bad}'
 print(f'  {a.authorization_id}: {a.STUDY.key} {got[\"kind\"]}, hard \${a.hard_cap_usd:.4f}, study {got[\"identity\"][:12]}, harness {got[\"harness\"][:12]}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "stage2_teacher_modes_tm" ]; then
+  # Research A v2 (token-matched, `stages.teacher_modes.token_matched_phase`): its OWN type and study identity,
+  # never v1's. FORMAL; says yes to exactly its one kind (PHASE_KIND: supplement) and never to a dry-run artifact.
+  # Identity, harness, kind and the kind's bound records are recomputed HERE from the pod's own files.
+  cd "$REPO" && PYTHONPATH=src:scripts:scripts/stages/stage-1 SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" PHASE_KIND="${PHASE_KIND:-}" /opt/train/bin/python -c "
+import os
+from shared import study_engineering as SE
+from stages.teacher_modes.token_matched_phase import TMAuthorization, kind_conditions
+a = TMAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+assert os.environ['PHASE_KIND'] in TMAuthorization.STUDY.kinds, 'PHASE_KIND names none of the study kinds'
+got = SE.require_on_pod(a, TMAuthorization.STUDY, os.environ['SESSION_PLAN_HASH'], kind=os.environ['PHASE_KIND'])
+bad = {k: v for k, v in kind_conditions(got['kind']).items() if a.stage_conditions.get(k) != v}
+assert not bad, f'the artifact binds other records than this pod holds: {bad}'
+print(f'  {a.authorization_id}: {a.STUDY.key} {got[\"kind\"]}, hard \${a.hard_cap_usd:.4f}, study {got[\"identity\"][:12]}, harness {got[\"harness\"][:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   # A THIRD type, not a relaxation of the second. The continuation's artifact
   # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend

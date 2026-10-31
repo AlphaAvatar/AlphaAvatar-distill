@@ -1,0 +1,40 @@
+{
+ "schema": "aadistill.study_phase_grant/v1",
+ "status": "granted",
+ "study": "A-TM",
+ "proposed_utc": "2026-10-31",
+ "granted_by": "maintainer",
+ "decision": "Maintainer 2026-10-31 'Research A Immediate STOP and Token-Matched Data Completion': 「本次指令允许在现有 Research A 和项目累计硬上限内开展补数，但旧的冻结科学身份不能被当成新版授权使用。必须先完成合法的设计变更、预算核算及新的适用授权，所有既有实际支出必须计入累计账本，不得重置额度。」 and 2026-10-31 'Research A STOP、Token-Matched 数据补齐及 D4 Full Search 方案审查': 「可以在适用的合法授权范围内继续补充 Teacher 数据；如果旧冻结授权不能覆盖新设计，必须先处理新的授权身份，不能直接沿用旧的科学执行权限。不得自动提高预算或改用 A100。」",
+ "ceiling_usd": 95.8883,
+ "_ceiling": "Research A's cumulative $142.19 minus everything Research A v1 spent ($42.8017 in six sessions' closeouts, $3.50 storage): the phase cap is not reset, raised or duplicated",
+ "per_session_hard_cap_usd": 63.76,
+ "_per_session": "the v1 teacher envelope's per-session cap, unchanged",
+ "session_hard_caps_usd": {
+  "supplement": 63.76
+ },
+ "project_cumulative_cap_usd": 868.0,
+ "gpus": {
+  "NVIDIA L40S": 1.19
+ },
+ "gpu_count_max": 1,
+ "_gpus": "the L40S only, at most one GPU on one pod; no A100",
+ "engineering_reserve_usd": 10.0,
+ "network_volume": {
+  "id": "am5m373kuq",
+  "datacenter": "EUR-IS-2",
+  "size_gb_now": 55,
+  "expansion": "none: the supplement's shards (about 1 GB) fit"
+ },
+ "scope": "the supplementary teacher generation of Research A v2 (configs/stages/stage-2/teacher_modes/token_matched_design.json, its preregistration and supplement protocol, order_v2) through scripts/stages/stage-2/teacher_modes/token_matched_phase.py --kind supplement; the dev box's $0 admission after it",
+ "retries": "ordinary pre-generation engineering failures are repaired and rerun as new runs with new one-use artifacts inside this one cumulative envelope (P12.1); sealed records are never regenerated; a deterministic failure is never retried unchanged",
+ "application": {
+  "path": "logs/budget/applications/research_a_tm_2026-10-31/proposal.json"
+ },
+ "never": [
+  "a D4 full search, a calibration generation, an initialization, a student recovery or a student evaluation (proposals awaiting the maintainer's review)",
+  "an A100 or any card other than the L40S; a budget increase",
+  "Research A v1's frozen identity or grant as authority for any of this",
+  "Research B"
+ ],
+ "authorizes": "one-use supplement artifacts inside the ceiling, each priced at the live rate"
+}

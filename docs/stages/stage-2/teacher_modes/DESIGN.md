@@ -1,6 +1,22 @@
 # Research A — hybrid teacher: thinking against non-thinking distillation
 
-## Current study (2026-10-28, hardware revised 2026-10-29): D4-Augmented's training scale, no pilot
+## Current study (2026-10-31): Research A v2, token-matched
+
+**The maintainer stopped Research A v1 on 2026-10-31** (its recovery `a_recovery_20261030_211948`: five units
+trained and scored, the sixth trained and not scored; all kept as v1's historical evidence) and redesigned the
+scale. The record is [`TOKEN_MATCHED.md`](TOKEN_MATCHED.md):
+- the training scale is unique supervised tokens, per mode 5,923,021 = 2,960,507 (the counterpart of D4's E1
+  base corpus, type by type) + 2,962,514 (fluid, D4's increment cell shares);
+- the primary comparison is token-matched and composition-matched, the same-tasks comparison secondary;
+- the initialization is a new D4 full search on the hybrid teacher: proposed, not run;
+- this round prepares the data only, then stops for the maintainer's review.
+
+Owners: [`token_matched_design.json`](../../../../configs/stages/stage-2/teacher_modes/token_matched_design.json),
+[`plans/token_matched_preregistration.json`](../../../../logs/stages/stage-2/teacher_modes/plans/token_matched_preregistration.json),
+[`token_matched_phase.py`](../../../../scripts/stages/stage-2/teacher_modes/token_matched_phase.py) (its own study
+identity and grant). Everything below is Research A v1, frozen.
+
+## Research A v1 (2026-10-28, hardware revised 2026-10-29; stopped 2026-10-31): D4-Augmented's training scale, no pilot
 
 **Status: the whole chain is implemented at $0 and its task order is frozen;
 nothing is authorized.** The maintainer's decisions of 2026-10-28 (the revised

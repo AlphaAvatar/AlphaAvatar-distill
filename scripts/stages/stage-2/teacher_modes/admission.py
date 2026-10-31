@@ -147,19 +147,20 @@ def admit(task: dict, mode: str, recs: list[dict], proto: dict) -> dict:
     return {"admitted": False, "docs": [], "candidates": seen}
 
 
-def isolation_recheck(admitted: dict, tasks: dict) -> tuple[set[tuple[str, str]], dict]:
+def isolation_recheck(admitted: dict, tasks: dict, sources: dict | None = None) -> tuple[set[tuple[str, str]], dict]:
     """(task, mode) pairs whose admitted record fails P1v's recheck against eval-set-1 -- R1's held-out keys,
     R2's near-copies, R9's mechanism-equivalent families -- after which the rest must pass every rule (it
     raises otherwise): the task with the record's own messages (an episode's observations are the
     teacher-dependent text). R9 is here because order_v1's isolation report covered only its new tasks; the
-    pooled supply it reused carried E tasks of R9's refused families."""
+    pooled supply it reused carried E tasks of R9's refused families. ``sources`` is the source catalogue
+    (`isolation_check.check_pool`'s; the base catalogue when None)."""
     from shared import eval_sets as ES
     from stages.reasoning_data import isolation_check as IC
     items = [{**tasks[tid], "task_id": f"{tid}|{mode}", "unit_id": f"{tid}|{mode}", "messages": v["record"]["messages"]}
              for (tid, mode), v in sorted(admitted.items())]
     if not items:
         return set(), {"n_items": 0}
-    rep = IC.check_pool(items)
+    rep = IC.check_pool(items, sources=sources)
     flagged = set(rep["results"]["R2_near_duplicate"]["flagged_ids"])
     if rep["results"]["R1_held_out_keys"]["held_out_overlap"]:
         held = {ES.prompt_key(ES.prompt_text(r)) for rows in ES.component_items(roles=ES.HELD_OUT_ROLES).values()
@@ -169,7 +170,7 @@ def isolation_recheck(admitted: dict, tasks: dict) -> tuple[set[tuple[str, str]]
     refused = set(r9["refused_families"])
     flagged |= {i["unit_id"] for i in items if f"{i.get('generator_id')}/{i.get('family_id')}" in refused}
     rest = [i for i in items if i["unit_id"] not in flagged]
-    final = IC.check_pool(rest, refuse=True) if rest else {"n_items": 0, "pass": True, "violations": []}
+    final = IC.check_pool(rest, refuse=True, sources=sources) if rest else {"n_items": 0, "pass": True, "violations": []}
     return {tuple(f.rsplit("|", 1)) for f in flagged}, {
         "n_items": rep["n_items"], "pass": final["pass"], "violations": final["violations"][:20],
         "before_removal": {"pass": rep["pass"], "violations": rep["violations"][:20], "R9_items": r9["items"]},

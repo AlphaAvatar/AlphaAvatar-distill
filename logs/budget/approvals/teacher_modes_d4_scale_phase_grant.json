@@ -54,5 +54,6 @@
   "sha256": "15ba61b1b221719bbe19c9eafc3812b473598585515fc5d8e759799f6f22973d"
  },
  "study_identity_sha256": "848f65087269a8328a0cd682d5f8e089e5af93bb3e3e0b843b4868ef9c7a03d1",
- "granted_at_commit": "3729719c0b46a276827ee83089b1f33b81102073"
+ "granted_at_commit": "3729719c0b46a276827ee83089b1f33b81102073",
+ "closed": "2026-10-31: closed for new work by the maintainer's STOP of Research A v1 (recovery a_recovery_20261030_211948 stopped; the token-matched redesign has its own identity and grant, teacher_modes_token_matched_grant.json). Its $142.19 phase cap is carried there net of every v1 cost; nothing more is issued under this grant"
 }

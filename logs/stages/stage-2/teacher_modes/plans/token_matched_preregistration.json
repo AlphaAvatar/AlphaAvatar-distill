@@ -1,0 +1,119 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.token_matched_preregistration/v1",
+ "version": 1,
+ "study_id": "stage2.teacher_modes.token_matched",
+ "written_utc": "2026-10-31T08:39:47Z",
+ "status": "REGISTERED before any supplementary generation, before order_v2's records exist and before any student of this study exists; no Research A v1 student score was read by the agent before it. The decision rule is bound now; the training recipe and the initialization are PROPOSALS (docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md) that freeze only on the maintainer's approval, without changing anything registered here",
+ "design": {
+  "path": "configs/stages/stage-2/teacher_modes/token_matched_design.json"
+ },
+ "supersedes": {
+  "for_new_work": "logs/stages/stage-2/teacher_modes/plans/d4_scale_preregistration.json (v1, sha256 060a156e74ebcefc9115f0945192a2f1266a9e8e0e4fa2e2788c2573bfc39ecf): frozen, not overwritten; its comparisons S and C and its students stay Research A v1's"
+ },
+ "arms": {
+  "H-T-TM": "H-T documents of the H-T token-matched selection: 5,923,021 unique supervised tokens (2,960,507 base-corpus counterpart + 2,962,514 fluid), whole tasks, at the design's cell shares",
+  "H-N-TM": "H-N documents of the H-N token-matched selection, the same targets and cell shares",
+  "H-T-ST": "H-T documents of the tasks both token-matched selections hold",
+  "H-N-ST": "H-N documents of the same tasks"
+ },
+ "seeds": [
+  20260726,
+  20260801
+ ],
+ "seed_pairing": "arms are paired by training-seed number; every directional label needs both seeds' own estimates on its side",
+ "initialization": "one checkpoint for every arm and seed: the Top-1 of a NEW D4 full search on the hybrid teacher (proposed, not yet run); its artifact digest is bound into every unit before training",
+ "comparisons": {
+  "primary": {
+   "contrast": "H-T-TM - H-N-TM",
+   "role": "decided",
+   "reading": "at equal unique supervised tokens and equal category and cell composition; NOT at equal compute (steps, non-padding tokens, FLOPs and task counts differ and are reported)"
+  },
+  "secondary": {
+   "contrast": "H-T-ST - H-N-ST",
+   "role": "decided, independent",
+   "reading": "on the same tasks with each mode's natural length (supervised tokens differ and are reported)"
+  },
+  "never": "the two are never pooled into one effect estimate; step-matched and FLOPs-matched comparisons are not registered and are not implied by either",
+  "teacher_gap": {
+   "contrast": "teacher(mode) - student, per arm",
+   "role": "descriptive"
+  }
+ },
+ "multiplicity": "Bonferroni over the two decided comparisons: each interval at 97.5%",
+ "evaluation": {
+  "set": {
+   "eval_set_id": "eval-set-1",
+   "status": "frozen",
+   "manifest_sha256": "62a1a5d3357d73c94f7eadf56809e3853b24ff3a6a948e19c0177168cce77571",
+   "validity_mask": "v1 (formal 714 = 570 static + 144 interactive)",
+   "scoring_protocol": "v2, unchanged",
+   "action_protocol": "v2"
+  },
+  "decoding": {
+   "protocol_id": "nucleus_v1",
+   "sha256": "912214c68db6acd8a42643b24e4aa7a420603884ca6b20ba845a099cfe5b00c4",
+   "path": "configs/shared/evaluation/decoding/nucleus_v1.json"
+  },
+  "modes": "students in their own training mode; the teacher in both",
+  "think_state": "every generation records the think_state its prompt produced; the preclosed state is scored with no think delimiter allowed in the continuation, and no earlier record or verdict changes",
+  "every_item": "every item of every unit is generated for every checkpoint and for the teacher in both modes"
+ },
+ "primary_measure": "correctness on the 570 formal static items of fluid_reasoning_720 (dev_v1), one nucleus_v1 sample per item and seed, clustered by rule family. AGENTS.md P10.2's four primary axes are each reported apart: task-contained deduction, inductive rule discovery and compositional generalization (static, decided) and interactive adaptation and planning (the 144 interactive episodes, exploratory); abstract/analogical reasoning is a registered sub-category, reported as its own axis",
+ "decision_rule": {
+  "module": "scripts/stages/stage-2/teacher_modes/mode_statistics.py",
+  "rule_id": "stage2.teacher_modes.statistics/v1",
+  "applies": "H1's rule shape (h1_statistics.py: pairing, SESOI, floor, resolution), at this study's level and seed",
+  "bound_sha256": {
+   "scripts/stages/stage-2/teacher_modes/mode_statistics.py": "5220e8d581ba20942a8d134b11eb1f3d3c7c3f7df4dbc0c9a457d700f37a42bb",
+   "scripts/stages/stage-2/reasoning_data/h1_statistics.py": "c4c1191102f8b293feb9f165a7c72f1a69af3b96789c564e1747d95ea20a2836",
+   "src/aadistill/evaluation/paired_stats.py": "7d41ef3199eee78d3a9d9460c3b8f4c3bb33773d5d6b4945c57a62df934fe782"
+  },
+  "constants": {
+   "sesoi": 0.05,
+   "sesoi_axis": 0.08,
+   "level": 0.975,
+   "iterations": 10000,
+   "bootstrap_seed": 20261029,
+   "floor_rate": 0.02,
+   "min_discordant": 10,
+   "min_informative_clusters": 5,
+   "alpha_axes": 0.05
+  },
+  "labels": {
+   "GO_THINKING": "the interval lies wholly above +5 pp and both seeds' estimates are above +5 pp",
+   "GO_NON_THINKING": "the interval lies wholly below -5 pp and both seeds' estimates are below -5 pp",
+   "NO_GO": "the interval and both seeds' estimates lie inside (-5, +5) pp and neither arm is below 2%: a meaningful difference between the modes is excluded at this scale",
+   "INCONCLUSIVE": "anything else off the floor",
+   "NOT_RESOLVED": "both arms below 2% (FLOOR); one arm below 2% flagged FLOOR_<arm>"
+  },
+  "reading": "primary and secondary are read separately and never merged"
+ },
+ "data_budget_rules": {
+  "scale": "per mode 5,923,021 unique supervised tokens = 2,960,507 + 2,962,514 (token_matched_design.json :: scale); each category stops at the first whole-task boundary reaching its target; total excess at most 0.5%, category share within 0.5 points; a shortfall is reported, never substituted",
+  "selection": "token_matched_design.json :: selection (reuse first, the frozen v1 verdict and isolation recheck, largest-remainder interleave over cells, families toward the two modes' mean family shares)",
+  "steps": "each arm: ceil(epochs x sequences / batch size) as the approved training plan fixes it; the arms' differing step counts are reported, never equalized here",
+  "length_censoring": "a generation that reaches its 8,184-minus-prompt allowance is training-length-limited (right-censored at the training sequence; never called a context-limit hit: the teacher supports 40,960) and never admitted; any primary cell whose H-T first-candidate length-limited share exceeds 20% carries the DESCRIPTIVE warning LENGTH_CENSORED, its limited share, correctness, natural-termination rate and trainable-sample count reported in full; nothing is cut, re-sampled, re-run or dropped because of it",
+  "validation": "each mode's admitted V and V2 documents, at most 16 isolated sequences: diagnostics only"
+ },
+ "teacher_correctness": "per mode on every T0 task's first candidate (the teacher's correctness), and the two-candidate yield, per cell and axis; and on eval-set-1 per mode under nucleus_v1",
+ "reported_beside": [
+  "supervised tokens, documents, tasks, packed sequences, non-padding tokens, padding share, optimizer steps, supervised-token exposure, student and teacher FLOPs per arm",
+  "per-cell and per-family token distributions per mode and their total-variation distances",
+  "the teacher's correctness per mode and the teacher-student gap",
+  "reasoning and answer lengths"
+ ],
+ "never": [
+  "a re-rendered target, a hand-built mode prefix, a soft switch, or a mode-forcing system message",
+  "removing a thinking span from a thinking-mode trace to make a non-thinking target, or any answer-only cut of a Thinking-2507 trace",
+  "changing this rule, its constants, the evaluation set, the mask, the scorers or nucleus_v1 after a datum is seen",
+  "a pooled score across units, or usable rollout, KL, loss or length read as reasoning",
+  "selecting, dropping or re-running a seed for its result",
+  "combining the hybrid non-thinking teacher with the projected-residual architecture in this round (brief section 4)",
+  "starting any follow-up automatically from a result of this study",
+  "comparing a teacher mode and a context strategy in one contrast, or switching an arm's context strategy after a datum is seen",
+  "a 10% promotion pilot or any scientific gate on a slice of the data",
+  "comparing a Research A student with a Research B student as a controlled pair (different teacher lineages)",
+  "admitting a truncated reasoning trajectory, or lowering a correctness standard to reach a scale"
+ ],
+ "authorizes": "nothing"
+}

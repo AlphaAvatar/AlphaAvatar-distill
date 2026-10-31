@@ -233,7 +233,8 @@ def test_each_study_has_its_own_type_and_setup_branch():
     for kind, mod, cls in (("stage2_teacher_modes", "stages.teacher_modes.ae_launch", "AEAuthorization"),
                            ("stage1_projected_residual", "stages.projected_residual.be_launch", "BEAuthorization"),
                            ("stage1_independent_gated", "stages.projected_residual.igv_launch", "IGEAuthorization"),
-                           ("stage2_teacher_modes_phase", "stages.teacher_modes.phase", "PhaseAuthorization")):
+                           ("stage2_teacher_modes_phase", "stages.teacher_modes.phase", "PhaseAuthorization"),
+                           ("stage2_teacher_modes_tm", "stages.teacher_modes.token_matched_phase", "TMAuthorization")):
         body = text[text.index(f'elif [ "$SESSION_KIND" = "{kind}" ]; then'):]
         body = body[:body.index("elif [", 10)]
         for needle in (f"from {mod} import {cls}", f"{cls}.load(", "SE.require_on_pod(", "AUTHORIZATION_MISMATCH"):

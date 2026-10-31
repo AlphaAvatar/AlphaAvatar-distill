@@ -1,0 +1,170 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.token_matched_design/v1",
+ "study_id": "stage2.teacher_modes.token_matched",
+ "name": "Research A v2: thinking against non-thinking at matched supervised tokens and composition",
+ "status": "REGISTERED 2026-10-31 at $0, before any supplementary generation and before any student result was read; DATA ONLY: this design authorizes supplementary teacher generation and the data admission, never a calibration generation, a search, an initialization, a training run or an evaluation (the D4 full search and the training are proposals that wait for the maintainer's review)",
+ "decided_by": {
+  "maintainer": "2026-10-31 'Research A Immediate STOP and Token-Matched Data Completion': stop the recovery; the training scale is supervised tokens, not packed sequences; per mode 5,923,021 = 2,960,507 (the category corresponding to D4-Augmented's base corpus) + 2,962,514 (fluid reasoning); matched totals, category ratio and comparable source distribution; reuse every legal sealed record first; stop after the data and wait for review",
+  "maintainer_choice": "2026-10-31 (question in session): the base-corpus category corresponds to E1's corpus_v2 type by type -- competition math (MATH train, replacing openmath), GSM8K train, SQuAD v2 answerable reading, HotpotQA multi-hop reading, code -- one fifth each; tool calling has no legal training source and is dropped; answerability is not counted",
+  "maintainer_2": "2026-10-31 'Research A STOP, Token-Matched data completion and D4 Full Search plan review' (supersedes the first 2026-10-31 brief): the same token targets; match totals, categories and source/family distributions as closely as possible; the new study's initialization is a NEW D4 full search on the hybrid teacher's frozen weights with D4's search specification and freshly computed hybrid calibration references -- proposed now, not executed; every arm and both seeds start from its one Top-1"
+ },
+ "supersedes": {
+  "for_new_work": "configs/stages/stage-2/teacher_modes/d4_scale_design.json (study 848f6508..., the 2,468-sequence target); it stays frozen as Research A v1 and its records, preregistration and student results keep their identity",
+  "not_reinterpreted": "Research A v1's six units (runs/a_recovery_20261030_211948) are historical evidence of v1; none is a result of this design"
+ },
+ "question": "One hybrid teacher (Qwen/Qwen3-4B@1cfa9a72) in its two official modes, H-T (enable_thinking=True) and H-N (enable_thinking=False). At the same number of unique supervised tokens and the same category and cell composition, which mode's teacher-native documents give the 596M student better fluid-reasoning correctness on eval-set-1? A same-tasks comparison is reported beside it, never merged with it.",
+ "teacher": "unchanged from Research A v1: configs/stages/stage-2/teacher_modes/teacher_identity.json; the generation protocol's modes, sampling, stop ids, allowance and candidate rule (generation_protocol.json) apply to every supplementary record unchanged",
+ "scale": {
+  "measure": "unique supervised tokens: the generated tokens of an admitted token-native document (`len(output_ids)`), the positions CE and KD train on; packed 8,192-token sequences are a consequence, never the target",
+  "per_mode_total": 5923021,
+  "categories": {
+   "base_counterpart": 2960507,
+   "fluid": 2962514
+  },
+  "_reference": "D4-Augmented (h1pa.json :: arms.D4-Augmented): E1's 1,944 corpus_v2 sequences = 2,960,507 supervised tokens, the H1-PA fluid increment = 2,962,514 (logs/stages/stage-2/reasoning_data/audit/h1pa_fluid_whole_units.json)",
+  "tolerance": {
+   "total_over_target_max_fraction": 0.005,
+   "category_share_deviation_max_points": 0.5,
+   "rule": "whole tasks only (an episode with all its turns); each category stops at the first task boundary that reaches its target, so the only excess is the last task's natural length; a shortfall is reported, never filled from another category or cell"
+  },
+  "sequence_length": 8192,
+  "never": "padding, repeated samples, repeated epochs to reach a count, cut or concatenated traces, re-rendered generations, a lowered correctness standard"
+ },
+ "categories": {
+  "base_counterpart": {
+   "what": "the verified, legally trainable counterpart of each corpus_v2 type in E1's 2,960,507 tokens (E1 held each type at 1/6 by supervised tokens: logs/stages/stage-2/teacher_modes/audit/token_matched_supply.json :: e1_reference)",
+   "not": "knowledge reasoning: none of these is closed-book factual recall. Math and code are learned procedures; SQuAD and HotpotQA reading answers from evidence supplied in the prompt. They are P10.2 supporting capabilities",
+   "types": {
+    "competition_math": {
+     "e1_type": "openmath (OpenMathInstruct-2 augmented MATH-style problems; key = Llama-3.1-405B majority vote, not a human gold)",
+     "cells": [
+      [
+       "supporting.math_new",
+       "math_train"
+      ]
+     ],
+     "share": 0.2,
+     "verifier": "boxed_math against MATH train's human gold"
+    },
+    "gsm8k": {
+     "e1_type": "gsm8k (GSM8K train, raw question)",
+     "cells": [
+      [
+       "supporting.math_gsm8k",
+       "gsm8k_train"
+      ]
+     ],
+     "share": 0.2,
+     "verifier": "final_number against the human gold"
+    },
+    "rag_reading": {
+     "e1_type": "rag_evidence (SQuAD v2 train answerable, corpus_v2's RAG_PROMPT)",
+     "cells": [
+      [
+       "supporting.reading_verified",
+       "squad_v2_train_answerable"
+      ]
+     ],
+     "share": 0.2,
+     "verifier": "span: the normalized gold span in the final answer; an answer that opens with an abstention is refused"
+    },
+    "multihop_reading": {
+     "e1_type": "multihop_qa (HotpotQA distractor train, corpus_v2's HOTPOT_PROMPT)",
+     "cells": [
+      [
+       "supporting.reading_verified",
+       "hotpot_qa_train"
+      ]
+     ],
+     "share": 0.2,
+     "verifier": "span (a yes/no gold leading the answer)"
+    },
+    "code": {
+     "e1_type": "code (MBPP, no verifier in corpus_v2)",
+     "cells": [
+      [
+       "supporting.code_algorithmic",
+       "mbpp_train"
+      ],
+      [
+       "supporting.code_algorithmic",
+       "reasoning_core"
+      ]
+     ],
+     "share": 0.2,
+     "verifier": "MBPP: every declared assert in the dev-box sandbox; reasoning_core: the module's comparator or project checker",
+     "split": "MBPP train is exhausted (its 474 eligible tasks are all generated): its cell is capped at the smaller of the two modes' admitted MBPP supervised tokens, and the type's remainder is reasoning_core's code modules, the code stratum's registered construction (order_v1's substitution once MBPP ran out)"
+    },
+    "tool_calling": {
+     "e1_type": "tool_calling (xLAM / glaive)",
+     "share": 0.0,
+     "why": "no legal training source: xLAM is research-purposes-only and DeepSeek-generated, glaive's provenance is undocumented (configs/stages/stage-2/reasoning_data/sources.json :: evaluation only); its sixth is spread equally over the five types above"
+    }
+   },
+   "excluded_supply": "Research A v1's supporting cells outside these types -- answerability (SQuAD v2 unanswerable; E1 had none), mathematics_dataset and reasoning_gym math (procedural, not E1's competition problems), reasoning_gym code (no task admitted in either mode) -- are audited and reported, never trained here"
+  },
+  "fluid": {
+   "what": "P10.2's primary strata, each cell at its share of D4-Augmented's fluid increment (h1pa_fluid_whole_units.json :: admission.admitted_mixture)",
+   "cells": {
+    "primary.abstract_analogical/s0_generators_v2_calsplit": 0.123489,
+    "primary.compositional_generalization/reasoning_core": 0.040353,
+    "primary.compositional_generalization/reasoning_gym": 0.034051,
+    "primary.compositional_generalization/s0_generators_v2_calsplit": 0.14053,
+    "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 0.246288,
+    "primary.interactive_adaptation/s0_generators_v2_calsplit": 0.167869,
+    "primary.task_contained_deduction/reasoning_core": 0.057858,
+    "primary.task_contained_deduction/reasoning_gym": 0.036847,
+    "primary.task_contained_deduction/s0_generators_v2_calsplit": 0.152715
+   },
+   "prontoqa": "D4's deduction/prontoqa share (0.046317) is spread over the deduction stratum's other three cells in proportion to their D4 shares: H-N admits none of its 575 ProntoQA tasks (the contract requires a verified step chain, which the non-thinking answers do not give), so the cell cannot be matched and is dropped from BOTH modes",
+   "abstract_analogical/reasoning_core": "not a D4 cell (share 0): its v1 supply is audited, not trained"
+  }
+ },
+ "selection": {
+  "reuse_first": "within a cell, tasks in the order T0 (its lists' order), then order_v1's E and X positions, then order_v2's own cell position; a (task, mode) already sealed is never generated again",
+  "verdict": "admission.py's frozen per-(task, mode) verdict (verified correct, naturally terminated, protocol-valid, token-native documents under the mode's generation prompt; MBPP in the dev-box sandbox) and its isolation recheck (R1, R2, R9 against eval-set-1, then every rule over the rest), with this study's source catalogue extension",
+  "rule": "per mode and per category: a largest-remainder interleave over the category's cells on supervised tokens (the next task comes from the cell furthest below its share of the category's running total) until the category reaches its target; each cell is then within one task of its share. A cell exhausted before its category stops is a SHORTFALL: the selection is refused, never substituted",
+  "excluded_from_training": "V (order_v1's validation slice) and V2 (order_v2's validation slice): validation only",
+  "nothing_read": "no student result, no eval-set-1 item, no length or score beyond the frozen verdict",
+  "family": "inside a cell, the next task comes from the family furthest below its target share of the cell's running total; the target is the mean of the two modes' admitted-supply family shares in that cell (by supervised tokens; symmetric, fixed at admission from the sealed records, never from a student result). A family that runs dry hands its remainder to the cell's other families in proportion; per cell the family distribution of each mode and their total-variation distance are reported"
+ },
+ "supplement": {
+  "order": "artifacts/stages/stage-2/teacher_modes/tasks/order_v2.jsonl.gz (build_supplement_tasks.py; outside git, bound by its sha256 in data/stages/stage-2/teacher_modes/tasks/order_v2.manifest.json): one queue per cell needing supply, every task new -- a fresh project seed block, new third-party export seed bases, the datasets in their own row order past every task an earlier pool or order holds -- and R0-R9, eval-set-1 and calibration isolation before any generation",
+  "need": "per (mode, cell): the cell's quota minus its admitted supervised tokens in the sealed v1 records (dev-box exact, logs/stages/stage-2/teacher_modes/data/supplement_plan.json)",
+  "generation": "rounds on the pod (supplement_session.py): each round takes, per (mode, cell) still short by the pod's lower bound, the next tasks of the cell's queue sized from the cell's measured yield; pass 0, then pass 1 for each first candidate the pod rejects; until every (mode, cell) bound reaches its need x (1 + pod_margin) or the cell's queue is exhausted. Seed base 20261031 (+ pass), new task ids: no (task, mode, candidate) seed repeats v1's",
+  "pod_margin": 0.05,
+  "family_skip": "a family with no admitted task in a mode over at least 25 generated tasks in the sealed v1 records is not generated again in that mode (supplement_plan.json :: skip); a family with none in either mode is not built into order_v2 at all. Both are reported. Nothing else about a family is read",
+  "sizing": "each round sizes a (mode, cell)'s next batch from the cell's measured admitted tokens per generated task in that mode, times 1.25"
+ },
+ "validation": "per mode, the admitted documents of V and V2 (32 tasks of each new dataset cell), document-isolated at 8,192, at most 16 sequences: diagnostic only",
+ "packing": "aadistill.data.token_documents.pack_isolated (document_isolated) at 8,192, documents sorted by doc id, order seed 20261029 (generation_protocol.json :: stopping)",
+ "comparisons": {
+  "primary": {
+   "name": "token-matched, composition-matched",
+   "arms": {
+    "H-T-TM": "H-T documents of the H-T selection",
+    "H-N-TM": "H-N documents of the H-N selection"
+   },
+   "matched": "unique supervised tokens per category and cell",
+   "differs_and_is_reported": "task counts and task identities (the modes' lengths differ about 5x), documents, packed sequences, non-padding context tokens, optimizer steps, training FLOPs and teacher-forward FLOPs, padding share; the causal reading is limited to 'at equal supervised tokens and composition', never 'at equal compute'"
+  },
+  "secondary": {
+   "name": "same tasks",
+   "arms": {
+    "H-T-ST": "H-T documents of the tasks both selections hold",
+    "H-N-ST": "H-N documents of the same tasks"
+   },
+   "differs_and_is_reported": "supervised tokens (each mode's natural length) and everything that follows from them",
+   "never": "pooled with the primary into one effect estimate"
+  },
+  "not_the_same": "token-matched, step-matched and FLOPs-matched are different comparisons; only token-matched (primary) and same-tasks (secondary) are registered here, the others are reported as accounting"
+ },
+ "compute_accounting": "per arm: unique supervised tokens, documents, tasks, packed sequences, non-padding tokens, padding share, optimizer steps, supervised-token exposure, student and teacher FLOPs (logs/stages/stage-2/teacher_modes/data/token_matched_admission.json)",
+ "next": "the maintainer's review of the data audit, the initialization plan and the training plan (docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md); nothing is initialized, trained or evaluated before it",
+ "authorizes": "nothing",
+ "initialization": {
+  "decision": "maintainer 2026-10-31: a new D4 full search on the hybrid teacher (Qwen/Qwen3-4B@1cfa9a72), not D4 Top-1 and not Research A v1's fixed-path common initialization",
+  "status": "PROPOSED, not executed: docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md section B and configs/stages/stage-2/teacher_modes/full_search_proposal.json; nothing in this round calibrates, searches or materializes",
+  "shared_by": "both primary arms, both secondary arms and both seeds start from the one Top-1 checkpoint, bound by its artifact digest"
+ }
+}

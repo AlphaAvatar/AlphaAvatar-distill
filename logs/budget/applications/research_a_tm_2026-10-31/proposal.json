@@ -1,0 +1,35 @@
+{
+ "schema": "aadistill.study_phase_application/v1",
+ "written_utc": "2026-10-31T08:40:00Z",
+ "status": "proposed",
+ "study": "A-TM",
+ "what": "Research A v2's supplementary teacher generation only (token_matched_design.json :: supplement): order_v2 in both modes until each (mode, cell) token need is met; then the dev box's admission at $0. No calibration, search, initialization, training or evaluation",
+ "money": {
+  "phase_cap_usd": 142.19,
+  "spent_by_research_a_v1": {
+   "sessions_usd": 42.8017,
+   "storage_usd": 3.5,
+   "runs": {
+    "a_check_20261029_164345": 0.6347,
+    "a_check_20261029_172423": 1.7508,
+    "a_check_20261029_190241": 1.3815,
+    "a_teacher_20261029_201915": 5.3342,
+    "a_teacher_20261030_012648": 21.7443,
+    "a_recovery_20261030_211948": 11.9562
+   },
+   "storage": "am5m373kuq 30 -> 55 GB, logs/stages/stage-2/reasoning_data/storage/h1pa_volume_am5m373kuq.json :: expansions"
+  },
+  "remaining_usd": 95.8883,
+  "engineering_reserve_usd": 10.0,
+  "_reserve": "of the remaining, $10 stays the phase's engineering reserve for pre-science subruns and is not spent on scientific work",
+  "project_cumulative_cap_usd": 868.0
+ },
+ "ceiling_usd": 95.8883,
+ "per_session_hard_cap_usd": 63.76,
+ "project_cumulative_cap_usd": 868.0,
+ "gpus": {
+  "NVIDIA L40S": 1.19
+ },
+ "gpu_count_max": 1,
+ "authorizes": "nothing"
+}

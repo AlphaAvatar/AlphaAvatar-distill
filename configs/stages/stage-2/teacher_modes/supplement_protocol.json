@@ -1,0 +1,31 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.supplement_protocol/v1",
+ "status": "FROZEN at $0 before any supplementary generation (token_matched_design.json :: supplement)",
+ "base_protocol": {
+  "path": "configs/stages/stage-2/teacher_modes/generation_protocol.json",
+  "sha256": "462034035ccf6d82fddd686e56670c60f7ab52d7c9e55cedde67ccee78516a0a"
+ },
+ "_base": "every runner value -- the teacher and its revision, both modes' template kwargs and official sampling, stop ids, pad id, the 8,184-token session limit, two candidates except MBPP, action protocol v2, the completion shards -- is the base protocol's, unchanged; only the seed base below replaces it",
+ "seed_base": 20261031,
+ "_seed": "candidate pass k runs at seed base 20261031 + k in both modes; a turn's seed is run_battery.request_seed(base, task_id, turn) and every task id is new, so no (task, candidate, turn) seed repeats v1's",
+ "inputs": {
+  "order": {
+   "path": "artifacts/stages/stage-2/teacher_modes/tasks/order_v2.jsonl.gz",
+   "sha256": "02c98b81a3d0fd0dacb184435572decae225c5d07ff411d8322330b8db8a9306"
+  },
+  "plan": {
+   "path": "logs/stages/stage-2/teacher_modes/data/supplement_plan.json",
+   "sha256": "a48ce65ace613dd90a7027b2e7ae4b443ca7c4b81f0688336b5f497c5334c7d2"
+  },
+  "calibration": {
+   "path": "data/stages/stage-2/teacher_modes/tasks/calibration_v2.jsonl",
+   "sha256": "da246f6732016451fb22b62db373c67b9103c12572b991512dcec9e869277387"
+  }
+ },
+ "pod_margin": 0.05,
+ "sizing": 1.25,
+ "min_batch": 8,
+ "max_rounds": 8,
+ "_rounds": "supplement_session.py: per (mode, cell) short of need x (1 + pod_margin), the next tasks of the cell's queue, sized remaining / tokens per generated task x sizing (at least min_batch); V2 in round 1; round 0 is the calibration supplement (one candidate, each unit in the modes its audit needs)",
+ "authorizes": "nothing"
+}
