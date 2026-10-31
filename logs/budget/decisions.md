@@ -14910,3 +14910,54 @@ on a paid pod.
   non-word prefix finds 38 of those 55 equal to gold -- beside the formal number, never in it. The S/C decision
   (static fluid, boxed answers: non-thinking 7 `unusable` of 714) is unaffected; the supporting math units and any
   non-thinking student that imitates this heading are. Changing the rule is a new scorer identity: the maintainer's.
+
+## 2026-10-31 (UTC) — Maintainer: Research A v1 stopped; v2 token-matched data, a new hybrid D4 full search (proposed), the lineage invariant and the final 3 x 2 matrix
+
+- **Context.** Four maintainer briefs on 2026-10-31: (1) "Research A Immediate STOP and Token-Matched Data
+  Completion"; (2) "Research A STOP, Token-Matched data completion and D4 Full Search plan review" (supersedes 1);
+  (3) the calibration rule (reuse v1's hybrid calibration first, keep D4's Base/Reasoning-Heavy design and scale,
+  references from the hybrid); (4) "Teacher-Student Lineage Invariant and Final 3 x 2 Training Matrix". And one
+  answer in session: the base-corpus category corresponds to E1's corpus_v2 type by type.
+- **Stop.** `a_recovery_20261030_211948` was stopped at the nearest persistence boundary: unit 6 (H-T-C s20260801)
+  had trained 231/231 steps and persisted its checkpoint; its evaluation had just started and was killed. Pod
+  deleted 08:07:47Z, provider confirms gone, observers closed; $11.9562 all-in. Five units trained and scored, the
+  sixth trained and not scored; every product stays on am5m373kuq as Research A v1's historical evidence, none read
+  or used by v2 (`runs/a_recovery_20261030_211948/closeout/maintainer_stop.json`).
+- **Decision: scale by unique supervised tokens.** Per mode 5,923,021 = 2,960,507 (E1's base-corpus position) +
+  2,962,514 (fluid); whole tasks; total excess <= 0.5%, category share within 0.5 points; no padding, repetition,
+  cutting, re-rendering or lowered correctness (`configs/stages/stage-2/teacher_modes/token_matched_design.json`).
+- **E1 audited.** E1's 2,960,507 tokens are corpus_v2's six types at about 1/6 each (openmath 494,130, gsm8k
+  494,582, multihop 492,790, rag 493,581, code 492,837, tool calling 492,587), Thinking-2507-generated, hygiene-only
+  acceptance (openmath 35.8% wrong, code and tool calling unverifiable), 352 traces cut. None is knowledge
+  reasoning: math and code are learned procedure, rag and multihop read supplied evidence. Research A v1's
+  "supporting" strata (math, code, answerability) are not E1: no GSM8K, no answerable reading, and an answerability
+  stratum E1 never had.
+- **Decision (maintainer, in session): the base-corpus category mirrors E1 type by type**, one fifth each:
+  competition math (MATH train), GSM8K train, SQuAD v2 answerable, HotpotQA, code (MBPP capped at the smaller mode's
+  supply, reasoning_core's code modules for the rest); tool calling dropped (no legal training source). E1's own
+  prompts first (rendered byte for byte: 1,698 / 4,100 / 1,074 of 1,698 / 4,100 / 1,074 identical).
+- **Fluid composition:** D4's increment cell shares; ProntoQA dropped from both modes (H-N admits 0 of 575: no
+  verifiable step chain), its share spread inside deduction. Inside a cell, families toward the two modes' mean
+  family shares, differences reported.
+- **Supply audit ($0, `audit/supply_audit.json`).** Every sealed v1 record through the frozen verdict: H-T admits
+  5,575,708 fluid / 2,200,042 supporting tokens, H-N 2,971,518 / 1,016,559 (V included). Refusals: H-N mostly
+  incorrect answers (4,933) and repetition stops (1,242), H-T training-length limits (760). X's non-thinking
+  records are reused where their cells are design cells.
+- **Calibration audit ($0, `audit/calibration_coverage.json`).** D4's 4x profiles (180,000 scored positions each)
+  with half per mode per cell: v1's sealed hybrid calibration covers H-T (one cell 829 short) but H-N only about
+  27,500 of 90,000 per profile. 801 further D4-pool units in D4's cell order (`calibration_v2.jsonl`: all 801 in H-N,
+  12 of them also in H-T) are generated; all held out of training.
+- **New identity and grant.** Study A-TM (`token_matched_phase.py`, identity 0d39ad93 after the preregistration's v2
+  amendment) with its own grant: ceiling $95.8883 = $142.19 - v1's $42.8017 (six sessions) - $3.50 storage; the
+  A-D4 grant is closed for new work. order_v2: 80,771 new tasks, R0-R9 pass, disjoint from every v1 task, both
+  calibration sets and eval-set-1's held-out prompts; 232 MB, kept outside git as a sha256-bound gzip.
+- **Lineage invariant (maintainer).** A student starts from its own teacher's weights and is distilled by that
+  teacher. Implemented at $0: `aadistill.training.lineage` (declared lineage vs observed KD teacher, snapshot weights,
+  template, RoPE, student config and bytes, pack bytes; fail closed), called by the trainer at runtime when a config
+  declares a lineage, by the training plan's config validation and by its launch admission.
+- **Final matrix (maintainer):** A1 (hybrid Top-1, hybrid thinking), A2 (the same Top-1, non-thinking), C1
+  (Thinking-2507 D4 Top-1 `fc28e0dd...`, Thinking-2507, D4-Augmented's pack), seeds 20260726 and 20260801: six runs,
+  no other arm. C1's identities verified from the bytes (`audit/c1_identity_audit.json`): the pack's three files
+  match h1pa.json, both parts' targets are Thinking-2507's, the Top-1's sha256 matches.
+- **Not authorized and not run:** the hybrid D4 full search (`full_search_proposal.json`), any initialization,
+  recovery or student evaluation, Research B.
