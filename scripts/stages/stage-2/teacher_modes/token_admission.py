@@ -51,6 +51,7 @@ SCHEMA = "aadistill.stage2.teacher_modes.token_matched_admission/v1"
 #: the student's parameter count (the 596M geometry) and the teacher's, for the FLOPs accounting only
 STUDENT_PARAMS, TEACHER_PARAMS = 596_049_920, 4_022_468_096
 EPOCHS, BATCH = 3, 2
+THINK_CLOSE = 151668          #: </think> in both teachers' vocabulary (teacher_identity.json :: special_token_ids)
 
 
 def family_of(t: dict) -> str:
@@ -183,8 +184,11 @@ def accounting(got: dict, dec: dict, packs: dict | None) -> dict:
             reuse["supplement" if got["rank"][t][0] == 3 else "reused_v1"] += n
         sup = sum(len(dd.output_ids) for dd in docs)
         ctx = sum(len(dd) for dd in docs)
+        reasoning = sum(list(dd.output_ids).index(THINK_CLOSE) + 1 for dd in docs if THINK_CLOSE in list(dd.output_ids))
         row = {"mode": mode, "tasks": len(ids), "documents": len(docs), "supervised_tokens": sup,
-               "non_padding_tokens": ctx, "by_category": dict(cat), "by_axis": dict(axis), "by_cell": dict(cell),
+               "reasoning_tokens": reasoning, "answer_tokens": sup - reasoning,
+               "_reasoning": "generated tokens through </think> (the think span the model wrote); the rest, <|im_end|> included",
+               "non_padding_tokens": ctx, "prompt_context_tokens": ctx - sup, "by_category": dict(cat), "by_axis": dict(axis), "by_cell": dict(cell),
                "by_source": dict(src), "by_family": dict(fam), "reused_vs_new_tokens": dict(reuse),
                "category_share_points": {k: round(100 * v / sup, 3) for k, v in cat.items()} if sup else {}}
         if packs and name in packs:
@@ -234,8 +238,11 @@ def build_packs(got: dict, dec: dict, out: Path) -> dict:
     for name, (mode, ids) in dec["arms"].items():
         docs = sorted((dd for t in ids for dd in got["verdicts"][(t, mode)]["docs"]), key=lambda dd: dd.doc_id)
         tr = pack_isolated(docs, seq, pad, order_seed=seed)
+        t = proto["teacher"]
         res[name] = write_pack(tr, val[mode], Path(out) / name, data_type=dtype,
-                               extra={"arm": name, "mode": mode, "context_strategy": "document_isolated"})
+                               extra={"arm": name, "mode": mode, "context_strategy": "document_isolated",
+                                      "teacher": {"model_id": t["model"], "revision": t["revision"]},
+                                      "teacher_mode": {"H-T": "thinking", "H-N": "non_thinking"}[mode]})
     return res
 
 

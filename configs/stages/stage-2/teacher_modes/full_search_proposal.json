@@ -1,0 +1,109 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.full_search_proposal/v1",
+ "status": "PROPOSED 2026-10-31 for the maintainer's review; NOT authorized, NOT run. Nothing here searches, materializes or computes a reference",
+ "decided_by": "maintainer 2026-10-31 (three briefs): a NEW D4 full search on the hybrid teacher's frozen weights, D4's search specification, the hybrid's own calibration (both modes, balanced on scored positions, reusing v1's sealed trajectories first), references and activations computed from the hybrid; one Top-1 shared by A1 and A2 and both seeds; never D4 Top-1, its rankings, references or weights, never v1's fixed-path initialization",
+ "root_teacher": {
+  "model": "Qwen/Qwen3-4B",
+  "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+  "weight_shards": [
+   {
+    "file": "model-00001-of-00003.safetensors",
+    "size_bytes": 3957900840,
+    "lfs_sha256": "328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223"
+   },
+   {
+    "file": "model-00002-of-00003.safetensors",
+    "size_bytes": 3987450520,
+    "lfs_sha256": "6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5"
+   },
+   {
+    "file": "model-00003-of-00003.safetensors",
+    "size_bytes": 99630640,
+    "lfs_sha256": "e4bf436957184f4eeb86a80e9db394503f1f56446b2e6b7edeac5b81470f4ca1"
+   }
+  ],
+  "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+  "vocabulary_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+  "identity": "configs/stages/stage-2/teacher_modes/teacher_identity.json",
+  "architecture": "36 layers, hidden 2560, 32 Q / 8 KV heads, FFN 9728, head dim 128, RoPE base 1,000,000, 40,960 positions"
+ },
+ "method": {
+  "forward_baseline": "stage1_init.d1_target_aware.scored_v1@v1 (configs/shared/baselines/selection.json :: selections.initialization -> initialization_forward_baseline_v1.json), resolved through shared.forward_baseline, never copied",
+  "operators": {
+   "ATTENTION": "attention.activation_importance_v1",
+   "DEPTH": "depth.causal_kl_greedy_v1",
+   "RESIDUAL_WIDTH": "width.global_pca_v0",
+   "FFN": "ffn.activation_importance_v0"
+  },
+  "free_variables": [
+   "operator order (all 4! = 24 orders)",
+   "calibration profile per operator (hybrid Base or hybrid Reasoning-Heavy)"
+  ],
+  "candidate_space": "each level expands every kept state by each unused operator under each of the two profiles: 8 children at level 1, then beam 6 x (remaining operators x 2); D4's tree was 8 + 48 + 24 + 12 = 92 expansions to 12 complete leaves, and the same schedule gives the same tree size here",
+  "beam": "beam.delayed_prune@v1, width 6, warmup_levels 1 (no pruning at level 0)",
+  "ranking": "beam.pareto_multi_objective@v2: minimize state.teacher_kl.equal_domain_mean, state.teacher_kl.worst_domain, state.critical_token_kl (epsilon 1e-4), tie-break the same keys then state id, diversity key parent_path; NLL diagnostic only",
+  "positions": "positions.supervised_target_v1@v1 (operator selection, state evaluation and ranking alike)",
+  "support": "reference_topk_tail_v1, top-200 + one tail bucket, not renormalized",
+  "prediction_rows": "scored_v1",
+  "packing": "length_sorted_v1",
+  "depth_prefix_reuse": "on (D4's validated execution; bit-identical scores, removal order and child bytes on the A100 bench, bench_20261019_051316) -- re-validated on the search device (validate_on_search_device true)",
+  "kl_reference": "DEPTH: parent state; state evaluation and ranking: the lineage root, i.e. the HYBRID teacher, recomputed per state (ReferenceStrategy.RECOMPUTE); no Thinking-2507 reference, sketch or logit is read",
+  "target_geometry": "596,049,920 parameters: 28 layers, hidden 1024, 16 Q / 8 KV heads, head dim 128, FFN 3072, tied embeddings, vocabulary 151,936 (phase_c3 TARGET_GEOMETRY, a3_session.path_spec)",
+  "seed": "SEARCH_SEED 20260815 (D4's)",
+  "finalists_k": 1,
+  "commit_rule": "stage1_selection.commit: the Pareto quality order's first of the complete leaves is Top-1 (D4's rule, lineage diversity not applied)"
+ },
+ "calibration": {
+  "profiles": {
+   "calib.hybrid_d4_base@v1": "D4's base cells and weights (0.18 per static primary axis, 0.28 supporting), 4 x 45,000 = 180,000 scored positions, half from each mode in every cell",
+   "calib.hybrid_d4_rh@v1": "D4's reasoning-heavy weights (0.22 per axis, 0.12 supporting), the same volume and per-cell mode balance"
+  },
+  "rule": "per profile, mode and cell: D4's cell order over base_pool_v1 (seed 1308798386), the mode's own naturally terminated scored positions, until half the cell's D4 quota; items are the hybrid's own trajectories as generated (ids = prompt + output ids, tags.assistant = the generated positions, subtype = '<source subtype>|<mode>' so the subtype-then-domain reduction weighs the modes equally inside every domain)",
+  "supply": "v1's sealed calibration trajectories (D4's 4x prefix, both modes) first; the audit (logs/stages/stage-2/teacher_modes/audit/calibration_coverage.json) found H-N about 62,500 positions short per profile and H-T 829 short in one cell, so 801 further D4-pool units (data/stages/stage-2/teacher_modes/tasks/calibration_v2.jsonl: 789 non-thinking, 12 thinking) are generated in the supplement session's round 0, one candidate, the v1 calibration rule",
+  "isolation": "disjoint from every training order (order_v1, order_v2, T0, the pools) and eval-set-1's held-out prompts (R1, R2) and refused families (R9)",
+  "built_by": "build_calibration_supplement.py (the profiles are written on the dev box from the sealed records after the supplement; their items files and hashes go into the search config)"
+ },
+ "state_evaluation": {
+  "method": "state_eval@v1's method (80 items, 74,022 prediction positions, domains tool / rag_multihop / reasoning_math / general / code, critical tags think_close, eos, final_answer, tool_close; equal_subtype_then_equal_domain/v1)",
+  "references": "recomputed from the hybrid for every state; nothing of Thinking-2507's",
+  "decision_for_the_maintainer": "(a) state_eval@v1's items as they are (Thinking-2507 trajectories) with hybrid-recomputed references -- no new data, but the hybrid is measured on another model's text and the non-thinking mode is absent; or (b, recommended) the same 80 prompts with the hybrid's own trajectories in both modes, balanced on prediction positions, the same domains and critical-tag rules -- 160 short generations (well under $0.50) at the start of the search session. The loader binds Thinking-2507's suite today (phase_d1 d1_session.load_state_eval_suite, TEACHER_BINDING) and needs a hybrid binding either way"
+ },
+ "mode_combination": "ONE initialization: every operator's calibration and every state's KL read one profile whose cells hold equal scored positions of the two modes, and the state objectives average over subtypes '<subtype>|<mode>' before domains: the two modes are weighted equally inside every domain by construction, never searched separately",
+ "execution": {
+  "card": "NVIDIA L40S (48 GB)",
+  "micro_batch": "1 for the whole search (DECLARED before the run): micro-batch 3 ran out of memory in DEPTH on an L40S with the hybrid root on D4's items (a_check_20261029_190241 :: initialization_mb3.json, 10.99 GiB asked, 44.39 GiB card); micro-batch 1 completed (initialization_mb1.json: DEPTH 2,371 s, peak reserved 26.88 GiB with expandable_segments). Micro-batch is a numerical-execution field: semantic state ids are unchanged, materialization ids and the fingerprint differ from a micro-batch-3 run",
+  "alternative": "an A100-80GB at micro-batch 3 (D4's own execution profile) only under a separate approval: the L40S measurement above is the evidence",
+  "allocator": "expandable_segments:True",
+  "teacher": "resident for the whole search (bf16), no offload",
+  "persistence": "every state's checkpoint and the journal (states.jsonl, telemetry.jsonl) on the network volume after each expansion (prune_weights false); resume replays the journal and restores a state only when its bytes re-identify (BeamSearch._restore); a completed search writes products.json",
+  "storage": "D4 stored 274 GB of states (largest 7.3 GB, the teacher-sized ones early in the tree); am5m373kuq holds 55 GB: the search needs its own volume of about 300 GB in the card's datacenter, or prune_weights true (pruned states' bytes deleted, the journal kept) -- a maintainer decision"
+ },
+ "estimate": {
+  "basis": "D4's measured search: 92 expansions, 11.08 h of operator time on an A100 at micro-batch 3, DEPTH 9.72 h of it; the L40S check's DEPTH at micro-batch 1 took 1.05 x the A100's micro-batch-3 DEPTH on the same items, the other operators about 1.09 x",
+  "hours_expected": 13.5,
+  "hours_conservative": 18.0,
+  "usd_expected": 15.22,
+  "usd_conservative": 20.12,
+  "plus": "a 300 GB volume for about a week (about $5) unless prune_weights; the Top-1's materialization and verification are inside the search",
+  "not_yet_measured": "the hybrid profiles' token counts (H-N items are shorter: more items for the same scored positions) and the L40S's state-evaluation time"
+ },
+ "product": {
+  "top1": "the Top-1's checkpoint identity (aadistill.autoinit.checkpoint_identity/v1: artifact_digest, weights_digest, single_shard_sha256, config_sha256, arch_signature, 596,049,920 parameters) and its materialization identity (semantic_state_id, materialization_id, numerical_execution_fingerprint, parent)",
+  "lineage": "root teacher Qwen/Qwen3-4B@1cfa9a72 recorded with the Top-1; A1's and A2's four units (two arms x two seeds) bind its single-shard sha256 in their lineage block (aadistill.training.lineage), checked by the launch admission and by the trainer before a step runs",
+  "evidence": "the full journal, every candidate's operator order and profiles, every expansion's KL and state-evaluation metrics, the stage1_selection decisions (fronts, quality order), GPU memory and time telemetry, the resume record; compared with D4 Top-1's structure (ATTENTION(rh) -> DEPTH(base) -> RESIDUAL_WIDTH(base) -> FFN(base)) without changing the new result"
+ },
+ "differences": {
+  "vs_historical_d4_search": [
+   "root teacher: the hybrid (RoPE 1,000,000, 40,960 positions, the hybrid template) instead of Thinking-2507",
+   "calibration: the hybrid's own trajectories in both modes, half the scored positions each, instead of Thinking-2507's",
+   "state evaluation: hybrid references (and, under (b), hybrid trajectories)",
+   "card and micro-batch: L40S at micro-batch 1 instead of A100 at micro-batch 3",
+   "everything else -- operators, beam, ranking, positions, support, rows, packing, prefix reuse, seed, geometry -- unchanged"
+  ],
+  "vs_research_a_v1_fixed_path": [
+   "v1 ran D4 Top-1's path step for step (no search); this searches order and profiles",
+   "v1's profiles were about 55,000 scored positions each (a quarter of D4's volume), balanced by whole items; these are D4's 180,000 with per-cell mode balance"
+  ]
+ },
+ "authorizes": "nothing"
+}

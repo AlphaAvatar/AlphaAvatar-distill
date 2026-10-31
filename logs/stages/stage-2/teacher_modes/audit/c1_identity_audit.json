@@ -1,0 +1,209 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.c1_identity_audit/v1",
+ "written_utc": "2026-10-31T09:34:00Z",
+ "pack": {
+  "path": "artifacts/stages/stage-2/reasoning_data/packs/D4A_merged_whole",
+  "files_sha256": {
+   "blocks.npz": "8b97b202e2c1f861fe5c99e3a247ce7fdd063c354b7668ddc1ba75fedb8043f3",
+   "audit.jsonl": "0fab85184e83b5b5ebf0454cb656d3752e80f48eeabc75a092a2a9906949080b",
+   "ladder.json": "dabd1405236fe4823d944d8215f6c2a5e8abf765115436578c6446c035e4e8f7"
+  },
+  "registered": {
+   "blocks.npz": "8b97b202e2c1f861fe5c99e3a247ce7fdd063c354b7668ddc1ba75fedb8043f3",
+   "audit.jsonl": "0fab85184e83b5b5ebf0454cb656d3752e80f48eeabc75a092a2a9906949080b",
+   "ladder.json": "dabd1405236fe4823d944d8215f6c2a5e8abf765115436578c6446c035e4e8f7"
+  },
+  "match": true,
+  "sequences_by_part": {
+   "e1": 1944,
+   "fluid": 524,
+   "e1_validation": 16
+  },
+  "sessions_by_part": {
+   "e1": 4524,
+   "fluid": 767,
+   "e1_validation": 60
+  },
+  "supervised_tokens_by_part": {
+   "e1": 2960507,
+   "fluid": 2962514,
+   "e1_validation": 81195
+  },
+  "registered_rung": {
+   "target_supervised_tokens": 5923021,
+   "reachable": true,
+   "n_blocks": 2468,
+   "actual_supervised_tokens": 5923021,
+   "e1_supervised_tokens": 2960507,
+   "fluid_supervised_tokens": 2962514
+  },
+  "relay": "AlphaAvatar/aadistill-artifacts :: stage2_h1pa/packs/D4A_merged_whole, read back, 0 mismatches"
+ },
+ "targets_teacher": {
+  "e1_part": {
+   "source": "corpus_v2 (artifacts/stages/stage-3/corpus_v2/manifest.json)",
+   "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+   "decoding": {
+    "n": 4,
+    "all_candidates_sampled": true,
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0,
+    "preset": "Qwen3-4B-Thinking-2507 official recommendation",
+    "seed_base": 20260731,
+    "seed_rule": "seed + batch_index + candidate_index * 1000003",
+    "seed_stride": 1000003,
+    "max_new_tokens": "per example: block_len - rendered_prompt - allowance",
+    "dtype": "bfloat16",
+    "engine": "vllm",
+    "engine_version": "0.26.0"
+   }
+  },
+  "fluid_part": {
+   "sessions": {
+    "h1gen_20261022_190653": {
+     "phase": "P1",
+     "authorization": true
+    },
+    "h1p1t_20261023_094007": {
+     "phase": "P1t",
+     "authorization": true
+    },
+    "h1pat_20261024_115517": {
+     "phase": "PA1",
+     "authorization": true
+    }
+   },
+   "generation_protocol_teacher": {
+    "model": "Qwen/Qwen3-4B-Thinking-2507",
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+    "tokenizer_sha256": "3ec3c124e02b7ace235364350c04b8fc38d34b182aad914fc45430fa925c0f3f",
+    "_identity_owners": "revision and chat template: artifacts/stages/stage-3/corpus_v2/manifest.json and the teacher_cal summary (they agree); tokenizer sha: corpus_v2's manifest (teacher_cal recorded it as null -- a gap this protocol closes by recording it per run)",
+    "thinking_mode": true,
+    "think_opening": "the chat template's generation prompt opens <think>; nothing is prefilled by hand",
+    "system_message": "You are a helpful Assistant. (sessions.SYSTEM_DEFAULT; a source's own system message is kept byte-for-byte)"
+   },
+   "protocol": "configs/stages/stage-2/reasoning_data/generation_protocol.json"
+  },
+  "expected": {
+   "model": "Qwen/Qwen3-4B-Thinking-2507",
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+  }
+ },
+ "initialization": {
+  "path": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4",
+  "model_safetensors_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+  "expected": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+  "match": true,
+  "record": "logs/stages/stage-2/reasoning_data/assets/d4_top1_materialization.json",
+  "record_keys": [
+   "authorizes",
+   "copies",
+   "decision",
+   "materialization_identity",
+   "method_identity",
+   "read_back",
+   "relay_metadata",
+   "schema",
+   "tokenizer_binding",
+   "verified",
+   "written_utc"
+  ],
+  "root_teacher": null,
+  "config": {
+   "num_hidden_layers": 28,
+   "hidden_size": 1024,
+   "intermediate_size": 3072,
+   "num_attention_heads": 16,
+   "num_key_value_heads": 8,
+   "head_dim": 128,
+   "tie_word_embeddings": true,
+   "vocab_size": 151936,
+   "rope_theta": null,
+   "max_position_embeddings": 262144
+  },
+  "tokenizer": {
+   "source": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+   "files_sha256": {
+    "tokenizer.json": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+    "tokenizer_config.json": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a"
+   }
+  }
+ },
+ "teacher": {
+  "snapshot": "768f209d9ea81521153ed38c47d515654e938aea",
+  "rope_theta": 5000000,
+  "max_position_embeddings": 262144,
+  "vocab_size": 151936,
+  "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+  "tokenizer_json_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
+ },
+ "reasoning_answer": {
+  "by_part": {
+   "e1": {
+    "reasoning": 2142358,
+    "answer": 818149
+   },
+   "fluid": {
+    "reasoning": 2677056,
+    "answer": 285458
+   },
+   "e1_validation": {
+    "reasoning": 60415,
+    "answer": 20780
+   }
+  },
+  "keys": [
+   "input_ids",
+   "ce_mask",
+   "content_mask"
+  ],
+  "_": "target positions of a session up to and including its first </think> (151668) are reasoning, the rest answer; a cut session without </think> counts as answer"
+ },
+ "differences": [
+  {
+   "what": "packing / context strategy",
+   "c1": "E1's sequential ladder packing (cross-context: several sessions per sequence inside a system-prompt group, 1,861 groups) for E1's part; E1's packer with no terminal truncation for the fluid part",
+   "a1_a2": "document-isolated, each document conditioned on itself"
+  },
+  {
+   "what": "cut traces (E1's part)",
+   "c1": "352 sessions cut mid-trace at the 8,192 boundary (629,315 supervised tokens discarded), the cut sessions trained without <|im_end|>",
+   "a1_a2": "no trace is cut: a turn over its allowance is refused"
+  },
+  {
+   "what": "target correctness (E1's part)",
+   "c1": "hygiene acceptance only: openmath 35.8% wrong, gsm8k 11.2%, multihop 14.2%, rag 2.1%; code and tool calling unverifiable (asset_audit.json :: corpus_v2)",
+   "a1_a2": "every admitted target verified correct"
+  },
+  {
+   "what": "tool calling (E1's part)",
+   "c1": "about 1/6 of E1's tokens (492,587)",
+   "a1_a2": "none (no legal source)"
+  },
+  {
+   "what": "re-rendered targets (fluid part)",
+   "c1": "the template's prefilled <think> supervised in 767 sessions; 1,102 positions re-tokenized (token_identity_audit.json)",
+   "a1_a2": "token-native: the engine's own ids"
+  },
+  {
+   "what": "KD positions",
+   "c1_new": "target positions only (kd_scope assistant), Top-200 + tail",
+   "historical_d4_augmented": "every non-padding position (kd_scope all), the full vocabulary",
+   "a1_a2": "target positions only, Top-200 + tail"
+  },
+  {
+   "what": "teacher",
+   "c1": "Qwen/Qwen3-4B-Thinking-2507@768f209d (thinking-only, RoPE base 5,000,000, 262,144 positions)",
+   "a1_a2": "Qwen/Qwen3-4B@1cfa9a72 (hybrid, RoPE base 1,000,000, 40,960 positions), its two modes"
+  }
+ ],
+ "root_teacher": {
+  "id": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+ },
+ "authorizes": "nothing",
+ "terminal": "IDENTITIES_VERIFIED"
+}

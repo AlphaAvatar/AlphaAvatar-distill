@@ -3,6 +3,9 @@
 
     PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.build_calibration_supplement build \\
         --v1-records <v1 store>/generation --v1-identity <v1 study identity>
+    # after the supplement session: both hybrid D4 profiles from the sealed records
+    PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.build_calibration_supplement profiles \\
+        --v1-records <v1 store>/generation --v1-identity <id> --records <supplement store>/generation --identity <id>
 
 D4's profiles (``calib.s0v_base_d4@v1``, ``calib.s0v_rh_d4@v1``; configs/stages/stage-0/calibration_volume/
 formal_design.json and profiles_formal.json) are a stratified nested sample of ``base_pool_v1``: per cell (one
@@ -175,13 +178,117 @@ def keys(rows: list[dict]) -> set[str]:
     return {ES.prompt_key(ES.prompt_text(r)) for r in rows}
 
 
+PROFILE_DIR = REPO / "artifacts/stages/stage-2/teacher_modes/calibration_v2"
+PROFILE_DOC = REPO / "configs/stages/stage-2/teacher_modes/hybrid_d4_profiles.json"
+HYBRID_IDS = {"base": "calib.hybrid_d4_base", "rh": "calib.hybrid_d4_rh"}
+
+
+def hybrid_records(v1_store: Path, v1_identity: str, store: Path | None, identity: str | None) -> dict:
+    """(unit id, mode) -> the hybrid's sealed calibration record: v1's cal_ groups, then the supplement's s00 groups."""
+    from stages.reasoning_data import generation_driver as GD
+    meta = {r["task_id"]: r["calibration"] for r in A.jsonl(V1_INPUTS)}
+    unit_of = {it["item_id"]: it["unit_id"] for prof in CAL.PROFILES for it in CAL.items(prof)}
+    out = {}
+    for mode in MODES:
+        for tid, rec in GD.sealed(v1_store, f"cal_{mode}_pass0_cal_g0", v1_identity).items():
+            out.setdefault((unit_of[meta[tid]["item_id"]], mode), rec)
+    if store is not None:
+        cal = {r["task_id"]: r["calibration"]["unit_id"] for r in A.jsonl(OUT)}
+        for mode in MODES:
+            label = f"s00{'t' if mode == 'H-T' else 'n'}_{mode}_pass0_s00{'t' if mode == 'H-T' else 'n'}_g0"
+            if (Path(store) / f"{label}.complete").is_file():
+                for tid, rec in GD.sealed(Path(store), label, identity).items():
+                    out.setdefault((cal[tid], mode), rec)
+    return out
+
+
+def item_of(rec: dict, unit: dict, mode: str, stop_ids: set[int]) -> dict | None:
+    """hybrid_calibration's item format: the trajectory exactly as generated, None unless naturally terminated."""
+    turn = rec["turns"][0]
+    p, o = turn.get("prompt_token_ids") or [], turn.get("output_token_ids") or []
+    if not p or not o or int(o[-1]) not in stop_ids:
+        return None
+    ids = list(p) + list(o)
+    it = unit["items"][0]
+    return {"item_id": f"{unit['unit_id']}|{mode}", "unit_id": f"{unit['unit_id']}|{mode}", "ids": ids,
+            "n_tokens": len(ids), "n_prediction_positions": len(ids) - 1,
+            "tags": {"assistant": list(range(len(p) - 1, len(ids) - 1))}, "domain": it["domain"],
+            "subtype": f"{it['subtype']}|{mode}", "mode": mode, "source": "hybrid_teacher_native",
+            "source_item": it["item_id"], "generator_id": it.get("generator_id"), "family_id": it.get("family_id"),
+            "turn": 0}
+
+
+def profiles(v1_store: Path, v1_identity: str, store: Path | None, identity: str | None) -> dict:
+    """Both hybrid D4 profiles: per cell and mode, D4's order, half the cell quota of the mode's own positions."""
+    from aadistill.initialization.calibration.profiles import mixture_content_sha256
+    d = design()
+    quotas = cell_quotas(d)
+    units, order = pool_order(d)
+    recs = hybrid_records(v1_store, v1_identity, store, identity)
+    proto = json.loads((REPO / "configs/stages/stage-2/teacher_modes/generation_protocol.json").read_text())
+    stop = {int(x) for x in proto["teacher"]["stop_ids"]}
+    PROFILE_DIR.mkdir(parents=True, exist_ok=True)
+    doc, report = [], {}
+    for prof, q in quotas.items():
+        items, census = [], {}
+        for cell, quota in sorted(q.items()):
+            for mode in MODES:
+                got, taken, skipped = 0, 0, 0
+                for uid in order[cell]:
+                    if got >= quota / 2 and taken:
+                        break
+                    rec = recs.get((uid, mode))
+                    if rec is None:
+                        continue
+                    it = item_of(rec, units[uid], mode, stop)
+                    if it is None:
+                        skipped += 1
+                        continue
+                    items.append(it)
+                    got += len(it["tags"]["assistant"])
+                    taken += 1
+                census[f"{'/'.join(cell[:2])}|{mode}"] = {"quota": round(quota / 2, 1), "scored": got, "items": taken,
+                                                          "not_naturally_terminated": skipped, "short": got < quota / 2}
+        pid = HYBRID_IDS[prof]
+        path = PROFILE_DIR / f"{pid}.items.jsonl"
+        body = "".join(json.dumps(it, sort_keys=True) + "\n" for it in items)
+        path.write_text(body)
+        pos = {m: sum(len(i["tags"]["assistant"]) for i in items if i["mode"] == m) for m in MODES}
+        doc.append({"profile_id": pid, "version": 1,
+                    "description": f"the hybrid's D4 {prof} profile: D4's cells, order and quotas, half of every cell from each mode",
+                    "domain_weights": d["profiles"][prof]["domain_weights"], "token_budget": int(DOSE * d["reference_uesp"]),
+                    "seed": SEED, "role": "operator_calibration", "materialized": True,
+                    "items_path": str(path.relative_to(REPO)), "items_file_sha256": hashlib.sha256(body.encode()).hexdigest(),
+                    "content_sha256": mixture_content_sha256(items) if items else None,
+                    "metadata": {"uesp": sum(pos.values()), "scored_positions_by_mode": pos, "n_items": len(items),
+                                 "tokens": sum(i["n_tokens"] for i in items),
+                                 "short_cells": sorted(k for k, v in census.items() if v["short"])}})
+        report[pid] = census
+    rec = {"schema": "aadistill.calibration_profiles/v1",
+           "_contract": ("Research A v2's hybrid D4-scale calibration profiles (build_calibration_supplement.py profiles); data "
+                         "for the PROPOSED full search -- nothing searches with them before the maintainer's approval"),
+           "teacher": {"model": proto["teacher"]["model"], "revision": proto["teacher"]["revision"]},
+           "profiles": doc, "census": report, "authorizes": "nothing"}
+    PROFILE_DOC.write_text(json.dumps(rec, indent=1) + "\n")
+    return rec
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     b = sub.add_parser("build")
     b.add_argument("--v1-records", required=True)
     b.add_argument("--v1-identity", required=True)
+    pr = sub.add_parser("profiles")
+    pr.add_argument("--v1-records", required=True)
+    pr.add_argument("--v1-identity", required=True)
+    pr.add_argument("--records", default=None)
+    pr.add_argument("--identity", default=None)
     a = ap.parse_args(argv)
+    if a.cmd == "profiles":
+        rec = profiles(Path(a.v1_records), a.v1_identity, Path(a.records) if a.records else None, a.identity)
+        print(json.dumps({p["profile_id"]: p["metadata"] for p in rec["profiles"]}, indent=1))
+        return 0
     p = plan(Path(a.v1_records), a.v1_identity)
     rows = tasks(p)
     iso = isolation(rows)

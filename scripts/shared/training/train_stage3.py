@@ -272,6 +272,27 @@ def main() -> None:
             raise ValueError("teacher and student tokenizers differ; refusing to train")
         logger.log("teacher_loaded", **teacher_identity)
 
+    #: Teacher-student lineage (AGENTS.md P3; aadistill.training.lineage): a config that declares one teacher
+    #: lineage is checked here against what was actually loaded -- the KD teacher and its snapshot, the student's
+    #: config and initialization bytes, the pack, the tokenizer -- and refused on any mismatch, before a step runs.
+    if cfg.get("lineage") is not None:
+        from aadistill.training import lineage as LIN
+        from aadistill.infrastructure.manifest import sha256_file as _sha
+        snap = None
+        if teacher is not None:
+            from huggingface_hub import snapshot_download
+            snap = LIN.snapshot_facts(snapshot_download(cfg["teacher"]["model_id"], revision=teacher_identity["revision"],
+                                                        local_files_only=True))
+        LIN.require(cfg["lineage"], kd_teacher=cfg["teacher"], loaded_teacher=teacher_identity, teacher_snapshot=snap,
+                    student_config=json.loads((Path(model_path) / "config.json").read_text()),
+                    student_weights_sha256=(None if resume_ckpt is not None else
+                                            _sha(Path(paths["student_path"]) / "model.safetensors")),
+                    pack_files_sha256={n: _sha(Path(data_dir) / n) for n in ("blocks.npz", "ladder.json", "audit.jsonl")
+                                       if (Path(data_dir) / n).is_file()},
+                    tokenizer_sha256=tokenizer_hash(tokenizer))
+        logger.log("lineage_verified", teacher=cfg["lineage"]["teacher"]["model_id"],
+                   revision=cfg["lineage"]["teacher"]["revision"], mode=cfg["lineage"].get("mode"))
+
     print(f"loading student from {model_path} ...")
     student = AutoModelForCausalLM.from_pretrained(
         model_path, dtype=DTYPES[cfg["dtype"]]
