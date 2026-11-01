@@ -4,8 +4,8 @@
 The shared loader (`shared.evaluation.load_state_eval.load`) reads any suite directory; phase_d1's
 `load_state_eval_suite` binds Thinking-2507's frozen `state_eval_v1` and is not edited. This module is the hybrid's
 binding: `load(root, teacher_identity, types)` refuses a suite whose manifest does not name the root teacher (model,
-revision, weight shards), its tokenizer, chat template, both modes and the full-search type table it was built
-from, or whose items file is not the manifest's -- and only then loads it.
+revision, weight shards), its tokenizer, chat template, both modes, one critical-token group per mode and the
+full-search type table it was built from, or whose items file is not the manifest's -- and only then loads it.
 """
 from __future__ import annotations
 
@@ -16,6 +16,11 @@ from pathlib import Path
 
 class BindingError(ValueError):
     """The suite is not this search's suite."""
+
+
+#: each mode's critical-token classes, as the hybrid generates them (full_search_types.json :: critical_tokens); the
+#: suite declares them as critical groups, so the two modes weigh 50:50 in state.critical_token_kl (group_balanced/v1)
+CRITICAL_GROUPS = {"H-T": ["think_close", "final_answer", "eos"], "H-N": ["final_answer", "eos"]}
 
 
 def binding_problems(manifest: dict, teacher_identity: dict, types_sha256: str, items_sha256: str) -> list[str]:
@@ -31,6 +36,9 @@ def binding_problems(manifest: dict, teacher_identity: dict, types_sha256: str, 
             bad.append(f"root_teacher.{k} is {str(got)[:40]}, the search's root is {str(v)[:40]}")
     if sorted((manifest.get("modes") or {})) != ["H-N", "H-T"]:
         bad.append("the suite must hold both modes, H-T and H-N")
+    if manifest.get("critical_groups") != CRITICAL_GROUPS:
+        bad.append(f"the suite's critical groups are {manifest.get('critical_groups')}, not one group per mode "
+                   f"{CRITICAL_GROUPS}: the modes would not weigh 50:50 in the critical-token KL")
     if manifest.get("types_sha256") != types_sha256:
         bad.append("the suite was not built from this type table")
     if manifest.get("items_sha256") != items_sha256:

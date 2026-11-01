@@ -11,13 +11,18 @@ The registered rules (token_matched_design.json :: scale, categories, selection,
 
 1. VERDICTS. Every (task, mode) of both record sets through admission.py's frozen `admit` (verified correct,
    naturally terminated, protocol-valid, token-native documents under the mode's generation prompt; MBPP in the
-   sandbox), then its isolation recheck (R1, R2, R9, then every rule) with this study's source catalogue.
+   sandbox), then the code-stability recheck (code_stability.recheck: an MBPP candidate must pass under every
+   hash seed, else the task's next candidate is considered; a program task's gold must be its value under every
+   seed, else the task is refused), then its isolation recheck (R1, R2, R9, then every rule) with this study's
+   source catalogue.
 2. SUPPLY. Per mode and cell, the admitted tasks outside V and V2, reuse first: T0 in its lists' order, then
    order_v1's positions (E, X), then order_v2's cell positions.
 3. SELECTION, per mode and category: the next task comes from the cell furthest below its share of the
    category's running total (largest remainder on supervised tokens), and inside the cell from the family
    furthest below its target share of the cell's running total -- the mean of the two modes' admitted-supply
-   family shares in that cell; a family that runs dry hands its share to the cell's others. The category stops
+   family shares in that cell; a family that runs dry hands its share to the cell's others. The MBPP cell's
+   quota is the registered cap, the smaller mode's admitted MBPP supply (never above the plan's figure); the code
+   type's rest goes to the reasoning_core code cell. The category stops
    at the first task that reaches its target. A cell that runs dry first is a SHORTFALL: reported, the
    selection refused, nothing substituted.
 4. PACKS: each arm's documents `pack_isolated` at 8,192 (doc ids sorted, the protocol's order seed), with its
@@ -43,6 +48,7 @@ for _p in ("src", "scripts", "scripts/stages/stage-1"):
 from stages.reasoning_data import assets as A  # noqa: E402
 from stages.teacher_modes import admission as ADM  # noqa: E402
 from stages.teacher_modes import build_supplement_tasks as BST  # noqa: E402
+from stages.teacher_modes import code_stability as CS  # noqa: E402
 
 RECORD = REPO / "logs/stages/stage-2/teacher_modes/data/token_matched_admission.json"
 ORDER_V2 = BST.ORDER
@@ -51,6 +57,7 @@ SCHEMA = "aadistill.stage2.teacher_modes.token_matched_admission/v1"
 #: the student's parameter count (the 596M geometry) and the teacher's, for the FLOPs accounting only
 STUDENT_PARAMS, TEACHER_PARAMS = 596_049_920, 4_022_468_096
 EPOCHS, BATCH = 3, 2
+MBPP_CELL = "supporting.code_algorithmic/mbpp_train"
 THINK_CLOSE = 151668          #: </think> in both teachers' vocabulary (teacher_identity.json :: special_token_ids)
 
 
@@ -67,6 +74,7 @@ def load(v1_store: Path, v1_identity: str, store: Path | None, identity: str | N
     if store is not None and Path(store).is_dir():
         recs.update(ADM.records(Path(store), identity))
     verdicts = {k: ADM.admit(tasks[k[0]], k[1], v, proto) for k, v in recs.items()}
+    code = CS.recheck(verdicts, tasks, recs, proto, ADM.admit)
     flagged, iso = ADM.isolation_recheck({k: v for k, v in verdicts.items() if v["admitted"]}, tasks,
                                          sources=BST.catalogue())
     for k in flagged:
@@ -78,7 +86,7 @@ def load(v1_store: Path, v1_identity: str, store: Path | None, identity: str | N
         rank[t["task_id"]] = (9 if t["slice"] == "V2" else 3, int(t["cell_position"]))
     val_ids = [t["task_id"] for t in order1 if t["slice"] == "V"] + [t["task_id"] for t in order2 if t["slice"] == "V2"]
     return {"proto": proto, "tasks": tasks, "verdicts": verdicts, "flagged": sorted(flagged), "isolation": iso,
-            "rank": rank, "val_ids": val_ids, "recs": recs}
+            "rank": rank, "val_ids": val_ids, "recs": recs, "code_recheck": code}
 
 
 def cell_of(t: dict) -> str:
@@ -147,9 +155,11 @@ def tvd(a: dict[str, float], b: dict[str, float]) -> float:
 def decide(got: dict, design: dict | None = None) -> dict:
     d = design or BST.design()
     plan = json.loads(BST.PLAN.read_text())
-    q = BST.quotas(d, mbpp_cap=plan["mbpp_cap"])
-    cells = {"/".join(c) for c in q}
+    cells = {"/".join(c) for c in BST.quotas(d, mbpp_cap=plan["mbpp_cap"])}
     sup = supply(got, cells)
+    have = {m: sum(n for f in sup[m][MBPP_CELL].values() for _, n in f) for m in MODES}
+    cap = min(int(plan["mbpp_cap"]), *have.values())
+    q = BST.quotas(d, mbpp_cap=cap)
     targets = family_targets(sup, cells)
     sel = {}
     for m in MODES:
@@ -163,7 +173,10 @@ def decide(got: dict, design: dict | None = None) -> dict:
     #: the maintainer's final matrix (2026-10-31): A1 and A2 are the hybrid arms; same-tasks arms are cancelled
     arms = {"A1": ("H-T", ids["H-T"]), "A2": ("H-N", ids["H-N"])}
     return {"quotas": {"/".join(c): v for c, v in q.items()}, "targets": targets, "selection": sel, "arms": arms,
-            "val": val, "supply": sup}
+            "val": val, "supply": sup,
+            "mbpp_cap": {"plan": int(plan["mbpp_cap"]), "admitted_supply": have, "applied": cap,
+                         "rule": "the smaller mode's admitted MBPP supply (token_matched_design.json: code = MBPP capped "
+                                 "at the smaller mode's supply + reasoning_core); never above the plan's figure"}}
 
 
 def accounting(got: dict, dec: dict, packs: dict | None) -> dict:
@@ -252,7 +265,8 @@ def refusals(got: dict, cells: set[str]) -> dict:
         c = cell_of(got["tasks"][tid])
         if v["admitted"]:
             continue
-        why = "isolation recheck" if v.get("isolation_flagged") else (
+        why = "isolation recheck" if v.get("isolation_flagged") else "code-stability recheck" if (
+            v.get("unstable_verification") and not v.get("candidates")) else (
             v["candidates"][-1]["reasons"][0].split(":")[0] if v["candidates"] and v["candidates"][-1]["reasons"] else "none")
         out[f"{mode}|{'design cell' if c in cells else 'outside the design'}"][why] += 1
     return {k: dict(v.most_common()) for k, v in sorted(out.items())}
@@ -299,11 +313,16 @@ def main(argv=None) -> int:
                        "supplement": {"dir": a.records, "identity": a.identity,
                                       "complete_groups": sorted(p.name for p in Path(a.records).glob("*.complete"))
                                       if a.records and Path(a.records).is_dir() else []}},
-           "quotas": dec["quotas"], "family_targets": dec["targets"], "shortfall": short, "tolerance_checks": checks,
+           "quotas": dec["quotas"], "mbpp_cap": dec["mbpp_cap"], "family_targets": dec["targets"], "shortfall": short, "tolerance_checks": checks,
            "family_tvd_between_modes": fam_tvd, "arms": acc,
            "validation": {m: {"documents": len(v)} for m, v in dec["val"].items()},
            "selection": {m: {cat: [t for t, *_ in s["tasks"]] for cat, s in dec["selection"][m].items()} for m in MODES},
            "isolation_recheck": {**got["isolation"], "flagged": got["flagged"]},
+           "code_stability_recheck": {"hash_seeds": got["code_recheck"]["hash_seeds"],
+                                      "changed": got["code_recheck"]["changed"],
+                                      "mbpp_checked": len(got["code_recheck"]["checked"]["mbpp"]),
+                                      "program_tasks_checked": len(got["code_recheck"]["checked"]["program"]),
+                                      "audit": "logs/stages/stage-2/teacher_modes/audit/code_stability.json"},
            "refusals": refusals(got, cells), "authorizes": "nothing"}
     Path(a.record).parent.mkdir(parents=True, exist_ok=True)
     Path(a.record).write_text(json.dumps(doc, indent=1, default=str) + "\n")
