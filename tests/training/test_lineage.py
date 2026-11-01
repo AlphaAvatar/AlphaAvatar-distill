@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from pathlib import Path
 
 import pytest
 
@@ -11,22 +12,33 @@ from aadistill.training import lineage as LIN
 A = {"model_id": "org/teacher-a", "revision": "a" * 40}
 B = {"model_id": "org/teacher-b", "revision": "b" * 40}
 PACK = {"blocks.npz": "1" * 64, "ladder.json": "2" * 64, "audit.jsonl": "3" * 64}
+SHARDS = {"model-00001.safetensors": "f" * 64, "model-00002.safetensors": "d" * 64}
+TOK_A = {"tokenizer.json": "4" * 64, "tokenizer_config.json": "5" * 64}
+#: teacher B's tokenizer: the same vocabulary file, another template
+TOK_B = {"tokenizer.json": "4" * 64, "tokenizer_config.json": "6" * 64}
 
 
-def _lineage(teacher=A, root=A, data_teacher=A, mode="thinking", data_mode="thinking"):
-    return {"teacher": {**teacher, "weights_sha256": {"model.safetensors": "f" * 64}, "rope_theta": 1_000_000,
+def _lineage(teacher=A, root=A, data_teacher=A, mode="thinking", data_mode="thinking", init="e" * 64):
+    return {"teacher": {**teacher, "weights_sha256": dict(SHARDS), "rope_theta": 1_000_000,
                         "max_position_embeddings": 40960, "vocab_size": 151936, "chat_template_sha256": "c" * 64},
-            "mode": mode,
-            "initialization": {"root_teacher": dict(root), "model_safetensors_sha256": "e" * 64},
+            "mode": mode, "tokenizer": {"files_sha256": dict(TOK_A)},
+            "initialization": {"root_teacher": dict(root), "model_safetensors_sha256": init,
+                               "provenance": {"record": "logs/search_record.json", "record_sha256": "7" * 64}},
             "data": [{"files_sha256": PACK, "teacher": dict(data_teacher), "mode": data_mode}]}
+
+
+def _provenance(teacher=A, shards=None, checkpoint="e" * 64):
+    return {"root_teacher_id": f"{teacher['model_id']}@{teacher['revision']}",
+            "root_teacher_sha256": LIN.shard_set_sha256(shards or SHARDS), "checkpoint_sha256": checkpoint}
 
 
 def _observed(**over):
     obs = {"kd_teacher": {**A, "dtype": "bfloat16"}, "loaded_teacher": {**A, "vocab_size": 151936},
-           "teacher_snapshot": {"weights_sha256": {"model.safetensors": "f" * 64}, "rope_theta": 1_000_000.0,
+           "teacher_snapshot": {"weights_sha256": dict(SHARDS), "rope_theta": 1_000_000.0,
                                 "max_position_embeddings": 40960, "chat_template_sha256": "c" * 64},
            "student_config": {"rope_theta": 1_000_000, "max_position_embeddings": 40960, "vocab_size": 151936},
-           "student_weights_sha256": "e" * 64, "pack_files_sha256": PACK}
+           "student_weights_sha256": "e" * 64, "pack_files_sha256": PACK, "tokenizer_files_sha256": dict(TOK_A),
+           "initialization_provenance": _provenance()}
     obs.update(over)
     return obs
 
@@ -57,7 +69,7 @@ def test_data_of_another_teacher_or_another_mode_is_refused():
 
 def test_the_bytes_actually_loaded_are_checked():
     with pytest.raises(LIN.LineageError, match="weight shards"):
-        LIN.require(_lineage(), **_observed(teacher_snapshot={"weights_sha256": {"model.safetensors": "0" * 64}}))
+        LIN.require(_lineage(), **_observed(teacher_snapshot={"weights_sha256": {"model-00001.safetensors": "0" * 64}}))
     with pytest.raises(LIN.LineageError, match="initialization's weights"):
         LIN.require(_lineage(), **_observed(student_weights_sha256="0" * 64))
     with pytest.raises(LIN.LineageError, match="chat_template"):
@@ -89,3 +101,110 @@ def test_snapshot_facts_read_lfs_blob_names_the_template_and_rope(tmp_path):
     assert f["weights_sha256"] == {"extra.safetensors": hashlib.sha256(b"x").hexdigest(), "model.safetensors": "d" * 64}
     assert f["rope_theta"] == 5_000_000.0 and f["max_position_embeddings"] == 262144
     assert f["chat_template_sha256"] == hashlib.sha256(b"T").hexdigest()
+
+
+# --- maintainer review 2026-11-01: missing fields, provenance, tokenizer files, the effective config, resume -----
+
+@pytest.mark.parametrize("field", ["rope_theta", "max_position_embeddings", "vocab_size"])
+def test_a_field_the_student_config_leaves_unstated_is_refused_not_skipped(field):
+    cfg = {"rope_theta": 1_000_000, "max_position_embeddings": 40960, "vocab_size": 151936}
+    cfg.pop(field)
+    with pytest.raises(LIN.LineageError, match=f"states no {field}"):
+        LIN.require(_lineage(), **_observed(student_config=cfg))
+
+
+def test_a_declaration_missing_a_structural_field_a_tokenizer_or_a_provenance_is_refused():
+    for drop, match in ((("teacher", "rope_theta"), "must state rope_theta"),
+                        (("tokenizer", "files_sha256"), "tokenizer's files"),
+                        (("initialization", "provenance"), "provenance")):
+        lin = _lineage()
+        lin[drop[0]].pop(drop[1])
+        with pytest.raises(LIN.LineageError, match=match):
+            LIN.require(lin, **_observed())
+
+
+def test_the_effective_rope_of_a_config_file_without_one_is_the_library_default_and_is_refused(tmp_path):
+    """A config.json without its RoPE base loads with the library default (10,000 for Qwen3), not the root's: the
+    gate reads the config the loader builds, so the missing field cannot pass as a match."""
+    cfg = {"architectures": ["Qwen3ForCausalLM"], "model_type": "qwen3", "hidden_size": 64, "intermediate_size": 128,
+           "num_hidden_layers": 2, "num_attention_heads": 4, "num_key_value_heads": 2, "head_dim": 16,
+           "max_position_embeddings": 40960, "vocab_size": 151936}
+    (tmp_path / "config.json").write_text(json.dumps(cfg))
+    eff = LIN.effective_config(tmp_path)
+    assert LIN.rope_theta(eff) is not None and LIN.rope_theta(eff) != 1_000_000
+    with pytest.raises(LIN.LineageError, match="rope_theta"):
+        LIN.require(_lineage(), **_observed(student_config=eff))
+    (tmp_path / "config.json").write_text(json.dumps({**cfg, "rope_parameters": {"rope_theta": 1_000_000,
+                                                                                 "rope_type": "default"}}))
+    LIN.require(_lineage(), **_observed(student_config=LIN.effective_config(tmp_path)))
+
+
+def test_the_initialization_is_bound_by_what_its_search_recorded_not_by_the_declared_model_id():
+    # the config declares teacher A as the root; the search that produced the checkpoint ran on B
+    with pytest.raises(LIN.LineageError, match="recorded root org/teacher-b"):
+        LIN.require(_lineage(), **_observed(initialization_provenance=_provenance(teacher=B)))
+    with pytest.raises(LIN.LineageError, match="root shards"):
+        LIN.require(_lineage(), **_observed(initialization_provenance=_provenance(shards={"x.safetensors": "0" * 64})))
+    with pytest.raises(LIN.LineageError, match="recorded checkpoint"):
+        LIN.require(_lineage(), **_observed(initialization_provenance=_provenance(checkpoint="0" * 64)))
+
+
+def test_the_shard_set_hash_is_the_one_the_searches_record():
+    """`d1_session.root_teacher_identity`'s rule; Thinking-2507's committed binding gives D4's recorded 6de20cc7..."""
+    binding = json.loads((Path(__file__).resolve().parents[2]
+                          / "logs/stages/stage-1/phase_c1/plans/teacher_binding.json").read_text())
+    assert LIN.shard_set_sha256(binding["expected_shard_sha256"]) == (
+        "6de20cc746dd42e96f93aeb4551b8d378e415a206309435d7eaefd39cfdf45f9")
+
+
+def test_another_teachers_tokenizer_is_refused_even_with_the_same_vocabulary():
+    with pytest.raises(LIN.LineageError, match=r"tokenizer source's files differ .*tokenizer_config.json"):
+        LIN.require(_lineage(), **_observed(tokenizer_files_sha256=dict(TOK_B)))
+    with pytest.raises(LIN.LineageError, match="training tokenizer"):
+        lin = _lineage()
+        lin["teacher"]["tokenizer_sha256"] = "8" * 64
+        LIN.require(lin, **_observed(tokenizer_sha256="9" * 64))
+
+
+def test_tokenizer_files_hashes_each_named_file_and_marks_an_absent_one(tmp_path):
+    (tmp_path / "tokenizer.json").write_bytes(b"t")
+    got = LIN.tokenizer_files(tmp_path, ["tokenizer.json", "vocab.json"])
+    assert got == {"tokenizer.json": hashlib.sha256(b"t").hexdigest(), "vocab.json": "missing"}
+
+
+def test_a_resume_must_show_the_checkpoint_descends_from_this_lineage():
+    lin = _lineage()
+    ok = LIN.stamp(lin, initialization_sha256="e" * 64)
+    LIN.require(lin, **_observed(student_weights_sha256=None, checkpoint_lineage=ok))
+    with pytest.raises(LIN.LineageError, match="carries no lineage stamp"):
+        LIN.require(lin, **_observed(student_weights_sha256=None, checkpoint_lineage={}))
+    # a checkpoint of another lineage (another init) resumed under this one
+    other = LIN.stamp(_lineage(init="0" * 64), initialization_sha256="0" * 64)
+    with pytest.raises(LIN.LineageError, match="written under lineage") as e:
+        LIN.require(lin, **_observed(student_weights_sha256=None, checkpoint_lineage=other))
+    assert "verified initialization" in str(e.value)
+    # a checkpoint of another teacher's lineage
+    with pytest.raises(LIN.LineageError, match="written under lineage"):
+        LIN.require(lin, **_observed(student_weights_sha256=None,
+                                     checkpoint_lineage=LIN.stamp(_lineage(teacher=B, root=B, data_teacher=B),
+                                                                  initialization_sha256="e" * 64)))
+    # this lineage's digest, but a run that verified other initialization bytes
+    with pytest.raises(LIN.LineageError, match="verified initialization"):
+        LIN.require(lin, **_observed(student_weights_sha256=None,
+                                     checkpoint_lineage={**ok, "initialization_sha256": "0" * 64}))
+    # staged initialization bytes are re-hashed on a resume too
+    with pytest.raises(LIN.LineageError, match="initialization's weights"):
+        LIN.require(lin, **_observed(student_weights_sha256="0" * 64, checkpoint_lineage=ok))
+
+
+def test_the_trainer_checks_resumes_the_effective_config_and_the_loaded_model():
+    """train_stage3.py's lineage gate: no `None if resume` skip of the initialization bytes, the checkpoint's stamp
+    passed on a resume and carried into its bound identity, the effective config before loading and the loaded
+    model's config after."""
+    src = (Path(__file__).resolve().parents[2] / "scripts/shared/training/train_stage3.py").read_text()
+    gate = src[src.index("lineage_stamp = None"):src.index('print(f"loading student from')]
+    assert "None if resume_ckpt" not in gate and "student_weights_sha256=init_sha" in gate
+    assert "checkpoint_lineage=ck" in gate and "LIN.effective_config(model_path)" in gate
+    assert "initialization_provenance=read_provenance(" in gate and "tokenizer_files_sha256=" in gate
+    assert 'LIN.require(cfg["lineage"], student_config=student.config.to_dict())' in src
+    assert 'resume_identity["lineage"] = lineage_stamp' in src

@@ -55,7 +55,11 @@ def load(root: str | Path):
         if isinstance(manifest["domains"], dict) else
         {d: tuple(s) for d, s in manifest["subtypes"].items()},
         critical_tags=tuple(manifest["critical_tags"]),
-        general_domain=manifest.get("general_domain", "general"))
+        general_domain=manifest.get("general_domain", "general"),
+        #: present only in a suite whose items carry different critical classes
+        #: by group (StateEvalSuite.critical_groups); absent, the historical suite
+        critical_groups=({g: tuple(c) for g, c in manifest["critical_groups"].items()}
+                         if manifest.get("critical_groups") is not None else None))
     items = []
     for line in (root / "items.jsonl").read_text().splitlines():
         if not line.strip():
@@ -83,5 +87,5 @@ def load(root: str | Path):
             tags[name] = mask
         items.append(SuiteItem(item_id=row["item_id"], input_ids=ids,
                                domain=row["domain"], subtype=row["subtype"],
-                               tags=tags))
+                               tags=tags, critical_group=row.get("critical_group")))
     return suite, items, manifest

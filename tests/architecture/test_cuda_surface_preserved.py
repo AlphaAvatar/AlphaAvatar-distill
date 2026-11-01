@@ -2455,15 +2455,40 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "declared lineage against the observed KD teacher (model id, revision, snapshot "
             "weight shards, vocabulary, chat template, RoPE base, position limit), the student "
             "config and initialization bytes, and the pack bytes; every mismatch refuses. "
-            "Called only where a config declares a lineage. NO CUDA SURFACE.",
+            "Called only where a config declares a lineage. Maintainer review 2026-11-01: a "
+            "field the declaration or the student's EFFECTIVE config leaves unstated is a "
+            "problem, never a match; the tokenizer is bound by its files; the initialization "
+            "by its search record's root id, shard-set hash and checkpoint sha256 "
+            "(`initialization_provenance`, `shard_set_sha256`); a resume by the checkpoint's "
+            "lineage `stamp`. NEW `effective_config`, `tokenizer_files`. NO CUDA SURFACE.",
         "src/aadistill/data/code_exec.py":
             "v4 (`CODE_EXEC_SCHEMA` .../v4): the child runs with `-s -P` and "
             "PYTHONHASHSEED=0 instead of `-I` (which ignores the seed), so a program whose "
             "result depends on string-hash order gets the same verdict on every run; the "
             "probe admits the variable as the interpreter's own. THIS IS A DECLARED "
             "SEMANTIC CHANGE of a verdict (a hash-dependent program no longer passes or "
-            "fails at random); limits, sandbox and the pass rule are unchanged. NO CUDA "
-            "SURFACE.",
+            "fails at random); limits, sandbox and the pass rule are unchanged. Then "
+            "`hash_seed` (default 0: every v4 verdict unchanged) and NEW "
+            "`run_asserts_across_seeds`: passed only when the tests pass under every given "
+            "seed and seed 0 twice, else `unstable`. NO CUDA SURFACE.",
+        "src/aadistill/initialization/specs/metrics.py":
+            "`StateEvalSuite.critical_groups` and `SuiteItem.critical_group` (optional): a "
+            "suite whose items carry different critical-token classes by group. Versioned by "
+            "absence: an undeclared suite's `suite_hash` and `as_dict` are byte-identical. NO "
+            "CUDA SURFACE.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "with `critical_groups` declared, `state.critical_token_kl` (and the objective's "
+            "`critical_token`) is the unweighted mean over groups of each group's mean over "
+            "its own classes (`CRITICAL_GROUP_AGGREGATION`), per-group values beside it; a "
+            "class with no scored position in its group, or an item outside a declared group, "
+            "is refused at construction. THIS IS A DECLARED SEMANTIC CHANGE only for a suite "
+            "that declares groups; every undeclared suite's values and protocol id are "
+            "unchanged. The per-group sums are on the logits' device like every other "
+            "`DistortionSums`. NO NEW CUDA SURFACE.",
+        "src/aadistill/initialization/scoring/protocol_identity.py":
+            "`ReductionSemantics.critical_aggregation` (optional, versioned by absence): set "
+            "for a grouped suite, so its measurement protocol id is new; every historical id "
+            "unchanged. NO CUDA SURFACE.",
      }),
 )
 

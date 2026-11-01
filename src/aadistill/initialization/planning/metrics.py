@@ -268,10 +268,14 @@ class StateEvaluator:
                     require_binary_scoring_weights(weights)
                 except ObjectiveError as exc:
                     raise MeasurementError(str(exc)) from exc
+        if suite.critical_groups is not None:
+            _require_critical_groups(suite, self.items, self._weights)
         self.reduction = ReductionSemantics(
             chunk=int(chunk), reference_strategy=reference_strategy.value,
             distribution_support=distribution_support,
-            scoring_objective=scoring_objective)
+            scoring_objective=scoring_objective,
+            critical_aggregation=(None if suite.critical_groups is None
+                                  else CRITICAL_GROUP_AGGREGATION))
         self.measurement_protocol_id = measurement_protocol_id(
             suite_structural_identity=suite.suite_hash,
             suite_content_identity=(suite_content_sha256
@@ -756,10 +760,12 @@ class StateEvaluator:
             raise MeasurementError("refusing to measure without the artifact digest")
 
         per_subtype: dict[str, DistortionSums] = {}
+        per_group: dict[str, DistortionSums] = {}
         totals = DistortionSums()
         objective_acc = (None if self.scoring_objective is None
                          else _ObjectiveAccumulator(self.scoring_objective,
-                                                    self.suite.critical_tags))
+                                                    self.suite.critical_tags,
+                                                    self.suite.critical_groups))
         pairs = (self._union_pairs(model) if self._union_store is not None
                  else self._logit_pairs(model))
         for item, ref, cand, select in pairs:
@@ -768,6 +774,9 @@ class StateEvaluator:
                 sums = self._union_item(item, cand, select, objective_acc)
                 per_subtype.setdefault(item.subtype,
                                        DistortionSums()).merge(sums)
+                if item.critical_group is not None:
+                    per_group.setdefault(item.critical_group,
+                                         DistortionSums()).merge(sums)
                 totals.merge(sums)
                 del cand
                 continue
@@ -831,6 +840,9 @@ class StateEvaluator:
             if full_tags is not None:
                 _restore_unselected_counts(sums, select, full_tags)
             per_subtype.setdefault(item.subtype, DistortionSums()).merge(sums)
+            if item.critical_group is not None:
+                per_group.setdefault(item.critical_group,
+                                     DistortionSums()).merge(sums)
             totals.merge(sums)
             del ref, cand
 
@@ -876,11 +888,29 @@ class StateEvaluator:
                 values[f"state.critical_token_kl.{tag}"] = float(entry["kl"])
         present = [tagged[t]["kl"] for t in self.suite.critical_tags
                    if t in tagged and tagged[t]["kl"] is not None]
-        if present:
+        if present and self.suite.critical_groups is None:
             # Unweighted mean over declared critical-token classes: a token-count
             # mean would be dominated by whichever class is common, and the rare
             # ones (think_close, eos) are the ones that decide termination.
             values["state.critical_token_kl"] = float(sum(present) / len(present))
+        group_detail = None
+        if self.suite.critical_groups is not None:
+            #: Per group, each of ITS classes pooled over its items; the group's
+            #: unweighted mean over them; then the unweighted mean over groups.
+            group_detail = {}
+            for g, classes in sorted(self.suite.critical_groups.items()):
+                tg = per_group[g].as_dict()["tagged"]
+                kls = {t: tg[t]["kl"] for t in classes if t in tg and tg[t]["kl"] is not None}
+                if len(kls) != len(classes):
+                    raise MeasurementError(
+                        f"critical group {g!r}: classes {sorted(set(classes) - set(kls))} "
+                        "have no scored position; a missing class reweights its group")
+                group_detail[g] = {"classes": kls, "mean": sum(kls.values()) / len(kls)}
+                values[f"state.critical_token_kl.group.{g}"] = float(group_detail[g]["mean"])
+                for t, v in kls.items():
+                    values[f"state.critical_token_kl.group.{g}.{t}"] = float(v)
+            values["state.critical_token_kl"] = float(
+                sum(d["mean"] for d in group_detail.values()) / len(group_detail))
 
         return StateEvaluation(
             artifact_digest=artifact_digest,
@@ -891,6 +921,9 @@ class StateEvaluator:
             positions=int(agg["positions"]),
             detail={"per_subtype_kl": subtype_kl, "per_domain_kl": per_domain,
                     "per_domain_nll": per_domain_ce, "tagged": tagged,
+                    **({} if group_detail is None else
+                       {"critical_groups": group_detail,
+                        "critical_aggregation": CRITICAL_GROUP_AGGREGATION}),
                     "reference_strategy": self.reference_strategy.value,
                     #: WHICH POSITIONS these numbers are means over. Recorded in
                     #: the evaluation rather than left to the run config, because
@@ -952,11 +985,16 @@ class _ObjectiveAccumulator:
     integrand, not to how items were weighted.
     """
 
-    def __init__(self, objective: Any, critical_tags: Sequence[str]) -> None:
+    def __init__(self, objective: Any, critical_tags: Sequence[str],
+                 critical_groups: Mapping[str, Sequence[str]] | None = None) -> None:
         self.objective = objective
         self.names = tuple(objective.components())
         self.confidence_key = objective.confidence_key()
         self.critical_tags = tuple(critical_tags)
+        #: `StateEvalSuite.critical_groups`: classes then pool within a group,
+        #: keyed ``(group, class)``, and groups weigh equally (see the evaluator).
+        self.critical_groups = (None if critical_groups is None else
+                                {g: tuple(c) for g, c in critical_groups.items()})
         #: sub-type -> component -> [sum over scored positions, count]
         self.per_subtype: dict[str, dict[str, list[float]]] = {}
         #: class -> component -> [sum over scored class positions, count], for
@@ -1026,13 +1064,16 @@ class _ObjectiveAccumulator:
             acc = bucket.setdefault(name, [0.0, 0])
             acc[0] += float(terms[name][scored].double().sum())
             acc[1] += n_scored
-        for tag in self.critical_tags:
+        own = (self.critical_tags if self.critical_groups is None
+               else self.critical_groups.get(item.critical_group, ()))
+        for tag in own:
             if tag not in tags:
                 continue
             m = tags[tag].to(kl.device).bool() & scored
             n = int(m.sum())
             if n:
-                cls = self.per_class.setdefault(tag, {})
+                key = tag if self.critical_groups is None else (item.critical_group, tag)
+                cls = self.per_class.setdefault(key, {})
                 for name in ("objective", "raw_kl"):
                     acc = cls.setdefault(name, [0.0, 0])
                     acc[0] += float(terms[name][m].double().sum())
@@ -1072,6 +1113,22 @@ class _ObjectiveAccumulator:
                              ("raw_kl", "state.objective.raw_kl.critical_token")):
             means = {tag: c[name][0] / c[name][1]
                      for tag, c in self.per_class.items() if c[name][1]}
+            if self.critical_groups is not None:
+                groups = {}
+                for g, classes in sorted(self.critical_groups.items()):
+                    got = {t: means[(g, t)] for t in classes if (g, t) in means}
+                    if len(got) != len(classes):
+                        raise MeasurementError(
+                            f"critical group {g!r}: classes {sorted(set(classes) - set(got))} "
+                            "have no scored position; a missing class reweights its group")
+                    groups[g] = sum(got.values()) / len(got)
+                    values[f"{prefix}.group.{g}"] = float(groups[g])
+                    for t, v in got.items():
+                        values[f"{prefix}.group.{g}.{t}"] = float(v)
+                values[prefix] = float(sum(groups.values()) / len(groups))
+                if name == "objective":
+                    class_means = {f"{g}.{t}": v for (g, t), v in means.items()}
+                continue
             if name == "objective":
                 class_means = means
             for tag, v in means.items():
@@ -1107,6 +1164,43 @@ class _ObjectiveAccumulator:
             "per_item": self.per_item,
         }
         return values, detail
+
+
+#: How critical-token classes combine when a suite declares groups: recorded in
+#: the reduction semantics (and so the measurement protocol id) of every such
+#: evaluation.
+CRITICAL_GROUP_AGGREGATION = (
+    "group_balanced/v1: per group, each of its declared classes pooled over the "
+    "group's items' scored positions; unweighted mean over the group's classes; "
+    "unweighted mean over groups")
+
+
+def _require_critical_groups(suite: StateEvalSuite, items: Sequence[SuiteItem],
+                             weights: Mapping[str, torch.Tensor] | None) -> None:
+    """Every item names a declared group, every group has items, and every class
+    a group declares has at least one scored position among its items -- a class
+    or group that is silently absent reweights the others, the failure the
+    declared sub-type check refuses for domains."""
+    groups = suite.critical_groups or {}
+    stray = sorted({str(i.critical_group) for i in items if i.critical_group not in groups})
+    if stray:
+        raise MeasurementError(
+            f"{suite.qualified_id}: items in undeclared critical groups {stray}")
+    seen: dict[str, set[str]] = {g: set() for g in groups}
+    for i in items:
+        w = None if weights is None else weights[i.item_id] > 0
+        for t in groups[i.critical_group]:
+            m = i.tags.get(t)
+            if m is None:
+                continue
+            m = m.bool() if w is None else (m.bool() & w)
+            if bool(m.any()):
+                seen[i.critical_group].add(t)
+    short = {g: sorted(set(groups[g]) - seen[g]) for g in groups if set(groups[g]) - seen[g]}
+    if short:
+        raise MeasurementError(
+            f"{suite.qualified_id}: critical classes with no scored position in their "
+            f"group {short}; a missing class or group reweights the others")
 
 
 #: How the state evaluator aggregates a declared objective across items. Named

@@ -126,6 +126,17 @@ class StateEvalSuite:
     #: emitted at all, rather than being silently backed by a pooled average over
     #: reasoning, code and tool text that is not "general" by any reading.
     general_domain: str | None = "general"
+    #: CRITICAL-TOKEN GROUPS, when items belong to populations whose outputs carry
+    #: different critical-token classes (one teacher's two generation modes, say:
+    #: one closes a think block it opened, the other never opens one). Each group
+    #: names the classes ITS items carry; every item names its group
+    #: (`SuiteItem.critical_group`). `state.critical_token_kl` is then the
+    #: unweighted mean over groups of each group's unweighted mean over its own
+    #: classes, so a group with more classes gets no more weight -- a flat mean
+    #: over (class, group) pairs would weight a three-class group 3:2 against a
+    #: two-class one. `None`: the historical flat mean over `critical_tags`, and
+    #: every historical suite hash unchanged (versioned by absence).
+    critical_groups: Mapping[str, tuple[str, ...]] | None = None
 
     def __post_init__(self) -> None:
         if not self.domains:
@@ -133,6 +144,17 @@ class StateEvalSuite:
         missing = [d for d in self.domains if d not in self.subtypes]
         if missing:
             raise MeasurementError(f"{self.suite_id}: domains without sub-types {missing}")
+        if self.critical_groups is not None:
+            if not self.critical_groups:
+                raise MeasurementError(f"{self.suite_id}: critical_groups declared empty")
+            for g, classes in self.critical_groups.items():
+                if not classes:
+                    raise MeasurementError(f"{self.suite_id}: critical group {g!r} has no classes")
+                stray = sorted(set(classes) - set(self.critical_tags))
+                if stray:
+                    raise MeasurementError(
+                        f"{self.suite_id}: critical group {g!r} names classes {stray} "
+                        "that are not declared critical tags")
 
     @property
     def qualified_id(self) -> str:
@@ -147,6 +169,8 @@ class StateEvalSuite:
             "subtypes": {k: list(v) for k, v in sorted(self.subtypes.items())},
             "critical_tags": list(self.critical_tags),
             "content_sha256": self.content_sha256,
+            **({} if self.critical_groups is None else
+               {"critical_groups": {g: list(c) for g, c in sorted(self.critical_groups.items())}}),
         }, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
     def required_metrics(self) -> tuple[str, ...]:
@@ -173,6 +197,8 @@ class StateEvalSuite:
             "items_path": self.items_path, "content_sha256": self.content_sha256,
             "n_items": self.n_items, "description": self.description,
             "general_domain": self.general_domain,
+            **({} if self.critical_groups is None else
+               {"critical_groups": {g: list(c) for g, c in sorted(self.critical_groups.items())}}),
             "suite_hash": self.suite_hash,
         }
 
@@ -242,6 +268,9 @@ class SuiteItem:
     domain: str
     subtype: str
     tags: Mapping[str, torch.Tensor] = field(default_factory=dict)
+    #: The critical-token group this item counts under, when the suite declares
+    #: `StateEvalSuite.critical_groups`; `None` otherwise.
+    critical_group: str | None = None
 
 
 class ReferenceStrategy(Enum):

@@ -15,6 +15,12 @@ pinned seed it gets the same verdict on every run. ``-I`` would ignore
 ``PYTHONHASHSEED`` (it implies ``-E``); no other ``PYTHON*`` variable reaches
 the child, since the environment is built here.
 
+A pinned seed makes a verdict reproducible; it does not make it right. Such a
+program is correct only by the luck of seed 0, so ``run_asserts_across_seeds``
+runs the same tests under several caller-chosen seeds (and seed 0 twice) and
+passes only a program every run passes: a verdict that moves with the seed, or
+between two runs at one seed, is ``unstable``, never a pass.
+
 Two modes, because benchmarks state tests in two ways:
 
 * ``asserts`` -- the tests are Python statements (MBPP-style). A driver runs the
@@ -140,7 +146,7 @@ def bwrap_sandbox(*, bwrap: str = "bwrap", python_prefix: str | None = None,
 
 
 def _run(argv: list[str], workdir: str, stdin: str, lim: Limits,
-         sandbox: Sandbox | None, pass_fds: Sequence[int] = ()) -> dict:
+         sandbox: Sandbox | None, pass_fds: Sequence[int] = (), hash_seed: int = 0) -> dict:
     """One process. stdout and stderr go to files outside the work directory,
     bounded by the file-size limit, and are read back whole."""
     with tempfile.TemporaryDirectory(prefix="aad_cap_") as cap:
@@ -148,7 +154,7 @@ def _run(argv: list[str], workdir: str, stdin: str, lim: Limits,
         cmd = (sandbox(workdir) if sandbox else []) + [_interpreter(), "-s", "-P", *argv]
         with open(out_path, "wb") as out, open(err_path, "wb") as err:
             p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=out, stderr=err,
-                                 cwd=workdir, env={"PATH": _PATH, "PYTHONHASHSEED": _HASH_SEED},
+                                 cwd=workdir, env={"PATH": _PATH, "PYTHONHASHSEED": str(int(hash_seed))},
                                  preexec_fn=_limiter(lim), pass_fds=tuple(pass_fds))
             try:
                 p.communicate(stdin.encode(), timeout=lim.wall_seconds)
@@ -277,8 +283,10 @@ def _drain(fd: int, *, grace: float = 1.0, limit: int = 1 << 20) -> bytes:
 
 
 def run_asserts(code: str, tests: Sequence[str], *, setup: str = "",
-                limits: Limits = Limits(), sandbox: Sandbox | None = None) -> dict:
-    """Pass only when every declared test ran and passed (see the module doc)."""
+                limits: Limits = Limits(), sandbox: Sandbox | None = None,
+                hash_seed: int = int(_HASH_SEED)) -> dict:
+    """Pass only when every declared test ran and passed (see the module doc).
+    ``hash_seed`` is the child's string-hash seed (0 unless a caller asks)."""
     tests = list(tests)
     base = {"schema": CODE_EXEC_SCHEMA, "mode": "asserts", "sandboxed": sandbox is not None,
             "tests_total": len(tests), "tests_run": 0, "tests_passed": 0}
@@ -294,7 +302,7 @@ def run_asserts(code: str, tests: Sequence[str], *, setup: str = "",
                 json.dump({"setup": setup, "code": code, "tests": tests,
                            "max_failures": _MAX_FAILURES}, f)
             run = _run(["driver.py", str(wfd)], d, nonce + "\n", limits, sandbox,
-                       pass_fds=(wfd,))
+                       pass_fds=(wfd,), hash_seed=hash_seed)
         os.close(wfd)
         wfd = -1
         raw = _drain(rfd)
@@ -328,6 +336,29 @@ def run_asserts(code: str, tests: Sequence[str], *, setup: str = "",
                    detail=rep.get("tampered") or rep.get("exited") or rep.get("error"))
     passed = status == "passed"
     return {**out, "passed": passed, "status": status,
+            "establishes": ESTABLISHES if passed else None}
+
+
+def run_asserts_across_seeds(code: str, tests: Sequence[str], *, hash_seeds: Sequence[int],
+                             setup: str = "", limits: Limits = Limits(),
+                             sandbox: Sandbox | None = None) -> dict:
+    """`run_asserts` once per hash seed, and seed 0 a second time: ``passed`` only
+    when every run passed. Runs that disagree make the verdict ``unstable`` --
+    the program's result depends on string-hash order (or on something else
+    that moves between runs), so its pass at any one seed is luck, not
+    evidence. ``by_seed`` keeps every run's status."""
+    seeds = [int(s) for s in hash_seeds]
+    if not seeds:
+        raise ValueError("run_asserts_across_seeds needs at least one hash seed")
+    runs = [(s, run_asserts(code, tests, setup=setup, limits=limits, sandbox=sandbox, hash_seed=s))
+            for s in [*seeds, seeds[0]]]
+    verdicts = {r["passed"] for _, r in runs}
+    passed = verdicts == {True}
+    status = "passed" if passed else ("unstable" if len(verdicts) > 1 else runs[0][1]["status"])
+    return {"schema": CODE_EXEC_SCHEMA, "mode": "asserts_across_seeds", "hash_seeds": seeds,
+            "sandboxed": sandbox is not None, "passed": passed, "status": status,
+            "stable": len(verdicts) == 1,
+            "by_seed": [{"hash_seed": s, "passed": r["passed"], "status": r["status"]} for s, r in runs],
             "establishes": ESTABLISHES if passed else None}
 
 

@@ -274,29 +274,55 @@ def main() -> None:
 
     #: Teacher-student lineage (AGENTS.md P3; aadistill.training.lineage): a config that declares one teacher
     #: lineage is checked here against what was actually loaded -- the KD teacher and its snapshot, the student's
-    #: config and initialization bytes, the pack, the tokenizer -- and refused on any mismatch, before a step runs.
+    #: EFFECTIVE config, the initialization's bytes and the search record that produced them, the tokenizer's
+    #: vocabulary and files, the pack -- and refused on any mismatch, before a step runs. A resume is checked too:
+    #: the checkpoint must carry the lineage stamp its run wrote (the lineage's digest and the initialization bytes
+    #: verified at the run's first start), and the initialization is re-hashed whenever it is staged here.
+    lineage_stamp = None
     if cfg.get("lineage") is not None:
         from aadistill.training import lineage as LIN
         from aadistill.infrastructure.manifest import sha256_file as _sha
+        from shared.training.initialization_provenance import read as read_provenance
+        lin = cfg["lineage"]
+        if not cfg["checkpoint"].get("bind_identity"):
+            raise ValueError("a config with a lineage block must set checkpoint.bind_identity: the lineage stamp a "
+                             "resume is checked against travels with the bound identity")
         snap = None
         if teacher is not None:
             from huggingface_hub import snapshot_download
             snap = LIN.snapshot_facts(snapshot_download(cfg["teacher"]["model_id"], revision=teacher_identity["revision"],
                                                         local_files_only=True))
-        LIN.require(cfg["lineage"], kd_teacher=cfg["teacher"], loaded_teacher=teacher_identity, teacher_snapshot=snap,
-                    student_config=json.loads((Path(model_path) / "config.json").read_text()),
-                    student_weights_sha256=(None if resume_ckpt is not None else
-                                            _sha(Path(paths["student_path"]) / "model.safetensors")),
+        init_file = Path(paths["student_path"]) / "model.safetensors"
+        init_sha = _sha(init_file) if init_file.is_file() else None
+        if resume_ckpt is None and init_sha is None:
+            raise FileNotFoundError(f"{init_file} is not here: a fresh run must verify its initialization's bytes")
+        ck = None
+        if resume_ckpt is not None:
+            rid = resume_ckpt / "resume_identity.json"
+            ck = (json.loads(rid.read_text()).get("lineage") or {}) if rid.is_file() else {}
+        prov = lin["initialization"].get("provenance") or {}
+        LIN.require(lin, kd_teacher=cfg["teacher"], loaded_teacher=teacher_identity, teacher_snapshot=snap,
+                    student_config=LIN.effective_config(model_path), student_weights_sha256=init_sha,
                     pack_files_sha256={n: _sha(Path(data_dir) / n) for n in ("blocks.npz", "ladder.json", "audit.jsonl")
                                        if (Path(data_dir) / n).is_file()},
-                    tokenizer_sha256=tokenizer_hash(tokenizer))
-        logger.log("lineage_verified", teacher=cfg["lineage"]["teacher"]["model_id"],
-                   revision=cfg["lineage"]["teacher"]["revision"], mode=cfg["lineage"].get("mode"))
+                    tokenizer_sha256=tokenizer_hash(tokenizer),
+                    tokenizer_files_sha256=LIN.tokenizer_files(paths["tokenizer_source"],
+                                                               (lin.get("tokenizer") or {}).get("files_sha256") or {}),
+                    initialization_provenance=read_provenance(at(prov["record"]), prov["record_sha256"],
+                                                              lin["initialization"]["model_safetensors_sha256"]),
+                    checkpoint_lineage=ck)
+        lineage_stamp = ck if resume_ckpt is not None else LIN.stamp(lin, initialization_sha256=init_sha)
+        logger.log("lineage_verified", teacher=lin["teacher"]["model_id"], revision=lin["teacher"]["revision"],
+                   mode=lin.get("mode"), resumed=resume_ckpt is not None,
+                   initialization_rehashed=init_sha is not None, stamp=lineage_stamp)
 
     print(f"loading student from {model_path} ...")
     student = AutoModelForCausalLM.from_pretrained(
         model_path, dtype=DTYPES[cfg["dtype"]]
     )
+    if cfg.get("lineage") is not None:
+        #: the config the loader actually built (library defaults filled in), not the file it was read from
+        LIN.require(cfg["lineage"], student_config=student.config.to_dict())
     logger.log(
         "student_loaded",
         path=str(model_path),
@@ -335,6 +361,8 @@ def main() -> None:
     # after either changed under its path is refused (Trainer.restore).
     resume_identity = (bound_identity(cfg, paths, resume_ckpt) if cfg["checkpoint"].get("bind_identity")
                        else None)
+    if lineage_stamp is not None:
+        resume_identity["lineage"] = lineage_stamp
     trainer = Trainer(
         cfg,
         student,
