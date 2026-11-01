@@ -67,7 +67,8 @@ STUDY = SE.Study(
     scripts=tuple(f"scripts/stages/stage-2/teacher_modes/{n}.py" for n in
                   ("token_matched_phase", "phase", "supplement_session", "teacher_session", "admission",
                    "supply_audit", "build_supplement_tasks", "build_tasks", "build_calibration_supplement",
-                   "hybrid_calibration", "inputs_session")) + (
+                   "hybrid_calibration", "inputs_session", "full_search", "hybrid_state_eval",
+                   "freeze_state_eval", "a1_units", "training_plan")) + (
         "scripts/shared/study_engineering.py", "scripts/shared/project_position.py", "scripts/shared/eval_sets.py",
         "scripts/shared/pod/teacher_cache.py", "scripts/stages/stage-0/calibration_volume/run_battery.py",
         "scripts/stages/stage-0/calibration_volume/score_battery.py",
@@ -94,9 +95,14 @@ class TMAuthorization(SE.EngineeringAuthorization):
 KIND_RECORDS = {
     "supplement": (),
     "inputs": ("configs/stages/stage-2/teacher_modes/inputs_protocol.json",),
-    "search": (),
-    "train_a1": (),
+    "search": ("configs/stages/stage-2/teacher_modes/hybrid_d4_profiles.json",
+               "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_freeze.json"),
+    "train_a1": ("logs/stages/stage-2/teacher_modes/plans/training_plan_a1.json",),
 }
+#: the full search's planned minutes and A1's per-unit deadline (budget_v2.json: the search's deadline-bounded
+#: 37.3 h; A1's 6.35 h per seed)
+SEARCH_DEADLINE_MINUTES = 37.29 * 60
+A1_UNIT_DEADLINE_HOURS = 6.35
 
 
 def kind_conditions(kind: str, root: Path = REPO_ROOT) -> dict:
@@ -233,6 +239,24 @@ def supplement_command(ctx, plan) -> str:
             f"--authorization {auth} --durable-root {P1.durable(a)} --status {status}" + P1._tail(status))
 
 
+def search_command(ctx, plan) -> str:
+    a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
+    auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
+    #: the driver stops itself 30 minutes before the planned search time, leaving the commit and the copy time
+    minutes = max(30.0, float(getattr(a, "search_minutes", None) or SEARCH_DEADLINE_MINUTES) - 30.0)
+    return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/full_search.py "
+            f"--authorization {auth} --durable-root {P1.durable(a)} --status {status} --deadline-minutes {minutes:.0f}"
+            + P1._tail(status))
+
+
+def train_a1_command(ctx, plan) -> str:
+    a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
+    auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
+    return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/a1_units.py "
+            f"--authorization {auth} --durable-root {P1.durable(a)} --status {status} "
+            f"--unit-deadline-hours {A1_UNIT_DEADLINE_HOURS}" + P1._tail(status))
+
+
 def inputs_command(ctx, plan) -> str:
     a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
     auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
@@ -246,7 +270,54 @@ DRIVERS = {
                    "Research A v2: the supplementary teacher generation (order_v2, both modes, token quotas)"),
     "inputs": ("scripts/stages/stage-2/teacher_modes/inputs_session.py", inputs_command, (),
                "Research A v2, A1 phase A: the calibration top-up and the state evaluation's native generation"),
+    "search": ("scripts/stages/stage-2/teacher_modes/full_search.py", search_command, ("profiles", "suite"),
+               "Research A v2, A1 phase B: the hybrid D4 full search (one L40S, micro-batch 1)"),
+    "train_a1": ("scripts/stages/stage-2/teacher_modes/a1_units.py", train_a1_command, ("a1_pack",),
+                 "Research A v2, A1 phases C and D: A1's two seeds trained from the Top-1 and formally evaluated"),
 }
+#: small evidence pulled on every poll, per kind (relative to the durable root)
+POLLED = {"search": ("search_a1/search_record.json", "search_a1/first_evaluation_check.json",
+                     "search_a1/search/states.jsonl", "search_a1/search/telemetry.jsonl", "search_a1/products.json"),
+          "train_a1": ("a1_units.json",)}
+
+
+def secure_files(ctx) -> None:
+    """on_poll for the search and A1 kinds: their small evidence, pulled as it stands (never raises)."""
+    try:
+        if ctx.target is None:
+            return
+        root, st, kind = P1.durable(ctx.args), SE.store(ctx), _kind(ctx)
+        for rel in POLLED.get(kind, ()):
+            P1._pull(ctx, f"{root}/{rel}", st / rel, None)
+        if kind == "train_a1":
+            lines = P1._listing(ctx, f"cd {root}/v2_units 2>/dev/null && ls -d A1-s*/train/train_log.jsonl 2>/dev/null || true") or []
+            for rel in (l.strip() for l in lines if l.strip()):
+                P1._pull(ctx, f"{root}/v2_units/{rel}", st / "v2_units" / rel, None)
+        SE._scp(ctx, f"/workspace/{SESSION_KIND}.status", st / "driver.status", limit_s=120)
+    except Exception as exc:  # noqa: BLE001
+        ctx.evidence.setdefault("secure_errors", []).append(repr(exc)[:300])
+
+
+def files_secured(ctx, *_a, **_k) -> tuple[bool, str]:
+    """Closeout for the search and A1 kinds: the evidence directories tarred (weights excluded: they stay on the
+    volume, by sha256 in the records), and the products a later kind or the report reads pulled and re-hashed."""
+    import json
+    secure_files(ctx)
+    root, st, kind = P1.durable(ctx.args), SE.store(ctx), _kind(ctx)
+    got = {}
+    if kind == "search":
+        got["search_evidence"] = P1._tar(ctx, f"{root}/search_a1", "search_evidence",
+                                         excludes=("./search/states", "./top1", "./repeatability"))[0]
+        prod = st / "search_a1/products.json"
+        if prod.is_file():
+            top = json.loads(prod.read_text())["top1"]
+            for n, digest in top["files_sha256"].items():
+                got[f"top1/{n}"] = P1._pull(ctx, f"{root}/search_a1/top1/{n}", st / "search_a1/top1" / n, digest)
+    else:
+        got["a1_evidence"] = P1._tar(ctx, f"{root}/v2_units", "a1_evidence", excludes=("./*/train/checkpoints",))[0]
+    ctx.evidence["files_secured"] = got
+    bad = sorted(k for k, v in got.items() if not v)
+    return (not bad, "secured off-pod: " + ", ".join(sorted(got)) if not bad else f"not secured: {bad}")
 
 
 def launch_spec(kind: str = "supplement", minutes: float = 0.0) -> SE.Launch:
@@ -259,18 +330,31 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0) -> SE.Launch:
     battery = LocalAsset(repo_path="artifacts/stages/stage-3/eval/battery_v2", dest_name="battery_v2",
                          install_to="artifacts/stages/stage-3/eval")         #: the v1 teacher kind's assets, unchanged
     order = LocalAsset(repo_path=ORDER, dest_name=Path(ORDER).name, install_to=str(Path(ORDER).parent))
-    assets = (battery,) + tuple({"order": order}[x] for x in extra)
+    cal = "artifacts/stages/stage-2/teacher_modes/calibration_v2"
+    suite = "artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v1"
+    pack = "artifacts/stages/stage-2/teacher_modes/packs_tm/A1"
+    named = {"order": order,
+             "profiles": LocalAsset(repo_path=cal, dest_name=Path(cal).name, install_to=str(Path(cal).parent)),
+             "suite": LocalAsset(repo_path=suite, dest_name=Path(suite).name, install_to=str(Path(suite).parent)),
+             "a1_pack": LocalAsset(repo_path=pack, dest_name=Path(pack).name, install_to=str(Path(pack).parent))}
+    assets = (battery,) + tuple(named[x] for x in extra)
+    polls = (secure, products_secured) if kind in SHARDS else (secure_files, files_secured)
+    relay = ()
+    if kind == "train_a1":                  #: the evaluation's relayed inputs, as v1's recovery kind (phase.py)
+        from stages.phase_c1.autoinit_c1_launch import C1_EVAL_TOKENIZER
+        relay = tuple(C1_EVAL_TOKENIZER)
     return SE.Launch(
         session_kind=SESSION_KIND, authorization=TMAuthorization, teacher_model=t["model"],
         teacher_revision=t["revision"], kind=kind, local_assets=assets, disk_gb=150,
         contingency_fraction=0.25,
         setup_env={"PHASE_KIND": kind},
         extra_prechecks=(P1.the_volume_is_the_planned_one, the_kind_records_are_the_bound_ones),
-        on_poll=secure, products_secured=products_secured,
+        on_poll=polls[0], products_secured=polls[1],
         artifact_spec="configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
         teardown_note=("delete the pod, verify from the provider that it is gone, STOP; the network volume is KEPT: it "
                        "holds every shard and the phase's states"),
-        driver=driver, validation_minutes=minutes, setup_minutes=20.0, command=command, description=description)
+        driver=driver, validation_minutes=minutes, setup_minutes=20.0, command=command, description=description,
+        relay_inputs=relay)
 
 
 def main(argv=None) -> int:

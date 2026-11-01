@@ -183,7 +183,8 @@ class FirstEvaluationCheck:
     def __init__(self, session: Session, adapter, *, rule=None, scratch: Path):
         from shared.epsilon_response import EPSILON_RESPONSE_V1
         self.session, self.adapter, self.rule = session, adapter, rule or EPSILON_RESPONSE_V1
-        self.scratch, self.record: dict = Path(scratch), {}
+        self.scratch = Path(scratch)
+        self.record: dict = {}
 
     def __call__(self, model, digest):
         ev = self.session.evaluator.evaluate(model, digest)

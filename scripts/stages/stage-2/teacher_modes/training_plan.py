@@ -289,12 +289,61 @@ def accounting(u: dict, budget: dict) -> dict:
                                    "by_category", "category_share_points") if k in acc}}
 
 
+A1_PLAN = REPO / "logs/stages/stage-2/teacher_modes/plans/training_plan_a1.json"
+#: where the full search's Top-1 lives on the A1 phase's network volume (full_search.persist_top1)
+TOP1_ON_VOLUME = "/runpod-volume/teacher_modes/search_a1/top1"
+
+
+def a1_plan(search_record: Path, root: Path = REPO) -> dict:
+    """A1's two units with the full search's Top-1 bound (maintainer 2026-11-01, 'Execute A1 First'): the committed
+    search record names the root it ran on and the checkpoint it selected; the units' initialization is that
+    checkpoint (on the volume), its sha256 and the record itself as provenance. Nothing else changes."""
+    from shared.training.initialization_provenance import read as read_provenance
+    rel = str(Path(search_record).resolve().relative_to(Path(root).resolve()))
+    doc = json.loads((Path(root) / rel).read_text())
+    if doc.get("status") != "COMPLETE":
+        raise SystemExit(f"{rel} is {doc.get('status')!r}: no Top-1 before the search completes")
+    top1 = doc["top1"]
+    sha = top1["files_sha256"]["model.safetensors"]
+    prov = read_provenance(Path(root) / rel, A.sha256_file(Path(root) / rel), sha)
+    adm = json.loads(ADMISSION.read_text())
+    us = [u for u in units(adm, json.loads(C1_AUDIT.read_text())) if u["arm"] == "A1"]
+    out = []
+    for u in us:
+        cfg = u["config"]
+        cfg["student_path"] = TOP1_ON_VOLUME
+        cfg["lineage"]["initialization"].update(model_safetensors_sha256=sha,
+                                                provenance={"record": rel, "record_sha256": A.sha256_file(Path(root) / rel)})
+        bad = LIN.problems(cfg["lineage"], kd_teacher=cfg["teacher"], initialization_provenance=prov)
+        if bad or UNSET in json.dumps(cfg):
+            raise SystemExit(f"{u['unit']}: {bad or 'an unset field remains'}")
+        out.append({"unit": u["unit"], "arm": "A1", "seed": u["seed"], "config": cfg})
+    t = teachers()["hybrid"]
+    return {"schema": "aadistill.stage2.teacher_modes.training_plan_a1/v1",
+            "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "decided_by": "maintainer 2026-11-01 'Research A v2: Execute A1 First' (phases C and D)",
+            "teacher": {"model_id": t["model_id"], "revision": t["revision"]}, "seed_order": list(SEEDS),
+            "search_record": {"path": rel, "sha256": A.sha256_file(Path(root) / rel)},
+            "top1": {"on_volume": TOP1_ON_VOLUME, "model_safetensors_sha256": sha, "state_id": top1.get("state_id"),
+                     "artifact_digest": top1.get("artifact_digest")},
+            "units": out, "authorizes": "nothing by itself: the train_a1 kind's one-use artifact funds the session"}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--write", required=True)
+    ap.add_argument("--write", default=None)
     ap.add_argument("--stage-tokenizers", default=None, metavar="SNAPSHOT",
                     help="first copy the hybrid's pinned tokenizer files from this snapshot directory")
+    ap.add_argument("--a1-from-search", default=None, metavar="SEARCH_RECORD",
+                    help="write training_plan_a1.json from the committed full-search record instead")
     a = ap.parse_args(argv)
+    if a.a1_from_search:
+        doc = a1_plan(Path(a.a1_from_search))
+        A1_PLAN.write_text(json.dumps(doc, indent=1, default=str) + "\n")
+        print(json.dumps({"units": [u["unit"] for u in doc["units"]], "top1": doc["top1"]}, indent=1))
+        return 0
+    if not a.write:
+        ap.error("--write is required unless --a1-from-search is given")
     if a.stage_tokenizers:
         stage_tokenizers(Path(a.stage_tokenizers))
     adm = json.loads(ADMISSION.read_text()) if ADMISSION.is_file() else None
