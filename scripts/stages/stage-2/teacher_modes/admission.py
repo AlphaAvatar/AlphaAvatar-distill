@@ -67,6 +67,8 @@ from stages.reasoning_data import source_plan as SP  # noqa: E402
 PROTOCOL = REPO / "configs/stages/stage-2/teacher_modes/generation_protocol.json"
 RECORD = REPO / "logs/stages/stage-2/teacher_modes/data/admission.json"
 MODES = ("H-T", "H-N")
+#: calibration groups, never training data: Research A v1's `cal_` and the v2 supplement's round 0 (`s00t_`, `s00n_`)
+CALIBRATION_GROUPS = ("cal_", "s00t_", "s00n_")
 VAL_SEQUENCES = 16
 MIXTURE_POINTS = 2.0
 CENSOR_WARNING = 0.20
@@ -95,11 +97,11 @@ def tasks_and_stages(proto: dict, repo: Path = REPO) -> tuple[dict, list[str], l
 
 
 def records(store: Path, identity: str) -> dict[tuple[str, str], list[dict]]:
-    """(task, mode) -> its sealed records in candidate order, from every complete group."""
+    """(task, mode) -> its sealed records in candidate order, from every complete group but the calibration ones."""
     out: dict[tuple[str, str], list[dict]] = defaultdict(list)
     for done in sorted(store.glob("*.complete")):
         label = done.name[:-len(".complete")]
-        if label.startswith("cal_"):
+        if label.startswith(CALIBRATION_GROUPS):
             continue
         mode = label.split("_")[1]
         listed = {s["name"]: s["sha256"] for s in json.loads(done.read_text())["shards"]}

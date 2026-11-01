@@ -1,11 +1,19 @@
 """Run a candidate program against its tests in a separate, limited process.
 
 A code target is verified by EXECUTION, never by reading it. The candidate runs
-in a fresh interpreter (``-I``: no user site, no PYTHON* variables, and the base
-interpreter rather than any virtualenv, so only the standard library), in an
-empty temporary directory, with CPU-time, address-space, file-size and
-open-file limits, a wall-clock timeout, and an environment holding only
-``PATH``.
+in a fresh interpreter (``-s -P``: no user site, no script directory on the
+path, and the base interpreter rather than any virtualenv, so only the standard
+library), in an empty temporary directory, with CPU-time, address-space,
+file-size and open-file limits, a wall-clock timeout, and an environment holding
+only ``PATH`` and ``PYTHONHASHSEED=0``.
+
+The hash seed is pinned so that a verdict is reproducible (v4). A program whose
+result depends on the iteration order of a set or a dict of strings -- unpacking
+``set(s)`` into two names, say -- passed or failed by the child's random seed;
+one teacher candidate passed in one audit and failed in the next. Under the
+pinned seed it gets the same verdict on every run. ``-I`` would ignore
+``PYTHONHASHSEED`` (it implies ``-E``); no other ``PYTHON*`` variable reaches
+the child, since the environment is built here.
 
 Two modes, because benchmarks state tests in two ways:
 
@@ -64,7 +72,7 @@ import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
-CODE_EXEC_SCHEMA = "aadistill.data.code_exec/v3"
+CODE_EXEC_SCHEMA = "aadistill.data.code_exec/v4"
 ESTABLISHES = ("the declared tests ran and passed: evidence bounded by those tests, "
                "not full semantic correctness")
 
@@ -73,6 +81,8 @@ ESTABLISHES = ("the declared tests ran and passed: evidence bounded by those tes
 Sandbox = Callable[[str], list[str]]
 
 _PATH = "/usr/bin:/bin"
+#: string hashing in the child: pinned, so the same program gets the same verdict (v4)
+_HASH_SEED = "0"
 _WORK = "/work"
 _MAX_FAILURES = 20
 
@@ -135,10 +145,10 @@ def _run(argv: list[str], workdir: str, stdin: str, lim: Limits,
     bounded by the file-size limit, and are read back whole."""
     with tempfile.TemporaryDirectory(prefix="aad_cap_") as cap:
         out_path, err_path = os.path.join(cap, "out"), os.path.join(cap, "err")
-        cmd = (sandbox(workdir) if sandbox else []) + [_interpreter(), "-I", *argv]
+        cmd = (sandbox(workdir) if sandbox else []) + [_interpreter(), "-s", "-P", *argv]
         with open(out_path, "wb") as out, open(err_path, "wb") as err:
             p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=out, stderr=err,
-                                 cwd=workdir, env={"PATH": _PATH},
+                                 cwd=workdir, env={"PATH": _PATH, "PYTHONHASHSEED": _HASH_SEED},
                                  preexec_fn=_limiter(lim), pass_fds=tuple(pass_fds))
             try:
                 p.communicate(stdin.encode(), timeout=lim.wall_seconds)
@@ -366,7 +376,7 @@ print(json.dumps({
 '''
 
 #: what an interpreter sets for itself; anything else came from outside
-_OWN_ENVIRONMENT = frozenset({"PATH", "PWD", "LC_CTYPE", "SHLVL", "_"})
+_OWN_ENVIRONMENT = frozenset({"PATH", "PYTHONHASHSEED", "PWD", "LC_CTYPE", "SHLVL", "_"})
 
 
 def probe_sandbox(sandbox: Sandbox, protected: Sequence[str], *,

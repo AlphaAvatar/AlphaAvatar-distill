@@ -128,6 +128,17 @@ def test_the_environment_is_not_inherited(monkeypatch):
     assert r["passed"]
 
 
+def test_string_hashing_is_pinned_so_a_hash_dependent_program_gets_one_verdict():
+    """`a, b = set("abab")` passed or failed by the child's random hash seed: one MBPP candidate passed in one
+    audit and failed in the next (Research A v2's admission). The child's hash is seed 0's, every run."""
+    import subprocess
+    seed0 = subprocess.run([sys.executable, "-c", "print(hash('abab'))"], env={"PYTHONHASHSEED": "0"},
+                           capture_output=True, text=True, check=True).stdout.strip()
+    for _ in range(3):
+        r = run_asserts("h = hash('abab')\n", [f"assert h == {seed0}"], limits=FAST)
+        assert r["passed"], r
+
+
 SUM = "a, b = map(int, input().split())\nprint(a + b)\n"
 
 

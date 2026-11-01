@@ -2450,6 +2450,20 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "per pod (the per-GPU quote x the count) against --max-price; one GPU keeps "
             "every earlier session's command and price. THIS IS A DECLARED SEMANTIC "
             "CHANGE of provisioning; NO CUDA SURFACE.",
+        "src/aadistill/training/lineage.py":
+            "NEW: the teacher-student lineage gate (Research A v2, maintainer 2026-10-31). A "
+            "declared lineage against the observed KD teacher (model id, revision, snapshot "
+            "weight shards, vocabulary, chat template, RoPE base, position limit), the student "
+            "config and initialization bytes, and the pack bytes; every mismatch refuses. "
+            "Called only where a config declares a lineage. NO CUDA SURFACE.",
+        "src/aadistill/data/code_exec.py":
+            "v4 (`CODE_EXEC_SCHEMA` .../v4): the child runs with `-s -P` and "
+            "PYTHONHASHSEED=0 instead of `-I` (which ignores the seed), so a program whose "
+            "result depends on string-hash order gets the same verdict on every run; the "
+            "probe admits the variable as the interpreter's own. THIS IS A DECLARED "
+            "SEMANTIC CHANGE of a verdict (a hash-dependent program no longer passes or "
+            "fails at random); limits, sandbox and the pass rule are unchanged. NO CUDA "
+            "SURFACE.",
      }),
 )
 

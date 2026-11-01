@@ -135,6 +135,24 @@ def test_the_supplement_session_generates_calibration_then_rounds_to_the_need_an
     assert len(fake.calls) == n                                               # every sealed record is read back
 
 
+def test_the_admission_reads_the_supplements_rounds_but_never_its_calibration_round(tmp_path, monkeypatch):
+    """Round 0 seals the calibration units beside the training rounds: the admission read them as training records
+    and failed on their ids (KeyError calib2_..., after a_supplement_20261031_144618)."""
+    from stages.reasoning_data import generation_adapter as GA
+    from stages.teacher_modes import admission as ADM
+    from stages.teacher_modes.tests.test_d4_scale_chain import FakeTeacher, _verdict
+    root, got = _tiny_supplement(tmp_path)
+    monkeypatch.setattr(GA, "candidate", _verdict)
+    vol = tmp_path / "vol"
+    auth = lambda path, repo: {"authorization_id": "a", "identity": "e" * 64, "harness_digest": "h"}  # noqa: E731
+    args = ["--authorization", "a.json", "--durable-root", str(vol), "--status", str(vol / "status")]
+    assert SS.main(args, run=FakeTeacher(), authorize=auth, repo=root) == 0
+    assert list((vol / "generation").glob("s00n_*.complete"))
+    tids = {tid for tid, _ in ADM.records(vol / "generation", "e" * 64)}
+    assert tids and not tids & {t["task_id"] for t in got["cal"]}
+    assert tids <= {t["task_id"] for t in got["order"]}
+
+
 def test_closeout_pulls_this_studys_runner_logs_only(monkeypatch, tmp_path):
     """A unit that dies before sealing leaves its traceback in its runner log alone: closeout pulls every own one."""
     from types import SimpleNamespace
