@@ -49,6 +49,8 @@ POOL = REPO / "artifacts/stages/stage-0/calibration_volume/base_pool_v1"
 V1_INPUTS = REPO / "logs/stages/stage-2/teacher_modes/plans/calibration_inputs/calibration_input_g0.jsonl"
 OUT = REPO / "data/stages/stage-2/teacher_modes/tasks/calibration_v2.jsonl"
 AUDIT = REPO / "logs/stages/stage-2/teacher_modes/audit/calibration_coverage.json"
+TOPUP = REPO / "data/stages/stage-2/teacher_modes/tasks/calibration_topup_v1.jsonl"
+TOPUP_AUDIT = REPO / "logs/stages/stage-2/teacher_modes/audit/calibration_topup.json"
 PROFILES = {"base": "calib.s0v_base_d4@v1", "rh": "calib.s0v_rh_d4@v1"}
 DOSE, SEED = 4, 1308798386
 MODES = ("H-T", "H-N")
@@ -196,8 +198,11 @@ PROFILE_DOC = REPO / "configs/stages/stage-2/teacher_modes/hybrid_d4_profiles.js
 HYBRID_IDS = {"base": "calib.hybrid_d4_base", "rh": "calib.hybrid_d4_rh"}
 
 
-def hybrid_records(v1_store: Path, v1_identity: str, store: Path | None, identity: str | None) -> dict:
-    """(unit id, mode) -> the hybrid's sealed calibration record: v1's cal_ groups, then the supplement's s00 groups."""
+def hybrid_records(v1_store: Path, v1_identity: str, store: Path | None, identity: str | None,
+                   inputs_store: Path | None = None, inputs_identity: str | None = None) -> dict:
+    """(unit id, mode) -> the hybrid's sealed calibration record: v1's cal_ groups, the supplement's s00 groups, then
+    the A1 phase's inputs session's c00 groups (the top-up: a pool unit by its calibration unit id, a code prompt by
+    its task id)."""
     from stages.reasoning_data import generation_driver as GD
     meta = {r["task_id"]: r["calibration"] for r in A.jsonl(V1_INPUTS)}
     unit_of = {it["item_id"]: it["unit_id"] for prof in CAL.PROFILES for it in CAL.items(prof)}
@@ -212,6 +217,13 @@ def hybrid_records(v1_store: Path, v1_identity: str, store: Path | None, identit
             if (Path(store) / f"{label}.complete").is_file():
                 for tid, rec in GD.sealed(Path(store), label, identity).items():
                     out.setdefault((cal[tid], mode), rec)
+    if inputs_store is not None:
+        top = {r["task_id"]: (r["calibration"]["unit_id"] if "calibration" in r else r["task_id"]) for r in A.jsonl(TOPUP)}
+        for mode in MODES:
+            tag = f"c00{'t' if mode == 'H-T' else 'n'}"
+            for done in sorted(Path(inputs_store).glob(f"{tag}_{mode}_pass0_{tag}_g*.complete")):
+                for tid, rec in GD.sealed(Path(inputs_store), done.name[:-len(".complete")], inputs_identity).items():
+                    out.setdefault((top[tid], mode), rec)
     return out
 
 
@@ -232,8 +244,9 @@ def item_of(rec: dict, unit: dict, mode: str, stop_ids: set[int]) -> dict | None
 
 
 def held_out_of_profiles(units: dict) -> dict[str, str]:
-    """unit id -> why it may not enter a hybrid profile: R9 by family name, or its prompt is a training prompt of
-    either lineage (A1/A2's sets or C1's D4-Augmented sessions)."""
+    """unit id -> why it may not enter a hybrid profile: R9 by family name, a calibration task build's isolation
+    check removed it (calibration_coverage.json, calibration_topup.json), or its prompt is a training prompt of either
+    lineage (A1/A2's sets or C1's D4-Augmented sessions)."""
     from huggingface_hub.constants import HF_HUB_CACHE
     from transformers import AutoTokenizer
 
@@ -242,11 +255,18 @@ def held_out_of_profiles(units: dict) -> dict[str, str]:
     train = {ES.prompt_key(ES.prompt_text(t)) for rows in training_sets().values() for t in rows}
     m, rev = CAL.SOURCE_TOKENIZER
     tok = AutoTokenizer.from_pretrained(Path(HF_HUB_CACHE) / f"models--{m.replace('/', '--')}" / "snapshots" / rev)
+    flagged = set()
+    for rec in (AUDIT, TOPUP_AUDIT):        #: units a calibration task build removed by its isolation check
+        if rec.is_file():
+            doc = json.loads(rec.read_text())
+            flagged |= set(doc.get("removed_by_isolation") or []) | set((doc.get("removed") or {}).get("isolation") or [])
     out = {}
     for uid, u in units.items():
         it = u["items"][0]
         if r9_refused(it.get("generator_id"), it.get("family_id")):
             out[uid] = "R9 (family name)"
+        elif "calib2_" + hashlib.sha256(f"base_pool_v1|{uid}".encode()).hexdigest()[:20] in flagged:
+            out[uid] = "isolation (R1/R2 against eval-set-1)"
         elif "ids" in it:
             msgs = CAL.prompt_messages(it, tok)
             if ES.prompt_key(ES.prompt_text({"messages": msgs})) in train:
@@ -254,7 +274,8 @@ def held_out_of_profiles(units: dict) -> dict[str, str]:
     return out
 
 
-def profiles(v1_store: Path, v1_identity: str, store: Path | None, identity: str | None) -> dict:
+def profiles(v1_store: Path, v1_identity: str, store: Path | None, identity: str | None,
+             inputs_store: Path | None = None, inputs_identity: str | None = None) -> dict:
     """Both hybrid D4 profiles: per cell and mode, D4's order, half the cell quota of the mode's own positions; units
     held out (`held_out_of_profiles`) are passed over and the order continues. A (profile, mode, cell) still short
     lists the next units of its order a calibration top-up would generate (``refill``)."""
@@ -269,7 +290,7 @@ def profiles(v1_store: Path, v1_identity: str, store: Path | None, identity: str
         for t in code:
             units[t["task_id"]] = {"unit_id": t["task_id"], "items": [{"item_id": t["task_id"], "domain": "supporting",
                                    "subtype": "code", "generator_id": t.get("module"), "family_id": t.get("family_id")}]}
-    recs = hybrid_records(v1_store, v1_identity, store, identity)
+    recs = hybrid_records(v1_store, v1_identity, store, identity, inputs_store, inputs_identity)
     held = held_out_of_profiles(units)
     per_unit = defaultdict(list)
     for (uid, mode), rec in recs.items():
@@ -345,20 +366,142 @@ def profiles(v1_store: Path, v1_identity: str, store: Path | None, identity: str
     return rec
 
 
+def reserve_of(refill: int) -> int:
+    """Units generated past a short cell's refill, so one session closes it whatever its yield: as many again, at
+    least three. A reserve unit the profile does not reach is generated and never used."""
+    return max(3, refill)
+
+
+def topup(v1_store: Path, v1_identity: str, store: Path | None, identity: str | None,
+          also_held: set[str] = frozenset()) -> dict:
+    """The calibration top-up's units (maintainer 2026-11-01, Phase A): per (profile, cell, mode) still short, the
+    refill units `profiles` lists -- the same walk of D4's cell order, held-out units passed over, a new unit
+    counted at the mode's mean positions x MARGIN -- and then `reserve_of` more units of the order not yet
+    generated in that mode. The code cell is its own prompt list (calibration_code_v1.jsonl), both modes. Generates
+    nothing."""
+    d = design()
+    types = json.loads(TYPES.read_text())["types"]
+    quotas = cell_quotas(d, types)
+    units, order = pool_order(d)
+    recs = hybrid_records(v1_store, v1_identity, store, identity)
+    held = {**held_out_of_profiles(units), **{u: "the top-up's isolation check" for u in also_held}}
+    proto = json.loads((REPO / "configs/stages/stage-2/teacher_modes/generation_protocol.json").read_text())
+    stop = {int(x) for x in proto["teacher"]["stop_ids"]}
+    per_unit = defaultdict(list)
+    for (uid, mode), rec in recs.items():
+        t = rec["turns"][0]
+        if t.get("stop_reason") == "eos" and uid in units:
+            per_unit[(mode, units[uid]["items"][0]["subtype"])].append(int(t["generated_tokens"]))
+    need: dict[str, set] = defaultdict(set)
+    why = {}
+    for prof, q in quotas.items():
+        for cell, quota in sorted(q.items()):
+            if cell[1] == "code":
+                continue
+            for mode in MODES:
+                ppu = per_unit[(mode, cell[1])]
+                mean = sum(ppu) / len(ppu) if ppu else 0.0
+                got, taken, est, new, extra = 0, 0, 0.0, [], []
+                seq = [u for u in order.get(cell, []) if u not in held]
+                k = 0
+                while k < len(seq):
+                    uid = seq[k]
+                    if got + est >= quota / 2 and (taken or new):
+                        break
+                    k += 1
+                    rec = recs.get((uid, mode))
+                    if rec is None:
+                        new.append(uid)
+                        est += mean * MARGIN if mean else quota
+                        continue
+                    it = item_of(rec, units[uid], mode, stop)
+                    if it is not None:
+                        got += len(it["tags"]["assistant"])
+                        taken += 1
+                if not new:
+                    continue
+                for uid in seq[k:]:
+                    if len(extra) >= reserve_of(len(new)):
+                        break
+                    if recs.get((uid, mode)) is None:
+                        extra.append(uid)
+                for uid in new + extra:
+                    need[uid].add(mode)
+                why[f"{prof}|{'/'.join(cell[:2])}|{mode}"] = {"scored_now": got, "quota": round(quota / 2, 1),
+                                                              "refill": len(new), "reserve": len(extra),
+                                                              "pool_left_after": len(seq) - k - len(extra)}
+    return {"need": {u: sorted(m) for u, m in sorted(need.items())}, "why": why, "units": units}
+
+
+def write_topup(v1_store: Path, v1_identity: str, store: Path | None, identity: str | None) -> dict:
+    """`topup`'s units as calibration_v2-format task rows plus the code prompts, isolation-checked; the list and
+    its record. A frozen list is never rebuilt."""
+    if TOPUP.exists():
+        raise SystemExit(f"{TOPUP.relative_to(REPO)} exists: a frozen task list is never rebuilt")
+    code = [{**c, "modes": list(MODES)} for c in A.jsonl(CODE_TASKS)]
+    flagged_units: set[str] = set()
+    for _ in range(10):                     #: a flagged unit is passed over and the order continues past it
+        t = topup(v1_store, v1_identity, store, identity, also_held=flagged_units)
+        rows = tasks(t)
+        iso = isolation(rows)
+        bad = set(iso["R1_held_out_prompt_keys"]) | set(iso["R2_flagged"]) | set(iso["R9_refused_family_units"])
+        unit_of = {r["task_id"]: r["calibration"]["unit_id"] for r in rows}
+        if not bad:
+            break
+        flagged_units |= {unit_of[b] for b in bad}
+    else:
+        raise SystemExit("the top-up's isolation check still flags units after 10 passes")
+    bad = {"calib2_" + hashlib.sha256(f"base_pool_v1|{u}".encode()).hexdigest()[:20] for u in flagged_units}
+    from stages.teacher_modes.build_state_eval_hybrid import SE_OUT, training_sets
+    se_keys = keys(list(A.jsonl(SE_OUT)))
+    train_keys = {k for rs in training_sets().values() for k in keys(rs)}
+    clash = {r["task_id"] for r in rows + code if keys([r]) & (se_keys | train_keys)}
+    kept = [r for r in rows if r["task_id"] not in bad | clash] + [r for r in code if r["task_id"] not in clash]
+    TOPUP.write_text("".join(json.dumps(r, sort_keys=True, ensure_ascii=False) + "\n" for r in kept))
+    by = Counter(f"{r['calibration']['domain']}/{r['calibration']['subtype']}|{'+'.join(r['modes'])}"
+                 if "calibration" in r else f"supporting/code|{'+'.join(r['modes'])}" for r in kept)
+    rec = {"schema": "aadistill.stage2.teacher_modes.calibration_topup/v1",
+           "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+           "decided_by": "maintainer 2026-11-01 'Execute A1 First', Phase A.1: the remaining 10 short (profile, cell, mode)",
+           "rule": ("per short (profile, cell, mode): D4's cell order, held-out units passed over; the refill a "
+                    "profile build lists, then reserve_of(refill) = max(3, refill) more units not yet generated in "
+                    "that mode; the code cell's 9 prompts in both modes; one candidate per (unit, mode), the mode's "
+                    "official template and sampling"),
+           "short_cells": t["why"], "units": len(kept), "by_cell_and_modes": dict(sorted(by.items())),
+           "removed": {"isolation": sorted(bad), "state_evaluation_or_training_prompt": sorted(clash)},
+           "isolation": iso, "output": {"path": str(TOPUP.relative_to(REPO)), "sha256": A.sha256_file(TOPUP)},
+           "authorizes": "nothing"}
+    TOPUP_AUDIT.write_text(json.dumps(rec, indent=1) + "\n")
+    return rec
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     b = sub.add_parser("build")
     b.add_argument("--v1-records", required=True)
     b.add_argument("--v1-identity", required=True)
+    tp = sub.add_parser("topup")
+    for x in (tp,):
+        x.add_argument("--v1-records", required=True)
+        x.add_argument("--v1-identity", required=True)
+        x.add_argument("--records", default=None)
+        x.add_argument("--identity", default=None)
     pr = sub.add_parser("profiles")
     pr.add_argument("--v1-records", required=True)
     pr.add_argument("--v1-identity", required=True)
     pr.add_argument("--records", default=None)
     pr.add_argument("--identity", default=None)
+    pr.add_argument("--inputs-records", default=None, help="the A1 phase's inputs session store (inputs_generation)")
+    pr.add_argument("--inputs-identity", default=None)
     a = ap.parse_args(argv)
+    if a.cmd == "topup":
+        rec = write_topup(Path(a.v1_records), a.v1_identity, Path(a.records) if a.records else None, a.identity)
+        print(json.dumps({k: rec[k] for k in ("short_cells", "units", "by_cell_and_modes", "removed")}, indent=1))
+        return 0
     if a.cmd == "profiles":
-        rec = profiles(Path(a.v1_records), a.v1_identity, Path(a.records) if a.records else None, a.identity)
+        rec = profiles(Path(a.v1_records), a.v1_identity, Path(a.records) if a.records else None, a.identity,
+                       Path(a.inputs_records) if a.inputs_records else None, a.inputs_identity)
         print(json.dumps({p["profile_id"]: p["metadata"] for p in rec["profiles"]}, indent=1))
         return 0
     p = plan(Path(a.v1_records), a.v1_identity)

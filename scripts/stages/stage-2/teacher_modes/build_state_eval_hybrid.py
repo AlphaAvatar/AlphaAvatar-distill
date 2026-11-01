@@ -69,7 +69,12 @@ CAL_CODE_OUT = REPO / "data/stages/stage-2/teacher_modes/tasks/calibration_code_
 PROOF = REPO / "logs/stages/stage-2/teacher_modes/audit/full_search_isolation.json"
 MODES = ("H-T", "H-N")
 SE_POSITIONS = 12_000
-SE_MARGIN, CAL_MARGIN = 1.4, 1.3
+#: maintainer 2026-11-01 ('Execute A1 First', Phase A): every (type, mode) also holds at least this many independent,
+#: naturally terminated tasks, registered in the suite identity before generation
+SE_MIN_TASKS = 5
+#: each queue holds this multiple of its expected need (the reserve): the pod takes it in order, only until the
+#: (type, mode)'s quota and minimum are met, so an unused tail costs nothing (rebuilt 2026-11-01; first build 1.4, 1.3)
+SE_MARGIN, CAL_MARGIN = 2.0, 2.0
 #: dataset candidates drawn per planned unit before the 13-gram screens
 CANDIDATES = 1.35
 SE_SEED_BLOCK, SPAN = 2_500_000, 10_000
@@ -99,8 +104,10 @@ def yields() -> dict[tuple[str, str], tuple[float, float]]:
     return out
 
 
-def units_needed(positions: float, y: tuple[float, float], margin: float) -> int:
-    return math.ceil(positions / max(y[0] * y[1], 1.0) * margin)
+def units_needed(positions: float, y: tuple[float, float], margin: float, min_tasks: int = 0) -> int:
+    """Units to queue for ``positions`` scored positions and ``min_tasks`` naturally terminated tasks at yield ``y``
+    (natural-termination share, positions per terminated unit), times ``margin``."""
+    return math.ceil(max(positions / max(y[0] * y[1], 1.0), min_tasks / max(y[0], 1e-9)) * margin)
 
 
 def prompt_key(t: dict) -> str:
@@ -330,7 +337,8 @@ def main(argv=None) -> int:
     cal_code = code_units(Path(a.calibration_code_export), n_cal_code, taken, "calibration")
     block |= {prompt_key(t) for t in cal_code}
     # the state evaluation's queues
-    need = {t["subtype"]: max(units_needed(SE_POSITIONS, y[(t["subtype"], m)], SE_MARGIN) for m in MODES) for t in ts}
+    need = {t["subtype"]: max(units_needed(SE_POSITIONS, y[(t["subtype"], m)], SE_MARGIN, SE_MIN_TASKS) for m in MODES)
+            for t in ts}
     fluid, short = fluid_units({s: n for s, n in need.items() if "@" in s}, taken)
     rows = list(fluid)
     #: past the last row order_v2 holds (every earlier row is a training task or was refused from one)
@@ -383,6 +391,11 @@ def main(argv=None) -> int:
              "types": {"path": str(TYPES.relative_to(REPO)), "sha256": A.sha256_file(TYPES)},
              "state_evaluation": {"path": str(SE_OUT.relative_to(REPO)), "sha256": A.sha256_file(SE_OUT), "units": len(se_out),
                                   "queue_by_type": dict(pos), "positions_per_type_and_mode": SE_POSITIONS,
+                                  "min_tasks_per_type_and_mode": SE_MIN_TASKS, "queue_margin": SE_MARGIN,
+                                  "_rebuilt": ("2026-11-01, before any generation: the maintainer's minimum of 5 "
+                                               "independent tasks per (type, mode) and a reserve (queues at 2x the "
+                                               "expected need, taken in order only until each quota is met); the "
+                                               "first build (1.4x, no minimum, 1,722 prompts) was never generated"),
                                   "planned_units": need, "fluid_shortfalls": short, "lineage": lineage(se_out)},
              "calibration_code": {"path": str(CAL_CODE_OUT.relative_to(REPO)), "sha256": A.sha256_file(CAL_CODE_OUT),
                                   "units": len(cal_code), "lineage": lineage(cal_code)},

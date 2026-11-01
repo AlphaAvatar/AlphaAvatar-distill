@@ -1019,7 +1019,8 @@
    "research_a": 80.02,
    "project": 81.68,
    "provider_balance": 79.23,
-   "provider_account_spend_limit": 80.0
+   "provider_hourly_spend_limit": 80.0,
+   "_provider_hourly_spend_limit": "per hour (provider docs), not cumulative: no constraint on a $1.11/h pod (corrected 2026-11-01)"
   },
   "by_scenario_with_reserve": {
    "lower": {

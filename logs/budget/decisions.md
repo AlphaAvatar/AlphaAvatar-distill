@@ -15063,3 +15063,31 @@ on a paid pod.
   deadline; staged authorization phase by phase keeps the bound. These are requests, not changes: no cap is
   raised.
 - **Stopped at the paid boundary.** No pod; only `am5m373kuq`. No cap raised, no A100.
+
+## 2026-11-01 (UTC) — Research A v2: execute A1 first (maintainer); the A1 phase's grant, inputs and drivers at $0
+
+- **Decision (maintainer, 'Research A v2: Execute A1 First').** Complete A1 end to end -- the hybrid D4 full search's
+  inputs, the search, A1's two seeds trained and formally evaluated -- with the 3 x 2 matrix unchanged; A2 and C1 are
+  not trained or evaluated and consume no budget. A1's new spend has a hard cap of $77.00 (phase caps: inputs $2.65,
+  search $41.41, 350 GB storage for 14 days $13.34, each seed $7.05), inside Research A's $142.19 and the project's $868,
+  neither raised; no A100; stop on any protocol change, quota shortfall, deadline overrun, lineage/hash gate failure,
+  cap or provider limit. Research B pending; no merge.
+- **Grant amended** (`approvals/teacher_modes_token_matched_grant.json`): sessions ceiling $79.5289 (the supplement's
+  $15.8689 + $63.66), per-kind caps inputs $2.65 / search $41.41 / train_a1 $14.10 (enforced at issue; the
+  supplement closed at 0), the new volume's $13.34 reserve outside the session envelope, so all new spend <= $77.00.
+- **Corrected:** the provider's `spendLimit` $80 is per HOUR (provider docs), not a cumulative cap; the 2026-11-01
+  review report and budget_v2 had read it as cumulative. The cumulative provider constraint is the balance ($79.22).
+- **State evaluation re-queued before any generation** (the maintainer's minimum of 5 independent tasks per (type,
+  mode), registered in `build_state_eval_hybrid.SE_MIN_TASKS` and `inputs_protocol.json`): queues at 2x the expected
+  need (2,459 prompts; 1,716 of the first build's 1,722 unchanged in place), code prompts re-exported at the same seed
+  bases with reasoning-core 0.5.0 (supersets of the first exports), the isolation proof regenerated (R1-R4, R7, R9 pass;
+  0 shared prompt keys, ids or contents with calibration). Cost unchanged: the pod takes each queue in order only until
+  its quota and minimum are met.
+- **Calibration top-up** (`tasks/calibration_topup_v1.jsonl`, `audit/calibration_topup.json`): 22 string_induction
+  units (refill + reserve, D4's order) and the 14 code prompts in both modes. rag_evidence H-N was not short: its two
+  refill units were the ones the supplement's isolation check had removed (R2); passed over, the existing records reach
+  its quota. Calibration quotas unchanged; cells under 5 tasks are reported THIN.
+- **Drivers at $0:** `inputs_session.py` (kind `inputs`), `freeze_state_eval.py`, `full_search.py` (kind `search`);
+  tests with a fake teacher.
+- **Blocked on the provider:** L40S secure stock is currently only in US-MO-1, which has no network storage; the phase
+  needs a datacenter with both (EU-NL-1, US-TX-3, US-IL-1, US-NC-1). Nothing is created until one has both.

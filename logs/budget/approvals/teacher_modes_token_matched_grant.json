@@ -4,13 +4,16 @@
  "study": "A-TM",
  "proposed_utc": "2026-10-31",
  "granted_by": "maintainer",
- "decision": "Maintainer 2026-10-31 'Research A Immediate STOP and Token-Matched Data Completion': 「本次指令允许在现有 Research A 和项目累计硬上限内开展补数，但旧的冻结科学身份不能被当成新版授权使用。必须先完成合法的设计变更、预算核算及新的适用授权，所有既有实际支出必须计入累计账本，不得重置额度。」 and 2026-10-31 'Research A STOP、Token-Matched 数据补齐及 D4 Full Search 方案审查': 「可以在适用的合法授权范围内继续补充 Teacher 数据；如果旧冻结授权不能覆盖新设计，必须先处理新的授权身份，不能直接沿用旧的科学执行权限。不得自动提高预算或改用 A100。」",
- "ceiling_usd": 95.8883,
- "_ceiling": "Research A's cumulative $142.19 minus everything Research A v1 spent ($42.8017 in six sessions' closeouts, $3.50 storage): the phase cap is not reset, raised or duplicated",
- "per_session_hard_cap_usd": 63.76,
- "_per_session": "the v1 teacher envelope's per-session cap, unchanged",
+ "decision": "Maintainer 2026-10-31 'Research A Immediate STOP and Token-Matched Data Completion': 「本次指令允许在现有 Research A 和项目累计硬上限内开展补数，但旧的冻结科学身份不能被当成新版授权使用。必须先完成合法的设计变更、预算核算及新的适用授权，所有既有实际支出必须计入累计账本，不得重置额度。」 and 2026-10-31 'Research A STOP、Token-Matched 数据补齐及 D4 Full Search 方案审查': 「可以在适用的合法授权范围内继续补充 Teacher 数据；如果旧冻结授权不能覆盖新设计，必须先处理新的授权身份，不能直接沿用旧的科学执行权限。不得自动提高预算或改用 A100。」 || AMENDED by the maintainer's 2026-11-01 'Research A v2: Execute A1 First': 「现在优先完成 A1：Hybrid Teacher Thinking Mode Distillation 的完整实验，包括新 Full Search 初始化、两个 Seed 的 Recovery Training 和正式评估。」「A1 本次新增费用的总硬上限建议为 $77.00，包含工程波动以及全部本次新增的持续性资源费用，不得超过剩余 Research A、项目和 Provider 的有效上限。」「不提高原有 Research A 累计 $142.19、项目累计 $868 上限，不自动更改 Provider 的消费限制。」「不允许创建 A100 Pod。」",
+ "ceiling_usd": 79.5289,
+ "_ceiling": "sessions only: the supplement's $15.8689 (closed) + $63.66 for the A1 phase's sessions; the A1 phase's $77.00 hard cap = $63.66 sessions + $13.34 for the new 350 GB volume (14 days at the bills' +17%), so all new spend stays <= $77.00 and Research A's cumulative $142.19 is not exceeded ($62.17 spent before the phase)",
+ "per_session_hard_cap_usd": 41.41,
+ "_per_session": "the largest phase cap (the full search's deadline cost); each kind's own cap is session_hard_caps_usd[kind], enforced at issue",
  "session_hard_caps_usd": {
-  "supplement": 63.76
+  "supplement": 0.0,
+  "inputs": 2.65,
+  "search": 41.41,
+  "train_a1": 14.1
  },
  "project_cumulative_cap_usd": 868.0,
  "gpus": {
@@ -20,21 +23,73 @@
  "_gpus": "the L40S only, at most one GPU on one pod; no A100",
  "engineering_reserve_usd": 10.0,
  "network_volume": {
-  "id": "am5m373kuq",
-  "datacenter": "EUR-IS-2",
-  "size_gb_now": 55,
-  "expansion": "none: the supplement's shards (about 1 GB) fit"
+  "am5m373kuq": {
+   "datacenter": "EUR-IS-2",
+   "size_gb": 55,
+   "role": "historical archive; its storage is booked in the cumulative ledger, outside the $77"
+  },
+  "a1_phase": {
+   "size_gb": 350,
+   "datacenter": "EU-NL-1 or US-TX-3 (storage support and L40S stock confirmed at creation)",
+   "reserve_usd": 13.34,
+   "role": "the full search's states and journal (prune_weights false), the inputs' shards, A1's checkpoints; lifecycle decided by the maintainer after the evidence audit"
+  }
  },
- "scope": "the supplementary teacher generation of Research A v2 (configs/stages/stage-2/teacher_modes/token_matched_design.json, its preregistration and supplement protocol, order_v2) through scripts/stages/stage-2/teacher_modes/token_matched_phase.py --kind supplement; the dev box's $0 admission after it",
+ "scope": "the supplementary teacher generation of Research A v2 (configs/stages/stage-2/teacher_modes/token_matched_design.json, its preregistration and supplement protocol, order_v2) through scripts/stages/stage-2/teacher_modes/token_matched_phase.py --kind supplement; the dev box's $0 admission after it; AMENDED 2026-11-01: the A1 phase -- kinds inputs, search, train_a1 through scripts/stages/stage-2/teacher_modes/token_matched_phase.py, and the dev box's $0 work between them",
  "retries": "ordinary pre-generation engineering failures are repaired and rerun as new runs with new one-use artifacts inside this one cumulative envelope (P12.1); sealed records are never regenerated; a deterministic failure is never retried unchanged",
  "application": {
   "path": "logs/budget/applications/research_a_tm_2026-10-31/proposal.json"
  },
  "never": [
-  "a D4 full search, a calibration generation, an initialization, a student recovery or a student evaluation (proposals awaiting the maintainer's review)",
-  "an A100 or any card other than the L40S; a budget increase",
+  "A2's or C1's training or evaluation; any arm but A1",
+  "an A100 or any card other than the L40S; a budget or limit increase",
   "Research A v1's frozen identity or grant as authority for any of this",
   "Research B"
  ],
- "authorizes": "one-use supplement artifacts inside the ceiling, each priced at the live rate"
+ "authorizes": "one-use artifacts of the kinds above inside the ceiling, each priced at the live rate and capped by its kind",
+ "_session_hard_caps": "supplement 0: done, closed for new work. inputs: the calibration top-up and the state evaluation's generation ($2.65). search: the hybrid D4 full search ($41.41). train_a1: A1's two seeds trained and evaluated in turn ($7.05 each). A retry of a kind draws on the same envelope; the phase total never exceeds the ceiling.",
+ "phase_a1": {
+  "decided_utc": "2026-11-01",
+  "hard_cap_usd": 77.0,
+  "phase_caps_usd": {
+   "inputs": 2.65,
+   "search": 41.41,
+   "storage_350gb_14d": 13.34,
+   "a1_seed_20260726": 7.05,
+   "a1_seed_20260801": 7.05
+  },
+  "sum_of_phase_caps_usd": 71.5,
+  "order": [
+   "inputs (Phase A)",
+   "search (Phase B)",
+   "train_a1 seed 20260726 then 20260801 (Phases C and D)"
+  ],
+  "stop_if": [
+   "the scientific protocol, calibration distribution, state evaluation or training objective would have to change",
+   "the data types cannot meet the frozen quotas",
+   "the full search cannot finish inside its deadline",
+   "a GPU change or out of memory",
+   "any lineage, tokenizer, RoPE, checkpoint, resume or data-hash gate fails",
+   "a phase or the global cap is reached",
+   "the provider's balance or limits block the next legal step"
+  ],
+  "never": [
+   "A2 or C1 training or evaluation",
+   "an A100",
+   "Research B",
+   "a merge to main",
+   "raising a cap or the provider's limits"
+  ]
+ },
+ "amendments": [
+  {
+   "utc": "2026-11-01",
+   "by": "maintainer decision 'Execute A1 First'",
+   "previous_ceiling_usd": 95.8883,
+   "previous_scope": "the supplementary teacher generation of Research A v2 (configs/stages/stage-2/teacher_modes/token_matched_design.json, its preregistration and supplement protocol, order_v2) through scripts/stages/stage-2/teacher_modes/token_matched_phase.py --kind supplement; the dev box's $0 admission after it",
+   "previous_session_hard_caps_usd": {
+    "supplement": 63.76
+   }
+  }
+ ]
 }

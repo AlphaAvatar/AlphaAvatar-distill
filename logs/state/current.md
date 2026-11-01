@@ -25,7 +25,7 @@ entries). Branch `research/teacher-modes-and-projected-residual`; `main` stays a
   and xLAM both restricted, for the maintainer's ruling); provider price, stock and volumes
   (`audit/provider_resources_20261101.json`).
 - **Budget** (`plans/budget_v2.json`): expected $82.74, deadline-bounded $132.18; with a $10 reserve $92.74 /
-  $142.18, against Research A $80.02, project $81.68, provider $79.23 (account spend limit $80).
+  $142.18, against Research A $80.02, project $81.68, provider balance $79.23 (the $80 spend limit is per hour).
 - **Owed by the maintainer:** funding (minimum or conservative, TOKEN_MATCHED.md "Budget"); C1's restricted
   sources; a 350 GB volume or 300 GB with post-audit retirement; whether thin cells need a minimum task count;
   authorization of the inputs session, then the search, then the trainings.

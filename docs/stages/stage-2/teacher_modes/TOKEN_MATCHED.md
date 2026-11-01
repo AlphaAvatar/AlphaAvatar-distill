@@ -31,7 +31,7 @@ Decided by the maintainer on 2026-10-31, in four briefs and one answer in sessio
 | [`audit/code_stability.json`](../../../../logs/stages/stage-2/teacher_modes/audit/code_stability.json) | every code verdict under hash seeds 0–7 |
 | [`audit/full_search_data_audit.json`](../../../../logs/stages/stage-2/teacher_modes/audit/full_search_data_audit.json) | B's data per type and mode; the training sources' axes |
 | [`audit/c1_tool_calling_sources.json`](../../../../logs/stages/stage-2/teacher_modes/audit/c1_tool_calling_sources.json) | C1's tool-calling sources and their terms |
-| [`audit/provider_resources_20261101.json`](../../../../logs/stages/stage-2/teacher_modes/audit/provider_resources_20261101.json) | L40S price and stock, volume price, balance, spend limit |
+| [`audit/provider_resources_20261101.json`](../../../../logs/stages/stage-2/teacher_modes/audit/provider_resources_20261101.json) | L40S price and stock, volume price, balance |
 | [`plans/budget_v2.json`](../../../../logs/stages/stage-2/teacher_modes/plans/budget_v2.json) | the budget: lower, expected, deadline |
 
 ## A. Data (admitted 2026-11-01; re-admitted the same day after the review removed one MBPP example)
@@ -153,7 +153,7 @@ again):
 **Actual cost.** The supplement's two sessions: $15.8689 ($5.7873 + $10.0816), inside its original $23.00
 (`a_supplement_20261031_091618` created no resource). Study A-TM: $15.8689 of $95.8883 spent, $80.0194 left.
 Project: $786.3228 of $868 committed, $81.6772 left. The provider account's balance is $79.23 (2026-11-01 10:21 UTC),
-and the account has its own spend limit of $80.
+(The account's $80 spend limit is per hour, not cumulative.)
 
 ## B. The hybrid D4 full search (proposed, not run)
 
@@ -541,12 +541,12 @@ What changed against the proposal ($86.38 / $92.18):
 - **Storage.** It needs 350 GB, or 300 GB with non-Top-1 states retired after the audit.
 
 **Against what is left.** Remaining: Research A $80.02 (of $142.19), the project $81.68 (of $868), the provider
-balance $79.23. The provider account also has its own spend limit of $80.
+balance $79.23. (The provider's $80 spend limit is per hour, not a cumulative cap: corrected 2026-11-01.)
 
 | need | Research A cap | project cap | provider |
 | --- | ---: | ---: | --- |
-| **minimum**: expected + $10 reserve, $92.74 | $154.91 (+$12.72) | $879.06 (+$11.06) | balance +$13.51; spend limit ≥ $92.74 |
-| **conservative**: every phase at its deadline + $10, $142.18 | $204.35 (+$62.16) | $928.50 (+$60.50) | balance +$62.95; spend limit ≥ $142.18 |
+| **minimum**: expected + $10 reserve, $92.74 | $154.91 (+$12.72) | $879.06 (+$11.06) | balance +$13.51 |
+| **conservative**: every phase at its deadline + $10, $142.18 | $204.35 (+$62.16) | $928.50 (+$60.50) | balance +$62.95 |
 | the maintainer's suggested figures | $165 (left $102.83) | $890 (left $103.68) | +$25–30 (about $104–109) |
 
 - The suggested figures cover the minimum with about $10 to spare. They do not cover every phase running to its

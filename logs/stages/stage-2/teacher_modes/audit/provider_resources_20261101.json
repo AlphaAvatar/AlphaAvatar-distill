@@ -11,7 +11,7 @@
     "currentSpendPerHr_usd": 0.005,
     "spendLimit_usd": 80
    },
-   "note": "currentSpendPerHr 0.005 = the 55 GB volume (55 x 0.07 / 720 = 0.00535); spendLimit 80 is an ACCOUNT spend limit at the provider, below every proposed full-experiment total"
+   "note": "currentSpendPerHr 0.005 = the 55 GB volume (55 x 0.07 / 720 = 0.00535). CORRECTED 2026-11-01: spendLimit 80 is the provider's HOURLY spend limit ('By default, Runpod accounts have a spend limit of $80 per hour across all resources', docs.runpod.io/get-started/manage-accounts), not a cumulative cap; a $1.11/h pod is far below it. The cumulative constraint at the provider is the balance."
   },
   "pods": {
    "command": "runpodctl pod list --all",
@@ -243,10 +243,16 @@
   "risks": [
    "L40S stock is 'Low' everywhere it is offered and the API gives no GPU count: availability can vanish between the audit and the create (a no-cost create window with retries, as the runners already do)",
    "the provider's 'Low' and the CLI's empty stockStatus disagree for four datacenters; the create call is the only definitive test",
-   "the account balance is 79.23 USD and the provider spend limit is 80 USD: below any full-experiment total, independent of the project caps",
+   "the account balance is 79.23 USD: the cumulative constraint at the provider (the $80 spend limit is per hour, see facts.account)",
    "volume billing rows have exceeded size x 24 h per day (+17%)",
    "a network volume serves one running pod at a time"
   ]
  },
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "corrections": [
+  {
+   "utc": "2026-11-01",
+   "what": "spendLimit_usd 80 read as a cumulative account cap; it is $80 per hour (provider docs)"
+  }
+ ]
 }

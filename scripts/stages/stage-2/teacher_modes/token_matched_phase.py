@@ -18,9 +18,15 @@ complete the data inside Research A's and the project's existing caps: its ceili
 everything v1 spent (sessions and storage), so the cumulative phase cap is unchanged.
 
 KIND ``supplement`` (one L40S, on am5m373kuq): `supplement_session.py` -- order_v2's rounds in both modes until
-each (mode, cell) need is met. Sealed shards are pulled on every poll, like the teacher session's; the volume
-keeps everything. There is no other kind: the D4 full search, the initialization, recovery and evaluation are
-proposals awaiting the maintainer's review, and this module cannot issue them.
+each (mode, cell) need is met. Done; the grant closes it for new work (cap 0).
+
+THE A1 PHASE (maintainer 2026-11-01, 'Research A v2: Execute A1 First'; the grant's ``phase_a1``), on the phase's own
+350 GB network volume, one L40S, in order:
+* ``inputs`` -- `inputs_session.py`: the calibration top-up and the state evaluation's native generation, both modes;
+* ``search`` -- the hybrid D4 full search (its driver, below);
+* ``train_a1`` -- A1's two seeds, trained and evaluated in turn.
+Each kind's hard cap is the grant's ``session_hard_caps_usd[kind]``, enforced at issue; all of them draw on one
+cumulative envelope. Sealed shards are pulled on every poll; the volume keeps everything.
 """
 from __future__ import annotations
 
@@ -55,11 +61,13 @@ STUDY = SE.Study(
                     "data/stages/stage-2/teacher_modes/tasks/calibration_v2.jsonl",
                     "logs/stages/stage-2/teacher_modes/audit/calibration_coverage.json",
                     "configs/stages/stage-2/teacher_modes/token_matched_sources.json", P1.PROTOCOL,
-                    "configs/stages/stage-2/teacher_modes/teacher_identity.json"),
+                    "configs/stages/stage-2/teacher_modes/teacher_identity.json",
+                    "configs/stages/stage-2/teacher_modes/inputs_protocol.json",
+                    "configs/stages/stage-2/teacher_modes/full_search_types.json"),
     scripts=tuple(f"scripts/stages/stage-2/teacher_modes/{n}.py" for n in
                   ("token_matched_phase", "phase", "supplement_session", "teacher_session", "admission",
                    "supply_audit", "build_supplement_tasks", "build_tasks", "build_calibration_supplement",
-                   "hybrid_calibration")) + (
+                   "hybrid_calibration", "inputs_session")) + (
         "scripts/shared/study_engineering.py", "scripts/shared/project_position.py", "scripts/shared/eval_sets.py",
         "scripts/shared/pod/teacher_cache.py", "scripts/stages/stage-0/calibration_volume/run_battery.py",
         "scripts/stages/stage-0/calibration_volume/score_battery.py",
@@ -73,7 +81,8 @@ STUDY = SE.Study(
         "scripts/shared/pod/autoinit_preflight_setup.sh", "scripts/shared/pod/collect_artifacts.py"),
     wire_schema="aadistill.stage2.teacher_modes.tm_authorization/v1",
     claims=frozenset({"formal", "teacher_generation"}),
-    kinds=("supplement",))
+    kinds=("supplement", "inputs", "search", "train_a1"),
+    kind_claims=(("search", frozenset({"formal"})), ("train_a1", frozenset({"formal", "training", "evaluation"}))))
 
 
 class TMAuthorization(SE.EngineeringAuthorization):
@@ -81,14 +90,40 @@ class TMAuthorization(SE.EngineeringAuthorization):
     STUDY = STUDY
 
 
+#: what each kind's artifact binds, beyond the study identity (the records its driver reads, by sha256)
+KIND_RECORDS = {
+    "supplement": (),
+    "inputs": ("configs/stages/stage-2/teacher_modes/inputs_protocol.json",),
+    "search": (),
+    "train_a1": (),
+}
+
+
 def kind_conditions(kind: str, root: Path = REPO_ROOT) -> dict:
-    """The supplement runs the generation path the committed L40S check admitted (the same engine, card and
-    protocol as the v1 teacher session); its artifact binds that record."""
+    """Generation runs the path the committed L40S check admitted (the same engine, card and protocol as the v1
+    teacher session); every kind's artifact binds that record and its own `KIND_RECORDS`."""
     from stages.teacher_modes import l40s_check as LC
-    bad = LC.gate(LC.load_config(Path(root) / P1.CHECK_CONFIG)["gates"]["teacher"], root)
-    if bad:
-        raise SE.AuthorizationError("the L40S check record does not admit generation: " + "; ".join(bad))
-    return {"l40s_check_record_sha256": P1._sha(P1.CHECK_RECORD, root)}
+    gate = "teacher" if kind in ("supplement", "inputs") else None
+    if gate:
+        bad = LC.gate(LC.load_config(Path(root) / P1.CHECK_CONFIG)["gates"][gate], root)
+        if bad:
+            raise SE.AuthorizationError("the L40S check record does not admit generation: " + "; ".join(bad))
+    out = {"l40s_check_record_sha256": P1._sha(P1.CHECK_RECORD, root)}
+    for rel in KIND_RECORDS.get(kind, ()):
+        out[f"record:{rel}"] = P1._sha(rel, root)
+    return out
+
+
+def kind_cap_problems(kind: str, hard_cap_usd: float, root: Path = REPO_ROOT) -> list[str]:
+    """The grant's cap for this kind (``session_hard_caps_usd``): a kind without one, or a cap above it, refuses."""
+    import json
+    g = json.loads((Path(root) / STUDY.grant).read_text())
+    caps = g.get("session_hard_caps_usd") or {}
+    if kind not in caps:
+        return [f"the grant names no hard cap for kind {kind!r}"]
+    if hard_cap_usd > float(caps[kind]) + 1e-9:
+        return [f"${hard_cap_usd} exceeds the grant's ${caps[kind]} for kind {kind!r}"]
+    return []
 
 
 def require_on_pod(path: Path, kind: str, root: Path = REPO_ROOT) -> dict:
@@ -111,6 +146,13 @@ V1_SMALL = tuple(f"units/H-T-C-s20260801/{n}" for n in ("checkpoint.descriptor.j
 
 #: this study's stage labels (supplement_session.py: s<round><t|n>_<mode>_pass<k>_...)
 OWN_SHARD = re.compile(r"^s\d\d[tn]_")
+#: per kind: (the generation directory under the durable root, its stage labels, the session record)
+SHARDS = {"supplement": ("generation", OWN_SHARD, "supplement_session.json"),
+          "inputs": ("inputs_generation", re.compile(r"^(c00|e\d\d)[tn]_"), "inputs_session.json")}
+
+
+def _kind(ctx) -> str:
+    return (ctx.auth.stage_conditions or {}).get("kind", "supplement") if getattr(ctx, "auth", None) else "supplement"
 
 
 def secure(ctx) -> None:
@@ -119,28 +161,30 @@ def secure(ctx) -> None:
         if ctx.target is None:
             return
         root, st = P1.durable(ctx.args), SE.store(ctx)
+        kind = _kind(ctx)
+        gdir, own, session_record = SHARDS[kind]
         got = ctx.evidence.setdefault("secured", {})
-        lines = P1._listing(ctx, f"cd {root}/generation 2>/dev/null && for f in *.done; do [ -e \"$f\" ] && "
+        lines = P1._listing(ctx, f"cd {root}/{gdir} 2>/dev/null && for f in *.done; do [ -e \"$f\" ] && "
                                  f"echo \"$f $(cat \"$f\")\"; done; ls *.complete 2>/dev/null || true")
         if lines is None:
-            ctx.evidence.setdefault("listing_unknown", []).append("generation")
+            ctx.evidence.setdefault("listing_unknown", []).append(gdir)
             return
         for line in lines:
             parts = line.split()
-            if not parts or not OWN_SHARD.match(parts[0]):
+            if not parts or not own.match(parts[0]):
                 continue                    #: v1's shards are on the dev box already: artifacts follow consumers
             if len(parts) == 2 and parts[0].endswith(".done") and len(parts[1]) == 64:
                 name = parts[0][:-5] + ".jsonl"
                 if got.get(name, {}).get("ok"):
                     continue
-                ok = P1._pull(ctx, f"{root}/generation/{name}", st / "generation" / name, parts[1])
+                ok = P1._pull(ctx, f"{root}/{gdir}/{name}", st / gdir / name, parts[1])
                 if ok:
-                    (st / "generation" / parts[0]).write_text(parts[1] + "\n")
+                    (st / gdir / parts[0]).write_text(parts[1] + "\n")
                 got[name] = {"ok": ok, "sha256": parts[1]}
             elif len(parts) == 1 and parts[0].endswith(".complete"):
-                P1._pull(ctx, f"{root}/generation/{parts[0]}", st / "generation" / parts[0], None)
-        P1._pull(ctx, f"{root}/supplement_session.json", st / "supplement_session.json", None)
-        if not ctx.evidence.get("v1_small"):
+                P1._pull(ctx, f"{root}/{gdir}/{parts[0]}", st / gdir / parts[0], None)
+        P1._pull(ctx, f"{root}/{session_record}", st / session_record, None)
+        if kind == "supplement" and not ctx.evidence.get("v1_small"):
             ctx.evidence["v1_small"] = {f: P1._pull(ctx, f"{root}/{f}", st / "v1_small" / f, None) for f in V1_SMALL}
         SE._scp(ctx, f"/workspace/{SESSION_KIND}.status", st / "driver.status", limit_s=120)
     except Exception as exc:  # noqa: BLE001
@@ -154,9 +198,10 @@ def runner_logs(ctx) -> None:
         if ctx.target is None:
             return
         root, st = P1.durable(ctx.args), SE.store(ctx)
-        lines = P1._listing(ctx, f"cd {root}/generation 2>/dev/null && ls *.log 2>/dev/null || true") or []
-        ctx.evidence["runner_logs"] = {n: P1._pull(ctx, f"{root}/generation/{n}", st / "generation" / n, None)
-                                       for n in (l.strip() for l in lines) if OWN_SHARD.match(n)}
+        gdir, own, _ = SHARDS[_kind(ctx)]
+        lines = P1._listing(ctx, f"cd {root}/{gdir} 2>/dev/null && ls *.log 2>/dev/null || true") or []
+        ctx.evidence["runner_logs"] = {n: P1._pull(ctx, f"{root}/{gdir}/{n}", st / gdir / n, None)
+                                       for n in (l.strip() for l in lines) if own.match(n)}
     except Exception as exc:  # noqa: BLE001
         ctx.evidence.setdefault("secure_errors", []).append(repr(exc)[:300])
 
@@ -188,26 +233,44 @@ def supplement_command(ctx, plan) -> str:
             f"--authorization {auth} --durable-root {P1.durable(a)} --status {status}" + P1._tail(status))
 
 
+def inputs_command(ctx, plan) -> str:
+    a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
+    auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
+    return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/inputs_session.py "
+            f"--authorization {auth} --durable-root {P1.durable(a)} --status {status}" + P1._tail(status))
+
+
+#: per kind: (driver, command, local assets beyond the battery, description)
+DRIVERS = {
+    "supplement": ("scripts/stages/stage-2/teacher_modes/supplement_session.py", supplement_command, ("order",),
+                   "Research A v2: the supplementary teacher generation (order_v2, both modes, token quotas)"),
+    "inputs": ("scripts/stages/stage-2/teacher_modes/inputs_session.py", inputs_command, (),
+               "Research A v2, A1 phase A: the calibration top-up and the state evaluation's native generation"),
+}
+
+
 def launch_spec(kind: str = "supplement", minutes: float = 0.0) -> SE.Launch:
     import json
     from aadistill.infrastructure.session import LocalAsset
+    if kind not in DRIVERS:
+        raise SE.AuthorizationError(f"kind {kind!r} has no session driver yet")
+    driver, command, extra, description = DRIVERS[kind]
     t = json.loads((REPO_ROOT / P1.PROTOCOL).read_text())["teacher"]
     battery = LocalAsset(repo_path="artifacts/stages/stage-3/eval/battery_v2", dest_name="battery_v2",
                          install_to="artifacts/stages/stage-3/eval")         #: the v1 teacher kind's assets, unchanged
     order = LocalAsset(repo_path=ORDER, dest_name=Path(ORDER).name, install_to=str(Path(ORDER).parent))
+    assets = (battery,) + tuple({"order": order}[x] for x in extra)
     return SE.Launch(
         session_kind=SESSION_KIND, authorization=TMAuthorization, teacher_model=t["model"],
-        teacher_revision=t["revision"], kind=kind, local_assets=(battery, order), disk_gb=150,
+        teacher_revision=t["revision"], kind=kind, local_assets=assets, disk_gb=150,
         contingency_fraction=0.25,
         setup_env={"PHASE_KIND": kind},
         extra_prechecks=(P1.the_volume_is_the_planned_one, the_kind_records_are_the_bound_ones),
         on_poll=secure, products_secured=products_secured,
         artifact_spec="configs/stages/stage-2/teacher_modes/engineering_artifacts.json",
         teardown_note=("delete the pod, verify from the provider that it is gone, STOP; the network volume is KEPT: it "
-                       "holds every shard, v1's checkpoints and the historical ones"),
-        driver="scripts/stages/stage-2/teacher_modes/supplement_session.py", validation_minutes=minutes,
-        setup_minutes=20.0, command=supplement_command,
-        description="Research A v2: the supplementary teacher generation (order_v2, both modes, token quotas)")
+                       "holds every shard and the phase's states"),
+        driver=driver, validation_minutes=minutes, setup_minutes=20.0, command=command, description=description)
 
 
 def main(argv=None) -> int:
@@ -234,6 +297,10 @@ def main(argv=None) -> int:
             ap.add_argument("--out", default=None)
             ap.add_argument("--note", default="")
             x = ap.parse_args(rest[1:])
+            bad = kind_cap_problems(kind, x.hard_cap_usd)
+            if bad:
+                print(f"REFUSED at $0: {bad}")
+                return 11
             try:
                 path = SE.issue(STUDY, x.run_id, expected_usd=x.expected_usd, hard_cap_usd=x.hard_cap_usd,
                                 dry_run=x.dry_run, out=Path(x.out) if x.out else None, note=x.note, kind=kind,
