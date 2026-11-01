@@ -14995,3 +14995,71 @@ on a paid pod.
   Research A and $81.6772 in the project. The gap ($6.36-$12.16) is reported; no cap is raised and no A100 is used.
 - **Stopped here.** Nothing searches, initializes, trains or evaluates before the maintainer's independent review;
   Research B is not started.
+
+## 2026-11-01 (UTC) — Research A v2 after the maintainer's independent review: the $0 repairs, audits and re-costing; stopped at the paid boundary
+
+- **Context.** The maintainer reviewed d2c3e1fd (TOKEN_MATCHED.md A–C, the type table, the profiles, the training
+  plan, the budget). Accepted in principle: A1/A2's data; the matrix A1, A2, C1 on two seeds, three epochs, 8,192
+  context, Top-200+tail KD + CE; the 13 types / 5 domains in both sets and modes, interactive adaptation excluded,
+  reasoning_core / reasoning_gym training-only, no sixth domain; one L40S at micro-batch 1, D4's search otherwise,
+  a ~300 GB network volume over `prune_weights`. Authorized now: only $0 repairs, audits, configuration, regression
+  tests and the budget's re-estimate. Not authorized: the calibration top-up, the state evaluation's generation, the
+  full search, the six trainings; Research B stays pending.
+- **The MBPP false pass removed, data re-admitted** (`data/token_matched_admission.json`, `ADMITTED`). `d934be3a…`
+  (171 supervised tokens; seeds 0/1/5/6 pass, 2/3/4/7 fail) is refused by the admission's new code-stability recheck
+  (`code_stability.recheck`, before the isolation recheck: MBPP under hash seeds 0-7 and 0 twice, else the next
+  candidate; program golds under the same seeds, else the task in both modes). By the registered rule the MBPP cap
+  is the smaller mode's admitted supply, 38,431 -> 38,260, and the reasoning_core code quota +171; A2's reasoning_core
+  code cell was already above it, so the selection gave the last tokens to SQuAD (+72) and HotpotQA (+75). A2:
+  49,830 examples, 53,136 turns, 4,577 packed sequences, 5,923,646 supervised tokens (+0.011%, category 0.005
+  points), 6,866 optimizer steps; pack rebuilt (`a583763d…`, `506e42e9…`, `e75c1ddd…`), the superseded one kept
+  outside git. A1 byte-identical. No other verdict loosened; C1's pack untouched.
+- **Code-stability audit** (`audit/code_stability.json`): 862 MBPP candidates (663 pass at every seed, 198 fail at
+  every seed, 1 unstable: the one above); 1,029 training `controlled_code_execution` golds and the full search's 31
+  program golds stable; 1,028 `dynamic_programming` tasks hash nothing and are not executed. Core
+  `code_exec.run_asserts_across_seeds` (and a `hash_seed` argument whose default keeps every v4 verdict); tests in
+  core and `teacher_modes/tests/test_code_stability.py`.
+- **Mode-aware critical-token aggregation** (core, $0): a suite may declare `critical_groups` and each item its
+  group; `state.critical_token_kl` (and the objective's `critical_token`) is then the mean over groups of each
+  group's mean over its own classes (`group_balanced/v1`), recorded in the reduction semantics so the protocol id is
+  new; a class with no scored position in its group is refused; undeclared suites (`state_eval@v1`) keep their values
+  and ids. The hybrid binding requires one group per mode. Tests: `test_critical_token_groups.py` (the 60:40 flat
+  weighting is shown and refused), mutation-checked.
+- **Lineage / tokenizer gaps closed** (core `aadistill.training.lineage`, `train_stage3.py`, `training_plan.py`):
+  - every unit's config carries `tokenizer_sha256`; A1/A2's tokenizer source is the hybrid's pinned files staged by
+    sha256 (`artifacts/stages/stage-2/teacher_modes/tokenizers/qwen3_4b_1cfa9a72`), C1's the PCA directory; the
+    lineage binds the files (the two teachers' vocabularies hash alike);
+  - an unstated structural field is a refusal, and the gate reads the EFFECTIVE config (a config.json without its
+    RoPE base loads at 10,000) before and after loading; C1's effective RoPE base is 5,000,000;
+  - the initialization is bound by its search record (root id, shard-set hash reproducing D4's `6de20cc7…`,
+    checkpoint sha256), not the declared model id;
+  - a resume must carry the checkpoint's lineage stamp for this lineage and its verified initialization; staged
+    initialization bytes are re-hashed.
+  Tests for missing fields, wrong teacher, wrong RoPE, wrong tokenizer, wrong pack and resume mixing; the four new
+  clauses mutation-checked. C1's two units pass launch admission on the dev box with nothing pending; A1/A2's four
+  have no problems and wait only for the search's Top-1 (and the hybrid's shards, checked on the pod).
+  Disclosed: v1's units named Thinking-2507's tokenizer files (identical vocabulary, pre-tokenized packs).
+- **Full search** (`full_search_proposal.json`, revised): the micro-batch-1 numerical execution fingerprint
+  `24787ea9…` (micro-batch 3 reproduces `e627f461…`); the L40S validation owed inside the search session (all
+  operators at level 0, the evaluation under the new protocol id, the ranking, epsilon repeatability); completion
+  conditions for the calibration top-up and the state evaluation; storage on a network volume without
+  `prune_weights` — 350 GB, or 300 GB with non-Top-1 states retired after the evidence audit (maintainer); EU-NL-1 or
+  US-TX-3. The per type and mode audit (`audit/full_search_data_audit.json`): 10 short calibration cells
+  (string_induction and code in both modes, rag_evidence H-N; both profiles), thin H-T cells listed, state-evaluation
+  queues ≥ 1.36x their expected need; training sources mapped to axes (types stand for 66.3% of the fluid quota,
+  98.7% of the base-corpus quota).
+- **C1's tool-calling sources** (`audit/c1_tool_calling_sources.json`): glaive-function-calling-v2 (482,892
+  supervised tokens, Apache-2.0 tag, provenance undocumented: unproven) and xlam-function-calling-60k (9,695;
+  CC-BY-4.0, research only, DeepSeek-generated rows: conditional) are both restricted, for the maintainer's ruling.
+  C1 is not launched and the pack is not edited.
+- **Budget re-estimated** (`plans/budget_v2.json`, provider facts `audit/provider_resources_20261101.json`):
+  lower / expected / deadline $68.98 / $82.74 / $132.18 (inputs $1.13-2.65, search $22.59-41.41, volume
+  $2.10-13.34, six trainings $43.16-74.78); with a $10 reserve $92.74 (minimum) and $142.18 (conservative). The state
+  evaluation forwards about 1.0 M tokens (2.9 h over the search, not 0.9 h); trainings priced per arm from measured
+  L40S steps (C1 3.6 s, A2 5.66 s, not 6.7 s); per-unit deadlines A1 6.35 h, A2 17.91 h, C1 8.54 h. Left: Research A
+  $80.02, project $81.68, provider $79.23 with an $80 account spend limit. Minimum funding: Research A cap >= $154.91,
+  project >= $879.06, provider +$13.51 and the spend limit raised; conservative: $204.35, $928.50, +$62.95. The
+  maintainer's suggested $165 / $890 / +$25-30 covers the minimum with about $10 to spare, not every phase at its
+  deadline; staged authorization phase by phase keeps the bound. These are requests, not changes: no cap is
+  raised.
+- **Stopped at the paid boundary.** No pod; only `am5m373kuq`. No cap raised, no A100.

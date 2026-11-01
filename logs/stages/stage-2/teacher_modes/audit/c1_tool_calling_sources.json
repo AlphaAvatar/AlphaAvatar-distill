@@ -1,0 +1,155 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.c1_tool_calling_sources/v1",
+ "written_utc": "2026-11-01T10:24:00Z",
+ "question": "maintainer review 2026-11-01, section 7: are the tool-calling sources in C1's training pack (Thinking-2507's original D4-Augmented pack, E1 part) licensed for C1's use -- training a 596M student by distillation in a research repository, no release authorized?",
+ "pack": {
+  "path": "artifacts/stages/stage-2/reasoning_data/packs/D4A_merged_whole",
+  "files_sha256": {
+   "blocks.npz": "8b97b202e2c1f861fe5c99e3a247ce7fdd063c354b7668ddc1ba75fedb8043f3",
+   "audit.jsonl": "0fab85184e83b5b5ebf0454cb656d3752e80f48eeabc75a092a2a9906949080b",
+   "ladder.json": "dabd1405236fe4823d944d8215f6c2a5e8abf765115436578c6446c035e4e8f7"
+  },
+  "registered_in": "configs/stages/stage-2/reasoning_data/h1pa.json :: datasets (D4A_merged_whole); logs/stages/stage-2/teacher_modes/audit/c1_identity_audit.json :: pack (match true)",
+  "files_match_registered": true,
+  "e1_part": "sequences 0-1943 (E1's own pack artifacts/shared/instruments/ladder_uniform_probe, blocks 6f324cb0...), all 1,944 inside C1's rung of 2,468 sequences; e1_validation = the 16 validation sequences"
+ },
+ "lineage_of_the_rows": {
+  "corpus": {
+   "path": "artifacts/stages/stage-3/corpus_v2/manifest.json",
+   "sha256": "59ece2a5407e4177922c523da44835c46e1422c3c4df8878a601152098e290fa",
+   "tool_calling_sources": [
+    "glaive_fc_v2",
+    "xlam_fc_60k"
+   ],
+   "turn_expansion": "one example per assistant turn; context = the conversation prefix (the source's own earlier turns, tool schemas and function responses); only the newly generated teacher turn is supervised"
+  },
+  "source_manifests": {
+   "data/stages/stage-2/stage2_v1/stage2_offline_v1.manifest.json": "6cd8a970e28c265997a22bfd375f74b709d8417eb60a7a78576bffa118cd4eb4",
+   "data/stages/stage-2/stage2/stage2_offline_v0.manifest.json": "842612ddbd38e59cbbfc957c2e9ae847ed39449553e4380d875cf66c0aeaf477"
+  },
+  "row_ids": "stage2 ids are the upstream row index (build_stage2_v0.build_glaive / build_stage2_v1.build_xlam: enumerate(rows))"
+ },
+ "targets_teacher": {
+  "model": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+  "license": "Apache-2.0",
+  "note": "every supervised token is this teacher's generation; the upstream rows enter as prompt context only (user queries, tool schemas, the source's earlier assistant turns and function responses). The question is the PROMPT sources' terms: their rows are still training inputs of C1."
+ },
+ "method": "exact: per session of the pack's audit.jsonl with data_type tool_calling, grouped by the session-id prefix (glaive-/xlam-); supervised tokens = supervised_retained (no tool-calling turn is truncated, supervised_discarded 0); examples = distinct conversation ids before '#'; turns = sessions. The training sum 482,892 + 9,695 = 492,587 equals c1_identity_audit.json's figure.",
+ "sources": [
+  {
+   "source": "glaive_fc_v2",
+   "upstream_id": "glaiveai/glaive-function-calling-v2",
+   "revision": "e7f4b6456019f5d8bcb991ef0dd67d8ff23221ac",
+   "split": "train",
+   "training": {
+    "examples": 1421,
+    "turns": 1591,
+    "supervised_tokens": 482892,
+    "truncated_turns": 0
+   },
+   "validation": {
+    "examples": 13,
+    "turns": 13,
+    "supervised_tokens": 12624,
+    "truncated_turns": 0
+   },
+   "recorded_license": "Apache-2.0 (stage2_offline_v0/v1 manifests)",
+   "upstream_license": "apache-2.0 (dataset card metadata at the recorded revision; README sha256 39c78f1f56b86fcd159cadeb8feda8a9333db6ef5ca0ce6830731ac3c666838e)",
+   "upstream_terms_quote": "the card at the recorded revision is metadata only: 'license: apache-2.0' -- no description of how the rows were generated, by which models, or under which terms (the hub page today: README content is empty)",
+   "repo_marking": "configs/stages/stage-2/reasoning_data/sources.json :: tool_calling -- 'glaive: Apache-2.0, provenance undocumented', role evaluation_only, approved_for_h1 false; token_matched_design.json :: categories tool_calling -- 'no legal training source: ... glaive's provenance is undocumented'",
+   "verdict": "unproven",
+   "why": "the license tag is permissive and covers training use as such, but the rows are synthetic multi-turn conversations whose generator (model and its terms) is undocumented, so whether upstream model terms restrict training on them cannot be established; the repo itself classifies this source as having no legal training source for the v2 arms"
+  },
+  {
+   "source": "xlam_fc_60k",
+   "upstream_id": "Salesforce/xlam-function-calling-60k",
+   "revision": "26d14ebfe18b1f7b524bd39b404b50af5dc97866",
+   "split": "train",
+   "training": {
+    "examples": 19,
+    "turns": 19,
+    "supervised_tokens": 9695,
+    "truncated_turns": 0
+   },
+   "validation": {
+    "examples": 0,
+    "turns": 0,
+    "supervised_tokens": 0,
+    "truncated_turns": 0
+   },
+   "upstream_rows": [
+    0,
+    7,
+    10,
+    16,
+    22,
+    25,
+    29,
+    47,
+    50,
+    66,
+    69,
+    72,
+    79,
+    82,
+    85,
+    91,
+    110,
+    113,
+    116
+   ],
+   "recorded_license": "CC-BY-4.0 (auto-gated, accepted on the AlphaAvatar HF account) (stage2_offline_v1 manifest)",
+   "upstream_license": "cc-by-4.0, gated: 'Acknowledge to follow corresponding license and cite APIGen to access the repository' (card at the recorded revision; README sha256 8564c08b4555289ef4bb488f876ea4d7505d18e9f09edd9ec7869e6d0bbe523f)",
+   "upstream_terms_quote": "'This release is for research purposes only in support of an academic paper.' and 'The first 33,659 data entries were generated by DeepSeek, i.e., from id 0 to id 33658.' Every C1 row is upstream id 0-116, so every one is DeepSeek-V2-Chat-generated. DeepSeek License Agreement v1.0 counts as a Derivative any model created by 'methods based on the generation of synthetic data by the Model for training the other model', and requires its Attachment A use-based restrictions to be passed on to users of a Derivative (paragraphs 4(a), 5)",
+   "repo_marking": "configs/stages/stage-2/reasoning_data/sources.json :: tool_calling -- \"CC-BY-4.0 but gated, 'for research purposes only', rows generated by DeepSeek-V2-Chat (whose license counts distilled models as derivatives)\"; historical_corpus_flags.corpus_v2 -- 'xLAM rows are research-only and DeepSeek-V2-generated'; data/eval-set/eval-set-1/NOTICE.md -- the 7 xlam eval prompts are kept outside the public core 'until [the redistribution terms] are' confirmed (maintainer 2026-10-19)",
+   "verdict": "conditional",
+   "why": "C1 is internal research training with no release, which the 'research purposes only' statement and CC-BY-4.0 (attribution) admit; but the gate's access agreement has not been reviewed in the repo, and the rows are DeepSeek-V2 output, so under the DeepSeek License a student trained on them is arguably a Derivative carrying Attachment A's use-based restrictions -- binding on any later distribution or deployment of C1's checkpoints"
+  }
+ ],
+ "totals": {
+  "training_supervised_tokens": 492587,
+  "by_verdict": {
+   "covered": {
+    "supervised_tokens": 0,
+    "examples": 0
+   },
+   "conditional": {
+    "supervised_tokens": 9695,
+    "examples": 19,
+    "turns": 19
+   },
+   "unproven": {
+    "supervised_tokens": 482892,
+    "examples": 1421,
+    "turns": 1591
+   }
+  },
+  "validation_supervised_tokens": 12624,
+  "share_of_c1_supervised_tokens": 0.0832,
+  "share_of_e1_part": 0.1664
+ },
+ "restricted_sources": [
+  {
+   "source": "glaive_fc_v2",
+   "verdict": "unproven",
+   "training_supervised_tokens": 482892,
+   "examples": 1421,
+   "turns": 1591,
+   "validation_supervised_tokens": 12624,
+   "open_question": "is an Apache-2.0 tag with undocumented generation provenance an adequate basis for C1's training use?"
+  },
+  {
+   "source": "xlam_fc_60k",
+   "verdict": "conditional",
+   "training_supervised_tokens": 9695,
+   "examples": 19,
+   "turns": 19,
+   "validation_supervised_tokens": 0,
+   "open_question": "accept research-only use under the gate's agreement, and the DeepSeek License's derivative restrictions on any later distribution of C1's checkpoints?"
+  }
+ ],
+ "consequence": "C1 cannot be launched on the claim that its whole pack's sources are proven licensed for training: 492,587 of its 5,923,021 supervised tokens (8.3%; 16.6% of the E1 part) come from these two sources. Removing them would no longer be D4-Augmented's pack (and a re-pack changes E1's ladder), so neither launching nor removing is done here: the maintainer rules.",
+ "not_in_scope": "the E1 part's other model-generated prompt sources (e.g. magicoder_oss, 41 turns / 103,683 supervised tokens of code; openmath_instruct_2, Llama-generated) were not audited here",
+ "authorizes": "nothing",
+ "observed_in_passing": "one glaive conversation (glaive-000941) has turns in both the training part and the 16 validation sequences (1,421 training + 13 validation conversations, 1,433 distinct): a turn-level, not conversation-level, train/validation split in E1's pack; recorded, not repaired (C1's pack is unchanged)"
+}

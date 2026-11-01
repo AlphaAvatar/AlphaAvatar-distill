@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.teacher_modes.full_search_proposal/v1",
- "status": "PROPOSED 2026-10-31 for the maintainer's review, revised the same day for the brief 'Full Search Calibration / State Evaluation Distribution Alignment'; NOT authorized, NOT run",
+ "status": "PROPOSED 2026-10-31; REVISED 2026-11-01 after the maintainer's independent review (conditionally accepted: 13 types / 5 domains, both modes in both sets, interactive adaptation excluded, reasoning_core / reasoning_gym as training sources only, no sixth domain, D4's weights and search arms unchanged); NOT authorized, NOT run",
  "decided_by": "maintainer 2026-10-31 (three briefs): a NEW D4 full search on the hybrid teacher's frozen weights, D4's search specification, the hybrid's own calibration (both modes, balanced on scored positions, reusing v1's sealed trajectories first), references and activations computed from the hybrid; one Top-1 shared by A1 and A2 and both seeds; never D4 Top-1, its rankings, references or weights, never v1's fixed-path initialization",
  "root_teacher": {
   "model": "Qwen/Qwen3-4B",
@@ -77,7 +77,7 @@
   "scoring": {
    "objectives": "D4's: state.teacher_kl.equal_domain_mean, state.teacher_kl.worst_domain, state.critical_token_kl",
    "reduction": "equal_subtype_then_equal_domain/v1 over sub-types '<type>|<mode>': inside every domain each type and each mode weigh equally, so the modes are 50:50 and a profile's raw tokens confer nothing",
-   "critical_tokens": "per mode: H-T think_close, final_answer, eos; H-N final_answer, eos (no </think>: the non-thinking prompt's preclosed think block is prompt, not output); critical_token_kl = 0.5 x mean over H-T's classes + 0.5 x mean over H-N's -- the current evaluator averages every declared class unweighted (H-T would weigh 3/5): a generic extension, critical classes grouped by mode, is owed before the search, with its test",
+   "critical_tokens": "per mode: H-T think_close, final_answer, eos; H-N final_answer, eos (no </think>: the non-thinking prompt's preclosed think block is prompt, not output). IMPLEMENTED at $0 (2026-11-01): the manifest declares critical_groups {H-T: [think_close, final_answer, eos], H-N: [final_answer, eos]} and every item its critical_group (= its mode); the evaluator then reports state.critical_token_kl = 0.5 x H-T's mean over its classes + 0.5 x H-N's (aadistill.initialization.planning.metrics.CRITICAL_GROUP_AGGREGATION, group_balanced/v1), refuses a class with no scored position in its group, and records the aggregation in the reduction semantics, so the suite's measurement protocol id is new; state_eval@v1's values and ids are unchanged (tests/initialization/test_critical_token_groups.py)",
    "per_mode_kl": "each mode's equal-domain mean, worst domain and critical-token KL recorded beside the ranking values in every state's evaluation (journal), never ranked on alone",
    "same_suite": "every candidate of the search is scored on this one frozen suite, items and weights fixed"
   },
@@ -100,7 +100,25 @@
   "allocator": "expandable_segments:True",
   "teacher": "resident for the whole search (bf16), no offload",
   "persistence": "every state's checkpoint and the journal (states.jsonl, telemetry.jsonl) on the network volume after each expansion (prune_weights false); resume replays the journal and restores a state only when its bytes re-identify (BeamSearch._restore); a completed search writes products.json",
-  "storage": "D4 stored 274 GB of states (largest 7.3 GB, the teacher-sized ones early in the tree); am5m373kuq holds 55 GB: the search needs its own volume of about 300 GB in the card's datacenter, or prune_weights true (pruned states' bytes deleted, the journal kept) -- a maintainer decision"
+  "storage": {
+   "decision": "a network volume holding every state's checkpoint, the journal and the training save points; prune_weights stays false; no candidate evidence is deleted before the evidence audit (maintainer, 2026-11-01)",
+   "size": "D4's tree stored 274 GB of states; the six trainings' save points add about 50 GB: 350 GB holds both, 300 GB holds both only if non-Top-1 search states are retired after the evidence audit (a maintainer decision, never automatic)",
+   "price": "$0.07 per GB-month: 300 GB $0.70/day, 350 GB $0.82/day (provider bills have run up to 17% over the rate)",
+   "where": "a datacenter with both network storage and L40S on-demand quotes: EU-NL-1 or US-TX-3 (US-IL-1 also); am5m373kuq (55 GB) is in EUR-IS-2, which reports no storage support now, and stays the archive of the supplement's shards; L40S stock reads 'Low' everywhere it is offered",
+   "write_time": "the repo's measured 132 MB/s copy-and-re-identify: about 9 s per 1.19 GB state, 0.6 h over the search",
+   "evidence": "logs/stages/stage-2/teacher_modes/audit/provider_resources_20261101.json"
+  },
+  "numerical_execution_fingerprint": {
+   "micro_batch_1_this_search": "24787ea9c00dbbba2006530f70397076998b95915199f03270e4130c6298c6ef",
+   "micro_batch_3_d4_and_the_forward_baseline": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "derivation": "aadistill.initialization.specs.materialization.numerical_execution_fingerprint(ExecutionConfig(micro_batch_size=1, calibration_batch_packing='length_sorted_v1', prediction_rows='scored_v1'), NumericalEnvironment('cuda', 'bfloat16', 'float32')); the same call at micro-batch 3 reproduces the forward baseline's recorded e627f461..., so the two differ by the micro-batch alone",
+   "meaning": "semantic state ids are shared with a micro-batch-3 run; materialization ids, checkpoint bytes and the fingerprint are this search's own; D4's digests are never this search's expected digests"
+  },
+  "validation_on_the_l40s": [
+   "already measured (a_check_20261029_190241 :: initialization_mb1.json): DEPTH at micro-batch 1 with the hybrid root on D4's items completes on one L40S (2,371 s, 26.88 GiB peak reserved); micro-batch 3 runs out of memory",
+   "owed, in the search session itself and before level 1: every operator (ATTENTION, DEPTH, RESIDUAL_WIDTH, FFN) at micro-batch 1 on both hybrid profiles (level 0 expands all eight), each child's state evaluation on state_eval_hybrid@v1 under its new protocol id, and the Pareto v2 ranking of level 0; the session stops if any operator, evaluation or ranking fails or level 0 overruns its deadline share",
+   "Pareto v2's epsilon (1e-4) repeatability is re-measured at micro-batch 1 on this suite under the frozen EpsilonResponseRule (conservative_review_gate@v1) before pruning starts"
+  ]
  },
  "estimate": {
   "basis": "D4's measured search (A100, micro-batch 3): DEPTH 9.72 h over 14 expansions (base 4.64 h, rh 5.08 h), the other operators 1.36 h, state evaluation 7.5 s per state at 74,022 positions; DEPTH is token-linear (MIXED.md's model); the L40S at micro-batch 1 ran D4's DEPTH path at 1.05 x the A100's micro-batch-3 time",
@@ -123,7 +141,8 @@
    "storage": "about $5 for a 300 GB volume for a week (D4 kept 274 GB of states), or prune_weights true",
    "inputs_session": "the calibration top-up and the state evaluation's generation: about 1.0 M generated tokens, about 45 min with setup, about $1.0-1.5"
   },
-  "note": "profile token counts are from the records generated so far; the top-up adds a few thousand tokens"
+  "note": "profile token counts are from the records generated so far; the top-up adds a few thousand tokens",
+  "superseded_by": "logs/stages/stage-2/teacher_modes/plans/budget_v2.json (2026-11-01): the state evaluation forwards every prompt token, so its time is about 2.9 h, not 0.9 h; expected search 24.5 h ($27.16), deadline 37.3 h ($41.41)"
  },
  "product": {
   "top1": "the Top-1's checkpoint identity (aadistill.autoinit.checkpoint_identity/v1: artifact_digest, weights_digest, single_shard_sha256, config_sha256, arch_signature, 596,049,920 parameters) and its materialization identity (semantic_state_id, materialization_id, numerical_execution_fingerprint, parent)",
@@ -157,6 +176,39 @@
    "calibration vs A1/A2's training: 0; calibration vs C1's training: 232 shared prompts (D4's pool and E1 both drew corpus_v2) -- held out of the hybrid profiles",
    "state evaluation vs eval-set-1: R1, R2 (2 removed), R3, R4, R7 and R9 by family name pass; calibration vs eval-set-1: R1-R4, R7 pass, R9 by family name fails for 18 units -- held out of the profiles",
    "rule families, generators and source lineage are SHARED between calibration and state evaluation by design (one type table); seeds, instances and dataset rows are disjoint; both sit in the calibration seed range, disjoint from training's"
+  ]
+ },
+ "review_2026_11_01": {
+  "accepted": [
+   "13 types over 5 domains, each in both modes, in calibration and state evaluation alike",
+   "interactive adaptation excluded from both sets; static teacher-forced KL is never read as interactive ability, which eval-set-1's closed-loop units measure after training",
+   "reasoning_core / reasoning_gym stay training sources without a calibration subtype; their axis and source mapping and the source-distribution differences are in audit/full_search_data_audit.json",
+   "1 x L40S, micro-batch 1; D4's four operators, beam width 6 / warmup 1, Pareto v2, target-aware scored_v1, Top-200 + tail, the Base and RH profiles, one Top-1 for A1 and A2"
+  ],
+  "owed_before_any_paid_step": [
+   "the 10 short calibration (profile, type, mode) cells closed, code included",
+   "the state evaluation's 1,722 prompts generated natively in both modes and its manifest verified",
+   "mode-aware critical-token aggregation (done at $0: group_balanced/v1)",
+   "the micro-batch-1 numerical execution fingerprint recorded (done) and the micro-batch-1 operator and ranking path validated on the L40S (in the search session's first level)",
+   "a network volume holding the whole search state, journal and checkpoints"
+  ],
+  "not_authorized": "the inputs session (calibration top-up, state evaluation generation), the full search and the six trainings"
+ },
+ "completion_conditions": {
+  "calibration": [
+   "every (profile, type, mode) cell of calib.hybrid_d4_base@v1 and calib.hybrid_d4_rh@v1 reaches its quota with the mode's own naturally terminated trajectories of the hybrid at 1cfa9a72, under that mode's template and official sampling: 0 short cells (now 10: string_induction H-T/H-N, code H-T/H-N, rag_evidence H-N, in both profiles)",
+   "the top-up: the 14 refill units in D4's cell order and the code cell's 9 prompts (calibration_code_v1.jsonl); a cell still short continues its queue in order, never another type's or mode's units",
+   "every task disjoint from A1/A2/C1 training, the state evaluation and eval-set-1 (R1, R2, R3, R9), the isolation proof re-run on the final items; the code prompts' gold stable under every hash seed (audit/code_stability.json)",
+   "scored positions are positions.supervised_target_v1 on the hybrid's own output; no preclosed think block, prompt or template position is scored",
+   "per (type, mode) the independent task count is reported beside its positions (audit/full_search_data_audit.json); cells under 5 tasks are flagged THIN (eight H-T cells and code now) -- a minimum task count per cell would be a change to D4's design and is the maintainer's choice",
+   "the rebuilt profiles' items files and content hashes recorded, status COMPLETE"
+  ],
+  "state_evaluation": [
+   "all 26 (type, mode) cells reach 12,000 scored positions from whole, naturally terminated trajectories in queue order (312,000 in all); a cell whose queue runs out is a SHORTFALL that stops before any search -- a reserve queue (the same sources, the next instances or rows, isolation-checked) is built at $0 before the session so a short cell continues inside it",
+   "every (type, mode) has at least one scored position of each of its critical classes (the evaluator refuses otherwise)",
+   "the manifest binds the root teacher (model, revision, weight shards), tokenizer files and vocabulary, template, both modes, the type table, every item's prompt and output ids with masks and its critical_group, the critical groups, the isolation proof, the content sha256 and the suite hash; hybrid_state_eval.load accepts it",
+   "independent of calibration and of all training (no shared task id, prompt key or content; 13-gram screen) and of eval-set-1 (R1-R4, R7, R9), re-run on the final items",
+   "the measurement protocol id computed at the first state evaluation and recorded with the search"
   ]
  }
 }

@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.teacher_modes.training_plan_proposal/v1",
- "written_utc": "2026-11-01T00:25:37Z",
+ "written_utc": "2026-11-01T11:40:43Z",
  "status": "PROPOSED for the maintainer's review; nothing trains before an explicit authorization",
  "matrix": {
   "A1": "hybrid Top-1 + hybrid thinking",
@@ -24,6 +24,25 @@
  "baseline_recipe": {
   "path": "configs/stages/stage-3/e1/e1_r2960k_sa_pca.json",
   "sha256": "c0eaec2ea03959e3258065b72249e9491fa0f3a458fb7d2eb0db5434fb58c6bb"
+ },
+ "tokenizers": {
+  "hybrid": {
+   "source": "artifacts/stages/stage-2/teacher_modes/tokenizers/qwen3_4b_1cfa9a72",
+   "files_sha256": {
+    "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+    "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+    "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+    "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+   }
+  },
+  "thinking_2507": {
+   "source": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+   "files_sha256": {
+    "tokenizer.json": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+    "tokenizer_config.json": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+    "chat_template.jinja": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7"
+   }
+  }
  },
  "units": [
   {
@@ -96,7 +115,8 @@
     "out_dir": "/runpod-volume/teacher_modes/v2_units/A1-s20260726/train",
     "rung": 5930273,
     "val_blocks": 16,
-    "tokenizer_source": "the hybrid Top-1's own tokenizer files (the teacher snapshot's, by sha256)",
+    "tokenizer_source": "artifacts/stages/stage-2/teacher_modes/tokenizers/qwen3_4b_1cfa9a72",
+    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
     "lineage": {
      "teacher": {
       "model_id": "Qwen/Qwen3-4B",
@@ -113,12 +133,24 @@
       "vocab_size": 151936
      },
      "mode": "thinking",
+     "tokenizer": {
+      "files_sha256": {
+       "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+       "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+       "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+       "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+      }
+     },
      "initialization": {
       "root_teacher": {
        "model_id": "Qwen/Qwen3-4B",
        "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
       },
-      "model_safetensors_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH"
+      "model_safetensors_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH",
+      "provenance": {
+       "record": "TO_BE_SET_BY_THE_FULL_SEARCH",
+       "record_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH"
+      }
      },
      "data": [
       {
@@ -140,13 +172,35 @@
     "problems": [],
     "pending_full_search": true
    },
+   "launch_admission": {
+    "problems": [],
+    "pending": [
+     "the teacher snapshot's shards are not cached here: the trainer checks them on the pod",
+     "the initialization is the full search's Top-1, which does not exist yet"
+    ],
+    "observed": [
+     "kd_teacher",
+     "pack_files_sha256",
+     "tokenizer_files_sha256",
+     "tokenizer_sha256"
+    ]
+   },
    "accounting": {
     "packed_sequences": 1102,
     "optimizer_steps": 1653,
     "unique_supervised_tokens": 5930273,
     "supervised_token_exposure": 17790819,
-    "hours": 4.33,
-    "usd": 4.72,
+    "hours": {
+     "lower": 3.61,
+     "expected": 4.28,
+     "upper": 6.35
+    },
+    "usd": {
+     "lower": 4.01,
+     "expected": 4.76,
+     "upper": 7.05
+    },
+    "deadline_hours": 6.35,
     "non_padding_tokens": 8924771,
     "padding_share": 0.0114,
     "training_flops": 5.142e+17,
@@ -232,7 +286,8 @@
     "out_dir": "/runpod-volume/teacher_modes/v2_units/A1-s20260801/train",
     "rung": 5930273,
     "val_blocks": 16,
-    "tokenizer_source": "the hybrid Top-1's own tokenizer files (the teacher snapshot's, by sha256)",
+    "tokenizer_source": "artifacts/stages/stage-2/teacher_modes/tokenizers/qwen3_4b_1cfa9a72",
+    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
     "lineage": {
      "teacher": {
       "model_id": "Qwen/Qwen3-4B",
@@ -249,12 +304,24 @@
       "vocab_size": 151936
      },
      "mode": "thinking",
+     "tokenizer": {
+      "files_sha256": {
+       "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+       "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+       "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+       "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+      }
+     },
      "initialization": {
       "root_teacher": {
        "model_id": "Qwen/Qwen3-4B",
        "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
       },
-      "model_safetensors_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH"
+      "model_safetensors_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH",
+      "provenance": {
+       "record": "TO_BE_SET_BY_THE_FULL_SEARCH",
+       "record_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH"
+      }
      },
      "data": [
       {
@@ -276,13 +343,35 @@
     "problems": [],
     "pending_full_search": true
    },
+   "launch_admission": {
+    "problems": [],
+    "pending": [
+     "the teacher snapshot's shards are not cached here: the trainer checks them on the pod",
+     "the initialization is the full search's Top-1, which does not exist yet"
+    ],
+    "observed": [
+     "kd_teacher",
+     "pack_files_sha256",
+     "tokenizer_files_sha256",
+     "tokenizer_sha256"
+    ]
+   },
    "accounting": {
     "packed_sequences": 1102,
     "optimizer_steps": 1653,
     "unique_supervised_tokens": 5930273,
     "supervised_token_exposure": 17790819,
-    "hours": 4.33,
-    "usd": 4.72,
+    "hours": {
+     "lower": 3.61,
+     "expected": 4.28,
+     "upper": 6.35
+    },
+    "usd": {
+     "lower": 4.01,
+     "expected": 4.76,
+     "upper": 7.05
+    },
+    "deadline_hours": 6.35,
     "non_padding_tokens": 8924771,
     "padding_share": 0.0114,
     "training_flops": 5.142e+17,
@@ -346,7 +435,7 @@
      "grad_clip": 1.0
     },
     "schedule": {
-     "total_steps": 6864,
+     "total_steps": 6866,
      "warmup_steps": 343,
      "min_lr_frac": 0.1
     },
@@ -356,7 +445,7 @@
      "context_strategy": "document_isolated"
     },
     "checkpoint": {
-     "save_every": 3432,
+     "save_every": 3433,
      "keep_last": 1,
      "bind_identity": true
     },
@@ -366,9 +455,10 @@
      "eval_blocks": 16
     },
     "out_dir": "/runpod-volume/teacher_modes/v2_units/A2-s20260726/train",
-    "rung": 5923670,
+    "rung": 5923646,
     "val_blocks": 16,
-    "tokenizer_source": "the hybrid Top-1's own tokenizer files (the teacher snapshot's, by sha256)",
+    "tokenizer_source": "artifacts/stages/stage-2/teacher_modes/tokenizers/qwen3_4b_1cfa9a72",
+    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
     "lineage": {
      "teacher": {
       "model_id": "Qwen/Qwen3-4B",
@@ -385,19 +475,31 @@
       "vocab_size": 151936
      },
      "mode": "non_thinking",
+     "tokenizer": {
+      "files_sha256": {
+       "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+       "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+       "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+       "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+      }
+     },
      "initialization": {
       "root_teacher": {
        "model_id": "Qwen/Qwen3-4B",
        "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
       },
-      "model_safetensors_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH"
+      "model_safetensors_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH",
+      "provenance": {
+       "record": "TO_BE_SET_BY_THE_FULL_SEARCH",
+       "record_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH"
+      }
      },
      "data": [
       {
        "files_sha256": {
-        "blocks.npz": "cd9e1a2342516b37bc894aff044b978efac7565545f3adc80e2f67cdd62e3666",
-        "ladder.json": "d4d53cc853bc45d77e511179cfb7892ed5c5082c77a63334777b99c5620da0b5",
-        "audit.jsonl": "d1f0f077a3d1ad2acd6ff250f748ea4ce1847d865ed8010b8b9a7ff93a874cc2"
+        "blocks.npz": "a583763d27371a3635a165cda5b860c18d16b2c86bbc8d7fdba88e0158e33acb",
+        "ladder.json": "506e42e9c4692dc6277348ca2cc5d121fd86857f49ad2705e980056d23a7e149",
+        "audit.jsonl": "e75c1ddd10e07e7f5794c829d06a9be8fa7f43a3e5fd6bb0a012d2a4927108c4"
        },
        "mode": "non_thinking",
        "teacher": {
@@ -412,20 +514,42 @@
     "problems": [],
     "pending_full_search": true
    },
+   "launch_admission": {
+    "problems": [],
+    "pending": [
+     "the teacher snapshot's shards are not cached here: the trainer checks them on the pod",
+     "the initialization is the full search's Top-1, which does not exist yet"
+    ],
+    "observed": [
+     "kd_teacher",
+     "pack_files_sha256",
+     "tokenizer_files_sha256",
+     "tokenizer_sha256"
+    ]
+   },
    "accounting": {
-    "packed_sequences": 4576,
-    "optimizer_steps": 6864,
-    "unique_supervised_tokens": 5923670,
-    "supervised_token_exposure": 17771010,
-    "hours": 14.03,
-    "usd": 15.29,
-    "non_padding_tokens": 37327460,
-    "padding_share": 0.0042,
-    "training_flops": 2.135e+18,
-    "documents": 53132,
-    "tasks": 49826,
+    "packed_sequences": 4577,
+    "optimizer_steps": 6866,
+    "unique_supervised_tokens": 5923646,
+    "supervised_token_exposure": 17770938,
+    "hours": {
+     "lower": 10.98,
+     "expected": 12.14,
+     "upper": 17.91
+    },
+    "usd": {
+     "lower": 12.2,
+     "expected": 13.48,
+     "upper": 19.89
+    },
+    "deadline_hours": 17.91,
+    "non_padding_tokens": 37330273,
+    "padding_share": 0.0044,
+    "training_flops": 2.136e+18,
+    "documents": 53136,
+    "tasks": 49830,
     "by_category": {
-     "base_counterpart": 2960531,
+     "base_counterpart": 2960507,
      "fluid": 2963139
     },
     "category_share_points": {
@@ -482,7 +606,7 @@
      "grad_clip": 1.0
     },
     "schedule": {
-     "total_steps": 6864,
+     "total_steps": 6866,
      "warmup_steps": 343,
      "min_lr_frac": 0.1
     },
@@ -492,7 +616,7 @@
      "context_strategy": "document_isolated"
     },
     "checkpoint": {
-     "save_every": 3432,
+     "save_every": 3433,
      "keep_last": 1,
      "bind_identity": true
     },
@@ -502,9 +626,10 @@
      "eval_blocks": 16
     },
     "out_dir": "/runpod-volume/teacher_modes/v2_units/A2-s20260801/train",
-    "rung": 5923670,
+    "rung": 5923646,
     "val_blocks": 16,
-    "tokenizer_source": "the hybrid Top-1's own tokenizer files (the teacher snapshot's, by sha256)",
+    "tokenizer_source": "artifacts/stages/stage-2/teacher_modes/tokenizers/qwen3_4b_1cfa9a72",
+    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
     "lineage": {
      "teacher": {
       "model_id": "Qwen/Qwen3-4B",
@@ -521,19 +646,31 @@
       "vocab_size": 151936
      },
      "mode": "non_thinking",
+     "tokenizer": {
+      "files_sha256": {
+       "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+       "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+       "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+       "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+      }
+     },
      "initialization": {
       "root_teacher": {
        "model_id": "Qwen/Qwen3-4B",
        "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
       },
-      "model_safetensors_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH"
+      "model_safetensors_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH",
+      "provenance": {
+       "record": "TO_BE_SET_BY_THE_FULL_SEARCH",
+       "record_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH"
+      }
      },
      "data": [
       {
        "files_sha256": {
-        "blocks.npz": "cd9e1a2342516b37bc894aff044b978efac7565545f3adc80e2f67cdd62e3666",
-        "ladder.json": "d4d53cc853bc45d77e511179cfb7892ed5c5082c77a63334777b99c5620da0b5",
-        "audit.jsonl": "d1f0f077a3d1ad2acd6ff250f748ea4ce1847d865ed8010b8b9a7ff93a874cc2"
+        "blocks.npz": "a583763d27371a3635a165cda5b860c18d16b2c86bbc8d7fdba88e0158e33acb",
+        "ladder.json": "506e42e9c4692dc6277348ca2cc5d121fd86857f49ad2705e980056d23a7e149",
+        "audit.jsonl": "e75c1ddd10e07e7f5794c829d06a9be8fa7f43a3e5fd6bb0a012d2a4927108c4"
        },
        "mode": "non_thinking",
        "teacher": {
@@ -548,20 +685,42 @@
     "problems": [],
     "pending_full_search": true
    },
+   "launch_admission": {
+    "problems": [],
+    "pending": [
+     "the teacher snapshot's shards are not cached here: the trainer checks them on the pod",
+     "the initialization is the full search's Top-1, which does not exist yet"
+    ],
+    "observed": [
+     "kd_teacher",
+     "pack_files_sha256",
+     "tokenizer_files_sha256",
+     "tokenizer_sha256"
+    ]
+   },
    "accounting": {
-    "packed_sequences": 4576,
-    "optimizer_steps": 6864,
-    "unique_supervised_tokens": 5923670,
-    "supervised_token_exposure": 17771010,
-    "hours": 14.03,
-    "usd": 15.29,
-    "non_padding_tokens": 37327460,
-    "padding_share": 0.0042,
-    "training_flops": 2.135e+18,
-    "documents": 53132,
-    "tasks": 49826,
+    "packed_sequences": 4577,
+    "optimizer_steps": 6866,
+    "unique_supervised_tokens": 5923646,
+    "supervised_token_exposure": 17770938,
+    "hours": {
+     "lower": 10.98,
+     "expected": 12.14,
+     "upper": 17.91
+    },
+    "usd": {
+     "lower": 12.2,
+     "expected": 13.48,
+     "upper": 19.89
+    },
+    "deadline_hours": 17.91,
+    "non_padding_tokens": 37330273,
+    "padding_share": 0.0044,
+    "training_flops": 2.136e+18,
+    "documents": 53136,
+    "tasks": 49830,
     "by_category": {
-     "base_counterpart": 2960531,
+     "base_counterpart": 2960507,
      "fluid": 2963139
     },
     "category_share_points": {
@@ -640,6 +799,7 @@
     "rung": 5923021,
     "val_blocks": 16,
     "tokenizer_source": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
     "lineage": {
      "teacher": {
       "model_id": "Qwen/Qwen3-4B-Thinking-2507",
@@ -656,12 +816,23 @@
       "vocab_size": 151936
      },
      "mode": "thinking",
+     "tokenizer": {
+      "files_sha256": {
+       "tokenizer.json": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+       "tokenizer_config.json": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+       "chat_template.jinja": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7"
+      }
+     },
      "initialization": {
       "root_teacher": {
        "model_id": "Qwen/Qwen3-4B-Thinking-2507",
        "revision": "768f209d9ea81521153ed38c47d515654e938aea"
       },
-      "model_safetensors_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8"
+      "model_safetensors_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+      "provenance": {
+       "record": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/search_record.json",
+       "record_sha256": "81a0e2dda20c81f6bf1d8a2294bfc7f53c417b5fb294cdd3bb52232001922473"
+      }
      },
      "data": [
       {
@@ -683,13 +854,36 @@
     "problems": [],
     "pending_full_search": false
    },
+   "launch_admission": {
+    "problems": [],
+    "pending": [],
+    "observed": [
+     "initialization_provenance",
+     "kd_teacher",
+     "pack_files_sha256",
+     "student_config",
+     "student_weights_sha256",
+     "teacher_snapshot",
+     "tokenizer_files_sha256",
+     "tokenizer_sha256"
+    ]
+   },
    "accounting": {
     "packed_sequences": 2468,
     "optimizer_steps": 3702,
     "unique_supervised_tokens": 5923021,
     "supervised_token_exposure": 17769063,
-    "hours": 8.14,
-    "usd": 8.88
+    "hours": {
+     "lower": 4.54,
+     "expected": 5.25,
+     "upper": 8.54
+    },
+    "usd": {
+     "lower": 5.05,
+     "expected": 5.83,
+     "upper": 9.48
+    },
+    "deadline_hours": 8.54
    }
   },
   {
@@ -762,6 +956,7 @@
     "rung": 5923021,
     "val_blocks": 16,
     "tokenizer_source": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+    "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
     "lineage": {
      "teacher": {
       "model_id": "Qwen/Qwen3-4B-Thinking-2507",
@@ -778,12 +973,23 @@
       "vocab_size": 151936
      },
      "mode": "thinking",
+     "tokenizer": {
+      "files_sha256": {
+       "tokenizer.json": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+       "tokenizer_config.json": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+       "chat_template.jinja": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7"
+      }
+     },
      "initialization": {
       "root_teacher": {
        "model_id": "Qwen/Qwen3-4B-Thinking-2507",
        "revision": "768f209d9ea81521153ed38c47d515654e938aea"
       },
-      "model_safetensors_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8"
+      "model_safetensors_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8",
+      "provenance": {
+       "record": "logs/stages/stage-0/calibration_volume/runs/dose_d4_20261020_212310/evidence/d4/search/search_record.json",
+       "record_sha256": "81a0e2dda20c81f6bf1d8a2294bfc7f53c417b5fb294cdd3bb52232001922473"
+      }
      },
      "data": [
       {
@@ -805,24 +1011,47 @@
     "problems": [],
     "pending_full_search": false
    },
+   "launch_admission": {
+    "problems": [],
+    "pending": [],
+    "observed": [
+     "initialization_provenance",
+     "kd_teacher",
+     "pack_files_sha256",
+     "student_config",
+     "student_weights_sha256",
+     "teacher_snapshot",
+     "tokenizer_files_sha256",
+     "tokenizer_sha256"
+    ]
+   },
    "accounting": {
     "packed_sequences": 2468,
     "optimizer_steps": 3702,
     "unique_supervised_tokens": 5923021,
     "supervised_token_exposure": 17769063,
-    "hours": 8.14,
-    "usd": 8.88
+    "hours": {
+     "lower": 4.54,
+     "expected": 5.25,
+     "upper": 8.54
+    },
+    "usd": {
+     "lower": 5.05,
+     "expected": 5.83,
+     "upper": 9.48
+    },
+    "deadline_hours": 8.54
    }
   }
  ],
  "cost": {
-  "usd_expected_training": 57.78,
-  "basis": {
-   "seconds_per_step": 6.7,
-   "evaluation_seconds_per_unit": 3917.1,
-   "fixed_seconds_per_unit": 600.0,
-   "usd_per_hour": 1.09
-  }
+  "six_trainings_usd": {
+   "lower": 43.16,
+   "expected": 49.44,
+   "upper": 74.78
+  },
+  "owner": "logs/stages/stage-2/teacher_modes/plans/budget_v2.json",
+  "budget_sha256": "26d19865c52590aa1081d39d59ba5208e542fc9eaf6d63ea3189add327877ee6"
  },
  "authorizes": "nothing"
 }

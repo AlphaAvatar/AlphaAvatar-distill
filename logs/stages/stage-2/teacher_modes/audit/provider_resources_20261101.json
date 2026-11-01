@@ -1,0 +1,252 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.provider_resources/v1",
+ "written_utc": "2026-11-01T10:24:37Z",
+ "purpose": "maintainer review 2026-11-01, section 6: provider capacity, storage price and datacenter stock for the hybrid full search's ~300 GB network volume on one L40S. READ-ONLY queries; nothing was created, started, resized or deleted.",
+ "facts": {
+  "account": {
+   "command": "runpodctl user",
+   "time_utc": "2026-11-01T10:21:08Z",
+   "value": {
+    "clientBalance_usd": 79.2275068357,
+    "currentSpendPerHr_usd": 0.005,
+    "spendLimit_usd": 80
+   },
+   "note": "currentSpendPerHr 0.005 = the 55 GB volume (55 x 0.07 / 720 = 0.00535); spendLimit 80 is an ACCOUNT spend limit at the provider, below every proposed full-experiment total"
+  },
+  "pods": {
+   "command": "runpodctl pod list --all",
+   "time_utc": "2026-11-01T10:21:08Z",
+   "value": [],
+   "note": "no pod exists, running or exited"
+  },
+  "network_volumes": {
+   "command": "runpodctl network-volume list; GraphQL myself { networkVolumes { id name size dataCenterId } }",
+   "time_utc": "2026-11-01T10:21:09Z / 2026-11-01T10:22:16Z",
+   "value": [
+    {
+     "id": "am5m373kuq",
+     "name": "aad-h1pa",
+     "size_gb": 55,
+     "dataCenterId": "EUR-IS-2"
+    }
+   ]
+  },
+  "l40s_price": {
+   "command": "GraphQL gpuTypes(input:{id:\"NVIDIA L40S\"}) { securePrice communityPrice lowestPrice(input:{gpuCount:1, secureCloud:true}) { uninterruptablePrice stockStatus } } (UA aadistill-watchdog/1.0, src/aadistill/infrastructure/provider.py)",
+   "time_utc": "2026-11-01T10:21:50Z",
+   "value": {
+    "securePrice_usd_per_hour": 1.09,
+    "communityPrice_usd_per_hour": 0.79,
+    "secure_uninterruptablePrice": 1.09,
+    "stockStatus": "Low"
+   },
+   "note": "pod create provisions SECURE cloud (network volumes are Secure-Cloud only), so the rate is securePrice 1.09, unchanged from the plan; communityPrice is not a price this project can be billed at"
+  },
+  "l40s_global_stock": {
+   "command": "runpodctl gpu list --include-unavailable",
+   "time_utc": "2026-11-01T10:21:20Z",
+   "value": {
+    "available": true,
+    "communityCloud": true,
+    "displayName": "L40S",
+    "gpuId": "NVIDIA L40S",
+    "memoryInGb": 48,
+    "secureCloud": true,
+    "stockStatus": "Low"
+   }
+  },
+  "l40s_by_datacenter": {
+   "command": "runpodctl datacenter list (stockStatus) + GraphQL lowestPrice(input:{gpuCount:1, secureCloud:true, dataCenterId:<dc>}) + GraphQL dataCenters { id storageSupport }",
+   "time_utc": "2026-11-01T10:21:21Z",
+   "value": {
+    "EU-NL-1": {
+     "cli_datacenter_list_stockStatus": "",
+     "graphql_secure_lowestPrice": {
+      "uninterruptablePrice": 1.09,
+      "stockStatus": "Low",
+      "maxUnreservedGpuCount": null,
+      "availableGpuCounts": null
+     },
+     "graphql_time_utc": "2026-11-01T10:21:57Z",
+     "storageSupport": true
+    },
+    "EUR-IS-2": {
+     "cli_datacenter_list_stockStatus": "",
+     "graphql_secure_lowestPrice": {
+      "uninterruptablePrice": 1.09,
+      "stockStatus": "Low",
+      "maxUnreservedGpuCount": null,
+      "availableGpuCounts": null
+     },
+     "graphql_time_utc": "2026-11-01T10:21:57Z",
+     "storageSupport": false
+    },
+    "OC-AU-1": {
+     "cli_datacenter_list_stockStatus": "Low",
+     "graphql_secure_lowestPrice": {
+      "uninterruptablePrice": 1.09,
+      "stockStatus": "Low",
+      "maxUnreservedGpuCount": null,
+      "availableGpuCounts": null
+     },
+     "graphql_time_utc": "2026-11-01T10:21:58Z",
+     "storageSupport": false
+    },
+    "US-IL-1": {
+     "cli_datacenter_list_stockStatus": "Low",
+     "graphql_secure_lowestPrice": {
+      "uninterruptablePrice": 1.09,
+      "stockStatus": "Low",
+      "maxUnreservedGpuCount": null,
+      "availableGpuCounts": null
+     },
+     "graphql_time_utc": "2026-11-01T10:21:58Z",
+     "storageSupport": true
+    },
+    "US-MO-1": {
+     "cli_datacenter_list_stockStatus": "",
+     "graphql_secure_lowestPrice": {
+      "uninterruptablePrice": null,
+      "stockStatus": null,
+      "maxUnreservedGpuCount": null,
+      "availableGpuCounts": null
+     },
+     "graphql_time_utc": "2026-11-01T10:21:59Z",
+     "storageSupport": false
+    },
+    "US-NC-1": {
+     "cli_datacenter_list_stockStatus": "",
+     "graphql_secure_lowestPrice": {
+      "uninterruptablePrice": null,
+      "stockStatus": null,
+      "maxUnreservedGpuCount": null,
+      "availableGpuCounts": null
+     },
+     "graphql_time_utc": "2026-11-01T10:21:59Z",
+     "storageSupport": true
+    },
+    "US-TX-3": {
+     "cli_datacenter_list_stockStatus": "Low",
+     "graphql_secure_lowestPrice": {
+      "uninterruptablePrice": 1.09,
+      "stockStatus": "Low",
+      "maxUnreservedGpuCount": null,
+      "availableGpuCounts": null
+     },
+     "graphql_time_utc": "2026-11-01T10:22:00Z",
+     "storageSupport": true
+    },
+    "US-TX-4": {
+     "cli_datacenter_list_stockStatus": "Low",
+     "graphql_secure_lowestPrice": {
+      "uninterruptablePrice": 1.09,
+      "stockStatus": "Low",
+      "maxUnreservedGpuCount": null,
+      "availableGpuCounts": null
+     },
+     "graphql_time_utc": "2026-11-01T10:22:00Z",
+     "storageSupport": false
+    }
+   },
+   "note": "the CLI lists 8 datacenters with L40S; the GraphQL per-datacenter secure quote returns 1.09/h 'Low' in six and nothing in US-MO-1 and US-NC-1. The two sources disagree for EUR-IS-2, EU-NL-1, US-MO-1 and US-NC-1 (CLI stockStatus empty); 'Low' is the provider's only stock grade seen here and gives no GPU count (maxUnreservedGpuCount null). storageSupport is false in EUR-IS-2 (am5m373kuq's datacenter), OC-AU-1, US-MO-1 and US-TX-4."
+  },
+  "network_volume_price": {
+   "command": "WebFetch https://docs.runpod.io/storage/network-volumes; runpodctl billing network-volume (last 4 day rows)",
+   "time_utc": "2026-11-01T10:22:29Z",
+   "value": {
+    "usd_per_gb_month_first_1tb": 0.07,
+    "usd_per_gb_month_beyond_1tb": 0.05,
+    "billed_rate_check": [
+     {
+      "amount_usd": 0.081667,
+      "gb_hours": 840,
+      "usd_per_gb_hour": 9.72222e-05
+     },
+     {
+      "amount_usd": 0.094792,
+      "gb_hours": 975,
+      "usd_per_gb_hour": 9.72222e-05
+     },
+     {
+      "amount_usd": 0.149722,
+      "gb_hours": 1540,
+      "usd_per_gb_hour": 9.72222e-05
+     },
+     {
+      "amount_usd": 0.058819,
+      "gb_hours": 605,
+      "usd_per_gb_hour": 9.72222e-05
+     }
+    ],
+    "billed_rate_usd_per_gb_hour": 9.72222e-05,
+    "300_gb": {
+     "usd_per_hour": 0.029167,
+     "usd_per_day": 0.7,
+     "7_days": 4.9,
+     "14_days": 9.8,
+     "30_days": 21.0
+    },
+    "300_gb_conservative_overbilling_x1.1667": {
+     "usd_per_day": 0.8167,
+     "7_days": 5.72,
+     "14_days": 11.43,
+     "30_days": 24.5
+    }
+   },
+   "provider_api_exposes_this": false,
+   "note": "storage is a dated stated constant (memory gpu-price-is-not-the-bill): the docs' 0.07/GB/month, confirmed by the bill's own rows at 0.07/720 per GB-hour. The provider's volume rows have billed more GB-hours than a volume can hold (1,540 GB-h on a 55 GB volume in one UTC day = 28 h): the conservative column scales by 1540/1320. Container disk is billed separately at 0.10/GB/month for the pod's lifetime."
+  },
+  "resize": {
+   "command": "runpodctl network-volume update --help; docs.runpod.io/storage/network-volumes",
+   "time_utc": "2026-11-01T10:21:30Z",
+   "value": {
+    "supported": true,
+    "how": "runpodctl network-volume update <id> --size <GB> (must be larger than current)",
+    "docs": "Volume size can be increased later but cannot be decreased",
+    "am5m373kuq_caveat": "EUR-IS-2 reports storageSupport false now; whether a resize is accepted there is unknown and was NOT tried (a resize is a mutation)"
+   }
+  },
+  "write_throughput": {
+   "command": "logs/stages/stage-2/reasoning_data/runs/h1p1g_20261023_191644/evidence/p1g_report.json :: checks.persistence + released_validation_bytes; docs.runpod.io/storage/network-volumes; memory df-lies-on-network-volumes",
+   "value": {
+    "measured_repo": {
+     "bytes": 2384236592,
+     "seconds": 18.0,
+     "what": "persist_unit copy of one trained 596M checkpoint to /runpod-volume plus re-identification from the landed bytes",
+     "effective_MB_per_s": 132.5
+    },
+    "measured_read_plus_sha256_MB_per_s": 237,
+    "docs_MB_per_s": "200-400 (up to 10 GB/s peak)",
+    "save_time_estimate": {
+     "one_596M_state_bf16_bytes": 1192135096,
+     "seconds_copy_plus_verify": 9.0,
+     "seconds_at_docs_low_200MB_s": 6.0
+    }
+   },
+   "note": "one repo measurement (H1 P1g, 2026-10-23, an A100 pod's volume); the search's per-expansion persistence of a 1.19 GB bf16 state is ~9 s copy+verify at that rate"
+  }
+ },
+ "conclusion": {
+  "rate_basis": "L40S securePrice 1.09 USD/h (quoted 2026-11-01T10:21:50Z, unchanged) + container disk 0.10/GB/month for the pod's provisioned disk + network volume 0.07/GB/month on a 720 h month",
+  "volume_300_gb": {
+   "usd_per_day": 0.7,
+   "usd_per_day_conservative": 0.82,
+   "usd_7_days": 4.9,
+   "usd_14_days": 9.8,
+   "usd_30_days": 21.0
+  },
+  "datacenter": {
+   "recommended": "EU-NL-1 or US-TX-3 (both: storageSupport true AND an L40S secure quote at 1.09/h, stock Low; US-IL-1 likewise); the volume is created only in the datacenter whose L40S stock is confirmed at authorization time",
+   "am5m373kuq": "EUR-IS-2 has L40S quotes but storageSupport false: a NEW volume cannot be assumed there, and a resize of am5m373kuq to 300 GB is supported by the CLI but untested in a datacenter refusing new storage. The search reads no byte on am5m373kuq (its inputs are dev-box built), so a new volume elsewhere loses nothing; am5m373kuq stays as the supplement's archive",
+   "rule": "memory choose-gpu-before-the-volume: the volume's datacenter locks the GPU for the search AND for the six trainings that resume from it"
+  },
+  "risks": [
+   "L40S stock is 'Low' everywhere it is offered and the API gives no GPU count: availability can vanish between the audit and the create (a no-cost create window with retries, as the runners already do)",
+   "the provider's 'Low' and the CLI's empty stockStatus disagree for four datacenters; the create call is the only definitive test",
+   "the account balance is 79.23 USD and the provider spend limit is 80 USD: below any full-experiment total, independent of the project caps",
+   "volume billing rows have exceeded size x 24 h per day (+17%)",
+   "a network volume serves one running pod at a time"
+  ]
+ },
+ "authorizes": "nothing"
+}

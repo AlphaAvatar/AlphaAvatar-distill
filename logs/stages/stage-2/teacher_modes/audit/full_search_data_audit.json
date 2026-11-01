@@ -1,0 +1,1796 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.full_search_data_audit/v1",
+ "written_utc": "2026-11-01T10:42:19Z",
+ "inputs": {
+  "full_search_types.json": "configs/stages/stage-2/teacher_modes/full_search_types.json",
+  "hybrid_d4_profiles.json": "configs/stages/stage-2/teacher_modes/hybrid_d4_profiles.json",
+  "state_eval_hybrid_v1.tasks.jsonl": "data/stages/stage-2/teacher_modes/tasks/state_eval_hybrid_v1.tasks.jsonl",
+  "calibration_code_v1.jsonl": "data/stages/stage-2/teacher_modes/tasks/calibration_code_v1.jsonl",
+  "token_matched_admission.json": "logs/stages/stage-2/teacher_modes/data/token_matched_admission.json"
+ },
+ "rules": {
+  "thin": "fewer than 5 independent tasks in a profile's (type, mode)",
+  "queue_at_risk": "state-evaluation prompts below 1.15 x the expected tasks needed for 12,000 scored positions at the planning yield"
+ },
+ "summary": {
+  "type_modes": 26,
+  "calibration_short": [
+   "string_induction@v1|H-T",
+   "string_induction@v1|H-N",
+   "rag_evidence|H-N",
+   "code|H-T",
+   "code|H-N"
+  ],
+  "calibration_thin": {
+   "scan_language@v1|H-T": [
+    "calib.hybrid_d4_base",
+    "calib.hybrid_d4_rh"
+   ],
+   "string_induction@v1|H-T": [
+    "calib.hybrid_d4_base",
+    "calib.hybrid_d4_rh"
+   ],
+   "knights_knaves@v1|H-T": [
+    "calib.hybrid_d4_base",
+    "calib.hybrid_d4_rh"
+   ],
+   "ordering@v1|H-T": [
+    "calib.hybrid_d4_base"
+   ],
+   "openmath|H-T": [
+    "calib.hybrid_d4_base",
+    "calib.hybrid_d4_rh"
+   ],
+   "gsm8k|H-T": [
+    "calib.hybrid_d4_rh"
+   ],
+   "code|H-T": [
+    "calib.hybrid_d4_base",
+    "calib.hybrid_d4_rh"
+   ],
+   "code|H-N": [
+    "calib.hybrid_d4_base",
+    "calib.hybrid_d4_rh"
+   ]
+  },
+  "state_evaluation_queue_at_risk": [],
+  "calibration_code_prompts": 9
+ },
+ "table": [
+  {
+   "type_mode": "grid_transform@v1|H-T",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 16200.0,
+     "scored_positions": 17211,
+     "deficit": 0.0,
+     "items": 6,
+     "independent_tasks": 6,
+     "not_naturally_terminated": 1,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "grid.flip_v": 3,
+      "grid.flip_h": 2,
+      "grid.rotate_cw": 1
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 19800.0,
+     "scored_positions": 21405,
+     "deficit": 0.0,
+     "items": 7,
+     "independent_tasks": 7,
+     "not_naturally_terminated": 1,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "grid.flip_v": 3,
+      "grid.flip_h": 3,
+      "grid.rotate_cw": 1
+     }
+    },
+    "union_independent_tasks": 7
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 21,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 3057.9
+    },
+    "expected_tasks_needed": 4,
+    "queue_over_expected_need": 5.35,
+    "at_risk": false,
+    "sources": {
+     "grid.fill_rows": 5,
+     "grid.flip_h": 4,
+     "grid.flip_v": 4,
+     "grid.rotate_ccw": 4,
+     "grid.rotate_cw": 4
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "grid_transform@v1|H-N",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 16200.0,
+     "scored_positions": 16322,
+     "deficit": 0.0,
+     "items": 20,
+     "independent_tasks": 20,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "grid.flip_v": 6,
+      "grid.flip_h": 6,
+      "grid.fill_rows": 5,
+      "grid.rotate_cw": 2,
+      "grid.rotate_ccw": 1
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 19800.0,
+     "scored_positions": 20646,
+     "deficit": 0.0,
+     "items": 25,
+     "independent_tasks": 25,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "grid.flip_v": 8,
+      "grid.flip_h": 8,
+      "grid.fill_rows": 5,
+      "grid.rotate_cw": 3,
+      "grid.rotate_ccw": 1
+     }
+    },
+    "union_independent_tasks": 25
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 21,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 839.6
+    },
+    "expected_tasks_needed": 15,
+    "queue_over_expected_need": 1.47,
+    "at_risk": false,
+    "sources": {
+     "grid.fill_rows": 5,
+     "grid.flip_h": 4,
+     "grid.flip_v": 4,
+     "grid.rotate_ccw": 4,
+     "grid.rotate_cw": 4
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "defined_ops@v1|H-T",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 8100.0,
+     "scored_positions": 8273,
+     "deficit": 0.0,
+     "items": 7,
+     "independent_tasks": 7,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "comp.chain3": 6,
+      "comp.conditional_chain": 1
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 9900.0,
+     "scored_positions": 10512,
+     "deficit": 0.0,
+     "items": 9,
+     "independent_tasks": 9,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "comp.chain3": 6,
+      "comp.conditional_chain": 3
+     }
+    },
+    "union_independent_tasks": 9
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 53,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 1142.5
+    },
+    "expected_tasks_needed": 11,
+    "queue_over_expected_need": 5.05,
+    "at_risk": false,
+    "sources": {
+     "comp.chain3": 27,
+     "comp.conditional_chain": 26
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "defined_ops@v1|H-N",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 8100.0,
+     "scored_positions": 8144,
+     "deficit": 0.0,
+     "items": 24,
+     "independent_tasks": 24,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "comp.chain3": 15,
+      "comp.conditional_chain": 9
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 9900.0,
+     "scored_positions": 10052,
+     "deficit": 0.0,
+     "items": 30,
+     "independent_tasks": 30,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "comp.chain3": 18,
+      "comp.conditional_chain": 12
+     }
+    },
+    "union_independent_tasks": 30
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 53,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 321.3
+    },
+    "expected_tasks_needed": 38,
+    "queue_over_expected_need": 1.42,
+    "at_risk": false,
+    "sources": {
+     "comp.chain3": 27,
+     "comp.conditional_chain": 26
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "scan_language@v1|H-T",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 8100.0,
+     "scored_positions": 10930,
+     "deficit": 0.0,
+     "items": 3,
+     "independent_tasks": 3,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "scan.sur_sur": 2,
+      "scan.rev_sur": 1
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 9900.0,
+     "scored_positions": 10930,
+     "deficit": 0.0,
+     "items": 3,
+     "independent_tasks": 3,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "scan.sur_sur": 2,
+      "scan.rev_sur": 1
+     }
+    },
+    "union_independent_tasks": 3
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 39,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 4217.8
+    },
+    "expected_tasks_needed": 3,
+    "queue_over_expected_need": 13.71,
+    "at_risk": false,
+    "sources": {
+     "scan.rev_sur": 13,
+     "scan.seq_rev": 13,
+     "scan.sur_sur": 13
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [
+     "calib.hybrid_d4_base",
+     "calib.hybrid_d4_rh"
+    ],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "scan_language@v1|H-N",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 8100.0,
+     "scored_positions": 8409,
+     "deficit": 0.0,
+     "items": 19,
+     "independent_tasks": 19,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "scan.rev_sur": 7,
+      "scan.seq_rev": 7,
+      "scan.sur_sur": 5
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 9900.0,
+     "scored_positions": 10469,
+     "deficit": 0.0,
+     "items": 22,
+     "independent_tasks": 22,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "scan.seq_rev": 9,
+      "scan.rev_sur": 8,
+      "scan.sur_sur": 5
+     }
+    },
+    "union_independent_tasks": 22
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 39,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 434.5
+    },
+    "expected_tasks_needed": 28,
+    "queue_over_expected_need": 1.41,
+    "at_risk": false,
+    "sources": {
+     "scan.rev_sur": 13,
+     "scan.seq_rev": 13,
+     "scan.sur_sur": 13
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "list_induction@v1|H-T",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 8100.0,
+     "scored_positions": 9249,
+     "deficit": 0.0,
+     "items": 5,
+     "independent_tasks": 5,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "list.pairwise_sums": 1,
+      "list.append_sum": 1,
+      "list.keep_even": 1,
+      "list.mul_k": 1,
+      "list.duplicate_each": 1
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 9900.0,
+     "scored_positions": 10851,
+     "deficit": 0.0,
+     "items": 6,
+     "independent_tasks": 6,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "list.mul_k": 2,
+      "list.pairwise_sums": 1,
+      "list.append_sum": 1,
+      "list.keep_even": 1,
+      "list.duplicate_each": 1
+     }
+    },
+    "union_independent_tasks": 6
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 23,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 2098.0
+    },
+    "expected_tasks_needed": 6,
+    "queue_over_expected_need": 4.02,
+    "at_risk": false,
+    "sources": {
+     "list.append_sum": 3,
+     "list.dedupe": 2,
+     "list.duplicate_each": 2,
+     "list.keep_even": 2,
+     "list.min": 2,
+     "list.mod_k": 2,
+     "list.mul_k": 2,
+     "list.pairwise_sums": 2,
+     "list.sort_asc": 2,
+     "list.square": 2,
+     "list.swap_ends": 2
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "list_induction@v1|H-N",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 8100.0,
+     "scored_positions": 8306,
+     "deficit": 0.0,
+     "items": 10,
+     "independent_tasks": 10,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "list.mul_k": 2,
+      "list.dedupe": 2,
+      "list.pairwise_sums": 1,
+      "list.append_sum": 1,
+      "list.keep_even": 1,
+      "list.duplicate_each": 1,
+      "list.min": 1,
+      "list.swap_ends": 1
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 9900.0,
+     "scored_positions": 10221,
+     "deficit": 0.0,
+     "items": 12,
+     "independent_tasks": 12,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "list.append_sum": 2,
+      "list.mul_k": 2,
+      "list.duplicate_each": 2,
+      "list.dedupe": 2,
+      "list.pairwise_sums": 1,
+      "list.keep_even": 1,
+      "list.min": 1,
+      "list.swap_ends": 1
+     }
+    },
+    "union_independent_tasks": 12
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 23,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 733.6
+    },
+    "expected_tasks_needed": 17,
+    "queue_over_expected_need": 1.41,
+    "at_risk": false,
+    "sources": {
+     "list.append_sum": 3,
+     "list.dedupe": 2,
+     "list.duplicate_each": 2,
+     "list.keep_even": 2,
+     "list.min": 2,
+     "list.mod_k": 2,
+     "list.mul_k": 2,
+     "list.pairwise_sums": 2,
+     "list.sort_asc": 2,
+     "list.square": 2,
+     "list.swap_ends": 2
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "string_induction@v1|H-T",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 8100.0,
+     "scored_positions": 4294,
+     "deficit": 3806.0,
+     "items": 2,
+     "independent_tasks": 2,
+     "not_naturally_terminated": 1,
+     "short": true,
+     "refill_units": 2,
+     "sources": {
+      "str.mirror": 2
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 9900.0,
+     "scored_positions": 4294,
+     "deficit": 5606.0,
+     "items": 2,
+     "independent_tasks": 2,
+     "not_naturally_terminated": 1,
+     "short": true,
+     "refill_units": 3,
+     "sources": {
+      "str.mirror": 2
+     }
+    },
+    "union_independent_tasks": 2
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 31,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 1966.8
+    },
+    "expected_tasks_needed": 7,
+    "queue_over_expected_need": 5.08,
+    "at_risk": false,
+    "sources": {
+     "str.append_first": 8,
+     "str.keep_even_positions": 8,
+     "str.mirror": 8,
+     "str.sort_letters": 7
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [
+     "calib.hybrid_d4_base",
+     "calib.hybrid_d4_rh"
+    ],
+    "calibration_thin": [
+     "calib.hybrid_d4_base",
+     "calib.hybrid_d4_rh"
+    ],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "string_induction@v1|H-N",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 8100.0,
+     "scored_positions": 4578,
+     "deficit": 3522.0,
+     "items": 8,
+     "independent_tasks": 8,
+     "not_naturally_terminated": 2,
+     "short": true,
+     "refill_units": 5,
+     "sources": {
+      "str.mirror": 3,
+      "str.keep_even_positions": 2,
+      "str.append_first": 2,
+      "str.sort_letters": 1
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 9900.0,
+     "scored_positions": 4578,
+     "deficit": 5322.0,
+     "items": 8,
+     "independent_tasks": 8,
+     "not_naturally_terminated": 2,
+     "short": true,
+     "refill_units": 8,
+     "sources": {
+      "str.mirror": 3,
+      "str.keep_even_positions": 2,
+      "str.append_first": 2,
+      "str.sort_letters": 1
+     }
+    },
+    "union_independent_tasks": 8
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 31,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 557.5
+    },
+    "expected_tasks_needed": 22,
+    "queue_over_expected_need": 1.44,
+    "at_risk": false,
+    "sources": {
+     "str.append_first": 8,
+     "str.keep_even_positions": 8,
+     "str.mirror": 8,
+     "str.sort_letters": 7
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [
+     "calib.hybrid_d4_base",
+     "calib.hybrid_d4_rh"
+    ],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "entity_tracking@v1|H-T",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 5400.0,
+     "scored_positions": 6214,
+     "deficit": 0.0,
+     "items": 5,
+     "independent_tasks": 5,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "track.move": 3,
+      "track.move_remove": 2
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 6600.0,
+     "scored_positions": 7505,
+     "deficit": 0.0,
+     "items": 6,
+     "independent_tasks": 6,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "track.move_remove": 3,
+      "track.move": 3
+     }
+    },
+    "union_independent_tasks": 6
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 53,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 1250.8
+    },
+    "expected_tasks_needed": 10,
+    "queue_over_expected_need": 5.52,
+    "at_risk": false,
+    "sources": {
+     "track.move": 27,
+     "track.move_remove": 26
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "entity_tracking@v1|H-N",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 5400.0,
+     "scored_positions": 5473,
+     "deficit": 0.0,
+     "items": 19,
+     "independent_tasks": 19,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "track.move": 10,
+      "track.move_remove": 9
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 6600.0,
+     "scored_positions": 6798,
+     "deficit": 0.0,
+     "items": 23,
+     "independent_tasks": 23,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "track.move_remove": 12,
+      "track.move": 11
+     }
+    },
+    "union_independent_tasks": 23
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 53,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 307.5
+    },
+    "expected_tasks_needed": 40,
+    "queue_over_expected_need": 1.36,
+    "at_risk": false,
+    "sources": {
+     "track.move": 27,
+     "track.move_remove": 26
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "knights_knaves@v1|H-T",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 5400.0,
+     "scored_positions": 6257,
+     "deficit": 0.0,
+     "items": 2,
+     "independent_tasks": 2,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "kk.counting": 2
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 6600.0,
+     "scored_positions": 10724,
+     "deficit": 0.0,
+     "items": 3,
+     "independent_tasks": 3,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "kk.counting": 3
+     }
+    },
+    "union_independent_tasks": 3
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 21,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 3574.7
+    },
+    "expected_tasks_needed": 4,
+    "queue_over_expected_need": 6.26,
+    "at_risk": false,
+    "sources": {
+     "kk.counting": 21
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [
+     "calib.hybrid_d4_base",
+     "calib.hybrid_d4_rh"
+    ],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "knights_knaves@v1|H-N",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 5400.0,
+     "scored_positions": 6130,
+     "deficit": 0.0,
+     "items": 6,
+     "independent_tasks": 6,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "kk.counting": 6
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 6600.0,
+     "scored_positions": 6905,
+     "deficit": 0.0,
+     "items": 7,
+     "independent_tasks": 7,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "kk.counting": 7
+     }
+    },
+    "union_independent_tasks": 7
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 21,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 792.7
+    },
+    "expected_tasks_needed": 16,
+    "queue_over_expected_need": 1.39,
+    "at_risk": false,
+    "sources": {
+     "kk.counting": 21
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "ordering@v1|H-T",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 5400.0,
+     "scored_positions": 5982,
+     "deficit": 0.0,
+     "items": 4,
+     "independent_tasks": 4,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "order.race": 4
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 6600.0,
+     "scored_positions": 7809,
+     "deficit": 0.0,
+     "items": 5,
+     "independent_tasks": 5,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "order.race": 5
+     }
+    },
+    "union_independent_tasks": 5
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 70,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 1381.3
+    },
+    "expected_tasks_needed": 9,
+    "queue_over_expected_need": 8.06,
+    "at_risk": false,
+    "sources": {
+     "order.race": 70
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [
+     "calib.hybrid_d4_base"
+    ],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "ordering@v1|H-N",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 5400.0,
+     "scored_positions": 5459,
+     "deficit": 0.0,
+     "items": 21,
+     "independent_tasks": 21,
+     "not_naturally_terminated": 1,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "order.race": 21
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 6600.0,
+     "scored_positions": 6747,
+     "deficit": 0.0,
+     "items": 25,
+     "independent_tasks": 25,
+     "not_naturally_terminated": 1,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "order.race": 25
+     }
+    },
+    "union_independent_tasks": 25
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 70,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 243.0
+    },
+    "expected_tasks_needed": 50,
+    "queue_over_expected_need": 1.42,
+    "at_risk": false,
+    "sources": {
+     "order.race": 70
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "openmath|H-T",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 5040.0,
+     "scored_positions": 5306,
+     "deficit": 0.0,
+     "items": 4,
+     "independent_tasks": 4,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "openmath": 4
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 2160.0,
+     "scored_positions": 2560,
+     "deficit": 0.0,
+     "items": 2,
+     "independent_tasks": 2,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "openmath": 2
+     }
+    },
+    "union_independent_tasks": 4
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 43,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 2629.0
+    },
+    "expected_tasks_needed": 5,
+    "queue_over_expected_need": 9.42,
+    "at_risk": false,
+    "sources": {
+     "corpus_v2_openmath": 43
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [
+     "calib.hybrid_d4_base",
+     "calib.hybrid_d4_rh"
+    ],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "openmath|H-N",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 5040.0,
+     "scored_positions": 5967,
+     "deficit": 0.0,
+     "items": 11,
+     "independent_tasks": 11,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "openmath": 11
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 2160.0,
+     "scored_positions": 2194,
+     "deficit": 0.0,
+     "items": 6,
+     "independent_tasks": 6,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "openmath": 6
+     }
+    },
+    "union_independent_tasks": 11
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 43,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 393.5
+    },
+    "expected_tasks_needed": 31,
+    "queue_over_expected_need": 1.41,
+    "at_risk": false,
+    "sources": {
+     "corpus_v2_openmath": 43
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "gsm8k|H-T",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 5040.0,
+     "scored_positions": 8182,
+     "deficit": 0.0,
+     "items": 6,
+     "independent_tasks": 6,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "gsm8k": 6
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 2160.0,
+     "scored_positions": 2385,
+     "deficit": 0.0,
+     "items": 2,
+     "independent_tasks": 2,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "gsm8k": 2
+     }
+    },
+    "union_independent_tasks": 6
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 73,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 1337.6
+    },
+    "expected_tasks_needed": 9,
+    "queue_over_expected_need": 8.14,
+    "at_risk": false,
+    "sources": {
+     "gsm8k_train": 73
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [
+     "calib.hybrid_d4_rh"
+    ],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "gsm8k|H-N",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 5040.0,
+     "scored_positions": 5150,
+     "deficit": 0.0,
+     "items": 22,
+     "independent_tasks": 22,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "gsm8k": 22
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 2160.0,
+     "scored_positions": 2175,
+     "deficit": 0.0,
+     "items": 9,
+     "independent_tasks": 9,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "gsm8k": 9
+     }
+    },
+    "union_independent_tasks": 22
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 73,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 232.2
+    },
+    "expected_tasks_needed": 52,
+    "queue_over_expected_need": 1.41,
+    "at_risk": false,
+    "sources": {
+     "gsm8k_train": 73
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "rag_evidence|H-T",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 5040.0,
+     "scored_positions": 5633,
+     "deficit": 0.0,
+     "items": 15,
+     "independent_tasks": 15,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "squad_v2": 15
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 2160.0,
+     "scored_positions": 2384,
+     "deficit": 0.0,
+     "items": 12,
+     "independent_tasks": 12,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "squad_v2": 12
+     }
+    },
+    "union_independent_tasks": 15
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 590,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 320.5
+    },
+    "expected_tasks_needed": 38,
+    "queue_over_expected_need": 15.76,
+    "at_risk": false,
+    "sources": {
+     "squad_v2_train_answerable": 590
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "rag_evidence|H-N",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 5040.0,
+     "scored_positions": 4984,
+     "deficit": 56.0,
+     "items": 187,
+     "independent_tasks": 187,
+     "not_naturally_terminated": 0,
+     "short": true,
+     "refill_units": 2,
+     "sources": {
+      "squad_v2": 187
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 2160.0,
+     "scored_positions": 2136,
+     "deficit": 24.0,
+     "items": 79,
+     "independent_tasks": 79,
+     "not_naturally_terminated": 0,
+     "short": true,
+     "refill_units": 1,
+     "sources": {
+      "squad_v2": 79
+     }
+    },
+    "union_independent_tasks": 187
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 590,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 28.5
+    },
+    "expected_tasks_needed": 422,
+    "queue_over_expected_need": 1.4,
+    "at_risk": false,
+    "sources": {
+     "squad_v2_train_answerable": 590
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [
+     "calib.hybrid_d4_base",
+     "calib.hybrid_d4_rh"
+    ],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "multihop_qa|H-T",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 5040.0,
+     "scored_positions": 5117,
+     "deficit": 0.0,
+     "items": 8,
+     "independent_tasks": 8,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "hotpot": 8
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 2160.0,
+     "scored_positions": 4056,
+     "deficit": 0.0,
+     "items": 5,
+     "independent_tasks": 5,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "hotpot": 5
+     }
+    },
+    "union_independent_tasks": 8
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 683,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 661.9
+    },
+    "expected_tasks_needed": 19,
+    "queue_over_expected_need": 37.67,
+    "at_risk": false,
+    "sources": {
+     "hotpot_qa_train": 683
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "multihop_qa|H-N",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 5040.0,
+     "scored_positions": 5077,
+     "deficit": 0.0,
+     "items": 129,
+     "independent_tasks": 129,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "hotpot": 129
+     }
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 2160.0,
+     "scored_positions": 2163,
+     "deficit": 0.0,
+     "items": 53,
+     "independent_tasks": 53,
+     "not_naturally_terminated": 0,
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "hotpot": 53
+     }
+    },
+    "union_independent_tasks": 129
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 683,
+    "planning_yield": {
+     "natural_termination_share": 1.0,
+     "scored_positions_per_terminated_task": 24.6
+    },
+    "expected_tasks_needed": 488,
+    "queue_over_expected_need": 1.4,
+    "at_risk": false,
+    "sources": {
+     "hotpot_qa_train": 683
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [],
+    "calibration_thin": [],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "code|H-T",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 5040.0,
+     "scored_positions": 0,
+     "deficit": 5040.0,
+     "items": 0,
+     "independent_tasks": 0,
+     "not_naturally_terminated": 0,
+     "short": true,
+     "refill_units": 1,
+     "sources": {}
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 2160.0,
+     "scored_positions": 0,
+     "deficit": 2160.0,
+     "items": 0,
+     "independent_tasks": 0,
+     "not_naturally_terminated": 0,
+     "short": true,
+     "refill_units": 1,
+     "sources": {}
+    },
+    "union_independent_tasks": 0
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 22,
+    "planning_yield": {
+     "natural_termination_share": 0.518,
+     "scored_positions_per_terminated_task": 2179
+    },
+    "expected_tasks_needed": 11,
+    "queue_over_expected_need": 2.07,
+    "at_risk": false,
+    "sources": {
+     "reasoning_core/controlled_code_execution": 22
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [
+     "calib.hybrid_d4_base",
+     "calib.hybrid_d4_rh"
+    ],
+    "calibration_thin": [
+     "calib.hybrid_d4_base",
+     "calib.hybrid_d4_rh"
+    ],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  },
+  {
+   "type_mode": "code|H-N",
+   "calibration": {
+    "calib.hybrid_d4_base": {
+     "quota": 5040.0,
+     "scored_positions": 0,
+     "deficit": 5040.0,
+     "items": 0,
+     "independent_tasks": 0,
+     "not_naturally_terminated": 0,
+     "short": true,
+     "refill_units": 1,
+     "sources": {}
+    },
+    "calib.hybrid_d4_rh": {
+     "quota": 2160.0,
+     "scored_positions": 0,
+     "deficit": 2160.0,
+     "items": 0,
+     "independent_tasks": 0,
+     "not_naturally_terminated": 0,
+     "short": true,
+     "refill_units": 1,
+     "sources": {}
+    },
+    "union_independent_tasks": 0
+   },
+   "state_evaluation": {
+    "quota_scored_positions": 12000,
+    "queue_prompts": 22,
+    "planning_yield": {
+     "natural_termination_share": 0.937,
+     "scored_positions_per_terminated_task": 819
+    },
+    "expected_tasks_needed": 16,
+    "queue_over_expected_need": 1.41,
+    "at_risk": false,
+    "sources": {
+     "reasoning_core/controlled_code_execution": 22
+    },
+    "generated": false
+   },
+   "flags": {
+    "calibration_short": [
+     "calib.hybrid_d4_base",
+     "calib.hybrid_d4_rh"
+    ],
+    "calibration_thin": [
+     "calib.hybrid_d4_base",
+     "calib.hybrid_d4_rh"
+    ],
+    "state_evaluation_not_generated": true,
+    "state_evaluation_queue_at_risk": false
+   }
+  }
+ ],
+ "training_axis_map": {
+  "primary.abstract_analogical/s0_generators_v2_calsplit": {
+   "ability_axis": "abstract_analogical",
+   "role": "primary (fluid)",
+   "search_types": [
+    "grid_transform@v1"
+   ],
+   "typed_in_search": true,
+   "quota_supervised_tokens": 365837.891346,
+   "why_not_typed": null
+  },
+  "primary.compositional_generalization/reasoning_core": {
+   "ability_axis": "compositional_generalization",
+   "role": "primary (fluid)",
+   "search_types": [],
+   "typed_in_search": false,
+   "quota_supervised_tokens": 119546.327442,
+   "why_not_typed": "third-party generators: D4's calibration pool holds none; the axis is typed by its project generators"
+  },
+  "primary.compositional_generalization/reasoning_gym": {
+   "ability_axis": "compositional_generalization",
+   "role": "primary (fluid)",
+   "search_types": [],
+   "typed_in_search": false,
+   "quota_supervised_tokens": 100876.564214,
+   "why_not_typed": "third-party generators: D4's calibration pool holds none; the axis is typed by its project generators"
+  },
+  "primary.compositional_generalization/s0_generators_v2_calsplit": {
+   "ability_axis": "compositional_generalization",
+   "role": "primary (fluid)",
+   "search_types": [
+    "defined_ops@v1",
+    "scan_language@v1"
+   ],
+   "typed_in_search": true,
+   "quota_supervised_tokens": 416322.09241999994,
+   "why_not_typed": null
+  },
+  "primary.inductive_rule_discovery/s0_generators_v2_calsplit": {
+   "ability_axis": "inductive_rule_discovery",
+   "role": "primary (fluid)",
+   "search_types": [
+    "list_induction@v1",
+    "string_induction@v1"
+   ],
+   "typed_in_search": true,
+   "quota_supervised_tokens": 729631.648032,
+   "why_not_typed": null
+  },
+  "primary.interactive_adaptation/s0_generators_v2_calsplit": {
+   "ability_axis": "interactive_adaptation",
+   "role": "primary (fluid)",
+   "search_types": [],
+   "typed_in_search": false,
+   "quota_supervised_tokens": 497314.262666,
+   "why_not_typed": "token-level KL on a fixed episode transcript measures the student's agreement with the teacher on observations the teacher's own actions produced; it is not closed-loop interaction and must not be read as interactive ability"
+  },
+  "primary.task_contained_deduction/reasoning_core": {
+   "ability_axis": "task_contained_deduction",
+   "role": "primary (fluid)",
+   "search_types": [],
+   "typed_in_search": false,
+   "quota_supervised_tokens": 171405.135012,
+   "why_not_typed": "third-party generators: D4's calibration pool holds none; the axis is typed by its project generators"
+  },
+  "primary.task_contained_deduction/reasoning_gym": {
+   "ability_axis": "task_contained_deduction",
+   "role": "primary (fluid)",
+   "search_types": [],
+   "typed_in_search": false,
+   "quota_supervised_tokens": 109159.75335799999,
+   "why_not_typed": "third-party generators: D4's calibration pool holds none; the axis is typed by its project generators"
+  },
+  "primary.task_contained_deduction/s0_generators_v2_calsplit": {
+   "ability_axis": "task_contained_deduction",
+   "role": "primary (fluid)",
+   "search_types": [
+    "entity_tracking@v1",
+    "knights_knaves@v1",
+    "ordering@v1"
+   ],
+   "typed_in_search": true,
+   "quota_supervised_tokens": 452420.32551,
+   "why_not_typed": null
+  },
+  "supporting.code_algorithmic/mbpp_train": {
+   "ability_axis": "code_algorithmic",
+   "role": "supporting (base-corpus counterpart)",
+   "search_types": [],
+   "typed_in_search": false,
+   "quota_supervised_tokens": 38431.0,
+   "why_not_typed": "MBPP is exhausted by training (every eligible task is a training task); the code type uses reasoning_core's code modules, the code cell's main training source"
+  },
+  "supporting.code_algorithmic/reasoning_core": {
+   "ability_axis": "code_algorithmic",
+   "role": "supporting (base-corpus counterpart)",
+   "search_types": [
+    "code"
+   ],
+   "typed_in_search": true,
+   "quota_supervised_tokens": 553670.4,
+   "why_not_typed": null
+  },
+  "supporting.math_gsm8k/gsm8k_train": {
+   "ability_axis": "math_gsm8k",
+   "role": "supporting (base-corpus counterpart)",
+   "search_types": [
+    "gsm8k"
+   ],
+   "typed_in_search": true,
+   "quota_supervised_tokens": 592101.4,
+   "why_not_typed": null
+  },
+  "supporting.math_new/math_train": {
+   "ability_axis": "math_new",
+   "role": "supporting (base-corpus counterpart)",
+   "search_types": [
+    "openmath"
+   ],
+   "typed_in_search": true,
+   "quota_supervised_tokens": 592101.4,
+   "why_not_typed": null
+  },
+  "supporting.reading_verified/hotpot_qa_train": {
+   "ability_axis": "reading_verified",
+   "role": "supporting (base-corpus counterpart)",
+   "search_types": [
+    "multihop_qa"
+   ],
+   "typed_in_search": true,
+   "quota_supervised_tokens": 592101.4,
+   "why_not_typed": null
+  },
+  "supporting.reading_verified/squad_v2_train_answerable": {
+   "ability_axis": "reading_verified",
+   "role": "supporting (base-corpus counterpart)",
+   "search_types": [
+    "rag_evidence"
+   ],
+   "typed_in_search": true,
+   "quota_supervised_tokens": 592101.4,
+   "why_not_typed": null
+  }
+ },
+ "distribution_differences": {
+  "fluid": {
+   "training_share_typed_in_search": 0.6629,
+   "training_share_not_typed": {
+    "primary.compositional_generalization/reasoning_core": 0.0404,
+    "primary.compositional_generalization/reasoning_gym": 0.0341,
+    "primary.interactive_adaptation/s0_generators_v2_calsplit": 0.1679,
+    "primary.task_contained_deduction/reasoning_core": 0.0579,
+    "primary.task_contained_deduction/reasoning_gym": 0.0368
+   }
+  },
+  "base_counterpart": {
+   "training_share_typed_in_search": 0.987,
+   "training_share_not_typed": {
+    "supporting.code_algorithmic/mbpp_train": 0.013
+   }
+  },
+  "notes": [
+   "the fluid types are the same @v1 project generators as the training cells, on calibration-split families and the calibration seed range: the generators and rule families' kinds are shared, the instances, families and seeds are not (isolation by design)",
+   "reasoning_core and reasoning_gym (compositional and deduction axes) and interactive adaptation are training sources with no search type: their axes are represented in the search by the project generators only",
+   "MBPP is exhausted by training; the search's code type is reasoning_core's code modules (the code cell's main training source)",
+   "the openmath type is the same type as training's competition math from another source (corpus_v2's OpenMathInstruct-2 units of base_pool_v1, against MATH train); gsm8k, rag_evidence (SQuAD v2 answerable) and multihop_qa (HotpotQA) are the training sources' own datasets, rows past every training and calibration row",
+   "weights differ by design: training follows D4's increment shares by supervised tokens; calibration D4's domain weights (base 0.18 x 4 + 0.28, rh 0.22 x 4 + 0.12) split equally over a domain's types and halved per mode; state evaluation a frozen 12,000 scored positions per (type, mode), reduced equal sub-type then equal domain"
+  ]
+ },
+ "training_source_shares": {
+  "A1": {
+   "by_axis_share": {
+    "primary.abstract_analogical": 0.0617,
+    "primary.compositional_generalization": 0.1069,
+    "primary.inductive_rule_discovery": 0.1223,
+    "primary.interactive_adaptation": 0.0868,
+    "primary.task_contained_deduction": 0.1231,
+    "supporting.code_algorithmic": 0.1001,
+    "supporting.math_gsm8k": 0.0999,
+    "supporting.math_new": 0.0998,
+    "supporting.reading_verified": 0.1995
+   },
+   "by_cell_share": {
+    "primary.abstract_analogical/s0_generators_v2_calsplit": 0.0617,
+    "primary.compositional_generalization/reasoning_core": 0.02,
+    "primary.compositional_generalization/reasoning_gym": 0.0167,
+    "primary.compositional_generalization/s0_generators_v2_calsplit": 0.0701,
+    "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 0.1223,
+    "primary.interactive_adaptation/s0_generators_v2_calsplit": 0.0868,
+    "primary.task_contained_deduction/reasoning_core": 0.0288,
+    "primary.task_contained_deduction/reasoning_gym": 0.0184,
+    "primary.task_contained_deduction/s0_generators_v2_calsplit": 0.0759,
+    "supporting.code_algorithmic/mbpp_train": 0.0065,
+    "supporting.code_algorithmic/reasoning_core": 0.0936,
+    "supporting.math_gsm8k/gsm8k_train": 0.0999,
+    "supporting.math_new/math_train": 0.0998,
+    "supporting.reading_verified/hotpot_qa_train": 0.0998,
+    "supporting.reading_verified/squad_v2_train_answerable": 0.0998
+   }
+  },
+  "A2": {
+   "by_axis_share": {
+    "primary.abstract_analogical": 0.0617,
+    "primary.compositional_generalization": 0.1074,
+    "primary.inductive_rule_discovery": 0.1232,
+    "primary.interactive_adaptation": 0.084,
+    "primary.task_contained_deduction": 0.1239,
+    "supporting.code_algorithmic": 0.1002,
+    "supporting.math_gsm8k": 0.0999,
+    "supporting.math_new": 0.0999,
+    "supporting.reading_verified": 0.1997
+   },
+   "by_cell_share": {
+    "primary.abstract_analogical/s0_generators_v2_calsplit": 0.0617,
+    "primary.compositional_generalization/reasoning_core": 0.0202,
+    "primary.compositional_generalization/reasoning_gym": 0.017,
+    "primary.compositional_generalization/s0_generators_v2_calsplit": 0.0702,
+    "primary.inductive_rule_discovery/s0_generators_v2_calsplit": 0.1232,
+    "primary.interactive_adaptation/s0_generators_v2_calsplit": 0.084,
+    "primary.task_contained_deduction/reasoning_core": 0.0289,
+    "primary.task_contained_deduction/reasoning_gym": 0.0186,
+    "primary.task_contained_deduction/s0_generators_v2_calsplit": 0.0763,
+    "supporting.code_algorithmic/mbpp_train": 0.0065,
+    "supporting.code_algorithmic/reasoning_core": 0.0938,
+    "supporting.math_gsm8k/gsm8k_train": 0.0999,
+    "supporting.math_new/math_train": 0.0999,
+    "supporting.reading_verified/hotpot_qa_train": 0.0999,
+    "supporting.reading_verified/squad_v2_train_answerable": 0.0999
+   }
+  }
+ },
+ "authorizes": "nothing"
+}
