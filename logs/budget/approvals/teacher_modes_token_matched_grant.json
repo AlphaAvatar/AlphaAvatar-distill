@@ -30,9 +30,11 @@
   },
   "a1_phase": {
    "size_gb": 350,
-   "datacenter": "EU-NL-1 or US-TX-3 (storage support and L40S stock confirmed at creation)",
+   "datacenter": "US-TX-3",
    "reserve_usd": 13.34,
-   "role": "the full search's states and journal (prune_weights false), the inputs' shards, A1's checkpoints; lifecycle decided by the maintainer after the evidence audit"
+   "role": "the full search's states and journal (prune_weights false), the inputs' shards, A1's checkpoints; lifecycle decided by the maintainer after the evidence audit",
+   "id": "4rhubprswo",
+   "created_utc": "2026-11-01T12:55:01Z"
   }
  },
  "scope": "the supplementary teacher generation of Research A v2 (configs/stages/stage-2/teacher_modes/token_matched_design.json, its preregistration and supplement protocol, order_v2) through scripts/stages/stage-2/teacher_modes/token_matched_phase.py --kind supplement; the dev box's $0 admission after it; AMENDED 2026-11-01: the A1 phase -- kinds inputs, search, train_a1 through scripts/stages/stage-2/teacher_modes/token_matched_phase.py, and the dev box's $0 work between them",
