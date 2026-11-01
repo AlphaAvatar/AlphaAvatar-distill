@@ -239,11 +239,11 @@ def supplement_command(ctx, plan) -> str:
             f"--authorization {auth} --durable-root {P1.durable(a)} --status {status}" + P1._tail(status))
 
 
-def search_command(ctx, plan) -> str:
+def search_command(ctx, plan, planned_minutes: float = SEARCH_DEADLINE_MINUTES) -> str:
     a, status = ctx.args, f"/workspace/{SESSION_KIND}.status"
     auth = f"{SE.POD_REPO}/{STUDY.authorization_path(a.run_id)}"
-    #: the driver stops itself 30 minutes before the planned search time, leaving the commit and the copy time
-    minutes = max(30.0, float(getattr(a, "search_minutes", None) or SEARCH_DEADLINE_MINUTES) - 30.0)
+    #: the driver stops itself 30 minutes before the session's planned minutes, leaving the commit and the copy time
+    minutes = max(30.0, float(planned_minutes) - 30.0)
     return (f"mkdir -p {P1.durable(a)} && {P1._py()} scripts/stages/stage-2/teacher_modes/full_search.py "
             f"--authorization {auth} --durable-root {P1.durable(a)} --status {status} --deadline-minutes {minutes:.0f}"
             + P1._tail(status))
@@ -275,6 +275,10 @@ DRIVERS = {
     "train_a1": ("scripts/stages/stage-2/teacher_modes/a1_units.py", train_a1_command, ("a1_pack",),
                  "Research A v2, A1 phases C and D: A1's two seeds trained from the Top-1 and formally evaluated"),
 }
+#: the plan's time contingency per kind: the search and A1's units stop themselves at their own deadlines with their
+#: state saved (full_search --deadline-minutes, a1_units --unit-deadline-hours), so 5% covers the closeout; the
+#: generation kinds keep the runner's 25%
+CONTINGENCY = {"search": 0.05, "train_a1": 0.05}
 #: small evidence pulled on every poll, per kind (relative to the durable root)
 POLLED = {"search": ("search_a1/search_record.json", "search_a1/first_evaluation_check.json",
                      "search_a1/search/states.jsonl", "search_a1/search/telemetry.jsonl", "search_a1/products.json"),
@@ -326,6 +330,8 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0) -> SE.Launch:
     if kind not in DRIVERS:
         raise SE.AuthorizationError(f"kind {kind!r} has no session driver yet")
     driver, command, extra, description = DRIVERS[kind]
+    if kind == "search" and minutes:
+        command = (lambda ctx, plan, _m=float(minutes): search_command(ctx, plan, _m))
     t = json.loads((REPO_ROOT / P1.PROTOCOL).read_text())["teacher"]
     battery = LocalAsset(repo_path="artifacts/stages/stage-3/eval/battery_v2", dest_name="battery_v2",
                          install_to="artifacts/stages/stage-3/eval")         #: the v1 teacher kind's assets, unchanged
@@ -346,7 +352,7 @@ def launch_spec(kind: str = "supplement", minutes: float = 0.0) -> SE.Launch:
     return SE.Launch(
         session_kind=SESSION_KIND, authorization=TMAuthorization, teacher_model=t["model"],
         teacher_revision=t["revision"], kind=kind, local_assets=assets, disk_gb=150,
-        contingency_fraction=0.25,
+        contingency_fraction=CONTINGENCY.get(kind, 0.25),
         setup_env={"PHASE_KIND": kind},
         extra_prechecks=(P1.the_volume_is_the_planned_one, the_kind_records_are_the_bound_ones),
         on_poll=polls[0], products_secured=polls[1],
