@@ -14961,3 +14961,37 @@ on a paid pod.
   match h1pa.json, both parts' targets are Thinking-2507's, the Top-1's sha256 matches.
 - **Not authorized and not run:** the hybrid D4 full search (`full_search_proposal.json`), any initialization,
   recovery or student evaluation, Research B.
+
+## 2026-11-01 (UTC) — Research A v2: the supplement completed, the token-matched data admitted; stopped at the maintainer's review
+
+- **Context.** The supplement (study A-TM, one-use authorizations under `teacher_modes_token_matched_grant.json`)
+  generates the hybrid teacher's missing thinking and non-thinking examples for the token-matched design, then the dev
+  box admits A1's and A2's data at $0. Owner of the numbers: `docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md` A.
+- **First session failed before science** (`a_supplement_20261031_092108`, $5.7873). Rounds 0 and thinking round 1
+  sealed; non-thinking round 1 failed in 21.5 s before the engine loaded: `run_battery.py` read its JSON Lines input
+  with `str.splitlines()`, which also splits at U+2028 (a GSM8K train problem carries one raw). Reproduced at $0;
+  fixed in 7d31676f (the runner's input reader and the shard sealer split on "\n" only; closeout also pulls the
+  runner logs). An ordinary engineering failure inside the envelope (P12.1).
+- **Replacement** (`a_supplement_20261031_144618`, f0bcdcb3, hard cap $17.00 so that the supplement stays inside
+  its original $23.00): replayed the sealed rounds without regenerating, then non-thinking rounds 1 and 2.
+  `ALL_DONE`, $10.0816; pod deleted, provider confirms only `am5m373kuq`. Shards written by both sessions carry
+  different `runner_sha256` values; no study consumer reads that field, and the runner's behaviour on the inputs
+  both sessions generated is the same (the fix changes only how a line separator inside a record is read).
+- **Admission: two dev-box defects found and fixed (e5d34d3a).**
+  - The record reader skipped v1's calibration groups (`cal_`) but not the supplement's round 0 (`s00t_`, `s00n_`):
+    `CALIBRATION_GROUPS` now names both.
+  - **Code verdicts were not reproducible.** `aadistill.data.code_exec` ran the child with `-I`, which ignores
+    `PYTHONHASHSEED`, so string hashing was random per process. One MBPP candidate (`d934be3a…`, unpacking
+    `set(s)` into two names) passed in the supply audit and failed in the first admission, leaving the
+    non-thinking MBPP cell 171 tokens short of its cap. v4 runs the child with `-s -P` and `PYTHONHASHSEED=0`. Of
+    v1's 812 MBPP candidates it is the only hash-dependent one (seeds 0-3); it passes at seed 0 and is admitted,
+    disclosed as a known false pass. Whether to drop it (171 tokens of the MBPP cap move to reasoning_core's code
+    cell) is the maintainer's call.
+  - `aadistill.training.lineage` (e151b84b) had not been declared in the core-change test; now declared with v4.
+- **Result: `ADMITTED`.** A1 5,930,273 supervised tokens (+0.122%), A2 5,923,670 (+0.011%); category shares within
+  0.060 and 0.005 points. A2's non-padding tokens are 4.2x A1's, so its training costs about 3.2x A1's per seed.
+- **Exact budget (TOKEN_MATCHED.md, "Budget").** Inputs session $1.25-1.50, the hybrid full search $22.35-27.90,
+  search storage about $5, six trainings $57.78: $86.38 expected, $92.18 conservative, against $80.0194 left in
+  Research A and $81.6772 in the project. The gap ($6.36-$12.16) is reported; no cap is raised and no A100 is used.
+- **Stopped here.** Nothing searches, initializes, trains or evaluates before the maintainer's independent review;
+  Research B is not started.

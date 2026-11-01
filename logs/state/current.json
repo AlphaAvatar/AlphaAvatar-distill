@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Research A phase granted ($142.19, project cap $868, L40S only) and executing: check passed; teacher sessions 1 and 2 COMPLETE ($27.08); admission committed (E exhausted: H-T-S 591 / H-N-S 154 seq; C by its fallback, H-T-C); recovery running; B's teacher pending. Owner: decisions.md 2026-10-29.",
+ "blocker": "BLOCKED on the maintainer's review. Research A v1 STOPPED 2026-10-31; v2 data ADMITTED (A1 5,930,273 / A2 5,923,670 supervised tokens; supplement $15.87). Hybrid full search, initialization, six trainings PROPOSED, not authorized; gap $6.36-$12.16 vs Research A. Owner: docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md.",
  "branch": "research/teacher-modes-and-projected-residual: from stage2/reasoning-data d5f1c6f2 (kept), merged with main 72492e46 (its squash, 2026-10-27)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -60,7 +60,7 @@
   "protocol": "12 probes: 6 screening, 6 confirmation. All executed and scored.",
   "why_b_stands": "no valid C2 challenger displaced it"
  },
- "commit": "2f032662f86815f4614d03dd60e67e27651c709a",
+ "commit": "e5d34d3a5e22cdd909e63fefdfe05734a02570f3",
  "cuda_engineering_validation": {
   "_what": "engineering evidence only; none authorizes anything.",
   "authorizes": "nothing",
@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-30T21:25:00Z",
+ "generated_utc": "2026-11-01T00:50:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,10 +123,10 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Research A: recovery to its end; then analysis, the evidence audit and closeout (the phase grant; no new approval).",
+ "next": "The maintainer's review of Research A v2 (TOKEN_MATCHED.md: data, full search, 3x2 matrix, budget). Nothing paid before it.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "Research A: recovery's closeout, analysis.py on the secured evidence, the evidence audit, closeout",
+  "next_work": "Research A v2: the maintainer's review of TOKEN_MATCHED.md",
   "not_next": "no paid resource without a new maintainer decision. Owner: decisions.md 2026-10-21 (Stage-2/3 round opened at $0).",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D-series CLOSED 2026-10-17 (D1 NO-GO, D2 NO_GO, D3 STRUCTURAL_CHANGE + INCONCLUSIVE probes); forward baseline D1 + scored_v1.",
   "then": "nothing follows automatically: every grant is the maintainer's"
@@ -194,14 +194,14 @@
  },
  "read_order": [
   "logs/README.md -- START HERE, the index",
-  "docs/stages/stage-2/teacher_modes/DESIGN.md and docs/stages/stage-1/projected_residual/DESIGN.md -- the live designs"
+  "docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md (Research A v2, for review), DESIGN.md and docs/stages/stage-1/projected_residual/DESIGN.md"
  ],
  "running": {
-  "paid_compute": true,
-  "pods": 1,
+  "paid_compute": false,
+  "pods": 0,
   "network_volumes": 1,
-  "run": "a_recovery_20261030_211948 (pod qa8rgmd67mpgei, 1 x L40S $1.09/h, hard cap $20.00)",
-  "volume": "am5m373kuq (55 GB): the four D4 checkpoints, the two Mix-Augmented checkpoints, Research A's initialization, sealed shards and teacher evaluation"
+  "run": null,
+  "volume": "am5m373kuq (55 GB): the four D4 checkpoints, the two Mix-Augmented checkpoints, Research A's initialization, sealed shards and teacher evaluation; Research A v2's supplement shards"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

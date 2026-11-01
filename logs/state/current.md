@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-30 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-11-01 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,27 +9,29 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A PHASE GRANTED AND EXECUTING (maintainer, 2026-10-29 UTC): $142.19 phase, $868 project cap, the L40S only. Check PASSED; teacher sessions 1 ($5.3342) and 2 ($21.7443) COMPLETE; admission COMMITTED; recovery RUNNING on one L40S. Research B: teacher pending, nothing authorized.**
-Decision record: `logs/budget/decisions.md` 2026-10-29 "Research A's L40S phase APPROVED" (with the check attempts,
-both teacher sessions, the admission and the recovery pricing). Grant: `logs/budget/approvals/teacher_modes_d4_scale_phase_grant.json`.
-Branch `research/teacher-modes-and-projected-residual`; `main` stays at `72492e46`.
-- **Check** ($3.7670, attempt 3 `a_check_20261029_190241` PASSED); record `assets/l40s_check.json`.
-- **Teacher sessions** `a_teacher_20261029_201915` (calibration, the initialization, W00) and
-  `a_teacher_20261030_012648` (E W01-W09, X 32 groups, the teacher's evaluation in both modes): both COMPLETE,
-  pods deleted, provider confirms gone. Secured evaluation archives under the session's scratch store.
-- **Admission** (`data/admission.json`, dev box, $0): E exhausted, so the reached count is the scale (the
-  preregistered rule): I = 1,969 tasks, H-T-S 591 sequences (887 steps per seed), H-N-S 154 (231). C is the
-  registered FALLBACK (H-T-C, 154 sequences, against H-N-S): code_algorithmic's share in X is 5.11 points under I's.
-  The isolation recheck now enforces R9 (193 records of three refused string families removed; the order's own
-  isolation covered only its new tasks).
-- **Recovery** `a_recovery_20261030_211948`: six units on ONE L40S (no 2-GPU stock at 21:15Z); `am5m373kuq`
-  expanded to 55 GB (booked, $3.50); hard cap $20.00 (all-in $19.36 at 796 min); tmux `a_recovery`, scratch
-  `.scratch/research_a/a_recovery_20261030_211948`, pod `qa8rgmd67mpgei`.
-- **Spent:** $30.85 in runs + $3.50 storage of $142.19.
-- **Next:** recovery's closeout; `analysis.py` on the secured unit and teacher evidence; the evidence audit and
-  closeout. Open item for the maintainer: eval-set-1's strict answer rule does not read an emoji-prefixed
-  "Final Answer:" heading (the non-thinking teacher's GSM8K: 55 of 100 "no final answer"); the frozen scorer is
-  unchanged, the S/C decision (static fluid, boxed answers) is unaffected.
+**RESEARCH A v2: DATA ADMITTED, AWAITING THE MAINTAINER'S REVIEW (2026-11-01 UTC). v1 STOPPED 2026-10-31. Nothing paid runs: no pod, only `am5m373kuq`. The hybrid D4 full search, any initialization, the six trainings and Research B are NOT authorized.**
+The review document: [`docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md`](../../docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md)
+(A data, B full search, C 3 x 2 matrix, budget). Decision record: `logs/budget/decisions.md` 2026-10-31 and 2026-11-01.
+Grant: `logs/budget/approvals/teacher_modes_token_matched_grant.json` (study A-TM). Branch
+`research/teacher-modes-and-projected-residual`; `main` stays at `72492e46`.
+- **v1** (`a_recovery_20261030_211948`) was stopped by the maintainer; its units are historical evidence only.
+- **Supplement** (thinking and non-thinking teacher generation, one L40S): `a_supplement_20261031_092108` failed
+  before the engine loaded at non-thinking round 1 (a raw U+2028 split by `splitlines()`, fixed 7d31676f; $5.7873);
+  `a_supplement_20261031_144618` resumed from the sealed shards, `ALL_DONE` ($10.0816). Pod deleted, provider
+  confirms only the volume.
+- **Admission** (`data/token_matched_admission.json`, dev box, $0): `ADMITTED`. A1 (thinking) 5,957 examples, 6,105
+  turns, 1,102 packed sequences, 5,930,273 supervised tokens; A2 (non-thinking) 49,826 / 53,132 / 4,576 /
+  5,923,670. A2 carries 4.2x A1's non-padding tokens (token-matched, not compute-matched). Packs under
+  `artifacts/stages/stage-2/teacher_modes/packs_tm/` (ignored), sha256 in the record.
+- **Fixed on the way** (e5d34d3a): the code sandbox pins the string-hash seed (`code_exec` v4; one MBPP candidate
+  passed or failed at random, disclosed in A); the admission skips the supplement's calibration round; the core-change
+  declaration test is green again (`aadistill.training.lineage` had gone undeclared).
+- **Spent:** A-TM $15.8689 of $95.8883 ($80.0194 left); project $786.3228 of $868 ($81.6772 left); provider balance
+  $79.31.
+- **Owed by the maintainer:** the review of A/B/C; the budget gap (expected $86.38 / conservative $92.18 for the inputs
+  session, the search, its storage and six trainings, against $80.02 left); search storage (300 GB or
+  `prune_weights`); the L40S micro-batch 1 search; the interactive exclusion and the untyped reasoning_core /
+  reasoning_gym cells; the critical-token evaluator extension; whether to drop the hash-dependent MBPP example.
 
 **RESEARCH A AND B: A-E ($3.50) AND B-E ($3.00) PAID ENGINEERING VALIDATIONS AUTHORIZED (maintainer, 2026-10-28 UTC). A-E: PASS (attempt 2 `ae_20261028_093428`; $0.7089 of $3.50 across two attempts). B-E: FAIL (`be_20261028_095332`, $0.4366 of $3.00): trainer smoke OOM on the L40S at the frozen E1 recipe, so resume unmeasured; vLLM median |Δ log-prob| 0.234 > 0.1 nat. Initialization, both fold checks, checkpoint identity and GPU isolation PASS. Both closed; no pod; committed $725.4993 of $740. STOPPED at the maintainer's next decision.**
 Decision record: `logs/budget/decisions.md` 2026-10-28 "A-E ($3.50) and B-E ($3.00) ... authorized". Neither PASS is a scientific GO; A1–A3, B1 and 600M stay unauthorized. The text below is the $0 readiness state the authorization was granted on.

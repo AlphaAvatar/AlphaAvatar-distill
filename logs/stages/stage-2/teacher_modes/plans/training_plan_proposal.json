@@ -1,0 +1,828 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.training_plan_proposal/v1",
+ "written_utc": "2026-11-01T00:25:37Z",
+ "status": "PROPOSED for the maintainer's review; nothing trains before an explicit authorization",
+ "matrix": {
+  "A1": "hybrid Top-1 + hybrid thinking",
+  "A2": "hybrid Top-1 + hybrid non-thinking",
+  "C1": "Thinking-2507 D4 Top-1 + Thinking-2507 + D4-Augmented"
+ },
+ "seeds": [
+  20260726,
+  20260801
+ ],
+ "objective": {
+  "ce_weight": 0.25,
+  "kd_weight": 1.0,
+  "kd_temperature": 1.0,
+  "kd_scope": "assistant",
+  "kd_support": {
+   "support_id": "reference_topk_tail_v1",
+   "top_k": 200
+  }
+ },
+ "baseline_recipe": {
+  "path": "configs/stages/stage-3/e1/e1_r2960k_sa_pca.json",
+  "sha256": "c0eaec2ea03959e3258065b72249e9491fa0f3a458fb7d2eb0db5434fb58c6bb"
+ },
+ "units": [
+  {
+   "unit": "A1-s20260726",
+   "config": {
+    "stage": "stage3_recovery",
+    "run_name": "research_a_v2_A1_s20260726",
+    "student_path": "TO_BE_SET_BY_THE_FULL_SEARCH",
+    "teacher": {
+     "model_id": "Qwen/Qwen3-4B",
+     "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+     "dtype": "bfloat16"
+    },
+    "data_dir": "artifacts/stages/stage-2/teacher_modes/packs_tm/A1",
+    "groups": null,
+    "packing": "ladder",
+    "block_len": 8192,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "device": "auto",
+    "seed": 20260726,
+    "trainable_patterns": [
+     "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+     "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+     "input_layernorm",
+     "post_attention_layernorm",
+     "model\\.norm\\."
+    ],
+    "loss": {
+     "ce_weight": 0.25,
+     "kd_weight": 1.0,
+     "kd_temperature": 1.0,
+     "kd_scope": "assistant",
+     "kd_support": {
+      "support_id": "reference_topk_tail_v1",
+      "top_k": 200
+     }
+    },
+    "optim": {
+     "lr": 5e-05,
+     "weight_decay": 0.01,
+     "betas": [
+      0.9,
+      0.95
+     ],
+     "eps": 1e-08,
+     "grad_clip": 1.0
+    },
+    "schedule": {
+     "total_steps": 1653,
+     "warmup_steps": 83,
+     "min_lr_frac": 0.1
+    },
+    "batch": {
+     "blocks_per_step": 2,
+     "micro_blocks": 1,
+     "context_strategy": "document_isolated"
+    },
+    "checkpoint": {
+     "save_every": 826,
+     "keep_last": 1,
+     "bind_identity": true
+    },
+    "intervals": {
+     "log_every": 10,
+     "eval_every": 206,
+     "eval_blocks": 16
+    },
+    "out_dir": "/runpod-volume/teacher_modes/v2_units/A1-s20260726/train",
+    "rung": 5930273,
+    "val_blocks": 16,
+    "tokenizer_source": "the hybrid Top-1's own tokenizer files (the teacher snapshot's, by sha256)",
+    "lineage": {
+     "teacher": {
+      "model_id": "Qwen/Qwen3-4B",
+      "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "weights_sha256": {
+       "model-00001-of-00003.safetensors": "328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223",
+       "model-00002-of-00003.safetensors": "6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5",
+       "model-00003-of-00003.safetensors": "e4bf436957184f4eeb86a80e9db394503f1f56446b2e6b7edeac5b81470f4ca1"
+      },
+      "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+      "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+      "rope_theta": 1000000.0,
+      "max_position_embeddings": 40960,
+      "vocab_size": 151936
+     },
+     "mode": "thinking",
+     "initialization": {
+      "root_teacher": {
+       "model_id": "Qwen/Qwen3-4B",
+       "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+      },
+      "model_safetensors_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH"
+     },
+     "data": [
+      {
+       "files_sha256": {
+        "blocks.npz": "32a87943433cf6747a897f09160b0068a1288a5cee45e1a306cca8c8e0c67a86",
+        "ladder.json": "dccfe323109be7f157a184fe8d4208354a4e10e0e5b214ce2a4b72088c9f4e75",
+        "audit.jsonl": "7d71e9e1ebfd5fcd1dde56a07914cb7d5797161a2ed9a70eb9fff30ca5aa0a13"
+       },
+       "mode": "thinking",
+       "teacher": {
+        "model_id": "Qwen/Qwen3-4B",
+        "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+       }
+      }
+     ]
+    }
+   },
+   "lineage_validation": {
+    "problems": [],
+    "pending_full_search": true
+   },
+   "accounting": {
+    "packed_sequences": 1102,
+    "optimizer_steps": 1653,
+    "unique_supervised_tokens": 5930273,
+    "supervised_token_exposure": 17790819,
+    "hours": 4.33,
+    "usd": 4.72,
+    "non_padding_tokens": 8924771,
+    "padding_share": 0.0114,
+    "training_flops": 5.142e+17,
+    "documents": 6105,
+    "tasks": 5957,
+    "by_category": {
+     "base_counterpart": 2960578,
+     "fluid": 2969695
+    },
+    "category_share_points": {
+     "base_counterpart": 49.923,
+     "fluid": 50.077
+    }
+   }
+  },
+  {
+   "unit": "A1-s20260801",
+   "config": {
+    "stage": "stage3_recovery",
+    "run_name": "research_a_v2_A1_s20260801",
+    "student_path": "TO_BE_SET_BY_THE_FULL_SEARCH",
+    "teacher": {
+     "model_id": "Qwen/Qwen3-4B",
+     "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+     "dtype": "bfloat16"
+    },
+    "data_dir": "artifacts/stages/stage-2/teacher_modes/packs_tm/A1",
+    "groups": null,
+    "packing": "ladder",
+    "block_len": 8192,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "device": "auto",
+    "seed": 20260801,
+    "trainable_patterns": [
+     "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+     "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+     "input_layernorm",
+     "post_attention_layernorm",
+     "model\\.norm\\."
+    ],
+    "loss": {
+     "ce_weight": 0.25,
+     "kd_weight": 1.0,
+     "kd_temperature": 1.0,
+     "kd_scope": "assistant",
+     "kd_support": {
+      "support_id": "reference_topk_tail_v1",
+      "top_k": 200
+     }
+    },
+    "optim": {
+     "lr": 5e-05,
+     "weight_decay": 0.01,
+     "betas": [
+      0.9,
+      0.95
+     ],
+     "eps": 1e-08,
+     "grad_clip": 1.0
+    },
+    "schedule": {
+     "total_steps": 1653,
+     "warmup_steps": 83,
+     "min_lr_frac": 0.1
+    },
+    "batch": {
+     "blocks_per_step": 2,
+     "micro_blocks": 1,
+     "context_strategy": "document_isolated"
+    },
+    "checkpoint": {
+     "save_every": 826,
+     "keep_last": 1,
+     "bind_identity": true
+    },
+    "intervals": {
+     "log_every": 10,
+     "eval_every": 206,
+     "eval_blocks": 16
+    },
+    "out_dir": "/runpod-volume/teacher_modes/v2_units/A1-s20260801/train",
+    "rung": 5930273,
+    "val_blocks": 16,
+    "tokenizer_source": "the hybrid Top-1's own tokenizer files (the teacher snapshot's, by sha256)",
+    "lineage": {
+     "teacher": {
+      "model_id": "Qwen/Qwen3-4B",
+      "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "weights_sha256": {
+       "model-00001-of-00003.safetensors": "328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223",
+       "model-00002-of-00003.safetensors": "6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5",
+       "model-00003-of-00003.safetensors": "e4bf436957184f4eeb86a80e9db394503f1f56446b2e6b7edeac5b81470f4ca1"
+      },
+      "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+      "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+      "rope_theta": 1000000.0,
+      "max_position_embeddings": 40960,
+      "vocab_size": 151936
+     },
+     "mode": "thinking",
+     "initialization": {
+      "root_teacher": {
+       "model_id": "Qwen/Qwen3-4B",
+       "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+      },
+      "model_safetensors_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH"
+     },
+     "data": [
+      {
+       "files_sha256": {
+        "blocks.npz": "32a87943433cf6747a897f09160b0068a1288a5cee45e1a306cca8c8e0c67a86",
+        "ladder.json": "dccfe323109be7f157a184fe8d4208354a4e10e0e5b214ce2a4b72088c9f4e75",
+        "audit.jsonl": "7d71e9e1ebfd5fcd1dde56a07914cb7d5797161a2ed9a70eb9fff30ca5aa0a13"
+       },
+       "mode": "thinking",
+       "teacher": {
+        "model_id": "Qwen/Qwen3-4B",
+        "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+       }
+      }
+     ]
+    }
+   },
+   "lineage_validation": {
+    "problems": [],
+    "pending_full_search": true
+   },
+   "accounting": {
+    "packed_sequences": 1102,
+    "optimizer_steps": 1653,
+    "unique_supervised_tokens": 5930273,
+    "supervised_token_exposure": 17790819,
+    "hours": 4.33,
+    "usd": 4.72,
+    "non_padding_tokens": 8924771,
+    "padding_share": 0.0114,
+    "training_flops": 5.142e+17,
+    "documents": 6105,
+    "tasks": 5957,
+    "by_category": {
+     "base_counterpart": 2960578,
+     "fluid": 2969695
+    },
+    "category_share_points": {
+     "base_counterpart": 49.923,
+     "fluid": 50.077
+    }
+   }
+  },
+  {
+   "unit": "A2-s20260726",
+   "config": {
+    "stage": "stage3_recovery",
+    "run_name": "research_a_v2_A2_s20260726",
+    "student_path": "TO_BE_SET_BY_THE_FULL_SEARCH",
+    "teacher": {
+     "model_id": "Qwen/Qwen3-4B",
+     "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+     "dtype": "bfloat16"
+    },
+    "data_dir": "artifacts/stages/stage-2/teacher_modes/packs_tm/A2",
+    "groups": null,
+    "packing": "ladder",
+    "block_len": 8192,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "device": "auto",
+    "seed": 20260726,
+    "trainable_patterns": [
+     "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+     "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+     "input_layernorm",
+     "post_attention_layernorm",
+     "model\\.norm\\."
+    ],
+    "loss": {
+     "ce_weight": 0.25,
+     "kd_weight": 1.0,
+     "kd_temperature": 1.0,
+     "kd_scope": "assistant",
+     "kd_support": {
+      "support_id": "reference_topk_tail_v1",
+      "top_k": 200
+     }
+    },
+    "optim": {
+     "lr": 5e-05,
+     "weight_decay": 0.01,
+     "betas": [
+      0.9,
+      0.95
+     ],
+     "eps": 1e-08,
+     "grad_clip": 1.0
+    },
+    "schedule": {
+     "total_steps": 6864,
+     "warmup_steps": 343,
+     "min_lr_frac": 0.1
+    },
+    "batch": {
+     "blocks_per_step": 2,
+     "micro_blocks": 1,
+     "context_strategy": "document_isolated"
+    },
+    "checkpoint": {
+     "save_every": 3432,
+     "keep_last": 1,
+     "bind_identity": true
+    },
+    "intervals": {
+     "log_every": 10,
+     "eval_every": 858,
+     "eval_blocks": 16
+    },
+    "out_dir": "/runpod-volume/teacher_modes/v2_units/A2-s20260726/train",
+    "rung": 5923670,
+    "val_blocks": 16,
+    "tokenizer_source": "the hybrid Top-1's own tokenizer files (the teacher snapshot's, by sha256)",
+    "lineage": {
+     "teacher": {
+      "model_id": "Qwen/Qwen3-4B",
+      "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "weights_sha256": {
+       "model-00001-of-00003.safetensors": "328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223",
+       "model-00002-of-00003.safetensors": "6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5",
+       "model-00003-of-00003.safetensors": "e4bf436957184f4eeb86a80e9db394503f1f56446b2e6b7edeac5b81470f4ca1"
+      },
+      "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+      "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+      "rope_theta": 1000000.0,
+      "max_position_embeddings": 40960,
+      "vocab_size": 151936
+     },
+     "mode": "non_thinking",
+     "initialization": {
+      "root_teacher": {
+       "model_id": "Qwen/Qwen3-4B",
+       "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+      },
+      "model_safetensors_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH"
+     },
+     "data": [
+      {
+       "files_sha256": {
+        "blocks.npz": "cd9e1a2342516b37bc894aff044b978efac7565545f3adc80e2f67cdd62e3666",
+        "ladder.json": "d4d53cc853bc45d77e511179cfb7892ed5c5082c77a63334777b99c5620da0b5",
+        "audit.jsonl": "d1f0f077a3d1ad2acd6ff250f748ea4ce1847d865ed8010b8b9a7ff93a874cc2"
+       },
+       "mode": "non_thinking",
+       "teacher": {
+        "model_id": "Qwen/Qwen3-4B",
+        "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+       }
+      }
+     ]
+    }
+   },
+   "lineage_validation": {
+    "problems": [],
+    "pending_full_search": true
+   },
+   "accounting": {
+    "packed_sequences": 4576,
+    "optimizer_steps": 6864,
+    "unique_supervised_tokens": 5923670,
+    "supervised_token_exposure": 17771010,
+    "hours": 14.03,
+    "usd": 15.29,
+    "non_padding_tokens": 37327460,
+    "padding_share": 0.0042,
+    "training_flops": 2.135e+18,
+    "documents": 53132,
+    "tasks": 49826,
+    "by_category": {
+     "base_counterpart": 2960531,
+     "fluid": 2963139
+    },
+    "category_share_points": {
+     "base_counterpart": 49.978,
+     "fluid": 50.022
+    }
+   }
+  },
+  {
+   "unit": "A2-s20260801",
+   "config": {
+    "stage": "stage3_recovery",
+    "run_name": "research_a_v2_A2_s20260801",
+    "student_path": "TO_BE_SET_BY_THE_FULL_SEARCH",
+    "teacher": {
+     "model_id": "Qwen/Qwen3-4B",
+     "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+     "dtype": "bfloat16"
+    },
+    "data_dir": "artifacts/stages/stage-2/teacher_modes/packs_tm/A2",
+    "groups": null,
+    "packing": "ladder",
+    "block_len": 8192,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "device": "auto",
+    "seed": 20260801,
+    "trainable_patterns": [
+     "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+     "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+     "input_layernorm",
+     "post_attention_layernorm",
+     "model\\.norm\\."
+    ],
+    "loss": {
+     "ce_weight": 0.25,
+     "kd_weight": 1.0,
+     "kd_temperature": 1.0,
+     "kd_scope": "assistant",
+     "kd_support": {
+      "support_id": "reference_topk_tail_v1",
+      "top_k": 200
+     }
+    },
+    "optim": {
+     "lr": 5e-05,
+     "weight_decay": 0.01,
+     "betas": [
+      0.9,
+      0.95
+     ],
+     "eps": 1e-08,
+     "grad_clip": 1.0
+    },
+    "schedule": {
+     "total_steps": 6864,
+     "warmup_steps": 343,
+     "min_lr_frac": 0.1
+    },
+    "batch": {
+     "blocks_per_step": 2,
+     "micro_blocks": 1,
+     "context_strategy": "document_isolated"
+    },
+    "checkpoint": {
+     "save_every": 3432,
+     "keep_last": 1,
+     "bind_identity": true
+    },
+    "intervals": {
+     "log_every": 10,
+     "eval_every": 858,
+     "eval_blocks": 16
+    },
+    "out_dir": "/runpod-volume/teacher_modes/v2_units/A2-s20260801/train",
+    "rung": 5923670,
+    "val_blocks": 16,
+    "tokenizer_source": "the hybrid Top-1's own tokenizer files (the teacher snapshot's, by sha256)",
+    "lineage": {
+     "teacher": {
+      "model_id": "Qwen/Qwen3-4B",
+      "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+      "weights_sha256": {
+       "model-00001-of-00003.safetensors": "328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223",
+       "model-00002-of-00003.safetensors": "6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5",
+       "model-00003-of-00003.safetensors": "e4bf436957184f4eeb86a80e9db394503f1f56446b2e6b7edeac5b81470f4ca1"
+      },
+      "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+      "chat_template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+      "rope_theta": 1000000.0,
+      "max_position_embeddings": 40960,
+      "vocab_size": 151936
+     },
+     "mode": "non_thinking",
+     "initialization": {
+      "root_teacher": {
+       "model_id": "Qwen/Qwen3-4B",
+       "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+      },
+      "model_safetensors_sha256": "TO_BE_SET_BY_THE_FULL_SEARCH"
+     },
+     "data": [
+      {
+       "files_sha256": {
+        "blocks.npz": "cd9e1a2342516b37bc894aff044b978efac7565545f3adc80e2f67cdd62e3666",
+        "ladder.json": "d4d53cc853bc45d77e511179cfb7892ed5c5082c77a63334777b99c5620da0b5",
+        "audit.jsonl": "d1f0f077a3d1ad2acd6ff250f748ea4ce1847d865ed8010b8b9a7ff93a874cc2"
+       },
+       "mode": "non_thinking",
+       "teacher": {
+        "model_id": "Qwen/Qwen3-4B",
+        "revision": "1cfa9a7208912126459214e8b04321603b3df60c"
+       }
+      }
+     ]
+    }
+   },
+   "lineage_validation": {
+    "problems": [],
+    "pending_full_search": true
+   },
+   "accounting": {
+    "packed_sequences": 4576,
+    "optimizer_steps": 6864,
+    "unique_supervised_tokens": 5923670,
+    "supervised_token_exposure": 17771010,
+    "hours": 14.03,
+    "usd": 15.29,
+    "non_padding_tokens": 37327460,
+    "padding_share": 0.0042,
+    "training_flops": 2.135e+18,
+    "documents": 53132,
+    "tasks": 49826,
+    "by_category": {
+     "base_counterpart": 2960531,
+     "fluid": 2963139
+    },
+    "category_share_points": {
+     "base_counterpart": 49.978,
+     "fluid": 50.022
+    }
+   }
+  },
+  {
+   "unit": "C1-s20260726",
+   "config": {
+    "stage": "stage3_recovery",
+    "run_name": "research_a_v2_C1_s20260726",
+    "student_path": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4",
+    "teacher": {
+     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+     "dtype": "bfloat16"
+    },
+    "data_dir": "artifacts/stages/stage-2/reasoning_data/packs/D4A_merged_whole",
+    "groups": null,
+    "packing": "ladder",
+    "block_len": 8192,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "device": "auto",
+    "seed": 20260726,
+    "trainable_patterns": [
+     "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+     "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+     "input_layernorm",
+     "post_attention_layernorm",
+     "model\\.norm\\."
+    ],
+    "loss": {
+     "ce_weight": 0.25,
+     "kd_weight": 1.0,
+     "kd_temperature": 1.0,
+     "kd_scope": "assistant",
+     "kd_support": {
+      "support_id": "reference_topk_tail_v1",
+      "top_k": 200
+     }
+    },
+    "optim": {
+     "lr": 5e-05,
+     "weight_decay": 0.01,
+     "betas": [
+      0.9,
+      0.95
+     ],
+     "eps": 1e-08,
+     "grad_clip": 1.0
+    },
+    "schedule": {
+     "total_steps": 3702,
+     "warmup_steps": 185,
+     "min_lr_frac": 0.1
+    },
+    "batch": {
+     "blocks_per_step": 2,
+     "micro_blocks": 1
+    },
+    "checkpoint": {
+     "save_every": 1851,
+     "keep_last": 1,
+     "bind_identity": true
+    },
+    "intervals": {
+     "log_every": 10,
+     "eval_every": 462,
+     "eval_blocks": 16
+    },
+    "out_dir": "/runpod-volume/teacher_modes/v2_units/C1-s20260726/train",
+    "rung": 5923021,
+    "val_blocks": 16,
+    "tokenizer_source": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+    "lineage": {
+     "teacher": {
+      "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+      "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "weights_sha256": {
+       "model-00001-of-00003.safetensors": "98178c1cddbca8ad76102afdbf76e4df79b64b82377ad4dca34c755cac00571a",
+       "model-00002-of-00003.safetensors": "57b5bd1f667d420350f169342a90b50e5ffc2aa202ba1819da1af3367ff2261f",
+       "model-00003-of-00003.safetensors": "e3cccb84e8926f3f18c334465639939a68af310b0729938fccc2de66a9a31953"
+      },
+      "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+      "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+      "rope_theta": 5000000.0,
+      "max_position_embeddings": 262144,
+      "vocab_size": 151936
+     },
+     "mode": "thinking",
+     "initialization": {
+      "root_teacher": {
+       "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+       "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+      },
+      "model_safetensors_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8"
+     },
+     "data": [
+      {
+       "files_sha256": {
+        "blocks.npz": "8b97b202e2c1f861fe5c99e3a247ce7fdd063c354b7668ddc1ba75fedb8043f3",
+        "audit.jsonl": "0fab85184e83b5b5ebf0454cb656d3752e80f48eeabc75a092a2a9906949080b",
+        "ladder.json": "dabd1405236fe4823d944d8215f6c2a5e8abf765115436578c6446c035e4e8f7"
+       },
+       "mode": "thinking",
+       "teacher": {
+        "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+        "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+       }
+      }
+     ]
+    }
+   },
+   "lineage_validation": {
+    "problems": [],
+    "pending_full_search": false
+   },
+   "accounting": {
+    "packed_sequences": 2468,
+    "optimizer_steps": 3702,
+    "unique_supervised_tokens": 5923021,
+    "supervised_token_exposure": 17769063,
+    "hours": 8.14,
+    "usd": 8.88
+   }
+  },
+  {
+   "unit": "C1-s20260801",
+   "config": {
+    "stage": "stage3_recovery",
+    "run_name": "research_a_v2_C1_s20260801",
+    "student_path": "artifacts/stages/stage-0/calibration_volume/candidates/d4/1301deb71685aa1ca5c7b6cf2c491ac4",
+    "teacher": {
+     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+     "dtype": "bfloat16"
+    },
+    "data_dir": "artifacts/stages/stage-2/reasoning_data/packs/D4A_merged_whole",
+    "groups": null,
+    "packing": "ladder",
+    "block_len": 8192,
+    "dtype": "float32",
+    "autocast_bf16": true,
+    "gradient_checkpointing": true,
+    "device": "auto",
+    "seed": 20260801,
+    "trainable_patterns": [
+     "\\.self_attn\\.(q_proj|k_proj|v_proj|o_proj|q_norm|k_norm)\\.",
+     "\\.mlp\\.(gate_proj|up_proj|down_proj)\\.",
+     "input_layernorm",
+     "post_attention_layernorm",
+     "model\\.norm\\."
+    ],
+    "loss": {
+     "ce_weight": 0.25,
+     "kd_weight": 1.0,
+     "kd_temperature": 1.0,
+     "kd_scope": "assistant",
+     "kd_support": {
+      "support_id": "reference_topk_tail_v1",
+      "top_k": 200
+     }
+    },
+    "optim": {
+     "lr": 5e-05,
+     "weight_decay": 0.01,
+     "betas": [
+      0.9,
+      0.95
+     ],
+     "eps": 1e-08,
+     "grad_clip": 1.0
+    },
+    "schedule": {
+     "total_steps": 3702,
+     "warmup_steps": 185,
+     "min_lr_frac": 0.1
+    },
+    "batch": {
+     "blocks_per_step": 2,
+     "micro_blocks": 1
+    },
+    "checkpoint": {
+     "save_every": 1851,
+     "keep_last": 1,
+     "bind_identity": true
+    },
+    "intervals": {
+     "log_every": 10,
+     "eval_every": 462,
+     "eval_blocks": 16
+    },
+    "out_dir": "/runpod-volume/teacher_modes/v2_units/C1-s20260801/train",
+    "rung": 5923021,
+    "val_blocks": 16,
+    "tokenizer_source": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+    "lineage": {
+     "teacher": {
+      "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+      "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "weights_sha256": {
+       "model-00001-of-00003.safetensors": "98178c1cddbca8ad76102afdbf76e4df79b64b82377ad4dca34c755cac00571a",
+       "model-00002-of-00003.safetensors": "57b5bd1f667d420350f169342a90b50e5ffc2aa202ba1819da1af3367ff2261f",
+       "model-00003-of-00003.safetensors": "e3cccb84e8926f3f18c334465639939a68af310b0729938fccc2de66a9a31953"
+      },
+      "tokenizer_sha256": "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654",
+      "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+      "rope_theta": 5000000.0,
+      "max_position_embeddings": 262144,
+      "vocab_size": 151936
+     },
+     "mode": "thinking",
+     "initialization": {
+      "root_teacher": {
+       "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+       "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+      },
+      "model_safetensors_sha256": "fc28e0dd916d14438163ce9b5bd3f335165dafdf0d61075c065e97caa86dcfe8"
+     },
+     "data": [
+      {
+       "files_sha256": {
+        "blocks.npz": "8b97b202e2c1f861fe5c99e3a247ce7fdd063c354b7668ddc1ba75fedb8043f3",
+        "audit.jsonl": "0fab85184e83b5b5ebf0454cb656d3752e80f48eeabc75a092a2a9906949080b",
+        "ladder.json": "dabd1405236fe4823d944d8215f6c2a5e8abf765115436578c6446c035e4e8f7"
+       },
+       "mode": "thinking",
+       "teacher": {
+        "model_id": "Qwen/Qwen3-4B-Thinking-2507",
+        "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+       }
+      }
+     ]
+    }
+   },
+   "lineage_validation": {
+    "problems": [],
+    "pending_full_search": false
+   },
+   "accounting": {
+    "packed_sequences": 2468,
+    "optimizer_steps": 3702,
+    "unique_supervised_tokens": 5923021,
+    "supervised_token_exposure": 17769063,
+    "hours": 8.14,
+    "usd": 8.88
+   }
+  }
+ ],
+ "cost": {
+  "usd_expected_training": 57.78,
+  "basis": {
+   "seconds_per_step": 6.7,
+   "evaluation_seconds_per_unit": 3917.1,
+   "fixed_seconds_per_unit": 600.0,
+   "usd_per_hour": 1.09
+  }
+ },
+ "authorizes": "nothing"
+}

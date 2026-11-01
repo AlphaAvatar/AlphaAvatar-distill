@@ -23,9 +23,98 @@ Decided by the maintainer on 2026-10-31, in four briefs and one answer in sessio
 | [`full_search_proposal.json`](../../../../configs/stages/stage-2/teacher_modes/full_search_proposal.json) | B |
 | [`plans/training_plan_proposal.json`](../../../../logs/stages/stage-2/teacher_modes/plans/training_plan_proposal.json) | C: every unit's config, lineage block and accounting |
 
-## A. Data
+## A. Data (admitted 2026-11-01)
 
-_Filled from the admission record once the supplement session's records are secured._
+Owner: [`data/token_matched_admission.json`](../../../../logs/stages/stage-2/teacher_modes/data/token_matched_admission.json),
+terminal `ADMITTED` (design `2ba937fb…`, plan `a48ce65a…`, order_v2 `02c98b81…`). Built on the dev box at $0 from
+v1's sealed records (identity `848f6508…`) and the supplement's (`0d39ad93…`), through v1's frozen verdict.
+
+**Both arms meet the target** (per mode 5,923,021; total over target ≤ 0.5%, category share within 0.5 points).
+
+| | A1 (thinking) | A2 (non-thinking) |
+| --- | ---: | ---: |
+| examples | 5,957 | 49,826 |
+| turns | 6,105 | 53,132 |
+| packed sequences (8,192 tokens) | 1,102 | 4,576 |
+| unique supervised tokens | 5,930,273 (+0.122%) | 5,923,670 (+0.011%) |
+| base-corpus / fluid share | 49.923% / 50.077% (0.060 points) | 49.978% / 50.022% (0.005 points) |
+| reasoning / answer tokens | 4,983,377 / 946,896 | 0 / 5,923,670 |
+| non-padding tokens (prompt/context) | 8,924,771 (2,994,498) | 37,327,460 (31,403,790) |
+| padding share | 1.14% | 0.42% |
+| optimizer steps (3 epochs, batch size 2) | 1,653 | 6,864 |
+| supervised-token / non-padding-token exposure | 17,790,819 / 26,774,313 | 17,771,010 / 111,982,380 |
+| training FLOPs | 5.14e17 | 2.14e18 |
+| supervised tokens reused from v1 / new | 3,293,941 / 2,636,332 | 2,774,856 / 3,148,814 |
+| validation | 16 sequences, 77 turns (pool 217) | 16 sequences, 201 turns (pool 201) |
+
+**Token-matched is not compute-matched.** Non-thinking turns pair long prompts with short answers (5.3 context
+tokens per supervised token, against 0.5 in thinking mode), so at equal supervised tokens A2 carries 4.2× A1's
+non-padding tokens and 4.15× its packed sequences, optimizer steps and training FLOPs.
+
+**By cell** (supervised tokens). Quota = the category total × the cell's share: the base-corpus category's five types
+one fifth each (code = MBPP capped at the smaller mode's supply + reasoning_core), the fluid cells D4's increment
+shares. Whole examples; each category stops at the first example reaching its total; inside it, the cell furthest
+behind its share goes next, and inside a cell, the family furthest behind the two modes' mean family shares. The
+tolerance is on the categories, so a cell may differ by its last examples (A1's interactive cell +3.5%: thinking-mode
+episodes average about 1,260 supervised tokens).
+
+| cell | quota | A1 | A2 | family TVD between modes |
+| --- | ---: | ---: | ---: | ---: |
+| competition math (MATH train) | 592,101 | 591,618 | 592,022 | 0.019 |
+| GSM8K train | 592,101 | 592,205 | 591,639 | 0.000 |
+| SQuAD v2 answerable | 592,101 | 591,549 | 591,546 | 0.000 |
+| HotpotQA | 592,101 | 591,757 | 591,531 | 0.000 |
+| code: MBPP | 38,431 | 38,512 | 38,291 | 0.000 |
+| code: reasoning_core | 553,670 | 554,937 | 555,502 | 0.147 |
+| abstract_analogical / project generators | 365,838 | 366,150 | 365,686 | 0.153 |
+| compositional_generalization / reasoning_core | 119,546 | 118,760 | 119,661 | 0.000 |
+| compositional_generalization / reasoning_gym | 100,877 | 99,330 | 100,625 | 0.085 |
+| compositional_generalization / project generators | 416,322 | 415,768 | 416,045 | 0.233 |
+| inductive_rule_discovery / project generators | 729,632 | 725,310 | 729,532 | 0.015 |
+| interactive_adaptation / project generators | 497,314 | 514,586 | 497,683 | 0.183 |
+| task_contained_deduction / reasoning_core | 171,405 | 170,571 | 171,399 | 0.000 |
+| task_contained_deduction / reasoning_gym | 109,160 | 108,857 | 110,414 | 0.136 |
+| task_contained_deduction / project generators | 452,420 | 450,363 | 452,094 | 0.032 |
+
+Family TVD is between the two modes' admitted family shares inside a cell; where a family's yield differs by mode
+(non-thinking answers more of some generator families wrong), the shares differ and are reported, not equalized.
+
+**Refusals and isolation.**
+- Isolation recheck against eval-set-1 (R1, R2, R9): 193 (example, mode) pairs of R9's refused families removed
+  (string_induction@v2 `str.caesar` 64, `str.duplicate_each` 53, `str.double_last` 76); the remaining 70,580 pass.
+- Refused in design cells (every candidate failed): thinking: answer 1,412, ending 1,610 (training-length limits,
+  repetition stops), isolation 102, protocol 1; non-thinking: answer 19,244, ending 2,675, isolation 91, action
+  legality 24. Sources outside the design (not selected): thinking 887, non-thinking 3,597 examples.
+- Calibration units (v1's and the supplement's round 0) are never training data and are held out of both packs.
+
+**One known false pass, disclosed.** An MBPP candidate in A2 (`d934be3a…`, 171 supervised tokens) unpacks
+`set(s)` into two names: its asserts pass at string-hash seeds 0 and 1 and fail at 2 and 3. The code sandbox now
+pins the seed (`aadistill.data.code_exec` v4, e5d34d3a), so it is admitted on every run; before, the verdict was
+random per process (the supply audit passed it, the first admission failed it and came up 171 tokens short of the
+MBPP cap). It is the only hash-dependent one of v1's 812 MBPP candidates. Removing it would move 171 tokens of the
+MBPP cap to the reasoning_core code cell: the maintainer's call.
+
+**Generation (the supplement).**
+- `a_supplement_20261031_092108`: round 0 (calibration: 801 units non-thinking, 12 thinking) and thinking round 1
+  (7,232 examples, 18,977,409 generated tokens) sealed. It failed at non-thinking round 1 before the engine loaded:
+  the runner's `splitlines()` split a GSM8K problem at a raw U+2028 (fixed in 7d31676f). $5.7873.
+- `a_supplement_20261031_144618`: replayed the sealed rounds without regenerating; non-thinking round 1 (65,813
+  examples, 23,171,660 generated tokens, 8.8 h with second candidates) and round 2 (HotpotQA's last 3,332 examples,
+  154,022 tokens). `ALL_DONE`, $10.0816; pod deleted, provider confirms only am5m373kuq.
+- The non-thinking HotpotQA queue ended at 1.03× need on the pod (below its 1.05 margin); the admission reaches the
+  cell's share of the category.
+
+**Manifest and storage.**
+- A1 pack `artifacts/stages/stage-2/teacher_modes/packs_tm/A1`: `blocks.npz` `32a87943…` (91.6 MB), `ladder.json`
+  `dccfe323…`, `audit.jsonl` `7d71e9e1…`.
+- A2 pack: `blocks.npz` `cd9e1a23…` (376.2 MB), `ladder.json` `d4d53cc8…`, `audit.jsonl` `d1f0f077…`.
+- Both `token_documents.document_isolated` (each turn attends only to itself), sequence length 8,192, teacher
+  `Qwen/Qwen3-4B@1cfa9a72` in its own mode. Packs and stores stay outside git (`artifacts/`, `.scratch/`); the
+  supplement's sealed shards are also on am5m373kuq.
+
+**Actual cost.** The supplement's two sessions: $15.8689 ($5.7873 + $10.0816), inside its original $23.00
+(`a_supplement_20261031_091618` created no resource). Study A-TM: $15.8689 of $95.8883 spent, $80.0194 left.
+Project: $786.3228 of $868 committed, $81.6772 left; the provider account's balance is $79.31.
 
 ## B. The hybrid D4 full search (proposed, not run)
 
@@ -151,10 +240,10 @@ modes, and the item sub-type is `<type>|<mode>`:
 | | A1 | A2 | C1 |
 | --- | --- | --- | --- |
 | packing / context strategy | token-native turns, each turn attends only to itself (`document_isolated`) | the same | D4-Augmented's ladder: cross-context within system-prompt groups (kept, disclosed) |
-| packed sequences, optimizer steps | from the admission | from the admission | 2,468 sequences, 3,702 steps (warmup 185, eval every 462, save every 1,851) |
-| supervised tokens / exposure | about 5.923M / 3 × | about 5.923M / 3 × | 5,923,021 / 17,769,063 |
-| non-padding tokens | from the admission | from the admission | 7,882,298 (61.0% padding) |
-| reasoning / answer tokens | from the admission | answer only (preclosed think) | E1 part 2,142,358 / 818,149; fluid part 2,677,056 / 285,458 |
+| packed sequences, optimizer steps | 1,102 sequences, 1,653 steps (warmup 83, save every 826) | 4,576 sequences, 6,864 steps | 2,468 sequences, 3,702 steps (warmup 185, eval every 462, save every 1,851) |
+| supervised tokens / exposure | 5,930,273 / 17,790,819 | 5,923,670 / 17,771,010 | 5,923,021 / 17,769,063 |
+| non-padding tokens | 8,924,771 (1.1% padding) | 37,327,460 (0.4% padding) | 7,882,298 (61.0% padding) |
+| reasoning / answer tokens | 4,983,377 / 946,896 | 0 / 5,923,670 (preclosed think) | E1 part 2,142,358 / 818,149; fluid part 2,677,056 / 285,458 |
 | tokenizer | the hybrid's | the hybrid's | the PCA init directory's (Thinking-2507's) |
 | evaluation | eval-set-1 v2 (frozen), nucleus_v1, thinking mode | the same, non-thinking mode | the same, Thinking-2507's template |
 
@@ -190,12 +279,32 @@ template and the weights tell them apart.
 
 Token-matched is neither step-matched nor FLOPs-matched.
 
-**Cost (estimates; the admission's numbers replace the A rows).**
+**Cost (estimates, `training_plan_proposal.json`).**
 - Basis: 6.7 s per optimizer step on the L40S (v1's measured H-T-C), the student evaluation's 3,917 s per unit,
   10 min fixed per unit, $1.09/h.
-- C1: 3,702 steps, about 8.1 h and $8.9 per seed.
-- A1 and A2: from their packs below.
+- A1: 1,653 steps, 4.33 h, $4.72 per seed. A2: 6,864 steps, 14.03 h, $15.29 per seed. C1: 3,702 steps, 8.14 h,
+  $8.88 per seed.
+- Six runs: $57.78.
 
 ---
 
-_Sections A and the budget summary are completed after the supplement session._
+## Budget (exact figures; nothing below is authorized)
+
+| item | expected | conservative |
+| --- | ---: | ---: |
+| full-search inputs session (calibration top-up, the state evaluation's generation) | $1.25 | $1.50 |
+| hybrid D4 full search, one L40S at micro-batch 1 (20.5 h / 25.6 h) | $22.35 | $27.90 |
+| search storage (about 300 GB for a week, or `prune_weights`) | $5.00 | $5.00 |
+| six trainings (A1, A2, C1 × 2 seeds) | $57.78 | $57.78 |
+| **total** | **$86.38** | **$92.18** |
+| left: Research A ($142.19 cumulative) | $80.02 | $80.02 |
+| **gap against Research A** | **$6.36** | **$12.16** |
+| left: project ($868 cumulative) | $81.68 | $81.68 |
+| **gap against the project** | **$4.70** | **$10.50** |
+
+- The provider account's balance ($79.31) is below either total.
+- A2 is the largest item: its 37.3M non-padding tokens make each seed about 3.2× A1's cost.
+- Neither cap is raised and no A100 is used without the maintainer. Options that change the total:
+  - `prune_weights` (about $5 less storage);
+  - micro-batch 3 on an A100 for the search (a hardware change);
+  - a cap decision.
