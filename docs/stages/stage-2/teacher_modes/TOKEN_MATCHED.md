@@ -1,6 +1,7 @@
 # Research A v2 — token-matched data, the hybrid D4 full search (proposed), the 3 × 2 training matrix (proposed)
 
-**Status: $0 work after the maintainer's independent review (2026-11-01), stopped at the paid boundary.**
+**Status: the A1 phase is executing (maintainer 2026-11-01, "Execute A1 First"; section D). Before it, the $0 work
+after the maintainer's independent review (2026-11-01).**
 - Nothing searches, initializes, trains or evaluates a student, and no inputs session runs. Research B stays
   pending.
 - The review accepted A in principle, accepted B on conditions and confirmed C's matrix. It asked for:
@@ -508,6 +509,79 @@ earlier turns and function responses. Counts are exact, from the pack's `audit.j
 - Seen in passing: one glaive conversation (`glaive-000941`) has turns in both training and validation.
 
 ---
+
+## D. The A1 phase (maintainer 2026-11-01, "Execute A1 First": executing)
+
+A1 end to end: the hybrid D4 full search's inputs, the search, A1's two seeds trained from its Top-1 and formally
+evaluated. The 3 × 2 matrix is unchanged; A2 and C1 are neither trained nor evaluated and consume no budget. Research
+B stays pending.
+
+**Money.**
+- A1's new spend has a hard cap of $77.00. The phase caps are:
+  - inputs $2.65;
+  - search $41.41;
+  - 350 GB of storage for 14 days, $13.34;
+  - $7.05 per seed.
+- The grant (`approvals/teacher_modes_token_matched_grant.json`, amended) enforces a cap per session kind:
+  - `inputs` $2.65, `search` $41.41, `train_a1` $14.10;
+  - every kind draws on one sessions envelope of $63.66;
+  - the volume's $13.34 sits outside that envelope.
+- Neither Research A's $142.19 nor the project's $868 is raised. No A100 is used.
+- The provider's `spendLimit` ($80) is per hour, not cumulative (provider docs). The cumulative constraint at the
+  provider is the balance.
+
+**Resources.**
+- One L40S at a time.
+- The new volume `4rhubprswo` (350 GB, US-TX-3, created 2026-11-01): the only datacenter at the time with both network
+  storage and L40S stock.
+- `am5m373kuq` stays the historical archive.
+
+**Phase A (inputs)** (`inputs_session.py`, kind `inputs`, `inputs_protocol.json`).
+- Calibration top-up (`calibration_topup_v1.jsonl`): 22 string_induction units (refill plus reserve, in D4's order)
+  and 14 code prompts, both modes.
+  - rag_evidence H-N was never short: its two refill units were the ones isolation had removed. Passing over them,
+    the existing records reach the quota.
+  - Quotas are unchanged. Cells under 5 tasks are reported THIN.
+- State evaluation, re-queued before any generation:
+  - the maintainer's minimum of 5 independent tasks per (type, mode) beside the 12,000 scored positions;
+  - queues at 2× the expected need: 2,459 prompts, of which 1,716 of the first build's 1,722 are unchanged in place;
+  - code prompts re-exported with reasoning-core 0.5.0 at the same seed bases (supersets);
+  - the isolation proof regenerated (R1–R4, R7 and R9 pass).
+- On the pod, each type's queue is generated in order until both thresholds hold, both modes from the queue's start.
+- Then, at $0:
+  - the profiles are rebuilt (`build_calibration_supplement profiles --inputs-records`);
+  - the suite is frozen (`freeze_state_eval.py`: tags, one critical group per mode, manifest, measurement protocol id);
+  - the isolation and type audits are re-run.
+
+**Phase B (the search)** (`full_search.py`, kind `search`).
+- The method is resolved from the forward baseline, with these choices:
+  - the hybrid root, its shards hashed on the pod;
+  - micro-batch 1, prefix reuse and on-device validation;
+  - `prune_weights` false;
+  - seed 20260815 and C3's 596M geometry.
+- Level 0's first evaluation is also the device check:
+  - both modes' critical groups must be present and their 50:50 mean must hold;
+  - the frozen epsilon rule: the child materialized, reloaded and measured 10 times, with the range below 1e-4.
+- A deadline stops the search with its journal intact; a partial ranking is never a Top-1.
+- On completion:
+  - the commit (k = 1);
+  - the Pareto order of every complete leaf;
+  - the Top-1 copied to `search_a1/top1` on the volume, by sha256, and pulled to the dev box.
+
+**Phases C and D (A1)** (`a1_units.py`, kind `train_a1`; `training_plan_a1.json` from the committed search record).
+- Seed 20260726, then seed 20260801. Each:
+  - the hybrid's tokenizer staged by sha256;
+  - launch admission on the pod, which checks the lineage, Top-1 bytes and effective config, the search record, the
+    tokenizer and the pack;
+  - training with the frozen recipe, resuming from the latest save point with its lineage stamp;
+  - eval-set-1 v2 with nucleus_v1 in thinking mode.
+- A failure of the first seed stops the session. The second seed is never skipped because of the first one's result.
+- `a1_analysis.py` reports:
+  - the static fluid correctness by axis per seed (Wilson intervals) and the two seeds' paired bootstrap;
+  - the interactive axis as exploratory;
+  - rollout integrity and reasoning and answer lengths;
+  - the gap to the teacher's thinking mode;
+  - the training logs.
 
 ## Budget (re-estimated 2026-11-01; nothing below is authorized)
 

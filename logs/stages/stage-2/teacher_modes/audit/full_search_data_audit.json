@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.teacher_modes.full_search_data_audit/v1",
- "written_utc": "2026-11-01T10:42:19Z",
+ "written_utc": "2026-11-01T13:00:44Z",
  "inputs": {
   "full_search_types.json": "configs/stages/stage-2/teacher_modes/full_search_types.json",
   "hybrid_d4_profiles.json": "configs/stages/stage-2/teacher_modes/hybrid_d4_profiles.json",
@@ -54,7 +54,7 @@
    ]
   },
   "state_evaluation_queue_at_risk": [],
-  "calibration_code_prompts": 9
+  "calibration_code_prompts": 14
  },
  "table": [
   {
@@ -94,20 +94,20 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 21,
+    "queue_prompts": 29,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 3057.9
     },
     "expected_tasks_needed": 4,
-    "queue_over_expected_need": 5.35,
+    "queue_over_expected_need": 7.39,
     "at_risk": false,
     "sources": {
-     "grid.fill_rows": 5,
-     "grid.flip_h": 4,
-     "grid.flip_v": 4,
-     "grid.rotate_ccw": 4,
-     "grid.rotate_cw": 4
+     "grid.fill_rows": 6,
+     "grid.flip_h": 6,
+     "grid.flip_v": 6,
+     "grid.rotate_ccw": 6,
+     "grid.rotate_cw": 5
     },
     "generated": false
    },
@@ -159,20 +159,20 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 21,
+    "queue_prompts": 29,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 839.6
     },
     "expected_tasks_needed": 15,
-    "queue_over_expected_need": 1.47,
+    "queue_over_expected_need": 2.03,
     "at_risk": false,
     "sources": {
-     "grid.fill_rows": 5,
-     "grid.flip_h": 4,
-     "grid.flip_v": 4,
-     "grid.rotate_ccw": 4,
-     "grid.rotate_cw": 4
+     "grid.fill_rows": 6,
+     "grid.flip_h": 6,
+     "grid.flip_v": 6,
+     "grid.rotate_ccw": 6,
+     "grid.rotate_cw": 5
     },
     "generated": false
    },
@@ -218,17 +218,17 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 53,
+    "queue_prompts": 75,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 1142.5
     },
     "expected_tasks_needed": 11,
-    "queue_over_expected_need": 5.05,
+    "queue_over_expected_need": 7.14,
     "at_risk": false,
     "sources": {
-     "comp.chain3": 27,
-     "comp.conditional_chain": 26
+     "comp.chain3": 38,
+     "comp.conditional_chain": 37
     },
     "generated": false
    },
@@ -274,17 +274,17 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 53,
+    "queue_prompts": 75,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 321.3
     },
     "expected_tasks_needed": 38,
-    "queue_over_expected_need": 1.42,
+    "queue_over_expected_need": 2.01,
     "at_risk": false,
     "sources": {
-     "comp.chain3": 27,
-     "comp.conditional_chain": 26
+     "comp.chain3": 38,
+     "comp.conditional_chain": 37
     },
     "generated": false
    },
@@ -330,18 +330,18 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 39,
+    "queue_prompts": 56,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 4217.8
     },
     "expected_tasks_needed": 3,
-    "queue_over_expected_need": 13.71,
+    "queue_over_expected_need": 19.68,
     "at_risk": false,
     "sources": {
-     "scan.rev_sur": 13,
-     "scan.seq_rev": 13,
-     "scan.sur_sur": 13
+     "scan.rev_sur": 19,
+     "scan.seq_rev": 19,
+     "scan.sur_sur": 18
     },
     "generated": false
    },
@@ -392,18 +392,18 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 39,
+    "queue_prompts": 56,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 434.5
     },
     "expected_tasks_needed": 28,
-    "queue_over_expected_need": 1.41,
+    "queue_over_expected_need": 2.03,
     "at_risk": false,
     "sources": {
-     "scan.rev_sur": 13,
-     "scan.seq_rev": 13,
-     "scan.sur_sur": 13
+     "scan.rev_sur": 19,
+     "scan.seq_rev": 19,
+     "scan.sur_sur": 18
     },
     "generated": false
    },
@@ -455,26 +455,26 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 23,
+    "queue_prompts": 33,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 2098.0
     },
     "expected_tasks_needed": 6,
-    "queue_over_expected_need": 4.02,
+    "queue_over_expected_need": 5.77,
     "at_risk": false,
     "sources": {
      "list.append_sum": 3,
-     "list.dedupe": 2,
-     "list.duplicate_each": 2,
-     "list.keep_even": 2,
-     "list.min": 2,
-     "list.mod_k": 2,
-     "list.mul_k": 2,
-     "list.pairwise_sums": 2,
-     "list.sort_asc": 2,
-     "list.square": 2,
-     "list.swap_ends": 2
+     "list.dedupe": 3,
+     "list.duplicate_each": 3,
+     "list.keep_even": 3,
+     "list.min": 3,
+     "list.mod_k": 3,
+     "list.mul_k": 3,
+     "list.pairwise_sums": 3,
+     "list.sort_asc": 3,
+     "list.square": 3,
+     "list.swap_ends": 3
     },
     "generated": false
    },
@@ -532,26 +532,26 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 23,
+    "queue_prompts": 33,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 733.6
     },
     "expected_tasks_needed": 17,
-    "queue_over_expected_need": 1.41,
+    "queue_over_expected_need": 2.02,
     "at_risk": false,
     "sources": {
      "list.append_sum": 3,
-     "list.dedupe": 2,
-     "list.duplicate_each": 2,
-     "list.keep_even": 2,
-     "list.min": 2,
-     "list.mod_k": 2,
-     "list.mul_k": 2,
-     "list.pairwise_sums": 2,
-     "list.sort_asc": 2,
-     "list.square": 2,
-     "list.swap_ends": 2
+     "list.dedupe": 3,
+     "list.duplicate_each": 3,
+     "list.keep_even": 3,
+     "list.min": 3,
+     "list.mod_k": 3,
+     "list.mul_k": 3,
+     "list.pairwise_sums": 3,
+     "list.sort_asc": 3,
+     "list.square": 3,
+     "list.swap_ends": 3
     },
     "generated": false
    },
@@ -595,19 +595,19 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 31,
+    "queue_prompts": 44,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 1966.8
     },
     "expected_tasks_needed": 7,
-    "queue_over_expected_need": 5.08,
+    "queue_over_expected_need": 7.21,
     "at_risk": false,
     "sources": {
-     "str.append_first": 8,
-     "str.keep_even_positions": 8,
-     "str.mirror": 8,
-     "str.sort_letters": 7
+     "str.append_first": 11,
+     "str.keep_even_positions": 11,
+     "str.mirror": 11,
+     "str.sort_letters": 11
     },
     "generated": false
    },
@@ -663,19 +663,19 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 31,
+    "queue_prompts": 44,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 557.5
     },
     "expected_tasks_needed": 22,
-    "queue_over_expected_need": 1.44,
+    "queue_over_expected_need": 2.04,
     "at_risk": false,
     "sources": {
-     "str.append_first": 8,
-     "str.keep_even_positions": 8,
-     "str.mirror": 8,
-     "str.sort_letters": 7
+     "str.append_first": 11,
+     "str.keep_even_positions": 11,
+     "str.mirror": 11,
+     "str.sort_letters": 11
     },
     "generated": false
    },
@@ -724,17 +724,17 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 53,
+    "queue_prompts": 77,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 1250.8
     },
     "expected_tasks_needed": 10,
-    "queue_over_expected_need": 5.52,
+    "queue_over_expected_need": 8.03,
     "at_risk": false,
     "sources": {
-     "track.move": 27,
-     "track.move_remove": 26
+     "track.move": 39,
+     "track.move_remove": 38
     },
     "generated": false
    },
@@ -780,17 +780,17 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 53,
+    "queue_prompts": 77,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 307.5
     },
     "expected_tasks_needed": 40,
-    "queue_over_expected_need": 1.36,
+    "queue_over_expected_need": 1.97,
     "at_risk": false,
     "sources": {
-     "track.move": 27,
-     "track.move_remove": 26
+     "track.move": 39,
+     "track.move_remove": 38
     },
     "generated": false
    },
@@ -834,16 +834,16 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 21,
+    "queue_prompts": 30,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 3574.7
     },
     "expected_tasks_needed": 4,
-    "queue_over_expected_need": 6.26,
+    "queue_over_expected_need": 8.94,
     "at_risk": false,
     "sources": {
-     "kk.counting": 21
+     "kk.counting": 30
     },
     "generated": false
    },
@@ -890,16 +890,16 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 21,
+    "queue_prompts": 30,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 792.7
     },
     "expected_tasks_needed": 16,
-    "queue_over_expected_need": 1.39,
+    "queue_over_expected_need": 1.98,
     "at_risk": false,
     "sources": {
-     "kk.counting": 21
+     "kk.counting": 30
     },
     "generated": false
    },
@@ -943,16 +943,16 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 70,
+    "queue_prompts": 99,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 1381.3
     },
     "expected_tasks_needed": 9,
-    "queue_over_expected_need": 8.06,
+    "queue_over_expected_need": 11.4,
     "at_risk": false,
     "sources": {
-     "order.race": 70
+     "order.race": 99
     },
     "generated": false
    },
@@ -998,16 +998,16 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 70,
+    "queue_prompts": 99,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 243.0
     },
     "expected_tasks_needed": 50,
-    "queue_over_expected_need": 1.42,
+    "queue_over_expected_need": 2.0,
     "at_risk": false,
     "sources": {
-     "order.race": 70
+     "order.race": 99
     },
     "generated": false
    },
@@ -1051,16 +1051,16 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 43,
+    "queue_prompts": 61,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 2629.0
     },
     "expected_tasks_needed": 5,
-    "queue_over_expected_need": 9.42,
+    "queue_over_expected_need": 13.36,
     "at_risk": false,
     "sources": {
-     "corpus_v2_openmath": 43
+     "corpus_v2_openmath": 61
     },
     "generated": false
    },
@@ -1107,16 +1107,16 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 43,
+    "queue_prompts": 61,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 393.5
     },
     "expected_tasks_needed": 31,
-    "queue_over_expected_need": 1.41,
+    "queue_over_expected_need": 2.0,
     "at_risk": false,
     "sources": {
-     "corpus_v2_openmath": 43
+     "corpus_v2_openmath": 61
     },
     "generated": false
    },
@@ -1160,16 +1160,16 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 73,
+    "queue_prompts": 104,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 1337.6
     },
     "expected_tasks_needed": 9,
-    "queue_over_expected_need": 8.14,
+    "queue_over_expected_need": 11.59,
     "at_risk": false,
     "sources": {
-     "gsm8k_train": 73
+     "gsm8k_train": 104
     },
     "generated": false
    },
@@ -1215,16 +1215,16 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 73,
+    "queue_prompts": 104,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 232.2
     },
     "expected_tasks_needed": 52,
-    "queue_over_expected_need": 1.41,
+    "queue_over_expected_need": 2.01,
     "at_risk": false,
     "sources": {
-     "gsm8k_train": 73
+     "gsm8k_train": 104
     },
     "generated": false
    },
@@ -1268,16 +1268,16 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 590,
+    "queue_prompts": 843,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 320.5
     },
     "expected_tasks_needed": 38,
-    "queue_over_expected_need": 15.76,
+    "queue_over_expected_need": 22.52,
     "at_risk": false,
     "sources": {
-     "squad_v2_train_answerable": 590
+     "squad_v2_train_answerable": 843
     },
     "generated": false
    },
@@ -1321,16 +1321,16 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 590,
+    "queue_prompts": 843,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 28.5
     },
     "expected_tasks_needed": 422,
-    "queue_over_expected_need": 1.4,
+    "queue_over_expected_need": 2.0,
     "at_risk": false,
     "sources": {
-     "squad_v2_train_answerable": 590
+     "squad_v2_train_answerable": 843
     },
     "generated": false
    },
@@ -1377,16 +1377,16 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 683,
+    "queue_prompts": 976,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 661.9
     },
     "expected_tasks_needed": 19,
-    "queue_over_expected_need": 37.67,
+    "queue_over_expected_need": 53.83,
     "at_risk": false,
     "sources": {
-     "hotpot_qa_train": 683
+     "hotpot_qa_train": 976
     },
     "generated": false
    },
@@ -1430,16 +1430,16 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 683,
+    "queue_prompts": 976,
     "planning_yield": {
      "natural_termination_share": 1.0,
      "scored_positions_per_terminated_task": 24.6
     },
     "expected_tasks_needed": 488,
-    "queue_over_expected_need": 1.4,
+    "queue_over_expected_need": 2.0,
     "at_risk": false,
     "sources": {
-     "hotpot_qa_train": 683
+     "hotpot_qa_train": 976
     },
     "generated": false
    },
@@ -1479,16 +1479,16 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 22,
+    "queue_prompts": 32,
     "planning_yield": {
      "natural_termination_share": 0.518,
      "scored_positions_per_terminated_task": 2179
     },
     "expected_tasks_needed": 11,
-    "queue_over_expected_need": 2.07,
+    "queue_over_expected_need": 3.01,
     "at_risk": false,
     "sources": {
-     "reasoning_core/controlled_code_execution": 22
+     "reasoning_core/controlled_code_execution": 32
     },
     "generated": false
    },
@@ -1534,16 +1534,16 @@
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
-    "queue_prompts": 22,
+    "queue_prompts": 32,
     "planning_yield": {
      "natural_termination_share": 0.937,
      "scored_positions_per_terminated_task": 819
     },
     "expected_tasks_needed": 16,
-    "queue_over_expected_need": 1.41,
+    "queue_over_expected_need": 2.05,
     "at_risk": false,
     "sources": {
-     "reasoning_core/controlled_code_execution": 22
+     "reasoning_core/controlled_code_execution": 32
     },
     "generated": false
    },
@@ -1651,7 +1651,7 @@
    "role": "supporting (base-corpus counterpart)",
    "search_types": [],
    "typed_in_search": false,
-   "quota_supervised_tokens": 38431.0,
+   "quota_supervised_tokens": 38260.0,
    "why_not_typed": "MBPP is exhausted by training (every eligible task is a training task); the code type uses reasoning_core's code modules, the code cell's main training source"
   },
   "supporting.code_algorithmic/reasoning_core": {
@@ -1661,7 +1661,7 @@
     "code"
    ],
    "typed_in_search": true,
-   "quota_supervised_tokens": 553670.4,
+   "quota_supervised_tokens": 553841.4,
    "why_not_typed": null
   },
   "supporting.math_gsm8k/gsm8k_train": {
@@ -1717,9 +1717,9 @@
    }
   },
   "base_counterpart": {
-   "training_share_typed_in_search": 0.987,
+   "training_share_typed_in_search": 0.9871,
    "training_share_not_typed": {
-    "supporting.code_algorithmic/mbpp_train": 0.013
+    "supporting.code_algorithmic/mbpp_train": 0.0129
    }
   },
   "notes": [
@@ -1783,7 +1783,7 @@
     "primary.task_contained_deduction/reasoning_core": 0.0289,
     "primary.task_contained_deduction/reasoning_gym": 0.0186,
     "primary.task_contained_deduction/s0_generators_v2_calsplit": 0.0763,
-    "supporting.code_algorithmic/mbpp_train": 0.0065,
+    "supporting.code_algorithmic/mbpp_train": 0.0064,
     "supporting.code_algorithmic/reasoning_core": 0.0938,
     "supporting.math_gsm8k/gsm8k_train": 0.0999,
     "supporting.math_new/math_train": 0.0999,

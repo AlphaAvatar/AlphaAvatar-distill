@@ -69,11 +69,12 @@
   "identity": "state_eval_hybrid@v1, a NEW suite; state_eval@v1 and its records are unchanged and unused by this search",
   "prompts": {
    "path": "data/stages/stage-2/teacher_modes/tasks/state_eval_hybrid_v1.tasks.jsonl",
-   "units": 1722,
-   "by_type": "code 22, defined_ops 53, entity_tracking 53, grid_transform 21, gsm8k 73, knights_knaves 21, list_induction 23, multihop_qa 683, openmath 43, ordering 70, rag_evidence 590, scan_language 39, string_induction 31",
-   "sources": "fluid: new instances of the same @v1 generators, calibration-split families, seeds 2,500,000-2,570,030 (calibration range; Stage-0's calibration used 2,000,000-2,200,024); gsm8k / rag / multihop: dataset train rows past every row order_v2 holds, corpus_v2's rendering, one question per SQuAD paragraph; openmath: base_pool_v1 units no calibration or training set holds; code: reasoning_core code modules at seed base 2026320000"
+   "units": 2459,
+   "by_type": "code 32, defined_ops 75, entity_tracking 77, grid_transform 29, gsm8k 104, knights_knaves 30, list_induction 33, multihop_qa 976, openmath 61, ordering 99, rag_evidence 843, scan_language 56, string_induction 44",
+   "sources": "fluid: new instances of the same @v1 generators, calibration-split families, seeds 2,500,000-2,570,030 (calibration range; Stage-0's calibration used 2,000,000-2,200,024); gsm8k / rag / multihop: dataset train rows past every row order_v2 holds, corpus_v2's rendering, one question per SQuAD paragraph; openmath: base_pool_v1 units no calibration or training set holds; code: reasoning_core code modules at seed base 2026320000",
+   "_rebuilt": "2026-11-01, before generation (maintainer 'Execute A1 First'): at least 5 independent tasks per (type, mode) and queues at 2x the expected need, taken in order only until each (type, mode) holds 12,000 scored positions and 5 naturally terminated tasks; 1,716 of the first build's 1,722 prompts unchanged in place"
   },
-  "quota": "12,000 scored positions per (type, mode), frozen before generation: 13 x 2 x 12,000 = 312,000; each mode takes its type's queue in order until its positions reach the quota (whole units)",
+  "quota": "12,000 scored positions AND at least 5 independent naturally terminated tasks per (type, mode), frozen before generation: each mode takes its type's queue in order until both hold (whole units)",
   "scoring": {
    "objectives": "D4's: state.teacher_kl.equal_domain_mean, state.teacher_kl.worst_domain, state.critical_token_kl",
    "reduction": "equal_subtype_then_equal_domain/v1 over sub-types '<type>|<mode>': inside every domain each type and each mode weigh equally, so the modes are 50:50 and a profile's raw tokens confer nothing",

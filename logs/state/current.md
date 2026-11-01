@@ -9,26 +9,18 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A v2: THE MAINTAINER'S REVIEW ANSWERED AT $0 (2026-11-01 UTC); STOPPED AT THE PAID BOUNDARY. No pod, only `am5m373kuq`. The inputs session (calibration top-up, state-evaluation generation), the hybrid D4 full search, the six trainings and Research B are NOT authorized.**
-The review document: [`docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md`](../../docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md)
-(A data, B full search, C 3 x 2 matrix, budget). Decision record: `logs/budget/decisions.md` 2026-11-01 (two
-entries). Branch `research/teacher-modes-and-projected-residual`; `main` stays at `72492e46`.
-- **Data** (`data/token_matched_admission.json`, `ADMITTED` again): the hash-dependent MBPP example is removed by a
-  code-stability recheck (every code verdict under hash seeds 0-7; `audit/code_stability.json`: it is the only
-  unstable one). A2 rebuilt: 49,830 examples, 4,577 packed sequences, 5,923,646 supervised tokens; A1 unchanged.
-- **Fixed at $0:** mode-aware critical-token aggregation (`group_balanced/v1`, a new protocol id; `state_eval@v1`
-  unchanged); the lineage gate (tokenizer files, the effective RoPE, the initialization's search record, the resume
-  stamp) and every unit's `tokenizer_sha256` and real tokenizer source. C1's two units pass launch admission on the
-  dev box; A1/A2 wait only for the search's Top-1.
-- **Audited:** the full search's data per type and mode (`audit/full_search_data_audit.json`: 10 short calibration
-  cells, thin thinking-mode cells listed); C1's tool-calling sources (`audit/c1_tool_calling_sources.json`: glaive
-  and xLAM both restricted, for the maintainer's ruling); provider price, stock and volumes
-  (`audit/provider_resources_20261101.json`).
-- **Budget** (`plans/budget_v2.json`): expected $82.74, deadline-bounded $132.18; with a $10 reserve $92.74 /
-  $142.18, against Research A $80.02, project $81.68, provider balance $79.23 (the $80 spend limit is per hour).
-- **Owed by the maintainer:** funding (minimum or conservative, TOKEN_MATCHED.md "Budget"); C1's restricted
-  sources; a 350 GB volume or 300 GB with post-audit retirement; whether thin cells need a minimum task count;
-  authorization of the inputs session, then the search, then the trainings.
+**RESEARCH A v2: THE A1 PHASE IS EXECUTING (maintainer 2026-11-01, "Execute A1 First"). A1's new spend is capped at $77.00 (inputs $2.65, search $41.41, storage $13.34, $7.05 per seed). A2, C1 and Research B are NOT authorized; no merge.**
+The owner: [`docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md`](../../docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md)
+section D. Decision record: `logs/budget/decisions.md` 2026-11-01 (three entries). Grant:
+`logs/budget/approvals/teacher_modes_token_matched_grant.json` (amended). Branch
+`research/teacher-modes-and-projected-residual`; `main` stays at `72492e46`.
+- **Resources:** the new 350 GB volume `4rhubprswo` (US-TX-3, record `storage/a1_phase_volume_4rhubprswo.json`);
+  `am5m373kuq` kept as the archive. One L40S at a time.
+- **Phase A (inputs)** launched (`runs/a_inputs_*`): the $0 create window waits for L40S stock in US-TX-3 (two earlier
+  launches were refused at $0, nothing created). Then at $0: profiles rebuilt, suite frozen, audits.
+- **Phase B (search), C and D (A1's two seeds trained and evaluated):** drivers ready at $0 (`full_search.py`,
+  `a1_units.py`, `a1_analysis.py`), each needing its own one-use artifact after the previous phase.
+- **Spent before the phase:** A-TM $15.8689; project position read at issue: $67.21 left after the new volume's reserve.
 
 **RESEARCH A AND B: A-E ($3.50) AND B-E ($3.00) PAID ENGINEERING VALIDATIONS AUTHORIZED (maintainer, 2026-10-28 UTC). A-E: PASS (attempt 2 `ae_20261028_093428`; $0.7089 of $3.50 across two attempts). B-E: FAIL (`be_20261028_095332`, $0.4366 of $3.00): trainer smoke OOM on the L40S at the frozen E1 recipe, so resume unmeasured; vLLM median |Δ log-prob| 0.234 > 0.1 nat. Initialization, both fold checks, checkpoint identity and GPU isolation PASS. Both closed; no pod; committed $725.4993 of $740. STOPPED at the maintainer's next decision.**
 Decision record: `logs/budget/decisions.md` 2026-10-28 "A-E ($3.50) and B-E ($3.00) ... authorized". Neither PASS is a scientific GO; A1–A3, B1 and 600M stay unauthorized. The text below is the $0 readiness state the authorization was granted on.

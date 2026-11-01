@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Research A v2: the maintainer's review answered at $0 (MBPP false pass removed, A2 rebuilt; lineage/tokenizer and critical-token fixes; audits; budget). Paid steps NOT authorized: funding $92.74-$142.18 vs $80.02 left. Owner: docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md.",
+ "blocker": "BLOCKED NO. Research A v2 A1 phase EXECUTING (maintainer 2026-11-01): inputs -> hybrid D4 full search -> A1 x 2 seeds trained and evaluated; cap $77; volume 4rhubprswo (US-TX-3). A2, C1, Research B not authorized. Owner: TOKEN_MATCHED.md D.",
  "branch": "research/teacher-modes-and-projected-residual: from stage2/reasoning-data d5f1c6f2 (kept), merged with main 72492e46 (its squash, 2026-10-27)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -123,10 +123,10 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "The maintainer's funding and authorization decisions for Research A v2 (TOKEN_MATCHED.md, Budget). Nothing paid before them.",
+ "next": "Research A v2 A1 phase: inputs session, then the search, then A1's two seeds (TOKEN_MATCHED.md D).",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "Research A v2: the maintainer's decisions on funding, C1's restricted sources and storage",
+  "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
   "not_next": "no paid resource without a new maintainer decision. Owner: decisions.md 2026-10-21 (Stage-2/3 round opened at $0).",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D-series CLOSED 2026-10-17 (D1 NO-GO, D2 NO_GO, D3 STRUCTURAL_CHANGE + INCONCLUSIVE probes); forward baseline D1 + scored_v1.",
   "then": "nothing follows automatically: every grant is the maintainer's"
@@ -197,11 +197,11 @@
   "docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md (Research A v2, for review), DESIGN.md and docs/stages/stage-1/projected_residual/DESIGN.md"
  ],
  "running": {
-  "paid_compute": false,
+  "paid_compute": "the A1 phase's inputs session (a $0 create window until L40S stock in US-TX-3)",
   "pods": 0,
-  "network_volumes": 1,
-  "run": null,
-  "volume": "am5m373kuq (55 GB): the four D4 checkpoints, the two Mix-Augmented checkpoints, Research A's initialization, sealed shards and teacher evaluation; Research A v2's supplement shards"
+  "network_volumes": 2,
+  "run": "logs/stages/stage-2/teacher_modes/runs/a_inputs_*",
+  "volume": "4rhubprswo (350 GB, US-TX-3): the A1 phase; am5m373kuq (55 GB): the archive"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {
