@@ -98,6 +98,20 @@ def verify_root(path: Path, ident: dict | None = None) -> dict:
             "root_teacher_sha256": rid["root_teacher_sha256"]}
 
 
+def load_root(device: str):
+    """The hybrid root from the snapshot setup fetched, its shards verified before it loads. Resolved through
+    `shared.pod.teacher_cache.local_snapshot` (setup's file patterns): huggingface_hub 1.x refuses an offline lookup
+    of the whole repository, which a_search_20261101_142659 hit at its first step."""
+    from aadistill.initialization.specs.arch import get_adapter
+    from shared.pod.teacher_cache import local_snapshot
+    ident = json.loads(TEACHER.read_text())
+    path = Path(local_snapshot(ident["model"], ident["revision"]))
+    root = verify_root(path, ident)
+    teacher = get_adapter("qwen3").load(str(path), dtype="bfloat16", device=device)
+    teacher.config.use_cache = False
+    return teacher, root
+
+
 def profiles(doc_path: Path = PROFILES_DOC) -> tuple:
     """The two hybrid profiles, registered from their document; refused unless COMPLETE (no short cell)."""
     from aadistill.initialization.calibration.profiles import get_profile, load_profiles
@@ -298,17 +312,7 @@ def main(argv=None, *, teacher_loader=None, repo: Path | None = None) -> int:
             return 0
 
         st = stage("B_teacher")
-        if teacher_loader is None:
-            from huggingface_hub import snapshot_download
-
-            from aadistill.initialization.specs.arch import get_adapter
-            ident = json.loads(TEACHER.read_text())
-            path = Path(snapshot_download(ident["model"], revision=ident["revision"], local_files_only=True))
-            record["root_teacher"] = verify_root(path, ident)
-            teacher = get_adapter("qwen3").load(str(path), dtype="bfloat16", device=a.device)
-            teacher.config.use_cache = False
-        else:
-            teacher, record["root_teacher"] = teacher_loader()
+        teacher, record["root_teacher"] = (teacher_loader or (lambda: load_root(a.device)))()
         session.evaluator.prime_reference(teacher)
         done(st)
         save()

@@ -1,0 +1,81 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.full_search_record/v1",
+ "search_run_id": "research_a_v2_hybrid_d4_full_search",
+ "started_utc": "2026-11-01T15:30:47Z",
+ "stages": {
+  "A_contract": {
+   "config_hash": "e8a43631eec71442",
+   "seconds": 2.31,
+   "status": "ok"
+  },
+  "B_teacher": {
+   "t0": 1793547049.539749
+  }
+ },
+ "status": "FAILED",
+ "authorization_id": "stage2.teacher_modes.token_matched.a_search_20261101_142659",
+ "session": {
+  "config_hash": "e8a43631eec71442ef783c127e5e2d7dc10cb04942d503287042bbc633d58675",
+  "numerical_execution_fingerprint": "24787ea9c00dbbba2006530f70397076998b95915199f03270e4130c6298c6ef",
+  "measurement_protocol_id": "1c8305246073213e58d0c1098ba4e4e0",
+  "profiles": [
+   "calib.hybrid_d4_base@v1",
+   "calib.hybrid_d4_rh@v1"
+  ],
+  "profile_hashes": {
+   "calib.hybrid_d4_base@v1": "5d4d92f2afcc2f514b7b44ac32d0bc7af36c800b863d8662b7d3832fcf0e5bc2",
+   "calib.hybrid_d4_rh@v1": "768443f63002b90abb1f01a05a96cf806433e869f93ebdcd778c3f92e1348661"
+  },
+  "suite": {
+   "suite_id": "state_eval_hybrid",
+   "content_sha256": "b36c6abc601f799f6cc0d44eac9887962163e73f48efd4b5d1f8e2b38abc4598",
+   "items_sha256": "0ddc148e95ee2c91e0f08f868554a6c4d3f331f31af034384cfbc333678d36f1"
+  },
+  "execution": {
+   "evaluator": {
+    "micro_batch_size": 1,
+    "calibration_batch_packing": "length_sorted_v1",
+    "prediction_rows": "scored_v1"
+   },
+   "operators": {
+    "micro_batch_size": 1,
+    "calibration_batch_packing": "length_sorted_v1",
+    "prediction_rows": "scored_v1",
+    "depth_prefix_reuse": true
+   }
+  },
+  "baseline": {
+   "baseline": "stage1_init.d1_target_aware.scored_v1@v1",
+   "record_sha256": "333af13d9f2441fc658ee064f1a6ec6b15ebf5be5ee8ab31320763bbe41ce266",
+   "numerical_execution_fingerprint": "e627f461e303401318f16009bf0b0ca8cde85e46aa0f6de4243ee9bacda61a05",
+   "execution": {
+    "micro_batch_size": 3,
+    "calibration_batch_packing": "length_sorted_v1",
+    "prediction_rows": "scored_v1"
+   },
+   "implementations": {
+    "FFN": "ffn.activation_importance_v0",
+    "DEPTH": "depth.causal_kl_greedy_v1",
+    "RESIDUAL_WIDTH": "width.global_pca_v0",
+    "ATTENTION": "attention.activation_importance_v1"
+   },
+   "position_policy": "positions.supervised_target_v1@v1",
+   "distribution_support": {
+    "support_id": "reference_topk_tail_v1",
+    "top_k": 200
+   }
+  },
+  "seed": 20260815,
+  "beam": {
+   "width": 6,
+   "warmup_levels": 1
+  },
+  "prune_weights": false
+ },
+ "failure": {
+  "type": "IncompleteSnapshotError",
+  "message": "The cached snapshot for 'Qwen/Qwen3-4B' (revision '1cfa9a7208912126459214e8b04321603b3df60c', commit 1cfa9a7208912126459214e8b04321603b3df60c) is incomplete: 3 file(s) are missing (.gitattributes, LICENSE, README.md). Outgoing traffic is disabled ('local_files_only=True'). Re-run the download with network access to complete the snapshot.",
+  "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/stages/stage-2/teacher_modes/full_search.py\", line 306, in main\n    path = Path(snapshot_download(ident[\"model\"], revision=ident[\"revision\"], local_files_only=True))\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py\", line 88, in _inner_fn\n    return fn(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^\n  File \"/opt/train/lib/python3.12/site-packages/huggingface_hub/_snapshot_download.py\", line 312, in snapshot_download\n    _raise_if_incomplete_snapshot(\n  File \"/opt/train/lib/python3.12/site-packages/huggingface_hub/_snapshot_download.py\", line 567, in _raise_if_incomplete_snapshot\n    raise IncompleteSnapshotError(\nhuggingface_hub.errors.IncompleteSnapshotError: The cached snapshot for 'Qwen/Qwen3-4B' (revision '1cfa9a7208912126459214e8b04321603b3df60c', commit 1cfa9a7208912126459214e8b04321603b3df60c) is incomplete: 3 file(s) are missing (.gitattributes, LICENSE, README.md). Outgoing traffic is disabled ('local_files_only=True'). Re-run the download with network access to complete the snapshot.\n"
+ },
+ "ended_utc": "2026-11-01T15:30:49Z"
+}

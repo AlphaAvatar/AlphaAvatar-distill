@@ -44,6 +44,22 @@ def test_the_hybrid_root_identity_is_the_lineage_rule_on_the_pinned_shards():
     assert rid["root_teacher_sha256"] == shard_set_sha256({s["file"]: s["lfs_sha256"] for s in ident["weight_shards"]})
 
 
+def test_the_root_is_looked_up_offline_with_setups_file_patterns(tmp_path, monkeypatch):
+    import huggingface_hub
+    from shared.pod import teacher_cache as TC
+    seen = {}
+
+    def offline(model, **kw):           # huggingface_hub 1.x, offline: the whole repository is refused
+        seen.update(model=model, **kw)
+        if kw.get("allow_patterns") != list(TC.TEACHER_FILES):
+            raise RuntimeError("IncompleteSnapshotError: .gitattributes, LICENSE, README.md are missing")
+        return str(tmp_path)
+    monkeypatch.setattr(huggingface_hub, "snapshot_download", offline)
+    with pytest.raises(FS.FullSearchError, match="is absent from"):        # past the lookup, at the shard check
+        FS.load_root("cpu")
+    assert seen["local_files_only"] and f"{seen['model']}@{seen['revision']}" == FS.root_identity()["root_teacher_id"]
+
+
 def test_the_first_evaluation_must_carry_both_modes_groups_and_their_mean():
     ok = {"state.critical_token_kl.group.H-T": 0.3, "state.critical_token_kl.group.H-N": 0.1, "state.critical_token_kl": 0.2}
     assert FS.critical_problems(ok) == []

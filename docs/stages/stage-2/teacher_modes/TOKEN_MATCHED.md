@@ -587,6 +587,16 @@ B stays pending.
   - the commit (k = 1);
   - the Pareto order of every complete leaf;
   - the Top-1 copied to `search_a1/top1` on the volume, by sha256, and pulled to the dev box.
+- Attempt 1, `a_search_20261101_142659`, failed before any measurement:
+  - the pod came up after 11 stock retries;
+  - the driver failed 2 s after `CONTRACT_OK`: it looked the teacher up offline as the whole repository, which
+    huggingface_hub 1.x refuses (README.md, LICENSE and .gitattributes were not fetched by setup), the known A-E
+    failure;
+  - the $0 check-only run stops before this step, so it never reached the line;
+  - the pod was deleted, the provider confirms it gone, $0.1973; no state was evaluated and the journal is empty;
+  - fix: `full_search.load_root` resolves the root through `shared.pod.teacher_cache.local_snapshot` (setup's file
+    patterns), with a regression test;
+  - the search phase's cap is cumulative, so the next authorization's hard cap is $41.21 ($41.41 − $0.20).
 
 **Phases C and D (A1)** (`a1_units.py`, kind `train_a1`; `training_plan_a1.json` from the committed search record).
 - Seed 20260726, then seed 20260801. Each:
