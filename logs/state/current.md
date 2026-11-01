@@ -16,8 +16,10 @@ section D. Decision record: `logs/budget/decisions.md` 2026-11-01 (three entries
 `research/teacher-modes-and-projected-residual`; `main` stays at `72492e46`.
 - **Resources:** the new 350 GB volume `4rhubprswo` (US-TX-3, record `storage/a1_phase_volume_4rhubprswo.json`);
   `am5m373kuq` kept as the archive. One L40S at a time.
-- **Phase A (inputs)** launched (`runs/a_inputs_*`): the $0 create window waits for L40S stock in US-TX-3 (two earlier
-  launches were refused at $0, nothing created). Then at $0: profiles rebuilt, suite frozen, audits.
+- **Phase A (inputs): done** (`a_inputs_20261101_125916`, $0.5713): profiles COMPLETE, `state_eval_hybrid@v1`
+  frozen (1,135 items, protocol `1c830524`).
+- **Phase B (search): launched** (`runs/a_search_*`, hard cap $41.41), waiting in a $0 create window for L40S stock in
+  US-TX-3.
 - **Phase B (search), C and D (A1's two seeds trained and evaluated):** drivers ready at $0 (`full_search.py`,
   `a1_units.py`, `a1_analysis.py`), each needing its own one-use artifact after the previous phase.
 - **Spent before the phase:** A-TM $15.8689; project position read at issue: $67.21 left after the new volume's reserve.

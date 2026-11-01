@@ -553,6 +553,26 @@ B stays pending.
   - the suite is frozen (`freeze_state_eval.py`: tags, one critical group per mode, manifest, measurement protocol id);
   - the isolation and type audits are re-run.
 
+**Phase A result (2026-11-01).**
+- Session `a_inputs_20261101_125916`: `ALL_DONE` in 30.9 min, $0.5713 of the $2.65 cap. The pod was deleted and the
+  provider confirms it gone. Two earlier launches were refused at $0 with nothing created.
+- Calibration is COMPLETE (0 short cells):
+
+  | profile | thinking positions | non-thinking positions | items | tokens |
+  | --- | ---: | ---: | ---: | ---: |
+  | Base | 103,961 | 93,123 | 565 | 472,966 |
+  | RH | 105,057 | 93,149 | 377 | 339,452 |
+
+- `state_eval_hybrid@v1` is FROZEN (`audit/state_eval_hybrid_freeze.json`):
+  - 1,135 items; every one of the 26 (type, mode) cells holds at least 12,000 scored positions and 5 tasks;
+  - thinking mode: 146 items, 192,246 positions; non-thinking mode: 989 items, 158,169 positions;
+  - every critical class is present in each mode's group;
+  - measurement protocol id `1c8305246073213e58d0c1098ba4e4e0`.
+- The search driver's $0 check-only run with the real inputs passes:
+  - config hash `1dcae927…`;
+  - the protocol id is the frozen record's;
+  - fingerprint `24787ea9…`.
+
 **Phase B (the search)** (`full_search.py`, kind `search`).
 - The method is resolved from the forward baseline, with these choices:
   - the hybrid root, its shards hashed on the pod;
