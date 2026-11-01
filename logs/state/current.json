@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED on the maintainer's review. Research A v1 STOPPED 2026-10-31; v2 data ADMITTED (A1 5,930,273 / A2 5,923,670 supervised tokens; supplement $15.87). Hybrid full search, initialization, six trainings PROPOSED, not authorized; gap $6.36-$12.16 vs Research A. Owner: docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md.",
+ "blocker": "BLOCKED NO. Research A v1 STOPPED 2026-10-31; v2 data ADMITTED (A1 5,930,273 / A2 5,923,670 supervised tokens; supplement $15.87). Hybrid full search, initialization, six trainings PROPOSED, not authorized: the maintainer's review; gap $6.36-$12.16 vs Research A. Owner: docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md.",
  "branch": "research/teacher-modes-and-projected-residual: from stage2/reasoning-data d5f1c6f2 (kept), merged with main 72492e46 (its squash, 2026-10-27)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -31,8 +31,8 @@
   "_owner": "derived by scripts/maintenance/consolidation/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
   "_package_spent_usd": 179.7156,
   "_project_spend_before_this_package_usd": 267.8998,
-  "authorized_cap_usd": 740.0,
-  "cumulative_spend_usd": 688.5486,
+  "authorized_cap_usd": 868.0,
+  "cumulative_spend_usd": 747.2192,
   "engineering_remaining_usd": 3.1804,
   "formal_remaining_usd": 98.8304,
   "full_ceiling_sessions_fundable": 3,
@@ -42,7 +42,7 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 51.4514,
+  "remaining_usd": 120.7808,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -153,7 +153,7 @@
    "blocker": "none; see the top-level blocker.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line."
   },
   "c2": {
