@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.calibration_profiles/v1",
- "status": "INCOMPLETE: 10 (profile, cell, mode) short until the top-up's units are generated",
+ "status": "COMPLETE: every cell holds half its D4 quota in each mode",
  "_contract": "Research A v2's hybrid D4-scale calibration profiles (build_calibration_supplement.py profiles); data for the PROPOSED full search -- nothing searches with them before the maintainer's approval",
  "teacher": {
   "model": "Qwen/Qwen3-4B",
@@ -11,6 +11,60 @@
    "profile_id": "calib.hybrid_d4_base",
    "version": 1,
    "description": "the hybrid's D4 base profile: D4's cells, order and quotas, half of every cell from each mode",
+   "sources": [
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "inductive_rule_discovery",
+     "n_items": 32,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "compositional_generalization",
+     "n_items": 53,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "task_contained_deduction",
+     "n_items": 57,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "abstract_analogical",
+     "n_items": 26,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "supporting",
+     "n_items": 397,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    }
+   ],
+   "sample_rule": "per cell and mode: D4's cell order over base_pool_v1 (the code cell: its own prompt list), held-out units passed over, the mode's own naturally terminated whole trajectories until half the cell's D4 quota of scored positions (build_calibration_supplement.profiles)",
+   "leakage_exclusions": [
+    "eval-set-1 held-out prompts and near-copies (R1, R2) and R9's refused families",
+    "A1/A2's and C1's training prompts",
+    "state_eval_hybrid@v1's prompts"
+   ],
+   "leakage_proof_path": "logs/stages/stage-2/teacher_modes/audit/full_search_isolation.json",
    "domain_weights": {
     "inductive_rule_discovery": 0.18,
     "compositional_generalization": 0.18,
@@ -23,29 +77,77 @@
    "role": "operator_calibration",
    "materialized": true,
    "items_path": "artifacts/stages/stage-2/teacher_modes/calibration_v2/calib.hybrid_d4_base.items.jsonl",
-   "items_file_sha256": "246ee9a858031cf6267eb092fa60d3ec38793ce1d86acd2976ea7f4de4336b5f",
-   "content_sha256": "4a38094d9027114953ab52c4038d04a05b01031f4d3d8463d8caca620cd23b6c",
+   "items_file_sha256": "ce1a22439e4ae1e2b0812c7b110e19489cd192aa6617aaa2b28bb8f5a00fc181",
+   "content_sha256": "1e40ad0af3dc07ed608558bc87e00c3991944e5cfdf2ec3ff6416f015a72fb71",
    "metadata": {
-    "uesp": 176647,
+    "uesp": 197084,
     "scored_positions_by_mode": {
-     "H-T": 92648,
-     "H-N": 83999
+     "H-T": 103961,
+     "H-N": 93123
     },
-    "n_items": 543,
-    "tokens": 449155,
-    "short_cells": [
-     "inductive_rule_discovery/string_induction@v1|H-N",
-     "inductive_rule_discovery/string_induction@v1|H-T",
-     "supporting/code|H-N",
-     "supporting/code|H-T",
-     "supporting/rag_evidence|H-N"
-    ]
+    "n_items": 565,
+    "tokens": 472966,
+    "short_cells": []
    }
   },
   {
    "profile_id": "calib.hybrid_d4_rh",
    "version": 1,
    "description": "the hybrid's D4 rh profile: D4's cells, order and quotas, half of every cell from each mode",
+   "sources": [
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "inductive_rule_discovery",
+     "n_items": 37,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "compositional_generalization",
+     "n_items": 64,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "task_contained_deduction",
+     "n_items": 69,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "abstract_analogical",
+     "n_items": 32,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    },
+    {
+     "dataset_id": "aadistill/hybrid_teacher_native_calibration",
+     "revision": "1cfa9a7208912126",
+     "domain": "supporting",
+     "n_items": 175,
+     "content_sha256": null,
+     "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+     "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"
+    }
+   ],
+   "sample_rule": "per cell and mode: D4's cell order over base_pool_v1 (the code cell: its own prompt list), held-out units passed over, the mode's own naturally terminated whole trajectories until half the cell's D4 quota of scored positions (build_calibration_supplement.profiles)",
+   "leakage_exclusions": [
+    "eval-set-1 held-out prompts and near-copies (R1, R2) and R9's refused families",
+    "A1/A2's and C1's training prompts",
+    "state_eval_hybrid@v1's prompts"
+   ],
+   "leakage_proof_path": "logs/stages/stage-2/teacher_modes/audit/full_search_isolation.json",
    "domain_weights": {
     "inductive_rule_discovery": 0.22,
     "compositional_generalization": 0.22,
@@ -58,23 +160,17 @@
    "role": "operator_calibration",
    "materialized": true,
    "items_path": "artifacts/stages/stage-2/teacher_modes/calibration_v2/calib.hybrid_d4_rh.items.jsonl",
-   "items_file_sha256": "3f6a3a0629d24613131e9324368b67060bd69313b2f8541530f409891bb1b6cd",
-   "content_sha256": "a6682519759738a9cf48416bbdff87531ebe4c6c7bbf3abd3b159230d23364f9",
+   "items_file_sha256": "59fc17f2c881d8eeab45053e2a008dd28199900328f5fef884f176b0a122c501",
+   "content_sha256": "2cf4a8f1d98a4914b135b0b79bba0846b39d10644155492408e808ab5799dcc5",
    "metadata": {
-    "uesp": 180499,
+    "uesp": 198206,
     "scored_positions_by_mode": {
-     "H-T": 95415,
-     "H-N": 85084
+     "H-T": 105057,
+     "H-N": 93149
     },
-    "n_items": 361,
-    "tokens": 319611,
-    "short_cells": [
-     "inductive_rule_discovery/string_induction@v1|H-N",
-     "inductive_rule_discovery/string_induction@v1|H-T",
-     "supporting/code|H-N",
-     "supporting/code|H-T",
-     "supporting/rag_evidence|H-N"
-    ]
+    "n_items": 377,
+    "tokens": 339452,
+    "short_cells": []
    }
   }
  ],
@@ -154,39 +250,39 @@
    },
    "inductive_rule_discovery/string_induction@v1|H-T": {
     "quota": 8100.0,
-    "scored": 4294,
-    "items": 2,
+    "scored": 10131,
+    "items": 4,
     "not_naturally_terminated": 1,
     "held_out_units": 7,
-    "short": true,
-    "refill_units": 2
+    "short": false,
+    "refill_units": 0
    },
    "inductive_rule_discovery/string_induction@v1|H-N": {
     "quota": 8100.0,
-    "scored": 4578,
-    "items": 8,
+    "scored": 8137,
+    "items": 13,
     "not_naturally_terminated": 2,
     "held_out_units": 20,
-    "short": true,
-    "refill_units": 5
+    "short": false,
+    "refill_units": 0
    },
    "supporting/code|H-T": {
     "quota": 5040.0,
-    "scored": 0,
-    "items": 0,
+    "scored": 5476,
+    "items": 3,
     "not_naturally_terminated": 0,
     "held_out_units": 0,
-    "short": true,
-    "refill_units": 1
+    "short": false,
+    "refill_units": 0
    },
    "supporting/code|H-N": {
     "quota": 5040.0,
-    "scored": 0,
-    "items": 0,
+    "scored": 5504,
+    "items": 9,
     "not_naturally_terminated": 0,
     "held_out_units": 0,
-    "short": true,
-    "refill_units": 1
+    "short": false,
+    "refill_units": 0
    },
    "supporting/gsm8k|H-T": {
     "quota": 5040.0,
@@ -253,12 +349,12 @@
    },
    "supporting/rag_evidence|H-N": {
     "quota": 5040.0,
-    "scored": 4984,
-    "items": 187,
+    "scored": 5045,
+    "items": 190,
     "not_naturally_terminated": 0,
-    "held_out_units": 47,
-    "short": true,
-    "refill_units": 2
+    "held_out_units": 49,
+    "short": false,
+    "refill_units": 0
    },
    "task_contained_deduction/entity_tracking@v1|H-T": {
     "quota": 5400.0,
@@ -390,39 +486,39 @@
    },
    "inductive_rule_discovery/string_induction@v1|H-T": {
     "quota": 9900.0,
-    "scored": 4294,
-    "items": 2,
+    "scored": 10131,
+    "items": 4,
     "not_naturally_terminated": 1,
-    "held_out_units": 10,
-    "short": true,
-    "refill_units": 3
+    "held_out_units": 7,
+    "short": false,
+    "refill_units": 0
    },
    "inductive_rule_discovery/string_induction@v1|H-N": {
     "quota": 9900.0,
-    "scored": 4578,
-    "items": 8,
+    "scored": 9974,
+    "items": 15,
     "not_naturally_terminated": 2,
     "held_out_units": 21,
-    "short": true,
-    "refill_units": 8
+    "short": false,
+    "refill_units": 0
    },
    "supporting/code|H-T": {
     "quota": 2160.0,
-    "scored": 0,
-    "items": 0,
+    "scored": 3805,
+    "items": 2,
     "not_naturally_terminated": 0,
     "held_out_units": 0,
-    "short": true,
-    "refill_units": 1
+    "short": false,
+    "refill_units": 0
    },
    "supporting/code|H-N": {
     "quota": 2160.0,
-    "scored": 0,
-    "items": 0,
+    "scored": 2627,
+    "items": 4,
     "not_naturally_terminated": 0,
     "held_out_units": 0,
-    "short": true,
-    "refill_units": 1
+    "short": false,
+    "refill_units": 0
    },
    "supporting/gsm8k|H-T": {
     "quota": 2160.0,
@@ -489,12 +585,12 @@
    },
    "supporting/rag_evidence|H-N": {
     "quota": 2160.0,
-    "scored": 2136,
-    "items": 79,
+    "scored": 2178,
+    "items": 80,
     "not_naturally_terminated": 0,
-    "held_out_units": 24,
-    "short": true,
-    "refill_units": 1
+    "held_out_units": 25,
+    "short": false,
+    "refill_units": 0
    },
    "task_contained_deduction/entity_tracking@v1|H-T": {
     "quota": 6600.0,
@@ -554,61 +650,13 @@
  },
  "held_out": {
   "R9 (family name)": 33,
-  "a training prompt": 5034
+  "a training prompt": 5034,
+  "isolation (R1/R2 against eval-set-1)": 2
  },
  "refill": {
-  "units": 14,
-  "by_cell_and_modes": {
-   "inductive_rule_discovery/string_induction@v1|H-T": 3,
-   "inductive_rule_discovery/string_induction@v1|H-N": 8,
-   "supporting/code|H-N+H-T": 1,
-   "supporting/rag_evidence|H-N": 2
-  },
-  "unit_ids": {
-   "09cb938af3b3bc2c3f94": [
-    "H-T"
-   ],
-   "13505c6f56d2ed912db8": [
-    "H-T"
-   ],
-   "249f90ed0a6657629356": [
-    "H-N",
-    "H-T"
-   ],
-   "2ba9101caf4f20230778": [
-    "H-N"
-   ],
-   "56b68ae392e88bfedf92": [
-    "H-N"
-   ],
-   "595a6ed8c4ec149be566": [
-    "H-N"
-   ],
-   "615532328aa54b5ba873": [
-    "H-N"
-   ],
-   "c085f69a5ee59543c2c2": [
-    "H-N"
-   ],
-   "c2bc29d40663e02f302e": [
-    "H-N"
-   ],
-   "db38afeee44ab8906645": [
-    "H-N"
-   ],
-   "db93c4cb84d681506be8": [
-    "H-T"
-   ],
-   "eacade49691a5ac02d06": [
-    "H-N"
-   ],
-   "squad_v2-010803": [
-    "H-N"
-   ],
-   "squad_v2-013660": [
-    "H-N"
-   ]
-  }
+  "units": 0,
+  "by_cell_and_modes": {},
+  "unit_ids": {}
  },
  "authorizes": "nothing"
 }

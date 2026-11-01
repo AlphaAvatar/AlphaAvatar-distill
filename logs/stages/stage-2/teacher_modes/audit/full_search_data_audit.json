@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.stage2.teacher_modes.full_search_data_audit/v1",
- "written_utc": "2026-11-01T13:00:44Z",
+ "written_utc": "2026-11-01T14:25:15Z",
  "inputs": {
   "full_search_types.json": "configs/stages/stage-2/teacher_modes/full_search_types.json",
   "hybrid_d4_profiles.json": "configs/stages/stage-2/teacher_modes/hybrid_d4_profiles.json",
@@ -14,13 +14,7 @@
  },
  "summary": {
   "type_modes": 26,
-  "calibration_short": [
-   "string_induction@v1|H-T",
-   "string_induction@v1|H-N",
-   "rag_evidence|H-N",
-   "code|H-T",
-   "code|H-N"
-  ],
+  "calibration_short": [],
   "calibration_thin": {
    "scan_language@v1|H-T": [
     "calib.hybrid_d4_base",
@@ -49,7 +43,6 @@
     "calib.hybrid_d4_rh"
    ],
    "code|H-N": [
-    "calib.hybrid_d4_base",
     "calib.hybrid_d4_rh"
    ]
   },
@@ -567,31 +560,35 @@
    "calibration": {
     "calib.hybrid_d4_base": {
      "quota": 8100.0,
-     "scored_positions": 4294,
-     "deficit": 3806.0,
-     "items": 2,
-     "independent_tasks": 2,
+     "scored_positions": 10131,
+     "deficit": 0.0,
+     "items": 4,
+     "independent_tasks": 4,
      "not_naturally_terminated": 1,
-     "short": true,
-     "refill_units": 2,
+     "short": false,
+     "refill_units": 0,
      "sources": {
-      "str.mirror": 2
+      "str.mirror": 2,
+      "str.keep_even_positions": 1,
+      "str.sort_letters": 1
      }
     },
     "calib.hybrid_d4_rh": {
      "quota": 9900.0,
-     "scored_positions": 4294,
-     "deficit": 5606.0,
-     "items": 2,
-     "independent_tasks": 2,
+     "scored_positions": 10131,
+     "deficit": 0.0,
+     "items": 4,
+     "independent_tasks": 4,
      "not_naturally_terminated": 1,
-     "short": true,
-     "refill_units": 3,
+     "short": false,
+     "refill_units": 0,
      "sources": {
-      "str.mirror": 2
+      "str.mirror": 2,
+      "str.keep_even_positions": 1,
+      "str.sort_letters": 1
      }
     },
-    "union_independent_tasks": 2
+    "union_independent_tasks": 4
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
@@ -612,10 +609,7 @@
     "generated": false
    },
    "flags": {
-    "calibration_short": [
-     "calib.hybrid_d4_base",
-     "calib.hybrid_d4_rh"
-    ],
+    "calibration_short": [],
     "calibration_thin": [
      "calib.hybrid_d4_base",
      "calib.hybrid_d4_rh"
@@ -629,37 +623,37 @@
    "calibration": {
     "calib.hybrid_d4_base": {
      "quota": 8100.0,
-     "scored_positions": 4578,
-     "deficit": 3522.0,
-     "items": 8,
-     "independent_tasks": 8,
+     "scored_positions": 8137,
+     "deficit": 0.0,
+     "items": 13,
+     "independent_tasks": 13,
      "not_naturally_terminated": 2,
-     "short": true,
-     "refill_units": 5,
+     "short": false,
+     "refill_units": 0,
      "sources": {
-      "str.mirror": 3,
-      "str.keep_even_positions": 2,
-      "str.append_first": 2,
+      "str.mirror": 5,
+      "str.append_first": 4,
+      "str.keep_even_positions": 3,
       "str.sort_letters": 1
      }
     },
     "calib.hybrid_d4_rh": {
      "quota": 9900.0,
-     "scored_positions": 4578,
-     "deficit": 5322.0,
-     "items": 8,
-     "independent_tasks": 8,
+     "scored_positions": 9974,
+     "deficit": 0.0,
+     "items": 15,
+     "independent_tasks": 15,
      "not_naturally_terminated": 2,
-     "short": true,
-     "refill_units": 8,
+     "short": false,
+     "refill_units": 0,
      "sources": {
-      "str.mirror": 3,
-      "str.keep_even_positions": 2,
-      "str.append_first": 2,
+      "str.mirror": 5,
+      "str.append_first": 5,
+      "str.keep_even_positions": 4,
       "str.sort_letters": 1
      }
     },
-    "union_independent_tasks": 8
+    "union_independent_tasks": 15
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
@@ -680,10 +674,7 @@
     "generated": false
    },
    "flags": {
-    "calibration_short": [
-     "calib.hybrid_d4_base",
-     "calib.hybrid_d4_rh"
-    ],
+    "calibration_short": [],
     "calibration_thin": [],
     "state_evaluation_not_generated": true,
     "state_evaluation_queue_at_risk": false
@@ -1293,31 +1284,31 @@
    "calibration": {
     "calib.hybrid_d4_base": {
      "quota": 5040.0,
-     "scored_positions": 4984,
-     "deficit": 56.0,
-     "items": 187,
-     "independent_tasks": 187,
+     "scored_positions": 5045,
+     "deficit": 0.0,
+     "items": 190,
+     "independent_tasks": 190,
      "not_naturally_terminated": 0,
-     "short": true,
-     "refill_units": 2,
+     "short": false,
+     "refill_units": 0,
      "sources": {
-      "squad_v2": 187
+      "squad_v2": 190
      }
     },
     "calib.hybrid_d4_rh": {
      "quota": 2160.0,
-     "scored_positions": 2136,
-     "deficit": 24.0,
-     "items": 79,
-     "independent_tasks": 79,
+     "scored_positions": 2178,
+     "deficit": 0.0,
+     "items": 80,
+     "independent_tasks": 80,
      "not_naturally_terminated": 0,
-     "short": true,
-     "refill_units": 1,
+     "short": false,
+     "refill_units": 0,
      "sources": {
-      "squad_v2": 79
+      "squad_v2": 80
      }
     },
-    "union_independent_tasks": 187
+    "union_independent_tasks": 190
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
@@ -1335,10 +1326,7 @@
     "generated": false
    },
    "flags": {
-    "calibration_short": [
-     "calib.hybrid_d4_base",
-     "calib.hybrid_d4_rh"
-    ],
+    "calibration_short": [],
     "calibration_thin": [],
     "state_evaluation_not_generated": true,
     "state_evaluation_queue_at_risk": false
@@ -1455,27 +1443,31 @@
    "calibration": {
     "calib.hybrid_d4_base": {
      "quota": 5040.0,
-     "scored_positions": 0,
-     "deficit": 5040.0,
-     "items": 0,
-     "independent_tasks": 0,
+     "scored_positions": 5476,
+     "deficit": 0.0,
+     "items": 3,
+     "independent_tasks": 3,
      "not_naturally_terminated": 0,
-     "short": true,
-     "refill_units": 1,
-     "sources": {}
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "reasoning_core/controlled_code_execution": 3
+     }
     },
     "calib.hybrid_d4_rh": {
      "quota": 2160.0,
-     "scored_positions": 0,
-     "deficit": 2160.0,
-     "items": 0,
-     "independent_tasks": 0,
+     "scored_positions": 3805,
+     "deficit": 0.0,
+     "items": 2,
+     "independent_tasks": 2,
      "not_naturally_terminated": 0,
-     "short": true,
-     "refill_units": 1,
-     "sources": {}
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "reasoning_core/controlled_code_execution": 2
+     }
     },
-    "union_independent_tasks": 0
+    "union_independent_tasks": 3
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
@@ -1493,10 +1485,7 @@
     "generated": false
    },
    "flags": {
-    "calibration_short": [
-     "calib.hybrid_d4_base",
-     "calib.hybrid_d4_rh"
-    ],
+    "calibration_short": [],
     "calibration_thin": [
      "calib.hybrid_d4_base",
      "calib.hybrid_d4_rh"
@@ -1510,27 +1499,31 @@
    "calibration": {
     "calib.hybrid_d4_base": {
      "quota": 5040.0,
-     "scored_positions": 0,
-     "deficit": 5040.0,
-     "items": 0,
-     "independent_tasks": 0,
+     "scored_positions": 5504,
+     "deficit": 0.0,
+     "items": 9,
+     "independent_tasks": 9,
      "not_naturally_terminated": 0,
-     "short": true,
-     "refill_units": 1,
-     "sources": {}
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "reasoning_core/controlled_code_execution": 9
+     }
     },
     "calib.hybrid_d4_rh": {
      "quota": 2160.0,
-     "scored_positions": 0,
-     "deficit": 2160.0,
-     "items": 0,
-     "independent_tasks": 0,
+     "scored_positions": 2627,
+     "deficit": 0.0,
+     "items": 4,
+     "independent_tasks": 4,
      "not_naturally_terminated": 0,
-     "short": true,
-     "refill_units": 1,
-     "sources": {}
+     "short": false,
+     "refill_units": 0,
+     "sources": {
+      "reasoning_core/controlled_code_execution": 4
+     }
     },
-    "union_independent_tasks": 0
+    "union_independent_tasks": 9
    },
    "state_evaluation": {
     "quota_scored_positions": 12000,
@@ -1548,12 +1541,8 @@
     "generated": false
    },
    "flags": {
-    "calibration_short": [
-     "calib.hybrid_d4_base",
-     "calib.hybrid_d4_rh"
-    ],
+    "calibration_short": [],
     "calibration_thin": [
-     "calib.hybrid_d4_base",
      "calib.hybrid_d4_rh"
     ],
     "state_evaluation_not_generated": true,

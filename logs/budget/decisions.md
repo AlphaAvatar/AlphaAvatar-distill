@@ -15091,3 +15091,20 @@ on a paid pod.
   tests with a fake teacher.
 - **Blocked on the provider:** L40S secure stock is currently only in US-MO-1, which has no network storage; the phase
   needs a datacenter with both (EU-NL-1, US-TX-3, US-IL-1, US-NC-1). Nothing is created until one has both.
+
+## 2026-11-01 (UTC) — Research A v2, A1 phase A done: the inputs generated, the suite frozen, the profiles complete
+
+- **Session** `a_inputs_20261101_125916` (one L40S, US-TX-3, volume `4rhubprswo`): pod `q5prmo0lqbvemn` created at
+  13:45 after a $0 create window (no L40S anywhere 12:58-13:45), `ALL_DONE` in 30.9 min, pod deleted, provider confirms
+  gone. $0.5713 all-in of the $2.65 kind cap. Two earlier launches were refused at $0 with nothing created
+  (`a_inputs_20261101_125520`: 90 planned minutes over the cap; `a_inputs_20261101_125709`: a single create with no
+  stock); each consumed its one-use artifact.
+- **Calibration** (`hybrid_d4_profiles.json`: COMPLETE, 0 short cells): Base H-T 103,961 / H-N 93,123 scored positions
+  (565 items, 472,966 tokens); RH 105,057 / 93,149 (377 items, 339,452 tokens). Thin cells (under 5 tasks) are reported,
+  quotas unchanged. The profile document now declares its sources, sample rule and leakage exclusions (the core
+  `CalibrationProfile` requires them; caught by the search driver's $0 check-only run).
+- **State evaluation** (`audit/state_eval_hybrid_freeze.json`: FROZEN): 1,135 items, all 26 (type, mode) cells at
+  >= 12,000 scored positions and >= 5 tasks; H-T 146 items / 192,246 positions, H-N 989 / 158,169; every critical
+  class present in each mode's group. Measurement protocol id `1c8305246073213e58d0c1098ba4e4e0` (group_balanced/v1).
+- **Search driver $0 check-only** with the real inputs: config hash `1dcae927...`, the evaluator's protocol id equals
+  the frozen record's, numerical execution fingerprint `24787ea9...` (micro-batch 1). Phase B next.

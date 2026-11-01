@@ -339,8 +339,21 @@ def profiles(v1_store: Path, v1_identity: str, store: Path | None, identity: str
         body = "".join(json.dumps(it, sort_keys=True) + "\n" for it in items)
         path.write_text(body)
         pos = {m: sum(len(i["tags"]["assistant"]) for i in items if i["mode"] == m) for m in MODES}
+        by_domain = Counter(it["domain"] for it in items)
+        sources = [{"dataset_id": "aadistill/hybrid_teacher_native_calibration", "revision": proto["teacher"]["revision"][:16],
+                    "domain": dom, "n_items": by_domain.get(dom, 0), "content_sha256": None,
+                    "license": "the hybrid teacher's own trajectories (Qwen3-4B, Apache-2.0) on project-generated and corpus_v2 prompts",
+                    "note": "D4's base_pool_v1 cells and order (stage-0 formal design), the top-up's units and code prompts"}
+                   for dom in d["profiles"][prof]["domain_weights"]]
         doc.append({"profile_id": pid, "version": 1,
                     "description": f"the hybrid's D4 {prof} profile: D4's cells, order and quotas, half of every cell from each mode",
+                    "sources": sources,
+                    "sample_rule": ("per cell and mode: D4's cell order over base_pool_v1 (the code cell: its own prompt list), "
+                                    "held-out units passed over, the mode's own naturally terminated whole trajectories until "
+                                    "half the cell's D4 quota of scored positions (build_calibration_supplement.profiles)"),
+                    "leakage_exclusions": ["eval-set-1 held-out prompts and near-copies (R1, R2) and R9's refused families",
+                                           "A1/A2's and C1's training prompts", "state_eval_hybrid@v1's prompts"],
+                    "leakage_proof_path": "logs/stages/stage-2/teacher_modes/audit/full_search_isolation.json",
                     "domain_weights": d["profiles"][prof]["domain_weights"], "token_budget": int(DOSE * d["reference_uesp"]),
                     "seed": SEED, "role": "operator_calibration", "materialized": True,
                     "items_path": str(path.relative_to(REPO)), "items_file_sha256": hashlib.sha256(body.encode()).hexdigest(),

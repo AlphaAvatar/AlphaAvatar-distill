@@ -118,7 +118,9 @@ class Session:
     baseline: dict
 
     def as_record(self) -> dict:
+        from aadistill.initialization.specs.materialization import numerical_execution_fingerprint
         return {"config_hash": self.config.config_hash,
+                "numerical_execution_fingerprint": numerical_execution_fingerprint(self.evaluator.execution, self.numerics),
                 "measurement_protocol_id": self.evaluator.measurement_protocol_id,
                 "profiles": [p.qualified_id for p in self.config.profiles],
                 "profile_hashes": {p.qualified_id: p.profile_hash for p in self.config.profiles},

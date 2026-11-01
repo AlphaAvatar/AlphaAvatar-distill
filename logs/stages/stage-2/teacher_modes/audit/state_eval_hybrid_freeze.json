@@ -1,0 +1,382 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.state_eval_hybrid_freeze/v1",
+ "written_utc": "2026-11-01T14:25:13Z",
+ "records": {
+  "dir": ".scratch/research_a/a_inputs_20261101_125916/store/inputs_generation",
+  "identity": "2a24101c2c925092dd57f4207520b3c0974c9a18c2835b844321a7fe90282a18",
+  "state_evaluation_records": 1742
+ },
+ "census": {
+  "code|H-T": {
+   "scored_positions": 13428,
+   "tasks": 7,
+   "generated_in_order": 7,
+   "skipped": {},
+   "reached": true,
+   "tag_positions": {
+    "think_close": 7,
+    "final_answer": 4405,
+    "eos": 7
+   }
+  },
+  "code|H-N": {
+   "scored_positions": 12375,
+   "tasks": 20,
+   "generated_in_order": 20,
+   "skipped": {},
+   "reached": true,
+   "tag_positions": {
+    "think_close": 0,
+    "final_answer": 12355,
+    "eos": 20
+   }
+  },
+  "defined_ops@v1|H-T": {
+   "scored_positions": 13501,
+   "tasks": 10,
+   "generated_in_order": 10,
+   "skipped": {},
+   "reached": true,
+   "tag_positions": {
+    "think_close": 10,
+    "final_answer": 3685,
+    "eos": 10
+   }
+  },
+  "defined_ops@v1|H-N": {
+   "scored_positions": 12256,
+   "tasks": 35,
+   "generated_in_order": 35,
+   "skipped": {},
+   "reached": true,
+   "tag_positions": {
+    "think_close": 0,
+    "final_answer": 12221,
+    "eos": 35
+   }
+  },
+  "entity_tracking@v1|H-T": {
+   "scored_positions": 12526,
+   "tasks": 13,
+   "generated_in_order": 13,
+   "skipped": {},
+   "reached": true,
+   "tag_positions": {
+    "think_close": 13,
+    "final_answer": 3660,
+    "eos": 13
+   }
+  },
+  "entity_tracking@v1|H-N": {
+   "scored_positions": 12180,
+   "tasks": 40,
+   "generated_in_order": 40,
+   "skipped": {},
+   "reached": true,
+   "tag_positions": {
+    "think_close": 0,
+    "final_answer": 12140,
+    "eos": 40
+   }
+  },
+  "grid_transform@v1|H-T": {
+   "scored_positions": 19933,
+   "tasks": 5,
+   "generated_in_order": 13,
+   "skipped": {
+    "not naturally terminated or protocol": 8
+   },
+   "reached": true,
+   "tag_positions": {
+    "think_close": 5,
+    "final_answer": 1924,
+    "eos": 5
+   }
+  },
+  "grid_transform@v1|H-N": {
+   "scored_positions": 12201,
+   "tasks": 16,
+   "generated_in_order": 18,
+   "skipped": {
+    "not naturally terminated or protocol": 2
+   },
+   "reached": true,
+   "tag_positions": {
+    "think_close": 0,
+    "final_answer": 12185,
+    "eos": 16
+   }
+  },
+  "gsm8k|H-T": {
+   "scored_positions": 12133,
+   "tasks": 15,
+   "generated_in_order": 15,
+   "skipped": {},
+   "reached": true,
+   "tag_positions": {
+    "think_close": 15,
+    "final_answer": 2596,
+    "eos": 15
+   }
+  },
+  "gsm8k|H-N": {
+   "scored_positions": 12018,
+   "tasks": 55,
+   "generated_in_order": 55,
+   "skipped": {},
+   "reached": true,
+   "tag_positions": {
+    "think_close": 0,
+    "final_answer": 11963,
+    "eos": 55
+   }
+  },
+  "knights_knaves@v1|H-T": {
+   "scored_positions": 13720,
+   "tasks": 5,
+   "generated_in_order": 5,
+   "skipped": {},
+   "reached": true,
+   "tag_positions": {
+    "think_close": 5,
+    "final_answer": 3312,
+    "eos": 5
+   }
+  },
+  "knights_knaves@v1|H-N": {
+   "scored_positions": 12161,
+   "tasks": 13,
+   "generated_in_order": 14,
+   "skipped": {
+    "not naturally terminated or protocol": 1
+   },
+   "reached": true,
+   "tag_positions": {
+    "think_close": 0,
+    "final_answer": 12148,
+    "eos": 13
+   }
+  },
+  "list_induction@v1|H-T": {
+   "scored_positions": 13715,
+   "tasks": 6,
+   "generated_in_order": 8,
+   "skipped": {
+    "not naturally terminated or protocol": 2
+   },
+   "reached": true,
+   "tag_positions": {
+    "think_close": 6,
+    "final_answer": 2659,
+    "eos": 6
+   }
+  },
+  "list_induction@v1|H-N": {
+   "scored_positions": 12174,
+   "tasks": 14,
+   "generated_in_order": 14,
+   "skipped": {},
+   "reached": true,
+   "tag_positions": {
+    "think_close": 0,
+    "final_answer": 12160,
+    "eos": 14
+   }
+  },
+  "multihop_qa|H-T": {
+   "scored_positions": 12119,
+   "tasks": 25,
+   "generated_in_order": 25,
+   "skipped": {},
+   "reached": true,
+   "tag_positions": {
+    "think_close": 25,
+    "final_answer": 1533,
+    "eos": 25
+   }
+  },
+  "multihop_qa|H-N": {
+   "scored_positions": 12018,
+   "tasks": 292,
+   "generated_in_order": 292,
+   "skipped": {},
+   "reached": true,
+   "tag_positions": {
+    "think_close": 0,
+    "final_answer": 11726,
+    "eos": 292
+   }
+  },
+  "openmath|H-T": {
+   "scored_positions": 15709,
+   "tasks": 5,
+   "generated_in_order": 6,
+   "skipped": {
+    "not naturally terminated or protocol": 1
+   },
+   "reached": true,
+   "tag_positions": {
+    "think_close": 5,
+    "final_answer": 2831,
+    "eos": 5
+   }
+  },
+  "openmath|H-N": {
+   "scored_positions": 12037,
+   "tasks": 22,
+   "generated_in_order": 23,
+   "skipped": {
+    "not naturally terminated or protocol": 1
+   },
+   "reached": true,
+   "tag_positions": {
+    "think_close": 0,
+    "final_answer": 12015,
+    "eos": 22
+   }
+  },
+  "ordering@v1|H-T": {
+   "scored_positions": 14124,
+   "tasks": 9,
+   "generated_in_order": 9,
+   "skipped": {},
+   "reached": true,
+   "tag_positions": {
+    "think_close": 9,
+    "final_answer": 2565,
+    "eos": 9
+   }
+  },
+  "ordering@v1|H-N": {
+   "scored_positions": 12051,
+   "tasks": 52,
+   "generated_in_order": 52,
+   "skipped": {},
+   "reached": true,
+   "tag_positions": {
+    "think_close": 0,
+    "final_answer": 11999,
+    "eos": 52
+   }
+  },
+  "rag_evidence|H-T": {
+   "scored_positions": 12150,
+   "tasks": 35,
+   "generated_in_order": 35,
+   "skipped": {},
+   "reached": true,
+   "tag_positions": {
+    "think_close": 35,
+    "final_answer": 1911,
+    "eos": 35
+   }
+  },
+  "rag_evidence|H-N": {
+   "scored_positions": 12004,
+   "tasks": 390,
+   "generated_in_order": 390,
+   "skipped": {},
+   "reached": true,
+   "tag_positions": {
+    "think_close": 0,
+    "final_answer": 11614,
+    "eos": 390
+   }
+  },
+  "scan_language@v1|H-T": {
+   "scored_positions": 26432,
+   "tasks": 5,
+   "generated_in_order": 8,
+   "skipped": {
+    "not naturally terminated or protocol": 3
+   },
+   "reached": true,
+   "tag_positions": {
+    "think_close": 5,
+    "final_answer": 2168,
+    "eos": 5
+   }
+  },
+  "scan_language@v1|H-N": {
+   "scored_positions": 12330,
+   "tasks": 24,
+   "generated_in_order": 25,
+   "skipped": {
+    "not naturally terminated or protocol": 1
+   },
+   "reached": true,
+   "tag_positions": {
+    "think_close": 0,
+    "final_answer": 12306,
+    "eos": 24
+   }
+  },
+  "string_induction@v1|H-T": {
+   "scored_positions": 12756,
+   "tasks": 6,
+   "generated_in_order": 7,
+   "skipped": {
+    "not naturally terminated or protocol": 1
+   },
+   "reached": true,
+   "tag_positions": {
+    "think_close": 6,
+    "final_answer": 2456,
+    "eos": 6
+   }
+  },
+  "string_induction@v1|H-N": {
+   "scored_positions": 12364,
+   "tasks": 16,
+   "generated_in_order": 17,
+   "skipped": {
+    "not naturally terminated or protocol": 1
+   },
+   "reached": true,
+   "tag_positions": {
+    "think_close": 0,
+    "final_answer": 12348,
+    "eos": 16
+   }
+  }
+ },
+ "shortfall": [],
+ "terminal": "FROZEN",
+ "asset": {
+  "dir": "artifacts/stages/stage-2/teacher_modes/state_eval_hybrid_v1",
+  "manifest_sha256": "f7d76b90e4cb8163904eec5e7028f9c04b685f54d3b68bed62ea747fb31d00de",
+  "items_sha256": "0ddc148e95ee2c91e0f08f868554a6c4d3f331f31af034384cfbc333678d36f1",
+  "content_sha256": "b36c6abc601f799f6cc0d44eac9887962163e73f48efd4b5d1f8e2b38abc4598",
+  "n_items": 1135
+ },
+ "suite_identity": {
+  "measurement_protocol_id": "1c8305246073213e58d0c1098ba4e4e0",
+  "suite_hash": "4b966c8b671cd5e99d173989dd780919bcf1abce90da450daadc15ad35248150",
+  "reduction": {
+   "chunk": 512,
+   "reference_strategy": "recompute",
+   "aggregation_rule": "equal_subtype_then_equal_domain/v1",
+   "distribution_support": {
+    "support_id": "reference_topk_tail_v1",
+    "top_k": 200
+   },
+   "critical_aggregation": "group_balanced/v1: per group, each of its declared classes pooled over the group's items' scored positions; unweighted mean over the group's classes; unweighted mean over groups"
+  }
+ },
+ "rules": {
+  "positions_per_type_and_mode": 12000,
+  "min_tasks_per_type_and_mode": 5,
+  "selection": "the type's queue in order, whole naturally terminated one-turn trajectories, until both"
+ },
+ "by_mode": {
+  "H-T": {
+   "items": 146,
+   "scored_positions": 192246
+  },
+  "H-N": {
+   "items": 989,
+   "scored_positions": 158169
+  }
+ },
+ "authorizes": "nothing"
+}
