@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-11-02T17:20:00Z",
+ "generated_utc": "2026-11-02T18:50:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Research A v2 A1 phase: A1's two seeds training and evaluation (a_train_a1_20261102_165858), then a1_analysis (TOKEN_MATCHED.md D).",
+ "next": "Research A v2 A1 phase: A1's two seeds training and evaluation (a_train_a1_20261102_184122, attempt 3), then a1_analysis (TOKEN_MATCHED.md D).",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -197,10 +197,10 @@
   "docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md (Research A v2, for review), DESIGN.md and docs/stages/stage-1/projected_residual/DESIGN.md"
  ],
  "running": {
-  "paid_compute": "train_a1 session a_train_a1_20261102_165858 (hard cap $14.10; a $0 create window until L40S stock in US-TX-3)",
+  "paid_compute": "train_a1 session a_train_a1_20261102_184122 (hard cap $13.85; a $0 create window until L40S stock in US-TX-3)",
   "pods": 0,
   "network_volumes": 2,
-  "run": "logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_165858",
+  "run": "logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_184122",
   "volume": "4rhubprswo (350 GB, US-TX-3): the A1 phase, holds the search Top-1; am5m373kuq (55 GB): the archive"
  },
  "schema": "aadistill.current_state/v2",

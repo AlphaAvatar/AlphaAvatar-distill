@@ -21,8 +21,9 @@ section D. Decision record: `logs/budget/decisions.md` 2026-11-01 (three entries
 - **Phase B (search): COMPLETE** (`a_search_20261101_153803`, $23.97 of $41.21): 93 states, 12 complete leaves;
   Top-1 `159e73be` (DEPTH(base) → FFN(base) → ATTENTION(base) → RESIDUAL_WIDTH(rh), 596,049,920 parameters,
   `model.safetensors` `3459b9c9…`) on volume `4rhubprswo`, sha256-verified there. Pod gone; no observers remain.
-- **Phases C and D (A1's two seeds trained and evaluated): launched** (`a_train_a1_20261102_165858`, hard cap $14.10,
-  `training_plan_a1.json`), waiting in a $0 create window for L40S stock in US-TX-3.
+- **Phases C and D (A1's two seeds trained and evaluated): attempt 3 launched** (`a_train_a1_20261102_184122`,
+  hard cap $13.85, `training_plan_a1.json`). Attempts 1 ($0.2436, lineage gate read Xet hashes) and 2 ($0, no pod;
+  the trainer's offline lookup) ended before any training step and are repaired; TOKEN_MATCHED.md D has both.
 - **Spent before the phase:** A-TM $15.8689; project position read at issue: $67.21 left after the new volume's reserve.
 
 **RESEARCH A AND B: A-E ($3.50) AND B-E ($3.00) PAID ENGINEERING VALIDATIONS AUTHORIZED (maintainer, 2026-10-28 UTC). A-E: PASS (attempt 2 `ae_20261028_093428`; $0.7089 of $3.50 across two attempts). B-E: FAIL (`be_20261028_095332`, $0.4366 of $3.00): trainer smoke OOM on the L40S at the frozen E1 recipe, so resume unmeasured; vLLM median |Δ log-prob| 0.234 > 0.1 nat. Initialization, both fold checks, checkpoint identity and GPU isolation PASS. Both closed; no pod; committed $725.4993 of $740. STOPPED at the maintainer's next decision.**

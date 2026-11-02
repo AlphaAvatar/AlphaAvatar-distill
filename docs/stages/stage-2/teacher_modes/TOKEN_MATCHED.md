@@ -652,6 +652,20 @@ B stays pending.
   - the gap to the teacher's thinking mode;
   - the training logs.
 
+**Phase C attempts (2026-11-02).** Both ended before a training step. Each is closed under its own run directory.
+- `a_train_a1_20261102_165858` (pod, 13.2 min, $0.2436): launch admission refused the pinned teacher.
+  - Cause: the pod's huggingface_hub links `blobs/<LFS sha256>` on to a shared Xet store
+    (`hub/blobs/<xx>/<Xet hash>`). `lineage.snapshot_facts` resolved the whole chain and read the Xet hash as
+    the shard's sha256.
+  - The Hub's paths-info confirms each refused digest is that shard's own Xet hash, so the teacher was the pinned
+    one (`closeout/diagnosis.json`).
+  - Repair: `snapshot_facts` reads the link's first hop (1b8c658b).
+- `a_train_a1_20261102_183510` (no pod, $0): stopped in its create-retry wait.
+  - Found at $0 in the meantime: `train_stage3`'s own lineage check looked the teacher up offline as the whole
+    repository, which huggingface_hub 1.x refuses when setup fetched only `teacher_cache.TEACHER_FILES`.
+  - Repair: it goes through `teacher_cache.local_snapshot`, as admission does (ddd88001).
+- `a_train_a1_20261102_184122`: the current session, hard cap $13.85 (the kind's $14.10 less attempt 1).
+
 ## Budget (re-estimated 2026-11-01; nothing below is authorized)
 
 Owner: [`plans/budget_v2.json`](../../../../logs/stages/stage-2/teacher_modes/plans/budget_v2.json). Provider facts:
