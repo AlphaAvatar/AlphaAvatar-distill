@@ -289,9 +289,10 @@ def main() -> None:
                              "resume is checked against travels with the bound identity")
         snap = None
         if teacher is not None:
-            from huggingface_hub import snapshot_download
-            snap = LIN.snapshot_facts(snapshot_download(cfg["teacher"]["model_id"], revision=teacher_identity["revision"],
-                                                        local_files_only=True))
+            #: the files setup fetched, looked up offline: huggingface_hub 1.x refuses an offline lookup of the whole
+            #: repository when setup fetched only `teacher_cache.TEACHER_FILES` (a_train_a1_20261102_183510)
+            from shared.pod.teacher_cache import local_snapshot
+            snap = LIN.snapshot_facts(local_snapshot(cfg["teacher"]["model_id"], teacher_identity["revision"]))
         init_file = Path(paths["student_path"]) / "model.safetensors"
         init_sha = _sha(init_file) if init_file.is_file() else None
         if resume_ckpt is None and init_sha is None:

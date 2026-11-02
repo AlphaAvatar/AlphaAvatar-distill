@@ -1,0 +1,15 @@
+[18:36:11] budget: expected 694 min $12.61 · soft $13.43 · hard $13.61 (authorized $13.85)
+[18:36:12] NVIDIA L40S $1.09/h, stock Low
+[18:36:12] account funds OK: the provider account holds $53.0825 against the $13.6105 this session must be able to fund
+[18:36:13] account resources OK: the provider account holds only the 2 resource(s) the records account for
+[18:36:13] a A-TM train_a1 artifact, unused
+[18:36:13] 1 x NVIDIA L40S at no more than $1.09/h for the pod, as granted
+[18:36:13] all-in $13.8387 over 750.45 min, inside $13.85
+[18:36:13] study identity 2a24101c2c92 is the authorized one
+[18:36:13] every bound file is in the session commit
+[18:36:15] $13.85 inside the envelope ($38.675) and the $40.8328 the project cap leaves now
+[18:36:15] volume 4rhubprswo: 350 GB in US-TX-3
+[18:36:15] the kind's bound records are the committed ones
+[18:36:17] precheck OK: 3 relay inputs (3 from AlphaAvatar/aadistill-artifacts), 2 local assets
+[18:36:17] attempt 1: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+[18:36:17] attempt 1: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
