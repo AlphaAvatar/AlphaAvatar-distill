@@ -18,7 +18,7 @@ section D. Decision record: `logs/budget/decisions.md` 2026-11-01 (three entries
   `am5m373kuq` kept as the archive. One L40S at a time.
 - **Phase A (inputs): done** (`a_inputs_20261101_125916`, $0.5713): profiles COMPLETE, `state_eval_hybrid@v1`
   frozen (1,135 items, protocol `1c830524`).
-- **Phase B (search): COMPLETE** (`a_search_20261101_153803`, $23.97 of $41.21): 93 states, 12 complete leaves;
+- **Phase B (search): COMPLETE** (`a_search_20261101_153803`, $23.96 of $41.21): 93 states, 12 complete leaves;
   Top-1 `159e73be` (DEPTH(base) → FFN(base) → ATTENTION(base) → RESIDUAL_WIDTH(rh), 596,049,920 parameters,
   `model.safetensors` `3459b9c9…`) on volume `4rhubprswo`, sha256-verified there. Pod gone; no observers remain.
 - **Phases C and D (A1's two seeds trained and evaluated): attempt 3 launched** (`a_train_a1_20261102_184122`,

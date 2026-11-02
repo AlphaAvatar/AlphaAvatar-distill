@@ -15,16 +15,23 @@
  "evidence": null,
  "verdict_rederived": null,
  "money": {
-  "all_in_usd": 23.9728,
-  "gpu_and_disk_provider_posted_usd": 22.9206,
-  "provider_posted_minutes": 1242.65,
+  "all_in_usd": 23.9553,
+  "gpu_and_disk_provider_posted_usd": 23.9553,
+  "provider_posted_minutes": 1298.76,
   "pod_life_minutes": 1299.69,
   "provider_rate_usd_per_hour": 1.1067,
   "watchdog_accrued_gpu_usd": 23.6111,
   "retained_after_gate_usd": 1.28,
   "authorized_usd": 41.21,
-  "final_hour_bucket_posted": false,
-  "_basis": "provider hourly billing rows for the pod (GPU and container disk) posted through the 15:00 UTC bucket, plus the remaining pod minutes at the provider's own effective rate, rounded up; network-volume storage is booked under the storage phase"
+  "final_hour_bucket_posted": true,
+  "_basis": "provider hourly billing rows for the pod (GPU and container disk), all 22 buckets posted through the 16:00 UTC bucket (re-read 2026-11-02T19:50Z); network-volume storage is booked under the storage phase",
+  "before_final_bucket": {
+   "all_in_usd": 23.9728,
+   "gpu_and_disk_provider_posted_usd": 22.9206,
+   "provider_posted_minutes": 1242.65,
+   "final_hour_bucket_posted": false,
+   "_basis": "provider hourly billing rows for the pod (GPU and container disk) posted through the 15:00 UTC bucket, plus the remaining pod minutes at the provider's own effective rate, rounded up; network-volume storage is booked under the storage phase"
+  }
  },
  "provider_confirms_gone": true,
  "provider_reconciliation_after": {

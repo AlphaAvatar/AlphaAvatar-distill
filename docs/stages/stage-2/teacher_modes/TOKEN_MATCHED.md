@@ -627,7 +627,7 @@ B stays pending.
   - `model.safetensors` sha256 `3459b9c9…`, artifact digest `ab8ffb0d…`;
   - on volume `4rhubprswo` at `/runpod-volume/teacher_modes/search_a1/top1`.
   These are KL and ranking facts about initializations, not reasoning results (P10.2).
-- Cost: $23.97 of $41.21, from the provider's hourly billing.
+- Cost: $23.9553 of $41.21, from the provider's hourly billing (all 22 hourly buckets posted).
   - $1.28 of it is the 69 minutes the pod was retained after the search had finished. The closeout tried to pull the
     1.19 GB Top-1 to the dev box (5.7 MB in 1,200 s), and its gate refused teardown.
   - The Top-1 was then hashed on the volume, and the pod deleted (provider 404, the watchdog ended `pod_gone`).
