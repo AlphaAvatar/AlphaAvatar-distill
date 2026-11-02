@@ -224,13 +224,18 @@ def require_all(lineages: Iterable[tuple[str, Mapping, Mapping]]) -> None:
 
 def snapshot_facts(snapshot_dir) -> dict:
     """What a teacher snapshot directory IS: each weight shard's sha256 (an LFS blob's name when the file links to
-    one, else its bytes hashed), sha256 of tokenizer_config's chat_template, the RoPE base and position limit."""
+    one, else its bytes hashed), sha256 of tokenizer_config's chat_template, the RoPE base and position limit.
+
+    The blob name is the link's FIRST hop (``snapshots/<rev>/<file> -> ../../blobs/<lfs sha256>``), never the end of
+    the chain: a huggingface_hub that keeps Xet files in a shared store links that blob on again, to
+    ``blobs/<xx>/<xet hash>``, and the Xet hash is not a sha256 (a_train_a1_20261102_165858)."""
+    import os
     import re
     from pathlib import Path
     d = Path(snapshot_dir)
     shards = {}
     for p in sorted(d.glob("*.safetensors")):
-        name = Path(p.resolve()).name if p.is_symlink() else ""
+        name = Path(os.readlink(p)).name if p.is_symlink() else ""
         if re.fullmatch(r"[0-9a-f]{64}", name):
             shards[p.name] = name
         else:

@@ -103,6 +103,19 @@ def test_snapshot_facts_read_lfs_blob_names_the_template_and_rope(tmp_path):
     assert f["chat_template_sha256"] == hashlib.sha256(b"T").hexdigest()
 
 
+def test_snapshot_facts_read_the_first_hop_not_a_shared_xet_store_behind_it(tmp_path):
+    """2026-11-02: the pod's huggingface_hub linked blobs/<lfs sha256> on to blobs/<xx>/<xet hash>; resolving the
+    whole chain read the Xet hash as the shard's sha256 and the lineage gate refused the right teacher."""
+    store, blobs, snap = tmp_path / "hub/blobs/a6", tmp_path / "hub/models--org--t/blobs", tmp_path / "snap"
+    for d in (store, blobs, snap):
+        d.mkdir(parents=True)
+    (store / ("a" * 64)).write_bytes(b"weights")
+    (blobs / ("3" * 64)).symlink_to(store / ("a" * 64))
+    (snap / "model.safetensors").symlink_to(blobs / ("3" * 64))
+    (snap / "config.json").write_text(json.dumps({"rope_theta": 1_000_000, "max_position_embeddings": 40960}))
+    assert LIN.snapshot_facts(snap)["weights_sha256"] == {"model.safetensors": "3" * 64}
+
+
 # --- maintainer review 2026-11-01: missing fields, provenance, tokenizer files, the effective config, resume -----
 
 @pytest.mark.parametrize("field", ["rope_theta", "max_position_embeddings", "vocab_size"])

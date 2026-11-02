@@ -1,0 +1,22 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.a1_units/v1",
+ "started_utc": "2026-11-02T18:28:43Z",
+ "units": {
+  "A1-s20260726": {
+   "state_at_start": "fresh"
+  }
+ },
+ "authorization": "stage2.teacher_modes.token_matched.a_train_a1_20261102_165858",
+ "tokenizer": {
+  "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+  "tokenizer_config.json": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+  "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+  "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+ },
+ "error": {
+  "error": "LineageError(\"teacher-student lineage refused: A1-s20260726: the teacher's weight shards [('model-00001-of-00003.safetensors', 'a6f5dec111c34cd267ff4fd7889ef961237b30418d123d5b60b2c1fd3cbd3cc7'), ('model-00002-of-00003.safetensors', 'ecdf348827111862a9e3830801e7ee1724029573294e851f4aefa70b69116fdd'), ('model-00003-of-00003.safetensors', '9e03420e9ba417fa0d35ccd26596147c96e2303391318f9a9304a8238dac0614')] are not the lineage's [('model-00001-of-00003.safetensors', '328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223'), ('model-00002-of-00003.safetensors', '6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5'), ('model-00003-of-00003.safetensors', 'e4bf436957184f4eeb86a80e9db394503f1f56446b2e6b7edeac5b81470f4ca1')]\")",
+  "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/stages/stage-2/teacher_modes/a1_units.py\", line 137, in main\n    TP.admit([{\"unit\": name, \"config\": cfg}], snapshots={t[\"model_id\"]: snap})\n  File \"/workspace/aad/scripts/stages/stage-2/teacher_modes/training_plan.py\", line 256, in admit\n    raise LIN.LineageError(\"; \".join(bad))\naadistill.training.lineage.LineageError: teacher-student lineage refused: A1-s20260726: the teacher's weight shards [('model-00001-of-00003.safetensors', 'a6f5dec111c34cd267ff4fd7889ef961237b30418d123d5b60b2c1fd3cbd3cc7'), ('model-00002-of-00003.safetensors', 'ecdf348827111862a9e3830801e7ee1724029573294e851f4aefa70b69116fdd'), ('model-00003-of-00003.safetensors', '9e03420e9ba417fa0d35ccd26596147c96e2303391318f9a9304a8238dac0614')] are not the lineage's [('model-00001-of-00003.safetensors', '328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223'), ('model-00002-of-00003.safetensors', '6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5'), ('model-00003-of-00003.safetensors', 'e4bf436957184f4eeb86a80e9db394503f1f56446b2e6b7edeac5b81470f4ca1')]\n"
+ },
+ "finished_utc": "2026-11-02T18:28:52Z",
+ "terminal": "RUN_FAILED"
+}
