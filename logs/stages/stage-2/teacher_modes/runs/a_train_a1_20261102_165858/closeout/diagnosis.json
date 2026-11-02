@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.stage2.teacher_modes.failure_diagnosis/v1",
  "run_id": "a_train_a1_20261102_165858",
- "recorded_utc": "2026-11-02T18:50:00Z",
+ "recorded_utc": "2026-11-02T18:34:00Z",
  "classification": "engineering failure before formal training: the lineage gate's own mechanism read the wrong hash; no training step ran, no measurement exists",
  "failure": {
   "at": "2026-11-02T18:28:52Z, a1_units.py -> training_plan.admit, unit A1-s20260726, before TRAIN_START",
