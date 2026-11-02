@@ -677,7 +677,10 @@ def closeout(study: Study, launch: Launch, run_id: str, scr: Path, *, root: Path
                       else "INCOMPLETE"),
            "validation_passed": passed, "products_secured": products, "terminal": terminal, "runner_terminal": sess.get("terminal"),
            "provider_resource_created": created, "evidence": evidence, "verdict_rederived": rederived,
-           "money": {"all_in_usd": math.ceil((gpu + disk) * 1e4) / 1e4 if created else 0.0, "gpu_usd": gpu,
+           # a created resource whose session recorded no teardown cost (a blocked gate retains the pod) is an
+           # unknown, never $0: spent() then refuses every later issue until the run is reconciled
+           "money": {"all_in_usd": (math.ceil((gpu + disk) * 1e4) / 1e4 if sess.get("cost") else None) if created
+                     else 0.0, "gpu_usd": gpu,
                      "disk_usd": round(disk, 4), "elapsed_minutes": minutes, "price_per_hour": cost.get("price_per_hour"),
                      "authorized_usd": cost.get("authorized_usd"),
                      "_basis": (f"GPU actual from runtime/session.json :: cost plus container disk at "

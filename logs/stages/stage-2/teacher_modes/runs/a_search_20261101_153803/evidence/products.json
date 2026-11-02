@@ -1,0 +1,22 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.full_search_products/v1",
+ "search_run_id": "research_a_v2_hybrid_d4_full_search",
+ "root_teacher": {
+  "root_teacher_id": "Qwen/Qwen3-4B@1cfa9a7208912126459214e8b04321603b3df60c",
+  "root_teacher_sha256": "a8b9dec375a8f2c5238cac67e7542b3cbaed02d02385e08b05806a75be911192"
+ },
+ "top1": {
+  "path": "/runpod-volume/teacher_modes/search_a1/top1",
+  "files_sha256": {
+   "model.safetensors": "3459b9c99492b33ea41fc5545fc3a1d80a89bfba28fb5181c2d1606ea5c3220c",
+   "config.json": "f0f6c3c856bff61a8e2f542179bb48b0799dc28185764badf2fe440ea104a84b",
+   "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633"
+  },
+  "state_id": "159e73be3e1157e8367a476eb72e6afc",
+  "artifact_digest": "ab8ffb0d05ae95539432b5a31ea7cfa193ff0e7fb6ef854fd6b32958589f18f4",
+  "weights_digest": "e19abcd93f575a6c0f53975311738d85fda7f87d2ed0667e9220fc759e1baa4c",
+  "source_checkpoint_path": "/runpod-volume/teacher_modes/search_a1/search/states/159e73be3e1157e8367a476eb72e6afc/33c7430abdb61d03b46f2fb73732b57a"
+ },
+ "selection": "/runpod-volume/teacher_modes/search_a1/stage1_selection.json",
+ "journal": "/runpod-volume/teacher_modes/search_a1/search/states.jsonl"
+}

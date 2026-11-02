@@ -1,0 +1,106 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tm_authorization_outcome/v1",
+ "run_id": "a_search_20261101_153803",
+ "study": "A-TM",
+ "recorded_utc": "2026-11-02T16:58:00Z",
+ "status": "COMPLETE",
+ "validation_passed": false,
+ "products_secured": {
+  "ok": true,
+  "why": "search_evidence pulled and re-hashed; the Top-1's three files sha256-verified on volume 4rhubprswo against the committed digests (closeout/teardown.json)"
+ },
+ "terminal": "ALL_DONE",
+ "runner_terminal": "ALL_DONE",
+ "provider_resource_created": true,
+ "evidence": null,
+ "verdict_rederived": null,
+ "money": {
+  "all_in_usd": 23.9728,
+  "gpu_and_disk_provider_posted_usd": 22.9206,
+  "provider_posted_minutes": 1242.65,
+  "pod_life_minutes": 1299.69,
+  "provider_rate_usd_per_hour": 1.1067,
+  "watchdog_accrued_gpu_usd": 23.6111,
+  "retained_after_gate_usd": 1.28,
+  "authorized_usd": 41.21,
+  "final_hour_bucket_posted": false,
+  "_basis": "provider hourly billing rows for the pod (GPU and container disk) posted through the 15:00 UTC bucket, plus the remaining pod minutes at the provider's own effective rate, rounded up; network-volume storage is booked under the storage phase"
+ },
+ "provider_confirms_gone": true,
+ "provider_reconciliation_after": {
+  "checked": true,
+  "known": true,
+  "pods": [],
+  "ok": true,
+  "why": "runpodctl pod list --all -> [] and pod get -> 404 after the deletion (2026-11-02T16:49Z)"
+ },
+ "kind": "search",
+ "scientific_use": true,
+ "authorizes": "nothing",
+ "reconciled_after_gate": {
+  "by": "closeout/teardown.json",
+  "as_launcher_wrote": {
+   "recorded_utc": "2026-11-02T15:39:59+00:00",
+   "status": "INCOMPLETE",
+   "products_secured": {
+    "ok": false,
+    "why": "not secured: ['top1/model.safetensors']"
+   },
+   "money": {
+    "all_in_usd": 0.0,
+    "gpu_usd": 0.0,
+    "disk_usd": 0.0,
+    "elapsed_minutes": 0.0,
+    "price_per_hour": null,
+    "authorized_usd": null,
+    "_basis": "GPU actual from runtime/session.json :: cost plus container disk at $0.1/GB-month over the elapsed minutes (150 GB)"
+   },
+   "provider_confirms_gone": null,
+   "provider_reconciliation_after": {
+    "checked": true,
+    "known": true,
+    "pods": [
+     {
+      "kind": "pod",
+      "id": "jzslup672m2jiy",
+      "name": "aadistill-stage2_teacher_modes_tm-search",
+      "desiredStatus": "RUNNING",
+      "costPerHr": 1.09
+     }
+    ],
+    "network_volumes": [
+     {
+      "kind": "network_volume",
+      "id": "4rhubprswo",
+      "name": "aad-a1-phase",
+      "size": 350,
+      "dataCenterId": "US-TX-3"
+     },
+     {
+      "kind": "network_volume",
+      "id": "am5m373kuq",
+      "name": "aad-h1pa",
+      "size": 55,
+      "dataCenterId": "EUR-IS-2"
+     }
+    ],
+    "error": null,
+    "accounted": [
+     "4rhubprswo",
+     "am5m373kuq"
+    ],
+    "unaccounted": [
+     {
+      "kind": "pod",
+      "id": "jzslup672m2jiy",
+      "name": "aadistill-stage2_teacher_modes_tm-search",
+      "desiredStatus": "RUNNING",
+      "costPerHr": 1.09
+     }
+    ],
+    "ok": false,
+    "why": "the provider account holds 1 resource(s) the records do not account for: [('pod', 'jzslup672m2jiy')]; reconcile or tear them down before anything else is created"
+   }
+  }
+ }
+}

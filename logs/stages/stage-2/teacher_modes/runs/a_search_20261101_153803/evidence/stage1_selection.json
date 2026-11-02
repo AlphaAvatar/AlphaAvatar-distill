@@ -1,0 +1,350 @@
+{
+  "schema": "aadistill.autoinit.stage1_selection/v1",
+  "generated_utc": "2026-11-02T15:03:19.643124+00:00",
+  "_contract": "Written the moment a Stage-1 ranking exists, before the control measurement, the retained candidates, the summary, or any other bookkeeping. If this file exists the search COMPLETED and these five leaves were selected, whatever happened afterwards. It is not a search result and not a substitute for the summary.",
+  "search": {
+    "run_id": "research_a_v2_hybrid_d4_full_search",
+    "config_hash": "e8a43631eec71442ef783c127e5e2d7dc10cb04942d503287042bbc633d58675",
+    "seed": 20260815,
+    "target_spec_hash": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "workdir": "/runpod-volume/teacher_modes/search_a1/search"
+  },
+  "journal": {
+    "path": "/runpod-volume/teacher_modes/search_a1/search/states.jsonl",
+    "sha256": "5ee31414ec087db5a672550b14e9fe29f30952eaf722d0854a8530bd137a14af"
+  },
+  "policy": {
+    "qualified_id": "beam.pareto_multi_objective@v2",
+    "hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4"
+  },
+  "suite": {
+    "qualified_id": "state_eval_hybrid@v1",
+    "hash": "4b966c8b671cd5e99d173989dd780919bcf1abce90da450daadc15ad35248150"
+  },
+  "profiles": [
+    {
+      "qualified_id": "calib.hybrid_d4_base@v1",
+      "profile_hash": "5d4d92f2afcc2f514b7b44ac32d0bc7af36c800b863d8662b7d3832fcf0e5bc2",
+      "content_sha256": "1e40ad0af3dc07ed608558bc87e00c3991944e5cfdf2ec3ff6416f015a72fb71"
+    },
+    {
+      "qualified_id": "calib.hybrid_d4_rh@v1",
+      "profile_hash": "768443f63002b90abb1f01a05a96cf806433e869f93ebdcd778c3f92e1348661",
+      "content_sha256": "2cf4a8f1d98a4914b135b0b79bba0846b39d10644155492408e808ab5799dcc5"
+    }
+  ],
+  "selected": [
+    {
+      "state_id": "159e73be3e1157e8367a476eb72e6afc",
+      "path": "DEPTH(calib.hybrid_d4_base@v1)->FFN(calib.hybrid_d4_base@v1)->ATTENTION(calib.hybrid_d4_base@v1)->RESIDUAL_WIDTH(calib.hybrid_d4_rh@v1)",
+      "artifact_digest": "ab8ffb0d05ae95539432b5a31ea7cfa193ff0e7fb6ef854fd6b32958589f18f4",
+      "single_shard_sha256": "3459b9c99492b33ea41fc5545fc3a1d80a89bfba28fb5181c2d1606ea5c3220c",
+      "checkpoint_path": "/runpod-volume/teacher_modes/search_a1/search/states/159e73be3e1157e8367a476eb72e6afc/33c7430abdb61d03b46f2fb73732b57a",
+      "num_parameters": 596049920,
+      "impl_ids": [
+        "depth.causal_kl_greedy_v1",
+        "ffn.activation_importance_v0",
+        "attention.activation_importance_v1",
+        "width.global_pca_v0"
+      ],
+      "calibration_profiles": [
+        "calib.hybrid_d4_base@v1",
+        "calib.hybrid_d4_rh@v1"
+      ],
+      "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+      "weights_digest": "e19abcd93f575a6c0f53975311738d85fda7f87d2ed0667e9220fc759e1baa4c"
+    }
+  ],
+  "n_selected": 1,
+  "decisions": [
+    {
+      "state_id": "159e73be3e1157e8367a476eb72e6afc",
+      "path": "DEPTH(calib.hybrid_d4_base@v1)->FFN(calib.hybrid_d4_base@v1)->ATTENTION(calib.hybrid_d4_base@v1)->RESIDUAL_WIDTH(calib.hybrid_d4_rh@v1)",
+      "front": 0,
+      "position_in_front": 0,
+      "quality_order": 1,
+      "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0|attention.activation_importance_v1",
+      "selected": true,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 7.337514471292595,
+        "state.teacher_kl.worst_domain": 7.693508155868296,
+        "state.critical_token_kl": 12.002268161025714
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 7.6086883891675425,
+        "state.nll.teacher_reference_pooled": 0.10580527841463948,
+        "state.nll.abstract_analogical": 6.898832071932272,
+        "state.nll.compositional_generalization": 7.847097942853969,
+        "state.nll.inductive_rule_discovery": 7.205335997903896,
+        "state.nll.task_contained_deduction": 7.710959329336778,
+        "state.nll.supporting": 7.816591838117046
+      },
+      "reason": "kept: quality order 1 of 12 (front 0), top 1 by the policy's own ordering; lineage diversity NOT applied"
+    },
+    {
+      "state_id": "3119e1ef1c5e1a8d07923b67229a37f6",
+      "path": "DEPTH(calib.hybrid_d4_rh@v1)->FFN(calib.hybrid_d4_base@v1)->ATTENTION(calib.hybrid_d4_base@v1)->RESIDUAL_WIDTH(calib.hybrid_d4_rh@v1)",
+      "front": 0,
+      "position_in_front": 1,
+      "quality_order": 2,
+      "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0|attention.activation_importance_v1",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 7.337514471292595,
+        "state.teacher_kl.worst_domain": 7.693508155868296,
+        "state.critical_token_kl": 12.002268161025714
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 7.6086883891675425,
+        "state.nll.teacher_reference_pooled": 0.10580527841463948,
+        "state.nll.abstract_analogical": 6.898832071932272,
+        "state.nll.compositional_generalization": 7.847097942853969,
+        "state.nll.inductive_rule_discovery": 7.205335997903896,
+        "state.nll.task_contained_deduction": 7.710959329336778,
+        "state.nll.supporting": 7.816591838117046
+      },
+      "reason": "not retained: quality order 2 of 12 (front 0), outside the top 1"
+    },
+    {
+      "state_id": "3b20d0b1f3b10c15e5f5b7e8061fd167",
+      "path": "FFN(calib.hybrid_d4_rh@v1)->DEPTH(calib.hybrid_d4_rh@v1)->RESIDUAL_WIDTH(calib.hybrid_d4_base@v1)->ATTENTION(calib.hybrid_d4_rh@v1)",
+      "front": 0,
+      "position_in_front": 2,
+      "quality_order": 3,
+      "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1|width.global_pca_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 8.964820269018166,
+        "state.teacher_kl.worst_domain": 10.617062753927783,
+        "state.critical_token_kl": 11.199086238374761
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 9.54841370383975,
+        "state.nll.teacher_reference_pooled": 0.10580527841463948,
+        "state.nll.abstract_analogical": 7.481656698633301,
+        "state.nll.compositional_generalization": 9.038958851200714,
+        "state.nll.inductive_rule_discovery": 9.07707303956764,
+        "state.nll.task_contained_deduction": 9.279487682176896,
+        "state.nll.supporting": 10.738162738350438
+      },
+      "reason": "not retained: quality order 3 of 12 (front 0), outside the top 1"
+    },
+    {
+      "state_id": "c8b9a124d0951a5927f760d9eb7d5040",
+      "path": "FFN(calib.hybrid_d4_rh@v1)->DEPTH(calib.hybrid_d4_base@v1)->RESIDUAL_WIDTH(calib.hybrid_d4_base@v1)->ATTENTION(calib.hybrid_d4_rh@v1)",
+      "front": 0,
+      "position_in_front": 3,
+      "quality_order": 4,
+      "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1|width.global_pca_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 8.964820269018166,
+        "state.teacher_kl.worst_domain": 10.617062753927783,
+        "state.critical_token_kl": 11.199086238374761
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 9.54841370383975,
+        "state.nll.teacher_reference_pooled": 0.10580527841463948,
+        "state.nll.abstract_analogical": 7.481656698633301,
+        "state.nll.compositional_generalization": 9.038958851200714,
+        "state.nll.inductive_rule_discovery": 9.07707303956764,
+        "state.nll.task_contained_deduction": 9.279487682176896,
+        "state.nll.supporting": 10.738162738350438
+      },
+      "reason": "not retained: quality order 4 of 12 (front 0), outside the top 1"
+    },
+    {
+      "state_id": "5dcbd5b61b1c4ccdf43ed31adbfa5e62",
+      "path": "FFN(calib.hybrid_d4_rh@v1)->DEPTH(calib.hybrid_d4_base@v1)->RESIDUAL_WIDTH(calib.hybrid_d4_base@v1)->ATTENTION(calib.hybrid_d4_base@v1)",
+      "front": 0,
+      "position_in_front": 4,
+      "quality_order": 5,
+      "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1|width.global_pca_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 9.074190457187978,
+        "state.teacher_kl.worst_domain": 10.87592595798007,
+        "state.critical_token_kl": 10.951252818752392
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 9.646666219977009,
+        "state.nll.teacher_reference_pooled": 0.10580527841463948,
+        "state.nll.abstract_analogical": 7.824641686278865,
+        "state.nll.compositional_generalization": 9.081479193607697,
+        "state.nll.inductive_rule_discovery": 9.185599494650866,
+        "state.nll.task_contained_deduction": 9.074345442029697,
+        "state.nll.supporting": 10.996722444020445
+      },
+      "reason": "not retained: quality order 5 of 12 (front 0), outside the top 1"
+    },
+    {
+      "state_id": "cdc6550cb1625b6a32c9080e689831fb",
+      "path": "FFN(calib.hybrid_d4_rh@v1)->DEPTH(calib.hybrid_d4_rh@v1)->RESIDUAL_WIDTH(calib.hybrid_d4_base@v1)->ATTENTION(calib.hybrid_d4_base@v1)",
+      "front": 0,
+      "position_in_front": 5,
+      "quality_order": 6,
+      "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1|width.global_pca_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 9.074190457187978,
+        "state.teacher_kl.worst_domain": 10.87592595798007,
+        "state.critical_token_kl": 10.951252818752392
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 9.646666219977009,
+        "state.nll.teacher_reference_pooled": 0.10580527841463948,
+        "state.nll.abstract_analogical": 7.824641686278865,
+        "state.nll.compositional_generalization": 9.081479193607697,
+        "state.nll.inductive_rule_discovery": 9.185599494650866,
+        "state.nll.task_contained_deduction": 9.074345442029697,
+        "state.nll.supporting": 10.996722444020445
+      },
+      "reason": "not retained: quality order 6 of 12 (front 0), outside the top 1"
+    },
+    {
+      "state_id": "374f7825582702df13b3649eafab4776",
+      "path": "DEPTH(calib.hybrid_d4_rh@v1)->FFN(calib.hybrid_d4_base@v1)->ATTENTION(calib.hybrid_d4_base@v1)->RESIDUAL_WIDTH(calib.hybrid_d4_base@v1)",
+      "front": 1,
+      "position_in_front": 0,
+      "quality_order": 7,
+      "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0|attention.activation_importance_v1",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 7.471411205492989,
+        "state.teacher_kl.worst_domain": 7.847827765954823,
+        "state.critical_token_kl": 12.207852713344904
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 7.7763375580366105,
+        "state.nll.teacher_reference_pooled": 0.10580527841463948,
+        "state.nll.abstract_analogical": 6.982084304379862,
+        "state.nll.compositional_generalization": 8.016861460506135,
+        "state.nll.inductive_rule_discovery": 7.381898997449701,
+        "state.nll.task_contained_deduction": 7.91088073143147,
+        "state.nll.supporting": 7.860465598607275
+      },
+      "reason": "not retained: quality order 7 of 12 (front 1), outside the top 1"
+    },
+    {
+      "state_id": "dc604d45e2b8ff35968a4232b8008cdd",
+      "path": "DEPTH(calib.hybrid_d4_base@v1)->FFN(calib.hybrid_d4_base@v1)->ATTENTION(calib.hybrid_d4_base@v1)->RESIDUAL_WIDTH(calib.hybrid_d4_base@v1)",
+      "front": 1,
+      "position_in_front": 1,
+      "quality_order": 8,
+      "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0|attention.activation_importance_v1",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 7.471411205492989,
+        "state.teacher_kl.worst_domain": 7.847827765954823,
+        "state.critical_token_kl": 12.207852713344904
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 7.7763375580366105,
+        "state.nll.teacher_reference_pooled": 0.10580527841463948,
+        "state.nll.abstract_analogical": 6.982084304379862,
+        "state.nll.compositional_generalization": 8.016861460506135,
+        "state.nll.inductive_rule_discovery": 7.381898997449701,
+        "state.nll.task_contained_deduction": 7.91088073143147,
+        "state.nll.supporting": 7.860465598607275
+      },
+      "reason": "not retained: quality order 8 of 12 (front 1), outside the top 1"
+    },
+    {
+      "state_id": "db2bb5c16f5e1113c3321854a32b48a2",
+      "path": "ATTENTION(calib.hybrid_d4_base@v1)->DEPTH(calib.hybrid_d4_rh@v1)->FFN(calib.hybrid_d4_rh@v1)->RESIDUAL_WIDTH(calib.hybrid_d4_base@v1)",
+      "front": 2,
+      "position_in_front": 0,
+      "quality_order": 9,
+      "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 11.40391107451993,
+        "state.teacher_kl.worst_domain": 14.769901102667546,
+        "state.critical_token_kl": 20.26476355432903
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 12.427043982983527,
+        "state.nll.teacher_reference_pooled": 0.10580527841463948,
+        "state.nll.abstract_analogical": 8.215396632504163,
+        "state.nll.compositional_generalization": 11.005675998805742,
+        "state.nll.inductive_rule_discovery": 11.53739475086915,
+        "state.nll.task_contained_deduction": 12.05276292911366,
+        "state.nll.supporting": 14.884416456120741
+      },
+      "reason": "not retained: quality order 9 of 12 (front 2), outside the top 1"
+    },
+    {
+      "state_id": "8fd62a96e4e35c995e94b81ec2f29889",
+      "path": "RESIDUAL_WIDTH(calib.hybrid_d4_rh@v1)->DEPTH(calib.hybrid_d4_base@v1)->ATTENTION(calib.hybrid_d4_rh@v1)->FFN(calib.hybrid_d4_base@v1)",
+      "front": 2,
+      "position_in_front": 1,
+      "quality_order": 10,
+      "lineage": "width.global_pca_v0|depth.causal_kl_greedy_v1|attention.activation_importance_v1",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 11.49686432715639,
+        "state.teacher_kl.worst_domain": 12.582779829735383,
+        "state.critical_token_kl": 18.510165765196653
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 12.009362271012263,
+        "state.nll.teacher_reference_pooled": 0.10580527841463948,
+        "state.nll.abstract_analogical": 8.737263562522122,
+        "state.nll.compositional_generalization": 12.280805202709887,
+        "state.nll.inductive_rule_discovery": 12.137200685795369,
+        "state.nll.task_contained_deduction": 12.385638137203593,
+        "state.nll.supporting": 12.702663021189228
+      },
+      "reason": "not retained: quality order 10 of 12 (front 2), outside the top 1"
+    },
+    {
+      "state_id": "4cd1acbe0956ff59f5af42640de2cfed",
+      "path": "RESIDUAL_WIDTH(calib.hybrid_d4_rh@v1)->DEPTH(calib.hybrid_d4_base@v1)->ATTENTION(calib.hybrid_d4_rh@v1)->FFN(calib.hybrid_d4_rh@v1)",
+      "front": 2,
+      "position_in_front": 2,
+      "quality_order": 11,
+      "lineage": "width.global_pca_v0|depth.causal_kl_greedy_v1|attention.activation_importance_v1",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 11.631827405654422,
+        "state.teacher_kl.worst_domain": 12.76437710286192,
+        "state.critical_token_kl": 18.47102854840149
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 12.144352826879866,
+        "state.nll.teacher_reference_pooled": 0.10580527841463948,
+        "state.nll.abstract_analogical": 8.916848302760942,
+        "state.nll.compositional_generalization": 12.232813832881828,
+        "state.nll.inductive_rule_discovery": 12.293051382936206,
+        "state.nll.task_contained_deduction": 12.590408390620546,
+        "state.nll.supporting": 12.884460560502365
+      },
+      "reason": "not retained: quality order 11 of 12 (front 2), outside the top 1"
+    },
+    {
+      "state_id": "469d567c52938f9f655f79c9d3a2fc33",
+      "path": "ATTENTION(calib.hybrid_d4_base@v1)->DEPTH(calib.hybrid_d4_rh@v1)->FFN(calib.hybrid_d4_rh@v1)->RESIDUAL_WIDTH(calib.hybrid_d4_rh@v1)",
+      "front": 3,
+      "position_in_front": 0,
+      "quality_order": 12,
+      "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+      "selected": false,
+      "objectives": {
+        "state.teacher_kl.equal_domain_mean": 12.980979246373778,
+        "state.teacher_kl.worst_domain": 16.908553830349422,
+        "state.critical_token_kl": 23.210335886382914
+      },
+      "diagnostics": {
+        "state.nll.pooled_all_domains": 14.158534289623589,
+        "state.nll.teacher_reference_pooled": 0.10580527841463948,
+        "state.nll.abstract_analogical": 9.819766166678079,
+        "state.nll.compositional_generalization": 12.14574216414738,
+        "state.nll.inductive_rule_discovery": 12.59774693938086,
+        "state.nll.task_contained_deduction": 14.003140692855027,
+        "state.nll.supporting": 17.023531104555758
+      },
+      "reason": "not retained: quality order 12 of 12 (front 3), outside the top 1"
+    }
+  ],
+  "selection_sha256": "ae662692d329b6abd40b2041d7e7eca95fa5e605832bd27d180a752e7ed86af2"
+}

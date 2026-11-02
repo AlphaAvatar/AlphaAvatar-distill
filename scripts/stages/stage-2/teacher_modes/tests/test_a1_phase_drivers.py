@@ -118,6 +118,39 @@ def test_the_top1_copy_must_be_the_commits_bytes(tmp_path):
         FS.persist_top1({**row, "single_shard_sha256": _sha(b"other")}, tmp_path / "vol2")
 
 
+def test_the_search_closeout_verifies_the_top1_on_the_volume_and_pulls_no_weights(monkeypatch, tmp_path):
+    """2026-11-02: the 1.19 GB Top-1 pull to the dev box timed out and blocked teardown; its one consumer is the
+    train_a1 pod, which reads it on the volume, so the closeout hashes it there instead."""
+    from types import SimpleNamespace
+
+    from stages.teacher_modes import token_matched_phase as TM
+    digests = {"model.safetensors": _sha(b"W"), "config.json": _sha(b"{}")}
+    (tmp_path / "search_a1").mkdir()
+    (tmp_path / "search_a1/products.json").write_text(json.dumps({"top1": {"files_sha256": digests}}))
+    on_volume = dict(digests)
+    ran, pulled = [], []
+
+    def run(cmd, timeout):
+        ran.append(cmd)
+        out = "".join(f"{on_volume[n]}  {n}\n" for n in sorted(on_volume))
+        return SimpleNamespace(returncode=0, stdout=out + TM.P1.LISTED + "\n")
+    ctx = SimpleNamespace(target=SimpleNamespace(run=run), args=None, evidence={})
+    monkeypatch.setattr(TM, "secure_files", lambda c: None)
+    monkeypatch.setattr(TM, "_kind", lambda c: "search")
+    monkeypatch.setattr(TM.P1, "durable", lambda args: "/v/d")
+    monkeypatch.setattr(TM.SE, "store", lambda c: tmp_path)
+    monkeypatch.setattr(TM.P1, "_tar", lambda c, src, name, excludes=(): (True, "e" * 64))
+    monkeypatch.setattr(TM.P1, "_pull", lambda c, remote, dest, digest: pulled.append(remote) or True)
+    ok, why = TM.files_secured(ctx)
+    assert ok and pulled == [] and ran == ["cd /v/d/search_a1/top1 && sha256sum config.json model.safetensors; echo "
+                                          + TM.P1.LISTED]
+    assert ctx.evidence["files_secured"] == {"search_evidence": True, "top1_on_volume/config.json": True,
+                                             "top1_on_volume/model.safetensors": True}
+    on_volume["model.safetensors"] = _sha(b"other")
+    ok, why = TM.files_secured(ctx)
+    assert not ok and why == "not secured: ['top1_on_volume/model.safetensors']"
+
+
 def test_a_units_state_comes_from_the_volume(tmp_path):
     out, ev = tmp_path / "train", tmp_path / "evaluation"
     out.mkdir()

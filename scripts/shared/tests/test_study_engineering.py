@@ -228,6 +228,24 @@ def test_a_kind_that_secures_its_products_closes_on_them(tmp_path, secured):
     assert out["products_secured"]["ok"] is secured and not out["validation_passed"]
 
 
+def test_a_blocked_closeout_records_an_unknown_cost_and_the_envelope_refuses(tmp_path):
+    """2026-11-02: a teardown gate that retains the pod leaves the session without a cost; that is an unknown,
+    not $0, or the next issue under-counts the envelope by the whole session."""
+    st = _study(tmp_path)
+    launch = SE.Launch(session_kind="x", authorization=SE.EngineeringAuthorization, teacher_model="m",
+                       teacher_revision="r", driver="scripts/x/driver.py", validation_minutes=10.0,
+                       products_secured=lambda ctx, *a, **k: (False, ""))
+    _run(tmp_path, st, "r1")
+    (tmp_path / st.run_dir("r1") / "runtime/session.json").write_text(json.dumps(
+        {"provider_resource_created": True, "required_products_secured": {"ok": False, "why": "not secured"}}))
+    (tmp_path / "scr/store").mkdir(parents=True)
+    (tmp_path / "scr/store/driver.status").write_text("2026-11-02T15:03:25Z MARKER:ALL_DONE\n")
+    out = SE.closeout(st, launch, "r1", tmp_path / "scr", root=tmp_path, reconcile=lambda: {"ok": False})
+    assert out["status"] == "INCOMPLETE" and out["money"]["all_in_usd"] is None
+    with pytest.raises(SE.AuthorizationError, match="record no closeout cost"):
+        SE.envelope(st, {"ceiling_usd": 3.0}, tmp_path)
+
+
 def test_each_study_has_its_own_type_and_setup_branch():
     text = (SE.REPO_ROOT / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     for kind, mod, cls in (("stage2_teacher_modes", "stages.teacher_modes.ae_launch", "AEAuthorization"),

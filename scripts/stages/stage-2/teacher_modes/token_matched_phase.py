@@ -302,9 +302,24 @@ def secure_files(ctx) -> None:
         ctx.evidence.setdefault("secure_errors", []).append(repr(exc)[:300])
 
 
+def top1_on_volume(ctx, top_dir: str, files_sha256: dict[str, str]) -> dict[str, bool]:
+    """Each Top-1 file hashed where its one consumer reads it -- the network volume, by the train_a1 pod -- against the
+    digest the search committed. Its bytes are not carried to the dev box (P8.4): nothing there reads them, and on
+    2026-11-02 the 1.19 GB pull moved 5.7 MB in its 1,200 s and held the pod for an hour."""
+    names = sorted(files_sha256)
+    lines = P1._listing(ctx, f"cd {top_dir} && sha256sum " + " ".join(names)) or []
+    seen = {}
+    for line in lines:
+        parts = line.split()
+        if len(parts) == 2:
+            seen[parts[1]] = parts[0]
+    ctx.evidence["top1_on_volume"] = {"path": top_dir, "sha256": seen}
+    return {f"top1_on_volume/{n}": seen.get(n) == files_sha256[n] for n in names}
+
+
 def files_secured(ctx, *_a, **_k) -> tuple[bool, str]:
-    """Closeout for the search and A1 kinds: the evidence directories tarred (weights excluded: they stay on the
-    volume, by sha256 in the records), and the products a later kind or the report reads pulled and re-hashed."""
+    """Closeout for the search and A1 kinds: the evidence directories tarred and pulled (weights excluded: they stay
+    on the volume, by sha256 in the records), and the search's Top-1 verified by its sha256 on the volume."""
     import json
     secure_files(ctx)
     root, st, kind = P1.durable(ctx.args), SE.store(ctx), _kind(ctx)
@@ -314,14 +329,12 @@ def files_secured(ctx, *_a, **_k) -> tuple[bool, str]:
                                          excludes=("./search/states", "./top1", "./repeatability"))[0]
         prod = st / "search_a1/products.json"
         if prod.is_file():
-            top = json.loads(prod.read_text())["top1"]
-            for n, digest in top["files_sha256"].items():
-                got[f"top1/{n}"] = P1._pull(ctx, f"{root}/search_a1/top1/{n}", st / "search_a1/top1" / n, digest)
+            got.update(top1_on_volume(ctx, f"{root}/search_a1/top1", json.loads(prod.read_text())["top1"]["files_sha256"]))
     else:
         got["a1_evidence"] = P1._tar(ctx, f"{root}/v2_units", "a1_evidence", excludes=("./*/train/checkpoints",))[0]
     ctx.evidence["files_secured"] = got
     bad = sorted(k for k, v in got.items() if not v)
-    return (not bad, "secured off-pod: " + ", ".join(sorted(got)) if not bad else f"not secured: {bad}")
+    return (not bad, "secured: " + ", ".join(sorted(got)) if not bad else f"not secured: {bad}")
 
 
 def launch_spec(kind: str = "supplement", minutes: float = 0.0) -> SE.Launch:
