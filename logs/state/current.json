@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "BLOCKED NO. Research A v2 A1 phase EXECUTING (maintainer 2026-11-01): inputs -> hybrid D4 full search -> A1 x 2 seeds trained and evaluated; cap $77; volume 4rhubprswo (US-TX-3). A2, C1, Research B not authorized. Owner: TOKEN_MATCHED.md D.",
+ "blocker": "BLOCKED NO. Research A v2 A1 phase EXECUTING (maintainer 2026-11-01): inputs done; hybrid D4 full search COMPLETE (Top-1 159e73be); A1 x 2 seeds launched; cap $77; volume 4rhubprswo (US-TX-3). A2, C1, Research B not authorized. Owner: TOKEN_MATCHED.md D.",
  "branch": "research/teacher-modes-and-projected-residual: from stage2/reasoning-data d5f1c6f2 (kept), merged with main 72492e46 (its squash, 2026-10-27)",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -98,7 +98,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-11-01T00:50:00Z",
+ "generated_utc": "2026-11-02T17:20:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -123,7 +123,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "Research A v2 A1 phase: inputs session, then the search, then A1's two seeds (TOKEN_MATCHED.md D).",
+ "next": "Research A v2 A1 phase: A1's two seeds training and evaluation (a_train_a1_20261102_165858), then a1_analysis (TOKEN_MATCHED.md D).",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "Research A v2 A1 phase (TOKEN_MATCHED.md D)",
@@ -153,7 +153,7 @@
    "blocker": "none; see the top-level blocker.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line."
   },
   "c2": {
@@ -197,11 +197,11 @@
   "docs/stages/stage-2/teacher_modes/TOKEN_MATCHED.md (Research A v2, for review), DESIGN.md and docs/stages/stage-1/projected_residual/DESIGN.md"
  ],
  "running": {
-  "paid_compute": "the A1 phase's inputs session (a $0 create window until L40S stock in US-TX-3)",
+  "paid_compute": "train_a1 session a_train_a1_20261102_165858 (hard cap $14.10; a $0 create window until L40S stock in US-TX-3)",
   "pods": 0,
   "network_volumes": 2,
-  "run": "logs/stages/stage-2/teacher_modes/runs/a_inputs_*",
-  "volume": "4rhubprswo (350 GB, US-TX-3): the A1 phase; am5m373kuq (55 GB): the archive"
+  "run": "logs/stages/stage-2/teacher_modes/runs/a_train_a1_20261102_165858",
+  "volume": "4rhubprswo (350 GB, US-TX-3): the A1 phase, holds the search Top-1; am5m373kuq (55 GB): the archive"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

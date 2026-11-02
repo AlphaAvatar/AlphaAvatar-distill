@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-11-01 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-11-02 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -18,10 +18,11 @@ section D. Decision record: `logs/budget/decisions.md` 2026-11-01 (three entries
   `am5m373kuq` kept as the archive. One L40S at a time.
 - **Phase A (inputs): done** (`a_inputs_20261101_125916`, $0.5713): profiles COMPLETE, `state_eval_hybrid@v1`
   frozen (1,135 items, protocol `1c830524`).
-- **Phase B (search): launched** (`runs/a_search_*`, hard cap $41.41), waiting in a $0 create window for L40S stock in
-  US-TX-3.
-- **Phase B (search), C and D (A1's two seeds trained and evaluated):** drivers ready at $0 (`full_search.py`,
-  `a1_units.py`, `a1_analysis.py`), each needing its own one-use artifact after the previous phase.
+- **Phase B (search): COMPLETE** (`a_search_20261101_153803`, $23.97 of $41.21): 93 states, 12 complete leaves;
+  Top-1 `159e73be` (DEPTH(base) → FFN(base) → ATTENTION(base) → RESIDUAL_WIDTH(rh), 596,049,920 parameters,
+  `model.safetensors` `3459b9c9…`) on volume `4rhubprswo`, sha256-verified there. Pod gone; no observers remain.
+- **Phases C and D (A1's two seeds trained and evaluated): launched** (`a_train_a1_20261102_165858`, hard cap $14.10,
+  `training_plan_a1.json`), waiting in a $0 create window for L40S stock in US-TX-3.
 - **Spent before the phase:** A-TM $15.8689; project position read at issue: $67.21 left after the new volume's reserve.
 
 **RESEARCH A AND B: A-E ($3.50) AND B-E ($3.00) PAID ENGINEERING VALIDATIONS AUTHORIZED (maintainer, 2026-10-28 UTC). A-E: PASS (attempt 2 `ae_20261028_093428`; $0.7089 of $3.50 across two attempts). B-E: FAIL (`be_20261028_095332`, $0.4366 of $3.00): trainer smoke OOM on the L40S at the frozen E1 recipe, so resume unmeasured; vLLM median |Δ log-prob| 0.234 > 0.1 nat. Initialization, both fold checks, checkpoint identity and GPU isolation PASS. Both closed; no pod; committed $725.4993 of $740. STOPPED at the maintainer's next decision.**

@@ -586,7 +586,8 @@ B stays pending.
 - On completion:
   - the commit (k = 1);
   - the Pareto order of every complete leaf;
-  - the Top-1 copied to `search_a1/top1` on the volume, by sha256, and pulled to the dev box.
+  - the Top-1 copied to `search_a1/top1` on the volume, by sha256, and verified there by sha256 at closeout (its one
+    consumer, the `train_a1` pod, reads it on the volume; the bytes are not carried to the dev box).
 - Attempt 1, `a_search_20261101_142659`, failed before any measurement:
   - the pod came up after 11 stock retries;
   - the driver failed 2 s after `CONTRACT_OK`: it looked the teacher up offline as the whole repository, which
@@ -597,6 +598,44 @@ B stays pending.
   - fix: `full_search.load_root` resolves the root through `shared.pod.teacher_cache.local_snapshot` (setup's file
     patterns), with a regression test;
   - the search phase's cap is cumulative, so the next authorization's hard cap is $41.21 ($41.41 − $0.20).
+
+**Phase B result (2026-11-02).** Run `a_search_20261101_153803` (records under its run directory).
+- COMPLETE: the pod came up after 43 stock retries (3.5 h, $0); the driver ran 2026-11-01T19:16Z to
+  2026-11-02T15:03Z (beam search 19.8 h).
+- The first evaluation's check passed: both critical groups present and their mean exact; epsilon range 0.0 over 10
+  repeats.
+- 93 states, 12 complete leaves, 8 distinct weight sets. DEPTH under either calibration profile selects the same
+  layers, so leaves that differ only in DEPTH's profile have identical weights and metrics.
+- The complete leaves in Pareto order, one row per distinct weight set (KL to the teacher on `state_eval_hybrid@v1`;
+  the critical-token KL at `</think>`, final-answer and EOS positions, per mode):
+
+  | rank | path (profile per operator) | teacher KL, equal-domain mean | worst domain | critical, thinking | critical, non-thinking |
+  | ---: | --- | ---: | ---: | ---: | ---: |
+  | 1–2 | DEPTH → FFN(base) → ATTENTION(base) → RESIDUAL_WIDTH(rh) | 7.338 | 7.694 | 12.637 | 11.367 |
+  | 3–4 | FFN(rh) → DEPTH → RESIDUAL_WIDTH(base) → ATTENTION(rh) | 8.965 | 10.617 | 11.713 | 10.685 |
+  | 5–6 | FFN(rh) → DEPTH → RESIDUAL_WIDTH(base) → ATTENTION(base) | 9.074 | 10.876 | 11.388 | 10.515 |
+  | 7–8 | DEPTH → FFN(base) → ATTENTION(base) → RESIDUAL_WIDTH(base) | 7.471 | 7.848 | 12.710 | 11.706 |
+  | 9 | ATTENTION(base) → DEPTH(rh) → FFN(rh) → RESIDUAL_WIDTH(base) | 11.404 | 14.770 | 20.121 | 20.409 |
+  | 10 | RESIDUAL_WIDTH(rh) → DEPTH(base) → ATTENTION(rh) → FFN(base) | 11.497 | 12.583 | 19.403 | 17.618 |
+  | 11 | RESIDUAL_WIDTH(rh) → DEPTH(base) → ATTENTION(rh) → FFN(rh) | 11.632 | 12.764 | 19.354 | 17.589 |
+  | 12 | ATTENTION(base) → DEPTH(rh) → FFN(rh) → RESIDUAL_WIDTH(rh) | 12.981 | 16.909 | 23.806 | 22.615 |
+
+- **Top-1:** state `159e73be3e1157e8367a476eb72e6afc`, path DEPTH(base) → FFN(base) → ATTENTION(base) →
+  RESIDUAL_WIDTH(rh):
+  - 596,049,920 parameters, provenance `search`;
+  - root `Qwen/Qwen3-4B@1cfa9a72…`, shard-set sha256 `a8b9dec3…`;
+  - `model.safetensors` sha256 `3459b9c9…`, artifact digest `ab8ffb0d…`;
+  - on volume `4rhubprswo` at `/runpod-volume/teacher_modes/search_a1/top1`.
+  These are KL and ranking facts about initializations, not reasoning results (P10.2).
+- Cost: $23.97 of $41.21, from the provider's hourly billing.
+  - $1.28 of it is the 69 minutes the pod was retained after the search had finished. The closeout tried to pull the
+    1.19 GB Top-1 to the dev box (5.7 MB in 1,200 s), and its gate refused teardown.
+  - The Top-1 was then hashed on the volume, and the pod deleted (provider 404, the watchdog ended `pod_gone`).
+- Two repairs, each with a regression test:
+  - the search closeout verifies the Top-1 on the volume and pulls no weights;
+  - a closeout whose session recorded no cost writes an unknown instead of $0, so the envelope refuses the next issue
+    until the run is reconciled.
+- `closeout/teardown.json` records the reconciliation. `outcome.json` keeps what the launcher wrote.
 
 **Phases C and D (A1)** (`a1_units.py`, kind `train_a1`; `training_plan_a1.json` from the committed search record).
 - Seed 20260726, then seed 20260801. Each:
