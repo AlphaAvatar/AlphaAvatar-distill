@@ -9,7 +9,7 @@
  "actual_usd": null,
  "decided_by": "maintainer 2026-11-01 'Research A v2: Execute A1 First': 优先新建 350 GB Volume，保留完整 Full Search State 和 Journal",
  "purpose": "the A1 phase: the inputs session's shards, the hybrid full search's states and journal (prune_weights false), the Top-1, A1's save points and checkpoints",
- "price": "/bin/bash.07 per GB-month: /bin/bash.82/day (the bills have run up to 17% over the rate); the reserve is 14 days",
+ "price": "$0.07 per GB-month: $0.82/day (the bills have run up to 17% over the rate); the reserve is 14 days",
  "lifecycle": "kept while the A1 phase runs; after A1's evidence audit the maintainer decides what stays (the Top-1 for A2, the full search state as evidence) and what is retired under AGENTS.md 2.5; nothing on it is deleted automatically",
  "datacenter_choice": "the only datacenter at creation with both network storage and L40S secure stock (provider read 2026-11-01T12:54Z)",
  "authorizes": "nothing"
