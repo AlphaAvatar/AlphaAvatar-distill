@@ -44,7 +44,7 @@ class TestAtoms:
     def test_a_servers_tasks_share_one_split_and_a_split_never_shares_a_server(self):
         a, b = server_in("training"), server_in("state_eval")
         tasks = [task(f"tc1-a{k}", f"q{k}", [a], [tool(f"{a}-t{k % 3}")]) for k in range(6)]
-        tasks += [task(f"tc1-b{k}", f"r{k}", [b], [tool(f"{b}-t{k}")]) for k in range(3)]
+        tasks += [task(f"tc1-b{k}", f"r{k}", [b], [tool(f"{b}-u{k}")]) for k in range(3)]
         pool = TP.assemble(tasks)
         assert {t["split"] for t in pool["tasks"] if t["task_id"].startswith("tc1-a")} == {"training"}
         assert {t["split"] for t in pool["tasks"] if t["task_id"].startswith("tc1-b")} == {"state_eval"}
@@ -81,28 +81,31 @@ class TestAtoms:
 class TestDecontamination:
     def test_eval_set_tool_names_and_identities_and_benchmark_identities_are_refused(self):
         ref = TP.Reference()
-        ref.add("eval-set-1", prompts=["held out"], tools=[("get_weather", {"type": "object"})], refuse_tool_names=True)
-        ref.add("bench", prompts=["bench q"], tools=[("lookup", {"type": "object"}), ("search", {"a": 1})])
+        ref.add("eval-set-1", label="T1", prompts=["held out"], tools=[("get_weather", {"type": "object"})],
+                refuse_tool_names=True)
+        ref.add("bench", label="T2", prompts=["bench q"], tools=[("lookup", {"type": "object"}), ("search", {"a": 1})])
         s = server_in("training")
         pool = TP.assemble([task("tc1-held", "held   OUT", [s], [tool(f"{s}-x")]),
-                            task("tc1-name", "q1", [s], [tool(f"{s}-get_weather", {"other": 1})]),
+                            task("tc1-name", "q1", [s], [tool(f"{s}-get_weather", {
+                                "type": "object", "properties": {"z": {"type": "string"}}})]),
                             task("tc1-ident", "q2", [s], [tool(f"{s}-lookup")]),
                             task("tc1-nameonly", "q3", [s], [tool(f"{s}-search")]),
                             task("tc1-ok", "q4", [s], [tool(f"{s}-x")])], reference=ref)
         reasons = {e["task_id"]: e["reason"] for e in pool["excluded"]}
-        assert reasons["tc1-held"] == "T1/T2: a eval-set-1 prompt"
-        assert reasons["tc1-name"] == "T1/T2: a eval-set-1 tool name"
-        assert reasons["tc1-ident"] == "T1/T2: a bench tool (name and schema)"
-        assert "tc1-nameonly" not in reasons and pool["tool_name_only_matches_counted"] == {"bench": 1}
+        assert reasons["tc1-held"] == "T1: a eval-set-1 prompt"
+        assert reasons["tc1-name"] == "T1: a eval-set-1 tool name"
+        assert reasons["tc1-ident"] == "T2: a bench tool (name and schema)"
+        assert "tc1-nameonly" not in reasons
+        assert pool["tool_name_only_matches_counted"] == {"bench": 1, "bench:signature": 1}     #: counted, not refused
 
     def test_a_13_gram_near_duplicate_of_a_held_out_prompt_is_refused(self):
-        ref = TP.Reference().add("bench", prompts=[long_text("w")])
+        ref = TP.Reference().add("bench", label="T2", prompts=[long_text("w")])
         s = server_in("training")
         near = long_text("w").replace("w29", "something else")
         pool = TP.assemble([task("tc1-near", near, [s], [tool(f"{s}-x")]),
                             task("tc1-far", long_text("v"), [s], [tool(f"{s}-x")])], reference=ref)
         assert {e["task_id"]: e["reason"] for e in pool["excluded"]} == {
-            "tc1-near": "T1/T2: a 13-gram near-duplicate of a bench prompt"}
+            "tc1-near": "T2: a 13-gram near-duplicate of a bench prompt"}
 
     def test_training_never_keeps_a_near_duplicate_of_a_state_eval_task(self):
         a, b = server_in("state_eval"), server_in("training")
@@ -110,6 +113,41 @@ class TestDecontamination:
                             task("tc1-tr", long_text("u") + " extra words", [b], [tool(f"{b}-y")])])
         assert {e["task_id"]: e["reason"] for e in pool["excluded"]} == {
             "tc1-tr": "T4: a 13-gram near-duplicate of an earlier split's task"}
+
+    def test_an_exact_prompt_never_crosses_splits_even_when_templated_away(self):
+        # one prompt repeated across more servers than the 13-gram index keeps (document frequency > 5): only the
+        # exact prompt key catches it; the earliest split in the priority keeps it, the others refuse it
+        se, cal, tr = server_in("state_eval"), server_in("calibration"), server_in("training")
+        text = long_text("same")
+        tasks = [task(f"tc1-se{k}", text, [se], [tool(f"{se}-a{k}")]) for k in range(7)]
+        tasks += [task("tc1-cal", text, [cal], [tool(f"{cal}-b")]), task("tc1-tr", text, [tr], [tool(f"{tr}-c")])]
+        pool = TP.assemble(tasks)
+        reasons = {e["task_id"]: e["reason"] for e in pool["excluded"]}
+        assert reasons["tc1-cal"] == reasons["tc1-tr"] == "T4: an earlier split's exact prompt"
+        assert {t["split"] for t in pool["tasks"]} == {"state_eval"}
+
+    def test_a_tool_identity_never_crosses_splits(self):
+        a, b = server_in("state_eval"), server_in("training")
+        pool = TP.assemble([task("tc1-a", "first", [a], [tool(f"{a}-get_weather")]),
+                            task("tc1-b", "second", [b], [tool(f"{b}-get_weather")])])
+        assert {e["task_id"]: e["reason"] for e in pool["excluded"]} == {
+            "tc1-b": "T4: a tool identity of an earlier split"}
+
+    def test_t3_refuses_a_lineage_tools_signature_and_unchecked_schemas_are_refused(self):
+        ref = TP.Reference().add("xlam", label="T3", prompts=["x"], refuse_signatures=True,
+                                 tools=[("live_giveaways", {"type": {"type": "str", "description": "kind"}})])
+        s = server_in("training")
+        sig = tool(f"{s}-live_giveaways", {"type": "object", "properties": {"type": {"type": "string"}}})
+        odd = tool(f"{s}-odd", {"type": "object", "properties": {"x": {"type": "string", "if": {}}}})
+        pool = TP.assemble([task("tc1-sig", "q1", [s], [sig]), task("tc1-odd", "q2", [s], [odd])], reference=ref)
+        reasons = {e["task_id"]: e["reason"] for e in pool["excluded"]}
+        assert reasons["tc1-sig"] == "T3: a xlam tool (name and parameter names)"
+        assert reasons["tc1-odd"] == "schema: keywords the validator does not check ['if']"
+        #: the pool's default: a signature match is counted, not refused (generic APIs share signatures)
+        ref = TP.Reference().add("xlam", label="T3", prompts=["x"],
+                                 tools=[("live_giveaways", {"type": {"type": "str", "description": "kind"}})])
+        pool = TP.assemble([task("tc1-sig", "q1", [s], [sig])], reference=ref)
+        assert not pool["excluded"] and pool["tool_name_only_matches_counted"] == {"xlam:signature": 1, "xlam": 1}
 
     def test_conflicting_recorded_responses_are_refused_not_chosen(self):
         s = server_in("training")
@@ -267,14 +305,22 @@ class TestSixTypePacks:
         path.write_text("".join(json.dumps(r) + "\n" for r in rows))
         return [f"tc1-{k}" for k in reversed(range(n))]
 
-    def test_tool_episodes_are_cut_whole_at_the_target_in_the_frozen_order(self, tmp_path):
+    def cells(self, train=100.0, val=2.0):
+        return {"training": [{"split": "training", "category": "c", "unit": "supervised_tokens", "target": train}],
+                "validation": [{"split": "validation", "category": None, "unit": "tasks", "target": val}]}
+
+    def test_tool_episodes_are_cut_whole_per_cell_in_the_frozen_order(self, tmp_path):
         from stages.teacher_modes import packed_packs as PP
         order = self.tool_file(tmp_path / "t.jsonl", 10, 30)
-        train, val, q = PP.tool_documents(tmp_path / "t.jsonl", "T2507", target=100, order=order)
-        assert [d.doc_id.split("|")[0] for d in train] == order[:4] and q["selected_supervised_tokens"] == 120
-        assert len(val) == 2
-        with pytest.raises(PP.PackBuildError):
-            PP.tool_documents(tmp_path / "t.jsonl", "T2507", target=10 ** 6, order=order)
+        orders = {"training": order, "validation": ["tc1-v1", "tc1-v0"]}
+        train, val, q = PP.tool_documents(tmp_path / "t.jsonl", "T2507", cells=self.cells(), orders=orders)
+        assert [d.doc_id.split("|")[0] for d in train] == order[:4]
+        assert q["cells"]["training/c"]["selected"] == 120 and q["cells"]["training/c"]["status"] == "REACHED"
+        assert [d.doc_id.split("|")[0] for d in val] == ["tc1-v1", "tc1-v0"]
+        _, _, q = PP.tool_documents(tmp_path / "t.jsonl", "T2507", cells=self.cells(train=10 ** 6), orders=orders)
+        assert q["cells"]["training/c"]["status"] == "SHORTFALL"             #: recorded, never filled from elsewhere
+        with pytest.raises(PP.PackBuildError, match="frozen order"):
+            PP.tool_documents(tmp_path / "t.jsonl", "T2507", cells=self.cells(), orders={**orders, "training": []})
 
     def test_shares_are_counted_before_packing_and_refuse_outside_the_check(self):
         from stages.teacher_modes import packed_packs as PP
@@ -298,17 +344,115 @@ class TestSixTypePacks:
         from aadistill.data.token_documents import TokenDocument
         val = [TokenDocument(f"v{d.doc_id}", d.prompt_ids, d.output_ids) for d in val]
         monkeypatch.setattr(PP, "c1_documents", lambda: (train, val, {**dtype, **vtype}))
-        monkeypatch.setattr(PP, "tool_target", lambda arm: 100)
+        from stages.teacher_modes import tool_generation_plan as TGP
         order = self.tool_file(tmp_path / "t.jsonl", 4, 50)
-        (tmp_path / "pool").mkdir()
-        (tmp_path / "pool/pool.json").write_text(json.dumps({"training_order": order}))
+        plan = {"lineages": {"thinking_2507": {"modes": {"T2507": {"cells": [
+            *self.cells()["training"], *self.cells()["validation"]]}}}}}
+        monkeypatch.setattr(TGP, "for_consumers", lambda **k: (plan, {"training": order,
+                                                                      "validation": ["tc1-v0", "tc1-v1"]}))
         design = json.loads(PP.DESIGN.read_text())
         design["stage3_packing"]["sequence_length"] = 64
         (tmp_path / "design.json").write_text(json.dumps(design))
         monkeypatch.setattr(PP, "DESIGN", tmp_path / "design.json")
-        rec = PP.build("C1-6cat", tool_docs=tmp_path / "t.jsonl", out=tmp_path / "out", pool_dir=tmp_path / "pool")
+        rec = PP.build("C1-6cat", tool_docs=tmp_path / "t.jsonl", out=tmp_path / "out")
         assert rec["n_val_blocks"] > 16                                       # no 16-sequence cap
         assert rec["validation_coverage"]["training_types_without_validation"] == [
             "code", "gsm8k", "multihop_qa", "primary.x", "rag_evidence"]
         assert rec["proportions_before_packing"]["fluid_fraction"] == 0.5
-        assert rec["tool_documents"]["quota"]["episodes"] == 2
+        assert rec["tool_documents"]["quota"]["cells"]["training/c"]["episodes"] == 2
+
+
+class TestPoolIdentity:
+    def pool(self, tmp_path):
+        a, b = server_in("training"), server_in("state_eval")
+        pool = TP.assemble([task(f"tc1-{k}", f"q{k}", [a if k % 2 else b], [tool(f"{a if k % 2 else b}-t{k}")])
+                            for k in range(6)])
+        TP.write_pool(pool, tmp_path / "pool", sources={"toy": {"converted_sha256": "0" * 64, "tasks": 6}}, extra={})
+        return tmp_path / "pool"
+
+    def test_load_pool_verifies_every_file_and_fails_closed(self, tmp_path):
+        d = self.pool(tmp_path)
+        man, splits = TP.load_pool(d)
+        assert set(splits) == {"training", "state_eval"} and man["files"]["training"]["tasks"] == 3
+        assert man["content_sha256"] and all(len(v["sha256"]) == 64 for v in man["files"].values())
+        f = d / "training.tasks.jsonl"
+        good = f.read_text()
+        f.write_text(good.replace('"q1"', '"q9"'))                            #: one changed byte
+        with pytest.raises(TP.PoolIdentityError, match="sha256"):
+            TP.load_pool(d)
+        f.unlink()
+        with pytest.raises(TP.PoolIdentityError, match="missing"):
+            TP.load_pool(d)
+        f.write_text(good)
+        man_doc = json.loads((d / "pool.json").read_text())
+        man_doc["source_revisions"] = [["other", "r"]]
+        (d / "pool.json").write_text(json.dumps(man_doc))
+        with pytest.raises(TP.PoolIdentityError, match="another split or source"):
+            TP.load_pool(d)
+
+    def test_the_session_refuses_a_plan_of_another_pool(self, tmp_path, monkeypatch):
+        from stages.teacher_modes import tool_session as TS
+        d = self.pool(tmp_path)
+        proto = json.loads(TS.PROTOCOL.read_text())
+        proto["pool"] = {**proto["pool"], "dir": str(d), "plan": str(tmp_path / "plan.json")}
+        proto["lineages"]["hybrid"]["splits"] = ["training", "state_eval"]
+        (tmp_path / "plan.json").write_text(json.dumps({"schema": "aadistill.stage2.teacher_modes.tool_generation_plan/v1",
+                                                        "pool": {"content_sha256": "x"}, "protocol_sha256": "y",
+                                                        "lineages": {"hybrid": {}}}))
+        with pytest.raises(TS.PlanError, match="another pool"):
+            TS.checked_plan(proto, "hybrid")
+
+
+class TestReferenceCache:
+    def test_a_changed_or_missing_registered_file_refuses_the_reference(self, tmp_path, monkeypatch):
+        import hashlib
+        from stages.teacher_modes import tool_benchmarks as TB
+        d = tmp_path / f"toolsandbox@{TB.REFERENCES['toolsandbox'][2][:8]}"
+        (d / "a").mkdir(parents=True)
+        (d / "a/x.py").write_text("content = 1\n")
+        man = {"benchmark": "toolsandbox", "host": "github", "repository": TB.REFERENCES["toolsandbox"][1],
+               "revision": TB.REFERENCES["toolsandbox"][2],
+               "files": {"a/x.py": hashlib.sha256(b"content = 1\n").hexdigest(), "_tarball_sha256": "t"}}
+        (d / "manifest.json").write_text(json.dumps(man))
+        assert TB.fetch("toolsandbox", root=tmp_path)["revision"] == TB.REFERENCES["toolsandbox"][2]
+        (d / "a/x.py").write_text("content = 2\n")
+        with pytest.raises(TB.ReferenceCacheError, match="missing or changed"):
+            TB.fetch("toolsandbox", root=tmp_path)
+        (d / "a/x.py").unlink()
+        with pytest.raises(TB.ReferenceCacheError):
+            TB.fetch("toolsandbox", root=tmp_path)
+
+
+class TestPivot:
+    def row(self, tid, step, items, action, *, conv=False):
+        info = {"turn": 1, "step": step}
+        return {"trajectory_id": tid, ("meta_info" if conv else "info"): info,
+                "responses_create_params": {"input": items, "tools": [
+                    {"type": "function", "name": "lookup", "parameters": {
+                        "type": "object", "properties": {"id": {"type": "string"}, "n": {"type": "integer"}},
+                        "required": ["id"]}}]},
+                "expected_action": action}
+
+    def test_trajectories_rebuild_from_their_first_step_with_recorded_outputs(self, tmp_path):
+        from stages.teacher_modes import tool_sources_pivot as PV
+        sys_, user = {"role": "system", "content": "policy"}, {"role": "user", "content": "find A1"}
+        call = {"type": "function_call", "name": "lookup", "arguments": json.dumps({"id": "A1"})}
+        fc = {"type": "function_call", "name": "lookup", "arguments": json.dumps({"id": "A1"}), "call_id": "c1"}
+        out = {"type": "function_call_output", "call_id": "c1", "output": "found"}
+        rows = [self.row(1, 0, [sys_, user], call, conv=True),                               # 0-based steps
+                self.row(1, 1, [sys_, user, fc, out], {"type": "message", "content": "ok"}, conv=True),
+                self.row(2, 0, [sys_, user, {"role": "assistant", "content": "hi"}], call, conv=True),  # expert text
+                self.row(3, 0, [sys_, user], call, conv=True)]                                # no recorded output
+        path = tmp_path / "train.jsonl"
+        path.write_text("".join(json.dumps(r) + "\n" for r in rows))
+        tasks, audit = PV.convert(path, "conversational")
+        assert [t["source"]["row"] for t in tasks] == ["1"]
+        t = tasks[0]
+        assert t["messages"] == [{"role": "user", "content": "find A1"}] and t["system"] == "policy"
+        assert t["gold_steps"] == [[[{"name": "lookup", "arguments": {"id": "A1"}}]], [[]]]
+        assert list(t["backend"]["table"].values()) == ["found"] and t["category"] == "tool_selection"
+        assert t["environment"].startswith("pivot-conversational:")
+        assert t["source"]["verification"]["levels"] == ["protocol", "schema_validity", "recorded_execution",
+                                                         "step_gold"]
+        assert audit["skipped"] == {"no first-step row (system and user only) for turn 1": 1,
+                                    "a gold call without a recorded output": 1}

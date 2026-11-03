@@ -12,8 +12,10 @@ cap (a cap after the shuffle kept a random part of each category) -- written in 
 (`write_pack`, no position ids: the trainer reads it with standard causal attention).
 
 Data volume and proportions are counted BEFORE packing (maintainer 2026-11-03): unique supervised tokens per
-document, once. The tool-calling documents enter as whole episodes in the pool's frozen training order up to the
-arm's registered target (`tool_documents`, the shortest prefix that reaches it), and `shares` checks the six
+document, once. The tool-calling documents enter as whole episodes, per category, in the pool's frozen training
+order up to each category's target in the frozen generation plan (`tool_documents`, `tool_generation_plan.select`:
+the rule the session stopped generating by; a short category is recorded, never filled from another), and the
+validation episodes likewise up to the validation cell; `shares` checks the six
 base-corpus types at ~1/6 each of the supporting total and fluid : supporting at ~50:50 within the design's
 tolerance (``stage3_packing.share_check``), refusing a pack outside it. Packing's repeated, truncated and padding
 tokens and the supervised-token exposure are recorded beside them as packing / compute measures only, never as the
@@ -56,8 +58,6 @@ ARMS = {"A1-6cat": {"mode": "H-T", "source_pack": "A1", "teacher": "hybrid"},
         "C1-6cat": {"mode": "T2507", "source_pack": None, "teacher": "thinking_2507"}}
 TOOL_TYPE = "supporting.tool_calling"
 PAD_ID = 151643
-SIX = REPO / "configs/stages/stage-2/teacher_modes/six_category_design.json"
-TOOL_PROTOCOL = REPO / "configs/stages/stage-2/teacher_modes/tool_generation_protocol.json"
 #: a document's data type -> the base-corpus type it counts toward (six_category_design.json :: base_category; C1's
 #: D4A types by their sources). A1's / A2's packs carry RAG and multi-hop reading as one data type,
 #: ``supporting.reading_verified``: its split between the two comes from the selection record and must sum to it.
@@ -73,49 +73,46 @@ class PackBuildError(RuntimeError):
     pass
 
 
-def tool_target(arm: str) -> int:
-    """The arm's registered tool-calling supervised-token target (six_category_design.json)."""
-    return int(round(json.loads(SIX.read_text())["tool_calling"]["expected_per_arm"][arm]["target"]))
-
-
-def tool_documents(path: Path | None, mode: str, *, target: int | None = None, order: list[str] | None = None):
-    """``(train, validation, quota record)``: one lineage's admitted tool episodes as TokenDocuments. With a target,
-    the training episodes are taken WHOLE in the pool's frozen training ``order`` until their unique supervised
-    tokens reach it (the shortest prefix that does); without one, all of them."""
+def tool_documents(path: Path | None, mode: str, *, cells: dict | None = None, orders: dict | None = None):
+    """``(train, validation, quota record)``: one lineage's admitted tool episodes as TokenDocuments. With the plan's
+    ``cells`` (``{"training": [...], "validation": [...]}``) and the pool's frozen ``orders``, whole episodes are
+    selected per cell by `tool_generation_plan.select`; without them, every admitted episode."""
     from aadistill.data.token_documents import TokenDocument
+    from stages.teacher_modes import tool_generation_plan as TGP
     if path is None:
         return [], [], None
-    by_task, val = {}, []
+    docs = {"training": {}, "validation": {}}
+    cat_of, units = {}, {"training": {}, "validation": {}}
     for line in Path(path).read_text().splitlines():
         if not line.strip():
             continue
         r = json.loads(line)
         if f"|{mode}|" not in r["doc_id"]:
             raise PackBuildError(f"{r['doc_id']}: not a {mode} document; an arm reads only its own teacher's tokens")
+        if r["split"] not in docs:
+            continue
         d = TokenDocument(r["doc_id"], tuple(r["prompt_ids"]), tuple(r["output_ids"]), {"category": r["category"]})
-        if r["split"] == "training":
-            by_task.setdefault(r["task_id"], []).append(d)
-        elif r["split"] == "validation":
-            val.append(d)
-    if target is None:
-        return [d for ds in by_task.values() for d in ds], val, None
-    stray = sorted(set(by_task) - set(order or ()))
-    if stray:
-        raise PackBuildError(f"{len(stray)} tool training episode(s) not in the pool's training order, e.g. {stray[:3]}")
-    train, got, used = [], 0, 0
-    for tid in order:
-        if got >= target:
-            break
-        if tid in by_task:
-            train += by_task[tid]
-            got += sum(len(d.output_ids) for d in by_task[tid])
-            used += 1
-    if got < target:
-        raise PackBuildError(f"{mode}: the admitted tool episodes hold {got} supervised tokens, short of the "
-                             f"target {target}; the type is never filled from another")
-    return train, val, {"target": target, "selected_supervised_tokens": got, "episodes": used,
-                        "admitted_episodes": len(by_task), "rule": "whole episodes in the pool's frozen training "
-                        "order, the shortest prefix reaching the target"}
+        docs[r["split"]].setdefault(r["task_id"], []).append(d)
+        cat_of[r["task_id"]] = r["category"]
+        units[r["split"]][r["task_id"]] = units[r["split"]].get(r["task_id"], 0) + len(d.output_ids)
+    if cells is None:
+        return ([d for ds in docs["training"].values() for d in ds],
+                [d for ds in docs["validation"].values() for d in ds], None)
+    out, quota = {"training": [], "validation": []}, {}
+    for split in ("training", "validation"):
+        stray = sorted(set(docs[split]) - set(orders.get(split, [])))
+        if stray:
+            raise PackBuildError(f"{len(stray)} {split} tool episode(s) not in the pool's frozen order, e.g. {stray[:3]}")
+        for c in cells[split]:
+            order = [t for t in orders[split] if c["category"] is None or cat_of.get(t) == c["category"]]
+            u = units[split] if c["unit"] == "supervised_tokens" else {t: 1.0 for t in units[split]}
+            ids, got = TGP.select(order, u, c["target"], c.get("min_tasks", 0))
+            out[split] += [d for t in ids for d in docs[split][t]]
+            quota[f"{split}/{c['category']}"] = {"unit": c["unit"], "target": c["target"], "selected": got,
+                                                 "episodes": len(ids), "status": "REACHED" if got >= c["target"]
+                                                 else "SHORTFALL"}
+    return out["training"], out["validation"], {"cells": quota, "rule": "whole episodes per cell in the pool's "
+                                                "frozen order, until the plan's target (tool_generation_plan.select)"}
 
 
 def shares(arm: str, train, dtype: dict, check: dict) -> dict:
@@ -234,12 +231,12 @@ def build(arm: str, *, tool_docs: Path | None, out: Path = OUT, records: dict | 
     else:
         train, val, dtype = c1_documents()
         missing = []
-    order = None
+    cells = orders = None
     if tool_docs is not None:
-        pool_dir = Path(pool_dir) if pool_dir else REPO / json.loads(TOOL_PROTOCOL.read_text())["pool"]["dir"]
-        order = json.loads((pool_dir / "pool.json").read_text())["training_order"]
-    t_train, t_val, quota = tool_documents(tool_docs, spec["mode"], target=tool_target(arm) if tool_docs else None,
-                                           order=order)
+        from stages.teacher_modes import tool_generation_plan as TGP
+        plan, orders = TGP.for_consumers(pool_dir=pool_dir)
+        cells = {s: TGP.cells_for(plan, spec["teacher"], spec["mode"], s) for s in ("training", "validation")}
+    t_train, t_val, quota = tool_documents(tool_docs, spec["mode"], cells=cells, orders=orders)
     if require_tools and not t_train:
         raise PackBuildError(f"{arm}: no tool-calling training documents; the sixth type is required")
     for x in t_train + t_val:

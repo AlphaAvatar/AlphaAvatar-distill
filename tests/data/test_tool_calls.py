@@ -46,7 +46,34 @@ class TestSchema:
         assert schema_problems({"anyOf": [{"type": "string"}, {"type": "null"}]}, None) == []
 
     def test_unchecked_keywords_are_named_not_assumed(self):
-        assert unchecked_keywords({"type": "object", "properties": {"n": {"type": "integer", "minimum": 0}}}) == {"minimum"}
+        assert unchecked_keywords({"type": "object", "properties": {"n": {"type": "integer", "minimum": 0}}}) == set()
+        assert unchecked_keywords({"type": "object", "properties": {"n": {"if": {}, "optional": True}},
+                                   "$defs": {"d": {"dependentRequired": {}}}}) == {"if", "optional", "dependentRequired"}
+
+    def test_numbers_strings_arrays_and_applicators(self):
+        assert schema_problems({"type": "integer", "minimum": 1, "maximum": 3}, 0) != []
+        assert schema_problems({"type": "integer", "minimum": 1, "maximum": 3}, 2.0) == []     # 2.0 is an integer
+        assert schema_problems({"exclusiveMinimum": 0}, 0) != [] and schema_problems({"multipleOf": 5}, 7) != []
+        assert schema_problems({"minLength": 2, "maxLength": 3, "pattern": "^a"}, "abcd") != []
+        assert schema_problems({"minLength": 2, "maxLength": 3, "pattern": "^a"}, "ab") == []
+        assert schema_problems({"type": "array", "minItems": 2, "uniqueItems": True}, [1, 1]) != []
+        assert schema_problems({"prefixItems": [{"type": "string"}], "items": {"type": "integer"}}, ["a", 1, 2]) == []
+        assert schema_problems({"prefixItems": [{"type": "string"}], "items": {"type": "integer"}}, ["a", "b"]) != []
+        assert schema_problems({"const": "x"}, "y") != [] and schema_problems({"enum": [1, [2]]}, [2]) == []
+        assert schema_problems({"oneOf": [{"type": "integer"}, {"type": "number"}]}, 1) != []    # matches both
+        assert schema_problems({"allOf": [{"minimum": 0}, {"maximum": 1}]}, 2) != []
+        assert schema_problems({"not": {"type": "null"}}, None) != []
+        s = {"type": "object", "properties": {"a": {"$ref": "#/$defs/A"}}, "$defs": {"A": {"type": "string"}},
+             "additionalProperties": {"type": "integer"}}
+        assert schema_problems(s, {"a": "x", "b": 1}) == [] and schema_problems(s, {"a": 1}) != []
+        assert schema_problems(s, {"a": "x", "b": "y"}) != []                  # additionalProperties as a schema
+        assert schema_problems({"$ref": "#/$defs/missing"}, 1) != []
+
+    def test_a_schema_with_an_unchecked_keyword_fails_closed(self):
+        from aadistill.data.tool_calls import call_problems, tool_index
+        tools = tool_index([{"type": "function", "function": {"name": "f", "parameters": {
+            "type": "object", "properties": {"x": {"type": "string", "if": {"const": "a"}}}}}}])
+        assert call_problems(ToolCall("f", {"x": "b"}), tools) != []
 
 
 class TestReplayAndGold:

@@ -29,7 +29,12 @@ def test_the_plan_fits_the_proposed_cap_at_the_quoted_rate_and_the_granted_ceili
     #: the runner's funds gate calls this on the real plan (a property mistaken for a method failed the
     #: first $0 dry run, 2026-10-28)
     assert s.budget.account_balance_required_usd(at_quote) == at_quote.hard_terminate_usd
-    assert set(s.budget.accounted_provider_resources()) <= {"am5m373kuq"}
+    #: the volumes the live storage records own (am5m373kuq, and 4rhubprswo since it was retained with the v2
+    #: Top-1's only copy), read from the records rather than restated
+    live = {json.loads(p.read_text())["volume_id"] for p in REPO.glob("logs/stages/*/*/storage/*.json")
+            if json.loads(p.read_text()).get("volume_id")
+            and (json.loads(p.read_text()).get("retirement") or {}).get("status") != "DELETED"}
+    assert set(s.budget.accounted_provider_resources()) == live and "am5m373kuq" in live
     top = s.budget.plan(price_per_hour=prop["max_price_usd_per_hour"], authorized_usd=prop["per_session_hard_cap_usd"])
     assert SE.all_in(top, prop["max_price_usd_per_hour"], 120)["all_in_usd"] <= prop["per_session_hard_cap_usd"]
 

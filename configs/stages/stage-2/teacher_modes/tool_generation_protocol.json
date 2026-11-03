@@ -1,12 +1,13 @@
 {
  "schema": "aadistill.stage2.teacher_modes.tool_generation_protocol/v1",
- "status": "PREPARED (2026-11-03): code ready, nothing generated; a session needs its own authorization",
+ "status": "PREPARED (2026-11-03, revised after the maintainer's review of 77be6e13): code ready, the generation BOUNDED by the frozen plan (bounded_plan, plans/tool_generation_plan.json); nothing generated; a session needs its own authorization",
  "_contract": "The teacher-native tool-calling generation of the packed round: which teacher, which modes, which pool splits, the runner's execution terms. The task protocol (task_record, verification, supervision) is six_category_design.json :: task_pool / protocol, executed by tool_episodes.py and tool_admission.py. AUTHORIZES NOTHING.",
  "pool": {
   "id": "tool_pool@v1",
   "dir": "data/stages/stage-2/teacher_modes/tool_pool_v1",
   "candidate_sources": "CANDIDATES under the maintainer's review, none approved (logs/stages/stage-2/teacher_modes/audit/tool_calling_source_review_v2.json): priority candidates Agent-Ark/Toucan-1.5M @0df3cf37 and the NeMo Gym Pivot pair @0ac34ec8/@bfc7a4dd, both still owing their admission review; nvidia/Nemotron-SFT-Agentic-v4 deferred until its licence, generator-output terms and upstream tool provenance are confirmed",
-  "rules": "tool_pool.py (schema tool_pool/v2): per-atom splits (MCP server or tool identity), eval-set-1 and public-benchmark decontamination (prompt keys, 13-gram containment, tool identities), T4 between splits, T5, replay conflicts refused, the 6,144-token first-prompt bound under every lineage and mode below"
+  "rules": "tool_pool.py (schema tool_pool/v2): per-atom splits (MCP server or tool identity), eval-set-1 and public-benchmark decontamination (prompt keys, 13-gram containment, tool identities), T4 between splits, T5, replay conflicts refused, the 6,144-token first-prompt bound under every lineage and mode below",
+  "plan": "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json"
  },
  "lineages": {
   "hybrid": {
@@ -78,7 +79,125 @@
   "system_message_default": "You are a helpful Assistant.",
   "env_factory": "stages.teacher_modes.tool_episodes:ToolEnv.factory",
   "gpu_memory_utilization": 0.8,
-  "_": "request_seed(seed_base, task_id, turn), candidate pass k at seed_base + k, the same rule for every teacher, so a (task, candidate, turn) has one seed whatever the model; 2: pass 1 only for a task whose first candidate fails verification (the current protocol)"
+  "_": "request_seed(seed_base, task_id, turn), candidate pass k at seed_base + k, the same rule for every teacher, so a (task, candidate, turn) has one seed whatever the model; 2: pass 1 only for a task whose first candidate fails verification (the current protocol)",
+  "stop_ids": [
+   151645,
+   151643
+  ]
  },
- "authorizes": "nothing"
+ "authorizes": "nothing",
+ "bounded_plan": {
+  "_contract": "The bounded generation (maintainer review of 77be6e13, P0-1): what each lineage, mode and split generates, counted in its consumer's unit BEFORE packing, walked in the pool's frozen orders, stopped at the target, bounded. tool_generation_plan.py turns these terms into the plan the session runs (logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json).",
+  "targets": {
+   "training": {
+    "unit": "supervised_tokens",
+    "per_mode": {
+     "H-T": 493417.83,
+     "H-N": 493417.83,
+     "T2507": 492587
+    },
+    "by_category": "six_category_design.json :: tool_calling.categories[*].share (proposed, unchanged)",
+    "_": "each arm's sixth base-corpus type: 1/6 of A1-6cat's / A2-6cat's 2,960,507 base-category supervised tokens; C1-6cat's registered 492,587"
+   },
+   "validation": {
+    "H-T": {
+     "unit": "tasks",
+     "value": 32
+    },
+    "H-N": {
+     "unit": "tasks",
+     "value": 32
+    },
+    "T2507": {
+     "unit": "supervised_tokens",
+     "value": 12624
+    },
+    "_": "six_category_design.json :: validation (the hybrid's 32 validation-split tasks per mode; C1-6cat's historical 12,624 supervised tokens)"
+   },
+   "calibration": {
+    "unit": "scored_positions",
+    "per_mode": {
+     "H-T": 4200,
+     "H-N": 4200
+    },
+    "_": "the base profile's tool cell; the reasoning-heavy cell (1,800) is a prefix of the same frozen order (packed_inputs.profiles_v2)"
+   },
+   "state_eval": {
+    "unit": "scored_positions",
+    "per_mode": {
+     "H-T": 12000,
+     "H-N": 12000
+    },
+    "min_tasks_per_category": 5,
+    "_": "state_eval_hybrid@v2's floor; every category the split holds with >= 5 tasks (THIN reported)"
+   }
+  },
+  "priors": {
+   "supervised_tokens_per_turn": {
+    "H-T": [
+     250,
+     350,
+     450
+    ],
+    "H-N": [
+     40,
+     70,
+     120
+    ],
+    "T2507": [
+     300,
+     350,
+     450
+    ]
+   },
+   "episode_pass_rate": [
+    0.45,
+    0.6,
+    0.8
+   ],
+   "_": "[low, expected, high]; six_category_design.json :: tool_calling.expected_per_arm (A1's teacher evaluation and Thinking-2507's historical tool turns). A pilot's measured values replace them before the cap is final"
+  },
+  "rounds": {
+   "first": "per cell the frozen-order prefix whose expected yield reaches the target",
+   "top_up": "ceil(remaining units / observed units per attempted task x top_up_margin); with nothing admitted yet, the pessimistic prefix of what is left",
+   "top_up_margin": 1.1,
+   "max_rounds": 4,
+   "expected_rounds": {
+    "lower": 1,
+    "expected": 2
+   },
+   "bound": "a cell never attempts more than the frozen-order prefix whose pessimistic yield (low tokens per turn, low pass rate) reaches its target, nor more than its supply; a cell still short at its bound or after max_rounds is a SHORTFALL",
+   "invocations": "one engine invocation per mode and round for the first candidates, one for the second candidates of the round's refused tasks"
+  },
+  "throughput": {
+   "decode_tokens_per_s": {
+    "thinking": 1170,
+    "non_thinking": 755
+   },
+   "thinking_modes": [
+    "H-T",
+    "T2507"
+   ],
+   "tool_workload_efficiency": [
+    0.5,
+    0.75,
+    1.0
+   ],
+   "prefill_tokens_per_s": [
+    5000,
+    10000,
+    20000
+   ],
+   "model_load_minutes": [
+    4.0,
+    2.5,
+    1.5
+   ],
+   "setup_minutes": 20,
+   "teardown_minutes": 15,
+   "prompt_tokens_default": 690,
+   "_": "decode: the supplement's measured batched throughput on one L40S (SIX_CATEGORY.md); the tool-workload efficiency, prefill rate and model load are UNMEASURED ranges [slow, expected, fast] until the pilot; prompt_tokens_default only where a task has no first_prompt_tokens"
+  },
+  "rate_usd_per_hour": 1.1067
+ }
 }

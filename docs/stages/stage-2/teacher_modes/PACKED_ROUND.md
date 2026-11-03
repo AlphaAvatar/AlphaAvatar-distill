@@ -14,6 +14,15 @@
   - It asked for the $0 repairs recorded in sections 5, 5a and 7: the tool pool's isolation and length bound,
     Toucan's categories and replay conflicts, verification by level, each lineage's generation kind, and the packs'
     validation and share check.
+- **The maintainer's review of `77be6e13` (2026-11-03)** confirmed those repairs and asked for six more, done at $0
+  (sections 5, 5a and 8):
+  - the tool generation is BOUNDED by a frozen plan, so it no longer walks the whole pool;
+  - the pool's split files are content-identified and re-verified at every read;
+  - exact prompts are isolated across splits;
+  - schema validation and the benchmark caches fail closed;
+  - the Pivot pair is converted and decontaminated;
+  - the `a_search` position reconciliation and an end-to-end consumer regression are added.
+  Loss normalization stays as it is, and no further ruling is owed on it.
 
 | record | owns |
 | --- | --- |
@@ -25,6 +34,9 @@
 | [`validations/packed_round/dry_run_20261103.json`](../../../../logs/stages/stage-2/teacher_modes/validations/packed_round/dry_run_20261103.json) | the $0 dry run of the new search chain, and the historical search's identities reproduced |
 | [`data/six_category_selection.json`](../../../../logs/stages/stage-2/teacher_modes/data/six_category_selection.json) | the five existing base types re-selected at 1/6 each (`six_category_selection.py`; see section 7) |
 | [`audit/tool_pool_dry_run_v2.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_pool_dry_run_v2.json) | Toucan converted and assembled dry through `tool_pool.py`'s entry point: census, verification levels, atoms, every exclusion by reason, source, category and split, the decontamination references |
+| [`audit/tool_pool_dry_run_v3.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_pool_dry_run_v3.json) | the candidate pool (Toucan + Pivot Conversational) dry: identity (every split file's sha256), census, verification levels, atoms, every exclusion, T1/T2/T3 findings, the seven categories' coverage |
+| [`audit/pivot_conversion_v1.json`](../../../../logs/stages/stage-2/teacher_modes/audit/pivot_conversion_v1.json) | the Pivot pair rebuilt from the first user turn: what is kept and skipped, step gold, replay, feasibility, coverage |
+| [`plans/tool_generation_plan_dry_run.json`](../../../../logs/stages/stage-2/teacher_modes/plans/tool_generation_plan_dry_run.json) | the bounded generation plan over the dry pool: every cell's target, supply, expected tasks and bound, and the price |
 | [`audit/experiment_suite_baseline_20261103.json`](../../../../logs/stages/stage-2/teacher_modes/audit/experiment_suite_baseline_20261103.json) | the four experiment-suite failures run at `b7ee0c93` and `c861d704`: pre-existing, with their causes |
 
 ## 1. The rule, by stage (AGENTS.md P19)
@@ -189,6 +201,11 @@ found five defects, repaired at $0:
 | "parallel" was two calls in total; "missing-parameter recovery" was any response containing `error`, including `"error": null` | steps are read from the trajectory: parallel = a step with two or more calls. An error is one the response reports. `error_recovery` is split into `corrected_retry` (an error, then a successful call of the same tool with other arguments) and `tool_failure`. No Toucan task is "ask for the missing value" |
 | a call recorded twice with different responses kept the first silently | listed under `backend.conflicts`; the pool refuses the task |
 | `calls_tools` set `task_success`, and checks without a verifier passed | `verify_episode` reports `LEVELS`: protocol, schema validity, recorded execution, step gold, tool selection, task success. A level without a verifier is `None`, never passed. A target-tools check is tool selection, and every task registers its levels |
+| (`77be6e13`) the session generated every task of its splits, pass 1 for every refusal: about 238,790 first candidates for ~493K supervised tokens per arm | the **bounded plan** (`tool_generation_plan.py`, section 5a): per mode, split and category a target in the consumer's unit, the frozen order, rounds that stop at the target, a hard bound |
+| (`77be6e13`) `pool.json` registered no split file; the session read the files unchecked | `pool.json` registers every file's sha256, task count, sources and order; `load_pool` re-verifies all of it at every read and refuses on any difference; the tool kinds bind `pool.json` and the plan |
+| (`77be6e13`) one prompt in several splits could pass the 13-gram screen (template n-grams are dropped) and T5 (keyed by family) | T4 also refuses an earlier split's exact prompt key and any earlier split's tool identity |
+| (`77be6e13`) `schema_problems` checked a subset and ignored other keywords | the common assertion keywords are enforced (numbers, strings, arrays, `const`, `oneOf` / `allOf` / `not`, local `$ref`, `additionalProperties` as a schema); any other keyword fails closed, and the pool refuses such tasks up front |
+| (`77be6e13`) a cached benchmark copy was reused without checking it | `tool_benchmarks.fetch` re-hashes every registered file on every use and refuses a missing or changed one |
 
 **Candidates, none approved** (maintainer, 2026-11-03).
 - Review: [`audit/tool_calling_source_review_v2.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_calling_source_review_v2.json),
@@ -214,71 +231,116 @@ found five defects, repaired at $0:
 - GLM-5.2's output terms are not reviewed;
 - the origin of its tool sets is unstated, and its predecessor v2 drew on Glaive/xLAM (T3).
 
-**Isolation and decontamination** (Toucan in full, [`audit/tool_pool_dry_run_v2.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_pool_dry_run_v2.json)):
-- **eval-set-1**: 0 prompt keys and 0 13-gram near-duplicates. 1,878 tasks were refused for offering a tool whose
-  bare name is one of eval-set-1's 26 tool names (`factorial` 1,856, `get_news` 22); none shares a name and a schema.
-  eval-set-1's tools are bare-named OpenAI envelopes and Toucan's are `<server slug>-<tool>`, so the comparison uses
-  the bare name.
-- **Public benchmarks** (`tool_benchmarks.py`; BFCL v3, When2Call test, API-Bank test, tau-bench, ToolSandbox, each
-  pinned): 2 exact prompts refused, 0 near-duplicates, 0 tool identities. Bare-name-only hits on generic names are
-  counted, not refused.
-- **Between splits**: 2,199 near-duplicates of a task in an earlier split were refused, 2,114 of them from training.
-- **Protocol**: 13-gram containment ≥ 0.5, template n-grams (document frequency > 5) dropped, as
-  `isolation_rules.json`.
-- **Not yet screened**: the other candidates, which are not converted. T3 detection for v4.
+**Pivot** ([`audit/pivot_conversion_v1.json`](../../../../logs/stages/stage-2/teacher_modes/audit/pivot_conversion_v1.json),
+`tool_sources_pivot.py`). A Pivot row is one step, and its context already holds the expert's earlier turns. So a
+task can be rebuilt only from the first user turn, and the teacher then runs every step itself:
+- **Step gold is real.** Each step's expected action is compared exactly after canonicalization; a message step must
+  make no call.
+- **Replay is partial.** A gold call is answered only if a later row recorded the expert's identical call.
+- **Later user turns are not used.** They were written in reply to the expert's message.
+- **Conversational:** 9,051 tasks — no_tool 7,265, tool_selection 1,112, schema_arguments 430, multi-step 244. For
+  9,558 trajectories a gold call's output is missing. The data has no parallel calls and no recorded errors.
+  Qwen3-235B's per-step pass rates, multiplied over a task's steps, have a median of 0.375; under exact comparison a
+  4B teacher should expect less.
+- **Function-Calling fails T3.** Of its 78 rebuildable tasks, 15 repeat an xLAM-60k or Glaive-v2 prompt exactly, so
+  it is left out of the pool.
 
-**Data prepared ($0, dry)**, through `tool_pool.py`'s entry point into scratch, not under `data/`:
+**Isolation and decontamination** (Toucan and Pivot Conversational in full,
+[`audit/tool_pool_dry_run_v3.json`](../../../../logs/stages/stage-2/teacher_modes/audit/tool_pool_dry_run_v3.json)):
+- **T1 (eval-set-1).** 0 prompt keys and 0 near-duplicates. 1,878 tasks were refused for a held-out tool's bare name
+  (`factorial`, `get_news`); none shares a name and a schema.
+- **T2 (BFCL v3, When2Call, API-Bank, tau-bench, ToolSandbox).** 1 exact prompt refused; 0 near-duplicates; 0 tool
+  identities.
+- **T3 (xLAM-60k, Glaive-v2, newly pinned and verified).**
+  - Refused: 7 prompt matches in Toucan, and 56 Pivot tasks with a tool identical in name and schema to a Glaive
+    tool.
+  - Tool signatures (name plus parameter names) are counted, not refused. Refusing them removed 20,536 tasks in a
+    first run, all through 22 generic signatures served by real MCP servers: `get_definitions(word)` 6,907,
+    `get_current_weather(location)` 3,737, `get_user_profile(...)` 4,507, and so on.
+- **T4 (between splits).** 2,512 exact prompts and 7 near-duplicates of an earlier split. 6,825 tool identities
+  already used by an earlier split: the same bare tool and schema served by several MCP servers. 5,707 tasks whose
+  atoms disagree.
+- **Schema.** 157 Pivot tasks use keywords the validator does not check (fail closed).
 
-| split | tasks | no_tool | tool_selection | multi_turn | multiple_parallel | mcp_agent | error_recovery |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| training | 73,759 | 33,431 | 12,674 | 14,391 | 5,546 | 4,886 | 2,831 |
-| validation | 1,475 | 775 | 241 | 221 | 52 | 133 | 53 |
-| state_eval | 2,180 | 1,420 | 324 | 204 | 125 | 78 | 29 |
-| calibration | 4,364 | 2,101 | 1,009 | 682 | 427 | 105 | 40 |
-| reserve | 305 | 283 | 2 | 6 | 5 | 4 | 5 |
+**Data prepared ($0, dry)** into scratch, not under `data/`. 83,764 of 128,338 tasks were admitted, and every split
+file is registered with its sha256 (content `811f4870…`):
 
-- **Admitted**: 82,083 of 119,287 converted tasks. There are 360 atoms (345 servers, 15 tool identities): 321 in
-  training, 11 to 13 in each evaluation split, none in two splits.
-- **Refused**: 37,204 tasks, each with its reason:
+| split | tasks | no_tool | tool_selection | schema_arguments | multi_turn | multiple_parallel | mcp_agent | error_recovery |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| training | 74,762 | 37,880 | 12,499 | 368 | 12,224 | 4,581 | 4,542 | 2,668 |
+| validation | 1,517 | 867 | 230 | 5 | 181 | 51 | 133 | 50 |
+| state_eval | 2,312 | 1,535 | 333 | 7 | 205 | 125 | 78 | 29 |
+| calibration | 4,814 | 2,479 | 1,050 | 28 | 685 | 427 | 105 | 40 |
+| reserve | 359 | 329 | 10 | 1 | 5 | 5 | 4 | 5 |
 
-  | reason | tasks |
-  | --- | ---: |
-  | T5 duplicates | 25,107 |
-  | atoms in different splits | 5,707 |
-  | near-duplicates between splits | 2,199 |
-  | eval-set-1 tool names | 1,878 |
-  | replay conflicts | 1,321 |
-  | over 6,144 tokens | 990 |
-  | benchmark prompts | 2 |
+- **Atoms:** 498 in total (333 servers, 155 Pivot environments, 10 tool identities). Each evaluation split holds 17–20
+  of them, and no atom is in two splits.
+- **Verification levels:**
+  - Toucan tasks verify protocol, schema validity, recorded execution and tool selection;
+  - Pivot tasks verify step gold instead of tool selection;
+  - nothing verifies task success.
 
-- **Verification**: every admitted task verifies protocol, schema validity, recorded execution and tool selection.
-  None carries step gold or a task-success verifier.
-- **Cost of server-level isolation**: the evaluation splits come from 11–13 servers each and are mostly no_tool.
+**The seven categories** (the plan uses the design's proposed shares unchanged; a short category is reported as
+SHORTFALL and never filled from another):
 
-The Pivot pair and v4 are not converted yet.
+| category | source and verification | gap |
+| --- | --- | --- |
+| tool_selection | Toucan (tool selection); Pivot (step gold) | — |
+| schema_arguments | Pivot Conversational only (step gold): 368 training, 28 calibration, 7 state-evaluation tasks | **SHORTFALL in non-thinking mode** (training target 74,013 tokens; state evaluation) |
+| no_tool | Toucan irrelevant subset, Pivot message steps (tool selection: no call) | — |
+| multiple_parallel | Toucan only (tool selection; no gold parallel arguments) | no gold arguments |
+| multi_turn | Toucan (2–4 user turns), Pivot (sequential steps, step gold) | — |
+| error_recovery | Toucan's recorded errors (`corrected_retry` / `tool_failure`; tool selection) | **"ask for the missing value": no verified source in any mode** |
+| mcp_agent | Toucan only (tool selection) | no task-success check |
 
 **Gaps that remain:**
 - gold arguments for parallel calls;
-- "ask for the missing parameter" with gold;
-- a task-success verifier (Toucan verifies tool selection, Pivot adds step gold, neither verifies task success);
+- "ask for the missing value" with gold;
+- a task-success verifier (Toucan verifies tool selection, Pivot step gold);
 - a registered tool-calling evaluation (eval-set-2): teacher-forced KL on tool turns is not tool-call success.
 
 ## 5a. The code chain, end to end (ready, nothing run)
 
 | step | code | paid? |
 | --- | --- | --- |
-| task records from a source | `tool_sources_toucan.py` (others to write) | no |
-| pinned benchmark copies for decontamination | `tool_benchmarks.py fetch` | no |
-| the pool: atoms, splits, T1/T2/T4/T5, replay conflicts, length bound, frozen order | `tool_pool.py` | no |
-| teacher-native episodes, one lineage per session, each under its own kind and the L40S teacher gate | `tool_session.py` (hybrid `tool_generation`, Thinking-2507 `tool_generation_t2507`) over `run_battery --env-factory` | yes |
+| task records from a source | `tool_sources_toucan.py`, `tool_sources_pivot.py` | no |
+| pinned, verified reference copies: T2 benchmarks, T3 xLAM / Glaive | `tool_benchmarks.py fetch` | no |
+| the pool: atoms, splits, T1–T5, schema, replay conflicts, length bound, frozen orders, content identity | `tool_pool.py` | no |
+| the bounded plan: cells, targets, frozen orders, rounds, bounds, price | `tool_generation_plan.py` | no |
+| teacher-native episodes in rounds to each cell's target, one lineage per session under its own kind and the L40S teacher gate; the plan and the pool verified first | `tool_session.py` (hybrid `tool_generation`, Thinking-2507 `tool_generation_t2507`) over `run_battery --env-factory` (each task renders its own system text) | yes |
 | verification by level; documents and items | `tool_admission.py` (from the sealed shards), `aadistill.data.tool_calls`, `tool_episodes.py` | no |
-| types v2, profiles v2, `state_eval_hybrid@v2`, the packed freeze | `packed_inputs.py` | no |
+| types v2, profiles v2, `state_eval_hybrid@v2` (tool items selected by the plan, THIN categories listed), the packed freeze | `packed_inputs.py` | no |
 | the packed hybrid full search | `packed_full_search.py` (kind `packed_search`) | yes |
-| the packs of A1-6cat / A2-6cat / C1-6cat: the tool quota, the share check before packing, every validation document | `packed_packs.py` | no |
+| the packs of A1-6cat / A2-6cat / C1-6cat: the plan's per-category tool selection, the share check before packing, every validation document | `packed_packs.py` | no |
 | the units bound to packs and Top-1 | `packed_training_plan.py --bind-packs` | no |
 | training and formal evaluation per arm | `a1_units.py --arm` (kinds `train_6cat_a1`, `_a2`, `_c1`) | yes |
 
 Every paid kind refuses at issue until the grant names its hard cap.
+
+**The bounded plan** (`bounded_plan` in `tool_generation_protocol.json`;
+[`plans/tool_generation_plan_dry_run.json`](../../../../logs/stages/stage-2/teacher_modes/plans/tool_generation_plan_dry_run.json)):
+- **Cells.** Training targets are each arm's sixth type (493,418 supervised tokens for each hybrid mode, 492,587 for
+  Thinking-2507), split over the seven categories by the design's shares. Calibration takes 4,200 and state
+  evaluation 12,000 scored positions per mode, by the same shares; state evaluation also needs at least 5 tasks per
+  category. Validation is as registered: 32 tasks per hybrid mode, 12,624 supervised tokens for Thinking-2507.
+- **Rounds.**
+  - Round 1 takes each cell's frozen-order prefix whose expected yield reaches its target.
+  - Later rounds add `remaining / observed yield × 1.1`, up to 4 rounds.
+  - Each round is one engine invocation per mode for first candidates, and one for the second candidates of its
+    refused tasks.
+  - A cell never passes the prefix whose pessimistic yield reaches its target, nor its supply. A cell still short is
+    recorded as SHORTFALL.
+- **Resume.** Each round's input is derived from the plan and from what earlier rounds sealed, so a replacement
+  session recomputes the same rounds. `test_tool_generation_rounds.py` checks this on a scripted engine.
+- **Size.** 4,698 tasks expected and 8,547 at the bound:
+  - non-thinking: 3,089 training tasks (bound 6,053);
+  - thinking: 683 (1,150);
+  - Thinking-2507: 683 (951).
+  - Before this fix the session would have generated about 238,790 first candidates.
+- **Consumers select by the same rule.** Admission reads the verified pool in its frozen orders. The packs and the
+  packed inputs take whole episodes per category, in frozen order, up to the plan's targets
+  (`tool_generation_plan.select`). `test_tool_chain_consumers.py` runs pool → plan → admission → profiles, suite and
+  freeze → the C1-6cat pack → plan binding on synthetic episodes.
 
 ## 6. The new hybrid full search
 
@@ -388,32 +450,47 @@ items and a suite without Glaive.
 - $836.73 committed of the $868.00 project cap; $31.27 left;
 - 0 pods; volumes `4rhubprswo` (350 GB, US-TX-3, holds the v2 Top-1's only copy) and `am5m373kuq`.
 
-**Phases, expected (upper):**
-- pool and generation: $4.4 ($6.6);
-- packed search: $32.43 ($42.14);
-- six trainings: $50.38 ($85.18).
+**Phases, lower / expected / upper:**
+- **Bounded tool generation: $2.27 / $3.62 / $10.31, cap $11.34.**
+  - hybrid session (both modes): $1.37 / $2.38 / $7.85;
+  - Thinking-2507: $0.90 / $1.24 / $2.46.
+  - The basis is the plan's task counts × expected turns × each mode's tokens per turn × second candidates.
+  - Decode uses the supplement's measured throughput (1,170 / 755 tokens/s). The tool-workload efficiency (0.5–1.0),
+    the prefill rate (5–20k tokens/s) and model loads (1.5–4 min) are unmeasured ranges.
+  - Setup and teardown add 35 min. The upper bound adds the bound's task counts, long turns, the low pass rate, the
+    slow ends and every round.
+  - A pilot (about 1 h) replaces the priors before the cap is final. The earlier $4.4 / $6.6 priced only a fraction
+    of what the unbounded session would have generated.
+- packed search: $23.72 / $32.43 / $42.14, cap $46.35;
+- six trainings: $37.82 / $50.38 / $85.18.
 
-The Full Search Authorization (pool generation plus search) needs about $37, with a cap around $53, which is more than
-is left.
+The Full Search Authorization (generation plus search) needs $36.05 expected and $52.45 at the upper bounds, with caps
+of $57.69. That is more than the $31.27 left.
 
 ## 9. Decisions owed to the maintainer
 
-Fragments are no longer on this list: the maintainer accepted them as specified (2026-11-03).
+The maintainer has settled two former items: fragments are accepted, and loss normalization is kept. No Thinking-2507
+packed search runs unless it is requested.
 
-1. **Tool-calling sources.** Complete the admission review of Toucan and the Pivot pair (the priority candidates).
-   Nemotron-SFT-Agentic-v4 is deferred until its licence, generator-output terms and upstream tool provenance are
-   confirmed. Also owed: the category shares, the prompt bound, the non-thinking state-evaluation floor, and an
-   eval-set-2.
-2. **Isolation costs.** Server-level splits leave 11–13 servers per evaluation split, mostly no_tool. eval-set-1's
-   tool names are refused, which removes 1,856 tasks of the server that offers `factorial`. Bare-name-only benchmark
-   matches are counted, not refused. Confirm or change.
-3. **Validation coverage.** C1-6cat's validation documents (D4A's validation tail) hold no fluid type, and A1-6cat's
-   none of `interactive_adaptation`. The packs record the gap; validation loss is diagnostic.
-4. **Budget.** A raised project cap for the Full Search Authorization.
-5. **Thinking-2507.** Whether a Thinking-2507 packed search is wanted.
-6. **Storage.** Volume `4rhubprswo` and the v2 Top-1's single copy. The four pre-existing experiment-suite failures
-   come from it and from the `a_search` records' unreconciled pod `jzslup672m2jiy`.
-7. **Loss weighting.** Keep the step-level weighting, or register a fixed-denominator objective.
+1. **Tool-calling sources.**
+   - Admit Toucan and Pivot Conversational, the priority candidates.
+   - Pivot Function-Calling fails T3; Nemotron-SFT-Agentic-v4 stays deferred.
+   - Also owed: the category shares (used unchanged by the plan), the prompt bound and the non-thinking state-evaluation
+     floor.
+2. **Expected SHORTFALLS.**
+   - `schema_arguments` in non-thinking mode, in training and in state evaluation (Pivot is its only source).
+   - "Ask for the missing value" in every mode.
+3. **Isolation costs.**
+   - Each evaluation split holds only 17–20 atoms.
+   - eval-set-1's tool names are refused.
+   - A tool identity served by several servers is kept to one split (6,825 tasks).
+   - T3 signatures are counted, not refused.
+4. **Validation coverage.** C1-6cat's validation has no fluid type, and A1-6cat's no `interactive_adaptation`. Both
+   gaps are recorded.
+5. **eval-set-2** for closed-loop tool success.
+6. **Budget.** A raised project cap for the Full Search Authorization.
+7. **Storage.** Volume `4rhubprswo`. The v2 Top-1's only copy stays protected until a verified copy exists off the
+   volume.
 
 ## Reproduce ($0)
 

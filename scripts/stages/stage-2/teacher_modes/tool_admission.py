@@ -2,8 +2,11 @@
 """Teacher-native tool-calling episodes -> admitted training documents and search items, per lineage. $0, dev box.
 
     PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_admission \\
-        --tasks <tool_pool@v1 tasks.jsonl> --episodes <run_battery generate-mode records.jsonl> \\
+        --pool data/stages/stage-2/teacher_modes/tool_pool_v1 --store <tool_session store> --identity <id> \\
         --mode H-T --out <dir>
+
+The tasks are read through `tool_pool.load_pool` (every split file re-verified against pool.json) in each split's
+frozen order, so the documents and items come out in the order the session walked and the consumers select by.
 
 Every episode the teacher generated (``run_battery.run_episodes`` in ``generate`` mode, so each turn keeps the
 engine's own prompt and output token ids) goes through `tool_episodes.verify` -- protocol, schema validity, recorded
@@ -91,7 +94,7 @@ def episodes_from_store(store: Path, identity: str, mode: str) -> list[dict]:
     labels whose ``.complete`` lists exactly the shards present are read."""
     import re
     from stages.reasoning_data import generation_driver as GD
-    pat = re.compile(rf"^tool_{re.escape(mode)}_pass(\d+)_.*$")
+    pat = re.compile(rf"^tool_{re.escape(mode)}_r\d+_pass(\d+)$")       #: tool_session.py's round labels
     out = []
     for done in sorted(Path(store).glob("*.complete")):
         label = done.name[:-len(".complete")]
@@ -109,7 +112,7 @@ def episodes_from_store(store: Path, identity: str, mode: str) -> list[dict]:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--tasks", required=True)
+    ap.add_argument("--pool", required=True, help="the tool_pool@v1 directory (verified by tool_pool.load_pool)")
     ap.add_argument("--episodes", default=None, help="run_battery records (jsonl)")
     ap.add_argument("--store", default=None, help="a tool_session.py store (sealed shards), with --identity")
     ap.add_argument("--identity", default=None)
@@ -117,7 +120,12 @@ def main(argv=None) -> int:
     ap.add_argument("--stop-ids", default="151645,151643")
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
-    tasks = TE.read_tasks(a.tasks)
+    from stages.teacher_modes import tool_pool as TP
+    man, splits = TP.load_pool(Path(a.pool))
+    tasks = []
+    for split in sorted(splits):
+        by_id = {t["task_id"]: t for t in splits[split]}
+        tasks += [by_id[t] for t in man["orders"][split]]
     bad = {t.get("task_id"): TE.task_problems(t) for t in tasks if TE.task_problems(t)}
     if bad:
         raise SystemExit(f"{len(bad)} task records the protocol cannot run, e.g. {next(iter(bad.items()))}")

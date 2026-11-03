@@ -1,0 +1,101 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.pivot_conversion/v1",
+ "written_utc": "2026-11-03",
+ "question": "the maintainer's review of 77be6e13, item 5: can the NeMo Gym Pivot pair be rebuilt so the teacher runs from step one, with step gold and replay, and what does it cover?",
+ "converter": "scripts/stages/stage-2/teacher_modes/tool_sources_pivot.py",
+ "commands": [
+  "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_sources_pivot --which function_calling --jsonl artifacts/stages/stage-2/teacher_modes/tool_sources/nvidia__Nemotron-RL-Agentic-Function-Calling-Pivot-v1@0ac34ec8/train.jsonl --out <scratch>/pivot_function_calling.jsonl",
+  "PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_sources_pivot --which conversational --jsonl artifacts/stages/stage-2/teacher_modes/tool_sources/nvidia__Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1@bfc7a4dd/train.jsonl --out <scratch>/pivot_conversational.jsonl"
+ ],
+ "local_files_not_tracked": {
+  "function_calling_tasks_sha256": "46468f027be2de125d19b339e481407cd3279e520c9958f10ee6055288b870d6",
+  "conversational_tasks_sha256": "a4b840d6be41e1b8adb57ead3ea69b08ccea312e93507619b44f1ea1e2d74630"
+ },
+ "what_a_row_is": "one step of an expert trajectory: input = the whole history up to the step (the expert's own messages, reasoning items and calls included), expected_action = the next action (one function_call or one message). No row carries parallel calls; no recorded tool error was seen. Steps count from 1 in Function-Calling and from 0 in Conversational",
+ "teacher_native_rule": "only the first user turn can be rebuilt: its first-step context holds system and user items only, so the teacher generates every assistant turn itself; later user turns are NOT used (the user simulator wrote them in reply to the expert's message, which the teacher's reply does not reproduce)",
+ "datasets": {
+  "function_calling": {
+   "dataset": "nvidia/Nemotron-RL-Agentic-Function-Calling-Pivot-v1",
+   "revision": "0ac34ec81bb6976d3746407df306a57ce48f0bd8",
+   "trajectories_with_turn1_rows": 2576,
+   "kept": 78,
+   "skipped": {
+    "no first-step row (system and user only) for turn 1": 1951,
+    "a gold call without a recorded output": 480,
+    "turn-1 steps not contiguous from the first step": 67
+   },
+   "category": {
+    "no_tool": 29,
+    "tool_selection": 22,
+    "schema_arguments": 27
+   },
+   "steps": {
+    "1": 76,
+    "2": 2
+   },
+   "ends_on_call": 47,
+   "tasks_with_conflicts": 1,
+   "environments": {
+    "count": 59,
+    "largest_tasks": 4,
+    "largest_share": 0.0513
+   },
+   "qwen3_235b_episode_pass_rate_product": null
+  },
+  "conversational": {
+   "dataset": "nvidia/Nemotron-RL-Agentic-Conversational-Tool-Use-Pivot-v1",
+   "revision": "bfc7a4dd55ec1424cc3761ceacdd85a5743b4f4e",
+   "trajectories_with_turn1_rows": 30621,
+   "kept": 9051,
+   "skipped": {
+    "a gold call without a recorded output": 9558,
+    "no first-step row (system and user only) for turn 1": 11283,
+    "turn-1 steps not contiguous from the first step": 729
+   },
+   "category": {
+    "no_tool": 7265,
+    "tool_selection": 1112,
+    "multi_turn": 244,
+    "schema_arguments": 430
+   },
+   "steps": {
+    "1": 8291,
+    "2": 634,
+    "3": 105,
+    "4": 19,
+    "5": 2
+   },
+   "ends_on_call": 1158,
+   "tasks_with_conflicts": 9,
+   "environments": {
+    "count": 158,
+    "largest_tasks": 3873,
+    "largest_share": 0.4279
+   },
+   "qwen3_235b_episode_pass_rate_product": {
+    "tasks": 9051,
+    "median": 0.375,
+    "p25": 0.21875,
+    "p75": 0.5
+   }
+  }
+ },
+ "feasibility": {
+  "step_gold": "REAL: every turn-1 step's expected_action is a deterministic gold (call name + arguments compared exactly after canonicalization; a message step = no call). This is the only candidate with per-step gold arguments",
+  "replay": "PARTIAL: a gold call's response exists only when a later row of the same trajectory holds the expert's identical call and its function_call_output; the datasets sample steps, so 480 FC and 9,558 Conversational trajectories lack it and are skipped",
+  "teacher_native_rebuild": "REAL for turn 1: 9,051 Conversational and 78 Function-Calling tasks; the teacher must reproduce each gold call exactly to reach the next step (off-script ends the episode, refused)",
+  "difficulty_reference": "Conversational rows carry Qwen3-235B's per-step pass rate on the dataset's own (argument-comparison) check: the product over a task's steps has median 0.375 (p25 0.22, p75 0.50); a 4B teacher under an EXACT canonical comparison should expect fewer -- the pilot measures it",
+  "task_success": "NONE: step gold verifies each decision, not the task's outcome; the final message is free text and unchecked"
+ },
+ "coverage": {
+  "function_calling": "78 tasks: no_tool 29, tool_selection 22, schema_arguments 27; 59 environments",
+  "conversational": "9,051 tasks: no_tool 7,265 (mostly step 0 asking the user to authenticate: the correct decision is no call, but what it asks for is unverified), tool_selection 1,112, schema_arguments 430, multi_turn 244 (2-5 sequential calls); 158 environments, the largest 42.8% of tasks (shared policy tools chain domains)",
+  "not_covered": [
+   "multiple_parallel (no row has parallel calls)",
+   "error_recovery (no recorded tool error; asking for a missing value is a message step whose content is unverified, so it stays no_tool)",
+   "mcp_agent (no MCP servers)"
+  ]
+ },
+ "isolation": "the Pivot tasks go through tool_pool.py with Toucan: per-environment atoms, T1 eval-set-1, T2 the five benchmarks, T3 xLAM-60k and Glaive-v2 (prompt keys, 13-gram containment, tool identities and signatures), T4 between splits -- results in audit/tool_pool_dry_run_v3.json",
+ "authorizes": "nothing"
+}

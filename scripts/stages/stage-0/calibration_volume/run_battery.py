@@ -118,7 +118,8 @@ def run_episodes(tasks, *, tok, eng, make_sampling, limit, ctx, stop_ids, mode,
                    if t.get("interactive") else None)
             turn_cap = max_turns(t["env"]) if env else 1
         episodes[t["task_id"]] = {
-            "task": t, "env": env, "history": [{"role": "system", "content": system},
+            #: a task carrying its own ``system`` text (a tool task's policy) is rendered with it
+            "task": t, "env": env, "history": [{"role": "system", "content": t.get("system") or system},
                                               *t["messages"]],
             "turns": [], "done": False, "end": None, "max_turns": turn_cap, "last_ids": None}
 

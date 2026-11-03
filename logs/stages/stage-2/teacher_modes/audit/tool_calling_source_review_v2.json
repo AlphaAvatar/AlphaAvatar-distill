@@ -294,8 +294,8 @@
    ]
   },
   "not_converted_yet": [
-   "the Pivot pair (trajectory rebuild so the teacher runs from step one; replay when the call equals expected_action)",
-   "Nemotron-SFT-Agentic-v4 (after its licence, GLM-5.2 terms and tool-set provenance are confirmed)"
-  ]
+   "Nemotron-SFT-Agentic-v4 (deferred: licence, GLM-5.2 terms and tool-set provenance)"
+  ],
+  "pivot_2026_11_03": "audit/pivot_conversion_v1.json: rebuilt from the first user turn so the teacher runs from step one (later user turns were written to the expert's replies and are not used). Conversational: 9,051 tasks with per-step gold (no_tool 7,265, tool_selection 1,112, schema_arguments 430, multi_turn 244; no parallel calls, no recorded errors); 9,558 trajectories lack a gold call's recorded output. Function-Calling: 78 tasks, of which 15 repeat xLAM-60k / Glaive-v2 prompts exactly -- it fails T3. Pool: audit/tool_pool_dry_run_v3.json"
  }
 }

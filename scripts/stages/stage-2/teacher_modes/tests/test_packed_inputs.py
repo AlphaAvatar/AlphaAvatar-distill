@@ -32,6 +32,32 @@ def tool_items(mode: str, split: str, tasks: int, turns: int = 2, per_turn: int 
     return out
 
 
+def plan_for(items: dict, cal_target: float = 4200.0, se_target: float = PI.SE_POSITIONS) -> tuple[dict, dict]:
+    """A one-category generation plan (these items are all multi_turn) and the frozen orders of their tasks."""
+    cells = [{"split": "calibration", "category": "multi_turn", "unit": "scored_positions", "target": cal_target,
+              "min_tasks": 0},
+             {"split": "state_eval", "category": "multi_turn", "unit": "scored_positions", "target": se_target,
+              "min_tasks": PI.SE_MIN_TASKS}]
+    orders = {}
+    for rows in items.values():
+        for x in rows:
+            orders.setdefault(x["split"], [])
+            if x["task_id"] not in orders[x["split"]]:
+                orders[x["split"]].append(x["task_id"])
+    return {"lineages": {"hybrid": {"modes": {m: {"cells": cells} for m in PI.MODES}}}}, orders
+
+
+@pytest.fixture(scope="module", autouse=True)
+def the_plan():
+    """profiles_v2 / suite_v2 select tool episodes through the frozen generation plan (`tool_episodes_by_plan`)."""
+    from stages.teacher_modes import tool_generation_plan as TGP
+    mp = pytest.MonkeyPatch()
+    items = {m: tool_items(m, "calibration", 40) + tool_items(m, "state_eval", 40) for m in PI.MODES}
+    mp.setattr(TGP, "for_consumers", lambda *a, **k: plan_for(items))
+    yield
+    mp.undo()
+
+
 @pytest.fixture(scope="module")
 def built(tmp_path_factory):
     d = tmp_path_factory.mktemp("v2")
@@ -58,9 +84,9 @@ def test_profiles_keep_v1s_cells_and_add_the_tool_cell(built):
             if dom != "supporting":
                 assert n == o, key                                    # v1's cell, item for item
             elif not sm.startswith("tool_calling@v1"):
-                assert n == o[:len(n)] and c["scored"] >= c["quota"], key   # a prefix of v1's cell
+                assert n == o[:len(n)] and c["scored"] >= c["quota"] - PI.QUOTA_EPS, key   # a prefix of v1's cell
             else:
-                assert n and c["scored"] >= c["quota"], key
+                assert n and c["scored"] >= c["quota"] - PI.QUOTA_EPS and not c["short"], key
         sup = [c["quota"] for k, c in census.items() if k.startswith("supporting/")]
         assert len(sup) == 12 and len(set(round(q, 6) for q in sup)) == 1   # six sub-types x two modes, equal
 

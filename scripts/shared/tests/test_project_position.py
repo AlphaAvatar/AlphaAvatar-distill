@@ -124,7 +124,8 @@ def test_the_position_on_the_repository_is_the_issuers_rule_plus_campaign_subrun
     assert camp["campaigns_scanned"] >= 18 and camp["subruns_with_a_pod"] >= 55
     assert sum(camp["teardown_confirmed_by"].values()) == camp["subruns_with_a_pod"]
     assert pos["committed_usd"] == round(base["committed_usd"] + sum(u["usd"] for u in camp["unposted"]), 4)
-    assert pos["project_cap_usd"] == 740.0            # the newest grant's, not a constant here
+    from maintenance.consolidation import derive_budget as DB
+    assert pos["project_cap_usd"] == float(DB.latest_project_cap(REPO, None)["cap_usd"])   # the newest grant's
     r = PP.readiness(pos, {"A-E": 3.5, "B-E": 3.0})
     assert r["together"]["hard_caps_usd"] == 6.5
     assert r["together"]["committed_after_usd"] == round(pos["committed_usd"] + 6.5, 4)

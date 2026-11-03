@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.stage2.teacher_modes.packed_round_design/v1",
  "status": "PREPARATION (2026-11-03): designed and partly prepared at $0; no search, no training, no generation, no pod",
- "decided_by": "maintainer brief 2026-11-03 'Stage-1 Forward / Stage-3 Training Packing 重构及 Research A 前置准备'; revised by the maintainer's independent review of 649d25dd (2026-11-03): fragments accepted, formal data counted before packing, the tool pool / Toucan / verification / lineage-kind / validation repairs",
+ "decided_by": "maintainer brief 2026-11-03 'Stage-1 Forward / Stage-3 Training Packing 重构及 Research A 前置准备'; revised by the maintainer's independent review of 649d25dd (2026-11-03): fragments accepted, formal data counted before packing, the tool pool / Toucan / verification / lineage-kind / validation repairs; the maintainer's review of 77be6e13 (2026-11-03): bounded generation, pool content identity, cross-split exact-prompt isolation, fail-closed schema validation and reference caches, the Pivot converter; loss normalization kept, no further ruling owed",
  "_contract": "The registered terms of Research A's packed round: the new hybrid full search under the packed forward context (Stage 1), and the packed training of A1-6cat, A2-6cat and C1-6cat (Stage 3). It supersedes the packing terms of six_category_design.json (document_isolated and E1's packer) and nothing else in it; its tool-calling pool, protocol, verification and quotas stay that record's. Sequence lengths and seeds are instance values of this experiment and live here, never in src/aadistill. AUTHORIZES NOTHING.",
  "stage1_forward_context": {
   "sequence_length": 8192,
@@ -96,14 +96,14 @@
  "tool_calling": {
   "role": "a supporting capability AlphaAvatar-distill must keep; the sixth base-corpus type at 1/6 of the base category's supervised tokens",
   "owner_of_the_protocol": "six_category_design.json :: task_pool, protocol (tool_pool@v1, seven categories, the 87/3/4/4/2 split ranges, the 6,144-token prompt bound, run_episodes' loop, whole-episode admission, only native assistant ids supervised), with the 2026-11-03 repairs: splits per ATOM (MCP server or tool identity, tool_pool.py schema v2), eval-set-1 / public-benchmark / between-split decontamination, verification reported by level (aadistill.data.tool_calls.LEVELS: a target-tools check is tool selection, never task success)",
-  "sources": "CANDIDATES under the maintainer's review, none approved (audit/tool_calling_source_review_v2.json). Recommended base: Agent-Ark/Toucan-1.5M @0df3cf37 (real MCP executions, Apache-2.0) + the NeMo Gym Pivot pair @0ac34ec8/@bfc7a4dd (deterministic per-step gold, CC-BY-4.0). Conditional supplement: nvidia/Nemotron-SFT-Agentic-v4 tool_calling @a4593a26 (OpenMDW-1.1 terms, GLM-5.2 output terms and tool-set provenance open). On hold: nvidia/Nemotron-Agentic-v1 interactive_agent @650d5909; its tool_calling subset excluded (glaive-function-calling-v2 tool sets, T3). Not recommended: Team-ACE/ToolACE @6bda777c (undisclosed generators, simulated responses, 2024). External assistant turns are never targets",
-  "status": "code ready end to end (PACKED_ROUND.md section 5a). Toucan's SFT config converted and assembled DRY into scratch through tool_pool.py's entry point (audit/tool_pool_dry_run_v2.json): 82,083 of 119,287 tasks admitted (training 73,759, validation 1,475, state_eval 2,180, calibration 4,364, reserve 305), every category in training, validation, state_eval and calibration; 360 atoms, none in two splits; 37,204 refused with reasons (T5 25,107, atoms in different splits 5,707, between-split near-duplicates 2,199, eval-set-1 tool names 1,878, replay conflicts 1,321, length 990, benchmark prompts 2). Every admitted task verifies tool selection at most. The Pivot pair and v4 are not converted. The paid teacher-native generation stays unauthorized",
+  "sources": "CANDIDATES under the maintainer's review, none approved (audit/tool_calling_source_review_v2.json). Priority: Agent-Ark/Toucan-1.5M @0df3cf37 (real MCP executions, Apache-2.0; tool-selection level) and the Pivot Conversational set @bfc7a4dd (per-step gold, CC-BY-4.0; 9,051 teacher-native first-turn tasks, audit/pivot_conversion_v1.json). Pivot Function-Calling @0ac34ec8 FAILS T3 (15 of its 78 rebuildable tasks repeat xLAM-60k / Glaive-v2 prompts). Deferred: Nemotron-SFT-Agentic-v4 (licence, generator-output terms, tool provenance). Out: Nemotron-Agentic-v1's tool_calling subset; ToolACE not recommended. External assistant turns are never targets",
+  "status": "code ready end to end (PACKED_ROUND.md section 5a). The candidate pool assembled DRY into scratch (audit/tool_pool_dry_run_v3.json): 83,764 of 128,338 tasks (training 74,762, validation 1,517, state_eval 2,312, calibration 4,814, reserve 359), every split file sha256-registered (content 811f4870...); 44,574 refused with reasons. The bounded generation plan over it (plans/tool_generation_plan_dry_run.json): 4,698 tasks expected, 8,547 at the bound. Generation unauthorized",
   "per_lineage_need": {
    "hybrid thinking (A1-6cat)": "training (493,418 supervised tokens), validation (32 tasks), calibration cells (4,200 + 1,800 scored positions), state evaluation (>= 12,000 scored positions)",
    "hybrid non-thinking (A2-6cat)": "the same splits in its own mode",
    "Thinking-2507 (C1-6cat)": "training (492,587) and validation (~12,624); calibration and state evaluation only if a Thinking-2507 packed search is authorized"
   },
-  "implementation_owed_before_generation": "done: run_episodes carries tools and tool messages (--env-factory), the replay backend and level-reporting verifier (aadistill.data.tool_calls, tool_episodes), admission, the pool with atomic isolation, decontamination and the length bound, the benchmark copies (tool_benchmarks.py), the session driver under each lineage's own kind. Owed: the Pivot converter (trajectories rebuilt so the teacher runs from step one), then each admitted source's decontamination run"
+  "implementation_owed_before_generation": "done: the bounded plan and round-based session, pool identity (load_pool), cross-split exact prompts and tool identities, fail-closed schema validation, verified reference caches (T2 benchmarks, T3 xLAM / Glaive), the Pivot converter, plan-based selection in admission / packs / inputs, the consumer chain regression. Owed: the maintainer's source admission, then the pool under data/ and the canonical plan over it, then a pilot"
  },
  "training": {
   "objective": "frozen, unchanged: CE weight 0.25, KD weight 1.0, KD temperature 1.0, KD and CE at the assistant target positions (kd_scope assistant), Top-200 + tail (loss.kd_support reference_topk_tail_v1, K=200), 3 epochs, batch size 2, micro-batch size 1, seeds 20260726 and 20260801; optimizer, learning rate and scheduler as registered for A1 (token_matched_design.json / the A1 training plan)",
@@ -179,14 +179,16 @@
    "the five existing base types re-selected at 1/6 each (data/six_category_selection.json: FIVE_TYPES_SELECTED, no shortfall; A1-6cat 5,163 tasks / 5,436,912 supervised tokens without tool calling, A2-6cat 42,606 / 5,430,311)",
    "tool-calling code chain: aadistill.data.tool_calls, run_battery tool tasks, tool_episodes, tool_admission, tool_pool, tool_session, packed_inputs, packed_packs, packed_training_plan bind, launcher kinds",
    "tool-calling source review v2 (audit/tool_calling_source_review_v2.json) and Toucan's dry pool",
-   "2026-11-03 review repairs: fragments and pre-packing accounting recorded (AGENTS.md P19, stage3_packing); tool_pool v2 (atoms, decontamination, the length bound in main); Toucan steps / errors / conflicts; verification levels; each lineage's tool-generation kind and L40S gate; packs with every validation document, the tool quota and the pre-packing share check (audit/tool_pool_dry_run_v2.json, audit/experiment_suite_baseline_20261103.json)"
+   "2026-11-03 review repairs: fragments and pre-packing accounting recorded (AGENTS.md P19, stage3_packing); tool_pool v2 (atoms, decontamination, the length bound in main); Toucan steps / errors / conflicts; verification levels; each lineage's tool-generation kind and L40S gate; packs with every validation document, the tool quota and the pre-packing share check (audit/tool_pool_dry_run_v2.json, audit/experiment_suite_baseline_20261103.json)",
+   "2026-11-03 second review repairs: bounded generation plan (tool_generation_plan.py; plans/tool_generation_plan_dry_run.json), pool content identity verified at every read, T4 exact prompts and tool identities, fail-closed JSON Schema validation, verified reference caches incl. T3, the Pivot converter (audit/pivot_conversion_v1.json), audit/tool_pool_dry_run_v3.json, the position reconciliation of a_search's closeout, the consumer chain regression"
   ],
   "pending": [
-   "the maintainer's ruling on the tool-calling candidates, then converters for each admitted source beyond Toucan (the Pivot pair: trajectories rebuilt so the teacher runs from step one) and tool_pool@v1 assembled under data/",
+   "the maintainer's source admission (Toucan, Pivot Conversational), then tool_pool@v1 under data/ and the canonical plan over it (plans/tool_generation_plan.json)",
+   "a pilot (about 1 h) measuring pass rates, turn lengths and throughput, replacing the plan's priors before the cap is final",
    "teacher-native tool generation (hybrid both modes; Thinking-2507): paid, unauthorized",
-   "calibration v2 and state_eval_hybrid@v2 built and frozen (packed_inputs.py build/freeze; they read the admitted tool items)",
+   "calibration v2 and state_eval_hybrid@v2 built and frozen (packed_inputs.py build)",
    "a GPU measurement of the packed path (first state evaluation / first DEPTH round)",
-   "the packs of A1-6cat, A2-6cat, C1-6cat (packed_packs.py; they wait for the tool turns)"
+   "the packs of A1-6cat, A2-6cat, C1-6cat (packed_packs.py)"
   ]
  },
  "budget": {
@@ -194,11 +196,12 @@
   "phases": {
    "1_pool_and_generation": {
     "usd": {
-     "lower": 2.2,
-     "expected": 4.4,
-     "upper": 6.6
+     "lower": 2.27,
+     "expected": 3.62,
+     "upper": 10.31
     },
-    "basis": "six_category_design.json: a ~1 h pilot ($1.1) then one L40S session for both hybrid modes and Thinking-2507 (2-3 h, $2.2-3.3), widened for the hybrid's calibration and state-evaluation tool episodes"
+    "proposed_hard_cap": 11.34,
+    "basis": "plans/tool_generation_plan_dry_run.json: the bounded plan's task counts (4,698 expected, 8,547 at the bound) x expected turns x the modes' tokens per turn x second candidates, decode at the supplement's measured throughput x an unmeasured tool-workload efficiency, first-prompt prefill, a model load per engine invocation, setup and teardown, $1.1067/h. Sessions: hybrid $1.37 / $2.38 / $7.85, Thinking-2507 $0.90 / $1.24 / $2.46. Replaces the unbounded $4.4 / $6.6, which priced a fraction of a pool the session would have generated whole (~238,790 first candidates)"
    },
    "2_packed_hybrid_full_search": {
     "usd": {
@@ -227,18 +230,16 @@
    }
   },
   "storage": "4rhubprswo $0.82/day (350 GB) holds the v2 Top-1; the packed search needs a volume of similar size in the GPU's datacenter",
-  "conclusion": "phases 1 and 2 together (~$37 expected, ~$49 upper, cap ~$53 with the search's hard cap) do not fit the $31.27 left: the Full Search Authorization needs a raised project cap"
+  "conclusion": "phases 1 and 2 together: $36.05 expected, $52.45 upper, caps $57.69 -- more than the $31.27 left: the Full Search Authorization needs a raised project cap"
  },
  "decisions_owed_to_the_maintainer": [
-  "tool-calling sources: complete the admission review of Toucan-1.5M and the Pivot pair (priority candidates); Nemotron-SFT-Agentic-v4 deferred until its licence, generator-output terms and upstream tool provenance are confirmed; Nemotron-Agentic-v1's tool_calling subset stays out (Glaive tool sets), its interactive_agent subset on hold; ToolACE not recommended",
-  "the tool pool's isolation costs: server-level splits leave 11-13 servers per evaluation split, dominated by no_tool; eval-set-1's tool NAMES are refused (1,856 tasks of the server offering 'factorial'); bare-name-only benchmark matches are counted, not refused -- confirm or change",
-  "validation coverage: C1-6cat's validation documents (D4A's validation tail) hold no fluid type and A1-6cat's none of interactive_adaptation (packed_packs.validation_coverage); validation loss is diagnostic, so the packs record the gap rather than move training documents into validation",
-  "tool category shares, the 6,144-token prompt bound, the non-thinking state-evaluation floor (12,000 scored positions)",
-  "a registered tool-calling evaluation (eval-set-2) for closed-loop tool-execution success",
-  "a raised project cap for the Full Search Authorization (pool generation + packed search)",
-  "whether a Thinking-2507 packed search is wanted (only for an initialization-matched C1-6cat vs A1-6cat contrast)",
-  "the lifecycle of volume 4rhubprswo and the v2 Top-1's single copy",
-  "the step-level loss weighting (per-step normalization makes a token's weight 1/N_step; reading_verified carries 1.13x (A1) to 1.28x (A2) its exposure share): keep (unchanged objective) or register a fixed-denominator normalization as a new objective"
+  "tool-calling source admission: Toucan-1.5M and Pivot Conversational (priority); Pivot Function-Calling fails T3; Nemotron-SFT-Agentic-v4 deferred; the category shares (proposed, used unchanged by the plan), the 6,144-token prompt bound, the non-thinking state-evaluation floor",
+  "SHORTFALLS the plan expects: schema_arguments in non-thinking mode (training and state evaluation: Pivot is its only source); 'ask for the missing value' has no verified source in any mode",
+  "the isolation costs: per-atom splits leave 17-20 atoms per evaluation split (mostly no_tool); eval-set-1 tool names refused (1,878 tasks); tool identities shared by several MCP servers kept to one split (6,825 refused); T3 signature matches counted, not refused",
+  "validation coverage: C1-6cat's validation has no fluid type, A1-6cat's no interactive_adaptation (recorded; validation loss is diagnostic)",
+  "a registered tool-calling evaluation (eval-set-2) for closed-loop success",
+  "a raised project cap for the Full Search Authorization (bounded generation $3.62 expected / $10.31 upper, cap $11.34; packed search $32.43 / $42.14, cap $46.35; $31.27 left)",
+  "the lifecycle of volume 4rhubprswo (the v2 Top-1's only copy stays protected until a verified copy off the volume exists)"
  ],
  "gpu_execution_request": {
   "operation": "research_a_packed_hybrid_full_search (packed_full_search.py), after calibration v2 and state_eval_hybrid@v2 exist; its level-0 first state evaluation and first DEPTH round are the GPU measurement of the packed path (throughput, scored rows/s, peak VRAM, repeatability), not a separate session",

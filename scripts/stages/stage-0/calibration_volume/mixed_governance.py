@@ -326,6 +326,17 @@ def netted_posted(v: dict, rows: list[dict], records: list[dict], now: datetime)
     return {"netted_gb_h": gbh, "netted_usd": round(usd, 6), "days": days}
 
 
+def closeout_confirms_gone(outcome: dict | None, pod: str) -> bool:
+    """Whether a run's closeout confirms ``pod`` gone when its launcher could not: a teardown finished after the
+    launcher's gate refused writes ``provider_confirms_gone`` into closeout/outcome.json with the provider
+    reconciliation that proves it (``ok`` and the pod no longer listed); runtime/session.json keeps what the
+    launcher wrote and is never edited."""
+    if not outcome or outcome.get("provider_confirms_gone") is not True:
+        return False
+    rec = outcome.get("provider_reconciliation_after") or {}
+    return rec.get("ok") is True and not any(str(x.get("id")) == pod for x in rec.get("pods") or [])
+
+
 def position(repo_root: Path = REPO, *, snapshot: dict | None = None, now: datetime | None = None,
              expect_pods: tuple[str, ...] = ()) -> dict:
     """The project's committed spend as the PROVIDER bills it now (module
@@ -356,7 +367,7 @@ def position(repo_root: Path = REPO, *, snapshot: dict | None = None, now: datet
         row = {"run": str(run.relative_to(root)), "pod_id": pod, "usd": usd, "ended_utc": ended.isoformat()}
         if pod in expect_pods:
             continue
-        if not sess.get("provider_confirms_gone"):
+        if not (sess.get("provider_confirms_gone") or closeout_confirms_gone(out, pod)):
             raise AuthorizationError(f"{row['run']}: pod {pod} is not confirmed gone and not posted; reconcile first")
         if usd is None:
             raise AuthorizationError(f"{row['run']}: pod {pod} is unposted and its session records no cost")

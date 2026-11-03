@@ -72,7 +72,8 @@ STUDY = SE.Study(
                    "freeze_state_eval", "a1_units", "training_plan",
                    #: the packed round (packed_round_design.json)
                    "packed_full_search", "packed_inputs", "packed_packs", "packed_training_plan", "packing_audit",
-                   "tool_episodes", "tool_admission", "tool_pool", "tool_session", "six_category_selection")) + (
+                   "tool_episodes", "tool_admission", "tool_pool", "tool_session", "six_category_selection",
+                   "tool_generation_plan", "tool_benchmarks", "tool_sources_toucan", "tool_sources_pivot")) + (
         "scripts/shared/study_engineering.py", "scripts/shared/project_position.py", "scripts/shared/eval_sets.py",
         "scripts/shared/pod/teacher_cache.py", "scripts/stages/stage-0/calibration_volume/run_battery.py",
         "scripts/stages/stage-0/calibration_volume/score_battery.py",
@@ -108,10 +109,14 @@ KIND_RECORDS = {
     "search": ("configs/stages/stage-2/teacher_modes/hybrid_d4_profiles.json",
                "logs/stages/stage-2/teacher_modes/audit/state_eval_hybrid_freeze.json"),
     "train_a1": ("logs/stages/stage-2/teacher_modes/plans/training_plan_a1.json",),
+    #: the protocol, the pool manifest (which registers every split file's sha256, re-verified on the pod by
+    #: tool_pool.load_pool) and the frozen bounded plan (which names the pool's content)
     "tool_generation": ("configs/stages/stage-2/teacher_modes/tool_generation_protocol.json",
-                        "data/stages/stage-2/teacher_modes/tool_pool_v1/pool.json"),
+                        "data/stages/stage-2/teacher_modes/tool_pool_v1/pool.json",
+                        "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json"),
     "tool_generation_t2507": ("configs/stages/stage-2/teacher_modes/tool_generation_protocol.json",
-                              "data/stages/stage-2/teacher_modes/tool_pool_v1/pool.json"),
+                              "data/stages/stage-2/teacher_modes/tool_pool_v1/pool.json",
+                              "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json"),
     "packed_search": ("configs/stages/stage-2/teacher_modes/packed_round_design.json",
                       "configs/stages/stage-2/teacher_modes/hybrid_profiles_v2.json",
                       "configs/stages/stage-2/teacher_modes/full_search_types_v2.json",

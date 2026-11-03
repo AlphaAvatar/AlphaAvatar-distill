@@ -1,26 +1,35 @@
 #!/usr/bin/env python3
-"""On-pod driver of the teacher-native tool-calling generation (Research A packed round), one lineage per session.
+"""On-pod driver of the BOUNDED teacher-native tool-calling generation (Research A packed round), one lineage per session.
 
     cd /workspace/aad && HF_HUB_OFFLINE=1 PYTHONPATH=src:scripts:scripts/stages/stage-1:scripts/stages/stage-0/calibration_volume \\
         /opt/train/bin/python scripts/stages/stage-2/teacher_modes/tool_session.py --authorization <a.json> \\
         --lineage hybrid --durable-root <volume>/teacher_modes --status <file>
 
-`tool_generation_protocol.json` names the lineage's teacher, modes, pool splits and execution terms. Per mode, the
-lineage's pool tasks (its splits; the training split in the pool's frozen order) go to `run_battery` in generate
-mode, grouped by their system text, with the tool environment (``--env-factory``): each turn the official template
-renders the conversation and the tools, the replay backend answers the parsed calls, an off-script call ends the
-episode. `generation_driver.run_group` seals every finished episode into identity-bound shards as it ends, so a
-replacement session resumes without regenerating. Pass 1 runs only for tasks whose pass-0 episode fails
-`tool_episodes.verify`. Nothing here admits data: the dev box does (`tool_admission.py`) from the sealed shards.
+`tool_generation_protocol.json` names the lineage's teacher, modes, pool and execution terms; the frozen generation
+plan (`tool_generation_plan.py`, bound by the artifact with the pool manifest) names every cell -- split, category,
+unit, target and bound. Before anything runs, the plan must name this pool's content and this protocol, and
+`tool_pool.load_pool` re-verifies every split file the lineage reads: a missing file, a changed byte or a foreign
+source refuses the session.
+
+Per mode, the cells are generated in ROUNDS (`tool_generation_plan.round_tasks`): each round takes every unfinished
+cell's next tasks in its frozen order, runs them through `run_battery` in generate mode with the tool environment
+(``--env-factory``; each task renders its own system text), then the second candidates of the round's refused
+tasks. Every finished episode is verified here (`tool_episodes.verify`) and counted in its cell's own unit --
+supervised tokens of its documents, scored positions of its items, or tasks -- the units the dev box's admission
+and the packs count again. A cell stops at its target; it never attempts past its bound or after the last round,
+and a cell short at either is recorded as SHORTFALL. `generation_driver.run_group` seals every finished episode into
+identity-bound shards, and a replacement session recomputes every round from them, so nothing finished is
+regenerated and the stopping state comes from the volume. Nothing here admits data: the dev box does
+(`tool_admission.py`) from the sealed shards.
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 import time
 import traceback
-from collections import defaultdict
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[4]
@@ -29,51 +38,49 @@ for _p in ("src", "scripts", "scripts/stages/stage-1", "scripts/stages/stage-0/c
         sys.path.insert(0, str(REPO / _p))
 
 from stages.teacher_modes import tool_episodes as TE  # noqa: E402
+from stages.teacher_modes import tool_generation_plan as TGP  # noqa: E402
 
 PROTOCOL = REPO / "configs/stages/stage-2/teacher_modes/tool_generation_protocol.json"
-SCHEMA = "aadistill.stage2.teacher_modes.tool_session/v1"
+SCHEMA = "aadistill.stage2.teacher_modes.tool_session/v2"
+
+
+class PlanError(RuntimeError):
+    """A plan that does not belong to this pool or protocol."""
 
 
 def protocol() -> dict:
     return json.loads(PROTOCOL.read_text())
 
 
-def lineage_tasks(proto: dict, lineage: str, pool_dir: Path) -> list[dict]:
-    """The lineage's tasks: the training split in the pool's frozen order, then the other splits by task id."""
-    pool = json.loads((pool_dir / "pool.json").read_text())
-    order = {t: i for i, t in enumerate(pool["training_order"])}
-    out = []
-    for split in proto["lineages"][lineage]["splits"]:
-        path = pool_dir / f"{split}.tasks.jsonl"
-        if not path.is_file():
-            continue
-        rows = TE.read_tasks(path)
-        rows.sort(key=lambda t: (order.get(t["task_id"], len(order)), t["task_id"]))
-        out += rows
-    bad = {t["task_id"]: TE.task_problems(t) for t in out if TE.task_problems(t)}
-    if bad:
-        raise TE.ToolTaskError(f"{len(bad)} pool tasks the protocol cannot run, e.g. {next(iter(bad.items()))}")
-    return out
+def checked_plan(proto: dict, lineage: str):
+    """``(plan, pool manifest, tasks by id)``: the frozen plan, verified to name this pool's content and this
+    protocol, and the lineage's split files re-verified by `tool_pool.load_pool`."""
+    from stages.teacher_modes import tool_pool as TP
+    plan = json.loads((REPO / proto["pool"]["plan"]).read_text())
+    pool_dir = REPO / proto["pool"]["dir"]
+    man, splits = TP.load_pool(pool_dir, proto["lineages"][lineage]["splits"])
+    if plan.get("schema") != TGP.SCHEMA:
+        raise PlanError("the plan is not a tool generation plan")
+    if plan["pool"]["content_sha256"] != man["content_sha256"]:
+        raise PlanError("the plan was built from another pool")
+    if plan["protocol_sha256"] != hashlib.sha256(PROTOCOL.read_bytes()).hexdigest():
+        raise PlanError("the plan was built under another protocol")
+    if lineage not in plan["lineages"]:
+        raise PlanError(f"the plan holds no {lineage} lineage")
+    return plan, man, {t["task_id"]: t for rows in splits.values() for t in rows}
 
 
-def write_inputs(tasks: list[dict], out: Path, label: str, default_system: str) -> list[dict]:
-    """One run_battery input file per system text, deterministic; an existing file must be identical."""
-    import hashlib
-    by_system = defaultdict(list)
-    for t in tasks:
-        by_system[t.get("system") or default_system].append(t)
+def write_round(tasks: list[dict], out: Path, label: str, default_system: str) -> dict:
+    """The round's run_battery input (each task keeps its own ``system``); an existing file must be identical."""
     d = out / "inputs"
     d.mkdir(parents=True, exist_ok=True)
-    files = []
-    for k, (system, rows) in enumerate(sorted(by_system.items())):
-        path = d / f"{label}_g{k}.jsonl"
-        body = "".join(json.dumps(r, sort_keys=True, ensure_ascii=False) + "\n" for r in rows)
-        if path.is_file() and path.read_text() != body:
-            raise RuntimeError(f"{path.name} on the volume is not this session's input")
-        path.write_text(body)
-        files.append({"file": path.name, "system": system, "tasks": len(rows),
-                      "sha256": hashlib.sha256(body.encode()).hexdigest()})
-    return files
+    path = d / f"{label}.jsonl"
+    body = "".join(json.dumps(r, sort_keys=True, ensure_ascii=False) + "\n" for r in tasks)
+    if path.is_file() and path.read_text() != body:
+        raise RuntimeError(f"{path.name} on the volume is not this session's input")
+    path.write_text(body)
+    return {"file": path.name, "system": default_system, "tasks": len(tasks),
+            "sha256": hashlib.sha256(body.encode()).hexdigest()}
 
 
 def context(proto: dict, lineage: str, identity: str) -> dict:
@@ -91,38 +98,78 @@ def mode_args(proto: dict, lineage: str, mode: str) -> tuple[str, ...]:
             "--env-factory", proto["execution"]["env_factory"])
 
 
-def retry_ids(tasks: dict[str, dict], records: dict[str, dict], *, thinking: bool) -> list[str]:
-    """Task ids whose first episode fails verification (the second candidate's only reason to run)."""
-    return sorted(tid for tid, rec in records.items()
-                  if not TE.verify(tasks[tid], rec.get("turns") or [], thinking=thinking).admitted)
+def units(task: dict, turns: list, unit: str, *, mode: str, thinking: bool, stop_ids) -> float | None:
+    """The cell units one episode contributes, or None when it is refused (verification or the item protocol)."""
+    if not TE.verify(task, turns or [], thinking=thinking).admitted:
+        return None
+    if unit == "tasks":
+        return 1.0
+    if unit == "supervised_tokens":
+        return float(sum(len(d.output_ids) for d in TE.documents(task, turns, mode=mode, stop_ids=stop_ids)))
+    if unit == "scored_positions":
+        its = TE.items(task, turns, mode=mode, thinking=thinking)
+        return float(sum(len(it["tags"]["assistant"]) for it in its)) if its else None
+    raise PlanError(f"unknown unit {unit!r}")
 
 
-def generate(proto: dict, lineage: str, tasks: list[dict], out: Path, identity: str, run, mark) -> dict:
+def generate_mode(proto: dict, plan: dict, lineage: str, mode: str, by_id: dict, man: dict, out: Path,
+                  identity: str, run, mark) -> dict:
+    """Every cell of one mode, round by round, to its target or its bound; returns the cells' final states."""
     from stages.reasoning_data import generation_driver as GD
-    c = context(proto, lineage, identity)
-    by_id = {t["task_id"]: t for t in tasks}
-    got = {"groups": [], "complete": True}
-    for mode, spec in proto["lineages"][lineage]["modes"].items():
-        thinking = bool(spec["template_kwargs"].get("enable_thinking", True))
-        files = write_inputs(tasks, out, f"tool_{mode}", proto["execution"]["system_message_default"])
-        for f in files:
-            ids = None
-            for k in range(int(proto["execution"]["candidates"])):
-                if k and not ids:
-                    break
-                label = f"tool_{mode}_pass{k}_{Path(f['file']).stem}"
-                g = GD.run_group(c, out, out / "inputs", f, k, ids, run, mark, label=label,
-                                 extra_args=mode_args(proto, lineage, mode))
-                recs = g.pop("records")
-                got["groups"].append(g)
-                if not g["complete"]:
-                    got["complete"] = False
-                    mark(f"{GD.UNIT_FAILED}:{label}")
-                    break
-                mark(f"{GD.UNIT_OK}:{label}")
-                if k == 0:
-                    ids = retry_ids(by_id, recs, thinking=thinking)
-    return got
+    bp, ex = proto["bounded_plan"], proto["execution"]
+    cand, stop_ids = int(ex["candidates"]), [int(x) for x in ex["stop_ids"]]
+    thinking = bool(proto["lineages"][lineage]["modes"][mode]["template_kwargs"].get("enable_thinking", True))
+    cells = plan["lineages"][lineage]["modes"][mode]["cells"]
+    orders = [TGP.cell_order(man["orders"].get(c["split"], []), by_id, c["category"]) for c in cells]
+    state = [{"attempted": 0, "units": 0.0, "admitted": 0} for _ in cells]
+    c, groups = context(proto, lineage, identity), []
+    for r in range(1, int(bp["rounds"]["max_rounds"]) + 1):
+        picks = [TGP.round_tasks(cell, orders[i], state[i], r, bp=bp, mode=mode, candidates=cand)
+                 for i, cell in enumerate(cells)]
+        ids = [t for p in picks for t in p]
+        if not ids:
+            break
+        if len(set(ids)) != len(ids):
+            raise PlanError(f"round {r}: a task picked by two cells")
+        label = f"tool_{mode}_r{r}"
+        f = write_round([by_id[t] for t in ids], out, label, ex["system_message_default"])
+        admitted: dict[str, float] = {}
+        retry = None
+        for k in range(cand):
+            if k and not retry:
+                break
+            g = GD.run_group(c, out, out / "inputs", f, k, retry, run, mark, label=f"{label}_pass{k}",
+                             extra_args=mode_args(proto, lineage, mode))
+            recs = g.pop("records")
+            groups.append(g)
+            if not g["complete"]:
+                mark(f"{GD.UNIT_FAILED}:{label}_pass{k}")
+                return {"complete": False, "groups": groups, "cells": _report(cells, state)}
+            mark(f"{GD.UNIT_OK}:{label}_pass{k}")
+            unit_of = {t: cells[i]["unit"] for i, p in enumerate(picks) for t in p}
+            for tid, rec in recs.items():
+                if tid in admitted:
+                    continue
+                u = units(by_id[tid], rec.get("turns") or [], unit_of[tid], mode=mode, thinking=thinking,
+                          stop_ids=stop_ids)
+                if u is not None:
+                    admitted[tid] = u
+            retry = sorted(t for t in ids if t not in admitted)
+        for i, p in enumerate(picks):
+            state[i]["attempted"] += len(p)
+            state[i]["units"] += sum(admitted.get(t, 0.0) for t in p)
+            state[i]["admitted"] += sum(t in admitted for t in p)
+        mark(f"ROUND_DONE:{label}")
+    return {"complete": True, "groups": groups, "cells": _report(cells, state)}
+
+
+def _report(cells: list[dict], state: list[dict]) -> list[dict]:
+    out = []
+    for cell, s in zip(cells, state):
+        done = s["units"] >= cell["target"] and s["admitted"] >= cell.get("min_tasks", 0)
+        out.append({k: cell[k] for k in ("split", "category", "unit", "target", "bound")} |
+                   {**s, "status": "REACHED" if done else "SHORTFALL"})
+    return out
 
 
 def main(argv=None, *, run=None) -> int:
@@ -151,12 +198,17 @@ def main(argv=None, *, run=None) -> int:
         bound = TM.require_on_pod(Path(a.authorization), kind, REPO)
         record.update(kind=kind, authorization=bound.get("authorization_id"))
         proto = protocol()
-        tasks = lineage_tasks(proto, a.lineage, REPO / proto["pool"]["dir"])
-        record["tasks"] = len(tasks)
+        plan, man, by_id = checked_plan(proto, a.lineage)
+        record.update(plan_pool_content_sha256=plan["pool"]["content_sha256"], tasks_readable=len(by_id))
         mark("CONTRACT_OK")
-        res = generate(proto, a.lineage, tasks, out, bound["identity"], run or GD.run_battery, mark)
-        record.update(groups=res["groups"], complete=res["complete"])
-        ok = res["complete"]
+        record["modes"] = {}
+        for mode in sorted(proto["lineages"][a.lineage]["modes"]):
+            res = generate_mode(proto, plan, a.lineage, mode, by_id, man, out, bound["identity"],
+                                run or GD.run_battery, mark)
+            record["modes"][mode] = res
+            if not res["complete"]:
+                ok = False
+                break
     except BaseException as exc:  # noqa: BLE001
         ok = False
         record["error"] = {"error": repr(exc)[:2000], "traceback": traceback.format_exc()[-6000:]}

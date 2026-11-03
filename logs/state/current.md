@@ -9,7 +9,7 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**RESEARCH A PACKED ROUND: PREPARATION_BLOCKED (2026-11-03; maintainer brief "Stage-1 Forward / Stage-3 Training Packing 重构及 Research A 前置准备"). Code, identities, tests, $0 audits, the new full-search chain and the training plans are done; nothing searched, trained, generated, downloaded or evaluated; no pod; no cap raised.**
+**RESEARCH A PACKED ROUND: PREPARATION_BLOCKED (2026-11-03; maintainer brief "Stage-1 Forward / Stage-3 Training Packing 重构及 Research A 前置准备"). Code, identities, tests, $0 audits, the new full-search chain, the training plans and the bounded tool-generation plan are done; nothing searched, trained, generated or evaluated (only candidate-source and decontamination-reference files downloaded, gitignored); no pod; no cap raised.**
 The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stages/stage-2/teacher_modes/PACKED_ROUND.md)
 (design `configs/stages/stage-2/teacher_modes/packed_round_design.json`). Decision record: `logs/budget/decisions.md`
 2026-11-03 (sequential packing). AGENTS.md P19 states the rule by stage.
@@ -23,26 +23,25 @@ The owner: [`docs/stages/stage-2/teacher_modes/PACKED_ROUND.md`](../../docs/stag
 - **Measured at $0** (`audit/packing_audit.json`): Stage-1 sets re-score 10–13% of scored positions in fragments; A1's
   documents add 18.7% repeated supervised tokens (1,288 sequences vs 1,102), A2's 4.3%; on this data
   `truncate=False` gives the same sequences.
-- **The maintainer's independent review of `649d25dd` (2026-11-03):** the packing core stands. Fragments are ACCEPTED
-  as specified, and formal data volumes and shares are counted BEFORE packing (both in AGENTS.md P19). The $0 repairs
-  are done:
-  - the tool pool splits per atom (MCP server or tool identity), decontaminates against eval-set-1, the five pinned
-    benchmarks and earlier splits, and applies the 6,144-token bound in its entry point;
-  - Toucan's categories are read from steps and real errors, and replay conflicts are refused;
-  - verification is reported by level, so a target-tools check is tool selection, never task success;
-  - each lineage generates under its own kind;
-  - the packs keep every validation document, cut the tool type to its target and check the shares before packing.
-  - Toucan's dry pool: 82,083 of 119,287 tasks (`audit/tool_pool_dry_run_v2.json`).
-  - The four experiment-suite failures are pre-existing (`audit/experiment_suite_baseline_20261103.json`).
-- **Blocked on tool calling:** the code chain is ready end to end. The sources are candidates under review, none
-  approved: Toucan-1.5M and the Pivot pair have priority and still owe their admission review;
-  Nemotron-SFT-Agentic-v4 is deferred. The generation is a paid session to authorize. Calibration v2,
-  `state_eval_hybrid@v2` and so the new search wait for them.
+- **The maintainer's reviews of `649d25dd` and `77be6e13` (2026-11-03).** The packing core stands: fragments are
+  accepted, formal data is counted before packing, and loss normalization is kept. Both rounds of $0 repairs are done.
+  - **Bounded generation.** Tool generation is bounded by a frozen plan (`tool_generation_plan.py`): per-category
+    targets in the consumer's unit, frozen orders, rounds, a hard bound. Priced over the dry pool at
+    $2.27 / $3.62 / $10.31, cap $11.34; 4,698 tasks expected, 8,547 at the bound.
+  - **Pool identity.** Every split file is sha256-registered and re-verified at every read.
+  - **Isolation.** Exact prompts and tool identities are isolated across splits.
+  - **Fail closed.** Schema validation and the reference caches fail closed. T3 now checks xLAM-60k and Glaive-v2.
+  - **Pivot.** Pivot Conversational is rebuilt (9,051 tasks, step gold); Pivot Function-Calling fails T3.
+  - **Evidence.** The dry pool: 83,764 tasks (`audit/tool_pool_dry_run_v3.json`). The `a_search` position
+    reconciliation is repaired, and the four experiment-suite failures are closed.
+- **Blocked on tool calling.** The code chain is ready end to end. The sources are candidates under review, none
+  approved: Toucan-1.5M and Pivot Conversational are the priority. The generation is a paid session to authorize.
+  Calibration v2, `state_eval_hybrid@v2` and therefore the new search wait for it.
 - **Next: the maintainer's ruling** on:
-  - the tool-calling candidates, shares and isolation costs, and the validation-coverage gaps (C1-6cat's validation
-    has no fluid type);
-  - a raised cap (the generation + search phase is ~$37 expected against $31.27 left);
-  - a Thinking-2507 packed search (not needed for C1-6cat as registered);
+  - source admission;
+  - the expected SHORTFALLS: non-thinking `schema_arguments`, and "ask for the missing value";
+  - the isolation costs and the validation-coverage gaps;
+  - a raised cap: generation plus search is $36.05 expected against $31.27 left;
   - volume `4rhubprswo`.
 
   0 pods; the two volumes are retained.

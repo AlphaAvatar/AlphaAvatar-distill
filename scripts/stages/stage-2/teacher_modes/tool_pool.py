@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""`tool_pool@v1`'s assembly: atomic isolation, decontamination, the length bound and the frozen order. $0 code.
+"""`tool_pool@v1`'s assembly: atomic isolation, decontamination, the length bound, frozen orders and its identity. $0.
 
     PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_pool \\
         --source toucan=<converted tasks.jsonl> [--source <name>=<converted tasks.jsonl> ...] \\
@@ -7,34 +7,41 @@
 
 Every source is a CANDIDATE until the maintainer admits it (audit/tool_calling_source_review_v2.json). A source
 enters as CONVERTED task records (`tool_episodes.task_problems` must pass: upstream assistant turns are never in the
-context, the backend is a replay table or none); each source's converter is its own module, registered in
-`CONVERTERS` once it exists.
+context, the backend is a replay table or none); each source's converter is its own module (`CONVERTERS`).
 
-* atoms -- a task's atomic tool identities: ``server:<slug>`` for every server its converter declares
-  (``servers``: an MCP server owns every tool named ``<slug>-<tool>``), and ``tool:<identity>`` for every offered
-  tool no declared server owns, its identity the sha256 of its bare name and canonical parameter schema;
+* atoms -- a task's atomic tool identities: its ``environment`` when the converter declares one (it owns every
+  offered tool: the Pivot sets' connected tool components), else ``server:<slug>`` for every declared server (an
+  MCP server owns every tool named ``<slug>-<tool>``) and ``tool:<identity>`` for every offered tool no declared
+  server owns, its identity the sha256 of its bare name and canonical parameter schema;
 * split -- per ATOM, never per task: ``int(sha256('tool_pool@v1|' + atom), 16) mod 100``: 0-2 validation,
   3-6 state_eval, 7-10 calibration, 11-12 reserve, 13-99 training. A task enters the split all its atoms share;
-  a task whose atoms fall in different splits is refused, so no server or tool is ever in two splits (T4). A
-  connected grouping is not an option: Toucan's multi-server tasks chain 99.8% of its tasks into one component;
+  a task whose atoms fall in different splits is refused (T4). A connected grouping of Toucan is not an option:
+  its multi-server tasks chain 99.8% of it into one component;
 * family -- the task's environment, sha256 of its sorted atoms (the T5 key and the documents' ``family``);
-* T1 (eval-set-1) -- a task sharing a prompt key with a held-out item, a 13-gram near-duplicate of one (containment
-  >= 0.5 against each held-out unit's index without its template n-grams, isolation_rules.json's protocol), or
-  offering a tool whose bare name or identity is one of eval-set-1's tool items' is refused;
-* T2 (public benchmarks, `tool_benchmarks`) -- the same prompt-key and 13-gram screens against BFCL v3, When2Call,
-  API-Bank, tau-bench and ToolSandbox, and a tool IDENTITY match; a bare-name-only match with a benchmark tool is
-  counted, not refused (names such as ``search`` recur across unrelated APIs);
-* T4 (between splits) -- a task that is a 13-gram near-duplicate of a task of a split earlier in
-  ``state_eval, calibration, validation, reserve, training`` is refused, so training never holds a reworded copy
-  of an evaluation, calibration or state-evaluation task;
+* T1 (eval-set-1), T2 (public benchmarks) and T3 (the excluded lineage sources xLAM-60k and Glaive-v2), all pinned
+  and verified (`tool_benchmarks`) -- a task sharing a prompt key with a reference item, a 13-gram near-duplicate of
+  one (containment >= 0.5 against the reference's index without its template n-grams, isolation_rules.json's
+  protocol), or offering a tool with a reference tool's identity (bare name + schema) is refused. T1 also refuses a
+  held-out tool's bare NAME. Signature matches (bare name + parameter names; xLAM's parameters are not a JSON
+  Schema) and other bare-name matches are counted, not refused: on Toucan they were generic APIs offered by real
+  MCP servers, not rows derived from the reference (``Reference.add(refuse_signatures=True)`` refuses them);
+* T4 (between splits) -- walking ``state_eval, calibration, validation, reserve, training``, a task is refused when
+  an earlier split's admitted task has its exact prompt key (13-gram screens drop template n-grams, so a prompt
+  repeated across servers would pass them), offers one of its tool identities, or is its 13-gram near-duplicate;
 * T5 -- an exact or normalized-query duplicate (same prompt key and family) collapses to its first task in
   (source, task id) order;
+* schema -- a task offering a tool whose parameter schema uses a keyword the validator does not check
+  (`aadistill.data.tool_calls.unchecked_keywords`) is refused: its calls could never pass schema validity;
 * replay -- a task whose converter recorded a call with conflicting responses (``backend.conflicts``) is refused;
 * length -- a task whose first rendered prompt exceeds ``PROMPT_BOUND`` tokens under ANY lineage and mode of
   tool_generation_protocol.json (each teacher's own tokenizer and official template, the tools rendered by it, the
-  system text the session uses) is refused for every teacher (`length_checkers`);
-* order -- the training split's canonical order is a seeded shuffle (``ORDER_SEED``) of task ids, frozen with its
-  sha256 before any generation; every teacher walks the same order.
+  system text the session uses) is refused for every teacher (`length_checkers`); an admitted task records the
+  longest of those lengths (``first_prompt_tokens``, the generation plan's prefill term);
+* orders -- every split's canonical order is a seeded shuffle (``ORDER_SEED``) of its task ids, frozen with its
+  sha256 before any generation; every teacher walks the same order (``training_order`` is the training split's);
+* identity -- pool.json registers every split file's sha256, task count and sources, every converted input's
+  sha256, and ``content_sha256`` over them; `load_pool` re-verifies all of it before anything reads a task and
+  refuses a missing file, a changed byte, a task in the wrong file or an unregistered source revision.
 
 Every exclusion is listed with its reason and counted by reason, source, category and split; nothing is silently
 dropped. The census registers every admitted task's verification levels (`tool_episodes.verification_levels`).
@@ -42,6 +49,7 @@ dropped. The census registers every admitted task's verification levels (`tool_e
 from __future__ import annotations
 
 import argparse
+import gc
 import hashlib
 import json
 import sys
@@ -70,15 +78,29 @@ PROTOCOL = REPO / "configs/stages/stage-2/teacher_modes/tool_generation_protocol
 
 
 #: source id -> converter(path) -> iterable of task records, each written and checked against its source's real rows:
-#: Toucan's SFT config (tool_sources_toucan.py); the Pivot pair and Nemotron-SFT-Agentic-v4 are not converted yet
-#: (audit/tool_calling_source_review_v2.json). Every source remains a CANDIDATE until the maintainer admits it.
+#: Toucan's SFT config (tool_sources_toucan.py) and the Pivot pair (tool_sources_pivot.py); Nemotron-SFT-Agentic-v4
+#: is deferred (audit/tool_calling_source_review_v2.json). Every source remains a CANDIDATE until the maintainer
+#: admits it.
 def _toucan(path: Path) -> Iterable[dict]:
     from stages.teacher_modes import tool_sources_toucan
     return tool_sources_toucan.convert(path)
 
 
-CONVERTERS: dict[str, Callable[[Path], Iterable[dict]]] = {"toucan_sft": _toucan}
-SCHEMA = "aadistill.stage2.teacher_modes.tool_pool/v2"
+def _pivot(which: str) -> Callable[[Path], Iterable[dict]]:
+    def convert(path: Path) -> Iterable[dict]:
+        from stages.teacher_modes import tool_sources_pivot
+        return tool_sources_pivot.convert(path, which)[0]
+    return convert
+
+
+CONVERTERS: dict[str, Callable[[Path], Iterable[dict]]] = {
+    "toucan_sft": _toucan, "pivot_function_calling": _pivot("function_calling"),
+    "pivot_conversational": _pivot("conversational")}
+
+
+class PoolIdentityError(RuntimeError):
+    """A pool whose files are missing, changed, misplaced or from an unregistered source."""
+SCHEMA = "aadistill.stage2.teacher_modes.tool_pool/v3"
 
 
 def canonical(obj) -> str:
@@ -110,8 +132,29 @@ def tool_identities(task: Mapping) -> list[tuple[str, str]]:
     return out
 
 
+def param_names(parameters) -> tuple[str, ...]:
+    """A tool's parameter names: a JSON Schema's properties, or xLAM's flat ``{name: {type, description}}`` map."""
+    if not isinstance(parameters, Mapping):
+        return ()
+    if isinstance(parameters.get("properties"), Mapping):
+        return tuple(sorted(parameters["properties"]))
+    if parameters.get("type") == "object" or not parameters:
+        return ()
+    #: a flat map: every value a parameter's description (xLAM's tools may have a parameter named "type")
+    if all(isinstance(v, Mapping) for v in parameters.values()):
+        return tuple(sorted(parameters))
+    return ()
+
+
+def tool_signature(bare: str, parameters) -> str:
+    return f"{bare}({','.join(param_names(parameters))})"
+
+
 def atoms_of(task: Mapping) -> list[str]:
-    """The task's atomic identities: its declared servers, and every offered tool no declared server owns."""
+    """The task's atomic identities: its declared environment; else its declared servers and every offered tool no
+    declared server owns."""
+    if task.get("environment"):
+        return [f"environment:{task['environment']}"]
     servers = sorted(set(task.get("servers") or []))
     atoms = {f"server:{s}" for s in servers}
     for t in task.get("tools") or []:
@@ -153,13 +196,15 @@ def user_text(task: Mapping) -> str:
 
 
 class Reference:
-    """What a pool is isolated from: per named set, its prompt keys, a 13-gram index, tool identities and names."""
+    """What a pool is isolated from: per named set, its rule label (T1 / T2 / T3), prompt keys, a 13-gram index,
+    tool identities, signatures and names."""
 
     def __init__(self):
         self.sets: dict[str, dict] = {}
 
-    def add(self, name: str, *, prompts: Iterable[str] = (), prompt_units: Mapping[str, Sequence[str]] | None = None,
-            tools: Iterable[tuple[str, object]] = (), refuse_tool_names: bool = False) -> Reference:
+    def add(self, name: str, *, label: str, prompts: Iterable[str] = (),
+            prompt_units: Mapping[str, Sequence[str]] | None = None, tools: Iterable[tuple[str, object]] = (),
+            refuse_tool_names: bool = False, refuse_signatures: bool = False) -> Reference:
         from aadistill.evaluation.isolation import ngram_index
         from shared.eval_sets import prompt_key as pk
         units = dict(prompt_units or {})
@@ -170,15 +215,17 @@ class Reference:
         for texts in units.values():
             index |= ngram_index([t for t in texts if t], NGRAM, max_document_frequency=MAX_DF)
         tools = list(tools)
-        self.sets[name] = {"keys": keys - {None, ""}, "index": index,
+        self.sets[name] = {"label": label, "keys": keys - {None, ""}, "index": index,
                            "tool_ids": {tool_identity(n, p) for n, p in tools}, "tool_names": {n for n, _ in tools},
-                           "refuse_tool_names": refuse_tool_names, "prompts": sum(map(len, units.values())),
-                           "tools": len(tools)}
+                           "signatures": {tool_signature(n, p) for n, p in tools},
+                           "refuse_tool_names": refuse_tool_names, "refuse_signatures": refuse_signatures,
+                           "prompts": sum(map(len, units.values())), "tools": len(tools)}
         return self
 
     def summary(self) -> dict:
-        return {n: {"prompts": s["prompts"], "prompt_keys": len(s["keys"]), "ngrams": len(s["index"]),
-                    "tools": s["tools"], "tool_names_refused": s["refuse_tool_names"]} for n, s in self.sets.items()}
+        return {n: {"label": s["label"], "prompts": s["prompts"], "prompt_keys": len(s["keys"]),
+                    "ngrams": len(s["index"]), "tools": s["tools"], "tool_names_refused": s["refuse_tool_names"],
+                    "signatures_refused": s["refuse_signatures"]} for n, s in self.sets.items()}
 
 
 def containment(grams: set, index: set) -> float:
@@ -189,12 +236,36 @@ def containment(grams: set, index: set) -> float:
 def reason_class(reason: str) -> str:
     """An exclusion reason without its per-task detail (the census key)."""
     head = reason.split(":")[0]
-    return reason if head in ("T1/T2", "T4") else head
+    return reason if head in ("T1", "T2", "T3", "T4") else head
+
+
+def screen(t: Mapping, key: str, grams: set, reference: Reference, name_hits: Counter) -> str | None:
+    """Why ``t`` is refused by a reference set (T1 / T2 / T3), or None."""
+    tools = [(b, i, tool_signature(b, _fn(x).get("parameters")))
+             for (b, i), x in zip(tool_identities(t), t.get("tools") or [])]
+    for name, ref in reference.sets.items():
+        lab = ref["label"]
+        if key in ref["keys"]:
+            return f"{lab}: a {name} prompt"
+        if any(i in ref["tool_ids"] for _, i, _ in tools):
+            return f"{lab}: a {name} tool (name and schema)"
+        if any(sig in ref["signatures"] for _, _, sig in tools):
+            if ref["refuse_signatures"]:
+                return f"{lab}: a {name} tool (name and parameter names)"
+            name_hits[f"{name}:signature"] += 1
+        if any(b in ref["tool_names"] for b, _, _ in tools):
+            if ref["refuse_tool_names"]:
+                return f"{lab}: a {name} tool name"
+            name_hits[name] += 1
+        if ref["index"] and containment(grams, ref["index"]) >= CONTAINMENT:
+            return f"{lab}: a 13-gram near-duplicate of a {name} prompt"
+    return None
 
 
 def assemble(tasks: Iterable[dict], *, reference: Reference | None = None,
              prompt_lengths: Sequence[Callable[[Mapping], int]] = ()) -> dict:
-    """The pool: admitted tasks with atoms, family and split set, the frozen training order, every exclusion."""
+    """The pool: admitted tasks with atoms, family and split set, every split's frozen order, every exclusion."""
+    from aadistill.data.tool_calls import unchecked_keywords
     from aadistill.evaluation.isolation import ngrams
     reference = reference or Reference()
     seen, candidates, excluded = {}, [], []
@@ -214,25 +285,15 @@ def assemble(tasks: Iterable[dict], *, reference: Reference | None = None,
         if bad:
             refuse(t, "record: " + "; ".join(bad))
             continue
+        unchecked = sorted({k for x in t["tools"] for k in unchecked_keywords(_fn(x).get("parameters") or {})})
+        if unchecked:
+            refuse(t, f"schema: keywords the validator does not check {unchecked}")
+            continue
         if (t.get("backend") or {}).get("conflicts"):
             refuse(t, f"replay: {len(t['backend']['conflicts'])} call(s) recorded with different responses")
             continue
-        key, grams, ids = prompt_key(t), ngrams(user_text(t), NGRAM), tool_identities(t)
-        why = None
-        for name, ref in reference.sets.items():
-            if key in ref["keys"]:
-                why = f"T1/T2: a {name} prompt"
-            elif any(i in ref["tool_ids"] for _, i in ids):
-                why = f"T1/T2: a {name} tool (name and schema)"
-            elif any(b in ref["tool_names"] for b, _ in ids):
-                if ref["refuse_tool_names"]:
-                    why = f"T1/T2: a {name} tool name"
-                else:
-                    name_hits[name] += 1
-            if why is None and ref["index"] and containment(grams, ref["index"]) >= CONTAINMENT:
-                why = f"T1/T2: a 13-gram near-duplicate of a {name} prompt"
-            if why:
-                break
+        key, grams = prompt_key(t), ngrams(user_text(t), NGRAM)
+        why = screen(t, key, grams, reference, name_hits)
         if why:
             refuse(t, why)
             continue
@@ -240,60 +301,91 @@ def assemble(tasks: Iterable[dict], *, reference: Reference | None = None,
         if dup is not None:
             refuse(t, f"T5: duplicates {dup}")
             continue
-        over = [n for n in (f(t) for f in prompt_lengths) if n > PROMPT_BOUND]
-        if over:
-            refuse(t, f"length: first prompt {max(over)} > {PROMPT_BOUND}")
+        lengths = [f(t) for f in prompt_lengths]
+        if lengths and max(lengths) > PROMPT_BOUND:
+            refuse(t, f"length: first prompt {max(lengths)} > {PROMPT_BOUND}")
             continue
         seen[(key, t["family"])] = t["task_id"]
-        candidates.append({**t, "content_keys": {"prompt": key, "tools": t["family"]}})
-    admitted = near_duplicates_between_splits(candidates, refuse)
-    from aadistill.data.sequence_packing import shuffled_order
-    train = [t for t in admitted if t["split"] == "training"]
-    order = [train[i]["task_id"] for i in shuffled_order([t["task_id"] for t in train], ORDER_SEED,
-                                                         namespace=POOL_ID)]
+        candidates.append({**t, "content_keys": {"prompt": key, "tools": t["family"]},
+                           "first_prompt_tokens": max(lengths) if lengths else None})
+    admitted = isolate_between_splits(candidates, refuse)
+    orders = frozen_orders(admitted)
     census, verification = defaultdict(Counter), defaultdict(Counter)
-    atom_splits = defaultdict(set)
+    atom_splits, key_splits, tool_splits = defaultdict(set), defaultdict(set), defaultdict(set)
     for t in admitted:
         census[t["split"]][t["category"]] += 1
         verification[t["split"]]["+".join(TE.verification_levels(t))] += 1
+        key_splits[t["content_keys"]["prompt"]].add(t["split"])
         for a in t["atoms"]:
             atom_splits[a].add(t["split"])
-    crossing = sorted(a for a, s in atom_splits.items() if len(s) > 1)
-    if crossing:
-        raise AssertionError(f"atoms in more than one split: {crossing[:3]}")
+        for _, i in tool_identities(t):
+            tool_splits[i].add(t["split"])
+    for what, m in (("atoms", atom_splits), ("prompt keys", key_splits), ("tool identities", tool_splits)):
+        crossing = sorted(a for a, s in m.items() if len(s) > 1)
+        if crossing:
+            raise AssertionError(f"{what} in more than one split: {crossing[:3]}")
     by = Counter((reason_class(e["reason"]), e["source"], e["category"], e["split"]) for e in excluded)
-    return {"tasks": admitted, "excluded": excluded, "training_order": order,
-            "training_order_sha256": hashlib.sha256(canonical(order).encode()).hexdigest(),
+    return {"tasks": admitted, "excluded": excluded, "orders": orders,
+            "training_order": orders.get("training", []),
+            "training_order_sha256": hashlib.sha256(canonical(orders.get("training", [])).encode()).hexdigest(),
             "census": {s: dict(c) for s, c in sorted(census.items())},
             "verification_levels": {s: dict(c) for s, c in sorted(verification.items())},
             "atoms": {"total": len(atom_splits),
-                      "by_split": dict(Counter(next(iter(s)) for s in atom_splits.values()))},
+                      "by_split": dict(Counter(next(iter(s)) for s in atom_splits.values())),
+                      "by_kind": dict(Counter(a.split(":")[0] for a in atom_splits))},
             "excluded_by": [{"reason": r, "source": src, "category": c, "split": s, "tasks": n}
                             for (r, src, c, s), n in sorted(by.items())],
             "tool_name_only_matches_counted": dict(name_hits),
-            "by_source": dict(Counter(str(t["source"].get("dataset")) for t in admitted))}
+            "by_source": {s: dict(c) for s, c in sorted(_by_source(admitted).items())}}
 
 
-def near_duplicates_between_splits(candidates: list[dict], refuse) -> list[dict]:
-    """T4: walk the splits in `SPLIT_PRIORITY`; a task near-duplicating an earlier split's admitted task is refused."""
+def _by_source(tasks) -> dict:
+    out = defaultdict(Counter)
+    for t in tasks:
+        out[str(t["source"].get("dataset"))][t["split"]] += 1
+    return out
+
+
+def frozen_orders(tasks: list[dict]) -> dict[str, list[str]]:
+    """Every split's seeded shuffle of its task ids (training's namespace is the pool id, as in v1)."""
+    from aadistill.data.sequence_packing import shuffled_order
+    out = {}
+    for split in sorted({t["split"] for t in tasks}):
+        ids = sorted(t["task_id"] for t in tasks if t["split"] == split)
+        ns = POOL_ID if split == "training" else f"{POOL_ID}|{split}"
+        out[split] = [ids[i] for i in shuffled_order(ids, ORDER_SEED, namespace=ns)]
+    return out
+
+
+def isolate_between_splits(candidates: list[dict], refuse) -> list[dict]:
+    """T4: walk the splits in `SPLIT_PRIORITY`; a task is refused when an earlier split's admitted task has its exact
+    prompt key, one of its tool identities, or is its 13-gram near-duplicate."""
     from aadistill.evaluation.isolation import ngrams
     by_split = defaultdict(list)
     for t in candidates:
         by_split[t["split"]].append(t)
-    admitted, index, df = [], set(), Counter()
+    admitted, index, df, keys, tools = [], set(), Counter(), set(), set()
     for split in SPLIT_PRIORITY:
-        keep = []
+        keep, last = [], split == SPLIT_PRIORITY[-1]
         for t in by_split.get(split, []):
             grams = ngrams(user_text(t), NGRAM)
-            if index and containment(grams, index) >= CONTAINMENT:
+            ids = {i for _, i in tool_identities(t)}
+            if t["content_keys"]["prompt"] in keys:
+                refuse(t, "T4: an earlier split's exact prompt", split)
+            elif ids & tools:
+                refuse(t, "T4: a tool identity of an earlier split", split)
+            elif index and containment(grams, index) >= CONTAINMENT:
                 refuse(t, "T4: a 13-gram near-duplicate of an earlier split's task", split)
-                continue
-            keep.append((t, grams))
-        admitted += [t for t, _ in keep]
-        if split != SPLIT_PRIORITY[-1]:
-            for _, grams in keep:
-                df.update(grams)
-            index = {g for g, c in df.items() if c <= MAX_DF}
+            else:
+                keep.append((t, None, None) if last else (t, grams, ids))   #: nothing reads the last split's
+        admitted += [t for t, _, _ in keep]
+        if last:
+            break
+        for t, grams, ids in keep:
+            keys.add(t["content_keys"]["prompt"])
+            tools |= ids
+            df.update(grams)
+        index = {g for g, c in df.items() if c <= MAX_DF}
     return sorted(admitted, key=lambda t: (str(t["source"].get("dataset")), t["task_id"]))
 
 
@@ -308,15 +400,18 @@ def eval_set_reference(ref: Reference, repo: Path = REPO) -> Reference:
             for t in r.get("tools") or []:
                 f = _fn(t)
                 tools.append((str(f["name"]), f.get("parameters")))
-    return ref.add("eval-set-1", prompt_units=units, tools=tools, refuse_tool_names=True)
+    return ref.add("eval-set-1", label="T1", prompt_units=units, tools=tools, refuse_tool_names=True)
 
 
 def benchmark_reference(ref: Reference) -> Reference:
-    """The pinned public benchmarks (`tool_benchmarks`): prompts and tool identities; names only counted."""
+    """The pinned public benchmarks (T2) and lineage sources (T3), each verified against its manifest
+    (`tool_benchmarks.fetch`): prompts and tool identities refused; tool signatures and names only counted -- a
+    signature match on Toucan was generic APIs (get_definitions(word), get_current_weather(location), ...), not a
+    derived row (audit/tool_pool_dry_run_v3.json)."""
     from stages.teacher_modes import tool_benchmarks as TB
-    for name in sorted(TB.BENCHMARKS):
+    for name in sorted(TB.REFERENCES):
         TB.fetch(name)
-        ref.add(name, prompts=[t for _, t in TB.prompts(name)],
+        ref.add(name, label="T3" if name in TB.LINEAGE else "T2", prompts=[t for _, t in TB.prompts(name)],
                 tools=[(t["name"], t["parameters"]) for t in TB.tools(name)])
     return ref
 
@@ -344,37 +439,127 @@ def length_checkers(protocol: Mapping) -> list[Callable[[Mapping], int]]:
     return out
 
 
+def _sha_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def write_pool(pool: dict, out: Path, *, sources: dict, extra: dict) -> dict:
+    """The split files and pool.json with the identity `load_pool` checks; returns pool.json's content."""
+    out.mkdir(parents=True, exist_ok=True)
+    files = {}
+    for split in sorted({t["split"] for t in pool["tasks"]}):
+        rows = [t for t in pool["tasks"] if t["split"] == split]
+        path = out / f"{split}.tasks.jsonl"
+        with path.open("w") as f:
+            for t in rows:
+                f.write(json.dumps(t, ensure_ascii=False) + "\n")
+        files[split] = {"file": path.name, "sha256": _sha_file(path), "tasks": len(rows),
+                        "by_source": dict(Counter(str(t["source"].get("dataset")) for t in rows)),
+                        "order_sha256": hashlib.sha256(canonical(pool["orders"][split]).encode()).hexdigest()}
+    revisions = sorted({(str(t["source"].get("dataset")), str(t["source"].get("revision"))) for t in pool["tasks"]})
+    doc = {"schema": SCHEMA, "pool_id": POOL_ID,
+           "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+           "files": files, "sources": sources, "source_revisions": [list(x) for x in revisions],
+           "content_sha256": hashlib.sha256(canonical({"files": {k: v["sha256"] for k, v in files.items()},
+                                                       "sources": sources}).encode()).hexdigest(),
+           "census": pool["census"], "verification_levels": pool["verification_levels"], "atoms": pool["atoms"],
+           "by_source": pool["by_source"], "excluded_by": pool["excluded_by"],
+           "tool_name_only_matches_counted": pool["tool_name_only_matches_counted"], "excluded": pool["excluded"],
+           **extra,
+           "near_duplicate_protocol": {"n": NGRAM, "containment": CONTAINMENT, "max_document_frequency": MAX_DF},
+           "orders": pool["orders"], "training_order": pool["training_order"],
+           "training_order_sha256": pool["training_order_sha256"],
+           "order_seed": ORDER_SEED, "prompt_bound": PROMPT_BOUND, "authorizes": "nothing"}
+    (out / "pool.json").write_text(json.dumps(doc, indent=1) + "\n")
+    return doc
+
+
+def load_pool(pool_dir: Path, splits: Sequence[str] | None = None) -> tuple[dict, dict[str, list[dict]]]:
+    """``(pool.json, {split: tasks})`` after verifying every file the caller reads against pool.json: present,
+    byte-identical (sha256), its task count, every task in its own split and from a registered source revision, the
+    split's order exactly its task ids; raises `PoolIdentityError` otherwise (fail closed)."""
+    pool_dir = Path(pool_dir)
+    man_path = pool_dir / "pool.json"
+    if not man_path.is_file():
+        raise PoolIdentityError(f"{man_path} does not exist")
+    man = json.loads(man_path.read_text())
+    if man.get("schema") != SCHEMA or not isinstance(man.get("files"), dict):
+        raise PoolIdentityError(f"{man_path} is not a {SCHEMA} manifest with registered files")
+    want = sorted(man["files"]) if splits is None else list(splits)
+    revisions = {tuple(x) for x in man.get("source_revisions") or []}
+    out = {}
+    for split in want:
+        rec = man["files"].get(split)
+        if rec is None:
+            raise PoolIdentityError(f"pool.json registers no {split!r} file")
+        path = pool_dir / rec["file"]
+        if not path.is_file():
+            raise PoolIdentityError(f"{path} is missing")
+        if _sha_file(path) != rec["sha256"]:
+            raise PoolIdentityError(f"{path.name} differs from its registered sha256")
+        rows = TE.read_tasks(path)
+        if len(rows) != rec["tasks"]:
+            raise PoolIdentityError(f"{path.name} holds {len(rows)} tasks, pool.json registers {rec['tasks']}")
+        stray = [t["task_id"] for t in rows if t.get("split") != split
+                 or (str(t["source"].get("dataset")), str(t["source"].get("revision"))) not in revisions]
+        if stray:
+            raise PoolIdentityError(f"{path.name}: {len(stray)} task(s) of another split or source, e.g. {stray[:3]}")
+        order = man["orders"].get(split) or []
+        if sorted(order) != sorted(t["task_id"] for t in rows) or \
+                hashlib.sha256(canonical(order).encode()).hexdigest() != rec["order_sha256"]:
+            raise PoolIdentityError(f"the {split} order is not the split's task ids as registered")
+        out[split] = rows
+    return man, out
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--source", action="append", default=[], help="name=converted tasks.jsonl")
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
-    tasks = []
+    tasks, sources, shared = [], {}, {}
     for spec in a.source:
         name, _, path = spec.partition("=")
-        tasks += TE.read_tasks(path)
+        rows = read_interned(Path(path), shared)
+        tasks += rows
+        sources[name] = {"converted_sha256": _sha_file(Path(path)), "tasks": len(rows),
+                         "datasets": sorted({f"{t['source'].get('dataset')}@{t['source'].get('revision')}"
+                                             for t in rows})}
     proto = json.loads(PROTOCOL.read_text())
     ref = benchmark_reference(eval_set_reference(Reference()))
+    summary = ref.summary()
     checkers = length_checkers(proto)
     pool = assemble(tasks, reference=ref, prompt_lengths=checkers)
-    out = Path(a.out)
-    out.mkdir(parents=True, exist_ok=True)
-    for split in {t["split"] for t in pool["tasks"]}:
-        with (out / f"{split}.tasks.jsonl").open("w") as f:
-            for t in pool["tasks"]:
-                if t["split"] == split:
-                    f.write(json.dumps(t, ensure_ascii=False) + "\n")
-    (out / "pool.json").write_text(json.dumps({
-        "schema": SCHEMA, "pool_id": POOL_ID, "written_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "census": pool["census"], "verification_levels": pool["verification_levels"], "atoms": pool["atoms"],
-        "by_source": pool["by_source"], "excluded_by": pool["excluded_by"],
-        "tool_name_only_matches_counted": pool["tool_name_only_matches_counted"], "excluded": pool["excluded"],
-        "reference": ref.summary(), "length_checkers": [f.__name__ for f in checkers],
-        "near_duplicate_protocol": {"n": NGRAM, "containment": CONTAINMENT, "max_document_frequency": MAX_DF},
-        "training_order": pool["training_order"], "training_order_sha256": pool["training_order_sha256"],
-        "order_seed": ORDER_SEED, "prompt_bound": PROMPT_BOUND, "authorizes": "nothing"}, indent=1) + "\n")
-    print(json.dumps({"census": pool["census"], "excluded": len(pool["excluded"])}, indent=1))
+    del tasks, ref, shared
+    write_pool(pool, Path(a.out), sources=sources,
+               extra={"reference": summary, "length_checkers": [f.__name__ for f in checkers]})
+    report = {"census": pool["census"], "excluded": len(pool["excluded"])}
+    del pool
+    gc.collect()
+    load_pool(Path(a.out))                     #: what was written reads back under its own identity
+    print(json.dumps(report, indent=1))
     return 0
+
+
+def read_interned(path: Path, shared: dict) -> list[dict]:
+    """A converted source's tasks, with identical tool lists and system texts held once (Toucan's 119,287 tasks
+    carry 6,319 distinct tool lists): the records are unchanged, only their memory is shared."""
+    out = []
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            if not line.strip():
+                continue
+            t = json.loads(line)
+            key = canonical(t.get("tools"))
+            t["tools"] = shared.setdefault(key, t.get("tools"))
+            if t.get("system"):
+                t["system"] = shared.setdefault("system:" + t["system"], t["system"])
+            out.append(t)
+    return out
 
 
 if __name__ == "__main__":

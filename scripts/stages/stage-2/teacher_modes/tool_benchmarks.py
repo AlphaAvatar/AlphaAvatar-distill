@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""The public tool-calling benchmarks `tool_pool@v1` is decontaminated against: pinned copies, prompts and tools. $0.
+"""What `tool_pool@v1` is decontaminated against: pinned copies of the public tool-calling benchmarks (T2) and of
+the excluded lineage sources (T3), their prompts and tools. $0.
 
     PYTHONPATH=src:scripts .venv/bin/python -m stages.teacher_modes.tool_benchmarks fetch
 
-BFCL v3, When2Call (test), API-Bank (test), tau-bench and ToolSandbox, each pinned by revision and fetched once
-into ``artifacts/stages/stage-2/teacher_modes/tool_sources/benchmarks/<name>@<rev8>/`` (gitignored; only these
-small test files, P8.4). Nothing here is training data: the pool reads `prompts` (each item's user text) for the
-13-gram screen and `tools` (name and parameter schema) for the tool-identity screen. The downloaded files are
-untrusted data: Python sources are parsed with `ast`, never imported or run.
+T2: BFCL v3, When2Call (test), API-Bank (test), tau-bench and ToolSandbox. T3: xLAM function-calling-60k and Glaive
+function-calling-v2 (no pool task may be one of their rows or derived from one). Each is pinned by revision and
+fetched once into ``artifacts/stages/stage-2/teacher_modes/tool_sources/benchmarks/<name>@<rev8>/`` (gitignored;
+P8.4) with a manifest of every file's sha256; a later `fetch` re-hashes every registered file and refuses a missing
+or changed one (`ReferenceCacheError`), so a damaged copy never passes as a decontamination. Nothing here is
+training data: the pool reads `prompts` (each item's user text) for the prompt screens and `tools` (name and
+parameters) for the tool screens. The downloaded files are untrusted data: Python sources are parsed with `ast`,
+never imported or run.
 """
 from __future__ import annotations
 
@@ -35,19 +39,51 @@ BENCHMARKS = {
     "toolsandbox": ("github", "apple-aiml-research/ToolSandbox", "c8571d7854316d2e1c5f288e59fe1e34e53f6dd1",
                     ("tool_sandbox/scenarios/", "tool_sandbox/tools/")),
 }
+#: the T3 lineage sources (no pool row may be one of theirs or derived from one); xLAM is gated on the hub
+LINEAGE = {
+    "xlam_fc_60k": ("hf", "Salesforce/xlam-function-calling-60k", "26d14ebfe18b1f7b524bd39b404b50af5dc97866",
+                    ("xlam_function_calling_60k.json",)),
+    "glaive_fc_v2": ("hf", "glaiveai/glaive-function-calling-v2", "e7f4b6456019f5d8bcb991ef0dd67d8ff23221ac",
+                     ("glaive-function-calling-v2.json",)),
+}
+REFERENCES = {**BENCHMARKS, **LINEAGE}
+
+
+class ReferenceCacheError(RuntimeError):
+    """A local reference copy whose files are missing or differ from its manifest."""
 
 
 def path_of(name: str, root: Path = ROOT) -> Path:
-    return Path(root) / f"{name}@{BENCHMARKS[name][2][:8]}"
+    return Path(root) / f"{name}@{REFERENCES[name][2][:8]}"
+
+
+def verify(name: str, root: Path = ROOT) -> dict:
+    """The manifest of a local copy whose every registered file is present with its sha256; raises otherwise."""
+    out = path_of(name, root)
+    man = out / "manifest.json"
+    if not man.is_file():
+        raise ReferenceCacheError(f"{name}: no manifest at {man}")
+    rec = json.loads(man.read_text())
+    host, repo, rev, _ = REFERENCES[name]
+    if (rec.get("repository"), rec.get("revision")) != (repo, rev):
+        raise ReferenceCacheError(f"{name}: the manifest names {rec.get('repository')}@{rec.get('revision')}")
+    files = {k: v for k, v in rec.get("files", {}).items() if not k.startswith("_")}
+    if not files:
+        raise ReferenceCacheError(f"{name}: the manifest registers no file")
+    bad = [k for k, v in sorted(files.items())
+           if not (out / k).is_file() or hashlib.sha256((out / k).read_bytes()).hexdigest() != v]
+    if bad:
+        raise ReferenceCacheError(f"{name}: {len(bad)} registered file(s) missing or changed, e.g. {bad[:3]}")
+    return rec
 
 
 def fetch(name: str, root: Path = ROOT) -> dict:
-    """Download one benchmark's files at its pinned revision (idempotent); returns its manifest."""
-    host, repo, rev, files = BENCHMARKS[name]
+    """Download one reference's files at its pinned revision once, then verify them (`verify`) on every call."""
+    host, repo, rev, files = REFERENCES[name]
     out = path_of(name, root)
     man = out / "manifest.json"
     if man.is_file():
-        return json.loads(man.read_text())
+        return verify(name, root)
     out.mkdir(parents=True, exist_ok=True)
     got = {}
     if host == "hf":
@@ -73,7 +109,7 @@ def fetch(name: str, root: Path = ROOT) -> dict:
         got["_tarball_sha256"] = hashlib.sha256(blob).hexdigest()
     rec = {"benchmark": name, "host": host, "repository": repo, "revision": rev, "files": got}
     man.write_text(json.dumps(rec, indent=1, sort_keys=True) + "\n")
-    return rec
+    return verify(name, root)
 
 
 def _jsonl(p: Path) -> Iterator[dict]:
@@ -180,11 +216,40 @@ def prompts(name: str, root: Path = ROOT) -> list[tuple[str, str]]:
         for p in sorted((d / "tool_sandbox/scenarios").rglob("*.py")):
             for k, s in enumerate(list(_py_strings(p, ("content",))) + list(_py_dict_strings(p, "content"))):
                 out.append((f"{p.relative_to(d)}:{k}", s))
+    elif name == "xlam_fc_60k":
+        for r in json.loads((d / "xlam_function_calling_60k.json").read_text(encoding="utf-8")):
+            out.append((str(r["id"]), str(r["query"])))
+    elif name == "glaive_fc_v2":
+        for k, r in enumerate(json.loads((d / "glaive-function-calling-v2.json").read_text(encoding="utf-8"))):
+            out.append((str(k), _glaive_users(r.get("chat") or "")))
     return [(i, t) for i, t in out if t and t.strip()]
 
 
+def _glaive_users(chat: str) -> str:
+    """Glaive's user turns: the ``USER:`` segments of its flattened chat."""
+    import re
+    return "\n".join(m.strip() for m in re.findall(r"USER:(.*?)(?=\n\n\n(?:ASSISTANT|FUNCTION RESPONSE):|$)", chat,
+                                                  re.S))
+
+
+def _glaive_tools(system: str) -> list[dict]:
+    """The JSON function definitions in Glaive's system text."""
+    dec, out, at = json.JSONDecoder(), [], system.find("{")
+    while at >= 0:
+        try:
+            obj, end = dec.raw_decode(system, at)
+        except ValueError:
+            at = system.find("{", at + 1)
+            continue
+        if isinstance(obj, dict) and isinstance(obj.get("name"), str):
+            out.append(obj)
+        at = system.find("{", end)
+    return out
+
+
 def tools(name: str, root: Path = ROOT) -> list[dict]:
-    """Every tool the benchmark offers, as ``{"name", "parameters"}`` (ToolSandbox's Python tools: name only)."""
+    """Every tool the reference offers, as ``{"name", "parameters"}`` (ToolSandbox's Python tools: name only; xLAM's
+    parameters are its flat ``{name: {type, description}}`` map, not a JSON Schema)."""
     d = path_of(name, root)
     out = []
 
@@ -220,6 +285,14 @@ def tools(name: str, root: Path = ROOT) -> list[dict]:
         for p in sorted(d.rglob("tools/*.py")):
             for t in _py_tool_dicts(p):
                 add(t)
+    elif name == "xlam_fc_60k":
+        for r in json.loads((d / "xlam_function_calling_60k.json").read_text(encoding="utf-8")):
+            for t in json.loads(r["tools"]):
+                add(t)
+    elif name == "glaive_fc_v2":
+        for r in json.loads((d / "glaive-function-calling-v2.json").read_text(encoding="utf-8")):
+            for t in _glaive_tools(r.get("system") or ""):
+                add(t)
     elif name == "toolsandbox":
         for p in sorted((d / "tool_sandbox/tools").rglob("*.py")):
             try:
@@ -236,7 +309,7 @@ def main(argv=None) -> int:
     if argv[:1] != ["fetch"]:
         print(__doc__)
         return 2
-    for name in (argv[1:] or sorted(BENCHMARKS)):
+    for name in (argv[1:] or sorted(REFERENCES)):
         rec = fetch(name)
         print(name, rec["revision"][:8], len(rec["files"]), "files,", len(prompts(name)), "prompts,",
               len(tools(name)), "tools")

@@ -90,8 +90,37 @@ def test_position_counts_unposted_inside_the_window_and_lists_older(tmp_path):
     assert [u["pod_id"] for u in pos["unposted_sessions"]] == ["podA"]
     assert [u["pod_id"] for u in pos["never_posted_sessions_not_counted"]] == ["podB"]
     am = next(s for s in pos["storage"] if s["volume"] == "am5m373kuq")
-    assert am["future_usd"] == pytest.approx(4.2 - 300 * 0.07 / 720, abs=1e-4)
+    #: the record's reservation (it grew with the 2026-10-30 expansion), less the posted row
+    reserved = json.loads((root / "logs/stages/stage-2/reasoning_data/storage/h1pa_volume_am5m373kuq.json")
+                          .read_text())["reserved_usd"]
+    assert am["future_usd"] == pytest.approx(reserved - 300 * 0.07 / 720, abs=1e-4)
     assert pos["committed_usd"] == pytest.approx(9.9 + 300 * 0.07 / 720 + 1.5 + am["future_usd"], abs=1e-3)
+
+
+def test_a_closeout_reconciliation_confirms_a_pod_the_launcher_could_not(tmp_path):
+    """a_search_20261101_153803: the launcher's gate refused, the pod was torn down by hand, and the closeout -- not
+    runtime/session.json, which keeps what the launcher wrote -- records the provider's confirmation."""
+    from aadistill.governance.authorization import AuthorizationError
+    root = _repo(tmp_path)
+    now = datetime(2026, 10, 26, 9, 28, 51, tzinfo=UTC)
+    _session(root, "gated", "podG", 2.0, now - timedelta(hours=2))
+    run = root / "logs/stages/stage-2/reasoning_data/runs/gated"
+    (run / "runtime/session.json").write_text(json.dumps({"pod_id": "podG", "provider_resource_created": True,
+                                                          "provider_confirms_gone": None}))
+    out = {"recorded_utc": (now - timedelta(hours=2)).isoformat(), "money": {"all_in_usd": 2.0},
+           "provider_confirms_gone": True, "provider_reconciliation_after": {"ok": True, "pods": []}}
+    (run / "closeout/outcome.json").write_text(json.dumps(out))
+    snap = _snapshot(vol_rows=[_row("2026-10-26", 300)])
+    assert [u["pod_id"] for u in MG.position(root, snapshot=snap)["unposted_sessions"]] == ["podG"]
+    out["provider_reconciliation_after"] = {"ok": True, "pods": [{"id": "podG"}]}      # still listed: not gone
+    (run / "closeout/outcome.json").write_text(json.dumps(out))
+    with pytest.raises(AuthorizationError, match="not confirmed gone"):
+        MG.position(root, snapshot=snap)
+    out.pop("provider_confirms_gone")
+    out["provider_reconciliation_after"] = {"ok": True, "pods": []}
+    (run / "closeout/outcome.json").write_text(json.dumps(out))
+    with pytest.raises(AuthorizationError, match="not confirmed gone"):
+        MG.position(root, snapshot=snap)
 
 
 def test_position_refuses_pods_foreign_volumes_and_unknown_reads(tmp_path):

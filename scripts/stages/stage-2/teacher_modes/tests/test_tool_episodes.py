@@ -185,7 +185,7 @@ def test_the_pool_splits_by_atom_dedupes_isolates_and_freezes_its_order():
     dup = task(task_id="tc1-zz", messages=[{"role": "user", "content": "QUESTION   1"}])
     long_ = task(task_id="tc1-long", messages=[{"role": "user", "content": "x" * 50}])
     held = task(task_id="tc1-held", messages=[{"role": "user", "content": "held out"}])
-    pool = TP.assemble(base + [dup, long_, held], reference=TP.Reference().add("eval-set-1", prompts=["held out"]),
+    pool = TP.assemble(base + [dup, long_, held], reference=TP.Reference().add("eval-set-1", label="T1", prompts=["held out"]),
                        prompt_lengths=[lambda t: len(TP.prompt_key(t)) if t["task_id"] != "tc1-long" else 10 ** 6])
     reasons = {e["task_id"]: e["reason"] for e in pool["excluded"]}
     assert reasons["tc1-zz"].startswith("T5") and reasons["tc1-held"].startswith("T1") and \

@@ -143,7 +143,7 @@
    "domain": "supporting",
    "ability_axis": "supporting (P10.2): tool calling, a required agent capability",
    "subtype": "tool_calling@v1",
-   "source_type": "tool_pool@v1 (ToolACE, TOUCAN-1.5M, Nemotron-Agentic-v1 task material), the hybrid's own verified episodes; calibration and state_eval splits, family-disjoint from training",
+   "source_type": "tool_pool@v1 (task material from candidate sources under the maintainer's review: Toucan-1.5M and the NeMo Gym Pivot pair), the hybrid's own verified episodes; calibration and state_eval splits, atom-disjoint from training",
    "training_cells": [
     "tool_calling: supporting.tool_calling/tool_pool@v1 (training split)"
    ]

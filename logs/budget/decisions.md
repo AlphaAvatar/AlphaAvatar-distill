@@ -15263,3 +15263,49 @@ on a paid pod.
   resources, a merge to main.
 - **Revisit when:** the maintainer completes the source admission review and the phased budget review.
 
+## 2026-11-03 (UTC) — Maintainer: independent review of 77be6e13; bounded tool generation, pool identity, cross-split prompts, fail-closed schema and caches, Pivot; $0 repairs
+
+- **Context.** "77be6e13 独立复核结论及剩余修复" confirmed the packing protocol, the pre-packing accounting, CE/KD/KL
+  and loss normalization (kept, no further ruling owed) and the earlier repairs. It found execution-chain defects to
+  repair at $0 before any paid authorization is reviewed.
+- **Repairs.**
+  - P0, bounded generation. `tool_generation_plan.py` and `bounded_plan` in `tool_generation_protocol.json`.
+    - Targets per lineage, mode, split and category, in the consumer's unit before packing: training supervised
+      tokens by the design's (unchanged) shares; calibration 4,200 and state evaluation 12,000 scored positions;
+      validation as registered.
+    - Frozen orders; rounds stop at the target; a hard bound at the pessimistic-yield prefix; SHORTFALL recorded.
+    - `tool_session.py` runs rounds (round inputs carry each task's system text: `run_battery` renders a task's own
+      `system`) and verifies on the pod. Admission, packs and packed inputs select by the same rule.
+    - Priced over the dry pool: $2.27 / $3.62 / $10.31, cap $11.34, replacing the unbounded $4.4 / $6.6. The session
+      would have generated about 238,790 first candidates; the plan expects 4,698 tasks, 8,547 at the bound.
+  - P0, pool identity.
+    - `pool.json` (schema v3) registers every split file's sha256, count, sources and order, and a content sha256.
+    - `load_pool` re-verifies all of it at every read: the session, admission and plan building. It fails closed.
+    - The tool kinds bind `pool.json` and the plan.
+  - P0, cross-split prompts. T4 now also refuses an earlier split's exact prompt key and tool identity. A regression
+    covers a templated prompt repeated across servers.
+  - Schema and caches.
+    - `aadistill.data.tool_calls.schema_problems` enforces the common assertion keywords; any other keyword fails
+      closed. The pool refuses such tasks up front.
+    - `tool_benchmarks.fetch` re-verifies every registered file and now also pins the T3 lineage sources: xLAM-60k
+      @26d14ebf and Glaive-v2 @e7f4b645, the latter downloaded as a decontamination reference only.
+  - Pivot. `tool_sources_pivot.py` rebuilds tasks from the first user turn (step gold, partial replay).
+    - Conversational: 9,051 tasks.
+    - Function-Calling fails T3: 15 of its 78 rebuildable tasks repeat xLAM / Glaive prompts.
+  - Records and tests.
+    - `mixed_governance.position` accepts a closeout's provider-confirmed teardown when the launcher's gate refused
+      (a_search_20261101_153803: outcome.json `provider_confirms_gone` true, reconciliation `[]` / 404;
+      runtime/session.json never edited).
+    - Three historical test literals now read their records: the $868 cap, am5m373kuq's $7.70 reservation, the live
+      volumes.
+    - An end-to-end consumer regression: pool → plan → admission → profiles, suite and freeze → the C1-6cat pack →
+      plan binding.
+- **Evidence.**
+  - `audit/tool_pool_dry_run_v3.json`: 83,764 of 128,338 tasks admitted, content 811f4870….
+  - T3 signature matches are counted, not refused: refusing them removed 20,536 real MCP tasks through 22 generic
+    API signatures.
+  - `audit/pivot_conversion_v1.json`; `plans/tool_generation_plan_dry_run.json`.
+- **Not authorized and not done.** Teacher generation, the full search, student training, formal evaluation, GPU
+  resources, a merge to main.
+- **Revisit when:** the maintainer admits the sources and reviews the phased budget.
+

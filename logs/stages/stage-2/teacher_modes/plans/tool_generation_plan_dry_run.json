@@ -1,0 +1,979 @@
+{
+ "schema": "aadistill.stage2.teacher_modes.tool_generation_plan/v1",
+ "written_utc": "2026-11-03T14:26:50Z",
+ "pool": {
+  "dir": "<scratch>/tool_pool_dry_v3",
+  "content_sha256": "811f4870e5087b1ce50887f4c840065115426322cc87011eebc02349092e7ac1",
+  "pool_json_sha256": "fbf8adfc8fcb07421ba08d2cc35ad0dbb60f864f4dbd4af89016d0df45799893"
+ },
+ "protocol_sha256": "f3d464d53c7ee8e5cb65fe31238d39920c3c5cc5b47151ec639322f3834ecf9e",
+ "six_category_design_sha256": "b4d067f971f5699de460d1440f096d26b108d1f7e968a05aca8b578fda204f72",
+ "shares": {
+  "tool_selection": 0.15,
+  "schema_arguments": 0.15,
+  "no_tool": 0.1,
+  "multiple_parallel": 0.15,
+  "multi_turn": 0.2,
+  "error_recovery": 0.1,
+  "mcp_agent": 0.15
+ },
+ "rules": {
+  "first": "per cell the frozen-order prefix whose expected yield reaches the target",
+  "top_up": "ceil(remaining units / observed units per attempted task x top_up_margin); with nothing admitted yet, the pessimistic prefix of what is left",
+  "top_up_margin": 1.1,
+  "max_rounds": 4,
+  "expected_rounds": {
+   "lower": 1,
+   "expected": 2
+  },
+  "bound": "a cell never attempts more than the frozen-order prefix whose pessimistic yield (low tokens per turn, low pass rate) reaches its target, nor more than its supply; a cell still short at its bound or after max_rounds is a SHORTFALL",
+  "invocations": "one engine invocation per mode and round for the first candidates, one for the second candidates of the round's refused tasks"
+ },
+ "lineages": {
+  "hybrid": {
+   "modes": {
+    "H-N": {
+     "cells": [
+      {
+       "split": "training",
+       "category": "error_recovery",
+       "unit": "supervised_tokens",
+       "target": 49341.783,
+       "min_tasks": 0,
+       "supply": 2668,
+       "tasks": {
+        "lower": 71,
+        "expected": 129,
+        "upper": 258
+       },
+       "bound": 258,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 1772
+      },
+      {
+       "split": "training",
+       "category": "mcp_agent",
+       "unit": "supervised_tokens",
+       "target": 74012.6745,
+       "min_tasks": 0,
+       "supply": 4542,
+       "tasks": {
+        "lower": 157,
+        "expected": 305,
+        "upper": 640
+       },
+       "bound": 640,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 2655
+      },
+      {
+       "split": "training",
+       "category": "multi_turn",
+       "unit": "supervised_tokens",
+       "target": 98683.566,
+       "min_tasks": 0,
+       "supply": 12224,
+       "tasks": {
+        "lower": 148,
+        "expected": 276,
+        "upper": 561
+       },
+       "bound": 561,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 3539
+      },
+      {
+       "split": "training",
+       "category": "multiple_parallel",
+       "unit": "supervised_tokens",
+       "target": 74012.6745,
+       "min_tasks": 0,
+       "supply": 4581,
+       "tasks": {
+        "lower": 281,
+        "expected": 541,
+        "upper": 1130
+       },
+       "bound": 1130,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 2654
+      },
+      {
+       "split": "training",
+       "category": "no_tool",
+       "unit": "supervised_tokens",
+       "target": 49341.783,
+       "min_tasks": 0,
+       "supply": 37880,
+       "tasks": {
+        "lower": 429,
+        "expected": 840,
+        "upper": 1769
+       },
+       "bound": 1769,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 1769
+      },
+      {
+       "split": "training",
+       "category": "schema_arguments",
+       "unit": "supervised_tokens",
+       "target": 74012.6745,
+       "min_tasks": 0,
+       "supply": 368,
+       "tasks": {
+        "lower": 322,
+        "expected": 368,
+        "upper": 368
+       },
+       "bound": 368,
+       "shortfall_at_pessimistic_yield": true,
+       "expected_turns_in_bound": 736
+      },
+      {
+       "split": "training",
+       "category": "tool_selection",
+       "unit": "supervised_tokens",
+       "target": 74012.6745,
+       "min_tasks": 0,
+       "supply": 12499,
+       "tasks": {
+        "lower": 322,
+        "expected": 630,
+        "upper": 1327
+       },
+       "bound": 1327,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 2654
+      },
+      {
+       "split": "validation",
+       "category": null,
+       "unit": "tasks",
+       "target": 32.0,
+       "min_tasks": 0,
+       "supply": 1517,
+       "tasks": {
+        "lower": 34,
+        "expected": 39,
+        "upper": 46
+       },
+       "bound": 46,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 113
+      },
+      {
+       "split": "calibration",
+       "category": "error_recovery",
+       "unit": "scored_positions",
+       "target": 420.0,
+       "min_tasks": 0,
+       "supply": 40,
+       "tasks": {
+        "lower": 1,
+        "expected": 2,
+        "upper": 2
+       },
+       "bound": 2,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 16
+      },
+      {
+       "split": "calibration",
+       "category": "mcp_agent",
+       "unit": "scored_positions",
+       "target": 630.0,
+       "min_tasks": 0,
+       "supply": 105,
+       "tasks": {
+        "lower": 1,
+        "expected": 3,
+        "upper": 7
+       },
+       "bound": 7,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 25
+      },
+      {
+       "split": "calibration",
+       "category": "multi_turn",
+       "unit": "scored_positions",
+       "target": 840.0,
+       "min_tasks": 0,
+       "supply": 685,
+       "tasks": {
+        "lower": 3,
+        "expected": 4,
+        "upper": 7
+       },
+       "bound": 7,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 33
+      },
+      {
+       "split": "calibration",
+       "category": "multiple_parallel",
+       "unit": "scored_positions",
+       "target": 630.0,
+       "min_tasks": 0,
+       "supply": 427,
+       "tasks": {
+        "lower": 2,
+        "expected": 5,
+        "upper": 11
+       },
+       "bound": 11,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 24
+      },
+      {
+       "split": "calibration",
+       "category": "no_tool",
+       "unit": "scored_positions",
+       "target": 420.0,
+       "min_tasks": 0,
+       "supply": 2479,
+       "tasks": {
+        "lower": 4,
+        "expected": 8,
+        "upper": 16
+       },
+       "bound": 16,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 16
+      },
+      {
+       "split": "calibration",
+       "category": "schema_arguments",
+       "unit": "scored_positions",
+       "target": 630.0,
+       "min_tasks": 0,
+       "supply": 28,
+       "tasks": {
+        "lower": 3,
+        "expected": 6,
+        "upper": 12
+       },
+       "bound": 12,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 24
+      },
+      {
+       "split": "calibration",
+       "category": "tool_selection",
+       "unit": "scored_positions",
+       "target": 630.0,
+       "min_tasks": 0,
+       "supply": 1050,
+       "tasks": {
+        "lower": 3,
+        "expected": 6,
+        "upper": 12
+       },
+       "bound": 12,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 24
+      },
+      {
+       "split": "state_eval",
+       "category": "error_recovery",
+       "unit": "scored_positions",
+       "target": 1200.0,
+       "min_tasks": 5,
+       "supply": 29,
+       "tasks": {
+        "lower": 2,
+        "expected": 4,
+        "upper": 8
+       },
+       "bound": 8,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 47
+      },
+      {
+       "split": "state_eval",
+       "category": "mcp_agent",
+       "unit": "scored_positions",
+       "target": 1800.0,
+       "min_tasks": 5,
+       "supply": 78,
+       "tasks": {
+        "lower": 6,
+        "expected": 10,
+        "upper": 20
+       },
+       "bound": 20,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 67
+      },
+      {
+       "split": "state_eval",
+       "category": "multi_turn",
+       "unit": "scored_positions",
+       "target": 2400.0,
+       "min_tasks": 5,
+       "supply": 205,
+       "tasks": {
+        "lower": 4,
+        "expected": 8,
+        "upper": 15
+       },
+       "bound": 15,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 87
+      },
+      {
+       "split": "state_eval",
+       "category": "multiple_parallel",
+       "unit": "scored_positions",
+       "target": 1800.0,
+       "min_tasks": 5,
+       "supply": 125,
+       "tasks": {
+        "lower": 7,
+        "expected": 14,
+        "upper": 28
+       },
+       "bound": 28,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 65
+      },
+      {
+       "split": "state_eval",
+       "category": "no_tool",
+       "unit": "scored_positions",
+       "target": 1200.0,
+       "min_tasks": 5,
+       "supply": 1535,
+       "tasks": {
+        "lower": 11,
+        "expected": 21,
+        "upper": 44
+       },
+       "bound": 44,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 44
+      },
+      {
+       "split": "state_eval",
+       "category": "schema_arguments",
+       "unit": "scored_positions",
+       "target": 1800.0,
+       "min_tasks": 5,
+       "supply": 7,
+       "tasks": {
+        "lower": 7,
+        "expected": 7,
+        "upper": 7
+       },
+       "bound": 7,
+       "shortfall_at_pessimistic_yield": true,
+       "expected_turns_in_bound": 14
+      },
+      {
+       "split": "state_eval",
+       "category": "tool_selection",
+       "unit": "scored_positions",
+       "target": 1800.0,
+       "min_tasks": 5,
+       "supply": 333,
+       "tasks": {
+        "lower": 8,
+        "expected": 16,
+        "upper": 33
+       },
+       "bound": 33,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 66
+      }
+     ]
+    },
+    "H-T": {
+     "cells": [
+      {
+       "split": "training",
+       "category": "error_recovery",
+       "unit": "supervised_tokens",
+       "target": 49341.783,
+       "min_tasks": 0,
+       "supply": 2668,
+       "tasks": {
+        "lower": 24,
+        "expected": 29,
+        "upper": 46
+       },
+       "bound": 46,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 291
+      },
+      {
+       "split": "training",
+       "category": "mcp_agent",
+       "unit": "supervised_tokens",
+       "target": 74012.6745,
+       "min_tasks": 0,
+       "supply": 4542,
+       "tasks": {
+        "lower": 43,
+        "expected": 63,
+        "upper": 107
+       },
+       "bound": 107,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 429
+      },
+      {
+       "split": "training",
+       "category": "multi_turn",
+       "unit": "supervised_tokens",
+       "target": 98683.566,
+       "min_tasks": 0,
+       "supply": 12224,
+       "tasks": {
+        "lower": 41,
+        "expected": 55,
+        "upper": 96
+       },
+       "bound": 96,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 568
+      },
+      {
+       "split": "training",
+       "category": "multiple_parallel",
+       "unit": "supervised_tokens",
+       "target": 74012.6745,
+       "min_tasks": 0,
+       "supply": 4581,
+       "tasks": {
+        "lower": 78,
+        "expected": 116,
+        "upper": 192
+       },
+       "bound": 192,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 426
+      },
+      {
+       "split": "training",
+       "category": "no_tool",
+       "unit": "supervised_tokens",
+       "target": 49341.783,
+       "min_tasks": 0,
+       "supply": 37880,
+       "tasks": {
+        "lower": 115,
+        "expected": 168,
+        "upper": 283
+       },
+       "bound": 283,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 283
+      },
+      {
+       "split": "training",
+       "category": "schema_arguments",
+       "unit": "supervised_tokens",
+       "target": 74012.6745,
+       "min_tasks": 0,
+       "supply": 368,
+       "tasks": {
+        "lower": 86,
+        "expected": 126,
+        "upper": 213
+       },
+       "bound": 213,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 426
+      },
+      {
+       "split": "training",
+       "category": "tool_selection",
+       "unit": "supervised_tokens",
+       "target": 74012.6745,
+       "min_tasks": 0,
+       "supply": 12499,
+       "tasks": {
+        "lower": 86,
+        "expected": 126,
+        "upper": 213
+       },
+       "bound": 213,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 426
+      },
+      {
+       "split": "validation",
+       "category": null,
+       "unit": "tasks",
+       "target": 32.0,
+       "min_tasks": 0,
+       "supply": 1517,
+       "tasks": {
+        "lower": 34,
+        "expected": 39,
+        "upper": 46
+       },
+       "bound": 46,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 113
+      },
+      {
+       "split": "calibration",
+       "category": "error_recovery",
+       "unit": "scored_positions",
+       "target": 420.0,
+       "min_tasks": 0,
+       "supply": 40,
+       "tasks": {
+        "lower": 1,
+        "expected": 1,
+        "upper": 1
+       },
+       "bound": 1,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 4
+      },
+      {
+       "split": "calibration",
+       "category": "mcp_agent",
+       "unit": "scored_positions",
+       "target": 630.0,
+       "min_tasks": 0,
+       "supply": 105,
+       "tasks": {
+        "lower": 1,
+        "expected": 1,
+        "upper": 1
+       },
+       "bound": 1,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 6
+      },
+      {
+       "split": "calibration",
+       "category": "multi_turn",
+       "unit": "scored_positions",
+       "target": 840.0,
+       "min_tasks": 0,
+       "supply": 685,
+       "tasks": {
+        "lower": 1,
+        "expected": 1,
+        "upper": 2
+       },
+       "bound": 2,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 6
+      },
+      {
+       "split": "calibration",
+       "category": "multiple_parallel",
+       "unit": "scored_positions",
+       "target": 630.0,
+       "min_tasks": 0,
+       "supply": 427,
+       "tasks": {
+        "lower": 1,
+        "expected": 1,
+        "upper": 1
+       },
+       "bound": 1,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 4
+      },
+      {
+       "split": "calibration",
+       "category": "no_tool",
+       "unit": "scored_positions",
+       "target": 420.0,
+       "min_tasks": 0,
+       "supply": 2479,
+       "tasks": {
+        "lower": 1,
+        "expected": 2,
+        "upper": 3
+       },
+       "bound": 3,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 3
+      },
+      {
+       "split": "calibration",
+       "category": "schema_arguments",
+       "unit": "scored_positions",
+       "target": 630.0,
+       "min_tasks": 0,
+       "supply": 28,
+       "tasks": {
+        "lower": 1,
+        "expected": 2,
+        "upper": 2
+       },
+       "bound": 2,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 4
+      },
+      {
+       "split": "calibration",
+       "category": "tool_selection",
+       "unit": "scored_positions",
+       "target": 630.0,
+       "min_tasks": 0,
+       "supply": 1050,
+       "tasks": {
+        "lower": 1,
+        "expected": 2,
+        "upper": 2
+       },
+       "bound": 2,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 4
+      },
+      {
+       "split": "state_eval",
+       "category": "error_recovery",
+       "unit": "scored_positions",
+       "target": 1200.0,
+       "min_tasks": 5,
+       "supply": 29,
+       "tasks": {
+        "lower": 1,
+        "expected": 2,
+        "upper": 2
+       },
+       "bound": 5,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 31
+      },
+      {
+       "split": "state_eval",
+       "category": "mcp_agent",
+       "unit": "scored_positions",
+       "target": 1800.0,
+       "min_tasks": 5,
+       "supply": 78,
+       "tasks": {
+        "lower": 2,
+        "expected": 3,
+        "upper": 4
+       },
+       "bound": 5,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 15
+      },
+      {
+       "split": "state_eval",
+       "category": "multi_turn",
+       "unit": "scored_positions",
+       "target": 2400.0,
+       "min_tasks": 5,
+       "supply": 205,
+       "tasks": {
+        "lower": 2,
+        "expected": 2,
+        "upper": 3
+       },
+       "bound": 5,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 28
+      },
+      {
+       "split": "state_eval",
+       "category": "multiple_parallel",
+       "unit": "scored_positions",
+       "target": 1800.0,
+       "min_tasks": 5,
+       "supply": 125,
+       "tasks": {
+        "lower": 2,
+        "expected": 3,
+        "upper": 4
+       },
+       "bound": 5,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 13
+      },
+      {
+       "split": "state_eval",
+       "category": "no_tool",
+       "unit": "scored_positions",
+       "target": 1200.0,
+       "min_tasks": 5,
+       "supply": 1535,
+       "tasks": {
+        "lower": 3,
+        "expected": 5,
+        "upper": 7
+       },
+       "bound": 7,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 7
+      },
+      {
+       "split": "state_eval",
+       "category": "schema_arguments",
+       "unit": "scored_positions",
+       "target": 1800.0,
+       "min_tasks": 5,
+       "supply": 7,
+       "tasks": {
+        "lower": 3,
+        "expected": 4,
+        "upper": 6
+       },
+       "bound": 6,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 12
+      },
+      {
+       "split": "state_eval",
+       "category": "tool_selection",
+       "unit": "scored_positions",
+       "target": 1800.0,
+       "min_tasks": 5,
+       "supply": 333,
+       "tasks": {
+        "lower": 3,
+        "expected": 4,
+        "upper": 6
+       },
+       "bound": 6,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 12
+      }
+     ]
+    }
+   },
+   "splits": [
+    "training",
+    "validation",
+    "calibration",
+    "state_eval"
+   ]
+  },
+  "thinking_2507": {
+   "modes": {
+    "T2507": {
+     "cells": [
+      {
+       "split": "training",
+       "category": "error_recovery",
+       "unit": "supervised_tokens",
+       "target": 49258.700000000004,
+       "min_tasks": 0,
+       "supply": 2668,
+       "tasks": {
+        "lower": 24,
+        "expected": 29,
+        "upper": 39
+       },
+       "bound": 39,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 241
+      },
+      {
+       "split": "training",
+       "category": "mcp_agent",
+       "unit": "supervised_tokens",
+       "target": 73888.05,
+       "min_tasks": 0,
+       "supply": 4542,
+       "tasks": {
+        "lower": 43,
+        "expected": 63,
+        "upper": 86
+       },
+       "bound": 86,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 357
+      },
+      {
+       "split": "training",
+       "category": "multi_turn",
+       "unit": "supervised_tokens",
+       "target": 98517.40000000001,
+       "min_tasks": 0,
+       "supply": 12224,
+       "tasks": {
+        "lower": 41,
+        "expected": 55,
+        "upper": 77
+       },
+       "bound": 77,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 475
+      },
+      {
+       "split": "training",
+       "category": "multiple_parallel",
+       "unit": "supervised_tokens",
+       "target": 73888.05,
+       "min_tasks": 0,
+       "supply": 4581,
+       "tasks": {
+        "lower": 78,
+        "expected": 116,
+        "upper": 159
+       },
+       "bound": 159,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 354
+      },
+      {
+       "split": "training",
+       "category": "no_tool",
+       "unit": "supervised_tokens",
+       "target": 49258.700000000004,
+       "min_tasks": 0,
+       "supply": 37880,
+       "tasks": {
+        "lower": 115,
+        "expected": 168,
+        "upper": 236
+       },
+       "bound": 236,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 236
+      },
+      {
+       "split": "training",
+       "category": "schema_arguments",
+       "unit": "supervised_tokens",
+       "target": 73888.05,
+       "min_tasks": 0,
+       "supply": 368,
+       "tasks": {
+        "lower": 86,
+        "expected": 126,
+        "upper": 177
+       },
+       "bound": 177,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 354
+      },
+      {
+       "split": "training",
+       "category": "tool_selection",
+       "unit": "supervised_tokens",
+       "target": 73888.05,
+       "min_tasks": 0,
+       "supply": 12499,
+       "tasks": {
+        "lower": 86,
+        "expected": 126,
+        "upper": 177
+       },
+       "bound": 177,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 354
+      },
+      {
+       "split": "validation",
+       "category": null,
+       "unit": "supervised_tokens",
+       "target": 12624.0,
+       "min_tasks": 0,
+       "supply": 1517,
+       "tasks": {
+        "lower": 15,
+        "expected": 18,
+        "upper": 28
+       },
+       "bound": 28,
+       "shortfall_at_pessimistic_yield": false,
+       "expected_turns_in_bound": 61
+      }
+     ]
+    }
+   },
+   "splits": [
+    "training",
+    "validation"
+   ]
+  }
+ },
+ "authorizes": "nothing",
+ "price": {
+  "sessions": {
+   "hybrid": {
+    "lower": {
+     "usd": 1.37,
+     "hours": 1.24,
+     "generated_tokens": 1359612,
+     "prefill_tokens": 10375264,
+     "engine_invocations": 4
+    },
+    "expected": {
+     "usd": 2.38,
+     "hours": 2.15,
+     "generated_tokens": 1719900,
+     "prefill_tokens": 19676101,
+     "engine_invocations": 8
+    },
+    "upper": {
+     "usd": 7.85,
+     "hours": 7.09,
+     "generated_tokens": 5228506,
+     "prefill_tokens": 38942759,
+     "engine_invocations": 16
+    }
+   },
+   "thinking_2507": {
+    "lower": {
+     "usd": 0.9,
+     "hours": 0.82,
+     "generated_tokens": 648540,
+     "prefill_tokens": 2105521,
+     "engine_invocations": 2
+    },
+    "expected": {
+     "usd": 1.24,
+     "hours": 1.12,
+     "generated_tokens": 851620,
+     "prefill_tokens": 3609524,
+     "engine_invocations": 4
+    },
+    "upper": {
+     "usd": 2.46,
+     "hours": 2.23,
+     "generated_tokens": 1696320,
+     "prefill_tokens": 5470853,
+     "engine_invocations": 8
+    }
+   }
+  },
+  "total_usd": {
+   "lower": 2.27,
+   "expected": 3.62,
+   "upper": 10.31
+  },
+  "proposed_hard_cap_usd": 11.34,
+  "rate_usd_per_hour": 1.1067,
+  "levels": {
+   "lower": [
+    "lower",
+    2,
+    2,
+    2
+   ],
+   "expected": [
+    "expected",
+    1,
+    1,
+    1
+   ],
+   "upper": [
+    "bound",
+    2,
+    0,
+    0
+   ]
+  },
+  "basis": "plan task counts (expected / bound) x expected turns x the mode's tokens per turn x (1 + the second candidates' share); decode at the supplement's measured throughput x a tool-workload efficiency; prefill of each turn's prompt (first prompt x turns; prefix caching would lower it); a model load per engine invocation (rounds x candidates per mode); setup and teardown"
+ },
+ "dry_run": {
+  "pool": "the scratch candidate pool (Toucan-1.5M SFT + Pivot Conversational, audit/tool_pool_dry_run_v3.json); no source is admitted",
+  "canonical": "logs/stages/stage-2/teacher_modes/plans/tool_generation_plan.json is written by the same command over the ADMITTED pool under data/ before any authorization; the tool kinds bind that file, not this one"
+ }
+}
