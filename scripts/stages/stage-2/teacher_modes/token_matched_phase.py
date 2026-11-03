@@ -331,7 +331,10 @@ def files_secured(ctx, *_a, **_k) -> tuple[bool, str]:
         if prod.is_file():
             got.update(top1_on_volume(ctx, f"{root}/search_a1/top1", json.loads(prod.read_text())["top1"]["files_sha256"]))
     else:
-        got["a1_evidence"] = P1._tar(ctx, f"{root}/v2_units", "a1_evidence", excludes=("./*/train/checkpoints",))[0]
+        #: the evaluation's model package is the checkpoint's weights again (a_train_a1_20261102_184122 carried two
+        #: 2.38 GB copies home that no analysis reads; their sha256 is in a1_units.json) -- they stay on the volume
+        got["a1_evidence"] = P1._tar(ctx, f"{root}/v2_units", "a1_evidence",
+                                     excludes=("./*/train/checkpoints", "./*/evaluation/package/*.safetensors"))[0]
     ctx.evidence["files_secured"] = got
     bad = sorted(k for k, v in got.items() if not v)
     return (not bad, "secured: " + ", ".join(sorted(got)) if not bad else f"not secured: {bad}")

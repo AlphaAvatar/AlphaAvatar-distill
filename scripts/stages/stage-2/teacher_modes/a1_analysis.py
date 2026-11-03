@@ -55,7 +55,7 @@ def wilson(c: int, n: int, z: float = 1.959964) -> tuple[float, float] | None:
     d = 1 + z * z / n
     m = (p + z * z / (2 * n)) / d
     h = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
-    return round(m - h, 4), round(m + h, 4)
+    return round(max(0.0, m - h), 4), round(min(1.0, m + h), 4)
 
 
 def rate(rows: list[dict]) -> dict:
@@ -133,11 +133,16 @@ def paired_mean(seeds: list[dict], axis: str | None) -> dict:
     vals = [statistics.fmean(s["item_correct"][i] for s in seeds) for i in ids]
     rng = random.Random(BOOT_SEED)
     boots = sorted(statistics.fmean(rng.choice(vals) for _ in vals) for _ in range(BOOT))
+    #: equal counts are not the same items: A1's two seeds both scored 26/2/2/0 by axis with 15 of their 30 static
+    #: correct items in common, so the item-level agreement is reported beside the rates
+    per_item = [[s["item_correct"][i] for s in seeds] for i in ids]
     return {"n_items": len(ids), "mean": round(statistics.fmean(vals), 4),
             "bootstrap95": (round(boots[int(0.025 * BOOT)], 4), round(boots[int(0.975 * BOOT) - 1], 4)),
             "seed_difference": round(abs(statistics.fmean(seeds[0]["item_correct"][i] for i in ids)
                                          - statistics.fmean(seeds[1]["item_correct"][i] for i in ids)), 4)
-            if len(seeds) == 2 else None}
+            if len(seeds) == 2 else None,
+            "items_correct_in_every_seed": sum(all(c) for c in per_item),
+            "items_correct_in_any_seed": sum(any(c) for c in per_item)}
 
 
 def training(unit_dir: Path) -> dict:
